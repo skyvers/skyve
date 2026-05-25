@@ -20,6 +20,10 @@ import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 
+/**
+ * Generates styled Excel ({@code .xlsx}) worksheets from a Skyve document's
+ * query results using Apache POI.
+ */
 public class POISheetGenerator {
 	private static final String XLSX = ".xlsx";
 

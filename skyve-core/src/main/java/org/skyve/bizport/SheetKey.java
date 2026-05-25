@@ -8,6 +8,9 @@ import jakarta.annotation.Nullable;
  * There are 2 types of sheets - document sheets and collection sheets.
  * Document sheets have a key of module name and document name.
  * Collection sheets have a key of owning module name, owning document name and collection attribute name.
+ *
+ * <p>Ordering and equality are value-based across all key components and are used for
+ * map/set lookups when wiring cross-sheet references in {@link BizPortWorkbook}.
  */
 public final class SheetKey implements Comparable<SheetKey> {
 	@Nonnull private String moduleName;
@@ -15,9 +18,10 @@ public final class SheetKey implements Comparable<SheetKey> {
 	@Nullable private String collectionBinding;
 
 	/**
-	 * 
-	 * @param moduleName
-	 * @param documentName
+	 * Creates a key for a document sheet.
+	 *
+	 * @param moduleName the owning module name; must not be {@code null}
+	 * @param documentName the document name within the module; must not be {@code null}
 	 */
 	public SheetKey(@Nonnull String moduleName, @Nonnull String documentName) {
 		this.moduleName = moduleName;
@@ -25,10 +29,11 @@ public final class SheetKey implements Comparable<SheetKey> {
 	}
 	
 	/**
-	 * 
-	 * @param drivingModuleName
-	 * @param drivingDocumentName
-	 * @param collectionBinding
+	 * Creates a key for a collection sheet.
+	 *
+	 * @param drivingModuleName the module containing the owning document; must not be {@code null}
+	 * @param drivingDocumentName the owning document name; must not be {@code null}
+	 * @param collectionBinding the collection attribute binding on the owning document; must not be {@code null}
 	 */
 	public SheetKey(@Nonnull String drivingModuleName, @Nonnull String drivingDocumentName, @Nonnull String collectionBinding) {
 		this.moduleName = drivingModuleName;
@@ -37,24 +42,27 @@ public final class SheetKey implements Comparable<SheetKey> {
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Returns the module component of this key.
+	 *
+	 * @return the module name; never {@code null}
 	 */
 	public @Nonnull String getModuleName() {
 		return moduleName;
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Returns the document component of this key.
+	 *
+	 * @return the document name; never {@code null}
 	 */
 	public @Nonnull String getDocumentName() {
 		return documentName;
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Returns the collection-binding component for collection sheets.
+	 *
+	 * @return the collection binding, or {@code null} for document sheets
 	 */
 	public @Nullable String getCollectionBinding() {
 		return collectionBinding;
@@ -63,6 +71,10 @@ public final class SheetKey implements Comparable<SheetKey> {
 	/**
 	 * Compare based on module name, document name, and optionally (for collection sheets)
 	 * the collection attribute name.
+	 *
+	 * @param o the key to compare against
+	 * @return a negative value, zero, or a positive value according to lexicographic order
+	 *         of module, document, and collection binding
 	 */
 	@Override
 	@SuppressWarnings("null") // collection binding null checks are correct below
@@ -95,7 +107,11 @@ public final class SheetKey implements Comparable<SheetKey> {
 	}
 
 	/**
-	 * 
+	 * Returns whether this key is value-equal to another object.
+	 *
+	 * @param o the candidate object
+	 * @return {@code true} when {@code o} is a {@link SheetKey} with equal module,
+	 *         document, and collection-binding components
 	 */
 	@Override
 	public boolean equals(@Nullable Object o) {
@@ -106,7 +122,9 @@ public final class SheetKey implements Comparable<SheetKey> {
 	}
 
 	/**
-	 * 
+	 * Returns a hash code derived from all key components.
+	 *
+	 * @return a stable value-based hash code
 	 */
 	@Override
 	public int hashCode() {
@@ -116,7 +134,9 @@ public final class SheetKey implements Comparable<SheetKey> {
 	}
 
 	/**
-	 * 
+	 * Returns a compact textual form of this key.
+	 *
+	 * @return a string containing module, document, and optional collection components
 	 */
 	@Override
 	public @Nonnull String toString() {

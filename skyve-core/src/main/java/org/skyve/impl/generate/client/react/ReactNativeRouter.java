@@ -19,6 +19,9 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.menu.MenuRenderer;
 
+/**
+ * Generates React Native navigation routes for generated views.
+ */
 public class ReactNativeRouter {
 	private static String[] EDIT_VIEW_PARAMS = new String[] {"bizId"};
 

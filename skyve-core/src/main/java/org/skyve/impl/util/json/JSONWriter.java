@@ -41,6 +41,16 @@ import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
 // TODO Clean up exception handling in JSON stuff
+/**
+ * Serialises Java objects — domain beans, maps, collections, and primitives — to
+ * a JSON string, respecting Skyve attribute converters and bean reference semantics.
+ *
+ * <p>Supports circular-reference detection via a visited-bean set. Geometry values
+ * are written as Well-Known Text (WKT). Dates and Skyve temporal types are written
+ * as ISO-8601 strings.
+ *
+ * <p>Threading: not thread-safe. Create a new instance per serialisation.
+ */
 public class JSONWriter {
 	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(JSONWriter.class);
 	private StringBuilder buf = new StringBuilder();

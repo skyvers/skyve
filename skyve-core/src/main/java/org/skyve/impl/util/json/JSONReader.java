@@ -28,6 +28,16 @@ import org.skyve.util.Binder.TargetMetaData;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
+/**
+ * Deserialises JSON text into Java objects: {@link java.util.Map}, {@link java.util.List},
+ * {@link String}, {@link Number}, {@link Boolean}, and {@code null}.
+ *
+ * <p>Also supports domain-aware reading: when a {@link org.skyve.metadata.user.User}
+ * and document context are supplied, attribute values are converted via the
+ * document's declared {@link org.skyve.domain.types.converters.Converter}.
+ *
+ * <p>Threading: not thread-safe. Create a new instance per parse operation.
+ */
 public class JSONReader {
 	public enum JSONMode {
 		dynamic, // make collections and maps

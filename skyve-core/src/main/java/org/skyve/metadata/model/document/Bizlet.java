@@ -48,7 +48,12 @@ public class Bizlet<T extends Bean> implements MetaData {
     protected final Logger LOGGER = SkyveLoggerFactory.getLogger(getClass());
 
 	/**
-	 * Key/Value pairs for domains defined.
+	 * An immutable code/description pair used to populate drop-down and radio-button widgets.
+	 *
+	 * <p>The {@link #getCode() code} is the value persisted or stored in the bean;
+	 * the {@link #getLocalisedDescription() description} is the label displayed in the UI.
+	 * When only a single string is supplied to the constructor, both code and description
+	 * are set to that string.
 	 */
 	public static class DomainValue implements Serializable {
 		private static final long serialVersionUID = -7737192861504224293L;
@@ -57,17 +62,20 @@ public class Bizlet<T extends Bean> implements MetaData {
 		@Nonnull private String description;
 		
 		/**
-		 * 
-		 * @param codeAndDescription
+		 * Creates a domain value where the code and the display description are identical.
+		 *
+		 * @param codeAndDescription  the value used for both code and description;
+		 *                            must not be {@code null}
 		 */
 		public DomainValue(@Nonnull String codeAndDescription) {
 			this(codeAndDescription, codeAndDescription);
 		}
 		
 		/**
-		 * 
-		 * @param code
-		 * @param description
+		 * Creates a domain value with distinct code and display description.
+		 *
+		 * @param code         the persisted/stored value; must not be {@code null}
+		 * @param description  the i18n key or literal label shown in the UI; must not be {@code null}
 		 */
 		public DomainValue(@Nonnull String code, @Nonnull String description) {
 			this.code = code;
@@ -75,8 +83,9 @@ public class Bizlet<T extends Bean> implements MetaData {
 		}
 		
 		/**
-		 * 
-		 * @return
+		 * Returns the code (persisted or stored value) for this domain entry.
+		 *
+		 * @return the code; never {@code null}
 		 */
 		public @Nonnull String getCode() {
 			return code;

@@ -38,6 +38,13 @@ import org.skyve.util.Util;
 /**
  * Utility class for retrieving Beans archived to file.
  */
+/**
+ * Reads archived document records from the flat-file archive store.
+ *
+ * <p>Uses a Lucene index hit (doc id and byte offset) returned by
+ * {@link ArchivedDocumentListModel} to locate and deserialise the corresponding
+ * record in the archive file via random-access file I/O.
+ */
 public class ArchiveRetriever {
 
     private final Logger logger = LogManager.getLogger();

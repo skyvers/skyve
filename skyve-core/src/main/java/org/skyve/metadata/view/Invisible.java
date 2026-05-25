@@ -3,7 +3,14 @@ package org.skyve.metadata.view;
 import org.skyve.metadata.SerializableMetaData;
 
 /**
- * 
+ * Mixin interface for view elements that can be conditionally hidden.
+ *
+ * <p>The invisible state is driven by a named {@link org.skyve.metadata.model.document.Condition}
+ * evaluated on the current document bean. The convenience method
+ * {@link #setVisibleConditionName} accepts a visible condition and negates it
+ * (by prepending {@code not}) to produce the stored invisible condition name.
+ *
+ * @see Disableable
  */
 public interface Invisible extends SerializableMetaData {
 	/**

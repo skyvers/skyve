@@ -5,6 +5,13 @@ import java.util.Iterator;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+/**
+ * An iterator adapter that logs a diagnostic message when iteration completes after
+ * at least 1 000 elements, helping to identify unexpectedly large result sets.
+ *
+ * <p>Delegates all iterator operations to the wrapped {@code Iterator<T>}. The log
+ * message is emitted at INFO level via the Skyve logging infrastructure.
+ */
 public class LoggingIteratorAdapter<T> implements Iterator<T> {
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(LoggingIteratorAdapter.class);
 

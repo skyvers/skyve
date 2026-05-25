@@ -55,6 +55,25 @@ import org.slf4j.Logger;
 
 import net.gcardone.junidecode.Junidecode;
 
+/**
+ * Primary framework configuration façade and miscellaneous utility class.
+ *
+ * <p>All fields are public and mutable because they are set once during application
+ * bootstrap (typically from {@code skyve.json}) and then treated as read-only for the
+ * lifetime of the application.
+ *
+ * <p>Key responsibilities:
+ * <ul>
+ *   <li>Holds global configuration: application name, data-store settings,
+ *       environment name, cache configs, bootstrap user credentials, etc.
+ *   <li>Provides deep-clone, serialisation, and Hibernate-proxy utilities via
+ *       {@link #cloneToTransientBeanFromPersistentBean} and {@link #cloneToTransientBeanFromPersistentBean}.
+ *   <li>Provides bean-graph traversal helpers used throughout the framework.
+ * </ul>
+ *
+ * <p>Threading: configuration fields are read after bootstrap without synchronisation;
+ * callers must not modify these fields outside of the bootstrap phase.
+ */
 @SuppressWarnings({"java:S3008", "java:S1104", "java:S1444", "java:S2386"})
 public class UtilImpl {
 	/**

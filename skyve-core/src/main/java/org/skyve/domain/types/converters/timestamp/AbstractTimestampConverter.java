@@ -10,6 +10,13 @@ import org.skyve.metadata.model.Attribute.AttributeType;
 
 import jakarta.annotation.Nonnull;
 
+/**
+ * Base converter for {@link Timestamp} attributes using a configured
+ * timestamp pattern and i18n conversion error key.
+ *
+ * <p>Threading: thread-safe when used with {@link CORE} format factories,
+ * because formatter instances are obtained per operation.
+ */
 public abstract class AbstractTimestampConverter implements Converter<Timestamp> {
 	@Override
 	public final AttributeType getAttributeType() {

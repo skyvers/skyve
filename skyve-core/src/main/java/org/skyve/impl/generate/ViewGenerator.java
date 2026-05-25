@@ -66,6 +66,12 @@ import org.skyve.util.Binder.TargetMetaData;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+/**
+ * Generates server-side view helper classes from view metadata descriptors.
+ *
+ * <p>Traverses view definitions and emits strongly typed references for
+ * generated code consumers.
+ */
 public class ViewGenerator {
 
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ViewGenerator.class);

@@ -16,6 +16,23 @@ import jakarta.xml.bind.annotation.XmlElementWrapper;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB-annotated conditional statement for the Skyve behaviour (business rules) DSL.
+ *
+ * <p>An {@code IfStatement} evaluates a MVEL or Skyve {@code condition} expression
+ * against the current {@link Bean} context and executes the {@code then} branch if
+ * the expression is truthy, otherwise the {@code else} branch.  Both branches are
+ * optional ordered lists of nested {@link StatementMetaData} instances.
+ *
+ * <p>Precondition: {@code condition} must be a valid expression that evaluates to
+ * a {@code boolean}; a {@code null} condition is treated as {@code false}.
+ *
+ * <p>Threading: not thread-safe.  Instances are populated during JAXB unmarshalling
+ * and are read-only once placed in the repository cache.
+ *
+ * @see SetStatement
+ * @see org.skyve.impl.metadata.repository.behaviour.statement.StatementMetaData
+ */
 @XmlRootElement(namespace = XMLMetaData.BEHAVIOUR_NAMESPACE, name = "if")
 @XmlType(namespace = XMLMetaData.BEHAVIOUR_NAMESPACE,
 			name ="if",

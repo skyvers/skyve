@@ -7,6 +7,9 @@ import org.skyve.domain.types.converters.Validator;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.util.BeanValidator;
 
+/**
+ * Converts integer values representing simple percentage display values.
+ */
 public class SimplePercentage implements Converter<Integer> {
 	@Override
 	public Class<Integer> getValueType() {

@@ -5,7 +5,15 @@ import java.math.MathContext;
 import java.math.RoundingMode;
 
 /**
- * 
+ * A fixed-scale decimal with 2 decimal places and 20 significant digits of precision.
+ *
+ * <p>Suitable for monetary amounts and any value that requires two decimal places
+ * (e.g. {@code 12.34}). All arithmetic results are rounded using
+ * {@link java.math.RoundingMode#HALF_UP}.
+ *
+ * @see Decimal
+ * @see Decimal5
+ * @see Decimal10
  */
 public class Decimal2 extends Decimal {
 	/**
@@ -18,29 +26,19 @@ public class Decimal2 extends Decimal {
 	 */
 	private static final MathContext MC = new MathContext(20, RoundingMode.HALF_UP);
 
-	/**
-	 * 
-	 */
+	/** Convenience constant for zero with 2 decimal places. */
 	public static final Decimal2 ZERO = new Decimal2(0);
 	
-	/**
-	 * 
-	 */
+	/** Convenience constant for one with 2 decimal places. */
 	public static final Decimal2 ONE = new Decimal2(1);
 	
-	/**
-	 * 
-	 */
+	/** Convenience constant for ten with 2 decimal places. */
 	public static final Decimal2 TEN = new Decimal2(10);
 	
-	/**
-	 * 
-	 */
+	/** Convenience constant for one hundred with 2 decimal places. */
 	public static final Decimal2 ONE_HUNDRED = new Decimal2(100);
 	
-	/**
-	 * 
-	 */
+	/** Convenience constant for one thousand with 2 decimal places. */
 	public static final Decimal2 ONE_THOUSAND = new Decimal2(1000);
 
 	/**
@@ -131,11 +129,21 @@ public class Decimal2 extends Decimal {
 		return new Decimal2(value.negate());
 	}
 
+	/**
+	 * Executes min.
+	 * @param other the other
+	 * @return the result
+	 */
 	@Override
 	public Decimal2 min(Decimal other) {
 		return new Decimal2(bigDecimalValue().min(other.bigDecimalValue()));
 	}
 
+	/**
+	 * Executes max.
+	 * @param other the other
+	 * @return the result
+	 */
 	@Override
 	public Decimal2 max(Decimal other) {
 		return new Decimal2(bigDecimalValue().max(other.bigDecimalValue()));

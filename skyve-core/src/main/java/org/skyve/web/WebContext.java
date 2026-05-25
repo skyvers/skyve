@@ -9,7 +9,22 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 /**
- * 
+ * Per-conversation server-side context for view rendering and action execution.
+ *
+ * <p>A {@code WebContext} represents a single conversation — typically one browser tab
+ * or popup window — and holds the conversation's current state: the current bean under
+ * edit, any pending messages or growls, and the cached bean map indexed by {@code bizId}.
+ *
+ * <p>Actions that need to display messages, trigger background work, or access the
+ * current conversation bean receive a {@code WebContext} via
+ * {@link org.skyve.metadata.controller.ServerSideAction#execute(org.skyve.domain.Bean, WebContext)}.
+ *
+ * <p>Threading: a {@code WebContext} instance is confined to a single HTTP request
+ * thread at a time. The framework ensures this via the conversation cache mechanism
+ * ({@link #cacheConversation()}). Never share a {@code WebContext} across threads.
+ *
+ * @see BackgroundTask
+ * @see org.skyve.metadata.controller.ServerSideAction
  */
 public interface WebContext extends Serializable {
 	/**
@@ -18,21 +33,23 @@ public interface WebContext extends Serializable {
 	public static final String USER_SESSION_ATTRIBUTE_NAME = "user";
 
 	/**
-	 * 
-	 * @return
+	 * Returns the unique conversation key that identifies this context in the conversation cache.
+	 * The key is stable for the lifetime of the conversation.
 	 */
 	public @Nonnull String getKey();
 	
 	/**
-	 * 
-	 * @param key
+	 * Sets the conversation key.
+	 *
+	 * @param key the unique cache key; must not be {@code null}
 	 */
 	public void setKey(@Nonnull String key);
 	
 	/**
-	 * 
-	 * @param bizId
-	 * @return
+	 * Returns the bean with the given {@code bizId} from this conversation's bean map,
+	 * or {@code null} if no such bean exists in this conversation.
+	 *
+	 * @param bizId the {@link org.skyve.domain.Bean#getBizId() bizId} to look up
 	 */
 	public @Nullable Bean getBean(String bizId);
 	
@@ -48,8 +65,9 @@ public interface WebContext extends Serializable {
 	throws IllegalStateException;
 	
 	/**
-	 * 
-	 * @param currentBean
+	 * Sets the current bean under view or edit.
+	 *
+	 * @param currentBean the bean to make current; may be {@code null} during transitions
 	 */
 	public void setCurrentBean(@Nullable Bean currentBean);
 	
@@ -60,14 +78,14 @@ public interface WebContext extends Serializable {
 	public @Nonnull String getWebId();
 	
 	/**
-	 * 
-	 * @return
+	 * Returns the action binding name for the current request, or {@code null} if none is set.
 	 */
 	public @Nullable String getAction();
 	
 	/**
-	 * 
-	 * @param action
+	 * Sets the action binding name for the current request.
+	 *
+	 * @param action the action name, or {@code null} to clear
 	 */
 	public void setAction(@Nullable String action);
 

@@ -29,6 +29,9 @@ import org.skyve.util.logging.SkyveLoggerFactory;
  * TODO convert this away from string concatenation so
  * we can prune emtpy items etc.
  */
+/**
+ * Generates Flutter route declarations for generated views.
+ */
 public class FlutterRouting {
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(FlutterRouting.class);
     

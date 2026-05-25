@@ -20,7 +20,26 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 /**
- * 
+ * Utilities for evaluating, getting, and setting bean attribute values via Skyve binding expressions.
+ *
+ * <p>Skyve binding expressions are dot-separated paths (e.g. {@code "contact.name"}) that
+ * navigate through associations and collections to a leaf attribute. All methods in this
+ * class accept such paths and delegate to {@link org.skyve.impl.bind.BindUtil} for the
+ * actual reflection and metadata-aware traversal.
+ *
+ * <p>Useful operations:
+ * <ul>
+ *   <li>{@link #get(Bean, String)} — read a value at a binding path.</li>
+ *   <li>{@link #set(Customer, Bean, String, Object)} — write a typed value at a binding path.</li>
+ *   <li>{@link #convertAndSet(Customer, Bean, String, String)} — parse a display string and set
+ *       it using the attribute's converter.</li>
+ *   <li>{@link #getMetaData(Customer, Document, String)} — resolve the attribute metadata and
+ *       its owning document at a binding path.</li>
+ *   <li>{@link #sortCollectionByMetaDataOrdering}/{@link #sortCollectionByOrdering} — sort a
+ *       child collection by its declared or supplied orderings.</li>
+ * </ul>
+ *
+ * <p>Threading: all methods are stateless and thread-safe.
  */
 public class Binder {
 	/**

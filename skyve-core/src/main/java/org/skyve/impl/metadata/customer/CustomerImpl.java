@@ -61,6 +61,22 @@ import com.google.common.base.MoreObjects;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpSession;
 
+/**
+ * Runtime implementation of the {@link Customer} contract, populated from a
+ * customer XML descriptor and its referenced metadata during repository bootstrap.
+ *
+ * <p>Holds the customer's module activations, role definitions, converter overrides,
+ * UI resource references, interceptors, and observers.  The object graph is fully
+ * resolved before being placed in the repository cache; callers may read all
+ * accessors without triggering additional I/O.
+ *
+ * <p>Threading: not thread-safe.  A {@code CustomerImpl} instance is written
+ * exclusively during repository loading and is read-only afterwards.  Callers must
+ * not mutate the instance after it has been published to the cache.
+ *
+ * @see Customer
+ * @see org.skyve.impl.metadata.repository.FileSystemRepository
+ */
 public class CustomerImpl implements Customer {
 	private static final long serialVersionUID = 2926460705821800439L;
 	private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();

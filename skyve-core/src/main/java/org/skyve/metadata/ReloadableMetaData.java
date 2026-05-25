@@ -1,5 +1,15 @@
 package org.skyve.metadata;
 
+/**
+ * Metadata that supports hot-reload and tracks when it was last checked.
+ *
+ * <p>The repository periodically checks whether on-disk metadata has changed
+ * and triggers a reload if necessary. {@link #getLastCheckedMillis()} records
+ * when the check was last performed so the repository can throttle repeated
+ * file-system polls.
+ *
+ * @see PersistentMetaData
+ */
 public interface ReloadableMetaData {
 	/**
 	 * Used to throttle the checking for reload of meta-data.

@@ -16,6 +16,9 @@ import org.skyve.impl.metadata.view.container.form.FormRow;
 
 import jakarta.annotation.Nullable;
  
+/**
+ * PrimeReact-specific layout/container renderer.
+ */
 public class PrimeReactLayoutRenderer extends LayoutRenderer {
 	private Map<String, String> imports;
 

@@ -6,6 +6,26 @@ import org.skyve.domain.Bean;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.persistence.AutoClosingIterable;
 
+/**
+ * Manages persistent user-defined tags applied to beans.
+ *
+ * <p>Tags are named groupings (owned by admin Tag records) that associate arbitrary
+ * beans (identified by module name, document name, and bizId). A single bean can
+ * carry any number of tags, and a tag can reference beans from any document type.
+ *
+ * <p>Typical usage patterns:
+ * <ul>
+ *   <li>Bulk-select list rows into a temporary tag, then operate on all tagged beans.</li>
+ *   <li>Persistent user bookmarks: tag individual records from multiple lists.</li>
+ *   <li>Set operations ({@link #intersect}, {@link #union}, {@link #subtract}) between
+ *       two tags to produce a third tag for pipeline workflows.</li>
+ * </ul>
+ *
+ * <p>Obtain a {@code TagManager} via {@link org.skyve.EXT#getTagManager()}.
+ *
+ * <p>Threading: a {@code TagManager} instance is not thread-safe. Do not share across
+ * concurrent threads.
+ */
 public interface TagManager {
 	/**
 	 * Tag 1 bean.

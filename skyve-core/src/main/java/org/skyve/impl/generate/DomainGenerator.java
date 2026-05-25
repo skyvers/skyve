@@ -31,6 +31,15 @@ import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nullable;
 
+/**
+ * Abstract base for source generators that produce domain classes from Skyve
+ * metadata.
+ *
+ * <p>Coordinates module/document traversal and delegates language-specific
+ * output to subclasses.
+ *
+ * <p>Threading: not thread-safe; intended for single-threaded generation runs.
+ */
 public abstract class DomainGenerator {
 
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(DomainGenerator.class);

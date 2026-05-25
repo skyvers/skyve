@@ -39,6 +39,10 @@ import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
+/**
+ * Manages serialised conversation (page-scope) state in the HTTP session,
+ * providing store and retrieve operations for Faces view state and navigation data.
+ */
 public class StateUtil {
 
     private static final Logger FACES_LOGGER = Category.FACES.logger();

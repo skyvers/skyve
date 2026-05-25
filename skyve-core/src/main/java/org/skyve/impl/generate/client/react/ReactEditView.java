@@ -13,6 +13,9 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 
+/**
+ * Renders React edit view component code from Skyve metadata.
+ */
 public class ReactEditView extends ReactComponent {
 	private Module module;
 	private Document document;

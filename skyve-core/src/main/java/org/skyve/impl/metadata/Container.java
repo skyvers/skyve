@@ -35,6 +35,12 @@ import jakarta.xml.bind.annotation.XmlElementRef;
 import jakarta.xml.bind.annotation.XmlElementRefs;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * Holds an ordered collection of nested view metadata elements for JAXB binding.
+ *
+ * <p>The contained elements are marshalled and unmarshalled as heterogeneous metadata
+ * components in the order they were added.
+ */
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 public abstract class Container implements SerializableMetaData {
 	private static final long serialVersionUID = 2633803738970828551L;
@@ -66,6 +72,11 @@ public abstract class Container implements SerializableMetaData {
 						@XmlElementRef(type = Component.class)})
 	private List<SerializableMetaData> contained = new ArrayList<>();
 
+	/**
+	 * Returns the nested metadata elements in declaration order.
+	 *
+	 * @return the live contained-element list; never {@code null}
+	 */
 	public List<SerializableMetaData> getContained() {
 		return contained;
 	}

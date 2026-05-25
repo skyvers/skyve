@@ -93,6 +93,13 @@ import org.skyve.util.Util;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
+/**
+ * Abstract base renderer that converts a {@link org.skyve.metadata.view.View}
+ * into a client-specific representation.
+ *
+ * <p>Extends {@link org.skyve.impl.metadata.view.ViewVisitor} to walk the
+ * view tree and emit renderer-specific output.
+ */
 public abstract class ViewRenderer extends ViewVisitor {
 	// The user to render for
 	protected User user;

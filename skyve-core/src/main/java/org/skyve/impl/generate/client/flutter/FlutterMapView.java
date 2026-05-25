@@ -7,6 +7,9 @@ import org.skyve.domain.Bean;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.view.model.list.ListModel;
 
+/**
+ * Renders Flutter map view scaffolding from Skyve metadata.
+ */
 public class FlutterMapView extends FlutterView {
 	@SuppressWarnings("unused")
 	private ListModel<Bean> model;

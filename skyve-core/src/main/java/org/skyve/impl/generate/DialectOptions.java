@@ -1,5 +1,10 @@
 package org.skyve.impl.generate;
 
+/**
+ * Enumerates supported SQL/JPA dialect generation options.
+ *
+ * <p>Used by domain generation tooling to select dialect-specific output.
+ */
 public enum DialectOptions {
 	// @formatter:off
 	H2("H2", true, false, 0, 1024), 

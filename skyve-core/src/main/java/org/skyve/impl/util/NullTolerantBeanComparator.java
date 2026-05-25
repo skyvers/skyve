@@ -3,6 +3,15 @@ package org.skyve.impl.util;
 import org.apache.commons.beanutils.BeanComparator;
 import org.skyve.impl.bind.BindUtil;
 
+/**
+ * A {@link org.apache.commons.beanutils.BeanComparator} that tolerates {@code null}
+ * property values during in-memory collection sorting.
+ *
+ * <p>{@code null} values sort before any non-null value. Uses
+ * {@link NullTolerantComparator} internally for element ordering. The property path
+ * is resolved via {@link org.skyve.impl.bind.BindUtil#get}, which supports
+ * dot-separated Skyve binding expressions.
+ */
 @SuppressWarnings("rawtypes")
 public class NullTolerantBeanComparator extends BeanComparator {
 	private static final long serialVersionUID = 6217533183265925971L;

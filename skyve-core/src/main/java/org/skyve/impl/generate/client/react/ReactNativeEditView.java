@@ -13,6 +13,9 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.TreeMap;
 
+/**
+ * Renders React Native edit view component code from Skyve metadata.
+ */
 public class ReactNativeEditView extends ReactComponent {
 	private Module module;
 	private Document document;

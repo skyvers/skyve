@@ -20,6 +20,30 @@ import freemarker.template.Template;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperPrint;
 
+/**
+ * Renders JasperReports and Freemarker report templates against Skyve domain data.
+ *
+ * <p>Obtain the active {@code Reporting} service via {@link org.skyve.EXT#getReporting()}.
+ * The interface supports three output paths:
+ * <ul>
+ *   <li>Direct stream rendering — write a report to an {@link java.io.OutputStream} in the
+ *       requested {@link ReportFormat}.</li>
+ *   <li>{@link org.skyve.metadata.controller.Download} creation — wrap output for Skyve's
+ *       download-action pipeline so the rendered report is returned to the browser.</li>
+ *   <li>Mail attachment rendering — produce a {@link org.skyve.util.MailAttachment}
+ *       suitable for inclusion in a Skyve mail message.</li>
+ * </ul>
+ *
+ * <p>JasperReports templates are resolved from the customer's report directory using
+ * the module/document/report name triple. Parameters are passed as a {@link java.util.Map}
+ * and supplemented by the provided bean as the primary data source.
+ *
+ * <p>Threading: this interface is thread-safe; the implementation may share a single
+ * JasperReports compile cache across requests.
+ *
+ * @see ReportFormat
+ * @see org.skyve.EXT#getReporting()
+ */
 public interface Reporting extends SystemObserver {
 	/**
 	 * 

@@ -113,6 +113,12 @@ import org.skyve.web.WebAction;
 
 import jakarta.annotation.Nullable;
 
+/**
+ * Base view renderer for client-code generation targets.
+ *
+ * <p>Bridges generic {@link org.skyve.impl.generate.ViewRenderer} traversal to
+ * client-specific component/layout renderers.
+ */
 public class ClientViewRenderer extends ViewRenderer {
 	protected ComponentRenderer cr;
 	protected LayoutRenderer lr;

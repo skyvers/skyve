@@ -57,9 +57,23 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
- * Represents a SAIL interaction, which is a named sequence of automation steps.
- * 
- * @author mike
+ * Represents a named sequence of automation steps within an {@link Automation} script.
+ *
+ * <p>An {@code Interaction} is the primary unit of script organisation — analogous
+ * to a test method. It has a {@code name} attribute (displayed in reports), optional
+ * {@code before} and {@code after} {@link Procedure} hooks, and an ordered list of
+ * {@link Step} objects in a {@code method} element.
+ *
+ * <p>Steps cover the full set of UI operations: session management (login/logout),
+ * navigation (list/edit/tree/map/calendar), data entry, action buttons, grid operations,
+ * lookup/description widgets, tab selection, context management, and test assertions.
+ *
+ * <p>JAXB-bound to the SAIL XML namespace. Execute via
+ * {@link org.skyve.metadata.sail.execution.Executor#executeInteraction}.
+ *
+ * @see Automation
+ * @see Procedure
+ * @see Step
  */
 @XmlType(namespace = XMLMetaData.SAIL_NAMESPACE, propOrder = {"before", "steps", "after"})
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)

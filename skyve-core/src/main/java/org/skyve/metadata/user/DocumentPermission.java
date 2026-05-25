@@ -5,7 +5,27 @@ import org.skyve.impl.util.XMLMetaData;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
- * 
+ * An enum encoding the Create/Read/Update/Delete permissions and the data visibility
+ * scope for a document, as declared in Skyve module role metadata.
+ *
+ * <p>Each constant name encodes five characters:
+ * <pre>
+ *   Position 0 &mdash; {@code C} = can create,  {@code _} = cannot
+ *   Position 1 &mdash; {@code R} = can read,    {@code _} = cannot
+ *   Position 2 &mdash; {@code U} = can update,  {@code _} = cannot
+ *   Position 3 &mdash; {@code D} = can delete,  {@code _} = cannot
+ *   Position 4 &mdash; scope: {@code G}=global, {@code C}=customer,
+ *                              {@code D}=dataGroup, {@code U}=user, {@code _}=none
+ * </pre>
+ *
+ * <p>For example, {@code CRU_G} means create/read/update (no delete) with global scope,
+ * and {@code _____} means no permissions at all.
+ *
+ * <p>Permissions from multiple roles are combined via {@link #mergePermission},
+ * which unions the CRUD bits and takes the broader (higher-ordinal) scope.
+ *
+ * @see DocumentPermissionScope
+ * @see User
  */
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE)
 public enum DocumentPermission {
@@ -53,12 +73,13 @@ public enum DocumentPermission {
 	private DocumentPermissionScope scope;
 
 	/**
-	 * 
-	 * @param canCreate
-	 * @param canRead
-	 * @param canUpdate
-	 * @param canDelete
-	 * @param scope
+	 * Constructs a permission constant with explicit CRUD flags and a data scope.
+	 *
+	 * @param canCreate  {@code true} if create operations are permitted
+	 * @param canRead    {@code true} if read operations are permitted
+	 * @param canUpdate  {@code true} if update operations are permitted
+	 * @param canDelete  {@code true} if delete operations are permitted
+	 * @param scope      the data visibility scope; must not be {@code null}
 	 */
 	private DocumentPermission(boolean canCreate, 
 								boolean canRead, 
@@ -73,9 +94,14 @@ public enum DocumentPermission {
 	}
 
 	/**
-	 * 
-	 * @param anotherPermission
-	 * @return
+	 * Merges this permission with another, returning the union of CRUD bits and the
+	 * broader of the two data scopes.
+	 *
+	 * <p>The merge operation is commutative: {@code a.mergePermission(b)} and
+	 * {@code b.mergePermission(a)} return the same permission constant.
+	 *
+	 * @param anotherPermission  the permission to merge with; must not be {@code null}
+	 * @return the merged permission constant; never {@code null}
 	 */
 	public DocumentPermission mergePermission(DocumentPermission anotherPermission) {
 		char[] permissions = {'_', '_', '_', '_', scope.charValue()};
@@ -105,40 +131,45 @@ public enum DocumentPermission {
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Returns whether create operations are permitted by this permission.
+	 *
+	 * @return {@code true} if create is permitted
 	 */
 	public boolean canCreate() {
 		return canCreate;
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Returns whether delete operations are permitted by this permission.
+	 *
+	 * @return {@code true} if delete is permitted
 	 */
 	public boolean canDelete() {
 		return canDelete;
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Returns whether read operations are permitted by this permission.
+	 *
+	 * @return {@code true} if read is permitted
 	 */
 	public boolean canRead() {
 		return canRead;
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Returns whether update operations are permitted by this permission.
+	 *
+	 * @return {@code true} if update is permitted
 	 */
 	public boolean canUpdate() {
 		return canUpdate;
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Returns the data visibility scope associated with this permission.
+	 *
+	 * @return the scope; never {@code null}
 	 */
 	public DocumentPermissionScope getScope() {
 		return scope;

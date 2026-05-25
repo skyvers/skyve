@@ -10,22 +10,45 @@ import org.skyve.metadata.model.Attribute.AttributeType;
 
 import jakarta.annotation.Nonnull;
 
+/**
+ * Base converter for {@link DateTime} attributes using a configured
+ * date-time pattern and i18n conversion error key.
+ *
+ * <p>Threading: thread-safe when used with {@link CORE} format factories,
+ * because formatter instances are obtained per operation.
+ */
 public abstract class AbstractDateTimeConverter implements Converter<DateTime> {
+	/**
+	 * Returns the attribute type supported by this converter.
+	 * @return the result value
+	 */
 	@Override
 	public final AttributeType getAttributeType() {
 		return AttributeType.dateTime;
 	}
 
+	/**
+	 * Returns the value type handled by this converter.
+	 * @return the result value
+	 */
 	@Override
 	public Class<DateTime> getValueType() {
 		return DateTime.class;
 	}
 	
+	/**
+	 * Returns the optional format descriptor for this converter.
+	 * @return the result value
+	 */
 	@Override
 	public Format<DateTime> getFormat() {
 		return null;
 	}
 
+	/**
+	 * Returns the optional validator descriptor for this converter.
+	 * @return the result value
+	 */
 	@Override
 	public Validator<DateTime> getValidator() {
 		return null;
@@ -43,6 +66,11 @@ public abstract class AbstractDateTimeConverter implements Converter<DateTime> {
 	@Override
 	public abstract @Nonnull String getFormatPattern();
 
+	/**
+	 * Converts a display representation to its domain value.
+	 * @param displayValue the display value
+	 * @return the result value
+	 */
 	@Override
 	public DateTime fromDisplayValue(String displayValue) throws ConversionException {
 		try {
@@ -53,6 +81,11 @@ public abstract class AbstractDateTimeConverter implements Converter<DateTime> {
 		}
 	}
 
+	/**
+	 * Converts a domain value to its display representation.
+	 * @param value the value
+	 * @return the result value
+	 */
 	@Override
 	public String toDisplayValue(DateTime value) throws ConversionException {
 		try {

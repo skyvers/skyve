@@ -46,6 +46,11 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 
 import jakarta.annotation.Nullable;
 
+/**
+ * Abstract renderer for individual view widgets/components.
+ *
+ * <p>Subclasses emit target-client code for each widget type.
+ */
 public abstract class ComponentRenderer extends AbstractRenderer {
 	/**
 	 * Used to create a visible/invisible panel for a view based to switch between create and edit views.

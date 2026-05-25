@@ -11,6 +11,21 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * Abstract base for all scalar document field attribute types.
+ *
+ * <p>Extends {@link AbstractAttribute} with field-specific properties: whether
+ * the field is mandatory, the indexed state (database index type), and the
+ * SQL column type override.  All concrete field classes (Text, Integer, Date,
+ * etc.) extend this class directly or via intermediate abstract types such as
+ * {@link ConstrainableField} and {@link ConvertibleField}.
+ *
+ * <p>Threading: not thread-safe.  Instances are populated during metadata loading
+ * and are read-only once placed in the repository cache.
+ *
+ * @see ConstrainableField
+ * @see AbstractAttribute
+ */
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE, 
 			propOrder = {"persistentBool", "dynamicBool", "requiredBool", "requiredMessage", "defaultValue", "index", "generated"})
 public abstract class Field extends AbstractAttribute {

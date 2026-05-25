@@ -13,6 +13,17 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * Carries optional dynamic class-name overrides for a document's Bizlet, actions,
+ * images, and models.
+ *
+ * <p>When a document declares {@code <dynamic>} in its XML, Skyve loads the named
+ * classes at runtime rather than relying on statically generated domain classes. This
+ * supports hot-reloadable implementations in development and plugin scenarios.
+ *
+ * <p>The maps ({@link #getActions()}, {@link #getImages()}, {@link #getModels()}) are
+ * keyed by the action/image/model name and valued by fully-qualified class names.
+ */
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 public class Dynamic implements SerializableMetaData {

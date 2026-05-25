@@ -8,6 +8,16 @@ import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * Records the parent document name in a Skyve document inheritance hierarchy.
+ *
+ * <p>When a document XML declares {@code <extends document="ParentDoc" />}, the
+ * metadata loader creates an {@code Extends} instance carrying the parent document name.
+ * The domain generator uses this to set up Java inheritance and the ORM inheritance
+ * strategy declared in {@link Persistent}.
+ *
+ * @see Persistent.ExtensionStrategy
+ */
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 public class Extends implements SerializableMetaData {

@@ -43,6 +43,32 @@ import org.skyve.web.SortParameter;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
+/**
+ * Abstract base for custom list view models that supply data to Skyve list widgets.
+ *
+ * <p>Subclass {@code ListModel} to provide a custom dataset to a {@code listGrid},
+ * {@code listRepeater}, or similar Skyve view widget via the {@code modelName} attribute.
+ * The framework calls {@link #fetch()} to retrieve a {@link Page} of results.
+ *
+ * <p>Subclasses must implement at minimum:
+ * <ul>
+ *   <li>{@link #getColumns()} — declare the typed column schema for the list.</li>
+ *   <li>{@link #fetch()} — return a {@link Page} of rows for the requested range
+ *       and sort order. Read {@link #getStartRow()}, {@link #getEndRow()}, and
+ *       {@link #getSorts()} to honour pagination and sort.</li>
+ * </ul>
+ *
+ * <p>For in-memory data sets, extend {@link InMemoryListModel} rather than this class.
+ * For document-query-backed lists, extend {@link DocumentQueryListModel}.
+ *
+ * <p>Threading: one {@code ListModel} instance is created per view render cycle and
+ * is not shared across threads.
+ *
+ * @param <T> the driving document bean type
+ * @see Page
+ * @see Filter
+ * @see InMemoryListModel
+ */
 public abstract class ListModel<T extends Bean> implements ViewModel {
 	private T bean;
 	public T getBean() {

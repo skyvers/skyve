@@ -15,6 +15,18 @@ import org.skyve.impl.util.LoggingIteratorAdapter;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DataStore;
 
+/**
+ * A lazy, auto-closing {@link org.skyve.persistence.AutoClosingIterable} over a raw
+ * SQL query result set, surfacing each row as an Apache Commons
+ * {@link org.apache.commons.beanutils.DynaBean}.
+ *
+ * <p>The underlying JDBC {@link java.sql.PreparedStatement} and
+ * {@link java.sql.ResultSet} are opened in the constructor and closed when
+ * {@link #close()} is called or iteration is exhausted.
+ *
+ * <p>Side effects: opens a JDBC statement and result-set on the provided connection;
+ * callers must ensure {@link #close()} is called (preferably via try-with-resources).
+ */
 public class DynaIterable implements AutoClosingIterable<DynaBean> {
 	private final NamedParameterPreparedStatement ps;
 	private final ResultSet rs;

@@ -29,6 +29,11 @@ import org.skyve.metadata.repository.ProvidedRepository;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+/**
+ * Domain generator that emits JPA-annotated domain classes.
+ *
+ * <p>Produces Java source suitable for JPA/Hibernate persistence mapping.
+ */
 public final class JPADomainGenerator extends DomainGenerator {
 
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(JPADomainGenerator.class);

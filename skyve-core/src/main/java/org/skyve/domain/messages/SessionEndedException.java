@@ -10,7 +10,13 @@ import jakarta.annotation.Nonnull;
 import jakarta.validation.constraints.NotNull;
 
 /**
- * 
+ * Thrown when an action is attempted after the user's HTTP session has expired.
+ *
+ * <p>The framework raises this when it detects that the Skyve session state (user,
+ * persistence context, conversation) is no longer available on the current thread.
+ * The message is localised using the request's {@link java.util.Locale}.
+ *
+ * @see ConversationEndedException
  */
 public class SessionEndedException extends DomainException implements MessageException {
 	private static final long serialVersionUID = 2247724782906480914L;
@@ -19,11 +25,19 @@ public class SessionEndedException extends DomainException implements MessageExc
 
 	private List<Message> messages = null;
 
+	/**
+	 * Creates a new SessionEndedException instance.
+	 * @param httpRequestLocale the httpRequestLocale
+	 */
 	public SessionEndedException(@NotNull Locale httpRequestLocale) {
 		super(Util.nullSafeI18n(MESSAGE_KEY, httpRequestLocale), false);
 		messages = Collections.singletonList(new Message(getMessage()));
 	}
 
+	/**
+	 * Returns the messages.
+	 * @return the result
+	 */
 	@Override
 	public @Nonnull List<Message> getMessages() {
 		return messages;

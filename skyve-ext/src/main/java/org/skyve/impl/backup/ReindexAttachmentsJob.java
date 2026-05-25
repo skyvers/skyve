@@ -15,6 +15,10 @@ import org.skyve.impl.metadata.model.document.field.Field.IndexType;
 import org.skyve.job.CancellableJob;
 import org.skyve.metadata.model.Attribute.AttributeType;
 
+/**
+ * Reindexes all binary attachment content (uploaded files) in the content
+ * search engine after a restore or configuration change.
+ */
 public class ReindexAttachmentsJob extends CancellableJob {
 	@Override
 	public void execute() throws Exception {

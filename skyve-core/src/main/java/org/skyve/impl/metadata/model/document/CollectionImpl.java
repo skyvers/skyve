@@ -20,6 +20,23 @@ import jakarta.xml.bind.annotation.XmlType;
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE,
 			name = "collection",
 			propOrder = {"type", "ordered", "minCardinality", "maxCardinality", "ordering", "uniqueConstraints", "ownerDatabaseIndex", "elementDatabaseIndex", "cacheName"})
+/**
+ * JAXB-annotated implementation of {@link Collection}, representing a one-to-many
+ * or many-to-many relation from one document to another.
+ *
+ * <p>Extends {@link ReferenceImpl} with collection-specific properties:
+ * {@link CollectionType} (child or aggregation), ordering bindings,
+ * sort definitions, and min/max cardinality constraints.  Implements
+ * {@link OrderedAttribute} so that collection elements can be persisted
+ * in explicit user-defined order via an {@code bizOrdinal} column.
+ *
+ * <p>Threading: not thread-safe.  Instances are populated during metadata loading
+ * and are read-only once placed in the repository cache.
+ *
+ * @see ReferenceImpl
+ * @see Collection
+ * @see OrderedAttribute
+ */
 public class CollectionImpl extends ReferenceImpl implements Collection, OrderedAttribute {
 	private static final long serialVersionUID = 835190692384615766L;
 

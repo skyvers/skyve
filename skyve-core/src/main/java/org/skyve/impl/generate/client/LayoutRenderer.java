@@ -12,6 +12,9 @@ import org.skyve.impl.metadata.view.container.form.FormRow;
 
 import jakarta.annotation.Nullable;
 
+/**
+ * Abstract renderer for container and layout structures in generated clients.
+ */
 public abstract class LayoutRenderer extends AbstractRenderer {
 	/**
 	 * The view Layout for the view internally

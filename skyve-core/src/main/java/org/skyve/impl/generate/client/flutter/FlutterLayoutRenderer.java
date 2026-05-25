@@ -16,6 +16,9 @@ import org.skyve.impl.metadata.view.container.form.FormRow;
 
 import jakarta.annotation.Nullable;
  
+/**
+ * Flutter-specific layout/container renderer.
+ */
 public class FlutterLayoutRenderer extends LayoutRenderer {
 	public static final String VBOX_IMPORT = "widgets/skyve_vbox";
 	public static final String HBOX_IMPORT = "widgets/skyve_hbox";

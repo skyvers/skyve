@@ -14,6 +14,15 @@ import org.slf4j.Logger;
 
 import jakarta.annotation.Nonnull;
 
+/**
+ * Abstract implementation of {@link org.skyve.persistence.BizQL} providing
+ * parameter binding and timeout management for Skyve BizQL string queries.
+ *
+ * <p>Subclasses supply query execution by translating the BizQL string into a
+ * back-end-specific query (typically HQL via Hibernate).
+ *
+ * @see org.skyve.persistence.BizQL
+ */
 public class AbstractBizQL extends AbstractQuery implements BizQL {
 	private String query;
 	private String resolvedQuery;

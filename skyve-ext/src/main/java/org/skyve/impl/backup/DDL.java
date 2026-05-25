@@ -5,6 +5,10 @@ import java.util.List;
 
 import org.skyve.impl.persistence.AbstractPersistence;
 
+/**
+ * Utility class for executing DDL (DROP/CREATE) SQL scripts against the
+ * database as part of a backup restore operation.
+ */
 public class DDL {
 	private DDL() {
 		// nothing to see here

@@ -53,6 +53,22 @@ import jakarta.xml.bind.annotation.XmlType;
 
 @XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
+/**
+ * A reusable sequence of {@link Step} objects used as a before/after hook within
+ * an {@link Interaction} or {@link Automation}.
+ *
+ * <p>Procedures serve as setup and teardown blocks: the {@code before} procedure
+ * of an interaction runs before its main {@code method} steps; the {@code after}
+ * procedure runs unconditionally after. The same set of step types available in
+ * an interaction method body is available in a procedure.
+ *
+ * <p>JAXB-bound to the SAIL XML namespace; serialised as {@code <before>} or
+ * {@code <after>} elements within an {@link Automation} or {@link Interaction}.
+ *
+ * @see Interaction
+ * @see Automation
+ * @see Step
+ */
 public class Procedure {
 	private List<Step> steps = new ArrayList<>();
 

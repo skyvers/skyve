@@ -25,6 +25,13 @@ import com.azure.storage.blob.models.BlobRequestConditions;
 import com.azure.storage.blob.models.ParallelTransferOptions;
 import com.azure.storage.blob.specialized.BlobOutputStream;
 
+/**
+ * {@link ExternalBackup} implementation that stores Skyve backup archives in
+ * Azure Blob Storage.
+ *
+ * <p>Configured via the {@code backups.externalBackupClass} JSON key with
+ * {@code connectionString} and {@code containerName} sub-keys.
+ */
 public class AzureBlobStorageBackup implements ExternalBackup {
 
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(AzureBlobStorageBackup.class);

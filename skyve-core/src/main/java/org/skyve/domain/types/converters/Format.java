@@ -9,7 +9,29 @@ import org.skyve.impl.util.XMLMetaData;
 
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * Applies an input mask and optional text-case transformation to a display value.
+ *
+ * <p>A {@code Format} is the optional mask/case constraint attached to a {@link Converter}.
+ * It uses a simplified mask notation that is translated internally to
+ * {@link MaskFormatter} syntax:
+ * <ul>
+ *   <li>{@code A} — any alphanumeric character (letter or digit)
+ *   <li>{@code #} — any digit
+ *   <li>{@code L} — any letter (case controlled by {@link TextCase})
+ *   <li>all other characters are treated as literals in the mask
+ * </ul>
+ *
+ * <p>The {@link TextCase} enum controls how the resulting string value is cased:
+ * {@code upper}, {@code lower}, or {@code capital} (title-case via
+ * {@link org.apache.commons.text.WordUtils#capitalize}).
+ *
+ * @param <T> the value type this format produces and consumes
+ */
 public class Format<T> {
+	/**
+	 * Controls the case transformation applied to display strings.
+	 */
 	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public static enum TextCase {
 		upper, lower, capital;
@@ -22,23 +44,42 @@ public class Format<T> {
 	private TextCase textCase;
 	private String maskFormatterMask;
 	
+	/**
+	 * Constructs a {@code Format} with a mask and optional text-case transformation.
+	 *
+	 * @param mask      the mask string using A/#/L notation, or {@code null} for no mask
+	 * @param textCase  the desired text-case transformation, or {@code null} for no change
+	 */
 	public Format(String mask, TextCase textCase) {
 		this.mask = mask;
 		this.textCase = textCase;
 	}
 	
+	/**
+	 * Returns the mask string as declared in converter metadata.
+	 *
+	 * @return the mask, or {@code null} if no mask was specified
+	 */
 	public final String getMask() {
 		return mask;
 	}
 	
+	/**
+	 * Returns the text-case transformation applied to string values.
+	 *
+	 * @return the text case, or {@code null} if none was specified
+	 */
 	public final TextCase getTextCase() {
 		return textCase;
 	}
 	
 	/**
-	 * @param value
-	 * @return
-	 * @throws ParseException
+	 * Parses a display string through this format's mask (if any) and applies the
+	 * text-case transformation.
+	 *
+	 * @param value the display string to parse
+	 * @return the formatted value of type {@code T}
+	 * @throws ParseException if the value does not match the mask
 	 */
 	@SuppressWarnings("unchecked")
 	public final T fromDisplayValue(String value) throws ParseException {
@@ -51,9 +92,13 @@ public class Format<T> {
 	}
 
 	/**
-	 * @param value
-	 * @return
-	 * @throws ParseException
+	 * Formats a domain value through this format's mask (if any) and applies the
+	 * text-case transformation.
+	 *
+	 * @param value the value to format; may be {@code null}, in which case an empty
+	 *              string is returned
+	 * @return the display string; never {@code null}
+	 * @throws ParseException if the mask formatter cannot represent {@code value}
 	 */
 	public final String toDisplayValue(T value) throws ParseException {
 		MaskFormatter maskFormatter = getMaskFormatter();

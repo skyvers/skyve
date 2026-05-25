@@ -3,6 +3,12 @@ package org.skyve.impl.generate.client;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Value object holding rendered client component output fragments.
+ *
+ * <p>Used to pass generated markup/code and related metadata between
+ * renderer stages.
+ */
 public class RenderedComponent {
 	private String indentation = "\t";
 	private String indent = null;

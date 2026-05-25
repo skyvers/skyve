@@ -12,6 +12,18 @@ import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+/**
+ * A {@link UserImpl} subclass with all document and action privileges granted.
+ *
+ * <p>Used for framework-internal background jobs, bootstrapping, and system
+ * operations that must run outside a real authenticated user session. Granting
+ * superuser access bypasses all document-level permission checks.
+ *
+ * <p>Side effects: any persistence operation performed under a {@code SuperUser}
+ * context will not enforce customer or data-group scoping.
+ *
+ * @see UserImpl
+ */
 public class SuperUser extends UserImpl {
 	private static final long serialVersionUID = -6233814867322594601L;
 	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SuperUser.class);

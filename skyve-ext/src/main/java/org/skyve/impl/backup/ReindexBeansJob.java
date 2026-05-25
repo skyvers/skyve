@@ -24,6 +24,10 @@ import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.SQL;
 
+/**
+ * Reindexes all bean-level content (indexed text attributes) in the content
+ * search engine after a restore or configuration change.
+ */
 public class ReindexBeansJob extends CancellableJob {
 	@Override
 	public void execute() throws Exception {

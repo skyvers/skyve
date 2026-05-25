@@ -26,6 +26,24 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB-annotated field type whose valid values are restricted to a declared
+ * enumeration of named constants.
+ *
+ * <p>An {@code Enumeration} field declares a set of {@link EnumeratedValue}
+ * records, each with a {@code code} (stored in the database), an optional
+ * {@code description} (displayed to the user), and an optional boolean flag
+ * marking the value as the default.  The framework generates a Java enum from
+ * these values during domain generation.
+ *
+ * <p>Enumeration values are resolved via the customer override chain: a customer
+ * may extend or reorder the values for a given enumeration field.
+ *
+ * <p>Threading: not thread-safe.  Instances are populated during metadata loading
+ * and are read-only once placed in the repository cache.
+ *
+ * @see ConstrainableField
+ */
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "enum")
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE,
 			propOrder = {"xmlTypeName", "xmlImplementingEnumClassName", "moduleRef", "documentRef", "attributeRef", "xmlValues"})

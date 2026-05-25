@@ -16,6 +16,9 @@ import org.skyve.impl.metadata.view.container.form.FormRow;
 
 import jakarta.annotation.Nullable;
 
+/**
+ * React Native-specific layout/container renderer.
+ */
 public class ReactNativeLayoutRenderer extends LayoutRenderer {
 	private Map<String, String> imports;
 

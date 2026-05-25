@@ -30,6 +30,21 @@ import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * JAXB-annotated base class for all document attribute types.
+ *
+ * <p>Carries the properties common to every attribute: display name, description,
+ * documentation, widget reference, deprecation flag, change-tracking and audit
+ * settings, transience flag, and an open-ended property map.  Concrete subclasses
+ * add the type-specific details (e.g., field length, collection type, referenced
+ * document).
+ *
+ * <p>Threading: not thread-safe.  Attribute instances are written during metadata
+ * loading and are read-only once placed in the repository cache.
+ *
+ * @see Attribute
+ * @see org.skyve.impl.metadata.repository.NamedMetaData
+ */
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE,
 			propOrder = {"documentation",
 							"displayName", 

@@ -7,6 +7,9 @@ import org.skyve.domain.types.converters.Validator;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.util.BeanValidator;
 
+/**
+ * Converts long values using grouped thousands separator formatting.
+ */
 public class LongIntegerSeparator implements Converter<Long> {
 	@Override
 	public Class<Long> getValueType() {

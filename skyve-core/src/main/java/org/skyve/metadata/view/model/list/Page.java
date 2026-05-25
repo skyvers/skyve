@@ -4,6 +4,14 @@ import java.util.List;
 
 import org.skyve.domain.Bean;
 
+/**
+ * A single page of rows returned by {@link ListModel#fetch()}.
+ *
+ * <p>A {@code Page} carries the subset of rows for the requested start/end range
+ * together with the total row count for the full result set (used for pagination
+ * controls). An optional summary row holds aggregate values (count, sum, avg, etc.)
+ * when an {@link org.skyve.persistence.DocumentQuery.AggregateFunction} is active.
+ */
 public final class Page {
 	private long totalRows;
 	private List<Bean> rows;

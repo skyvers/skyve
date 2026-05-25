@@ -91,8 +91,39 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
- * The central factory for creating all objects required in skyve ext.
- * See {@link org.skyve.CORE} for creating objects implemented in the skyve core API.
+ * Static facade providing access to all Skyve extended runtime services.
+ *
+ * <p>{@code EXT} is the {@code skyve-ext} counterpart to {@link org.skyve.CORE}.
+ * It provides factory methods and service accessors for capabilities that depend
+ * on the full runtime stack: content management, job scheduling, tagging, caching,
+ * reporting, mail, SMS, push messaging, GeoIP, BizPort, SQL data access, and security.
+ *
+ * <p>All methods are static and may be called from any framework layer. Underlying
+ * service implementations are resolved via singleton holders; they are available from
+ * application startup onward.
+ *
+ * <p>Example usages:
+ * <pre>
+ *   // Content management — always in try-with-resources
+ *   try (ContentManager cm = EXT.newContentManager()) {
+ *       cm.put(attachment);
+ *   }
+ *
+ *   // Tag management
+ *   TagManager tm = EXT.getTagManager();
+ *   tm.tag(tagId, bean);
+ *
+ *   // SQL access to a named data store
+ *   try (SQLDataAccess sql = EXT.newSQLDataAccess()) {
+ *       SQL q = sql.newSQL("select count(*) from ...");
+ *   }
+ * </pre>
+ *
+ * <p>Threading: all static methods are safe to call concurrently. Individual
+ * returned objects (e.g. {@link ContentManager}, {@link SQLDataAccess}) are
+ * thread-confined and must not be shared.
+ *
+ * @see org.skyve.CORE
  */
 public class EXT {
 

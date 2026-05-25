@@ -4,22 +4,47 @@ import org.skyve.impl.util.XMLMetaData;
 
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * Mixin interface for view elements that output text and support HTML escaping
+ * and sanitisation of the rendered value.
+ *
+ * <p>The two concerns are orthogonal:
+ * <ul>
+ *   <li>{@link #getEscape()} governs whether special characters are HTML-encoded
+ *       before rendering (XSS prevention for plain-text fields).</li>
+ *   <li>{@link #getSanitise()} applies an HTML sanitisation policy to rich-text
+ *       content, removing or neutralising unsafe elements and attributes.</li>
+ * </ul>
+ */
 public interface TextOutput {
+	/**
+	 * Returns whether HTML special characters in the rendered value should be escaped.
+	 *
+	 * @return {@code Boolean.TRUE} to escape, {@code Boolean.FALSE} to render raw HTML,
+	 *         or {@code null} to use the widget-type default
+	 */
 	Boolean getEscape();
 
+	/**
+	 * Defines the HTML sanitisation policy applied to a rich-text value before rendering.
+	 *
+	 * <p>Policies are ordered from least restrictive ({@link #none}) to most restrictive
+	 * ({@link #text}). When comparing policies the ordinal may be used to determine
+	 * relative restrictiveness.
+	 */
 	@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 	public static enum Sanitisation {
 		// Note the values are ordered from least restrictive to most restrictive so we can compare the ordinals
 		
-		// No sanitisation applied
+		/** No sanitisation applied; the raw value is rendered as-is. */
 		none,
-		// Formatting tags, structural tags, links and images and CSS too
+		/** Permits formatting tags, structural tags, links, images, and CSS styles. */
 		relaxed,
-		// Formatting tags, structural tags, links and images
+		/** Permits formatting tags, structural tags, links, and images (no CSS). */
 		simple,
-		// Formatting tags only
+		/** Permits inline formatting tags only (bold, italic, etc.). */
 		basic,
-		// Only Text - no HTML
+		/** Strips all HTML; only plain text is rendered. */
 		text
 	}
 	

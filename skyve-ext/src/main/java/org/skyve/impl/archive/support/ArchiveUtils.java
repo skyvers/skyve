@@ -10,6 +10,12 @@ import org.skyve.CORE;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 
+/**
+ * Static utility methods for the Skyve document archiving subsystem.
+ *
+ * <p>Provides: archive file-path construction, string excerpting for search
+ * result display, and shared constants (charset, file suffix).
+ */
 public class ArchiveUtils {
 
     public static Charset ARCHIVE_CHARSET = UTF_8;

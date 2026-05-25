@@ -1,5 +1,9 @@
 package org.skyve.impl.backup;
 
+/**
+ * Configuration contract for the restore operation, specifying how existing
+ * database schema and content should be handled before data is restored.
+ */
 public interface RestoreOptions {
 	public static enum ContentOption {
 		clearOrphanedContentIds,

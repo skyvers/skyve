@@ -5,6 +5,15 @@ import org.skyve.domain.messages.SkyveException;
 /**
  * 
  */
+/**
+ * Signals an error in metadata loading, parsing, or validation.
+ *
+ * <p>Thrown by the repository and metadata processing pipelines when XML metadata
+ * is malformed, references a non-existent target, or violates a Skyve constraint.
+ * Because metadata errors are typically unrecoverable at startup, this exception
+ * extends {@link org.skyve.domain.messages.SkyveException} and is usually propagated
+ * to the deployment log.
+ */
 public class MetaDataException extends SkyveException {
 	private static final long serialVersionUID = 1447684367914523647L;
 

@@ -32,6 +32,10 @@ import org.skyve.util.logging.SkyveLoggerFactory;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
+/**
+ * Validates that every content attachment referenced in the database exists in
+ * the content store, reporting missing or erroneous content attachments.
+ */
 public class ContentChecker {
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ContentChecker.class);
 

@@ -10,6 +10,22 @@ import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 //@XmlSchemaType(name = "string")
 //@XmlJavaTypeAdapter(GeometryMapper.class)
+/**
+ * JAXB {@link XmlAdapter} that converts between a Well-Known Text (WKT) string
+ * and a JTS {@link Geometry} object.
+ *
+ * <p>On unmarshalling, parses the WKT string using a {@link org.locationtech.jts.io.WKTReader}.
+ * On marshalling, converts the geometry to its canonical WKT representation via
+ * {@code Geometry.toText()}.  A {@code null} input produces a {@code null} output
+ * in both directions.
+ *
+ * @throws org.locationtech.jts.io.ParseException if the WKT string is malformed
+ *
+ * <p>Threading: not thread-safe; a new {@link org.locationtech.jts.io.WKTReader}
+ * is created on each unmarshal call (WKTReader is not reentrant).
+ *
+ * @see Geometry
+ */
 public class GeometryMapper extends XmlAdapter<String, Geometry> {
 	@Override
 	public Geometry unmarshal(String geometry) throws Exception {

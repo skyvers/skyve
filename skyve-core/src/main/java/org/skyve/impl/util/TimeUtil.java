@@ -19,6 +19,18 @@ import org.skyve.domain.types.Decimal5;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.util.Time;
 
+/**
+ * Date and time arithmetic utilities for Skyve temporal types.
+ *
+ * <p>Provides static helpers for manipulating {@link java.util.Date},
+ * {@link org.skyve.domain.types.DateOnly}, and
+ * {@link org.skyve.domain.types.TimeOnly} values: clearing time components,
+ * computing date differences, rolling periods, parsing date strings, and
+ * converting between Java time types. All methods delegate to or complement
+ * {@link org.skyve.util.Time}.
+ *
+ * <p>Threading: stateless; all methods are safe for concurrent use.
+ */
 public class TimeUtil {
 	private TimeUtil() {
 		// no implementation

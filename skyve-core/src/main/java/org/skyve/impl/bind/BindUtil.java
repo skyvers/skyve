@@ -78,7 +78,28 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 /**
- * Provides utilities for getting and setting simple and compound bean properties.
+ * Core implementation of Skyve's bean binding engine.
+ *
+ * <p>Provides get/set/convert/format operations on bean attributes identified by
+ * dot-separated binding expressions (e.g. {@code "contact.name"}). Traversal is
+ * metadata-aware: it consults document attribute definitions to apply the correct
+ * {@link org.skyve.domain.types.converters.Converter} for display formatting and
+ * string-to-value parsing.
+ *
+ * <p>Key responsibilities:
+ * <ul>
+ *   <li>Property traversal via Apache Commons BeanUtils, extended by
+ *       {@link DeproxyingPropertyUtilsBean} to handle Hibernate proxies.</li>
+ *   <li>Expression evaluation delegation to the registered
+ *       {@link org.skyve.util.ExpressionEvaluator} (EL, display-name, i18n, etc.).</li>
+ *   <li>Collection sorting by declared or supplied {@link org.skyve.metadata.Ordering} lists.</li>
+ *   <li>Format/parse of typed values using the attribute's converter.</li>
+ * </ul>
+ *
+ * <p>The public API is exposed via {@link org.skyve.util.Binder}; use that class
+ * directly from application code.
+ *
+ * <p>Threading: all methods are stateless and thread-safe.
  */
 public final class BindUtil {
 	private static final String DEFAULT_DISPLAY_DATE_FORMAT = "dd/MM/yyyy";

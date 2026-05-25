@@ -5,11 +5,26 @@ import org.skyve.impl.util.XMLMetaData;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
- * 
+ * A to-one relational attribute linking a document to another document instance.
+ *
+ * <p>Associations come in three flavours declared by {@link AssociationType}:
+ * <ul>
+ *   <li>{@link AssociationType#composition composition} — the associated bean is
+ *       cascade-deleted when the owner is deleted.</li>
+ *   <li>{@link AssociationType#aggregation aggregation} — the associated bean lives
+ *       independently; only the foreign key is removed on owner deletion.</li>
+ *   <li>{@link AssociationType#embedded embedded} — the associated document's columns are
+ *       inlined into the owner's table, optionally with a column prefix.</li>
+ * </ul>
+ *
+ * @see Collection
+ * @see Inverse
  */
 public interface Association extends Reference {
 	/**
-	 * 
+	 * Association cardinality and lifecycle variants.
+	 *
+	 * <p>The chosen type determines the ORM mapping and the cascade-delete behaviour.
 	 */
 	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public enum AssociationType implements ReferenceType {
@@ -30,7 +45,9 @@ public interface Association extends Reference {
 	}
 
 	/**
-	 * 
+	 * Returns the {@link AssociationType} that governs the ORM mapping and lifecycle of this association.
+	 *
+	 * @return the association type; never {@code null}
 	 */
 	@Override
 	AssociationType getType();

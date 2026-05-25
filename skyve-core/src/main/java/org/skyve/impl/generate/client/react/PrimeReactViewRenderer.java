@@ -8,6 +8,9 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
 import org.skyve.web.UserAgentType;
 
+/**
+ * PrimeReact-oriented view renderer specialisation.
+ */
 public class PrimeReactViewRenderer extends ReactViewRenderer {
 	static final String PRIME_REACT_VIEW_FILE = "../../PrimeReactView.js";
 	static final String STARTING_INDENT = "\t\t\t";

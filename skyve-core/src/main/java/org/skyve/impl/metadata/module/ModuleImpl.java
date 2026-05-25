@@ -41,6 +41,20 @@ import org.skyve.metadata.view.View.ViewType;
 
 import com.google.common.base.MoreObjects;
 
+/**
+ * Runtime implementation of the {@link Module} contract, populated from a
+ * module XML descriptor during repository bootstrap.
+ *
+ * <p>Holds the module's document registrations, role definitions, query definitions
+ * (MetaData, SQL, BizQL), menu structure, and job declarations.  The object graph
+ * is fully resolved before being placed in the repository cache.
+ *
+ * <p>Threading: not thread-safe.  A {@code ModuleImpl} instance is written
+ * exclusively during repository loading and is read-only afterwards.
+ *
+ * @see Module
+ * @see CustomerImpl
+ */
 public class ModuleImpl extends AbstractMetaDataMap implements Module {
 	private static final long serialVersionUID = -5291187014833234045L;
 

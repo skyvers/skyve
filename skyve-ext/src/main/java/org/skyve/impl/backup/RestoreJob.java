@@ -44,6 +44,10 @@ import org.skyve.util.Util;
 import org.supercsv.io.CsvMapReader;
 import org.supercsv.prefs.CsvPreference;
 
+/**
+ * Restores a Skyve application from a backup ZIP, re-creating table data and
+ * binary content according to the {@link RestoreOptions} provided.
+ */
 public class RestoreJob extends CancellableJob {
 	/**
 	 * Executes a restore job when invoked with {@link RestoreOptions}.

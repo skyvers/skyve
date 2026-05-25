@@ -9,6 +9,9 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
 import org.skyve.web.UserAgentType;
 
+/**
+ * Flutter view renderer entry point used by {@link FlutterGenerator}.
+ */
 public class FlutterViewRenderer extends ClientViewRenderer {
 	static final String STARTING_INDENT = "";
 

@@ -50,6 +50,9 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 
 import jakarta.annotation.Nullable;
 
+/**
+ * Flutter-specific widget/component renderer.
+ */
 public class FlutterComponentRenderer extends ComponentRenderer {
     
     /**

@@ -38,6 +38,16 @@ import org.slf4j.Logger;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
+/**
+ * Abstract implementation of {@link org.skyve.persistence.SQL} providing parameter
+ * binding, projection, timeout management, and execution scaffolding for raw SQL
+ * queries against Skyve's configured data store.
+ *
+ * <p>Subclasses supply the JDBC/Hibernate execution logic by implementing
+ * {@link #toQueryString()} and the underlying execution methods.
+ *
+ * @see org.skyve.persistence.SQL
+ */
 public abstract class AbstractSQL extends AbstractQuery implements SQL {
 
     private static final Logger QUERY_LOGGER = Category.QUERY.logger();

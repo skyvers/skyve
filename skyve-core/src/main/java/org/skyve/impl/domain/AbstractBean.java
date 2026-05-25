@@ -27,6 +27,27 @@ import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+/**
+ * Base implementation of {@link org.skyve.domain.Bean} providing change-tracking,
+ * dynamic attribute support, and binding utilities.
+ *
+ * <p>Change tracking works by saving the original value of a property in
+ * {@code originalValues} before each setter call so that
+ * {@link #isChanged()} and {@link #originalValues} can report unsaved mutations.
+ * {@link ChangeTrackingArrayList} delegates to the same mechanism for collection
+ * mutations.
+ *
+ * <p>Dynamic attributes (those not declared in document metadata) are stored in a
+ * lazily-created {@link org.apache.commons.beanutils.LazyDynaMap} and accessed via
+ * the {@link #getDynamic()} binding.
+ *
+ * <p>Threading: thread-confined. Instances must not be shared across threads
+ * while a persistence session is open.
+ *
+ * @see org.skyve.domain.Bean
+ * @see AbstractPersistentBean
+ * @see ChangeTrackingArrayList
+ */
 public abstract class AbstractBean implements Bean {
 	private static final long serialVersionUID = -5241897716950549433L;
 

@@ -9,6 +9,16 @@ import org.skyve.metadata.user.User;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB-annotated range validator for {@link Integer}-typed document fields.
+ *
+ * <p>Enforces that the integer value falls within the declared {@code min} and/or
+ * {@code max} integer boundaries.  Extends {@link RangeValidator}.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see RangeValidator
+ */
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 public class IntegerValidator extends RangeValidator<Integer> {

@@ -15,6 +15,10 @@ import org.skyve.domain.types.converters.Converter;
 import org.supercsv.io.CsvMapReader;
 import org.supercsv.prefs.CsvPreference;
 
+/**
+ * {@link AbstractDataFileLoader} implementation that reads CSV files via
+ * SuperCSV, mapping each header column to a Skyve binding expression.
+ */
 public class CSVLoader extends AbstractDataFileLoader {
 	private InputStreamReader fileReader;
 	private CsvMapReader csvReader;

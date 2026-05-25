@@ -18,6 +18,16 @@ import org.skyve.util.Binder.TargetMetaData;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
+/**
+ * Mutable filter expression builder for {@link AbstractDocumentQuery}.
+ *
+ * <p>Appends predicate clauses (equality, range, like, null checks, etc.) to a
+ * growing SQL/HQL {@code WHERE} expression. The resulting clause is embedded into
+ * the owning query before execution. The {@code RDBMS} hint is used for
+ * platform-specific like-escaping.
+ *
+ * @see org.skyve.persistence.DocumentFilter
+ */
 public class DocumentFilterImpl implements DocumentFilter {
 	private static final String LIKE_OPERATOR = " like ";
 	private static final String NOT_LIKE_OPERATOR = " not like ";

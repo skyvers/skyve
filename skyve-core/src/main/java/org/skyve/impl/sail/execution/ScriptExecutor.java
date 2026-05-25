@@ -8,6 +8,18 @@ import org.skyve.metadata.sail.language.step.Execute;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+/**
+ * Abstract SAIL executor that drives a full automation script, managing the execution
+ * order of procedures ({@code before}, interactions, {@code after}) and translating
+ * each step into client-generated script output.
+ *
+ * <p>Subclasses provide the target scripting language (Selenese, WebDriver Java, etc.)
+ * by implementing the abstract {@code startTest}, {@code endTest}, and step-specific
+ * methods. The accumulated script is available via {@code getScript()}.
+ *
+ * @param <T> the concrete {@link AutomationContext} type used by this executor
+ * @see ContextualExecutor
+ */
 public abstract class ScriptExecutor<T extends AutomationContext> extends ContextualExecutor<T> {
 	private StringBuilder script = new StringBuilder(4096);
 	private int indent = 0;

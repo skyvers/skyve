@@ -49,6 +49,23 @@ import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+/**
+ * Validates domain object attributes, required fields, uniqueness constraints,
+ * and field-level format rules, collecting violations into a
+ * {@link org.skyve.domain.messages.ValidationException}.
+ *
+ * <p>The main entry points are:
+ * <ul>
+ *   <li>{@link #validateBeanAgainstDocument} — validates a single bean against its
+ *       document metadata (required, format, range, uniqueness).
+ *   <li>{@link #validateBeanAgainstBizlet} — delegates to the document's
+ *       {@link org.skyve.metadata.model.document.Bizlet#validate} callback.
+ * </ul>
+ *
+ * <p>Complexity: validation traverses the document's attribute list (O(a)) and may
+ * issue uniqueness queries against the persistence layer (O(u) queries, one per unique
+ * constraint). Avoid calling this in tight loops.
+ */
 public class ValidationUtil {
 
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ValidationUtil.class);

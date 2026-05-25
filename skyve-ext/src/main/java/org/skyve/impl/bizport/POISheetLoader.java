@@ -18,6 +18,10 @@ import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.converters.Converter;
 
+/**
+ * {@link AbstractDataFileLoader} implementation that reads data from an
+ * Apache POI {@link org.apache.poi.ss.usermodel.Sheet}.
+ */
 public class POISheetLoader extends AbstractDataFileLoader {
 
 	private Workbook workbook;

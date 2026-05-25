@@ -34,10 +34,23 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 /**
- * Repository API for resolving metadata, UI artifacts, and runtime components for modules/documents.
- * Supports customer overrides and runtime resolution, and exposes permission/user population helpers.
+ * The primary metadata resolution API used throughout the Skyve framework at runtime.
  *
- * <p>Nullability is expressed via {@link Nonnull} and {@link Nullable} on parameters and return values.
+ * <p>{@code ProvidedRepository} extends {@link CachedRepository} with the full set of
+ * operations needed to resolve modules, documents, views, bizlets, actions, models,
+ * reports, and user/permission state &mdash; always honouring customer overrides and
+ * UX/UI-specific variants.
+ *
+ * <p>Constant fields define the standard folder namespaces (e.g.
+ * {@link #MODULES_NAMESPACE}, {@link #VIEWS_NAMESPACE}) used throughout the metadata
+ * file system layout.
+ *
+ * <p>The singleton instance is obtained via
+ * {@link org.skyve.CORE#getRepository()}.
+ *
+ * @see Repository
+ * @see CachedRepository
+ * @see MutableRepository
  */
 public interface ProvidedRepository extends CachedRepository {
 	final String ROUTER_NAME = "router";

@@ -9,6 +9,9 @@ import org.skyve.domain.types.converters.Format;
 import org.skyve.domain.types.converters.Validator;
 import org.skyve.metadata.model.Attribute.AttributeType;
 
+/**
+ * Converts geometry values to and from Well-Known Text (WKT).
+ */
 public class GeometryConverter implements Converter<Geometry> {
 	@Override
 	public Class<Geometry> getValueType() {

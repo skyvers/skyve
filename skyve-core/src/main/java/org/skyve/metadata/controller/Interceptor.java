@@ -13,9 +13,21 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.web.WebContext;
 
 /**
- * Extend this class to enable before and after interception of events.
- * 
- * @author sandsm01
+ * Provides before/after interception hooks for every Skyve lifecycle event.
+ *
+ * <p>Extend this class and register the subclass in the customer XML
+ * ({@code <interceptors>}) to intercept framework calls without modifying Bizlets.
+ * Skyve chains all registered interceptors in declaration order.
+ *
+ * <p>Each {@code beforeXxx} method returns {@code boolean}. Returning {@code true}
+ * short-circuits further interceptor chain processing and skips the underlying framework
+ * operation. Returning {@code false} (the default) allows the chain to continue.
+ *
+ * <p>Threading: Interceptor instances are long-lived singletons shared across
+ * all threads. Override methods must be thread-safe or must not hold mutable instance
+ * state.
+ *
+ * @see Observer
  */
 public abstract class Interceptor implements MetaData {
 	@SuppressWarnings({"unused", "static-method"})

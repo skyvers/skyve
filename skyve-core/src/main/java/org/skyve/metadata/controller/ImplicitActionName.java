@@ -99,8 +99,10 @@ public enum ImplicitActionName {
 	private boolean validatable;
 
 	/**
-	 * 
-	 * @param displayName
+	 * Initialises an implicit action constant with its i18n display name key and validatability flag.
+	 *
+	 * @param displayName   the i18n resource key for the human-readable action name
+	 * @param validatable   {@code true} if the action supports a {@code clientValidation} attribute in view XML
 	 */
 	private ImplicitActionName(String displayName, boolean validatable) {
 		this.displayName = displayName;
@@ -108,8 +110,10 @@ public enum ImplicitActionName {
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Returns the i18n resource key for the human-readable display name of this action.
+	 *
+	 * @return the i18n key; never {@code null}
+	 * @see #getLocalisedDisplayName()
 	 */
 	public String getDisplayName() {
 		return displayName;

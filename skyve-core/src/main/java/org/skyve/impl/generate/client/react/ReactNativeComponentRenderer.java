@@ -49,6 +49,9 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 
 import jakarta.annotation.Nullable;
 
+/**
+ * React Native-specific widget/component renderer.
+ */
 public class ReactNativeComponentRenderer extends ComponentRenderer {
 	public static final String REACT_NATIVE_IMPORT = "react-native";
 

@@ -43,6 +43,10 @@ import org.skyve.util.Util;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+/**
+ * Singleton {@link org.skyve.cache.Caching} implementation that backs Skyve's
+ * application-level caches with Infinispan/EhCache.
+ */
 public class DefaultCaching implements Caching {
 
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(DefaultCaching.class);

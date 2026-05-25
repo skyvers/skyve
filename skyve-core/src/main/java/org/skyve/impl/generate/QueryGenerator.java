@@ -30,6 +30,11 @@ import org.skyve.metadata.repository.ProvidedRepository;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+/**
+ * Generates query-related artefacts from module metadata.
+ *
+ * <p>Builds query helper classes and constants used by generated domain code.
+ */
 public class QueryGenerator {
 
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(QueryGenerator.class);

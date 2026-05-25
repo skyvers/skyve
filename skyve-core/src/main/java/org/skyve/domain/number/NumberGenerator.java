@@ -1,36 +1,88 @@
 package org.skyve.domain.number;
 
+/**
+ * Generates unique, monotonically increasing document sequence numbers.
+ *
+ * <p>Skyve applications use document numbers to assign human-readable identifiers to
+ * records (e.g. invoice numbers, order codes). A {@code NumberGenerator} provides
+ * thread-safe, per-field counters keyed by {@code (moduleName, documentName, fieldName)}.
+ *
+ * <p>The primary contract is the five-argument {@link #next(String, String, String, String, int)}
+ * method; all other overloads are convenience defaults that delegate to it. Implementations
+ * must guarantee that concurrent calls return distinct values.
+ *
+ * <p>If no counter exists for a given key, the implementation typically bootstraps from
+ * the maximum value currently stored in the field's column, preventing duplicates with
+ * pre-existing data.
+ *
+ * <p>The generator is accessed via {@link org.skyve.EXT#getNumberGenerator()}.
+ *
+ * @see org.skyve.EXT#getNumberGenerator()
+ */
 public interface NumberGenerator {
 	/**
-	 * Next Integer.
+	 * Returns the next sequence value as an {@link Integer}, with no prefix or
+	 * minimum length.
+	 *
+	 * @param moduleName   the module name
+	 * @param documentName the document name
+	 * @param fieldName    the field name that holds the sequence
+	 * @return the next integer sequence value
 	 */
 	default Integer nextInt(String moduleName, String documentName, String fieldName) {
 		return Integer.valueOf(Integer.parseInt(next(null, moduleName, documentName, fieldName, 0)));
 	}
 
 	/**
-	 * Next Long.
+	 * Returns the next sequence value as a {@link Long}, with no prefix or
+	 * minimum length.
+	 *
+	 * @param moduleName   the module name
+	 * @param documentName the document name
+	 * @param fieldName    the field name that holds the sequence
+	 * @return the next long sequence value
 	 */
 	default Long nextLong(String moduleName, String documentName, String fieldName) {
 		return Long.valueOf(Long.parseLong(next(null, moduleName, documentName, fieldName, 0)));
 	}
 
 	/**
-	 * Next String without prefix or length padding.
+	 * Returns the next sequence value as a plain string with no prefix and no
+	 * minimum length padding.
+	 *
+	 * @param moduleName   the module name
+	 * @param documentName the document name
+	 * @param fieldName    the field name that holds the sequence
+	 * @return the next sequence value string
 	 */
 	default String next(String moduleName, String documentName, String fieldName) {
 		return next(null, moduleName, documentName, fieldName, 0);
 	}
 
 	/**
-	 * Next String without prefix.
+	 * Returns the next sequence value as a string with no prefix, left-padded with
+	 * zeros to at least {@code minimumLength} characters.
+	 *
+	 * @param moduleName   the module name
+	 * @param documentName the document name
+	 * @param fieldName    the field name that holds the sequence
+	 * @param minimumLength the minimum length of the returned string; shorter results are
+	 *                      zero-padded on the left
+	 * @return the next sequence value string
 	 */
 	default String next(String moduleName, String documentName, String fieldName, int minimumLength) {
 		return next(null, moduleName, documentName, fieldName, minimumLength);
 	}
 	
 	/**
-	 * Next String without length padding.
+	 * Returns the next sequence value as a string with the given prefix but no
+	 * minimum length padding.
+	 *
+	 * @param prefix       the string prefix prepended to the numeric value (e.g. {@code "INV"})
+	 * @param moduleName   the module name
+	 * @param documentName the document name
+	 * @param fieldName    the field name that holds the sequence
+	 * @return the next sequence value string, e.g. {@code "INV42"}
 	 */
 	default String next(String prefix, String moduleName, String documentName, String fieldName) {
 		return next(prefix, moduleName, documentName, fieldName, 0);

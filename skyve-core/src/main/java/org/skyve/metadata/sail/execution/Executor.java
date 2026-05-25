@@ -45,12 +45,33 @@ import org.skyve.metadata.sail.language.step.interaction.session.Login;
 import org.skyve.metadata.sail.language.step.interaction.session.Logout;
 
 /**
- * Defines the contract for executing SAIL automation steps and interactions.
- * 
- * @author mike
+ * Visitor over the SAIL language model that drives execution of automation scripts.
+ *
+ * <p>Each method in this interface corresponds to one concrete {@link org.skyve.metadata.sail.language.Step}
+ * subtype. When a step is executed via {@link org.skyve.metadata.sail.language.Executable#execute(Executor)},
+ * it calls the matching {@code execute*()} method here, passing itself as the argument.
+ *
+ * <p>Implementations include browser-driven executors (via Selenium/WebDriver in
+ * {@code skyve-web}), mock executors used by the test harness, and code-generation
+ * visitors that emit test source. Adding a new executor does not require changing
+ * the language model.
+ *
+ * <p>Threading: executor instances are not thread-safe and must be used from a
+ * single thread per execution run.
+ *
+ * @see org.skyve.metadata.sail.language.Automation
+ * @see org.skyve.metadata.sail.language.Interaction
  */
 public interface Executor {
+	/**
+	 * Executes a complete {@link Automation} script, including its before/after procedures
+	 * and all contained {@link Interaction} steps.
+	 */
 	public void executeAutomation(Automation automation);
+
+	/**
+	 * Executes a single named {@link Interaction} within an automation run.
+	 */
 	public void executeInteraction(Interaction interaction);
 
 	public void executePushListContext(PushListContext push);

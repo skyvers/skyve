@@ -73,6 +73,22 @@ import org.slf4j.Logger;
 
 import jakarta.annotation.Nonnull;
 
+/**
+ * Runtime implementation of the {@link Document} contract, populated from a
+ * document XML descriptor during repository bootstrap.
+ *
+ * <p>Extends {@link ModelImpl} with document-specific metadata: persistence
+ * descriptor, conditions, bizlet class reference, actions, and the complete
+ * attribute hierarchy (owned attributes and inherited ones from the parent
+ * document).  After loading the fully-resolved instance is placed in the
+ * repository cache and shared read-only across all threads.
+ *
+ * <p>Threading: not thread-safe.  The instance is written during loading and
+ * read-only afterwards.
+ *
+ * @see Document
+ * @see ModelImpl
+ */
 public final class DocumentImpl extends ModelImpl implements Document {
     private static final long serialVersionUID = 9091172268741052691L;
     private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();

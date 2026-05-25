@@ -49,6 +49,9 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 
 import jakarta.annotation.Nullable;
 
+/**
+ * PrimeReact-specific widget/component renderer.
+ */
 public class PrimeReactComponentRenderer extends ComponentRenderer {
 	private Map<String, String> imports;
 	private String startingIndent;

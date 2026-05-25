@@ -22,6 +22,17 @@ import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB-annotated validator for {@link String}-typed document fields.
+ *
+ * <p>Supports regular-expression pattern matching, minimum and maximum length
+ * constraints, and a severity level (error or warning).  Extends
+ * {@link FieldValidator}.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see FieldValidator
+ */
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 public class TextValidator extends FieldValidator<String> {

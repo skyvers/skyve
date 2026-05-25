@@ -2,6 +2,10 @@ package org.skyve.domain.types.converters.timestamp;
 
 import org.skyve.domain.messages.ConversionException;
 
+/**
+ * Converts {@link Timestamp} values using this class's configured
+ * day-first, 12-hour timestamp pattern with seconds.
+ */
 public class DD_MM_YYYY_HH_MI_SS extends AbstractTimestampConverter {
 	public static final String PATTERN = "dd/MM/yyyy hh:mm:ss a";
 

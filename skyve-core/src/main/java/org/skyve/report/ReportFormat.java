@@ -5,7 +5,15 @@ import org.skyve.impl.util.XMLMetaData;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
- * 
+ * Output formats supported by the Skyve reporting engine.
+ *
+ * <p>Each constant corresponds to a file format that JasperReports (and the
+ * {@link org.skyve.report.ReportService} abstraction) can produce. The format
+ * determines both the MIME type of the HTTP response and the file extension of
+ * any download offered to the user.
+ *
+ * <p>Typical usage: pass a format constant to
+ * {@link org.skyve.report.ReportService} methods to control the output type.
  */
 @XmlType(namespace = XMLMetaData.COMMON_NAMESPACE)
 public enum ReportFormat {

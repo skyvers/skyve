@@ -13,6 +13,17 @@ import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB-annotated range validator for {@link Decimal}-typed document fields
+ * (Decimal2, Decimal5, Decimal10).
+ *
+ * <p>Enforces that the field value falls within the declared {@code min} and/or
+ * {@code max} decimal boundaries.  Extends {@link RangeValidator}.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see RangeValidator
+ */
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 public class DecimalValidator extends RangeValidator<Decimal> {

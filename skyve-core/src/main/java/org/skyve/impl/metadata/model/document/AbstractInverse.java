@@ -13,6 +13,23 @@ import jakarta.xml.bind.annotation.XmlType;
 
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE,
 			propOrder = {"domainType", "documentName", "referenceName"})
+/**
+ * Abstract base for inverse navigation attributes.
+ *
+ * <p>An inverse attribute provides a navigable back-reference from the target
+ * document to the source document of a collection or association.  Unlike a
+ * forward reference, an inverse attribute carries no persistence column; it is
+ * resolved at runtime via the owning relation.  Concrete subclasses differentiate
+ * between a single inverse reference ({@link InverseOne}) and a collection
+ * inverse ({@link InverseMany}).
+ *
+ * <p>Threading: not thread-safe.  Instances are populated during metadata loading
+ * and are read-only once placed in the repository cache.
+ *
+ * @see InverseOne
+ * @see InverseMany
+ * @see AbstractAttribute
+ */
 public abstract class AbstractInverse extends AbstractAttribute implements Inverse {
 	private static final long serialVersionUID = 6617399816835649143L;
 

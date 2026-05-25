@@ -11,6 +11,21 @@ import org.skyve.impl.metadata.repository.view.ViewMetaData;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
+/**
+ * SPI for lazy, on-demand loading of raw metadata artefacts from the backing store
+ * (file system, database, classpath, etc.).
+ *
+ * <p>An {@code OnDemandRepository} is the read side of the metadata store abstraction.
+ * Implementations load each artefact type on demand and report its last-modified
+ * timestamp so the caching layer ({@link CachedRepository}) can decide whether a
+ * reload is necessary.
+ *
+ * <p>All {@code load*} methods return fully-parsed (but not yet resolved) raw metadata
+ * objects that the {@link MutableRepository} then converts to the runtime representation.
+ *
+ * @see MutableRepository
+ * @see CachedRepository
+ */
 public interface OnDemandRepository {
 	void populateKeys();
 	

@@ -23,6 +23,11 @@ import org.skyve.metadata.customer.Customer;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+/**
+ * Orchestrates Flutter client code generation for modules and views.
+ *
+ * <p>Coordinates routing, component/layout rendering, and output writing.
+ */
 public class FlutterGenerator {
     public static final String INDENT = "  ";
 

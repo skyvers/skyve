@@ -7,6 +7,21 @@ import org.skyve.domain.types.Decimal;
 
 import jakarta.annotation.Nonnull;
 
+/**
+ * Composable filter predicate applied to a {@link ListModel} or query-backed list.
+ *
+ * <p>A {@code Filter} is built by adding typed criteria via the {@code add*} methods and
+ * composing sub-filters with {@link #addAnd}/{@link #addOr}. The framework calls
+ * {@link ListModel#getFilter()} to obtain the current filter and applies it during
+ * {@link ListModel#fetch()}.
+ *
+ * <p>Each {@code add*} method appends a criterion on the given binding path. All criteria
+ * added directly to one {@code Filter} instance are combined with logical AND; use
+ * {@link #addOr(Filter)} to introduce disjunctions.
+ *
+ * <p>Obtain a new filter via {@link ListModel#newFilter()} so that the implementation
+ * can return the correct concrete type for the underlying data source.
+ */
 public interface Filter {
 	public void addAnd(@Nonnull Filter filter);
 	public void addOr(@Nonnull Filter filter);

@@ -11,7 +11,25 @@ import org.skyve.util.Util;
 import jakarta.annotation.Nonnull;
 
 /**
- * Used to convey messages to views.
+ * Carries a user-facing message with optional bean-binding paths for field highlighting.
+ *
+ * <p>A {@code Message} is the unit of communication between the framework's exception
+ * hierarchy ({@link ValidationException}, {@link ConversionException}, etc.) and the
+ * Skyve view layer. The view renders each message's {@link #getText()} as an error/warning
+ * notice and highlights any form fields identified by the message's
+ * {@link #getBindings() bindings}.
+ *
+ * <p>Message text strings are passed through
+ * {@link org.skyve.util.Util#nullSafeI18n} so they may be i18n resource keys.
+ * Constructors that accept {@code Bean...} varargs additionally format the resolved
+ * string via {@link org.skyve.util.Binder#formatMessage}, substituting binding
+ * expressions within the message text with live bean values.
+ *
+ * <p>Instances are mutable: bindings may be added after construction via
+ * {@link #addBinding} or prefixed via {@link #setBindingPrefix}.
+ *
+ * @see ValidationException
+ * @see MessageException
  */
 public class Message implements Serializable {
 	private static final long serialVersionUID = 2905365885858233030L;

@@ -7,6 +7,20 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * Document field type for bounded-length Unicode text.
+ *
+ * <p>Stored as a {@code VARCHAR(length)} column.  Extends {@link ConvertibleField}
+ * with a maximum character {@code length} (required) and an optional
+ * {@link TextFormat} mask.  A length of 255 or less maps to a standard column;
+ * longer lengths may map to {@code TEXT} on some databases.
+ *
+ * <p>Threading: not thread-safe.  Instances are populated during metadata loading
+ * and are read-only once placed in the repository cache.
+ *
+ * @see ConvertibleField
+ * @see LengthField
+ */
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE,
 			propOrder = {"length", "format", "validator"})

@@ -20,6 +20,10 @@ import org.skyve.persistence.Persistence;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 
+/**
+ * Utility class for emptying all Skyve customer tables in the correct order
+ * (observing foreign-key constraints) prior to a restore operation.
+ */
 public class Truncate {
 
     private static final Logger COMMAND_LOGGER = Category.COMMAND.logger();

@@ -7,6 +7,19 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * Document field type for combined date and time values (without sub-second precision).
+ *
+ * <p>Stored as a {@code DATETIME} or {@code TIMESTAMP} column.  The domain type is
+ * {@link org.skyve.domain.types.DateTime}.  Extends {@link ConvertibleField}
+ * for locale-aware display formatting.
+ *
+ * <p>Threading: not thread-safe.  Instances are populated during metadata loading
+ * and are read-only once placed in the repository cache.
+ *
+ * @see ConvertibleField
+ * @see org.skyve.domain.types.DateTime
+ */
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 public class DateTime extends ConvertibleField {

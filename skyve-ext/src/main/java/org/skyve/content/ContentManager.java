@@ -3,6 +3,30 @@ package org.skyve.content;
 import org.pf4j.ExtensionPoint;
 import org.skyve.impl.util.SystemObserver;
 
+/**
+ * Manages the storage, retrieval, search, and indexing of managed content
+ * (file attachments and bean-level full-text search data).
+ *
+ * <p>Content is stored in a pluggable content store (the default implementation uses a
+ * file-system store). Two categories of content are managed:
+ * <ul>
+ *   <li>{@link AttachmentContent} — binary file data attached to a document attribute.
+ *       Stored by a content ID and optionally indexed for full-text search.</li>
+ *   <li>{@link BeanContent} — textual metadata from a bean, indexed for search without
+ *       storing a physical file.</li>
+ * </ul>
+ *
+ * <p>Obtain a {@code ContentManager} via {@link org.skyve.EXT#newContentManager()}.
+ * {@code ContentManager} implements {@link AutoCloseable}; always use it in a
+ * try-with-resources block.
+ *
+ * <p>Threading: a {@code ContentManager} instance is not thread-safe. Use one
+ * instance per request or execution context and close it when done.
+ *
+ * @see AttachmentContent
+ * @see BeanContent
+ * @see SearchResults
+ */
 public interface ContentManager extends AutoCloseable, ExtensionPoint, SystemObserver {
 	public static final String FILE_STORE_NAME = "SKYVE_STORE";
 

@@ -22,6 +22,15 @@ import org.slf4j.Logger;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
+/**
+ * Abstract implementation of {@link DocumentQuery} providing common document-query
+ * infrastructure: projection, filter composition, ordering, paging, and tagging.
+ *
+ * <p>Subclasses supply the ORM-specific query execution via
+ * {@link #projectedResults}, {@link #beanResults}, and related methods.
+ *
+ * @see org.skyve.persistence.DocumentQuery
+ */
 public abstract class AbstractDocumentQuery extends AbstractQuery implements DocumentQuery {
 
     private static final Logger QUERY_LOGGER = Category.QUERY.logger();

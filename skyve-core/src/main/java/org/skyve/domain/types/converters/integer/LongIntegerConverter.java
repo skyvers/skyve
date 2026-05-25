@@ -7,6 +7,9 @@ import org.skyve.domain.types.converters.Validator;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.util.BeanValidator;
 
+/**
+ * Converts long integer values using plain long formatting/parsing.
+ */
 public class LongIntegerConverter implements Converter<Long> {
 	@Override
 	public Class<Long> getValueType() {

@@ -15,6 +15,21 @@ import org.skyve.persistence.Persistence;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
+/**
+ * Thread-confined persistence context that forms the foundation for all Skyve
+ * persistence back-end implementations.
+ *
+ * <p>One instance is associated with the current thread via a {@link ThreadLocal}.
+ * It is obtained with {@link #get()} and discarded (with transaction commit or rollback)
+ * via the {@link #commit} / {@link #rollback} / {@link #dispose} lifecycle methods.
+ *
+ * <p>Subclasses (e.g. {@code AbstractHibernatePersistence} in {@code skyve-ext})
+ * bind this contract to a concrete ORM session.
+ *
+ * <p>Threading: thread-confined. Instances must not be shared across threads.
+ *
+ * @see org.skyve.persistence.Persistence
+ */
 public abstract class AbstractPersistence implements Persistence {
 	private static final long serialVersionUID = -766607064543920926L;
 

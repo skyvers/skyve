@@ -35,6 +35,21 @@ import com.google.common.base.MoreObjects;
 
 import jakarta.annotation.Nonnull;
 
+/**
+ * Runtime implementation of {@link org.skyve.metadata.user.User} carrying the
+ * authenticated user's identity, resolved role privileges, and permission state.
+ *
+ * <p>Constructed by the persistence layer during login; populated with the user's
+ * customer, data group, roles, and the derived privilege set (aggregated from all
+ * assigned roles). The privilege set is cached on construction so that permission
+ * checks during request processing do not require repeated metadata traversal.
+ *
+ * <p>Threading: thread-confined. One instance per request thread (held by
+ * {@link org.skyve.impl.persistence.AbstractPersistence}).
+ *
+ * @see org.skyve.metadata.user.User
+ * @see SuperUser
+ */
 public class UserImpl implements User {
 	private static final long serialVersionUID = -8485741818564437957L;
 
