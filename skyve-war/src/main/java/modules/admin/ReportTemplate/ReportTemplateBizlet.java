@@ -182,7 +182,7 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 				}
 			}
 
-			if (days.contains(ALL_CODE_SPEC) | days.contains(ANY_CODE_SPEC)) {
+			if (days.contains(ALL_CODE_SPEC) || days.contains(ANY_CODE_SPEC)) {
 				bean.setAllDays(ALL_CODE);
 			} else if (expression.getLastDayOfMonth()) {
 				if (expression.getNearestWeekday()) {
