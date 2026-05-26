@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
@@ -40,6 +41,7 @@ import org.skyve.job.CancellableJob;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.util.FileUtil;
 import org.skyve.util.PushMessage;
+import org.skyve.util.SecurityUtil;
 import org.skyve.util.Util;
 import org.supercsv.io.CsvMapReader;
 import org.supercsv.prefs.CsvPreference;
@@ -116,7 +118,9 @@ public class RestoreJob extends CancellableJob {
 				log.add(trace);
 				LOGGER.info(trace);
 			}
-			FileUtil.extractZipArchive(backup, extractDir);
+			FileUtil.extractZipArchive(backup, extractDir,
+					UtilImpl.BACKUP_RESTORE_MAX_EXTRACT_ENTRIES,
+					UtilImpl.BACKUP_RESTORE_MAX_EXTRACT_SIZE_MB);
 			trace = String.format("Extracted %s to %s", backup.getAbsolutePath(), extractDir.getAbsolutePath());
 			log.add(trace);
 			LOGGER.info(trace);
@@ -197,6 +201,36 @@ public class RestoreJob extends CancellableJob {
 			setPercentComplete(100);
 
 			EXT.push(new PushMessage().growl(MessageSeverity.info, "System Restore complete."));
+		}
+		catch (IOException zipLimitEx) {
+			String msg = zipLimitEx.getMessage();
+			if (msg != null && msg.startsWith("Zip archive exceeds")) {
+				restoreSuccessful = false;
+				String alert = new StringBuilder(256)
+						.append("Restore ABORTED for customer '").append(customerName)
+						.append("', backup '").append(selectedBackupName)
+						.append("': ").append(msg)
+						.append(" (configured limits: maxEntries=").append(UtilImpl.BACKUP_RESTORE_MAX_EXTRACT_ENTRIES)
+						.append(", maxSizeMB=").append(UtilImpl.BACKUP_RESTORE_MAX_EXTRACT_SIZE_MB)
+						.append(')')
+						.toString();
+				log.add(alert);
+				LOGGER.error(alert);
+				// Remove any partially extracted files
+				String extractDirName = selectedBackupName.substring(0, selectedBackupName.length() - 4);
+				File partialExtract = new File(backup.getParentFile(), extractDirName);
+				if (partialExtract.exists()) {
+					try {
+						FileUtil.delete(partialExtract);
+					}
+					catch (IOException delEx) {
+						LOGGER.warn("Could not delete partial extract at {}", partialExtract.getAbsolutePath(), delEx);
+					}
+				}
+				// Create a SecurityLog entry and email to securityNotificationsEmail / supportEmailAddress
+				SecurityUtil.log("Restore Archive Limit Exceeded", alert, true);
+			}
+			throw zipLimitEx;
 		}
 		catch (Throwable t) {
 			restoreSuccessful = false;

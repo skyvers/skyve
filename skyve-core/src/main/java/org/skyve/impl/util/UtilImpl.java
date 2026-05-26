@@ -174,8 +174,13 @@ public class UtilImpl {
 	
 	// Properties required to connect to a cloud provider for backup storage
 	public static Map<String, Object> BACKUP_PROPERTIES = null;
-	
-	
+
+	// Maximum number of zip entries to extract from a backup archive before aborting (zip bomb protection)
+	public static int BACKUP_RESTORE_MAX_EXTRACT_ENTRIES = 10_000;
+
+	// Maximum total uncompressed size in MB to extract from a backup archive before aborting (zip bomb protection)
+	public static int BACKUP_RESTORE_MAX_EXTRACT_SIZE_MB = 500;
+
 	// Allowed file upload file names - default is a blacklist of harmful "executable" files
 	public static String UPLOADS_FILE_WHITELIST_REGEX = "^.+\\.(?!(ADE|ADP|APP|ASA|ASP|BAS|BAT|CAB|CER|CHM|CMD|COM|CPL|CRT|CSH|DLL|DOCM|DOTM|EXE|FXP|HLP|HTA|HTR|INF|INS|ISP|ITS|JS|JSE|KSH|LNK|MAD|MAF|MAG|MAM|MAQ|MAR|MAS|MAT|MAU|MAV|MAW|MDA|MDB|MDE|MDT|MDW|MDZ|MSC|MSI|MSP|MST|OCX|OPS|PCD|PIF|POTM|PPAM|PPSM|PPTM|PRF|PRG|REG|SCF|SO|SCR|SCT|SHB|SHS|TMP|URL|VB|VBE|VBS|VBX|VSMACROS|VSS|VST|VSW|WS|WSC|WSF|WSH|XLAM|XLSB|XLSM|XSTM|XSL)$)([^.]+$)";
 	
@@ -799,6 +804,8 @@ public class UtilImpl {
     	BACKUP_DIRECTORY = null;
     	BACKUP_EXTERNAL_BACKUP_CLASS = null;
     	BACKUP_PROPERTIES = null;
+    	BACKUP_RESTORE_MAX_EXTRACT_ENTRIES = 10_000;
+    	BACKUP_RESTORE_MAX_EXTRACT_SIZE_MB = 500;
     	
     	UPLOADS_FILE_WHITELIST_REGEX = "^.+\\.(?!(ADE|ADP|APP|ASA|ASP|BAS|BAT|CAB|CER|CHM|CMD|COM|CPL|CRT|CSH|DLL|DOCM|DOTM|EXE|FXP|HLP|HTA|HTR|INF|INS|ISP|ITS|JS|JSE|KSH|LNK|MAD|MAF|MAG|MAM|MAQ|MAR|MAS|MAT|MAU|MAV|MAW|MDA|MDB|MDE|MDT|MDW|MDZ|MSC|MSI|MSP|MST|OCX|OPS|PCD|PIF|POTM|PPAM|PPSM|PPTM|PRF|PRG|REG|SCF|SO|SCR|SCT|SHB|SHS|TMP|URL|VB|VBE|VBS|VBX|VSMACROS|VSS|VST|VSW|WS|WSC|WSF|WSH|XLAM|XLSB|XLSM|XSTM|XSL)$)([^.]+$)";
     	UPLOADS_FILE_MAXIMUM_SIZE_IN_MB = 10;

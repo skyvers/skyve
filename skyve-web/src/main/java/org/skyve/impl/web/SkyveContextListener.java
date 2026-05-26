@@ -312,6 +312,14 @@ public class SkyveContextListener implements ServletContextListener {
 			}
 			UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS = getString("backup", "externalBackupClass", backup, false);
 			UtilImpl.BACKUP_PROPERTIES = getObject("backup", "properties", backup, false);
+			Number restoreMaxExtractEntries = getNumber("backup", "restoreMaxExtractEntries", backup, false);
+			if (restoreMaxExtractEntries != null) {
+				UtilImpl.BACKUP_RESTORE_MAX_EXTRACT_ENTRIES = restoreMaxExtractEntries.intValue();
+			}
+			Number restoreMaxExtractSizeMB = getNumber("backup", "restoreMaxExtractSizeMB", backup, false);
+			if (restoreMaxExtractSizeMB != null) {
+				UtilImpl.BACKUP_RESTORE_MAX_EXTRACT_SIZE_MB = restoreMaxExtractSizeMB.intValue();
+			}
 		}
 		
 		// Uploads settings
@@ -923,8 +931,8 @@ public class SkyveContextListener implements ServletContextListener {
 			UtilImpl.CONCURRENT_SESSION_WARNINGS = getBoolean("security", "concurrentSessionWarnings", security);
 			}
 			if (security.containsKey("concurrentSessionNotifications")) {
-			UtilImpl.CONCURRENT_SESSION_NOTIFICATIONS = getBoolean("security", "concurrentSessionNotifications", security);
-		}
+				UtilImpl.CONCURRENT_SESSION_NOTIFICATIONS = getBoolean("security", "concurrentSessionNotifications", security);
+			}
 		}
 
         configureArchiveProperties(properties);

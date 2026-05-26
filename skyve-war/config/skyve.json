@@ -46,6 +46,25 @@
 		// Where to look for add-ins - defaults to <content.directory>/addins/
 		"directory": null
 	},
+	// Backup settings - configure where Skyve stores backup archives and the safety limits applied during restore
+	"backup": {
+		// Filesystem path where Skyve writes backup archives (ZIP files).
+		// If null, defaults to <content.directory>/SKYVE_BACKUP/<customerName>/
+		"directory": null,
+		// Fully-qualified class name of an ExternalBackup implementation for uploading
+		// or downloading backup archives to/from cloud storage (e.g. AWS S3, Azure Blob).
+		// null uses local filesystem only.
+		"externalBackupClass": null,
+		// Additional connection properties passed to the externalBackupClass implementation.
+		// Format is provider-specific - consult the implementation's documentation.
+		"properties": null,
+		// Maximum number of zip entries allowed when extracting a backup archive.
+		// Prevents zip-bomb attacks during restore operations. 0 = unlimited (not recommended).
+		"restoreMaxExtractEntries": 10000,
+		// Maximum total uncompressed size in MB allowed when extracting a backup archive.
+		// Prevents zip-bomb attacks during restore operations. 0 = unlimited (not recommended).
+		"restoreMaxExtractSizeMB": 500
+	},
 	// Archive process settings - uncomment to enable
 //	"archive": {
 //		// Preferred limit on how long the export sub-process should run for each time

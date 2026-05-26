@@ -437,6 +437,40 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
+	public void testPopulateUtilImplReadsBackupRestoreLimits() throws Exception {
+		int originalMaxEntries = UtilImpl.BACKUP_RESTORE_MAX_EXTRACT_ENTRIES;
+		int originalMaxSizeMB = UtilImpl.BACKUP_RESTORE_MAX_EXTRACT_SIZE_MB;
+		String savedPropertiesFilePath = System.getProperty("PROPERTIES_FILE_PATH");
+		Class<? extends AbstractPersistence> originalPersistenceImplementation = AbstractPersistence.IMPLEMENTATION_CLASS;
+		Class<? extends DynamicPersistence> originalDynamicPersistenceImplementation = AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS;
+		Path tempDir = Files.createTempDirectory("skyve-context-listener-backup-limits");
+		try {
+			String extraStanza = "\"backup\":{\"restoreMaxExtractEntries\":5000,\"restoreMaxExtractSizeMB\":250,\"properties\":null}";
+			Path configFile = writeConfigurationWithExtra(tempDir, extraStanza);
+			System.setProperty("PROPERTIES_FILE_PATH", configFile.toString());
+			ProvidedRepository originalRepository = ProvidedRepositoryFactory.get();
+			ProvidedRepositoryFactory.set(mock(ProvidedRepository.class));
+			try {
+				invokePopulateUtilImpl(configFile, tempDir);
+			}
+			finally {
+				ProvidedRepositoryFactory.set(originalRepository);
+			}
+			assertEquals(5000, UtilImpl.BACKUP_RESTORE_MAX_EXTRACT_ENTRIES);
+			assertEquals(250, UtilImpl.BACKUP_RESTORE_MAX_EXTRACT_SIZE_MB);
+		}
+		finally {
+			restoreProperty("PROPERTIES_FILE_PATH", savedPropertiesFilePath);
+			AbstractPersistence.IMPLEMENTATION_CLASS = originalPersistenceImplementation;
+			AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = originalDynamicPersistenceImplementation;
+			UtilImpl.BACKUP_RESTORE_MAX_EXTRACT_ENTRIES = originalMaxEntries;
+			UtilImpl.BACKUP_RESTORE_MAX_EXTRACT_SIZE_MB = originalMaxSizeMB;
+			deleteTree(tempDir);
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
 	public void testPopulateUtilImplReadsUploadsStanza() throws Exception {
 		int originalFileSizeMb = UtilImpl.UPLOADS_FILE_MAXIMUM_SIZE_IN_MB;
 		int originalContentSizeMb = UtilImpl.UPLOADS_CONTENT_MAXIMUM_SIZE_IN_MB;

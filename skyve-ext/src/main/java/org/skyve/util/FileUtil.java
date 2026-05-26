@@ -341,7 +341,27 @@ public class FileUtil {
 		}
 	}
 
-	private static void extractFile(@Nonnull ZipInputStream in, @Nonnull File outdir, @Nonnull String name)
+	/**
+	 * Extracts a single entry from a zip stream into the output directory.
+	 * Returns the number of bytes written so the caller can accumulate a running total.
+	 * If {@code maxUncompressedBytes} is greater than zero, the write loop checks
+	 * {@code bytesWrittenSoFar + bytesThisEntry} after each buffer flush and throws
+	 * immediately if the combined total exceeds the limit — catching single-entry
+	 * zip bombs before they can exhaust disk space.
+	 *
+	 * @param in                   the zip input stream positioned at the entry
+	 * @param outdir               the target directory; must already exist
+	 * @param name                 the entry name (relative path within the archive)
+	 * @param bytesWrittenSoFar    cumulative bytes written by previous entries in this archive
+	 * @param maxUncompressedBytes upper bound in bytes on the total uncompressed bytes written
+	 *                             ({@code bytesWrittenSoFar + bytesThisEntry});
+	 *                             {@code 0} disables the check
+	 * @return the number of bytes written for this entry
+	 * @throws IOException if a Zip Slip path-traversal is detected, if the size
+	 *                     limit is exceeded, or if an I/O error occurs
+	 */
+	private static long extractFile(@Nonnull ZipInputStream in, @Nonnull File outdir, @Nonnull String name,
+			long bytesWrittenSoFar, long maxUncompressedBytes)
 	throws IOException {
 		File file = new File(outdir, name);
 		// Zip Slip protection: resolve symlinks and ".." segments, then confirm the
@@ -351,15 +371,21 @@ public class FileUtil {
 			throw new IOException("Zip entry '" + name + "' would be extracted outside of the target directory");
 		}
 		if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("Writing '{}' from zip file to {}", name, file);
+		long bytesWritten = 0L;
 		try (FileOutputStream fos = new FileOutputStream(file)) {
 			try (BufferedOutputStream out = new BufferedOutputStream(fos)) {
 				byte[] bytes = new byte[1024];
 			    int length = 0;
 			    while ((length = in.read(bytes)) >= 0) {
 		    		out.write(bytes, 0, length);
+		    		bytesWritten += length;
+	    		if (maxUncompressedBytes > 0 && bytesWrittenSoFar + bytesWritten > maxUncompressedBytes) {
+	    			throw new IOException("Zip archive exceeds maximum uncompressed size of " + maxUncompressedBytes + " bytes");
+		    		}
 			    }
 			}
 		}
+		return bytesWritten;
 	}
 
 	private static void mkdirs(@Nonnull File outdir, @Nonnull String path)
@@ -381,10 +407,15 @@ public class FileUtil {
 	  }
 
 	/**
-	 * Extract zipfile to outdir with complete directory structure
-	 * 
-	 * @param zipfile Input .zip file
-	 * @param outdir Output directory
+	 * Extract zipfile to outdir with complete directory structure.
+	 * No entry-count or size limits are applied; this overload is suitable for
+	 * trusted archives such as user-uploaded report or communication specification
+	 * packages. For restore operations on externally-supplied backups, prefer
+	 * {@link #extractZipArchive(File, File, int, int)} and supply explicit limits.
+	 *
+	 * @param zipfile the archive to extract
+	 * @param outdir  the destination directory; created if absent
+	 * @throws IOException if a Zip Slip path-traversal entry is detected or an I/O error occurs
 	 */
 	public static void extractZipArchive(@Nonnull File zipfile, @Nonnull File outdir)
 	throws IOException {
@@ -410,7 +441,63 @@ public class FileUtil {
 						mkdirs(outdir, dir);
 						if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("create dir {}", name);
 					}
-					extractFile(zin, outdir, name);
+					extractFile(zin, outdir, name, 0L, 0L);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Extract zipfile to outdir with complete directory structure, aborting if
+	 * the archive exceeds either of the supplied safety limits.
+	 *
+	 * <p>Both limits protect against zip bomb attacks:
+	 * <ul>
+	 *   <li>{@code maxEntries} — caps the total number of zip entries processed.
+	 *       A value of {@code 0} disables this check.</li>
+	 *   <li>{@code maxUncompressedMB} — caps the cumulative uncompressed bytes
+	 *       written to disk, expressed in MB. The check is applied per write-buffer
+	 *       flush, so a single oversized entry is caught before it exhausts disk
+	 *       space. A value of {@code 0} disables this check.</li>
+	 * </ul>
+	 * When a limit is exceeded an {@link IOException} is thrown whose message
+	 * starts with {@code "Zip archive exceeds"}. Any bytes already written to
+	 * {@code outdir} are <em>not</em> cleaned up by this method; the caller is
+	 * responsible for removing the partially extracted directory.
+	 *
+	 * @param zipfile              the archive to extract; must exist
+	 * @param outdir               the destination directory; created if absent
+	 * @param maxEntries           maximum number of zip entries; {@code 0} = unlimited
+	 * @param maxUncompressedMB    maximum cumulative uncompressed size in MB; {@code 0} = unlimited
+	 * @throws IOException if a limit is exceeded, a Zip Slip entry is detected,
+	 *                     or an I/O error occurs
+	 */
+	public static void extractZipArchive(@Nonnull File zipfile, @Nonnull File outdir,
+			int maxEntries, int maxUncompressedMB)
+	throws IOException {
+		outdir.mkdirs();
+		int entryCount = 0;
+		long totalBytes = 0L;
+		long maxUncompressedBytes = maxUncompressedMB > 0 ? maxUncompressedMB * 1024L * 1024L : 0L;
+		try (FileInputStream fis = new FileInputStream(zipfile)) {
+			try (ZipInputStream zin = new ZipInputStream(fis)) {
+				ZipEntry entry = null;
+				while ((entry = zin.getNextEntry()) != null) {
+					if (maxEntries > 0 && ++entryCount > maxEntries) {
+						throw new IOException("Zip archive exceeds maximum entry count of " + maxEntries);
+					}
+					String name = entry.getName();
+					if (entry.isDirectory()) {
+						mkdirs(outdir, name);
+						if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("create dir {}", name);
+						continue;
+					}
+					String dir = dirpart(name);
+					if (dir != null) {
+						mkdirs(outdir, dir);
+						if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("create dir {}", name);
+					}
+					totalBytes += extractFile(zin, outdir, name, totalBytes, maxUncompressedBytes);
 				}
 			}
 		}
