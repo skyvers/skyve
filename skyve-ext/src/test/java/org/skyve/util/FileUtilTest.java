@@ -164,7 +164,7 @@ class FileUtilTest {
 		}
 
 		Path outputDir = tempDir.resolve("unzippedEvil");
-		assertThrows(IOException.class, () -> FileUtil.extractZipArchive(zipPath.toFile(), outputDir.toFile()));
+		assertThrows(IOException.class, () -> FileUtil.extractZipArchive(zipPath.toFile(), outputDir.toFile(), 100, 10));
 	}
 
 	@Test
@@ -179,7 +179,7 @@ class FileUtilTest {
 		}
 
 		Path outputDir = tempDir.resolve("unzippedEvil2");
-		assertThrows(IOException.class, () -> FileUtil.extractZipArchive(zipPath.toFile(), outputDir.toFile()));
+		assertThrows(IOException.class, () -> FileUtil.extractZipArchive(zipPath.toFile(), outputDir.toFile(), 100, 10));
 	}
 
 	@Test
@@ -194,7 +194,7 @@ class FileUtilTest {
 		}
 
 		Path outputDir = tempDir.resolve("unzipped");
-		FileUtil.extractZipArchive(zipPath.toFile(), outputDir.toFile());
+		FileUtil.extractZipArchive(zipPath.toFile(), outputDir.toFile(), 100, 10);
 
 		assertEquals("child", Files.readString(outputDir.resolve("nested/child.txt"), StandardCharsets.UTF_8));
 	}
@@ -265,7 +265,7 @@ class FileUtilTest {
 		Path zipFile = tempDir2.resolve("test.zip");
 		Files.write(zipFile, baos.toByteArray());
 		Path outDir = Files.createDirectory(tempDir2.resolve("out"));
-		FileUtil.extractZipArchive(zipFile.toFile(), outDir.toFile());
+		FileUtil.extractZipArchive(zipFile.toFile(), outDir.toFile(), 100, 10);
 		assertTrue(Files.exists(outDir.resolve("hello.txt")));
 		assertTrue(Files.exists(outDir.resolve("nested/world.txt")));
 	}
@@ -317,7 +317,7 @@ class FileUtilTest {
 
 		Path outDir = tempDir2.resolve("out");
 		IOException ex = assertThrows(IOException.class,
-				() -> FileUtil.extractZipArchive(zipPath.toFile(), outDir.toFile(), 3, 0));
+				() -> FileUtil.extractZipArchive(zipPath.toFile(), outDir.toFile(), 3, 10));
 		assertTrue(ex.getMessage().startsWith("Zip archive exceeds maximum entry count"),
 				"Expected entry-count message, got: " + ex.getMessage());
 	}
@@ -337,7 +337,7 @@ class FileUtilTest {
 		Path outDir = tempDir2.resolve("out");
 		// Limit to 2 MB — the 2 MB + 1 byte entry must be rejected.
 		IOException ex = assertThrows(IOException.class,
-				() -> FileUtil.extractZipArchive(zipPath.toFile(), outDir.toFile(), 0, 2));
+				() -> FileUtil.extractZipArchive(zipPath.toFile(), outDir.toFile(), 100, 2));
 		assertTrue(ex.getMessage().startsWith("Zip archive exceeds maximum uncompressed size"),
 				"Expected size message, got: " + ex.getMessage());
 	}
@@ -355,7 +355,7 @@ class FileUtilTest {
 		}
 
 		Path outDir = tempDir2.resolve("out");
-		assertDoesNotThrow(() -> FileUtil.extractZipArchive(zipPath.toFile(), outDir.toFile(), 3, 0));
+		assertDoesNotThrow(() -> FileUtil.extractZipArchive(zipPath.toFile(), outDir.toFile(), 3, 10));
 		assertTrue(Files.exists(outDir.resolve("file3.txt")));
 	}
 
@@ -374,13 +374,12 @@ class FileUtilTest {
 		}
 
 		Path outDir = tempDir2.resolve("out");
-		assertDoesNotThrow(() -> FileUtil.extractZipArchive(zipPath.toFile(), outDir.toFile(), 10, 0));
+		assertDoesNotThrow(() -> FileUtil.extractZipArchive(zipPath.toFile(), outDir.toFile(), 10, 10));
 		assertEquals("data", Files.readString(outDir.resolve("nested/data.txt"), StandardCharsets.UTF_8));
 	}
 
 	@Test
-	void extractZipArchiveLimitedBehavesAsUnlimitedWhenBothLimitsAreZero(@TempDir Path tempDir2) throws IOException {
-		// Passing 0, 0L must apply no limits — same behaviour as the no-limit overload.
+	void extractZipArchiveLimitedRejectsNonPositiveLimits(@TempDir Path tempDir2) throws IOException {
 		Path zipPath = tempDir2.resolve("nolimit.zip");
 		try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(zipPath))) {
 			for (int i = 1; i <= 5; i++) {
@@ -391,7 +390,11 @@ class FileUtilTest {
 		}
 
 		Path outDir = tempDir2.resolve("out");
-		assertDoesNotThrow(() -> FileUtil.extractZipArchive(zipPath.toFile(), outDir.toFile(), 0, 0));
-		assertTrue(Files.exists(outDir.resolve("file5.txt")));
+		File zipFile = zipPath.toFile();
+		File outDirectory = outDir.toFile();
+		assertThrows(IllegalArgumentException.class,
+				() -> FileUtil.extractZipArchive(zipFile, outDirectory, 0, 10));
+		assertThrows(IllegalArgumentException.class,
+				() -> FileUtil.extractZipArchive(zipFile, outDirectory, 10, 0));
 	}
 }

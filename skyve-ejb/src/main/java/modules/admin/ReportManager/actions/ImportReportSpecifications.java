@@ -30,6 +30,8 @@ import modules.admin.domain.ReportManager.ImportActionType;
 import modules.admin.domain.ReportTemplate;
 
 public class ImportReportSpecifications extends UploadAction<ReportManagerExtension> {
+	private static final int IMPORT_ZIP_MAX_ENTRIES = 2000;
+	private static final int IMPORT_ZIP_MAX_UNCOMPRESSED_MB = 100;
 
 	/**
 	 * Upload a zip containing a number of report configurations
@@ -80,7 +82,10 @@ public class ImportReportSpecifications extends UploadAction<ReportManagerExtens
 				Files.copy(in, Paths.get(importFile.getAbsolutePath()));
 	
 				// extract the report configurations from the zip
-				FileUtil.extractZipArchive(importFile, outdir);
+				FileUtil.extractZipArchive(importFile,
+						outdir,
+						IMPORT_ZIP_MAX_ENTRIES,
+						IMPORT_ZIP_MAX_UNCOMPRESSED_MB);
 				
 				// handle case that zip supplied was a directory of files
 				if (outdir.isDirectory()) {
