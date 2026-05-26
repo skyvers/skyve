@@ -895,7 +895,7 @@ public class TestUtil {
 			return null;
 		}
 
-		int randomIndex = documentQueryRandom.nextInt((int) count - 1);
+		int randomIndex = (count == 1) ? 0 : documentQueryRandom.nextInt((int) count - 1);
 
 		// get the random record
 		aq.clearProjections();

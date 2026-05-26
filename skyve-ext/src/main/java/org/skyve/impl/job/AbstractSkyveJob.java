@@ -24,8 +24,8 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
-import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
+import org.slf4j.Logger;
 
 /**
  * Base implementation for all Skyve background jobs.
@@ -185,6 +185,7 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 	}
 
 	@Override
+	@SuppressWarnings({"java:S1143", "java:S1163"}) // OK to throw in the finally block here as it stops deployment
 	public final void execute(JobExecutionContext context)
 	throws JobExecutionException {
 		AbstractPersistence persistence = AbstractPersistence.get();
@@ -288,7 +289,8 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 					Thread.sleep(sleepInSeconds.intValue() * 1000L);
 				}
 				catch (@SuppressWarnings("unused") InterruptedException e) {
-					// Do nothing - can't do anything here - its all too late
+					// Restore the interrupted status, but don't do anything - its all too late.
+				    Thread.currentThread().interrupt();
 				}
 			}
 		}

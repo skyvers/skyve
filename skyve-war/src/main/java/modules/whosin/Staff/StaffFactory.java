@@ -28,7 +28,8 @@ public class StaffFactory {
 
 		// throw the dice to see whether to create a new office, or re-use an existing one
 		@SuppressWarnings("java:S2245") // It's ok that this is not cryptographically strong as it's only used for generating test data
-		int dice = new Random().nextInt(50);
+		Random random = new Random();
+		int dice = random.nextInt(50);
 		if (dice < 49) {
 
 			// re-use a random existing office
@@ -36,8 +37,7 @@ public class StaffFactory {
 
 			int officeCount = qOffice.beanResults().size();
 			if (officeCount > 0) {
-				@SuppressWarnings("java:S2245") // It's ok that this is not cryptographically strong as it's only used for generating test data
-				int randomOfficeIndex = new Random().nextInt(officeCount);
+				int randomOfficeIndex = random.nextInt(officeCount);
 				qOffice.setFirstResult(randomOfficeIndex);
 
 				Office office = qOffice.beanResult();

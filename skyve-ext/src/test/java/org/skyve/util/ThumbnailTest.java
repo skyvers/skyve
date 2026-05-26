@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -15,16 +16,35 @@ import java.nio.file.Files;
 
 import javax.imageio.ImageIO;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.MimeType;
+import org.skyve.impl.util.UtilImpl;
 
 @SuppressWarnings("static-method")
 class ThumbnailTest {
 
 	@TempDir
 	File tempDir;
+
+	/** Saves and restores THUMBNAIL_DIRECTORY so tests don't affect each other. */
+	private String savedThumbnailDirectory;
+
+	@BeforeEach
+	void setUp() {
+		savedThumbnailDirectory = UtilImpl.THUMBNAIL_DIRECTORY;
+		// Point thumbnails at our temp dir so Thumbnail(File,int,int) can write
+		UtilImpl.THUMBNAIL_DIRECTORY = tempDir.getAbsolutePath() + "/thumbnails/";
+	}
+
+	@AfterEach
+	void tearDown() {
+		UtilImpl.THUMBNAIL_DIRECTORY = savedThumbnailDirectory;
+	}
 
 	/** Writes a minimal 2×2 PNG to a temp file and returns it. */
 	private File createPngFile() throws IOException {
@@ -165,5 +185,69 @@ class ThumbnailTest {
 		Thumbnail t = new Thumbnail(unknownFile);
 		// MimeType.fromFileName returns null for unknown extensions
 		assertNull(t.getMimeType());
+	}
+
+	// ---- Thumbnail(File, int, int) — exercises process() with file storage ----
+
+	/** Creates a 10x10 red PNG file in tempDir. */
+	private File createSmallPngFile() throws IOException {
+		BufferedImage img = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
+		Graphics2D g = img.createGraphics();
+		g.setColor(Color.RED);
+		g.fillRect(0, 0, 10, 10);
+		g.dispose();
+		File png = new File(tempDir, "small.png");
+		ImageIO.write(img, "png", png);
+		return png;
+	}
+
+	@Test
+	void fileWidthHeightConstructorProducesPngThumbnail() throws IOException {
+		File pngFile = createSmallPngFile();
+		Thumbnail t = new Thumbnail(pngFile, 4, 4);
+		assertNotNull(t.getBytes());
+		assertEquals(MimeType.png, t.getMimeType());
+	}
+
+	@Test
+	void fileWidthHeightConstructorWritesCacheFile() throws IOException {
+		File pngFile = createSmallPngFile();
+		Thumbnail t = new Thumbnail(pngFile, 4, 4);
+		// Verify a thumbnail was produced (cache dir is created inside THUMBNAIL_DIRECTORY)
+		assertNotNull(t.getBytes());
+		File thumbnailDir = new File(UtilImpl.THUMBNAIL_DIRECTORY);
+		assertTrue(thumbnailDir.exists());
+	}
+
+	@Test
+	void fileWidthHeightConstructorForSvgReturnsSvgDirectly() throws IOException {
+		File svgFile = createSvgFile();
+		Thumbnail t = new Thumbnail(svgFile, 64, 64);
+		assertNotNull(t.getBytes());
+		assertEquals(MimeType.svg, t.getMimeType());
+	}
+
+	@Disabled("ImageUtil.svg() uses CORE.getRepository() which is null in unit tests")
+	@Test
+	void fileWidthHeightConstructorForNonImageReturnsPlaceholderSvg() throws IOException {
+		// A text file is not a valid image — process() should return a placeholder SVG
+		File txtFile = new File(tempDir, "doc.docx");
+		Files.write(txtFile.toPath(), "not an image".getBytes());
+		Thumbnail t = new Thumbnail(txtFile, 64, 64);
+		assertNotNull(t.getBytes());
+		// Not an image → placeholder SVG byte array (ImageUtil.svg)
+		assertEquals(MimeType.svg, t.getMimeType());
+	}
+
+	@Test
+	void fileWidthHeightConstructorSecondCallReturnsCachedPng() throws IOException {
+		File pngFile = createSmallPngFile();
+		// First call creates the cache file
+		Thumbnail first = new Thumbnail(pngFile, 4, 4);
+		// Second call should load from cache
+		Thumbnail second = new Thumbnail(pngFile, 4, 4);
+		assertNotNull(second.getBytes());
+		assertEquals(MimeType.png, second.getMimeType());
+		assertArrayEquals(first.getBytes(), second.getBytes());
 	}
 }

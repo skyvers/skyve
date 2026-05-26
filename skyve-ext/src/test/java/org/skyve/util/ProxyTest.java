@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.messages.DomainException;
 
-@Disabled
 @SuppressWarnings("static-method")
 class ProxyTest {
 	public static class Counter {
@@ -65,6 +64,7 @@ class ProxyTest {
 		}
 	}
 
+	@Disabled("ByteBuddy requires --add-opens java.base/java.lang not set in surefire")
 	@Test
 	void ofCreatesProxyWithDelegateMethodCalls() {
 		Counter counter = new Counter();
@@ -74,6 +74,7 @@ class ProxyTest {
 		assertEquals(1, counter.getValue());
 	}
 
+	@Disabled("ByteBuddy requires --add-opens java.base/java.lang not set in surefire")
 	@Test
 	void ofCreatesProxyWithOverriddenDelegate() {
 		Counter counter = new Counter();
@@ -90,6 +91,7 @@ class ProxyTest {
 		assertEquals(99, proxy.getValue());
 	}
 
+	@Disabled("ByteBuddy requires --add-opens java.base/java.lang not set in surefire")
 	@Test
 	void ofTransientCreatesProxyDelegatingThroughToOriginal() {
 		Counter counter = new Counter();
@@ -98,6 +100,7 @@ class ProxyTest {
 		assertEquals(1, counter.getValue());
 	}
 
+	@Disabled("ByteBuddy requires --add-opens java.base/java.lang not set in surefire")
 	@Test
 	void deproxyReturnsOriginalObject() {
 		Counter counter = new Counter();
@@ -105,6 +108,7 @@ class ProxyTest {
 		assertSame(counter, Proxy.deproxy(proxy));
 	}
 
+	@Disabled("ByteBuddy requires --add-opens java.base/java.lang not set in surefire")
 	@Test
 	void reproxySetsNewProxiedObject() {
 		Counter counter = new Counter();
@@ -114,6 +118,7 @@ class ProxyTest {
 		assertSame(replacement, Proxy.deproxy(proxy));
 	}
 
+	@Disabled("ByteBuddy requires --add-opens java.base/java.lang not set in surefire")
 	@Test
 	void isProxyReturnsTrueForProxy() {
 		Counter counter = new Counter();
@@ -121,6 +126,7 @@ class ProxyTest {
 		assertTrue(Proxy.isProxy(proxy));
 	}
 
+	@Disabled("ByteBuddy requires --add-opens java.base/java.lang not set in surefire")
 	@Test
 	void getDelegateReturnsOriginalDelegate() {
 		Counter counter = new Counter();
@@ -129,6 +135,7 @@ class ProxyTest {
 		assertSame(delegate, Proxy.getDelegate(proxy));
 	}
 
+	@Disabled("ByteBuddy requires --add-opens java.base/java.lang not set in surefire")
 	@Test
 	void ofProxyThrowsIllegalArgumentException() {
 		// Covers Proxy.java line 109-110: proxying an already-proxied object throws
@@ -144,6 +151,7 @@ class ProxyTest {
 		assertTrue(threw, "Expected IllegalArgumentException when proxying a proxy");
 	}
 
+	@Disabled("ByteBuddy requires --add-opens java.base/java.lang not set in surefire")
 	@Test
 	public void deproxyOnNonProxyThrowsDomainException() {
 		// Covers Proxy.java lines 185-186: deproxy on a non-proxy throws DomainException
@@ -158,6 +166,7 @@ class ProxyTest {
 		assertTrue(threw, "Expected DomainException when deproxying a non-proxy");
 	}
 
+	@Disabled("ByteBuddy requires --add-opens java.base/java.lang not set in surefire")
 	@Test
 	void reproxyOnNonProxyThrowsDomainException() {
 		// Covers Proxy.java lines 200-201: reproxy on a non-proxy throws DomainException
@@ -173,6 +182,7 @@ class ProxyTest {
 		assertTrue(threw, "Expected DomainException when reproxying a non-proxy");
 	}
 
+	@Disabled("ByteBuddy requires --add-opens java.base/java.lang not set in surefire")
 	@Test
 	void getDelegateOnNonProxyThrowsDomainException() {
 		// Covers Proxy.java lines 237-238: getDelegate on a non-proxy throws DomainException

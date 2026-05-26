@@ -51,7 +51,7 @@ public class RequestListModelTest {
 	@Test
 	void calculateTimestampForIndexCurrentWeek() {
 		long ts = RequestListModel.calculateTimestampForIndex(TEST_TIME_MILLIS, 2, Period.currentWeek);
-		assertNotNull(ts);
+		assertTrue(ts > 0, "Timestamp should be positive");
 		// Just verifying it executes without exception
 		LocalDateTime result = LocalDateTime.ofInstant(Instant.ofEpochMilli(ts), ZoneId.systemDefault());
 		assertNotNull(result);
@@ -60,7 +60,7 @@ public class RequestListModelTest {
 	@Test
 	void calculateTimestampForIndexCurrentYear() {
 		long ts = RequestListModel.calculateTimestampForIndex(TEST_TIME_MILLIS, 10, Period.currentYear);
-		assertNotNull(ts);
+		assertTrue(ts > 0, "Timestamp should be positive");
 		LocalDateTime result = LocalDateTime.ofInstant(Instant.ofEpochMilli(ts), ZoneId.systemDefault());
 		assertNotNull(result);
 	}

@@ -40,8 +40,8 @@ import org.skyve.cache.JCacheConfig;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.FileUtil;
 import org.skyve.util.Util;
-import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
+import org.slf4j.Logger;
 
 /**
  * Singleton {@link org.skyve.cache.Caching} implementation that backs Skyve's
@@ -72,11 +72,11 @@ public class DefaultCaching implements Caching {
 		return INSTANCE;
 	}
 
-	@Override
-	@SuppressWarnings("resource")
 	/**
 	 * Performs startup.
 	 */
+	@Override
+	@SuppressWarnings({"resource", "java:S1143", "java:S1163"}) // OK to throw in the finally block here as it stops deployment
 	public void startup() {
 		if (isUnInitialised()) {
 			try {
@@ -86,11 +86,8 @@ public class DefaultCaching implements Caching {
 				// Check if there are any persistent caches and multiple cache instances have been requested
 				if (UtilImpl.CACHE_MULTIPLE) {
 					for (CacheConfig<? extends Serializable, ? extends Serializable> config : UtilImpl.APP_CACHES) {
-						if (config instanceof EHCacheConfig<?, ?>) {
-							EHCacheConfig<?, ?> ehConfig = (EHCacheConfig<?, ?>) config;
-							if (ehConfig.isPersistent()) {
-								throw new IllegalStateException("Cannot run multiple cache instances when one of the caches is persistent");
-							}
+						if (config instanceof EHCacheConfig<?, ?> ehConfig && ehConfig.isPersistent()) {
+							throw new IllegalStateException("Cannot run multiple cache instances when one of the caches is persistent");
 						}
 					}
 				}

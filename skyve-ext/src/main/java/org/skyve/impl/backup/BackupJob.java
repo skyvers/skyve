@@ -54,8 +54,8 @@ import org.skyve.util.FileUtil;
 import org.skyve.util.Mail;
 import org.skyve.util.PushMessage;
 import org.skyve.util.Util;
-import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
+import org.slf4j.Logger;
 import org.supercsv.io.CsvMapWriter;
 import org.supercsv.prefs.CsvPreference;
 
@@ -113,6 +113,7 @@ public class BackupJob extends CancellableJob {
 	 *
 	 * @throws Exception if the backup fails
 	 */
+	@SuppressWarnings("java:S1143") // Allow nested try blocks for clarity in resource management and error handling
 	private void backup() throws Exception {
 		Bean bean = getBean();
 		List<String> log = getLog();

@@ -1,6 +1,7 @@
 package modules.admin.domain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -143,7 +144,7 @@ public class AuditDomainTest extends AbstractH2Test {
         @SuppressWarnings("static-method")
         void operationToDomainValues() {
                 assertNotNull(Audit.Operation.toDomainValues());
-                assertNotNull(Audit.Operation.toDomainValues().isEmpty() == false);
+                assertFalse(Audit.Operation.toDomainValues().isEmpty());
         }
 
         @Test
