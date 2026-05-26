@@ -16,6 +16,7 @@ import org.skyve.dataaccess.sql.SQLDataAccess;
 import org.skyve.domain.Bean;
 import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.messages.NoResultsException;
 import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.SkyveException;
 import org.skyve.impl.metadata.repository.customer.CustomerRoleMetaData;
@@ -44,6 +45,14 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 
     private static final Logger QUERY_LOGGER = Category.QUERY.logger();
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(LocalDataStoreRepository.class);
+
+	public LocalDataStoreRepository() {
+		super();
+	}
+
+	LocalDataStoreRepository(String absolutePath) {
+		super(absolutePath);
+	}
 
 	@Override
 	public UserImpl retrieveUser(String userPrincipal) {
@@ -380,17 +389,29 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 		if (UtilImpl.CUSTOMER == null) { // multi-tenant
 			sql += "where c.bizCustomer = :bizCustomer";
 		}
-		try (SQLDataAccess da = EXT.newSQLDataAccess()) {
+		try (SQLDataAccess da = newSQLDataAccess()) {
 			SQL s = da.newSQL(sql);
 			if (UtilImpl.CUSTOMER == null) { // multi-tenant
 				s.putParameter(Bean.CUSTOMER_NAME, customerName, false);
 			}
 			result = s.retrieveScalar(String.class);
 		}
+		catch (NoResultsException e) {
+			// No anonymous public user configured for this customer - this is valid.
+			result = null;
+		}
 		catch (Exception e) {
-			LOGGER.warn("Could not retrieve public user for customer {}", customerName, e);
+			logPublicUserLookupFailure(customerName, e);
 		}
 		
 		return result;
+	}
+
+	SQLDataAccess newSQLDataAccess() {
+		return EXT.newSQLDataAccess();
+	}
+
+	void logPublicUserLookupFailure(String customerName, Exception e) {
+		LOGGER.warn("Could not retrieve public user for customer {}", customerName, e);
 	}
 }
