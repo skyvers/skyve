@@ -337,7 +337,7 @@ public class UtilImpl {
 	public static boolean SMTP_TEST_BOGUS_SEND = false;
 
 	// Map Keys
-	@SuppressWarnings("java:S115") // these are populated by strings from the JSON config
+	@SuppressWarnings("java:S115") // Suppress "Constant names should comply with a naming convention" as these are not constants but enum values
 	public enum MapType {
 		gmap, leaflet;
 	}

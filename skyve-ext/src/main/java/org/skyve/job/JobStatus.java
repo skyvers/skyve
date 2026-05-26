@@ -6,6 +6,7 @@ package org.skyve.job;
  * <p>These values are written to job status records and used by admin/job monitoring
  * views to indicate completion outcome.
  */
+@SuppressWarnings("java:S115") // Suppress "Constant names should comply with a naming convention" as these are not constants but enum values
 public enum JobStatus {
 	/**
 	 * Job completed successfully.

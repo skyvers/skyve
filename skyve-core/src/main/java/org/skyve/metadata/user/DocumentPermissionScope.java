@@ -19,6 +19,7 @@ package org.skyve.metadata.user;
  *
  * @see DocumentPermission
  */
+@SuppressWarnings("java:S115") // Suppress "Constant names should comply with a naming convention" as these are not constants but enum values
 public enum DocumentPermissionScope {
 	/** No instances are accessible regardless of ownership. */
 	none('_'),

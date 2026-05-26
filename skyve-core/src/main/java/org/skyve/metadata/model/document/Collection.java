@@ -33,6 +33,7 @@ public interface Collection extends Reference {
 	 * The type (database structure and behaviour) of a collection.
 	 */
 	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+	@SuppressWarnings("java:S115") // Suppress "Constant names should comply with a naming convention" as these are not constants but enum values
 	public enum CollectionType implements ReferenceType {
 		/**
 		 * Composition relationship to a child document - child points back to parent.

@@ -74,6 +74,7 @@ public class SkyveScriptException extends SkyveException {
 	/**
 	 * Classifies script exceptions by severity for rendering and handling.
 	 */
+	@SuppressWarnings("java:S115") // Suppress "Constant names should comply with a naming convention" as these are not constants but enum values
 	public enum ExceptionType {
 		/** Informational event with no action required. */
 		info,

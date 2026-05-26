@@ -5,6 +5,7 @@ package org.skyve.impl.generate;
  *
  * <p>Used by domain generation tooling to select dialect-specific output.
  */
+@SuppressWarnings("java:S115") // Suppress "Constant names should comply with a naming convention" as these are not constants but enum values
 public enum DialectOptions {
 	// @formatter:off
 	H2("H2", true, false, 0, 1024), 

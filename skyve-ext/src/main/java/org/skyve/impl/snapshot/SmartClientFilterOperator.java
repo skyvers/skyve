@@ -5,6 +5,7 @@ import org.skyve.metadata.FilterOperator;
 /**
  * Enumerates SmartClient-compatible filter operators used by snapshot serialization.
  */
+@SuppressWarnings("java:S115") // Suppress "Constant names should comply with a naming convention" as these are not constants but enum values
 public enum SmartClientFilterOperator {
 	// text match style for filtering
 	substring, startsWith, exact, // all case insensitive

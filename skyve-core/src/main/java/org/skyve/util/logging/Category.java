@@ -10,7 +10,6 @@ import org.slf4j.Logger;
  * Do not use these outside of framework code.
  */
 public enum Category {
-
     XML("xml"),
     HTTP("http"),
     QUERY("query"),

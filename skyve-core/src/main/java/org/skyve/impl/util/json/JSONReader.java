@@ -39,6 +39,7 @@ import jakarta.annotation.Nullable;
  * <p>Threading: not thread-safe. Create a new instance per parse operation.
  */
 public class JSONReader {
+	@SuppressWarnings("java:S115") // Suppress "Constant names should comply with a naming convention" as these are not constants but enum values
 	public enum JSONMode {
 		dynamic, // make collections and maps
 		bean, // make document beans

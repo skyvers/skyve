@@ -6,6 +6,7 @@ package org.skyve.cache;
  * <p>The tier indicates where data is physically stored and the expected
  * trade-off between access latency and capacity.
  */
+@SuppressWarnings("java:S115") // Suppress "Constant names should comply with a naming convention" as these are not constants but enum values
 public enum CacheTier {
 	/**
 	 * Entry resides in JVM heap memory.

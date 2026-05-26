@@ -1919,6 +1919,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 	}
 
+	@SuppressWarnings("java:S115") // Suppress "Constant names should comply with a naming convention" as these are not constants but enum values
 	private enum DataStoreType {
 		PK, FK, UK, IDX
 	}

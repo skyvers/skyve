@@ -7,6 +7,7 @@ package org.skyve.content;
  * {@code inline} instructs it to display the content within the browser window if
  * the MIME type is supported (e.g. PDF, image).
  */
+@SuppressWarnings("java:S115") // Suppress "Constant names should comply with a naming convention" as these are not constants but enum values
 public enum Disposition {
 	/** Content should be downloaded as a file attachment. */
 	attachment,

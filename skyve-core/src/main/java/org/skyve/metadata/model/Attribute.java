@@ -50,6 +50,7 @@ public interface Attribute extends NamedMetaData, DecoratedMetaData {
 	 * via {@link #getImplementingType()} / {@link Attribute#getImplementingType()}.
 	 */
 	@XmlType
+	@SuppressWarnings("java:S115") // Suppress "Constant names should comply with a naming convention" as these are not constants but enum values
 	public enum AttributeType {
 		text(String.class), 
 		date(DateOnly.class), 
@@ -95,6 +96,7 @@ public interface Attribute extends NamedMetaData, DecoratedMetaData {
 	 * </ul>
 	 */
 	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+	@SuppressWarnings("java:S115") // Suppress "Constant names should comply with a naming convention" as these are not constants but enum values
 	public enum UsageType {
 		domain, view, both
 	}
@@ -103,6 +105,7 @@ public interface Attribute extends NamedMetaData, DecoratedMetaData {
 	 * Defines the Sensitivity enumeration.
 	 */
 	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+	@SuppressWarnings("java:S115") // Suppress "Constant names should comply with a naming convention" as these are not constants but enum values
 	public enum Sensitivity {	
 		/**
 		 * Data is freely available and does not require any special security measures. 

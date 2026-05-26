@@ -34,6 +34,7 @@ public class OptimisticLockException extends DomainException implements MessageE
 	 * Distinguishes between an update-on-updated-record collision and an
 	 * update-on-deleted-record collision.
 	 */
+	@SuppressWarnings("java:S115") // Suppress "Constant names should comply with a naming convention" as these are not constants but enum values
 	public enum OperationType {
 		update, delete;
 	}

@@ -27,6 +27,7 @@ public interface Association extends Reference {
 	 * <p>The chosen type determines the ORM mapping and the cascade-delete behaviour.
 	 */
 	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+	@SuppressWarnings("java:S115") // Suppress "Constant names should comply with a naming convention" as these are not constants but enum values
 	public enum AssociationType implements ReferenceType {
 		/**
 		 * The associated bean is persisted to another table but is cascade deleted when the owning bean is deleted.
