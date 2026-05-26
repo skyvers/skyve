@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.impl.domain.AbstractTransientBean;
+import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
@@ -130,5 +131,37 @@ class ReferenceListModelTest {
 	void removeThrowsIllegalStateException() {
 		TestReferenceListModel model = new TestReferenceListModel(mockModule, mockDocument, "items");
 		assertThrows(IllegalStateException.class, () -> model.remove("bizId"));
+	}
+
+	/** A convenience constructor variant that requires postConstruct to resolve module/document. */
+	private static class StringConstructorModel extends ReferenceListModel<Bean> {
+		StringConstructorModel(String moduleName, String documentName, String referenceBinding) {
+			super(moduleName, documentName, referenceBinding);
+		}
+		@Override public List<MetaDataQueryColumn> getColumns() { return Collections.emptyList(); }
+		@Override public String getDescription() { return "StringConstructorModel"; }
+	}
+
+	@Test
+	void postConstructWithStringConstructorResolvesModuleAndDocument() {
+		Customer customer = mock(Customer.class);
+		Module resolvedModule = mock(Module.class);
+		Document resolvedDocument = mock(Document.class);
+		when(customer.getModule("myModule")).thenReturn(resolvedModule);
+		when(resolvedModule.getDocument(customer, "MyDoc")).thenReturn(resolvedDocument);
+
+		StringConstructorModel model = new StringConstructorModel("myModule", "MyDoc", "items");
+		// Should not throw - postConstruct resolves module/document via customer
+		model.postConstruct(customer, false);
+	}
+
+	@Test
+	void postConstructWithModuleDocumentConstructorSkipsResolution() {
+		// When using the Module, Document constructor, postConstruct skips resolution
+		Customer customer = mock(Customer.class);
+
+		TestReferenceListModel model = new TestReferenceListModel(mockModule, mockDocument, "items");
+		// Should not throw - module/document already set
+		model.postConstruct(customer, false);
 	}
 }

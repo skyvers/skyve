@@ -7,10 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.skyve.metadata.controller.ImplicitActionName;
 
 import modules.admin.domain.Audit;
-import util.AbstractSkyveTest;
-
 @SuppressWarnings("static-method")
-public class AuditBizletTest extends AbstractSkyveTest {
+public class AuditBizletTest {
 
 	@Test
 	void preExecuteNewReturnsBean() throws Exception {

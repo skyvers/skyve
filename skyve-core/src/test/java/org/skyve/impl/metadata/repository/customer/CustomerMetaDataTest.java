@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.skyve.metadata.ConverterName;
 import org.skyve.metadata.MetaDataException;
@@ -320,6 +322,144 @@ class CustomerMetaDataTest {
 		observer2.setClassName("org.example.MyObserver"); // duplicate
 		customer.getObservers().add(observer1);
 		customer.getObservers().add(observer2);
+		assertThrows(MetaDataException.class, () -> customer.convert("test"));
+	}
+
+	@Test
+	void convertSucceedsWithMinimalCustomer() {
+		CustomerMetaData customer = createMinimalCustomerMetaData();
+		assertNotNull(customer.convert("test"));
+	}
+
+	@Test
+	void convertSucceedsWithRolesAndModuleRoles() {
+		CustomerMetaData customer = createMinimalCustomerMetaData();
+		CustomerRolesMetaData rolesMetaData = new CustomerRolesMetaData();
+		CustomerRoleMetaData role = new CustomerRoleMetaData();
+		role.setName("AdminRole");
+		CustomerModuleRoleMetaData moduleRole = new CustomerModuleRoleMetaData();
+		moduleRole.setName("BasicUser");
+		moduleRole.setModuleName("admin");
+		role.getRoles().add(moduleRole);
+		rolesMetaData.getRoles().add(role);
+		customer.setRoles(rolesMetaData);
+		assertNotNull(customer.convert("test"));
+	}
+
+	@Test
+	void convertThrowsWhenModuleRoleNameIsNull() {
+		CustomerMetaData customer = createMinimalCustomerMetaData();
+		CustomerRolesMetaData rolesMetaData = new CustomerRolesMetaData();
+		CustomerRoleMetaData role = new CustomerRoleMetaData();
+		role.setName("AdminRole");
+		CustomerModuleRoleMetaData moduleRole = new CustomerModuleRoleMetaData();
+		moduleRole.setName(null); // null name - should throw
+		moduleRole.setModuleName("admin");
+		role.getRoles().add(moduleRole);
+		rolesMetaData.getRoles().add(role);
+		customer.setRoles(rolesMetaData);
+		assertThrows(MetaDataException.class, () -> customer.convert("test"));
+	}
+
+	@Test
+	void convertThrowsWhenModuleRoleModuleNotValid() {
+		CustomerMetaData customer = createMinimalCustomerMetaData();
+		CustomerRolesMetaData rolesMetaData = new CustomerRolesMetaData();
+		CustomerRoleMetaData role = new CustomerRoleMetaData();
+		role.setName("AdminRole");
+		CustomerModuleRoleMetaData moduleRole = new CustomerModuleRoleMetaData();
+		moduleRole.setName("SomeRole");
+		moduleRole.setModuleName("nonExistentModule"); // not a valid module
+		role.getRoles().add(moduleRole);
+		rolesMetaData.getRoles().add(role);
+		customer.setRoles(rolesMetaData);
+		assertThrows(MetaDataException.class, () -> customer.convert("test"));
+	}
+
+	@Test
+	void convertSucceedsWithTextSearchFeatureRole() {
+		CustomerMetaData customer = createMinimalCustomerMetaData();
+
+		CustomerRolesMetaData rolesMetaData = new CustomerRolesMetaData();
+		CustomerRoleMetaData role = new CustomerRoleMetaData();
+		role.setName("SearchRole");
+		CustomerModuleRoleMetaData moduleRole = new CustomerModuleRoleMetaData();
+		moduleRole.setName("BasicUser");
+		moduleRole.setModuleName("admin");
+		role.getRoles().add(moduleRole);
+		rolesMetaData.getRoles().add(role);
+		customer.setRoles(rolesMetaData);
+
+		CustomerFeatureRoleMetaData featureRole = new CustomerFeatureRoleMetaData();
+		featureRole.setName("SearchRole"); // reference to existing customer role
+		List<CustomerFeatureRoleMetaData> textSearchRoles = customer.getTextSearchRoles();
+		textSearchRoles.add(featureRole);
+
+		assertNotNull(customer.convert("test"));
+	}
+
+	@Test
+	void convertSucceedsWithFlagFeatureRoleByModuleName() {
+		CustomerMetaData customer = createMinimalCustomerMetaData();
+		CustomerFeatureRoleMetaData featureRole = new CustomerFeatureRoleMetaData();
+		featureRole.setName("BasicUser");
+		featureRole.setModuleName("admin");
+		customer.getFlagRoles().add(featureRole);
+		assertNotNull(customer.convert("test"));
+	}
+
+	@Test
+	void convertSucceedsWithSwitchModeFeatureRoleByModuleName() {
+		CustomerMetaData customer = createMinimalCustomerMetaData();
+		CustomerFeatureRoleMetaData featureRole = new CustomerFeatureRoleMetaData();
+		featureRole.setName("BasicUser");
+		featureRole.setModuleName("admin");
+		customer.getSwitchModeRoles().add(featureRole);
+		assertNotNull(customer.convert("test"));
+	}
+
+	@Test
+	void convertThrowsWhenFeatureRoleNameIsNull() {
+		CustomerMetaData customer = createMinimalCustomerMetaData();
+		CustomerFeatureRoleMetaData featureRole = new CustomerFeatureRoleMetaData();
+		featureRole.setName(null); // null name - should throw
+		featureRole.setModuleName("admin");
+		customer.getFlagRoles().add(featureRole);
+		assertThrows(MetaDataException.class, () -> customer.convert("test"));
+	}
+
+	@Test
+	void convertThrowsWhenFeatureRoleModuleIsInvalid() {
+		CustomerMetaData customer = createMinimalCustomerMetaData();
+		CustomerFeatureRoleMetaData featureRole = new CustomerFeatureRoleMetaData();
+		featureRole.setName("SomeRole");
+		featureRole.setModuleName("nonExistentModule"); // invalid module
+		customer.getFlagRoles().add(featureRole);
+		assertThrows(MetaDataException.class, () -> customer.convert("test"));
+	}
+
+	@Test
+	void convertThrowsWhenFeatureRoleNameRefersToUnknownCustomerRole() {
+		CustomerMetaData customer = createMinimalCustomerMetaData();
+		// no roles defined, so this customer role name won't be found
+		CustomerFeatureRoleMetaData featureRole = new CustomerFeatureRoleMetaData();
+		featureRole.setName("NonExistentCustomerRole"); // no matching customer role
+		// no module name set - will try to find by customer role name
+		customer.getTextSearchRoles().add(featureRole);
+		assertThrows(MetaDataException.class, () -> customer.convert("test"));
+	}
+
+	@Test
+	void convertThrowsWhenDuplicateFeatureRole() {
+		CustomerMetaData customer = createMinimalCustomerMetaData();
+		CustomerFeatureRoleMetaData featureRole1 = new CustomerFeatureRoleMetaData();
+		featureRole1.setName("BasicUser");
+		featureRole1.setModuleName("admin");
+		CustomerFeatureRoleMetaData featureRole2 = new CustomerFeatureRoleMetaData();
+		featureRole2.setName("BasicUser");
+		featureRole2.setModuleName("admin"); // duplicate
+		customer.getFlagRoles().add(featureRole1);
+		customer.getFlagRoles().add(featureRole2);
 		assertThrows(MetaDataException.class, () -> customer.convert("test"));
 	}
 }

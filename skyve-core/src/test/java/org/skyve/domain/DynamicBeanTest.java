@@ -707,4 +707,49 @@ class DynamicBeanTest {
 		// hashCode should be based on bizId
 		assertEquals(b.getBizId().hashCode(), b.hashCode());
 	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getWithIndexReturnsDynaPropertyByIndex() {
+		Map<String, Object> props = new HashMap<>();
+		DynamicBean b = new DynamicBean("admin", "User", props);
+		java.util.List<String> items = new java.util.ArrayList<>();
+		items.add("first");
+		items.add("second");
+		b.putDynamic("items", items);
+		// isDynaProperty("items") == true → delegates to super.get("items", 0)
+		Object result = b.get("items", 0);
+		assertEquals("first", result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getWithKeyReturnsDynaPropertyByKey() {
+		Map<String, Object> props = new HashMap<>();
+		DynamicBean b = new DynamicBean("admin", "User", props);
+		java.util.Map<String, String> mapProp = new java.util.HashMap<>();
+		mapProp.put("alpha", "first");
+		b.putDynamic("mapProp", mapProp);
+		// isDynaProperty("mapProp") == true → delegates to super.get("mapProp", "alpha")
+		Object result = b.get("mapProp", "alpha");
+		assertEquals("first", result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getWithIndexThrowsWhenNoBeanAndNotDyna() {
+		Map<String, Object> props = new HashMap<>();
+		DynamicBean b = new DynamicBean("admin", "User", props);
+		// no bean property set, not a dyna property → throws
+		assertThrows(IllegalArgumentException.class, () -> b.get("unknownBinding", 0));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getWithKeyThrowsWhenNoBeanAndNotDyna() {
+		Map<String, Object> props = new HashMap<>();
+		DynamicBean b = new DynamicBean("admin", "User", props);
+		// no bean property set, not a dyna property → throws
+		assertThrows(IllegalArgumentException.class, () -> b.get("unknownBinding", "key"));
+	}
 }

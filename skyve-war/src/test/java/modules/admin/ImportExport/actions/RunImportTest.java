@@ -7,10 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.skyve.metadata.controller.ServerSideActionResult;
 
 import modules.admin.ImportExport.ImportExportExtension;
-import util.AbstractSkyveTest;
-
 @SuppressWarnings("static-method")
-public class RunImportTest extends AbstractSkyveTest {
+public class RunImportTest {
 
 	@Test
 	void executeWithNullImportFileReturnsBean() throws Exception {

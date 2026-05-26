@@ -440,4 +440,63 @@ class FacesViewTest {
 		field.setAccessible(true);
 		field.set(view, uxui);
 	}
+
+	// ----- getCsrfToken -----
+
+	@Test
+	void getCsrfTokenReturnsNonNullToken() {
+		FacesView view = new FacesView();
+		assertNotNull(view.getCsrfToken());
+	}
+
+	@Test
+	void getCsrfTokenReturnsSameValueOnMultipleCalls() {
+		FacesView view = new FacesView();
+		String first = view.getCsrfToken();
+		String second = view.getCsrfToken();
+		assertEquals(first, second);
+	}
+
+	// ----- getCurrentBean -----
+
+	@Test
+	void getCurrentBeanIsNullByDefault() {
+		FacesView view = new FacesView();
+		assertNull(view.getCurrentBean());
+	}
+
+	// ----- getSelectedRow / setSelectedRow -----
+
+	@Test
+	void selectedRowIsNullByDefault() {
+		FacesView view = new FacesView();
+		assertNull(view.getSelectedRow());
+	}
+
+	// ----- getUserAgentType / setUserAgentType -----
+
+	@Test
+	void userAgentTypeIsNullByDefault() {
+		FacesView view = new FacesView();
+		assertNull(view.getUserAgentType());
+	}
+
+	// ----- getDualListModels -----
+
+	@Test
+	void getDualListModelsIsNotNull() {
+		FacesView view = new FacesView();
+		assertNotNull(view.getDualListModels());
+	}
+
+	// ----- getBean with webContext -----
+
+	@Test
+	void getBeanReturnsNullWithNonNullWebContextButNullBean() {
+		FacesView view = new FacesView();
+		MockWebContext webContext = new MockWebContext();
+		webContext.setKey("key1");
+		view.setWebContext(webContext);
+		assertNull(view.getBean());
+	}
 }

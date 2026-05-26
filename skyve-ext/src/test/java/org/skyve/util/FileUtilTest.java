@@ -317,7 +317,7 @@ class FileUtilTest {
 
 		Path outDir = tempDir2.resolve("out");
 		IOException ex = assertThrows(IOException.class,
-				() -> FileUtil.extractZipArchive(zipPath.toFile(), outDir.toFile(), 3, 0L));
+				() -> FileUtil.extractZipArchive(zipPath.toFile(), outDir.toFile(), 3, 0));
 		assertTrue(ex.getMessage().startsWith("Zip archive exceeds maximum entry count"),
 				"Expected entry-count message, got: " + ex.getMessage());
 	}
@@ -337,7 +337,7 @@ class FileUtilTest {
 		Path outDir = tempDir2.resolve("out");
 		// Limit to 2 MB — the 2 MB + 1 byte entry must be rejected.
 		IOException ex = assertThrows(IOException.class,
-				() -> FileUtil.extractZipArchive(zipPath.toFile(), outDir.toFile(), 0, 2L));
+				() -> FileUtil.extractZipArchive(zipPath.toFile(), outDir.toFile(), 0, 2));
 		assertTrue(ex.getMessage().startsWith("Zip archive exceeds maximum uncompressed size"),
 				"Expected size message, got: " + ex.getMessage());
 	}
@@ -355,8 +355,27 @@ class FileUtilTest {
 		}
 
 		Path outDir = tempDir2.resolve("out");
-		assertDoesNotThrow(() -> FileUtil.extractZipArchive(zipPath.toFile(), outDir.toFile(), 3, 0L));
+		assertDoesNotThrow(() -> FileUtil.extractZipArchive(zipPath.toFile(), outDir.toFile(), 3, 0));
 		assertTrue(Files.exists(outDir.resolve("file3.txt")));
+	}
+
+	@Test
+	void extractZipArchiveLimitedHandlesDirectoryEntriesAndNestedPaths(@TempDir Path tempDir2) throws IOException {
+		// Contains an explicit directory entry and a file under a nested path so that
+		// both the isDirectory() branch and the dirpart() != null branch inside the
+		// limited overload are exercised.
+		Path zipPath = tempDir2.resolve("dirs.zip");
+		try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(zipPath))) {
+			zos.putNextEntry(new ZipEntry("nested/"));
+			zos.closeEntry();
+			zos.putNextEntry(new ZipEntry("nested/data.txt"));
+			zos.write("data".getBytes(StandardCharsets.UTF_8));
+			zos.closeEntry();
+		}
+
+		Path outDir = tempDir2.resolve("out");
+		assertDoesNotThrow(() -> FileUtil.extractZipArchive(zipPath.toFile(), outDir.toFile(), 10, 0));
+		assertEquals("data", Files.readString(outDir.resolve("nested/data.txt"), StandardCharsets.UTF_8));
 	}
 
 	@Test
@@ -372,7 +391,7 @@ class FileUtilTest {
 		}
 
 		Path outDir = tempDir2.resolve("out");
-		assertDoesNotThrow(() -> FileUtil.extractZipArchive(zipPath.toFile(), outDir.toFile(), 0, 0L));
+		assertDoesNotThrow(() -> FileUtil.extractZipArchive(zipPath.toFile(), outDir.toFile(), 0, 0));
 		assertTrue(Files.exists(outDir.resolve("file5.txt")));
 	}
 }

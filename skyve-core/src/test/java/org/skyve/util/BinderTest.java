@@ -264,6 +264,26 @@ class BinderTest {
 	}
 
 	@Test
+	void negateConditionReturnsNullForNullInput() {
+		assertNull(Binder.negateCondition(null));
+	}
+
+	@Test
+	void negateConditionNegatesTrue() {
+		assertThat(Binder.negateCondition("true"), is("false"));
+	}
+
+	@Test
+	void negateConditionNegatesFalse() {
+		assertThat(Binder.negateCondition("false"), is("true"));
+	}
+
+	@Test
+	void negateConditionRemovesNotPrefix() {
+		assertThat(Binder.negateCondition("notActive"), is("active"));
+	}
+
+	@Test
 	void expressionHelpersDelegateToBindUtil() {
 		assertTrue(Binder.isSkyveExpression("{USER}"));
 		assertTrue(Binder.containsSkyveExpressions("Hi {USER}"));

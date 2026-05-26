@@ -975,4 +975,212 @@ class ModuleMetaDataTest {
 		module.getQueries().add(q);
 		assertThrows(MetaDataException.class, () -> module.convert("test"));
 	}
+
+	// ── Calendar menu item tests ───────────────────────────────────────────
+
+	@Test
+	void convertSucceedsWithCalendarMenuItemWithDocument() {
+		ModuleMetaData module = createModuleWithRole();
+		CalendarItemMetaData item = new CalendarItemMetaData();
+		item.setName("calendarItem");
+		item.setDocumentName("TestDocument");
+		item.setStartBinding("startDate");
+		item.setEndBinding("endDate");
+		item.getRoles().add(grantedTo("viewer"));
+		module.getMenu().getActions().add(item);
+		assertNotNull(module.convert("test"));
+	}
+
+	@Test
+	void convertSucceedsWithCalendarMenuItemWithQuery() {
+		ModuleMetaData module = createModuleWithRole();
+		module.getQueries().add(createMetaDataQuery("myQuery", "TestDocument"));
+		CalendarItemMetaData item = new CalendarItemMetaData();
+		item.setName("calendarByQuery");
+		item.setQueryName("myQuery");
+		item.setStartBinding("startDate");
+		item.setEndBinding("endDate");
+		item.getRoles().add(grantedTo("viewer"));
+		module.getMenu().getActions().add(item);
+		assertNotNull(module.convert("test"));
+	}
+
+	@Test
+	void convertThrowsWhenCalendarItemDocumentIsPresentWithQuery() {
+		ModuleMetaData module = createModuleWithRole();
+		module.getQueries().add(createMetaDataQuery("myQuery", "TestDocument"));
+		CalendarItemMetaData item = new CalendarItemMetaData();
+		item.setName("calendarBad");
+		item.setDocumentName("TestDocument");
+		item.setQueryName("myQuery"); // should not have both
+		item.setStartBinding("startDate");
+		item.setEndBinding("endDate");
+		item.getRoles().add(grantedTo("viewer"));
+		module.getMenu().getActions().add(item);
+		assertThrows(MetaDataException.class, () -> module.convert("test"));
+	}
+
+	@Test
+	void convertThrowsWhenCalendarItemDocumentPresentWithoutStartBinding() {
+		ModuleMetaData module = createModuleWithRole();
+		CalendarItemMetaData item = new CalendarItemMetaData();
+		item.setName("calendarNoStart");
+		item.setDocumentName("TestDocument");
+		// missing startBinding
+		item.setEndBinding("endDate");
+		item.getRoles().add(grantedTo("viewer"));
+		module.getMenu().getActions().add(item);
+		assertThrows(MetaDataException.class, () -> module.convert("test"));
+	}
+
+	@Test
+	void convertThrowsWhenCalendarItemNoneOfDocumentQueryOrModel() {
+		ModuleMetaData module = createModuleWithRole();
+		CalendarItemMetaData item = new CalendarItemMetaData();
+		item.setName("calendarEmpty");
+		// no document, query, or model
+		item.getRoles().add(grantedTo("viewer"));
+		module.getMenu().getActions().add(item);
+		assertThrows(MetaDataException.class, () -> module.convert("test"));
+	}
+
+	// ── Map menu item tests ────────────────────────────────────────────────
+
+	@Test
+	void convertSucceedsWithMapMenuItemWithDocument() {
+		ModuleMetaData module = createModuleWithRole();
+		MapItemMetaData item = new MapItemMetaData();
+		item.setName("mapItem");
+		item.setDocumentName("TestDocument");
+		item.setGeometryBinding("location");
+		item.getRoles().add(grantedTo("viewer"));
+		module.getMenu().getActions().add(item);
+		assertNotNull(module.convert("test"));
+	}
+
+	@Test
+	void convertSucceedsWithMapMenuItemWithQuery() {
+		ModuleMetaData module = createModuleWithRole();
+		module.getQueries().add(createMetaDataQuery("myQuery", "TestDocument"));
+		MapItemMetaData item = new MapItemMetaData();
+		item.setName("mapByQuery");
+		item.setQueryName("myQuery");
+		item.setGeometryBinding("location");
+		item.getRoles().add(grantedTo("viewer"));
+		module.getMenu().getActions().add(item);
+		assertNotNull(module.convert("test"));
+	}
+
+	@Test
+	void convertThrowsWhenMapItemDocumentPresentWithMissingGeometryBinding() {
+		ModuleMetaData module = createModuleWithRole();
+		MapItemMetaData item = new MapItemMetaData();
+		item.setName("mapNoGeometry");
+		item.setDocumentName("TestDocument");
+		// missing geometryBinding
+		item.getRoles().add(grantedTo("viewer"));
+		module.getMenu().getActions().add(item);
+		assertThrows(MetaDataException.class, () -> module.convert("test"));
+	}
+
+	@Test
+	void convertThrowsWhenMapItemNoneOfDocumentQueryOrModel() {
+		ModuleMetaData module = createModuleWithRole();
+		MapItemMetaData item = new MapItemMetaData();
+		item.setName("mapEmpty");
+		// no document, query, or model
+		item.getRoles().add(grantedTo("viewer"));
+		module.getMenu().getActions().add(item);
+		assertThrows(MetaDataException.class, () -> module.convert("test"));
+	}
+
+	@Test
+	void convertThrowsWhenMapItemRefreshTimeLessThanFive() {
+		ModuleMetaData module = createModuleWithRole();
+		MapItemMetaData item = new MapItemMetaData();
+		item.setName("mapFastRefresh");
+		item.setDocumentName("TestDocument");
+		item.setGeometryBinding("location");
+		item.setRefreshTimeInSeconds(3); // < 5 should throw
+		item.getRoles().add(grantedTo("viewer"));
+		module.getMenu().getActions().add(item);
+		assertThrows(MetaDataException.class, () -> module.convert("test"));
+	}
+
+	// ── User access tests ──────────────────────────────────────────────────
+
+	@Test
+	void convertSucceedsWithDocumentAggregateUserAccess() {
+		ModuleMetaData module = createMinimalModuleMetaData();
+		ModuleRoleMetaData role = new ModuleRoleMetaData();
+		role.setName("viewer");
+		ModuleRoleDocumentAggregateUserAccessMetaData access = new ModuleRoleDocumentAggregateUserAccessMetaData();
+		access.setDocumentName("TestDocument");
+		role.getAccesses().add(access);
+		module.getRoles().add(role);
+		assertNotNull(module.convert("test"));
+	}
+
+	@Test
+	void convertSucceedsWithUserAccessWithUxUi() {
+		ModuleMetaData module = createMinimalModuleMetaData();
+		ModuleRoleMetaData role = new ModuleRoleMetaData();
+		role.setName("viewer");
+		ModuleRoleDocumentAggregateUserAccessMetaData access = new ModuleRoleDocumentAggregateUserAccessMetaData();
+		access.setDocumentName("TestDocument");
+		ModuleRoleUserAccessUxUiMetadata uxui = new ModuleRoleUserAccessUxUiMetadata();
+		uxui.setName("desktop");
+		access.getUxuis().add(uxui);
+		role.getAccesses().add(access);
+		module.getRoles().add(role);
+		assertNotNull(module.convert("test"));
+	}
+
+	@Test
+	void convertThrowsWhenUserAccessUxUiNameIsNull() {
+		ModuleMetaData module = createMinimalModuleMetaData();
+		ModuleRoleMetaData role = new ModuleRoleMetaData();
+		role.setName("viewer");
+		ModuleRoleDocumentAggregateUserAccessMetaData access = new ModuleRoleDocumentAggregateUserAccessMetaData();
+		access.setDocumentName("TestDocument");
+		ModuleRoleUserAccessUxUiMetadata uxui = new ModuleRoleUserAccessUxUiMetadata();
+		// uxui name is null
+		access.getUxuis().add(uxui);
+		role.getAccesses().add(access);
+		module.getRoles().add(role);
+		assertThrows(MetaDataException.class, () -> module.convert("test"));
+	}
+
+	@Test
+	void convertThrowsWhenUserAccessHasDuplicateUxUi() {
+		ModuleMetaData module = createMinimalModuleMetaData();
+		ModuleRoleMetaData role = new ModuleRoleMetaData();
+		role.setName("viewer");
+		ModuleRoleDocumentAggregateUserAccessMetaData access = new ModuleRoleDocumentAggregateUserAccessMetaData();
+		access.setDocumentName("TestDocument");
+		ModuleRoleUserAccessUxUiMetadata uxui1 = new ModuleRoleUserAccessUxUiMetadata();
+		uxui1.setName("desktop");
+		ModuleRoleUserAccessUxUiMetadata uxui2 = new ModuleRoleUserAccessUxUiMetadata();
+		uxui2.setName("desktop"); // duplicate
+		access.getUxuis().add(uxui1);
+		access.getUxuis().add(uxui2);
+		role.getAccesses().add(access);
+		module.getRoles().add(role);
+		assertThrows(MetaDataException.class, () -> module.convert("test"));
+	}
+
+	@Test
+	void convertThrowsWhenDuplicateUserAccess() {
+		ModuleMetaData module = createMinimalModuleMetaData();
+		ModuleRoleMetaData role = new ModuleRoleMetaData();
+		role.setName("viewer");
+		ModuleRoleDocumentAggregateUserAccessMetaData access1 = new ModuleRoleDocumentAggregateUserAccessMetaData();
+		access1.setDocumentName("TestDocument");
+		ModuleRoleDocumentAggregateUserAccessMetaData access2 = new ModuleRoleDocumentAggregateUserAccessMetaData();
+		access2.setDocumentName("TestDocument"); // duplicate
+		role.getAccesses().add(access1);
+		role.getAccesses().add(access2);
+		module.getRoles().add(role);
+		assertThrows(MetaDataException.class, () -> module.convert("test"));
+	}
 }

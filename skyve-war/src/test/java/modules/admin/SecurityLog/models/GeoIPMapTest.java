@@ -10,10 +10,8 @@ import org.locationtech.jts.geom.Point;
 import org.skyve.metadata.view.model.map.MapResult;
 import org.skyve.util.IPGeolocation;
 
-import util.AbstractSkyveTest;
-
 @SuppressWarnings("static-method")
-public class GeoIPMapTest extends AbstractSkyveTest {
+public class GeoIPMapTest {
 
 	@Test
 	void mapModelWithEmptyGeoIPReturnsEmptyList() {

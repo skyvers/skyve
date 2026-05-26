@@ -6,10 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import org.junit.jupiter.api.Test;
 
 import modules.kitchensink.domain.ListAttributes;
-import util.AbstractSkyveTest;
-
 @SuppressWarnings("static-method")
-public class InlineGridBizletTest extends AbstractSkyveTest {
+public class InlineGridBizletTest {
 
 	private static final InlineGridBizlet bizlet = new InlineGridBizlet();
 

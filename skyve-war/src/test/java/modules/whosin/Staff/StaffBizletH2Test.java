@@ -20,7 +20,7 @@ public class StaffBizletH2Test extends AbstractH2Test {
 
 	@BeforeEach
 	void setUpBean() {
-		bean = new StaffExtension();
+		bean = new Staff();
 		webContext = new MockWebContext();
 	}
 

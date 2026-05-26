@@ -4,10 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
 
-import util.AbstractSkyveTest;
-
 @SuppressWarnings("static-method")
-public class AvailableDiskSpaceAlarmJobTest extends AbstractSkyveTest {
+public class AvailableDiskSpaceAlarmJobTest {
 
 	@Test
 	void cancelReturnsNull() {

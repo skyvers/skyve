@@ -2,6 +2,7 @@ package modules.admin.ReportTemplate;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
@@ -190,5 +191,68 @@ public class ReportTemplateBizletTest extends AbstractSkyveTest {
 					return false;
 				});
 		assertTrue(hasBothError, "Should have error when both days and weekdays are selected");
+	}
+
+	// ---- getDynamicDomainValues ----
+
+	@Test
+	void getDynamicDomainValuesForDocumentNameWithNullModuleReturnsEmptyList() throws Exception {
+		ReportTemplateExtension bean = (ReportTemplateExtension) ReportTemplate.newInstance();
+		bean.setModuleName(null);
+		List<DomainValue> result = bizlet.getDynamicDomainValues(ReportTemplate.documentNamePropertyName, bean);
+		assertNotNull(result);
+		assertTrue(result.isEmpty());
+	}
+
+	@Test
+	void getDynamicDomainValuesForGenerateDocumentNameWithNullModuleReturnsEmptyList() throws Exception {
+		ReportTemplateExtension bean = (ReportTemplateExtension) ReportTemplate.newInstance();
+		bean.setGenerateModuleName(null);
+		List<DomainValue> result = bizlet.getDynamicDomainValues(ReportTemplate.generateDocumentNamePropertyName, bean);
+		assertNotNull(result);
+		assertTrue(result.isEmpty());
+	}
+
+	// ---- preRerender ----
+
+	@Test
+	void preRerenderWithReportTypeSourceClearsGenerateFields() throws Exception {
+		ReportTemplateExtension bean = (ReportTemplateExtension) ReportTemplate.newInstance();
+		bean.setGenerateExisting(ReportTemplate.GenerateExisting.generate);
+		bean.setGenerateModuleName("admin");
+		bean.setGenerateDocumentName("User");
+		bizlet.preRerender(ReportTemplate.reportTypePropertyName, bean, null);
+		// Should clear the generate fields
+		assertNull(bean.getGenerateExisting());
+		assertNull(bean.getGenerateModuleName());
+		assertNull(bean.getGenerateDocumentName());
+	}
+
+	@Test
+	void preRerenderWithScheduledFalseDoesNotThrow() throws Exception {
+		ReportTemplateExtension bean = (ReportTemplateExtension) ReportTemplate.newInstance();
+		bean.setScheduled(Boolean.FALSE);
+		// Should not throw any exception
+		bizlet.preRerender(ReportTemplate.scheduledPropertyName, bean, null);
+	}
+
+	@Test
+	void preRerenderWithUnknownSourceDoesNotThrow() throws Exception {
+		ReportTemplateExtension bean = (ReportTemplateExtension) ReportTemplate.newInstance();
+		bizlet.preRerender("unknownSource", bean, null);
+	}
+
+	// ---- newInstance ----
+
+	@Test
+	void newInstanceSetsDefaultSchedulingCodes() throws Exception {
+		ReportTemplateExtension bean = (ReportTemplateExtension) ReportTemplate.newInstance();
+		ReportTemplateExtension result = bizlet.newInstance(bean);
+		assertNotNull(result);
+		// All scheduling fields should be set to "*" (All)
+		assertTrue("*".equals(result.getAllHours()), "allHours should be '*'");
+		assertTrue("*".equals(result.getAllDays()), "allDays should be '*'");
+		assertTrue("*".equals(result.getAllMonths()), "allMonths should be '*'");
+		assertTrue("*".equals(result.getAllWeekdays()), "allWeekdays should be '*'");
 	}
 }
