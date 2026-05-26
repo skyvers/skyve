@@ -52,6 +52,7 @@ public class ConfigurationBizletH2Test extends AbstractH2Test {
 
 	@Test
 	void postSaveWithAllTwoFactorFieldsSetDoesNotThrow() throws Exception {
+		bean.setBizVersion(Integer.valueOf(0));
 		bean.setTwoFactorType(modules.admin.domain.Configuration.TwoFactorType.email);
 		bean.setTwofactorPushCodeTimeOutSeconds(Integer.valueOf(300));
 		bean.setTwoFactorEmailSubject("Verification Code");

@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
@@ -454,5 +455,25 @@ class BinderTest {
 				() -> Binder.getMetaDataForBinding(customer, module, document, "children[0].bizId"));
 		assertThrows(RuntimeException.class,
 				() -> Binder.instantiateAndGet(user, module, document, new SimpleOwner("I1"), "manager.bizId"));
+	}
+
+	@Test
+	void validateMessageDocumentOverloadWithPlainTextAndThreadLocalCustomerReturnsNull() {
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		when(user.getCustomer()).thenReturn(customer);
+		withThreadLocalUser(user, () -> {
+			Document document = mock(Document.class);
+			assertNull(Binder.validateMessage("plain text", document));
+		});
+	}
+
+	@Test
+	void ensureElementAlreadyInCollectionReturnsSameElement() {
+		SimpleOwner owner = new SimpleOwner("O1");
+		SimpleChild child = new SimpleChild("C1");
+		owner.getChildren().add(child);
+		Bean result = Binder.ensureElementIsInCollection(owner, "children", child);
+		assertSame(child, result);
 	}
 }

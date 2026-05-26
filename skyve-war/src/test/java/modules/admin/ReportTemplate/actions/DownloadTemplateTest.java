@@ -26,6 +26,7 @@ class DownloadTemplateTest {
 		ReportTemplateExtension bean = new ReportTemplateExtension();
 		bean.setReportType(ReportType.jasper);
 		bean.setName("MyReport");
+		bean.setTemplate("template content");
 
 		Download result = action.download(bean, null);
 
@@ -39,6 +40,7 @@ class DownloadTemplateTest {
 		bean.setReportType(ReportType.freemarker);
 		bean.setOutputFormat(OutputFormat.CSV);
 		bean.setName("MyReport");
+		bean.setTemplate("template content");
 
 		Download result = action.download(bean, null);
 
@@ -52,6 +54,7 @@ class DownloadTemplateTest {
 		bean.setReportType(ReportType.freemarker);
 		bean.setOutputFormat(OutputFormat.PDF);
 		bean.setName("MyReport");
+		bean.setTemplate("template content");
 
 		Download result = action.download(bean, null);
 

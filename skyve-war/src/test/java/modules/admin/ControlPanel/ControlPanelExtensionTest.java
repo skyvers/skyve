@@ -8,8 +8,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
+import util.AbstractH2Test;
+
 @SuppressWarnings("static-method")
-public class ControlPanelExtensionTest {
+public class ControlPanelExtensionTest extends AbstractH2Test {
 
 	@Test
 	void trapExceptionSetsResultsWithStackTrace() {

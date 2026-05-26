@@ -79,21 +79,23 @@ public class GroupDomainTest extends AbstractH2Test {
 	@Test
 	void addAndRemoveCandidateRolesElement() throws Exception {
 		Group bean = Group.newInstance();
+		int initialSize = bean.getCandidateRoles().size();
 		GroupRole role = GroupRole.newInstance();
 		role.setRoleName("admin.BasicUser");
 		assertTrue(bean.addCandidateRolesElement(role));
-		assertEquals(1, bean.getCandidateRoles().size());
+		assertEquals(initialSize + 1, bean.getCandidateRoles().size());
 		assertTrue(bean.removeCandidateRolesElement(role));
-		assertEquals(0, bean.getCandidateRoles().size());
+		assertEquals(initialSize, bean.getCandidateRoles().size());
 	}
 
 	@Test
 	void addCandidateRolesElementAtIndex() throws Exception {
 		Group bean = Group.newInstance();
+		int initialSize = bean.getCandidateRoles().size();
 		GroupRole role = GroupRole.newInstance();
 		role.setRoleName("admin.BasicUser");
 		bean.addCandidateRolesElement(0, role);
-		assertEquals(1, bean.getCandidateRoles().size());
+		assertEquals(initialSize + 1, bean.getCandidateRoles().size());
 		GroupRole removed = bean.removeCandidateRolesElement(0);
 		assertNotNull(removed);
 	}

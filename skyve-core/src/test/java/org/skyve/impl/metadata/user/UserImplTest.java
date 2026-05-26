@@ -824,4 +824,17 @@ class UserImplTest {
 		// canAccessContent returns true when a permission key matches
 		Assert.assertTrue(user.canAccessContent("bizId", "admin", "User", "myCustomer", null, "userId1", "photo"));
 	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testPutDocumentPermissionMergesWithExistingPermission() {
+		TestUserImpl user = new TestUserImpl();
+		// Put an initial permission
+		user.callPutDocumentPermission("admin", "User", DocumentPermission._R__G);
+		Assert.assertNotNull(user.getScope("admin", "User"));
+		// Put a second permission for the same document – triggers the merge branch
+		user.callPutDocumentPermission("admin", "User", DocumentPermission.CR__G);
+		// After merging C____ with _R__G the user still has scope (merged permission)
+		Assert.assertNotNull(user.getScope("admin", "User"));
+	}
 }

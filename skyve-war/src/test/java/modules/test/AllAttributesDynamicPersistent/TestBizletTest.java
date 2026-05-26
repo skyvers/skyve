@@ -2,7 +2,7 @@ package modules.test.AllAttributesDynamicPersistent;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import java.util.Map;
+import java.util.HashMap;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.DynamicPersistentBean;
@@ -15,7 +15,7 @@ public class TestBizletTest {
 	private static final TestBizlet bizlet = new TestBizlet();
 
 	private static DynamicPersistentBean newBean() {
-		return new DynamicPersistentBean("test", "AllAttributesDynamicPersistent", Map.of());
+		return new DynamicPersistentBean("test", "AllAttributesDynamicPersistent", new HashMap<>());
 	}
 
 	@Test
