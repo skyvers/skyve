@@ -1,6 +1,8 @@
 package org.skyve.impl.backup;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -18,15 +20,13 @@ public class DDL {
 	throws Exception {
 		List<String> drops = null;
 		if (dropScript == null) {
-			File file = File.createTempFile("drop", ".sql");
+			Path path = Files.createTempFile("drop", ".sql");
 			try {
-				AbstractPersistence.get().generateDDL(file.getAbsolutePath(), null, null);
-				drops = BackupUtil.readScript(file);
+				AbstractPersistence.get().generateDDL(path.toString(), null, null);
+				drops = BackupUtil.readScript(path.toFile());
 			}
 			finally {
-				if (file.exists()) {
-					file.delete();
-				}
+				Files.deleteIfExists(path);
 			}
 		}
 		else {
@@ -43,15 +43,13 @@ public class DDL {
 	throws Exception {
 		List<String> creates = null;
 		if (createScript == null) {
-			File file = File.createTempFile("create", ".sql");
+			Path path = Files.createTempFile("create", ".sql");
 			try {
-				AbstractPersistence.get().generateDDL(null, file.getAbsolutePath(), null);
-				creates = BackupUtil.readScript(file);
+				AbstractPersistence.get().generateDDL(null, path.toString(), null);
+				creates = BackupUtil.readScript(path.toFile());
 			}
 			finally {
-				if (file.exists()) {
-					file.delete();
-				}
+				Files.deleteIfExists(path);
 			}
 		}
 		else {
@@ -67,15 +65,13 @@ public class DDL {
 	public static List<String> sync(boolean execute)
 	throws Exception {
 		List<String> updates = null;
-		File file = File.createTempFile("update", ".sql");
+		Path path = Files.createTempFile("update", ".sql");
 		try {
-			AbstractPersistence.get().generateDDL(null, null, file.getAbsolutePath());
-			updates = BackupUtil.readScript(file);
+			AbstractPersistence.get().generateDDL(null, null, path.toString());
+			updates = BackupUtil.readScript(path.toFile());
 		}
 		finally {
-			if (file.exists()) {
-				file.delete();
-			}
+			Files.deleteIfExists(path);
 		}
 		if (execute) {
 			BackupUtil.executeScript(updates);
