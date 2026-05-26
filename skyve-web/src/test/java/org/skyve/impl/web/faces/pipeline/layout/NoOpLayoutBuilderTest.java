@@ -4,10 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.Container;
@@ -20,12 +23,40 @@ import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.container.form.FormRow;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 
+import jakarta.el.ELContext;
+import jakarta.el.ExpressionFactory;
+import jakarta.faces.application.Application;
 import jakarta.faces.component.UIComponent;
+import jakarta.faces.context.FacesContext;
 
 /**
  * Tests for NoOpLayoutBuilder - verifies each method returns input unchanged or does nothing.
  */
 class NoOpLayoutBuilderTest {
+	private abstract static class FacesContextBridge extends FacesContext {
+		static void setCurrent(FacesContext facesContext) {
+			setCurrentInstance(facesContext);
+		}
+	}
+
+	@BeforeAll
+	@SuppressWarnings("static-method")
+	static void setUpFacesContext() {
+		FacesContext facesContext = mock(FacesContext.class);
+		Application mockApplication = mock(Application.class);
+		ExpressionFactory mockExpressionFactory = mock(ExpressionFactory.class);
+		ELContext mockELContext = mock(ELContext.class);
+		when(facesContext.getApplication()).thenReturn(mockApplication);
+		when(facesContext.getELContext()).thenReturn(mockELContext);
+		when(mockApplication.getExpressionFactory()).thenReturn(mockExpressionFactory);
+		FacesContextBridge.setCurrent(facesContext);
+	}
+
+	@AfterAll
+	@SuppressWarnings("static-method")
+	static void tearDownFacesContext() {
+		FacesContextBridge.setCurrent(null);
+	}
 
 	private NoOpLayoutBuilder builder;
 	private UIComponent component;

@@ -5,15 +5,41 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Field;
+import java.util.Collections;
 import java.util.List;
 
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.metadata.ConverterName;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.module.Module;
+import org.skyve.metadata.repository.ProvidedRepository;
 
 @SuppressWarnings("static-method")
 class CustomerMetaDataTest {
+
+	@BeforeAll
+	static void setUpRepository() throws Exception {
+		ProvidedRepository mockRepository = mock(ProvidedRepository.class);
+		Module mockModule = mock(Module.class);
+		when(mockRepository.getModule(any(), any())).thenReturn(mockModule);
+		when(mockModule.getDocumentRefs()).thenReturn(Collections.emptyMap());
+		ProvidedRepositoryFactory.set(mockRepository);
+	}
+
+	@AfterAll
+	static void tearDownRepository() throws Exception {
+		Field field = ProvidedRepositoryFactory.class.getDeclaredField("repository");
+		field.setAccessible(true);
+		field.set(null, null);
+	}
 
 	@Test
 	void testSetAndGetLanguage() {

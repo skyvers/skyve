@@ -312,6 +312,66 @@ void fluentTextSetsLengthAndRequired() {
 }
 ```
 
+## skyve-web: Testing JSF Builder Classes
+
+Classes in `skyve-web` that extend `AbstractFacesBuilder` (e.g. `LayoutBuilder`, `ComponentBuilder`, and their subclasses) capture a `FacesContext` in instance field initialisers during construction:
+
+```java
+protected FacesContext fc = FacesContext.getCurrentInstance();
+protected Application a = fc.getApplication();
+```
+
+Without a `FacesContext` installed on the current thread, constructing any of these classes throws `NoClassDefFoundError: com/sun/faces/util/Util` (Mojarra is not on the test classpath) or `NullPointerException`. The fix is to install a mock `FacesContext` before the class under test is constructed, using a `FacesContextBridge` inner class to reach the protected `setCurrentInstance` method.
+
+### Pattern
+
+```java
+class MyBuilderTest {
+
+    private abstract static class FacesContextBridge extends FacesContext {
+        static void setCurrent(FacesContext facesContext) {
+            setCurrentInstance(facesContext);   // protected in FacesContext
+        }
+    }
+
+    @BeforeAll
+    @SuppressWarnings("static-method")
+    static void setUpFacesContext() {
+        FacesContext facesContext = mock(FacesContext.class);
+        Application mockApplication = mock(Application.class);
+        ExpressionFactory mockExpressionFactory = mock(ExpressionFactory.class);
+        ELContext mockELContext = mock(ELContext.class);
+        when(facesContext.getApplication()).thenReturn(mockApplication);
+        when(facesContext.getELContext()).thenReturn(mockELContext);
+        when(mockApplication.getExpressionFactory()).thenReturn(mockExpressionFactory);
+        FacesContextBridge.setCurrent(facesContext);
+    }
+
+    @AfterAll
+    @SuppressWarnings("static-method")
+    static void tearDownFacesContext() {
+        FacesContextBridge.setCurrent(null);
+    }
+
+    @BeforeEach
+    void setUp() {
+        builder = new MyBuilder();   // safe — FacesContext is now on the thread
+    }
+}
+```
+
+### Rules
+
+- Always use `@BeforeAll` / `@AfterAll` (static) so the context is installed once for the whole class and torn down cleanly.
+- Stub `getApplication()`, `getApplication().getExpressionFactory()`, and `getELContext()` — these are always accessed by `AbstractFacesBuilder` field initialisers.
+- Stub additional `Application.createComponent(...)` calls only if the builder method under test actually creates components. No-op builders do not need these stubs.
+- Set the context to `null` in `@AfterAll` to avoid leaking state into subsequent test classes.
+- Do **not** add Mojarra (`org.glassfish:jakarta.faces`) as a test dependency — the `FacesContextBridge` pattern is sufficient and avoids the Mojarra runtime on the test classpath.
+
+### When additional stubs are needed
+
+Builders that create real JSF/PrimeFaces components (e.g. `TabularLayoutBuilder`, `ResponsiveLayoutBuilder`) need `mockApplication.createComponent(SomeComponent.COMPONENT_TYPE)` stubs to return fresh Mockito mocks per test, because the builder calls `application.createComponent(...)` inside its layout methods. See `TabularLayoutBuilderTest` for a full example.
+
 ## Hybrid H2 + Mock Seams
 
 - Purpose: Exercise realistic persistence state while mocking infrastructure seams.

@@ -3,7 +3,6 @@ package org.skyve.impl.metadata.repository.customer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -427,11 +426,18 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 			}
 			String moduleName = featureRole.getModuleName();
 			if (moduleName == null) {
-				Optional<CustomerRoleMetaData> oCustomerRole = roles.getRoles().stream().filter(r -> r.getName().equals(roleName)).findAny();
-				if (oCustomerRole.isEmpty()) {
+				CustomerRoleMetaData customerRole = null;
+				if (roles != null) {
+					for (CustomerRoleMetaData candidate : roles.getRoles()) {
+						if (roleName.equals(candidate.getName())) {
+							customerRole = candidate;
+							break;
+						}
+					}
+				}
+				if (customerRole == null) {
 					throw new MetaDataException(metaDataName + " : The [name] of feature role " + roleName + " is not a valid customer role");
 				}
-				CustomerRoleMetaData customerRole = oCustomerRole.get();
 				for (CustomerModuleRoleMetaData moduleRole : customerRole.getRoles()) {
 					moduleName = moduleRole.getModuleName();
 					String value = moduleRole.getName();
