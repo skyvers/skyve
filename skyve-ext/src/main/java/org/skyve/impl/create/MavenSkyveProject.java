@@ -22,6 +22,12 @@ import org.skyve.impl.script.SkyveScriptInterpreter;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+/**
+ * Utility class for creating a new Skyve Maven project from template artefacts.
+ *
+ * <p>Copies and customises the project scaffold (directories, POM, configuration
+ * files) for the specified project name and customer, ready for import into an IDE.
+ */
 public class MavenSkyveProject {
 
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(MavenSkyveProject.class);

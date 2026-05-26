@@ -10,6 +10,18 @@ import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB-annotated descriptor for a {@code <dynamicImageAccess>} user-access grant
+ * in a module role.
+ *
+ * <p>Grants access to server-rendered dynamic images (chart thumbnails, generated
+ * diagrams) for a named document.  Extends
+ * {@link ModuleRoleDocumentAggregateUserAccessMetaData}.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see ModuleRoleDocumentAggregateUserAccessMetaData
+ */
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "dynamicImageAccess")
 public class ModuleRoleDynamicImageUserAccessMetaData extends ModuleRoleDocumentAggregateUserAccessMetaData {

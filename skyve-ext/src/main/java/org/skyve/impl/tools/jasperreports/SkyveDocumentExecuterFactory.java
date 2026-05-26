@@ -20,7 +20,19 @@ import net.sf.jasperreports.engine.JasperReportsContext;
 import net.sf.jasperreports.engine.query.JRQueryExecuter;
 import net.sf.jasperreports.engine.query.QueryExecuterFactory;
 
+/**
+ * Factory that creates Jasper query executers for Skyve document query language.
+ */
 public class SkyveDocumentExecuterFactory implements QueryExecuterFactory {
+	/**
+	 * Creates a Skyve document query executer for the dataset query text.
+	 *
+	 * @param jasperReportsContext The Jasper reports context.
+	 * @param dataset The report dataset containing query metadata.
+	 * @param parameters The query parameter map.
+	 * @return A query executer when a dataset query is present, otherwise {@code null}.
+	 * @throws JRException If executer creation fails.
+	 */
 	@Override
 	public JRQueryExecuter createQueryExecuter(JasperReportsContext jasperReportsContext, JRDataset dataset, Map<String, ? extends JRValueParameter> parameters)
 	throws JRException {
@@ -34,17 +46,34 @@ public class SkyveDocumentExecuterFactory implements QueryExecuterFactory {
 		return null;
 	}
 
+	/**
+	 * Returns Jasper built-in parameters supported by this factory.
+	 *
+	 * @return An empty array, as no additional built-in parameters are defined.
+	 */
 	@Override
 	public Object[] getBuiltinParameters() {
 		return new Object[0];
 	}
 
+	/**
+	 * Indicates whether this factory supports the supplied query parameter type.
+	 *
+	 * @param className The query parameter class name.
+	 * @return {@code true}, as all parameter types are accepted.
+	 */
 	@Override
 	public boolean supportsQueryParameterType(String className) {
 		return true;
 	}
 	
+	/**
+	 * Lazy singleton holder for the design-time user used by Jasper query execution.
+	 */
 	private static class UserSingleton {
+		/**
+		 * Singleton user instance initialised for report-design execution contexts.
+		 */
 		private static UserImpl user;
 		static {
 			ProvidedRepository repository = new LocalDesignRepository() {
@@ -63,6 +92,11 @@ public class SkyveDocumentExecuterFactory implements QueryExecuterFactory {
 		}
 	}
 
+	/**
+	 * Returns the singleton design-time user used by Jasper tooling integration.
+	 *
+	 * @return The singleton design-time user.
+	 */
 	public static org.skyve.metadata.user.User getUser() {
 		return UserSingleton.user;
 	}

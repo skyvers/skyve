@@ -105,6 +105,21 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 							"conditions", 
 							"uniqueConstraints",
 							"properties"})
+/**
+ * JAXB root element for a document XML descriptor ({@code document.xml}), converted
+ * to a runtime {@link Document} during repository bootstrap.
+ *
+ * <p>Holds the full structural definition of a Skyve document: class name,
+ * persistence mapping, fields, associations, collections, conditions, unique
+ * constraints, and actions.  Extends {@link NamedMetaData} to bind the document
+ * to its symbolic name.
+ *
+ * <p>Threading: not thread-safe.  Instances are populated during JAXB unmarshalling
+ * and are read-only once converted and placed in the repository cache.
+ *
+ * @see Document
+ * @see org.skyve.impl.metadata.model.document.DocumentImpl
+ */
 public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaData<Document>, DecoratedMetaData {
 	private static final long serialVersionUID = 222166383815547958L;
 

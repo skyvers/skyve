@@ -12,10 +12,19 @@ import org.skyve.metadata.user.User;
 import jakarta.annotation.Nonnull;
 
 /**
- * A Thread-safe cached singleton Bizlet implementation that memoises the bizId from the super.newInstance() call
- * if the permission is global or customer scoped.
+ * Caches singleton document instance identifiers for global/customer-scoped
+ * access and reuses them across {@link #newInstance(PersistentBean)} calls.
  *
- * @param <T>
+ * <p>Cache entries are keyed by module/document and, for customer scope, by
+ * customer name. If a cached identifier no longer resolves to a persisted
+ * instance, the cache is refreshed from {@link SingletonBizlet} fallback
+ * creation logic.
+ *
+ * <p>Threading: thread-safe for cache access via {@link ConcurrentMap};
+ * returned document instances are not immutable and follow normal persistence
+ * context/thread confinement rules.
+ *
+ * @param <T> the singleton document bean type
  */
 public abstract class SingletonCachedBizlet<T extends PersistentBean> extends SingletonBizlet<T> {
 

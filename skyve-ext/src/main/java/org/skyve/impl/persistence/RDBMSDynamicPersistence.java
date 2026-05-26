@@ -53,6 +53,10 @@ import jakarta.annotation.Nonnull;
 // TODO Need to replicate HibernateListener functions for dynamic beans
 // TODO Need to treat bizVersion and bizLock which requires change detection in DynamicBean.
 // The idea here is to completely persist all beans reachable, no matter the relationship.
+/**
+ * RDBMS-backed {@link org.skyve.persistence.DynamicPersistence} implementation
+ * that persists dynamic entity instances as JSON in a designated dynamic-entity table.
+ */
 public class RDBMSDynamicPersistence implements DynamicPersistence {
 	private static final long serialVersionUID = -6445760028486705253L;
 

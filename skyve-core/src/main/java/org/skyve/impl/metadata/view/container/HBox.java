@@ -20,6 +20,17 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * JAXB-annotated horizontal-box container widget.
+ *
+ * <p>Arranges child widgets in a horizontal row with optional border and
+ * widget identifier.  Extends {@link Container} so child widgets can be
+ * nested using the standard JAXB element-ref polymorphism.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see VBox
+ */
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE, name = "HBox")
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "hbox")
 public class HBox extends Container implements Box, Identifiable, Bordered {

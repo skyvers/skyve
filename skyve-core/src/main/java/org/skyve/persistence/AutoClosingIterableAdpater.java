@@ -19,15 +19,26 @@ import org.skyve.impl.util.LoggingIteratorAdapter;
 public class AutoClosingIterableAdpater<T> implements AutoClosingIterable<T> {
 	private Iterable<T> iterable;
 	
+	/**
+	 * Creates a new AutoClosingIterableAdpater instance.
+	 * @param adapted the adapted
+	 */
 	public AutoClosingIterableAdpater(Iterable<T> adapted) {
 		iterable = adapted;
 	}
 	
+	/**
+	 * Executes iterator.
+	 * @return the result
+	 */
 	@Override
 	public Iterator<T> iterator() {
 		return new LoggingIteratorAdapter<>(iterable.iterator());
 	}
 
+	/**
+	 * Executes close.
+	 */
 	@Override
 	public void close() throws Exception {
 		// nothing to do here

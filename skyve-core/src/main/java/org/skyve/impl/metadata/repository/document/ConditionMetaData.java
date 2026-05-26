@@ -16,6 +16,17 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * JAXB-annotated descriptor for a {@code <condition>} element in a document XML file.
+ *
+ * <p>Declares a named boolean condition (expression) on a document that can be
+ * referenced by view widgets (visibility, disability) and business rules.  Extends
+ * {@link NamedMetaData} to bind the condition to its symbolic name.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see org.skyve.impl.metadata.model.document.ConditionImpl
+ */
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE, 
 			name = "condition",
 			propOrder = {"documentation", "description", "expression", "usage", "properties"})

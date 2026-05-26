@@ -7,6 +7,10 @@ import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.metadata.view.View;
 
+/**
+ * Generates a JasperReports design from a Skyve view definition, producing a
+ * layout that mirrors the view's sections and widget arrangement.
+ */
 public class ViewReportDesignGenerator extends ReportDesignGenerator {
 
     private ReportViewVisitor visitor;

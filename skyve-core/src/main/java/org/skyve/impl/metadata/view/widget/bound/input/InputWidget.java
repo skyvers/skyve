@@ -10,6 +10,18 @@ import org.skyve.metadata.view.Invisible;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * Abstract JAXB base for all data-bound input widgets in a view.
+ *
+ * <p>Provides common input-widget properties: binding path, disabled/invisible
+ * conditions, and decorator settings.  Concrete subclasses represent specific
+ * input controls (text field, combo, check box, etc.).
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see FocusableInputWidget
+ * @see ChangeableInputWidget
+ */
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"invisibleConditionName", "visibleConditionName", "disabledConditionName", "enabledConditionName"})
 public abstract class InputWidget extends AbstractBound implements Disableable, Invisible {

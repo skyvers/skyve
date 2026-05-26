@@ -134,6 +134,10 @@ public enum FormatterName {
 		this.formatter = formatter;
 	}
 	
+	/**
+	 * Returns the formatter.
+	 * @return the result
+	 */
 	@SuppressWarnings("unchecked")
 	public <T> Formatter<T> getFormatter() {
 		return (Formatter<T>) formatter;

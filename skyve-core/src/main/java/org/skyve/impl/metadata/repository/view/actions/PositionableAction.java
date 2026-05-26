@@ -7,6 +7,17 @@ import org.skyve.metadata.view.Action.ActionShow;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * Abstract JAXB base for action descriptors that carry a display position.
+ *
+ * <p>Adds an optional {@code displayOrder} integer to {@link ActionMetaData}
+ * so the action button can be placed at a specific position in the rendered
+ * action bar.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see ActionMetaData
+ */
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 public abstract class PositionableAction extends ActionMetaData {
 	private static final long serialVersionUID = -7322904477575844567L;

@@ -5,6 +5,10 @@ import org.skyve.content.BeanContent;
 import org.skyve.content.ContentManager;
 import org.skyve.domain.PersistentBean;
 
+/**
+ * {@link AbstractHibernatePersistence} variant that also manages content-store
+ * (attachment and bean content) lifecycle alongside the relational data.
+ */
 public class HibernateContentPersistence extends AbstractHibernatePersistence {
 	private static final long serialVersionUID = 1433618526097088364L;
 

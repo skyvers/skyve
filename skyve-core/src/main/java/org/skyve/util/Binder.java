@@ -50,34 +50,70 @@ public class Binder {
 	}
 	
 	/**
-	 * 
-	 * @param customer
-	 * @param message
-	 * @param bean
-	 * @return
+	 * Evaluates all Skyve expressions embedded in a message template.
+	 *
+	 * @param message	message text that may contain {@code {...}} expressions
+	 * @param beans	bean context used when resolving expressions
+	 * @return the formatted message with all resolvable expressions substituted
 	 */
 	public static @Nonnull String formatMessage(@Nonnull String message, @Nonnull Bean... beans) {
 		return BindUtil.formatMessage(message, beans);
 	}
 
+	/**
+	 * Evaluates all Skyve expressions embedded in a message template with an optional
+	 * post-processing hook for display values.
+	 *
+	 * @param message	message text that may contain {@code {...}} expressions
+	 * @param postEvaluateDisplayValue	optional callback to transform resolved display values
+	 * @param beans	bean context used when resolving expressions
+	 * @return the formatted message with post-processed display values where applicable
+	 */
 	public static @Nonnull String formatMessage(@Nonnull String message,
 													@Nullable Function<String, String> postEvaluateDisplayValue,
 													@Nonnull Bean... beans) {
 		return BindUtil.formatMessage(message, postEvaluateDisplayValue, beans);
 	}
 
+	/**
+	 * Validates all expressions embedded in a message template against one or more documents.
+	 *
+	 * @param message	message text that may contain {@code {...}} expressions
+	 * @param documents	document metadata used for binding validation
+	 * @return {@code null} when valid, otherwise a human-readable validation error
+	 */
 	public static @Nullable String validateMessage(@Nonnull String message, @Nonnull Document... documents) {
 		return BindUtil.validateMessageExpressions(message, CORE.getCustomer(), documents);
 	}
 
+	/**
+	 * Determines whether the supplied text is exactly one Skyve expression token.
+	 *
+	 * @param expression	candidate expression text
+	 * @return {@code true} when the text is a single Skyve expression, otherwise {@code false}
+	 */
 	public static boolean isSkyveExpression(@Nonnull String expression) {
 		return BindUtil.isSkyveExpression(expression);
 	}
 	
+	/**
+	 * Determines whether the supplied text contains one or more Skyve expression tokens.
+	 *
+	 * @param message	message text to inspect
+	 * @return {@code true} when at least one expression token is present
+	 */
 	public static boolean containsSkyveExpressions(@Nonnull String message) {
 		return BindUtil.containsSkyveExpressions(message);
 	}
 	
+	/**
+	 * Validates message expressions against documents resolved from a module/document-name list.
+	 *
+	 * @param message	message text that may contain {@code {...}} expressions
+	 * @param moduleName	module used to resolve {@code documentNames}
+	 * @param documentNames	document names used for expression validation context
+	 * @return {@code null} when valid, otherwise a human-readable validation error
+	 */
 	public static @Nullable String validateMessage(@Nonnull String message,
 													@Nonnull String moduleName,
 													@Nonnull String... documentNames) {
@@ -99,6 +135,15 @@ public class Binder {
 		return null;
 	}
 
+	/**
+	 * Validates a binding expression and returns metadata for its resolved target.
+	 *
+	 * @param customer	customer context used for metadata resolution
+	 * @param module	starting module for the binding
+	 * @param document	starting document for the binding
+	 * @param binding	dot-separated binding expression
+	 * @return resolved target metadata including terminal document, optional attribute, and type
+	 */
 	public static @Nonnull TargetMetaData validateBinding(@Nonnull Customer customer,
 															@Nonnull Module module,
 															@Nonnull Document document,
@@ -106,6 +151,12 @@ public class Binder {
 		return BindUtil.validateBinding(customer, module, document, binding);
 	}
 	
+	/**
+	 * Returns the logical negation of a Skyve condition expression.
+	 *
+	 * @param condition	condition to negate; may be {@code null}
+	 * @return negated condition text, or {@code null} when the input is {@code null}
+	 */
 	public static @Nullable String negateCondition(@Nullable String condition) {
         return BindUtil.negateCondition(condition);
 	}
@@ -136,6 +187,12 @@ public class Binder {
 	
 	/**
 	 * Explicit type coercion using the <code>converter</code> if supplied, or by java language coercion.
+	 *
+	 * @param customer	customer context used by customer-aware converters; may be {@code null}
+	 * @param converter	explicit converter to use; may be {@code null}
+	 * @param type	target Java type
+	 * @param stringValue	input string value
+	 * @return converted value, or {@code null} when conversion resolves to null
 	 */
 	public static @Nullable Object fromString(@Nullable Customer customer,
 												@Nullable Converter<?> converter,
@@ -146,6 +203,11 @@ public class Binder {
 
 	/**
 	 * Explicit type coercion from serialised formats using the <code>converter</code> if supplied, or by java language coercion.
+	 *
+	 * @param converter	explicit converter to use; may be {@code null}
+	 * @param type	target Java type
+	 * @param stringValue	serialised source value
+	 * @return converted value, or {@code null} when conversion resolves to null
 	 */
 	public static @Nullable Object fromSerialised(@Nullable Converter<?> converter,
 													@Nonnull Class<?> type,
@@ -155,17 +217,25 @@ public class Binder {
 
 	/**
 	 * Type coercion from serialised formats by java language coercion.
+	 *
+	 * @param type	target Java type
+	 * @param stringValue	serialised source value
+	 * @return converted value, or {@code null} when conversion resolves to null
 	 */
 	public static @Nullable Object fromSerialised(@Nonnull Class<?> type, @Nonnull String stringValue) {
 		return BindUtil.fromSerialised(type, stringValue);
 	}
 
 	/**
-	 * 
-	 * @param customer
-	 * @param bean
-	 * @param binding
-	 * @return
+	 * Returns the display-formatted value for a binding on the supplied bean.
+	 *
+	 * <p>Formatting precedence follows Skyve rules: attribute converter/display metadata,
+	 * then customer-level converter rules.
+	 *
+	 * @param customer	customer context used for converter resolution
+	 * @param bean	root bean that owns the binding path
+	 * @param binding	dot-separated binding expression
+	 * @return localised display text; never {@code null}
 	 */
 	public static @Nonnull String getDisplay(@Nonnull Customer customer,
 												@Nonnull Bean bean,
@@ -176,8 +246,8 @@ public class Binder {
 	/**
 	 * Given a list of bindings, create a compound one. ie binding1.binding2.binding3 etc
 	 * 
-	 * @param bindings
-	 * @return
+	 * @param bindings	binding segments to join
+	 * @return a compound binding expression joined with {@code '.'}
 	 */
 	public static @Nonnull String createCompoundBinding(@Nonnull String... bindings) {
 		return BindUtil.createCompoundBinding(bindings);
@@ -185,6 +255,10 @@ public class Binder {
 
 	/**
 	 * Given a multiple cardinality binding and an index, create an indexed one. ie binding[index]
+	 *
+	 * @param binding	collection binding
+	 * @param index	element index
+	 * @return indexed binding expression
 	 */
 	public static @Nonnull String createIndexedBinding(@Nonnull String binding, int index) {
 		return BindUtil.createIndexedBinding(binding, index);
@@ -192,6 +266,10 @@ public class Binder {
 
 	/**
 	 * Given a multiple cardinality binding and a bizId, create an element one. ie bindingElementById(id)
+	 *
+	 * @param binding	collection binding
+	 * @param bizId	business identifier for the collection element
+	 * @return id-based binding expression
 	 */
 	public static @Nonnull String createIdBinding(@Nonnull String binding, @Nonnull String bizId) {
 		return BindUtil.createIdBinding(binding, bizId);
@@ -226,10 +304,11 @@ public class Binder {
 	}
 
 	/**
-	 * 
-	 * @param list
-	 * @param elementBizId
-	 * @return
+	 * Finds a collection element by business identifier.
+	 *
+	 * @param list	collection to search
+	 * @param elementBizId	business identifier to match
+	 * @return matching element, or {@code null} when no element matches
 	 */
 	public static @Nullable <T extends Bean> T findElementInCollection(@Nonnull List<T> list,
 																		@Nonnull String elementBizId) {
@@ -243,6 +322,12 @@ public class Binder {
 		return null;
 	}
 	
+	/**
+	 * Replaces an element in a collection by business identifier, or appends if absent.
+	 *
+	 * @param list	collection to update
+	 * @param element	element to insert or replace
+	 */
 	public static <T extends Bean> void setElementInCollection(@Nonnull List<T> list, @Nonnull T element) {
 		BindUtil.setElementInCollection(list, element);
 	}
@@ -336,18 +421,20 @@ public class Binder {
 	 * Get a simple or compound <code>bean</code> property value.
 	 * 
 	 * @param bean The bean to get the property value from.
-	 * @param fullyQualifiedAttributeName The fully qualified name of a bean property, separating components with a '.'. 
+	 * @param fullyQualifiedPropertyName The fully qualified name of a bean property, separating components with a '.'. 
 	 * 										Examples would be "identifier" {simple} or "identifier.clientId" {compound}.
+	 * @return the current property value, or {@code null}
 	 */
 	public static @Nullable Object get(@Nonnull Object bean, @Nonnull String fullyQualifiedPropertyName) {
 		return BindUtil.get(bean, fullyQualifiedPropertyName);
 	}
 
 	/**
-	 * 
-	 * @param bean
-	 * @param propertyName
-	 * @param value
+	 * Converts a value and assigns it to a simple or compound bean property.
+	 *
+	 * @param bean	bean to update
+	 * @param propertyName	property name or compound binding
+	 * @param value	value to coerce and assign
 	 */
 	public static void convertAndSet(@Nonnull Object bean,
 										@Nonnull String propertyName,
@@ -370,20 +457,22 @@ public class Binder {
 	}
 
 	/**
-	 * 
-	 * @param bean
-	 * @param propertyName
-	 * @return
+	 * Returns the runtime Java type of a simple or compound property.
+	 *
+	 * @param bean	bean that owns the property
+	 * @param propertyName	property name or compound binding
+	 * @return resolved Java type for the target property
 	 */
 	public static @Nonnull Class<?> getPropertyType(@Nonnull Object bean, @Nonnull String propertyName) {
 		return BindUtil.getPropertyType(bean, propertyName);
 	}
 
 	/**
-	 * 
-	 * @param bean
-	 * @param propertyName
-	 * @return
+	 * Determines whether a simple or compound property can be modified.
+	 *
+	 * @param bean	bean that owns the property
+	 * @param propertyName	property name or compound binding
+	 * @return {@code true} when the property is mutable
 	 */
 	public static boolean isMutable(@Nonnull Object bean, @Nonnull String propertyName) {
 		return BindUtil.isMutable(bean, propertyName);
@@ -402,7 +491,8 @@ public class Binder {
 	/**
 	 * Determine if an attribute name is an implicit attribute.
 	 * 
-	 * @param attributeName
+	 * @param attributeName	attribute name to test
+	 * @return {@code true} when the name is one of Skyve's implicit attributes
 	 */
 	public static final boolean isImplicit(@Nullable String attributeName) {
 		return BindUtil.isImplicit(attributeName);
@@ -458,11 +548,15 @@ public class Binder {
 	}
 
 	/**
-	 * 
-	 * @param user
-	 * @param bean
-	 * @param properties
-	 * @param fromSerializedFormat
+	 * Populates multiple bean properties from a sorted property map.
+	 *
+	 * <p>{@code properties} must be sorted shortest-binding-first so parent references
+	 * are initialised before nested assignments.
+	 *
+	 * @param user	user context used for metadata-aware conversion
+	 * @param bean	bean to populate; may be {@code null}
+	 * @param properties	sorted map of property names to values
+	 * @param fromSerializedFormat	whether values are supplied in serialised form
 	 */
 	// NB properties must be a sorted map to ensure that the shortest properties
 	// are processed first - ie User.contact is populated before User.contact.firstName,
@@ -475,12 +569,13 @@ public class Binder {
 	}
 
 	/**
-	 * 
-	 * @param user
-	 * @param bean
-	 * @param name
-	 * @param value
-	 * @param fromSerializedFormat
+	 * Populates a single bean property with conversion and metadata-aware assignment.
+	 *
+	 * @param user	user context used for metadata-aware conversion
+	 * @param bean	bean to populate
+	 * @param name	property name or compound binding
+	 * @param value	value to assign
+	 * @param fromSerializedFormat	whether {@code value} is supplied in serialised form
 	 */
 	public static void populateProperty(@Nonnull User user, 
 											@Nonnull Bean bean, 
@@ -501,7 +596,10 @@ public class Binder {
 	}
 	
 	/**
-	 * 
+	 * Describes the resolved target of a binding expression.
+	 *
+	 * <p>The target includes the terminal document, optional terminal attribute,
+	 * and resolved Java type.
 	 */
 	public static class TargetMetaData {
 		private Document document;
@@ -509,10 +607,11 @@ public class Binder {
 		private Class<?> type;
 
 		/**
-		 * 
-		 * @param document
-		 * @param attribute
-		 * @param type
+		 * Creates target metadata for a resolved binding.
+		 *
+		 * @param document	terminal document reached by the binding
+		 * @param attribute	terminal attribute, or {@code null} for implicit targets
+		 * @param type	resolved Java type
 		 */
 		public TargetMetaData(@Nonnull Document document,
 								@Nullable Attribute attribute,
@@ -558,13 +657,14 @@ public class Binder {
 	}
 
 	/**
-	 * 
-	 * @param user
-	 * @param module
-	 * @param document
-	 * @param bean
-	 * @param binding
-	 * @return
+	 * Instantiates missing intermediate beans along a binding path and returns the target value.
+	 *
+	 * @param user	user context used for instance creation
+	 * @param module	starting module for the binding
+	 * @param document	starting document for the binding
+	 * @param bean	root bean instance
+	 * @param binding	target binding expression
+	 * @return resolved value at {@code binding}, or {@code null}
 	 */
 	public static @Nullable Object instantiateAndGet(@Nonnull User user,
 														@Nonnull Module module,

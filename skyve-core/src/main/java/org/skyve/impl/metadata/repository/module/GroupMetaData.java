@@ -10,6 +10,18 @@ import jakarta.xml.bind.annotation.XmlElementRefs;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB-annotated descriptor for a {@code <group>} menu separator/sub-menu in a
+ * module menu.
+ *
+ * <p>A group is a named menu container that holds an ordered list of child menu
+ * items.  Extends {@link ActionMetaData} to carry the group name.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see MenuMetaData
+ * @see ItemMetaData
+ */
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "group")
 public class GroupMetaData extends ActionMetaData {

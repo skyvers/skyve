@@ -15,6 +15,18 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * JAXB-annotated descriptor for the {@code <modules>} element in a
+ * {@code customer.xml} file.
+ *
+ * <p>Enumerates the modules available to this customer tenant and identifies
+ * the home module shown to users after login.  Each entry is a
+ * {@link CustomerModuleMetaData} that can further restrict available roles.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see CustomerModuleMetaData
+ */
 @XmlType(namespace = XMLMetaData.CUSTOMER_NAMESPACE,
 			name = "modules",
 			propOrder = {"homeModule", "modules", "properties"})

@@ -15,6 +15,19 @@ import jakarta.xml.bind.annotation.XmlElementRefs;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * JAXB-annotated holder for the top-level module menu structure.
+ *
+ * <p>Contains the ordered list of root-level menu groups and items for a module
+ * as declared in the {@code module.xml} file.  The menu entries are polymorphic
+ * JAXB element-refs that resolve to concrete {@link ItemMetaData} and
+ * {@link GroupMetaData} instances.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see GroupMetaData
+ * @see ItemMetaData
+ */
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE)
 public class MenuMetaData implements DecoratedMetaData {
 	private static final long serialVersionUID = 8381343095222755228L;

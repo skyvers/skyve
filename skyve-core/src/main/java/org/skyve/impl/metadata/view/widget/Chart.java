@@ -18,6 +18,17 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * JAXB-annotated chart widget that renders a visual chart from a named chart
+ * model.
+ *
+ * <p>Supports bar, pie, line, and other chart types defined by the named
+ * model.  Provides relative sizing and visibility conditions.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see org.skyve.impl.metadata.view.model.chart.ChartBuilderMetaData
+ */
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "chart")
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			name = "chart",

@@ -6,6 +6,17 @@ import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB-annotated numeric spinner widget that extends {@link TextField} with
+ * increment/decrement controls.
+ *
+ * <p>Renders a text field with up/down buttons to increment or decrement the
+ * bound numeric value within optional min/max bounds by a configurable step.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see TextField
+ */
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "spinner")
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"min", "max", "step"})

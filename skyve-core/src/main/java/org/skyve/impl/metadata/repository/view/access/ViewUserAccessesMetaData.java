@@ -11,6 +11,17 @@ import jakarta.xml.bind.annotation.XmlElementRef;
 import jakarta.xml.bind.annotation.XmlElementRefs;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB-annotated holder for the list of user-access constraints on a view.
+ *
+ * <p>Groups the ordered list of {@link ViewUserAccessMetaData} entries that
+ * collectively define which access grants a user must hold before the
+ * view is presented.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see ViewUserAccessMetaData
+ */
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE, name = "accesses")
 public class ViewUserAccessesMetaData implements SerializableMetaData {
 	private static final long serialVersionUID = 802609954407129386L;

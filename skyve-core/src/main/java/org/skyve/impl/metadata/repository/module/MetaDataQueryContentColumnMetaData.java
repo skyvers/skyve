@@ -7,6 +7,19 @@ import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB-annotated descriptor for a {@code <content>} binary/content column in a
+ * metadata query.
+ *
+ * <p>Specifies the display mode (thumbnail/download), pixel height for thumbnail
+ * rendering, and a fallback empty-thumbnail image path.  Extends
+ * {@link MetaDataQueryColumnMetaData}.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see MetaDataQueryColumnMetaData
+ * @see MetaDataQueryProjectedColumnMetaData
+ */
 @XmlRootElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "content")
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE, 
 			propOrder = {"display", "pixelHeight", "emptyThumbnailRelativeFile"})

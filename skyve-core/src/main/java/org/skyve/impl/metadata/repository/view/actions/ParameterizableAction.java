@@ -12,6 +12,17 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * Abstract JAXB base for action descriptors that accept runtime parameters.
+ *
+ * <p>Extends {@link PositionableAction} with the {@link Parameterizable}
+ * contract, allowing the view author to supply a list of named parameters
+ * passed to the action handler at runtime.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see ReportAction
+ */
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 public abstract class ParameterizableAction extends PositionableAction implements Parameterizable {
 	private static final long serialVersionUID = -9222943585683812109L;

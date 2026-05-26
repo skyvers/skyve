@@ -20,6 +20,19 @@ import jakarta.xml.bind.annotation.XmlElementWrapper;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * JAXB-annotated descriptor for a {@code <role>} element within the customer roles
+ * section of a {@code customer.xml} file.
+ *
+ * <p>Defines a named composite role that aggregates module-level roles into a
+ * single assignable customer role.  Implements {@link CustomerRole} so it can
+ * be returned directly from the runtime {@link Customer}.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see CustomerRolesMetaData
+ * @see org.skyve.metadata.customer.CustomerRole
+ */
 @XmlType(namespace = XMLMetaData.CUSTOMER_NAMESPACE,
 			name = "role",
 			propOrder = {"documentation", "description", "roles", "properties"})

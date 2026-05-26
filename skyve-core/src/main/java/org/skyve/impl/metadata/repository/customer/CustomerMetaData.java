@@ -56,6 +56,21 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 							"JFreeChartPostProcessorClassName",
 							"primeFacesChartPostProcessorClassName",
 							"properties"})
+/**
+ * JAXB root element for a customer descriptor ({@code customer.xml}), converted
+ * to a runtime {@link Customer} during repository bootstrap.
+ *
+ * <p>Holds the complete tenant configuration: locale, UI/HTML resource overrides,
+ * login resources, module set, composite roles, interceptors, observers, and
+ * third-party chart post-processor class names.  Extends {@link NamedMetaData}
+ * to bind the descriptor to the customer name.
+ *
+ * <p>Threading: not thread-safe.  Instances are populated during JAXB unmarshalling
+ * and are read-only once converted and placed in the repository cache.
+ *
+ * @see Customer
+ * @see org.skyve.impl.metadata.customer.CustomerImpl
+ */
 public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaData<Customer>, DecoratedMetaData {
 	private static final long serialVersionUID = 4281621343439667457L;
 

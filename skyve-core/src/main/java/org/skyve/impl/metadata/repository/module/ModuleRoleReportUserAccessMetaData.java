@@ -10,6 +10,17 @@ import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB-annotated descriptor for a {@code <reportAccess>} user-access grant in
+ * a module role.
+ *
+ * <p>Grants access to run a named report on a module resource.
+ * Extends {@link ModuleRoleUserAccessMetaData}.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see ModuleRoleUserAccessMetaData
+ */
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "reportAccess")
 public class ModuleRoleReportUserAccessMetaData extends ModuleRoleUserAccessMetaData {

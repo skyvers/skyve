@@ -21,6 +21,20 @@ import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * JAXB root element for a bizlet descriptor ({@code bizlet.xml}) in the module
+ * actions package.
+ *
+ * <p>A bizlet descriptor provides documentation and optional properties for the
+ * document Bizlet class.  Conversion via {@link ConvertibleMetaData} produces the
+ * runtime Bizlet reference held on the document.
+ *
+ * <p>Threading: not thread-safe.  Instances are populated during JAXB unmarshalling
+ * and are read-only once placed in the repository cache.
+ *
+ * @see ActionMetaData
+ * @see org.skyve.metadata.controller.Bizlet
+ */
 @XmlRootElement(namespace = XMLMetaData.BEHAVIOUR_NAMESPACE, name = "bizlet")
 @XmlType(namespace = XMLMetaData.BEHAVIOUR_NAMESPACE, 
 			name = "bizlet",

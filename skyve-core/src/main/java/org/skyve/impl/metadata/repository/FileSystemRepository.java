@@ -49,6 +49,24 @@ import org.slf4j.Logger;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
+/**
+ * Abstract base for metadata repositories backed by the local file system.
+ *
+ * <p>Loads customer, module, document, view, and router descriptors by scanning the
+ * {@code absolutePath} directory tree.  Unmarshals each XML file with JAXB and
+ * populates the in-memory cache held by {@link MutableCachedRepository}.
+ *
+ * <p>Concrete subclasses must supply the scanner implementation
+ * ({@link #populateCustomers(Customer)} and related hooks) and decide the physical
+ * layout of descriptor files.
+ *
+ * <p>Threading: not thread-safe for mutations.  Repository loading is performed
+ * once during application startup; thereafter all public accessors are read-only
+ * and safe for concurrent use.
+ *
+ * @see MutableCachedRepository
+ * @see org.skyve.metadata.repository.ProvidedRepository
+ */
 public abstract class FileSystemRepository extends MutableCachedRepository {
 
     private static final Logger XML_LOGGER = Category.XML.logger();

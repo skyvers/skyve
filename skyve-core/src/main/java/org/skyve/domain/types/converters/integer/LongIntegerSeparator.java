@@ -11,11 +11,20 @@ import org.skyve.util.BeanValidator;
  * Converts long values using grouped thousands separator formatting.
  */
 public class LongIntegerSeparator implements Converter<Long> {
+	/**
+	 * Returns the value type handled by this converter.
+	 * @return the result value
+	 */
 	@Override
 	public Class<Long> getValueType() {
 		return Long.class;
 	}
 	
+	/**
+	 * Converts a display representation to its domain value.
+	 * @param displayValue the display value
+	 * @return the result value
+	 */
 	@Override
 	public Long fromDisplayValue(String displayValue) throws ConversionException {
 		try {
@@ -36,6 +45,11 @@ public class LongIntegerSeparator implements Converter<Long> {
 		}
 	}
 
+	/**
+	 * Converts a domain value to its display representation.
+	 * @param value the value
+	 * @return the result value
+	 */
 	@Override
 	public String toDisplayValue(Long value) throws ConversionException {
 		try {
@@ -46,21 +60,37 @@ public class LongIntegerSeparator implements Converter<Long> {
 		}
 	}
 
+	/**
+	 * Returns the attribute type supported by this converter.
+	 * @return the result value
+	 */
 	@Override
 	public AttributeType getAttributeType() {
 		return AttributeType.longInteger;
 	}
 
+	/**
+	 * Returns the optional format descriptor for this converter.
+	 * @return the result value
+	 */
 	@Override
 	public Format<Long> getFormat() {
 		return null;
 	}
 
+	/**
+	 * Returns the optional validator descriptor for this converter.
+	 * @return the result value
+	 */
 	@Override
 	public Validator<Long> getValidator() {
 		return null;
 	}
 	
+	/**
+	 * Returns the optional format pattern for this converter.
+	 * @return the result value
+	 */
 	@Override
 	public String getFormatPattern() {
 		return null;

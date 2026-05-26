@@ -39,6 +39,11 @@ import org.skyve.metadata.module.Module;
 import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
 
+/**
+ * Hibernate event listener that bridges Hibernate entity lifecycle events to the
+ * Skyve domain-object lifecycle, enforcing field-level encryption, content
+ * persistence synchronisation, optimistic lock management, and bean observer callbacks.
+ */
 public class HibernateListener implements PostLoadEventListener,
 											PreDeleteEventListener,
 											PostDeleteEventListener,

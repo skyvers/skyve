@@ -10,6 +10,14 @@ import org.skyve.metadata.user.User;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
+/**
+ * Serialises and deserialises Skyve domain objects to and from JSON.
+ *
+ * <p>Marshalling delegates to {@link org.skyve.impl.util.json.JSONWriter} and can include
+ * a property-name projection for query-result shaping. Unmarshalling delegates to
+ * {@link org.skyve.impl.util.json.JSONReader} and may return beans, bean collections,
+ * maps, or plain Java objects depending on the JSON payload.
+ */
 public class JSON {
 	/**
 	 * Create JSON.

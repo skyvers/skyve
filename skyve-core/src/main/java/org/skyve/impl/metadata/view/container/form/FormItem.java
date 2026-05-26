@@ -47,6 +47,18 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * JAXB-annotated descriptor for a single labelled field entry within a
+ * {@link FormRow}.
+ *
+ * <p>Pairs a label with a widget (input field, static text, etc.) and carries
+ * spanning, alignment, and visibility settings for its cell in the form grid.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see FormRow
+ * @see Form
+ */
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "item")
 public class FormItem implements DecoratedMetaData {

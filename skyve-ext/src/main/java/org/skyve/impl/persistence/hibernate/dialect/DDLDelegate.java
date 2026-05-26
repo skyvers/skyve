@@ -35,6 +35,10 @@ import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect.RDBMS;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+/**
+ * Utility class that applies Hibernate DDL migration scripts to the database,
+ * delegating schema-diffing to the Hibernate {@code StandardServiceRegistry}.
+ */
 public class DDLDelegate {
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(DDLDelegate.class);
 

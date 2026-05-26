@@ -24,6 +24,16 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * JAXB-annotated button widget that opens a named dialog or executes a
+ * dialog command.
+ *
+ * <p>Binds a labelled button to a named dialog, passing optional parameters.
+ * Supports configurable dialog dimensions, modal display, disabled/invisible
+ * conditions.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ */
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"displayName", 

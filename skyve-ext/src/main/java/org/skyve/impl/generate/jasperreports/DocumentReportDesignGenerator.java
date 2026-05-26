@@ -5,6 +5,10 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
 
+/**
+ * Generates a JasperReports design ({@code .jrxml}) for a single Skyve document,
+ * rendering all persistent attributes as report fields.
+ */
 public class DocumentReportDesignGenerator extends ReportDesignGenerator {
 
     @Override

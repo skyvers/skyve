@@ -4,6 +4,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.skyve.domain.types.Decimal2;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 
+/**
+ * Describes a single positioned element (text field, static text, image) within
+ * a JasperReports band during programmatic {@code .jrxml} generation.
+ */
 public class ReportElement {
 	public static enum ElementType {
 		staticText, 

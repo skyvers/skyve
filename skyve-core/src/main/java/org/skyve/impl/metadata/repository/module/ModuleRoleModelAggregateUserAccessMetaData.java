@@ -10,6 +10,18 @@ import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB-annotated descriptor for a {@code <modelAggregateAccess>} user-access grant
+ * in a module role.
+ *
+ * <p>Grants access to aggregate views rendered by a named
+ * {@link org.skyve.metadata.module.Module.DocumentAggregateChartModel} model.
+ * Extends {@link ModuleRoleDocumentAggregateUserAccessMetaData}.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see ModuleRoleDocumentAggregateUserAccessMetaData
+ */
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "modelAggregateAccess")
 public class ModuleRoleModelAggregateUserAccessMetaData extends ModuleRoleDocumentAggregateUserAccessMetaData {

@@ -74,6 +74,21 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 							"menu",
 							"queries",
 							"properties"})
+/**
+ * JAXB root element for a module descriptor ({@code module.xml}), converted to a
+ * runtime {@link Module} during repository bootstrap.
+ *
+ * <p>Holds the complete structural definition of a Skyve module: display aliases,
+ * home document/view, document registrations, menu tree, queries (metadata, SQL,
+ * BizQL), and role/privilege declarations.  Extends {@link NamedMetaData} to
+ * bind the module to its symbolic name.
+ *
+ * <p>Threading: not thread-safe.  Instances are populated during JAXB unmarshalling
+ * and are read-only once converted and placed in the repository cache.
+ *
+ * @see Module
+ * @see org.skyve.impl.metadata.module.ModuleImpl
+ */
 public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData<Module>, DecoratedMetaData {
 	private static final long serialVersionUID = -6257431975403255783L;
 

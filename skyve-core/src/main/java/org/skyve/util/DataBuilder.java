@@ -325,28 +325,36 @@ public class DataBuilder {
 	/**
 	 * Specify whether to log how the data was built.
 	 * 
-	 * @param trace
-	 * @return
+	 * @param trace {@code true} to enable trace logging of build decisions
 	 */
 	public static void setTrace(boolean trace) {
 		DataBuilder.trace = trace;
 	}
 	
 	/**
-	 * Build a domain bean.
-	 * @param moduleName
-	 * @param documentName
-	 * @return
+	 * Builds a populated bean instance for the supplied module/document names.
+	 *
+	 * <p>Metadata is resolved from the current builder customer context and the
+	 * resulting instance is populated according to the builder's inclusion filters,
+	 * recursion settings, and active fixture.
+	 *
+	 * @param moduleName Module name containing the target document
+	 * @param documentName Document name to instantiate
+	 * @return Populated bean instance
 	 */
 	public <T extends Bean> T build(String moduleName, String documentName) {
 		return build(moduleName, documentName, true);
 	}
 	
 	/**
-	 * Build a domain bean within its Factory class. This will stop infinite recursion between the DataBuilder and the factory.
-	 * @param moduleName
-	 * @param documentName
-	 * @return
+	 * Builds a populated bean instance while suppressing recursive factory re-entry.
+	 *
+	 * <p>Use this from within a factory method to prevent infinite recursion between
+	 * factory hooks and {@link DataBuilder}.
+	 *
+	 * @param moduleName Module name containing the target document
+	 * @param documentName Document name to instantiate
+	 * @return Populated bean instance
 	 */
 	public <T extends Bean> T factoryBuild(String moduleName, String documentName) {
 		return build(moduleName, documentName, false);
@@ -360,20 +368,22 @@ public class DataBuilder {
 	}
 	
 	/**
-	 * Build a domain bean.
-	 * @param module
-	 * @param document
-	 * @return
+	 * Builds a populated bean instance from resolved module/document metadata.
+	 *
+	 * @param module Resolved module metadata
+	 * @param document Resolved document metadata
+	 * @return Populated bean instance
 	 */
 	public <T extends Bean> T build(Module module, Document document) {
 		return build(module, document, true);
 	}
 
 	/**
-	 * Build a domain bean within its Factory class. This will stop infinite recursion between the DataBuilder and the factory.
-	 * @param module
-	 * @param document
-	 * @return
+	 * Builds a populated bean from metadata while suppressing recursive factory re-entry.
+	 *
+	 * @param module Resolved module metadata
+	 * @param document Resolved document metadata
+	 * @return Populated bean instance
 	 */
 	public <T extends Bean> T factoryBuild(Module module, Document document) {
 		return build(module, document, false);

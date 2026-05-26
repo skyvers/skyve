@@ -18,21 +18,37 @@ import jakarta.annotation.Nonnull;
  * because formatter instances are obtained per operation.
  */
 public abstract class AbstractTimeConverter implements Converter<TimeOnly> {
+	/**
+	 * Returns the attribute type supported by this converter.
+	 * @return the result value
+	 */
 	@Override
 	public final AttributeType getAttributeType() {
 		return AttributeType.time;
 	}
 
+	/**
+	 * Returns the value type handled by this converter.
+	 * @return the result value
+	 */
 	@Override
 	public Class<TimeOnly> getValueType() {
 		return TimeOnly.class;
 	}
 	
+	/**
+	 * Returns the optional format descriptor for this converter.
+	 * @return the result value
+	 */
 	@Override
 	public Format<TimeOnly> getFormat() {
 		return null;
 	}
 
+	/**
+	 * Returns the optional validator descriptor for this converter.
+	 * @return the result value
+	 */
 	@Override
 	public Validator<TimeOnly> getValidator() {
 		return null;
@@ -50,6 +66,11 @@ public abstract class AbstractTimeConverter implements Converter<TimeOnly> {
 	 */
 	protected abstract String getI18nKey();
 	
+	/**
+	 * Converts a display representation to its domain value.
+	 * @param displayValue the display value
+	 * @return the result value
+	 */
 	@Override
 	public TimeOnly fromDisplayValue(String displayValue) throws ConversionException {
 		try {
@@ -60,6 +81,11 @@ public abstract class AbstractTimeConverter implements Converter<TimeOnly> {
 		}
 	}
 
+	/**
+	 * Converts a domain value to its display representation.
+	 * @param value the value
+	 * @return the result value
+	 */
 	@Override
 	public String toDisplayValue(TimeOnly value) throws ConversionException {
 		try {

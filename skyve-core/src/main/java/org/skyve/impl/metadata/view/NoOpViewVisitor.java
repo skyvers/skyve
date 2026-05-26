@@ -67,6 +67,17 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 
+/**
+ * No-operation adapter over {@link ViewVisitor} that overrides all abstract
+ * visit methods with empty bodies.
+ *
+ * <p>Extend this class when only a subset of visit methods is needed, to
+ * avoid being forced to implement the full {@link ViewVisitor} protocol.
+ *
+ * <p>Threading: not thread-safe; one instance per traversal.
+ *
+ * @see ViewVisitor
+ */
 public class NoOpViewVisitor extends ViewVisitor {
 	protected NoOpViewVisitor(CustomerImpl customer,
 								ModuleImpl module,

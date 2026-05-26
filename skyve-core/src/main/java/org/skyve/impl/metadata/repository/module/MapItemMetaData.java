@@ -7,6 +7,16 @@ import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB-annotated descriptor for a {@code <map>} menu item in a module menu.
+ *
+ * <p>Navigates to a geospatial map view for the named document and query.
+ * Extends {@link ItemMetaData}.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see ItemMetaData
+ */
 @XmlType(name = "map", namespace = XMLMetaData.MODULE_NAMESPACE)
 @XmlRootElement(name  = "map", namespace = XMLMetaData.MODULE_NAMESPACE)
 public class MapItemMetaData extends ItemMetaData {

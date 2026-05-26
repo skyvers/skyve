@@ -31,6 +31,19 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * JAXB-annotated inline-editable grid widget bound to a document collection.
+ *
+ * <p>Renders rows from the bound collection with per-column display widgets
+ * ({@link DataGridBoundColumn}, {@link DataGridContainerColumn}).  Supports
+ * add, edit, remove, zoom, and deselect operations with independent
+ * disable conditions and event handler lists.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see AbstractDataWidget
+ * @see DataGridColumn
+ */
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"inline", 

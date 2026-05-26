@@ -15,25 +15,40 @@ import org.skyve.util.Binder;
  */
 public class BeanForReport {
 
+	/**
+	 * Returns the bean.
+	 */
 	public static Bean getBean(String moduleName, String documentName, String bizId) {
 		Persistence pers = CORE.getPersistence();
 		return pers.retrieve(moduleName, documentName, bizId);
 	}
 
+	/**
+	 * Returns the user.
+	 */
 	public static User getUser() {
 		return CORE.getPersistence().getUser();
 	}
 
+	/**
+	 * Returns the message.
+	 */
 	public static String getMessage(String moduleName, String documentName, String bizId, String message) {
 		Bean bean = getBean(moduleName, documentName, bizId);
 
 		return getMessage(bean, message);
 	}
 
+	/**
+	 * Returns the message.
+	 */
 	public static String getMessage(Bean bean, String message) {
 		return Binder.formatMessage(message, bean);
 	}
 
+	/**
+	 * Performs evaluateCondition.
+	 */
 	public static boolean evaluateCondition(String moduleName, String documentName, String bizId, String conditionName) {
 		Bean bean = getBean(moduleName, documentName, bizId);
 		return bean.evaluateCondition(conditionName);

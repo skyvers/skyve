@@ -8,9 +8,15 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 /**
- * Enables the customisation of certain Skyve functions.
- * A class implementing this interface can be set in factories.customisationsClass of the JSON configuration.
- * The NoCustomisations class represents the Skyve defaults and can be extended for your own implementations.
+ * Defines deployment-level customization hooks for default UI behavior and
+ * framework extension registration.
+ *
+ * <p>An implementation is supplied via
+ * {@code factories.customisationsClass} configuration and is consulted during
+ * metadata/view generation and expression/formatter bootstrap.
+ *
+ * <p>Threading: implementations should be thread-safe because methods may be
+ * called concurrently across requests.
  */
 public interface Customisations {
 	/**

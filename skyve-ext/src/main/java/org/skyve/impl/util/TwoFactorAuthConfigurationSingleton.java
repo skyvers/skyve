@@ -10,6 +10,16 @@ import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.messages.DomainException;
 
+/**
+ * Caches and serves customer-level two-factor-authentication configuration.
+ *
+ * <p>The cache is populated from {@code ADM_Configuration} at startup and keyed by
+ * customer name. This singleton is also registered as a {@link SystemObserver}
+ * lifecycle participant.
+ *
+ * <p>Threading: internal storage uses a concurrent map and is safe for concurrent
+ * reads and updates.
+ */
 public class TwoFactorAuthConfigurationSingleton implements SystemObserver {
 	private static TwoFactorAuthConfigurationSingleton instance = new TwoFactorAuthConfigurationSingleton();
 
@@ -19,10 +29,21 @@ public class TwoFactorAuthConfigurationSingleton implements SystemObserver {
 		// disallow instantiation
 	}
 
+	/**
+	 * Returns the singleton instance.
+	 *
+	 * @return Global two-factor-auth configuration singleton
+	 */
 	public static TwoFactorAuthConfigurationSingleton getInstance() {
 		return instance;
 	}
 	
+	/**
+	 * Determines whether push/email-style TFA is enabled for a configuration object.
+	 *
+	 * @param tfaConfig Customer configuration to test
+	 * @return {@code true} when the configuration resolves to email TFA
+	 */
 	public static boolean isPushTfa(TwoFactorAuthCustomerConfiguration tfaConfig) {
 		if (tfaConfig == null) {
 			return false;
@@ -30,6 +51,12 @@ public class TwoFactorAuthConfigurationSingleton implements SystemObserver {
 		return tfaConfig.isTfaEmail();
 	}
 	
+	/**
+	 * Determines whether push/email-style TFA is enabled for a customer.
+	 *
+	 * @param customerName Customer name key
+	 * @return {@code true} when the customer has email TFA configured
+	 */
 	public boolean isPushTfa(String customerName) {
 		if (customerName == null) {
 			return false;
@@ -38,14 +65,30 @@ public class TwoFactorAuthConfigurationSingleton implements SystemObserver {
 	}
 	
 	
+	/**
+	 * Returns cached two-factor configuration for a customer.
+	 *
+	 * @param customerName Customer name key
+	 * @return Cached configuration, or {@code null} when absent
+	 */
 	public TwoFactorAuthCustomerConfiguration getConfig(String customerName) {
 		return configuration.get(customerName);
 	}
 	
+	/**
+	 * Removes cached two-factor configuration for a customer.
+	 *
+	 * @param customerName Customer name key
+	 */
 	public void clearConfig(String customerName) {
 		configuration.remove(customerName);
 	}
 	
+	/**
+	 * Adds/overwrites configuration for the current thread customer.
+	 *
+	 * @param config Customer configuration to cache
+	 */
 	public void add(TwoFactorAuthCustomerConfiguration config) {
 		String customerName = CORE.getCustomer().getName();
 		if (customerName != null && config != null) {
@@ -53,6 +96,11 @@ public class TwoFactorAuthConfigurationSingleton implements SystemObserver {
 		}
 	}
 	
+	/**
+	 * Loads all configured customer TFA settings from the admin configuration table.
+	 *
+	 * <p>Only rows with complete TFA settings are loaded.
+	 */
 	@Override
 	public void startup() {
 		try (Connection c = EXT.getDataStoreConnection()) {
@@ -80,6 +128,9 @@ public class TwoFactorAuthConfigurationSingleton implements SystemObserver {
 		}
 	}
 	
+	/**
+	 * Clears all cached TFA settings.
+	 */
 	@Override
 	public void shutdown() {
 		configuration.clear();

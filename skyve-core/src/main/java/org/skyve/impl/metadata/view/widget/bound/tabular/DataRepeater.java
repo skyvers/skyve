@@ -17,6 +17,17 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * JAXB-annotated read-only repeater widget that displays rows from a bound
+ * document collection without edit capabilities.
+ *
+ * <p>Renders each row using the declared {@link DataGridBoundColumn} or
+ * container column definitions.  No add/edit/remove actions are available.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see AbstractDataWidget
+ */
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"showColumnHeaders",

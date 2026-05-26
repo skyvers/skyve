@@ -9,6 +9,17 @@ import org.skyve.metadata.customer.InterceptorMetaData;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB-annotated descriptor for an {@code <interceptor>} element in a
+ * {@code customer.xml} file.
+ *
+ * <p>Declares a fully-qualified interceptor class name that Skyve will instantiate
+ * and register for the customer's persistence and action pipeline.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see org.skyve.metadata.customer.InterceptorMetaData
+ */
 @XmlType(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "interceptor")
 public class InterceptorMetaDataImpl implements InterceptorMetaData {
 	private static final long serialVersionUID = 557157560945069012L;

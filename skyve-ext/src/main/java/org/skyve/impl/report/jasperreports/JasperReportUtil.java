@@ -65,13 +65,21 @@ import net.sf.jasperreports.export.SimpleXlsxReportConfiguration;
 import net.sf.jasperreports.export.SimpleXmlExporterOutput;
 import net.sf.jasperreports.web.util.WebHtmlResourceHandler;
 
+/**
+ * Utility methods for filling and exporting Jasper reports from Skyve data sources.
+ */
 public final class JasperReportUtil {
-
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(JasperReportUtil.class);
 
 	private JasperReportUtil() {
 		// disallow instantiation
 	}
+
+	/**
+	 * Runs a Jasper report using a bean-backed document data source.
+	 *
+	 * @return The filled report print.
+	 */
 
 	public static JasperPrint runBeanReport(User user,
 												Document document,
@@ -84,6 +92,12 @@ public final class JasperReportUtil {
 		return runReport(user, document, reportName, parameters, bean, format, out);
 	}
 
+	/**
+	 * Runs a Jasper report using its SQL query data source.
+	 *
+	 * @return The filled report print.
+	 */
+
 	public static JasperPrint runSQLReport(User user,
 											Document document,
 											String reportName,
@@ -94,6 +108,12 @@ public final class JasperReportUtil {
 		// Cast to null to remove method call ambiguity, this does not throw an NPE.
 		return runReport(user, document, reportName, parameters, (Bean) null, format, out);
 	}
+
+	/**
+	 * Loads and runs a Jasper report file for document/bean execution.
+	 *
+	 * @return The filled report print.
+	 */
 
 	public static JasperPrint runReport(User user,
 											Document document,
@@ -109,6 +129,12 @@ public final class JasperReportUtil {
 		return runReport(jasperReport, user, document, parameters, bean, format, out);
 	}
 
+	/**
+	 * Loads and runs a Jasper report file for list-model execution.
+	 *
+	 * @return The filled report print.
+	 */
+
 	public static JasperPrint runReport(User user,
 											Document document,
 											String reportName,
@@ -122,6 +148,12 @@ public final class JasperReportUtil {
 		final JasperReport jasperReport = (JasperReport) JRLoader.loadObject(new File(reportFileName));
 		return runReport(jasperReport, user, parameters, listModel, format, out);
 	}
+
+	/**
+	 * Fills and exports a compiled Jasper report using either SQL or document query language.
+	 *
+	 * @return The filled report print.
+	 */
 
 	public static JasperPrint runReport(JasperReport jasperReport,
 											User user,
@@ -164,6 +196,12 @@ public final class JasperReportUtil {
 		return result;
 	}
 
+	/**
+	 * Fills and exports a compiled Jasper report from a list-model data source.
+	 *
+	 * @return The filled report print.
+	 */
+
 	public static JasperPrint runReport(JasperReport jasperReport,
 											User user,
 											Map<String, Object> parameters,
@@ -199,6 +237,12 @@ public final class JasperReportUtil {
 		}
 		return result;
 	}
+
+	/**
+	 * Runs and exports multiple reports described by report parameter descriptors.
+	 *
+	 * @return The list of filled report prints.
+	 */
 
 	public static List<JasperPrint> runReport(User user,
 												List<ReportParameters> reportParameters,
@@ -289,6 +333,10 @@ public final class JasperReportUtil {
 		return result;
 	}
 
+	/**
+	 * Exports a single filled report using the specified format.
+	 */
+
 	public static void runReport(JasperPrint jasperPrint,
 									ReportFormat format,
 									OutputStream out)
@@ -297,6 +345,10 @@ public final class JasperReportUtil {
 		exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
 		exporter.exportReport();
 	}
+
+	/**
+	 * Exports multiple filled reports using the specified format.
+	 */
 
 	public static void runReport(List<JasperPrint> jasperPrintList, ReportFormat format, OutputStream out)
 	throws Exception {
@@ -404,6 +456,14 @@ public final class JasperReportUtil {
 		return result;
 	}
 
+	/**
+	 * Resolves a list model for a document default query or named metadata query with security checks.
+	 *
+	 * @param module The module containing the query or document.
+	 * @param documentOrQueryName The query name or document name.
+	 * @param uxui The UX/UI context identifier used for access checks.
+	 * @return A list model for report iteration.
+	 */
 	public static ListModel<Bean> getQueryListModel(Module module, String documentOrQueryName, String uxui) {
 		final String moduleName = module.getName();
 		final User user = CORE.getUser();

@@ -12,6 +12,15 @@ import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.web.UserAgentType;
 
+/**
+ * Abstract dispatcher that processes concrete {@link Reference} subtypes.
+ *
+ * <p>Routes each reference instance to a specialised {@code process*} hook
+ * method that subclasses implement.  This centralises reference-type
+ * dispatch used by view conversion logic.
+ *
+ * <p>Threading: not thread-safe; one processor instance per conversion run.
+ */
 public abstract class ReferenceProcessor {
 	public final void process(Reference reference) {
 		if (reference instanceof ActionReference actionReference) {

@@ -24,10 +24,18 @@ public class Extends implements SerializableMetaData {
 	private static final long serialVersionUID = -7377979289426429434L;
 	
 	private String documentName;
+ 	/**
+ 	 * Returns the documentName.
+ 	 * @return the result
+ 	 */
  	public String getDocumentName() {
         return documentName;
     }
 
+    /**
+     * Sets the documentName.
+     * @param documentName the documentName
+     */
     @XmlAttribute(name="document", required = true)
     public void setDocumentName(String documentName) {
         this.documentName = UtilImpl.processStringValue(documentName);

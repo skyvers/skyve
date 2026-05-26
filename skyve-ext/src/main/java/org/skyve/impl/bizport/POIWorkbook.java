@@ -110,11 +110,17 @@ public final class POIWorkbook implements BizPortWorkbook {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public POISheet getSheet(SheetKey key) {
 		return sheets.get(key);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void addSheet(SheetKey key, BizPortSheet sheet) {
 		if (workbook != null) {
@@ -126,6 +132,9 @@ public final class POIWorkbook implements BizPortWorkbook {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public POISheet removeSheet(SheetKey key) {
 		if (workbook != null) {
@@ -135,11 +144,17 @@ public final class POIWorkbook implements BizPortWorkbook {
 		return sheets.remove(key);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Set<SheetKey> getSheetKeys() {
 		return sheets.keySet();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void materialise() {
 		Workbook newWorkbook = ooxmlFormat ? new XSSFWorkbook() : new HSSFWorkbook();
@@ -199,6 +214,9 @@ public final class POIWorkbook implements BizPortWorkbook {
 		timestampStyle.setDataFormat(format.getFormat("m/d/yy h:mm"));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void write(OutputStream out) throws IOException {
 		if (workbook == null) {
@@ -222,6 +240,9 @@ public final class POIWorkbook implements BizPortWorkbook {
 		workbook.write(out);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public BizPortFormat getFormat() {
 		return ooxmlFormat ? BizPortFormat.xlsx : BizPortFormat.xls;
@@ -320,10 +341,16 @@ public final class POIWorkbook implements BizPortWorkbook {
 			}
 		}
 	}
+	/**
+	 * Adds or replaces the pOICellValue value.
+	 */
 	public static void putPOICellValue(XSSFSheet sheet, int rowNum, int colNum, CellType cellType, Object value) throws Exception {
 		putPOICellValue(sheet, rowNum, colNum, cellType, value, false, false);
 	}
 
+	/**
+	 * Adds or replaces the pOICellValue value.
+	 */
 	public static void putPOICellValue(XSSFSheet sheet, int rowNum, int colNum, CellType cellType, String value, boolean bold) throws Exception {
 		putPOICellValue(sheet, rowNum, colNum, cellType, value, false, bold);
 	}

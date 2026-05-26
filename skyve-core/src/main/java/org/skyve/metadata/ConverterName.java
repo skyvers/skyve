@@ -56,6 +56,9 @@ import org.skyve.impl.util.XMLMetaData;
 
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * Defines the ConverterName enumeration.
+ */
 @XmlType(namespace = XMLMetaData.COMMON_NAMESPACE)
 public enum ConverterName {
 	DD_MM_YYYY(new DD_MM_YYYY()),
@@ -128,6 +131,10 @@ public enum ConverterName {
 		this.converter = converter;
 	}
 
+	/**
+	 * Returns the converter.
+	 * @return the result
+	 */
 	public Converter<?> getConverter() {
 		return converter;
 	}

@@ -20,6 +20,9 @@ import jakarta.annotation.Nonnull;
  * </pre>
  * Mask this class in a Skyve project with a real implementation which makes use
  * of the Azure Communication SDK.
+ *
+ * {@link org.skyve.service.MailService} implementation that sends mail via
+ * Azure Communication Services.
  */
 public class AzureCommunication implements MailService {
 	private static final String MESSAGE = "AzureCommunication is scaffold-only and does not yet implement mail sending.";

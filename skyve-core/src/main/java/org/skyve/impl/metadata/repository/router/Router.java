@@ -25,6 +25,21 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 @XmlRootElement(namespace = XMLMetaData.ROUTER_NAMESPACE)
 @XmlType(namespace = XMLMetaData.ROUTER_NAMESPACE, propOrder = {"uxuis", "unsecuredUrlPrefixes", "properties"})
+/**
+ * JAXB root element for the router descriptor ({@code router.xml}).
+ *
+ * <p>A {@code Router} contains an ordered list of {@link Route} instances and an
+ * optional set of UI ({@link UxUiMetadata}) configurations.  The router is loaded
+ * once during application startup and used by the web layer to map incoming
+ * requests to outcome URLs or UI configurations.
+ *
+ * <p>Threading: not thread-safe.  The instance is written during JAXB unmarshalling
+ * and is read-only once placed in the repository cache.
+ *
+ * @see Route
+ * @see UxUiMetadata
+ * @see org.skyve.metadata.router.UxUi
+ */
 public class Router implements ConvertibleMetaData<Router>, DecoratedMetaData, ReloadableMetaData {
 	private static final long serialVersionUID = 670690452538129424L;
 

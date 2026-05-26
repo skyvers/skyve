@@ -14,6 +14,10 @@ import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.type.LiteralType;
 import org.hibernate.usertype.UserType;
 
+/**
+ * Hibernate {@link org.hibernate.usertype.UserType} that maps the Skyve
+ * {@link org.skyve.domain.types.Timestamp} type to a SQL {@code TIMESTAMP} column.
+ */
 public class TimestampUserType implements UserType, LiteralType<Date>, Serializable {
 	private static final long serialVersionUID = 7498394614315784148L;
 

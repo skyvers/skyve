@@ -37,7 +37,6 @@ import jakarta.xml.bind.annotation.XmlType;
 @XmlType(namespace = XMLMetaData.SAIL_NAMESPACE, propOrder = {"uxui", "userAgentType", "testStrategy", "before", "interactions", "after"})
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
 public class Automation implements Executable {
-
 	/**
 	 * Controls how test assertion failures are handled during execution.
 	 */
@@ -58,57 +57,105 @@ public class Automation implements Executable {
 	private List<Interaction> interactions = new ArrayList<>();
 	private Procedure after;
 	
+	/**
+	 * Returns the uxui.
+	 * @return the result
+	 */
 	public String getUxui() {
 		return uxui;
 	}
 
+	/**
+	 * Sets the uxui.
+	 * @param uxui the uxui
+	 */
 	@XmlAttribute(name = "uxui", required = true)
 	public void setUxui(String uxui) {
 		this.uxui = Util.processStringValue(uxui);
 	}
 
+	/**
+	 * Returns the userAgentType.
+	 * @return the result
+	 */
 	public UserAgentType getUserAgentType() {
 		return userAgentType;
 	}
 
+	/**
+	 * Sets the userAgentType.
+	 * @param userAgentType the userAgentType
+	 */
 	@XmlAttribute(name = "userAgentType", required = true)
 	public void setUserAgentType(UserAgentType userAgentType) {
 		this.userAgentType = userAgentType;
 	}
 
 	
+	/**
+	 * Returns the testStrategy.
+	 * @return the result
+	 */
 	public TestStrategy getTestStrategy() {
 		return testStrategy;
 	}
 
+	/**
+	 * Sets the testStrategy.
+	 * @param testStrategy the testStrategy
+	 */
 	@XmlAttribute(name = "testStrategy")
 	public void setTestStrategy(TestStrategy testStrategy) {
 		this.testStrategy = testStrategy;
 	}
 
+	/**
+	 * Returns the before.
+	 * @return the result
+	 */
 	public Procedure getBefore() {
 		return before;
 	}
 
+	/**
+	 * Sets the before.
+	 * @param before the before
+	 */
 	@XmlElement(namespace = XMLMetaData.SAIL_NAMESPACE, name = "before")
 	public void setBefore(Procedure before) {
 		this.before = before;
 	}
 
+	/**
+	 * Returns the interactions.
+	 * @return the result
+	 */
 	@XmlElement(namespace = XMLMetaData.SAIL_NAMESPACE, name = "interaction", required = true)
 	public List<Interaction> getInteractions() {
 		return interactions;
 	}
 
+	/**
+	 * Returns the after.
+	 * @return the result
+	 */
 	public Procedure getAfter() {
 		return after;
 	}
 
+	/**
+	 * Sets the after.
+	 * @param after the after
+	 */
 	@XmlElement(namespace = XMLMetaData.SAIL_NAMESPACE, name = "after")
 	public void setAfter(Procedure after) {
 		this.after = after;
 	}
 	
+	/**
+	 * Executes execute.
+	 * @param executor the executor
+	 */
 	@Override
 	public void execute(Executor executor) {
 		executor.executeAutomation(this);

@@ -81,6 +81,10 @@ import net.sf.jasperreports.engine.type.TextAdjustEnum;
 import net.sf.jasperreports.engine.type.VerticalTextAlignEnum;
 import net.sf.jasperreports.engine.xml.JRXmlWriter;
 
+/**
+ * Renders JasperReports designs to various output formats (PDF, HTML, XLSX) by
+ * compiling the design, filling it with a Skyve data source, and exporting.
+ */
 public class JasperReportRenderer {
 
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(JasperReportRenderer.class);
@@ -137,6 +141,9 @@ public class JasperReportRenderer {
 		jasperDesign = new JasperDesign();
 	}
 
+	/**
+	 * Returns the report.
+	 */
 	public JasperReport getReport() throws Exception {
 		if (! rendered) {
 			renderDesign();
@@ -144,6 +151,9 @@ public class JasperReportRenderer {
 		return JasperCompileManager.compileReport(jasperDesign);
 	}
 
+	/**
+	 * Returns the jrxml.
+	 */
 	public String getJrxml() throws Exception {
 		if (! rendered) {
 			renderDesign();
@@ -166,6 +176,9 @@ public class JasperReportRenderer {
 		return subReportRenderer.getReport();
 	}
 
+	/**
+	 * Renders the design.
+	 */
 	public String renderDesign() throws Exception {
 		if (rendered) {
 			throw new IllegalStateException("Report has already been rendered.");
@@ -686,6 +699,9 @@ public class JasperReportRenderer {
 		return JRXmlWriter.writeReport(jasperDesign, "UTF-8");
 	}
 
+	/**
+	 * Adds a parameters.
+	 */
 	protected void addParameters(DesignSpecification design) throws JRException {
 		for (ReportParameter reportParameter : design.getParameters()) {
 			final JRDesignParameter parameter = new JRDesignParameter();
@@ -710,6 +726,9 @@ public class JasperReportRenderer {
 	}
 
 	@SuppressWarnings("boxing")
+	/**
+	 * Performs configureReportProperties.
+	 */
 	protected void configureReportProperties(DesignSpecification design) {
 		jasperDesign.setName(design.getName());
 		jasperDesign.setPageWidth(design.getWidth());
@@ -721,6 +740,9 @@ public class JasperReportRenderer {
 		jasperDesign.setBottomMargin(design.getBottomMargin());
 	}
 
+	/**
+	 * Returns the imports.
+	 */
 	protected static List<String> getImports() {
 		return IMPORTS;
 	}
@@ -729,6 +751,9 @@ public class JasperReportRenderer {
 		getImports().forEach(jasperDesign::addImport);
 	}
 
+	/**
+	 * Returns the properties.
+	 */
 	protected static Map<String, String> getProperties() {
 		return PROPERTIES;
 	}
@@ -737,6 +762,9 @@ public class JasperReportRenderer {
 		getProperties().forEach(jasperDesign::setProperty);
 	}
 
+	/**
+	 * Adds a query.
+	 */
 	protected void addQuery(@SuppressWarnings("hiding") DesignSpecification designSpecification) {
 		final JRDesignQuery query = new JRDesignQuery();
 		if (DesignSpecification.Mode.bean.equals(designSpecification.getMode())) {
@@ -826,6 +854,9 @@ public class JasperReportRenderer {
 		}
 	}
 
+	/**
+	 * Creates the field.
+	 */
 	protected static JRField createField(ReportField reportField) {
 		final JRDesignField jrField = new JRDesignField();
 
@@ -854,6 +885,9 @@ public class JasperReportRenderer {
 		}
 	}
 
+	/**
+	 * Creates the variable.
+	 */
 	protected static JRDesignVariable createVariable(ReportVariable reportVariable) {
 		final JRDesignVariable jrVariable = new JRDesignVariable();
 
@@ -866,16 +900,25 @@ public class JasperReportRenderer {
 		return jrVariable;
 	}
 
+	/**
+	 * Returns the incrementType.
+	 */
 	protected static IncrementTypeEnum getIncrementType() {
 		return IncrementTypeEnum.COLUMN;
 	}
 
+	/**
+	 * Creates the variableExpression.
+	 */
 	protected static JRExpression createVariableExpression(ReportVariable reportVariable) {
 		final JRDesignExpression jrExpression = new JRDesignExpression();
 		jrExpression.setText(String.format("$V{%s}.add($F{%s})", reportVariable.getTypeClass(), reportVariable.getName()));
 		return jrExpression;
 	}
 
+	/**
+	 * Creates the initialValueVariableExpression.
+	 */
 	protected static JRExpression createInitialValueVariableExpression(ReportVariable reportVariable) {
 		final JRDesignExpression jrExpression = new JRDesignExpression();
 		jrExpression.setText(String.format("new %s(0)", reportVariable.getTypeClass()));
@@ -900,6 +943,9 @@ public class JasperReportRenderer {
 		getBandByType(designSpecification, BandType.noData).ifPresent(jasperDesign::setNoData);
 	}
 
+	/**
+	 * Adds a customerLogo.
+	 */
 	protected static void addCustomerLogo(JRBand titleBand) {
 		final int logoWidth = 200;
 		final JRDesignImage logoImage = new JRDesignImage(null);
@@ -924,10 +970,16 @@ public class JasperReportRenderer {
 		return designSpecification.getBands().stream().filter(b -> BandType.detail.equals(b.getBandType())).map(this::createBand).collect(Collectors.toList());
 	}
 
+	/**
+	 * Adds a detailBand.
+	 */
 	protected void addDetailBand(JRBand band) {
 		((JRDesignSection) jasperDesign.getDetailSection()).addBand(band);
 	}
 
+	/**
+	 * Creates the band.
+	 */
 	protected JRBand createBand(ReportBand reportBand) {
 		if (reportBand.getElements().isEmpty()) {
 			return null;
@@ -1135,6 +1187,9 @@ public class JasperReportRenderer {
 		}
 	}
 
+	/**
+	 * Performs configureCommonTextFieldProperties.
+	 */
 	protected void configureCommonTextFieldProperties(JRDesignTextElement textElement, ReportElement reportElement) {
 		textElement.setKey(reportElement.getElementType().toString()+ "_" + 
 							(reportElement.getOrdinal() == null ? "1" : reportElement.getOrdinal()));
@@ -1179,6 +1234,9 @@ public class JasperReportRenderer {
 	}
 
 	@SuppressWarnings("boxing")
+	/**
+	 * Performs configureDimensions.
+	 */
 	protected static void configureDimensions(JRDesignElement jrDesignElement, ReportElement reportElement) {
 		jrDesignElement.setX(Optional.ofNullable(reportElement.getElementLeft()).orElse(0));
 		jrDesignElement.setY(Optional.ofNullable(reportElement.getElementTop()).orElse(0));
@@ -1186,6 +1244,9 @@ public class JasperReportRenderer {
 		jrDesignElement.setWidth(Optional.ofNullable(reportElement.getElementWidth()).orElse(0));
 	}
 
+	/**
+	 * Creates the textElementExpression.
+	 */
 	protected static JRExpression createTextElementExpression(ReportElement reportElement) {
 		final JRDesignExpression jrExpression = new JRDesignExpression();
 
@@ -1199,6 +1260,9 @@ public class JasperReportRenderer {
 		return jrExpression;
 	}
 
+	/**
+	 * Creates the imageElementExpression.
+	 */
 	protected static JRExpression createImageElementExpression(ReportElement reportElement) {
 		final JRDesignExpression jrExpression = new JRDesignExpression();
 
@@ -1252,6 +1316,9 @@ public class JasperReportRenderer {
 		return jrExpression;
 	}
 
+	/**
+	 * Performs flipCondition.
+	 */
 	public static String flipCondition(String conditionName) {
 		String result = null;
 		if (conditionName != null) {
@@ -1266,6 +1333,9 @@ public class JasperReportRenderer {
 		return result;
 	}
 
+	/**
+	 * Performs rawConditionName.
+	 */
 	public static String rawConditionName(String conditionName) {
 		if (conditionName.startsWith("not")) {
 			return conditionName.substring(3, 4).toLowerCase() + conditionName.substring(4);
@@ -1315,6 +1385,9 @@ public class JasperReportRenderer {
 		return reportDesignParameters;
 	}
 
+	/**
+	 * Returns the listModel.
+	 */
 	protected static ListModel<Bean> getListModel(DesignSpecification designSpecification) {
 		final Customer customer = CORE.getCustomer();
 		final Module module = designSpecification.getModule();
@@ -1330,6 +1403,9 @@ public class JasperReportRenderer {
 		return EXT.newListModel(query);
 	}
 
+	/**
+	 * Indicates whether isAggregatableAttribute is satisfied.
+	 */
 	protected static boolean isAggregatableAttribute(AttributeType attributeType) {
 		return attributeType == AttributeType.integer ||
 				attributeType == AttributeType.longInteger ||
@@ -1342,6 +1418,9 @@ public class JasperReportRenderer {
 				attributeType == AttributeType.timestamp;
 	}
 
+	/**
+	 * Indicates whether isDateOrTimeAttribute is satisfied.
+	 */
 	protected static boolean isDateOrTimeAttribute(AttributeType attributeType) {
 		return attributeType == AttributeType.date ||
 				attributeType == AttributeType.dateTime ||

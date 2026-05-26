@@ -77,6 +77,10 @@ public interface UniqueConstraint extends NamedMetaData, DecoratedMetaData {
 	 */
 	public String getDescription();
 	
+	/**
+	 * Returns the localisedDescription.
+	 * @return the result
+	 */
 	public default String getLocalisedDescription() {
 		return Util.i18n(getDescription());
 	}

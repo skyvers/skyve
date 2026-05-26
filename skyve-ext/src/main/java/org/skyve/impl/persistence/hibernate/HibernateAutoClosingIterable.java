@@ -10,6 +10,11 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.util.LoggingIteratorAdapter;
 import org.skyve.persistence.AutoClosingIterable;
 
+/**
+ * Auto-closing iterable that wraps a Hibernate scroll result set, closing the
+ * underlying {@link org.hibernate.ScrollableResults} when the iterator is exhausted
+ * or when {@link #close()} is explicitly called.
+ */
 public class HibernateAutoClosingIterable<T> implements AutoClosingIterable<T> {
 	private String moduleName = null;
 	private String documentName = null;

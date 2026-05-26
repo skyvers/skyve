@@ -119,6 +119,10 @@ public enum ImplicitActionName {
 		return displayName;
 	}
 	
+	/**
+	 * Returns the localisedDisplayName.
+	 * @return the result
+	 */
 	public String getLocalisedDisplayName() {
 		return Util.i18n(displayName);
 	}

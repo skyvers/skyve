@@ -133,6 +133,19 @@ import org.skyve.util.Binder.TargetMetaData;
 import jakarta.annotation.Nonnull;
 
 // TODO check suggestion attributes on text fields etc
+/**
+ * Validates view metadata for a given customer, module, and document after
+ * the repository has loaded the descriptor.
+ *
+ * <p>Visits every node in the view tree and checks that widget bindings
+ * resolve to valid document attributes, that referenced actions exist on the
+ * document, and that display names and other string properties are non-empty
+ * where required.  Collected problems are reported as
+ * {@link org.skyve.domain.messages.ValidationException} entries.
+ *
+ * <p>Threading: not thread-safe.  A fresh instance must be created per
+ * validation run.
+ */
 class ViewValidator extends ViewVisitor {
 	private ProvidedRepository repository;
 	

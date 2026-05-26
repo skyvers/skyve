@@ -85,6 +85,19 @@ import org.skyve.util.Binder.TargetMetaData;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+/**
+ * Abstract visitor that traverses the full widget and action tree of a
+ * {@link ViewImpl}, visiting every widget type and every action.
+ *
+ * <p>Subclasses override the relevant {@code visit*} methods for the widget
+ * types they care about.  Use {@link NoOpViewVisitor} to inherit empty
+ * implementations and override only the needed methods.
+ *
+ * <p>Threading: not thread-safe; one instance per traversal.
+ *
+ * @see ActionVisitor
+ * @see NoOpViewVisitor
+ */
 public abstract class ViewVisitor extends ActionVisitor {
 	// NB An instance member LOGGER is OK here as this is not Serializable
     protected final Logger LOGGER = SkyveLoggerFactory.getLogger(getClass());

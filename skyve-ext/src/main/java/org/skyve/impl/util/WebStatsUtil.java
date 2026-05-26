@@ -19,6 +19,12 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.SQL;
 import org.skyve.web.UserAgentType;
 
+/**
+ * Writes login and web-hit telemetry records to admin statistics tables.
+ *
+ * <p>This helper is used by web entry points to persist operational statistics
+ * without routing through domain-level services.
+ */
 public class WebStatsUtil {
 	private static final String YEAR_FORMAT = "yyyy";
 	private static final String MONTH_FORMAT = "M";
@@ -28,12 +34,11 @@ public class WebStatsUtil {
 	}
 	
 	/**
-	 * This method is used to populate the UserLoginRecord table with details of a new login to the system. It also checks the
-	 * previous record and sends alerts if there's a change in Ip Address and/or country
+	 * Writes a successful login record for a user.
 	 * 
-	 * @param user
-	 * @param userIPAddress
-	 * @throws Exception
+	 * @param user Authenticated user
+	 * @param userIPAddress Source IP address string
+	 * @throws Exception If record creation fails
 	 */
 	public static void recordLogin(User user, String userIPAddress)
 	throws Exception {
@@ -52,10 +57,18 @@ public class WebStatsUtil {
 		// NO COMMIT
 	}
 	
-	// this is called from the BizHubFilter - create and destroy a special persistence for this as
-	// the actual persistence used for this thread is set in the servlets or the faces bean and 
-	// could be different from the default created here for the thread - think webContext and conversations!!
-	// If it was not closed {commit(true)} then it could create a resource leak
+	/**
+	 * Records a monthly hit counter for a user/device/user-agent tuple.
+	 *
+	 * <p>Called from the web filter layer before normal servlet persistence setup.
+	 * The method opens its own persistence context, updates/creates a monthly row,
+	 * and commits in a {@code finally} block.
+	 *
+	 * @param user Current user
+	 * @param userAgentHeader Raw user-agent header (truncated to 400 chars)
+	 * @param userAgentType Parsed user-agent category
+	 * @throws Exception If hit recording fails
+	 */
 	public static synchronized void recordHit(User user, String userAgentHeader, UserAgentType userAgentType)
 	throws Exception {
 		AbstractPersistence persistence = AbstractPersistence.get();

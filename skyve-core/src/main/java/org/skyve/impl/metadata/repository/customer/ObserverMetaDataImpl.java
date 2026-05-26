@@ -9,6 +9,17 @@ import org.skyve.metadata.customer.ObserverMetaData;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB-annotated descriptor for an {@code <observer>} element in a
+ * {@code customer.xml} file.
+ *
+ * <p>Declares a fully-qualified observer class name registered with the Skyve
+ * event bus to receive domain-lifecycle and persistence events for this customer.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see org.skyve.metadata.customer.ObserverMetaData
+ */
 @XmlType(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "observer")
 public class ObserverMetaDataImpl implements ObserverMetaData {
 	private static final long serialVersionUID = -892596276688464356L;

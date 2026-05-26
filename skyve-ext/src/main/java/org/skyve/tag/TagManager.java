@@ -110,9 +110,10 @@ public interface TagManager {
 	String getTagId(String tagName) throws Exception;
 
 	/**
-	 * 
-	 * @return
-	 * @throws Exception
+	 * Returns all available tags as domain values for UI selection controls.
+	 *
+	 * @return Tag values where code is tag ID and description is display name
+	 * @throws Exception If tag retrieval fails
 	 */
 	List<DomainValue> getTags() throws Exception;
 

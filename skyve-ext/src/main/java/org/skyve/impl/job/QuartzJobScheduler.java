@@ -54,6 +54,12 @@ import org.skyve.web.BackgroundTask;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+/**
+ * {@link org.skyve.job.JobScheduler} implementation backed by the Quartz scheduler.
+ *
+ * <p>Manages trigger, job, and calendar registration; delegates actual job
+ * execution to Quartz while bridging Skyve's user and customer context.
+ */
 public class QuartzJobScheduler implements JobScheduler {
 	private static final String REPORT_JOB_CLASS_NAME = "modules.admin.ReportTemplate.jobs.ReportJob";
 	private static final String INTERNAL_JOB_GROUP_NAME = "INTERNAL";
@@ -67,6 +73,9 @@ public class QuartzJobScheduler implements JobScheduler {
 		// nothing to see here
 	}
 
+	/**
+	 * Performs startup.
+	 */
 	@Override
 	@SuppressWarnings("java:S2696") // startup initialises the static
 	public void startup() {
@@ -99,6 +108,9 @@ public class QuartzJobScheduler implements JobScheduler {
 		}
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void shutdown() {
 		try {
@@ -280,6 +292,9 @@ public class QuartzJobScheduler implements JobScheduler {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
 	public void runOneShotJob(JobMetaData job, Bean parameter, User user) {
 		Trigger trigger = TriggerBuilder.newTrigger()
@@ -289,6 +304,9 @@ public class QuartzJobScheduler implements JobScheduler {
 		scheduleJob(job, parameter, user, trigger, null);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void runOneShotJob(JobMetaData job, Bean parameter, User user, int sleepAtEndInSeconds) {
 		Trigger trigger = TriggerBuilder.newTrigger()
@@ -298,6 +316,9 @@ public class QuartzJobScheduler implements JobScheduler {
 		scheduleJob(job, parameter, user, trigger, Integer.valueOf(sleepAtEndInSeconds));
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public <T extends Bean> void runBackgroundTask(Class<? extends BackgroundTask<T>> taskClass, User user, String webId) {
 		@SuppressWarnings("unchecked")
@@ -322,6 +343,9 @@ public class QuartzJobScheduler implements JobScheduler {
 		}
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void runContentGarbageCollector() {
 		JobDetail detail = JobBuilder.newJob(ContentGarbageCollectionJob.class)
@@ -340,6 +364,9 @@ public class QuartzJobScheduler implements JobScheduler {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void scheduleOneShotJob(JobMetaData job, Bean parameter, User user, Date when) {
 		Trigger trigger = TriggerBuilder.newTrigger()
@@ -350,6 +377,9 @@ public class QuartzJobScheduler implements JobScheduler {
 		scheduleJob(job, parameter, user, trigger, null);
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void scheduleJob(JobSchedule jobSchedule, User user) {
 		String jobName = jobSchedule.getJobName();
@@ -444,6 +474,9 @@ public class QuartzJobScheduler implements JobScheduler {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void unscheduleJob(String uuid, String customerName) {
 		try {
@@ -455,6 +488,9 @@ public class QuartzJobScheduler implements JobScheduler {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void scheduleReport(JobSchedule reportSchedule, User user) {
 		String uuid = reportSchedule.getUuid();
@@ -557,6 +593,9 @@ public class QuartzJobScheduler implements JobScheduler {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void unscheduleReport(String uuid, String customerName) {
 		if (JOB_SCHEDULER != null) {
@@ -570,6 +609,9 @@ public class QuartzJobScheduler implements JobScheduler {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public List<JobDescription> getCustomerRunningJobs() {
 		User user = AbstractPersistence.get().getUser();
@@ -603,6 +645,9 @@ public class QuartzJobScheduler implements JobScheduler {
 		return result;
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean cancelJob(String instanceId) {
 		try {
@@ -615,6 +660,9 @@ public class QuartzJobScheduler implements JobScheduler {
 		}
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void validateMetaData() {
 		// Initialise validate metadata in a 1 shot immediate job
@@ -635,6 +683,9 @@ public class QuartzJobScheduler implements JobScheduler {
 		}
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void preRestore() {
 		String customerName = CORE.getCustomer().getName();
@@ -664,6 +715,9 @@ public class QuartzJobScheduler implements JobScheduler {
 		}
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void runRestoreJob(Bean restoreOptions) {
 		String customerName = CORE.getCustomer().getName();
@@ -689,6 +743,9 @@ public class QuartzJobScheduler implements JobScheduler {
 		}
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void postRestore(boolean restoreSuccessful) {
 		// Resume system jobs

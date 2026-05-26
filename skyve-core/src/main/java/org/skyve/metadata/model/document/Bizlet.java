@@ -45,6 +45,11 @@ import jakarta.annotation.Nonnull;
  */
 public class Bizlet<T extends Bean> implements MetaData {
 	// NB An instance member LOGGER is OK here as this is not Serializable
+    /**
+     * Executes SkyveLoggerFactory.getLogger.
+     * @param getClass() the getClass()
+     * @return the result
+     */
     protected final Logger LOGGER = SkyveLoggerFactory.getLogger(getClass());
 
 	/**
@@ -99,6 +104,10 @@ public class Bizlet<T extends Bean> implements MetaData {
 			return Util.nullSafeI18n(description);
 		}
 		
+		/**
+		 * Returns a string representation of this instance.
+		 * @return the result
+		 */
 		@Override
 		public @Nonnull String toString() {
 			StringBuilder result = new StringBuilder(128);

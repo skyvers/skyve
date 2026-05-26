@@ -19,6 +19,15 @@ import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 // TODO Implement the rendering of this
+/**
+ * JAXB-annotated progress-bar widget bound to a numeric document attribute.
+ *
+ * <p>Renders a horizontal progress bar whose fill percentage is driven by the
+ * bound attribute value relative to optional {@code min} and {@code max}
+ * bounds.  Supports absolute and constrained sizes and visibility conditions.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ */
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"pixelWidth", 

@@ -61,11 +61,17 @@ public class MailLogUtil {
 		// utility
 	}
 
+	/**
+	 * Logs the mail.
+	 */
 	public static void logMail(@Nonnull Mail mail, @Nonnull MailDispatchOutcome outcome) {
 		MailLogEntry entry = createSingleEntry(mail, outcome);
 		persist(entry);
 	}
 
+	/**
+	 * Logs the bulkMail.
+	 */
 	public static void logBulkMail(@Nonnull List<Mail> mails, @Nonnull MailDispatchOutcome outcome) {
 		MailLogEntry entry = createBulkEntry(mails, outcome);
 		persist(entry);

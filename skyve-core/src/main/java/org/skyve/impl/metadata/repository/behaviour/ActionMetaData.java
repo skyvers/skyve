@@ -30,6 +30,21 @@ import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * JAXB root element for an action descriptor ({@code *.xml} in the module actions
+ * package), converted to a runtime action metadata object.
+ *
+ * <p>An action descriptor names the action, provides documentation, and holds an
+ * ordered list of {@link StatementMetaData} behaviour statements.  The
+ * {@link ConvertibleMetaData} interface drives conversion to the runtime action
+ * representation during repository bootstrap.
+ *
+ * <p>Threading: not thread-safe.  Instances are populated during JAXB unmarshalling
+ * and are read-only once placed in the repository cache.
+ *
+ * @see BizletMetaData
+ * @see StatementMetaData
+ */
 @XmlRootElement(namespace = XMLMetaData.BEHAVIOUR_NAMESPACE, name = "action")
 @XmlType(namespace = XMLMetaData.BEHAVIOUR_NAMESPACE, 
 			name = "action",

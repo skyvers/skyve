@@ -84,33 +84,61 @@ public class Interaction implements Executable {
 	private List<Step> steps = new ArrayList<>();
 	private Procedure after;
 
+	/**
+	 * Returns the name.
+	 * @return the result
+	 */
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * Sets the name.
+	 * @param name the name
+	 */
 	@XmlAttribute(required = true)
 	public void setName(String name) {
 		this.name = UtilImpl.processStringValue(name);
 	}
 	
+	/**
+	 * Returns the before.
+	 * @return the result
+	 */
 	public Procedure getBefore() {
 		return before;
 	}
 
+	/**
+	 * Sets the before.
+	 * @param before the before
+	 */
 	@XmlElement(namespace = XMLMetaData.SAIL_NAMESPACE, name = "before")
 	public void setBefore(Procedure before) {
 		this.before = before;
 	}
 
+	/**
+	 * Returns the after.
+	 * @return the result
+	 */
 	public Procedure getAfter() {
 		return after;
 	}
 
+	/**
+	 * Sets the after.
+	 * @param after the after
+	 */
 	@XmlElement(namespace = XMLMetaData.SAIL_NAMESPACE, name = "after")
 	public void setAfter(Procedure after) {
 		this.after = after;
 	}
 
+	/**
+	 * Returns the steps.
+	 * @return the result
+	 */
 	@XmlElementWrapper(namespace = XMLMetaData.SAIL_NAMESPACE, name = "method")
 	@XmlElementRefs({@XmlElementRef(type = Login.class),
 						@XmlElementRef(type = Logout.class),
@@ -157,6 +185,10 @@ public class Interaction implements Executable {
 		return steps;
 	}
 	
+	/**
+	 * Executes execute.
+	 * @param executor the executor
+	 */
 	@Override
 	public void execute(Executor executor) {
 		executor.executeInteraction(this);

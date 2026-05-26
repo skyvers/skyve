@@ -69,6 +69,9 @@ import freemarker.template.TemplateExceptionHandler;
 import freemarker.template.TemplateModel;
 import jakarta.annotation.Nonnull;
 
+/**
+ * Central utility for executing FreeMarker report templates and rendering PDF output.
+ */
 public final class FreemarkerReportUtil {
 
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(FreemarkerReportUtil.class);
@@ -81,6 +84,9 @@ public final class FreemarkerReportUtil {
 		// disallow instantiation
 	}
 
+	/**
+	 * Initializes FreeMarker configuration, template loaders, and shared directives.
+	 */
 	public static void init() {
 		// Create your Configuration instance, and specify if up to what FreeMarker
 		// version (here 2.3.29) do you want to apply the fixes that are not 100%
@@ -375,12 +381,27 @@ public final class FreemarkerReportUtil {
 		return new W3CDom().fromJsoup(doc);
 	}
 
+	/**
+	 * Retrieves a document-scoped report template by module, document, and report name.
+	 *
+	 * @param bean Bean providing module/document context.
+	 * @param reportName Report template name.
+	 * @return The resolved FreeMarker template.
+	 * @throws Exception If template lookup fails.
+	 */
 	public static Template getBeanReport(final Bean bean, final String reportName)
 	throws Exception {
 		final String templateName = String.format("%s/%s/reports/%s", bean.getBizModule(), bean.getBizDocument(), reportName);
 		return cfg.getTemplate(templateName);
 	}
 
+	/**
+	 * Retrieves a template by name with customer permission scope applied.
+	 *
+	 * @param templateName Template name/path.
+	 * @return The resolved template.
+	 * @throws Exception If template lookup fails.
+	 */
 	public static Template getTemplate(final String templateName)
 	throws Exception {
 		return CORE.getPersistence().withDocumentPermissionScopes(DocumentPermissionScope.customer, p -> {
@@ -598,6 +619,10 @@ public final class FreemarkerReportUtil {
 		});
 	}
 
+	/**
+	 * User-agent bridge used by Flying Saucer PDF rendering to resolve external resources
+	 * (for example images and stylesheets) via the configured classpath and URL handling.
+	 */
 	@ParametersAreNonnullByDefault
 	private static class ResourceLoaderUserAgent extends ITextUserAgent {
 		private ResourceLoaderUserAgent(ITextOutputDevice outputDevice, int dotsPerPixel) {

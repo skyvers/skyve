@@ -73,17 +73,35 @@ public interface View extends NamedMetaData, PersistentMetaData, ReloadableMetaD
 		private String fromBinding;
 		private String boundTo;
 		
+		/**
+		 * Returns the fromBinding.
+		 * @return the result
+		 */
 		public String getFromBinding() {
 			return fromBinding;
 		}
+
+		/**
+		 * Sets the fromBinding.
+		 * @param fromBinding the fromBinding
+		 */
 		@XmlAttribute(required = true)
 		public void setFromBinding(String fromBinding) {
 			this.fromBinding = UtilImpl.processStringValue(fromBinding);
 		}
 		
+		/**
+		 * Returns the boundTo.
+		 * @return the result
+		 */
 		public String getBoundTo() {
 			return boundTo;
 		}
+
+		/**
+		 * Sets the boundTo.
+		 * @param boundTo the boundTo
+		 */
 		@XmlAttribute(required = true)
 		public void setBoundTo(String boundTo) {
 			this.boundTo = UtilImpl.processStringValue(boundTo);

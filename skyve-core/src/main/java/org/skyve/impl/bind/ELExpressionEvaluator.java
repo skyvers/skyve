@@ -35,8 +35,24 @@ import jakarta.annotation.Nullable;
 import jakarta.el.ELManager;
 import jakarta.el.ELProcessor;
 
+/**
+ * Evaluates Skyve EL expressions against bean, user, and stash contexts.
+ *
+ * <p>The evaluator supports runtime evaluation, validation-time type checking,
+ * and completion hints for expression authoring.
+ *
+ * <p>Complexity: completion is linear in the number of known expression prefixes
+ * and candidate members on the resolved type.
+ */
 public class ELExpressionEvaluator extends ExpressionEvaluator {
+	/**
+	 * Expression prefix used for validation-time EL evaluation.
+	 */
 	public static final String EL_PREFIX = "el";
+
+	/**
+	 * Expression prefix used for runtime EL evaluation.
+	 */
 	public static final String RTEL_PREFIX = "rtel";
 
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ELExpressionEvaluator.class); 
@@ -136,21 +152,51 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 
 	private boolean typesafe = false;
 	
+	/**
+	 * Creates an EL evaluator.
+	 *
+	 * @param typesafe {@code true} to enable validation against the supplied metadata context
+	 */
 	public ELExpressionEvaluator(boolean typesafe) {
 		this.typesafe = typesafe;
 	}
 
+	/**
+	 * Evaluates the expression against the current EL context.
+	 *
+	 * @param expression the EL expression without prefix or suffix
+	 * @param bean the bean used as the EL {@code bean} variable; may be {@code null}
+	 * @return the evaluated value, or {@code null} when the expression resolves to null
+	 */
 	@Override
 	public Object evaluateWithoutPrefixOrSuffix(String expression, Bean bean) {
 		ELProcessor elp = newSkyveEvaluationProcessor(bean);
 		return elp.eval(expression);
 	}
 
+	/**
+	 * Formats the evaluated expression for display.
+	 *
+	 * @param expression the EL expression without prefix or suffix
+	 * @param bean the bean used as the EL {@code bean} variable; may be {@code null}
+	 * @return the display text derived from the evaluated value
+	 */
 	@Override
 	public String formatWithoutPrefixOrSuffix(String expression, Bean bean) {
 		return BindUtil.toDisplay(CORE.getCustomer(), evaluateWithoutPrefixOrSuffix(expression, bean));
 	}
 	
+	/**
+	 * Validates a type-safe EL expression against the supplied metadata context.
+	 *
+	 * @param expression the EL expression without prefix or suffix
+	 * @param returnType the required result type, or {@code null} when unconstrained
+	 * @param customer the customer metadata context
+	 * @param module the module metadata context
+	 * @param document the document metadata context
+	 * @return a validation message when the expression is malformed or the result type is incompatible;
+	 *         otherwise {@code null}
+	 */
 	@Override
 	public String validateWithoutPrefixOrSuffix(String expression,
 													Class<?> returnType,
@@ -193,6 +239,15 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 		return result;
 	}
 	
+	/**
+	 * Completes the expression fragment using the current EL context.
+	 *
+	 * @param fragment the partial expression being authored
+	 * @param customer the customer metadata context
+	 * @param module the module metadata context
+	 * @param document the document metadata context
+	 * @return matching completion candidates in the order they were discovered
+	 */
 	@Override
 	public List<String> completeWithoutPrefixOrSuffix(String fragment,
 														Customer customer,
@@ -362,6 +417,12 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 		}
 	}
 	
+	/**
+	 * Prefixes {@code bean} bindings in the expression with the supplied binding path.
+	 *
+	 * @param expression the expression buffer to mutate
+	 * @param binding the binding path to insert before each {@code bean} reference
+	 */
 	@Override
 	public void prefixBindingWithoutPrefixOrSuffix(StringBuilder expression, String binding) {
 		// Append binding to "bean."
@@ -379,12 +440,25 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 		}
 	}
 	
+	/**
+	 * Creates an EL processor configured for validation against metadata.
+	 *
+	 * @param customer the customer metadata context
+	 * @param document the document metadata context; may be {@code null}
+	 * @return a configured processor with Skyve EL functions and validation resolvers
+	 */
 	public static ELProcessor newSkyveValidationProcessor(@Nonnull Customer customer, @Nullable Document document) {
 		ELProcessor result = setupProcessor(customer, document, UserImpl.class, Map.class);
 		result.getELManager().addELResolver(new ValidationELResolver(customer));
 		return result;
 	}
 	
+	/**
+	 * Creates an EL processor configured for runtime evaluation.
+	 *
+	 * @param bean the bean to expose as {@code bean}; may be {@code null}
+	 * @return a configured processor with Skyve EL functions and runtime binding resolvers
+	 */
 	public static ELProcessor newSkyveEvaluationProcessor(@Nullable Bean bean) {
 		ELProcessor result = setupProcessor(null, bean, CORE.getUser(), CORE.getStash());
 		result.getELManager().addELResolver(new BindingELResolver());

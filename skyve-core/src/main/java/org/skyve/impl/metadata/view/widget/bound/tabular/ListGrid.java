@@ -30,6 +30,19 @@ import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * JAXB-annotated query-driven list grid widget.
+ *
+ * <p>Renders rows from a named query or model with paging, filtering, sorting,
+ * export, charting, and tagging capabilities.  Supports add, edit, remove,
+ * zoom, and deselect operations with independent disable conditions and
+ * event handler lists.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see AbstractListWidget
+ * @see TreeGrid
+ */
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"disabledConditionName",

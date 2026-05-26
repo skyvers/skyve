@@ -99,6 +99,9 @@ public interface Attribute extends NamedMetaData, DecoratedMetaData {
 		domain, view, both
 	}
 	
+	/**
+	 * Defines the Sensitivity enumeration.
+	 */
 	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public enum Sensitivity {	
 		/**

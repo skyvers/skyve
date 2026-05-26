@@ -15,6 +15,10 @@ import org.hibernate.usertype.UserType;
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.Decimal5;
 
+/**
+ * Hibernate {@link org.hibernate.usertype.UserType} that maps the Skyve
+ * {@link org.skyve.domain.types.Decimal5} type to a SQL {@code NUMERIC} column.
+ */
 public class Decimal5UserType implements UserType, Serializable, LiteralType<Number> {
 	private static final long serialVersionUID = -4189877865378690596L;
 

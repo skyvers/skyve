@@ -7,6 +7,10 @@ import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 
+/**
+ * Generates a JasperReports design from a Skyve named document query,
+ * mapping query columns to report fields.
+ */
 public class QueryReportDesignGenerator extends ReportDesignGenerator {
 
     @Override

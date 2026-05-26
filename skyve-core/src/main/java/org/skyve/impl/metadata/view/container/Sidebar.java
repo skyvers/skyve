@@ -19,6 +19,15 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * JAXB-annotated sidebar container widget for a view.
+ *
+ * <p>A sidebar is a collateral panel rendered alongside the main content area.
+ * It supports relative width, visibility conditions, a widget identifier,
+ * and decorator properties.  Child widgets are held via {@link Container}.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ */
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "sidebar")
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			name = "sidebar",

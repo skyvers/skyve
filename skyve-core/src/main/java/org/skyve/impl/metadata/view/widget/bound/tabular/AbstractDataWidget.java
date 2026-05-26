@@ -14,6 +14,18 @@ import org.skyve.util.Util;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * Abstract JAXB base for data-bound tabular widgets ({@link DataGrid},
+ * {@link DataRepeater}) that render rows from an in-memory bean collection.
+ *
+ * <p>Provides relative sizing, visibility conditions, and a widget identifier.
+ * The collection is supplied by the binding inherited from {@link AbstractBound}.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see DataGrid
+ * @see DataRepeater
+ */
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"widgetId",
 							"title", 

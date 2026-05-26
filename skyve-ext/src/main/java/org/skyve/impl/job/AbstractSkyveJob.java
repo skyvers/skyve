@@ -27,6 +27,14 @@ import org.skyve.metadata.user.User;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+/**
+ * Base implementation for all Skyve background jobs.
+ *
+ * <p>Implements Quartz {@link org.quartz.InterruptableJob} and the Skyve
+ * {@link org.skyve.metadata.MetaData} contract; subclasses override
+ * {@link #execute()} to provide job logic and may call {@link #checkCancelled()}
+ * to honour cancellation requests.
+ */
 public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 	public static final String DISPLAY_NAME_JOB_PARAMETER_KEY = "displayName";
 	public static final String BEAN_JOB_PARAMETER_KEY = "bean";
@@ -48,46 +56,79 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 	// NB An instance member LOGGER is OK here as this is not Serializable
     protected final Logger LOGGER = SkyveLoggerFactory.getLogger(getClass());
 
+	/**
+	 * Returns the displayName.
+	 */
 	public String getDisplayName() {
 		return displayName;
 	}
 
+	/**
+	 * Sets the displayName.
+	 */
 	public void setDisplayName(String displayName) {
 		this.displayName = displayName;
 	}
 
+	/**
+	 * Returns the percentComplete.
+	 */
 	public final int getPercentComplete() {
 		return percentComplete;
 	}
 
+	/**
+	 * Sets the percentComplete.
+	 */
 	public final void setPercentComplete(int percentComplete) {
 		this.percentComplete = percentComplete;
 	}
 
+	/**
+	 * Sets the percentComplete.
+	 */
 	public final void setPercentComplete(int totalProcessed, int totalSize) {
 		setPercentComplete((int) (((float) totalProcessed) / ((float) totalSize) * 100F));
 	}
 
+	/**
+	 * Returns the startTime.
+	 */
 	public final Timestamp getStartTime() {
 		return startTime;
 	}
 
+	/**
+	 * Returns the endTime.
+	 */
 	public final Timestamp getEndTime() {
 		return endTime;
 	}
 
+	/**
+	 * Returns the status.
+	 */
 	public final JobStatus getStatus() {
 		return status;
 	}
 
+	/**
+	 * Returns the log.
+	 */
 	public final List<String> getLog() {
 		return log;
 	}
 
+	/**
+	 * Sets the log.
+	 */
 	protected final void setLog(List<String> log) {
 		this.log = log;
 	}
 
+	/**
+	 * Creates the logDescriptionString.
+	 */
 	public final String createLogDescriptionString() {
 		StringBuilder sb = new StringBuilder(256);
 		synchronized (log) {
@@ -99,10 +140,16 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 		return sb.toString();
 	}
 
+	/**
+	 * Returns the bean.
+	 */
 	public final Bean getBean() {
 		return bean;
 	}
 
+	/**
+	 * Sets the bean.
+	 */
 	public final void setBean(Bean bean) {
 		this.bean = bean;
 	}

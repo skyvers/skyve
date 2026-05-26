@@ -32,6 +32,18 @@ import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.report.ReportFormat;
 
+/**
+ * Runtime implementation of the {@link Action} metadata interface.
+ *
+ * <p>Holds the resolved action properties (name, display name, icon, confirmation
+ * text, visibility/disability conditions, and parameters) assembled from the
+ * JAXB action descriptor during view conversion.
+ *
+ * <p>Threading: not thread-safe.  Instances are constructed during view bootstrap
+ * and are read-only once placed in the repository cache.
+ *
+ * @see org.skyve.metadata.view.Action
+ */
 public class ActionImpl implements Action {
 	private static final long serialVersionUID = -133387187684800312L;
 

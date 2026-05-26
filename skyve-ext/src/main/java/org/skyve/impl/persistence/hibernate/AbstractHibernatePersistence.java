@@ -173,6 +173,18 @@ import jakarta.persistence.RollbackException;
  * @see Persistence
  * @see DynamicPersistence
  */
+/**
+ * Core Hibernate-backed persistence context for Skyve, extending
+ * {@link org.skyve.impl.persistence.AbstractPersistence}.
+ *
+ * <p>Manages the Hibernate {@link org.hibernate.Session} lifecycle, JPQL/SQL
+ * query execution, flush, commit, rollback, and content persistence.
+ *
+ * <p>Threading: thread-confined — do not share instances across threads.
+ *
+ * @see HibernateContentPersistence
+ * @see HibernateNoContentPersistence
+ */
 public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	private static final long serialVersionUID = -1813679859498468849L;
 
@@ -246,6 +258,9 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 */
 	protected abstract void closeContent() throws Exception;
 	
+	/**
+	 * Performs disposeAllPersistenceInstances.
+	 */
 	@Override
 	@SuppressWarnings("unchecked")
 	public final void disposeAllPersistenceInstances() {
@@ -391,6 +406,9 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 						eventListenerRegistry.appendListeners(EventType.INIT_COLLECTION, listener);
 					}
 					
+					/**
+					 * {@inheritDoc}
+					 */
 					@Override
 					public void disintegrate(SessionFactoryImplementor sessionFactory, SessionFactoryServiceRegistry serviceRegistry) {
 						// nothing to clean up here
@@ -522,6 +540,9 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		
 	}
 	
+	/**
+	 * Performs generateDDL.
+	 */
 	@Override
 	@SuppressWarnings("resource")
 	public final void generateDDL(String dropDDLFilePath, String createDDLFilePath, String updateDDLFilePath) {
@@ -3288,6 +3309,9 @@ public void doWorkOnConnection(Session session) {
 	
 	private static final Integer NEW_VERSION = Integer.valueOf(0);
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void upsertBeanTuple(PersistentBean bean) {
 		CustomerImpl customer = (CustomerImpl) user.getCustomer();
@@ -3542,6 +3566,9 @@ public void doWorkOnConnection(Session session) {
 		bean.setBizVersion((bizVersion == null) ? NEW_VERSION : Integer.valueOf(bizVersion.intValue() + 1));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void upsertCollectionTuples(PersistentBean owningBean, String collectionName) {
 		Customer customer = user.getCustomer();
@@ -3596,6 +3623,9 @@ public void doWorkOnConnection(Session session) {
 		}
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void insertCollectionTuples(PersistentBean owningBean, String collectionName) {
 		Customer customer = user.getCustomer();

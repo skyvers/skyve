@@ -13,6 +13,15 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 
+/**
+ * JAXB-annotated event action that toggles the disabled state of a bound
+ * widget when a widget event fires.
+ *
+ * <p>A {@code <toggleDisabled>} action inverts the current disabled state of
+ * the widget identified by {@code binding} each time the event fires.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ */
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "toggleDisabled")
 public class ToggleDisabledEventAction extends AbstractBound implements EventAction {

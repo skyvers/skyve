@@ -45,6 +45,22 @@ import org.skyve.util.Binder.TargetMetaData;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
+/**
+ * Runtime implementation of {@link MetaDataQueryDefinition} — the framework's
+ * structured column-based query type.
+ *
+ * <p>A metadata query declares its columns declaratively in the module descriptor
+ * (bindings, sorting, filtering) and the framework generates the underlying
+ * JPQL/SQL at query execution time.  This class holds the resolved column list,
+ * the default sort orders, and the aggregate and filter expressions after
+ * metadata loading.
+ *
+ * <p>Threading: not thread-safe.  Instances are populated during metadata loading
+ * and are read-only once placed in the repository cache.
+ *
+ * @see QueryDefinitionImpl
+ * @see MetaDataQueryDefinition
+ */
 public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements MetaDataQueryDefinition {
 	private static final long serialVersionUID = 1867738351262041832L;
 

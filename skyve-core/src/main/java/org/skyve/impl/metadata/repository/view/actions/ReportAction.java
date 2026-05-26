@@ -14,6 +14,17 @@ import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB-annotated descriptor for a {@code <report>} action button in a view.
+ *
+ * <p>A report action renders a named Jasper / Skyve report and streams it to
+ * the browser.  Extends {@link ParameterizableAction} so runtime parameters
+ * can be forwarded to the report engine.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see ParameterizableAction
+ */
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "report")
 public class ReportAction extends ParameterizableAction {

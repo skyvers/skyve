@@ -619,6 +619,9 @@ public class StandardLoader {
 		beansBySheetKey.put(key, bean);
 	}
 	
+	/**
+	 * Adds a error.
+	 */
 	public void addError(@Nonnull Customer customer, @Nonnull Bean bean, @Nonnull Exception e) {
 		final SheetKey key = bizIdToSheetKey.get(bean.getBizId());
 		BizPortSheet sheet = workbook.getSheet(key);

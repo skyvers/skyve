@@ -33,6 +33,19 @@ import org.skyve.metadata.module.Module;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
+/**
+ * Evaluates, formats, and validates Skyve expression syntax.
+ *
+ * <p>Expressions are resolved by a registered evaluator prefix (for example binding,
+ * EL, i18n, role, or stash). Unprefixed expressions are interpreted as implicit
+ * built-ins (such as {@code {USER}}) or binding expressions.
+ *
+ * <p>This class is also responsible for optional format-suffix handling using
+ * {@link org.skyve.domain.types.formatters.Formatter} resolution.
+ *
+ * <p>Threading: evaluator registration is expected during startup; read operations
+ * ({@link #evaluate}, {@link #format}, {@link #validate}) are thread-safe for runtime use.
+ */
 @SuppressWarnings({"java:S2390", "java:S6548"}) // This class represents a strong cohesive collaboration between it and its subclasses
 public abstract class ExpressionEvaluator {
 	public static final String USER_EXPRESSION = "USER";

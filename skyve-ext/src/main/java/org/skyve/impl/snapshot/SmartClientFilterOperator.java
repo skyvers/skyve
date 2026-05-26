@@ -2,6 +2,9 @@ package org.skyve.impl.snapshot;
 
 import org.skyve.metadata.FilterOperator;
 
+/**
+ * Enumerates SmartClient-compatible filter operators used by snapshot serialization.
+ */
 public enum SmartClientFilterOperator {
 	// text match style for filtering
 	substring, startsWith, exact, // all case insensitive
@@ -77,6 +80,12 @@ public enum SmartClientFilterOperator {
 	geoCrosses, // not sure???
 	geoEquals; // the geometry field is equivalent to the operand geometry
 	
+	/**
+	 * Maps a framework {@link FilterOperator} to the closest SmartClient operator.
+	 *
+	 * @param operator The framework operator.
+	 * @return The mapped SmartClient operator, or {@code null} when no mapping exists.
+	 */
 	public static SmartClientFilterOperator fromFilterOperator(FilterOperator operator) {
 		SmartClientFilterOperator result = null;
 		

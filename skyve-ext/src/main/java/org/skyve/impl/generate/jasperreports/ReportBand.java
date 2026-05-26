@@ -5,6 +5,10 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+/**
+ * Describes a JasperReports report band (title, column header, detail, summary,
+ * etc.) used during programmatic {@code .jrxml} generation.
+ */
 public class ReportBand {
 	public static enum BandType {
 		background,

@@ -1,5 +1,9 @@
 package org.skyve.impl.generate.jasperreports;
 
+/**
+ * Descriptor for a single JasperReports parameter, used when generating a
+ * {@code .jrxml} programmatically from Skyve metadata.
+ */
 public class ReportParameter {
 	/**
 	 * Name

@@ -25,5 +25,10 @@ import jakarta.xml.bind.annotation.XmlTransient;
  */
 @XmlTransient
 public interface Step extends Executable {
+	/**
+	 * Returns the identifier.
+	 * @param context the context
+	 * @return the result
+	 */
 	public String getIdentifier(AutomationContext context);
 }

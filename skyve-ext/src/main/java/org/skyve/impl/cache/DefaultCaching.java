@@ -65,12 +65,18 @@ public class DefaultCaching implements Caching {
 		// nothing to see here
 	}
 
+	/**
+	 * Returns the singleton instance.
+	 */
 	public static DefaultCaching get() {
 		return INSTANCE;
 	}
 
 	@Override
 	@SuppressWarnings("resource")
+	/**
+	 * Performs startup.
+	 */
 	public void startup() {
 		if (isUnInitialised()) {
 			try {
@@ -146,6 +152,9 @@ public class DefaultCaching implements Caching {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void shutdown() {
 		// NB all caches are closed by closing the cache managers
@@ -199,16 +208,25 @@ public class DefaultCaching implements Caching {
 					jCacheManager.isClosed());
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public PersistentCacheManager getEHCacheManager() {
 		return ehCacheManager;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public javax.cache.CacheManager getJCacheManager() {
 		return jCacheManager;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public <K extends Serializable, V extends Serializable> Cache<K, V> createEHCache(EHCacheConfig<K, V> config) {
 		ResourcePoolsBuilder rpb = ResourcePoolsBuilder.newResourcePoolsBuilder();
@@ -243,6 +261,9 @@ public class DefaultCaching implements Caching {
 
 	@Override
 	@SuppressWarnings("resource")
+	/**
+	 * Creates the jCache.
+	 */
 	public <K extends Serializable, V extends Serializable> javax.cache.Cache<K, V> createJCache(JCacheConfig<K, V> config) {
 		ResourcePoolsBuilder rpb = ResourcePoolsBuilder.heap(config.getHeapSizeEntries());
 		long offHeapSizeInMB = config.getOffHeapSizeInMB();
@@ -266,31 +287,49 @@ public class DefaultCaching implements Caching {
 		return getJCacheManager().createCache(config.getName(), Eh107Configuration.fromEhcacheCacheConfiguration(ccb));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void removeEHCache(String name) {
 		ehCacheManager.removeCache(name);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void destroyEHCache(String name) throws CachePersistenceException {
 		ehCacheManager.destroyCache(name);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final void destroyJCache(String name) {
 		jCacheManager.destroyCache(name);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public <K extends Object, V extends Object> Cache<K, V> getEHCache(String name, Class<K> keyClass, Class<V> valueClass) {
 		return ehCacheManager.getCache(name, keyClass, valueClass);
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public <K extends Object, V extends Object> javax.cache.Cache<K, V> getJCache(String name, Class<K> keyClass, Class<V> valueClass) {
 		return jCacheManager.getCache(name, keyClass, valueClass);
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public CacheStatistics getEHCacheStatistics(String name) {
 		CacheStatistics result = null;
@@ -303,11 +342,17 @@ public class DefaultCaching implements Caching {
 		return result;
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public TierStatistics getEHTierStatistics(CacheStatistics statistics, CacheTier tier) {
 		return (statistics == null) ? null : statistics.getTierStatistics().get(tier.toString());
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public CacheStatisticsMXBean getJCacheStatisticsMXBean(String name) {
 		final MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();

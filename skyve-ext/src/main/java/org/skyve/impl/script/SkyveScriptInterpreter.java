@@ -48,6 +48,9 @@ import org.skyve.util.Binder;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+/**
+ * Parses and interprets Skyve Markdown script into module and document metadata models.
+ */
 public class SkyveScriptInterpreter {
 
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SkyveScriptInterpreter.class);
@@ -143,22 +146,47 @@ public class SkyveScriptInterpreter {
 		this.defaultModule = defaultModule;
 	}
 
+	/**
+	 * Returns the documents parsed from the script.
+	 *
+	 * @return Parsed document metadata.
+	 */
 	public List<DocumentMetaData> getDocuments() {
 		return documents;
 	}
 
+	/**
+	 * Returns accumulated parsing and interpretation issues.
+	 *
+	 * @return Script errors and warnings.
+	 */
 	public List<SkyveScriptException> getErrors() {
 		return errors;
 	}
 
+	/**
+	 * Returns modules parsed or inferred from the script.
+	 *
+	 * @return Parsed module metadata.
+	 */
 	public List<ModuleMetaData> getModules() {
 		return modules;
 	}
 
+	/**
+	 * Indicates whether newly created modules are marked prototype.
+	 *
+	 * @return {@code true} when prototype mode is enabled.
+	 */
 	public boolean isPrototypeModules() {
 		return prototypeModules;
 	}
 
+	/**
+	 * Parses the current script text into a CommonMark document tree.
+	 *
+	 * @return The parsed root node.
+	 */
 	public Node parse() {
 		if (script != null && script.length() > 0) {
 			this.document = parser.parse(script);
@@ -259,6 +287,9 @@ public class SkyveScriptInterpreter {
 		throw new IllegalArgumentException("Script was not supplied during construction.");
 	}
 
+	/**
+	 * Processes the parsed document tree into Skyve metadata objects and validation issues.
+	 */
 	public void process() {
 		// parse the script if it has not been done already
 		if (document == null) {
@@ -284,10 +315,20 @@ public class SkyveScriptInterpreter {
 		}
 	}
 
+	/**
+	 * Sets whether generated modules should be marked as prototype modules.
+	 *
+	 * @param prototypeModules {@code true} to mark modules as prototype.
+	 */
 	public void setPrototypeModules(boolean prototypeModules) {
 		this.prototypeModules = prototypeModules;
 	}
 
+	/**
+	 * Walks a CommonMark node tree and maps recognised structures to module/document metadata.
+	 *
+	 * @param node The current node to process.
+	 */
 	@SuppressWarnings("boxing")
 	private void process(Node node) {
 		if (isHeading(node)) {
@@ -417,6 +458,11 @@ public class SkyveScriptInterpreter {
 
 	}
 
+	/**
+	 * Adds a new error issue to the script error list.
+	 *
+	 * @param message Error message.
+	 */
 	private void addError(String message) {
 		LOGGER.warn(message);
 		getErrors().add(new SkyveScriptException(ExceptionType.error, message, currentLine));
@@ -444,6 +490,11 @@ public class SkyveScriptInterpreter {
 		currentModule.getDocuments().add(md);
 	}
 
+	/**
+	 * Adds a new warning issue to the script error list.
+	 *
+	 * @param message Warning message.
+	 */
 	private void addWarning(String message) {
 		LOGGER.info(message);
 		getErrors().add(new SkyveScriptException(ExceptionType.warning, message, currentLine));
@@ -455,6 +506,11 @@ public class SkyveScriptInterpreter {
 	private static void appendMenu(ModuleMetaData module, DocumentMetaData document) {
 		MenuMetaData menu = module.getMenu();
 
+	/**
+	 * Parses a list-item node into a field/association/collection definition.
+	 *
+	 * @param node The node containing attribute declaration content.
+	 */
 		if (menu == null) {
 			menu = new MenuMetaData();
 			module.setMenu(menu);
@@ -1116,6 +1172,11 @@ public class SkyveScriptInterpreter {
 		}
 	}
 
+	/**
+	 * Processes a list item and dispatches to attribute parsing when relevant.
+	 *
+	 * @param item The list item node.
+	 */
 	private void processListItem(Node item) {
 		if (item.getFirstChild() != null
 				&& (item.getFirstChild() instanceof Text || item.getFirstChild() instanceof Paragraph)) {
@@ -1128,6 +1189,9 @@ public class SkyveScriptInterpreter {
 		}
 	}
 
+	/**
+	 * Resolves stored child-document parent references once all documents are parsed.
+	 */
 	private void processParentDocuments() {
 		for (Map.Entry<String, String> e : parentDocuments.entrySet()) {
 			for (DocumentMetaData d : getDocuments()) {

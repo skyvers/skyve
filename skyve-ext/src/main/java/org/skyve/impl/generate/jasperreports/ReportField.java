@@ -1,5 +1,9 @@
 package org.skyve.impl.generate.jasperreports;
 
+/**
+ * Descriptor for a single JasperReports field, holding the name, class, and
+ * optional description used when generating a {@code .jrxml} programmatically.
+ */
 public class ReportField  {
 	/**
 	 * Name

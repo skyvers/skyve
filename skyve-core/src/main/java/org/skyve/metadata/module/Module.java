@@ -136,6 +136,10 @@ public interface Module extends NamedMetaData, PersistentMetaData, ReloadableMet
 			this.referencedModuleName = referencedModuleName;
 		}
 		
+		/**
+		 * Returns the properties.
+		 * @return the result
+		 */
 		@Override
 		public Map<String, String> getProperties() {
 			return properties;

@@ -656,9 +656,9 @@ public class EXT {
 	/**
 	 * Check a hash against a clear text password.
 	 * 
-	 * @param	clearText
-	 * @param	The encoded password.
-	 * @return	true if it matches, or false if it doesn't
+	 * @param clearText The candidate clear-text password
+	 * @param hashedPassword The encoded password hash
+	 * @return {@code true} when the candidate password matches the hash
 	 */
 	public static boolean checkPassword(@Nonnull String clearText, @Nonnull String hashedPassword) {
 		PasswordEncoder dpe = SecurityUtil.createDelegatingPasswordEncoder();

@@ -18,6 +18,21 @@ import org.skyve.web.WebAction;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB-annotated criteria record used to match an incoming web request against a
+ * {@link Route}.
+ *
+ * <p>A {@code RouteCriteria} specifies zero or more predicates — view type, web
+ * action, module name, document name, query name, customer name, data-group ID,
+ * or user ID — that must all match for the enclosing {@link Route} to apply.  A
+ * {@code null} field means the criterion is unconstrained (matches any value).
+ *
+ * <p>Threading: not thread-safe.  Instances are populated during JAXB unmarshalling
+ * and are read-only once placed in the repository cache.
+ *
+ * @see Route
+ * @see Router
+ */
 @XmlType(namespace = XMLMetaData.ROUTER_NAMESPACE)
 public class RouteCriteria implements SerializableMetaData {
 	private static final long serialVersionUID = 7017356339189117479L;

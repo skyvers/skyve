@@ -16,6 +16,17 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * JAXB-annotated rich-text (HTML) input widget bound to a Long-text String
+ * attribute.
+ *
+ * <p>Renders a WYSIWYG rich-text editor with configurable dimensions and
+ * optional content sanitisation.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see HTML
+ */
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"pixelWidth", "pixelHeight", "minPixelHeight", "maxPixelHeight", "sanitise", "properties"})

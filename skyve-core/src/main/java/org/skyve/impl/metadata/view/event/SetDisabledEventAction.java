@@ -17,6 +17,16 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 
+/**
+ * JAXB-annotated event action that sets the disabled state of a bound widget
+ * when a widget event fires.
+ *
+ * <p>A {@code <setDisabled>} action targets the widget identified by
+ * {@code binding} and applies the disabled/enabled condition, giving
+ * conditional disablement in response to user interaction.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ */
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "setDisabled")
 public class SetDisabledEventAction extends AbstractBound implements EventAction, Disableable {

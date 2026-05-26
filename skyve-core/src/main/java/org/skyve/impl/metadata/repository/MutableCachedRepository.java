@@ -40,6 +40,22 @@ import org.skyve.metadata.view.View.ViewType;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
+/**
+ * Abstract cached repository that supports on-demand reloading of mutable metadata.
+ *
+ * <p>Maintains an in-memory cache of all loaded {@link org.skyve.metadata.MetaData}
+ * objects keyed by their qualified name.  Provides a throttled reload check so that
+ * metadata file changes made at runtime are picked up without a full application
+ * restart.  The reload throttle defaults to {@value #RELOAD_CHECK_THROTTLE_MILLIS} ms.
+ *
+ * <p>Threading: the internal cache is a {@link java.util.concurrent.ConcurrentHashMap};
+ * individual cache entries are updated under write locks.  Callers that iterate over
+ * the cache while a reload is in progress may observe a transiently inconsistent view.
+ *
+ * @see FileSystemRepository
+ * @see org.skyve.metadata.repository.MutableRepository
+ * @see org.skyve.metadata.repository.OnDemandRepository
+ */
 public abstract class MutableCachedRepository extends ProvidedRepositoryFactory implements MutableRepository, OnDemandRepository {
 	protected static final String ROUTER_KEY = ROUTER_NAMESPACE + ROUTER_NAME;
 

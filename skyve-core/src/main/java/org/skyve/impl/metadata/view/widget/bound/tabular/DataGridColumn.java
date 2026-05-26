@@ -15,6 +15,17 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * Abstract JAXB base for all column types in a {@link DataGrid} widget.
+ *
+ * <p>Provides title, horizontal alignment, pixel width, and decorator
+ * properties shared by bound and container columns.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see DataGridBoundColumn
+ * @see DataGridContainerColumn
+ */
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE, propOrder = {"title", "alignment", "pixelWidth", "properties"})
 public abstract class DataGridColumn implements TabularColumn, AbsoluteWidth, DecoratedMetaData {
 	private static final long serialVersionUID = -5532364729219436008L;

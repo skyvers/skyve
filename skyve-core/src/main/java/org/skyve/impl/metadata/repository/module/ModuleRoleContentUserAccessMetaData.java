@@ -10,6 +10,18 @@ import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB-annotated descriptor for a {@code <contentAccess>} user-access grant in
+ * a module role.
+ *
+ * <p>Grants access to download or view binary content (documents/images) stored
+ * against a named document attribute.  Extends
+ * {@link ModuleRoleDocumentAggregateUserAccessMetaData}.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see ModuleRoleDocumentAggregateUserAccessMetaData
+ */
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "contentAccess")
 public class ModuleRoleContentUserAccessMetaData extends ModuleRoleDocumentAggregateUserAccessMetaData {

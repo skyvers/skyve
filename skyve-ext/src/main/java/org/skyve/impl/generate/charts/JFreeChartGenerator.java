@@ -32,6 +32,13 @@ import org.skyve.impl.metadata.view.widget.Chart.ChartType;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.view.model.chart.ChartData;
 
+/**
+ * Generates JFreeChart chart images from Skyve chart model data.
+ *
+ * <p>Converts a {@link org.skyve.metadata.view.model.chart.ChartData} payload
+ * into a JFreeChart instance and renders it as a PNG byte array suitable for
+ * embedding in reports or view responses.
+ */
 public class JFreeChartGenerator {
 	private static final String NO_DATA_AVAILABLE = "No data available";
 
@@ -53,6 +60,9 @@ public class JFreeChartGenerator {
 		this.pixelHeight = pixelHeight;
 	}
 
+	/**
+	 * Performs chart.
+	 */
 	public JFreeChart chart(ChartType type) {
 		JFreeChart result = null;
 		
@@ -87,14 +97,23 @@ public class JFreeChartGenerator {
 		return result;
 	}
 	
+	/**
+	 * Performs image.
+	 */
 	public BufferedImage image(JFreeChart chart) {
 		return chart.createBufferedImage(pixelWidth, pixelHeight);
 	}
 
+	/**
+	 * Performs image.
+	 */
 	public BufferedImage image(ChartType type) {
 		return image(chart(type));
 	}
 
+	/**
+	 * Performs bar.
+	 */
 	public JFreeChart bar() {
 		CategoryDataset dataSet = dataSet();
 		JFreeChart result = ChartFactory.createBarChart(data.getTitle(),
@@ -113,6 +132,9 @@ public class JFreeChartGenerator {
 		return result;
 	}
 	
+	/**
+	 * Performs horizontalBar.
+	 */
 	public JFreeChart horizontalBar() {
 		CategoryDataset dataSet = dataSet();
 		JFreeChart result = ChartFactory.createBarChart(data.getTitle(),
@@ -131,6 +153,9 @@ public class JFreeChartGenerator {
 		return result;
 	}
 	
+	/**
+	 * Performs lineArea.
+	 */
 	public JFreeChart lineArea() {
 		CategoryDataset dataSet = dataSet();
 		JFreeChart result = ChartFactory.createAreaChart(data.getTitle(),
@@ -147,6 +172,9 @@ public class JFreeChartGenerator {
 		return result;
 	}
 	
+	/**
+	 * Performs line.
+	 */
 	public JFreeChart line() {
 		CategoryDataset dataSet = dataSet();
 		JFreeChart result = ChartFactory.createLineChart(data.getTitle(),
@@ -166,6 +194,9 @@ public class JFreeChartGenerator {
 		return result;
 	}
 	
+	/**
+	 * Performs pie.
+	 */
 	public JFreeChart pie() {
 		PieDataset dataSet = pieDataSet();
 		JFreeChart result = ChartFactory.createPieChart(data.getTitle(), dataSet, true, false, false);
@@ -175,6 +206,9 @@ public class JFreeChartGenerator {
 		return result;
 	}
 	
+	/**
+	 * Performs doughnut.
+	 */
 	public JFreeChart doughnut() {
 		PieDataset dataSet = pieDataSet();
 		JFreeChart result = ChartFactory.createRingChart(data.getTitle(), dataSet, true, false, false);
@@ -184,6 +218,9 @@ public class JFreeChartGenerator {
 		return result;
 	}
 
+	/**
+	 * Performs polarArea.
+	 */
 	public JFreeChart polarArea() {
 		XYSeriesCollection dataSet = new XYSeriesCollection();
 		dataSet.setNotify(false);
@@ -237,6 +274,9 @@ public class JFreeChartGenerator {
 		return result;
 	}
 	
+	/**
+	 * Performs radar.
+	 */
 	public JFreeChart radar() {
 		CategoryDataset dataSet = dataSet();
 	    SpiderWebPlot plot = new SpiderWebPlot(dataSet);

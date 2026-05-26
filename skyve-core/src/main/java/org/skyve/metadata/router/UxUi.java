@@ -38,37 +38,77 @@ public final class UxUi implements Serializable {
 		this.name = name;
 	}
 
+	/**
+	 * Returns the name.
+	 * @return the result
+	 */
 	public String getName() {
 		return name;
 	}
+	/**
+	 * Sets the name.
+	 * @param name the name
+	 */
 	public void setName(String name) {
 		this.name = name;
 	}
 
+	/**
+	 * Returns the scSkin.
+	 * @return the result
+	 */
 	public String getScSkin() {
 		return scSkin;
 	}
+	/**
+	 * Sets the scSkin.
+	 * @param scSkin the scSkin
+	 */
 	public void setScSkin(String scSkin) {
 		this.scSkin = scSkin;
 	}
 
+	/**
+	 * Returns the pfTemplateName.
+	 * @return the result
+	 */
 	public String getPfTemplateName() {
 		return pfTemplateName;
 	}
+	/**
+	 * Sets the pfTemplateName.
+	 * @param pfTemplateName the pfTemplateName
+	 */
 	public void setPfTemplateName(String pfTemplateName) {
 		this.pfTemplateName = pfTemplateName;
 	}
 
+	/**
+	 * Returns the pfThemeName.
+	 * @return the result
+	 */
 	public String getPfThemeName() {
 		return pfThemeName;
 	}
+	/**
+	 * Sets the pfThemeName.
+	 * @param pfThemeName the pfThemeName
+	 */
 	public void setPfThemeName(String pfThemeName) {
 		this.pfThemeName = pfThemeName;
 	}
 
+	/**
+	 * Returns the pfThemeColour.
+	 * @return the result
+	 */
 	public String getPfThemeColour() {
 		return pfThemeColour;
 	}
+	/**
+	 * Sets the pfThemeColour.
+	 * @param pfThemeColour the pfThemeColour
+	 */
 	public void setPfThemeColour(String pfThemeColour) {
 		this.pfThemeColour = pfThemeColour;
 	}
@@ -135,12 +175,24 @@ public final class UxUi implements Serializable {
 		return result;
 	}
 
+	/**
+	 * Executes newSmartClient.
+	 * @param name the name
+	 * @param scSkin the scSkin
+	 * @param pfThemeName the pfThemeName
+	 * @param pfThemeColour the pfThemeColour
+	 * @return the result
+	 */
 	public static UxUi newSmartClient(String name, String scSkin, String pfThemeName, String pfThemeColour) {
 		UxUi result = newSmartClient(name, scSkin, pfThemeName);
 		result.setPfThemeColour(pfThemeColour);
 		return result;
 	}
 
+    /**
+     * Returns a string representation of this instance.
+     * @return the result
+     */
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)

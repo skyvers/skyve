@@ -13,6 +13,18 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * JAXB-annotated descriptor for a document registration entry within a module
+ * descriptor.
+ *
+ * <p>Identifies a document by reference name and (optionally) an external module
+ * reference, enabling a module to include documents owned by another module.
+ * An optional default query name overrides the module-level default.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see ModuleMetaData
+ */
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE, 
 			name = "document",
 			propOrder = {"ref", "defaultQueryName", "moduleRef", "properties"})

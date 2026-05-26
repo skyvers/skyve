@@ -13,6 +13,18 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * JAXB-annotated descriptor for an action-level privilege within a document
+ * privilege declaration.
+ *
+ * <p>Names a specific action on a document that is granted (or denied) by a
+ * module role, complementing the CRUD privilege flags on
+ * {@link DocumentPrivilegeMetaData}.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see DocumentPrivilegeMetaData
+ */
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE)
 public class ActionPrivilegeMetaData implements DecoratedMetaData {
 	private static final long serialVersionUID = 1294697285074132505L;

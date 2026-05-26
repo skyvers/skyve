@@ -12,6 +12,17 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 
+/**
+ * JAXB-annotated check-membership widget that lets the user select multiple
+ * values from a candidate collection using checkboxes.
+ *
+ * <p>Bound to an association or collection attribute; renders each candidate
+ * as a labelled checkbox.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see ListMembership
+ */
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 public class CheckMembership extends ChangeableInputWidget implements MembershipWidget {

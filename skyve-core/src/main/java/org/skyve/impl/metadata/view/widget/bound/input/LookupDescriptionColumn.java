@@ -10,6 +10,17 @@ import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.XmlValue;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
+/**
+ * JAXB-annotated descriptor for an extra display column shown in a
+ * {@link LookupDescription} pick-list popup.
+ *
+ * <p>Adds an additional column — identified by name and label — to the
+ * lookup result grid, giving users more context when selecting a value.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see LookupDescription
+ */
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 public class LookupDescriptionColumn implements NamedMetaData {
 	private static final long serialVersionUID = -8247885015791117746L;

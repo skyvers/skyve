@@ -29,6 +29,10 @@ import org.skyve.metadata.module.Module;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+/**
+ * Drives the complete JasperReports rendering pipeline: load or compile the
+ * {@code .jrxml}, fill with data, and export to the target format.
+ */
 public class Renderer {
 
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(Renderer.class);
@@ -36,6 +40,9 @@ public class Renderer {
 	public static final int defaultReportWith = 842;
 	public static final int defaultReportHeight = 595;
 
+	/**
+	 * Performs eS.
+	 */
 	public static String eS(String string, Map<String, String> attributes, boolean withTerminator) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("\n");
@@ -54,6 +61,9 @@ public class Renderer {
 		return sb.toString();
 	}
 
+	/**
+	 * Performs eS.
+	 */
 	public static String eS(String string, String key, String value, boolean withTerminator) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("\n");
@@ -70,10 +80,16 @@ public class Renderer {
 		return sb.toString();
 	}
 
+	/**
+	 * Performs eS.
+	 */
 	public static String eS(String string, String key, String value) {
 		return eS(string, key, value, true);
 	}
 
+	/**
+	 * Performs eS.
+	 */
 	public static String eS(String string, String key1, String value1, String key2, String value2) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("\n");
@@ -90,6 +106,9 @@ public class Renderer {
 		return sb.toString();
 	}
 
+	/**
+	 * Performs eS.
+	 */
 	public static String eS(String string, String key1, String value1, String key2, String value2, String key3, String value3) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("\n");
@@ -110,10 +129,16 @@ public class Renderer {
 		return sb.toString();
 	}
 
+	/**
+	 * Performs eF.
+	 */
 	public static String eF(String string) {
 		return "\n</" + string + ">";
 	}
 
+	/**
+	 * Renders the element.
+	 */
 	public static String renderElement(ReportElement elem) {
 
 		StringBuilder sb = new StringBuilder();
@@ -403,6 +428,9 @@ public class Renderer {
 		return sb.toString();
 	}
 
+	/**
+	 * Renders the box.
+	 */
 	public static String renderBox(ReportElement e) throws Exception {
 		StringBuilder sb = new StringBuilder();
 
@@ -453,6 +481,9 @@ public class Renderer {
 		return sb.toString();
 	}
 
+	/**
+	 * Renders the band.
+	 */
 	public static String renderBand(ReportBand band) {
 
 		StringBuilder sb = new StringBuilder();
@@ -491,6 +522,9 @@ public class Renderer {
 		return sb.toString();
 	}
 
+	/**
+	 * Renders the field.
+	 */
 	public static String renderField(ReportField field) {
 
 		StringBuilder sb = new StringBuilder();
@@ -523,6 +557,9 @@ public class Renderer {
 		return sb.toString();
 	}
 
+	/**
+	 * Renders the parameter.
+	 */
 	public static String renderParameter(ReportParameter param) {
 
 		StringBuilder sb = new StringBuilder();
@@ -541,6 +578,9 @@ public class Renderer {
 		return sb.toString();
 	}
 
+	/**
+	 * Renders the variable.
+	 */
 	public static String renderVariable(ReportVariable variable) {
 
 		StringBuilder sb = new StringBuilder();
@@ -566,6 +606,9 @@ public class Renderer {
 		return sb.toString();
 	}
 
+	/**
+	 * Renders the design.
+	 */
 	public static String renderDesign(DesignSpecification design) {
 		StringBuilder sb = new StringBuilder();
 
@@ -762,6 +805,9 @@ public class Renderer {
 		return sb.toString();
 	}
 
+	/**
+	 * Performs pathToReport.
+	 */
 	public static String pathToReport(String moduleName, String documentName, boolean enquote) {
 
 		String sep = System.getProperty("file.separator");
@@ -796,6 +842,9 @@ public class Renderer {
 		return sPath.toString();
 	}
 
+	/**
+	 * Returns the persistentIdentifierForDocument.
+	 */
 	public static String getPersistentIdentifierForDocument(Document document) {
 		String result = "UnknownTable";
 		Persistent persistent = document.getPersistent();
@@ -805,6 +854,9 @@ public class Renderer {
 		return result;
 	}
 
+	/**
+	 * Returns the sqlEquivalentClass.
+	 */
 	public static String getSqlEquivalentClass(AttributeType aType) {
 
 		String result = null;
@@ -942,6 +994,9 @@ public class Renderer {
 		return result;
 	}
 
+	/**
+	 * Performs rawConditionName.
+	 */
 	public static String rawConditionName(String conditionName) {
 		String result = conditionName;
 		if (conditionName.startsWith("not")) {

@@ -17,6 +17,9 @@ import jakarta.xml.bind.annotation.XmlType;
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE, 
 			propOrder = {"schema", "catalog", "strategy", "discriminator", "cacheName"}) 
+/**
+ * Defines the Persistent type.
+ */
 public class Persistent extends NamedMetaData {
 	private static final long serialVersionUID = -6359398747055206964L;
 
@@ -36,6 +39,9 @@ public class Persistent extends NamedMetaData {
 	private String discriminator;
 	private String cacheName;
 	
+	/**
+	 * Creates a new Persistent instance.
+	 */
 	public Persistent() {
 		// nothing to see here
 	}

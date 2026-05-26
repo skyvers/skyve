@@ -28,6 +28,17 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * JAXB-annotated dual-list membership widget that lets the user move values
+ * between a candidates list and a members list.
+ *
+ * <p>Bound to a collection attribute.  Displays candidate heading, members
+ * heading, configurable width and minimum height, and change events.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see CheckMembership
+ */
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"changedActions",

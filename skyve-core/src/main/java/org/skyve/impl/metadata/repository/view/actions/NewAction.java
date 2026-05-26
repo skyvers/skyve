@@ -6,6 +6,16 @@ import org.skyve.metadata.controller.ImplicitActionName;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB-annotated descriptor for a {@code <new>} action button in a view.
+ *
+ * <p>A new action creates and navigates to a fresh unsaved instance of the
+ * current document.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see PositionableAction
+ */
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "new")
 public class NewAction extends PositionableAction {

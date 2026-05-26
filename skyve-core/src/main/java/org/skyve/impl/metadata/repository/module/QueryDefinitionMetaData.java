@@ -10,6 +10,21 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * Abstract JAXB base for query definitions that embed a query body in a module
+ * descriptor.
+ *
+ * <p>Adds a description, documentation, and an optional execution timeout to the
+ * base {@link QueryMetaData} contract.  Concrete subclasses
+ * ({@link MetaDataQueryMetaData}, {@link SQLMetaData}, {@link BizQLMetaData})
+ * add the query-body property.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see MetaDataQueryMetaData
+ * @see SQLMetaData
+ * @see BizQLMetaData
+ */
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE, 
 			propOrder = {"documentation", "description", "timeoutInSeconds"})
 public abstract class QueryDefinitionMetaData extends QueryMetaData {

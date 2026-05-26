@@ -30,6 +30,9 @@ public class ContentImageForReport {
 		return new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
 	}
 
+	/**
+	 * Performs image.
+	 */
 	public static BufferedImage image(String contentId, int imageWidth, int imageHeight) throws Exception {
 		if (StringUtils.isBlank(contentId)) {
 			LOGGER.error("Attempted to generate image from null content id, returning blank image.");
@@ -54,6 +57,9 @@ public class ContentImageForReport {
 		}
 	}
 
+	/**
+	 * Performs customerLogo.
+	 */
 	public static BufferedImage customerLogo(int imageWidth, int imageHeight) throws IOException {
 		final Customer customer = CORE.getCustomer();
 		final File logo = CORE.getRepository().findResourceFile(customer.getUiResources().getLogoRelativeFileName(),

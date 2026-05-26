@@ -49,14 +49,45 @@ public interface DynamicPersistence extends Serializable, Closeable {
 	void populate(PersistentBean bean);
 		
 	// Persistence first level cache methods
+
+	/**
+	 * Executes evictAllCached.
+	 */
 	public void evictAllCached();
+	
+	/**
+	 * Executes evictCached.
+	 * @param bean the bean
+	 */
 	public void evictCached(Bean bean);
+	
+	/**
+	 * Executes cached.
+	 * @param bean the bean
+	 * @return the result
+	 */
 	public boolean cached(Bean bean);
 	
 	// Persistence Transaction methods
+	
+	/**
+	 * Executes begin.
+	 */
 	public void begin();
+	
+	/**
+	 * Executes rollback.
+	 */
 	public void rollback();
+	
+	/**
+	 * Executes commit.
+	 */
 	public void commit();
+	
+	/**
+	 * Executes close.
+	 */
 	@Override
 	public void close();
 }

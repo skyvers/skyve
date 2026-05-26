@@ -7,6 +7,21 @@ import org.skyve.metadata.repository.ProvidedRepository;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
+/**
+ * Static factory that provides access to the singleton {@link ProvidedRepository}.
+ *
+ * <p>The framework installs exactly one {@code ProvidedRepository} instance for the
+ * lifetime of the application.  Callers obtain it via
+ * {@link org.skyve.impl.metadata.repository.ProvidedRepositoryFactory#get()} rather than
+ * constructing one directly.  The factory hides the concrete implementation from
+ * framework code that only needs the repository contract.
+ *
+ * <p>Threading: the singleton reference is written once during bootstrap and read
+ * without synchronisation thereafter; the write must complete-before-read (e.g. via
+ * application server startup guarantees) to avoid a data race.
+ *
+ * @see ProvidedRepository
+ */
 public abstract class ProvidedRepositoryFactory implements ProvidedRepository {
 	private static ProvidedRepository repository;
 	

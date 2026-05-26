@@ -10,6 +10,17 @@ import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB-annotated descriptor for a {@code <queryAggregateAccess>} user-access
+ * grant in a module role.
+ *
+ * <p>Grants access to aggregate chart/report views driven by a named module query.
+ * Extends {@link ModuleRoleUserAccessMetaData}.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see ModuleRoleUserAccessMetaData
+ */
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "queryAggregateAccess")
 public class ModuleRoleQueryAggregateUserAccessMetaData extends ModuleRoleUserAccessMetaData {

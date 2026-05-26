@@ -66,6 +66,9 @@ class HibernateSQL extends AbstractSQL {
 		this.persistence = persistence;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public <T extends Bean> List<T> beanResults() {
 		String moduleName = getModuleName();
@@ -90,6 +93,9 @@ class HibernateSQL extends AbstractSQL {
 		}
 	}
 
+	/**
+	 * Performs beanIterable.
+	 */
 	@Override
 	@SuppressWarnings("resource")
 	public <T extends Bean> AutoClosingIterable<T> beanIterable() {
@@ -114,6 +120,9 @@ class HibernateSQL extends AbstractSQL {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public <T> List<T> scalarResults(Class<T> type) {
 		try {
@@ -135,6 +144,9 @@ class HibernateSQL extends AbstractSQL {
 		}
 	}
 
+	/**
+	 * Performs scalarIterable.
+	 */
 	@Override
 	@SuppressWarnings("resource")
 	public <T> AutoClosingIterable<T> scalarIterable(Class<T> type) {
@@ -152,6 +164,9 @@ class HibernateSQL extends AbstractSQL {
 		}
 	}
 
+	/**
+	 * Performs tupleResults.
+	 */
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<Object[]> tupleResults() {
@@ -173,6 +188,9 @@ class HibernateSQL extends AbstractSQL {
 		}
 	}
 
+	/**
+	 * Performs tupleIterable.
+	 */
 	@Override
 	@SuppressWarnings("resource")
 	public AutoClosingIterable<Object[]> tupleIterable() {
@@ -190,6 +208,9 @@ class HibernateSQL extends AbstractSQL {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public List<DynaBean> dynaResults() {
 		try {
@@ -208,6 +229,9 @@ class HibernateSQL extends AbstractSQL {
 		}
 	}
 
+	/**
+	 * Performs dynaIterable.
+	 */
 	@Override
 	@SuppressWarnings("resource")
 	public AutoClosingIterable<DynaBean> dynaIterable() {
@@ -222,6 +246,9 @@ class HibernateSQL extends AbstractSQL {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public int execute() {
 		try {

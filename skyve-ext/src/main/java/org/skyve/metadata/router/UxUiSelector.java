@@ -27,20 +27,26 @@ import jakarta.servlet.http.HttpServletRequest;
  */
 public interface UxUiSelector extends TaggingUxUiSelector {
 	/**
-	 * Called to determine what UxUi to return when the user agent / device type is detected / determined (not previewing but normal system operation)
-	 * 
-	 * @param userAgentType
-	 * @param request
-	 * @return
+	 * Selects the UX/UI renderer to use for a normal (non-preview) request based on
+	 * the detected user-agent type and the HTTP request context.
+	 *
+	 * @param userAgentType the device type inferred from the real {@code User-Agent} header;
+	 *                      never {@code null}
+	 * @param request       the current HTTP servlet request; never {@code null}
+	 * @return the selected UX/UI descriptor; never {@code null}
 	 */
 	public @Nonnull UxUi select(@Nonnull UserAgentType userAgentType, @Nonnull HttpServletRequest request);
 	
 	/**
-	 * Called to determine what UxUi to return when the user agent / device type is emulated (in preview mode)
-	 * 
-	 * @param userAgentType
-	 * @param request
-	 * @return
+	 * Selects the UX/UI renderer to use when the device type is being emulated (e.g. in
+	 * preview or developer mode).
+	 *
+	 * <p>The default implementation delegates to {@link #select}, effectively treating
+	 * emulation the same as normal selection. Override to apply preview-specific logic.
+	 *
+	 * @param userAgentType the simulated device type; never {@code null}
+	 * @param request       the current HTTP servlet request; never {@code null}
+	 * @return the selected UX/UI descriptor; never {@code null}
 	 */
 	default public @Nonnull UxUi emulate(@Nonnull UserAgentType userAgentType, @Nonnull HttpServletRequest request) {
 		return select(userAgentType, request);

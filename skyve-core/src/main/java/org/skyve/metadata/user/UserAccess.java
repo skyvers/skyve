@@ -34,6 +34,10 @@ import org.skyve.metadata.module.Module;
 public class UserAccess implements Serializable, Comparable<UserAccess> {
 	private static final long serialVersionUID = 103193454372180990L;
 
+	/**
+	 * Executes Collections.emptySet.
+	 * @return the result
+	 */
 	public static final Set<String> ALL_UX_UIS = Collections.emptySet();
 
 	private char type;
@@ -231,6 +235,11 @@ public class UserAccess implements Serializable, Comparable<UserAccess> {
 		return UserAccess.singular(d.getOwningModuleName(), baseDocumentName);
 	}
 	
+	/**
+	 * Returns whether this instance is equal to the given object.
+	 * @param other the other
+	 * @return the result
+	 */
 	@Override
 	public boolean equals(Object other) {
 		if (other == null) {
@@ -239,11 +248,19 @@ public class UserAccess implements Serializable, Comparable<UserAccess> {
 		return toString().equals(other.toString());
 	}
 	
+	/**
+	 * Returns whether hCode.
+	 * @return the result
+	 */
 	@Override
 	public int hashCode() {
 		return toString().hashCode();
 	}
 	
+	/**
+	 * Returns a string representation of this instance.
+	 * @return the result
+	 */
 	@Override
 	public String toString() {
 		StringBuilder result = new StringBuilder(64);
@@ -260,6 +277,11 @@ public class UserAccess implements Serializable, Comparable<UserAccess> {
 		return result.toString();
 	}
 	
+	/**
+	 * Compares this instance with the given value.
+	 * @param other the other
+	 * @return the result
+	 */
 	@Override
 	public int compareTo(UserAccess other) {
 		return toString().compareTo(other.toString());

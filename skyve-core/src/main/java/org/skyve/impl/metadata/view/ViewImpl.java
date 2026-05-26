@@ -55,6 +55,21 @@ import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Binder.TargetMetaData;
 
+/**
+ * Runtime implementation of the {@link View} metadata interface.
+ *
+ * <p>Holds the fully resolved view structure: widget tree ({@link Container}),
+ * action list, sidebar, access-control entries, auto-refresh settings, and
+ * layout parameters.  Instances are produced by converting a
+ * {@link org.skyve.impl.metadata.repository.view.ViewMetaData} descriptor
+ * during repository bootstrap.
+ *
+ * <p>Threading: not thread-safe.  Instances are read-only once placed in
+ * the repository cache.
+ *
+ * @see View
+ * @see org.skyve.impl.metadata.repository.view.ViewMetaData
+ */
 public class ViewImpl extends Container implements View {
 	private static final long serialVersionUID = -2621201277538515637L;
 

@@ -34,9 +34,15 @@ import org.skyve.metadata.view.model.map.MapModel;
 import jakarta.annotation.Nonnull;
 
 /**
- * Implements a repository that delegates to a list of other repository delegates in order.
- * This is thread-safe for manipulating the list of delegates and the thread safety of the underlying delegated 
- * repository methods depends on the implementations of the respective delegates.
+ * Composes multiple {@link ProvidedRepository} delegates as an ordered lookup
+ * chain.
+ *
+ * <p>Query methods iterate delegates in insertion order and return the first
+ * non-null result. Mutation-style methods broadcast to all delegates.
+ *
+ * <p>Threading: chain structure updates are safe via
+ * {@link CopyOnWriteArrayList}; delegate method thread-safety depends on each
+ * delegate implementation.
  */
 public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory {
 	/**
@@ -47,28 +53,53 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 */
 	protected List<ProvidedRepository> delegates = new CopyOnWriteArrayList<>();
 	
+	/**
+	 * Creates a new DelegatingProvidedRepositoryChain instance.
+	 * @param delegates the delegates
+	 */
 	public DelegatingProvidedRepositoryChain(@Nonnull ProvidedRepository... delegates) {
 		for (ProvidedRepository delegate : delegates) {
 			addDelegate(delegate);
 		}
 	}
 
+	/**
+	 * Executes addDelegate.
+	 * @param delegate the delegate
+	 */
 	public void addDelegate(@Nonnull ProvidedRepository delegate) {
 		delegates.add(delegate);
 	}
 
+	/**
+	 * Executes addDelegate.
+	 * @param index the index
+	 * @param delegate the delegate
+	 */
 	public void addDelegate(int index, @Nonnull ProvidedRepository delegate) {
 		delegates.add(index, delegate);
 	}
 
+	/**
+	 * Executes removeDelegate.
+	 * @param delegate the delegate
+	 */
 	public void removeDelegate(@Nonnull ProvidedRepository delegate) {
 		delegates.remove(delegate);
 	}
 
+	/**
+	 * Executes removeDelegate.
+	 * @param index the index
+	 */
 	public void removeDelegate(int index) {
 		delegates.remove(index);
 	}
 
+	/**
+	 * Executes evictCachedMetaData.
+	 * @param customer the customer
+	 */
 	@Override
 	public void evictCachedMetaData(Customer customer) {
 		for (ProvidedRepository delegate : delegates) {
@@ -76,6 +107,13 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 		}
 	}
 
+	/**
+	 * Executes findResourceFile.
+	 * @param resourcePath the resourcePath
+	 * @param customerName the customerName
+	 * @param moduleName the moduleName
+	 * @return the result
+	 */
 	@Override
 	public File findResourceFile(String resourcePath, String customerName, String moduleName) {
 		for (ProvidedRepository delegate : delegates) {
@@ -87,6 +125,10 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 		return null;
 	}
 
+	/**
+	 * Returns the router.
+	 * @return the result
+	 */
 	@Override
 	public Router getRouter() {
 		for (ProvidedRepository delegate : delegates) {
@@ -98,6 +140,11 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 		return null;
 	}
 
+	/**
+	 * Returns the customer.
+	 * @param customerName the customerName
+	 * @return the result
+	 */
 	@Override
 	public Customer getCustomer(String customerName) {
 		for (ProvidedRepository delegate : delegates) {
@@ -109,6 +156,14 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 		return null;
 	}
 
+	/**
+	 * Returns the dynamicImage.
+	 * @param customer the customer
+	 * @param document the document
+	 * @param imageName the imageName
+	 * @param runtime the runtime
+	 * @return the result
+	 */
 	@Override
 	public <T extends Bean> DynamicImage<T> getDynamicImage(Customer customer, Document document, String imageName, boolean runtime) {
 		for (ProvidedRepository delegate : delegates) {
@@ -120,6 +175,14 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 		return null;
 	}
 
+	/**
+	 * Returns the view.
+	 * @param uxui the uxui
+	 * @param customer the customer
+	 * @param document the document
+	 * @param name the name
+	 * @return the result
+	 */
 	@Override
 	public View getView(String uxui, Customer customer, Document document, String name) {
 		for (ProvidedRepository delegate : delegates) {
@@ -131,6 +194,13 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 		return null;
 	}
 
+	/**
+	 * Returns the metaDataAction.
+	 * @param customer the customer
+	 * @param document the document
+	 * @param actionName the actionName
+	 * @return the result
+	 */
 	@Override
 	public ActionMetaData getMetaDataAction(Customer customer, Document document, String actionName) {
 		for (ProvidedRepository delegate : delegates) {
@@ -142,6 +212,14 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 		return null;
 	}
 
+	/**
+	 * Returns the comparisonModel.
+	 * @param customer the customer
+	 * @param document the document
+	 * @param modelName the modelName
+	 * @param runtime the runtime
+	 * @return the result
+	 */
 	@Override
 	public <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(Customer customer, Document document, String modelName, boolean runtime) {
 		for (ProvidedRepository delegate : delegates) {
@@ -153,6 +231,14 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 		return null;
 	}
 
+	/**
+	 * Returns the mapModel.
+	 * @param customer the customer
+	 * @param document the document
+	 * @param modelName the modelName
+	 * @param runtime the runtime
+	 * @return the result
+	 */
 	@Override
 	public <T extends Bean> MapModel<T> getMapModel(Customer customer, Document document, String modelName, boolean runtime) {
 		for (ProvidedRepository delegate : delegates) {
@@ -164,6 +250,14 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 		return null;
 	}
 
+	/**
+	 * Returns the chartModel.
+	 * @param customer the customer
+	 * @param document the document
+	 * @param modelName the modelName
+	 * @param runtime the runtime
+	 * @return the result
+	 */
 	@Override
 	public <T extends Bean> ChartModel<T> getChartModel(Customer customer, Document document, String modelName, boolean runtime) {
 		for (ProvidedRepository delegate : delegates) {
@@ -175,6 +269,14 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 		return null;
 	}
 
+	/**
+	 * Returns the listModel.
+	 * @param customer the customer
+	 * @param document the document
+	 * @param modelName the modelName
+	 * @param runtime the runtime
+	 * @return the result
+	 */
 	@Override
 	public <T extends Bean> ListModel<T> getListModel(Customer customer, Document document, String modelName, boolean runtime) {
 		for (ProvidedRepository delegate : delegates) {
@@ -186,6 +288,14 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 		return null;
 	}
 
+	/**
+	 * Returns the serverSideAction.
+	 * @param customer the customer
+	 * @param document the document
+	 * @param className the className
+	 * @param runtime the runtime
+	 * @return the result
+	 */
 	@Override
 	public ServerSideAction<Bean> getServerSideAction(Customer customer, Document document, String className, boolean runtime) {
 		for (ProvidedRepository delegate : delegates) {
@@ -197,6 +307,14 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 		return null;
 	}
 
+	/**
+	 * Returns the bizExportAction.
+	 * @param customer the customer
+	 * @param document the document
+	 * @param className the className
+	 * @param runtime the runtime
+	 * @return the result
+	 */
 	@Override
 	public BizExportAction getBizExportAction(Customer customer, Document document, String className, boolean runtime) {
 		for (ProvidedRepository delegate : delegates) {
@@ -208,6 +326,14 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 		return null;
 	}
 
+	/**
+	 * Returns the bizImportAction.
+	 * @param customer the customer
+	 * @param document the document
+	 * @param className the className
+	 * @param runtime the runtime
+	 * @return the result
+	 */
 	@Override
 	public BizImportAction getBizImportAction(Customer customer, Document document, String className, boolean runtime) {
 		for (ProvidedRepository delegate : delegates) {
@@ -219,6 +345,14 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 		return null;
 	}
 
+	/**
+	 * Returns the downloadAction.
+	 * @param customer the customer
+	 * @param document the document
+	 * @param className the className
+	 * @param runtime the runtime
+	 * @return the result
+	 */
 	@Override
 	public DownloadAction<Bean> getDownloadAction(Customer customer, Document document, String className, boolean runtime) {
 		for (ProvidedRepository delegate : delegates) {
@@ -230,6 +364,14 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 		return null;
 	}
 
+	/**
+	 * Returns the uploadAction.
+	 * @param customer the customer
+	 * @param document the document
+	 * @param className the className
+	 * @param runtime the runtime
+	 * @return the result
+	 */
 	@Override
 	public UploadAction<Bean> getUploadAction(Customer customer, Document document, String className, boolean runtime) {
 		for (ProvidedRepository delegate : delegates) {
@@ -241,6 +383,12 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 		return null;
 	}
 
+	/**
+	 * Returns the dataFactory.
+	 * @param customer the customer
+	 * @param document the document
+	 * @return the result
+	 */
 	@Override
 	public Object getDataFactory(Customer customer, Document document) {
 		for (ProvidedRepository delegate : delegates) {
@@ -252,6 +400,11 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 		return null;
 	}
 
+	/**
+	 * Executes retrieveUser.
+	 * @param userName the userName
+	 * @return the result
+	 */
 	@Override
 	public UserImpl retrieveUser(String userName) {
 		for (ProvidedRepository delegate : delegates) {
@@ -263,6 +416,10 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 		return null;
 	}
 	
+	/**
+	 * Executes retrieveAllScheduledJobsForAllCustomers.
+	 * @return the result
+	 */
 	@Override
 	public List<UserJobSchedule> retrieveAllScheduledJobsForAllCustomers() {
 		for (ProvidedRepository delegate : delegates) {
@@ -274,6 +431,10 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 		return null;
 	}
 
+	/**
+	 * Executes retrieveAllScheduledReportsForAllCustomers.
+	 * @return the result
+	 */
 	@Override
 	public List<UserJobSchedule> retrieveAllScheduledReportsForAllCustomers() {
 		for (ProvidedRepository delegate : delegates) {
@@ -285,6 +446,11 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 		return null;
 	}
 	
+	/**
+	 * Executes retrievePublicUserName.
+	 * @param customerName the customerName
+	 * @return the result
+	 */
 	@Override
 	public String retrievePublicUserName(String customerName) {
 		for (ProvidedRepository delegate : delegates) {
@@ -296,6 +462,10 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 		return null;
 	}
 	
+	/**
+	 * Executes resetMenus.
+	 * @param user the user
+	 */
 	@Override
 	public void resetMenus(User user) {
 		for (ProvidedRepository delegate : delegates) {
@@ -303,6 +473,11 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 		}
 	}
 
+	/**
+	 * Executes populatePermissions.
+	 * @param user the user
+	 * @return the result
+	 */
 	@Override
 	public boolean populatePermissions(User user) {
 	    for (ProvidedRepository delegate : delegates) {
@@ -313,6 +488,10 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	    return false;
 	}
 
+	/**
+	 * Executes resetUserPermissions.
+	 * @param user the user
+	 */
 	@Override
 	public void resetUserPermissions(User user) {
 		for (ProvidedRepository delegate : delegates) {
@@ -320,7 +499,14 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 		}
 	}
 
+	/**
+	 * Executes populateUser.
+	 * @param user the user
+	 * @param connection the connection
+	 * @return the result
+	 */
 	@Override
+	@SuppressWarnings("resource") // Connection lifecycle is owned by the caller and delegates.
 	public boolean populateUser(User user, Connection connection) {
 		for (ProvidedRepository delegate : delegates) {
 			if (delegate.populateUser(user, connection)) {
@@ -330,6 +516,10 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 		return false;
 	}
 	
+	/**
+	 * Returns the allCustomerNames.
+	 * @return the result
+	 */
 	@Override
 	public List<String> getAllCustomerNames() {
 		List<String> result = new ArrayList<>(10);
@@ -342,6 +532,10 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 		return result;
 	}
 
+	/**
+	 * Returns the allVanillaModuleNames.
+	 * @return the result
+	 */
 	@Override
 	public List<String> getAllVanillaModuleNames() {
 		List<String> result = new ArrayList<>(10);
@@ -354,6 +548,12 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 		return result;
 	}
 
+	/**
+	 * Returns the module.
+	 * @param customer the customer
+	 * @param moduleName the moduleName
+	 * @return the result
+	 */
 	@Override
 	public Module getModule(Customer customer, String moduleName) {
 		for (ProvidedRepository delegate : delegates) {
@@ -365,6 +565,13 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 		throw new MetaDataException(moduleName + " does not exist" + ((customer == null) ? "" : " for customer " + customer.getName()));
 	}
 
+	/**
+	 * Returns the document.
+	 * @param customer the customer
+	 * @param module the module
+	 * @param documentName the documentName
+	 * @return the result
+	 */
 	@Override
 	public Document getDocument(Customer customer, Module module, String documentName) {
 		for (ProvidedRepository delegate : delegates) {
@@ -376,6 +583,13 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 		throw new MetaDataException(documentName + " does not exist for module " + module.getName() + ((customer == null) ? "" : " for customer " + customer.getName()));
 	}
 
+	/**
+	 * Returns the bizlet.
+	 * @param customer the customer
+	 * @param document the document
+	 * @param runtime the runtime
+	 * @return the result
+	 */
 	@Override
 	public <T extends Bean> Bizlet<T> getBizlet(Customer customer, Document document, boolean runtime) {
 		for (ProvidedRepository delegate : delegates) {
@@ -387,6 +601,12 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 		return null;
 	}
 
+	/**
+	 * Returns the metaDataBizlet.
+	 * @param customer the customer
+	 * @param document the document
+	 * @return the result
+	 */
 	@Override
 	public BizletMetaData getMetaDataBizlet(Customer customer, Document document) {
 		for (ProvidedRepository delegate : delegates) {
@@ -398,6 +618,10 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 		return null;
 	}
 
+	/**
+	 * Executes validateCustomerForGenerateDomain.
+	 * @param customer the customer
+	 */
 	@Override
 	public void validateCustomerForGenerateDomain(Customer customer) {
 		for (ProvidedRepository delegate : delegates) {
@@ -405,6 +629,11 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 		}
 	}
 
+	/**
+	 * Executes validateModuleForGenerateDomain.
+	 * @param customer the customer
+	 * @param module the module
+	 */
 	@Override
 	public void validateModuleForGenerateDomain(Customer customer, Module module) {
 		for (ProvidedRepository delegate : delegates) {
@@ -412,6 +641,11 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 		}
 	}
 
+	/**
+	 * Executes validateDocumentForGenerateDomain.
+	 * @param customer the customer
+	 * @param document the document
+	 */
 	@Override
 	public void validateDocumentForGenerateDomain(Customer customer, Document document) {
 		for (ProvidedRepository delegate : delegates) {
@@ -419,6 +653,13 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 		}
 	}
 
+	/**
+	 * Executes validateViewForGenerateDomain.
+	 * @param customer the customer
+	 * @param document the document
+	 * @param view the view
+	 * @param uxui the uxui
+	 */
 	@Override
 	public void validateViewForGenerateDomain(Customer customer, Document document, View view, String uxui) {
 		for (ProvidedRepository delegate : delegates) {
@@ -426,6 +667,10 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 		}
 	}
 
+	/**
+	 * Returns the globalRouter.
+	 * @return the result
+	 */
 	@Override
 	public Router getGlobalRouter() {
 		for (ProvidedRepository delegate : delegates) {
@@ -437,6 +682,10 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 		return null;
 	}
 
+	/**
+	 * Returns the moduleRouters.
+	 * @return the result
+	 */
 	@Override
 	public List<Router> getModuleRouters() {
 		List<Router> result = new ArrayList<>(10);
@@ -449,6 +698,13 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 		return result;
 	}
 
+	/**
+	 * Returns the reportFileName.
+	 * @param customer the customer
+	 * @param document the document
+	 * @param reportName the reportName
+	 * @return the result
+	 */
 	@Override
 	public String getReportFileName(Customer customer, Document document, String reportName) {
 		for (ProvidedRepository delegate : delegates) {
@@ -460,6 +716,12 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 		return null;
 	}
 	
+	/**
+	 * Returns the javaClass.
+	 * @param customer the customer
+	 * @param key the key
+	 * @return the result
+	 */
 	@Override
 	public Class<?> getJavaClass(Customer customer, String key) {
 		for (ProvidedRepository delegate : delegates) {
@@ -471,6 +733,12 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 		return null;
 	}
 	
+	/**
+	 * Executes vtable.
+	 * @param customerName the customerName
+	 * @param key the key
+	 * @return the result
+	 */
 	@Override
 	public String vtable(String customerName, String key) {
 		for (ProvidedRepository delegate : delegates) {
@@ -482,6 +750,10 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 		return null;
 	}
 	
+	/**
+	 * Returns the useScaffoldedViews.
+	 * @return the result
+	 */
 	@Override
 	public boolean getUseScaffoldedViews() {
 		for (ProvidedRepository delegate : delegates) {

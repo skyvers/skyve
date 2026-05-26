@@ -1,5 +1,9 @@
 package org.skyve.impl.generate.jasperreports;
 
+/**
+ * Descriptor for a JasperReports variable (aggregate expression) used during
+ * programmatic {@code .jrxml} generation.
+ */
 public class ReportVariable {
 	/**
 	 * Name

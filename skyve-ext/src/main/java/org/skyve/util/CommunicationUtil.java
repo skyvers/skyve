@@ -39,6 +39,13 @@ import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nonnull;
 
+/**
+ * Executes communication-template workflows for {@code admin.Communication} documents.
+ *
+ * <p>This utility resolves recipients, applies template/body bindings, assembles
+ * attachments (including optional calendar payloads), and dispatches via SMTP or
+ * writes message files depending on the configured action path.
+ */
 public class CommunicationUtil {
 
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(CommunicationUtil.class);
@@ -75,6 +82,9 @@ public class CommunicationUtil {
 		FILE, SMTP;
 	}
 
+	/**
+	 * Holds generated calendar links and iCalendar payload bytes for a communication.
+	 */
 	public static class CommunicationCalendarItem {
 		private String googleCalendarLink;
 		private String yahooCalendarLink;
@@ -390,14 +400,15 @@ public class CommunicationUtil {
 	}
 
 	/**
-	 * Wrapper specific for generating to file
+	 * Generates communication output to file storage rather than sending via SMTP.
 	 * 
-	 * @param communication
-	 * @param runMode
-	 * @param responseMode
-	 * @param additionalAttachments
-	 * @param specificBeans
-	 * @throws Exception
+	 * @param communication Communication definition to execute
+	 * @param runMode Whether to execute or dry-run
+	 * @param responseMode Exception handling mode
+	 * @param additionalAttachments Attachments to append ahead of configured attachments
+	 * @param specificBeans Binding context beans
+	 * @return Generated output file path when generation occurs, otherwise {@code null}
+	 * @throws Exception If generation fails and explicit mode is used
 	 */
 	public static String generate(Communication communication, RunMode runMode, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... specificBeans)
 			throws Exception {
@@ -407,9 +418,9 @@ public class CommunicationUtil {
 	/**
 	 * Retrieves a persisted system communication with the nominated description
 	 * 
-	 * @param description
-	 * @return
-	 * @throws Exception
+	 * @param description Communication description to search for
+	 * @return Matching system communication, or {@code null} when not found
+	 * @throws Exception If retrieval fails
 	 */
 	public static Communication getSystemCommunicationByDescription(String description) throws Exception {
 		return CORE.getPersistence().withDocumentPermissionScopes(DocumentPermissionScope.customer, p -> {
@@ -454,7 +465,13 @@ public class CommunicationUtil {
 	/**
 	 * Creates the required system communication if it does not exist
 	 * 
-	 * @return
+	 * @param description Communication description key
+	 * @param sendToExpression Recipient expression
+	 * @param ccExpression CC expression
+	 * @param defaultSubject Default subject template
+	 * @param defaultBody Default body template
+	 * @return Existing or newly created persisted communication
+	 * @throws Exception If initialisation fails
 	 */
 	public static Communication initialiseSystemCommunication(String description, String sendToExpression, String ccExpression, String defaultSubject, String defaultBody)
 			throws Exception {
@@ -485,6 +502,15 @@ public class CommunicationUtil {
 		return result;
 	}
 
+	/**
+	 * Creates a system communication with default recipient expression when absent.
+	 *
+	 * @param description Communication description key
+	 * @param defaultSubject Default subject template
+	 * @param defaultBody Default body template
+	 * @return Existing or newly created persisted communication
+	 * @throws Exception If initialisation fails
+	 */
 	public static Communication initialiseSystemCommunication(String description, String defaultSubject, String defaultBody) throws Exception {
 
 		return initialiseSystemCommunication(description, "{contact.email1}", null, defaultSubject, defaultBody);
@@ -509,6 +535,17 @@ public class CommunicationUtil {
 		sendFailSafeSystemCommunication(webContext, description, sendTo, ccTo, defaultSubject, defaultBody, responseMode, additionalAttachments, beans);
 	}
 
+	/**
+	 * Fail-safe sends a system communication using default recipient expressions.
+	 *
+	 * @param description Communication description key
+	 * @param defaultSubject Default subject template
+	 * @param defaultBody Default body template
+	 * @param responseMode Exception handling mode
+	 * @param additionalAttachments Attachments to append
+	 * @param beans Binding context beans
+	 * @throws Exception If initialisation or send fails in explicit mode
+	 */
 	public static void sendFailSafeSystemCommunication(String description, String defaultSubject, String defaultBody, ResponseMode responseMode,
 			MailAttachment[] additionalAttachments, Bean... beans) throws Exception {
 		sendFailSafeSystemCommunication(null, description, defaultSubject, defaultBody, responseMode, additionalAttachments, beans);
@@ -532,6 +569,19 @@ public class CommunicationUtil {
 		actionCommunicationRequest(webContext, ActionType.SMTP, c, RunMode.ACTION, responseMode, additionalAttachments, beans);
 	}
 
+	/**
+	 * Fail-safe sends a system communication using explicit recipient expressions.
+	 *
+	 * @param description Communication description key
+	 * @param sendTo Recipient expression
+	 * @param ccTo CC expression
+	 * @param defaultSubject Default subject template
+	 * @param defaultBody Default body template
+	 * @param responseMode Exception handling mode
+	 * @param additionalAttachments Attachments to append
+	 * @param beans Binding context beans
+	 * @throws Exception If initialisation or send fails in explicit mode
+	 */
 	public static void sendFailSafeSystemCommunication(String description, String sendTo, String ccTo, String defaultSubject, String defaultBody, ResponseMode responseMode,
 			MailAttachment[] additionalAttachments, Bean... beans) throws Exception {
 		sendFailSafeSystemCommunication(null, description, sendTo, ccTo, defaultSubject, defaultBody, responseMode, additionalAttachments, beans);
@@ -544,9 +594,9 @@ public class CommunicationUtil {
 	 * Using the tag, format and action type, run the one shot job to either
 	 * test, send or generate the communication files.
 	 * 
-	 * @param communication
-	 * @return
-	 * @throws Exception
+	 * @param bean Communication instance driving the one-shot job request
+	 * @return Persisted communication instance with updated results text
+	 * @throws Exception If job kickoff cannot be scheduled
 	 */
 	public static <T extends Communication> T kickOffJob(T bean) throws Exception {
 

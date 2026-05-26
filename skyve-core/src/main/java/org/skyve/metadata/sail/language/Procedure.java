@@ -51,8 +51,6 @@ import jakarta.xml.bind.annotation.XmlElementRefs;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
-@XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
-@XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
 /**
  * A reusable sequence of {@link Step} objects used as a before/after hook within
  * an {@link Interaction} or {@link Automation}.
@@ -69,9 +67,15 @@ import jakarta.xml.bind.annotation.XmlType;
  * @see Automation
  * @see Step
  */
+@XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
+@XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
 public class Procedure {
 	private List<Step> steps = new ArrayList<>();
 
+	/**
+	 * Returns the steps.
+	 * @return the result
+	 */
 	@XmlElementRefs({@XmlElementRef(type = Login.class),
 						@XmlElementRef(type = Logout.class),
 						@XmlElementRef(type = NavigateList.class),

@@ -28,8 +28,21 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
-@XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "view")
+/**
+ * JAXB root element for a view descriptor ({@code edit.xml}, {@code list.xml}, etc.),
+ * converted to a runtime {@link ViewImpl} during repository bootstrap.
+ *
+ * <p>A view descriptor holds the full widget tree for one named view, along with
+ * the action list, sidebar, access-control entries, auto-refresh settings, and
+ * properties.  Extends {@link Container} so that child widgets can be nested
+ * using the standard JAXB element-ref polymorphism.
+ *
+ * <p>Threading: not thread-safe.  Instances are populated during JAXB unmarshalling
+ * and are read-only once converted and placed in the repository cache.
+ *
+ * @see ViewImpl
+ * @see Actions
+ */@XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "view")
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE, 
 			name = "view",
 			propOrder = {"documentation",

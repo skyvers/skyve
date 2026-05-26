@@ -16,6 +16,10 @@ import org.hibernate.type.LiteralType;
 import org.hibernate.usertype.UserType;
 import org.skyve.domain.types.TimeOnly;
 
+/**
+ * Hibernate {@link org.hibernate.usertype.UserType} that maps the Skyve
+ * {@link org.skyve.domain.types.TimeOnly} type to a SQL {@code TIME} column.
+ */
 public class TimeOnlyUserType implements UserType, LiteralType<Date>, Serializable {
 	private static final long serialVersionUID = 8170300540374728474L;
 

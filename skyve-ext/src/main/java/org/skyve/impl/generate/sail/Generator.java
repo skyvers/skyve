@@ -33,6 +33,13 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.web.UserAgentType;
 
+/**
+ * Entry point for SAIL test-script generation from Skyve module/view metadata.
+ *
+ * <p>Walks a module's documents and their views, instantiating
+ * {@link GenerateViewVisitor} for each view, and writes the resulting SAIL
+ * scripts to the configured output directory.
+ */
 public class Generator {
 /*
 	public static final void main(String[] args) throws Exception {

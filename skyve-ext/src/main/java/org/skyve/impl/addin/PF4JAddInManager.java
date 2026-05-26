@@ -11,6 +11,9 @@ import org.skyve.util.Util;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+/**
+ * Manages PF4J-based add-in lifecycle and extension lookup for Skyve runtime.
+ */
 public class PF4JAddInManager implements AddInManager {
 	private static final PF4JAddInManager INSTANCE = new PF4JAddInManager();
 	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(PF4JAddInManager.class);
@@ -21,10 +24,16 @@ public class PF4JAddInManager implements AddInManager {
 		// nothing to see here
 	}
 
+	/**
+	 * Returns the singleton instance.
+	 */
 	public static PF4JAddInManager get() {
 		return INSTANCE;
 	}
 	
+	/**
+	 * Loads and starts add-ins from the configured add-ins directory.
+	 */
 	@Override
 	public void startup() {
 		String addinsDirectory = Util.getAddinsDirectory();
@@ -45,6 +54,9 @@ public class PF4JAddInManager implements AddInManager {
 		}
 	}
 	
+	/**
+	 * Performs shutdown.
+	 */
 	@Override
 	public void shutdown() {
 		if (plugInManager != null) {
@@ -53,6 +65,12 @@ public class PF4JAddInManager implements AddInManager {
 		}
 	}
 	
+	/**
+	 * Returns the first registered extension that matches the requested type.
+	 *
+	 * @param type The extension contract type.
+	 * @return The matching extension instance, or {@code null} when none are available.
+	 */
 	@Override
 	public <T extends Object> T getExtension(Class<T> type) {
 		if (plugInManager != null) {

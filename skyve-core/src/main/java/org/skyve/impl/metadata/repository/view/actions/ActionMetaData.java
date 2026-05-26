@@ -15,8 +15,20 @@ import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
-@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
+/**
+ * Abstract JAXB base for all action descriptor elements in a view descriptor.
+ *
+ * <p>Carries the common action properties: name, display name, tooltip, icon,
+ * confirmation text, and visibility/disability condition names.  Concrete
+ * subclasses ({@link PositionableAction}, {@link ValidatableAction}, etc.) add
+ * type-specific properties.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see PositionableAction
+ * @see ValidatableAction
+ * @see ClassAction
+ */@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			name = "abstractAction",
 			propOrder = {"name", 
 							"displayName",

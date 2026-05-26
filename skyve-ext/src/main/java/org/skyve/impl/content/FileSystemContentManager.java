@@ -214,20 +214,32 @@ public class FileSystemContentManager extends AbstractContentManager {
 	@SuppressWarnings("java:S1604") // Not a functional interface, but extends a functional interface
 	public ContentIterable all() throws Exception {
 		return new ContentIterable() {
+			/**
+			 * {@inheritDoc}
+			 */
 			@Override
 			public ContentIterator iterator() {
 				return new ContentIterator() {
 					@Override
 					@SuppressWarnings("java:S2272") // No-op
+					/**
+					 * Performs next.
+					 */
 					public SearchResult next() {
 						return null;
 					}
 					
+					/**
+					 * {@inheritDoc}
+					 */
 					@Override
 					public boolean hasNext() {
 						return false;
 					}
 					
+					/**
+					 * {@inheritDoc}
+					 */
 					@Override
 					public long getTotalHits() {
 						return 0;

@@ -9,19 +9,32 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
- * Represents the Remove implicit action.
- * 
- * @author mike
+ * Clicks the Remove button ({@link org.skyve.metadata.controller.ImplicitActionName#Remove})
+ * to detach the currently selected row from a collection without permanently deleting
+ * the underlying record.
+ *
+ * @see Delete
+ * @see ZoomIn
+ * @see org.skyve.metadata.sail.execution.Executor#executeRemove
  */
 @XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
 public class Remove extends AbstractAction {
 
+	/**
+	 * Executes execute.
+	 * @param executor the executor
+	 */
 	@Override
 	public void execute(Executor executor) {
 		executor.executeRemove(this);
 	}
 	
+	/**
+	 * Returns the identifier.
+	 * @param context the context
+	 * @return the result
+	 */
 	@Override
 	public String getIdentifier(AutomationContext context) {
 		return ImplicitActionName.Remove.toString();

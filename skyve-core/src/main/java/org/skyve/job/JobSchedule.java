@@ -4,14 +4,18 @@ package org.skyve.job;
 import java.util.Date;
 
 /**
- * Represents a scheduled job configuration with timing and execution parameters.
- * <p>
- * This class encapsulates the scheduling information for a job, including
- * its unique identifier, name, time boundaries, cron expression for
- * recurring execution, and whether the schedule is currently active.
- * </p>
- * 
- * @author Mike
+ * Defines the scheduling contract for a background job execution entry.
+ *
+ * <p>A schedule identifies the target job ({@link #getJobName()}), the
+ * recurrence pattern ({@link #getCronExpression()}), and optional execution
+ * bounds ({@link #getStartTime()}, {@link #getEndTime()}). The runtime is
+ * expected to evaluate all populated constraints when deciding whether a job
+ * instance is eligible to run.
+ *
+ * <p>Threading: not thread-safe. Instances are mutable data carriers and must
+ * be confined to a single configuration/loading thread unless externally
+ * synchronized.
+ *
  * @since 9.5.0
  */
 public class JobSchedule {

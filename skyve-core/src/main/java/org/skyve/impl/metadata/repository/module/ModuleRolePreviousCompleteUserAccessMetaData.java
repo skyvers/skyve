@@ -10,6 +10,18 @@ import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB-annotated descriptor for a {@code <previousCompleteAccess>} user-access
+ * grant in a module role.
+ *
+ * <p>Grants access to view previous-complete snapshots of records undergoing
+ * a workflow-style status transition on a named document.  Extends
+ * {@link ModuleRoleDocumentAggregateUserAccessMetaData}.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see ModuleRoleDocumentAggregateUserAccessMetaData
+ */
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "previousCompleteAccess")
 public class ModuleRolePreviousCompleteUserAccessMetaData extends ModuleRoleDocumentAggregateUserAccessMetaData {

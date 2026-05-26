@@ -24,6 +24,19 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * JAXB-annotated form layout container widget.
+ *
+ * <p>Renders an aligned grid of labelled input fields using {@link FormRow} and
+ * {@link FormColumn} children.  Supports relative sizing, borders, visibility
+ * and disability conditions, a widget identifier, and decorator properties.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see FormRow
+ * @see FormColumn
+ * @see FormItem
+ */
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"widgetId",

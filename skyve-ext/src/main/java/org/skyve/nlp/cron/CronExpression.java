@@ -6,8 +6,11 @@ import java.util.regex.Pattern;
 
 import org.skyve.CORE;
 
+/**
+ * Represents a six-field cron expression and provides conversion helpers to and from
+ * natural-language phrases.
+ */
 public class CronExpression {
-
 	public String second = null;
 	public String minute = null;
 	public String hour = null;
@@ -40,10 +43,11 @@ public class CronExpression {
 	}
 
 	/**
-	 * Returns a CronExpression for the specified cron expression string.
-	 * 
-	 * @param expression A cron string
-	 * @return A CronExpression
+	 * Parses a raw six-field cron string into a {@link CronExpression} instance.
+	 *
+	 * @param expression The cron text in {@code second minute hour day month dayOfWeek} format.
+	 * @return The parsed expression, or {@code null} when {@code expression} is {@code null}.
+	 * @throws CronParserException If the text does not contain exactly six fields.
 	 */
 	public static CronExpression fromExpression(final String expression) {
 		if (expression != null) {
@@ -66,112 +70,219 @@ public class CronExpression {
 		return null;
 	}
 
+	/**
+	 * Returns the second.
+	 */
 	public String getSecond() {
 		return second;
 	}
 
+	/**
+	 * Indicates whether hasSecond is satisfied.
+	 */
 	public boolean hasSecond() {
 		return getSecond() != null;
 	}
 
+	/**
+	 * Sets the second.
+	 *
+	 * @return This expression for fluent configuration.
+	 */
 	public CronExpression setSecond(String second) {
 		this.second = second;
 		return this;
 	}
 
+	/**
+	 * Sets the second.
+	 *
+	 * @return This expression for fluent configuration.
+	 */
 	public CronExpression setSecond(Integer second) {
 		return setSecond(String.valueOf(second));
 	}
 
+	/**
+	 * Returns the minute.
+	 */
 	public String getMinute() {
 		return minute;
 	}
 
+	/**
+	 * Indicates whether hasMinute is satisfied.
+	 */
 	public boolean hasMinute() {
 		return getMinute() != null;
 	}
 
+	/**
+	 * Sets the minute.
+	 *
+	 * @return This expression for fluent configuration.
+	 */
 	public CronExpression setMinute(String minute) {
 		this.minute = minute;
 		return this;
 	}
 
+	/**
+	 * Sets the minute.
+	 *
+	 * @return This expression for fluent configuration.
+	 */
 	public CronExpression setMinute(Integer minute) {
 		return setMinute(String.valueOf(minute));
 	}
 
+	/**
+	 * Returns the hour.
+	 */
 	public String getHour() {
 		return hour;
 	}
 
+	/**
+	 * Indicates whether hasHour is satisfied.
+	 */
 	public boolean hasHour() {
 		return getHour() != null;
 	}
 
+	/**
+	 * Sets the hour.
+	 *
+	 * @return This expression for fluent configuration.
+	 */
 	public CronExpression setHour(String hour) {
 		this.hour = hour;
 		return this;
 	}
 
+	/**
+	 * Sets the hour.
+	 *
+	 * @return This expression for fluent configuration.
+	 */
 	public CronExpression setHour(Integer minute) {
 		return setHour(String.valueOf(minute));
 	}
 
+	/**
+	 * Returns the dayNumber.
+	 */
 	public String getDayNumber() {
 		return dayNumber;
 	}
 
+	/**
+	 * Indicates whether hasDayNumber is satisfied.
+	 */
 	public boolean hasDayNumber() {
 		return getDayNumber() != null;
 	}
 
+	/**
+	 * Sets the dayNumber.
+	 *
+	 * @return This expression for fluent configuration.
+	 */
 	public CronExpression setDayNumber(String dayNumber) {
 		this.dayNumber = dayNumber;
 		return this;
 	}
 
+	/**
+	 * Sets the dayNumber.
+	 *
+	 * @return This expression for fluent configuration.
+	 */
 	public CronExpression setDayNumber(Integer minute) {
 		return setDayNumber(String.valueOf(minute));
 	}
 
+	/**
+	 * Returns the month.
+	 */
 	public String getMonth() {
 		return month;
 	}
 
+	/**
+	 * Indicates whether hasMonth is satisfied.
+	 */
 	public boolean hasMonth() {
 		return getMonth() != null;
 	}
 
+	/**
+	 * Sets the month.
+	 *
+	 * @return This expression for fluent configuration.
+	 */
 	public CronExpression setMonth(String month) {
 		this.month = month;
 		return this;
 	}
 
+	/**
+	 * Sets the month.
+	 *
+	 * @return This expression for fluent configuration.
+	 */
 	public CronExpression setMonth(Integer minute) {
 		return setMonth(String.valueOf(minute));
 	}
 
+	/**
+	 * Returns the dayOfWeek.
+	 */
 	public String getDayOfWeek() {
 		return dayOfWeek;
 	}
 
+	/**
+	 * Indicates whether hasDayOfWeek is satisfied.
+	 */
 	public boolean hasDayOfWeek() {
 		return getDayOfWeek() != null;
 	}
 
+	/**
+	 * Sets the dayOfWeek.
+	 *
+	 * @return This expression for fluent configuration.
+	 */
 	public CronExpression setDayOfWeek(String dayOfWeek) {
 		this.dayOfWeek = dayOfWeek;
 		return this;
 	}
 
+	/**
+	 * Sets the dayOfWeek.
+	 *
+	 * @return This expression for fluent configuration.
+	 */
 	public CronExpression setDayOfWeek(Integer minute) {
 		return setDayOfWeek(String.valueOf(minute));
 	}
 
+	/**
+	 * Indicates whether hasNothing is satisfied.
+	 */
 	public boolean hasNothing() {
 		return !hasMinute() && !hasHour() && !hasDayNumber() && !hasMonth() && !hasDayOfWeek();
 	}
 
+	/**
+	 * Converts this expression into a friendly phrase for common schedules.
+	 *
+	 * <p>Returns canned labels for well-known schedules (for example {@code daily} and
+	 * {@code hourly}) and otherwise constructs a best-effort descriptive sentence.
+	 *
+	 * @return A natural-language description, or {@code null} when no fields are set.
+	 */
 	@SuppressWarnings("boxing")
 	public String toNaturalLanguage() {
 		if (!hasNothing()) {
@@ -294,6 +405,9 @@ public class CronExpression {
 		return null;
 	}
 
+	/**
+	 * Returns the string representation of this instance.
+	 */
 	@Override
 	@SuppressWarnings("boxing")
 	public String toString() {

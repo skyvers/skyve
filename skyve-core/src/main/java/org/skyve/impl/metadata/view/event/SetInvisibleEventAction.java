@@ -17,6 +17,16 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 
+/**
+ * JAXB-annotated event action that sets the visibility of a bound widget
+ * when a widget event fires.
+ *
+ * <p>A {@code <setInvisible>} action targets the widget identified by
+ * {@code binding} and applies the visible/invisible condition, giving
+ * conditional visibility in response to user interaction.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ */
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "setInvisible")
 public class SetInvisibleEventAction extends AbstractBound implements EventAction, Invisible {

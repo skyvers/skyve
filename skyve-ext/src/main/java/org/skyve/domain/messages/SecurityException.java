@@ -4,8 +4,23 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.SecurityUtil;
 
 /**
- * Thrown when the current user does not have privileges to 
- * a perform an operation on a data entity or web resource.
+ * Thrown when the current user does not have the privilege required to perform an
+ * operation on a data entity or web resource.
+ *
+ * <p>This exception is the root of the Skyve security exception hierarchy.
+ * {@link AccessException} specialises it for URL/resource denials; direct
+ * instantiation is used for data-level privilege violations.
+ *
+ * <p>Side effects: the constructor calls {@link org.skyve.util.SecurityUtil#log}
+ * which may log the denial and, if
+ * {@link org.skyve.impl.util.UtilImpl#SECURITY_EXCEPTION_NOTIFICATIONS} is enabled,
+ * send an email notification.
+ *
+ * <p>Invariant: {@link #getMessage()} always returns a non-null string of the form
+ * {@code "<user> does not have access to <resource>"}.
+ *
+ * @see AccessException
+ * @see org.skyve.util.SecurityUtil
  */
 public class SecurityException extends DomainException {
 	private static final long serialVersionUID = 2941808458696267548L;

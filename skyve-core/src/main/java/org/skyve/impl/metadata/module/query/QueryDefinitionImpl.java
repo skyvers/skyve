@@ -11,6 +11,21 @@ import com.google.common.base.MoreObjects;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
+/**
+ * Abstract base for all query definition implementations.
+ *
+ * <p>Holds the properties common to every query type: name, description,
+ * documentation, and the target module/document context.  Concrete subclasses
+ * specialise for MetaData-driven, SQL, and BizQL query types.
+ *
+ * <p>Threading: not thread-safe.  Instances are populated during metadata loading
+ * and are read-only once placed in the repository cache.
+ *
+ * @see QueryDefinition
+ * @see MetaDataQueryDefinitionImpl
+ * @see SQLDefinitionImpl
+ * @see BizQLDefinitionImpl
+ */
 public abstract class QueryDefinitionImpl implements QueryDefinition {
 	private static final long serialVersionUID = 1867738351262041832L;
 

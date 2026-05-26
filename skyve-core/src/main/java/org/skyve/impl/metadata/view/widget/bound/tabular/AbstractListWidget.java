@@ -19,6 +19,19 @@ import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * Abstract JAXB base for query-driven list widgets ({@link ListGrid},
+ * {@link ListRepeater}, {@link TreeGrid}) that render rows from a named
+ * query or model.
+ *
+ * <p>Provides the query/model binding, filter parameters, relative sizing,
+ * and visibility conditions shared by all list-type widgets.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see ListGrid
+ * @see ListRepeater
+ */
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"title", 
 							"queryName",

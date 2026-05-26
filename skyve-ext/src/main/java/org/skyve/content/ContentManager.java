@@ -66,9 +66,10 @@ public interface ContentManager extends AutoCloseable, ExtensionPoint, SystemObs
 	
 	/**
 	 * Get an attachment by content ID.
-	 * @param id
-	 * @return
-	 * @throws Exception
+	 *
+	 * @param contentId The unique attachment content identifier
+	 * @return The attachment content, or {@code null} when not found
+	 * @throws Exception If retrieval fails
 	 */
 	AttachmentContent getAttachment(String contentId) throws Exception;
 
@@ -88,10 +89,11 @@ public interface ContentManager extends AutoCloseable, ExtensionPoint, SystemObs
 
 	/**
 	 * Find matching content that the current user has access to containing the search term.
-	 * @param search
-	 * @param maxResults
-	 * @return
-	 * @throws Exception
+	 *
+	 * @param search The search text/query string
+	 * @param maxResults Maximum number of matches to return
+	 * @return Search results visible to the current user
+	 * @throws Exception If search execution fails
 	 */
 	SearchResults google(String search, int maxResults) throws Exception;
 	
@@ -125,8 +127,9 @@ public interface ContentManager extends AutoCloseable, ExtensionPoint, SystemObs
 	
 	/**
 	 * Iterate over all content independent of customer.
-	 * @return
-	 * @throws Exception
+	 *
+	 * @return Iterable cursor over all content records
+	 * @throws Exception If iteration cannot be opened
 	 */
 	ContentIterable all() throws Exception;
 }

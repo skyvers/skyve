@@ -9,6 +9,12 @@ import java.lang.annotation.Target;
 
 import org.skyve.metadata.controller.ServerSideAction;
 
+/**
+ * Marks a document factory used by generated CRUD/action test infrastructure.
+ *
+ * <p>When applied to a factory class, this annotation controls which test families
+ * are generated and which actions/attributes are excluded from generated scenarios.
+ */
 @Retention(RUNTIME)
 @Target(TYPE)
 @Inherited

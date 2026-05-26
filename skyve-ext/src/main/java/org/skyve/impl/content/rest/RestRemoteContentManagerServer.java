@@ -79,6 +79,9 @@ public class RestRemoteContentManagerServer {
 
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(RestRemoteContentManagerServer.class);
 
+	/**
+	 * Performs put.
+	 */
 	@PUT
 	@Path(BEAN_PATH)
 	@Produces(MediaType.TEXT_PLAIN)
@@ -97,6 +100,9 @@ public class RestRemoteContentManagerServer {
 		return Response.serverError().build();
 	}
 	
+	/**
+	 * Performs put.
+	 */
 	@PUT
 	@Path(ATTACHMENT_PATH)
 	@Produces(MediaType.TEXT_PLAIN)
@@ -115,6 +121,9 @@ public class RestRemoteContentManagerServer {
 		return Response.serverError().build();
 	}
 
+	/**
+	 * Performs update.
+	 */
 	@POST
 	@Path(ATTACHMENT_PATH)
 	@Produces(MediaType.TEXT_PLAIN)
@@ -133,6 +142,9 @@ public class RestRemoteContentManagerServer {
 		return Response.serverError().build();
 	}
 	
+	/**
+	 * Returns the attachment.
+	 */
 	@GET
 	@Path(ATTACHMENT_PATH + "/{contentId}")
 	@Produces(MediaType.TEXT_PLAIN)
@@ -153,6 +165,9 @@ public class RestRemoteContentManagerServer {
 		return Response.serverError().build();
 	}
 
+	/**
+	 * Removes the bean.
+	 */
 	@DELETE
 	@Path(BEAN_PATH + "/{bizId}")
 	@Produces(MediaType.TEXT_PLAIN)
@@ -169,6 +184,9 @@ public class RestRemoteContentManagerServer {
 		return Response.serverError().build();
 	}
 
+	/**
+	 * Removes the attachment.
+	 */
 	@DELETE
 	@Path(ATTACHMENT_PATH + "/{contentId}")
 	@Produces(MediaType.TEXT_PLAIN)

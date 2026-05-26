@@ -6,6 +6,14 @@ import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB descriptor for top-N chart truncation settings.
+ *
+ * <p>Extends {@link ChartBuilderOrderMetaData} with a row-count limit used to
+ * keep only the top values after ordering.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ */
 @XmlRootElement(name = "top", namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 public class ChartBuilderTopMetaData extends ChartBuilderOrderMetaData {

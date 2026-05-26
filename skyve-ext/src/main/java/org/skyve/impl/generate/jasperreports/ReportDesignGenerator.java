@@ -14,14 +14,26 @@ import org.skyve.metadata.module.Module;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+/**
+ * Abstract base for all JasperReports design generators.
+ *
+ * <p>Subclasses (document, list, query, view) implement report-type-specific
+ * layout and field-ordering logic on top of the common scaffolding provided here.
+ */
 public abstract class ReportDesignGenerator {
 
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ReportDesignGenerator.class);
 
+    /**
+     * Performs generateDesign.
+     */
     public DesignSpecification generateDesign() {
         return populateDesign(new DesignSpecification());
     }
 
+    /**
+     * Performs populateDesign.
+     */
     public DesignSpecification populateDesign(DesignSpecification design) {
         assert(design.getModuleName() != null);
         assert(design.getDocumentName() != null);
@@ -51,6 +63,9 @@ public abstract class ReportDesignGenerator {
         design.getSubReports().clear();
     }
 
+    /**
+     * Adds a parameters.
+     */
     protected static void addParameters(DesignSpecification design) {
         ReportParameter p1 = new ReportParameter();
         p1.setName("SUBREPORT_DIR");
@@ -72,6 +87,9 @@ public abstract class ReportDesignGenerator {
         design.getParameters().add(p3);
     }
 
+	/**
+	 * Adds a fields.
+	 */
     @SuppressWarnings("static-method") // overridable
 	protected void addFields(DesignSpecification design) {
         final Customer customer = CORE.getCustomer();
@@ -124,6 +142,9 @@ public abstract class ReportDesignGenerator {
         }
     }
 
+    /**
+     * Adds a variables.
+     */
     protected static void addVariables(DesignSpecification design) {
         if (DesignSpecification.ReportType.subreport.equals(design.getReportType())) {
             for (ReportField a : design.getFields()) {
@@ -141,6 +162,9 @@ public abstract class ReportDesignGenerator {
         }
     }
 
+    /**
+     * Adds a subreports.
+     */
     protected void addSubreports(DesignSpecification design) {
         //only generate default reports if subreports is empty (allows for manual creation of subreports instead of default)
         if (design.getSubReports().isEmpty()) {
@@ -156,6 +180,9 @@ public abstract class ReportDesignGenerator {
         }
     }
 
+	/**
+	 * Adds a bands.
+	 */
 	protected void addBands(DesignSpecification design) {
         ReportBand background = new ReportBand();
         background.setBandType(ReportBand.BandType.background);
@@ -226,7 +253,10 @@ public abstract class ReportDesignGenerator {
         design.getBands().add(noData);
     }
 
-    @SuppressWarnings("static-method") // overridable
+ 	/**
+	 * Creates the titleBand.
+	 */
+	   @SuppressWarnings("static-method") // overridable
 	protected ReportBand createTitleBand(DesignSpecification design) {
         final ReportBand title = new ReportBand();
         title.setName("Title");
@@ -236,6 +266,9 @@ public abstract class ReportDesignGenerator {
         return title;
     }
 
+    /**
+     * Performs fieldFromAttribute.
+     */
     protected static ReportField fieldFromAttribute(DesignSpecification bean, Customer customer, Document document, Attribute a, StringBuilder sJoin, StringBuilder fieldPrefix) {
     	StringBuilder mutableSJoin = sJoin;
     	ReportField f = new ReportField();

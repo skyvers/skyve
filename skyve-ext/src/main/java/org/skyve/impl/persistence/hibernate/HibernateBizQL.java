@@ -10,6 +10,10 @@ import org.skyve.persistence.BizQL;
 
 import jakarta.annotation.Nonnull;
 
+/**
+ * Hibernate implementation of {@link org.skyve.impl.persistence.AbstractBizQL}
+ * that executes BizQL (JPQL-dialect) queries via the current Hibernate session.
+ */
 public class HibernateBizQL extends AbstractBizQL {
 	private HibernateQueryDelegate delegate;
 	

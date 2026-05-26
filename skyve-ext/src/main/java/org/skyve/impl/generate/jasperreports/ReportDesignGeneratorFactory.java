@@ -1,5 +1,9 @@
 package org.skyve.impl.generate.jasperreports;
 
+/**
+ * Factory that selects and instantiates the appropriate {@link ReportDesignGenerator}
+ * subclass based on the report parameters supplied.
+ */
 public class ReportDesignGeneratorFactory {
     public static ReportDesignGenerator getGeneratorForDesign(DesignSpecification designSpecification) {
         assert(designSpecification.getDefinitionSource() != null);

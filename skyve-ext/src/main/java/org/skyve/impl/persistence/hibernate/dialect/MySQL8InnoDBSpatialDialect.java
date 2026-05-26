@@ -8,6 +8,9 @@ import org.hibernate.tool.schema.spi.Exporter;
 import org.locationtech.jts.geom.Geometry;
 import org.skyve.impl.persistence.hibernate.dialect.mysqlbugfix.MySQL8SpatialDialect;
 
+/**
+ * Skyve Hibernate dialect for MySQL 8 InnoDB with spatial type support.
+ */
 public class MySQL8InnoDBSpatialDialect extends MySQL8SpatialDialect implements SkyveDialect {
 	private static final long serialVersionUID = 1802127305662334430L;
 

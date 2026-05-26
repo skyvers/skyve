@@ -12,6 +12,16 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * JAXB-annotated descriptor for a column definition within a {@link Form} layout.
+ *
+ * <p>Declares the pixel width of a data-entry column in the form grid, used by
+ * the rendering engine to allocate horizontal space.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see Form
+ */
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 public class FormColumn implements DecoratedMetaData {
 	private static final long serialVersionUID = -2927913876248576162L;

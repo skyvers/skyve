@@ -8,6 +8,9 @@ import org.hibernate.tool.schema.extract.spi.ColumnInformation;
 import org.hibernate.tool.schema.spi.Exporter;
 import org.locationtech.jts.geom.Geometry;
 
+/**
+ * Skyve Hibernate dialect for PostgreSQL 8.2 with PostGIS spatial extensions.
+ */
 public class PostgreSQL82SpatialDialect extends PostgisPG82Dialect implements SkyveDialect {
 	private static final long serialVersionUID = 2172740003262109261L;
 

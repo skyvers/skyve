@@ -7,6 +7,9 @@ import org.hibernate.spatial.dialect.sqlserver.SqlServer2008SpatialDialect;
 import org.hibernate.tool.schema.extract.spi.ColumnInformation;
 import org.locationtech.jts.geom.Geometry;
 
+/**
+ * Skyve Hibernate dialect for SQL Server 2008 with spatial type support.
+ */
 public class SQLServer2008SpatialDialect extends SqlServer2008SpatialDialect implements SkyveDialect {
 	private static final long serialVersionUID = 5463421110159264122L;
 

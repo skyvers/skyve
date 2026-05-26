@@ -3,10 +3,20 @@ package org.skyve.domain.messages;
 import org.skyve.impl.util.UtilImpl;
 
 /**
- * Thrown when a page or resource is requested from a user agent (browser, mobile device, API client)
- * that the current user does not have access to.
- * Skyve derives an Access Control List from various metadata elements, mainly the menu and views.
- * Accesses can be defined in views or in module roles also.
+ * Thrown when a page or resource is requested by a user agent (browser, mobile device,
+ * or API client) that the current user does not have access to according to the Skyve
+ * ACL.
+ *
+ * <p>Access control is derived from document permissions, module role definitions,
+ * and view-level access rules declared in metadata. This exception is a specialisation
+ * of {@link SecurityException} that represents a URL/resource access denial rather
+ * than a data-entity privilege violation.
+ *
+ * <p>Side effects: if {@link org.skyve.impl.util.UtilImpl#ACCESS_EXCEPTION_NOTIFICATIONS}
+ * is enabled, constructing this exception sends an email notification.
+ *
+ * @see SecurityException
+ * @see org.skyve.util.SecurityUtil
  */
 public class AccessException extends SecurityException {
 	private static final long serialVersionUID = 6386350703055578L;

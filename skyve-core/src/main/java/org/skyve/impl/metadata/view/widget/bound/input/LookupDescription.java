@@ -34,6 +34,19 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * JAXB-annotated lookup-description widget that combines a text-input field
+ * with a pick-list popup for selecting an associated document instance.
+ *
+ * <p>Bound to an association attribute.  Renders the description of the
+ * selected instance in the text field and provides pick, clear, add, and
+ * edit action buttons with independently configurable visibility conditions.
+ * Supports filter parameters passed to the backing query.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see LookupDescriptionColumn
+ */
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"descriptionBinding",

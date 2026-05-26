@@ -13,6 +13,17 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * JAXB-annotated query-driven repeater that renders rows from a named
+ * query or model without CRUD action buttons.
+ *
+ * <p>Suitable for read-only summary displays.  Inherits query binding,
+ * filter parameters, sizing, and visibility from {@link AbstractListWidget}.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see AbstractListWidget
+ */
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"showColumnHeaders",

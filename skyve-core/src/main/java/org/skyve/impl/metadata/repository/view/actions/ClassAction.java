@@ -7,6 +7,18 @@ import org.skyve.impl.util.XMLMetaData;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * Abstract JAXB base for action descriptors that invoke a server-side Java class.
+ *
+ * <p>Adds a {@code className} attribute to {@link ValidatableAction} identifying
+ * the fully-qualified implementation class to instantiate and execute.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see CustomAction
+ * @see BizExportAction
+ * @see BizImportAction
+ */
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 public abstract class ClassAction extends ValidatableAction {
 	private static final long serialVersionUID = -2913422200090616971L;

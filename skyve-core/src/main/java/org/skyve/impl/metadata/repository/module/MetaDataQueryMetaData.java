@@ -16,6 +16,20 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * JAXB-annotated descriptor for a {@code <query>} metadata query in a module.
+ *
+ * <p>Defines a structured query over a named document with optional polymorphic
+ * flag, aggregation mode, FROM clause override, filter, grouping, ordering, and
+ * an ordered list of column descriptors.  Converted to a runtime
+ * {@link org.skyve.metadata.module.query.MetaDataQueryDefinition} during
+ * repository bootstrap.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see QueryDefinitionMetaData
+ * @see MetaDataQueryColumnMetaData
+ */
 @XmlRootElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "query")
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE, 
 			name = "query",

@@ -17,5 +17,10 @@ public interface Editable {
 	 *         read-only, or {@code null} to inherit
 	 */
 	public Boolean getEditable();
+
+	/**
+	 * Sets the editable.
+	 * @param editable the editable
+	 */
 	public void setEditable(Boolean editable);
 }

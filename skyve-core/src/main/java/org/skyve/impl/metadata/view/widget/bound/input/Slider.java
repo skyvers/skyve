@@ -15,6 +15,15 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * JAXB-annotated slider input widget bound to a numeric attribute.
+ *
+ * <p>Renders a horizontal or vertical drag slider with configurable minimum,
+ * maximum, step count, rounding precision, and pixel dimensions.  Supports
+ * absolute sizing, change events, and disabled/invisible conditions.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ */
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "slider")
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"min", 

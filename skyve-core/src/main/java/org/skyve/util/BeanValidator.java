@@ -16,7 +16,17 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 
 /**
- * 
+ * Validates Skyve beans against document metadata constraints and Bizlet rules.
+ *
+ * <p>This facade delegates to {@link org.skyve.impl.util.ValidationUtil} and provides
+ * convenience overloads that resolve customer/module/document context from
+ * {@link org.skyve.CORE#getUser()} when it is not supplied explicitly.
+ *
+ * <p>Validation operations may throw {@link ValidationException} or
+ * {@link UniqueConstraintViolationException} when metadata constraints fail.
+ * Methods that process message bindings mutate the supplied messages/exceptions in place.
+ *
+ * <p>Threading: all methods are stateless and thread-safe.
  */
 public class BeanValidator {
 	public static final String VALIDATION_REQUIRED_KEY = "validation.required";

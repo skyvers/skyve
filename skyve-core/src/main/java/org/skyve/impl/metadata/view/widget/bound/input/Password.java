@@ -14,6 +14,14 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * JAXB-annotated password input widget bound to a String attribute.
+ *
+ * <p>Renders as a masked text input.  Supports absolute width, focus/blur/change
+ * events, and disabled/invisible conditions.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ */
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 public class Password extends ChangeableInputWidget implements AbsoluteWidth, FormItemWidget {

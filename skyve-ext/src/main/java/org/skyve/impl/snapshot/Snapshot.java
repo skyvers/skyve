@@ -15,6 +15,9 @@ import org.skyve.util.JSON;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
+/**
+ * Captures list-grid snapshot state including sort, group, column and filter configuration.
+ */
 public class Snapshot {
 	private static final String ADVANCED_PROPERTY_NAME = "advanced";
 	private static final String SUMMARY_PROPERTY_NAME = "summary";
@@ -38,6 +41,9 @@ public class Snapshot {
 	public @Nullable AdvancedSearchType getAdvanced() {
 		return advanced;
 	}
+	/**
+	 * Sets the advanced.
+	 */
 	public void setAdvanced(@Nullable AdvancedSearchType advanced) {
 		this.advanced = advanced;
 	}
@@ -45,6 +51,9 @@ public class Snapshot {
 	public @Nullable AggregateFunction getSummary() {
 		return summary;
 	}
+	/**
+	 * Sets the summary.
+	 */
 	public void setSummary(@Nullable AggregateFunction summary) {
 		this.summary = summary;
 	}
@@ -52,9 +61,15 @@ public class Snapshot {
 	public @Nonnull Map<String, SortDirection> getSorts() {
 		return sorts;
 	}
+	/**
+	 * Adds or replaces the sort value.
+	 */
 	public void putSort(@Nonnull String column) {
 		putSort(column, SortDirection.ascending);
 	}
+	/**
+	 * Adds or replaces the sort value.
+	 */
 	public void putSort(@Nonnull String column, @Nonnull SortDirection direction) {
 		sorts.put(column, direction);
 	}
@@ -62,6 +77,9 @@ public class Snapshot {
 	public @Nullable String getGroup() {
 		return group;
 	}
+	/**
+	 * Sets the group.
+	 */
 	public void setGroup(@Nullable String group) {
 		this.group = group;
 	}
@@ -69,12 +87,21 @@ public class Snapshot {
 	public @Nonnull Map<String, Integer> getColumns() {
 		return columns;
 	}
+	/**
+	 * Adds or replaces the column value.
+	 */
 	public void putColumn(@Nonnull String column) {
 		columns.put(column, null);
 	}
+	/**
+	 * Adds or replaces the column value.
+	 */
 	public void putColumn(@Nonnull String column, int width) {
 		columns.put(column, Integer.valueOf(width));
 	}
+	/**
+	 * Adds or replaces the column value.
+	 */
 	public void putColumn(@Nonnull String column, @Nullable Integer width) {
 		columns.put(column, width);
 	}
@@ -82,6 +109,9 @@ public class Snapshot {
 	public @Nullable SnapshotFilter getFilter() {
 		return filter;
 	}
+	/**
+	 * Sets the filter.
+	 */
 	public void setFilter(@Nullable SnapshotFilter filter) {
 		this.filter = filter;
 	}
@@ -89,10 +119,18 @@ public class Snapshot {
 	public @Nullable Map<String, Object> getSourceSmartClientCriteria() {
 		return sourceSmartClientCriteria;
 	}
+	/**
+	 * Sets the sourceSmartClientCriteria.
+	 */
 	public void setSourceSmartClientCriteria(@Nullable Map<String, Object> sourceSmartClientCriteria) {
 		this.sourceSmartClientCriteria = sourceSmartClientCriteria;
 	}
 	
+	/**
+	 * Serializes this snapshot into JSON suitable for persistence and round-tripping.
+	 *
+	 * @return JSON containing non-null snapshot state.
+	 */
 	public String toJSON() {
 		Map<String, Object> result = new LinkedHashMap<>(); // keep insertion order
 		
@@ -118,10 +156,11 @@ public class Snapshot {
 	}
 	
 	/**
-	 * 
-	 * @param json
-	 * @return The purified snapshot or null if the entire snapshot is invalid.
-	 * @throws Exception
+	 * Rebuilds a snapshot instance from previously marshalled JSON.
+	 *
+	 * @param json Snapshot JSON text.
+	 * @return A populated snapshot, or {@code null} when the input contains no values.
+	 * @throws Exception If the JSON payload cannot be parsed into a valid snapshot structure.
 	 */
 	public static Snapshot fromJSON(String json) throws Exception {
 		@SuppressWarnings("unchecked")

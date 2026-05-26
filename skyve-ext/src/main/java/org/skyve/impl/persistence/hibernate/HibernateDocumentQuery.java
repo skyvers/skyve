@@ -12,6 +12,10 @@ import org.skyve.persistence.DocumentQuery;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
+/**
+ * Hibernate implementation of {@link org.skyve.impl.persistence.AbstractDocumentQuery}
+ * that builds and executes JPA Criteria or JPQL queries for Skyve document retrieval.
+ */
 public class HibernateDocumentQuery extends AbstractDocumentQuery {
 	private HibernateQueryDelegate delegate;
 	

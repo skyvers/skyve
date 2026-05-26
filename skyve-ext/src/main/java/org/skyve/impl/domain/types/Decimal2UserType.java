@@ -15,6 +15,10 @@ import org.hibernate.usertype.UserType;
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.Decimal2;
 
+/**
+ * Hibernate {@link org.hibernate.usertype.UserType} that maps the Skyve
+ * {@link org.skyve.domain.types.Decimal2} type to a SQL {@code NUMERIC} column.
+ */
 public class Decimal2UserType implements UserType, Serializable, LiteralType<Number> {
 	private static final long serialVersionUID = 7056962012110550357L;
 

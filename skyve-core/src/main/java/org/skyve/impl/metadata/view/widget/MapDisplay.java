@@ -18,6 +18,14 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * JAXB-annotated map widget that renders map markers from a named map model.
+ *
+ * <p>Supports lazy/eager loading strategies, optional auto-refresh interval,
+ * refresh controls, relative sizing, and visibility conditions.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ */
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "map")
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			name = "map",

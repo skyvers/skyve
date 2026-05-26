@@ -54,6 +54,12 @@ import com.mifmif.common.regex.Generex;
 
 import jakarta.annotation.Nonnull;
 
+/**
+ * Generates and mutates deterministic/random test data for Skyve domain documents.
+ *
+ * <p>This utility supports fixture-driven value sourcing, metadata-aware attribute
+ * updates, and random document instance construction for generated tests.
+ */
 public class TestUtil {
 
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(TestUtil.class);
@@ -389,6 +395,16 @@ public class TestUtil {
 						.add(new Decimal2(1)).intValue())).add(min);
 	}
 
+	/**
+	 * Returns a pseudo-random email string constrained to the requested total length.
+	 *
+	 * <p>The result is generated as {@code local@domain.cc}, where local and domain
+	 * parts are uppercase alphabetic characters and {@code cc} is a two-character
+	 * alphabetic suffix.
+	 *
+	 * @param length The requested total email length
+	 * @return A pseudo-random email string
+	 */
 	public static String randomEmail(int length) {
 		int addressLength = (int) Math.floor((length - 2) / 2);
 		int domainLength = (int) Math.floor((length - 2) / 2) - 2;

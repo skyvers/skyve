@@ -17,6 +17,17 @@ import jakarta.xml.bind.annotation.XmlElementRefs;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB-annotated data-grid column descriptor that contains child widgets
+ * rather than a single bound attribute.
+ *
+ * <p>Extends {@link DataGridColumn} to hold an ordered list of widgets
+ * rendered inside each row cell, enabling complex per-row layouts.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see DataGrid
+ */
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "containerColumn")
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE, propOrder = {"widgets"})
 public class DataGridContainerColumn extends DataGridColumn {

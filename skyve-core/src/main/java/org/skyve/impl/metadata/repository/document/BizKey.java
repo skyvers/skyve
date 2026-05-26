@@ -11,6 +11,16 @@ import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.XmlValue;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * JAXB-annotated descriptor for the {@code <bizKey>} element in a document XML file.
+ *
+ * <p>A {@code BizKey} declares the expression (MVEL or binding reference) that
+ * produces the human-readable label for a domain bean instance.  The expression
+ * is evaluated at runtime to provide values for display in lookups, headings,
+ * and audit entries.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ */
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 public class BizKey implements SerializableMetaData {
 	private static final long serialVersionUID = -2323204335740515884L;
