@@ -394,11 +394,13 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 			if (UtilImpl.CUSTOMER == null) { // multi-tenant
 				s.putParameter(Bean.CUSTOMER_NAME, customerName, false);
 			}
-			result = s.retrieveScalar(String.class);
-		}
-		catch (NoResultsException e) {
-			// No anonymous public user configured for this customer - this is valid.
-			result = null;
+			try {
+				result = s.retrieveScalar(String.class);
+			}
+			catch (NoResultsException e) {
+				// No anonymous public user configured for this customer - this is valid.
+				result = null;
+			}
 		}
 		catch (Exception e) {
 			logPublicUserLookupFailure(customerName, e);

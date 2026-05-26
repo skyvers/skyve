@@ -9,13 +9,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Comparator;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.skyve.dataaccess.sql.SQLDataAccess;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.NoResultsException;
@@ -24,22 +23,17 @@ import org.skyve.persistence.SQL;
 
 class LocalDataStoreRepositoryTest {
 	private String savedCustomer;
+	@TempDir
 	private Path repositoryPath;
 
 	@BeforeEach
-	void beforeEach() throws Exception {
+	void beforeEach() {
 		savedCustomer = UtilImpl.CUSTOMER;
-		repositoryPath = Files.createTempDirectory("local-data-store-repository-test");
 	}
 
 	@AfterEach
-	void afterEach() throws Exception {
+	void afterEach() {
 		UtilImpl.CUSTOMER = savedCustomer;
-		if (repositoryPath != null) {
-			try (var paths = Files.walk(repositoryPath)) {
-				paths.sorted(Comparator.reverseOrder()).forEach(path -> path.toFile().delete());
-			}
-		}
 	}
 
 	@Test
