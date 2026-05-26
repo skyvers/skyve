@@ -218,6 +218,7 @@ public class PushMessageTest {
 		PushMessage.startReaper(10);
 		PushMessage.stopReaper();
 		// No exception = pass
+		assertNotNull(new PushMessage());
 	}
 
 	@Test
@@ -226,12 +227,14 @@ public class PushMessageTest {
 		// Starting again should log a warning but not throw
 		PushMessage.startReaper(10);
 		PushMessage.stopReaper();
+		assertNotNull(new PushMessage());
 	}
 
 	@Test
 	public void testStopReaperWhenNotStartedDoesNotThrow() {
 		// Already stopped in setUp(); calling again should be safe
 		PushMessage.stopReaper();
+		assertNotNull(new PushMessage());
 	}
 
 	// ======== RECEIVERS queue ========

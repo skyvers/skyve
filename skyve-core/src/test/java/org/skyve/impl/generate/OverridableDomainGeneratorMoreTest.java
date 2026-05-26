@@ -4,17 +4,22 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.metadata.model.document.CollectionImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Enumeration.EnumeratedValue;
@@ -25,8 +30,10 @@ import org.skyve.metadata.model.Dynamic;
 import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.Persistent.ExtensionStrategy;
+import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.repository.ProvidedRepository;
 
 /**
  * Additional unit tests for {@link OverridableDomainGenerator} private/package
@@ -133,9 +140,11 @@ class OverridableDomainGeneratorMoreTest {
 
 	// ----- generateDataStoreName --------------------------------------------
 
+	@SuppressWarnings("java:S6201")
 	private static Class<?> dataStoreTypeClass() throws Exception {
 		for (Class<?> c : OverridableDomainGenerator.class.getDeclaredClasses()) {
-			if ("DataStoreType".equals(c.getSimpleName())) {
+			String name = c.getSimpleName();
+			if ("DataStoreType".equals(name)) {
 				return c;
 			}
 		}
@@ -439,11 +448,12 @@ class OverridableDomainGeneratorMoreTest {
 	}
 
 	@Test
+	@SuppressWarnings("boxing")
 	void testPolymorphicReturnsFalseWhenPolymorphicallyMapped() throws Exception {
 		OverridableDomainGenerator gen = generator();
 		Document doc = mock(Document.class);
 		Persistent persistent = mock(Persistent.class);
-		when(persistent.isPolymorphicallyMapped()).thenAnswer(i -> Boolean.TRUE);
+		when(persistent.isPolymorphicallyMapped()).thenReturn(Boolean.TRUE);
 		when(doc.getPersistent()).thenReturn(persistent);
 
 		assertNotEquals(Boolean.TRUE, declaredMethod("testPolymorphic", Document.class)
@@ -451,11 +461,12 @@ class OverridableDomainGeneratorMoreTest {
 	}
 
 	@Test
+	@SuppressWarnings("boxing")
 	void testPolymorphicReturnsFalseWhenNoDerivations() throws Exception {
 		OverridableDomainGenerator gen = generator();
 		Document doc = mock(Document.class);
 		Persistent persistent = mock(Persistent.class);
-		when(persistent.isPolymorphicallyMapped()).thenAnswer(i -> Boolean.FALSE);
+		when(persistent.isPolymorphicallyMapped()).thenReturn(Boolean.FALSE);
 		when(doc.getPersistent()).thenReturn(persistent);
 		when(doc.getOwningModuleName()).thenReturn("test");
 		when(doc.getName()).thenReturn("Base");
@@ -1047,7 +1058,7 @@ class OverridableDomainGeneratorMoreTest {
 		nameField.setName("label");
 		nameField.setDisplayName("Label");
 		nameField.setLength(100);
-		// containsSkyveExpressions returns true for strings containing unescaped {
+		// This uses an unescaped { which makes containsSkyveExpressions return true
 		nameField.setDefaultValue("{title}");
 		doc.putAttribute(nameField);
 
@@ -1119,7 +1130,7 @@ class OverridableDomainGeneratorMoreTest {
 				new org.skyve.impl.metadata.model.document.field.Date();
 		dateField.setName("eventDate");
 		dateField.setDisplayName("Event Date");
-		// isSkyveExpression returns true when format is {expression}
+		// The {el:...} format makes isSkyveExpression return true
 		dateField.setDefaultValue("{el:someExpression}");
 		doc.putAttribute(dateField);
 
@@ -1526,7 +1537,7 @@ class OverridableDomainGeneratorMoreTest {
 	// ----- validateDocumentAttributeNames - dialect reserved words ----------
 
 	@Test
-	void validateDocumentAttributeNamesMssqlReservedWordThrows() throws Exception {
+	void validateDocumentAttributeNamesMssqlReservedWordThrows() {
 		// "exec" is SQL Server reserved but NOT H2 reserved
 		// The MSSQL check triggers first
 		OverridableDomainGenerator gen = generator(DialectOptions.MSSQL_2014);
@@ -1547,7 +1558,7 @@ class OverridableDomainGeneratorMoreTest {
 	}
 
 	@Test
-	void validateDocumentAttributeNamesMssql2016ReservedWordThrows() throws Exception {
+	void validateDocumentAttributeNamesMssql2016ReservedWordThrows() {
 		// Use MSSQL_2016 dialect as well to cover that branch
 		OverridableDomainGenerator gen = generator(DialectOptions.MSSQL_2016);
 		DocumentImpl doc = new DocumentImpl();
@@ -1566,7 +1577,7 @@ class OverridableDomainGeneratorMoreTest {
 	}
 
 	@Test
-	void validateDocumentAttributeNamesMysql5ReservedWordThrows() throws Exception {
+	void validateDocumentAttributeNamesMysql5ReservedWordThrows() {
 		// "accessible" is MySQL 5 reserved but NOT H2 reserved
 		OverridableDomainGenerator gen = generator(DialectOptions.MYSQL_5);
 		DocumentImpl doc = new DocumentImpl();
@@ -1585,7 +1596,7 @@ class OverridableDomainGeneratorMoreTest {
 	}
 
 	@Test
-	void validateDocumentAttributeNamesMysql5ByteCharsetReservedWordThrows() throws Exception {
+	void validateDocumentAttributeNamesMysql5ByteCharsetReservedWordThrows() {
 		OverridableDomainGenerator gen = generator(DialectOptions.MYSQL_5_4_BYTE_CHARSET);
 		DocumentImpl doc = new DocumentImpl();
 		doc.setName("Mysql5ByteDoc");
@@ -1603,7 +1614,7 @@ class OverridableDomainGeneratorMoreTest {
 	}
 
 	@Test
-	void validateDocumentAttributeNamesMysql8ReservedWordThrows() throws Exception {
+	void validateDocumentAttributeNamesMysql8ReservedWordThrows() {
 		// "lateral" is MySQL 8 reserved but NOT H2 reserved
 		OverridableDomainGenerator gen = generator(DialectOptions.MYSQL_8);
 		DocumentImpl doc = new DocumentImpl();
@@ -1622,7 +1633,7 @@ class OverridableDomainGeneratorMoreTest {
 	}
 
 	@Test
-	void validateDocumentAttributeNamesMysql8ByteReservedWordThrows() throws Exception {
+	void validateDocumentAttributeNamesMysql8ByteReservedWordThrows() {
 		OverridableDomainGenerator gen = generator(DialectOptions.MYSQL_8_4_BYTE_CHARSET);
 		DocumentImpl doc = new DocumentImpl();
 		doc.setName("Mysql8ByteDoc");
@@ -1640,7 +1651,7 @@ class OverridableDomainGeneratorMoreTest {
 	}
 
 	@Test
-	void validateDocumentAttributeNamesPostgresqlReservedWordThrows() throws Exception {
+	void validateDocumentAttributeNamesPostgresqlReservedWordThrows() {
 		// "verbose" is PostgreSQL reserved but NOT H2 reserved
 		OverridableDomainGenerator gen = generator(DialectOptions.POSTGRESQL);
 		DocumentImpl doc = new DocumentImpl();
@@ -1659,7 +1670,7 @@ class OverridableDomainGeneratorMoreTest {
 	}
 
 	@Test
-	void validateDocumentAttributeNamesH2ValidOnOtherDialect() throws Exception {
+	void validateDocumentAttributeNamesH2ValidOnOtherDialect() {
 		// Test that a word reserved in H2 throws even on MSSQL dialect (H2 always checked)
 		OverridableDomainGenerator gen = generator(DialectOptions.MSSQL_2014);
 		DocumentImpl doc = new DocumentImpl();
@@ -1693,7 +1704,8 @@ class OverridableDomainGeneratorMoreTest {
 		doc.putAttribute(field);
 
 		// Should NOT throw because doc has no Persistent = all attributes transient
-		declaredMethod("validateDocumentAttributeNames", Document.class).invoke(gen, doc);
+		assertNull(declaredMethod("validateDocumentAttributeNames", Document.class).invoke(gen, doc),
+				"void method invocation should return null for transient doc");
 	}
 
 	// ----- generateJava with bizKeyMethodCode --------------------------------
@@ -2502,7 +2514,7 @@ class OverridableDomainGeneratorMoreTest {
 				"populateModocDerivations",
 				Module.class, Document.class, ExtensionStrategy.class);
 		m.setAccessible(true);
-		m.invoke(gen, module, doc, null); // Should not throw
+		assertNull(m.invoke(gen, module, doc, null), "void populateModocDerivations should return null");
 	}
 
 	@Test
@@ -2563,7 +2575,7 @@ class OverridableDomainGeneratorMoreTest {
 				"populateModocDerivations",
 				Module.class, Document.class, ExtensionStrategy.class);
 		m.setAccessible(true);
-		m.invoke(gen, module, doc, null); // Should not throw
+		assertNull(m.invoke(gen, module, doc, null), "void populateModocDerivations with inherits should return null");
 	}
 
 	// ----- generateActionTests tests ----------------------------------------
@@ -2590,7 +2602,8 @@ class OverridableDomainGeneratorMoreTest {
 				org.skyve.util.test.SkyveFactory.class);
 		m.setAccessible(true);
 		// annotation=null, class not found → skipGeneration=true → nothing written
-		m.invoke(gen, "testMod", "modules/testMod/domain", "modules/testMod", doc, "ActionDoc", null);
+		assertNull(m.invoke(gen, "testMod", "modules/testMod/domain", "modules/testMod", doc, "ActionDoc", null),
+				"void generateActionTests should return null when skipping");
 	}
 
 	@Test
@@ -2615,7 +2628,8 @@ class OverridableDomainGeneratorMoreTest {
 				Document.class, String.class,
 				org.skyve.util.test.SkyveFactory.class);
 		m.setAccessible(true);
-		m.invoke(gen, "testMod", "modules/testMod/domain", "modules/testMod", doc, "DebugActionDoc", null);
+		assertNull(m.invoke(gen, "testMod", "modules/testMod/domain", "modules/testMod", doc, "DebugActionDoc", null),
+				"void generateActionTests should return null for debug mode");
 	}
 
 	// ----- addReference with deprecated flag --------------------------------
@@ -2728,6 +2742,1431 @@ class OverridableDomainGeneratorMoreTest {
 		String java = contents.toString();
 		assertTrue(java.contains("transient "), "Should have transient keyword for transient association");
 		assertTrue(java.contains("getTransRef"), "Should have getter for transient association");
+	}
+
+	// ----- generateJava with deprecated association (covers addReference deprecated branch) ---
+
+	@Test
+	void generateJavaWithDeprecatedAssociationNew() throws Exception {
+		OverridableDomainGenerator gen = generator();
+
+		DocumentImpl refDoc = new DocumentImpl();
+		refDoc.setName("DepRefDoc");
+		refDoc.setOwningModuleName("testMod");
+
+		DocumentImpl ownerDoc = new DocumentImpl();
+		ownerDoc.setName("DepAssocOwner");
+		ownerDoc.setOwningModuleName("testMod");
+
+		org.skyve.impl.metadata.model.document.AssociationImpl assoc =
+				new org.skyve.impl.metadata.model.document.AssociationImpl();
+		assoc.setName("depRef");
+		assoc.setDisplayName("Deprecated Ref");
+		assoc.setDocumentName("DepRefDoc");
+		assoc.setType(org.skyve.metadata.model.document.Association.AssociationType.aggregation);
+		assoc.setDeprecated(true);
+
+		ownerDoc.putRelation(assoc);
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("testMod");
+		when(module.getDocument(null, "DepRefDoc")).thenReturn(refDoc);
+
+		// Set up vanilla classes
+		Class<?> domainClassType = Class.forName("org.skyve.impl.generate.OverridableDomainGenerator$DomainClass");
+		java.lang.reflect.Constructor<?> ctor = domainClassType.getDeclaredConstructor();
+		ctor.setAccessible(true);
+		Object domainClassInst = ctor.newInstance();
+
+		java.lang.reflect.Field vanillaField = OverridableDomainGenerator.class.getDeclaredField("moduleDocumentVanillaClasses");
+		vanillaField.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		java.util.TreeMap<String, java.util.TreeMap<String, Object>> vanillaClasses =
+				(java.util.TreeMap<String, java.util.TreeMap<String, Object>>) vanillaField.get(gen);
+		java.util.TreeMap<String, Object> modClasses = new java.util.TreeMap<>();
+		modClasses.put("DepRefDoc", domainClassInst);
+		vanillaClasses.put("testMod", modClasses);
+
+		StringBuilder contents = new StringBuilder();
+		declaredMethod("generateJava",
+				org.skyve.metadata.customer.Customer.class,
+				Module.class, Document.class, StringBuilder.class,
+				String.class, String.class, String.class, boolean.class)
+				.invoke(gen, null, module, ownerDoc, contents,
+						"modules.testMod.domain", "DepAssocOwner", null, Boolean.FALSE);
+
+		String java = contents.toString();
+		assertTrue(java.contains("@Deprecated"), "Should have @Deprecated annotation");
+		assertTrue(java.contains("getDepRef"), "Should have getter for deprecated association");
+	}
+
+	// ----- generateJava with aggregation collection (covers Collection branch in addReference) ---
+
+	@Test
+	void generateJavaWithAggregationCollection() throws Exception {
+		OverridableDomainGenerator gen = generator();
+
+		DocumentImpl itemDoc = new DocumentImpl();
+		itemDoc.setName("LineItem");
+		itemDoc.setOwningModuleName("testMod");
+
+		DocumentImpl ownerDoc = new DocumentImpl();
+		ownerDoc.setName("OrderDoc");
+		ownerDoc.setOwningModuleName("testMod");
+
+		org.skyve.impl.metadata.model.document.CollectionImpl coll =
+				new org.skyve.impl.metadata.model.document.CollectionImpl();
+		coll.setName("lineItems");
+		coll.setDisplayName("Line Items");
+		coll.setDocumentName("LineItem");
+		coll.setType(org.skyve.metadata.model.document.Collection.CollectionType.aggregation);
+
+		ownerDoc.putRelation(coll);
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("testMod");
+		when(module.getDocument(null, "LineItem")).thenReturn(itemDoc);
+
+		// Set up vanilla classes
+		Class<?> domainClassType = Class.forName("org.skyve.impl.generate.OverridableDomainGenerator$DomainClass");
+		java.lang.reflect.Constructor<?> ctor = domainClassType.getDeclaredConstructor();
+		ctor.setAccessible(true);
+		Object domainClassInst = ctor.newInstance();
+
+		java.lang.reflect.Field vanillaField = OverridableDomainGenerator.class.getDeclaredField("moduleDocumentVanillaClasses");
+		vanillaField.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		java.util.TreeMap<String, java.util.TreeMap<String, Object>> vanillaClasses =
+				(java.util.TreeMap<String, java.util.TreeMap<String, Object>>) vanillaField.get(gen);
+		java.util.TreeMap<String, Object> modClasses = new java.util.TreeMap<>();
+		modClasses.put("LineItem", domainClassInst);
+		vanillaClasses.put("testMod", modClasses);
+
+		StringBuilder contents = new StringBuilder();
+		declaredMethod("generateJava",
+				org.skyve.metadata.customer.Customer.class,
+				Module.class, Document.class, StringBuilder.class,
+				String.class, String.class, String.class, boolean.class)
+				.invoke(gen, null, module, ownerDoc, contents,
+						"modules.testMod.domain", "OrderDoc", null, Boolean.FALSE);
+
+		String java = contents.toString();
+		assertTrue(java.contains("List<LineItem>"), "Should have list of line items");
+		assertTrue(java.contains("getLineItems"), "Should have getter");
+		assertTrue(java.contains("addLineItemsElement"), "Should have add method");
+		assertTrue(java.contains("removeLineItemsElement"), "Should have remove method");
+	}
+
+	// ----- generateJava with deprecated aggregation collection (covers deprecated Collection path) ---
+
+	@Test
+	void generateJavaWithDeprecatedAggregationCollection() throws Exception {
+		OverridableDomainGenerator gen = generator();
+
+		DocumentImpl itemDoc = new DocumentImpl();
+		itemDoc.setName("DepItem");
+		itemDoc.setOwningModuleName("testMod");
+
+		DocumentImpl ownerDoc = new DocumentImpl();
+		ownerDoc.setName("DepCollOwner");
+		ownerDoc.setOwningModuleName("testMod");
+
+		org.skyve.impl.metadata.model.document.CollectionImpl coll =
+				new org.skyve.impl.metadata.model.document.CollectionImpl();
+		coll.setName("depItems");
+		coll.setDisplayName("Deprecated Items");
+		coll.setDocumentName("DepItem");
+		coll.setType(org.skyve.metadata.model.document.Collection.CollectionType.aggregation);
+		coll.setDeprecated(true);
+
+		ownerDoc.putRelation(coll);
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("testMod");
+		when(module.getDocument(null, "DepItem")).thenReturn(itemDoc);
+
+		// Set up vanilla classes
+		Class<?> domainClassType = Class.forName("org.skyve.impl.generate.OverridableDomainGenerator$DomainClass");
+		java.lang.reflect.Constructor<?> ctor = domainClassType.getDeclaredConstructor();
+		ctor.setAccessible(true);
+		Object domainClassInst = ctor.newInstance();
+
+		java.lang.reflect.Field vanillaField = OverridableDomainGenerator.class.getDeclaredField("moduleDocumentVanillaClasses");
+		vanillaField.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		java.util.TreeMap<String, java.util.TreeMap<String, Object>> vanillaClasses =
+				(java.util.TreeMap<String, java.util.TreeMap<String, Object>>) vanillaField.get(gen);
+		java.util.TreeMap<String, Object> modClasses = new java.util.TreeMap<>();
+		modClasses.put("DepItem", domainClassInst);
+		vanillaClasses.put("testMod", modClasses);
+
+		StringBuilder contents = new StringBuilder();
+		declaredMethod("generateJava",
+				org.skyve.metadata.customer.Customer.class,
+				Module.class, Document.class, StringBuilder.class,
+				String.class, String.class, String.class, boolean.class)
+				.invoke(gen, null, module, ownerDoc, contents,
+						"modules.testMod.domain", "DepCollOwner", null, Boolean.FALSE);
+
+		String java = contents.toString();
+		assertTrue(java.contains("@Deprecated"), "Should have @Deprecated annotation on collection");
+		assertTrue(java.contains("List<DepItem>"), "Should have list type");
+	}
+
+	// ----- generateJava with association with inverse back-ref (covers inverse != null in addReference) ---
+
+	@Test
+	void generateJavaWithAssociationHavingInverseBackRef() throws Exception {
+		OverridableDomainGenerator gen = generator();
+
+		// refDoc has an InverseMany back to ownerDoc via "orders"
+		DocumentImpl refDoc = new DocumentImpl();
+		refDoc.setName("RefWithInverse");
+		refDoc.setOwningModuleName("testMod");
+
+		org.skyve.impl.metadata.model.document.InverseMany inverseMany =
+				new org.skyve.impl.metadata.model.document.InverseMany();
+		inverseMany.setName("orders");
+		inverseMany.setDisplayName("Orders");
+		inverseMany.setDocumentName("AssocWithInverseOwner");
+		inverseMany.setReferenceName("myRef"); // matches the association name below
+		inverseMany.setRelationship(org.skyve.impl.metadata.model.document.AbstractInverse.InverseRelationship.oneToMany);
+		refDoc.putRelation(inverseMany);
+
+		DocumentImpl ownerDoc = new DocumentImpl();
+		ownerDoc.setName("AssocWithInverseOwner");
+		ownerDoc.setOwningModuleName("testMod");
+
+		org.skyve.impl.metadata.model.document.AssociationImpl assoc =
+				new org.skyve.impl.metadata.model.document.AssociationImpl();
+		assoc.setName("myRef");
+		assoc.setDisplayName("My Ref");
+		assoc.setDocumentName("RefWithInverse");
+		assoc.setType(org.skyve.metadata.model.document.Association.AssociationType.aggregation);
+
+		ownerDoc.putRelation(assoc);
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("testMod");
+		when(module.getDocument(null, "RefWithInverse")).thenReturn(refDoc);
+		when(module.getDocument(null, "AssocWithInverseOwner")).thenReturn(ownerDoc);
+
+		// Set up vanilla classes - only include refDoc, NOT ownerDoc so documentClass==null
+		// which means the condition (documentClass == null) is true and attribute gets generated
+		Class<?> domainClassType = Class.forName("org.skyve.impl.generate.OverridableDomainGenerator$DomainClass");
+		java.lang.reflect.Constructor<?> ctor = domainClassType.getDeclaredConstructor();
+		ctor.setAccessible(true);
+		Object domainClassInst1 = ctor.newInstance();
+
+		java.lang.reflect.Field vanillaField = OverridableDomainGenerator.class.getDeclaredField("moduleDocumentVanillaClasses");
+		vanillaField.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		java.util.TreeMap<String, java.util.TreeMap<String, Object>> vanillaClasses =
+				(java.util.TreeMap<String, java.util.TreeMap<String, Object>>) vanillaField.get(gen);
+		java.util.TreeMap<String, Object> modClasses = new java.util.TreeMap<>();
+		modClasses.put("RefWithInverse", domainClassInst1);
+		// Do NOT put AssocWithInverseOwner so documentClass=null → attribute gets generated
+		vanillaClasses.put("testMod", modClasses);
+
+		StringBuilder contents = new StringBuilder();
+		declaredMethod("generateJava",
+				org.skyve.metadata.customer.Customer.class,
+				Module.class, Document.class, StringBuilder.class,
+				String.class, String.class, String.class, boolean.class)
+				.invoke(gen, null, module, ownerDoc, contents,
+						"modules.testMod.domain", "AssocWithInverseOwner", null, Boolean.FALSE);
+
+		String java = contents.toString();
+		assertTrue(java.contains("getMyRef"), "Should have getter");
+		// With one-to-many inverse, the setter should reference the inverse collection
+		assertTrue(java.contains("getOrders"), "Setter should reference inverse collection");
+	}
+
+	// ----- generateJava with association with oneToOne inverse (covers oneToOne inverse path in addReference) ---
+
+	@Test
+	void generateJavaWithAssociationHavingOneToOneInverse() throws Exception {
+		OverridableDomainGenerator gen = generator();
+
+		// refDoc has an InverseOne back to ownerDoc via "owner"
+		DocumentImpl refDoc = new DocumentImpl();
+		refDoc.setName("RefWithOneToOneInverse");
+		refDoc.setOwningModuleName("testMod");
+
+		org.skyve.impl.metadata.model.document.InverseOne inverseOne =
+				new org.skyve.impl.metadata.model.document.InverseOne();
+		inverseOne.setName("owner");
+		inverseOne.setDisplayName("Owner");
+		inverseOne.setDocumentName("OneToOneOwner");
+		inverseOne.setReferenceName("myRef");
+		inverseOne.setRelationship(org.skyve.impl.metadata.model.document.AbstractInverse.InverseRelationship.oneToOne);
+		refDoc.putRelation(inverseOne);
+
+		DocumentImpl ownerDoc = new DocumentImpl();
+		ownerDoc.setName("OneToOneOwner");
+		ownerDoc.setOwningModuleName("testMod");
+
+		org.skyve.impl.metadata.model.document.AssociationImpl assoc =
+				new org.skyve.impl.metadata.model.document.AssociationImpl();
+		assoc.setName("myRef");
+		assoc.setDisplayName("My Ref");
+		assoc.setDocumentName("RefWithOneToOneInverse");
+		assoc.setType(org.skyve.metadata.model.document.Association.AssociationType.aggregation);
+
+		ownerDoc.putRelation(assoc);
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("testMod");
+		when(module.getDocument(null, "RefWithOneToOneInverse")).thenReturn(refDoc);
+		when(module.getDocument(null, "OneToOneOwner")).thenReturn(ownerDoc);
+
+		// Set up vanilla classes
+		Class<?> domainClassType = Class.forName("org.skyve.impl.generate.OverridableDomainGenerator$DomainClass");
+		java.lang.reflect.Constructor<?> ctor = domainClassType.getDeclaredConstructor();
+		ctor.setAccessible(true);
+		Object domainClassInst1 = ctor.newInstance();
+
+		java.lang.reflect.Field vanillaField = OverridableDomainGenerator.class.getDeclaredField("moduleDocumentVanillaClasses");
+		vanillaField.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		java.util.TreeMap<String, java.util.TreeMap<String, Object>> vanillaClasses =
+				(java.util.TreeMap<String, java.util.TreeMap<String, Object>>) vanillaField.get(gen);
+		java.util.TreeMap<String, Object> modClasses = new java.util.TreeMap<>();
+		modClasses.put("RefWithOneToOneInverse", domainClassInst1);
+		// Do NOT add OneToOneOwner so documentClass=null → attributes get generated
+		vanillaClasses.put("testMod", modClasses);
+
+		StringBuilder contents = new StringBuilder();
+		declaredMethod("generateJava",
+				org.skyve.metadata.customer.Customer.class,
+				Module.class, Document.class, StringBuilder.class,
+				String.class, String.class, String.class, boolean.class)
+				.invoke(gen, null, module, ownerDoc, contents,
+						"modules.testMod.domain", "OneToOneOwner", null, Boolean.FALSE);
+
+		String java = contents.toString();
+		assertTrue(java.contains("getMyRef"), "Should have getter");
+		// With oneToOne inverse, the setter should reference nullMyRef
+		assertTrue(java.contains("nullMyRef"), "Should have null method for oneToOne inverse");
+	}
+
+	// ----- generateJava with collection and composition type (covers trackChanges path) ---
+
+	@Test
+	void generateJavaWithTrackChangesCompositionCollection() throws Exception {
+		OverridableDomainGenerator gen = generator();
+
+		DocumentImpl itemDoc = new DocumentImpl();
+		itemDoc.setName("CompositionItem");
+		itemDoc.setOwningModuleName("testMod");
+
+		DocumentImpl ownerDoc = new DocumentImpl();
+		ownerDoc.setName("CompositionOwner");
+		ownerDoc.setOwningModuleName("testMod");
+
+		org.skyve.impl.metadata.model.document.CollectionImpl coll =
+				new org.skyve.impl.metadata.model.document.CollectionImpl();
+		coll.setName("items");
+		coll.setDisplayName("Items");
+		coll.setDocumentName("CompositionItem");
+		coll.setType(org.skyve.metadata.model.document.Collection.CollectionType.composition);
+		coll.setTrackChanges(true);
+
+		ownerDoc.putRelation(coll);
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("testMod");
+		when(module.getDocument(null, "CompositionItem")).thenReturn(itemDoc);
+
+		// Set up vanilla classes
+		Class<?> domainClassType = Class.forName("org.skyve.impl.generate.OverridableDomainGenerator$DomainClass");
+		java.lang.reflect.Constructor<?> ctor = domainClassType.getDeclaredConstructor();
+		ctor.setAccessible(true);
+		Object domainClassInst = ctor.newInstance();
+
+		java.lang.reflect.Field vanillaField = OverridableDomainGenerator.class.getDeclaredField("moduleDocumentVanillaClasses");
+		vanillaField.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		java.util.TreeMap<String, java.util.TreeMap<String, Object>> vanillaClasses =
+				(java.util.TreeMap<String, java.util.TreeMap<String, Object>>) vanillaField.get(gen);
+		java.util.TreeMap<String, Object> modClasses = new java.util.TreeMap<>();
+		modClasses.put("CompositionItem", domainClassInst);
+		vanillaClasses.put("testMod", modClasses);
+
+		StringBuilder contents = new StringBuilder();
+		declaredMethod("generateJava",
+				org.skyve.metadata.customer.Customer.class,
+				Module.class, Document.class, StringBuilder.class,
+				String.class, String.class, String.class, boolean.class)
+				.invoke(gen, null, module, ownerDoc, contents,
+						"modules.testMod.domain", "CompositionOwner", null, Boolean.FALSE);
+
+		String java = contents.toString();
+		assertTrue(java.contains("ChangeTrackingArrayList"), "Should use ChangeTrackingArrayList for trackChanges collection");
+		assertTrue(java.contains("getItems"), "Should have getter");
+	}
+
+	// ----- generateJava with text attribute with bizKeyMethodCode ---
+
+	@Test
+	void generateJavaWithBizKeyMethodCode() throws Exception {
+		OverridableDomainGenerator gen = generator();
+
+		DocumentImpl doc = new DocumentImpl();
+		doc.setName("BizKeyDoc");
+		doc.setOwningModuleName("testMod");
+		doc.setBizKeyMethodCode("return getName();");
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("testMod");
+
+		StringBuilder contents = new StringBuilder();
+		declaredMethod("generateJava",
+				org.skyve.metadata.customer.Customer.class,
+				Module.class, Document.class, StringBuilder.class,
+				String.class, String.class, String.class, boolean.class)
+				.invoke(gen, null, module, doc, contents,
+						"modules.testMod.domain", "BizKeyDoc", null, Boolean.FALSE);
+
+		String java = contents.toString();
+		assertTrue(java.contains("getBizKey"), "Should contain getBizKey method");
+		assertTrue(java.contains("return getName()"), "Should contain the bizKey method code");
+	}
+
+	// ----- generateJava with overridden document (extension class) ---
+
+	@Test
+	void generateJavaForOverriddenDocument() throws Exception {
+		OverridableDomainGenerator gen = generator();
+
+		DocumentImpl baseDoc = new DocumentImpl();
+		baseDoc.setName("BaseDoc");
+		baseDoc.setOwningModuleName("testMod");
+
+		DocumentImpl doc = new DocumentImpl();
+		doc.setName("ExtDoc");
+		doc.setOwningModuleName("testMod");
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("testMod");
+		when(module.getDocument(null, "BaseDoc")).thenReturn(baseDoc);
+
+		// Set up vanilla class so the overridden=true path sees a base class
+		Class<?> domainClassType = Class.forName("org.skyve.impl.generate.OverridableDomainGenerator$DomainClass");
+		java.lang.reflect.Constructor<?> ctor = domainClassType.getDeclaredConstructor();
+		ctor.setAccessible(true);
+		Object domainClassInst = ctor.newInstance();
+
+		java.lang.reflect.Field vanillaField = OverridableDomainGenerator.class.getDeclaredField("moduleDocumentVanillaClasses");
+		vanillaField.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		java.util.TreeMap<String, java.util.TreeMap<String, Object>> vanillaClasses =
+				(java.util.TreeMap<String, java.util.TreeMap<String, Object>>) vanillaField.get(gen);
+		java.util.TreeMap<String, Object> modClasses = new java.util.TreeMap<>();
+		modClasses.put("ExtDoc", domainClassInst);
+		vanillaClasses.put("testMod", modClasses);
+
+		StringBuilder contents = new StringBuilder();
+		declaredMethod("generateJava",
+				org.skyve.metadata.customer.Customer.class,
+				Module.class, Document.class, StringBuilder.class,
+				String.class, String.class, String.class, boolean.class)
+				.invoke(gen, null, module, doc, contents,
+						"modules.testMod.domain", "ExtDoc", "BaseDoc", Boolean.FALSE);
+
+		String java = contents.toString();
+		// overridden=false but baseDocumentName set means this doc extends another doc
+		assertTrue(java.contains("class ExtDoc"), "Should contain class name");
+		assertTrue(java.contains("extends BaseDoc"), "Should extend base document class");
+	}
+
+	// ----- generateJava with persistent document and overridden=true (extension class path) ---
+
+	@Test
+	void generateJavaWithOverriddenTrueExtensionClass() throws Exception {
+		OverridableDomainGenerator gen = generator();
+
+		DocumentImpl doc = new DocumentImpl();
+		doc.setName("CustExtDoc");
+		doc.setOwningModuleName("testMod");
+		// No persistent = transient
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("testMod");
+
+		// Set up vanilla class so overridden path has a documentClass reference
+		Class<?> domainClassType = Class.forName("org.skyve.impl.generate.OverridableDomainGenerator$DomainClass");
+		java.lang.reflect.Constructor<?> ctor = domainClassType.getDeclaredConstructor();
+		ctor.setAccessible(true);
+		Object domainClassInst = ctor.newInstance();
+
+		java.lang.reflect.Field vanillaField = OverridableDomainGenerator.class.getDeclaredField("moduleDocumentVanillaClasses");
+		vanillaField.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		java.util.TreeMap<String, java.util.TreeMap<String, Object>> vanillaClasses =
+				(java.util.TreeMap<String, java.util.TreeMap<String, Object>>) vanillaField.get(gen);
+		java.util.TreeMap<String, Object> modClasses = new java.util.TreeMap<>();
+		modClasses.put("CustExtDoc", domainClassInst);
+		vanillaClasses.put("testMod", modClasses);
+
+		StringBuilder contents = new StringBuilder();
+		// overridden = Boolean.TRUE means this is an extension/override class
+		declaredMethod("generateJava",
+				org.skyve.metadata.customer.Customer.class,
+				Module.class, Document.class, StringBuilder.class,
+				String.class, String.class, String.class, boolean.class)
+				.invoke(gen, null, module, doc, contents,
+						"customers.testCust.modules.testMod.domain", "CustExtDoc", null, Boolean.TRUE);
+
+		String java = contents.toString();
+		assertTrue(java.contains("class CustExtDoc"), "Should contain class name");
+		// overridden=true with last param Boolean.TRUE generates an extension class
+		assertTrue(java.contains("CustExtDoc"), "Should contain document class name");
+	}
+
+	// ----- generateAttributeMappings with child collection ------------------
+
+	private static void setupPersistentPropertyLengths(OverridableDomainGenerator gen, String persistentId)
+			throws Exception {
+		Field pplField = OverridableDomainGenerator.class.getDeclaredField("persistentPropertyLengths");
+		pplField.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		TreeMap<String, TreeMap<String, Integer>> ppl =
+				(TreeMap<String, TreeMap<String, Integer>>) pplField.get(gen);
+		ppl.put(persistentId, new TreeMap<>());
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	void generateAttributeMappingsChildCollectionGeneratesBagElement() throws Exception {
+		OverridableDomainGenerator gen = generator();
+		setupPersistentPropertyLengths(gen, "OWN_TABLE");
+
+		// Referenced doc with a concrete Persistent (non-null name → isPolymorphicallyMapped = false)
+		DocumentImpl refDoc = new DocumentImpl();
+		refDoc.setName("ItemDoc");
+		refDoc.setOwningModuleName("testMod");
+		Persistent refPersistent = new Persistent();
+		refPersistent.setName("ITEM_TABLE");
+		refDoc.setPersistent(refPersistent);
+
+		// Build the collection attribute
+		CollectionImpl col = new CollectionImpl();
+		col.setName("items");
+		col.setDocumentName("ItemDoc");
+		col.setType(CollectionType.child);
+
+		// Owner doc
+		DocumentImpl ownerDoc = new DocumentImpl();
+		ownerDoc.setName("OwnerDoc");
+		ownerDoc.setOwningModuleName("testMod");
+		ownerDoc.putRelation(col);
+
+		// Module mock
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("testMod");
+		when(module.getDocument(null, "ItemDoc")).thenReturn(refDoc);
+
+		Persistent ownerPersistent = new Persistent();
+		ownerPersistent.setName("OWN_TABLE");
+
+		StringBuilder contents = new StringBuilder();
+		declaredMethod("generateAttributeMappings",
+				StringBuilder.class,
+				org.skyve.metadata.customer.Customer.class,
+				Module.class, Document.class, Persistent.class,
+				String.class, Set.class, String.class, boolean.class, String.class)
+				.invoke(gen, contents, null, module, ownerDoc, ownerPersistent,
+						null, new TreeSet<>(), "OwnerDoc", false, "");
+
+		String xml = contents.toString();
+		assertTrue(xml.contains("<bag name=\"items\""), "Expected child bag element, got: " + xml);
+		assertTrue(xml.contains("cascade=\"all-delete-orphan\""), "Expected child cascade, got: " + xml);
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	void generateAttributeMappingsAggregationCollectionGeneratesManyToMany() throws Exception {
+		OverridableDomainGenerator gen = generator();
+		setupPersistentPropertyLengths(gen, "OWN_TABLE2");
+
+		DocumentImpl refDoc = new DocumentImpl();
+		refDoc.setName("TagDoc");
+		refDoc.setOwningModuleName("testMod");
+		Persistent refPersistent = new Persistent();
+		refPersistent.setName("TAG_TABLE");
+		refDoc.setPersistent(refPersistent);
+
+		CollectionImpl col = new CollectionImpl();
+		col.setName("tags");
+		col.setDocumentName("TagDoc");
+		col.setType(CollectionType.aggregation);
+
+		DocumentImpl ownerDoc = new DocumentImpl();
+		ownerDoc.setName("OwnerDoc2");
+		ownerDoc.setOwningModuleName("testMod");
+		ownerDoc.putRelation(col);
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("testMod");
+		when(module.getDocument(null, "TagDoc")).thenReturn(refDoc);
+
+		Persistent ownerPersistent = new Persistent();
+		ownerPersistent.setName("OWN_TABLE2");
+
+		StringBuilder contents = new StringBuilder();
+		declaredMethod("generateAttributeMappings",
+				StringBuilder.class,
+				org.skyve.metadata.customer.Customer.class,
+				Module.class, Document.class, Persistent.class,
+				String.class, Set.class, String.class, boolean.class, String.class)
+				.invoke(gen, contents, null, module, ownerDoc, ownerPersistent,
+						null, new TreeSet<>(), "OwnerDoc2", false, "");
+
+		String xml = contents.toString();
+		assertTrue(xml.contains("<bag name=\"tags\"") || xml.contains("<list name=\"tags\""),
+				"Expected bag/list element, got: " + xml);
+		assertTrue(xml.contains("cascade=\"persist,save-update,refresh,merge\""),
+				"Expected aggregation cascade, got: " + xml);
+		assertTrue(xml.contains("<many-to-many"), "Expected many-to-many, got: " + xml);
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	void generateAttributeMappingsCompositionCollectionGeneratesComposeBag() throws Exception {
+		OverridableDomainGenerator gen = generator();
+		setupPersistentPropertyLengths(gen, "OWN_TABLE3");
+
+		DocumentImpl refDoc = new DocumentImpl();
+		refDoc.setName("LineDoc");
+		refDoc.setOwningModuleName("testMod");
+		Persistent refPersistent = new Persistent();
+		refPersistent.setName("LINE_TABLE");
+		refDoc.setPersistent(refPersistent);
+
+		CollectionImpl col = new CollectionImpl();
+		col.setName("lines");
+		col.setDocumentName("LineDoc");
+		col.setType(CollectionType.composition);
+
+		DocumentImpl ownerDoc = new DocumentImpl();
+		ownerDoc.setName("OwnerDoc3");
+		ownerDoc.setOwningModuleName("testMod");
+		ownerDoc.putRelation(col);
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("testMod");
+		when(module.getDocument(null, "LineDoc")).thenReturn(refDoc);
+
+		Persistent ownerPersistent = new Persistent();
+		ownerPersistent.setName("OWN_TABLE3");
+
+		StringBuilder contents = new StringBuilder();
+		declaredMethod("generateAttributeMappings",
+				StringBuilder.class,
+				org.skyve.metadata.customer.Customer.class,
+				Module.class, Document.class, Persistent.class,
+				String.class, Set.class, String.class, boolean.class, String.class)
+				.invoke(gen, contents, null, module, ownerDoc, ownerPersistent,
+						null, new TreeSet<>(), "OwnerDoc3", false, "");
+
+		String xml = contents.toString();
+		assertTrue(xml.contains("cascade=\"all-delete-orphan\""), "Expected compose cascade, got: " + xml);
+		assertTrue(xml.contains("<many-to-many"), "Expected many-to-many, got: " + xml);
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	void generateAttributeMappingsOrderedCompositionGeneratesListElement() throws Exception {
+		OverridableDomainGenerator gen = generator();
+		setupPersistentPropertyLengths(gen, "OWN_TABLE4");
+
+		DocumentImpl refDoc = new DocumentImpl();
+		refDoc.setName("OrderedItem");
+		refDoc.setOwningModuleName("testMod");
+		Persistent refPersistent = new Persistent();
+		refPersistent.setName("ORDERED_ITEM");
+		refDoc.setPersistent(refPersistent);
+
+		CollectionImpl col = new CollectionImpl();
+		col.setName("orderedItems");
+		col.setDocumentName("OrderedItem");
+		col.setType(CollectionType.composition);
+		col.setOrdered(Boolean.TRUE);
+
+		DocumentImpl ownerDoc = new DocumentImpl();
+		ownerDoc.setName("OwnerDoc4");
+		ownerDoc.setOwningModuleName("testMod");
+		ownerDoc.putRelation(col);
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("testMod");
+		when(module.getDocument(null, "OrderedItem")).thenReturn(refDoc);
+
+		Persistent ownerPersistent = new Persistent();
+		ownerPersistent.setName("OWN_TABLE4");
+
+		StringBuilder contents = new StringBuilder();
+		declaredMethod("generateAttributeMappings",
+				StringBuilder.class,
+				org.skyve.metadata.customer.Customer.class,
+				Module.class, Document.class, Persistent.class,
+				String.class, Set.class, String.class, boolean.class, String.class)
+				.invoke(gen, contents, null, module, ownerDoc, ownerPersistent,
+						null, new TreeSet<>(), "OwnerDoc4", false, "");
+
+		String xml = contents.toString();
+		assertTrue(xml.contains("<list name=\"orderedItems\""), "Expected ordered list element, got: " + xml);
+		assertTrue(xml.contains("<list-index"), "Expected list-index for ordinal, got: " + xml);
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	void generateAttributeMappingsTransientCollectionIsSkipped() throws Exception {
+		OverridableDomainGenerator gen = generator();
+		setupPersistentPropertyLengths(gen, "OWN_TABLE5");
+
+		DocumentImpl refDoc = new DocumentImpl();
+		refDoc.setName("TransientItem");
+		refDoc.setOwningModuleName("testMod");
+
+		CollectionImpl col = new CollectionImpl();
+		col.setName("transientItems");
+		col.setDocumentName("TransientItem");
+		col.setType(CollectionType.aggregation);
+		col.setPersistent(false); // transient: isPersistent() = false
+
+		DocumentImpl ownerDoc = new DocumentImpl();
+		ownerDoc.setName("OwnerDoc5");
+		ownerDoc.setOwningModuleName("testMod");
+		ownerDoc.putRelation(col);
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("testMod");
+		when(module.getDocument(null, "TransientItem")).thenReturn(refDoc);
+
+		Persistent ownerPersistent = new Persistent();
+		ownerPersistent.setName("OWN_TABLE5");
+
+		StringBuilder contents = new StringBuilder();
+		declaredMethod("generateAttributeMappings",
+				StringBuilder.class,
+				org.skyve.metadata.customer.Customer.class,
+				Module.class, Document.class, Persistent.class,
+				String.class, Set.class, String.class, boolean.class, String.class)
+				.invoke(gen, contents, null, module, ownerDoc, ownerPersistent,
+						null, new TreeSet<>(), "OwnerDoc5", false, "");
+
+		// Transient collection should be skipped - no bag/list elements
+		String xml = contents.toString();
+		assertFalse(xml.contains("<bag"), "Transient collection should be skipped, got: " + xml);
+		assertFalse(xml.contains("<list"), "Transient collection should be skipped, got: " + xml);
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	void generateAttributeMappingsAssociationGeneratesManyToOne() throws Exception {
+		OverridableDomainGenerator gen = generator();
+		setupPersistentPropertyLengths(gen, "OWN_ASSOC_TABLE");
+
+		DocumentImpl refDoc = new DocumentImpl();
+		refDoc.setName("RefDoc");
+		refDoc.setOwningModuleName("testMod");
+		Persistent refPersistent = new Persistent();
+		refPersistent.setName("REF_TABLE");
+		refDoc.setPersistent(refPersistent);
+
+		org.skyve.impl.metadata.model.document.AssociationImpl assoc =
+				new org.skyve.impl.metadata.model.document.AssociationImpl();
+		assoc.setName("myRef");
+		assoc.setDocumentName("RefDoc");
+		assoc.setType(org.skyve.metadata.model.document.Association.AssociationType.aggregation);
+
+		DocumentImpl ownerDoc = new DocumentImpl();
+		ownerDoc.setName("OwnerAssocDoc");
+		ownerDoc.setOwningModuleName("testMod");
+		ownerDoc.putRelation(assoc);
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("testMod");
+		when(module.getDocument(null, "RefDoc")).thenReturn(refDoc);
+
+		Persistent ownerPersistent = new Persistent();
+		ownerPersistent.setName("OWN_ASSOC_TABLE");
+
+		StringBuilder contents = new StringBuilder();
+		declaredMethod("generateAttributeMappings",
+				StringBuilder.class,
+				org.skyve.metadata.customer.Customer.class,
+				Module.class, Document.class, Persistent.class,
+				String.class, Set.class, String.class, boolean.class, String.class)
+				.invoke(gen, contents, null, module, ownerDoc, ownerPersistent,
+						null, new TreeSet<>(), "OwnerAssocDoc", false, "");
+
+		String xml = contents.toString();
+		assertTrue(xml.contains("<many-to-one name=\"myRef\""), "Expected many-to-one for association, got: " + xml);
+	}
+
+	// ----- generateORM basic tests ------------------------------------------
+
+	private static void injectRepository(OverridableDomainGenerator gen, ProvidedRepository repo) throws Exception {
+		Field repoField = DomainGenerator.class.getDeclaredField("repository");
+		repoField.setAccessible(true);
+		repoField.set(gen, repo);
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	void generateORMWithNoPersistentDocumentGeneratesNothing() throws Exception {
+		OverridableDomainGenerator gen = generator();
+
+		ProvidedRepository repo = mock(ProvidedRepository.class);
+		injectRepository(gen, repo);
+
+		DocumentImpl doc = new DocumentImpl();
+		doc.setName("TransientDoc");
+		doc.setOwningModuleName("testMod");
+		// persistent is null by default → transient document
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("testMod");
+
+		StringBuilder contents = new StringBuilder();
+		StringBuilder filterDefs = new StringBuilder();
+
+		declaredMethod("generateORM",
+				StringBuilder.class, Module.class, Document.class,
+				String.class, boolean.class, boolean.class,
+				org.skyve.metadata.customer.Customer.class,
+				StringBuilder.class, String.class)
+				.invoke(gen, contents, module, doc, "modules.testMod.domain.", false, true,
+						null, filterDefs, "");
+
+		// No persistent → no ORM class element
+		assertFalse(contents.toString().contains("<class"), "Transient doc should generate no ORM class, got: " + contents);
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	void generateORMWithPersistentDocumentGeneratesClassElement() throws Exception {
+		OverridableDomainGenerator gen = generator();
+
+		ProvidedRepository repo = mock(ProvidedRepository.class);
+		when(repo.findNearestPersistentSingleOrJoinedSuperDocument(null, null, null))
+				.thenReturn(null);
+		injectRepository(gen, repo);
+
+		// Use a minimal setup - persistent doc with no attributes, no inherits, no parent
+		Persistent persistent = new Persistent();
+		persistent.setName("TEST_ORM_TABLE");
+
+		DocumentImpl doc = new DocumentImpl();
+		doc.setName("PersistDoc");
+		doc.setOwningModuleName("testMod");
+		doc.setPersistent(persistent);
+
+		// isPersistable needs persistent != null and persistent.getName() != null → satisfied
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("testMod");
+		// repository.findNearestPersistentSingleOrJoinedSuperDocument is called with the document, 
+		// configure so it returns null (not an ORM subclass)
+		when(repo.findNearestPersistentSingleOrJoinedSuperDocument(null, module, doc)).thenReturn(null);
+
+		// Set up persistentPropertyLengths for this persistent ID
+		setupPersistentPropertyLengths(gen, "TEST_ORM_TABLE");
+
+		StringBuilder contents = new StringBuilder();
+		StringBuilder filterDefs = new StringBuilder();
+
+		declaredMethod("generateORM",
+				StringBuilder.class, Module.class, Document.class,
+				String.class, boolean.class, boolean.class,
+				org.skyve.metadata.customer.Customer.class,
+				StringBuilder.class, String.class)
+				.invoke(gen, contents, module, doc, "modules.testMod.domain.", false, true,
+						null, filterDefs, "");
+
+		String xml = contents.toString();
+		assertTrue(xml.contains("<class name="), "Expected class element in ORM, got: " + xml);
+		assertTrue(xml.contains("TEST_ORM_TABLE"), "Expected table name, got: " + xml);
+		assertTrue(xml.contains("</class>"), "Expected closing class tag, got: " + xml);
+	}
+
+	// ----- generateAttributeMappings with catalog/schema on Persistent ------
+
+	@Test
+	@SuppressWarnings("boxing")
+	void generateAttributeMappingsWithCatalogOnPersistentIncludesCatalogAttribute() throws Exception {
+		OverridableDomainGenerator gen = generator();
+		setupPersistentPropertyLengths(gen, "OWN_CAT_TABLE");
+
+		DocumentImpl refDoc = new DocumentImpl();
+		refDoc.setName("CatRefDoc");
+		refDoc.setOwningModuleName("testMod");
+		Persistent refPersistent = new Persistent();
+		refPersistent.setName("CAT_REF_TABLE");
+		refDoc.setPersistent(refPersistent);
+
+		CollectionImpl col = new CollectionImpl();
+		col.setName("catItems");
+		col.setDocumentName("CatRefDoc");
+		col.setType(CollectionType.aggregation);
+
+		DocumentImpl ownerDoc = new DocumentImpl();
+		ownerDoc.setName("CatOwnerDoc");
+		ownerDoc.setOwningModuleName("testMod");
+		ownerDoc.putRelation(col);
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("testMod");
+		when(module.getDocument(null, "CatRefDoc")).thenReturn(refDoc);
+
+		Persistent ownerPersistent = new Persistent();
+		ownerPersistent.setName("OWN_CAT_TABLE");
+		ownerPersistent.setCatalog("mydb");
+
+		StringBuilder contents = new StringBuilder();
+		declaredMethod("generateAttributeMappings",
+				StringBuilder.class,
+				org.skyve.metadata.customer.Customer.class,
+				Module.class, Document.class, Persistent.class,
+				String.class, Set.class, String.class, boolean.class, String.class)
+				.invoke(gen, contents, null, module, ownerDoc, ownerPersistent,
+						null, new TreeSet<>(), "CatOwnerDoc", false, "");
+
+		assertTrue(contents.toString().contains("catalog=\"mydb\""),
+				"Expected catalog attribute in output, got: " + contents);
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	void generateAttributeMappingsWithSchemaOnPersistentIncludesSchemaAttribute() throws Exception {
+		OverridableDomainGenerator gen = generator();
+		setupPersistentPropertyLengths(gen, "OWN_SCH_TABLE");
+
+		DocumentImpl refDoc = new DocumentImpl();
+		refDoc.setName("SchRefDoc");
+		refDoc.setOwningModuleName("testMod");
+		Persistent refPersistent = new Persistent();
+		refPersistent.setName("SCH_REF_TABLE");
+		refDoc.setPersistent(refPersistent);
+
+		CollectionImpl col = new CollectionImpl();
+		col.setName("schItems");
+		col.setDocumentName("SchRefDoc");
+		col.setType(CollectionType.aggregation);
+
+		DocumentImpl ownerDoc = new DocumentImpl();
+		ownerDoc.setName("SchOwnerDoc");
+		ownerDoc.setOwningModuleName("testMod");
+		ownerDoc.putRelation(col);
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("testMod");
+		when(module.getDocument(null, "SchRefDoc")).thenReturn(refDoc);
+
+		Persistent ownerPersistent = new Persistent();
+		ownerPersistent.setName("OWN_SCH_TABLE");
+		ownerPersistent.setSchema("myschema");
+
+		StringBuilder contents = new StringBuilder();
+		declaredMethod("generateAttributeMappings",
+				StringBuilder.class,
+				org.skyve.metadata.customer.Customer.class,
+				Module.class, Document.class, Persistent.class,
+				String.class, Set.class, String.class, boolean.class, String.class)
+				.invoke(gen, contents, null, module, ownerDoc, ownerPersistent,
+						null, new TreeSet<>(), "SchOwnerDoc", false, "");
+
+		assertTrue(contents.toString().contains("schema=\"myschema\""),
+				"Expected schema attribute in output, got: " + contents);
+	}
+
+	// ----- generateAttributeMappings with cacheName on non-child collection --
+
+	@Test
+	@SuppressWarnings("boxing")
+	void generateAttributeMappingsWithCacheNameOnAggregationIncludesCacheElement() throws Exception {
+		OverridableDomainGenerator gen = generator();
+		setupPersistentPropertyLengths(gen, "OWN_CACHE_TABLE");
+
+		DocumentImpl refDoc = new DocumentImpl();
+		refDoc.setName("CacheRefDoc");
+		refDoc.setOwningModuleName("testMod");
+		Persistent refPersistent = new Persistent();
+		refPersistent.setName("CACHE_REF_TABLE");
+		refDoc.setPersistent(refPersistent);
+
+		CollectionImpl col = new CollectionImpl();
+		col.setName("cacheItems");
+		col.setDocumentName("CacheRefDoc");
+		col.setType(CollectionType.aggregation);
+		col.setCacheName("myRegion");
+
+		DocumentImpl ownerDoc = new DocumentImpl();
+		ownerDoc.setName("CacheOwnerDoc");
+		ownerDoc.setOwningModuleName("testMod");
+		ownerDoc.putRelation(col);
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("testMod");
+		when(module.getDocument(null, "CacheRefDoc")).thenReturn(refDoc);
+
+		Persistent ownerPersistent = new Persistent();
+		ownerPersistent.setName("OWN_CACHE_TABLE");
+
+		StringBuilder contents = new StringBuilder();
+		declaredMethod("generateAttributeMappings",
+				StringBuilder.class,
+				org.skyve.metadata.customer.Customer.class,
+				Module.class, Document.class, Persistent.class,
+				String.class, Set.class, String.class, boolean.class, String.class)
+				.invoke(gen, contents, null, module, ownerDoc, ownerPersistent,
+						null, new TreeSet<>(), "CacheOwnerDoc", false, "");
+
+		assertTrue(contents.toString().contains("<cache usage=\"read-write\" region=\"myRegion\""),
+				"Expected cache element in output, got: " + contents);
+	}
+
+	// ----- generateAttributeMappings with ownerDatabaseIndex = true ----------
+
+	@Test
+	@SuppressWarnings("boxing")
+	void generateAttributeMappingsWithOwnerDatabaseIndexGeneratesKeyWithIndex() throws Exception {
+		OverridableDomainGenerator gen = generator();
+		setupPersistentPropertyLengths(gen, "OWN_IDX_TABLE");
+
+		DocumentImpl refDoc = new DocumentImpl();
+		refDoc.setName("IdxRefDoc");
+		refDoc.setOwningModuleName("testMod");
+		Persistent refPersistent = new Persistent();
+		refPersistent.setName("IDX_REF_TABLE");
+		refDoc.setPersistent(refPersistent);
+
+		CollectionImpl col = new CollectionImpl();
+		col.setName("idxItems");
+		col.setDocumentName("IdxRefDoc");
+		col.setType(CollectionType.aggregation);
+		col.setOwnerDatabaseIndex(Boolean.TRUE);
+
+		DocumentImpl ownerDoc = new DocumentImpl();
+		ownerDoc.setName("IdxOwnerDoc");
+		ownerDoc.setOwningModuleName("testMod");
+		ownerDoc.putRelation(col);
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("testMod");
+		when(module.getDocument(null, "IdxRefDoc")).thenReturn(refDoc);
+
+		Persistent ownerPersistent = new Persistent();
+		ownerPersistent.setName("OWN_IDX_TABLE");
+
+		StringBuilder contents = new StringBuilder();
+		declaredMethod("generateAttributeMappings",
+				StringBuilder.class,
+				org.skyve.metadata.customer.Customer.class,
+				Module.class, Document.class, Persistent.class,
+				String.class, Set.class, String.class, boolean.class, String.class)
+				.invoke(gen, contents, null, module, ownerDoc, ownerPersistent,
+						null, new TreeSet<>(), "IdxOwnerDoc", false, "");
+
+		// Indexed key uses <key ...> with <column name=... index=... />
+		String xml = contents.toString();
+		assertTrue(xml.contains("<key foreign-key="), "Expected key element with index, got: " + xml);
+		assertTrue(xml.contains("index="), "Expected index attribute on key column, got: " + xml);
+	}
+
+	// ----- generateAttributeMappings with elementDatabaseIndex = true --------
+
+	@Test
+	@SuppressWarnings("boxing")
+	void generateAttributeMappingsWithElementDatabaseIndexGeneratesManyToManyWithIndex() throws Exception {
+		OverridableDomainGenerator gen = generator();
+		setupPersistentPropertyLengths(gen, "OWN_EL_IDX_TABLE");
+
+		DocumentImpl refDoc = new DocumentImpl();
+		refDoc.setName("ElIdxRefDoc");
+		refDoc.setOwningModuleName("testMod");
+		Persistent refPersistent = new Persistent();
+		refPersistent.setName("EL_IDX_REF_TABLE");
+		refDoc.setPersistent(refPersistent);
+
+		CollectionImpl col = new CollectionImpl();
+		col.setName("elIdxItems");
+		col.setDocumentName("ElIdxRefDoc");
+		col.setType(CollectionType.aggregation);
+		col.setElementDatabaseIndex(Boolean.TRUE);
+
+		DocumentImpl ownerDoc = new DocumentImpl();
+		ownerDoc.setName("ElIdxOwnerDoc");
+		ownerDoc.setOwningModuleName("testMod");
+		ownerDoc.putRelation(col);
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("testMod");
+		when(module.getDocument(null, "ElIdxRefDoc")).thenReturn(refDoc);
+
+		Persistent ownerPersistent = new Persistent();
+		ownerPersistent.setName("OWN_EL_IDX_TABLE");
+
+		StringBuilder contents = new StringBuilder();
+		declaredMethod("generateAttributeMappings",
+				StringBuilder.class,
+				org.skyve.metadata.customer.Customer.class,
+				Module.class, Document.class, Persistent.class,
+				String.class, Set.class, String.class, boolean.class, String.class)
+				.invoke(gen, contents, null, module, ownerDoc, ownerPersistent,
+						null, new TreeSet<>(), "ElIdxOwnerDoc", false, "");
+
+		// elementDatabaseIndex=true → many-to-many with <column name=... index=.../>
+		String xml = contents.toString();
+		assertTrue(xml.contains("<many-to-many"), "Expected many-to-many, got: " + xml);
+		assertTrue(xml.contains("<column name="), "Expected column with index, got: " + xml);
+	}
+
+	// ----- generateAttributeMappings with persistent collection referencing dynamic doc ---
+
+	@Test
+	@SuppressWarnings("boxing")
+	void generateAttributeMappingsPersistentCollectionReferencingDynamicDocIsSkipped() throws Exception {
+		OverridableDomainGenerator gen = generator();
+		setupPersistentPropertyLengths(gen, "OWN_DYN_TABLE");
+
+		// Dynamic referenced doc (has a persistent but isDynamic() = true)
+		DocumentImpl refDoc = new DocumentImpl();
+		refDoc.setName("DynRefDoc");
+		refDoc.setOwningModuleName("testMod");
+		Persistent refPersistent = new Persistent();
+		refPersistent.setName("DYN_REF_TABLE");
+		refDoc.setPersistent(refPersistent);
+		refDoc.setDynamism(new org.skyve.metadata.model.Dynamic());
+
+		CollectionImpl col = new CollectionImpl();
+		col.setName("dynItems");
+		col.setDocumentName("DynRefDoc");
+		col.setType(CollectionType.aggregation);
+
+		DocumentImpl ownerDoc = new DocumentImpl();
+		ownerDoc.setName("DynOwnerDoc");
+		ownerDoc.setOwningModuleName("testMod");
+		ownerDoc.putRelation(col);
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("testMod");
+		when(module.getDocument(null, "DynRefDoc")).thenReturn(refDoc);
+
+		Persistent ownerPersistent = new Persistent();
+		ownerPersistent.setName("OWN_DYN_TABLE");
+
+		StringBuilder contents = new StringBuilder();
+		declaredMethod("generateAttributeMappings",
+				StringBuilder.class,
+				org.skyve.metadata.customer.Customer.class,
+				Module.class, Document.class, Persistent.class,
+				String.class, Set.class, String.class, boolean.class, String.class)
+				.invoke(gen, contents, null, module, ownerDoc, ownerPersistent,
+						null, new TreeSet<>(), "DynOwnerDoc", false, "");
+
+		// Dynamic referenced document → collection is skipped
+		String xml = contents.toString();
+		assertFalse(xml.contains("<bag"), "Dynamic referenced doc collection should be skipped, got: " + xml);
+		assertFalse(xml.contains("<list"), "Dynamic referenced doc collection should be skipped, got: " + xml);
+	}
+
+	// ----- generateAttributeMappings child + polymorphicallymapped → throw ---
+
+	@Test
+	@SuppressWarnings("boxing")
+	void generateAttributeMappingsChildCollectionWithPolymorphicTargetThrows() throws Exception {
+		OverridableDomainGenerator gen = generator();
+		setupPersistentPropertyLengths(gen, "OWN_POLY_TABLE");
+
+		// Polymorphically mapped: strategy=mapped, name=null
+		DocumentImpl refDoc = new DocumentImpl();
+		refDoc.setName("PolyRefDoc");
+		refDoc.setOwningModuleName("testMod");
+		Persistent refPersistent = new Persistent();
+		// name = null (default) + strategy=mapped → isPolymorphicallyMapped() = true
+		refPersistent.setStrategy(ExtensionStrategy.mapped);
+		refDoc.setPersistent(refPersistent);
+
+		CollectionImpl col = new CollectionImpl();
+		col.setName("polyItems");
+		col.setDocumentName("PolyRefDoc");
+		col.setType(CollectionType.child);
+
+		DocumentImpl ownerDoc = new DocumentImpl();
+		ownerDoc.setName("PolyOwnerDoc");
+		ownerDoc.setOwningModuleName("testMod");
+		ownerDoc.putRelation(col);
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("testMod");
+		when(module.getDocument(null, "PolyRefDoc")).thenReturn(refDoc);
+
+		Persistent ownerPersistent = new Persistent();
+		ownerPersistent.setName("OWN_POLY_TABLE");
+
+		Object caught = assertThrows(InvocationTargetException.class,
+				() -> declaredMethod("generateAttributeMappings",
+						StringBuilder.class,
+						org.skyve.metadata.customer.Customer.class,
+						Module.class, Document.class, Persistent.class,
+						String.class, Set.class, String.class, boolean.class, String.class)
+						.invoke(gen, new StringBuilder(), null, module, ownerDoc, ownerPersistent,
+								null, new TreeSet<>(), "PolyOwnerDoc", false, ""));
+		assertTrue(((InvocationTargetException) caught).getCause() instanceof MetaDataException,
+				"Expected MetaDataException for child collection with polymorphic target");
+	}
+
+	// ----- addReference with dynamic referenced document → early return ------
+
+	@Test
+	@SuppressWarnings("boxing")
+	void addReferenceWithDynamicReferencedDocumentReturnsEarlyAndGeneratesNothing() throws Exception {
+		OverridableDomainGenerator gen = generator();
+
+		// Dynamic ref doc
+		DocumentImpl refDoc = new DocumentImpl();
+		refDoc.setName("DynRefAssocDoc");
+		refDoc.setOwningModuleName("testMod");
+		refDoc.setDynamism(new org.skyve.metadata.model.Dynamic());
+
+		org.skyve.impl.metadata.model.document.AssociationImpl assoc =
+				new org.skyve.impl.metadata.model.document.AssociationImpl();
+		assoc.setName("dynAssoc");
+		assoc.setDisplayName("Dyn Assoc");
+		assoc.setDocumentName("DynRefAssocDoc");
+		assoc.setType(org.skyve.metadata.model.document.Association.AssociationType.aggregation);
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("testMod");
+		when(module.getDocument(null, "DynRefAssocDoc")).thenReturn(refDoc);
+
+		Set<String> imports = new HashSet<>();
+		StringBuilder attributes = new StringBuilder();
+		StringBuilder methods = new StringBuilder();
+
+		declaredMethod("addReference",
+				org.skyve.metadata.model.document.Reference.class,
+				boolean.class,
+				org.skyve.metadata.customer.Customer.class,
+				Module.class, String.class, boolean.class, String.class,
+				Set.class, StringBuilder.class, StringBuilder.class)
+				.invoke(gen, assoc, false, null, module, "OwnerDoc", false,
+						"modules.testMod.domain", imports, attributes, methods);
+
+		// Dynamic doc → early return: no attributes or methods generated
+		assertEquals("", attributes.toString(), "Dynamic ref doc should produce no attributes");
+		assertEquals("", methods.toString(), "Dynamic ref doc should produce no methods");
+	}
+
+	// ----- addReference with overriddenReference = true → early return -------
+
+	@Test
+	@SuppressWarnings("boxing")
+	void addReferenceWithOverriddenReferenceFlagReturnsEarlyAndGeneratesNothing() throws Exception {
+		OverridableDomainGenerator gen = generator();
+
+		DocumentImpl refDoc = new DocumentImpl();
+		refDoc.setName("OvrRefDoc");
+		refDoc.setOwningModuleName("testMod");
+
+		org.skyve.impl.metadata.model.document.AssociationImpl assoc =
+				new org.skyve.impl.metadata.model.document.AssociationImpl();
+		assoc.setName("ovrAssoc");
+		assoc.setDisplayName("Ovr Assoc");
+		assoc.setDocumentName("OvrRefDoc");
+		assoc.setType(org.skyve.metadata.model.document.Association.AssociationType.aggregation);
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("testMod");
+		when(module.getDocument(null, "OvrRefDoc")).thenReturn(refDoc);
+
+		// Populate vanilla classes to satisfy the customer check further down
+		Class<?> domainClassType = Class.forName("org.skyve.impl.generate.OverridableDomainGenerator$DomainClass");
+		java.lang.reflect.Constructor<?> domainClassCtor = domainClassType.getDeclaredConstructor();
+		domainClassCtor.setAccessible(true);
+		Object domainClassInstance = domainClassCtor.newInstance();
+		Field vanillaField = OverridableDomainGenerator.class.getDeclaredField("moduleDocumentVanillaClasses");
+		vanillaField.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		TreeMap<String, TreeMap<String, Object>> vanillaClasses =
+				(TreeMap<String, TreeMap<String, Object>>) vanillaField.get(gen);
+		TreeMap<String, Object> modClasses = new TreeMap<>();
+		modClasses.put("OvrRefDoc", domainClassInstance);
+		vanillaClasses.put("testMod", modClasses);
+
+		Set<String> imports = new HashSet<>();
+		StringBuilder attributes = new StringBuilder();
+		StringBuilder methods = new StringBuilder();
+
+		// overriddenReference = true → early return
+		declaredMethod("addReference",
+				org.skyve.metadata.model.document.Reference.class,
+				boolean.class,
+				org.skyve.metadata.customer.Customer.class,
+				Module.class, String.class, boolean.class, String.class,
+				Set.class, StringBuilder.class, StringBuilder.class)
+				.invoke(gen, assoc, true, null, module, "OwnerDoc", false,
+						"modules.testMod.domain", imports, attributes, methods);
+
+		assertEquals("", attributes.toString(), "overriddenReference should produce no attributes");
+		assertEquals("", methods.toString(), "overriddenReference should produce no methods");
+	}
+
+	// ----- addInverse with dynamic property document → early return ----------
+
+	@Test
+	@SuppressWarnings("boxing")
+	void addInverseWithDynamicPropertyDocumentReturnsEarlyAndGeneratesNothing() throws Exception {
+		OverridableDomainGenerator gen = generator();
+
+		// Dynamic property doc
+		DocumentImpl propDoc = new DocumentImpl();
+		propDoc.setName("DynPropDoc");
+		propDoc.setOwningModuleName("testMod");
+		propDoc.setDynamism(new org.skyve.metadata.model.Dynamic());
+
+		org.skyve.impl.metadata.model.document.InverseMany inverseMany =
+				new org.skyve.impl.metadata.model.document.InverseMany();
+		inverseMany.setName("dynBack");
+		inverseMany.setDisplayName("Dyn Back");
+		inverseMany.setDocumentName("DynPropDoc");
+		inverseMany.setReferenceName("owner");
+		inverseMany.setRelationship(org.skyve.impl.metadata.model.document.AbstractInverse.InverseRelationship.oneToMany);
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("testMod");
+		when(module.getDocument(null, "DynPropDoc")).thenReturn(propDoc);
+
+		Set<String> imports = new HashSet<>();
+		StringBuilder attributes = new StringBuilder();
+		StringBuilder methods = new StringBuilder();
+
+		declaredMethod("addInverse",
+				org.skyve.impl.metadata.model.document.AbstractInverse.class,
+				boolean.class,
+				org.skyve.metadata.customer.Customer.class,
+				Module.class, String.class, boolean.class, String.class,
+				Set.class, StringBuilder.class, StringBuilder.class)
+				.invoke(gen, inverseMany, false, null, module, "OwnerDoc", false,
+						"modules.testMod.domain", imports, attributes, methods);
+
+		assertEquals("", attributes.toString(), "Dynamic prop doc should produce no attributes");
+		assertEquals("", methods.toString(), "Dynamic prop doc should produce no methods");
+	}
+
+	// ----- addInverse with deprecated toMany inverse -------------------------
+
+	@Test
+	@SuppressWarnings("boxing")
+	void addInverseDeprecatedInverseManyGeneratesDeprecatedAnnotation() throws Exception {
+		OverridableDomainGenerator gen = generator();
+
+		DocumentImpl propDoc = new DocumentImpl();
+		propDoc.setName("DepPropDoc");
+		propDoc.setOwningModuleName("testMod");
+
+		org.skyve.impl.metadata.model.document.InverseMany inverseMany =
+				new org.skyve.impl.metadata.model.document.InverseMany();
+		inverseMany.setName("depBackRefs");
+		inverseMany.setDisplayName("Dep Back Refs");
+		inverseMany.setDocumentName("DepPropDoc");
+		inverseMany.setReferenceName("owner");
+		inverseMany.setRelationship(org.skyve.impl.metadata.model.document.AbstractInverse.InverseRelationship.oneToMany);
+		inverseMany.setDeprecated(Boolean.TRUE);
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("testMod");
+		when(module.getDocument(null, "DepPropDoc")).thenReturn(propDoc);
+
+		// Populate vanilla classes
+		Class<?> domainClassType = Class.forName("org.skyve.impl.generate.OverridableDomainGenerator$DomainClass");
+		java.lang.reflect.Constructor<?> domainClassCtor = domainClassType.getDeclaredConstructor();
+		domainClassCtor.setAccessible(true);
+		Object domainClassInstance = domainClassCtor.newInstance();
+		Field vanillaField = OverridableDomainGenerator.class.getDeclaredField("moduleDocumentVanillaClasses");
+		vanillaField.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		TreeMap<String, TreeMap<String, Object>> vanillaClasses =
+				(TreeMap<String, TreeMap<String, Object>>) vanillaField.get(gen);
+		TreeMap<String, Object> modClasses = new TreeMap<>();
+		modClasses.put("DepPropDoc", domainClassInstance);
+		vanillaClasses.put("testMod", modClasses);
+
+		Set<String> imports = new HashSet<>();
+		StringBuilder attributes = new StringBuilder();
+		StringBuilder methods = new StringBuilder();
+
+		declaredMethod("addInverse",
+				org.skyve.impl.metadata.model.document.AbstractInverse.class,
+				boolean.class,
+				org.skyve.metadata.customer.Customer.class,
+				Module.class, String.class, boolean.class, String.class,
+				Set.class, StringBuilder.class, StringBuilder.class)
+				.invoke(gen, inverseMany, false, null, module, "OwnerDoc", false,
+						"modules.testMod.domain", imports, attributes, methods);
+
+		String java = attributes.toString() + methods.toString();
+		assertTrue(java.contains("@Deprecated"), "Deprecated inverse should emit @Deprecated, got: " + java);
+	}
+
+	// ----- addInverse with manyToMany relationship ---------------------------
+
+	@Test
+	@SuppressWarnings("boxing")
+	void addInverseManyToManyRelationshipGeneratesCorrectCollectionMethods() throws Exception {
+		OverridableDomainGenerator gen = generator();
+
+		DocumentImpl propDoc = new DocumentImpl();
+		propDoc.setName("MtmPropDoc");
+		propDoc.setOwningModuleName("testMod");
+
+		org.skyve.impl.metadata.model.document.InverseMany inverseMany =
+				new org.skyve.impl.metadata.model.document.InverseMany();
+		inverseMany.setName("mtmBackRefs");
+		inverseMany.setDisplayName("MtM Back Refs");
+		inverseMany.setDocumentName("MtmPropDoc");
+		inverseMany.setReferenceName("owner");
+		inverseMany.setRelationship(org.skyve.impl.metadata.model.document.AbstractInverse.InverseRelationship.manyToMany);
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("testMod");
+		when(module.getDocument(null, "MtmPropDoc")).thenReturn(propDoc);
+
+		// Populate vanilla classes
+		Class<?> domainClassType = Class.forName("org.skyve.impl.generate.OverridableDomainGenerator$DomainClass");
+		java.lang.reflect.Constructor<?> domainClassCtor = domainClassType.getDeclaredConstructor();
+		domainClassCtor.setAccessible(true);
+		Object domainClassInstance = domainClassCtor.newInstance();
+		Field vanillaField = OverridableDomainGenerator.class.getDeclaredField("moduleDocumentVanillaClasses");
+		vanillaField.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		TreeMap<String, TreeMap<String, Object>> vanillaClasses =
+				(TreeMap<String, TreeMap<String, Object>>) vanillaField.get(gen);
+		TreeMap<String, Object> modClasses = new TreeMap<>();
+		modClasses.put("MtmPropDoc", domainClassInstance);
+		vanillaClasses.put("testMod", modClasses);
+
+		Set<String> imports = new HashSet<>();
+		StringBuilder attributes = new StringBuilder();
+		StringBuilder methods = new StringBuilder();
+
+		declaredMethod("addInverse",
+				org.skyve.impl.metadata.model.document.AbstractInverse.class,
+				boolean.class,
+				org.skyve.metadata.customer.Customer.class,
+				Module.class, String.class, boolean.class, String.class,
+				Set.class, StringBuilder.class, StringBuilder.class)
+				.invoke(gen, inverseMany, false, null, module, "OwnerDoc", false,
+						"modules.testMod.domain", imports, attributes, methods);
+
+		// manyToMany uses get...().add(this) instead of set....(this)
+		String java = methods.toString();
+		assertTrue(java.contains("getMtmBackRefsElementById"), "manyToMany should have get-by-id method, got: " + java);
+		assertTrue(java.contains("addMtmBackRefsElement"), "manyToMany should have add method, got: " + java);
 	}
 }
 

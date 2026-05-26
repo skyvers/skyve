@@ -2,6 +2,7 @@ package org.skyve.impl.bind;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -161,5 +162,73 @@ class ELExpressionEvaluatorTest {
 		assertTrue(result.contains("incompatible"), "Error should mention incompatibility");
 	}
 
+	@Test
+	void validateWithTypesafeAndCompatibleReturnTypeReturnsNull() {
+		ELExpressionEvaluator evaluator = new ELExpressionEvaluator(true);
+		Customer customer = mock(Customer.class);
+		// "user" evaluates to UserImpl.class, UserImpl.class is assignable from UserImpl.class → null
+		String result = evaluator.validateWithoutPrefixOrSuffix("user", org.skyve.impl.metadata.user.UserImpl.class, customer, null, null);
+		assertNull(result, "Should return null when return type is compatible");
+	}
+
+	@Test
+	void validateWithTypesafeAndNullReturnTypeReturnsNull() {
+		ELExpressionEvaluator evaluator = new ELExpressionEvaluator(true);
+		Customer customer = mock(Customer.class);
+		// returnType=null means unconstrained — no type check, always null
+		String result = evaluator.validateWithoutPrefixOrSuffix("user", null, customer, null, null);
+		assertNull(result, "Should return null when returnType is null (unconstrained)");
+	}
+
+	@Test
+	void validateWithTypesafeAndMalformedExpressionReturnsErrorMessage() {
+		ELExpressionEvaluator evaluator = new ELExpressionEvaluator(true);
+		Customer customer = mock(Customer.class);
+		// Malformed EL expression should cause exception → non-null error message
+		String result = evaluator.validateWithoutPrefixOrSuffix("bad#expression!!", String.class, customer, null, null);
+		assertNotNull(result, "Should return error message for malformed expression");
+	}
+
+	// ---- completeWithoutPrefixOrSuffix — continuation paths (EL evaluation) ----
+
+	@Test
+	void completeWithUserDotFragmentReturnsUserImplProperties() {
+		ELExpressionEvaluator evaluator = new ELExpressionEvaluator(false);
+		// "user." → evaluates "user" to UserImpl.class → Class<?> path → property descriptors
+		List<String> result = evaluator.completeWithoutPrefixOrSuffix("user.", null, null, null);
+		// Should contain at least some UserImpl properties starting with "user."
+		assertFalse(result.isEmpty(), "Should return completions for 'user.' fragment");
+		assertTrue(result.stream().allMatch(s -> s.startsWith("user.")),
+				"All completions should start with 'user.'");
+	}
+
+	@Test
+	void completeWithStashOpenBracketReturnsMapNotation() {
+		ELExpressionEvaluator evaluator = new ELExpressionEvaluator(false);
+		// "stash[" → evaluates "stash" to Map.class → open square brace + Map → adds "stash['"
+		List<String> result = evaluator.completeWithoutPrefixOrSuffix("stash[", null, null, null);
+		assertTrue(result.contains("stash['"), "Should contain map key notation 'stash[\\''");
+	}
+
+	@Test
+	void completeWithUserDotPrefixFiltersToMatchingProperties() {
+		ELExpressionEvaluator evaluator = new ELExpressionEvaluator(false);
+		// "user.name" → evaluates "user" to UserImpl.class, filter by "name" prefix
+		List<String> result = evaluator.completeWithoutPrefixOrSuffix("user.name", null, null, null);
+		// All completions should start with "user.name"
+		for (String completion : result) {
+			assertTrue(completion.startsWith("user.name"),
+					"Completion '" + completion + "' should start with 'user.name'");
+		}
+	}
+
+	@Test
+	void completeWithUnknownBeanDotFragmentHandlesGracefully() {
+		ELExpressionEvaluator evaluator = new ELExpressionEvaluator(false);
+		// "bean." → "bean" is not defined (no document) → eval throws → caught, returns empty or newExpression
+		List<String> result = evaluator.completeWithoutPrefixOrSuffix("bean.", null, null, null);
+		// no NPE — graceful handling whether empty or with new-expression suggestions
+		assertNotNull(result);
+	}
 
 }

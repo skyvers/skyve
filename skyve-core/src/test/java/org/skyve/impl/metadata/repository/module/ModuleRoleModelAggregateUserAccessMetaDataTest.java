@@ -1,5 +1,6 @@
 package org.skyve.impl.metadata.repository.module;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -44,6 +45,6 @@ class ModuleRoleModelAggregateUserAccessMetaDataTest {
 		metaData.setModelName("MyModel");
 
 		// Should not throw
-		metaData.validate("TestMeta", "TestRole", module);
+		assertDoesNotThrow(() -> metaData.validate("TestMeta", "TestRole", module));
 	}
 }

@@ -403,7 +403,8 @@ public class BackupUtilTest {
 		BackupUtil.secureSQL(sql, table, "testCustomer");
 		// The only way we know nothing was added is if no bizCustomer field
 		// (hasBizCustomer returns false → no append regardless of CUSTOMER setting)
-		// We just verify the method doesn't throw
+			// Verify the SQL was not cleared
+			assertTrue("SQL should remain non-empty after secureSQL", sql.length() > 0);
 	}
 
 	@Test

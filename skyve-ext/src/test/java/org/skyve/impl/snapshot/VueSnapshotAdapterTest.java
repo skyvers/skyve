@@ -255,5 +255,172 @@ class VueSnapshotAdapterTest {
 		String payload = SnapshotAdapter.VUE.toClientPayload(snapshot);
 		assertNull(payload, "Expected null when criterion has start/end (range)");
 	}
+
+	@Test
+	void toClientPayloadWithNestedCriteriaContainingStartEndReturnsNull() {
+		// Covers the branch: bottomCriterion.getStart() != null inside restructure
+		Snapshot snapshot = new Snapshot();
+		SnapshotCriteria outer = new SnapshotCriteria();
+		outer.setOperator(CompoundFilterOperator.and);
+
+		SnapshotCriteria inner = new SnapshotCriteria();
+		inner.setOperator(CompoundFilterOperator.or);
+
+		SnapshotCriterion c = new SnapshotCriterion();
+		c.setColumn("date");
+		c.setStart("2020-01-01");
+		c.setEnd("2020-12-31");
+		inner.getFilters().add(c);
+		outer.getFilters().add(inner);
+		snapshot.setFilter(outer);
+
+		String payload = SnapshotAdapter.VUE.toClientPayload(snapshot);
+		assertNull(payload, "Expected null when nested criterion has start/end");
+	}
+
+	@Test
+	void toClientPayloadWithNestedCriteriaHavingNotOperatorReturnsNull() {
+		// Covers: middleCriteriaOperator == not → return null in restructure
+		Snapshot snapshot = new Snapshot();
+		SnapshotCriteria outer = new SnapshotCriteria();
+		outer.setOperator(CompoundFilterOperator.and);
+
+		SnapshotCriteria inner = new SnapshotCriteria();
+		inner.setOperator(CompoundFilterOperator.not);
+
+		SnapshotCriterion c = new SnapshotCriterion();
+		c.setColumn("status");
+		c.setOperator(SmartClientFilterOperator.equals);
+		c.setValue("active");
+		inner.getFilters().add(c);
+		outer.getFilters().add(inner);
+		snapshot.setFilter(outer);
+
+		String payload = SnapshotAdapter.VUE.toClientPayload(snapshot);
+		assertNull(payload, "Expected null when inner criteria uses 'not' operator");
+	}
+
+	@Test
+	void toClientPayloadWithDeepNestingReturnsNull() {
+		// Covers: bottomFilter instanceof SnapshotCriteria → return null (infinite nesting)
+		Snapshot snapshot = new Snapshot();
+		SnapshotCriteria outer = new SnapshotCriteria();
+		outer.setOperator(CompoundFilterOperator.and);
+
+		SnapshotCriteria inner = new SnapshotCriteria();
+		inner.setOperator(CompoundFilterOperator.or);
+
+		// Add another nested SnapshotCriteria (depth > 2 → unsupported)
+		SnapshotCriteria deepNested = new SnapshotCriteria();
+		deepNested.setOperator(CompoundFilterOperator.and);
+		inner.getFilters().add(deepNested);
+		outer.getFilters().add(inner);
+		snapshot.setFilter(outer);
+
+		String payload = SnapshotAdapter.VUE.toClientPayload(snapshot);
+		assertNull(payload, "Expected null when filter nesting depth exceeds supported level");
+	}
+
+	@Test
+	void toClientPayloadWithNestedCriteriaHavingUnsupportedOperatorReturnsNull() {
+		// Covers: bottomCriterionOperator not in VUE_ALLOWED_CONSTRAINT_OPERATORS → return null
+		Snapshot snapshot = new Snapshot();
+		SnapshotCriteria outer = new SnapshotCriteria();
+		outer.setOperator(CompoundFilterOperator.and);
+
+		SnapshotCriteria inner = new SnapshotCriteria();
+		inner.setOperator(CompoundFilterOperator.or);
+
+		SnapshotCriterion c = new SnapshotCriterion();
+		c.setColumn("status");
+		c.setOperator(SmartClientFilterOperator.betweenInclusive); // not in VUE_ALLOWED_CONSTRAINT_OPERATORS
+		c.setValue("x");
+		inner.getFilters().add(c);
+		outer.getFilters().add(inner);
+		snapshot.setFilter(outer);
+
+		String payload = SnapshotAdapter.VUE.toClientPayload(snapshot);
+		assertNull(payload, "Expected null when nested criterion uses unsupported operator");
+	}
+
+	@Test
+	void toClientPayloadWithNestedCriteriaConflictingOperatorReturnsNull() {
+		// Covers: criteria already added to same column but different operator → return null
+		Snapshot snapshot = new Snapshot();
+		SnapshotCriteria outer = new SnapshotCriteria();
+		outer.setOperator(CompoundFilterOperator.and);
+
+		// First nested criteria for column "status" with "and" operator
+		SnapshotCriteria inner1 = new SnapshotCriteria();
+		inner1.setOperator(CompoundFilterOperator.or);
+		SnapshotCriterion c1 = new SnapshotCriterion();
+		c1.setColumn("status");
+		c1.setOperator(SmartClientFilterOperator.equals);
+		c1.setValue("active");
+		inner1.getFilters().add(c1);
+
+		// Second nested criteria for column "status" with different operator "and" → conflicts
+		SnapshotCriteria inner2 = new SnapshotCriteria();
+		inner2.setOperator(CompoundFilterOperator.and);
+		SnapshotCriterion c2 = new SnapshotCriterion();
+		c2.setColumn("status");
+		c2.setOperator(SmartClientFilterOperator.equals);
+		c2.setValue("inactive");
+		inner2.getFilters().add(c2);
+
+		outer.getFilters().add(inner1);
+		outer.getFilters().add(inner2);
+		snapshot.setFilter(outer);
+
+		String payload = SnapshotAdapter.VUE.toClientPayload(snapshot);
+		assertNull(payload, "Expected null when nested criteria have conflicting operators for same column");
+	}
+
+	@Test
+	void toClientPayloadWithDirectCriterionHavingStartEndThrowsAndReturnsNull() {
+		// Covers: constraint() throws when criterion has start/end
+		Snapshot snapshot = new Snapshot();
+		SnapshotCriterion criterion = new SnapshotCriterion();
+		criterion.setColumn("date");
+		criterion.setStart("2020-01-01");
+		criterion.setEnd("2020-12-31");
+		snapshot.setFilter(criterion);
+
+		String payload = SnapshotAdapter.VUE.toClientPayload(snapshot);
+		assertNull(payload, "Expected null when direct criterion has start/end");
+	}
+
+	@Test
+	void toClientPayloadWithCriteriaAndExistingAndOperatorMergesFilters() {
+		// Covers: criteria already added for same column with same "and" operator (merge)
+		Snapshot snapshot = new Snapshot();
+		SnapshotCriteria outer = new SnapshotCriteria();
+		outer.setOperator(CompoundFilterOperator.and);
+
+		// Two nested criteria for same column "name" both with "and" → should merge
+		SnapshotCriteria inner1 = new SnapshotCriteria();
+		inner1.setOperator(CompoundFilterOperator.and);
+		SnapshotCriterion c1 = new SnapshotCriterion();
+		c1.setColumn("name");
+		c1.setOperator(SmartClientFilterOperator.iContains);
+		c1.setValue("Alice");
+		inner1.getFilters().add(c1);
+
+		SnapshotCriteria inner2 = new SnapshotCriteria();
+		inner2.setOperator(CompoundFilterOperator.and);
+		SnapshotCriterion c2 = new SnapshotCriterion();
+		c2.setColumn("name");
+		c2.setOperator(SmartClientFilterOperator.iContains);
+		c2.setValue("Smith");
+		inner2.getFilters().add(c2);
+
+		outer.getFilters().add(inner1);
+		outer.getFilters().add(inner2);
+		snapshot.setFilter(outer);
+
+		String payload = SnapshotAdapter.VUE.toClientPayload(snapshot);
+		assertNotNull(payload, "Expected valid payload when nested criteria for same column have compatible operators");
+		assertThat(payload, containsString("name"));
+	}
 }
 

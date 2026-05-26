@@ -1,5 +1,6 @@
 package org.skyve.impl.util;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -775,7 +776,7 @@ class ValidationUtilTest {
 		persistence.setUser(user);
 		persistence.setForThread();
 		try {
-			ValidationUtil.validateBeanAgainstDocument(document, bean);
+			assertDoesNotThrow(() -> ValidationUtil.validateBeanAgainstDocument(document, bean));
 			// Should complete without throwing
 		}
 		finally {
@@ -913,7 +914,7 @@ class ValidationUtilTest {
 		persistence.setUser(user);
 		persistence.setForThread();
 		try {
-			ValidationUtil.validateBeanAgainstDocument(document, bean);
+			assertDoesNotThrow(() -> ValidationUtil.validateBeanAgainstDocument(document, bean));
 			// Should traverse the inheritance chain without throwing
 		}
 		finally {

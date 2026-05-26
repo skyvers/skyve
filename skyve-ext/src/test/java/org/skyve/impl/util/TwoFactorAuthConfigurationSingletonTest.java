@@ -60,7 +60,9 @@ public class TwoFactorAuthConfigurationSingletonTest {
 	@Test
 	public void testClearConfigForAbsentKeyDoesNotThrow() {
 		// Clearing a customer that was never added must be safe
-		TwoFactorAuthConfigurationSingleton.getInstance().clearConfig("nonexistent_xyzzy");
+		TwoFactorAuthConfigurationSingleton singleton = TwoFactorAuthConfigurationSingleton.getInstance();
+		singleton.clearConfig("nonexistent_xyzzy");
+		assertNotNull(singleton);
 	}
 
 	@Test

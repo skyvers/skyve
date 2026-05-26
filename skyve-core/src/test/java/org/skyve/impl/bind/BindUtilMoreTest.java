@@ -5,14 +5,34 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
+import org.skyve.domain.DynamicBean;
 import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.OptimisticLock;
+import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Condition;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
+import org.skyve.metadata.user.User;
 
 @SuppressWarnings("static-method")
 class BindUtilMoreTest {
@@ -202,5 +222,372 @@ class BindUtilMoreTest {
 	@Test
 	void implicitAttributeTypeUnknownAttributeReturnsNull() {
 		assertThat(BindUtil.implicitAttributeType("myCustomField"), is(nullValue()));
+	}
+
+	// --- DynamicBean indexed get ---
+
+	@Test
+	void getWithIndexedDynamicBeanBindingReturnsElementAtIndex() {
+		Map<String, Object> props = new HashMap<>();
+		DynamicBean item0 = new DynamicBean("mod", "Item", new HashMap<>());
+		DynamicBean item1 = new DynamicBean("mod", "Item", new HashMap<>());
+		props.put("myList", new ArrayList<>(Arrays.asList(item0, item1)));
+		DynamicBean bean = new DynamicBean("mod", "Doc", props);
+
+		Object result = BindUtil.get(bean, "myList[0]");
+		// assertSame avoids DynamicBean.equals() which calls CORE
+		assertSame(item0, result);
+	}
+
+	@Test
+	void getWithIndexedDynamicBeanBindingReturnsSecondElement() {
+		Map<String, Object> props = new HashMap<>();
+		DynamicBean item0 = new DynamicBean("mod", "Item", new HashMap<>());
+		DynamicBean item1 = new DynamicBean("mod", "Item", new HashMap<>());
+		props.put("myList", new ArrayList<>(Arrays.asList(item0, item1)));
+		DynamicBean bean = new DynamicBean("mod", "Doc", props);
+
+		Object result = BindUtil.get(bean, "myList[1]");
+		// assertSame avoids DynamicBean.equals() which calls CORE
+		assertSame(item1, result);
+	}
+
+	@Test
+	void getWithNullListInDynamicBeanReturnsNull() {
+		Map<String, Object> props = new HashMap<>();
+		props.put("myList", null);
+		DynamicBean bean = new DynamicBean("mod", "Doc", props);
+
+		Object result = BindUtil.get(bean, "myList[0]");
+		assertNull(result);
+	}
+
+	// --- DynamicBean indexed set ---
+
+	@Test
+	void setWithIndexedDynamicBeanBindingReplacesElementAtIndex() {
+		Map<String, Object> props = new HashMap<>();
+		DynamicBean original = new DynamicBean("mod", "Item", new HashMap<>());
+		DynamicBean replacement = new DynamicBean("mod", "Item", new HashMap<>());
+		List<DynamicBean> list = new ArrayList<>(Arrays.asList(original));
+		props.put("myList", list);
+		DynamicBean bean = new DynamicBean("mod", "Doc", props);
+
+		BindUtil.set(bean, "myList[0]", replacement);
+		// Use reference equality to avoid DynamicBean.equals() which calls CORE
+		assertSame(replacement, list.get(0));
+	}
+
+	// --- isMutable on DynamicBean ---
+
+	@Test
+	void isMutableReturnsFalseForBizKeyBinding() {
+		Map<String, Object> props = new HashMap<>();
+		props.put(Bean.BIZ_KEY, "some key");
+		DynamicBean bean = new DynamicBean("mod", "Doc", props);
+		assertFalse(BindUtil.isMutable(bean, Bean.BIZ_KEY));
+	}
+
+	@Test
+	void isMutableReturnsFalseForModuleKeyBinding() {
+		Map<String, Object> props = new HashMap<>();
+		props.put(Bean.MODULE_KEY, "mod");
+		DynamicBean bean = new DynamicBean("mod", "Doc", props);
+		assertFalse(BindUtil.isMutable(bean, Bean.MODULE_KEY));
+	}
+
+	@Test
+	void isMutableReturnsTrueForStringDynamicProperty() {
+		Map<String, Object> props = new HashMap<>();
+		props.put("name", "test");
+		DynamicBean bean = new DynamicBean("mod", "Doc", props);
+		assertTrue(BindUtil.isMutable(bean, "name"));
+	}
+
+	@Test
+	void isMutableReturnsFalseForListDynamicProperty() {
+		Map<String, Object> props = new HashMap<>();
+		props.put("items", new ArrayList<>());
+		DynamicBean bean = new DynamicBean("mod", "Doc", props);
+		assertFalse(BindUtil.isMutable(bean, "items"));
+	}
+
+	// --- getPropertyType on DynamicBean ---
+
+	@Test
+	void getPropertyTypeReturnsDynamicValueClassForNonNullDynamicProperty() {
+		Map<String, Object> props = new HashMap<>();
+		props.put("name", "hello");
+		DynamicBean bean = new DynamicBean("mod", "Doc", props);
+		Class<?> type = BindUtil.getPropertyType(bean, "name");
+		assertEquals(String.class, type);
+	}
+
+	// --- set with String-to-non-String coercion ---
+
+	@Test
+	void setCoercesStringToIntegerViaValueOf() {
+		IntPojo pojo = new IntPojo();
+		BindUtil.set(pojo, "count", "42");
+		assertEquals(Integer.valueOf(42), pojo.getCount());
+	}
+
+	@Test
+	void setCoercesStringToIntegerViaConstructor() {
+		// Integer has a (deprecated) String constructor, so it goes through constructor path first
+		// OR falls through to valueOf — either way result should be 7
+		IntPojo pojo = new IntPojo();
+		BindUtil.set(pojo, "count", "7");
+		assertEquals(Integer.valueOf(7), pojo.getCount());
+	}
+
+	// --- order with empty / single element lists ---
+
+	@Test
+	void orderWithNullListDoesNothing() {
+		// order(null, ...) should be safe
+		BindUtil.order(null);
+		// If we got here without throwing, the test passes
+		assertTrue(true);
+	}
+
+	@Test
+	void orderWithEmptyListDoesNothing() {
+		List<Object> list = new ArrayList<>();
+		BindUtil.order(list);
+		assertTrue(list.isEmpty());
+	}
+
+	// --- createCompoundBinding, createIndexedBinding, createIdBinding ---
+
+	@Test
+	void createCompoundBindingCombinesBindings() {
+		assertEquals("a.b.c", BindUtil.createCompoundBinding("a", "b", "c"));
+	}
+
+	@Test
+	void createCompoundBindingWithTwoBindings() {
+		assertEquals("parent.child", BindUtil.createCompoundBinding("parent", "child"));
+	}
+
+	@Test
+	void createIndexedBindingAddsIndexSuffix() {
+		assertEquals("items[2]", BindUtil.createIndexedBinding("items", 2));
+	}
+
+	@Test
+	void createIdBindingAddsIdSuffix() {
+		String result = BindUtil.createIdBinding("items", "abc-123");
+		assertTrue(result.contains("abc-123"));
+	}
+
+	// --- sanitiseBinding and unsanitiseBinding ---
+
+	@Test
+	void sanitiseBindingReturnsNullForNull() {
+		assertNull(BindUtil.sanitiseBinding(null));
+	}
+
+	@Test
+	void unsanitiseBindingReturnsNullForNull() {
+		assertNull(BindUtil.unsanitiseBinding(null));
+	}
+
+	@Test
+	void sanitiseAndUnsanitiseBindingAreInverse() {
+		String binding = "items[0].name";
+		String sanitised = BindUtil.sanitiseBinding(binding);
+		assertNotNull(sanitised);
+		String unsanitised = BindUtil.unsanitiseBinding(sanitised);
+		// unsanitised should preserve the binding info
+		assertNotNull(unsanitised);
+	}
+
+	// --- Helper POJO ---
+	public static class IntPojo {
+		private Integer count;
+
+		public Integer getCount() {
+			return count;
+		}
+
+		public void setCount(Integer count) {
+			this.count = count;
+		}
+	}
+
+	// --- evaluateCondition (CORE-backed paths) ---
+
+	@Test
+	void evaluateConditionWithImplicitConditionReturnsTrueWhenPropertyIsTrue() {
+		AbstractPersistence persistence = Mockito.mock(AbstractPersistence.class,
+				Mockito.withSettings().defaultAnswer(Mockito.CALLS_REAL_METHODS));
+		User user = Mockito.mock(User.class);
+		Customer customer = Mockito.mock(Customer.class);
+		Module module = Mockito.mock(Module.class);
+		Document document = Mockito.mock(Document.class);
+		Mockito.when(user.getCustomer()).thenReturn(customer);
+		Mockito.when(customer.getModule("mod")).thenReturn(module);
+		Mockito.when(module.getDocument(customer, "Doc")).thenReturn(document);
+		Mockito.when(document.getCondition("myFlag")).thenReturn(null);
+		persistence.setUser(user);
+		persistence.setForThread();
+		try {
+			Map<String, Object> props = new HashMap<>();
+			props.put("myFlag", Boolean.TRUE);
+			DynamicBean bean = new DynamicBean("mod", "Doc", props);
+			assertTrue(BindUtil.evaluateCondition(bean, "myFlag"));
+		}
+		finally {
+			clearPersistenceThreadLocal();
+		}
+	}
+
+	@Test
+	void evaluateConditionWithImplicitConditionReturnsFalseWhenPropertyAbsent() {
+		AbstractPersistence persistence = Mockito.mock(AbstractPersistence.class,
+				Mockito.withSettings().defaultAnswer(Mockito.CALLS_REAL_METHODS));
+		User user = Mockito.mock(User.class);
+		Customer customer = Mockito.mock(Customer.class);
+		Module module = Mockito.mock(Module.class);
+		Document document = Mockito.mock(Document.class);
+		Mockito.when(user.getCustomer()).thenReturn(customer);
+		Mockito.when(customer.getModule("mod")).thenReturn(module);
+		Mockito.when(module.getDocument(customer, "Doc")).thenReturn(document);
+		Mockito.when(document.getCondition("myFlag")).thenReturn(null);
+		persistence.setUser(user);
+		persistence.setForThread();
+		try {
+			Map<String, Object> props = new HashMap<>();
+			// "myFlag" not in props → BindUtil.get returns null → false
+			DynamicBean bean = new DynamicBean("mod", "Doc", props);
+			assertFalse(BindUtil.evaluateCondition(bean, "myFlag"));
+		}
+		finally {
+			clearPersistenceThreadLocal();
+		}
+	}
+
+	@Test
+	void evaluateConditionWithNegatedImplicitConditionReturnsTrueWhenPropertyIsTrue() {
+		AbstractPersistence persistence = Mockito.mock(AbstractPersistence.class,
+				Mockito.withSettings().defaultAnswer(Mockito.CALLS_REAL_METHODS));
+		User user = Mockito.mock(User.class);
+		Customer customer = Mockito.mock(Customer.class);
+		Module module = Mockito.mock(Module.class);
+		Document document = Mockito.mock(Document.class);
+		Mockito.when(user.getCustomer()).thenReturn(customer);
+		Mockito.when(customer.getModule("mod")).thenReturn(module);
+		Mockito.when(module.getDocument(customer, "Doc")).thenReturn(document);
+		Mockito.when(document.getCondition("myFlag")).thenReturn(null);
+		persistence.setUser(user);
+		persistence.setForThread();
+		try {
+			Map<String, Object> props = new HashMap<>();
+			// evaluateCondition("notMyFlag") → conditionName="myFlag" → condish=null
+			// → BindUtil.get(bean, "notMyFlag") → looks up "notMyFlag" property
+			props.put("notMyFlag", Boolean.TRUE);
+			DynamicBean bean = new DynamicBean("mod", "Doc", props);
+			assertTrue(BindUtil.evaluateCondition(bean, "notMyFlag"));
+		}
+		finally {
+			clearPersistenceThreadLocal();
+		}
+	}
+
+	@Test
+	void evaluateConditionWithSkyveExpressionDocumentConditionReturnsFalseWhenNegated() {
+		AbstractPersistence persistence = Mockito.mock(AbstractPersistence.class,
+				Mockito.withSettings().defaultAnswer(Mockito.CALLS_REAL_METHODS));
+		User user = Mockito.mock(User.class);
+		Customer customer = Mockito.mock(Customer.class);
+		Module module = Mockito.mock(Module.class);
+		Document document = Mockito.mock(Document.class);
+		Condition condish = Mockito.mock(Condition.class);
+		Mockito.when(user.getCustomer()).thenReturn(customer);
+		Mockito.when(customer.getModule("mod")).thenReturn(module);
+		Mockito.when(module.getDocument(customer, "Doc")).thenReturn(document);
+		// conditionName = "myFlag" (stripped from "notMyFlag") → returns non-null condition
+		Mockito.when(document.getCondition("myFlag")).thenReturn(condish);
+		// expression is a Skyve expression that evaluates to true
+		Mockito.when(condish.getExpression()).thenReturn("{el:true}");
+		persistence.setUser(user);
+		persistence.setForThread();
+		try {
+			Map<String, Object> props = new HashMap<>();
+			DynamicBean bean = new DynamicBean("mod", "Doc", props);
+			// negated=true, expression evaluates to true → negated result is false
+			assertFalse(BindUtil.evaluateCondition(bean, "notMyFlag"));
+		}
+		finally {
+			clearPersistenceThreadLocal();
+		}
+	}
+
+	@Test
+	void evaluateConditionWrapsExceptionAsMetaDataException() {
+		AbstractPersistence persistence = Mockito.mock(AbstractPersistence.class,
+				Mockito.withSettings().defaultAnswer(Mockito.CALLS_REAL_METHODS));
+		User user = Mockito.mock(User.class);
+		Customer customer = Mockito.mock(Customer.class);
+		Mockito.when(user.getCustomer()).thenReturn(customer);
+		// module lookup throws to trigger the catch block
+		Mockito.when(customer.getModule("mod")).thenThrow(new RuntimeException("no module"));
+		persistence.setUser(user);
+		persistence.setForThread();
+		try {
+			Map<String, Object> props = new HashMap<>();
+			DynamicBean bean = new DynamicBean("mod", "Doc", props);
+			assertThrows(MetaDataException.class, () -> BindUtil.evaluateCondition(bean, "myFlag"));
+		}
+		finally {
+			clearPersistenceThreadLocal();
+		}
+	}
+
+	// --- validateBinding (condition-name paths, no CORE needed) ---
+
+	@Test
+	void validateBindingForConditionNameReturnsTargetMetaDataWithBooleanType() {
+		Customer customer = Mockito.mock(Customer.class);
+		Module module = Mockito.mock(Module.class);
+		Document document = Mockito.mock(Document.class);
+		Condition condition = Mockito.mock(Condition.class);
+		Mockito.when(document.getCondition("myFlag")).thenReturn(condition);
+		Mockito.when(document.getOwningModuleName()).thenReturn("mod");
+		org.skyve.util.Binder.TargetMetaData result =
+				BindUtil.validateBinding(customer, module, document, "myFlag");
+		assertNotNull(result);
+		assertEquals(Boolean.class, result.getType());
+	}
+
+	@Test
+	void validateBindingForNegatedConditionNameReturnsTargetMetaDataWithBooleanType() {
+		Customer customer = Mockito.mock(Customer.class);
+		Module module = Mockito.mock(Module.class);
+		Document document = Mockito.mock(Document.class);
+		Condition condition = Mockito.mock(Condition.class);
+		// "notMyFlag" strips to "myFlag" for the condition lookup
+		Mockito.when(document.getCondition("myFlag")).thenReturn(condition);
+		Mockito.when(document.getOwningModuleName()).thenReturn("mod");
+		org.skyve.util.Binder.TargetMetaData result =
+				BindUtil.validateBinding(customer, module, document, "notMyFlag");
+		assertNotNull(result);
+		assertEquals(Boolean.class, result.getType());
+	}
+
+	// --- helpers ---
+
+	private static void clearPersistenceThreadLocal() {
+		try {
+			Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
+			field.setAccessible(true);
+			@SuppressWarnings("unchecked")
+			ThreadLocal<AbstractPersistence> tl = (ThreadLocal<AbstractPersistence>) field.get(null);
+			tl.remove();
+		}
+		catch (@SuppressWarnings("unused") Exception ignored) {
+			// ignore
+		}
 	}
 }

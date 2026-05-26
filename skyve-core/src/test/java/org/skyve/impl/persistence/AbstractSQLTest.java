@@ -1,6 +1,7 @@
 package org.skyve.impl.persistence;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -32,6 +33,7 @@ import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.persistence.AutoClosingIterable;
+import org.skyve.persistence.AutoClosingIterableAdpater;
 import org.skyve.persistence.DataStore;
 import org.skyve.persistence.SQL;
 
@@ -632,5 +634,135 @@ class AbstractSQLTest {
 		TestSQL sql = new TestSQL("SELECT 1");
 		sql.putParameter("t", "short text", false);
 		assertEquals(AttributeType.text, sql.getParameterType("t"));
+	}
+
+	// ---- result methods returning non-null ----
+
+	private static class StubBean extends org.skyve.impl.domain.AbstractTransientBean {
+		private static final long serialVersionUID = 1L;
+		@Override public String getBizModule() { return "test"; }
+		@Override public String getBizDocument() { return "StubBean"; }
+		@Override public String getBizKey() { return "key"; }
+	}
+
+	private static class OneResultSQL extends AbstractSQL {
+		private final StubBean bean;
+		private final org.apache.commons.beanutils.DynaBean dynaBean;
+
+		OneResultSQL(String query, StubBean bean) {
+			super(query);
+			this.bean = bean;
+			this.dynaBean = org.mockito.Mockito.mock(org.apache.commons.beanutils.DynaBean.class);
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public <T extends org.skyve.domain.Bean> List<T> beanResults() {
+			return java.util.Collections.singletonList((T) bean);
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public <T extends org.skyve.domain.Bean> AutoClosingIterable<T> beanIterable() {
+			return new AutoClosingIterableAdpater<>(java.util.Collections.singletonList((T) bean));
+		}
+
+		@Override
+		public List<Object[]> tupleResults() {
+			return java.util.Collections.singletonList(new Object[]{bean});
+		}
+
+		@Override
+		public AutoClosingIterable<Object[]> tupleIterable() {
+			return new AutoClosingIterableAdpater<>(java.util.Collections.singletonList(new Object[]{bean}));
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public <T> List<T> scalarResults(Class<T> type) {
+			return java.util.Collections.singletonList((T) bean);
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public <T> AutoClosingIterable<T> scalarIterable(Class<T> type) {
+			return new AutoClosingIterableAdpater<>(java.util.Collections.singletonList((T) bean));
+		}
+
+		@Override
+		public List<org.apache.commons.beanutils.DynaBean> dynaResults() {
+			return java.util.Collections.singletonList(dynaBean);
+		}
+
+		@Override
+		public AutoClosingIterable<org.apache.commons.beanutils.DynaBean> dynaIterable() {
+			return new AutoClosingIterableAdpater<>(java.util.Collections.singletonList(dynaBean));
+		}
+
+		@Override
+		public int execute() { return 1; }
+
+		@Override
+		public String toQueryString() { return super.toQueryString(); }
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void beanResultReturnsFirstBeanWhenListHasOneItem() {
+		StubBean bean = new StubBean();
+		OneResultSQL sql = new OneResultSQL("SELECT 1", bean);
+		assertSame(bean, sql.beanResult());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void retrieveBeanReturnsBeanWhenListHasOneItem() {
+		StubBean bean = new StubBean();
+		OneResultSQL sql = new OneResultSQL("SELECT 1", bean);
+		assertSame(bean, sql.retrieveBean());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void scalarResultReturnsFirstItemWhenListHasOneItem() {
+		StubBean bean = new StubBean();
+		OneResultSQL sql = new OneResultSQL("SELECT 1", bean);
+		assertSame(bean, sql.scalarResult(Object.class));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void retrieveScalarReturnsItemWhenListHasOneItem() {
+		StubBean bean = new StubBean();
+		OneResultSQL sql = new OneResultSQL("SELECT 1", bean);
+		assertSame(bean, sql.retrieveScalar(Object.class));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void tupleResultReturnsFirstTupleWhenListHasOneItem() {
+		OneResultSQL sql = new OneResultSQL("SELECT 1", new StubBean());
+		assertNotNull(sql.tupleResult());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void retrieveTupleReturnsTupleWhenListHasOneItem() {
+		OneResultSQL sql = new OneResultSQL("SELECT 1", new StubBean());
+		assertNotNull(sql.retrieveTuple());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void dynaResultReturnsDynaBeanWhenListHasOneItem() {
+		OneResultSQL sql = new OneResultSQL("SELECT 1", new StubBean());
+		assertNotNull(sql.dynaResult());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void retrieveDynaReturnsDynaBeanWhenListHasOneItem() {
+		OneResultSQL sql = new OneResultSQL("SELECT 1", new StubBean());
+		assertNotNull(sql.retrieveDyna());
 	}
 }

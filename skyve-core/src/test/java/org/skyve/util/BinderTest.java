@@ -28,7 +28,13 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.metadata.user.User;
+import org.skyve.domain.types.DateOnly;
+import org.skyve.domain.types.TimeOnly;
+import org.skyve.domain.types.DateTime;
+import org.skyve.domain.types.Timestamp;
+import java.math.BigDecimal;
 
 @SuppressWarnings("static-method")
 class BinderTest {
@@ -142,6 +148,10 @@ class BinderTest {
 
 		public boolean addChildrenElement(SimpleChild element) {
 			return children.add(element);
+		}
+
+		public void addChildrenElement(int index, SimpleChild element) {
+			children.add(index, element);
 		}
 
 		public boolean removeChildrenElement(SimpleChild element) {
@@ -475,5 +485,335 @@ class BinderTest {
 		owner.getChildren().add(child);
 		Bean result = Binder.ensureElementIsInCollection(owner, "children", child);
 		assertSame(child, result);
+	}
+
+	@Test
+	void addElementToCollectionAddsToStaticCollection() {
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Attribute collectionAttr = mock(Attribute.class); // not Field, not Relation -> not dynamic
+
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("admin")).thenReturn(module);
+		when(module.getDocument(customer, "Owner")).thenReturn(document);
+		when(document.getPolymorphicAttribute(customer, "children")).thenReturn(collectionAttr);
+
+		SimpleOwner owner = new SimpleOwner("O1");
+		SimpleChild child = new SimpleChild("C1");
+
+		withThreadLocalUser(user, () -> {
+			boolean added = Binder.addElementToCollection(owner, "children", child);
+			assertTrue(added, "Element should be added");
+			assertTrue(owner.getChildren().contains(child), "Child should be in collection");
+		});
+	}
+
+	@Test
+	void addElementToCollectionAtIndexAddsToStaticCollection() {
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Attribute collectionAttr = mock(Attribute.class);
+
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("admin")).thenReturn(module);
+		when(module.getDocument(customer, "Owner")).thenReturn(document);
+		when(document.getPolymorphicAttribute(customer, "children")).thenReturn(collectionAttr);
+
+		SimpleOwner owner = new SimpleOwner("O1");
+		SimpleChild c1 = new SimpleChild("C1");
+		SimpleChild c2 = new SimpleChild("C2");
+		owner.getChildren().add(c1);
+
+		withThreadLocalUser(user, () -> {
+			Binder.addElementToCollection(owner, "children", 0, c2);
+			assertEquals(c2, owner.getChildren().get(0), "Element should be inserted at index 0");
+		});
+	}
+
+	@Test
+	void removeElementFromCollectionByBeanRemovesFromStaticCollection() {
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Attribute collectionAttr = mock(Attribute.class);
+
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("admin")).thenReturn(module);
+		when(module.getDocument(customer, "Owner")).thenReturn(document);
+		when(document.getPolymorphicAttribute(customer, "children")).thenReturn(collectionAttr);
+
+		SimpleOwner owner = new SimpleOwner("O1");
+		SimpleChild child = new SimpleChild("C1");
+		owner.getChildren().add(child);
+
+		withThreadLocalUser(user, () -> {
+			boolean removed = Binder.removeElementFromCollection(owner, "children", child);
+			assertTrue(removed, "Element should be removed");
+			assertFalse(owner.getChildren().contains(child), "Child should not be in collection");
+		});
+	}
+
+	@Test
+	void removeElementFromCollectionByIndexRemovesFromStaticCollection() {
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Attribute collectionAttr = mock(Attribute.class);
+
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("admin")).thenReturn(module);
+		when(module.getDocument(customer, "Owner")).thenReturn(document);
+		when(document.getPolymorphicAttribute(customer, "children")).thenReturn(collectionAttr);
+
+		SimpleOwner owner = new SimpleOwner("O1");
+		SimpleChild child = new SimpleChild("C1");
+		owner.getChildren().add(child);
+
+		withThreadLocalUser(user, () -> {
+			Bean removed = Binder.removeElementFromCollection(owner, "children", 0);
+			assertSame(child, removed, "Removed element should be the child");
+			assertTrue(owner.getChildren().isEmpty(), "Collection should be empty after removal");
+		});
+	}
+
+	@Test
+	void setAssociationSetsManagerOnOwner() {
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Attribute assocAttr = mock(Attribute.class);
+
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("admin")).thenReturn(module);
+		when(module.getDocument(customer, "Owner")).thenReturn(document);
+		when(document.getPolymorphicAttribute(customer, "manager")).thenReturn(assocAttr);
+
+		SimpleOwner owner = new SimpleOwner("O1");
+		SimpleChild manager = new SimpleChild("M1");
+
+		withThreadLocalUser(user, () -> {
+			Binder.setAssociation(owner, "manager", manager);
+			assertSame(manager, owner.getManager(), "Manager should be set");
+		});
+	}
+
+	@Test
+	void setAssociationSetsManagerToNull() {
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Attribute assocAttr = mock(Attribute.class);
+
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("admin")).thenReturn(module);
+		when(module.getDocument(customer, "Owner")).thenReturn(document);
+		when(document.getPolymorphicAttribute(customer, "manager")).thenReturn(assocAttr);
+
+		SimpleOwner owner = new SimpleOwner("O1");
+		owner.setManager(new SimpleChild("M1")); // set initially
+
+		withThreadLocalUser(user, () -> {
+			Binder.setAssociation(owner, "manager", null);
+			assertNull(owner.getManager(), "Manager should be null after setAssociation(null)");
+		});
+	}
+
+	@Test
+	void ensureElementNotInCollectionAddsThenReturnsIt() {
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Attribute collectionAttr = mock(Attribute.class);
+
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("admin")).thenReturn(module);
+		when(module.getDocument(customer, "Owner")).thenReturn(document);
+		when(document.getPolymorphicAttribute(customer, "children")).thenReturn(collectionAttr);
+
+		SimpleOwner owner = new SimpleOwner("O1");
+		SimpleChild child = new SimpleChild("C2");
+
+		withThreadLocalUser(user, () -> {
+			Bean result = Binder.ensureElementIsInCollection(owner, "children", child);
+			assertSame(child, result, "ensureElement should return the element");
+			assertTrue(owner.getChildren().contains(child), "Child should now be in collection");
+		});
+	}
+
+	// ---- nullSafeConvert extended paths ------------------------------------
+
+	@Test
+	void nullSafeConvertLongFromInteger() {
+		Object result = Binder.nullSafeConvert(Long.class, Integer.valueOf(42));
+		assertThat(result, instanceOf(Long.class));
+		assertEquals(42L, result);
+	}
+
+	@Test
+	void nullSafeConvertIntegerFromLong() {
+		Object result = Binder.nullSafeConvert(Integer.class, Long.valueOf(42L));
+		assertThat(result, instanceOf(Integer.class));
+		assertEquals(42, result);
+	}
+
+	@Test
+	void nullSafeConvertDoubleFromInteger() {
+		Object result = Binder.nullSafeConvert(Double.class, Integer.valueOf(5));
+		assertThat(result, instanceOf(Double.class));
+		assertEquals(5.0, (Double) result, 0.0001);
+	}
+
+	@Test
+	void nullSafeConvertFloatFromInteger() {
+		Object result = Binder.nullSafeConvert(Float.class, Integer.valueOf(3));
+		assertThat(result, instanceOf(Float.class));
+		assertEquals(3.0f, (Float) result, 0.0001f);
+	}
+
+	@Test
+	void nullSafeConvertBigDecimalFromString() {
+		Object result = Binder.nullSafeConvert(BigDecimal.class, "1.23");
+		assertThat(result, instanceOf(BigDecimal.class));
+		assertEquals(new BigDecimal("1.23"), result);
+	}
+
+	@Test
+	void nullSafeConvertDateOnlyFromJavaDate() {
+		java.util.Date javaDate = new java.util.Date(1000000L);
+		Object result = Binder.nullSafeConvert(DateOnly.class, javaDate);
+		assertThat(result, instanceOf(DateOnly.class));
+	}
+
+	@Test
+	void nullSafeConvertTimeOnlyFromJavaDate() {
+		java.util.Date javaDate = new java.util.Date(1000000L);
+		Object result = Binder.nullSafeConvert(TimeOnly.class, javaDate);
+		assertThat(result, instanceOf(TimeOnly.class));
+	}
+
+	@Test
+	void nullSafeConvertDateTimeFromJavaDate() {
+		java.util.Date javaDate = new java.util.Date(1000000L);
+		Object result = Binder.nullSafeConvert(DateTime.class, javaDate);
+		assertThat(result, instanceOf(DateTime.class));
+	}
+
+	@Test
+	void nullSafeConvertTimestampFromJavaDate() {
+		java.util.Date javaDate = new java.util.Date(1000000L);
+		Object result = Binder.nullSafeConvert(Timestamp.class, javaDate);
+		assertThat(result, instanceOf(Timestamp.class));
+	}
+
+	@Test
+	void nullSafeConvertSameTypeReturnsSameObject() {
+		Long val = Long.valueOf(99L);
+		Object result = Binder.nullSafeConvert(Long.class, val);
+		assertSame(val, result);
+	}
+
+	// ---- toDisplay ----------------------------------------------------------
+
+	@Test
+	void toDisplayNullValueReturnsEmptyString() {
+		Customer customer = mock(Customer.class);
+		assertEquals("", BindUtil.toDisplay(customer, null));
+	}
+
+	@Test
+	void toDisplayBooleanTrueReturnsYes() {
+		Customer customer = mock(Customer.class);
+		assertEquals("Yes", BindUtil.toDisplay(customer, Boolean.TRUE));
+	}
+
+	@Test
+	void toDisplayBooleanFalseReturnsNo() {
+		Customer customer = mock(Customer.class);
+		assertEquals("No", BindUtil.toDisplay(customer, Boolean.FALSE));
+	}
+
+	@Test
+	void toDisplayStringValueUsesToString() {
+		Customer customer = mock(Customer.class);
+		assertEquals("hello", BindUtil.toDisplay(customer, "hello"));
+	}
+
+	@Test
+	void toDisplayIntegerUsesToString() {
+		Customer customer = mock(Customer.class);
+		assertEquals("42", BindUtil.toDisplay(customer, 42));
+	}
+
+	// ---- sanitiseBinding / unsanitiseBinding ---------------------------------
+
+	@Test
+	void sanitiseBindingReturnsNullForNull() {
+		assertNull(BindUtil.sanitiseBinding(null));
+	}
+
+	@Test
+	void sanitiseBindingReplacesDotWithUnderscore() {
+		assertEquals("a_b_c", BindUtil.sanitiseBinding("a.b.c"));
+	}
+
+	@Test
+	void sanitiseBindingReplacesSquareBracketsWithUnderscore() {
+		assertEquals("a_0_", BindUtil.sanitiseBinding("a[0]"));
+	}
+
+	@Test
+	void unsanitiseBindingReturnsNullForNull() {
+		assertNull(BindUtil.unsanitiseBinding(null));
+	}
+
+	@Test
+	void unsanitiseBindingConvertsUnderscoreToDot() {
+		assertEquals("a.b.c", BindUtil.unsanitiseBinding("a_b_c"));
+	}
+
+	@Test
+	void unsanitiseBindingConvertsIndexedUnderscoresToBrackets() {
+		assertEquals("a[0]", BindUtil.unsanitiseBinding("a_0_"));
+	}
+
+	// ---- prefixMessageExpressions -------------------------------------------
+
+	@Test
+	void prefixMessageExpressionsReturnsNullForNull() {
+		assertNull(BindUtil.prefixMessageExpressions(null, "prefix"));
+	}
+
+	@Test
+	void prefixMessageExpressionsWithNoExpressionsReturnsSameString() {
+		assertEquals("Hello World", BindUtil.prefixMessageExpressions("Hello World", "contact"));
+	}
+
+	@Test
+	void prefixMessageExpressionsWithExpressionPrefixesBinding() {
+		String result = BindUtil.prefixMessageExpressions("{name}", "contact");
+		assertTrue(result.contains("contact"), "Result should contain prefix: " + result);
+	}
+
+	// ---- evaluateCondition --------------------------------------------------
+
+	@Test
+	void evaluateConditionReturnsTrueForTrueString() {
+		SimpleOwner bean = new SimpleOwner("O1");
+		assertTrue(BindUtil.evaluateCondition(bean, "true"));
+	}
+
+	@Test
+	void evaluateConditionReturnsFalseForFalseString() {
+		SimpleOwner bean = new SimpleOwner("O1");
+		assertFalse(BindUtil.evaluateCondition(bean, "false"));
 	}
 }

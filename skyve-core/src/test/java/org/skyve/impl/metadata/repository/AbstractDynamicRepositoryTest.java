@@ -105,22 +105,22 @@ class AbstractDynamicRepositoryTest {
 
 	@Test
 	void validateCustomerForGenerateDomainDoesNotThrow() {
-		repo.validateCustomerForGenerateDomain(customer);
+		assertDoesNotThrow(() -> repo.validateCustomerForGenerateDomain(customer));
 	}
 
 	@Test
 	void validateModuleForGenerateDomainDoesNotThrow() {
-		repo.validateModuleForGenerateDomain(customer, module);
+		assertDoesNotThrow(() -> repo.validateModuleForGenerateDomain(customer, module));
 	}
 
 	@Test
 	void validateDocumentForGenerateDomainDoesNotThrow() {
-		repo.validateDocumentForGenerateDomain(customer, document);
+		assertDoesNotThrow(() -> repo.validateDocumentForGenerateDomain(customer, document));
 	}
 
 	@Test
 	void validateViewForGenerateDomainDoesNotThrow() {
-		repo.validateViewForGenerateDomain(customer, document, view, "desktop");
+		assertDoesNotThrow(() -> repo.validateViewForGenerateDomain(customer, document, view, "desktop"));
 	}
 
 	@Test

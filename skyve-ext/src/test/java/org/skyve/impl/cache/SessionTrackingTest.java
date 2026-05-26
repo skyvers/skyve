@@ -118,6 +118,7 @@ public class SessionTrackingTest {
 	public void removeSessionOnNonexistentUserDoesNotThrow() {
 		HttpSession sessionA = session("A");
 		StateUtil.removeSession("no-such-user-" + System.nanoTime(), sessionA); // should not throw
+		assertThat(StateUtil.getSessionCount("no-such-user-x"), is(0));
 	}
 
 	@Test

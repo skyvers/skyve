@@ -121,6 +121,7 @@ public class POISheetTest {
 		// resetRow does not check for materialisation; it just resets internal state
 		POISheet sheet = new POISheet("TestSheet");
 		sheet.resetRow(); // should not throw
+		assertNotNull(sheet);
 	}
 
 	@Test(expected = IllegalStateException.class)

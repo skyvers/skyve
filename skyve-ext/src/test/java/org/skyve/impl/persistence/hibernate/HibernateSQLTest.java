@@ -317,7 +317,7 @@ class HibernateSQLTest {
 
 			HibernateSQL sql = new HibernateSQL("SELECT 1", p);
 			sql.putParameter("t", new TimeOnly());
-			sql.scalarResults(Integer.class);
+			assertNotNull(sql.scalarResults(Integer.class));
 		}
 		finally {
 			p.close();
@@ -337,7 +337,7 @@ class HibernateSQLTest {
 
 			HibernateSQL sql = new HibernateSQL("SELECT 1", p);
 			sql.putParameter("ts", new Timestamp());
-			sql.scalarResults(Integer.class);
+			assertNotNull(sql.scalarResults(Integer.class));
 		}
 		finally {
 			p.close();
@@ -357,7 +357,7 @@ class HibernateSQLTest {
 
 			HibernateSQL sql = new HibernateSQL("SELECT 1", p);
 			sql.putParameter("dt", new DateTime());
-			sql.scalarResults(Integer.class);
+			assertNotNull(sql.scalarResults(Integer.class));
 		}
 		finally {
 			p.close();
@@ -378,7 +378,7 @@ class HibernateSQLTest {
 			HibernateSQL sql = new HibernateSQL("SELECT 1", p);
 			// Plain java.util.Date is NOT a sql.Date, so the Date early-exit fires
 			sql.putParameter("d", new Date(), AttributeType.date);
-			sql.scalarResults(Integer.class);
+			assertNotNull(sql.scalarResults(Integer.class));
 		}
 		finally {
 			p.close();
@@ -398,7 +398,7 @@ class HibernateSQLTest {
 
 			HibernateSQL sql = new HibernateSQL("SELECT 1", p);
 			sql.putParameter("lock", new OptimisticLock("testUser", new Date()), AttributeType.text);
-			sql.scalarResults(Integer.class);
+			assertNotNull(sql.scalarResults(Integer.class));
 		}
 		finally {
 			p.close();
@@ -422,7 +422,7 @@ class HibernateSQLTest {
 			HibernateSQL sql = new HibernateSQL("SELECT 1", p);
 			// Store the Enumeration object directly (bypassing the String-code-storing overload)
 			sql.putParameter("e", enumMock, AttributeType.enumeration);
-			sql.scalarResults(Integer.class);
+			assertNotNull(sql.scalarResults(Integer.class));
 		}
 		finally {
 			p.close();
@@ -442,7 +442,7 @@ class HibernateSQLTest {
 
 			HibernateSQL sql = new HibernateSQL("SELECT 1", p);
 			sql.putParameter("flags", List.of(Boolean.TRUE, Boolean.FALSE), AttributeType.bool);
-			sql.scalarResults(Integer.class);
+			assertNotNull(sql.scalarResults(Integer.class));
 		}
 		finally {
 			p.close();
@@ -462,7 +462,7 @@ class HibernateSQLTest {
 
 			HibernateSQL sql = new HibernateSQL("SELECT 1", p);
 			sql.putParameter("flags", new Boolean[] {Boolean.TRUE}, AttributeType.bool);
-			sql.scalarResults(Integer.class);
+			assertNotNull(sql.scalarResults(Integer.class));
 		}
 		finally {
 			p.close();
@@ -482,7 +482,7 @@ class HibernateSQLTest {
 
 			HibernateSQL sql = new HibernateSQL("SELECT 1", p);
 			sql.putParameter("texts", List.of("a", "b"), AttributeType.text);
-			sql.scalarResults(Integer.class);
+			assertNotNull(sql.scalarResults(Integer.class));
 		}
 		finally {
 			p.close();
@@ -502,7 +502,7 @@ class HibernateSQLTest {
 
 			HibernateSQL sql = new HibernateSQL("SELECT 1", p);
 			sql.putParameter("texts", new String[] {"a", "b"}, AttributeType.text);
-			sql.scalarResults(Integer.class);
+			assertNotNull(sql.scalarResults(Integer.class));
 		}
 		finally {
 			p.close();
@@ -522,7 +522,7 @@ class HibernateSQLTest {
 
 			HibernateSQL sql = new HibernateSQL("SELECT 1", p);
 			sql.putParameter("enums", List.of("CODE1", "CODE2"), AttributeType.enumeration);
-			sql.scalarResults(Integer.class);
+			assertNotNull(sql.scalarResults(Integer.class));
 		}
 		finally {
 			p.close();
@@ -542,7 +542,7 @@ class HibernateSQLTest {
 
 			HibernateSQL sql = new HibernateSQL("SELECT 1", p);
 			sql.putParameter("enums", new String[] {"CODE1"}, AttributeType.enumeration);
-			sql.scalarResults(Integer.class);
+			assertNotNull(sql.scalarResults(Integer.class));
 		}
 		finally {
 			p.close();
@@ -562,7 +562,7 @@ class HibernateSQLTest {
 
 			HibernateSQL sql = new HibernateSQL("SELECT 1", p);
 			sql.putParameter("memos", List.of("long text 1", "long text 2"), AttributeType.markup);
-			sql.scalarResults(Integer.class);
+			assertNotNull(sql.scalarResults(Integer.class));
 		}
 		finally {
 			p.close();
@@ -582,7 +582,7 @@ class HibernateSQLTest {
 
 			HibernateSQL sql = new HibernateSQL("SELECT 1", p);
 			sql.putParameter("dates", List.of(new Date()), AttributeType.date);
-			sql.scalarResults(Integer.class);
+			assertNotNull(sql.scalarResults(Integer.class));
 		}
 		finally {
 			p.close();
@@ -602,7 +602,7 @@ class HibernateSQLTest {
 
 			HibernateSQL sql = new HibernateSQL("SELECT 1", p);
 			sql.putParameter("dts", List.of(new Date()), AttributeType.dateTime);
-			sql.scalarResults(Integer.class);
+			assertNotNull(sql.scalarResults(Integer.class));
 		}
 		finally {
 			p.close();
@@ -622,7 +622,7 @@ class HibernateSQLTest {
 
 			HibernateSQL sql = new HibernateSQL("SELECT 1", p);
 			sql.putParameter("decimals", List.of(new Decimal2("1.50"), new Decimal2("2.00")), AttributeType.decimal2);
-			sql.scalarResults(Integer.class);
+			assertNotNull(sql.scalarResults(Integer.class));
 		}
 		finally {
 			p.close();
@@ -642,7 +642,7 @@ class HibernateSQLTest {
 
 			HibernateSQL sql = new HibernateSQL("SELECT 1", p);
 			sql.putParameter("decimals", new Decimal2[] {new Decimal2("3.14")}, AttributeType.decimal5);
-			sql.scalarResults(Integer.class);
+			assertNotNull(sql.scalarResults(Integer.class));
 		}
 		finally {
 			p.close();
@@ -662,7 +662,7 @@ class HibernateSQLTest {
 
 			HibernateSQL sql = new HibernateSQL("SELECT 1", p);
 			sql.putParameter("ints", List.of(Integer.valueOf(1), Integer.valueOf(2), Integer.valueOf(3)), AttributeType.integer);
-			sql.scalarResults(Integer.class);
+			assertNotNull(sql.scalarResults(Integer.class));
 		}
 		finally {
 			p.close();
@@ -682,7 +682,7 @@ class HibernateSQLTest {
 
 			HibernateSQL sql = new HibernateSQL("SELECT 1", p);
 			sql.putParameter("longs", List.of(Long.valueOf(100L), Long.valueOf(200L)), AttributeType.longInteger);
-			sql.scalarResults(Integer.class);
+			assertNotNull(sql.scalarResults(Integer.class));
 		}
 		finally {
 			p.close();
@@ -702,7 +702,7 @@ class HibernateSQLTest {
 
 			HibernateSQL sql = new HibernateSQL("SELECT 1", p);
 			sql.putParameter("times", List.of(new TimeOnly()), AttributeType.time);
-			sql.scalarResults(Integer.class);
+			assertNotNull(sql.scalarResults(Integer.class));
 		}
 		finally {
 			p.close();
@@ -722,7 +722,7 @@ class HibernateSQLTest {
 
 			HibernateSQL sql = new HibernateSQL("SELECT 1", p);
 			sql.putParameter("ids", List.of("id1", "id2"), AttributeType.id);
-			sql.scalarResults(Integer.class);
+			assertNotNull(sql.scalarResults(Integer.class));
 		}
 		finally {
 			p.close();
@@ -742,7 +742,7 @@ class HibernateSQLTest {
 
 			HibernateSQL sql = new HibernateSQL("SELECT 1", p);
 			sql.putParameter("ids", new String[] {"id1", "id2"}, AttributeType.id);
-			sql.scalarResults(Integer.class);
+			assertNotNull(sql.scalarResults(Integer.class));
 		}
 		finally {
 			p.close();
@@ -763,7 +763,7 @@ class HibernateSQLTest {
 			HibernateSQL sql = new HibernateSQL("SELECT 1", p);
 			// null type falls into the else-branch: result.setParameter(name, value)
 			sql.putParameter("x", Integer.valueOf(42), null);
-			sql.scalarResults(Integer.class);
+			assertNotNull(sql.scalarResults(Integer.class));
 		}
 		finally {
 			p.close();

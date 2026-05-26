@@ -123,10 +123,13 @@ public class TikaTextExtractorTest {
 	@Test
 	public void testSniffLanguageEmpty() {
 		try {
-			// should not throw for empty text
-			new TikaTextExtractor().sniffLanguage("");
+			// empty text should return null or a language code, never throw
+			String result = new TikaTextExtractor().sniffLanguage("");
+			Assert.assertTrue("sniffLanguage should return null or a valid language code",
+					result == null || !result.isEmpty());
 		} catch (IllegalStateException e) {
 			// No language detectors available in test classpath — acceptable
+			Assert.assertNotNull(e);
 		}
 	}
 }

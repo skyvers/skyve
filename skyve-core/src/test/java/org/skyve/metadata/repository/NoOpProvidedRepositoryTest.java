@@ -202,12 +202,12 @@ class NoOpProvidedRepositoryTest {
 
 	@Test
 	void validateDocumentForGenerateDomainDoesNotThrow() {
-		repo.validateDocumentForGenerateDomain(null, null);
+		assertDoesNotThrow(() -> repo.validateDocumentForGenerateDomain(null, null));
 	}
 
 	@Test
 	void validateViewForGenerateDomainDoesNotThrow() {
-		repo.validateViewForGenerateDomain(null, null, null, "desktop");
+		assertDoesNotThrow(() -> repo.validateViewForGenerateDomain(null, null, null, "desktop"));
 	}
 
 	@Test

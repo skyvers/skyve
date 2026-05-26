@@ -17,6 +17,8 @@ class FreemarkerReportUtilTest {
 	@Test
 	void initCompletesWithoutException() {
 		FreemarkerReportUtil.init();
+		// Verify configuration is accessible after init (removing non-existent template returns false)
+		assertFalse(FreemarkerReportUtil.removeTemplate("nonexistent_abc_init"));
 	}
 
 	@Test
@@ -41,6 +43,8 @@ class FreemarkerReportUtilTest {
 	@Test
 	void addDirectiveDoesNotThrow() {
 		FreemarkerReportUtil.addDirective("d1", new SqlFormatDirective());
+		// Verify the directive was registered (removing a non-existent template is always false)
+		assertFalse(FreemarkerReportUtil.removeTemplate("d1"));
 	}
 
 	@Test

@@ -2,6 +2,7 @@ package org.skyve.metadata.view.model.list;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -17,6 +18,7 @@ import org.skyve.domain.Bean;
 import org.skyve.impl.domain.AbstractTransientBean;
 import org.skyve.impl.web.SortParameterImpl;
 import org.skyve.metadata.SortDirection;
+import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
@@ -218,8 +220,6 @@ class InMemoryListModelTest {
 		TestListModel model = new TestListModel(mockModule, mockDocument, beans);
 		model.setStartRow(0);
 		model.setEndRow(10);
-		// Get the filter and apply it (InMemoryFilter will filter based on criteria;
-		// with no criteria set, filter passes all rows through)
 		Filter filter = model.getFilter();
 		assertNotNull(filter);
 		Page page = model.fetch();
@@ -501,5 +501,78 @@ class InMemoryListModelTest {
 		Bean summary = page.getSummary();
 		assertNotNull(summary);
 		assertEquals("zzz", summary.getDynamic(Bean.BIZ_KEY));
+	}
+
+	/** DynamicBean with a Double "numericField" property for sum/avg testing. */
+	private static class NumericDynamicBean extends org.skyve.domain.DynamicBean {
+		private static final long serialVersionUID = 1L;
+
+		NumericDynamicBean(double value) {
+			super("test", "NumericDoc", buildProps(value));
+		}
+
+		private static java.util.Map<String, Object> buildProps(double value) {
+			java.util.Map<String, Object> props = new java.util.HashMap<>();
+			props.put(Bean.DOCUMENT_ID, java.util.UUID.randomUUID().toString());
+			props.put("numericField", Double.valueOf(value));
+			return props;
+		}
+	}
+
+	@Test
+	void fetchSumSummaryWithNumericColumnValuesComputesSum() throws Exception {
+		MetaDataQueryColumn col = mock(MetaDataQueryColumn.class);
+		when(col.getBinding()).thenReturn("numericField");
+		List<Bean> beans = new ArrayList<>(Arrays.asList(
+				new NumericDynamicBean(5.0),
+				new NumericDynamicBean(3.0)));
+		TestListModelWithColumns model = new TestListModelWithColumns(beans, Arrays.asList(col));
+		model.setSummary(AggregateFunction.Sum);
+		model.setStartRow(0);
+		model.setEndRow(10);
+		Page page = model.fetch();
+		Bean summary = page.getSummary();
+		assertNotNull(summary);
+		assertEquals(Double.valueOf(8.0), summary.getDynamic("numericField"));
+	}
+
+	@Test
+	void fetchAvgSummaryWithNumericColumnValuesComputesAverage() throws Exception {
+		MetaDataQueryColumn col = mock(MetaDataQueryColumn.class);
+		when(col.getBinding()).thenReturn("numericField");
+		List<Bean> beans = new ArrayList<>(Arrays.asList(
+				new NumericDynamicBean(4.0),
+				new NumericDynamicBean(6.0)));
+		TestListModelWithColumns model = new TestListModelWithColumns(beans, Arrays.asList(col));
+		model.setSummary(AggregateFunction.Avg);
+		model.setStartRow(0);
+		model.setEndRow(10);
+		Page page = model.fetch();
+		Bean summary = page.getSummary();
+		assertNotNull(summary);
+		assertEquals(Double.valueOf(5.0), summary.getDynamic("numericField"));
+	}
+
+	@Test
+	void postConstructWithNonNullBindingAddsProjectionForImplicitAttribute() {
+		Customer customer = mock(Customer.class);
+		MetaDataQueryColumn col = mock(MetaDataQueryColumn.class);
+		when(col.getBinding()).thenReturn(Bean.CUSTOMER_NAME); // "bizCustomer" — implicit, not in defaults
+		TestListModelWithColumns model = new TestListModelWithColumns(
+				Collections.emptyList(), Collections.singletonList(col));
+		model.postConstruct(customer, false);
+		assertTrue(model.getProjections().contains(Bean.CUSTOMER_NAME));
+	}
+
+	@Test
+	void postConstructWithNullBindingAddsColumnNameProjection() {
+		Customer customer = mock(Customer.class);
+		MetaDataQueryColumn col = mock(MetaDataQueryColumn.class);
+		when(col.getBinding()).thenReturn(null);
+		when(col.getName()).thenReturn("myCustomColumn");
+		TestListModelWithColumns model = new TestListModelWithColumns(
+				Collections.emptyList(), Collections.singletonList(col));
+		model.postConstruct(customer, false);
+		assertTrue(model.getProjections().contains("myCustomColumn"));
 	}
 }

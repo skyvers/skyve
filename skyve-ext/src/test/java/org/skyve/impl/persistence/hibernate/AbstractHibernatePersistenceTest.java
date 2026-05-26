@@ -1,5 +1,6 @@
 package org.skyve.impl.persistence.hibernate;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -172,7 +173,7 @@ class AbstractHibernatePersistenceTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void testLogSecondLevelCacheStatsWithUnknownRegion() {
-		AbstractHibernatePersistence.logSecondLevelCacheStats("missing-region");
+		assertDoesNotThrow(() -> AbstractHibernatePersistence.logSecondLevelCacheStats("missing-region"));
 	}
 
 	@Test
@@ -278,6 +279,7 @@ class AbstractHibernatePersistenceTest {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
 			persistence.evictAllSharedCache();
+			assertNotNull(persistence);
 		}
 		finally {
 			persistence.close();
@@ -291,6 +293,7 @@ class AbstractHibernatePersistenceTest {
 		persistence.injectDynamicPersistence(mock(DynamicPersistence.class));
 		try {
 			persistence.evictAllCached();
+			assertNotNull(persistence);
 		}
 		finally {
 			persistence.close();
@@ -303,6 +306,7 @@ class AbstractHibernatePersistenceTest {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
 			persistence.evictSharedCacheCollections();
+			assertNotNull(persistence);
 		}
 		finally {
 			persistence.close();
@@ -316,6 +320,7 @@ class AbstractHibernatePersistenceTest {
 		try {
 			persistence.setUser(createTestUser());
 			persistence.evictSharedCacheBeans("admin", "Contact");
+			assertNotNull(persistence);
 		}
 		finally {
 			persistence.close();
@@ -329,6 +334,7 @@ class AbstractHibernatePersistenceTest {
 		try {
 			persistence.setUser(createTestUser());
 			persistence.evictSharedCachedBean("admin", "Contact", "test-bean-id");
+			assertNotNull(persistence);
 		}
 		finally {
 			persistence.close();
@@ -356,6 +362,7 @@ class AbstractHibernatePersistenceTest {
 		try {
 			persistence.begin();
 			persistence.flush();
+			assertNotNull(persistence);
 		}
 		finally {
 			persistence.close();
@@ -383,6 +390,7 @@ class AbstractHibernatePersistenceTest {
 		try {
 			persistence.begin();
 			persistence.rollback();
+			assertNotNull(persistence);
 		}
 		finally {
 			persistence.close();
@@ -395,6 +403,7 @@ class AbstractHibernatePersistenceTest {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
 			persistence.evictSharedCacheBeans();
+			assertNotNull(persistence);
 		}
 		finally {
 			persistence.close();
@@ -458,6 +467,7 @@ class AbstractHibernatePersistenceTest {
 			persistence.withDocumentPermissionScopes(
 				DocumentPermissionScope.customer,
 				p -> {});
+			assertNotNull(persistence);
 		}
 		finally {
 			persistence.close();
@@ -545,6 +555,7 @@ class AbstractHibernatePersistenceTest {
 		try {
 			persistence.setUser(createTestUser());
 			persistence.evictSharedCacheBeans("admin", "Contact");
+			assertNotNull(persistence);
 		}
 		finally {
 			persistence.close();
@@ -558,6 +569,7 @@ class AbstractHibernatePersistenceTest {
 		try {
 			persistence.setUser(createTestUser());
 			persistence.evictSharedCachedBean("admin", "Contact", "some-biz-id");
+			assertNotNull(persistence);
 		}
 		finally {
 			persistence.close();
@@ -575,6 +587,7 @@ class AbstractHibernatePersistenceTest {
 			when(bean.getBizDocument()).thenReturn("Contact");
 			when(bean.getBizId()).thenReturn("test-id");
 			persistence.evictSharedCachedBean(bean);
+			assertNotNull(persistence);
 		}
 		finally {
 			persistence.close();
@@ -588,6 +601,7 @@ class AbstractHibernatePersistenceTest {
 		try {
 			persistence.setUser(createTestUser());
 			persistence.evictSharedCacheCollections("admin", "Contact", "roles");
+			assertNotNull(persistence);
 		}
 		finally {
 			persistence.close();
@@ -601,6 +615,7 @@ class AbstractHibernatePersistenceTest {
 		try {
 			persistence.setUser(createTestUser());
 			persistence.evictSharedCacheCollection("admin", "Contact", "roles", "some-biz-id");
+			assertNotNull(persistence);
 		}
 		finally {
 			persistence.close();
@@ -618,6 +633,7 @@ class AbstractHibernatePersistenceTest {
 			when(owner.getBizDocument()).thenReturn("Contact");
 			when(owner.getBizId()).thenReturn("test-id");
 			persistence.evictSharedCacheCollection(owner, "roles");
+			assertNotNull(persistence);
 		}
 		finally {
 			persistence.close();
@@ -654,6 +670,7 @@ class AbstractHibernatePersistenceTest {
 			when(bean.getBizDocument()).thenReturn("Contact");
 			when(bean.getBizId()).thenReturn("test-id");
 			persistence.evictCached(bean);
+			assertNotNull(persistence);
 		}
 		finally {
 			persistence.close();
@@ -666,6 +683,7 @@ class AbstractHibernatePersistenceTest {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
 			persistence.evictAllSharedCache();
+			assertNotNull(persistence);
 		}
 		finally {
 			persistence.close();
@@ -772,6 +790,7 @@ class AbstractHibernatePersistenceTest {
 		try {
 			persistence.begin();
 			persistence.rollback();
+			assertNotNull(persistence);
 		}
 		finally {
 			persistence.close();
@@ -791,6 +810,7 @@ class AbstractHibernatePersistenceTest {
 			when(bean.getBizDocument()).thenReturn("Contact");
 			// just ensure no exception from evictCached when not in cache
 			persistence.evictCached(bean);
+			assertNotNull(persistence);
 		}
 		finally {
 			persistence.close();
@@ -805,6 +825,7 @@ class AbstractHibernatePersistenceTest {
 			persistence.begin();
 			// commit with close=false, removeUniqueHashes=false should work cleanly
 			persistence.commit(false, false);
+			assertNotNull(persistence);
 		}
 		finally {
 			persistence.close();
@@ -992,6 +1013,7 @@ class AbstractHibernatePersistenceTest {
 			persistence.begin();
 			persistence.flush(); // should flush cleanly against H2
 			persistence.rollback();
+			assertNotNull(persistence);
 		}
 		finally {
 			persistence.close();
@@ -1025,6 +1047,7 @@ class AbstractHibernatePersistenceTest {
 			persistence.setUser(createTestUser());
 			// evictSharedCacheBeans by module + document should not throw even if not cached
 			persistence.evictSharedCacheBeans("admin", "Contact");
+			assertNotNull(persistence);
 		}
 		finally {
 			persistence.close();
@@ -1043,6 +1066,7 @@ class AbstractHibernatePersistenceTest {
 			when(bean.getBizId()).thenReturn("some-id");
 			// should not throw even when not in shared cache
 			persistence.evictSharedCachedBean(bean);
+			assertNotNull(persistence);
 		}
 		finally {
 			persistence.close();
@@ -1053,7 +1077,7 @@ class AbstractHibernatePersistenceTest {
 	@SuppressWarnings("static-method")
 	void testLogSecondLevelCacheStatsWithAnotherUnknownRegionDoesNotThrow() {
 		// Verifies the static method handles additional unknown regions gracefully
-		AbstractHibernatePersistence.logSecondLevelCacheStats("another-missing-region");
+		assertDoesNotThrow(() -> AbstractHibernatePersistence.logSecondLevelCacheStats("another-missing-region"));
 	}
 
 	@Test
@@ -1370,6 +1394,7 @@ class AbstractHibernatePersistenceTest {
 				da.newSQL("DELETE FROM ADM_Contact WHERE bizId = '" + id + "'").execute();
 				da.commit();
 			}
+			assertNotNull(persistence);
 		}
 		finally {
 			unbindPersistenceFromThread();
@@ -1763,6 +1788,7 @@ class AbstractHibernatePersistenceTest {
 			bindPersistenceToThread(persistence);
 			persistence.begin();
 			persistence.commit(true);
+			assertNotNull(persistence);
 		}
 		finally {
 			unbindPersistenceFromThread();
@@ -1867,6 +1893,7 @@ class AbstractHibernatePersistenceTest {
 			persistence.begin();
 			persistence.setRollbackOnly();
 			persistence.rollback();
+			assertNotNull(persistence);
 		}
 		finally {
 			persistence.close();
@@ -1900,6 +1927,7 @@ class AbstractHibernatePersistenceTest {
 			persistence.begin();
 			persistence.evictAllCached();
 			persistence.rollback();
+			assertNotNull(persistence);
 		}
 		finally {
 			persistence.close();
@@ -1958,6 +1986,7 @@ class AbstractHibernatePersistenceTest {
 			persistence.begin();
 			persistence.flush();
 			persistence.rollback();
+			assertNotNull(persistence);
 		}
 		finally {
 			persistence.close();

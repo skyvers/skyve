@@ -3,6 +3,7 @@ package org.skyve.impl.metadata.repository.module;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -445,7 +446,7 @@ class ModuleRoleSmallAccessMetaDataTest {
 		access.setModuleName("admin");
 		access.setDocumentName("Contact");
 		access.setReportName("ContactReport");
-		access.validate("testMetaData", "testRole", null);
+		assertDoesNotThrow(() -> access.validate("testMetaData", "testRole", null));
 	}
 
 	@Test
@@ -479,7 +480,7 @@ class ModuleRoleSmallAccessMetaDataTest {
 		org.skyve.metadata.module.Module module = org.mockito.Mockito.mock(org.skyve.metadata.module.Module.class);
 		org.mockito.Mockito.when(module.getDocumentRefs()).thenReturn(java.util.Collections.singletonMap("Contact", null));
 		org.mockito.Mockito.when(module.getName()).thenReturn("admin");
-		md.validate("test", "role", module);
+		assertDoesNotThrow(() -> md.validate("test", "role", module));
 	}
 
 	@Test
@@ -491,7 +492,7 @@ class ModuleRoleSmallAccessMetaDataTest {
 		org.skyve.metadata.module.Module module = org.mockito.Mockito.mock(org.skyve.metadata.module.Module.class);
 		org.mockito.Mockito.when(module.getDocumentRefs()).thenReturn(java.util.Collections.singletonMap("Contact", null));
 		org.mockito.Mockito.when(module.getName()).thenReturn("admin");
-		md.validate("test", "role", module);
+		assertDoesNotThrow(() -> md.validate("test", "role", module));
 	}
 
 	@Test
@@ -503,7 +504,7 @@ class ModuleRoleSmallAccessMetaDataTest {
 		org.skyve.metadata.module.Module module = org.mockito.Mockito.mock(org.skyve.metadata.module.Module.class);
 		org.mockito.Mockito.when(module.getDocumentRefs()).thenReturn(java.util.Collections.singletonMap("Contact", null));
 		org.mockito.Mockito.when(module.getName()).thenReturn("admin");
-		md.validate("test", "role", module);
+		assertDoesNotThrow(() -> md.validate("test", "role", module));
 	}
 
 	// ---- MapItemMetaData ----
@@ -545,6 +546,6 @@ class ModuleRoleSmallAccessMetaDataTest {
 		org.skyve.metadata.module.Module module = org.mockito.Mockito.mock(org.skyve.metadata.module.Module.class);
 		org.skyve.metadata.module.query.MetaDataQueryDefinition query = org.mockito.Mockito.mock(org.skyve.metadata.module.query.MetaDataQueryDefinition.class);
 		org.mockito.Mockito.when(module.getMetaDataQuery("myQuery")).thenReturn(query);
-		md.validate("test", "role", module);
+		assertDoesNotThrow(() -> md.validate("test", "role", module));
 	}
 }

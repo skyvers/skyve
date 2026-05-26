@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.mock;
@@ -22,9 +23,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.NoResultsException;
+import org.skyve.impl.domain.AbstractTransientBean;
 import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect.RDBMS;
 import org.skyve.metadata.SortDirection;
+import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
+import org.skyve.metadata.user.User;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.AutoClosingIterableAdpater;
 import org.skyve.persistence.DocumentFilter;
@@ -41,6 +46,18 @@ class AbstractDocumentQueryTest {
 
 		TestDocumentQuery(Document document, RDBMS rdbms) {
 			super(document, rdbms);
+		}
+
+		TestDocumentQuery(String moduleName, String documentName) {
+			super(moduleName, documentName, (RDBMS) null);
+		}
+
+		TestDocumentQuery(Document document, String filterClause, String groupClause, String orderClause) {
+			super(document, (RDBMS) null, null, filterClause, groupClause, orderClause);
+		}
+
+		TestDocumentQuery(Bean queryByExampleBean) {
+			super(queryByExampleBean, (RDBMS) null);
 		}
 
 		@Override
@@ -96,14 +113,25 @@ class AbstractDocumentQueryTest {
 
 	private AbstractPersistence persistence;
 	private Document document;
+	private User user;
+	private Customer customer;
+	private Module module;
 
 	@BeforeEach
 	void setUp() throws Exception {
 		persistence = mock(AbstractPersistence.class, withSettings().defaultAnswer(CALLS_REAL_METHODS));
 		document = mock(Document.class);
+		user = mock(User.class);
+		customer = mock(Customer.class);
+		module = mock(Module.class);
 		when(document.getOwningModuleName()).thenReturn("testModule");
 		when(document.getName()).thenReturn("TestDoc");
+		when(document.getAttributes()).thenReturn(Collections.emptyList());
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule(anyString())).thenReturn(module);
+		when(module.getDocument(any(), anyString())).thenReturn(document);
 		when(persistence.getDocumentEntityName(anyString(), anyString())).thenReturn("TestTable");
+		persistence.setUser(user);
 		persistence.setForThread();
 	}
 
@@ -614,5 +642,166 @@ class AbstractDocumentQueryTest {
 		q.getFilter().addNull("name");
 		String qs = q.toQueryString();
 		assertTrue(qs.contains("WHERE"), "Expected WHERE clause after filter: " + qs);
+	}
+
+	// ---- additional constructors ----
+
+	@Test
+	void constructorWithStringModuleAndDocumentNamesCreatesQuery() {
+		TestDocumentQuery q = new TestDocumentQuery("testModule", "TestDoc");
+		assertSame(document, q.getDrivingDocument());
+	}
+
+	@Test
+	void constructorWithDocumentAndClausesAppliesGroupClause() {
+		TestDocumentQuery q = new TestDocumentQuery(document, null, "name", null);
+		String qs = q.toQueryString();
+		assertTrue(qs.contains("GROUP BY"), "Expected GROUP BY in: " + qs);
+	}
+
+	@Test
+	void constructorWithQueryByExampleBeanCreatesQuery() {
+		Bean bean = mock(Bean.class);
+		when(bean.getBizModule()).thenReturn("testModule");
+		when(bean.getBizDocument()).thenReturn("TestDoc");
+		TestDocumentQuery q = new TestDocumentQuery(bean);
+		assertSame(document, q.getDrivingDocument());
+	}
+
+	// ---- toQueryString GROUP BY path ----
+
+	@Test
+	void toQueryStringWithGroupByContainsGroupByClause() {
+		TestDocumentQuery q = newQuery();
+		q.addBoundGrouping("name");
+		String qs = q.toQueryString();
+		assertTrue(qs.contains("GROUP BY"), "Expected GROUP BY in: " + qs);
+		assertTrue(qs.contains("bean.name"), "Expected binding in GROUP BY: " + qs);
+	}
+
+	// ---- result methods returning non-null ----
+
+	private static class OneResultQuery extends AbstractDocumentQuery {
+		private final Bean resultBean;
+
+		OneResultQuery(Document document, Bean resultBean) {
+			super(document, (RDBMS) null);
+			this.resultBean = resultBean;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public <T extends Bean> List<T> beanResults() {
+			return Collections.singletonList((T) resultBean);
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public <T extends Bean> AutoClosingIterable<T> beanIterable() {
+			return new AutoClosingIterableAdpater<>(Collections.singletonList((T) resultBean));
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public <T extends Bean> List<T> projectedResults() {
+			return Collections.singletonList((T) resultBean);
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public <T extends Bean> AutoClosingIterable<T> projectedIterable() {
+			return new AutoClosingIterableAdpater<>(Collections.singletonList((T) resultBean));
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public <T> List<T> scalarResults(Class<T> type) {
+			return Collections.singletonList((T) resultBean);
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public <T> AutoClosingIterable<T> scalarIterable(Class<T> type) {
+			return new AutoClosingIterableAdpater<>(Collections.singletonList((T) resultBean));
+		}
+
+		@Override
+		public List<Object[]> tupleResults() {
+			return Collections.singletonList(new Object[]{resultBean});
+		}
+
+		@Override
+		public AutoClosingIterable<Object[]> tupleIterable() {
+			return new AutoClosingIterableAdpater<>(Collections.singletonList(new Object[]{resultBean}));
+		}
+
+		@Override
+		public DocumentQuery setFirstResult(int first) { return this; }
+
+		@Override
+		public DocumentQuery setMaxResults(int max) { return this; }
+	}
+
+	private static class StubBean extends AbstractTransientBean {
+		private static final long serialVersionUID = 1L;
+		@Override public String getBizModule() { return "test"; }
+		@Override public String getBizDocument() { return "StubBean"; }
+		@Override public String getBizKey() { return "key"; }
+	}
+
+	@Test
+	void beanResultReturnsFirstBeanWhenListHasOneItem() {
+		Bean bean = new StubBean();
+		OneResultQuery q = new OneResultQuery(document, bean);
+		assertSame(bean, q.beanResult());
+	}
+
+	@Test
+	void retrieveBeanReturnsBeanWhenListHasOneItem() {
+		Bean bean = new StubBean();
+		OneResultQuery q = new OneResultQuery(document, bean);
+		assertSame(bean, q.retrieveBean());
+	}
+
+	@Test
+	void projectedResultReturnsFirstBeanWhenListHasOneItem() {
+		Bean bean = new StubBean();
+		OneResultQuery q = new OneResultQuery(document, bean);
+		assertSame(bean, q.projectedResult());
+	}
+
+	@Test
+	void retrieveProjectedReturnsBeanWhenListHasOneItem() {
+		Bean bean = new StubBean();
+		OneResultQuery q = new OneResultQuery(document, bean);
+		assertSame(bean, q.retrieveProjected());
+	}
+
+	@Test
+	void scalarResultReturnsFirstItemWhenListHasOneItem() {
+		Bean bean = new StubBean();
+		OneResultQuery q = new OneResultQuery(document, bean);
+		assertSame(bean, q.scalarResult(Bean.class));
+	}
+
+	@Test
+	void retrieveScalarReturnsItemWhenListHasOneItem() {
+		Bean bean = new StubBean();
+		OneResultQuery q = new OneResultQuery(document, bean);
+		assertSame(bean, q.retrieveScalar(Bean.class));
+	}
+
+	@Test
+	void tupleResultReturnsFirstTupleWhenListHasOneItem() {
+		Bean bean = new StubBean();
+		OneResultQuery q = new OneResultQuery(document, bean);
+		assertNotNull(q.tupleResult());
+	}
+
+	@Test
+	void retrieveTupleReturnsTupleWhenListHasOneItem() {
+		Bean bean = new StubBean();
+		OneResultQuery q = new OneResultQuery(document, bean);
+		assertNotNull(q.retrieveTuple());
 	}
 }

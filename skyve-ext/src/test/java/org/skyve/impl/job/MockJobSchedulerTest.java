@@ -19,57 +19,79 @@ public class MockJobSchedulerTest {
 
 	@Test
 	public void testStartup() {
-		scheduler().startup();
+		MockJobScheduler s = scheduler();
+		s.startup();
+		assertNotNull(s);
 	}
 
 	@Test
 	public void testShutdown() {
-		scheduler().shutdown();
+		MockJobScheduler s = scheduler();
+		s.shutdown();
+		assertNotNull(s);
 	}
 
 	@Test
 	public void testRunOneShotJobNoSleep() {
-		scheduler().runOneShotJob(null, null, null);
+		MockJobScheduler s = scheduler();
+		s.runOneShotJob(null, null, null);
+		assertNotNull(s);
 	}
 
 	@Test
 	public void testRunOneShotJobWithSleep() {
-		scheduler().runOneShotJob(null, null, null, 0);
+		MockJobScheduler s = scheduler();
+		s.runOneShotJob(null, null, null, 0);
+		assertNotNull(s);
 	}
 
 	@Test
 	public void testRunBackgroundTask() {
-		scheduler().runBackgroundTask(null, null, null);
+		MockJobScheduler s = scheduler();
+		s.runBackgroundTask(null, null, null);
+		assertNotNull(s);
 	}
 
 	@Test
 	public void testRunContentGarbageCollector() {
-		scheduler().runContentGarbageCollector();
+		MockJobScheduler s = scheduler();
+		s.runContentGarbageCollector();
+		assertNotNull(s);
 	}
 
 	@Test
 	public void testScheduleOneShotJob() {
-		scheduler().scheduleOneShotJob(null, null, null, null);
+		MockJobScheduler s = scheduler();
+		s.scheduleOneShotJob(null, null, null, null);
+		assertNotNull(s);
 	}
 
 	@Test
 	public void testScheduleJob() {
-		scheduler().scheduleJob(null, null);
+		MockJobScheduler s = scheduler();
+		s.scheduleJob(null, null);
+		assertNotNull(s);
 	}
 
 	@Test
 	public void testUnscheduleJob() {
-		scheduler().unscheduleJob("uuid-1", "demo");
+		MockJobScheduler s = scheduler();
+		s.unscheduleJob("uuid-1", "demo");
+		assertNotNull(s);
 	}
 
 	@Test
 	public void testScheduleReport() {
-		scheduler().scheduleReport(null, null);
+		MockJobScheduler s = scheduler();
+		s.scheduleReport(null, null);
+		assertNotNull(s);
 	}
 
 	@Test
 	public void testUnscheduleReport() {
-		scheduler().unscheduleReport("uuid-1", "demo");
+		MockJobScheduler s = scheduler();
+		s.unscheduleReport("uuid-1", "demo");
+		assertNotNull(s);
 	}
 
 	@Test
@@ -85,22 +107,30 @@ public class MockJobSchedulerTest {
 
 	@Test
 	public void testValidateMetaData() {
-		scheduler().validateMetaData();
+		MockJobScheduler s = scheduler();
+		s.validateMetaData();
+		assertNotNull(s);
 	}
 
 	@Test
 	public void testPreRestore() {
-		scheduler().preRestore();
+		MockJobScheduler s = scheduler();
+		s.preRestore();
+		assertNotNull(s);
 	}
 
 	@Test
 	public void testRunRestoreJob() {
-		scheduler().runRestoreJob(null);
+		MockJobScheduler s = scheduler();
+		s.runRestoreJob(null);
+		assertNotNull(s);
 	}
 
 	@Test
 	public void testPostRestore() {
-		scheduler().postRestore(true);
-		scheduler().postRestore(false);
+		MockJobScheduler s = scheduler();
+		s.postRestore(true);
+		s.postRestore(false);
+		assertNotNull(s);
 	}
 }

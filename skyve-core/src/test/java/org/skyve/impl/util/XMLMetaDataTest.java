@@ -1234,4 +1234,54 @@ class XMLMetaDataTest {
 				() -> XMLMetaData.unmarshalSAILString("not valid xml"));
 	}
 
+	// ---- File unmarshal exception-path tests (covers catch blocks) ----
+
+	@Test
+	void unmarshalRouterFileThrowsMetaDataExceptionForNonexistentFile() {
+		assertThrows(MetaDataException.class,
+				() -> XMLMetaData.unmarshalRouterFile("/nonexistent/no_such_file_12345.xml"));
+	}
+
+	@Test
+	void unmarshalCustomerFileThrowsMetaDataExceptionForNonexistentFile() {
+		assertThrows(MetaDataException.class,
+				() -> XMLMetaData.unmarshalCustomerFile("/nonexistent/no_such_file_12345.xml"));
+	}
+
+	@Test
+	void unmarshalModuleFileThrowsMetaDataExceptionForNonexistentFile() {
+		assertThrows(MetaDataException.class,
+				() -> XMLMetaData.unmarshalModuleFile("/nonexistent/no_such_file_12345.xml"));
+	}
+
+	@Test
+	void unmarshalDocumentFileThrowsMetaDataExceptionForNonexistentFile() {
+		assertThrows(MetaDataException.class,
+				() -> XMLMetaData.unmarshalDocumentFile("/nonexistent/no_such_file_12345.xml"));
+	}
+
+	@Test
+	void unmarshalBizletFileThrowsMetaDataExceptionForNonexistentFile() {
+		assertThrows(MetaDataException.class,
+				() -> XMLMetaData.unmarshalBizletFile("/nonexistent/no_such_file_12345.xml"));
+	}
+
+	@Test
+	void unmarshalActionFileThrowsMetaDataExceptionForNonexistentFile() {
+		assertThrows(MetaDataException.class,
+				() -> XMLMetaData.unmarshalActionFile("/nonexistent/no_such_file_12345.xml"));
+	}
+
+	@Test
+	void unmarshalViewFileThrowsMetaDataExceptionForNonexistentFile() {
+		assertThrows(MetaDataException.class,
+				() -> XMLMetaData.unmarshalViewFile("/nonexistent/no_such_file_12345.xml"));
+	}
+
+	@Test
+	void unmarshalSAILFileThrowsMetaDataExceptionForNonexistentFile() {
+		assertThrows(MetaDataException.class,
+				() -> XMLMetaData.unmarshalSAILFile("/nonexistent/no_such_file_12345.xml"));
+	}
+
 }

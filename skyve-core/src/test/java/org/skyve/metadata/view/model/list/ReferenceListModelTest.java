@@ -153,6 +153,7 @@ class ReferenceListModelTest {
 		StringConstructorModel model = new StringConstructorModel("myModule", "MyDoc", "items");
 		// Should not throw - postConstruct resolves module/document via customer
 		model.postConstruct(customer, false);
+		assertNotNull(model.getDrivingDocument(), "postConstruct should resolve the driving document");
 	}
 
 	@Test
@@ -163,5 +164,6 @@ class ReferenceListModelTest {
 		TestReferenceListModel model = new TestReferenceListModel(mockModule, mockDocument, "items");
 		// Should not throw - module/document already set
 		model.postConstruct(customer, false);
+		assertNotNull(model.getDrivingDocument(), "postConstruct should retain the driving document");
 	}
 }

@@ -1,12 +1,11 @@
 package org.skyve.impl.metadata.repository.document;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -821,7 +820,7 @@ class DocumentMetaDataTest {
 		dec.setDisplayName("My Dec2");
 		DecimalValidator validator = new DecimalValidator();
 		validator.setXmlMin("1.0");
-		validator.setPrecision(3);
+		validator.setPrecision(java.lang.Integer.valueOf(3));
 		dec.setValidator(validator);
 		d.getAttributes().add(dec);
 		assertThrows(MetaDataException.class, () -> d.convert("test"));
@@ -847,7 +846,7 @@ class DocumentMetaDataTest {
 		dec.setDisplayName("My Dec5");
 		DecimalValidator validator = new DecimalValidator();
 		validator.setXmlMin("1.0");
-		validator.setPrecision(6);
+		validator.setPrecision(java.lang.Integer.valueOf(6));
 		dec.setValidator(validator);
 		d.getAttributes().add(dec);
 		assertThrows(MetaDataException.class, () -> d.convert("test"));
@@ -873,7 +872,7 @@ class DocumentMetaDataTest {
 		dec.setDisplayName("My Dec10");
 		DecimalValidator validator = new DecimalValidator();
 		validator.setXmlMin("1.0");
-		validator.setPrecision(11);
+		validator.setPrecision(java.lang.Integer.valueOf(11));
 		dec.setValidator(validator);
 		d.getAttributes().add(dec);
 		assertThrows(MetaDataException.class, () -> d.convert("test"));
@@ -1064,5 +1063,220 @@ class DocumentMetaDataTest {
 		// attributeRef is null with documentRef set — must throw
 		d.getAttributes().add(enumAttr);
 		assertThrows(MetaDataException.class, () -> d.convert("test"));
+	}
+
+	// -------------------------------------------------------------------------
+	// Happy-path convert() tests
+	// -------------------------------------------------------------------------
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertSucceedsWithMinimalTransientDocument() {
+		DocumentMetaData d = minimalTransientDoc();
+		org.skyve.metadata.model.document.Document result = d.convert("test.TestDoc");
+		assertNotNull(result);
+		assertEquals("TestDoc", result.getName());
+		assertEquals("Test Doc", result.getSingularAlias());
+		assertEquals("Test Docs", result.getPluralAlias());
+		// audited defaults to true
+		assertTrue(result.isAudited());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertSetsDefaultIconStyleClassWhenAllIconFieldsNull() {
+		DocumentMetaData d = minimalTransientDoc();
+		// all icon fields are null by default → Icons.FONT_DOCUMENT is assigned
+		org.skyve.metadata.model.document.Document result = d.convert("test.TestDoc");
+		assertNotNull(result.getIconStyleClass());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertSetsIcon16FromIcon32WhenIcon16IsNull() {
+		DocumentMetaData d = minimalTransientDoc();
+		d.setIcon32x32RelativeFilePath("icons/doc32.png");
+		// icon16 is null → it should copy icon32 value
+		org.skyve.metadata.model.document.Document result = d.convert("test.TestDoc");
+		assertEquals("icons/doc32.png", result.getIcon16x16RelativeFileName());
+		assertEquals("icons/doc32.png", result.getIcon32x32RelativeFileName());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertSetsIcon32FromIcon16WhenIcon32IsNull() {
+		DocumentMetaData d = minimalTransientDoc();
+		d.setIcon16x16RelativeFilePath("icons/doc16.png");
+		// icon32 is null → it should copy icon16 value
+		org.skyve.metadata.model.document.Document result = d.convert("test.TestDoc");
+		assertEquals("icons/doc16.png", result.getIcon16x16RelativeFileName());
+		assertEquals("icons/doc16.png", result.getIcon32x32RelativeFileName());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertPreservesExplicitIconValues() {
+		DocumentMetaData d = minimalTransientDoc();
+		d.setIcon16x16RelativeFilePath("icons/doc16.png");
+		d.setIcon32x32RelativeFilePath("icons/doc32.png");
+		d.setIconStyleClass("fa fa-file");
+		org.skyve.metadata.model.document.Document result = d.convert("test.TestDoc");
+		assertEquals("icons/doc16.png", result.getIcon16x16RelativeFileName());
+		assertEquals("icons/doc32.png", result.getIcon32x32RelativeFileName());
+		assertEquals("fa fa-file", result.getIconStyleClass());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertAuditedFalseWhenExplicitlySetFalse() {
+		DocumentMetaData d = minimalTransientDoc();
+		d.setAudited(Boolean.FALSE);
+		org.skyve.metadata.model.document.Document result = d.convert("test.TestDoc");
+		assertFalse(result.isAudited());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertSetsDescription() {
+		DocumentMetaData d = minimalTransientDoc();
+		d.setDescription("A useful document");
+		org.skyve.metadata.model.document.Document result = d.convert("test.TestDoc");
+		assertEquals("A useful document", result.getDescription());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertSetsParentDocumentName() {
+		DocumentMetaData d = minimalTransientDoc();
+		ParentDocument parent = new ParentDocument();
+		parent.setParentDocumentName("ParentDoc");
+		d.setParentDocument(parent);
+		org.skyve.metadata.model.document.Document result = d.convert("test.TestDoc");
+		assertEquals("ParentDoc", result.getParentDocumentName());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertTransientDocumentUsesBizKeyToStringWhenBizKeyNull() {
+		// transient doc with no bizKey: default bizKey code should be return toString()
+		DocumentMetaData d = minimalTransientDoc();
+		org.skyve.metadata.model.document.Document result = d.convert("test.TestDoc");
+		assertNotNull(result);
+		// just verify it doesn't throw and the document is valid
+		assertNotNull(result.getName());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertPersistentDocumentWithBizKeyExpression() {
+		DocumentMetaData d = minimalTransientDoc();
+		org.skyve.metadata.model.Persistent persistent = new org.skyve.metadata.model.Persistent();
+		persistent.setName("TST_TEST_DOC");
+		d.setPersistent(persistent);
+		BizKey bk = new BizKey();
+		bk.setExpression("{name}");
+		d.setBizKey(bk);
+		org.skyve.metadata.model.document.Document result = d.convert("test.TestDoc");
+		assertNotNull(result);
+		assertEquals("TestDoc", result.getName());
+		// bizKey expression generates code containing the expression
+		assertNotNull(result.getBizKeyExpression());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertPersistentDocumentWithBizKeyCode() {
+		DocumentMetaData d = minimalTransientDoc();
+		org.skyve.metadata.model.Persistent persistent = new org.skyve.metadata.model.Persistent();
+		persistent.setName("TST_TEST_DOC");
+		d.setPersistent(persistent);
+		BizKey bk = new BizKey();
+		bk.setCode("return \"static key\";");
+		d.setBizKey(bk);
+		org.skyve.impl.metadata.model.document.DocumentImpl result =
+				(org.skyve.impl.metadata.model.document.DocumentImpl) d.convert("test.TestDoc");
+		assertNotNull(result);
+		assertEquals("return \"static key\";", result.getBizKeyMethodCode());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertAddsInterfaceToDocument() {
+		DocumentMetaData d = minimalTransientDoc();
+		InterfaceImpl iface = new InterfaceImpl();
+		iface.setInterfaceName("com.example.MyInterface");
+		d.getImplements().add(iface);
+		org.skyve.metadata.model.document.Document result = d.convert("test.TestDoc");
+		assertNotNull(result);
+		assertFalse(result.getInterfaces().isEmpty());
+		assertEquals("com.example.MyInterface", result.getInterfaces().get(0).getInterfaceName());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertWithValidTextAttributeSucceeds() {
+		DocumentMetaData d = minimalTransientDoc();
+		Text textAttr = new Text();
+		textAttr.setName("myField");
+		textAttr.setDisplayName("My Field");
+		textAttr.setLength(50);
+		d.getAttributes().add(textAttr);
+		org.skyve.metadata.model.document.Document result = d.convert("test.TestDoc");
+		assertNotNull(result);
+		assertNotNull(result.getAttribute("myField"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertWithDateAttributeSucceeds() {
+		DocumentMetaData d = minimalTransientDoc();
+		Date dateAttr = new Date();
+		dateAttr.setName("myDate");
+		dateAttr.setDisplayName("My Date");
+		d.getAttributes().add(dateAttr);
+		org.skyve.metadata.model.document.Document result = d.convert("test.TestDoc");
+		assertNotNull(result);
+		assertNotNull(result.getAttribute("myDate"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertWithIntegerAttributeSucceeds() {
+		DocumentMetaData d = minimalTransientDoc();
+		Integer intAttr = new Integer();
+		intAttr.setName("myInt");
+		intAttr.setDisplayName("My Integer");
+		d.getAttributes().add(intAttr);
+		org.skyve.metadata.model.document.Document result = d.convert("test.TestDoc");
+		assertNotNull(result);
+		assertNotNull(result.getAttribute("myInt"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertWithDecimalAttributeSucceeds() {
+		DocumentMetaData d = minimalTransientDoc();
+		Decimal2 dec2 = new Decimal2();
+		dec2.setName("myDecimal");
+		dec2.setDisplayName("My Decimal");
+		d.getAttributes().add(dec2);
+		org.skyve.metadata.model.document.Document result = d.convert("test.TestDoc");
+		assertNotNull(result);
+		assertNotNull(result.getAttribute("myDecimal"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertWithAssociationAttributeSucceeds() {
+		DocumentMetaData d = minimalTransientDoc();
+		AssociationImpl assoc = new AssociationImpl();
+		assoc.setName("myAssoc");
+		assoc.setDisplayName("My Association");
+		assoc.setDocumentName("OtherDoc");
+		assoc.setType(AssociationType.aggregation);
+		d.getAttributes().add(assoc);
+		org.skyve.metadata.model.document.Document result = d.convert("test.TestDoc");
+		assertNotNull(result);
+		assertNotNull(result.getAttribute("myAssoc"));
 	}
 }

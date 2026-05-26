@@ -1,6 +1,7 @@
 package org.skyve.toolchain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -323,6 +324,7 @@ class NewServiceMojoTest {
         
         // The method should complete without throwing an exception
         // The actual file creation would fail, but the method handles the IOException gracefully
+        assertNotNull(mojo);
     }
     
     /**

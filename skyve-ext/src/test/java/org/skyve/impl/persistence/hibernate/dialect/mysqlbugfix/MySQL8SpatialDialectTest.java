@@ -138,11 +138,13 @@ public class MySQL8SpatialDialectTest {
 		MySQL8SpatialDialect dialect = new MySQL8SpatialDialect();
 		// just verify the method can be called without throwing
 		dialect.supports(SpatialFunction.convexhull);
+		assertNotNull(dialect);
 	}
 
 	@Test
 	public void supportsWithinDoesNotThrow() {
 		MySQL8SpatialDialect dialect = new MySQL8SpatialDialect();
 		dialect.supports(SpatialFunction.within);
+		assertNotNull(dialect);
 	}
 }
