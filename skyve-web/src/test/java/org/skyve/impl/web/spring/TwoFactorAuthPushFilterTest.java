@@ -582,7 +582,7 @@ class TwoFactorAuthPushFilterTest {
 		}
 
 		@Override
-		protected boolean supportsPushConfiguration(TwoFactorAuthCustomerConfiguration config) {
+		protected boolean supportsPushConfiguration(org.skyve.impl.util.TwoFactorAuthCustomerConfiguration config) {
 			return (config != null) && config.isTfaEmail();
 		}
 
@@ -624,7 +624,6 @@ class TwoFactorAuthPushFilterTest {
 			return super.tfaCodeExpired(customer, twoFactorCode);
 		}
 
-		@Override
 		protected long currentTimeMillis() {
 			if (currentTimeMillisOverride != Long.MIN_VALUE) {
 				return currentTimeMillisOverride;

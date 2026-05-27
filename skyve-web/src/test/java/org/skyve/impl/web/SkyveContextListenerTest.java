@@ -6,6 +6,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
@@ -13,6 +14,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -865,6 +867,140 @@ public class SkyveContextListenerTest {
 			UtilImpl.ADDINS_DIRECTORY = originalAddinsDirectory;
 			deleteTree(tempDir);
 		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testMergeOverridesCompatibleNestedValues() throws Exception {
+		Map<String, Object> originalNested = new HashMap<>();
+		originalNested.put("enabled", Boolean.TRUE);
+		originalNested.put("max", Integer.valueOf(5));
+
+		Map<String, Object> original = new HashMap<>();
+		original.put("name", "default");
+		original.put("nested", originalNested);
+
+		Map<String, Object> overrideNested = new HashMap<>();
+		overrideNested.put("enabled", Boolean.FALSE);
+		overrideNested.put("max", Integer.valueOf(10));
+
+		Map<String, Object> overrides = new HashMap<>();
+		overrides.put("name", "override");
+		overrides.put("nested", overrideNested);
+
+		invokePrivateStatic("merge", new Class<?>[] {Map.class, Map.class}, overrides, original);
+
+		assertEquals("override", original.get("name"));
+		@SuppressWarnings("unchecked")
+		Map<String, Object> mergedNested = (Map<String, Object>) original.get("nested");
+		assertEquals(Boolean.FALSE, mergedNested.get("enabled"));
+		assertEquals(Integer.valueOf(10), mergedNested.get("max"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testMergeRejectsIncompatibleOverrideType() {
+		Map<String, Object> original = new HashMap<>();
+		original.put("nested", Map.of("value", "ok"));
+
+		Map<String, Object> overrides = new HashMap<>();
+		overrides.put("nested", "not-a-map");
+
+		InvocationTargetException thrown = assertThrows(InvocationTargetException.class,
+				() -> invokePrivateStatic("merge", new Class<?>[] {Map.class, Map.class}, overrides, original));
+
+		assertThat(thrown.getCause(), instanceOf(IllegalStateException.class));
+		assertTrue(thrown.getCause().getMessage().contains("Cannot apply override"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testGetHelpersReturnTypedValues() throws Exception {
+		Map<String, Object> nested = new HashMap<>();
+		nested.put("sub", "value");
+
+		Map<String, Object> properties = new HashMap<>();
+		properties.put("flag", Boolean.TRUE);
+		properties.put("number", Integer.valueOf(7));
+		properties.put("name", "demo");
+		properties.put("object", nested);
+		properties.put("items", List.of("a", "b"));
+
+		Boolean flag = (Boolean) invokePrivateStatic("getBoolean",
+				new Class<?>[] {String.class, String.class, Map.class},
+				"security",
+				"flag",
+				properties);
+		Integer number = (Integer) invokePrivateStatic("getInt",
+				new Class<?>[] {String.class, String.class, Map.class},
+				"limits",
+				"number",
+				properties);
+		String name = (String) invokePrivateStatic("getString",
+				new Class<?>[] {String.class, String.class, Map.class, boolean.class},
+				"environment",
+				"name",
+				properties,
+				Boolean.TRUE);
+		Number optionalMissingNumber = (Number) invokePrivateStatic("getNumber",
+				new Class<?>[] {String.class, String.class, Map.class, boolean.class},
+				null,
+				"missing",
+				properties,
+				Boolean.FALSE);
+		@SuppressWarnings("unchecked")
+		Map<String, Object> object = (Map<String, Object>) invokePrivateStatic("getObject",
+				new Class<?>[] {String.class, String.class, Map.class, boolean.class},
+				"api",
+				"object",
+				properties,
+				Boolean.TRUE);
+		@SuppressWarnings("unchecked")
+		List<String> items = (List<String>) invokePrivateStatic("getList",
+				new Class<?>[] {String.class, String.class, Map.class, boolean.class},
+				"api",
+				"items",
+				properties,
+				Boolean.TRUE);
+
+		assertTrue(flag.booleanValue());
+		assertEquals(Integer.valueOf(7), number);
+		assertEquals("demo", name);
+		assertNull(optionalMissingNumber);
+		assertEquals("value", object.get("sub"));
+		assertEquals(List.of("a", "b"), items);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testGetThrowsWhenRequiredValueMissing() {
+		Map<String, Object> properties = new HashMap<>();
+
+		InvocationTargetException withPrefix = assertThrows(InvocationTargetException.class,
+				() -> invokePrivateStatic("get",
+						new Class<?>[] {String.class, String.class, Map.class, boolean.class},
+						"security",
+						"missing",
+						properties,
+						Boolean.TRUE));
+		assertThat(withPrefix.getCause(), instanceOf(IllegalStateException.class));
+		assertEquals("Property security.missing does not exist in the JSON configuration.", withPrefix.getCause().getMessage());
+
+		InvocationTargetException withoutPrefix = assertThrows(InvocationTargetException.class,
+				() -> invokePrivateStatic("get",
+						new Class<?>[] {String.class, String.class, Map.class, boolean.class},
+						null,
+						"missing",
+						properties,
+						Boolean.TRUE));
+		assertThat(withoutPrefix.getCause(), instanceOf(IllegalStateException.class));
+		assertEquals("Property missing does not exist in the JSON configuration.", withoutPrefix.getCause().getMessage());
+	}
+
+	private static Object invokePrivateStatic(String methodName, Class<?>[] parameterTypes, Object... args) throws Exception {
+		Method method = SkyveContextListener.class.getDeclaredMethod(methodName, parameterTypes);
+		method.setAccessible(true);
+		return method.invoke(null, args);
 	}
 
 	private static Path writeConfigurationWithReplacedApi(Path tempDir, String oldApiStanza, String newApiStanza) throws Exception {
