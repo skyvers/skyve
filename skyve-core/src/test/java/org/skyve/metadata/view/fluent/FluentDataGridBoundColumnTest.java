@@ -382,8 +382,11 @@ class FluentDataGridBoundColumnTest {
 	void fromWithUnknownInputWidgetTypeThrowsIllegalState() {
 		DataGridBoundColumn col = new DataGridBoundColumn();
 		WidgetReference ref = new WidgetReference();
-		ref.setWidget(new InputWidget() {});
+		ref.setWidget(new InputWidget() {
+			// Deliberately unknown InputWidget subtype for exception-path coverage.
+		});
 		col.setInputWidget(ref);
-		assertThrows(IllegalStateException.class, () -> new FluentDataGridBoundColumn().from(col));
+		FluentDataGridBoundColumn fluentDataGridBoundColumn = new FluentDataGridBoundColumn();
+		assertThrows(IllegalStateException.class, () -> fluentDataGridBoundColumn.from(col));
 	}
 }

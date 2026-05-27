@@ -36,7 +36,7 @@ import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Timestamp;
 import java.math.BigDecimal;
 
-@SuppressWarnings("static-method")
+@SuppressWarnings({"static-method", "boxing", "java:S5778"})
 class BinderTest {
 	public abstract static class TestBeanBase extends AbstractBean {
 		private static final long serialVersionUID = 1L;

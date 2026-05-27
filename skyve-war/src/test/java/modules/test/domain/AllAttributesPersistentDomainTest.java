@@ -15,39 +15,38 @@ import org.skyve.domain.types.Decimal5;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
 
-import modules.test.domain.AllAttributesEmbedded;
 import modules.test.domain.AllAttributesPersistent.Enum3;
 import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
-public class AllAttributesPersistentDomainTest extends AbstractH2Test {
+class AllAttributesPersistentDomainTest extends AbstractH2Test {
 
 	@Test
-	void bizModuleIsTest() throws Exception {
+	void bizModuleIsTest() {
 		AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
 		assertEquals("test", bean.getBizModule());
 	}
 
 	@Test
-	void bizDocumentIsAllAttributesPersistent() throws Exception {
+	void bizDocumentIsAllAttributesPersistent() {
 		AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
 		assertEquals("AllAttributesPersistent", bean.getBizDocument());
 	}
 
 	@Test
-	void getBizKeyNotNull() throws Exception {
+	void getBizKeyNotNull() {
 		AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
 		assertNotNull(bean.getBizKey());
 	}
 
 	@Test
-	void enum3DefaultIsOne() throws Exception {
+	void enum3DefaultIsOne() {
 		AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
 		assertEquals(Enum3.one, bean.getEnum3());
 	}
 
 	@Test
-	void enum3SetAndGet() throws Exception {
+	void enum3SetAndGet() {
 		AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
 		bean.setEnum3(Enum3.two);
 		assertEquals(Enum3.two, bean.getEnum3());
@@ -102,63 +101,63 @@ public class AllAttributesPersistentDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void colourSetAndGet() throws Exception {
+	void colourSetAndGet() {
 		AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
 		bean.setColour("#FF0000");
 		assertEquals("#FF0000", bean.getColour());
 	}
 
 	@Test
-	void idSetAndGet() throws Exception {
+	void idSetAndGet() {
 		AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
 		bean.setId("testId123");
 		assertEquals("testId123", bean.getId());
 	}
 
 	@Test
-	void markupSetAndGet() throws Exception {
+	void markupSetAndGet() {
 		AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
 		bean.setMarkup("<b>bold</b>");
 		assertEquals("<b>bold</b>", bean.getMarkup());
 	}
 
 	@Test
-	void memoSetAndGet() throws Exception {
+	void memoSetAndGet() {
 		AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
 		bean.setMemo("some memo text");
 		assertEquals("some memo text", bean.getMemo());
 	}
 
 	@Test
-	void textSetAndGet() throws Exception {
+	void textSetAndGet() {
 		AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
 		bean.setText("hello world");
 		assertEquals("hello world", bean.getText());
 	}
 
 	@Test
-	void normalIntegerSetAndGet() throws Exception {
+	void normalIntegerSetAndGet() {
 		AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
 		bean.setNormalInteger(Integer.valueOf(42));
 		assertEquals(Integer.valueOf(42), bean.getNormalInteger());
 	}
 
 	@Test
-	void longIntegerSetAndGet() throws Exception {
+	void longIntegerSetAndGet() {
 		AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
 		bean.setLongInteger(Long.valueOf(123456789L));
 		assertEquals(Long.valueOf(123456789L), bean.getLongInteger());
 	}
 
 	@Test
-	void booleanFlagSetAndGet() throws Exception {
+	void booleanFlagSetAndGet() {
 		AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
 		bean.setBooleanFlag(Boolean.TRUE);
 		assertEquals(Boolean.TRUE, bean.getBooleanFlag());
 	}
 
 	@Test
-	void decimal10SetAndGet() throws Exception {
+	void decimal10SetAndGet() {
 		AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
 		Decimal10 val = new Decimal10("1234567890.1234567890");
 		bean.setDecimal10(val);
@@ -166,7 +165,7 @@ public class AllAttributesPersistentDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void decimal2SetAndGet() throws Exception {
+	void decimal2SetAndGet() {
 		AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
 		Decimal2 val = new Decimal2("12.34");
 		bean.setDecimal2(val);
@@ -174,7 +173,7 @@ public class AllAttributesPersistentDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void decimal5SetAndGet() throws Exception {
+	void decimal5SetAndGet() {
 		AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
 		Decimal5 val = new Decimal5("123.45678");
 		bean.setDecimal5(val);
@@ -182,7 +181,7 @@ public class AllAttributesPersistentDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void dateSetAndGet() throws Exception {
+	void dateSetAndGet() {
 		AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
 		DateOnly date = new DateOnly();
 		bean.setDate(date);
@@ -190,7 +189,7 @@ public class AllAttributesPersistentDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void dateTimeSetAndGet() throws Exception {
+	void dateTimeSetAndGet() {
 		AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
 		DateTime dateTime = new DateTime();
 		bean.setDateTime(dateTime);
@@ -198,7 +197,7 @@ public class AllAttributesPersistentDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void timeSetAndGet() throws Exception {
+	void timeSetAndGet() {
 		AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
 		TimeOnly time = new TimeOnly();
 		bean.setTime(time);
@@ -206,7 +205,7 @@ public class AllAttributesPersistentDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void timestampSetAndGet() throws Exception {
+	void timestampSetAndGet() {
 		AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
 		Timestamp ts = new Timestamp();
 		bean.setTimestamp(ts);
@@ -214,19 +213,19 @@ public class AllAttributesPersistentDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void isConditionAlwaysTrue() throws Exception {
+	void isConditionAlwaysTrue() {
 		AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
 		assertTrue(bean.isCondition());
 	}
 
 	@Test
-	void isNotConditionAlwaysFalse() throws Exception {
+	void isNotConditionAlwaysFalse() {
 		AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
 		assertFalse(bean.isNotCondition());
 	}
 
         @Test
-        void aggregatedAssociationSetAndGet() throws Exception {
+        void aggregatedAssociationSetAndGet() {
                 AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
                 assertNull(bean.getAggregatedAssociation());
                 AllAttributesPersistent assoc = new AllAttributesPersistent();
@@ -235,7 +234,7 @@ public class AllAttributesPersistentDomainTest extends AbstractH2Test {
         }
 
         @Test
-        void nullAggregatedAssociationClearsField() throws Exception {
+        void nullAggregatedAssociationClearsField() {
                 AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
                 AllAttributesPersistent assoc = new AllAttributesPersistent();
                 bean.setAggregatedAssociation(assoc);
@@ -244,7 +243,7 @@ public class AllAttributesPersistentDomainTest extends AbstractH2Test {
         }
 
         @Test
-        void composedAssociationSetAndGet() throws Exception {
+        void composedAssociationSetAndGet() {
                 AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
                 assertNull(bean.getComposedAssociation());
                 AllAttributesPersistent assoc = new AllAttributesPersistent();
@@ -253,7 +252,7 @@ public class AllAttributesPersistentDomainTest extends AbstractH2Test {
         }
 
         @Test
-        void embeddedAssociationSetAndGet() throws Exception {
+        void embeddedAssociationSetAndGet() {
                 AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
                 assertNull(bean.getEmbeddedAssociation());
                 AllAttributesEmbedded embedded = new AllAttributesEmbedded();
@@ -262,7 +261,7 @@ public class AllAttributesPersistentDomainTest extends AbstractH2Test {
         }
 
         @Test
-        void geometrySetAndGet() throws Exception {
+        void geometrySetAndGet() {
                 AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
                 var geom = new org.locationtech.jts.geom.GeometryFactory()
                                 .createPoint(new org.locationtech.jts.geom.Coordinate(138.6, -34.9));
@@ -271,7 +270,7 @@ public class AllAttributesPersistentDomainTest extends AbstractH2Test {
         }
 
         @Test
-        void aggregatedCollectionAddAndGet() throws Exception {
+        void aggregatedCollectionAddAndGet() {
                 AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
                 assertTrue(bean.getAggregatedCollection().isEmpty());
                 AllAttributesPersistent element = new AllAttributesPersistent();
@@ -280,7 +279,7 @@ public class AllAttributesPersistentDomainTest extends AbstractH2Test {
         }
 
         @Test
-        void composedCollectionAddAndGet() throws Exception {
+        void composedCollectionAddAndGet() {
                 AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
                 assertTrue(bean.getComposedCollection().isEmpty());
                 AllAttributesPersistent element = new AllAttributesPersistent();
@@ -289,7 +288,7 @@ public class AllAttributesPersistentDomainTest extends AbstractH2Test {
         }
 
         @Test
-        void inverseAggregatedAssociationAddAndGet() throws Exception {
+        void inverseAggregatedAssociationAddAndGet() {
                 AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
                 assertTrue(bean.getInverseAggregatedAssociation().isEmpty());
                 AllAttributesPersistent element = new AllAttributesPersistent();
@@ -299,7 +298,7 @@ public class AllAttributesPersistentDomainTest extends AbstractH2Test {
         }
 
         @Test
-        void inverseAggregatedAssociationRemove() throws Exception {
+        void inverseAggregatedAssociationRemove() {
                 AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
                 AllAttributesPersistent element = new AllAttributesPersistent();
                 bean.addInverseAggregatedAssociationElement(element);
@@ -308,7 +307,7 @@ public class AllAttributesPersistentDomainTest extends AbstractH2Test {
         }
 
         @Test
-        void inverseAggregatedAssociationAddAtIndexAndRemoveByIndex() throws Exception {
+        void inverseAggregatedAssociationAddAtIndexAndRemoveByIndex() {
                 AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
                 AllAttributesPersistent element = new AllAttributesPersistent();
                 bean.addInverseAggregatedAssociationElement(0, element);
@@ -317,7 +316,7 @@ public class AllAttributesPersistentDomainTest extends AbstractH2Test {
         }
 
         @Test
-        void aggregatedCollectionRemoveAndIndex() throws Exception {
+        void aggregatedCollectionRemoveAndIndex() {
                 AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
                 AllAttributesPersistent element = new AllAttributesPersistent();
                 bean.addAggregatedCollectionElement(element);
@@ -326,7 +325,7 @@ public class AllAttributesPersistentDomainTest extends AbstractH2Test {
         }
 
         @Test
-        void aggregatedCollectionAddAtIndexAndRemoveByIndex() throws Exception {
+        void aggregatedCollectionAddAtIndexAndRemoveByIndex() {
                 AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
                 AllAttributesPersistent element = new AllAttributesPersistent();
                 bean.addAggregatedCollectionElement(0, element);
@@ -336,7 +335,7 @@ public class AllAttributesPersistentDomainTest extends AbstractH2Test {
         }
 
         @Test
-        void aggregatedCollectionSetById() throws Exception {
+        void aggregatedCollectionSetById() {
                 AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
                 AllAttributesPersistent element = new AllAttributesPersistent();
                 bean.addAggregatedCollectionElement(element);
@@ -348,7 +347,7 @@ public class AllAttributesPersistentDomainTest extends AbstractH2Test {
         }
 
         @Test
-        void composedCollectionGetById() throws Exception {
+        void composedCollectionGetById() {
                 AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
                 AllAttributesPersistent element = new AllAttributesPersistent();
                 bean.addComposedCollectionElement(element);
@@ -357,7 +356,7 @@ public class AllAttributesPersistentDomainTest extends AbstractH2Test {
         }
 
         @Test
-        void composedCollectionSetById() throws Exception {
+        void composedCollectionSetById() {
                 AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
                 AllAttributesPersistent element = new AllAttributesPersistent();
                 bean.addComposedCollectionElement(element);
@@ -369,7 +368,7 @@ public class AllAttributesPersistentDomainTest extends AbstractH2Test {
         }
 
         @Test
-        void composedCollectionAddAtIndexAndRemove() throws Exception {
+        void composedCollectionAddAtIndexAndRemove() {
                 AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
                 AllAttributesPersistent element = new AllAttributesPersistent();
                 bean.addComposedCollectionElement(0, element);
@@ -379,7 +378,7 @@ public class AllAttributesPersistentDomainTest extends AbstractH2Test {
         }
 
         @Test
-        void composedCollectionRemoveByIndex() throws Exception {
+        void composedCollectionRemoveByIndex() {
                 AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
                 AllAttributesPersistent element = new AllAttributesPersistent();
                 bean.addComposedCollectionElement(element);

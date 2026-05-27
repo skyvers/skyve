@@ -14,7 +14,7 @@ import org.skyve.metadata.view.model.chart.ChartData;
 import modules.admin.domain.MonitoringDashboard.Period;
 
 @SuppressWarnings("static-method")
-public class SystemHeapRamUsageModelTest {
+class SystemHeapRamUsageModelTest {
 
 	@Test
 	void getChartLabelReturnsHeapRamLabel() {
@@ -42,7 +42,7 @@ public class SystemHeapRamUsageModelTest {
 	void setChartColorsWithHighRamUsageSetsNonNullColor() {
 		SystemHeapRamUsageModel model = new SystemHeapRamUsageModel();
 		ChartData cd = new ChartData();
-		model.setChartColors(cd, Arrays.asList(90f)); // >85% = red
+		model.setChartColors(cd, Arrays.<Number>asList(Float.valueOf(90f))); // >85% = red
 		assertNotNull(cd.getBackground());
 	}
 }

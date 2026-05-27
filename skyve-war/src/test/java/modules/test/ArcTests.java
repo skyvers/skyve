@@ -3,7 +3,6 @@ package modules.test;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
@@ -15,6 +14,7 @@ import modules.test.domain.AnyDerived2;
 import modules.test.domain.ArcOneToMany;
 import modules.test.domain.ArcOneToOne;
 
+@SuppressWarnings("java:S5778")
 class ArcTests extends AbstractSkyveTest {
 	/**
 	 * This just wont work...
@@ -22,7 +22,7 @@ class ArcTests extends AbstractSkyveTest {
 	 * @throws Exception
 	 */
 	@Test
-	void testOneToManyPersist() throws Exception {
+	void testOneToManyPersist() {
 		DomainException de = Assert.assertThrows(DomainException.class, () -> {
 			ArcOneToMany test = Util.constructRandomInstance(u, m, ao2m, 0);
 			test = p.save(test);
@@ -63,7 +63,7 @@ class ArcTests extends AbstractSkyveTest {
 	 * @throws Exception
 	 */
 	@Test
-	void testOneToOnePersistArcTransient() throws Exception {
+	void testOneToOnePersistArcTransient() {
 		DomainException de = Assert.assertThrows(DomainException.class, () -> {
 			ArcOneToOne test = Util.constructRandomInstance(u, m, ao2o, 0);
 			test = p.save(test);
@@ -104,7 +104,7 @@ class ArcTests extends AbstractSkyveTest {
 	 * @throws Exception
 	 */
 	@Test
-	void testOneToOnePersistFullyTransient() throws Exception {
+	void testOneToOnePersistFullyTransient() {
 		DomainException de = Assert.assertThrows(DomainException.class, () -> {
 			ArcOneToOne test = Util.constructRandomInstance(u, m, ao2o, 0);
 			test.setArc((AnyDerived1) Util.constructRandomInstance(u, m, ad1, 0));

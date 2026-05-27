@@ -12,7 +12,7 @@ import static org.mockito.Mockito.mock;
 import org.junit.Test;
 import org.skyve.domain.Bean;
 
-@SuppressWarnings({ "boxing", "static-method" })
+@SuppressWarnings("static-method")
 public class JobTest {
 	private static class RecordingJob extends Job {
 		@Override

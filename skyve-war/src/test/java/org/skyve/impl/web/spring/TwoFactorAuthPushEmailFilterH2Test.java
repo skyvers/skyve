@@ -49,7 +49,6 @@ class TwoFactorAuthPushEmailFilterH2Test extends AbstractH2Test {
 		UtilImpl.SMTP_TEST_BOGUS_SEND = originalSmtpTestBogusSend;
 	}
 
-	@SuppressWarnings({ "boxing", "static-method" })
 	@Test
 	void testPushNotificationUsesExtMailService() {
 		ExposedTwoFactorAuthPushEmailFilter filter = new ExposedTwoFactorAuthPushEmailFilter();
@@ -77,7 +76,6 @@ class TwoFactorAuthPushEmailFilterH2Test extends AbstractH2Test {
 		assertThat(capture.lastSend.getBody(), containsString("654321"));
 	}
 
-	@SuppressWarnings({ "boxing", "static-method" })
 	@Test
 	void testResendGeneratesNewCodeAndSendsEmail() {
 		ExposedTwoFactorAuthPushEmailFilter filter = new ExposedTwoFactorAuthPushEmailFilter();

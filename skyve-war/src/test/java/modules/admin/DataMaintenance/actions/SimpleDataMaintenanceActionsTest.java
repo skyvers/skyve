@@ -22,9 +22,7 @@ class SimpleDataMaintenanceActionsTest {
 	void refreshBackupListReturnsBeanUnchanged() throws Exception {
 		RefreshBackupList action = new RefreshBackupList();
 		DataMaintenanceExtension bean = new DataMaintenanceExtension();
-
-		@SuppressWarnings("unchecked")
-		ServerSideActionResult<DataMaintenance> result = (ServerSideActionResult<DataMaintenance>) action.execute(bean, null);
+		ServerSideActionResult<DataMaintenance> result = action.execute(bean, null);
 
 		assertNotNull(result);
 		assertSame(bean, result.getBean());
@@ -36,9 +34,7 @@ class SimpleDataMaintenanceActionsTest {
 	void backupSelectedReturnsBean() throws Exception {
 		BackupSelected action = new BackupSelected();
 		DataMaintenanceExtension bean = new DataMaintenanceExtension();
-
-		@SuppressWarnings("unchecked")
-		ServerSideActionResult<DataMaintenance> result = (ServerSideActionResult<DataMaintenance>) action.execute(bean, null);
+		ServerSideActionResult<DataMaintenance> result = action.execute(bean, null);
 		assertSame(bean, result.getBean());
 	}
 
@@ -60,9 +56,7 @@ class SimpleDataMaintenanceActionsTest {
 		ContentSelected action = new ContentSelected();
 		DataMaintenanceExtension bean = new DataMaintenanceExtension();
 		bean.setSelectedContentId(null);
-
-		@SuppressWarnings("unchecked")
-		ServerSideActionResult<DataMaintenance> result = (ServerSideActionResult<DataMaintenance>) action.execute(bean, null);
+		ServerSideActionResult<DataMaintenance> result = action.execute(bean, null);
 
 		assertNotNull(result);
 		assertNull(bean.getContentLink());

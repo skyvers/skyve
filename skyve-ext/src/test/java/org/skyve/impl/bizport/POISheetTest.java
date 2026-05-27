@@ -150,6 +150,7 @@ public class POISheetTest {
 	// ---- Materialized sheet tests ----
 
 	/** Injects an XSSFSheet into the sheet field and returns it, keeping the workbook alive. */
+	@SuppressWarnings("resource")
 	private static XSSFWorkbook materialize(POISheet poiSheet) throws Exception {
 		XSSFWorkbook wb = new XSSFWorkbook();
 		XSSFSheet xssfSheet = wb.createSheet("data");
@@ -379,7 +380,7 @@ public class POISheetTest {
 	}
 
 	@Test
-	public void setValueDecimal5RoundtripsAsNumeric() throws Exception {
+	public void setValueDecimal5RoundtripsAsNumeric() {
 		POIWorkbook wb = new POIWorkbook(true);
 		POISheet sheet = new POISheet("TestSheet");
 		sheet.addColumn("price", new BizPortColumn("Price", null, AttributeType.decimal5));
@@ -392,7 +393,7 @@ public class POISheetTest {
 	}
 
 	@Test
-	public void setValueDecimal10RoundtripsAsNumeric() throws Exception {
+	public void setValueDecimal10RoundtripsAsNumeric() {
 		POIWorkbook wb = new POIWorkbook(true);
 		POISheet sheet = new POISheet("TestSheet");
 		sheet.addColumn("amount", new BizPortColumn("Amount", null, AttributeType.decimal10));
@@ -405,7 +406,7 @@ public class POISheetTest {
 	}
 
 	@Test
-	public void setValueDateOnlyAndGetValueReturnsDateOnly() throws Exception {
+	public void setValueDateOnlyAndGetValueReturnsDateOnly() {
 		POIWorkbook wb = new POIWorkbook(true);
 		POISheet sheet = new POISheet("TestSheet");
 		sheet.addColumn("date", new BizPortColumn("Date", null, AttributeType.date));
@@ -419,7 +420,7 @@ public class POISheetTest {
 	}
 
 	@Test
-	public void setValueDateTimeAndGetValueReturnsDateTime() throws Exception {
+	public void setValueDateTimeAndGetValueReturnsDateTime() {
 		POIWorkbook wb = new POIWorkbook(true);
 		POISheet sheet = new POISheet("TestSheet");
 		sheet.addColumn("dt", new BizPortColumn("DT", null, AttributeType.dateTime));
@@ -433,7 +434,7 @@ public class POISheetTest {
 	}
 
 	@Test
-	public void setValueTimestampAndGetValueReturnsTimestamp() throws Exception {
+	public void setValueTimestampAndGetValueReturnsTimestamp() {
 		POIWorkbook wb = new POIWorkbook(true);
 		POISheet sheet = new POISheet("TestSheet");
 		sheet.addColumn("ts", new BizPortColumn("TS", null, AttributeType.timestamp));
@@ -447,7 +448,7 @@ public class POISheetTest {
 	}
 
 	@Test
-	public void setValueTimeOnlyAndGetValueReturnsTimeOnly() throws Exception {
+	public void setValueTimeOnlyAndGetValueReturnsTimeOnly() {
 		POIWorkbook wb = new POIWorkbook(true);
 		POISheet sheet = new POISheet("TestSheet");
 		sheet.addColumn("time", new BizPortColumn("Time", null, AttributeType.time));
@@ -461,7 +462,7 @@ public class POISheetTest {
 	}
 
 	@Test
-	public void numericCellWithStringTypeReturnsStringConversion() throws Exception {
+	public void numericCellWithStringTypeReturnsStringConversion() {
 		POIWorkbook wb = new POIWorkbook(true);
 		POISheet sheet = new POISheet("TestSheet");
 		sheet.addColumn("num", new BizPortColumn("Num", null, AttributeType.integer));

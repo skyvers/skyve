@@ -52,8 +52,8 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.SQL;
 import org.skyve.impl.snapshot.Snapshot;
 import org.skyve.impl.snapshot.SnapshotAdapter;
-import org.skyve.impl.snapshot.SnapshotAdapter;
 
+@SuppressWarnings({"static-method", "resource", "boxing", "java:S108", "java:S5976", "java:S4144", "java:S1130"})
 class AbstractHibernatePersistenceTest {
 	
 	private static final String TEST_MAPPING_XML = """
@@ -131,7 +131,6 @@ class AbstractHibernatePersistenceTest {
 	static void tearDownPersistenceBootstrap() throws Exception {
 		try {
 			if (bootstrapComplete) {
-				@SuppressWarnings("resource")
 				SessionFactory sessionFactory = getSessionFactory();
 				if ((sessionFactory != null) && (! sessionFactory.isClosed())) {
 					sessionFactory.close();
@@ -147,7 +146,6 @@ class AbstractHibernatePersistenceTest {
 		}
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testGetDialectCachesByClassName() {
 		SkyveDialect first = AbstractHibernatePersistence.getDialect(H2SpatialDialect.class.getName());
@@ -155,7 +153,6 @@ class AbstractHibernatePersistenceTest {
 		assertSame(first, second);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testGetDialectUsesConfiguredDataStoreDialect() {
 		SkyveDialect byClassName = AbstractHibernatePersistence.getDialect(H2SpatialDialect.class.getName());
@@ -163,7 +160,6 @@ class AbstractHibernatePersistenceTest {
 		assertSame(byClassName, fromDataStore);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testGetDialectThrowsForUnknownClass() {
 		assertThrows(IllegalStateException.class,
@@ -171,13 +167,11 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testLogSecondLevelCacheStatsWithUnknownRegion() {
 		assertDoesNotThrow(() -> AbstractHibernatePersistence.logSecondLevelCacheStats("missing-region"));
 	}
 
 	@Test
-	@SuppressWarnings({ "static-method", "resource" })
 	void testTransactionLifecycleWithoutDynamicPersistence() {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -201,7 +195,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testGetDocumentEntityNameReturnsEntityName() {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -216,7 +209,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testNewSQLCreatesInstance() {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -229,7 +221,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testNewSQLWithModuleDocumentCreatesInstance() {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -242,7 +233,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testNewBizQLCreatesInstance() {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -255,7 +245,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testNewDocumentQueryFromDocumentCreatesInstance() throws Exception {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -274,7 +263,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testEvictAllSharedCacheDoesNotThrow() {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -287,7 +275,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testEvictAllCachedDoesNotThrow() {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		persistence.injectDynamicPersistence(mock(DynamicPersistence.class));
@@ -301,7 +288,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testEvictSharedCacheCollectionsDoesNotThrow() {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -314,7 +300,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testEvictSharedCacheBeansByModuleDocumentDoesNotThrow() {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -328,7 +313,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testEvictSharedCachedBeanByIdDoesNotThrow() {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -342,7 +326,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testSharedCacheBeanReturnsFalseForUnknownBean() {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -356,7 +339,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testFlushDoesNotThrow() {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -370,7 +352,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testSetUserDoesNotThrow() {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -384,7 +365,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testRollbackDoesNotThrow() {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -398,7 +378,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testEvictSharedCacheBeansAllDoesNotThrow() {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -411,7 +390,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testNewNamedSQLWithModuleAndQueryNameDoesNotThrow() {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -424,7 +402,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testDisposalOfEntityManagerOnClose() {
 		TestHibernatePersistence persistence1 = new TestHibernatePersistence();
 		TestHibernatePersistence persistence2 = new TestHibernatePersistence();
@@ -439,7 +416,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testWithDocumentPermissionScopesFunctionReturnsResult() {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		persistence.injectDynamicPersistence(mock(DynamicPersistence.class));
@@ -458,7 +434,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testWithDocumentPermissionScopesConsumerDoesNotThrow() {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		persistence.injectDynamicPersistence(mock(DynamicPersistence.class));
@@ -466,7 +441,9 @@ class AbstractHibernatePersistenceTest {
 			persistence.setUser(createTestUserImpl());
 			persistence.withDocumentPermissionScopes(
 				DocumentPermissionScope.customer,
-				p -> {});
+				p -> {
+					// no-op callback for scope reset verification
+				});
 			assertNotNull(persistence);
 		}
 		finally {
@@ -485,7 +462,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testSharedCacheBeanByModuleDocumentBizIdReturnsFalse() {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -499,7 +475,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testSharedCacheBeanByBeanReturnsFalse() {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -517,7 +492,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testSharedCacheCollectionReturnsFalse() {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -531,7 +505,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testSharedCacheCollectionByBeanReturnsFalse() {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -549,7 +522,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testEvictSharedCacheBeansByModuleDocumentDoesNotThrow2() {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -563,7 +535,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testEvictSharedCachedBeanByModuleDocumentBizIdDoesNotThrow() {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -577,7 +548,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testEvictSharedCachedBeanByBeanDoesNotThrow() {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -595,7 +565,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testEvictSharedCacheCollectionsByModuleDocumentCollectionDoesNotThrow() {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -609,7 +578,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testEvictSharedCacheCollectionByModuleDocumentCollectionIdDoesNotThrow() {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -623,7 +591,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testEvictSharedCacheCollectionByBeanDoesNotThrow() {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -641,7 +608,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testCachedBeanReturnsFalseForNonDynamicBean() {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -659,7 +625,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testEvictCachedBeanDoesNotThrowForNonCachedBean() {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -678,7 +643,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testEvictAllSharedCacheOnlyEvictsEntityData() {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -691,7 +655,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testNewSQLWithDocumentCreatesInstance() throws Exception {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -719,7 +682,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testNewDocumentQueryByModuleDocumentStringsCreatesInstance() throws Exception {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -747,7 +709,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testNewDocumentQueryFromDocumentWithClausesCreatesInstance() throws Exception {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -766,7 +727,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testNewBizQLCreatesInstanceWithUser() throws Exception {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -782,7 +742,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testBeginWithDynamicPersistenceDoesNotThrow() {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		DynamicPersistence dp = mock(DynamicPersistence.class);
@@ -798,7 +757,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testEvictCachedBeanDoesNotThrowForNonCachedBean2() {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		DynamicPersistence dp = mock(DynamicPersistence.class);
@@ -818,7 +776,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testCommitWithCloseAndRemoveHashesDoesNotThrow() {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -842,7 +799,6 @@ class AbstractHibernatePersistenceTest {
 		"\"groupState\":\"[]\",\"summaryType\":\"\",\"criteria\":{}}";
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testVueFromClientPayloadReturnsSnapshotWhenPersistenceBound() throws Exception {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -858,7 +814,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testVueFromClientPayloadWithColumnAndSortReturnsSnapshot() throws Exception {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -878,7 +833,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testVueFromClientPayloadWithFilterReturnsSnapshot() throws Exception {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -899,7 +853,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testVueFromClientPayloadWithInvalidPayloadReturnsNull() throws Exception {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -915,7 +868,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testSmartClientFromClientPayloadReturnsSnapshotWhenPersistenceBound() throws Exception {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -931,7 +883,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testSmartClientFromClientPayloadWithFieldStateReturnsSnapshot() throws Exception {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -952,7 +903,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testSmartClientFromClientPayloadWithSortStateReturnsSnapshot() throws Exception {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -973,7 +923,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testNewBizQLWithModuleNameCreatesInstance() {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -986,7 +935,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testNewDocumentQueryFromBeanCreatesInstance() throws Exception {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -1006,7 +954,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testFlushWithActiveTransactionDoesNotThrow() {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -1021,7 +968,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testCachedReturnsFalseForBeanNotInCache() {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -1040,7 +986,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testEvictSharedCacheBeansByModuleDocumentSilentNoOp() {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -1055,7 +1000,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testEvictSharedCachedBeanByBeanNoOp() {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -1074,14 +1018,12 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testLogSecondLevelCacheStatsWithAnotherUnknownRegionDoesNotThrow() {
 		// Verifies the static method handles additional unknown regions gracefully
 		assertDoesNotThrow(() -> AbstractHibernatePersistence.logSecondLevelCacheStats("another-missing-region"));
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testToVueReturnsNullForNullInput() throws Exception {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -1098,7 +1040,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testToVueWithValidVueSnapshotReturnsPayload() throws Exception {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -1115,7 +1056,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testToVueWithSmartClientSnapshotConverts() throws Exception {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -1134,7 +1074,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testToSmartClientWithSmartClientSnapshotReturnsSame() throws Exception {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -1151,7 +1090,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testToSmartClientWithVueSnapshotConverts() throws Exception {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -1168,7 +1106,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testSQLExecuteInsertAndScalarQuery() throws Exception {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -1192,7 +1129,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testSQLTupleResultsFromADMContact() throws Exception {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -1218,7 +1154,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testSQLScalarIterableFromADMContact() throws Exception {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -1245,7 +1180,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testSQLTupleIterableFromADMContact() throws Exception {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -1798,7 +1732,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testRetrieveReturnsNullForNonExistentId() throws Exception {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -1818,7 +1751,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testRetrieveAndLockThrowsForNonExistentId() throws Exception {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -1837,7 +1769,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testCommitFalseDoesNotCloseEntityManager() throws Exception {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -1853,7 +1784,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testGetSessionReturnsOpenSession() throws Exception {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -1869,7 +1799,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testGetEntityManagerReturnsOpenManager() throws Exception {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -1885,7 +1814,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testSetRollbackOnlyAndRollbackDoesNotThrow() throws Exception {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -1901,7 +1829,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testGetDocumentEntityNameWithRealUser() throws Exception {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -1917,7 +1844,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testEvictAllCachedAfterBeginDoesNotThrow() throws Exception {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		DynamicPersistence dp = mock(DynamicPersistence.class);
@@ -1935,7 +1861,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testWithDocumentPermissionScopesConsumerVariant() throws Exception {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -1952,7 +1877,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testNewNamedDocumentQueryFromModuleReturnsNonNull() throws Exception {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -1978,7 +1902,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testFlushAfterBeginDoesNotThrow() throws Exception {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -1994,7 +1917,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testNewSQLQueryReturnsNonNull() throws Exception {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -2010,7 +1932,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testNewBizQLQueryReturnsNonNull() throws Exception {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -2026,7 +1947,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testNewSQLWithModuleDocumentReturnsNonNull() throws Exception {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -2042,7 +1962,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testNewDocumentQueryWithDocumentAndClausesReturnsNonNull() throws Exception {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -2061,7 +1980,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testGetConnectionReturnsNonNull() throws Exception {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -2077,7 +1995,6 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testSharedCacheBeanReturnsFalseForUnpersistedBean() throws Exception {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -2126,7 +2043,6 @@ class AbstractHibernatePersistenceTest {
 		repositoryField.set(null, repository);
 	}
 
-	@SuppressWarnings("resource")
 	private static void ensureSessionFactoryOpen() throws Exception {
 		SessionFactory sessionFactory = getSessionFactory();
 		if ((sessionFactory == null) || sessionFactory.isClosed()) {

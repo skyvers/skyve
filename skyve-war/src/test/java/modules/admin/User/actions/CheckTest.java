@@ -39,7 +39,6 @@ class CheckTest extends AbstractH2Test {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
 	void testExecuteEmailSearchEmptySearchThrowsException() {
 		// create the test data
 		UserExtension searchUser = User.newInstance();
@@ -56,7 +55,6 @@ class CheckTest extends AbstractH2Test {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
 	void testExecuteEmailSearchNullSearchThrowsException() {
 		// create the test data
 		UserExtension searchUser = User.newInstance();
@@ -73,7 +71,6 @@ class CheckTest extends AbstractH2Test {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
 	void testExecuteEmailSearchCleansSearchString() throws Exception {
 		// create the test data
 		UserExtension searchUser = User.newInstance();
@@ -88,7 +85,6 @@ class CheckTest extends AbstractH2Test {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
 	void testExecuteEmailSearchExactMatch() throws Exception {
 		// create the test data
 		UserExtension searchUser = User.newInstance();
@@ -103,7 +99,6 @@ class CheckTest extends AbstractH2Test {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
 	void testExecuteEmailSearchMatchesForward() throws Exception {
 		// create the test data
 		UserExtension searchUser = User.newInstance();
@@ -117,7 +112,6 @@ class CheckTest extends AbstractH2Test {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
 	void testExecuteEmailSearchMatchesWithin() throws Exception {
 		// create the test data
 		UserExtension searchUser = User.newInstance();

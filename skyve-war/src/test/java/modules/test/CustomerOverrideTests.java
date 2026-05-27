@@ -9,13 +9,12 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.view.View;
 
 import modules.test.domain.AllAttributesPersistent;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@SuppressWarnings("static-method")
 class CustomerOverrideTests extends AbstractSkyveTest {
 
 	@Test
-	@SuppressWarnings("static-method")
-	void testCustomerOverridesExist() throws Exception {
+	void testCustomerOverridesExist() {
 		Customer customer = CORE.getRepository().getCustomer("test");
 		Assert.assertNotNull(customer);
 		Module module = customer.getModule("test");
@@ -24,20 +23,19 @@ class CustomerOverrideTests extends AbstractSkyveTest {
 		Assert.assertNotNull(document.getCondition("test"));
 		View view = document.getView(null, customer, "edit");
 		Assert.assertEquals("Test", view.getTitle());
-		document = module.getDocument(customer, "Test");
-		Assert.assertNotNull(document);
+		Assert.assertNotNull(module.getDocument(customer, "Test"));
 		Assert.assertNotNull(document.getCondition("test"));
 	}
 
 	@Test
-	void testCustomerOverridesDoNotExist() throws Exception {
+	void testCustomerOverridesDoNotExist() {
 		Assert.assertNull(m.getRole("TestRole"));
 		Document document = m.getDocument(c, AllAttributesPersistent.DOCUMENT_NAME);
 		Assert.assertNull(document.getCondition("test"));
 		View view = document.getView(null, c, "edit");
 		Assert.assertNotEquals("Test", view.getTitle());
 		try {
-			document = m.getDocument(c, "Test");
+			m.getDocument(c, "Test");
 			Assert.fail("Test should not exist");
 		}
 		catch (@SuppressWarnings("unused") Exception e) {

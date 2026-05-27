@@ -16,7 +16,8 @@ import modules.test.domain.AllAttributesPersistent;
  * Tests for GetSelectItemsAction using the filter constructor
  * (no bean, uses module/document/binding parameters).
  */
-public class GetSelectItemsActionTest extends AbstractSkyveTest {
+@SuppressWarnings("static-method")
+class GetSelectItemsActionTest extends AbstractSkyveTest {
 
 	@Test
 	void callbackWithEnumBindingReturnsItems() throws Exception {

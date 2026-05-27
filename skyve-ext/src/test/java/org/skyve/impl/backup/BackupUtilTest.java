@@ -4,7 +4,9 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.skyve.impl.backup.BackupUtil.redactData;
 
@@ -395,16 +397,9 @@ public class BackupUtilTest {
 	public void secureSQLForRegularTableWithNoCustomerFieldDoesNotAppend() {
 		Table table = new Table("NoCustomerTable", "NoCustomerTable");
 		table.fields.put("bizId", Table.TEXT);
-		// no bizCustomer field and UtilImpl.CUSTOMER is typically null in tests
 		StringBuilder sql = new StringBuilder("select * from NoCustomerTable");
-		String before = sql.toString();
-		// UtilImpl.CUSTOMER may or may not be null depending on test environment;
-		// if it's null and hasBizCustomer=false, no where clause added
 		BackupUtil.secureSQL(sql, table, "testCustomer");
-		// The only way we know nothing was added is if no bizCustomer field
-		// (hasBizCustomer returns false → no append regardless of CUSTOMER setting)
-			// Verify the SQL was not cleared
-			assertTrue("SQL should remain non-empty after secureSQL", sql.length() > 0);
+		assertFalse("SQL should remain non-empty after secureSQL", sql.isEmpty());
 	}
 
 	@Test
@@ -526,7 +521,7 @@ public class BackupUtilTest {
 		try {
 			BackupUtil.writeScript(commands, tempFile);
 			List<String> result = BackupUtil.readScript(tempFile);
-			assertThat(result.size(), is(2));
+			assertEquals(2, result.size());
 			assertThat(result.get(0), is("INSERT INTO foo VALUES (1)"));
 			assertThat(result.get(1), is("UPDATE bar SET x = 2"));
 		}
@@ -602,8 +597,8 @@ public class BackupUtilTest {
 
 		Table restored = Table.fromJSON(json);
 		assertThat(restored.agnosticIdentifier, is("myTable"));
-		assertThat(restored.fields.containsKey("id"), is(true));
-		assertThat(restored.fields.containsKey("amount"), is(true));
+		assertTrue(restored.fields.containsKey("id"));
+		assertTrue(restored.fields.containsKey("amount"));
 	}
 
 	@Test
@@ -612,8 +607,8 @@ public class BackupUtilTest {
 		Table t1 = new Table("same", "same");
 		Table t2 = new Table("same", "different");
 		Table t3 = new Table("other", "same");
-		assertThat(t1.equals(t2), is(true));
-		assertThat(t1.equals(t3), is(false));
+		assertEquals(t1, t2);
+		assertNotEquals(t1, t3);
 	}
 
 	@Test
@@ -621,7 +616,7 @@ public class BackupUtilTest {
 	public void tableHashCodeConsistentWithEquals() {
 		Table t1 = new Table("abc", "abc");
 		Table t2 = new Table("abc", "xyz");
-		assertThat(t1.hashCode(), is(t2.hashCode()));
+		assertEquals(t2.hashCode(), t1.hashCode());
 	}
 
 	@Test
@@ -638,7 +633,7 @@ public class BackupUtilTest {
 		try {
 			BackupUtil.writeTables(tables, tempFile);
 			java.util.Collection<Table> result = BackupUtil.readTables(tempFile);
-			assertThat(result.size(), is(2));
+			assertEquals(2, result.size());
 		}
 		finally {
 			tempFile.delete();
@@ -660,9 +655,9 @@ public class BackupUtilTest {
 			java.util.Collection<Table> result = BackupUtil.readTables(tempFile);
 			Table restored = result.iterator().next();
 			assertThat(restored.agnosticIdentifier, is("myTable"));
-			assertThat(restored.fields.containsKey("textField"), is(true));
-			assertThat(restored.fields.containsKey("intField"), is(true));
-			assertThat(restored.fields.containsKey("assocField"), is(true));
+			assertTrue(restored.fields.containsKey("textField"));
+			assertTrue(restored.fields.containsKey("intField"));
+			assertTrue(restored.fields.containsKey("assocField"));
 		}
 		finally {
 			tempFile.delete();
@@ -723,22 +718,22 @@ public class BackupUtilTest {
 		Table restored = Table.fromJSON(json);
 		assertTrue(restored instanceof JoinTable);
 		JoinTable restoredJoin = (JoinTable) restored;
-		assertThat(restoredJoin.ordered, is(true));
+		assertTrue(restoredJoin.ordered);
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
 	public void joinTableHasOwnerAndElementFields() {
 		JoinTable joinTable = new JoinTable("t_elem", "t_elem", "t_owner", "t_owner", false);
-		assertThat(joinTable.fields.containsKey("owner_id"), is(true));
-		assertThat(joinTable.fields.containsKey("element_id"), is(true));
+		assertTrue(joinTable.fields.containsKey("owner_id"));
+		assertTrue(joinTable.fields.containsKey("element_id"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
 	public void orderedJoinTableHasOrderByField() {
 		JoinTable joinTable = new JoinTable("t_elem", "t_elem", "t_owner", "t_owner", true);
-		assertThat(joinTable.fields.containsKey("bizOrdinal"), is(true));
+		assertTrue(joinTable.fields.containsKey("bizOrdinal"));
 	}
 
 	@Test

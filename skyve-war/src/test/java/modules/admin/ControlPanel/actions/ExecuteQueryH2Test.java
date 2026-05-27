@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -37,7 +38,6 @@ class ExecuteQueryH2Test extends AbstractH2Test {
 		action = new ExecuteQuery();
 	}
 
-	@SuppressWarnings("boxing")
 	@Test
 	void testExecuteWithNullQueryThrowsValidationException() {
 		// setup the test data
@@ -53,14 +53,13 @@ class ExecuteQueryH2Test extends AbstractH2Test {
 		assertTrue(hasBinding(e.getMessages().get(0).getBindings(), ControlPanel.queryPropertyName));
 	}
 
-	@SuppressWarnings("boxing")
 	@Test
 	void testExecuteWithValidQueryReturnsResults() throws Exception {
 		// setup the test data - create some users in the database
 		User user1 = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
-		user1 = CORE.getPersistence().save(user1);
+		CORE.getPersistence().save(user1);
 		User user2 = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
-		user2 = CORE.getPersistence().save(user2);
+		CORE.getPersistence().save(user2);
 
 		// set a valid query
 		controlPanel.setQuery("SELECT bean FROM adminUser bean");
@@ -72,11 +71,10 @@ class ExecuteQueryH2Test extends AbstractH2Test {
 		assertThat(result, is(notNullValue()));
 		assertThat(result.getBean(), is(controlPanel));
 		assertThat(controlPanel.getResults(), is(notNullValue()));
-		assertTrue(controlPanel.getResults().length() > 0);
+		assertFalse(controlPanel.getResults().isEmpty());
 		assertEquals(2, controlPanel.getTabIndex());
 	}
 
-	@SuppressWarnings("boxing")
 	@Test
 	void testExecuteWithInvalidQueryTrapsException() throws Exception {
 		// setup the test data with an invalid query
@@ -94,13 +92,12 @@ class ExecuteQueryH2Test extends AbstractH2Test {
 		assertEquals(2, controlPanel.getTabIndex());
 	}
 
-	@SuppressWarnings("boxing")
 	@Test
 	void testExecuteClearsResultsBeforeExecution() throws Exception {
 		// setup the test data
 		controlPanel.setQuery("SELECT bean FROM adminUser bean");
 		controlPanel.setResults("Previous results");
-		controlPanel.setTabIndex(5);
+		controlPanel.setTabIndex(Integer.valueOf(5));
 
 		// call the method under test
 		action.execute(controlPanel, null);
@@ -111,14 +108,13 @@ class ExecuteQueryH2Test extends AbstractH2Test {
 		assertEquals(2, controlPanel.getTabIndex());
 	}
 
-	@SuppressWarnings("boxing")
 	@Test
 	void testExecuteFormatsMultipleResultsWithNewlines() throws Exception {
 		// setup the test data - create multiple users
 		User user1 = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
-		user1 = CORE.getPersistence().save(user1);
+		CORE.getPersistence().save(user1);
 		User user2 = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
-		user2 = CORE.getPersistence().save(user2);
+		CORE.getPersistence().save(user2);
 
 		// set a valid query
 		controlPanel.setQuery("SELECT bean FROM adminUser bean");

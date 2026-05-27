@@ -19,7 +19,6 @@ import org.skyve.util.Util;
 import modules.admin.domain.ImportExport;
 import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.InverseOneToOnePersistent;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class BeanVisitorTests extends AbstractSkyveTest {
 

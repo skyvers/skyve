@@ -115,7 +115,7 @@ class KitchenSinkChildDomainTest extends AbstractH2Test {
                 KitchenSink parent = new KitchenSink();
                 bean.setParent(parent);
                 assertEquals(parent, bean.getParent());
-                bean.setBizOrdinal(1);
+		bean.setBizOrdinal(Integer.valueOf(1));
                 assertEquals(Integer.valueOf(1), bean.getBizOrdinal());
         }
 
@@ -147,7 +147,7 @@ class KitchenSinkChildDomainTest extends AbstractH2Test {
         // --- ContainerGrid ---
 
         @Test
-        void containerGridBizModuleAndDocument() throws Exception {
+        void containerGridBizModuleAndDocument() {
                 ContainerGrid bean = ContainerGrid.newInstance();
                 assertEquals("kitchensink", bean.getBizModule());
                 assertEquals("ContainerGrid", bean.getBizDocument());

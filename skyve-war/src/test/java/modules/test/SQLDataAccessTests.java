@@ -26,8 +26,6 @@ import org.skyve.util.Util;
 
 import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.AllAttributesPersistent.Enum3;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class SQLDataAccessTests extends AbstractSkyveTestDispose {
 

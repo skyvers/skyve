@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
-import org.skyve.domain.types.Timestamp;
 import org.skyve.metadata.view.model.chart.ChartData;
 import org.skyve.util.monitoring.RequestMeasurements;
 
@@ -24,7 +23,8 @@ import modules.test.AbstractSkyveTest;
  * Tests for the static utility methods in AbstractMonitoringChartModel.
  * Uses a minimal concrete subclass since the methods are protected.
  */
-public class AbstractMonitoringChartModelTest extends AbstractSkyveTest {
+@SuppressWarnings("static-method")
+class AbstractMonitoringChartModelTest extends AbstractSkyveTest {
 
 	/** Minimal concrete subclass to expose protected static methods. */
 	private static class TestChartModel extends AbstractMonitoringChartModel {
@@ -65,18 +65,18 @@ public class AbstractMonitoringChartModelTest extends AbstractSkyveTest {
 
 	@Test
 	void isDataValidForCurrentPeriodReturnsTrueWhenJustCreated() {
-		RequestMeasurements m = new RequestMeasurements();
+		RequestMeasurements measurements = new RequestMeasurements();
 		// timeLastUpdate is initialized to System.currentTimeMillis(), so it's valid
-		assertTrue(TestChartModel.testIsDataValid(m, Period.currentMinute));
+		assertTrue(TestChartModel.testIsDataValid(measurements, Period.currentMinute));
 	}
 
 	@Test
 	void isDataValidForCurrentPeriodReturnsTrueWhenRecentlyUpdated() {
-		RequestMeasurements m = new RequestMeasurements();
+		RequestMeasurements measurements = new RequestMeasurements();
 		// Record a request so the last update time gets set
-		m.updateMeasurements(50, (short) 50, (short) 50, (short) 50);
+		measurements.updateMeasurements(50, (short) 50, (short) 50, (short) 50);
 		// Should be valid for currentMinute (updated less than 2 minutes ago)
-		assertTrue(TestChartModel.testIsDataValid(m, Period.currentMinute));
+		assertTrue(TestChartModel.testIsDataValid(measurements, Period.currentMinute));
 	}
 
 	// ---- getTimePeriodLabel ----

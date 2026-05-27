@@ -16,6 +16,7 @@ import jakarta.inject.Inject;
 import modules.admin.domain.Startup;
 import util.AbstractH2Test;
 
+@SuppressWarnings({"java:S5778", "java:S5976"})
 class StartupBizletH2Test extends AbstractH2Test {
 
 	@Inject
@@ -25,14 +26,13 @@ class StartupBizletH2Test extends AbstractH2Test {
 	private StartupExtension bean;
 
 	@BeforeEach
-	void startup() throws Exception {
+	void startup() {
 		db = new DataBuilder().fixture(FixtureType.crud);
 
 		bean = Startup.newInstance();
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
 	void testValidateBackupDirectoryNameMinimumLength() throws Exception {
 		// setup the test data
 		bean.setBackupDirectoryName("aa");
@@ -47,7 +47,6 @@ class StartupBizletH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
 	void testValidateBackupDirectoryNameExceedsMaximumLength() throws Exception {
 		// setup the test data
 		bean.setBackupDirectoryName("1234567890123456789012345678901234567890123456789012345678901234567890");
@@ -62,8 +61,7 @@ class StartupBizletH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	void testValidateBackupDirectoryNameAgainstMetadataRegexInvalidCharacters() throws Exception {
+	void testValidateBackupDirectoryNameAgainstMetadataRegexInvalidCharacters() {
 		// setup the test data
 		bean = db.build(Startup.MODULE_NAME, Startup.DOCUMENT_NAME);
 		bean.setBackupDirectoryName("container@name");
@@ -80,8 +78,7 @@ class StartupBizletH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	void testValidateBackupDirectoryNameAgainstMetadataRegexUpperCaseLetters() throws Exception {
+	void testValidateBackupDirectoryNameAgainstMetadataRegexUpperCaseLetters() {
 		// setup the test data
 		bean = db.build(Startup.MODULE_NAME, Startup.DOCUMENT_NAME);
 		bean.setBackupDirectoryName("MyContainer");
@@ -98,8 +95,7 @@ class StartupBizletH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	void testValidateBackupDirectoryNameAgainstMetadataRegexEndingWithDash() throws Exception {
+	void testValidateBackupDirectoryNameAgainstMetadataRegexEndingWithDash() {
 		// setup the test data
 		bean = db.build(Startup.MODULE_NAME, Startup.DOCUMENT_NAME);
 		bean.setBackupDirectoryName("container-");
@@ -116,8 +112,7 @@ class StartupBizletH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	void testValidateBackupDirectoryNameAgainstMetadataRegexStartingWithDash() throws Exception {
+	void testValidateBackupDirectoryNameAgainstMetadataRegexStartingWithDash() {
 		// setup the test data
 		bean = db.build(Startup.MODULE_NAME, Startup.DOCUMENT_NAME);
 		bean.setBackupDirectoryName("-container");
@@ -134,8 +129,7 @@ class StartupBizletH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	void testValidateBackupDirectoryNameAgainstMetadataRegexConsecutiveDashes() throws Exception {
+	void testValidateBackupDirectoryNameAgainstMetadataRegexConsecutiveDashes() {
 		// setup the test data
 		bean = db.build(Startup.MODULE_NAME, Startup.DOCUMENT_NAME);
 		bean.setBackupDirectoryName("my--container");
@@ -152,7 +146,7 @@ class StartupBizletH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	void testValidateBackupDirectoryNameAgainstMetadataRegexValidName() throws Exception {
+	void testValidateBackupDirectoryNameAgainstMetadataRegexValidNameDoesNotThrow() {
 		// setup the test data
 		bean = db.build(Startup.MODULE_NAME, Startup.DOCUMENT_NAME);
 		bean.setBackupDirectoryName("my-container-1");

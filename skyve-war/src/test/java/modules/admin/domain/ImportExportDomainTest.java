@@ -22,7 +22,7 @@ import util.AbstractH2Test;
 class ImportExportDomainTest extends AbstractH2Test {
 
 	@Test
-	void dataBuilderPopulatesImportExportBean() throws Exception {
+	void dataBuilderPopulatesImportExportBean() {
 		ImportExport bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(ImportExport.MODULE_NAME, ImportExport.DOCUMENT_NAME);
@@ -31,35 +31,35 @@ class ImportExportDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void bizModuleAndDocumentAreCorrect() throws Exception {
+	void bizModuleAndDocumentAreCorrect() {
 		ImportExport bean = ImportExport.newInstance();
 		assertEquals(ImportExport.MODULE_NAME, bean.getBizModule());
 		assertEquals(ImportExport.DOCUMENT_NAME, bean.getBizDocument());
 	}
 
 	@Test
-	void modeSetAndGet() throws Exception {
+	void modeSetAndGet() {
 		ImportExport bean = ImportExport.newInstance();
 		bean.setMode(Mode.importData);
 		assertEquals(Mode.importData, bean.getMode());
 	}
 
 	@Test
-	void modeExportSetAndGet() throws Exception {
+	void modeExportSetAndGet() {
 		ImportExport bean = ImportExport.newInstance();
 		bean.setMode(Mode.exportData);
 		assertEquals(Mode.exportData, bean.getMode());
 	}
 
 	@Test
-	void rollbackErrorsSetAndGet() throws Exception {
+	void rollbackErrorsSetAndGet() {
 		ImportExport bean = ImportExport.newInstance();
 		bean.setRollbackErrors(RollbackErrors.rollbackErrors);
 		assertEquals(RollbackErrors.rollbackErrors, bean.getRollbackErrors());
 	}
 
 	@Test
-	void moduleAndDocumentNameSetAndGet() throws Exception {
+	void moduleAndDocumentNameSetAndGet() {
 		ImportExport bean = ImportExport.newInstance();
 		bean.setModuleName("admin");
 		bean.setDocumentName("User");
@@ -68,7 +68,7 @@ class ImportExportDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void filePathsSetAndGet() throws Exception {
+	void filePathsSetAndGet() {
 		ImportExport bean = ImportExport.newInstance();
 		bean.setImportFileName("data.csv");
 		bean.setImportFileAbsolutePath("/tmp/data.csv");
@@ -79,7 +79,8 @@ class ImportExportDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void booleanFlagsSetAndGet() throws Exception {
+	@SuppressWarnings("deprecation")
+	void booleanFlagsSetAndGet() {
 		ImportExport bean = ImportExport.newInstance();
 		bean.setColumnTitlesOnly(Boolean.TRUE);
 		bean.setAdvancedMode(Boolean.FALSE);
@@ -88,14 +89,14 @@ class ImportExportDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void resultsSetAndGet() throws Exception {
+	void resultsSetAndGet() {
 		ImportExport bean = ImportExport.newInstance();
 		bean.setResults("Imported: 10 records");
 		assertEquals("Imported: 10 records", bean.getResults());
 	}
 
 	@Test
-	void getBizKeyNotNull() throws Exception {
+	void getBizKeyNotNull() {
 		ImportExport bean = ImportExport.newInstance();
 		assertNotNull(bean.getBizKey());
 	}
@@ -152,7 +153,7 @@ class ImportExportDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void isContextSetFalseWhenModuleAndDocumentAreNull() throws Exception {
+	void isContextSetFalseWhenModuleAndDocumentAreNull() {
 		ImportExport bean = ImportExport.newInstance();
 		bean.setModuleName(null);
 		bean.setDocumentName(null);
@@ -161,7 +162,7 @@ class ImportExportDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void isContextSetTrueWhenBothSet() throws Exception {
+	void isContextSetTrueWhenBothSet() {
 		ImportExport bean = ImportExport.newInstance();
 		bean.setModuleName("admin");
 		bean.setDocumentName("User");
@@ -170,7 +171,7 @@ class ImportExportDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void isFileExistsTrueWhenImportModeAndPathSet() throws Exception {
+	void isFileExistsTrueWhenImportModeAndPathSet() {
 		ImportExport bean = ImportExport.newInstance();
 		bean.setMode(Mode.importData);
 		bean.setImportFileAbsolutePath("/tmp/file.csv");
@@ -179,14 +180,14 @@ class ImportExportDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void isFileExistsFalseWhenExportMode() throws Exception {
+	void isFileExistsFalseWhenExportMode() {
 		ImportExport bean = ImportExport.newInstance();
 		bean.setMode(Mode.exportData);
 		assertFalse(bean.isFileExists());
 	}
 
 	@Test
-	void isShowExportTrueWhenExportMode() throws Exception {
+	void isShowExportTrueWhenExportMode() {
 		ImportExport bean = ImportExport.newInstance();
 		bean.setMode(Mode.exportData);
 		assertTrue(bean.isShowExport());
@@ -194,7 +195,7 @@ class ImportExportDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void isShowExportFalseWhenImportMode() throws Exception {
+	void isShowExportFalseWhenImportMode() {
 		ImportExport bean = ImportExport.newInstance();
 		bean.setMode(Mode.importData);
 		assertFalse(bean.isShowExport());
@@ -202,7 +203,7 @@ class ImportExportDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void isLoadTypeCreateFindTrueWhenImportAndCreateLoadType() throws Exception {
+	void isLoadTypeCreateFindTrueWhenImportAndCreateLoadType() {
 		ImportExport bean = ImportExport.newInstance();
 		bean.setMode(Mode.importData);
 		bean.setLoadType(modules.admin.ImportExport.ImportExportUtil.CREATE_RELATED_RECORDS_IF_THEY_DON_T_EXIST);
@@ -211,7 +212,7 @@ class ImportExportDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void isLoadTypeCreateFindFalseWhenExportMode() throws Exception {
+	void isLoadTypeCreateFindFalseWhenExportMode() {
 		ImportExport bean = ImportExport.newInstance();
 		bean.setMode(Mode.exportData);
 		bean.setLoadType(modules.admin.ImportExport.ImportExportUtil.CREATE_RELATED_RECORDS_IF_THEY_DON_T_EXIST);

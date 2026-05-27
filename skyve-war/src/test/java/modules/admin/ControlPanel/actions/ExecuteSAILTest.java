@@ -40,7 +40,6 @@ class ExecuteSAILTest extends AbstractH2Test {
 		controlPanel = db.build(ControlPanel.MODULE_NAME, ControlPanel.DOCUMENT_NAME);
 	}
 
-	@SuppressWarnings("boxing")
 	@Test
 	void testExecuteSAILWithNullUserThrowsValidationException() {
 		// setup the test data - all fields except user
@@ -61,7 +60,6 @@ class ExecuteSAILTest extends AbstractH2Test {
 		assertTrue(hasBinding(e.getMessages().get(0).getBindings(), ControlPanel.sailUserPropertyName));
 	}
 
-	@SuppressWarnings("boxing")
 	@Test
 	void testExecuteSAILWithNullBaseUrlThrowsValidationException() {
 		// setup the test data - all fields except baseUrl
@@ -83,7 +81,6 @@ class ExecuteSAILTest extends AbstractH2Test {
 		assertTrue(hasBinding(e.getMessages().get(0).getBindings(), ControlPanel.sailBaseUrlPropertyName));
 	}
 
-	@SuppressWarnings("boxing")
 	@Test
 	void testExecuteSAILWithNullExecutorThrowsValidationException() {
 		// setup the test data - all fields except executor
@@ -105,7 +102,6 @@ class ExecuteSAILTest extends AbstractH2Test {
 		assertTrue(hasBinding(e.getMessages().get(0).getBindings(), ControlPanel.sailExecutorPropertyName));
 	}
 
-	@SuppressWarnings("boxing")
 	@Test
 	void testExecuteSAILWithNullComponentBuilderThrowsValidationException() {
 		// setup the test data - all fields except componentBuilder
@@ -127,7 +123,6 @@ class ExecuteSAILTest extends AbstractH2Test {
 		assertTrue(hasBinding(e.getMessages().get(0).getBindings(), ControlPanel.sailComponentBuilderPropertyName));
 	}
 
-	@SuppressWarnings("boxing")
 	@Test
 	void testExecuteSAILWithNullLayoutBuilderThrowsValidationException() {
 		// setup the test data - all fields except layoutBuilder
@@ -149,7 +144,6 @@ class ExecuteSAILTest extends AbstractH2Test {
 		assertTrue(hasBinding(e.getMessages().get(0).getBindings(), ControlPanel.sailLayoutBuilderPropertyName));
 	}
 
-	@SuppressWarnings("boxing")
 	@Test
 	void testExecuteSAILWithNullSailThrowsValidationException() {
 		// setup the test data - all fields except sail
@@ -171,7 +165,6 @@ class ExecuteSAILTest extends AbstractH2Test {
 		assertTrue(hasBinding(e.getMessages().get(0).getBindings(), ControlPanel.sailPropertyName));
 	}
 
-	@SuppressWarnings("boxing")
 	@Test
 	void testExecuteSAILWithMultipleNullFieldsThrowsValidationExceptionWithAllBindings() {
 		// setup the test data - multiple null fields

@@ -511,8 +511,11 @@ class FluentFormItemTest {
 
 	@Test
 	void fromFormItemWithUnknownWidgetTypeThrowsIllegalState() {
-			FormItem source = new FormItem();
-			source.setWidget(new MetaData() {});
-			assertThrows(IllegalStateException.class, () -> new FluentFormItem().from(source));
+		FormItem source = new FormItem();
+		source.setWidget(new MetaData() {
+			// intentionally empty anonymous metadata implementation for invalid widget path
+		});
+		FluentFormItem fluentFormItem = new FluentFormItem();
+		assertThrows(IllegalStateException.class, () -> fluentFormItem.from(source));
 	}
 }

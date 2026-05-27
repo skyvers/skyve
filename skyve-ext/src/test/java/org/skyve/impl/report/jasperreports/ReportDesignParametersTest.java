@@ -6,6 +6,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import java.util.List;
 
@@ -17,6 +18,7 @@ import org.skyve.impl.report.jasperreports.ReportDesignParameters.ReportStyle;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.report.ReportFormat;
 
+@SuppressWarnings("static-method")
 class ReportDesignParametersTest {
 
 	private ReportDesignParameters params;
@@ -36,7 +38,7 @@ class ReportDesignParametersTest {
 	void reportStyleEnumValues() {
 		assertThat(ReportStyle.tabular, notNullValue());
 		assertThat(ReportStyle.columnar, notNullValue());
-		assertFalse(ReportStyle.tabular.equals(ReportStyle.columnar));
+		assertNotEquals(ReportStyle.tabular, ReportStyle.columnar);
 	}
 
 	@Test
@@ -44,7 +46,7 @@ class ReportDesignParametersTest {
 		assertThat(ColumnAlignment.left, notNullValue());
 		assertThat(ColumnAlignment.center, notNullValue());
 		assertThat(ColumnAlignment.right, notNullValue());
-		assertFalse(ColumnAlignment.left.equals(ColumnAlignment.center));
+		assertNotEquals(ColumnAlignment.left, ColumnAlignment.center);
 	}
 
 	@Test

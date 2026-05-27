@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.maven.plugin.MojoExecutionException;
@@ -40,7 +39,6 @@ class AbstractSkyveMojoTest {
 	private org.apache.maven.project.MavenProject project;
 
 	@BeforeEach
-	@SuppressWarnings("static-method")
 	void setUp() {
 		mojo = new TestMojo();
 		project = new org.apache.maven.project.MavenProject();
@@ -48,7 +46,6 @@ class AbstractSkyveMojoTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void getModulesDirectoryReturnsPathWhenModulesExists() throws Exception {
 		Path src = tempDir.resolve("src");
 		Files.createDirectories(src.resolve("modules"));
@@ -60,14 +57,12 @@ class AbstractSkyveMojoTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void getModulesDirectoryThrowsWhenModulesAbsent() {
 		project.addCompileSourceRoot(tempDir.toString());
 		assertThrows(FileNotFoundException.class, () -> mojo.getModulesDirectory());
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void getCustomersDirectoryReturnsPathWhenCustomersExists() throws Exception {
 		Path src = tempDir.resolve("src");
 		Files.createDirectories(src.resolve("customers"));
@@ -78,7 +73,6 @@ class AbstractSkyveMojoTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void getCustomerDirectoriesReturnsOnlyDirectories() throws Exception {
 		Path customersDir = tempDir.resolve("customers");
 		Files.createDirectories(customersDir.resolve("customerA"));
@@ -91,13 +85,11 @@ class AbstractSkyveMojoTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void getDefaultOrPromptReturnsDefaultWhenNonBlank() throws Exception {
 		assertEquals("myDefault", mojo.getDefaultOrPrompt("myDefault", "Enter value"));
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void getDefaultOrPromptCallsPrompterWhenDefaultBlank() throws Exception {
 		Prompter mockPrompter = mock(Prompter.class);
 		when(mockPrompter.prompt(anyString())).thenReturn("promptedValue");
@@ -108,7 +100,6 @@ class AbstractSkyveMojoTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void getDefaultOrPromptCustomerReturnsSingleCustomerWithoutPrompt() throws Exception {
 		Path src = tempDir.resolve("src");
 		Files.createDirectories(src.resolve("customers").resolve("onlyCustomer"));
@@ -119,14 +110,12 @@ class AbstractSkyveMojoTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void getDefaultOrPromptCustomerReturnsDefaultWhenNonBlank() throws Exception {
 		String result = mojo.getDefaultOrPromptCustomer("fixedCustomer");
 		assertEquals("fixedCustomer", result);
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void getDefaultOrPromptCustomerPromptsWhenMultipleCustomers() throws Exception {
 		Path src = tempDir.resolve("src");
 		Files.createDirectories(src.resolve("customers").resolve("alpha"));
@@ -142,7 +131,6 @@ class AbstractSkyveMojoTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void getDefaultOrPromptCustomerThrowsWhenSelectedCustomerDoesNotExist() throws Exception {
 		Path src = tempDir.resolve("src");
 		Files.createDirectories(src.resolve("customers").resolve("alpha"));
@@ -157,7 +145,6 @@ class AbstractSkyveMojoTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void getDefaultOrPromptCustomerPromptsWhenNoCustomersDir() throws Exception {
 		Path src = tempDir.resolve("src");
 		Files.createDirectories(src.resolve("customers"));

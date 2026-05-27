@@ -143,6 +143,7 @@ class ReferenceListModelTest {
 	}
 
 	@Test
+	@SuppressWarnings("static-method")
 	void postConstructWithStringConstructorResolvesModuleAndDocument() {
 		Customer customer = mock(Customer.class);
 		Module resolvedModule = mock(Module.class);

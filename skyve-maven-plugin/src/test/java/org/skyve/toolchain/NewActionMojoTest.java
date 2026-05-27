@@ -39,7 +39,6 @@ class NewActionMojoTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void executeCreatesActionClassFile() throws Exception {
 		when(mockPrompter.prompt(anyString()))
 				.thenReturn("testModule")
@@ -53,7 +52,6 @@ class NewActionMojoTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void executeThrowsWhenModuleDoesNotExist() throws Exception {
 		when(mockPrompter.prompt(anyString()))
 				.thenReturn("nonExistentModule")
@@ -64,7 +62,6 @@ class NewActionMojoTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void executeThrowsWhenDocumentDoesNotExist() throws Exception {
 		when(mockPrompter.prompt(anyString()))
 				.thenReturn("testModule")
@@ -75,7 +72,6 @@ class NewActionMojoTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void executeUsesExtensionClassWhenPresent() throws Exception {
 		Path docDir = tempDir.resolve("modules/testModule/TestDocument");
 		Files.writeString(docDir.resolve("TestDocumentExtension.java"), "// extension");

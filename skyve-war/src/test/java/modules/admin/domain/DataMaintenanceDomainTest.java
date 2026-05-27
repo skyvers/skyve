@@ -25,7 +25,7 @@ import util.AbstractH2Test;
 class DataMaintenanceDomainTest extends AbstractH2Test {
 
 	@Test
-	void dataBuilderPopulatesDataMaintenanceBean() throws Exception {
+	void dataBuilderPopulatesDataMaintenanceBean() {
 		DataMaintenance bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(DataMaintenance.MODULE_NAME, DataMaintenance.DOCUMENT_NAME);
@@ -34,14 +34,14 @@ class DataMaintenanceDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void bizModuleAndDocumentAreCorrect() throws Exception {
+	void bizModuleAndDocumentAreCorrect() {
 		DataMaintenance bean = DataMaintenance.newInstance();
 		assertEquals(DataMaintenance.MODULE_NAME, bean.getBizModule());
 		assertEquals(DataMaintenance.DOCUMENT_NAME, bean.getBizDocument());
 	}
 
 	@Test
-	void backupRetentionSetAndGet() throws Exception {
+	void backupRetentionSetAndGet() {
 		DataMaintenance bean = DataMaintenance.newInstance();
 		bean.setDailyBackupRetention(Integer.valueOf(7));
 		bean.setWeeklyBackupRetention(Integer.valueOf(4));
@@ -54,21 +54,21 @@ class DataMaintenanceDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void restorePreProcessSetAndGet() throws Exception {
+	void restorePreProcessSetAndGet() {
 		DataMaintenance bean = DataMaintenance.newInstance();
 		bean.setRestorePreProcess(RestorePreProcess.noProcessing);
 		assertEquals(RestorePreProcess.noProcessing, bean.getRestorePreProcess());
 	}
 
 	@Test
-	void contentRestoreOptionSetAndGet() throws Exception {
+	void contentRestoreOptionSetAndGet() {
 		DataMaintenance bean = DataMaintenance.newInstance();
 		bean.setContentRestoreOption(ContentRestoreOption.error);
 		assertEquals(ContentRestoreOption.error, bean.getContentRestoreOption());
 	}
 
 	@Test
-	void evictOptionSetAndGet() throws Exception {
+	void evictOptionSetAndGet() {
 		DataMaintenance bean = DataMaintenance.newInstance();
 		bean.setEvictOption(EvictOption.all);
 		assertEquals(EvictOption.all, bean.getEvictOption());
@@ -79,21 +79,21 @@ class DataMaintenanceDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void selectedBackupNameSetAndGet() throws Exception {
+	void selectedBackupNameSetAndGet() {
 		DataMaintenance bean = DataMaintenance.newInstance();
 		bean.setSelectedBackupName("backup-20250101.zip");
 		assertEquals("backup-20250101.zip", bean.getSelectedBackupName());
 	}
 
 	@Test
-	void notificationSetAndGet() throws Exception {
+	void notificationSetAndGet() {
 		DataMaintenance bean = DataMaintenance.newInstance();
 		bean.setNotification(Boolean.TRUE);
 		assertEquals(Boolean.TRUE, bean.getNotification());
 	}
 
 	@Test
-	void refreshFlagsSetAndGet() throws Exception {
+	void refreshFlagsSetAndGet() {
 		DataMaintenance bean = DataMaintenance.newInstance();
 		bean.setRefreshBackups(Boolean.FALSE);
 		bean.setRefreshContent(Boolean.FALSE);
@@ -102,7 +102,7 @@ class DataMaintenanceDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void auditFieldsSetAndGet() throws Exception {
+	void auditFieldsSetAndGet() {
 		DataMaintenance bean = DataMaintenance.newInstance();
 		bean.setAuditModuleName("admin");
 		bean.setAuditDocumentName("User");
@@ -114,7 +114,7 @@ class DataMaintenanceDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void schemaNameAndDdlScriptSetAndGet() throws Exception {
+	void schemaNameAndDdlScriptSetAndGet() {
 		DataMaintenance bean = DataMaintenance.newInstance();
 		bean.setSchemaName("skyve");
 		bean.setDdlScript("CREATE TABLE test (id bigint)");
@@ -123,7 +123,6 @@ class DataMaintenanceDomainTest extends AbstractH2Test {
 	}
 
         @Test
-        @SuppressWarnings("static-method")
         void restorePreProcessFromCodeAndFromLocalisedDescription() {
                 assertEquals(RestorePreProcess.noProcessing, RestorePreProcess.fromCode("noProcessing"));
                 assertNull(RestorePreProcess.fromCode("notexist"));
@@ -132,14 +131,12 @@ class DataMaintenanceDomainTest extends AbstractH2Test {
         }
 
         @Test
-        @SuppressWarnings("static-method")
         void restorePreProcessToDomainValues() {
                 assertNotNull(RestorePreProcess.toDomainValues());
                 assertEquals(8, RestorePreProcess.toDomainValues().size());
         }
 
         @Test
-        @SuppressWarnings("static-method")
         void restoreIndexingOptionFromCodeAndFromLocalisedDescription() {
                 assertEquals(RestoreIndexingOption.data, RestoreIndexingOption.fromCode("data"));
                 assertNull(RestoreIndexingOption.fromCode("notexist"));
@@ -148,14 +145,12 @@ class DataMaintenanceDomainTest extends AbstractH2Test {
         }
 
         @Test
-        @SuppressWarnings("static-method")
         void restoreIndexingOptionToDomainValues() {
                 assertNotNull(RestoreIndexingOption.toDomainValues());
                 assertEquals(4, RestoreIndexingOption.toDomainValues().size());
         }
 
         @Test
-        @SuppressWarnings("static-method")
         void contentRestoreOptionFromCodeAndFromLocalisedDescription() {
                 assertEquals(ContentRestoreOption.error, ContentRestoreOption.fromCode("error"));
                 assertNull(ContentRestoreOption.fromCode("notexist"));
@@ -164,35 +159,30 @@ class DataMaintenanceDomainTest extends AbstractH2Test {
         }
 
         @Test
-        @SuppressWarnings("static-method")
         void contentRestoreOptionToDomainValues() {
                 assertNotNull(ContentRestoreOption.toDomainValues());
                 assertEquals(3, ContentRestoreOption.toDomainValues().size());
         }
 
         @Test
-        @SuppressWarnings("static-method")
         void restorePreProcessToCodeAndToDomainValue() {
                 assertNotNull(RestorePreProcess.dropTablesUsingMetadataRecreateTablesFromBackupCreatesql.toCode());
                 assertNotNull(RestorePreProcess.dropTablesUsingMetadataRecreateTablesFromBackupCreatesql.toDomainValue());
         }
 
         @Test
-        @SuppressWarnings("static-method")
         void restoreIndexingOptionToCodeAndToDomainValue() {
                 assertNotNull(RestoreIndexingOption.data.toCode());
                 assertNotNull(RestoreIndexingOption.data.toDomainValue());
         }
 
         @Test
-        @SuppressWarnings("static-method")
         void contentRestoreOptionToCodeAndToDomainValue() {
                 assertNotNull(ContentRestoreOption.error.toCode());
                 assertNotNull(ContentRestoreOption.error.toDomainValue());
         }
 
 	@Test
-	@SuppressWarnings("static-method")
 	void evictOptionFromCodeAndFromLocalisedDescription() {
 		assertEquals(EvictOption.bean, EvictOption.fromCode("Bean"));
 		assertNull(EvictOption.fromCode("nonexistent"));
@@ -202,7 +192,6 @@ class DataMaintenanceDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void refreshOptionFromCodeAndFromLocalisedDescription() {
 		assertEquals(RefreshOption.upsert, RefreshOption.fromCode("Upsert"));
 		assertNull(RefreshOption.fromCode("nonexistent"));

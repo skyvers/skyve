@@ -36,7 +36,7 @@ import org.skyve.metadata.view.fluent.FluentTextField;
  * Tests for {@link FluentAttribute} base class methods, exercised via
  * the concrete {@link FluentText} subclass.
  */
-@SuppressWarnings("static-method")
+@SuppressWarnings({"static-method", "java:S4144"})
 class FluentAttributeTest {
 
 	@Test
@@ -388,8 +388,11 @@ class FluentAttributeTest {
 	void fromWithUnknownDefaultWidgetThrowsIllegalState() {
 		Text text = new Text();
 		WidgetReference ref = new WidgetReference();
-		ref.setWidget(new InputWidget() {});
+		ref.setWidget(new InputWidget() {
+			// intentionally empty unknown widget for error-path coverage
+		});
 		text.setDefaultWidgetReference(ref);
-		assertThrows(IllegalStateException.class, () -> new FluentText().from(text));
+		FluentText fluentText = new FluentText();
+		assertThrows(IllegalStateException.class, () -> fluentText.from(text));
 	}
 }

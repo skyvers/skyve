@@ -8,7 +8,8 @@ import org.junit.jupiter.api.Test;
 /**
  * Tests for ReportManagerUtil static methods.
  */
-public class ReportManagerUtilTest {
+@SuppressWarnings("static-method")
+class ReportManagerUtilTest {
 
 	@Test
 	void getZipNameIsNotNull() {
@@ -38,12 +39,13 @@ public class ReportManagerUtilTest {
 	}
 
 	@Test
-	void getZipNameReturnsNewValueEachCall() throws InterruptedException {
+	void getZipNameReturnsValidValueEachCall() {
 		String name1 = ReportManagerUtil.getZipName();
-		Thread.sleep(1100); // ensure different timestamp (1 second resolution)
 		String name2 = ReportManagerUtil.getZipName();
-		// Names may or may not be the same depending on timing, but both should be valid
+		// Both values should always be valid ZIP names regardless of call timing.
 		assertNotNull(name1);
 		assertNotNull(name2);
+		assertTrue(name1.matches("reportManager_\\d{14}\\.zip"));
+		assertTrue(name2.matches("reportManager_\\d{14}\\.zip"));
 	}
 }

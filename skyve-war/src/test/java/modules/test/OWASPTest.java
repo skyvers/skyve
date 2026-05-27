@@ -15,7 +15,6 @@ import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 
 import modules.test.domain.AllAttributesPersistent;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class OWASPTest extends AbstractSkyveTest {
 

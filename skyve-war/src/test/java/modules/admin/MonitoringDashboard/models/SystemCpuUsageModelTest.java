@@ -15,7 +15,7 @@ import org.skyve.metadata.view.model.chart.ChartData;
 import modules.admin.domain.MonitoringDashboard.Period;
 
 @SuppressWarnings("static-method")
-public class SystemCpuUsageModelTest {
+class SystemCpuUsageModelTest {
 
 	@Test
 	void getChartLabelReturnsCpuUsageLabel() {
@@ -44,7 +44,7 @@ public class SystemCpuUsageModelTest {
 	void setChartColorsWithHighCpuLoadSetsNonNullColor() {
 		SystemCpuUsageModel model = new SystemCpuUsageModel();
 		ChartData cd = new ChartData();
-		List<Number> values = Arrays.asList(90f); // >85% = red
+		List<Number> values = Arrays.<Number>asList(Float.valueOf(90f)); // >85% = red
 		model.setChartColors(cd, values);
 		assertNotNull(cd.getBackground());
 	}
@@ -53,7 +53,7 @@ public class SystemCpuUsageModelTest {
 	void setChartColorsWithLowCpuLoadSetsGreenColor() {
 		SystemCpuUsageModel model = new SystemCpuUsageModel();
 		ChartData cd = new ChartData();
-		List<Number> values = Arrays.asList(30f); // <50% = green
+		List<Number> values = Arrays.<Number>asList(Float.valueOf(30f)); // <50% = green
 		model.setChartColors(cd, values);
 		assertNotNull(cd.getBackground());
 	}

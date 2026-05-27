@@ -70,6 +70,7 @@ import jakarta.ws.rs.sse.SseEventSource;
  * {@link #clearReceiversAfterTest()} so that tests do not interfere with each
  * other.
  */
+@SuppressWarnings({"resource", "boxing", "java:S4144", "java:S1612", "java:S2925"})
 class SseClientHandlerTest extends JerseyTest {
 
 	private static final String TEST_USER_ID = "dead-beef";
@@ -79,6 +80,7 @@ class SseClientHandlerTest extends JerseyTest {
 	 * that static state from one test cannot affect another.
 	 */
 	@BeforeEach
+	@SuppressWarnings("static-method")
 	void clearReceiversBeforeTest() {
 		org.skyve.util.PushMessage.stopReaper();
 		org.skyve.util.PushMessage.RECEIVERS.clear();
@@ -89,6 +91,7 @@ class SseClientHandlerTest extends JerseyTest {
 	 * in case a test threw before reaching its own finally block.
 	 */
 	@AfterEach
+	@SuppressWarnings("static-method")
 	void clearReceiversAfterTest() {
 		org.skyve.util.PushMessage.stopReaper();
 		org.skyve.util.PushMessage.RECEIVERS.clear();
@@ -223,7 +226,6 @@ class SseClientHandlerTest extends JerseyTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testStreamRejectedWhenGlobalReceiverLimitReached() {
 		int originalMaxTotal = UtilImpl.PUSH_MAX_RECEIVERS_TOTAL;
 		try {

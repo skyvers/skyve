@@ -16,6 +16,7 @@ import org.skyve.domain.types.Decimal10;
 /**
  * Tests for the static type-dispatch methods of {@link ListModel}.
  */
+@SuppressWarnings("static-method")
 class ListModelStaticMethodTest {
 
 	// ===== addEquals =====
@@ -83,7 +84,8 @@ class ListModelStaticMethodTest {
 	@Test
 	void addEqualsWithUnsupportedTypeThrows() {
 		Filter filter = mock(Filter.class);
-		assertThrows(IllegalArgumentException.class, () -> ListModel.addEquals(filter, "field", new Object()));
+		Object value = new Object();
+		assertThrows(IllegalArgumentException.class, () -> ListModel.addEquals(filter, "field", value));
 	}
 
 	// ===== addNotEquals =====
@@ -151,7 +153,8 @@ class ListModelStaticMethodTest {
 	@Test
 	void addNotEqualsWithUnsupportedTypeThrows() {
 		Filter filter = mock(Filter.class);
-		assertThrows(IllegalArgumentException.class, () -> ListModel.addNotEquals(filter, "field", new Object()));
+		Object value = new Object();
+		assertThrows(IllegalArgumentException.class, () -> ListModel.addNotEquals(filter, "field", value));
 	}
 
 	// ===== addGreaterThan =====

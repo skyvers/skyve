@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
-import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
@@ -15,10 +14,10 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
-public class UserDomainTest extends AbstractH2Test {
+class UserDomainTest extends AbstractH2Test {
 
         @Test
-        void dataBuilderCreatesUser() throws Exception {
+        void dataBuilderCreatesUser() {
                 User bean = new DataBuilder()
                                 .fixture(FixtureType.crud)
                                 .build(User.MODULE_NAME, User.DOCUMENT_NAME);
@@ -26,21 +25,21 @@ public class UserDomainTest extends AbstractH2Test {
         }
 
         @Test
-        void moduleAndDocumentNames() throws Exception {
+        void moduleAndDocumentNames() {
                 User bean = User.newInstance();
                 assertEquals("admin", bean.getBizModule());
                 assertEquals("User", bean.getBizDocument());
         }
 
         @Test
-        void passwordHashSetAndGet() throws Exception {
+        void passwordHashSetAndGet() {
                 User bean = User.newInstance();
                 bean.setPassword("hash123");
                 assertEquals("hash123", bean.getPassword());
         }
 
         @Test
-        void activeFlagSetAndGet() throws Exception {
+        void activeFlagSetAndGet() {
                 User bean = User.newInstance();
                 bean.setInactive(Boolean.TRUE);
                 assertEquals(Boolean.TRUE, bean.getInactive());
@@ -91,14 +90,14 @@ public class UserDomainTest extends AbstractH2Test {
         }
 
         @Test
-        void wizardStateSetAndGet() throws Exception {
+        void wizardStateSetAndGet() {
                 User bean = User.newInstance();
                 bean.setWizardState(User.WizardState.confirmContact);
                 assertEquals(User.WizardState.confirmContact, bean.getWizardState());
         }
 
         @Test
-        void conditionConfirmContactTrueWhenWizardStateMatches() throws Exception {
+        void conditionConfirmContactTrueWhenWizardStateMatches() {
                 User bean = User.newInstance();
                 bean.setWizardState(User.WizardState.confirmContact);
                 assertTrue(bean.isConfirmContact());
@@ -106,7 +105,7 @@ public class UserDomainTest extends AbstractH2Test {
         }
 
         @Test
-        void conditionConfirmContactFalseWhenOtherState() throws Exception {
+        void conditionConfirmContactFalseWhenOtherState() {
                 User bean = User.newInstance();
                 bean.setWizardState(User.WizardState.createContact);
                 assertFalse(bean.isConfirmContact());
@@ -114,7 +113,7 @@ public class UserDomainTest extends AbstractH2Test {
         }
 
         @Test
-        void conditionCreateContactTrueWhenWizardStateMatches() throws Exception {
+        void conditionCreateContactTrueWhenWizardStateMatches() {
                 User bean = User.newInstance();
                 bean.setWizardState(User.WizardState.createContact);
                 assertTrue(bean.isCreateContact());
@@ -122,7 +121,7 @@ public class UserDomainTest extends AbstractH2Test {
         }
 
         @Test
-        void conditionConfirmGroupMembershipsWhenWizardStateMatches() throws Exception {
+        void conditionConfirmGroupMembershipsWhenWizardStateMatches() {
                 User bean = User.newInstance();
                 bean.setWizardState(User.WizardState.confirmGroupMemberships);
                 assertTrue(bean.isConfirmGroupMemberships());
@@ -130,7 +129,7 @@ public class UserDomainTest extends AbstractH2Test {
         }
 
         @Test
-        void conditionConfirmUserNameAndPasswordWhenWizardStateMatches() throws Exception {
+        void conditionConfirmUserNameAndPasswordWhenWizardStateMatches() {
                 User bean = User.newInstance();
                 bean.setWizardState(User.WizardState.confirmUserNameAndPassword);
                 assertTrue(bean.isConfirmUserNameAndPassword());
@@ -138,63 +137,63 @@ public class UserDomainTest extends AbstractH2Test {
         }
 
         @Test
-        void conditionCandidateContactsEmptyInitially() throws Exception {
+        void conditionCandidateContactsEmptyInitially() {
                 User bean = User.newInstance();
                 assertTrue(bean.isCandidateContactsEmpty());
                 assertFalse(bean.isNotCandidateContactsEmpty());
         }
 
         @Test
-        void homeModuleSetAndGet() throws Exception {
+        void homeModuleSetAndGet() {
                 User bean = User.newInstance();
                 bean.setHomeModule("admin");
                 assertEquals("admin", bean.getHomeModule());
         }
 
         @Test
-        void generatedPasswordSetAndGet() throws Exception {
+        void generatedPasswordSetAndGet() {
                 User bean = User.newInstance();
                 bean.setGeneratedPassword("genpass123");
                 assertEquals("genpass123", bean.getGeneratedPassword());
         }
 
         @Test
-        void newPasswordSetAndGet() throws Exception {
+        void newPasswordSetAndGet() {
                 User bean = User.newInstance();
                 bean.setNewPassword("new123");
                 assertEquals("new123", bean.getNewPassword());
         }
 
         @Test
-        void confirmPasswordSetAndGet() throws Exception {
+        void confirmPasswordSetAndGet() {
                 User bean = User.newInstance();
                 bean.setConfirmPassword("confirm123");
                 assertEquals("confirm123", bean.getConfirmPassword());
         }
 
         @Test
-        void legacyIdSetAndGet() throws Exception {
+        void legacyIdSetAndGet() {
                 User bean = User.newInstance();
                 bean.setLegacyId("legacy-001");
                 assertEquals("legacy-001", bean.getLegacyId());
         }
 
         @Test
-        void passwordExpiredSetAndGet() throws Exception {
+        void passwordExpiredSetAndGet() {
                 User bean = User.newInstance();
                 bean.setPasswordExpired(Boolean.TRUE);
                 assertEquals(Boolean.TRUE, bean.getPasswordExpired());
         }
 
         @Test
-        void passwordLastChangedIPSetAndGet() throws Exception {
+        void passwordLastChangedIPSetAndGet() {
                 User bean = User.newInstance();
                 bean.setPasswordLastChangedIP("192.168.1.1");
                 assertEquals("192.168.1.1", bean.getPasswordLastChangedIP());
         }
 
         @Test
-        void passwordLastChangedCountryCodeSetAndGet() throws Exception {
+        void passwordLastChangedCountryCodeSetAndGet() {
                 User bean = User.newInstance();
                 bean.setPasswordLastChangedCountryCode("AU");
                 assertEquals("AU", bean.getPasswordLastChangedCountryCode());
@@ -202,28 +201,28 @@ public class UserDomainTest extends AbstractH2Test {
 
 
         @Test
-        void passwordResetTokenSetAndGet() throws Exception {
+        void passwordResetTokenSetAndGet() {
                 User bean = User.newInstance();
                 bean.setPasswordResetToken("reset-token-abc");
                 assertEquals("reset-token-abc", bean.getPasswordResetToken());
         }
 
         @Test
-        void passwordHistorySetAndGet() throws Exception {
+        void passwordHistorySetAndGet() {
                 User bean = User.newInstance();
                 bean.setPasswordHistory("old-hash-1|old-hash-2");
                 assertEquals("old-hash-1|old-hash-2", bean.getPasswordHistory());
         }
 
         @Test
-        void authenticationFailuresSetAndGet() throws Exception {
+        void authenticationFailuresSetAndGet() {
                 User bean = User.newInstance();
                 bean.setAuthenticationFailures(Integer.valueOf(3));
                 assertEquals(Integer.valueOf(3), bean.getAuthenticationFailures());
         }
 
         @Test
-        void lastAuthenticationFailureSetAndGet() throws Exception {
+        void lastAuthenticationFailureSetAndGet() {
                 User bean = User.newInstance();
                 Timestamp now = new Timestamp();
                 bean.setLastAuthenticationFailure(now);
@@ -231,28 +230,28 @@ public class UserDomainTest extends AbstractH2Test {
         }
 
         @Test
-        void groupSelectionSetAndGet() throws Exception {
+        void groupSelectionSetAndGet() {
                 User bean = User.newInstance();
                 bean.setGroupSelection(User.GroupSelection.newGroup);
                 assertEquals(User.GroupSelection.newGroup, bean.getGroupSelection());
         }
 
         @Test
-        void groupsExistSetAndGet() throws Exception {
+        void groupsExistSetAndGet() {
                 User bean = User.newInstance();
                 bean.setGroupsExist(Boolean.TRUE);
                 assertEquals(Boolean.TRUE, bean.getGroupsExist());
         }
 
         @Test
-        void activatedSetAndGet() throws Exception {
+        void activatedSetAndGet() {
                 User bean = User.newInstance();
                 bean.setActivated(Boolean.TRUE);
                 assertEquals(Boolean.TRUE, bean.getActivated());
         }
 
         @Test
-        void activationCodeSetAndGet() throws Exception {
+        void activationCodeSetAndGet() {
                 User bean = User.newInstance();
                 bean.setActivationCode("ACT-123456");
                 assertEquals("ACT-123456", bean.getActivationCode());
@@ -260,42 +259,42 @@ public class UserDomainTest extends AbstractH2Test {
 
 
         @Test
-        void twoFactorCodeSetAndGet() throws Exception {
+        void twoFactorCodeSetAndGet() {
                 User bean = User.newInstance();
                 bean.setTwoFactorCode("654321");
                 assertEquals("654321", bean.getTwoFactorCode());
         }
 
         @Test
-        void twoFactorTokenSetAndGet() throws Exception {
+        void twoFactorTokenSetAndGet() {
                 User bean = User.newInstance();
                 bean.setTwoFactorToken("token-xyz");
                 assertEquals("token-xyz", bean.getTwoFactorToken());
         }
 
         @Test
-        void searchContactNameSetAndGet() throws Exception {
+        void searchContactNameSetAndGet() {
                 User bean = User.newInstance();
                 bean.setSearchContactName("John");
                 assertEquals("John", bean.getSearchContactName());
         }
 
         @Test
-        void searchEmailSetAndGet() throws Exception {
+        void searchEmailSetAndGet() {
                 User bean = User.newInstance();
                 bean.setSearchEmail("john@example.com");
                 assertEquals("john@example.com", bean.getSearchEmail());
         }
 
         @Test
-        void contactSelectedSetAndGet() throws Exception {
+        void contactSelectedSetAndGet() {
                 User bean = User.newInstance();
                 bean.setContactSelected(Boolean.TRUE);
                 assertEquals(Boolean.TRUE, bean.getContactSelected());
         }
 
         @Test
-        void conditionShowNextButtonTrueWhenCreateContact() throws Exception {
+        void conditionShowNextButtonTrueWhenCreateContact() {
                 User bean = User.newInstance();
                 bean.setWizardState(User.WizardState.createContact);
                 assertTrue(bean.isShowNextButton());
@@ -303,7 +302,7 @@ public class UserDomainTest extends AbstractH2Test {
         }
 
         @Test
-        void conditionShowNextButtonFalseWhenConfirmContact() throws Exception {
+        void conditionShowNextButtonFalseWhenConfirmContact() {
                 User bean = User.newInstance();
                 bean.setWizardState(User.WizardState.confirmContact);
                 assertFalse(bean.isShowNextButton());
@@ -388,7 +387,8 @@ public class UserDomainTest extends AbstractH2Test {
         }
 
         @Test
-        void isConfirmGroupMembershipsWhenStateSet() throws Exception {
+        @SuppressWarnings("java:S4144")
+        void isConfirmGroupMembershipsWhenStateSet() {
                 User bean = User.newInstance();
                 bean.setWizardState(User.WizardState.confirmGroupMemberships);
                 assertTrue(bean.isConfirmGroupMemberships());
@@ -396,7 +396,8 @@ public class UserDomainTest extends AbstractH2Test {
         }
 
         @Test
-        void isConfirmUserNameAndPasswordWhenStateSet() throws Exception {
+        @SuppressWarnings("java:S4144")
+        void isConfirmUserNameAndPasswordWhenStateSet() {
                 User bean = User.newInstance();
                 bean.setWizardState(User.WizardState.confirmUserNameAndPassword);
                 assertTrue(bean.isConfirmUserNameAndPassword());
@@ -404,7 +405,7 @@ public class UserDomainTest extends AbstractH2Test {
         }
 
         @Test
-        void isShowExistingGroupsWhenExistingGroupsSet() throws Exception {
+        void isShowExistingGroupsWhenExistingGroupsSet() {
                 User bean = User.newInstance();
                 bean.setGroupSelection(User.GroupSelection.existingGroups);
                 assertTrue(bean.isShowExistingGroups());
@@ -412,7 +413,7 @@ public class UserDomainTest extends AbstractH2Test {
         }
 
         @Test
-        void isShowGroupCreatorWhenNewGroupSet() throws Exception {
+        void isShowGroupCreatorWhenNewGroupSet() {
                 User bean = User.newInstance();
                 bean.setGroupSelection(User.GroupSelection.newGroup);
                 assertTrue(bean.isShowGroupCreator());
@@ -420,7 +421,8 @@ public class UserDomainTest extends AbstractH2Test {
         }
 
         @Test
-        void isCreateContactWhenStateSet() throws Exception {
+        @SuppressWarnings("java:S4144")
+        void isCreateContactWhenStateSet() {
                 User bean = User.newInstance();
                 bean.setWizardState(User.WizardState.createContact);
                 assertTrue(bean.isCreateContact());
@@ -428,7 +430,8 @@ public class UserDomainTest extends AbstractH2Test {
         }
 
         @Test
-        void isConfirmContactWhenStateSet() throws Exception {
+        @SuppressWarnings("java:S4144")
+        void isConfirmContactWhenStateSet() {
                 User bean = User.newInstance();
                 bean.setWizardState(User.WizardState.confirmContact);
                 assertTrue(bean.isConfirmContact());
@@ -436,54 +439,56 @@ public class UserDomainTest extends AbstractH2Test {
         }
 
         @Test
-        void isAccessDeniedConditions() throws Exception {
+        void isAccessDeniedConditions() {
                 User bean = User.newInstance();
                 assertFalse(bean.isAccessDenied());
                 assertTrue(bean.isNotAccessDenied());
         }
 
         @Test
-        void isDesignerConditions() throws Exception {
+        @SuppressWarnings("boxing")
+        void isDesignerConditions() {
                 User bean = User.newInstance();
                 assertEquals(!bean.isDesigner(), bean.isNotDesigner());
         }
 
         @Test
-        void isInDataGroupConditions() throws Exception {
+        void isInDataGroupConditions() {
                 User bean = User.newInstance();
                 assertFalse(bean.isInDataGroup());
                 assertTrue(bean.isNotInDataGroup());
         }
 
         @Test
-        void isOwningUserConditions() throws Exception {
+        void isOwningUserConditions() {
                 User bean = User.newInstance();
                 assertFalse(bean.isOwningUser());
                 assertTrue(bean.isNotOwningUser());
         }
 
         @Test
-        void isSecurityAdministratorConditions() throws Exception {
+        @SuppressWarnings("boxing")
+        void isSecurityAdministratorConditions() {
                 User bean = User.newInstance();
                 assertEquals(!bean.isSecurityAdministrator(), bean.isNotSecurityAdministrator());
         }
 
         @Test
-        void isSelfRegistrationEnabledConditions() throws Exception {
+        void isSelfRegistrationEnabledConditions() {
                 User bean = User.newInstance();
                 assertFalse(bean.isSelfRegistrationEnabled());
                 assertTrue(bean.isNotSelfRegistrationEnabled());
         }
 
         @Test
-        void isCreatedConditions() throws Exception {
+        void isCreatedConditions() {
                 User bean = User.newInstance();
                 assertFalse(bean.isCreated());
                 assertTrue(bean.isNotCreated());
         }
 
         @Test
-        void rolesAddAndGet() throws Exception {
+        void rolesAddAndGet() {
                 User bean = User.newInstance();
                 assertTrue(bean.getRoles().isEmpty());
                 UserRole role = new UserRole();
@@ -493,7 +498,7 @@ public class UserDomainTest extends AbstractH2Test {
         }
 
         @Test
-        void rolesRemove() throws Exception {
+        void rolesRemove() {
                 User bean = User.newInstance();
                 UserRole role = new UserRole();
                 bean.addRolesElement(role);
@@ -502,7 +507,7 @@ public class UserDomainTest extends AbstractH2Test {
         }
 
         @Test
-        void groupsAddAndGet() throws Exception {
+        void groupsAddAndGet() {
                 User bean = User.newInstance();
                 assertTrue(bean.getGroups().isEmpty());
                 modules.admin.Group.GroupExtension group = new modules.admin.Group.GroupExtension();
@@ -512,7 +517,7 @@ public class UserDomainTest extends AbstractH2Test {
         }
 
         @Test
-        void groupsRemove() throws Exception {
+        void groupsRemove() {
                 User bean = User.newInstance();
                 modules.admin.Group.GroupExtension group = new modules.admin.Group.GroupExtension();
                 bean.addGroupsElement(group);
@@ -521,7 +526,7 @@ public class UserDomainTest extends AbstractH2Test {
         }
 
         @Test
-        void candidateContactsAddAndGet() throws Exception {
+        void candidateContactsAddAndGet() {
                 User bean = User.newInstance();
                 assertTrue(bean.getCandidateContacts().isEmpty());
                 UserCandidateContact candidate = new UserCandidateContact();

@@ -139,7 +139,10 @@ class TwoFactorAuthPushFilterLockoutH2Test extends AbstractH2Test {
 	}
 
 	private static org.springframework.security.core.Authentication failAuthenticationAndRecordFailure(String fullUsername,
-																										org.springframework.security.core.Authentication authentication) {
+																		org.springframework.security.core.Authentication authentication) {
+		if (authentication != null) {
+			authentication.getName();
+		}
 		recordLoginFailure(fullUsername);
 		throw new BadCredentialsException("bad code");
 	}
@@ -314,9 +317,10 @@ class TwoFactorAuthPushFilterLockoutH2Test extends AbstractH2Test {
 		return request;
 	}
 
-	private static HttpServletResponse loginResponse() throws Exception {
+	@SuppressWarnings("boxing")
+	private static HttpServletResponse loginResponse() {
 		HttpServletResponse response = mock(HttpServletResponse.class);
-		when(response.isCommitted()).thenReturn(false);
+		when(response.isCommitted()).thenReturn(Boolean.FALSE);
 		when(response.encodeRedirectURL(anyString())).thenAnswer(invocation -> invocation.getArgument(0));
 		return response;
 	}

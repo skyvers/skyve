@@ -49,7 +49,6 @@ class SendMailTest {
 		UtilImpl.SMTP_TEST_BOGUS_SEND = originalSmtpTestBogusSend;
 	}
 
-	@SuppressWarnings({ "boxing", "static-method" })
 	@Test
 	void testExecuteUsesExtMailService() throws Exception {
 		ConfigurationExtension bean = mock(ConfigurationExtension.class);

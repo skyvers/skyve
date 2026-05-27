@@ -37,7 +37,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@SuppressWarnings("static-method")
+@SuppressWarnings({"static-method", "boxing"})
 class CustomerImplTest {
 
 	@Test
@@ -150,7 +150,7 @@ class CustomerImplTest {
 	}
 
 	@Test
-	void testInterceptAfterNewInstanceWithNoInterceptors() throws Exception {
+	void testInterceptAfterNewInstanceWithNoInterceptors() {
 		CustomerImpl customer = new CustomerImpl();
 		assertDoesNotThrow(() -> customer.interceptAfterNewInstance(null));
 	}
@@ -162,7 +162,7 @@ class CustomerImplTest {
 	}
 
 	@Test
-	void testInterceptAfterValidateWithNoInterceptors() throws Exception {
+	void testInterceptAfterValidateWithNoInterceptors() {
 		CustomerImpl customer = new CustomerImpl();
 		assertDoesNotThrow(() -> customer.interceptAfterValidate(null, null));
 	}
@@ -174,7 +174,7 @@ class CustomerImplTest {
 	}
 
 	@Test
-	void testInterceptAfterGetConstantDomainValuesWithNoInterceptors() throws Exception {
+	void testInterceptAfterGetConstantDomainValuesWithNoInterceptors() {
 		CustomerImpl customer = new CustomerImpl();
 		assertDoesNotThrow(() -> customer.interceptAfterGetConstantDomainValues("attr", new ArrayList<>()));
 	}
@@ -186,7 +186,7 @@ class CustomerImplTest {
 	}
 
 	@Test
-	void testInterceptAfterGetVariantDomainValuesWithNoInterceptors() throws Exception {
+	void testInterceptAfterGetVariantDomainValuesWithNoInterceptors() {
 		CustomerImpl customer = new CustomerImpl();
 		assertDoesNotThrow(() -> customer.interceptAfterGetVariantDomainValues("attr", new ArrayList<>()));
 	}
@@ -198,7 +198,7 @@ class CustomerImplTest {
 	}
 
 	@Test
-	void testInterceptAfterGetDynamicDomainValuesWithNoInterceptors() throws Exception {
+	void testInterceptAfterGetDynamicDomainValuesWithNoInterceptors() {
 		CustomerImpl customer = new CustomerImpl();
 		assertDoesNotThrow(() -> customer.interceptAfterGetDynamicDomainValues("attr", null, new ArrayList<>()));
 	}
@@ -210,7 +210,7 @@ class CustomerImplTest {
 	}
 
 	@Test
-	void testInterceptAfterCompleteWithNoInterceptors() throws Exception {
+	void testInterceptAfterCompleteWithNoInterceptors() {
 		CustomerImpl customer = new CustomerImpl();
 		assertDoesNotThrow(() -> customer.interceptAfterComplete("attr", "val", null, new ArrayList<>()));
 	}
@@ -222,7 +222,7 @@ class CustomerImplTest {
 	}
 
 	@Test
-	void testInterceptAfterSaveWithNoInterceptors() throws Exception {
+	void testInterceptAfterSaveWithNoInterceptors() {
 		CustomerImpl customer = new CustomerImpl();
 		assertDoesNotThrow(() -> customer.interceptAfterSave(null, null));
 	}
@@ -234,7 +234,7 @@ class CustomerImplTest {
 	}
 
 	@Test
-	void testInterceptAfterPreSaveWithNoInterceptors() throws Exception {
+	void testInterceptAfterPreSaveWithNoInterceptors() {
 		CustomerImpl customer = new CustomerImpl();
 		assertDoesNotThrow(() -> customer.interceptAfterPreSave(null));
 	}
@@ -246,7 +246,7 @@ class CustomerImplTest {
 	}
 
 	@Test
-	void testInterceptAfterPostSaveWithNoInterceptors() throws Exception {
+	void testInterceptAfterPostSaveWithNoInterceptors() {
 		CustomerImpl customer = new CustomerImpl();
 		assertDoesNotThrow(() -> customer.interceptAfterPostSave(null));
 	}
@@ -258,7 +258,7 @@ class CustomerImplTest {
 	}
 
 	@Test
-	void testInterceptAfterDeleteWithNoInterceptors() throws Exception {
+	void testInterceptAfterDeleteWithNoInterceptors() {
 		CustomerImpl customer = new CustomerImpl();
 		assertDoesNotThrow(() -> customer.interceptAfterDelete(null, null));
 	}
@@ -270,7 +270,7 @@ class CustomerImplTest {
 	}
 
 	@Test
-	void testInterceptAfterPreDeleteWithNoInterceptors() throws Exception {
+	void testInterceptAfterPreDeleteWithNoInterceptors() {
 		CustomerImpl customer = new CustomerImpl();
 		assertDoesNotThrow(() -> customer.interceptAfterPreDelete(null));
 	}
@@ -282,7 +282,7 @@ class CustomerImplTest {
 	}
 
 	@Test
-	void testInterceptAfterPostDeleteWithNoInterceptors() throws Exception {
+	void testInterceptAfterPostDeleteWithNoInterceptors() {
 		CustomerImpl customer = new CustomerImpl();
 		assertDoesNotThrow(() -> customer.interceptAfterPostDelete(null));
 	}
@@ -294,7 +294,7 @@ class CustomerImplTest {
 	}
 
 	@Test
-	void testInterceptAfterPostLoadWithNoInterceptors() throws Exception {
+	void testInterceptAfterPostLoadWithNoInterceptors() {
 		CustomerImpl customer = new CustomerImpl();
 		assertDoesNotThrow(() -> customer.interceptAfterPostLoad(null));
 	}
@@ -306,7 +306,7 @@ class CustomerImplTest {
 	}
 
 	@Test
-	void testInterceptAfterPreExecuteWithNoInterceptors() throws Exception {
+	void testInterceptAfterPreExecuteWithNoInterceptors() {
 		CustomerImpl customer = new CustomerImpl();
 		assertDoesNotThrow(() -> customer.interceptAfterPreExecute(null, null, null, (WebContext) null));
 	}
@@ -318,7 +318,7 @@ class CustomerImplTest {
 	}
 
 	@Test
-	void testInterceptAfterPreRerenderWithNoInterceptors() throws Exception {
+	void testInterceptAfterPreRerenderWithNoInterceptors() {
 		CustomerImpl customer = new CustomerImpl();
 		assertDoesNotThrow(() -> customer.interceptAfterPreRerender(null, null, (WebContext) null));
 	}
@@ -330,7 +330,7 @@ class CustomerImplTest {
 	}
 
 	@Test
-	void testInterceptAfterServerSideActionWithNoInterceptors() throws Exception {
+	void testInterceptAfterServerSideActionWithNoInterceptors() {
 		CustomerImpl customer = new CustomerImpl();
 		assertDoesNotThrow(() -> customer.interceptAfterServerSideAction(null, null, null, (WebContext) null));
 	}
@@ -342,7 +342,7 @@ class CustomerImplTest {
 	}
 
 	@Test
-	void testInterceptAfterDownloadActionWithNoInterceptors() throws Exception {
+	void testInterceptAfterDownloadActionWithNoInterceptors() {
 		CustomerImpl customer = new CustomerImpl();
 		assertDoesNotThrow(() -> customer.interceptAfterDownloadAction(null, null, null, null, (WebContext) null));
 	}
@@ -354,7 +354,7 @@ class CustomerImplTest {
 	}
 
 	@Test
-	void testInterceptAfterUploadActionWithNoInterceptors() throws Exception {
+	void testInterceptAfterUploadActionWithNoInterceptors() {
 		CustomerImpl customer = new CustomerImpl();
 		assertDoesNotThrow(() -> customer.interceptAfterUploadAction(null, null, null, null, (WebContext) null));
 	}
@@ -366,7 +366,7 @@ class CustomerImplTest {
 	}
 
 	@Test
-	void testInterceptAfterBizImportActionWithNoInterceptors() throws Exception {
+	void testInterceptAfterBizImportActionWithNoInterceptors() {
 		CustomerImpl customer = new CustomerImpl();
 		assertDoesNotThrow(() -> customer.interceptAfterBizImportAction(null, null, null, null));
 	}
@@ -378,7 +378,7 @@ class CustomerImplTest {
 	}
 
 	@Test
-	void testInterceptAfterBizExportActionWithNoInterceptors() throws Exception {
+	void testInterceptAfterBizExportActionWithNoInterceptors() {
 		CustomerImpl customer = new CustomerImpl();
 		assertDoesNotThrow(() -> customer.interceptAfterBizExportAction(null, null, null, (WebContext) null));
 	}
@@ -1062,7 +1062,6 @@ class CustomerImplTest {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	void interceptAfterServerSideActionCallsInterceptor() throws Exception {
 		Interceptor interceptor = mock(Interceptor.class);
 		CustomerImpl customer = customerWithInterceptor(interceptor);
@@ -1251,7 +1250,7 @@ class CustomerImplTest {
 	}
 
 	@Test
-	void notifyLoginCallsObserver() throws Exception {
+	void notifyLoginCallsObserver() {
 		Observer observer = mock(Observer.class);
 		CustomerImpl customer = customerWithObserver(observer);
 		org.skyve.metadata.user.User user = mock(org.skyve.metadata.user.User.class);
@@ -1261,7 +1260,7 @@ class CustomerImplTest {
 	}
 
 	@Test
-	void notifyLogoutCallsObserver() throws Exception {
+	void notifyLogoutCallsObserver() {
 		Observer observer = mock(Observer.class);
 		CustomerImpl customer = customerWithObserver(observer);
 		org.skyve.metadata.user.User user = mock(org.skyve.metadata.user.User.class);
@@ -1273,7 +1272,6 @@ class CustomerImplTest {
 	// ---- derivations / exportedReferences ----
 
 	@Test
-	@SuppressWarnings("static-method")
 	void getBaseDocumentReturnsNullWhenDerivationsMapIsEmpty() {
 		CustomerImpl customer = new CustomerImpl();
 		Document doc = Mockito.mock(Document.class);
@@ -1283,7 +1281,6 @@ class CustomerImplTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void getDerivedDocumentsReturnsEmptyListWhenDerivationsMapIsEmpty() {
 		CustomerImpl customer = new CustomerImpl();
 		Document doc = Mockito.mock(Document.class);
@@ -1295,7 +1292,7 @@ class CustomerImplTest {
 	}
 
 	@Test
-	@SuppressWarnings({"static-method", "unchecked"})
+	@SuppressWarnings("unchecked")
 	void getDerivedDocumentsReturnsMatchingEntriesWhenDerivationsPopulated() throws Exception {
 		CustomerImpl customer = new CustomerImpl();
 		java.lang.reflect.Field derivationsField = CustomerImpl.class.getDeclaredField("derivations");
@@ -1313,7 +1310,7 @@ class CustomerImplTest {
 	}
 
 	@Test
-	@SuppressWarnings({"static-method", "unchecked"})
+	@SuppressWarnings("unchecked")
 	void getBaseDocumentReturnsValueWhenDerivationsContainsKey() throws Exception {
 		CustomerImpl customer = new CustomerImpl();
 		java.lang.reflect.Field derivationsField = CustomerImpl.class.getDeclaredField("derivations");
@@ -1329,7 +1326,6 @@ class CustomerImplTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void getExportedReferencesReturnsNullWhenMapIsEmpty() {
 		CustomerImpl customer = new CustomerImpl();
 		Document doc = Mockito.mock(Document.class);

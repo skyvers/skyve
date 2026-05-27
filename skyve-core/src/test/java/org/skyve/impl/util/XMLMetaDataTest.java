@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.regex.Matcher;
@@ -106,8 +107,7 @@ class XMLMetaDataTest {
 
 		assertTrue(result.contains("name=\"TestDocument\""));
 		assertTrue(result.contains("<displayName>Attribute 1</displayName>"));
-		assertThat(result.contains("<validator max=\"10\" min=\"0\" validationMessage=\"Value must be between 0 and 10\"/>"),
-				is(true));
+		assertTrue(result.contains("<validator max=\"10\" min=\"0\" validationMessage=\"Value must be between 0 and 10\"/>"));
 	}
 
 	@Test
@@ -689,7 +689,6 @@ class XMLMetaDataTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testConvertSucceedsWhenGeneratedSetOnPersistentField() {
 		// setup the test data - document IS persistent, field has default persistence
 		DocumentMetaData document = createDocument();
@@ -780,8 +779,7 @@ class XMLMetaDataTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	void testMarshalRouterRoundtrips() throws Exception {
+	void testMarshalRouterRoundtrips() {
 		Router router = new Router();
 		router.setUxuiSelectorClassName("org.skyve.impl.metadata.repository.router.TaggingUxUiSelector");
 		String xml = XMLMetaData.marshalRouter(router);
@@ -792,7 +790,6 @@ class XMLMetaDataTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testMarshalRouterProducesXml() {
 		Router router = new Router();
 		String xml = XMLMetaData.marshalRouter(router);
@@ -801,7 +798,6 @@ class XMLMetaDataTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testUnmarshalRouterStringReturnsRouter() {
 		String xml = XMLMetaData.marshalRouter(new Router());
 		Router result = XMLMetaData.unmarshalRouterString(xml);
@@ -809,8 +805,7 @@ class XMLMetaDataTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	void testMarshalBizletRoundtrips() throws Exception {
+	void testMarshalBizletRoundtrips() {
 		BizletMetaData bizlet = new BizletMetaData();
 		bizlet.setDocumentation("Test bizlet");
 		String xml = XMLMetaData.marshalBizlet(bizlet, false);
@@ -820,8 +815,7 @@ class XMLMetaDataTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	void testMarshalBizletCustomerOverriddenRoundtrips() throws Exception {
+	void testMarshalBizletCustomerOverriddenRoundtrips() {
 		BizletMetaData bizlet = new BizletMetaData();
 		String xml = XMLMetaData.marshalBizlet(bizlet, true);
 		assertThat(xml, is(notNullValue()));
@@ -830,8 +824,7 @@ class XMLMetaDataTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	void testMarshalActionRoundtrips() throws Exception {
+	void testMarshalActionRoundtrips() {
 		ActionMetaData action = new ActionMetaData();
 		action.setName("TestAction");
 		String xml = XMLMetaData.marshalAction(action, false);
@@ -842,8 +835,7 @@ class XMLMetaDataTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	void testMarshalActionCustomerOverriddenRoundtrips() throws Exception {
+	void testMarshalActionCustomerOverriddenRoundtrips() {
 		ActionMetaData action = new ActionMetaData();
 		action.setName("TestAction");
 		String xml = XMLMetaData.marshalAction(action, true);
@@ -854,7 +846,7 @@ class XMLMetaDataTest {
 	}
 
 	@Test
-	void testMarshalCustomerRoundtrips() throws Exception {
+	void testMarshalCustomerRoundtrips() {
 		CustomerMetaData customer = new CustomerMetaData();
 		customer.setName("testcustomer");
 		String xml = XMLMetaData.marshalCustomer(customer);
@@ -872,7 +864,7 @@ class XMLMetaDataTest {
 	}
 
 	@Test
-	void testMarshalModuleRoundtrips() throws Exception {
+	void testMarshalModuleRoundtrips() {
 		ModuleMetaData module = new ModuleMetaData();
 		module.setTitle("Test Module");
 		module.setName("testmodule");
@@ -882,7 +874,7 @@ class XMLMetaDataTest {
 	}
 
 	@Test
-	void testMarshalModuleCustomerOverriddenProducesXml() throws Exception {
+	void testMarshalModuleCustomerOverriddenProducesXml() {
 		ModuleMetaData module = new ModuleMetaData();
 		module.setTitle("Overridden Module");
 		module.setName("overriddenmodule");
@@ -892,7 +884,7 @@ class XMLMetaDataTest {
 	}
 
 	@Test
-	void testMarshalModuleProducesNameInXml() throws Exception {
+	void testMarshalModuleProducesNameInXml() {
 		ModuleMetaData module = new ModuleMetaData();
 		module.setTitle("MyModule");
 		module.setName("mymodule");
@@ -902,7 +894,7 @@ class XMLMetaDataTest {
 	}
 
 	@Test
-	void testMarshalViewRoundtrips() throws Exception {
+	void testMarshalViewRoundtrips() {
 		ViewMetaData view = new ViewMetaData();
 		view.setName("edit");
 		String xml = XMLMetaData.marshalView(view, false, false);
@@ -911,7 +903,7 @@ class XMLMetaDataTest {
 	}
 
 	@Test
-	void testMarshalViewCustomerOverriddenProducesXml() throws Exception {
+	void testMarshalViewCustomerOverriddenProducesXml() {
 		ViewMetaData view = new ViewMetaData();
 		view.setName("list");
 		String xml = XMLMetaData.marshalView(view, true, false);
@@ -920,7 +912,7 @@ class XMLMetaDataTest {
 	}
 
 	@Test
-	void testMarshalViewUxUiOverriddenProducesXml() throws Exception {
+	void testMarshalViewUxUiOverriddenProducesXml() {
 		ViewMetaData view = new ViewMetaData();
 		view.setName("edit");
 		String xml = XMLMetaData.marshalView(view, false, true);
@@ -929,8 +921,7 @@ class XMLMetaDataTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	void testUnmarshalCustomerStringRoundTrip() throws Exception {
+	void testUnmarshalCustomerStringRoundTrip() {
 		CustomerMetaData customer = new CustomerMetaData();
 		customer.setName("acme");
 		customer.setDefaultDateConverter(ConverterName.DD_MMM_YYYY);
@@ -950,8 +941,7 @@ class XMLMetaDataTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	void testUnmarshalModuleStringRoundTrip() throws Exception {
+	void testUnmarshalModuleStringRoundTrip() {
 		ModuleMetaData module = createModule();
 		module.setHomeDocument("Dashboard");
 		ModuleDocumentMetaData docRef = new ModuleDocumentMetaData();
@@ -969,8 +959,7 @@ class XMLMetaDataTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	void testUnmarshalViewStringRoundTrip() throws Exception {
+	void testUnmarshalViewStringRoundTrip() {
 		ViewMetaData view = new ViewMetaData();
 		view.setName("edit");
 		view.setTitle("Edit");
@@ -981,8 +970,7 @@ class XMLMetaDataTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	void testMarshalSailRoundTrip() throws Exception {
+	void testMarshalSailRoundTrip() {
 		Automation automation = new Automation();
 		automation.setUxui("desktop");
 		automation.setUserAgentType(org.skyve.web.UserAgentType.desktop);
@@ -997,7 +985,7 @@ class XMLMetaDataTest {
 	}
 
 	@Test
-	void testMarshalCustomerFile(@TempDir Path tempDir) throws Exception {
+	void testMarshalCustomerFile(@TempDir Path tempDir) {
 		CustomerMetaData customer = new CustomerMetaData();
 		customer.setName("acme");
 		customer.setDefaultDateConverter(ConverterName.DD_MMM_YYYY);
@@ -1016,8 +1004,7 @@ class XMLMetaDataTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	void testUnmarshalCustomerFile(@TempDir Path tempDir) throws Exception {
+	void testUnmarshalCustomerFile(@TempDir Path tempDir) {
 		CustomerMetaData customer = new CustomerMetaData();
 		customer.setName("acme");
 		customer.setDefaultDateConverter(ConverterName.DD_MMM_YYYY);
@@ -1038,7 +1025,7 @@ class XMLMetaDataTest {
 	}
 
 	@Test
-	void testMarshalModuleFile(@TempDir Path tempDir) throws Exception {
+	void testMarshalModuleFile(@TempDir Path tempDir) {
 		ModuleMetaData module = createModule();
 		module.setHomeDocument("Dashboard");
 		ModuleDocumentMetaData docRef = new ModuleDocumentMetaData();
@@ -1055,8 +1042,7 @@ class XMLMetaDataTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	void testUnmarshalModuleFile(@TempDir Path tempDir) throws Exception {
+	void testUnmarshalModuleFile(@TempDir Path tempDir) {
 		ModuleMetaData module = createModule();
 		module.setHomeDocument("Dashboard");
 		ModuleDocumentMetaData docRef = new ModuleDocumentMetaData();
@@ -1075,7 +1061,7 @@ class XMLMetaDataTest {
 	}
 
 	@Test
-	void testMarshalDocumentFile(@TempDir Path tempDir) throws Exception {
+	void testMarshalDocumentFile(@TempDir Path tempDir) {
 		DocumentMetaData document = createDocument();
 		XMLMetaData.marshalDocument(document, false, tempDir.toString());
 		File expected = tempDir.resolve("TestDocument/TestDocument.xml").toFile();
@@ -1083,8 +1069,7 @@ class XMLMetaDataTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	void testUnmarshalDocumentFile(@TempDir Path tempDir) throws Exception {
+	void testUnmarshalDocumentFile(@TempDir Path tempDir) {
 		DocumentMetaData document = createDocument();
 		XMLMetaData.marshalDocument(document, false, tempDir.toString());
 		String filePath = tempDir.resolve("TestDocument/TestDocument.xml").toString();
@@ -1094,7 +1079,7 @@ class XMLMetaDataTest {
 	}
 
 	@Test
-	void testMarshalBizletFile(@TempDir Path tempDir) throws Exception {
+	void testMarshalBizletFile(@TempDir Path tempDir) {
 		BizletMetaData bizlet = new BizletMetaData();
 		Path docDir = tempDir.resolve("TestDocument");
 		XMLMetaData.marshalBizlet(bizlet, false, docDir.toString());
@@ -1103,8 +1088,7 @@ class XMLMetaDataTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	void testUnmarshalBizletFile(@TempDir Path tempDir) throws Exception {
+	void testUnmarshalBizletFile(@TempDir Path tempDir) {
 		BizletMetaData bizlet = new BizletMetaData();
 		Path docDir = tempDir.resolve("TestDocument");
 		XMLMetaData.marshalBizlet(bizlet, false, docDir.toString());
@@ -1114,7 +1098,7 @@ class XMLMetaDataTest {
 	}
 
 	@Test
-	void testMarshalActionFile(@TempDir Path tempDir) throws Exception {
+	void testMarshalActionFile(@TempDir Path tempDir) {
 		ActionMetaData action = new ActionMetaData();
 		action.setName("TestAction");
 		XMLMetaData.marshalAction(action, false, tempDir.toString());
@@ -1123,8 +1107,7 @@ class XMLMetaDataTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	void testUnmarshalActionFile(@TempDir Path tempDir) throws Exception {
+	void testUnmarshalActionFile(@TempDir Path tempDir) {
 		ActionMetaData action = new ActionMetaData();
 		action.setName("TestAction");
 		XMLMetaData.marshalAction(action, false, tempDir.toString());
@@ -1135,7 +1118,7 @@ class XMLMetaDataTest {
 	}
 
 	@Test
-	void testMarshalViewFile(@TempDir Path tempDir) throws Exception {
+	void testMarshalViewFile(@TempDir Path tempDir) {
 		ViewMetaData view = new ViewMetaData();
 		view.setName("edit");
 		XMLMetaData.marshalView(view, false, false, tempDir.toString());
@@ -1144,8 +1127,7 @@ class XMLMetaDataTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	void testUnmarshalViewFile(@TempDir Path tempDir) throws Exception {
+	void testUnmarshalViewFile(@TempDir Path tempDir) {
 		ViewMetaData view = new ViewMetaData();
 		view.setName("edit");
 		view.setTitle("Edit");
@@ -1157,8 +1139,7 @@ class XMLMetaDataTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	void testUnmarshalRouterFile(@TempDir Path tempDir) throws Exception {
+	void testUnmarshalRouterFile(@TempDir Path tempDir) throws IOException {
 		Router router = new Router();
 		String xml = XMLMetaData.marshalRouter(router);
 		Path tempFile = tempDir.resolve("router.xml");
@@ -1168,8 +1149,7 @@ class XMLMetaDataTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	void testUnmarshalSAILFile(@TempDir Path tempDir) throws Exception {
+	void testUnmarshalSAILFile(@TempDir Path tempDir) throws IOException {
 		Automation automation = new Automation();
 		automation.setUxui("desktop");
 		automation.setUserAgentType(org.skyve.web.UserAgentType.desktop);

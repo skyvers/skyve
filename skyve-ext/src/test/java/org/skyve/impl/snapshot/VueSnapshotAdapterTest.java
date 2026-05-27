@@ -9,10 +9,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
-import org.skyve.impl.snapshot.SmartClientFilterOperator;
 import org.skyve.metadata.SortDirection;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
-import org.skyve.impl.snapshot.CompoundFilterOperator;
 
 /**
  * Tests for {@code VueSnapshotAdapter#toClientPayload(Snapshot)}.

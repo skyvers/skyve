@@ -7,8 +7,8 @@ import org.junit.jupiter.api.Test;
 import modules.admin.domain.UserAccount;
 import util.AbstractH2Test;
 
-public class UserAccountBizletH2Test extends AbstractH2Test {
-
+@SuppressWarnings("static-method")
+class UserAccountBizletH2Test extends AbstractH2Test {
 	@Test
 	void newInstancePopulatesSessionsAndReturnsSameBean() throws Exception {
 		UserAccountBizlet bizlet = new UserAccountBizlet();

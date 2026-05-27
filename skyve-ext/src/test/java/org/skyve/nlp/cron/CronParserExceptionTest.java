@@ -18,8 +18,7 @@ public class CronParserExceptionTest {
 
 	@Test
 	public void testIsRuntimeException() {
-		CronParserException ex = new CronParserException("msg");
-		assertTrue(ex instanceof RuntimeException);
+		assertTrue(RuntimeException.class.isAssignableFrom(CronParserException.class));
 	}
 
 	@Test

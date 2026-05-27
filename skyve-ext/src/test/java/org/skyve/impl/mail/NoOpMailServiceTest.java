@@ -13,7 +13,7 @@ import org.skyve.util.MailDispatchOutcome;
 
 class NoOpMailServiceTest {
 
-	@SuppressWarnings("boxing")
+	@SuppressWarnings("static-method")
 	@Test
 	void testNoOpMailServiceIgnoresAllMailOperations() {
 		NoOpMailService service = new NoOpMailService();

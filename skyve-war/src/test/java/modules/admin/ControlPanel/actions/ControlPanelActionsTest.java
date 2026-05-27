@@ -19,9 +19,7 @@ class ControlPanelActionsTest {
 		EvictSelectedCache action = new EvictSelectedCache();
 		ControlPanelExtension bean = new ControlPanelExtension();
 		// selectedCache is null → skip caching block, return bean
-		@SuppressWarnings("unchecked")
-		ServerSideActionResult<ControlPanelExtension> result =
-				(ServerSideActionResult<ControlPanelExtension>) action.execute(bean, null);
+		ServerSideActionResult<ControlPanelExtension> result = action.execute(bean, null);
 
 		assertNotNull(result);
 		assertSame(bean, result.getBean());

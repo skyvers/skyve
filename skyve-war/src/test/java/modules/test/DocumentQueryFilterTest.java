@@ -26,8 +26,7 @@ class DocumentQueryFilterTest extends AbstractSkyveTest {
 	private Filter filter2; // second filter for addAnd/addOr
 
 	@BeforeEach
-	@SuppressWarnings("unchecked")
-	void setUpFilter() throws Exception {
+	void setUpFilter() {
 		// Use qH query (Hierarchical document) as a simple test query
 		DocumentQueryListModel<?> model = new DocumentQueryListModel<>(m.getNullSafeMetaDataQuery("qH"));
 		model.postConstruct(c, false);

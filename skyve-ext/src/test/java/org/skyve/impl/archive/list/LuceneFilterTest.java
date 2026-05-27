@@ -1,7 +1,6 @@
 package org.skyve.impl.archive.list;
 
 import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
@@ -70,9 +69,9 @@ public class LuceneFilterTest {
     private static final String BOOLEAN_FIELD = "our_bool";
     private static final String ENUM_FIELD = "our_enum";
 
-    private final int MAX_RESULTS = 25;
+    private static final int MAX_RESULTS = 25;
 
-    private static final boolean debugPrint = false;
+    private static final boolean DEBUG_PRINT = false;
 
     private enum TestEnum {
         X, Y, Z
@@ -776,8 +775,8 @@ public class LuceneFilterTest {
 
         final Instant start = Instant.parse("2014-01-01T08:00:00Z");
         List<Document> docs = datesSeries(start, Duration.ofDays(1)).limit(10)
-                                                                    .map(d -> createDoc(d))
-                                                                    .collect(toList());
+                                                                    .map(this::createDoc)
+                                                                    .toList();
 
         // This date appears in the 10 dates we just generated
         // so we can distunguish the results of the 'OrEqualTo' criteria
@@ -851,7 +850,7 @@ public class LuceneFilterTest {
         AtomicInteger i = new AtomicInteger(1);
         List<Document> docs = Stream.generate(() -> createDoc(i.getAndIncrement()))
                                     .limit(10)
-                                    .collect(toList());
+                                    .toList();
 
         int targetVal = 8;
 
@@ -907,7 +906,7 @@ public class LuceneFilterTest {
         AtomicLong i = new AtomicLong(1);
         List<Document> docs = Stream.generate(() -> createDoc(i.getAndIncrement()))
                                     .limit(10)
-                                    .collect(toList());
+                                    .toList();
 
         long targetVal = 8;
 
@@ -967,7 +966,7 @@ public class LuceneFilterTest {
             return doc;
         })
                                     .limit(10)
-                                    .collect(toList());
+                                    .toList();
 
         Decimal targetVal = new Decimal2("8.0");
 
@@ -1151,7 +1150,7 @@ public class LuceneFilterTest {
 
                 try (IndexWriter writer = new IndexWriter(dir, iwc)) {
 
-                    if (debugPrint) {
+                    if (DEBUG_PRINT) {
                         System.out.println("Inserting: ");
                         docsToInsert.forEach(d -> System.out.println("\t" + d));
                     }
@@ -1180,9 +1179,9 @@ public class LuceneFilterTest {
                                                              throw new RuntimeException(e);
                                                          }
                                                      })
-                                                     .collect(toList());
+                                                     .toList();
 
-                if (debugPrint) {
+                if (DEBUG_PRINT) {
                     System.out.println("=================");
                     System.out.println("Query: \n\t" + query);
                     System.out.println("ScoreDocs:");
@@ -1201,6 +1200,7 @@ public class LuceneFilterTest {
 
     }
 
+    @SuppressWarnings("resource")
     private static Analyzer customAnalyzer() {
 
         try {
@@ -1263,5 +1263,4 @@ public class LuceneFilterTest {
     public void testAddEqualsGeometryThrowsUnsupportedOperationException() {
         new LuceneFilter().addEquals("binding", (org.locationtech.jts.geom.Geometry) null);
     }
-
 }

@@ -18,11 +18,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.messages.NoResultsException;
 
-@SuppressWarnings("static-method")
+@SuppressWarnings({"static-method", "java:S5778"})
 class AbstractBizQLTest {
 
 	@AfterEach
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings("rawtypes")
 	void clearPersistenceThreadLocal() throws Exception {
 		Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
 		field.setAccessible(true);
@@ -66,7 +66,7 @@ class AbstractBizQLTest {
 	@Test
 	void putParameterReturnsSelf() {
 		AbstractBizQL bql = q();
-		assertSame(bql, bql.putParameter("x", 1));
+		assertSame(bql, bql.putParameter("x", Integer.valueOf(1)));
 	}
 
 	@Test
@@ -85,8 +85,10 @@ class AbstractBizQLTest {
 	}
 
 	@Test
-	void beanIterableHasNoElements() {
-		assertFalse(q().beanIterable().iterator().hasNext());
+	void beanIterableHasNoElements() throws Exception {
+		try (var iterable = q().beanIterable()) {
+			assertFalse(iterable.iterator().hasNext());
+		}
 	}
 
 	@Test
@@ -105,8 +107,10 @@ class AbstractBizQLTest {
 	}
 
 	@Test
-	void projectedIterableHasNoElements() {
-		assertFalse(q().projectedIterable().iterator().hasNext());
+	void projectedIterableHasNoElements() throws Exception {
+		try (var iterable = q().projectedIterable()) {
+			assertFalse(iterable.iterator().hasNext());
+		}
 	}
 
 	@Test
@@ -125,8 +129,10 @@ class AbstractBizQLTest {
 	}
 
 	@Test
-	void scalarIterableHasNoElements() {
-		assertFalse(q().scalarIterable(String.class).iterator().hasNext());
+	void scalarIterableHasNoElements() throws Exception {
+		try (var iterable = q().scalarIterable(String.class)) {
+			assertFalse(iterable.iterator().hasNext());
+		}
 	}
 
 	@Test
@@ -145,8 +151,10 @@ class AbstractBizQLTest {
 	}
 
 	@Test
-	void tupleIterableHasNoElements() {
-		assertFalse(q().tupleIterable().iterator().hasNext());
+	void tupleIterableHasNoElements() throws Exception {
+		try (var iterable = q().tupleIterable()) {
+			assertFalse(iterable.iterator().hasNext());
+		}
 	}
 
 	@Test
@@ -205,7 +213,7 @@ class AbstractBizQLTest {
 		mockPersistence("TestTable");
 		AbstractBizQL bql = new AbstractBizQL("select * from {m.Doc");
 		// No closing brace → DomainException wrapped in IllegalStateException
-		assertThrows(IllegalStateException.class, () -> bql.toQueryString());
+		assertThrows(IllegalStateException.class, bql::toQueryString);
 	}
 
 	@Test
@@ -213,7 +221,7 @@ class AbstractBizQLTest {
 		mockPersistence("TestTable");
 		AbstractBizQL bql = new AbstractBizQL("select * from {NoDocumentName}");
 		// No dot in module.document → DomainException wrapped in IllegalStateException
-		assertThrows(IllegalStateException.class, () -> bql.toQueryString());
+		assertThrows(IllegalStateException.class, bql::toQueryString);
 	}
 
 	@Test

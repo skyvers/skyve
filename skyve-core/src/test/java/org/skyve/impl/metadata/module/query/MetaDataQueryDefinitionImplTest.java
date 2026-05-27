@@ -241,7 +241,6 @@ class MetaDataQueryDefinitionImplTest {
 	}
 
 	@Nested
-	@SuppressWarnings("static-method")
 	class ConstructDocumentQueryTests {
 
 		private AbstractPersistence persistence;
@@ -253,7 +252,7 @@ class MetaDataQueryDefinitionImplTest {
 		private DocumentFilter filter;
 
 		@BeforeEach
-		void setUp() throws Exception {
+		void setUp() {
 			persistence = mock(AbstractPersistence.class, withSettings().defaultAnswer(CALLS_REAL_METHODS));
 			user = mock(User.class);
 			customer = mock(Customer.class);

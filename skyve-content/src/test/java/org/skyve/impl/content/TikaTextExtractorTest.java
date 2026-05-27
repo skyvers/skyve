@@ -10,39 +10,39 @@ import org.skyve.content.AttachmentContent;
 import org.skyve.impl.util.UUIDv7;
 
 @SuppressWarnings("static-method")
-public class TikaTextExtractorTest {
+class TikaTextExtractorTest {
 	@Test
-	public void testDocx() throws IOException {
+	void testDocx() throws IOException {
 		testContent("test.docx", "Test");
 	}
 	
 	@Test
-	public void testXlsx() throws IOException {
+	void testXlsx() throws IOException {
 		testContent("test.xlsx", "Test");
 	}
 
 	@Test
-	public void testXml() throws IOException {
+	void testXml() throws IOException {
 		testContent("test.xml", "admin");
 	}
 
 	@Test
-	public void testHtml() throws IOException {
+	void testHtml() throws IOException {
 		testContent("test.html", "booking");
 	}
 
 	@Test
-	public void testPdf() throws IOException {
+	void testPdf() throws IOException {
 		testContent("test.pdf", "Invoice");
 	}
 
 	@Test
-	public void testSvg() throws IOException {
+	void testSvg() throws IOException {
 		testContent("test.svg", "Test");
 	}
 
 	@Test
-	public void testDoc() throws IOException {
+	void testDoc() throws IOException {
 		testContent("test.doc", "REGISTRATION");
 	}
 
@@ -65,7 +65,7 @@ public class TikaTextExtractorTest {
 	}
 
 	@Test
-	public void testExtractTextFromMarkupWithHtml() {
+	void testExtractTextFromMarkupWithHtml() {
 		String markup = "<html><body><p>Hello world</p></body></html>";
 		String result = new TikaTextExtractor().extractTextFromMarkup(markup);
 		assertNotNull(result);
@@ -73,19 +73,19 @@ public class TikaTextExtractorTest {
 	}
 
 	@Test
-	public void testExtractTextFromMarkupWithNull() {
+	void testExtractTextFromMarkupWithNull() {
 		String result = new TikaTextExtractor().extractTextFromMarkup(null);
 		Assert.assertNull(result);
 	}
 
 	@Test
-	public void testExtractTextFromMarkupWithBlank() {
+	void testExtractTextFromMarkupWithBlank() {
 		String result = new TikaTextExtractor().extractTextFromMarkup("   ");
 		Assert.assertNull(result);
 	}
 
 	@Test
-	public void testSniffContentTypeWithPngBytes() throws IOException {
+	void testSniffContentTypeWithPngBytes() {
 		// PNG magic bytes
 		byte[] pngBytes = new byte[] {(byte)0x89, 'P', 'N', 'G', '\r', '\n', (byte)0x1A, '\n'};
 		AttachmentContent content = new AttachmentContent("demo", "admin", "Contact", null, "", UUIDv7.create().toString(), "image")
@@ -97,7 +97,7 @@ public class TikaTextExtractorTest {
 	}
 
 	@Test
-	public void testSniffContentTypeAlreadySet() throws IOException {
+	void testSniffContentTypeAlreadySet() {
 		byte[] bytes = new byte[] {1, 2, 3};
 		AttachmentContent content = new AttachmentContent("demo", "admin", "Contact", null, "", UUIDv7.create().toString(), "image")
 				.attachment("test.bin", bytes);
@@ -108,20 +108,21 @@ public class TikaTextExtractorTest {
 	}
 
 	@Test
-	public void testSniffLanguageEnglish() {
+	void testSniffLanguageEnglish() {
 		try {
 			String result = new TikaTextExtractor().sniffLanguage("The quick brown fox jumps over the lazy dog");
 			// if a detector is available, result should be non-null
 			if (result != null) {
 				Assert.assertEquals("en", result);
 			}
-		} catch (IllegalStateException e) {
+		} catch (IllegalStateException expected) {
+			assertNotNull(expected.getMessage());
 			// No language detectors available in test classpath — acceptable
 		}
 	}
 
 	@Test
-	public void testSniffLanguageEmpty() {
+	void testSniffLanguageEmpty() {
 		try {
 			// empty text should return null or a language code, never throw
 			String result = new TikaTextExtractor().sniffLanguage("");

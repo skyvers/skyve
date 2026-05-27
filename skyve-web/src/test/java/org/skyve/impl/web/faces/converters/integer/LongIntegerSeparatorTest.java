@@ -9,8 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import jakarta.faces.convert.ConverterException;
-
-public class LongIntegerSeparatorTest {
+class LongIntegerSeparatorTest {
 	private LongIntegerSeparator converter;
 
 	@Before

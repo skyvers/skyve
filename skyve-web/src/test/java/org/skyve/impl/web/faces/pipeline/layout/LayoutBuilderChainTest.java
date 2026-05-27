@@ -33,6 +33,7 @@ import jakarta.faces.context.FacesContext;
 /**
  * Tests for LayoutBuilderChain delegation and state propagation.
  */
+@SuppressWarnings({"static-method", "boxing"})
 class LayoutBuilderChainTest {
 
 	private abstract static class FacesContextBridge extends FacesContext {

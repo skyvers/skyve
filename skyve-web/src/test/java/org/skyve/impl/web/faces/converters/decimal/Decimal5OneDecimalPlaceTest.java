@@ -9,8 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import jakarta.faces.convert.ConverterException;
-
-public class Decimal5OneDecimalPlaceTest {
+class Decimal5OneDecimalPlaceTest {
 	private Decimal5OneDecimalPlace converter;
 
 	@Before

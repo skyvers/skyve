@@ -14,10 +14,10 @@ import modules.admin.domain.ImportExportColumn.LoadAction;
 import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
-public class ImportExportColumnDomainTest extends AbstractH2Test {
+class ImportExportColumnDomainTest extends AbstractH2Test {
 
 	@Test
-	void dataBuilderCreatesBean() throws Exception {
+	void dataBuilderCreatesBean() {
 		ImportExportColumn bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(ImportExportColumn.MODULE_NAME, ImportExportColumn.DOCUMENT_NAME);
@@ -25,42 +25,42 @@ public class ImportExportColumnDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void moduleAndDocumentNames() throws Exception {
+	void moduleAndDocumentNames() {
 		ImportExportColumn bean = ImportExportColumn.newInstance();
 		assertEquals("admin", bean.getBizModule());
 		assertEquals("ImportExportColumn", bean.getBizDocument());
 	}
 
 	@Test
-	void columnNameSetAndGet() throws Exception {
+	void columnNameSetAndGet() {
 		ImportExportColumn bean = ImportExportColumn.newInstance();
 		bean.setColumnName("First Name");
 		assertEquals("First Name", bean.getColumnName());
 	}
 
 	@Test
-	void bindingNameSetAndGet() throws Exception {
+	void bindingNameSetAndGet() {
 		ImportExportColumn bean = ImportExportColumn.newInstance();
 		bean.setBindingName("contact.name");
 		assertEquals("contact.name", bean.getBindingName());
 	}
 
 	@Test
-	void bindingExpressionSetAndGet() throws Exception {
+	void bindingExpressionSetAndGet() {
 		ImportExportColumn bean = ImportExportColumn.newInstance();
 		bean.setBindingExpression("{contact.name} {contact.lastName}");
 		assertEquals("{contact.name} {contact.lastName}", bean.getBindingExpression());
 	}
 
 	@Test
-	void loadActionSetAndGet() throws Exception {
+	void loadActionSetAndGet() {
 		ImportExportColumn bean = ImportExportColumn.newInstance();
 		bean.setLoadAction(LoadAction.setValue);
 		assertEquals(LoadAction.setValue, bean.getLoadAction());
 	}
 
 	@Test
-	void isNotShowExpressionWhenBindingNameIsNull() throws Exception {
+	void isNotShowExpressionWhenBindingNameIsNull() {
 		ImportExportColumn bean = ImportExportColumn.newInstance();
 		assertNull(bean.getBindingName());
 		assertFalse(bean.isShowExpression());
@@ -68,7 +68,7 @@ public class ImportExportColumnDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void isShowExpressionWhenBindingNameIsExpression() throws Exception {
+	void isShowExpressionWhenBindingNameIsExpression() {
 		ImportExportColumn bean = ImportExportColumn.newInstance();
 		bean.setBindingName(modules.admin.ImportExport.ImportExportUtil.EXPRESSION);
 		assertTrue(bean.isShowExpression());
@@ -76,7 +76,7 @@ public class ImportExportColumnDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void loadActionFromCode() throws Exception {
+	void loadActionFromCode() {
 		assertEquals(LoadAction.setValue, LoadAction.fromCode("set"));
 		assertEquals(LoadAction.lookupEquals, LoadAction.fromCode("equals"));
 		assertEquals(LoadAction.lookupLike, LoadAction.fromCode("like"));
@@ -86,62 +86,62 @@ public class ImportExportColumnDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void loadActionToCode() throws Exception {
+	void loadActionToCode() {
 		assertEquals("set", LoadAction.setValue.toCode());
 		assertEquals("equals", LoadAction.lookupEquals.toCode());
 	}
 
 	@Test
-	void loadActionToDomainValues() throws Exception {
+	void loadActionToDomainValues() {
 		assertNotNull(LoadAction.toDomainValues());
 		assertFalse(LoadAction.toDomainValues().isEmpty());
 	}
 
 	@Test
-	void loadActionToLocalisedDescription() throws Exception {
+	void loadActionToLocalisedDescription() {
 		assertNotNull(LoadAction.setValue.toLocalisedDescription());
 	}
 
 	@Test
-	void loadActionToDomainValue() throws Exception {
+	void loadActionToDomainValue() {
 		assertNotNull(LoadAction.setValue.toDomainValue());
 	}
 
 	@Test
-	void loadActionFromLocalisedDescription() throws Exception {
+	void loadActionFromLocalisedDescription() {
 		String desc = LoadAction.setValue.toLocalisedDescription();
 		assertEquals(LoadAction.setValue, LoadAction.fromLocalisedDescription(desc));
 	}
 
 	@Test
-	void loadActionFromLocalisedDescriptionUnknownReturnsNull() throws Exception {
+	void loadActionFromLocalisedDescriptionUnknownReturnsNull() {
 		assertNull(LoadAction.fromLocalisedDescription("nonexistent description xyz"));
 	}
 
-        @Test
-        void getBizKeyNotNull() throws Exception {
-                ImportExportColumn bean = ImportExportColumn.newInstance();
-                assertNotNull(bean.getBizKey());
-        }
+	@Test
+	void getBizKeyNotNull() {
+			ImportExportColumn bean = ImportExportColumn.newInstance();
+			assertNotNull(bean.getBizKey());
+	}
 
-        @Test
-        void parentNullByDefault() throws Exception {
-                ImportExportColumn bean = ImportExportColumn.newInstance();
-                assertNull(bean.getParent());
-        }
+	@Test
+	void parentNullByDefault() {
+			ImportExportColumn bean = ImportExportColumn.newInstance();
+			assertNull(bean.getParent());
+	}
 
-        @Test
-        void parentSetAndGet() throws Exception {
-                ImportExportColumn bean = ImportExportColumn.newInstance();
-                modules.admin.ImportExport.ImportExportExtension parent = new modules.admin.ImportExport.ImportExportExtension();
-                bean.setParent(parent);
-                assertEquals(parent, bean.getParent());
-        }
+	@Test
+	void parentSetAndGet() {
+			ImportExportColumn bean = ImportExportColumn.newInstance();
+			modules.admin.ImportExport.ImportExportExtension parent = new modules.admin.ImportExport.ImportExportExtension();
+			bean.setParent(parent);
+			assertEquals(parent, bean.getParent());
+	}
 
-        @Test
-        void bizOrdinalSetAndGet() throws Exception {
-                ImportExportColumn bean = ImportExportColumn.newInstance();
-                bean.setBizOrdinal(5);
-                assertEquals(Integer.valueOf(5), bean.getBizOrdinal());
-        }
+	@Test
+	void bizOrdinalSetAndGet() {
+		ImportExportColumn bean = ImportExportColumn.newInstance();
+		bean.setBizOrdinal(Integer.valueOf(5));
+		assertEquals(Integer.valueOf(5), bean.getBizOrdinal());
+	}
 }

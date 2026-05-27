@@ -9,8 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import jakarta.faces.convert.ConverterException;
-
-public class Decimal2IntegerTest {
+class Decimal2IntegerTest {
 	private Decimal2Integer converter;
 
 	@Before

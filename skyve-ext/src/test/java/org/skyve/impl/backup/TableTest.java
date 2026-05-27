@@ -1,7 +1,6 @@
 package org.skyve.impl.backup;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -37,13 +36,19 @@ public class TableTest {
 	@Test
 	public void testEqualsReturnsFalseForNull() {
 		Table t = new Table("myTable", "schema.myTable");
-		assertFalse(t.equals(null));
+		assertNotEquals(null, t);
 	}
 
 	@Test
 	public void testEqualsReturnsFalseForNonTableObject() {
 		Table t = new Table("myTable", "schema.myTable");
-		assertFalse(t.equals("myTable"));
+		assertNotEquals("myTable", t);
+	}
+
+	@Test
+	public void testEqualsReturnsTrueForSameInstance() {
+		Table t = new Table("myTable", "schema.myTable");
+		assertEquals(t, t);
 	}
 
 	@Test
@@ -98,9 +103,4 @@ public class TableTest {
 		assertNotNull(json);
 	}
 
-	@Test
-	public void testEqualsReturnsTrueForSameObject() {
-		Table t = new Table("myTable", "schema.myTable");
-		assertTrue(t.equals(t));
-	}
 }

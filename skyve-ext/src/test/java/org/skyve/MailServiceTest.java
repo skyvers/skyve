@@ -29,6 +29,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Mail;
 import org.skyve.util.MailService;
 
+@SuppressWarnings("java:S5778")
 class MailServiceTest {
 	private MailService originalMailService;
 	private String originalSmtpSender;
@@ -63,7 +64,7 @@ class MailServiceTest {
 		assertThat(MailServiceStaticSingleton.get(), instanceOf(SMTPMailService.class));
 	}
 
-	@SuppressWarnings({ "static-method", "boxing" })
+	@SuppressWarnings({"static-method"})
 	@Test
 	void testSendMailAppliesSenderFallbackAndTestRecipientOverride() {
 		CaptureMailService capture = new CaptureMailService();
@@ -84,7 +85,7 @@ class MailServiceTest {
 		assertTrue(capture.lastSend.getBccEmailAddresses().isEmpty());
 	}
 
-	@SuppressWarnings({ "static-method", "boxing" })
+	@SuppressWarnings({"static-method"})
 	@Test
 	void testSendMailSenderFallbackReusesMailInstanceWithoutTestRecipientOverride() {
 		CaptureMailService capture = new CaptureMailService();
@@ -102,7 +103,7 @@ class MailServiceTest {
 		assertThat(capture.lastSend.getRecipientEmailAddresses(), is(setOf("to@skyve.org")));
 	}
 
-	@SuppressWarnings({ "static-method", "boxing" })
+	@SuppressWarnings({"static-method"})
 	@Test
 	void testBogusSendSkipsDispatchForAllServices() {
 		CaptureMailService capture = new CaptureMailService();
@@ -121,7 +122,7 @@ class MailServiceTest {
 		assertEquals(0, out.size());
 	}
 
-	@SuppressWarnings({ "static-method", "boxing" })
+	@SuppressWarnings({"static-method"})
 	@Test
 	void testSendBulkMailAppliesNormalisation() {
 		CaptureMailService capture = new CaptureMailService();
@@ -151,7 +152,7 @@ class MailServiceTest {
 		assertTrue(capture.lastBulk.get(1).getBccEmailAddresses().isEmpty());
 	}
 
-	@SuppressWarnings({ "static-method", "boxing" })
+	@SuppressWarnings({"static-method"})
 	@Test
 	void testInjectableDelegatesViaExtMailService() {
 		CaptureMailService capture = new CaptureMailService();
@@ -203,7 +204,6 @@ class MailServiceTest {
 
 	private static class CaptureMailService implements MailService {
 		private Mail lastSend;
-		private Mail lastWrite;
 		private List<Mail> lastBulk;
 		private int sendCount;
 		private int writeCount;
@@ -211,7 +211,6 @@ class MailServiceTest {
 
 		@Override
 		public void writeMail(Mail mail, OutputStream out) {
-			lastWrite = mail;
 			writeCount++;
 		}
 

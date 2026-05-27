@@ -23,6 +23,7 @@ import jakarta.faces.component.UISelectItem;
 import jakarta.faces.model.SelectItem;
 import jakarta.faces.model.SelectItemGroup;
 
+@SuppressWarnings("static-method")
 public class SelectItemsBeanConverterTest {
 
 	private SelectItemsBeanConverter converter;
@@ -80,19 +81,16 @@ public class SelectItemsBeanConverterTest {
 	// ---- isEmpty ----
 
 	@Test
-	@SuppressWarnings("static-method")
 	public void isEmptyReturnsTrueForNull() {
 		assertTrue(SelectItemsBeanConverter.isEmpty(null));
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	public void isEmptyReturnsTrueForEmptyArray() {
 		assertTrue(SelectItemsBeanConverter.isEmpty(new SelectItem[0]));
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	public void isEmptyReturnsFalseForNonEmptyArray() {
 		assertFalse(SelectItemsBeanConverter.isEmpty(new SelectItem[]{new SelectItem("v", "l")}));
 	}
@@ -127,6 +125,7 @@ public class SelectItemsBeanConverterTest {
 		return menu;
 	}
 
+	@SuppressWarnings("boxing")
 	private static UISelectItem mockSelectItem(Object itemValue, String itemLabel, boolean noSelectionOption) {
 		UISelectItem uiItem = mock(UISelectItem.class);
 		when(uiItem.getValue()).thenReturn(null);

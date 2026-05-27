@@ -9,8 +9,7 @@ import org.junit.Test;
 import org.skyve.domain.Bean;
 import org.skyve.impl.web.faces.models.BeanMapAdapter;
 import org.skyve.web.WebContext;
-
-public class AssociationAutoCompleteConverterTest {
+class AssociationAutoCompleteConverterTest {
 
 	private AssociationAutoCompleteConverter converter;
 

@@ -55,8 +55,7 @@ class TestSendH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	void testExecuteThrowsValidationExceptionWhenNoTaggedItems() throws Exception {
+	void testExecuteThrowsValidationExceptionWhenNoTaggedItems() {
 		// setup the test data - create communication with a tag but no tagged items
 		tag = CORE.getPersistence().save(tag);
 		communication.setTag(tag);
@@ -257,7 +256,7 @@ class TestSendH2Test extends AbstractH2Test {
 			}
 			contact = CORE.getPersistence().save(contact);
 			userProxy.setContact(contact);
-			userProxy = CORE.getPersistence().save(userProxy);
+			CORE.getPersistence().save(userProxy);
 		} catch (Exception e) {
 			// If we can't set up the user, the test will fail appropriately
 			throw new RuntimeException("Failed to set up current user with contact", e);

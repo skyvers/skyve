@@ -204,7 +204,7 @@ public class KitchenSinkDomainTest {
 	@Test
 	public void setNormalIntegerStoresValue() {
 		KitchenSink ks = new KitchenSink();
-		ks.setNormalInteger(42);
+		ks.setNormalInteger(Integer.valueOf(42));
 		assertEquals(Integer.valueOf(42), ks.getNormalInteger());
 	}
 
@@ -216,7 +216,7 @@ public class KitchenSinkDomainTest {
 	@Test
 	public void setSpinnerStoresValue() {
 		KitchenSink ks = new KitchenSink();
-		ks.setSpinner(10);
+		ks.setSpinner(Integer.valueOf(10));
 		assertEquals(Integer.valueOf(10), ks.getSpinner());
 	}
 
@@ -228,7 +228,7 @@ public class KitchenSinkDomainTest {
 	@Test
 	public void setSliderStoresValue() {
 		KitchenSink ks = new KitchenSink();
-		ks.setSlider(5);
+		ks.setSlider(Integer.valueOf(5));
 		assertEquals(Integer.valueOf(5), ks.getSlider());
 	}
 
@@ -242,7 +242,7 @@ public class KitchenSinkDomainTest {
 	@Test
 	public void setLongIntegerStoresValue() {
 		KitchenSink ks = new KitchenSink();
-		ks.setLongInteger(100L);
+		ks.setLongInteger(Long.valueOf(100L));
 		assertEquals(Long.valueOf(100L), ks.getLongInteger());
 	}
 

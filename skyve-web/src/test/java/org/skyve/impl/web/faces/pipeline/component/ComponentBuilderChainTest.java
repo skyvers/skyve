@@ -1,6 +1,5 @@
 package org.skyve.impl.web.faces.pipeline.component;
 
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -62,8 +61,6 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.model.list.ListModel;
-import org.skyve.metadata.view.widget.FilterParameter;
-import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.web.UserAgentType;
 
 import jakarta.el.ELContext;
@@ -76,6 +73,7 @@ import jakarta.faces.context.FacesContext;
 /**
  * Tests for ComponentBuilderChain delegation and state propagation.
  */
+@SuppressWarnings({"static-method", "boxing"})
 class ComponentBuilderChainTest {
 
 	private abstract static class FacesContextBridge extends FacesContext {
@@ -405,7 +403,6 @@ class ComponentBuilderChainTest {
 		assertSame(result, chain.chart(mockComponent, chart));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	void listGridDelegatesToBuilder() {
 		ListModel<Bean> model = mock(ListModel.class);
@@ -424,7 +421,6 @@ class ComponentBuilderChainTest {
 		assertSame(result, chain.listGridContextMenu(mockComponent, "gridId", listGrid));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	void listRepeaterDelegatesToBuilder() {
 		ListModel<Bean> model = mock(ListModel.class);
@@ -535,7 +531,6 @@ class ComponentBuilderChainTest {
 	void spinnerDelegatesToBuilder() {
 		Spinner spinner = mock(Spinner.class);
 		EventSourceComponent result = new EventSourceComponent(mock(UIComponent.class), mock(UIComponentBase.class));
-		@SuppressWarnings("unchecked")
 		jakarta.faces.convert.Converter<?> facesConverter = mock(jakarta.faces.convert.Converter.class);
 		when(mockBuilder.spinner(mockEventSource, "var", spinner, "disabled", "title", null, HorizontalAlignment.left, facesConverter)).thenReturn(result);
 		assertSame(result, chain.spinner(mockEventSource, "var", spinner, "disabled", "title", null, HorizontalAlignment.left, facesConverter));
@@ -545,7 +540,6 @@ class ComponentBuilderChainTest {
 	void sliderDelegatesToBuilder() {
 		Slider slider = mock(Slider.class);
 		EventSourceComponent result = new EventSourceComponent(mock(UIComponent.class), mock(UIComponentBase.class));
-		@SuppressWarnings("unchecked")
 		jakarta.faces.convert.Converter<?> facesConverter = mock(jakarta.faces.convert.Converter.class);
 		when(mockBuilder.slider(mockEventSource, "var", slider, "disabled", "title", null, facesConverter)).thenReturn(result);
 		assertSame(result, chain.slider(mockEventSource, "var", slider, "disabled", "title", null, facesConverter));
@@ -560,7 +554,6 @@ class ComponentBuilderChainTest {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	void textDelegatesToBuilder() {
 		TextField textField = mock(TextField.class);
 		Converter<?> converter = mock(Converter.class);

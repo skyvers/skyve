@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Test;
 import org.skyve.domain.types.DateOnly;
 
 import jakarta.faces.convert.ConverterException;
-
-public class DateConverterTest {
+@SuppressWarnings({"static-method", "java:S5778"})
+class DateConverterTest {
 
 	// ---- DD_MM_YYYY ----
 

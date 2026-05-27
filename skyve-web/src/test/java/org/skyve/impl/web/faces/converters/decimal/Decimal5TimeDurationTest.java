@@ -9,8 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import jakarta.faces.convert.ConverterException;
-
-public class Decimal5TimeDurationTest {
+class Decimal5TimeDurationTest {
 	private Decimal5TimeDuration converter;
 
 	@Before

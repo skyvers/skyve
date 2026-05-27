@@ -158,23 +158,23 @@ class SMTPMailServiceTest {
 	}
 
 	@Test
-	void testWriteMailWrapsExceptionWhenStreamFails() {
+	void testWriteMailWrapsExceptionWhenStreamFails() throws Exception {
 		Mail mail = new Mail().from("sender@skyve.org")
 				.addTo("to@skyve.org")
 				.subject("Subject")
 				.body("Body")
 				.html();
 
-		java.io.OutputStream failingStream = new java.io.OutputStream() {
+		try (java.io.OutputStream failingStream = new java.io.OutputStream() {
 			@Override
 			public void write(int b) throws java.io.IOException {
 				throw new java.io.IOException("Stream closed");
 			}
-		};
-
-		SMTPMailService smtpService = new SMTPMailService();
-		ValidationException e = assertThrows(ValidationException.class, () -> smtpService.writeMail(mail, failingStream));
-		assertThat(e.getMessage(), containsString("Email was not written"));
+		}) {
+			SMTPMailService smtpService = new SMTPMailService();
+			ValidationException e = assertThrows(ValidationException.class, () -> smtpService.writeMail(mail, failingStream));
+			assertThat(e.getMessage(), containsString("Email was not written"));
+		}
 	}
 
 	@Test

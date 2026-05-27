@@ -61,7 +61,6 @@ class BackupJobTest {
 		UtilImpl.SMTP_TEST_BOGUS_SEND = originalSmtpTestBogusSend;
 	}
 
-	@SuppressWarnings({ "boxing", "static-method" })
 	@Test
 	void testEmailProblemUsesExtMailService() throws Exception {
 		List<String> jobLog = new ArrayList<>();
@@ -75,9 +74,8 @@ class BackupJobTest {
 		assertThat(capture.lastSend.getBody(), containsString("a problem:- simulated failure"));
 	}
 
-        @SuppressWarnings({ "boxing", "static-method" })
-        @Test
-        void testEmailProblemWithNullProblemSendsGenericMessage() throws Exception {
+		@Test
+		void testEmailProblemWithNullProblemSendsGenericMessage() throws Exception {
                 List<String> jobLog = new ArrayList<>();
 
                 BackupJob.emailProblem(jobLog, null);
@@ -87,9 +85,8 @@ class BackupJobTest {
                 assertEquals(0, jobLog.size(), "No log entry when support email is set");
         }
 
-        @SuppressWarnings({ "boxing", "static-method" })
-        @Test
-        void testEmailProblemWithNoSupportEmailLogsToJobLog() throws Exception {
+		@Test
+		void testEmailProblemWithNoSupportEmailLogsToJobLog() throws Exception {
                 UtilImpl.SUPPORT_EMAIL_ADDRESS = null;
                 List<String> jobLog = new ArrayList<>();
 
@@ -100,9 +97,8 @@ class BackupJobTest {
                 assertThat(jobLog.get(0), containsString("disk full"));
         }
 
-        @SuppressWarnings({ "boxing", "static-method" })
-        @Test
-        void testEmailProblemWithNullEnvironmentIdentifierOmitsEnvSuffix() throws Exception {
+		@Test
+		void testEmailProblemWithNullEnvironmentIdentifierOmitsEnvSuffix() throws Exception {
                 UtilImpl.ENVIRONMENT_IDENTIFIER = null;
                 List<String> jobLog = new ArrayList<>();
 
@@ -125,6 +121,7 @@ class BackupJobTest {
 
 		@Override
 		public void sendBulkMail(@jakarta.annotation.Nonnull List<Mail> mails) {
+			// no-op
 		}
 
 		@Override

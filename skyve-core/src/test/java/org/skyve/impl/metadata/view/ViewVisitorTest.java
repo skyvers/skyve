@@ -79,14 +79,6 @@ class ViewVisitorTest {
 		}
 	}
 
-	/** Concrete subclass that exposes setUseMetaData for tests that skip metadata resolution. */
-	private static final class TestNoMetaDataVisitor extends NoOpViewVisitor {
-		TestNoMetaDataVisitor(CustomerImpl customer, ModuleImpl module, DocumentImpl document, ViewImpl view) {
-			super(customer, module, document, view, "desktop");
-			setUseMetaData(false);
-		}
-	}
-
 	private static CustomerImpl mockCustomer() {
 		return Mockito.mock(CustomerImpl.class);
 	}

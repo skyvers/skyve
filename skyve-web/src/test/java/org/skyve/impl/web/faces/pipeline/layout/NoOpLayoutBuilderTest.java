@@ -40,7 +40,6 @@ class NoOpLayoutBuilderTest {
 	}
 
 	@BeforeAll
-	@SuppressWarnings("static-method")
 	static void setUpFacesContext() {
 		FacesContext facesContext = mock(FacesContext.class);
 		Application mockApplication = mock(Application.class);
@@ -53,7 +52,6 @@ class NoOpLayoutBuilderTest {
 	}
 
 	@AfterAll
-	@SuppressWarnings("static-method")
 	static void tearDownFacesContext() {
 		FacesContextBridge.setCurrent(null);
 	}

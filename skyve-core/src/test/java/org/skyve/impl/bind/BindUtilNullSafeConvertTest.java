@@ -372,6 +372,7 @@ class BindUtilNullSafeConvertTest {
 			return new DomainValue(code, desc);
 		}
 
+		@SuppressWarnings("unused")
 		public static SkyveTestEnum fromCode(String c) {
 			for (SkyveTestEnum e : values()) {
 				if (e.code.equals(c)) {
@@ -381,6 +382,7 @@ class BindUtilNullSafeConvertTest {
 			return null;
 		}
 
+		@SuppressWarnings("unused")
 		public static SkyveTestEnum fromLocalisedDescription(String d) {
 			for (SkyveTestEnum e : values()) {
 				if (e.desc.equals(d)) {
@@ -390,6 +392,7 @@ class BindUtilNullSafeConvertTest {
 			return null;
 		}
 
+		@SuppressWarnings("unused")
 		public static DomainValue[] toDomainValues() {
 			SkyveTestEnum[] vals = values();
 			DomainValue[] result = new DomainValue[vals.length];

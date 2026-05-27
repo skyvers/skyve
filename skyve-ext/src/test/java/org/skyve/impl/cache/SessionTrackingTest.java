@@ -22,6 +22,7 @@ import jakarta.servlet.http.HttpSession;
 /**
  * Unit tests for user-session tracking helpers in {@link StateUtil}.
  */
+@SuppressWarnings({"static-method", "boxing"})
 public class SessionTrackingTest {
 	private static final String USER_ID = "test-user";
 

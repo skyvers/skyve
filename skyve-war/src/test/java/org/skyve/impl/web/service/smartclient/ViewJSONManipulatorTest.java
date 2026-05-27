@@ -2,18 +2,15 @@ package org.skyve.impl.web.service.smartclient;
 
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
-import org.skyve.impl.metadata.repository.view.actions.AddAction;
 import org.skyve.impl.metadata.repository.view.actions.BizExportAction;
 import org.skyve.impl.metadata.repository.view.actions.BizImportAction;
 import org.skyve.impl.metadata.repository.view.actions.CancelAction;
 import org.skyve.impl.metadata.repository.view.actions.CustomAction;
 import org.skyve.impl.metadata.repository.view.actions.DeleteAction;
 import org.skyve.impl.metadata.repository.view.actions.DownloadAction;
-import org.skyve.impl.metadata.repository.view.actions.NewAction;
 import org.skyve.impl.metadata.repository.view.actions.OKAction;
 import org.skyve.impl.metadata.repository.view.actions.PrintAction;
 import org.skyve.impl.metadata.repository.view.actions.RemoveAction;
-import org.skyve.impl.metadata.repository.view.actions.ReportAction;
 import org.skyve.impl.metadata.repository.view.actions.SaveAction;
 import org.skyve.impl.metadata.repository.view.actions.UploadAction;
 import org.skyve.impl.metadata.repository.view.actions.ZoomOutAction;

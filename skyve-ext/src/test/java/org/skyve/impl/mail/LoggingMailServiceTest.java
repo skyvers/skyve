@@ -56,7 +56,6 @@ class LoggingMailServiceTest {
 		UtilImpl.SMTP_TEST_BOGUS_SEND = originalSmtpTestBogusSend;
 	}
 
-	@SuppressWarnings("boxing")
 	@Test
 	void testSendMailLogsNormalisedRecipientsAndProviderMetadata() {
 		RecordingDelegate delegate = new RecordingDelegate();
@@ -86,25 +85,23 @@ class LoggingMailServiceTest {
 		assertThat(entry.getIsBulk(), is(Boolean.FALSE));
 	}
 
-	@SuppressWarnings("boxing")
 	@Test
 	void testSendMailFailureIsLoggedAndRethrown() {
 		RecordingDelegate delegate = new RecordingDelegate();
 		delegate.singleException = new IllegalStateException("relay down");
 		MailService service = new PreProcessingMailService(new LoggingMailService(delegate));
+		Mail mail = new Mail().from("sender@skyve.org")
+								.addTo("to@skyve.org")
+								.subject("Subject")
+								.body("Body");
 
-		IllegalStateException e = assertThrows(IllegalStateException.class,
-				() -> service.sendMail(new Mail().from("sender@skyve.org")
-											.addTo("to@skyve.org")
-											.subject("Subject")
-											.body("Body")));
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> service.sendMail(mail));
 		assertThat(e.getMessage(), is("relay down"));
 		assertEquals(1, entries.size());
 		assertThat(entries.get(0).getDispatchStatus(), is("FAILED"));
 		assertThat(entries.get(0).getErrorDetail(), containsString("relay down"));
 	}
 
-	@SuppressWarnings("boxing")
 	@Test
 	void testBogusSendSkipsDispatchAndLogsSkipped() {
 		RecordingDelegate delegate = new RecordingDelegate();
@@ -122,8 +119,8 @@ class LoggingMailServiceTest {
 		assertThat(entries.get(0).getRelayDetail(), is("testBogusSend"));
 	}
 
-	@SuppressWarnings("boxing")
 	@Test
+	@SuppressWarnings("static-method")
 	void testDispatchMailNormalisesNullProviderOutcomes() {
 		RecordingDelegate delegate = new RecordingDelegate();
 		MailService service = new LoggingMailService(delegate);
@@ -158,7 +155,6 @@ class LoggingMailServiceTest {
 		assertThat(sentOutcome.getRelayDetail(), is("queued"));
 	}
 
-	@SuppressWarnings("boxing")
 	@Test
 	void testDispatchBulkMailDefaultsNullOutcomeAndLogsBulkEntry() {
 		RecordingDelegate delegate = new RecordingDelegate();
@@ -185,18 +181,17 @@ class LoggingMailServiceTest {
 		assertThat(entries.get(0).getProvider(), is("RecordingDelegate"));
 	}
 
-	@SuppressWarnings("boxing")
 	@Test
 	void testDispatchMailBlankFailureMessageFallsBackToExceptionClassName() {
 		RecordingDelegate delegate = new RecordingDelegate();
 		delegate.singleException = new IllegalStateException("");
 		MailService service = new LoggingMailService(delegate);
+		Mail mail = new Mail().from("sender@skyve.org")
+								.addTo("to@skyve.org")
+								.subject("Subject")
+								.body("Body");
 
-		IllegalStateException e = assertThrows(IllegalStateException.class,
-				() -> service.dispatchMail(new Mail().from("sender@skyve.org")
-													.addTo("to@skyve.org")
-													.subject("Subject")
-													.body("Body")));
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> service.dispatchMail(mail));
 		assertThat(e.getMessage(), is(""));
 		assertEquals(1, entries.size());
 		assertThat(entries.get(0).getDispatchStatus(), is("FAILED"));
@@ -204,18 +199,18 @@ class LoggingMailServiceTest {
 		assertThat(entries.get(0).getProvider(), is("RecordingDelegate"));
 	}
 
-	@SuppressWarnings("boxing")
 	@Test
 	void testSendBulkMailBlankFailureMessageFallsBackToExceptionClassName() {
 		RecordingDelegate delegate = new RecordingDelegate();
 		delegate.bulkException = new IllegalStateException("");
 		MailService service = new LoggingMailService(delegate);
+		Mail mail = new Mail().from("sender@skyve.org")
+								.addTo("to@skyve.org")
+								.subject("Subject")
+								.body("Body");
+		List<Mail> mails = Arrays.asList(mail);
 
-		IllegalStateException e = assertThrows(IllegalStateException.class,
-				() -> service.sendBulkMail(Arrays.asList(new Mail().from("sender@skyve.org")
-																.addTo("to@skyve.org")
-																.subject("Subject")
-																.body("Body"))));
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> service.sendBulkMail(mails));
 		assertThat(e.getMessage(), is(""));
 		assertEquals(1, entries.size());
 		assertThat(entries.get(0).getDispatchStatus(), is("FAILED"));
@@ -223,18 +218,18 @@ class LoggingMailServiceTest {
 		assertThat(entries.get(0).getProvider(), is("RecordingDelegate"));
 	}
 
-	@SuppressWarnings("boxing")
 	@Test
 	void testDispatchBulkMailBlankFailureMessageFallsBackToExceptionClassName() {
 		RecordingDelegate delegate = new RecordingDelegate();
 		delegate.bulkException = new IllegalStateException("");
 		MailService service = new LoggingMailService(delegate);
+		Mail mail = new Mail().from("sender@skyve.org")
+								.addTo("to@skyve.org")
+								.subject("Subject")
+								.body("Body");
+		List<Mail> mails = Arrays.asList(mail);
 
-		IllegalStateException e = assertThrows(IllegalStateException.class,
-				() -> service.dispatchBulkMail(Arrays.asList(new Mail().from("sender@skyve.org")
-																	.addTo("to@skyve.org")
-																	.subject("Subject")
-																	.body("Body"))));
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> service.dispatchBulkMail(mails));
 		assertThat(e.getMessage(), is(""));
 		assertEquals(1, entries.size());
 		assertThat(entries.get(0).getDispatchStatus(), is("FAILED"));
@@ -242,18 +237,17 @@ class LoggingMailServiceTest {
 		assertThat(entries.get(0).getProvider(), is("RecordingDelegate"));
 	}
 
-	@SuppressWarnings("boxing")
 	@Test
 	void testSendMailBlankFailureMessageFallsBackToExceptionClassName() {
 		RecordingDelegate delegate = new RecordingDelegate();
 		delegate.singleException = new IllegalStateException("");
 		MailService service = new LoggingMailService(delegate);
+		Mail mail = new Mail().from("sender@skyve.org")
+								.addTo("to@skyve.org")
+								.subject("Subject")
+								.body("Body");
 
-		IllegalStateException e = assertThrows(IllegalStateException.class,
-				() -> service.sendMail(new Mail().from("sender@skyve.org")
-												.addTo("to@skyve.org")
-												.subject("Subject")
-												.body("Body")));
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> service.sendMail(mail));
 		assertThat(e.getMessage(), is(""));
 		assertEquals(1, entries.size());
 		assertThat(entries.get(0).getDispatchStatus(), is("FAILED"));
@@ -261,7 +255,6 @@ class LoggingMailServiceTest {
 		assertThat(entries.get(0).getProvider(), is("RecordingDelegate"));
 	}
 
-	@SuppressWarnings("boxing")
 	@Test
 	void testBogusSendEmptyBulkMailLogsSkippedEntry() {
 		RecordingDelegate delegate = new RecordingDelegate();
@@ -277,7 +270,7 @@ class LoggingMailServiceTest {
 		assertThat(entries.get(0).getProvider(), is("RecordingDelegate"));
 	}
 
-	@SuppressWarnings({ "boxing", "deprecation" })
+	@SuppressWarnings("deprecation")
 	@Test
 	void testExtSendMailBogusSendLogsSkipped() {
 		RecordingDelegate delegate = new RecordingDelegate();
@@ -295,7 +288,6 @@ class LoggingMailServiceTest {
 		assertThat(entries.get(0).getRelayDetail(), is("testBogusSend"));
 	}
 
-	@SuppressWarnings("boxing")
 	@Test
 	void testBulkSendLogsSingleEntryWithFirstBodyAndVariantCounts() {
 		RecordingDelegate delegate = new RecordingDelegate();
@@ -329,7 +321,6 @@ class LoggingMailServiceTest {
 		assertThat(entry.getBodyVariantCount(), is(Long.valueOf(2)));
 	}
 
-	@SuppressWarnings("boxing")
 	@Test
 	void testBulkSendNormalisesHtmlBreakTagVariantsForBodyComparison() {
 		RecordingDelegate delegate = new RecordingDelegate();
@@ -353,7 +344,6 @@ class LoggingMailServiceTest {
 		assertThat(entries.get(0).getBodyVariantCount(), is(Long.valueOf(1)));
 	}
 
-	@SuppressWarnings("boxing")
 	@Test
 	void testBulkSendMasksSensitiveCodeValuesForBodyComparison() {
 		RecordingDelegate delegate = new RecordingDelegate();
@@ -443,7 +433,6 @@ class LoggingMailServiceTest {
 		assertThat(entries.get(0).getDispatchStatus(), is("SKIPPED"));
 	}
 
-	@SuppressWarnings("boxing")
 	@Test
 	void testWriteMailDoesNotCreateMailLog() {
 		RecordingDelegate delegate = new RecordingDelegate();

@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -43,7 +42,7 @@ class EXTTest {
 	 * Send some broadcast messages
 	 */
 	@Test
-	@SuppressWarnings({"boxing", "static-method"})
+	@SuppressWarnings("static-method")
 	void testPushBroadcastReceived() {
 		TestReceiver recvA = new TestReceiver(BATMAN_USERID);
 		TestReceiver recvB = new TestReceiver(JOKER_USERID);
@@ -66,7 +65,7 @@ class EXTTest {
 	 * Send some messages addressed to users
 	 */
 	@Test
-	@SuppressWarnings({"boxing", "static-method"})
+	@SuppressWarnings("static-method")
 	void testPushAddressedMessagesReceived() {
 		TestReceiver recvBatman = new TestReceiver(BATMAN_USERID);
 		TestReceiver recvJoker = new TestReceiver(JOKER_USERID);
@@ -91,8 +90,8 @@ class EXTTest {
 	}
 
 	@Test
-	@SuppressWarnings({"boxing", "static-method"})
-	void testReaperRemovesStaleReceiverAndClosesIt() throws Exception {
+	@SuppressWarnings("static-method")
+	void testReaperRemovesStaleReceiverAndClosesIt() {
 		AtomicBoolean closed = new AtomicBoolean(false);
 		PushMessageReceiver stale = new PushMessageReceiver() {
 			@Override
@@ -120,8 +119,9 @@ class EXTTest {
 			PushMessage.RECEIVERS.add(stale);
 			PushMessage.startReaper(1);
 
-			for (int waitIterations = 4; PushMessage.RECEIVERS.contains(stale) && (waitIterations > 0); --waitIterations) {
-				TimeUnit.SECONDS.sleep(1);
+			long deadline = System.currentTimeMillis() + 4_000L;
+			while (PushMessage.RECEIVERS.contains(stale) && (System.currentTimeMillis() < deadline)) {
+				Thread.onSpinWait();
 			}
 
 			assertFalse(PushMessage.RECEIVERS.contains(stale));
@@ -153,7 +153,7 @@ class EXTTest {
 		String hash1 = EXT.hashPassword("password");
 		String hash2 = EXT.hashPassword("password");
 		// BCrypt produces a different salt each time
-		assertFalse(hash1.equals(hash2), "BCrypt hashes should differ even for the same input");
+		org.junit.jupiter.api.Assertions.assertNotEquals(hash1, hash2, "BCrypt hashes should differ even for the same input");
 	}
 
 	@Test
@@ -195,20 +195,21 @@ class EXTTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void testNewSQLDataAccessWithDataStoreReturnsNonNull() {
+	void testNewSQLDataAccessWithDataStoreReturnsNonNull() throws Exception {
 		org.skyve.persistence.DataStore ds = new org.skyve.persistence.DataStore(
 				"org.h2.Driver",
 				"jdbc:h2:mem:ext_test;DB_CLOSE_DELAY=-1",
 				"sa",
 				"",
 				org.skyve.impl.persistence.hibernate.dialect.H2SpatialDialect.class.getName());
-		org.skyve.dataaccess.sql.SQLDataAccess da = EXT.newSQLDataAccess(ds);
-		assertNotNull(da);
+		try (org.skyve.dataaccess.sql.SQLDataAccess da = EXT.newSQLDataAccess(ds)) {
+			assertNotNull(da);
+		}
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	void testNewSQLDataAccessDefaultReturnsNonNull() {
+	void testNewSQLDataAccessDefaultReturnsNonNull() throws Exception {
 		org.skyve.impl.util.UtilImpl.DATA_STORE = new org.skyve.persistence.DataStore(
 				"org.h2.Driver",
 				"jdbc:h2:mem:ext_test2;DB_CLOSE_DELAY=-1",
@@ -216,8 +217,9 @@ class EXTTest {
 				"",
 				org.skyve.impl.persistence.hibernate.dialect.H2SpatialDialect.class.getName());
 		try {
-			org.skyve.dataaccess.sql.SQLDataAccess da = EXT.newSQLDataAccess();
-			assertNotNull(da);
+			try (org.skyve.dataaccess.sql.SQLDataAccess da = EXT.newSQLDataAccess()) {
+				assertNotNull(da);
+			}
 		}
 		finally {
 			org.skyve.impl.util.UtilImpl.DATA_STORE = null;

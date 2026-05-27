@@ -1,6 +1,7 @@
 package org.skyve.impl.web.faces.pipeline.layout;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -42,6 +43,7 @@ import jakarta.faces.component.html.HtmlPanelGrid;
 import jakarta.faces.component.html.HtmlPanelGroup;
 import jakarta.faces.context.FacesContext;
 
+@SuppressWarnings("boxing")
 class TabularLayoutBuilderTest {
 
 	private abstract static class FacesContextBridge extends FacesContext {
@@ -66,7 +68,6 @@ class TabularLayoutBuilderTest {
 	private Panel mockPanel;
 
 	@BeforeAll
-	@SuppressWarnings("static-method")
 	static void setUpFacesContext() {
 		FacesContext facesContext = mock(FacesContext.class);
 		mockApplication = mock(Application.class);
@@ -85,7 +86,6 @@ class TabularLayoutBuilderTest {
 	}
 
 	@AfterAll
-	@SuppressWarnings("static-method")
 	static void tearDownFacesContext() {
 		FacesContextBridge.setCurrent(null);
 	}
@@ -245,7 +245,7 @@ class TabularLayoutBuilderTest {
 	void toolbarLayoutsCreatesToolbarGroup() {
 		List<UIComponent> result = builder.toolbarLayouts(null);
 		assertNotNull(result);
-		assertTrue(result.size() == 1);
+		assertEquals(1, result.size());
 		assertSame(mockToolbarGroup, result.get(0));
 	}
 
@@ -416,7 +416,7 @@ class TabularLayoutBuilderTest {
 		FormColumn formColumn = new FormColumn();
 		builder.layoutFormItemLabel(rowLayout, widget, form, formItem, formColumn, "My Label", null, null, null);
 		// Should add a Column to the row
-		assertTrue(rowChildren.size() == 1);
+		assertEquals(1, rowChildren.size());
 		assertSame(mockColumn, rowChildren.get(0));
 	}
 
@@ -430,7 +430,7 @@ class TabularLayoutBuilderTest {
 		FormItem formItem = new FormItem();
 		FormColumn formColumn = new FormColumn();
 		builder.layoutFormItemWidget(rowLayout, widget, form, formItem, formColumn, "My Label", 1, null, null, null, null, true, false);
-		assertTrue(rowChildren.size() == 1);
+		assertEquals(1, rowChildren.size());
 		assertSame(mockColumn, rowChildren.get(0));
 	}
 
@@ -468,9 +468,9 @@ class TabularLayoutBuilderTest {
 		HBox hbox = new HBox();
 		UIComponent result = builder.addToContainer(null, hbox, mockPanelGrid, child, null, null, null, null, null, null, null, null);
 		assertSame(child, result);
-		assertTrue(containerChildren.size() == 1);
+		assertEquals(1, containerChildren.size());
 		assertSame(mockRow, containerChildren.get(0));
-		assertTrue(rowChildren.size() == 1);
+		assertEquals(1, rowChildren.size());
 		assertSame(mockColumn, rowChildren.get(0));
 		assertTrue(columnChildren.contains(child));
 	}
@@ -496,10 +496,10 @@ class TabularLayoutBuilderTest {
 		builder.addToContainer(null, hbox, mockPanelGrid, mock(UIComponent.class), null, null, null, null, null, null, null, null);
 		builder.addToContainer(null, hbox, mockPanelGrid, mock(UIComponent.class), null, null, null, null, null, null, null, null);
 		// Container still has only the original Row
-		assertTrue(containerChildren.size() == 1);
+		assertEquals(1, containerChildren.size());
 		assertSame(existingRow, containerChildren.get(0));
 		// Both columns were added to the existing row
-		assertTrue(existingRowChildren.size() == 2);
+		assertEquals(2, existingRowChildren.size());
 	}
 
 	@Test

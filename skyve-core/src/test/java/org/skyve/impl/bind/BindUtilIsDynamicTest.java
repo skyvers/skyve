@@ -12,7 +12,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 
-@SuppressWarnings("static-method")
+@SuppressWarnings({"static-method", "boxing"})
 class BindUtilIsDynamicTest {
 
 	// -----------------------------------------------------------------------

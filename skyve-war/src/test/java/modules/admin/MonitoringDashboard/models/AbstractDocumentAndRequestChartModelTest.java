@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
-import org.skyve.metadata.view.model.chart.ChartData;
 import org.skyve.util.monitoring.RequestMeasurements;
 
 import modules.admin.domain.MonitoringDashboard;
@@ -22,7 +21,8 @@ import modules.test.AbstractSkyveTest;
 /**
  * Tests for static utility methods in AbstractDocumentChartModel and AbstractRequestPeriodBarChartModel.
  */
-public class AbstractDocumentAndRequestChartModelTest extends AbstractSkyveTest {
+@SuppressWarnings("static-method")
+class AbstractDocumentAndRequestChartModelTest extends AbstractSkyveTest {
 
 	/** Concrete impl for AbstractDocumentChartModel */
 	private static class TestDocumentChartModel extends AbstractDocumentChartModel {
@@ -150,20 +150,20 @@ public class AbstractDocumentAndRequestChartModelTest extends AbstractSkyveTest 
 
 	@Test
 	void isDataValidForPeriodReturnsTrueWhenJustCreated() {
-		RequestMeasurements m = new RequestMeasurements();
+		RequestMeasurements measurements = new RequestMeasurements();
 		// timeLastUpdate is initialized to System.currentTimeMillis()
-		assertTrue(TestBarChartModel.testIsDataValidForPeriod(m, Period.currentMinute));
+		assertTrue(TestBarChartModel.testIsDataValidForPeriod(measurements, Period.currentMinute));
 	}
 
 	@Test
 	void isDataValidForPeriodForAllPeriods() {
-		RequestMeasurements m = new RequestMeasurements();
-		m.updateMeasurements(50, (short) 50, (short) 50, (short) 50);
+		RequestMeasurements measurements = new RequestMeasurements();
+		measurements.updateMeasurements(50, (short) 50, (short) 50, (short) 50);
 		// All periods should be valid immediately after recording
-		assertTrue(TestBarChartModel.testIsDataValidForPeriod(m, Period.currentMinute));
-		assertTrue(TestBarChartModel.testIsDataValidForPeriod(m, Period.currentHour));
-		assertTrue(TestBarChartModel.testIsDataValidForPeriod(m, Period.currentDay));
-		assertTrue(TestBarChartModel.testIsDataValidForPeriod(m, Period.currentWeek));
-		assertTrue(TestBarChartModel.testIsDataValidForPeriod(m, Period.currentYear));
+		assertTrue(TestBarChartModel.testIsDataValidForPeriod(measurements, Period.currentMinute));
+		assertTrue(TestBarChartModel.testIsDataValidForPeriod(measurements, Period.currentHour));
+		assertTrue(TestBarChartModel.testIsDataValidForPeriod(measurements, Period.currentDay));
+		assertTrue(TestBarChartModel.testIsDataValidForPeriod(measurements, Period.currentWeek));
+		assertTrue(TestBarChartModel.testIsDataValidForPeriod(measurements, Period.currentYear));
 	}
 }

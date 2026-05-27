@@ -9,8 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import jakarta.faces.convert.ConverterException;
-
-public class IntegerTest {
+class IntegerTest {
 	private IntegerConverter converter;
 
 	@Before

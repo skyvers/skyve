@@ -11,8 +11,8 @@ import org.skyve.domain.types.Decimal5;
 import org.skyve.domain.types.Decimal10;
 
 import jakarta.faces.convert.ConverterException;
-
-public class CurrencyConverterTest {
+@SuppressWarnings("static-method")
+class CurrencyConverterTest {
 
 	// ---- Decimal2DollarsAndCents ----
 
@@ -40,7 +40,8 @@ public class CurrencyConverterTest {
 
 	@Test
 	void decimal2DollarsAndCents_getAsObjectThrowsForInvalid() {
-		assertThrows(ConverterException.class, () -> new Decimal2DollarsAndCents().getAsObject(null, null, "not-a-number"));
+		Decimal2DollarsAndCents converter = new Decimal2DollarsAndCents();
+		assertThrows(ConverterException.class, () -> converter.getAsObject(null, null, "not-a-number"));
 	}
 
 	// ---- Decimal2DollarsAndCentsAbsolute ----
@@ -69,7 +70,8 @@ public class CurrencyConverterTest {
 
 	@Test
 	void decimal2DollarsAndCentsAbsolute_getAsObjectThrowsForInvalid() {
-		assertThrows(ConverterException.class, () -> new Decimal2DollarsAndCentsAbsolute().getAsObject(null, null, "not-a-number"));
+		Decimal2DollarsAndCentsAbsolute converter = new Decimal2DollarsAndCentsAbsolute();
+		assertThrows(ConverterException.class, () -> converter.getAsObject(null, null, "not-a-number"));
 	}
 
 	// ---- Decimal5DollarsAndCents ----
@@ -98,7 +100,8 @@ public class CurrencyConverterTest {
 
 	@Test
 	void decimal5DollarsAndCents_getAsObjectThrowsForInvalid() {
-		assertThrows(ConverterException.class, () -> new Decimal5DollarsAndCents().getAsObject(null, null, "not-a-number"));
+		Decimal5DollarsAndCents converter = new Decimal5DollarsAndCents();
+		assertThrows(ConverterException.class, () -> converter.getAsObject(null, null, "not-a-number"));
 	}
 
 	// ---- Decimal10DollarsAndCents ----
@@ -127,6 +130,7 @@ public class CurrencyConverterTest {
 
 	@Test
 	void decimal10DollarsAndCents_getAsObjectThrowsForInvalid() {
-		assertThrows(ConverterException.class, () -> new Decimal10DollarsAndCents().getAsObject(null, null, "not-a-number"));
+		Decimal10DollarsAndCents converter = new Decimal10DollarsAndCents();
+		assertThrows(ConverterException.class, () -> converter.getAsObject(null, null, "not-a-number"));
 	}
 }

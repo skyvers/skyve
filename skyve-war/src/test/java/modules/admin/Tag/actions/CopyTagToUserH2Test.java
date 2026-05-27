@@ -44,7 +44,6 @@ class CopyTagToUserH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
 	void testExecuteCopiesTagToUser() throws Exception {
 		// Create source and target users
 		UserExtension sourceUser = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
@@ -121,7 +120,6 @@ class CopyTagToUserH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
 	void testExecuteWithNullCopyToUserThrowsValidationException() throws Exception {
 		// Create a user and tag
 		UserExtension user = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
@@ -165,7 +163,6 @@ class CopyTagToUserH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
 	void testExecuteWithEmptyTagCopiesEmptyTag() throws Exception {
 		// Create source and target users
 		UserExtension sourceUser = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);

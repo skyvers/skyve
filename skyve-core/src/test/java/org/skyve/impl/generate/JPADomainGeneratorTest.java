@@ -19,7 +19,6 @@ import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Collection.CollectionType;
-import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 
 /**

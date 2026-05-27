@@ -18,7 +18,6 @@ import org.skyve.web.WebContext;
  * Tests focus on paths that don't require H2: public pages, session-based UxUi selection,
  * and user-agent type switching.
  */
-@SuppressWarnings("static-method")
 class DefaultUxUiSelectorTest {
 
 	private DefaultUxUiSelector selector;

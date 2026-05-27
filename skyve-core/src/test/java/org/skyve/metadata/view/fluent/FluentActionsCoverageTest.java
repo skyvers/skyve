@@ -182,7 +182,6 @@ class FluentActionsCoverageTest {
 	}
 
         @Test
-        @SuppressWarnings("static-method")
         void fromWithUnknownActionTypeThrowsIllegalState() {
                 ActionMetaData unknown = new ActionMetaData() {
                         private static final long serialVersionUID = 1L;

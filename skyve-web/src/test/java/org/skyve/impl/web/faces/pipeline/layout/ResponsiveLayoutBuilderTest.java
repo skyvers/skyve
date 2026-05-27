@@ -58,7 +58,6 @@ class ResponsiveLayoutBuilderTest {
 	private static int idCounter;
 
 	@BeforeAll
-	@SuppressWarnings("static-method")
 	static void setUpFacesContext() {
 		mockFacesContext = mock(FacesContext.class);
 		mockApplication = mock(Application.class);
@@ -82,7 +81,6 @@ class ResponsiveLayoutBuilderTest {
 	}
 
 	@AfterAll
-	@SuppressWarnings("static-method")
 	static void tearDownFacesContext() {
 		FacesContextBridge.setCurrent(null);
 	}
@@ -224,7 +222,7 @@ class ResponsiveLayoutBuilderTest {
 		toolbars.add(toolbar);
 		builder.addToolbarsOrLayouts(view, toolbars);
 		// The grid div should be added to the view at index 0
-		assertTrue(viewChildren.size() == 1);
+		assertEquals(1, viewChildren.size());
 		assertSame(gridDiv, viewChildren.get(0));
 		// The toolbar should be added inside the grid div
 		assertTrue(gridDivChildren.contains(toolbar));
@@ -242,7 +240,7 @@ class ResponsiveLayoutBuilderTest {
 		UIComponent result = builder.addToContainer(null, new VBox(), container, child, null, null, null, null, null, null, null, null);
 		assertSame(child, result);
 		// The div should be added to the container
-		assertTrue(containerChildren.size() == 1);
+		assertEquals(1, containerChildren.size());
 		assertSame(mockHtmlPanelGroup, containerChildren.get(0));
 		// The child should be added to the div
 		assertTrue(divChildren.contains(child));
@@ -313,7 +311,7 @@ class ResponsiveLayoutBuilderTest {
 		FormColumn formColumn = new FormColumn();
 		builder.layoutFormItemLabel(rowLayout, widget, form, formItem, formColumn, "Label", null, null, null);
 		// A div should be added to rowLayout
-		assertTrue(rowChildren.size() == 1);
+		assertEquals(1, rowChildren.size());
 		assertSame(mockHtmlPanelGroup, rowChildren.get(0));
 		// The label should be added to the div
 		assertTrue(divChildren.contains(mockOutputLabel));
@@ -332,7 +330,7 @@ class ResponsiveLayoutBuilderTest {
 		FormColumn formColumn = new FormColumn();
 		builder.layoutFormItemWidget(rowLayout, widget, form, formItem, formColumn, "Label", 1, null, null, null, null, true, false);
 		// A flex div should be added to rowLayout
-		assertTrue(rowChildren.size() == 1);
+		assertEquals(1, rowChildren.size());
 		assertSame(mockHtmlPanelGroup, rowChildren.get(0));
 		// Message and widget should be inside flex
 		assertTrue(flexChildren.contains(mockMessage));
@@ -365,7 +363,7 @@ class ResponsiveLayoutBuilderTest {
 		FormColumn formColumn = new FormColumn();
 		builder.layoutFormItemWidget(rowLayout, widget, form, formItem, formColumn, "Label", 1, null, null, null, null, true, true);
 		// The flex div should be added to rowLayout
-		assertTrue(rowChildren.size() == 1);
+		assertEquals(1, rowChildren.size());
 		assertSame(flexDiv, rowChildren.get(0));
 		// Message should be in flex
 		assertTrue(flexChildren.contains(mockMessage));
@@ -474,7 +472,7 @@ class ResponsiveLayoutBuilderTest {
 		// colspan = 2 triggers the else (colspan > 1) branch
 		builder.layoutFormItemWidget(rowLayout, widget, form, formItem, formColumn, "Label", 2, null, null, null, null, true, false);
 		// A flex div should be added to rowLayout
-		assertTrue(rowChildren.size() == 1);
+		assertEquals(1, rowChildren.size());
 		assertSame(mockHtmlPanelGroup, rowChildren.get(0));
 	}
 }

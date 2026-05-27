@@ -16,38 +16,58 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Binder;
-import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
+import org.slf4j.Logger;
 
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 
+/**
+ * Executes a Faces callback action within the current Skyve web context.
+ */
 public class ActionUtil {
-
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ActionUtil.class);
 
 	/**
-	 * Disallow instantiation
+	 * Disallows instantiation of this utility class.
 	 */
 	private ActionUtil() {
 		// nothing to see here
 	}
 	
-	public static Bean getTargetBeanForView(FacesView facesView)
-	throws Exception {
+	/**
+	 * Resolves the target bean for the current faces view without additional reference binding.
+	 *
+	 * @param facesView the active faces view
+	 * @return the resolved target bean, or {@code null} when the view has no root bean
+	 */
+	public static Bean getTargetBeanForView(FacesView facesView) {
 		return getTargetBeanForViewAndReferenceBinding(facesView, null);
 	}
 
+	/**
+	 * Resolves the target bean for the current faces view and optional reference binding.
+	 *
+	 * @param facesView the active faces view
+	 * @param referenceBinding the optional reference binding path
+	 * @return the resolved target bean, or {@code null} when the view has no root bean
+	 */
 	public static Bean getTargetBeanForViewAndReferenceBinding(FacesView facesView,
-																String referenceBinding)
-	throws Exception {
+																String referenceBinding) {
 		return getTargetBeanForViewAndReferenceBinding(facesView, referenceBinding, null);
 	}
 
+	/**
+	 * Resolves the target bean for the current faces view, optional reference binding, and optional collection element id.
+	 *
+	 * @param facesView the active faces view
+	 * @param referenceBinding the optional reference binding path
+	 * @param elementBizId the optional collection element biz id for collection dereferencing
+	 * @return the resolved target bean, or {@code null} when the view has no root bean
+	 */
 	public static Bean getTargetBeanForViewAndReferenceBinding(FacesView facesView,
     															String referenceBinding,
-																String elementBizId)
-    throws Exception {
+																String elementBizId) {
     	Bean result = facesView.getBean();
     	
     	if (result != null) { // hopefully never
@@ -71,6 +91,14 @@ public class ActionUtil {
     	return result;
     }
 
+	/**
+	 * Replaces the current target bean (or collection element) for a faces view binding context.
+	 *
+	 * @param <T> the bean subtype
+	 * @param facesView the active faces view
+	 * @param collectionName the optional collection binding name
+	 * @param newValue the replacement bean value
+	 */
     static <T extends Bean> void setTargetBeanForViewAndCollectionBinding(FacesView facesView, String collectionName, T newValue)
 	throws Exception {
     	Bean bean = facesView.getBean();
@@ -99,6 +127,13 @@ public class ActionUtil {
     	}
     }
     
+	/**
+	 * Redirects while preserving the current view-scoped conversation and zoom-in navigation state.
+	 *
+	 * @param facesView the active faces view
+	 * @param zoomIn whether the navigation event is a zoom-in transition
+	 * @throws Exception if state caching, history scripting, or redirect handling fails
+	 */
     static final void redirectViewScopedConversation(FacesView facesView, boolean zoomIn)
     throws Exception {
 		// ensure that the proper conversation is stashed in the webContext object
@@ -137,6 +172,13 @@ public class ActionUtil {
 		ec.redirect(outcome.toString());
     }
     
+	/**
+	 * Resolves a metadata query definition by name, falling back to the document default query.
+	 *
+	 * @param bizModule the module name containing the query
+	 * @param queryName the metadata query name
+	 * @return the resolved metadata query definition
+	 */
     public static MetaDataQueryDefinition getMetaDataQuery(final String bizModule, final String queryName) {
 		User user = CORE.getUser();
 		Customer customer = user.getCustomer();

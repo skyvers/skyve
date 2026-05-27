@@ -31,7 +31,7 @@ class ChartActionStaticTest extends AbstractSkyveTest {
 	private static ChartData minimalChartData() {
 		ChartData data = new ChartData();
 		data.setLabel("Test Label");
-		data.setValues(Arrays.asList(1, 2, 3));
+		data.setValues(Arrays.asList(Integer.valueOf(1), Integer.valueOf(2), Integer.valueOf(3)));
 		data.setLabels(Arrays.asList("A", "B", "C"));
 		data.setBackground(Color.BLUE);
 		data.setBorder(Color.RED);
@@ -40,7 +40,7 @@ class ChartActionStaticTest extends AbstractSkyveTest {
 
 	private static ChartData multiColorChartData() {
 		ChartData data = new ChartData();
-		data.setValues(Arrays.asList(10, 20, 30));
+		data.setValues(Arrays.asList(Integer.valueOf(10), Integer.valueOf(20), Integer.valueOf(30)));
 		data.setLabels(Arrays.asList("X", "Y", "Z"));
 		data.setBackgrounds(Arrays.asList(Color.RED, Color.GREEN, Color.BLUE));
 		data.setBorders(Arrays.asList(Color.DARK_GRAY, Color.DARK_GRAY, Color.DARK_GRAY));

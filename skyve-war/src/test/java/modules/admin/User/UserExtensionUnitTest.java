@@ -17,31 +17,26 @@ import org.skyve.impl.util.UtilImpl;
 /**
  * Unit tests for {@link UserExtension} that do not require the H2 test database.
  */
-@SuppressWarnings("static-method")
 class UserExtensionUnitTest {
 
 	@Spy
 	private UserExtension user;
-
-	private AutoCloseable closeable;
 
 	private String originalServerUrl;
 	private String originalSkyveContext;
 	private String originalHomeUri;
 
 	@BeforeEach
+	@SuppressWarnings("deprecation")
 	void setup() {
-		closeable = MockitoAnnotations.openMocks(this);
+		MockitoAnnotations.initMocks(this);
 		originalServerUrl = UtilImpl.SERVER_URL;
 		originalSkyveContext = UtilImpl.SKYVE_CONTEXT;
 		originalHomeUri = UtilImpl.HOME_URI;
 	}
 
 	@AfterEach
-	void tearDown() throws Exception {
-		if (closeable != null) {
-			closeable.close();
-		}
+	void tearDown() {
 		UtilImpl.SERVER_URL = originalServerUrl;
 		UtilImpl.SKYVE_CONTEXT = originalSkyveContext;
 		UtilImpl.HOME_URI = originalHomeUri;

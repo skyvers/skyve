@@ -16,6 +16,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.messages.UploadException;
 import org.skyve.metadata.model.document.Document;
 
+@SuppressWarnings("static-method")
 public class StandardLoaderTest {
 
 	private static BizPortWorkbook mockWorkbook() {

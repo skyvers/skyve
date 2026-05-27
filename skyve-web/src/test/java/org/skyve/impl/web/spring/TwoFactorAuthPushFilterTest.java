@@ -100,6 +100,7 @@ class TwoFactorAuthPushFilterTest {
 	}
 
 	@Test
+	@SuppressWarnings("static-method")
 	void testIsPushTfaRemainsEmailOnly() {
 		assertFalse(TwoFactorAuthConfigurationSingleton.isPushTfa(new TwoFactorAuthCustomerConfiguration("OFF", 300, "subject", "body")));
 		assertTrue(TwoFactorAuthConfigurationSingleton.isPushTfa(new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body")));
@@ -440,9 +441,10 @@ class TwoFactorAuthPushFilterTest {
 		return request;
 	}
 
-	private static HttpServletResponse loginResponse() throws Exception {
+	@SuppressWarnings("boxing")
+	private static HttpServletResponse loginResponse() {
 		HttpServletResponse response = mock(HttpServletResponse.class);
-		when(response.isCommitted()).thenReturn(Boolean.FALSE);
+		when(response.isCommitted()).thenReturn(false);
 		when(response.encodeRedirectURL(anyString())).thenAnswer(invocation -> invocation.getArgument(0));
 		return response;
 	}
@@ -459,23 +461,17 @@ class TwoFactorAuthPushFilterTest {
 		return request;
 	}
 
+	@SuppressWarnings("boxing")
 	private static HttpServletResponse responseWithForward(HttpServletRequest request) {
 		HttpServletResponse response = mock(HttpServletResponse.class);
 		RequestDispatcher dispatcher = mock(RequestDispatcher.class);
-		when(response.isCommitted()).thenReturn(Boolean.FALSE);
+		when(response.isCommitted()).thenReturn(false);
 		when(request.getRequestDispatcher("/login")).thenReturn(dispatcher);
 		return response;
 	}
 
 	private static HttpServletResponse responseWithRedirect() {
-		HttpServletResponse response = mock(HttpServletResponse.class);
-		when(response.isCommitted()).thenReturn(Boolean.FALSE);
-		when(response.encodeRedirectURL(anyString())).thenAnswer(invocation -> invocation.getArgument(0));
-		return response;
-	}
-
-	private static TwoFactorAuthUser twoFactorUser(boolean accountNonLocked) {
-		return twoFactorUser(true, true, true, accountNonLocked);
+		return loginResponse();
 	}
 
 	private static TwoFactorAuthUser twoFactorUser(boolean accountNonLocked, String token) {
@@ -534,7 +530,6 @@ class TwoFactorAuthPushFilterTest {
 		private boolean pushNotificationCalled;
 		private int pushNotificationCallCount;
 		private boolean updateUserCalled;
-		private int updateUserCallCount;
 		private Boolean expiredOverride;
 		private String generatedCode = "123456";
 		private String generatedPushId = "generated-token";
@@ -603,7 +598,6 @@ class TwoFactorAuthPushFilterTest {
 		@Override
 		protected void updateUserTFADetails(TwoFactorAuthUser user) {
 			updateUserCalled = true;
-			updateUserCallCount++;
 		}
 
 		@Override
@@ -624,6 +618,7 @@ class TwoFactorAuthPushFilterTest {
 			return super.tfaCodeExpired(customer, twoFactorCode);
 		}
 
+		@Override
 		protected long currentTimeMillis() {
 			if (currentTimeMillisOverride != Long.MIN_VALUE) {
 				return currentTimeMillisOverride;

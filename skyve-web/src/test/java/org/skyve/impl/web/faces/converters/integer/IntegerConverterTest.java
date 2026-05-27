@@ -8,8 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 
 import jakarta.faces.convert.ConverterException;
-
-public class IntegerConverterTest {
+@SuppressWarnings("static-method")
+class IntegerConverterTest {
 
 	// ---- IntegerConverter ----
 
@@ -35,7 +35,8 @@ public class IntegerConverterTest {
 
 	@Test
 	void integerConverter_getAsObjectThrowsForInvalid() {
-		assertThrows(ConverterException.class, () -> new IntegerConverter().getAsObject(null, null, "not-a-number"));
+		IntegerConverter converter = new IntegerConverter();
+		assertThrows(ConverterException.class, () -> converter.getAsObject(null, null, "not-a-number"));
 	}
 
 	// ---- IntegerSeparator ----
@@ -64,7 +65,8 @@ public class IntegerConverterTest {
 
 	@Test
 	void integerSeparator_getAsObjectThrowsForInvalid() {
-		assertThrows(ConverterException.class, () -> new IntegerSeparator().getAsObject(null, null, "not-a-number"));
+		IntegerSeparator converter = new IntegerSeparator();
+		assertThrows(ConverterException.class, () -> converter.getAsObject(null, null, "not-a-number"));
 	}
 
 	// ---- LongIntegerConverter ----
@@ -91,7 +93,8 @@ public class IntegerConverterTest {
 
 	@Test
 	void longIntegerConverter_getAsObjectThrowsForInvalid() {
-		assertThrows(ConverterException.class, () -> new LongIntegerConverter().getAsObject(null, null, "not-a-number"));
+		LongIntegerConverter converter = new LongIntegerConverter();
+		assertThrows(ConverterException.class, () -> converter.getAsObject(null, null, "not-a-number"));
 	}
 
 	// ---- LongIntegerSeparator ----
@@ -120,7 +123,8 @@ public class IntegerConverterTest {
 
 	@Test
 	void longIntegerSeparator_getAsObjectThrowsForInvalid() {
-		assertThrows(ConverterException.class, () -> new LongIntegerSeparator().getAsObject(null, null, "not-a-number"));
+		LongIntegerSeparator converter = new LongIntegerSeparator();
+		assertThrows(ConverterException.class, () -> converter.getAsObject(null, null, "not-a-number"));
 	}
 
 	// ---- SimplePercentage ----
@@ -149,6 +153,7 @@ public class IntegerConverterTest {
 
 	@Test
 	void simplePercentage_getAsObjectThrowsForInvalid() {
-		assertThrows(ConverterException.class, () -> new SimplePercentage().getAsObject(null, null, "not-a-number"));
+		SimplePercentage converter = new SimplePercentage();
+		assertThrows(ConverterException.class, () -> converter.getAsObject(null, null, "not-a-number"));
 	}
 }

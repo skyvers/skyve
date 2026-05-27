@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Test;
 import org.skyve.domain.types.TimeOnly;
 
 import jakarta.faces.convert.ConverterException;
-
-public class TimeConverterTest {
+@SuppressWarnings({"static-method", "java:S5778"})
+class TimeConverterTest {
 
 	// ---- HH_MI ----
 

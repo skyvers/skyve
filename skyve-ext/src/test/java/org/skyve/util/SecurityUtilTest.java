@@ -22,6 +22,7 @@ import org.skyve.impl.mail.MailServiceStaticSingleton;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.util.UtilImpl;
 
+@SuppressWarnings("java:S4144")
 class SecurityUtilTest {
 	private final CaptureMailService capture = new CaptureMailService();
 
@@ -72,7 +73,6 @@ class SecurityUtilTest {
 		UtilImpl.SMTP_TEST_BOGUS_SEND = originalSmtpTestBogusSend;
 	}
 
-	@SuppressWarnings("boxing")
 	@Test
 	void testEmailUsesExtMailService() throws Exception {
 		SecurityLog securityLog = mock(SecurityLog.class);
@@ -177,7 +177,7 @@ class SecurityUtilTest {
 		assertThat(encoded, containsString("{argon2}"));
 	}
 
-	@SuppressWarnings({"static-method", "boxing"})
+	@SuppressWarnings("static-method")
 	@Test
 	void testCreateDelegatingPasswordEncoderCanMatch() {
 		org.springframework.security.crypto.password.PasswordEncoder encoder = SecurityUtil.createDelegatingPasswordEncoder();

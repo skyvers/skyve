@@ -15,7 +15,6 @@ import org.skyve.metadata.view.model.list.RDBMSDynamicPersistenceListModel;
 import org.skyve.util.Util;
 
 import modules.test.domain.AllAttributesPersistent;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class RDBMSDynamicPersistenceListModelTests extends AbstractSkyveTest {
 	@Test

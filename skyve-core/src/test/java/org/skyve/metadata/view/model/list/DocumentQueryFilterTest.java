@@ -26,7 +26,7 @@ import org.skyve.persistence.DocumentFilter;
  * Comprehensive tests for DocumentQueryFilter.
  * The constructor is package-private, so this test lives in the same package.
  */
-@SuppressWarnings({ "static-method", "boxing" })
+@SuppressWarnings("java:S4144")
 class DocumentQueryFilterTest {
 
 	private DocumentFilter detailFilter;

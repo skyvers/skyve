@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -23,6 +24,7 @@ import org.skyve.impl.util.UtilImpl.ArchiveConfig;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveSchedule;
 
+@SuppressWarnings("boxing")
 class UtilImplTest {
 	
 	private ClassLoader classLoader;
@@ -30,7 +32,7 @@ class UtilImplTest {
 	private Map<String, String> twilio;
 	
 	@BeforeEach
-	void setup() throws Exception {
+	void setup() {
 		classLoader = getClass().getClassLoader();
 	}
 	
@@ -102,14 +104,14 @@ class UtilImplTest {
 	
 	@Test
 	@SuppressWarnings("static-method")
-	public void testConcurrentSessionFlagsDefaultToEnabled() {
+	void testConcurrentSessionFlagsDefaultToEnabled() {
 		assertThat(UtilImpl.CONCURRENT_SESSION_WARNINGS, is(true));
 		assertThat(UtilImpl.CONCURRENT_SESSION_NOTIFICATIONS, is(true));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testUnidecode() {
+	void testUnidecode() {
 		Assert.assertEquals("descricao", UtilImpl.unidecode("descrição"));
 		Assert.assertEquals("tache", UtilImpl.unidecode("tâche"));
 		Assert.assertEquals("opcoes", UtilImpl.unidecode("opções"));
@@ -352,7 +354,7 @@ class UtilImplTest {
                 assertNotNull(clone);
                 assertEquals(original, clone);
                 // Verify it's a distinct object
-                assertFalse(original == clone);
+				assertNotSame(original, clone);
         }
 
 	@Test

@@ -32,7 +32,6 @@ import org.skyve.metadata.module.Module;
  * Tests for MutableCachedRepository cache operations (put/get/evict) via the
  * concrete LocalDesignRepository subclass.
  */
-@SuppressWarnings("static-method")
 class MutableCachedRepositoryTest {
 
 	@TempDir
@@ -475,14 +474,14 @@ class MutableCachedRepositoryTest {
 	void localDesignRepositoryRetrieveAllScheduledJobsThrowsUnsupportedOperationException() {
 		LocalDesignRepository repo = new LocalDesignRepository(basePath);
 		assertThrows(UnsupportedOperationException.class,
-				() -> repo.retrieveAllScheduledJobsForAllCustomers());
+				repo::retrieveAllScheduledJobsForAllCustomers);
 	}
 
 	@Test
 	void localDesignRepositoryRetrieveAllScheduledReportsThrowsUnsupportedOperationException() {
 		LocalDesignRepository repo = new LocalDesignRepository(basePath);
 		assertThrows(UnsupportedOperationException.class,
-				() -> repo.retrieveAllScheduledReportsForAllCustomers());
+				repo::retrieveAllScheduledReportsForAllCustomers);
 	}
 
 	@Test
@@ -491,6 +490,5 @@ class MutableCachedRepositoryTest {
 		LocalDesignRepository repo = new LocalDesignRepository(basePath, false);
 		assertNotNull(repo);
 	}
-
 }
 

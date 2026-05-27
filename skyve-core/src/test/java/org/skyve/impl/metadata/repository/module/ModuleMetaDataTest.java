@@ -1101,7 +1101,7 @@ class ModuleMetaDataTest {
 		item.setName("mapFastRefresh");
 		item.setDocumentName("TestDocument");
 		item.setGeometryBinding("location");
-		item.setRefreshTimeInSeconds(3); // < 5 should throw
+		item.setRefreshTimeInSeconds(Integer.valueOf(3)); // < 5 should throw
 		item.getRoles().add(grantedTo("viewer"));
 		module.getMenu().getActions().add(item);
 		assertThrows(MetaDataException.class, () -> module.convert("test"));

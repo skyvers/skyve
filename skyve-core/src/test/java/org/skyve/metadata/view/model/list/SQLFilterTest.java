@@ -26,8 +26,7 @@ class SQLFilterTest {
 	private SQLFilter filterNoSummary;
 
 	@BeforeEach
-	@SuppressWarnings("unchecked")
-	void setUp() throws Exception {
+	void setUp() {
 		User user = mock(User.class);
 		AbstractPersistence persistence =
 			mock(AbstractPersistence.class, withSettings().defaultAnswer(CALLS_REAL_METHODS));
@@ -39,7 +38,7 @@ class SQLFilterTest {
 	}
 
 	@AfterEach
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"static-method", "unchecked"})
 	void tearDown() throws Exception {
 		Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
 		field.setAccessible(true);

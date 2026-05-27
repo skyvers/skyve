@@ -102,7 +102,7 @@ class BindUtilTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "java:S5976"})
 	void testToJavaInstanceIdentifierRemovesInvalidCharacters() {
 		// setup the test data
 		String identifier = "E-Mail";
@@ -141,7 +141,7 @@ class BindUtilTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "java:S5976"})
 	void testToJavaTypeIdentifierRemovesInvalidCharacters() {
 		// setup the test data
 		String identifier = "E-Mail";
@@ -2151,7 +2151,7 @@ class BindUtilTest {
 	// ---- fromString with converter (covers L584, L595) ----
 
 	@Test
-	@SuppressWarnings({"static-method", "unchecked"})
+	@SuppressWarnings("static-method")
 	void fromStringWithNonNullConverterUsesConverterDirectly() throws Exception {
 		// Covers L584: !fromSerializedFormat && converter != null -> result = converter.fromDisplayValue(stringValue)
 		Converter<Integer> converter = mock(Converter.class);
@@ -2161,7 +2161,7 @@ class BindUtilTest {
 	}
 
 	@Test
-	@SuppressWarnings({"static-method", "unchecked"})
+	@SuppressWarnings("static-method")
 	void fromSerialisedWithNonDynamicConverterAndIntegerTypeUsesConverter() throws Exception {
 		// Covers L595: fromSerializedFormat=true, non-DynamicEnumerationConverter, Integer type, converter != null
 		Converter<Integer> converter = mock(Converter.class);
@@ -2171,7 +2171,7 @@ class BindUtilTest {
 	}
 
 	@Test
-	@SuppressWarnings({"static-method", "unchecked"})
+	@SuppressWarnings("static-method")
 	void fromSerialisedWithDynamicEnumerationConverterUsesConverter() throws Exception {
 		// Covers L588: fromSerializedFormat=true && converter instanceof DynamicEnumerationConverter
 		DynamicEnumerationConverter dynamicConverter = mock(DynamicEnumerationConverter.class);
@@ -2210,8 +2210,8 @@ class BindUtilTest {
 	}
 
 	@Test
-	@SuppressWarnings({"static-method", "unchecked"})
-	void toDisplayWithConverterAndImplementingTypeUsesConverter() throws Exception {
+	@SuppressWarnings("static-method")
+	void toDisplayWithConverterAndImplementingTypeUsesConverter() {
 		// Covers L741: converter + implementingType path
 		Converter<Integer> converter = mock(Converter.class);
 		when(converter.toDisplayValue(Integer.valueOf(42))).thenReturn("42 items");
@@ -2232,7 +2232,7 @@ class BindUtilTest {
 	// ---- fromString with customer — date type converter paths ----
 
 	@Test
-	@SuppressWarnings({"static-method", "unchecked"})
+	@SuppressWarnings("static-method")
 	void fromStringDateOnlyWithCustomerConverterReturnsDateOnly() throws Exception {
 		// Covers fromString L630-631: customer != null branch for DateOnly
 		Customer customer = mock(Customer.class);
@@ -2245,7 +2245,7 @@ class BindUtilTest {
 	}
 
 	@Test
-	@SuppressWarnings({"static-method", "unchecked"})
+	@SuppressWarnings("static-method")
 	void fromStringTimeOnlyWithCustomerConverterReturnsTimeOnly() throws Exception {
 		// Covers fromString L642-643: customer != null branch for TimeOnly
 		Customer customer = mock(Customer.class);
@@ -2258,7 +2258,7 @@ class BindUtilTest {
 	}
 
 	@Test
-	@SuppressWarnings({"static-method", "unchecked"})
+	@SuppressWarnings("static-method")
 	void fromStringDateTimeWithCustomerConverterReturnsDateTime() throws Exception {
 		// Covers fromString L654-655: customer != null branch for DateTime
 		Customer customer = mock(Customer.class);
@@ -2271,7 +2271,7 @@ class BindUtilTest {
 	}
 
 	@Test
-	@SuppressWarnings({"static-method", "unchecked"})
+	@SuppressWarnings("static-method")
 	void fromStringTimestampWithCustomerConverterReturnsTimestamp() throws Exception {
 		// Covers fromString L666-667: customer != null branch for Timestamp
 		Customer customer = mock(Customer.class);
@@ -2321,7 +2321,7 @@ class BindUtilTest {
 	// ---- toDisplay — DateOnly/TimeOnly/DateTime/Timestamp branches ----
 
 	@Test
-	@SuppressWarnings({"static-method", "unchecked"})
+	@SuppressWarnings("static-method")
 	void toDisplayDateOnlyUsesDefaultDateConverter() {
 		// Covers: value instanceof DateOnly date → customer.getDefaultDateConverter().toDisplayValue(date)
 		Customer customer = mock(Customer.class);
@@ -2334,7 +2334,7 @@ class BindUtilTest {
 	}
 
 	@Test
-	@SuppressWarnings({"static-method", "unchecked"})
+	@SuppressWarnings("static-method")
 	void toDisplayTimeOnlyUsesDefaultTimeConverter() {
 		// Covers: value instanceof TimeOnly time → customer.getDefaultTimeConverter().toDisplayValue(time)
 		Customer customer = mock(Customer.class);
@@ -2347,7 +2347,7 @@ class BindUtilTest {
 	}
 
 	@Test
-	@SuppressWarnings({"static-method", "unchecked"})
+	@SuppressWarnings("static-method")
 	void toDisplayDateTimeUsesDefaultDateTimeConverter() {
 		// Covers: value instanceof DateTime date → customer.getDefaultDateTimeConverter().toDisplayValue(date)
 		Customer customer = mock(Customer.class);
@@ -2360,7 +2360,7 @@ class BindUtilTest {
 	}
 
 	@Test
-	@SuppressWarnings({"static-method", "unchecked"})
+	@SuppressWarnings("static-method")
 	void toDisplayTimestampUsesDefaultTimestampConverter() {
 		// Covers: value instanceof Timestamp time → customer.getDefaultTimestampConverter().toDisplayValue(time)
 		Customer customer = mock(Customer.class);

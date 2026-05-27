@@ -9,7 +9,6 @@ import java.util.NoSuchElementException;
 import org.junit.Test;
 
 import jakarta.faces.model.SelectItem;
-
 @SuppressWarnings("static-method")
 public class SelectItemsBeanConverterArrayIteratorTest {
 

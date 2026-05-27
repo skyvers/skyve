@@ -35,7 +35,7 @@ import org.skyve.persistence.AutoClosingIterableAdpater;
 import org.skyve.persistence.DocumentFilter;
 import org.skyve.persistence.DocumentQuery;
 
-@SuppressWarnings("static-method")
+@SuppressWarnings({"static-method", "resource", "java:S5778"})
 class AbstractDocumentQueryTest {
 
 	/** Minimal concrete subclass – all execute/results methods are no-ops. */
@@ -118,7 +118,7 @@ class AbstractDocumentQueryTest {
 	private Module module;
 
 	@BeforeEach
-	void setUp() throws Exception {
+	void setUp() {
 		persistence = mock(AbstractPersistence.class, withSettings().defaultAnswer(CALLS_REAL_METHODS));
 		document = mock(Document.class);
 		user = mock(User.class);

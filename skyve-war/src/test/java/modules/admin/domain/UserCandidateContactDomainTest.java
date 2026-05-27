@@ -12,10 +12,10 @@ import modules.admin.Contact.ContactExtension;
 import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
-public class UserCandidateContactDomainTest extends AbstractH2Test {
+class UserCandidateContactDomainTest extends AbstractH2Test {
 
 	@Test
-	void dataBuilderCreatesBean() throws Exception {
+	void dataBuilderCreatesBean() {
 		UserCandidateContact bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(UserCandidateContact.MODULE_NAME, UserCandidateContact.DOCUMENT_NAME);
@@ -23,37 +23,37 @@ public class UserCandidateContactDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void moduleAndDocumentNames() throws Exception {
+	void moduleAndDocumentNames() {
 		UserCandidateContact bean = UserCandidateContact.newInstance();
 		assertEquals("admin", bean.getBizModule());
 		assertEquals("UserCandidateContact", bean.getBizDocument());
 	}
 
 	@Test
-	void matchScoreSetAndGet() throws Exception {
+	void matchScoreSetAndGet() {
 		UserCandidateContact bean = UserCandidateContact.newInstance();
 		bean.setMatchScore(Integer.valueOf(95));
 		assertEquals(Integer.valueOf(95), bean.getMatchScore());
 	}
 
 	@Test
-	void bizOrdinalSetAndGet() throws Exception {
+	void bizOrdinalSetAndGet() {
 		UserCandidateContact bean = UserCandidateContact.newInstance();
 		bean.setBizOrdinal(Integer.valueOf(1));
 		assertEquals(Integer.valueOf(1), bean.getBizOrdinal());
 	}
 
 	@Test
-	void contactSetAndGet() throws Exception {
+	void contactSetAndGet() {
 		UserCandidateContact bean = UserCandidateContact.newInstance();
 		assertNull(bean.getContact());
-		ContactExtension contact = ContactExtension.newInstance();
+		ContactExtension contact = Contact.newInstance();
 		bean.setContact(contact);
 		assertEquals(contact, bean.getContact());
 	}
 
 	@Test
-	void getBizKeyWithNoContact() throws Exception {
+	void getBizKeyWithNoContact() {
 		UserCandidateContact bean = UserCandidateContact.newInstance();
 		assertNotNull(bean.getBizKey());
 	}

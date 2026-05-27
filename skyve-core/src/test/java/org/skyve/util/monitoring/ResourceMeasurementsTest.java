@@ -11,6 +11,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
+@SuppressWarnings("boxing")
 class ResourceMeasurementsTest {
 
 	@Test
@@ -165,7 +166,7 @@ class ResourceMeasurementsTest {
 	}
 
 	@Test
-	@SuppressWarnings({"static-method", "boxing"})
+	@SuppressWarnings("static-method")
 	void rollupWithTwoMinutesBoundaryFillsMinutesBuckets() throws Exception {
 		ResourceMeasurements rm = new ResourceMeasurements();
 		rm.updateMeasurements(0.6f, 0.4f);

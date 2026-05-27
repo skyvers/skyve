@@ -26,8 +26,8 @@ import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.model.SelectItem;
 
+@SuppressWarnings({"static-method", "boxing"})
 class SelectItemsIteratorTest {
-
 	private FacesContext facesContext;
 	private ExternalContext externalContext;
 

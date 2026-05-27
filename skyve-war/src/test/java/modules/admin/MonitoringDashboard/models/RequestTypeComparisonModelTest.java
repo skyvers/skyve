@@ -21,13 +21,14 @@ import modules.admin.domain.MonitoringDashboard.RequestType;
 /**
  * Tests for RequestTypeComparisonModel.getChartData().
  */
-public class RequestTypeComparisonModelTest {
+@SuppressWarnings("static-method")
+class RequestTypeComparisonModelTest {
 
 	private RequestTypeComparisonModel model;
 	private MonitoringDashboard bean;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		Monitoring.purge(); // ensure no cross-test static state from MonitoringTest in skyve-core
 		model = new RequestTypeComparisonModel();
 		bean = new MonitoringDashboard();
@@ -37,7 +38,7 @@ public class RequestTypeComparisonModelTest {
 	// --- null field guards ---
 
 	@Test
-	public void testGetChartDataNullRequestTypeReturnsNoDataChart() {
+	void testGetChartDataNullRequestTypeReturnsNoDataChart() {
 		bean.setRequestType(null);
 		bean.setMetric(Metric.elapsedRequestTime);
 		bean.setPeriod(Period.currentHour);
@@ -50,7 +51,7 @@ public class RequestTypeComparisonModelTest {
 	}
 
 	@Test
-	public void testGetChartDataNullMetricReturnsNoDataChart() {
+	void testGetChartDataNullMetricReturnsNoDataChart() {
 		bean.setRequestType(RequestType.all);
 		bean.setMetric(null);
 		bean.setPeriod(Period.currentHour);
@@ -63,7 +64,7 @@ public class RequestTypeComparisonModelTest {
 	}
 
 	@Test
-	public void testGetChartDataNullPeriodReturnsNoDataChart() {
+	void testGetChartDataNullPeriodReturnsNoDataChart() {
 		bean.setRequestType(RequestType.all);
 		bean.setMetric(Metric.elapsedRequestTime);
 		bean.setPeriod(null);
@@ -76,7 +77,7 @@ public class RequestTypeComparisonModelTest {
 	}
 
 	@Test
-	public void testGetChartDataAllNullReturnsNoDataChart() {
+	void testGetChartDataAllNullReturnsNoDataChart() {
 		// MonitoringDashboard has defaults; explicitly null all three
 		bean.setRequestType(null);
 		bean.setMetric(null);
@@ -91,7 +92,7 @@ public class RequestTypeComparisonModelTest {
 	// --- empty monitoring data path ---
 
 	@Test
-	public void testGetChartDataWithAllRequestTypeAndNoMonitoringDataReturnsNoData() {
+	void testGetChartDataWithAllRequestTypeAndNoMonitoringDataReturnsNoData() {
 		bean.setRequestType(RequestType.all);
 		bean.setMetric(Metric.elapsedRequestTime);
 		bean.setPeriod(Period.currentHour);
@@ -105,7 +106,7 @@ public class RequestTypeComparisonModelTest {
 	}
 
 	@Test
-	public void testGetChartDataWithSpecificRequestTypeAndNoMonitoringDataReturnsNoData() {
+	void testGetChartDataWithSpecificRequestTypeAndNoMonitoringDataReturnsNoData() {
 		bean.setRequestType(RequestType.A);
 		bean.setMetric(Metric.requestCPUUtilisation);
 		bean.setPeriod(Period.currentDay);
@@ -120,7 +121,7 @@ public class RequestTypeComparisonModelTest {
 	// --- metric label coverage ---
 
 	@Test
-	public void testGetChartDataElapsedRequestTimeNoData() {
+	void testGetChartDataElapsedRequestTimeNoData() {
 		bean.setRequestType(RequestType.all);
 		bean.setMetric(Metric.elapsedRequestTime);
 		bean.setPeriod(Period.currentMinute);
@@ -131,7 +132,7 @@ public class RequestTypeComparisonModelTest {
 	}
 
 	@Test
-	public void testGetChartDataRequestCPUUtilisationNoData() {
+	void testGetChartDataRequestCPUUtilisationNoData() {
 		bean.setRequestType(RequestType.all);
 		bean.setMetric(Metric.requestCPUUtilisation);
 		bean.setPeriod(Period.currentMinute);
@@ -142,7 +143,7 @@ public class RequestTypeComparisonModelTest {
 	}
 
 	@Test
-	public void testGetChartDataSystemCPUUsageNoData() {
+	void testGetChartDataSystemCPUUsageNoData() {
 		bean.setRequestType(RequestType.all);
 		bean.setMetric(Metric.systemCPUUsage);
 		bean.setPeriod(Period.currentWeek);
@@ -153,7 +154,7 @@ public class RequestTypeComparisonModelTest {
 	}
 
 	@Test
-	public void testGetChartDataSystemRAMUsageNoData() {
+	void testGetChartDataSystemRAMUsageNoData() {
 		bean.setRequestType(RequestType.all);
 		bean.setMetric(Metric.systemRAMUsage);
 		bean.setPeriod(Period.currentYear);
@@ -166,7 +167,7 @@ public class RequestTypeComparisonModelTest {
 	// --- period coverage ---
 
 	@Test
-	public void testGetChartDataCurrentDayPeriodNoData() {
+	void testGetChartDataCurrentDayPeriodNoData() {
 		bean.setRequestType(RequestType.S);
 		bean.setMetric(Metric.elapsedRequestTime);
 		bean.setPeriod(Period.currentDay);
@@ -177,7 +178,7 @@ public class RequestTypeComparisonModelTest {
 	}
 
 	@Test
-	public void testGetChartDataCurrentWeekPeriodNoData() {
+	void testGetChartDataCurrentWeekPeriodNoData() {
 		bean.setRequestType(RequestType.E);
 		bean.setMetric(Metric.systemRAMUsage);
 		bean.setPeriod(Period.currentWeek);
@@ -188,7 +189,7 @@ public class RequestTypeComparisonModelTest {
 	}
 
 	@Test
-	public void testGetChartDataCurrentYearPeriodNoData() {
+	void testGetChartDataCurrentYearPeriodNoData() {
 		bean.setRequestType(RequestType.C);
 		bean.setMetric(Metric.systemCPUUsage);
 		bean.setPeriod(Period.currentYear);
@@ -201,7 +202,7 @@ public class RequestTypeComparisonModelTest {
 	// --- topN default ---
 
 	@Test
-	public void testGetChartDataNullTopNUsesDefault() {
+	void testGetChartDataNullTopNUsesDefault() {
 		bean.setRequestType(RequestType.all);
 		bean.setMetric(Metric.elapsedRequestTime);
 		bean.setPeriod(Period.currentHour);
@@ -214,7 +215,7 @@ public class RequestTypeComparisonModelTest {
 	}
 
 	@Test
-	public void testGetChartDataCustomTopN() {
+	void testGetChartDataCustomTopN() {
 		bean.setRequestType(RequestType.all);
 		bean.setMetric(Metric.elapsedRequestTime);
 		bean.setPeriod(Period.currentHour);
@@ -228,7 +229,7 @@ public class RequestTypeComparisonModelTest {
 	// --- all request type codes ---
 
 	@Test
-	public void testGetChartDataActionRequestTypeNoData() {
+	void testGetChartDataActionRequestTypeNoData() {
 		bean.setRequestType(RequestType.A);
 		bean.setMetric(Metric.elapsedRequestTime);
 		bean.setPeriod(Period.currentHour);
@@ -238,7 +239,7 @@ public class RequestTypeComparisonModelTest {
 	}
 
 	@Test
-	public void testGetChartDataDeleteRequestTypeNoData() {
+	void testGetChartDataDeleteRequestTypeNoData() {
 		bean.setRequestType(RequestType.D);
 		bean.setMetric(Metric.elapsedRequestTime);
 		bean.setPeriod(Period.currentHour);
@@ -248,7 +249,7 @@ public class RequestTypeComparisonModelTest {
 	}
 
 	@Test
-	public void testGetChartDataZoomOutRequestTypeNoData() {
+	void testGetChartDataZoomOutRequestTypeNoData() {
 		bean.setRequestType(RequestType.Z);
 		bean.setMetric(Metric.systemRAMUsage);
 		bean.setPeriod(Period.currentDay);
@@ -260,19 +261,19 @@ public class RequestTypeComparisonModelTest {
 	// --- RequestType enum helpers ---
 
 	@Test
-	public void testRequestTypeFromCode() {
+	void testRequestTypeFromCode() {
 		assertEquals(RequestType.all, RequestType.fromCode("all"));
 		assertEquals(RequestType.A, RequestType.fromCode("A"));
 		assertEquals(RequestType.S, RequestType.fromCode("S"));
 	}
 
 	@Test
-	public void testRequestTypeFromCodeUnknownReturnsNull() {
+	void testRequestTypeFromCodeUnknownReturnsNull() {
 		assertEquals(null, RequestType.fromCode("X"));
 	}
 
 	@Test
-	public void testRequestTypeToDomainValues() {
+	void testRequestTypeToDomainValues() {
 		List<DomainValue> dvs = RequestType.toDomainValues();
 		assertNotNull(dvs);
 		assertTrue(dvs.size() >= 11, "should have at least 11 request type domain values");
@@ -281,18 +282,18 @@ public class RequestTypeComparisonModelTest {
 	// --- Metric enum helpers ---
 
 	@Test
-	public void testMetricFromCode() {
+	void testMetricFromCode() {
 		assertEquals(Metric.elapsedRequestTime, Metric.fromCode("t"));
 		assertEquals(Metric.systemRAMUsage, Metric.fromCode("r"));
 	}
 
 	@Test
-	public void testMetricFromCodeUnknownReturnsNull() {
+	void testMetricFromCodeUnknownReturnsNull() {
 		assertEquals(null, Metric.fromCode("z"));
 	}
 
 	@Test
-	public void testMetricToDomainValues() {
+	void testMetricToDomainValues() {
 		List<DomainValue> dvs = Metric.toDomainValues();
 		assertNotNull(dvs);
 		assertEquals(4, dvs.size());
@@ -301,7 +302,7 @@ public class RequestTypeComparisonModelTest {
 	// --- Period enum helpers ---
 
 	@Test
-	public void testPeriodFromCode() {
+	void testPeriodFromCode() {
 		assertEquals(Period.currentMinute, Period.fromCode("m"));
 		assertEquals(Period.currentHour, Period.fromCode("h"));
 		assertEquals(Period.currentDay, Period.fromCode("d"));
@@ -310,12 +311,12 @@ public class RequestTypeComparisonModelTest {
 	}
 
 	@Test
-	public void testPeriodFromCodeUnknownReturnsNull() {
+	void testPeriodFromCodeUnknownReturnsNull() {
 		assertEquals(null, Period.fromCode("z"));
 	}
 
 	@Test
-	public void testPeriodToDomainValues() {
+	void testPeriodToDomainValues() {
 		List<DomainValue> dvs = Period.toDomainValues();
 		assertNotNull(dvs);
 		assertEquals(5, dvs.size());

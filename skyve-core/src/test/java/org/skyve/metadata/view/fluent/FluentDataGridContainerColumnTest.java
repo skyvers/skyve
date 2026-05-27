@@ -163,10 +163,13 @@ class FluentDataGridContainerColumnTest {
 		assertEquals(0, result.get().getWidgets().size());
 	}
 
-        @Test
-        void fromWithUnknownWidgetTypeThrowsIllegalState() {
-                DataGridContainerColumn source = new DataGridContainerColumn();
-                source.getWidgets().add(new MetaData() {});
-                assertThrows(IllegalStateException.class, () -> new FluentDataGridContainerColumn().from(source));
-        }
+	@Test
+	void fromWithUnknownWidgetTypeThrowsIllegalState() {
+		DataGridContainerColumn source = new DataGridContainerColumn();
+		source.getWidgets().add(new MetaData() {
+			// intentionally empty anonymous metadata implementation for invalid widget path
+		});
+		FluentDataGridContainerColumn fluent = new FluentDataGridContainerColumn();
+		assertThrows(IllegalStateException.class, () -> fluent.from(source));
+	}
 }

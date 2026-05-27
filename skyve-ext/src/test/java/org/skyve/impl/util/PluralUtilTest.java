@@ -9,6 +9,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+@SuppressWarnings("java:S5976")
 public class PluralUtilTest {
 
 	@Test
@@ -678,7 +679,7 @@ public class PluralUtilTest {
 		assertThat(data, is(notNullValue()));
 		String s = data.toString();
 		assertThat(s, is(notNullValue()));
-		assertThat(s.contains("honey"), is(true));
+		assertTrue(s.contains("honey"));
 	}
 
 	@Test

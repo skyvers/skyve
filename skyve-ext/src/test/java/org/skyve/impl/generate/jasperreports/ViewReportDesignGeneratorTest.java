@@ -16,7 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-@SuppressWarnings("static-method")
+@SuppressWarnings({"static-method", "boxing"})
 class ViewReportDesignGeneratorTest {
 
 	@Mock

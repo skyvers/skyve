@@ -1,7 +1,6 @@
 package modules.admin.ControlPanel;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -11,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
-public class ControlPanelExtensionTest extends AbstractH2Test {
+class ControlPanelExtensionTest extends AbstractH2Test {
 
 	@Test
 	void trapExceptionSetsResultsWithStackTrace() {
@@ -53,9 +52,9 @@ public class ControlPanelExtensionTest extends AbstractH2Test {
 	void setBizletTraceSetsUtilImplField() {
 		ControlPanelExtension cp = new ControlPanelExtension();
 		cp.setBizletTrace(Boolean.TRUE);
-		assertTrue(cp.getBizletTrace());
+		assertEquals(Boolean.TRUE, cp.getBizletTrace());
 		cp.setBizletTrace(Boolean.FALSE);
-		assertFalse(cp.getBizletTrace());
+		assertEquals(Boolean.FALSE, cp.getBizletTrace());
 	}
 
 	@Test

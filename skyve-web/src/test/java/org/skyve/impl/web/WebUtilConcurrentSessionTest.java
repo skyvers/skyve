@@ -29,6 +29,7 @@ import jakarta.servlet.http.HttpSession;
 /**
  * Unit tests for concurrent-session warning decision logic in {@link WebUtil}.
  */
+@SuppressWarnings("static-method")
 class WebUtilConcurrentSessionTest {
 	private static final String USER_ID = "test-user";
 

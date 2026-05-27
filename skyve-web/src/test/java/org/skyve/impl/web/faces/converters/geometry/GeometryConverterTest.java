@@ -10,8 +10,7 @@ import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
 
 import jakarta.faces.convert.ConverterException;
-
-public class GeometryConverterTest {
+class GeometryConverterTest {
 	private GeometryConverter converter;
 
 	@Before

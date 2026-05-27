@@ -34,7 +34,7 @@ class JFreeChartGeneratorTest {
 		data.setTitle("Test Chart");
 		data.setLabel("Series 1");
 		data.setLabels(List.of("Alpha", "Beta", "Gamma"));
-		data.setValues(List.of(10, 25, 15));
+		data.setValues(List.of(Integer.valueOf(10), Integer.valueOf(25), Integer.valueOf(15)));
 		data.setBackground(Color.BLUE);
 		data.setBorder(Color.BLACK);
 		data.setJFreeChartPostProcessorClassName(NoOpPostProcessor.class.getName());
@@ -47,7 +47,7 @@ class JFreeChartGeneratorTest {
 		data.setTitle("Pie Chart");
 		data.setLabel("Series");
 		data.setLabels(List.of("X", "Y"));
-		data.setValues(List.of(40, 60));
+		data.setValues(List.of(Integer.valueOf(40), Integer.valueOf(60)));
 		data.setBackground(Color.RED);
 		data.setBorder(Color.BLACK);
 		data.setBackgrounds(List.of(Color.RED, Color.BLUE));
@@ -62,7 +62,7 @@ class JFreeChartGeneratorTest {
 		data.setTitle("Polar Chart");
 		data.setLabel("Series");
 		data.setLabels(List.of("P", "Q"));
-		data.setValues(List.of(30, 70));
+		data.setValues(List.of(Integer.valueOf(30), Integer.valueOf(70)));
 		data.setBackground(Color.GREEN);
 		data.setBorder(Color.DARK_GRAY);
 		data.setBackgrounds(List.of(Color.GREEN, Color.ORANGE));

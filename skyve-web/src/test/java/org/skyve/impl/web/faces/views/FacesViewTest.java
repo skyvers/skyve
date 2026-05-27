@@ -18,6 +18,7 @@ import org.skyve.metadata.router.UxUi;
  * Tests use plain instantiation (bypassing @PostConstruct) to exercise getters, setters,
  * and sanitisation logic.
  */
+@SuppressWarnings("static-method")
 class FacesViewTest {
 
 	// ----- getThemeColour -----

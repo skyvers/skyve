@@ -155,7 +155,7 @@ class NewDocumentMojoTest {
      * - Generated persistent name follows the correct format (first 3 chars of module + _ + document name)
      */
 	@Test
-	@SuppressWarnings("static-method")
+    @SuppressWarnings("static-method")
     void testGeneratePersistentName() throws Exception {
         // Get the private method using reflection
         java.lang.reflect.Method generatePersistentName = NewDocumentMojo.class.getDeclaredMethod("generatePersistentName", 
@@ -181,7 +181,6 @@ class NewDocumentMojoTest {
     }
 
 	@Test
-	@SuppressWarnings("static-method")
 	void executeThrowsWhenDocumentDirectoryAlreadyExists() throws Exception {
 		// Pre-create the document directory
 		Path documentDir = tempDir.resolve("modules").resolve(moduleName).resolve(documentName);
@@ -193,7 +192,6 @@ class NewDocumentMojoTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void executeCompletesWhenModuleXmlMissing() throws Exception {
 		// Remove the module XML so the mojo warns instead of updating it
 		Path moduleXml = tempDir.resolve("modules").resolve(moduleName).resolve(moduleName + ".xml");
@@ -208,7 +206,6 @@ class NewDocumentMojoTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void executeThrowsWhenModuleDirectoryDoesNotExist() throws Exception {
 		// Change config to request a module that doesn't exist
 		org.skyve.toolchain.config.NewDocumentConfig config = new org.skyve.toolchain.config.NewDocumentConfig();
@@ -221,7 +218,6 @@ class NewDocumentMojoTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void executeCreatesDocumentWithoutPersistentNameForShortModuleName() throws Exception {
 		// Use a 2-char module name so persistentName == null
 		String shortModule = "ab";

@@ -69,6 +69,7 @@ import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 
 import modules.test.AbstractSkyveTest;
 
+@SuppressWarnings("java:S5778")
 class ViewValidatorTest extends AbstractSkyveTest {
 
 	private static final String UXUI = "external";
@@ -1142,7 +1143,7 @@ class ViewValidatorTest extends AbstractSkyveTest {
 	void validateViewWithFormHavingInvalidPixelWidthThrowsException() {
 		ViewImpl view = editView();
 		FormColumn col = new FormColumn();
-		col.setPixelWidth(-10);
+		col.setPixelWidth(Integer.valueOf(-10));
 		Form form = new Form();
 		form.getColumns().add(col);
 		FormRow row = new FormRow();
@@ -1174,7 +1175,7 @@ class ViewValidatorTest extends AbstractSkyveTest {
 	void validateViewWithHBoxHavingPixelWidth() {
 		ViewImpl view = editView();
 		HBox hbox = new HBox();
-		hbox.setPixelWidth(200);
+		hbox.setPixelWidth(Integer.valueOf(200));
 		TextField tf = new TextField();
 		tf.setBinding("text");
 		hbox.getContained().add(tf);
@@ -1186,7 +1187,7 @@ class ViewValidatorTest extends AbstractSkyveTest {
 	void validateViewWithVBoxHavingPixelWidth() {
 		ViewImpl view = editView();
 		VBox vbox = new VBox();
-		vbox.setPixelWidth(300);
+		vbox.setPixelWidth(Integer.valueOf(300));
 		TextField tf = new TextField();
 		tf.setBinding("text");
 		vbox.getContained().add(tf);
@@ -1198,7 +1199,7 @@ class ViewValidatorTest extends AbstractSkyveTest {
 	void validateViewWithHBoxHavingInvalidPixelWidthThrowsException() {
 		ViewImpl view = editView();
 		HBox hbox = new HBox();
-		hbox.setPixelWidth(-1);
+		hbox.setPixelWidth(Integer.valueOf(-1));
 		view.getContained().add(hbox);
 		assertThrows(MetaDataException.class, () -> newValidator(view).visit());
 	}
@@ -1207,7 +1208,7 @@ class ViewValidatorTest extends AbstractSkyveTest {
 	void validateViewWithHBoxHavingInvalidResponsiveWidthThrowsException() {
 		ViewImpl view = editView();
 		HBox hbox = new HBox();
-		hbox.setResponsiveWidth(15); // > 12
+		hbox.setResponsiveWidth(Integer.valueOf(15)); // > 12
 		view.getContained().add(hbox);
 		assertThrows(MetaDataException.class, () -> newValidator(view).visit());
 	}
@@ -1216,7 +1217,7 @@ class ViewValidatorTest extends AbstractSkyveTest {
 	void validateViewWithHBoxHavingZeroResponsiveWidthThrowsException() {
 		ViewImpl view = editView();
 		HBox hbox = new HBox();
-		hbox.setResponsiveWidth(0); // <= 0
+		hbox.setResponsiveWidth(Integer.valueOf(0)); // <= 0
 		view.getContained().add(hbox);
 		assertThrows(MetaDataException.class, () -> newValidator(view).visit());
 	}
@@ -1225,7 +1226,7 @@ class ViewValidatorTest extends AbstractSkyveTest {
 	void validateViewWithHBoxHavingValidResponsiveWidth() {
 		ViewImpl view = editView();
 		HBox hbox = new HBox();
-		hbox.setResponsiveWidth(6); // valid: 1-12
+		hbox.setResponsiveWidth(Integer.valueOf(6)); // valid: 1-12
 		view.getContained().add(hbox);
 		assertDoesNotThrow(() -> newValidator(view).visit());
 	}

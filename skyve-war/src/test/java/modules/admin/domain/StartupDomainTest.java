@@ -22,7 +22,7 @@ import util.AbstractH2Test;
 class StartupDomainTest extends AbstractH2Test {
 
 	@Test
-	void dataBuilderPopulatesStartupBean() throws Exception {
+	void dataBuilderPopulatesStartupBean() {
 		Startup bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(Startup.MODULE_NAME, Startup.DOCUMENT_NAME);
@@ -31,28 +31,28 @@ class StartupDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void bizModuleAndDocumentAreCorrect() throws Exception {
+	void bizModuleAndDocumentAreCorrect() {
 		Startup bean = Startup.newInstance();
 		assertEquals(Startup.MODULE_NAME, bean.getBizModule());
 		assertEquals(Startup.DOCUMENT_NAME, bean.getBizDocument());
 	}
 
 	@Test
-	void environmentIdentifierSetAndGet() throws Exception {
+	void environmentIdentifierSetAndGet() {
 		Startup bean = Startup.newInstance();
 		bean.setEnvironmentIdentifier("DEV");
 		assertEquals("DEV", bean.getEnvironmentIdentifier());
 	}
 
 	@Test
-	void environmentSupportEmailSetAndGet() throws Exception {
+	void environmentSupportEmailSetAndGet() {
 		Startup bean = Startup.newInstance();
 		bean.setEnvironmentSupportEmail("support@example.com");
 		assertEquals("support@example.com", bean.getEnvironmentSupportEmail());
 	}
 
 	@Test
-	void mapTypeSetAndGet() throws Exception {
+	void mapTypeSetAndGet() {
 		Startup bean = Startup.newInstance();
 		bean.setMapType(MapType.leaflet);
 		assertEquals(MapType.leaflet, bean.getMapType());
@@ -61,14 +61,14 @@ class StartupDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void mapLayerSetAndGet() throws Exception {
+	void mapLayerSetAndGet() {
 		Startup bean = Startup.newInstance();
 		bean.setMapLayer("custom-tiles");
 		assertEquals("custom-tiles", bean.getMapLayer());
 	}
 
 	@Test
-	void mailServerSettingsSetAndGet() throws Exception {
+	void mailServerSettingsSetAndGet() {
 		Startup bean = Startup.newInstance();
 		bean.setMailServerUrl("smtp.example.com");
 		bean.setMailPort(Integer.valueOf(587));
@@ -81,14 +81,14 @@ class StartupDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void mailTestRecipientSetAndGet() throws Exception {
+	void mailTestRecipientSetAndGet() {
 		Startup bean = Startup.newInstance();
 		bean.setMailTestRecipient("test@example.com");
 		assertEquals("test@example.com", bean.getMailTestRecipient());
 	}
 
 	@Test
-	void backupTypeSetAndGet() throws Exception {
+	void backupTypeSetAndGet() {
 		Startup bean = Startup.newInstance();
 		bean.setBackupType(BackupType.none);
 		assertEquals(BackupType.none, bean.getBackupType());
@@ -97,7 +97,7 @@ class StartupDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void backupConnectionStringSetAndGet() throws Exception {
+	void backupConnectionStringSetAndGet() {
 		Startup bean = Startup.newInstance();
 		bean.setBackupConnectionString("connection-string");
 		bean.setBackupDirectoryName("/backups");
@@ -106,14 +106,14 @@ class StartupDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void captchaTypeSetAndGet() throws Exception {
+	void captchaTypeSetAndGet() {
 		Startup bean = Startup.newInstance();
 		bean.setCaptchaType(CaptchaType.googleRecaptcha);
 		assertEquals(CaptchaType.googleRecaptcha, bean.getCaptchaType());
 	}
 
 	@Test
-	void apiKeysSetAndGet() throws Exception {
+	void apiKeysSetAndGet() {
 		Startup bean = Startup.newInstance();
 		bean.setApiGoogleMapsKey("maps-key");
 		bean.setApiGoogleRecaptchaSiteKey("recaptcha-site");
@@ -124,7 +124,7 @@ class StartupDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void apiCloudflareTurnstileKeysSetAndGet() throws Exception {
+	void apiCloudflareTurnstileKeysSetAndGet() {
 		Startup bean = Startup.newInstance();
 		bean.setApiCloudflareTurnstileSiteKey("cf-site");
 		bean.setApiCloudflareTurnstileSecretKey("cf-secret");
@@ -133,7 +133,7 @@ class StartupDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void apiTwilioSettingsSetAndGet() throws Exception {
+	void apiTwilioSettingsSetAndGet() {
 		Startup bean = Startup.newInstance();
 		bean.setApiTwilioSID("ACXXXXXXXX");
 		bean.setApiTwilioAuthToken("auth-token");
@@ -144,28 +144,27 @@ class StartupDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void securityNotificationsEmailSetAndGet() throws Exception {
+	void securityNotificationsEmailSetAndGet() {
 		Startup bean = Startup.newInstance();
 		bean.setSecurityNotificationsEmail("security@example.com");
 		assertEquals("security@example.com", bean.getSecurityNotificationsEmail());
 	}
 
 	@Test
-	void mailBogusSendSetAndGet() throws Exception {
+	void mailBogusSendSetAndGet() {
 		Startup bean = Startup.newInstance();
 		bean.setMailBogusSend(Boolean.TRUE);
 		assertEquals(Boolean.TRUE, bean.getMailBogusSend());
 	}
 
 	@Test
-	void geoIPKeySetAndGet() throws Exception {
+	void geoIPKeySetAndGet() {
 		Startup bean = Startup.newInstance();
 		bean.setGeoIPKey("geo-key-123");
 		assertEquals("geo-key-123", bean.getGeoIPKey());
 	}
 
         @Test
-        @SuppressWarnings("static-method")
         void mapTypeFromCodeAndToDomainValues() {
                 assertEquals(MapType.gmap, MapType.fromCode("gmap"));
                 assertNull(MapType.fromCode("notexist"));
@@ -176,7 +175,6 @@ class StartupDomainTest extends AbstractH2Test {
         }
 
         @Test
-        @SuppressWarnings("static-method")
         void backupTypeFromCodeAndToDomainValues() {
                 assertEquals(BackupType.none, BackupType.fromCode("none"));
                 assertNull(BackupType.fromCode("notexist"));
@@ -187,21 +185,18 @@ class StartupDomainTest extends AbstractH2Test {
         }
 
         @Test
-        @SuppressWarnings("static-method")
         void mapTypeToCodeAndToDomainValue() {
                 assertEquals("gmap", MapType.gmap.toCode());
                 assertNotNull(MapType.gmap.toDomainValue());
         }
 
         @Test
-        @SuppressWarnings("static-method")
         void backupTypeToCodeAndToDomainValue() {
                 assertEquals("none", BackupType.none.toCode());
                 assertNotNull(BackupType.none.toDomainValue());
         }
 
 	@Test
-	@SuppressWarnings("static-method")
 	void captchaTypeFromCodeAndFromLocalisedDescription() {
 		assertEquals(CaptchaType.googleRecaptcha, CaptchaType.fromCode("Google Recaptcha"));
 		assertNull(CaptchaType.fromCode("nonexistent"));
@@ -211,7 +206,6 @@ class StartupDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void geoIPCountryListTypeFromCodeAndFromLocalisedDescription() {
 		assertEquals(GeoIPCountryListType.blacklist, GeoIPCountryListType.fromCode("blacklist"));
 		assertNull(GeoIPCountryListType.fromCode("nonexistent"));

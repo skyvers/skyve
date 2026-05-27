@@ -21,7 +21,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.security.web.authentication.rememberme.PersistentRememberMeToken;
 
-@SuppressWarnings("static-method")
+@SuppressWarnings({"static-method", "boxing"})
 public class SkyveRememberMeTokenRepositoryTest {
 
 	@Test

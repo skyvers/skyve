@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
@@ -29,6 +28,7 @@ import modules.test.domain.AllAttributesPersistent;
  * H2-backed tests for AbstractDataFileLoader, CSVLoader, and POISheetLoader.
  * Uses AllAttributesPersistent (module=test) as the target document.
  */
+@SuppressWarnings({"static-method", "resource"})
 class DataFileLoaderH2Test extends AbstractH2Test {
 
 	private static final String MODULE = AllAttributesPersistent.MODULE_NAME;
@@ -78,7 +78,7 @@ class DataFileLoaderH2Test extends AbstractH2Test {
 	// ---- CSVLoader tests ----
 
 	@Test
-	void csvLoaderLoadsSingleTextBean() throws Exception {
+	void csvLoaderLoadsSingleTextBean() {
 		// CSV: header row + 1 data row with the "text" column
 		InputStream is = csvStream("text", "hello");
 		UploadException exception = new UploadException();
@@ -93,7 +93,7 @@ class DataFileLoaderH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	void csvLoaderLoadsMultipleColumnsAndRows() throws Exception {
+	void csvLoaderLoadsMultipleColumnsAndRows() {
 		InputStream is = csvStream(
 				"text,normalInteger",
 				"alpha,1",
@@ -113,7 +113,7 @@ class DataFileLoaderH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	void csvLoaderEmptyDataProducesWarning() throws Exception {
+	void csvLoaderEmptyDataProducesWarning() {
 		// Only a header row, no data rows → beanResults adds a "no data loaded" warning
 		InputStream is = csvStream("text");
 		UploadException exception = new UploadException();
@@ -127,7 +127,7 @@ class DataFileLoaderH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	void csvLoaderGetWhereIncludesLineAndColumn() throws Exception {
+	void csvLoaderGetWhereIncludesLineAndColumn() {
 		InputStream is = csvStream("text", "val");
 		UploadException exception = new UploadException();
 		CSVLoader loader = new CSVLoader(LoaderActivityType.CREATE_ALL, is, exception, MODULE, DOCUMENT);
@@ -141,7 +141,7 @@ class DataFileLoaderH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	void csvLoaderDebugModeProducesDebugData() throws Exception {
+	void csvLoaderDebugModeProducesDebugData() {
 		InputStream is = csvStream("text", "debugval");
 		UploadException exception = new UploadException();
 		CSVLoader loader = new CSVLoader(LoaderActivityType.CREATE_ALL, is, exception, MODULE, DOCUMENT);
@@ -156,7 +156,7 @@ class DataFileLoaderH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	void csvLoaderGetValueMapIsAccessible() throws Exception {
+	void csvLoaderGetValueMapIsAccessible() {
 		InputStream is = csvStream("text", "mapval");
 		UploadException exception = new UploadException();
 		CSVLoader loader = new CSVLoader(LoaderActivityType.CREATE_ALL, is, exception, MODULE, DOCUMENT);
@@ -170,11 +170,11 @@ class DataFileLoaderH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	void csvLoaderActivityTypeFindQueriesExistingBean() throws Exception {
+	void csvLoaderActivityTypeFindQueriesExistingBean() {
 		// Save a bean first so the FIND query can locate it
 		AllAttributesPersistent saved = AllAttributesPersistent.newInstance();
 		saved.setText("findme");
-		saved = CORE.getPersistence().save(saved);
+		CORE.getPersistence().save(saved);
 		CORE.getPersistence().flush();
 
 		InputStream is = csvStream("text", "findme");
@@ -323,7 +323,7 @@ class DataFileLoaderH2Test extends AbstractH2Test {
 	// ---- AbstractDataFileLoader shared behaviour ----
 
 	@Test
-	void addFieldsAddsMultipleFieldsInOrder() throws Exception {
+	void addFieldsAddsMultipleFieldsInOrder() {
 		InputStream is = csvStream("text", "value");
 		UploadException exception = new UploadException();
 		CSVLoader loader = new CSVLoader(LoaderActivityType.CREATE_ALL, is, exception, MODULE, DOCUMENT);
@@ -337,7 +337,7 @@ class DataFileLoaderH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	void setFieldOffsetShiftsAllFieldIndices() throws Exception {
+	void setFieldOffsetShiftsAllFieldIndices() {
 		InputStream is = csvStream("_skip,text", "_,shifted");
 		UploadException exception = new UploadException();
 		CSVLoader loader = new CSVLoader(LoaderActivityType.CREATE_ALL, is, exception, MODULE, DOCUMENT);
@@ -349,7 +349,7 @@ class DataFileLoaderH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	void setDocumentContextChangesTargetDocument() throws Exception {
+	void setDocumentContextChangesTargetDocument() {
 		InputStream is = csvStream("text", "contextval");
 		UploadException exception = new UploadException();
 		CSVLoader loader = new CSVLoader(LoaderActivityType.CREATE_ALL, is, exception, MODULE, DOCUMENT);
@@ -362,7 +362,7 @@ class DataFileLoaderH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	void noFieldsProducesErrorInException() throws Exception {
+	void noFieldsProducesErrorInException() {
 		InputStream is = csvStream("text", "val");
 		UploadException exception = new UploadException();
 		CSVLoader loader = new CSVLoader(LoaderActivityType.CREATE_ALL, is, exception, MODULE, DOCUMENT);
@@ -374,7 +374,7 @@ class DataFileLoaderH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	void csvLoaderCreateFindActivityType() throws Exception {
+	void csvLoaderCreateFindActivityType() {
 		// CREATE_FIND creates a new bean and sets values (no DB lookup for simple bindings)
 		InputStream is = csvStream("text", "createfind");
 		UploadException exception = new UploadException();
@@ -450,7 +450,7 @@ class DataFileLoaderH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	void csvLoaderBooleanField() throws Exception {
+	void csvLoaderBooleanField() {
 		InputStream is = csvStream("booleanFlag", "yes");
 		UploadException exception = new UploadException();
 		CSVLoader loader = new CSVLoader(LoaderActivityType.CREATE_ALL, is, exception, MODULE, DOCUMENT);
@@ -463,7 +463,7 @@ class DataFileLoaderH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	void csvLoaderLongIntegerField() throws Exception {
+	void csvLoaderLongIntegerField() {
 		InputStream is = csvStream("longInteger", "9876543210");
 		UploadException exception = new UploadException();
 		CSVLoader loader = new CSVLoader(LoaderActivityType.CREATE_ALL, is, exception, MODULE, DOCUMENT);
@@ -476,7 +476,7 @@ class DataFileLoaderH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	void csvLoaderDecimal2Field() throws Exception {
+	void csvLoaderDecimal2Field() {
 		InputStream is = csvStream("decimal2", "3.14");
 		UploadException exception = new UploadException();
 		CSVLoader loader = new CSVLoader(LoaderActivityType.CREATE_ALL, is, exception, MODULE, DOCUMENT);
@@ -489,7 +489,7 @@ class DataFileLoaderH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	void csvLoaderDecimal5Field() throws Exception {
+	void csvLoaderDecimal5Field() {
 		InputStream is = csvStream("decimal5", "1.23456");
 		UploadException exception = new UploadException();
 		CSVLoader loader = new CSVLoader(LoaderActivityType.CREATE_ALL, is, exception, MODULE, DOCUMENT);
@@ -502,7 +502,7 @@ class DataFileLoaderH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	void csvLoaderDecimal10Field() throws Exception {
+	void csvLoaderDecimal10Field() {
 		InputStream is = csvStream("decimal10", "9.9999999999");
 		UploadException exception = new UploadException();
 		CSVLoader loader = new CSVLoader(LoaderActivityType.CREATE_ALL, is, exception, MODULE, DOCUMENT);
@@ -566,7 +566,7 @@ class DataFileLoaderH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	void csvLoaderMemoField() throws Exception {
+	void csvLoaderMemoField() {
 		InputStream is = csvStream("memo", "some memo content");
 		UploadException exception = new UploadException();
 		CSVLoader loader = new CSVLoader(LoaderActivityType.CREATE_ALL, is, exception, MODULE, DOCUMENT);
@@ -626,7 +626,7 @@ class DataFileLoaderH2Test extends AbstractH2Test {
         // ---- AbstractDataFileLoader getter/setter coverage ----
 
         @Test
-        void csvLoaderIsDebugModeDefaultsFalse() throws Exception {
+        void csvLoaderIsDebugModeDefaultsFalse() {
                 InputStream is = csvStream("text", "hello");
                 UploadException exception = new UploadException();
                 CSVLoader loader = new CSVLoader(LoaderActivityType.CREATE_ALL, is, exception, MODULE, DOCUMENT);
@@ -636,7 +636,7 @@ class DataFileLoaderH2Test extends AbstractH2Test {
         }
 
         @Test
-        void csvLoaderGetDataIndexDefaultsZero() throws Exception {
+        void csvLoaderGetDataIndexDefaultsZero() {
                 InputStream is = csvStream("text", "hello");
                 UploadException exception = new UploadException();
                 CSVLoader loader = new CSVLoader(LoaderActivityType.CREATE_ALL, is, exception, MODULE, DOCUMENT);
@@ -644,7 +644,7 @@ class DataFileLoaderH2Test extends AbstractH2Test {
         }
 
         @Test
-        void csvLoaderSetFieldIndexAffectsProcessing() throws Exception {
+        void csvLoaderSetFieldIndexAffectsProcessing() {
                 InputStream is = csvStream("skip,text", "ignore,hello");
                 UploadException exception = new UploadException();
                 CSVLoader loader = new CSVLoader(LoaderActivityType.CREATE_ALL, is, exception, MODULE, DOCUMENT);
@@ -655,7 +655,7 @@ class DataFileLoaderH2Test extends AbstractH2Test {
         }
 
         @Test
-        void csvLoaderSetAndGetException() throws Exception {
+        void csvLoaderSetAndGetException() {
                 InputStream is = csvStream("text", "hello");
                 UploadException originalException = new UploadException();
                 CSVLoader loader = new CSVLoader(LoaderActivityType.CREATE_ALL, is, originalException, MODULE, DOCUMENT);
@@ -667,7 +667,7 @@ class DataFileLoaderH2Test extends AbstractH2Test {
         }
 
         @Test
-        void csvLoaderAddFieldWithStringBinding() throws Exception {
+        void csvLoaderAddFieldWithStringBinding() {
                 InputStream is = csvStream("text", "hello");
                 UploadException exception = new UploadException();
                 CSVLoader loader = new CSVLoader(LoaderActivityType.CREATE_ALL, is, exception, MODULE, DOCUMENT);
@@ -679,7 +679,7 @@ class DataFileLoaderH2Test extends AbstractH2Test {
         }
 
         @Test
-        void csvLoaderAddFieldWithCurlyBraceBinding() throws Exception {
+        void csvLoaderAddFieldWithCurlyBraceBinding() {
                 InputStream is = csvStream("text", "world");
                 UploadException exception = new UploadException();
                 CSVLoader loader = new CSVLoader(LoaderActivityType.CREATE_ALL, is, exception, MODULE, DOCUMENT);
@@ -691,7 +691,7 @@ class DataFileLoaderH2Test extends AbstractH2Test {
         }
 
         @Test
-        void csvLoaderSetEmptyAsZeroTreatsEmptyNumericAsZero() throws Exception {
+        void csvLoaderSetEmptyAsZeroTreatsEmptyNumericAsZero() {
                 // Use two columns so the row is not treated as empty/EOF; integer column has empty value
                 InputStream is = csvStream("text,normalInteger", "hello,");
                 UploadException exception = new UploadException();
@@ -705,7 +705,7 @@ class DataFileLoaderH2Test extends AbstractH2Test {
         }
 
         @Test
-        void csvLoaderGetWhereNoArgReturnsColumnInfo() throws Exception {
+        void csvLoaderGetWhereNoArgReturnsColumnInfo() {
                 InputStream is = csvStream("text", "hello");
                 UploadException exception = new UploadException();
                 CSVLoader loader = new CSVLoader(LoaderActivityType.CREATE_ALL, is, exception, MODULE, DOCUMENT);

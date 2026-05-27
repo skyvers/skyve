@@ -21,7 +21,7 @@ class NewScaffoldedDocumentMojoTest {
     private String documentName = "TestDocument";
     
     @BeforeEach
-    void setUp() throws Exception {
+	void setUp() {
         mojo = new NewScaffoldedDocumentMojo();
         
         // Set private fields using reflection
@@ -230,7 +230,6 @@ class NewScaffoldedDocumentMojoTest {
     }
     
 	@Test
-	@SuppressWarnings("static-method")
 	void generateDomainThrowsWhenConfigIsNull() {
 		org.apache.maven.plugin.MojoExecutionException ex = org.junit.jupiter.api.Assertions.assertThrows(
 				org.apache.maven.plugin.MojoExecutionException.class,

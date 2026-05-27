@@ -12,11 +12,11 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.test.AbstractSkyveTest;
 
-public class ControlPanelDomainTest extends AbstractSkyveTest {
+class ControlPanelDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void dataBuilderCreatesControlPanel() throws Exception {
+	void dataBuilderCreatesControlPanel() {
 		ControlPanel bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(ControlPanel.MODULE_NAME, ControlPanel.DOCUMENT_NAME);
@@ -25,7 +25,7 @@ public class ControlPanelDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void newInstanceCreatesControlPanel() throws Exception {
+	void newInstanceCreatesControlPanel() {
 		ControlPanel bean = ControlPanel.newInstance();
 		assertNotNull(bean);
 		assertEquals("admin", bean.getBizModule());
@@ -34,7 +34,7 @@ public class ControlPanelDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void sailUserAgentTypeDesktopSetAndGet() throws Exception {
+	void sailUserAgentTypeDesktopSetAndGet() {
 		ControlPanel bean = ControlPanel.newInstance();
 		bean.setSailUserAgentType(ControlPanel.SailUserAgentType.desktop);
 		assertEquals(ControlPanel.SailUserAgentType.desktop, bean.getSailUserAgentType());
@@ -42,7 +42,7 @@ public class ControlPanelDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void sailUserAgentTypeTabletSetAndGet() throws Exception {
+	void sailUserAgentTypeTabletSetAndGet() {
 		ControlPanel bean = ControlPanel.newInstance();
 		bean.setSailUserAgentType(ControlPanel.SailUserAgentType.tablet);
 		assertEquals(ControlPanel.SailUserAgentType.tablet, bean.getSailUserAgentType());
@@ -50,7 +50,7 @@ public class ControlPanelDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void sailUserAgentTypePhoneSetAndGet() throws Exception {
+	void sailUserAgentTypePhoneSetAndGet() {
 		ControlPanel bean = ControlPanel.newInstance();
 		bean.setSailUserAgentType(ControlPanel.SailUserAgentType.phone);
 		assertEquals(ControlPanel.SailUserAgentType.phone, bean.getSailUserAgentType());
@@ -58,7 +58,7 @@ public class ControlPanelDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void sailTestStrategyAssertSetAndGet() throws Exception {
+	void sailTestStrategyAssertSetAndGet() {
 		ControlPanel bean = ControlPanel.newInstance();
 		bean.setSailTestStrategy(ControlPanel.SailTestStrategy.Assert);
 		assertEquals(ControlPanel.SailTestStrategy.Assert, bean.getSailTestStrategy());
@@ -66,7 +66,7 @@ public class ControlPanelDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void sailTestStrategyVerifySetAndGet() throws Exception {
+	void sailTestStrategyVerifySetAndGet() {
 		ControlPanel bean = ControlPanel.newInstance();
 		bean.setSailTestStrategy(ControlPanel.SailTestStrategy.Verify);
 		assertEquals(ControlPanel.SailTestStrategy.Verify, bean.getSailTestStrategy());
@@ -74,7 +74,7 @@ public class ControlPanelDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void sailExecutorPrimeFacesSetAndGet() throws Exception {
+	void sailExecutorPrimeFacesSetAndGet() {
 		ControlPanel bean = ControlPanel.newInstance();
 		bean.setSailExecutor(ControlPanel.SailExecutor.primeFacesInlineSelenese);
 		assertEquals(ControlPanel.SailExecutor.primeFacesInlineSelenese, bean.getSailExecutor());
@@ -82,7 +82,7 @@ public class ControlPanelDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void sailUxUiSetAndGet() throws Exception {
+	void sailUxUiSetAndGet() {
 		ControlPanel bean = ControlPanel.newInstance();
 		bean.setSailUxUi("external");
 		assertEquals("external", bean.getSailUxUi());
@@ -90,7 +90,7 @@ public class ControlPanelDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void sailBaseUrlSetAndGet() throws Exception {
+	void sailBaseUrlSetAndGet() {
 		ControlPanel bean = ControlPanel.newInstance();
 		bean.setSailBaseUrl("http://localhost:8080/test");
 		assertEquals("http://localhost:8080/test", bean.getSailBaseUrl());
@@ -98,7 +98,7 @@ public class ControlPanelDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void xmlTraceSetAndGet() throws Exception {
+	void xmlTraceSetAndGet() {
 		ControlPanel bean = ControlPanel.newInstance();
 		bean.setXmlTrace(Boolean.TRUE);
 		assertEquals(Boolean.TRUE, bean.getXmlTrace());
@@ -106,7 +106,7 @@ public class ControlPanelDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void httpTraceSetAndGet() throws Exception {
+	void httpTraceSetAndGet() {
 		ControlPanel bean = ControlPanel.newInstance();
 		bean.setHttpTrace(Boolean.FALSE);
 		assertEquals(Boolean.FALSE, bean.getHttpTrace());
@@ -114,7 +114,7 @@ public class ControlPanelDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void queryTraceSetAndGet() throws Exception {
+	void queryTraceSetAndGet() {
 		ControlPanel bean = ControlPanel.newInstance();
 		bean.setQueryTrace(Boolean.TRUE);
 		assertEquals(Boolean.TRUE, bean.getQueryTrace());
@@ -122,7 +122,7 @@ public class ControlPanelDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void commandTraceSetAndGet() throws Exception {
+	void commandTraceSetAndGet() {
 		ControlPanel bean = ControlPanel.newInstance();
 		bean.setCommandTrace(Boolean.FALSE);
 		assertEquals(Boolean.FALSE, bean.getCommandTrace());
@@ -130,7 +130,7 @@ public class ControlPanelDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void facesTraceSetAndGet() throws Exception {
+	void facesTraceSetAndGet() {
 		ControlPanel bean = ControlPanel.newInstance();
 		bean.setFacesTrace(Boolean.TRUE);
 		assertEquals(Boolean.TRUE, bean.getFacesTrace());
@@ -138,7 +138,7 @@ public class ControlPanelDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void contentTraceSetAndGet() throws Exception {
+	void contentTraceSetAndGet() {
 		ControlPanel bean = ControlPanel.newInstance();
 		bean.setContentTrace(Boolean.FALSE);
 		assertEquals(Boolean.FALSE, bean.getContentTrace());
@@ -146,7 +146,7 @@ public class ControlPanelDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void securityTraceSetAndGet() throws Exception {
+	void securityTraceSetAndGet() {
 		ControlPanel bean = ControlPanel.newInstance();
 		bean.setSecurityTrace(Boolean.TRUE);
 		assertEquals(Boolean.TRUE, bean.getSecurityTrace());
@@ -154,7 +154,7 @@ public class ControlPanelDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void bizletTraceSetAndGet() throws Exception {
+	void bizletTraceSetAndGet() {
 		ControlPanel bean = ControlPanel.newInstance();
 		bean.setBizletTrace(Boolean.FALSE);
 		assertEquals(Boolean.FALSE, bean.getBizletTrace());
@@ -162,7 +162,7 @@ public class ControlPanelDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void dirtyTraceSetAndGet() throws Exception {
+	void dirtyTraceSetAndGet() {
 		ControlPanel bean = ControlPanel.newInstance();
 		bean.setDirtyTrace(Boolean.TRUE);
 		assertEquals(Boolean.TRUE, bean.getDirtyTrace());
@@ -170,7 +170,7 @@ public class ControlPanelDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void querySetAndGet() throws Exception {
+	void querySetAndGet() {
 		ControlPanel bean = ControlPanel.newInstance();
 		bean.setQuery("SELECT b FROM admin$User b");
 		assertEquals("SELECT b FROM admin$User b", bean.getQuery());
@@ -178,7 +178,7 @@ public class ControlPanelDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void customerNameToSwapToSetAndGet() throws Exception {
+	void customerNameToSwapToSetAndGet() {
 		ControlPanel bean = ControlPanel.newInstance();
 		bean.setCustomerNameToSwapTo("acme");
 		assertEquals("acme", bean.getCustomerNameToSwapTo());
@@ -186,7 +186,7 @@ public class ControlPanelDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void sailModuleNameSetAndGet() throws Exception {
+	void sailModuleNameSetAndGet() {
 		ControlPanel bean = ControlPanel.newInstance();
 		bean.setSailModuleName("admin");
 		assertEquals("admin", bean.getSailModuleName());
@@ -194,7 +194,7 @@ public class ControlPanelDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void resultsSetAndGet() throws Exception {
+	void resultsSetAndGet() {
 		ControlPanel bean = ControlPanel.newInstance();
 		bean.setResults("some results");
 		assertNotNull(bean.getResults());
@@ -203,7 +203,7 @@ public class ControlPanelDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void tabIndexSetAndGet() throws Exception {
+	void tabIndexSetAndGet() {
 		ControlPanel bean = ControlPanel.newInstance();
 		bean.setTabIndex(Integer.valueOf(2));
 		assertEquals(Integer.valueOf(2), bean.getTabIndex());
@@ -211,7 +211,7 @@ public class ControlPanelDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void selectedCacheSetAndGet() throws Exception {
+	void selectedCacheSetAndGet() {
 		ControlPanel bean = ControlPanel.newInstance();
 		bean.setSelectedCache("repositoryCache");
 		assertEquals("repositoryCache", bean.getSelectedCache());
@@ -219,7 +219,7 @@ public class ControlPanelDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void sessionCountSetAndGet() throws Exception {
+	void sessionCountSetAndGet() {
 		ControlPanel bean = ControlPanel.newInstance();
 		bean.setSessionCount(Integer.valueOf(5));
 		assertEquals(Integer.valueOf(5), bean.getSessionCount());
@@ -227,7 +227,7 @@ public class ControlPanelDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void testNumberToGenerateSetAndGet() throws Exception {
+	void testNumberToGenerateSetAndGet() {
 		ControlPanel bean = ControlPanel.newInstance();
 		bean.setTestNumberToGenerate(Integer.valueOf(10));
 		assertEquals(Integer.valueOf(10), bean.getTestNumberToGenerate());
@@ -235,7 +235,7 @@ public class ControlPanelDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void testModuleNameSetAndGet() throws Exception {
+	void testModuleNameSetAndGet() {
 		ControlPanel bean = ControlPanel.newInstance();
 		bean.setTestModuleName("kitchensink");
 		assertEquals("kitchensink", bean.getTestModuleName());
@@ -243,7 +243,7 @@ public class ControlPanelDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void testTagNameSetAndGet() throws Exception {
+	void testTagNameSetAndGet() {
 		ControlPanel bean = ControlPanel.newInstance();
 		bean.setTestTagName("myTag");
 		assertEquals("myTag", bean.getTestTagName());
@@ -251,7 +251,7 @@ public class ControlPanelDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void testTagGeneratedDataSetAndGet() throws Exception {
+	void testTagGeneratedDataSetAndGet() {
 		ControlPanel bean = ControlPanel.newInstance();
 		bean.setTestTagGeneratedData(Boolean.TRUE);
 		assertEquals(Boolean.TRUE, bean.getTestTagGeneratedData());
@@ -259,7 +259,7 @@ public class ControlPanelDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void sailSetAndGet() throws Exception {
+	void sailSetAndGet() {
 		ControlPanel bean = ControlPanel.newInstance();
 		bean.setSail("sail_content");
 		assertEquals("sail_content", bean.getSail());
@@ -267,7 +267,7 @@ public class ControlPanelDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void sailLoginCustomerSetAndGet() throws Exception {
+	void sailLoginCustomerSetAndGet() {
 		ControlPanel bean = ControlPanel.newInstance();
 		bean.setSailLoginCustomer("demo");
 		assertEquals("demo", bean.getSailLoginCustomer());
@@ -275,7 +275,7 @@ public class ControlPanelDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void sailLoginPasswordSetAndGet() throws Exception {
+	void sailLoginPasswordSetAndGet() {
 		ControlPanel bean = ControlPanel.newInstance();
 		bean.setSailLoginPassword("secret");
 		assertEquals("secret", bean.getSailLoginPassword());
@@ -283,7 +283,7 @@ public class ControlPanelDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void sailComponentBuilderSetAndGet() throws Exception {
+	void sailComponentBuilderSetAndGet() {
 		ControlPanel bean = ControlPanel.newInstance();
 		bean.setSailComponentBuilder("com.example.MyBuilder");
 		assertEquals("com.example.MyBuilder", bean.getSailComponentBuilder());
@@ -291,7 +291,7 @@ public class ControlPanelDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void sailLayoutBuilderSetAndGet() throws Exception {
+	void sailLayoutBuilderSetAndGet() {
 		ControlPanel bean = ControlPanel.newInstance();
 		bean.setSailLayoutBuilder("com.example.MyLayoutBuilder");
 		assertEquals("com.example.MyLayoutBuilder", bean.getSailLayoutBuilder());
@@ -299,7 +299,7 @@ public class ControlPanelDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void sailExecutorWebDriverSetAndGet() throws Exception {
+	void sailExecutorWebDriverSetAndGet() {
 		ControlPanel bean = ControlPanel.newInstance();
 		bean.setSailExecutor(ControlPanel.SailExecutor.primeFacesInlineWebDriver);
 		assertEquals(ControlPanel.SailExecutor.primeFacesInlineWebDriver, bean.getSailExecutor());
@@ -423,7 +423,7 @@ public class ControlPanelDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void conditionsIsResultsNotNull() throws Exception {
+	void conditionsIsResultsNotNull() {
 		ControlPanel bean = ControlPanel.newInstance();
 		assertFalse(bean.isResultsNotNull());
 		assertTrue(bean.isNotResultsNotNull());
@@ -434,7 +434,7 @@ public class ControlPanelDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void conditionsIsTaggingGeneratedDataSelected() throws Exception {
+	void conditionsIsTaggingGeneratedDataSelected() {
 		ControlPanel bean = ControlPanel.newInstance();
 		assertFalse(bean.isTaggingGeneratedDataSelected());
 		assertTrue(bean.isNotTaggingGeneratedDataSelected());
@@ -444,26 +444,26 @@ public class ControlPanelDomainTest extends AbstractSkyveTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	void conditionsIsFixedCustomer() throws Exception {
+	@SuppressWarnings({"static-method", "boxing"})
+	void conditionsIsFixedCustomer() {
 		ControlPanel bean = ControlPanel.newInstance();
 		// Just calling the methods ensures coverage regardless of the result
 		boolean fixed = bean.isFixedCustomer();
-		assertEquals(!fixed, bean.isNotFixedCustomer());
+		assertEquals(! fixed, bean.isNotFixedCustomer());
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	void conditionsIsProductionInstance() throws Exception {
+	@SuppressWarnings({"static-method", "boxing"})
+	void conditionsIsProductionInstance() {
 		ControlPanel bean = ControlPanel.newInstance();
 		// Just calling the methods ensures coverage regardless of the result
 		boolean prod = bean.isProductionInstance();
-		assertEquals(!prod, bean.isNotProductionInstance());
+		assertEquals(! prod, bean.isNotProductionInstance());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	void testDocumentNamesListManipulation() throws Exception {
+	void testDocumentNamesListManipulation() {
 		ControlPanel bean = ControlPanel.newInstance();
 		assertNotNull(bean.getTestDocumentNames());
 		// Null-safe fromCode paths

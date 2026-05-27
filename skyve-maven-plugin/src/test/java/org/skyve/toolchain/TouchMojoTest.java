@@ -20,7 +20,7 @@ class TouchMojoTest {
 	private MavenProject project;
 
 	@BeforeEach
-	void setUp() throws Exception {
+	void setUp() {
 		mojo = new TouchMojo();
 		project = new MavenProject();
 		project.setArtifactId("skyve-war");
@@ -31,7 +31,6 @@ class TouchMojoTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void executeCreatesDefaultDeploymentFile() throws Exception {
 		Files.createDirectories(tempDir.resolve("deployments"));
 		mojo.execute();
@@ -39,7 +38,6 @@ class TouchMojoTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void executeCreatesAbsolutePathFile() throws Exception {
 		Path target = tempDir.resolve("customfile.txt");
 		ReflectionTestUtils.setField(mojo, "touchFile", target.toString());
@@ -48,7 +46,6 @@ class TouchMojoTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void executeCreatesRelativePathFile() throws Exception {
 		ReflectionTestUtils.setField(mojo, "touchFile", "deployments/relative.txt");
 		Files.createDirectories(tempDir.resolve("deployments"));

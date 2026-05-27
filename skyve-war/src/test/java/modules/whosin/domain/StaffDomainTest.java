@@ -9,13 +9,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
 
 @SuppressWarnings("static-method")
-public class StaffDomainTest {
+class StaffDomainTest {
 
 	private Staff bean;
 

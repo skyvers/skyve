@@ -24,7 +24,7 @@ import util.AbstractH2Test;
 class ReportTemplateDomainTest extends AbstractH2Test {
 
 	@Test
-	void dataBuilderPopulatesReportTemplateBean() throws Exception {
+	void dataBuilderPopulatesReportTemplateBean() {
 		ReportTemplate bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(ReportTemplate.MODULE_NAME, ReportTemplate.DOCUMENT_NAME);
@@ -33,14 +33,14 @@ class ReportTemplateDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void bizModuleAndDocumentAreCorrect() throws Exception {
+	void bizModuleAndDocumentAreCorrect() {
 		ReportTemplate bean = ReportTemplate.newInstance();
 		assertEquals(ReportTemplate.MODULE_NAME, bean.getBizModule());
 		assertEquals(ReportTemplate.DOCUMENT_NAME, bean.getBizDocument());
 	}
 
 	@Test
-	void nameAndDescriptionSetAndGet() throws Exception {
+	void nameAndDescriptionSetAndGet() {
 		ReportTemplate bean = ReportTemplate.newInstance();
 		bean.setName("Monthly Sales Report");
 		bean.setDescription("Report of monthly sales figures");
@@ -49,7 +49,7 @@ class ReportTemplateDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void reportTypeSetAndGet() throws Exception {
+	void reportTypeSetAndGet() {
 		ReportTemplate bean = ReportTemplate.newInstance();
 		bean.setReportType(ReportType.freemarker);
 		assertEquals(ReportType.freemarker, bean.getReportType());
@@ -58,7 +58,7 @@ class ReportTemplateDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void outputFormatSetAndGet() throws Exception {
+	void outputFormatSetAndGet() {
 		ReportTemplate bean = ReportTemplate.newInstance();
 		bean.setOutputFormat(OutputFormat.PDF);
 		assertEquals(OutputFormat.PDF, bean.getOutputFormat());
@@ -67,7 +67,7 @@ class ReportTemplateDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void modeSetAndGet() throws Exception {
+	void modeSetAndGet() {
 		ReportTemplate bean = ReportTemplate.newInstance();
 		bean.setMode(Mode.SQL);
 		assertEquals(Mode.SQL, bean.getMode());
@@ -76,7 +76,7 @@ class ReportTemplateDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void moduleAndDocumentNameSetAndGet() throws Exception {
+	void moduleAndDocumentNameSetAndGet() {
 		ReportTemplate bean = ReportTemplate.newInstance();
 		bean.setModuleName("admin");
 		bean.setDocumentName("User");
@@ -85,7 +85,7 @@ class ReportTemplateDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void reportNameAndTemplateSetAndGet() throws Exception {
+	void reportNameAndTemplateSetAndGet() {
 		ReportTemplate bean = ReportTemplate.newInstance();
 		bean.setReportName("salesReport.jrxml");
 		bean.setTemplateName("salesTemplate.ftl");
@@ -94,14 +94,14 @@ class ReportTemplateDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void cronExpressionSetAndGet() throws Exception {
+	void cronExpressionSetAndGet() {
 		ReportTemplate bean = ReportTemplate.newInstance();
 		bean.setCronExpression("0 0 * * * ?");
 		assertEquals("0 0 * * * ?", bean.getCronExpression());
 	}
 
 	@Test
-	void startAndEndTimeSetAndGet() throws Exception {
+	void startAndEndTimeSetAndGet() {
 		ReportTemplate bean = ReportTemplate.newInstance();
 		DateTime start = new DateTime();
 		DateTime end = new DateTime();
@@ -112,21 +112,20 @@ class ReportTemplateDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void flagsSetAndGet() throws Exception {
+	void flagsSetAndGet() {
 		ReportTemplate bean = ReportTemplate.newInstance();
 		bean.setEnabled(Boolean.TRUE);
 		assertEquals(Boolean.TRUE, bean.getEnabled());
 	}
 
 	@Test
-	void restrictToRoleSetAndGet() throws Exception {
+	void restrictToRoleSetAndGet() {
 		ReportTemplate bean = ReportTemplate.newInstance();
 		bean.setRestrictToRole("admin.BasicUser");
 		assertEquals("admin.BasicUser", bean.getRestrictToRole());
 	}
 
         @Test
-        @SuppressWarnings("static-method")
         void reportTypeFromCodeAndToDomainValues() {
                 assertEquals(ReportType.jasper, ReportType.fromCode("Jasper"));
                 assertNull(ReportType.fromCode("notexist"));
@@ -137,7 +136,6 @@ class ReportTemplateDomainTest extends AbstractH2Test {
         }
 
         @Test
-        @SuppressWarnings("static-method")
         void outputFormatFromCodeAndToDomainValues() {
                 assertEquals(OutputFormat.CSV, OutputFormat.fromCode("CSV"));
                 assertNull(OutputFormat.fromCode("notexist"));
@@ -148,7 +146,6 @@ class ReportTemplateDomainTest extends AbstractH2Test {
         }
 
         @Test
-        @SuppressWarnings("static-method")
         void modeFromCodeAndToDomainValues() {
                 assertEquals(Mode.SQL, Mode.fromCode("sql"));
                 assertNull(Mode.fromCode("notexist"));
@@ -159,28 +156,24 @@ class ReportTemplateDomainTest extends AbstractH2Test {
         }
 
         @Test
-        @SuppressWarnings("static-method")
         void reportTypeToCodeAndToDomainValue() {
                 assertEquals("Jasper", ReportType.jasper.toCode());
                 assertNotNull(ReportType.jasper.toDomainValue());
         }
 
         @Test
-        @SuppressWarnings("static-method")
         void outputFormatToCodeAndToDomainValue() {
                 assertEquals("CSV", OutputFormat.CSV.toCode());
                 assertNotNull(OutputFormat.CSV.toDomainValue());
         }
 
         @Test
-        @SuppressWarnings("static-method")
         void modeToCodeAndToDomainValue() {
                 assertEquals("sql", Mode.SQL.toCode());
                 assertNotNull(Mode.SQL.toDomainValue());
         }
 
 	@Test
-	@SuppressWarnings("static-method")
 	void wizardStateFromCodeAndFromLocalisedDescription() {
 		assertEquals(WizardState.enterDetails, WizardState.fromCode("enterDetails"));
 		assertNull(WizardState.fromCode("nonexistent"));
@@ -190,7 +183,6 @@ class ReportTemplateDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void generateExistingFromCodeAndFromLocalisedDescription() {
 		assertEquals(GenerateExisting.generate, GenerateExisting.fromCode("Generate"));
 		assertNull(GenerateExisting.fromCode("nonexistent"));

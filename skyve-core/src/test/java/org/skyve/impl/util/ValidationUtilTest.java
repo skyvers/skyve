@@ -732,7 +732,7 @@ class ValidationUtilTest {
 	}
 
 	@Test
-	@SuppressWarnings({"rawtypes", "unchecked", "static-method"})
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	void validateConverterWithNonNullValidatorCallsValidate() {
 		// Converter with a non-null Validator → exercises line 132 (validator.validate call)
 		Text text = Mockito.mock(Text.class);
@@ -822,7 +822,6 @@ class ValidationUtilTest {
 	// ---- validateFormat — covers L276-303 ----
 
 	@Test
-	@SuppressWarnings({"unchecked", "rawtypes"})
 	void validateBeanPropertyTextWithUpperCaseFormatReformatsValue() {
 		// Covers validateFormat L276-283: success path where value is reformatted
 		Customer mockCustomer = Mockito.mock(Customer.class);
@@ -854,7 +853,6 @@ class ValidationUtilTest {
 	}
 
 	@Test
-	@SuppressWarnings({"unchecked", "rawtypes"})
 	void validateBeanPropertyTextWithInvalidMaskAddsValidationMessage() {
 		// Covers validateFormat L300-303: catch block when format parsing fails
 		Customer mockCustomer = Mockito.mock(Customer.class);

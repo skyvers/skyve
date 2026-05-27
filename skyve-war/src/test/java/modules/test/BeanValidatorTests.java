@@ -1,7 +1,6 @@
 package modules.test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
@@ -13,6 +12,7 @@ import org.skyve.util.Util;
 import modules.test.domain.AllAttributesRequiredPersistent;
 import modules.test.domain.MappedExtensionSingleStrategy;
 
+@SuppressWarnings("java:S5778")
 class BeanValidatorTests extends AbstractSkyveTest {
 
 	@Test
@@ -22,7 +22,7 @@ class BeanValidatorTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	void testValidateBeanAgainstBaseDocument() throws Exception {
+	void testValidateBeanAgainstBaseDocument() {
 		ValidationException ve = Assert.assertThrows(ValidationException.class, () -> {
 			MappedExtensionSingleStrategy test = Util.constructRandomInstance(u, m, messd, 2);
 			test.setColour(null);
@@ -39,7 +39,7 @@ class BeanValidatorTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	void testValidateBeanAgainstDocumentFail() throws Exception {
+	void testValidateBeanAgainstDocumentFail() {
 		ValidationException ve = Assert.assertThrows(ValidationException.class, () -> {
 			AllAttributesRequiredPersistent test = Util.constructRandomInstance(u, m, aarpd, 2);
 			test.setColour(null);
@@ -56,7 +56,7 @@ class BeanValidatorTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	void testValidateBeanAgainstDocumentNamecFail() throws Exception {
+	void testValidateBeanAgainstDocumentNamecFail() {
 		ValidationException ve = Assert.assertThrows(ValidationException.class, () -> {
 			AllAttributesRequiredPersistent test = Util.constructRandomInstance(u, m, aarpd, 2);
 			test.setColour(null);

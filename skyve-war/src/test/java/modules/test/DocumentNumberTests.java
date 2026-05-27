@@ -8,7 +8,6 @@ import org.skyve.impl.domain.number.DocumentNumberGenerator;
 
 import modules.admin.domain.DocumentNumber;
 import modules.test.domain.AllAttributesPersistent;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class DocumentNumberTests extends AbstractSkyveTestDispose {
 

@@ -13,8 +13,7 @@ import org.junit.Test;
 import org.primefaces.component.picklist.PickList;
 import org.primefaces.model.DualListModel;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
-
-public class AssociationPickListConverterTest {
+class AssociationPickListConverterTest {
 
 	private AssociationPickListConverter converter;
 
@@ -48,7 +47,6 @@ public class AssociationPickListConverterTest {
 		assertNull(converter.getAsObject(null, null, ""));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void getAsObjectFindsInSource() {
 		DomainValue dv1 = new DomainValue("A", "Alpha");
@@ -63,7 +61,6 @@ public class AssociationPickListConverterTest {
 		assertEquals(dv1, converter.getAsObject(null, pickList, "A"));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void getAsObjectFindsInTarget() {
 		DomainValue dv1 = new DomainValue("A", "Alpha");
@@ -78,7 +75,6 @@ public class AssociationPickListConverterTest {
 		assertEquals(dv2, converter.getAsObject(null, pickList, "B"));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void getAsObjectReturnsNullWhenNotFound() {
 		DualListModel<DomainValue> model = mock(DualListModel.class);

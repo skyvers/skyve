@@ -22,7 +22,7 @@ import org.junit.jupiter.api.io.TempDir;
  * Uses a @TempDir to exercise pure-filesystem and cache methods without any
  * Skyve XML parsing or CORE runtime.
  */
-@SuppressWarnings("static-method")
+@SuppressWarnings("java:S5976")
 class FileSystemRepositoryTest {
 
 	@TempDir
@@ -622,7 +622,7 @@ class FileSystemRepositoryTest {
 	}
 
 	@Test
-	void populateKeysRegistersRouterKey() throws Exception {
+	void populateKeysRegistersRouterKey() {
 		LocalDesignRepository repo = new LocalDesignRepository(basePath);
 		assertNotNull(repo.vtable(null, "router/router"));
 	}
@@ -630,7 +630,7 @@ class FileSystemRepositoryTest {
 	// ---- findResourceFile ----
 
 	@Test
-	void findResourceFileReturnsRootResourceWhenNotFound() throws Exception {
+	void findResourceFileReturnsRootResourceWhenNotFound() {
 		LocalDesignRepository repo = new LocalDesignRepository(basePath);
 		// Resource doesn't exist - returns the file object for the root resources path (non-null but not existing)
 		java.io.File result = repo.findResourceFile("logo.png", null, null);

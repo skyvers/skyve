@@ -17,7 +17,7 @@ import org.skyve.domain.types.Decimal2;
  *
  * Uses a mocked {@link Filter} to verify the correct overload is dispatched.
  */
-@SuppressWarnings("static-method")
+@SuppressWarnings("java:S5778")
 class ListModelStaticMethodsTest {
 
 	private Filter filter;

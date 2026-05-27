@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.slf4j.Logger;
 
+@SuppressWarnings("static-method")
 class WebErrorUtilTest {
 	@Test
 	void logUnexpectedAndGetReferenceReturnsTheReferenceWrittenToTheServerLog() {
