@@ -15,6 +15,8 @@ import modules.whosin.domain.Office;
 import modules.whosin.domain.Staff;
 
 public class StaffFactory {
+	@SuppressWarnings("java:S2245") // It's ok that this is not cryptographically strong as it's only used for generating test data
+	private static final Random random = new Random();
 
 	@SkyveFixture(types = FixtureType.seed)
 	public static Staff seedInstance() {
@@ -27,11 +29,8 @@ public class StaffFactory {
 		bean.setContact(contact);
 
 		// throw the dice to see whether to create a new office, or re-use an existing one
-		@SuppressWarnings("java:S2245") // It's ok that this is not cryptographically strong as it's only used for generating test data
-		Random random = new Random();
 		int dice = random.nextInt(50);
 		if (dice < 49) {
-
 			// re-use a random existing office
 			DocumentQuery qOffice = CORE.getPersistence().newDocumentQuery(Office.MODULE_NAME, Office.DOCUMENT_NAME);
 
@@ -55,5 +54,4 @@ public class StaffFactory {
 
 		return bean;
 	}
-
 }

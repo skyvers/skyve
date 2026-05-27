@@ -52,12 +52,13 @@ public class LoadDemonstrationDataJob extends Job {
 		}
 	}
 
+	@SuppressWarnings("java:S2245") // It's ok that this is not cryptographically strong as it's only used for generating demo data
+	private Random random = new Random();
+
 	private void generateRandomData() {
 		//generate a random number of staff
-		@SuppressWarnings("java:S2245") // It's ok that this is not cryptographically strong as it's only used for generating demo data
-		Random random = new Random();
 		int staffCount = random.nextInt(1000) + 50;
-		for(int i=0;i<staffCount;i++) {
+		for (int i = 0; i < staffCount; i++) {
 			if (cancelled) {
 				return;
 			}
