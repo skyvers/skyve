@@ -1,30 +1,28 @@
 package org.skyve.impl.web.filter.rest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.Vector;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.FilterConfig;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.WriteListener;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+@SuppressWarnings({"resource", "boxing"})
 class RegexFilterTest {
 
 	private RegexFilter filter;
@@ -42,7 +40,7 @@ class RegexFilterTest {
 		output = new CapturingServletOutputStream();
 	}
 
-	private FilterConfig buildConfig(String name, String regex) throws ServletException {
+	private static FilterConfig buildConfig(String name, String regex) {
 		FilterConfig config = mock(FilterConfig.class);
 		when(config.getInitParameter(AbstractRestFilter.REALM_INIT_PARAMETER)).thenReturn(null);
 		when(config.getInitParameter(AbstractRestFilter.UNSECURED_INIT_PARAMETER)).thenReturn(null);
@@ -110,7 +108,7 @@ class RegexFilterTest {
 		when(response.getOutputStream()).thenReturn(output);
 		filter.doFilter(request, response, chain);
 		verify(chain, never()).doFilter(request, response);
-		verify(response).setStatus(eq(HttpServletResponse.SC_FORBIDDEN));
+		verify(response).setStatus(HttpServletResponse.SC_FORBIDDEN);
 	}
 
 	// ===== Method checks =====
@@ -122,7 +120,7 @@ class RegexFilterTest {
 		when(response.getOutputStream()).thenReturn(output);
 		filter.doFilter(request, response, chain);
 		verify(chain, never()).doFilter(request, response);
-		verify(response).setStatus(eq(HttpServletResponse.SC_FORBIDDEN));
+		verify(response).setStatus(HttpServletResponse.SC_FORBIDDEN);
 	}
 
 	// ===== RemoteAddr checks =====
@@ -134,7 +132,7 @@ class RegexFilterTest {
 		when(response.getOutputStream()).thenReturn(output);
 		filter.doFilter(request, response, chain);
 		verify(chain, never()).doFilter(request, response);
-		verify(response).setStatus(eq(HttpServletResponse.SC_FORBIDDEN));
+		verify(response).setStatus(HttpServletResponse.SC_FORBIDDEN);
 	}
 
 	// ===== RequestURI checks =====
@@ -146,7 +144,7 @@ class RegexFilterTest {
 		when(response.getOutputStream()).thenReturn(output);
 		filter.doFilter(request, response, chain);
 		verify(chain, never()).doFilter(request, response);
-		verify(response).setStatus(eq(HttpServletResponse.SC_FORBIDDEN));
+		verify(response).setStatus(HttpServletResponse.SC_FORBIDDEN);
 	}
 
 	// ===== LocalAddr checks =====
@@ -424,7 +422,7 @@ class RegexFilterTest {
 
 	@Test
 	void testAbstractRestFilterInitWithRealm() throws Exception {
-		FilterConfig config = mock(FilterConfig.class);
+		FilterConfig config = Assertions.assertDoesNotThrow(() -> mock(FilterConfig.class));
 		when(config.getInitParameter(AbstractRestFilter.REALM_INIT_PARAMETER)).thenReturn("MyRealm");
 		when(config.getInitParameter(AbstractRestFilter.UNSECURED_INIT_PARAMETER)).thenReturn(null);
 		when(config.getInitParameterNames()).thenReturn(Collections.emptyEnumeration());
@@ -434,7 +432,7 @@ class RegexFilterTest {
 
 	@Test
 	void testAbstractRestFilterInitWithUnsecuredPrefixes() throws Exception {
-		FilterConfig config = mock(FilterConfig.class);
+		FilterConfig config = Assertions.assertDoesNotThrow(() -> mock(FilterConfig.class));
 		when(config.getInitParameter(AbstractRestFilter.REALM_INIT_PARAMETER)).thenReturn(null);
 		when(config.getInitParameter(AbstractRestFilter.UNSECURED_INIT_PARAMETER)).thenReturn("/public\n/api/v1/open");
 		when(config.getInitParameterNames()).thenReturn(Collections.emptyEnumeration());
@@ -474,10 +472,6 @@ class RegexFilterTest {
 		@Override
 		public void setWriteListener(WriteListener writeListener) {
 			// no-op
-		}
-
-		public String asString() {
-			return buf.toString(StandardCharsets.UTF_8);
 		}
 	}
 }

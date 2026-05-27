@@ -5,6 +5,7 @@ import static org.mockito.Mockito.when;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -14,6 +15,7 @@ import jakarta.servlet.ServletException;
 /**
  * Test that we can instantiate a ViewJSONManipulator from SmartClientEditServlet from an init parameter.
  */
+@SuppressWarnings("resource")
 class ViewJSONManipulatorFactoryTest {
 	@Mock
 	private ServletConfig config;
@@ -34,7 +36,7 @@ class ViewJSONManipulatorFactoryTest {
 	
 	@Test
 	void testSCESInitWithManipulator() throws ServletException {
-		SmartClientEditServlet sces = new SmartClientEditServlet();
+		SmartClientEditServlet sces = Assertions.assertDoesNotThrow(SmartClientEditServlet::new);
 		when(config.getInitParameter("manipulator")).thenReturn(TestExtendingViewJSONManipulator.class.getCanonicalName());
 		sces.init(config);
 	}

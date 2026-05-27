@@ -9,6 +9,7 @@ import java.io.StringWriter;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.web.WebErrorUtil;
 
+@SuppressWarnings("static-method")
 class SmartClientWarningResponseTest {
 	private static final String REFERENCE = "2f8f0e2c-3b93-4cc2-9d9d-5f24ec777a3d";
 

@@ -492,7 +492,7 @@ class TabularComponentBuilderTest {
 		Integer completePixelWidth;
 
 		@Override
-		protected UIInput checkbox(String dataWidgetVar,
+		protected UIInput checkBoxInput(String dataWidgetVar,
 									String binding,
 									String title,
 									String requiredMessage,
@@ -4063,7 +4063,7 @@ class TabularComponentBuilderTest {
 		assertEquals("doUpload", builder.uploadActionName);
 	}
 
-	@SuppressWarnings({ "static-method", "unchecked" })
+	@SuppressWarnings("static-method")
 	@Test
 	void testTextWithDateConverterUsesDatePicker() {
 		// Test that the datePicker branch is triggered for all date/time converter types.
@@ -4127,7 +4127,7 @@ class TabularComponentBuilderTest {
 		}
 	}
 
-	@SuppressWarnings({ "static-method", "unchecked" })
+	@SuppressWarnings("static-method")
 	@Test
 	void testTextWithUnknownDateConverterThrowsIllegalState() {
 		// When a date converter is used but has no matching if-branch, datePicker throws IllegalStateException.
@@ -4221,7 +4221,7 @@ class TabularComponentBuilderTest {
 		assertEquals("@form", result.update);
 	}
 
-	@SuppressWarnings({ "static-method", "unchecked" })
+	@SuppressWarnings("static-method")
 	@Test
 	void testAddAjaxBehaviorWithRerenderActionValidateTrue() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -4244,7 +4244,7 @@ class TabularComponentBuilderTest {
 		verify(component).addClientBehavior(eq("change"), same(ajax));
 	}
 
-	@SuppressWarnings({ "static-method", "unchecked" })
+	@SuppressWarnings("static-method")
 	@Test
 	void testAddAjaxBehaviorWithRerenderActionValidateFalse() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -4267,7 +4267,7 @@ class TabularComponentBuilderTest {
 		verify(component).addClientBehavior(eq("change"), same(ajax));
 	}
 
-	@SuppressWarnings({ "static-method", "unchecked" })
+	@SuppressWarnings("static-method")
 	@Test
 	void testAddAjaxBehaviorWithServerSideAction() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -4652,7 +4652,7 @@ class TabularComponentBuilderTest {
 		ValueExpression ve = mock(ValueExpression.class);
 		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), any(Class.class)))
 			.thenReturn(ve);
-		builder.setValueOrValueExpression("{bean.title}", v -> {}, "title", component);
+		builder.setValueOrValueExpression("{bean.title}", v -> { /* no-op setter */ }, "title", component);
 		verify(component).setValueExpression(eq("title"), any(ValueExpression.class));
 	}
 

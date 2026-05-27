@@ -4,7 +4,11 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,8 +16,6 @@ import org.skyve.CORE;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.sail.mock.MockWebContext;
 import org.skyve.metadata.controller.ServerSideActionResult;
-import org.skyve.util.DataBuilder;
-import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.admin.Tag.TagExtension;
 import modules.admin.domain.Tag;
@@ -23,18 +25,15 @@ import util.AbstractH2Test;
 /**
  * H2-backed tests for Tag actions: PrepareExplanation, TagAll, Clear, and PerformCombination validation.
  */
-public class TagActionsH2Test extends AbstractH2Test {
+class TagActionsH2Test extends AbstractH2Test {
 
-	private DataBuilder db;
 	private TagExtension bean;
 	private MockWebContext webContext;
 
 	@BeforeEach
-	void setup() throws Exception {
-		db = new DataBuilder().fixture(FixtureType.crud);
+	void setup() {
 		bean = Tag.newInstance();
-		bean.setName("TestTag");
-		bean.setBizId("test-tag-id");
+		bean.setName("TestTag-" + UUID.randomUUID());
 		bean.setUploadModuleName("admin");
 		bean.setUploadDocumentName("User");
 		bean = CORE.getPersistence().save(bean);
@@ -68,7 +67,7 @@ public class TagActionsH2Test extends AbstractH2Test {
 		ServerSideActionResult<TagExtension> result = action.execute(bean, webContext);
 		assertNotNull(result);
 		assertThat(result.getBean().getCombinationExplanation(), is(notNullValue()));
-		assertThat(result.getBean().getCombinationExplanation().contains("Do nothing"), is(true));
+		assertTrue(result.getBean().getCombinationExplanation().contains("Do nothing"));
 	}
 
 	// ---- PrepareExplanation: with union operator ----
@@ -86,7 +85,7 @@ public class TagActionsH2Test extends AbstractH2Test {
 		PrepareExplanation action = new PrepareExplanation();
 		ServerSideActionResult<TagExtension> result = action.execute(bean, webContext);
 		assertNotNull(result);
-		assertThat(result.getBean().getCombinationExplanation().contains("Add to"), is(true));
+		assertTrue(result.getBean().getCombinationExplanation().contains("Add to"));
 	}
 
 	// ---- PrepareExplanation: with except operator ----
@@ -103,7 +102,7 @@ public class TagActionsH2Test extends AbstractH2Test {
 		PrepareExplanation action = new PrepareExplanation();
 		ServerSideActionResult<TagExtension> result = action.execute(bean, webContext);
 		assertNotNull(result);
-		assertThat(result.getBean().getCombinationExplanation().contains("Remove"), is(true));
+		assertTrue(result.getBean().getCombinationExplanation().contains("Remove"));
 	}
 
 	// ---- PrepareExplanation: with intersect operator ----
@@ -121,7 +120,7 @@ public class TagActionsH2Test extends AbstractH2Test {
 		ServerSideActionResult<TagExtension> result = action.execute(bean, webContext);
 		assertNotNull(result);
 		assertThat(result.getBean().getCombinationExplanation(), is(notNullValue()));
-		assertThat(result.getBean().getCombinationExplanation().isEmpty(), is(false));
+		assertFalse(result.getBean().getCombinationExplanation().isEmpty());
 	}
 
 	// ---- TagAll: tags all User records ----

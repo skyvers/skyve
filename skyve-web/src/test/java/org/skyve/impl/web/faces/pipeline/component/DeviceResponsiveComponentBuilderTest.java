@@ -1,7 +1,6 @@
 package org.skyve.impl.web.faces.pipeline.component;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -14,6 +13,7 @@ import static org.mockito.Mockito.when;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 import org.primefaces.behavior.confirm.ConfirmBehavior;
 import org.primefaces.component.commandbutton.CommandButton;
 import org.skyve.impl.metadata.view.widget.Button;
@@ -262,8 +262,8 @@ class DeviceResponsiveComponentBuilderTest {
 		DeviceResponsiveComponentBuilder builder = new DeviceResponsiveComponentBuilder();
 		builder.setUserAgentType(UserAgentType.phone);
 		Button button = new Button();
-		button.setPixelWidth(200);
-		button.setPixelHeight(50);
+		button.setPixelWidth(Integer.valueOf(200));
+		button.setPixelHeight(Integer.valueOf(50));
 		Action action = mock(Action.class);
 		when(action.getName()).thenReturn("Save");
 		when(action.getImplicitName()).thenReturn(ImplicitActionName.Save);
@@ -283,7 +283,7 @@ class DeviceResponsiveComponentBuilderTest {
 		when(managedBean.nextId()).thenReturn("btnId");
 		builder.setSAILManagedBean(managedBean);
 		UIComponent result = builder.actionButton(null, null, null, "Save", null, null, null, button, null, action);
-		org.junit.jupiter.api.Assertions.assertNotNull(result);
+		Assertions.assertNotNull(result);
 	}
 
 	@Test
@@ -292,8 +292,8 @@ class DeviceResponsiveComponentBuilderTest {
 		DeviceResponsiveComponentBuilder builder = new DeviceResponsiveComponentBuilder();
 		builder.setUserAgentType(UserAgentType.desktop);
 		Button button = new Button();
-		button.setPixelWidth(200);
-		button.setPixelHeight(50);
+		button.setPixelWidth(Integer.valueOf(200));
+		button.setPixelHeight(Integer.valueOf(50));
 		Action action = mock(Action.class);
 		when(action.getName()).thenReturn("Save");
 		when(action.getImplicitName()).thenReturn(ImplicitActionName.Save);
@@ -313,6 +313,6 @@ class DeviceResponsiveComponentBuilderTest {
 		when(managedBean.nextId()).thenReturn("btnId");
 		builder.setSAILManagedBean(managedBean);
 		UIComponent result = builder.actionButton(null, null, null, "Save", null, null, null, button, null, action);
-		org.junit.jupiter.api.Assertions.assertNotNull(result);
+		Assertions.assertNotNull(result);
 	}
 }

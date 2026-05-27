@@ -16,10 +16,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.Vector;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.skyve.impl.web.filter.gzip.CompressionFilter;
 
 import jakarta.servlet.FilterChain;
@@ -33,12 +37,13 @@ import jakarta.servlet.WriteListener;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-public class WebFilterTest {
+@SuppressWarnings({"static-method", "resource"})
+class WebFilterTest {
 
 	// ===== UTF8CharacterEncodingFilter =====
 
 	@Test
-	public void testUtf8FilterSetsEncodingWhenNotSet() throws Exception {
+	void testUtf8FilterSetsEncodingWhenNotSet() throws Exception {
 		UTF8CharacterEncodingFilter filter = new UTF8CharacterEncodingFilter();
 		filter.init(null);
 
@@ -56,7 +61,7 @@ public class WebFilterTest {
 	}
 
 	@Test
-	public void testUtf8FilterSkipsEncodingWhenAlreadySet() throws Exception {
+	void testUtf8FilterSkipsEncodingWhenAlreadySet() throws Exception {
 		UTF8CharacterEncodingFilter filter = new UTF8CharacterEncodingFilter();
 		filter.init(null);
 
@@ -75,7 +80,7 @@ public class WebFilterTest {
 	// ===== ResponseHeaderFilter =====
 
 	@Test
-	public void testResponseHeaderFilterSetsHeaders() throws Exception {
+	void testResponseHeaderFilterSetsHeaders() throws Exception {
 		FilterConfig config = mock(FilterConfig.class);
 		HttpServletResponse response = mock(HttpServletResponse.class);
 		FilterChain chain = mock(FilterChain.class);
@@ -100,8 +105,8 @@ public class WebFilterTest {
 	}
 
 	@Test
-	public void testResponseHeaderFilterInitSetsSecurityConfig() throws Exception {
-		FilterConfig config = mock(FilterConfig.class);
+	void testResponseHeaderFilterInitSetsSecurityConfig() throws Exception {
+		FilterConfig config = Assertions.assertDoesNotThrow(() -> mock(FilterConfig.class));
 		when(config.getFilterName()).thenReturn(ResponseHeaderFilter.SECURITY_HEADERS_FILTER_NAME);
 		when(config.getInitParameterNames()).thenReturn(Collections.emptyEnumeration());
 
@@ -111,19 +116,30 @@ public class WebFilterTest {
 	}
 
 	@Test
-	public void testResponseHeaderFilterDestroySetsSecurityConfigToNull() throws Exception {
-		FilterConfig config = mock(FilterConfig.class);
+	void testResponseHeaderFilterDestroySetsSecurityConfigToNull() throws Exception {
+		FilterConfig config = Assertions.assertDoesNotThrow(() -> mock(FilterConfig.class));
 		when(config.getFilterName()).thenReturn(ResponseHeaderFilter.SECURITY_HEADERS_FILTER_NAME);
-		when(config.getInitParameterNames()).thenReturn(Collections.emptyEnumeration());
+		Vector<String> headerNames = new Vector<>();
+		headerNames.add("X-Destroy-Test");
+		when(config.getInitParameterNames()).thenReturn(headerNames.elements());
+		when(config.getInitParameter("X-Destroy-Test")).thenReturn("enabled");
+
+		HttpServletResponse response = mock(HttpServletResponse.class);
 
 		ResponseHeaderFilter filter = new ResponseHeaderFilter();
 		filter.init(config);
+		ResponseHeaderFilter.applySecurityHeaders(response);
+		verify(response).setHeader("X-Destroy-Test", "enabled");
+
+		org.mockito.Mockito.reset(response);
 		// destroy should null out SECURITY_HEADERS_FILTER_CONFIG — won't throw
 		filter.destroy();
+		ResponseHeaderFilter.applySecurityHeaders(response);
+		verify(response, never()).setHeader(anyString(), anyString());
 	}
 
 	@Test
-	public void testResponseHeaderFilterWithExpiresHeader() throws Exception {
+	void testResponseHeaderFilterWithExpiresHeader() throws Exception {
 		FilterConfig config = mock(FilterConfig.class);
 		HttpServletResponse response = mock(HttpServletResponse.class);
 		FilterChain chain = mock(FilterChain.class);
@@ -144,7 +160,7 @@ public class WebFilterTest {
 	}
 
 	@Test
-	public void testResponseHeaderFilterWithCspHeaderNoHttps() throws Exception {
+	void testResponseHeaderFilterWithCspHeaderNoHttps() throws Exception {
 		FilterConfig config = mock(FilterConfig.class);
 		HttpServletResponse response = mock(HttpServletResponse.class);
 		FilterChain chain = mock(FilterChain.class);
@@ -164,7 +180,9 @@ public class WebFilterTest {
 			java.lang.reflect.Field f = org.skyve.util.Util.class.getDeclaredField("secureUrl");
 			f.setAccessible(true);
 			f.set(null, null);
-		} catch (Exception ignored) {}
+		} catch (@SuppressWarnings("unused") Exception ignored) {
+			// ignore test-only reflective reset failures
+		}
 
 		ResponseHeaderFilter filter = new ResponseHeaderFilter();
 		filter.init(config);
@@ -176,7 +194,7 @@ public class WebFilterTest {
 	}
 
 	@Test
-	public void testResponseHeaderFilterApplySecurityHeaders() throws Exception {
+	void testResponseHeaderFilterApplySecurityHeaders() throws Exception {
 		FilterConfig config = mock(FilterConfig.class);
 		when(config.getFilterName()).thenReturn(ResponseHeaderFilter.SECURITY_HEADERS_FILTER_NAME);
 		Vector<String> headerNames = new Vector<>();
@@ -195,42 +213,28 @@ public class WebFilterTest {
 
 	// ===== DevLoginFilter init =====
 
-	@Test
-	public void testDevLoginFilterInitThrowsOnMissingCustomer() throws Exception {
+	@ParameterizedTest
+	@MethodSource("missingDevLoginParams")
+	void testDevLoginFilterInitThrowsOnMissingRequiredParam(String customer, String user, String password) {
 		FilterConfig config = mock(FilterConfig.class);
-		when(config.getInitParameter("customer")).thenReturn(null);
-		when(config.getInitParameter("user")).thenReturn("admin");
-		when(config.getInitParameter("password")).thenReturn("admin");
+		when(config.getInitParameter("customer")).thenReturn(customer);
+		when(config.getInitParameter("user")).thenReturn(user);
+		when(config.getInitParameter("password")).thenReturn(password);
 
 		DevLoginFilter filter = new DevLoginFilter();
 		assertThrows(ServletException.class, () -> filter.init(config));
 	}
 
-	@Test
-	public void testDevLoginFilterInitThrowsOnMissingUser() throws Exception {
-		FilterConfig config = mock(FilterConfig.class);
-		when(config.getInitParameter("customer")).thenReturn("demo");
-		when(config.getInitParameter("user")).thenReturn(null);
-		when(config.getInitParameter("password")).thenReturn("admin");
-
-		DevLoginFilter filter = new DevLoginFilter();
-		assertThrows(ServletException.class, () -> filter.init(config));
+	private static Stream<Arguments> missingDevLoginParams() {
+		return Stream.of(
+			Arguments.of(null, "admin", "admin"),
+			Arguments.of("demo", null, "admin"),
+			Arguments.of("demo", "admin", null));
 	}
 
 	@Test
-	public void testDevLoginFilterInitThrowsOnMissingPassword() throws Exception {
-		FilterConfig config = mock(FilterConfig.class);
-		when(config.getInitParameter("customer")).thenReturn("demo");
-		when(config.getInitParameter("user")).thenReturn("admin");
-		when(config.getInitParameter("password")).thenReturn(null);
-
-		DevLoginFilter filter = new DevLoginFilter();
-		assertThrows(ServletException.class, () -> filter.init(config));
-	}
-
-	@Test
-	public void testDevLoginFilterInitSucceedsWithAllParams() throws Exception {
-		FilterConfig config = mock(FilterConfig.class);
+	void testDevLoginFilterInitSucceedsWithAllParams() throws Exception {
+		FilterConfig config = Assertions.assertDoesNotThrow(() -> mock(FilterConfig.class));
 		when(config.getInitParameter("customer")).thenReturn("demo");
 		when(config.getInitParameter("user")).thenReturn("admin");
 		when(config.getInitParameter("password")).thenReturn("admin");
@@ -243,7 +247,7 @@ public class WebFilterTest {
 	// ===== ExcludeStaticFilter =====
 
 	@Test
-	public void testExcludeStaticFilterMatchesStaticPrefix() throws Exception {
+	void testExcludeStaticFilterMatchesStaticPrefix() throws Exception {
 		FilterConfig config = mock(FilterConfig.class);
 		ServletContext ctx = mock(ServletContext.class);
 		when(config.getServletContext()).thenReturn(ctx);
@@ -272,7 +276,7 @@ public class WebFilterTest {
 	}
 
 	@Test
-	public void testExcludeStaticFilterNoPrefixesReturnsFalse() throws Exception {
+	void testExcludeStaticFilterNoPrefixesReturnsFalse() throws Exception {
 		FilterConfig config = mock(FilterConfig.class);
 		ServletContext ctx = mock(ServletContext.class);
 		when(config.getServletContext()).thenReturn(ctx);
@@ -296,8 +300,8 @@ public class WebFilterTest {
 	// ===== ThumbnailFilter =====
 
 	@Test
-	public void testThumbnailFilterInitWithDefaults() throws Exception {
-		FilterConfig config = mock(FilterConfig.class);
+	void testThumbnailFilterInitWithDefaults() throws Exception {
+		FilterConfig config = Assertions.assertDoesNotThrow(() -> mock(FilterConfig.class));
 		when(config.getInitParameter("widthParam")).thenReturn(null);
 		when(config.getInitParameter("heightParam")).thenReturn(null);
 		when(config.getInitParameter("maxWidth")).thenReturn(null);
@@ -310,8 +314,8 @@ public class WebFilterTest {
 	}
 
 	@Test
-	public void testThumbnailFilterInitWithCustomParams() throws Exception {
-		FilterConfig config = mock(FilterConfig.class);
+	void testThumbnailFilterInitWithCustomParams() throws Exception {
+		FilterConfig config = Assertions.assertDoesNotThrow(() -> mock(FilterConfig.class));
 		when(config.getInitParameter("widthParam")).thenReturn("width");
 		when(config.getInitParameter("heightParam")).thenReturn("height");
 		when(config.getInitParameter("maxWidth")).thenReturn("800");
@@ -324,8 +328,8 @@ public class WebFilterTest {
 	}
 
 	@Test
-	public void testThumbnailFilterInitWithSvgNonImage() throws Exception {
-		FilterConfig config = mock(FilterConfig.class);
+	void testThumbnailFilterInitWithSvgNonImage() throws Exception {
+		FilterConfig config = Assertions.assertDoesNotThrow(() -> mock(FilterConfig.class));
 		when(config.getInitParameter("widthParam")).thenReturn(null);
 		when(config.getInitParameter("heightParam")).thenReturn(null);
 		when(config.getInitParameter("maxWidth")).thenReturn(null);
@@ -338,7 +342,7 @@ public class WebFilterTest {
 	}
 
 	@Test
-	public void testThumbnailFilterInitThrowsOnInvalidNonImageResponse() throws Exception {
+	void testThumbnailFilterInitThrowsOnInvalidNonImageResponse() {
 		FilterConfig config = mock(FilterConfig.class);
 		when(config.getInitParameter("widthParam")).thenReturn(null);
 		when(config.getInitParameter("heightParam")).thenReturn(null);
@@ -350,8 +354,9 @@ public class WebFilterTest {
 		assertThrows(ServletException.class, () -> filter.init(config));
 	}
 
-	@Test
-	public void testThumbnailFilterDoFilterPassesThroughWhenNoSizeParams() throws Exception {
+	@ParameterizedTest
+	@MethodSource("passthroughThumbnailParams")
+	void testThumbnailFilterDoFilterPassesThroughForInvalidParams(String width, String height) throws Exception {
 		FilterConfig config = mock(FilterConfig.class);
 		when(config.getInitParameter("widthParam")).thenReturn(null);
 		when(config.getInitParameter("heightParam")).thenReturn(null);
@@ -366,65 +371,23 @@ public class WebFilterTest {
 		HttpServletResponse response = mock(HttpServletResponse.class);
 		FilterChain chain = mock(FilterChain.class);
 
-		// No _w or _h params → pass straight through
-		when(request.getParameter("_w")).thenReturn(null);
-		when(request.getParameter("_h")).thenReturn(null);
+		when(request.getParameter("_w")).thenReturn(width);
+		when(request.getParameter("_h")).thenReturn(height);
 
 		filter.doFilter(request, response, chain);
 		verify(chain).doFilter(request, response);
 	}
 
-	@Test
-	public void testThumbnailFilterDoFilterPassesThroughWhenZeroWidth() throws Exception {
-		FilterConfig config = mock(FilterConfig.class);
-		when(config.getInitParameter("widthParam")).thenReturn(null);
-		when(config.getInitParameter("heightParam")).thenReturn(null);
-		when(config.getInitParameter("maxWidth")).thenReturn(null);
-		when(config.getInitParameter("maxHeight")).thenReturn(null);
-		when(config.getInitParameter("nonImageResponse")).thenReturn(null);
-
-		ThumbnailFilter filter = new ThumbnailFilter();
-		filter.init(config);
-
-		HttpServletRequest request = mock(HttpServletRequest.class);
-		HttpServletResponse response = mock(HttpServletResponse.class);
-		FilterChain chain = mock(FilterChain.class);
-
-		// width=0, height=100 → pass straight through (non-positive)
-		when(request.getParameter("_w")).thenReturn("0");
-		when(request.getParameter("_h")).thenReturn("100");
-
-		filter.doFilter(request, response, chain);
-		verify(chain).doFilter(request, response);
+	private static Stream<Arguments> passthroughThumbnailParams() {
+		return Stream.of(
+			Arguments.of(null, null),
+			Arguments.of("0", "100"),
+			Arguments.of("abc", "100"));
 	}
 
 	@Test
-	public void testThumbnailFilterDoFilterPassesThroughWhenNonNumericParam() throws Exception {
-		FilterConfig config = mock(FilterConfig.class);
-		when(config.getInitParameter("widthParam")).thenReturn(null);
-		when(config.getInitParameter("heightParam")).thenReturn(null);
-		when(config.getInitParameter("maxWidth")).thenReturn(null);
-		when(config.getInitParameter("maxHeight")).thenReturn(null);
-		when(config.getInitParameter("nonImageResponse")).thenReturn(null);
-
-		ThumbnailFilter filter = new ThumbnailFilter();
-		filter.init(config);
-
-		HttpServletRequest request = mock(HttpServletRequest.class);
-		HttpServletResponse response = mock(HttpServletResponse.class);
-		FilterChain chain = mock(FilterChain.class);
-
-		// non-numeric width → pass straight through
-		when(request.getParameter("_w")).thenReturn("abc");
-		when(request.getParameter("_h")).thenReturn("100");
-
-		filter.doFilter(request, response, chain);
-		verify(chain).doFilter(request, response);
-	}
-
-	@Test
-	public void testThumbnailFilterDoFilterCapsWidthAndHeight() throws Exception {
-		FilterConfig config = mock(FilterConfig.class);
+	void testThumbnailFilterDoFilterCapsWidthAndHeight() throws Exception {
+		FilterConfig config = Assertions.assertDoesNotThrow(() -> mock(FilterConfig.class));
 		when(config.getInitParameter("widthParam")).thenReturn(null);
 		when(config.getInitParameter("heightParam")).thenReturn(null);
 		when(config.getInitParameter("maxWidth")).thenReturn("800");
@@ -480,8 +443,8 @@ public class WebFilterTest {
 	}
 
 	@Test
-	public void testThumbnailFilterCapturingWrapperUsesWriterWhenChainWritesText() throws Exception {
-		FilterConfig config = mock(FilterConfig.class);
+	void testThumbnailFilterCapturingWrapperUsesWriterWhenChainWritesText() throws Exception {
+		FilterConfig config = Assertions.assertDoesNotThrow(() -> mock(FilterConfig.class));
 		when(config.getInitParameter("widthParam")).thenReturn(null);
 		when(config.getInitParameter("heightParam")).thenReturn(null);
 		when(config.getInitParameter("maxWidth")).thenReturn(null);
@@ -510,7 +473,9 @@ public class WebFilterTest {
 		ServletOutputStream sos = new ServletOutputStream() {
 			@Override public void write(int b) { baos.write(b); }
 			@Override public boolean isReady() { return true; }
-			@Override public void setWriteListener(WriteListener l) {}
+			@Override public void setWriteListener(WriteListener l) {
+				// no-op for test stream
+			}
 		};
 		when(response.getOutputStream()).thenReturn(sos);
 
@@ -519,8 +484,8 @@ public class WebFilterTest {
 	}
 
 	@Test
-	public void testThumbnailFilterCapturingWrapperAddsContentTypeHeader() throws Exception {
-		FilterConfig config = mock(FilterConfig.class);
+	void testThumbnailFilterCapturingWrapperAddsContentTypeHeader() throws Exception {
+		FilterConfig config = Assertions.assertDoesNotThrow(() -> mock(FilterConfig.class));
 		when(config.getInitParameter("widthParam")).thenReturn(null);
 		when(config.getInitParameter("heightParam")).thenReturn(null);
 		when(config.getInitParameter("maxWidth")).thenReturn(null);
@@ -538,7 +503,9 @@ public class WebFilterTest {
 			r.addHeader("Content-Type", "text/plain");
 			try {
 				res.getOutputStream().write("data".getBytes());
-			} catch (@SuppressWarnings("unused") Exception ignored) {}
+			} catch (@SuppressWarnings("unused") Exception ignored) {
+				// no-op for test helper path
+			}
 		};
 
 		when(request.getParameter("_w")).thenReturn("50");
@@ -548,7 +515,9 @@ public class WebFilterTest {
 		ServletOutputStream sos = new ServletOutputStream() {
 			@Override public void write(int b) { baos.write(b); }
 			@Override public boolean isReady() { return true; }
-			@Override public void setWriteListener(WriteListener l) {}
+			@Override public void setWriteListener(WriteListener l) {
+				// no-op for test stream
+			}
 		};
 		when(response.getOutputStream()).thenReturn(sos);
 
@@ -558,41 +527,27 @@ public class WebFilterTest {
 
 	// ===== CompressionFilter =====
 
-	@Test
-	public void testCompressionFilterInitWithDefaults() throws Exception {
-		FilterConfig config = mock(FilterConfig.class);
-		when(config.getInitParameter("debug")).thenReturn(null);
-		when(config.getInitParameter("compressionThreshold")).thenReturn(null);
+	@ParameterizedTest
+	@MethodSource("compressionInitParams")
+	void testCompressionFilterInitConfigurations(String debugValue, String thresholdValue) {
+		FilterConfig config = Assertions.assertDoesNotThrow(() -> mock(FilterConfig.class));
+		when(config.getInitParameter("debug")).thenReturn(debugValue);
+		when(config.getInitParameter("compressionThreshold")).thenReturn(thresholdValue);
 
 		CompressionFilter filter = new CompressionFilter();
 		filter.init(config);
 		filter.destroy();
 	}
 
-	@Test
-	public void testCompressionFilterInitWithThreshold() throws Exception {
-		FilterConfig config = mock(FilterConfig.class);
-		when(config.getInitParameter("debug")).thenReturn("1");
-		when(config.getInitParameter("compressionThreshold")).thenReturn("1024");
-
-		CompressionFilter filter = new CompressionFilter();
-		filter.init(config);
-		filter.destroy();
+	private static Stream<Arguments> compressionInitParams() {
+		return Stream.of(
+			Arguments.of(null, null),
+			Arguments.of("1", "1024"),
+			Arguments.of("2", "50"));
 	}
 
 	@Test
-	public void testCompressionFilterInitWithBelowMinThreshold() throws Exception {
-		FilterConfig config = mock(FilterConfig.class);
-		when(config.getInitParameter("debug")).thenReturn("2");
-		when(config.getInitParameter("compressionThreshold")).thenReturn("50");
-
-		CompressionFilter filter = new CompressionFilter();
-		filter.init(config);
-		filter.destroy();
-	}
-
-	@Test
-	public void testCompressionFilterDoFilterNoCompressionWhenThresholdZero() throws Exception {
+	void testCompressionFilterDoFilterNoCompressionWhenThresholdZero() throws Exception {
 		FilterConfig config = mock(FilterConfig.class);
 		when(config.getInitParameter("debug")).thenReturn(null);
 		when(config.getInitParameter("compressionThreshold")).thenReturn(null); // threshold=0
@@ -609,7 +564,7 @@ public class WebFilterTest {
 	}
 
 	@Test
-	public void testCompressionFilterDoFilterNoCompressionWhenGzipFalse() throws Exception {
+	void testCompressionFilterDoFilterNoCompressionWhenGzipFalse() throws Exception {
 		FilterConfig config = mock(FilterConfig.class);
 		when(config.getInitParameter("debug")).thenReturn(null);
 		when(config.getInitParameter("compressionThreshold")).thenReturn("1024");
@@ -628,7 +583,7 @@ public class WebFilterTest {
 	}
 
 	@Test
-	public void testCompressionFilterDoFilterNoCompressionWhenNoGzipHeader() throws Exception {
+	void testCompressionFilterDoFilterNoCompressionWhenNoGzipHeader() throws Exception {
 		FilterConfig config = mock(FilterConfig.class);
 		when(config.getInitParameter("debug")).thenReturn(null);
 		when(config.getInitParameter("compressionThreshold")).thenReturn("1024");
@@ -648,7 +603,7 @@ public class WebFilterTest {
 	}
 
 	@Test
-	public void testCompressionFilterDoFilterNoCompressionWhenNonGzipAcceptEncoding() throws Exception {
+	void testCompressionFilterDoFilterNoCompressionWhenNonGzipAcceptEncoding() throws Exception {
 		FilterConfig config = mock(FilterConfig.class);
 		when(config.getInitParameter("debug")).thenReturn(null);
 		when(config.getInitParameter("compressionThreshold")).thenReturn("1024");
@@ -670,14 +625,14 @@ public class WebFilterTest {
 	}
 
 	@Test
-	public void testCompressionFilterInitWithNullConfig() throws Exception {
-		CompressionFilter filter = new CompressionFilter();
+	void testCompressionFilterInitWithNullConfig() {
+		CompressionFilter filter = Assertions.assertDoesNotThrow(CompressionFilter::new);
 		filter.init(null);
 		filter.destroy();
 	}
 
 	@Test
-	public void testCompressionFilterDoFilterWithGzipSupportCompressesResponse() throws Exception {
+	void testCompressionFilterDoFilterWithGzipSupportCompressesResponse() throws Exception {
 		FilterConfig config = mock(FilterConfig.class);
 		when(config.getInitParameter("debug")).thenReturn(null);
 		when(config.getInitParameter("compressionThreshold")).thenReturn("1024");
@@ -691,7 +646,9 @@ public class WebFilterTest {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		ServletOutputStream sos = new ServletOutputStream() {
 			@Override public boolean isReady() { return true; }
-			@Override public void setWriteListener(WriteListener l) {}
+			@Override public void setWriteListener(WriteListener l) {
+				// no-op for test stream
+			}
 			@Override public void write(int b) throws IOException { bos.write(b); }
 		};
 		when(response.getOutputStream()).thenReturn(sos);
@@ -707,7 +664,7 @@ public class WebFilterTest {
 	}
 
 	@Test
-	public void testCompressionFilterSetAndGetFilterConfig() throws Exception {
+	void testCompressionFilterSetAndGetFilterConfig() {
 		FilterConfig config = mock(FilterConfig.class);
 		when(config.getInitParameter("debug")).thenReturn(null);
 		when(config.getInitParameter("compressionThreshold")).thenReturn("1024");
@@ -721,7 +678,7 @@ public class WebFilterTest {
 	// ===== RequestLoggingAndStatisticsFilter =====
 
 	@Test
-	public void testRequestLoggingFilterStaticUrlDelegatesToChainAndReturns() throws Exception {
+	void testRequestLoggingFilterStaticUrlDelegatesToChainAndReturns() throws Exception {
 		FilterConfig config = mock(FilterConfig.class);
 		ServletContext ctx = mock(ServletContext.class);
 		when(config.getServletContext()).thenReturn(ctx);
@@ -742,7 +699,7 @@ public class WebFilterTest {
 	}
 
 	@Test
-	public void testRequestLoggingFilterNullSessionCallsChainWithoutH2() throws Exception {
+	void testRequestLoggingFilterNullSessionCallsChainWithoutH2() throws Exception {
 		FilterConfig config = mock(FilterConfig.class);
 		ServletContext ctx = mock(ServletContext.class);
 		when(config.getServletContext()).thenReturn(ctx);

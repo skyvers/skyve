@@ -1,10 +1,12 @@
 package org.skyve.impl.web.filter.gzip;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -23,7 +25,7 @@ import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.WriteListener;
 import jakarta.servlet.http.HttpServletResponse;
 
-@SuppressWarnings("static-method")
+@SuppressWarnings({"static-method", "resource"})
 class GzipFilterTest {
 
 	/** A {@link ServletOutputStream} that writes to an in-memory buffer. */
@@ -71,8 +73,8 @@ class GzipFilterTest {
 	}
 
 	@Test
-	void setWriteListenerDoesNotThrow() throws IOException {
-		CompressionResponseStream stream = new CompressionResponseStream(mockResponse);
+	void setWriteListenerDoesNotThrow() {
+		CompressionResponseStream stream = assertDoesNotThrow(() -> new CompressionResponseStream(mockResponse));
 		stream.setWriteListener(mock(WriteListener.class));
 	}
 
@@ -98,7 +100,7 @@ class GzipFilterTest {
 
 	@Test
 	void writeToGzipSetsContentEncodingHeaderWhenNotCommitted() throws IOException {
-		when(mockResponse.isCommitted()).thenReturn(false);
+		doReturn(Boolean.FALSE).when(mockResponse).isCommitted();
 		CompressionResponseStream stream = new CompressionResponseStream(mockResponse);
 		stream.setBuffer(0); // zero threshold means every write goes straight to gzip
 		stream.writeToGZip(new byte[]{'A'}, 0, 1);
@@ -107,7 +109,7 @@ class GzipFilterTest {
 
 	@Test
 	void writeToGzipSkipsGzipHeaderWhenAlreadyCommitted() throws IOException {
-		when(mockResponse.isCommitted()).thenReturn(true);
+		doReturn(Boolean.TRUE).when(mockResponse).isCommitted();
 		CompressionResponseStream stream = new CompressionResponseStream(mockResponse);
 		stream.setBuffer(0);
 		stream.writeToGZip(new byte[]{'A'}, 0, 1);
@@ -136,7 +138,7 @@ class GzipFilterTest {
 
 	@Test
 	void flushOnOpenStreamDoesNotThrow() throws IOException {
-		CompressionResponseStream stream = new CompressionResponseStream(mockResponse);
+		CompressionResponseStream stream = assertDoesNotThrow(() -> new CompressionResponseStream(mockResponse));
 		stream.setBuffer(64);
 		// No gzipstream yet — flush should be a no-op
 		stream.flush();
@@ -169,7 +171,7 @@ class GzipFilterTest {
 
 	@Test
 	void writeCompressedDataCanBeDecompressed() throws IOException {
-		when(mockResponse.isCommitted()).thenReturn(false);
+		doReturn(Boolean.FALSE).when(mockResponse).isCommitted();
 		CompressionResponseStream stream = new CompressionResponseStream(mockResponse);
 		stream.setBuffer(1024);
 		byte[] original = "Hello, GZip!".getBytes();
@@ -184,7 +186,7 @@ class GzipFilterTest {
 
 	@Test
 	void writeExceedingBufferProducesGzipOutput() throws IOException {
-		when(mockResponse.isCommitted()).thenReturn(false);
+		doReturn(Boolean.FALSE).when(mockResponse).isCommitted();
 		CompressionResponseStream stream = new CompressionResponseStream(mockResponse);
 		// Threshold = 4; write 10 bytes → triggers flushToGzip then writeToGzip
 		stream.setBuffer(4);
@@ -203,7 +205,7 @@ class GzipFilterTest {
 	// ===== CompressionServletResponseWrapper =====
 
 	@Test
-	void wrapperConstructorSetsOrigResponse() throws IOException {
+	void wrapperConstructorSetsOrigResponse() {
 		CompressionServletResponseWrapper wrapper = new CompressionServletResponseWrapper(mockResponse);
 		assertNotNull(wrapper);
 	}
@@ -217,20 +219,20 @@ class GzipFilterTest {
 
 	@Test
 	void setCompressionThresholdStoresValue() {
-		CompressionServletResponseWrapper wrapper = new CompressionServletResponseWrapper(mockResponse);
+		CompressionServletResponseWrapper wrapper = assertDoesNotThrow(() -> new CompressionServletResponseWrapper(mockResponse));
 		// No exception — stores internally
 		wrapper.setCompressionThreshold(2048);
 	}
 
 	@Test
 	void setDebugLevelStoresValue() {
-		CompressionServletResponseWrapper wrapper = new CompressionServletResponseWrapper(mockResponse);
+		CompressionServletResponseWrapper wrapper = assertDoesNotThrow(() -> new CompressionServletResponseWrapper(mockResponse));
 		wrapper.setDebugLevel(2);
 	}
 
 	@Test
 	void setContentLengthIsNoOp() {
-		CompressionServletResponseWrapper wrapper = new CompressionServletResponseWrapper(mockResponse);
+		CompressionServletResponseWrapper wrapper = assertDoesNotThrow(() -> new CompressionServletResponseWrapper(mockResponse));
 		// Must not throw
 		wrapper.setContentLength(1024);
 	}
@@ -249,7 +251,7 @@ class GzipFilterTest {
 		wrapper.setCompressionThreshold(1024);
 		ServletOutputStream first = wrapper.getOutputStream();
 		ServletOutputStream second = wrapper.getOutputStream();
-		assertTrue(first == second);
+		org.junit.jupiter.api.Assertions.assertSame(first, second);
 	}
 
 	@Test
@@ -268,7 +270,7 @@ class GzipFilterTest {
 		wrapper.setCompressionThreshold(1024);
 		var first = wrapper.getWriter();
 		var second = wrapper.getWriter();
-		assertTrue(first == second);
+		org.junit.jupiter.api.Assertions.assertSame(first, second);
 	}
 
 	@Test
@@ -293,12 +295,12 @@ class GzipFilterTest {
 		CompressionServletResponseWrapper wrapper = new CompressionServletResponseWrapper(mockResponse);
 		wrapper.setCompressionThreshold(1024);
 		wrapper.getWriter(); // initialise writer
-		wrapper.finishResponse(); // must not throw
+		assertDoesNotThrow(wrapper::finishResponse);
 	}
 
 	@Test
 	void finishResponseClosesOutputStream() throws IOException {
-		CompressionServletResponseWrapper wrapper = new CompressionServletResponseWrapper(mockResponse);
+		CompressionServletResponseWrapper wrapper = assertDoesNotThrow(() -> new CompressionServletResponseWrapper(mockResponse));
 		wrapper.setCompressionThreshold(1024);
 		wrapper.getOutputStream(); // initialise stream
 		wrapper.finishResponse(); // must not throw
@@ -306,13 +308,13 @@ class GzipFilterTest {
 
 	@Test
 	void finishResponseWithNeitherDoesNotThrow() {
-		CompressionServletResponseWrapper wrapper = new CompressionServletResponseWrapper(mockResponse);
+		CompressionServletResponseWrapper wrapper = assertDoesNotThrow(() -> new CompressionServletResponseWrapper(mockResponse));
 		wrapper.finishResponse(); // both writer and stream are null
 	}
 
 	@Test
 	void flushBufferFlushesUnderlyingStream() throws IOException {
-		CompressionServletResponseWrapper wrapper = new CompressionServletResponseWrapper(mockResponse);
+		CompressionServletResponseWrapper wrapper = assertDoesNotThrow(() -> new CompressionServletResponseWrapper(mockResponse));
 		wrapper.setCompressionThreshold(1024);
 		wrapper.getOutputStream(); // creates the CompressionResponseStream
 		wrapper.flushBuffer(); // must not throw

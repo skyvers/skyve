@@ -5,7 +5,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -16,7 +16,6 @@ import java.util.Objects;
 
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Timeout;
 import org.skyve.CORE;
 import org.skyve.domain.PersistentBean;
@@ -109,8 +108,9 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 	}
 
 	@Test
+	@SuppressWarnings("java:S2699")
 	void testGetConstantDomainValues() throws Exception {
-		Assertions.assertDoesNotThrow(() -> assumeTrue(getBizlet() != null));
+		assumeTrue(getBizlet() != null);
 		// create the test data
 		ArrayList<? extends Attribute> allAttributes = getAllAttributes(getBean());
 
@@ -137,8 +137,9 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 	}
 
 	@Test
+	@SuppressWarnings("java:S2699")
 	void testGetDynamicDomainValues() throws Exception {
-		Assertions.assertDoesNotThrow(() -> assumeTrue(getBizlet() != null));
+		assumeTrue(getBizlet() != null);
 		// create the test data
 		ArrayList<? extends Attribute> allAttributes = getAllAttributes(getBean());
 
@@ -165,8 +166,9 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 	}
 
 	@Test
+	@SuppressWarnings("java:S2699")
 	void testGetVariantDomainValues() throws Exception {
-		Assertions.assertDoesNotThrow(() -> assumeTrue(getBizlet() != null));
+		assumeTrue(getBizlet() != null);
 		// create the test data
 		T bean = getBean();
 		ArrayList<? extends Attribute> allAttributes = getAllAttributes(bean);

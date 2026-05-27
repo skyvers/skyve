@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.security.Principal;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.FilterConfig;
@@ -20,7 +21,7 @@ class DevLoginFilterTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void initSuccessAndDestroy() throws ServletException {
-		DevLoginFilter filter = new DevLoginFilter();
+		DevLoginFilter filter = Assertions.assertDoesNotThrow(DevLoginFilter::new);
 		FilterConfig config = mock(FilterConfig.class);
 		when(config.getInitParameter("customer")).thenReturn("test");
 		when(config.getInitParameter("user")).thenReturn("admin");
@@ -37,8 +38,8 @@ class DevLoginFilterTest {
 		when(config.getInitParameter("customer")).thenReturn(null);
 		try {
 			filter.init(config);
-			org.junit.jupiter.api.Assertions.fail("Expected ServletException");
-		} catch (ServletException e) {
+			Assertions.fail("Expected ServletException");
+		} catch (@SuppressWarnings("unused") ServletException e) {
 			// expected
 		}
 	}
@@ -52,8 +53,8 @@ class DevLoginFilterTest {
 		when(config.getInitParameter("user")).thenReturn(null);
 		try {
 			filter.init(config);
-			org.junit.jupiter.api.Assertions.fail("Expected ServletException");
-		} catch (ServletException e) {
+			Assertions.fail("Expected ServletException");
+		} catch (@SuppressWarnings("unused") ServletException e) {
 			// expected
 		}
 	}
@@ -68,8 +69,8 @@ class DevLoginFilterTest {
 		when(config.getInitParameter("password")).thenReturn(null);
 		try {
 			filter.init(config);
-			org.junit.jupiter.api.Assertions.fail("Expected ServletException");
-		} catch (ServletException e) {
+			Assertions.fail("Expected ServletException");
+		} catch (@SuppressWarnings("unused") ServletException e) {
 			// expected
 		}
 	}

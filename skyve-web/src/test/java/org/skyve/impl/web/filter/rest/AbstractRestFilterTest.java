@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.persistence.Persistence;
 
@@ -24,9 +25,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.core.MediaType;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
+@SuppressWarnings({"static-method", "resource"})
 class AbstractRestFilterTest {
 	@Test
 	void jsonErrorsAreEscapedAndKeepStatusAndAuthenticationHeader() throws IOException {
@@ -161,7 +162,7 @@ class AbstractRestFilterTest {
 
 	@Test
 	void abstractRestFilterInitWithEmptyConfigDoesNotThrow() throws Exception {
-		ForbiddenFilter filter = new ForbiddenFilter();
+		ForbiddenFilter filter = Assertions.assertDoesNotThrow(ForbiddenFilter::new);
 		filter.init(mock(FilterConfig.class));
 		filter.destroy();
 	}

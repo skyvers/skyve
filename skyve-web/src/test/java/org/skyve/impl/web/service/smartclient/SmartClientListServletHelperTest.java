@@ -13,6 +13,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 import org.skyve.domain.Bean;
 import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
@@ -575,14 +576,14 @@ class SmartClientListServletHelperTest {
 	@Test
 	void fromStringDateWithoutTimeSeparatorRaisesValidationWhenUnparseable() {
 		Customer customer = mock(Customer.class);
-		org.junit.jupiter.api.Assertions.assertThrows(ValidationException.class,
+		Assertions.assertThrows(ValidationException.class,
 				() -> invokeFromString("created", "value", "2026-05-27", customer, null, java.util.Date.class));
 	}
 
 	@Test
 	void fromStringThrowsValidationExceptionWithBindingWhenConversionFails() {
 		Customer customer = mock(Customer.class);
-		ValidationException ex = org.junit.jupiter.api.Assertions.assertThrows(ValidationException.class,
+		ValidationException ex = Assertions.assertThrows(ValidationException.class,
 				() -> invokeFromString("customer.age", "value", "not-a-number", customer, null, Integer.class));
 
 		assertTrue(ex.getMessages().stream().anyMatch(m -> {
@@ -598,7 +599,7 @@ class SmartClientListServletHelperTest {
 	@Test
 	void fromStringThrowsValidationExceptionWithoutBindingWhenBindingIsNull() {
 		Customer customer = mock(Customer.class);
-		ValidationException ex = org.junit.jupiter.api.Assertions.assertThrows(ValidationException.class,
+		ValidationException ex = Assertions.assertThrows(ValidationException.class,
 				() -> invokeFromString(null, "start", "not-a-number", customer, null, Integer.class));
 
 		assertTrue(ex.getMessages().stream().anyMatch(m -> ! m.getBindings().iterator().hasNext()));

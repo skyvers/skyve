@@ -1,6 +1,5 @@
 package org.skyve.impl.web.filter.rest;
 
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -19,6 +18,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.core.MediaType;
 
+@SuppressWarnings({"static-method", "resource"})
 class BasicAuthFilterTest {
 
 	private static class CapturingOutputStream extends ServletOutputStream {
@@ -39,9 +39,6 @@ class BasicAuthFilterTest {
 			// no-op
 		}
 
-		String asString() {
-			return buf.toString(StandardCharsets.UTF_8);
-		}
 	}
 
 	@Test
@@ -59,7 +56,7 @@ class BasicAuthFilterTest {
 
 		filter.doFilter(request, response, chain);
 
-		verify(response).setStatus(eq(HttpServletResponse.SC_UNAUTHORIZED));
+		verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 	}
 
 	@Test
@@ -77,7 +74,7 @@ class BasicAuthFilterTest {
 
 		filter.doFilter(request, response, chain);
 
-		verify(response).setStatus(eq(HttpServletResponse.SC_UNAUTHORIZED));
+		verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 	}
 
 	@Test
@@ -97,7 +94,7 @@ class BasicAuthFilterTest {
 
 		filter.doFilter(request, response, chain);
 
-		verify(response).setStatus(eq(HttpServletResponse.SC_UNAUTHORIZED));
+		verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 	}
 
 	@Test
@@ -117,6 +114,6 @@ class BasicAuthFilterTest {
 
 		filter.doFilter(request, response, chain);
 
-		verify(response).setStatus(eq(HttpServletResponse.SC_UNAUTHORIZED));
+		verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 	}
 }
