@@ -9,6 +9,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.messages.DomainException;
+import org.slf4j.Logger;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 /**
  * Caches and serves customer-level two-factor-authentication configuration.
@@ -21,6 +23,7 @@ import org.skyve.domain.messages.DomainException;
  * reads and updates.
  */
 public class TwoFactorAuthConfigurationSingleton implements SystemObserver {
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(TwoFactorAuthConfigurationSingleton.class);
 	private static TwoFactorAuthConfigurationSingleton instance = new TwoFactorAuthConfigurationSingleton();
 
 	private final ConcurrentHashMap<String, TwoFactorAuthCustomerConfiguration> configuration = new ConcurrentHashMap<>();
@@ -103,7 +106,7 @@ public class TwoFactorAuthConfigurationSingleton implements SystemObserver {
 	 */
 	@Override
 	public void startup() {
-		try (Connection c = EXT.getDataStoreConnection()) {
+		try (Connection c = getDataStoreConnection()) {
 			String query = "select twoFactorType, twofactorPushCodeTimeOutSeconds, twoFactorEmailSubject, twoFactorEmailBody, bizCustomer " +
 								"from ADM_Configuration " +
 								"where twoFactorType is not null and twofactorPushCodeTimeOutSeconds is not null";
@@ -124,8 +127,39 @@ public class TwoFactorAuthConfigurationSingleton implements SystemObserver {
 			}
 		}
 		catch (SQLException e) {
+			if (shouldIgnoreStartupFailure(e)) {
+				LOGGER.warn("Skipping TFA database configuration read during non-production bootstrap.", e);
+				return;
+			}
 			throw new DomainException("Failure reading customer configuration from database.", e);
 		}
+	}
+
+	/**
+	 * Obtains a JDBC connection to the configured Skyve datastore.
+	 *
+	 * @return An open datastore connection
+	 * @throws SQLException If the connection cannot be created
+	 */
+	Connection getDataStoreConnection() throws SQLException {
+		return EXT.getDataStoreConnection();
+	}
+
+	/**
+	 * Determines whether startup database-read failures should be tolerated.
+	 *
+	 * <p>This is limited to non-production bootstrap-style environments where
+	 * customer-level two-factor authentication has been pre-configured in JSON and
+	 * the configuration table may not yet exist.
+	 *
+	 * @param exception The SQL failure raised while reading TFA settings
+	 * @return {@code true} when startup should continue despite the failure
+	 */
+	@SuppressWarnings("static-method")
+	boolean shouldIgnoreStartupFailure(@SuppressWarnings("unused") SQLException exception) {
+		return (UtilImpl.ENVIRONMENT_IDENTIFIER != null) &&
+				(UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS != null) &&
+				(! UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS.isEmpty());
 	}
 	
 	/**
