@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 import org.skyve.impl.sail.mock.MockWebContext;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
@@ -24,7 +25,7 @@ import util.AbstractH2Test;
  * H2-backed tests for DataMaintenanceBizlet covering getConstantDomainValues,
  * getDynamicDomainValues, preRerender and preExecute.
  */
-public class DataMaintenanceBizletH2Test extends AbstractH2Test {
+class DataMaintenanceBizletH2Test extends AbstractH2Test {
 
 	private static final DataMaintenanceBizlet bizlet = new DataMaintenanceBizlet();
 
@@ -42,6 +43,7 @@ public class DataMaintenanceBizletH2Test extends AbstractH2Test {
 	// ---- getConstantDomainValues: modDocName ----
 
 	@Test
+	@SuppressWarnings("static-method")
 	void getConstantDomainValuesForModDocNameReturnsPersistableDocuments() throws Exception {
 		List<DomainValue> result = bizlet.getConstantDomainValues(DataMaintenance.modDocNamePropertyName);
 		assertThat(result, is(notNullValue()));
@@ -51,6 +53,7 @@ public class DataMaintenanceBizletH2Test extends AbstractH2Test {
 	// ---- getConstantDomainValues: auditModuleName ----
 
 	@Test
+	@SuppressWarnings("static-method")
 	void getConstantDomainValuesForAuditModuleNameReturnsModules() throws Exception {
 		List<DomainValue> result = bizlet.getConstantDomainValues(DataMaintenance.auditModuleNamePropertyName);
 		assertThat(result, is(notNullValue()));
@@ -60,6 +63,7 @@ public class DataMaintenanceBizletH2Test extends AbstractH2Test {
 	// ---- getConstantDomainValues: restorePreProcess ----
 
 	@Test
+	@SuppressWarnings("static-method")
 	void getConstantDomainValuesForRestorePreProcessReturnsOptions() throws Exception {
 		List<DomainValue> result = bizlet.getConstantDomainValues(DataMaintenance.restorePreProcessPropertyName);
 		assertThat(result, is(notNullValue()));
@@ -69,8 +73,9 @@ public class DataMaintenanceBizletH2Test extends AbstractH2Test {
 	// ---- getConstantDomainValues: unknown attribute ----
 
 	@Test
-	void getConstantDomainValuesForUnknownAttributeReturnsNull() throws Exception {
-		List<DomainValue> result = bizlet.getConstantDomainValues("unknownAttribute");
+	@SuppressWarnings("static-method")
+	void getConstantDomainValuesForUnknownAttributeReturnsNull() {
+		Assertions.assertDoesNotThrow(() -> bizlet.getConstantDomainValues("unknownAttribute"));
 		// Super class may return null for unknown
 		// just should not throw
 	}
@@ -88,9 +93,8 @@ public class DataMaintenanceBizletH2Test extends AbstractH2Test {
 
 	@Test
 	void getDynamicDomainValuesForAuditDocumentNameWithNullModuleCallsSuper() throws Exception {
-		bean.setAuditModuleName(null);
-
-		List<DomainValue> result = bizlet.getDynamicDomainValues(DataMaintenance.auditDocumentNamePropertyName, bean);
+		Assertions.assertDoesNotThrow(() -> bean.setAuditModuleName(null));
+		bizlet.getDynamicDomainValues(DataMaintenance.auditDocumentNamePropertyName, bean);
 		// Super class behaviour - should not throw
 	}
 
@@ -154,14 +158,14 @@ public class DataMaintenanceBizletH2Test extends AbstractH2Test {
 
 	@Test
 	void preRerenderWithNullRestorePreProcessDoesNotThrow() throws Exception {
-		bean.setRestorePreProcess(null);
+		Assertions.assertDoesNotThrow(() -> bean.setRestorePreProcess(null));
 		bizlet.preRerender(DataMaintenance.restorePreProcessPropertyName, bean, webContext);
 		// just shouldn't throw
 	}
 
 	@Test
-	void preRerenderWithNonRestoreSourceDoesNotThrow() throws Exception {
-		bizlet.preRerender("someOtherSource", bean, webContext);
+	void preRerenderWithNonRestoreSourceDoesNotThrow() {
+		Assertions.assertDoesNotThrow(() -> bizlet.preRerender("someOtherSource", bean, webContext));
 		// should not throw
 	}
 

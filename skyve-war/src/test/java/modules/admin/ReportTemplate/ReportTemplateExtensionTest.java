@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.skyve.domain.app.admin.ReportDataset.DatasetType;
@@ -223,14 +224,14 @@ class ReportTemplateExtensionTest {
 	@Test
 	void testGenerateInitialFreemarkerTemplateThrowsWhenDocumentNameNull() {
 		bean.setGenerateDocumentName(null);
-		org.junit.jupiter.api.Assertions.assertThrows(ValidationException.class,
+		Assertions.assertThrows(ValidationException.class,
 				() -> bean.generateInitialFreemarkerTemplate());
 	}
 
 	@Test
 	void testGenerateInitialDatasetThrowsWhenDocumentNameNull() {
 		bean.setGenerateDocumentName(null);
-		org.junit.jupiter.api.Assertions.assertThrows(ValidationException.class,
+		Assertions.assertThrows(ValidationException.class,
 				() -> bean.generateInitialDataset());
 	}
 }

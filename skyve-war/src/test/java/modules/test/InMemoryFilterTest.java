@@ -17,15 +17,12 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.types.Decimal2;
 import org.skyve.metadata.view.model.list.InMemoryFilter;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void testFilterStrings() throws Exception {
+	void testFilterStrings() {
 		List<Bean> beans = new ArrayList<>(4);
 
 		Map<String, Object> map = new TreeMap<>();
@@ -115,7 +112,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterNullRetainsNullBean() throws Exception {
+	void filterNullRetainsNullBean() {
 		List<Bean> beans = beansWithValue("name", null);
 		InMemoryFilter f = new InMemoryFilter();
 		f.addNull("name");
@@ -125,7 +122,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterNullRemovesNonNullBean() throws Exception {
+	void filterNullRemovesNonNullBean() {
 		List<Bean> beans = beansWithValue("name", "Ted");
 		InMemoryFilter f = new InMemoryFilter();
 		f.addNull("name");
@@ -135,7 +132,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterNotNullRetainsNonNullBean() throws Exception {
+	void filterNotNullRetainsNonNullBean() {
 		List<Bean> beans = beansWithValue("name", "Ted");
 		InMemoryFilter f = new InMemoryFilter();
 		f.addNotNull("name");
@@ -145,7 +142,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterNotNullRemovesNullBean() throws Exception {
+	void filterNotNullRemovesNullBean() {
 		List<Bean> beans = beansWithValue("name", null);
 		InMemoryFilter f = new InMemoryFilter();
 		f.addNotNull("name");
@@ -155,7 +152,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterEqualsStringMatches() throws Exception {
+	void filterEqualsStringMatches() {
 		List<Bean> beans = beansWithValue("name", "Ted");
 		InMemoryFilter f = new InMemoryFilter();
 		f.addEquals("name", "Ted");
@@ -165,7 +162,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterEqualsStringNoMatch() throws Exception {
+	void filterEqualsStringNoMatch() {
 		List<Bean> beans = beansWithValue("name", "Fred");
 		InMemoryFilter f = new InMemoryFilter();
 		f.addEquals("name", "Ted");
@@ -175,7 +172,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterEqualsIntegerMatches() throws Exception {
+	void filterEqualsIntegerMatches() {
 		List<Bean> beans = beansWithValue("age", Integer.valueOf(42));
 		InMemoryFilter f = new InMemoryFilter();
 		f.addEquals("age", Integer.valueOf(42));
@@ -185,7 +182,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterEqualsLongMatches() throws Exception {
+	void filterEqualsLongMatches() {
 		List<Bean> beans = beansWithValue("count", Long.valueOf(100L));
 		InMemoryFilter f = new InMemoryFilter();
 		f.addEquals("count", Long.valueOf(100L));
@@ -195,7 +192,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterEqualsBooleanMatches() throws Exception {
+	void filterEqualsBooleanMatches() {
 		List<Bean> beans = beansWithValue("active", Boolean.TRUE);
 		InMemoryFilter f = new InMemoryFilter();
 		f.addEquals("active", Boolean.TRUE);
@@ -205,7 +202,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterEqualsDecimalMatches() throws Exception {
+	void filterEqualsDecimalMatches() {
 		List<Bean> beans = beansWithValue("amount", new Decimal2("10.00"));
 		InMemoryFilter f = new InMemoryFilter();
 		f.addEquals("amount", new Decimal2("10.00"));
@@ -215,7 +212,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterNotEqualsStringRemovesMatch() throws Exception {
+	void filterNotEqualsStringRemovesMatch() {
 		List<Bean> beans = beansWithValue("name", "Ted");
 		InMemoryFilter f = new InMemoryFilter();
 		f.addNotEquals("name", "Ted");
@@ -225,7 +222,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterNotEqualsStringRetainsNonMatch() throws Exception {
+	void filterNotEqualsStringRetainsNonMatch() {
 		List<Bean> beans = beansWithValue("name", "Fred");
 		InMemoryFilter f = new InMemoryFilter();
 		f.addNotEquals("name", "Ted");
@@ -235,7 +232,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterContainsMatches() throws Exception {
+	void filterContainsMatches() {
 		List<Bean> beans = beansWithValue("name", "Frederick");
 		InMemoryFilter f = new InMemoryFilter();
 		f.addContains("name", "eder");
@@ -245,7 +242,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterContainsNoMatch() throws Exception {
+	void filterContainsNoMatch() {
 		List<Bean> beans = beansWithValue("name", "Ted");
 		InMemoryFilter f = new InMemoryFilter();
 		f.addContains("name", "xyz");
@@ -255,7 +252,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterNotContainsRemovesMatch() throws Exception {
+	void filterNotContainsRemovesMatch() {
 		List<Bean> beans = beansWithValue("name", "Frederick");
 		InMemoryFilter f = new InMemoryFilter();
 		f.addNotContains("name", "eder");
@@ -265,7 +262,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterEndsWithMatches() throws Exception {
+	void filterEndsWithMatches() {
 		List<Bean> beans = beansWithValue("name", "Frederick");
 		InMemoryFilter f = new InMemoryFilter();
 		f.addEndsWith("name", "rick");
@@ -275,7 +272,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterNotStartsWithRemovesMatch() throws Exception {
+	void filterNotStartsWithRemovesMatch() {
 		List<Bean> beans = beansWithValue("name", "Frederick");
 		InMemoryFilter f = new InMemoryFilter();
 		f.addNotStartsWith("name", "Fred");
@@ -285,7 +282,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterNotEndsWithRemovesMatch() throws Exception {
+	void filterNotEndsWithRemovesMatch() {
 		List<Bean> beans = beansWithValue("name", "Frederick");
 		InMemoryFilter f = new InMemoryFilter();
 		f.addNotEndsWith("name", "rick");
@@ -295,7 +292,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterGreaterThanStringMatches() throws Exception {
+	void filterGreaterThanStringMatches() {
 		List<Bean> beans = beansWithValue("name", "Z");
 		InMemoryFilter f = new InMemoryFilter();
 		f.addGreaterThan("name", "A");
@@ -305,7 +302,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterGreaterThanIntegerMatches() throws Exception {
+	void filterGreaterThanIntegerMatches() {
 		List<Bean> beans = beansWithValue("age", Integer.valueOf(50));
 		InMemoryFilter f = new InMemoryFilter();
 		f.addGreaterThan("age", Integer.valueOf(40));
@@ -315,7 +312,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterGreaterThanLongMatches() throws Exception {
+	void filterGreaterThanLongMatches() {
 		List<Bean> beans = beansWithValue("count", Long.valueOf(200L));
 		InMemoryFilter f = new InMemoryFilter();
 		f.addGreaterThan("count", Long.valueOf(100L));
@@ -325,7 +322,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterGreaterThanDecimalMatches() throws Exception {
+	void filterGreaterThanDecimalMatches() {
 		List<Bean> beans = beansWithValue("amount", new Decimal2("20.00"));
 		InMemoryFilter f = new InMemoryFilter();
 		f.addGreaterThan("amount", new Decimal2("10.00"));
@@ -335,7 +332,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterGreaterThanOrEqualToStringMatches() throws Exception {
+	void filterGreaterThanOrEqualToStringMatches() {
 		List<Bean> beans = beansWithValue("name", "B");
 		InMemoryFilter f = new InMemoryFilter();
 		f.addGreaterThanOrEqualTo("name", "B");
@@ -345,7 +342,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterGreaterThanOrEqualToIntegerMatches() throws Exception {
+	void filterGreaterThanOrEqualToIntegerMatches() {
 		List<Bean> beans = beansWithValue("age", Integer.valueOf(40));
 		InMemoryFilter f = new InMemoryFilter();
 		f.addGreaterThanOrEqualTo("age", Integer.valueOf(40));
@@ -355,7 +352,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterGreaterThanOrEqualToLongMatches() throws Exception {
+	void filterGreaterThanOrEqualToLongMatches() {
 		List<Bean> beans = beansWithValue("count", Long.valueOf(100L));
 		InMemoryFilter f = new InMemoryFilter();
 		f.addGreaterThanOrEqualTo("count", Long.valueOf(100L));
@@ -365,7 +362,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterGreaterThanOrEqualToDecimalMatches() throws Exception {
+	void filterGreaterThanOrEqualToDecimalMatches() {
 		List<Bean> beans = beansWithValue("amount", new Decimal2("10.00"));
 		InMemoryFilter f = new InMemoryFilter();
 		f.addGreaterThanOrEqualTo("amount", new Decimal2("10.00"));
@@ -375,7 +372,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings({"static-method", "java:S5976"})
-	void filterBetweenStringMatches() throws Exception {
+	void filterBetweenStringMatches() {
 		List<Bean> beans = beansWithValue("name", "M");
 		InMemoryFilter f = new InMemoryFilter();
 		f.addBetween("name", "A", "Z");
@@ -385,7 +382,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterBetweenIntegerMatches() throws Exception {
+	void filterBetweenIntegerMatches() {
 		List<Bean> beans = beansWithValue("age", Integer.valueOf(25));
 		InMemoryFilter f = new InMemoryFilter();
 		f.addBetween("age", Integer.valueOf(20), Integer.valueOf(30));
@@ -395,7 +392,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterBetweenLongMatches() throws Exception {
+	void filterBetweenLongMatches() {
 		List<Bean> beans = beansWithValue("count", Long.valueOf(150L));
 		InMemoryFilter f = new InMemoryFilter();
 		f.addBetween("count", Long.valueOf(100L), Long.valueOf(200L));
@@ -405,7 +402,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterBetweenDecimalMatches() throws Exception {
+	void filterBetweenDecimalMatches() {
 		List<Bean> beans = beansWithValue("amount", new Decimal2("15.00"));
 		InMemoryFilter f = new InMemoryFilter();
 		f.addBetween("amount", new Decimal2("10.00"), new Decimal2("20.00"));
@@ -415,7 +412,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterEqualsIgnoreCaseMatches() throws Exception {
+	void filterEqualsIgnoreCaseMatches() {
 		List<Bean> beans = beansWithValue("name", "ted");
 		InMemoryFilter f = new InMemoryFilter();
 		f.addEqualsIgnoreCase("name", "TED");
@@ -425,7 +422,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterNotEqualsIgnoreCaseRemovesMatch() throws Exception {
+	void filterNotEqualsIgnoreCaseRemovesMatch() {
 		List<Bean> beans = beansWithValue("name", "ted");
 		InMemoryFilter f = new InMemoryFilter();
 		f.addNotEqualsIgnoreCase("name", "TED");
@@ -435,7 +432,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterAndCombinesPredicates() throws Exception {
+	void filterAndCombinesPredicates() {
 		List<Bean> beans = beansWithValue("name", "Ted");
 		InMemoryFilter f1 = new InMemoryFilter();
 		f1.addEquals("name", "Ted");
@@ -448,7 +445,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterOrCombinesPredicates() throws Exception {
+	void filterOrCombinesPredicates() {
 		List<Bean> beans = beansWithValue("name", "Ted");
 		InMemoryFilter f1 = new InMemoryFilter();
 		f1.addEquals("name", "Fred");
@@ -461,7 +458,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterEqualsDateMatches() throws Exception {
+	void filterEqualsDateMatches() {
 		Date d = new Date(0L);
 		List<Bean> beans = beansWithValue("created", d);
 		InMemoryFilter f = new InMemoryFilter();
@@ -472,7 +469,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterNotEqualsIntegerRemovesMatch() throws Exception {
+	void filterNotEqualsIntegerRemovesMatch() {
 		List<Bean> beans = beansWithValue("age", Integer.valueOf(42));
 		InMemoryFilter f = new InMemoryFilter();
 		f.addNotEquals("age", Integer.valueOf(42));
@@ -482,7 +479,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterNotEqualsLongRemovesMatch() throws Exception {
+	void filterNotEqualsLongRemovesMatch() {
 		List<Bean> beans = beansWithValue("count", Long.valueOf(100L));
 		InMemoryFilter f = new InMemoryFilter();
 		f.addNotEquals("count", Long.valueOf(100L));
@@ -492,7 +489,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterNotEqualsBooleanRemovesMatch() throws Exception {
+	void filterNotEqualsBooleanRemovesMatch() {
 		List<Bean> beans = beansWithValue("active", Boolean.TRUE);
 		InMemoryFilter f = new InMemoryFilter();
 		f.addNotEquals("active", Boolean.TRUE);
@@ -502,7 +499,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterNotEqualsDecimalRemovesMatch() throws Exception {
+	void filterNotEqualsDecimalRemovesMatch() {
 		List<Bean> beans = beansWithValue("amount", new Decimal2("10.00"));
 		InMemoryFilter f = new InMemoryFilter();
 		f.addNotEquals("amount", new Decimal2("10.00"));
@@ -514,7 +511,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterStartsWithMatches() throws Exception {
+	void filterStartsWithMatches() {
 		List<Bean> beans = beansWithValue("name", "Hello");
 		InMemoryFilter f = new InMemoryFilter();
 		f.addStartsWith("name", "He");
@@ -524,7 +521,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterStartsWithNoMatch() throws Exception {
+	void filterStartsWithNoMatch() {
 		List<Bean> beans = beansWithValue("name", "Hello");
 		InMemoryFilter f = new InMemoryFilter();
 		f.addStartsWith("name", "Wo");
@@ -536,7 +533,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterLessThanStringMatches() throws Exception {
+	void filterLessThanStringMatches() {
 		List<Bean> beans = beansWithValue("name", "Apple");
 		InMemoryFilter f = new InMemoryFilter();
 		f.addLessThan("name", "Banana");
@@ -546,7 +543,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterLessThanStringNoMatch() throws Exception {
+	void filterLessThanStringNoMatch() {
 		List<Bean> beans = beansWithValue("name", "Zebra");
 		InMemoryFilter f = new InMemoryFilter();
 		f.addLessThan("name", "Apple");
@@ -556,7 +553,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterLessThanIntegerMatches() throws Exception {
+	void filterLessThanIntegerMatches() {
 		List<Bean> beans = beansWithValue("count", Integer.valueOf(5));
 		InMemoryFilter f = new InMemoryFilter();
 		f.addLessThan("count", Integer.valueOf(10));
@@ -566,7 +563,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterLessThanLongMatches() throws Exception {
+	void filterLessThanLongMatches() {
 		List<Bean> beans = beansWithValue("count", Long.valueOf(5L));
 		InMemoryFilter f = new InMemoryFilter();
 		f.addLessThan("count", Long.valueOf(10L));
@@ -576,7 +573,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterLessThanDecimalMatches() throws Exception {
+	void filterLessThanDecimalMatches() {
 		List<Bean> beans = beansWithValue("amount", new Decimal2("5.00"));
 		InMemoryFilter f = new InMemoryFilter();
 		f.addLessThan("amount", new Decimal2("10.00"));
@@ -586,7 +583,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterLessThanDateMatches() throws Exception {
+	void filterLessThanDateMatches() {
 		Date earlier = new Date(1000L);
 		Date later = new Date(2000L);
 		List<Bean> beans = beansWithValue("when", earlier);
@@ -600,7 +597,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterLessThanOrEqualToStringMatches() throws Exception {
+	void filterLessThanOrEqualToStringMatches() {
 		List<Bean> beans = beansWithValue("name", "Apple");
 		InMemoryFilter f = new InMemoryFilter();
 		f.addLessThanOrEqualTo("name", "Apple");
@@ -610,7 +607,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterLessThanOrEqualToIntegerMatches() throws Exception {
+	void filterLessThanOrEqualToIntegerMatches() {
 		List<Bean> beans = beansWithValue("count", Integer.valueOf(10));
 		InMemoryFilter f = new InMemoryFilter();
 		f.addLessThanOrEqualTo("count", Integer.valueOf(10));
@@ -620,7 +617,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterLessThanOrEqualToLongMatches() throws Exception {
+	void filterLessThanOrEqualToLongMatches() {
 		List<Bean> beans = beansWithValue("count", Long.valueOf(10L));
 		InMemoryFilter f = new InMemoryFilter();
 		f.addLessThanOrEqualTo("count", Long.valueOf(10L));
@@ -630,7 +627,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterLessThanOrEqualToDecimalMatches() throws Exception {
+	void filterLessThanOrEqualToDecimalMatches() {
 		List<Bean> beans = beansWithValue("amount", new Decimal2("10.00"));
 		InMemoryFilter f = new InMemoryFilter();
 		f.addLessThanOrEqualTo("amount", new Decimal2("10.00"));
@@ -640,7 +637,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterLessThanOrEqualToDateMatches() throws Exception {
+	void filterLessThanOrEqualToDateMatches() {
 		Date d = new Date(1000L);
 		List<Bean> beans = beansWithValue("when", d);
 		InMemoryFilter f = new InMemoryFilter();
@@ -653,7 +650,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterGreaterThanDateMatches() throws Exception {
+	void filterGreaterThanDateMatches() {
 		Date earlier = new Date(1000L);
 		Date later = new Date(2000L);
 		List<Bean> beans = beansWithValue("when", later);
@@ -665,7 +662,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterGreaterThanOrEqualToDateMatches() throws Exception {
+	void filterGreaterThanOrEqualToDateMatches() {
 		Date d = new Date(1000L);
 		List<Bean> beans = beansWithValue("when", d);
 		InMemoryFilter f = new InMemoryFilter();
@@ -678,7 +675,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterBetweenDateMatches() throws Exception {
+	void filterBetweenDateMatches() {
 		Date start = new Date(1000L);
 		Date middle = new Date(1500L);
 		Date end = new Date(2000L);
@@ -691,7 +688,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterBetweenDateNoMatch() throws Exception {
+	void filterBetweenDateNoMatch() {
 		Date start = new Date(1000L);
 		Date end = new Date(2000L);
 		Date outside = new Date(3000L);
@@ -706,7 +703,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterInMatchesOneOfValues() throws Exception {
+	void filterInMatchesOneOfValues() {
 		List<Bean> beans = beansWithValue("name", "Bob");
 		InMemoryFilter f = new InMemoryFilter();
 		f.addIn("name", "Alice", "Bob", "Charlie");
@@ -716,7 +713,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterInNoMatch() throws Exception {
+	void filterInNoMatch() {
 		List<Bean> beans = beansWithValue("name", "Dave");
 		InMemoryFilter f = new InMemoryFilter();
 		f.addIn("name", "Alice", "Bob", "Charlie");
@@ -726,7 +723,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterInWithNullBeanValueNoMatch() throws Exception {
+	void filterInWithNullBeanValueNoMatch() {
 		List<Bean> beans = beansWithValue("name", null);
 		InMemoryFilter f = new InMemoryFilter();
 		f.addIn("name", "Alice", "Bob");
@@ -740,7 +737,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterEqualsEnumMatches() throws Exception {
+	void filterEqualsEnumMatches() {
 		List<Bean> beans = beansWithValue("status", TestEnum.A);
 		InMemoryFilter f = new InMemoryFilter();
 		f.addEquals("status", TestEnum.A);
@@ -750,7 +747,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterNotEqualsEnumRemovesMatch() throws Exception {
+	void filterNotEqualsEnumRemovesMatch() {
 		List<Bean> beans = beansWithValue("status", TestEnum.A);
 		InMemoryFilter f = new InMemoryFilter();
 		f.addNotEquals("status", TestEnum.A);
@@ -762,7 +759,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterNotInKeepsBeanNotInList() throws Exception {
+	void filterNotInKeepsBeanNotInList() {
 		List<Bean> beans = beansWithValue("name", "Alice");
 		InMemoryFilter f = new InMemoryFilter();
 		f.addNotIn("name", "Bob", "Charlie");
@@ -772,7 +769,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterNotInRemovesBeanInList() throws Exception {
+	void filterNotInRemovesBeanInList() {
 		List<Bean> beans = beansWithValue("name", "Alice");
 		InMemoryFilter f = new InMemoryFilter();
 		f.addNotIn("name", "Alice", "Bob");
@@ -784,7 +781,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterWithinRetainsBeanInsidePolygon() throws Exception {
+	void filterWithinRetainsBeanInsidePolygon() {
 		GeometryFactory gf = new GeometryFactory();
 		Geometry point = gf.createPoint(new Coordinate(1.0, 1.0));
 		Geometry polygon = gf.createPolygon(new Coordinate[] {
@@ -800,7 +797,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterWithinRemovesBeanOutsidePolygon() throws Exception {
+	void filterWithinRemovesBeanOutsidePolygon() {
 		GeometryFactory gf = new GeometryFactory();
 		Geometry point = gf.createPoint(new Coordinate(5.0, 5.0));
 		Geometry polygon = gf.createPolygon(new Coordinate[] {
@@ -816,7 +813,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterContainsGeometryRetainsBeanContainingPoint() throws Exception {
+	void filterContainsGeometryRetainsBeanContainingPoint() {
 		GeometryFactory gf = new GeometryFactory();
 		Geometry polygon = gf.createPolygon(new Coordinate[] {
 			new Coordinate(0, 0), new Coordinate(0, 2), new Coordinate(2, 2),
@@ -832,7 +829,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterDisjointRetainsBeanDisjointFromGeometry() throws Exception {
+	void filterDisjointRetainsBeanDisjointFromGeometry() {
 		GeometryFactory gf = new GeometryFactory();
 		Geometry point = gf.createPoint(new Coordinate(10.0, 10.0));
 		Geometry polygon = gf.createPolygon(new Coordinate[] {
@@ -848,7 +845,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterIntersectsRetainsBeanIntersectingGeometry() throws Exception {
+	void filterIntersectsRetainsBeanIntersectingGeometry() {
 		GeometryFactory gf = new GeometryFactory();
 		Geometry line = gf.createLineString(new Coordinate[] {
 			new Coordinate(0, 1), new Coordinate(2, 1)
@@ -866,7 +863,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterTouchesRetainsBeanTouchingGeometry() throws Exception {
+	void filterTouchesRetainsBeanTouchingGeometry() {
 		GeometryFactory gf = new GeometryFactory();
 		Geometry point = gf.createPoint(new Coordinate(0.0, 0.0));
 		Geometry polygon = gf.createPolygon(new Coordinate[] {
@@ -882,7 +879,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterCrossesRetainsBeanCrossingGeometry() throws Exception {
+	void filterCrossesRetainsBeanCrossingGeometry() {
 		GeometryFactory gf = new GeometryFactory();
 		Geometry line = gf.createLineString(new Coordinate[] {
 			new Coordinate(-1, 1), new Coordinate(3, 1)
@@ -900,7 +897,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterWithinRemovesNullBean() throws Exception {
+	void filterWithinRemovesNullBean() {
 		GeometryFactory gf = new GeometryFactory();
 		Geometry polygon = gf.createPolygon(new Coordinate[] {
 			new Coordinate(0, 0), new Coordinate(0, 2), new Coordinate(2, 2),
@@ -915,7 +912,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterOverlapsRetainsBeanOverlappingGeometry() throws Exception {
+	void filterOverlapsRetainsBeanOverlappingGeometry() {
 		GeometryFactory gf = new GeometryFactory();
 		Geometry poly1 = gf.createPolygon(new Coordinate[] {
 			new Coordinate(0, 0), new Coordinate(0, 2), new Coordinate(2, 2),
@@ -949,7 +946,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterAddNotEqualsDateRetainsBeanWithDifferentDate() throws Exception {
+	void filterAddNotEqualsDateRetainsBeanWithDifferentDate() {
 		Date d1 = new Date(1000L);
 		Date d2 = new Date(2000L);
 		List<Bean> beans = beansWithValue("date", d1);
@@ -961,7 +958,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterAddNotEqualsDateRemovesBeanWithSameDate() throws Exception {
+	void filterAddNotEqualsDateRemovesBeanWithSameDate() {
 		Date d = new Date(1000L);
 		List<Bean> beans = beansWithValue("date", d);
 		InMemoryFilter f = new InMemoryFilter();
@@ -972,7 +969,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterAddEqualsGeometryRetainsBeanWithMatchingGeometry() throws Exception {
+	void filterAddEqualsGeometryRetainsBeanWithMatchingGeometry() {
 		GeometryFactory gf = new GeometryFactory();
 		Geometry pt = gf.createPoint(new Coordinate(1, 1));
 		List<Bean> beans = beansWithValue("location", pt);
@@ -984,7 +981,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterAddNotEqualsGeometryRetainsBeanWithDifferentGeometry() throws Exception {
+	void filterAddNotEqualsGeometryRetainsBeanWithDifferentGeometry() {
 		GeometryFactory gf = new GeometryFactory();
 		Geometry pt1 = gf.createPoint(new Coordinate(1, 1));
 		Geometry pt2 = gf.createPoint(new Coordinate(2, 2));
@@ -997,7 +994,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterAddBetweenStringRetainsBeanInRange() throws Exception {
+	void filterAddBetweenStringRetainsBeanInRange() {
 		List<Bean> beans = beansWithValue("name", "Jane");
 		InMemoryFilter f = new InMemoryFilter();
 		f.addBetween("name", "A", "Z");
@@ -1007,7 +1004,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterAddBetweenStringRemovesBeanOutsideRange() throws Exception {
+	void filterAddBetweenStringRemovesBeanOutsideRange() {
 		List<Bean> beans = beansWithValue("name", "Zebra");
 		InMemoryFilter f = new InMemoryFilter();
 		f.addBetween("name", "A", "M");
@@ -1017,7 +1014,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void filterAddBetweenStringReturnsFalseForNullBeanValue() throws Exception {
+	void filterAddBetweenStringReturnsFalseForNullBeanValue() {
 		List<Bean> beans = beansWithValue("name", null);
 		InMemoryFilter f = new InMemoryFilter();
 		f.addBetween("name", "A", "Z");

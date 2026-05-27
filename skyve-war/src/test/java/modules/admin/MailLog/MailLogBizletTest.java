@@ -11,10 +11,10 @@ import org.junit.jupiter.api.Test;
 
 import modules.admin.domain.MailLog;
 
+@SuppressWarnings("static-method")
 class MailLogBizletTest {
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testResolveReturnsArchivedMailLogWhenPresent() throws Exception {
 		MailLog archived = new MailLog();
 		MailLogService service = mock(MailLogService.class);

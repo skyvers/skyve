@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 import org.skyve.domain.Bean;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.faces.views.FacesView;
@@ -22,6 +23,7 @@ import modules.test.domain.AllAttributesPersistent;
  * Tests for the FacesAction callback methods.
  * Tests exercise the main code paths using AllAttributesPersistent + AbstractSkyveTest.
  */
+@SuppressWarnings("static-method")
 class FacesActionsTest extends AbstractSkyveTest {
 
 	// ----- GetContentURLAction -----
@@ -68,7 +70,7 @@ class FacesActionsTest extends AbstractSkyveTest {
 
 	@Test
 	void setTitleActionWithNullBeanJustLogs() throws Exception {
-		FacesView facesView = new FacesView();
+		FacesView facesView = Assertions.assertDoesNotThrow(FacesView::new);
 		// webContext is null => getBean() returns null => action just logs warning
 		new SetTitleAction(facesView).callback();
 		// no exception expected
@@ -78,7 +80,7 @@ class FacesActionsTest extends AbstractSkyveTest {
 
 	@Test
 	void rerenderActionWithNullTargetBeanJustLogs() throws Exception {
-		FacesView facesView = new FacesView();
+		FacesView facesView = Assertions.assertDoesNotThrow(FacesView::new);
 		// webContext is null => getBean() returns null => target bean null => just logs
 		new RerenderAction(facesView, "source", false).callback();
 		// no exception expected
@@ -86,7 +88,7 @@ class FacesActionsTest extends AbstractSkyveTest {
 
 	@Test
 	void rerenderActionWithBeanAndValidateFalseSucceeds() throws Exception {
-		FacesView facesView = new FacesView();
+		FacesView facesView = Assertions.assertDoesNotThrow(FacesView::new);
 		AbstractWebContext ctx = mockWebContext();
 		facesView.setWebContext(ctx);
 		AllAttributesPersistent bean = AllAttributesPersistent.newInstance();

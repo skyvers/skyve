@@ -3,14 +3,15 @@ package modules.test;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 import org.skyve.domain.messages.UniqueConstraintViolationException;
 
 import modules.test.domain.UniqueConstraintOptimisation;
 
+@SuppressWarnings({ "java:S5778", "java:S1130", "java:S1854" })
 class UniqueConstraintOptimisationTest extends AbstractSkyveTest {
 
 	/**
@@ -22,7 +23,7 @@ class UniqueConstraintOptimisationTest extends AbstractSkyveTest {
 	 */
 	@Test
 	void testNullNotTested() throws Exception {
-		UniqueConstraintOptimisation bean1 = ucno.newInstance(u);
+		UniqueConstraintOptimisation bean1 = Assertions.assertDoesNotThrow(() -> ucno.newInstance(u));
 		bean1.setUc1("1");
 		bean1.setUc2(null);
 		bean1 = p.save(bean1);
@@ -38,7 +39,7 @@ class UniqueConstraintOptimisationTest extends AbstractSkyveTest {
 	 */
 	@Test
 	void testNonPersistentUnpersistedRelationNotTested() throws Exception {
-		UniqueConstraintOptimisation bean1 = ucno.newInstance(u);
+		UniqueConstraintOptimisation bean1 = Assertions.assertDoesNotThrow(() -> ucno.newInstance(u));
 		bean1.setUc1("1");
 		bean1.setUc2("1");
 
@@ -69,7 +70,7 @@ class UniqueConstraintOptimisationTest extends AbstractSkyveTest {
 
 	@Test
 	void testEllipsisSaveInsertsNullNotTested() throws Exception {
-		UniqueConstraintOptimisation bean1 = ucno.newInstance(u);
+		UniqueConstraintOptimisation bean1 = Assertions.assertDoesNotThrow(() -> ucno.newInstance(u));
 		bean1.setUc1("1");
 		bean1.setUc2(null);
 		
@@ -146,7 +147,7 @@ class UniqueConstraintOptimisationTest extends AbstractSkyveTest {
 	// pa not violated
 	@Test
 	void testPersistentNonPersistedRelationNotTested() throws Exception {
-		UniqueConstraintOptimisation bean1 = ucno.newInstance(u);
+		UniqueConstraintOptimisation bean1 = Assertions.assertDoesNotThrow(() -> ucno.newInstance(u));
 		bean1.setUc1("1");
 		bean1.setUc2("1");
 		
@@ -230,7 +231,7 @@ class UniqueConstraintOptimisationTest extends AbstractSkyveTest {
 	// uc1/uc2 not violated on update - when made clean
 	@Test
 	void testDirtyUpdateNotTested() throws Exception {
-		UniqueConstraintOptimisation bean1 = ucno.newInstance(u);
+		UniqueConstraintOptimisation bean1 = Assertions.assertDoesNotThrow(() -> ucno.newInstance(u));
 		bean1.setUc1("1");
 		bean1.setUc2("1");
 		bean1 = p.save(bean1);

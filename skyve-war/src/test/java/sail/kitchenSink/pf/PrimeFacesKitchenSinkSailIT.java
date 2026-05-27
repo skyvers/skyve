@@ -1,6 +1,7 @@
 package sail.kitchenSink.pf;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 
 import util.AbstractPrimeFacesInterpretedSail;
 import util.sail.BrowserConfiguration;
@@ -23,6 +24,6 @@ class PrimeFacesKitchenSinkSailIT extends AbstractPrimeFacesInterpretedSail {
 
 	@Test
 	void test() {
-		sailFile("/Users/simeonsolomou/git/skyve/skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-sail.xml");
+		Assertions.assertDoesNotThrow(() -> sailFile("/Users/simeonsolomou/git/skyve/skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-sail.xml"));
 	}
 }

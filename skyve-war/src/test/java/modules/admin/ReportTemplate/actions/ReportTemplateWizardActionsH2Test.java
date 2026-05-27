@@ -5,9 +5,11 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 import org.skyve.impl.sail.mock.MockWebContext;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.util.DataBuilder;
@@ -21,7 +23,7 @@ import util.AbstractH2Test;
 /**
  * Tests for simple ReportTemplate wizard actions: Back, Next, AddUserToEmail, CopyReport.
  */
-public class ReportTemplateWizardActionsH2Test extends AbstractH2Test {
+class ReportTemplateWizardActionsH2Test extends AbstractH2Test {
 
 	private DataBuilder db;
 	private MockWebContext webContext;
@@ -85,8 +87,8 @@ public class ReportTemplateWizardActionsH2Test extends AbstractH2Test {
 		assertThat(result, is(notNullValue()));
 		// State should be reset: template cleared, collections cleared
 		assertThat(result.getBean().getTemplate(), is(nullValue()));
-		assertThat(result.getBean().getParameters().isEmpty(), is(true));
-		assertThat(result.getBean().getDatasets().isEmpty(), is(true));
+		assertTrue(result.getBean().getParameters().isEmpty());
+		assertTrue(result.getBean().getDatasets().isEmpty());
 	}
 
 	@Test
@@ -105,12 +107,12 @@ public class ReportTemplateWizardActionsH2Test extends AbstractH2Test {
 	// ---- AddUserToEmail action ----
 
 	@Test
-	void addUserToEmailWithNullUserThrowsValidationException() throws Exception {
+	void addUserToEmailWithNullUserThrowsValidationException() {
 		ReportTemplate bean = db.build(ReportTemplate.MODULE_NAME, ReportTemplate.DOCUMENT_NAME);
 		bean.setNewUserToEmail(null);
 
 		AddUserToEmail action = new AddUserToEmail();
-		org.junit.jupiter.api.Assertions.assertThrows(
+		Assertions.assertThrows(
 				org.skyve.domain.messages.ValidationException.class,
 				() -> action.execute(bean, webContext));
 	}
@@ -129,8 +131,8 @@ public class ReportTemplateWizardActionsH2Test extends AbstractH2Test {
 
 		assertThat(result, is(notNullValue()));
 		assertThat(result.getBean(), is(notNullValue()));
-		assertThat(result.getBean().getName().startsWith("Copy of"), is(true));
-		assertThat(result.getBean().getTemplateName().startsWith("Copy of"), is(true));
+		assertTrue(result.getBean().getName().startsWith("Copy of"));
+		assertTrue(result.getBean().getTemplateName().startsWith("Copy of"));
 	}
 
 	@Test

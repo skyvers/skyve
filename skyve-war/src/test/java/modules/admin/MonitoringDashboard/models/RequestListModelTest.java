@@ -1,5 +1,6 @@
 package modules.admin.MonitoringDashboard.models;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -17,7 +18,8 @@ import modules.admin.domain.MonitoringDashboard.Period;
  * Unit tests for the static helper methods in RequestListModel.
  * These methods are package-private and testable without H2.
  */
-public class RequestListModelTest {
+@SuppressWarnings("static-method")
+class RequestListModelTest {
 
 	private static final long TEST_TIME_MILLIS = Instant.parse("2024-06-15T10:30:45Z")
 			.toEpochMilli();
@@ -28,24 +30,23 @@ public class RequestListModelTest {
 	void calculateTimestampForIndexCurrentMinute() {
 		long ts = RequestListModel.calculateTimestampForIndex(TEST_TIME_MILLIS, 30, Period.currentMinute);
 		LocalDateTime result = LocalDateTime.ofInstant(Instant.ofEpochMilli(ts), ZoneId.systemDefault());
-		// Seconds should be replaced with 30
-		assertTrue(result.getSecond() == 30, "Seconds should be 30");
+		assertEquals(30, result.getSecond(), "Seconds should be 30");
 	}
 
 	@Test
 	void calculateTimestampForIndexCurrentHour() {
 		long ts = RequestListModel.calculateTimestampForIndex(TEST_TIME_MILLIS, 15, Period.currentHour);
 		LocalDateTime result = LocalDateTime.ofInstant(Instant.ofEpochMilli(ts), ZoneId.systemDefault());
-		assertTrue(result.getMinute() == 15, "Minutes should be 15");
-		assertTrue(result.getSecond() == 0, "Seconds should be 0");
+		assertEquals(15, result.getMinute(), "Minutes should be 15");
+		assertEquals(0, result.getSecond(), "Seconds should be 0");
 	}
 
 	@Test
 	void calculateTimestampForIndexCurrentDay() {
 		long ts = RequestListModel.calculateTimestampForIndex(TEST_TIME_MILLIS, 8, Period.currentDay);
 		LocalDateTime result = LocalDateTime.ofInstant(Instant.ofEpochMilli(ts), ZoneId.systemDefault());
-		assertTrue(result.getHour() == 8, "Hours should be 8");
-		assertTrue(result.getMinute() == 0, "Minutes should be 0");
+		assertEquals(8, result.getHour(), "Hours should be 8");
+		assertEquals(0, result.getMinute(), "Minutes should be 0");
 	}
 
 	@Test

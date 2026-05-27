@@ -2,11 +2,13 @@ package modules.test;
 
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 import org.skyve.util.Util;
 
 import modules.test.InjectedDocument.InjectedDocumentExtension;
 import modules.test.domain.InjectedDocument;
 
+@SuppressWarnings("java:S1130")
 class InjectionTest extends AbstractSkyveTest {
 
 	@Test
@@ -58,7 +60,7 @@ class InjectionTest extends AbstractSkyveTest {
 	
 	@Test
 	void testBizlet() throws Exception {
-		Util.constructRandomInstance(u, m, id, 1);
+		Assertions.assertDoesNotThrow(() -> Util.constructRandomInstance(u, m, id, 1));
 		// if this succeeds then Bizlet.newInstance() passed its asserts
 	}
 	

@@ -16,6 +16,7 @@ import java.util.Objects;
 
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Timeout;
 import org.skyve.CORE;
 import org.skyve.domain.PersistentBean;
@@ -41,7 +42,6 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 	protected abstract T getBean() throws Exception;
 
 	@Test
-	@SuppressWarnings("boxing")
 	void testDelete() throws Exception {
 		// create the test data
 		T bean = getBean();
@@ -110,8 +110,7 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 
 	@Test
 	void testGetConstantDomainValues() throws Exception {
-		assumeTrue(getBizlet() != null);
-
+		Assertions.assertDoesNotThrow(() -> assumeTrue(getBizlet() != null));
 		// create the test data
 		ArrayList<? extends Attribute> allAttributes = getAllAttributes(getBean());
 
@@ -139,8 +138,7 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 
 	@Test
 	void testGetDynamicDomainValues() throws Exception {
-		assumeTrue(getBizlet() != null);
-
+		Assertions.assertDoesNotThrow(() -> assumeTrue(getBizlet() != null));
 		// create the test data
 		ArrayList<? extends Attribute> allAttributes = getAllAttributes(getBean());
 
@@ -168,7 +166,7 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 
 	@Test
 	void testGetVariantDomainValues() throws Exception {
-		assumeTrue(getBizlet() != null);
+		Assertions.assertDoesNotThrow(() -> assumeTrue(getBizlet() != null));
 		// create the test data
 		T bean = getBean();
 		ArrayList<? extends Attribute> allAttributes = getAllAttributes(bean);
@@ -196,7 +194,6 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
 	void testSave() throws Exception {
 		// create the test data
 		T bean = getBean();
@@ -215,7 +212,6 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 
 	@Test
 	@Timeout(30)
-	@SuppressWarnings("boxing")
 	void testUpdate() throws Exception {
 		// create the test data
 		T bean = getBean();
@@ -263,8 +259,7 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 		Customer customer = CORE.getUser().getCustomer();
 		Module module = customer.getModule(bean.getBizModule());
 		Document document = module.getDocument(customer, bean.getBizDocument());
-		ArrayList<? extends Attribute> allAttributes = new ArrayList<>(document.getAllAttributes(customer));
-		return allAttributes;
+		return new ArrayList<>(document.getAllAttributes(customer));
 	}
 
 	private Bizlet<T> getBizlet() throws Exception {

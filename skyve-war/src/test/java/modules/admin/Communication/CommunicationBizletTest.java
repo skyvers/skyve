@@ -5,12 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 import org.skyve.domain.messages.ValidationException;
 
 import modules.admin.domain.Communication;
 
 @SuppressWarnings("static-method")
-public class CommunicationBizletTest {
+class CommunicationBizletTest {
 
 	private static final CommunicationBizlet bizlet = new CommunicationBizlet();
 
@@ -30,7 +31,7 @@ public class CommunicationBizletTest {
 
 	@Test
 	void preRerenderWithUnknownSourceDoesNothing() throws Exception {
-		CommunicationExtension bean = new CommunicationExtension();
+		CommunicationExtension bean = Assertions.assertDoesNotThrow(CommunicationExtension::new);
 		bean.setDocumentName("someDocument");
 		bizlet.preRerender("unknownSource", bean, null);
 		// document name should be unchanged

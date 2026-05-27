@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 import org.skyve.util.monitoring.RequestMeasurements;
 import org.skyve.util.monitoring.ResourceMeasurements;
 
@@ -18,7 +19,7 @@ import modules.admin.domain.MonitoringDashboard.Period;
  * Tests the protected methods of all concrete monitoring model subclasses.
  * These tests verify the chart title/label/color strategy for each model type.
  */
-@SuppressWarnings("static-method")
+@SuppressWarnings({ "static-method", "java:S5976", "java:S5778", "java:S1130" })
 class ConcreteMonitoringModelTest {
 
 	// ========== RequestElapsedTimePeriodBarModel ==========
@@ -761,14 +762,14 @@ class ConcreteMonitoringModelTest {
 	@Test
 	void requestListModelUpdateThrowsIllegalState() throws Exception {
 		RequestListModel model = new RequestListModel();
-		org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class,
+		Assertions.assertThrows(IllegalStateException.class,
 				() -> model.update("someId", new java.util.TreeMap<>()));
 	}
 
 	@Test
 	void requestListModelRemoveThrowsIllegalState() throws Exception {
 		RequestListModel model = new RequestListModel();
-		org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class,
+		Assertions.assertThrows(IllegalStateException.class,
 				() -> model.remove("someId"));
 	}
 }

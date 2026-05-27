@@ -4,14 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 import org.skyve.impl.sail.mock.MockWebContext;
 import org.skyve.metadata.controller.ImplicitActionName;
 
 import modules.whosin.domain.Staff;
 import util.AbstractH2Test;
 
-@SuppressWarnings("static-method")
-public class StaffBizletH2Test extends AbstractH2Test {
+class StaffBizletH2Test extends AbstractH2Test {
 
 	private static final StaffBizlet bizlet = new StaffBizlet();
 
@@ -45,14 +45,14 @@ public class StaffBizletH2Test extends AbstractH2Test {
 
 	@Test
 	void preRerenderWithStatusSourceAndNullOfficeDoesNotThrow() throws Exception {
-		bean.setStatus(Staff.Status.inTheOffice);
+		Assertions.assertDoesNotThrow(() -> bean.setStatus(Staff.Status.inTheOffice));
 		bean.setBaseOffice(null);
 		// Should not throw - no office means skips the setLocation branch
 		bizlet.preRerender(Staff.statusPropertyName, bean, webContext);
 	}
 
 	@Test
-	void preRerenderWithOtherSourceDoesNotThrow() throws Exception {
-		bizlet.preRerender(Staff.staffCodePropertyName, bean, webContext);
+	void preRerenderWithOtherSourceDoesNotThrow() {
+		Assertions.assertDoesNotThrow(() -> bizlet.preRerender(Staff.staffCodePropertyName, bean, webContext));
 	}
 }

@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 import org.skyve.CORE;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.metadata.customer.Customer;
@@ -26,6 +27,7 @@ import modules.test.domain.AllAttributesPersistent;
  * Covers: populateProperty, set (nested bindings), isMutable,
  * getMetaDataForBinding, getPropertyType, validateBinding, copy.
  */
+@SuppressWarnings({ "static-method", "java:S1130" })
 class BindUtilH2Test extends AbstractH2Test {
 
 	private AllAttributesPersistent bean;
@@ -187,7 +189,7 @@ class BindUtilH2Test extends AbstractH2Test {
 
 	@Test
 	void validateBindingThrowsForInvalidField() {
-		org.junit.jupiter.api.Assertions.assertThrows(Exception.class,
+		Assertions.assertThrows(Exception.class,
 				() -> BindUtil.validateBinding(customer, module, document, "notAField"));
 	}
 
@@ -219,7 +221,7 @@ class BindUtilH2Test extends AbstractH2Test {
 	void copyPropertiesFromOneBeanToAnother() throws Exception {
 		AllAttributesPersistent source = AllAttributesPersistent.newInstance();
 		source.setText("copyme");
-		source.setNormalInteger(99);
+		source.setNormalInteger(Integer.valueOf(99));
 
 		AllAttributesPersistent dest = AllAttributesPersistent.newInstance();
 		BindUtil.copy(source, dest);

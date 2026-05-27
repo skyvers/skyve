@@ -5,12 +5,14 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 import org.skyve.impl.sail.mock.MockWebContext;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
@@ -26,7 +28,8 @@ import util.AbstractH2Test;
  * H2-backed tests for UserBizlet covering newInstance, preRerender,
  * preExecute, and getVariantDomainValues.
  */
-public class UserBizletH2Test extends AbstractH2Test {
+@SuppressWarnings("static-method")
+class UserBizletH2Test extends AbstractH2Test {
 
 	private static final UserBizlet bizlet = new UserBizlet();
 
@@ -87,23 +90,21 @@ public class UserBizletH2Test extends AbstractH2Test {
 
 	@Test
 	void preRerenderNewPasswordWithNullPasswordDoesNotThrow() throws Exception {
-		bean.setNewPassword(null);
-
+		Assertions.assertDoesNotThrow(() -> bean.setNewPassword(null));
 		bizlet.preRerender(User.newPasswordPropertyName, bean, webContext);
 		// just should not throw
 	}
 
 	@Test
 	void preRerenderNewPasswordWithValueDoesNotThrow() throws Exception {
-		bean.setNewPassword("testPassword123");
-
+		Assertions.assertDoesNotThrow(() -> bean.setNewPassword("testPassword123"));
 		bizlet.preRerender(User.newPasswordPropertyName, bean, webContext);
 		// just should not throw
 	}
 
 	@Test
-	void preRerenderUnknownSourceDoesNotThrow() throws Exception {
-		bizlet.preRerender("unknownSource", bean, webContext);
+	void preRerenderUnknownSourceDoesNotThrow() {
+		Assertions.assertDoesNotThrow(() -> bizlet.preRerender("unknownSource", bean, webContext));
 		// just should not throw
 	}
 
@@ -116,7 +117,7 @@ public class UserBizletH2Test extends AbstractH2Test {
 
 		UserExtension result = bizlet.preExecute(ImplicitActionName.Save, bean, null, webContext);
 		assertNotNull(result);
-		assertThat(result.getGroups().size(), is(initialSize));
+		assertEquals(initialSize, result.getGroups().size());
 	}
 
 	@Test
@@ -128,7 +129,7 @@ public class UserBizletH2Test extends AbstractH2Test {
 
 		UserExtension result = bizlet.preExecute(ImplicitActionName.Save, bean, null, webContext);
 		assertNotNull(result);
-		assertThat(result.getGroups().size(), is(initialSize + 1));
+		assertEquals(initialSize + 1, result.getGroups().size());
 	}
 
 	// ---- getVariantDomainValues ----
@@ -154,8 +155,8 @@ public class UserBizletH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	void getVariantDomainValuesForUnknownAttributeCallsSuper() throws Exception {
-		List<DomainValue> result = bizlet.getVariantDomainValues("unknownAttribute");
+	void getVariantDomainValuesForUnknownAttributeCallsSuper() {
+		Assertions.assertDoesNotThrow(() -> bizlet.getVariantDomainValues("unknownAttribute"));
 		// super returns null or empty - just should not throw
 	}
 }

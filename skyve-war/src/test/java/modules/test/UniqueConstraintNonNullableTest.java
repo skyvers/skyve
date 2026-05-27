@@ -8,12 +8,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 import org.skyve.CORE;
 import org.skyve.domain.messages.UniqueConstraintViolationException;
 import org.skyve.util.test.TestUtil;
 
 import modules.test.domain.UniqueConstraintNonNullable;
 
+@SuppressWarnings({ "java:S5778", "java:S1130", "java:S1854" })
 class UniqueConstraintNonNullableTest extends AbstractSkyveTest {
 
 	private UniqueConstraintNonNullable uniqueConstraintNonNullable;
@@ -25,7 +27,7 @@ class UniqueConstraintNonNullableTest extends AbstractSkyveTest {
 
 	@Test
 	void testSaveSingleInstance() throws Exception {
-		CORE.getPersistence().save(uniqueConstraintNonNullable);
+		Assertions.assertDoesNotThrow(() -> CORE.getPersistence().save(uniqueConstraintNonNullable));
 	}
 
 	@Test

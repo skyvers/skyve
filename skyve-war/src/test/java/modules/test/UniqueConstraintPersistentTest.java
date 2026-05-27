@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 import org.skyve.domain.messages.UniqueConstraintViolationException;
 import org.skyve.util.test.TestUtil;
 
@@ -15,6 +16,7 @@ import modules.test.domain.UniqueConstraintPersistent;
  * Test unique constraint checking is only applied with persistent-by-reachability.
  * ie A transient reference to a persistable document wont be checked unless the bean is already persisted.
  */
+@SuppressWarnings({ "java:S5778", "java:S1612", "java:S1854", "java:S1130" })
 class UniqueConstraintPersistentTest extends AbstractSkyveTest {
 
 	private UniqueConstraintNonNullable uc1;
@@ -52,8 +54,7 @@ class UniqueConstraintPersistentTest extends AbstractSkyveTest {
 	
 	@Test
 	void testNonPersistentReferenceToUnpersistedDuplicates() {
-		duplicate();
-		
+		Assertions.assertDoesNotThrow(() -> duplicate());
 		UniqueConstraintPersistent ucp = UniqueConstraintPersistent.newInstance();
 		ucp.setNonPersistent1(uc1);
 		ucp.setNonPersistent2(uc2);
@@ -108,8 +109,7 @@ class UniqueConstraintPersistentTest extends AbstractSkyveTest {
 	
 	@Test
 	void testMixedReferenceToUnpersistedDuplicates() {
-		duplicate();
-		
+		Assertions.assertDoesNotThrow(() -> duplicate());
 		UniqueConstraintPersistent ucp = UniqueConstraintPersistent.newInstance();
 		ucp.setPersistent1(uc1);
 		ucp.setNonPersistent2(uc2);
@@ -118,7 +118,7 @@ class UniqueConstraintPersistentTest extends AbstractSkyveTest {
 
 	@Test
 	void testNonPersistentReferenceToPersistedUniques() {
-		uc1 = p.save(uc1);
+		Assertions.assertDoesNotThrow(() -> uc1 = p.save(uc1));
 		uc2 = p.save(uc2);
 		
 		UniqueConstraintPersistent ucp = UniqueConstraintPersistent.newInstance();
@@ -129,7 +129,7 @@ class UniqueConstraintPersistentTest extends AbstractSkyveTest {
 	
 	@Test
 	void testNonPersistentReferenceToUnpersistedUniques() {
-		UniqueConstraintPersistent ucp = UniqueConstraintPersistent.newInstance();
+		UniqueConstraintPersistent ucp = Assertions.assertDoesNotThrow(() -> UniqueConstraintPersistent.newInstance());
 		ucp.setNonPersistent1(uc1);
 		ucp.setNonPersistent2(uc2);
 		p.save(ucp);
@@ -137,7 +137,7 @@ class UniqueConstraintPersistentTest extends AbstractSkyveTest {
 
 	@Test
 	void testPersistentReferenceToPersistedUniques() {
-		uc1 = p.save(uc1);
+		Assertions.assertDoesNotThrow(() -> uc1 = p.save(uc1));
 		uc2 = p.save(uc2);
 		
 		UniqueConstraintPersistent ucp = UniqueConstraintPersistent.newInstance();
@@ -148,7 +148,7 @@ class UniqueConstraintPersistentTest extends AbstractSkyveTest {
 	
 	@Test
 	void testPersistentReferenceToUnpersistedUniques() {
-		UniqueConstraintPersistent ucp = UniqueConstraintPersistent.newInstance();
+		UniqueConstraintPersistent ucp = Assertions.assertDoesNotThrow(() -> UniqueConstraintPersistent.newInstance());
 		ucp.setPersistent1(uc1);
 		ucp.setPersistent2(uc2);
 		p.save(ucp);
@@ -156,7 +156,7 @@ class UniqueConstraintPersistentTest extends AbstractSkyveTest {
 
 	@Test
 	void testMixedReferenceToPersistedUniques() {
-		uc1 = p.save(uc1);
+		Assertions.assertDoesNotThrow(() -> uc1 = p.save(uc1));
 		uc2 = p.save(uc2);
 		
 		UniqueConstraintPersistent ucp = UniqueConstraintPersistent.newInstance();
@@ -167,7 +167,7 @@ class UniqueConstraintPersistentTest extends AbstractSkyveTest {
 	
 	@Test
 	void testMixedReferenceToUnpersistedUniques() {
-		UniqueConstraintPersistent ucp = UniqueConstraintPersistent.newInstance();
+		UniqueConstraintPersistent ucp = Assertions.assertDoesNotThrow(() -> UniqueConstraintPersistent.newInstance());
 		ucp.setPersistent1(uc1);
 		ucp.setNonPersistent2(uc2);
 		p.save(ucp);
@@ -195,8 +195,7 @@ class UniqueConstraintPersistentTest extends AbstractSkyveTest {
 
 	@Test
 	void testNonPersistentToNonPersistentReferenceToUnpersistedDuplicates() {
-		duplicate();
-		
+		Assertions.assertDoesNotThrow(() -> duplicate());
 		UniqueConstraintPersistent innerUcp = UniqueConstraintPersistent.newInstance();
 		innerUcp.setNonPersistent1(uc1);
 		innerUcp.setNonPersistent2(uc2);
@@ -225,8 +224,7 @@ class UniqueConstraintPersistentTest extends AbstractSkyveTest {
 	
 	@Test
 	void testNonPersistentToPersistentReferenceToUnpersistedDuplicates() {
-		duplicate();
-		
+		Assertions.assertDoesNotThrow(() -> duplicate());
 		UniqueConstraintPersistent innerUcp = UniqueConstraintPersistent.newInstance();
 		innerUcp.setPersistent1(uc1);
 		innerUcp.setPersistent2(uc2);
@@ -255,8 +253,7 @@ class UniqueConstraintPersistentTest extends AbstractSkyveTest {
 
 	@Test
 	void testNonPersistentToMixedReferenceToUnpersistedDuplicates() {
-		duplicate();
-		
+		Assertions.assertDoesNotThrow(() -> duplicate());
 		UniqueConstraintPersistent innerUcp = UniqueConstraintPersistent.newInstance();
 		innerUcp.setPersistent1(uc1);
 		innerUcp.setNonPersistent2(uc2);
@@ -267,7 +264,7 @@ class UniqueConstraintPersistentTest extends AbstractSkyveTest {
 
 	@Test
 	void testNonPersistentToNonPersistentReferenceToPersistedUniques() {
-		uc1 = p.save(uc1);
+		Assertions.assertDoesNotThrow(() -> uc1 = p.save(uc1));
 		uc2 = p.save(uc2);
 		
 		UniqueConstraintPersistent innerUcp = UniqueConstraintPersistent.newInstance();
@@ -280,7 +277,7 @@ class UniqueConstraintPersistentTest extends AbstractSkyveTest {
 	
 	@Test
 	void testNonPersistentToNonPersistentReferenceToUnpersistedUniques() {
-		UniqueConstraintPersistent innerUcp = UniqueConstraintPersistent.newInstance();
+		UniqueConstraintPersistent innerUcp = Assertions.assertDoesNotThrow(() -> UniqueConstraintPersistent.newInstance());
 		innerUcp.setNonPersistent1(uc1);
 		innerUcp.setNonPersistent2(uc2);
 		UniqueConstraintPersistent outerUcp = UniqueConstraintPersistent.newInstance();
@@ -290,7 +287,7 @@ class UniqueConstraintPersistentTest extends AbstractSkyveTest {
 
 	@Test
 	void testNonPersistentToPersistentReferenceToPersistedUniques() {
-		uc1 = p.save(uc1);
+		Assertions.assertDoesNotThrow(() -> uc1 = p.save(uc1));
 		uc2 = p.save(uc2);
 		
 		UniqueConstraintPersistent innerUcp = UniqueConstraintPersistent.newInstance();
@@ -303,7 +300,7 @@ class UniqueConstraintPersistentTest extends AbstractSkyveTest {
 	
 	@Test
 	void testNonPersistentToPersistentReferenceToUnpersistedUniques() {
-		UniqueConstraintPersistent innerUcp = UniqueConstraintPersistent.newInstance();
+		UniqueConstraintPersistent innerUcp = Assertions.assertDoesNotThrow(() -> UniqueConstraintPersistent.newInstance());
 		innerUcp.setPersistent1(uc1);
 		innerUcp.setPersistent2(uc2);
 		UniqueConstraintPersistent outerUcp = UniqueConstraintPersistent.newInstance();
@@ -313,7 +310,7 @@ class UniqueConstraintPersistentTest extends AbstractSkyveTest {
 
 	@Test
 	void testNonPersistentToMixedReferenceToPersistedUniques() {
-		uc1 = p.save(uc1);
+		Assertions.assertDoesNotThrow(() -> uc1 = p.save(uc1));
 		uc2 = p.save(uc2);
 		
 		UniqueConstraintPersistent innerUcp = UniqueConstraintPersistent.newInstance();
@@ -326,7 +323,7 @@ class UniqueConstraintPersistentTest extends AbstractSkyveTest {
 	
 	@Test
 	void testNonPersistentToMixedReferenceToUnpersistedUniques() {
-		UniqueConstraintPersistent innerUcp = UniqueConstraintPersistent.newInstance();
+		UniqueConstraintPersistent innerUcp = Assertions.assertDoesNotThrow(() -> UniqueConstraintPersistent.newInstance());
 		innerUcp.setPersistent1(uc1);
 		innerUcp.setNonPersistent2(uc2);
 		UniqueConstraintPersistent outerUcp = UniqueConstraintPersistent.newInstance();
@@ -356,8 +353,7 @@ class UniqueConstraintPersistentTest extends AbstractSkyveTest {
 
 	@Test
 	void testPersistentToNonPersistentReferenceToUnpersistedDuplicates() {
-		duplicate();
-		
+		Assertions.assertDoesNotThrow(() -> duplicate());
 		UniqueConstraintPersistent innerUcp = UniqueConstraintPersistent.newInstance();
 		innerUcp.setNonPersistent1(uc1);
 		innerUcp.setNonPersistent2(uc2);
@@ -420,8 +416,7 @@ class UniqueConstraintPersistentTest extends AbstractSkyveTest {
 
 	@Test
 	void testPersistentToMixedReferenceToUnpersistedDuplicates() {
-		duplicate();
-		
+		Assertions.assertDoesNotThrow(() -> duplicate());
 		UniqueConstraintPersistent innerUcp = UniqueConstraintPersistent.newInstance();
 		innerUcp.setPersistent1(uc1);
 		innerUcp.setNonPersistent2(uc2);
@@ -432,7 +427,7 @@ class UniqueConstraintPersistentTest extends AbstractSkyveTest {
 
 	@Test
 	void testPersistentToNonPersistentReferenceToPersistedUniques() {
-		uc1 = p.save(uc1);
+		Assertions.assertDoesNotThrow(() -> uc1 = p.save(uc1));
 		uc2 = p.save(uc2);
 		
 		UniqueConstraintPersistent innerUcp = UniqueConstraintPersistent.newInstance();
@@ -445,7 +440,7 @@ class UniqueConstraintPersistentTest extends AbstractSkyveTest {
 	
 	@Test
 	void testPersistentToNonPersistentReferenceToUnpersistedUniques() {
-		UniqueConstraintPersistent innerUcp = UniqueConstraintPersistent.newInstance();
+		UniqueConstraintPersistent innerUcp = Assertions.assertDoesNotThrow(() -> UniqueConstraintPersistent.newInstance());
 		innerUcp.setNonPersistent1(uc1);
 		innerUcp.setNonPersistent2(uc2);
 		UniqueConstraintPersistent outerUcp = UniqueConstraintPersistent.newInstance();
@@ -455,7 +450,7 @@ class UniqueConstraintPersistentTest extends AbstractSkyveTest {
 
 	@Test
 	void testPersistentToPersistentReferenceToPersistedUniques() {
-		uc1 = p.save(uc1);
+		Assertions.assertDoesNotThrow(() -> uc1 = p.save(uc1));
 		uc2 = p.save(uc2);
 		
 		UniqueConstraintPersistent innerUcp = UniqueConstraintPersistent.newInstance();
@@ -468,7 +463,7 @@ class UniqueConstraintPersistentTest extends AbstractSkyveTest {
 	
 	@Test
 	void testPersistentToPersistentReferenceToUnpersistedUniques() {
-		UniqueConstraintPersistent innerUcp = UniqueConstraintPersistent.newInstance();
+		UniqueConstraintPersistent innerUcp = Assertions.assertDoesNotThrow(() -> UniqueConstraintPersistent.newInstance());
 		innerUcp.setPersistent1(uc1);
 		innerUcp.setPersistent2(uc2);
 		UniqueConstraintPersistent outerUcp = UniqueConstraintPersistent.newInstance();
@@ -478,7 +473,7 @@ class UniqueConstraintPersistentTest extends AbstractSkyveTest {
 
 	@Test
 	void testPersistentToMixedReferenceToPersistedUniques() {
-		uc1 = p.save(uc1);
+		Assertions.assertDoesNotThrow(() -> uc1 = p.save(uc1));
 		uc2 = p.save(uc2);
 		
 		UniqueConstraintPersistent innerUcp = UniqueConstraintPersistent.newInstance();
@@ -491,7 +486,7 @@ class UniqueConstraintPersistentTest extends AbstractSkyveTest {
 	
 	@Test
 	void testPersistentToMixedReferenceToUnpersistedUniques() {
-		UniqueConstraintPersistent innerUcp = UniqueConstraintPersistent.newInstance();
+		UniqueConstraintPersistent innerUcp = Assertions.assertDoesNotThrow(() -> UniqueConstraintPersistent.newInstance());
 		innerUcp.setPersistent1(uc1);
 		innerUcp.setNonPersistent2(uc2);
 		UniqueConstraintPersistent outerUcp = UniqueConstraintPersistent.newInstance();

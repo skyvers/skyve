@@ -6,11 +6,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 import org.skyve.impl.sail.mock.MockWebContext;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.util.DataBuilder;
@@ -24,7 +26,7 @@ import util.AbstractH2Test;
  * H2-backed tests for ControlPanelBizlet covering getConstantDomainValues,
  * getDynamicDomainValues, getVariantDomainValues, complete, preRerender and newInstance.
  */
-public class ControlPanelBizletH2Test extends AbstractH2Test {
+class ControlPanelBizletH2Test extends AbstractH2Test {
 
 	@Inject
 	private ControlPanelBizlet bizlet;
@@ -106,7 +108,7 @@ public class ControlPanelBizletH2Test extends AbstractH2Test {
 
 		List<DomainValue> result = bizlet.getDynamicDomainValues(ControlPanel.testDocumentNamesPropertyName, bean);
 		assertThat(result, is(notNullValue()));
-		assertThat(result.isEmpty(), is(true));
+		assertTrue(result.isEmpty());
 	}
 
 	// ---- getVariantDomainValues: customerNameToSwapTo ----
@@ -152,12 +154,12 @@ public class ControlPanelBizletH2Test extends AbstractH2Test {
 
 		bizlet.preRerender("push", bean, webContext);
 
-		assertThat(bean.getTestDocumentNames().isEmpty(), is(true));
+		assertTrue(bean.getTestDocumentNames().isEmpty());
 	}
 
 	@Test
-	void preRerenderUnknownSourceDoesNotThrow() throws Exception {
-		bizlet.preRerender("unknown", bean, webContext);
+	void preRerenderUnknownSourceDoesNotThrow() {
+		Assertions.assertDoesNotThrow(() -> bizlet.preRerender("unknown", bean, webContext));
 		// no exception expected
 	}
 }

@@ -5,20 +5,18 @@ import java.nio.charset.Charset;
 
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
 import modules.test.domain.AllAttributesPersistent;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@SuppressWarnings({ "java:S4144", "java:S1130", "java:S1854" })
 class UtilTests extends AbstractSkyveTest {
 
 	@Test
 	void testPopulateFully() throws Exception {
-		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 5);
-
+		AllAttributesPersistent test = Assertions.assertDoesNotThrow(() -> Util.constructRandomInstance(u, m, aapd, 5));
 		// Save and evict
 		test = p.save(test);
 		p.evictAllCached();

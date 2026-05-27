@@ -4,11 +4,13 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 import org.skyve.impl.sail.mock.MockWebContext;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
@@ -23,7 +25,7 @@ import util.AbstractH2Test;
  * H2-backed tests for MonitoringDashboardBizlet covering preExecute,
  * getDynamicDomainValues and complete with H2 context.
  */
-public class MonitoringDashboardBizletH2Test extends AbstractH2Test {
+class MonitoringDashboardBizletH2Test extends AbstractH2Test {
 
 	private static final MonitoringDashboardBizlet bizlet = new MonitoringDashboardBizlet();
 
@@ -96,8 +98,8 @@ public class MonitoringDashboardBizletH2Test extends AbstractH2Test {
 	// ---- getDynamicDomainValues: unknown attribute ----
 
 	@Test
-	void getDynamicDomainValuesForUnknownAttributeCallsSuper() throws Exception {
-		List<DomainValue> result = bizlet.getDynamicDomainValues("unknownAttribute", bean);
+	void getDynamicDomainValuesForUnknownAttributeCallsSuper() {
+		Assertions.assertDoesNotThrow(() -> bizlet.getDynamicDomainValues("unknownAttribute", bean));
 		// just shouldn't throw
 	}
 
@@ -109,7 +111,7 @@ public class MonitoringDashboardBizletH2Test extends AbstractH2Test {
 
 		List<String> result = bizlet.complete("rsModuleName", "admin", bean);
 		assertThat(result, is(notNullValue()));
-		assertThat(result.isEmpty(), is(true));
+		assertTrue(result.isEmpty());
 	}
 
 	@Test

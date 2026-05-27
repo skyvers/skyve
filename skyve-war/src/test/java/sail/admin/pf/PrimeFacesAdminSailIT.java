@@ -1,6 +1,7 @@
 package sail.admin.pf;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 
 import util.AbstractPrimeFacesInterpretedSail;
 import util.sail.BrowserConfiguration;
@@ -23,6 +24,6 @@ class PrimeFacesAdminSailIT extends AbstractPrimeFacesInterpretedSail {
 
 	@Test
 	void test() {
-		sailFile("/Users/simeonsolomou/git/skyve/skyve-war/src/test/java/sail/admin/pf/pf-admin-sail.xml");
+		Assertions.assertDoesNotThrow(() -> sailFile("/Users/simeonsolomou/git/skyve/skyve-war/src/test/java/sail/admin/pf/pf-admin-sail.xml"));
 	}
 }

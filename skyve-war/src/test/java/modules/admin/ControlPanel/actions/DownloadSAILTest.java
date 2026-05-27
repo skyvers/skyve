@@ -8,7 +8,8 @@ import org.junit.jupiter.api.Test;
 /**
  * Tests for DownloadSAIL static helper methods.
  */
-public class DownloadSAILTest {
+@SuppressWarnings("static-method")
+class DownloadSAILTest {
 
 	@Test
 	void sailSourceContainsClassDeclaration() {
@@ -54,6 +55,6 @@ public class DownloadSAILTest {
 		// Methods can be empty string but not null usually - test with empty
 		String source = DownloadSAIL.sailSource("", "http://localhost");
 		assertNotNull(source);
-		assertTrue(source.length() > 0);
+		assertTrue(! source.isEmpty());
 	}
 }

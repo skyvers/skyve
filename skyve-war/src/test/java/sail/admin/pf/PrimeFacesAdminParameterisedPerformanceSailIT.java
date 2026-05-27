@@ -2,6 +2,7 @@ package sail.admin.pf;
 
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
@@ -13,7 +14,7 @@ import util.JUnitMultiThreadedRunnerParameterizedRunnerFactory;
 @Ignore
 @RunWith(Parameterized.class)
 @UseParametersRunnerFactory(JUnitMultiThreadedRunnerParameterizedRunnerFactory.class)
-public class PrimeFacesAdminParameterisedPerformanceSail extends PrimeFacesAdminSailIT {
+public class PrimeFacesAdminParameterisedPerformanceSailIT extends PrimeFacesAdminSailIT {
 
 	@Parameters
 	public static String[][] params() {
@@ -32,6 +33,6 @@ public class PrimeFacesAdminParameterisedPerformanceSail extends PrimeFacesAdmin
 	@Test
 	@Override
 	public void test() {
-		selenium.login(customer, user, password);
+		Assertions.assertDoesNotThrow(() -> selenium.login(customer, user, password));
 	}
 }

@@ -6,16 +6,16 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.skyve.CORE;
+import org.junit.jupiter.api.Assertions;
 import org.skyve.impl.sail.mock.MockWebContext;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
-import org.skyve.metadata.module.Module;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
@@ -26,7 +26,8 @@ import util.AbstractH2Test;
  * H2-backed tests for TagBizlet covering getDynamicDomainValues,
  * getVariantDomainValues, preExecute and preRerender.
  */
-public class TagBizletH2Test extends AbstractH2Test {
+@SuppressWarnings("static-method")
+class TagBizletH2Test extends AbstractH2Test {
 
 	private static final TagBizlet bizlet = new TagBizlet();
 
@@ -61,7 +62,7 @@ public class TagBizletH2Test extends AbstractH2Test {
 	void getVariantDomainValuesForUnknownAttributeReturnsEmpty() throws Exception {
 		List<DomainValue> result = bizlet.getVariantDomainValues("unknownAttribute");
 		assertThat(result, is(notNullValue()));
-		assertThat(result.isEmpty(), is(true));
+		assertTrue(result.isEmpty());
 	}
 
 	// ---- getDynamicDomainValues: actionDocumentName ----
@@ -81,7 +82,7 @@ public class TagBizletH2Test extends AbstractH2Test {
 
 		List<DomainValue> result = bizlet.getDynamicDomainValues(Tag.actionDocumentNamePropertyName, bean);
 		assertThat(result, is(notNullValue()));
-		assertThat(result.isEmpty(), is(true));
+		assertTrue(result.isEmpty());
 	}
 
 	// ---- getDynamicDomainValues: uploadDocumentName ----
@@ -101,7 +102,7 @@ public class TagBizletH2Test extends AbstractH2Test {
 
 		List<DomainValue> result = bizlet.getDynamicDomainValues(Tag.uploadDocumentNamePropertyName, bean);
 		assertThat(result, is(notNullValue()));
-		assertThat(result.isEmpty(), is(true));
+		assertTrue(result.isEmpty());
 	}
 
 	// ---- getDynamicDomainValues: attributeName ----
@@ -123,7 +124,7 @@ public class TagBizletH2Test extends AbstractH2Test {
 
 		List<DomainValue> result = bizlet.getDynamicDomainValues(Tag.attributeNamePropertyName, bean);
 		assertThat(result, is(notNullValue()));
-		assertThat(result.isEmpty(), is(true));
+		assertTrue(result.isEmpty());
 	}
 
 	// ---- getDynamicDomainValues: operandTag ----
@@ -154,7 +155,7 @@ public class TagBizletH2Test extends AbstractH2Test {
 
 		List<DomainValue> result = bizlet.getDynamicDomainValues(Tag.documentActionPropertyName, bean);
 		assertThat(result, is(notNullValue()));
-		assertThat(result.isEmpty(), is(true));
+		assertTrue(result.isEmpty());
 	}
 
 	// ---- getDynamicDomainValues: documentCondition ----
@@ -176,7 +177,7 @@ public class TagBizletH2Test extends AbstractH2Test {
 
 		List<DomainValue> result = bizlet.getDynamicDomainValues(Tag.documentConditionPropertyName, bean);
 		assertThat(result, is(notNullValue()));
-		assertThat(result.isEmpty(), is(true));
+		assertTrue(result.isEmpty());
 	}
 
 	// ---- preExecute: Edit action ----
@@ -275,8 +276,8 @@ public class TagBizletH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	void preRerenderWithUnknownSourceDoesNotThrow() throws Exception {
-		bizlet.preRerender("unknownSource", bean, webContext);
+	void preRerenderWithUnknownSourceDoesNotThrow() {
+		Assertions.assertDoesNotThrow(() -> bizlet.preRerender("unknownSource", bean, webContext));
 		// no exception expected
 	}
 }

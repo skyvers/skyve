@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.metadata.controller.Download;
 
@@ -14,7 +15,7 @@ import modules.admin.ControlPanel.ControlPanelExtension;
 class DownloadResultsTest {
 
 	@Test
-	void prepareWithNullResultsThrowsValidationException() throws Exception {
+	void prepareWithNullResultsThrowsValidationException() {
 		DownloadResults action = new DownloadResults();
 		ControlPanelExtension bean = new ControlPanelExtension();
 		// results is null by default → prepare() throws ValidationException
@@ -23,7 +24,7 @@ class DownloadResultsTest {
 
 	@Test
 	void prepareWithNonNullResultsDoesNotThrow() throws Exception {
-		DownloadResults action = new DownloadResults();
+		DownloadResults action = Assertions.assertDoesNotThrow(DownloadResults::new);
 		ControlPanelExtension bean = new ControlPanelExtension();
 		bean.setResults("some results", false);
 		// should not throw

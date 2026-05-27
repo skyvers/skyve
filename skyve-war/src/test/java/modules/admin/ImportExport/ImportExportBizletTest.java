@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 
 import modules.admin.domain.ImportExport;
@@ -48,7 +49,7 @@ public class ImportExportBizletTest extends AbstractH2Test {
 	@Test
 	void getConstantDomainValuesForOtherAttributeCallsSuper() throws Exception {
 		// super returns null for unknown attributes
-		bizlet.getConstantDomainValues("unknownAttr");
+		Assertions.assertNull(bizlet.getConstantDomainValues("unknownAttr"));
 	}
 
 	@Test
@@ -70,6 +71,6 @@ public class ImportExportBizletTest extends AbstractH2Test {
 	@Test
 	void getDynamicDomainValuesForOtherAttributeCallsSuper() throws Exception {
 		// super returns null for unknown attributes
-		bizlet.getDynamicDomainValues("unknownAttr", bean);
+		Assertions.assertNull(bizlet.getDynamicDomainValues("unknownAttr", bean));
 	}
 }

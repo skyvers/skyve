@@ -28,18 +28,14 @@ class MakePasswordChangeTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void testNewAndConfirmPasswordNotTheSame() throws Exception {
-		Assert.assertThrows(ValidationException.class, () -> {
-			changePassword("Password0!", "Password0@");
-		});
+	void testNewAndConfirmPasswordNotTheSame() {
+		Assert.assertThrows(ValidationException.class, () -> changePassword("Password0!", "Password0@"));
 	}
 	
 	@Test
 	@SuppressWarnings("static-method")
-	void testOldPasswordMatchesNewPassword() throws Exception {
-		Assert.assertThrows(ValidationException.class, () -> {
-			changePassword(PASSWORD);
-		});
+	void testOldPasswordMatchesNewPassword() {
+		Assert.assertThrows(ValidationException.class, () -> changePassword(PASSWORD));
 	}
 	
 	@Test
@@ -49,8 +45,10 @@ class MakePasswordChangeTest extends AbstractH2Test {
 
 		// change password
 		changePassword("Password0!0!");
+		assertEquals(0, getPasswordHistory(false).length);
 		// change password back
 		changePassword(PASSWORD);
+		assertEquals(0, getPasswordHistory(false).length);
 	}
 	
 	@Test
@@ -77,22 +75,18 @@ class MakePasswordChangeTest extends AbstractH2Test {
 	@Test
 	@SuppressWarnings("static-method")
 	void checkPasswordHistoryOfTwoThrows() throws Exception {
-		Assert.assertThrows(ValidationException.class, () -> {
-			UtilImpl.PASSWORD_HISTORY_RETENTION = 2;
+		UtilImpl.PASSWORD_HISTORY_RETENTION = 2;
 
-			// change password
-			changePassword("Password0!0!"); // sets the password history
+		// change password
+		changePassword("Password0!0!"); // sets the password history
+		Assert.assertEquals(1, getPasswordHistory(false).length);
 
-			Assert.assertEquals(1, getPasswordHistory(false).length);
+		// change password back
+		changePassword(PASSWORD);
+		Assert.assertEquals(2, getPasswordHistory(false).length);
 
-			// change password back
-			changePassword(PASSWORD);
-
-			Assert.assertEquals(2, getPasswordHistory(false).length);
-
-			// change password
-			changePassword("Password0!0!");
-		});
+		// reusing a recent password should throw
+		Assert.assertThrows(ValidationException.class, () -> changePassword("Password0!0!"));
 	}
 
 	@Test

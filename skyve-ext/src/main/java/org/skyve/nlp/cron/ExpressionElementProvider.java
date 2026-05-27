@@ -7,36 +7,37 @@ package org.skyve.nlp.cron;
  * a per-parse basis by {@link NaturalCronExpressionParser}.
  */
 public interface ExpressionElementProvider {
-	/**
-	 * Determines whether this provider can interpret any part of {@code value}.
-	 *
-	 * @param value The natural-language text to inspect.
-	 * @return {@code true} when this provider captured matching segments.
-	 */
+
+	 /**
+	  * Determines whether this provider can interpret any part of {@code value}.
+	  *
+	  * @param value The natural-language text to inspect.
+	  * @return {@code true} when this provider captured matching segments.
+	  */
 	public boolean matches(String value);
 
 	/**
-	 * Indicates whether this provider can supply the cron second field.
+	 * Indicates whether this provider contributes the cron seconds field.
 	 *
-	 * @return {@code true} when a second element is available.
+	 * @return {@code true} when {@link #getSecondElement()} is meaningful for the current parse
 	 */
 	default boolean canProvideSecond() {
 		return false;
 	}
 
 	/**
-	 * Returns the cron second field contributed by this provider.
+	 * Returns the cron seconds token contributed by this provider.
 	 *
-	 * @return A valid cron second token or {@code null} when not provided.
+	 * @return A cron seconds token, or {@code null} when no seconds value is provided
 	 */
 	default String getSecondElement() {
 		return null;
 	}
 
 	/**
-	 * Indicates whether this provider can supply the cron minute field.
+	 * Indicates whether this provider contributes the cron minute field.
 	 *
-	 * @return {@code true} when a minute element is available.
+	 * @return {@code true} when {@link #getMinuteElement()} is meaningful for the current parse
 	 */
 	public boolean canProvideMinute();
 
@@ -48,9 +49,9 @@ public interface ExpressionElementProvider {
 	public String getMinuteElement();
 
 	/**
-	 * Indicates whether this provider can supply the cron hour field.
+	 * Indicates whether this provider contributes the cron hour field.
 	 *
-	 * @return {@code true} when an hour element is available.
+	 * @return {@code true} when {@link #getHourElement()} is meaningful for the current parse
 	 */
 	public boolean canProvideHour();
 
@@ -62,9 +63,9 @@ public interface ExpressionElementProvider {
 	public String getHourElement();
 
 	/**
-	 * Indicates whether this provider can supply the cron day-of-month field.
+	 * Indicates whether this provider contributes the cron day-of-month field.
 	 *
-	 * @return {@code true} when a day-of-month element is available.
+	 * @return {@code true} when {@link #getDayNumberElement()} is meaningful for the current parse
 	 */
 	public boolean canProvideDayNumber();
 
@@ -76,9 +77,9 @@ public interface ExpressionElementProvider {
 	public String getDayNumberElement();
 
 	/**
-	 * Indicates whether this provider can supply the cron month field.
+	 * Indicates whether this provider contributes the cron month field.
 	 *
-	 * @return {@code true} when a month element is available.
+	 * @return {@code true} when {@link #getMonthElement()} is meaningful for the current parse
 	 */
 	public boolean canProvideMonth();
 
@@ -90,9 +91,9 @@ public interface ExpressionElementProvider {
 	public String getMonthElement();
 
 	/**
-	 * Indicates whether this provider can supply the cron day-of-week field.
+	 * Indicates whether this provider contributes the cron day-of-week field.
 	 *
-	 * @return {@code true} when a day-of-week element is available.
+	 * @return {@code true} when {@link #getDayOfWeekElement()} is meaningful for the current parse
 	 */
 	public boolean canProvideDayOfWeek();
 
@@ -104,46 +105,46 @@ public interface ExpressionElementProvider {
 	public String getDayOfWeekElement();
 
 	/**
-	 * Indicates whether the second field value is fixed and should not be overridden.
+	 * Indicates whether the contributed seconds value is fixed and should not be overridden.
 	 *
-	 * @return {@code true} when the second element is locked.
+	 * @return {@code true} when the seconds token is immutable for this provider
 	 */
 	default boolean isSecondElementLocked() {
 		return false;
 	}
 
 	/**
-	 * Indicates whether the minute field value is fixed and should not be overridden.
+	 * Indicates whether the contributed minute value is fixed and should not be overridden.
 	 *
-	 * @return {@code true} when the minute element is locked.
+	 * @return {@code true} when the minute token is immutable for this provider
 	 */
 	public boolean isMinuteElementLocked();
 
 	/**
-	 * Indicates whether the hour field value is fixed and should not be overridden.
+	 * Indicates whether the contributed hour value is fixed and should not be overridden.
 	 *
-	 * @return {@code true} when the hour element is locked.
+	 * @return {@code true} when the hour token is immutable for this provider
 	 */
 	public boolean isHourElementLocked();
 
 	/**
-	 * Indicates whether the day-of-month field value is fixed and should not be overridden.
+	 * Indicates whether the contributed day-of-month value is fixed and should not be overridden.
 	 *
-	 * @return {@code true} when the day-of-month element is locked.
+	 * @return {@code true} when the day-of-month token is immutable for this provider
 	 */
 	public boolean isDayNumberElementLocked();
 
 	/**
-	 * Indicates whether the month field value is fixed and should not be overridden.
+	 * Indicates whether the contributed month value is fixed and should not be overridden.
 	 *
-	 * @return {@code true} when the month element is locked.
+	 * @return {@code true} when the month token is immutable for this provider
 	 */
 	public boolean isMonthElementLocked();
 
 	/**
-	 * Indicates whether the day-of-week field value is fixed and should not be overridden.
+	 * Indicates whether the contributed day-of-week value is fixed and should not be overridden.
 	 *
-	 * @return {@code true} when the day-of-week element is locked.
+	 * @return {@code true} when the day-of-week token is immutable for this provider
 	 */
 	public boolean isDayOfWeekElementLocked();
 }

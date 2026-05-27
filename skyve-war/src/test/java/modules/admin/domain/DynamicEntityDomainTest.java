@@ -8,17 +8,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 
 @SuppressWarnings("static-method")
-public class DynamicEntityDomainTest {
+class DynamicEntityDomainTest {
 
 	private DynamicEntity entity;
 	private DynamicRelation relation;
 
 	@BeforeEach
 	void setUp() {
-		entity = new DynamicEntity() {};
-		relation = new DynamicRelation() {};
+		entity = new DynamicEntity() { /* test stub */ };
+		relation = new DynamicRelation() { /* test stub */ };
 	}
 
 	@Test
@@ -116,7 +117,7 @@ public class DynamicEntityDomainTest {
 
 	@Test
 	void setRelationsElementByIdNoOp() {
-		entity.setRelationsElementById("some-id", relation);
+		Assertions.assertDoesNotThrow(() -> entity.setRelationsElementById("some-id", relation));
 	}
 
 	@Test
@@ -140,7 +141,7 @@ public class DynamicEntityDomainTest {
         @Test
         void setRelationsElementByIdReplaces() {
                 entity.addRelationsElement(relation);
-                DynamicRelation replacement = new DynamicRelation() {};
+				DynamicRelation replacement = new DynamicRelation() { /* test stub */ };
                 replacement.setBizId(relation.getBizId());
                 entity.setRelationsElementById(relation.getBizId(), replacement);
                 assertTrue(entity.getRelations().contains(replacement));

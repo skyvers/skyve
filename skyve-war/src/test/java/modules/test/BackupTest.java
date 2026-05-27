@@ -29,7 +29,6 @@ import modules.test.domain.MappedExtensionJoinedStrategy;
 import modules.test.domain.MappedExtensionSingleStrategy;
 import modules.test.domain.MappedSubclassedJoinedStrategy;
 import modules.test.domain.MappedSubclassedSingleStrategy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class BackupTest extends AbstractSkyveTestDispose {
 	private static File backupZip;
@@ -70,6 +69,7 @@ class BackupTest extends AbstractSkyveTestDispose {
 			job.execute();
 			backupZip = job.getBackupZip();
 		}
+		Assert.assertNotNull(backupZip);
 	}
 	
 	@Test
@@ -138,6 +138,8 @@ class BackupTest extends AbstractSkyveTestDispose {
 		if ((one == null) && (other == null)) {
 			return;
 		}
+		Assert.assertNotNull("original bean should not be null", one);
+		Assert.assertNotNull("restored bean should not be null", other);
 		Assert.assertEquals("bizModules", one.getBizModule(), other.getBizModule());
 		Assert.assertEquals("bizDocuments", one.getBizDocument(), other.getBizDocument());
 		

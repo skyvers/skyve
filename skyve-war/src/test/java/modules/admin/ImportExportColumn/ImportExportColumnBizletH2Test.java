@@ -10,11 +10,10 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 import org.skyve.impl.sail.mock.MockWebContext;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
-import org.skyve.util.DataBuilder;
-import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.admin.ImportExport.ImportExportExtension;
 import modules.admin.domain.ImportExport;
@@ -25,7 +24,7 @@ import util.AbstractH2Test;
  * H2-backed tests for ImportExportColumnBizlet covering getDynamicDomainValues,
  * complete and preExecute.
  */
-public class ImportExportColumnBizletH2Test extends AbstractH2Test {
+class ImportExportColumnBizletH2Test extends AbstractH2Test {
 
 	private ImportExportColumnBizlet bizlet;
 	private ImportExportColumn columnBean;
@@ -33,7 +32,7 @@ public class ImportExportColumnBizletH2Test extends AbstractH2Test {
 	private MockWebContext webContext;
 
 	@BeforeEach
-	void setup() throws Exception {
+	void setup() {
 		bizlet = new ImportExportColumnBizlet();
 		webContext = new MockWebContext();
 
@@ -64,8 +63,8 @@ public class ImportExportColumnBizletH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	void getDynamicDomainValuesForUnknownAttributeCallsSuper() throws Exception {
-		List<DomainValue> result = bizlet.getDynamicDomainValues("unknownAttribute", columnBean);
+	void getDynamicDomainValuesForUnknownAttributeCallsSuper() {
+		Assertions.assertDoesNotThrow(() -> bizlet.getDynamicDomainValues("unknownAttribute", columnBean));
 		// Calling super - should return null or empty
 	}
 
@@ -87,8 +86,8 @@ public class ImportExportColumnBizletH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	void completeForUnknownAttributeCallsSuper() throws Exception {
-		List<String> result = bizlet.complete("unknownAttribute", "", columnBean);
+	void completeForUnknownAttributeCallsSuper() {
+		Assertions.assertDoesNotThrow(() -> bizlet.complete("unknownAttribute", "", columnBean));
 		// super returns null or empty
 	}
 

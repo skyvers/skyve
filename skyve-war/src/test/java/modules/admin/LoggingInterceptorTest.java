@@ -1,12 +1,14 @@
 package modules.admin;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import java.lang.reflect.Field;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.document.Document;
 
@@ -14,7 +16,6 @@ import org.skyve.metadata.model.document.Document;
  * Unit tests for LoggingInterceptor.
  * These tests exercise every before/after callback with default (non-vetoing) state.
  */
-@SuppressWarnings("static-method")
 class LoggingInterceptorTest {
 
 	private LoggingInterceptor interceptor;
@@ -31,7 +32,7 @@ class LoggingInterceptorTest {
 
 	@Test
 	void afterNewInstanceDoesNotThrow() {
-		interceptor.afterNewInstance(null);
+		Assertions.assertDoesNotThrow(() -> interceptor.afterNewInstance(null));
 	}
 
 	@Test
@@ -41,7 +42,7 @@ class LoggingInterceptorTest {
 
 	@Test
 	void afterValidateDoesNotThrow() {
-		interceptor.afterValidate(null, null);
+		Assertions.assertDoesNotThrow(() -> interceptor.afterValidate(null, null));
 	}
 
 	@Test
@@ -51,7 +52,7 @@ class LoggingInterceptorTest {
 
 	@Test
 	void afterGetConstantDomainValuesDoesNotThrow() {
-		interceptor.afterGetConstantDomainValues("attr", null);
+		Assertions.assertDoesNotThrow(() -> interceptor.afterGetConstantDomainValues("attr", null));
 	}
 
 	@Test
@@ -61,7 +62,7 @@ class LoggingInterceptorTest {
 
 	@Test
 	void afterGetVariantDomainValuesDoesNotThrow() {
-		interceptor.afterGetVariantDomainValues("attr", null);
+		Assertions.assertDoesNotThrow(() -> interceptor.afterGetVariantDomainValues("attr", null));
 	}
 
 	@Test
@@ -71,7 +72,7 @@ class LoggingInterceptorTest {
 
 	@Test
 	void afterGetDynamicDomainValuesDoesNotThrow() {
-		interceptor.afterGetDynamicDomainValues("attr", null, null);
+		Assertions.assertDoesNotThrow(() -> interceptor.afterGetDynamicDomainValues("attr", null, null));
 	}
 
 	@Test
@@ -80,8 +81,8 @@ class LoggingInterceptorTest {
 	}
 
 	@Test
-	void afterSaveDoesNotThrow() throws Exception {
-		interceptor.afterSave(null, null);
+	void afterSaveDoesNotThrow() {
+		Assertions.assertDoesNotThrow(() -> interceptor.afterSave(null, null));
 	}
 
 	@Test
@@ -91,7 +92,7 @@ class LoggingInterceptorTest {
 
 	@Test
 	void afterPreSaveDoesNotThrow() {
-		interceptor.afterPreSave(null);
+		Assertions.assertDoesNotThrow(() -> interceptor.afterPreSave(null));
 	}
 
 	@Test
@@ -101,7 +102,7 @@ class LoggingInterceptorTest {
 
 	@Test
 	void afterPostSaveDoesNotThrow() {
-		interceptor.afterPostSave(null);
+		Assertions.assertDoesNotThrow(() -> interceptor.afterPostSave(null));
 	}
 
 	@Test
@@ -111,7 +112,7 @@ class LoggingInterceptorTest {
 
 	@Test
 	void afterDeleteDoesNotThrow() {
-		interceptor.afterDelete(null, null);
+		Assertions.assertDoesNotThrow(() -> interceptor.afterDelete(null, null));
 	}
 
 	@Test
@@ -121,7 +122,7 @@ class LoggingInterceptorTest {
 
 	@Test
 	void afterPreDeleteDoesNotThrow() {
-		interceptor.afterPreDelete(null);
+		Assertions.assertDoesNotThrow(() -> interceptor.afterPreDelete(null));
 	}
 
 	@Test
@@ -131,7 +132,7 @@ class LoggingInterceptorTest {
 
 	@Test
 	void afterPostLoadDoesNotThrow() {
-		interceptor.afterPostLoad(null);
+		Assertions.assertDoesNotThrow(() -> interceptor.afterPostLoad(null));
 	}
 
 	@Test
@@ -141,7 +142,7 @@ class LoggingInterceptorTest {
 
 	@Test
 	void afterPreExecuteDoesNotThrow() {
-		interceptor.afterPreExecute(ImplicitActionName.Save, null, null, null);
+		Assertions.assertDoesNotThrow(() -> interceptor.afterPreExecute(ImplicitActionName.Save, null, null, null));
 	}
 
 	@Test
@@ -153,7 +154,7 @@ class LoggingInterceptorTest {
 	@Test
 	void afterServerSideActionDoesNotThrow() {
 		Document doc = mock(Document.class);
-		interceptor.afterServerSideAction(doc, "TestAction", null, null);
+		Assertions.assertDoesNotThrow(() -> interceptor.afterServerSideAction(doc, "TestAction", null, null));
 	}
 
 	@Test
@@ -165,7 +166,7 @@ class LoggingInterceptorTest {
 	@Test
 	void afterUploadActionDoesNotThrow() {
 		Document doc = mock(Document.class);
-		interceptor.afterUploadAction(doc, "TestAction", null, null, null);
+		Assertions.assertDoesNotThrow(() -> interceptor.afterUploadAction(doc, "TestAction", null, null, null));
 	}
 
 	@Test
@@ -177,7 +178,7 @@ class LoggingInterceptorTest {
 	@Test
 	void afterBizImportActionDoesNotThrow() {
 		Document doc = mock(Document.class);
-		interceptor.afterBizImportAction(doc, "TestAction", null, null);
+		Assertions.assertDoesNotThrow(() -> interceptor.afterBizImportAction(doc, "TestAction", null, null));
 	}
 
 	@Test
@@ -189,15 +190,15 @@ class LoggingInterceptorTest {
 	@Test
 	void afterBizExportActionDoesNotThrow() {
 		Document doc = mock(Document.class);
-		interceptor.afterBizExportAction(doc, "TestAction", null, null);
+		Assertions.assertDoesNotThrow(() -> interceptor.afterBizExportAction(doc, "TestAction", null, null));
 	}
 
 	@Test
 	void vetoFieldMakesBeforeMethodsReturnTrue() throws Exception {
-		Field vetoField = LoggingInterceptor.class.getDeclaredField("veto");
+		Field vetoField = Assertions.assertDoesNotThrow(() -> LoggingInterceptor.class.getDeclaredField("veto"));
 		vetoField.setAccessible(true);
 		vetoField.set(interceptor, Boolean.TRUE);
-		assert interceptor.beforeNewInstance(null) : "veto=true should return true";
-		assert interceptor.beforePreSave(null) : "veto=true should return true";
+		assertTrue(interceptor.beforeNewInstance(null), "veto=true should return true");
+		assertTrue(interceptor.beforePreSave(null), "veto=true should return true");
 	}
 }

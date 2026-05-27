@@ -16,6 +16,7 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 import org.skyve.CORE;
 import org.skyve.impl.report.freemarker.FreemarkerReportUtil;
 import org.skyve.impl.report.freemarker.SkyveDatastoreTemplateLoader;
@@ -27,12 +28,12 @@ import modules.test.domain.AllAttributesPersistent;
  * Exercises template loading via StringTemplateLoader, SkyveDatastoreTemplateLoader,
  * and the built-in directives (format, sqlformat, description, displayName).
  */
+@SuppressWarnings({ "static-method", "java:S1130" })
 class FreemarkerReportH2Test extends AbstractH2Test {
 
 	private AllAttributesPersistent testBean;
 
 	@BeforeAll
-	@SuppressWarnings("static-method")
 	static void initFreemarker() {
 		// Covers FreemarkerReportUtil.init() and all directive constructors
 		FreemarkerReportUtil.init();
@@ -42,7 +43,7 @@ class FreemarkerReportH2Test extends AbstractH2Test {
 	void createTestBean() throws Exception {
 		testBean = AllAttributesPersistent.newInstance();
 		testBean.setText("hello world");
-		testBean.setNormalInteger(42);
+		testBean.setNormalInteger(Integer.valueOf(42));
 		testBean = CORE.getPersistence().save(testBean);
 	}
 
@@ -169,9 +170,9 @@ class FreemarkerReportH2Test extends AbstractH2Test {
 
 	@Test
 	void skyveDatastoreLoaderCloseTemplateSourceIsNoOp() throws Exception {
-		// closeTemplateSource has no observable effect — verify it does not throw
 		SkyveDatastoreTemplateLoader loader = new SkyveDatastoreTemplateLoader();
-		loader.closeTemplateSource(null);
+		// closeTemplateSource has no observable effect — verify it does not throw
+		Assertions.assertDoesNotThrow(() -> loader.closeTemplateSource(null));
 	}
 
 	@Test

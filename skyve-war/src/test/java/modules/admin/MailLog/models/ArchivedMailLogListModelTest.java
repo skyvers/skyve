@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field.Store;
@@ -27,12 +26,13 @@ import modules.admin.domain.MailLog;
 class ArchivedMailLogListModelTest {
 
 	@Test
+	@SuppressWarnings("static-method")
 	void testColumnsAndProjectionsContainExpectedBindings() {
 		ArchivedMailLogListModelForTest<Bean> model = new ArchivedMailLogListModelForTest<>();
 
 		List<String> bindings = model.getColumns().stream()
 									.map(c -> c.getBinding())
-									.collect(Collectors.toList());
+									.toList();
 		assertThat(bindings, hasItems(MailLog.timestampPropertyName,
 									 MailLog.dispatchStatusPropertyName,
 									 MailLog.providerPropertyName,
@@ -49,6 +49,7 @@ class ArchivedMailLogListModelTest {
 	}
 
 	@Test
+	@SuppressWarnings("static-method")
 	void testConvertToBeanAndDefaultSort() {
 		ArchivedMailLogListModelForTest<Bean> model = new ArchivedMailLogListModelForTest<>();
 		String timestamp = DocumentConverter.dateToString(new java.util.Date());

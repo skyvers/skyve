@@ -2,6 +2,7 @@ package modules.test;
 
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.DateOnly;
@@ -16,21 +17,19 @@ import org.skyve.util.Util;
 
 import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.MappedSubclassedSingleStrategy;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@SuppressWarnings({ "java:S5976", "java:S1854", "java:S1130" })
 class DocumentQueryTest extends AbstractSkyveTest {
 
 	@Test
 	void testDefaultHierarchical() {
-		DocumentQuery q = m.getDocumentDefaultQuery(c, hd.getName()).constructDocumentQuery(null, null);
+		DocumentQuery q = Assertions.assertDoesNotThrow(() -> m.getDocumentDefaultQuery(c, hd.getName()).constructDocumentQuery(null, null));
 		q.tupleResults();
 	}
 
 	@Test
 	void testHierarchical() {
-		DocumentQuery q = m.getNullSafeMetaDataQuery("qH").constructDocumentQuery(null, null);
+		DocumentQuery q = Assertions.assertDoesNotThrow(() -> m.getNullSafeMetaDataQuery("qH").constructDocumentQuery(null, null));
 		q.tupleResults();
 	}
 
@@ -60,13 +59,13 @@ class DocumentQueryTest extends AbstractSkyveTest {
 
 	@Test
 	void testDefaultMEJS() {
-		DocumentQuery q = m.getDocumentDefaultQuery(c, mejsd.getName()).constructDocumentQuery(null, null);
+		DocumentQuery q = Assertions.assertDoesNotThrow(() -> m.getDocumentDefaultQuery(c, mejsd.getName()).constructDocumentQuery(null, null));
 		q.tupleResults();
 	}
 
 	@Test
 	void testMEJS() {
-		DocumentQuery q = m.getNullSafeMetaDataQuery("qMEJS").constructDocumentQuery(null, null);
+		DocumentQuery q = Assertions.assertDoesNotThrow(() -> m.getNullSafeMetaDataQuery("qMEJS").constructDocumentQuery(null, null));
 		q.tupleResults();
 	}
 
@@ -97,13 +96,13 @@ class DocumentQueryTest extends AbstractSkyveTest {
 
 	@Test
 	void testDefaultMESS() {
-		DocumentQuery q = m.getDocumentDefaultQuery(c, messd.getName()).constructDocumentQuery(null, null);
+		DocumentQuery q = Assertions.assertDoesNotThrow(() -> m.getDocumentDefaultQuery(c, messd.getName()).constructDocumentQuery(null, null));
 		q.tupleResults();
 	}
 
 	@Test
 	void testMESS() {
-		DocumentQuery q = m.getNullSafeMetaDataQuery("qMESS").constructDocumentQuery(null, null);
+		DocumentQuery q = Assertions.assertDoesNotThrow(() -> m.getNullSafeMetaDataQuery("qMESS").constructDocumentQuery(null, null));
 		q.tupleResults();
 	}
 
@@ -121,13 +120,13 @@ class DocumentQueryTest extends AbstractSkyveTest {
 
 	@Test
 	void testDefaultMSJS() {
-		DocumentQuery q = m.getDocumentDefaultQuery(c, msjsd.getName()).constructDocumentQuery(null, null);
+		DocumentQuery q = Assertions.assertDoesNotThrow(() -> m.getDocumentDefaultQuery(c, msjsd.getName()).constructDocumentQuery(null, null));
 		q.tupleResults();
 	}
 
 	@Test
 	void testMSJS() {
-		DocumentQuery q = m.getNullSafeMetaDataQuery("qMSJS").constructDocumentQuery(null, null);
+		DocumentQuery q = Assertions.assertDoesNotThrow(() -> m.getNullSafeMetaDataQuery("qMSJS").constructDocumentQuery(null, null));
 		q.tupleResults();
 	}
 
@@ -145,13 +144,13 @@ class DocumentQueryTest extends AbstractSkyveTest {
 
 	@Test
 	void testDefaultMSSS() {
-		DocumentQuery q = m.getDocumentDefaultQuery(c, msssd.getName()).constructDocumentQuery(null, null);
+		DocumentQuery q = Assertions.assertDoesNotThrow(() -> m.getDocumentDefaultQuery(c, msssd.getName()).constructDocumentQuery(null, null));
 		q.tupleResults();
 	}
 
 	@Test
 	void testMSSS() {
-		DocumentQuery q = m.getNullSafeMetaDataQuery("qMSSS").constructDocumentQuery(null, null);
+		DocumentQuery q = Assertions.assertDoesNotThrow(() -> m.getNullSafeMetaDataQuery("qMSSS").constructDocumentQuery(null, null));
 		q.tupleResults();
 	}
 
@@ -247,7 +246,7 @@ class DocumentQueryTest extends AbstractSkyveTest {
 
 	@Test
 	void testAssociations() throws Exception {
-		AllAttributesPersistent test1 = Util.constructRandomInstance(u, m, aapd, 1);
+		AllAttributesPersistent test1 = Assertions.assertDoesNotThrow(() -> Util.constructRandomInstance(u, m, aapd, 1));
 		AllAttributesPersistent test2 = Util.constructRandomInstance(u, m, aapd, 1);
 		AllAttributesPersistent test3 = Util.constructRandomInstance(u, m, aapd, 1);
 		test2.setAggregatedAssociation(test3);
@@ -258,28 +257,28 @@ class DocumentQueryTest extends AbstractSkyveTest {
 	
 	@Test
 	void testIn() throws Exception {
-		DocumentQuery q = p.newDocumentQuery(aapd);
+		DocumentQuery q = Assertions.assertDoesNotThrow(() -> p.newDocumentQuery(aapd));
 		q.getFilter().addIn(AllAttributesPersistent.datePropertyName, new DateOnly(), new DateOnly());
 		q.beanResults();
 	}
 
 	@Test
 	void testStringIn() throws Exception {
-		DocumentQuery q = p.newDocumentQuery(aapd);
+		DocumentQuery q = Assertions.assertDoesNotThrow(() -> p.newDocumentQuery(aapd));
 		q.getFilter().addIn(AllAttributesPersistent.textPropertyName, "a", "b", "c");
 		q.beanResults();
 	}
 
 	@Test
 	void testBetween() throws Exception {
-		DocumentQuery q = p.newDocumentQuery(aapd);
+		DocumentQuery q = Assertions.assertDoesNotThrow(() -> p.newDocumentQuery(aapd));
 		q.getFilter().addBetween(AllAttributesPersistent.dateTimePropertyName, new DateTime(), new DateTime());
 		q.beanResults();
 	}
 
 	@Test
 	void testStringBetween() throws Exception {
-		DocumentQuery q = p.newDocumentQuery(aapd);
+		DocumentQuery q = Assertions.assertDoesNotThrow(() -> p.newDocumentQuery(aapd));
 		q.getFilter().addBetween(AllAttributesPersistent.textPropertyName, "a", "b");
 		q.beanResults();
 	}
@@ -316,7 +315,7 @@ class DocumentQueryTest extends AbstractSkyveTest {
 	
 	@Test
 	void testPostgresqlIn() throws Exception {
-		postgresql();
+		Assertions.assertDoesNotThrow(() -> postgresql());
 		DocumentQuery q = p.newDocumentQuery(aapd);
 		q.getFilter().addIn(AllAttributesPersistent.datePropertyName, new DateOnly(), new DateOnly());
 		q.beanResults();
@@ -324,7 +323,7 @@ class DocumentQueryTest extends AbstractSkyveTest {
 
 	@Test
 	void testPostgresqlStringIn() throws Exception {
-		postgresql();
+		Assertions.assertDoesNotThrow(() -> postgresql());
 		DocumentQuery q = p.newDocumentQuery(aapd);
 		q.getFilter().addIn(AllAttributesPersistent.textPropertyName, "a", "b", "c");
 		q.beanResults();
@@ -332,7 +331,7 @@ class DocumentQueryTest extends AbstractSkyveTest {
 
 	@Test
 	void testPostgresqlBizIdIn() throws Exception {
-		postgresql();
+		Assertions.assertDoesNotThrow(() -> postgresql());
 		DocumentQuery q = p.newDocumentQuery(aapd);
 		q.getFilter().addIn(Bean.DOCUMENT_ID, "a", "b", "c");
 		q.beanResults();
@@ -340,7 +339,7 @@ class DocumentQueryTest extends AbstractSkyveTest {
 
 	@Test
 	void testPostgresqlBetween() throws Exception {
-		postgresql();
+		Assertions.assertDoesNotThrow(() -> postgresql());
 		DocumentQuery q = p.newDocumentQuery(aapd);
 		q.getFilter().addBetween(AllAttributesPersistent.dateTimePropertyName, new DateTime(), new DateTime());
 		q.beanResults();
@@ -348,7 +347,7 @@ class DocumentQueryTest extends AbstractSkyveTest {
 
 	@Test
 	void testPostgresqlStringBetween() throws Exception {
-		postgresql();
+		Assertions.assertDoesNotThrow(() -> postgresql());
 		DocumentQuery q = p.newDocumentQuery(aapd);
 		q.getFilter().addBetween(AllAttributesPersistent.textPropertyName, "a", "b");
 		q.beanResults();
@@ -356,7 +355,7 @@ class DocumentQueryTest extends AbstractSkyveTest {
 
 	@Test
 	void testPostgresqlBizIdBetween() throws Exception {
-		postgresql();
+		Assertions.assertDoesNotThrow(() -> postgresql());
 		DocumentQuery q = p.newDocumentQuery(aapd);
 		q.getFilter().addBetween(Bean.DOCUMENT_ID, "a", "b");
 		q.beanResults();
@@ -364,7 +363,7 @@ class DocumentQueryTest extends AbstractSkyveTest {
 
 	@Test
 	void testPostgresqlStringEquals() throws Exception {
-		postgresql();
+		Assertions.assertDoesNotThrow(() -> postgresql());
 		DocumentQuery q = p.newDocumentQuery(aapd);
 		q.getFilter().addEquals(AllAttributesPersistent.textPropertyName, "a");
 		q.beanResults();
@@ -372,7 +371,7 @@ class DocumentQueryTest extends AbstractSkyveTest {
 
 	@Test
 	void testPostgresqlBizIdEquals() throws Exception {
-		postgresql();
+		Assertions.assertDoesNotThrow(() -> postgresql());
 		DocumentQuery q = p.newDocumentQuery(aapd);
 		q.getFilter().addEquals(Bean.DOCUMENT_ID, "a");
 		q.beanResults();
@@ -380,7 +379,7 @@ class DocumentQueryTest extends AbstractSkyveTest {
 
 	@Test
 	void testPostgresqlStringLike() throws Exception {
-		postgresql();
+		Assertions.assertDoesNotThrow(() -> postgresql());
 		DocumentQuery q = p.newDocumentQuery(aapd);
 		q.getFilter().addLike(AllAttributesPersistent.textPropertyName, "%a%");
 		q.beanResults();
@@ -388,7 +387,7 @@ class DocumentQueryTest extends AbstractSkyveTest {
 
 	@Test
 	void testPostgresqlBizIdLike() throws Exception {
-		postgresql();
+		Assertions.assertDoesNotThrow(() -> postgresql());
 		DocumentQuery q = p.newDocumentQuery(aapd);
 		q.getFilter().addLike(Bean.DOCUMENT_ID, "%a%");
 		q.beanResults();

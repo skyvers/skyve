@@ -4,11 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 
 import modules.admin.domain.Snapshot;
 
-@SuppressWarnings("static-method")
-public class SnapshotBizletTest {
+@SuppressWarnings({ "static-method", "java:S1130" })
+class SnapshotBizletTest {
 
 	private static final SnapshotBizlet bizlet = new SnapshotBizlet();
 
@@ -32,7 +33,7 @@ public class SnapshotBizletTest {
 
 	@Test
 	void preRerenderWithUnknownSourceDoesNothing() throws Exception {
-		Snapshot bean = new Snapshot();
+		Snapshot bean = Assertions.assertDoesNotThrow(Snapshot::new);
 		bean.setQueryName("someQuery");
 		bizlet.preRerender("unknownSource", bean, null);
 		// query name unchanged, no exception

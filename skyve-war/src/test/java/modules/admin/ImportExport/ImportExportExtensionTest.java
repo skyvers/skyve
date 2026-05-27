@@ -3,9 +3,10 @@ package modules.admin.ImportExport;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 
 @SuppressWarnings("static-method")
-public class ImportExportExtensionTest {
+class ImportExportExtensionTest {
 
 	@Test
 	void anyColumnHasExpressionWithNoColumnsReturnsFalse() {
@@ -15,7 +16,7 @@ public class ImportExportExtensionTest {
 
 	@Test
 	void cleanupImportFileWithNullAbsolutePathDoesNothing() {
-		ImportExportExtension ext = new ImportExportExtension();
+		ImportExportExtension ext = Assertions.assertDoesNotThrow(ImportExportExtension::new);
 		// getImportFileAbsolutePath() returns null → method exits immediately
 		ext.cleanupImportFile();
 	}

@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 import org.skyve.domain.messages.UniqueConstraintViolationException;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.util.Util;
@@ -16,6 +17,7 @@ import modules.test.domain.MappedExtensionUniqueSingleStrategy;
 import modules.test.domain.MappedSubclassedUniqueJoinedStrategy;
 import modules.test.domain.MappedSubclassedUniqueSingleStrategy;
 
+@SuppressWarnings({ "java:S5778", "java:S1130", "java:S1854" })
 class UniqueConstraintHierarchyTest extends AbstractSkyveTest {
 	/**
 	 * Insert the base document and then insert a duplicate extension document in the same transaction.
@@ -200,6 +202,7 @@ class UniqueConstraintHierarchyTest extends AbstractSkyveTest {
 		// Should be able to insert a new bean with the same unique text value
 		MappedSubclassedUniqueJoinedStrategy test2 = Util.constructRandomInstance(u, m, msujsd, 1);
 		test2.setText("text");
-		p.save(test2);
+		test2 = p.save(test2);
+		Assertions.assertNotNull(test2.getBizId());
 	}
 }

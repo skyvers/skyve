@@ -3,11 +3,12 @@ package modules.admin.Snapshots;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 
 import modules.admin.domain.Snapshots;
 
-@SuppressWarnings("static-method")
-public class SnapshotsBizletTest {
+@SuppressWarnings({ "static-method", "java:S1130" })
+class SnapshotsBizletTest {
 
 	private static final SnapshotsBizlet bizlet = new SnapshotsBizlet();
 
@@ -31,7 +32,7 @@ public class SnapshotsBizletTest {
 
 	@Test
 	void preRerenderWithUnknownSourceDoesNothing() throws Exception {
-		Snapshots bean = new Snapshots();
+		Snapshots bean = Assertions.assertDoesNotThrow(Snapshots::new);
 		bean.setQueryName("someQuery");
 		bizlet.preRerender("unknownSource", bean, null);
 		// no exception expected

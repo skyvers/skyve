@@ -21,6 +21,69 @@
 **Primary target: each in-scope sub-project >=80% line coverage in the aggregate report, with overall aggregate coverage also >=80% (about ~67 120 lines covered overall; gap from current: ~19 083 lines).**
 **Intermediate target: move every sub-project toward >=80%, while driving framework-testable coverage toward 80% (~53 560 lines; gap: ~5 500 lines).**
 
+## Iteration Log (27 May 2026)
+
+### Latest measured baseline
+- Aggregate (`skyve-coverage`): **67.26%** (`68,577 / 101,954`) from:
+    - `mvn -Pcoverage -pl skyve-coverage -am -DskipIntegrationTests=true -DskipUnitTests=false verify`
+
+### Completed this iteration
+- Added new web-service tests:
+    - `skyve-web/src/test/java/org/skyve/impl/web/service/HealthServletTest.java`
+    - `skyve-web/src/test/java/org/skyve/impl/web/service/DocsServletTest.java`
+    - `skyve-web/src/test/java/org/skyve/impl/web/service/rest/JaxRsActivatorTest.java`
+- Verified new tests compile and pass via targeted test runs.
+- Added new core generator tests:
+    - `skyve-core/src/test/java/org/skyve/impl/generate/client/AbstractRendererTest.java`
+    - `skyve-core/src/test/java/org/skyve/impl/generate/client/react/ReactComponentTest.java`
+    - `skyve-core/src/test/java/org/skyve/impl/generate/client/react/ReactGeneratorTest.java`
+    - `skyve-core/src/test/java/org/skyve/impl/generate/client/react/ReactListViewTest.java`
+    - `skyve-core/src/test/java/org/skyve/impl/generate/client/react/ReactEditViewTest.java`
+    - `skyve-core/src/test/java/org/skyve/impl/generate/client/react/ReactNativeEditViewTest.java`
+    - `skyve-core/src/test/java/org/skyve/impl/generate/client/react/ReactSimpleViewsTest.java`
+    - `skyve-core/src/test/java/org/skyve/impl/generate/client/react/ReactRouterTest.java`
+    - `skyve-core/src/test/java/org/skyve/impl/generate/client/react/ReactNativeRouterTest.java`
+    - `skyve-core/src/test/java/org/skyve/impl/generate/client/flutter/FlutterRoutingTest.java`
+    - `skyve-core/src/test/java/org/skyve/impl/generate/client/flutter/FlutterListViewTest.java`
+    - `skyve-core/src/test/java/org/skyve/impl/generate/client/flutter/FlutterSimpleViewsTest.java`
+    - `skyve-core/src/test/java/org/skyve/impl/generate/client/flutter/FlutterViewTest.java`
+    - `skyve-core/src/test/resources/org/skyve/impl/generate/client/flutter/test-template.txt`
+- Measured core-module improvement after full `skyve-core` coverage run:
+    - `skyve-core`: **74.88%** (`29,103 / 38,867`) after the latest full coverage verify — up from 74.79% in the previous loop.
+    - `org.skyve.impl.generate.client.flutter`: **12.30%** (`84 / 683`) — up from 6.59%.
+    - `org.skyve.impl.generate.client.react`: **44.07%** (`457 / 1,037`) after targeted generator tests (router/list/simple views + edit/native-edit/generator paths).
+- Measured targeted router coverage from IDE coverage runs:
+    - `org.skyve.impl.generate.client.react.ReactRouter`: **100.0%** statements (`105 / 105`) and **100.0%** branches (`28 / 28`) after adding coverage for foreign-owner `DocumentRef` handling and remaining calendar/map/tree component-name branches.
+    - `org.skyve.impl.generate.client.react.ReactNativeRouter`: **100.0%** statements (`100 / 100`) and **100.0%** branches (`18 / 18`) after adding coverage for foreign-owner `DocumentRef` handling in `viewImportsAndRoutes()`.
+    - `org.skyve.impl.generate.client.flutter.FlutterRouting`: **100.0%** statements (`159 / 159`) and **100.0%** branches (`36 / 36`) after adding whitelist-rejection coverage for calendar/list/map/tree callbacks, foreign-owner `DocumentRef` skip coverage, and remaining calendar/map/tree view-name branch cases.
+    - `org.skyve.impl.generate.client.flutter.FlutterListView`: **100.0%** statements (`56 / 56`) and **100.0%** branches (`26 / 26`) after adding null query/model fallback and early-break column selection coverage.
+    - `org.skyve.impl.generate.client.flutter.FlutterCalendarView`: **100.0%** statements (`3 / 3`).
+    - `org.skyve.impl.generate.client.flutter.FlutterMapView`: **100.0%** statements (`3 / 3`).
+    - `org.skyve.impl.generate.client.flutter.FlutterTreeView`: **100.0%** statements (`3 / 3`).
+    - Focused verification remains green: `41 passed, 0 failed` from targeted combined coverage execution.
+    - Added targeted react list/simple-view coverage:
+        - `org.skyve.impl.generate.client.react.ReactListView`: **100.0%** statements (`70 / 70`) and **100.0%** branches (`20 / 20`).
+        - `org.skyve.impl.generate.client.react.ReactCalendarView`: **100.0%** statements (`18 / 18`).
+        - `org.skyve.impl.generate.client.react.ReactMapView`: **100.0%** statements (`21 / 21`).
+        - `org.skyve.impl.generate.client.react.ReactTreeView`: **100.0%** statements (`21 / 21`).
+    - Added targeted react generator/native-edit coverage:
+        - `org.skyve.impl.generate.client.react.ReactGenerator`: **88.2%** lines (`15 / 17`) (only `main()` remains uncovered in current report).
+        - `org.skyve.impl.generate.client.react.ReactEditView`: **64.7%** lines (`44 / 68`) after no-view generation and `setViews()` path coverage.
+        - `org.skyve.impl.generate.client.react.ReactNativeEditView`: **60.6%** lines (`43 / 71`) after no-view and navigation-options path tests.
+    - Latest focused react batch remains green: `34 passed, 0 failed` (routers + list + simple views + generator + edit/native-edit).
+    - Latest full-module verification command is green: `mvn -Pcoverage -pl skyve-core -DskipIntegrationTests=true -DskipUnitTests=false verify`.
+
+### Active blockers encountered
+- Full module/re-aggregate coverage runs are currently unstable because unrelated existing tests in the workspace are failing/flaky (not introduced in this iteration), for example:
+    - Fresh aggregate baseline command did not produce `skyve-coverage/target/site/jacoco-aggregate/jacoco.csv` in this loop, so aggregate percentages could not be refreshed from artifact output.
+    - `modules.admin.Tag.actions.CopyTagToUserH2Test` intermittent failure in `skyve-war` during aggregate runs.
+    - `skyve-web` module-wide coverage run currently fails with pre-existing `SkyveContextListenerTest` unresolved-compilation errors tied to in-progress main-code edits (outside this coverage test batch).
+    - Mockito static mocks remain unavailable in `skyve-core` tests (`SubclassByteBuddyMockMaker` only), so tests that require `CORE.getCustomer()` must use thread-local persistence context setup rather than `mockStatic(CORE.class)`.
+
+### Immediate next targets
+- Continue with low-coverage pure-generator packages in `skyve-core` (`org.skyve.impl.generate.client.react` and `org.skyve.impl.generate.client.flutter`) while `skyve-web` module-wide test suite is unstable.
+- After each batch, rerun aggregate coverage command and update this section with measured deltas.
+
 ---
 
 ## Build Commands

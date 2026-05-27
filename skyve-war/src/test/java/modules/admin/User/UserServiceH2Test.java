@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.function.Executable;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
@@ -29,7 +30,6 @@ import modules.admin.domain.Group;
 import modules.admin.domain.User;
 import modules.admin.domain.UserProxy;
 import util.AbstractH2Test;
-import org.skyve.CORE;
 import org.skyve.domain.messages.ValidationException;
 
 class UserServiceH2Test extends AbstractH2Test {
@@ -161,7 +161,7 @@ class UserServiceH2Test extends AbstractH2Test {
 
 	@Test
 	void evictUserProxyDoesNotThrowForNewBean() {
-		UserExtension user = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		UserExtension user = Assertions.assertDoesNotThrow(() -> db.build(User.MODULE_NAME, User.DOCUMENT_NAME));
 		// Just verify the method doesn't throw
 		userService.evictUserProxy(user);
 	}

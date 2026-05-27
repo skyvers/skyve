@@ -17,6 +17,7 @@ import modules.admin.domain.MailLog;
 class MailLogDocumentConverterTest {
 
 	@Test
+	@SuppressWarnings("static-method")
 	void testHandlesAdminMailLogOnly() {
 		MailLogDocumentConverter converter = new MailLogDocumentConverter();
 
@@ -26,6 +27,7 @@ class MailLogDocumentConverterTest {
 	}
 
 	@Test
+	@SuppressWarnings("static-method")
 	void testConvertIndexesExpectedFields() {
 		MailLogDocumentConverter converter = new MailLogDocumentConverter();
 		MailLog mailLog = new MailLog();

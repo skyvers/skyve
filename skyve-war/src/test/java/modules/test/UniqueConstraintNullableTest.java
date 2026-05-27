@@ -10,12 +10,14 @@ import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 import org.skyve.CORE;
 import org.skyve.domain.messages.UniqueConstraintViolationException;
 import org.skyve.util.test.TestUtil;
 
 import modules.test.domain.UniqueConstraintNullable;
 
+@SuppressWarnings({ "java:S5778", "java:S1130", "java:S1854" })
 class UniqueConstraintNullableTest extends AbstractSkyveTest {
 	private UniqueConstraintNullable uniqueConstraintNullable;
 
@@ -26,7 +28,7 @@ class UniqueConstraintNullableTest extends AbstractSkyveTest {
 
 	@Test
 	void testSaveSingleInstance() throws Exception {
-		CORE.getPersistence().save(uniqueConstraintNullable);
+		Assertions.assertDoesNotThrow(() -> CORE.getPersistence().save(uniqueConstraintNullable));
 	}
 
 	@Test
@@ -71,7 +73,7 @@ class UniqueConstraintNullableTest extends AbstractSkyveTest {
 	 * it hasn't been implemented yet, so by default null values or partially nulled composite keys are ignored. 
 	 */
 	@Test
-	@Disabled
+	@Disabled("Null-inclusive unique-constraint validation is not implemented yet")
 	void testSaveTwoIdenticalInstancesWithNull() throws Exception {
 		UniqueConstraintViolationException ucve = Assert.assertThrows(UniqueConstraintViolationException.class, () -> {
 			// setup the test data

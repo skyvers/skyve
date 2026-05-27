@@ -1,6 +1,7 @@
 package modules.admin.ReportTemplate;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -8,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 
@@ -18,7 +20,8 @@ import modules.test.AbstractSkyveTest;
 /**
  * Tests for ReportTemplateBizlet covering getConstantDomainValues and validate.
  */
-public class ReportTemplateBizletTest extends AbstractSkyveTest {
+@SuppressWarnings("static-method")
+class ReportTemplateBizletTest extends AbstractSkyveTest {
 
 	private static ReportTemplateBizlet bizlet = new ReportTemplateBizlet();
 
@@ -61,19 +64,19 @@ public class ReportTemplateBizletTest extends AbstractSkyveTest {
 
 	@Test
 	void validateWhenNotScheduledAddsNoMessages() throws Exception {
-		ReportTemplateExtension bean = (ReportTemplateExtension) ReportTemplate.newInstance();
+		ReportTemplateExtension bean = ReportTemplate.newInstance();
 		bean.setScheduled(Boolean.FALSE);
 		ValidationException ve = new ValidationException();
 		bizlet.validate(bean, ve);
 		// When not scheduled, no scheduling errors should be added
 		boolean hasScheduleError = ve.getMessages().stream()
-				.anyMatch(m -> m.getText() != null && m.getText().contains("scheduled"));
+				.anyMatch(msg -> msg.getText() != null && msg.getText().contains("scheduled"));
 		assertFalse(hasScheduleError, "No schedule-related errors expected when not scheduled");
 	}
 
 	@Test
 	void validateWhenScheduledWithRequiredParametersAddsMessage() throws Exception {
-		ReportTemplateExtension bean = (ReportTemplateExtension) ReportTemplate.newInstance();
+		ReportTemplateExtension bean = ReportTemplate.newInstance();
 		bean.setScheduled(Boolean.TRUE);
 		// Add a required parameter
 		ReportParameterExtension param = new ReportParameterExtension();
@@ -83,20 +86,20 @@ public class ReportTemplateBizletTest extends AbstractSkyveTest {
 		ValidationException ve = new ValidationException();
 		bizlet.validate(bean, ve);
 		boolean hasRequiredError = ve.getMessages().stream()
-				.anyMatch(m -> m.getText() != null && m.getText().contains("required parameters"));
+				.anyMatch(msg -> msg.getText() != null && msg.getText().contains("required parameters"));
 		assertTrue(hasRequiredError, "Should have error about required parameters");
 	}
 
 	@Test
 	void validateWhenScheduledWithNoUsersToEmailAddsMessage() throws Exception {
-		ReportTemplateExtension bean = (ReportTemplateExtension) ReportTemplate.newInstance();
+		ReportTemplateExtension bean = ReportTemplate.newInstance();
 		bean.setScheduled(Boolean.TRUE);
 		// No users to email - users list should be empty by default
 		ValidationException ve = new ValidationException();
 		bizlet.validate(bean, ve);
 		boolean hasUsersError = ve.getMessages().stream()
-				.anyMatch(m -> {
-					for (String b : m.getBindings()) {
+				.anyMatch(msg -> {
+					for (String b : msg.getBindings()) {
 						if (ReportTemplate.usersToEmailPropertyName.equals(b)) return true;
 					}
 					return false;
@@ -106,14 +109,14 @@ public class ReportTemplateBizletTest extends AbstractSkyveTest {
 
 	@Test
 	void validateWhenScheduledWithSelectedHoursButNoneChosenAddsMessage() throws Exception {
-		ReportTemplateExtension bean = (ReportTemplateExtension) ReportTemplate.newInstance();
+		ReportTemplateExtension bean = ReportTemplate.newInstance();
 		bean.setScheduled(Boolean.TRUE);
 		bean.setAllHours("X"); // Selected but no hours chosen
 		ValidationException ve = new ValidationException();
 		bizlet.validate(bean, ve);
 		boolean hasHoursError = ve.getMessages().stream()
-				.anyMatch(m -> {
-					for (String b : m.getBindings()) {
+				.anyMatch(msg -> {
+					for (String b : msg.getBindings()) {
 						if (ReportTemplate.allHoursPropertyName.equals(b)) return true;
 					}
 					return false;
@@ -123,14 +126,14 @@ public class ReportTemplateBizletTest extends AbstractSkyveTest {
 
 	@Test
 	void validateWhenScheduledWithSelectedDaysButNoneChosenAddsMessage() throws Exception {
-		ReportTemplateExtension bean = (ReportTemplateExtension) ReportTemplate.newInstance();
+		ReportTemplateExtension bean = ReportTemplate.newInstance();
 		bean.setScheduled(Boolean.TRUE);
 		bean.setAllDays("X"); // Selected but no days chosen
 		ValidationException ve = new ValidationException();
 		bizlet.validate(bean, ve);
 		boolean hasDaysError = ve.getMessages().stream()
-				.anyMatch(m -> {
-					for (String b : m.getBindings()) {
+				.anyMatch(msg -> {
+					for (String b : msg.getBindings()) {
 						if (ReportTemplate.allDaysPropertyName.equals(b)) return true;
 					}
 					return false;
@@ -140,14 +143,14 @@ public class ReportTemplateBizletTest extends AbstractSkyveTest {
 
 	@Test
 	void validateWhenScheduledWithSelectedMonthsButNoneChosenAddsMessage() throws Exception {
-		ReportTemplateExtension bean = (ReportTemplateExtension) ReportTemplate.newInstance();
+		ReportTemplateExtension bean = ReportTemplate.newInstance();
 		bean.setScheduled(Boolean.TRUE);
 		bean.setAllMonths("X"); // Selected but no months chosen
 		ValidationException ve = new ValidationException();
 		bizlet.validate(bean, ve);
 		boolean hasMonthsError = ve.getMessages().stream()
-				.anyMatch(m -> {
-					for (String b : m.getBindings()) {
+				.anyMatch(msg -> {
+					for (String b : msg.getBindings()) {
 						if (ReportTemplate.allMonthsPropertyName.equals(b)) return true;
 					}
 					return false;
@@ -157,14 +160,14 @@ public class ReportTemplateBizletTest extends AbstractSkyveTest {
 
 	@Test
 	void validateWhenScheduledWithSelectedWeekdaysButNoneChosenAddsMessage() throws Exception {
-		ReportTemplateExtension bean = (ReportTemplateExtension) ReportTemplate.newInstance();
+		ReportTemplateExtension bean = ReportTemplate.newInstance();
 		bean.setScheduled(Boolean.TRUE);
 		bean.setAllWeekdays("X"); // Selected but no weekdays chosen
 		ValidationException ve = new ValidationException();
 		bizlet.validate(bean, ve);
 		boolean hasWeekdaysError = ve.getMessages().stream()
-				.anyMatch(m -> {
-					for (String b : m.getBindings()) {
+				.anyMatch(msg -> {
+					for (String b : msg.getBindings()) {
 						if (ReportTemplate.allWeekdaysPropertyName.equals(b)) return true;
 					}
 					return false;
@@ -174,7 +177,7 @@ public class ReportTemplateBizletTest extends AbstractSkyveTest {
 
 	@Test
 	void validateWhenScheduledWithBothDaysAndWeekdaysSelectedAddsMessage() throws Exception {
-		ReportTemplateExtension bean = (ReportTemplateExtension) ReportTemplate.newInstance();
+		ReportTemplateExtension bean = ReportTemplate.newInstance();
 		bean.setScheduled(Boolean.TRUE);
 		bean.setAllDays("X");
 		bean.setAllWeekdays("X");
@@ -183,8 +186,8 @@ public class ReportTemplateBizletTest extends AbstractSkyveTest {
 		ValidationException ve = new ValidationException();
 		bizlet.validate(bean, ve);
 		boolean hasBothError = ve.getMessages().stream()
-				.anyMatch(m -> {
-					for (String b : m.getBindings()) {
+				.anyMatch(msg -> {
+					for (String b : msg.getBindings()) {
 						if (ReportTemplate.allDaysPropertyName.equals(b)) return true;
 						if (ReportTemplate.allWeekdaysPropertyName.equals(b)) return true;
 					}
@@ -197,7 +200,7 @@ public class ReportTemplateBizletTest extends AbstractSkyveTest {
 
 	@Test
 	void getDynamicDomainValuesForDocumentNameWithNullModuleReturnsEmptyList() throws Exception {
-		ReportTemplateExtension bean = (ReportTemplateExtension) ReportTemplate.newInstance();
+		ReportTemplateExtension bean = ReportTemplate.newInstance();
 		bean.setModuleName(null);
 		List<DomainValue> result = bizlet.getDynamicDomainValues(ReportTemplate.documentNamePropertyName, bean);
 		assertNotNull(result);
@@ -206,7 +209,7 @@ public class ReportTemplateBizletTest extends AbstractSkyveTest {
 
 	@Test
 	void getDynamicDomainValuesForGenerateDocumentNameWithNullModuleReturnsEmptyList() throws Exception {
-		ReportTemplateExtension bean = (ReportTemplateExtension) ReportTemplate.newInstance();
+		ReportTemplateExtension bean = ReportTemplate.newInstance();
 		bean.setGenerateModuleName(null);
 		List<DomainValue> result = bizlet.getDynamicDomainValues(ReportTemplate.generateDocumentNamePropertyName, bean);
 		assertNotNull(result);
@@ -217,7 +220,7 @@ public class ReportTemplateBizletTest extends AbstractSkyveTest {
 
 	@Test
 	void preRerenderWithReportTypeSourceClearsGenerateFields() throws Exception {
-		ReportTemplateExtension bean = (ReportTemplateExtension) ReportTemplate.newInstance();
+		ReportTemplateExtension bean = ReportTemplate.newInstance();
 		bean.setGenerateExisting(ReportTemplate.GenerateExisting.generate);
 		bean.setGenerateModuleName("admin");
 		bean.setGenerateDocumentName("User");
@@ -230,7 +233,7 @@ public class ReportTemplateBizletTest extends AbstractSkyveTest {
 
 	@Test
 	void preRerenderWithScheduledFalseDoesNotThrow() throws Exception {
-		ReportTemplateExtension bean = (ReportTemplateExtension) ReportTemplate.newInstance();
+		ReportTemplateExtension bean = Assertions.assertDoesNotThrow(ReportTemplate::newInstance);
 		bean.setScheduled(Boolean.FALSE);
 		// Should not throw any exception
 		bizlet.preRerender(ReportTemplate.scheduledPropertyName, bean, null);
@@ -238,7 +241,7 @@ public class ReportTemplateBizletTest extends AbstractSkyveTest {
 
 	@Test
 	void preRerenderWithUnknownSourceDoesNotThrow() throws Exception {
-		ReportTemplateExtension bean = (ReportTemplateExtension) ReportTemplate.newInstance();
+		ReportTemplateExtension bean = Assertions.assertDoesNotThrow(ReportTemplate::newInstance);
 		bizlet.preRerender("unknownSource", bean, null);
 	}
 
@@ -246,13 +249,13 @@ public class ReportTemplateBizletTest extends AbstractSkyveTest {
 
 	@Test
 	void newInstanceSetsDefaultSchedulingCodes() throws Exception {
-		ReportTemplateExtension bean = (ReportTemplateExtension) ReportTemplate.newInstance();
+		ReportTemplateExtension bean = ReportTemplate.newInstance();
 		ReportTemplateExtension result = bizlet.newInstance(bean);
 		assertNotNull(result);
 		// All scheduling fields should be set to "*" (All)
-		assertTrue("*".equals(result.getAllHours()), "allHours should be '*'");
-		assertTrue("*".equals(result.getAllDays()), "allDays should be '*'");
-		assertTrue("*".equals(result.getAllMonths()), "allMonths should be '*'");
-		assertTrue("*".equals(result.getAllWeekdays()), "allWeekdays should be '*'");
+		assertEquals("*", result.getAllHours(), "allHours should be '*'");
+		assertEquals("*", result.getAllDays(), "allDays should be '*'");
+		assertEquals("*", result.getAllMonths(), "allMonths should be '*'");
+		assertEquals("*", result.getAllWeekdays(), "allWeekdays should be '*'");
 	}
 }
