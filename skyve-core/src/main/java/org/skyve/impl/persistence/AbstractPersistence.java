@@ -1,5 +1,6 @@
 package org.skyve.impl.persistence;
 
+import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -160,7 +161,7 @@ public abstract class AbstractPersistence implements Persistence {
 	}
 
 	public abstract void disposeAllPersistenceInstances();
-	public abstract void generateDDL(@Nullable String dropDDLFilePath, @Nullable String createDDLFilePath, @Nullable String updateDDLFilePath);
+	public abstract void generateDDL(@Nullable List<String> dropDDL, @Nullable List<String> createDDL, @Nullable List<String> updateDDL);
 
 
 	public abstract @Nonnull String getDocumentEntityName(@Nonnull String moduleName, @Nonnull String documentName);

@@ -153,9 +153,11 @@ public class BackupJob extends CancellableJob {
 		
 		BackupUtil.writeTables(tables, new File(backupDir, "tables.txt"));
 
-		p.generateDDL(new File(backupDir, "drop.sql").getAbsolutePath(),
-				new File(backupDir, "create.sql").getAbsolutePath(),
-				null);
+		List<String> dropDDL = new java.util.ArrayList<>();
+		List<String> createDDL = new java.util.ArrayList<>();
+		p.generateDDL(dropDDL, createDDL, null);
+		BackupUtil.writeScript(dropDDL, new File(backupDir, "drop.sql"));
+		BackupUtil.writeScript(createDDL, new File(backupDir, "create.sql"));
 		boolean problem = false; // indicates if the backup had a problem
 		try {
 			try {

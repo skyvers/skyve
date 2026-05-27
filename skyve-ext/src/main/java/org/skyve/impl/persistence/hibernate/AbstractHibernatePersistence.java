@@ -1,9 +1,6 @@
 package org.skyve.impl.persistence.hibernate;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.sql.Connection;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -45,6 +42,7 @@ import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.boot.spi.MetadataImplementor;
 import org.hibernate.cache.CacheException;
 import org.hibernate.cfg.AvailableSettings;
+import org.hibernate.engine.config.spi.ConfigurationService;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.event.service.spi.EventListenerRegistry;
 import org.hibernate.event.spi.EventType;
@@ -57,8 +55,12 @@ import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
 import org.hibernate.service.spi.SessionFactoryServiceRegistry;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
-import org.hibernate.tool.hbm2ddl.SchemaUpdate;
 import org.hibernate.tool.schema.TargetType;
+import org.hibernate.tool.schema.internal.ExceptionHandlerLoggedImpl;
+import org.hibernate.tool.schema.spi.ExecutionOptions;
+import org.hibernate.tool.schema.spi.SchemaManagementTool;
+import org.hibernate.tool.schema.spi.ScriptTargetOutput;
+import org.hibernate.tool.schema.spi.TargetDescriptor;
 import org.hibernate.type.StringType;
 import org.hibernate.type.Type;
 import org.skyve.EXT;
@@ -135,8 +137,8 @@ import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
 import org.skyve.util.logging.Category;
-import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
+import org.slf4j.Logger;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -545,35 +547,94 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 */
 	@Override
 	@SuppressWarnings("resource")
-	public final void generateDDL(String dropDDLFilePath, String createDDLFilePath, String updateDDLFilePath) {
+	public final void generateDDL(List<String> dropDDL, List<String> createDDL, List<String> updateDDL) {
 		try {
-			if (dropDDLFilePath != null) {
-				new SchemaExport().setOutputFile(dropDDLFilePath).drop(EnumSet.of(TargetType.SCRIPT), metadata);
+			if (dropDDL != null) {
+				new SchemaExport().perform(SchemaExport.Action.DROP, metadata, new ListScriptTargetOutput(dropDDL));
 			}
-			if (createDDLFilePath != null) {
-				new SchemaExport().setOutputFile(createDDLFilePath).createOnly(EnumSet.of(TargetType.SCRIPT), metadata);
+			if (createDDL != null) {
+				new SchemaExport().perform(SchemaExport.Action.CREATE, metadata, new ListScriptTargetOutput(createDDL));
 			}
-			if (updateDDLFilePath != null) {
-				new SchemaUpdate().setOutputFile(updateDDLFilePath).execute(EnumSet.of(TargetType.SCRIPT), metadata);
-				try (FileWriter fw = new FileWriter(updateDDLFilePath, true)) {
-					try (BufferedWriter bw = new BufferedWriter(fw)) {
-						for (String ddl : DDLDelegate.migrate(((MetadataImplementor) metadata).getMetadataBuildingOptions().getServiceRegistry(),
-																metadata,
-																AbstractHibernatePersistence.getDialect(),
-																false)) {
-							bw.write(ddl);
-							bw.write(';');
-							bw.newLine();
-						}
+			if (updateDDL != null) {
+				// NOTE: In later Hibernate, the old org.hibernate.tool.hbm2ddl.SchemaUpdate path appears to be gone
+				// from the published 6.6/7.0 Javadocs, and the supported API is the schema tooling SPI under org.hibernate.tool.schema.
+				// That SPI does support in-memory collection, but through SchemaMigrator plus TargetDescriptor and ScriptTargetOutput, not through a convenience SchemaUpdate wrapper.
+				MetadataImplementor metadataImplementor = (MetadataImplementor) metadata;
+				org.hibernate.service.ServiceRegistry serviceRegistry = metadataImplementor.getMetadataBuildingOptions().getServiceRegistry();
+				Map<?, ?> configurationValues = serviceRegistry.getService(ConfigurationService.class).getSettings();
+
+				ExecutionOptions executionOptions = new ExecutionOptions() {
+					@Override
+					public Map<?, ?> getConfigurationValues() {
+						return configurationValues;
 					}
+
+					@Override
+					public boolean shouldManageNamespaces() {
+						return false;
+					}
+
+					@Override
+					public org.hibernate.tool.schema.spi.ExceptionHandler getExceptionHandler() {
+						return ExceptionHandlerLoggedImpl.INSTANCE;
+					}
+				};
+
+				TargetDescriptor targetDescriptor = new TargetDescriptor() {
+					@Override
+					public EnumSet<TargetType> getTargetTypes() {
+						return EnumSet.of(TargetType.SCRIPT);
+					}
+
+					@Override
+					public ScriptTargetOutput getScriptTargetOutput() {
+						return new ListScriptTargetOutput(updateDDL);
+					}
+				};
+
+				serviceRegistry.getService(SchemaManagementTool.class)
+							.getSchemaMigrator(configurationValues)
+							.doMigration(metadata, executionOptions, targetDescriptor);
+
+				updateDDL.addAll(DDLDelegate.migrate(serviceRegistry,
+												metadata,
+												AbstractHibernatePersistence.getDialect(),
+												false));
+			}
+		}
+		catch (Exception e) {
+			throw new DomainException("Could not generate DDL", e);
+		}
+	}
+
+	private static final class ListScriptTargetOutput implements ScriptTargetOutput {
+		private final List<String> commands;
+
+		private ListScriptTargetOutput(List<String> commands) {
+			this.commands = commands;
+		}
+
+		@Override
+		public void prepare() {
+			// nothing to prepare
+		}
+
+		@Override
+		public void accept(String command) {
+			if (command != null) {
+				String sql = command.trim();
+				if (! sql.isEmpty()) {
+					if (sql.endsWith(";")) {
+						sql = sql.substring(0, sql.length() - 1);
+					}
+					commands.add(sql);
 				}
 			}
 		}
-		catch (IOException e) {
-			throw new DomainException("Could not create temporary DDL file", e);
-		}
-		catch (Exception e) {
-			throw new DomainException("Could not read temporary DDL file", e);
+
+		@Override
+		public void release() {
+			// nothing to release
 		}
 	}
 

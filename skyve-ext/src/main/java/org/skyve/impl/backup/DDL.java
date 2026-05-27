@@ -1,8 +1,7 @@
 package org.skyve.impl.backup;
 
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -20,14 +19,8 @@ public class DDL {
 	throws Exception {
 		List<String> drops = null;
 		if (dropScript == null) {
-			Path path = Files.createTempFile("drop", ".sql");
-			try {
-				AbstractPersistence.get().generateDDL(path.toString(), null, null);
-				drops = BackupUtil.readScript(path.toFile());
-			}
-			finally {
-				Files.deleteIfExists(path);
-			}
+			drops = new ArrayList<>();
+			AbstractPersistence.get().generateDDL(drops, null, null);
 		}
 		else {
 			drops = BackupUtil.readScript(dropScript);
@@ -43,14 +36,8 @@ public class DDL {
 	throws Exception {
 		List<String> creates = null;
 		if (createScript == null) {
-			Path path = Files.createTempFile("create", ".sql");
-			try {
-				AbstractPersistence.get().generateDDL(null, path.toString(), null);
-				creates = BackupUtil.readScript(path.toFile());
-			}
-			finally {
-				Files.deleteIfExists(path);
-			}
+			creates = new ArrayList<>();
+			AbstractPersistence.get().generateDDL(null, creates, null);
 		}
 		else {
 			creates = BackupUtil.readScript(createScript);
@@ -65,14 +52,8 @@ public class DDL {
 	public static List<String> sync(boolean execute)
 	throws Exception {
 		List<String> updates = null;
-		Path path = Files.createTempFile("update", ".sql");
-		try {
-			AbstractPersistence.get().generateDDL(null, null, path.toString());
-			updates = BackupUtil.readScript(path.toFile());
-		}
-		finally {
-			Files.deleteIfExists(path);
-		}
+		updates = new ArrayList<>();
+		AbstractPersistence.get().generateDDL(null, null, updates);
 		if (execute) {
 			BackupUtil.executeScript(updates);
 		}

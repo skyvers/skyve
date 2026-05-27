@@ -3,12 +3,7 @@ package modules.test;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.io.File;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -1597,26 +1592,16 @@ class PersistenceTests extends AbstractSkyveTestDispose {
 
 	@Test
 	void testGenerateDDLCreateScript() throws Exception {
-		File createFile = Files.createTempFile("skyve-create", ".sql").toFile();
-		try {
-			((AbstractHibernatePersistence) p).generateDDL(null, createFile.getAbsolutePath(), null);
-			Assert.assertTrue("DDL create script should have been written", createFile.length() > 0);
-		}
-		finally {
-			createFile.delete();
-		}
+		List<String> createDDL = new ArrayList<>();
+		((AbstractHibernatePersistence) p).generateDDL(null, createDDL, null);
+		Assert.assertTrue("DDL create script should have been generated", ! createDDL.isEmpty());
 	}
 
 	@Test
 	void testGenerateDDLDropScript() throws Exception {
-		File dropFile = Files.createTempFile("skyve-drop", ".sql").toFile();
-		try {
-			((AbstractHibernatePersistence) p).generateDDL(dropFile.getAbsolutePath(), null, null);
-			Assert.assertTrue("DDL drop script should have been written", dropFile.length() > 0);
-		}
-		finally {
-			dropFile.delete();
-		}
+		List<String> dropDDL = new ArrayList<>();
+		((AbstractHibernatePersistence) p).generateDDL(dropDDL, null, null);
+		Assert.assertTrue("DDL drop script should have been generated", ! dropDDL.isEmpty());
 	}
 
 	@Test
