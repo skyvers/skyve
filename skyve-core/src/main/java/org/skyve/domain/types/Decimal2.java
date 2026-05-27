@@ -45,6 +45,7 @@ public class Decimal2 extends Decimal {
 	 * 
 	 * @param value
 	 */
+	@SuppressWarnings("java:S2111") // allow double literal constructor
 	public Decimal2(double value) {
 		this.value = new BigDecimal(value, MC).setScale(2, MC.getRoundingMode());
 	}
