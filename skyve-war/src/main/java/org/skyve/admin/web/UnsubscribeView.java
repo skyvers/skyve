@@ -17,8 +17,10 @@ import modules.admin.Subscription.SubscriptionService;
 public class UnsubscribeView extends PublicFacesView {
 	private static final long serialVersionUID = 6713621260342289323L;
 	@Inject 
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient SubscriptionService subscriptionService;
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient CommunicationService communicationService;
 
 	// indicates if the RSVP processing on HTTP GET was successful or not

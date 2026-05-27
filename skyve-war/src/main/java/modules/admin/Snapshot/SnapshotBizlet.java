@@ -15,6 +15,7 @@ import modules.admin.domain.Snapshot;
 
 public class SnapshotBizlet extends Bizlet<Snapshot> {
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient SnapshotService snapshotService;
 
 	/**

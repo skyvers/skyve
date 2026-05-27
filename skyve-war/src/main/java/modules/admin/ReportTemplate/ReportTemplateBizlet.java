@@ -32,6 +32,7 @@ import modules.admin.domain.ReportTemplate;
 
 public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient UserService userService;
 
 	public static final String FREEMARKER_HTML_TEMPLATE_EXTENSION = "ftlh";

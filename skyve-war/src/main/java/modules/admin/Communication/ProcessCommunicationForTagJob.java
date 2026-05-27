@@ -30,6 +30,7 @@ import modules.admin.domain.Communication;
  */
 public class ProcessCommunicationForTagJob extends Job {
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient TagService tagService;
 
 	@Override

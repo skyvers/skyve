@@ -13,10 +13,12 @@ import modules.admin.Country.CountryService;
 import modules.admin.domain.Startup;
 
 public class StartupBizlet extends Bizlet<StartupExtension> {
-	@Inject
-	private transient CountryService countryService;
 	public static final String MAP_LAYER_GMAP = "google.maps.MapTypeId.ROADMAP";
 	public static final String MAP_LAYER_OPEN_STREET_MAP = "[L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19, attribution: '&copy; <a href=\\\\\\\"https://www.openstreetmap.org/copyright\\\\\\\">OpenStreetMap</a> contributors'})]";
+
+	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
+	private transient CountryService countryService;
 
 	@Override
 	public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {

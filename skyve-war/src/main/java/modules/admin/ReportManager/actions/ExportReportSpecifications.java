@@ -24,6 +24,7 @@ import modules.admin.domain.ReportTemplate;
  */
 public class ExportReportSpecifications extends DownloadAction<ReportManagerExtension> {
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient ReportManagerService reportManagerService;
 
 	/**

@@ -33,6 +33,7 @@ public class CommunicationBizlet extends Bizlet<Communication> {
 			+ JobsBizlet.SYSTEM_JOB_NOTIFICATION_LINK_TO_JOBS;
 
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient CommunicationService communicationService;
 
 	@Override

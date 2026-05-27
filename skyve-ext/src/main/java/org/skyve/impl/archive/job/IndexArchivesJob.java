@@ -83,9 +83,11 @@ public class IndexArchivesJob extends CancellableJob {
 
     @Inject
     @Any
+    @SuppressWarnings("java:S6813") // allow member injection
     private Instance<DocumentConverter> documentConverters;
 
     @Inject
+    @SuppressWarnings("java:S6813") // allow member injection
     private Persistence persistence;
 
     /**

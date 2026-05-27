@@ -5,10 +5,10 @@ import modules.admin.MailLog.MailLogService;
 import modules.admin.domain.MailLogList;
 
 public class MailLogListExtension extends MailLogList {
-
 	private static final long serialVersionUID = 4043844475789272707L;
 
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient MailLogService mailLogService;
 
 	/**

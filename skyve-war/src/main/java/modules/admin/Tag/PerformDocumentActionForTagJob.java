@@ -46,6 +46,7 @@ import modules.admin.domain.DataMaintenance.EvictOption;
  */
 public class PerformDocumentActionForTagJob extends Job {
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient TagService tagService;
 
 	@Override

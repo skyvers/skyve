@@ -38,6 +38,7 @@ import modules.admin.domain.DownloadFolder;
 
 public class BackupsModel extends ListModel<DataMaintenance> {
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient DataMaintenanceService dataMaintenanceService;
 	private Document drivingDocument = null;
 	private Set<String> projections = new TreeSet<>();

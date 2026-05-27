@@ -34,10 +34,10 @@ import modules.admin.domain.User;
  * registration email to confirm their user account.
  */
 public class Register implements ServerSideAction<SelfRegistrationExtension> {
-
 	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(Register.class);
 
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient GeoIPService geoIPService;
 
 	@Override

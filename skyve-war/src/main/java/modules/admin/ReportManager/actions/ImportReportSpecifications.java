@@ -46,7 +46,9 @@ public class ImportReportSpecifications extends UploadAction<ReportManagerExtens
 	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ImportReportSpecifications.class);
 	private static final int IMPORT_ZIP_MAX_ENTRIES = 2000;
 	private static final int IMPORT_ZIP_MAX_UNCOMPRESSED_MB = 100;
+
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient ReportManagerService reportManagerService;
 
 	/**

@@ -49,6 +49,7 @@ public class FileUploadView extends AbstractUploadView {
 
 	@Inject
 	@ManagedProperty(value = "#{param." + AbstractWebContext.ACTION_NAME + "}")
+	@SuppressWarnings("java:S6813") // allow member injection
 	private String action;
 
 	public FileUploadView() {

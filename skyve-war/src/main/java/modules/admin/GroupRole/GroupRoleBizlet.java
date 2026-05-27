@@ -16,6 +16,7 @@ import modules.admin.domain.GroupRole;
 public class GroupRoleBizlet extends Bizlet<GroupRole> {
 
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient UserService userService;
 
 	@Override

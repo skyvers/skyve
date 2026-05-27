@@ -35,6 +35,7 @@ import modules.admin.domain.UserDashboard;
 
 public class UserDashboardExtension extends UserDashboard {
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient UserService userService;
 
 	private static final long serialVersionUID = -6841455574804123970L;
@@ -61,6 +62,7 @@ public class UserDashboardExtension extends UserDashboard {
 	}
 
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient Persistence persistence;
 
 	@Override

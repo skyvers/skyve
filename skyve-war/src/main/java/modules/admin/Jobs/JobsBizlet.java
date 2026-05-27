@@ -12,6 +12,7 @@ public class JobsBizlet extends Bizlet<Jobs> {
 	public static final String SYSTEM_JOB_NOTICATION_DEFAULT_BODY = "The Job is complete." + SYSTEM_JOB_NOTIFICATION_LINK_TO_JOBS;
 
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient JobsService jobsService;
 
 	@Override

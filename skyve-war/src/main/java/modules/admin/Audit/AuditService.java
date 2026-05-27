@@ -38,7 +38,9 @@ import modules.admin.domain.Audit.Operation;
  */
 public class AuditService {
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient Persistence persistence;
+
 	private ArchiveRetriever retriever = ArchiveRetriever.getInstance();
 
 	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(AuditService.class);

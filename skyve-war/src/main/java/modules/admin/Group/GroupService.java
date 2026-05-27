@@ -18,6 +18,7 @@ import modules.admin.domain.Group;
 @Default
 public class GroupService {
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient Persistence persistence;
 
 	/**

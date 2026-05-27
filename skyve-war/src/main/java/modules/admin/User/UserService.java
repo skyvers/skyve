@@ -46,9 +46,11 @@ import modules.admin.domain.UserProxy;
 @Default
 public class UserService {
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient Persistence pers;
 
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient GroupService groupService;
 
 	/**

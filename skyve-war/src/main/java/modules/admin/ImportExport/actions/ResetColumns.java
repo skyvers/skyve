@@ -11,6 +11,7 @@ import modules.admin.domain.ImportExport;
 
 public class ResetColumns implements ServerSideAction<ImportExportExtension> {
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient ImportExportService importExportService;
 
 	@Override

@@ -8,6 +8,7 @@ import modules.admin.domain.UserDashboard;
 
 public class UserDashboardBizlet extends Bizlet<UserDashboard> {
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient UserService userService;
 
 	@Override

@@ -23,10 +23,12 @@ public abstract class AbstractUploadView extends LocalisableView {
 
 	@Inject
 	@ManagedProperty(value = "#{param." + AbstractWebContext.CONTEXT_NAME + "}")
+	@SuppressWarnings("java:S6813") // allow member injection
 	private String context;
 
 	@Inject
 	@ManagedProperty(value = "#{param." + AbstractWebContext.BINDING_NAME + "}")
+	@SuppressWarnings("java:S6813") // allow member injection
 	private String binding;
 
 	// Indicates that there is a session and a skyve user in that session.

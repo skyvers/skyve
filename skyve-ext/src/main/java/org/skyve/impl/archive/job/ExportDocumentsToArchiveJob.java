@@ -53,6 +53,7 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
     private static final String REQD_BEAN_INTERFACE = ArchiveableBean.class.getName();
 
     @Inject
+    @SuppressWarnings("java:S6813") // allow member injection
     private transient Persistence persistence;
 
     private transient FileLockRepo repo = FileLockRepo.getInstance();

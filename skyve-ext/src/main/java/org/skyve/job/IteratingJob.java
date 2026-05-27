@@ -12,6 +12,7 @@ import jakarta.inject.Inject;
 public abstract class IteratingJob<T> extends CancellableJob {
 
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient Persistence persistence;
 
 	private int numProcessedElements;

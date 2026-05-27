@@ -18,6 +18,7 @@ import modules.admin.domain.UserLoginRecord;
  */
 public class DifferentCountryLoginNotificationJob extends Job {
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient ContactService contactService;
 
 	public static final String JOB_NAME = "jDifferentCountryLoginNotification";

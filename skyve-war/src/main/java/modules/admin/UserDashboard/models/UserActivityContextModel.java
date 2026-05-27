@@ -19,6 +19,7 @@ import modules.admin.domain.UserDashboard;
 
 public class UserActivityContextModel extends ChartModel<UserDashboard> {
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient UserService userService;
 
 	@Override

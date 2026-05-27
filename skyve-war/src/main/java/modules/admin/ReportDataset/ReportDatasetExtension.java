@@ -26,9 +26,10 @@ import modules.admin.ReportParameter.ReportParameterExtension;
 import modules.admin.domain.ReportDataset;
 
 public class ReportDatasetExtension extends ReportDataset {
-
 	private static final long serialVersionUID = -688307133122437337L;
+
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient ReportDatasetService reportDatasetService;
 
 	/**

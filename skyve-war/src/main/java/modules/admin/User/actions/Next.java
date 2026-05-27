@@ -9,8 +9,8 @@ import modules.admin.User.UserExtension;
 import modules.admin.User.UserService;
 
 public class Next implements ServerSideAction<UserExtension> {
-
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient UserService userService;
 
 	@Override

@@ -19,6 +19,7 @@ public class GroupExtension extends Group {
 	private static final long serialVersionUID = 2678377209921744911L;
 
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient UserService userService;
 
 	private boolean determinedCandidateRoles = false;

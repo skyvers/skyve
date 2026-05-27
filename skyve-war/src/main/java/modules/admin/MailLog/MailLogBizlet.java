@@ -9,6 +9,7 @@ import modules.admin.domain.MailLog;
 
 public class MailLogBizlet extends Bizlet<MailLog> {
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient MailLogService mailLogService;
 
 	@Override

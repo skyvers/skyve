@@ -39,6 +39,7 @@ public class RecoverArchiveJob extends CancellableJob {
     private static final ArchiveLuceneIndexerSingleton archiveLuceneIndexerSingleton = ArchiveLuceneIndexerSingleton.getInstance();
 
     @Inject
+    @SuppressWarnings("java:S6813") // allow member injection
     private Persistence persistence;
 
     private FileLockRepo repo = FileLockRepo.getInstance();

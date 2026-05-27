@@ -10,6 +10,7 @@ import modules.admin.ImportExport.ImportExportService;
 
 public class GetImportTemplate extends DownloadAction<ImportExportExtension> {
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient ImportExportService importExportService;
 
 	@Override

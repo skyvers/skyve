@@ -18,6 +18,7 @@ import modules.admin.domain.ImportExport.Mode;
 
 public class ImportExportBizlet extends Bizlet<ImportExportExtension> {
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient ImportExportService importExportService;
 
 	@Override

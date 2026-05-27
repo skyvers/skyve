@@ -14,6 +14,7 @@ import modules.admin.domain.User.WizardState;
 
 public class New implements ServerSideAction<UserExtension> {
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient UserService userService;
 
 	@Override

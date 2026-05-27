@@ -16,9 +16,11 @@ import modules.admin.domain.ReportManager;
 import modules.admin.domain.ReportTemplate;
 
 public class ReportManagerExtension extends ReportManager {
-	@Inject
-	private transient ReportManagerService reportManagerService;
 	private static final long serialVersionUID = 4946402450868738555L;
+
+	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
+	private transient ReportManagerService reportManagerService;
 
 	public void marshallReportBean(final ReportTemplate report, final String name) {
 		// marshall each report to a JSON string

@@ -13,6 +13,7 @@ import modules.admin.domain.Jobs;
  */
 public class Refresh implements ServerSideAction<Jobs> {
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient JobsService jobsService;
 
 	@Override

@@ -23,8 +23,10 @@ import modules.admin.domain.Contact;
  */
 public class TestSend implements ServerSideAction<Communication> {
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient TagService tagService;
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient UserService userService;
 
 	@Override

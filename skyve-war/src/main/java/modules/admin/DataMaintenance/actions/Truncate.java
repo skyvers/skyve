@@ -14,6 +14,7 @@ import modules.admin.domain.DataMaintenance;
 
 public class Truncate implements ServerSideAction<DataMaintenance> {
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient UserService userService;
 
 	@Override

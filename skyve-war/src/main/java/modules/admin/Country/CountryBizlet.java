@@ -8,6 +8,7 @@ import jakarta.inject.Inject;
 
 public class CountryBizlet extends Bizlet<CountryExtension> {
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient CountryService countryService;
 
 	/**

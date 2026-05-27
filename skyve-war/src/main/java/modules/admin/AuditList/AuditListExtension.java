@@ -9,6 +9,7 @@ public class AuditListExtension extends AuditList {
 	private static final long serialVersionUID = -2480022026425411282L;
 
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient AuditService auditService;
 
 	/**

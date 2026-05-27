@@ -37,6 +37,7 @@ import modules.admin.domain.User.WizardState;
 
 public class UserBizlet extends Bizlet<UserExtension> {
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient UserService userService;
 
 	/**

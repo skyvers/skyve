@@ -28,6 +28,7 @@ import modules.admin.domain.DataGroup;
 public class DataGroupService {
 	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(DataGroupService.class);
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient Persistence pers;
 
 	/**

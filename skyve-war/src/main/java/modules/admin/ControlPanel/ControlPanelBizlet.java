@@ -33,6 +33,7 @@ import modules.admin.domain.Tag;
 
 public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient UserService userService;
 
 	@Override

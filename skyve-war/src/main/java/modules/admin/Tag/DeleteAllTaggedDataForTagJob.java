@@ -25,6 +25,7 @@ import jakarta.inject.Inject;
  */
 public class DeleteAllTaggedDataForTagJob extends Job {
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient TagService tagService;
 
 	@Override

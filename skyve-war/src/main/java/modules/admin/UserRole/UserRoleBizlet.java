@@ -11,7 +11,8 @@ import modules.admin.domain.UserRole;
 
 public class UserRoleBizlet extends Bizlet<UserRole> {
 	@Inject
-	private transient UserService userService;
+	@SuppressWarnings("java:S6813") // allow member injection
+	private UserService userService;
 
 	@Override
 	public List<DomainValue> getVariantDomainValues(String fieldName)

@@ -41,6 +41,7 @@ public class ContentUploadView extends AbstractUploadView {
 
 	@Inject
 	@ManagedProperty(value = "#{param." + AbstractWebContext.RESOURCE_FILE_NAME + "}")
+	@SuppressWarnings("java:S6813") // allow member injection
 	private String contentBinding;
 
 	public ContentUploadView() {

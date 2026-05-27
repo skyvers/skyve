@@ -33,13 +33,15 @@ import modules.admin.Country.CountryService;
 import modules.admin.domain.Startup;
 
 public class StartupExtension extends Startup {
-
-	@Inject
-	private transient Customer customer;
-	@Inject
-	private transient CountryService countryService;
-
 	private static final long serialVersionUID = -8931459527432227257L;
+
+	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
+	private transient Customer customer;
+
+	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
+	private transient CountryService countryService;
 
 	static final String ACCOUNT_STANZA_KEY = "account";
 	static final String ACCOUNT_ALLOW_SELF_REGISTRATION_KEY = "allowUserSelfRegistration";

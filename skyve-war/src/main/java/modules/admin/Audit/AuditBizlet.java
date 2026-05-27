@@ -9,10 +9,10 @@ import org.skyve.web.WebContext;
 
 import jakarta.inject.Inject;
 import modules.admin.domain.Audit;
-
 public class AuditBizlet extends Bizlet<Audit> {
 
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient AuditService auditService;
 
 	@Override
