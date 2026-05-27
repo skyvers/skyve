@@ -1,8 +1,8 @@
 # Coverage Improvement Plan
 
-**Goal:** 80% line coverage of the _testable_ framework surface area, measured by the JaCoCo aggregate report (`skyve-coverage`). The admin module domain tests are included as they contribute to the aggregate and exercise framework code paths heavily.
+**Goal:** Minimum 80% line coverage for each in-scope sub-project in the JaCoCo aggregate report (`skyve-coverage`) and at least 80% overall aggregate coverage across the combined testable surface. The admin module domain tests are included as they contribute to the aggregate and exercise framework code paths heavily.
 
-**Measurement:** JaCoCo aggregate report produced by `skyve-coverage`. Tests in any module (including `skyve-war`) that call framework classes contribute to the aggregate.
+**Measurement:** JaCoCo aggregate report produced by `skyve-coverage`. Success criteria are: (1) each in-scope sub-project reaches at least 80% line coverage in the aggregate report view, and (2) the overall combined aggregate reaches at least 80%. Tests in any module (including `skyve-war`) that call framework classes contribute to the aggregate.
 
 **Out of scope:** `skyve-ejb` — ignore this module entirely. Do not write tests in it and do not count its classes against coverage targets.
 
@@ -14,15 +14,12 @@
 |-------|-------------|-------------|----------|
 | Aggregate (all) | 48 037 | 101 768 | **47.2%** |
 | Framework testable | 36 424 | 61 697 | **59.0%** |
-| Framework skipped | 5 962 | 23 106 | 25.8% |
 | Admin/module code | 5 651 | 16 965 | 33.3% |
 | `skyve-core` standalone | 22 582 | 38 732 | 58.3% |
 | `skyve-web` standalone | 2 350 | 23 761 | 9.9% |
 
-**Primary target: 80% of fully testable surface = ~67 120 lines covered (gap from current: ~19 083 lines).**
-**Intermediate target: 80% of framework testable (excluding partially-testable) = ~53 560 lines (gap: ~5 500 lines).**
-
-The skip list has been significantly reduced (from ~31 400 to ~14 400 hard-skipped lines) after re-evaluation showed many packages are testable with existing H2, MockFaces, and Mockito infrastructure. See "Skip List" section for full details.
+**Primary target: each in-scope sub-project >=80% line coverage in the aggregate report, with overall aggregate coverage also >=80% (about ~67 120 lines covered overall; gap from current: ~19 083 lines).**
+**Intermediate target: move every sub-project toward >=80%, while driving framework-testable coverage toward 80% (~53 560 lines; gap: ~5 500 lines).**
 
 ---
 
@@ -77,83 +74,6 @@ HTML reports:
 Tests in `skyve-war` that call into `skyve-core`, `skyve-ext`, or `skyve-web` classes count toward those modules' coverage in the aggregate.
 
 See [docs/test-patterns.md](test-patterns.md) for full patterns, naming conventions, and code examples.
-
----
-
-## Skip List — Genuinely Untestable Packages
-
-These packages require live infrastructure (browser, full metadata generation pipelines, or runtime contexts) that cannot be reproduced in CI. They are excluded from the 80% target.
-
-### skyve-core (~7 100 lines)
-
-| Package | Lines | Reason |
-|---|---|---|
-| `impl/generate` + `impl/generate/client/*` | ~6 500 | Code generators — emit source code from full customer/module/document metadata graphs; testing individual outputs is impractical without a running generator pipeline |
-| `impl/sail/execution` | 182 | SAIL executor — drives a live browser via WebDriver |
-| `metadata/sail/**` (execution types) | ~200 | SAIL step/interaction types that only execute in a browser context |
-
-### skyve-ext (~3 700 lines)
-
-| Package | Lines | Reason |
-|---|---|---|
-| `impl/generate/jasperreports` (generators) | ~2 500 | Report design generators — need JasperReports runtime + full metadata |
-| `impl/generate/sail` | 252 | SAIL test generator — needs full metadata pipeline |
-| Other small packages (domain number, persistence dialect internals) | ~950 | Hibernate dialect registration, low-level persistence internals |
-
-### skyve-web (~3 600 lines)
-
-| Package | Lines | Reason |
-|---|---|---|
-| `impl/sail/execution/*` | 1 585 | SAIL PrimeFaces/SmartClient execution — drives live browser |
-| `impl/web/faces/views` (core managed bean lifecycle) | ~1 000 | Deep CDI lifecycle methods (`@PostConstruct`, PrimeFaces AJAX callbacks) that require a live CDI container + Faces lifecycle. Utility methods within these classes ARE testable — see "Partially Testable" below |
-| `impl/web/faces/components` (rendering) | ~300 | Custom composite rendering (`encodeBegin`/`encodeEnd`) needs a live component tree |
-| Other (SAIL mock internals) | ~700 | SAIL mock/interpret infrastructure used only by SAIL execution |
-
-### Partially Testable — Target Opportunistically
-
-These packages were previously fully skipped but contain significant testable logic. Cover the accessible portions; do not aim for 80% on these individually.
-
-| Package | Total lines | Testable portion | How to test |
-|---|---|---|---|
-| `metadata/view/model/list` | 1 882 | ~1 200 | H2/AbstractSkyveTest — `DocumentQueryListModel`, `InMemoryListModel`, `Page`, filter classes |
-| `impl/metadata/repository` | 2 036 | ~800 | H2/AbstractSkyveTest — router, module/document resolution (not bootstrap loader) |
-| `impl/persistence` (core) | 880 | ~400 | H2 — `DocumentFilterImpl`, query builder utility methods |
-| `metadata/sail/**` (data types) | 222 | ~150 | Plain JUnit — SAIL step/interaction data structures (constructors, getters) |
-| `impl/generate/jasperreports` (helpers) | 685 | ~400 | Plain JUnit/Mockito — `ReportBand`, field definitions, non-generator utility classes |
-| `impl/web/faces/views` (utility) | 566 | ~400 | Mockito mock of FacesView + H2 — utility getters, state management methods |
-| `impl/web/faces/components` (utility) | 163 | ~100 | MockFaces — component property setup, non-rendering methods |
-
-### Now Testable — Removed from Skip List
-
-These packages were previously skipped but analysis shows they are fully testable with existing infrastructure:
-
-| Package | Lines | Module | How to test |
-|---|---|---|---|
-| `impl/bizport` | 1 804 | skyve-ext | Already has tests! POI/CSV operations with test files; extend existing `POISheetTest` etc. |
-| `impl/snapshot` | 778 | skyve-ext | Pure data structures + JSON parsing — plain JUnit |
-| `impl/report/freemarker` | ~600 | skyve-ext | Freemarker directives with mocked `Environment` + H2 for `CORE` |
-| `impl/archive/job` | 518 | skyve-ext | H2/AbstractSkyveTest — job execution with Quartz mocking |
-| `impl/create` | 252 | skyve-ext | File system operations — plain JUnit + temp directories |
-| `impl/content` + `ejb` + `rest` | 411 | skyve-ext | File system + CORE — H2/AbstractSkyveTest + temp directories |
-| `impl/cdi` | 280 | skyve-ext | Thin proxies delegating to CORE — H2/AbstractSkyveTest |
-| `impl/web/faces/actions` | 1 047 | skyve-web | `Mockito.mock(FacesView.class)` + AbstractSkyveTest — actions take FacesView as constructor param, not injected |
-| `impl/web/faces/models` | 324 | skyve-web | Mockito + H2 — `SkyveLazyDataModel`, `SkyveDualListModelMap` |
-| `impl/sail/mock` + `interpret` | 263 | skyve-web | Plain JUnit — mock infrastructure support code |
-| `impl/web/service/rest` + `filter/rest` | 502 | skyve-web | Mockito servlet mocks — no different from other filter testing |
-| `impl/web/faces` (top-level utilities) | 432 | skyve-web | Mockito servlet mocks + H2 for CORE-dependent utilities |
-
-**Total reclassified as testable: ~7 211 lines (full) + ~3 450 lines (partial) = ~10 661 lines**
-
-### Revised Summary
-
-| Module | Total lines | Hard-skipped | Partially testable | Fully testable |
-|---|---|---|---|---|
-| Framework (`org/skyve`) | 84 803 | ~14 400 | ~3 450 | **~66 950** |
-| Admin/modules | 16 965 | 0 | 0 | **~16 965** |
-| **Grand total** | 101 768 | ~14 400 | ~3 450 | **~83 900** |
-
-**Revised 80% target: 80% of fully testable = 67 120 lines (gap from current 48 037: ~19 083 lines).**
-**Conservative target: 80% of (fully testable − partially testable) = ~53 560 lines (gap: ~5 500 lines) — achievable in Phases 1–2.**
 
 ---
 
@@ -521,9 +441,9 @@ Action invocation with `DataBuilder` fixtures. Key areas:
 
 ---
 
-### Phase 4 — Formerly-Skipped Packages (target: +6 000 lines)
+### Phase 4 — Expanded Package Coverage (target: +6 000 lines)
 
-These were previously on the skip list but are now confirmed testable.
+These packages provide additional high-yield coverage opportunities with existing test infrastructure.
 
 #### WP-21: BizPort Excel/CSV I/O
 
@@ -741,7 +661,7 @@ Drive every partially-covered package to 90%+. Includes:
 | Phase 1 complete | ~56 700 | ~55.7% | +8 700 lines |
 | Phase 2 complete | ~60 000 | ~58.9% | +3 300 lines |
 | Phase 3 complete | ~65 200 | ~64.1% | +5 200 lines |
-| Phase 4 complete | ~71 050 | ~69.8% | +5 850 lines (formerly-skipped) |
+| Phase 4 complete | ~71 050 | ~69.8% | +5 850 lines |
 | Phase 5 complete | ~73 550 | ~72.3% | +2 500 lines |
 
 **To reach 80% aggregate (81 414 lines) from Phase 5:**
@@ -809,7 +729,7 @@ Each session targets **one work package** (or a portion of a large one). Do not 
 2. **Find existing tests** — add to them.
 3. **Write tests** — one per branch, follow [test-patterns.md](test-patterns.md).
 4. **Compile and run** — fix failures.
-5. **Verify coverage** — confirm lines are now covered.
+5. **Verify coverage (module only)** — run JaCoCo for the current module and confirm lines are now covered. Do not run aggregate coverage during the per-class loop.
 
 ### Post-session
 
@@ -833,7 +753,6 @@ mvn -Pcoverage -pl skyve-coverage -am -DskipIntegrationTests=true -DskipUnitTest
 
 ### Rules
 
-- Do not test skip-listed packages.
 - Do not create duplicate test classes.
 - Do not suppress failures.
 - Do not refactor production code unless asked.
