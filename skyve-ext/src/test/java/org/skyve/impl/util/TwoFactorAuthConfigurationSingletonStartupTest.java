@@ -50,4 +50,17 @@ class TwoFactorAuthConfigurationSingletonStartupTest {
 
 		assertThrows(DomainException.class, singleton::startup);
 	}
+
+	@Test
+	void startupStillFailsForUnrelatedSqlFailureInBootstrapScenario() throws SQLException {
+		UtilImpl.ENVIRONMENT_IDENTIFIER = "development";
+		UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS = new HashSet<>(Set.of("acme"));
+
+		TwoFactorAuthConfigurationSingleton singleton = spy(TwoFactorAuthConfigurationSingleton.getInstance());
+		doThrow(new SQLException("Connection refused", "08001"))
+				.when(singleton)
+				.getDataStoreConnection();
+
+		assertThrows(DomainException.class, singleton::startup);
+	}
 }

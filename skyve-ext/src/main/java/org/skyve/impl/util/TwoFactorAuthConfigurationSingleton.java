@@ -4,13 +4,15 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLSyntaxErrorException;
+import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.messages.DomainException;
-import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
+import org.slf4j.Logger;
 
 /**
  * Caches and serves customer-level two-factor-authentication configuration.
@@ -23,6 +25,7 @@ import org.skyve.util.logging.SkyveLoggerFactory;
  * reads and updates.
  */
 public class TwoFactorAuthConfigurationSingleton implements SystemObserver {
+	private static final String ADM_CONFIGURATION_TABLE_NAME = "adm_configuration";
 	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(TwoFactorAuthConfigurationSingleton.class);
 	private static TwoFactorAuthConfigurationSingleton instance = new TwoFactorAuthConfigurationSingleton();
 
@@ -156,10 +159,25 @@ public class TwoFactorAuthConfigurationSingleton implements SystemObserver {
 	 * @return {@code true} when startup should continue despite the failure
 	 */
 	@SuppressWarnings("static-method")
-	boolean shouldIgnoreStartupFailure(@SuppressWarnings("unused") SQLException exception) {
+	boolean shouldIgnoreStartupFailure(SQLException exception) {
 		return (UtilImpl.ENVIRONMENT_IDENTIFIER != null) &&
 				(UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS != null) &&
-				(! UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS.isEmpty());
+				(! UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS.isEmpty()) &&
+				isMissingConfigurationTableFailure(exception);
+	}
+
+	private static boolean isMissingConfigurationTableFailure(SQLException exception) {
+		for (SQLException current = exception; current != null; current = current.getNextException()) {
+			String state = current.getSQLState();
+			String message = current.getMessage();
+			boolean syntaxOrObjectState = (state != null) && state.startsWith("42");
+			boolean missingConfigurationTable = (message != null) &&
+					message.toLowerCase(Locale.ROOT).contains(ADM_CONFIGURATION_TABLE_NAME);
+			if (missingConfigurationTable && (syntaxOrObjectState || (current instanceof SQLSyntaxErrorException))) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	/**
