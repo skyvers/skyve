@@ -14,14 +14,19 @@ import static org.mockito.Mockito.when;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.primefaces.behavior.confirm.ConfirmBehavior;
+import org.primefaces.component.commandbutton.CommandButton;
 import org.skyve.impl.metadata.view.widget.Button;
 import org.skyve.impl.metadata.view.widget.Spacer;
 import org.skyve.impl.web.faces.views.FacesView;
+import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.view.Action;
 import org.skyve.web.UserAgentType;
 
 import jakarta.el.ELContext;
 import jakarta.el.ExpressionFactory;
+import jakarta.el.MethodExpression;
+import jakarta.el.ValueExpression;
 import jakarta.faces.application.Application;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.context.FacesContext;
@@ -253,20 +258,61 @@ class DeviceResponsiveComponentBuilderTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void actionButtonForPhoneUserAgentType() {
-		// Verify phone user agent type is set correctly
+	void actionButtonForPhoneCallsThrough() {
 		DeviceResponsiveComponentBuilder builder = new DeviceResponsiveComponentBuilder();
 		builder.setUserAgentType(UserAgentType.phone);
-		// Just verify the builder was created and phone type set without error
-		// (actionButton phone branch nulls out pixel dimensions when calling super)
-		assertNotNull(builder);
+		Button button = new Button();
+		button.setPixelWidth(200);
+		button.setPixelHeight(50);
+		Action action = mock(Action.class);
+		when(action.getName()).thenReturn("Save");
+		when(action.getImplicitName()).thenReturn(ImplicitActionName.Save);
+		when(action.getDisabledConditionName()).thenReturn(null);
+		when(action.getInvisibleConditionName()).thenReturn(null);
+		CommandButton btn = mock(CommandButton.class);
+		when(mockApplication.createComponent(CommandButton.COMPONENT_TYPE)).thenReturn(btn);
+		ConfirmBehavior confirmBehavior = mock(ConfirmBehavior.class);
+		when(mockApplication.createBehavior(ConfirmBehavior.BEHAVIOR_ID)).thenReturn(confirmBehavior);
+		MethodExpression me = mock(MethodExpression.class);
+		ValueExpression ve = mock(ValueExpression.class);
+		when(mockExpressionFactory.createMethodExpression(any(ELContext.class), anyString(), any(), any()))
+			.thenReturn(me);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), any(Class.class)))
+			.thenReturn(ve);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("btnId");
+		builder.setSAILManagedBean(managedBean);
+		UIComponent result = builder.actionButton(null, null, null, "Save", null, null, null, button, null, action);
+		org.junit.jupiter.api.Assertions.assertNotNull(result);
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	void actionButtonForDesktopUserAgentType() {
+	void actionButtonForDesktopCallsThrough() {
 		DeviceResponsiveComponentBuilder builder = new DeviceResponsiveComponentBuilder();
 		builder.setUserAgentType(UserAgentType.desktop);
-		assertNotNull(builder);
+		Button button = new Button();
+		button.setPixelWidth(200);
+		button.setPixelHeight(50);
+		Action action = mock(Action.class);
+		when(action.getName()).thenReturn("Save");
+		when(action.getImplicitName()).thenReturn(ImplicitActionName.Save);
+		when(action.getDisabledConditionName()).thenReturn(null);
+		when(action.getInvisibleConditionName()).thenReturn(null);
+		CommandButton btn = mock(CommandButton.class);
+		when(mockApplication.createComponent(CommandButton.COMPONENT_TYPE)).thenReturn(btn);
+		ConfirmBehavior confirmBehavior = mock(ConfirmBehavior.class);
+		when(mockApplication.createBehavior(ConfirmBehavior.BEHAVIOR_ID)).thenReturn(confirmBehavior);
+		MethodExpression me = mock(MethodExpression.class);
+		ValueExpression ve = mock(ValueExpression.class);
+		when(mockExpressionFactory.createMethodExpression(any(ELContext.class), anyString(), any(), any()))
+			.thenReturn(me);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), any(Class.class)))
+			.thenReturn(ve);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("btnId");
+		builder.setSAILManagedBean(managedBean);
+		UIComponent result = builder.actionButton(null, null, null, "Save", null, null, null, button, null, action);
+		org.junit.jupiter.api.Assertions.assertNotNull(result);
 	}
 }

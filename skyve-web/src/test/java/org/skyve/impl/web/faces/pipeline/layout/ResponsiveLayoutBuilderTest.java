@@ -1,5 +1,6 @@
 package org.skyve.impl.web.faces.pipeline.layout;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -373,4 +374,108 @@ class ResponsiveLayoutBuilderTest {
 		// widget should be in floatSpan
 		assertTrue(floatChildren.contains(widget));
 	}
+
+	@Test
+	void addToContainerHBoxWithUnsizedColumns() {
+		// HBox viewContainer with no widths provided: should auto-compute percentageWidth
+		UIComponent container = mock(UIComponent.class);
+		List<UIComponent> containerChildren = new ArrayList<>();
+		when(container.getChildren()).thenReturn(containerChildren);
+		List<UIComponent> divChildren = new ArrayList<>();
+		when(mockHtmlPanelGroup.getChildren()).thenReturn(divChildren);
+		UIComponent child = mock(UIComponent.class);
+
+		HBox hbox = new HBox();
+		// Add two unsized contained items (neither AbsoluteWidth nor Inject)
+		org.skyve.impl.metadata.view.widget.Spacer spacer1 = new org.skyve.impl.metadata.view.widget.Spacer();
+		org.skyve.impl.metadata.view.widget.Spacer spacer2 = new org.skyve.impl.metadata.view.widget.Spacer();
+		// Spacer doesn't implement AbsoluteWidth, so both are unsized
+		hbox.getContained().add(spacer1);
+		hbox.getContained().add(spacer2);
+
+		UIComponent result = builder.addToContainer(null, hbox, container, child,
+			null, null, null, null, null, null, null, null);
+		assertSame(child, result);
+		assertEquals(1, containerChildren.size());
+	}
+
+	@Test
+	void addToContainerHBoxWithPixelWidth() {
+		// When pixelWidth is not null, HBox branch should be skipped
+		UIComponent container = mock(UIComponent.class);
+		List<UIComponent> containerChildren = new ArrayList<>();
+		when(container.getChildren()).thenReturn(containerChildren);
+		List<UIComponent> divChildren = new ArrayList<>();
+		when(mockHtmlPanelGroup.getChildren()).thenReturn(divChildren);
+		UIComponent child = mock(UIComponent.class);
+
+		HBox hbox = new HBox();
+		UIComponent result = builder.addToContainer(null, hbox, container, child,
+			Integer.valueOf(200), null, null, null, null, null, null, null);
+		assertSame(child, result);
+		assertEquals(1, containerChildren.size());
+	}
+
+	@Test
+	void vboxLayoutWithPrimeFlexTopAlignmentSetsStyleClass() {
+		try {
+			org.skyve.impl.util.UtilImpl.PRIMEFLEX = true;
+			VBox vbox = new VBox();
+			vbox.setVerticalAlignment(org.skyve.impl.metadata.view.VerticalAlignment.top);
+			vbox.setHorizontalAlignment(org.skyve.impl.metadata.view.HorizontalAlignment.centre);
+			builder.vboxLayout(null, vbox);
+			verify(mockHtmlPanelGroup).setStyleClass(org.mockito.ArgumentMatchers.contains("p-grid"));
+		}
+		finally {
+			org.skyve.impl.util.UtilImpl.PRIMEFLEX = false;
+		}
+	}
+
+	@Test
+	void vboxLayoutWithPrimeFlexMiddleAlignmentSetsStyleClass() {
+		try {
+			org.skyve.impl.util.UtilImpl.PRIMEFLEX = true;
+			VBox vbox = new VBox();
+			vbox.setVerticalAlignment(org.skyve.impl.metadata.view.VerticalAlignment.middle);
+			vbox.setHorizontalAlignment(org.skyve.impl.metadata.view.HorizontalAlignment.right);
+			builder.vboxLayout(null, vbox);
+			verify(mockHtmlPanelGroup).setStyleClass(org.mockito.ArgumentMatchers.contains("p-align-center"));
+		}
+		finally {
+			org.skyve.impl.util.UtilImpl.PRIMEFLEX = false;
+		}
+	}
+
+	@Test
+	void vboxLayoutWithPrimeFlexBottomAlignmentSetsStyleClass() {
+		try {
+			org.skyve.impl.util.UtilImpl.PRIMEFLEX = true;
+			VBox vbox = new VBox();
+			vbox.setVerticalAlignment(org.skyve.impl.metadata.view.VerticalAlignment.bottom);
+			builder.vboxLayout(null, vbox);
+			verify(mockHtmlPanelGroup).setStyleClass(org.mockito.ArgumentMatchers.contains("p-align-end"));
+		}
+		finally {
+			org.skyve.impl.util.UtilImpl.PRIMEFLEX = false;
+		}
+	}
+
+	@Test
+	void layoutFormItemWidgetWithColspanGreaterThanOneUsesColspanExpression() {
+		UIComponent rowLayout = mock(UIComponent.class);
+		List<UIComponent> rowChildren = new ArrayList<>();
+		when(rowLayout.getChildren()).thenReturn(rowChildren);
+		List<UIComponent> flexChildren = new ArrayList<>();
+		when(mockHtmlPanelGroup.getChildren()).thenReturn(flexChildren);
+		UIComponent widget = mock(UIComponent.class);
+		Form form = new Form();
+		FormItem formItem = new FormItem();
+		FormColumn formColumn = new FormColumn();
+		// colspan = 2 triggers the else (colspan > 1) branch
+		builder.layoutFormItemWidget(rowLayout, widget, form, formItem, formColumn, "Label", 2, null, null, null, null, true, false);
+		// A flex div should be added to rowLayout
+		assertTrue(rowChildren.size() == 1);
+		assertSame(mockHtmlPanelGroup, rowChildren.get(0));
+	}
 }
+

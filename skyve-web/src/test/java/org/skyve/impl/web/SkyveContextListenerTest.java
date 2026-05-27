@@ -368,6 +368,38 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
+	public void testPopulateUtilImplDetectsDevLoginFilter() throws Exception {
+		boolean savedDevLoginFilterUsed = UtilImpl.DEV_LOGIN_FILTER_USED;
+		String savedPropertiesFilePath = System.getProperty("PROPERTIES_FILE_PATH");
+		Class<? extends AbstractPersistence> originalPersistenceImplementation = AbstractPersistence.IMPLEMENTATION_CLASS;
+		Class<? extends DynamicPersistence> originalDynamicPersistenceImplementation = AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS;
+		Path tempDir = Files.createTempDirectory("skyve-context-listener-devlogin");
+		try {
+			Path configFile = writeConfiguration(tempDir, false);
+			System.setProperty("PROPERTIES_FILE_PATH", configFile.toString());
+
+			ProvidedRepository originalRepository = ProvidedRepositoryFactory.get();
+			ProvidedRepositoryFactory.set(mock(ProvidedRepository.class));
+			try {
+				invokePopulateUtilImplWithDevLoginFilter(configFile, tempDir);
+			}
+			finally {
+				ProvidedRepositoryFactory.set(originalRepository);
+			}
+
+			assertTrue(UtilImpl.DEV_LOGIN_FILTER_USED);
+		}
+		finally {
+			restoreProperty("PROPERTIES_FILE_PATH", savedPropertiesFilePath);
+			AbstractPersistence.IMPLEMENTATION_CLASS = originalPersistenceImplementation;
+			AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = originalDynamicPersistenceImplementation;
+			UtilImpl.DEV_LOGIN_FILTER_USED = savedDevLoginFilterUsed;
+			deleteTree(tempDir);
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
 	public void testPopulateUtilImplLeavesConcurrentSessionSettingsWhenMissing() throws Exception {
 		boolean originalWarnings = UtilImpl.CONCURRENT_SESSION_WARNINGS;
 		boolean originalNotifications = UtilImpl.CONCURRENT_SESSION_NOTIFICATIONS;
@@ -652,6 +684,29 @@ public class SkyveContextListenerTest {
 
 		HashMap<String, FilterRegistration> filterRegistrations = new HashMap<>();
 		filterRegistrations.put(ResponseHeaderFilter.SECURITY_HEADERS_FILTER_NAME, securityHeadersFilter);
+		doReturn(filterRegistrations).when(context).getFilterRegistrations();
+
+		Method populateUtilImpl = SkyveContextListener.class.getDeclaredMethod("populateUtilImpl", ServletContext.class);
+		populateUtilImpl.setAccessible(true);
+		populateUtilImpl.invoke(null, context);
+	}
+
+	private static void invokePopulateUtilImplWithDevLoginFilter(Path configFile, Path tempDir) throws Exception {
+		ServletContext context = mock(ServletContext.class);
+		when(context.getRealPath("/")).thenReturn(tempDir.toString());
+		when(context.getInitParameter("PROPERTIES_FILE_PATH")).thenReturn(configFile.toString());
+
+		FilterRegistration securityHeadersFilter = mock(FilterRegistration.class);
+		when(securityHeadersFilter.getClassName()).thenReturn(ResponseHeaderFilter.class.getName());
+		when(securityHeadersFilter.getName()).thenReturn(ResponseHeaderFilter.SECURITY_HEADERS_FILTER_NAME);
+
+		FilterRegistration devLoginFilter = mock(FilterRegistration.class);
+		when(devLoginFilter.getClassName()).thenReturn(org.skyve.impl.web.filter.DevLoginFilter.class.getName());
+		when(devLoginFilter.getName()).thenReturn("DevLoginFilter");
+
+		HashMap<String, FilterRegistration> filterRegistrations = new HashMap<>();
+		filterRegistrations.put(ResponseHeaderFilter.SECURITY_HEADERS_FILTER_NAME, securityHeadersFilter);
+		filterRegistrations.put("DevLoginFilter", devLoginFilter);
 		doReturn(filterRegistrations).when(context).getFilterRegistrations();
 
 		Method populateUtilImpl = SkyveContextListener.class.getDeclaredMethod("populateUtilImpl", ServletContext.class);

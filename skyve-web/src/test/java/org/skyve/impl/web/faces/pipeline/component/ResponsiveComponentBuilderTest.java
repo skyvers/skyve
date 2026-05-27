@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.primefaces.component.panel.Panel;
 import org.primefaces.component.toolbar.Toolbar;
 import org.skyve.impl.web.faces.views.FacesView;
+import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder.EventSourceComponent;
 import org.skyve.web.UserAgentType;
 
 import jakarta.el.ELContext;
@@ -120,4 +121,208 @@ class ResponsiveComponentBuilderTest {
 		assertSame(panel, result);
 		verify(panel).setStyle(null);
 	}
+
+        @Test
+        @SuppressWarnings("static-method")
+        void blurbShortcutReturnsExistingAndAddsFloatLabel() {
+                ResponsiveComponentBuilder builder = new ResponsiveComponentBuilder();
+                builder.setUserAgentType(UserAgentType.desktop);
+                UIComponent existing = mock(UIComponent.class);
+                java.util.Map<String, Object> attrs = new java.util.HashMap<>();
+                when(existing.getAttributes()).thenReturn(attrs);
+                org.skyve.impl.metadata.view.widget.Blurb blurb = new org.skyve.impl.metadata.view.widget.Blurb();
+                UIComponent result = builder.blurb(existing, "row", null, null, blurb);
+                assertSame(existing, result);
+                assertNotNull(attrs.get("styleClass"));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void checkBoxShortcutReturnsExistingAndAddsFloatLabel() {
+                ResponsiveComponentBuilder builder = new ResponsiveComponentBuilder();
+                builder.setUserAgentType(UserAgentType.desktop);
+                ComponentBuilder.EventSourceComponent existing = mock(ComponentBuilder.EventSourceComponent.class);
+                UIComponent panel = mock(UIComponent.class);
+                java.util.Map<String, Object> attrs = new java.util.HashMap<>();
+                when(existing.getComponent()).thenReturn(panel);
+                when(panel.getAttributes()).thenReturn(attrs);
+                org.skyve.impl.metadata.view.widget.bound.input.CheckBox checkBox =
+                        new org.skyve.impl.metadata.view.widget.bound.input.CheckBox();
+                ComponentBuilder.EventSourceComponent result =
+                        builder.checkBox(existing, "row", checkBox, null, "Check", null);
+                assertSame(existing, result);
+                assertNotNull(attrs.get("styleClass"));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void colourPickerShortcutReturnsExistingAndAddsFloatLabel() {
+                ResponsiveComponentBuilder builder = new ResponsiveComponentBuilder();
+                builder.setUserAgentType(UserAgentType.desktop);
+                ComponentBuilder.EventSourceComponent existing = mock(ComponentBuilder.EventSourceComponent.class);
+                UIComponent panel = mock(UIComponent.class);
+                java.util.Map<String, Object> attrs = new java.util.HashMap<>();
+                when(existing.getComponent()).thenReturn(panel);
+                when(panel.getAttributes()).thenReturn(attrs);
+                org.skyve.impl.metadata.view.widget.bound.input.ColourPicker colour =
+                        new org.skyve.impl.metadata.view.widget.bound.input.ColourPicker();
+                ComponentBuilder.EventSourceComponent result =
+                        builder.colourPicker(existing, "row", colour, null, "Color", null, null);
+                assertSame(existing, result);
+                assertNotNull(attrs.get("styleClass"));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void radioShortcutReturnsExistingAndAddsFloatLabel() {
+                ResponsiveComponentBuilder builder = new ResponsiveComponentBuilder();
+                builder.setUserAgentType(UserAgentType.desktop);
+                ComponentBuilder.EventSourceComponent existing = mock(ComponentBuilder.EventSourceComponent.class);
+                UIComponent panel = mock(UIComponent.class);
+                java.util.Map<String, Object> attrs = new java.util.HashMap<>();
+                when(existing.getComponent()).thenReturn(panel);
+                when(panel.getAttributes()).thenReturn(attrs);
+                org.skyve.impl.metadata.view.widget.bound.input.Radio radio =
+                        new org.skyve.impl.metadata.view.widget.bound.input.Radio();
+                ComponentBuilder.EventSourceComponent result =
+                        builder.radio(existing, "row", radio, null, "Radio", null);
+                assertSame(existing, result);
+                assertNotNull(attrs.get("styleClass"));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void htmlShortcutReturnsExistingAndAddsFloatLabel() {
+                ResponsiveComponentBuilder builder = new ResponsiveComponentBuilder();
+                builder.setUserAgentType(UserAgentType.desktop);
+                UIComponent existing = mock(UIComponent.class);
+                java.util.Map<String, Object> attrs = new java.util.HashMap<>();
+                when(existing.getAttributes()).thenReturn(attrs);
+                org.skyve.impl.metadata.view.widget.bound.input.HTML html =
+                        new org.skyve.impl.metadata.view.widget.bound.input.HTML();
+                UIComponent result = builder.html(existing, "row", html, null, "HTML", null);
+                assertSame(existing, result);
+                assertNotNull(attrs.get("styleClass"));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void labelValueShortcutReturnsExistingAndAddsFloatLabel() {
+                ResponsiveComponentBuilder builder = new ResponsiveComponentBuilder();
+                builder.setUserAgentType(UserAgentType.desktop);
+                UIComponent existing = mock(UIComponent.class);
+                java.util.Map<String, Object> attrs = new java.util.HashMap<>();
+                when(existing.getAttributes()).thenReturn(attrs);
+                UIComponent result = builder.label(existing, "Test Label");
+                assertSame(existing, result);
+                assertNotNull(attrs.get("styleClass"));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void labelBindingShortcutReturnsExistingAndAddsFloatLabel() {
+                ResponsiveComponentBuilder builder = new ResponsiveComponentBuilder();
+                builder.setUserAgentType(UserAgentType.desktop);
+                UIComponent existing = mock(UIComponent.class);
+                java.util.Map<String, Object> attrs = new java.util.HashMap<>();
+                when(existing.getAttributes()).thenReturn(attrs);
+                org.skyve.impl.metadata.view.widget.bound.Label label =
+                        new org.skyve.impl.metadata.view.widget.bound.Label();
+                UIComponent result = builder.label(existing, "row", "Value", "binding", label);
+                assertSame(existing, result);
+                assertNotNull(attrs.get("styleClass"));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void richTextShortcutReturnsExistingAndAddsFloatLabel() {
+                ResponsiveComponentBuilder builder = new ResponsiveComponentBuilder();
+                builder.setUserAgentType(UserAgentType.desktop);
+                ComponentBuilder.EventSourceComponent existing = mock(ComponentBuilder.EventSourceComponent.class);
+                UIComponent panel = mock(UIComponent.class);
+                java.util.Map<String, Object> attrs = new java.util.HashMap<>();
+                when(existing.getComponent()).thenReturn(panel);
+                when(panel.getAttributes()).thenReturn(attrs);
+                org.skyve.impl.metadata.view.widget.bound.input.RichText richText =
+                        new org.skyve.impl.metadata.view.widget.bound.input.RichText();
+                ComponentBuilder.EventSourceComponent result =
+                        builder.richText(existing, "row", richText, null, "RichText", null);
+                assertSame(existing, result);
+                assertNotNull(attrs.get("styleClass"));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void addContentSignatureShortcutAddsFloatLabelOnLayout() {
+                ResponsiveComponentBuilder builder = new ResponsiveComponentBuilder();
+                builder.setUserAgentType(UserAgentType.desktop);
+                UIComponent layout = mock(UIComponent.class);
+                java.util.Map<String, Object> attrs = new java.util.HashMap<>();
+                when(layout.getAttributes()).thenReturn(attrs);
+                org.skyve.impl.metadata.view.widget.bound.input.ContentSignature sig =
+                        new org.skyve.impl.metadata.view.widget.bound.input.ContentSignature();
+                UIComponent existingComp = mock(UIComponent.class);
+                builder.addContentSignature(existingComp, layout, sig, null, "Sig", null);
+                assertNotNull(attrs.get("styleClass"));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void contentLinkShortcutAddsFloatLabel() {
+                ResponsiveComponentBuilder builder = new ResponsiveComponentBuilder();
+                UIComponent existing = mock(UIComponent.class);
+                java.util.Map<String, Object> attrs = new java.util.HashMap<>();
+                when(existing.getAttributes()).thenReturn(attrs);
+                org.skyve.impl.metadata.view.widget.bound.input.ContentLink link =
+                        new org.skyve.impl.metadata.view.widget.bound.input.ContentLink();
+                UIComponent result = builder.contentLink(existing, "row", link, null, "Link", null, null);
+                assertSame(existing, result);
+                assertNotNull(attrs.get("styleClass"));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void contentImageShortcutAddsFloatLabel() {
+                ResponsiveComponentBuilder builder = new ResponsiveComponentBuilder();
+                UIComponent existing = mock(UIComponent.class);
+                java.util.Map<String, Object> attrs = new java.util.HashMap<>();
+                when(existing.getAttributes()).thenReturn(attrs);
+                org.skyve.impl.metadata.view.widget.bound.input.ContentImage image =
+                        new org.skyve.impl.metadata.view.widget.bound.input.ContentImage();
+                UIComponent result = builder.contentImage(existing, "row", image, null, "Image", null);
+                assertSame(existing, result);
+                assertNotNull(attrs.get("styleClass"));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void geometryShortcutAddsFloatLabel() {
+                ResponsiveComponentBuilder builder = new ResponsiveComponentBuilder();
+                EventSourceComponent existing = mock(EventSourceComponent.class);
+                UIComponent existingComp = mock(UIComponent.class);
+                java.util.Map<String, Object> attrs = new java.util.HashMap<>();
+                when(existing.getComponent()).thenReturn(existingComp);
+                when(existingComp.getAttributes()).thenReturn(attrs);
+                org.skyve.impl.metadata.view.widget.bound.input.Geometry geometry =
+                        new org.skyve.impl.metadata.view.widget.bound.input.Geometry();
+                EventSourceComponent result = builder.geometry(existing, "row", geometry, null, "Geo", null, null);
+                assertSame(existing, result);
+                assertNotNull(attrs.get("styleClass"));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void geometryMapShortcutAddsFloatLabel() {
+                ResponsiveComponentBuilder builder = new ResponsiveComponentBuilder();
+                EventSourceComponent existing = mock(EventSourceComponent.class);
+                UIComponent existingComp = mock(UIComponent.class);
+                java.util.Map<String, Object> attrs = new java.util.HashMap<>();
+                when(existing.getComponent()).thenReturn(existingComp);
+                when(existingComp.getAttributes()).thenReturn(attrs);
+                org.skyve.impl.metadata.view.widget.bound.input.GeometryMap geomMap =
+                        new org.skyve.impl.metadata.view.widget.bound.input.GeometryMap();
+                EventSourceComponent result = builder.geometryMap(existing, geomMap, null, "GeomMap", null);
+                assertSame(existing, result);
+                assertNotNull(attrs.get("styleClass"));
+        }
 }

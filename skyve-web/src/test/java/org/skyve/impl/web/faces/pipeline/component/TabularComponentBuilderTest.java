@@ -71,7 +71,9 @@ import org.skyve.impl.metadata.view.widget.Button;
 import org.skyve.impl.metadata.view.widget.Link;
 import org.skyve.impl.metadata.view.widget.bound.Label;
 import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
+import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
+import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.CompleteType;
@@ -3999,5 +4001,718 @@ class TabularComponentBuilderTest {
 		UIComponent result = builder.invokeCreateSpecialColumnFilterFacetComponentForTest(mock(Document.class), "description", attribute, "tableWidget");
 
 		assertNull(result);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testReportShortCircuitReturnsExistingComponent() {
+		TabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		UIComponent component = mock(UIComponent.class);
+		Action action = mock(Action.class);
+		assertSame(component, builder.report(component, "label", "icon", "tip", null, action));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testDownloadShortCircuitReturnsExistingComponent() {
+		TabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		UIComponent component = mock(UIComponent.class);
+		Action action = mock(Action.class);
+		assertSame(component, builder.download(component, null, null, "label", "icon", "tip", null, action));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testUploadShortCircuitReturnsExistingComponent() {
+		TabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		UIComponent component = mock(UIComponent.class);
+		Action action = mock(Action.class);
+		assertSame(component, builder.upload(component, "label", "icon", "tip", null, action));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testRemoveShortCircuitReturnsExistingComponent() {
+		TabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		UIComponent component = mock(UIComponent.class);
+		Action action = mock(Action.class);
+		assertSame(component, builder.remove(component, "label", "icon", "tip", null, action, false));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testActionShortCircuitReturnsExistingComponent() {
+		TabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		UIComponent component = mock(UIComponent.class);
+		Action action = mock(Action.class);
+		assertSame(component, builder.action(component, null, null, "label", "icon", "tip", null, null, action));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testUploadDelegatesToUploadButton() {
+		CapturingDelegationBuilder builder = new CapturingDelegationBuilder();
+		Action action = mock(Action.class);
+		when(action.getName()).thenReturn("doUpload");
+		when(action.getClientValidation()).thenReturn(null);
+		when(action.getDisabledConditionName()).thenReturn(null);
+		when(action.getInvisibleConditionName()).thenReturn(null);
+
+		UIComponent result = builder.upload(null, "UploadLabel", "icon", "tip", null, action);
+		assertSame(builder.delegatedUploadButtonResult, result);
+		assertEquals("doUpload", builder.uploadActionName);
+	}
+
+	@SuppressWarnings({ "static-method", "unchecked" })
+	@Test
+	void testTextWithDateConverterUsesDatePicker() {
+		// Test that the datePicker branch is triggered for all date/time converter types.
+		// We just verify that text() doesn't throw and returns a non-null EventSourceComponent.
+		jakarta.faces.convert.Converter<?>[] facesConverters = {
+			new org.skyve.impl.web.faces.converters.date.DD_MM_YYYY(),
+			new org.skyve.impl.web.faces.converters.date.DD_MMM_YYYY(),
+			new org.skyve.impl.web.faces.converters.date.MM_DD_YYYY(),
+			new org.skyve.impl.web.faces.converters.date.MMM_DD_YYYY(),
+			new org.skyve.impl.web.faces.converters.date.YYYY_MM_DD(),
+			new org.skyve.impl.web.faces.converters.datetime.DD_MM_YYYY_HH_MI(),
+			new org.skyve.impl.web.faces.converters.datetime.DD_MM_YYYY_HH24_MI(),
+			new org.skyve.impl.web.faces.converters.datetime.DD_MMM_YYYY_HH_MI(),
+			new org.skyve.impl.web.faces.converters.datetime.DD_MMM_YYYY_HH24_MI(),
+			new org.skyve.impl.web.faces.converters.datetime.MM_DD_YYYY_HH_MI(),
+			new org.skyve.impl.web.faces.converters.datetime.MM_DD_YYYY_HH24_MI(),
+			new org.skyve.impl.web.faces.converters.datetime.MMM_DD_YYYY_HH_MI(),
+			new org.skyve.impl.web.faces.converters.datetime.MMM_DD_YYYY_HH24_MI(),
+			new org.skyve.impl.web.faces.converters.datetime.YYYY_MM_DD_HH_MI(),
+			new org.skyve.impl.web.faces.converters.datetime.YYYY_MM_DD_HH24_MI(),
+			new org.skyve.impl.web.faces.converters.time.HH_MI(),
+			new org.skyve.impl.web.faces.converters.time.HH24_MI(),
+			new org.skyve.impl.web.faces.converters.time.HH_MI_SS(),
+			new org.skyve.impl.web.faces.converters.time.HH24_MI_SS(),
+			new org.skyve.impl.web.faces.converters.timestamp.DD_MM_YYYY_HH_MI_SS(),
+			new org.skyve.impl.web.faces.converters.timestamp.DD_MM_YYYY_HH24_MI_SS(),
+			new org.skyve.impl.web.faces.converters.timestamp.DD_MMM_YYYY_HH_MI_SS(),
+			new org.skyve.impl.web.faces.converters.timestamp.DD_MMM_YYYY_HH24_MI_SS(),
+			new org.skyve.impl.web.faces.converters.timestamp.MM_DD_YYYY_HH_MI_SS(),
+			new org.skyve.impl.web.faces.converters.timestamp.MM_DD_YYYY_HH24_MI_SS(),
+			new org.skyve.impl.web.faces.converters.timestamp.MMM_DD_YYYY_HH_MI_SS(),
+			new org.skyve.impl.web.faces.converters.timestamp.MMM_DD_YYYY_HH24_MI_SS(),
+			new org.skyve.impl.web.faces.converters.timestamp.YYYY_MM_DD_HH_MI_SS(),
+			new org.skyve.impl.web.faces.converters.timestamp.YYYY_MM_DD_HH24_MI_SS(),
+		};
+
+		org.skyve.domain.types.converters.Converter<?> skyveDateConverter =
+				mock(org.skyve.domain.types.converters.Converter.class);
+		when(skyveDateConverter.getAttributeType()).thenReturn(org.skyve.metadata.model.Attribute.AttributeType.date);
+
+		for (jakarta.faces.convert.Converter<?> facesConverter : facesConverters) {
+			NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+			FacesView managedBean = mock(FacesView.class);
+			when(managedBean.nextId()).thenReturn("datePickerId");
+			builder.setManagedBeanForTest(managedBean);
+
+			org.primefaces.component.datepicker.DatePicker datePicker =
+					mock(org.primefaces.component.datepicker.DatePicker.class);
+			when(mockApplication.createComponent(
+					org.primefaces.component.datepicker.DatePicker.COMPONENT_TYPE)).thenReturn(datePicker);
+
+			TextField textField = new TextField();
+			textField.setBinding("dateField");
+
+			org.skyve.impl.web.faces.pipeline.component.ComponentBuilder.EventSourceComponent result =
+					builder.text(null, "row", textField, null, "Date", null, null, null,
+							skyveDateConverter, null, facesConverter);
+
+			assertNotNull(result,
+					"Expected non-null result for converter: " + facesConverter.getClass().getSimpleName());
+		}
+	}
+
+	@SuppressWarnings({ "static-method", "unchecked" })
+	@Test
+	void testTextWithUnknownDateConverterThrowsIllegalState() {
+		// When a date converter is used but has no matching if-branch, datePicker throws IllegalStateException.
+		org.skyve.domain.types.converters.Converter<?> skyveDateConverter =
+				mock(org.skyve.domain.types.converters.Converter.class);
+		when(skyveDateConverter.getAttributeType()).thenReturn(org.skyve.metadata.model.Attribute.AttributeType.date);
+
+		jakarta.faces.convert.Converter<?> unknownFacesConverter = mock(jakarta.faces.convert.Converter.class);
+
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("datePickerId2");
+		builder.setManagedBeanForTest(managedBean);
+
+		org.primefaces.component.datepicker.DatePicker datePicker =
+				mock(org.primefaces.component.datepicker.DatePicker.class);
+		when(mockApplication.createComponent(
+				org.primefaces.component.datepicker.DatePicker.COMPONENT_TYPE)).thenReturn(datePicker);
+
+		TextField textField = new TextField();
+		textField.setBinding("dateField2");
+
+		assertThrows(IllegalStateException.class, () ->
+				builder.text(null, "row", textField, null, "Date", null, null, null,
+						skyveDateConverter, null, unknownFacesConverter));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testDetermineActionFacesAttributesEmptyList() {
+		ComponentBuilder.ActionFacesAttributes result =
+				ComponentBuilder.determineActionFacesAttributes(new ArrayList<>());
+		assertNull(result.actionName);
+		assertNull(result.process);
+		assertNull(result.update);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testDetermineActionFacesAttributesWithServerSideAction() {
+		org.skyve.impl.metadata.view.event.ServerSideActionEventAction serverAction =
+				new org.skyve.impl.metadata.view.event.ServerSideActionEventAction();
+		serverAction.setActionName("MyAction");
+		List<org.skyve.impl.metadata.view.event.EventAction> actions = new ArrayList<>();
+		actions.add(serverAction);
+
+		ComponentBuilder.ActionFacesAttributes result = ComponentBuilder.determineActionFacesAttributes(actions);
+		assertEquals("MyAction", result.actionName);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testDetermineActionFacesAttributesWithRerenderValidateTrue() {
+		org.skyve.impl.metadata.view.event.RerenderEventAction rerender =
+				new org.skyve.impl.metadata.view.event.RerenderEventAction();
+		// clientValidation = null means validate=true (! Boolean.FALSE.equals(null) == true)
+		List<org.skyve.impl.metadata.view.event.EventAction> actions = new ArrayList<>();
+		actions.add(rerender);
+
+		ComponentBuilder.ActionFacesAttributes result = ComponentBuilder.determineActionFacesAttributes(actions);
+		assertEquals("true", result.actionName);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testDetermineActionFacesAttributesWithRerenderValidateFalse() {
+		org.skyve.impl.metadata.view.event.RerenderEventAction rerender =
+				new org.skyve.impl.metadata.view.event.RerenderEventAction();
+		rerender.setClientValidation(Boolean.FALSE);
+		List<org.skyve.impl.metadata.view.event.EventAction> actions = new ArrayList<>();
+		actions.add(rerender);
+
+		ComponentBuilder.ActionFacesAttributes result = ComponentBuilder.determineActionFacesAttributes(actions);
+		assertEquals("false", result.actionName);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testDetermineActionFacesAttributesWithProcessAndUpdateOverrides() {
+		org.skyve.impl.metadata.view.event.ServerSideActionEventAction serverAction =
+				new org.skyve.impl.metadata.view.event.ServerSideActionEventAction();
+		serverAction.setActionName("TestAction");
+		serverAction.getProperties().put("process", "@this");
+		serverAction.getProperties().put("update", "@form");
+		List<org.skyve.impl.metadata.view.event.EventAction> actions = new ArrayList<>();
+		actions.add(serverAction);
+
+		ComponentBuilder.ActionFacesAttributes result = ComponentBuilder.determineActionFacesAttributes(actions);
+		assertEquals("TestAction", result.actionName);
+		assertEquals("@this", result.process);
+		assertEquals("@form", result.update);
+	}
+
+	@SuppressWarnings({ "static-method", "unchecked" })
+	@Test
+	void testAddAjaxBehaviorWithRerenderActionValidateTrue() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("ajaxId");
+		builder.setManagedBeanForTest(managedBean);
+
+		AjaxBehavior ajax = new AjaxBehavior();
+		when(mockApplication.createBehavior(AjaxBehavior.BEHAVIOR_ID)).thenReturn(ajax);
+
+		jakarta.faces.component.UIComponentBase component = mock(jakarta.faces.component.UIComponentBase.class);
+
+		org.skyve.impl.metadata.view.event.RerenderEventAction rerender =
+				new org.skyve.impl.metadata.view.event.RerenderEventAction();
+		// null clientValidation → validate=true
+		List<org.skyve.impl.metadata.view.event.EventAction> actions = new ArrayList<>();
+		actions.add(rerender);
+
+		builder.addAjaxBehavior(component, "change", null, null, null, actions);
+		verify(component).addClientBehavior(eq("change"), same(ajax));
+	}
+
+	@SuppressWarnings({ "static-method", "unchecked" })
+	@Test
+	void testAddAjaxBehaviorWithRerenderActionValidateFalse() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("ajaxId2");
+		builder.setManagedBeanForTest(managedBean);
+
+		AjaxBehavior ajax = new AjaxBehavior();
+		when(mockApplication.createBehavior(AjaxBehavior.BEHAVIOR_ID)).thenReturn(ajax);
+
+		jakarta.faces.component.UIComponentBase component = mock(jakarta.faces.component.UIComponentBase.class);
+
+		org.skyve.impl.metadata.view.event.RerenderEventAction rerender =
+				new org.skyve.impl.metadata.view.event.RerenderEventAction();
+		rerender.setClientValidation(Boolean.FALSE);
+		List<org.skyve.impl.metadata.view.event.EventAction> actions = new ArrayList<>();
+		actions.add(rerender);
+
+		builder.addAjaxBehavior(component, "change", null, null, null, actions);
+		verify(component).addClientBehavior(eq("change"), same(ajax));
+	}
+
+	@SuppressWarnings({ "static-method", "unchecked" })
+	@Test
+	void testAddAjaxBehaviorWithServerSideAction() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("ajaxId3");
+		builder.setManagedBeanForTest(managedBean);
+
+		AjaxBehavior ajax = new AjaxBehavior();
+		when(mockApplication.createBehavior(AjaxBehavior.BEHAVIOR_ID)).thenReturn(ajax);
+
+		jakarta.faces.component.UIComponentBase component = mock(jakarta.faces.component.UIComponentBase.class);
+
+		org.skyve.impl.metadata.view.event.ServerSideActionEventAction serverAction =
+				new org.skyve.impl.metadata.view.event.ServerSideActionEventAction();
+		serverAction.setActionName("MyServerAction");
+		List<org.skyve.impl.metadata.view.event.EventAction> actions = new ArrayList<>();
+		actions.add(serverAction);
+
+		builder.addAjaxBehavior(component, "change", null, null, null, actions);
+		verify(component).addClientBehavior(eq("change"), same(ajax));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testOutputLinkWithNullDataWidgetVarAndNullTarget() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		HtmlOutputLink link = mock(HtmlOutputLink.class);
+		List<UIComponent> linkChildren = new ArrayList<>();
+		when(link.getChildren()).thenReturn(linkChildren);
+		when(mockApplication.createComponent(HtmlOutputLink.COMPONENT_TYPE)).thenReturn(link);
+
+		HtmlOutputLink result = builder.outputLink(null, null, "/some/href", null, null);
+		assertSame(link, result);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testOutputLinkWithDataWidgetVarAddsValueExpression() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		HtmlOutputLink link = mock(HtmlOutputLink.class);
+		List<UIComponent> linkChildren = new ArrayList<>();
+		when(link.getChildren()).thenReturn(linkChildren);
+		when(mockApplication.createComponent(HtmlOutputLink.COMPONENT_TYPE)).thenReturn(link);
+
+		HtmlOutputLink result = builder.outputLink("row", null, "href", null, null);
+		assertSame(link, result);
+		verify(link).setValueExpression(eq("value"), any());
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testOutputLinkWithValueAddsChildText() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		HtmlOutputLink link = mock(HtmlOutputLink.class);
+		List<UIComponent> linkChildren = new ArrayList<>();
+		when(link.getChildren()).thenReturn(linkChildren);
+		when(mockApplication.createComponent(HtmlOutputLink.COMPONENT_TYPE)).thenReturn(link);
+
+		HtmlOutputText outputText = new HtmlOutputText();
+		when(mockApplication.createComponent(UIOutput.COMPONENT_TYPE)).thenReturn(outputText);
+
+		HtmlOutputLink result = builder.outputLink(null, "Link Text", "/href", null, null);
+		assertSame(link, result);
+		assertTrue(linkChildren.contains(outputText));
+		assertEquals("Link Text", outputText.getValue());
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testOutputLinkWithBlankFrameTarget() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		HtmlOutputLink link = mock(HtmlOutputLink.class);
+		List<UIComponent> linkChildren = new ArrayList<>();
+		when(link.getChildren()).thenReturn(linkChildren);
+		when(mockApplication.createComponent(HtmlOutputLink.COMPONENT_TYPE)).thenReturn(link);
+
+		org.skyve.impl.metadata.view.reference.ReferenceTarget target =
+				new org.skyve.impl.metadata.view.reference.ReferenceTarget();
+		target.setType(org.skyve.impl.metadata.view.reference.ReferenceTarget.ReferenceTargetType.blankFrame);
+
+		HtmlOutputLink result = builder.outputLink(null, null, "/href", null, target);
+		assertSame(link, result);
+		verify(link).setTarget("_blank");
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testOutputLinkWithNamedFrameTarget() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		HtmlOutputLink link = mock(HtmlOutputLink.class);
+		List<UIComponent> linkChildren = new ArrayList<>();
+		when(link.getChildren()).thenReturn(linkChildren);
+		when(mockApplication.createComponent(HtmlOutputLink.COMPONENT_TYPE)).thenReturn(link);
+
+		org.skyve.impl.metadata.view.reference.ReferenceTarget target =
+				new org.skyve.impl.metadata.view.reference.ReferenceTarget();
+		target.setType(org.skyve.impl.metadata.view.reference.ReferenceTarget.ReferenceTargetType.namedFame);
+		target.setName("myFrame");
+
+		HtmlOutputLink result = builder.outputLink(null, null, "/href", null, target);
+		assertSame(link, result);
+		verify(link).setTarget("myFrame");
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testColourPickerShortcutReturnsExistingComponent() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		EventSourceComponent existing = mock(EventSourceComponent.class);
+		ColourPicker colour = new ColourPicker();
+		EventSourceComponent result = builder.colourPicker(existing, "row", colour, null, "Colour", null, null);
+		assertSame(existing, result);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testPasswordShortcutReturnsExistingComponent() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		EventSourceComponent existing = mock(EventSourceComponent.class);
+		org.skyve.impl.metadata.view.widget.bound.input.Password pwd =
+			new org.skyve.impl.metadata.view.widget.bound.input.Password();
+		EventSourceComponent result = builder.password(existing, "row", pwd, null, "Password", null, null);
+		assertSame(existing, result);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testDataListCreatesAndConfigures() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		org.primefaces.component.datalist.DataList dataListComponent =
+			mock(org.primefaces.component.datalist.DataList.class);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("dataListId");
+		builder.setManagedBeanForTest(managedBean);
+		when(mockApplication.createComponent(org.primefaces.component.datalist.DataList.COMPONENT_TYPE))
+			.thenReturn(dataListComponent);
+		org.primefaces.component.datalist.DataList result =
+			builder.dataList("myBinding", "row", null, "myId");
+		assertSame(dataListComponent, result);
+		verify(dataListComponent).setVar("row");
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testAccordionPanelCreatesComponent() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		org.primefaces.component.accordionpanel.AccordionPanel accordionComponent =
+			mock(org.primefaces.component.accordionpanel.AccordionPanel.class);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("accordionId");
+		builder.setManagedBeanForTest(managedBean);
+		when(mockApplication.createComponent(org.primefaces.component.accordionpanel.AccordionPanel.COMPONENT_TYPE))
+			.thenReturn(accordionComponent);
+		org.primefaces.component.accordionpanel.AccordionPanel result =
+			builder.accordionPanel(null, "myAccordion");
+		assertSame(accordionComponent, result);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testSliderVerticalConfiguresVerticalSlider() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		HtmlPanelGrid panelGrid = mock(HtmlPanelGrid.class);
+		HtmlInputHidden hidden = mock(HtmlInputHidden.class);
+		HtmlOutputText display = mock(HtmlOutputText.class);
+		org.primefaces.component.slider.Slider sliderComponent = mock(org.primefaces.component.slider.Slider.class);
+		Spacer spacer = mock(Spacer.class);
+		List<UIComponent> children = new ArrayList<>();
+		ValueExpression hiddenValueExpression = mock(ValueExpression.class);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("vSliderPanelId", "vSliderHiddenId", "vSliderDisplayId", "vSliderComponentId", "vSliderSpacerId");
+		builder.setManagedBeanForTest(managedBean);
+
+		when(panelGrid.getChildren()).thenReturn(children);
+		when(hidden.getId()).thenReturn("vSliderHidden");
+		when(hidden.getValueExpression("value")).thenReturn(hiddenValueExpression);
+		when(display.getId()).thenReturn("vSliderDisplay");
+		when(mockApplication.createComponent(HtmlPanelGrid.COMPONENT_TYPE)).thenReturn(panelGrid);
+		when(mockApplication.createComponent(HtmlInputHidden.COMPONENT_TYPE)).thenReturn(hidden);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(display);
+		when(mockApplication.createComponent(org.primefaces.component.slider.Slider.COMPONENT_TYPE)).thenReturn(sliderComponent);
+		when(mockApplication.createComponent(Spacer.COMPONENT_TYPE)).thenReturn(spacer);
+
+		org.skyve.impl.metadata.view.widget.bound.input.Slider slider = new org.skyve.impl.metadata.view.widget.bound.input.Slider();
+		slider.setBinding("angle");
+		slider.setVertical(Boolean.TRUE);
+
+		EventSourceComponent result = builder.slider(null, "row", slider, null, "Angle", null, null);
+
+		assertSame(panelGrid, result.getComponent());
+		assertSame(sliderComponent, result.getEventSource());
+		verify(panelGrid).setColumns(4);
+		verify(sliderComponent).setType("vertical");
+		// Spacer should be in children (between slider and display)
+		assertTrue(children.contains(spacer));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testSliderNoDiscreteValuesUsesStepOfOne() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		HtmlPanelGrid panelGrid = mock(HtmlPanelGrid.class);
+		HtmlInputHidden hidden = mock(HtmlInputHidden.class);
+		HtmlOutputText display = mock(HtmlOutputText.class);
+		org.primefaces.component.slider.Slider sliderComponent = mock(org.primefaces.component.slider.Slider.class);
+		List<UIComponent> children = new ArrayList<>();
+		ValueExpression hiddenValueExpression = mock(ValueExpression.class);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("s2PanelId", "s2HiddenId", "s2DisplayId", "s2ComponentId");
+		builder.setManagedBeanForTest(managedBean);
+
+		when(panelGrid.getChildren()).thenReturn(children);
+		when(hidden.getId()).thenReturn("s2Hidden");
+		when(hidden.getValueExpression("value")).thenReturn(hiddenValueExpression);
+		when(display.getId()).thenReturn("s2Display");
+		when(mockApplication.createComponent(HtmlPanelGrid.COMPONENT_TYPE)).thenReturn(panelGrid);
+		when(mockApplication.createComponent(HtmlInputHidden.COMPONENT_TYPE)).thenReturn(hidden);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(display);
+		when(mockApplication.createComponent(org.primefaces.component.slider.Slider.COMPONENT_TYPE)).thenReturn(sliderComponent);
+
+		org.skyve.impl.metadata.view.widget.bound.input.Slider slider = new org.skyve.impl.metadata.view.widget.bound.input.Slider();
+		slider.setBinding("rating");
+		slider.setVertical(Boolean.FALSE);
+		// No numberOfDiscreteValues set — should use step of 1.0
+
+		builder.slider(null, "row", slider, null, "Rating", null, null);
+		verify(sliderComponent).setStep(1.0);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testActionButtonWithDeleteAndNoConfirmationUsesDefault() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		CommandButton commandButton = mock(CommandButton.class);
+		MethodExpression actionExpression = mock(MethodExpression.class);
+		ValueExpression valueExpression = mock(ValueExpression.class);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("deleteId");
+		builder.setManagedBeanForTest(managedBean);
+
+		ConfirmBehavior confirmBehavior = mock(ConfirmBehavior.class);
+		when(mockApplication.createComponent(CommandButton.COMPONENT_TYPE)).thenReturn(commandButton);
+		when(mockApplication.createBehavior(ConfirmBehavior.BEHAVIOR_ID)).thenReturn(confirmBehavior);
+		when(mockExpressionFactory.createMethodExpression(any(ELContext.class), anyString(), isNull(), any(Class[].class)))
+			.thenReturn(actionExpression);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), any(Class.class)))
+			.thenReturn(valueExpression);
+
+		// Delete with null confirmationText — should set default confirmation
+		builder.actionButton(null, null, null, ImplicitActionName.Delete, "deleteAction",
+			false, null, null, null, null,
+			null, // confirmationText = null → default set
+			null, null, null, null, null, false);
+
+		verify(commandButton).setValue(null);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testActionButtonWithCancelSetsModeAndOnclick() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		CommandButton commandButton = mock(CommandButton.class);
+		MethodExpression actionExpression = mock(MethodExpression.class);
+		ValueExpression valueExpression = mock(ValueExpression.class);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("cancelId");
+		builder.setManagedBeanForTest(managedBean);
+
+		when(mockApplication.createComponent(CommandButton.COMPONENT_TYPE)).thenReturn(commandButton);
+		when(mockExpressionFactory.createMethodExpression(any(ELContext.class), anyString(), isNull(), any(Class[].class)))
+			.thenReturn(actionExpression);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), any(Class.class)))
+			.thenReturn(valueExpression);
+
+		// Cancel — should set type="button" and onclick
+		builder.actionButton(null, null, null, ImplicitActionName.Cancel, null,
+			false, null, null, null, null, null, null, null, null, null, null, false);
+
+		verify(commandButton).setType("button");
+		verify(commandButton).setOnclick("SKYVE.PF.popHistory(true)");
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testActionButtonWithRemoveAndNoConfirmationUsesDefault() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		CommandButton commandButton = mock(CommandButton.class);
+		MethodExpression actionExpression = mock(MethodExpression.class);
+		ValueExpression valueExpression = mock(ValueExpression.class);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("removeId");
+		builder.setManagedBeanForTest(managedBean);
+
+		ConfirmBehavior confirmBehavior2 = mock(ConfirmBehavior.class);
+		when(mockApplication.createComponent(CommandButton.COMPONENT_TYPE)).thenReturn(commandButton);
+		when(mockApplication.createBehavior(ConfirmBehavior.BEHAVIOR_ID)).thenReturn(confirmBehavior2);
+		when(mockExpressionFactory.createMethodExpression(any(ELContext.class), anyString(), isNull(), any(Class[].class)))
+			.thenReturn(actionExpression);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), any(Class.class)))
+			.thenReturn(valueExpression);
+
+		// Remove not inline, null confirmation — sets default; invisible=null → rendered expression
+		builder.actionButton(null, null, null, ImplicitActionName.Remove, null,
+			false, null, null, null, null, null, null, null, null, null, null, false);
+
+		verify(commandButton).setValue(null);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testActionButtonWithZoomOutAndInvisibleSetsInvisible() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		CommandButton commandButton = mock(CommandButton.class);
+		MethodExpression actionExpression = mock(MethodExpression.class);
+		ValueExpression valueExpression = mock(ValueExpression.class);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("zoomOutId");
+		builder.setManagedBeanForTest(managedBean);
+
+		when(mockApplication.createComponent(CommandButton.COMPONENT_TYPE)).thenReturn(commandButton);
+		when(mockExpressionFactory.createMethodExpression(any(ELContext.class), anyString(), isNull(), any(Class[].class)))
+			.thenReturn(actionExpression);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), any(Class.class)))
+			.thenReturn(valueExpression);
+
+		// ZoomOut not inline, with invisible → setInvisible branch
+		builder.actionButton(null, null, null, ImplicitActionName.ZoomOut, null,
+			false, null, null, null, null, null, null, null, "invisibleCondition", null, null, false);
+
+		verify(commandButton).setValue(null);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testActionButtonWithSaveAndNullInvisibleSetsRenderedExpression() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		CommandButton commandButton = mock(CommandButton.class);
+		MethodExpression actionExpression = mock(MethodExpression.class);
+		ValueExpression valueExpression = mock(ValueExpression.class);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("saveId");
+		builder.setManagedBeanForTest(managedBean);
+
+		when(mockApplication.createComponent(CommandButton.COMPONENT_TYPE)).thenReturn(commandButton);
+		when(mockExpressionFactory.createMethodExpression(any(ELContext.class), anyString(), isNull(), any(Class[].class)))
+			.thenReturn(actionExpression);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), any(Class.class)))
+			.thenReturn(valueExpression);
+
+		// Save with invisible=null → sets rendered value expression
+		builder.actionButton(null, null, null, ImplicitActionName.Save, null,
+			false, null, null, null, null, null, null, null, null, null, null, false);
+
+		verify(commandButton).setValueExpression(eq("rendered"), any(ValueExpression.class));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testSetValueOrValueExpressionWithNullDoesNothing() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		UIComponent component = mock(UIComponent.class);
+		boolean[] called = {false};
+		builder.setValueOrValueExpression(null, v -> called[0] = true, "title", component);
+		assertFalse(called[0]);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testSetValueOrValueExpressionWithSimpleValueCallsSetter() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		UIComponent component = mock(UIComponent.class);
+		String[] captured = {null};
+		builder.setValueOrValueExpression("hello", v -> captured[0] = v, "title", component);
+		assertEquals("hello", captured[0]);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testSetValueOrValueExpressionWithBindingExpressionSetsValueExpression() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		UIComponent component = mock(UIComponent.class);
+		ValueExpression ve = mock(ValueExpression.class);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), any(Class.class)))
+			.thenReturn(ve);
+		builder.setValueOrValueExpression("{bean.title}", v -> {}, "title", component);
+		verify(component).setValueExpression(eq("title"), any(ValueExpression.class));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testCheckboxShortcutReturnsExisting() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		EventSourceComponent existing = mock(EventSourceComponent.class);
+		CheckBox checkBox = new CheckBox();
+		EventSourceComponent result = builder.checkBox(existing, "row", checkBox, null, "Check", null);
+		assertSame(existing, result);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testMapShortcutReturnsExisting() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		UIComponent existing = mock(UIComponent.class);
+		MapDisplay mapDisplay = new MapDisplay();
+		UIComponent result = builder.map(existing, mapDisplay, null, "widgets", null);
+		assertSame(existing, result);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testBlurbShortcutReturnsExisting() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		UIComponent existing = mock(UIComponent.class);
+		Blurb blurb = new Blurb();
+		UIComponent result = builder.blurb(existing, "row", "value", null, blurb);
+		assertSame(existing, result);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testLabelBindingShortcutReturnsExisting() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		UIComponent existing = mock(UIComponent.class);
+		Label label = new Label();
+		UIComponent result = builder.label(existing, "row", "value", "binding", label);
+		assertSame(existing, result);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testGeometryShortcutReturnsExisting() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		EventSourceComponent existing = mock(EventSourceComponent.class);
+		Geometry geometry = new Geometry();
+		EventSourceComponent result = builder.geometry(existing, "row", geometry, null, "Geo", null, null);
+		assertSame(existing, result);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testListMembershipShortcutReturnsExisting() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		EventSourceComponent existing = mock(EventSourceComponent.class);
+		ListMembership membership = new ListMembership();
+		EventSourceComponent result = builder.listMembership(existing, "Candidates", "Members", membership);
+		assertSame(existing, result);
 	}
 }
