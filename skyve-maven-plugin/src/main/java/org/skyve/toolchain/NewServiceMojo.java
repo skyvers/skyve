@@ -29,13 +29,9 @@ import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 
 /**
- * <p>
- * This mojo creates a new service class for a document.
- * </p>
- * <p>
- * It creates a service class for the specified Document with helper methods
- * for retrieving single and multiple instances.
- * </p>
+	 * Creates a new document service class with standard retrieval helpers.
+	 *
+	 * <p>Threading: this mojo mutates project sources and should be treated as thread-confined.
  */
 @Mojo(name = "newService")
 public class NewServiceMojo extends NewDocumentMojo {
@@ -48,10 +44,9 @@ public class NewServiceMojo extends NewDocumentMojo {
 	protected String srcDir;
 
 	/**
-	 * Executes the mojo to create a new service class for a document.
-	 * This will create the service class with basic CRUD operations.
-	 * 
-	 * @throws MojoExecutionException if there is an error during execution
+	 * Creates the document first when required, then writes the service class.
+	 *
+	 * @throws MojoExecutionException if the service cannot be created
 	 */
 	@Override
 	public void execute() throws MojoExecutionException {
@@ -77,8 +72,8 @@ public class NewServiceMojo extends NewDocumentMojo {
 
 	/**
 	 * Creates the document service class.
-	 * This class provides service layer methods for working with the document.
-	 * It includes methods for retrieving single and multiple instances.
+	 *
+	 * <p>The generated service injects {@link Persistence} and exposes simple document lookup helpers.
 	 */
 	void createServiceClass() {
 		final String serviceName = documentName + "Service";
@@ -137,14 +132,19 @@ public class NewServiceMojo extends NewDocumentMojo {
 	}
 
 	/**
-	 * Gets the name of the extension class for the document.
-	 * 
-	 * @return The extension class name (document name + "Extension")
+	 * Returns the generated extension class name for the current document.
+	 *
+	 * @return the extension class name
 	 */
 	private String getExtensionName() {
 		return documentName + "Extension";
 	}
 
+	/**
+	 * Returns the output path for the generated service class.
+	 *
+	 * @return the service source file path
+	 */
 	private Path getServiceClassPath() {
 		return Paths.get(srcDir, "modules", moduleName, documentName, documentName + "Service.java");
 	}

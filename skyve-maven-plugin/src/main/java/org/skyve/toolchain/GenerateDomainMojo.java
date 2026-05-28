@@ -13,7 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Generates Skyve domain (java) files.
+ * Generates Skyve domain and generated-test sources from the repository metadata.
+ *
+ * <p>Threading: this mojo mutates generated source trees and should be treated as thread-confined.
  */
 @Mojo(name = "generateDomain", requiresDependencyResolution = ResolutionScope.TEST)
 @Execute(phase = LifecyclePhase.PROCESS_RESOURCES)
@@ -47,6 +49,11 @@ public class GenerateDomainMojo extends AbstractSkyveMojo {
 	@Parameter()
 	private GenerateDomainConfig generateDomainConfig;
 
+	/**
+	 * Runs the domain generator with the configured dialect, source roots, and excluded modules.
+	 *
+	 * @throws MojoExecutionException if generation fails or the configuration is missing
+	 */
 	@Override
 	public void execute() throws MojoExecutionException {
 		if (generateDomainConfig == null) {

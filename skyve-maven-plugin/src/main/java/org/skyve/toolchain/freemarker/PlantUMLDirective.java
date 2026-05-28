@@ -59,6 +59,16 @@ public class PlantUMLDirective implements TemplateDirectiveModel {
 	private static final String PARAM_NAME_BINDING = "binding";
 	private static final String PARAM_NAME_MARKUP = "markup";
 
+	/**
+	 * Renders a PlantUML diagram image from either a bean binding or explicit markup.
+	 *
+	 * @param env the current FreeMarker environment
+	 * @param params directive parameters; must include either {@code bean} and {@code binding}, or {@code markup}
+	 * @param loopVars loop variables, which are not supported
+	 * @param body nested directive content, which is not supported
+	 * @throws TemplateException if the parameters are invalid
+	 * @throws IOException if the rendered image cannot be written to the template output
+	 */
 	@Override
 	public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
 	throws TemplateException, IOException {
@@ -127,10 +137,10 @@ public class PlantUMLDirective implements TemplateDirectiveModel {
 	}
 
 	/**
-	 * Converts PlantUML markup into a base64 encoded data url inside a HTML image tag.
-	 * 
-	 * @param uml The PlantUML markup
-	 * @return A HTML image tag representing the diagram
+	 * Converts PlantUML markup into an HTML image tag with an embedded base64 data URL.
+	 *
+	 * @param uml the PlantUML markup to render
+	 * @return the HTML image tag containing the rendered diagram
 	 */
 	private static String generateImage(final String uml) {
 		try {

@@ -14,7 +14,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Generates a Skyve edit view.
+ * Generates the XML edit view for a Skyve document.
+ *
+ * <p>Threading: this mojo mutates generated source trees and repository wiring and should be treated as
+ * thread-confined.
  */
 @Mojo(name = "generateEditView", requiresDependencyResolution = ResolutionScope.TEST)
 @Execute(phase = LifecyclePhase.PROCESS_RESOURCES)
@@ -36,6 +39,11 @@ public class GenerateEditViewMojo extends AbstractSkyveMojo {
 	@Parameter()
 	private GenerateEditViewConfig generateEditViewConfig;
 
+	/**
+	 * Resolves the customer, module, and document names and generates the edit view XML.
+	 *
+	 * @throws MojoExecutionException if generation fails
+	 */
 	@Override
 	public void execute() throws MojoExecutionException {
 		try {
@@ -48,7 +56,7 @@ public class GenerateEditViewMojo extends AbstractSkyveMojo {
 			final String configDocumentName = (generateEditViewConfig != null) ? generateEditViewConfig.getDocument() : null;
 			final String documentName = getDefaultOrPrompt(configDocumentName, "Please enter a document name");
 
-			final boolean isCustomerOverriden = (generateEditViewConfig != null) ? generateEditViewConfig.isCustomerOverriden() : false;
+			final boolean isCustomerOverriden = (generateEditViewConfig != null) && generateEditViewConfig.isCustomerOverriden();
 
 			final String overridenViewName = (generateEditViewConfig != null) ? generateEditViewConfig.getOverridenViewName() : null;
 

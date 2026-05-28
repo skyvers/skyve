@@ -12,7 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Generates default queries.
+ * Generates the default query metadata for a Skyve customer and module.
+ *
+ * <p>Threading: this mojo reads repository metadata and should be treated as thread-confined.
  */
 @Mojo(name = "generateDefaultQueries", requiresDependencyResolution = ResolutionScope.TEST)
 @Execute(phase = LifecyclePhase.PROCESS_RESOURCES)
@@ -22,6 +24,11 @@ public class GenerateDefaultQueriesMojo extends AbstractSkyveMojo {
 	@Parameter
 	private GenerateDefaultQueriesConfig generateDefaultQueriesConfig;
 
+	/**
+	 * Resolves the customer and module names, then invokes the Skyve query generator.
+	 *
+	 * @throws MojoExecutionException if query generation fails
+	 */
 	@Override
 	public void execute() throws MojoExecutionException {
 		try {
@@ -33,9 +40,7 @@ public class GenerateDefaultQueriesMojo extends AbstractSkyveMojo {
 												generateDefaultQueriesConfig.getModule() :
 												null;
 			final String moduleName = getDefaultOrPrompt(configModuleName, "Please enter a module name");
-			final boolean includeAssociationBizKeys = (generateDefaultQueriesConfig != null) ?
-														generateDefaultQueriesConfig.isIncludeAssociationBizKeys() :
-														false;
+			final boolean includeAssociationBizKeys = (generateDefaultQueriesConfig != null) && generateDefaultQueriesConfig.isIncludeAssociationBizKeys();
 
 			configureClasspath();
 			QueryGenerator.main(new String[] {customerName, moduleName, String.valueOf(includeAssociationBizKeys)});

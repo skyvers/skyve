@@ -8,6 +8,11 @@ import org.codehaus.plexus.util.StringUtils;
 
 import java.io.File;
 
+/**
+ * Updates the deploy marker file for the current Skyve build output.
+ *
+ * <p>Threading: this mojo mutates filesystem state and should be treated as thread-confined.
+ */
 @Mojo(name = "touch")
 public class TouchMojo extends AbstractSkyveMojo {
 	/**
@@ -16,6 +21,11 @@ public class TouchMojo extends AbstractSkyveMojo {
 	@Parameter()
 	private String touchFile;
 
+	/**
+	 * Touches the configured marker file, or the default deployment marker when none is supplied.
+	 *
+	 * @throws MojoExecutionException if the marker file cannot be updated
+	 */
 	@Override
 	public void execute() throws MojoExecutionException {
 		try {

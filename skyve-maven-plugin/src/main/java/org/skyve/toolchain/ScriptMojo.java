@@ -11,6 +11,11 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+/**
+ * Applies a Skyve script to an existing project.
+ *
+ * <p>Threading: this mojo mutates project state and should be treated as thread-confined.
+ */
 @Mojo(name = "script", requiresDependencyResolution = ResolutionScope.TEST)
 public class ScriptMojo extends AbstractSkyveMojo {
 
@@ -32,6 +37,11 @@ public class ScriptMojo extends AbstractSkyveMojo {
 	@Parameter(required = true, defaultValue = "script/skyve.md", property = "scriptPath")
 	private String scriptPath;
 
+	/**
+	 * Loads the target Skyve project and applies the configured script contents.
+	 *
+	 * @throws MojoExecutionException if the script cannot be applied
+	 */
 	@Override
 	public void execute() throws MojoExecutionException {
 		try {

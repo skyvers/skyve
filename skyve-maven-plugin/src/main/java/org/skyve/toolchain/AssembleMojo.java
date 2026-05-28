@@ -11,6 +11,11 @@ import org.apache.maven.project.MavenProject;
 import org.skyve.impl.create.MavenSkyveProject;
 import org.skyve.impl.create.MavenSkyveProject.MavenSkyveProjectCreator;
 
+/**
+ * Assembles a deployable Skyve project from an existing Skyve installation or a template project.
+ *
+ * <p>Threading: this mojo mutates filesystem state and should be treated as thread-confined.
+ */
 @Mojo(name = "assemble")
 public class AssembleMojo extends AbstractMojo {
 
@@ -35,6 +40,13 @@ public class AssembleMojo extends AbstractMojo {
 	@Parameter(required = true, property = "customer")
 	private String customer;
 
+	/**
+	 * Resolves the supplied directories and assembles the project output.
+	 *
+	 * <p>Side effects: creates or updates files beneath the target project directory.
+	 *
+	 * @throws MojoExecutionException if the project cannot be assembled
+	 */
 	@Override
 	public void execute() throws MojoExecutionException {
 		try {
@@ -61,12 +73,10 @@ public class AssembleMojo extends AbstractMojo {
 														.projectDirectory(project.getBasedir().getAbsolutePath())
 														.customerName(customer)
 														.skyveDirectory(skyveDir);
-			if (templateDir != null) {
+			if ((templateDir != null) && new File(templateDir).exists()) {
 				// Assemble from a project instead of Skyve.
-				if (new File(templateDir).exists()) {
-					creator.skyveDirectory(templateDir);
-					creator.copyFromProject(true);
-				}
+				creator.skyveDirectory(templateDir);
+				creator.copyFromProject(true);
 			}
 
 			final MavenSkyveProject me = creator.initialise();

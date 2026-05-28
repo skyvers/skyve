@@ -19,10 +19,20 @@ import org.skyve.impl.util.XMLMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Creates a new Skyve module directory and registers it in customer metadata when possible.
+ *
+ * <p>Threading: this mojo mutates project sources and metadata files and should be treated as thread-confined.
+ */
 @Mojo(name = "newModule")
 public class NewModuleMojo extends AbstractSkyveMojo {
 	private static final Logger LOGGER = LoggerFactory.getLogger(NewModuleMojo.class);
 
+	/**
+	 * Prompts for the module name, creates the module metadata, and updates the customer metadata if available.
+	 *
+	 * @throws MojoExecutionException if the module cannot be created
+	 */
 	@Override
 	public void execute() throws MojoExecutionException {
 		try {

@@ -38,7 +38,10 @@ import org.skyve.persistence.DataStore;
 import org.skyve.toolchain.AbstractSkyveMojo;
 
 /**
- * From a skyve project generate a baseline flutter project.
+ * Generates a baseline Flutter project from an existing Skyve project.
+ *
+ * <p>Threading: this mojo bootstraps CDI, persistence, repository, and utility singletons and should be treated
+ * as thread-confined.
  */
 @Mojo(name = "flutter-init")
 public class FlutterInitMojo extends AbstractSkyveMojo {
@@ -64,6 +67,12 @@ public class FlutterInitMojo extends AbstractSkyveMojo {
     @Parameter(property = "modocWhitelist", required = true, defaultValue = "*.*")
     private List<String> modocWhitelist;
 
+    /**
+     * Resolves interactive parameters, prepares the output directory, and runs the Flutter generator.
+     *
+     * @throws MojoExecutionException if generation fails
+     * @throws MojoFailureException if required parameters are missing or the target directory already exists
+     */
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
 
@@ -117,6 +126,16 @@ public class FlutterInitMojo extends AbstractSkyveMojo {
         }
     }
 
+    /**
+     * Bootstraps the Skyve runtime needed by the Flutter generator.
+     *
+     * <p>Side effects: initialises CDI, configures persistence, data stores, repository access, and the current
+     * thread's Skyve user context.
+     *
+     * @return the initialised Weld container
+     * @throws DependencyResolutionRequiredException if Maven cannot resolve the test classpath
+     * @throws MalformedURLException if a classpath element cannot be converted to a URL
+     */
     @SuppressWarnings("resource") // NB for weld use
 	private Weld bootstrapSkyve() throws DependencyResolutionRequiredException, MalformedURLException {
         configureClasspath(srcDir);
@@ -163,7 +182,16 @@ public class FlutterInitMojo extends AbstractSkyveMojo {
         return weld;
     }
 
-    private Path prepareTargetDirectory(String dir, boolean clear) throws MojoFailureException, MojoExecutionException {
+    /**
+     * Creates or clears the target directory for the generated Flutter project.
+     *
+     * @param dir the target directory path
+     * @param clear whether to delete existing contents instead of failing when the directory exists
+     * @return the resolved target path
+     * @throws MojoFailureException if the directory already exists and {@code clear} is {@code false}
+     * @throws MojoExecutionException if the directory cannot be created or cleared
+     */
+	private Path prepareTargetDirectory(String dir, boolean clear) throws MojoFailureException, MojoExecutionException {
         Path root = Path.of(dir);
         if (root.toFile()
                 .exists()) {
@@ -204,17 +232,33 @@ public class FlutterInitMojo extends AbstractSkyveMojo {
         return root;
     }
 
-    private void debug(CharSequence msg) {
+    /**
+     * Logs a debug message using the mojo prefix.
+     *
+     * @param msg the message to log
+     */
+	private void debug(CharSequence msg) {
 
         getLog().debug("[flutter-init] " + msg);
     }
 
-    private void info(CharSequence msg) {
+    /**
+     * Logs an informational message using the mojo prefix.
+     *
+     * @param msg the message to log
+     */
+	private void info(CharSequence msg) {
 
         getLog().info("[flutter-init] " + msg);
     }
 
-    private void debugParam(String name, Object value) {
+    /**
+     * Logs a named debug parameter value using the mojo prefix.
+     *
+     * @param name the parameter name
+     * @param value the parameter value
+     */
+	private void debugParam(String name, Object value) {
 
         debug(name + "=" + value);
     }

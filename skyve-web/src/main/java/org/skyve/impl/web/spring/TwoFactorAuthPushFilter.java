@@ -18,8 +18,8 @@ import org.skyve.impl.util.TwoFactorAuthCustomerConfiguration;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.util.OWASP;
-import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
+import org.slf4j.Logger;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.security.authentication.AuthenticationServiceException;
@@ -46,26 +46,26 @@ import jakarta.servlet.http.HttpServletResponse;
  * codes, and controls forwarding to the intermediate two-factor entry flow.
  */
 public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthenticationFilter {
-	private static final PathPatternRequestMatcher DEFAULT_LOGIN_ATTEMPT_PATH_REQUEST_MATCHER = PathPatternRequestMatcher.withDefaults()
-			.matcher(HttpMethod.POST, SkyveSpringSecurity.LOGIN_ATTEMPT_PATH);
+	private static final PathPatternRequestMatcher DEFAULT_LOGIN_ATTEMPT_PATH_REQUEST_MATCHER = 
+								PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, SkyveSpringSecurity.LOGIN_ATTEMPT_PATH);
 	private static final Pattern SIX_DIGIT_TFA_CODE_PATTERN = Pattern.compile("\\d{6}");
 
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(TwoFactorAuthPushFilter.class);
 
 	public static final String SKYVE_SECURITY_FORM_CUSTOMER_KEY = "customer";
 	
-	public static String TWO_FACTOR_TOKEN_ATTRIBUTE = "tfaToken";
-	public static String USER_ATTRIBUTE = "user"; 
-	public static String CUSTOMER_ATTRIBUTE = "customer";
+	public static final String TWO_FACTOR_TOKEN_ATTRIBUTE = "tfaToken";
+	public static final String USER_ATTRIBUTE = "user"; 
+	public static final String CUSTOMER_ATTRIBUTE = "customer";
 	public static final String TWO_FACTOR_EXPIRED_PARAMETER = "tfaExpired";
 	
-	public static String REMEMBER_ATTRIBUTE = "remember";
+	public static final String REMEMBER_ATTRIBUTE = "remember";
 	public static final String RESEND_ATTRIBUTE = "tfaResend";
 	public static final String RESEND_SUCCESS_ATTRIBUTE = "tfaResendSuccess";
 	public static final String RESEND_COOLDOWN_ATTRIBUTE = "tfaResendCooldown";
 	
 	// this is from the SpringSecurityConfig.remember me.
-	public static String REMEMBER_PARAMETER = "remember";
+	public static final String REMEMBER_PARAMETER = "remember";
 	
 	private UserDetailsManager userDetailsManager;
 
@@ -345,24 +345,24 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		return forwardToTwoFactorPage(request, response, user, rememberMe, false);
 	}
 
-	private void redirectToLogin(HttpServletRequest request, HttpServletResponse response)
+	private static void redirectToLogin(HttpServletRequest request, HttpServletResponse response)
 	throws IOException, ServletException {
 		SimpleUrlAuthenticationFailureHandler handler = new SimpleUrlAuthenticationFailureHandler("/login");
 		handler.onAuthenticationFailure(request, response, new AuthenticationServiceException("Invalid TFA resend request"));
 	}
 
-	private boolean forwardToTwoFactorPage(HttpServletRequest request,
-											HttpServletResponse response,
-											TwoFactorAuthUser user)
+	private static boolean forwardToTwoFactorPage(HttpServletRequest request,
+													HttpServletResponse response,
+													TwoFactorAuthUser user)
 	throws IOException, ServletException {
 		return forwardToTwoFactorPage(request, response, user, false, true);
 	}
 
-	private boolean forwardToTwoFactorPage(HttpServletRequest request,
-											HttpServletResponse response,
-											TwoFactorAuthUser user,
-											boolean rememberMe,
-											boolean invalidCode)
+	private static boolean forwardToTwoFactorPage(HttpServletRequest request,
+													HttpServletResponse response,
+													TwoFactorAuthUser user,
+													boolean rememberMe,
+													boolean invalidCode)
 	throws IOException, ServletException {
 		TwoFactorAuthForwardHandler handler = new TwoFactorAuthForwardHandler("/login");
 		request.setAttribute(CUSTOMER_ATTRIBUTE, user.getCustomer());
@@ -407,7 +407,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	 * @param request inbound login request
 	 * @return resolved customer name
 	 */
-	protected String obtainCustomer(HttpServletRequest request) {
+	static String obtainCustomer(HttpServletRequest request) {
 		String customerName = UtilImpl.processStringValue(request.getParameter(SKYVE_SECURITY_FORM_CUSTOMER_KEY));
 		if (customerName == null) {
 			customerName = UtilImpl.CUSTOMER;
@@ -416,7 +416,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		return customerName;
 	}
 
-	protected boolean isValidTwoFactorCode(String twoFactorCode) {
+	static boolean isValidTwoFactorCode(String twoFactorCode) {
 		return (twoFactorCode != null) && SIX_DIGIT_TFA_CODE_PATTERN.matcher(twoFactorCode).matches();
 	}
 	
@@ -557,7 +557,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 													currentTimeMillis());
 	}
 
-	private LockoutState loadLockoutState(String fullUsername) {
+	private static LockoutState loadLockoutState(String fullUsername) {
 		if (UtilImpl.DATA_STORE == null) {
 			return null;
 		}

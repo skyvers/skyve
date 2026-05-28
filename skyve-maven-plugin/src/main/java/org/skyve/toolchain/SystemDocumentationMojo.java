@@ -63,7 +63,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Generates Skyve System Documentation PDF.
+ * Generates the Skyve system documentation report and exports it as a PDF.
+ *
+ * <p>Threading: this mojo mutates global Skyve bootstrap state, repository wiring, caches, and persistence
+ * configuration; it must be treated as thread-confined.
  */
 @Mojo(name = "systemDocumentation") //, requiresDependencyResolution = ResolutionScope.TEST)
 @Execute(phase = LifecyclePhase.PROCESS_RESOURCES)
@@ -106,6 +109,15 @@ public class SystemDocumentationMojo extends AbstractSkyveMojo {
 	@Parameter(property = "excludedModules")
 	private String excludedModules;
 
+	/**
+	 * Bootstraps a temporary reporting environment, renders the HTML report, and copies the generated PDF into
+	 * the target directory.
+	 *
+	 * <p>Side effects: mutates Skyve global singletons, creates temporary files, and writes
+	 * {@code target/system-documentation.pdf}.
+	 *
+	 * @throws MojoExecutionException if report generation fails
+	 */
 	@Override
 	public void execute() throws MojoExecutionException {
 		try {
@@ -163,16 +175,22 @@ public class SystemDocumentationMojo extends AbstractSkyveMojo {
 	}
 	
 	/**
-	 * Generates a PDF for the application. Assumes there's a file named 'systemDocumentation.html' in the directory.
-	 * 
-	 * @return A File to the generated PDF on disk
-	 * @throws Exception
+	 * Renders the system documentation report to a PDF file.
+	 *
+	 * @return the generated PDF file on disk
+	 * @throws Exception if report rendering fails
 	 */
 	public File pdf() throws Exception {
 		Map<String, Object> parameters = prepareParameters();
 		return EXT.getReporting().createFreemarkerReportPDF(REPORT_FILENAME, parameters, "system-documentation");
 	}
 
+	/**
+	 * Builds the data model consumed by the system documentation template.
+	 *
+	 * @return the template parameter map
+	 * @throws IOException if report assets cannot be loaded
+	 */
 	private Map<String, Object> prepareParameters() throws IOException {
 		Map<String, Object> result = new HashMap<>();
 		Customer c = CORE.getCustomer();
@@ -389,10 +407,11 @@ public class SystemDocumentationMojo extends AbstractSkyveMojo {
 	}
 	
 	/**
-	 * Generates a PlantUML diagram for the document.
-	 * 
-	 * @param document The document to generate the diagram for.
-	 * @return The generated PlantUML markup, or null if there are no associations or collections to model
+	 * Generates a PlantUML diagram for the supplied document when the document has relationships to model.
+	 *
+	 * @param document the document to describe
+	 * @param customer the current customer context used for attribute resolution
+	 * @return the generated PlantUML markup, or {@code null} when no relationships are present
 	 */
 	private static String generateDiagram(final Document document, final Customer customer) {
 		boolean noDiagram = true; // determines whether to return a diagram or null
@@ -478,6 +497,15 @@ public class SystemDocumentationMojo extends AbstractSkyveMojo {
 		return outputDiagram(document, (parentDocument != null), uniqueRelatedNames, relations.toString());
 	}
 	
+	/**
+	 * Wraps the PlantUML relation block in a full diagram definition.
+	 *
+	 * @param document the primary document being rendered
+	 * @param child whether the document has a parent relationship
+	 * @param relatedNames the related document and interface names to declare
+	 * @param relations the relation statements to append
+	 * @return the full PlantUML diagram text
+	 */
 	private static String outputDiagram(Document document,
 											boolean child,
 											Set<String> relatedNames,

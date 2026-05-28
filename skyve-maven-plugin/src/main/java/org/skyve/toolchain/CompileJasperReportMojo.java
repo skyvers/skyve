@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -20,7 +19,9 @@ import net.sf.jasperreports.engine.JasperReportsContext;
 import net.sf.jasperreports.engine.query.QueryExecuterFactory;
 
 /**
- * Compiles a Jasper report.
+ * Compiles one or more JasperReports templates from the Skyve module tree.
+ *
+ * <p>Threading: this mojo mutates JasperReports global context and should be treated as thread-confined.
  */
 @Mojo(name = "compileJasperReport")
 public class CompileJasperReportMojo extends AbstractSkyveMojo {
@@ -28,6 +29,14 @@ public class CompileJasperReportMojo extends AbstractSkyveMojo {
 	public static final String JRXML_EXTENSION = "jrxml";
 	public static final String JASPER_EXTENSION = "jasper";
 
+	/**
+	 * Prompts for a report name, resolves the matching templates, and compiles them to {@code .jasper} files.
+	 *
+	 * <p>Side effects: writes compiled report files next to the source templates and configures the JasperReports
+	 * query executer factory for Skyve document queries.
+	 *
+	 * @throws MojoExecutionException if compilation fails
+	 */
 	@Override
 	public void execute() throws MojoExecutionException {
 		try {
@@ -52,6 +61,13 @@ public class CompileJasperReportMojo extends AbstractSkyveMojo {
 		}
 	}
 
+	/**
+	 * Finds the matching JasperReports templates for the supplied report name.
+	 *
+	 * @param reportName the report name to search for, with or without the {@code .jrxml} suffix
+	 * @return the matching report templates
+	 * @throws FileNotFoundException if the Skyve modules directory cannot be found
+	 */
 	private List<File> getReports(String reportName) throws FileNotFoundException {
 		final Path modulesDirectory = getModulesDirectory();
 		LOGGER.info("Searching for reports in {}.", modulesDirectory);
@@ -61,6 +77,6 @@ public class CompileJasperReportMojo extends AbstractSkyveMojo {
 		final Collection<File> reports = FileUtils.listFiles(modulesDirectory.toFile(),
 																new String[] {JRXML_EXTENSION},
 																true);
-		return reports.stream().filter(report -> report.getName().equals(reportNameWithExtension)).collect(Collectors.toList());
+		return reports.stream().filter(report -> report.getName().equals(reportNameWithExtension)).toList();
 	}
 }

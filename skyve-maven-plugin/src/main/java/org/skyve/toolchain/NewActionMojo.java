@@ -26,6 +26,11 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
+/**
+ * Creates a new server-side action class for an existing Skyve document.
+ *
+ * <p>Threading: this mojo reads and writes project sources and should be treated as thread-confined.
+ */
 @Mojo(name = "newAction")
 public class NewActionMojo extends AbstractSkyveMojo {
 
@@ -41,6 +46,11 @@ public class NewActionMojo extends AbstractSkyveMojo {
 	protected File documentDirectory;
 	protected File actionsDirectory;
 
+	/**
+	 * Prompts for the module, document, and action names, then writes the new action source file.
+	 *
+	 * @throws MojoExecutionException if the action cannot be created
+	 */
 	@Override
 	public void execute() throws MojoExecutionException {
 		try {
@@ -86,6 +96,13 @@ public class NewActionMojo extends AbstractSkyveMojo {
 		}
 	}
 
+	/**
+	 * Locates the Skyve {@code modules} directory beneath the project's compile source roots.
+	 *
+	 * @param project the Maven project to inspect
+	 * @return the modules directory
+	 * @throws FileNotFoundException if the directory cannot be found
+	 */
 	private static Path getModulesDirectory(MavenProject project) throws FileNotFoundException {
 		for (final String sourceRoot : project.getCompileSourceRoots()) {
 			final Path modules = Paths.get(sourceRoot, "modules");
@@ -97,6 +114,11 @@ public class NewActionMojo extends AbstractSkyveMojo {
 		throw new FileNotFoundException("Failed to find modules directory.");
 	}
 
+	/**
+	 * Generates the JavaPoet model for the new action and writes it to the source tree.
+	 *
+	 * @throws IOException if the file cannot be written
+	 */
 	private void createActionClass() throws IOException {
 		final String extensionName = documentName + "Extension";
 		final Path extensionClassPath = documentDirectory.toPath().resolve(extensionName + ".java");
