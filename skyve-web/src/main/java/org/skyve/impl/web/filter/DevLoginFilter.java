@@ -22,7 +22,7 @@ public class DevLoginFilter implements Filter {
 	private static final String PASSWORD = "password";
 	
 	private String user;
-	private String password;
+	private String userPassword;
 	
 	@Override
 	public void init(FilterConfig config) throws ServletException {
@@ -35,8 +35,8 @@ public class DevLoginFilter implements Filter {
 			throw new ServletException(USER_NAME + " init parameter is required");
 		}
 		user = customerName + '/' + userName;
-		password = Util.processStringValue(config.getInitParameter(PASSWORD));
-		if (password == null) {
+		userPassword = Util.processStringValue(config.getInitParameter(PASSWORD));
+		if (userPassword == null) {
 			throw new ServletException(PASSWORD + " init parameter is required");
 		}
 	}
@@ -44,7 +44,7 @@ public class DevLoginFilter implements Filter {
 	@Override
 	public void destroy() {
 		user = null;
-		password = null;
+		userPassword = null;
 	}
 	
 	@Override
@@ -53,7 +53,7 @@ public class DevLoginFilter implements Filter {
 		HttpServletRequest hsr = (HttpServletRequest) request;
 		Principal userPrincipal = hsr.getUserPrincipal();
 		if (userPrincipal == null) {
-			hsr.login(user, password);
+			hsr.login(user, userPassword);
 		}
 		chain.doFilter(request, response);
 	}

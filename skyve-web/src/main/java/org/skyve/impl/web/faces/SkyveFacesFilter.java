@@ -28,6 +28,9 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+/**
+ * Filters inbound or outbound requests before downstream web processing.
+ */
 public class SkyveFacesFilter implements Filter {
 
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SkyveFacesFilter.class);
@@ -45,6 +48,9 @@ public class SkyveFacesFilter implements Filter {
 	// The value of jakarta.faces.DEFAULT_SUFFIX or ".jsf";
 	private String facesSuffix = ".jsf";
 
+	/**
+	 * Initialises configured routing and security parameters used by the Faces filter.
+	 */
 	@Override
 	public void init(FilterConfig config) throws ServletException {
 		forwardURI = Util.processStringValue(config.getInitParameter("forward"));
@@ -64,6 +70,9 @@ public class SkyveFacesFilter implements Filter {
 		}
 	}
 
+	/**
+	 * Clears filter configuration state.
+	 */
 	@Override
 	public void destroy() {
 		forwardURI = null;
@@ -71,6 +80,9 @@ public class SkyveFacesFilter implements Filter {
 		unsecuredURLPrefixes = null;
 	}
 
+	/**
+	 * Applies Faces-page authentication/session routing and error handling before delegating the filter chain.
+	 */
 	@Override
 	@SuppressWarnings("javasecurity:S5146") // false positive: see below
 	public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain)

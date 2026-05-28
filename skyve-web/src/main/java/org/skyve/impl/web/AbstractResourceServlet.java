@@ -51,6 +51,16 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 
 	/**
 	 * Parsed common request parameters shared across resource servlet implementations.
+	 *
+	 * @param moduleName the module name parsed from the request
+	 * @param documentName the document name parsed from the request
+	 * @param binding the optional binding parameter
+	 * @param resourceFileName the resource or content identifier
+	 * @param imageWidth the requested image width
+	 * @param imageHeight the requested image height
+	 * @param user the authenticated user, if present
+	 * @param customer the authenticated customer, if present
+	 * @param customerName the resolved customer name
 	 */
 	protected record RequestParams(
 			@Nullable String moduleName,
@@ -362,6 +372,7 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 	 * then call secure() before returning.
 	 *
 	 * @param request the HTTP request
+	 * @param params the parsed request parameters
 	 * @return the populated Resource - never null
 	 * @throws Exception if there is a problem creating the resource, including SecurityException if access should be denied
 	 */

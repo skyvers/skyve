@@ -40,6 +40,9 @@ public class SkyveDualListModelMap extends TreeMap<String, DualListModel<DomainV
 
 	private FacesView view;
 
+	/**
+	 * Creates a dual-list model map backed by the supplied Faces view.
+	 */
 	public SkyveDualListModelMap(FacesView view) {
 		this.view = view;
 	}

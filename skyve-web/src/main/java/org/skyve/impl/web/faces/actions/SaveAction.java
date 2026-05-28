@@ -23,6 +23,9 @@ import org.skyve.util.monitoring.RequestKey;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 
+/**
+ * Executes a Faces callback action within the current Skyve web context.
+ */
 public class SaveAction extends FacesAction<Void> {
 
     private static final Logger FACES_LOGGER = Category.FACES.logger();

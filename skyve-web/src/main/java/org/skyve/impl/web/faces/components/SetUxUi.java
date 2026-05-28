@@ -9,6 +9,9 @@ import jakarta.faces.component.UIComponentBase;
 import jakarta.faces.context.FacesContext;
 import jakarta.servlet.http.HttpServletRequest;
 
+/**
+ * Implements internal web-module behavior for this Skyve runtime concern.
+ */
 @FacesComponent(SetUxUi.COMPONENT_TYPE)
 public class SetUxUi extends UIComponentBase {
 	public static final String COMPONENT_TYPE = "org.skyve.impl.web.faces.components.SetUxUi";

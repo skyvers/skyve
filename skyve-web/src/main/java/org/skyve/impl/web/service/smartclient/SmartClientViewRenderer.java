@@ -128,6 +128,9 @@ import org.skyve.util.Util;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
+/**
+ * Renders Skyve metadata into SC Skyve Javascript.
+ */
 public class SmartClientViewRenderer extends ViewRenderer {
 	private static final Integer DEFAULT_MIN_HEIGHT_IN_PIXELS = Integer.valueOf(170);
 	private static final Integer DEFAULT_TAB_MIN_HEIGHT_IN_PIXELS = Integer.valueOf(200);
@@ -142,6 +145,16 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	private StringBuilder code = new StringBuilder(2048);
 	private Deque<String> containerVariables = new ArrayDeque<>(16); // non-null elements
 	
+	/**
+	 * Creates a renderer for generating SmartClient JavaScript for the supplied view.
+	 *
+	 * @param user The active user context.
+	 * @param module The module containing the rendered document.
+	 * @param document The document metadata to render.
+	 * @param view The view metadata to render.
+	 * @param uxui The active UX/UI profile.
+	 * @param noCreateView Whether create/edit root container creation should be skipped.
+	 */
 	protected SmartClientViewRenderer(User user,
 										Module module,
 										Document document,
@@ -152,10 +165,18 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		this.noCreateView = noCreateView;
 	}
 
+	/**
+	 * Returns the generated SmartClient JavaScript buffer.
+	 *
+	 * @return The mutable code buffer used during rendering.
+	 */
 	public StringBuilder getCode() {
 		return code;
 	}
 
+	/**
+	 * Starts SmartClient view rendering by creating the top-level container for the active view type.
+	 */
 	@Override
 	public void renderView(String icon16x16Url, String icon32x32Url) {
 		LOGGER.info("VIEW = {} for {}", view.getTitle(), document.getName());
@@ -192,6 +213,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 	}
 
+	/**
+	 * Rearranges the top-level layout to include a sidebar alongside the main view pane.
+	 *
+	 * @param sidebar The sidebar metadata to apply.
+	 * @param invisibleConditionName The optional invisible condition for the wrapper container.
+	 * @param variableName The JavaScript variable name to assign to the wrapper container.
+	 */
 	private void rearrangeForSidebar(Sidebar sidebar, String invisibleConditionName, String variableName) {
 		code.append("var sidebarPane=isc.BizContainer.create({");
 		size(sidebar, null, code);
@@ -220,6 +248,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 	}
 	
+	/**
+	 * Finalizes SmartClient view rendering by attaching the generated view container to the root view.
+	 */
 	@Override
 	public void renderedView(String icon16x16Url, String icon32x32Url) {
 		containerVariables.pop();
@@ -247,6 +278,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	// This is a stack in case we have a tab pane inside a tab pane
 	private Deque<Integer> tabNumbers = new ArrayDeque<>(4); // non-null elements
 
+	/**
+	 * Starts rendering a tab pane container.
+	 *
+	 * @param tabPane The tab pane metadata being rendered.
+	 */
 	@Override
 	public void renderTabPane(TabPane tabPane) {
 		tabNumbers.push(Integer.valueOf(0));
@@ -264,6 +300,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		containerVariables.push(variable);
 	}
 
+	/**
+	 * Completes rendering of the current tab pane and adds it to the parent container.
+	 *
+	 * @param tabPane The tab pane metadata being rendered.
+	 */
 	@Override
 	public void renderedTabPane(TabPane tabPane) {
 		String variable = containerVariables.pop();
@@ -271,6 +312,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		tabNumbers.pop();
 	}
 
+	/**
+	 * Starts rendering a tab body container.
+	 *
+	 * @param title The localized tab title.
+	 * @param icon16x16Url The optional 16x16 icon URL.
+	 * @param tab The tab metadata being rendered.
+	 */
 	@Override
 	public void renderTab(String title, String icon16x16Url, Tab tab) {
 		String variable = "v" + variableCounter++;
@@ -279,6 +327,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		containerVariables.push(variable);
 	}
 
+	/**
+	 * Completes rendering of a tab and registers it on the current tab pane.
+	 *
+	 * @param title The localized tab title.
+	 * @param icon16x16Url The optional 16x16 icon URL.
+	 * @param tab The tab metadata being rendered.
+	 */
 	@Override
 	public void renderedTab(String title, String icon16x16Url, Tab tab) {
 		String paneVariable = containerVariables.pop();
@@ -306,11 +361,23 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append("});\n");
 	}
 
+	/**
+	 * Starts rendering a vertical box container.
+	 *
+	 * @param borderTitle The optional border title.
+	 * @param vbox The vertical box metadata.
+	 */
 	@Override
 	public void renderVBox(String borderTitle, VBox vbox) {
 		vbox(borderTitle, vbox);
 	}
 
+	/**
+	 * Renders a vertical box container with optional collapsible wrapping.
+	 *
+	 * @param borderTitle The optional border title.
+	 * @param vbox The vertical box metadata.
+	 */
 	private void vbox(String borderTitle, VBox vbox) {
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append("=isc.BizVBox.create({");
@@ -371,11 +438,23 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		containerVariables.push(variable);
 	}
 	
+	/**
+	 * Completes rendering of the current vertical box container.
+	 *
+	 * @param borderTitle The optional border title.
+	 * @param vbox The vertical box metadata.
+	 */
 	@Override
 	public void renderedVBox(String borderTitle, VBox vbox) {
 		containerVariables.pop();
 	}
 
+	/**
+	 * Starts rendering a horizontal box container.
+	 *
+	 * @param borderTitle The optional border title.
+	 * @param hbox The horizontal box metadata.
+	 */
 	@Override
 	public void renderHBox(String borderTitle, HBox hbox) {
 		String variable = "v" + variableCounter++;
@@ -438,11 +517,22 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		containerVariables.push(variable);
 	}
 	
+	/**
+	 * Completes rendering of the current horizontal box container.
+	 *
+	 * @param title The optional border title.
+	 * @param bbox The horizontal box metadata.
+	 */
 	@Override
 	public void renderedHBox(String title, HBox bbox) {
 		containerVariables.pop();
 	}
 
+	/**
+	 * Appends common spacing configuration for box containers.
+	 *
+	 * @param box The box metadata providing padding values.
+	 */
 	private void box(Box box) {
 		Integer padding = box.getPixelPadding();
 		if (padding != null) {
@@ -457,6 +547,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 	}
 	
+	/**
+	 * Wraps an item in a collapsible container when the box declares collapsible behaviour.
+	 *
+	 * @param borderTitle The localized border title.
+	 * @param box The box metadata.
+	 * @param itemVariable The JavaScript variable for the inner item.
+	 * @return The collapsible wrapper variable name, or null when no wrapper is created.
+	 */
 	private String collapsible(String borderTitle, Box box, String itemVariable) {
 		String result = null;
 		Collapsible collapsible = box.getCollapsible();
@@ -476,6 +574,12 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	private String formVariable = null;
 	private VBox borderBox = null;
 
+	/**
+	 * Starts rendering a dynamic form and initializes its enclosing layout when needed.
+	 *
+	 * @param borderTitle The optional border title.
+	 * @param form The form metadata being rendered.
+	 */
 	@Override
 	public void renderForm(String borderTitle, Form form) {
 		viewHasAtLeastOneForm = true;
@@ -543,6 +647,12 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append(",colWidths:[");
 	}
 
+	/**
+	 * Completes rendering of the current form and adds it to the container hierarchy.
+	 *
+	 * @param borderTitle The optional border title.
+	 * @param form The form metadata being rendered.
+	 */
 	@Override
 	public void renderedForm(String borderTitle, Form form) {
 		code.setLength(code.length() - 1); // remove last comma
@@ -557,6 +667,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 	}
 
+	/**
+	 * Appends a rendered form column width definition.
+	 *
+	 * @param column The form column metadata.
+	 */
 	@Override
 	public void renderFormColumn(FormColumn column) {
 		Integer percentage = column.getPercentageWidth();
@@ -583,6 +698,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	// have we started a new row
 	private boolean startedNewFormRow = false;
 
+	/**
+	 * Starts rendering a form row and emits required row separators.
+	 *
+	 * @param row The form row metadata being rendered.
+	 */
 	@Override
 	public void renderFormRow(FormRow row) {
 		startedNewFormRow = true;
@@ -655,6 +775,18 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append(",endRow:true},");
 	}
 
+	/**
+	 * Starts rendering a button within a form item context.
+	 *
+	 * @param name The action name.
+	 * @param label The localized button label.
+	 * @param iconUrl The optional icon URL.
+	 * @param iconStyleClass The optional icon style class.
+	 * @param toolTip The optional tooltip text.
+	 * @param confirmationText The optional confirmation message.
+	 * @param action The action metadata.
+	 * @param button The button widget metadata.
+	 */
 	@Override
 	public void renderFormButton(String name,
 									String label,
@@ -683,6 +815,18 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		invisible(action.getInvisibleConditionName(), code);
 	}
 
+	/**
+	 * Renders a standalone button and appends it to the current container.
+	 *
+	 * @param name The action name.
+	 * @param label The localized button label.
+	 * @param iconUrl The optional icon URL.
+	 * @param iconStyleClass The optional icon style class.
+	 * @param toolTip The optional tooltip text.
+	 * @param confirmationText The optional confirmation message.
+	 * @param action The action metadata.
+	 * @param button The button widget metadata.
+	 */
 	@Override
 	public void renderButton(String name,
 								String label,
@@ -710,6 +854,15 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 	}
 
+	/**
+	 * Starts rendering a zoom-in control within a form item context.
+	 *
+	 * @param label The localized label.
+	 * @param iconUrl The optional icon URL.
+	 * @param iconStyleClass The optional icon style class.
+	 * @param toolTip The optional tooltip text.
+	 * @param zoomIn The zoom-in metadata.
+	 */
 	@Override
 	public void renderFormZoomIn(String label,
 									String iconUrl,
@@ -723,6 +876,15 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		invisible(zoomIn.getInvisibleConditionName(), code);
 	}
 
+	/**
+	 * Renders a standalone zoom-in control and appends it to the current container.
+	 *
+	 * @param label The localized label.
+	 * @param iconUrl The optional icon URL.
+	 * @param iconStyleClass The optional icon style class.
+	 * @param toolTip The optional tooltip text.
+	 * @param zoomIn The zoom-in metadata.
+	 */
 	@Override
 	public void renderZoomIn(String label,
 								String iconUrl,
@@ -735,6 +897,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 	}
 
+	/**
+	 * Renders a map display widget.
+	 *
+	 * @param map The map metadata.
+	 */
 	@Override
 	public void renderMap(MapDisplay map) {
 		String variable = "v" + variableCounter++;
@@ -749,6 +916,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 	}
 
+	/**
+	 * Renders a chart widget.
+	 *
+	 * @param chart The chart metadata.
+	 */
 	@Override
 	public void renderChart(Chart chart) {
 		String variable = "v" + variableCounter++;
@@ -763,16 +935,31 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 	}
 
+	/**
+	 * Records a geometry widget for deferred bound-column rendering.
+	 *
+	 * @param geometry The geometry metadata.
+	 */
 	@Override
 	public void renderBoundColumnGeometry(Geometry geometry) {
 		dataWidgetColumnInputWidget = geometry;
 	}
 
+	/**
+	 * Completes bound-column geometry rendering.
+	 *
+	 * @param geometry The geometry metadata.
+	 */
 	@Override
 	public void renderedBoundColumnGeometry(Geometry geometry) {
 		// do nothing
 	}
 
+	/**
+	 * Starts rendering a geometry input in a form.
+	 *
+	 * @param geometry The geometry metadata.
+	 */
 	@Override
 	public void renderFormGeometry(Geometry geometry) {
 		preProcessFormItem(geometry, "geometry");
@@ -791,11 +978,21 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		// TODO add in the filter operators allowed
 	}
 
+	/**
+	 * Completes form geometry rendering.
+	 *
+	 * @param geometry The geometry metadata.
+	 */
 	@Override
 	public void renderedFormGeometry(Geometry geometry) {
 		// do nothing
 	}
 
+	/**
+	 * Starts rendering a geometry map input in a form.
+	 *
+	 * @param geometry The geometry map metadata.
+	 */
 	@Override
 	public void renderFormGeometryMap(GeometryMap geometry) {
 		preProcessFormItem(geometry, "geometryMap");
@@ -821,11 +1018,22 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 	}
 
+	/**
+	 * Completes form geometry map rendering.
+	 *
+	 * @param geometry The geometry map metadata.
+	 */
 	@Override
 	public void renderedFormGeometryMap(GeometryMap geometry) {
 		// do nothing
 	}
 
+	/**
+	 * Renders a dialog button placeholder inside a form item.
+	 *
+	 * @param label The localized button label.
+	 * @param button The dialog button metadata.
+	 */
 	@Override
 	public void renderFormDialogButton(String label, DialogButton button) {
 		code.append("type:'blurb',defaultValue:'dialog button ");
@@ -834,6 +1042,12 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		invisible(button.getInvisibleConditionName(), code);
 	}
 
+	/**
+	 * Renders a standalone dialog button placeholder.
+	 *
+	 * @param label The localized button label.
+	 * @param button The dialog button metadata.
+	 */
 	@Override
 	public void renderDialogButton(String label, DialogButton button) {
 		String variable = "v" + variableCounter++;
@@ -843,6 +1057,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 	}
 
+	/**
+	 * Renders a form spacer.
+	 *
+	 * @param spacer The spacer metadata.
+	 */
 	@Override
 	public void renderFormSpacer(Spacer spacer) {
 		code.append("type:'spacer',");
@@ -850,6 +1069,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		invisible(spacer.getInvisibleConditionName(), code);
 	}
 
+	/**
+	 * Renders a standalone layout spacer.
+	 *
+	 * @param spacer The spacer metadata.
+	 */
 	@Override
 	public void renderSpacer(Spacer spacer) {
 		String variable = "v" + variableCounter++;
@@ -868,6 +1092,12 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	// TODO size, invisibility and binding
+	/**
+	 * Renders a static image inside a form item.
+	 *
+	 * @param fileUrl The resolved static image URL.
+	 * @param image The static image metadata.
+	 */
 	@Override
 	public void renderFormStaticImage(String fileUrl, StaticImage image) {
 		if (isCurrentWidgetShowLabel()) {
@@ -884,12 +1114,24 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append(',');
 	}
 
+	/**
+	 * Renders a static image for a container column.
+	 *
+	 * @param fileUrl The resolved static image URL.
+	 * @param image The static image metadata.
+	 */
 	@Override
 	public void renderContainerColumnStaticImage(String fileUrl, StaticImage image) {
 		// markup is generated in the JSON data for a data grid container column static image
 	}
 
 	// TODO size, invisibility and binding
+	/**
+	 * Renders a standalone static image.
+	 *
+	 * @param fileUrl The resolved static image URL.
+	 * @param image The static image metadata.
+	 */
 	@Override
 	public void renderStaticImage(String fileUrl, StaticImage image) {
 		String variable = "v" + variableCounter++;
@@ -899,6 +1141,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 	}
 
+	/**
+	 * Appends JavaScript to construct a static image component.
+	 *
+	 * @param image The static image metadata.
+	 */
 	private void addStaticImage(StaticImage image) {
 		code.append("isc.BizImage.create({modoc:'").append(module.getName()).append('.').append(document.getName());
 		code.append("',file:'").append(image.getRelativeFile()).append("',");
@@ -907,11 +1154,21 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append("})");
 	}
 
+	/**
+	 * Renders a dynamic image for a container column.
+	 *
+	 * @param image The dynamic image metadata.
+	 */
 	@Override
 	public void renderContainerColumnDynamicImage(DynamicImage image) {
 		// markup is generated in the JSON data for a data grid container column dynamic image
 	}
 
+	/**
+	 * Renders a standalone dynamic image.
+	 *
+	 * @param image The dynamic image metadata.
+	 */
 	@Override
 	public void renderDynamicImage(DynamicImage image) {
 		String variable = "v" + variableCounter++;
@@ -921,6 +1178,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 	}
 
+	/**
+	 * Appends JavaScript to construct a dynamic image component.
+	 *
+	 * @param image The dynamic image metadata.
+	 */
 	private void addImage(DynamicImage image) {
 		code.append("isc.BizDynamicImage.create({name:'");
 		code.append(image.getName());
@@ -943,6 +1205,12 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append("_view:view})");
 	}
 
+	/**
+	 * Renders a form link field.
+	 *
+	 * @param value The link value expression.
+	 * @param link The link metadata.
+	 */
 	@Override
 	public void renderFormLink(String value, Link link) {
 		// Take care of the title, as we're not calling preProcessFormItem
@@ -957,16 +1225,34 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		invisible(link.getInvisibleConditionName(), code);
 	}
 
+	/**
+	 * Renders a container-column link.
+	 *
+	 * @param value The link value expression.
+	 * @param link The link metadata.
+	 */
 	@Override
 	public void renderContainerColumnLink(String value, Link link) {
 		// markup is generated in the JSON data for a data grid container column link
 	}
 
+	/**
+	 * Renders a standalone link widget.
+	 *
+	 * @param value The link value expression.
+	 * @param link The link metadata.
+	 */
 	@Override
 	public void renderLink(String value, Link link) {
 		// TODO Implement later
 	}
 
+	/**
+	 * Creates a temporary label using blurb metadata.
+	 *
+	 * @param blurb The blurb metadata source.
+	 * @return A label configured from the blurb.
+	 */
 	private static Label makeNewLabelFromBlurb(Blurb blurb) {
 		Label result = new Label();
 		result.setValue(blurb.getMarkup());
@@ -977,21 +1263,46 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		return result;
 	}
 
+	/**
+	 * Renders blurb markup as a form label.
+	 *
+	 * @param markup The blurb markup.
+	 * @param blurb The blurb metadata.
+	 */
 	@Override
 	public void renderFormBlurb(String markup, Blurb blurb) {
 		renderFormLabel(markup, BindUtil.containsSkyveExpressions(markup), makeNewLabelFromBlurb(blurb));
 	}
 
+	/**
+	 * Renders blurb markup as a container-column label.
+	 *
+	 * @param markup The blurb markup.
+	 * @param blurb The blurb metadata.
+	 */
 	@Override
 	public void renderContainerColumnBlurb(String markup, Blurb blurb) {
 		renderContainerColumnLabel(markup, makeNewLabelFromBlurb(blurb));
 	}
 
+	/**
+	 * Renders blurb markup as a standalone label.
+	 *
+	 * @param markup The blurb markup.
+	 * @param blurb The blurb metadata.
+	 */
 	@Override
 	public void renderBlurb(String markup, Blurb blurb) {
 		renderLabel(markup, BindUtil.containsSkyveExpressions(markup), makeNewLabelFromBlurb(blurb));
 	}
 
+	/**
+	 * Renders a label inside a form item.
+	 *
+	 * @param value The label value.
+	 * @param boundValue Whether the value contains binding expressions.
+	 * @param label The label metadata.
+	 */
 	@Override
 	public void renderFormLabel(String value, boolean boundValue, Label label) {
 		FormItem currentFormItem = getCurrentFormItem();
@@ -1037,11 +1348,24 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		invisible(label.getInvisibleConditionName(), code);
 	}
 
+	/**
+	 * Renders a label for a container column.
+	 *
+	 * @param value The label value.
+	 * @param label The label metadata.
+	 */
 	@Override
 	public void renderContainerColumnLabel(String value, Label label) {
 		// markup is generated in the JSON data for a data grid container column label or a dynamic form-based value
 	}
 
+	/**
+	 * Renders a standalone label component.
+	 *
+	 * @param value The label value.
+	 * @param boundValue Whether the value contains binding expressions.
+	 * @param label The label metadata.
+	 */
 	@Override
 	public void renderLabel(String value, boolean boundValue, Label label) {
 		// Throw if the value has binding expressions in them
@@ -1076,6 +1400,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 	}
 
+	/**
+	 * Renders a progress bar placeholder inside a form.
+	 *
+	 * @param progressBar The progress bar metadata.
+	 */
 	@Override
 	public void renderFormProgressBar(ProgressBar progressBar) {
 		// TODO Make a value from CanvasItem.
@@ -1088,30 +1417,60 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 	private String listWidgetVariable = null;
 
+	/**
+	 * Starts rendering a list grid.
+	 *
+	 * @param title The list grid title.
+	 * @param aggregateQuery Whether the backing query is aggregate.
+	 * @param grid The list grid metadata.
+	 */
 	@Override
 	public void renderListGrid(String title, boolean aggregateQuery, ListGrid grid) {
 		renderListWidget(grid);
 		renderGrid(grid);
 	}
 
+	/**
+	 * Renders a projected list-grid column.
+	 *
+	 * @param column The projected query column metadata.
+	 */
 	@Override
 	public void renderListGridProjectedColumn(MetaDataQueryProjectedColumn column) {
 		// TODO Auto-generated method stub
 
 	}
 
+	/**
+	 * Renders a content list-grid column.
+	 *
+	 * @param column The content query column metadata.
+	 */
 	@Override
 	public void renderListGridContentColumn(MetaDataQueryContentColumn column) {
 		// TODO Auto-generated method stub
 
 	}
 
+	/**
+	 * Completes rendering of a list grid.
+	 *
+	 * @param title The list grid title.
+	 * @param aggregateQuery Whether the backing query is aggregate.
+	 * @param grid The list grid metadata.
+	 */
 	@Override
 	public void renderedListGrid(String title, boolean aggregateQuery, ListGrid grid) {
 		appendFilterParameters(grid.getFilterParameters(), grid.getParameters(), code);
 		renderedListWidget();
 	}
 
+	/**
+	 * Starts rendering a list repeater.
+	 *
+	 * @param title The repeater title.
+	 * @param repeater The list repeater metadata.
+	 */
 	@Override
 	public void renderListRepeater(String title, ListRepeater repeater) {
 		renderListWidget(repeater);
@@ -1120,24 +1479,46 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append("showGrid:").append(Boolean.TRUE.equals(repeater.getShowGrid())).append(',');
 	}
 
+	/**
+	 * Renders a projected list-repeater column.
+	 *
+	 * @param column The projected query column metadata.
+	 */
 	@Override
 	public void renderListRepeaterProjectedColumn(MetaDataQueryProjectedColumn column) {
 		// TODO Auto-generated method stub
 
 	}
 
+	/**
+	 * Renders a content list-repeater column.
+	 *
+	 * @param column The content query column metadata.
+	 */
 	@Override
 	public void renderListRepeaterContentColumn(MetaDataQueryContentColumn column) {
 		// TODO Auto-generated method stub
 
 	}
 
+	/**
+	 * Completes rendering of a list repeater.
+	 *
+	 * @param title The repeater title.
+	 * @param repeater The list repeater metadata.
+	 */
 	@Override
 	public void renderedListRepeater(String title, ListRepeater repeater) {
 		appendFilterParameters(repeater.getFilterParameters(), repeater.getParameters(), code);
 		renderedListWidget();
 	}
 
+	/**
+	 * Starts rendering a tree grid.
+	 *
+	 * @param title The tree grid title.
+	 * @param grid The tree grid metadata.
+	 */
 	@Override
 	public void renderTreeGrid(String title, TreeGrid grid) {
 		renderListWidget(grid);
@@ -1149,24 +1530,45 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append("isTree:true,");
 	}
 
+	/**
+	 * Renders a projected tree-grid column.
+	 *
+	 * @param column The projected query column metadata.
+	 */
 	@Override
 	public void renderTreeGridProjectedColumn(MetaDataQueryProjectedColumn column) {
 		// TODO Auto-generated method stub
 
 	}
 
+	/**
+	 * Renders a content tree-grid column.
+	 *
+	 * @param column The content query column metadata.
+	 */
 	@Override
 	public void renderTreeGridContentColumn(MetaDataQueryContentColumn column) {
 		// TODO Auto-generated method stub
 
 	}
 
+	/**
+	 * Completes rendering of a tree grid.
+	 *
+	 * @param title The tree grid title.
+	 * @param grid The tree grid metadata.
+	 */
 	@Override
 	public void renderedTreeGrid(String title, TreeGrid grid) {
 		appendFilterParameters(grid.getFilterParameters(), grid.getParameters(), code);
 		renderedListWidget();
 	}
 
+	/**
+	 * Starts rendering common list-widget infrastructure.
+	 *
+	 * @param widget The list widget metadata.
+	 */
 	private void renderListWidget(AbstractListWidget widget) {
 		String queryName = widget.getQueryName();
 		String modelName = widget.getModelName();
@@ -1224,6 +1626,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		invisible(widget.getInvisibleConditionName(), code);
 	}
 
+	/**
+	 * Appends common list-grid properties shared by list and tree grids.
+	 *
+	 * @param grid The list-grid metadata.
+	 */
 	private void renderGrid(ListGrid grid) {
 		code.append("contConv:").append(grid.getContinueConversation()).append(",");
 		String selectedIdBinding = grid.getSelectedIdBinding();
@@ -1276,6 +1683,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 	}
 
+	/**
+	 * Completes rendering for the current list widget.
+	 */
 	private void renderedListWidget() {
 		code.append("_view:view});\n");
 		code.append(containerVariables.peek()).append(".addContained(").append(listWidgetVariable).append(");\n");
@@ -1289,6 +1699,12 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	// Its used to ensure the last ']' is appended before adding events or closing the grid definition
 	private boolean dataWidgetFieldsIncomplete = false;
 
+	/**
+	 * Starts rendering a data grid widget.
+	 *
+	 * @param title The grid title.
+	 * @param grid The data-grid metadata.
+	 */
 	@Override
 	public void renderDataGrid(String title, DataGrid grid) {
 		renderDataWidget(grid);
@@ -1326,11 +1742,23 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append("_fields:[");
 	}
 
+	/**
+	 * Completes rendering of a data grid widget.
+	 *
+	 * @param title The grid title.
+	 * @param grid The data-grid metadata.
+	 */
 	@Override
 	public void renderedDataGrid(String title, DataGrid grid) {
 		renderedDataWidget();
 	}
 
+	/**
+	 * Starts rendering a data repeater widget.
+	 *
+	 * @param title The repeater title.
+	 * @param repeater The repeater metadata.
+	 */
 	@Override
 	public void renderDataRepeater(String title, DataRepeater repeater) {
 		renderDataWidget(repeater);
@@ -1340,11 +1768,22 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append(",_fields:[");
 	}
 
+	/**
+	 * Completes rendering of a data repeater widget.
+	 *
+	 * @param title The repeater title.
+	 * @param repeater The repeater metadata.
+	 */
 	@Override
 	public void renderedDataRepeater(String title, DataRepeater repeater) {
 		renderedDataWidget();
 	}
 
+	/**
+	 * Starts rendering shared data-widget infrastructure.
+	 *
+	 * @param widget The data-widget metadata.
+	 */
 	private void renderDataWidget(AbstractDataWidget widget) {
 		dataWidgetBinding = widget.getBinding();
 		Relation relation = (Relation) getCurrentTarget().getAttribute();
@@ -1376,6 +1815,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		dataWidgetFieldsIncomplete = true;
 	}
 
+	/**
+	 * Completes rendering for the current data widget.
+	 */
 	private void renderedDataWidget() {
 		if (dataWidgetFieldsIncomplete) {
 			code.setLength(code.length() - 1); // remove trailing comma from list grid field definition
@@ -1391,16 +1833,34 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 	private InputWidget dataWidgetColumnInputWidget;
 
+	/**
+	 * Starts rendering a bound data-grid column.
+	 *
+	 * @param title The column title.
+	 * @param column The bound column metadata.
+	 */
 	@Override
 	public void renderDataGridBoundColumn(String title, DataGridBoundColumn column) {
 		// do nothing
 	}
 
+	/**
+	 * Starts rendering a bound data-repeater column.
+	 *
+	 * @param title The column title.
+	 * @param column The bound column metadata.
+	 */
 	@Override
 	public void renderDataRepeaterBoundColumn(String title, DataGridBoundColumn column) {
 		renderDataGridBoundColumn(title, column);
 	}
 
+	/**
+	 * Completes rendering a bound data-grid column.
+	 *
+	 * @param title The column title.
+	 * @param column The bound column metadata.
+	 */
 	@Override
 	public void renderedDataGridBoundColumn(String title, DataGridBoundColumn column) {
 		if (dataWidgetColumnInputWidget != null) {
@@ -1449,11 +1909,23 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 	}
 
+	/**
+	 * Completes rendering a bound data-repeater column.
+	 *
+	 * @param title The column title.
+	 * @param column The bound column metadata.
+	 */
 	@Override
 	public void renderedDataRepeaterBoundColumn(String title, DataGridBoundColumn column) {
 		renderedDataGridBoundColumn(title, column);
 	}
 
+	/**
+	 * Starts rendering a data-grid container column.
+	 *
+	 * @param title The column title.
+	 * @param column The container column metadata.
+	 */
 	@Override
 	public void renderDataGridContainerColumn(String title, DataGridContainerColumn column) {
 		code.append("{name:'_").append(formatCounter++);
@@ -1471,26 +1943,54 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append("},");
 	}
 
+	/**
+	 * Starts rendering a data-repeater container column.
+	 *
+	 * @param title The column title.
+	 * @param column The container column metadata.
+	 */
 	@Override
 	public void renderDataRepeaterContainerColumn(String title, DataGridContainerColumn column) {
 		renderDataGridContainerColumn(title, column);
 	}
 
+	/**
+	 * Completes rendering a data-grid container column.
+	 *
+	 * @param title The column title.
+	 * @param column The container column metadata.
+	 */
 	@Override
 	public void renderedDataGridContainerColumn(String title, DataGridContainerColumn column) {
 		// do nothing
 	}
 
+	/**
+	 * Completes rendering a data-repeater container column.
+	 *
+	 * @param title The column title.
+	 * @param column The container column metadata.
+	 */
 	@Override
 	public void renderedDataRepeaterContainerColumn(String title, DataGridContainerColumn column) {
 		renderedDataGridContainerColumn(title, column);
 	}
 
+	/**
+	 * Starts rendering a bound-column checkbox.
+	 *
+	 * @param checkBox The checkbox metadata.
+	 */
 	@Override
 	public void renderBoundColumnCheckBox(CheckBox checkBox) {
 		dataWidgetColumnInputWidget = checkBox;
 	}
 
+	/**
+	 * Renders a checkbox form item.
+	 *
+	 * @param checkBox The checkbox metadata.
+	 */
 	@Override
 	public void renderFormCheckBox(CheckBox checkBox) {
 		preProcessFormItem(checkBox, "checkbox");
@@ -1503,17 +2003,32 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		invisible(checkBox.getInvisibleConditionName(), code);
 	}
 
+	/**
+	 * Completes bound-column checkbox rendering.
+	 *
+	 * @param checkBox The checkbox metadata.
+	 */
 	@Override
 	public void renderedBoundColumnCheckBox(CheckBox checkBox) {
 		// do nothing
 	}
 
+	/**
+	 * Completes form checkbox rendering.
+	 *
+	 * @param checkBox The checkbox metadata.
+	 */
 	@Override
 	public void renderedFormCheckBox(CheckBox checkBox) {
 		// do nothing
 	}
 
 	// TODO implement this - does this need size? probably
+	/**
+	 * Renders a check-membership placeholder component.
+	 *
+	 * @param membership The check-membership metadata.
+	 */
 	@Override
 	public void renderCheckMembership(CheckMembership membership) {
 		String variable = "v" + variableCounter++;
@@ -1523,16 +2038,31 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 	}
 
+	/**
+	 * Completes check-membership rendering.
+	 *
+	 * @param membership The check-membership metadata.
+	 */
 	@Override
 	public void renderedCheckMembership(CheckMembership membership) {
 		// do nothing - until implemented properly
 	}
 
+	/**
+	 * Starts rendering a bound-column colour picker.
+	 *
+	 * @param colour The colour picker metadata.
+	 */
 	@Override
 	public void renderBoundColumnColourPicker(ColourPicker colour) {
 		dataWidgetColumnInputWidget = colour;
 	}
 
+	/**
+	 * Renders a colour picker form item.
+	 *
+	 * @param colour The colour picker metadata.
+	 */
 	@Override
 	public void renderFormColourPicker(ColourPicker colour) {
 		preProcessFormItem(colour, "color");
@@ -1541,21 +2071,41 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		invisible(colour.getInvisibleConditionName(), code);
 	}
 
+	/**
+	 * Completes bound-column colour picker rendering.
+	 *
+	 * @param colour The colour picker metadata.
+	 */
 	@Override
 	public void renderedBoundColumnColourPicker(ColourPicker colour) {
 		// do nothing
 	}
 
+	/**
+	 * Completes form colour picker rendering.
+	 *
+	 * @param colour The colour picker metadata.
+	 */
 	@Override
 	public void renderedFormColourPicker(ColourPicker colour) {
 		// do nothing
 	}
 
+	/**
+	 * Starts rendering a bound-column combo field.
+	 *
+	 * @param combo The combo metadata.
+	 */
 	@Override
 	public void renderBoundColumnCombo(Combo combo) {
 		dataWidgetColumnInputWidget = combo;
 	}
 
+	/**
+	 * Renders a combo form item.
+	 *
+	 * @param combo The combo metadata.
+	 */
 	@Override
 	public void renderFormCombo(Combo combo) {
 		preProcessFormItem(combo, "select");
@@ -1564,26 +2114,51 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		invisible(combo.getInvisibleConditionName(), code);
 	}
 
+	/**
+	 * Completes bound-column combo rendering.
+	 *
+	 * @param combo The combo metadata.
+	 */
 	@Override
 	public void renderedBoundColumnCombo(Combo combo) {
 		// do nothing
 	}
 
+	/**
+	 * Completes form combo rendering.
+	 *
+	 * @param combo The combo metadata.
+	 */
 	@Override
 	public void renderedFormCombo(Combo combo) {
 		// do nothing
 	}
 
+	/**
+	 * Starts rendering a bound-column content image.
+	 *
+	 * @param image The content-image metadata.
+	 */
 	@Override
 	public void renderBoundColumnContentImage(ContentImage image) {
 		dataWidgetColumnInputWidget = image;
 	}
 
+	/**
+	 * Renders a container-column content image.
+	 *
+	 * @param image The content-image metadata.
+	 */
 	@Override
 	public void renderContainerColumnContentImage(ContentImage image) {
 		// markup is generated in the JSON data for a data grid container column content image
 	}
 
+	/**
+	 * Renders a content image form item.
+	 *
+	 * @param image The content-image metadata.
+	 */
 	@Override
 	public void renderFormContentImage(ContentImage image) {
 		preProcessFormItem(image, "bizContentImage");
@@ -1594,11 +2169,23 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append("showMarkup:").append((! Boolean.FALSE.equals(image.getShowMarkup())) ? "true," : "false,");
 	}
 
+	/**
+	 * Starts rendering a bound-column content link.
+	 *
+	 * @param value The link value.
+	 * @param link The content-link metadata.
+	 */
 	@Override
 	public void renderBoundColumnContentLink(String value, ContentLink link) {
 		dataWidgetColumnInputWidget = link;
 	}
 
+	/**
+	 * Renders a content link form item.
+	 *
+	 * @param value The link value.
+	 * @param link The content-link metadata.
+	 */
 	@Override
 	public void renderFormContentLink(String value, ContentLink link) {
 		preProcessFormItem(link, "bizContentLink");
@@ -1610,6 +2197,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		editable(link.getEditable(), code);
 	}
 
+	/**
+	 * Renders a content signature form item.
+	 *
+	 * @param signature The content-signature metadata.
+	 */
 	@Override
 	public void renderFormContentSignature(ContentSignature signature) {
 		// TODO not implemented for SC yet - use a ContentImage for now
@@ -1620,11 +2212,21 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		editable(Boolean.TRUE, code);
 	}
 
+	/**
+	 * Starts rendering a bound-column HTML editor.
+	 *
+	 * @param html The HTML metadata.
+	 */
 	@Override
 	public void renderBoundColumnHTML(HTML html) {
 		dataWidgetColumnInputWidget = html;
 	}
 
+	/**
+	 * Renders an HTML form item.
+	 *
+	 * @param html The HTML metadata.
+	 */
 	@Override
 	public void renderFormHTML(HTML html) {
 		preProcessFormItem(html, "bizHTML");
@@ -1637,6 +2239,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		invisible(html.getInvisibleConditionName(), code);
 	}
 
+	/**
+	 * Starts rendering a list-membership widget.
+	 *
+	 * @param candidatesHeading The optional candidates heading.
+	 * @param membersHeading The optional members heading.
+	 * @param membership The list-membership metadata.
+	 */
 	@Override
 	public void renderListMembership(String candidatesHeading, String membersHeading, ListMembership membership) {
 		Relation relation = (Relation) getCurrentTarget().getAttribute();
@@ -1664,6 +2273,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		containerVariables.push(variable);
 	}
 
+	/**
+	 * Completes rendering of a list-membership widget.
+	 *
+	 * @param candidatesHeading The optional candidates heading.
+	 * @param membersHeading The optional members heading.
+	 * @param membership The list-membership metadata.
+	 */
 	@Override
 	public void renderedListMembership(String candidatesHeading, String membersHeading, ListMembership membership) {
 		removeTrailingComma(code);
@@ -1673,6 +2289,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 	}
 
+	/**
+	 * Renders a comparison widget.
+	 *
+	 * @param comparison The comparison metadata.
+	 */
 	@Override
 	public void renderComparison(Comparison comparison) {
 		String variable = "v" + variableCounter++;
@@ -1688,6 +2309,15 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 	}
 
+	/**
+	 * Starts rendering a bound-column lookup description.
+	 *
+	 * @param query The lookup query metadata.
+	 * @param canCreate Whether create is allowed.
+	 * @param canUpdate Whether update is allowed.
+	 * @param descriptionBinding The description binding.
+	 * @param lookup The lookup metadata.
+	 */
 	@Override
 	public void renderBoundColumnLookupDescription(MetaDataQueryDefinition query,
 													boolean canCreate,
@@ -1697,6 +2327,15 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		dataWidgetColumnInputWidget = lookup;
 	}
 
+	/**
+	 * Renders a lookup description form item.
+	 *
+	 * @param query The lookup query metadata.
+	 * @param canCreate Whether create is allowed.
+	 * @param canUpdate Whether update is allowed.
+	 * @param descriptionBinding The description binding.
+	 * @param lookup The lookup metadata.
+	 */
 	@Override
 	public void renderFormLookupDescription(MetaDataQueryDefinition query,
 												boolean canCreate,
@@ -1729,6 +2368,15 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.insert(0, ds);
 	}
 
+			/**
+			 * Completes bound-column lookup-description rendering.
+			 *
+			 * @param query The lookup query metadata.
+			 * @param canCreate Whether create is allowed.
+			 * @param canUpdate Whether update is allowed.
+			 * @param descriptionBinding The description binding.
+			 * @param lookup The lookup metadata.
+			 */
 	@Override
 	public void renderedBoundColumnLookupDescription(MetaDataQueryDefinition query,
 														boolean canCreate,
@@ -1738,6 +2386,15 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		// do nothing
 	}
 
+		/**
+		 * Completes form lookup-description rendering.
+		 *
+		 * @param query The lookup query metadata.
+		 * @param canCreate Whether create is allowed.
+		 * @param canUpdate Whether update is allowed.
+		 * @param descriptionBinding The description binding.
+		 * @param lookup The lookup metadata.
+		 */
 	@Override
 	public void renderedFormLookupDescription(MetaDataQueryDefinition query,
 												boolean canCreate,
@@ -1747,11 +2404,21 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		// do nothing
 	}
 
+	/**
+	 * Starts rendering a bound-column password field.
+	 *
+	 * @param password The password metadata.
+	 */
 	@Override
 	public void renderBoundColumnPassword(Password password) {
 		dataWidgetColumnInputWidget = password;
 	}
 
+	/**
+	 * Renders a password form item.
+	 *
+	 * @param password The password metadata.
+	 */
 	@Override
 	public void renderFormPassword(Password password) {
 		preProcessFormItem(password, "password");
@@ -1762,21 +2429,41 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		invisible(password.getInvisibleConditionName(), code);
 	}
 
+	/**
+	 * Completes bound-column password rendering.
+	 *
+	 * @param password The password metadata.
+	 */
 	@Override
 	public void renderedBoundColumnPassword(Password password) {
 		// do nothing
 	}
 
+	/**
+	 * Completes form password rendering.
+	 *
+	 * @param password The password metadata.
+	 */
 	@Override
 	public void renderedFormPassword(Password password) {
 		// do nothing
 	}
 
+	/**
+	 * Starts rendering a bound-column radio control.
+	 *
+	 * @param radio The radio metadata.
+	 */
 	@Override
 	public void renderBoundColumnRadio(Radio radio) {
 		dataWidgetColumnInputWidget = radio;
 	}
 
+	/**
+	 * Renders a radio form item.
+	 *
+	 * @param radio The radio metadata.
+	 */
 	@Override
 	public void renderFormRadio(Radio radio) {
 		preProcessFormItem(radio, "radioGroup");
@@ -1788,21 +2475,41 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		invisible(radio.getInvisibleConditionName(), code);
 	}
 
+	/**
+	 * Completes bound-column radio rendering.
+	 *
+	 * @param radio The radio metadata.
+	 */
 	@Override
 	public void renderedBoundColumnRadio(Radio radio) {
 		// do nothing
 	}
 
+	/**
+	 * Completes form radio rendering.
+	 *
+	 * @param radio The radio metadata.
+	 */
 	@Override
 	public void renderedFormRadio(Radio radio) {
 		// do nothing
 	}
 
+	/**
+	 * Starts rendering a bound-column rich-text field.
+	 *
+	 * @param text The rich-text metadata.
+	 */
 	@Override
 	public void renderBoundColumnRichText(RichText text) {
 		dataWidgetColumnInputWidget = text;
 	}
 
+	/**
+	 * Renders a rich-text form item.
+	 *
+	 * @param text The rich-text metadata.
+	 */
 	@Override
 	public void renderFormRichText(RichText text) {
 		preProcessFormItem(text, "richText");
@@ -1811,21 +2518,41 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		invisible(text.getInvisibleConditionName(), code);
 	}
 
+	/**
+	 * Completes bound-column rich-text rendering.
+	 *
+	 * @param richText The rich-text metadata.
+	 */
 	@Override
 	public void renderedBoundColumnRichText(RichText richText) {
 		// do nothing
 	}
 
+	/**
+	 * Completes form rich-text rendering.
+	 *
+	 * @param richText The rich-text metadata.
+	 */
 	@Override
 	public void renderedFormRichText(RichText richText) {
 		// do nothing
 	}
 
+	/**
+	 * Starts rendering a bound-column slider.
+	 *
+	 * @param slider The slider metadata.
+	 */
 	@Override
 	public void renderBoundColumnSlider(Slider slider) {
 		dataWidgetColumnInputWidget = slider;
 	}
 
+	/**
+	 * Renders a slider form item.
+	 *
+	 * @param slider The slider metadata.
+	 */
 	@Override
 	public void renderFormSlider(Slider slider) {
 		preProcessFormItem(slider, "slider");
@@ -1853,21 +2580,41 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		invisible(slider.getInvisibleConditionName(), code);
 	}
 
+	/**
+	 * Completes bound-column slider rendering.
+	 *
+	 * @param slider The slider metadata.
+	 */
 	@Override
 	public void renderedBoundColumnSlider(Slider slider) {
 		// do nothing
 	}
 
+	/**
+	 * Completes form slider rendering.
+	 *
+	 * @param slider The slider metadata.
+	 */
 	@Override
 	public void renderedFormSlider(Slider slider) {
 		// do nothing
 	}
 
+	/**
+	 * Starts rendering a bound-column spinner.
+	 *
+	 * @param spinner The spinner metadata.
+	 */
 	@Override
 	public void renderBoundColumnSpinner(Spinner spinner) {
 		dataWidgetColumnInputWidget = spinner;
 	}
 
+	/**
+	 * Renders a spinner form item.
+	 *
+	 * @param spinner The spinner metadata.
+	 */
 	@Override
 	public void renderFormSpinner(Spinner spinner) {
 		preProcessFormItem(spinner, "spinner");
@@ -1888,21 +2635,41 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		invisible(spinner.getInvisibleConditionName(), code);
 	}
 
+	/**
+	 * Completes bound-column spinner rendering.
+	 *
+	 * @param spinner The spinner metadata.
+	 */
 	@Override
 	public void renderedBoundColumnSpinner(Spinner spinner) {
 		// do nothing
 	}
 
+	/**
+	 * Completes form spinner rendering.
+	 *
+	 * @param spinner The spinner metadata.
+	 */
 	@Override
 	public void renderedFormSpinner(Spinner spinner) {
 		// do nothing
 	}
 
+	/**
+	 * Starts rendering a bound-column text area.
+	 *
+	 * @param text The text-area metadata.
+	 */
 	@Override
 	public void renderBoundColumnTextArea(TextArea text) {
 		dataWidgetColumnInputWidget = text;
 	}
 
+	/**
+	 * Renders a text-area form item.
+	 *
+	 * @param text The text-area metadata.
+	 */
 	@Override
 	public void renderFormTextArea(TextArea text) {
 		preProcessFormItem(text, "textArea");
@@ -1918,21 +2685,41 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append("selectOnFocus:true,");
 	}
 
+	/**
+	 * Completes bound-column text-area rendering.
+	 *
+	 * @param text The text-area metadata.
+	 */
 	@Override
 	public void renderedBoundColumnTextArea(TextArea text) {
 		// do nothing
 	}
 
+	/**
+	 * Completes form text-area rendering.
+	 *
+	 * @param text The text-area metadata.
+	 */
 	@Override
 	public void renderedFormTextArea(TextArea text) {
 		// do nothing
 	}
 
+	/**
+	 * Starts rendering a bound-column text field.
+	 *
+	 * @param text The text-field metadata.
+	 */
 	@Override
 	public void renderBoundColumnTextField(TextField text) {
 		dataWidgetColumnInputWidget = text;
 	}
 
+	/**
+	 * Renders a text-field form item.
+	 *
+	 * @param text The text-field metadata.
+	 */
 	@Override
 	public void renderFormTextField(TextField text) {
 		CompleteType complete = text.getComplete();
@@ -1957,16 +2744,31 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append("selectOnFocus:true,");
 	}
 
+	/**
+	 * Completes bound-column text-field rendering.
+	 *
+	 * @param text The text-field metadata.
+	 */
 	@Override
 	public void renderedBoundColumnTextField(TextField text) {
 		// do nothing
 	}
 
+	/**
+	 * Completes form text-field rendering.
+	 *
+	 * @param text The text-field metadata.
+	 */
 	@Override
 	public void renderedFormTextField(TextField text) {
 		// do nothing
 	}
 	
+	/**
+	 * Renders an inject script within a form item.
+	 *
+	 * @param inject The inject metadata.
+	 */
 	@Override
 	public void renderFormInject(Inject inject) {
 		FormItem currentFormItem = getCurrentFormItem();
@@ -1982,6 +2784,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append(inject.getScript());
 	}
 
+	/**
+	 * Renders an inject script in the current output stream.
+	 *
+	 * @param inject The inject metadata.
+	 */
 	@Override
 	public void renderInject(Inject inject) {
 		code.append(inject.getScript());
@@ -2625,7 +3432,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 	/**
 	 * This generates an ID based on the module name and document name and an incrementing number.
-	 * @return
+	 *
+	 * @return A JavaScript expression that yields a unique component identifier.
 	 */
 	private String IDExpression() {
 		StringBuilder result = new StringBuilder(64);
@@ -3079,15 +3887,12 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	/**
-	 * Get the smart client field definition given the widget/binding.
-	 * If bindingOverride is defined, it will be used to determine the field to use.
-	 * bindingOverride is used when a Datagrid has a lookupDescription which has no binding.
-	 * That is, the lookupDescription is for the entire dataGrid entity.
-	 * 
-	 * @param document
-	 * @param widget	The widget metadata to use to define the smart client form field
-	 * @param bindingOverride	If defined, specifies a different binding to use.
-	 * @return
+	 * Returns the SmartClient field definition for a widget bound to the supplied document.
+	 *
+	 * @param document The document metadata containing the widget binding.
+	 * @param widget The widget metadata to convert into a SmartClient field definition.
+	 * @param runtime Whether the generated definition is for runtime execution.
+	 * @return The SmartClient field definition for the widget.
 	 */
 	public SmartClientFieldDefinition getField(@SuppressWarnings("hiding") Document document, 
 												InputWidget widget,

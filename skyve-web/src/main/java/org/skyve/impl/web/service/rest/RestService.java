@@ -46,6 +46,11 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 
+/**
+ * Implements generic Skyve REST endpoint.
+ * Think carefully about the security ramifications of exposing this.
+ * It is currently blocked in web.xml.
+ */
 @Path("/api")
 @RequestScoped
 @SuppressWarnings("javasecurity:S6173") // This class is currently blocked in web.xml and an ACL will be added if it is ever used
@@ -57,6 +62,14 @@ public class RestService {
 	@Context
 	private HttpServletResponse response;
 	
+	/**
+	 * Retrieves a single document instance and returns it as JSON.
+	 *
+	 * @param module module name
+	 * @param document document name
+	 * @param id business id
+	 * @return marshalled JSON payload, or {@code null} when an error occurs
+	 */
 	@GET
 	@Path("/json/{module}/{document}/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -93,6 +106,14 @@ public class RestService {
 		return result;
 	}
 
+	/**
+	 * Retrieves a single document instance and returns it as XML.
+	 *
+	 * @param module module name
+	 * @param document document name
+	 * @param id business id
+	 * @return retrieved bean, or {@code null} when an error occurs
+	 */
 	@GET
 	@Path("/xml/{module}/{document}/{id}")
 	@Produces(MediaType.APPLICATION_XML)
@@ -127,6 +148,15 @@ public class RestService {
 		return result;
 	}
 	
+	/**
+	 * Retrieves a page of document instances and returns them as JSON.
+	 *
+	 * @param module module name
+	 * @param document document name
+	 * @param start first row index (inclusive)
+	 * @param end end row index (exclusive)
+	 * @return marshalled JSON payload, or {@code null} when an error occurs
+	 */
 	@GET
 	@Path("/json/{module}/{document}")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -166,6 +196,12 @@ public class RestService {
 		return result;
 	}
 
+	/**
+	 * Supports insert operations over GET for legacy clients by delegating to JSON insert.
+	 *
+	 * @param json JSON payload representing the bean to insert
+	 * @return marshalled inserted bean JSON, or {@code null} when an error occurs
+	 */
 	@GET
 	@Path("/json/insert/{bean}")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -173,6 +209,12 @@ public class RestService {
 		return insertJSON(json);
 	}
 
+	/**
+	 * Inserts a new persistent bean from a JSON payload.
+	 *
+	 * @param json JSON payload representing the bean to insert
+	 * @return marshalled inserted bean JSON, or {@code null} when an error occurs
+	 */
 	@PUT
 	@Path("/json/insert")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -181,6 +223,12 @@ public class RestService {
 		return insertJSON(json);
 	}
 	
+	/**
+	 * Inserts a new persistent bean from a JSON payload.
+	 *
+	 * @param json JSON payload representing the bean to insert
+	 * @return marshalled inserted bean JSON, or {@code null} when an error occurs
+	 */
 	private String insertJSON(String json) {
 		String result = null;
 		
@@ -201,6 +249,12 @@ public class RestService {
 		return result;
 	}
 
+	/**
+	 * Supports update operations over GET for legacy clients by delegating to JSON update.
+	 *
+	 * @param json JSON payload representing the bean to update
+	 * @return marshalled updated bean JSON, or {@code null} when an error occurs
+	 */
 	@GET
 	@Path("/json/update/{bean}")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -208,6 +262,12 @@ public class RestService {
 		return updateJSON(json);
 	}
 
+	/**
+	 * Updates an existing persistent bean from a JSON payload.
+	 *
+	 * @param json JSON payload representing the bean to update
+	 * @return marshalled updated bean JSON, or {@code null} when an error occurs
+	 */
 	@POST
 	@Path("/json/update")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -216,6 +276,12 @@ public class RestService {
 		return updateJSON(json);
 	}
 	
+	/**
+	 * Updates an existing persistent bean from a JSON payload.
+	 *
+	 * @param json JSON payload representing the bean to update
+	 * @return marshalled updated bean JSON, or {@code null} when an error occurs
+	 */
 	private String updateJSON(String json) {
 		String result = null;
 		
@@ -238,6 +304,12 @@ public class RestService {
 		return result;
 	}
 
+	/**
+	 * Supports delete operations over GET for legacy clients by delegating to JSON delete.
+	 *
+	 * @param json JSON payload representing the bean to delete
+	 * @return empty JSON object string, or {@code null} when an error occurs
+	 */
 	@GET
 	@Path("/json/delete/{bean}")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -245,6 +317,12 @@ public class RestService {
 		return deleteJSON(json);
 	}
 	
+	/**
+	 * Deletes an existing persistent bean identified by a JSON payload.
+	 *
+	 * @param json JSON payload representing the bean to delete
+	 * @return empty JSON object string, or {@code null} when an error occurs
+	 */
 	@DELETE
 	@Path("/json/delete")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -253,6 +331,12 @@ public class RestService {
 		return deleteJSON(json);
 	}
 
+	/**
+	 * Deletes an existing persistent bean identified by a JSON payload.
+	 *
+	 * @param json JSON payload representing the bean to delete
+	 * @return empty JSON object string, or {@code null} when an error occurs
+	 */
 	private String deleteJSON(String json) {
 		String result = null;
 		
@@ -287,6 +371,15 @@ public class RestService {
 	}
 */
 
+	/**
+	 * Executes a metadata query or default document query and returns projected rows as JSON.
+	 *
+	 * @param module module name
+	 * @param documentOrQuery query name or document name whose default query will be used
+	 * @param start first row index (inclusive)
+	 * @param end end row index (exclusive)
+	 * @return marshalled JSON payload, or {@code null} when an error occurs
+	 */
 	@GET
 	@Path("/json/query/{module}/{documentOrQuery}")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -338,6 +431,12 @@ public class RestService {
 		return result;
 	}
 	
+	/**
+	 * Retrieves stored attachment content as binary thumbnail bytes for the supplied content id.
+	 *
+	 * @param contentId content identifier
+	 * @return thumbnail bytes, or {@code null} when content is not found or an error occurs
+	 */
 	@GET
 	@Path("/content/{contentId}")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
@@ -390,6 +489,18 @@ public class RestService {
 		return result;
 	}
 
+	/**
+	 * Inserts or replaces attachment content for a bean attribute using Base64-encoded payload data.
+	 *
+	 * @param customer customer name
+	 * @param module module name
+	 * @param document document name
+	 * @param id bean business id
+	 * @param attributeName content attribute name
+	 * @param contentType content MIME type label
+	 * @param encodedContent Base64-encoded payload
+	 * @return new content id, or {@code null} when not found or an error occurs
+	 */
 	@PUT
 	@Path("/content/insert/{customer}/{module}/{document}/{id}/{attributeName}/{contentType}")
 	@Consumes(MediaType.TEXT_PLAIN)
@@ -445,13 +556,14 @@ public class RestService {
 	}
 
 	/**
-	 * Handles unexpected errors in REST calls by logging the error and returning a generic error message
-	 * to the client.
-	 * 
-	 * @param persistence The persistence context, which may be null if the error occurred before it
-	 *        could be established.
-	 * @param context A string describing the context of the error for logging purposes.
-	 * @param t The throwable representing the error that occurred.
+	 * Logs an unexpected REST failure, captures a support reference, and writes a generic error response.
+	 *
+	 * <p>Side effects: records the underlying throwable through the shared web-error logger and delegates to
+	 * the REST filter error pipeline so callers do not leak internal exception details to API clients.
+	 *
+	 * @param persistence the active persistence context, or {@code null} when failure occurred before one was available
+	 * @param context a human-readable description of the failing REST operation for structured logging
+	 * @param t the unexpected failure that triggered the REST error response
 	 */
 	private void handleUnexpectedRestError(Persistence persistence, String context, Throwable t) {
 		String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, context, t);

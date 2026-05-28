@@ -34,15 +34,24 @@ import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.html.HtmlPanelGroup;
 import jakarta.faces.context.FacesContext;
 
+/**
+ * Models a view interaction and binds it to the active Skyve web context.
+ */
 @FacesComponent(View.COMPONENT_TYPE) 
 public class View extends HtmlPanelGroup {
-
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(View.class);
     private static final Logger FACES_LOGGER = Category.FACES.logger();
 
     @SuppressWarnings("hiding")
     public static final String COMPONENT_TYPE = "org.skyve.impl.web.faces.components.View";
 
+	/**
+	 * Populates the view component tree on first render and delegates view generation to the configured builders.
+	 *
+	 * @param context the current Faces context
+	 * @throws IOException if a configured component or layout builder cannot be created or invoked
+	 */
+	// The method intentionally preserves the existing request-scoped generation flow.
     @Override
     public void encodeBegin(FacesContext context) throws IOException {
 		Map<String, Object> attributes = getAttributes();
@@ -158,12 +167,29 @@ public class View extends HtmlPanelGroup {
 				}
 			}.execute();
 			
-			if ((UtilImpl.FACES_TRACE) && (! context.isPostback())) FACES_LOGGER.info(new ComponentRenderer(this).toString());
+			if ((UtilImpl.FACES_TRACE) && (! context.isPostback())) {
+				FACES_LOGGER.info("{}", new ComponentRenderer(this));
+			}
 		}
 
 		super.encodeBegin(context);
     }
     
+	/**
+	 * Generates Faces view components for edit/create variants of the requested document view.
+		 *
+		 * @param moduleName the module name containing the document
+		 * @param documentName the document name whose views are generated
+		 * @param widgetId the optional widget identifier used to wire the generated faces view
+		 * @param managedBeanName the managed bean name that owns the generated view
+		 * @param uxui the UX/UI profile name
+		 * @param userAgentType the current user-agent type
+		 * @param process the PrimeFaces process expression
+		 * @param update the PrimeFaces update expression
+		 * @param componentBuilder the component builder used to render the view
+		 * @param layoutBuilder the layout builder used to render the view
+		 * @return the generated faces view components, including an optional sidebar
+	 */
     public static List<UIComponent> generate(String moduleName,
 				    							String documentName,
 				    							String widgetId,
@@ -179,7 +205,7 @@ public class View extends HtmlPanelGroup {
     	User user = CORE.getUser();
     	Customer customer = user.getCustomer();
         Module module = customer.getModule(moduleName);
-        Document document = module.getDocument(customer, documentName); // FacesActions.getTargetDocumentForViewBinding(customer, module, facesView);
+		Document document = module.getDocument(customer, documentName);
 
         componentBuilder.setManagedBeanName(managedBeanName);
     	componentBuilder.setProcess(process);
@@ -192,8 +218,8 @@ public class View extends HtmlPanelGroup {
 
     	FacesViewRenderer fvr = null;
         org.skyve.metadata.view.View view = document.getView(uxui, customer, ViewType.edit.toString());
-        if (view != null) {
-        	fvr = new FacesViewRenderer(user,
+		if (view != null) {
+			fvr = new FacesViewRenderer(user,
 										module, 
 										document,
 										view,
@@ -208,9 +234,9 @@ public class View extends HtmlPanelGroup {
 				result.add(sidebar);
 			}
         }
-        // Get the create view and add (so long as we didn't get the edit view back)
+		// Get the create view and add (so long as we didn't get the edit view back)
         view = document.getView(uxui, customer, ViewType.create.toString());
-        if ((view != null) && ViewType.create.toString().equals(view.getName())) {
+		if ((view != null) && ViewType.create.toString().equals(view.getName())) {
         	fvr = new FacesViewRenderer(user,
                                           module, 
                                           document,

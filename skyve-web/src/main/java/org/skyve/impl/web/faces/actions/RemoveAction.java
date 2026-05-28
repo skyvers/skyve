@@ -26,7 +26,6 @@ import org.slf4j.Logger;
  * The onRemovedHandlers event actions are processed here also.
  */
 public class RemoveAction extends FacesAction<Void> {
-
     private static final Logger FACES_LOGGER = Category.FACES.logger();
     private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
 
@@ -35,6 +34,14 @@ public class RemoveAction extends FacesAction<Void> {
 	private String elementBizId;
 	private List<String> removedHandlerActionNames; // "true/false" means rerender with/without client validation
 	
+	/**
+	 * Creates an action that removes a collection element or zoomed association target.
+	 *
+	 * @param facesView the current Faces view context
+	 * @param collectionName the collection binding name for inline removal
+	 * @param elementBizId the selected element business ID for inline removal
+	 * @param removedHandlerActionNames post-remove handler actions to execute
+	 */
 	public RemoveAction(FacesView facesView,
 							String collectionName,
 							String elementBizId,
@@ -45,6 +52,16 @@ public class RemoveAction extends FacesAction<Void> {
 		this.removedHandlerActionNames = removedHandlerActionNames;
 	}
 
+	/**
+	 * Removes a target bean from either an inline collection context or a zoomed binding context.
+	 *
+	 * <p>For inline removal, this removes the selected element and executes configured
+	 * on-removed handlers. For zoomed removal, this executes remove pre-hooks, applies
+	 * the association/collection mutation, and then zooms out.
+	 *
+	 * @return always {@code null} because this action mutates view and model state only
+	 * @throws Exception if target resolution, interceptors, bizlet hooks, or binding updates fail
+	 */
 	@Override
 	public Void callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("RemoveAction - collectionName={} : elementBizId={}", collectionName, elementBizId);

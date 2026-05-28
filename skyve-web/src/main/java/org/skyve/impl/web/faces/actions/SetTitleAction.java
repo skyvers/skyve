@@ -16,6 +16,9 @@ import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+/**
+ * Executes a Faces callback action within the current Skyve web context.
+ */
 public class SetTitleAction extends FacesAction<Void> {
 
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SetTitleAction.class);

@@ -37,10 +37,29 @@ import jakarta.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 
+/**
+ * Implements file downloads for Skyve.
+ */
 public class DownloadServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(DownloadServlet.class);
 
+	/**
+	 * Resolves and streams the result of a document download action for the current conversation bean.
+	 *
+	 * <p>This method restores the cached web conversation, binds its persistence context to the current
+	 * thread, re-establishes the authenticated user, enforces download-action security, executes document
+	 * interception hooks, and writes either in-memory bytes, a backing file, or a streamed payload to the
+	 * servlet response.
+	 *
+	 * <p>Side effects: mutates response headers, may cache the conversation again after streaming completes,
+	 * and writes a minimal HTML error payload when download generation fails unexpectedly.
+	 *
+	 * @param request the HTTP request containing conversation, document, and resource identifiers
+	 * @param response the HTTP response used to stream generated download content
+	 * @throws ServletException when servlet processing fails before response streaming can complete
+	 * @throws IOException when request or response I/O fails
+	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
 	public void doGet(HttpServletRequest request, HttpServletResponse response)

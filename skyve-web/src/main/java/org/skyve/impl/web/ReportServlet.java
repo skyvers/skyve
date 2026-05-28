@@ -67,6 +67,9 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.jakarta.servlets.BaseHttpServlet;
 
+/**
+ * Handles HTTP requests for this Skyve web endpoint.
+ */
 public class ReportServlet extends HttpServlet {
     private static final Logger HTTP_LOGGER = Category.HTTP.logger();
 
@@ -75,6 +78,9 @@ public class ReportServlet extends HttpServlet {
 	public static final String REPORT_PATH = "/report";
 	public static final String EXPORT_PATH = "/export";
 
+	/**
+	 * Handles report POST requests by delegating to the common GET processing path.
+	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
 	public void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -82,6 +88,12 @@ public class ReportServlet extends HttpServlet {
 		doGet(request, response);
 	}
 
+	/**
+	 * Dispatches report and export requests inside a persistence context bound to the authenticated user.
+	 *
+	 * <p>Side effects: starts and commits or rolls back the current persistence conversation, resolves the
+	 * current user from the servlet request, and redirects unexpected failures to the shared error page.
+	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
 	public void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -111,7 +123,7 @@ public class ReportServlet extends HttpServlet {
 			catch (Exception e) {
 				persistence.rollback();
 				String reference = WebErrorUtil.logUnexpectedAndGetReference(HTTP_LOGGER, "Report servlet request failed", e);
-				redirectToErrorPage(request, response, reference);
+				redirectToErrorPage(response, reference);
 			}
 		}
 		finally {
@@ -119,7 +131,13 @@ public class ReportServlet extends HttpServlet {
 		}
 	}
 
-	private static void redirectToErrorPage(HttpServletRequest request, HttpServletResponse response, String reference) {
+	/**
+	 * Redirects an unexpected servlet failure to the standard Skyve error page using the supplied reference.
+	 *
+	 * <p>Side effects: sends an HTTP redirect when possible, otherwise falls back to writing a minimal HTML
+	 * error response directly to the servlet output stream.
+	 */
+	private static void redirectToErrorPage(HttpServletResponse response, String reference) {
 		try {
 			String errorURI = WebErrorUtil.appendErrorReference(Util.getSkyveContextUrl() + "/pages/error.jsp", reference);
 			response.sendRedirect(response.encodeRedirectURL(errorURI));
@@ -130,6 +148,16 @@ public class ReportServlet extends HttpServlet {
 		}
 	}
 
+	/**
+	 * Generates or executes a report request and streams the formatted result to the client.
+	 *
+	 * <p>This method handles both generated edit-view reports and named report definitions, resolves the
+	 * driving bean or list model from request context, enforces access checks, and delegates final response
+	 * formatting to {@link #pumpOutReportFormat(byte[], JasperPrint, ReportFormat, String, HttpSession, HttpServletResponse)}.
+	 *
+	 * <p>Side effects: reads request parameters, may restore conversation state, may load persistent beans,
+	 * executes JasperReports rendering, and writes either report bytes or a generic HTML error response.
+	 */
 	private static void doReport(HttpServletRequest request, HttpServletResponse response) {
 		try {
 			String moduleName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.MODULE_NAME)));
@@ -223,15 +251,24 @@ public class ReportServlet extends HttpServlet {
 		}
 	}
 
+	/**
+	 * Writes a generic HTML error response for a failed report request using the servlet output stream.
+	 */
 	private static void writeReportError(HttpServletResponse response, String reference) {
-		try {
-			writeReportError(response, response.getOutputStream(), reference);
+		try (ServletOutputStream out = response.getOutputStream()) {
+			writeReportError(response, out, reference);
 		}
 		catch (IOException ioe) {
 			HTTP_LOGGER.warn("Could not open report error response stream for reference {}", reference, ioe);
 		}
 	}
 
+	/**
+	 * Writes a generic HTML error response for a failed report request to the supplied output stream.
+	 *
+	 * <p>Side effects: resets the servlet response when it is still mutable, sets a 500 status, and emits a
+	 * minimal UTF-8 HTML payload containing the supplied support reference.
+	 */
 	private static void writeReportError(HttpServletResponse response, OutputStream out, String reference) {
 		try {
 			if (response.isCommitted()) {
@@ -251,6 +288,12 @@ public class ReportServlet extends HttpServlet {
 		}
 	}
 
+	/**
+	 * Extracts report parameters from the request after excluding servlet control parameters.
+	 *
+	 * <p>Returned values are sanitised as text because this helper is used for report execution parameters
+	 * sourced directly from the HTTP request.
+	 */
 	private static Map<String, Object> getParameters(HttpServletRequest request) {
 //		 TODO coercion somehow...
 		Map<String, Object> params = new TreeMap<>();
@@ -271,6 +314,12 @@ public class ReportServlet extends HttpServlet {
 		return params;
 	}
 
+	/**
+	 * Configures the HTTP response for the selected report format and streams the rendered bytes to the client.
+	 *
+	 * <p>Side effects: sets content headers, content disposition, cache headers, content length, and for HTML
+	 * reports stores the {@link JasperPrint} in the session for JasperReports viewer integration.
+	 */
 	private static void pumpOutReportFormat(byte[] bytes,
 												JasperPrint jasperPrint,
 												ReportFormat format,
@@ -362,6 +411,13 @@ public class ReportServlet extends HttpServlet {
 		}
 	}
 
+	/**
+	 * Exports list-model data based on SmartClient criteria posted from the web client.
+	 *
+	 * <p>This method reconstructs the target query or model from the request payload, applies access checks,
+	 * rebuilds filter criteria, derives export columns, fills a Jasper report from the resulting iterable, and
+	 * streams the generated document back to the client.
+	 */
 	private static void doExport(HttpServletRequest request, HttpServletResponse response)
 	throws IOException {
 		try (ServletOutputStream out = response.getOutputStream()) {

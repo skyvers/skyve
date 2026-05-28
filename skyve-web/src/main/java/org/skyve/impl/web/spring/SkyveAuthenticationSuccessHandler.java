@@ -27,10 +27,13 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
 
-    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SkyveAuthenticationSuccessHandler.class);
+	private static final Logger LOG = SkyveLoggerFactory.getLogger(SkyveAuthenticationSuccessHandler.class);
 
 	private UserDetailsManager userDetailsManager;
 	
+	/**
+	 * Creates the authentication success handler with optional user-details management support.
+	 */
 	public SkyveAuthenticationSuccessHandler(UserDetailsManager userDetailsManager) {
 		this.userDetailsManager = userDetailsManager;
 	}
@@ -49,7 +52,7 @@ public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenti
 		if (savedRequest != null) {
 			redirectUrl = savedRequest.getRedirectUrl();
 			if (redirectUrl != null) {
-				LOGGER.info("Redirect after login requested to {}", redirectUrl);
+				LOG.info("Redirect after login requested to {}", redirectUrl);
 				// its http behind proxy server terminating TLS or some other edge case
 				if (Util.isSecureUrl() && redirectUrl.startsWith("http://")) { // could be https:// or ws:// or wss://
 					if (savedRequest instanceof DefaultSavedRequest defaultSavedRequest) {
@@ -94,7 +97,7 @@ public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenti
 			}
 		}
 		
-		LOGGER.info("Redirected to {}", redirectUrl);
+		LOG.info("Redirected to {}", redirectUrl);
 		requestCache.removeRequest(request, response);
 		clearAuthenticationAttributes(request);
 		getRedirectStrategy().sendRedirect(request, response, redirectUrl);

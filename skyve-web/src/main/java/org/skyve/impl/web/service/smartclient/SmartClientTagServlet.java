@@ -44,11 +44,25 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
+/**
+ * Servlet handling SmartClient tag operations for lookup fields, including listing available tags, tagging, untagging, and tag management.
+ * This servlet performs operations based on the "a" (action) parameter in the request.
+ * Supported actions include:
+ * - "L": List available tags for a lookup field.
+ * - "T": Tag all records in the current list context with a specified tag.
+ * - "U": Untag all records in the current list context from a specified tag.
+ * - "C": Clear all tagged records in the current list context for a specified tag.
+ * - "N": Create a new tag with a specified name.
+ * - "D": Delete a specified tag.
+ */
 public class SmartClientTagServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SmartClientTagServlet.class);
 
+	/**
+	 * Handles SmartClient tag GET requests by delegating to the shared request processor.
+	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -56,6 +70,9 @@ public class SmartClientTagServlet extends HttpServlet {
 		processRequest(request, response);
 	}
 
+	/**
+	 * Handles SmartClient tag POST requests by delegating to the shared request processor.
+	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -64,6 +81,13 @@ public class SmartClientTagServlet extends HttpServlet {
 	}
 
 	// NB - Never throw ServletException as this will halt the SmartClient Relogin flow.
+	/**
+	 * Processes SmartClient tag actions and writes response payloads.
+	 *
+	 * @param request inbound HTTP request
+	 * @param response outbound HTTP response
+	 * @throws IOException when response writing fails
+	 */
 	private static void processRequest(HttpServletRequest request, 
 										HttpServletResponse response)
 	throws IOException {
@@ -200,11 +224,25 @@ public class SmartClientTagServlet extends HttpServlet {
 		}
 	}
 
+	/**
+	 * Appends an escaped generic warning message to the response writer.
+	 *
+	 * @param reference support reference token
+	 * @param pw response writer
+	 */
 	static void appendUnexpectedWarning(String reference, PrintWriter pw) {
 		pw.append("The tag operation was unsuccessful. ");
 		pw.append(WebErrorUtil.escapeJsString(WebErrorUtil.genericMessage(reference)));
 	}
 
+	/**
+	 * Lists available tags and emits SmartClient menu JSON for tag operations.
+	 *
+	 * @param tagId currently selected tag id, or {@code null}
+	 * @param menuButtonId client-side menu button id
+	 * @param sb response builder receiving menu JSON
+	 * @throws Exception when tag listing fails
+	 */
 	private static void list(String tagId, String menuButtonId, StringBuilder sb)
 	throws Exception {
 	    sb.append("[{title:'New Tag',icon:'icons/tag_add.png',click:'");
@@ -256,6 +294,19 @@ public class SmartClientTagServlet extends HttpServlet {
         sb.append("]");
 	}
 
+	/**
+	 * Builds an iterable over beans in the current list context for tag operations.
+	 *
+	 * @param tagId selected tag id used in criteria handling
+	 * @param dataSourceName SmartClient data source name
+	 * @param criteriaJSON criteria payload JSON
+	 * @param bean current context bean, or {@code null}
+	 * @param user active user
+	 * @param customer active customer metadata
+	 * @param uxui active UX/UI profile name
+	 * @return auto-closing iterable of beans matching the criteria
+	 * @throws Exception when model/query resolution or criteria parsing fails
+	 */
 	private static AutoClosingIterable<Bean> iterate(String tagId,
 														String dataSourceName,
 														String criteriaJSON,

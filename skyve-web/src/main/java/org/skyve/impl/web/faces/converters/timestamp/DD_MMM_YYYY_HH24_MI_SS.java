@@ -10,8 +10,20 @@ import jakarta.faces.context.FacesContext;
 import jakarta.faces.convert.Converter;
 import jakarta.faces.convert.ConverterException;
 
+/**
+ * Converts JSF values between formatted UI strings and Skyve domain representations for this format.
+ */
 public class DD_MMM_YYYY_HH24_MI_SS extends org.skyve.domain.types.converters.timestamp.DD_MMM_YYYY_HH24_MI_SS
 										implements Converter<Timestamp> {
+	/**
+	 * Parses a UI string value into the corresponding Skyve domain value for this converter format.
+	 *
+	 * @param fc the active JSF context used to resolve locale and conversion error handling
+	 * @param component the component requesting conversion
+	 * @param value the submitted UI value
+	 * @return the converted domain value, or {@code null} when the submitted value is blank
+	 * @throws ConverterException when the submitted value cannot be parsed using this format
+	 */
 	@Override
 	public Timestamp getAsObject(FacesContext fc, UIComponent component, String value) {
     	String processedValue = UtilImpl.processStringValue(value);
@@ -27,6 +39,14 @@ public class DD_MMM_YYYY_HH24_MI_SS extends org.skyve.domain.types.converters.ti
     	return null;
 	}
 
+	/**
+	 * Formats a Skyve domain value to the display string expected by this converter format.
+	 *
+	 * @param fc the active JSF context used to resolve locale-specific formatting
+	 * @param component the component requesting conversion
+	 * @param value the domain value to format
+	 * @return a formatted display value, or an empty string when the value is {@code null} or formatting fails
+	 */
 	@Override
 	public String getAsString(FacesContext fc, UIComponent component, Timestamp value) {
 		if (value == null) {

@@ -6,8 +6,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationEventPublisher;
 import org.springframework.security.authentication.DefaultAuthenticationEventPublisher;
 
+/**
+ * Configures Skyve web integration for the host runtime environment.
+ */
 @Configuration
 public class SkyveSpringSecurityConfig {
+	/**
+	 * Exposes the primary Skyve Spring Security helper bean.
+	 */
 	@Bean
 	@SuppressWarnings("static-method")
 	public SkyveSpringSecurity skyveSpringSecurity() {

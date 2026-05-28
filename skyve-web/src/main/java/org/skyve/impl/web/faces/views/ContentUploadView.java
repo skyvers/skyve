@@ -34,6 +34,9 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
 
+/**
+ * Models a view interaction and binds it to the active Skyve web context.
+ */
 @RequestScoped
 @Named("_skyveContent")
 public class ContentUploadView extends AbstractUploadView {
@@ -44,10 +47,16 @@ public class ContentUploadView extends AbstractUploadView {
 	@SuppressWarnings("java:S6813") // allow member injection
 	private String contentBinding;
 
+	/**
+	 * Creates the request-scoped content upload view with framework content upload limits.
+	 */
 	public ContentUploadView() {
 		super(UtilImpl.UPLOADS_CONTENT_WHITELIST_REGEX, UtilImpl.UPLOADS_CONTENT_MAXIMUM_SIZE_IN_MB);
 	}
 
+	/**
+	 * Creates a content upload view with explicit whitelist and size constraints.
+	 */
 	protected ContentUploadView(String whitelistRegex, int maximumSizeMB) {
 		super(whitelistRegex, maximumSizeMB);
 	}
@@ -59,6 +68,9 @@ public class ContentUploadView extends AbstractUploadView {
 		contentBinding = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(contentBinding));
 	}
 	
+	/**
+	 * Restores cached upload conversation state before the page is rendered.
+	 */
 	public void preRender() {
 		new FacesAction<Void>() {
 			@Override
@@ -69,6 +81,9 @@ public class ContentUploadView extends AbstractUploadView {
 		}.execute();
 	}
 
+	/**
+	 * Returns the binding that stores the uploaded content identifier.
+	 */
 	public String getContentBinding() {
 		return contentBinding;
 	}

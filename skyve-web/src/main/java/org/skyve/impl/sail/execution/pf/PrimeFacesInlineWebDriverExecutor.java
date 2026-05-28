@@ -80,17 +80,31 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import jakarta.faces.component.UIComponent;
 
+/**
+ * Executes SAIL interaction steps against the web UI for test scenarios.
+ */
 public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFacesAutomationContext> {
 
 	private ComponentBuilder componentBuilder;
 	private LayoutBuilder layoutBuilder;
 	
+	/**
+	 * Creates an inline WebDriver executor with explicit component and layout builders.
+	 *
+	 * @param componentBuilder the component builder used to generate PrimeFaces components
+	 * @param layoutBuilder the layout builder used to assemble PrimeFaces layouts
+	 */
 	public PrimeFacesInlineWebDriverExecutor(ComponentBuilder componentBuilder,
 												LayoutBuilder layoutBuilder) {
 		this.componentBuilder = componentBuilder;
 		this.layoutBuilder = layoutBuilder;
 	}
 
+	/**
+	 * Pushes a list-view context and generates component mappings for the list scope.
+	 *
+	 * @param push the list-context metadata to push
+	 */
 	@Override
 	public void executePushListContext(PushListContext push) {
 		PrimeFacesAutomationContext newContext = new PrimeFacesAutomationContext();
@@ -100,6 +114,11 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 		newContext.generate(new PrimeFacesGenerateListContext(push, componentBuilder));
 	}
 
+	/**
+	 * Pushes an edit-view context and generates component mappings for the edit scope.
+	 *
+	 * @param push the edit-context metadata to push
+	 */
 	@Override
 	public void executePushEditContext(PushEditContext push) {
 		PrimeFacesAutomationContext newContext = new PrimeFacesAutomationContext();
@@ -109,16 +128,31 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 		newContext.generate(new PrimeFacesGenerateEditContext(push, componentBuilder, layoutBuilder));
 	}
 	
+	/**
+	 * Clears the current execution context stack.
+	 *
+	 * @param clear the clear-context step being executed
+	 */
 	@Override
 	public void executeClearContext(ClearContext clear) {
 		clear();
 	}
 	
+	/**
+	 * Pops the active execution context from the stack.
+	 *
+	 * @param pop the pop-context step being executed
+	 */
 	@Override
 	public void executePopContext(PopContext pop) {
 		pop();
 	}
 	
+	/**
+	 * Emits login script statements for the supplied credentials.
+	 *
+	 * @param login the login step containing authentication credentials
+	 */
 	@Override
 	public void executeLogin(Login login) {
 		String customer = login.getCustomer();
@@ -141,12 +175,22 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 		append("\"").append(login.getPassword()).append("\");").newline();
 	}
 	
+	/**
+	 * Emits logout script statements.
+	 *
+	 * @param logout the logout step being executed
+	 */
 	@Override
 	public void executeLogout(Logout logout) {
 		comment("Logout");
 		indent().append("logout();").newline();
 	}
 	
+	/**
+	 * Navigates to a list view and pushes corresponding list context metadata.
+	 *
+	 * @param list the list-navigation step to execute
+	 */
 	@Override
 	public void executeNavigateList(NavigateList list) {
 		String moduleName = list.getModuleName();
@@ -177,6 +221,11 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 		}
 	}
 
+	/**
+	 * Navigates to an edit view and pushes corresponding edit context metadata.
+	 *
+	 * @param edit the edit-navigation step to execute
+	 */
 	@Override
 	public void executeNavigateEdit(NavigateEdit edit) {
 		String moduleName = edit.getModuleName();
@@ -198,30 +247,67 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 		}
 	}
 
+	/**
+	 * Resolves tree-navigation metadata but does not currently emit a WebDriver script step.
+	 *
+	 * <p>Current behavior: delegates to the superclass so the driving-document context is updated consistently,
+	 * then performs no additional action because PrimeFaces inline tree navigation has not yet been implemented.
+	 *
+	 * @param tree the tree-navigation step to resolve
+	 */
 	@Override
 	public void executeNavigateTree(NavigateTree tree) {
 		super.executeNavigateTree(tree); // determine driving document
 		// TODO Auto-generated method stub
 	}
 
+	/**
+	 * Resolves map-navigation metadata but does not currently emit a WebDriver script step.
+	 *
+	 * <p>Current behavior: delegates to the superclass so the driving-document context is updated consistently,
+	 * then performs no additional action because PrimeFaces inline map navigation has not yet been implemented.
+	 *
+	 * @param map the map-navigation step to resolve
+	 */
 	@Override
 	public void executeNavigateMap(NavigateMap map) {
 		super.executeNavigateMap(map); // determine driving document
 		// TODO Auto-generated method stub
 	}
 
+	/**
+	 * Resolves calendar-navigation metadata but does not currently emit a WebDriver script step.
+	 *
+	 * <p>Current behavior: delegates to the superclass so the driving-document context is updated consistently,
+	 * then performs no additional action because PrimeFaces inline calendar navigation has not yet been implemented.
+	 *
+	 * @param calendar the calendar-navigation step to resolve
+	 */
 	@Override
 	public void executeNavigateCalendar(NavigateCalendar calendar) {
 		super.executeNavigateCalendar(calendar); // determine driving document
 		// TODO Auto-generated method stub
 	}
 
+	/**
+	 * Resolves link-navigation metadata but does not currently emit a WebDriver script step.
+	 *
+	 * <p>Current behavior: delegates to the superclass so the executor records the null driving-document state,
+	 * then performs no additional action because PrimeFaces inline link navigation has not yet been implemented.
+	 *
+	 * @param link the link-navigation step to resolve
+	 */
 	@Override
 	public void executeNavigateLink(NavigateLink link) {
 		super.executeNavigateLink(link); // null driving document
 		// TODO Auto-generated method stub
 	}
 
+	/**
+	 * Selects one or more rendered tab components resolved from the tab path identifier.
+	 *
+	 * @param tabSelect the tab-selection step to execute
+	 */
 	@Override
 	public void executeTabSelect(TabSelect tabSelect) {
 		PrimeFacesAutomationContext context = peek();
@@ -237,6 +323,11 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 		}
 	}
 
+	/**
+	 * Builds fixture data and emits generated data-entry steps for the current edit context.
+	 *
+	 * @param testDataEnter the test-data-enter step describing fixture selection
+	 */
 	@Override
 	public void executeTestDataEnter(TestDataEnter testDataEnter) {
 		PrimeFacesAutomationContext context = peek();
@@ -276,6 +367,11 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 		}
 	}
 
+	/**
+	 * Emits data-entry script for resolved component types matching the supplied binding.
+	 *
+	 * @param dataEnter the data-entry step to execute
+	 */
 	@Override
 	public void executeDataEnter(DataEnter dataEnter) {
 		PrimeFacesAutomationContext context = peek();
@@ -342,6 +438,15 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 		}
 	}
 
+	/**
+	 * Emits script for clicking resolved button-like components and optional success assertions.
+	 *
+	 * @param button the button-oriented step being executed
+	 * @param tagName the logical SAIL tag name used in comments and error reporting
+	 * @param ajax whether the click is expected to execute via AJAX
+	 * @param confirm whether a confirmation dialog is expected
+	 * @param testSuccess optional success-assertion override
+	 */
 	private void button(Step button, String tagName, boolean ajax, boolean confirm, Boolean testSuccess) {
 		PrimeFacesAutomationContext context = peek();
 		String identifier = button.getIdentifier(context);
@@ -362,6 +467,14 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 		}
 	}
 
+	/**
+	 * Emits script for redirecting button actions and optional success assertions.
+	 *
+	 * @param button the button-oriented step being executed
+	 * @param tagName the logical SAIL tag name used in comments and error reporting
+	 * @param confirm whether a confirmation dialog is expected
+	 * @param testSuccess optional success-assertion override
+	 */
 	private void redirectButton(Step button, String tagName, boolean confirm, Boolean testSuccess) {
 		PrimeFacesAutomationContext context = peek();
 		String identifier = button.getIdentifier(context);
@@ -382,12 +495,22 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 		}
 	}
 
+	/**
+	 * Executes an OK action and pops the active edit context.
+	 *
+	 * @param ok the OK action step to execute
+	 */
 	@Override
 	public void executeOk(Ok ok) {
 		redirectButton(ok, "ok", false, ok.getTestSuccess());
 		pop();
 	}
 
+	/**
+	 * Executes a save action and updates inferred view type when create-view intent is provided.
+	 *
+	 * @param save the save action step to execute
+	 */
 	@Override
 	public void executeSave(Save save) {
 		button(save, "save", true, false, save.getTestSuccess());
@@ -402,30 +525,55 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 		}
 	}
 
+	/**
+	 * Executes a cancel action and pops the active edit context.
+	 *
+	 * @param cancel the cancel action step to execute
+	 */
 	@Override
 	public void executeCancel(Cancel cancel) {
 		button(cancel, "cancel", false, false, cancel.getTestSuccess());
 		pop();
 	}
 
+	/**
+	 * Executes a delete action and pops the active edit context.
+	 *
+	 * @param delete the delete action step to execute
+	 */
 	@Override
 	public void executeDelete(Delete delete) {
 		redirectButton(delete, "delete", true, delete.getTestSuccess());
 		pop();
 	}
 
+	/**
+	 * Executes a zoom-out action and pops the active edit context.
+	 *
+	 * @param zoomOut the zoom-out action step to execute
+	 */
 	@Override
 	public void executeZoomOut(ZoomOut zoomOut) {
 		button(zoomOut, "zoom out", false, false, zoomOut.getTestSuccess());
 		pop();
 	}
 
+	/**
+	 * Executes a remove action and pops the active edit context.
+	 *
+	 * @param remove the remove action step to execute
+	 */
 	@Override
 	public void executeRemove(Remove remove) {
 		button(remove, "remove", false, true, remove.getTestSuccess());
 		pop();
 	}
 
+	/**
+	 * Executes a custom action button resolved from the current context.
+	 *
+	 * @param action the custom action step to execute
+	 */
 	@Override
 	public void executeAction(Action action) {
 		button(action, 
@@ -435,16 +583,34 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 				action.getTestSuccess());
 	}
 
+	/**
+	 * Executes lookup auto-complete selection by search text.
+	 *
+	 * @param complete the lookup auto-complete step to execute
+	 */
 	@Override
 	public void executeLookupDescriptionAutoComplete(LookupDescriptionAutoComplete complete) {
 		lookupDescription(complete, complete.getBinding(), null, complete.getSearch());
 	}
 
+	/**
+	 * Executes lookup pick-list selection by row index.
+	 *
+	 * @param pick the lookup pick step to execute
+	 */
 	@Override
 	public void executeLookupDescriptionPick(LookupDescriptionPick pick) {
 		lookupDescription(pick, pick.getBinding(), pick.getRow(), null);
 	}
 
+	/**
+	 * Emits lookup-description interaction script for either row picking or search auto-complete.
+	 *
+	 * @param step the originating lookup step
+	 * @param binding the lookup binding identifier
+	 * @param row optional row index for pick-list selection
+	 * @param search optional search string for auto-complete selection
+	 */
 	private void lookupDescription(Step step, String binding, Integer row, String search) {
 		PrimeFacesAutomationContext context = peek();
 		
@@ -467,16 +633,31 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 		}
 	}
 
+	/**
+	 * No-op because PrimeFaces lookup descriptions do not expose inline new behavior.
+	 *
+	 * @param nu the lookup-description-new step being ignored
+	 */
 	@Override
 	public void executeLookupDescriptionNew(LookupDescriptionNew nu) {
 		// Nothing to do here as PF doesn't allow new off of lookup descriptions
 	}
 
+	/**
+	 * No-op because PrimeFaces lookup descriptions do not expose inline edit behavior.
+	 *
+	 * @param edit the lookup-description-edit step being ignored
+	 */
 	@Override
 	public void executeLookupDescriptionEdit(LookupDescriptionEdit edit) {
 		// Nothing to do here as PF doesn't allow edit off of lookup descriptions
 	}
 
+	/**
+	 * Executes zoom-in and pushes a nested edit context for the resolved relation target.
+	 *
+	 * @param zoom the zoom-in action step to execute
+	 */
 	@Override
 	public void executeZoomIn(ZoomIn zoom) {
 		button(zoom, "zoomIn", false, false, zoom.getTestSuccess());
@@ -502,31 +683,63 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 		}
 	}
 	
+	/**
+	 * Executes DataGrid new-row interaction.
+	 *
+	 * @param nu the data-grid-new step to execute
+	 */
 	@Override
 	public void executeDataGridNew(DataGridNew nu) {
 		dataGridGesture(nu, nu.getBinding(), null);
 	}
 	
+	/**
+	 * Executes DataGrid zoom interaction on a specific row.
+	 *
+	 * @param zoom the data-grid-zoom step to execute
+	 */
 	@Override
 	public void executeDataGridZoom(DataGridZoom zoom) {
 		dataGridGesture(zoom, zoom.getBinding(), zoom.getRow());
 	}
 	
+	/**
+	 * Executes DataGrid remove interaction on a specific row.
+	 *
+	 * @param remove the data-grid-remove step to execute
+	 */
 	@Override
 	public void executeDataGridRemove(DataGridRemove remove) {
 		dataGridGesture(remove, remove.getBinding(), remove.getRow());
 	}
 
+	/**
+	 * Executes DataGrid row-select interaction.
+	 *
+	 * @param select the data-grid-select step to execute
+	 */
 	@Override
 	public void executeDataGridSelect(DataGridSelect select) {
 		dataGridGesture(select, select.getBinding(), select.getRow());
 	}
 
+	/**
+	 * No-op because inline editing of DataGrid rows is not supported by this executor.
+	 *
+	 * @param edit the data-grid-edit step being ignored
+	 */
 	@Override
 	public void executeDataGridEdit(DataGridEdit edit) {
 		// cannot edit a grid row in PF
 	}
 
+	/**
+	 * Emits DataGrid gesture script and pushes nested edit context when navigation enters a related row.
+	 *
+	 * @param step the originating data-grid step
+	 * @param binding the data-grid binding identifier
+	 * @param row optional row index for row-scoped interactions
+	 */
 	private void dataGridGesture(Step step, String binding, Integer row) {
 		PrimeFacesAutomationContext context = peek();
 		String buttonIdentifier = step.getIdentifier(context);
@@ -599,6 +812,11 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 		}
 	}
 
+	/**
+	 * Executes ListGrid new-row interaction and pushes an edit context for the row document.
+	 *
+	 * @param nu the list-grid-new step to execute
+	 */
 	@Override
 	public void executeListGridNew(ListGridNew nu) {
 		listGridGesture(nu, null);
@@ -608,6 +826,11 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 		push.execute(this);
 	}
 
+	/**
+	 * Executes ListGrid zoom interaction and pushes an edit context for the row document.
+	 *
+	 * @param zoom the list-grid-zoom step to execute
+	 */
 	@Override
 	public void executeListGridZoom(ListGridZoom zoom) {
 		listGridGesture(zoom, zoom.getRow());
@@ -616,11 +839,22 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 		push.execute(this);
 	}
 
+	/**
+	 * Executes ListGrid row-select interaction.
+	 *
+	 * @param select the list-grid-select step to execute
+	 */
 	@Override
 	public void executeListGridSelect(ListGridSelect select) {
 		listGridGesture(select, select.getRow());
 	}
 
+	/**
+	 * Emits ListGrid gesture script for new/zoom/select interactions.
+	 *
+	 * @param step the originating list-grid step
+	 * @param row optional row index for row-scoped interactions
+	 */
 	private void listGridGesture(Step step, Integer row) {
 		PrimeFacesAutomationContext context = peek();
 		String buttonIdentifier = step.getIdentifier(context);
@@ -669,6 +903,15 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 		}
 	}
 	
+	/**
+	 * Resolves and builds a push-edit context target for list-grid interactions.
+	 *
+	 * @param queryName optional query name driving the list-grid
+	 * @param documentName optional document name driving the list-grid
+	 * @param modelName optional model name driving the list-grid
+	 * @param step the originating list-grid step
+	 * @return a populated push-edit context for the target document
+	 */
 	private PushEditContext listGridContext(String queryName, String documentName, String modelName, Step step) {
 		PushEditContext result = new PushEditContext();
 
@@ -718,11 +961,21 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 		return result;
 	}
 
+	/**
+	 * Placeholder for value assertion support in inline WebDriver execution.
+	 *
+	 * @param test the value-assertion step being ignored until implemented
+	 */
 	@Override
 	public void executeTestValue(TestValue test) {
 		// TODO Auto-generated method stub
 	}
 	
+	/**
+	 * Emits success assertions or verifications based on the configured test strategy.
+	 *
+	 * @param test the success-assertion step to execute
+	 */
 	@Override
 	public void executeTestSuccess(TestSuccess test) {
 		TestStrategy strategy = getTestStrategy();
@@ -739,6 +992,11 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 		}
 	}
 	
+	/**
+	 * Emits failure assertions or verifications based on the configured test strategy.
+	 *
+	 * @param test the failure-assertion step to execute
+	 */
 	@Override
 	public void executeTestFailure(TestFailure test) {
 		TestStrategy strategy = getTestStrategy();
@@ -765,6 +1023,11 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 		}
 	}
 	
+	/**
+	 * Emits a script-level GET navigation call for the supplied URL fragment.
+	 *
+	 * @param url the URL fragment to navigate to
+	 */
 	private void get(String url) {
 		indent().append("get(\"").append(url).append("\");").newline();
 	}

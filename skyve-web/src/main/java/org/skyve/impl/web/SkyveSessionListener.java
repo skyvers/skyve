@@ -23,11 +23,12 @@ import jakarta.servlet.http.HttpSessionListener;
  * @author mike
  */
 public class SkyveSessionListener implements HttpSessionListener {
-
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SkyveSessionListener.class);
 
 	/**
 	 * Increment the session count
+	 *
+	 * @param se the session event for the created session
 	 */
 	@Override
 	public void sessionCreated(HttpSessionEvent se) {
@@ -38,6 +39,8 @@ public class SkyveSessionListener implements HttpSessionListener {
 	 * Decrement the session count, 
 	 * and if a logged in user exists, notify the customer that they have logged out,
 	 * and remove the session repository if it exists.
+	 *
+	 * @param se the session event for the destroyed session
 	 */
 	@Override
 	public void sessionDestroyed(HttpSessionEvent se) {

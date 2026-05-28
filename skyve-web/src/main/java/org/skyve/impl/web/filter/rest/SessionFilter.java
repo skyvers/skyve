@@ -20,9 +20,17 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 public class SessionFilter extends AbstractRestFilter {
-
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SessionFilter.class);
 
+	/**
+	 * Validates session-backed REST access and establishes the persistence user context for the request.
+	 *
+	 * @param request inbound servlet request
+	 * @param response outbound servlet response
+	 * @param chain downstream filter chain
+	 * @throws IOException when the response cannot be written
+	 * @throws ServletException when downstream servlet processing fails
+	 */
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 	throws IOException, ServletException {

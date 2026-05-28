@@ -14,6 +14,9 @@ import org.skyve.util.logging.SkyveLoggerFactory;
 import jakarta.faces.context.FacesContext;
 import jakarta.servlet.http.HttpServletRequest;
 
+/**
+ * Executes a Faces callback action within the current Skyve web context.
+ */
 public class PreRenderColdHitAction extends FacesAction<Void> {
 
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(PreRenderColdHitAction.class);

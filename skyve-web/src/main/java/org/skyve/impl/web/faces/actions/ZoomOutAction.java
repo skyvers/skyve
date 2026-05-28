@@ -27,15 +27,26 @@ import org.slf4j.Logger;
  * Strip the last term off the view binding
  */
 public class ZoomOutAction extends FacesAction<Void> {
-
     private static final Logger FACES_LOGGER = Category.FACES.logger();
     private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
 
 	private FacesView facesView;
+	
+	/**
+	 * Creates an action that zooms out from the current nested view context.
+	 *
+	 * @param facesView the current Faces view context
+	 */
 	public ZoomOutAction(FacesView facesView) {
 		this.facesView = facesView;
 	}
 	
+	/**
+	 * Validates the current nested bean, runs zoom-out pre-execute hooks, and returns to the owning view.
+	 *
+	 * @return always {@code null} because this action mutates view and model state only
+	 * @throws Exception if validation, bizlet hooks, binding updates, or redirect handling fails
+	 */
 	@Override
 	public Void callback() throws Exception {
 		Deque<String> zoomInBindings = facesView.getZoomInBindings();
@@ -94,6 +105,13 @@ public class ZoomOutAction extends FacesAction<Void> {
 		return null;
 	}
 	
+	/**
+	 * Repositions the faces view one level higher in the zoom-in binding stack and redirects the conversation.
+	 *
+	 * @param facesView the active faces view
+	 * @param internalCustomer the resolved internal customer used for metadata lookup
+	 * @throws Exception if target bean resolution or redirect handling fails
+	 */
 	static void zoomOut(FacesView facesView, CustomerImpl internalCustomer) throws Exception {
 		String viewBinding = facesView.getViewBinding();
 		Deque<String> zoomInBindings = facesView.getZoomInBindings();
@@ -118,15 +136,15 @@ public class ZoomOutAction extends FacesAction<Void> {
     			// otherwise remove the view binding altogether as we are at the outer-most level.
     		}
     		else { // there is a zoom in binding, remove the binding
-    			if (viewBinding.endsWith(zoomInBinding)) {
+	    		if (viewBinding.endsWith(zoomInBinding) && 
+						(viewBinding.length() > zoomInBinding.length())) {
     				// if we have some view binding left, there must be a dot between, we need to remove the dot too,
     				// so take an extra char away
-    				if (viewBinding.length() > zoomInBinding.length()) {
-    					newViewBinding = viewBinding.substring(0, viewBinding.length() - zoomInBinding.length() - 1);
-    				}
-    				// else zoom in binding and view bindings are the same length, so leave the new view binding null
+	    			newViewBinding = viewBinding.substring(0, viewBinding.length() - zoomInBinding.length() - 1);
     			}
-    			// otherwise leave the new view binding null as we are at the outer-most level.
+    			// otherwise leave the new view binding null as 
+				// 1. we are at the outer-most level.
+    			// 2. zoom in binding and view bindings are the same length
     		}
     	}
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("zoomOut - newViewBinding = {}", newViewBinding);

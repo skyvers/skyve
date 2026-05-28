@@ -69,6 +69,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
+/**
+ * Provides utility methods shared by Skyve web rendering and request handling paths.
+ */
 public class WebUtil {
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(WebUtil.class);
 	private static final String CONCURRENT_SESSION_EVENT_TYPE = "Concurrent Session";
@@ -77,6 +80,14 @@ public class WebUtil {
 		// Disallow instantiation.
 	}
 	
+	/**
+	 * Resolves and binds the active user for a request from session, principal, or basic-auth fallback.
+	 *
+	 * @param request active HTTP request
+	 * @param userPrincipal optional authenticated principal name
+	 * @return resolved user, or {@code null} when no authenticated user is available
+	 * @throws Exception when session restoration or user resolution fails
+	 */
 	public static User processUserPrincipalForRequest(@Nonnull HttpServletRequest request,
 														@Nullable String userPrincipal)
 	throws Exception {
@@ -161,6 +172,14 @@ public class WebUtil {
 		return user;
 	}
 	
+	/**
+	 * Resolves the conversation bean targeted by the request binding and optional row identifier.
+	 *
+	 * @param webContext current web context, or {@code null}
+	 * @param request active HTTP request
+	 * @return resolved bean for the request context, or {@code null}
+	 * @throws Exception when binding resolution fails
+	 */
 	public static @Nullable Bean getConversationBeanFromRequest(@Nullable AbstractWebContext webContext,
 																	@Nonnull HttpServletRequest request)
 	throws Exception {
@@ -191,6 +210,13 @@ public class WebUtil {
         return result;
 	}
 	
+	/**
+	 * Resolves customer context without requiring an authenticated session.
+	 * Preference order is configured customer first, then sanitized customer cookie.
+	 *
+	 * @param request active HTTP request
+	 * @return resolved customer name, or {@code null} when none can be determined
+	 */
 	@SuppressWarnings("javasecurity:S5146") // false positive: the customer name is not user controlled as it is either set by configuration or from a cookie that is protected against tampering by OWASP sanitisation
 	public static @Nullable String determineCustomerWithoutSession(@Nonnull HttpServletRequest request) {
 		String result = UtilImpl.CUSTOMER;
@@ -212,8 +238,14 @@ public class WebUtil {
 		return result;
 	}
 	
-	/**]
-	 * Set the session ID if it is established.
+	/**
+	 * Copies the current HTTP session identifier onto the supplied user when a session already exists.
+	 *
+	 * <p>Side effects: mutates {@code user} by updating its stored session identifier. This method does not
+	 * create a new servlet session.
+	 *
+	 * @param user user to update
+	 * @param request active HTTP request
 	 */
 	public static void setSessionId(@Nonnull UserImpl user, @Nonnull HttpServletRequest request) {
 		HttpSession session = request.getSession(false);
@@ -278,6 +310,12 @@ public class WebUtil {
 		return concurrentSessionWarningsEnabled && (! sessionAlreadyRegistered) && hasOtherSession && eligibleForWarning;
 	}
 
+	/**
+	 * Builds a human-readable concurrent-session warning message.
+	 *
+	 * @param existingSessionCount number of existing sessions before adding the current one
+	 * @return warning message text
+	 */
 	static @Nonnull String buildConcurrentSessionWarningMessage(int existingSessionCount) {
 		return "User logged in while another active session already existed. Existing session count: " + existingSessionCount + '.';
 	}
@@ -294,12 +332,27 @@ public class WebUtil {
 		return isConcurrentSessionWarningEligible(user, request.getUserPrincipal(), ProvidedRepositoryFactory.get());
 	}
 
+	/**
+	 * Determines whether a session is eligible for concurrent-session warning auditing.
+	 *
+	 * @param user current user
+	 * @param principal authenticated request principal, or {@code null}
+	 * @param repository repository used to resolve customer public-user identity
+	 * @return {@code true} when warnings are eligible for this user/principal combination
+	 */
 	static boolean isConcurrentSessionWarningEligible(@Nonnull User user,
 														@Nullable Principal principal,
 														@Nonnull ProvidedRepository repository) {
 		return (principal != null) && (! isPublicUser(user, repository));
 	}
 
+	/**
+	 * Determines whether the provided user is the configured public user for the customer.
+	 *
+	 * @param user current user
+	 * @param repository repository used to resolve public-user name
+	 * @return {@code true} when the user matches the customer's public-user account
+	 */
 	static boolean isPublicUser(@Nonnull User user, @Nonnull ProvidedRepository repository) {
 		String customerName = user.getCustomerName();
 		if (customerName == null) {
@@ -314,6 +367,10 @@ public class WebUtil {
 	 * Delete all cookies (except the customer cookie which could be useful next time) or selected cookies by name.
 	 * If names varargs isn't used all cookies bar the customer cookie are deleted.
 	 * If names varargs is used, only those cookies are deleted.
+	 *
+	 * @param request active HTTP request
+	 * @param response active HTTP response
+	 * @param names optional explicit cookie names to delete
 	 */
 	public static void deleteCookies(@Nonnull HttpServletRequest request,
 										@Nonnull HttpServletResponse response,
@@ -352,6 +409,9 @@ public class WebUtil {
 	
 	/**
 	 * Delete the menu state cookies for all PF themes.
+	 *
+	 * @param request active HTTP request
+	 * @param response active HTTP response
 	 */
 	public static void deleteMenuCookies(@Nonnull HttpServletRequest request,
 											@Nonnull HttpServletResponse response) {
@@ -363,6 +423,10 @@ public class WebUtil {
 	
 	/**
 	 * Really logout of the app - logout, invalidate session and remove all cookies.
+	 *
+	 * @param request active HTTP request
+	 * @param response active HTTP response
+	 * @throws ServletException when container logout fails
 	 */
 	public static void logout(@Nonnull HttpServletRequest request,
 								@Nonnull HttpServletResponse response) 
@@ -379,12 +443,18 @@ public class WebUtil {
 	}
 	
 	/**
-	 * Called from the changePassword.jsp.
-	 * 
-	 * @param user
-	 * @param newPassword
-	 * @return
-	 * @throws Exception
+	 * Executes the change-password server-side action for the supplied user.
+	 *
+	 * <p>The action is run inside a fresh persistence transaction because this helper is called directly from
+	 * the JSP flow rather than from a fully prepared web action context.
+	 *
+	 * @return the first validation error message when the password change is rejected, or {@code null} when
+	 * the password change succeeds
+	 * @param user target user
+	 * @param oldPassword existing password, or {@code null}
+	 * @param newPassword new password value
+	 * @param confirmPassword confirmation password value
+	 * @throws Exception when the underlying server-side action fails unexpectedly
 	 */
 	public static @Nullable String makePasswordChange(@Nonnull User user,
 														@Nullable String oldPassword,
@@ -428,9 +498,15 @@ public class WebUtil {
 	}
 	
 	/**
-	 * Called from the requestPasswordReset.jsp.
-	 * 
-	 * @param userName
+	 * Issues password-reset tokens for all users matching the supplied customer/email pair and sends one reset email.
+	 *
+	 * <p>Side effects: writes reset-token state to matching security-user records, may record GeoIP security
+	 * events for blocked submissions, and sends a single outbound email when at least one eligible user exists.
+	 * The method is intentionally silent when no user matches the email address.
+	 *
+	 * @param customer customer name
+	 * @param email target email address
+	 * @throws Exception when token generation, persistence, or mail delivery fails unexpectedly
 	 */
 	public static void requestPasswordReset(@Nonnull String customer, @Nonnull String email)
 	throws Exception {
@@ -517,12 +593,29 @@ public class WebUtil {
 		}
 	}
 
+	/**
+	 * Generates a password-reset token string combining random UUID and current timestamp.
+	 *
+	 * @return generated reset token
+	 */
 	public static @Nonnull String generatePasswordResetToken() {
 		return UUID.randomUUID().toString() + Long.toString(System.currentTimeMillis());
 	}
 
 	/**
-	 * /download?_n=<action>&_doc=<module.document>&_c=<webId>&_ctim=<millis> and optionally &_b=<view binding>
+	 * Builds a download-action URL for the supplied target document and optional binding context.
+	 *
+	 * <p>The generated URL includes the download action name, target module/document, web context identifier,
+	 * an optional compound binding, optional element bizId for data-widget rows, and a cache-busting timestamp.
+	 *
+	 * @param downloadActionName download action name
+	 * @param targetModuleName target module name
+	 * @param targetDocumentName target document name
+	 * @param webId web context id
+	 * @param viewBinding optional view binding
+	 * @param dataWidgetBinding optional data-widget binding
+	 * @param elementBizId optional element business id
+	 * @return generated download URL
 	 */
 	public static @Nonnull String getDownloadActionUrl(@Nonnull String downloadActionName,
 														@Nonnull String targetModuleName,
@@ -563,10 +656,18 @@ public class WebUtil {
 	}
 	
 	/**
-	 * Called from the resetPassword.jsp.
-	 * 
-	 * @param passwordResetToken
-	 * @param newPassword
+	 * Validates a password-reset token and, when still valid, delegates to the password-change workflow.
+	 *
+	 * <p>The token is resolved directly from the datastore so the method can enforce token expiry without
+	 * leaking whether a specific credential exists. Invalid or expired tokens return a localized user-facing
+	 * error message instead of throwing.
+	 *
+	 * @param passwordResetToken password reset token
+	 * @param newPassword new password value
+	 * @param confirmPassword confirmation password value
+	 * @return a localized validation or expiry message when the reset cannot be completed, or {@code null}
+	 * when the password reset succeeds
+	 * @throws Exception when persistence or password-change execution fails unexpectedly
 	 */
 	public static @Nullable String resetPassword(@Nonnull String passwordResetToken,
 													@Nonnull String newPassword,
@@ -641,6 +742,18 @@ public class WebUtil {
 		return errorMsg;
 	}
 	
+	/**
+	 * Resolves an existing referenced bean via bizlet resolution and fallback persistence retrieval.
+	 *
+	 * @param referenceDocument referenced document metadata
+	 * @param bizId business id of the referenced bean
+	 * @param persistence active persistence context
+	 * @param conversationBean current conversation bean
+	 * @param webContext current web context
+	 * @return resolved referenced bean
+	 * @throws NoResultsException when no referenced bean can be resolved
+	 * @throws SecurityException when the current user cannot read the resolved bean
+	 */
 	// find the existing bean with retrieve
 	public static @Nonnull Bean findReferencedBean(@Nonnull Document referenceDocument, 
 													@Nonnull String bizId, 
@@ -688,6 +801,12 @@ public class WebUtil {
 		return result;
 	}
 	
+	/**
+	 * Returns a sanitized same-origin Referer header value, or {@code null} when absent/invalid.
+	 *
+	 * @param request active HTTP request
+	 * @return sanitized referer header value, or {@code null}
+	 */
 	@SuppressWarnings("javasecurity:S5131") // OWASP sanitisation is applied to the referer header value before it is used, so this is not a reflected XSS vulnerability
 	public static @Nullable String getRefererHeader(@Nonnull HttpServletRequest request) {
 		String result = Util.processStringValue(request.getHeader("referer"));
@@ -708,8 +827,8 @@ public class WebUtil {
 	/**
 	 * Sends a registration email with an activation code to the specified email address.
 	 * 
-	 * @param userBizId The email address to send the email to
-	 * @throws Exception
+	 * @param userBizId business id of the self-registration user record
+	 * @throws Exception when registration email dispatch fails unexpectedly
 	 */
 	public static void sendRegistrationEmail(final @Nonnull String userBizId) throws Exception {
 		Customer cust = CORE.getCustomer();
@@ -734,9 +853,14 @@ public class WebUtil {
 	}
 
 	/**
-	 * Validate the recaptcha response with google.
-	 * @param response	The response from the recaptcha control.
-	 * @return true if valid, otherwise false.
+	 * Validates a Google reCAPTCHA or Cloudflare Turnstile response against the configured verification endpoint.
+	 *
+	 * <p>When no secret key is configured, the method returns the default configured behavior for the active
+	 * provider path. When a secret key is configured, a missing or rejected client response evaluates to
+	 * {@code false}.
+	 *
+	 * @param response the client verification token submitted by the captcha control
+	 * @return {@code true} when the remote verification service reports success, otherwise {@code false}
 	 */
 	public static boolean validateRecaptcha(@Nullable String response) {
 		boolean valid = true;

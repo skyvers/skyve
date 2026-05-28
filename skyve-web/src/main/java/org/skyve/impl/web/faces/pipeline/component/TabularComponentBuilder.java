@@ -1823,7 +1823,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		else {
 			AttributeType type = columnAttribute.getAttributeType();
 			if (AttributeType.bool.equals(type)) {
-				TriStateCheckbox cb = (TriStateCheckbox) checkbox(null, null, null, null, null, null, true);
+				TriStateCheckbox cb = (TriStateCheckbox) checkBoxInput(null, null, null, null, null, null, true);
 				cb.setOnchange(String.format("PF('%s').filter()", tableVar));
 				result = cb;
 			}
@@ -2147,7 +2147,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			return component;
 		}
 
-		UIInput result = checkbox(dataWidgetVar,
+		UIInput result = checkBoxInput(dataWidgetVar,
 									checkBox.getBinding(),
 									title,
 									requiredMessage,
@@ -4264,7 +4264,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 	// TODO do the grids
 
-	protected UIInput checkbox(String dataWidgetVar,
+	protected UIInput checkBoxInput(String dataWidgetVar,
 								String binding,
 								String title,
 								@Nullable String requiredMessage,

@@ -42,6 +42,9 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
 
+/**
+ * Models a view interaction and binds it to the active Skyve web context.
+ */
 @RequestScoped
 @Named("_skyveBizImport")
 public class BizportImportView extends AbstractUploadView {
@@ -52,10 +55,16 @@ public class BizportImportView extends AbstractUploadView {
 	@SuppressWarnings("java:S6813") // allow member injection
 	private String action;
 
+	/**
+	 * Creates the request-scoped BizPort import view with framework import upload limits.
+	 */
 	public BizportImportView() {
 		super(UtilImpl.UPLOADS_BIZPORT_WHITELIST_REGEX, UtilImpl.UPLOADS_BIZPORT_MAXIMUM_SIZE_IN_MB);
 	}
 
+	/**
+	 * Initialises request parameters and upload-view state after dependency injection.
+	 */
 	@Override
 	@PostConstruct
 	public void postConstruct() {
@@ -63,6 +72,11 @@ public class BizportImportView extends AbstractUploadView {
 		action = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(action));
 	}
 	
+	/**
+	 * Restores cached import conversation state before the page is rendered.
+	 *
+	 * @throws Exception when conversation initialisation fails
+	 */
 	public void preRender() {
 		new FacesAction<Void>() {
 			@Override
@@ -73,22 +87,38 @@ public class BizportImportView extends AbstractUploadView {
 		}.execute();
 	}
 
+	/**
+	 * Returns the import action name requested in the page URL.
+	 *
+	 * @return import action name
+	 */
 	public String getAction() {
 		return action;
 	}
 
+	/**
+	 * Problems accumulated while processing the uploaded workbook.
+	 */
 	private List<Problem> problems = new ArrayList<>();
 
+	/**
+	 * Returns import problems accumulated during processing.
+	 *
+	 * @return mutable list of import problems
+	 */
 	public List<Problem> getProblems() {
 		return problems;
 	}
 
 	/**
-	 * Process the file upload
-	 * This method does not use FacesAction because it should show errors/growls under all circumstances
-	 * since the upload pages are embedded in iframes.
-	 * 
-	 * @param event
+	 * Processes an uploaded BizPort workbook and executes the configured import action.
+	 *
+	 * <p>This method intentionally does not use {@link FacesAction} so user-facing growl messages
+	 * are always available, including iframe-hosted upload pages.
+	 *
+	 * @param event PrimeFaces upload event containing the uploaded file
+	 * @throws Exception when unexpected import processing failures occur before they are converted
+	 *         to user-facing messages
 	 */
 	public void handleFileUpload(FileUploadEvent event) throws Exception {
 		FacesContext fc = FacesContext.getCurrentInstance();

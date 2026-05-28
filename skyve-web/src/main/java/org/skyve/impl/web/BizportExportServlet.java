@@ -28,10 +28,23 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+/**
+ * Handles HTTP requests for this Skyve web endpoint.
+ */
 public class BizportExportServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(BizportExportServlet.class);
 
+	/**
+	 * Executes a BizPort export action for the current conversation and streams the resulting workbook.
+	 *
+	 * <p>This method restores the cached conversation, binds its persistence context to the current thread,
+	 * resolves the authenticated user, checks export-action permissions, executes pre/post interception hooks,
+	 * serializes the generated workbook, and writes the appropriate attachment response headers.
+	 *
+	 * <p>Side effects: mutates servlet response headers, may recache the conversation after successful export,
+	 * and writes a minimal HTML error response if export generation fails unexpectedly.
+	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
 	public void doGet(HttpServletRequest request, HttpServletResponse response)

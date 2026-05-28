@@ -18,6 +18,9 @@ import org.skyve.impl.web.faces.pipeline.layout.ResponsiveLayoutBuilder;
 import org.skyve.metadata.sail.language.Automation;
 import org.skyve.persistence.DataStore;
 
+/**
+ * Implements internal web-module behavior for this Skyve runtime concern.
+ */
 public class Interpreter {
 	protected static final String USER = "TestUser";
 	protected static final String CUSTOMER = "bizhub";
@@ -29,6 +32,12 @@ public class Interpreter {
 	private static final String DB_PWD = "password";
 	private static final String CONTENT_DIRECTORY = "content/";
 
+	/**
+	 * Runs a standalone SAIL interpretation workflow against the configured local metadata repository.
+	 *
+	 * @param args ignored command-line arguments
+	 * @throws Exception if repository/bootstrap/execution setup fails
+	 */
 	@SuppressWarnings("resource")
 	public static void main(String[] args) throws Exception {
 		AbstractPersistence.IMPLEMENTATION_CLASS = HibernateContentPersistence.class;

@@ -31,8 +31,10 @@ import org.skyve.util.monitoring.Monitoring;
 import org.skyve.util.monitoring.RequestKey;
 import org.slf4j.Logger;
 
+/**
+ * Executes a Faces callback action within the current Skyve web context.
+ */
 public class CompleteAction extends FacesAction<List<String>> {
-
     private static final Logger FACES_LOGGER = Category.FACES.logger();
     private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
 
@@ -41,6 +43,14 @@ public class CompleteAction extends FacesAction<List<String>> {
 	private String binding;
 	private CompleteType complete;
 	
+	/**
+	 * Creates a completion action for the specified query fragment and binding.
+	 *
+	 * @param facesView the active Faces view state
+	 * @param query the user-entered completion query text
+	 * @param binding the target binding to complete against
+	 * @param complete the completion strategy to execute
+	 */
 	public CompleteAction(FacesView facesView,
 							String query,
 							String binding,
@@ -51,6 +61,12 @@ public class CompleteAction extends FacesAction<List<String>> {
 		this.complete = complete;
 	}
 
+	/**
+	 * Executes completion for the configured binding using either previous values or bizlet completion logic.
+	 *
+	 * @return completion candidates suitable for UI suggestion rendering
+	 * @throws Exception when completion processing fails unexpectedly
+	 */
 	@Override
 	public List<String> callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("CompleteAction - EXECUTE complete {} for binding {}", query, binding);

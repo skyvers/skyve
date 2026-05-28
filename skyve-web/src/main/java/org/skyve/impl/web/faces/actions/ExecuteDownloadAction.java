@@ -32,6 +32,14 @@ public class ExecuteDownloadAction extends FacesAction<Void> {
 	private String dataWidgetBinding;
 	private String elementBizId;
 	
+	/**
+	 * Creates an action that prepares and triggers a document download.
+	 *
+	 * @param facesView the current Faces view context
+	 * @param actionName the metadata action name
+	 * @param dataWidgetBinding the optional binding for inline list actions
+	 * @param elementBizId the optional selected element business ID
+	 */
 	public ExecuteDownloadAction(FacesView facesView,
 									String actionName,
 									String dataWidgetBinding,
@@ -57,14 +65,17 @@ public class ExecuteDownloadAction extends FacesAction<Void> {
 											targetBean.isCreated() ? ViewType.edit.toString() : ViewType.create.toString());
     	Action action = view.getAction(actionName);
     	Boolean clientValidation = action.getClientValidation();
-		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("ExecuteActionAction - client validation = {}", (! Boolean.FALSE.equals(clientValidation)));
-    	String resourceName = action.getResourceName();
+		boolean clientValidationEnabled = ! Boolean.FALSE.equals(clientValidation);
+		if (UtilImpl.FACES_TRACE) {
+			FACES_LOGGER.info("ExecuteActionAction - client validation = {}", Boolean.valueOf(clientValidationEnabled));
+		}
+	    String resourceName = action.getResourceName();
     	
 		if (! user.canExecuteAction(targetDocument, resourceName)) {
 			throw new SecurityException(resourceName, user.getName());
 		}
 
-		if (Boolean.FALSE.equals(clientValidation) || FacesAction.validateRequiredFields()) {
+		if (! clientValidationEnabled || FacesAction.validateRequiredFields()) {
 			WebContext webContext = facesView.getWebContext();
 
 			DownloadAction<Bean> downloadAction = targetDocument.getDownloadAction(customer, resourceName, true);

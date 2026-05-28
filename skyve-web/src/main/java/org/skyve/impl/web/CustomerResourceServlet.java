@@ -133,6 +133,7 @@ public class CustomerResourceServlet extends AbstractResourceServlet {
 	 * @param request the current HTTP request
 	 * @param params  parsed request parameters carrying the resource file name,
 	 *                customer/module context, and optional image dimensions
+	 *                (thumbnail dimensions are honoured when both are positive)
 	 * @return a {@link FileResource} (possibly with no backing file if not found)
 	 * @throws Exception if repository access fails
 	 */

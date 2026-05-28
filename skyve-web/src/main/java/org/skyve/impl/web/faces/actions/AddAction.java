@@ -30,19 +30,25 @@ import org.slf4j.Logger;
  * The onAddedHandlers event actions is not implemented since the grid cannot be inlined.
  */
 public class AddAction extends FacesAction<Void> {
-    
     private static Logger FACES_LOGGER = Category.FACES.logger();
     private static Logger BIZLET_LOGGER = Category.BIZLET.logger();
     
 	private FacesView facesView;
 	private String dataWidgetBinding;
 	private boolean inline;
+
+	/**
+	 * Creates an add action for the given collection binding.
+	 */
 	public AddAction(FacesView facesView, String dataWidgetBinding, boolean inline) {
 		this.facesView = facesView;
 		this.dataWidgetBinding = dataWidgetBinding;
 		this.inline = inline;
 	}
 
+	/**
+	 * Creates and inserts a new collection element, then optionally zooms into the new element view.
+	 */
 	@Override
 	public Void callback() throws Exception {
 		String viewBinding = facesView.getViewBinding();

@@ -37,6 +37,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import net.coobird.thumbnailator.Thumbnails;
 import net.coobird.thumbnailator.Thumbnails.Builder;
 
+/**
+ * Serves Skyve dynamic images.
+ */
 public class DynamicImageServlet extends HttpServlet {
 	private static final long serialVersionUID = 5180477867432555312L;
 	
@@ -48,6 +51,17 @@ public class DynamicImageServlet extends HttpServlet {
 	public static final String IMAGE_WIDTH_ZOOM_NAME = "_wz";
 	public static final String IMAGE_HEIGHT_ZOOM_NAME = "_hz";
 
+	/**
+	 * Generates a dynamic image for the current conversation bean and streams the rendered thumbnail response.
+	 *
+	 * <p>This method sanitises request parameters, restores the cached conversation and authenticated user,
+	 * validates dynamic-image access, delegates image generation to document metadata, configures cache
+	 * headers, and falls back to a one-pixel blank image if generation fails.
+	 *
+	 * <p>Side effects: binds the conversation persistence context to the current thread, mutates response
+	 * headers, writes image bytes to the response stream, logs failures without surfacing them to the client,
+	 * and records dynamic-image monitoring metrics when the target image metadata is known.
+	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
 	public void doGet(HttpServletRequest request, HttpServletResponse response)

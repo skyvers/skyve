@@ -189,7 +189,8 @@ public class ContentServlet extends AbstractResourceServlet {
 	 * @param user             the authenticated user, or {@code null} if not logged in
 	 * @param uxui             the UX/UI name for access checking
 	 * @throws SecurityException if the user is not authorised to access the content
-	 */	@Override
+	 */
+	@Override
 	protected void secureResource(Resource resource,
 									String moduleName,
 									String documentName,

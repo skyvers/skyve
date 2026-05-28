@@ -38,17 +38,31 @@ import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 import jakarta.servlet.http.HttpServletRequest;
 
+/**
+ * Executes a Faces callback action within the current Skyve web context.
+ */
 public class EditAction extends FacesAction<Void> {
-
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(EditAction.class);
     private static final Logger FACES_LOGGER = Category.FACES.logger();
     private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
 
 	private FacesView facesView = null;
+
+	/**
+	 * Creates an edit action bound to the supplied Faces view state.
+	 *
+	 * @param facesView the target Faces view model
+	 */
 	public EditAction(FacesView facesView) {
 		this.facesView = facesView;
 	}
 
+	/**
+	 * Initializes edit/create view state by restoring or creating context beans and applying pre-execute hooks.
+	 *
+	 * @return {@code null}; the action updates {@code facesView} and conversation state by side effect
+	 * @throws Exception when edit initialization fails
+	 */
 	@Override
 	public Void callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("EditAction");

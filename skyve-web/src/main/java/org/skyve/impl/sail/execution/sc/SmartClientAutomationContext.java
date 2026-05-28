@@ -29,6 +29,11 @@ public class SmartClientAutomationContext extends AutomationContext<SmartClientG
 	
 	private Map<String, List<Locator>> locators = new TreeMap<>();
 
+	/**
+	 * Generates list-view locators for the supplied SmartClient list context.
+	 *
+	 * @param listContext the list generation context
+	 */
 	@Override
 	public void generate(SmartClientGenerateListContext listContext) {
 		PushListContext push = listContext.pushListContext();
@@ -49,6 +54,11 @@ public class SmartClientAutomationContext extends AutomationContext<SmartClientG
 				"//VLayout[ID=\"details\"]/member[Class=VLayout||classIndex=0]/member[Class=BizListGrid||classIndex=0]/member[Class=ListGrid||classIndex=0]/body/row[%%d]"));
 	}
 
+	/**
+	 * Generates edit-view locators for the supplied SmartClient edit context.
+	 *
+	 * @param editContext the edit generation context
+	 */
 	@Override
 	public void generate(SmartClientGenerateEditContext editContext) {
 		PushEditContext push = editContext.pushEditContext();
@@ -87,13 +97,7 @@ public class SmartClientAutomationContext extends AutomationContext<SmartClientG
 	 * @param locator the locator to associate with the identifier
 	 */
 	void put(String identifier, Locator locator) {
-		List<Locator> locatorList = locators.get(identifier);
-
-		if (locatorList == null) {
-			locatorList = new ArrayList<>();
-			locators.put(identifier, locatorList);
-		}
-
+		List<Locator> locatorList = locators.computeIfAbsent(identifier, key -> new ArrayList<>());
 		locatorList.add(locator);
 	}
 	

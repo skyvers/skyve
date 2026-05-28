@@ -74,6 +74,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
+/**
+ * Handles HTTP requests for this Skyve web endpoint.
+ */
 public class SmartClientEditServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
@@ -82,6 +85,9 @@ public class SmartClientEditServlet extends HttpServlet {
 
 	private static Class<? extends SmartClientViewRenderer> MANIPULATOR_CLASS = null;
 	
+	/**
+	 * Initializes the servlet and resolves an optional custom SmartClient view renderer implementation.
+	 */
 	@Override
 	@SuppressWarnings("unchecked")
 	public void init(ServletConfig config) throws ServletException {
@@ -98,6 +104,20 @@ public class SmartClientEditServlet extends HttpServlet {
 		}
 	}
 	
+	/**
+	 * Creates a JSON manipulator for SmartClient view rendering/apply operations.
+	 *
+	 * @param user active user
+	 * @param module module containing the document
+	 * @param document document metadata
+	 * @param view view metadata
+	 * @param uxui active UX/UI profile name
+	 * @param bean bean bound to the view
+	 * @param editIdCounter base edit-id counter for generated component ids
+	 * @param createIdCounter base create-id counter for generated component ids
+	 * @param forApply whether the manipulator is for apply processing
+	 * @return configured JSON manipulator
+	 */
 	private static ViewJSONManipulator newManipulator(User user,
 														Module module, 
 														Document document, 
@@ -119,6 +139,9 @@ public class SmartClientEditServlet extends HttpServlet {
 		}
 	}
 	
+	/**
+	 * Handles SmartClient edit GET requests by delegating to the shared request processor.
+	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) 
@@ -127,6 +150,9 @@ public class SmartClientEditServlet extends HttpServlet {
 		processRequest(request, response);
 	}
 	
+	/**
+	 * Handles SmartClient edit POST requests by delegating to the shared request processor.
+	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
@@ -136,6 +162,13 @@ public class SmartClientEditServlet extends HttpServlet {
 	}
 	
 	// NB - Never throw ServletException as this will halt the SmartClient Relogin flow.
+	/**
+	 * Processes SmartClient edit requests and writes a JSON response.
+	 *
+	 * @param request inbound HTTP request
+	 * @param response outbound HTTP response
+	 * @throws IOException when writing the response fails
+	 */
 	private static void processRequest(HttpServletRequest request, HttpServletResponse response) 
 	throws IOException {
 		response.setContentType(MimeType.json.toString());
@@ -473,6 +506,13 @@ public class SmartClientEditServlet extends HttpServlet {
     	pw.append("}}");
 	}
 	
+	/**
+	 * Appends a formatted HTML list of messages to the response payload.
+	 *
+	 * @param synopsis leading summary text
+	 * @param ms messages to render
+	 * @param pw response writer
+	 */
 	static void appendErrorText(String synopsis, List<Message> ms, PrintWriter pw) {
     	pw.append(synopsis).append("<br/><ul>");
     	for (Message m : ms) {
@@ -484,10 +524,11 @@ public class SmartClientEditServlet extends HttpServlet {
 	}
 
     /**
-     * 
-     * @param e
-     * @param sb
-     * @return if there are any keys in the message
+	 * Appends validation errors keyed by sanitised bindings.
+	 *
+	 * @param ms validation messages to inspect
+	 * @param sb JSON fragment builder receiving errors
+	 * @return {@code true} when at least one bound validation error exists
      */
     private static boolean pumpOutValidationErrors(List<Message> ms, StringBuilder sb) {
     	boolean result = false;
@@ -505,6 +546,27 @@ public class SmartClientEditServlet extends HttpServlet {
     }
     
 
+	/**
+	 * Fetches and prepares bean/view state for SmartClient edit responses.
+	 *
+	 * @param webContext active web conversation context
+	 * @param user active user
+	 * @param customer active customer metadata
+	 * @param contextBean current conversation bean
+	 * @param processModule module for the requested operation
+	 * @param processDocument document for the requested operation
+	 * @param formBinding form binding path, or {@code null}
+	 * @param source rerender source id, or {@code null}
+	 * @param bizId target business id, or {@code null}
+	 * @param editIdCounter base edit-id counter for generated component ids
+	 * @param createIdCounter base create-id counter for generated component ids
+	 * @param action implicit action, or {@code null}
+	 * @param parameters request parameters map
+	 * @param persistence active persistence context
+	 * @param uxui active UX/UI profile name
+	 * @param pw response writer
+	 * @throws Exception when fetch processing fails
+	 */
 	private static void fetch(AbstractWebContext webContext,
 			                    User user,
 		    					Customer customer,
@@ -789,11 +851,12 @@ public class SmartClientEditServlet extends HttpServlet {
 		}
     }
     
-    /**
-     * Collect the request parameters filtering out system parameters unsanitising bindings and converting nulls etc
-     * @param request
-     * @return sorted map of parameters
-     */
+	/**
+	 * Collects request parameters, removing system keys and normalising values.
+	 *
+	 * @param request inbound HTTP request
+	 * @return sorted map of normalised parameters
+	 */
     public static SortedMap<String, Object> collectRequestParameters(HttpServletRequest request) {
     	SortedMap<String, Object> result = new TreeMap<>();
 		java.util.Enumeration<String> names = request.getParameterNames();
@@ -820,18 +883,19 @@ public class SmartClientEditServlet extends HttpServlet {
 		return result;
     }
 
-    /**
-     * Set the declared view parameters into its backing bean.
-     * @param customer
-     * @param user
-     * @param persistence
-     * @param processModule	The backing bean's module
-     * @param processDocument	The backing bean's document
-     * @param processBean	The backing bean
-     * @param parameters	The map of parameters to potentially apply
-     * @param uxui	Used to get the view
-     * @throws Exception
-     */
+	/**
+	 * Applies declared view parameters to a new backing bean instance.
+	 *
+	 * @param customer active customer metadata
+	 * @param user active user
+	 * @param persistence active persistence context
+	 * @param processModule backing bean module
+	 * @param processDocument backing bean document
+	 * @param processBean backing bean instance
+	 * @param parameters request parameters to apply
+	 * @param uxui UX/UI profile used to resolve the view
+	 * @throws Exception when parameter conversion or binding fails
+	 */
     public static void applyNewParameters(Customer customer, 
 	    									User user, 
 	    									AbstractPersistence persistence, 
@@ -910,6 +974,30 @@ public class SmartClientEditServlet extends HttpServlet {
 		}
     }
     
+	/**
+	 * Applies request changes and executes action/rerender/save flows.
+	 *
+	 * @param webContext active web conversation context
+	 * @param user active user
+	 * @param customer active customer metadata
+	 * @param formModule module of the form bean
+	 * @param formDocument document of the form bean
+	 * @param formBean form bean instance
+	 * @param processDocument document being processed
+	 * @param processBean bean being processed
+	 * @param formBinding response binding context
+	 * @param gridBinding grid binding context, or {@code null}
+	 * @param source rerender source id, or {@code null}
+	 * @param implicitAction implicit action, or {@code null}
+	 * @param customActionName custom action name, or {@code null}
+	 * @param editIdCounter base edit-id counter for generated component ids
+	 * @param createIdCounter base create-id counter for generated component ids
+	 * @param parameters request parameters map
+	 * @param persistence active persistence context
+	 * @param uxui active UX/UI profile name
+	 * @param pw response writer
+	 * @throws Exception when apply processing fails
+	 */
 	private static void apply(AbstractWebContext webContext,
 		                        User user,
 		    					Customer customer,
@@ -1124,6 +1212,24 @@ public class SmartClientEditServlet extends HttpServlet {
 		}
 	}
 
+	/**
+	 * Writes a successful SmartClient response payload for the current form state.
+	 *
+	 * @param webContext active web conversation context
+	 * @param user active user
+	 * @param internalCustomer internal customer metadata implementation
+	 * @param formModule form module
+	 * @param formDocument form document
+	 * @param formView form view metadata
+	 * @param uxui active UX/UI profile name
+	 * @param formBean form bean to render
+	 * @param formBizlet form bizlet, or {@code null}
+	 * @param editIdCounter base edit-id counter for generated component ids
+	 * @param createIdCounter base create-id counter for generated component ids
+	 * @param redirectUrl redirect URL for client follow-up, or {@code null}
+	 * @param pw response writer
+	 * @throws Exception when response rendering fails
+	 */
 	private static void pumpOutResponse(AbstractWebContext webContext,
 		                                    User user,
 		                                    CustomerImpl internalCustomer,
@@ -1172,6 +1278,19 @@ public class SmartClientEditServlet extends HttpServlet {
 		}
 	}
 	
+	/**
+	 * Removes a persistent bean and writes a successful delete response.
+	 *
+	 * @param webContext active web conversation context
+	 * @param user active user
+	 * @param customer active customer metadata
+	 * @param processDocument document from which the bean is deleted
+	 * @param beanToDelete bean requested for deletion
+	 * @param bizlet document bizlet, or {@code null}
+	 * @param persistence active persistence context
+	 * @param pw response writer
+	 * @throws Exception when delete processing fails
+	 */
 	private static void remove(AbstractWebContext webContext,
 								User user,
 		                        Customer customer,
@@ -1244,6 +1363,15 @@ public class SmartClientEditServlet extends HttpServlet {
 		}
 	}
 	
+	/**
+	 * Executes post-render interceptors and bizlet callbacks.
+	 *
+	 * @param internalCustomer internal customer metadata implementation
+	 * @param bizlet bizlet instance, or {@code null}
+	 * @param bean rendered bean
+	 * @param webContext active web conversation context
+	 * @param <T> rendered bean type
+	 */
 	private static <T extends Bean> void postRender(CustomerImpl internalCustomer, Bizlet<T> bizlet, T bean, AbstractWebContext webContext) {
 		boolean vetoed = internalCustomer.interceptBeforePostRender(bean, webContext);
 		if (! vetoed) {

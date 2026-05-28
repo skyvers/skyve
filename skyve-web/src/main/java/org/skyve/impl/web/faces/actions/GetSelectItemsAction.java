@@ -30,6 +30,9 @@ import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.faces.model.SelectItem;
 
+/**
+ * Executes a Faces callback action within the current Skyve web context.
+ */
 public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
 
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(GetSelectItemsAction.class);

@@ -24,11 +24,18 @@ import org.springframework.security.authentication.event.AbstractAuthenticationF
 import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
 import org.springframework.stereotype.Component;
 
+/**
+ * Listens for lifecycle events and applies Skyve-specific web behavior.
+ */
 @Component
 public class SecurityListener {
-
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SecurityListener.class);
 
+	/**
+	 * Records failed authentication attempts that qualify for account lockout tracking.
+	 *
+	 * @param evt The authentication failure event.
+	 */
 	@EventListener
 	@SuppressWarnings("static-method")
 	public void onAuthenticationFailure(AbstractAuthenticationFailureEvent evt) {
@@ -46,10 +53,21 @@ public class SecurityListener {
 		}
 	}
 
+	/**
+	 * Determines whether the authentication exception should increment lockout failure counters.
+	 *
+	 * @param exception The authentication exception.
+	 * @return True when the failure should be counted toward lockout.
+	 */
 	static boolean countsTowardLockout(AuthenticationException exception) {
 		return (exception instanceof BadCredentialsException) || (exception instanceof LockedException);
 	}
 	
+	/**
+	 * Resets persisted login-failure counters when authentication succeeds.
+	 *
+	 * @param evt The authentication success event.
+	 */
 	@EventListener
 	@SuppressWarnings("static-method")
 	public void onAuthenticationSuccess(AuthenticationSuccessEvent evt) {
@@ -63,6 +81,12 @@ public class SecurityListener {
 		}
 	}
 	
+	/**
+	 * Persists a failed login attempt for the specified user and updates lockout counters.
+	 *
+	 * @param username The username to record.
+	 * @throws MetaDataException If the failure record cannot be persisted.
+	 */
 	private static void recordLoginFailure(String username) {
 		SkyveDialect dialect = AbstractHibernatePersistence.getDialect(UtilImpl.DATA_STORE.getDialectClassName());
 		RDBMS rdbms = dialect.getRDBMS();
@@ -140,6 +164,12 @@ public class SecurityListener {
 		}
 	}
 
+	/**
+	 * Clears login-failure counters for the specified user when a login succeeds.
+	 *
+	 * @param username The username to reset.
+	 * @throws MetaDataException If the reset cannot be persisted.
+	 */
 	private static void resetLoginFailure(String username) {
 		String sql = "update ADM_SecurityUser set authenticationFailures = 0, lastAuthenticationFailure = null where bizId = ?";
 
@@ -163,6 +193,15 @@ public class SecurityListener {
 		}
 	}
 	
+	/**
+	 * Resolves the security-user business ID for a username.
+	 *
+	 * @param fullUsername The full username, optionally including tenant prefix.
+	 * @param c The JDBC connection used to query the user row.
+	 * @param forReset Whether lookup is for a reset operation (which skips already-reset rows).
+	 * @return The matching business ID, or null when no applicable row is found.
+	 * @throws SQLException If the lookup query fails.
+	 */
 	private static String getBizId(String fullUsername, Connection c, boolean forReset) throws SQLException {
 		String result = null;
 		

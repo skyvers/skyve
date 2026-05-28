@@ -18,6 +18,10 @@ import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.user.User;
 
+/**
+ * SmartClient lookup definition encapsulates metadata used to render SmartClient option data sources and pick lists for lookup fields.
+ * This includes the backing metadata query, display field, pick list fields, and filter fields.
+ */
 public class SmartClientLookupDefinition {
 	private boolean bindingToDataGrid;
 	// The data source for the drop down box
@@ -31,6 +35,19 @@ public class SmartClientLookupDefinition {
     private boolean canCreate = true;
     private boolean canUpdate = true;
     
+	/**
+	 * Creates lookup metadata used to render SmartClient option data sources and pick lists.
+	 *
+	 * @param bindingToDataGrid whether the lookup is bound to a data-grid context
+	 * @param user active user, or {@code null}
+	 * @param customer active customer metadata
+	 * @param module module containing the relation/query metadata
+	 * @param document document containing the lookup relation
+	 * @param relation relation metadata for the lookup target
+	 * @param lookup lookup widget metadata, or {@code null}
+	 * @param runtime whether runtime domain/query values should be resolved
+	 * @param uxui active UX/UI profile name
+	 */
 	protected SmartClientLookupDefinition(boolean bindingToDataGrid,
 		    								User user,
 		    								Customer customer,
@@ -111,58 +128,128 @@ public class SmartClientLookupDefinition {
         }
     }
     
+	/**
+	 * Returns the field name used to display selected lookup values.
+	 *
+	 * @return display field name
+	 */
 	public String getDisplayField() {
         return displayField;
     }
 
+	/**
+	 * Sets the field name used to display selected lookup values.
+	 *
+	 * @param displayField display field name
+	 */
     public void setDisplayField(String displayField) {
         this.displayField = displayField;
     }
 
+	/**
+	 * Returns the SmartClient option data source identifier for this lookup.
+	 *
+	 * @return option data source identifier
+	 */
     public String getOptionDataSource() {
         return optionDataSource;
     }
 
+	/**
+	 * Sets the SmartClient option data source identifier for this lookup.
+	 *
+	 * @param optionDataSource option data source identifier
+	 */
     public void setOptionDataSource(String optionDataSource) {
         this.optionDataSource = optionDataSource;
     }
 
+	/**
+	 * Returns the configured pick-list fields for lookup selection.
+	 *
+	 * @return configured pick-list fields
+	 */
     public List<String> getPickListFields() {
         return pickListFields;
     }
 
+	/**
+	 * Returns the fields that should participate in lookup filtering.
+	 *
+	 * @return lookup filter fields
+	 */
     public List<String> getFilterFields() {
         return filterFields;
     }
 
+	/**
+	 * Returns the metadata query backing this lookup.
+	 *
+	 * @return backing metadata query
+	 */
     public MetaDataQueryDefinition getQuery() {
         return query;
     }
 
+	/**
+	 * Sets the metadata query backing this lookup.
+	 *
+	 * @param query backing metadata query
+	 */
     public void setQuery(MetaDataQueryDefinition query) {
         this.query = query;
     }
 
+	/**
+	 * Indicates whether this lookup is being rendered for a data-grid binding.
+	 *
+	 * @return {@code true} when rendered for a data-grid binding
+	 */
 	public boolean isBindingToDataGrid() {
 		return bindingToDataGrid;
 	}
 
+	/**
+	 * Sets whether this lookup is being rendered for a data-grid binding.
+	 *
+	 * @param bindingToDataGrid whether rendered for a data-grid binding
+	 */
 	public void setBindingToDataGrid(boolean bindingToDataGrid) {
 		this.bindingToDataGrid = bindingToDataGrid;
 	}
 
+	/**
+	 * Indicates whether create access is available for the lookup target document.
+	 *
+	 * @return {@code true} when create access is available
+	 */
 	public boolean getCanCreate() {
 		return canCreate;
 	}
 
+	/**
+	 * Sets whether create access is available for the lookup target document.
+	 *
+	 * @param canCreate whether create access is available
+	 */
 	public void setCanCreate(boolean canCreate) {
 		this.canCreate = canCreate;
 	}
 
+	/**
+	 * Indicates whether update access is available for the lookup target document.
+	 *
+	 * @return {@code true} when update access is available
+	 */
 	public boolean getCanUpdate() {
 		return canUpdate;
 	}
 
+	/**
+	 * Sets whether update access is available for the lookup target document.
+	 *
+	 * @param canUpdate whether update access is available
+	 */
 	public void setCanUpdate(boolean canUpdate) {
 		this.canUpdate = canUpdate;
 	}

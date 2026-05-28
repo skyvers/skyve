@@ -10,6 +10,9 @@ import jakarta.ws.rs.core.Application;
 
 @ApplicationPath("/rest")
 public class JaxRsActivator extends Application {
+	/**
+	 * Returns JAX-RS resource classes exposed by the Skyve REST application.
+	 */
 	@Override
 	public Set<Class<?>> getClasses() {
 		final Set<Class<?>> classes = new HashSet<>();

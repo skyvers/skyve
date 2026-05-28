@@ -50,16 +50,28 @@ import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
+/**
+ * Implements internal web-module behavior for this Skyve runtime concern.
+ */
 public class SkyveSpringSecurity {
+	/**
+	 * Endpoint used by the Spring login processing pipeline.
+	 */
 	public static final String LOGIN_ATTEMPT_PATH = "/loginAttempt";
 
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SkyveSpringSecurity.class);
 
+	/**
+	 * Provides the password encoder used for Skyve Spring Security authentication.
+	 */
 	@SuppressWarnings("static-method")
 	public PasswordEncoder passwordEncoder() {
 		return SecurityUtil.createDelegatingPasswordEncoder();
 	}
 	
+	/**
+	 * Provides the remember-me token repository bound to the configured data source.
+	 */
 	public PersistentTokenRepository tokenRepository() {
 		SkyveRememberMeTokenRepository result = new SkyveRememberMeTokenRepository();
 		result.setDataSource(dataSource());
@@ -146,6 +158,9 @@ public class SkyveSpringSecurity {
 		return ThreadSafeSingleton.dataSource;
 	}
 	
+	/**
+	 * Provides an in-memory test user-details service for integration and local testing scenarios.
+	 */
 	@SuppressWarnings("static-method")
 	public UserDetailsService testUserDetailsService(String customerName, String userName, String password) {
 		@SuppressWarnings("deprecation")
@@ -179,6 +194,9 @@ public class SkyveSpringSecurity {
 		return currentTime < (generatedTime + expiryMillis);
 	}
 
+	/**
+	 * Determines whether the user is currently within an active lockout window.
+	 */
 	static boolean hasActiveLockout(int authenticationFailures, Timestamp lastAuthenticationFailure, long currentTimeMillis) {
 		if (lastAuthenticationFailure == null) {
 			return false;
@@ -186,6 +204,9 @@ public class SkyveSpringSecurity {
 		return hasActiveLockout(authenticationFailures, lastAuthenticationFailure.getTime(), currentTimeMillis);
 	}
 
+	/**
+	 * Determines whether the user is currently within an active lockout window.
+	 */
 	static boolean hasActiveLockout(int authenticationFailures, long lastAuthenticationFailureMillis, long currentTimeMillis) {
 		if ((UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD <= 0) || (UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS <= 0)) {
 			return false;
@@ -199,10 +220,16 @@ public class SkyveSpringSecurity {
 		return millisRemaining > 0L;
 	}
 
+	/**
+	 * Computes lockout duration in milliseconds for the supplied failure count.
+	 */
 	static long lockoutDurationMillis(int authenticationFailures) {
 		return authenticationFailures * (long) UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS * 1000L;
 	}
 	
+	/**
+	 * Creates a JDBC-backed user-details manager configured for Skyve credential and authority queries.
+	 */
 	public UserDetailsManager jdbcUserDetailsManager() {
 		JdbcUserDetailsManager result = new JdbcUserDetailsManager() {
 			private String skyveUserQuery;
@@ -387,6 +414,9 @@ public class SkyveSpringSecurity {
 		return result;
 	}
 	
+	/**
+	 * Builds the OAuth client registration repository for enabled identity providers.
+	 */
 	public ClientRegistrationRepository clientRegistrationRepository() {
 		List<ClientRegistration> registrations = new ArrayList<>(3);
 		if (UtilImpl.AUTHENTICATION_GOOGLE_CLIENT_ID != null) {
@@ -413,7 +443,10 @@ public class SkyveSpringSecurity {
     // https://console.developers.google.com/
  	// Based on CommonOAuth2Provider.GOOGLE
  	// Hit /oauth2/authorization/google
- 	@SuppressWarnings("static-method")
+	/**
+	 * Builds the OAuth client registration for Google sign-in.
+	 */
+	@SuppressWarnings("static-method")
 	public ClientRegistration googleClientRegistration() {
 		return ClientRegistration.withRegistrationId("google")
 									.clientId(UtilImpl.AUTHENTICATION_GOOGLE_CLIENT_ID)
@@ -434,7 +467,10 @@ public class SkyveSpringSecurity {
     // https://developers.facebook.com/
     // Based on CommonOAuth2Provider.FACEBOOK
  	// Hit /oauth2/authorization/facebook
- 	@SuppressWarnings("static-method")
+	/**
+	 * Builds the OAuth client registration for Facebook sign-in.
+	 */
+	@SuppressWarnings("static-method")
     public ClientRegistration facebookClientRegistration() {
 		return ClientRegistration.withRegistrationId("facebook")
 									.clientId(UtilImpl.AUTHENTICATION_FACEBOOK_CLIENT_ID)
@@ -454,7 +490,10 @@ public class SkyveSpringSecurity {
 	// https://github.com/settings/applications
 	// Based on CommonOAuth2Provider.GITHUB
     // Hit /oauth2/authorization/github
- 	@SuppressWarnings("static-method")
+	/**
+	 * Builds the OAuth client registration for GitHub sign-in.
+	 */
+	@SuppressWarnings("static-method")
     public ClientRegistration githubClientRegistration() {
 		return ClientRegistration.withRegistrationId("github")
 									.clientId(UtilImpl.AUTHENTICATION_GITHUB_CLIENT_ID)
@@ -473,6 +512,9 @@ public class SkyveSpringSecurity {
 
 	// https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration
 	// Hit /oauth2/authorization/microsoft
+	/**
+	 * Builds the OAuth client registration for Microsoft Entra ID sign-in.
+	 */
 	@SuppressWarnings("static-method")
 	public ClientRegistration azureAdClientRegistration() {
 

@@ -1011,11 +1011,19 @@ public class SkyveContextListener implements ServletContextListener {
 
     /**
      * Is this app configured for multiple tenants?
+	 *
+	 * @return {@code true} when no default customer is configured
      */
     private static boolean isMultiTenant() {
         return UtilImpl.CUSTOMER == null;
     }
 
+	/**
+	 * Configures the mail service implementation and related SMTP settings.
+	 *
+	 * @param properties the root configuration properties
+	 * @param factories the configured factory class names
+	 */
 	static void configureMailServiceAndSmtp(Map<String, Object> properties, Map<String, Object> factories) {
 		boolean smtpRequired = true;
 		UtilImpl.SKYVE_MAIL_SERVICE_CLASS = getString("factories", "mailServiceClass", factories, false);
@@ -1077,6 +1085,12 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.SMTP_TEST_BOGUS_SEND = Boolean.TRUE.equals(smtpTestBogusSend);
 	}
 
+	/**
+	 * Recursively merges override values into a base configuration map.
+	 *
+	 * @param overrides the overriding values
+	 * @param properties the destination properties to update
+	 */
 	private static void merge(Map<String, Object> overrides, Map<String, Object> properties) {
 		for (String key : overrides.keySet()) {
 			Object override = overrides.get(key);

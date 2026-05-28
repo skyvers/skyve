@@ -18,6 +18,9 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+/**
+ * Filters inbound or outbound requests before downstream web processing.
+ */
 public class RegexFilter extends AbstractRestFilter {
 	private Map<String, String> initParameters = new TreeMap<>();
 	

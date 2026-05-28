@@ -44,6 +44,7 @@ public class MenuView extends HarnessView {
 
 	// The modules menu on the LHS
 	// Note: MenuModel is never mutated once established, only the reference is dropped
+	@SuppressWarnings("java:S3077") // Session-scoped access pattern uses effectively immutable menu instances.
 	private transient volatile MenuModel menu;
 	
 	public MenuModel getMenu() {
@@ -83,6 +84,13 @@ public class MenuView extends HarnessView {
 
 	private transient int menuItemId; 
 
+	/**
+	 * Builds the PrimeFaces menu model for the selected module and UX/UI mode.
+	 *
+	 * @param bizModule the currently selected module
+	 * @param uxui the active UX/UI name
+	 * @return the populated menu model
+	 */
 	private MenuModel createMenuModel(String bizModule, String uxui) {
 		MenuModel result = new DefaultMenuModel();
 
@@ -185,6 +193,17 @@ public class MenuView extends HarnessView {
 		return result;
 	}
 
+	/**
+	 * Creates a PrimeFaces menu item from Skyve menu metadata.
+	 *
+	 * @param item the Skyve menu item metadata
+	 * @param iconStyleClass the icon style class
+	 * @param menuModule the current menu module
+	 * @param itemModule the module for the target item
+	 * @param itemQueryName the resolved query name
+	 * @param itemAbsoluteHref an explicit absolute href, when supplied
+	 * @return the configured PrimeFaces menu item
+	 */
 	private org.primefaces.model.menu.MenuItem createMenuItem(MenuItem item,
 																String iconStyleClass,
 																Module menuModule,
@@ -196,6 +215,17 @@ public class MenuView extends HarnessView {
 		return result;
 	}
 
+	/**
+	 * Builds the JavaScript history URL for a rendered menu item.
+	 *
+	 * @param menuModule the module containing the menu definition
+	 * @param itemModule the module targeted by the menu item
+	 * @param item the Skyve menu item metadata
+	 * @param itemQueryName the resolved query name
+	 * @param itemAbsoluteHref an explicit absolute href, when supplied
+	 * @return the JavaScript menu href
+	 */
+	@SuppressWarnings("java:S3776") // Legacy URL assembly branching retained during Javadoc remediation.
 	public static String createMenuHref(Module menuModule,
 											Module itemModule,
 											MenuItem item,

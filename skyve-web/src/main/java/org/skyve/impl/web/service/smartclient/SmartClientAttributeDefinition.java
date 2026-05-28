@@ -66,6 +66,9 @@ import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.OWASP;
 
+/**
+ * Implements internal web-module behavior for this Skyve runtime concern.
+ */
 abstract class SmartClientAttributeDefinition {
     protected SmartClientLookupDefinition lookup;
 	protected String name;
@@ -87,6 +90,20 @@ abstract class SmartClientAttributeDefinition {
     protected HorizontalAlignment align;
 	protected TargetMetaData target;
 	
+	/**
+	 * Builds SmartClient attribute metadata from binding and document model definitions.
+	 *
+	 * @param user the active user for localization and validator messaging
+	 * @param customer the active customer metadata
+	 * @param module the module containing the target document
+	 * @param document the target document metadata
+	 * @param binding the binding path for the attribute definition
+	 * @param name explicit attribute name override, or {@code null} to derive from binding
+	 * @param runtime whether runtime domain values should be resolved
+	 * @param isQueryColumn whether the attribute is used in a query/list context
+	 * @param isField whether the attribute renders as a form field
+	 * @param uxui the active UX/UI profile name
+	 */
 	protected SmartClientAttributeDefinition(User user,
 												Customer customer, 
 												Module module,
@@ -419,79 +436,174 @@ abstract class SmartClientAttributeDefinition {
 		}
 	}
 
+	/**
+	 * Returns target binding metadata for this attribute definition.
+	 *
+	 * @return target binding metadata, or {@code null}
+	 */
 	public TargetMetaData getTarget() {
 	    return target;
 	}
 	
+	/**
+	 * Returns the SmartClient editor type name.
+	 *
+	 * @return editor type name, or {@code null}
+	 */
 	public String getEditorType() {
 		return editorType;
 	}
 
+	/**
+	 * Sets the SmartClient editor type name.
+	 *
+	 * @param editorType editor type name
+	 */
 	public void setEditorType(String editorType) {
 		this.editorType = editorType;
 	}
 
+	/**
+	 * Returns lookup metadata used for association/domain selection widgets.
+	 *
+	 * @return lookup metadata, or {@code null}
+	 */
     public SmartClientLookupDefinition getLookup() {
         return lookup;
     }
 
+	/**
+	 * Returns maximum display/input length when constrained.
+	 *
+	 * @return maximum display/input length, or {@code null}
+	 */
 	public Integer getLength() {
 		return length;
 	}
 
+	/**
+	 * Sets maximum display/input length when constrained.
+	 *
+	 * @param length maximum display/input length
+	 */
 	public void setLength(Integer length) {
 		this.length = length;
 	}
 
+	/**
+	 * Returns the attribute name used in generated SmartClient definitions.
+	 *
+	 * @return attribute name
+	 */
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * Sets the attribute name used in generated SmartClient definitions.
+	 *
+	 * @param name attribute name
+	 */
 	public void setName(String name) {
 		this.name = name;
 	}
 
+	/**
+	 * Returns the required-message text for validation failures.
+	 *
+	 * @return required-message text, or {@code null}
+	 */
 	public String getRequiredMessage() {
 		return requiredMessage;
 	}
 
+	/**
+	 * Sets the required-message text and updates required state accordingly.
+	 *
+	 * @param requiredMessage required-message text
+	 */
 	public void setRequiredMessage(String requiredMessage) {
 		this.requiredMessage = requiredMessage;
 		required = (requiredMessage != null);
 	}
 
+	/**
+	 * Returns the display title for this attribute.
+	 *
+	 * @return display title
+	 */
 	public String getTitle() {
 		return title;
 	}
 
+	/**
+	 * Sets the display title for this attribute.
+	 *
+	 * @param title display title
+	 */
 	public void setTitle(String title) {
 		this.title = title;
 	}
 
+	/**
+	 * Returns SmartClient logical type identifier.
+	 *
+	 * @return SmartClient logical type identifier
+	 */
 	public String getType() {
 		return type;
 	}
 
+	/**
+	 * Sets SmartClient logical type identifier.
+	 *
+	 * @param type SmartClient logical type identifier
+	 */
 	public void setType(String type) {
 		this.type = type;
 	}
 
+	/**
+	 * Indicates whether this definition has a corresponding display field.
+	 *
+	 * @return {@code true} when a display field is available
+	 */
 	public boolean isHasDisplayField() {
 		return hasDisplayField;
 	}
 	
+	/**
+	 * Sets whether this definition has a corresponding display field.
+	 *
+	 * @param hasDisplayField whether a display field is available
+	 */
 	public void setHasDisplayField(boolean hasDisplayField) {
 		this.hasDisplayField = hasDisplayField;
 	}
 	
+	/**
+	 * Indicates whether values should be escaped before client rendering.
+	 *
+	 * @return {@code true} when values should be escaped
+	 */
 	public boolean isEscape() {
 		return escape;
 	}
 
+	/**
+	 * Sets whether values should be escaped before client rendering.
+	 *
+	 * @param escape whether values should be escaped
+	 */
 	public void setEscape(boolean escape) {
 		this.escape = escape;
 	}
 
+	/**
+	 * Returns domain value-map entries when this attribute uses enumerated values.
+	 *
+	 * @return domain value-map entries, or {@code null}
+	 */
 	public Map<String, String> getValueMap() {
 		return valueMap;
 	}
@@ -500,7 +612,8 @@ abstract class SmartClientAttributeDefinition {
 	 * Convert the valueMap to a string for use in the various toJavascript() methods in the sub-classes. Produces a JSON representation of the
 	 * <code>valueMap</code> field (it the map contains any values), or an array containing one space (if the map is empty).
 	 * 
-	 * @return	The value map string
+	 *
+	 * @return value-map JavaScript literal string
 	 */
 	protected String getValueMapAsString() {
 		if (valueMap.isEmpty()) {
@@ -523,18 +636,38 @@ abstract class SmartClientAttributeDefinition {
 		this.textBoxStyle = textBoxStyle;
 	}
 	
+	/**
+	 * Returns preferred pixel width for grid/field rendering.
+	 *
+	 * @return preferred pixel width, or {@code null}
+	 */
 	public Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
+	/**
+	 * Sets preferred pixel width for grid/field rendering.
+	 *
+	 * @param pixelWidth preferred pixel width
+	 */
 	public void setPixelWidth(Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 
+	/**
+	 * Returns text/content alignment preference.
+	 *
+	 * @return text/content alignment preference, or {@code null}
+	 */
 	public HorizontalAlignment getAlign() {
 		return align;
 	}
 
+	/**
+	 * Sets text/content alignment preference.
+	 *
+	 * @param align text/content alignment preference
+	 */
 	public void setAlign(HorizontalAlignment align) {
 		this.align = align;
 	}
@@ -561,8 +694,8 @@ abstract class SmartClientAttributeDefinition {
 	 * This method escapes anything that should be literal and then 
 	 * converts the expression taking into consideration the case setting.
 	 * 
-	 * @param text
-	 * @return
+	 *
+	 * @param text text attribute metadata whose format determines mask and text style
 	 */
 	public void setMaskAndStyle(Text text) {
 		String result = null;
@@ -621,6 +754,14 @@ abstract class SmartClientAttributeDefinition {
 	//		but including this has unexpected results also
 	// 2) get the filter row to be a text field bound to the description binding of the field
 	//		this hangs the UI when trying to display the list
+	/**
+	 * Appends SmartClient editor-property JavaScript for this attribute definition.
+	 *
+	 * @param result JavaScript builder receiving editor properties
+	 * @param forDataGrid whether properties are being generated for a data-grid context
+	 * @param pixelHeight preferred pixel height for image thumbnails, or {@code null}
+	 * @param emptyThumbnailRelativeFile fallback thumbnail resource path, or {@code null}
+	 */
 	void appendEditorProperties(StringBuilder result,
 									boolean forDataGrid,
 									Integer pixelHeight,
@@ -767,6 +908,15 @@ abstract class SmartClientAttributeDefinition {
 		}
     }
 
+	/**
+	 * Builds a constant-domain code-to-description value map for client-side enumeration rendering.
+	 *
+	 * @param customer customer metadata context
+	 * @param document document metadata containing the attribute
+	 * @param attribute attribute whose constant domain values are required
+	 * @param runtime whether runtime domain values should be resolved
+	 * @return ordered map of escaped domain codes to escaped localised descriptions
+	 */
 	private static Map<String, String> getConstantDomainValueMap(Customer customer,
 															Document document,
 															Attribute attribute,

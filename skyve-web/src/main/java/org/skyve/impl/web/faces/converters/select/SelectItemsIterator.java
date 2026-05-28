@@ -433,7 +433,7 @@ final class SelectItemsIterator implements Iterator<SelectItem> {
              * The request-scoped variable under which the current object
              * will be exposed.
              */
-            private String var;
+            private String requestVar;
 
             private UISelectItems sourceComponent;
 
@@ -442,7 +442,7 @@ final class SelectItemsIterator implements Iterator<SelectItem> {
 
             private GenericObjectSelectItem(UISelectItems sourceComponent) {
 
-                var = (String) sourceComponent.getAttributes().get(VAR);
+                requestVar = (String) sourceComponent.getAttributes().get(VAR);
                 this.sourceComponent = sourceComponent;
 
             }
@@ -462,8 +462,8 @@ final class SelectItemsIterator implements Iterator<SelectItem> {
                 Map<String, Object> reqMap =
                       ctx.getExternalContext().getRequestMap();
                 Object oldVarValue = null;
-                if (var != null) {
-                    oldVarValue = reqMap.put(var, value);
+                if (requestVar != null) {
+                    oldVarValue = reqMap.put(requestVar, value);
                 }
                 try {
                     Map<String,Object> attrs = sourceComponent.getAttributes();
@@ -493,11 +493,11 @@ final class SelectItemsIterator implements Iterator<SelectItem> {
                         setNoSelectionOption(getValue().equals(noSelectionValueResult));
                     }
                 } finally {
-                    if (var != null) {
+                    if (requestVar != null) {
                         if (oldVarValue != null) {
-                            reqMap.put(var, oldVarValue);
+                            reqMap.put(requestVar, oldVarValue);
                         } else {
-                            reqMap.remove(var);
+                            reqMap.remove(requestVar);
                         }
                     }
                 }

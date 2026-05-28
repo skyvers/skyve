@@ -25,7 +25,7 @@ import jakarta.faces.context.FacesContext;
 public abstract class LocalisableView implements Serializable {
 	private static final long serialVersionUID = 2440700208785488690L;
 
-    protected final Logger LOGGER = SkyveLoggerFactory.getLogger(getClass());
+    protected static final Logger LOGGER = SkyveLoggerFactory.getLogger(LocalisableView.class);
     private static final Logger FACES_LOGGER = Category.FACES.logger();
 
 	public static final class I18nMapAdapter implements Map<String, String>, Serializable {
@@ -33,6 +33,11 @@ public abstract class LocalisableView implements Serializable {
 
 		private Locale locale;
 		
+		/**
+		 * Sets the locale used to resolve i18n keys.
+		 *
+		 * @param locale the locale to use for key resolution
+		 */
 		public void setLocale(Locale locale) {
 			this.locale = locale;
 		}
@@ -47,16 +52,34 @@ public abstract class LocalisableView implements Serializable {
 			throw new UnsupportedOperationException();
 		}
 
+		/**
+		 * Indicates whether key lookup is supported.
+		 *
+		 * @param key the key to test
+		 * @return never returns normally
+		 */
 		@Override
 		public boolean containsKey(Object key) {
 			throw new UnsupportedOperationException();
 		}
 
+		/**
+		 * Indicates whether value lookup is supported.
+		 *
+		 * @param value the value to test
+		 * @return never returns normally
+		 */
 		@Override
 		public boolean containsValue(Object value) {
 			throw new UnsupportedOperationException();
 		}
 
+		/**
+		 * Resolves the localised value for a key.
+		 *
+		 * @param key the i18n key
+		 * @return the localised value
+		 */
 		@Override
 		public String get(final Object key) {
 			return new FacesAction<String>() {
@@ -69,16 +92,34 @@ public abstract class LocalisableView implements Serializable {
 			}.execute();
 		}
 
+		/**
+		 * Indicates whether mutating put is supported.
+		 *
+		 * @param key the key to store
+		 * @param value the value to store
+		 * @return never returns normally
+		 */
 		@Override
 		public String put(String key, String value) {
 			throw new UnsupportedOperationException();
 		}
 
+		/**
+		 * Indicates whether remove is supported.
+		 *
+		 * @param key the key to remove
+		 * @return never returns normally
+		 */
 		@Override
 		public String remove(Object key) {
 			throw new UnsupportedOperationException();
 		}
 
+		/**
+		 * Indicates whether bulk put is supported.
+		 *
+		 * @param m the entries to insert
+		 */
 		@Override
 		public void putAll(Map<? extends String, ? extends String> m) {
 			throw new UnsupportedOperationException();

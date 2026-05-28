@@ -87,6 +87,7 @@ public class EmptyStringResolver extends ELResolver {
 	 * @param obj the value to convert
 	 * @param targetType the requested conversion target type
 	 * @return {@code null} for string targets when the source is {@code null}; otherwise {@code null}
+	 *         so that downstream resolvers can continue handling conversion
 	 */
 	@Override
 	public <T extends Object> T convertToType(ELContext context, Object obj, Class<T> targetType) {

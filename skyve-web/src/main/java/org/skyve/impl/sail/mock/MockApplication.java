@@ -89,14 +89,25 @@ import jakarta.faces.convert.Converter;
 import jakarta.faces.event.ActionListener;
 import jakarta.faces.validator.Validator;
 
+/**
+ * Provides a mock implementation used by SAIL execution tests in the web module.
+ */
 public class MockApplication extends Application {
 	private ExpressionFactory ef = new MockExpressionFactory();
 	
+	/**
+	 * Returns the mock expression factory used by SAIL execution tests.
+	 */
 	@Override
 	public ExpressionFactory getExpressionFactory() {
     	return ef;
     }
     
+	/**
+	 * Creates a concrete PrimeFaces or Skyve component for the supplied component type identifier.
+	 *
+	 * @throws FacesException when the component type is not mapped by this mock registry
+	 */
 	@Override
 	public UIComponent createComponent(String componentType) throws FacesException {
 		if (AutoComplete.COMPONENT_TYPE.equals(componentType)) {
@@ -324,6 +335,11 @@ public class MockApplication extends Application {
 		throw new FacesException("MockApplication.createComponent() does not cater for componentType " + componentType);
 	}
 
+	/**
+	 * Creates a supported behavior implementation for SAIL tests.
+	 *
+	 * @throws FacesException when the behavior ID is not mapped by this mock registry
+	 */
 	@Override
 	public Behavior createBehavior(String behaviorId) throws FacesException {
 		if (AjaxBehavior.BEHAVIOR_ID.equals(behaviorId)) {
@@ -335,136 +351,217 @@ public class MockApplication extends Application {
 		throw new FacesException("MockApplication.createBehavior() does not cater for behaviorId " + behaviorId);
 	}
 	
+	/**
+	 * Returns no action listener in this mock implementation.
+	 */
 	@Override
 	public ActionListener getActionListener() {
 		return null;
 	}
 
+	/**
+	 * Ignores action listener assignment in this mock implementation.
+	 */
 	@Override
 	public void setActionListener(ActionListener listener) {
 		// nothing to see here
 	}
 
+	/**
+	 * Returns no default locale in this mock implementation.
+	 */
 	@Override
 	public Locale getDefaultLocale() {
 		return null;
 	}
 
+	/**
+	 * Ignores locale assignment in this mock implementation.
+	 */
 	@Override
 	public void setDefaultLocale(Locale locale) {
 		// nothing to see here
 	}
 
+	/**
+	 * Returns no default render kit ID in this mock implementation.
+	 */
 	@Override
 	public String getDefaultRenderKitId() {
 		return null;
 	}
 
+	/**
+	 * Ignores default render kit assignment in this mock implementation.
+	 */
 	@Override
 	public void setDefaultRenderKitId(String renderKitId) {
 		// nothing to see here
 	}
 
+	/**
+	 * Returns no message bundle in this mock implementation.
+	 */
 	@Override
 	public String getMessageBundle() {
 		return null;
 	}
 
+	/**
+	 * Ignores message bundle assignment in this mock implementation.
+	 */
 	@Override
 	public void setMessageBundle(String bundle) {
 		// nothing to see here
 	}
 
+	/**
+	 * Returns no navigation handler in this mock implementation.
+	 */
 	@Override
 	public NavigationHandler getNavigationHandler() {
 		return null;
 	}
 
+	/**
+	 * Ignores navigation handler assignment in this mock implementation.
+	 */
 	@Override
 	public void setNavigationHandler(NavigationHandler handler) {
 		// nothing to see here
 	}
 
+	/**
+	 * Returns no view handler in this mock implementation.
+	 */
 	@Override
 	public ViewHandler getViewHandler() {
 		return null;
 	}
 
+	/**
+	 * Ignores view handler assignment in this mock implementation.
+	 */
 	@Override
 	public void setViewHandler(ViewHandler handler) {
 		// nothing to see here
 	}
 
+	/**
+	 * Returns no state manager in this mock implementation.
+	 */
 	@Override
 	public StateManager getStateManager() {
 		return null;
 	}
 
+	/**
+	 * Ignores state manager assignment in this mock implementation.
+	 */
 	@Override
 	public void setStateManager(StateManager manager) {
 		// nothing to see here
 	}
 
+	/**
+	 * Ignores component registration in this mock implementation.
+	 */
 	@Override
 	public void addComponent(String componentType, String componentClass) {
 		// nothing to see here
 	}
 
+	/**
+	 * Returns no dynamic component type iterator in this mock implementation.
+	 */
 	@Override
 	public Iterator<String> getComponentTypes() {
 		return null;
 	}
 
+	/**
+	 * Ignores converter registration by ID in this mock implementation.
+	 */
 	@Override
 	public void addConverter(String converterId, String converterClass) {
 		// nothing to see here
 	}
 
+	/**
+	 * Ignores converter registration by target type in this mock implementation.
+	 */
 	@Override
 	public void addConverter(Class<?> targetClass, String converterClass) {
 		// nothing to see here
 	}
 
+	/**
+	 * Returns no converter for ID lookups in this mock implementation.
+	 */
 	@Override
 	public Converter<?> createConverter(String converterId) {
 		return null;
 	}
 
+	/**
+	 * Returns no converter for target class lookups in this mock implementation.
+	 */
 	@Override
 	public Converter createConverter(Class<?> targetClass) {
 		return null;
 	}
 
+	/**
+	 * Returns no registered converter IDs in this mock implementation.
+	 */
 	@Override
 	public Iterator<String> getConverterIds() {
 		return null;
 	}
 
+	/**
+	 * Returns no registered converter target types in this mock implementation.
+	 */
 	@Override
 	public Iterator<Class<?>> getConverterTypes() {
 		return null;
 	}
 
+	/**
+	 * Returns no supported locales in this mock implementation.
+	 */
 	@Override
 	public Iterator<Locale> getSupportedLocales() {
 		return null;
 	}
 
+	/**
+	 * Ignores supported locale assignment in this mock implementation.
+	 */
 	@Override
 	public void setSupportedLocales(Collection<Locale> locales) {
 		// nothing to see here
 	}
 
+	/**
+	 * Ignores validator registration in this mock implementation.
+	 */
 	@Override
 	public void addValidator(String validatorId, String validatorClass) {
 		// nothing to see here
 	}
 
+	/**
+	 * Returns no validator instance in this mock implementation.
+	 */
 	@Override
 	public Validator<?> createValidator(String validatorId) throws FacesException {
 		return null;
 	}
 
+	/**
+	 * Returns no registered validator IDs in this mock implementation.
+	 */
 	@Override
 	public Iterator<String> getValidatorIds() {
 		return null;

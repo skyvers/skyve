@@ -39,60 +39,143 @@ public abstract class HarnessView extends LocalisableView {
 	private static final long serialVersionUID = 2805839690076647L;
 
 	private String logoRelativeFileNameUrl;
+
+	/**
+	 * Returns the logo resource URL relative to the web context.
+	 *
+	 * @return logo resource URL, or {@code null}
+	 */
 	public String getLogoRelativeFileNameUrl() {
 		return logoRelativeFileNameUrl;
 	}
 
 	private String cssRelativeFileNameUrl;
+
+	/**
+	 * Returns the CSS resource URL relative to the web context.
+	 *
+	 * @return CSS resource URL, or {@code null}
+	 */
 	public String getCssRelativeFileNameUrl() {
 		return cssRelativeFileNameUrl;
 	}
 	
 	private String bizModuleParameter;
+
+	/**
+	 * Returns the selected module parameter.
+	 *
+	 * @return module parameter, or {@code null}
+	 */
 	public String getBizModuleParameter() {
 		return bizModuleParameter;
 	}
+
+	/**
+	 * Sets the module parameter used to initialise the harness context.
+	 *
+	 * @param bizModuleParameter the module name parameter
+	 */
 	public void setBizModuleParameter(String bizModuleParameter) {
 		this.bizModuleParameter = OWASP.sanitise(Sanitisation.text, Util.processStringValue(bizModuleParameter));
 	}
 
 	private String bizDocumentParameter;
+
+	/**
+	 * Returns the selected document parameter.
+	 *
+	 * @return document parameter, or {@code null}
+	 */
 	public String getBizDocumentParameter() {
 		return bizDocumentParameter;
 	}
+
+	/**
+	 * Sets the document parameter used to initialise the harness context.
+	 *
+	 * @param bizDocumentParameter the document name parameter
+	 */
 	public void setBizDocumentParameter(String bizDocumentParameter) {
 		this.bizDocumentParameter = OWASP.sanitise(Sanitisation.text, Util.processStringValue(bizDocumentParameter));
 	}
 	
 	private String queryNameParameter;
+
+	/**
+	 * Returns the selected query or model parameter.
+	 *
+	 * @return query or model parameter, or {@code null}
+	 */
 	public String getQueryNameParameter() {
 		return queryNameParameter;
 	}
+
+	/**
+	 * Sets the query/model parameter used to initialise list views.
+	 *
+	 * @param queryNameParameter the query or model name parameter
+	 */
 	public void setQueryNameParameter(String queryNameParameter) {
 		this.queryNameParameter = OWASP.sanitise(Sanitisation.text, Util.processStringValue(queryNameParameter));
 	}
 
 	private String bizIdParameter;
+
+	/**
+	 * Returns the selected business ID parameter.
+	 *
+	 * @return business ID parameter, or {@code null}
+	 */
 	public String getBizIdParameter() {
 		return bizIdParameter;
 	}
+
+	/**
+	 * Sets the business ID parameter used to target an existing record.
+	 *
+	 * @param bizIdParameter the target business ID
+	 */
 	public void setBizIdParameter(String bizIdParameter) {
 		this.bizIdParameter = OWASP.sanitise(Sanitisation.text, Util.processStringValue(bizIdParameter));
 	}
 
 	private WebAction webActionParameter;
+
+	/**
+	 * Returns the selected web action.
+	 *
+	 * @return selected web action, or {@code null}
+	 */
 	public WebAction getWebActionParameter() {
 		return webActionParameter;
 	}
+
+	/**
+	 * Sets the requested web action mode (for example edit or list).
+	 *
+	 * @param webActionParameter the requested web action
+	 */
 	public void setWebActionParameter(WebAction webActionParameter) {
 		this.webActionParameter = webActionParameter;
 	}
 
 	private ViewType viewType;
+
+	/**
+	 * Returns the resolved home view type for initial navigation.
+	 *
+	 * @return resolved home view type, or {@code null}
+	 */
 	public ViewType getViewType() {
 		return viewType;
 	}
 
+	/**
+	 * Returns an HTML comment describing the current Skyve framework version.
+	 *
+	 * @return HTML version comment
+	 */
 	@SuppressWarnings("static-method")
 	public String getSkyveVersionComment() {
 		StringBuilder result = new StringBuilder(64);
@@ -101,40 +184,83 @@ public abstract class HarnessView extends LocalisableView {
 	}
 	
 	private String apiScript;
+
+	/**
+	 * Returns the generated bootstrap API script fragment.
+	 *
+	 * @return API bootstrap script, or {@code null}
+	 */
 	public String getApiScript() {
 		return apiScript;
 	}
 	
+	/**
+	 * Returns the computed base URL for the current request context.
+	 *
+	 * @return base URL
+	 */
 	@SuppressWarnings("static-method")
 	public String getBaseHref() {
 		return Util.getBaseUrl();
 	}
 
+	/**
+	 * Returns the configured map provider type.
+	 *
+	 * @return map provider type name
+	 */
 	@SuppressWarnings("static-method")
 	public String getMapType() {
 		return UtilImpl.MAP_TYPE.toString();
 	}
 
 	private String userContactInitials;
+
+	/**
+	 * Returns the escaped initials for the current user contact avatar.
+	 *
+	 * @return user contact initials, or {@code null}
+	 */
 	public String getUserContactInitials() {
 		return userContactInitials;
 	}
 
 	private String userContactImageUrl;
+
+	/**
+	 * Returns the contact avatar image URL for the current user.
+	 *
+	 * @return contact avatar image URL, or {@code null}
+	 */
 	public String getUserContactImageUrl() {
 		return userContactImageUrl;
 	}
 
 	private String userContactName;
+
+	/**
+	 * Returns the escaped display name for the current user contact.
+	 *
+	 * @return user contact display name, or {@code null}
+	 */
 	public String getUserContactName() {
 		return userContactName;
 	}
 
 	private String userName;
+
+	/**
+	 * Returns the escaped user principal name.
+	 *
+	 * @return escaped user principal name, or {@code null}
+	 */
 	public String getUserName() {
 		return userName;
 	}
 
+	/**
+	 * Initialises harness state for the current request and user context.
+	 */
 	@Override
 	public void initialise() {
 		super.initialise();
@@ -158,15 +284,13 @@ public abstract class HarnessView extends LocalisableView {
 
 		if (bizModuleParameter == null) {
 			Set<String> moduleNames = user.getAccessibleModuleNames();
-			if (moduleNames.size() == 0) {
+			if (moduleNames.isEmpty()) {
 				throw new SecurityException("any module", customer.getName() + '/' + user.getName());
 			}
 			Module homeModule = null;
 			bizModuleParameter = user.getHomeModuleName();
-			if (bizModuleParameter != null) {
-				if (moduleNames.contains(bizModuleParameter)) {
-					homeModule = customer.getModule(bizModuleParameter);
-				}
+			if ((bizModuleParameter != null) && moduleNames.contains(bizModuleParameter)) {
+				homeModule = customer.getModule(bizModuleParameter);
 			}
 			if (homeModule == null) {
 				homeModule = customer.getHomeModule();
@@ -212,19 +336,17 @@ public abstract class HarnessView extends LocalisableView {
 				if (bizDocumentParameter != null) {
 					d = m.getDocument(customer, bizDocumentParameter);
 				}
-				if (queryNameParameter != null) {
-					if (! queryNameParameter.equals(bizDocumentParameter)) {
-						if (m.getMetaDataQuery(queryNameParameter) == null) {
-							if (d == null) {
-								if (m.getDocument(customer, queryNameParameter) == null) {
-									throw new MetaDataException("Query name " + queryNameParameter + " does not exist for module " + bizModuleParameter);
-								}
-							}
-							else {
-								if (d.getListModel(customer, queryNameParameter, false) == null) {
-									throw new MetaDataException("Model name " + queryNameParameter + " does not exist for module " + bizModuleParameter);
-								}
-							}
+				if ((queryNameParameter != null) && 
+						(! queryNameParameter.equals(bizDocumentParameter)) && 
+						(m.getMetaDataQuery(queryNameParameter) == null)) {
+					if (d == null) {
+						if (m.getDocument(customer, queryNameParameter) == null) {
+							throw new MetaDataException("Query name " + queryNameParameter + " does not exist for module " + bizModuleParameter);
+						}
+					}
+					else {
+						if (d.getListModel(customer, queryNameParameter, false) == null) {
+							throw new MetaDataException("Model name " + queryNameParameter + " does not exist for module " + bizModuleParameter);
 						}
 					}
 				}
@@ -276,12 +398,23 @@ public abstract class HarnessView extends LocalisableView {
 		apiScript = sb.toString();
 	}
 	
+	/**
+	 * Returns the current session user, if present.
+	 *
+	 * @return current session user, or {@code null}
+	 */
 	@SuppressWarnings("static-method")
 	public @Nullable User getUser() {
 		ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
 		return (User) ec.getSessionMap().get(WebContext.USER_SESSION_ATTRIBUTE_NAME);
 	}
 	
+	/**
+	 * Asserts the supplied customer/user identity into the current web session.
+	 *
+	 * @param customerName the customer name
+	 * @param userName the user name
+	 */
 	@SuppressWarnings("static-method")
 	public void setUser(String customerName, String userName) {
 		UserImpl user = null;
@@ -307,11 +440,21 @@ public abstract class HarnessView extends LocalisableView {
 		persistence.setUser(user);
 	}
 	
+	/**
+	 * Returns whether the current user can perform text search operations.
+	 *
+	 * @return {@code true} when text search is available
+	 */
 	public boolean isCanTextSearch() {
 		User u = getUser();
 		return ((u != null) && (u.canTextSearch()));
 	}
 	
+	/**
+	 * Returns whether the current user can switch UX/UI mode.
+	 *
+	 * @return {@code true} when mode switching is available
+	 */
 	public boolean isCanSwitchMode() {
 		User u = getUser();
 		return ((u != null) && (u.canSwitchMode()));
@@ -319,7 +462,8 @@ public abstract class HarnessView extends LocalisableView {
 	
 	/**
 	 * Sets the UX/UI preference in the session.
-	 * @param uxui	The UX/UI name.
+	 *
+	 * @param uxui the UX/UI name
 	 */
 	public void setUxUi(String uxui) {
 		if (! isCanSwitchMode()) {

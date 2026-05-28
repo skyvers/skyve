@@ -37,6 +37,11 @@ public abstract class AbstractFacesBuilder {
 	protected String update = "@(form)";
 	protected UserAgentType userAgentType;
 	
+	/**
+	 * Sets the managed bean name used for generated EL expressions.
+	 *
+	 * @param managedBeanName the managed bean name
+	 */
 	public void setManagedBeanName(String managedBeanName) {
 		if (managedBeanName != null) {
 			this.managedBeanName = managedBeanName;
@@ -47,28 +52,61 @@ public abstract class AbstractFacesBuilder {
 		}
 	}
 	
+	/**
+	 * Injects the managed bean instance used when running under SAIL.
+	 *
+	 * @param managedBean the SAIL managed bean
+	 */
 	public void setSAILManagedBean(FacesView managedBean) {
 		this.managedBean = managedBean;
 	}
 	
+	/**
+	 * Sets the PrimeFaces process expression for generated action components.
+	 *
+	 * @param process the process expression
+	 */
 	public void setProcess(String process) {
 		if (process != null) {
 			this.process = process;
 		}
 	}
+	/**
+	 * Sets the PrimeFaces update expression for generated action components.
+	 *
+	 * @param update the update expression
+	 */
 	public void setUpdate(String update) {
 		if (update != null) {
 			this.update = update;
 		}
 	}
+	/**
+	 * Sets the user agent type used by downstream component builders.
+	 *
+	 * @param userAgentType the current user agent type
+	 */
 	public void setUserAgentType(UserAgentType userAgentType) {
 		this.userAgentType = userAgentType;
 	}
 
+	/**
+	 * Assigns a component ID, generating one when no widget ID is supplied.
+	 *
+	 * @param component the component to assign an ID to
+	 * @param widgetId the optional widget ID
+	 */
 	protected void setId(UIComponent component, String widgetId) {
 		component.setId((widgetId == null) ? managedBean.nextId() : widgetId);
 	}
 	
+	/**
+	 * Applies disabled-state value expressions for widget-level and form-level conditions.
+	 *
+	 * @param component the component to update
+	 * @param disabledConditionName the optional widget disabled condition
+	 * @param formDisabledConditionName the optional form disabled condition
+	 */
 	protected void setDisabled(UIComponent component, String disabledConditionName, String formDisabledConditionName) {
 		if (disabledConditionName != null) {
 			if (formDisabledConditionName == null) {
@@ -83,6 +121,13 @@ public abstract class AbstractFacesBuilder {
 		}
 	}
 
+	/**
+	 * Applies a rendered expression from an invisible condition.
+	 *
+	 * @param component the component to update
+	 * @param invisibleConditionName the optional invisible condition
+	 * @param extraELToAnd extra EL condition appended using logical AND
+	 */
 	protected void setInvisible(UIComponent component, String invisibleConditionName, String extraELToAnd) {
 		if (invisibleConditionName != null) {
 			String visible = BindUtil.negateCondition(invisibleConditionName);
@@ -90,6 +135,14 @@ public abstract class AbstractFacesBuilder {
 		}
 	}
 
+	/**
+	 * Applies a rendered expression from an invisible condition using a data-widget variable.
+	 *
+	 * @param component the component to update
+	 * @param dataWidgetVar the data-widget variable name
+	 * @param invisibleConditionName the optional invisible condition
+	 * @param extraELToAnd extra EL condition appended using logical AND
+	 */
 	protected void setInvisible(UIComponent component, String dataWidgetVar, String invisibleConditionName, String extraELToAnd) {
 		if (invisibleConditionName != null) {
 			final String visible = BindUtil.negateCondition(invisibleConditionName);
@@ -104,12 +157,30 @@ public abstract class AbstractFacesBuilder {
 		}
 	}
 
+	/**
+	 * Applies text-alignment style class when alignment is configured.
+	 *
+	 * @param component the component to update
+	 * @param textAlignment the requested alignment
+	 */
 	protected void setTextAlign(UIComponent component, HorizontalAlignment textAlignment) {
 		if (textAlignment != null) {
 			component.setValueExpression("styleClass", ef.createValueExpression(textAlignment.toTextAlignmentString(), String.class));
 		}
 	}
 	
+	/**
+	 * Applies width/height styling without a specialised text-alignment target attribute.
+	 *
+	 * @param component the component to style
+	 * @param existingStyle existing inline style text
+	 * @param pixelWidth fixed width in pixels
+	 * @param responsiveWidth responsive width unit
+	 * @param percentageWidth width in percent
+	 * @param pixelHeight fixed height in pixels
+	 * @param percentageHeight height in percent
+	 * @param defaultPercentageWidth default percentage width when no width is specified
+	 */
 	protected final void setSizeAndTextAlignStyle(UIComponent component,
 													String existingStyle, 
 													Integer pixelWidth, 
@@ -121,6 +192,21 @@ public abstract class AbstractFacesBuilder {
 		setSizeAndTextAlignStyle(component, existingStyle, pixelWidth, responsiveWidth, percentageWidth, pixelHeight, percentageHeight, defaultPercentageWidth, null, null, null);
 	}
 	
+	/**
+	 * Applies width/height and optional text-alignment styling to a component.
+	 *
+	 * @param component the component to style
+	 * @param existingStyle existing inline style text
+	 * @param pixelWidth fixed width in pixels
+	 * @param responsiveWidth responsive width unit
+	 * @param percentageWidth width in percent
+	 * @param pixelHeight fixed height in pixels
+	 * @param percentageHeight height in percent
+	 * @param defaultPercentageWidth default percentage width when no width is specified
+	 * @param textAlign optional text alignment
+	 * @param specialTextAlignStyleAttributeName optional style attribute name for text alignment
+	 * @param rightPaddingIfNecessary optional right padding applied for right alignment
+	 */
 	protected void setSizeAndTextAlignStyle(UIComponent component,
 												String existingStyle, 
 												Integer pixelWidth, 
@@ -188,6 +274,17 @@ public abstract class AbstractFacesBuilder {
 		component.setValueExpression("style", ef.createValueExpression(style.toString(), String.class));
 	}
 
+	/**
+	 * Creates a value expression from a bean-relative fragment.
+	 *
+	 * @param fragment the binding fragment
+	 * @param map whether map-style access should be used
+	 * @param extraELConditionToAnd optional trailing EL condition to AND
+	 * @param typeReturned the expected expression return type
+	 * @param escape whether text should be escaped
+	 * @param sanitise sanitisation mode
+	 * @return the created value expression
+	 */
 	protected ValueExpression createValueExpressionFromFragment(String fragment, 
 																	boolean map,
 																	String extraELConditionToAnd, 
@@ -204,6 +301,19 @@ public abstract class AbstractFacesBuilder {
 													sanitise);
 	}
 
+	/**
+	 * Creates a value expression from a fully-qualified expression prefix and fragment.
+	 *
+	 * @param expressionPrefix the expression prefix
+	 * @param dataWidgetVar whether the prefix is a data-widget variable
+	 * @param fragment the binding or condition fragment
+	 * @param map whether map-style access should be used
+	 * @param extraELConditionToAnd optional trailing EL condition to AND
+	 * @param typeReturned the expected expression return type
+	 * @param escape whether text should be escaped
+	 * @param sanitise sanitisation mode
+	 * @return the created value expression
+	 */
 	protected ValueExpression createValueExpressionFromFragment(String expressionPrefix, 
 																	boolean dataWidgetVar,
 																	String fragment, 
@@ -238,6 +348,13 @@ public abstract class AbstractFacesBuilder {
 		return ef.createValueExpression(elc, sb.toString(), typeReturned);
 	}
 
+	/**
+	 * Creates a boolean value expression from a Skyve condition expression.
+	 *
+	 * @param condition the source condition
+	 * @param extraELConditionToAnd optional trailing EL condition to AND
+	 * @return the created value expression
+	 */
 	protected ValueExpression createValueExpressionFromCondition(String condition, String extraELConditionToAnd) {
 		if (String.valueOf(false).equals(condition)) {
 			return ef.createValueExpression(condition, Boolean.class);
@@ -253,6 +370,12 @@ public abstract class AbstractFacesBuilder {
 		return createValueExpressionFromFragment(condition, true, extraELConditionToAnd, Boolean.class, false, Sanitisation.none);
 	}
 	
+	/**
+	 * Builds an OR expression fragment from multiple conditions.
+	 *
+	 * @param conditions the conditions to join with OR
+	 * @return the OR expression fragment
+	 */
 	protected String createOredValueExpressionFragmentFromConditions(String[] conditions) {
 		StringBuilder result = new StringBuilder(64);
 		
@@ -272,6 +395,12 @@ public abstract class AbstractFacesBuilder {
 		return result.toString();
 	}
 	
+	/**
+	 * Creates an OR-combined boolean value expression from multiple conditions.
+	 *
+	 * @param conditions the conditions to combine
+	 * @return the combined value expression, or {@code null} when no conditions exist
+	 */
 	protected ValueExpression createOredValueExpressionFromConditions(String[] conditions) {
 		if (conditions == null) {
 			return null;
@@ -292,6 +421,16 @@ public abstract class AbstractFacesBuilder {
 		return null;
 	}
 	
+	/**
+	 * Creates a panel group configured for wrap, alignment, visibility, and layout.
+	 *
+	 * @param nowrap whether white-space should be nowrap
+	 * @param middle whether vertical middle alignment is applied
+	 * @param blockLayout whether block layout is used
+	 * @param invisibleConditionName optional invisible condition
+	 * @param widgetId optional widget ID
+	 * @return the configured panel group
+	 */
 	protected HtmlPanelGroup panelGroup(boolean nowrap, 
 											boolean middle, 
 											boolean blockLayout,
@@ -316,6 +455,19 @@ public abstract class AbstractFacesBuilder {
 		return result;
 	}
 	
+	/**
+	 * Creates a PrimeFaces column configured for visibility, size, and spanning.
+	 *
+	 * @param invisible invisible condition
+	 * @param noWrap whether content should be nowrap
+	 * @param top whether top vertical alignment should be applied
+	 * @param pixelWidth fixed width in pixels
+	 * @param responsiveWidth responsive width unit
+	 * @param percentageWidth width in percent
+	 * @param colspan column span
+	 * @param rowspan row span
+	 * @return the configured column
+	 */
 	protected Column column(String invisible, 
 								boolean noWrap, 
 								boolean top, 
@@ -342,6 +494,12 @@ public abstract class AbstractFacesBuilder {
 		return result;
 	}
 	
+	/**
+	 * Creates a PrimeFaces message component for a target input component.
+	 *
+	 * @param forId the target component ID
+	 * @return the configured message component
+	 */
 	protected Message message(String forId) {
 		Message message = (Message) a.createComponent(Message.COMPONENT_TYPE);
 		setId(message, null);

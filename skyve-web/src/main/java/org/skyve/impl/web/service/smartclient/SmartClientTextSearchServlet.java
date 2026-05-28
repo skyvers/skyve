@@ -36,11 +36,23 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+/**
+ * Servlet implementation for text-search requests.
+ * This is used to power the global text search mechanism.
+ */
 public class SmartClientTextSearchServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SmartClientTextSearchServlet.class);
 
+	/**
+	 * Executes SmartClient text-search requests and returns matching indexed content in ISC JSON format.
+	 *
+	 * @param request inbound HTTP request containing search criteria
+	 * @param response outbound HTTP response receiving ISC JSON payload
+	 * @throws ServletException when search execution fails
+	 * @throws IOException when response writing fails
+	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
