@@ -12,6 +12,10 @@ import modules.admin.domain.Configuration;
 import modules.admin.domain.SelfRegistrationActivation;
 import modules.admin.domain.User;
 
+/**
+ * Extends {@link SelfRegistrationActivation} with activation-code processing
+ * and localized message composition for activation outcomes.
+ */
 public class SelfRegistrationActivationExtension extends SelfRegistrationActivation {
 	private static final long serialVersionUID = -852587779096146278L;
 
@@ -70,33 +74,63 @@ public class SelfRegistrationActivationExtension extends SelfRegistrationActivat
 		});
 	}
 
+	/**
+	 * Returns the login URL shown in activation outcome messages.
+	 *
+	 * @return the application login URL
+	 */
 	@Override
 	public String getLoginUrl() {
 		return Util.getSkyveContextUrl() + "/login";
 	}
 
+	/**
+	 * Returns the localized success prompt shown after activation.
+	 *
+	 * @return the success message inviting the user to sign in
+	 */
 	@Override
 	public String getPleaseSignIn() {
 		return Util.nullSafeI18n("admin.selfRegistrationActivation.pleaseSignIn", this.getUser().getContact().getName(), this.getLoginUrl(),
 				this.getUser().getContact().getEmail1());
 	}
 
+	/**
+	 * Returns the localized sign-in hyperlink label.
+	 *
+	 * @return the localized sign-in link text
+	 */
 	@Override
 	public String getSignInLink() {
 		return Util.nullSafeI18n("admin.selfRegistrationActivation.signInLink", this.getLoginUrl());
 	}
 
+	/**
+	 * Returns the localized message for already-activated users.
+	 *
+	 * @return the localized already-activated message
+	 */
 	@Override
 	public String getAlreadyActivated() {
 		return Util.nullSafeI18n("admin.selfRegistrationActivation.alreadyActivated", this.getUser().getContact().getName(),
 				this.getLoginUrl());
 	}
 
+	/**
+	 * Returns the localized message for expired activation links.
+	 *
+	 * @return the localized expired-link message
+	 */
 	@Override
 	public String getNoLongerValid() {
 		return Util.nullSafeI18n("admin.selfRegistrationActivation.noLongerValid", this.getLoginUrl());
 	}
 
+	/**
+	 * Returns the localized message for unknown activation codes.
+	 *
+	 * @return the localized unknown-code message
+	 */
 	@Override
 	public String getNotRecognised() {
 		return Util.nullSafeI18n("admin.selfRegistrationActivation.notRecognised", this.getLoginUrl());

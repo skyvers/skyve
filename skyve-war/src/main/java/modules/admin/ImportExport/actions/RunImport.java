@@ -31,10 +31,26 @@ import modules.admin.domain.ImportExport;
 import modules.admin.domain.ImportExport.RollbackErrors;
 import modules.admin.domain.ImportExportColumn;
 
+/**
+ * Imports spreadsheet data into a target document using configured bindings.
+ */
 public class RunImport implements ServerSideAction<ImportExport> {
-
 	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(RunImport.class);
 
+	/**
+	 * Executes the import workflow for an uploaded spreadsheet file.
+	 * <p>
+	 * The action validates headers, maps configured bindings, iterates data rows,
+	 * saves each resolved bean, and writes user-visible import results.
+	 *
+	 * @param bean
+	 *        the import/export configuration bean
+	 * @param webContext
+	 *        the current web context used for growl feedback
+	 * @return a result wrapping {@code bean}
+	 * @throws Exception
+	 *         if the import pipeline fails
+	 */
 	@Override
 	public ServerSideActionResult<ImportExport> execute(ImportExport bean, WebContext webContext)
 			throws Exception {

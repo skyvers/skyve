@@ -33,11 +33,19 @@ public class ProcessCommunicationForTagJob extends Job {
 	@SuppressWarnings("java:S6813") // allow member injection
 	private transient TagService tagService;
 
+	/**
+	 * Performs the cancel operation.
+	 * @return the operation result
+	 */
 	@Override
 	public String cancel() {
 		return null;
 	}
 
+	/**
+	 * Performs the execute operation.
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public void execute() throws Exception {
 		List<String> log = getLog();

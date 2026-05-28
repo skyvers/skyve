@@ -28,11 +28,21 @@ public class DeleteAllTaggedDataForTagJob extends Job {
 	@SuppressWarnings("java:S6813") // allow member injection
 	private transient TagService tagService;
 
+	/**
+	 * Indicates cancellation is not implemented for this job.
+	 *
+	 * @return Always {@code null}.
+	 */
 	@Override
 	public String cancel() {
 		return null;
 	}
 
+	/**
+	 * Deletes all beans currently associated with the supplied tag.
+	 *
+	 * @throws Exception If retrieval, untag, or delete operations fail.
+	 */
 	@Override
 	public void execute() throws Exception {
 		List<String> log = getLog();

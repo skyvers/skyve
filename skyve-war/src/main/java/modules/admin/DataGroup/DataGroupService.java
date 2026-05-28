@@ -20,7 +20,7 @@ import jakarta.inject.Inject;
 import modules.admin.domain.DataGroup;
 
 /**
- * This class acts as a service layer to encapsulate domain logic.
+ * Provides service operations for admin data group management.
  *
  * Add this line to classes that wish to use it: @Inject private transient DataGroupService dataGroupService;
  */

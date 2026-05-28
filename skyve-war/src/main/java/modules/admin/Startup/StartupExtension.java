@@ -32,6 +32,10 @@ import modules.admin.Country.CountryExtension;
 import modules.admin.Country.CountryService;
 import modules.admin.domain.Startup;
 
+/**
+ * Extends {@link Startup} with logic to load, compare, and persist runtime
+ * configuration overrides for the admin setup experience.
+ */
 public class StartupExtension extends Startup {
 	private static final long serialVersionUID = -8931459527432227257L;
 
@@ -191,7 +195,7 @@ public class StartupExtension extends Startup {
 	/**
 	 * Write any modified configuration properties to the application's override json file.
 	 * 
-	 * @throws IOException
+	 * @throws IOException if writing the override file fails
 	 */
 	public void saveConfiguration() throws IOException {
 		if (Boolean.TRUE.equals(getDontShowAgain())) {
@@ -221,7 +225,7 @@ public class StartupExtension extends Startup {
 	 * property to false so that the startup configuration page is not shown again
 	 * for this Skyve application.
 	 * 
-	 * @throws IOException
+	 * @throws IOException if writing the override file fails
 	 */
 	@SuppressWarnings({ "unchecked" })
 	public void setDontShow() throws IOException {
@@ -596,6 +600,14 @@ public class StartupExtension extends Startup {
 		return map;
 	}
 
+	/**
+	 * Removes empty stanza maps and marshals the remaining override settings to
+	 * JSON.
+	 *
+	 * @param properties override properties grouped by stanza
+	 * @return marshaled JSON when at least one property remains, otherwise
+	 *         {@code null}
+	 */
 	@SuppressWarnings({ "unchecked" })
 	String marshall(final Map<String, Object> properties) {
 		if (!properties.isEmpty()) {
@@ -709,11 +721,10 @@ public class StartupExtension extends Startup {
 	}
 
 	/**
-	 * Marshals the specified map of properties to JSON and creates or overwrites the
-	 * override JSON folder for this Skyve application.
+	 * Writes override configuration JSON to the archive override file.
 	 * 
-	 * @param properties The map of override properties to write
-	 * @throws IOException
+	 * @param json the JSON payload to persist
+	 * @throws IOException if file output fails
 	 */
 	@SuppressWarnings("static-method")
 	void writeConfiguration(final String json) throws IOException {
@@ -727,10 +738,11 @@ public class StartupExtension extends Startup {
 	}
 
 	/**
-	 * This method is used to clear any api values in the json override file found in the content folder
+	 * Clears API stanza values from the in-memory override map and persists the
+	 * updated configuration.
 	 * 
-	 * @param properties
-	 * @throws IOException
+	 * @param properties the override properties map to mutate
+	 * @throws IOException if the updated override file cannot be written
 	 */
 	public void clearApi(Map<String, Object> properties) throws IOException {
 		// initialise or get the existing property map

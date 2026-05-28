@@ -28,14 +28,27 @@ import modules.admin.domain.Group;
 import modules.admin.domain.User;
 import modules.admin.domain.UserList;
 
+/**
+ * Creates users in bulk from an email list and optional invitation delivery settings.
+ */
 public class BulkUserCreationJob extends Job {
 	private static final String SPACE_COMMA_OR_SEMICOLON = "[\\s,;]+";
 
+	/**
+	 * Indicates cancellation is not implemented for this job.
+	 *
+	 * @return Always {@code null}.
+	 */
 	@Override
 	public String cancel() {
 		return null;
 	}
 
+	/**
+	 * Creates users for each validated contact and optionally sends invitations.
+	 *
+	 * @throws Exception If job execution fails.
+	 */
 	@Override
 	public void execute() throws Exception {
 
@@ -78,6 +91,13 @@ public class BulkUserCreationJob extends Job {
 		log.add("Job to create new users has completed - " + created + " users created");
 	}
 
+	/**
+	 * Validates request bean and submits the one-shot bulk creation job.
+	 *
+	 * @param bean Bulk creation request bean.
+	 * @param webContext The current web context.
+	 * @throws Exception If validation fails or scheduling fails.
+	 */
 	public static void kickoffJob(UserList bean, WebContext webContext) throws Exception {
 
 		// validate that some groups are selected
@@ -106,11 +126,10 @@ public class BulkUserCreationJob extends Job {
 	}
 
 	/**
-	 * Perform basic validation of Contact email addresses prior to new users being created
-	 * and return a list of Valid Contacts
-	 * 
-	 * @param bean
-	 * @return
+	 * Validates contact email inputs and returns contact beans safe for user creation.
+	 *
+	 * @param bean Request bean containing raw email list.
+	 * @return Validated contact beans.
 	 */
 	public static List<ContactExtension> getValidatedContacts(UserList bean) {
 
@@ -145,11 +164,13 @@ public class BulkUserCreationJob extends Job {
 	}
 
 	/**
-	 * Create a new user from a contact, using the groups assigned in the UserList bean
-	 * 
-	 * @param contact
-	 * @param bean
-	 * @return the new User (saved)
+	 * Creates and persists one user from a validated contact.
+	 *
+	 * @param c Validated contact.
+	 * @param bean Request bean holding defaults and group assignments.
+	 * @param log Job log collector.
+	 * @return Persisted user, or {@code null} when user exists or creation fails.
+	 * @throws Exception If unexpected persistence failures occur.
 	 */
 	public static User createUserFromContact(ContactExtension c, UserList bean, List<String> log) throws Exception {
 

@@ -15,7 +15,15 @@ import modules.admin.UserDashboard.UserDashboardExtension;
 import modules.admin.domain.Audit;
 import modules.admin.domain.SystemDashboard;
 
+/**
+ * Produces a chart of recent audit activity grouped by document context.
+ */
 public class ActivityContextModel extends ChartModel<SystemDashboard> {
+	/**
+	 * Builds chart data for the top audit contexts over the last two weeks.
+	 *
+	 * @return chart data grouped by audit context
+	 */
 	@Override
 	public ChartData getChartData() {
 		// temporarily elevate user to be able to see Audit records in case they don't usually have access

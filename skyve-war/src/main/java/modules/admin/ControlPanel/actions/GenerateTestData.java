@@ -17,8 +17,17 @@ import org.skyve.web.WebContext;
 import modules.admin.ControlPanel.ControlPanelExtension;
 import modules.admin.domain.ControlPanel;
 
+/**
+ * Schedules generation of test data for the selected scope.
+ */
 public class GenerateTestData implements ServerSideAction<ControlPanelExtension> {
-
+	/**
+	 * Performs the execute operation.
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public ServerSideActionResult<ControlPanelExtension> execute(ControlPanelExtension bean, WebContext webContext)
 			throws Exception {
@@ -35,6 +44,12 @@ public class GenerateTestData implements ServerSideAction<ControlPanelExtension>
 		return new ServerSideActionResult<>(bean);
 	}
 
+	/**
+	 * Validates required inputs before submitting the generate-test-data job.
+	 *
+	 * @param bean The control-panel request bean being validated.
+	 * @throws ValidationException If one or more required inputs are missing or invalid.
+	 */
 	private static void validateFields(ControlPanelExtension bean) {
 		ValidationException ve = new ValidationException();
 
@@ -66,7 +81,7 @@ public class GenerateTestData implements ServerSideAction<ControlPanelExtension>
 			ve.getMessages().add(new Message(ControlPanel.testTagNamePropertyName, "Enter the name of a tag for data tagging"));
 		}
 
-		if (ve.getMessages().size() > 0) {
+		if (! ve.getMessages().isEmpty()) {
 			throw ve;
 		}
 	}

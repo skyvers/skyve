@@ -30,6 +30,9 @@ import modules.admin.JobSchedule.JobCronExpression;
 import modules.admin.User.UserService;
 import modules.admin.domain.ReportTemplate;
 
+/**
+ * Orchestrates report template editing, scheduling options, and dynamic domain values.
+ */
 public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 	@Inject
 	@SuppressWarnings("java:S6813") // allow member injection
@@ -46,6 +49,12 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 	private static final String ANY_CODE = "?";
 	private static final Integer ANY_CODE_SPEC = Integer.valueOf(98);
 
+	/**
+	 * Returns constant domain values for schedule selectors and module lists.
+	 * @param attributeName the attributeName value
+	 * @return the result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public List<DomainValue> getConstantDomainValues(String attributeName) throws Exception {
 
@@ -79,6 +88,13 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 		return super.getConstantDomainValues(attributeName);
 	}
 
+	/**
+	 * Returns dynamic domain values for document selectors scoped to selected modules.
+	 * @param attributeName the attributeName value
+	 * @param bean the bean value
+	 * @return the result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public List<DomainValue> getDynamicDomainValues(String attributeName, ReportTemplateExtension bean) throws Exception {
 		// list documents within modules
@@ -97,6 +113,12 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 		return super.getDynamicDomainValues(attributeName, bean);
 	}
 
+	/**
+	 * Returns role variants used for report visibility restrictions.
+	 * @param attributeName the attributeName value
+	 * @return the result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
 		if (ReportTemplate.restrictToRolePropertyName.equals(attributeName)) {
@@ -106,6 +128,12 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 		return super.getVariantDomainValues(attributeName);
 	}
 
+	/**
+	 * Initialises default schedule selector state for new report templates.
+	 * @param bean the bean value
+	 * @return the result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public ReportTemplateExtension newInstance(ReportTemplateExtension bean) throws Exception {
 		ReportTemplateExtension template = super.newInstance(bean);
@@ -117,6 +145,15 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 		return template;
 	}
 
+	/**
+	 * Normalises edit-state defaults and restores scheduled recipients when opening existing templates.
+	 * @param actionName the implicit action being executed
+	 * @param bean the report template bean
+	 * @param parentBean the parent bean for the current context
+	 * @param webContext the current web context
+	 * @return the report template bean after pre-execute processing
+	 * @throws Exception if pre-execute processing fails
+	 */
 	@Override
 	public ReportTemplateExtension preExecute(ImplicitActionName actionName, ReportTemplateExtension bean,
 			Bean parentBean, WebContext webContext) throws Exception {
@@ -143,6 +180,13 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 		return super.preExecute(actionName, bean, parentBean, webContext);
 	}
 
+	/**
+	 * Handles report-type and scheduling rerender transitions.
+	 * @param source the source value
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public void preRerender(String source, ReportTemplateExtension bean, WebContext webContext) throws Exception {
 		if (ReportTemplate.reportTypePropertyName.equals(source)) {
@@ -162,6 +206,11 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 		super.preRerender(source, bean, webContext);
 	}
 
+	/**
+	 * Hydrates schedule selection flags from persisted cron expressions.
+	 * @param bean the bean value
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public void postLoad(ReportTemplateExtension bean) throws Exception {
 		super.postLoad(bean);
@@ -218,6 +267,11 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 		}
 	}
 
+	/**
+	 * Unschedules job execution before deleting scheduled report templates.
+	 * @param bean the bean value
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public void preDelete(ReportTemplateExtension bean) throws Exception {
 		super.preDelete(bean);
@@ -226,6 +280,11 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 		}
 	}
 
+	/**
+	 * Persists schedule configuration and registers/unregisters report jobs as required.
+	 * @param bean the bean value
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public void preSave(ReportTemplateExtension bean) throws Exception {
 		JobScheduler jobScheduler = EXT.getJobScheduler();
@@ -335,6 +394,12 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 		super.preSave(bean);
 	}
 
+	/**
+	 * Executes validate.
+	 * @param bean the bean value
+	 * @param e the e value
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public void validate(ReportTemplateExtension bean, ValidationException e) throws Exception {
 		super.validate(bean, e);

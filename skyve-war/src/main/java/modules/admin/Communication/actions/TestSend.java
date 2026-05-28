@@ -29,6 +29,13 @@ public class TestSend implements ServerSideAction<Communication> {
 	@SuppressWarnings("java:S6813") // allow member injection
 	private transient UserService userService;
 
+	/**
+	 * Performs the execute operation.
+	 * @param communication the communication value
+	 * @param webContext the webContext value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public ServerSideActionResult<Communication> execute(Communication communication, WebContext webContext) throws Exception {
 

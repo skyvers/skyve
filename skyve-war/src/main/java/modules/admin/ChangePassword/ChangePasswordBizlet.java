@@ -11,8 +11,18 @@ import org.skyve.web.WebContext;
 import jakarta.servlet.http.HttpSession;
 import modules.admin.domain.ChangePassword;
 
+/**
+ * Validates password-change requests and enforces configured password policy.
+ */
 public class ChangePasswordBizlet extends Bizlet<ChangePassword> {
 
+	/**
+	 * Performs the preRerender operation.
+	 * @param source the source value
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public void preRerender(String source, ChangePassword bean, WebContext webContext) throws Exception {
 		if (ChangePassword.newPasswordPropertyName.equals(source)) {
@@ -30,7 +40,7 @@ public class ChangePasswordBizlet extends Bizlet<ChangePassword> {
 	}
 	
 	/**
-	 * Ivalidate the session after a password change and the response has been sent.
+	 * Invalidate the session after a password change and the response has been sent.
 	 */
 	@Override
 	public void postRender(ChangePassword bean, WebContext webContext) {

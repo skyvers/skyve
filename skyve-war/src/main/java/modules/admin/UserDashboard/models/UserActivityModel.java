@@ -28,6 +28,11 @@ public class UserActivityModel extends ChartModel<UserDashboard> {
 	@SuppressWarnings("java:S6813") // allow member injection
 	private transient UserService userService;
 
+	/**
+	 * Builds chart data for current-user daily activity counts over the last 14 days.
+	 *
+	 * @return Time-bucketed activity chart data.
+	 */
 	@Override
 	public ChartData getChartData() {
 		// temporarily elevate user to be able to see Audit records in case they don't usually have access

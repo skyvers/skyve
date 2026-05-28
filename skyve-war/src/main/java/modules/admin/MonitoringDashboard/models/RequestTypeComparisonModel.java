@@ -17,7 +17,14 @@ import modules.admin.domain.MonitoringDashboard.Metric;
 import modules.admin.domain.MonitoringDashboard.Period;
 import modules.admin.domain.MonitoringDashboard.RequestType;
 
+/**
+ * Chart model comparing request performance across request types for selected periods and metrics.
+ */
 public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> {
+	/**
+	 * Builds comparison chart data for request metrics grouped by request type and period.
+	 * @return the result
+	 */
 	@Override
 	public ChartData getChartData() {
 		MonitoringDashboard bean = getBean();

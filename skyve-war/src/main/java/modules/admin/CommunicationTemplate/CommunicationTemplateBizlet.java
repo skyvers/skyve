@@ -6,10 +6,19 @@ import org.skyve.metadata.model.document.Bizlet;
 
 import modules.admin.domain.CommunicationTemplate;
 
+/**
+ * Validates communication template content and merge expression usage.
+ */
 public class CommunicationTemplateBizlet extends Bizlet<CommunicationTemplate> {
 
 	public static final String TEMPLATE_BODY = "{body}";
 
+	/**
+	 * Performs the validate operation.
+	 * @param bean the bean value
+	 * @param e the e value
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public void validate(CommunicationTemplate bean, ValidationException e) throws Exception {
 		if(bean.getTemplate() == null) {

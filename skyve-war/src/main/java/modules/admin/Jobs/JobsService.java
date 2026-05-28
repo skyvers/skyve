@@ -11,20 +11,19 @@ import modules.admin.domain.Job;
 import modules.admin.domain.Jobs;
 
 /**
- * This class acts as a service layer to encapsulate domain logic.
- *
- * Add this line to classes that wish to use it: @Inject private transient JobsService jobsService;
+ * Provides service operations for populating running job information.
  */
 @Default
 public class JobsService {
-
 	/**
 	 * Refreshes the list of running jobs for the given `Jobs` instance.
 	 * This method clears the current list of running jobs and repopulates it
 	 * with the jobs that are currently running in the system.
 	 *
-	 * @param jobs The `Jobs` instance whose running jobs list needs to be refreshed.
-	 * @throws Exception If an error occurs while retrieving the running jobs.
+	 * @param jobs
+	 *        the jobs instance whose running-jobs collection should be refreshed
+	 * @throws Exception
+	 *         if querying the scheduler fails
 	 */
 	@SuppressWarnings("static-method")
 	public final void refresh(Jobs jobs) throws Exception {

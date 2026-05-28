@@ -13,8 +13,24 @@ import org.skyve.web.WebContext;
 
 import modules.admin.domain.DocumentCreator;
 
+/**
+ * Executes script submission for document metadata generation.
+ * <p>
+ * The action validates required inputs, runs the script interpreter, writes
+ * generated module/document metadata to disk, and reports outcomes to the UI.
+ */
 public class Submit implements ServerSideAction<DocumentCreator> {
-
+	/**
+	 * Validates the submission and writes generated metadata output.
+	 *
+	 * @param bean
+	 *        the script submission bean
+	 * @param webContext
+	 *        the current web context used for growl notifications
+	 * @return a result wrapping {@code bean}
+	 * @throws Exception
+	 *         if validation fails or metadata generation cannot complete
+	 */
 	@Override
 	public ServerSideActionResult<DocumentCreator> execute(DocumentCreator bean, WebContext webContext) throws Exception {
 
@@ -27,6 +43,14 @@ public class Submit implements ServerSideAction<DocumentCreator> {
 		return new ServerSideActionResult<>(bean);
 	}
 
+	/**
+	 * Parses and processes the script, then persists generated module/document XML.
+	 *
+	 * @param bean
+	 *        the script source and output configuration
+	 * @param webContext
+	 *        the current web context for user feedback
+	 */
 	@SuppressWarnings("boxing")
 	private static void parseScript(DocumentCreator bean, WebContext webContext) {
 		SkyveScriptInterpreter i = new SkyveScriptInterpreter(bean.getScript(), bean.getDefaultModule());

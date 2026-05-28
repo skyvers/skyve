@@ -14,10 +14,19 @@ import org.skyve.util.logging.SkyveLoggerFactory;
 
 import modules.admin.domain.DataMaintenance;
 
+/**
+ * Deletes selected backup files from the maintenance backup location.
+ */
 public class DeleteBackup implements ServerSideAction<DataMaintenance> {
-
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(DeleteBackup.class);
 
+	/**
+	 * Performs the execute operation.
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public ServerSideActionResult<DataMaintenance> execute(DataMaintenance bean, WebContext webContext)
 			throws Exception {

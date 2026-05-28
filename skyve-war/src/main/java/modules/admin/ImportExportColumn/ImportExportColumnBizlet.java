@@ -24,10 +24,23 @@ import modules.admin.ImportExport.ImportExportUtil;
 import modules.admin.domain.ImportExport.Mode;
 import modules.admin.domain.ImportExportColumn;
 
+/**
+ * Provides binding/domain validation logic for import/export column configuration rows.
+ */
 public class ImportExportColumnBizlet extends Bizlet<ImportExportColumn> {
-
 	private List<DomainValue> bindings = null;
 
+	/**
+	 * Returns dynamic binding choices for the selected parent document.
+	 *
+	 * @param attributeName
+	 *        the attribute requesting dynamic values
+	 * @param bean
+	 *        the current import/export column bean
+	 * @return available binding domain values for {@link ImportExportColumn#bindingNamePropertyName}, otherwise superclass values
+	 * @throws Exception
+	 *         if metadata inspection fails
+	 */
 	@Override
 	public List<DomainValue> getDynamicDomainValues(String attributeName, ImportExportColumn bean) throws Exception {
 
@@ -76,6 +89,19 @@ public class ImportExportColumnBizlet extends Bizlet<ImportExportColumn> {
 		return super.getDynamicDomainValues(attributeName, bean);
 	}
 
+	/**
+	 * Returns completion candidates for binding names.
+	 *
+	 * @param attributeName
+	 *        the attribute requesting completions
+	 * @param value
+	 *        current user-entered text
+	 * @param bean
+	 *        the current import/export column bean
+	 * @return available binding completions for {@link ImportExportColumn#bindingNamePropertyName}, otherwise superclass values
+	 * @throws Exception
+	 *         if metadata inspection fails
+	 */
 	@Override
 	public List<String> complete(String attributeName, String value, ImportExportColumn bean) throws Exception {
 		if (ImportExportColumn.bindingNamePropertyName.equals(attributeName)) {
@@ -118,6 +144,21 @@ public class ImportExportColumnBizlet extends Bizlet<ImportExportColumn> {
 		return super.complete(attributeName, value, bean);
 	}
 
+	/**
+	 * Validates binding or expression syntax before saving the inline row.
+	 *
+	 * @param actionName
+	 *        the pending implicit action
+	 * @param bean
+	 *        the import/export column being validated
+	 * @param parentBean
+	 *        the parent bean from the conversation
+	 * @param webContext
+	 *        the current web context
+	 * @return the bean passed to the superclass pre-execute pipeline
+	 * @throws Exception
+	 *         if validation fails
+	 */
 	@Override
 	public ImportExportColumn preExecute(ImplicitActionName actionName, ImportExportColumn bean, Bean parentBean,
 			WebContext webContext) throws Exception {
@@ -182,5 +223,4 @@ public class ImportExportColumnBizlet extends Bizlet<ImportExportColumn> {
 
 		return super.preExecute(actionName, bean, parentBean, webContext);
 	}
-
 }

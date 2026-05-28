@@ -8,8 +8,20 @@ import org.skyve.web.WebContext;
 import modules.whosin.domain.Staff;
 import modules.whosin.domain.Staff.Status;
 
+/**
+ * Applies hierarchy and location-driven status rules for {@link Staff} records.
+ */
 public class StaffBizlet extends Bizlet<Staff> {
-
+	/**
+	 * Synchronises transient reporting relationships and office-presence status before execution.
+	 *
+	 * @param actionName the implicit action being executed
+	 * @param bean the staff bean under edit
+	 * @param parentBean the parent bean in the interaction context
+	 * @param webContext the active web context
+	 * @return the bean to continue processing
+	 * @throws Exception if lifecycle processing fails
+	 */
 	@Override
 	public Staff preExecute(ImplicitActionName actionName, Staff bean, Bean parentBean, WebContext webContext) throws Exception {
 
@@ -43,6 +55,14 @@ public class StaffBizlet extends Bizlet<Staff> {
 		return super.preExecute(actionName, bean, parentBean, webContext);
 	}
 
+	/**
+	 * Repositions staff to the office centroid when status is set to in-office during rerender.
+	 *
+	 * @param source the source binding that triggered rerender
+	 * @param bean the staff bean being rerendered
+	 * @param webContext the active web context
+	 * @throws Exception if rerender preprocessing fails
+	 */
 	@Override
 	public void preRerender(String source, Staff bean, WebContext webContext) throws Exception {
 
@@ -55,5 +75,4 @@ public class StaffBizlet extends Bizlet<Staff> {
 
 		super.preRerender(source, bean, webContext);
 	}
-
 }

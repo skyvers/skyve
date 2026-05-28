@@ -4,6 +4,9 @@ import jakarta.inject.Inject;
 import modules.admin.Audit.AuditService;
 import modules.admin.domain.AuditList;
 
+/**
+ * Extends Audit List documents with admin-specific runtime behaviour.
+ */
 public class AuditListExtension extends AuditList {
 
 	private static final long serialVersionUID = -2480022026425411282L;

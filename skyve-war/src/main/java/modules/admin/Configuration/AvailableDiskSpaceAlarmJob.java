@@ -12,6 +12,9 @@ import org.skyve.util.CommunicationUtil.RunMode;
 import modules.admin.domain.Configuration;
 import modules.admin.domain.Generic;
 
+/**
+ * Raises an alarm when available disk space drops below the configured threshold.
+ */
 public class AvailableDiskSpaceAlarmJob extends Job {
 	private static final Integer DEFAULT_AVAILABLE_DISK_SPACE_ALARM_LEVEL_PERCENTAGE = Integer.valueOf(10);
 	private static final String AVAILABLE_DISK_SPACE_ALARM_NOFITICATION = "Available Disk Space Alarm Notification";
@@ -19,6 +22,10 @@ public class AvailableDiskSpaceAlarmJob extends Job {
 	private static final String AVAILABLE_DISK_SPACE_ALARM_DEFAULT_SUBJECT = "Disk space notification for {#context}";
 	private static final String AVAILABLE_DISK_SPACE_ALARM_DEFAULT_BODY = "<p>{text5001} available disk space has fallen below the alarm level:</p><p>{markup1}</p>";
 
+	/**
+	 * Performs the cancel operation.
+	 * @return the operation result
+	 */
 	@Override
 	public String cancel() {
 		return null;

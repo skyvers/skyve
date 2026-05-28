@@ -17,10 +17,18 @@ import org.skyve.util.logging.SkyveLoggerFactory;
 
 import modules.admin.domain.DataMaintenance;
 
+/**
+ * Streams the selected backup file to the client.
+ */
 public class DownloadBackup extends DownloadAction<DataMaintenance> {
-
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(DownloadBackup.class);
 
+	/**
+	 * Performs the prepare operation.
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public void prepare(DataMaintenance bean, WebContext webContext) throws Exception {
 		String selectedBackupName = bean.getSelectedBackupName();
@@ -45,6 +53,13 @@ public class DownloadBackup extends DownloadAction<DataMaintenance> {
 		}
 	}
 
+	/**
+	 * Performs the download operation.
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public Download download(DataMaintenance bean, WebContext webContext)
 	throws Exception {

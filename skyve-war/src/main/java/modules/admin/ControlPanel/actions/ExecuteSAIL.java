@@ -22,8 +22,18 @@ import modules.admin.domain.UserProxy;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+/**
+ * Executes SAIL automation against the selected runtime context.
+ */
 public class ExecuteSAIL implements ServerSideAction<ControlPanelExtension> {
 	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ExecuteSAIL.class);
+	/**
+	 * Performs the execute operation.
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public ServerSideActionResult<ControlPanelExtension> execute(ControlPanelExtension bean, WebContext webContext)
 	throws Exception {

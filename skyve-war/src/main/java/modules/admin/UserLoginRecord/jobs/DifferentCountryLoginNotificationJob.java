@@ -44,11 +44,21 @@ public class DifferentCountryLoginNotificationJob extends Job {
 			+ "Best regards,<br/>"
 			+ "The Security Team";
 
+	/**
+	 * Disables persistence of successful job executions for this notification job.
+	 *
+	 * @return {@code false} to avoid storing successful executions.
+	 */
 	@Override
 	public boolean persistJobExecutionOnSuccess() {
 		return false;
 	}
 
+	/**
+	 * Sends a different-country login email warning to the affected user.
+	 *
+	 * @throws Exception If notification processing fails.
+	 */
 	@Override
 	public void execute() throws Exception {
 		List<String> log = getLog();

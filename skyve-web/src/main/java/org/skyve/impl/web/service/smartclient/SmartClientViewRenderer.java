@@ -1573,6 +1573,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		String queryName = widget.getQueryName();
 		String modelName = widget.getModelName();
 		String dataSourceId = null;
+		if ((module == null) || (document == null)) {
+			throw new MetaDataException("Cannot render list widget without module and document context");
+		}
 		if (queryName != null) { // its a query
 			MetaDataQueryDefinition query = module.getNullSafeMetaDataQuery(queryName);
 			StringBuilder ds = new StringBuilder(256);

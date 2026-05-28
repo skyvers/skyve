@@ -8,6 +8,9 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import modules.admin.domain.Tag;
 import modules.admin.domain.Tagged;
 
+/**
+ * Extends {@link Tag} with convenience counters backed by tagged-row aggregation.
+ */
 public class TagExtension extends Tag {
 	private static final long serialVersionUID = -5043937504771795370L;
 
@@ -37,14 +40,11 @@ public class TagExtension extends Tag {
 	}
 	
 	/**
-	 * Return the number of tagged items for this tag
-	 * Optionally filtered for a specific module.document
-	 * 
-	 * @param bean
-	 * @param moduleName
-	 * @param documentName
-	 * @return
-	 * @throws Exception
+	 * Returns tagged-row count for this tag, optionally constrained to one module/document pair.
+	 *
+	 * @param moduleName Optional module filter.
+	 * @param documentName Optional document filter.
+	 * @return The matching tagged-row count, defaulting to zero on query failure.
 	 */
 	private long count(String moduleName, String documentName) {
 

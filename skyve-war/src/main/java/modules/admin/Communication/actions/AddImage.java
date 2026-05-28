@@ -11,8 +11,20 @@ import org.skyve.web.WebContext;
 
 import modules.admin.domain.Communication;
 
+/**
+ * Uploads an image and inserts its reference into communication content.
+ */
 public class AddImage extends UploadAction<Communication> {
 
+	/**
+	 * Performs the upload operation.
+	 * @param communication the communication value
+	 * @param upload the upload value
+	 * @param exception the exception value
+	 * @param webContext the webContext value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public Communication upload(Communication communication, Upload upload, UploadException exception, WebContext webContext) throws Exception {
 

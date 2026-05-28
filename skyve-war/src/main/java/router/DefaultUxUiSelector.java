@@ -17,10 +17,16 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import modules.admin.domain.Startup;
 
+/**
+ * Selects the effective UX/UI profile for incoming web requests.
+ */
 public class DefaultUxUiSelector implements UxUiSelector {
 
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(DefaultUxUiSelector.class);
 
+	/**
+	 * Session key that records whether the startup wizard has been dismissed.
+	 */
 	public static final String DISMISS_STARTUP = "DISMISS_STARTUP";
 
 	private static final Map<String, UxUi> uxuis = new TreeMap<>();
@@ -32,6 +38,13 @@ public class DefaultUxUiSelector implements UxUiSelector {
 		uxuis.put(UxUis.STARTUP.getName(), UxUis.STARTUP);
 	}
 
+	/**
+	 * Selects the UX/UI profile for the current request.
+	 *
+	 * @param userAgentType the detected user-agent category
+	 * @param request the current servlet request
+	 * @return the selected UX/UI profile
+	 */
 	@Override
 	public UxUi select(UserAgentType userAgentType, HttpServletRequest request) {
 		// public pages are destined for external UX/UI always
@@ -73,6 +86,13 @@ public class DefaultUxUiSelector implements UxUiSelector {
 		}
 	}
 	
+	/**
+	 * Selects the emulated UX/UI profile for preview and testing scenarios.
+	 *
+	 * @param userAgentType the requested user-agent category
+	 * @param request the current servlet request
+	 * @return the emulated UX/UI profile
+	 */
 	@Override
 	public UxUi emulate(UserAgentType userAgentType, HttpServletRequest request) {
 		switch (userAgentType) {

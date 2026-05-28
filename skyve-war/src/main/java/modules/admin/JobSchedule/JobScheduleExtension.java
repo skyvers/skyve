@@ -13,15 +13,17 @@ import com.cronutils.parser.CronParser;
 
 import modules.admin.domain.JobSchedule;
 
+/**
+ * Extends {@link JobSchedule} with display and conversion helpers.
+ */
 public class JobScheduleExtension extends JobSchedule {
-
 	private static final long serialVersionUID = 1881085154489046318L;
 	private static final CronDefinition CRON_DEFINITION = CronDefinitionBuilder.instanceDefinitionFor(CronType.QUARTZ);
 
 	/**
 	 * Gets a human-readable description of the cron schedule.
 	 * 
-	 * @return A string describing the schedule in natural language
+	 * @return a natural-language schedule description
 	 */
 	@Override
 	public String getScheduleString() {
@@ -32,7 +34,7 @@ public class JobScheduleExtension extends JobSchedule {
 	 * Generates a bizKey for the job schedule.
 	 * The bizKey is a combination of the module name and the localized display name of the job.
 	 * 
-	 * @return A string in the format "Module Name - Job Display Name", or an empty string if an error occurs.
+	 * @return a string in the format {@code Module - Job Display Name}, or an empty string if resolution fails
 	 */
 	public String bizKey() {
 		try {
@@ -60,7 +62,7 @@ public class JobScheduleExtension extends JobSchedule {
 	 *   <li>endTime → endTime</li>
 	 * </ul>
 	 * 
-	 * @return A new {@link org.skyve.job.JobSchedule} instance populated with this schedule's values
+	 * @return a new {@link org.skyve.job.JobSchedule} populated with this schedule values
 	 */
 	org.skyve.job.JobSchedule toJobSchedule() {
 		org.skyve.job.JobSchedule result = new org.skyve.job.JobSchedule();

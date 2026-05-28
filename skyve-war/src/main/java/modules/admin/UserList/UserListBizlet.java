@@ -14,8 +14,17 @@ import org.skyve.persistence.Persistence;
 import modules.admin.domain.Group;
 import modules.admin.domain.UserList;
 
+/**
+ * Supplies module and group domain values for bulk user-list workflows.
+ */
 public class UserListBizlet extends Bizlet<UserList> {
-
+	/**
+	 * Resolves selectable modules and invitation groups.
+	 *
+	 * @param attributeName The attribute requiring variant values.
+	 * @return Domain values for the requested attribute.
+	 * @throws Exception If domain lookup fails.
+	 */
 	@Override
 	public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
 		Persistence persistence = CORE.getPersistence();
@@ -40,5 +49,4 @@ public class UserListBizlet extends Bizlet<UserList> {
 		}
 		return super.getVariantDomainValues(attributeName);
 	}
-
 }

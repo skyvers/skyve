@@ -25,6 +25,9 @@ import jakarta.inject.Inject;
 import modules.admin.ReportParameter.ReportParameterExtension;
 import modules.admin.domain.ReportDataset;
 
+/**
+ * Extends report datasets with query parameter discovery and executable dataset evaluation.
+ */
 public class ReportDatasetExtension extends ReportDataset {
 	private static final long serialVersionUID = -688307133122437337L;
 
@@ -205,6 +208,7 @@ public class ReportDatasetExtension extends ReportDataset {
 	 * in use by the dataset.
 	 * 
 	 * @return The list of beans from the query
+	 * @throws Exception if the operation fails
 	 */
 	@Override
 	public List<DynaBean> executeSQLQuery() throws Exception {
@@ -315,6 +319,7 @@ public class ReportDatasetExtension extends ReportDataset {
 	 * in use by the dataset query.
 	 * 
 	 * @return The list of beans from the query
+	 * @throws Exception if the operation fails
 	 */
 	public List<DynaBean> executeTestSQLQuery() throws Exception {
 		if (DatasetType.SQL != getDatasetType()) {
@@ -433,20 +438,37 @@ public class ReportDatasetExtension extends ReportDataset {
 		private final String query;
 		private final Map<String, DateOnly> parameters;
 
+		/**
+		 * Creates a substituted query result with no date parameters.
+		 * @param query the substituted query text
+		 */
 		public SubstitutedQueryResult(String query) {
 			this.query = query;
 			this.parameters = new HashMap<>();
 		}
 
+		/**
+		 * Creates a substituted query result with query text and replacement parameters.
+		 * @param query the substituted query text
+		 * @param parameters the replacement date parameters keyed by generated parameter name
+		 */
 		public SubstitutedQueryResult(final String query, final Map<String, DateOnly> parameters) {
 			this.query = query;
 			this.parameters = parameters != null ? parameters : new HashMap<>();
 		}
 
+		/**
+		 * Executes getQuery.
+		 * @return the result
+		 */
 		public String getQuery() {
 			return query;
 		}
 
+		/**
+		 * Executes getParameters.
+		 * @return the result
+		 */
 		public Map<String, DateOnly> getParameters() {
 			return parameters;
 		}

@@ -25,6 +25,16 @@ import modules.admin.domain.Tag.FilterAction;
  * tagging operations by uploading spreadsheet data with filter conditions.
  */
 public class UploadTagCriteria extends UploadAction<TagExtension> {
+	/**
+	 * Processes an uploaded spreadsheet and tags or untags matching records.
+	 *
+	 * @param tag The tag definition receiving upload results.
+	 * @param upload Uploaded spreadsheet metadata and stream.
+	 * @param exception Collector for upload validation problems.
+	 * @param webContext The current web context.
+	 * @return The updated tag bean.
+	 * @throws Exception If spreadsheet parsing or tagging fails.
+	 */
 	@Override
 	public TagExtension upload(TagExtension tag,
 			Upload upload,

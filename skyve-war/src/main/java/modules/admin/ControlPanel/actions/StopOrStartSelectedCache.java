@@ -17,7 +17,17 @@ import org.skyve.web.WebContext;
 
 import modules.admin.ControlPanel.ControlPanelExtension;
 
+/**
+ * Starts or stops selected caches in the cache provider.
+ */
 public class StopOrStartSelectedCache implements ServerSideAction<ControlPanelExtension> {
+	/**
+	 * Performs the execute operation.
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public ServerSideActionResult<ControlPanelExtension> execute(ControlPanelExtension bean, WebContext webContext) throws Exception {
 		bean.setTabIndex(null);

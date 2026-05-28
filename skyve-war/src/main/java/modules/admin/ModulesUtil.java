@@ -36,7 +36,6 @@ import modules.admin.domain.GroupRole;
  *
  * @author robert.brown
  * @deprecated This class is deprecated and will be removed in a future version.
- *
  */
 @Deprecated
 public class ModulesUtil {
@@ -432,6 +431,11 @@ public class ModulesUtil {
 		return date;
 	}
 
+	/**
+	 * Performs the sqlFormatDateOnly operation.
+	 * @param theDate the theDate value
+	 * @return the operation result
+	 */
 	public static String sqlFormatDateOnly(DateOnly theDate) {
 		String result = "";
 
@@ -514,6 +518,12 @@ public class ModulesUtil {
 		}
 	}
 
+	/**
+	 * Performs the addValidationError operation.
+	 * @param e the e value
+	 * @param fieldName the fieldName value
+	 * @param messageString the messageString value
+	 */
 	public static void addValidationError(ValidationException e, String fieldName, String messageString) {
 		Message vM = new Message(messageString);
 		vM.addBinding(fieldName);
@@ -776,5 +786,4 @@ public class ModulesUtil {
 
 		return g;
 	}
-
 }

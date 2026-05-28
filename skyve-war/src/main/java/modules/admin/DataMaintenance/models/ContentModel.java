@@ -34,14 +34,21 @@ import org.skyve.util.logging.SkyveLoggerFactory;
 import modules.admin.domain.Content;
 import modules.admin.domain.DataMaintenance;
 
+/**
+ * Lists content repository records and projections for the Data Maintenance content grid.
+ */
 public class ContentModel extends ListModel<DataMaintenance> {
-
 	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ContentModel.class);
 
 	private Document drivingDocument = null;
 	private Set<String> projections = new TreeSet<>();
 	private List<MetaDataQueryColumn> columns = new ArrayList<>(1);
 
+	/**
+	 * Performs the postConstruct operation.
+	 * @param customer the customer value
+	 * @param runtime the runtime value
+	 */
 	@Override
 	public void postConstruct(Customer customer, boolean runtime) {
 		drivingDocument = customer.getModule(Content.MODULE_NAME).getDocument(customer, Content.DOCUMENT_NAME);
@@ -94,43 +101,77 @@ public class ContentModel extends ListModel<DataMaintenance> {
 		columns.add(column);
 	}
 
+	/**
+	 * Performs the getDescription operation.
+	 * @return the operation result
+	 */
 	@Override
 	public String getDescription() {
 		return "All Content";
 	}
 
+	/**
+	 * Performs the getDrivingDocument operation.
+	 * @return the operation result
+	 */
 	@Override
 	public Document getDrivingDocument() {
 		return drivingDocument;
 	}
 
+	/**
+	 * Performs the getColumns operation.
+	 * @return the operation result
+	 */
 	@Override
 	public List<MetaDataQueryColumn> getColumns() {
 		return columns;
 	}
 
+	/**
+	 * Performs the getProjections operation.
+	 * @return the operation result
+	 */
 	@Override
 	public Set<String> getProjections() {
 		return projections;
 	}
 
+	/**
+	 * Performs the getFilter operation.
+	 * @return the operation result
+	 */
 	@Override
 	public Filter getFilter() {
 		// not required
 		return null;
 	}
 
+	/**
+	 * Performs the newFilter operation.
+	 * @return the operation result
+	 */
 	@Override
 	public Filter newFilter() {
 		// not required
 		return null;
 	}
 
+	/**
+	 * Performs the putParameter operation.
+	 * @param name the name value
+	 * @param value the value value
+	 */
 	@Override
 	public void putParameter(String name, Object value) {
 		// not required
 	}
 
+	/**
+	 * Performs the fetch operation.
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@SuppressWarnings("boxing")
 	@Override
 	public Page fetch() throws Exception {
@@ -202,17 +243,34 @@ public class ContentModel extends ListModel<DataMaintenance> {
 		}
 	}
 
+	/**
+	 * Performs the iterate operation.
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public AutoClosingIterable<Bean> iterate() throws Exception {
 		throw new IllegalStateException("NOT IMPLEMENTED");
 	}
 
+	/**
+	 * Performs the update operation.
+	 * @param bizId the bizId value
+	 * @param properties the properties value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public Bean update(String bizId, SortedMap<String, Object> properties)
 			throws Exception {
 		throw new IllegalStateException("NOT IMPLEMENTED");
 	}
 
+	/**
+	 * Performs the remove operation.
+	 * @param bizId the bizId value
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public void remove(String bizId) throws Exception {
 		throw new IllegalStateException("NOT IMPLEMENTED");

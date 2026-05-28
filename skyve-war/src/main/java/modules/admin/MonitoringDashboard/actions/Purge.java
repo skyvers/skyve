@@ -11,6 +11,12 @@ import modules.admin.domain.MonitoringDashboard;
  * Purges all measurements and starts again monitoring from the current time.
  */
 public class Purge implements ServerSideAction<MonitoringDashboard> {
+	/**
+	 * Executes execute.
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @return the result
+	 */
 	@Override
 	public ServerSideActionResult<MonitoringDashboard> execute(MonitoringDashboard bean, WebContext webContext) {
 		Monitoring.purge();

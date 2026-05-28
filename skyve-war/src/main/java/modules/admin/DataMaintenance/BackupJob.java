@@ -18,12 +18,23 @@ import org.skyve.util.FileUtil;
 
 import modules.admin.domain.DataMaintenance;
 
+/**
+ * Runs background backup generation and records progress for Data Maintenance.
+ */
 public class BackupJob extends Job {
+	/**
+	 * Performs the cancel operation.
+	 * @return the operation result
+	 */
 	@Override
 	public String cancel() {
 		return null;
 	}
 
+	/**
+	 * Performs the execute operation.
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public void execute() throws Exception {
 		DateOnly now = new DateOnly();

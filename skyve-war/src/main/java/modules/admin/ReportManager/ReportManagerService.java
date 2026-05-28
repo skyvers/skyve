@@ -15,7 +15,7 @@ import org.skyve.util.logging.SkyveLoggerFactory;
 import jakarta.enterprise.inject.Default;
 
 /**
- * This class acts as a service layer to encapsulate domain logic.
+ * Manages filesystem paths and temporary artefacts used by report import/export workflows.
  *
  * Add this line to classes that wish to use it: @Inject private transient ReportManagerService reportManagerService;
  */

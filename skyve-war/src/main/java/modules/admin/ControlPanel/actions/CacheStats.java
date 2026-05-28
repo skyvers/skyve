@@ -20,7 +20,17 @@ import org.skyve.web.WebContext;
 
 import modules.admin.ControlPanel.ControlPanelExtension;
 
+/**
+ * Collects and exposes runtime cache statistics for inspection.
+ */
 public class CacheStats implements ServerSideAction<ControlPanelExtension> {
+	/**
+	 * Performs the execute operation.
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public ServerSideActionResult<ControlPanelExtension> execute(ControlPanelExtension bean, WebContext webContext) throws Exception {
 		final Caching caching = EXT.getCaching();
@@ -56,6 +66,12 @@ public class CacheStats implements ServerSideAction<ControlPanelExtension> {
 		return new ServerSideActionResult<>(bean);
 	}
 	
+	/**
+	 * Performs the addEHCacheStats operation.
+	 * @param cacheName the cacheName value
+	 * @param stats the stats value
+	 * @param sb the sb value
+	 */
 	public static void addEHCacheStats(String cacheName, CacheStatistics stats, StringBuilder sb) {
 		final Caching caching = EXT.getCaching();
 
@@ -90,6 +106,12 @@ public class CacheStats implements ServerSideAction<ControlPanelExtension> {
 		sb.append("</tr>");
 	}
 
+	/**
+	 * Performs the addJCacheStats operation.
+	 * @param cacheName the cacheName value
+	 * @param stats the stats value
+	 * @param sb the sb value
+	 */
 	public static void addJCacheStats(String cacheName, CacheStatisticsMXBean stats, StringBuilder sb) {
 		sb.append("<tr><td style=\"padding:20px\">");
 		sb.append("<h1>").append(cacheName).append("</h1>");
@@ -98,6 +120,12 @@ public class CacheStats implements ServerSideAction<ControlPanelExtension> {
 		sb.append("</tr>");
 	}
 
+	/**
+	 * Appends EHCache-level cache statistics to the HTML response table.
+	 *
+	 * @param stats The EHCache statistics source.
+	 * @param sb The HTML output buffer.
+	 */
 	private static void addStats(CacheStatistics stats, StringBuilder sb) {
 		if (stats == null) {
 			sb.append("No stats<br/>");
@@ -115,6 +143,12 @@ public class CacheStats implements ServerSideAction<ControlPanelExtension> {
 		}
 	}
 	
+	/**
+	 * Appends EHCache tier-level statistics to the HTML response table.
+	 *
+	 * @param stats The tier statistics source.
+	 * @param sb The HTML output buffer.
+	 */
 	private static void addStats(TierStatistics stats, StringBuilder sb) {
 		if (stats != null) {
 			sb.append("Allocated Byte Size: ").append(stats.getAllocatedByteSize()).append("<br/>");
@@ -129,6 +163,12 @@ public class CacheStats implements ServerSideAction<ControlPanelExtension> {
 		}
 	}
 
+	/**
+	 * Appends JCache statistics to the HTML response table.
+	 *
+	 * @param stats The JCache statistics source.
+	 * @param sb The HTML output buffer.
+	 */
 	private static void addStats(CacheStatisticsMXBean stats, StringBuilder sb) {
 		if (stats == null) {
 			sb.append("No Stats<br/>");

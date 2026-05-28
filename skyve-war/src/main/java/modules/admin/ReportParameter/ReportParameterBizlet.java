@@ -7,8 +7,16 @@ import org.skyve.metadata.model.document.Bizlet;
 
 import modules.admin.domain.ReportParameter;
 
+/**
+ * Validates report parameter naming and required test values during report design.
+ */
 public class ReportParameterBizlet extends Bizlet<ReportParameterExtension> {
-
+	/**
+	 * Validates parameter naming conventions and required test-value inputs.
+	 * @param bean the bean value
+	 * @param e the e value
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public void validate(ReportParameterExtension bean, ValidationException e) throws Exception {
 		// validate the report name cannot contain spaces or special characters
@@ -46,5 +54,4 @@ public class ReportParameterBizlet extends Bizlet<ReportParameterExtension> {
 		}
 		super.validate(bean, e);
 	}
-
 }

@@ -16,7 +16,17 @@ import modules.whosin.domain.Office;
 import modules.whosin.domain.Staff;
 import modules.whosin.domain.Staff.Status;
 
+/**
+ * Produces map features for an office and its staff members.
+ */
 public class OfficeMap extends MapModel<Office> {
+	/**
+	 * Builds a map result containing the office polygon and visible staff markers.
+	 *
+	 * @param mapBounds the viewport bounds to test for feature visibility
+	 * @return map items for the selected office and related staff records
+	 * @throws Exception if data retrieval fails
+	 */
 	@Override
 	public MapResult getResult(Geometry mapBounds) throws Exception {
 		Office office = getBean();		

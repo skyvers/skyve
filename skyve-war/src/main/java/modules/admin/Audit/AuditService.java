@@ -46,21 +46,23 @@ public class AuditService {
 	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(AuditService.class);
 
 	/**
-	 * Retrieves an Audit record from the relational database by its BizID.
-	 * 
-	 * @param bizId The BizID of the Audit record to retrieve
-	 * @return The Audit record, or null if not found
+	 * Retrieves an audit record from the relational database by business identifier.
+	 *
+	 * @param bizId the business identifier of the audit record to retrieve; never {@code null}
+	 * @return the database audit record, or {@code null} if no live row exists
 	 */
 	public Audit retrieveFromRdbms(String bizId) {
 		return persistence.retrieve(Audit.MODULE_NAME, Audit.DOCUMENT_NAME, bizId);
 	}
 
 	/**
-	 * Retrieve the request Audit from the archives (if Audit archiving is
-	 * enabled).
-	 * 
-	 * @return The requested bean, or null if it isn't found or if Audit
-	 *         archiving isn't configured.
+	 * Retrieves an audit record from the archive store when archiving is configured.
+	 *
+	 * <p>If archiving is not enabled for the audit document, the method returns
+	 * {@code null} without attempting a lookup.
+	 *
+	 * @param bizId the business identifier of the audit record to retrieve; never {@code null}
+	 * @return the archived audit record, or {@code null} if archiving is disabled or the record is absent
 	 */
 	public Audit retrieveFromArchives(String bizId) {
 
@@ -74,13 +76,14 @@ public class AuditService {
 	}
 
 	/**
-	 * Retrieves all available versions of an audit record from both the database and archives.
-	 * The method combines results from both sources, removes duplicate insert operations,
-	 * and returns them as domain values suitable for UI selection components.
-	 * 
-	 * @param bean The audit record to find versions for
-	 * @param forComparison If true, only returns versions that occurred before the given audit record (for comparison purposes)
-	 * @return A list of domain values representing available audit versions
+	 * Retrieves the available versions for an audit record from both the database and the archive.
+	 *
+	 * <p>The combined result is deduplicated, sorted newest-first, and converted into domain
+	 * values suitable for selection controls.
+	 *
+	 * @param bean the audit record whose versions are being enumerated; never {@code null}
+	 * @param forComparison {@code true} to return only versions older than the selected source audit
+	 * @return the available version choices, never {@code null}
 	 */
 	public List<DomainValue> getVersions(Audit bean, boolean forComparison) {
 
@@ -97,12 +100,14 @@ public class AuditService {
 	}
 
 	/**
-	 * Retrieves audit record versions from the relational database for a given audit record.
-	 * When used for comparison, only returns records that occurred before the specified audit.
-	 * 
-	 * @param audit The audit record to find versions for
-	 * @param forComparison If true, only returns versions that occurred before the given audit record
-	 * @return A list of audit record versions from the database, limited to 100 results
+	 * Retrieves audit versions from the relational database for the supplied audit record.
+	 *
+	 * <p>When {@code forComparison} is {@code true}, the method returns only records older than
+	 * the selected audit and suppresses comparison lookup for non-update operations.
+	 *
+	 * @param audit the audit record to find versions for; never {@code null}
+	 * @param forComparison {@code true} to limit the result to earlier versions
+	 * @return the database versions, limited to 100 rows; never {@code null}
 	 */
 	@SuppressWarnings("static-method")
 	public List<Bean> getRdbmsVersions(Audit audit, boolean forComparison) {
@@ -134,13 +139,14 @@ public class AuditService {
 	}
 
 	/**
-	 * Retrieves audit record versions from the Lucene for a given audit record.
-	 * When used for comparison, only returns records that occurred before the specified audit.
-	 * Returns an empty list if audit archiving is not configured.
-	 * 
-	 * @param audit The audit record to find versions for
-	 * @param forComparison If true, only returns versions that occurred before the given audit record
-	 * @return A list of audit record versions from the archives, limited to 500 results
+	 * Retrieves audit versions from the archive index for the supplied audit record.
+	 *
+	 * <p>When archiving is disabled, the method returns an empty list. When
+	 * {@code forComparison} is {@code true}, only older audit versions are retained.
+	 *
+	 * @param audit the audit record to find versions for; never {@code null}
+	 * @param forComparison {@code true} to limit the result to earlier versions
+	 * @return the archived versions, limited to 500 rows; never {@code null}
 	 */
 	@SuppressWarnings("boxing")
 	public List<Audit> getLuceneVersions(Audit audit, boolean forComparison) {
@@ -167,12 +173,11 @@ public class AuditService {
 	}
 
 	/**
-	 * Merges two lists of audit records - one from the Lucene archive system and one from the RDBMS.
-	 * Eliminates duplicates by preferring Lucene versions over RDBMS versions when the same bizID exists in both lists.
-	 * 
-	 * @param luceneVersions List of audit records from the Lucene archive system
-	 * @param rdbmsVersions List of audit records from the relational database
-	 * @return A merged list containing all unique audit records, with Lucene versions taking precedence over RDBMS duplicates
+	 * Merges archive and database audit lists while preferring archived rows on duplicate identifiers.
+	 *
+	 * @param luceneVersions the archived audit rows; never {@code null}
+	 * @param rdbmsVersions the relational audit rows; never {@code null}
+	 * @return the merged list of unique audit rows, never {@code null}
 	 */
 	private static List<Bean> merge(List<Audit> luceneVersions, List<Bean> rdbmsVersions) {
 
@@ -193,11 +198,12 @@ public class AuditService {
 	}
 
 	/**
-	 * Remove all but the oldest Insert operations and sort the
-	 * provided list of audits newest to oldest.
-	 * 
-	 * @param audits The list of audits, must be sorted so the older audit
-	 *        is at the end of the list
+	 * Sorts the supplied audit beans newest-first and removes duplicate insert rows.
+	 *
+	 * <p>The oldest record is preserved even when it is an insert so the comparison
+	 * UI always has a terminal baseline row.
+	 *
+	 * @param audits the audit rows to normalise; must be mutable and never {@code null}
 	 */
 	@SuppressWarnings("static-method")
 	private void cleanSortAuditList(List<Bean> audits) {
@@ -238,11 +244,12 @@ public class AuditService {
 	}
 
 	/**
-	 * The "Source Version To Compare" selection has changed, update the available
-	 * comparison versions options ("Other Version To Compare"), picking the first option
-	 * as a default.
-	 * 
-	 * @param bean The audit record containing the source version selection and where the comparison version will be set
+	 * Recomputes the comparison-version selection after the source-version choice changes.
+	 *
+	 * <p>The first eligible comparison version is selected automatically when a matching
+	 * source update exists; otherwise the comparison selection is cleared.
+	 *
+	 * @param bean the audit bean whose source-version selection changed; never {@code null}
 	 */
 	public void sourceVersionChanged(Audit bean) {
 		Audit source = bean.getSourceVersion();
@@ -273,11 +280,10 @@ public class AuditService {
 	}
 
 	/**
-	 * Converts a list of audit record beans into DomainValue objects suitable for use in UI selection components.
-	 * Each DomainValue contains the bizID as the code and the bizKey as the display value.
-	 * 
-	 * @param versions The list of audit record beans to convert
-	 * @return A list of DomainValue objects containing the bizID and bizKey from each audit record
+	 * Converts audit beans into selection values that expose the business identifier and business key.
+	 *
+	 * @param versions the audit versions to convert; never {@code null}
+	 * @return the selection values for the supplied rows, never {@code null}
 	 */
 	private static List<DomainValue> convertToDomainValues(List<Bean> versions) {
 
@@ -294,9 +300,9 @@ public class AuditService {
 	}
 
 	/**
-	 * Find the Audit document archiving configuration (if it exists).
-	 * 
-	 * @return An Optional containing the ArchiveDocConfig for Audit documents, or empty if archiving is not configured
+	 * Resolves the archive configuration for the audit document.
+	 *
+	 * @return the audit archive configuration when present, or an empty optional when archiving is disabled
 	 */
 	@SuppressWarnings("static-method")
 	public Optional<ArchiveDocConfig> auditDocConfig() {

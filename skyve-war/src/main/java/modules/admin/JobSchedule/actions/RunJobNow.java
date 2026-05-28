@@ -18,10 +18,23 @@ import org.skyve.util.logging.SkyveLoggerFactory;
 
 import modules.admin.domain.JobSchedule;
 
+/**
+ * Runs a configured scheduled job immediately as a one-shot execution.
+ */
 public class RunJobNow implements ServerSideAction<JobSchedule> {
-
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(RunJobNow.class);
 
+	/**
+	 * Validates the selected job name and triggers immediate execution.
+	 *
+	 * @param bean
+	 *        the selected schedule bean
+	 * @param webContext
+	 *        the current web context
+	 * @return a result wrapping {@code bean}
+	 * @throws Exception
+	 *         if validation or scheduling fails
+	 */
 	@Override
 	public ServerSideActionResult<JobSchedule> execute(JobSchedule bean, WebContext webContext) throws Exception {
 

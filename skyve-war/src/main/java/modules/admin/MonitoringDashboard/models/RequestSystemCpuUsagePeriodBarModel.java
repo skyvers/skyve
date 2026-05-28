@@ -12,21 +12,40 @@ import modules.admin.domain.MonitoringDashboard.Period;
  * Shows average System CPU usages across different time periods (seconds, minutes, hours, days, weeks).
  */
 public class RequestSystemCpuUsagePeriodBarModel extends AbstractRequestPeriodBarChartModel {
+	/**
+	 * Executes getChartTitle.
+	 * @param requestDescription the requestDescription value
+	 * @return the result
+	 */
 	@Override
 	protected String getChartTitle(String requestDescription) {
 		return "System CPU Usage Averages - " + requestDescription;
 	}
 
+	/**
+	 * Executes getChartLabel.
+	 * @return the result
+	 */
 	@Override
 	protected String getChartLabel() {
 		return "Average System CPU Usage (%)";
 	}
 
+	/**
+	 * Executes getChartColour.
+	 * @return the result
+	 */
 	@Override
 	protected Color getChartColour() {
 		return new Color(46, 204, 113); // Green
 	}
 
+	/**
+	 * Executes extractDataForTimePeriod.
+	 * @param measurements the measurements value
+	 * @param period the period value
+	 * @return the result
+	 */
 	@Override
 	protected Map<Integer, Float> extractDataForTimePeriod(RequestMeasurements measurements, Period period) {
 		return RequestListModel.extractSystemCpuUsageForTimePeriod(measurements, period);

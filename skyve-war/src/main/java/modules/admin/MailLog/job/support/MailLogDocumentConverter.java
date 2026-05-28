@@ -12,8 +12,10 @@ import org.skyve.domain.Bean;
 
 import modules.admin.domain.MailLog;
 
+/**
+ * Converts archived {@link MailLog} beans into Lucene documents used by archive search.
+ */
 public class MailLogDocumentConverter implements DocumentConverter {
-
 	/** Padding width for numeric sort fields — enough to represent {@link Long#MAX_VALUE} (19 digits) plus one. */
 	private static final int NUMERIC_SORT_PAD_WIDTH = 20;
 
@@ -37,6 +39,12 @@ public class MailLogDocumentConverter implements DocumentConverter {
 		doc.add(sortField(binding, sortValue));
 	}
 
+	/**
+	 * Converts a mail log bean to a Lucene document with searchable and sortable fields.
+	 *
+	 * @param bean the bean to convert, expected to be a {@link MailLog}
+	 * @return the Lucene document containing archive index fields
+	 */
 	@Override
 	public Document convert(Bean bean) {
 		MailLog mailLog = (MailLog) bean;
@@ -66,6 +74,13 @@ public class MailLogDocumentConverter implements DocumentConverter {
 		return doc;
 	}
 
+	/**
+	 * Returns whether this converter applies to the supplied module/document pair.
+	 *
+	 * @param module the module name to test
+	 * @param document the document name to test
+	 * @return {@code true} when the pair represents {@code admin.MailLog}
+	 */
 	@Override
 	public boolean handles(String module, String document) {
 		return MailLog.MODULE_NAME.equals(module) && MailLog.DOCUMENT_NAME.equals(document);

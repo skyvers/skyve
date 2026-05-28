@@ -2,9 +2,16 @@ package modules.admin.Contact;
 
 import modules.admin.domain.Contact;
 
+/**
+ * Extends Contact with admin-specific helper behaviour.
+ */
 public class ContactExtension extends Contact {
 	private static final long serialVersionUID = -2378327647462703888L;
 
+	/**
+	 * Performs the bizKey operation.
+	 * @return the operation result
+	 */
 	public String bizKey() {
 		StringBuilder result = new StringBuilder(64);
 

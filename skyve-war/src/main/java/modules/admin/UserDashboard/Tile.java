@@ -6,10 +6,12 @@ import java.io.Serializable;
  * Simple POJO to hold the attributes of a UserDashboard Tile.
  */
 public class Tile implements Serializable {
-
 	private static final long serialVersionUID = -2095114210805045601L;
 	private static final int TILE_TEXT_LENGTH_LIMIT = 50;
 
+	/**
+	 * Enumerates tile operations used for CSS and icon selection.
+	 */
 	public static enum Operation {
 		insert, update, delete, view
 	}
@@ -46,6 +48,9 @@ public class Tile implements Serializable {
 		// constructor is private, use the Builder
 	}
 
+	/**
+	 * Fluent builder for immutable-like {@link Tile} creation.
+	 */
 	public static class Builder {
 
 		private String action;
@@ -56,24 +61,51 @@ public class Tile implements Serializable {
 		private String reason;
 		private String title;
 
+		/**
+		 * Creates an empty builder.
+		 */
 		public Builder() {
 		}
 
+		/**
+		 * Sets tile action text.
+		 *
+		 * @param action The action text.
+		 * @return This builder.
+		 */
 		public Builder action(@SuppressWarnings("hiding") final String action) {
 			this.action = action;
 			return this;
 		}
 
+		/**
+		 * Sets the action icon CSS class.
+		 *
+		 * @param actionClass The icon class.
+		 * @return This builder.
+		 */
 		public Builder actionClass(@SuppressWarnings("hiding") final String actionClass) {
 			this.actionClass = actionClass;
 			return this;
 		}
 
+		/**
+		 * Sets the document icon markup.
+		 *
+		 * @param icon The icon markup.
+		 * @return This builder.
+		 */
 		public Builder icon(@SuppressWarnings("hiding") final String icon) {
 			this.icon = icon;
 			return this;
 		}
 
+		/**
+		 * Sets click behaviour by converting a URL into onclick markup.
+		 *
+		 * @param link The target URL.
+		 * @return This builder.
+		 */
 		public Builder link(@SuppressWarnings("hiding") final String link) {
 			if (link != null && link.length() > 0) {
 				this.link = String.format("onclick=\"location.href='%s';\"", link);
@@ -81,21 +113,44 @@ public class Tile implements Serializable {
 			return this;
 		}
 
+		/**
+		 * Sets tile operation.
+		 *
+		 * @param operation The operation enum.
+		 * @return This builder.
+		 */
 		public Builder operation(@SuppressWarnings("hiding") final Operation operation) {
 			this.operation = operation.toString();
 			return this;
 		}
 
+		/**
+		 * Sets explanatory reason text.
+		 *
+		 * @param reason The reason text.
+		 * @return This builder.
+		 */
 		public Builder reason(@SuppressWarnings("hiding") final String reason) {
 			this.reason = reason;
 			return this;
 		}
 
+		/**
+		 * Sets tile title text.
+		 *
+		 * @param title The tile title.
+		 * @return This builder.
+		 */
 		public Builder title(@SuppressWarnings("hiding") final String title) {
 			this.title = title;
 			return this;
 		}
 
+		/**
+		 * Builds a tile instance from current builder state.
+		 *
+		 * @return A new tile.
+		 */
 		public synchronized Tile build() {
 			Tile tile = new Tile();
 			tile.action = this.action;
@@ -110,30 +165,65 @@ public class Tile implements Serializable {
 		}
 	}
 
+	/**
+	 * Returns tile action text.
+	 *
+	 * @return Action text.
+	 */
 	public String getAction() {
 		return action;
 	}
 
+	/**
+	 * Returns action icon class.
+	 *
+	 * @return CSS class for action icon.
+	 */
 	public String getActionClass() {
 		return actionClass;
 	}
 
+	/**
+	 * Returns document icon markup.
+	 *
+	 * @return Icon markup.
+	 */
 	public String getIcon() {
 		return icon;
 	}
 
+	/**
+	 * Returns onclick markup link.
+	 *
+	 * @return Link markup.
+	 */
 	public String getLink() {
 		return link;
 	}
 
+	/**
+	 * Returns operation style token.
+	 *
+	 * @return Operation token.
+	 */
 	public String getOperation() {
 		return operation;
 	}
 
+	/**
+	 * Returns tile reason text.
+	 *
+	 * @return Reason text.
+	 */
 	public String getReason() {
 		return reason;
 	}
 
+	/**
+	 * Returns title text truncated to tile display limit.
+	 *
+	 * @return Display-safe title.
+	 */
 	public String getTitle() {
 		return title != null && title.length() > TILE_TEXT_LENGTH_LIMIT
 				? title.toString().substring(0, TILE_TEXT_LENGTH_LIMIT - 3) + "..."
@@ -155,6 +245,11 @@ public class Tile implements Serializable {
 				reason);
 	}
 
+	/**
+	 * Returns a hash code derived from tile link identity semantics.
+	 *
+	 * @return Hash code based on {@code link}.
+	 */
 	@Override
 	public int hashCode() {
 		final int prime = 31;

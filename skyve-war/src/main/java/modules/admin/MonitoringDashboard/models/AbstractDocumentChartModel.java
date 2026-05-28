@@ -56,6 +56,10 @@ public abstract class AbstractDocumentChartModel extends AbstractMonitoringChart
 	 */
 	protected abstract Map<Integer, ? extends Number> extractDataForTimePeriod(RequestMeasurements measurements, Period period);
 
+	/**
+	 * Executes getChartData.
+	 * @return the result
+	 */
 	@Override
 	public ChartData getChartData() {
 		MonitoringDashboard bean = getBean();
@@ -97,6 +101,8 @@ public abstract class AbstractDocumentChartModel extends AbstractMonitoringChart
 
 	/**
 	 * Get the selected document name from the bean, with fallback logic.
+	 * @param bean the bean value
+	 * @return the result
 	 */
 	protected static String getSelectedDocumentName(MonitoringDashboard bean) {
 		if (bean.getDocumentName() != null && !bean.getDocumentName().trim().isEmpty()) {
@@ -107,6 +113,10 @@ public abstract class AbstractDocumentChartModel extends AbstractMonitoringChart
 
 	/**
 	 * Build time series data, only including time points with meaningful values.
+	 * @param timeLabels the output list of formatted time labels
+	 * @param values the output list of numeric values
+	 * @param data the source time-indexed data map
+	 * @param period the selected monitoring period
 	 */
 	@SuppressWarnings("boxing")
 	protected static void buildTimeSeriesData(List<String> timeLabels, List<Number> values,

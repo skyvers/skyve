@@ -6,8 +6,10 @@ import org.skyve.web.WebContext;
 
 import modules.admin.domain.Communication;
 
+/**
+ * Appends an unsubscribe link placeholder to communication content.
+ */
 public class AddUnsubscribeLink implements ServerSideAction<Communication> {
-	
 	static final String UNSUBSCRIBE_LINK = "<a href=\"{unsubscribeUrl}\">Unsubscribe</a>";
 
 	/**
@@ -15,7 +17,6 @@ public class AddUnsubscribeLink implements ServerSideAction<Communication> {
 	 */
 	@Override
 	public ServerSideActionResult<Communication> execute(Communication communication, WebContext webContext) throws Exception {
-
 		Communication result = communication;
 
 		String body = result.getBody();

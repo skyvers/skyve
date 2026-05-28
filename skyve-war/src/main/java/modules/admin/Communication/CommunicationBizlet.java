@@ -26,6 +26,9 @@ import modules.admin.domain.Communication;
 import modules.admin.domain.CommunicationTemplate;
 import modules.admin.domain.Tag;
 
+/**
+ * Applies validation and lifecycle rules for communication generation and sending.
+ */
 public class CommunicationBizlet extends Bizlet<Communication> {
 	public static final String SYSTEM_COMMUNICATION_JOB_NOTIFICATION = "SYSTEM Communication Job Notification";
 	public static final String SYSTEM_COMMUNICATION_JOB_DEFAULT_SUBJECT = "Bulk Communication Job for '{description}' - Complete";
@@ -36,6 +39,12 @@ public class CommunicationBizlet extends Bizlet<Communication> {
 	@SuppressWarnings("java:S6813") // allow member injection
 	private transient CommunicationService communicationService;
 
+	/**
+	 * Performs the newInstance operation.
+	 * @param communication the communication value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public Communication newInstance(Communication communication) throws Exception {
 
@@ -47,6 +56,15 @@ public class CommunicationBizlet extends Bizlet<Communication> {
 		return super.newInstance(bean);
 	}
 
+	/**
+	 * Performs the preExecute operation.
+	 * @param actionName the actionName value
+	 * @param communication the communication value
+	 * @param parentBean the parentBean value
+	 * @param webContext the webContext value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public Communication preExecute(ImplicitActionName actionName, Communication communication, Bean parentBean,
 			WebContext webContext) throws Exception {
@@ -58,6 +76,11 @@ public class CommunicationBizlet extends Bizlet<Communication> {
 		return super.preExecute(actionName, bean, parentBean, webContext);
 	}
 
+	/**
+	 * Performs the checkForUnsavedData operation.
+	 * @param communication the communication value
+	 * @throws Exception if the operation fails
+	 */
 	public static void checkForUnsavedData(Communication communication) throws Exception {
 		if (!communication.originalValues().isEmpty()) {
 			// find if any field except results
@@ -70,6 +93,13 @@ public class CommunicationBizlet extends Bizlet<Communication> {
 		}
 	}
 
+	/**
+	 * Performs the getDynamicDomainValues operation.
+	 * @param attributeName the attributeName value
+	 * @param bean the bean value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public List<DomainValue> getDynamicDomainValues(String attributeName, Communication bean) throws Exception {
 
@@ -92,6 +122,12 @@ public class CommunicationBizlet extends Bizlet<Communication> {
 		return result;
 	}
 
+	/**
+	 * Performs the getVariantDomainValues operation.
+	 * @param attributeName the attributeName value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
 
@@ -126,6 +162,11 @@ public class CommunicationBizlet extends Bizlet<Communication> {
 		return result;
 	}
 
+	/**
+	 * Performs the preDelete operation.
+	 * @param bean the bean value
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public void preDelete(Communication bean) throws Exception {
 		if (bean.isLocked()) {
@@ -148,6 +189,13 @@ public class CommunicationBizlet extends Bizlet<Communication> {
 		super.preDelete(bean);
 	}
 
+	/**
+	 * Performs the preRerender operation.
+	 * @param source the source value
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public void preRerender(String source, Communication bean, WebContext webContext) throws Exception {
 

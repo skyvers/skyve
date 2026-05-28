@@ -12,7 +12,7 @@ import jakarta.enterprise.inject.Default;
 import modules.admin.domain.Country;
 
 /**
- * This class acts as a service layer to encapsulate domain logic.
+ * Provides service operations for admin country maintenance.
  *
  * Add this line to classes that wish to use it: @Inject private transient CountryService countryService;
  */

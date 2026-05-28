@@ -13,7 +13,12 @@ import modules.admin.Tag.TagExtension;
  */
 public class PrepareExplanation implements ServerSideAction<TagExtension> {
 	/**
-	 * Describe the set operation currently configured.
+	 * Builds explanatory text for the selected combination operator.
+	 *
+	 * @param bean The tag being edited.
+	 * @param webContext The current web context.
+	 * @return The same tag bean.
+	 * @throws Exception If explanation generation fails.
 	 */
 	@Override
 	public ServerSideActionResult<TagExtension> execute(TagExtension bean, WebContext webContext) throws Exception {

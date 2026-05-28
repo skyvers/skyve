@@ -15,6 +15,9 @@ import jakarta.inject.Inject;
 import modules.admin.domain.ReportManager;
 import modules.admin.domain.ReportTemplate;
 
+/**
+ * Extends report manager state with JSON marshalling helpers used by export actions.
+ */
 public class ReportManagerExtension extends ReportManager {
 	private static final long serialVersionUID = 4946402450868738555L;
 
@@ -22,6 +25,12 @@ public class ReportManagerExtension extends ReportManager {
 	@SuppressWarnings("java:S6813") // allow member injection
 	private transient ReportManagerService reportManagerService;
 
+	/**
+	 * Writes a report template JSON specification to the temporary export directory.
+	 *
+	 * @param report the report template to serialise
+	 * @param name the output file stem
+	 */
 	public void marshallReportBean(final ReportTemplate report, final String name) {
 		// marshall each report to a JSON string
 		String json = JSON.marshall(CORE.getCustomer(), report);
@@ -44,6 +53,5 @@ public class ReportManagerExtension extends ReportManager {
 			reportManagerService.cleanUpTemporaryFiles();
 			throw new ValidationException(String.format("The report %s could not be written.", name));
 		}
-
 	}
 }

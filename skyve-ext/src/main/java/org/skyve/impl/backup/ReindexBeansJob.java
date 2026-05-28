@@ -47,8 +47,8 @@ public class ReindexBeansJob extends CancellableJob {
 		
 		// reindex
 		List<Module> modules = customer.getModules();
-		float i = 0f;
-		float l = modules.size();
+		int i = 0;
+		int l = modules.size();
 		for (Module module : modules) {
 			i++;
 			String moduleName = module.getName();
@@ -115,7 +115,7 @@ public class ReindexBeansJob extends CancellableJob {
 					}
 				}
 			}
-			setPercentComplete((int) (i / l * 100f));
+			setPercentComplete((int) ((((float) i) / ((float) l)) * 100f));
 		}
 		trace = "Reindex beans complete";
 		log.add(trace);

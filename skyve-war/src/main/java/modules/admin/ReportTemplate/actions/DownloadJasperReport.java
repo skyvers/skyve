@@ -25,6 +25,12 @@ import modules.admin.domain.ReportTemplate;
  * Used to download a Jasper {@link ReportTemplate}.
  */
 public class DownloadJasperReport extends DownloadAction<ReportTemplateExtension> {
+	/**
+	 * Executes prepare.
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public void prepare(ReportTemplateExtension bean, WebContext webContext) throws Exception {
 		// validate any required parameters
@@ -39,9 +45,15 @@ public class DownloadJasperReport extends DownloadAction<ReportTemplateExtension
 		}
 	}
 
+	/**
+	 * Executes download.
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @return the result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public Download download(ReportTemplateExtension bean, WebContext webContext) throws Exception {
-
 		User user = CORE.getUser();
 		Module module = user.getCustomer().getModule(bean.getModuleName());
 		Document document = module.getDocument(user.getCustomer(), bean.getDocumentName());

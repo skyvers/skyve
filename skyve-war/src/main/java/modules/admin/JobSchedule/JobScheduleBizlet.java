@@ -17,6 +17,12 @@ import org.skyve.util.Binder;
 
 import modules.admin.domain.JobSchedule;
 
+/**
+ * Provides schedule-editor Bizlet behaviour for job scheduling in admin.
+ * <p>
+ * The bizlet translates between UI selector fields and Quartz cron expressions,
+ * manages scheduler side-effects on save/delete, and validates schedule selections.
+ */
 public class JobScheduleBizlet extends Bizlet<JobScheduleExtension> {
 	private static final String ALL_CODE = "*";
 	private static final Integer ALL_CODE_SPEC = Integer.valueOf(99);
@@ -26,6 +32,15 @@ public class JobScheduleBizlet extends Bizlet<JobScheduleExtension> {
 	private static final String ANY_CODE = "?";
 	private static final Integer ANY_CODE_SPEC = Integer.valueOf(98);
 
+	/**
+	 * Initialises new schedule beans with wildcard selections.
+	 *
+	 * @param bean
+	 *        the new schedule bean
+	 * @return the same bean with default selector codes applied
+	 * @throws Exception
+	 *         if initialisation fails
+	 */
 	@Override
 	public JobScheduleExtension newInstance(JobScheduleExtension bean) throws Exception {
 		bean.setAllMinutes(ALL_CODE);
@@ -37,6 +52,15 @@ public class JobScheduleBizlet extends Bizlet<JobScheduleExtension> {
 		return bean;
 	}
 
+	/**
+	 * Returns selector options for all/selected schedule dimensions.
+	 *
+	 * @param attributeName
+	 *        the attribute requesting domain values
+	 * @return selector values for supported dimensions, otherwise {@code null}
+	 * @throws Exception
+	 *         if resolution fails
+	 */
 	@Override
 	public List<DomainValue> getConstantDomainValues(String attributeName)
 			throws Exception {
@@ -60,6 +84,15 @@ public class JobScheduleBizlet extends Bizlet<JobScheduleExtension> {
 		return result;
 	}
 
+	/**
+	 * Returns available schedulable job names grouped by module.
+	 *
+	 * @param attributeName
+	 *        the attribute requesting variant values
+	 * @return job-name values for {@link JobSchedule#jobNamePropertyName}
+	 * @throws Exception
+	 *         if metadata traversal fails
+	 */
 	@Override
 	public List<DomainValue> getVariantDomainValues(String attributeName)
 			throws Exception {
@@ -82,6 +115,14 @@ public class JobScheduleBizlet extends Bizlet<JobScheduleExtension> {
 		return result;
 	}
 
+	/**
+	 * Populates UI selector booleans from the persisted cron expression.
+	 *
+	 * @param bean
+	 *        the schedule bean being loaded
+	 * @throws Exception
+	 *         if cron parsing fails
+	 */
 	@Override
 	public void postLoad(JobScheduleExtension bean) throws Exception {
 		JobCronExpression expression = new JobCronExpression(bean.getCronExpression());
@@ -144,6 +185,14 @@ public class JobScheduleBizlet extends Bizlet<JobScheduleExtension> {
 		}
 	}
 
+	/**
+	 * Builds and stores the cron expression from UI selector fields.
+	 *
+	 * @param bean
+	 *        the schedule bean being saved
+	 * @throws Exception
+	 *         if expression generation fails
+	 */
 	@Override
 	public void preSave(JobScheduleExtension bean) throws Exception {
 		StringBuilder expression = new StringBuilder(128);
@@ -230,6 +279,11 @@ public class JobScheduleBizlet extends Bizlet<JobScheduleExtension> {
 
 	/**
 	 * Reschedule this job after any runAs user name change has been flushed.
+	 *
+	 * @param bean
+	 *        the saved schedule bean
+	 * @throws Exception
+	 *         if unschedule/schedule operations fail
 	 */
 	@Override
 	public void postSave(JobScheduleExtension bean) throws Exception {
@@ -241,11 +295,29 @@ public class JobScheduleBizlet extends Bizlet<JobScheduleExtension> {
 		}
 	}
 
+	/**
+	 * Unschedules the persisted job before deleting the schedule record.
+	 *
+	 * @param bean
+	 *        the schedule being deleted
+	 * @throws Exception
+	 *         if unscheduling fails
+	 */
 	@Override
 	public void preDelete(JobScheduleExtension bean) throws Exception {
 		EXT.getJobScheduler().unscheduleJob(bean.getBizId(), CORE.getCustomer().getName());
 	}
 
+	/**
+	 * Validates selector combinations and minimum field selections.
+	 *
+	 * @param bean
+	 *        the schedule bean under validation
+	 * @param e
+	 *        the validation exception collector
+	 * @throws Exception
+	 *         if validation processing fails
+	 */
 	@Override
 	public void validate(JobScheduleExtension bean, ValidationException e)
 			throws Exception {

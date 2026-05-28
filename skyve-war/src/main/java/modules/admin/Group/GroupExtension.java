@@ -11,9 +11,11 @@ import modules.admin.domain.Group;
 import modules.admin.domain.GroupRole;
 
 /**
- * Synthesize Group Roles from metadata.
- * 
- * @author mike
+ * Extends {@link Group} with lazily-expanded candidate role synthesis.
+ * <p>
+ * Candidate roles are derived from configured customer roles and merged with
+ * currently assigned roles so UI pickers can offer both existing and available
+ * role options.
  */
 public class GroupExtension extends Group {
 	private static final long serialVersionUID = 2678377209921744911L;
@@ -24,6 +26,11 @@ public class GroupExtension extends Group {
 
 	private boolean determinedCandidateRoles = false;
 
+	/**
+	 * Returns candidate roles, populating them on first access for this bean state.
+	 *
+	 * @return the candidate role list
+	 */
 	@Override
 	public List<GroupRole> getCandidateRoles() {
 		if (!determinedCandidateRoles) {
@@ -45,6 +52,9 @@ public class GroupExtension extends Group {
 		return super.getCandidateRoles();
 	}
 
+	/**
+	 * Clears the lazy-resolution flag so candidate roles can be recomputed.
+	 */
 	void resetCandidateRoles() {
 		determinedCandidateRoles = false;
 	}

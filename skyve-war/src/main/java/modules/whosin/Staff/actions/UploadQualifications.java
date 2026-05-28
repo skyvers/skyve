@@ -17,11 +17,22 @@ import org.skyve.web.WebContext;
 import modules.whosin.domain.Staff;
 import modules.whosin.domain.StaffQualification;
 
+/**
+ * Imports staff qualifications from uploaded CSV or XLSX files.
+ */
 public class UploadQualifications extends UploadAction<Staff> {
-
+	/**
+	 * Parses the uploaded file and appends imported qualifications to the supplied staff bean.
+	 *
+	 * @param bean the staff bean receiving imported qualifications
+	 * @param upload the uploaded data file
+	 * @param exception the upload exception collector
+	 * @param webContext the active web context
+	 * @return the updated staff bean
+	 * @throws Exception if parsing or validation fails
+	 */
 	@Override
 	public Staff upload(Staff bean, Upload upload, UploadException exception, WebContext webContext) throws Exception {
-
 		List<StaffQualification> quals = null;
 		if (upload.getFileName().endsWith(MimeType.xlsx.getStandardFileSuffix())) {
 			try (InputStream is = upload.getInputStream()) {

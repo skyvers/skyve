@@ -18,8 +18,19 @@ import org.skyve.web.WebContext;
 import modules.admin.domain.MonitoringDashboard;
 import modules.admin.domain.MonitoringDashboard.RequestType;
 
+/**
+ * Drives dynamic values, autocomplete, and lifecycle behaviour for the monitoring dashboard.
+ */
 public class MonitoringDashboardBizlet extends SingletonCachedBizlet<MonitoringDashboard> {
-
+	/**
+	 * Initialises dashboard state when entering edit/new flows.
+	 * @param actionName the implicit action being executed
+	 * @param bean the dashboard bean
+	 * @param parentBean the parent bean for the current context
+	 * @param webContext the current web context
+	 * @return the dashboard bean after lifecycle initialisation
+	 * @throws Exception if lifecycle initialisation fails
+	 */
 	@Override
 	public MonitoringDashboard preExecute(ImplicitActionName actionName, MonitoringDashboard bean, Bean parentBean,
 			WebContext webContext) throws Exception {
@@ -30,6 +41,13 @@ public class MonitoringDashboardBizlet extends SingletonCachedBizlet<MonitoringD
 		return super.preExecute(actionName, bean, parentBean, webContext);
 	}
 
+	/**
+	 * Normalises dependent request-stat filters before rerender.
+	 * @param source the source value
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public void preRerender(String source, MonitoringDashboard bean, WebContext webContext) throws Exception {
 		if (MonitoringDashboard.rsModuleNamePropertyName.equals(source)
@@ -42,6 +60,13 @@ public class MonitoringDashboardBizlet extends SingletonCachedBizlet<MonitoringD
 		super.preRerender(source, bean, webContext);
 	}
 
+	/**
+	 * Supplies dynamic domain values limited to request types/documents/queries with captured telemetry.
+	 * @param attributeName the attributeName value
+	 * @param bean the bean value
+	 * @return the result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public List<DomainValue> getDynamicDomainValues(String attributeName, MonitoringDashboard bean) throws Exception {
 		List<DomainValue> results = new ArrayList<>();
@@ -124,6 +149,14 @@ public class MonitoringDashboardBizlet extends SingletonCachedBizlet<MonitoringD
 		MODULE, DOCUMENT, COMPONENT
 	}
 
+	/**
+	 * Provides autocomplete suggestions for request-stat module/document/component selectors.
+	 * @param attributeName the attributeName value
+	 * @param value the value value
+	 * @param bean the bean value
+	 * @return the result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public List<String> complete(String attributeName, String value, MonitoringDashboard bean) throws Exception {
 		MonitoringDashboard workingBean = bean;
@@ -225,5 +258,4 @@ public class MonitoringDashboardBizlet extends SingletonCachedBizlet<MonitoringD
 
 		return results;
 	}
-
 }

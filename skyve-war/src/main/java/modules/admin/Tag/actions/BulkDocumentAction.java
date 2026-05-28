@@ -24,7 +24,12 @@ import modules.admin.domain.Tag;
  */
 public class BulkDocumentAction implements ServerSideAction<TagExtension> {
 	/**
-	 * Perform an action in bulk.
+	 * Schedules the perform-document-action job and records a human-readable summary.
+	 *
+	 * @param tag The tag containing action configuration.
+	 * @param webContext The current web context.
+	 * @return The same tag bean.
+	 * @throws Exception If scheduling or metadata lookup fails.
 	 */
 	@Override
 	public ServerSideActionResult<TagExtension> execute(TagExtension tag, WebContext webContext)

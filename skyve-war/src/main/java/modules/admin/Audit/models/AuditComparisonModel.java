@@ -29,7 +29,26 @@ import org.skyve.util.JSON;
 import modules.admin.domain.Audit;
 import modules.admin.domain.Audit.Operation;
 
+/**
+ * Builds the comparison tree used by the audit diff view.
+ *
+ * <p>The model reconstructs the source and comparison audit payloads into a tree
+ * of comparison composites, preserving the document and binding structure so the
+ * UI can show added, deleted, and changed nodes.
+ */
 public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
+	/**
+	 * Rebuilds the comparison tree for the selected audit record.
+	 *
+	 * <p>The method resolves the original document metadata when possible so it can
+	 * annotate nodes with the correct reference names, relationship labels, and
+	 * document aliases. If metadata is no longer available, the tree is still built
+	 * using the stored audit payload.
+	 *
+	 * @param me the selected audit record containing source and comparison versions; never {@code null}
+	 * @return the root of the comparison tree, or {@code null} if the source payload is empty
+	 * @throws Exception if audit payload parsing or metadata lookup fails
+	 */
 	@Override
 	public ComparisonComposite getComparisonComposite(Audit me) throws Exception {
 		Audit sourceVersion = me.getSourceVersion();

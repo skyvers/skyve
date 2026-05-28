@@ -23,6 +23,9 @@ public abstract class AbstractMonitoringChartModel extends ChartModel<Monitoring
 	/**
 	 * Check if the request data is valid for the current period based on the last update time.
 	 * If the last update was too long ago, the data should not be displayed.
+	 * @param measurements the measurements value
+	 * @param period the period value
+	 * @return the result
 	 */
 	protected static boolean isDataValidForCurrentPeriod(RequestMeasurements measurements, Period period) {
 		if (measurements == null) {
@@ -57,6 +60,8 @@ public abstract class AbstractMonitoringChartModel extends ChartModel<Monitoring
 
 	/**
 	 * Get a human-readable label for the time period.
+	 * @param period the period value
+	 * @return the result
 	 */
 	protected static String getTimePeriodLabel(Period period) {
 		return switch (period) {
@@ -70,6 +75,10 @@ public abstract class AbstractMonitoringChartModel extends ChartModel<Monitoring
 
 	/**
 	 * Build time series data, only including time points with meaningful values.
+	 * @param timeLabels the output list of formatted time labels
+	 * @param values the output list of numeric values
+	 * @param data the source time-indexed data map
+	 * @param period the selected monitoring period
 	 */
 	protected static void buildTimeSeriesData(List<String> timeLabels, List<Number> values,
 			Map<Integer, ? extends Number> data, Period period) {
@@ -107,6 +116,8 @@ public abstract class AbstractMonitoringChartModel extends ChartModel<Monitoring
 	/**
 	 * Build a request key from the bean's request stats selections.
 	 * Format: {type}{module}.{document}^{component}
+	 * @param bean the bean value
+	 * @return the result
 	 */
 	protected static String buildRequestKey(MonitoringDashboard bean) {
 		StringBuilder result = new StringBuilder();
@@ -138,6 +149,8 @@ public abstract class AbstractMonitoringChartModel extends ChartModel<Monitoring
 
 	/**
 	 * Get a human-readable description of the request selection.
+	 * @param bean the bean value
+	 * @return the result
 	 */
 	protected static String getRequestDescription(MonitoringDashboard bean) {
 		StringBuilder result = new StringBuilder();

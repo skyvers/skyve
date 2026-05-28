@@ -54,11 +54,19 @@ public class SendPasswordChangeNotificationJob extends Job {
 			+ Startup.environmentSupportEmailPropertyName
 			+ "}\">here</a>.";
 
+	/**
+	 * Performs the persistJobExecutionOnSuccess operation.
+	 * @return the operation result
+	 */
 	@Override
 	public boolean persistJobExecutionOnSuccess() {
 		return false;
 	}
 	
+	/**
+	 * Performs the execute operation.
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public void execute() throws Exception {
 		List<String> log = getLog();

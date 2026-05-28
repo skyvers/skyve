@@ -27,22 +27,34 @@ import freemarker.template.Template;
 import modules.admin.ReportDataset.ReportDatasetExtension;
 import modules.admin.domain.Contact;
 import modules.admin.domain.ReportTemplate;
-import modules.admin.domain.User;
 import modules.admin.domain.UserProxy;
 
+/**
+ * Scheduled job that renders report templates and emails generated outputs to configured recipients.
+ */
 public class ReportJob extends Job {
 	public static final String SYSTEM_SCHEDULED_REPORT_EMAIL = "SYSTEM Scheduled Report";
 	public static final String SYSTEM_SCHEDULED_REPORT_EMAIL_DEFAULT_SUBJECT = String.format("Scheduled Report {%s}",
 			ReportTemplate.namePropertyName);
 	public static final String SYSTEM_SCHEDULED_REPORT_EMAIL_DEFAULT_BODY = String.format("Hi {%s}, <br /><br />" +
 					"Please find attached your copy of a scheduled report.",
-			Binder.createCompoundBinding(User.contactPropertyName, Contact.namePropertyName));
+			Binder.createCompoundBinding(UserProxy.contactPropertyName, Contact.namePropertyName));
 
+	/**
+	 * Executes the scheduled report job.
+	 *
+	 * @throws Exception if report generation or dispatch fails
+	 */
 	@Override
 	public void execute() throws Exception {
 		executeReport();
 	}
 
+	/**
+	 * Generates the configured report output and dispatches it to all configured recipients.
+	 *
+	 * @throws Exception if template processing, output rendering, or delivery fails
+	 */
 	public void executeReport() throws Exception {
 		UtilImpl.inject(this);
 

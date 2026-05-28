@@ -6,6 +6,9 @@ import java.util.List;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.util.Util;
 
+/**
+ * Enumerates built-in actions that can be executed against a tag selection.
+ */
 public enum TagDefaultAction {
 	tagUpsert("SkyveUpsert", "Upsert (Save Top Level Only) Documents"), tagResave("SkyveResave", "Save Documents"), tagDelete("SkyveDelete", "Delete Documents"), tagValidate("SkyveValidate", "Validate Documents");
 
@@ -20,14 +23,30 @@ public enum TagDefaultAction {
 		this.description = description;
 	}
 
+	/**
+	 * Returns the persisted code for this default action.
+	 *
+	 * @return The stable action code.
+	 */
 	public String toCode() {
 		return code;
 	}
 
+	/**
+	 * Returns the localised description for UI rendering.
+	 *
+	 * @return The localised action description.
+	 */
 	public String toLocalisedDescription() {
 		return Util.i18n(description);
 	}
 
+	/**
+	 * Resolves a default action from its persisted code.
+	 *
+	 * @param code The action code to resolve.
+	 * @return Matching enum constant, or {@code null} when unknown.
+	 */
 	public static TagDefaultAction fromCode(String code) {
 		TagDefaultAction result = null;
 
@@ -41,6 +60,12 @@ public enum TagDefaultAction {
 		return result;
 	}
 
+	/**
+	 * Resolves a default action from its localised description.
+	 *
+	 * @param description The localised description to resolve.
+	 * @return Matching enum constant, or {@code null} when not found.
+	 */
 	public static TagDefaultAction fromLocalisedDescription(String description) {
 		TagDefaultAction result = null;
 
@@ -54,6 +79,11 @@ public enum TagDefaultAction {
 		return result;
 	}
 
+	/**
+	 * Converts all enum values into domain values for metadata dropdowns.
+	 *
+	 * @return Cached list of code/description pairs.
+	 */
 	public static List<DomainValue> toDomainValues() {
 		if (domainValues == null) {
 			TagDefaultAction[] values = values();
@@ -66,6 +96,12 @@ public enum TagDefaultAction {
 		return domainValues;
 	}
 	
+	/**
+	 * Indicates whether a supplied action name maps to a built-in tag action.
+	 *
+	 * @param actionName The action name to test.
+	 * @return {@code true} when actionName is one of the built-in codes.
+	 */
 	public static boolean isDefaultTagAction(String actionName){
 		boolean defaultAction = false;
 		for(TagDefaultAction da: TagDefaultAction.values()){

@@ -41,6 +41,11 @@ public class CommunicationService {
 		return Boolean.TRUE.equals(result);
 	}
 
+	/**
+	 * Performs the setLinks operation.
+	 * @param communication the communication value
+	 * @return the operation result
+	 */
 	@SuppressWarnings("static-method")
 	public Communication setLinks(Communication communication) {
 		Communication bean = communication;

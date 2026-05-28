@@ -39,9 +39,15 @@ import modules.admin.domain.ReportDataset;
  * Supports BizQL, SQL, and class-based datasets with parameter substitution and result formatting.
  */
 public class TestQuery implements ServerSideAction<ReportDatasetExtension> {
-
 	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(TestQuery.class);
 
+	/**
+	 * Executes execute.
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @return the result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public ServerSideActionResult<ReportDatasetExtension> execute(ReportDatasetExtension bean, WebContext webContext)
 			throws Exception {

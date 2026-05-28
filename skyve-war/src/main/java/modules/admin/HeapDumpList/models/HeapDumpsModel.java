@@ -34,11 +34,18 @@ import modules.admin.domain.HeapDumpList;
  * List model for displaying heap dump files for download in the content directory.
  */
 public class HeapDumpsModel extends ListModel<HeapDumpList> {
-
 	private Document drivingDocument = null;
 	private Set<String> projections = new TreeSet<>();
 	private List<MetaDataQueryColumn> columns = new ArrayList<>(1);
 
+	/**
+	 * Initialises driving-document metadata and projected list columns.
+	 *
+	 * @param customer
+	 *        the current customer metadata root
+	 * @param runtime
+	 *        whether the model is running in runtime mode
+	 */
 	@Override
 	public void postConstruct(Customer customer, boolean runtime) {
 		drivingDocument = customer.getModule(DownloadFolder.MODULE_NAME).getDocument(customer, DownloadFolder.DOCUMENT_NAME);
@@ -57,43 +64,88 @@ public class HeapDumpsModel extends ListModel<HeapDumpList> {
 		columns.add(column);
 	}
 
+	/**
+	 * Returns the list description shown by the UI.
+	 *
+	 * @return the list description
+	 */
 	@Override
 	public String getDescription() {
 		return "All Heap Dumps";
 	}
 
+	/**
+	 * Returns the document that defines list metadata bindings.
+	 *
+	 * @return the driving document
+	 */
 	@Override
 	public Document getDrivingDocument() {
 		return drivingDocument;
 	}
 
+	/**
+	 * Returns projected list columns used to render the model.
+	 *
+	 * @return projected query columns
+	 */
 	@Override
 	public List<MetaDataQueryColumn> getColumns() {
 		return columns;
 	}
 
+	/**
+	 * Returns required projections for dynamic-bean rows.
+	 *
+	 * @return projection names used by the model
+	 */
 	@Override
 	public Set<String> getProjections() {
 		return projections;
 	}
 
+	/**
+	 * This list model does not expose a persisted filter state.
+	 *
+	 * @return {@code null} because filtering is not implemented
+	 */
 	@Override
 	public Filter getFilter() {
 		// Not required
 		return null;
 	}
 
+	/**
+	 * This list model does not create ad-hoc filter instances.
+	 *
+	 * @return {@code null} because filtering is not implemented
+	 */
 	@Override
 	public Filter newFilter() {
 		// Not required
 		return null;
 	}
 
+	/**
+	 * Ignores named parameters because this model has no external parameters.
+	 *
+	 * @param name
+	 *        parameter name
+	 * @param value
+	 *        parameter value
+	 */
 	@Override
 	public void putParameter(String name, Object value) {
 		// Not required
 	}
 
+	/**
+	 * Fetches the current page of heap dump rows from the heap dump directory.
+	 *
+	 * @return one page of heap dump rows
+	 * @throws Exception
+	 *         if listing heap dump files fails
+	 */
 	@Override
 	public Page fetch() throws Exception {
 		return fetchHeapDumps(
@@ -102,17 +154,43 @@ public class HeapDumpsModel extends ListModel<HeapDumpList> {
 				getEndRow());
 	}
 
+	/**
+	 * Iteration is unsupported because this model only supports page fetches.
+	 *
+	 * @return never returns
+	 * @throws Exception
+	 *         always throws via {@link IllegalStateException}
+	 */
 	@Override
 	public AutoClosingIterable<Bean> iterate() throws Exception {
 		throw new IllegalStateException();
 	}
 
+	/**
+	 * Updates are unsupported for heap dump listing rows.
+	 *
+	 * @param bizId
+	 *        the row identifier
+	 * @param properties
+	 *        requested updates
+	 * @return never returns
+	 * @throws Exception
+	 *         always throws via {@link IllegalStateException}
+	 */
 	@Override
 	public Bean update(String bizId, SortedMap<String, Object> properties)
 			throws Exception {
 		throw new IllegalStateException();
 	}
 
+	/**
+	 * Deletion is unsupported for heap dump listing rows.
+	 *
+	 * @param bizId
+	 *        the row identifier
+	 * @throws Exception
+	 *         always throws via {@link IllegalStateException}
+	 */
 	@Override
 	public void remove(String bizId) throws Exception {
 		throw new IllegalStateException();

@@ -15,13 +15,22 @@ import modules.admin.domain.UserDashboard;
  * Returns a list of "tiles" from the favourites collection on UserDashboard.
  */
 public class FavouritesModel extends ReferenceListModel<Generic> {
-
 	private List<MetaDataQueryColumn> columns;
 
+	/**
+	 * Creates a favourites model bound to {@link UserDashboard#favouritesPropertyName}.
+	 *
+	 * @throws Exception If model initialisation fails.
+	 */
 	public FavouritesModel() throws Exception {
 		super(Generic.MODULE_NAME, Generic.DOCUMENT_NAME, UserDashboard.favouritesPropertyName);
 	}
 
+	/**
+	 * Defines a single markup column used to render tile HTML.
+	 *
+	 * @return Cached projected columns.
+	 */
 	@Override
 	public List<MetaDataQueryColumn> getColumns() {
 		if (columns == null) {
@@ -41,6 +50,11 @@ public class FavouritesModel extends ReferenceListModel<Generic> {
 		return columns;
 	}
 
+	/**
+	 * Describes this list model.
+	 *
+	 * @return Static model description.
+	 */
 	@Override
 	public String getDescription() {
 		return "User Dashboard Tiles";

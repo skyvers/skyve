@@ -55,11 +55,16 @@ public class ImportReportSpecifications extends UploadAction<ReportManagerExtens
 	 * Upload a zip containing a number of report configurations
 	 * unzip to a temporary folder
 	 * and then unmarshall the json
+	 * @param bean the report manager bean
+	 * @param upload the uploaded file metadata and stream
+	 * @param exception the upload exception holder
+	 * @param webContext the current web context
+	 * @return the updated report manager bean
+	 * @throws Exception if upload or import processing fails
 	 */
 	@Override
 	public ReportManagerExtension upload(ReportManagerExtension bean, Upload upload, UploadException exception,
 			WebContext webContext) throws Exception {
-
 		// Mimetype not being detected, so use file extension instead
 		String ext = upload.getFileName().substring(upload.getFileName().lastIndexOf(".") + 1);
 

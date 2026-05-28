@@ -16,6 +16,8 @@ public class MailLogService {
 
 	/**
 	 * Retrieve the requested MailLog from configured archives, if present.
+	 * @param bizId the bizId value
+	 * @return the result
 	 */
 	public MailLog retrieveFromArchives(String bizId) {
 		Optional<ArchiveDocConfig> config = mailLogDocConfig();
@@ -29,6 +31,7 @@ public class MailLogService {
 
 	/**
 	 * Find MailLog archive configuration, if configured.
+	 * @return the result
 	 */
 	public Optional<ArchiveDocConfig> mailLogDocConfig() {
 		return Util.getArchiveConfig()

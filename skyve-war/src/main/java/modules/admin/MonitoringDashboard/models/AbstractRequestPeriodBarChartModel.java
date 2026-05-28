@@ -21,7 +21,6 @@ import modules.admin.domain.MonitoringDashboard.Period;
  * Shows averages across different time periods (seconds, minutes, hours, days, weeks) as bars.
  */
 public abstract class AbstractRequestPeriodBarChartModel extends AbstractMonitoringChartModel {
-
 	/**
 	 * Get the chart title for this specific chart type and request.
 	 * 
@@ -50,11 +49,14 @@ public abstract class AbstractRequestPeriodBarChartModel extends AbstractMonitor
 	 * @param measurements The request measurements data
 	 * @param timePeriod The time period ("seconds", "minutes", "hours", "days", "weeks")
 	 * @return Map of time index to measurement value, or null if no data
+	 * @param period the period value
 	 */
 	protected abstract Map<Integer, ? extends Number> extractDataForTimePeriod(RequestMeasurements measurements, Period period);
 
 	/**
 	 * Determine if a value is significant enough to include in the chart.
+	 * @param value the value value
+	 * @return the result
 	 */
 	protected static boolean isSignificantValue(Number value) {
 		return value != null && value.doubleValue() != 0.0;
@@ -63,6 +65,9 @@ public abstract class AbstractRequestPeriodBarChartModel extends AbstractMonitor
 	/**
 	 * Check if data is valid for a specific time period based on the last update time.
 	 * If the last update was too long ago, certain periods should not be shown.
+	 * @param measurements the measurements value
+	 * @param period the period value
+	 * @return the result
 	 */
 	protected static boolean isDataValidForPeriod(RequestMeasurements measurements, Period period) {
 		if (measurements == null) {
@@ -94,6 +99,10 @@ public abstract class AbstractRequestPeriodBarChartModel extends AbstractMonitor
 		};
 	}
 
+	/**
+	 * Executes getChartData.
+	 * @return the result
+	 */
 	@Override
 	public ChartData getChartData() {
 		MonitoringDashboard bean = getBean();

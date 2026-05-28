@@ -12,11 +12,21 @@ import jakarta.inject.Inject;
 import modules.admin.User.UserService;
 import modules.admin.domain.DataMaintenance;
 
+/**
+ * Truncates selected persisted data as part of maintenance operations.
+ */
 public class Truncate implements ServerSideAction<DataMaintenance> {
 	@Inject
 	@SuppressWarnings("java:S6813") // allow member injection
 	private transient UserService userService;
 
+	/**
+	 * Performs the execute operation.
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public ServerSideActionResult<DataMaintenance> execute(DataMaintenance bean, WebContext webContext)
 			throws Exception {

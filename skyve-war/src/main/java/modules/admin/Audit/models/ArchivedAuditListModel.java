@@ -45,16 +45,30 @@ public class ArchivedAuditListModel<U extends Bean> extends ArchivedDocumentList
 			Audit.auditBizKeyPropertyName,
 			Audit.auditBizIdPropertyName);
 
+	/**
+	 * Performs the getDescription operation.
+	 * @return the operation result
+	 */
 	@Override
 	public String getDescription() {
 		return "The list of all Audits.";
 	}
 
+	/**
+	 * Performs the toSortBinding operation.
+	 * @param binding the binding value
+	 * @return the operation result
+	 */
 	@Override
 	protected String toSortBinding(String binding) {
 		return DocumentConverter.toSortBinding(binding);
 	}
 
+	/**
+	 * Performs the convertToBean operation.
+	 * @param luceneDoc the luceneDoc value
+	 * @return the operation result
+	 */
 	@Override
 	protected Bean convertToBean(Document luceneDoc) {
 		Map<String, Object> props = new HashMap<>();
@@ -81,16 +95,28 @@ public class ArchivedAuditListModel<U extends Bean> extends ArchivedDocumentList
 		return new DynamicBean(getModule(), getDocument(), props);
 	}
 
+	/**
+	 * Performs the getModule operation.
+	 * @return the operation result
+	 */
 	@Override
 	protected String getModule() {
 		return Audit.MODULE_NAME;
 	}
 
+	/**
+	 * Performs the getDocument operation.
+	 * @return the operation result
+	 */
 	@Override
 	protected String getDocument() {
 		return Audit.DOCUMENT_NAME;
 	}
 
+	/**
+	 * Performs the getColumns operation.
+	 * @return the operation result
+	 */
 	@Override
 	public List<MetaDataQueryColumn> getColumns() {
 
@@ -99,6 +125,12 @@ public class ArchivedAuditListModel<U extends Bean> extends ArchivedDocumentList
 				.collect(toCollection(ArrayList::new));
 	}
 
+	/**
+	 * Creates a projected query column definition for an archived-audit binding.
+	 *
+	 * @param binding The binding to expose in the archived projection.
+	 * @return A sortable projected column for the supplied binding.
+	 */
 	@SuppressWarnings("static-method")
 	private MetaDataQueryColumn createColumn(String binding) {
 		MetaDataQueryProjectedColumnImpl column = new MetaDataQueryProjectedColumnImpl();
@@ -112,6 +144,10 @@ public class ArchivedAuditListModel<U extends Bean> extends ArchivedDocumentList
 		return column;
 	}
 
+	/**
+	 * Performs the getProjections operation.
+	 * @return the operation result
+	 */
 	@Override
 	public Set<String> getProjections() {
 
@@ -128,6 +164,10 @@ public class ArchivedAuditListModel<U extends Bean> extends ArchivedDocumentList
 		return projections;
 	}
 
+	/**
+	 * Performs the getDefaultSort operation.
+	 * @return the operation result
+	 */
 	@Override
 	protected Sort getDefaultSort() {
 		// Default to sorting by timestamp, descending

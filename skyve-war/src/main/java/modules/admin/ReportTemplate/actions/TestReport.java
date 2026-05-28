@@ -29,6 +29,12 @@ import modules.admin.domain.ReportTemplate;
  * Used to test a Freemarker {@link ReportTemplate}.
  */
 public class TestReport extends DownloadAction<ReportTemplate> {
+	/**
+	 * Executes prepare.
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public void prepare(ReportTemplate bean, WebContext webContext) throws Exception {
 		// check there are no unsaved changes
@@ -91,6 +97,13 @@ public class TestReport extends DownloadAction<ReportTemplate> {
 		}
 	}
 
+	/**
+	 * Executes download.
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @return the result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public Download download(ReportTemplate bean, WebContext webContext) throws Exception {
 		// return the correct report type

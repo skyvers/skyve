@@ -9,12 +9,28 @@ import org.skyve.web.WebContext;
 
 import modules.admin.domain.Communication;
 
+/**
+ * Packages generated communication files into a zip archive.
+ */
 public class ZipBatch extends DownloadAction<Communication> {
+	/**
+	 * Performs the prepare operation.
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public void prepare(Communication bean, WebContext webContext) throws Exception {
 		bean.setRefreshBatches(Boolean.FALSE);
 	}
 	
+	/**
+	 * Performs the download operation.
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public Download download(Communication bean, WebContext webContext) throws Exception {
 		

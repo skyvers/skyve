@@ -12,6 +12,9 @@ import jakarta.inject.Named;
 import modules.admin.Communication.CommunicationService;
 import modules.admin.Subscription.SubscriptionService;
 
+/**
+ * Processes public unsubscribe requests for email communications.
+ */
 @RequestScoped
 @Named("adminUnsubscribe")
 public class UnsubscribeView extends PublicFacesView {
@@ -26,10 +29,18 @@ public class UnsubscribeView extends PublicFacesView {
 	// indicates if the RSVP processing on HTTP GET was successful or not
 	private boolean success = false;
 
+	/**
+	 * Indicates whether unsubscribe processing succeeded.
+	 *
+	 * @return {@code true} when the supplied communication request was valid
+	 */
 	public boolean isSuccess() {
 		return success;
 	}
 
+	/**
+	 * Validates request parameters and performs unsubscribe on first render.
+	 */
 	@Override
 	public void preRender() {
 		super.preRender();

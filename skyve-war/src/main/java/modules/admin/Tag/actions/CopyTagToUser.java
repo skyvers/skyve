@@ -23,7 +23,12 @@ import modules.admin.domain.Tag;
  */
 public class CopyTagToUser implements ServerSideAction<TagExtension> {
 	/**
-	 * Copy tag to another user.
+	 * Copies the current tag and all tagged memberships to another user.
+	 *
+	 * @param bean The source tag.
+	 * @param webContext The current web context.
+	 * @return The source tag bean.
+	 * @throws Exception If validation, copy, or tagging fails.
 	 */
 	@Override
 	public ServerSideActionResult<TagExtension> execute(TagExtension bean, WebContext webContext) throws Exception {

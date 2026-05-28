@@ -29,10 +29,12 @@ public class ExportReportSpecifications extends DownloadAction<ReportManagerExte
 
 	/**
 	 * Prepare the zip for download
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @throws Exception if the operation fails
 	 */
 	@Override
 	public void prepare(ReportManagerExtension bean, WebContext webContext) throws Exception {
-
 		if (bean.getCurrentReports().size() == 0) {
 			throw new ValidationException(new Message("Please select at least one report to export"));
 		}
@@ -78,10 +80,13 @@ public class ExportReportSpecifications extends DownloadAction<ReportManagerExte
 	/**
 	 * Marshall a json version of each report
 	 * Save to a temporary folder and then zip and provide as a download
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @return the result
+	 * @throws Exception if the operation fails
 	 */
 	@Override
 	public Download download(ReportManagerExtension bean, WebContext webContext) throws Exception {
-
 		Download download = FileUtil.prepareZipDownload(bean.getPathToZip(), ReportManagerUtil.getZipName());
 
 		reportManagerService.cleanUpTemporaryFiles();

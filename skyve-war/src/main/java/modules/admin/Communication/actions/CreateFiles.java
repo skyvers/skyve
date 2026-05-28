@@ -8,8 +8,10 @@ import org.skyve.web.WebContext;
 
 import modules.admin.domain.Communication;
 
+/**
+ * Generates output files for the configured communication batch.
+ */
 public class CreateFiles implements ServerSideAction<Communication> {
-
 	/**
 	 * Kick off the job to generate email files for bulk send.
 	 */

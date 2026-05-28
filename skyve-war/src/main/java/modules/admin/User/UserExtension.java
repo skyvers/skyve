@@ -30,6 +30,9 @@ import modules.admin.domain.User;
 import modules.admin.domain.UserProxy;
 import modules.admin.domain.UserRole;
 
+/**
+ * Extends admin {@link User} with metadata-user mapping and activation workflows.
+ */
 public class UserExtension extends User {
 	private static final long serialVersionUID = 3422968996147520436L;
 
@@ -232,11 +235,26 @@ public class UserExtension extends User {
 
 		private String bizUserId;
 
+		/**
+		 * Creates a visitor that stamps traversed beans with the supplied owner user id.
+		 *
+		 * @param bizUserId The owning biz user id to apply.
+		 */
 		public UpdateBizUserVisitor(String bizUserId) {
 			super(false, false);
 			this.bizUserId = bizUserId;
 		}
 
+		/**
+		 * Applies ownership to each visited bean in the object graph.
+		 *
+		 * @param binding The current binding path.
+		 * @param document The visited document metadata.
+		 * @param owningDocument The owning document metadata.
+		 * @param owningRelation The relation traversed to reach this bean.
+		 * @param bean The visited bean.
+		 * @return Always {@code true} to continue traversal.
+		 */
 		@Override
 		protected boolean accept(String binding, Document document, Document owningDocument, Relation owningRelation, Bean bean) {
 			bean.setBizUserId(bizUserId);
@@ -244,6 +262,11 @@ public class UserExtension extends User {
 		}
 	}
 
+	/**
+	 * Builds a defensive business key that includes inactive-state marker when applicable.
+	 *
+	 * @return A human-readable key for list and log contexts.
+	 */
 	public String bizKey() {
 		StringBuilder sb = new StringBuilder(64);
 		try {

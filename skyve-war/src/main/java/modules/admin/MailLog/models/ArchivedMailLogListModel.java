@@ -36,7 +36,6 @@ import modules.admin.domain.MailLog;
  * @param <U> The bean type.
  */
 public class ArchivedMailLogListModel<U extends Bean> extends ArchivedDocumentListModel<U> {
-
 	private final List<String> mailLogBindings = List.of(MailLog.timestampPropertyName,
 														MailLog.dispatchStatusPropertyName,
 														MailLog.providerPropertyName,
@@ -46,16 +45,32 @@ public class ArchivedMailLogListModel<U extends Bean> extends ArchivedDocumentLi
 														MailLog.mailCountPropertyName,
 														MailLog.recipientCountPropertyName);
 
+	/**
+	 * Returns the user-facing description for this archived list model.
+	 * @return the result
+	 */
 	@Override
 	public String getDescription() {
 		return "The list of all archived Mail Logs.";
 	}
 
+	/**
+	 * Maps a logical binding to the Lucene sort-field binding used by archived index queries.
+	 *
+	 * @param binding the logical model binding
+	 * @return the archive sort binding
+	 */
 	@Override
 	protected String toSortBinding(String binding) {
 		return DocumentConverter.toSortBinding(binding);
 	}
 
+	/**
+	 * Converts a Lucene archive row into a dynamic bean for list rendering.
+	 *
+	 * @param luceneDoc the indexed archive document
+	 * @return a dynamic bean containing mapped mail log fields
+	 */
 	@Override
 	protected Bean convertToBean(Document luceneDoc) {
 		Map<String, Object> props = new HashMap<>();
@@ -92,16 +107,28 @@ public class ArchivedMailLogListModel<U extends Bean> extends ArchivedDocumentLi
 		return new DynamicBean(getModule(), getDocument(), props);
 	}
 
+	/**
+	 * Returns the module backing this archived list.
+	 * @return the result
+	 */
 	@Override
 	protected String getModule() {
 		return MailLog.MODULE_NAME;
 	}
 
+	/**
+	 * Returns the document backing this archived list.
+	 * @return the result
+	 */
 	@Override
 	protected String getDocument() {
 		return MailLog.DOCUMENT_NAME;
 	}
 
+	/**
+	 * Returns the projected columns shown in the archived mail log list.
+	 * @return the result
+	 */
 	@Override
 	public List<MetaDataQueryColumn> getColumns() {
 		return mailLogBindings.stream()
@@ -117,6 +144,10 @@ public class ArchivedMailLogListModel<U extends Bean> extends ArchivedDocumentLi
 		return column;
 	}
 
+	/**
+	 * Returns the projection bindings required to materialise archived list rows.
+	 * @return the result
+	 */
 	@Override
 	public Set<String> getProjections() {
 		Set<String> projections = new LinkedHashSet<>();
@@ -131,6 +162,10 @@ public class ArchivedMailLogListModel<U extends Bean> extends ArchivedDocumentLi
 		return projections;
 	}
 
+	/**
+	 * Returns the default sort for archived rows (timestamp descending).
+	 * @return the result
+	 */
 	@Override
 	protected Sort getDefaultSort() {
 		return new Sort(new SortField(toSortBinding(MailLog.timestampPropertyName), Type.STRING, true));

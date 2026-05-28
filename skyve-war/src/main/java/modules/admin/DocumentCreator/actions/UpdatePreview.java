@@ -15,8 +15,24 @@ import org.skyve.web.WebContext;
 
 import modules.admin.domain.DocumentCreator;
 
+/**
+ * Rebuilds preview output for the document-creator script editor.
+ * <p>
+ * The action produces both rendered markdown preview and escaped XML preview,
+ * and aggregates parser/processor errors for display.
+ */
 public class UpdatePreview implements ServerSideAction<DocumentCreator> {
-
+	/**
+	 * Recomputes preview fields from the current script content.
+	 *
+	 * @param bean
+	 *        the document-creator bean containing script and preview fields
+	 * @param webContext
+	 *        the current web context
+	 * @return a result wrapping {@code bean}
+	 * @throws Exception
+	 *         if parsing or metadata processing fails
+	 */
 	@Override
 	@SuppressWarnings("boxing")
 	public ServerSideActionResult<DocumentCreator> execute(DocumentCreator bean, WebContext webContext) throws Exception {
@@ -70,5 +86,4 @@ public class UpdatePreview implements ServerSideAction<DocumentCreator> {
 
 		return new ServerSideActionResult<>(bean);
 	}
-
 }

@@ -23,12 +23,23 @@ import modules.admin.domain.Tag;
 import modules.admin.domain.Tag.FilterAction;
 import modules.admin.domain.Tag.FilterOperator;
 
+/**
+ * Provides dynamic domain values, defaults, and rerender rules for admin tag editing.
+ */
 public class TagBizlet extends Bizlet<TagExtension> {
 	public static final String SYSTEM_TAG_ACTION_NOTIFICATION = "SYSTEM Tag Action Notification";
 	public static final String SYSTEM_TAG_ACTION_DEFAULT_SUBJECT = "Perform Document Action for Tag - Complete";
 	public static final String SYSTEM_TAG_ACTION_DEFAULT_BODY = "The action for Tag {name} is complete."
 			+ JobsBizlet.SYSTEM_JOB_NOTIFICATION_LINK_TO_JOBS;
 
+	/**
+	 * Computes dynamic domain values for module, document, condition, attribute, and action fields.
+	 *
+	 * @param attributeName The attribute requiring dynamic choices.
+	 * @param bean The current tag bean context.
+	 * @return Dynamic domain values for the requested attribute.
+	 * @throws Exception If metadata resolution fails.
+	 */
 	@Override
 	public List<DomainValue> getDynamicDomainValues(String attributeName, TagExtension bean) throws Exception {
 		Persistence pers = CORE.getPersistence();
@@ -106,6 +117,16 @@ public class TagBizlet extends Bizlet<TagExtension> {
 		return result;
 	}
 
+	/**
+	 * Applies edit-time defaults and delete-time cleanup behavior.
+	 *
+	 * @param actionName The implicit action being executed.
+	 * @param bean The current tag bean.
+	 * @param parentBean Optional parent bean.
+	 * @param webContext The current web context.
+	 * @return The updated bean.
+	 * @throws Exception If setup or cleanup fails.
+	 */
 	@Override
 	public TagExtension preExecute(ImplicitActionName actionName, TagExtension bean, Bean parentBean, WebContext webContext)
 			throws Exception {
@@ -150,6 +171,13 @@ public class TagBizlet extends Bizlet<TagExtension> {
 		return bean;
 	}
 
+	/**
+	 * Returns module selections for upload/action module fields.
+	 *
+	 * @param attributeName The field requiring variant values.
+	 * @return Module domain values for supported fields.
+	 * @throws Exception If customer metadata cannot be read.
+	 */
 	@Override
 	public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
 		List<DomainValue> result = new ArrayList<>();
@@ -164,6 +192,14 @@ public class TagBizlet extends Bizlet<TagExtension> {
 		return result;
 	}
 
+	/**
+	 * Clears dependent fields when module/document source selections change.
+	 *
+	 * @param source The source field that triggered rerender.
+	 * @param bean The current tag bean.
+	 * @param webContext The current web context.
+	 * @throws Exception If superclass rerender processing fails.
+	 */
 	@Override
 	public void preRerender(String source, TagExtension bean, WebContext webContext) throws Exception {
 
@@ -187,5 +223,4 @@ public class TagBizlet extends Bizlet<TagExtension> {
 		}
 		super.preRerender(source, bean, webContext);
 	}
-
 }

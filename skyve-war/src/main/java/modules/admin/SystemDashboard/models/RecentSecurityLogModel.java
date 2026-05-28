@@ -24,9 +24,14 @@ import modules.admin.domain.SystemDashboard;
  * @author Simeon Solomou
  */
 public class RecentSecurityLogModel extends InMemoryListModel<SystemDashboard> {
-
 	private List<MetaDataQueryColumn> columns = new ArrayList<>();
 
+	/**
+	 * Initializes list metadata including driving document and visible columns.
+	 *
+	 * @param customer the current customer metadata context
+	 * @param runtime whether the model is being initialized for runtime usage
+	 */
 	@Override
 	public void postConstruct(Customer customer, boolean runtime) {
 		// Set driving document
@@ -43,6 +48,12 @@ public class RecentSecurityLogModel extends InMemoryListModel<SystemDashboard> {
 		super.postConstruct(customer, runtime);
 	}
 
+	/**
+	 * Defines a projected read-only list column.
+	 *
+	 * @param binding the document binding
+	 * @param displayName the user-facing column title
+	 */
 	private void defineColumn(final String binding, final String displayName) {
 		MetaDataQueryProjectedColumnImpl column = new MetaDataQueryProjectedColumnImpl();
 		column.setDisplayName(displayName);
@@ -53,16 +64,32 @@ public class RecentSecurityLogModel extends InMemoryListModel<SystemDashboard> {
 		columns.add(column);
 	}
 
+	/**
+	 * Returns the list description shown by the view model framework.
+	 *
+	 * @return a short model description
+	 */
 	@Override
 	public String getDescription() {
 		return "Recent Security Logs";
 	}
 
+	/**
+	 * Returns configured projected columns for the in-memory list model.
+	 *
+	 * @return projected security-log columns
+	 */
 	@Override
 	public List<MetaDataQueryColumn> getColumns() {
 		return columns;
 	}
 
+	/**
+	 * Retrieves the most recent security log rows.
+	 *
+	 * @return up to five most recent security log beans
+	 * @throws Exception if query execution fails
+	 */
 	@Override
 	public List<Bean> getRows() throws Exception {
 		DocumentQuery q = CORE.getPersistence()
@@ -72,11 +99,25 @@ public class RecentSecurityLogModel extends InMemoryListModel<SystemDashboard> {
 		return q.beanResults();
 	}
 
+	/**
+	 * Rejects row updates because this model is read-only.
+	 *
+	 * @param bizId the row identifier
+	 * @param properties requested updates
+	 * @return never returns normally
+	 * @throws Exception always throws {@link IllegalStateException}
+	 */
 	@Override
 	public Bean update(String bizId, SortedMap<String, Object> properties) throws Exception {
 		throw new IllegalStateException("Not implemented");
 	}
 
+	/**
+	 * Rejects row removal because this model is read-only.
+	 *
+	 * @param bizId the row identifier
+	 * @throws Exception always throws {@link IllegalStateException}
+	 */
 	@Override
 	public void remove(String bizId) throws Exception {
 		throw new IllegalStateException("Not implemented");

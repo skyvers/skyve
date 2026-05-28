@@ -3155,9 +3155,12 @@ if (document.isDynamic()) return;
 		if (! deleteContext.isEmpty()) { // called within a Persistence.delete() operation 
 			// Don't continue if we've already called preDelete on this bean 
 			// as it was the argument in a Persistence.delete() call
-			Bean beanToDelete = beansToDelete.get("").stream().findFirst().get();
-			if (bean.equals(beanToDelete)) {
-				return;
+			Set<Bean> rootBeansToDelete = beansToDelete.get("");
+			if (rootBeansToDelete != null) {
+				Bean beanToDelete = rootBeansToDelete.stream().findFirst().orElse(null);
+				if (bean.equals(beanToDelete)) {
+					return;
+				}
 			}
 		}
 		
@@ -3236,16 +3239,19 @@ if (document.isDynamic()) return;
 		if (! deleteContext.isEmpty()) { // called within a Persistence.delete() operation 
 			// Don't continue if we've already called preDelete on this bean 
 			// as it was the argument in a Persistence.delete() call
-			Bean beanToDelete = beansToDelete.get("").stream().findFirst().get();
-			if (bean.equals(beanToDelete)) {
-				// remove content and unique constraints state but don't call Bizlet.postDelete()
-				try {
-					removeBeanContent(bean);
+			Set<Bean> rootBeansToDelete = beansToDelete.get("");
+			if (rootBeansToDelete != null) {
+				Bean beanToDelete = rootBeansToDelete.stream().findFirst().orElse(null);
+				if (bean.equals(beanToDelete)) {
+					// remove content and unique constraints state but don't call Bizlet.postDelete()
+					try {
+						removeBeanContent(bean);
+					}
+					finally {
+						removeInsertedUniqueConstraintState(customer, document, bean);
+					}
+					return;
 				}
-				finally {
-					removeInsertedUniqueConstraintState(customer, document, bean);
-				}
-				return;
 			}
 		}
 

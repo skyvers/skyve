@@ -46,8 +46,8 @@ public class ReindexAttachmentsJob extends CancellableJob {
 					return;
 				}
 				Collection<Table> tables = BackupUtil.getTables();
-				float i = 0f;
-				float l = tables.size();
+				int i = 0;
+				int l = tables.size();
 				for (Table table : tables) {
 					i++;
 					if (! hasContent(table)) {
@@ -106,7 +106,7 @@ public class ReindexAttachmentsJob extends CancellableJob {
 							}
 						}
 					}
-					setPercentComplete((int) (i / l * 100f));
+					setPercentComplete((int) ((((float) i) / ((float) l)) * 100f));
 				}
 			}
 		}

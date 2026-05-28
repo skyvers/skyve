@@ -16,7 +16,15 @@ import modules.admin.UserDashboard.UserDashboardExtension;
 import modules.admin.domain.Audit;
 import modules.admin.domain.SystemDashboard;
 
+/**
+ * Produces a day-by-day activity chart of recent audit events.
+ */
 public class ActivityModel extends ChartModel<SystemDashboard> {
+	/**
+	 * Builds chart data for activity over the last two weeks.
+	 *
+	 * @return chart data grouped by day with event counts
+	 */
 	@Override
 	public ChartData getChartData() {
 		// temporarily elevate user to be able to see Audit records in case they don't usually have access

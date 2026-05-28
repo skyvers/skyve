@@ -5,6 +5,9 @@ import java.security.SecureRandom;
 import modules.admin.Configuration.ConfigurationExtension;
 import modules.admin.domain.Configuration;
 
+/**
+ * Generates passwords using configured complexity and length constraints from admin configuration.
+ */
 public class PasswordGenerator {
 	private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
@@ -22,6 +25,11 @@ public class PasswordGenerator {
 
 	public static final String PRINTABLE_CHARACTERS = DIGITS + LOWERCASE_CHARACTERS + UPPERCASE_CHARACTERS;
 
+	/**
+	 * Performs the generate operation.
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	public static String generate() throws Exception {
 
 		ConfigurationExtension config = Configuration.newInstance();

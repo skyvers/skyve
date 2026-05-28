@@ -11,14 +11,30 @@ import org.skyve.util.Util;
 import modules.admin.User.UserExtension;
 import modules.admin.domain.User;
 
+/**
+ * Defines lifecycle and validation rules for public self-registration requests.
+ */
 public class SelfRegistrationBizlet extends Bizlet<SelfRegistrationExtension> {
-
+	/**
+	 * Creates a new registration bean with an initialized user document.
+	 *
+	 * @param bean the registration bean being created
+	 * @return the initialized registration bean after superclass processing
+	 * @throws Exception if instance creation fails
+	 */
 	@Override
 	public SelfRegistrationExtension newInstance(SelfRegistrationExtension bean) throws Exception {
 		bean.setUser(User.newInstance());
 		return super.newInstance(bean);
 	}
 	
+	/**
+	 * Validates registration constraints before save.
+	 *
+	 * @param bean the registration bean being validated
+	 * @param e the validation collector to append messages to
+	 * @throws Exception if validation processing fails
+	 */
 	@Override
 	public void validate(SelfRegistrationExtension bean, ValidationException e) throws Exception {
 		// validate that this email address hasn't already been registered (prompts to login)
@@ -31,6 +47,8 @@ public class SelfRegistrationBizlet extends Bizlet<SelfRegistrationExtension> {
 	 * Checks that a {@link User} does not already exist in the system with the same username
 	 * (email address) as the one trying to be registered.
 	 * 
+	 * @param emailAddress the email address to test for uniqueness
+	 * @param e the validation collector to receive conflict messages
 	 * @throws A {@link ValidationException} if the email address has already been registered.
 	 */
 	private static void validateUniqueEmail(final String emailAddress, final ValidationException e) {

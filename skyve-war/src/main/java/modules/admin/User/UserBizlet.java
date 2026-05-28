@@ -35,6 +35,9 @@ import modules.admin.domain.User;
 import modules.admin.domain.User.GroupSelection;
 import modules.admin.domain.User.WizardState;
 
+/**
+ * Implements admin user document lifecycle rules for defaults, validation, and security events.
+ */
 public class UserBizlet extends Bizlet<UserExtension> {
 	@Inject
 	@SuppressWarnings("java:S6813") // allow member injection
@@ -73,6 +76,14 @@ public class UserBizlet extends Bizlet<UserExtension> {
 		return bean;
 	}
 
+	/**
+	 * Reacts to wizard-selection and password changes before rerender.
+	 *
+	 * @param source The field that triggered rerender.
+	 * @param bean The current user bean.
+	 * @param webContext The current web context.
+	 * @throws Exception If superclass handling fails.
+	 */
 	@Override
 	public void preRerender(String source, UserExtension bean, WebContext webContext) throws Exception {
 
@@ -97,6 +108,16 @@ public class UserBizlet extends Bizlet<UserExtension> {
 		super.preRerender(source, bean, webContext);
 	}
 
+	/**
+	 * Applies pre-execute save defaults such as assigning a newly-created group.
+	 *
+	 * @param actionName The implicit action being processed.
+	 * @param bean The current user bean.
+	 * @param parentBean Optional parent bean.
+	 * @param webContext The current web context.
+	 * @return The user bean to continue processing.
+	 * @throws Exception If superclass processing fails.
+	 */
 	@Override
 	public UserExtension preExecute(ImplicitActionName actionName,
 			UserExtension bean,
@@ -130,6 +151,13 @@ public class UserBizlet extends Bizlet<UserExtension> {
 		user.setBizDataGroupId((user.getDataGroup() != null) ? user.getDataGroup().getBizId() : null);
 	}
 
+	/**
+	 * Resolves selectable values for groups, data groups, and home modules.
+	 *
+	 * @param fieldName The field requesting values.
+	 * @return Domain values for supported fields.
+	 * @throws Exception If query or metadata access fails.
+	 */
 	@Override
 	public List<DomainValue> getVariantDomainValues(String fieldName) throws Exception {
 		Persistence persistence = CORE.getPersistence();
@@ -169,6 +197,12 @@ public class UserBizlet extends Bizlet<UserExtension> {
 		return super.getVariantDomainValues(fieldName);
 	}
 
+	/**
+	 * Applies persistence-side transformations before user save.
+	 *
+	 * @param bean The user bean about to be saved.
+	 * @throws Exception If state mutation fails.
+	 */
 	@Override
 	public void preSave(UserExtension bean) throws Exception {
 
@@ -247,9 +281,14 @@ public class UserBizlet extends Bizlet<UserExtension> {
 		userService.evictUserProxy(bean);
 	}
 
+	/**
+	 * Evicts user-proxy cache prior to deleting the user.
+	 *
+	 * @param bean The user being deleted.
+	 * @throws Exception If proxy eviction fails.
+	 */
 	@Override
 	public void preDelete(UserExtension bean) throws Exception {
 		userService.evictUserProxy(bean);
 	}
-
 }

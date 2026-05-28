@@ -20,12 +20,21 @@ import modules.admin.domain.DataMaintenance;
 import modules.admin.domain.DataMaintenance.RestorePreProcess;
 import modules.admin.domain.ModuleDocument;
 
+/**
+ * Applies Data Maintenance document rules and lifecycle behaviour.
+ */
 public class DataMaintenanceBizlet extends SingletonCachedBizlet<DataMaintenance> {
 	public static final String SYSTEM_DATA_REFRESH_NOTIFICATION = "SYSTEM Document Data Refresh Notification";
 	public static final String SYSTEM_DATA_REFRESH_DEFAULT_SUBJECT = "Perform Document Data Refresh - Complete";
 	public static final String SYSTEM_DATA_REFRESH_DEFAULT_BODY = "The document data refresh is complete."
 			+ JobsBizlet.SYSTEM_JOB_NOTIFICATION_LINK_TO_JOBS;
 
+	/**
+	 * Performs the newInstance operation.
+	 * @param bean the bean value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public DataMaintenance newInstance(DataMaintenance bean) throws Exception {
 		DataMaintenance result = super.newInstance(bean);
@@ -47,6 +56,12 @@ public class DataMaintenanceBizlet extends SingletonCachedBizlet<DataMaintenance
 		return result;
 	}
 
+	/**
+	 * Performs the getConstantDomainValues operation.
+	 * @param attributeName the attributeName value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public List<DomainValue> getConstantDomainValues(String attributeName) throws Exception {
 		List<DomainValue> result = null;
@@ -88,6 +103,13 @@ public class DataMaintenanceBizlet extends SingletonCachedBizlet<DataMaintenance
 		return result;
 	}
 
+	/**
+	 * Performs the preRerender operation.
+	 * @param source the source value
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public void preRerender(String source, DataMaintenance bean, WebContext webContext) throws Exception {
 		if (DataMaintenance.restorePreProcessPropertyName.equals(source)) {
@@ -129,6 +151,13 @@ public class DataMaintenanceBizlet extends SingletonCachedBizlet<DataMaintenance
 		super.preRerender(source, bean, webContext);
 	}
 
+	/**
+	 * Performs the getDynamicDomainValues operation.
+	 * @param attributeName the attributeName value
+	 * @param bean the bean value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public List<DomainValue> getDynamicDomainValues(String attributeName, DataMaintenance bean)
 			throws Exception {
@@ -151,6 +180,15 @@ public class DataMaintenanceBizlet extends SingletonCachedBizlet<DataMaintenance
 		return super.getDynamicDomainValues(attributeName, bean);
 	}
 
+	/**
+	 * Performs the preExecute operation.
+	 * @param actionName the actionName value
+	 * @param bean the bean value
+	 * @param parentBean the parentBean value
+	 * @param webContext the webContext value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public DataMaintenance preExecute(ImplicitActionName actionName, DataMaintenance bean, Bean parentBean, WebContext webContext)
 			throws Exception {
@@ -161,5 +199,4 @@ public class DataMaintenanceBizlet extends SingletonCachedBizlet<DataMaintenance
 
 		return super.preExecute(actionName, bean, parentBean, webContext);
 	}
-
 }

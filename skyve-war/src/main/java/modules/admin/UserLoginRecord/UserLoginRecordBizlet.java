@@ -23,6 +23,9 @@ import modules.admin.domain.Startup;
 import modules.admin.domain.User;
 import modules.admin.domain.UserLoginRecord;
 
+/**
+ * Applies geolocation enrichment and security anomaly checks to login records.
+ */
 public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
 	private static final String IP_CHANGE_LOG_MESSAGE = "The user %s has logged in from a new IP address. "
 			+ "The IP address has changed from %s to %s. "
@@ -33,6 +36,16 @@ public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
 			+ "Their location has changed from %s - %s (IP: %s) to %s - %s (IP: %s). "
 			+ "If this change is unexpected, it might indicate unauthorized access. Please review the user's recent activity for any discrepancies.";
 
+	/**
+	 * Enriches edit view with city/region from geolocation lookup.
+	 *
+	 * @param actionName The implicit action being executed.
+	 * @param bean The current login record bean.
+	 * @param parentBean Optional parent bean.
+	 * @param webContext The current web context.
+	 * @return The login record bean.
+	 * @throws Exception If enrichment fails.
+	 */
 	@Override
 	public UserLoginRecordExtension preExecute(ImplicitActionName actionName,
 												UserLoginRecordExtension bean,

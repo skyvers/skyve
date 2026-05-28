@@ -20,7 +20,12 @@ import modules.admin.Tag.TagExtension;
  */
 public class TagAll implements ServerSideAction<TagExtension> {
 	/**
-	 * Tag all records
+	 * Tags every bean for the configured upload module/document pair.
+	 *
+	 * @param bean The tag definition to apply.
+	 * @param webContext The current web context.
+	 * @return The same tag bean with refreshed counters.
+	 * @throws Exception If query or tagging fails.
 	 */
 	@Override
 	public ServerSideActionResult<TagExtension> execute(TagExtension bean, WebContext webContext)
