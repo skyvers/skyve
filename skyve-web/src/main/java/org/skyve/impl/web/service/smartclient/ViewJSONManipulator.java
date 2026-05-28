@@ -2011,7 +2011,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 			return;
 		}
 
-		if (parentVisible & visible(password)) {
+		if (parentVisible && visible(password)) {
 			if ((! forApply) || 
 					(forApply && parentEnabled && enabled(password))) {
 				addBinding(password.getBinding(), true, false, Sanitisation.none);
