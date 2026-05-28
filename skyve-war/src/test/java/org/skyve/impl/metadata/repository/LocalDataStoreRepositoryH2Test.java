@@ -9,6 +9,7 @@ import org.skyve.CORE;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
+import modules.admin.Startup.StartupBizlet;
 import modules.admin.Configuration.ConfigurationExtension;
 import modules.admin.User.UserExtension;
 import modules.admin.domain.Configuration;
@@ -19,9 +20,7 @@ import util.AbstractH2Test;
 class LocalDataStoreRepositoryH2Test extends AbstractH2Test {
 	@Test
 	void retrievePublicUserNameReturnsNullWhenNoPublicUserConfigured() {
-		ConfigurationExtension configuration = new DataBuilder().fixture(FixtureType.crud).build(Configuration.MODULE_NAME, Configuration.DOCUMENT_NAME);
-		configuration.setPublicUser(null);
-		configuration = CORE.getPersistence().save(configuration);
+		ConfigurationExtension configuration = saveConfiguration(null);
 
 		LocalDataStoreRepository repository = new LocalDataStoreRepository();
 
@@ -35,13 +34,22 @@ class LocalDataStoreRepositoryH2Test extends AbstractH2Test {
 		UserExtension publicUser = new DataBuilder().fixture(FixtureType.crud).build(User.MODULE_NAME, User.DOCUMENT_NAME);
 		publicUser.setUserName(expectedUserName);
 		publicUser = CORE.getPersistence().save(publicUser);
-
-		ConfigurationExtension configuration = new DataBuilder().fixture(FixtureType.crud).build(Configuration.MODULE_NAME, Configuration.DOCUMENT_NAME);
-		configuration.setPublicUser(publicUser);
-		CORE.getPersistence().save(configuration);
+		saveConfiguration(publicUser);
 
 		LocalDataStoreRepository repository = new LocalDataStoreRepository();
 
 		assertEquals(expectedUserName, repository.retrievePublicUserName(CUSTOMER));
+	}
+
+	private static ConfigurationExtension saveConfiguration(UserExtension publicUser) {
+		ConfigurationExtension configuration = new DataBuilder().fixture(FixtureType.crud).build(Configuration.MODULE_NAME,
+				Configuration.DOCUMENT_NAME);
+		configuration.getStartup().setMapLayer(StartupBizlet.MAP_LAYER_GMAP);
+		configuration.getStartup().setMailPort(Integer.valueOf(25));
+		configuration.setPublicUser(publicUser);
+		configuration = CORE.getPersistence().save(configuration);
+		CORE.getPersistence().commit(false);
+		CORE.getPersistence().begin();
+		return configuration;
 	}
 }
