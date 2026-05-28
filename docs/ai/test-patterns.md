@@ -102,9 +102,9 @@ Pure Mockito unit tests
 - Tips: inject tricky private fields via reflection only when necessary; swallow logging/persistence in `doAnswer`.
 # Test Patterns Cookbook
 
-`docs/test-patterns.md` captures reusable test patterns seen across Skyve repositories, generalised for framework and application work.
+`docs/ai/test-patterns.md` captures reusable test patterns seen across Skyve repositories, generalised for framework and application work.
 
-Use the smallest pattern that proves the behaviour. For the active coverage improvement plan, target packages, and skip list, see [docs/coverage-plan.md](coverage-plan.md).
+Use the smallest pattern that proves the behaviour. For the active coverage improvement plan, target packages, and skip list, see [docs/coverage-plan.md](../coverage-plan.md).
 
 ## Test Placement Decision
 
@@ -672,4 +672,4 @@ To run a coverage build and generate reports:
 - Coverage reports are generated in each module and aggregated in `skyve-coverage/target/site/jacoco-aggregate/`.
 - This approach is opt-in: only use coverage builds when you need to measure or improve test coverage.
 
-For more on test types and patterns, see the sections above. For coverage troubleshooting or advanced usage, see the agent documentation in `agents.md`.
+For more on test types and patterns, see the sections above. For coverage troubleshooting or advanced usage, see [testing-and-coverage.md](testing-and-coverage.md) and [project-agent-guide.md](project-agent-guide.md).

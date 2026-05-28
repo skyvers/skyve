@@ -38,10 +38,13 @@ Important constraints:
 
 Use these sources when planning or executing milestones:
 - `README.md` for user-facing framework capabilities and getting started
-- `agents.md` for project-wide delivery rules, coding conventions, Javadoc standards, and cross-cutting invariants
-- `docs/learnings.md` for durable engineering guidance and project learnings
+- `docs/ai/project-agent-guide.md` for project-wide delivery rules, cross-cutting invariants, and workflow expectations
+- `docs/ai/performance-and-coding-conventions.md` for coding and runtime performance conventions
+- `docs/ai/javadoc-standards.md` for Javadoc contract standards
+- `docs/ai/testing-and-coverage.md` for test validation and coverage execution guidance
+- `docs/ai/learnings.md` for durable engineering guidance and project learnings
 - `docs/architecture.md` for framework architecture decisions and design attributes
-- `docs/test-patterns.md` before creating or modifying tests
+- `docs/ai/test-patterns.md` before creating or modifying tests
 - `docs/coverage-plan.md` before any coverage-improvement work (defines target, skip list, tier ordering)
 - module-local `pom.xml` files for dependency and build structure
 - current module metadata, views, bizlets, services, jobs, and tests for the actual implemented behaviour
@@ -51,16 +54,16 @@ Use these sources when planning or executing milestones:
 # Working files expected in this repo
 
 These files should exist and evolve over time:
-- `docs/plan.md` — framework roadmap and orchestration rules (this file)
+- `docs/ai/plan.md` — framework roadmap and orchestration rules (this file)
 - `docs/architecture.md` — durable architecture decisions and design attributes
-- `docs/learnings.md` — durable engineering learnings and patterns
+- `docs/ai/learnings.md` — durable engineering learnings and patterns
 - `docs/coverage-plan.md` — coverage improvement plan, baselines, and tier ordering
-- `docs/test-patterns.md` — reusable test pattern cookbook
-- `docs/plan_m{n}.md` — one self-contained plan per milestone, for example `docs/plan_m1.md`
+- `docs/ai/test-patterns.md` — reusable test pattern cookbook
+- `docs/ai/plan_m{n}.md` — one self-contained plan per milestone, for example `docs/ai/plan_m1.md`
 
-If guidance is milestone-specific, keep it in `docs/plan_m{n}.md`.
+If guidance is milestone-specific, keep it in `docs/ai/plan_m{n}.md`.
 If guidance is durable and architecture-oriented, put it in `docs/architecture.md`.
-If guidance is durable and broadly engineering-oriented, put it in `docs/learnings.md`.
+If guidance is durable and broadly engineering-oriented, put it in `docs/ai/learnings.md`.
 
 ---
 
@@ -68,10 +71,10 @@ If guidance is durable and broadly engineering-oriented, put it in `docs/learnin
 
 If the user asks you to plan a milestone, these are the steps to take.
 
-1. Read all of `docs/plan.md` to understand the framework roadmap, milestone boundaries, and planning rules.
-2. Read any prior related `docs/plan_m{n}.md` files that this milestone depends on.
-3. Read `agents.md`, `docs/architecture.md`, and `docs/learnings.md`.
-4. If the milestone involves coverage work, also read `docs/coverage-plan.md` and `docs/test-patterns.md`.
+1. Read all of `docs/ai/plan.md` to understand the framework roadmap, milestone boundaries, and planning rules.
+2. Read any prior related `docs/ai/plan_m{n}.md` files that this milestone depends on.
+3. Read `docs/ai/project-agent-guide.md`, `docs/architecture.md`, and `docs/ai/learnings.md`.
+4. If the milestone involves coverage work, also read `docs/coverage-plan.md` and `docs/ai/test-patterns.md`.
 5. Inspect the current repository and determine the real current state before planning.
 6. Ask important clarifying questions only where needed.
    - Prefer discovering facts from the repo over asking the user.
@@ -105,10 +108,10 @@ If the user asks you to plan a milestone, these are the steps to take.
 12. Do a better-engineering pass on the plan.
     - Identify the smallest safe implementation.
     - Record deferred cleanup or follow-up work separately from the milestone scope.
-13. Present the completed `docs/plan_m{n}.md` for user signoff.
+13. Present the completed `docs/ai/plan_m{n}.md` for user signoff.
 14. Ensure the plan is a complete handoff document for implementation.
 
-Use the following format for all `docs/plan_m{n}.md` files:
+Use the following format for all `docs/ai/plan_m{n}.md` files:
 
     # Plan: M{n} - <title>
 
@@ -154,9 +157,9 @@ Use the following format for all `docs/plan_m{n}.md` files:
 
 If the user asks you to execute a milestone plan, these are the steps to take.
 
-1. Read the relevant `docs/plan_m{n}.md` in full.
-2. Re-read any referenced parts of `docs/plan.md`, `agents.md`, `docs/learnings.md`, and area-specific guidance.
-3. If the milestone involves tests or coverage, also read `docs/test-patterns.md` and `docs/coverage-plan.md`.
+1. Read the relevant `docs/ai/plan_m{n}.md` in full.
+2. Re-read any referenced parts of `docs/ai/plan.md`, `docs/ai/project-agent-guide.md`, `docs/ai/learnings.md`, and area-specific guidance.
+3. If the milestone involves tests or coverage, also read `docs/ai/test-patterns.md` and `docs/coverage-plan.md`.
 4. Implement the plan.
    - Prefer the smallest clean solution that satisfies the scope.
    - Reuse existing Skyve patterns, metadata mechanisms, and service abstractions.
@@ -164,17 +167,17 @@ If the user asks you to execute a milestone plan, these are the steps to take.
    - Keep business logic out of views — use extensions, services, or jobs.
 5. Regenerate domain when metadata changes make that necessary.
    - Use `mvn -B -DskipTests compile` and `mvn -B skyve:generateDomain` in the right order.
-   - See `docs/learnings.md` for Eclipse class file conflicts that require `clean compile` first.
+   - See `docs/ai/learnings.md` for Eclipse class file conflicts that require `clean compile` first.
 6. Validate continuously while implementing.
    - Run the smallest meaningful compile or test step first.
    - After editing any Java file, call `get_errors` and resolve all warnings before moving on.
-   - Follow `docs/test-patterns.md` for test placement and base class selection.
+   - Follow `docs/ai/test-patterns.md` for test placement and base class selection.
    - For coverage work, use the build commands in `docs/coverage-plan.md`.
    - Broaden validation before handoff: `mvn -B package` is the baseline CI-aligned build.
 7. Update the `Acceptance checklist` and `AI validation results` sections in the milestone plan.
 8. Review your own work for behavioural regressions, backward compatibility, and scope completeness.
 9. Do a better-engineering pass.
-   - Add durable learnings to `docs/learnings.md` when warranted.
+   - Add durable learnings to `docs/ai/learnings.md` when warranted.
    - Record deferred follow-up work in the milestone plan instead of silently broadening scope.
 10. Ensure the implementation is ready for human review.
 11. Present:

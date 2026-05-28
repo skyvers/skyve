@@ -515,4 +515,4 @@ Consider integration tests (`*IT.java`) for:
 
 ### Additional Resources
 
-See `docs/test-patterns.md` for detailed examples of all test patterns and more comprehensive guidance.
+See `docs/ai/test-patterns.md` for detailed examples of all test patterns and more comprehensive guidance.
