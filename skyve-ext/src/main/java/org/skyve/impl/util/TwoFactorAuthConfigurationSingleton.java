@@ -1,11 +1,10 @@
 package org.skyve.impl.util;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.SQLSyntaxErrorException;
-import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.skyve.CORE;
@@ -25,7 +24,8 @@ import org.slf4j.Logger;
  * reads and updates.
  */
 public class TwoFactorAuthConfigurationSingleton implements SystemObserver {
-	private static final String ADM_CONFIGURATION_TABLE_NAME = "adm_configuration";
+	private static final String ADM_CONFIGURATION_TABLE_NAME = "ADM_Configuration";
+	private static final String[] TABLE_TYPES = new String[] {"TABLE"};
 	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(TwoFactorAuthConfigurationSingleton.class);
 	private static TwoFactorAuthConfigurationSingleton instance = new TwoFactorAuthConfigurationSingleton();
 
@@ -110,8 +110,14 @@ public class TwoFactorAuthConfigurationSingleton implements SystemObserver {
 	@Override
 	public void startup() {
 		try (Connection c = getDataStoreConnection()) {
+			if (shouldSkipDatabaseConfigurationRead(c)) {
+				LOGGER.warn("Skipping TFA database configuration read during non-production bootstrap because {} does not exist.",
+								ADM_CONFIGURATION_TABLE_NAME);
+				return;
+			}
+
 			String query = "select twoFactorType, twofactorPushCodeTimeOutSeconds, twoFactorEmailSubject, twoFactorEmailBody, bizCustomer " +
-								"from ADM_Configuration " +
+								"from " + ADM_CONFIGURATION_TABLE_NAME + " " +
 								"where twoFactorType is not null and twofactorPushCodeTimeOutSeconds is not null";
 			try (PreparedStatement s = c.prepareStatement(query)) {
 				try (ResultSet rs = s.executeQuery()) {
@@ -130,10 +136,6 @@ public class TwoFactorAuthConfigurationSingleton implements SystemObserver {
 			}
 		}
 		catch (SQLException e) {
-			if (shouldIgnoreStartupFailure(e)) {
-				LOGGER.warn("Skipping TFA database configuration read during non-production bootstrap.", e);
-				return;
-			}
 			throw new DomainException("Failure reading customer configuration from database.", e);
 		}
 	}
@@ -144,37 +146,39 @@ public class TwoFactorAuthConfigurationSingleton implements SystemObserver {
 	 * @return An open datastore connection
 	 * @throws SQLException If the connection cannot be created
 	 */
+	@SuppressWarnings("static-method")
 	Connection getDataStoreConnection() throws SQLException {
 		return EXT.getDataStoreConnection();
 	}
 
 	/**
-	 * Determines whether startup database-read failures should be tolerated.
+	 * Determines whether the startup database read should be skipped.
 	 *
 	 * <p>This is limited to non-production bootstrap-style environments where
 	 * customer-level two-factor authentication has been pre-configured in JSON and
 	 * the configuration table may not yet exist.
 	 *
-	 * @param exception The SQL failure raised while reading TFA settings
-	 * @return {@code true} when startup should continue despite the failure
+	 * @param connection The open datastore connection
+	 * @return {@code true} when startup should continue without reading database-backed
+	 *         TFA settings
+	 * @throws SQLException If table metadata cannot be read
 	 */
-	@SuppressWarnings("static-method")
-	boolean shouldIgnoreStartupFailure(SQLException exception) {
+	private static boolean shouldSkipDatabaseConfigurationRead(Connection connection) throws SQLException {
 		return (UtilImpl.ENVIRONMENT_IDENTIFIER != null) &&
 				(UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS != null) &&
 				(! UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS.isEmpty()) &&
-				isMissingConfigurationTableFailure(exception);
+				(! configurationTableExists(connection));
 	}
 
-	private static boolean isMissingConfigurationTableFailure(SQLException exception) {
-		for (SQLException current = exception; current != null; current = current.getNextException()) {
-			String state = current.getSQLState();
-			String message = current.getMessage();
-			boolean syntaxOrObjectState = (state != null) && state.startsWith("42");
-			boolean missingConfigurationTable = (message != null) &&
-					message.toLowerCase(Locale.ROOT).contains(ADM_CONFIGURATION_TABLE_NAME);
-			if (missingConfigurationTable && (syntaxOrObjectState || (current instanceof SQLSyntaxErrorException))) {
-				return true;
+	private static boolean configurationTableExists(Connection connection) throws SQLException {
+		DatabaseMetaData metadata = connection.getMetaData();
+		String catalog = connection.getCatalog();
+		try (ResultSet tables = metadata.getTables(catalog, null, "%", TABLE_TYPES)) {
+			while (tables.next()) {
+				String tableName = tables.getString("TABLE_NAME");
+				if (ADM_CONFIGURATION_TABLE_NAME.equalsIgnoreCase(tableName)) {
+					return true;
+				}
 			}
 		}
 		return false;
