@@ -33,13 +33,22 @@ package org.skyve.impl.tools.javadoc;
 
 
 /**
- * Chaining doclet that runs the standart Javadoc doclet first, and on success,
- * runs the generation of dot files by UMLGraph
+ * Provides the historical Skyve doclet entry points.
+ *
+ * <p>The original implementation chained the standard Javadoc doclet with
+ * UMLGraph output generation. In Java 11+ builds the legacy doclet APIs are
+ * unavailable, so the executable portions are disabled while the type and
+ * method signatures are retained for compatibility.
  */
 public class SkyveDoclet {
 	/**
-	 * Option check, forwards options to the standard doclet, if that one
-	 * refuses them, they are sent to UmlGraph
+	 * Returns the length of a recognised custom option.
+	 *
+	 * <p>Compatibility mode currently recognises no options and always returns
+	 * {@code 0}.
+	 *
+	 * @param option option token supplied by the Javadoc tool
+	 * @return {@code 0} in Java 11+ compatibility mode
 	 */
 	@SuppressWarnings("unused")
 	public static int optionLength(String option) {
@@ -93,9 +102,10 @@ public class SkyveDoclet {
 	 */
 
 	/**
-	 * Standand doclet entry
-	 * 
-	 * @return
+	 * Placeholder for the legacy language-version hook.
+	 *
+	 * <p>The method is intentionally disabled because legacy doclet integration
+	 * is not compiled in Java 11+ mode.
 	 */
 	//DC JAVA 11
 	//public static LanguageVersion languageVersion() {
@@ -103,8 +113,9 @@ public class SkyveDoclet {
 	//}
 
 	/**
-	 * Generates the package diagrams for all of the packages that contain
-	 * classes among those returned by RootDoc.class()
+	 * Placeholder for package diagram generation logic.
+	 *
+	 * <p>Kept as commented reference for the legacy UMLGraph-based pipeline.
 	 */
 
 	//DC JAVA 11
@@ -134,7 +145,9 @@ public class SkyveDoclet {
 
 
 	/**
-	 * Generates the context diagram for a single class
+	 * Placeholder for per-class context diagram generation logic.
+	 *
+	 * <p>Kept as commented reference for the legacy UMLGraph-based pipeline.
 	 */
 	//DC JAVA 11
 	/*
@@ -175,8 +188,9 @@ public class SkyveDoclet {
 	 */
 
 	/**
-	 * Runs Graphviz dot building both a diagram (in png format) and a client
-	 * side map for it.
+	 * Placeholder for Graphviz execution logic.
+	 *
+	 * <p>Kept as commented reference for the legacy UMLGraph-based pipeline.
 	 */
 	//DC JAVA 11
 //	private static void runGraphviz(String dotExecutable, String outputFolder,
@@ -236,9 +250,9 @@ public class SkyveDoclet {
 //			+ "</div>";
 
 	/**
-	 * Takes an HTML file, looks for the first instance of the specified
-	 * insertion point, and inserts the diagram image reference and a client
-	 * side map in that point.
+	 * Placeholder for HTML diagram-insertion logic.
+	 *
+	 * <p>Kept as commented reference for the legacy UMLGraph-based pipeline.
 	 */
 
 	//DC JAVA 11
@@ -300,9 +314,9 @@ public class SkyveDoclet {
 //	}
 
 	/**
-	 * Reads the map file and outputs in to the specified writer
-	 * 
-	 * @throws IOException
+	 * Placeholder for client-side map insertion logic.
+	 *
+	 * <p>Kept as commented reference for the legacy UMLGraph-based pipeline.
 	 */
 //	private static void insertClientSideMap(File mapFile, BufferedWriter writer)
 //	throws IOException {
@@ -316,7 +330,9 @@ public class SkyveDoclet {
 //	}
 
 	/**
-	 * Returns the output path specified on the javadoc options
+	 * Placeholder for output-path resolution from doclet options.
+	 *
+	 * <p>Kept as commented reference for the legacy UMLGraph-based pipeline.
 	 */
 //	private static String findOutputPath(String[][] options) {
 //		for (int i = 0; i < options.length; i++) {

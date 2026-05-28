@@ -9,6 +9,13 @@ package org.skyve.impl.tools.javadoc;
 //import com.sun.javadoc.PackageDoc;
 //import com.sun.javadoc.RootDoc;
 //public class SkyvePackageView extends PackageView {
+/**
+ * Retains the historical Skyve package-view type name for doclet wiring.
+ *
+ * <p>The UMLGraph integration code is commented out in Java 11+ builds. This
+ * class remains as a compatibility placeholder so existing references continue
+ * to compile.
+ */
 public class SkyvePackageView{
 
 //	public SkyvePackageView(String outputFolder,

@@ -3,18 +3,35 @@ package org.skyve.impl.tools.javadoc.doctor;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Renders tabular documentation content with optional list fallback.
+ */
 public class DocTable {
-
 	private String id;
 
+	/**
+	 * Returns the table identifier.
+	 *
+	 * @return table id
+	 */
 	public String getId() {
 		return id;
 	}
 
+	/**
+	 * Sets the table identifier.
+	 *
+	 * @param id table id
+	 */
 	public void setId(String id) {
 		this.id = id;
 	}
 
+	/**
+	 * Creates a table with the supplied identifier.
+	 *
+	 * @param id table id
+	 */
 	public DocTable(String id) {
 		super();
 		this.id = id;
@@ -22,24 +39,49 @@ public class DocTable {
 
 	private String title;
 
+	/**
+	 * Returns the table title.
+	 *
+	 * @return table title
+	 */
 	public String getTitle() {
 		return title;
 	}
 
+	/**
+	 * Sets the table title.
+	 *
+	 * @param title table title
+	 */
 	public void setTitle(String title) {
 		this.title = title;
 	}
 
 	private List<String> htmlContent = new ArrayList<>();
 
+	/**
+	 * Returns additional HTML fragments emitted before table content.
+	 *
+	 * @return mutable list of HTML fragments
+	 */
 	public List<String> getHtmlContent() {
 		return htmlContent;
 	}
 
+	/**
+	 * Returns configured column headers.
+	 *
+	 * @return header array
+	 */
 	public String[] getHeaders() {
 		return headers;
 	}
 
+	/**
+	 * Sets configured column headers.
+	 *
+	 * @param headers header values
+	 */
 	public void setHeaders(String[] headers) {
 		this.headers = headers;
 	}
@@ -48,14 +90,33 @@ public class DocTable {
 
 	private List<String[]> rows = new ArrayList<>();
 
+	/**
+	 * Replaces the table header values.
+	 *
+	 * @param headers header values
+	 */
 	public void setHeaderValues(String... headers) {
 		this.headers = headers;
 	}
 
+	/**
+	 * Appends a row of values to the table.
+	 *
+	 * @param values row values aligned with headers
+	 */
 	public void setRowValues(String... values) {
 		this.rows.add(values);
 	}
 
+	/**
+	 * Renders this table as HTML.
+	 *
+	 * <p>Empty columns are omitted. When enabled and exactly one non-empty
+	 * column remains, content is rendered as an unordered list.
+	 *
+	 * @param displayAsListIfOneColumnOnly whether to use list fallback
+	 * @return HTML string representation
+	 */
 	public String toHTML(boolean displayAsListIfOneColumnOnly) {
 
 		// exclude empty columns - if only one column then display as an

@@ -3,6 +3,12 @@ package org.umlgraph.doclet;
 //import java.util.Map;
 //import java.util.regex.Pattern;
 
+/**
+ * Provides a compatibility shim for UMLGraph option access.
+ *
+ * <p>The original field-forwarding implementation is retained as commented
+ * reference while Java 11+ builds avoid depending on legacy doclet internals.
+ */
 public class AccessibleOptions {
 //DC JAVA 11
 

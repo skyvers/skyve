@@ -11,6 +11,13 @@ package org.skyve.impl.tools.javadoc;
 
 //DC JAVA 11
 //public class SkyveContextView extends ContextView {
+/**
+ * Retains the historical Skyve context-view type name for doclet wiring.
+ *
+ * <p>The original UMLGraph-based implementation is intentionally disabled for
+ * Java 11+ compatibility. This placeholder preserves source and binary links in
+ * tooling code that still references the type.
+ */
 public class SkyveContextView {
 //	private ClassDoc classDoc;
 //

@@ -39,20 +39,29 @@ import org.skyve.metadata.user.DocumentPermission;
 import org.skyve.metadata.user.Role;
 
 /**
- * DoctorUtil contains methods for the creation of documentation, based on the
- * configuration options defined in the Configuration document.
- * <p>
- * 
- * 
- * @author Rob
- * 
+ * Generates static HTML documentation from Skyve metadata.
+ *
+ * <p>This utility renders modules, documents, queries, and roles into HTML
+ * fragments using helper types in this package. Methods write directly to the
+ * supplied {@link PrintStream}, so callers control output destination and
+ * lifecycle.
+ *
+ * <p>Threading: this class is stateless and method-local. It is safe for
+ * concurrent use when callers provide independent stream and metadata contexts.
  */
 public class DoctorUtil {
 
+	/**
+	 * Enumerates output formats supported by the documentation tool.
+	 */
 	public static enum OutputFormat {
+		/** Writes diagnostic output to standard output. */
 		debug, template, htmlSet, htmlDoc
 	}
 
+	/**
+	 * Provides domain values suitable for format selection UI controls.
+	 */
 	public static final List<DomainValue> OUTPUT_FORMATS = new ArrayList<>();
 
 	static {
@@ -62,15 +71,11 @@ public class DoctorUtil {
 	}
 
 	/**
-	 * Renders all modules for the customer.
-	 * <p>
-	 * 
-	 * @param config
-	 *            - the documentation configuration
-	 * @param customer
-	 * @param out
-	 *            - the print stream
-	 * @throws Exception
+	 * Renders documentation for every module owned by the customer.
+	 *
+	 * @param customer customer whose modules will be rendered
+	 * @param out destination stream receiving HTML fragments
+	 * @throws Exception if metadata access or rendering fails
 	 */
 	public static void renderCustomer(Customer customer, PrintStream out) throws Exception {
 
@@ -86,15 +91,15 @@ public class DoctorUtil {
 	}
 
 	/**
-	 * Render the module as documentation.
-	 * 
-	 * @param config
-	 *            - the documentation configuration
-	 * @param customer
-	 * @param module
-	 * @param out
-	 *            - the print stream
-	 * @throws Exception
+	 * Renders module-level documentation including module indexes and detail
+	 * sections.
+	 *
+	 * <p>Side effects: writes HTML markup to {@code out}.
+	 *
+	 * @param customer owning customer for metadata resolution
+	 * @param module module to document
+	 * @param out destination stream receiving HTML fragments
+	 * @throws Exception if metadata access or rendering fails
 	 */
 	public static void renderModule(Customer customer, Module module, PrintStream out) throws Exception {
 
@@ -228,16 +233,16 @@ public class DoctorUtil {
 	}
 
 	/**
-	 * Render the document as documentation.
-	 * 
-	 * @param config
-	 *            - the documentation configuration
-	 * @param customer
-	 * @param module
-	 * @param document
-	 * @param out
-	 *            - the print stream
-	 * @throws Exception
+	 * Renders detailed documentation for a module document.
+	 *
+	 * <p>The output includes overview, attributes, references, conditions,
+	 * uniqueness constraints, and declared actions when present.
+	 *
+	 * @param customer owning customer for metadata resolution
+	 * @param module module owning the document
+	 * @param document document to render
+	 * @param out destination stream receiving HTML fragments
+	 * @throws Exception if metadata access or rendering fails
 	 */
 	public static void renderDocument(Customer customer, Module module, Document document, PrintStream out) throws Exception {
 
@@ -396,14 +401,13 @@ public class DoctorUtil {
 	}
 
 	/**
-	 * Renders the query as documentation.
-	 * 
-	 * @param config
-	 * @param customer
-	 * @param module
-	 * @param q
-	 * @param out
-	 * @throws Exception
+	 * Renders documentation for a module query definition.
+	 *
+	 * @param customer owning customer for metadata resolution
+	 * @param module module owning the query
+	 * @param q query definition to document
+	 * @param out destination stream receiving HTML fragments
+	 * @throws Exception if metadata access or rendering fails
 	 */
 	public static void renderQuery(Customer customer, Module module, QueryDefinition q, PrintStream out) throws Exception {
 		// Documentation for Query
@@ -454,14 +458,14 @@ public class DoctorUtil {
 	}
 
 	/**
-	 * Render the role as documentation.
-	 * 
-	 * @param config
-	 * @param customer
-	 * @param module
-	 * @param r
-	 * @param out
-	 * @throws Exception
+	 * Renders documentation for a module role and its document/action
+	 * permissions.
+	 *
+	 * @param customer owning customer for metadata resolution
+	 * @param module module owning the role
+	 * @param r role to render
+	 * @param out destination stream receiving HTML fragments
+	 * @throws Exception if metadata access or rendering fails
 	 */
 	public static void renderRole(Customer customer, Module module, Role r, PrintStream out) throws Exception {
 		// Documentation for Role
@@ -522,12 +526,13 @@ public class DoctorUtil {
 	}
 
 	/**
-	 * Concatenates an array of Strings to a single non-spaced string useful as
-	 * an identifier.
-	 * 
-	 * @param s
-	 *            - the array of Strings
-	 * @return - the identifier
+	 * Creates a stable identifier by normalising and joining name fragments.
+	 *
+	 * <p>Each fragment is lower-cased with spaces removed. Non-empty fragments
+	 * are joined with underscores.
+	 *
+	 * @param s identifier fragments
+	 * @return normalised identifier string
 	 */
 	public static String createIndentifier(String... s) {
 
@@ -547,12 +552,14 @@ public class DoctorUtil {
 	}
 
 	/**
-	 * Returns an attribute from a binding string within the context of a
-	 * document.
-	 * 
-	 * @param d
-	 * @param f
-	 * @return
+	 * Resolves a direct attribute by name from a document.
+	 *
+	 * <p>This helper currently supports direct attribute names only and does not
+	 * parse nested bindings.
+	 *
+	 * @param d document to inspect
+	 * @param f attribute/binding name
+	 * @return matching attribute, or {@code null} when none exists
 	 */
 	private static Attribute getAttributeFromFieldName(Document d, String f) {
 		// TODO - do this properly for all bindings
@@ -569,13 +576,10 @@ public class DoctorUtil {
 	}
 
 	/**
-	 * getCheckHTML returns an HTML image tag representing the boolean state of
-	 * true, represented by the Check icon reference specified in the
-	 * configuration document.
-	 * 
-	 * @param c
-	 * @param b
-	 * @return
+	 * Returns HTML that marks a granted permission.
+	 *
+	 * @param b permission flag
+	 * @return centered {@code X} marker when {@code true}; otherwise {@code null}
 	 */
 	private static String getCheckHTML(boolean b) {
 		String result = null;
@@ -587,10 +591,10 @@ public class DoctorUtil {
 	}
 
 	/**
-	 * Returns a title case version of the String.
-	 * 
-	 * @param s
-	 * @return
+	 * Converts a string to simple title case.
+	 *
+	 * @param s source value
+	 * @return source with first character uppercased
 	 */
 	private static String titleCase(String s) {
 		if (s.length() > 1) {
@@ -599,6 +603,15 @@ public class DoctorUtil {
 		return s.toUpperCase();
 	}
 	
+	/**
+	 * Generates overview and module package HTML files for selected modules.
+	 *
+	 * <p>Expected arguments are output directory, customer name, then one or more
+	 * module names.
+	 *
+	 * @param args command-line arguments
+	 * @throws Exception if repository access or file generation fails
+	 */
 	public static void main(String[] args)
 	throws Exception {
 		ProvidedRepositoryFactory.set(new LocalDesignRepository());

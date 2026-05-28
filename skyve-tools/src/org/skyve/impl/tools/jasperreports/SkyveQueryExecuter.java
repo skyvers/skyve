@@ -16,13 +16,31 @@ import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.query.JRQueryExecuter;
 
+/**
+ * Executes JasperReports queries using Skyve metadata queries.
+ *
+ * <p>Query text is interpreted as {@code module.query}. The executer creates a
+ * projected Skyve {@link DocumentQuery} and exposes it through
+ * {@link SkyveDataSource}.
+ */
 public class SkyveQueryExecuter implements JRQueryExecuter {
 	private String moduleDotQuery;
 	
+	/**
+	 * Creates an executer for a {@code module.query} identifier.
+	 *
+	 * @param queryString query selector in {@code module.query} format
+	 */
 	public SkyveQueryExecuter(String queryString) {
 		moduleDotQuery = queryString;
 	}
 	
+	/**
+	 * Indicates cancellation is not currently supported.
+	 *
+	 * @return always {@code false}
+	 * @throws JRException if cancellation fails
+	 */
 	@Override
 	public boolean cancelQuery() 
 	throws JRException {
@@ -30,11 +48,22 @@ public class SkyveQueryExecuter implements JRQueryExecuter {
 		return false;
 	}
 
+	/**
+	 * Releases resources associated with this executer.
+	 *
+	 * <p>No explicit resources are held, so this method is a no-op.
+	 */
 	@Override
 	public void close() {
 		// nothing to do here
 	}
 
+	/**
+	 * Creates a JasperReports data source backed by a Skyve projected query.
+	 *
+	 * @return data source iterating projected query rows
+	 * @throws JRException if metadata lookup or query construction fails
+	 */
 	@Override
 	@SuppressWarnings("resource")
 	public JRDataSource createDatasource() 
@@ -51,6 +80,12 @@ public class SkyveQueryExecuter implements JRQueryExecuter {
         }
 	}
 	
+	/**
+	 * Resolves metadata query definition from {@code module.query} notation.
+	 *
+	 * @param moduleDotQuery query selector in {@code module.query} format
+	 * @return resolved metadata query definition
+	 */
 	public static MetaDataQueryDefinition getQuery(String moduleDotQuery) {
 		AbstractPersistence.IMPLEMENTATION_CLASS = HibernateContentPersistence.class;
 		AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = RDBMSDynamicPersistence.class;
@@ -71,6 +106,12 @@ public class SkyveQueryExecuter implements JRQueryExecuter {
 		return query;
 	}
 	
+	/**
+	 * Runs a basic manual check for query data source creation.
+	 *
+	 * @param args not used
+	 * @throws Exception if data-source creation fails
+	 */
 	public static void main(String[] args)
 	throws Exception {
 		new SkyveQueryExecuter("admin.Contact").createDatasource();

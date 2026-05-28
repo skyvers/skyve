@@ -20,18 +20,49 @@ import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRField;
 import net.sf.jasperreports.engine.design.JRDesignField;
 
+/**
+ * Resolves JasperReports fields from a Skyve document identifier.
+ *
+ * <p>The report query text is expected to be in {@code module.document}
+ * format. The provider inspects the document metadata and returns one
+ * {@link JRField} per attribute.
+ */
 public class SkyveDocumentFieldsProvider implements FieldsProvider {
+    /**
+     * Returns no query-designer support for this provider.
+	 *
+	 * @param connection ignored by this implementation
+	 * @param query ignored by this implementation
+	 * @param dialog ignored by this implementation
+	 * @return always {@code null}
+	 * @throws JRException if query design fails
+     */
     @Override
 	public String designQuery(IReportConnection connection, String query, ReportQueryDialog dialog) 
 	throws JRException, UnsupportedOperationException {
 	    return null; // not used
     }
 
+	/**
+	 * Returns no editor component because query text is entered directly.
+	 *
+	 * @param dialog ignored by this implementation
+	 * @return always {@code null}
+	 */
 	@Override
     public FieldsProviderEditor getEditorComponent(ReportQueryDialog dialog) {
 	    return null; // not used
     }
 
+	/**
+	 * Builds the field list from all attributes of the referenced document.
+	 *
+	 * @param connection ignored by this implementation
+	 * @param dataset the dataset containing {@code module.document} query text
+	 * @param parameters ignored by this implementation
+	 * @return report fields mapped from document attributes
+	 * @throws JRException if metadata cannot be resolved
+	 */
 	@Override
     public JRField[] getFields(IReportConnection connection, JRDataset dataset, Map parameters) 
 	throws JRException, UnsupportedOperationException {
@@ -60,26 +91,52 @@ public class SkyveDocumentFieldsProvider implements FieldsProvider {
 		}
     }
 
+	/**
+	 * Indicates that no custom editor component is available.
+	 *
+	 * @return always {@code false}
+	 */
 	@Override
     public boolean hasEditorComponent() {
 	    return false;
     }
 
+	/**
+	 * Indicates that no query-designer UI is available.
+	 *
+	 * @return always {@code false}
+	 */
 	@Override
     public boolean hasQueryDesigner() {
 	    return false;
     }
 
+	/**
+	 * Indicates that fields must be loaded explicitly, not by auto execution.
+	 *
+	 * @return always {@code false}
+	 */
 	@Override
     public boolean supportsAutomaticQueryExecution() {
 	    return false;
     }
 
+	/**
+	 * Indicates support for field introspection operations.
+	 *
+	 * @return always {@code true}
+	 */
 	@Override
     public boolean supportsGetFieldsOperation() {
 		return true;
     }
 	
+	/**
+	 * Resolves a Skyve document from {@code module.document} notation.
+	 *
+	 * @param moduleDotDocument document selector in {@code module.document} format
+	 * @return the resolved document metadata
+	 */
 	public static Document getDocument(String moduleDotDocument) {
 		User user = SkyveDocumentExecuterFactory.getUser();
 		

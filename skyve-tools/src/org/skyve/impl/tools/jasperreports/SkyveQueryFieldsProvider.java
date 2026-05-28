@@ -23,18 +23,49 @@ import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRField;
 import net.sf.jasperreports.engine.design.JRDesignField;
 
+/**
+ * Resolves JasperReports fields from a Skyve metadata query definition.
+ *
+ * <p>The dataset query text is interpreted as {@code module.query}. For each
+ * query column this provider emits one {@link JRField} using the sanitised
+ * binding name and inferred Skyve attribute type when available.
+ */
 public class SkyveQueryFieldsProvider implements FieldsProvider {
+    /**
+     * Returns no query-designer support for this provider.
+	 *
+	 * @param connection ignored by this implementation
+	 * @param query ignored by this implementation
+	 * @param dialog ignored by this implementation
+	 * @return always {@code null}
+	 * @throws JRException if query design fails
+     */
     @Override
 	public String designQuery(IReportConnection connection, String query, ReportQueryDialog dialog) 
 	throws JRException, UnsupportedOperationException {
 	    return null; // not used
     }
 
+    /**
+     * Returns no editor component because query text is entered directly.
+	 *
+	 * @param dialog ignored by this implementation
+	 * @return always {@code null}
+     */
     @Override
 	public FieldsProviderEditor getEditorComponent(ReportQueryDialog dialog) {
 	    return null; // not used
     }
 
+	/**
+	 * Builds report fields from metadata query columns.
+	 *
+	 * @param connection ignored by this implementation
+	 * @param dataset dataset containing {@code module.query} text
+	 * @param parameters ignored by this implementation
+	 * @return report fields for each query column
+	 * @throws JRException if metadata lookup fails
+	 */
 	@Override
     public JRField[] getFields(IReportConnection connection, JRDataset dataset, Map parameters) 
 	throws JRException, UnsupportedOperationException {
@@ -70,21 +101,41 @@ public class SkyveQueryFieldsProvider implements FieldsProvider {
 		}
     }
 
+	/**
+	 * Indicates that no custom editor component is available.
+	 *
+	 * @return always {@code false}
+	 */
 	@Override
     public boolean hasEditorComponent() {
 	    return false;
     }
 
+	/**
+	 * Indicates that no query-designer UI is available.
+	 *
+	 * @return always {@code false}
+	 */
 	@Override
     public boolean hasQueryDesigner() {
 	    return false;
     }
 
+	/**
+	 * Indicates that fields must be loaded explicitly, not by auto execution.
+	 *
+	 * @return always {@code false}
+	 */
 	@Override
     public boolean supportsAutomaticQueryExecution() {
 	    return false;
     }
 
+	/**
+	 * Indicates support for field introspection operations.
+	 *
+	 * @return always {@code true}
+	 */
 	@Override
     public boolean supportsGetFieldsOperation() {
 		return true;
