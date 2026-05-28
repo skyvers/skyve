@@ -17,6 +17,11 @@ import org.skyve.impl.util.UtilImpl;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+/**
+ * Extracts searchable text and metadata from markup and binary attachments using Apache Tika.
+ *
+ * <p>Threading: thread-safe for current usage because it maintains no mutable instance state.
+ */
 @Extension(points = {TextExtractor.class})
 public class TikaTextExtractor implements TextExtractor {
 
@@ -24,6 +29,12 @@ public class TikaTextExtractor implements TextExtractor {
 
 	private static final Tika TIKA = new Tika();
 	
+	/**
+	 * Extracts plain text from a markup fragment.
+	 *
+	 * @param markup the markup to parse
+	 * @return normalised text, or {@code null} when no meaningful text is available
+	 */
 	@Override
 	public String extractTextFromMarkup(String markup) {
 		String result = null;
@@ -39,6 +50,14 @@ public class TikaTextExtractor implements TextExtractor {
 		return result;
 	}
 	
+	/**
+	 * Extracts searchable text and selected metadata from attachment content.
+	 *
+	 * <p>Side effects: reads attachment streams and logs extraction failures.
+	 *
+	 * @param content the attachment to parse
+	 * @return extracted text, or {@code null} when extraction yields no content
+	 */
 	@Override
 	@SuppressWarnings("java:S3776")
 	public String extractTextFromContent(AttachmentContent content) {
@@ -102,6 +121,11 @@ public class TikaTextExtractor implements TextExtractor {
 		return result.isEmpty() ? null : result.toString();
 	}
 	
+	/**
+	 * Detects and sets the attachment MIME type when one has not already been supplied.
+	 *
+	 * @param attachment the attachment whose content type should be detected
+	 */
 	@Override
 	public void sniffContentType(AttachmentContent attachment) {
 		// Sniff content type if necessary
@@ -125,6 +149,12 @@ public class TikaTextExtractor implements TextExtractor {
 		}
 	}
 	
+	/**
+	 * Detects the language code for the supplied text.
+	 *
+	 * @param text the text to classify
+	 * @return the detected language code, or {@code null} when no language can be inferred
+	 */
 	@Override
 	public String sniffLanguage(String text) {
 		LanguageResult result = LanguageDetector.getDefaultLanguageDetector().detect(text);

@@ -14,10 +14,11 @@ import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.util.UtilImpl;
 
 /**
- * This class is used to talk to another skyve server's content server via JDBC.
- * To use this, the contentManager property of the factories property 
- * in the JSON file should be set to this class name and a "CONTENT" data store should be defined
- * as an in-memory database.
+ * Calls a remote Skyve content server over JDBC stored-procedure style aliases.
+ *
+ * <p>Configure this class as the content manager and provide a {@code CONTENT} datastore
+ * that points to the remote H2 TCP endpoint exposed by
+ * {@link JDBCRemoteContentManagerServer}.
  * 
  *  JSON
  *  		...
@@ -46,24 +47,41 @@ import org.skyve.impl.util.UtilImpl;
  *			<background-validation-millis>0</background-validation-millis>
  *		</validation>
  *
- * @author mike
+ * <p>Threading: not thread-safe; expected to be created and managed by the runtime container.
  */
 public class JDBCRemoteContentManagerClient extends AbstractContentManager {
+	/**
+	 * Initializes the client lifecycle.
+	 */
 	@Override
 	public void startup() {
 		// nothing to do here
 	}
 
+	/**
+	 * Closes the client lifecycle.
+	 *
+	 * @throws Exception never thrown by this implementation
+	 */
 	@Override
 	public void close() throws Exception {
 		// nothing to do here
 	}
 
+	/**
+	 * Shuts down the client lifecycle.
+	 */
 	@Override
 	public void shutdown() {
 		// nothing to do here
 	}
 
+	/**
+	 * Sends bean content to the remote server for indexing.
+	 *
+	 * @param content the bean content payload
+	 * @throws Exception if JDBC invocation fails
+	 */
 	@Override
 	public void put(BeanContent content) throws Exception {
 		try (Connection c = EXT.getDataStoreConnection(UtilImpl.DATA_STORES.get(JDBCRemoteContentManagerServer.CONTENT_DATA_STORE_NAME), false)) {
@@ -74,6 +92,13 @@ public class JDBCRemoteContentManagerClient extends AbstractContentManager {
 		}
 	}
 
+	/**
+	 * Sends attachment content to the remote server for storage and optional indexing.
+	 *
+	 * @param content the attachment payload
+	 * @param index whether remote indexing should be performed
+	 * @throws Exception if JDBC invocation fails
+	 */
 	@Override
 	public void put(AttachmentContent content, boolean index) throws Exception {
 		try (Connection c = EXT.getDataStoreConnection(UtilImpl.DATA_STORES.get(JDBCRemoteContentManagerServer.CONTENT_DATA_STORE_NAME), false)) {
@@ -88,6 +113,12 @@ public class JDBCRemoteContentManagerClient extends AbstractContentManager {
 		}
 	}
 
+	/**
+	 * Sends attachment metadata updates to the remote server.
+	 *
+	 * @param content the attachment update payload
+	 * @throws Exception if JDBC invocation fails
+	 */
 	@Override
 	public void update(AttachmentContent content) throws Exception {
 		try (Connection c = EXT.getDataStoreConnection(UtilImpl.DATA_STORES.get(JDBCRemoteContentManagerServer.CONTENT_DATA_STORE_NAME), false)) {
@@ -98,11 +129,25 @@ public class JDBCRemoteContentManagerClient extends AbstractContentManager {
 		}
 	}
 
+	/**
+	 * Rejects remote reindex operations for this client protocol.
+	 *
+	 * @param attachment the attachment to reindex
+	 * @param index whether indexing is requested
+	 * @throws Exception always via {@link UnsupportedOperationException}
+	 */
 	@Override
 	public void reindex(AttachmentContent attachment, boolean index) throws Exception {
 		throw new UnsupportedOperationException("Reindex of a remote content repository is not supported");
 	}
 	
+	/**
+	 * Retrieves attachment content from the remote server.
+	 *
+	 * @param contentId the content identifier
+	 * @return decoded attachment payload, or {@code null} when absent
+	 * @throws Exception if JDBC invocation fails
+	 */
 	@Override
 	public AttachmentContent getAttachment(String contentId) throws Exception {
 		AttachmentContent result = null;
@@ -123,6 +168,12 @@ public class JDBCRemoteContentManagerClient extends AbstractContentManager {
 		return result;
 	}
 
+	/**
+	 * Removes bean-scoped indexed content on the remote server.
+	 *
+	 * @param bizId the business identifier
+	 * @throws Exception if JDBC invocation fails
+	 */
 	@Override
 	public void removeBean(String bizId) throws Exception {
 		try (Connection c = EXT.getDataStoreConnection(UtilImpl.DATA_STORES.get(JDBCRemoteContentManagerServer.CONTENT_DATA_STORE_NAME), false)) {
@@ -133,6 +184,12 @@ public class JDBCRemoteContentManagerClient extends AbstractContentManager {
 		}
 	}
 
+	/**
+	 * Removes attachment content on the remote server.
+	 *
+	 * @param contentId the content identifier
+	 * @throws Exception if JDBC invocation fails
+	 */
 	@Override
 	public void removeAttachment(String contentId) throws Exception {
 		try (Connection c = EXT.getDataStoreConnection(UtilImpl.DATA_STORES.get(JDBCRemoteContentManagerServer.CONTENT_DATA_STORE_NAME), false)) {
@@ -143,6 +200,14 @@ public class JDBCRemoteContentManagerClient extends AbstractContentManager {
 		}
 	}
 
+	/**
+	 * Executes remote full-text search.
+	 *
+	 * @param search the search expression
+	 * @param maxResults maximum number of results to return
+	 * @return search results from the remote content manager
+	 * @throws Exception if JDBC invocation fails
+	 */
 	@Override
 	public SearchResults google(String search, int maxResults) throws Exception {
 		SearchResults result = null;
@@ -161,26 +226,55 @@ public class JDBCRemoteContentManagerClient extends AbstractContentManager {
 		return result;
 	}
 
+	/**
+	 * Rejects drop-index operations for remote repositories.
+	 *
+	 * @throws Exception always via {@link UnsupportedOperationException}
+	 */
 	@Override
 	public void dropIndexing() throws Exception {
 		throw new UnsupportedOperationException("Drop indexing of a remote content repository is not supported");
 	}
 
+	/**
+	 * Rejects truncate-index operations for remote repositories.
+	 *
+	 * @param customerName the customer tenant name
+	 * @throws Exception always via {@link UnsupportedOperationException}
+	 */
 	@Override
 	public void truncateIndexing(String customerName) throws Exception {
 		throw new UnsupportedOperationException("Truncate indexing of a remote content repository is not supported");
 	}
 
+	/**
+	 * Rejects attachment-index truncation for remote repositories.
+	 *
+	 * @param customerName the customer tenant name
+	 * @throws Exception always via {@link UnsupportedOperationException}
+	 */
 	@Override
 	public void truncateAttachmentIndexing(String customerName) throws Exception {
 		throw new UnsupportedOperationException("Truncate indexing of a remote content repository is not supported");
 	}
 
+	/**
+	 * Rejects bean-index truncation for remote repositories.
+	 *
+	 * @param customerName the customer tenant name
+	 * @throws Exception always via {@link UnsupportedOperationException}
+	 */
 	@Override
 	public void truncateBeanIndexing(String customerName) throws Exception {
 		throw new UnsupportedOperationException("Truncate indexing of a remote content repository is not supported");
 	}
 
+	/**
+	 * Rejects full repository iteration for remote repositories.
+	 *
+	 * @return never returns normally
+	 * @throws Exception always via {@link UnsupportedOperationException}
+	 */
 	@Override
 	public ContentIterable all() throws Exception {
 		throw new UnsupportedOperationException("Iterating over a remote content repository is not supported");

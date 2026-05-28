@@ -16,13 +16,27 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.util.TimeUtil;
 
+/**
+ * Iterates over all records in the Lucene content index.
+ *
+ * <p>Iteration streams results in pages to avoid loading the full index result set into
+ * memory at once.
+ */
 public class LuceneContentIterable implements ContentIterable {
 	private Directory directory = null;
 	
+	/**
+	 * Creates an iterable for the supplied Lucene directory.
+	 *
+	 * @param directory the Lucene directory containing content records
+	 */
 	public LuceneContentIterable(Directory directory) {
 		this.directory = directory;
 	}
 	
+	/**
+	 * Provides paged iteration over Lucene documents.
+	 */
 	class LuceneContentIterator implements ContentIterator {
 		private final int PAGE_SIZE = 1000;
 		
@@ -32,6 +46,9 @@ public class LuceneContentIterable implements ContentIterable {
 		private ScoreDoc[] scoreDocs = null;
 		private int index = 0;
 		
+		/**
+		 * Opens an index reader and prepares search state.
+		 */
 		private LuceneContentIterator() {
 			try {
 				reader = DirectoryReader.open(directory);
@@ -43,6 +60,11 @@ public class LuceneContentIterable implements ContentIterable {
 			totalHits = reader.numDocs();
 		}
 		
+		/**
+		 * Returns the next indexed content result from the current page.
+		 *
+		 * @return the next result, or {@code null} when no more results remain
+		 */
 		@Override
 		public SearchResult next() {
 			if ((scoreDocs != null) && (scoreDocs.length > index)) {
@@ -78,6 +100,11 @@ public class LuceneContentIterable implements ContentIterable {
 			return null;
 		}
 		
+		/**
+		 * Loads the first page lazily and then subsequent pages as needed.
+		 *
+		 * @return {@code true} when more results are available
+		 */
 		@Override
 		public boolean hasNext() {
 			if (scoreDocs == null) { // never issued a query
@@ -112,12 +139,22 @@ public class LuceneContentIterable implements ContentIterable {
 			return more;
 		}
 		
+		/**
+		 * Returns the total number of indexed documents at iterator creation time.
+		 *
+		 * @return total indexed document count
+		 */
 		@Override
 		public long getTotalHits() {
 			return totalHits;
 		}
 	}
 	
+	/**
+	 * Returns an iterator over indexed content.
+	 *
+	 * @return a new Lucene content iterator
+	 */
 	@Override
 	public ContentIterator iterator() {
 		return new LuceneContentIterator();

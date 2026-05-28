@@ -22,6 +22,14 @@ import org.codehaus.plexus.components.interactivity.Prompter;
 import org.codehaus.plexus.components.interactivity.PrompterException;
 import org.skyve.util.Util;
 
+/**
+ * Provides shared helper operations for Skyve Maven mojos.
+ *
+ * <p>This base type centralises classpath bootstrapping and interactive resolution of customer and other
+ * configuration values used by concrete goals.
+ *
+ * <p>Threading: instances are created and used by Maven per execution and should be treated as thread-confined.
+ */
 public abstract class AbstractSkyveMojo extends AbstractMojo {
     @Parameter(defaultValue = "${project}", readonly = true)
     protected MavenProject project;
@@ -113,6 +121,18 @@ public abstract class AbstractSkyveMojo extends AbstractMojo {
                 .toList();
     }
 
+    /**
+     * Returns the configured customer value or prompts the user to select one.
+     *
+     * <p>When no default is supplied this method inspects the customers directory. It auto-selects the sole
+     * customer when exactly one exists, prompts for selection when multiple exist, and prompts for a free-form
+     * value when no customer directories are present.
+     *
+     * @param defaultCustomer the configured customer value; may be blank
+     * @return the resolved customer name
+     * @throws FileNotFoundException if the customers directory cannot be found
+     * @throws PrompterException if prompting fails
+     */
     protected String getDefaultOrPromptCustomer(String defaultCustomer) throws FileNotFoundException, PrompterException {
         String processedDefaultCustomer = Util.processStringValue(defaultCustomer);
     	if (processedDefaultCustomer != null) {

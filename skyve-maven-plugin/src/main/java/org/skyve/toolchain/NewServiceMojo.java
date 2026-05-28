@@ -29,9 +29,9 @@ import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 
 /**
-	 * Creates a new document service class with standard retrieval helpers.
-	 *
-	 * <p>Threading: this mojo mutates project sources and should be treated as thread-confined.
+ * Creates a new document service class with standard retrieval helpers.
+ *
+ * <p>Threading: this mojo mutates project sources and should be treated as thread-confined.
  */
 @Mojo(name = "newService")
 public class NewServiceMojo extends NewDocumentMojo {

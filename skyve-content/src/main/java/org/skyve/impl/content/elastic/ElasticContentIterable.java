@@ -13,6 +13,12 @@ package org.skyve.impl.content.elastic;
 import org.skyve.content.ContentIterable;
 import org.skyve.content.SearchResult;
 
+/**
+ * Provides iteration over content records stored in the legacy Elasticsearch repository.
+ *
+ * <p>Current implementation is a placeholder that returns no results while legacy
+ * Elasticsearch integration remains disabled.
+ */
 class ElasticContentIterable implements ContentIterable {
 //	private Client client = null;
 /*
@@ -21,11 +27,17 @@ class ElasticContentIterable implements ContentIterable {
 	}
 */
 
+	/**
+	 * Iterates over Elasticsearch-backed content search hits.
+	 */
 	class ESIterator implements ContentIterator {
 //		private Iterator<SearchHit> i = null;
 		private long totalHits = 0;
 //		private String scrollId = null;
 		
+		/**
+		 * Creates the iterator state for a scroll-based Elasticsearch query.
+		 */
 		private ESIterator() {
 /*
 			@SuppressWarnings("synthetic-access")
@@ -54,6 +66,11 @@ class ElasticContentIterable implements ContentIterable {
 */
 		}
 
+		/**
+		 * Indicates whether more hits are available.
+		 *
+		 * @return {@code false} in the current placeholder implementation
+		 */
 		@Override
 		public boolean hasNext() {
 return false;
@@ -83,6 +100,11 @@ return false;
 */
 		}
 
+		/**
+		 * Returns the next search hit.
+		 *
+		 * @return {@code null} in the current placeholder implementation
+		 */
 		@Override
 		public SearchResult next() {
 /*
@@ -132,17 +154,32 @@ return false;
 return null;
 		}
 
+		/**
+		 * Rejects removal because content iterators are read-only.
+		 *
+		 * @throws IllegalAccessError always
+		 */
 		@Override
 		public void remove() {
 			throw new IllegalAccessError("Cannot remove from an ESIterator.");
 		}
 		
+		/**
+		 * Returns the total number of hits captured when the iterator was created.
+		 *
+		 * @return total hit count
+		 */
 		@Override
 		public long getTotalHits() {
 			return totalHits;
 		}
 	}
 	
+	/**
+	 * Creates a new iterator over the content index.
+	 *
+	 * @return iterator over indexed content records
+	 */
 	@Override
 	public ContentIterator iterator() {
 		return new ESIterator();

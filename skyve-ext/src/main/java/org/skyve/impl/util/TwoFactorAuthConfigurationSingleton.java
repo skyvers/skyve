@@ -105,7 +105,7 @@ public class TwoFactorAuthConfigurationSingleton implements SystemObserver {
 	 */
 	@Override
 	public void startup() {
-		try (Connection c = getDataStoreConnection()) {
+		try (Connection c = EXT.getDataStoreConnection()) {
 			String query = "select twoFactorType, twofactorPushCodeTimeOutSeconds, twoFactorEmailSubject, twoFactorEmailBody, bizCustomer " +
 								"from " + ADM_CONFIGURATION_TABLE_NAME + " " +
 								"where twoFactorType is not null and twofactorPushCodeTimeOutSeconds is not null";
@@ -130,20 +130,9 @@ public class TwoFactorAuthConfigurationSingleton implements SystemObserver {
 		}
 	}
 
-	/**
-	 * Obtains a JDBC connection to the configured Skyve datastore.
-	 *
-	 * @return An open datastore connection
-	 * @throws SQLException If the connection cannot be created
-	 */
-	@SuppressWarnings("static-method")
-	Connection getDataStoreConnection() throws SQLException {
-		return EXT.getDataStoreConnection();
-	}
-
 	private static String buildStartupFailureMessage() {
 		boolean tfaCustomersConfigured = (UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS != null) &&
-				(! UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS.isEmpty());
+											(! UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS.isEmpty());
 		StringBuilder message = new StringBuilder(512);
 		message.append("Failure reading two-factor authentication customer configuration from database table ");
 		message.append(ADM_CONFIGURATION_TABLE_NAME);
