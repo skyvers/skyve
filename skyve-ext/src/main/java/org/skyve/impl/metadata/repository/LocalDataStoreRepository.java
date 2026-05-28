@@ -45,6 +45,17 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
     private static final Logger QUERY_LOGGER = Category.QUERY.logger();
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(LocalDataStoreRepository.class);
 
+	public LocalDataStoreRepository() {
+		super();
+	}
+
+	/**
+	 * Creates a repository rooted at a specific metadata path for tests.
+	 */
+	LocalDataStoreRepository(String absolutePath) {
+		super(absolutePath);
+	}
+
 	@Override
 	public UserImpl retrieveUser(String userPrincipal) {
 		if (userPrincipal == null) {
@@ -385,7 +396,7 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 			if (UtilImpl.CUSTOMER == null) { // multi-tenant
 				s.putParameter(Bean.CUSTOMER_NAME, customerName, false);
 			}
-			result = s.retrieveScalar(String.class);
+			result = s.scalarResult(String.class);
 		}
 		catch (Exception e) {
 			LOGGER.warn("Could not retrieve public user for customer {}", customerName, e);

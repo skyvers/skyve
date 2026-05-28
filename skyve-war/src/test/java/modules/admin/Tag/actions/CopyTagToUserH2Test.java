@@ -73,7 +73,9 @@ class CopyTagToUserH2Test extends AbstractH2Test {
 		CORE.getPersistence().begin();
 
 		// Verify source tag has 2 tagged items
-		assertEquals(2L, sourceTag.count());
+		@Nonnull TagExtension refreshedSourceTag = CORE.getPersistence().retrieve(Tag.MODULE_NAME, Tag.DOCUMENT_NAME,
+				sourceTag.getBizId());
+		assertEquals(2L, refreshedSourceTag.count());
 
 		// Set up the action bean with copyToUser
 		@Nonnull TagExtension actionBean = CORE.getPersistence().retrieve(Tag.MODULE_NAME, Tag.DOCUMENT_NAME, sourceTag.getBizId());
