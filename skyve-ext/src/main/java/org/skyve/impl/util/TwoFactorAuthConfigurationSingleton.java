@@ -144,20 +144,21 @@ public class TwoFactorAuthConfigurationSingleton implements SystemObserver {
 	private static String buildStartupFailureMessage() {
 		boolean tfaCustomersConfigured = (UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS != null) &&
 				(! UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS.isEmpty());
-		return "Failure reading two-factor authentication customer configuration from database table " +
-				ADM_CONFIGURATION_TABLE_NAME +
-				". Troubleshooting: confirm table " +
-				ADM_CONFIGURATION_TABLE_NAME +
-				" exists in the configured datastore/schema; confirm schema synchronisation or migrations completed successfully before startup; " +
-				"check whether JSON property " +
-				TFA_CUSTOMERS_JSON_PATH +
-				" is configured. " +
-				TFA_CUSTOMERS_JSON_PATH +
-				" configured: " +
-				tfaCustomersConfigured +
-				". On a brand-new database, either create/bootstrap the admin configuration table before enabling TFA customers in JSON, or temporarily remove/empty " +
-				TFA_CUSTOMERS_JSON_PATH +
-				" until the admin configuration exists.";
+		StringBuilder message = new StringBuilder(512);
+		message.append("Failure reading two-factor authentication customer configuration from database table ");
+		message.append(ADM_CONFIGURATION_TABLE_NAME);
+		message.append(". Skyve reads this table during every application startup to preload customer TFA settings, even when ");
+		message.append(TFA_CUSTOMERS_JSON_PATH);
+		message.append(" is empty. Troubleshooting: confirm schema synchronisation or migrations completed successfully, confirm ");
+		message.append(ADM_CONFIGURATION_TABLE_NAME);
+		message.append(" exists in the configured datastore/schema, and check whether ");
+		message.append(TFA_CUSTOMERS_JSON_PATH);
+		message.append(" is configured in JSON. ");
+		message.append(TFA_CUSTOMERS_JSON_PATH);
+		message.append(" configured: ");
+		message.append(tfaCustomersConfigured);
+		message.append('.');
+		return message.toString();
 	}
 	
 	/**

@@ -51,8 +51,9 @@ class TwoFactorAuthConfigurationSingletonStartupTest {
 
 		assertTrue(message.contains("ADM_Configuration"));
 		assertTrue(message.contains("schema synchronisation"));
+		assertTrue(message.contains("every application startup"));
+		assertTrue(message.contains("even when account.tfaCustomers is empty"));
 		assertTrue(message.contains("account.tfaCustomers configured: true"));
-		assertTrue(message.contains("brand-new database"));
 	}
 
 	@Test
