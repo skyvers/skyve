@@ -58,6 +58,9 @@ public class SkyveSpringSecurity {
 	 * Endpoint used by the Spring login processing pipeline.
 	 */
 	public static final String LOGIN_ATTEMPT_PATH = "/loginAttempt";
+	private static final String OAUTH2_REDIRECT_URI_TEMPLATE = "/login/oauth2/code/{registrationId}";
+	private static final String EMAIL_CLAIM = "email";
+	private static final String TENANT_ID_PLACEHOLDER = "{tenantId}";
 
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SkyveSpringSecurity.class);
 
@@ -128,11 +131,13 @@ public class SkyveSpringSecurity {
 						}
 						
 						@Override
+						@SuppressWarnings("resource")
 						public Connection getConnection(String username, String password) throws SQLException {
 							return getConnection();
 						}
 						
 						@Override
+						@SuppressWarnings("resource")
 						public Connection getConnection() throws SQLException {
 							Connection result = EXT.getDataStoreConnection();
 							// Override to be non transactional
@@ -187,7 +192,7 @@ public class SkyveSpringSecurity {
 			return false;
 		}
 		
-		long expiryMillis = config.getTfaTimeOutSeconds() * 1000;
+		long expiryMillis = config.getTfaTimeOutSeconds() * 1000L;
 		long generatedTime = createdTimestamp.getTime();
 		long currentTime = new DateTime(System.currentTimeMillis()).getTime();
 		
@@ -453,8 +458,8 @@ public class SkyveSpringSecurity {
 									.clientSecret(UtilImpl.AUTHENTICATION_GOOGLE_SECRET)
 									.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
 									.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-									.redirectUri(Util.getSkyveContextUrl() + "/login/oauth2/code/{registrationId}")
-									.scope("openid", "profile", "email", "address", "phone")
+									.redirectUri(Util.getSkyveContextUrl() + OAUTH2_REDIRECT_URI_TEMPLATE)
+									.scope("openid", "profile", EMAIL_CLAIM, "address", "phone")
 									.authorizationUri("https://accounts.google.com/o/oauth2/v2/auth")
 									.tokenUri("https://www.googleapis.com/oauth2/v4/token")
 									.userInfoUri("https://www.googleapis.com/oauth2/v3/userinfo")
@@ -477,8 +482,8 @@ public class SkyveSpringSecurity {
 									.clientSecret(UtilImpl.AUTHENTICATION_FACEBOOK_SECRET)
 									.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
 									.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-									.redirectUri(Util.getSkyveContextUrl() + "/login/oauth2/code/{registrationId}")
-									.scope("public_profile", "email")
+									.redirectUri(Util.getSkyveContextUrl() + OAUTH2_REDIRECT_URI_TEMPLATE)
+									.scope("public_profile", EMAIL_CLAIM)
 									.authorizationUri("https://www.facebook.com/v2.8/dialog/oauth")
 									.tokenUri("https://graph.facebook.com/v2.8/oauth/access_token")
 									.userInfoUri("https://graph.facebook.com/me")
@@ -500,7 +505,7 @@ public class SkyveSpringSecurity {
 									.clientSecret(UtilImpl.AUTHENTICATION_GITHUB_SECRET)
 									.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
 									.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-									.redirectUri(Util.getSkyveContextUrl() + "/login/oauth2/code/{registrationId}")
+									.redirectUri(Util.getSkyveContextUrl() + OAUTH2_REDIRECT_URI_TEMPLATE)
 									.scope("read:user")
 									.authorizationUri("https://github.com/login/oauth/authorize")
 									.tokenUri("https://github.com/login/oauth/access_token")
@@ -525,14 +530,14 @@ public class SkyveSpringSecurity {
 				.clientSecret(UtilImpl.AUTHENTICATION_AZUREAD_SECRET)
 				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
 				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-				.redirectUri(Util.getSkyveContextUrl() + "/login/oauth2/code/{registrationId}")
+				.redirectUri(Util.getSkyveContextUrl() + OAUTH2_REDIRECT_URI_TEMPLATE)
 				.scope("User.Read")
 				.authorizationUri(
-						"https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/authorize".replace("{tenantId}", tenantId))
-				.tokenUri("https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token".replace("{tenantId}", tenantId))
+						"https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/authorize".replace(TENANT_ID_PLACEHOLDER, tenantId))
+				.tokenUri("https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token".replace(TENANT_ID_PLACEHOLDER, tenantId))
 				.userInfoUri("https://graph.microsoft.com/oidc/userinfo")
-				.jwkSetUri("https://login.microsoftonline.com/{tenantId}/discovery/v2.0/keys".replace("{tenantId}", tenantId))
-				.userNameAttributeName("email")
+				.jwkSetUri("https://login.microsoftonline.com/{tenantId}/discovery/v2.0/keys".replace(TENANT_ID_PLACEHOLDER, tenantId))
+				.userNameAttributeName(EMAIL_CLAIM)
 				.clientName("Microsoft")
 				.build();
 	}

@@ -1056,7 +1056,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 									boolean parentEnabled) {
 		if (visitingDataWidget) {
 			if (processingDataWidget) {
-				if (htmlGuts.length() > 0) {
+				if (! htmlGuts.isEmpty()) {
 					htmlGuts.append("&nbsp;");
 				}
 				// TODO - should make the URL dependent on the image format
@@ -1104,7 +1104,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 									boolean parentEnabled) {
 		if (visitingDataWidget) {
 			if (processingDataWidget) {
-				if (htmlGuts.length() > 0) {
+				if (! htmlGuts.isEmpty()) {
 					htmlGuts.append("&nbsp;");
 				}
 				htmlGuts.append("<img src=\"resources?_n=").append(image.getRelativeFile());
@@ -1124,7 +1124,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 									boolean parentEnabled) {
 		if (visitingDataWidget) {
 			if (processingDataWidget) {
-				if (htmlGuts.length() > 0) {
+				if (! htmlGuts.isEmpty()) {
 					htmlGuts.append("&nbsp;");
 				}
 				String binding = image.getBinding();
@@ -1175,7 +1175,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 							boolean parentEnabled) {
 		if (visitingDataWidget) {
 			if (processingDataWidget) {
-				if (htmlGuts.length() > 0) {
+				if (! htmlGuts.isEmpty()) {
 					htmlGuts.append("&nbsp;");
 				}
 				htmlGuts.append("<div");
@@ -1214,7 +1214,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 							boolean parentEnabled) {
 		if (visitingDataWidget) {
 			if (processingDataWidget) {
-				if (htmlGuts.length() > 0) {
+				if (! htmlGuts.isEmpty()) {
 					htmlGuts.append("&nbsp;");
 				}
 				htmlGuts.append("<span");
@@ -1275,7 +1275,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 							boolean parentVisible,
 							boolean parentEnabled) {
 		if (processingDataWidget) {
-			if (htmlGuts.length() > 0) {
+			if (! htmlGuts.isEmpty()) {
 				htmlGuts.append("&nbsp;");
 			}
 		}

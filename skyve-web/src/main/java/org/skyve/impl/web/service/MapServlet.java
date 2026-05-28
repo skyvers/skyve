@@ -51,10 +51,16 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
- * Map Servlet - supplies map data to a map display.
- * 
- * there are 3 usage modes:-
- * 
+ * Serves map overlay data as JSON for query, collection, and named map-model views.
+ *
+ * <p>The servlet supports three request shapes:
+ * <ol>
+ *   <li>query mode: execute a metadata query and extract geometry by binding,</li>
+ *   <li>collection mode: read geometry from a collection on the current conversation bean,</li>
+ *   <li>model mode: execute a named {@link MapModel} declared on the current document.</li>
+ * </ol>
+ *
+ * Three modes...
  * 1) This mode executes the query and then gets each geometry object using qeometryBinding.
  * 		parameters
  * 			query
@@ -69,8 +75,11 @@ import jakarta.servlet.http.HttpServletResponse;
  * 		parameters
  * 			webContext
  * 			modelName
+ *
+ * <p>Side effects: establishes persistence context, resolves user/session state from the web conversation,
+ * applies Skyve access checks, and records monitoring metrics for the selected model path.
  */
-// TODO This should support continue conversation
+//TODO This should support continue conversation
 public class MapServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(MapServlet.class);
@@ -226,8 +235,8 @@ public class MapServlet extends HttpServlet {
 		String json = JSON.marshall(customer, result);
 		
 		// Add _doc property to json response for resources such as images for map pins.
-		String _doc = bean.getBizModule() + '.' + bean.getBizDocument();
-		json = json.substring(0, json.length() - 1) + ",\"_doc\":\"" + _doc + "\"}";
+		String doc = bean.getBizModule() + '.' + bean.getBizDocument();
+		json = json.substring(0, json.length() - 1) + ",\"_doc\":\"" + doc + "\"}";
 		Monitoring.measure(RequestKey.model(document, modelName));
 		return json;
 	}

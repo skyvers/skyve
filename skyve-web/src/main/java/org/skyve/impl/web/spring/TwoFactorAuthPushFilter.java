@@ -39,6 +39,12 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+/**
+ * Coordinates push-style two-factor authentication during login attempts.
+ *
+ * <p>This filter intercepts qualifying login submissions, issues and validates one-time challenge
+ * codes, and controls forwarding to the intermediate two-factor entry flow.
+ */
 public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthenticationFilter {
 	private static final PathPatternRequestMatcher DEFAULT_LOGIN_ATTEMPT_PATH_REQUEST_MATCHER = PathPatternRequestMatcher.withDefaults()
 			.matcher(HttpMethod.POST, SkyveSpringSecurity.LOGIN_ATTEMPT_PATH);
@@ -63,6 +69,11 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	
 	private UserDetailsManager userDetailsManager;
 
+	/**
+	 * Creates a two-factor push filter.
+	 *
+	 * @param userDetailsManager user-details manager used for challenge state retrieval and updates
+	 */
 	public TwoFactorAuthPushFilter(UserDetailsManager userDetailsManager) {
 		setRequiresAuthenticationRequestMatcher(DEFAULT_LOGIN_ATTEMPT_PATH_REQUEST_MATCHER);
 		this.userDetailsManager = userDetailsManager;
@@ -82,6 +93,13 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		doFilter(request, response, chain);
 	}
 	
+	/**
+	 * Determines whether the current request should bypass push two-factor processing.
+	 *
+	 * @param request inbound login request
+	 * @param response outbound login response
+	 * @return true when this filter should be skipped
+	 */
 	protected boolean skipPushFilter(HttpServletRequest request, HttpServletResponse response) {
 		// No two factor customers defined
 		if (UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS == null) {
@@ -383,7 +401,12 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		return UtilImpl.processStringValue(super.obtainUsername(request));
 	}
 	
-	@SuppressWarnings("static-method")
+	/**
+	 * Resolves the customer from request parameters, defaulting to configured single-customer mode.
+	 *
+	 * @param request inbound login request
+	 * @return resolved customer name
+	 */
 	protected String obtainCustomer(HttpServletRequest request) {
 		String customerName = UtilImpl.processStringValue(request.getParameter(SKYVE_SECURITY_FORM_CUSTOMER_KEY));
 		if (customerName == null) {
@@ -408,11 +431,10 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	protected abstract void pushNotification(TwoFactorAuthUser user, String code);
 	
 	/**
-	 * Get the user details required for this filter
-	 * 
-	 * @param username	customer/username
-	 * @return
-	 * @throws Exception 
+	 * Loads two-factor user details for the supplied customer-qualified username.
+	 *
+	 * @param username customer/username value
+	 * @return two-factor user details, or null when no user can be loaded
 	 */
 	protected TwoFactorAuthUser getUserDB(String username) {
 		UserDetails userDetails;
@@ -430,10 +452,21 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		return null;
 	}
 	
+	/**
+	 * Persists generated challenge details for the supplied user.
+	 *
+	 * @param user two-factor user with updated challenge state
+	 */
 	protected void updateUserTFADetails(TwoFactorAuthUser user) {
 		userDetailsManager.updateUser(user);
 	}
 	
+	/**
+	 * Generates an opaque challenge token that includes challenge issue time for expiry checks.
+	 *
+	 * @param generatedTS challenge generation timestamp
+	 * @return generated challenge token
+	 */
 	@SuppressWarnings("static-method")
 	protected String generateTFAPushId(Timestamp generatedTS) {
 		return UUID.randomUUID().toString() + "-" + Long.toString(generatedTS.getTime());
@@ -447,17 +480,22 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	    RANDOM.nextBytes(randomBytes);
     }
     
+	/**
+	 * Generates a random six-digit challenge code.
+	 *
+	 * @return six-digit challenge code
+	 */
 	@SuppressWarnings("static-method")
 	protected String generateTFACode() {
 		return new DecimalFormat("000000").format(RANDOM.nextDouble() * 1000000d);
 	}
 	
 	/**
-	 * note: return true here does not log the user in.
-	 * Checks the credentials are correct before sending the push notification
-	 * 
-	 * @param request
-	 * @return
+	 * Validates primary credentials before sending a push challenge.
+	 *
+	 * @param request inbound login request
+	 * @param user loaded two-factor user record
+	 * @return true when credentials are valid for challenge dispatch
 	 */
 	protected boolean canAuthenticateWithPassword(HttpServletRequest request, TwoFactorAuthUser user) {
 		if ((! user.isEnabled()) ||
@@ -473,6 +511,13 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		return EXT.checkPassword(password, user.getUserPassword());
 	}
 	
+	/**
+	 * Determines whether a two-factor token has expired for the supplied customer.
+	 *
+	 * @param customer customer used to resolve timeout policy
+	 * @param twoFactorCode issued two-factor token
+	 * @return true when token is invalid or expired
+	 */
 	@SuppressWarnings("static-method")
 	protected boolean tfaCodeExpired(String customer, String twoFactorCode) {
 		long generatedTime;
@@ -577,14 +622,14 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	private static long getTwoFactorTimeoutMillis(String customer) {
 		TwoFactorAuthCustomerConfiguration config = TwoFactorAuthConfigurationSingleton.getInstance().getConfig(customer);
 		int timeoutSeconds = config.getTfaTimeOutSeconds();
-		return timeoutSeconds * 1000;
+		return timeoutSeconds * 1000L;
 	}
 	
 	/**
-	 * Check the user and see if they have the necessary TFA codes populated
-	 * 
-	 * @param user
-	 * @return
+	 * Checks whether all required challenge fields are populated for the supplied user.
+	 *
+	 * @param user two-factor user record
+	 * @return true when challenge fields are populated
 	 */
 	@SuppressWarnings("static-method")
 	protected boolean tfaCodesPopulated(TwoFactorAuthUser user) {
@@ -593,6 +638,12 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 				(user.getTfaCodeGeneratedTimestamp() != null));
 	}
 
+	/**
+	 * Indicates whether challenge resend is still within the configured cooldown period.
+	 *
+	 * @param user two-factor user record
+	 * @return true when resend should be blocked due to cooldown
+	 */
 	protected boolean isResendOnCooldown(TwoFactorAuthUser user) {
 		Timestamp generatedTimestamp = user.getTfaCodeGeneratedTimestamp();
 		if (generatedTimestamp == null) {
@@ -603,6 +654,11 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		return elapsedMillis < (UtilImpl.TWO_FACTOR_AUTH_RESEND_COOLDOWN_SECONDS * 1000L);
 	}
 
+	/**
+	 * Returns current epoch time in milliseconds.
+	 *
+	 * @return current system time in milliseconds
+	 */
 	@SuppressWarnings("static-method")
 	protected long currentTimeMillis() {
 		return System.currentTimeMillis();

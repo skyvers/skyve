@@ -22,6 +22,7 @@ import jakarta.servlet.http.HttpServletResponse;
  * Filters inbound or outbound requests before downstream web processing.
  */
 public class RegexFilter extends AbstractRestFilter {
+	private static final String FORBIDDEN = "Forbidden";
 	private Map<String, String> initParameters = new TreeMap<>();
 	
 	@Override
@@ -58,123 +59,84 @@ public class RegexFilter extends AbstractRestFilter {
 		for (Entry<String, String> initParameter : initParameters.entrySet()) {
 			String name = initParameter.getKey();
 			String regex = initParameter.getValue();
-			// NB - Don't test requested session ID as it is doctorable by the user
-			if ("ContextPath".equals(name) && fails(httpRequest.getContextPath(), regex)) {
-				error(httpResponse, HttpServletResponse.SC_FORBIDDEN, "Forbidden");
+
+			if (!passes(httpRequest, name, regex)) {
+				error(httpResponse, HttpServletResponse.SC_FORBIDDEN, FORBIDDEN);
 				return;
-			}
-			else if ("LocalAddr".equals(name) && fails(httpRequest.getLocalAddr(), regex)) {
-				error(httpResponse, HttpServletResponse.SC_FORBIDDEN, "Forbidden");
-				return;
-			}
-			else if ("LocalName".equals(name) && fails(httpRequest.getLocalName(), regex)) {
-				error(httpResponse, HttpServletResponse.SC_FORBIDDEN, "Forbidden");
-				return;
-			}
-			else if ("LocalPort".equals(name) && fails(String.valueOf(httpRequest.getLocalPort()), regex)) {
-				error(httpResponse, HttpServletResponse.SC_FORBIDDEN, "Forbidden");
-				return;
-			}
-			else if ("Method".equals(name) && fails(httpRequest.getMethod(), regex)) {
-				error(httpResponse, HttpServletResponse.SC_FORBIDDEN, "Forbidden");
-				return;
-			}
-			else if ("PathInfo".equals(name) && fails(httpRequest.getPathInfo(), regex)) {
-				error(httpResponse, HttpServletResponse.SC_FORBIDDEN, "Forbidden");
-				return;
-			}
-			else if ("PathTranslated".equals(name) && fails(httpRequest.getPathTranslated(), regex)) {
-				error(httpResponse, HttpServletResponse.SC_FORBIDDEN, "Forbidden");
-				return;
-			}
-			else if ("Protocol".equals(name) && fails(httpRequest.getProtocol(), regex)) {
-				error(httpResponse, HttpServletResponse.SC_FORBIDDEN, "Forbidden");
-				return;
-			}
-			else if ("QueryString".equals(name) && fails(httpRequest.getQueryString(), regex)) {
-				error(httpResponse, HttpServletResponse.SC_FORBIDDEN, "Forbidden");
-				return;
-			}
-			else if ("RemoteAddr".equals(name) && fails(httpRequest.getRemoteAddr(), regex)) {
-				error(httpResponse, HttpServletResponse.SC_FORBIDDEN, "Forbidden");
-				return;
-			}
-			else if ("RemoteHost".equals(name) && fails(httpRequest.getRemoteHost(), regex)) {
-				error(httpResponse, HttpServletResponse.SC_FORBIDDEN, "Forbidden");
-				return;
-			}
-			else if ("RemotePort".equals(name) && fails(String.valueOf(httpRequest.getRemotePort()), regex)) {
-				error(httpResponse, HttpServletResponse.SC_FORBIDDEN, "Forbidden");
-				return;
-			}
-			else if ("RemoteUser".equals(name) && fails(httpRequest.getRemoteUser(), regex)) {
-				error(httpResponse, HttpServletResponse.SC_FORBIDDEN, "Forbidden");
-				return;
-			}
-			else if ("RequestURI".equals(name) && fails(httpRequest.getRequestURI(), regex)) {
-				error(httpResponse, HttpServletResponse.SC_FORBIDDEN, "Forbidden");
-				return;
-			}
-			else if ("RequestURL".equals(name)) {
-				StringBuffer value = httpRequest.getRequestURL();
-				if ((value == null) || fails(value.toString(), regex)) {
-					error(httpResponse, HttpServletResponse.SC_FORBIDDEN, "Forbidden");
-					return;
-				}
-			}
-			else if ("Scheme".equals(name) && fails(httpRequest.getScheme(), regex)) {
-				error(httpResponse, HttpServletResponse.SC_FORBIDDEN, "Forbidden");
-				return;
-			}
-			else if ("ServerName".equals(name) && fails(httpRequest.getServerName(), regex)) {
-				error(httpResponse, HttpServletResponse.SC_FORBIDDEN, "Forbidden");
-				return;
-			}
-			else if ("ServerPort".equals(name) && fails(String.valueOf(httpRequest.getServerPort()), regex)) {
-				error(httpResponse, HttpServletResponse.SC_FORBIDDEN, "Forbidden");
-				return;
-			}
-			else if ("ServletPath".equals(name) && fails(httpRequest.getServletPath(), regex)) {
-				error(httpResponse, HttpServletResponse.SC_FORBIDDEN, "Forbidden");
-				return;
-			}
-			else if ("UserPrincipal".equals(name)) {
-				Principal value = httpRequest.getUserPrincipal();
-				if ((value == null) || fails(value.getName(), regex)) {
-					error(httpResponse, HttpServletResponse.SC_FORBIDDEN, "Forbidden");
-					return;
-				}
-			}
-			else {
-				// Check if a header matches
-				Enumeration<String> headers = httpRequest.getHeaders(name);
-				if ((headers != null) && headers.hasMoreElements()) {
-					while (headers.hasMoreElements()) {
-						if (fails(headers.nextElement(), regex)) {
-							error(httpResponse, HttpServletResponse.SC_FORBIDDEN, "Forbidden");
-							return;
-						}
-					}
-				}
-				else {
-					String[] parameters = httpRequest.getParameterValues(name);
-					if ((parameters != null) && (parameters.length > 0)) {
-						for (String parameter : parameters) {
-							if (fails(parameter, regex)) {
-								error(httpResponse, HttpServletResponse.SC_FORBIDDEN, "Forbidden");
-								return;
-							}
-						}
-					}
-					else {
-						error(httpResponse, HttpServletResponse.SC_FORBIDDEN, "Forbidden");
-						return;
-					}
-				}
 			}
 		}
 		
         chain.doFilter(request, response);
+	}
+
+	private static boolean passes(HttpServletRequest request, String name, String regex) {
+		String value = requestValue(request, name);
+		if ((value != null) || isRequestPropertyName(name)) {
+			return !fails(value, regex);
+		}
+
+		Enumeration<String> headers = request.getHeaders(name);
+		if ((headers != null) && headers.hasMoreElements()) {
+			while (headers.hasMoreElements()) {
+				if (fails(headers.nextElement(), regex)) {
+					return false;
+				}
+			}
+			return true;
+		}
+
+		return parametersPass(request.getParameterValues(name), regex);
+	}
+
+	private static boolean parametersPass(String[] parameters, String regex) {
+		if ((parameters != null) && (parameters.length > 0)) {
+			for (String parameter : parameters) {
+				if (fails(parameter, regex)) {
+					return false;
+				}
+			}
+			return true;
+		}
+		return false;
+	}
+
+	private static boolean isRequestPropertyName(String name) {
+		// NB Don't test requestedSessionId as it is doctorable by the user
+		return switch (name) {
+			case "ContextPath", "LocalAddr", "LocalName", "LocalPort", "Method", "PathInfo", "PathTranslated", "Protocol",
+					"QueryString", "RemoteAddr", "RemoteHost", "RemotePort", "RemoteUser", "RequestURI", "RequestURL",
+					"Scheme", "ServerName", "ServerPort", "ServletPath", "UserPrincipal" -> true;
+			default -> false;
+		};
+	}
+
+	private static String requestValue(HttpServletRequest request, String name) {
+		return switch (name) {
+			case "ContextPath" -> request.getContextPath();
+			case "LocalAddr" -> request.getLocalAddr();
+			case "LocalName" -> request.getLocalName();
+			case "LocalPort" -> String.valueOf(request.getLocalPort());
+			case "Method" -> request.getMethod();
+			case "PathInfo" -> request.getPathInfo();
+			case "PathTranslated" -> request.getPathTranslated();
+			case "Protocol" -> request.getProtocol();
+			case "QueryString" -> request.getQueryString();
+			case "RemoteAddr" -> request.getRemoteAddr();
+			case "RemoteHost" -> request.getRemoteHost();
+			case "RemotePort" -> String.valueOf(request.getRemotePort());
+			case "RemoteUser" -> request.getRemoteUser();
+			case "RequestURI" -> request.getRequestURI();
+			case "RequestURL" -> (request.getRequestURL() == null) ? null : new StringBuilder(request.getRequestURL()).toString();
+			case "Scheme" -> request.getScheme();
+			case "ServerName" -> request.getServerName();
+			case "ServerPort" -> String.valueOf(request.getServerPort());
+			case "ServletPath" -> request.getServletPath();
+			case "UserPrincipal" -> {
+				Principal principal = request.getUserPrincipal();
+				yield (principal == null) ? null : principal.getName();
+			}
+			default -> null;
+		};
 	}
 
 	private static boolean fails(String value, String regex) {

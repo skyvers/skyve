@@ -22,6 +22,12 @@ public class ResponseHeaderFilter implements Filter {
 	
 	private FilterConfig fc;
 
+	/**
+	 * Captures filter configuration and tracks the dedicated security-headers filter instance.
+	 *
+	 * @param config filter configuration containing response header settings
+	 * @throws ServletException when filter initialization fails
+	 */
 	@Override
 	public void init(FilterConfig config) throws ServletException {
 		if (SECURITY_HEADERS_FILTER_NAME.equals(config.getFilterName())) {
@@ -30,6 +36,9 @@ public class ResponseHeaderFilter implements Filter {
 		fc = config;
 	}
 
+	/**
+	 * Clears cached filter configuration references on shutdown.
+	 */
 	@Override
 	public void destroy() {
 		if (SECURITY_HEADERS_FILTER_NAME.equals(fc.getFilterName())) {

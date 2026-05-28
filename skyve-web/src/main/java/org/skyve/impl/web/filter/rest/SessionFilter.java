@@ -1,7 +1,6 @@
 package org.skyve.impl.web.filter.rest;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.security.Principal;
 
 import org.skyve.domain.messages.SessionEndedException;
@@ -19,6 +18,9 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+/**
+ * Resolves the authenticated servlet principal into a Skyve {@link User} and binds it to persistence for REST calls.
+ */
 public class SessionFilter extends AbstractRestFilter {
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SessionFilter.class);
 
@@ -43,25 +45,20 @@ public class SessionFilter extends AbstractRestFilter {
 		
 		AbstractPersistence persistence = null;
 		try {
-			try {
-				persistence = AbstractPersistence.get();
-				persistence.evictAllCached();
-				persistence.begin();
-	
+			persistence = AbstractPersistence.get();
+			persistence.evictAllCached();
+			persistence.begin();
+
 		    	Principal userPrincipal = httpRequest.getUserPrincipal();
-				User user = WebUtil.processUserPrincipalForRequest(httpRequest, 
-																	(userPrincipal == null) ? null : userPrincipal.getName());
-				if (user == null) {
-					error(persistence, httpRequest, httpResponse, HttpServletResponse.SC_UNAUTHORIZED, realm, new SessionEndedException(httpRequest.getLocale()).getMessage());
-			    	return;
-				}
-				persistence.setUser(user);
-	
-				chain.doFilter(request, response);
+			User user = WebUtil.processUserPrincipalForRequest(httpRequest,
+														(userPrincipal == null) ? null : userPrincipal.getName());
+			if (user == null) {
+				error(persistence, httpRequest, httpResponse, HttpServletResponse.SC_UNAUTHORIZED, realm, new SessionEndedException(httpRequest.getLocale()).getMessage());
+		    	return;
 			}
-			catch (InvocationTargetException e) {
-				throw e.getTargetException();
-			}
+			persistence.setUser(user);
+
+			chain.doFilter(request, response);
 		}
 		catch (Throwable t) {
 			if (persistence != null) {

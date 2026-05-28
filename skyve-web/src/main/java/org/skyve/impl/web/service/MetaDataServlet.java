@@ -213,10 +213,25 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+/**
+ * Produces SmartClient metadata payloads for module menus, data sources, and resolved document views.
+ *
+ * <p>Requests can target either full module metadata or a specific document view definition.
+ * The servlet resolves the authenticated user, applies access checks, and serializes runtime metadata
+ * to JSON for SmartClient bootstrap and view rendering.
+ */
 public class MetaDataServlet extends HttpServlet {
 	private static final long serialVersionUID = -2160904569807647301L;
 	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(MetaDataServlet.class);
 
+	/**
+	 * Handles metadata retrieval requests and returns the computed JSON metadata payload.
+	 *
+	 * @param request inbound servlet request
+	 * @param response outbound servlet response
+	 * @throws ServletException when servlet processing fails
+	 * @throws IOException when metadata cannot be written to the response stream
+	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -270,6 +285,14 @@ public class MetaDataServlet extends HttpServlet {
 		}
 	}
 	
+	/**
+	 * Delegates POST metadata requests to {@link #doGet(HttpServletRequest, HttpServletResponse)}.
+	 *
+	 * @param req inbound servlet request
+	 * @param resp outbound servlet response
+	 * @throws ServletException when servlet processing fails
+	 * @throws IOException when metadata cannot be written to the response stream
+	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -827,7 +850,7 @@ public class MetaDataServlet extends HttpServlet {
 
 				result.setLength(result.length() - 1); // remove last comma
 
-				if (actionsJSON.length() > 0) {
+				if (! actionsJSON.isEmpty()) {
 					actionsJSON.setLength(actionsJSON.length() - 1); // remove last comma
 					result.append(",\"actions\":[").append(actionsJSON).append(']');
 				}

@@ -6,7 +6,7 @@ import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.core.Application;
 
 /**
- * Implements internal web-module behavior for this Skyve runtime concern.
+ * Boots the JAX-RS application that hosts Skyve server-sent event endpoints.
  */
 @ApplicationPath("/sse")
 public class SseApplication extends Application {

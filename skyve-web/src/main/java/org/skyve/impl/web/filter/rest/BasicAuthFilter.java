@@ -1,7 +1,6 @@
 package org.skyve.impl.web.filter.rest;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
@@ -30,10 +29,18 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+/**
+ * Authenticates REST requests using HTTP Basic credentials and establishes the Skyve persistence user context.
+ *
+ * <p>Side effects: starts and commits/rolls back a persistence transaction, updates request session identity
+ * metadata through {@link WebUtil#setSessionId(org.skyve.metadata.user.User, jakarta.servlet.http.HttpServletRequest)},
+ * and writes REST error responses on authentication or processing failure.
+ */
 public class BasicAuthFilter extends AbstractRestFilter {
 
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(BasicAuthFilter.class);
     private static final Logger COMMAND_LOGGER = Category.COMMAND.logger();
+	private static final String AUTH_FAILURE_MESSAGE = "Unable to authenticate with the provided credentials";
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -62,49 +69,39 @@ public class BasicAuthFilter extends AbstractRestFilter {
 		final String password = UtilImpl.processStringValue(values[1]);
 
 		if ((username == null) || (password == null)) {
-			error(null, httpRequest, httpResponse, HttpServletResponse.SC_UNAUTHORIZED, realm, "Unable to authenticate with the provided credentials");
+			error(null, httpRequest, httpResponse, HttpServletResponse.SC_UNAUTHORIZED, realm, AUTH_FAILURE_MESSAGE);
 			return;
 		}
 
 		if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("Basic Auth for username: {} URI: {}", username, httpRequest.getRequestURI());
 
+		processAuthenticatedRequest(httpRequest, httpResponse, chain, username, password);
+	}
+
+	private void processAuthenticatedRequest(HttpServletRequest httpRequest,
+										HttpServletResponse httpResponse,
+										FilterChain chain,
+										String username,
+										String password) {
 		AbstractPersistence persistence = null;
 		try {
-			try {
-				persistence = AbstractPersistence.get();
-				persistence.evictAllCached();
-				persistence.begin();
+			persistence = AbstractPersistence.get();
+			persistence.evictAllCached();
+			persistence.begin();
 
-				UserImpl user = ProvidedRepositoryFactory.get().retrieveUser(username);
-				if (user != null) {
-					WebUtil.setSessionId(user, httpRequest);
-					persistence.setUser(user);
-					validateUserCredentials(persistence, username, password);
-					chain.doFilter(httpRequest, httpResponse);
-				}
-				else {
-					error(persistence, httpRequest, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, "Unable to authenticate with the provided credentials");
-				}
+			UserImpl user = ProvidedRepositoryFactory.get().retrieveUser(username);
+			if (user == null) {
+				error(persistence, httpRequest, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, AUTH_FAILURE_MESSAGE);
+				return;
 			}
-			catch (InvocationTargetException e) {
-				throw e.getTargetException();
-			}
+
+			WebUtil.setSessionId(user, httpRequest);
+			persistence.setUser(user);
+			validateUserCredentials(persistence, username, password);
+			chain.doFilter(httpRequest, httpResponse);
 		}
-		catch (Throwable t) {
-			if (persistence != null) {
-				persistence.rollback();
-			}
-
-			if (t instanceof SecurityException) {
-				error(persistence, httpRequest, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, "Unable to authenticate with the provided credentials");
-			}
-			else if (t instanceof MetaDataException) {
-				error(persistence, httpRequest, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, "Unable to authenticate with the provided credentials");
-			}
-			else {
-				String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "REST basic authentication failed", t);
-				error(persistence, httpRequest, httpResponse, WebErrorUtil.genericMessage(reference));
-			}
+		catch (Exception e) {
+			handleAuthFailure(persistence, httpRequest, httpResponse, e);
 		}
 		finally {
 			if (persistence != null) {
@@ -112,15 +109,34 @@ public class BasicAuthFilter extends AbstractRestFilter {
 			}
 		}
 	}
+
+	private void handleAuthFailure(AbstractPersistence persistence,
+								HttpServletRequest httpRequest,
+								HttpServletResponse httpResponse,
+								Throwable throwable) {
+		if (throwable instanceof Error error) {
+			throw error;
+		}
+
+		if (persistence != null) {
+			persistence.rollback();
+		}
+
+		if ((throwable instanceof SecurityException) || (throwable instanceof MetaDataException)) {
+			error(persistence, httpRequest, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, AUTH_FAILURE_MESSAGE);
+			return;
+		}
+
+		String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "REST basic authentication failed", throwable);
+		error(persistence, httpRequest, httpResponse, WebErrorUtil.genericMessage(reference));
+	}
 	
-	private static void validateUserCredentials(Persistence p, String username, String password)
-	throws Exception {
+	private static void validateUserCredentials(Persistence p, String username, String password) {
 		ProvidedRepository r = ProvidedRepositoryFactory.get();
 		Module admin = r.getModule(null, AppConstants.ADMIN_MODULE_NAME);
-		@SuppressWarnings("null")
-		String ADM_SecurityUser = admin.getDocument(null, AppConstants.USER_DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
+		String admSecurityUser = admin.getDocument(null, AppConstants.USER_DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
 		StringBuilder sql = new StringBuilder(128);
-		sql.append("select ").append(AppConstants.PASSWORD_ATTRIBUTE_NAME).append(" from ").append(ADM_SecurityUser);
+		sql.append("select ").append(AppConstants.PASSWORD_ATTRIBUTE_NAME).append(" from ").append(admSecurityUser);
 		sql.append(" where " ).append(AppConstants.USER_NAME_ATTRIBUTE_NAME).append(" = :").append(AppConstants.USER_NAME_ATTRIBUTE_NAME);
 
 		final String[] customerAndUser = username.split("/");

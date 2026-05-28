@@ -2,6 +2,9 @@ package org.skyve.impl.web.spring;
 
 import org.springframework.security.core.AuthenticationException;
 
+/**
+ * Signals that primary authentication succeeded but the user must complete a two-factor challenge.
+ */
 public class TwoFactorAuthRequiredException extends AuthenticationException {
 	private static final long serialVersionUID = -4848026331324090665L;
 

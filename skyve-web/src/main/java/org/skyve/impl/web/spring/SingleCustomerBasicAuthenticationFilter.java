@@ -51,10 +51,21 @@ import jakarta.servlet.http.HttpServletResponse;
  *  </b:bean>
  */
 public class SingleCustomerBasicAuthenticationFilter extends BasicAuthenticationFilter {
+	/**
+	 * Creates the filter using the supplied authentication manager.
+	 *
+	 * @param authenticationManager authentication manager used for BASIC credential validation
+	 */
 	public SingleCustomerBasicAuthenticationFilter(AuthenticationManager authenticationManager) {
 		super(authenticationManager);
 	}
 
+	/**
+	 * Creates the filter using explicit authentication manager and entry point strategy.
+	 *
+	 * @param authenticationManager authentication manager used for BASIC credential validation
+	 * @param authenticationEntryPoint entry point used when authentication fails
+	 */
 	public SingleCustomerBasicAuthenticationFilter(AuthenticationManager authenticationManager,
 										AuthenticationEntryPoint authenticationEntryPoint) {
 		super(authenticationManager, authenticationEntryPoint);
@@ -161,6 +172,12 @@ public class SingleCustomerBasicAuthenticationFilter extends BasicAuthentication
 	}
 
 	private AuthenticationDetailsSource<HttpServletRequest, ?> authenticationDetailsSource = new WebAuthenticationDetailsSource();
+
+	/**
+	 * Overrides the details source used for generated authentication requests.
+	 *
+	 * @param authenticationDetailsSource details source for request-derived authentication metadata
+	 */
 	@Override
 	public void setAuthenticationDetailsSource(AuthenticationDetailsSource<HttpServletRequest, ?> authenticationDetailsSource) {
 		this.authenticationDetailsSource = authenticationDetailsSource;
@@ -168,6 +185,12 @@ public class SingleCustomerBasicAuthenticationFilter extends BasicAuthentication
 	}
 
 	private RememberMeServices rememberMeServices =  new NullRememberMeServices();
+
+	/**
+	 * Overrides the remember-me service used during BASIC authentication success/failure handling.
+	 *
+	 * @param rememberMeServices remember-me service implementation
+	 */
 	@Override
 	public void setRememberMeServices(RememberMeServices rememberMeServices) {
 		this.rememberMeServices = rememberMeServices;

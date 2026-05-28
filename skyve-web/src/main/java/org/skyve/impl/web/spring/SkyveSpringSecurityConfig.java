@@ -7,7 +7,7 @@ import org.springframework.security.authentication.AuthenticationEventPublisher;
 import org.springframework.security.authentication.DefaultAuthenticationEventPublisher;
 
 /**
- * Configures Skyve web integration for the host runtime environment.
+ * Declares Spring beans that connect Spring Security eventing and helper services to Skyve web runtime behavior.
  */
 @Configuration
 public class SkyveSpringSecurityConfig {

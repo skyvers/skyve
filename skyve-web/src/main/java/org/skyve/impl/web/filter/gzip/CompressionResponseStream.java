@@ -49,6 +49,7 @@ public class CompressionResponseStream
      *
      * @param response The associated response
      */
+    @SuppressWarnings("resource")
     public CompressionResponseStream(HttpServletResponse response) throws IOException{
 
         super();
@@ -86,6 +87,7 @@ public class CompressionResponseStream
     /**
      * The underlying gzip output stream to which we should write data.
      */
+    @SuppressWarnings("resource")
     protected OutputStream gzipstream = null;
 
     /**
@@ -107,6 +109,7 @@ public class CompressionResponseStream
     /**
      * The underlying servket output stream to which we should write data.
      */
+    @SuppressWarnings("resource")
     protected ServletOutputStream output = null;
 
 
@@ -127,7 +130,7 @@ public class CompressionResponseStream
         compressionThreshold = threshold;
         buffer = new byte[compressionThreshold];
         if (debug > 1) {
-        	LOGGER.info("buffer is set to {}", compressionThreshold);
+	        LOGGER.info("buffer is set to {}", Integer.valueOf(compressionThreshold));
         }
     }
 
@@ -188,7 +191,7 @@ public class CompressionResponseStream
         }
         if (bufferCount > 0) {
             if (debug > 1) {
-            	LOGGER.info("flushing out to GZipStream, bufferCount = {}", bufferCount);
+	            LOGGER.info("flushing out to GZipStream, bufferCount = {}", Integer.valueOf(bufferCount));
             }
             writeToGZip(buffer, 0, bufferCount);
             bufferCount = 0;
@@ -226,7 +229,7 @@ public class CompressionResponseStream
      * @exception IOException if an input/output error occurs
      */
     @Override
-	public void write(byte b[]) throws IOException {
+    public void write(byte[] b) throws IOException {
 
         write(b, 0, b.length);
 
@@ -244,10 +247,10 @@ public class CompressionResponseStream
      * @exception IOException if an input/output error occurs
      */
     @Override
-	public void write(byte b[], int off, int len) throws IOException {
+    public void write(byte[] b, int off, int len) throws IOException {
 
         if (debug > 1) {
-        	LOGGER.info("write, bufferCount = {} len = {} off = {}", bufferCount, len, off);
+	        LOGGER.info("write, bufferCount = {} len = {} off = {}", Integer.valueOf(bufferCount), Integer.valueOf(len), Integer.valueOf(off));
         }
 
         if (closed)
@@ -277,10 +280,10 @@ public class CompressionResponseStream
         writeToGZip(b, off, len);
     }
 
-    public void writeToGZip(byte b[], int off, int len) throws IOException {
+    public void writeToGZip(byte[] b, int off, int len) throws IOException {
 
         if (debug > 1) {
-        	LOGGER.info("writeToGZip, len = {}", len);
+	        	LOGGER.info("writeToGZip, len = {}", Integer.valueOf(len));
         }
         if (gzipstream == null) {
             if (debug > 1) {

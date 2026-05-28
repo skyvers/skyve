@@ -9,6 +9,9 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+/**
+ * Forwards two-factor authentication failures back to the login flow while tagging invalid-code attempts.
+ */
 public class TwoFactorAuthForwardHandler extends ForwardAuthenticationFailureHandler {
 	/**
 	 * Request attribute key indicating an invalid two-factor code was supplied.

@@ -24,6 +24,12 @@ public class DevLoginFilter implements Filter {
 	private String user;
 	private String userPassword;
 	
+	/**
+	 * Reads required development login credentials from filter init parameters.
+	 *
+	 * @param config filter configuration containing customer, user, and password parameters
+	 * @throws ServletException when any required parameter is missing
+	 */
 	@Override
 	public void init(FilterConfig config) throws ServletException {
 		String customerName = Util.processStringValue(config.getInitParameter(CUSTOMER_NAME));
@@ -41,12 +47,24 @@ public class DevLoginFilter implements Filter {
 		}
 	}
 
+	/**
+	 * Clears cached development credentials when the filter is destroyed.
+	 */
 	@Override
 	public void destroy() {
 		user = null;
 		userPassword = null;
 	}
 	
+	/**
+	 * Performs transparent login for unauthenticated requests using configured development credentials.
+	 *
+	 * @param request inbound servlet request
+	 * @param response outbound servlet response
+	 * @param chain downstream filter chain
+	 * @throws IOException when request processing fails due to I/O issues
+	 * @throws ServletException when authentication or downstream processing fails
+	 */
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 	throws IOException, ServletException {

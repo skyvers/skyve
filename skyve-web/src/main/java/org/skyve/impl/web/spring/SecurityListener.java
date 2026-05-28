@@ -25,7 +25,10 @@ import org.springframework.security.authentication.event.AuthenticationSuccessEv
 import org.springframework.stereotype.Component;
 
 /**
- * Listens for lifecycle events and applies Skyve-specific web behavior.
+ * Handles Spring Security authentication success/failure events to maintain Skyve login-failure lockout state.
+ *
+ * <p>Side effects: writes failure counters and login-record audit rows to {@code ADM_SecurityUser}
+ * and {@code ADM_UserLoginRecord} using JDBC transactions.
  */
 @Component
 public class SecurityListener {

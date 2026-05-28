@@ -53,6 +53,12 @@ import jakarta.servlet.http.HttpServletResponse;
  *	&lt;url-pattern&gt;{restUrlPattern}&lt;/url-pattern&gt;
  * &lt;/filter-mapping&gt;
  * </pre>
+ *
+ * <p>Side effects: starts a persistence transaction, sets the thread-local persistence user,
+ * and writes REST error responses on authentication/metadata/unexpected failures.
+ *
+ * <p>Threading: this filter stores configuration in {@code persistenceUser} during
+ * initialization and then treats it as read-only for request processing.
  */
 public class RestUserPersistenceFilter extends AbstractRestFilter {
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(RestUserPersistenceFilter.class);
@@ -60,6 +66,12 @@ public class RestUserPersistenceFilter extends AbstractRestFilter {
     
 	private String persistenceUser;
 
+	/**
+	 * Reads the configured persistence user and initializes shared REST filter settings.
+	 *
+	 * @param config filter configuration containing the PersistenceUser parameter
+	 * @throws ServletException when initialization fails
+	 */
 	@Override
 	public void init(FilterConfig config) throws ServletException {
 		persistenceUser = config.getInitParameter("PersistenceUser");
@@ -67,6 +79,19 @@ public class RestUserPersistenceFilter extends AbstractRestFilter {
 		super.init(config);
 	}
 
+	/**
+	 * Processes a REST request under the configured persistence user.
+	 *
+	 * <p>When the configured user cannot be resolved, this method returns HTTP 403.
+	 * For non-security failures, it logs an unexpected error reference and returns
+	 * a generic REST error payload.
+	 *
+	 * @param request the incoming servlet request
+	 * @param response the outgoing servlet response
+	 * @param chain the downstream filter chain
+	 * @throws IOException if writing the response fails
+	 * @throws ServletException if downstream filter processing fails
+	 */
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 	throws IOException, ServletException {
