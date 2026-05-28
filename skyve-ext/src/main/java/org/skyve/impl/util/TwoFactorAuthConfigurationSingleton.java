@@ -21,6 +21,8 @@ import org.skyve.domain.messages.DomainException;
  * reads and updates.
  */
 public class TwoFactorAuthConfigurationSingleton implements SystemObserver {
+	private static final String ADM_CONFIGURATION_TABLE_NAME = "ADM_Configuration";
+	private static final String TFA_CUSTOMERS_JSON_PATH = "account.tfaCustomers";
 	private static TwoFactorAuthConfigurationSingleton instance = new TwoFactorAuthConfigurationSingleton();
 
 	private final ConcurrentHashMap<String, TwoFactorAuthCustomerConfiguration> configuration = new ConcurrentHashMap<>();
@@ -103,9 +105,9 @@ public class TwoFactorAuthConfigurationSingleton implements SystemObserver {
 	 */
 	@Override
 	public void startup() {
-		try (Connection c = EXT.getDataStoreConnection()) {
+		try (Connection c = getDataStoreConnection()) {
 			String query = "select twoFactorType, twofactorPushCodeTimeOutSeconds, twoFactorEmailSubject, twoFactorEmailBody, bizCustomer " +
-								"from ADM_Configuration " +
+								"from " + ADM_CONFIGURATION_TABLE_NAME + " " +
 								"where twoFactorType is not null and twofactorPushCodeTimeOutSeconds is not null";
 			try (PreparedStatement s = c.prepareStatement(query)) {
 				try (ResultSet rs = s.executeQuery()) {
@@ -124,8 +126,39 @@ public class TwoFactorAuthConfigurationSingleton implements SystemObserver {
 			}
 		}
 		catch (SQLException e) {
-			throw new DomainException("Failure reading customer configuration from database.", e);
+			throw new DomainException(buildStartupFailureMessage(), e);
 		}
+	}
+
+	/**
+	 * Obtains a JDBC connection to the configured Skyve datastore.
+	 *
+	 * @return An open datastore connection
+	 * @throws SQLException If the connection cannot be created
+	 */
+	@SuppressWarnings("static-method")
+	Connection getDataStoreConnection() throws SQLException {
+		return EXT.getDataStoreConnection();
+	}
+
+	private static String buildStartupFailureMessage() {
+		boolean tfaCustomersConfigured = (UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS != null) &&
+				(! UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS.isEmpty());
+		StringBuilder message = new StringBuilder(512);
+		message.append("Failure reading two-factor authentication customer configuration from database table ");
+		message.append(ADM_CONFIGURATION_TABLE_NAME);
+		message.append(". Skyve reads this table during every application startup to preload customer TFA settings, even when ");
+		message.append(TFA_CUSTOMERS_JSON_PATH);
+		message.append(" is empty. Troubleshooting: confirm schema synchronisation or migrations completed successfully, confirm ");
+		message.append(ADM_CONFIGURATION_TABLE_NAME);
+		message.append(" exists in the configured datastore/schema, and check whether ");
+		message.append(TFA_CUSTOMERS_JSON_PATH);
+		message.append(" is configured in JSON. ");
+		message.append(TFA_CUSTOMERS_JSON_PATH);
+		message.append(" configured: ");
+		message.append(tfaCustomersConfigured);
+		message.append('.');
+		return message.toString();
 	}
 	
 	/**
