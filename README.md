@@ -13,6 +13,7 @@ This repository is the Java implementation of the Skyve framework specification.
   * [User Guide](#user-guide)
   * [Development Guide](#development-guide)
   * [Skyve Cookbook](#skyve-cookbook) 
+  * [Architecture & Design](#architecture--design)
 * [Creating a new Skyve project](#creating-a-new-skyve-project)
   * [Before you start](#before-you-start)
   * [Overview](#overview)
@@ -27,17 +28,33 @@ This repository is the Java implementation of the Skyve framework specification.
 
 ## What is Skyve?
 
-Skyve is an open-source low-code platform that gives you access to all of the key capabilities needed to build sophisticated, robust and scalable cloud solutions. 
+Skyve is an open-source low-code platform for building secure, scalable enterprise applications — and it's uniquely suited to AI-assisted development.
 
-Skyve is platform/operating-system independent, works with all common database types, and is accessible through all common browsers and devices.
+Instead of generating thousands of lines of code that must be manually audited for security flaws, Skyve applications are declared in concise XML metadata. The platform interprets these declarations at runtime, enforcing security, rendering UIs, managing persistence, and handling schema evolution automatically. The entire metadata model is **statically validated** on every build — giving both human developers and AI agents immediate, deterministic feedback on correctness.
 
-By incorporating and integrating a range of other open-source technologies to handle persistence, rich UI, security, navigation, reporting, jobs, content, spatial, mobile integration; Skyve provides a platform with all the technology specific areas required to support the Skyve standard for enterprise applications.
+### Security by design
 
-Skyve also provides sophisticated validation and a high-level API so that you can build powerful enterprise SaaS solutions.
+Security in Skyve is declarative and impossible to accidentally bypass:
 
-At any time, branch out into "traditional" development without restriction, but will all the benefits of the API and integrated platform.
+- **Role-based CRUD with row-level scoping** — permissions are declared per document, enforced universally across persistence, queries, and UI. No endpoint-level checks to forget.
+- **Payload shaping** — REST and UI responses only include fields the user is permitted to see. Unpermitted input fields are silently ignored. No over-posting vulnerabilities.
+- **Forced-browsing prevention** — access vectors computed from roles, menus, and routes reject any request without a declared path. Users cannot reach documents by guessing URLs.
+- **Fail-closed defaults** — REST is blocked unless explicitly enabled. CSP, X-Frame, MIME-sniffing, and referrer headers are enforced on every response. CSRF tokens rotate per conversation.
+- **Multi-tenant isolation** — every row carries ownership fields (`bizCustomer`, `bizDataGroupId`, `bizUserId`); queries are automatically filtered to the user's scope.
 
-Skyve supports spatial concepts natively with MySQL (and MariaDB), SQL Server, Postgres and H2 - Oracle is in beta. Otherwise, pretty much anything supported by Hibernate should work (but we haven't tested them all!).
+### Purpose-built for AI
+
+- **Minimal output** — AI agents declare metadata, not boilerplate. Less context, fewer tokens, fewer mistakes.
+- **Static validation loop** — `generateDomain` validates the entire model instantly. AI gets compiler-grade feedback to self-correct without guesswork.
+- **Constrained schema** — the metadata format limits what can be expressed, dramatically reducing hallucination and invalid output.
+- **Open source** — AI models have trained on Skyve's codebase, dev guide, and cookbook. Pattern recognition is strong.
+- **High leverage** — a 20-line document declaration delivers persistence, UI, security, search indexing, and API exposure.
+
+### Platform capabilities
+
+Skyve is platform/OS independent, works with all common database types (MySQL, MariaDB, PostgreSQL, SQL Server, H2 — Oracle in beta), and renders across JSF/PrimeFaces, SmartClient, Vue, and Flutter from a single view definition. Built-in capabilities include spatial/geometry as a primary type, federated content management and full-text search, job scheduling, reporting (Jasper & FreeMarker), bulk import/export, and database-independent backup/restore.
+
+At any time, branch out into traditional Java development without restriction — with all the benefits of the API and integrated platform.
 
 For more details on the framework and its capabilities, please check out the platform homepage - [www.skyve.org](https://skyve.org/).
 
@@ -73,9 +90,9 @@ The development guide is available at [github.com/skyvers/skyve-dev-guide](https
 
 The Skyve Cookbook is available at [github.com/skyvers/skyve-cookbook](https://github.com/skyvers/skyve-cookbook). This contains code samples of advanced usage such as REST API configuration and troubleshooting advice.
 
-### Architecure Document
+### Architecture & Design
 
-This document is a work in progress and can be found [here](/docs/architecture.md)
+The [Architecture & Design document](/docs/architecture-design.md) is a comprehensive guide to Skyve's internal architecture — covering why Skyve's metadata-driven approach is uniquely suited to AI-assisted development, the static validation pipeline, declarative security model, multi-tenant override system, persistence layer, rendering pipelines, and all major subsystems.
 
 ## Creating a new Skyve project
 
