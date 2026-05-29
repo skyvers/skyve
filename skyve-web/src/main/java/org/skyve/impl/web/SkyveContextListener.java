@@ -11,7 +11,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -958,8 +957,8 @@ public class SkyveContextListener implements ServletContextListener {
             throw new IllegalArgumentException("Archiving is not supported on multi-tenancy instances");
         }
 
-		Integer runtime = Integer.valueOf(getNumber(archKey, "exportRuntimeSec", archiveProps, true).intValue());
-		Integer batchSize = Integer.valueOf(getNumber(archKey, "exportBatchSize", archiveProps, true).intValue());
+		int runtime = getNumber(archKey, "exportRuntimeSec", archiveProps, true).intValue();
+		int batchSize = getNumber(archKey, "exportBatchSize", archiveProps, true).intValue();
 
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> docProps = (List<Map<String, Object>>) get(archKey, "documents", archiveProps, true);
@@ -983,12 +982,10 @@ public class SkyveContextListener implements ServletContextListener {
 
             final String cacheKey = archKey + ".cache";
 
-            long heapSizeEntries = Optional.ofNullable(getNumber(cacheKey, "heapSizeEntries", cacheProps, false))
-                                           .map(Number::longValue)
-                                           .orElse(100l);
-            long expiryInMinutes = Optional.ofNullable(getNumber(cacheKey, "expiryTimeMinutes", cacheProps, false))
-                                           .map(Number::longValue)
-                                           .orElse(10l);
+			Number heapSizeEntriesNumber = getNumber(cacheKey, "heapSizeEntries", cacheProps, false);
+			long heapSizeEntries = (heapSizeEntriesNumber == null) ? 100L : heapSizeEntriesNumber.longValue();
+			Number expiryInMinutesNumber = getNumber(cacheKey, "expiryTimeMinutes", cacheProps, false);
+			long expiryInMinutes = (expiryInMinutesNumber == null) ? 10L : expiryInMinutesNumber.longValue();
 
             cacheConfig = new ArchivedDocumentCacheConfig(heapSizeEntries, expiryInMinutes);
         }

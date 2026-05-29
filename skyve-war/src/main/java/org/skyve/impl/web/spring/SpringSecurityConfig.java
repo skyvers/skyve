@@ -24,15 +24,31 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
 /**
- * This class supplies named spring beans to the OOTB security.xml
+ * Supplies Spring Security beans and request-filter configuration for Skyve WAR.
+ *
+ * <p>Side effects: defines URL authorization rules, login/logout behavior,
+ * remember-me persistence, optional OAuth login, and two-factor pre-processing.
  */
 @Configuration
 @Import(SkyveSpringSecurityConfig.class)
 @EnableWebSecurity
 public class SpringSecurityConfig {
+	/**
+	 * Security adapter that provides concrete Spring Security collaborators.
+	 */
 	@Autowired
+	@SuppressWarnings("java:S6813")
 	private SkyveSpringSecurity skyve;
 	
+	/**
+	 * Builds the application {@link SecurityFilterChain}.
+	 *
+	 * <p>Side effects: configures URL authorisation, remember-me, login/logout handlers, and two-factor email push filtering.
+	 *
+	 * @param http the mutable Spring security builder
+	 * @return the configured security filter chain
+	 * @throws Exception if chain construction fails
+	 */
     @Bean
     @SuppressWarnings("java:S4502") // Suppress CSRF turned off as Skyve implements its own
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -190,21 +206,41 @@ public class SpringSecurityConfig {
 	}
 */
     
+	/**
+	 * Exposes the password encoder used by authentication providers.
+	 *
+	 * @return the configured password encoder
+	 */
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return skyve.passwordEncoder();
 	}
 	
+	/**
+	 * Exposes the remember-me token repository.
+	 *
+	 * @return the configured persistent token repository
+	 */
 	@Bean
 	public PersistentTokenRepository tokenRepository() {
 		return skyve.tokenRepository();
 	}
 	
+	/**
+	 * Exposes the JDBC-backed user-details manager.
+	 *
+	 * @return the configured user-details manager
+	 */
 	@Bean
 	public UserDetailsManager userDetailsManager() {
 		return skyve.jdbcUserDetailsManager();
 	}
 	
+	/**
+	 * Exposes OAuth client registration definitions.
+	 *
+	 * @return the configured client registration repository
+	 */
  	@Bean
     public ClientRegistrationRepository clientRegistrationRepository() {
  		return skyve.clientRegistrationRepository();

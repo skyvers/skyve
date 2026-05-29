@@ -194,37 +194,52 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
     }
 
     /**
-     * Default to sorting by relevance (i.e. Lucene score). Can be overridden by subclasses as needed.
-     * 
-     * @return
+     * Returns the default Lucene sort when no explicit sort parameters are supplied.
+     *
+     * <p>Defaults to relevance (Lucene score); subclasses may override to enforce
+     * deterministic ordering for their document type.
+     *
+     * @return the default sort strategy, never {@code null}
      */
     protected Sort getDefaultSort() {
         return Sort.RELEVANCE;
     }
 
     /**
-     * Convert the given binding into the sort field binding that will be used with
-     * Lucene (most likely <em>${binding}_sort</em>); this is determined when converting
-     * the Skyve document into a Lucene document in the relevant DocumentConverter.
-     * See <em>DocumentConverter.toSortBinding(String)</em> for more info.
-     * 
-     * @param binding
-     * @return
+     * Converts a Skyve binding into the Lucene sort-field binding.
+     *
+     * <p>This typically appends a sort suffix (for example {@code _sort}) matching
+     * the field written by the document converter.
+     *
+     * @param binding the Skyve binding used in list metadata
+     * @return the Lucene field name used for sorting
      */
     protected abstract String toSortBinding(String binding);
 
     /**
-     * Convert the supplied Lucene Document into a skyve Bean.
-     * <p>
-     * NB DynamicBean is suitable, and likely to be easier that constructing a whole
-     * Bean instance.
-     * 
-     * @param luceneDoc
-     * @return
+     * Converts a Lucene document into the row bean returned by this list model.
+     *
+     * <p>{@link DynamicBean} is typically suitable when no concrete generated domain
+     * class is required.
+     *
+     * @param luceneDoc the Lucene document read from the archive index
+     * @return the converted bean row to include in list results
      */
     protected abstract Bean convertToBean(Document luceneDoc);
 
     /**
+	 * Reads a stored Lucene document by id.
+	 * <p>
+	 * Exposed as a protected seam to allow deterministic testing of iterator
+	 * error handling without relying on brittle Lucene internals.
+	 * </p>
+	 */
+	@SuppressWarnings("static-method")
+	protected Document readStoredDocument(DirectoryReader reader, int docId) throws IOException {
+		return reader.storedFields().document(docId);
+	}
+
+	/**
      * Tuple record for ferrying query results around
      */
     private static record Result(List<Bean> rows, long totalRowCount) {
@@ -232,7 +247,6 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
 
     @Override
     public AutoClosingIterable<Bean> iterate() throws Exception {
-
         return this.new LuceneResultsIterable(0, Integer.MAX_VALUE);
     }
 
@@ -252,28 +266,29 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
     }
 
     /**
-     * Get the module for the driving document, also used
-     * to find the ArchiveDocConfig.
-     * 
-     * @return
+     * Returns the module name for the driving archived document.
+     *
+     * <p>Used to resolve both document metadata and archive configuration.
+     *
+     * @return the module name used by this model
      */
     protected abstract String getModule();
 
     /**
-     * Get the document for the driving document, also used
-     * to find the ArchiveDocConfig.
-     * 
-     * @return
+     * Returns the document name for the driving archived document.
+     *
+     * <p>Used to resolve both document metadata and archive configuration.
+     *
+     * @return the document name used by this model
      */
     protected abstract String getDocument();
 
     /**
-     * Get the (lucene) index directory from the document config for the configured module+document
-     * in the application config (via <em>Util.getArchiveConfig()</em>). Can be overridden if needed.
-     * 
-     * @throws NoSuchElementException if the module+document combination is not present in the
-     *         application config.
-     * @return
+     * Resolves the Lucene index directory configured for this model's module and document.
+     *
+     * @return the configured index directory path
+     * @throws NoSuchElementException if no archive configuration exists for the
+     *         module and document combination
      */
     protected Path getIndexDirectory() {
         return Util.getArchiveConfig()
@@ -283,9 +298,10 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
     }
     
     /**
-     * Find the ArchiveDocConfig for this list model's document type.
-     * Could be an empty optional if no archive config is set up
-     * for the document type. 
+     * Finds the archive document configuration for this model's module and document.
+     *
+     * @return the matching archive configuration, or empty when archiving is not
+     *         configured for this document type
      */
     protected Optional<ArchiveDocConfig> findArchiveDocumentConfig() {
 
@@ -341,9 +357,12 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
         }
 
         /**
-         * Iterator is not resettable, calling a 2nd time will break.
-         * 
-         * @return
+         * Returns a forward-only iterator over the fetched Lucene score docs.
+         *
+         * <p>Threading: this iterator is stateful and not resettable; callers must
+         * consume it once.
+         *
+         * @return a stateful iterator over converted bean rows
          */
         @Override
         public Iterator<Bean> iterator() {
@@ -387,14 +406,12 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
                 ++readNextRowIdx;
 
                 try {
-                    Document doc = dirReader.storedFields()
-                                            .document(docId);
+                    Document doc = readStoredDocument(dirReader, docId);
                     return convertToBean(doc);
                 } catch (IOException ioe) {
                     throw new RuntimeException("Unable to retrieve doc #" + docId, ioe);
                 }
             }
         }
-
     }
 }

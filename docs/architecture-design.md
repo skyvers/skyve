@@ -1,6 +1,53 @@
 # Skyve Architecture & Design
 
-## 1. Why Skyve Exists
+## 1. Architecture at a Glance
+
+### Scope
+
+Skyve is a metadata-driven enterprise application platform that interprets XML declarations into secure, multi-tenant business applications with generated domain code, runtime UI rendering, and integrated persistence, search, content, and job orchestration.
+
+### Stakeholders
+
+| Stakeholder | Primary Concern |
+|-------------|-----------------|
+| Platform maintainers | Reliability, backward compatibility, operability |
+| Application developers | Speed of feature delivery with low boilerplate |
+| Security reviewers | Strong tenant isolation and fail-closed defaults |
+| Operators/SRE | Predictable scaling, observability, recovery |
+| Architects | Long-term evolvability and open exit path |
+
+### Constraints
+
+| Constraint | Architectural Implication |
+|-----------|---------------------------|
+| Single metadata source of truth | Runtime and generated code must remain metadata-aligned |
+| Multi-tenant by default | All access paths must enforce customer/data-group/user scope |
+| Multiple UI pipelines | View metadata must be renderer-agnostic |
+| Database portability | Persistence layer must isolate dialect-specific behaviors |
+| Customer overrides | Metadata resolution order must support tenant-first lookup |
+
+### Top Architecture Decisions
+
+| Decision | Why It Exists | Consequence |
+|----------|----------------|-------------|
+| Metadata-first model | Minimise boilerplate and centralise authority | Requires strict validation and metadata governance |
+| Static validation gate (`generateDomain`) | Catch structural faults before runtime | Build pipeline is mandatory for safe change |
+| Declarative authorization model | Prevent omission-based security defects | Higher up-front role/permission modeling effort |
+| Conversation-oriented UI state | Preserve rich transactional user interactions | Requires cache/session integrity controls |
+| Renderer-isomorphic view model | One declaration for multiple clients | Renderer-specific parity testing is required |
+
+### Traceability to Quality Goals
+
+The architecture is optimized for seven top-level outcomes:
+1. Deterministic correctness before deploy.
+2. Fail-closed security under misconfiguration.
+3. Predictable multi-tenant isolation.
+4. Controlled schema and API evolution.
+5. Horizontal scalability under read-heavy and mixed workloads.
+6. Fast recovery from service and data-plane failures.
+7. Operational visibility sufficient for SLO-based incident response.
+
+## 2. Why Skyve Exists
 
 AI can now generate code at extraordinary speed. But speed without structure produces sprawl — thousands of lines of procedural code that no human (and no AI) can confidently reason about, validate, or secure. The bottleneck in 2026 is not writing code; it's **knowing that what was written is correct, secure, and maintainable**.
 
@@ -103,7 +150,227 @@ This model gives developers rich transactional semantics without manual state ma
 
 ---
 
-## 2. Module Layout
+## 3. Quality Attributes and Measurable Targets
+
+Architecture claims are only valid if testable. The following are platform-level targets for production-grade deployments.
+
+| Attribute | Target | Measurement Method | Review Cadence |
+|-----------|--------|--------------------|----------------|
+| Availability | 99.9% monthly for core interactive services | Uptime checks against authenticated critical flows | Monthly |
+| Request latency | p95 <= 300 ms for metadata-driven CRUD requests under baseline load | APM percentiles, stratified by endpoint class | Weekly |
+| Error rate | <= 0.5% 5xx over 5-minute windows | Gateway and application metrics | Continuous |
+| Throughput | Sustain baseline 200 req/s per app node without breaching latency SLO | Load tests per release candidate | Per release |
+| Metadata validation reliability | 100% of releases run `generateDomain` and fail on validation errors | CI policy check | Per build |
+| Multi-tenant isolation | 0 unauthorized cross-tenant reads/writes in regression suite | Security integration tests + audit sampling | Per release |
+| Recovery objectives | RTO <= 60 minutes, RPO <= 15 minutes | Restore drills from production-like backups | Quarterly |
+
+### Capacity Assumptions
+
+- Baseline sizing assumes read-heavy enterprise workloads with periodic write bursts.
+- Stateful conversation cache pressure is expected to scale with concurrent active tabs rather than only active sessions.
+- Content indexing throughput is workload-dependent and must be benchmarked separately for Lucene and Elastic deployments.
+
+### Validation Policy
+
+- No architecture change is complete unless it states its expected impact on at least one SLO.
+- Capacity and resilience tests are required for changes to persistence, caching, routing, or security filters.
+
+---
+
+## 4. Deployment Topologies
+
+Skyve supports progressive deployment models from local development to highly available production clusters.
+
+### Topology A: Single-Node Development
+
+```mermaid
+graph TD
+    U[Developer Browser] --> A[Skyve App Process]
+    A --> D[(Single Database)]
+    A --> C[(Local Content Store)]
+```
+
+Characteristics:
+1. Fast startup and debugging.
+2. No high-availability guarantees.
+3. Suitable for metadata and UX iteration.
+
+### Topology B: Standard Production (HA)
+
+```mermaid
+graph TD
+    U[Users] --> WAF[WAF/Reverse Proxy]
+    WAF --> LB[Load Balancer - sticky session]
+    LB --> A1[Skyve Node 1]
+    LB --> A2[Skyve Node 2]
+    A1 --> DB[(Primary Database)]
+    A2 --> DB
+    A1 --> OBJ[Skyve Shared Content Store Node]
+    A2 --> OBJ
+```
+
+Characteristics:
+1. N+1 app-node redundancy.
+2. Shared state dependency for content.
+3. Rolling deployments with health-gated traffic shifts.
+
+### Topology C: Resilient Multi-Zone Production
+
+```mermaid
+graph TD
+    U[Users] --> G[Global Traffic Manager]
+    G --> Z1[Zone A Ingress]
+    G --> Z2[Zone B Ingress]
+    Z1 --> A1[App Pool A]
+    Z2 --> A2[App Pool B]
+    A1 --> DBP[(DB Primary)]
+    A2 --> DBR[(DB Replica/Failover)]
+    DBP --> DBR
+    A1 --> O1[(Object Store Region A)]
+    A2 --> O2[(Object Store Region B)]
+```
+
+Characteristics:
+1. Zone-level fault tolerance.
+2. Explicit failover runbooks for database and content access.
+3. Requires tested replication lag and consistency thresholds.
+
+### Deployment Guardrails
+
+- Terminate TLS at the edge and re-encrypt in transit where required by policy.
+- Isolate admin interfaces and operational endpoints on restricted networks.
+- Configure per-environment cache expiry and size limits, not hard-coded defaults.
+
+---
+
+## 5. Architecture Decision Records (ADR) Index
+
+The following ADRs define currently accepted architecture decisions. Status values: `Accepted`, `Proposed`, `Superseded`.
+
+| ADR | Title | Status | Summary |
+|-----|-------|--------|---------|
+| [ADR-001](adr/ADR-001-metadata-first-system-definition.md) | Metadata-First System Definition | Accepted | Business capabilities are declared in metadata, with runtime interpretation and optional generation. |
+| [ADR-002](adr/ADR-002-mandatory-generatedomain-validation-gate.md) | Mandatory `generateDomain` Validation Gate | Accepted | Build and release paths must run full metadata validation before deployment. |
+| [ADR-003](adr/ADR-003-declarative-role-and-scope-authorization.md) | Declarative Role and Scope Authorization | Accepted | Security permissions are modeled declaratively and enforced centrally. |
+| [ADR-004](adr/ADR-004-conversation-oriented-web-interaction-model.md) | Conversation-Oriented Web Interaction Model | Accepted | Rich tab-local state is preserved server-side for multi-step interactions. |
+| [ADR-005](adr/ADR-005-multi-renderer-view-interpretation.md) | Multi-Renderer View Interpretation | Accepted | A single metadata view model feeds Faces, SmartClient, Vue, and Flutter pipelines. |
+| [ADR-006](adr/ADR-006-database-portability-via-dialect-delegation.md) | Database Portability via Dialect Delegation | Accepted | Vendor-specific behavior is encapsulated in dialect and delegate layers. |
+| [ADR-007](adr/ADR-007-fail-closed-rest-exposure.md) | Fail-Closed REST Exposure | Accepted | REST endpoints are blocked by default and explicitly enabled by deployment choice. |
+| [ADR-008](adr/ADR-008-pluggable-content-indexing-strategy.md) | Pluggable Content Indexing Strategy | Accepted | Content indexing/storage providers are selected through a stable SPI boundary. |
+
+---
+
+## 6. Threat Model and Trust Boundaries
+
+### Primary Trust Boundaries
+
+| Boundary | Crossing Actors | Main Risks | Controls |
+|----------|-----------------|------------|----------|
+| Internet edge -> web tier | End users, API clients | Injection, forced browsing, token replay | Security headers, access vectors, CSRF controls, auth filters |
+| Web tier -> persistence | Application runtime, DB | Unauthorized row access, privilege escalation | Scope-aware permissions, filtered queries, transaction demarcation |
+| Web tier -> content/index | App runtime, storage/index backends | Data leakage, stale index views, tampering | Tenant metadata linkage, controlled SPI, authenticated service calls |
+| Admin/operator plane -> runtime | Operators, deployment automation | Misconfiguration, accidental exposure | Environment separation, least privilege, change control |
+
+### Key Abuse Cases
+
+| Abuse Case | Example | Primary Mitigation |
+|------------|---------|--------------------|
+| Forced browsing | Guessing module/document/action URLs | `UserAccess` vector checks and route enforcement |
+| Over-posting | Client submits non-editable fields | Payload shaping and permission-filtered input processing |
+| Cross-tenant access | Manipulated IDs or query filters | Scope enforcement via `bizCustomer`/`bizDataGroupId`/`bizUserId` |
+| Session misuse | Reusing stale conversation state | Session ownership checks in conversation restore |
+| REST surface drift | Unintended endpoint availability | Fail-closed REST filter with explicit opt-in |
+
+### Security Review Triggers
+
+- New endpoint categories or transport protocols.
+- Changes to authentication providers or token lifecycle.
+- Any modification to permission-scope merge semantics.
+
+---
+
+## 7. Operability, Observability, and Incident Response
+
+### Telemetry Model
+
+| Signal | Minimum Requirement | Example Use |
+|--------|---------------------|-------------|
+| Logs | Structured request, auth, and error events with correlation IDs | Trace request failures across filters and handlers |
+| Metrics | RED metrics (rate, errors, duration) and resource saturation | Alert on SLO breach risk before outage |
+| Traces | End-to-end request spans including persistence and content calls | Diagnose latency hotspots and retry storms |
+| Audit | Security-sensitive action audit trail | Investigate access and change history |
+
+### SLO Alerting Policy
+
+| Alert Class | Trigger | Initial Response Time |
+|-------------|---------|-----------------------|
+| Critical | Availability or error budget burn indicates imminent SLO breach | <= 15 minutes |
+| High | Sustained p95 latency violation or auth failure spike | <= 30 minutes |
+| Medium | Non-critical dependency degradation | <= 4 hours |
+
+### Minimum Runbooks
+
+1. Node saturation and horizontal scaling response.
+2. Database failover and rollback procedure.
+3. Cache corruption or cache-thrashing remediation.
+4. Content/index desynchronisation recovery.
+5. Credential/key rotation and incident containment.
+
+### Operational Ownership
+
+- Platform team owns framework-level SLO definitions and telemetry standards.
+- Application teams own module-level performance budgets and release verification.
+- Security function owns policy baselines, exception process, and periodic control testing.
+
+---
+
+## 8. Evolution, Versioning, and Compatibility Policy
+
+### Compatibility Guarantees
+
+| Surface | Compatibility Goal | Breaking Change Policy |
+|---------|--------------------|------------------------|
+| Metadata schema | Backward compatible within major version | Breaking changes require major-version uplift and migration tooling |
+| Public Java APIs | Source compatibility for supported extension points | Deprecated first, removal only after documented window |
+| Runtime behavior | Stable semantics for permission scope and validation | Any semantic change requires ADR + migration notes |
+| REST contracts | Additive by default | Field removals/renames require versioned endpoint strategy |
+
+### Deprecation Lifecycle
+
+1. Mark as deprecated with explicit replacement path.
+2. Emit build-time or startup warning where feasible.
+3. Maintain compatibility for at least one minor release train.
+4. Remove only with release note migration instructions and automated checks where possible.
+
+### Data and Schema Evolution Rules
+
+- Schema coercion support does not replace migration planning for high-volume production datasets.
+- All schema-impacting changes must be tested with representative data volumes and rollback plans.
+- Backup and restore validation is mandatory before production rollout of structural changes.
+
+### Contract Testing Expectations
+
+- Maintain regression suites for metadata validation, role scope enforcement, and persistence mappings.
+- Include compatibility tests for customer overrides and multi-UI route selection.
+
+---
+
+## 9. Architecture Governance Checklist
+
+Use this checklist before merging architecture-significant changes:
+
+1. Decision recorded in ADR index (new or amended).
+2. Impact on SLOs and capacity assumptions documented.
+3. Threat model impact reviewed.
+4. Deployment and rollback implications verified.
+5. Observability and alert coverage updated.
+6. Compatibility/deprecation implications documented.
+7. Recovery drill or test evidence attached for data-plane changes.
+
+The remainder of this document is the implementation-oriented reference section that maps these governance controls to concrete modules, runtime paths, and extension points.
+
+
+## 10. Module Layout
 
 Skyve is structured as a multi-module Maven project (Java 17, version 10.0.0-SNAPSHOT). Dependencies flow strictly downstream: `skyve-core` → `skyve-ext` → `skyve-web` → `skyve-war`.
 
@@ -145,7 +412,7 @@ graph TD
 
 ---
 
-## 3. Metadata-Driven Architecture
+## 11. Metadata-Driven Architecture
 
 All application behaviour derives from XML metadata that is validated, converted to runtime objects, and optionally used to generate Java source code. This eliminates boilerplate and ensures static validation before deployment.
 
@@ -191,7 +458,7 @@ Additionally, `ValidateMetaDataJob` runs asynchronously on startup to validate a
 
 ---
 
-## 4. Layered Architecture
+## 12. Layered Architecture
 
 ```mermaid
 graph TD
@@ -224,7 +491,7 @@ Each layer depends only on layers above it. Application code in `skyve-war` inte
 
 ---
 
-## 5. Request Lifecycle
+## 13. Request Lifecycle
 
 ```mermaid
 sequenceDiagram
@@ -273,7 +540,7 @@ sequenceDiagram
 
 ---
 
-## 5a. Core Class Relationships
+### 13.a Core Class Relationships
 
 ```mermaid
 classDiagram
@@ -357,7 +624,7 @@ classDiagram
 
 ---
 
-## 6. Metadata Model
+## 14. Metadata Model
 
 | Metadata Type | Runtime Class | Validation Path | Description |
 |---------------|--------------|-----------------|-------------|
@@ -390,7 +657,7 @@ flowchart TB
 
 ---
 
-## 7. Type System
+## 15. Type System
 
 ### Scalar Attribute Types
 
@@ -439,7 +706,7 @@ flowchart TB
 
 ---
 
-## 8. Persistence & Data Model
+## 16. Persistence & Data Model
 
 ### Supported Relation and Inheritance Strategies
 
@@ -506,7 +773,7 @@ Results are lazy `Map` instances exposing the domain interface until a real bean
 
 ---
 
-## 9. Security Architecture
+## 17. Security Architecture
 
 ```mermaid
 flowchart TD
@@ -561,7 +828,7 @@ Row-level isolation is enforced via `Bean` ownership fields: `bizCustomer`, `biz
 
 ---
 
-## 10. UI Rendering Pipelines
+## 18. UI Rendering Pipelines
 
 ```mermaid
 graph TD
@@ -628,7 +895,7 @@ Each browser tab/popup is a `WebContext` — a server-side conversation holding 
 
 ---
 
-## 11. Content Management & Search
+## 19. Content Management & Search
 
 ```mermaid
 flowchart LR
@@ -675,7 +942,7 @@ Content is stored transactionally alongside database operations:
 
 ---
 
-## 12. Jobs & Background Tasks
+## 20. Jobs & Background Tasks
 
 | Concept | Class | Scheduling | Persistence Mode | UI Context |
 |---------|-------|-----------|------------------|------------|
@@ -696,7 +963,7 @@ A `ViewBackgroundTask` is a short-running asynchronous process kicked off from a
 
 ---
 
-## 13. Reporting
+## 21. Reporting
 
 ```mermaid
 flowchart TD
@@ -743,7 +1010,7 @@ Reports are declared in module metadata and resolved by `ProvidedRepository.getR
 
 ---
 
-## 14. Import / Export
+## 22. Import / Export
 
 ### BizPort (Full Graph Exchange)
 
@@ -768,7 +1035,7 @@ Reports are declared in module metadata and resolved by `ProvidedRepository.getR
 
 ---
 
-## 15. Spatial
+## 23. Spatial
 
 Geometry is a **first-class attribute type** in Skyve — not an add-on. Spatial capabilities are woven through the type system, persistence layer, query API, and UI rendering.
 
@@ -809,7 +1076,7 @@ flowchart LR
 
 ---
 
-## 16. Extension Points
+## 24. Extension Points
 
 ```mermaid
 flowchart TD
@@ -862,7 +1129,7 @@ flowchart TD
 
 ---
 
-## 17. Caching
+## 25. Caching
 
 | Cache Region | Implementation | Purpose |
 |--------------|---------------|---------|
@@ -886,7 +1153,7 @@ flowchart TD
 
 ---
 
-## 18. Web Services & APIs
+## 26. Web Services & APIs
 
 ### REST Endpoints
 
@@ -919,7 +1186,7 @@ flowchart TD
 
 ---
 
-## 19. Scaffolding & Tooling
+## 27. Scaffolding & Tooling
 
 ### Maven Plugin Goals
 
@@ -960,7 +1227,7 @@ Skyve generates complete project scaffolding including:
 
 ---
 
-## 20. Key Abstractions Reference
+## 28. Key Abstractions Reference
 
 | Class/Interface | Module | Package | Description |
 |----------------|--------|---------|-------------|
