@@ -150,13 +150,14 @@ graph TD
 All application behaviour derives from XML metadata that is validated, converted to runtime objects, and optionally used to generate Java source code. This eliminates boilerplate and ensures static validation before deployment.
 
 ```mermaid
-flowchart LR
+flowchart TD
     XML["XML Metadata<br/>(customer, module, document,<br/>view, query, role, router)"]
     CMeta["ConvertibleMetaData<br/>JAXB binding layer"]
     Runtime["Runtime Model<br/>(Customer, Module, Document,<br/>View, Role objects)"]
+
     DomGen["DomainGenerator<br/>validate() → generate()"]
     Java["Generated Java<br/>(domain classes, enums,<br/>HBM mappings)"]
-    App["Deployed Application<br/>(runtime metadata + generated code)"]
+    App["Deployed Application<br/>(runtime metadata +<br/>generated code)"]
 
     XML --> CMeta
     CMeta -->|"convert()"| Runtime
@@ -193,36 +194,25 @@ Additionally, `ValidateMetaDataJob` runs asynchronously on startup to validate a
 ## 4. Layered Architecture
 
 ```mermaid
-graph LR
+graph TD
     subgraph Contracts["Layer 1: Contracts (skyve-core)"]
-        direction TB
-        A1[Metadata Interfaces]
-        A2[Domain Types]
-        A3[Binding & Expressions]
-        A4[Extension Point APIs]
+        direction LR
+        A1[Metadata Interfaces] ~~~ A2[Domain Types] ~~~ A3[Binding & Expressions] ~~~ A4[Extension Point APIs]
     end
 
     subgraph Services["Layer 2: Runtime Services (skyve-ext)"]
-        direction TB
-        B1[Hibernate Persistence]
-        B2[Security Providers]
-        B3[Job Scheduler]
-        B4[Reporting Engines]
+        direction LR
+        B1[Hibernate Persistence] ~~~ B2[Security Providers] ~~~ B3[Job Scheduler] ~~~ B4[Reporting Engines]
     end
 
     subgraph Delivery["Layer 3: Web Delivery (skyve-web)"]
-        direction TB
-        C1[JSF/Faces Pipeline]
-        C2[SmartClient Pipeline]
-        C3[REST Endpoints]
-        C4[Servlet Filters]
+        direction LR
+        C1[JSF/Faces Pipeline] ~~~ C2[SmartClient Pipeline] ~~~ C3[REST Endpoints] ~~~ C4[Servlet Filters]
     end
 
     subgraph Assembly["Layer 4: Application (skyve-war)"]
-        direction TB
-        D1[Spring Security Config]
-        D2[Application Modules]
-        D3[Customer Overrides]
+        direction LR
+        D1[Spring Security Config] ~~~ D2[Application Modules] ~~~ D3[Customer Overrides]
     end
 
     Contracts --> Services
@@ -230,7 +220,7 @@ graph LR
     Delivery --> Assembly
 ```
 
-Each layer depends only on layers to its left. Application code in `skyve-war` interacts exclusively through public APIs defined in `skyve-core`, with runtime services injected via CDI or Spring.
+Each layer depends only on layers above it. Application code in `skyve-war` interacts exclusively through public APIs defined in `skyve-core`, with runtime services injected via CDI or Spring.
 
 ---
 
@@ -287,21 +277,14 @@ sequenceDiagram
 
 ```mermaid
 classDiagram
+    direction TB
+
+    %% Row 1
     class MetaData {
         <<interface>>
     }
-    class SerializableMetaData {
-        <<interface>>
-        +Serializable
-    }
-    class NamedMetaData {
-        <<interface>>
-        +getName() String
-    }
-    class ConvertibleMetaData~T~ {
-        <<interface>>
-        +convert(String) T
-    }
+
+    %% Row 2
     class Customer {
         <<interface>>
         +getModules()
@@ -325,6 +308,8 @@ classDiagram
         +getWidgets()
         +getActions()
     }
+
+    %% Row 3
     class ProvidedRepository {
         +validateCustomerForGenerateDomain()
         +validateModuleForGenerateDomain()
@@ -355,18 +340,18 @@ classDiagram
         +afterDelete(Bean)
     }
 
-    MetaData <|-- SerializableMetaData
-    SerializableMetaData <|-- NamedMetaData
-    NamedMetaData <|-- Customer
-    NamedMetaData <|-- Module
-    NamedMetaData <|-- Document
-    NamedMetaData <|-- View
-    MetaData <|.. ConvertibleMetaData
-    ProvidedRepository --> Customer : resolves
-    ProvidedRepository --> Module : resolves
-    ProvidedRepository --> Document : resolves
-    Persistence --> Document : queries
-    Bizlet --> Document : extends
+    %% Inheritance (Row 1 → Row 2)
+    MetaData <|-- Customer
+    MetaData <|-- Module
+    MetaData <|-- Document
+    MetaData <|-- View
+
+    %% Dependencies (Row 2 ← Row 3)
+    Customer <-- ProvidedRepository : resolves
+    Module <-- ProvidedRepository : resolves
+    Document <-- ProvidedRepository : resolves
+    Document <-- Persistence : queries
+    Document <-- Bizlet~T~ : extends
     Customer --> Interceptor : declares
 ```
 
