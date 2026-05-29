@@ -1,53 +1,6 @@
 # Skyve Architecture & Design
 
-## 1. Architecture at a Glance
-
-### Scope
-
-Skyve is a metadata-driven enterprise application platform that interprets XML declarations into secure, multi-tenant business applications with generated domain code, runtime UI rendering, and integrated persistence, search, content, and job orchestration.
-
-### Stakeholders
-
-| Stakeholder | Primary Concern |
-|-------------|-----------------|
-| Platform maintainers | Reliability, backward compatibility, operability |
-| Application developers | Speed of feature delivery with low boilerplate |
-| Security reviewers | Strong tenant isolation and fail-closed defaults |
-| Operators/SRE | Predictable scaling, observability, recovery |
-| Architects | Long-term evolvability and open exit path |
-
-### Constraints
-
-| Constraint | Architectural Implication |
-|-----------|---------------------------|
-| Single metadata source of truth | Runtime and generated code must remain metadata-aligned |
-| Multi-tenant by default | All access paths must enforce customer/data-group/user scope |
-| Multiple UI pipelines | View metadata must be renderer-agnostic |
-| Database portability | Persistence layer must isolate dialect-specific behaviors |
-| Customer overrides | Metadata resolution order must support tenant-first lookup |
-
-### Top Architecture Decisions
-
-| Decision | Why It Exists | Consequence |
-|----------|----------------|-------------|
-| Metadata-first model | Minimise boilerplate and centralise authority | Requires strict validation and metadata governance |
-| Static validation gate (`generateDomain`) | Catch structural faults before runtime | Build pipeline is mandatory for safe change |
-| Declarative authorization model | Prevent omission-based security defects | Higher up-front role/permission modeling effort |
-| Conversation-oriented UI state | Preserve rich transactional user interactions | Requires cache/session integrity controls |
-| Renderer-isomorphic view model | One declaration for multiple clients | Renderer-specific parity testing is required |
-
-### Traceability to Quality Goals
-
-The architecture is optimized for seven top-level outcomes:
-1. Deterministic correctness before deploy.
-2. Fail-closed security under misconfiguration.
-3. Predictable multi-tenant isolation.
-4. Controlled schema and API evolution.
-5. Horizontal scalability under read-heavy and mixed workloads.
-6. Fast recovery from service and data-plane failures.
-7. Operational visibility sufficient for SLO-based incident response.
-
-## 2. Why Skyve Exists
+## 1. Why Skyve Exists
 
 AI can now generate code at extraordinary speed. But speed without structure produces sprawl — thousands of lines of procedural code that no human (and no AI) can confidently reason about, validate, or secure. The bottleneck in 2026 is not writing code; it's **knowing that what was written is correct, secure, and maintainable**.
 
@@ -149,6 +102,53 @@ Unlike stateless REST-centric frameworks, Skyve manages **conversations** — se
 This model gives developers rich transactional semantics without manual state management — the framework handles serialisation, session binding, conflict detection, and cache lifecycle.
 
 ---
+
+## 2. Architecture at a Glance
+
+### Scope
+
+Skyve is a metadata-driven enterprise application platform that interprets XML declarations into secure, multi-tenant business applications with generated domain code, runtime UI rendering, and integrated persistence, search, content, and job orchestration.
+
+### Stakeholders
+
+| Stakeholder | Primary Concern |
+|-------------|-----------------|
+| Platform maintainers | Reliability, backward compatibility, operability |
+| Application developers | Speed of feature delivery with low boilerplate |
+| Security reviewers | Strong tenant isolation and fail-closed defaults |
+| Operators/SRE | Predictable scaling, observability, recovery |
+| Architects | Long-term evolvability and open exit path |
+
+### Constraints
+
+| Constraint | Architectural Implication |
+|-----------|---------------------------|
+| Single metadata source of truth | Runtime and generated code must remain metadata-aligned |
+| Multi-tenant by default | All access paths must enforce customer/data-group/user scope |
+| Multiple UI pipelines | View metadata must be renderer-agnostic |
+| Database portability | Persistence layer must isolate dialect-specific behaviors |
+| Customer overrides | Metadata resolution order must support tenant-first lookup |
+
+### Top Architecture Decisions
+
+| Decision | Why It Exists | Consequence |
+|----------|----------------|-------------|
+| Metadata-first model | Minimise boilerplate and centralise authority | Requires strict validation and metadata governance |
+| Static validation gate (`generateDomain`) | Catch structural faults before runtime | Build pipeline is mandatory for safe change |
+| Declarative authorization model | Prevent omission-based security defects | Higher up-front role/permission modeling effort |
+| Conversation-oriented UI state | Preserve rich transactional user interactions | Requires cache/session integrity controls |
+| Renderer-isomorphic view model | One declaration for multiple clients | Renderer-specific parity testing is required |
+
+### Traceability to Quality Goals
+
+The architecture is optimized for seven top-level outcomes:
+1. Deterministic correctness before deploy.
+2. Fail-closed security under misconfiguration.
+3. Predictable multi-tenant isolation.
+4. Controlled schema and API evolution.
+5. Horizontal scalability under read-heavy and mixed workloads.
+6. Fast recovery from service and data-plane failures.
+7. Operational visibility sufficient for SLO-based incident response.
 
 ## 3. Quality Attributes and Measurable Targets
 

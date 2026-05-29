@@ -199,6 +199,9 @@ Prefer method-level suppression when only a few methods trigger the warning. Use
 
 - Purpose: Fast branch and exception coverage of one class by stubbing collaborators.
 - Tooling: `@Mock`, `@Spy`, `@InjectMocks`, and static mocking only when unavoidable.
+- Repository constraint: In this repository/runtime combination, Mockito static mocking is not always available with the default mock maker in `skyve-web` (and enabling inline mock maker can conflict with Hibernate/Byte Buddy version constraints). Prefer non-static seams first.
+- Preferred fallback: Bind a mocked `AbstractPersistence` into `AbstractPersistence.threadLocalPersistence` and validate deterministic success/error branches without `mockStatic(CORE/EXT/JSON)`.
+- Example: `RestServiceDeleteJsonTest` should use thread-local persistence and explicit error-path assertions rather than static mocks for `CORE`, `EXT`, or `JSON`.
 - Guidance: Prefer constructor or field injection seams over reflection; use reflection only when no cleaner seam exists.
 - **Dispatch trees:** when a class has a large conditional tree (many `instanceof` checks, `AttributeType` switches, collection/array/scalar paths), model each independent arm as its own small `@Test` method with a descriptive name. Bundling arms into one test degrades diagnostic clarity and makes partial regressions harder to localise.
 - **Extend, don't duplicate:** if an existing test class already covers part of the class under test (e.g. `BindUtilTest`, `StashExpressionEvaluatorTest`), add new `@Test` methods to it rather than creating a parallel class. Parallel classes split coverage data and make it harder to see what is already proven.
