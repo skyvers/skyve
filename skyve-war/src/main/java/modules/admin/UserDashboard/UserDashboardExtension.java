@@ -208,6 +208,11 @@ public class UserDashboardExtension extends UserDashboard {
 				Module module = customer.getModule(moduleName);
 				Document document = module.getDocument(customer, documentName);
 
+				if (!document.isPersistable()) {
+					LOGGER.debug(reason + " tile skipped for non-persistable document: " + moduleName + "." + documentName);
+					continue;
+				}
+
 				if (CORE.getUser().canAccessDocument(document)) {
 					String id = (String) Binder.get(audit, Audit.auditBizIdPropertyName);
 					if (id != null) {
