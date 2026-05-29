@@ -18,17 +18,39 @@ import org.skyve.metadata.view.View.ViewParameter;
 
 import jakarta.annotation.Nonnull;
 
+/**
+ * Fluent builder for top-level {@link View} metadata.
+ */
 public class FluentView extends FluentContainer<FluentView> {
 	private ViewMetaData view = null;
 
+	/**
+	 * Creates a builder backed by a new {@link ViewMetaData} instance.
+	 */
 	public FluentView() {
 		view = new ViewMetaData();
 	}
 
+	/**
+	 * Creates a builder backed by the supplied view metadata instance.
+	 *
+	 * @param view
+	 *            the view metadata to mutate
+	 */
 	public FluentView(ViewMetaData view) {
 		this.view = view;
 	}
 
+	/**
+	 * Copies view metadata into this builder.
+	 *
+	 * <p>Side effects: replaces identity, presentation, refresh settings, sidebar/actions,
+	 * parameters, and all contained widgets.
+	 *
+	 * @param view
+	 *            the source view metadata
+	 * @return this builder
+	 */
 	public FluentView from(@SuppressWarnings("hiding") View view) {
 		name(view.getName());
 		title(view.getTitle());
@@ -60,26 +82,61 @@ public class FluentView extends FluentContainer<FluentView> {
 		return this;
 	}
 
+	/**
+	 * Sets the view name.
+	 *
+	 * @param name
+	 *            the view identifier
+	 * @return this builder
+	 */
 	public FluentView name(String name) {
 		view.setName(name);
 		return this;
 	}
 
+	/**
+	 * Sets the view title.
+	 *
+	 * @param title
+	 *            the display title
+	 * @return this builder
+	 */
 	public FluentView title(String title) {
 		view.setTitle(title);
 		return this;
 	}
 
+	/**
+	 * Sets the style class for the view icon.
+	 *
+	 * @param iconStyleClass
+	 *            icon style class
+	 * @return this builder
+	 */
 	public FluentView iconStyleClass(String iconStyleClass) {
 		view.setIconStyleClass(iconStyleClass);
 		return this;
 	}
 
+	/**
+	 * Sets the relative path to the 32x32 icon.
+	 *
+	 * @param icon32x32RelativeFileName
+	 *            relative icon file path
+	 * @return this builder
+	 */
 	public FluentView icon32x32RelativeFileName(String icon32x32RelativeFileName) {
 		view.setIcon32x32RelativeFileName(icon32x32RelativeFileName);
 		return this;
 	}
 
+	/**
+	 * Sets the documentation text for this view.
+	 *
+	 * @param documentation
+	 *            documentation content
+	 * @return this builder
+	 */
 	public FluentView documentation(String documentation) {
 		view.setDocumentation(documentation);
 		return this;
@@ -388,67 +445,162 @@ public class FluentView extends FluentContainer<FluentView> {
 		return this;
 	}
 	
+	/**
+	 * Removes the access metadata block from this view.
+	 *
+	 * <p>Side effects: drops all existing access entries and resets generate-access behaviour
+	 * to framework defaults.
+	 *
+	 * @return this builder
+	 */
 	public FluentView removeAccesses() {
 		view.setAccesses(null);
 		return this;
 	}
 	
+	/**
+	 * Enables or disables generated access metadata for this view.
+	 *
+	 * <p>Side effects: creates the access metadata container when absent.
+	 *
+	 * @param generate
+	 *            {@code true} to enable generated access metadata
+	 * @return this builder
+	 */
 	public FluentView generateAccesses(boolean generate) {
 		ViewUserAccessesMetaData accesses = establishViewAccesses();
 		accesses.setGenerate(generate);
 		return this;
 	}
 	
+	/**
+	 * Sets the relative help file path for this view.
+	 *
+	 * @param helpRelativeFileName
+	 *            relative help file path
+	 * @return this builder
+	 */
 	public FluentView helpRelativeFileName(String helpRelativeFileName) {
 		view.setHelpRelativeFileName(helpRelativeFileName);
 		return this;
 	}
 
+	/**
+	 * Sets the external help URL for this view.
+	 *
+	 * @param helpURL
+	 *            help URL
+	 * @return this builder
+	 */
 	public FluentView helpURL(String helpURL) {
 		view.setHelpURL(helpURL);
 		return this;
 	}
 
+	/**
+	 * Sets the automatic refresh interval in seconds.
+	 *
+	 * @param refreshTimeInSeconds
+	 *            refresh interval in seconds
+	 * @return this builder
+	 */
 	public FluentView refreshTimeInSeconds(int refreshTimeInSeconds) {
 		view.setRefreshTimeInSeconds(Integer.valueOf(refreshTimeInSeconds));
 		return this;
 	}
 
+	/**
+	 * Sets the condition name controlling automatic refresh.
+	 *
+	 * @param refreshConditionName
+	 *            refresh condition identifier
+	 * @return this builder
+	 */
 	public FluentView refreshConditionName(String refreshConditionName) {
 		view.setRefreshConditionName(refreshConditionName);
 		return this;
 	}
 
+	/**
+	 * Sets the action name invoked during automatic refresh.
+	 *
+	 * @param refreshActionName
+	 *            refresh action identifier
+	 * @return this builder
+	 */
 	public FluentView refreshActionName(String refreshActionName) {
 		view.setRefreshActionName(refreshActionName);
 		return this;
 	}
 
+	/**
+	 * Sets the sidebar for this view.
+	 *
+	 * @param sidebar
+	 *            sidebar builder
+	 * @return this builder
+	 */
 	public FluentView sidebar(FluentSidebar sidebar) {
 		view.setSidebar(sidebar.get());
 		return this;
 	}
 
+	/**
+	 * Sets the actions metadata for this view.
+	 *
+	 * @param actions
+	 *            actions builder
+	 * @return this builder
+	 */
 	public FluentView actions(FluentActions actions) {
 		view.setActions(actions.get());
 		return this;
 	}
 
+	/**
+	 * Appends a view parameter.
+	 *
+	 * @param parameter
+	 *            parameter builder to append
+	 * @return this builder
+	 */
 	public FluentView addParameter(FluentViewParameter parameter) {
 		view.getParameters().add(parameter.get());
 		return this;
 	}
 
+	/**
+	 * Removes parameters matching the supplied binding.
+	 *
+	 * <p>A parameter is removed when {@code boundTo} or {@code fromBinding} equals the
+	 * supplied binding.
+	 *
+	 * @param binding
+	 *            binding to remove
+	 * @return this builder
+	 */
 	public FluentView removeParameter(String binding) {
 		view.getParameters().removeIf(p -> (binding.equals(p.getBoundTo()) || binding.equals(p.getFromBinding())));
 		return this;
 	}
 
+	/**
+	 * Removes all parameters from this view.
+	 *
+	 * @return this builder
+	 */
 	public FluentView clearParameters() {
 		view.getParameters().clear();
 		return this;
 	}
 
+	/**
+	 * Finds a parameter that is bound to or sourced from the supplied binding.
+	 *
+	 * @param binding
+	 *            the binding to match against {@code boundTo} and {@code fromBinding}
+	 * @return the matching parameter wrapper, or {@code null} when no parameter matches
+	 */
 	public FluentViewParameter findParameter(String binding) {
 		ViewParameter result = view.getParameters().stream()
 				.filter(p -> (binding.equals(p.getBoundTo()) || binding.equals(p.getFromBinding()))).findAny().orElse(null);
@@ -458,6 +610,11 @@ public class FluentView extends FluentContainer<FluentView> {
 		return null;
 	}
 
+	/**
+	 * Returns the backing metadata instance.
+	 *
+	 * @return the mutable view metadata
+	 */
 	@Override
 	public ViewMetaData get() {
 		return view;

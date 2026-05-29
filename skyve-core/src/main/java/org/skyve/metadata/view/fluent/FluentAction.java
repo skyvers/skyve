@@ -20,11 +20,27 @@ import org.skyve.impl.metadata.repository.view.actions.ZoomOutAction;
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.metadata.view.Action;
 
+/**
+ * Provides fluent configuration for common {@link Action} metadata attributes.
+ *
+ * @param <T>
+ *            the concrete fluent action type
+ */
 public abstract class FluentAction<T extends FluentAction<T>> {
+	/**
+	 * Creates a new fluent action base.
+	 */
 	protected FluentAction() {
 		// nothing to see
 	}
 
+	/**
+	 * Copies shared action metadata values into this builder.
+	 *
+	 * @param action
+	 *            the source action metadata
+	 * @return this builder
+	 */
 	@SuppressWarnings("unchecked")
 	protected T fromBase(ActionMetaData action) {
 		name(action.getName());
@@ -39,11 +55,31 @@ public abstract class FluentAction<T extends FluentAction<T>> {
 		return (T) this;
 	}
 
+	/**
+	 * Converts a runtime {@link Action} into a concrete fluent action builder.
+	 *
+	 * @param action
+	 *            the runtime action to convert
+	 * @param <T>
+	 *            the concrete fluent action type
+	 * @return a builder that wraps metadata equivalent to {@code action}
+	 */
 	public static <T extends FluentAction<T>> T from(Action action) {
 		ActionMetaData a = ((ActionImpl) action).toRepositoryAction();
 		return from(a);
 	}
 
+	/**
+	 * Converts repository action metadata into a concrete fluent action builder.
+	 *
+	 * @param action
+	 *            the repository action metadata to convert
+	 * @param <T>
+	 *            the concrete fluent action type
+	 * @return a fluent builder that wraps the supplied metadata
+	 * @throws IllegalStateException
+	 *             if the action type is not supported
+	 */
 	@SuppressWarnings("unchecked")
 	public static <T extends FluentAction<T>> T from(ActionMetaData action) {
 		if (action instanceof DefaultsAction defaults) {
@@ -97,59 +133,127 @@ public abstract class FluentAction<T extends FluentAction<T>> {
 		throw new IllegalStateException(action + " not catered for");
 	}
 
+	/**
+	 * Sets the action name.
+	 *
+	 * @param name
+	 *            the action name
+	 * @return this builder
+	 */
 	@SuppressWarnings("unchecked")
 	public T name(String name) {
 		get().setName(name);
 		return (T) this;
 	}
 
+	/**
+	 * Sets the display label shown for the action.
+	 *
+	 * @param displayName
+	 *            the display label
+	 * @return this builder
+	 */
 	@SuppressWarnings("unchecked")
 	public T displayName(String displayName) {
 		get().setDisplayName(displayName);
 		return (T) this;
 	}
 
+	/**
+	 * Sets the tooltip text for the action.
+	 *
+	 * @param toolTip
+	 *            the tooltip text
+	 * @return this builder
+	 */
 	@SuppressWarnings("unchecked")
 	public T toolTip(String toolTip) {
 		get().setToolTip(toolTip);
 		return (T) this;
 	}
 
+	/**
+	 * Sets the icon resource path used for the action.
+	 *
+	 * @param relativeIconFileName
+	 *            the icon file path relative to the configured icon root
+	 * @return this builder
+	 */
 	@SuppressWarnings("unchecked")
 	public T relativeIconFileName(String relativeIconFileName) {
 		get().setRelativeIconFileName(relativeIconFileName);
 		return (T) this;
 	}
 
+	/**
+	 * Sets the CSS class for icon rendering.
+	 *
+	 * @param iconStyleClass
+	 *            the CSS class to apply to the action icon
+	 * @return this builder
+	 */
 	@SuppressWarnings("unchecked")
 	public T iconStyleClass(String iconStyleClass) {
 		get().setIconStyleClass(iconStyleClass);
 		return (T) this;
 	}
 
+	/**
+	 * Sets the user confirmation text displayed before action execution.
+	 *
+	 * @param confirmationText
+	 *            the confirmation prompt text
+	 * @return this builder
+	 */
 	@SuppressWarnings("unchecked")
 	public T confirmationText(String confirmationText) {
 		get().setConfirmationText(confirmationText);
 		return (T) this;
 	}
 
+	/**
+	 * Sets the name of the condition controlling whether the action is disabled.
+	 *
+	 * @param disabledConditionName
+	 *            the condition name used to compute disabled state
+	 * @return this builder
+	 */
 	@SuppressWarnings("unchecked")
 	public T disabledConditionName(String disabledConditionName) {
 		get().setDisabledConditionName(disabledConditionName);
 		return (T) this;
 	}
 
+	/**
+	 * Sets the name of the condition controlling whether the action is hidden.
+	 *
+	 * @param invisibleConditionName
+	 *            the condition name used to compute visibility
+	 * @return this builder
+	 */
 	@SuppressWarnings("unchecked")
 	public T invisibleConditionName(String invisibleConditionName) {
 		get().setInvisibleConditionName(invisibleConditionName);
 		return (T) this;
 	}
 
+	/**
+	 * Adds or replaces an action property entry.
+	 *
+	 * @param k
+	 *            the property key
+	 * @param v
+	 *            the property value
+	 * @return this builder
+	 */
 	@SuppressWarnings("unchecked")
 	public T putProperty(String k, String v) {
 		get().getProperties().put(k, v);
 		return (T) this;
 	}
 
+	/**
+	 * Returns the wrapped repository action instance.
+	 */
 	public abstract ActionMetaData get();
 }

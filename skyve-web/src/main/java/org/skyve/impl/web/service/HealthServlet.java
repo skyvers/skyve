@@ -34,16 +34,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
- * Returns a JSON response regarding the health of the relevant Skyve system components, or a 404 if turned off in the JSON.
- * The response is cached for the JSON configured number of seconds to alleviate denial of service attacks.
- * <br/>
- * The way to test using this service is...
- * <ol>
- * <li>Can I hit it and get a response.</li>
- * <li>Either parse the JSON response to evaluate or string search for "error".</li>
- * </ol>
- * 
- * @author mike
+ * Reports runtime health for core Skyve subsystems as a JSON payload.
+ *
+ * <p>The response includes status probes for persistence, configured data stores, repository,
+ * add-ins, content manager, job scheduler, caching, and startup uptime. A configurable response
+ * cache window is used to reduce repeated probe cost under frequent health polling.
+ *
+ * <p>Side effects: may open and rollback datastore and persistence connections during probes,
+ * updates static cached response state, and writes probe outcomes to application logs.
  */
 public class HealthServlet extends HttpServlet {
 	private static final long serialVersionUID = -509208309881530817L;
@@ -55,6 +53,17 @@ public class HealthServlet extends HttpServlet {
 	// The thread-safe millis at caching instant - used to determine whether to use the cached response or not
 	private static AtomicLong responseInstant = new AtomicLong(Long.MIN_VALUE);
 	
+	/**
+	 * Returns the current health payload, using the cached payload when still within cache TTL.
+	 *
+	 * <p>Response semantics: returns {@code 404} when health checks are disabled, otherwise returns
+	 * {@code 200} with a JSON payload.
+	 *
+	 * @param request inbound servlet request
+	 * @param response outbound servlet response
+	 * @throws ServletException when servlet processing fails
+	 * @throws IOException when writing to the response stream fails
+	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)

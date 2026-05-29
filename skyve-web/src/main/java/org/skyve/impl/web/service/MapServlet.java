@@ -88,6 +88,17 @@ public class MapServlet extends HttpServlet {
 	private static final String NORTH_EAST_NAME = "_ne";
 	private static final String SOUTH_WEST_NAME = "_sw";
 	
+	/**
+	 * Resolves map request mode and returns the corresponding geometry payload as JSON.
+	 *
+	 * <p>Request routing: when {@code query} is present it executes query mode; otherwise when
+	 * {@code modelName} is present it executes model mode; otherwise it executes collection mode.
+	 *
+	 * @param request inbound servlet request containing map model/query parameters
+	 * @param response outbound servlet response receiving geometry JSON
+	 * @throws ServletException when servlet container processing fails
+	 * @throws IOException when writing to the response stream fails
+	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)

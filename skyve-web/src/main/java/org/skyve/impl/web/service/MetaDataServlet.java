@@ -331,6 +331,7 @@ public class MetaDataServlet extends HttpServlet {
 		dataSourceJson.append("{");
 		
 		new MenuRenderer(uxui, chosenModuleName) {
+			/** {@inheritDoc} */
 			@Override
 			public void renderModuleMenu(Menu menu, Module menuModule, boolean open) {
 				menuJson.append("{\"module\":\"").append(OWASP.escapeJsonString(menuModule.getName()));
@@ -338,11 +339,13 @@ public class MetaDataServlet extends HttpServlet {
 				menuJson.append("\",\"open\":").append(open).append(",\"menu\":[");
 			}
 
+			/** {@inheritDoc} */
 			@Override
 			public void renderMenuGroup(MenuGroup group, Module menuModule) {
 				menuJson.append("{\"group\":\"").append(OWASP.escapeJsonString(group.getLocalisedName())).append("\",\"items\":[");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderCalendarItem(CalendarItem item,
 											Module menuModule,
@@ -373,6 +376,7 @@ public class MetaDataServlet extends HttpServlet {
 				addDataSource(menuModule, itemDocument, item);
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderEditItem(EditItem item,
 										Module menuModule,
@@ -390,12 +394,14 @@ public class MetaDataServlet extends HttpServlet {
 				menuJson.append("\",\"document\":\"").append(itemDocument.getName()).append("\"},");
 			}
 
+			/** {@inheritDoc} */
 			@Override
 			public void renderLinkItem(LinkItem item, Module menuModule, boolean relative, String absoluteHref) {
 				menuJson.append("{\"link\":\"").append(OWASP.escapeJsonString(item.getLocalisedName()));
 				menuJson.append("\",\"href\":\"").append(absoluteHref).append("\"},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderListItem(ListItem item,
 										Module menuModule,
@@ -424,6 +430,7 @@ public class MetaDataServlet extends HttpServlet {
 				addDataSource(menuModule, itemDocument, item);
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderMapItem(MapItem item,
 										Module menuModule,
@@ -453,6 +460,7 @@ public class MetaDataServlet extends HttpServlet {
 				addDataSource(menuModule, itemDocument, item);
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderTreeItem(TreeItem item,
 										Module menuModule,
@@ -481,12 +489,14 @@ public class MetaDataServlet extends HttpServlet {
 				addDataSource(menuModule, itemDocument, item);
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderedMenuGroup(MenuGroup group, Module menuModule) {
 				menuJson.setLength(menuJson.length() - 1); // remove trailing comma
 				menuJson.append("]},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderedModuleMenu(Menu menu, Module menuModule, boolean open) {
 				menuJson.setLength(menuJson.length() - 1); // remove trailing comma
@@ -792,6 +802,7 @@ public class MetaDataServlet extends HttpServlet {
 		View editView = document.getView(uxui, c, ViewType.edit.toString());
 		
 		ViewRenderer vr = new ViewRenderer(user, module, document, editView, uxui) {
+			/** {@inheritDoc} */
 			@Override
 			public void renderView(String icon16x16Url, String icon32x32Url) {
 				result.append("{\"type\":\"view\",\"name\":\"");
@@ -842,6 +853,7 @@ public class MetaDataServlet extends HttpServlet {
 				processContainer();
 			}
 
+			/** {@inheritDoc} */
 			@Override
 			public void renderedView(String icon16x16Url, String icon32x32Url) {
 				if (view.getSidebar() == null) {
@@ -858,6 +870,7 @@ public class MetaDataServlet extends HttpServlet {
 				result.append('}');
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderVBox(String borderTitle, VBox vbox) {
 				result.append("{\"type\":\"vbox\"");
@@ -878,6 +891,7 @@ public class MetaDataServlet extends HttpServlet {
 				processContainer();
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderedVBox(String borderTitle, VBox vbox) {
 				processedContainer(vbox);
@@ -885,6 +899,7 @@ public class MetaDataServlet extends HttpServlet {
 				result.append("},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderHBox(String borderTitle, HBox hbox) {
 				result.append("{\"type\":\"hbox\"");
@@ -905,6 +920,7 @@ public class MetaDataServlet extends HttpServlet {
 				processContainer();
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderedHBox(String title, HBox hbox) {
 				processedContainer(hbox);
@@ -912,6 +928,7 @@ public class MetaDataServlet extends HttpServlet {
 				result.append("},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderTabPane(TabPane tabPane) {
 				result.append("{\"type\":\"tabPane\"");
@@ -927,12 +944,14 @@ public class MetaDataServlet extends HttpServlet {
 				result.append(",\"tabs\":[");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderedTabPane(TabPane tabPane) {
 				result.setLength(result.length() - 1); // remove last comma
 				result.append("]},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderTab(String title, String icon16x16Url, Tab tab) {
 				result.append("{\"type\":\"tab\",\"title\":\"");
@@ -950,6 +969,7 @@ public class MetaDataServlet extends HttpServlet {
 				processContainer();
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderedTab(String title, String icon16x16Url, Tab tab) {
 				processedContainer(tab);
@@ -957,6 +977,7 @@ public class MetaDataServlet extends HttpServlet {
 				result.append("},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderForm(String borderTitle, Form form) {
 				result.append("{\"type\":\"form\"");
@@ -1012,17 +1033,20 @@ public class MetaDataServlet extends HttpServlet {
 				result.append("],\"rows\":[");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderedForm(String borderTitle, Form form) {
 				result.setLength(result.length() - 1); // remove last comma
 				result.append("]},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderFormColumn(FormColumn column) {
 				// handled in renderForm()
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderFormRow(FormRow row) {
 				result.append("{\"type\":\"row\"");
@@ -1030,12 +1054,14 @@ public class MetaDataServlet extends HttpServlet {
 				result.append(",\"items\":[");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderedFormRow(FormRow row) {
 				result.setLength(result.length() - 1); // remove last comma
 				result.append("]},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderFormItem(String label,
 										String requiredMessage,
@@ -1077,6 +1103,7 @@ public class MetaDataServlet extends HttpServlet {
 				result.append(",\"widget\":");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderedFormItem(String label,
 											String requiredMessage,
@@ -1087,6 +1114,7 @@ public class MetaDataServlet extends HttpServlet {
 				result.append("},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderFormTextField(TextField text) {
 				result.append("{\"type\":\"textField\"");
@@ -1109,11 +1137,13 @@ public class MetaDataServlet extends HttpServlet {
 				processDecorated(text);
 			}
 
+			/** {@inheritDoc} */
 			@Override
 			public void renderedFormTextField(TextField text) {
 				// nothing to see here
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderFormTextArea(TextArea text) {
 				result.append("{\"type\":\"textArea\"");
@@ -1133,11 +1163,13 @@ public class MetaDataServlet extends HttpServlet {
 				result.append('}');
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderedFormTextArea(TextArea text) {
 				// nothing to see here
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderFormZoomIn(String label,
 											String iconUrl,
@@ -1169,6 +1201,7 @@ public class MetaDataServlet extends HttpServlet {
 				result.append('}');
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderFormStaticImage(String fileUrl, StaticImage image) {
 				result.append("{\"type\":\"staticImage\",\"fileUrl\":\"");
@@ -1179,6 +1212,7 @@ public class MetaDataServlet extends HttpServlet {
 				result.append('}');
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderFormSpinner(Spinner spinner) {
 				result.append("{\"type\":\"spinner\"");
@@ -1198,11 +1232,13 @@ public class MetaDataServlet extends HttpServlet {
 				result.append('}');
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderedFormSpinner(Spinner spinner) {
 				// nothing to see here
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderFormSpacer(Spacer spacer) {
 				result.append("{\"type\":\"spacer\"");
@@ -1212,6 +1248,7 @@ public class MetaDataServlet extends HttpServlet {
 				result.append('}');
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderFormSlider(Slider slider) {
 				result.append("{\"type\":\"slider\"");
@@ -1241,11 +1278,13 @@ public class MetaDataServlet extends HttpServlet {
 				result.append('}');
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderedFormSlider(Slider slider) {
 				// nothing to see here
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderFormRichText(RichText text) {
 				result.append("{\"type\":\"richText\"");
@@ -1259,11 +1298,13 @@ public class MetaDataServlet extends HttpServlet {
 				result.append('}');
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderedFormRichText(RichText text) {
 				// nothing to see here
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderFormRadio(Radio radio) {
 				result.append("{\"type\":\"radio\"");
@@ -1277,11 +1318,13 @@ public class MetaDataServlet extends HttpServlet {
 				result.append('}');
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderedFormRadio(Radio radio) {
 				// nothing to see here
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderFormProgressBar(ProgressBar progressBar) {
 				result.append("{\"type\":\"progressBar\"");
@@ -1292,6 +1335,7 @@ public class MetaDataServlet extends HttpServlet {
 				result.append('}');
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderFormPassword(Password password) {
 				result.append("{\"type\":\"password\"");
@@ -1301,11 +1345,13 @@ public class MetaDataServlet extends HttpServlet {
 				result.append('}');
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderedFormPassword(Password password) {
 				// nothing to see here
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderFormLookupDescription(MetaDataQueryDefinition query,
 														boolean canCreate,
@@ -1357,6 +1403,7 @@ public class MetaDataServlet extends HttpServlet {
 				result.append('}');
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderedFormLookupDescription(MetaDataQueryDefinition query,
 														boolean canCreate,
@@ -1366,6 +1413,7 @@ public class MetaDataServlet extends HttpServlet {
 				// nothing to see here
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderFormLink(String value, Link link) {
 				result.append("{\"type\":\"link\"");
@@ -1376,12 +1424,14 @@ public class MetaDataServlet extends HttpServlet {
 				if (linkReference != null) {
 					result.append(",\"reference\":{");
 					new ReferenceProcessor() {
+						/** {@inheritDoc} */
 						@Override
 						public void processResourceReference(ResourceReference reference) {
 							result.append("\"type\":\"resourceRef\",\"relativeFile\":\"");
 							result.append(OWASP.escapeJsonString(reference.getRelativeFile())).append('"');
 						}
 						
+						/** {@inheritDoc} */
 						@Override
 						public void processReportReference(ReportReference reference) {
 							result.append("\"type\":\"reportRef\"");
@@ -1404,24 +1454,28 @@ public class MetaDataServlet extends HttpServlet {
 							MetaDataServlet.processParameterizable(reference, result);
 						}
 						
+						/** {@inheritDoc} */
 						@Override
 						public void processQueryListViewReference(QueryListViewReference reference) {
 							result.append("\"type\":\"queryListViewRef\",\"queryName\":\"");
 							result.append(reference.getQueryName()).append('"');
 						}
 						
+						/** {@inheritDoc} */
 						@Override
 						public void processImplicitActionReference(ImplicitActionReference reference) {
 							result.append("\"type\":\"implicitActionRef\",\"implicitActionname\":\"");
 							result.append(reference.getImplicitActionName()).append('"');
 						}
 						
+						/** {@inheritDoc} */
 						@Override
 						public void processExternalReference(ExternalReference reference) {
 							result.append("\"type\":\"externalRef\",\"href\":\"");
 							result.append(reference.getHref()).append('"');
 						}
 						
+						/** {@inheritDoc} */
 						@Override
 						public void processEditViewReference(EditViewReference reference) {
 							result.append("\"type\":\"editViewRef\"");
@@ -1439,6 +1493,7 @@ public class MetaDataServlet extends HttpServlet {
 							}
 						}
 						
+						/** {@inheritDoc} */
 						@Override
 						public void processDefaultListViewReference(DefaultListViewReference reference) {
 							result.append("\"type\":\"listViewRef\",\"moduleName\":\"");
@@ -1446,12 +1501,14 @@ public class MetaDataServlet extends HttpServlet {
 							result.append(reference.getDocumentName()).append('"');
 						}
 						
+						/** {@inheritDoc} */
 						@Override
 						public void processContentReference(ContentReference reference) {
 							result.append("\"type\":\"contentRef\",\"binding\":\"");
 							result.append(reference.getBinding()).append('"');
 						}
 						
+						/** {@inheritDoc} */
 						@Override
 						public void processActionReference(ActionReference reference) {
 							result.append("\"type\":\"actionRef\",\"actionName\":\"");
@@ -1470,6 +1527,7 @@ public class MetaDataServlet extends HttpServlet {
 				result.append('}');
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderFormLabel(String value, boolean boundValue, Label label) {
 				result.append("{\"type\":\"label\"");
@@ -1492,12 +1550,14 @@ public class MetaDataServlet extends HttpServlet {
 				result.append('}');
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderFormInject(Inject inject) {
 				// Unused so just stub
 				result.append("{\"type\":\"inject\"}");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderFormHTML(HTML html) {
 				result.append("{\"type\":\"html\"");
@@ -1511,6 +1571,7 @@ public class MetaDataServlet extends HttpServlet {
 				result.append('}');
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderFormGeometryMap(GeometryMap geometry) {
 				result.append("{\"type\":\"geometryMap\"");
@@ -1524,11 +1585,13 @@ public class MetaDataServlet extends HttpServlet {
 				result.append('}');
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderedFormGeometryMap(GeometryMap geometry) {
 				// nothing to see here
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderFormGeometry(Geometry geometry) {
 				result.append("{\"type\":\"geometry\"");
@@ -1542,11 +1605,13 @@ public class MetaDataServlet extends HttpServlet {
 				result.append('}');
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderedFormGeometry(Geometry geometry) {
 				// nothing to see here
 			}
 
+			/** {@inheritDoc} */
 			@Override
 			public void renderFormDialogButton(String label, DialogButton button) {
 				result.append("{\"type\":\"dialogButton\"");
@@ -1571,6 +1636,7 @@ public class MetaDataServlet extends HttpServlet {
 				result.append('}');
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderFormContentSignature(ContentSignature signature) {
 				result.append("{\"type\":\"contentSignature\"");
@@ -1588,6 +1654,7 @@ public class MetaDataServlet extends HttpServlet {
 				result.append('}');
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderFormContentLink(String value, ContentLink link) {
 				result.append("{\"type\":\"contentLink\"");
@@ -1602,6 +1669,7 @@ public class MetaDataServlet extends HttpServlet {
 				result.append('}');
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderFormContentImage(ContentImage image) {
 				result.append("{\"type\":\"contentImage\"");
@@ -1616,6 +1684,7 @@ public class MetaDataServlet extends HttpServlet {
 				result.append('}');
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderFormCombo(Combo combo) {
 				result.append("{\"type\":\"combo\"");
@@ -1625,11 +1694,13 @@ public class MetaDataServlet extends HttpServlet {
 				result.append('}');
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderedFormCombo(Combo combo) {
 				// nothing to see here
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderFormColourPicker(ColourPicker colour) {
 				result.append("{\"type\":\"colour\"");
@@ -1639,11 +1710,13 @@ public class MetaDataServlet extends HttpServlet {
 				result.append('}');
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderedFormColourPicker(ColourPicker colour) {
 				// nothing to see here
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderFormCheckBox(CheckBox checkBox) {
 				result.append("{\"type\":\"checkBox\"");
@@ -1657,11 +1730,13 @@ public class MetaDataServlet extends HttpServlet {
 				result.append('}');
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderedFormCheckBox(CheckBox checkBox) {
 				// nothing to see here
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderFormButton(String name,
 											String label,
@@ -1704,6 +1779,7 @@ public class MetaDataServlet extends HttpServlet {
 				result.append('}');
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderFormBlurb(String markup, Blurb blurb) {
 				result.append("{\"type\":\"blurb\"");
@@ -1721,6 +1797,7 @@ public class MetaDataServlet extends HttpServlet {
 				result.append('}');
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderDataGrid(String title, DataGrid grid) {
 				result.append("{\"type\":\"dataGrid\"");
@@ -1766,6 +1843,7 @@ public class MetaDataServlet extends HttpServlet {
 				result.append(",\"columns\":[");
 			}
 
+			/** {@inheritDoc} */
 			@Override
 			public void renderDataGridContainerColumn(String title, DataGridContainerColumn column) {
 				result.append("{\"type\":\"containerColumn\"");
@@ -1781,37 +1859,44 @@ public class MetaDataServlet extends HttpServlet {
 				result.append(",\"widgets\":[");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderContainerColumnStaticImage(String fileUrl, StaticImage image) {
 				renderStaticImage(fileUrl, image);
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderContainerColumnLink(String value, Link link) {
 				renderLink(value, link);
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderContainerColumnLabel(String value, Label label) {
 				renderLabel(value, false, label);
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderContainerColumnDynamicImage(DynamicImage image) {
 				renderDynamicImage(image);
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderContainerColumnContentImage(ContentImage image) {
 				renderFormContentImage(image);
 				result.append(',');
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderContainerColumnBlurb(String markup, Blurb blurb) {
 				renderBlurb(markup, blurb);
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderedDataGridContainerColumn(String title, DataGridContainerColumn column) {
 				result.setLength(result.length() - 1); // remove last comma
@@ -1820,6 +1905,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			WidgetReference input = null;
 
+			/** {@inheritDoc} */
 			@Override
 			public void renderDataGridBoundColumn(String title, DataGridBoundColumn column) {
 				result.append("{\"type\":\"boundColumn\"");
@@ -1838,6 +1924,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderBoundColumnTextField(TextField text) {
 				if (input != null) {
@@ -1845,6 +1932,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderedBoundColumnTextField(TextField text) {
 				if (input != null) {
@@ -1852,6 +1940,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderBoundColumnTextArea(TextArea text) {
 				if (input != null) {
@@ -1859,6 +1948,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderedBoundColumnTextArea(TextArea text) {
 				if (input != null) {
@@ -1866,6 +1956,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderBoundColumnSpinner(Spinner spinner) {
 				if (input != null) {
@@ -1873,6 +1964,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderedBoundColumnSpinner(Spinner spinner) {
 				if (input != null) {
@@ -1880,6 +1972,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderBoundColumnSlider(Slider slider) {
 				if (input != null) {
@@ -1887,6 +1980,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderedBoundColumnSlider(Slider slider) {
 				if (input != null) {
@@ -1894,6 +1988,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderBoundColumnRichText(RichText text) {
 				if (input != null) {
@@ -1901,6 +1996,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderedBoundColumnRichText(RichText text) {
 				if (input != null) {
@@ -1908,6 +2004,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderBoundColumnRadio(Radio radio) {
 				if (input != null) {
@@ -1915,6 +2012,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderedBoundColumnRadio(Radio radio) {
 				if (input != null) {
@@ -1922,6 +2020,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderBoundColumnPassword(Password password) {
 				if (input != null) {
@@ -1929,6 +2028,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderedBoundColumnPassword(Password password) {
 				if (input != null) {
@@ -1936,6 +2036,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderBoundColumnLookupDescription(MetaDataQueryDefinition query,
 															boolean canCreate,
@@ -1947,6 +2048,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderedBoundColumnLookupDescription(MetaDataQueryDefinition query,
 																boolean canCreate,
@@ -1958,6 +2060,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderBoundColumnHTML(HTML html) {
 				if (input != null) {
@@ -1965,6 +2068,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderBoundColumnGeometry(Geometry geometry) {
 				if (input != null) {
@@ -1972,6 +2076,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderedBoundColumnGeometry(Geometry geometry) {
 				if (input != null) {
@@ -1979,6 +2084,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderBoundColumnContentLink(String value, ContentLink link) {
 				if (input != null) {
@@ -1986,6 +2092,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderBoundColumnContentImage(ContentImage image) {
 				if (input != null) {
@@ -1993,6 +2100,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderBoundColumnCombo(Combo combo) {
 				if (input != null) {
@@ -2000,6 +2108,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderedBoundColumnCombo(Combo combo) {
 				if (input != null) {
@@ -2007,6 +2116,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderBoundColumnColourPicker(ColourPicker colour) {
 				if (input != null) {
@@ -2014,6 +2124,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderedBoundColumnColourPicker(ColourPicker colour) {
 				if (input != null) {
@@ -2021,6 +2132,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderBoundColumnCheckBox(CheckBox checkBox) {
 				if (input != null) {
@@ -2028,6 +2140,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 
+			/** {@inheritDoc} */
 			@Override
 			public void renderedBoundColumnCheckBox(CheckBox checkBox) {
 				if (input != null) {
@@ -2035,18 +2148,21 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 
+			/** {@inheritDoc} */
 			@Override
 			public void renderedDataGridBoundColumn(String title, DataGridBoundColumn column) {
 				result.append("},");
 				input = null;
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderedDataGrid(String title, DataGrid grid) {
 				result.setLength(result.length() - 1); // remove last comma
 				result.append("]},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderDataRepeater(String title, DataRepeater repeater) {
 				result.append("{\"type\":\"dataRepeater\"");
@@ -2069,32 +2185,38 @@ public class MetaDataServlet extends HttpServlet {
 				result.append(",\"columns\":[");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderDataRepeaterContainerColumn(String title, DataGridContainerColumn column) {
 				renderDataGridContainerColumn(title, column);
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderedDataRepeaterContainerColumn(String title, DataGridContainerColumn column) {
 				renderedDataGridContainerColumn(title, column);
 			}
 
+			/** {@inheritDoc} */
 			@Override
 			public void renderDataRepeaterBoundColumn(String title, DataGridBoundColumn column) {
 				renderDataGridBoundColumn(title, column);
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderedDataRepeaterBoundColumn(String title, DataGridBoundColumn column) {
 				renderedDataGridBoundColumn(title, column);
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderedDataRepeater(String title, DataRepeater repeater) {
 				result.setLength(result.length() - 1); // remove last comma
 				result.append("]},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderListGrid(String title, boolean aggregateQuery, ListGrid grid) {
 				result.append("{\"type\":\"listGrid\"");
@@ -2169,6 +2291,7 @@ public class MetaDataServlet extends HttpServlet {
 				processDecorated(grid);
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderListGridProjectedColumn(MetaDataQueryProjectedColumn column) {
 				result.append("{\"type\":\"column\"");
@@ -2184,6 +2307,7 @@ public class MetaDataServlet extends HttpServlet {
 				result.append("},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderListGridContentColumn(MetaDataQueryContentColumn column) {
 				result.append("{\"type\":\"contentColumn\"");
@@ -2203,12 +2327,14 @@ public class MetaDataServlet extends HttpServlet {
 				result.append("},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderedListGrid(String title, boolean aggregateQuery, ListGrid grid) {
 				result.setLength(result.length() - 1); // remove last comma
 				result.append("]},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderListRepeater(String title, ListRepeater repeater) {
 				result.append("{\"type\":\"listRepeater\"");
@@ -2228,22 +2354,26 @@ public class MetaDataServlet extends HttpServlet {
 				result.append(",\"columns\":[");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderListRepeaterProjectedColumn(MetaDataQueryProjectedColumn column) {
 				renderListGridProjectedColumn(column);
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderListRepeaterContentColumn(MetaDataQueryContentColumn column) {
 				renderListGridContentColumn(column);
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderedListRepeater(String title, ListRepeater repeater) {
 				result.setLength(result.length() - 1); // remove last comma
 				result.append("]},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderTreeGrid(String title, TreeGrid grid) {
 				result.append("{\"type\":\"treeGrid\"");
@@ -2255,22 +2385,26 @@ public class MetaDataServlet extends HttpServlet {
 				result.append(",\"columns\":[");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderTreeGridProjectedColumn(MetaDataQueryProjectedColumn column) {
 				renderListGridProjectedColumn(column);
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderTreeGridContentColumn(MetaDataQueryContentColumn column) {
 				renderListGridContentColumn(column);
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderedTreeGrid(String title, TreeGrid grid) {
 				result.setLength(result.length() - 1); // remove last comma
 				result.append("]},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderListMembership(String candidatesHeading, String membersHeading, ListMembership membership) {
 				result.append("{\"type\":\"listMembership\"");
@@ -2282,11 +2416,13 @@ public class MetaDataServlet extends HttpServlet {
 				result.append("},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderedListMembership(String candidatesHeading, String membersHeading, ListMembership membership) {
 				// nothing to see here
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderCheckMembership(CheckMembership membership) {
 				result.append("{\"type\":\"checkMembership\"");
@@ -2295,29 +2431,34 @@ public class MetaDataServlet extends HttpServlet {
 				result.append("},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderedCheckMembership(CheckMembership membership) {
 				// nothing to see here
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderStaticImage(String fileUrl, StaticImage image) {
 				renderFormStaticImage(fileUrl, image);
 				result.append(',');
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderSpacer(Spacer spacer) {
 				renderFormSpacer(spacer);
 				result.append(',');
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderZoomIn(String label, String iconUrl, String iconStyleClass, String toolTip, ZoomIn zoomIn) {
 				renderFormZoomIn(label, iconUrl, iconStyleClass, toolTip, zoomIn);
 				result.append(',');
 			}
 						
+			/** {@inheritDoc} */
 			@Override
 			public void renderMap(MapDisplay map) {
 				result.append("{\"type\":\"map\"");
@@ -2343,24 +2484,28 @@ public class MetaDataServlet extends HttpServlet {
 				result.append("},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderLink(String value, Link link) {
 				renderFormLink(value, link);
 				result.append(',');
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderLabel(String value, boolean boundValue, Label label) {
 				renderFormLabel(value, boundValue, label);
 				result.append(',');
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderInject(Inject inject) {
 				renderFormInject(inject);
 				result.append(',');
 			}
 
+			/** {@inheritDoc} */
 			@Override
 			public void renderDynamicImage(DynamicImage image) {
 				result.append("{\"type\":\"dynamicImage\"");
@@ -2383,12 +2528,14 @@ public class MetaDataServlet extends HttpServlet {
 				result.append("},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderDialogButton(String label, DialogButton button) {
 				renderFormDialogButton(label, button);
 				result.append(',');
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderComparison(Comparison comparison) {
 				result.append("{\"type\":\"comparison\"");
@@ -2402,6 +2549,7 @@ public class MetaDataServlet extends HttpServlet {
 				result.append("},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderChart(Chart chart) {
 				result.append("{\"type\":\"chart\",\"chartType\":\"").append(chart.getType()).append('"');
@@ -2509,6 +2657,7 @@ public class MetaDataServlet extends HttpServlet {
 				result.append("},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderButton(String name,
 										String label,
@@ -2522,12 +2671,14 @@ public class MetaDataServlet extends HttpServlet {
 				result.append(',');
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderBlurb(String markup, Blurb blurb) {
 				renderFormBlurb(markup, blurb);
 				result.append(',');
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderZoomOutAction(String name,
 												String label,
@@ -2541,6 +2692,7 @@ public class MetaDataServlet extends HttpServlet {
 				actionsJSON.append("},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderUploadAction(String name,
 											String label,
@@ -2554,6 +2706,7 @@ public class MetaDataServlet extends HttpServlet {
 				actionsJSON.append("},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderSaveAction(String name,
 											String label,
@@ -2567,6 +2720,7 @@ public class MetaDataServlet extends HttpServlet {
 				actionsJSON.append("},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderReportAction(String name,
 											String label,
@@ -2580,6 +2734,7 @@ public class MetaDataServlet extends HttpServlet {
 				actionsJSON.append("},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderRemoveAction(String name,
 											String label,
@@ -2594,6 +2749,7 @@ public class MetaDataServlet extends HttpServlet {
 				actionsJSON.append("},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderPrintAction(String name,
 											String label,
@@ -2607,6 +2763,7 @@ public class MetaDataServlet extends HttpServlet {
 				actionsJSON.append("},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderOKAction(String name,
 										String label,
@@ -2620,6 +2777,7 @@ public class MetaDataServlet extends HttpServlet {
 				actionsJSON.append("},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderNewAction(String name,
 											String label,
@@ -2633,6 +2791,7 @@ public class MetaDataServlet extends HttpServlet {
 				actionsJSON.append("},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderNavigateAction(String name,
 												String label,
@@ -2646,6 +2805,7 @@ public class MetaDataServlet extends HttpServlet {
 				actionsJSON.append("},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderEditAction(String name,
 											String label,
@@ -2659,6 +2819,7 @@ public class MetaDataServlet extends HttpServlet {
 				actionsJSON.append("},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderDownloadAction(String name,
 												String label,
@@ -2672,6 +2833,7 @@ public class MetaDataServlet extends HttpServlet {
 				actionsJSON.append("},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderDeleteAction(String name,
 											String label,
@@ -2685,6 +2847,7 @@ public class MetaDataServlet extends HttpServlet {
 				actionsJSON.append("},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderCustomAction(String name,
 											String label,
@@ -2698,6 +2861,7 @@ public class MetaDataServlet extends HttpServlet {
 				actionsJSON.append("},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderCancelAction(String name,
 											String label,
@@ -2711,6 +2875,7 @@ public class MetaDataServlet extends HttpServlet {
 				actionsJSON.append("},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderBizImportAction(String name,
 												String label,
@@ -2724,6 +2889,7 @@ public class MetaDataServlet extends HttpServlet {
 				actionsJSON.append("},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderBizExportAction(String name,
 												String label,
@@ -2737,6 +2903,7 @@ public class MetaDataServlet extends HttpServlet {
 				actionsJSON.append("},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void renderAddAction(String name,
 											String label,
@@ -2750,11 +2917,13 @@ public class MetaDataServlet extends HttpServlet {
 				actionsJSON.append("},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void visitParameter(Parameter parameter, boolean parentVisible, boolean parentEnabled) {
 				// handled in processParameterizable()
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void visitFilterParameter(FilterParameter parameter, boolean parentVisible, boolean parentEnabled) {
 				// handled in processFilterable()
@@ -2767,6 +2936,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void visitOnSelectedEventHandler(Selectable selectable, boolean parentVisible, boolean parentEnabled) {
 				postProcessListColumns();
@@ -2780,6 +2950,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void visitedOnSelectedEventHandler(Selectable selectable, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = selectable.getSelectedActions();
@@ -2789,6 +2960,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 
+			/** {@inheritDoc} */
 			@Override
 			public void visitOnRemovedEventHandler(Removable removable, boolean parentVisible, boolean parentEnabled) {
 				postProcessListColumns();
@@ -2798,6 +2970,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void visitedOnRemovedEventHandler(Removable removable, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = removable.getRemovedActions();
@@ -2807,6 +2980,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void visitOnFocusEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = blurable.getFocusActions();
@@ -2815,6 +2989,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void visitedOnFocusEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = blurable.getFocusActions();
@@ -2824,6 +2999,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void visitOnBlurEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = blurable.getBlurActions();
@@ -2832,6 +3008,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void visitedOnBlurEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = blurable.getBlurActions();
@@ -2841,6 +3018,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void visitOnEditedEventHandler(Editable editable, boolean parentVisible, boolean parentEnabled) {
 				postProcessListColumns();
@@ -2850,6 +3028,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void visitedOnEditedEventHandler(Editable editable, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = editable.getEditedActions();
@@ -2859,6 +3038,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void visitOnChangedEventHandler(Changeable changeable, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = changeable.getChangedActions();
@@ -2867,6 +3047,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void visitedOnChangedEventHandler(Changeable changeable, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = changeable.getChangedActions();
@@ -2876,6 +3057,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void visitOnAddedEventHandler(Addable addable, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = addable.getAddedActions();
@@ -2884,6 +3066,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void visitedOnAddedEventHandler(Addable addable, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = addable.getAddedActions();
@@ -2893,6 +3076,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 
+			/** {@inheritDoc} */
 			@Override
 			public void visitOnPickedEventHandler(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = lookup.getPickedActions();
@@ -2901,6 +3085,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void visitedOnPickedEventHandler(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = lookup.getPickedActions();
@@ -2910,6 +3095,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void visitOnClearedEventHandler(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = lookup.getClearedActions();
@@ -2918,6 +3104,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void visitedOnClearedEventHandler(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = lookup.getClearedActions();
@@ -2927,6 +3114,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void visitToggleVisibilityEventAction(ToggleVisibilityEventAction toggleVisibility,
 															boolean parentVisible,
@@ -2934,6 +3122,7 @@ public class MetaDataServlet extends HttpServlet {
 				result.append("{\"type\":\"toggleVisibility\"},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void visitToggleDisabledEventAction(ToggleDisabledEventAction toggleDisabled,
 														boolean parentVisible,
@@ -2941,6 +3130,7 @@ public class MetaDataServlet extends HttpServlet {
 				result.append("{\"type\":\"toggleDisabled\"},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void visitSetInvisibleEventAction(SetInvisibleEventAction setInvisible,
 														boolean parentVisible,
@@ -2948,6 +3138,7 @@ public class MetaDataServlet extends HttpServlet {
 				result.append("{\"type\":\"setInvisible\"},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void visitSetDisabledEventAction(SetDisabledEventAction setDisabled,
 														boolean parentVisible,
@@ -2955,6 +3146,7 @@ public class MetaDataServlet extends HttpServlet {
 				result.append("{\"type\":\"setDisabled\"},");
 			}
 			
+			/** {@inheritDoc} */
 			@Override
 			public void visitRerenderEventAction(RerenderEventAction rerender,
 													EventSource source,
@@ -2964,6 +3156,7 @@ public class MetaDataServlet extends HttpServlet {
 			}
 			
 			
+			/** {@inheritDoc} */
 			@Override
 			public void visitServerSideActionEventAction(Action action, ServerSideActionEventAction server) {
 				result.append("{\"type\":\"server\"},");
@@ -3463,6 +3656,7 @@ public class MetaDataServlet extends HttpServlet {
 				MetaDataServlet.processDecorated(action, actionsJSON);
 			}
 
+			/** {@inheritDoc} */
 			@Override
 			public void renderSidebar(Sidebar sidebar) {
 				result.setLength(result.length() - 1); // remove last comma from view.getContained() processing
@@ -3474,6 +3668,7 @@ public class MetaDataServlet extends HttpServlet {
 				processContainer();
 			}
 
+			/** {@inheritDoc} */
 			@Override
 			public void renderedSidebar(Sidebar sidebar) {
 				processedContainer(sidebar);

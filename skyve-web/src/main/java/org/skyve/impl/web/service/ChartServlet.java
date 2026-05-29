@@ -93,6 +93,18 @@ public class ChartServlet extends HttpServlet {
 	private static final String DATA_SOURCE_NAME = "ds";
 	private static final String BUILDER_NAME = "b";
 	
+	/**
+	 * Produces chart configuration JSON for the requested chart model.
+	 *
+	 * <p>Response semantics: always returns JSON with no-cache headers. When model resolution or
+	 * aggregation fails, the servlet returns an empty JSON response body rather than propagating raw
+	 * stack traces to the client.
+	 *
+	 * @param request inbound servlet request containing chart model parameters
+	 * @param response outbound servlet response receiving chart configuration JSON
+	 * @throws ServletException when the servlet container reports a request-processing failure
+	 * @throws IOException when writing to the response stream fails
+	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -140,6 +152,14 @@ public class ChartServlet extends HttpServlet {
 		}
 	}
 	
+	/**
+	 * Delegates POST chart requests to {@link #doGet(HttpServletRequest, HttpServletResponse)}.
+	 *
+	 * @param request inbound servlet request
+	 * @param response outbound servlet response
+	 * @throws ServletException when servlet processing fails
+	 * @throws IOException when writing to the response stream fails
+	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
