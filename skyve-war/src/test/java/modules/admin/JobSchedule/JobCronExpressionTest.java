@@ -9,7 +9,6 @@ import java.text.ParseException;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
-import org.skyve.domain.messages.DomainException;
 
 /**
  * Tests for JobCronExpression — pure Java, no H2 needed.
@@ -34,7 +33,7 @@ class JobCronExpressionTest {
 		JobCronExpression expr = new JobCronExpression("0 15 10 * * ?");
 		Set<Integer> minutes = expr.getMinutes();
 		assertNotNull(minutes);
-		assertTrue(minutes.contains(15), "Expected minute 15");
+		assertTrue(minutes.contains(Integer.valueOf(15)), "Expected minute 15");
 	}
 
 	@Test
@@ -43,7 +42,7 @@ class JobCronExpressionTest {
 		JobCronExpression expr = new JobCronExpression("0 0 10 * * ?");
 		Set<Integer> hours = expr.getHours();
 		assertNotNull(hours);
-		assertTrue(hours.contains(10), "Expected hour 10");
+		assertTrue(hours.contains(Integer.valueOf(10)), "Expected hour 10");
 	}
 
 	@Test
@@ -52,7 +51,7 @@ class JobCronExpressionTest {
 		JobCronExpression expr = new JobCronExpression("0 0 12 1 * ?");
 		Set<Integer> days = expr.getDaysOfMonth();
 		assertNotNull(days);
-		assertTrue(days.contains(1), "Expected day 1");
+		assertTrue(days.contains(Integer.valueOf(1)), "Expected day 1");
 	}
 
 	@Test
@@ -61,7 +60,7 @@ class JobCronExpressionTest {
 		JobCronExpression expr = new JobCronExpression("0 0 12 * 6 ?");
 		Set<Integer> months = expr.getMonths();
 		assertNotNull(months);
-		assertTrue(months.contains(6), "Expected month 6");
+		assertTrue(months.contains(Integer.valueOf(6)), "Expected month 6");
 	}
 
 	@Test

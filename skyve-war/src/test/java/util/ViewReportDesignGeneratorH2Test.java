@@ -22,7 +22,7 @@ import modules.test.domain.ArcOneToOne;
  *
  * <p>Running these tests in {@code skyve-war} means {@code CORE.getCustomer()}, impl-typed metadata
  * casts, and {@code UtilImpl.getAbsoluteBasePath()} all resolve without any production-code changes.
- * See {@code docs/test-patterns.md} — "This looks untestable without refactoring — check H2 first".
+ * See {@code docs/ai/test-patterns.md} — "This looks untestable without refactoring — check H2 first".
  */
 @SuppressWarnings("static-method")
 class ViewReportDesignGeneratorH2Test extends AbstractH2Test {

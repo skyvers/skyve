@@ -1,10 +1,17 @@
 package org.skyve.impl.report.freemarker;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+
+import java.io.InputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.xhtmlrenderer.pdf.ITextOutputDevice;
 
 @SuppressWarnings("static-method")
 class FreemarkerReportUtilTest {
@@ -58,5 +65,18 @@ class FreemarkerReportUtilTest {
 		FreemarkerReportUtil.addTemplate("ow", "v1");
 		FreemarkerReportUtil.addTemplate("ow", "v2");
 		assertTrue(FreemarkerReportUtil.removeTemplate("ow"));
+	}
+
+	@Test
+	void resourceLoaderUserAgentResolveAndOpenStreamHandlesUnknownUri() throws Exception {
+		Class<?> clazz = Class.forName("org.skyve.impl.report.freemarker.FreemarkerReportUtil$ResourceLoaderUserAgent");
+		Constructor<?> constructor = clazz.getDeclaredConstructor(ITextOutputDevice.class, int.class);
+		constructor.setAccessible(true);
+		Object userAgent = constructor.newInstance(mock(ITextOutputDevice.class), Integer.valueOf(1));
+
+		Method method = clazz.getDeclaredMethod("resolveAndOpenStream", String.class);
+		method.setAccessible(true);
+		InputStream result = (InputStream) method.invoke(userAgent, "missing://resource");
+		assertNull(result);
 	}
 }

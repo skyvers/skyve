@@ -24,6 +24,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.poi</groupId>
+			<version>${poi.version}</version>
 			<artifactId>poi-ooxml</artifactId>
 			<scope>compile</scope>
 		</dependency>
@@ -136,6 +137,12 @@
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-params</artifactId>
 			<version>${junit-jupiter.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish</groupId>
+			<artifactId>jakarta.faces</artifactId>
+			<version>${mojarra.version}</version>
 			<scope>test</scope>
 		</dependency>
 

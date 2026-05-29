@@ -2,9 +2,19 @@ package org.skyve.impl.archive.support;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.lang.reflect.Field;
 
 import org.junit.Test;
+import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
+import org.skyve.metadata.user.User;
 
 @SuppressWarnings("static-method")
 public class ArchiveUtilsTest {
@@ -76,4 +86,51 @@ public class ArchiveUtilsTest {
                 ArchiveUtils au = new ArchiveUtils();
                 assertNotNull(au);
         }
+
+	@Test
+	public void getDocumentResolvesFromCurrentUserCustomer() throws Exception {
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+
+		when(persistence.getUser()).thenReturn(user);
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("admin")).thenReturn(module);
+		when(module.getDocument(customer, "Audit")).thenReturn(document);
+
+		withThreadLocalPersistence(persistence, () -> {
+			assertSame(document, ArchiveUtils.getDocument("admin", "Audit"));
+		});
+	}
+
+	private interface ThrowingRunnable {
+		void run() throws Exception;
+	}
+
+	private static void withThreadLocalPersistence(AbstractPersistence persistence, ThrowingRunnable runnable)
+	throws Exception {
+		ThreadLocal<AbstractPersistence> threadLocal = getThreadLocalPersistence();
+		AbstractPersistence original = threadLocal.get();
+		try {
+			threadLocal.set(persistence);
+			runnable.run();
+		}
+		finally {
+			if (original == null) {
+				threadLocal.remove();
+			}
+			else {
+				threadLocal.set(original);
+			}
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private static ThreadLocal<AbstractPersistence> getThreadLocalPersistence() throws Exception {
+		Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
+		field.setAccessible(true);
+		return (ThreadLocal<AbstractPersistence>) field.get(null);
+	}
 }

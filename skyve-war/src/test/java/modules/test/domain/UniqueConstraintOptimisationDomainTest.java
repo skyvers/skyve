@@ -7,8 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-@SuppressWarnings("static-method")
-public class UniqueConstraintOptimisationDomainTest {
+
+class UniqueConstraintOptimisationDomainTest {
 
 	private UniqueConstraintOptimisation bean;
 

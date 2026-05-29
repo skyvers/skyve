@@ -1,6 +1,7 @@
 package router;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -10,6 +11,8 @@ import jakarta.servlet.http.HttpSession;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.metadata.router.UxUi;
+import org.skyve.metadata.user.User;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.web.UserAgentType;
 import org.skyve.web.WebContext;
 
@@ -118,6 +121,55 @@ class DefaultUxUiSelectorTest {
 		UxUi result = selector.select(UserAgentType.phone, request);
 
 		assertEquals(UxUis.PHONE, result);
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	void selectRoutesToSTARTUPForSecurityAdministratorWhenSetupVisibleAndNotDismissed() {
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpSession session = mock(HttpSession.class);
+		User user = mock(User.class);
+		boolean previousShowSetup = UtilImpl.SHOW_SETUP;
+		UtilImpl.SHOW_SETUP = true;
+		try {
+			when(request.getUserPrincipal()).thenReturn(mock(java.security.Principal.class));
+			when(request.getSession(false)).thenReturn(session);
+			when(session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME)).thenReturn(user);
+			doReturn(true).when(user).isInRole(modules.admin.domain.Startup.MODULE_NAME, "SecurityAdministrator");
+			when(session.getAttribute(DefaultUxUiSelector.DISMISS_STARTUP)).thenReturn(null);
+
+			UxUi result = selector.select(UserAgentType.desktop, request);
+
+			assertEquals(UxUis.STARTUP, result);
+		}
+		finally {
+			UtilImpl.SHOW_SETUP = previousShowSetup;
+		}
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	void selectDoesNotRouteToSTARTUPWhenDismissedInSession() {
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpSession session = mock(HttpSession.class);
+		User user = mock(User.class);
+		boolean previousShowSetup = UtilImpl.SHOW_SETUP;
+		UtilImpl.SHOW_SETUP = true;
+		try {
+			when(request.getUserPrincipal()).thenReturn(mock(java.security.Principal.class));
+			when(request.getSession(false)).thenReturn(session);
+			when(session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME)).thenReturn(user);
+			doReturn(true).when(user).isInRole(modules.admin.domain.Startup.MODULE_NAME, "SecurityAdministrator");
+			when(session.getAttribute(DefaultUxUiSelector.DISMISS_STARTUP)).thenReturn(Boolean.TRUE);
+			when(session.getAttribute(org.skyve.impl.web.AbstractWebContext.UXUI)).thenReturn(null);
+
+			UxUi result = selector.select(UserAgentType.desktop, request);
+
+			assertEquals(UxUis.EXTERNAL, result);
+		}
+		finally {
+			UtilImpl.SHOW_SETUP = previousShowSetup;
+		}
 	}
 
 	// ===== emulate() =====

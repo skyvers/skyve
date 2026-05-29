@@ -118,10 +118,27 @@ class ImportExportColumnBizletH2Test extends AbstractH2Test {
 	}
 
 	@Test
+	void preExecuteZoomOutWithValidBindingReturnsBean() throws Exception {
+		columnBean.setBindingName("userName");
+
+		ImportExportColumn result = bizlet.preExecute(ImplicitActionName.ZoomOut, columnBean, parentBean, webContext);
+		assertNotNull(result);
+	}
+
+	@Test
 	void preExecuteEditActionDoesNotThrow() throws Exception {
 		columnBean.setBindingName("userName");
 
 		ImportExportColumn result = bizlet.preExecute(ImplicitActionName.Edit, columnBean, parentBean, webContext);
+		assertNotNull(result);
+	}
+
+	@Test
+	void preExecuteOkWithShowExpressionAndWrappedBindingExpressionReturnsBean() throws Exception {
+		columnBean.setBindingName(modules.admin.ImportExport.ImportExportUtil.EXPRESSION);
+		columnBean.setBindingExpression("{userName}");
+
+		ImportExportColumn result = bizlet.preExecute(ImplicitActionName.OK, columnBean, parentBean, webContext);
 		assertNotNull(result);
 	}
 }

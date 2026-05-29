@@ -4,10 +4,10 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 
@@ -17,7 +17,8 @@ import util.AbstractH2Test;
 /**
  * H2-backed tests for JobScheduleBizlet covering postLoad and getVariantDomainValues.
  */
-public class JobScheduleBizletH2Test extends AbstractH2Test {
+@SuppressWarnings({"static-method", "java:S5976"})
+class JobScheduleBizletH2Test extends AbstractH2Test {
 
 	private static final JobScheduleBizlet bizlet = new JobScheduleBizlet();
 
@@ -127,6 +128,6 @@ public class JobScheduleBizletH2Test extends AbstractH2Test {
 	void getVariantDomainValuesForUnknownAttributeReturnsEmptyList() throws Exception {
 		List<DomainValue> result = bizlet.getVariantDomainValues("unknownAttribute");
 		assertThat(result, is(notNullValue()));
-		assertThat(result.isEmpty(), is(true));
+		assertTrue(result.isEmpty(), "Expected no domain values for unknown attribute");
 	}
 }

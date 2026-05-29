@@ -7,7 +7,6 @@ import org.skyve.metadata.SortDirection;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 
 import modules.test.AbstractSkyveTest;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class SnapshotAdapterTest extends AbstractSkyveTest {
 	@Test

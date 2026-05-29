@@ -2,9 +2,20 @@ package org.skyve.impl.metadata.view.reference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
+import org.skyve.metadata.view.Action;
+import org.skyve.metadata.view.View;
+import org.skyve.web.UserAgentType;
 
 class ReferenceProcessorTest {
 
@@ -134,5 +145,56 @@ class ReferenceProcessorTest {
 			IllegalStateException.class,
 			() -> processor.process(unknown)
 		);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void obtainActionForActionReferenceReturnsCreateActionWhenEditMissing() {
+		ActionReference ref = new ActionReference();
+		ref.setActionName("approve");
+
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Attribute attribute = mock(Attribute.class);
+		View createView = mock(View.class);
+		Action action = mock(Action.class);
+
+		when(document.getAttribute("status")).thenReturn(attribute);
+		when(document.getExtends()).thenReturn(null);
+		when(attribute.getAttributeType()).thenReturn(AttributeType.text);
+		doReturn(String.class).when(attribute).getImplementingType();
+		when(document.getView(UserAgentType.desktop.name(), customer, "edit")).thenReturn(null);
+		when(document.getView(UserAgentType.desktop.name(), customer, "create")).thenReturn(createView);
+		when(createView.getAction("approve")).thenReturn(action);
+
+		Action result = ReferenceProcessor.obtainActionForActionReference(ref, customer, module, document, "status", UserAgentType.desktop);
+
+		assertEquals(action, result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void obtainActionForActionReferenceReturnsNullWhenNoMatchingAction() {
+		ActionReference ref = new ActionReference();
+		ref.setActionName("approve");
+
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Attribute attribute = mock(Attribute.class);
+		View editView = mock(View.class);
+
+		when(document.getAttribute("status")).thenReturn(attribute);
+		when(document.getExtends()).thenReturn(null);
+		when(attribute.getAttributeType()).thenReturn(AttributeType.text);
+		doReturn(String.class).when(attribute).getImplementingType();
+		when(document.getView(UserAgentType.desktop.name(), customer, "edit")).thenReturn(editView);
+		when(editView.getAction("approve")).thenReturn(null);
+		when(document.getView(UserAgentType.desktop.name(), customer, "create")).thenReturn(null);
+
+		Action result = ReferenceProcessor.obtainActionForActionReference(ref, customer, module, document, "status", UserAgentType.desktop);
+
+		assertNull(result);
 	}
 }

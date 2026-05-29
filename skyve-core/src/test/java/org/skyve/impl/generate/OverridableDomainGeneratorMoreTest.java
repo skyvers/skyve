@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -13,6 +14,8 @@ import static org.mockito.Mockito.when;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeMap;
@@ -24,13 +27,17 @@ import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Enumeration.EnumeratedValue;
 import org.skyve.impl.metadata.model.document.field.Text;
+import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Dynamic;
 import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.Persistent.ExtensionStrategy;
 import org.skyve.metadata.model.document.Collection.CollectionType;
+import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.repository.ProvidedRepository;
@@ -58,6 +65,10 @@ class OverridableDomainGeneratorMoreTest {
 		Method m = OverridableDomainGenerator.class.getDeclaredMethod(name, params);
 		m.setAccessible(true);
 		return m;
+	}
+
+	private static String normalisedPath(Path path) {
+		return path.toString() + '/';
 	}
 
 	// ----- columnName -------------------------------------------------------
@@ -731,6 +742,379 @@ class OverridableDomainGeneratorMoreTest {
 		String java = contents.toString();
 		assertTrue(java.contains("isHasName()"), "Should contain condition method");
 		assertTrue(java.contains("isNotHasName()"), "Should contain negated condition method");
+	}
+
+	@Test
+	void replaceGeneratedRemovesUnreferencedModulesAndWritesGenerationFiles() throws Exception {
+		Path temp = Files.createTempDirectory("odg-replace");
+		Path generatedSrc = temp.resolve("generated-src");
+		Path generatedTest = temp.resolve("generated-test");
+
+		Path salesDomain = generatedSrc.resolve("modules/sales/domain");
+		Path obsoleteDomain = generatedSrc.resolve("modules/obsolete/domain");
+		Path hrModule = generatedSrc.resolve("modules/hr");
+		Files.createDirectories(salesDomain);
+		Files.createDirectories(obsoleteDomain);
+		Files.createDirectories(hrModule);
+		Files.writeString(salesDomain.resolve("Old.java"), "old");
+		Files.writeString(obsoleteDomain.resolve("Old.java"), "old");
+
+		Files.createDirectories(generatedTest);
+		Files.writeString(generatedTest.resolve("OldTest.java"), "old-test");
+
+		OverridableDomainGenerator gen = new OverridableDomainGenerator(true,
+				false,
+				false,
+				DialectOptions.H2_NO_INDEXES,
+				"",
+				normalisedPath(generatedSrc),
+				"",
+				normalisedPath(generatedTest),
+				null);
+
+		Path newDomainFile = salesDomain.resolve("New.java");
+		Path newGeneratedTestFile = generatedTest.resolve("modules/sales/domain/NewTest.java");
+		gen.generation.put(newDomainFile, "public class New {}\n");
+		gen.generation.put(newGeneratedTestFile, "public class NewTest {}\n");
+
+		declaredMethod("replaceGenerated", java.util.List.class).invoke(gen, java.util.List.of("sales", "hr"));
+
+		assertFalse(Files.exists(obsoleteDomain.getParent()), "Unreferenced module directory should be deleted");
+		assertTrue(Files.exists(generatedSrc.resolve("modules/hr/domain")), "Referenced module should have domain directory created");
+		assertFalse(Files.exists(salesDomain.resolve("Old.java")), "Old generated source files should be removed");
+		assertTrue(Files.exists(newDomainFile), "New generated source file should be written");
+		assertFalse(Files.exists(generatedTest.resolve("OldTest.java")), "Generated test directory should be replaced");
+		assertTrue(Files.exists(newGeneratedTestFile), "New generated test file should be written");
+		assertTrue(gen.generation.isEmpty(), "Generation map should be drained after writing files");
+	}
+
+	@Test
+	void replaceGeneratedHandlesMissingModulesDirectoryAndCreatesParentsForGenerationEntries() throws Exception {
+		Path temp = Files.createTempDirectory("odg-replace-empty");
+		Path generatedSrc = temp.resolve("generated-src");
+		Path generatedTest = temp.resolve("generated-test");
+
+		OverridableDomainGenerator gen = new OverridableDomainGenerator(true,
+				false,
+				false,
+				DialectOptions.H2_NO_INDEXES,
+				"",
+				normalisedPath(generatedSrc),
+				"",
+				normalisedPath(generatedTest),
+				null);
+
+		Path outFile = generatedSrc.resolve("modules/newmod/domain/Created.java");
+		gen.generation.put(outFile, "public class Created {}\n");
+
+		declaredMethod("replaceGenerated", java.util.List.class).invoke(gen, java.util.List.of("newmod"));
+
+		assertTrue(Files.exists(outFile), "replaceGenerated should create parent directories for generation entries");
+		assertTrue(gen.generation.isEmpty(), "Generation map should be empty after write");
+	}
+
+	@Test
+	void generateWithEmptyRepositoryCompletesWithoutSideEffects() throws Exception {
+		OverridableDomainGenerator gen = generator();
+		ProvidedRepository repo = mock(ProvidedRepository.class);
+		gen.repository = repo;
+
+		when(repo.getAllVanillaModuleNames()).thenReturn(java.util.List.of());
+		when(repo.getAllCustomerNames()).thenReturn(java.util.List.of());
+
+		gen.generate();
+
+		assertTrue(gen.generation.isEmpty());
+	}
+
+	@Test
+	void populateDataStructuresWithEmptyRepositoryLeavesMapsEmpty() throws Exception {
+		OverridableDomainGenerator gen = generator();
+		ProvidedRepository repo = mock(ProvidedRepository.class);
+		gen.repository = repo;
+
+		when(repo.getAllVanillaModuleNames()).thenReturn(java.util.List.of());
+		when(repo.getAllCustomerNames()).thenReturn(java.util.List.of());
+
+		declaredMethod("populateDataStructures").invoke(gen);
+
+		Field vanillaClassesField = OverridableDomainGenerator.class.getDeclaredField("moduleDocumentVanillaClasses");
+		vanillaClassesField.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		TreeMap<String, ?> vanillaClasses = (TreeMap<String, ?>) vanillaClassesField.get(gen);
+		assertTrue(vanillaClasses.isEmpty());
+
+		Field propertyLengthsField = OverridableDomainGenerator.class.getDeclaredField("persistentPropertyLengths");
+		propertyLengthsField.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		TreeMap<String, ?> propertyLengths = (TreeMap<String, ?>) propertyLengthsField.get(gen);
+		assertTrue(propertyLengths.isEmpty());
+	}
+
+	@Test
+	void generateVanillaWithEmptyModuleCreatesMappingEntry() throws Exception {
+		Path temp = Files.createTempDirectory("odg-generate-vanilla");
+		Path generatedSrc = temp.resolve("generated-src");
+		Path generatedTest = temp.resolve("generated-test");
+
+		OverridableDomainGenerator gen = new OverridableDomainGenerator(true,
+				false,
+				false,
+				DialectOptions.H2_NO_INDEXES,
+				"",
+				normalisedPath(generatedSrc),
+				"",
+				normalisedPath(generatedTest),
+				null);
+
+		ProvidedRepository repo = mock(ProvidedRepository.class);
+		gen.repository = repo;
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("sales");
+		when(module.getDocumentRefs()).thenReturn(java.util.Map.of());
+
+		declaredMethod("generateVanilla", Module.class).invoke(gen, module);
+
+		Path mappingPath = generatedSrc.resolve("modules/sales/domain/sales_orm.hbm.xml");
+		assertTrue(gen.generation.containsKey(mappingPath));
+	}
+
+	@Test
+	void generateOverriddenWithNoModulesCreatesCustomerOrmEntry() throws Exception {
+		Path temp = Files.createTempDirectory("odg-generate-overridden");
+		Path generatedSrc = temp.resolve("generated-src");
+		Path generatedTest = temp.resolve("generated-test");
+
+		OverridableDomainGenerator gen = new OverridableDomainGenerator(true,
+				false,
+				false,
+				DialectOptions.H2_NO_INDEXES,
+				"",
+				normalisedPath(generatedSrc),
+				"",
+				normalisedPath(generatedTest),
+				null);
+
+		Customer customer = mock(Customer.class);
+		when(customer.getName()).thenReturn("acme");
+		when(customer.getModules()).thenReturn(java.util.List.of());
+
+		Path customerModulesPath = generatedSrc.resolve("customers/acme/modules");
+		Files.createDirectories(customerModulesPath);
+
+		declaredMethod("generateOverridden", Customer.class, String.class)
+				.invoke(gen, customer, normalisedPath(customerModulesPath));
+
+		Path mappingPath = customerModulesPath.resolve("orm.hbm.xml");
+		assertTrue(gen.generation.containsKey(mappingPath));
+	}
+
+	@Test
+	void generateWithVanillaModuleAndCustomerModulesDirectoryWritesMappings() throws Exception {
+		Path temp = Files.createTempDirectory("odg-generate-full");
+		Path generatedSrc = temp.resolve("generated-src");
+		Path generatedTest = temp.resolve("generated-test");
+
+		OverridableDomainGenerator gen = new OverridableDomainGenerator(true,
+				false,
+				false,
+				DialectOptions.H2_NO_INDEXES,
+				"",
+				normalisedPath(generatedSrc),
+				"",
+				normalisedPath(generatedTest),
+				null);
+
+		ProvidedRepository repo = mock(ProvidedRepository.class);
+		gen.repository = repo;
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("sales");
+		when(module.getDocumentRefs()).thenReturn(java.util.Map.of());
+
+		Customer customer = mock(Customer.class);
+		when(customer.getName()).thenReturn("acme");
+		when(customer.getModules()).thenReturn(java.util.List.of());
+
+		when(repo.getAllVanillaModuleNames()).thenReturn(java.util.List.of("sales"));
+		when(repo.getModule(null, "sales")).thenReturn(module);
+		when(repo.getAllCustomerNames()).thenReturn(java.util.List.of("acme"));
+		when(repo.getCustomer("acme")).thenReturn(customer);
+
+		Path customerModulesPath = generatedSrc.resolve("customers/acme/modules");
+		Files.createDirectories(customerModulesPath);
+
+		gen.generate();
+
+		assertTrue(Files.exists(generatedSrc.resolve("modules/sales/domain/sales_orm.hbm.xml")));
+		assertTrue(Files.exists(customerModulesPath.resolve("orm.hbm.xml")));
+		assertTrue(gen.generation.isEmpty(), "Generation map should be written and drained");
+	}
+
+	@Test
+	void generateOverriddenWithOverrideWithoutExtraPropertiesCreatesOnlyOrmEntry() throws Exception {
+		Path temp = Files.createTempDirectory("odg-generate-overridden-existing");
+		Path generatedSrc = temp.resolve("generated-src");
+		Path generatedTest = temp.resolve("generated-test");
+
+		OverridableDomainGenerator gen = new OverridableDomainGenerator(true,
+				false,
+				false,
+				DialectOptions.H2_NO_INDEXES,
+				"",
+				normalisedPath(generatedSrc),
+				"",
+				normalisedPath(generatedTest),
+				null);
+
+		ProvidedRepository repo = mock(ProvidedRepository.class);
+		gen.repository = repo;
+
+		Text vanillaCode = new Text();
+		vanillaCode.setName("code");
+		vanillaCode.setDisplayName("Code");
+
+		DocumentImpl vanillaDocument = new DocumentImpl();
+		vanillaDocument.setName("Order");
+		vanillaDocument.setOwningModuleName("sales");
+		vanillaDocument.setPersistent(persistentOf("SALES_ORDER"));
+		vanillaDocument.putAttribute(vanillaCode);
+
+		Text overrideCode = new Text();
+		overrideCode.setName("code");
+		overrideCode.setDisplayName("Code");
+
+		DocumentImpl overrideDocument = new DocumentImpl();
+		overrideDocument.setName("Order");
+		overrideDocument.setOwningModuleName("sales");
+		overrideDocument.setPersistent(persistentOf("SALES_ORDER"));
+		overrideDocument.putAttribute(overrideCode);
+
+		Module.DocumentRef documentRef = new Module.DocumentRef();
+		documentRef.setOwningModuleName("sales");
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("sales");
+		when(module.getDocumentRefs()).thenReturn(java.util.Map.of("Order", documentRef));
+
+		CustomerImpl customer = new CustomerImpl();
+		customer.setName("acme");
+		customer.getModuleEntries().put("sales", null);
+
+		when(module.getDocument(null, "Order")).thenReturn(vanillaDocument);
+		when(module.getDocument(customer, "Order")).thenReturn(overrideDocument);
+		when(repo.getModule(null, "sales")).thenReturn(module);
+		when(repo.getModule(customer, "sales")).thenReturn(module);
+		when(repo.getAllVanillaModuleNames()).thenReturn(java.util.List.of("sales"));
+		when(repo.getAllCustomerNames()).thenReturn(java.util.List.of());
+		when(repo.vtable("acme", "modules/sales/Order")).thenReturn("customers/acme/modules/sales/Order");
+
+		Path customerModulesPath = generatedSrc.resolve("customers/acme/modules");
+		Files.createDirectories(customerModulesPath);
+
+		ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
+		ProvidedRepositoryFactory.set(repo);
+		try {
+			declaredMethod("populateDataStructures").invoke(gen);
+			declaredMethod("generateOverridden", Customer.class, String.class)
+					.invoke(gen, customer, normalisedPath(customerModulesPath));
+		}
+		finally {
+			ProvidedRepositoryFactory.set(previousRepository);
+		}
+
+		assertTrue(gen.generation.containsKey(customerModulesPath.resolve("orm.hbm.xml")));
+		assertFalse(gen.generation.containsKey(generatedSrc.resolve("customers/acme/modules/sales/domain/OrderExt.java")));
+	}
+
+	@Test
+	void populateDataStructuresWithCustomerOverrideMarksVanillaClassAbstract() throws Exception {
+		Path temp = Files.createTempDirectory("odg-populate-override");
+		Path generatedSrc = temp.resolve("generated-src");
+
+		OverridableDomainGenerator gen = new OverridableDomainGenerator(false,
+				false,
+				false,
+				DialectOptions.H2_NO_INDEXES,
+				"",
+				normalisedPath(generatedSrc),
+				"",
+				normalisedPath(temp.resolve("generated-test")),
+				null);
+
+		ProvidedRepository repo = mock(ProvidedRepository.class);
+		gen.repository = repo;
+
+		Text vanillaCode = new Text();
+		vanillaCode.setName("code");
+		vanillaCode.setDisplayName("Code");
+		Text vanillaDescription = new Text();
+		vanillaDescription.setName("description");
+		vanillaDescription.setDisplayName("Description");
+
+		DocumentImpl vanillaDocument = new DocumentImpl();
+		vanillaDocument.setName("Order");
+		vanillaDocument.setOwningModuleName("sales");
+		vanillaDocument.setPersistent(persistentOf("SALES_ORDER"));
+		vanillaDocument.putAttribute(vanillaCode);
+		vanillaDocument.putAttribute(vanillaDescription);
+
+		Text overrideCode = new Text();
+		overrideCode.setName("code");
+		overrideCode.setDisplayName("Code");
+
+		DocumentImpl overrideDocument = new DocumentImpl();
+		overrideDocument.setName("Order");
+		overrideDocument.setOwningModuleName("sales");
+		overrideDocument.setPersistent(persistentOf("SALES_ORDER"));
+		overrideDocument.putAttribute(overrideCode);
+
+		Module.DocumentRef documentRef = new Module.DocumentRef();
+		documentRef.setOwningModuleName("sales");
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("sales");
+		when(module.getDocumentRefs()).thenReturn(java.util.Map.of("Order", documentRef));
+
+		Customer customer = mock(Customer.class);
+		when(customer.getName()).thenReturn("acme");
+		when(customer.getModules()).thenReturn(java.util.List.of(module));
+
+		when(module.getDocument(null, "Order")).thenReturn(vanillaDocument);
+		when(module.getDocument(customer, "Order")).thenReturn(overrideDocument);
+		when(repo.getAllVanillaModuleNames()).thenReturn(java.util.List.of("sales"));
+		when(repo.getModule(null, "sales")).thenReturn(module);
+		when(repo.getAllCustomerNames()).thenReturn(java.util.List.of("acme"));
+		when(repo.getCustomer("acme")).thenReturn(customer);
+		when(repo.vtable("acme", "modules/sales/Order")).thenReturn("customers/acme/modules/sales/Order");
+
+		Files.createDirectories(generatedSrc.resolve("customers/acme/modules"));
+
+		declaredMethod("populateDataStructures").invoke(gen);
+
+		Field vanillaClassesField = OverridableDomainGenerator.class.getDeclaredField("moduleDocumentVanillaClasses");
+		vanillaClassesField.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		TreeMap<String, TreeMap<String, ?>> vanillaClasses = (TreeMap<String, TreeMap<String, ?>>) vanillaClassesField.get(gen);
+		Object domainClass = vanillaClasses.get("sales").get("Order");
+
+		Field attributesField = domainClass.getClass().getDeclaredField("attributes");
+		attributesField.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		TreeMap<String, ?> attributes = (TreeMap<String, ?>) attributesField.get(domainClass);
+		assertTrue(attributes.containsKey("code"));
+		assertFalse(attributes.containsKey("description"));
+
+		Field isAbstractField = domainClass.getClass().getDeclaredField("isAbstract");
+		isAbstractField.setAccessible(true);
+		assertEquals(Boolean.TRUE, isAbstractField.get(domainClass));
+
+		Field propertyLengthsField = OverridableDomainGenerator.class.getDeclaredField("persistentPropertyLengths");
+		propertyLengthsField.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		TreeMap<String, TreeMap<String, Integer>> propertyLengths = (TreeMap<String, TreeMap<String, Integer>>) propertyLengthsField.get(gen);
+		assertTrue(propertyLengths.containsKey("SALES_ORDER"));
 	}
 
 	// ----- generateJava with multiple field types ---------------------------
@@ -2496,6 +2880,133 @@ class OverridableDomainGeneratorMoreTest {
 		assertTrue(propLengths.isEmpty(), "Mapped doc with null derivedId should produce no entries");
 	}
 
+	@Test
+	void populatePropertyLengthsWithGeneratedEnumerationUsesLongestCode() throws Exception {
+		OverridableDomainGenerator gen = generator();
+
+		DocumentImpl doc = new DocumentImpl();
+		doc.setName("EnumDoc");
+		doc.setOwningModuleName("testMod");
+		doc.setPersistent(persistentOf("ENUM_TABLE"));
+
+		Enumeration enumeration = new Enumeration();
+		enumeration.setName("status");
+		enumeration.setDisplayName("Status");
+
+		EnumeratedValue shortValue = new EnumeratedValue();
+		shortValue.setCode("A");
+		EnumeratedValue longValue = new EnumeratedValue();
+		longValue.setCode("LONGCODE");
+		enumeration.getXmlValues().add(shortValue);
+		enumeration.getXmlValues().add(longValue);
+		doc.putAttribute(enumeration);
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("testMod");
+
+		Method m = OverridableDomainGenerator.class.getDeclaredMethod(
+				"populatePropertyLengths",
+				org.skyve.metadata.customer.Customer.class,
+				Module.class, Document.class, String.class);
+		m.setAccessible(true);
+		m.invoke(gen, null, module, doc, null);
+
+		Field f = OverridableDomainGenerator.class.getDeclaredField("persistentPropertyLengths");
+		f.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		TreeMap<String, TreeMap<String, Integer>> propLengths =
+				(TreeMap<String, TreeMap<String, Integer>>) f.get(gen);
+		assertEquals(Integer.valueOf(8), propLengths.get("ENUM_TABLE").get("status"));
+	}
+
+	@Test
+	void populatePropertyLengthsWithHandCodedEnumerationUsesLongestCode() throws Exception {
+		OverridableDomainGenerator gen = generator();
+
+		DocumentImpl doc = new DocumentImpl();
+		doc.setName("HandEnumDoc");
+		doc.setOwningModuleName("testMod");
+		doc.setPersistent(persistentOf("HAND_ENUM_TABLE"));
+
+		Enumeration enumeration = new Enumeration();
+		enumeration.setName("status");
+		enumeration.setDisplayName("Status");
+		enumeration.setXmlImplementingEnumClassName(HandCodedLengthEnum.class.getName());
+		doc.putAttribute(enumeration);
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("testMod");
+
+		Method m = OverridableDomainGenerator.class.getDeclaredMethod(
+				"populatePropertyLengths",
+				org.skyve.metadata.customer.Customer.class,
+				Module.class, Document.class, String.class);
+		m.setAccessible(true);
+		m.invoke(gen, null, module, doc, null);
+
+		Field f = OverridableDomainGenerator.class.getDeclaredField("persistentPropertyLengths");
+		f.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		TreeMap<String, TreeMap<String, Integer>> propLengths =
+				(TreeMap<String, TreeMap<String, Integer>>) f.get(gen);
+		assertEquals(Integer.valueOf(12), propLengths.get("HAND_ENUM_TABLE").get("status"));
+	}
+
+	@Test
+	void populatePropertyLengthsWithMappedBaseInheritsDerivedIdentifier() throws Exception {
+		OverridableDomainGenerator gen = generator();
+		ProvidedRepository repo = mock(ProvidedRepository.class);
+		gen.repository = repo;
+
+		DocumentImpl baseDoc = new DocumentImpl();
+		baseDoc.setName("BaseDoc");
+		baseDoc.setOwningModuleName("testMod");
+		Persistent basePersistent = new Persistent();
+		basePersistent.setStrategy(ExtensionStrategy.mapped);
+		baseDoc.setPersistent(basePersistent);
+
+		Text baseField = new Text();
+		baseField.setName("baseText");
+		baseField.setDisplayName("Base Text");
+		baseField.setLength(50);
+		baseDoc.putAttribute(baseField);
+
+		DocumentImpl childDoc = new DocumentImpl();
+		childDoc.setName("ChildDoc");
+		childDoc.setOwningModuleName("testMod");
+		childDoc.setPersistent(persistentOf("CHILD_TABLE"));
+
+		Extends inherits = new Extends();
+		inherits.setDocumentName("BaseDoc");
+		childDoc.setExtends(inherits);
+
+		Text childField = new Text();
+		childField.setName("childText");
+		childField.setDisplayName("Child Text");
+		childField.setLength(100);
+		childDoc.putAttribute(childField);
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("testMod");
+		when(module.getDocument(null, "BaseDoc")).thenReturn(baseDoc);
+		when(repo.getModule(null, "testMod")).thenReturn(module);
+
+		Method m = OverridableDomainGenerator.class.getDeclaredMethod(
+				"populatePropertyLengths",
+				org.skyve.metadata.customer.Customer.class,
+				Module.class, Document.class, String.class);
+		m.setAccessible(true);
+		m.invoke(gen, null, module, childDoc, null);
+
+		Field f = OverridableDomainGenerator.class.getDeclaredField("persistentPropertyLengths");
+		f.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		TreeMap<String, TreeMap<String, Integer>> propLengths =
+				(TreeMap<String, TreeMap<String, Integer>>) f.get(gen);
+		assertEquals(Integer.valueOf(50), propLengths.get("CHILD_TABLE").get("baseText"));
+		assertEquals(Integer.valueOf(100), propLengths.get("CHILD_TABLE").get("childText"));
+	}
+
 	// ----- populateModocDerivations tests -----------------------------------
 
 	@Test
@@ -2576,6 +3087,175 @@ class OverridableDomainGeneratorMoreTest {
 				Module.class, Document.class, ExtensionStrategy.class);
 		m.setAccessible(true);
 		assertNull(m.invoke(gen, module, doc, null), "void populateModocDerivations with inherits should return null");
+	}
+
+	@Test
+	void populateModocDerivationsWithConflictingStrategyThrows() throws Exception {
+		OverridableDomainGenerator gen = generator();
+
+		DocumentImpl doc = new DocumentImpl();
+		doc.setName("ConflictingDoc");
+		doc.setOwningModuleName("testMod");
+		Persistent persistent = new Persistent();
+		persistent.setStrategy(ExtensionStrategy.single);
+		persistent.setName("CONF_TABLE");
+		doc.setPersistent(persistent);
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("testMod");
+
+		Method m = OverridableDomainGenerator.class.getDeclaredMethod(
+				"populateModocDerivations",
+				Module.class, Document.class, ExtensionStrategy.class);
+		m.setAccessible(true);
+		InvocationTargetException ex = assertThrows(InvocationTargetException.class,
+				() -> m.invoke(gen, module, doc, ExtensionStrategy.joined));
+		assertTrue(ex.getCause() instanceof MetaDataException);
+	}
+
+	@Test
+	void populateModocDerivationsWithMissingBaseDocumentThrows() throws Exception {
+		OverridableDomainGenerator gen = generator();
+
+		DocumentImpl doc = new DocumentImpl();
+		doc.setName("DerivedMissingBase");
+		doc.setOwningModuleName("testMod");
+		doc.setPersistent(persistentOf("DERIVED_TABLE"));
+
+		Extends inherits = new Extends();
+		inherits.setDocumentName("MissingBase");
+		doc.setExtends(inherits);
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("testMod");
+		when(module.getDocument(null, "MissingBase")).thenReturn(null);
+
+		Method m = OverridableDomainGenerator.class.getDeclaredMethod(
+				"populateModocDerivations",
+				Module.class, Document.class, ExtensionStrategy.class);
+		m.setAccessible(true);
+		InvocationTargetException ex = assertThrows(InvocationTargetException.class,
+				() -> m.invoke(gen, module, doc, null));
+		assertTrue(ex.getCause() instanceof MetaDataException);
+	}
+
+	@Test
+	void populateModocDerivationsWithJoinedStrategySameIdentifierThrows() throws Exception {
+		OverridableDomainGenerator gen = generator();
+
+		DocumentImpl baseDoc = new DocumentImpl();
+		baseDoc.setName("BaseJoined");
+		baseDoc.setOwningModuleName("testMod");
+		Persistent basePersistent = new Persistent();
+		basePersistent.setStrategy(ExtensionStrategy.joined);
+		basePersistent.setName("SAME_TABLE");
+		baseDoc.setPersistent(basePersistent);
+
+		DocumentImpl doc = new DocumentImpl();
+		doc.setName("ChildJoined");
+		doc.setOwningModuleName("testMod");
+		Persistent persistent = new Persistent();
+		persistent.setStrategy(ExtensionStrategy.joined);
+		persistent.setName("SAME_TABLE");
+		doc.setPersistent(persistent);
+
+		Extends inherits = new Extends();
+		inherits.setDocumentName("BaseJoined");
+		doc.setExtends(inherits);
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("testMod");
+		when(module.getDocument(null, "BaseJoined")).thenReturn(baseDoc);
+
+		Method m = OverridableDomainGenerator.class.getDeclaredMethod(
+				"populateModocDerivations",
+				Module.class, Document.class, ExtensionStrategy.class);
+		m.setAccessible(true);
+		InvocationTargetException ex = assertThrows(InvocationTargetException.class,
+				() -> m.invoke(gen, module, doc, null));
+		assertTrue(ex.getCause() instanceof MetaDataException);
+	}
+
+	@Test
+	void populateModocDerivationsWithSingleStrategyDifferentIdentifierThrows() throws Exception {
+		OverridableDomainGenerator gen = generator();
+
+		DocumentImpl baseDoc = new DocumentImpl();
+		baseDoc.setName("BaseSingle");
+		baseDoc.setOwningModuleName("testMod");
+		Persistent basePersistent = new Persistent();
+		basePersistent.setStrategy(ExtensionStrategy.single);
+		basePersistent.setName("BASE_TABLE");
+		baseDoc.setPersistent(basePersistent);
+
+		DocumentImpl doc = new DocumentImpl();
+		doc.setName("ChildSingle");
+		doc.setOwningModuleName("testMod");
+		Persistent persistent = new Persistent();
+		persistent.setStrategy(ExtensionStrategy.single);
+		persistent.setName("CHILD_TABLE");
+		doc.setPersistent(persistent);
+
+		Extends inherits = new Extends();
+		inherits.setDocumentName("BaseSingle");
+		doc.setExtends(inherits);
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("testMod");
+		when(module.getDocument(null, "BaseSingle")).thenReturn(baseDoc);
+
+		Method m = OverridableDomainGenerator.class.getDeclaredMethod(
+				"populateModocDerivations",
+				Module.class, Document.class, ExtensionStrategy.class);
+		m.setAccessible(true);
+		InvocationTargetException ex = assertThrows(InvocationTargetException.class,
+				() -> m.invoke(gen, module, doc, null));
+		assertTrue(ex.getCause() instanceof MetaDataException);
+	}
+
+	@Test
+	void populateModocDerivationsWithValidSingleStrategyRegistersDerivation() throws Exception {
+		OverridableDomainGenerator gen = generator();
+		ProvidedRepository repo = mock(ProvidedRepository.class);
+		gen.repository = repo;
+
+		DocumentImpl baseDoc = new DocumentImpl();
+		baseDoc.setName("BaseSingle");
+		baseDoc.setOwningModuleName("testMod");
+		Persistent basePersistent = new Persistent();
+		basePersistent.setStrategy(ExtensionStrategy.single);
+		basePersistent.setName("BASE_TABLE");
+		baseDoc.setPersistent(basePersistent);
+
+		DocumentImpl doc = new DocumentImpl();
+		doc.setName("ChildSingle");
+		doc.setOwningModuleName("testMod");
+		Persistent persistent = new Persistent();
+		persistent.setStrategy(ExtensionStrategy.single);
+		persistent.setName("BASE_TABLE");
+		doc.setPersistent(persistent);
+
+		Extends inherits = new Extends();
+		inherits.setDocumentName("BaseSingle");
+		doc.setExtends(inherits);
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("testMod");
+		when(module.getDocument(null, "BaseSingle")).thenReturn(baseDoc);
+		when(repo.getModule(null, "testMod")).thenReturn(module);
+
+		Method m = OverridableDomainGenerator.class.getDeclaredMethod(
+				"populateModocDerivations",
+				Module.class, Document.class, ExtensionStrategy.class);
+		m.setAccessible(true);
+		assertNull(m.invoke(gen, module, doc, null));
+
+		Field field = OverridableDomainGenerator.class.getDeclaredField("modocDerivations");
+		field.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		TreeMap<String, TreeMap<String, Document>> derivations =
+				(TreeMap<String, TreeMap<String, Document>>) field.get(gen);
+		assertSame(doc, derivations.get("testMod.BaseSingle").get("testMod.ChildSingle"));
 	}
 
 	// ----- generateActionTests tests ----------------------------------------
@@ -3236,6 +3916,37 @@ class OverridableDomainGeneratorMoreTest {
 		ppl.put(persistentId, new TreeMap<>());
 	}
 
+	private enum HandCodedLengthEnum implements org.skyve.domain.types.Enumeration {
+		SHORT("A"),
+		LONG("LONGEST_CODE");
+
+		private final String code;
+
+		HandCodedLengthEnum(String code) {
+			this.code = code;
+		}
+
+		@Override
+		public String toCode() {
+			return code;
+		}
+
+		@Override
+		public String toLocalisedDescription() {
+			return code;
+		}
+
+		@Override
+		public DomainValue toDomainValue() {
+			return new DomainValue(code);
+		}
+
+		@SuppressWarnings("unused")
+		public static java.util.List<DomainValue> toDomainValues() {
+			return java.util.List.of(SHORT.toDomainValue(), LONG.toDomainValue());
+		}
+	}
+
 	@Test
 	@SuppressWarnings("boxing")
 	void generateAttributeMappingsChildCollectionGeneratesBagElement() throws Exception {
@@ -3515,6 +4226,17 @@ class OverridableDomainGeneratorMoreTest {
 		repoField.set(gen, repo);
 	}
 
+	private static void setupModuleDocumentVanillaClasses(OverridableDomainGenerator gen,
+			String moduleName,
+			java.util.Map<String, ?> documents) throws Exception {
+		Field field = OverridableDomainGenerator.class.getDeclaredField("moduleDocumentVanillaClasses");
+		field.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		TreeMap<String, TreeMap<String, Object>> value =
+				(TreeMap<String, TreeMap<String, Object>>) field.get(gen);
+		value.put(moduleName, new TreeMap<>(documents));
+	}
+
 	@Test
 	@SuppressWarnings("boxing")
 	void generateORMWithNoPersistentDocumentGeneratesNothing() throws Exception {
@@ -3544,6 +4266,175 @@ class OverridableDomainGeneratorMoreTest {
 
 		// No persistent → no ORM class element
 		assertFalse(contents.toString().contains("<class"), "Transient doc should generate no ORM class, got: " + contents);
+	}
+
+	@Test
+	void generateOverriddenOrmWithCustomerOnlyDocumentUsesCustomerPackagePrefix() throws Exception {
+		OverridableDomainGenerator gen = generator();
+
+		ProvidedRepository repo = mock(ProvidedRepository.class);
+		injectRepository(gen, repo);
+		setupModuleDocumentVanillaClasses(gen, "sales", java.util.Map.of());
+		setupPersistentPropertyLengths(gen, "CUSTOM_TABLE");
+
+		CustomerImpl customer = new CustomerImpl();
+		customer.setName("acme");
+		customer.getModuleEntries().put("sales", null);
+
+		DocumentImpl doc = new DocumentImpl();
+		doc.setName("CustomOnly");
+		doc.setOwningModuleName("sales");
+		doc.setPersistent(persistentOf("CUSTOM_TABLE"));
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("sales");
+		when(repo.getModule(customer, "sales")).thenReturn(module);
+		when(repo.vtable("acme", "modules/sales/CustomOnly"))
+				.thenReturn("customers/acme/modules/sales/CustomOnly");
+		when(repo.findNearestPersistentSingleOrJoinedSuperDocument(customer, module, doc)).thenReturn(null);
+
+		ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
+		ProvidedRepositoryFactory.set(repo);
+		try {
+			StringBuilder contents = new StringBuilder();
+			StringBuilder filterDefs = new StringBuilder();
+			declaredMethod("generateOverriddenORM",
+					StringBuilder.class,
+					Customer.class,
+					Module.class,
+					Document.class,
+					StringBuilder.class)
+					.invoke(gen, contents, customer, module, doc, filterDefs);
+			assertTrue(contents.toString().contains("customers.acme.modules.sales.domain.CustomOnly"),
+					"Expected customer package prefix in ORM output, got: " + contents);
+		}
+		finally {
+			ProvidedRepositoryFactory.set(previousRepository);
+		}
+	}
+
+	@Test
+	void generateOverriddenOrmWithChildCollectionRecursesToChildDocument() throws Exception {
+		OverridableDomainGenerator gen = generator();
+
+		ProvidedRepository repo = mock(ProvidedRepository.class);
+		injectRepository(gen, repo);
+		setupModuleDocumentVanillaClasses(gen, "sales", java.util.Map.of());
+		setupPersistentPropertyLengths(gen, "OWNER_TABLE");
+		setupPersistentPropertyLengths(gen, "CHILD_TABLE");
+
+		CustomerImpl customer = new CustomerImpl();
+		customer.setName("acme");
+		customer.getModuleEntries().put("sales", null);
+
+		DocumentImpl childDoc = new DocumentImpl();
+		childDoc.setName("ChildDoc");
+		childDoc.setOwningModuleName("sales");
+		childDoc.setPersistent(persistentOf("CHILD_TABLE"));
+
+		CollectionImpl childCollection = new CollectionImpl();
+		childCollection.setName("children");
+		childCollection.setDocumentName("ChildDoc");
+		childCollection.setType(CollectionType.child);
+
+		DocumentImpl ownerDoc = new DocumentImpl();
+		ownerDoc.setName("OwnerDoc");
+		ownerDoc.setOwningModuleName("sales");
+		ownerDoc.setPersistent(persistentOf("OWNER_TABLE"));
+		ownerDoc.putRelation(childCollection);
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("sales");
+		when(module.getDocument(customer, "ChildDoc")).thenReturn(childDoc);
+		when(repo.getModule(customer, "sales")).thenReturn(module);
+		when(repo.vtable("acme", "modules/sales/OwnerDoc")).thenReturn(null);
+		when(repo.vtable("acme", "modules/sales/ChildDoc")).thenReturn(null);
+		when(repo.findNearestPersistentSingleOrJoinedSuperDocument(customer, module, ownerDoc)).thenReturn(null);
+		when(repo.findNearestPersistentSingleOrJoinedSuperDocument(customer, module, childDoc)).thenReturn(null);
+
+		ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
+		ProvidedRepositoryFactory.set(repo);
+		try {
+			StringBuilder contents = new StringBuilder();
+			StringBuilder filterDefs = new StringBuilder();
+			declaredMethod("generateOverriddenORM",
+					StringBuilder.class,
+					Customer.class,
+					Module.class,
+					Document.class,
+					StringBuilder.class)
+					.invoke(gen, contents, customer, module, ownerDoc, filterDefs);
+
+			Field visitedField = OverridableDomainGenerator.class.getDeclaredField("visitedOverriddenORMDocumentsPerCustomer");
+			visitedField.setAccessible(true);
+			@SuppressWarnings("unchecked")
+			Set<String> visited = (Set<String>) visitedField.get(gen);
+			assertTrue(visited.contains("sales.OwnerDoc"));
+			assertTrue(visited.contains("sales.ChildDoc"));
+		}
+		finally {
+			ProvidedRepositoryFactory.set(previousRepository);
+		}
+	}
+
+	@Test
+	void generateOverriddenOrmWithTransientExportedReferenceThrows() throws Exception {
+		OverridableDomainGenerator gen = generator();
+
+		ProvidedRepository repo = mock(ProvidedRepository.class);
+		injectRepository(gen, repo);
+		setupModuleDocumentVanillaClasses(gen, "sales", java.util.Map.of());
+		setupPersistentPropertyLengths(gen, "OWNER_TABLE_TRANSIENT_REF");
+
+		CustomerImpl customer = new CustomerImpl();
+		customer.setName("acme");
+		customer.getModuleEntries().put("sales", null);
+
+		DocumentImpl ownerDoc = new DocumentImpl();
+		ownerDoc.setName("OwnerDoc");
+		ownerDoc.setOwningModuleName("sales");
+		ownerDoc.setPersistent(persistentOf("OWNER_TABLE_TRANSIENT_REF"));
+
+		DocumentImpl transientRefDoc = new DocumentImpl();
+		transientRefDoc.setName("TransientRef");
+		transientRefDoc.setOwningModuleName("sales");
+
+		org.skyve.impl.metadata.customer.ExportedReference ref = new org.skyve.impl.metadata.customer.ExportedReference();
+		ref.setModuleName("sales");
+		ref.setDocumentName("TransientRef");
+
+		Field exportedField = CustomerImpl.class.getDeclaredField("exportedReferences");
+		exportedField.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		java.util.Map<String, java.util.List<org.skyve.impl.metadata.customer.ExportedReference>> exported =
+				(java.util.Map<String, java.util.List<org.skyve.impl.metadata.customer.ExportedReference>>) exportedField.get(customer);
+		exported.put("sales.OwnerDoc", java.util.List.of(ref));
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("sales");
+		when(module.getDocument(customer, "TransientRef")).thenReturn(transientRefDoc);
+		when(repo.getModule(customer, "sales")).thenReturn(module);
+		when(repo.vtable("acme", "modules/sales/OwnerDoc")).thenReturn(null);
+		when(repo.findNearestPersistentSingleOrJoinedSuperDocument(customer, module, ownerDoc)).thenReturn(null);
+
+		ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
+		ProvidedRepositoryFactory.set(repo);
+		try {
+			StringBuilder contents = new StringBuilder();
+			StringBuilder filterDefs = new StringBuilder();
+			InvocationTargetException ex = assertThrows(InvocationTargetException.class,
+					() -> declaredMethod("generateOverriddenORM",
+							StringBuilder.class,
+							Customer.class,
+							Module.class,
+							Document.class,
+							StringBuilder.class)
+							.invoke(gen, contents, customer, module, ownerDoc, filterDefs));
+			assertTrue(ex.getCause() instanceof IllegalStateException);
+		}
+		finally {
+			ProvidedRepositoryFactory.set(previousRepository);
+		}
 	}
 
 	@Test

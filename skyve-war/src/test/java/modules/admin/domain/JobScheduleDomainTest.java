@@ -2,20 +2,17 @@ package modules.admin.domain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.types.DateTime;
-import org.skyve.util.DataBuilder;
-import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.test.AbstractSkyveTest;
 
-public class JobScheduleDomainTest extends AbstractSkyveTest {
+class JobScheduleDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void newInstanceCreatesJobSchedule() throws Exception {
+	void newInstanceCreatesJobSchedule() {
 		JobSchedule bean = JobSchedule.newInstance();
 		assertNotNull(bean);
 		assertEquals("admin", bean.getBizModule());
@@ -24,7 +21,7 @@ public class JobScheduleDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void jobNameSetAndGet() throws Exception {
+	void jobNameSetAndGet() {
 		JobSchedule bean = JobSchedule.newInstance();
 		bean.setJobName("BackupJob");
 		assertEquals("BackupJob", bean.getJobName());
@@ -32,7 +29,7 @@ public class JobScheduleDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void cronExpressionSetAndGet() throws Exception {
+	void cronExpressionSetAndGet() {
 		JobSchedule bean = JobSchedule.newInstance();
 		bean.setCronExpression("0 0 * * * ?");
 		assertEquals("0 0 * * * ?", bean.getCronExpression());
@@ -40,7 +37,7 @@ public class JobScheduleDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void startTimeSetAndGet() throws Exception {
+	void startTimeSetAndGet() {
 		JobSchedule bean = JobSchedule.newInstance();
 		DateTime dt = new DateTime();
 		bean.setStartTime(dt);
@@ -49,7 +46,7 @@ public class JobScheduleDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void endTimeSetAndGet() throws Exception {
+	void endTimeSetAndGet() {
 		JobSchedule bean = JobSchedule.newInstance();
 		DateTime dt = new DateTime();
 		bean.setEndTime(dt);
@@ -58,23 +55,23 @@ public class JobScheduleDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void jobScheduledImmediatelySetAndGet() throws Exception {
+	void jobScheduledImmediatelySetAndGet() {
 		JobSchedule bean = JobSchedule.newInstance();
 		bean.setJobScheduledImmediately(Boolean.TRUE);
-		assertTrue(bean.getJobScheduledImmediately());
+		assertEquals(Boolean.TRUE, bean.getJobScheduledImmediately());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	void disabledSetAndGet() throws Exception {
+	void disabledSetAndGet() {
 		JobSchedule bean = JobSchedule.newInstance();
 		bean.setDisabled(Boolean.TRUE);
-		assertTrue(bean.getDisabled());
+		assertEquals(Boolean.TRUE, bean.getDisabled());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	void minuteFieldsSetAndGet() throws Exception {
+	void minuteFieldsSetAndGet() {
 		JobSchedule bean = JobSchedule.newInstance();
 		bean.setAllMinutes("*");
 		bean.setMinute0(Boolean.TRUE);
@@ -83,16 +80,16 @@ public class JobScheduleDomainTest extends AbstractSkyveTest {
 		bean.setMinute45(Boolean.TRUE);
 		bean.setMinute59(Boolean.TRUE);
 		assertEquals("*", bean.getAllMinutes());
-		assertTrue(bean.getMinute0());
-		assertTrue(bean.getMinute15());
-		assertTrue(bean.getMinute30());
-		assertTrue(bean.getMinute45());
-		assertTrue(bean.getMinute59());
+		assertEquals(Boolean.TRUE, bean.getMinute0());
+		assertEquals(Boolean.TRUE, bean.getMinute15());
+		assertEquals(Boolean.TRUE, bean.getMinute30());
+		assertEquals(Boolean.TRUE, bean.getMinute45());
+		assertEquals(Boolean.TRUE, bean.getMinute59());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	void allMinuteFieldsSetAndGet() throws Exception {
+	void allMinuteFieldsSetAndGet() {
 		JobSchedule bean = JobSchedule.newInstance();
 		bean.setMinute1(Boolean.TRUE);
 		bean.setMinute2(Boolean.TRUE);
@@ -149,13 +146,13 @@ public class JobScheduleDomainTest extends AbstractSkyveTest {
 		bean.setMinute56(Boolean.TRUE);
 		bean.setMinute57(Boolean.TRUE);
 		bean.setMinute58(Boolean.TRUE);
-		assertTrue(bean.getMinute1());
-		assertTrue(bean.getMinute58());
+		assertEquals(Boolean.TRUE, bean.getMinute1());
+		assertEquals(Boolean.TRUE, bean.getMinute58());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	void hourFieldsSetAndGet() throws Exception {
+	void hourFieldsSetAndGet() {
 		JobSchedule bean = JobSchedule.newInstance();
 		bean.setAllHours("*");
 		bean.setHour0(Boolean.TRUE);
@@ -164,14 +161,14 @@ public class JobScheduleDomainTest extends AbstractSkyveTest {
 		bean.setHour18(Boolean.TRUE);
 		bean.setHour23(Boolean.TRUE);
 		assertEquals("*", bean.getAllHours());
-		assertTrue(bean.getHour0());
-		assertTrue(bean.getHour12());
-		assertTrue(bean.getHour23());
+		assertEquals(Boolean.TRUE, bean.getHour0());
+		assertEquals(Boolean.TRUE, bean.getHour12());
+		assertEquals(Boolean.TRUE, bean.getHour23());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	void allHourFieldsSetAndGet() throws Exception {
+	void allHourFieldsSetAndGet() {
 		JobSchedule bean = JobSchedule.newInstance();
 		bean.setHour1(Boolean.TRUE);
 		bean.setHour2(Boolean.TRUE);
@@ -192,27 +189,27 @@ public class JobScheduleDomainTest extends AbstractSkyveTest {
 		bean.setHour20(Boolean.TRUE);
 		bean.setHour21(Boolean.TRUE);
 		bean.setHour22(Boolean.TRUE);
-		assertTrue(bean.getHour1());
-		assertTrue(bean.getHour22());
+		assertEquals(Boolean.TRUE, bean.getHour1());
+		assertEquals(Boolean.TRUE, bean.getHour22());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	void dayFieldsSetAndGet() throws Exception {
+	void dayFieldsSetAndGet() {
 		JobSchedule bean = JobSchedule.newInstance();
 		bean.setAllDays("*");
 		bean.setDay1(Boolean.TRUE);
 		bean.setDay15(Boolean.TRUE);
 		bean.setDay31(Boolean.TRUE);
 		assertEquals("*", bean.getAllDays());
-		assertTrue(bean.getDay1());
-		assertTrue(bean.getDay15());
-		assertTrue(bean.getDay31());
+		assertEquals(Boolean.TRUE, bean.getDay1());
+		assertEquals(Boolean.TRUE, bean.getDay15());
+		assertEquals(Boolean.TRUE, bean.getDay31());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	void allDayFieldsSetAndGet() throws Exception {
+	void allDayFieldsSetAndGet() {
 		JobSchedule bean = JobSchedule.newInstance();
 		bean.setDay2(Boolean.TRUE);
 		bean.setDay3(Boolean.TRUE);
@@ -242,27 +239,27 @@ public class JobScheduleDomainTest extends AbstractSkyveTest {
 		bean.setDay28(Boolean.TRUE);
 		bean.setDay29(Boolean.TRUE);
 		bean.setDay30(Boolean.TRUE);
-		assertTrue(bean.getDay2());
-		assertTrue(bean.getDay30());
+		assertEquals(Boolean.TRUE, bean.getDay2());
+		assertEquals(Boolean.TRUE, bean.getDay30());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	void monthFieldsSetAndGet() throws Exception {
+	void monthFieldsSetAndGet() {
 		JobSchedule bean = JobSchedule.newInstance();
 		bean.setAllMonths("*");
 		bean.setMonth1(Boolean.TRUE);
 		bean.setMonth6(Boolean.TRUE);
 		bean.setMonth12(Boolean.TRUE);
 		assertEquals("*", bean.getAllMonths());
-		assertTrue(bean.getMonth1());
-		assertTrue(bean.getMonth6());
-		assertTrue(bean.getMonth12());
+		assertEquals(Boolean.TRUE, bean.getMonth1());
+		assertEquals(Boolean.TRUE, bean.getMonth6());
+		assertEquals(Boolean.TRUE, bean.getMonth12());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	void allMonthFieldsSetAndGet() throws Exception {
+	void allMonthFieldsSetAndGet() {
 		JobSchedule bean = JobSchedule.newInstance();
 		bean.setMonth2(Boolean.TRUE);
 		bean.setMonth3(Boolean.TRUE);
@@ -273,13 +270,13 @@ public class JobScheduleDomainTest extends AbstractSkyveTest {
 		bean.setMonth9(Boolean.TRUE);
 		bean.setMonth10(Boolean.TRUE);
 		bean.setMonth11(Boolean.TRUE);
-		assertTrue(bean.getMonth2());
-		assertTrue(bean.getMonth11());
+		assertEquals(Boolean.TRUE, bean.getMonth2());
+		assertEquals(Boolean.TRUE, bean.getMonth11());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	void weekdayFieldsSetAndGet() throws Exception {
+	void weekdayFieldsSetAndGet() {
 		JobSchedule bean = JobSchedule.newInstance();
 		bean.setAllWeekdays("*");
 		bean.setWeekday1(Boolean.TRUE);
@@ -290,7 +287,7 @@ public class JobScheduleDomainTest extends AbstractSkyveTest {
 		bean.setWeekday6(Boolean.TRUE);
 		bean.setWeekday7(Boolean.TRUE);
 		assertEquals("*", bean.getAllWeekdays());
-		assertTrue(bean.getWeekday1());
-		assertTrue(bean.getWeekday7());
+		assertEquals(Boolean.TRUE, bean.getWeekday1());
+		assertEquals(Boolean.TRUE, bean.getWeekday7());
 	}
 }

@@ -23,6 +23,7 @@ import org.skyve.util.MailDispatchOutcome;
 
 import jakarta.mail.BodyPart;
 import jakarta.mail.Multipart;
+import jakarta.mail.PasswordAuthentication;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 
@@ -226,6 +227,24 @@ class SMTPMailServiceTest {
 		SMTPMailService smtpService = new SMTPMailService();
 		ValidationException e = assertThrows(ValidationException.class, () -> smtpService.sendMail(mail));
 		assertThat(e.getMessage(), containsString("Email was not sent"));
+	}
+
+	@Test
+	void testAuthenticatorReturnsConfiguredCredentials() throws Exception {
+		UtilImpl.SMTP_UID = "smtp-user";
+		UtilImpl.SMTP_PWD = "smtp-pass";
+
+		Class<?> authenticatorClass = Class.forName("org.skyve.impl.mail.SMTPMailService$Authenticator");
+		java.lang.reflect.Constructor<?> constructor = authenticatorClass.getDeclaredConstructor();
+		constructor.setAccessible(true);
+		Object authenticator = constructor.newInstance();
+
+		Method getter = authenticatorClass.getDeclaredMethod("getPasswordAuthentication");
+		getter.setAccessible(true);
+		PasswordAuthentication authentication = (PasswordAuthentication) getter.invoke(authenticator);
+
+		assertThat(authentication.getUserName(), is("smtp-user"));
+		assertThat(authentication.getPassword(), is("smtp-pass"));
 	}
 
 	private static class StubSMTPMailService extends SMTPMailService {

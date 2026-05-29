@@ -7,15 +7,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("static-method")
-public class DynamicRelationDomainTest {
+class DynamicRelationDomainTest {
 
 	private DynamicRelation relation;
 	private DynamicEntity entity;
 
 	@BeforeEach
 	void setUp() {
-		relation = new DynamicRelation() {};
-		entity = new DynamicEntity() {};
+		relation = new DynamicRelation() { /* test stub */ };
+		entity = new DynamicEntity() { /* test stub */ };
 	}
 
 	@Test

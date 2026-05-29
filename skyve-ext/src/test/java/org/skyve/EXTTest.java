@@ -4,6 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +17,8 @@ import org.junit.jupiter.api.Test;
 import org.skyve.bizport.BizPortSheet;
 import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.domain.messages.MessageSeverity;
+import org.skyve.metadata.user.User;
+import org.skyve.metadata.user.UserAccess;
 import org.skyve.util.PushMessage;
 import org.skyve.util.PushMessage.PushMessageReceiver;
 
@@ -246,6 +251,112 @@ class EXTTest {
 	void testIsWebRequestReturnsFalseWhenNoRequestSet() {
 		// No WebContainer has been set, so isWebRequest should return false
 		assertFalse(EXT.isWebRequest());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testGetHttpServletRequestThrowsWhenNoRequestAvailable() {
+		assertThrows(IllegalStateException.class, EXT::getHttpServletRequest);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testGetHttpServletResponseThrowsWhenNoResponseAvailable() {
+		assertThrows(IllegalStateException.class, EXT::getHttpServletRespsone);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testCoreServiceGettersDoNotThrow() {
+		org.junit.jupiter.api.Assertions.assertDoesNotThrow(EXT::getJobScheduler);
+		org.junit.jupiter.api.Assertions.assertDoesNotThrow(EXT::getTagManager);
+		org.junit.jupiter.api.Assertions.assertDoesNotThrow(EXT::getReporting);
+		org.junit.jupiter.api.Assertions.assertDoesNotThrow(EXT::getCaching);
+		org.junit.jupiter.api.Assertions.assertDoesNotThrow(EXT::getAddInManager);
+		org.junit.jupiter.api.Assertions.assertDoesNotThrow(EXT::getGeoIPService);
+		org.junit.jupiter.api.Assertions.assertDoesNotThrow(EXT::getSMSService);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testGetMailServiceHandlesInitialisationState() {
+		try {
+			EXT.getMailService();
+		}
+		catch (IllegalStateException e) {
+			assertTrue(e.getMessage().contains("not been initialised"));
+		}
+	}
+
+	@Test
+	@SuppressWarnings({ "static-method", "boxing" })
+	void testCheckAccessDoesNotThrowWhenUserCanAccess() {
+		User user = mock(User.class);
+		UserAccess access = UserAccess.singular("admin", "User");
+
+		when(user.canAccess(access, "desktop")).thenReturn(true);
+
+		org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> EXT.checkAccess(user, access, "desktop"));
+	}
+
+	@Test
+	@SuppressWarnings({ "static-method", "boxing" })
+	void testCheckAccessThrowsForSingularAccess() {
+		User user = mock(User.class);
+		UserAccess access = UserAccess.singular("admin", "User");
+
+		when(user.canAccess(access, "desktop")).thenReturn(false);
+		when(user.getName()).thenReturn("tester");
+
+		assertThrows(IllegalArgumentException.class, () -> EXT.checkAccess(user, access, "desktop"));
+	}
+
+	@Test
+	@SuppressWarnings({ "static-method", "boxing" })
+	void testCheckAccessThrowsForModelAggregateAccess() {
+		User user = mock(User.class);
+		UserAccess access = UserAccess.modelAggregate("admin", "User", "UserModel");
+
+		when(user.canAccess(access, "desktop")).thenReturn(false);
+		when(user.getName()).thenReturn("tester");
+
+		assertThrows(IllegalArgumentException.class, () -> EXT.checkAccess(user, access, "desktop"));
+	}
+
+	@Test
+	@SuppressWarnings({ "static-method", "boxing" })
+	void testCheckAccessThrowsForReportAccess() {
+		User user = mock(User.class);
+		UserAccess access = UserAccess.report("admin", "User", "UserSummary");
+
+		when(user.canAccess(access, "desktop")).thenReturn(false);
+		when(user.getName()).thenReturn("tester");
+
+		assertThrows(IllegalArgumentException.class, () -> EXT.checkAccess(user, access, "desktop"));
+	}
+
+	@Test
+	@SuppressWarnings({ "static-method", "boxing" })
+	void testCheckAccessThrowsForContentAccess() {
+		User user = mock(User.class);
+		UserAccess access = UserAccess.content("admin", "User", "attachment");
+
+		when(user.canAccess(access, "desktop")).thenReturn(false);
+		when(user.getName()).thenReturn("tester");
+
+		assertThrows(IllegalArgumentException.class, () -> EXT.checkAccess(user, access, "desktop"));
+	}
+
+	@Test
+	@SuppressWarnings({ "static-method", "boxing" })
+	void testCheckAccessThrowsForDynamicImageAccess() {
+		User user = mock(User.class);
+		UserAccess access = UserAccess.dynamicImage("admin", "User", "avatar");
+
+		when(user.canAccess(access, "desktop")).thenReturn(false);
+		when(user.getName()).thenReturn("tester");
+
+		assertThrows(IllegalArgumentException.class, () -> EXT.checkAccess(user, access, "desktop"));
 	}
 
 	private static class TestReceiver implements PushMessageReceiver {

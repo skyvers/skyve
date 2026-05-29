@@ -429,7 +429,7 @@ class ModulesUtilTest extends AbstractH2Test {
 	void getPersistentIdentifierReturnsTableNameForPersistentDocument() {
 		String result = ModulesUtil.getPersistentIdentifier("admin", "User");
 		assertNotNull(result);
-		assertTrue(result.contains("USR_User") || result.length() > 0);
+		assertTrue(result.contains("USR_User") || !result.isEmpty());
 	}
 
 	@Test

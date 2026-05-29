@@ -8,16 +8,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -47,17 +50,22 @@ import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.ValidationException;
+import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.metadata.model.document.Condition;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.Inverse;
+import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter;
+import org.skyve.util.Binder.TargetMetaData;
 
 import org.locationtech.jts.geom.Geometry;
 
@@ -1374,6 +1382,120 @@ class BindUtilTest {
 		assertEquals(String.class, BindUtil.getPropertyType(new SimplePojo(), "value"));
 	}
 
+	@Test
+	@SuppressWarnings("static-method")
+	void getMetaDataForBindingReturnsImplicitTypeForBizId() {
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		when(document.getAttribute(Bean.DOCUMENT_ID)).thenReturn(null);
+		when(document.getExtends()).thenReturn(null);
+
+		TargetMetaData target = BindUtil.getMetaDataForBinding(null, module, document, Bean.DOCUMENT_ID);
+
+		assertSame(document, target.getDocument());
+		assertNull(target.getAttribute());
+		assertEquals(String.class, target.getType());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getMetaDataForBindingThrowsWhenLastAttributeMissing() {
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		when(document.getAttribute("missing")).thenReturn(null);
+		when(document.getExtends()).thenReturn(null);
+		when(document.getOwningModuleName()).thenReturn("admin");
+		when(document.getName()).thenReturn("User");
+
+		MetaDataException exception = assertThrows(MetaDataException.class,
+				() -> BindUtil.getMetaDataForBinding(null, module, document, "missing"));
+
+		assertTrue(exception.getMessage().contains("last attribute not in document"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getMetaDataForBindingResolvesRelationTraversal() {
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Module relationModule = mock(Module.class);
+		Document rootDocument = mock(Document.class);
+		Document relationDocument = mock(Document.class);
+		Relation relation = mock(Relation.class);
+		Attribute relationField = mock(Attribute.class);
+
+		when(rootDocument.getAttribute("child")).thenReturn(relation);
+		when(rootDocument.getExtends()).thenReturn(null);
+		when(rootDocument.getOwningModuleName()).thenReturn("admin");
+		when(customer.getModule("admin")).thenReturn(module);
+		when(relation.getDocumentName()).thenReturn("ChildDoc");
+		when(module.getDocument(customer, "ChildDoc")).thenReturn(relationDocument);
+		when(relationDocument.getOwningModuleName()).thenReturn("sales");
+		when(customer.getModule("sales")).thenReturn(relationModule);
+
+		when(relationDocument.getAttribute("name")).thenReturn(relationField);
+		when(relationDocument.getExtends()).thenReturn(null);
+		when(relationField.getAttributeType()).thenReturn(Attribute.AttributeType.text);
+		doReturn(String.class).when(relationField).getImplementingType();
+
+		TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, rootDocument, "child.name");
+
+		assertSame(relationDocument, target.getDocument());
+		assertSame(relationField, target.getAttribute());
+		assertEquals(String.class, target.getType());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void validateBindingReturnsConditionBooleanType() {
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Condition condition = mock(Condition.class);
+
+		when(document.getCondition("active")).thenReturn(condition);
+		when(document.getOwningModuleName()).thenReturn("admin");
+		when(customer.getModule("admin")).thenReturn(module);
+
+		TargetMetaData target = BindUtil.validateBinding(customer, module, document, "active");
+
+		assertSame(document, target.getDocument());
+		assertNull(target.getAttribute());
+		assertEquals(Boolean.class, target.getType());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void validateBindingResolvesRelationThenUltimateAttribute() {
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Module relationModule = mock(Module.class);
+		Document rootDocument = mock(Document.class);
+		Document relationDocument = mock(Document.class);
+		Relation relation = mock(Relation.class);
+		Attribute status = mock(Attribute.class);
+
+		when(rootDocument.getAttribute("child")).thenReturn(relation);
+		when(rootDocument.getExtends()).thenReturn(null);
+		when(rootDocument.getOwningModuleName()).thenReturn("admin");
+		when(customer.getModule("admin")).thenReturn(module);
+		when(relation.getDocumentName()).thenReturn("ChildDoc");
+		when(module.getDocument(customer, "ChildDoc")).thenReturn(relationDocument);
+
+		when(relationDocument.getOwningModuleName()).thenReturn("sales");
+		when(customer.getModule("sales")).thenReturn(relationModule);
+		when(relationDocument.getAttribute("status")).thenReturn(status);
+		when(relationDocument.getExtends()).thenReturn(null);
+		when(status.getAttributeType()).thenReturn(Attribute.AttributeType.text);
+		doReturn(String.class).when(status).getImplementingType();
+
+		TargetMetaData target = BindUtil.validateBinding(customer, module, rootDocument, "child.status");
+
+		assertSame(relationDocument, target.getDocument());
+		assertSame(status, target.getAttribute());
+		assertEquals(String.class, target.getType());
+	}
+
 	// ---- convertAndSet ------------------------------------------------------
 
 	@Test
@@ -1672,6 +1794,413 @@ class BindUtilTest {
 				() -> BindUtil.populateProperties(null, mock(Bean.class), properties, false));
 
 		assertFalse(exception.getMessages().isEmpty());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void populatePropertySetsConvertedIntegerOnDynamicBean() {
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Attribute ageAttribute = mock(Attribute.class);
+		User user = mock(User.class);
+
+		Map<String, Object> properties = new HashMap<>();
+		properties.put("age", Integer.valueOf(0));
+		DynamicBean bean = new DynamicBean("sales", "Order", properties);
+
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("sales")).thenReturn(module);
+		when(module.getDocument(customer, "Order")).thenReturn(document);
+		when(document.getAttribute("age")).thenReturn(ageAttribute);
+		when(document.getExtends()).thenReturn(null);
+		when(ageAttribute.getAttributeType()).thenReturn(Attribute.AttributeType.integer);
+		doReturn(Integer.class).when(ageAttribute).getImplementingType();
+
+		BindUtil.populateProperty(user, bean, "age", " 42 ", false);
+
+		assertEquals(Integer.valueOf(42), bean.get("age"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void populatePropertyBlankStringSetsNullForScalarAttribute() {
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Attribute nameAttribute = mock(Attribute.class);
+		User user = mock(User.class);
+
+		Map<String, Object> properties = new HashMap<>();
+		properties.put("name", "before");
+		DynamicBean bean = new DynamicBean("sales", "Order", properties);
+
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("sales")).thenReturn(module);
+		when(module.getDocument(customer, "Order")).thenReturn(document);
+		when(document.getAttribute("name")).thenReturn(nameAttribute);
+		when(document.getExtends()).thenReturn(null);
+		when(nameAttribute.getAttributeType()).thenReturn(Attribute.AttributeType.text);
+		doReturn(String.class).when(nameAttribute).getImplementingType();
+
+		BindUtil.populateProperty(user, bean, "name", "   ", false);
+
+		assertNull(bean.get("name"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void findLastNestedIndexIgnoresDotsInsideMappedAndIndexedSegments() throws Exception {
+		Method method = BindUtil.class.getDeclaredMethod("findLastNestedIndex", String.class);
+		method.setAccessible(true);
+
+		int index = ((Integer) method.invoke(null, "orders[0].itemsElementById(a.b).name")).intValue();
+		assertEquals("orders[0].itemsElementById(a.b)".length(), index);
+		assertEquals(-1, ((Integer) method.invoke(null, "simpleBinding")).intValue());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void instantiateAndGetCreatesMissingRelationInstance() throws Exception {
+		Customer customer = mock(Customer.class);
+		User user = mock(User.class);
+		Module module = mock(Module.class);
+		Document rootDocument = mock(Document.class);
+		Document childDocument = mock(Document.class);
+		Relation childRelation = mock(Relation.class);
+
+		Map<String, Object> properties = new HashMap<>();
+		properties.put("child", null);
+		DynamicBean rootBean = new DynamicBean("sales", "Order", properties);
+		DynamicBean childBean = new DynamicBean("sales", "Child", new HashMap<>());
+
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("sales")).thenReturn(module);
+		when(module.getDocument(customer, "Order")).thenReturn(rootDocument);
+		when(rootDocument.getAttribute("child")).thenReturn(childRelation);
+		when(rootDocument.getPolymorphicAttribute(customer, "child")).thenReturn(childRelation);
+		when(rootDocument.getExtends()).thenReturn(null);
+		when(childRelation.getDocumentName()).thenReturn("Child");
+		when(module.getDocument(customer, "Child")).thenReturn(childDocument);
+		doReturn(childBean).when(childDocument).newInstance(user);
+
+		withThreadLocalUser(user, () -> {
+			Object result = BindUtil.instantiateAndGet(user, module, rootDocument, rootBean, "child");
+
+			assertSame(childBean, result);
+			assertSame(childBean, rootBean.get("child"));
+		});
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void instantiateAndGetIndexedCollectionThrowsMetadataExceptionForOutOfRangeElement() {
+		Customer customer = mock(Customer.class);
+		User user = mock(User.class);
+		Module module = mock(Module.class);
+		Document rootDocument = mock(Document.class);
+		Document lineDocument = mock(Document.class);
+		Relation linesRelation = mock(Relation.class);
+
+		Map<String, Object> properties = new HashMap<>();
+		properties.put("lines", new ArrayList<>());
+		DynamicBean rootBean = new DynamicBean("sales", "Order", properties);
+
+		when(user.getCustomer()).thenReturn(customer);
+		when(rootDocument.getAttribute("lines")).thenReturn(linesRelation);
+		when(rootDocument.getExtends()).thenReturn(null);
+		when(linesRelation.getDocumentName()).thenReturn("Line");
+		when(module.getDocument(customer, "Line")).thenReturn(lineDocument);
+
+		MetaDataException exception = assertThrows(MetaDataException.class,
+				() -> BindUtil.instantiateAndGet(user, module, rootDocument, rootBean, "lines[2]"));
+
+		assertTrue(exception.getMessage().contains("problem was encountered"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void instantiateAndGetThrowsWhenParentDocumentDoesNotExist() {
+		Customer customer = mock(Customer.class);
+		User user = mock(User.class);
+		Module module = mock(Module.class);
+		Document rootDocument = mock(Document.class);
+
+		when(user.getCustomer()).thenReturn(customer);
+		when(rootDocument.getParentDocument(customer)).thenReturn(null);
+
+		MetaDataException exception = assertThrows(MetaDataException.class,
+				() -> BindUtil.instantiateAndGet(user, module, rootDocument, mock(Bean.class), "parent.child"));
+
+		assertTrue(exception.getMessage().contains("parent document does not exist"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void instantiateAndGetNavigatesParentThenCreatesNestedRelation() throws Exception {
+		Customer customer = mock(Customer.class);
+		User user = mock(User.class);
+		Module module = mock(Module.class);
+		Document rootDocument = mock(Document.class);
+		Document parentDocument = mock(Document.class);
+		Document childDocument = mock(Document.class);
+		Relation childRelation = mock(Relation.class);
+
+		Map<String, Object> parentProperties = new HashMap<>();
+		parentProperties.put("child", null);
+		DynamicBean parentBean = new DynamicBean("sales", "ParentDoc", parentProperties);
+
+		Map<String, Object> rootProperties = new HashMap<>();
+		rootProperties.put("parent", parentBean);
+		DynamicBean rootBean = new DynamicBean("sales", "Order", rootProperties);
+
+		DynamicBean childBean = new DynamicBean("sales", "Child", new HashMap<>());
+
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("sales")).thenReturn(module);
+
+		when(rootDocument.getParentDocument(customer)).thenReturn(parentDocument);
+		when(parentDocument.getAttribute("child")).thenReturn(childRelation);
+		when(parentDocument.getExtends()).thenReturn(null);
+		when(parentDocument.getPolymorphicAttribute(customer, "child")).thenReturn(childRelation);
+		when(childRelation.getDocumentName()).thenReturn("Child");
+		when(module.getDocument(customer, "Child")).thenReturn(childDocument);
+		when(module.getDocument(customer, "ParentDoc")).thenReturn(parentDocument);
+		doReturn(childBean).when(childDocument).newInstance(user);
+
+		withThreadLocalUser(user, () -> {
+			Object result = BindUtil.instantiateAndGet(user, module, rootDocument, rootBean, "parent.child");
+
+			assertSame(childBean, result);
+			assertSame(childBean, parentBean.get("child"));
+		});
+	}
+
+	@Test
+	@SuppressWarnings({ "static-method", "unchecked" })
+	void copyCopiesScalarAndCollectionsAndReparentsChildElements() {
+		Customer customer = mock(Customer.class);
+		User user = mock(User.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Attribute textAttribute = mock(Attribute.class);
+		org.skyve.metadata.model.document.Collection childCollectionAttribute =
+				mock(org.skyve.metadata.model.document.Collection.class);
+		Attribute inverseManyAttribute = mock(Attribute.class);
+		ChildBean<Bean> childElement = mock(ChildBean.class);
+
+		Map<String, Object> fromProperties = new HashMap<>();
+		fromProperties.put("text", "copied-value");
+		fromProperties.put("children", new ArrayList<>(List.of(childElement)));
+		fromProperties.put("peers", new ArrayList<>(List.of(mock(Bean.class))));
+		DynamicBean from = new DynamicBean("sales", "Order", fromProperties);
+
+		Map<String, Object> toProperties = new HashMap<>();
+		toProperties.put("text", "before");
+		toProperties.put("children", new ArrayList<>());
+		toProperties.put("peers", new ArrayList<>());
+		DynamicBean to = new DynamicBean("sales", "Order", toProperties);
+
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("sales")).thenReturn(module);
+		when(module.getDocument(customer, "Order")).thenReturn(document);
+		doReturn(Arrays.asList(textAttribute, childCollectionAttribute, inverseManyAttribute)).when(document).getAllAttributes(customer);
+
+		when(textAttribute.getName()).thenReturn("text");
+		when(textAttribute.getAttributeType()).thenReturn(Attribute.AttributeType.text);
+
+		when(childCollectionAttribute.getName()).thenReturn("children");
+		when(childCollectionAttribute.getAttributeType()).thenReturn(Attribute.AttributeType.collection);
+		when(childCollectionAttribute.getType()).thenReturn(org.skyve.metadata.model.document.Collection.CollectionType.child);
+
+		when(inverseManyAttribute.getName()).thenReturn("peers");
+		when(inverseManyAttribute.getAttributeType()).thenReturn(Attribute.AttributeType.inverseMany);
+
+		withThreadLocalUser(user, () -> BindUtil.copy(from, to));
+
+		assertEquals("copied-value", to.get("text"));
+
+		List<Bean> copiedChildren = (List<Bean>) to.get("children");
+		assertEquals(1, copiedChildren.size());
+		assertSame(childElement, copiedChildren.get(0));
+		verify(childElement).setParent(to);
+
+		List<Bean> copiedPeers = (List<Bean>) to.get("peers");
+		assertEquals(1, copiedPeers.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void copySkipsCollectionWhenDestinationCollectionIsNull() {
+		Customer customer = mock(Customer.class);
+		User user = mock(User.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		org.skyve.metadata.model.document.Collection childCollectionAttribute =
+				mock(org.skyve.metadata.model.document.Collection.class);
+
+		Map<String, Object> fromProperties = new HashMap<>();
+		fromProperties.put("children", new ArrayList<>());
+		DynamicBean from = new DynamicBean("sales", "Order", fromProperties);
+
+		Map<String, Object> toProperties = new HashMap<>();
+		toProperties.put("children", null);
+		DynamicBean to = new DynamicBean("sales", "Order", toProperties);
+
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("sales")).thenReturn(module);
+		when(module.getDocument(customer, "Order")).thenReturn(document);
+		doReturn(Arrays.asList(childCollectionAttribute)).when(document).getAllAttributes(customer);
+		when(childCollectionAttribute.getName()).thenReturn("children");
+		when(childCollectionAttribute.getAttributeType()).thenReturn(Attribute.AttributeType.collection);
+		when(childCollectionAttribute.getType()).thenReturn(org.skyve.metadata.model.document.Collection.CollectionType.child);
+
+		assertDoesNotThrow(() -> withThreadLocalUser(user, () -> BindUtil.copy(from, to)));
+		assertNull(to.get("children"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void setElementParentSetsParentWhenRelationParentMatchesOwnerDocument() throws Exception {
+		Method method = BindUtil.class.getDeclaredMethod("setElementParent",
+				Customer.class,
+				Module.class,
+				Document.class,
+				Relation.class,
+				Bean.class,
+				Bean.class);
+		method.setAccessible(true);
+
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Module module = mock(Module.class);
+		Document ownerDocument = mock(Document.class);
+		Document relatedDocument = mock(Document.class);
+		Document parentDocument = mock(Document.class);
+		Relation relation = mock(Relation.class);
+		ChildBean<Bean> child = mock(ChildBean.class);
+		Bean parent = mock(Bean.class);
+
+		when(relation.getDocumentName()).thenReturn("ChildDoc");
+		when(module.getDocument(customer, "ChildDoc")).thenReturn(relatedDocument);
+		when(relatedDocument.getParentDocument(customer)).thenReturn(parentDocument);
+		when(parentDocument.getOwningModuleName()).thenReturn("sales");
+		when(parentDocument.getName()).thenReturn("Order");
+		when(ownerDocument.getOwningModuleName()).thenReturn("sales");
+		when(ownerDocument.getName()).thenReturn("Order");
+
+		method.invoke(null, customer, module, ownerDocument, relation, child, parent);
+
+		verify(child).setParent(parent);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void orderByMetaDataReturnsEarlyWhenCompoundOwnerIsNull() {
+		Map<String, Object> properties = new HashMap<>();
+		properties.put("parent", null);
+		DynamicBean bean = new DynamicBean("sales", "Order", properties);
+
+		assertDoesNotThrow(() -> BindUtil.orderByMetaData(bean, "parent.lines"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void orderByMetaDataHandlesCollectionTargetWithoutOrdering() {
+		Customer customer = mock(Customer.class);
+		User user = mock(User.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		org.skyve.metadata.model.document.Collection collection =
+				mock(org.skyve.metadata.model.document.Collection.class);
+
+		Map<String, Object> properties = new HashMap<>();
+		properties.put("lines", new ArrayList<>());
+		DynamicBean bean = new DynamicBean("sales", "Order", properties);
+
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("sales")).thenReturn(module);
+		when(module.getDocument(customer, "Order")).thenReturn(document);
+		when(document.getAttribute("lines")).thenReturn(collection);
+		when(document.getExtends()).thenReturn(null);
+		when(collection.getName()).thenReturn("lines");
+		when(collection.getOrdered()).thenReturn(Boolean.FALSE);
+		when(collection.getType()).thenReturn(org.skyve.metadata.model.document.Collection.CollectionType.child);
+		doReturn(new ArrayList<>()).when(collection).getOrdering();
+
+		assertDoesNotThrow(() -> withThreadLocalUser(user, () -> BindUtil.orderByMetaData(bean, "lines")));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void setRelationInverseUsesInverseReferenceNameForBeanAssociation() throws Exception {
+		Method method = BindUtil.class.getDeclaredMethod("setRelationInverse",
+				Customer.class,
+				Document.class,
+				Relation.class,
+				Bean.class,
+				String.class,
+				Bean.class,
+				boolean.class);
+		method.setAccessible(true);
+
+		Customer customer = mock(Customer.class);
+		Document ownerDocument = mock(Document.class);
+		Inverse inverseRelation = mock(Inverse.class);
+		Bean owner = mock(Bean.class);
+
+		Map<String, Object> properties = new HashMap<>();
+		properties.put("ownerRef", null);
+		DynamicBean value = new DynamicBean("sales", "Child", properties);
+
+		when(inverseRelation.getReferenceName()).thenReturn("ownerRef");
+
+		method.invoke(null, customer, ownerDocument, inverseRelation, owner, "children", value, Boolean.FALSE);
+		assertSame(owner, value.get("ownerRef"));
+
+		method.invoke(null, customer, ownerDocument, inverseRelation, owner, "children", value, Boolean.TRUE);
+		assertNull(value.get("ownerRef"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void setRelationInverseFindsElementInverseAndMutatesCollection() throws Exception {
+		Method method = BindUtil.class.getDeclaredMethod("setRelationInverse",
+				Customer.class,
+				Document.class,
+				Relation.class,
+				Bean.class,
+				String.class,
+				Bean.class,
+				boolean.class);
+		method.setAccessible(true);
+
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document ownerDocument = mock(Document.class);
+		Document elementDocument = mock(Document.class);
+		Relation relation = mock(Relation.class);
+		Inverse inverseAttribute = mock(Inverse.class);
+		Bean owner = mock(Bean.class);
+
+		List<Bean> parents = new ArrayList<>();
+		Map<String, Object> properties = new HashMap<>();
+		properties.put("parents", parents);
+		DynamicBean value = new DynamicBean("sales", "Child", properties);
+
+		when(ownerDocument.getName()).thenReturn("Order");
+		when(customer.getModule("sales")).thenReturn(module);
+		when(module.getDocument(customer, "Child")).thenReturn(elementDocument);
+		doReturn(Arrays.asList(inverseAttribute)).when(elementDocument).getAllAttributes(customer);
+		when(inverseAttribute.getDocumentName()).thenReturn("Order");
+		when(inverseAttribute.getReferenceName()).thenReturn("children");
+		when(inverseAttribute.getName()).thenReturn("parents");
+
+		method.invoke(null, customer, ownerDocument, relation, owner, "children", value, Boolean.FALSE);
+		assertEquals(1, parents.size());
+		assertSame(owner, parents.get(0));
+
+		method.invoke(null, customer, ownerDocument, relation, owner, "children", value, Boolean.TRUE);
+		assertTrue(parents.isEmpty());
 	}
 
 	// ---- nullSafeConvert ----

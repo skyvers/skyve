@@ -2,7 +2,6 @@ package org.skyve.domain.types;
 
 import org.junit.Assert;
 import org.junit.Test;
-import static org.junit.Assert.assertEquals;
 
 public class Decimal2Test {
 

@@ -13,11 +13,11 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.test.AbstractSkyveTest;
 
-public class ReportParameterDomainTest extends AbstractSkyveTest {
+class ReportParameterDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void dataBuilderCreatesReportParameter() throws Exception {
+	void dataBuilderCreatesReportParameter() {
 		ReportParameter bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(ReportParameter.MODULE_NAME, ReportParameter.DOCUMENT_NAME);
@@ -26,7 +26,7 @@ public class ReportParameterDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void newInstanceCreatesReportParameter() throws Exception {
+	void newInstanceCreatesReportParameter() {
 		ReportParameter bean = ReportParameter.newInstance();
 		assertNotNull(bean);
 		assertEquals("admin", bean.getBizModule());
@@ -35,7 +35,7 @@ public class ReportParameterDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void nameSetAndGet() throws Exception {
+	void nameSetAndGet() {
 		ReportParameter bean = ReportParameter.newInstance();
 		bean.setName("myParam");
 		assertEquals("myParam", bean.getName());
@@ -43,7 +43,7 @@ public class ReportParameterDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void descriptionSetAndGet() throws Exception {
+	void descriptionSetAndGet() {
 		ReportParameter bean = ReportParameter.newInstance();
 		bean.setDescription("A test parameter");
 		assertEquals("A test parameter", bean.getDescription());
@@ -51,7 +51,7 @@ public class ReportParameterDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void typeTextSetAndGet() throws Exception {
+	void typeTextSetAndGet() {
 		ReportParameter bean = ReportParameter.newInstance();
 		bean.setType(ReportParameter.Type.text);
 		assertEquals(ReportParameter.Type.text, bean.getType());
@@ -60,7 +60,7 @@ public class ReportParameterDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void typeIntegerSetAndGet() throws Exception {
+	void typeIntegerSetAndGet() {
 		ReportParameter bean = ReportParameter.newInstance();
 		bean.setType(ReportParameter.Type.integer);
 		assertEquals(ReportParameter.Type.integer, bean.getType());
@@ -69,7 +69,7 @@ public class ReportParameterDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void typeLongIntegerSetAndGet() throws Exception {
+	void typeLongIntegerSetAndGet() {
 		ReportParameter bean = ReportParameter.newInstance();
 		bean.setType(ReportParameter.Type.longInteger);
 		assertEquals(ReportParameter.Type.longInteger, bean.getType());
@@ -78,7 +78,7 @@ public class ReportParameterDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void typeDateSetAndGet() throws Exception {
+	void typeDateSetAndGet() {
 		ReportParameter bean = ReportParameter.newInstance();
 		bean.setType(ReportParameter.Type.date);
 		assertEquals(ReportParameter.Type.date, bean.getType());
@@ -87,15 +87,15 @@ public class ReportParameterDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void requiredSetAndGet() throws Exception {
+	void requiredSetAndGet() {
 		ReportParameter bean = ReportParameter.newInstance();
 		bean.setRequired(Boolean.TRUE);
-		assertTrue(bean.getRequired());
+		assertEquals(Boolean.TRUE, bean.getRequired());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	void dateDefaultValueSetAndGet() throws Exception {
+	void dateDefaultValueSetAndGet() {
 		ReportParameter bean = ReportParameter.newInstance();
 		DateOnly d = new DateOnly();
 		bean.setDateDefaultValue(d);
@@ -104,7 +104,7 @@ public class ReportParameterDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void numericalDefaultValueSetAndGet() throws Exception {
+	void numericalDefaultValueSetAndGet() {
 		ReportParameter bean = ReportParameter.newInstance();
 		bean.setNumericalDefaultValue(Long.valueOf(42L));
 		assertEquals(Long.valueOf(42L), bean.getNumericalDefaultValue());
@@ -112,7 +112,7 @@ public class ReportParameterDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void textDefaultValueSetAndGet() throws Exception {
+	void textDefaultValueSetAndGet() {
 		ReportParameter bean = ReportParameter.newInstance();
 		bean.setTextDefaultValue("default text");
 		assertEquals("default text", bean.getTextDefaultValue());
@@ -120,7 +120,7 @@ public class ReportParameterDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void reportInputValueSetAndGet() throws Exception {
+	void reportInputValueSetAndGet() {
 		ReportParameter bean = ReportParameter.newInstance();
 		bean.setReportInputValue("input value");
 		assertEquals("input value", bean.getReportInputValue());
@@ -128,7 +128,7 @@ public class ReportParameterDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void dateTestValueSetAndGet() throws Exception {
+	void dateTestValueSetAndGet() {
 		ReportParameter bean = ReportParameter.newInstance();
 		DateOnly d = new DateOnly();
 		bean.setDateTestValue(d);
@@ -137,7 +137,7 @@ public class ReportParameterDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void numericalTestValueSetAndGet() throws Exception {
+	void numericalTestValueSetAndGet() {
 		ReportParameter bean = ReportParameter.newInstance();
 		bean.setNumericalTestValue(Long.valueOf(99L));
 		assertEquals(Long.valueOf(99L), bean.getNumericalTestValue());
@@ -145,7 +145,7 @@ public class ReportParameterDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void textTestValueSetAndGet() throws Exception {
+	void textTestValueSetAndGet() {
 		ReportParameter bean = ReportParameter.newInstance();
 		bean.setTextTestValue("test text");
 		assertEquals("test text", bean.getTextTestValue());
@@ -153,7 +153,7 @@ public class ReportParameterDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void defaultValueStringSetAndGet() throws Exception {
+	void defaultValueStringSetAndGet() {
 		ReportParameter bean = ReportParameter.newInstance();
 		bean.setDefaultValueString("default");
 		assertEquals("default", bean.getDefaultValueString());
@@ -161,7 +161,7 @@ public class ReportParameterDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void testValueStringFromTextTestValue() throws Exception {
+	void testValueStringFromTextTestValue() {
 		ReportParameter bean = ReportParameter.newInstance();
 		bean.setTextTestValue("myTestVal");
 		assertEquals("myTestVal", bean.getTestValueString());
@@ -169,7 +169,7 @@ public class ReportParameterDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void formattedInputValueFromDefaultValueString() throws Exception {
+	void formattedInputValueFromDefaultValueString() {
 		ReportParameter bean = ReportParameter.newInstance();
 		bean.setDefaultValueString("myDefault");
 		assertEquals("myDefault", bean.getFormattedInputValue());
@@ -177,7 +177,7 @@ public class ReportParameterDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void typeTextIsNotNumericalOrDate() throws Exception {
+	void typeTextIsNotNumericalOrDate() {
 		ReportParameter bean = ReportParameter.newInstance();
 		bean.setType(ReportParameter.Type.text);
 		assertTrue(bean.isNotNumericalValue());
@@ -186,7 +186,7 @@ public class ReportParameterDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void typeDateIsNotTextOrNumerical() throws Exception {
+	void typeDateIsNotTextOrNumerical() {
 		ReportParameter bean = ReportParameter.newInstance();
 		bean.setType(ReportParameter.Type.date);
 		assertTrue(bean.isNotTextValue());
@@ -195,7 +195,7 @@ public class ReportParameterDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void typeNumericalIsNotTextOrDate() throws Exception {
+	void typeNumericalIsNotTextOrDate() {
 		ReportParameter bean = ReportParameter.newInstance();
 		bean.setType(modules.admin.domain.ReportParameter.Type.integer);
 		assertTrue(bean.isNumericalValue());
@@ -206,7 +206,7 @@ public class ReportParameterDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void isTextValueWhenTypeText() throws Exception {
+	void isTextValueWhenTypeText() {
 		ReportParameter bean = ReportParameter.newInstance();
 		bean.setType(modules.admin.domain.ReportParameter.Type.text);
 		assertTrue(bean.isTextValue());
@@ -215,7 +215,7 @@ public class ReportParameterDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void isDateValueWhenTypeDate() throws Exception {
+	void isDateValueWhenTypeDate() {
 		ReportParameter bean = ReportParameter.newInstance();
 		bean.setType(modules.admin.domain.ReportParameter.Type.date);
 		assertTrue(bean.isDateValue());
@@ -270,9 +270,9 @@ public class ReportParameterDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void bizOrdinalSetAndGet() throws Exception {
+	void bizOrdinalSetAndGet() {
 		ReportParameter bean = ReportParameter.newInstance();
-		bean.setBizOrdinal(42);
+		bean.setBizOrdinal(Integer.valueOf(42));
 		assertEquals(42, bean.getBizOrdinal());
 	}
 }

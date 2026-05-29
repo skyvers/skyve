@@ -19,7 +19,8 @@ import org.junit.jupiter.api.Test;
  * Tests for JobScheduleBizlet - covering getConstantDomainValues,
  * newInstance, preSave (cron expression building), and validate.
  */
-public class JobScheduleBizletTest extends AbstractSkyveTest {
+@SuppressWarnings("static-method")
+class JobScheduleBizletTest extends AbstractSkyveTest {
 
 	private static JobScheduleBizlet bizlet = new JobScheduleBizlet();
 
@@ -79,7 +80,7 @@ public class JobScheduleBizletTest extends AbstractSkyveTest {
 
 	@Test
 	void newInstanceSetsDefaultAllCodesOnBean() throws Exception {
-		JobScheduleExtension bean = (JobScheduleExtension) JobSchedule.newInstance();
+		JobScheduleExtension bean = JobSchedule.newInstance();
 		JobScheduleExtension result = bizlet.newInstance(bean);
 		assertNotNull(result);
 		assertEquals("*", result.getAllMinutes());
@@ -93,7 +94,7 @@ public class JobScheduleBizletTest extends AbstractSkyveTest {
 
 	@Test
 	void preSaveWithAllDefaultsBuildsAllStarCronExpression() throws Exception {
-		JobScheduleExtension bean = (JobScheduleExtension) JobSchedule.newInstance();
+		JobScheduleExtension bean = JobSchedule.newInstance();
 		bizlet.newInstance(bean);
 		bizlet.preSave(bean);
 		String cron = bean.getCronExpression();
@@ -104,7 +105,7 @@ public class JobScheduleBizletTest extends AbstractSkyveTest {
 
 	@Test
 	void preSaveWithSelectedMinuteBuildsCronWithMinuteIndex() throws Exception {
-		JobScheduleExtension bean = (JobScheduleExtension) JobSchedule.newInstance();
+		JobScheduleExtension bean = JobSchedule.newInstance();
 		bizlet.newInstance(bean);
 		bean.setAllMinutes("X"); // Selected
 		bean.setMinute5(Boolean.TRUE);
@@ -116,7 +117,7 @@ public class JobScheduleBizletTest extends AbstractSkyveTest {
 
 	@Test
 	void preSaveWithSelectedHourBuildsCronWithHourIndex() throws Exception {
-		JobScheduleExtension bean = (JobScheduleExtension) JobSchedule.newInstance();
+		JobScheduleExtension bean = JobSchedule.newInstance();
 		bizlet.newInstance(bean);
 		bean.setAllHours("X");
 		bean.setHour8(Boolean.TRUE);
@@ -128,7 +129,7 @@ public class JobScheduleBizletTest extends AbstractSkyveTest {
 
 	@Test
 	void preSaveWithLastDayCodeSetsLastDay() throws Exception {
-		JobScheduleExtension bean = (JobScheduleExtension) JobSchedule.newInstance();
+		JobScheduleExtension bean = JobSchedule.newInstance();
 		bizlet.newInstance(bean);
 		bean.setAllDays("L");
 		bizlet.preSave(bean);
@@ -139,7 +140,7 @@ public class JobScheduleBizletTest extends AbstractSkyveTest {
 
 	@Test
 	void preSaveWithLastWeekDayCodeSetsLastWeekDay() throws Exception {
-		JobScheduleExtension bean = (JobScheduleExtension) JobSchedule.newInstance();
+		JobScheduleExtension bean = JobSchedule.newInstance();
 		bizlet.newInstance(bean);
 		bean.setAllDays("LW");
 		bizlet.preSave(bean);
@@ -151,7 +152,7 @@ public class JobScheduleBizletTest extends AbstractSkyveTest {
 	@Test
 	void preSaveWithSelectedWeekdayAndAllDaysBuildsCronWithQuestion() throws Exception {
 		// When allWeekdays is "X" (Selected), days of month becomes "?"
-		JobScheduleExtension bean = (JobScheduleExtension) JobSchedule.newInstance();
+		JobScheduleExtension bean = JobSchedule.newInstance();
 		bizlet.newInstance(bean);
 		bean.setAllWeekdays("X");
 		bean.setWeekday2(Boolean.TRUE);
@@ -166,7 +167,7 @@ public class JobScheduleBizletTest extends AbstractSkyveTest {
 
 	@Test
 	void validateWithAllDefaultsDoesNotAddMessages() throws Exception {
-		JobScheduleExtension bean = (JobScheduleExtension) JobSchedule.newInstance();
+		JobScheduleExtension bean = JobSchedule.newInstance();
 		bizlet.newInstance(bean);
 		ValidationException ve = new ValidationException();
 		bizlet.validate(bean, ve);
@@ -175,7 +176,7 @@ public class JobScheduleBizletTest extends AbstractSkyveTest {
 
 	@Test
 	void validateWithBothDaysAndWeekdaysSelectedAddsMessage() throws Exception {
-		JobScheduleExtension bean = (JobScheduleExtension) JobSchedule.newInstance();
+		JobScheduleExtension bean = JobSchedule.newInstance();
 		bizlet.newInstance(bean);
 		bean.setAllDays("X");
 		bean.setAllWeekdays("X");
@@ -188,14 +189,14 @@ public class JobScheduleBizletTest extends AbstractSkyveTest {
 
 	@Test
 	void validateWithSelectedMinutesButNoneChosenAddsMessage() throws Exception {
-		JobScheduleExtension bean = (JobScheduleExtension) JobSchedule.newInstance();
+		JobScheduleExtension bean = JobSchedule.newInstance();
 		bizlet.newInstance(bean);
 		bean.setAllMinutes("X"); // Selected but no minutes set
 		ValidationException ve = new ValidationException();
 		bizlet.validate(bean, ve);
 		boolean hasMinsError = ve.getMessages().stream()
-				.anyMatch(m -> {
-					for (String b : m.getBindings()) {
+				.anyMatch(msg -> {
+					for (String b : msg.getBindings()) {
 						if (JobSchedule.allMinutesPropertyName.equals(b)) return true;
 					}
 					return false;
@@ -205,15 +206,15 @@ public class JobScheduleBizletTest extends AbstractSkyveTest {
 
 	@Test
 	void validateWithSelectedMinutesAndOneChosenHasNoMinuteError() throws Exception {
-		JobScheduleExtension bean = (JobScheduleExtension) JobSchedule.newInstance();
+		JobScheduleExtension bean = JobSchedule.newInstance();
 		bizlet.newInstance(bean);
 		bean.setAllMinutes("X");
 		bean.setMinute0(Boolean.TRUE);
 		ValidationException ve = new ValidationException();
 		bizlet.validate(bean, ve);
 		boolean hasMinsError = ve.getMessages().stream()
-				.anyMatch(m -> {
-					for (String b : m.getBindings()) {
+				.anyMatch(msg -> {
+					for (String b : msg.getBindings()) {
 						if (JobSchedule.allMinutesPropertyName.equals(b)) return true;
 					}
 					return false;
@@ -223,14 +224,14 @@ public class JobScheduleBizletTest extends AbstractSkyveTest {
 
 	@Test
 	void validateWithSelectedHoursButNoneChosenAddsMessage() throws Exception {
-		JobScheduleExtension bean = (JobScheduleExtension) JobSchedule.newInstance();
+		JobScheduleExtension bean = JobSchedule.newInstance();
 		bizlet.newInstance(bean);
 		bean.setAllHours("X");
 		ValidationException ve = new ValidationException();
 		bizlet.validate(bean, ve);
 		boolean hasHoursError = ve.getMessages().stream()
-				.anyMatch(m -> {
-					for (String b : m.getBindings()) {
+				.anyMatch(msg -> {
+					for (String b : msg.getBindings()) {
 						if (JobSchedule.allHoursPropertyName.equals(b)) return true;
 					}
 					return false;
@@ -240,14 +241,14 @@ public class JobScheduleBizletTest extends AbstractSkyveTest {
 
 	@Test
 	void validateWithSelectedDaysButNoneChosenAddsMessage() throws Exception {
-		JobScheduleExtension bean = (JobScheduleExtension) JobSchedule.newInstance();
+		JobScheduleExtension bean = JobSchedule.newInstance();
 		bizlet.newInstance(bean);
 		bean.setAllDays("X");
 		ValidationException ve = new ValidationException();
 		bizlet.validate(bean, ve);
 		boolean hasDaysError = ve.getMessages().stream()
-				.anyMatch(m -> {
-					for (String b : m.getBindings()) {
+				.anyMatch(msg -> {
+					for (String b : msg.getBindings()) {
 						if (JobSchedule.allDaysPropertyName.equals(b)) return true;
 					}
 					return false;
@@ -257,14 +258,14 @@ public class JobScheduleBizletTest extends AbstractSkyveTest {
 
 	@Test
 	void validateWithSelectedMonthsButNoneChosenAddsMessage() throws Exception {
-		JobScheduleExtension bean = (JobScheduleExtension) JobSchedule.newInstance();
+		JobScheduleExtension bean = JobSchedule.newInstance();
 		bizlet.newInstance(bean);
 		bean.setAllMonths("X");
 		ValidationException ve = new ValidationException();
 		bizlet.validate(bean, ve);
 		boolean hasMonthsError = ve.getMessages().stream()
-				.anyMatch(m -> {
-					for (String b : m.getBindings()) {
+				.anyMatch(msg -> {
+					for (String b : msg.getBindings()) {
 						if (JobSchedule.allMonthsPropertyName.equals(b)) return true;
 					}
 					return false;
@@ -274,14 +275,14 @@ public class JobScheduleBizletTest extends AbstractSkyveTest {
 
 	@Test
 	void validateWithSelectedWeekdaysButNoneChosenAddsMessage() throws Exception {
-		JobScheduleExtension bean = (JobScheduleExtension) JobSchedule.newInstance();
+		JobScheduleExtension bean = JobSchedule.newInstance();
 		bizlet.newInstance(bean);
 		bean.setAllWeekdays("X");
 		ValidationException ve = new ValidationException();
 		bizlet.validate(bean, ve);
 		boolean hasWeekdaysError = ve.getMessages().stream()
-				.anyMatch(m -> {
-					for (String b : m.getBindings()) {
+				.anyMatch(msg -> {
+					for (String b : msg.getBindings()) {
 						if (JobSchedule.allWeekdaysPropertyName.equals(b)) return true;
 					}
 					return false;

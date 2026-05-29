@@ -8,17 +8,29 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.skyve.impl.generate.jasperreports.DesignSpecification.Mode;
+import org.skyve.metadata.model.Persistent;
+import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.Attribute.AttributeType;
 
 @SuppressWarnings({"static-method", "boxing"})
 class RendererStringTest {
+	@TempDir
+	Path tempDir;
 
 	private DesignSpecification parent;
 
@@ -867,6 +879,95 @@ class RendererStringTest {
 				null, null, null, null, null, null, null);
 		// border should be first
 		assertThat(band.getElements().get(0).getElementType(), is(ReportElement.ElementType.border));
+	}
+
+	@Test
+	void constructorCreatesRendererInstance() {
+		assertNotNull(new Renderer());
+	}
+
+	@Test
+	void getPersistentIdentifierForDocumentReturnsUnknownTableWhenPersistentIsNull() {
+		Document document = mock(Document.class);
+		when(document.getPersistent()).thenReturn(null);
+		assertEquals("UnknownTable", Renderer.getPersistentIdentifierForDocument(document));
+	}
+
+	@Test
+	void getPersistentIdentifierForDocumentReturnsPersistentIdentifierWhenAvailable() {
+		Document document = mock(Document.class);
+		Persistent persistent = new Persistent();
+		persistent.setName("contact");
+		when(document.getPersistent()).thenReturn(persistent);
+		assertEquals("contact", Renderer.getPersistentIdentifierForDocument(document));
+	}
+
+	@Test
+	void saveJrxmlWithProvidedRendererWritesToDocumentPackagePath() throws Exception {
+		DesignSpecification design = new DesignSpecification();
+		design.setName("MainReport");
+		design.setModuleName("admin");
+		design.setDocumentName("Contact");
+		design.setRepositoryPath(tempDir.toString());
+		design.setSaveToDocumentPackage(Boolean.TRUE);
+
+		DesignSpecification child = new DesignSpecification();
+		child.setName("ChildReport");
+		child.setModuleName("admin");
+		child.setDocumentName("Contact");
+		child.setRepositoryPath(tempDir.toString());
+		child.setSaveToDocumentPackage(Boolean.TRUE);
+		design.getSubReports().add(child);
+
+		JasperReportRenderer renderer = mock(JasperReportRenderer.class);
+		when(renderer.getJrxml()).thenReturn("<jrxml/>");
+
+		Renderer.saveJrxml(design, renderer);
+
+		Path root = tempDir.resolve("modules").resolve("admin").resolve("Contact").resolve("reports");
+		assertTrue(Files.exists(root.resolve("MainReport.jrxml")));
+		assertTrue(Files.exists(root.resolve("ChildReport.jrxml")));
+	}
+
+	@Test
+	void saveJrxmlWithProvidedRendererThrowsWhenRepositoryPathMissing() {
+		DesignSpecification design = new DesignSpecification();
+		design.setName("NoPath");
+		design.setModuleName("admin");
+		design.setDocumentName("Contact");
+		JasperReportRenderer renderer = mock(JasperReportRenderer.class);
+		assertThrows(org.skyve.metadata.MetaDataException.class, () -> Renderer.saveJrxml(design, renderer));
+	}
+
+	@Test
+	void saveJrxmlDefaultOverloadWritesGeneratedReportFile() throws Exception {
+		DesignSpecification design = new DesignSpecification();
+		design.setName("GeneratedDefault");
+		design.setModuleName("test");
+		design.setDocumentName("AllAttributesPersistent");
+		design.setRepositoryPath(tempDir.toString());
+		design.setSaveToDocumentPackage(Boolean.FALSE);
+
+		Renderer.saveJrxml(design);
+
+		Path generatedFile = tempDir.resolve("generatedReports").resolve("GeneratedDefault.jrxml");
+		assertTrue(Files.exists(generatedFile));
+	}
+
+	@Test
+	void saveJrxmlPathOverloadWritesFileAtProvidedPath() throws Exception {
+		DesignSpecification design = new DesignSpecification();
+		design.setName("PathOnly");
+		design.setModuleName("test");
+		design.setDocumentName("AllAttributesPersistent");
+		design.setRepositoryPath(tempDir.toString());
+
+		Path outputPath = tempDir.resolve("customOutput");
+		Files.createDirectories(outputPath);
+
+		Renderer.saveJrxml(design, outputPath);
+
+		assertTrue(Files.exists(outputPath.resolve("PathOnly.jrxml")));
 	}
 }
 

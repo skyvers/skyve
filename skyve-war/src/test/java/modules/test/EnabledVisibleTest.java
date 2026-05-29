@@ -26,7 +26,6 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.metadata.view.Disableable;
 import org.skyve.metadata.view.Invisible;
 import org.skyve.util.Binder;
-import static org.junit.Assert.assertEquals;
 
 public class EnabledVisibleTest {
 	private static final String CONDITION = "test";

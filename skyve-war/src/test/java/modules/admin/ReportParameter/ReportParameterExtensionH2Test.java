@@ -12,7 +12,7 @@ import org.skyve.domain.types.DateOnly;
 
 import util.AbstractH2Test;
 
-public class ReportParameterExtensionH2Test extends AbstractH2Test {
+class ReportParameterExtensionH2Test extends AbstractH2Test {
 
 	private ReportParameterExtension bean;
 
@@ -24,7 +24,7 @@ public class ReportParameterExtensionH2Test extends AbstractH2Test {
 
 	@Test
 	void getDefaultValueStringWithNumericalDefaultValue() {
-		bean.setNumericalDefaultValue(42L);
+		bean.setNumericalDefaultValue(Long.valueOf(42L));
 		assertNotNull(bean.getDefaultValueString());
 	}
 
@@ -36,7 +36,7 @@ public class ReportParameterExtensionH2Test extends AbstractH2Test {
 
 	@Test
 	void getTestValueStringWithNumericalTestValue() {
-		bean.setNumericalTestValue(99L);
+		bean.setNumericalTestValue(Long.valueOf(99L));
 		assertNotNull(bean.getTestValueString());
 	}
 
@@ -74,7 +74,7 @@ public class ReportParameterExtensionH2Test extends AbstractH2Test {
 	@Test
 	void validateTestWithNumericalTestValueNoError() {
 		bean.setRequired(Boolean.TRUE);
-		bean.setNumericalTestValue(5L);
+		bean.setNumericalTestValue(Long.valueOf(5L));
 		ValidationException e = new ValidationException();
 		bean.validateTest(e);
 		assertTrue(e.getMessages().isEmpty());

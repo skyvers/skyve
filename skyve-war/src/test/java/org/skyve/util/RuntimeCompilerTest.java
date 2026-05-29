@@ -10,7 +10,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.RuntimeCompiler.InMemoryClassLoader;
-import static org.junit.Assert.assertEquals;
 
 public class RuntimeCompilerTest {
 	private static final String JAVA =  "public class Calculator { " + 

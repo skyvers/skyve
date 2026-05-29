@@ -1,10 +1,9 @@
 package modules.whosin.domain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Coordinate;
@@ -124,7 +123,7 @@ class OfficeDomainTest extends AbstractH2Test {
         @Test
         void isManagerAndIsNotManagerAreOpposite() {
                 Office bean = new Office();
-                assertEquals(!bean.isManager(), bean.isNotManager());
+                assertNotEquals(Boolean.valueOf(bean.isManager()), Boolean.valueOf(bean.isNotManager()));
         }
 }
 

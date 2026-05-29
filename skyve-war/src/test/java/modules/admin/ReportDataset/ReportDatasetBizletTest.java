@@ -16,7 +16,8 @@ import modules.admin.domain.ReportDataset;
 /**
  * Tests for ReportDatasetBizlet covering getVariantDomainValues.
  */
-public class ReportDatasetBizletTest {
+@SuppressWarnings("static-method")
+class ReportDatasetBizletTest {
 
 	private static ReportDatasetBizlet bizlet = new ReportDatasetBizlet();
 

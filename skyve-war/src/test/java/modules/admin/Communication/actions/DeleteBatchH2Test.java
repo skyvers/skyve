@@ -49,7 +49,6 @@ class DeleteBatchH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
 	void testExecuteSetsRefreshBatchesToTrue() throws Exception {
 		// setup the test data
 		setupCommunicationWithBasePath();

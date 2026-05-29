@@ -1,16 +1,46 @@
 package org.skyve.impl.metadata.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.controller.BizExportAction;
+import org.skyve.metadata.controller.BizImportAction;
+import org.skyve.metadata.controller.Download;
+import org.skyve.metadata.controller.DownloadAction;
+import org.skyve.metadata.controller.ServerSideAction;
+import org.skyve.metadata.controller.ServerSideActionResult;
+import org.skyve.metadata.controller.Upload;
+import org.skyve.metadata.controller.UploadAction;
+import org.skyve.metadata.model.Dynamic;
+import org.skyve.metadata.model.document.Bizlet;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.DynamicImage;
+import org.skyve.metadata.user.User;
+import org.skyve.metadata.view.model.chart.ChartData;
+import org.skyve.metadata.view.model.chart.ChartModel;
+import org.skyve.metadata.view.model.comparison.ComparisonComposite;
+import org.skyve.metadata.view.model.comparison.ComparisonModel;
+import org.skyve.metadata.view.model.list.Filter;
+import org.skyve.metadata.view.model.list.ListModel;
+import org.skyve.metadata.view.model.list.Page;
+import org.skyve.metadata.view.model.map.MapModel;
+import org.skyve.metadata.view.model.map.MapResult;
+import org.skyve.web.WebContext;
 
+import java.awt.image.BufferedImage;
+import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.SortedMap;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -341,6 +371,161 @@ class FileSystemRepositoryTest {
 		Files.createFile(viewsDir.resolve("edit.xml"));
 		LocalDesignRepository repo = new LocalDesignRepository(basePath);
 		assertTrue(repo.viewLastModifiedMillis(null, "myModule", "MyDoc", null, "edit") > Long.MIN_VALUE);
+	}
+
+	// ---- getJavaClass / getJavaMetaData ----
+
+	@Test
+	void getJavaClassReturnsWidgetReferenceWhenLoadClassesIsFalseAndDottedJavaExists() throws Exception {
+		createVanillaModule("myModule");
+		Files.createFile(tempDir.resolve("modules.myModule.java"));
+
+		LocalDesignRepository repo = new LocalDesignRepository(basePath, false);
+		Class<?> type = repo.getJavaClass(null, "modules/myModule");
+
+		assertEquals(org.skyve.impl.metadata.view.WidgetReference.class, type);
+	}
+
+	@Test
+	void getJavaMetaDataReturnsWidgetReferenceWhenClassResolvedInNoLoadMode() throws Exception {
+		createVanillaModule("myModule");
+		Files.createFile(tempDir.resolve("modules.myModule.java"));
+
+		LocalDesignRepository repo = new LocalDesignRepository(basePath, false);
+		Object metaData = repo.getJavaMetaData(null, "modules/myModule", true, false);
+
+		assertNotNull(metaData);
+		assertInstanceOf(org.skyve.impl.metadata.view.WidgetReference.class, metaData);
+	}
+
+	@Test
+	void getJavaMetaDataThrowsWhenMissingAndAssertExistenceTrue() {
+		LocalDesignRepository repo = new LocalDesignRepository(basePath, false);
+
+		assertThrows(MetaDataException.class,
+				() -> repo.getJavaMetaData(null, "modules/nonExistent", true, false));
+	}
+
+	@Test
+	void getJavaMetaDataReturnsNullWhenMissingAndAssertExistenceFalse() {
+		LocalDesignRepository repo = new LocalDesignRepository(basePath, false);
+
+		assertNull(repo.getJavaMetaData(null, "modules/nonExistent", false, false));
+	}
+
+	// ---- getReportFileName ----
+
+	@Test
+	void getReportFileNameReturnsJasperPathWhenJasperReportExists() throws Exception {
+		createVanillaModule("myModule");
+		Path reportsDir = tempDir.resolve("modules/myModule/MyDoc/reports");
+		Files.createDirectories(reportsDir);
+		Files.createFile(reportsDir.resolve("monthly.jasper"));
+
+		Document document = mock(Document.class);
+		when(document.getOwningModuleName()).thenReturn("myModule");
+		when(document.getName()).thenReturn("MyDoc");
+
+		LocalDesignRepository repo = new LocalDesignRepository(basePath, false);
+		String reportFile = repo.getReportFileName(null, document, "monthly");
+
+		assertNotNull(reportFile);
+		assertTrue(reportFile.endsWith("modules/myModule/MyDoc/reports/monthly.jasper"));
+	}
+
+	@Test
+	void getReportFileNameReturnsFreemarkerPathWhenOnlyFtlhExists() throws Exception {
+		createVanillaModule("myModule");
+		Path reportsDir = tempDir.resolve("modules/myModule/MyDoc/reports");
+		Files.createDirectories(reportsDir);
+		Files.createFile(reportsDir.resolve("summary.ftlh"));
+
+		Document document = mock(Document.class);
+		when(document.getOwningModuleName()).thenReturn("myModule");
+		when(document.getName()).thenReturn("MyDoc");
+
+		LocalDesignRepository repo = new LocalDesignRepository(basePath, false);
+		String reportFile = repo.getReportFileName(null, document, "summary");
+
+		assertNotNull(reportFile);
+		assertTrue(reportFile.endsWith("modules/myModule/MyDoc/reports/summary.flth"));
+	}
+
+	// ---- getDataFactory ----
+
+	@Test
+	void getDataFactoryReturnsWidgetReferenceInstanceInNoLoadModeWhenFactoryKeyExists() throws Exception {
+		createVanillaModule("myModule");
+		Path docDir = tempDir.resolve("modules/myModule/MyDoc");
+		Files.createDirectories(docDir);
+		Files.createFile(docDir.resolve("MyDocFactory.class"));
+		Files.createFile(tempDir.resolve("modules.myModule.MyDoc.MyDocFactory.java"));
+
+		Document document = mock(Document.class);
+		when(document.getOwningModuleName()).thenReturn("myModule");
+		when(document.getName()).thenReturn("MyDoc");
+		when(document.getDynamism()).thenReturn(null);
+
+		LocalDesignRepository repo = new LocalDesignRepository(basePath, false);
+		Object factory = repo.getDataFactory(null, document);
+
+		assertNotNull(factory);
+		assertInstanceOf(org.skyve.impl.metadata.view.WidgetReference.class, factory);
+	}
+
+	@Test
+	void getDataFactoryReturnsNullWhenNoFactoryDefined() {
+		Document document = mock(Document.class);
+		when(document.getOwningModuleName()).thenReturn("myModule");
+		when(document.getName()).thenReturn("MyDoc");
+		when(document.getDynamism()).thenReturn(null);
+
+		LocalDesignRepository repo = new LocalDesignRepository(basePath, false);
+		assertNull(repo.getDataFactory(null, document));
+	}
+
+	@Test
+	void getDataFactoryDynamicClassReturnsWidgetReferenceWhenLoadClassesFalse() throws Exception {
+		Dynamic dynamic = new Dynamic();
+		dynamic.setDataFactoryClassName("dynamic.Factory");
+		Files.createFile(tempDir.resolve("dynamic.Factory.java"));
+
+		Document document = mock(Document.class);
+		when(document.getOwningModuleName()).thenReturn("myModule");
+		when(document.getName()).thenReturn("MyDoc");
+		when(document.getDynamism()).thenReturn(dynamic);
+
+		LocalDesignRepository repo = new LocalDesignRepository(basePath, false);
+		Object factory = repo.getDataFactory(null, document);
+
+		assertNotNull(factory);
+		assertInstanceOf(org.skyve.impl.metadata.view.WidgetReference.class, factory);
+	}
+
+	@Test
+	void getServerSideActionThrowsWhenStaticActionClassMissing() {
+		Document document = mock(Document.class);
+		when(document.getDynamism()).thenReturn(null);
+		when(document.getOwningModuleName()).thenReturn("myModule");
+		when(document.getName()).thenReturn("MyDoc");
+
+		LocalDesignRepository repo = new LocalDesignRepository(basePath, false);
+
+		assertThrows(MetaDataException.class,
+				() -> repo.getServerSideAction(null, document, "missingAction", false));
+	}
+
+	@Test
+	void getServerSideActionThrowsWhenDynamicActionNotDeclared() {
+		Dynamic dynamic = new Dynamic();
+		Document document = mock(Document.class);
+		when(document.getDynamism()).thenReturn(dynamic);
+		when(document.getName()).thenReturn("MyDoc");
+
+		LocalDesignRepository repo = new LocalDesignRepository(basePath, false);
+
+		assertThrows(MetaDataException.class,
+				() -> repo.getServerSideAction(null, document, "missingAction", false));
 	}
 
 	@Test
@@ -711,5 +896,459 @@ class FileSystemRepositoryTest {
 		assertNotNull(result);
 		// Falls back to root resources since no customer/module-specific file exists
 		assertTrue(result.getPath().replace('\\', '/').endsWith("resources/fallback.css"));
+	}
+
+	@Test
+	void findResourceFileRejectsPathTraversalOutsideBase() {
+		LocalDesignRepository repo = new LocalDesignRepository(basePath);
+
+		assertThrows(SecurityException.class,
+				() -> repo.findResourceFile("../../../../outside.txt", null, null));
+	}
+
+	@Test
+	void getBizletReturnsDynamicBizletInstance() {
+		Dynamic dynamic = new Dynamic();
+		dynamic.setBizletClassName(TestBizlet.class.getName());
+
+		Document document = mock(Document.class);
+		when(document.getDynamism()).thenReturn(dynamic);
+		when(document.getOwningModuleName()).thenReturn("myModule");
+		when(document.getName()).thenReturn("MyDoc");
+
+		LocalDesignRepository repo = new LocalDesignRepository(basePath);
+		Object bizlet = repo.getBizlet(null, document, false);
+
+		assertInstanceOf(TestBizlet.class, bizlet);
+	}
+
+	@Test
+	void getDynamicImageReturnsDynamicImageInstance() {
+		Dynamic dynamic = new Dynamic();
+		dynamic.getImages().put("avatar", TestDynamicImage.class.getName());
+
+		Document document = mock(Document.class);
+		when(document.getDynamism()).thenReturn(dynamic);
+		when(document.getOwningModuleName()).thenReturn("myModule");
+		when(document.getName()).thenReturn("MyDoc");
+
+		LocalDesignRepository repo = new LocalDesignRepository(basePath);
+		Object image = repo.getDynamicImage(null, document, "avatar", false);
+
+		assertInstanceOf(TestDynamicImage.class, image);
+	}
+
+	@Test
+	void getDynamicImageThrowsWhenDynamicImageNotDeclared() {
+		Dynamic dynamic = new Dynamic();
+
+		Document document = mock(Document.class);
+		when(document.getDynamism()).thenReturn(dynamic);
+		when(document.getName()).thenReturn("MyDoc");
+
+		LocalDesignRepository repo = new LocalDesignRepository(basePath);
+		assertThrows(MetaDataException.class, () -> repo.getDynamicImage(null, document, "avatar", false));
+	}
+
+	@Test
+	void getComparisonModelReturnsDynamicComparisonModelInstance() {
+		Dynamic dynamic = new Dynamic();
+		dynamic.getModels().put("cmp", TestComparisonModel.class.getName());
+
+		Document document = mock(Document.class);
+		when(document.getDynamism()).thenReturn(dynamic);
+		when(document.getOwningModuleName()).thenReturn("myModule");
+		when(document.getName()).thenReturn("MyDoc");
+
+		LocalDesignRepository repo = new LocalDesignRepository(basePath);
+		Object model = repo.getComparisonModel(null, document, "cmp", false);
+
+		assertInstanceOf(TestComparisonModel.class, model);
+	}
+
+	@Test
+	void getMapModelReturnsDynamicMapModelInstance() {
+		Dynamic dynamic = new Dynamic();
+		dynamic.getModels().put("map", TestMapModel.class.getName());
+
+		Document document = mock(Document.class);
+		when(document.getDynamism()).thenReturn(dynamic);
+		when(document.getOwningModuleName()).thenReturn("myModule");
+		when(document.getName()).thenReturn("MyDoc");
+
+		LocalDesignRepository repo = new LocalDesignRepository(basePath);
+		Object model = repo.getMapModel(null, document, "map", false);
+
+		assertInstanceOf(TestMapModel.class, model);
+	}
+
+	@Test
+	void getChartModelReturnsDynamicChartModelInstance() {
+		Dynamic dynamic = new Dynamic();
+		dynamic.getModels().put("chart", TestChartModel.class.getName());
+
+		Document document = mock(Document.class);
+		when(document.getDynamism()).thenReturn(dynamic);
+		when(document.getOwningModuleName()).thenReturn("myModule");
+		when(document.getName()).thenReturn("MyDoc");
+
+		LocalDesignRepository repo = new LocalDesignRepository(basePath);
+		Object model = repo.getChartModel(null, document, "chart", false);
+
+		assertInstanceOf(TestChartModel.class, model);
+	}
+
+	@Test
+	void getListModelReturnsDynamicListModelInstance() {
+		Dynamic dynamic = new Dynamic();
+		dynamic.getModels().put("list", TestListModel.class.getName());
+
+		Document document = mock(Document.class);
+		when(document.getDynamism()).thenReturn(dynamic);
+		when(document.getOwningModuleName()).thenReturn("myModule");
+		when(document.getName()).thenReturn("MyDoc");
+
+		LocalDesignRepository repo = new LocalDesignRepository(basePath);
+		Object model = repo.getListModel(null, document, "list", false);
+
+		assertInstanceOf(TestListModel.class, model);
+	}
+
+	@Test
+	void getMapModelThrowsWhenDynamicModelNotDeclared() {
+		Dynamic dynamic = new Dynamic();
+
+		Document document = mock(Document.class);
+		when(document.getDynamism()).thenReturn(dynamic);
+		when(document.getName()).thenReturn("MyDoc");
+
+		LocalDesignRepository repo = new LocalDesignRepository(basePath);
+		assertThrows(MetaDataException.class, () -> repo.getMapModel(null, document, "map", false));
+	}
+
+	@Test
+	void getServerSideActionReturnsDynamicActionInstance() {
+		Dynamic dynamic = new Dynamic();
+		dynamic.getActions().put("run", TestServerSideAction.class.getName());
+
+		Document document = mock(Document.class);
+		when(document.getDynamism()).thenReturn(dynamic);
+		when(document.getName()).thenReturn("MyDoc");
+
+		LocalDesignRepository repo = new LocalDesignRepository(basePath);
+		Object action = repo.getServerSideAction(null, document, "run", false);
+
+		assertInstanceOf(TestServerSideAction.class, action);
+	}
+
+	@Test
+	void getServerSideActionReturnsNullWhenLoadClassesDisabled() throws Exception {
+		Dynamic dynamic = new Dynamic();
+		dynamic.getActions().put("run", "dynamic.ServerAction");
+		Files.createFile(tempDir.resolve("dynamic.ServerAction.java"));
+
+		Document document = mock(Document.class);
+		when(document.getDynamism()).thenReturn(dynamic);
+		when(document.getName()).thenReturn("MyDoc");
+
+		LocalDesignRepository repo = new LocalDesignRepository(basePath, false);
+		assertNull(repo.getServerSideAction(null, document, "run", false));
+	}
+
+	@Test
+	void getBizExportActionReturnsDynamicActionInstance() {
+		Dynamic dynamic = new Dynamic();
+		dynamic.getActions().put("export", TestBizExportAction.class.getName());
+
+		Document document = mock(Document.class);
+		when(document.getDynamism()).thenReturn(dynamic);
+		when(document.getName()).thenReturn("MyDoc");
+
+		LocalDesignRepository repo = new LocalDesignRepository(basePath);
+		Object action = repo.getBizExportAction(null, document, "export", false);
+
+		assertInstanceOf(TestBizExportAction.class, action);
+	}
+
+	@Test
+	void getBizExportActionReturnsNullWhenLoadClassesDisabled() throws Exception {
+		Dynamic dynamic = new Dynamic();
+		dynamic.getActions().put("export", "dynamic.ExportAction");
+		Files.createFile(tempDir.resolve("dynamic.ExportAction.java"));
+
+		Document document = mock(Document.class);
+		when(document.getDynamism()).thenReturn(dynamic);
+		when(document.getName()).thenReturn("MyDoc");
+
+		LocalDesignRepository repo = new LocalDesignRepository(basePath, false);
+		assertNull(repo.getBizExportAction(null, document, "export", false));
+	}
+
+	@Test
+	void getBizImportActionReturnsDynamicActionInstance() {
+		Dynamic dynamic = new Dynamic();
+		dynamic.getActions().put("import", TestBizImportAction.class.getName());
+
+		Document document = mock(Document.class);
+		when(document.getDynamism()).thenReturn(dynamic);
+		when(document.getName()).thenReturn("MyDoc");
+
+		LocalDesignRepository repo = new LocalDesignRepository(basePath);
+		Object action = repo.getBizImportAction(null, document, "import", false);
+
+		assertInstanceOf(TestBizImportAction.class, action);
+	}
+
+	@Test
+	void getDownloadActionReturnsDynamicActionInstance() {
+		Dynamic dynamic = new Dynamic();
+		dynamic.getActions().put("download", TestDownloadAction.class.getName());
+
+		Document document = mock(Document.class);
+		when(document.getDynamism()).thenReturn(dynamic);
+		when(document.getName()).thenReturn("MyDoc");
+
+		LocalDesignRepository repo = new LocalDesignRepository(basePath);
+		Object action = repo.getDownloadAction(null, document, "download", false);
+
+		assertInstanceOf(TestDownloadAction.class, action);
+	}
+
+	@Test
+	void getUploadActionReturnsDynamicActionInstance() {
+		Dynamic dynamic = new Dynamic();
+		dynamic.getActions().put("upload", TestUploadAction.class.getName());
+
+		Document document = mock(Document.class);
+		when(document.getDynamism()).thenReturn(dynamic);
+		when(document.getName()).thenReturn("MyDoc");
+
+		LocalDesignRepository repo = new LocalDesignRepository(basePath);
+		Object action = repo.getUploadAction(null, document, "upload", false);
+
+		assertInstanceOf(TestUploadAction.class, action);
+	}
+
+	@Test
+	void loadMethodsThrowMetaDataExceptionWhenSourceFilesMissing() {
+		LocalDesignRepository repo = new LocalDesignRepository(basePath);
+
+		assertThrows(MetaDataException.class, () -> repo.loadCustomer("missingCustomer"));
+		assertThrows(MetaDataException.class, () -> repo.loadModule(null, "missingModule"));
+		assertThrows(MetaDataException.class, () -> repo.loadDocument(null, "missingModule", "MissingDoc"));
+		assertThrows(MetaDataException.class,
+				() -> repo.loadMetaDataAction(null, "missingModule", "MissingDoc", "missingAction"));
+		assertThrows(MetaDataException.class,
+				() -> repo.loadView(null, "missingModule", "MissingDoc", null, "edit"));
+		assertThrows(MetaDataException.class,
+				() -> repo.loadMetaDataBizlet(null, "missingModule", "MissingDoc"));
+	}
+
+	@Test
+	void loadRouterThrowsMetaDataExceptionWhenRouterXmlMalformed() throws Exception {
+		Path routerDir = tempDir.resolve("router");
+		Files.createDirectories(routerDir);
+		Files.writeString(routerDir.resolve("router.xml"), "not-xml");
+
+		LocalDesignRepository repo = new LocalDesignRepository(basePath);
+		assertThrows(MetaDataException.class, repo::loadRouter);
+	}
+
+	@Test
+	void getGlobalRouterThrowsWhenRouterXmlMalformed() throws Exception {
+		Path routerDir = tempDir.resolve("router");
+		Files.createDirectories(routerDir);
+		Files.writeString(routerDir.resolve("router.xml"), "not-xml");
+
+		LocalDesignRepository repo = new LocalDesignRepository(basePath);
+		assertThrows(RuntimeException.class, repo::getGlobalRouter);
+	}
+
+	@Test
+	void getModuleRoutersThrowsWhenModuleRouterXmlMalformed() throws Exception {
+		createVanillaModule("myModule");
+		Files.writeString(tempDir.resolve("modules/myModule/router.xml"), "not-xml");
+
+		LocalDesignRepository repo = new LocalDesignRepository(basePath);
+		assertThrows(RuntimeException.class, repo::getModuleRouters);
+	}
+
+	@Test
+	void getJavaClassReturnsNullWhenClassNotLoadableInLoadClassesMode() throws Exception {
+		createVanillaModule("myModule");
+		createDocumentDir("myModule", "MyDoc");
+		Path actionsDir = tempDir.resolve("modules/myModule/MyDoc/actions");
+		Files.createDirectories(actionsDir);
+		Files.createFile(actionsDir.resolve("NoSuchAction.class"));
+
+		LocalDesignRepository repo = new LocalDesignRepository(basePath);
+		assertNull(repo.getJavaClass(null, "modules/myModule/MyDoc/actions/NoSuchAction"));
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	void evictCachedMetaDataUsesExistingThreadPersistence() throws Exception {
+		org.skyve.impl.persistence.AbstractPersistence persistence = mock(org.skyve.impl.persistence.AbstractPersistence.class);
+		org.skyve.metadata.user.User user = mock(org.skyve.metadata.user.User.class);
+		when(persistence.getUser()).thenReturn(user);
+
+		Field threadLocalField = org.skyve.impl.persistence.AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
+		threadLocalField.setAccessible(true);
+		ThreadLocal<?> threadLocal = (ThreadLocal<?>) threadLocalField.get(null);
+		Object previous = threadLocal.get();
+
+		try {
+			((ThreadLocal<org.skyve.impl.persistence.AbstractPersistence>) threadLocal).set(persistence);
+			LocalDesignRepository repo = new LocalDesignRepository(basePath);
+			repo.evictCachedMetaData(null);
+			verify(persistence).disposeAllPersistenceInstances();
+			verify(persistence).setUser(user);
+		}
+		finally {
+			if (previous == null) {
+				threadLocal.remove();
+			}
+			else {
+				((ThreadLocal<Object>) threadLocal).set(previous);
+			}
+		}
+	}
+
+	static final class TestBizlet extends Bizlet<org.skyve.domain.Bean> {
+		// no-op fixture for dynamic bizlet loading
+	}
+
+	static final class TestDynamicImage implements DynamicImage<org.skyve.domain.Bean> {
+		@Override
+		public BufferedImage getImage(org.skyve.domain.Bean bean, int width, int height, User user) {
+			return new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+		}
+	}
+
+	static final class TestComparisonModel extends ComparisonModel<org.skyve.domain.Bean, org.skyve.domain.Bean> {
+		@Override
+		public ComparisonComposite getComparisonComposite(org.skyve.domain.Bean toCompareTo) {
+			return new ComparisonComposite();
+		}
+	}
+
+	static final class TestMapModel extends MapModel<org.skyve.domain.Bean> {
+		@Override
+		public MapResult getResult(org.locationtech.jts.geom.Geometry mapBounds) {
+			return new MapResult();
+		}
+	}
+
+	static final class TestChartModel extends ChartModel<org.skyve.domain.Bean> {
+		@Override
+		public ChartData getChartData() {
+			return null;
+		}
+	}
+
+	static final class TestListModel extends ListModel<org.skyve.domain.Bean> {
+		@Override
+		public void postConstruct(org.skyve.metadata.customer.Customer customer, boolean runtime) {
+			// no-op
+		}
+
+		@Override
+		public String getDescription() {
+			return "fixture";
+		}
+
+		@Override
+		public Document getDrivingDocument() {
+			return null;
+		}
+
+		@Override
+		public List<org.skyve.metadata.module.query.MetaDataQueryColumn> getColumns() {
+			return List.of();
+		}
+
+		@Override
+		public java.util.Set<String> getProjections() {
+			return java.util.Set.of();
+		}
+
+		@Override
+		public Filter getFilter() {
+			return null;
+		}
+
+		@Override
+		public Filter newFilter() {
+			return null;
+		}
+
+		@Override
+		public void putParameter(String name, Object value) {
+			// no-op
+		}
+
+		@Override
+		public Page fetch() {
+			return null;
+		}
+
+		@Override
+		public org.skyve.persistence.AutoClosingIterable<org.skyve.domain.Bean> iterate() {
+			return null;
+		}
+
+		@Override
+		public org.skyve.domain.Bean update(String bizId, SortedMap<String, Object> properties) {
+			return null;
+		}
+
+		@Override
+		public void remove(String bizId) {
+			// no-op
+		}
+	}
+
+	static final class TestServerSideAction implements ServerSideAction<org.skyve.domain.Bean> {
+		@Override
+		public ServerSideActionResult<org.skyve.domain.Bean> execute(org.skyve.domain.Bean bean, WebContext webContext) {
+			return new ServerSideActionResult<>(bean);
+		}
+	}
+
+	static final class TestBizExportAction extends BizExportAction {
+		@Override
+		public org.skyve.bizport.BizPortWorkbook bizExport(WebContext webContext) {
+			return null;
+		}
+	}
+
+	static final class TestBizImportAction extends BizImportAction {
+		@Override
+		public void bizImport(org.skyve.bizport.BizPortWorkbook bizPortable,
+				org.skyve.domain.messages.UploadException problems) {
+			// no-op
+		}
+	}
+
+	static final class TestDownloadAction extends DownloadAction<org.skyve.domain.Bean> {
+		@Override
+		public void prepare(org.skyve.domain.Bean bean, WebContext webContext) {
+			// no-op
+		}
+
+		@Override
+		public Download download(org.skyve.domain.Bean bean, WebContext webContext) {
+			return null;
+		}
+	}
+
+	static final class TestUploadAction extends UploadAction<org.skyve.domain.Bean> {
+		@Override
+		public org.skyve.domain.Bean upload(org.skyve.domain.Bean bean,
+				Upload upload,
+				org.skyve.domain.messages.UploadException exception,
+				WebContext webContext) {
+			return bean;
+		}
 	}
 }

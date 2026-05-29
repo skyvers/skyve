@@ -12,6 +12,7 @@ import org.skyve.impl.util.UtilImpl;
 
 import modules.admin.MailLog.MailLogService;
 
+@SuppressWarnings("static-method")
 class MailLogListExtensionTest {
 	private final UtilImpl.ArchiveConfig originalArchiveConfig = UtilImpl.ARCHIVE_CONFIG;
 

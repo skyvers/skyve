@@ -44,6 +44,7 @@ import org.primefaces.component.commandlink.CommandLink;
 import org.primefaces.component.contextmenu.ContextMenu;
 import org.primefaces.component.datatable.DataTable;
 import org.primefaces.component.graphicimage.GraphicImage;
+import org.primefaces.component.inputmask.InputMask;
 import org.primefaces.component.inputtext.InputText;
 import org.primefaces.component.inputtextarea.InputTextarea;
 import org.primefaces.component.menuitem.UIMenuItem;
@@ -51,6 +52,7 @@ import org.primefaces.component.outputlabel.OutputLabel;
 import org.primefaces.component.panel.Panel;
 import org.primefaces.component.picklist.PickList;
 import org.primefaces.component.password.Password;
+import org.primefaces.component.remotecommand.RemoteCommand;
 import org.primefaces.component.selectonemenu.SelectOneMenu;
 import org.primefaces.component.selectoneradio.SelectOneRadio;
 import org.primefaces.component.signature.Signature;
@@ -62,6 +64,8 @@ import org.primefaces.component.toolbar.Toolbar;
 import org.primefaces.component.tristatecheckbox.TriStateCheckbox;
 import org.primefaces.component.autocomplete.AutoComplete;
 import org.skyve.impl.metadata.controller.CustomisationsStaticSingleton;
+import org.skyve.domain.types.converters.Format;
+import org.skyve.domain.types.converters.Format.TextCase;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.container.Collapsible;
 import org.skyve.impl.metadata.view.container.Sidebar;
@@ -1699,6 +1703,123 @@ class TabularComponentBuilderTest {
 
 	@SuppressWarnings("static-method")
 	@Test
+	void testTextAreaUsesBaseTextAreaBuilder() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		InputTextarea inputTextarea = mock(InputTextarea.class);
+		Map<String, Object> passThroughAttributes = new HashMap<>();
+		when(inputTextarea.getPassThroughAttributes()).thenReturn(passThroughAttributes);
+
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("baseTextAreaId");
+		builder.setManagedBeanForTest(managedBean);
+
+		when(mockApplication.createComponent(InputTextarea.COMPONENT_TYPE)).thenReturn(inputTextarea);
+
+		TextArea textArea = new TextArea();
+		textArea.setBinding("notes");
+		textArea.setEditable(Boolean.FALSE);
+		textArea.setKeyboardType(KeyboardType.tel);
+		textArea.setPixelWidth(Integer.valueOf(300));
+		textArea.setPixelHeight(Integer.valueOf(80));
+
+		EventSourceComponent result = builder.textArea(null,
+												"row",
+												textArea,
+												null,
+												"Notes",
+												"Required",
+												HorizontalAlignment.left,
+												Integer.valueOf(255));
+
+		assertSame(inputTextarea, result.getComponent());
+		assertSame(inputTextarea, result.getEventSource());
+		verify(inputTextarea).setReadonly(true);
+		verify(inputTextarea).setMaxlength(255);
+		assertEquals("tel", passThroughAttributes.get("inputmode"));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testLookupDescriptionUsesBaseLookupDescriptionBuilder() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		AutoComplete autoComplete = mock(AutoComplete.class);
+		Map<String, Object> attributes = new HashMap<>();
+		when(autoComplete.getAttributes()).thenReturn(attributes);
+
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("lookupBaseId");
+		builder.setManagedBeanForTest(managedBean);
+
+		when(mockApplication.createComponent(AutoComplete.COMPONENT_TYPE)).thenReturn(autoComplete);
+		when(mockExpressionFactory.createMethodExpression(any(ELContext.class), anyString(), eq(List.class), any(Class[].class))).thenReturn(mock(MethodExpression.class));
+
+		LookupDescription lookupDescription = new LookupDescription();
+		lookupDescription.setBinding("customer");
+		lookupDescription.setPixelWidth(Integer.valueOf(240));
+
+		QueryDefinition query = mock(QueryDefinition.class);
+		org.skyve.metadata.module.Module module = mock(org.skyve.metadata.module.Module.class);
+		when(query.getOwningModule()).thenReturn(module);
+		when(module.getName()).thenReturn("sales");
+		when(query.getName()).thenReturn("CustomerLookup");
+
+		EventSourceComponent result = builder.lookupDescription(null,
+													"row",
+													lookupDescription,
+													null,
+													"Customer",
+													null,
+													HorizontalAlignment.left,
+													"name",
+													query);
+
+		assertSame(autoComplete, result.getComponent());
+		assertSame(autoComplete, result.getEventSource());
+		assertEquals("sales", attributes.get("module"));
+		assertEquals("CustomerLookup", attributes.get("query"));
+		assertEquals("name", attributes.get("display"));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testPasswordUsesBasePasswordBuilder() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		Password passwordInput = mock(Password.class);
+		Map<String, Object> passThroughAttributes = new HashMap<>();
+		when(passwordInput.getPassThroughAttributes()).thenReturn(passThroughAttributes);
+		when(passwordInput.getId()).thenReturn("passwordInput");
+
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("passwordBaseId");
+		builder.setManagedBeanForTest(managedBean);
+
+		when(mockApplication.createComponent(Password.COMPONENT_TYPE)).thenReturn(passwordInput);
+
+		org.skyve.impl.metadata.view.widget.bound.input.Password passwordMeta =
+				new org.skyve.impl.metadata.view.widget.bound.input.Password();
+		passwordMeta.setBinding("secret");
+		passwordMeta.setPixelWidth(Integer.valueOf(200));
+
+		EventSourceComponent result = builder.password(null,
+												"row",
+												passwordMeta,
+												null,
+												"Password",
+												null,
+												HorizontalAlignment.left);
+
+		assertSame(passwordInput, result.getComponent());
+		assertSame(passwordInput, result.getEventSource());
+		verify(passwordInput).setId("passwordInputpassword");
+		verify(passwordInput).setAutocomplete("off");
+		verify(passwordInput).setRedisplay(true);
+		assertEquals("false", passThroughAttributes.get("spellcheck"));
+		assertEquals("none", passThroughAttributes.get("autocapitalize"));
+		assertEquals("none", passThroughAttributes.get("autocorrect"));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
 	void testTextDelegatesToTextFieldWhenNoConverterOrComplete() {
 		CapturingInputDelegationBuilder builder = new CapturingInputDelegationBuilder();
 		TextField textField = new TextField();
@@ -1771,6 +1892,61 @@ class TabularComponentBuilderTest {
 		assertEquals(CompleteType.suggest, builder.completeType);
 		assertEquals(KeyboardType.search, builder.completeKeyboardType);
 		assertEquals(Integer.valueOf(220), builder.completePixelWidth);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testTextUsesMaskFieldWhenFormatHasMask() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		InputMask inputMask = mock(InputMask.class);
+		Map<String, Object> passThroughAttributes = new HashMap<>();
+		when(inputMask.getPassThroughAttributes()).thenReturn(passThroughAttributes);
+
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("maskInputId");
+		builder.setManagedBeanForTest(managedBean);
+
+		when(mockApplication.createComponent(InputMask.COMPONENT_TYPE)).thenReturn(inputMask);
+
+		Format<Object> format = new Format<>("A#L9a*?", TextCase.upper);
+
+		TextField textField = new TextField();
+		textField.setBinding("code");
+		textField.setEditable(Boolean.FALSE);
+		textField.setKeyboardType(KeyboardType.numeric);
+		textField.setPixelWidth(Integer.valueOf(180));
+
+		EventSourceComponent result = builder.text(null,
+												"row",
+												textField,
+												null,
+												"Code",
+												"Required",
+												HorizontalAlignment.left,
+												Integer.valueOf(12),
+												null,
+												format,
+												null);
+
+		assertSame(inputMask, result.getComponent());
+		assertSame(inputMask, result.getEventSource());
+		verify(inputMask).setReadonly(true);
+		verify(inputMask).setMaxlength(12);
+		verify(inputMask).setMask("*9a\\9\\a\\*\\?");
+		assertEquals("numeric", passThroughAttributes.get("inputmode"));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testDetermineMaskEscapesPrimeFacesCharacters() throws Exception {
+		Format<Object> format = new Format<>("A#L9a*?", TextCase.upper);
+
+		Method method = TabularComponentBuilder.class.getDeclaredMethod("determineMask", Format.class);
+		method.setAccessible(true);
+
+		assertEquals("*9a\\9\\a\\*\\?", method.invoke(null, format));
+		assertNull(method.invoke(null, new Format<>(null, TextCase.upper)));
+		assertNull(method.invoke(null, new Object[] {null}));
 	}
 
 	@SuppressWarnings("static-method")
@@ -1852,6 +2028,47 @@ class TabularComponentBuilderTest {
 		assertEquals("downloadInvisible", builder.downloadLinkInvisible);
 		assertEquals("@form", builder.downloadLinkProcessOverride);
 		assertEquals("@(form)", builder.downloadLinkUpdateOverride);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testActionLinkImplicitDownloadUsesBaseDownloadLink() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		CommandLink commandLink = mock(CommandLink.class);
+		MethodExpression actionExpression = mock(MethodExpression.class);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("downloadLinkId");
+		builder.setManagedBeanForTest(managedBean);
+
+		when(mockApplication.createComponent(CommandLink.COMPONENT_TYPE)).thenReturn(commandLink);
+		when(mockExpressionFactory.createMethodExpression(any(ELContext.class), anyString(), isNull(), any(Class[].class))).thenReturn(actionExpression);
+
+		Link link = new Link();
+		link.setPixelWidth(Integer.valueOf(95));
+		link.getProperties().put("process", "@form");
+		link.getProperties().put("update", "@(form)");
+
+		Action action = mock(Action.class);
+		when(action.getImplicitName()).thenReturn(ImplicitActionName.Download);
+		when(action.getName()).thenReturn("downloadCsv");
+		when(action.getDisabledConditionName()).thenReturn(null);
+		when(action.getInvisibleConditionName()).thenReturn(null);
+
+		UIComponent result = builder.actionLink(null,
+												"orders",
+												"row",
+												"Download",
+												null,
+												"Download row",
+												null,
+												link,
+												action);
+
+		assertSame(commandLink, result);
+		verify(commandLink).setValue("Download");
+		verify(commandLink).setProcess("@form");
+		verify(commandLink).setUpdate("@(form)");
+		verify(commandLink).setActionExpression(actionExpression);
 	}
 
 	@SuppressWarnings("static-method")
@@ -2654,6 +2871,62 @@ class TabularComponentBuilderTest {
 
 	@SuppressWarnings("static-method")
 	@Test
+	void testUploadUsesBaseUploadButtonWithOverlay() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("uploadWrapperId", "uploadRefreshId", "uploadButtonId", "uploadOverlayId", "uploadFrameId");
+		builder.setManagedBeanForTest(managedBean);
+
+		HtmlPanelGroup wrapper = mock(HtmlPanelGroup.class);
+		List<UIComponent> wrapperChildren = new ArrayList<>();
+		when(wrapper.getChildren()).thenReturn(wrapperChildren);
+
+		RemoteCommand refresh = mock(RemoteCommand.class);
+		CommandButton uploadButton = mock(CommandButton.class);
+		OverlayPanel overlayPanel = mock(OverlayPanel.class);
+		List<UIComponent> overlayChildren = new ArrayList<>();
+		when(overlayPanel.getChildren()).thenReturn(overlayChildren);
+
+		HtmlOutputText iframe = mock(HtmlOutputText.class);
+		MethodExpression refreshExpression = mock(MethodExpression.class);
+		ValueExpression onShowExpression = mock(ValueExpression.class);
+
+		when(mockApplication.createComponent(HtmlPanelGroup.COMPONENT_TYPE)).thenReturn(wrapper);
+		when(mockApplication.createComponent(RemoteCommand.COMPONENT_TYPE)).thenReturn(refresh);
+		when(mockApplication.createComponent(CommandButton.COMPONENT_TYPE)).thenReturn(uploadButton);
+		when(mockApplication.createComponent(OverlayPanel.COMPONENT_TYPE)).thenReturn(overlayPanel);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(iframe);
+		when(mockExpressionFactory.createMethodExpression(any(ELContext.class), anyString(), isNull(), any(Class[].class))).thenReturn(refreshExpression);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(String.class))).thenReturn(onShowExpression);
+
+		Action action = mock(Action.class);
+		when(action.getName()).thenReturn("uploadAttachment");
+		when(action.getClientValidation()).thenReturn(Boolean.TRUE);
+		when(action.getDisabledConditionName()).thenReturn(null);
+		when(action.getInvisibleConditionName()).thenReturn(null);
+
+		UIComponent result = builder.upload(null,
+										"Upload",
+										null,
+										"Upload file",
+										null,
+										action);
+
+		assertSame(wrapper, result);
+		assertEquals(3, wrapperChildren.size());
+		assertSame(refresh, wrapperChildren.get(0));
+		assertSame(uploadButton, wrapperChildren.get(1));
+		assertSame(overlayPanel, wrapperChildren.get(2));
+		verify(uploadButton).setType("button");
+		assertEquals(1, overlayChildren.size());
+		assertSame(iframe, overlayChildren.get(0));
+		ArgumentCaptor<String> iframeMarkupCaptor = ArgumentCaptor.forClass(String.class);
+		verify(iframe).setValue(iframeMarkupCaptor.capture());
+		assertTrue(iframeMarkupCaptor.getValue().contains("_overlayiframe"));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
 	void testDownloadButtonNonShortcutPathUsesDefaultProcessAndUpdate() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
 		CommandButton commandButton = mock(CommandButton.class);
@@ -2996,8 +3269,9 @@ class TabularComponentBuilderTest {
 		ValueExpression renderedExpression = mock(ValueExpression.class);
 		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(Boolean.class))).thenReturn(renderedExpression);
 
-		assertThrows(NoClassDefFoundError.class,
-					() -> builder.tabPaneScript(null, tabPane, "admin", "User", "tp2"));
+		UIOutput result = (UIOutput) builder.tabPaneScript(null, tabPane, "admin", "User", "tp2");
+
+		assertSame(renderedExpression, result.getValueExpression("rendered"));
 	}
 
 	private static Object defaultValue(Class<?> type) {

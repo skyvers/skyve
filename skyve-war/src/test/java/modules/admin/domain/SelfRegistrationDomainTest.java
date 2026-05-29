@@ -2,8 +2,8 @@ package modules.admin.domain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
@@ -13,11 +13,11 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import util.AbstractH2Test;
 
-public class SelfRegistrationDomainTest extends AbstractH2Test {
+class SelfRegistrationDomainTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void dataBuilderCreatesSelfRegistration() throws Exception {
+	void dataBuilderCreatesSelfRegistration() {
 		SelfRegistration bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(SelfRegistration.MODULE_NAME, SelfRegistration.DOCUMENT_NAME);
@@ -26,7 +26,7 @@ public class SelfRegistrationDomainTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void moduleAndDocumentNames() throws Exception {
+	void moduleAndDocumentNames() {
 		SelfRegistration bean = SelfRegistration.newInstance();
 		assertEquals("admin", bean.getBizModule());
 		assertEquals("SelfRegistration", bean.getBizDocument());
@@ -34,7 +34,7 @@ public class SelfRegistrationDomainTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void activateUrlSetAndGet() throws Exception {
+	void activateUrlSetAndGet() {
 		SelfRegistration bean = SelfRegistration.newInstance();
 		bean.setActivateUrl("https://example.com/activate?token=abc");
 		assertEquals("https://example.com/activate?token=abc", bean.getActivateUrl());
@@ -42,7 +42,7 @@ public class SelfRegistrationDomainTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void confirmEmailSetAndGet() throws Exception {
+	void confirmEmailSetAndGet() {
 		SelfRegistration bean = SelfRegistration.newInstance();
 		bean.setConfirmEmail("user@example.com");
 		assertEquals("user@example.com", bean.getConfirmEmail());
@@ -50,7 +50,7 @@ public class SelfRegistrationDomainTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void confirmPasswordSetAndGet() throws Exception {
+	void confirmPasswordSetAndGet() {
 		SelfRegistration bean = SelfRegistration.newInstance();
 		bean.setConfirmPassword("Passw0rd!");
 		assertEquals("Passw0rd!", bean.getConfirmPassword());
@@ -58,7 +58,7 @@ public class SelfRegistrationDomainTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void loginUrlSetAndGet() throws Exception {
+	void loginUrlSetAndGet() {
 		SelfRegistration bean = SelfRegistration.newInstance();
 		bean.setLoginUrl("https://example.com/login");
 		assertEquals("https://example.com/login", bean.getLoginUrl());
@@ -66,7 +66,7 @@ public class SelfRegistrationDomainTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void loginMessageSetAndGet() throws Exception {
+	void loginMessageSetAndGet() {
 		SelfRegistration bean = SelfRegistration.newInstance();
 		bean.setLoginMessage("Registration successful. Please log in.");
 		assertEquals("Registration successful. Please log in.", bean.getLoginMessage());
@@ -74,7 +74,7 @@ public class SelfRegistrationDomainTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void registrationDateSetAndGet() throws Exception {
+	void registrationDateSetAndGet() {
 		SelfRegistration bean = SelfRegistration.newInstance();
 		DateTime now = new DateTime();
 		bean.setRegistrationDate(now);
@@ -83,7 +83,7 @@ public class SelfRegistrationDomainTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void passSilentlySetAndGet() throws Exception {
+	void passSilentlySetAndGet() {
 		SelfRegistration bean = SelfRegistration.newInstance();
 		bean.setPassSilently(Boolean.TRUE);
 		assertEquals(Boolean.TRUE, bean.getPassSilently());
@@ -91,7 +91,7 @@ public class SelfRegistrationDomainTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void previouslyAttemptedPasswordSetAndGet() throws Exception {
+	void previouslyAttemptedPasswordSetAndGet() {
 		SelfRegistration bean = SelfRegistration.newInstance();
 		bean.setPreviouslyAttemptedPassword("OldPassword1");
 		assertEquals("OldPassword1", bean.getPreviouslyAttemptedPassword());
@@ -99,14 +99,14 @@ public class SelfRegistrationDomainTest extends AbstractH2Test {
 
         @Test
         @SuppressWarnings("static-method")
-        void getBizKeyNotNull() throws Exception {
+        void getBizKeyNotNull() {
                 SelfRegistration bean = SelfRegistration.newInstance();
                 assertNotNull(bean.getBizKey());
         }
 
         @Test
         @SuppressWarnings("static-method")
-        void userNullByDefault() throws Exception {
+        void userNullByDefault() {
                 SelfRegistration bean = SelfRegistration.newInstance();
                 // SelfRegistration.newInstance() may pre-populate user via bizlet
                 assertNotNull(bean); // bean itself is created successfully
@@ -114,7 +114,7 @@ public class SelfRegistrationDomainTest extends AbstractH2Test {
 
         @Test
         @SuppressWarnings("static-method")
-        void isRegistrationCompleteWhenPassSilentlyTrue() throws Exception {
+        void isRegistrationCompleteWhenPassSilentlyTrue() {
                 SelfRegistration bean = SelfRegistration.newInstance();
                 assertFalse(bean.isRegistrationComplete());
                 assertTrue(bean.isNotRegistrationComplete());
@@ -125,29 +125,29 @@ public class SelfRegistrationDomainTest extends AbstractH2Test {
 
         @Test
         @SuppressWarnings("static-method")
-        void isSelfRegistrationAllowedReturnsBooleanValue() throws Exception {
+        void isSelfRegistrationAllowedReturnsBooleanValue() {
                 SelfRegistration bean = SelfRegistration.newInstance();
                 // Just verify method is callable - value depends on config
-                assertEquals(!bean.isSelfRegistrationAllowed(), bean.isNotSelfRegistrationAllowed());
+                assertNotEquals(Boolean.valueOf(bean.isSelfRegistrationAllowed()), Boolean.valueOf(bean.isNotSelfRegistrationAllowed()));
         }
 
         @Test
         @SuppressWarnings("static-method")
-        void isShowCloudflareTurnstileReturnsBooleanValue() throws Exception {
+        void isShowCloudflareTurnstileReturnsBooleanValue() {
                 SelfRegistration bean = SelfRegistration.newInstance();
-                assertEquals(!bean.isShowCloudflareTurnstile(), bean.isNotShowCloudflareTurnstile());
+                assertNotEquals(Boolean.valueOf(bean.isShowCloudflareTurnstile()), Boolean.valueOf(bean.isNotShowCloudflareTurnstile()));
         }
 
         @Test
         @SuppressWarnings("static-method")
-        void isShowGoogleRecaptchaReturnsBooleanValue() throws Exception {
+        void isShowGoogleRecaptchaReturnsBooleanValue() {
                 SelfRegistration bean = SelfRegistration.newInstance();
-                assertEquals(!bean.isShowGoogleRecaptcha(), bean.isNotShowGoogleRecaptcha());
+                assertNotEquals(Boolean.valueOf(bean.isShowGoogleRecaptcha()), Boolean.valueOf(bean.isNotShowGoogleRecaptcha()));
         }
 
         @Test
         @SuppressWarnings("static-method")
-        void isConfirmEmailInvalidFalseWhenNoConfirmEmail() throws Exception {
+        void isConfirmEmailInvalidFalseWhenNoConfirmEmail() {
                 SelfRegistration bean = SelfRegistration.newInstance();
                 assertFalse(bean.isConfirmEmailInvalid());
                 assertTrue(bean.isNotConfirmEmailInvalid());
@@ -155,7 +155,7 @@ public class SelfRegistrationDomainTest extends AbstractH2Test {
 
         @Test
         @SuppressWarnings("static-method")
-        void isConfirmEmailInvalidTrueForInvalidEmail() throws Exception {
+        void isConfirmEmailInvalidTrueForInvalidEmail() {
                 SelfRegistration bean = SelfRegistration.newInstance();
                 bean.setConfirmEmail("notanemail");
                 assertTrue(bean.isConfirmEmailInvalid());
@@ -164,7 +164,7 @@ public class SelfRegistrationDomainTest extends AbstractH2Test {
 
         @Test
         @SuppressWarnings("static-method")
-        void isEmailInvalidFalseWhenNoUser() throws Exception {
+        void isEmailInvalidFalseWhenNoUser() {
                 SelfRegistration bean = SelfRegistration.newInstance();
                 assertFalse(bean.isEmailInvalid());
                 assertTrue(bean.isNotEmailInvalid());

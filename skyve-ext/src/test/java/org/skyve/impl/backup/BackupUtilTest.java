@@ -8,9 +8,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.skyve.impl.backup.BackupUtil.redactData;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.sql.Date;
@@ -20,15 +23,33 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.customer.ExportedReference;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
+import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.Persistent;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.Collection.CollectionType;
+import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.Module.DocumentRef;
+import org.skyve.metadata.repository.ProvidedRepository;
+import org.skyve.persistence.SQL;
+import org.skyve.metadata.user.User;
 
 public class BackupUtilTest {
 	@Test
@@ -748,5 +769,480 @@ public class BackupUtilTest {
 		assertThat(restored.fields.get("bizId").getAttributeType(), is(AttributeType.text));
 		assertThat(restored.fields.get("amount").getAttributeType(), is(AttributeType.integer));
 		assertThat(restored.fields.get("owner").getAttributeType(), is(AttributeType.association));
+	}
+
+	@Test
+	@SuppressWarnings({ "static-method", "boxing" })
+	public void getTablesReturnsSingleTableForSimpleStaticDocument() throws Exception {
+		ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		ProvidedRepositoryFactory.set(repository);
+
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		User user = mock(User.class);
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Module module = mock(Module.class);
+		DocumentRef documentRef = mock(DocumentRef.class);
+		Document document = mock(Document.class);
+		Persistent persistent = mock(Persistent.class);
+
+		Map<String, DocumentRef> refs = new HashMap<>();
+		refs.put("MyDoc", documentRef);
+
+		org.skyve.metadata.model.Attribute.Sensitivity sensitivity = org.skyve.metadata.model.Attribute.Sensitivity.none;
+
+		org.skyve.metadata.model.Extends extension = null;
+
+		try {
+			when(persistence.getUser()).thenReturn(user);
+			when(user.getCustomer()).thenReturn(customer);
+			when(customer.getModules()).thenReturn(Collections.singletonList(module));
+			when(customer.getModule("mod")).thenReturn(module);
+			when(customer.getExportedReferences(document)).thenReturn(null);
+			when(module.getName()).thenReturn("mod");
+			when(module.getDocumentRefs()).thenReturn(refs);
+			when(module.getDocument(customer, "MyDoc")).thenReturn(document);
+			when(documentRef.getOwningModuleName()).thenReturn("mod");
+			when(document.isDynamic()).thenReturn(false);
+			when(document.isPersistable()).thenReturn(true);
+			when(document.getPersistent()).thenReturn(persistent);
+			when(document.getOwningModuleName()).thenReturn("mod");
+			when(document.getAllAttributes(customer)).thenReturn(Collections.emptyList());
+			when(document.getParentDocumentName()).thenReturn(null);
+			when(document.isOrdered()).thenReturn(false);
+			when(document.getBizKeySensitity()).thenReturn(sensitivity);
+			when(document.getExtends()).thenReturn(extension);
+			when(persistent.getAgnosticIdentifier()).thenReturn("T_DOC");
+			when(persistent.getPersistentIdentifier()).thenReturn("T_DOC");
+			when(repository.findNearestPersistentSingleOrJoinedSuperDocument(customer, module, document)).thenReturn(document);
+
+			withThreadLocalPersistence(persistence, () -> {
+				Collection<Table> tables = BackupUtil.getTables();
+				assertEquals(1, tables.size());
+				Table table = tables.iterator().next();
+				assertEquals("T_DOC", table.agnosticIdentifier);
+				assertTrue(table.fields.containsKey(Bean.DOCUMENT_ID));
+				assertTrue(table.fields.containsKey(Bean.BIZ_KEY));
+			});
+		}
+		finally {
+			ProvidedRepositoryFactory.set(previousRepository);
+		}
+	}
+
+	@Test
+	@SuppressWarnings({ "static-method", "boxing" })
+	public void getTablesAddsJoinTableForAggregationReference() throws Exception {
+		ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		ProvidedRepositoryFactory.set(repository);
+
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		User user = mock(User.class);
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Module module = mock(Module.class);
+		DocumentRef documentRef = mock(DocumentRef.class);
+		Document document = mock(Document.class);
+		Persistent persistent = mock(Persistent.class);
+
+		Document referencedDocument = mock(Document.class);
+		org.skyve.metadata.model.document.Collection collection = mock(org.skyve.metadata.model.document.Collection.class);
+		Persistent ownerPersistent = mock(Persistent.class);
+
+		ExportedReference reference = new ExportedReference();
+		reference.setModuleName("mod");
+		reference.setDocumentName("RefDoc");
+		reference.setReferenceFieldName("items");
+		reference.setType(CollectionType.aggregation);
+		reference.setPersistent(ownerPersistent);
+
+		Map<String, DocumentRef> refs = new HashMap<>();
+		refs.put("MyDoc", documentRef);
+
+		org.skyve.metadata.model.Attribute.Sensitivity sensitivity = org.skyve.metadata.model.Attribute.Sensitivity.none;
+
+		try {
+			when(persistence.getUser()).thenReturn(user);
+			when(user.getCustomer()).thenReturn(customer);
+			when(customer.getModules()).thenReturn(Collections.singletonList(module));
+			when(customer.getModule("mod")).thenReturn(module);
+			when(customer.getExportedReferences(document)).thenReturn(Collections.singletonList(reference));
+			when(module.getName()).thenReturn("mod");
+			when(module.getDocumentRefs()).thenReturn(refs);
+			when(module.getDocument(customer, "MyDoc")).thenReturn(document);
+			when(module.getDocument(customer, "RefDoc")).thenReturn(referencedDocument);
+			when(documentRef.getOwningModuleName()).thenReturn("mod");
+			when(document.isDynamic()).thenReturn(false);
+			when(document.isPersistable()).thenReturn(true);
+			when(document.getPersistent()).thenReturn(persistent);
+			when(document.getOwningModuleName()).thenReturn("mod");
+			when(document.getAllAttributes(customer)).thenReturn(Collections.emptyList());
+			when(document.getParentDocumentName()).thenReturn(null);
+			when(document.isOrdered()).thenReturn(false);
+			when(document.getBizKeySensitity()).thenReturn(sensitivity);
+			when(document.getExtends()).thenReturn(null);
+			when(persistent.getAgnosticIdentifier()).thenReturn("T_DOC");
+			when(persistent.getPersistentIdentifier()).thenReturn("T_DOC");
+			when(repository.findNearestPersistentSingleOrJoinedSuperDocument(customer, module, document)).thenReturn(document);
+
+			when(referencedDocument.isDynamic()).thenReturn(false);
+			when(referencedDocument.getReferenceByName("items")).thenReturn(collection);
+			when(collection.isPersistent()).thenReturn(true);
+			when(collection.getOrdered()).thenReturn(Boolean.TRUE);
+
+			when(ownerPersistent.getAgnosticIdentifier()).thenReturn("T_OWNER");
+			when(ownerPersistent.getPersistentIdentifier()).thenReturn("T_OWNER");
+			when(ownerPersistent.getStrategy()).thenReturn(null);
+			when(ownerPersistent.isPolymorphicallyMapped()).thenReturn(false);
+
+			withThreadLocalPersistence(persistence, () -> {
+				Collection<Table> tables = BackupUtil.getTables();
+				assertEquals(2, tables.size());
+			});
+		}
+		finally {
+			ProvidedRepositoryFactory.set(previousRepository);
+		}
+	}
+
+	@Test
+	@SuppressWarnings({ "static-method", "boxing" })
+	public void getTablesAddsJoinTableForJoinedReferenceStrategy() throws Exception {
+		ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		ProvidedRepositoryFactory.set(repository);
+
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		User user = mock(User.class);
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Module module = mock(Module.class);
+		DocumentRef documentRef = mock(DocumentRef.class);
+		Document document = mock(Document.class);
+		Persistent persistent = mock(Persistent.class);
+
+		Document referencedDocument = mock(Document.class);
+		org.skyve.metadata.model.document.Collection collection = mock(org.skyve.metadata.model.document.Collection.class);
+		Persistent referencePersistent = mock(Persistent.class);
+		Persistent referencedPersistent = mock(Persistent.class);
+
+		ExportedReference reference = new ExportedReference();
+		reference.setModuleName("mod");
+		reference.setDocumentName("RefDoc");
+		reference.setReferenceFieldName("items");
+		reference.setType(CollectionType.aggregation);
+		reference.setPersistent(referencePersistent);
+
+		Map<String, DocumentRef> refs = new HashMap<>();
+		refs.put("MyDoc", documentRef);
+
+		org.skyve.metadata.model.Attribute.Sensitivity sensitivity = org.skyve.metadata.model.Attribute.Sensitivity.none;
+
+		try {
+			when(persistence.getUser()).thenReturn(user);
+			when(user.getCustomer()).thenReturn(customer);
+			when(customer.getModules()).thenReturn(Collections.singletonList(module));
+			when(customer.getModule("mod")).thenReturn(module);
+			when(customer.getExportedReferences(document)).thenReturn(Collections.singletonList(reference));
+			when(module.getName()).thenReturn("mod");
+			when(module.getDocumentRefs()).thenReturn(refs);
+			when(module.getDocument(customer, "MyDoc")).thenReturn(document);
+			when(module.getDocument(customer, "RefDoc")).thenReturn(referencedDocument);
+			when(documentRef.getOwningModuleName()).thenReturn("mod");
+			when(document.isDynamic()).thenReturn(false);
+			when(document.isPersistable()).thenReturn(true);
+			when(document.getPersistent()).thenReturn(persistent);
+			when(document.getOwningModuleName()).thenReturn("mod");
+			when(document.getAllAttributes(customer)).thenReturn(Collections.emptyList());
+			when(document.getParentDocumentName()).thenReturn(null);
+			when(document.isOrdered()).thenReturn(false);
+			when(document.getBizKeySensitity()).thenReturn(sensitivity);
+			when(document.getExtends()).thenReturn(null);
+			when(persistent.getAgnosticIdentifier()).thenReturn("T_DOC");
+			when(persistent.getPersistentIdentifier()).thenReturn("T_DOC");
+			when(repository.findNearestPersistentSingleOrJoinedSuperDocument(customer, module, document)).thenReturn(document);
+
+			when(referencedDocument.isDynamic()).thenReturn(false);
+			when(referencedDocument.getReferenceByName("items")).thenReturn(collection);
+			when(referencedDocument.getExtends()).thenReturn(null);
+			when(referencedDocument.getPersistent()).thenReturn(referencedPersistent);
+			when(collection.isPersistent()).thenReturn(true);
+			when(collection.getOrdered()).thenReturn(Boolean.FALSE);
+
+			when(referencePersistent.getAgnosticIdentifier()).thenReturn("T_OWNER");
+			when(referencePersistent.getPersistentIdentifier()).thenReturn("T_OWNER");
+			when(referencePersistent.getStrategy()).thenReturn(org.skyve.metadata.model.Persistent.ExtensionStrategy.joined);
+			when(referencePersistent.isPolymorphicallyMapped()).thenReturn(false);
+			when(referencedPersistent.getAgnosticIdentifier()).thenReturn("T_REF");
+			when(referencedPersistent.getPersistentIdentifier()).thenReturn("T_REF");
+
+			withThreadLocalPersistence(persistence, () -> {
+				Collection<Table> tables = BackupUtil.getTables();
+				assertEquals(2, tables.size());
+			});
+		}
+		finally {
+			ProvidedRepositoryFactory.set(previousRepository);
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void getTablesForAllCustomersThrowsWhenCustomerMissing() throws Exception {
+		ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		try {
+			ProvidedRepositoryFactory.set(repository);
+			when(repository.getAllCustomerNames()).thenReturn(Collections.singletonList("missingCustomer"));
+			when(repository.getCustomer("missingCustomer")).thenReturn(null);
+
+			try {
+				BackupUtil.getTablesForAllCustomers();
+				org.junit.Assert.fail("Expected MetaDataException");
+			}
+			catch (MetaDataException e) {
+				assertThat(e.getMessage(), containsString("missingCustomer does not exist"));
+			}
+		}
+		finally {
+			ProvidedRepositoryFactory.set(previousRepository);
+		}
+	}
+
+	@Test
+	@SuppressWarnings({ "static-method", "boxing" })
+	public void getTablesForAllCustomersReturnsMergedTables() throws Exception {
+		ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		try {
+			ProvidedRepositoryFactory.set(repository);
+
+			CustomerImpl customerOne = mock(CustomerImpl.class);
+			CustomerImpl customerTwo = mock(CustomerImpl.class);
+			Module moduleOne = mock(Module.class);
+			Module moduleTwo = mock(Module.class);
+			DocumentRef refOne = mock(DocumentRef.class);
+			DocumentRef refTwo = mock(DocumentRef.class);
+			Document docOne = mock(Document.class);
+			Document docTwo = mock(Document.class);
+			Persistent persistentOne = mock(Persistent.class);
+			Persistent persistentTwo = mock(Persistent.class);
+
+			Map<String, DocumentRef> refsOne = new HashMap<>();
+			refsOne.put("MyDoc", refOne);
+			Map<String, DocumentRef> refsTwo = new HashMap<>();
+			refsTwo.put("MyDoc", refTwo);
+
+			org.skyve.metadata.model.Attribute.Sensitivity sensitivity = org.skyve.metadata.model.Attribute.Sensitivity.none;
+
+			when(repository.getAllCustomerNames()).thenReturn(Arrays.asList("c1", "c2"));
+			when(repository.getCustomer("c1")).thenReturn(customerOne);
+			when(repository.getCustomer("c2")).thenReturn(customerTwo);
+
+			when(customerOne.getModules()).thenReturn(Collections.singletonList(moduleOne));
+			when(customerTwo.getModules()).thenReturn(Collections.singletonList(moduleTwo));
+
+			when(moduleOne.getName()).thenReturn("mod");
+			when(moduleTwo.getName()).thenReturn("mod");
+			when(moduleOne.getDocumentRefs()).thenReturn(refsOne);
+			when(moduleTwo.getDocumentRefs()).thenReturn(refsTwo);
+			when(refOne.getOwningModuleName()).thenReturn("mod");
+			when(refTwo.getOwningModuleName()).thenReturn("mod");
+
+			when(moduleOne.getDocument(customerOne, "MyDoc")).thenReturn(docOne);
+			when(moduleTwo.getDocument(customerTwo, "MyDoc")).thenReturn(docTwo);
+
+			when(docOne.isDynamic()).thenReturn(false);
+			when(docOne.isPersistable()).thenReturn(true);
+			when(docOne.getPersistent()).thenReturn(persistentOne);
+			when(docOne.getOwningModuleName()).thenReturn("mod");
+			when(docOne.getAllAttributes(customerOne)).thenReturn(Collections.emptyList());
+			when(docOne.getParentDocumentName()).thenReturn(null);
+			when(docOne.isOrdered()).thenReturn(false);
+			when(docOne.getBizKeySensitity()).thenReturn(sensitivity);
+			when(docOne.getExtends()).thenReturn(null);
+			when(customerOne.getExportedReferences(docOne)).thenReturn(Collections.emptyList());
+
+			when(docTwo.isDynamic()).thenReturn(false);
+			when(docTwo.isPersistable()).thenReturn(true);
+			when(docTwo.getPersistent()).thenReturn(persistentTwo);
+			when(docTwo.getOwningModuleName()).thenReturn("mod");
+			when(docTwo.getAllAttributes(customerTwo)).thenReturn(Collections.emptyList());
+			when(docTwo.getParentDocumentName()).thenReturn(null);
+			when(docTwo.isOrdered()).thenReturn(false);
+			when(docTwo.getBizKeySensitity()).thenReturn(sensitivity);
+			when(docTwo.getExtends()).thenReturn(null);
+			when(customerTwo.getExportedReferences(docTwo)).thenReturn(Collections.emptyList());
+
+			when(persistentOne.getAgnosticIdentifier()).thenReturn("T_DOC");
+			when(persistentOne.getPersistentIdentifier()).thenReturn("T_DOC");
+			when(persistentTwo.getAgnosticIdentifier()).thenReturn("T_DOC");
+			when(persistentTwo.getPersistentIdentifier()).thenReturn("T_DOC");
+
+			when(repository.findNearestPersistentSingleOrJoinedSuperDocument(customerOne, moduleOne, docOne)).thenReturn(docOne);
+			when(repository.findNearestPersistentSingleOrJoinedSuperDocument(customerTwo, moduleTwo, docTwo)).thenReturn(docTwo);
+
+			Collection<Table> tables = BackupUtil.getTablesForAllCustomers();
+			assertEquals(1, tables.size());
+		}
+		finally {
+			ProvidedRepositoryFactory.set(previousRepository);
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void validateSkyveBackupThrowsWhenDirectoryMissing() throws Exception {
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		User user = mock(User.class);
+		when(persistence.getUser()).thenReturn(user);
+		when(user.getCustomerName()).thenReturn("missingDirCustomer");
+
+		withThreadLocalPersistence(persistence, () -> {
+			String extractName = "missing-backup-dir-" + System.nanoTime();
+			try {
+				BackupUtil.validateSkyveBackup(extractName);
+			}
+			catch (DomainException e) {
+				assertThat(e.getMessage(), containsString("is not a directory"));
+				return;
+			}
+			org.junit.Assert.fail("Expected DomainException");
+		});
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void executeScriptThrowsWhenPersistenceIsNotHibernate() throws Exception {
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		SQL sql = mock(SQL.class);
+		when(persistence.newSQL("select 1")).thenReturn(sql);
+		when(sql.noTimeout()).thenReturn(sql);
+
+		withThreadLocalPersistence(persistence, () -> {
+			List<String> script = Collections.singletonList("select 1");
+			try {
+				BackupUtil.executeScript(script);
+			}
+			catch (ClassCastException e) {
+				assertThat(e.getMessage(), containsString("AbstractHibernatePersistence"));
+				return;
+			}
+			org.junit.Assert.fail("Expected ClassCastException");
+		});
+	}
+
+	@Test
+	@SuppressWarnings({ "static-method", "boxing" })
+	public void getTablesAddsJoinTableForPolymorphicReference() throws Exception {
+		ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		ProvidedRepositoryFactory.set(repository);
+
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		User user = mock(User.class);
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Module module = mock(Module.class);
+		DocumentRef documentRef = mock(DocumentRef.class);
+		Document document = mock(Document.class);
+		Persistent persistent = mock(Persistent.class);
+
+		Document referencedDocument = mock(Document.class);
+		org.skyve.metadata.model.document.Collection collection = mock(org.skyve.metadata.model.document.Collection.class);
+		Persistent ownerPersistent = mock(Persistent.class);
+
+		Document derivedDocument = mock(Document.class);
+		Persistent derivedPersistent = mock(Persistent.class);
+
+		ExportedReference reference = new ExportedReference();
+		reference.setModuleName("mod");
+		reference.setDocumentName("RefDoc");
+		reference.setReferenceFieldName("items");
+		reference.setType(CollectionType.composition);
+		reference.setPersistent(ownerPersistent);
+
+		Map<String, DocumentRef> refs = new HashMap<>();
+		refs.put("MyDoc", documentRef);
+
+		org.skyve.metadata.model.Attribute.Sensitivity sensitivity = org.skyve.metadata.model.Attribute.Sensitivity.none;
+
+		try {
+			when(persistence.getUser()).thenReturn(user);
+			when(user.getCustomer()).thenReturn(customer);
+			when(customer.getModules()).thenReturn(Collections.singletonList(module));
+			when(customer.getModule("mod")).thenReturn(module);
+			when(customer.getExportedReferences(document)).thenReturn(Collections.singletonList(reference));
+			when(customer.getDerivedDocuments(referencedDocument)).thenReturn(Collections.singletonList("mod.DerivedDoc"));
+			when(module.getName()).thenReturn("mod");
+			when(module.getDocumentRefs()).thenReturn(refs);
+			when(module.getDocument(customer, "MyDoc")).thenReturn(document);
+			when(module.getDocument(customer, "RefDoc")).thenReturn(referencedDocument);
+			when(module.getDocument(customer, "DerivedDoc")).thenReturn(derivedDocument);
+			when(documentRef.getOwningModuleName()).thenReturn("mod");
+			when(document.isDynamic()).thenReturn(false);
+			when(document.isPersistable()).thenReturn(true);
+			when(document.getPersistent()).thenReturn(persistent);
+			when(document.getOwningModuleName()).thenReturn("mod");
+			when(document.getAllAttributes(customer)).thenReturn(Collections.emptyList());
+			when(document.getParentDocumentName()).thenReturn(null);
+			when(document.isOrdered()).thenReturn(false);
+			when(document.getBizKeySensitity()).thenReturn(sensitivity);
+			when(document.getExtends()).thenReturn(null);
+			when(persistent.getAgnosticIdentifier()).thenReturn("T_DOC");
+			when(persistent.getPersistentIdentifier()).thenReturn("T_DOC");
+			when(repository.findNearestPersistentSingleOrJoinedSuperDocument(customer, module, document)).thenReturn(document);
+
+			when(referencedDocument.isDynamic()).thenReturn(false);
+			when(referencedDocument.getReferenceByName("items")).thenReturn(collection);
+			when(collection.isPersistent()).thenReturn(true);
+			when(collection.getOrdered()).thenReturn(Boolean.TRUE);
+
+			when(ownerPersistent.getAgnosticIdentifier()).thenReturn("T_OWNER");
+			when(ownerPersistent.getPersistentIdentifier()).thenReturn("T_OWNER");
+			when(ownerPersistent.getStrategy()).thenReturn(null);
+			when(ownerPersistent.isPolymorphicallyMapped()).thenReturn(true);
+
+			when(derivedDocument.isPersistable()).thenReturn(true);
+			when(derivedDocument.getPersistent()).thenReturn(derivedPersistent);
+			when(derivedPersistent.getAgnosticIdentifier()).thenReturn("T_DERIVED");
+			when(derivedPersistent.getPersistentIdentifier()).thenReturn("T_DERIVED");
+
+			withThreadLocalPersistence(persistence, () -> {
+				Collection<Table> tables = BackupUtil.getTables();
+				assertEquals(2, tables.size());
+			});
+		}
+		finally {
+			ProvidedRepositoryFactory.set(previousRepository);
+		}
+	}
+
+	private static void withThreadLocalPersistence(AbstractPersistence persistence, ThrowingRunnable runnable) throws Exception {
+		ThreadLocal<AbstractPersistence> threadLocal = getThreadLocalPersistence();
+		AbstractPersistence previous = threadLocal.get();
+		try {
+			threadLocal.set(persistence);
+			runnable.run();
+		}
+		finally {
+			if (previous == null) {
+				threadLocal.remove();
+			}
+			else {
+				threadLocal.set(previous);
+			}
+		}
+	}
+
+	private static ThreadLocal<AbstractPersistence> getThreadLocalPersistence() throws Exception {
+		Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
+		field.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		ThreadLocal<AbstractPersistence> threadLocal = (ThreadLocal<AbstractPersistence>) field.get(null);
+		return threadLocal;
+	}
+
+	@FunctionalInterface
+	private interface ThrowingRunnable {
+		void run() throws Exception;
 	}
 }

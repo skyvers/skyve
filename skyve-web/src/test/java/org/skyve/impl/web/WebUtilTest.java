@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -11,13 +12,20 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.ArgumentMatchers.any;
 
+import java.lang.reflect.Field;
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
+import org.skyve.domain.Bean;
+import org.skyve.domain.DynamicBean;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.UserImpl;
+import org.skyve.impl.sail.mock.MockWebContext;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.repository.ProvidedRepository;
 
@@ -32,6 +40,8 @@ class WebUtilTest {
 	private ProvidedRepository savedRepository;
 	private String savedServerUrl;
 	private String savedSkyveContext;
+	private String savedGoogleRecaptchaSecretKey;
+	private String savedCloudflareTurnstileSecretKey;
 
 	@BeforeEach
 	void saveState() {
@@ -39,6 +49,8 @@ class WebUtilTest {
 		savedRepository = ProvidedRepositoryFactory.get();
 		savedServerUrl = UtilImpl.SERVER_URL;
 		savedSkyveContext = UtilImpl.SKYVE_CONTEXT;
+		savedGoogleRecaptchaSecretKey = UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY;
+		savedCloudflareTurnstileSecretKey = UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY;
 	}
 
 	@AfterEach
@@ -47,6 +59,8 @@ class WebUtilTest {
 		ProvidedRepositoryFactory.set(savedRepository);
 		UtilImpl.SERVER_URL = savedServerUrl;
 		UtilImpl.SKYVE_CONTEXT = savedSkyveContext;
+		UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY = savedGoogleRecaptchaSecretKey;
+		UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY = savedCloudflareTurnstileSecretKey;
 	}
 
 	// ===== generatePasswordResetToken =====
@@ -112,6 +126,82 @@ class WebUtilTest {
 		when(request.getCookies()).thenReturn(new Cookie[]{otherCookie});
 		String result = WebUtil.determineCustomerWithoutSession(request);
 		assertNull(result);
+	}
+
+	// ===== getConversationBeanFromRequest =====
+
+	@SuppressWarnings("static-method")
+	@Test
+	void getConversationBeanFromRequestReturnsNullWhenWebContextIsNull() throws Exception {
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		assertNull(WebUtil.getConversationBeanFromRequest(null, request));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void getConversationBeanFromRequestReturnsCurrentBeanWhenNoBindingProvided() throws Exception {
+		MockWebContext webContext = new MockWebContext();
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		DynamicBean root = new DynamicBean("test", "RootDoc", new HashMap<>());
+		setCurrentBeanUnsafe(webContext, root);
+		when(request.getParameter(AbstractWebContext.BINDING_NAME)).thenReturn(null);
+
+		Bean result = WebUtil.getConversationBeanFromRequest(webContext, request);
+
+		assertSame(root, result);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void getConversationBeanFromRequestResolvesAssociationBinding() throws Exception {
+		MockWebContext webContext = new MockWebContext();
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		DynamicBean child = new DynamicBean("test", "ChildDoc", new HashMap<>());
+		HashMap<String, Object> rootValues = new HashMap<>();
+		rootValues.put("child", child);
+		DynamicBean root = new DynamicBean("test", "RootDoc", rootValues);
+		setCurrentBeanUnsafe(webContext, root);
+		when(request.getParameter(AbstractWebContext.BINDING_NAME)).thenReturn("child");
+
+		Bean result = WebUtil.getConversationBeanFromRequest(webContext, request);
+
+		assertSame(child, result);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void getConversationBeanFromRequestResolvesCollectionElementByBizId() throws Exception {
+		MockWebContext webContext = new MockWebContext();
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HashMap<String, Object> firstValues = new HashMap<>();
+		firstValues.put(Bean.DOCUMENT_ID, "item-1");
+		DynamicBean first = new DynamicBean("test", "ItemDoc", firstValues);
+		HashMap<String, Object> secondValues = new HashMap<>();
+		secondValues.put(Bean.DOCUMENT_ID, "item-2");
+		DynamicBean second = new DynamicBean("test", "ItemDoc", secondValues);
+		List<Bean> items = new ArrayList<>();
+		items.add(first);
+		items.add(second);
+		HashMap<String, Object> rootValues = new HashMap<>();
+		rootValues.put("items", items);
+		DynamicBean root = new DynamicBean("test", "RootDoc", rootValues);
+		setCurrentBeanUnsafe(webContext, root);
+		when(request.getParameter(AbstractWebContext.BINDING_NAME)).thenReturn("items");
+		when(request.getParameter(Bean.DOCUMENT_ID)).thenReturn("item-2");
+
+		Bean result = WebUtil.getConversationBeanFromRequest(webContext, request);
+
+		assertSame(second, result);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void getConversationBeanFromRequestReturnsNullWhenBindingProvidedButCurrentBeanIsNull() throws Exception {
+		MockWebContext webContext = new MockWebContext();
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		when(request.getParameter(AbstractWebContext.BINDING_NAME)).thenReturn("child");
+
+		assertNull(WebUtil.getConversationBeanFromRequest(webContext, request));
 	}
 
 	// ===== setSessionId =====
@@ -189,6 +279,41 @@ class WebUtilTest {
 		assertTrue(result);
 	}
 
+	@SuppressWarnings("static-method")
+	@Test
+	void isConcurrentSessionWarningEligibleRequestWrapperUsesPrincipalAndRepository() {
+		UserImpl user = new UserImpl();
+		user.setCustomerName("demo");
+		user.setName("regularUser");
+		Principal principal = mock(Principal.class);
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		ProvidedRepository repo = mock(ProvidedRepository.class);
+		when(request.getUserPrincipal()).thenReturn(principal);
+		when(repo.retrievePublicUserName("demo")).thenReturn("publicUser");
+		ProvidedRepositoryFactory.set(repo);
+
+		assertTrue(WebUtil.isConcurrentSessionWarningEligible(user, request));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void shouldLogConcurrentSessionWarningRequiresAllFlagsToBeTrue() {
+		assertFalse(WebUtil.shouldLogConcurrentSessionWarning(false, false, true, true));
+		assertFalse(WebUtil.shouldLogConcurrentSessionWarning(true, true, true, true));
+		assertFalse(WebUtil.shouldLogConcurrentSessionWarning(true, false, false, true));
+		assertFalse(WebUtil.shouldLogConcurrentSessionWarning(true, false, true, false));
+		assertTrue(WebUtil.shouldLogConcurrentSessionWarning(true, false, true, true));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void buildConcurrentSessionWarningMessageIncludesExistingSessionCount() {
+		String message = WebUtil.buildConcurrentSessionWarningMessage(3);
+
+		assertTrue(message.contains("another active session already existed"));
+		assertTrue(message.contains("3"));
+	}
+
 	// ===== isPublicUser (package-private) =====
 
 	@SuppressWarnings("static-method")
@@ -250,6 +375,21 @@ class WebUtilTest {
 		// Only "session" cookie should be deleted (added to response)
 		// Customer cookie and ecuador_* cookies should be preserved
 		verify(response).addCookie(cookies[0]); // session cookie deleted
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void deleteCookiesPreservesUltimaExpandedItemsCookie() {
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		Cookie ultimaCookie = new Cookie("ultima_expandeditems", "state");
+		Cookie removable = new Cookie("auth", "token");
+		when(request.getCookies()).thenReturn(new Cookie[] {ultimaCookie, removable});
+
+		WebUtil.deleteCookies(request, response);
+
+		verify(response).addCookie(removable);
+		verify(response, never()).addCookie(ultimaCookie);
 	}
 
 	@SuppressWarnings("static-method")
@@ -365,5 +505,77 @@ class WebUtilTest {
 		String result = WebUtil.getRefererHeader(request);
 		assertNotNull(result);
 		assertTrue(result.startsWith("http://localhost:8080/app"));
+	}
+
+	// ===== logout =====
+
+	@SuppressWarnings("static-method")
+	@Test
+	void logoutInvalidatesExistingSessionAndDeletesCookies() throws Exception {
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		HttpSession session = mock(HttpSession.class);
+		Cookie removable = new Cookie("JSESSIONID", "abc");
+		Cookie customerCookie = new Cookie(AbstractWebContext.CUSTOMER_COOKIE_NAME, "demo");
+
+		when(request.getSession(false)).thenReturn(session);
+		when(request.getCookies()).thenReturn(new Cookie[] {removable, customerCookie});
+
+		WebUtil.logout(request, response);
+
+		verify(request).logout();
+		verify(session).invalidate();
+		verify(response).addCookie(removable);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void logoutSkipsSessionInvalidationWhenNoSessionExists() throws Exception {
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpServletResponse response = mock(HttpServletResponse.class);
+
+		when(request.getSession(false)).thenReturn(null);
+		when(request.getCookies()).thenReturn(null);
+
+		WebUtil.logout(request, response);
+
+		verify(request).logout();
+		verify(response, never()).addCookie(any());
+	}
+
+	// ===== validateRecaptcha =====
+
+	@SuppressWarnings("static-method")
+	@Test
+	void validateRecaptchaReturnsTrueWhenNoSecretConfigured() {
+		UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY = null;
+		UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY = null;
+
+		assertTrue(WebUtil.validateRecaptcha(null));
+		assertTrue(WebUtil.validateRecaptcha("any-response"));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void validateRecaptchaReturnsFalseWhenGoogleSecretConfiguredButNoResponse() {
+		UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY = "google-secret";
+		UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY = null;
+
+		assertFalse(WebUtil.validateRecaptcha(null));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void validateRecaptchaReturnsFalseWhenTurnstileSecretConfiguredButNoResponse() {
+		UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY = null;
+		UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY = "turnstile-secret";
+
+		assertFalse(WebUtil.validateRecaptcha(null));
+	}
+
+	private static void setCurrentBeanUnsafe(AbstractWebContext webContext, Bean bean) throws Exception {
+		Field currentBeanField = AbstractWebContext.class.getDeclaredField("currentBean");
+		currentBeanField.setAccessible(true);
+		currentBeanField.set(webContext, bean);
 	}
 }

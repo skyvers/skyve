@@ -39,6 +39,22 @@ public class SpringSecurityConfig {
 	@Autowired
 	@SuppressWarnings("java:S6813")
 	private SkyveSpringSecurity skyve;
+
+	/**
+	 * Default constructor for Spring.
+	 */
+	public SpringSecurityConfig() {
+		// Spring injects after construction.
+	}
+
+	/**
+	 * Test-only constructor that allows direct instantiation with a mock adapter.
+	 *
+	 * @param skyve the Spring Security adapter to delegate to
+	 */
+	SpringSecurityConfig(SkyveSpringSecurity skyve) {
+		this.skyve = skyve;
+	}
 	
 	/**
 	 * Builds the application {@link SecurityFilterChain}.

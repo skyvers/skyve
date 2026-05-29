@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
@@ -24,6 +23,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.persistence.SQL;
 
 @Disabled("Until byte buddy can be uplifted to allow mockito-inline lib to work")
+@SuppressWarnings("resource")
 class LocalDataStoreRepositoryTest {
 	private String savedCustomer;
 	private MockedStatic<EXT> mockedExt;
@@ -50,7 +50,7 @@ class LocalDataStoreRepositoryTest {
 		SQLDataAccess dataAccess = mock(SQLDataAccess.class);
 		SQL sql = mock(SQL.class);
 		when(dataAccess.newSQL(anyString())).thenReturn(sql);
-		when(sql.putParameter(eq(Bean.CUSTOMER_NAME), eq("demo"), eq(false))).thenReturn(sql);
+		when(sql.putParameter(Bean.CUSTOMER_NAME, "demo", false)).thenReturn(sql);
 		when(sql.scalarResult(String.class)).thenReturn(null);
 		mockedExt.when(EXT::newSQLDataAccess).thenReturn(dataAccess);
 
@@ -66,7 +66,7 @@ class LocalDataStoreRepositoryTest {
 		SQLDataAccess dataAccess = mock(SQLDataAccess.class);
 		SQL sql = mock(SQL.class);
 		when(dataAccess.newSQL(anyString())).thenReturn(sql);
-		when(sql.putParameter(eq(Bean.CUSTOMER_NAME), eq("demo"), eq(false))).thenReturn(sql);
+		when(sql.putParameter(Bean.CUSTOMER_NAME, "demo", false)).thenReturn(sql);
 		when(sql.scalarResult(String.class)).thenReturn("publicUser");
 		mockedExt.when(EXT::newSQLDataAccess).thenReturn(dataAccess);
 
@@ -82,7 +82,7 @@ class LocalDataStoreRepositoryTest {
 		SQLDataAccess dataAccess = mock(SQLDataAccess.class);
 		SQL sql = mock(SQL.class);
 		when(dataAccess.newSQL(anyString())).thenReturn(sql);
-		when(sql.putParameter(eq(Bean.CUSTOMER_NAME), eq("demo"), eq(false))).thenReturn(sql);
+		when(sql.putParameter(Bean.CUSTOMER_NAME, "demo", false)).thenReturn(sql);
 		when(sql.scalarResult(String.class)).thenThrow(new IllegalStateException("boom"));
 		mockedExt.when(EXT::newSQLDataAccess).thenReturn(dataAccess);
 

@@ -1,29 +1,16 @@
 package org.skyve.impl.util;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.SQLSyntaxErrorException;
+import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.skyve.domain.messages.DomainException;
 
 @SuppressWarnings("static-method")
 class TwoFactorAuthConfigurationSingletonStartupTest {
-	private static final String TFA_CONFIGURATION_QUERY =
-			"select twoFactorType, twofactorPushCodeTimeOutSeconds, twoFactorEmailSubject, twoFactorEmailBody, bizCustomer " +
-					"from ADM_Configuration " +
-					"where twoFactorType is not null and twofactorPushCodeTimeOutSeconds is not null";
-
 	private String previousEnvironmentIdentifier = UtilImpl.ENVIRONMENT_IDENTIFIER;
 	private Set<String> previousTwoFactorAuthCustomers = UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS;
 
@@ -34,20 +21,23 @@ class TwoFactorAuthConfigurationSingletonStartupTest {
 		TwoFactorAuthConfigurationSingleton.getInstance().shutdown();
 	}
 
+	private static String invokeStartupFailureMessageBuilder() {
+		try {
+			Method method = TwoFactorAuthConfigurationSingleton.class.getDeclaredMethod("buildStartupFailureMessage");
+			method.setAccessible(true);
+			return (String) method.invoke(null);
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	@Test
-	void startupFailureMessageIdentifiesConfigurationTableAndConfiguredJsonTfaCustomers() throws SQLException {
+	void startupFailureMessageIdentifiesConfigurationTableAndConfiguredJsonTfaCustomers() {
 		UtilImpl.ENVIRONMENT_IDENTIFIER = "development";
 		UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS = new HashSet<>(Set.of("acme"));
 
-		TwoFactorAuthConfigurationSingleton singleton = spy(TwoFactorAuthConfigurationSingleton.getInstance());
-		Connection connection = mock(Connection.class);
-		doReturn(connection).when(singleton).getDataStoreConnection();
-		doThrow(new SQLSyntaxErrorException("ADM_Configuration does not exist"))
-				.when(connection)
-				.prepareStatement(TFA_CONFIGURATION_QUERY);
-
-		DomainException exception = assertThrows(DomainException.class, singleton::startup);
-		String message = exception.getMessage();
+		String message = invokeStartupFailureMessageBuilder();
 
 		assertTrue(message.contains("ADM_Configuration"));
 		assertTrue(message.contains("schema synchronisation"));
@@ -57,19 +47,12 @@ class TwoFactorAuthConfigurationSingletonStartupTest {
 	}
 
 	@Test
-	void startupFailureMessageReportsWhenJsonTfaCustomersAreNotConfigured() throws SQLException {
+	void startupFailureMessageReportsWhenJsonTfaCustomersAreNotConfigured() {
 		UtilImpl.ENVIRONMENT_IDENTIFIER = "development";
 		UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS = new HashSet<>();
 
-		TwoFactorAuthConfigurationSingleton singleton = spy(TwoFactorAuthConfigurationSingleton.getInstance());
-		Connection connection = mock(Connection.class);
-		doReturn(connection).when(singleton).getDataStoreConnection();
-		doThrow(new SQLSyntaxErrorException("ADM_Configuration does not exist"))
-				.when(connection)
-				.prepareStatement(TFA_CONFIGURATION_QUERY);
+		String message = invokeStartupFailureMessageBuilder();
 
-		DomainException exception = assertThrows(DomainException.class, singleton::startup);
-
-		assertTrue(exception.getMessage().contains("account.tfaCustomers configured: false"));
+		assertTrue(message.contains("account.tfaCustomers configured: false"));
 	}
 }

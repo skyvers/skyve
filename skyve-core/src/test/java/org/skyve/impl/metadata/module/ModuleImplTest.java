@@ -9,16 +9,32 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.metadata.model.document.AssociationImpl;
+import org.skyve.impl.metadata.model.document.field.Content;
+import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.metadata.module.query.BizQLDefinitionImpl;
 import org.skyve.impl.metadata.module.query.MetaDataQueryDefinitionImpl;
 import org.skyve.impl.metadata.module.query.SQLDefinitionImpl;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
+import org.skyve.metadata.SortDirection;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.Extends;
+import org.skyve.metadata.model.document.Association.AssociationType;
+import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.query.QueryDefinition;
+import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.view.View.ViewType;
 
 @SuppressWarnings("static-method")
@@ -407,5 +423,162 @@ class ModuleImplTest {
 		m.getDocumentRefs().put("Bar", ref);
 		assertThrows(org.skyve.metadata.MetaDataException.class,
 				() -> m.getDocumentDefaultQuery(null, "Bar"));
+	}
+
+	@Test
+	void getDocumentReturnsRepositoryDocumentWhenFound() {
+		ModuleImpl m = newModule("M");
+		ProvidedRepository originalRepository = getRepository();
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		Customer customer = mock(Customer.class);
+		Document document = mock(Document.class);
+		when(repository.getDocument(customer, m, "Contact")).thenReturn(document);
+		setRepository(repository);
+		try {
+			assertEquals(document, m.getDocument(customer, "Contact"));
+		}
+		finally {
+			setRepository(originalRepository);
+		}
+	}
+
+	@Test
+	void getDocumentThrowsWhenRepositoryReturnsNull() {
+		ModuleImpl m = newModule("M");
+		ProvidedRepository originalRepository = getRepository();
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		Customer customer = mock(Customer.class);
+		when(repository.getDocument(customer, m, "MissingDoc")).thenReturn(null);
+		setRepository(repository);
+		try {
+			assertThrows(IllegalStateException.class, () -> m.getDocument(customer, "MissingDoc"));
+		}
+		finally {
+			setRepository(originalRepository);
+		}
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	void getDocumentDefaultQueryThrowsForTransientDocumentWithoutDefaultQueryName() {
+		ModuleImpl m = newModule("M");
+		org.skyve.metadata.module.Module.DocumentRef ref = new org.skyve.metadata.module.Module.DocumentRef();
+		m.getDocumentRefs().put("TransientDoc", ref);
+
+		ProvidedRepository originalRepository = getRepository();
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		Customer customer = mock(Customer.class);
+		Document document = mock(Document.class);
+		when(repository.getDocument(customer, m, "TransientDoc")).thenReturn(document);
+		doReturn(false).when(document).isPersistable();
+		when(document.getOwningModuleName()).thenReturn("M");
+		when(document.getName()).thenReturn("TransientDoc");
+		setRepository(repository);
+		try {
+			assertThrows(org.skyve.metadata.MetaDataException.class,
+					() -> m.getDocumentDefaultQuery(customer, "TransientDoc", true));
+		}
+		finally {
+			setRepository(originalRepository);
+		}
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	void getDocumentDefaultQueryBuildsColumnsForFieldContentAndAssociation() {
+		ModuleImpl m = newModule("M");
+		org.skyve.metadata.module.Module.DocumentRef ref = new org.skyve.metadata.module.Module.DocumentRef();
+		m.getDocumentRefs().put("Invoice", ref);
+
+		ProvidedRepository originalRepository = getRepository();
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		Customer customer = mock(Customer.class);
+		Document baseDocument = mock(Document.class);
+		Document document = mock(Document.class);
+
+		Text inheritedText = new Text();
+		inheritedText.setName("inheritedName");
+		inheritedText.setPersistent(true);
+		inheritedText.setDeprecated(false);
+
+		Text text = new Text();
+		text.setName("number");
+		text.setPersistent(true);
+		text.setDeprecated(false);
+
+		Content content = new Content();
+		content.setName("attachment");
+		content.setPersistent(true);
+		content.setDeprecated(false);
+
+		AssociationImpl embeddedAssociation = new AssociationImpl();
+		embeddedAssociation.setName("embeddedRef");
+		embeddedAssociation.setPersistent(true);
+		embeddedAssociation.setDeprecated(false);
+		embeddedAssociation.setType(AssociationType.embedded);
+
+		AssociationImpl association = new AssociationImpl();
+		association.setName("customer");
+		association.setPersistent(true);
+		association.setDeprecated(false);
+		association.setType(AssociationType.aggregation);
+
+		Extends inherits = new Extends();
+		inherits.setDocumentName("BaseInvoice");
+
+		when(repository.getDocument(customer, m, "Invoice")).thenReturn(document);
+		when(repository.getDocument(customer, m, "BaseInvoice")).thenReturn(baseDocument);
+		doReturn(true).when(document).isPersistable();
+		when(document.getLocalisedPluralAlias()).thenReturn("Invoices");
+		when(document.getExtends()).thenReturn(inherits);
+		List<Attribute> documentAttributes = List.of(text, content, embeddedAssociation, association);
+		doReturn(documentAttributes).when(document).getAttributes();
+		when(baseDocument.getExtends()).thenReturn(null);
+		List<Attribute> baseAttributes = List.of(inheritedText);
+		doReturn(baseAttributes).when(baseDocument).getAttributes();
+
+		setRepository(repository);
+		try {
+			MetaDataQueryDefinitionImpl query = (MetaDataQueryDefinitionImpl) m.getDocumentDefaultQuery(customer, "Invoice", true);
+			assertEquals("Invoice", query.getName());
+			assertEquals("Invoice", query.getDocumentName());
+			assertEquals("All Invoices", query.getDescription());
+			assertEquals(m, query.getOwningModule());
+
+			List<String> bindings = new ArrayList<>();
+			query.getColumns().forEach(c -> bindings.add(c.getBinding()));
+			assertTrue(bindings.contains("inheritedName"));
+			assertTrue(bindings.contains("number"));
+			assertTrue(bindings.contains("attachment"));
+			assertTrue(bindings.contains("customer.bizKey"));
+			assertFalse(bindings.contains("embeddedRef.bizKey"));
+
+			assertEquals(SortDirection.ascending, query.getColumns().get(0).getSortOrder());
+		}
+		finally {
+			setRepository(originalRepository);
+		}
+	}
+
+	private static ProvidedRepository getRepository() {
+		try {
+			Field field = ProvidedRepositoryFactory.class.getDeclaredField("repository");
+			field.setAccessible(true);
+			return (ProvidedRepository) field.get(null);
+		}
+		catch (ReflectiveOperationException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private static void setRepository(ProvidedRepository repository) {
+		try {
+			Field field = ProvidedRepositoryFactory.class.getDeclaredField("repository");
+			field.setAccessible(true);
+			field.set(null, repository);
+		}
+		catch (ReflectiveOperationException e) {
+			throw new RuntimeException(e);
+		}
 	}
 }

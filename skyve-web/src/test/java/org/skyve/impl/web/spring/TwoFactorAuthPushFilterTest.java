@@ -14,6 +14,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.Deque;
@@ -21,6 +22,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.skyve.EXT;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,11 +30,13 @@ import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.util.TwoFactorAuthConfigurationSingleton;
 import org.skyve.impl.util.TwoFactorAuthCustomerConfiguration;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.persistence.DataStore;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.provisioning.UserDetailsManager;
 
 import jakarta.servlet.FilterChain;
@@ -43,6 +47,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.MappingMatch;
 
+@SuppressWarnings("static-method")
 class TwoFactorAuthPushFilterTest {
 	private static final String CUSTOMER = "acme";
 	private static final String USER = "test.user";
@@ -50,6 +55,10 @@ class TwoFactorAuthPushFilterTest {
 
 	private Set<String> previousTwoFactorCustomers;
 	private int previousResendCooldownSeconds;
+	private int previousAccountLockoutThreshold;
+	private int previousAccountLockoutDurationSeconds;
+	private DataStore previousDataStore;
+	private String previousCustomer;
 	private Map<String, TwoFactorAuthCustomerConfiguration> previousConfigurations;
 	private ConcurrentHashMap<String, TwoFactorAuthCustomerConfiguration> configurationMap;
 	private UserDetailsManager userDetailsManager;
@@ -61,6 +70,10 @@ class TwoFactorAuthPushFilterTest {
 		UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS = Set.of(CUSTOMER);
 		previousResendCooldownSeconds = UtilImpl.TWO_FACTOR_AUTH_RESEND_COOLDOWN_SECONDS;
 		UtilImpl.TWO_FACTOR_AUTH_RESEND_COOLDOWN_SECONDS = 60;
+		previousAccountLockoutThreshold = UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD;
+		previousAccountLockoutDurationSeconds = UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS;
+		previousDataStore = UtilImpl.DATA_STORE;
+		previousCustomer = UtilImpl.CUSTOMER;
 
 		configurationMap = getConfigurationMap();
 		previousConfigurations = Map.copyOf(configurationMap);
@@ -74,8 +87,247 @@ class TwoFactorAuthPushFilterTest {
 	void tearDown() {
 		UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS = previousTwoFactorCustomers;
 		UtilImpl.TWO_FACTOR_AUTH_RESEND_COOLDOWN_SECONDS = previousResendCooldownSeconds;
+		UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD = previousAccountLockoutThreshold;
+		UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS = previousAccountLockoutDurationSeconds;
+		UtilImpl.DATA_STORE = previousDataStore;
+		UtilImpl.CUSTOMER = previousCustomer;
 		configurationMap.clear();
 		configurationMap.putAll(previousConfigurations);
+	}
+
+	@Test
+	void testDoFilterSkipsWhenPushFilterBypassed() throws Exception {
+		UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS = null;
+		HttpServletRequest request = loginRequest(CUSTOMER);
+		HttpServletResponse response = loginResponse();
+		FilterChain chain = mock(FilterChain.class);
+
+		filter.doFilter(request, response, chain);
+
+		verify(chain).doFilter(request, response);
+	}
+
+	@Test
+	void testSkipPushFilterWhenNotLoginAttempt() {
+		HttpServletRequest request = loginRequest(CUSTOMER);
+		when(request.getMethod()).thenReturn("GET");
+
+		boolean skip = filter.callSkipPushFilter(request, mock(HttpServletResponse.class));
+
+		assertTrue(skip);
+	}
+
+	@Test
+	void testSkipPushFilterWhenCustomerMissingOrNotConfigured() {
+		HttpServletRequest request = loginRequest(null);
+		boolean skipMissing = filter.callSkipPushFilter(request, mock(HttpServletResponse.class));
+		assertTrue(skipMissing);
+
+		when(request.getParameter(TwoFactorAuthPushFilter.SKYVE_SECURITY_FORM_CUSTOMER_KEY)).thenReturn("other");
+		boolean skipNotConfigured = filter.callSkipPushFilter(request, mock(HttpServletResponse.class));
+		assertTrue(skipNotConfigured);
+	}
+
+	@Test
+	void testDoFilterWithTokenAndUnknownUserContinuesChain() throws Exception {
+		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
+		filter.setUserToReturn(null);
+
+		HttpServletRequest request = loginRequest(CUSTOMER);
+		when(request.getParameter("username")).thenReturn(USERNAME);
+		when(request.getParameter(TwoFactorAuthPushFilter.TWO_FACTOR_TOKEN_ATTRIBUTE)).thenReturn("token");
+		HttpServletResponse response = loginResponse();
+		FilterChain chain = mock(FilterChain.class);
+
+		filter.doFilter(request, response, chain);
+
+		verify(chain).doFilter(request, response);
+	}
+
+	@Test
+	void testDoFilterWithTokenAndSuccessfulAuthenticationContinuesChain() throws Exception {
+		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
+		String token = "token-" + System.currentTimeMillis();
+		TwoFactorAuthUser user = createUser(token, new Timestamp(System.currentTimeMillis() - 10_000L));
+		filter.setUserToReturn(user);
+		filter.setExpiredOverride(Boolean.FALSE);
+
+		AuthenticationManager authenticationManager = mock(AuthenticationManager.class);
+		filter.setAuthenticationManager(authenticationManager);
+		when(authenticationManager.authenticate(any(Authentication.class))).thenReturn(mock(Authentication.class));
+
+		HttpServletRequest request = loginRequest(CUSTOMER);
+		when(request.getParameter("username")).thenReturn(USERNAME);
+		when(request.getParameter("password")).thenReturn("123456");
+		when(request.getParameter(TwoFactorAuthPushFilter.TWO_FACTOR_TOKEN_ATTRIBUTE)).thenReturn(token);
+		HttpServletResponse response = loginResponse();
+		FilterChain chain = mock(FilterChain.class);
+
+		filter.doFilter(request, response, chain);
+
+		verify(chain).doFilter(request, response);
+	}
+
+	@Test
+	void testDoFilterWithNoTokenAndNoPushConfigContinuesChain() throws Exception {
+		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("OFF", 300, "subject", "body"));
+		HttpServletRequest request = loginRequest(CUSTOMER);
+		when(request.getParameter(TwoFactorAuthPushFilter.TWO_FACTOR_TOKEN_ATTRIBUTE)).thenReturn(null);
+		HttpServletResponse response = loginResponse();
+		FilterChain chain = mock(FilterChain.class);
+
+		filter.doFilter(request, response, chain);
+
+		verify(chain).doFilter(request, response);
+	}
+
+	@Test
+	void testDoFilterWithNoTokenAndPushConfigUnknownUserContinuesChain() throws Exception {
+		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
+		filter.setUserToReturn(null);
+
+		HttpServletRequest request = loginRequest(CUSTOMER);
+		when(request.getParameter("username")).thenReturn(USERNAME);
+		when(request.getParameter(TwoFactorAuthPushFilter.TWO_FACTOR_TOKEN_ATTRIBUTE)).thenReturn(null);
+		HttpServletResponse response = loginResponse();
+		FilterChain chain = mock(FilterChain.class);
+
+		filter.doFilter(request, response, chain);
+
+		verify(chain).doFilter(request, response);
+	}
+
+	@Test
+	void testDoFilterStartsPushChallengeWhenPasswordValid() throws Exception {
+		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
+		TwoFactorAuthUser user = createUser("token-old", new Timestamp(System.currentTimeMillis() - 120_000L));
+		filter.setUserToReturn(user);
+		filter.generatedCode = "123456";
+		filter.generatedPushId = "new-token";
+
+		HttpServletRequest request = loginRequest(CUSTOMER);
+		when(request.getParameter("username")).thenReturn(USERNAME);
+		when(request.getParameter("password")).thenReturn("secret");
+		when(request.getParameter(TwoFactorAuthPushFilter.TWO_FACTOR_TOKEN_ATTRIBUTE)).thenReturn(null);
+		when(request.getParameter(TwoFactorAuthPushFilter.REMEMBER_PARAMETER)).thenReturn("true");
+		RequestDispatcher dispatcher = mock(RequestDispatcher.class);
+		when(request.getRequestDispatcher("/login")).thenReturn(dispatcher);
+		HttpServletResponse response = loginResponse();
+		FilterChain chain = mock(FilterChain.class);
+
+		filter.doFilter(request, response, chain);
+
+		verify(chain, never()).doFilter(any(), any());
+		verify(request).setAttribute(TwoFactorAuthPushFilter.CUSTOMER_ATTRIBUTE, CUSTOMER);
+		verify(request).setAttribute(TwoFactorAuthPushFilter.TWO_FACTOR_TOKEN_ATTRIBUTE, "new-token");
+		verify(request).setAttribute(TwoFactorAuthPushFilter.USER_ATTRIBUTE, USER);
+		verify(request).setAttribute(TwoFactorAuthPushFilter.REMEMBER_ATTRIBUTE, Boolean.TRUE);
+		assertTrue(filter.pushNotificationCalled);
+		assertTrue(filter.updateUserCalled);
+	}
+
+	@Test
+	void testClearTfaDetailsWhenPasswordInvalidClearsAndContinuesChain() throws Exception {
+		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
+		TwoFactorAuthUser user = createUser("token-old", new Timestamp(System.currentTimeMillis() - 120_000L));
+		filter.setUserToReturn(user);
+
+		HttpServletRequest request = loginRequest(CUSTOMER);
+		when(request.getParameter("username")).thenReturn(USERNAME);
+		when(request.getParameter("password")).thenReturn("not-matching");
+		when(request.getParameter(TwoFactorAuthPushFilter.TWO_FACTOR_TOKEN_ATTRIBUTE)).thenReturn(null);
+		HttpServletResponse response = loginResponse();
+		FilterChain chain = mock(FilterChain.class);
+
+		filter.doFilter(request, response, chain);
+
+		verify(chain).doFilter(request, response);
+		assertTrue(filter.updateUserCalled);
+		assertEquals(null, user.getTfaToken());
+		assertEquals(null, user.getTfaCode());
+		assertEquals(null, user.getTfaCodeGeneratedTimestamp());
+	}
+
+	@Test
+	void testGetUserDbAndUpdateUserTfADetailsBaseMethods() {
+		UserDetailsManager manager = mock(UserDetailsManager.class);
+		RawTwoFactorAuthPushFilter raw = new RawTwoFactorAuthPushFilter(manager);
+		TwoFactorAuthUser user = createUser("token", new Timestamp());
+		when(manager.loadUserByUsername(USERNAME)).thenReturn(user);
+
+		assertEquals(user, raw.callGetUserDb(USERNAME));
+		raw.callUpdateUser(user);
+		verify(manager).updateUser(user);
+	}
+
+	@Test
+	void testGetUserDbBaseMethodUsernameNotFoundAndNonTwoFactor() {
+		UserDetailsManager manager = mock(UserDetailsManager.class);
+		RawTwoFactorAuthPushFilter raw = new RawTwoFactorAuthPushFilter(manager);
+		when(manager.loadUserByUsername("missing")).thenThrow(new org.springframework.security.core.userdetails.UsernameNotFoundException("x"));
+		assertEquals(null, raw.callGetUserDb("missing"));
+
+		User plainUser = new User("plain", "pw", AuthorityUtils.NO_AUTHORITIES);
+		when(manager.loadUserByUsername("plain")).thenReturn(plainUser);
+		assertEquals(null, raw.callGetUserDb("plain"));
+	}
+
+	@Test
+	void testGenerateHelpersAndCustomerFallback() {
+		RawTwoFactorAuthPushFilter raw = new RawTwoFactorAuthPushFilter(userDetailsManager);
+		String code = raw.callGenerateCode();
+		assertTrue(code.matches("\\d{6}"));
+		String pushId = raw.callGeneratePushId(new Timestamp(1234L));
+		assertTrue(pushId.contains("-"));
+
+		HttpServletRequest request = loginRequest(null);
+		UtilImpl.CUSTOMER = CUSTOMER;
+		assertEquals(CUSTOMER, TwoFactorAuthPushFilter.obtainCustomer(request));
+	}
+
+	@Test
+	void testTfaCodeExpiredNumberFormatAndNotExpiredBranch() {
+		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
+		RawTwoFactorAuthPushFilter raw = new RawTwoFactorAuthPushFilter(userDetailsManager);
+		assertTrue(raw.tfaCodeExpired(CUSTOMER, "not-a-token"));
+
+		String freshToken = "x-" + (System.currentTimeMillis() - 1_000L);
+		assertFalse(raw.tfaCodeExpired(CUSTOMER, freshToken));
+	}
+
+	@Test
+	void testTfaCodesPopulatedMissingFields() {
+		RawTwoFactorAuthPushFilter raw = new RawTwoFactorAuthPushFilter(userDetailsManager);
+		TwoFactorAuthUser user = createUser("token", new Timestamp());
+		assertTrue(raw.tfaCodesPopulated(user));
+
+		user.setTfaCode(null);
+		assertFalse(raw.tfaCodesPopulated(user));
+		user.setTfaCode("x");
+		user.setTfaToken(null);
+		assertFalse(raw.tfaCodesPopulated(user));
+		user.setTfaToken("token");
+		user.setTfaCodeGeneratedTimestamp(null);
+		assertFalse(raw.tfaCodesPopulated(user));
+	}
+
+	@Test
+	void testIsNowLockedAfterBadCredentialsPrivateMethodBranches() throws Exception {
+		Method method = TwoFactorAuthPushFilter.class.getDeclaredMethod("isNowLockedAfterBadCredentials", String.class, TwoFactorAuthUser.class);
+		method.setAccessible(true);
+		RawTwoFactorAuthPushFilter raw = new RawTwoFactorAuthPushFilter(userDetailsManager);
+
+		TwoFactorAuthUser locked = createUser("token", new Timestamp(), false);
+		assertEquals(Boolean.TRUE, method.invoke(raw, USERNAME, locked));
+
+		UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD = 0;
+		UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS = 0;
+		assertNotEquals(Boolean.TRUE, method.invoke(raw, USERNAME, null));
+
+		UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD = 3;
+		UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS = 10;
+		UtilImpl.DATA_STORE = null;
+		assertNotEquals(Boolean.TRUE, method.invoke(raw, USERNAME, null));
 	}
 
 	@Test
@@ -100,7 +352,6 @@ class TwoFactorAuthPushFilterTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testIsPushTfaRemainsEmailOnly() {
 		assertFalse(TwoFactorAuthConfigurationSingleton.isPushTfa(new TwoFactorAuthCustomerConfiguration("OFF", 300, "subject", "body")));
 		assertTrue(TwoFactorAuthConfigurationSingleton.isPushTfa(new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body")));
@@ -252,6 +503,60 @@ class TwoFactorAuthPushFilterTest {
 	}
 
 	@Test
+	void testResendRejectsWhenUsernameMissing() throws Exception {
+		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
+		HttpServletRequest request = loginRequest(CUSTOMER);
+		when(request.getParameter("username")).thenReturn(null);
+		when(request.getParameter(TwoFactorAuthPushFilter.TWO_FACTOR_TOKEN_ATTRIBUTE)).thenReturn("token");
+		when(request.getParameter(TwoFactorAuthPushFilter.RESEND_ATTRIBUTE)).thenReturn("true");
+		HttpServletResponse response = loginResponse();
+		FilterChain chain = mock(FilterChain.class);
+
+		filter.doFilter(request, response, chain);
+
+		verify(response).sendRedirect("/login");
+		verify(chain, never()).doFilter(any(), any());
+	}
+
+	@Test
+	void testResendRejectsWhenUserMissing() throws Exception {
+		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
+		filter.setUserToReturn(null);
+
+		HttpServletRequest request = loginRequest(CUSTOMER);
+		when(request.getParameter("username")).thenReturn(USERNAME);
+		when(request.getParameter(TwoFactorAuthPushFilter.TWO_FACTOR_TOKEN_ATTRIBUTE)).thenReturn("token");
+		when(request.getParameter(TwoFactorAuthPushFilter.RESEND_ATTRIBUTE)).thenReturn("true");
+		HttpServletResponse response = loginResponse();
+		FilterChain chain = mock(FilterChain.class);
+
+		filter.doFilter(request, response, chain);
+
+		verify(response).sendRedirect("/login");
+		verify(chain, never()).doFilter(any(), any());
+	}
+
+	@Test
+	void testResendRejectsWhenCodesNotPopulated() throws Exception {
+		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
+		TwoFactorAuthUser user = createUser("token", new Timestamp(System.currentTimeMillis() - 120_000L));
+		user.setTfaCode(null);
+		filter.setUserToReturn(user);
+
+		HttpServletRequest request = loginRequest(CUSTOMER);
+		when(request.getParameter("username")).thenReturn(USERNAME);
+		when(request.getParameter(TwoFactorAuthPushFilter.TWO_FACTOR_TOKEN_ATTRIBUTE)).thenReturn("token");
+		when(request.getParameter(TwoFactorAuthPushFilter.RESEND_ATTRIBUTE)).thenReturn("true");
+		HttpServletResponse response = loginResponse();
+		FilterChain chain = mock(FilterChain.class);
+
+		filter.doFilter(request, response, chain);
+
+		verify(response).sendRedirect("/login");
+		verify(chain, never()).doFilter(any(), any());
+	}
+
+	@Test
 	void testResendInvalidatesOldCode() throws Exception {
 		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
 		String originalToken = "valid-" + System.currentTimeMillis();
@@ -297,7 +602,53 @@ class TwoFactorAuthPushFilterTest {
 								token,
 								timestamp,
 								"to@skyve.org",
-								"hashed-password");
+								EXT.hashPassword("secret"));
+	}
+
+	@Test
+	void testClearTfaDetailsNoFieldsSetDoesNotUpdate() throws Exception {
+		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
+		TwoFactorAuthUser user = createUser("token", new Timestamp(System.currentTimeMillis() - 120_000L));
+		user.setTfaCode(null);
+		user.setTfaToken(null);
+		user.setTfaCodeGeneratedTimestamp(null);
+		filter.setUserToReturn(user);
+
+		HttpServletRequest request = loginRequest(CUSTOMER);
+		when(request.getParameter("username")).thenReturn(USERNAME);
+		when(request.getParameter("password")).thenReturn("does-not-match");
+		when(request.getParameter(TwoFactorAuthPushFilter.TWO_FACTOR_TOKEN_ATTRIBUTE)).thenReturn(null);
+		HttpServletResponse response = loginResponse();
+		FilterChain chain = mock(FilterChain.class);
+
+		filter.doFilter(request, response, chain);
+
+		verify(chain).doFilter(request, response);
+		assertFalse(filter.updateUserCalled);
+	}
+
+	@Test
+	void testCanAuthenticateWithPasswordNullPasswordUsesEmptyString() {
+		RawTwoFactorAuthPushFilter raw = new RawTwoFactorAuthPushFilter(userDetailsManager);
+		TwoFactorAuthUser user = createUser("token", new Timestamp(System.currentTimeMillis() - 120_000L));
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		when(request.getParameter("password")).thenReturn(null);
+
+		assertFalse(raw.callCanAuthenticateWithPassword(request, user));
+	}
+
+	@Test
+	void testTfaCodeExpiredReturnsTrueForOldTimestamp() {
+		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 1, "subject", "body"));
+		RawTwoFactorAuthPushFilter raw = new RawTwoFactorAuthPushFilter(userDetailsManager);
+		String oldToken = "token-" + (System.currentTimeMillis() - 60_000L);
+		assertTrue(raw.tfaCodeExpired(CUSTOMER, oldToken));
+	}
+
+	@Test
+	void testIsTwoFactorEnabledNullConfig() {
+		RawTwoFactorAuthPushFilter raw = new RawTwoFactorAuthPushFilter(userDetailsManager);
+		assertFalse(raw.isTwoFactorEnabled(null));
 	}
 
 	private static HttpServletRequest resendRequest(String token, boolean rememberMe) {
@@ -626,4 +977,41 @@ class TwoFactorAuthPushFilterTest {
 			return super.currentTimeMillis();
 		}
 	}
+
+	private static final class RawTwoFactorAuthPushFilter extends TwoFactorAuthPushFilter {
+		private RawTwoFactorAuthPushFilter(UserDetailsManager userDetailsManager) {
+			super(userDetailsManager);
+		}
+
+		@Override
+		protected boolean supportsPushConfiguration(TwoFactorAuthCustomerConfiguration config) {
+			return false;
+		}
+
+		@Override
+		protected void pushNotification(TwoFactorAuthUser user, String code) {
+			// no-op
+		}
+
+		private TwoFactorAuthUser callGetUserDb(String username) {
+			return super.getUserDB(username);
+		}
+
+		private void callUpdateUser(TwoFactorAuthUser user) {
+			super.updateUserTFADetails(user);
+		}
+
+		private String callGenerateCode() {
+			return super.generateTFACode();
+		}
+
+		private String callGeneratePushId(Timestamp ts) {
+			return super.generateTFAPushId(ts);
+		}
+
+		private boolean callCanAuthenticateWithPassword(HttpServletRequest request, TwoFactorAuthUser user) {
+			return super.canAuthenticateWithPassword(request, user);
+		}
+	}
+
 }

@@ -1,7 +1,10 @@
 package modules.admin.domain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.app.admin.Communication.ActionType;
@@ -20,7 +23,7 @@ import util.AbstractH2Test;
 class CommunicationDomainTest extends AbstractH2Test {
 
 	@Test
-	void dataBuilderPopulatesCommunicationBean() throws Exception {
+	void dataBuilderPopulatesCommunicationBean() {
 		Communication bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
@@ -29,21 +32,21 @@ class CommunicationDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void bizModuleAndDocumentAreCorrect() throws Exception {
+	void bizModuleAndDocumentAreCorrect() {
 		Communication bean = Communication.newInstance();
 		assertEquals(Communication.MODULE_NAME, bean.getBizModule());
 		assertEquals(Communication.DOCUMENT_NAME, bean.getBizDocument());
 	}
 
 	@Test
-	void descriptionPropertySetAndGet() throws Exception {
+	void descriptionPropertySetAndGet() {
 		Communication bean = Communication.newInstance();
 		bean.setDescription("test description");
 		assertEquals("test description", bean.getDescription());
 	}
 
 	@Test
-	void moduleNameAndDocumentNameSetAndGet() throws Exception {
+	void moduleNameAndDocumentNameSetAndGet() {
 		Communication bean = Communication.newInstance();
 		bean.setModuleName("testModule");
 		bean.setDocumentName("testDocument");
@@ -52,7 +55,7 @@ class CommunicationDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void subjectAndBodySetAndGet() throws Exception {
+	void subjectAndBodySetAndGet() {
 		Communication bean = Communication.newInstance();
 		bean.setSubject("Test Subject");
 		bean.setBody("<p>Test body</p>");
@@ -61,21 +64,21 @@ class CommunicationDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void actionTypeSetAndGet() throws Exception {
+	void actionTypeSetAndGet() {
 		Communication bean = Communication.newInstance();
 		bean.setActionType(ActionType.saveForBulkSend);
 		assertEquals(ActionType.saveForBulkSend, bean.getActionType());
 	}
 
 	@Test
-	void formatTypeSetAndGet() throws Exception {
+	void formatTypeSetAndGet() {
 		Communication bean = Communication.newInstance();
 		bean.setFormatType(FormatType.email);
 		assertEquals(FormatType.email, bean.getFormatType());
 	}
 
 	@Test
-	void sendToAndCcToSetAndGet() throws Exception {
+	void sendToAndCcToSetAndGet() {
 		Communication bean = Communication.newInstance();
 		bean.setSendTo("user@example.com");
 		bean.setCcTo("cc@example.com");
@@ -84,21 +87,21 @@ class CommunicationDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void toBindingSetAndGet() throws Exception {
+	void toBindingSetAndGet() {
 		Communication bean = Communication.newInstance();
 		bean.setToBinding("contact.email");
 		assertEquals("contact.email", bean.getToBinding());
 	}
 
 	@Test
-	void sendFromSetAndGet() throws Exception {
+	void sendFromSetAndGet() {
 		Communication bean = Communication.newInstance();
 		bean.setSendFrom("noreply@example.com");
 		assertEquals("noreply@example.com", bean.getSendFrom());
 	}
 
 	@Test
-	void notificationAndSystemUseSetAndGet() throws Exception {
+	void notificationAndSystemUseSetAndGet() {
 		Communication bean = Communication.newInstance();
 		bean.setNotification(Boolean.TRUE);
 		bean.setSystemUse(Boolean.FALSE);
@@ -107,7 +110,7 @@ class CommunicationDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void attachment1And2SetAndGet() throws Exception {
+	void attachment1And2SetAndGet() {
 		Communication bean = Communication.newInstance();
 		bean.setAttachmentFileName1("file1.pdf");
 		bean.setAttachmentFileName2("file2.xlsx");
@@ -118,7 +121,7 @@ class CommunicationDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void calendarFieldsSetAndGet() throws Exception {
+	void calendarFieldsSetAndGet() {
 		Communication bean = Communication.newInstance();
 		bean.setIncludeCalendar(Boolean.TRUE);
 		bean.setCalendarTitleExpression("{title}");
@@ -134,7 +137,7 @@ class CommunicationDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void resultsAndUnsubscribeUrlSetAndGet() throws Exception {
+	void resultsAndUnsubscribeUrlSetAndGet() {
 		Communication bean = Communication.newInstance();
 		bean.setResults("sent: 5, failed: 0");
 		bean.setUnsubscribeUrl("https://example.com/unsubscribe");
@@ -143,7 +146,7 @@ class CommunicationDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void sendToOverrideAndCcToOverrideAndMonitorBccSetAndGet() throws Exception {
+	void sendToOverrideAndCcToOverrideAndMonitorBccSetAndGet() {
 		Communication bean = Communication.newInstance();
 		bean.setSendToOverride("override@example.com");
 		bean.setCcToOverride("ccoverride@example.com");
@@ -154,7 +157,7 @@ class CommunicationDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void selectedBatchTimestampFolderNameAndRefreshBatchesAndUnTagSuccessfulSetAndGet() throws Exception {
+	void selectedBatchTimestampFolderNameAndRefreshBatchesAndUnTagSuccessfulSetAndGet() {
 		Communication bean = Communication.newInstance();
 		bean.setSelectedBatchTimestampFolderName("2024-01-01_12-00");
 		bean.setRefreshBatches(Boolean.TRUE);
@@ -165,97 +168,97 @@ class CommunicationDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void mailImageSetAndGet() throws Exception {
+	void mailImageSetAndGet() {
 		Communication bean = Communication.newInstance();
 		bean.setMailImage("logo.png");
 		assertEquals("logo.png", bean.getMailImage());
 	}
 
 	@Test
-	void conditionBatchSelectedIsTrueWhenFolderNameIsSet() throws Exception {
+	void conditionBatchSelectedIsTrueWhenFolderNameIsSet() {
 		Communication bean = Communication.newInstance();
 		bean.setSelectedBatchTimestampFolderName("some-folder");
-		assertEquals(true, bean.isBatchSelected());
-		assertEquals(false, bean.isNotBatchSelected());
+		assertTrue(bean.isBatchSelected());
+		assertFalse(bean.isNotBatchSelected());
 	}
 
 	@Test
-	void conditionBatchSelectedIsFalseWhenFolderNameIsNull() throws Exception {
+	void conditionBatchSelectedIsFalseWhenFolderNameIsNull() {
 		Communication bean = Communication.newInstance();
 		bean.setSelectedBatchTimestampFolderName(null);
-		assertEquals(false, bean.isBatchSelected());
-		assertEquals(true, bean.isNotBatchSelected());
+		assertFalse(bean.isBatchSelected());
+		assertTrue(bean.isNotBatchSelected());
 	}
 
 	@Test
-	void conditionBatchesRefreshRequired() throws Exception {
+	void conditionBatchesRefreshRequired() {
 		Communication bean = Communication.newInstance();
 		bean.setRefreshBatches(Boolean.TRUE);
-		assertEquals(true, bean.isBatchesRefreshRequired());
-		assertEquals(false, bean.isNotBatchesRefreshRequired());
+		assertTrue(bean.isBatchesRefreshRequired());
+		assertFalse(bean.isNotBatchesRefreshRequired());
 		bean.setRefreshBatches(Boolean.FALSE);
-		assertEquals(false, bean.isBatchesRefreshRequired());
-		assertEquals(true, bean.isNotBatchesRefreshRequired());
+		assertFalse(bean.isBatchesRefreshRequired());
+		assertTrue(bean.isNotBatchesRefreshRequired());
 	}
 
 	@Test
-	void conditionEmailConfigured() throws Exception {
+	void conditionEmailConfigured() {
 		Communication bean = Communication.newInstance();
 		// just exercise the method; actual result depends on UtilImpl.SMTP config
 		boolean result = bean.isEmailConfigured();
-		assertEquals(!result, bean.isNotEmailConfigured());
+		assertNotEquals(Boolean.valueOf(result), Boolean.valueOf(bean.isNotEmailConfigured()));
 	}
 
 	@Test
-	void conditionEmailType() throws Exception {
+	void conditionEmailType() {
 		Communication bean = Communication.newInstance();
 		bean.setFormatType(FormatType.email);
-		assertEquals(true, bean.isEmailType());
-		assertEquals(false, bean.isNotEmailType());
+		assertTrue(bean.isEmailType());
+		assertFalse(bean.isNotEmailType());
 		bean.setFormatType(null);
-		assertEquals(false, bean.isEmailType());
-		assertEquals(true, bean.isNotEmailType());
+		assertFalse(bean.isEmailType());
+		assertTrue(bean.isNotEmailType());
 	}
 
 	@Test
-	void conditionIncludesCalendar() throws Exception {
+	void conditionIncludesCalendar() {
 		Communication bean = Communication.newInstance();
 		bean.setIncludeCalendar(Boolean.TRUE);
-		assertEquals(true, bean.isIncludesCalendar());
-		assertEquals(false, bean.isNotIncludesCalendar());
+		assertTrue(bean.isIncludesCalendar());
+		assertFalse(bean.isNotIncludesCalendar());
 		bean.setIncludeCalendar(Boolean.FALSE);
-		assertEquals(false, bean.isIncludesCalendar());
-		assertEquals(true, bean.isNotIncludesCalendar());
+		assertFalse(bean.isIncludesCalendar());
+		assertTrue(bean.isNotIncludesCalendar());
 	}
 
 	@Test
-	void conditionLockedWhenPersistedAndSystemUse() throws Exception {
+	void conditionLockedWhenPersistedAndSystemUse() {
 		// A new (unpersisted) bean should not be locked
 		Communication bean = Communication.newInstance();
 		bean.setSystemUse(Boolean.TRUE);
-		assertEquals(false, bean.isLocked()); // not persisted
-		assertEquals(true, bean.isNotLocked());
+		assertFalse(bean.isLocked()); // not persisted
+		assertTrue(bean.isNotLocked());
 	}
 
 	@Test
-	void conditionSaveAction() throws Exception {
+	void conditionSaveAction() {
 		Communication bean = Communication.newInstance();
 		bean.setActionType(ActionType.saveForBulkSend);
-		assertEquals(true, bean.isSaveAction());
-		assertEquals(false, bean.isNotSaveAction());
+		assertTrue(bean.isSaveAction());
+		assertFalse(bean.isNotSaveAction());
 		bean.setActionType(ActionType.sendImmediately);
-		assertEquals(false, bean.isSaveAction());
-		assertEquals(true, bean.isNotSaveAction());
+		assertFalse(bean.isSaveAction());
+		assertTrue(bean.isNotSaveAction());
 	}
 
 	@Test
-	void conditionShowBatches() throws Exception {
+	void conditionShowBatches() {
 		Communication bean = Communication.newInstance();
 		bean.setDescription("Test Comm");
-		assertEquals(true, bean.isShowBatches());
-		assertEquals(false, bean.isNotShowBatches());
+		assertTrue(bean.isShowBatches());
+		assertFalse(bean.isNotShowBatches());
 		bean.setDescription(null);
-		assertEquals(false, bean.isShowBatches());
-		assertEquals(true, bean.isNotShowBatches());
+		assertFalse(bean.isShowBatches());
+		assertTrue(bean.isNotShowBatches());
 	}
 }
