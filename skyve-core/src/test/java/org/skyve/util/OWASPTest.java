@@ -230,6 +230,13 @@ class OWASPTest {
 	}
 
 	@Test
+	@SuppressWarnings("static-method")
+	void testSanitiseFileNameStripsOtherControlCharacters() {
+		String result = OWASP.sanitiseFileName("20260525 - reno\u0019s bistro - 24.69.png");
+		assertEquals("20260525 - renos bistro - 24.69.png", result);
+	}
+
+	@Test
 	@SuppressWarnings({"static-method", "boxing"})
 	void testSanitiseAndEscapeListModelRowsEmptyRows() {
 		// Empty rows list — should complete without error

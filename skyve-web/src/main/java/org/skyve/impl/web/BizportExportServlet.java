@@ -19,6 +19,7 @@ import org.skyve.metadata.controller.BizExportAction;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.util.OWASP;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -102,12 +103,12 @@ public class BizportExportServlet extends HttpServlet {
 								case xls:
 									response.setContentType(MimeType.excel.toString());
 									response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-									response.setHeader("Content-Disposition", "attachment; filename=\"" + resourceName + "-export.xls\"");
+									response.setHeader("Content-Disposition", "attachment; filename=\"" + OWASP.sanitiseFileName(resourceName + "-export.xls") + '"');
 									break;
 								case xlsx:
 									response.setContentType(MimeType.xlsx.toString());
 									response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-									response.setHeader("Content-Disposition", "attachment; filename=\"" + resourceName + "-export.xlsx\"");
+									response.setHeader("Content-Disposition", "attachment; filename=\"" + OWASP.sanitiseFileName(resourceName + "-export.xlsx") + '"');
 									break;
 								default:
 							}

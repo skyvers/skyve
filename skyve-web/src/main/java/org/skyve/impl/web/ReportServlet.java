@@ -336,59 +336,59 @@ public class ReportServlet extends HttpServlet {
 			break;
 		case csv:
 			response.setContentType(MimeType.csv.toString());
-			sb.append("attachment; filename=\"").append(fileNameNoSuffix).append(".csv\"");
+			sb.append("attachment; filename=\"").append(OWASP.sanitiseFileName(fileNameNoSuffix + ".csv")).append('"');
 			response.setHeader("Content-Disposition", sb.toString());
 			break;
 		case html:
 			response.setContentType(MimeType.html.toString());
-			sb.append("inline; filename=\"").append(fileNameNoSuffix).append(".html\"");
+			sb.append("inline; filename=\"").append(OWASP.sanitiseFileName(fileNameNoSuffix + ".html")).append('"');
 			response.setHeader("Content-Disposition", sb.toString());
 // TODO maybe I should UUEncode this thing to the client
 			session.setAttribute(BaseHttpServlet.DEFAULT_JASPER_PRINT_SESSION_ATTRIBUTE, jasperPrint);
 			break;
 		case pdf:
 			response.setContentType(MimeType.pdf.toString());
-			sb.append("attachment; filename=\"").append(fileNameNoSuffix).append(".pdf\"");
+			sb.append("attachment; filename=\"").append(OWASP.sanitiseFileName(fileNameNoSuffix + ".pdf")).append('"');
 			response.setHeader("Content-Disposition", sb.toString());
 			break;
 		case xls:
 			response.setContentType(MimeType.excel.toString());
-			sb.append("attachment; filename=\"").append(fileNameNoSuffix).append(".xls\"");
+			sb.append("attachment; filename=\"").append(OWASP.sanitiseFileName(fileNameNoSuffix + ".xls")).append('"');
 			response.setHeader("Content-Disposition", sb.toString());
 			break;
 		case rtf:
 			response.setContentType(MimeType.rtf.toString());
-			sb.append("attachment; filename=\"").append(fileNameNoSuffix).append(".rtf\"");
+			sb.append("attachment; filename=\"").append(OWASP.sanitiseFileName(fileNameNoSuffix + ".rtf")).append('"');
 			response.setHeader("Content-Disposition", sb.toString());
 			break;
 		case odt:
 			response.setContentType(MimeType.openDocumentText.toString());
-			sb.append("attachment; filename=\"").append(fileNameNoSuffix).append(".odt\"");
+			sb.append("attachment; filename=\"").append(OWASP.sanitiseFileName(fileNameNoSuffix + ".odt")).append('"');
 			response.setHeader("Content-Disposition", sb.toString());
 			break;
 		case ods:
 			response.setContentType(MimeType.openDocumentSpreadsheet.toString());
-			sb.append("attachment; filename=\"").append(fileNameNoSuffix).append(".ods\"");
+			sb.append("attachment; filename=\"").append(OWASP.sanitiseFileName(fileNameNoSuffix + ".ods")).append('"');
 			response.setHeader("Content-Disposition", sb.toString());
 			break;
 		case docx:
 			response.setContentType(MimeType.docx.toString());
-			sb.append("attachment; filename=\"").append(fileNameNoSuffix).append(".docx\"");
+			sb.append("attachment; filename=\"").append(OWASP.sanitiseFileName(fileNameNoSuffix + ".docx")).append('"');
 			response.setHeader("Content-Disposition", sb.toString());
 			break;
 		case xlsx:
 			response.setContentType(MimeType.xlsx.toString());
-			sb.append("attachment; filename=\"").append(fileNameNoSuffix).append(".xlsx\"");
+			sb.append("attachment; filename=\"").append(OWASP.sanitiseFileName(fileNameNoSuffix + ".xlsx")).append('"');
 			response.setHeader("Content-Disposition", sb.toString());
 			break;
 		case pptx:
 			response.setContentType(MimeType.pptx.toString());
-			sb.append("attachment; filename=\"").append(fileNameNoSuffix).append(".pptx\"");
+			sb.append("attachment; filename=\"").append(OWASP.sanitiseFileName(fileNameNoSuffix + ".pptx")).append('"');
 			response.setHeader("Content-Disposition", sb.toString());
 			break;
 		case xml:
 			response.setContentType(MimeType.xml.toString());
-			sb.append("attachment; filename=\"").append(fileNameNoSuffix).append(".xml\"");
+			sb.append("attachment; filename=\"").append(OWASP.sanitiseFileName(fileNameNoSuffix + ".xml")).append('"');
 			response.setHeader("Content-Disposition", sb.toString());
 			break;
 		default:

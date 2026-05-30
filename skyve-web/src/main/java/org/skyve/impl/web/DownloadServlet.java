@@ -25,6 +25,7 @@ import org.skyve.metadata.controller.WebFileInputStream;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 import org.skyve.util.logging.SkyveLoggerFactory;
 import org.skyve.web.WebContext;
@@ -140,7 +141,7 @@ public class DownloadServlet extends HttpServlet {
 							header.append((disposition == null) ? 
 											Disposition.attachment.toString() : 
 											disposition.toString());
-							header.append("; filename=\"").append(result.getFileName()).append('"');
+							header.append("; filename=\"").append(OWASP.sanitiseFileName(result.getFileName())).append('"');
 							response.setHeader("Content-Disposition", header.toString());
 			            }
 			

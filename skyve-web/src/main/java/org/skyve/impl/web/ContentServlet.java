@@ -151,7 +151,7 @@ public class ContentServlet extends AbstractResourceServlet {
 	@Override
 	protected void addResponseHeaders(Resource resource, HttpServletResponse response)
 	throws IOException {
-		StringBuilder disposition = new StringBuilder(32);
+		StringBuilder disposition = new StringBuilder(64);
 		disposition.append("inline; filename=\"");
 		disposition.append(OWASP.sanitiseFileName(resource.getFileName()));
 		disposition.append('"');

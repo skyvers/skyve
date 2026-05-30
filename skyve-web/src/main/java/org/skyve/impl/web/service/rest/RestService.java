@@ -26,6 +26,7 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.JSON;
+import org.skyve.util.OWASP;
 import org.skyve.util.Thumbnail;
 import org.skyve.util.Util;
 import org.skyve.util.logging.SkyveLoggerFactory;
@@ -476,7 +477,7 @@ public class RestService {
 					fileName = "content." + mimeType.getStandardFileSuffix();
 				}
 				response.setHeader("Content-Disposition", 
-									String.format("attachment; filename=\"%s\"", fileName));
+									String.format("attachment; filename=\"%s\"", OWASP.sanitiseFileName(fileName)));
 				// The following allows partial requests which are useful for large media or downloading files with pause and resume functions.
 				response.setHeader("Accept-Ranges", "bytes");
 				LOGGER.info("{} served as binary", request.getRequestURI());
