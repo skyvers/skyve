@@ -2,8 +2,13 @@ package org.skyve.impl.content;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ByteArrayOutputStream;
+import java.lang.reflect.Field;
 
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.junit.Assert;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.Test;
 import org.skyve.content.AttachmentContent;
@@ -85,6 +90,68 @@ class TikaTextExtractorTest {
 	}
 
 	@Test
+	void testExtractTextFromContentIncludesHtmlMetadataAndMarkup() {
+		String html = "<html><head><title>Example Title</title><meta name=\"subject\" content=\"Example Subject\"></head>"
+				+ "<body><p>Hello body</p></body></html>";
+		AttachmentContent content = new AttachmentContent("demo", "admin", "Contact", null, "", UUIDv7.create().toString(), "image")
+				.attachment("test.html", "text/html", html.getBytes())
+				.markup("<div>Markup trail</div>");
+
+		String result = new TikaTextExtractor().extractTextFromContent(content);
+
+		assertNotNull(result);
+		Assert.assertTrue(result.contains("Hello body"));
+		Assert.assertTrue(result.contains("Example Title"));
+		Assert.assertTrue(result.contains("Markup trail"));
+	}
+
+	@Test
+	void testExtractTextFromContentIncludesDocxMetadata() throws Exception {
+		byte[] docxBytes;
+		try (XWPFDocument document = new XWPFDocument();
+				ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+			document.getProperties().getCoreProperties().setTitle("Meta Title");
+			document.getProperties().getCoreProperties().setCreator("Meta Author");
+			document.getProperties().getCoreProperties().setSubjectProperty("Meta Subject");
+			XWPFParagraph paragraph = document.createParagraph();
+			paragraph.createRun().setText("Body text");
+			document.write(out);
+			docxBytes = out.toByteArray();
+		}
+
+		AttachmentContent content = new AttachmentContent("demo", "admin", "Contact", null, "", UUIDv7.create().toString(), "image")
+				.attachment("meta.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", docxBytes);
+
+		String result = new TikaTextExtractor().extractTextFromContent(content);
+
+		assertNotNull(result);
+		Assert.assertTrue(result.contains("Body text"));
+		Assert.assertTrue(result.contains("Meta Title"));
+		Assert.assertTrue(result.contains("Meta Subject") || result.contains("Meta Author"));
+	}
+
+	@Test
+	void testExtractTextFromContentHandlesNullAttachmentGracefully() {
+		assertNull(new TikaTextExtractor().extractTextFromContent(null));
+	}
+
+	@Test
+	void testExtractTextFromContentReturnsNullForEmptyInput() {
+		AttachmentContent content = new AttachmentContent("demo", "admin", "Contact", null, "", UUIDv7.create().toString(), "image")
+				.attachment("empty.txt", "text/plain", new byte[0])
+				.markup("   ");
+
+		assertNull(new TikaTextExtractor().extractTextFromContent(content));
+	}
+
+	@Test
+	void testExtractTextFromContentHandlesMissingBytesGracefully() {
+		AttachmentContent content = new AttachmentContent("demo", "admin", "Contact", null, "", UUIDv7.create().toString(), "image");
+
+		assertNull(new TikaTextExtractor().extractTextFromContent(content));
+	}
+
+	@Test
 	void testSniffContentTypeWithPngBytes() {
 		// PNG magic bytes
 		byte[] pngBytes = new byte[] {(byte)0x89, 'P', 'N', 'G', '\r', '\n', (byte)0x1A, '\n'};
@@ -97,6 +164,19 @@ class TikaTextExtractorTest {
 	}
 
 	@Test
+	void testSniffContentTypeWithoutFileNameUsesStreamDetection() throws Exception {
+		byte[] pngBytes = new byte[] {(byte)0x89, 'P', 'N', 'G', '\r', '\n', (byte)0x1A, '\n'};
+		AttachmentContent content = new AttachmentContent("demo", "admin", "Contact", null, "", UUIDv7.create().toString(), "image")
+				.attachment("test.png", pngBytes);
+		content.setContentType(null);
+		setField(content, "fileName", null);
+
+		new TikaTextExtractor().sniffContentType(content);
+
+		Assert.assertEquals("image/png", content.getContentType());
+	}
+
+	@Test
 	void testSniffContentTypeAlreadySet() {
 		byte[] bytes = new byte[] {1, 2, 3};
 		AttachmentContent content = new AttachmentContent("demo", "admin", "Contact", null, "", UUIDv7.create().toString(), "image")
@@ -105,6 +185,16 @@ class TikaTextExtractorTest {
 		new TikaTextExtractor().sniffContentType(content);
 		// Content type should not change when already set
 		Assert.assertEquals("application/octet-stream", content.getContentType());
+	}
+
+	@Test
+	void testSniffContentTypeHandlesMissingBytesGracefully() {
+		AttachmentContent content = new AttachmentContent("demo", "admin", "Contact", null, "", UUIDv7.create().toString(), "image");
+		content.setContentType(null);
+
+		new TikaTextExtractor().sniffContentType(content);
+
+		assertNull(content.getContentType());
 	}
 
 	@Test
@@ -132,5 +222,11 @@ class TikaTextExtractorTest {
 			// No language detectors available in test classpath — acceptable
 			Assert.assertNotNull(e);
 		}
+	}
+
+	private static void setField(Object target, String fieldName, Object value) throws Exception {
+		Field field = AttachmentContent.class.getDeclaredField(fieldName);
+		field.setAccessible(true);
+		field.set(target, value);
 	}
 }
