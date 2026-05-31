@@ -101,6 +101,7 @@ import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder.EventSourceC
 import org.skyve.impl.web.faces.models.SkyveLazyDataModel;
 import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.metadata.FormatterName;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.controller.Customisations;
 import org.skyve.metadata.controller.ImplicitActionName;
@@ -110,6 +111,8 @@ import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.model.list.ListModel;
+import org.skyve.metadata.view.widget.FilterParameter;
+import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
 
 import jakarta.el.ELContext;
@@ -706,6 +709,11 @@ class TabularComponentBuilderTest {
 		boolean actionShowFilter;
 		String actionParentId;
 		Map<String, String> actionProperties;
+		boolean addDataTableSelectionCalled;
+		DataTable selectionTable;
+		String selectionBinding;
+		String selectionSource;
+		boolean selectionRowKeyFromModel;
 
 		void setManagedBeanForTest(FacesView managedBeanForTest) {
 			this.managedBean = managedBeanForTest;
@@ -750,6 +758,19 @@ class TabularComponentBuilderTest {
 			this.actionProperties = properties;
 			return actionColumnToReturn;
 		}
+
+		@Override
+		protected void addDataTableSelection(DataTable table,
+											String selectedIdBinding,
+											List<org.skyve.impl.metadata.view.event.EventAction> selectedActions,
+											String source,
+											boolean rowKeyFromModel) {
+			this.addDataTableSelectionCalled = true;
+			this.selectionTable = table;
+			this.selectionBinding = selectedIdBinding;
+			this.selectionSource = source;
+			this.selectionRowKeyFromModel = rowKeyFromModel;
+		}
 	}
 
 	private static final class ListGridCallResult {
@@ -787,8 +808,18 @@ class TabularComponentBuilderTest {
 		}
 	}
 
-	@SuppressWarnings("boxing")
 	private static ListGridCallResult invokeListGrid() {
+		return invokeListGrid(true, grid -> {
+			grid.setShowZoom(Boolean.FALSE);
+			grid.setShowFilter(Boolean.TRUE);
+			grid.setDisableAddConditionName("disableAdd");
+			grid.setDisabledConditionName("disableGrid");
+			grid.getProperties().put("process", "@this");
+		});
+	}
+
+	private static ListGridCallResult invokeListGrid(boolean canCreateDocument,
+											java.util.function.Consumer<ListGrid> gridConfigurer) {
 		CapturingListGridBuilder builder = new CapturingListGridBuilder();
 		DataTable dataTable = mock(DataTable.class);
 		UIOutput emptyMessage = mock(UIOutput.class);
@@ -822,17 +853,20 @@ class TabularComponentBuilderTest {
 		org.skyve.metadata.module.Module module = mock(org.skyve.metadata.module.Module.class);
 		AbstractPersistence persistence = mock(AbstractPersistence.class, org.mockito.Mockito.CALLS_REAL_METHODS);
 		AbstractPersistence previousPersistence = currentPersistenceIfPresent();
-		when(user.canCreateDocument(drivingDocument)).thenReturn(Boolean.TRUE);
+		if (canCreateDocument) {
+			org.mockito.Mockito.doReturn(Boolean.TRUE).when(user).canCreateDocument(drivingDocument);
+		}
+		else {
+			org.mockito.Mockito.doReturn(Boolean.FALSE).when(user).canCreateDocument(drivingDocument);
+		}
 		when(user.getCustomer()).thenReturn(customer);
 		when(customer.getModule("sales")).thenReturn(module);
 		when(persistence.getUser()).thenReturn(user);
 
 		ListGrid grid = new ListGrid();
-		grid.setShowZoom(Boolean.FALSE);
-		grid.setShowFilter(Boolean.TRUE);
-		grid.setDisableAddConditionName("disableAdd");
-		grid.setDisabledConditionName("disableGrid");
-		grid.getProperties().put("process", "@this");
+		if (gridConfigurer != null) {
+			gridConfigurer.accept(grid);
+		}
 
 		UIComponent callResult;
 		try {
@@ -2358,6 +2392,141 @@ class TabularComponentBuilderTest {
 
 	@SuppressWarnings("static-method")
 	@Test
+	void testListGridCreateDisabledUsesOnlyDisabledConditionWhenDisableAddMissing() {
+		ListGridCallResult r = invokeListGrid(true, grid -> {
+			grid.setShowZoom(Boolean.FALSE);
+			grid.setShowFilter(Boolean.TRUE);
+			grid.setDisableAddConditionName(null);
+			grid.setDisabledConditionName("disableGrid");
+		});
+
+		assertNotNull(r.builder.actionCreateDisabled);
+		assertEquals(1, r.builder.actionCreateDisabled.length);
+		assertEquals("disableGrid", r.builder.actionCreateDisabled[0]);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testListGridCreateDisabledUsesOnlyDisableAddConditionWhenFormDisabledMissing() {
+		ListGridCallResult r = invokeListGrid(true, grid -> {
+			grid.setShowZoom(Boolean.FALSE);
+			grid.setShowFilter(Boolean.TRUE);
+			grid.setDisableAddConditionName("disableAdd");
+			grid.setDisabledConditionName(null);
+		});
+
+		assertNotNull(r.builder.actionCreateDisabled);
+		assertEquals(1, r.builder.actionCreateDisabled.length);
+		assertEquals("disableAdd", r.builder.actionCreateDisabled[0]);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testListGridSelectedBindingDelegatesToDataTableSelection() {
+		ListGridCallResult r = invokeListGrid(true, grid -> {
+			grid.setShowZoom(Boolean.TRUE);
+			grid.setShowFilter(Boolean.TRUE);
+			grid.setSelectedIdBinding("selectedOrderId");
+		});
+
+		assertTrue(r.builder.addDataTableSelectionCalled);
+		assertSame(r.dataTable, r.builder.selectionTable);
+		assertEquals("selectedOrderId", r.builder.selectionBinding);
+		assertEquals("recentOrders", r.builder.selectionSource);
+		assertTrue(r.builder.selectionRowKeyFromModel);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testListGridUsesDefaultEmptyMessageWhenUserCannotCreate() {
+		ListGridCallResult r = invokeListGrid(false, grid -> {
+			grid.setShowZoom(Boolean.FALSE);
+			grid.setShowFilter(Boolean.TRUE);
+			grid.setDisableAddConditionName("disableAdd");
+			grid.setDisabledConditionName("disableGrid");
+		});
+
+		verify(r.emptyMessage).setValue(TabularComponentBuilder.EMPTY_DATA_TABLE_MESSAGE);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testListGridZoomWithDisableConditionUsesSelectionExpressionAndRowSelectBehavior() {
+		when(mockApplication.createBehavior(AjaxBehavior.BEHAVIOR_ID)).thenReturn(new AjaxBehavior());
+
+		ListGridCallResult r = invokeListGrid(true, grid -> {
+			grid.setShowZoom(Boolean.TRUE);
+			grid.setDisableZoomConditionName("disableZoom");
+			grid.setShowFilter(Boolean.TRUE);
+			grid.setSelectedIdBinding(null);
+		});
+
+		verify(r.dataTable, never()).setSelectionMode("single");
+		verify(r.dataTable).setValueExpression(eq("selectionMode"), any(ValueExpression.class));
+		verify(r.dataTable).addClientBehavior(eq("rowSelect"), any(AjaxBehavior.class));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testListGridZoomWithoutDisableConditionUsesSingleSelectionAndRowSelectBehavior() {
+		when(mockApplication.createBehavior(AjaxBehavior.BEHAVIOR_ID)).thenReturn(new AjaxBehavior());
+
+		ListGridCallResult r = invokeListGrid(true, grid -> {
+			grid.setShowZoom(Boolean.TRUE);
+			grid.setDisableZoomConditionName(null);
+			grid.setShowFilter(Boolean.TRUE);
+			grid.setSelectedIdBinding(null);
+		});
+
+		verify(r.dataTable).setSelectionMode("single");
+		verify(r.dataTable).addClientBehavior(eq("rowSelect"), any(AjaxBehavior.class));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testListGridBuildsCreateUrlParamsFromFilterAndParameterDefinitions() {
+		FilterParameter bindingFilter = mock(FilterParameter.class);
+		when(bindingFilter.getFilterBinding()).thenReturn("status");
+		when(bindingFilter.getOperator()).thenReturn(org.skyve.metadata.FilterOperator.equal);
+		when(bindingFilter.getValueBinding()).thenReturn("statusBinding");
+		when(bindingFilter.getValue()).thenReturn(null);
+
+		FilterParameter literalNullFilter = mock(FilterParameter.class);
+		when(literalNullFilter.getFilterBinding()).thenReturn("constant");
+		when(literalNullFilter.getOperator()).thenReturn(org.skyve.metadata.FilterOperator.equal);
+		when(literalNullFilter.getValueBinding()).thenReturn(null);
+		when(literalNullFilter.getValue()).thenReturn(null);
+
+		Parameter bindingParameter = mock(Parameter.class);
+		when(bindingParameter.getName()).thenReturn("region");
+		when(bindingParameter.getValueBinding()).thenReturn("regionBinding");
+		when(bindingParameter.getValue()).thenReturn(null);
+
+		Parameter literalParameter = mock(Parameter.class);
+		when(literalParameter.getName()).thenReturn("limit");
+		when(literalParameter.getValueBinding()).thenReturn(null);
+		when(literalParameter.getValue()).thenReturn("25");
+
+		ListGridCallResult r = invokeListGrid(true, grid -> {
+			grid.setShowZoom(Boolean.FALSE);
+			grid.setShowFilter(Boolean.TRUE);
+			grid.getFilterParameters().add(bindingFilter);
+			grid.getFilterParameters().add(literalNullFilter);
+			grid.getParameters().add(bindingParameter);
+			grid.getParameters().add(literalParameter);
+		});
+
+		assertNotNull(r.builder.actionCreateUrlParams);
+		assertTrue(r.builder.actionCreateUrlParams.contains("status="));
+		assertTrue(r.builder.actionCreateUrlParams.contains("statusBinding"));
+		assertTrue(r.builder.actionCreateUrlParams.contains("constant="));
+		assertTrue(r.builder.actionCreateUrlParams.contains("region="));
+		assertTrue(r.builder.actionCreateUrlParams.contains("regionBinding"));
+		assertTrue(r.builder.actionCreateUrlParams.contains("limit=25"));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
 	void testListMembershipNonShortcutPathSetsDefaultFacetHeadings() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
 		PickList pickList = mock(PickList.class);
@@ -2574,6 +2743,68 @@ class TabularComponentBuilderTest {
 		verify(actionColumn).setHeaderText("");
 	}
 
+	@SuppressWarnings("static-method")
+	@Test
+	void testCreateListGridActionColumnUsesOnclickWhenCreateUrlParamsMissing() {
+		ListGridActionColumnBuilder builder = new ListGridActionColumnBuilder(null, null);
+
+		Column actionColumn = mock(Column.class);
+		HtmlPanelGroup columnHeader = mock(HtmlPanelGroup.class);
+		CommandButton createButton = mock(CommandButton.class);
+		Map<String, UIComponent> facets = new HashMap<>();
+		List<UIComponent> headerChildren = new ArrayList<>();
+		List<UIComponent> actionChildren = new ArrayList<>();
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("createButtonId");
+		builder.setManagedBeanForTest(managedBean);
+
+		when(mockApplication.createComponent(Column.COMPONENT_TYPE)).thenReturn(actionColumn);
+		when(mockApplication.createComponent(HtmlPanelGroup.COMPONENT_TYPE)).thenReturn(columnHeader);
+		when(mockApplication.createComponent(CommandButton.COMPONENT_TYPE)).thenReturn(createButton);
+		when(actionColumn.getFacets()).thenReturn(facets);
+		when(actionColumn.getChildren()).thenReturn(actionChildren);
+		when(columnHeader.getChildren()).thenReturn(headerChildren);
+
+		UIComponent result = builder.createListGridActionColumn("sales",
+																"Order",
+																true,
+																true,
+																null,
+																null,
+																false,
+																null,
+																false,
+																"listGrid1",
+																Map.of());
+
+		assertSame(actionColumn, result);
+		assertEquals(1, headerChildren.size());
+		assertEquals(0, actionChildren.size());
+		verify(createButton).setOnclick("SKYVE.PF.pushHistory('./?a=e&m=sales&d=Order');return false");
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testCreateListGridZoomButtonWithNullConditionOmitsDisabledExpression() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		CommandButton button = mock(CommandButton.class);
+		ValueExpression onclickExpression = mock(ValueExpression.class);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("zoomButtonId");
+		builder.setManagedBeanForTest(managedBean);
+
+		when(mockApplication.createComponent(CommandButton.COMPONENT_TYPE)).thenReturn(button);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(String.class))).thenReturn(onclickExpression);
+
+		UIComponent result = builder.createListGridZoomButton(null, Map.of());
+
+		assertSame(button, result);
+		verify(button).setTitle("View Detail");
+		verify(button).setType("button");
+		verify(button, never()).setValueExpression(eq("disabled"), any());
+		verify(button).setValueExpression("onclick", onclickExpression);
+	}
+
 	@SuppressWarnings({ "static-method", "boxing" })
 	@Test
 	void testAddListGridDataColumnsAddsProjectedColumnWithoutMetadataBindingLookup() {
@@ -2638,6 +2869,134 @@ class TabularComponentBuilderTest {
 		verify(column).setSortable(false);
 		verify(column).setFilterable(false);
 		verify(column).setStyle("width:120px;text-align:left !important;");
+		verify(outputText).setValueExpression("value", valueExpression);
+		verify(outputText).setEscape(false);
+	}
+
+	@SuppressWarnings({ "static-method", "boxing" })
+	@Test
+	void testAddListGridDataColumnsUsesFormatterNameWhenPresent() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		Column column = mock(Column.class);
+		HtmlOutputText outputText = mock(HtmlOutputText.class);
+		List<UIComponent> listChildren = new ArrayList<>();
+		List<UIComponent> columnChildren = new ArrayList<>();
+		ValueExpression valueExpression = mock(ValueExpression.class);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("listFormatterColumnId");
+		builder.setManagedBeanForTest(managedBean);
+
+		when(mockApplication.createComponent(Column.COMPONENT_TYPE)).thenReturn(column);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(outputText);
+		when(column.getChildren()).thenReturn(columnChildren);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(Object.class))).thenReturn(valueExpression);
+
+		ListModel<org.skyve.domain.Bean> model = mock(ListModel.class);
+		Document drivingDocument = mock(Document.class);
+		when(model.getDrivingDocument()).thenReturn(drivingDocument);
+		when(drivingDocument.getOwningModuleName()).thenReturn("sales");
+
+		MetaDataQueryProjectedColumn queryColumn = mock(MetaDataQueryProjectedColumn.class);
+		when(model.getColumns()).thenReturn(List.of(queryColumn));
+		when(queryColumn.isHidden()).thenReturn(Boolean.FALSE);
+		when(queryColumn.isProjected()).thenReturn(Boolean.TRUE);
+		when(queryColumn.getName()).thenReturn("status");
+		when(queryColumn.getBinding()).thenReturn(null);
+		when(model.determineColumnTitle(queryColumn)).thenReturn("Status");
+		when(queryColumn.getPixelWidth()).thenReturn(Integer.valueOf(120));
+		when(queryColumn.getAlignment()).thenReturn(HorizontalAlignment.left);
+		when(queryColumn.getFormatterName()).thenReturn(FormatterName.Integer);
+		when(queryColumn.getCustomFormatterName()).thenReturn(null);
+		when(queryColumn.isEscape()).thenReturn(Boolean.TRUE);
+
+		org.skyve.metadata.user.User user = mock(org.skyve.metadata.user.User.class);
+		org.skyve.metadata.customer.Customer customer = mock(org.skyve.metadata.customer.Customer.class);
+		org.skyve.metadata.module.Module module = mock(org.skyve.metadata.module.Module.class);
+		Customisations customisations = mock(Customisations.class);
+		AbstractPersistence persistence = mock(AbstractPersistence.class, org.mockito.Mockito.CALLS_REAL_METHODS);
+		AbstractPersistence previousPersistence = currentPersistenceIfPresent();
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("sales")).thenReturn(module);
+		when(persistence.getUser()).thenReturn(user);
+		Customisations previousCustomisations = CustomisationsStaticSingleton.get();
+		try {
+			CustomisationsStaticSingleton.set(customisations);
+			persistence.setForThread();
+			builder.addListGridDataColumns(model, listChildren, false, "listTable", "desktop");
+		}
+		finally {
+			CustomisationsStaticSingleton.set(previousCustomisations);
+			restorePersistence(previousPersistence);
+		}
+
+		assertEquals(1, listChildren.size());
+		assertSame(column, listChildren.get(0));
+		assertEquals(1, columnChildren.size());
+		assertSame(outputText, columnChildren.get(0));
+		verify(outputText).setValueExpression("value", valueExpression);
+		verify(outputText).setEscape(false);
+	}
+
+	@SuppressWarnings({ "static-method", "boxing" })
+	@Test
+	void testAddListGridDataColumnsUsesCustomFormatterNameWhenPresent() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		Column column = mock(Column.class);
+		HtmlOutputText outputText = mock(HtmlOutputText.class);
+		List<UIComponent> listChildren = new ArrayList<>();
+		List<UIComponent> columnChildren = new ArrayList<>();
+		ValueExpression valueExpression = mock(ValueExpression.class);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("listCustomFormatterColumnId");
+		builder.setManagedBeanForTest(managedBean);
+
+		when(mockApplication.createComponent(Column.COMPONENT_TYPE)).thenReturn(column);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(outputText);
+		when(column.getChildren()).thenReturn(columnChildren);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(Object.class))).thenReturn(valueExpression);
+
+		ListModel<org.skyve.domain.Bean> model = mock(ListModel.class);
+		Document drivingDocument = mock(Document.class);
+		when(model.getDrivingDocument()).thenReturn(drivingDocument);
+		when(drivingDocument.getOwningModuleName()).thenReturn("sales");
+
+		MetaDataQueryProjectedColumn queryColumn = mock(MetaDataQueryProjectedColumn.class);
+		when(model.getColumns()).thenReturn(List.of(queryColumn));
+		when(queryColumn.isHidden()).thenReturn(Boolean.FALSE);
+		when(queryColumn.isProjected()).thenReturn(Boolean.TRUE);
+		when(queryColumn.getName()).thenReturn("status");
+		when(queryColumn.getBinding()).thenReturn(null);
+		when(model.determineColumnTitle(queryColumn)).thenReturn("Status");
+		when(queryColumn.getPixelWidth()).thenReturn(Integer.valueOf(120));
+		when(queryColumn.getAlignment()).thenReturn(HorizontalAlignment.left);
+		when(queryColumn.getFormatterName()).thenReturn(null);
+		when(queryColumn.getCustomFormatterName()).thenReturn("myFormatter");
+		when(queryColumn.isEscape()).thenReturn(Boolean.TRUE);
+
+		org.skyve.metadata.user.User user = mock(org.skyve.metadata.user.User.class);
+		org.skyve.metadata.customer.Customer customer = mock(org.skyve.metadata.customer.Customer.class);
+		org.skyve.metadata.module.Module module = mock(org.skyve.metadata.module.Module.class);
+		Customisations customisations = mock(Customisations.class);
+		AbstractPersistence persistence = mock(AbstractPersistence.class, org.mockito.Mockito.CALLS_REAL_METHODS);
+		AbstractPersistence previousPersistence = currentPersistenceIfPresent();
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("sales")).thenReturn(module);
+		when(persistence.getUser()).thenReturn(user);
+		Customisations previousCustomisations = CustomisationsStaticSingleton.get();
+		try {
+			CustomisationsStaticSingleton.set(customisations);
+			persistence.setForThread();
+			builder.addListGridDataColumns(model, listChildren, false, "listTable", "desktop");
+		}
+		finally {
+			CustomisationsStaticSingleton.set(previousCustomisations);
+			restorePersistence(previousPersistence);
+		}
+
+		assertEquals(1, listChildren.size());
+		assertSame(column, listChildren.get(0));
+		assertEquals(1, columnChildren.size());
+		assertSame(outputText, columnChildren.get(0));
 		verify(outputText).setValueExpression("value", valueExpression);
 		verify(outputText).setEscape(false);
 	}

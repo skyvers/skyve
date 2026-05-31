@@ -2,18 +2,23 @@ package org.skyve.impl.web.service.rest;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.Collections;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.domain.DynamicBean;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -319,6 +324,121 @@ class RestServiceDeleteJsonTest {
 	}
 
 	@Test
+	void retrieveXmlByIdReturnsBeanWhenReadableAndFound() throws Exception {
+		RestService service = new RestService();
+		HttpServletResponse response = mockResponse();
+		setPrivateField(service, "response", response);
+
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		DynamicBean bean = new DynamicBean("admin", "Contact", new java.util.HashMap<>());
+
+		when(persistence.getUser()).thenReturn(user);
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("admin")).thenReturn(module);
+		when(module.getDocument(customer, "Contact")).thenReturn(document);
+		when(user.canReadDocument(document)).thenReturn(true);
+		when(persistence.retrieve(document, "id-xml")).thenReturn(bean);
+		bindPersistenceToThread(persistence);
+
+		Object result = service.retrieveXML("admin", "Contact", "id-xml");
+
+		assertSame(bean, result);
+		verify(response, atLeastOnce()).setContentType("application/xml");
+		verify(persistence, never()).rollback();
+	}
+
+	@Test
+	void retrieveJsonByIdCoversNonNullRetrieveBranchThenRollsBackOnPopulateFailure() throws Exception {
+		RestService service = new RestService();
+		HttpServletResponse response = mockResponse();
+		setPrivateField(service, "response", response);
+
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		org.skyve.domain.Bean bean = mock(org.skyve.domain.Bean.class);
+
+		when(persistence.getUser()).thenReturn(user);
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("admin")).thenReturn(module);
+		when(module.getDocument(customer, "Contact")).thenReturn(document);
+		when(user.canReadDocument(document)).thenReturn(true);
+		when(persistence.retrieve(document, "id-4")).thenReturn(bean);
+		bindPersistenceToThread(persistence);
+
+		String result = service.retrieveJSON("admin", "Contact", "id-4");
+
+		assertNull(result);
+		verify(response, atLeastOnce()).setContentType("application/json");
+		verify(persistence).rollback();
+	}
+
+	@Test
+	void retrieveXmlByIdCoversNonNullRetrieveBranchThenRollsBackOnPopulateFailure() throws Exception {
+		RestService service = new RestService();
+		HttpServletResponse response = mockResponse();
+		setPrivateField(service, "response", response);
+
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		org.skyve.domain.Bean bean = mock(org.skyve.domain.Bean.class);
+
+		when(persistence.getUser()).thenReturn(user);
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("admin")).thenReturn(module);
+		when(module.getDocument(customer, "Contact")).thenReturn(document);
+		when(user.canReadDocument(document)).thenReturn(true);
+		when(persistence.retrieve(document, "id-5")).thenReturn(bean);
+		bindPersistenceToThread(persistence);
+
+		Object result = service.retrieveXML("admin", "Contact", "id-5");
+
+		assertEquals(bean, result);
+		verify(response, atLeastOnce()).setContentType("application/xml");
+	}
+
+	@Test
+	void retrieveJsonListCoversNonEmptyProjectedResultsLoopThenRollsBackOnPopulateFailure() throws Exception {
+		RestService service = new RestService();
+		HttpServletResponse response = mockResponse();
+		setPrivateField(service, "response", response);
+
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		DocumentQuery query = mock(DocumentQuery.class);
+		org.skyve.domain.Bean bean = mock(org.skyve.domain.Bean.class);
+
+		when(persistence.getUser()).thenReturn(user);
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("admin")).thenReturn(module);
+		when(module.getDocument(customer, "Contact")).thenReturn(document);
+		when(user.canReadDocument(document)).thenReturn(true);
+		when(persistence.newDocumentQuery(document)).thenReturn(query);
+		when(query.projectedResults()).thenReturn(java.util.Collections.singletonList(bean));
+		bindPersistenceToThread(persistence);
+
+		String result = service.retrieveJSON("admin", "Contact", 0, 2);
+
+		assertNull(result);
+		verify(query).setFirstResult(0);
+		verify(query).setMaxResults(1);
+		verify(response, atLeastOnce()).setContentType("application/json");
+		verify(persistence).rollback();
+	}
+
+	@Test
 	void retrieveJsonListReturnsNullAndRollsBackAfterDocumentQueryExecutionPath() throws Exception {
 		RestService service = new RestService();
 		HttpServletResponse response = mockResponse();
@@ -577,6 +697,64 @@ class RestServiceDeleteJsonTest {
 		assertNull(result);
 		verify(response, atLeastOnce()).setContentType("application/json");
 		verify(persistence).rollback();
+	}
+
+	@Test
+	void retrieveJsonByIdReturnsJsonWhenReadableAndFound() throws Exception {
+		RestService service = new RestService();
+		HttpServletResponse response = mockResponse();
+		setPrivateField(service, "response", response);
+
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		DynamicBean bean = new DynamicBean("admin", "Contact", new java.util.HashMap<>());
+
+		when(persistence.getUser()).thenReturn(user);
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("admin")).thenReturn(module);
+		when(module.getDocument(customer, "Contact")).thenReturn(document);
+		when(user.canReadDocument(document)).thenReturn(true);
+		when(persistence.retrieve(document, "id-json")).thenReturn(bean);
+		bindPersistenceToThread(persistence);
+
+		String result = service.retrieveJSON("admin", "Contact", "id-json");
+
+		assertNotNull(result);
+		verify(response, atLeastOnce()).setContentType("application/json");
+		verify(persistence, never()).rollback();
+	}
+
+	@Test
+	void retrieveJsonListReturnsJsonWhenReadableAndFound() throws Exception {
+		RestService service = new RestService();
+		HttpServletResponse response = mockResponse();
+		setPrivateField(service, "response", response);
+
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		org.skyve.persistence.DocumentQuery query = mock(org.skyve.persistence.DocumentQuery.class);
+		DynamicBean bean = new DynamicBean("admin", "Contact", new java.util.HashMap<>());
+
+		when(persistence.getUser()).thenReturn(user);
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("admin")).thenReturn(module);
+		when(module.getDocument(customer, "Contact")).thenReturn(document);
+		when(user.canReadDocument(document)).thenReturn(true);
+		when(persistence.newDocumentQuery(document)).thenReturn(query);
+		when(query.projectedResults()).thenReturn(Collections.singletonList(bean));
+		bindPersistenceToThread(persistence);
+
+		String result = service.retrieveJSON("admin", "Contact", 0, 1);
+
+		assertNotNull(result);
+		verify(response, atLeastOnce()).setContentType("application/json");
+		verify(persistence, never()).rollback();
 	}
 
 

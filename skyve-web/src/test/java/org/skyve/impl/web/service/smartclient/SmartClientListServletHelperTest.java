@@ -2,6 +2,7 @@ package org.skyve.impl.web.service.smartclient;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -11,21 +12,25 @@ import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
 import org.skyve.domain.Bean;
+import org.skyve.domain.DynamicBean;
 import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.snapshot.SmartClientFilterOperator;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.Filter;
 import org.locationtech.jts.geom.Geometry;
 import org.skyve.metadata.view.model.list.ListModel;
+import org.skyve.impl.metadata.model.document.field.Text;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -562,6 +567,477 @@ class SmartClientListServletHelperTest {
 	}
 
 	@Test
+	@SuppressWarnings("boxing")
+	void addSimpleFilterCriteriaToQueryUsesStringMetadataAndContainsOperator() throws Exception {
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Customer customer = mock(Customer.class);
+		ListModel<Bean> model = mock(ListModel.class);
+		Filter filter = mock(Filter.class);
+		Text nameField = new Text();
+		nameField.setName("name");
+		nameField.setLength(100);
+
+		org.mockito.Mockito.when(model.getFilter()).thenReturn(filter);
+		org.mockito.Mockito.when(document.getAttribute("name")).thenReturn(nameField);
+
+		java.util.Map<String, Object> criteria = new java.util.HashMap<>();
+		criteria.put("name", "O'Brien");
+
+		SmartClientListServlet.addSimpleFilterCriteriaToQuery(module,
+				document,
+				customer,
+				SmartClientFilterOperator.contains,
+				criteria,
+				null,
+				model);
+
+		verify(filter).addContains("name", "O%Brien");
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	void addSimpleFilterCriteriaToQueryForcesEqualsForConstantDomainFields() throws Exception {
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Customer customer = mock(Customer.class);
+		ListModel<Bean> model = mock(ListModel.class);
+		Filter filter = mock(Filter.class);
+		Text statusField = new Text();
+		statusField.setName("status");
+		statusField.setLength(20);
+		statusField.setDomainType(DomainType.constant);
+
+		org.mockito.Mockito.when(model.getFilter()).thenReturn(filter);
+		org.mockito.Mockito.when(document.getAttribute("status")).thenReturn(statusField);
+
+		java.util.Map<String, Object> criteria = new java.util.HashMap<>();
+		criteria.put("status", "A'B");
+
+		SmartClientListServlet.addSimpleFilterCriteriaToQuery(module,
+				document,
+				customer,
+				SmartClientFilterOperator.contains,
+				criteria,
+				null,
+				model);
+
+		verify(filter).addEquals("status", "A%B");
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	void addSimpleFilterCriteriaToQueryForcesEqualsForNumericFields() throws Exception {
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Customer customer = mock(Customer.class);
+		ListModel<Bean> model = mock(ListModel.class);
+		Filter filter = mock(Filter.class);
+		org.skyve.impl.metadata.model.document.field.Integer ageField = new org.skyve.impl.metadata.model.document.field.Integer();
+		ageField.setName("age");
+
+		org.mockito.Mockito.when(model.getFilter()).thenReturn(filter);
+		org.mockito.Mockito.when(document.getAttribute("age")).thenReturn(ageField);
+
+		java.util.Map<String, Object> criteria = new java.util.HashMap<>();
+		criteria.put("age", "42");
+
+		SmartClientListServlet.addSimpleFilterCriteriaToQuery(module,
+				document,
+				customer,
+				SmartClientFilterOperator.contains,
+				criteria,
+				null,
+				model);
+
+		verify(filter).addEquals("age", java.lang.Integer.valueOf(42));
+	}
+
+	@Test
+	void addSimpleFilterCriteriaToQueryStoresParameterizedListsAndArrays() throws Exception {
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Customer customer = mock(Customer.class);
+		ListModel<Bean> model = mock(ListModel.class);
+		Filter filter = mock(Filter.class);
+
+		org.mockito.Mockito.when(model.getFilter()).thenReturn(filter);
+
+		java.util.Map<String, Object> criteria = new java.util.HashMap<>();
+		criteria.put(":codes", new java.util.ArrayList<>(java.util.List.of("A", "B")));
+		criteria.put(":flags", new Object[] {"X", "Y"});
+
+		SmartClientListServlet.addSimpleFilterCriteriaToQuery(module,
+				document,
+				customer,
+				SmartClientFilterOperator.equals,
+				criteria,
+				null,
+				model);
+
+		verify(model).putParameter("codes", java.util.List.of("A", "B"));
+		verify(model).putParameter(org.mockito.ArgumentMatchers.eq("flags"), org.mockito.ArgumentMatchers.argThat(value -> {
+			if (! (value instanceof Object[] values)) {
+				return false;
+			}
+			return (values.length == 2) && "X".equals(values[0]) && "Y".equals(values[1]);
+		}));
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	void addAdvancedFilterCriteriaInternalUsesOrBranchForSecondSimpleCriterion() throws Exception {
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		ListModel<?> model = mock(ListModel.class);
+		Filter filter = mock(Filter.class);
+		Filter orFilter = mock(Filter.class);
+		Text nameField = new Text();
+		nameField.setName("name");
+		nameField.setLength(50);
+
+		org.mockito.Mockito.when(user.getCustomer()).thenReturn(customer);
+		org.mockito.Mockito.when(document.getAttribute("name")).thenReturn(nameField);
+		org.mockito.Mockito.when(model.newFilter()).thenReturn(orFilter);
+		org.mockito.Mockito.doReturn(false).when(orFilter).isEmpty();
+
+		java.util.Map<String, Object> c1 = new java.util.HashMap<>();
+		c1.put("fieldName", "name");
+		c1.put("operator", SmartClientFilterOperator.equals.toString());
+		c1.put("value", "first");
+
+		java.util.Map<String, Object> c2 = new java.util.HashMap<>();
+		c2.put("fieldName", "name");
+		c2.put("operator", SmartClientFilterOperator.equals.toString());
+		c2.put("value", "second");
+
+		invokeAddAdvancedFilterCriteriaToQueryInternal(module,
+				document,
+				user,
+				compoundFilterOperator("or"),
+				java.util.List.of(c1, c2),
+				null,
+				model,
+				filter);
+
+		verify(filter).addEquals("name", "first");
+		verify(orFilter).addEquals("name", "second");
+		verify(filter).addOr(orFilter);
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	void addAdvancedFilterCriteriaInternalNotInvertsStringAndSetOperators() throws Exception {
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		ListModel<?> model = mock(ListModel.class);
+		Filter filter = mock(Filter.class);
+		Text nameField = new Text();
+		nameField.setName("name");
+		nameField.setLength(100);
+
+		org.mockito.Mockito.when(user.getCustomer()).thenReturn(customer);
+		org.mockito.Mockito.when(document.getAttribute("name")).thenReturn(nameField);
+
+		java.util.Map<String, Object> contains = new java.util.HashMap<>();
+		contains.put("fieldName", "name");
+		contains.put("operator", SmartClientFilterOperator.contains.toString());
+		contains.put("value", "abc");
+
+		java.util.Map<String, Object> notContains = new java.util.HashMap<>();
+		notContains.put("fieldName", "name");
+		notContains.put("operator", SmartClientFilterOperator.notContains.toString());
+		notContains.put("value", "def");
+
+		java.util.Map<String, Object> inSet = new java.util.HashMap<>();
+		inSet.put("fieldName", "name");
+		inSet.put("operator", SmartClientFilterOperator.inSet.toString());
+		inSet.put("value", new java.util.ArrayList<>(java.util.List.of("A", "B")));
+
+		java.util.Map<String, Object> notInSet = new java.util.HashMap<>();
+		notInSet.put("fieldName", "name");
+		notInSet.put("operator", SmartClientFilterOperator.notInSet.toString());
+		notInSet.put("value", new java.util.ArrayList<>(java.util.List.of("X", "Y")));
+
+		invokeAddAdvancedFilterCriteriaToQueryInternal(module,
+				document,
+				user,
+				compoundFilterOperator("not"),
+				java.util.List.of(contains, notContains, inSet, notInSet),
+				null,
+				model,
+				filter);
+
+		verify(filter).addNotContains("name", "abc");
+		verify(filter).addContains("name", "def");
+		verify(filter).addNotIn("name", "A", "B");
+		verify(filter).addIn("name", "X", "Y");
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	void addAdvancedFilterCriteriaInternalNotInvertsRangeAndNullOperators() throws Exception {
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		ListModel<?> model = mock(ListModel.class);
+		Filter filter = mock(Filter.class);
+		Text nameField = new Text();
+		nameField.setName("name");
+		nameField.setLength(100);
+
+		org.mockito.Mockito.when(user.getCustomer()).thenReturn(customer);
+		org.mockito.Mockito.when(document.getAttribute("name")).thenReturn(nameField);
+
+		java.util.Map<String, Object> between = new java.util.HashMap<>();
+		between.put("fieldName", "name");
+		between.put("operator", SmartClientFilterOperator.betweenInclusive.toString());
+		between.put("start", "A");
+		between.put("end", "Z");
+
+		java.util.Map<String, Object> isNull = new java.util.HashMap<>();
+		isNull.put("fieldName", "name");
+		isNull.put("operator", SmartClientFilterOperator.isNull.toString());
+
+		java.util.Map<String, Object> notNull = new java.util.HashMap<>();
+		notNull.put("fieldName", "name");
+		notNull.put("operator", SmartClientFilterOperator.notNull.toString());
+
+		invokeAddAdvancedFilterCriteriaToQueryInternal(module,
+				document,
+				user,
+				compoundFilterOperator("not"),
+				java.util.List.of(between, isNull, notNull),
+				null,
+				model,
+				filter);
+
+		verify(filter).addLessThanOrEqualTo("name", "A");
+		verify(filter).addGreaterThan("name", "Z");
+		verify(filter).addNotNull("name");
+		verify(filter).addNull("name");
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	void addAdvancedFilterCriteriaInternalNotInvertsStartsEndsAndEqualityOperators() throws Exception {
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		ListModel<?> model = mock(ListModel.class);
+		Filter filter = mock(Filter.class);
+		Text nameField = new Text();
+		nameField.setName("name");
+		nameField.setLength(100);
+
+		org.mockito.Mockito.when(user.getCustomer()).thenReturn(customer);
+		org.mockito.Mockito.when(document.getAttribute("name")).thenReturn(nameField);
+
+		java.util.Map<String, Object> startsWith = criterion("name", SmartClientFilterOperator.startsWith, "ab");
+		java.util.Map<String, Object> iStartsWith = criterion("name", SmartClientFilterOperator.iStartsWith, "cd");
+		java.util.Map<String, Object> notStartsWith = criterion("name", SmartClientFilterOperator.notStartsWith, "ef");
+		java.util.Map<String, Object> iNotStartsWith = criterion("name", SmartClientFilterOperator.iNotStartsWith, "gh");
+		java.util.Map<String, Object> endsWith = criterion("name", SmartClientFilterOperator.endsWith, "ij");
+		java.util.Map<String, Object> iEndsWith = criterion("name", SmartClientFilterOperator.iEndsWith, "kl");
+		java.util.Map<String, Object> notEndsWith = criterion("name", SmartClientFilterOperator.notEndsWith, "mn");
+		java.util.Map<String, Object> iNotEndsWith = criterion("name", SmartClientFilterOperator.iNotEndsWith, "op");
+		java.util.Map<String, Object> exact = criterion("name", SmartClientFilterOperator.exact, "q");
+		java.util.Map<String, Object> iEquals = criterion("name", SmartClientFilterOperator.iEquals, "r");
+		java.util.Map<String, Object> notEqual = criterion("name", SmartClientFilterOperator.notEqual, "s");
+		java.util.Map<String, Object> iNotEqual = criterion("name", SmartClientFilterOperator.iNotEqual, "t");
+
+		invokeAddAdvancedFilterCriteriaToQueryInternal(module,
+				document,
+				user,
+				compoundFilterOperator("not"),
+				java.util.List.of(startsWith,
+						iStartsWith,
+						notStartsWith,
+						iNotStartsWith,
+						endsWith,
+						iEndsWith,
+						notEndsWith,
+						iNotEndsWith,
+						exact,
+						iEquals,
+						notEqual,
+						iNotEqual),
+				null,
+				model,
+				filter);
+
+		verify(filter).addNotStartsWith("name", "ab");
+		verify(filter).addNotStartsWith("name", "cd");
+		verify(filter).addStartsWith("name", "ef");
+		verify(filter).addStartsWith("name", "gh");
+		verify(filter).addNotEndsWith("name", "ij");
+		verify(filter).addNotEndsWith("name", "kl");
+		verify(filter).addEndsWith("name", "mn");
+		verify(filter).addEndsWith("name", "op");
+		verify(filter).addNotEquals("name", "q");
+		verify(filter).addNotEqualsIgnoreCase("name", "r");
+		verify(filter).addEquals("name", "s");
+		verify(filter).addEqualsIgnoreCase("name", "t");
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	void addAdvancedFilterCriteriaInternalNotInvertsRelationalAndBetweenOperators() throws Exception {
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		ListModel<?> model = mock(ListModel.class);
+		Filter filter = mock(Filter.class);
+		Text nameField = new Text();
+		nameField.setName("name");
+		nameField.setLength(100);
+
+		org.mockito.Mockito.when(user.getCustomer()).thenReturn(customer);
+		org.mockito.Mockito.when(document.getAttribute("name")).thenReturn(nameField);
+
+		java.util.Map<String, Object> greaterThan = criterion("name", SmartClientFilterOperator.greaterThan, "10");
+		java.util.Map<String, Object> greaterOrEqual = criterion("name", SmartClientFilterOperator.greaterOrEqual, "11");
+		java.util.Map<String, Object> lessThan = criterion("name", SmartClientFilterOperator.lessThan, "12");
+		java.util.Map<String, Object> lessOrEqual = criterion("name", SmartClientFilterOperator.lessOrEqual, "13");
+		java.util.Map<String, Object> iBetween = criterion("name", SmartClientFilterOperator.iBetween, null);
+		iBetween.put("start", "A");
+		iBetween.put("end", "Z");
+
+		invokeAddAdvancedFilterCriteriaToQueryInternal(module,
+				document,
+				user,
+				compoundFilterOperator("not"),
+				java.util.List.of(greaterThan, greaterOrEqual, lessThan, lessOrEqual, iBetween),
+				null,
+				model,
+				filter);
+
+		verify(filter).addLessThanOrEqualTo("name", "10");
+		verify(filter).addLessThan("name", "11");
+		verify(filter).addGreaterThanOrEqualTo("name", "12");
+		verify(filter).addGreaterThan("name", "13");
+		verify(filter).addLessThanOrEqualTo("name", "A");
+		verify(filter).addGreaterThanOrEqualTo("name", "Z");
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	void addAdvancedFilterCriteriaInternalNotNoOpsForFieldPatternGeoAndLogicalOperators() throws Exception {
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		ListModel<?> model = mock(ListModel.class);
+		Filter filter = mock(Filter.class);
+		Text nameField = new Text();
+		nameField.setName("name");
+		nameField.setLength(100);
+
+		org.mockito.Mockito.when(user.getCustomer()).thenReturn(customer);
+		org.mockito.Mockito.when(document.getAttribute("name")).thenReturn(nameField);
+
+		java.util.Map<String, Object> equalsField = criterion("name", SmartClientFilterOperator.equalsField, "x");
+		java.util.Map<String, Object> iEqualsField = criterion("name", SmartClientFilterOperator.iEqualsField, "x");
+		java.util.Map<String, Object> notEqualField = criterion("name", SmartClientFilterOperator.notEqualField, "x");
+		java.util.Map<String, Object> iNotEqualField = criterion("name", SmartClientFilterOperator.iNotEqualField, "x");
+		java.util.Map<String, Object> containsField = criterion("name", SmartClientFilterOperator.containsField, "x");
+		java.util.Map<String, Object> iContainsField = criterion("name", SmartClientFilterOperator.iContainsField, "x");
+		java.util.Map<String, Object> notContainsField = criterion("name", SmartClientFilterOperator.notContainsField, "x");
+		java.util.Map<String, Object> iNotContainsField = criterion("name", SmartClientFilterOperator.iNotContainsField, "x");
+		java.util.Map<String, Object> startsWithField = criterion("name", SmartClientFilterOperator.startsWithField, "x");
+		java.util.Map<String, Object> iStartsWithField = criterion("name", SmartClientFilterOperator.iStartsWithField, "x");
+		java.util.Map<String, Object> notStartsWithField = criterion("name", SmartClientFilterOperator.notStartsWithField, "x");
+		java.util.Map<String, Object> iNotStartsWithField = criterion("name", SmartClientFilterOperator.iNotStartsWithField, "x");
+		java.util.Map<String, Object> endsWithField = criterion("name", SmartClientFilterOperator.endsWithField, "x");
+		java.util.Map<String, Object> iEndsWithField = criterion("name", SmartClientFilterOperator.iEndsWithField, "x");
+		java.util.Map<String, Object> notEndsWithField = criterion("name", SmartClientFilterOperator.notEndsWithField, "x");
+		java.util.Map<String, Object> iNotEndsWithField = criterion("name", SmartClientFilterOperator.iNotEndsWithField, "x");
+		java.util.Map<String, Object> greaterThanField = criterion("name", SmartClientFilterOperator.greaterThanField, "x");
+		java.util.Map<String, Object> greaterOrEqualField = criterion("name", SmartClientFilterOperator.greaterOrEqualField, "x");
+		java.util.Map<String, Object> lessThanField = criterion("name", SmartClientFilterOperator.lessThanField, "x");
+		java.util.Map<String, Object> lessOrEqualField = criterion("name", SmartClientFilterOperator.lessOrEqualField, "x");
+		java.util.Map<String, Object> regexp = criterion("name", SmartClientFilterOperator.regexp, "x");
+		java.util.Map<String, Object> iregexp = criterion("name", SmartClientFilterOperator.iregexp, "x");
+		java.util.Map<String, Object> containsPattern = criterion("name", SmartClientFilterOperator.containsPattern, "x");
+		java.util.Map<String, Object> iContainsPattern = criterion("name", SmartClientFilterOperator.iContainsPattern, "x");
+		java.util.Map<String, Object> matchesPattern = criterion("name", SmartClientFilterOperator.matchesPattern, "x");
+		java.util.Map<String, Object> iMatchesPattern = criterion("name", SmartClientFilterOperator.iMatchesPattern, "x");
+		java.util.Map<String, Object> startsWithPattern = criterion("name", SmartClientFilterOperator.startsWithPattern, "x");
+		java.util.Map<String, Object> iStartsWithPattern = criterion("name", SmartClientFilterOperator.iStartsWithPattern, "x");
+		java.util.Map<String, Object> endsWithPattern = criterion("name", SmartClientFilterOperator.endsWithPattern, "x");
+		java.util.Map<String, Object> iEndsWithPattern = criterion("name", SmartClientFilterOperator.iEndsWithPattern, "x");
+		java.util.Map<String, Object> geoContains = criterion("name", SmartClientFilterOperator.geoContains, "x");
+		java.util.Map<String, Object> geoCrosses = criterion("name", SmartClientFilterOperator.geoCrosses, "x");
+		java.util.Map<String, Object> geoDisjoint = criterion("name", SmartClientFilterOperator.geoDisjoint, "x");
+		java.util.Map<String, Object> geoEquals = criterion("name", SmartClientFilterOperator.geoEquals, "x");
+		java.util.Map<String, Object> geoIntersects = criterion("name", SmartClientFilterOperator.geoIntersects, "x");
+		java.util.Map<String, Object> geoOverlaps = criterion("name", SmartClientFilterOperator.geoOverlaps, "x");
+		java.util.Map<String, Object> geoTouches = criterion("name", SmartClientFilterOperator.geoTouches, "x");
+		java.util.Map<String, Object> geoWithin = criterion("name", SmartClientFilterOperator.geoWithin, "x");
+		java.util.Map<String, Object> and = criterion("name", SmartClientFilterOperator.and, "x");
+		java.util.Map<String, Object> or = criterion("name", SmartClientFilterOperator.or, "x");
+		java.util.Map<String, Object> not = criterion("name", SmartClientFilterOperator.not, "x");
+
+		invokeAddAdvancedFilterCriteriaToQueryInternal(module,
+				document,
+				user,
+				compoundFilterOperator("not"),
+				java.util.List.of(equalsField,
+						iEqualsField,
+						notEqualField,
+						iNotEqualField,
+						containsField,
+						iContainsField,
+						notContainsField,
+						iNotContainsField,
+						startsWithField,
+						iStartsWithField,
+						notStartsWithField,
+						iNotStartsWithField,
+						endsWithField,
+						iEndsWithField,
+						notEndsWithField,
+						iNotEndsWithField,
+						greaterThanField,
+						greaterOrEqualField,
+						lessThanField,
+						lessOrEqualField,
+						regexp,
+						iregexp,
+						containsPattern,
+						iContainsPattern,
+						matchesPattern,
+						iMatchesPattern,
+						startsWithPattern,
+						iStartsWithPattern,
+						endsWithPattern,
+						iEndsWithPattern,
+						geoContains,
+						geoCrosses,
+						geoDisjoint,
+						geoEquals,
+						geoIntersects,
+						geoOverlaps,
+						geoTouches,
+						geoWithin,
+						and,
+						or,
+						not),
+				null,
+				model,
+				filter);
+
+		verifyNoInteractions(filter);
+	}
+
+	@Test
 	void fromStringReturnsNullWhenInputIsNull() throws Exception {
 		Object result = invokeFromString("name", "value", null, null, null, String.class);
 		assertEquals(null, result);
@@ -624,6 +1100,133 @@ class SmartClientListServletHelperTest {
 		assertFalse(invokeIsRowTagged(requestWithFalseTag));
 	}
 
+	@Test
+	void returnTagUpdateMessageNullsFlagForUserWithoutPermissionAndSetsTagState() throws Exception {
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		ListModel<Bean> model = mock(ListModel.class);
+
+		org.mockito.Mockito.when(user.canFlag()).thenReturn(false);
+		org.mockito.Mockito.when(module.getName()).thenReturn("admin");
+		org.mockito.Mockito.when(document.getName()).thenReturn("Contact");
+		org.mockito.Mockito.when(model.getDrivingDocument()).thenReturn(document);
+		org.mockito.Mockito.when(model.getProjections()).thenReturn(java.util.Set.of(PersistentBean.TAGGED_NAME,
+				PersistentBean.FLAG_COMMENT_NAME,
+				"name"));
+
+		java.util.Map<String, Object> parameters = new java.util.HashMap<>();
+		parameters.put(PersistentBean.FLAG_COMMENT_NAME, "sensitive");
+		parameters.put("name", "Alice");
+
+		StringBuilder message = invokeReturnTagUpdateMessage(user, customer, parameters, module, model, true);
+
+		assertNotNull(message);
+		assertTrue(message.toString().contains("\"" + PersistentBean.TAGGED_NAME + "\":true"));
+		assertTrue(message.toString().contains("\"" + PersistentBean.FLAG_COMMENT_NAME + "\":null"));
+		assertTrue(message.toString().contains("\"name\":\"Alice\""));
+	}
+
+	@Test
+	void returnTagUpdateMessageKeepsFlagForUserWithPermissionAndClearsTagStateOnUntag() throws Exception {
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		ListModel<Bean> model = mock(ListModel.class);
+
+		org.mockito.Mockito.when(user.canFlag()).thenReturn(true);
+		org.mockito.Mockito.when(module.getName()).thenReturn("admin");
+		org.mockito.Mockito.when(document.getName()).thenReturn("Contact");
+		org.mockito.Mockito.when(model.getDrivingDocument()).thenReturn(document);
+		org.mockito.Mockito.when(model.getProjections()).thenReturn(java.util.Set.of(PersistentBean.TAGGED_NAME,
+				PersistentBean.FLAG_COMMENT_NAME,
+				"name"));
+
+		java.util.Map<String, Object> parameters = new java.util.HashMap<>();
+		parameters.put(PersistentBean.FLAG_COMMENT_NAME, "visible-note");
+		parameters.put("name", "Alice");
+
+		StringBuilder message = invokeReturnTagUpdateMessage(user, customer, parameters, module, model, false);
+
+		assertNotNull(message);
+		assertTrue(message.toString().contains("\"" + PersistentBean.TAGGED_NAME + "\":false"));
+		assertTrue(message.toString().contains("\"" + PersistentBean.FLAG_COMMENT_NAME + "\":\"visible-note\""));
+		assertTrue(message.toString().contains("\"name\":\"Alice\""));
+	}
+
+	@Test
+	void returnUpdatedMessageMasksFlagWhenUserCannotFlagAndPreservesTaggedState() throws Exception {
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		ListModel<Bean> model = mock(ListModel.class);
+
+		org.mockito.Mockito.when(user.canFlag()).thenReturn(false);
+		org.mockito.Mockito.when(model.getColumns()).thenReturn(java.util.Collections.emptyList());
+		org.mockito.Mockito.when(model.getProjections()).thenReturn(java.util.Set.of(PersistentBean.TAGGED_NAME,
+				PersistentBean.FLAG_COMMENT_NAME,
+				"name"));
+
+		java.util.TreeMap<String, Object> beanValues = new java.util.TreeMap<>();
+		beanValues.put(PersistentBean.TAGGED_NAME, null);
+		beanValues.put(PersistentBean.FLAG_COMMENT_NAME, "private-note");
+		beanValues.put("name", "Bob");
+		DynamicBean bean = new DynamicBean("admin", "Contact", beanValues);
+
+		StringBuilder message = invokeReturnUpdatedMessage(user, customer, module, document, model, bean, true);
+
+		assertNotNull(message);
+		assertTrue(message.toString().contains("\"" + PersistentBean.TAGGED_NAME + "\":true"));
+		assertTrue(message.toString().contains("\"" + PersistentBean.FLAG_COMMENT_NAME + "\":null"));
+		assertTrue(message.toString().contains("\"name\":\"Bob\""));
+	}
+
+	@Test
+	void returnUpdatedMessageKeepsFlagWhenUserCanFlagAndDoesNotForceTaggedState() throws Exception {
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		ListModel<Bean> model = mock(ListModel.class);
+
+		org.mockito.Mockito.when(user.canFlag()).thenReturn(true);
+		org.mockito.Mockito.when(model.getColumns()).thenReturn(java.util.Collections.emptyList());
+		org.mockito.Mockito.when(model.getProjections()).thenReturn(java.util.Set.of(PersistentBean.TAGGED_NAME,
+				PersistentBean.FLAG_COMMENT_NAME,
+				"name"));
+
+		java.util.TreeMap<String, Object> beanValues = new java.util.TreeMap<>();
+		beanValues.put(PersistentBean.TAGGED_NAME, Boolean.FALSE);
+		beanValues.put(PersistentBean.FLAG_COMMENT_NAME, "visible-note");
+		beanValues.put("name", "Carol");
+		DynamicBean bean = new DynamicBean("admin", "Contact", beanValues);
+
+		StringBuilder message = invokeReturnUpdatedMessage(user, customer, module, document, model, bean, false);
+
+		assertNotNull(message);
+		assertTrue(message.toString().contains("\"" + PersistentBean.TAGGED_NAME + "\":false"));
+		assertTrue(message.toString().contains("\"" + PersistentBean.FLAG_COMMENT_NAME + "\":\"visible-note\""));
+		assertTrue(message.toString().contains("\"name\":\"Carol\""));
+	}
+
+	@Test
+	void removeDeletesModelRowAndReturnsStatusOkPayload() throws Exception {
+		ListModel<Bean> model = mock(ListModel.class);
+		java.io.StringWriter sink = new java.io.StringWriter();
+		java.io.PrintWriter pw = new java.io.PrintWriter(sink);
+		java.util.Map<String, Object> parameters = new java.util.HashMap<>();
+		parameters.put(Bean.DOCUMENT_ID, "biz-123");
+
+		invokeRemove(model, parameters, pw);
+		pw.flush();
+
+		verify(model).remove("biz-123");
+		assertEquals("{\"response\":{\"status\":0}}", sink.toString());
+	}
+
 	private static SmartClientFilterOperator invokeTransformWildcardFilterOperator(SmartClientFilterOperator operator)
 	throws Exception {
 		Method method = SmartClientListServlet.class.getDeclaredMethod("transformWildcardFilterOperator", SmartClientFilterOperator.class);
@@ -680,6 +1283,57 @@ class SmartClientListServletHelperTest {
 		Method method = SmartClientListServlet.class.getDeclaredMethod("isRowTagged", HttpServletRequest.class);
 		method.setAccessible(true);
 		return ((Boolean) method.invoke(null, request)).booleanValue();
+	}
+
+	private static StringBuilder invokeReturnTagUpdateMessage(User user,
+											Customer customer,
+											java.util.Map<String, Object> parameters,
+											Module module,
+											ListModel<Bean> model,
+											boolean tagging) throws Exception {
+		Method method = SmartClientListServlet.class.getDeclaredMethod("returnTagUpdateMessage",
+				User.class,
+				Customer.class,
+				Map.class,
+				Module.class,
+				ListModel.class,
+				boolean.class);
+		method.setAccessible(true);
+		return (StringBuilder) method.invoke(null, user, customer, parameters, module, model, Boolean.valueOf(tagging));
+	}
+
+	private static StringBuilder invokeReturnUpdatedMessage(User user,
+										Customer customer,
+										Module module,
+										Document document,
+										ListModel<Bean> model,
+										Bean bean,
+										boolean rowIsTagged) throws Exception {
+		Method method = SmartClientListServlet.class.getDeclaredMethod("returnUpdatedMessage",
+				User.class,
+				Customer.class,
+				Module.class,
+				Document.class,
+				ListModel.class,
+				Bean.class,
+				boolean.class);
+		method.setAccessible(true);
+		return (StringBuilder) method.invoke(null,
+				user,
+				customer,
+				module,
+				document,
+				model,
+				bean,
+				Boolean.valueOf(rowIsTagged));
+	}
+
+	private static void invokeRemove(ListModel<Bean> model,
+								java.util.Map<String, Object> parameters,
+								java.io.PrintWriter pw) throws Exception {
+		Method method = SmartClientListServlet.class.getDeclaredMethod("remove", ListModel.class, Map.class, java.io.PrintWriter.class);
+		method.setAccessible(true);
+		invokeVoid(method, model, parameters, pw);
 	}
 
 	private static void invokeAddAdvancedFilterCriteriaToQuery(Module module,
@@ -740,5 +1394,15 @@ class SmartClientListServletHelperTest {
 			}
 			throw e;
 		}
+	}
+
+	private static java.util.Map<String, Object> criterion(String fieldName,
+								SmartClientFilterOperator operator,
+								Object value) {
+		java.util.Map<String, Object> criterion = new java.util.HashMap<>();
+		criterion.put("fieldName", fieldName);
+		criterion.put("operator", operator.toString());
+		criterion.put("value", value);
+		return criterion;
 	}
 }

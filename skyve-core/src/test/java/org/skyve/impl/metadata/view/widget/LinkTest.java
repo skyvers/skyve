@@ -1,10 +1,14 @@
 package org.skyve.impl.metadata.view.widget;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.metadata.view.reference.ExternalReference;
+import org.skyve.impl.metadata.view.reference.ReferenceTarget;
+import org.skyve.impl.metadata.view.reference.ReferenceTarget.ReferenceTargetType;
 
 @SuppressWarnings("static-method")
 class LinkTest {
@@ -35,4 +39,22 @@ class LinkTest {
         void getPropertiesReturnsNonNull() {
                 assertNotNull(new Link().getProperties());
 	}
+
+        @Test
+        void settersPreserveReferenceAndProcessValue() {
+                Link link = new Link();
+                ExternalReference reference = new ExternalReference();
+                reference.setHref("  https://example.com  ");
+                ReferenceTarget target = new ReferenceTarget();
+                target.setType(ReferenceTargetType.blankFrame);
+                target.setName("  linkTarget  ");
+
+                link.setReference(reference);
+                link.setTarget(target);
+                link.setValue("  Link title  ");
+
+                assertEquals(reference, link.getReference());
+                assertEquals(target, link.getTarget());
+                assertEquals("Link title", link.getValue());
+        }
 }

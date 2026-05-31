@@ -14,8 +14,8 @@ public class TestExtendingViewJSONManipulator extends ViewJSONManipulator {
 										Module module,
 										Document document,
 										View view,
-										String uxui,
 										Bean bean,
+										String uxui,
 										int editIdCounter,
 										int createIdCounter,
 										boolean forApply) {

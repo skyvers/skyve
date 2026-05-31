@@ -124,6 +124,41 @@ class ProvidedRepositoryDefaultMethodsTest {
 		assertNull(repository.findNearestPersistentSingleOrJoinedSuperDocument(null, module, document));
 	}
 
+	@Test
+	void findNearestPersistentSingleOrJoinedSuperDocumentReturnsNullWhenResolvedBaseHasNoPersistent() {
+		ProvidedRepository repository = repository((method, args) -> unsupported(method));
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Document baseDocument = mock(Document.class);
+		Extends inherits = new Extends();
+		inherits.setDocumentName("BaseDoc");
+
+		when(document.getExtends()).thenReturn(inherits);
+		when(module.getDocument(null, "BaseDoc")).thenReturn(baseDocument);
+		when(baseDocument.getPersistent()).thenReturn(null);
+
+		assertNull(repository.findNearestPersistentSingleOrJoinedSuperDocument(null, module, document));
+	}
+
+	@Test
+	void findNearestPersistentSingleOrJoinedSuperDocumentReturnsNullWhenResolvedBaseUsesMappedStrategy() {
+		ProvidedRepository repository = repository((method, args) -> unsupported(method));
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Document baseDocument = mock(Document.class);
+		Extends inherits = new Extends();
+		Persistent persistent = new Persistent();
+		inherits.setDocumentName("BaseDoc");
+		persistent.setName("BASE_TABLE");
+		persistent.setStrategy(ExtensionStrategy.mapped);
+
+		when(document.getExtends()).thenReturn(inherits);
+		when(module.getDocument(null, "BaseDoc")).thenReturn(baseDocument);
+		when(baseDocument.getPersistent()).thenReturn(persistent);
+
+		assertNull(repository.findNearestPersistentSingleOrJoinedSuperDocument(null, module, document));
+	}
+
 	private static ProvidedRepository repository(RepositoryStub stub) {
 		InvocationHandler handler = (proxy, method, args) -> {
 			if (method.isDefault()) {

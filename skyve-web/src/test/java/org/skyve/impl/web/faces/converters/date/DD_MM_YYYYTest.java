@@ -11,7 +11,7 @@ import org.skyve.domain.types.DateOnly;
 import org.skyve.util.Time;
 
 import jakarta.faces.convert.ConverterException;
-class DD_MM_YYYYTest {
+public class DD_MM_YYYYTest {
 	private DD_MM_YYYY formatter;
 
 	@Before

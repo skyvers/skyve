@@ -11,7 +11,7 @@ import org.skyve.domain.types.TimeOnly;
 import org.skyve.util.Time;
 
 import jakarta.faces.convert.ConverterException;
-class HH24_MI_SSTest {
+public class HH24_MI_SSTest {
 	private HH24_MI_SS formatter;
 
 	@Before

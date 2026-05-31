@@ -172,6 +172,10 @@ class FacesViewRendererTest extends AbstractSkyveTest {
 	}
 
 	private FacesViewRenderer createRenderer(ViewImpl view) {
+		return createRenderer(view, null);
+	}
+
+	private FacesViewRenderer createRenderer(ViewImpl view, String widgetId) {
 		ResponsiveComponentBuilder cb = new ResponsiveComponentBuilder();
 		TestLayoutBuilder lb = new TestLayoutBuilder();
 		FacesView managedBean = new FacesView();
@@ -179,7 +183,7 @@ class FacesViewRendererTest extends AbstractSkyveTest {
 		lb.setUserAgentType(UserAgentType.desktop);
 		cb.setSAILManagedBean(managedBean);
 		lb.setSAILManagedBean(managedBean);
-		return new FacesViewRenderer(u, m, aapd, view, UXUI, null, cb, lb);
+		return new FacesViewRenderer(u, m, aapd, view, UXUI, widgetId, cb, lb);
 	}
 
 	@Test
@@ -570,6 +574,22 @@ class FacesViewRendererTest extends AbstractSkyveTest {
 		view.getContained().add(tabPane);
 
 		FacesViewRenderer renderer = createRenderer(view);
+		renderer.visit();
+		assertNotNull(renderer.getFacesView());
+	}
+
+	@Test
+	void renderViewWithWidgetIdMatchedTabPaneFragment() {
+		ViewImpl view = createEditView();
+		TabPane tabPane = new TabPane();
+		tabPane.setWidgetId("tabs-fragment");
+		Tab tab = new Tab();
+		tab.setTitle("Tab Fragment");
+		tab.getContained().add(createFormWithTextField());
+		tabPane.getTabs().add(tab);
+		view.getContained().add(tabPane);
+
+		FacesViewRenderer renderer = createRenderer(view, "tabs-fragment");
 		renderer.visit();
 		assertNotNull(renderer.getFacesView());
 	}

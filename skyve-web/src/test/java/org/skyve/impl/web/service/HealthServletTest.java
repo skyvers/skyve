@@ -126,6 +126,35 @@ class HealthServletTest {
         verify(response).addDateHeader(eq("Expires"), anyLong());
     }
 
+    @Test
+    @SuppressWarnings({"static-method", "resource"})
+    void doGetReportsJobSchedulerOffWhenSchedulerDisabled() throws Exception {
+        UtilImpl.HEALTH_CHECK = true;
+        UtilImpl.HEALTH_CACHE_TIME_IN_SECONDS = 60;
+        UtilImpl.JOB_SCHEDULER = false;
+        setCachedResponseField(new AtomicReference<>(new StringBuilder("{\"old\":true}")));
+        setResponseInstantField(new AtomicLong(Long.MIN_VALUE));
+
+        HealthServlet servlet = new HealthServlet();
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+        StringWriter body = new StringWriter();
+        PrintWriter writer = new PrintWriter(body);
+        when(response.getWriter()).thenReturn(writer);
+
+        try {
+            servlet.doGet(request, response);
+        }
+        finally {
+            writer.close();
+        }
+
+        String json = body.toString();
+        assertTrue(json.contains("\"jobs\":\"off\""));
+        assertTrue(json.contains("\"caching\":\"ok\""));
+        verify(response).setStatus(HttpServletResponse.SC_OK);
+    }
+
     private static AtomicReference<StringBuilder> getCachedResponseField() {
         try {
             Field field = HealthServlet.class.getDeclaredField("cachedResponse");

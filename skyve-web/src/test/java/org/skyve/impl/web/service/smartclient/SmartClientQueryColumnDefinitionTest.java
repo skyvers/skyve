@@ -1,6 +1,7 @@
 package org.skyve.impl.web.service.smartclient;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -113,6 +114,60 @@ class SmartClientQueryColumnDefinitionTest {
 		assertTrue(javascript.contains("type:'link'"));
 		assertTrue(javascript.contains("canFilter:false"));
 		assertTrue(javascript.contains("canSave:false"));
+	}
+
+	@Test
+	void contentThumbnailColumnPreservesExplicitHeight() {
+		MetaDataQueryContentColumn column = mock(MetaDataQueryContentColumn.class);
+		when(column.getBinding()).thenReturn(null);
+		when(column.getName()).thenReturn("photo");
+		when(column.getLocalisedDisplayName()).thenReturn("Photo");
+		when(column.getAlignment()).thenReturn(null);
+		when(column.getPixelWidth()).thenReturn(Integer.valueOf(80));
+		when(column.isEscape()).thenReturn(true);
+		when(column.isHidden()).thenReturn(false);
+		when(column.getPixelHeight()).thenReturn(Integer.valueOf(96));
+		when(column.getEmptyThumbnailRelativeFile()).thenReturn(null);
+		when(column.getDisplay()).thenReturn(DisplayType.thumbnail);
+
+		SmartClientQueryColumnDefinition definition = new SmartClientQueryColumnDefinition(null,
+				null,
+				null,
+				null,
+				column,
+				false,
+				null);
+
+		assertEquals(Integer.valueOf(96), definition.getPixelHeight());
+		assertTrue(definition.toJavascript().contains("type:'image'"));
+	}
+
+	@Test
+	void projectedColumnWithoutFormatterKeepsDefaultDisplayFieldOff() {
+		MetaDataQueryProjectedColumn column = mock(MetaDataQueryProjectedColumn.class);
+		when(column.getBinding()).thenReturn(null);
+		when(column.getName()).thenReturn("status");
+		when(column.getLocalisedDisplayName()).thenReturn("Status");
+		when(column.getAlignment()).thenReturn(null);
+		when(column.getPixelWidth()).thenReturn(null);
+		when(column.isEscape()).thenReturn(true);
+		when(column.isHidden()).thenReturn(false);
+		when(column.getFormatterName()).thenReturn(null);
+		when(column.getCustomFormatterName()).thenReturn(null);
+		when(column.isFilterable()).thenReturn(true);
+		when(column.isSortable()).thenReturn(true);
+		when(column.isEditable()).thenReturn(true);
+
+		SmartClientQueryColumnDefinition definition = new SmartClientQueryColumnDefinition(null,
+				null,
+				null,
+				null,
+				column,
+				false,
+				null);
+
+		assertFalse(definition.isHasDisplayField());
+		assertTrue(! definition.toJavascript().contains("sortByField:'status'"));
 	}
 
 	@Test

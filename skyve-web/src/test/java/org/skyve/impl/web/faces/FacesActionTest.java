@@ -5,11 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -19,6 +21,8 @@ import java.util.Set;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.primefaces.component.message.Message;
+import org.skyve.domain.messages.SessionEndedException;
+import org.skyve.impl.persistence.AbstractPersistence;
 
 import jakarta.el.ValueExpression;
 import jakarta.faces.application.FacesMessage;
@@ -27,7 +31,9 @@ import jakarta.faces.component.UIViewRoot;
 import jakarta.faces.component.html.HtmlInputHidden;
 import jakarta.faces.component.html.HtmlInputText;
 import jakarta.faces.context.FacesContext;
+import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.PartialViewContext;
+import jakarta.servlet.http.HttpServletRequest;
 
 @SuppressWarnings("static-method")
 class FacesActionTest {
@@ -41,6 +47,50 @@ class FacesActionTest {
 	@AfterEach
 	void clearFacesContext() {
 		FacesContextBridge.setCurrent(null);
+		clearThreadPersistence();
+	}
+
+	@Test
+	void executeReturnsCallbackResult() {
+		bindPersistenceToThread();
+		TestAction action = new TestAction("ok");
+
+		assertEquals("ok", action.execute());
+	}
+
+	@Test
+	void executeRethrowsSecurityExceptionAndMarksRollback() {
+		FacesContext facesContext = mock(FacesContext.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
+		when(externalContext.getRequest()).thenReturn(mock(HttpServletRequest.class));
+		when(facesContext.getExternalContext()).thenReturn(externalContext);
+		FacesContextBridge.setCurrent(facesContext);
+		bindPersistenceToThread();
+
+		TestAction action = new TestAction(new SessionEndedException(java.util.Locale.ENGLISH));
+
+		assertThrows(SessionEndedException.class, action::execute);
+	}
+
+	@Test
+	void executeHandlesUnexpectedThrowableAsGlobalMessage() {
+		UIViewRoot root = mock(UIViewRoot.class);
+		org.mockito.Mockito.doReturn(Boolean.TRUE).when(root).isRendered();
+		PartialViewContext partialViewContext = mock(PartialViewContext.class);
+		Set<String> renderIds = new LinkedHashSet<>();
+		when(partialViewContext.getRenderIds()).thenReturn(renderIds);
+
+		FacesContext facesContext = mock(FacesContext.class);
+		when(facesContext.getViewRoot()).thenReturn(root);
+		when(facesContext.getPartialViewContext()).thenReturn(partialViewContext);
+		doAnswer(invocation -> null).when(facesContext).addMessage(any(), any(FacesMessage.class));
+		FacesContextBridge.setCurrent(facesContext);
+		bindPersistenceToThread();
+
+		TestAction action = new TestAction(new IllegalStateException("boom"));
+
+		assertNull(action.execute());
+		assertTrue(renderIds.isEmpty());
 	}
 
 	@Test
@@ -211,5 +261,53 @@ class FacesActionTest {
 	@SafeVarargs
 	private static <T> Iterator<T> iterator(T... values) {
 		return java.util.Arrays.asList(values).iterator();
+	}
+
+	private static void bindPersistenceToThread() {
+		try {
+			Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
+			field.setAccessible(true);
+			@SuppressWarnings("unchecked")
+			ThreadLocal<AbstractPersistence> threadLocal = (ThreadLocal<AbstractPersistence>) field.get(null);
+			threadLocal.set(mock(AbstractPersistence.class));
+		}
+		catch (Exception e) {
+			throw new IllegalStateException("Unable to bind thread local persistence", e);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private static void clearThreadPersistence() {
+		try {
+			Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
+			field.setAccessible(true);
+			((ThreadLocal<AbstractPersistence>) field.get(null)).remove();
+		}
+		catch (Exception e) {
+			throw new IllegalStateException("Unable to clear thread local persistence", e);
+		}
+	}
+
+	private static final class TestAction extends FacesAction<String> {
+		private final RuntimeException toThrow;
+		private final String result;
+
+		private TestAction(String result) {
+			this.result = result;
+			this.toThrow = null;
+		}
+
+		private TestAction(RuntimeException toThrow) {
+			this.result = null;
+			this.toThrow = toThrow;
+		}
+
+		@Override
+		public String callback() throws Exception {
+			if (toThrow != null) {
+				throw toThrow;
+			}
+			return result;
+		}
 	}
 }

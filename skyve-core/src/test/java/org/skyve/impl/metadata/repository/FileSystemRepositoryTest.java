@@ -1,6 +1,7 @@
 package org.skyve.impl.metadata.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -71,6 +72,15 @@ class FileSystemRepositoryTest {
 	void getAllCustomerNamesEmptyWhenNoCustomersDirectory() {
 		LocalDesignRepository repo = new LocalDesignRepository(basePath);
 		assertTrue(repo.getAllCustomerNames().isEmpty());
+	}
+
+	@Test
+	void alternateConstructorAppliesLoadClassesFlag() throws Exception {
+		LocalDesignRepository repo = new LocalDesignRepository(basePath, false);
+		Field loadClasses = FileSystemRepository.class.getDeclaredField("loadClasses");
+		loadClasses.setAccessible(true);
+
+		assertFalse(loadClasses.getBoolean(repo));
 	}
 
 	@Test

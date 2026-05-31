@@ -415,6 +415,37 @@ class WebUtilTest {
 		verify(response).addCookie(sessionCookie);
 	}
 
+	@SuppressWarnings("static-method")
+	@Test
+	void deleteCookiesByNameCanExplicitlyDeleteCustomerCookie() {
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		Cookie customerCookie = new Cookie(AbstractWebContext.CUSTOMER_COOKIE_NAME, "demo");
+		Cookie otherCookie = new Cookie("other", "value");
+		when(request.getCookies()).thenReturn(new Cookie[]{customerCookie, otherCookie});
+
+		WebUtil.deleteCookies(request, response, AbstractWebContext.CUSTOMER_COOKIE_NAME);
+
+		verify(response).addCookie(customerCookie);
+		verify(response, never()).addCookie(otherCookie);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void deleteCookiesSetsDeletionAttributesForNamedCookie() {
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		Cookie target = new Cookie("auth", "token");
+		when(request.getCookies()).thenReturn(new Cookie[]{target});
+
+		WebUtil.deleteCookies(request, response, "auth");
+
+		assertEquals("-", target.getValue());
+		assertEquals(0, target.getMaxAge());
+		assertEquals("/", target.getPath());
+		assertTrue(target.isHttpOnly());
+	}
+
 	// ===== deleteMenuCookies =====
 
 	@SuppressWarnings("static-method")

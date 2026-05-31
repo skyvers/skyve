@@ -47,6 +47,13 @@ class FacesUtilityComponentsTest {
 	}
 
 	@Test
+	void resetMenuStateExposesExpectedComponentFamily() {
+		ResetMenuState component = new ResetMenuState();
+
+		assertEquals("resetMenuState", component.getFamily());
+	}
+
+	@Test
 	void resetMenuStateResetsMenuBeanAndDeletesMenuCookie() throws Exception {
 		ResetMenuState component = new ResetMenuState();
 		FacesContext facesContext = mock(FacesContext.class);

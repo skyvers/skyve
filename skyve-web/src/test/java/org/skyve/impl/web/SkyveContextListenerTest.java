@@ -997,6 +997,85 @@ public class SkyveContextListenerTest {
 		assertEquals("Property missing does not exist in the JSON configuration.", withoutPrefix.getCause().getMessage());
 	}
 
+	@Test
+	@SuppressWarnings("static-method")
+	public void testIsMultiTenantReflectsConfiguredCustomer() throws Exception {
+		String originalCustomerValue = UtilImpl.CUSTOMER;
+		try {
+			UtilImpl.CUSTOMER = null;
+			Boolean multiTenant = (Boolean) invokePrivateStatic("isMultiTenant", new Class<?>[0]);
+			assertTrue(multiTenant.booleanValue());
+
+			UtilImpl.CUSTOMER = "demo";
+			multiTenant = (Boolean) invokePrivateStatic("isMultiTenant", new Class<?>[0]);
+			assertFalse(multiTenant.booleanValue());
+		}
+		finally {
+			UtilImpl.CUSTOMER = originalCustomerValue;
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testTestWritableDirectoryThrowsForMissingDirectory() {
+		InvocationTargetException thrown = assertThrows(InvocationTargetException.class,
+				() -> invokePrivateStatic("testWritableDirectory",
+						new Class<?>[] {String.class, String.class},
+						"content.directory",
+						"/path/that/does/not/exist/for/skyve/tests"));
+
+		assertThat(thrown.getCause(), instanceOf(IllegalStateException.class));
+		assertTrue(thrown.getCause().getMessage().contains("does not exist"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testTestWritableDirectoryThrowsWhenPathIsAFile() throws Exception {
+		Path tempFile = Files.createTempFile("skyve-context-listener", ".txt");
+		try {
+			InvocationTargetException thrown = assertThrows(InvocationTargetException.class,
+					() -> invokePrivateStatic("testWritableDirectory",
+							new Class<?>[] {String.class, String.class},
+							"content.directory",
+							tempFile.toString()));
+
+			assertThat(thrown.getCause(), instanceOf(IllegalStateException.class));
+			assertTrue(thrown.getCause().getMessage().contains("is not a directory"));
+		}
+		finally {
+			Files.deleteIfExists(tempFile);
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testTestWritableDirectoryAcceptsWritableDirectory() throws Exception {
+		Path tempDirectory = Files.createTempDirectory("skyve-context-listener-writable");
+		try {
+			invokePrivateStatic("testWritableDirectory",
+					new Class<?>[] {String.class, String.class},
+					"content.directory",
+					tempDirectory.toString());
+		}
+		finally {
+			deleteTree(tempDirectory);
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testClearRepositoryFactorySetsRepositoryToNull() throws Exception {
+		ProvidedRepository originalRepository = ProvidedRepositoryFactory.get();
+		ProvidedRepositoryFactory.set(mock(ProvidedRepository.class));
+		try {
+			invokePrivateStatic("clearRepositoryFactory", new Class<?>[0]);
+			assertNull(ProvidedRepositoryFactory.get());
+		}
+		finally {
+			ProvidedRepositoryFactory.set(originalRepository);
+		}
+	}
+
 	private static Object invokePrivateStatic(String methodName, Class<?>[] parameterTypes, Object... args) throws Exception {
 		Method method = SkyveContextListener.class.getDeclaredMethod(methodName, parameterTypes);
 		method.setAccessible(true);

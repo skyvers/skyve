@@ -15,6 +15,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,6 +54,7 @@ import jakarta.faces.component.UIViewRoot;
 
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
+import jakarta.faces.context.PartialViewContext;
 
 /**
  * Tests for FacesView utility methods and state management that do not require a live CDI container.
@@ -803,6 +805,63 @@ class FacesViewTest {
 	}
 
 	@Test
+	void postBackThrowsFacesExceptionWhenRedirectFails() throws Exception {
+		FacesView view = new FacesView();
+		setPrivateField(view, "csrfTokenChecked", Boolean.FALSE);
+
+		FacesContext facesContext = mock(FacesContext.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
+		when(facesContext.getExternalContext()).thenReturn(externalContext);
+		when(externalContext.getRequestParameterMap()).thenReturn(Collections.emptyMap());
+		doThrow(new IOException("redirect failed")).when(externalContext).redirect(org.skyve.util.Util.getLoggedOutUrl());
+		FacesContextBridge.setCurrent(facesContext);
+
+		assertThrows(FacesException.class, view::postBack);
+		FacesContextBridge.setCurrent(null);
+	}
+
+	@Test
+	void postBackDoesNothingWhenCsrfTokenAlreadyChecked() throws Exception {
+		FacesView view = new FacesView();
+		setPrivateField(view, "csrfTokenChecked", Boolean.TRUE);
+
+		ExternalContext externalContext = setFacesContextWithRequestParameters(Collections.emptyMap());
+
+		view.postBack();
+		FacesContextBridge.setCurrent(null);
+
+		verify(externalContext, never()).redirect(org.skyve.util.Util.getLoggedOutUrl());
+	}
+
+	@Test
+	void postBackSkipsRedirectWhenIgnoreAutoUpdateFlagIsSet() throws Exception {
+		FacesView view = new FacesView();
+		setPrivateField(view, "csrfTokenChecked", Boolean.FALSE);
+
+		ExternalContext externalContext = setFacesContextWithRequestParameters(Collections.singletonMap("primefaces.ignoreautoupdate", "true"));
+
+		view.postBack();
+		FacesContextBridge.setCurrent(null);
+
+		verify(externalContext, never()).redirect(org.skyve.util.Util.getLoggedOutUrl());
+		assertEquals(Boolean.FALSE, getPrivateField(view, "csrfTokenChecked"));
+	}
+
+	@Test
+	void postBackConsumesCsrfTokenParameterWhenPresent() throws Exception {
+		FacesView view = new FacesView();
+		setPrivateField(view, "csrfTokenChecked", Boolean.FALSE);
+
+		ExternalContext externalContext = setFacesContextWithRequestParameters(Collections.singletonMap("csrfToken", "incoming-token"));
+
+		view.postBack();
+		FacesContextBridge.setCurrent(null);
+
+		verify(externalContext, never()).redirect(org.skyve.util.Util.getLoggedOutUrl());
+		assertEquals(Boolean.TRUE, getPrivateField(view, "csrfTokenChecked"));
+	}
+
+	@Test
 	void onRowReorderHandlesNullEventSafely() {
 		FacesView view = new FacesView();
 
@@ -842,6 +901,26 @@ class FacesViewTest {
 	}
 
 	@Test
+	void onRowReorderThrowsFacesExceptionWhenCollectionValueIsExplicitlyNull() throws Exception {
+		FacesView view = new FacesView();
+		HashMap<String, Object> rootValues = new HashMap<>();
+		rootValues.put("items", null);
+		DynamicBean root = new DynamicBean("test", "RootDoc", rootValues);
+		setPrivateField(view, "currentBean", new BeanMapAdapter(root, null));
+
+		ReorderEvent event = mock(ReorderEvent.class);
+		UIComponent component = mock(UIComponent.class);
+		Map<String, Object> attributes = new HashMap<>();
+		attributes.put(ComponentBuilder.COLLECTION_BINDING_ATTRIBUTE_KEY, "items");
+		when(event.getComponent()).thenReturn(component);
+		when(component.getAttributes()).thenReturn(attributes);
+		when(event.getFromIndex()).thenReturn(0);
+		when(event.getToIndex()).thenReturn(0);
+
+		assertThrows(FacesException.class, () -> view.onRowReorder(event));
+	}
+
+	@Test
 	void onRowReorderReordersListAndUpdatesChildOrdinals() throws Exception {
 		FacesView view = new FacesView();
 		ChildBean<?> first = mock(ChildBean.class);
@@ -870,6 +949,35 @@ class FacesViewTest {
 		assertSame(first, items.get(1));
 		verify(second).setBizOrdinal(Integer.valueOf(0));
 		verify(first).setBizOrdinal(Integer.valueOf(1));
+	}
+
+	@Test
+	void onRowReorderReordersListWhenElementsAreNotChildBeans() throws Exception {
+		FacesView view = new FacesView();
+		Bean first = mock(Bean.class);
+		Bean second = mock(Bean.class);
+		List<Bean> items = new ArrayList<>();
+		items.add(first);
+		items.add(second);
+
+		HashMap<String, Object> rootValues = new HashMap<>();
+		rootValues.put("items", items);
+		DynamicBean root = new DynamicBean("test", "RootDoc", rootValues);
+		setPrivateField(view, "currentBean", new BeanMapAdapter(root, null));
+
+		ReorderEvent event = mock(ReorderEvent.class);
+		UIComponent component = mock(UIComponent.class);
+		Map<String, Object> attributes = new HashMap<>();
+		attributes.put(ComponentBuilder.COLLECTION_BINDING_ATTRIBUTE_KEY, "items");
+		when(event.getComponent()).thenReturn(component);
+		when(component.getAttributes()).thenReturn(attributes);
+		when(event.getFromIndex()).thenReturn(0);
+		when(event.getToIndex()).thenReturn(1);
+
+		view.onRowReorder(event);
+
+		assertSame(second, items.get(0));
+		assertSame(first, items.get(1));
 	}
 	@Test
 	void actionOverloadDelegatesWithoutRowContext() {
@@ -922,6 +1030,71 @@ class FacesViewTest {
 
 		assertNull(view.lastActionName);
 		assertNull(view.lastRerenderSource);
+	}
+
+	@Test
+	void selectGridRowStringWithBizIdAndBindingExecutesUpdateBranch() {
+		FacesView view = new FacesView();
+		Map<String, Object> values = new HashMap<>();
+		DynamicBean root = new DynamicBean("test", "RootDoc", values);
+		try {
+			setPrivateField(view, "currentBean", new BeanMapAdapter(root, null));
+			bindPersistenceToThread(mock(AbstractPersistence.class));
+			FacesContext facesContext = mock(FacesContext.class);
+			PartialViewContext partialViewContext = mock(PartialViewContext.class);
+			when(facesContext.getPartialViewContext()).thenReturn(partialViewContext);
+			when(partialViewContext.getRenderIds()).thenReturn(new ArrayList<>());
+			FacesContextBridge.setCurrent(facesContext);
+			invokeIgnoringThrowable(() -> view.selectGridRow("biz-100", "selectedId", null, null));
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+		finally {
+			try {
+				FacesContextBridge.setCurrent(null);
+				unbindPersistenceFromThread();
+			}
+			catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+	}
+
+	@Test
+	void selectGridRowEventStripsHashSuffixFromBizIdBeforeBindingSet() throws Exception {
+		FacesView view = new FacesView();
+		Map<String, Object> values = new HashMap<>();
+		DynamicBean root = new DynamicBean("test", "RootDoc", values);
+		setPrivateField(view, "currentBean", new BeanMapAdapter(root, null));
+
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		bindPersistenceToThread(persistence);
+
+		FacesContext facesContext = mock(FacesContext.class);
+		PartialViewContext partialViewContext = mock(PartialViewContext.class);
+		when(facesContext.getPartialViewContext()).thenReturn(partialViewContext);
+		when(partialViewContext.getRenderIds()).thenReturn(new ArrayList<>());
+		FacesContextBridge.setCurrent(facesContext);
+
+		UIComponent component = mock(UIComponent.class);
+		Map<String, Object> attributes = new HashMap<>();
+		attributes.put("selectedIdBinding", "selectedId");
+		attributes.put("actionName", null);
+		when(component.getAttributes()).thenReturn(attributes);
+
+		Bean selectedBean = mock(Bean.class);
+		when(selectedBean.getBizId()).thenReturn("biz-200#Contact.admin");
+		BeanMapAdapter selectedAdapter = new BeanMapAdapter(selectedBean, null);
+
+		SelectEvent<BeanMapAdapter> event = mock(SelectEvent.class);
+		when(event.getComponent()).thenReturn(component);
+		when(event.getObject()).thenReturn(selectedAdapter);
+
+		invokeIgnoringThrowable(() -> view.selectGridRow(event));
+
+		FacesContextBridge.setCurrent(null);
+		unbindPersistenceFromThread();
 	}
 
 	@Test
@@ -1189,6 +1362,21 @@ class FacesViewTest {
 		invokeIgnoringThrowable(() -> view.add("items", false));
 		invokeIgnoringThrowable(view::zoomout);
 		invokeIgnoringThrowable(() -> view.remove("items", "id-1", java.util.Collections.emptyList()));
+	}
+
+	@Test
+	void navigationAndAddInlineWithFacesTraceEnabledExecuteMethodBodiesInHeadlessMode() {
+		FacesView view = new FacesView();
+		boolean originalFacesTrace = UtilImpl.FACES_TRACE;
+		UtilImpl.FACES_TRACE = true;
+		try {
+			invokeIgnoringThrowable(() -> view.navigate("items", "id-2"));
+			invokeIgnoringThrowable(() -> view.navigate("referenceBinding"));
+			invokeIgnoringThrowable(() -> view.add("items", true));
+		}
+		finally {
+			UtilImpl.FACES_TRACE = originalFacesTrace;
+		}
 	}
 
 	@Test
@@ -1574,6 +1762,34 @@ class FacesViewTest {
 		restoredContext.setCurrentBean(bean);
 
 		view.hydrate(restoredContext);
+
+		assertNull(view.getDehydratedWebId());
+		assertSame(restoredContext, view.getWebContext());
+		assertNotNull(view.getCurrentBean());
+		assertSame(bean, view.getCurrentBean().getBean());
+	}
+
+	@Test
+	void hydrateWithFacesTraceEnabledRestoresWebContextAndClearsDehydratedWebId() throws Exception {
+		FacesView view = new FacesView();
+		MockWebContext initialContext = new MockWebContext();
+		Bean bean = mock(Bean.class);
+		when(bean.getBizId()).thenReturn("biz-21");
+		view.setWebContext(initialContext);
+		view.setBean(bean);
+		view.dehydrate();
+
+		MockWebContext restoredContext = new MockWebContext();
+		restoredContext.setCurrentBean(bean);
+
+		boolean originalFacesTrace = UtilImpl.FACES_TRACE;
+		UtilImpl.FACES_TRACE = true;
+		try {
+			view.hydrate(restoredContext);
+		}
+		finally {
+			UtilImpl.FACES_TRACE = originalFacesTrace;
+		}
 
 		assertNull(view.getDehydratedWebId());
 		assertSame(restoredContext, view.getWebContext());

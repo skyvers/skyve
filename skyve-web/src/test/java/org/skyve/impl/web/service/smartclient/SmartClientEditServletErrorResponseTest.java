@@ -3,12 +3,16 @@ package org.skyve.impl.web.service.smartclient;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -16,11 +20,24 @@ import java.util.List;
 import java.util.SortedMap;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.domain.DynamicBean;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageException;
+import org.skyve.domain.messages.OptimisticLockException;
+import org.skyve.domain.messages.ValidationException;
+import org.skyve.domain.PersistentBean;
+import org.skyve.domain.Bean;
+import org.skyve.domain.types.OptimisticLock;
+import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.WebErrorUtil;
+import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.view.View;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.Bizlet;
+import org.skyve.metadata.user.User;
 import org.skyve.util.OWASP;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -413,6 +430,611 @@ class SmartClientEditServletErrorResponseTest {
 				"ux");
 
 		verify(processDocument).getView("ux", customer, "edit");
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void applyNewParametersClearsBoundValueWhenDeclaredIncomingParameterIsNull() throws Exception {
+		org.skyve.metadata.customer.Customer customer = mock(org.skyve.metadata.customer.Customer.class);
+		org.skyve.metadata.user.User user = mock(org.skyve.metadata.user.User.class);
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		org.skyve.metadata.module.Module module = mock(org.skyve.metadata.module.Module.class);
+		org.skyve.metadata.model.document.Document processDocument = mock(org.skyve.metadata.model.document.Document.class);
+		View view = mock(View.class);
+		java.util.HashMap<String, Object> values = new java.util.HashMap<>();
+		values.put("targetValue", "before");
+		DynamicBean processBean = new DynamicBean("admin", "Contact", values);
+
+		when(processDocument.getView("ux", customer, "edit")).thenReturn(view);
+
+		View.ViewParameter declared = new View.ViewParameter();
+		declared.setFromBinding("allowed.input");
+		declared.setBoundTo("targetValue");
+		when(view.getParameters()).thenReturn(List.of(declared));
+
+		java.util.SortedMap<String, Object> parameters = new java.util.TreeMap<>();
+		parameters.put("allowed.input", null);
+
+		SmartClientEditServlet.applyNewParameters(customer,
+				user,
+				persistence,
+				module,
+				processDocument,
+				processBean,
+				parameters,
+				"ux");
+
+		assertEquals(null, processBean.get("targetValue"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void applyNewParametersCopiesImplicitBindingValueWithoutMetadataConversion() throws Exception {
+		org.skyve.metadata.customer.Customer customer = mock(org.skyve.metadata.customer.Customer.class);
+		org.skyve.metadata.user.User user = mock(org.skyve.metadata.user.User.class);
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		org.skyve.metadata.module.Module module = mock(org.skyve.metadata.module.Module.class);
+		org.skyve.metadata.model.document.Document processDocument = mock(org.skyve.metadata.model.document.Document.class);
+		View view = mock(View.class);
+		java.util.HashMap<String, Object> values = new java.util.HashMap<>();
+		values.put("targetValue", "before");
+		DynamicBean processBean = new DynamicBean("admin", "Contact", values);
+
+		when(processDocument.getView("ux", customer, "edit")).thenReturn(view);
+		when(processDocument.getAttribute("bizId")).thenReturn(null);
+		when(processDocument.getExtends()).thenReturn(null);
+
+		View.ViewParameter declared = new View.ViewParameter();
+		declared.setFromBinding("bizId");
+		declared.setBoundTo("targetValue");
+		when(view.getParameters()).thenReturn(List.of(declared));
+
+		java.util.SortedMap<String, Object> parameters = new java.util.TreeMap<>();
+		parameters.put("bizId", "abc123");
+
+		SmartClientEditServlet.applyNewParameters(customer,
+				user,
+				persistence,
+				module,
+				processDocument,
+				processBean,
+				parameters,
+				"ux");
+
+		assertEquals("abc123", processBean.get("targetValue"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void applyNewParametersConvertsExplicitTextFieldValue() throws Exception {
+		org.skyve.metadata.customer.Customer customer = mock(org.skyve.metadata.customer.Customer.class);
+		org.skyve.metadata.user.User user = mock(org.skyve.metadata.user.User.class);
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		org.skyve.metadata.module.Module module = mock(org.skyve.metadata.module.Module.class);
+		org.skyve.metadata.model.document.Document processDocument = mock(org.skyve.metadata.model.document.Document.class);
+		View view = mock(View.class);
+		java.util.HashMap<String, Object> values = new java.util.HashMap<>();
+		values.put("targetValue", "before");
+		DynamicBean processBean = new DynamicBean("admin", "Contact", values);
+		Text text = new Text();
+		text.setName("name");
+
+		when(processDocument.getView("ux", customer, "edit")).thenReturn(view);
+		when(processDocument.getAttribute("name")).thenReturn(text);
+		when(processDocument.getExtends()).thenReturn(null);
+
+		View.ViewParameter declared = new View.ViewParameter();
+		declared.setFromBinding("name");
+		declared.setBoundTo("targetValue");
+		when(view.getParameters()).thenReturn(List.of(declared));
+
+		java.util.SortedMap<String, Object> parameters = new java.util.TreeMap<>();
+		parameters.put("name", "Alice");
+
+		SmartClientEditServlet.applyNewParameters(customer,
+				user,
+				persistence,
+				module,
+				processDocument,
+				processBean,
+				parameters,
+				"ux");
+
+		assertEquals("Alice", processBean.get("targetValue"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void applyNewParametersSetsNullWhenAssociationLookupMisses() throws Exception {
+		org.skyve.metadata.customer.Customer customer = mock(org.skyve.metadata.customer.Customer.class);
+		org.skyve.metadata.user.User user = mock(org.skyve.metadata.user.User.class);
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		org.skyve.metadata.module.Module module = mock(org.skyve.metadata.module.Module.class);
+		org.skyve.metadata.model.document.Document processDocument = mock(org.skyve.metadata.model.document.Document.class);
+		org.skyve.metadata.model.document.Document relatedDocument = mock(org.skyve.metadata.model.document.Document.class);
+		Association association = mock(Association.class);
+		View view = mock(View.class);
+		java.util.HashMap<String, Object> values = new java.util.HashMap<>();
+		values.put("targetValue", "before");
+		DynamicBean processBean = new DynamicBean("admin", "Contact", values);
+
+		when(processDocument.getView("ux", customer, "edit")).thenReturn(view);
+		when(processDocument.getAttribute("manager")).thenReturn(association);
+		when(processDocument.getExtends()).thenReturn(null);
+		when(association.getName()).thenReturn("manager");
+		when(processDocument.getRelatedDocument(customer, "manager")).thenReturn(relatedDocument);
+		when(persistence.retrieve(relatedDocument, "ref-1")).thenReturn(null);
+
+		View.ViewParameter declared = new View.ViewParameter();
+		declared.setFromBinding("manager");
+		declared.setBoundTo("targetValue");
+		when(view.getParameters()).thenReturn(List.of(declared));
+
+		java.util.SortedMap<String, Object> parameters = new java.util.TreeMap<>();
+		parameters.put("manager", "ref-1");
+
+		SmartClientEditServlet.applyNewParameters(customer,
+				user,
+				persistence,
+				module,
+				processDocument,
+				processBean,
+				parameters,
+				"ux");
+
+		assertEquals(null, processBean.get("targetValue"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void applyNewParametersThrowsWhenAssociationBeanIsNotReadable() throws Exception {
+		org.skyve.metadata.customer.Customer customer = mock(org.skyve.metadata.customer.Customer.class);
+		org.skyve.metadata.user.User user = mock(org.skyve.metadata.user.User.class);
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		org.skyve.metadata.module.Module module = mock(org.skyve.metadata.module.Module.class);
+		org.skyve.metadata.model.document.Document processDocument = mock(org.skyve.metadata.model.document.Document.class);
+		org.skyve.metadata.model.document.Document relatedDocument = mock(org.skyve.metadata.model.document.Document.class);
+		Association association = mock(Association.class);
+		Bean relatedBean = mock(Bean.class);
+		View view = mock(View.class);
+		java.util.HashMap<String, Object> values = new java.util.HashMap<>();
+		values.put("targetValue", "before");
+		DynamicBean processBean = new DynamicBean("admin", "Contact", values);
+
+		when(processDocument.getView("ux", customer, "edit")).thenReturn(view);
+		when(processDocument.getAttribute("manager")).thenReturn(association);
+		when(processDocument.getExtends()).thenReturn(null);
+		when(association.getName()).thenReturn("manager");
+		when(processDocument.getRelatedDocument(customer, "manager")).thenReturn(relatedDocument);
+		when(persistence.retrieve(relatedDocument, "ref-2")).thenReturn(relatedBean);
+		when(relatedBean.getBizId()).thenReturn("rb1");
+		when(relatedBean.getBizModule()).thenReturn("admin");
+		when(relatedBean.getBizDocument()).thenReturn("Contact");
+		when(relatedBean.getBizCustomer()).thenReturn("cust");
+		when(relatedBean.getBizDataGroupId()).thenReturn("dg");
+		when(relatedBean.getBizUserId()).thenReturn("user1");
+		doReturn(false).when(user).canReadBean("rb1", "admin", "Contact", "cust", "dg", "user1");
+
+		View.ViewParameter declared = new View.ViewParameter();
+		declared.setFromBinding("manager");
+		declared.setBoundTo("targetValue");
+		when(view.getParameters()).thenReturn(List.of(declared));
+
+		java.util.SortedMap<String, Object> parameters = new java.util.TreeMap<>();
+		parameters.put("manager", "ref-2");
+
+		assertThrows(RuntimeException.class,
+				() -> SmartClientEditServlet.applyNewParameters(customer,
+						user,
+						persistence,
+						module,
+						processDocument,
+						processBean,
+						parameters,
+						"ux"));
+
+		verify(user).canReadBean("rb1", "admin", "Contact", "cust", "dg", "user1");
+		assertEquals("before", processBean.get("targetValue"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void removePrivateThrowsIllegalArgumentWhenSecurityExceptionLoggingNeedsPersistence() throws Exception {
+		AbstractWebContext webContext = mock(AbstractWebContext.class);
+		User user = mock(User.class);
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Document processDocument = mock(Document.class);
+		PersistentBean beanToDelete = mock(PersistentBean.class);
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+
+		doReturn(false).when(user).canDeleteDocument(processDocument);
+
+		assertThrows(IllegalArgumentException.class,
+				() -> invokeRemovePrivate(webContext,
+						user,
+						customer,
+						processDocument,
+						beanToDelete,
+						null,
+						persistence,
+						new PrintWriter(new StringWriter())));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void removePrivateThrowsValidationWhenBeanAlreadyDeleted() throws Exception {
+		AbstractWebContext webContext = mock(AbstractWebContext.class);
+		User user = mock(User.class);
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Document processDocument = mock(Document.class);
+		PersistentBean beanToDelete = mock(PersistentBean.class);
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+
+		doReturn(true).when(user).canDeleteDocument(processDocument);
+		when(beanToDelete.getBizId()).thenReturn("gone-1");
+		when(persistence.retrieve(processDocument, "gone-1")).thenReturn(null);
+
+		assertThrows(ValidationException.class,
+				() -> invokeRemovePrivate(webContext,
+						user,
+						customer,
+						processDocument,
+						beanToDelete,
+						null,
+						persistence,
+						new PrintWriter(new StringWriter())));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void removePrivateThrowsIllegalArgumentWhenReadSecurityLoggingNeedsPersistence() throws Exception {
+		AbstractWebContext webContext = mock(AbstractWebContext.class);
+		User user = mock(User.class);
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Document processDocument = mock(Document.class);
+		PersistentBean beanToDelete = mock(PersistentBean.class);
+		PersistentBean retrieved = mock(PersistentBean.class);
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+
+		doReturn(true).when(user).canDeleteDocument(processDocument);
+		when(beanToDelete.getBizId()).thenReturn("b1");
+		when(persistence.retrieve(processDocument, "b1")).thenReturn(retrieved);
+		when(retrieved.getBizId()).thenReturn("b1");
+		when(retrieved.getBizModule()).thenReturn("admin");
+		when(retrieved.getBizDocument()).thenReturn("Contact");
+		when(retrieved.getBizCustomer()).thenReturn("cust");
+		when(retrieved.getBizDataGroupId()).thenReturn("dg");
+		when(retrieved.getBizUserId()).thenReturn("user1");
+		doReturn(false).when(user).canReadBean("b1", "admin", "Contact", "cust", "dg", "user1");
+
+		assertThrows(IllegalArgumentException.class,
+				() -> invokeRemovePrivate(webContext,
+						user,
+						customer,
+						processDocument,
+						beanToDelete,
+						null,
+						persistence,
+						new PrintWriter(new StringWriter())));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void removePrivateThrowsOptimisticLockWhenLockMismatch() throws Exception {
+		AbstractWebContext webContext = mock(AbstractWebContext.class);
+		User user = mock(User.class);
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Document processDocument = mock(Document.class);
+		PersistentBean beanToDelete = mock(PersistentBean.class);
+		PersistentBean retrieved = mock(PersistentBean.class);
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+
+		doReturn(true).when(user).canDeleteDocument(processDocument);
+		when(beanToDelete.getBizId()).thenReturn("b2");
+		when(beanToDelete.getBizLock()).thenReturn(new OptimisticLock("u1", new java.util.Date(10L)));
+		when(persistence.retrieve(processDocument, "b2")).thenReturn(retrieved);
+		when(retrieved.getBizId()).thenReturn("b2");
+		when(retrieved.getBizModule()).thenReturn("admin");
+		when(retrieved.getBizDocument()).thenReturn("Contact");
+		when(retrieved.getBizCustomer()).thenReturn("cust");
+		when(retrieved.getBizDataGroupId()).thenReturn("dg");
+		when(retrieved.getBizUserId()).thenReturn("user1");
+		doReturn(true).when(user).canReadBean("b2", "admin", "Contact", "cust", "dg", "user1");
+		when(retrieved.getBizLock()).thenReturn(new OptimisticLock("u2", new java.util.Date(11L)));
+
+		assertThrows(OptimisticLockException.class,
+				() -> invokeRemovePrivate(webContext,
+						user,
+						customer,
+						processDocument,
+						beanToDelete,
+						null,
+						persistence,
+						new PrintWriter(new StringWriter())));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void removePrivateDeletesAndWritesSuccessPayloadOnHappyPath() throws Exception {
+		AbstractWebContext webContext = mock(AbstractWebContext.class);
+		User user = mock(User.class);
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Document processDocument = mock(Document.class);
+		PersistentBean beanToDelete = mock(PersistentBean.class);
+		PersistentBean retrieved = mock(PersistentBean.class);
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		StringWriter sink = new StringWriter();
+		PrintWriter pw = new PrintWriter(sink);
+
+		doReturn(true).when(user).canDeleteDocument(processDocument);
+		when(beanToDelete.getBizId()).thenReturn("b3");
+		OptimisticLock lock = new OptimisticLock("u3", new java.util.Date(12L));
+		when(beanToDelete.getBizLock()).thenReturn(lock);
+		when(persistence.retrieve(processDocument, "b3")).thenReturn(retrieved);
+		when(retrieved.getBizId()).thenReturn("b3");
+		when(retrieved.getBizModule()).thenReturn("admin");
+		when(retrieved.getBizDocument()).thenReturn("Contact");
+		when(retrieved.getBizCustomer()).thenReturn("cust");
+		when(retrieved.getBizDataGroupId()).thenReturn("dg");
+		when(retrieved.getBizUserId()).thenReturn("user1");
+		when(retrieved.getBizLock()).thenReturn(lock);
+		doReturn(true).when(user).canReadBean("b3", "admin", "Contact", "cust", "dg", "user1");
+		doReturn(true).when(customer).interceptBeforePreExecute(org.skyve.metadata.controller.ImplicitActionName.Delete,
+				retrieved,
+				null,
+				webContext);
+		doReturn(true).when(customer).interceptBeforePostRender(retrieved, webContext);
+
+		assertThrows(NullPointerException.class,
+				() -> invokeRemovePrivate(webContext, user, customer, processDocument, beanToDelete, null, persistence, pw));
+		pw.flush();
+
+		verify(persistence).delete(processDocument, retrieved);
+		assertEquals("{\"response\":{\"status\":0}}", sink.toString());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void removePrivateInvokesBizletPreExecuteWhenNotVetoed() throws Exception {
+		AbstractWebContext webContext = mock(AbstractWebContext.class);
+		User user = mock(User.class);
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Document processDocument = mock(Document.class);
+		PersistentBean beanToDelete = mock(PersistentBean.class);
+		PersistentBean retrieved = mock(PersistentBean.class);
+		@SuppressWarnings("unchecked")
+		Bizlet<PersistentBean> bizlet = mock(Bizlet.class);
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		StringWriter sink = new StringWriter();
+		PrintWriter pw = new PrintWriter(sink);
+
+		doReturn(true).when(user).canDeleteDocument(processDocument);
+		when(beanToDelete.getBizId()).thenReturn("b4");
+		OptimisticLock lock = new OptimisticLock("u4", new java.util.Date(13L));
+		when(beanToDelete.getBizLock()).thenReturn(lock);
+		when(persistence.retrieve(processDocument, "b4")).thenReturn(retrieved);
+		when(retrieved.getBizId()).thenReturn("b4");
+		when(retrieved.getBizModule()).thenReturn("admin");
+		when(retrieved.getBizDocument()).thenReturn("Contact");
+		when(retrieved.getBizCustomer()).thenReturn("cust");
+		when(retrieved.getBizDataGroupId()).thenReturn("dg");
+		when(retrieved.getBizUserId()).thenReturn("user1");
+		when(retrieved.getBizLock()).thenReturn(lock);
+		doReturn(true).when(user).canReadBean("b4", "admin", "Contact", "cust", "dg", "user1");
+		doReturn(false).when(customer).interceptBeforePreExecute(org.skyve.metadata.controller.ImplicitActionName.Delete,
+				retrieved,
+				null,
+				webContext);
+		when(bizlet.preExecute(org.skyve.metadata.controller.ImplicitActionName.Delete,
+				retrieved,
+				null,
+				webContext)).thenReturn(retrieved);
+
+		assertThrows(NullPointerException.class,
+				() -> invokeRemovePrivate(webContext, user, customer, processDocument, beanToDelete, bizlet, persistence, pw));
+		pw.flush();
+
+		verify(bizlet).preExecute(org.skyve.metadata.controller.ImplicitActionName.Delete, retrieved, null, webContext);
+		verify(customer).interceptAfterPreExecute(org.skyve.metadata.controller.ImplicitActionName.Delete,
+				retrieved,
+				null,
+				webContext);
+		verify(persistence).delete(processDocument, retrieved);
+		assertEquals("{\"response\":{\"status\":0}}", sink.toString());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void removePrivateInvokesAfterPreExecuteWhenNotVetoedAndBizletIsNull() throws Exception {
+		AbstractWebContext webContext = mock(AbstractWebContext.class);
+		User user = mock(User.class);
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Document processDocument = mock(Document.class);
+		PersistentBean beanToDelete = mock(PersistentBean.class);
+		PersistentBean retrieved = mock(PersistentBean.class);
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		StringWriter sink = new StringWriter();
+		PrintWriter pw = new PrintWriter(sink);
+
+		doReturn(true).when(user).canDeleteDocument(processDocument);
+		when(beanToDelete.getBizId()).thenReturn("b4n");
+		OptimisticLock lock = new OptimisticLock("u4n", new java.util.Date(15L));
+		when(beanToDelete.getBizLock()).thenReturn(lock);
+		when(persistence.retrieve(processDocument, "b4n")).thenReturn(retrieved);
+		when(retrieved.getBizId()).thenReturn("b4n");
+		when(retrieved.getBizModule()).thenReturn("admin");
+		when(retrieved.getBizDocument()).thenReturn("Contact");
+		when(retrieved.getBizCustomer()).thenReturn("cust");
+		when(retrieved.getBizDataGroupId()).thenReturn("dg");
+		when(retrieved.getBizUserId()).thenReturn("user1");
+		when(retrieved.getBizLock()).thenReturn(lock);
+		doReturn(true).when(user).canReadBean("b4n", "admin", "Contact", "cust", "dg", "user1");
+		doReturn(false).when(customer).interceptBeforePreExecute(org.skyve.metadata.controller.ImplicitActionName.Delete,
+				retrieved,
+				null,
+				webContext);
+		doReturn(true).when(customer).interceptBeforePostRender(retrieved, webContext);
+
+		assertThrows(NullPointerException.class,
+				() -> invokeRemovePrivate(webContext, user, customer, processDocument, beanToDelete, null, persistence, pw));
+		pw.flush();
+
+		verify(customer).interceptAfterPreExecute(org.skyve.metadata.controller.ImplicitActionName.Delete,
+				retrieved,
+				null,
+				webContext);
+		verify(persistence).delete(processDocument, retrieved);
+		assertEquals("{\"response\":{\"status\":0}}", sink.toString());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void removePrivateSkipsBizletPreExecuteWhenVetoed() throws Exception {
+		AbstractWebContext webContext = mock(AbstractWebContext.class);
+		User user = mock(User.class);
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Document processDocument = mock(Document.class);
+		PersistentBean beanToDelete = mock(PersistentBean.class);
+		PersistentBean retrieved = mock(PersistentBean.class);
+		@SuppressWarnings("unchecked")
+		Bizlet<PersistentBean> bizlet = mock(Bizlet.class);
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+
+		doReturn(true).when(user).canDeleteDocument(processDocument);
+		when(beanToDelete.getBizId()).thenReturn("b5");
+		OptimisticLock lock = new OptimisticLock("u5", new java.util.Date(14L));
+		when(beanToDelete.getBizLock()).thenReturn(lock);
+		when(persistence.retrieve(processDocument, "b5")).thenReturn(retrieved);
+		when(retrieved.getBizId()).thenReturn("b5");
+		when(retrieved.getBizModule()).thenReturn("admin");
+		when(retrieved.getBizDocument()).thenReturn("Contact");
+		when(retrieved.getBizCustomer()).thenReturn("cust");
+		when(retrieved.getBizDataGroupId()).thenReturn("dg");
+		when(retrieved.getBizUserId()).thenReturn("user1");
+		when(retrieved.getBizLock()).thenReturn(lock);
+		doReturn(true).when(user).canReadBean("b5", "admin", "Contact", "cust", "dg", "user1");
+		doReturn(true).when(customer).interceptBeforePreExecute(org.skyve.metadata.controller.ImplicitActionName.Delete,
+				retrieved,
+				null,
+				webContext);
+
+		assertThrows(NullPointerException.class,
+				() -> invokeRemovePrivate(webContext,
+						user,
+						customer,
+						processDocument,
+						beanToDelete,
+						bizlet,
+						persistence,
+						new PrintWriter(new StringWriter())));
+
+		verify(bizlet, never()).preExecute(org.skyve.metadata.controller.ImplicitActionName.Delete,
+				retrieved,
+				null,
+				webContext);
+		verify(customer, never()).interceptAfterPreExecute(org.skyve.metadata.controller.ImplicitActionName.Delete,
+				retrieved,
+				null,
+				webContext);
+		verify(persistence).delete(processDocument, retrieved);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void postRenderPrivateSkipsBizletAndAfterWhenVetoed() throws Exception {
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Bizlet<Bean> bizlet = mock(Bizlet.class);
+		Bean bean = mock(Bean.class);
+		AbstractWebContext webContext = mock(AbstractWebContext.class);
+
+		doReturn(true).when(customer).interceptBeforePostRender(bean, webContext);
+
+		invokePostRenderPrivate(customer, bizlet, bean, webContext);
+
+		verify(bizlet, never()).postRender(bean, webContext);
+		verify(customer, never()).interceptAfterPostRender(bean, webContext);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void postRenderPrivateRunsBizletAndAfterWhenNotVetoed() throws Exception {
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Bizlet<Bean> bizlet = mock(Bizlet.class);
+		Bean bean = mock(Bean.class);
+		AbstractWebContext webContext = mock(AbstractWebContext.class);
+
+		doReturn(false).when(customer).interceptBeforePostRender(bean, webContext);
+
+		invokePostRenderPrivate(customer, bizlet, bean, webContext);
+
+		verify(bizlet).postRender(bean, webContext);
+		verify(customer).interceptAfterPostRender(bean, webContext);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void postRenderPrivateRunsAfterWhenNotVetoedAndBizletIsNull() throws Exception {
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Bean bean = mock(Bean.class);
+		AbstractWebContext webContext = mock(AbstractWebContext.class);
+
+		doReturn(false).when(customer).interceptBeforePostRender(bean, webContext);
+
+		invokePostRenderPrivate(customer, null, bean, webContext);
+
+		verify(customer).interceptAfterPostRender(bean, webContext);
+	}
+
+	private static void invokeRemovePrivate(AbstractWebContext webContext,
+										User user,
+										CustomerImpl customer,
+										Document processDocument,
+										PersistentBean beanToDelete,
+										Bizlet<PersistentBean> bizlet,
+										AbstractPersistence persistence,
+										PrintWriter pw) throws Exception {
+		Method method = SmartClientEditServlet.class.getDeclaredMethod("remove",
+				AbstractWebContext.class,
+				User.class,
+				org.skyve.metadata.customer.Customer.class,
+				Document.class,
+				PersistentBean.class,
+				Bizlet.class,
+				AbstractPersistence.class,
+				PrintWriter.class);
+		method.setAccessible(true);
+		try {
+			method.invoke(null, webContext, user, customer, processDocument, beanToDelete, bizlet, persistence, pw);
+		}
+		catch (InvocationTargetException e) {
+			Throwable cause = e.getCause();
+			if (cause instanceof Exception exception) {
+				throw exception;
+			}
+			throw e;
+		}
+	}
+
+	private static void invokePostRenderPrivate(CustomerImpl customer,
+										Bizlet<Bean> bizlet,
+										Bean bean,
+										AbstractWebContext webContext) throws Exception {
+		Method method = SmartClientEditServlet.class.getDeclaredMethod("postRender",
+				CustomerImpl.class,
+				Bizlet.class,
+				Bean.class,
+				AbstractWebContext.class);
+		method.setAccessible(true);
+		try {
+			method.invoke(null, customer, bizlet, bean, webContext);
+		}
+		catch (InvocationTargetException e) {
+			Throwable cause = e.getCause();
+			if (cause instanceof Exception exception) {
+				throw exception;
+			}
+			throw e;
+		}
 	}
 
 	private static String produce(Throwable t, Operation operation, boolean includeBindings, String reference) {

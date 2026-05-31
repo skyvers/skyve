@@ -2,15 +2,19 @@ package org.skyve.impl.backup;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
 
+import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayDeque;
+import java.util.Collections;
 import java.util.Collection;
 import java.util.List;
 
@@ -18,11 +22,36 @@ import org.junit.Test;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
 import org.skyve.impl.content.AbstractContentManager;
+import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.metadata.model.document.field.Field.IndexType;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.user.User;
 import org.skyve.metadata.model.Attribute.AttributeType;
 
 @SuppressWarnings({"static-method", "boxing", "resource", "hiding"})
 public class ReindexAttachmentsJobExecuteTest {
+	@Test
+	public void seamMethodsDelegateToBaseImplementations() throws Exception {
+		AbstractPersistence persistence = mock(AbstractPersistence.class, CALLS_REAL_METHODS);
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModules()).thenReturn(Collections.emptyList());
+		persistence.setUser(user);
+		persistence.setForThread();
+
+		try {
+			ExposedReindexAttachmentsJob job = new ExposedReindexAttachmentsJob();
+
+			assertTrue(job.callGetTables().isEmpty());
+			assertTrue(job.callIsAbstractContentManager(mock(AbstractContentManager.class)));
+			assertFalse(job.callIsAbstractContentManager(mock(ContentManager.class)));
+		}
+		finally {
+			clearThreadPersistence();
+		}
+	}
+
 	@Test
 	public void executeReturnsEarlyWhenContentManagerCannotReindex() throws Exception {
 		Connection connection = mock(Connection.class);
@@ -343,5 +372,28 @@ public class ReindexAttachmentsJobExecuteTest {
 		public boolean isCancelled() {
 			return cancelled;
 		}
+	}
+
+	private static final class ExposedReindexAttachmentsJob extends ReindexAttachmentsJob {
+		Collection<Table> callGetTables() throws Exception {
+			return super.getTables();
+		}
+
+		boolean callIsAbstractContentManager(ContentManager contentManager) {
+			return super.isAbstractContentManager(contentManager);
+		}
+
+		@Override
+		public void execute() {
+			throw new UnsupportedOperationException();
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private static void clearThreadPersistence() throws Exception {
+		Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
+		field.setAccessible(true);
+		ThreadLocal<AbstractPersistence> threadLocal = (ThreadLocal<AbstractPersistence>) field.get(null);
+		threadLocal.remove();
 	}
 }
