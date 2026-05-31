@@ -32,6 +32,16 @@ public class LockableDynamicRepository extends UnsynchronisedDynamicRepository {
 	private Lock read = lock.readLock();
 	private Lock write = lock.writeLock();
 	
+	/**
+	 * Executes a repository mutation while holding the write lock.
+	 *
+	 * <p>Side effects: blocks all concurrent readers and writers until
+	 * {@code function} returns or throws.
+	 *
+	 * @param <R> the function result type
+	 * @param function the callback to execute in the critical section
+	 * @return the callback result
+	 */
 	public <R> R withLock(Function<LockableDynamicRepository, R> function) {
 		write.lock();
 		try {
@@ -42,6 +52,13 @@ public class LockableDynamicRepository extends UnsynchronisedDynamicRepository {
 		}
 	}
 
+	/**
+	 * Executes a repository mutation while holding the write lock.
+	 *
+	 * <p>Use this overload for mutations that do not produce a return value.
+	 *
+	 * @param consumer the callback to execute in the critical section
+	 */
 	public void withLock(Consumer<LockableDynamicRepository> consumer) {
 		write.lock();
 		try {
@@ -52,6 +69,11 @@ public class LockableDynamicRepository extends UnsynchronisedDynamicRepository {
 		}
 	}
 	
+	/**
+	 * Returns the current router under a read lock.
+	 *
+	 * @return the current router, or {@code null} when none has been configured
+	 */
 	@Override
 	public Router getRouter() {
 		read.lock();
@@ -63,6 +85,12 @@ public class LockableDynamicRepository extends UnsynchronisedDynamicRepository {
 		}
 	}
 	
+	/**
+	 * Resolves a customer by name under a read lock.
+	 *
+	 * @param customerName the customer name
+	 * @return the customer, or {@code null} if no matching customer is cached
+	 */
 	@Override
 	public Customer getCustomer(String customerName) {
 		read.lock();
@@ -74,6 +102,13 @@ public class LockableDynamicRepository extends UnsynchronisedDynamicRepository {
 		}
 	}
 	
+	/**
+	 * Resolves a module for a customer under a read lock.
+	 *
+	 * @param customer the owning customer
+	 * @param moduleName the module name
+	 * @return the module, or {@code null} if no matching module is cached
+	 */
 	@Override
 	public Module getModule(Customer customer, String moduleName) {
 		read.lock();
@@ -85,6 +120,14 @@ public class LockableDynamicRepository extends UnsynchronisedDynamicRepository {
 		}
 	}
 	
+	/**
+	 * Resolves a document for a module under a read lock.
+	 *
+	 * @param customer the owning customer
+	 * @param module the owning module
+	 * @param documentName the document name
+	 * @return the document, or {@code null} if no matching document is cached
+	 */
 	@Override
 	public Document getDocument(Customer customer, Module module, String documentName) {
 		read.lock();
@@ -96,6 +139,15 @@ public class LockableDynamicRepository extends UnsynchronisedDynamicRepository {
 		}
 	}
 	
+	/**
+	 * Resolves a view definition under a read lock.
+	 *
+	 * @param uxui the UX/UI variant key
+	 * @param customer the owning customer
+	 * @param document the owning document
+	 * @param name the view name
+	 * @return the view, or {@code null} if no matching view is cached
+	 */
 	@Override
 	public View getView(String uxui, Customer customer, Document document, String name) {
 		read.lock();
@@ -107,6 +159,14 @@ public class LockableDynamicRepository extends UnsynchronisedDynamicRepository {
 		}
 	}
 	
+	/**
+	 * Resolves action metadata for a document action under a read lock.
+	 *
+	 * @param customer the owning customer
+	 * @param document the owning document
+	 * @param actionName the action name
+	 * @return action metadata, or {@code null} if no matching action is cached
+	 */
 	@Override
 	public ActionMetaData getMetaDataAction(Customer customer, Document document, String actionName) {
 		read.lock();
@@ -118,6 +178,13 @@ public class LockableDynamicRepository extends UnsynchronisedDynamicRepository {
 		}
 	}
 	
+	/**
+	 * Resolves Bizlet metadata for a document under a read lock.
+	 *
+	 * @param customer the owning customer
+	 * @param document the owning document
+	 * @return Bizlet metadata, or {@code null} if none is cached
+	 */
 	@Override
 	public BizletMetaData getMetaDataBizlet(Customer customer, Document document) {
 		read.lock();
@@ -129,6 +196,13 @@ public class LockableDynamicRepository extends UnsynchronisedDynamicRepository {
 		}
 	}
 	
+	/**
+	 * Resolves a repository key using vtable lookup under a read lock.
+	 *
+	 * @param customerName the customer name used for override resolution
+	 * @param key the logical repository key
+	 * @return the resolved key, or {@code null} when no mapping exists
+	 */
 	@Override
 	public String vtable(String customerName, String key) {
 		read.lock();

@@ -25,15 +25,33 @@ public abstract class ClassAction extends ValidatableAction {
 
 	private String className;
 
+	/**
+	 * Returns the fully-qualified action implementation class name.
+	 *
+	 * @return action implementation class name, or {@code null}
+	 */
 	public String getClassName() {
 		return className;
 	}
 	
+	/**
+	 * Sets the fully-qualified action implementation class name.
+	 *
+	 * @param className action implementation class name
+	 */
 	@XmlAttribute(required = false)
 	public void setClassName(String className) {
 		this.className = UtilImpl.processStringValue(className);
 	}
 
+	/**
+	 * Converts this descriptor to runtime metadata including the backing class name.
+	 *
+	 * <p>When no explicit action name is supplied, the configured class name becomes
+	 * the runtime action name.
+	 *
+	 * @return runtime action metadata with resource linkage applied
+	 */
 	@Override
 	public ActionImpl toMetaDataAction() {
 		ActionImpl result = super.toMetaDataAction();

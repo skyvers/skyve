@@ -21,6 +21,11 @@ public enum Collapsible {
 		this.collapsibleString = collapsibleString;
 	}
 	
+	/**
+	 * Returns the metadata token used for XML serialization.
+	 *
+	 * @return the stable XML token for this collapse mode
+	 */
 	public String toCollapsibleString() {
 		return this.collapsibleString;
 	}

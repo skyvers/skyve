@@ -7,6 +7,9 @@ package org.skyve.impl.persistence.hibernate.dialect;
 public class H222SpatialDialect extends H213SpatialDialect {
 	private static final long serialVersionUID = 5392219267730830548L;
 
+	/**
+	 * Creates the H2 2.2 spatial dialect with a {@code NULLS DISTINCT} unique-key delegate.
+	 */
 	public H222SpatialDialect() {
 		uniqueDelegate = new NullsDistinctUniqueDelegate(this);
 	}

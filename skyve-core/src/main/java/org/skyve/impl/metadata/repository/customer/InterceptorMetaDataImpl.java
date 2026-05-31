@@ -30,16 +30,35 @@ public class InterceptorMetaDataImpl implements InterceptorMetaData {
 	private String className;
 	private volatile Interceptor interceptor;
 
+	/**
+	 * Returns the fully-qualified interceptor implementation class name.
+	 *
+	 * @return interceptor implementation class name, or {@code null}
+	 */
 	@Override
 	public String getClassName() {
 		return className;
 	}
 
+	/**
+	 * Sets the fully-qualified interceptor implementation class name.
+	 *
+	 * @param className interceptor implementation class name
+	 */
 	@XmlAttribute(required = true)
 	public void setClassName(String className) {
 		this.className = UtilImpl.processStringValue(className);
 	}
 
+	/**
+	 * Returns the lazily-instantiated interceptor implementation.
+	 *
+	 * <p>Threading: uses double-checked locking over a {@code volatile} field so
+	 * exactly one interceptor instance is created per metadata instance.
+	 *
+	 * @return the interceptor instance, never {@code null}
+	 * @throws MetaDataException if the configured class cannot be loaded or instantiated
+	 */
 	@Override
 	public Interceptor getInterceptor() {
 		if (interceptor == null) {

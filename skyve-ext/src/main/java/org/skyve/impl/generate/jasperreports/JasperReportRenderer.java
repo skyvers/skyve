@@ -121,6 +121,11 @@ public class JasperReportRenderer {
 		IMPORTS.add("net.sf.jasperreports.engine.data.*");
 	}
 
+	/**
+	 * Creates a renderer from a metadata-driven design specification.
+	 *
+	 * @param designSpecification The source design specification.
+	 */
 	public JasperReportRenderer(DesignSpecification designSpecification) {
 		// Currently lists can only be rendered using the alternative report design abstraction
 		// so instead of re-implementing we convert to that design.
@@ -135,6 +140,11 @@ public class JasperReportRenderer {
 		jasperDesign = new JasperDesign();
 	}
 
+	/**
+	 * Creates a renderer from report design parameters.
+	 *
+	 * @param reportDesignParameters The source report design parameters.
+	 */
 	public JasperReportRenderer(ReportDesignParameters reportDesignParameters) {
 		this.reportDesignParameters = reportDesignParameters;
 		this.designSpecification = null;
@@ -142,7 +152,13 @@ public class JasperReportRenderer {
 	}
 
 	/**
-	 * Returns the report.
+
+	* Compiles and returns the Jasper report definition.
+	 *
+	 * <p>Side effects: triggers design rendering on first call.
+	 *
+	 * @return The compiled Jasper report.
+	 * @throws Exception If rendering or compilation fails.
 	 */
 	public JasperReport getReport() throws Exception {
 		if (! rendered) {
@@ -152,7 +168,12 @@ public class JasperReportRenderer {
 	}
 
 	/**
-	 * Returns the jrxml.
+	 * Renders and returns the generated JRXML text.
+	 *
+	 * <p>Side effects: triggers design rendering on first call.
+	 *
+	 * @return The generated JRXML document.
+	 * @throws Exception If rendering fails.
 	 */
 	public String getJrxml() throws Exception {
 		if (! rendered) {
@@ -162,6 +183,14 @@ public class JasperReportRenderer {
 		return jrxml;
 	}
 
+	/**
+	 * Resolves and compiles a named subreport from a parent design.
+	 *
+	 * @param designSpecification The parent design containing subreport definitions.
+	 * @param subReport The subreport name to resolve.
+	 * @return The compiled subreport.
+	 * @throws Exception If subreport rendering or compilation fails.
+	 */
 	public static JasperReport getSubReport(DesignSpecification designSpecification, String subReport)
 	throws Exception {
 		final DesignSpecification subReportSpec = designSpecification.getSubReports().stream()
@@ -177,7 +206,10 @@ public class JasperReportRenderer {
 	}
 
 	/**
-	 * Renders the design.
+	 * Renders the configured design abstraction into Jasper structures.
+	 *
+	 * @return The generated JRXML.
+	 * @throws Exception If rendering fails or no design was configured.
 	 */
 	public String renderDesign() throws Exception {
 		if (rendered) {
@@ -419,7 +451,7 @@ public class JasperReportRenderer {
 
 				// Value
 				textField = new JRDesignTextField();
-				textField.setBlankWhenNull(true);
+				textField.setBlankWhenNull(Boolean.TRUE);
 				textField.setX(xPos);
 				textField.setY(0);
 				textField.setWidth(column.getWidth());
@@ -446,7 +478,7 @@ public class JasperReportRenderer {
 				// Column totals
 				if (aggregatableAttribute) {
 					textField = new JRDesignTextField();
-					textField.setBlankWhenNull(true);
+					textField.setBlankWhenNull(Boolean.TRUE);
 					textField.setX(xPos);
 					textField.setY(0);
 					textField.setWidth(column.getWidth());
@@ -497,7 +529,7 @@ public class JasperReportRenderer {
 
 				// Value
 				textField = new JRDesignTextField();
-				textField.setBlankWhenNull(true);
+				textField.setBlankWhenNull(Boolean.TRUE);
 				textField.setX(wideStaticTexts ? 1000 : columnarLabelWidth);
 				textField.setY(yPos);
 				textField.setWidth(reportColumnWidth - columnarLabelWidth);
@@ -553,7 +585,7 @@ public class JasperReportRenderer {
 			line.setHeight(1);
 			band.addElement(line);
 			textField = new JRDesignTextField();
-			textField.setBlankWhenNull(true);
+			textField.setBlankWhenNull(Boolean.TRUE);
 			textField.setX(0);
 			textField.setY(13);
 			textField.setWidth(reportColumnWidth);
@@ -602,7 +634,7 @@ public class JasperReportRenderer {
 			textField = new JRDesignTextField();
 			textField.setEvaluationTime(EvaluationTimeEnum.REPORT);
 			textField.setPattern("");
-			textField.setBlankWhenNull(false);
+			textField.setBlankWhenNull(Boolean.FALSE);
 			textField.setX(30);
 			textField.setY(6);
 			textField.setWidth(209);
@@ -618,7 +650,7 @@ public class JasperReportRenderer {
 			// Page number of
 			textField = new JRDesignTextField();
 			textField.setPattern("");
-			textField.setBlankWhenNull(false);
+			textField.setBlankWhenNull(Boolean.FALSE);
 			textField.setX(reportColumnWidth - 200);
 			textField.setY(6);
 			textField.setWidth(155);
@@ -636,7 +668,7 @@ public class JasperReportRenderer {
 			textField = new JRDesignTextField();
 			textField.setEvaluationTime(EvaluationTimeEnum.REPORT);
 			textField.setPattern("");
-			textField.setBlankWhenNull(false);
+			textField.setBlankWhenNull(Boolean.FALSE);
 			textField.setX(reportColumnWidth - 40);
 			textField.setY(6);
 			textField.setWidth(40);
@@ -676,7 +708,7 @@ public class JasperReportRenderer {
 		summaryBand.addElement(line);
 
 		textField = new JRDesignTextField();
-		textField.setBlankWhenNull(true);
+		textField.setBlankWhenNull(Boolean.TRUE);
 		textField.setX(0);
 		textField.setY(20);
 		textField.setWidth(reportColumnWidth);
@@ -700,7 +732,10 @@ public class JasperReportRenderer {
 	}
 
 	/**
-	 * Adds a parameters.
+	 * Adds report parameters to the Jasper design.
+	 *
+	 * @param design The source design specification.
+	 * @throws JRException If Jasper rejects a parameter declaration.
 	 */
 	protected void addParameters(DesignSpecification design) throws JRException {
 		for (ReportParameter reportParameter : design.getParameters()) {
@@ -725,10 +760,12 @@ public class JasperReportRenderer {
 		jasperDesign.addParameter(designSpecParameter);
 	}
 
-	@SuppressWarnings("boxing")
 	/**
-	 * Performs configureReportProperties.
+	 * Copies page and margin properties from the design into Jasper metadata.
+	 *
+	 * @param design The source design specification.
 	 */
+	@SuppressWarnings("boxing")
 	protected void configureReportProperties(DesignSpecification design) {
 		jasperDesign.setName(design.getName());
 		jasperDesign.setPageWidth(design.getWidth());
@@ -741,7 +778,9 @@ public class JasperReportRenderer {
 	}
 
 	/**
-	 * Returns the imports.
+	 * Returns the static import list applied to generated reports.
+	 *
+	 * @return Immutable-by-convention list of import entries.
 	 */
 	protected static List<String> getImports() {
 		return IMPORTS;
@@ -752,7 +791,9 @@ public class JasperReportRenderer {
 	}
 
 	/**
-	 * Returns the properties.
+	 * Returns the static Jasper design properties applied during rendering.
+	 *
+	 * @return Property map used to configure generated designs.
 	 */
 	protected static Map<String, String> getProperties() {
 		return PROPERTIES;
@@ -763,7 +804,9 @@ public class JasperReportRenderer {
 	}
 
 	/**
-	 * Adds a query.
+	 * Builds and assigns the Jasper query for the supplied design.
+	 *
+	 * @param designSpecification The source design specification.
 	 */
 	protected void addQuery(@SuppressWarnings("hiding") DesignSpecification designSpecification) {
 		final JRDesignQuery query = new JRDesignQuery();
@@ -855,7 +898,10 @@ public class JasperReportRenderer {
 	}
 
 	/**
-	 * Creates the field.
+	 * Creates a Jasper field from a report field descriptor when eligible.
+	 *
+	 * @param reportField The source report field.
+	 * @return A Jasper field, or {@code null} when the field is intentionally skipped.
 	 */
 	protected static JRField createField(ReportField reportField) {
 		final JRDesignField jrField = new JRDesignField();
@@ -886,7 +932,10 @@ public class JasperReportRenderer {
 	}
 
 	/**
-	 * Creates the variable.
+	 * Creates a Jasper variable declaration for a report aggregate.
+	 *
+	 * @param reportVariable The source report variable descriptor.
+	 * @return A configured Jasper variable.
 	 */
 	protected static JRDesignVariable createVariable(ReportVariable reportVariable) {
 		final JRDesignVariable jrVariable = new JRDesignVariable();
@@ -901,14 +950,19 @@ public class JasperReportRenderer {
 	}
 
 	/**
-	 * Returns the incrementType.
+	 * Returns the increment scope used for generated aggregate variables.
+	 *
+	 * @return The Jasper increment type.
 	 */
 	protected static IncrementTypeEnum getIncrementType() {
 		return IncrementTypeEnum.COLUMN;
 	}
 
 	/**
-	 * Creates the variableExpression.
+	 * Creates the Jasper expression used to increment a generated variable.
+	 *
+	 * @param reportVariable The source report variable descriptor.
+	 * @return The configured Jasper expression.
 	 */
 	protected static JRExpression createVariableExpression(ReportVariable reportVariable) {
 		final JRDesignExpression jrExpression = new JRDesignExpression();
@@ -917,7 +971,10 @@ public class JasperReportRenderer {
 	}
 
 	/**
-	 * Creates the initialValueVariableExpression.
+	 * Creates the Jasper expression that initializes a generated variable.
+	 *
+	 * @param reportVariable The source report variable descriptor.
+	 * @return The configured Jasper expression.
 	 */
 	protected static JRExpression createInitialValueVariableExpression(ReportVariable reportVariable) {
 		final JRDesignExpression jrExpression = new JRDesignExpression();
@@ -944,7 +1001,9 @@ public class JasperReportRenderer {
 	}
 
 	/**
-	 * Adds a customerLogo.
+	 * Adds the customer logo image element to the title band.
+	 *
+	 * @param titleBand The Jasper title band to decorate.
 	 */
 	protected static void addCustomerLogo(JRBand titleBand) {
 		final int logoWidth = 200;
@@ -971,14 +1030,19 @@ public class JasperReportRenderer {
 	}
 
 	/**
-	 * Adds a detailBand.
+	 * Appends a detail band to the Jasper design detail section.
+	 *
+	 * @param band The band to append.
 	 */
 	protected void addDetailBand(JRBand band) {
 		((JRDesignSection) jasperDesign.getDetailSection()).addBand(band);
 	}
 
 	/**
-	 * Creates the band.
+	 * Creates a Jasper band from report band metadata.
+	 *
+	 * @param reportBand The source report band metadata.
+	 * @return The generated Jasper band, or {@code null} when there are no elements.
 	 */
 	protected JRBand createBand(ReportBand reportBand) {
 		if (reportBand.getElements().isEmpty()) {
@@ -1053,7 +1117,7 @@ public class JasperReportRenderer {
 			Optional.ofNullable(reportElement.getEvaluationTime())
 						.map(e -> EvaluationTimeEnum.getByName(e.toString()))
 						.ifPresent(textElement::setEvaluationTime);
-			textElement.setBlankWhenNull(true);
+			textElement.setBlankWhenNull(Boolean.TRUE);
 			textElement.setExpression(createTextElementExpression(reportElement));
 			wrapInBox(reportElement, textElement.getLineBox());
 			return textElement;
@@ -1188,7 +1252,10 @@ public class JasperReportRenderer {
 	}
 
 	/**
-	 * Performs configureCommonTextFieldProperties.
+	 * Applies common styling, sizing and visibility rules to text elements.
+	 *
+	 * @param textElement The Jasper text element to configure.
+	 * @param reportElement The source report element metadata.
 	 */
 	protected void configureCommonTextFieldProperties(JRDesignTextElement textElement, ReportElement reportElement) {
 		textElement.setKey(reportElement.getElementType().toString()+ "_" + 
@@ -1233,10 +1300,13 @@ public class JasperReportRenderer {
 		textElement.setStrikeThrough(Boolean.FALSE);
 	}
 
-	@SuppressWarnings("boxing")
 	/**
-	 * Performs configureDimensions.
+	 * Applies absolute position and size from the report element metadata.
+	 *
+	 * @param jrDesignElement The Jasper design element to configure.
+	 * @param reportElement The source report element metadata.
 	 */
+	@SuppressWarnings("boxing")
 	protected static void configureDimensions(JRDesignElement jrDesignElement, ReportElement reportElement) {
 		jrDesignElement.setX(Optional.ofNullable(reportElement.getElementLeft()).orElse(0));
 		jrDesignElement.setY(Optional.ofNullable(reportElement.getElementTop()).orElse(0));
@@ -1245,7 +1315,10 @@ public class JasperReportRenderer {
 	}
 
 	/**
-	 * Creates the textElementExpression.
+	 * Creates the Jasper expression used by text and static-text elements.
+	 *
+	 * @param reportElement The source report element metadata.
+	 * @return The configured Jasper expression.
 	 */
 	protected static JRExpression createTextElementExpression(ReportElement reportElement) {
 		final JRDesignExpression jrExpression = new JRDesignExpression();
@@ -1261,7 +1334,10 @@ public class JasperReportRenderer {
 	}
 
 	/**
-	 * Creates the imageElementExpression.
+	 * Creates the Jasper expression used by image-based elements.
+	 *
+	 * @param reportElement The source report element metadata.
+	 * @return The configured Jasper expression.
 	 */
 	protected static JRExpression createImageElementExpression(ReportElement reportElement) {
 		final JRDesignExpression jrExpression = new JRDesignExpression();
@@ -1317,7 +1393,10 @@ public class JasperReportRenderer {
 	}
 
 	/**
-	 * Performs flipCondition.
+	 * Converts a condition method name to its logical inverse form.
+	 *
+	 * @param conditionName The source condition name.
+	 * @return The inverse condition name, or {@code null} when input is {@code null}.
 	 */
 	public static String flipCondition(String conditionName) {
 		String result = null;
@@ -1334,7 +1413,10 @@ public class JasperReportRenderer {
 	}
 
 	/**
-	 * Performs rawConditionName.
+	 * Normalises a condition name to its non-prefixed form.
+	 *
+	 * @param conditionName The condition name (possibly prefixed with {@code not}).
+	 * @return The normalised condition name.
 	 */
 	public static String rawConditionName(String conditionName) {
 		if (conditionName.startsWith("not")) {
@@ -1386,7 +1468,10 @@ public class JasperReportRenderer {
 	}
 
 	/**
-	 * Returns the listModel.
+	 * Resolves the list model for list-style report conversion.
+	 *
+	 * @param designSpecification The source design specification.
+	 * @return The resolved list model.
 	 */
 	protected static ListModel<Bean> getListModel(DesignSpecification designSpecification) {
 		final Customer customer = CORE.getCustomer();
@@ -1404,7 +1489,10 @@ public class JasperReportRenderer {
 	}
 
 	/**
-	 * Indicates whether isAggregatableAttribute is satisfied.
+	 * Indicates whether an attribute type supports generated aggregate variables.
+	 *
+	 * @param attributeType The Skyve attribute type.
+	 * @return {@code true} when the type is numeric or temporal and can be aggregated.
 	 */
 	protected static boolean isAggregatableAttribute(AttributeType attributeType) {
 		return attributeType == AttributeType.integer ||
@@ -1419,7 +1507,10 @@ public class JasperReportRenderer {
 	}
 
 	/**
-	 * Indicates whether isDateOrTimeAttribute is satisfied.
+	 * Indicates whether an attribute type is date/time based.
+	 *
+	 * @param attributeType The Skyve attribute type.
+	 * @return {@code true} when the type is one of date, dateTime, time or timestamp.
 	 */
 	protected static boolean isDateOrTimeAttribute(AttributeType attributeType) {
 		return attributeType == AttributeType.date ||

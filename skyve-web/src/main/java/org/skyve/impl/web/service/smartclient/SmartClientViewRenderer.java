@@ -154,6 +154,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param view The view metadata to render.
 	 * @param uxui The active UX/UI profile.
 	 * @param noCreateView Whether create/edit root container creation should be skipped.
+	 *
+	 * @return The protected.
 	 */
 	protected SmartClientViewRenderer(User user,
 										Module module,
@@ -176,6 +178,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 	/**
 	 * Starts SmartClient view rendering by creating the top-level container for the active view type.
+	 *
+	 * @param icon16x16Url The icon 16 x 16 url.
+	 * @param icon32x32Url The icon 32 x 32 url.
 	 */
 	@Override
 	public void renderView(String icon16x16Url, String icon32x32Url) {
@@ -250,6 +255,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	
 	/**
 	 * Finalizes SmartClient view rendering by attaching the generated view container to the root view.
+	 *
+	 * @param icon16x16Url The icon 16 x 16 url.
+	 * @param icon32x32Url The icon 32 x 32 url.
 	 */
 	@Override
 	public void renderedView(String icon16x16Url, String icon32x32Url) {
@@ -716,6 +724,16 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		renderedFormRow = true;
 	}
 
+	/**
+	 * Starts rendering a SmartClient form item definition for the current form cell.
+	 *
+	 * @param label The label.
+	 * @param requiredMessage The required message.
+	 * @param help The help.
+	 * @param showLabel The show label.
+	 * @param colspan The colspan.
+	 * @param item The item.
+	 */
 	@Override
 	public void renderFormItem(String label,
 								String requiredMessage,
@@ -745,6 +763,16 @@ public class SmartClientViewRenderer extends ViewRenderer {
 //		code.append("{width:'*',");
 	}
 
+	/**
+	 * Completes a SmartClient form item definition and advances internal form-column tracking.
+	 *
+	 * @param label The label.
+	 * @param requiredMessage The required message.
+	 * @param help The help.
+	 * @param showLabel The show label.
+	 * @param colspan The colspan.
+	 * @param item The item.
+	 */
 	@Override
 	public void renderedFormItem(String label,
 									String requiredMessage,
@@ -768,6 +796,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			incrementFormColumn();
 		}
 	}
+	/**
+	 * Closes the current SmartClient form row.
+	 *
+	 * @param row The row.
+	 */
 
 	@Override
 	public void renderedFormRow(FormRow row) {
@@ -2797,6 +2830,17 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append(inject.getScript());
 	}
 
+	/**
+	 * Renders a custom action button using metadata-driven visibility, disablement, and parameters.
+	 *
+	 * @param name The name.
+	 * @param label The label.
+	 * @param iconUrl The icon url.
+	 * @param iconStyleClass The icon style class.
+	 * @param toolTip The tool tip.
+	 * @param confirmationText The confirmation text.
+	 * @param action The action.
+	 */
 	@Override
 	public void renderCustomAction(String name,
 									String label,
@@ -2820,6 +2864,17 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					null);
 	}
 
+	/**
+	 * Renders the implicit add action button and wires it to the SmartClient add handler.
+	 *
+	 * @param name The name.
+	 * @param label The label.
+	 * @param iconUrl The icon url.
+	 * @param iconStyleClass The icon style class.
+	 * @param toolTip The tool tip.
+	 * @param confirmationText The confirmation text.
+	 * @param action The action.
+	 */
 	@Override
 	public void renderAddAction(String name,
 									String label,
@@ -2843,6 +2898,18 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					null);
 	}
 
+	/**
+	 * Renders the implicit remove action button and passes through delete capability flags.
+	 *
+	 * @param name The name.
+	 * @param label The label.
+	 * @param iconUrl The icon url.
+	 * @param iconStyleClass The icon style class.
+	 * @param toolTip The tool tip.
+	 * @param confirmationText The confirmation text.
+	 * @param action The action.
+	 * @param canDelete The can delete.
+	 */
 	@Override
 	public void renderRemoveAction(String name,
 									String label,
@@ -2867,6 +2934,17 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					Boolean.valueOf(canDelete));
 	}
 
+	/**
+	 * Renders the implicit zoom-out action button.
+	 *
+	 * @param name The name.
+	 * @param label The label.
+	 * @param iconUrl The icon url.
+	 * @param iconStyleClass The icon style class.
+	 * @param toolTip The tool tip.
+	 * @param confirmationText The confirmation text.
+	 * @param action The action.
+	 */
 	@Override
 	public void renderZoomOutAction(String name,
 										String label,
@@ -2890,6 +2968,17 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					null);
 	}
 
+	/**
+	 * Renders the implicit navigate action button.
+	 *
+	 * @param name The name.
+	 * @param label The label.
+	 * @param iconUrl The icon url.
+	 * @param iconStyleClass The icon style class.
+	 * @param toolTip The tool tip.
+	 * @param confirmationText The confirmation text.
+	 * @param action The action.
+	 */
 	@Override
 	public void renderNavigateAction(String name,
 										String label,
@@ -2913,6 +3002,17 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					null);
 	}
 
+	/**
+	 * Renders the implicit OK action button.
+	 *
+	 * @param name The name.
+	 * @param label The label.
+	 * @param iconUrl The icon url.
+	 * @param iconStyleClass The icon style class.
+	 * @param toolTip The tool tip.
+	 * @param confirmationText The confirmation text.
+	 * @param action The action.
+	 */
 	@Override
 	public void renderOKAction(String name,
 								String label,
@@ -2936,6 +3036,17 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					null);
 	}
 
+	/**
+	 * Renders the implicit save action button.
+	 *
+	 * @param name The name.
+	 * @param label The label.
+	 * @param iconUrl The icon url.
+	 * @param iconStyleClass The icon style class.
+	 * @param toolTip The tool tip.
+	 * @param confirmationText The confirmation text.
+	 * @param action The action.
+	 */
 	@Override
 	public void renderSaveAction(String name,
 									String label,
@@ -2959,6 +3070,17 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					null);
 	}
 
+	/**
+	 * Renders the implicit cancel action button.
+	 *
+	 * @param name The name.
+	 * @param label The label.
+	 * @param iconUrl The icon url.
+	 * @param iconStyleClass The icon style class.
+	 * @param toolTip The tool tip.
+	 * @param confirmationText The confirmation text.
+	 * @param action The action.
+	 */
 	@Override
 	public void renderCancelAction(String name,
 									String label,
@@ -2982,6 +3104,17 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					null);
 	}
 
+	/**
+	 * Renders the implicit delete action button.
+	 *
+	 * @param name The name.
+	 * @param label The label.
+	 * @param iconUrl The icon url.
+	 * @param iconStyleClass The icon style class.
+	 * @param toolTip The tool tip.
+	 * @param confirmationText The confirmation text.
+	 * @param action The action.
+	 */
 	@Override
 	public void renderDeleteAction(String name,
 									String label,
@@ -3005,6 +3138,17 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					null);
 	}
 
+	/**
+	 * Renders the implicit report action button.
+	 *
+	 * @param name The name.
+	 * @param label The label.
+	 * @param iconUrl The icon url.
+	 * @param iconStyleClass The icon style class.
+	 * @param toolTip The tool tip.
+	 * @param confirmationText The confirmation text.
+	 * @param action The action.
+	 */
 	@Override
 	public void renderReportAction(String name,
 									String label,
@@ -3028,6 +3172,17 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					null);
 	}
 
+	/**
+	 * Renders the implicit biz-export action button.
+	 *
+	 * @param name The name.
+	 * @param label The label.
+	 * @param iconUrl The icon url.
+	 * @param iconStyleClass The icon style class.
+	 * @param toolTip The tool tip.
+	 * @param confirmationText The confirmation text.
+	 * @param action The action.
+	 */
 	@Override
 	public void renderBizExportAction(String name,
 										String label,
@@ -3051,6 +3206,17 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					null);
 	}
 
+	/**
+	 * Renders the implicit biz-import action button.
+	 *
+	 * @param name The name.
+	 * @param label The label.
+	 * @param iconUrl The icon url.
+	 * @param iconStyleClass The icon style class.
+	 * @param toolTip The tool tip.
+	 * @param confirmationText The confirmation text.
+	 * @param action The action.
+	 */
 	@Override
 	public void renderBizImportAction(String name,
 										String label,
@@ -3074,6 +3240,17 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					null);
 	}
 
+	/**
+	 * Renders the implicit download action button.
+	 *
+	 * @param name The name.
+	 * @param label The label.
+	 * @param iconUrl The icon url.
+	 * @param iconStyleClass The icon style class.
+	 * @param toolTip The tool tip.
+	 * @param confirmationText The confirmation text.
+	 * @param action The action.
+	 */
 	@Override
 	public void renderDownloadAction(String name,
 										String label,
@@ -3097,6 +3274,17 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					null);
 	}
 
+	/**
+	 * Renders the implicit upload action button.
+	 *
+	 * @param name The name.
+	 * @param label The label.
+	 * @param iconUrl The icon url.
+	 * @param iconStyleClass The icon style class.
+	 * @param toolTip The tool tip.
+	 * @param confirmationText The confirmation text.
+	 * @param action The action.
+	 */
 	@Override
 	public void renderUploadAction(String name,
 									String label,
@@ -3120,6 +3308,17 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					null);
 	}
 
+	/**
+	 * Renders the implicit new action button.
+	 *
+	 * @param name The name.
+	 * @param label The label.
+	 * @param iconUrl The icon url.
+	 * @param iconStyleClass The icon style class.
+	 * @param toolTip The tool tip.
+	 * @param confirmationText The confirmation text.
+	 * @param action The action.
+	 */
 	@Override
 	public void renderNewAction(String name,
 									String label,
@@ -3143,6 +3342,17 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					null);
 	}
 
+	/**
+	 * Renders the implicit edit action button.
+	 *
+	 * @param name The name.
+	 * @param label The label.
+	 * @param iconUrl The icon url.
+	 * @param iconStyleClass The icon style class.
+	 * @param toolTip The tool tip.
+	 * @param confirmationText The confirmation text.
+	 * @param action The action.
+	 */
 	@Override
 	public void renderEditAction(String name,
 									String label,
@@ -3166,6 +3376,17 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					null);
 	}
 
+	/**
+	 * Renders the implicit print action button.
+	 *
+	 * @param name The name.
+	 * @param label The label.
+	 * @param iconUrl The icon url.
+	 * @param iconStyleClass The icon style class.
+	 * @param toolTip The tool tip.
+	 * @param confirmationText The confirmation text.
+	 * @param action The action.
+	 */
 	@Override
 	public void renderPrintAction(String name,
 									String label,
@@ -3189,6 +3410,12 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					null);
 	}
 	
+	/**
+	 * Emits deferred server-side callback wrappers for async add/edit/remove handlers.
+	 *
+	 * <p>Side effects: appends callback method definitions to the generated JavaScript buffer
+	 * when a corresponding handler scope is active.
+	 */
 	private void writeOutServerSideCallbackMethodIfNecessary() {
 		if (inOnAddedEventHandler) {
 			code.append("},bizAddedForServer:function(form,item,value){var view=form._view;");
@@ -3201,6 +3428,12 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 	}
 	
+	/**
+	 * Emits JavaScript that dispatches a server-side action callback for the current event context.
+	 *
+	 * @param action The action.
+	 * @param server The server.
+	 */
 	@Override
 	public void visitServerSideActionEventAction(Action action, ServerSideActionEventAction server) {
 		if (getCurrentForm() != null) {
@@ -3215,7 +3448,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append(name).append("',");
 		code.append(! Boolean.FALSE.equals(action.getClientValidation())).append(");");
 	}
-
+	
+	/**
+	 * Starts an on-change handler body for the current widget context.
+	 *
+	 * @param changeable The changeable.
+	 * @param parentVisible The parent visible.
+	 * @param parentEnabled The parent enabled.
+	 */
 	@Override
 	public void visitOnChangedEventHandler(Changeable changeable, boolean parentVisible, boolean parentEnabled) {
 		if (getCurrentForm() == null) {
@@ -3225,18 +3465,39 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append("changed:function(form,item,value){var view=form._view;");
 		}
 	}
-
+	
+	/**
+	 * Closes the on-change handler body.
+	 *
+	 * @param changeable The changeable.
+	 * @param parentVisible The parent visible.
+	 * @param parentEnabled The parent enabled.
+	 */
 	@Override
 	public void visitedOnChangedEventHandler(Changeable changeable, boolean parentVisible, boolean parentEnabled) {
 		code.append("},");
 	}
-
+	
+	/**
+	 * Starts an on-focus handler that short-circuits while requests are pending.
+	 *
+	 * @param blurable The blurable.
+	 * @param parentVisible The parent visible.
+	 * @param parentEnabled The parent enabled.
+	 */
 	@Override
 	public void visitOnFocusEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
 		// Note the test to short circuit focus event processing whilst requests are pending to stop loops with multiple fields.
 		code.append("editorEnter:function(form,item,value){if((!isc.RPCManager.requestsArePending())&&item.validate()){var view=form._view;");
 	}
-
+	
+	/**
+	 * Closes the on-focus handler body.
+	 *
+	 * @param blurable The blurable.
+	 * @param parentVisible The parent visible.
+	 * @param parentEnabled The parent enabled.
+	 */
 	@Override
 	public void visitedOnFocusEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
 		code.append("}},");
@@ -3246,6 +3507,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	// to potentially serialize calls to button actions after editorExit.
 	private boolean visitingAsync = false;
 	
+	/**
+	 * Starts blur/edit-exit handlers and enables async sequencing for blurry actions.
+	 *
+	 * @param blurable The blurable.
+	 * @param parentVisible The parent visible.
+	 * @param parentEnabled The parent enabled.
+	 */
 	@Override
 	public void visitOnBlurEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
 		visitingAsync = true;
@@ -3257,7 +3525,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		// Note the test to short circuit blur event processing whilst requests are pending to stop loops with multiple fields.
 		code.append("editorExit:function(form,item,value){if(isc.RPCManager.requestsArePending()){form._view._blurry=null;}else{var view=form._view;");
 	}
-
+	
+	/**
+	 * Closes blur/edit-exit handler bodies and resets async sequencing state.
+	 *
+	 * @param blurable The blurable.
+	 * @param parentVisible The parent visible.
+	 * @param parentEnabled The parent enabled.
+	 */
 	@Override
 	public void visitedOnBlurEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
 		code.append("}},");
@@ -3266,7 +3541,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 	// Used to sort out server-side events into the bizEditedForServer() method.
 	private boolean inOnAddedEventHandler = false;
-
+	
+	/**
+	 * Starts a biz-added event handler body.
+	 *
+	 * @param addable The addable.
+	 * @param parentVisible The parent visible.
+	 * @param parentEnabled The parent enabled.
+	 */
 	@Override
 	public void visitOnAddedEventHandler(Addable addable, boolean parentVisible, boolean parentEnabled) {
 		if (dataWidgetFieldsIncomplete) {
@@ -3282,7 +3564,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append("bizAdded:function(form,item,value){var view=form._view;");
 		}
 	}
-
+	
+	/**
+	 * Closes the biz-added event handler body.
+	 *
+	 * @param addable The addable.
+	 * @param parentVisible The parent visible.
+	 * @param parentEnabled The parent enabled.
+	 */
 	@Override
 	public void visitedOnAddedEventHandler(Addable addable, boolean parentVisible, boolean parentEnabled) {
 		code.append("},");
@@ -3291,7 +3580,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 	// Used to sort out server-side events into the bizEditedForServer() method.
 	private boolean inOnEditedEventHandler = false;
-
+	
+	/**
+	 * Starts a biz-edited event handler body.
+	 *
+	 * @param editable The editable.
+	 * @param parentVisible The parent visible.
+	 * @param parentEnabled The parent enabled.
+	 */
 	@Override
 	public void visitOnEditedEventHandler(Editable editable, boolean parentVisible, boolean parentEnabled) {
 		if (dataWidgetFieldsIncomplete) {
@@ -3307,7 +3603,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append("bizEdited:function(form,item,value){var view=form._view;");
 		}
 	}
-
+	
+	/**
+	 * Closes the biz-edited event handler body.
+	 *
+	 * @param editable The editable.
+	 * @param parentVisible The parent visible.
+	 * @param parentEnabled The parent enabled.
+	 */
 	@Override
 	public void visitedOnEditedEventHandler(Editable editable, boolean parentVisible, boolean parentEnabled) {
 		code.append("},");
@@ -3316,7 +3619,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 	// Used to sort out server-side events into the bizEditedForServer() method.
 	private boolean inOnRemovedEventHandler = false;
-
+	
+	/**
+	 * Starts a biz-removed event handler body.
+	 *
+	 * @param removable The removable.
+	 * @param parentVisible The parent visible.
+	 * @param parentEnabled The parent enabled.
+	 */
 	@Override
 	public void visitOnRemovedEventHandler(Removable removable, boolean parentVisible, boolean parentEnabled) {
 		if (dataWidgetFieldsIncomplete) {
@@ -3332,13 +3642,27 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append("bizRemoved:function(form,item,value){var view=form._view;");
 		}
 	}
-
+	
+	/**
+	 * Closes the biz-removed event handler body.
+	 *
+	 * @param removable The removable.
+	 * @param parentVisible The parent visible.
+	 * @param parentEnabled The parent enabled.
+	 */
 	@Override
 	public void visitedOnRemovedEventHandler(Removable removable, boolean parentVisible, boolean parentEnabled) {
 		code.append("},");
 		inOnRemovedEventHandler = false;
 	}
-
+	
+	/**
+	 * Starts a biz-selected event handler body and enables async sequencing for list/data widgets.
+	 *
+	 * @param selectable The selectable.
+	 * @param parentVisible The parent visible.
+	 * @param parentEnabled The parent enabled.
+	 */
 	@Override
 	public void visitOnSelectedEventHandler(Selectable selectable, boolean parentVisible, boolean parentEnabled) {
 		if ((dataWidgetVariable != null) || (listWidgetVariable != null)) {
@@ -3351,33 +3675,76 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 		code.append("bizSelected:function(){var view=this._view;");
 	}
-
+	
+	/**
+	 * Closes the biz-selected event handler body and disables async sequencing.
+	 *
+	 * @param selectable The selectable.
+	 * @param parentVisible The parent visible.
+	 * @param parentEnabled The parent enabled.
+	 */
 	@Override
 	public void visitedOnSelectedEventHandler(Selectable selectable, boolean parentVisible, boolean parentEnabled) {
 		code.append("},");
 		visitingAsync = false;
 	}
-
+	
+	/**
+	 * Starts a lookup picked-event handler body.
+	 *
+	 * @param lookup The lookup.
+	 * @param parentVisible The parent visible.
+	 * @param parentEnabled The parent enabled.
+	 */
 	@Override
 	public void visitOnPickedEventHandler(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 		code.append("bizPicked:function(form,item,value){var view=form._view;");
 	}
-
+	
+	/**
+	 * Closes the lookup picked-event handler body.
+	 *
+	 * @param lookup The lookup.
+	 * @param parentVisible The parent visible.
+	 * @param parentEnabled The parent enabled.
+	 */
 	@Override
 	public void visitedOnPickedEventHandler(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 		code.append("},");
 	}
-
+	
+	/**
+	 * Starts a lookup cleared-event handler body.
+	 *
+	 * @param lookup The lookup.
+	 * @param parentVisible The parent visible.
+	 * @param parentEnabled The parent enabled.
+	 */
 	@Override
 	public void visitOnClearedEventHandler(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 		code.append("bizCleared:function(form,item,value){var view=form._view;");
 	}
-
+	
+	/**
+	 * Closes the lookup cleared-event handler body.
+	 *
+	 * @param lookup The lookup.
+	 * @param parentVisible The parent visible.
+	 * @param parentEnabled The parent enabled.
+	 */
 	@Override
 	public void visitedOnClearedEventHandler(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 		code.append("},");
 	}
 
+	/**
+	 * Emits JavaScript to trigger a rerender action for the specified source binding.
+	 *
+	 * @param rerender The rerender.
+	 * @param source The source.
+	 * @param parentVisible The parent visible.
+	 * @param parentEnabled The parent enabled.
+	 */
 	@Override
 	public void visitRerenderEventAction(RerenderEventAction rerender,
 											EventSource source,
@@ -3391,6 +3758,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append(source.getSource()).append("');");
 	}
 
+	/**
+	 * Emits JavaScript to apply a disabled condition to a target binding.
+	 *
+	 * @param setDisabled The set disabled.
+	 * @param parentVisible The parent visible.
+	 * @param parentEnabled The parent enabled.
+	 */
 	@Override
 	public void visitSetDisabledEventAction(SetDisabledEventAction setDisabled,
 												boolean parentVisible,
@@ -3399,6 +3773,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append("','").append(setDisabled.getDisabledConditionName()).append("');");
 	}
 
+	/**
+	 * Emits JavaScript to apply an invisible condition to a target binding.
+	 *
+	 * @param setInvisible The set invisible.
+	 * @param parentVisible The parent visible.
+	 * @param parentEnabled The parent enabled.
+	 */
 	@Override
 	public void visitSetInvisibleEventAction(SetInvisibleEventAction setInvisible,
 												boolean parentVisible,
@@ -3407,6 +3788,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append("','").append(setInvisible.getInvisibleConditionName()).append("');");
 	}
 
+	/**
+	 * Emits JavaScript to toggle the disabled state of a target binding.
+	 *
+	 * @param toggleDisabled The toggle disabled.
+	 * @param parentVisible The parent visible.
+	 * @param parentEnabled The parent enabled.
+	 */
 	@Override
 	public void visitToggleDisabledEventAction(ToggleDisabledEventAction toggleDisabled,
 												boolean parentVisible,
@@ -3415,6 +3803,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append("');");
 	}
 
+	/**
+	 * Emits JavaScript to toggle the visibility state of a target binding.
+	 *
+	 * @param toggleVisibility The toggle visibility.
+	 * @param parentVisible The parent visible.
+	 * @param parentEnabled The parent enabled.
+	 */
 	@Override
 	public void visitToggleVisibilityEventAction(ToggleVisibilityEventAction toggleVisibility,
 													boolean parentVisible,
@@ -3422,12 +3817,30 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append("view.toggleVisibility('").append(BindUtil.sanitiseBinding(toggleVisibility.getBinding()));
 		code.append("');");
 	}
-
+	
+	/**
+	 * Visits an action parameter node.
+	 *
+	 * <p>Side effects: none; parameters are rendered in dedicated action writers.
+	 *
+	 * @param parameter The parameter.
+	 * @param parentVisible The parent visible.
+	 * @param parentEnabled The parent enabled.
+	 */
 	@Override
 	public void visitParameter(Parameter parameter, boolean parentVisible, boolean parentEnabled) {
 		// do nothing - parameters are handled separately
 	}
-
+	
+	/**
+	 * Visits a filter parameter node.
+	 *
+	 * <p>Side effects: none; filter parameters are rendered in dedicated list/filter writers.
+	 *
+	 * @param parameter The parameter.
+	 * @param parentVisible The parent visible.
+	 * @param parentEnabled The parent enabled.
+	 */
 	@Override
 	public void visitFilterParameter(FilterParameter parameter, boolean parentVisible, boolean parentEnabled) {
 		// do nothing - parameters are handled separately
@@ -3454,6 +3867,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		return result.toString();
 	}
 	
+	/**
+	 * Appends width, height, and min/max constraints for a renderable component.
+	 *
+	 * @param sizable component metadata providing size and constraint hints
+	 * @param defaultMinHeightInPixels fallback minimum height when no explicit minimum is set
+	 * @param builder JavaScript buffer receiving size-related properties
+	 */
 	private void size(AbsoluteWidth sizable, 
 						Integer defaultMinHeightInPixels,
 						StringBuilder builder) {
@@ -3557,6 +3977,12 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 	}
 	
+	/**
+	 * Appends disable-condition flags for add/zoom/edit/remove grid actions.
+	 *
+	 * @param grid grid metadata containing disable-condition bindings
+	 * @param builder JavaScript buffer receiving action-disable properties
+	 */
 	private static void disableCRUD(DisableableCRUDGrid grid, StringBuilder builder) {
 		String disabledCRUDCondition = grid.getDisableAddConditionName();
 		if (disabledCRUDCondition != null) {
@@ -3576,6 +4002,12 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 	}
 
+	/**
+	 * Appends disable-condition flags for lookup pick/edit/add/clear controls.
+	 *
+	 * @param lookup lookup metadata containing disable-condition bindings
+	 * @param builder JavaScript buffer receiving action-disable properties
+	 */
 	private static void disableLookupComponents(LookupDescription lookup, StringBuilder builder) {
 		String disabledCondition = lookup.getDisablePickConditionName();
 		if (disabledCondition != null) {
@@ -3595,12 +4027,27 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 	}
 
+	/**
+	 * Applies bordered-group styling only when the component enables border rendering.
+	 *
+	 * @param title optional border title
+	 * @param bordered border-capable metadata
+	 * @param definedPixelPadding explicit padding value, or null
+	 * @param builder JavaScript buffer receiving border properties
+	 */
 	private static void bordered(String title, Bordered bordered, Integer definedPixelPadding, StringBuilder builder) {
 		if (Boolean.TRUE.equals(bordered.getBorder())) {
 			border(title, definedPixelPadding, builder);
 		}
 	}
 
+	/**
+	 * Appends the base SmartClient group-border presentation properties.
+	 *
+	 * @param title optional border title
+	 * @param definedPixelPadding explicit padding value, or null
+	 * @param builder JavaScript buffer receiving border properties
+	 */
 	private static void border(String title, Integer definedPixelPadding, StringBuilder builder) {
 		builder.append("styleName:'bizhubRoundedBorder',groupBorderCSS:'1px solid #bfbfbf',isGroup:true,margin:1,groupLabelBackgroundColor:'transparent',");
 		if (title != null) {
@@ -3612,22 +4059,45 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 	}
 	
+	/**
+	 * Appends a disabled-condition binding when configured.
+	 *
+	 * @param disabledConditionName condition binding name, or null
+	 * @param builder JavaScript buffer receiving the property
+	 */
 	private static void disabled(String disabledConditionName, StringBuilder builder) {
 		if (disabledConditionName != null) {
 			builder.append("disabledConditionName:'").append(disabledConditionName).append("',");
 		}
 	}
 
+	/**
+	 * Appends an invisible-condition binding when configured.
+	 *
+	 * @param invisibleConditionName condition binding name, or null
+	 * @param builder JavaScript buffer receiving the property
+	 */
 	private static void invisible(String invisibleConditionName, StringBuilder builder) {
 		if (invisibleConditionName != null) {
 			builder.append("invisibleConditionName:'").append(invisibleConditionName).append("',");
 		}
 	}
 
+	/**
+	 * Appends the effective editable state.
+	 *
+	 * @param editable metadata flag; null is treated as editable
+	 * @param builder JavaScript buffer receiving the property
+	 */
 	private static void editable(Boolean editable, StringBuilder builder) {
 		builder.append("editable:").append((! Boolean.FALSE.equals(editable)) ? "true," : "false,");
 	}
 
+	/**
+	 * Removes a trailing comma from the JavaScript buffer, if present.
+	 *
+	 * @param builder JavaScript buffer to trim
+	 */
 	private static void removeTrailingComma(StringBuilder builder) {
 		int length = builder.length();
 		if (builder.charAt(length - 1) == ',') {
@@ -3635,6 +4105,23 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 	}
 
+	/**
+	 * Adds an action button to the generated action panel when it is panel-visible.
+	 *
+	 * @param actionName action name sent to the client runtime
+	 * @param implicitName implicit action kind, or null
+	 * @param displayName button display label
+	 * @param inActionPanel whether this action should be rendered in the panel
+	 * @param clientValidation whether client-side validation should run
+	 * @param iconUrl optional icon URL
+	 * @param iconStyleClass optional icon style class
+	 * @param tooltip optional tooltip text
+	 * @param confirmationText optional confirmation message
+	 * @param parameters action parameters
+	 * @param disabledConditionName optional disabled condition binding
+	 * @param invisibleConditionName optional invisible condition binding
+	 * @param canDelete delete permission used for remove actions
+	 */
 	private void addAction(String actionName,
 							ImplicitActionName implicitName,
 							String displayName,
@@ -3674,6 +4161,16 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 	}
 
+	/**
+	 * Builds JavaScript for a zoom-in widget.
+	 *
+	 * @param label optional label text
+	 * @param iconUrl optional icon URL
+	 * @param iconStyleClass optional icon style class
+	 * @param toolTip optional tooltip text
+	 * @param zoomIn zoom-in metadata
+	 * @return JavaScript constructor expression for the widget
+	 */
 	private String generateZoomIn(String label,
 			String iconUrl,
 			String iconStyleClass,
@@ -3727,6 +4224,24 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		return result.toString();
 	}
 
+	/**
+	 * Builds JavaScript for an action button widget.
+	 *
+	 * @param actionName action name sent to the client runtime
+	 * @param implicitName implicit action kind, or null
+	 * @param label optional button label
+	 * @param clientValidation whether client-side validation should run
+	 * @param iconUrl optional icon URL
+	 * @param iconStyleClass optional icon style class
+	 * @param toolTip optional tooltip text
+	 * @param confirmationText optional confirmation message
+	 * @param parameters action parameters
+	 * @param disabledConditionName optional disabled condition binding
+	 * @param invisibleConditionName optional invisible condition binding
+	 * @param button source button metadata when rendering declared buttons
+	 * @param canDelete delete permission used for remove actions
+	 * @return JavaScript constructor expression for the button
+	 */
 	private String generateButton(String actionName,
 									ImplicitActionName implicitName,
 									String label,
@@ -3784,6 +4299,12 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		return result.toString();
 	}
 	
+	/**
+	 * Appends action parameters as JavaScript object properties.
+	 *
+	 * @param parameters parameter definitions to encode
+	 * @param builder JavaScript buffer receiving encoded parameters
+	 */
 	private static void appendParameters(List<Parameter> parameters, StringBuilder builder) {
 		if ((parameters != null) && (! parameters.isEmpty())) {
 			builder.append("params:{");
@@ -3808,6 +4329,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 	}
 
+	/**
+	 * Appends filter and named parameters for list/query requests.
+	 *
+	 * @param filterParameters filter parameter definitions
+	 * @param parameters named parameter definitions
+	 * @param builder JavaScript buffer receiving encoded request parameters
+	 */
 	private static void appendFilterParameters(@Nullable List<FilterParameter> filterParameters,
 												@Nullable List<Parameter> parameters,
 												@Nonnull StringBuilder builder) {
@@ -3857,6 +4385,15 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 	}
 	
+	/**
+	 * Builds and appends a SmartClient field definition for the current form item.
+	 *
+	 * <p>Side effects: appends field JavaScript to the output buffer.
+	 *
+	 * @param widget input widget metadata
+	 * @param typeOverride optional SmartClient type override
+	 * @return prepared field definition
+	 */
 	private SmartClientFieldDefinition preProcessFormItem(InputWidget widget,
 															String typeOverride) {
 		SmartClientFieldDefinition def = getField(document, widget, true);
@@ -3879,6 +4416,18 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		return def;
 	}
 	
+	/**
+	 * Creates a query-column definition for SmartClient list rendering.
+	 *
+	 * @param user active user
+	 * @param customer active customer metadata
+	 * @param module module containing the query/document metadata
+	 * @param document document owning the query column
+	 * @param column query column metadata
+	 * @param runtime whether runtime domain values should be resolved
+	 * @param uxui active UX/UI profile name
+	 * @return the generated query-column definition
+	 */
 	public static SmartClientQueryColumnDefinition getQueryColumn(User user,
 																	Customer customer,
 																	Module module,
@@ -3903,6 +4452,16 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		return new SmartClientFieldDefinition(user, customer, module, document, widget, runtime, currentUxUi);
 	}
 	
+	/**
+	 * Creates a data-grid field definition for SmartClient list rendering.
+	 *
+	 * @param document document owning the widget
+	 * @param widget widget metadata to convert into a field definition
+	 * @param dataGridBinding binding of the owning data grid
+	 * @param hasFormatter whether a formatter is already available
+	 * @param runtime whether the generated definition is for runtime execution
+	 * @return the generated data-grid field definition
+	 */
 	public SmartClientDataGridFieldDefinition getDataGridField(@SuppressWarnings("hiding") Document document,
     															InputWidget widget,
     															String dataGridBinding,
@@ -3912,16 +4471,21 @@ public class SmartClientViewRenderer extends ViewRenderer {
     }
 
     /**
-     * Appends a data source definition from a document list model.
-     * @param user
-     * @param customer
-     * @param owningModule
-     * @param owningDocument
-     * @param modelName
-     * @param config	Whether to create a partial config data source defn for the menu items
-     * @param toAppendTo	definition is appended to this
-     * @param visitedQueryNames
-     * @return	The ID for the query definition generated.
+	* Appends a SmartClient data source definition for a document list model.
+	*
+	* <p>Side effects: appends generated JavaScript to the supplied buffer and tracks
+	* visited data-source names to prevent recursive duplication.
+	*
+	* @param user active user
+	* @param customer active customer metadata
+	* @param owningModule module that owns the model
+	* @param owningDocument document that owns the model
+	* @param modelName list model name
+	* @param uxui active UX/UI profile name
+	* @param config whether to generate configuration-only output
+	* @param toAppendTo buffer receiving the generated definition
+	* @param visitedQueryNames visited data-source names used to break recursion
+	* @return the generated data-source id
      */
 	public static String appendDataSourceDefinition(User user,
 														Customer customer,
@@ -3960,15 +4524,21 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 	
 	/**
-     * Appends a data source definition from a module query.
-     * @param customer
-     * @param query
-     * @param dataSourceIDOverride	ID of created data source if mandated
-     * @param hiddenBindings	Extra bindings to include in the data source - not mandatory
-     * @param config	Whether to create a partial config data source defn for the menu items
-     * @param toAppendTo	definition is appended to this
-     * @param visitedQueryNames
-     * @return	The ID for the query definition generated.
+	* Appends a SmartClient data source definition for a module query.
+	*
+	* <p>Side effects: appends generated JavaScript to the supplied buffer and tracks
+	* visited data-source names to prevent recursive duplication.
+	*
+	* @param user active user
+	* @param customer active customer metadata
+	* @param query query metadata to render
+	* @param dataSourceIDOverride optional forced data-source id
+	* @param forLookup lookup metadata that may contribute hidden bindings
+	* @param uxui active UX/UI profile name
+	* @param config whether to generate configuration-only output
+	* @param toAppendTo buffer receiving the generated definition
+	* @param visitedQueryNames visited data-source names used to break recursion
+	* @return the generated data-source id
      */
 	public static String appendDataSourceDefinition(User user,
 														Customer customer,
@@ -4002,6 +4572,28 @@ public class SmartClientViewRenderer extends ViewRenderer {
 											visitedQueryNames);
 	}
 	
+	/**
+	 * Appends a full SmartClient data source definition and any nested lookup data sources.
+	 *
+	 * @param user active user
+	 * @param customer active customer metadata
+	 * @param owningModuleName module owning the model/query
+	 * @param owningDocument owning document metadata
+	 * @param drivingDocumentModule module of the driving document
+	 * @param drivingDocument driving document metadata
+	 * @param queryName query name, or null
+	 * @param aggregateQuery whether the query is aggregate
+	 * @param modelName model name, or null
+	 * @param description localized data-source title
+	 * @param columns query columns to encode
+	 * @param dataSourceIDOverride explicit data-source id override, or null
+	 * @param forLookup lookup context when generating nested definitions
+	 * @param uxui active UX/UI profile name
+	 * @param config true to generate configuration-only output
+	 * @param toAppendTo JavaScript buffer receiving generated definitions
+	 * @param visitedQueryNames visited data-source ids used to avoid recursion loops
+	 * @return generated data-source id
+	 */
 	@SuppressWarnings("null")
 	private static String appendDataSourceDefinition(User user,
 														Customer customer,
@@ -4212,12 +4804,24 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		return dataSourceId;
 	}
 	
+	/**
+	 * Validates that collapsible containers declare a border title.
+	 *
+	 * @param collapsible collapsible mode, or null
+	 * @param borderTitle localized border title, or null
+	 * @throws MetaDataException if collapsible is set without a border title
+	 */
 	private static void validateCollapsible(Collapsible collapsible,String borderTitle) {
 		if (collapsible != null && borderTitle == null) {
 			throw new MetaDataException("Border title must be defined if the collapsible attribute is present");
 		}
 	}
 
+	/**
+	 * Renders a SmartClient sidebar container into the current view output.
+	 *
+	 * @param sidebar sidebar metadata to render
+	 */
 	@Override
 	public void renderSidebar(Sidebar sidebar) {
 		String variable = "v" + variableCounter++;
@@ -4230,6 +4834,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		containerVariables.push(variable);
 	}
 	
+	/**
+	 * Closes the current SmartClient sidebar container.
+	 *
+	 * @param sidebar sidebar metadata that was just rendered
+	 */
 	@Override
 	public void renderedSidebar(Sidebar sidebar) {
 		containerVariables.pop();

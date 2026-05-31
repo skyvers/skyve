@@ -76,12 +76,23 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 
 	/**
 	 * Used to supply the Map implementation required by this repository.
-	 * @param cache	The map to use as the cache.
+	 * Creates a mutable repository using the supplied cache implementation.
+	 *
+	 * @param cache map used for metadata key-to-object storage
 	 */
 	protected MutableCachedRepository(Map<String, Optional<MetaData>> cache) {
 		this.cache = cache;
 	}
 	
+	/**
+	 * Evicts cached metadata entries.
+	 *
+	 * <p>When {@code customer} is {@code null}, the full cache is cleared. Otherwise,
+	 * customer overrides and cached module/document/view/action/bizlet entries for
+	 * the customer's accessible modules are removed.
+	 *
+	 * @param customer the customer scope to evict, or {@code null} for a full eviction
+	 */
 	@Override
 	public void evictCachedMetaData(Customer customer) {
 		// Clear the lot
@@ -115,6 +126,14 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		}
 	}
 	
+	/**
+	 * Returns the cached global router, loading and converting it on first access.
+	 *
+	 * <p>In development mode, the router is reloaded when its backing metadata is newer
+	 * than the cached instance and the reload-check throttle has elapsed.
+	 *
+	 * @return the resolved router, or {@code null} when no router key exists in the cache
+	 */
 	@Override
 	@SuppressWarnings("java:S2789")
 	public Router getRouter() {
@@ -149,6 +168,12 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		return (result == null) ? null : (Router) result.get();
 	}
 	
+	/**
+	 * Stores and returns a converted global router instance.
+	 *
+	 * @param router the router metadata to cache
+	 * @return the converted router instance
+	 */
 	@Override
 	public Router setRouter(Router router) {
 		Router result = router.convert(ROUTER_NAME);
@@ -157,6 +182,15 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		return result;
 	}
 
+	/**
+	 * Returns a customer by name, loading and converting it on first access.
+	 *
+	 * <p>In development mode, stale cached customers are reloaded after the
+	 * reload-check throttle and then validated via generate-domain checks.
+	 *
+	 * @param customerName the customer name
+	 * @return the resolved customer, or {@code null} when the key is not present
+	 */
 	@Override
 	@SuppressWarnings("java:S2789")
 	public Customer getCustomer(String customerName) {
@@ -194,6 +228,12 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		return (result == null) ? null : (Customer) result.get();
 	}
 	
+	/**
+	 * Converts and caches customer metadata.
+	 *
+	 * @param customer customer metadata
+	 * @return the converted customer
+	 */
 	@Override
 	public Customer putCustomer(CustomerMetaData customer) {
 		String customerName = customer.getName();
@@ -202,6 +242,15 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		return result;
 	}
 
+	/**
+	 * Returns a module for the supplied customer context.
+	 *
+	 * <p>Customer overrides are resolved first, then vanilla module metadata is used.
+	 *
+	 * @param customer the customer context, or {@code null} for vanilla lookup
+	 * @param moduleName the module name
+	 * @return the resolved module, or {@code null} when not found in this repository
+	 */
 	@Override
 	public Module getModule(Customer customer, String moduleName) {
 		Module result = null;
@@ -272,6 +321,13 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		return module.convert(metaDataName);
 	}
 	
+	/**
+	 * Converts and caches a customer-specific module override.
+	 *
+	 * @param customer the owning customer
+	 * @param module module metadata
+	 * @return the converted module
+	 */
 	@Override
 	public Module putModule(Customer customer, ModuleMetaData module) {
 		String customerName = customer.getName();
@@ -285,6 +341,12 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		return result;
 	}
 	
+	/**
+	 * Converts and caches a vanilla module definition.
+	 *
+	 * @param module module metadata
+	 * @return the converted module
+	 */
 	@Override
 	public Module putModule(ModuleMetaData module) {
 		String moduleName = module.getName();
@@ -295,6 +357,14 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		return result;
 	}
 	
+	/**
+	 * Returns a document for a module, preferring customer overrides.
+	 *
+	 * @param customer the customer context, or {@code null}
+	 * @param module the module declaring or referencing the document
+	 * @param documentName the document name
+	 * @return the resolved document, or {@code null} when not found in this repository
+	 */
 	@Override
 	public Document getDocument(Customer customer, Module module, String documentName) {
 		Document result = null;
@@ -415,6 +485,14 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		return result;
 	}
 	
+	/**
+	 * Converts and caches a customer-specific document override.
+	 *
+	 * @param customer the owning customer
+	 * @param module the owning module
+	 * @param document document metadata
+	 * @return the converted document
+	 */
 	@Override
 	public Document putDocument(Customer customer, Module module, DocumentMetaData document) {
 		String customerName = customer.getName();
@@ -429,6 +507,13 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		return result;
 	}
 
+	/**
+	 * Converts and caches a vanilla document definition.
+	 *
+	 * @param module the owning module
+	 * @param document document metadata
+	 * @return the converted document
+	 */
 	@Override
 	public Document putDocument(Module module, DocumentMetaData document) {
 		String moduleName = module.getName();
@@ -442,6 +527,19 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		return result;
 	}
 
+	/**
+	 * Returns a view for a document, resolving customer and UX/UI overrides.
+	 *
+	 * <p>Lookup order is customer+uxui, customer default, vanilla+uxui, then vanilla
+	 * default. When enabled, scaffolded edit/pick/params views are generated if no
+	 * metadata view exists.
+	 *
+	 * @param uxui the UX/UI variant key, or {@code null}
+	 * @param customer the customer context, or {@code null}
+	 * @param document the owning document
+	 * @param name the view name
+	 * @return the resolved or scaffolded view, or {@code null} when unavailable
+	 */
 	@Override
 	@SuppressWarnings("java:S2789")
 	public View getView(String uxui,
@@ -613,6 +711,15 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		return null;
 	}
 
+	/**
+	 * Converts and caches a customer-specific UX/UI view definition.
+	 *
+	 * @param customer the owning customer
+	 * @param uxui the UX/UI variant key
+	 * @param document the owning document
+	 * @param view view metadata
+	 * @return the converted view
+	 */
 	@Override
 	public View putView(Customer customer, String uxui, Document document, ViewMetaData view) {
 		String customerName = customer.getName();
@@ -631,6 +738,14 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		return result;
 	}
 
+	/**
+	 * Converts and caches a vanilla UX/UI view definition.
+	 *
+	 * @param uxui the UX/UI variant key
+	 * @param document the owning document
+	 * @param view view metadata
+	 * @return the converted view
+	 */
 	@Override
 	public View putView(String uxui, Document document, ViewMetaData view) {
 		String documentName = document.getName();
@@ -647,6 +762,14 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		return result;
 	}
 	
+	/**
+	 * Converts and caches a customer-specific default view definition.
+	 *
+	 * @param customer the owning customer
+	 * @param document the owning document
+	 * @param view view metadata
+	 * @return the converted view
+	 */
 	@Override
 	public View putView(Customer customer, Document document, ViewMetaData view) {
 		String customerName = customer.getName();
@@ -665,6 +788,13 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		return result;
 	}
 	
+	/**
+	 * Converts and caches a vanilla default view definition.
+	 *
+	 * @param document the owning document
+	 * @param view view metadata
+	 * @return the converted view
+	 */
 	@Override
 	public View putView(Document document, ViewMetaData view) {
 		String documentName = document.getName();
@@ -681,6 +811,14 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		return result;
 	}
 
+	/**
+	 * Returns metadata action definition for a document, preferring customer overrides.
+	 *
+	 * @param customer the customer context, or {@code null}
+	 * @param document the owning document
+	 * @param actionName the action name
+	 * @return the resolved action metadata, or {@code null} when not found
+	 */
 	@Override
 	public ActionMetaData getMetaDataAction(Customer customer, Document document, String actionName) {
 		ActionMetaData result = null;
@@ -766,6 +904,14 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		return action.convert(metaDataName);
 	}
 
+	/**
+	 * Converts and caches a customer-specific action metadata definition.
+	 *
+	 * @param customer the owning customer
+	 * @param document the owning document
+	 * @param action action metadata
+	 * @return the converted action metadata
+	 */
 	@Override
 	public ActionMetaData putMetaDataAction(Customer customer, Document document, ActionMetaData action) {
 		String customerName = customer.getName();
@@ -783,6 +929,13 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		return result;
 	}
 	
+	/**
+	 * Converts and caches a vanilla action metadata definition.
+	 *
+	 * @param document the owning document
+	 * @param action action metadata
+	 * @return the converted action metadata
+	 */
 	@Override
 	public ActionMetaData putMetaDataAction(Document document, ActionMetaData action) {
 		String moduleName = document.getOwningModuleName();
@@ -798,6 +951,13 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		return result;
 	}
 
+	/**
+	 * Returns Bizlet metadata for a document, preferring customer overrides.
+	 *
+	 * @param customer the customer context, or {@code null}
+	 * @param document the owning document
+	 * @return the resolved Bizlet metadata, or {@code null} when not found
+	 */
 	@Override
 	public BizletMetaData getMetaDataBizlet(Customer customer, Document document) {
 		BizletMetaData result = null;
@@ -881,6 +1041,14 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		return bizlet.convert(metaDataName);
 	}
 
+	/**
+	 * Converts and caches a customer-specific Bizlet metadata definition.
+	 *
+	 * @param customer the owning customer
+	 * @param document the owning document
+	 * @param bizlet Bizlet metadata
+	 * @return the converted Bizlet metadata
+	 */
 	@Override
 	public BizletMetaData putMetaDataBizlet(Customer customer, Document document, BizletMetaData bizlet) {
 		String customerName = customer.getName();
@@ -898,6 +1066,13 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		return result;
 	}
 	
+	/**
+	 * Converts and caches a vanilla Bizlet metadata definition.
+	 *
+	 * @param document the owning document
+	 * @param bizlet Bizlet metadata
+	 * @return the converted Bizlet metadata
+	 */
 	@Override
 	public BizletMetaData putMetaDataBizlet(Document document, BizletMetaData bizlet) {
 		String moduleName = document.getOwningModuleName();
@@ -914,13 +1089,25 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	}
 
 	/**
-	 * Called by populateKeys() implementations.
-	 * @param key
+	 * Registers a key placeholder for lazy metadata loading.
+ 	 * Called by populateKeys() implementations.
+	 *
+	 * @param key the repository key to add when absent
 	 */
 	protected void addKey(@Nonnull String key) {
 		cache.putIfAbsent(key, Optional.empty());
 	}
 	
+	/**
+	 * Resolves a logical repository key through customer override precedence.
+	 *
+	 * <p>When {@code customerName} is provided, this first checks for a customer-specific
+	 * key and then falls back to the vanilla key.
+	 *
+	 * @param customerName the customer name for override resolution, or {@code null}
+	 * @param key the logical key
+	 * @return the resolved key present in the cache, or {@code null} when not found
+	 */
 	@Override
 	public @Nullable String vtable(@Nullable String customerName, @Nonnull String key) {
 		String result = null;

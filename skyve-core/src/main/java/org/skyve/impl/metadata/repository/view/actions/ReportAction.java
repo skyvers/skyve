@@ -30,6 +30,9 @@ import jakarta.xml.bind.annotation.XmlType;
 public class ReportAction extends ParameterizableAction {
 	private static final long serialVersionUID = 6083685683273669677L;
 
+	/**
+	 * Creates a report action descriptor with implicit report action semantics.
+	 */
 	public ReportAction() {
 		implicitName = ImplicitActionName.Report;
 	}
@@ -42,69 +45,148 @@ public class ReportAction extends ParameterizableAction {
 	private String queryName;
 	private String modelName;
 	
+	/**
+	 * Returns the module containing the report document.
+	 *
+	 * @return module name
+	 */
 	public String getModuleName() {
 		return moduleName;
 	}
 
+	/**
+	 * Sets the module containing the report document.
+	 *
+	 * @param moduleName module name
+	 */
 	@XmlAttribute(required = true)
 	public void setModuleName(String moduleName) {
 		this.moduleName = moduleName;
 	}
 
+	/**
+	 * Returns the document owning the report definition.
+	 *
+	 * @return document name
+	 */
 	public String getDocumentName() {
 		return documentName;
 	}
 
+	/**
+	 * Sets the document owning the report definition.
+	 *
+	 * @param documentName document name
+	 */
 	@XmlAttribute(required = true)
 	public void setDocumentName(String documentName) {
 		this.documentName = documentName;
 	}
 
+	/**
+	 * Returns the report resource name to execute.
+	 *
+	 * @return report name
+	 */
 	public String getReportName() {
 		return reportName;
 	}
 
+	/**
+	 * Sets the report resource name to execute.
+	 *
+	 * @param reportName report name
+	 */
 	@XmlAttribute(required = true)
 	public void setReportName(String reportName) {
 		this.reportName = reportName;
 	}
 
+	/**
+	 * Returns the preferred output format.
+	 *
+	 * @return report format, or {@code null}
+	 */
 	public ReportFormat getReportFormat() {
 		return reportFormat;
 	}
 	
+	/**
+	 * Sets the preferred output format.
+	 *
+	 * @param reportFormat report format
+	 */
 	@XmlAttribute
 	public void setReportFormat(ReportFormat reportFormat) {
 		this.reportFormat = reportFormat;
 	}
 
+	/**
+	 * Indicates whether the report should run in list-report mode.
+	 *
+	 * @return {@code true} for list-report mode, {@code false} otherwise, or {@code null}
+	 */
 	public Boolean isListReport() {
 		return listReport;
 	}
 
+	/**
+	 * Sets whether the report should run in list-report mode.
+	 *
+	 * @param listReport {@code true} for list-report mode, {@code false} otherwise
+	 */
 	@XmlAttribute
 	public void setListReport(Boolean listReport) {
 		this.listReport = listReport;
 	}
 
+	/**
+	 * Returns the named query used to produce list-report data.
+	 *
+	 * @return query name, or {@code null}
+	 */
 	public String getQueryName() {
 		return queryName;
 	}
 
+	/**
+	 * Sets the named query used to produce list-report data.
+	 *
+	 * @param queryName query name
+	 */
 	@XmlAttribute
 	public void setQueryName(String queryName) {
 		this.queryName = queryName;
 	}
 
+	/**
+	 * Returns the list model name supplying rows for report execution.
+	 *
+	 * @return model name, or {@code null}
+	 */
 	public String getModelName() {
 		return modelName;
 	}
 
+	/**
+	 * Sets the list model name supplying rows for report execution.
+	 *
+	 * @param modelName model name
+	 */
 	@XmlAttribute
 	public void setModelName(String modelName) {
 		this.modelName = modelName;
 	}
 
+	/**
+	 * Converts this descriptor to runtime metadata and injects report parameters.
+	 *
+	 * <p>Side effects: appends framework report parameters to the action parameter
+	 * list, including report/module/document identifiers and optional format/query/model
+	 * controls.
+	 *
+	 * @return runtime action metadata configured for report execution
+	 */
 	@Override
 	public ActionImpl toMetaDataAction() {
 		ActionImpl result = super.toMetaDataAction();

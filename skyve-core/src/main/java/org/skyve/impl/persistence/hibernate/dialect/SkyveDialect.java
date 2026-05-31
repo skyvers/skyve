@@ -24,17 +24,64 @@ import org.locationtech.jts.geom.Geometry;
  * </ul>
  */
 public interface SkyveDialect {
+	/**
+	 * Identifies the supported relational database families that Skyve maps to
+	 * concrete Hibernate dialect implementations.
+	 */
 	public static enum RDBMS {
 		h2, mysql, sqlserver, postgresql
 	}
 	
+	/**
+	 * Returns the JDBC type code used when binding geometry columns for this dialect.
+	 *
+	 * @return the JDBC type code for persisted geometry values
+	 */
 	public int getGeometrySqlType();
+
+	/**
+	 * Returns the Hibernate type used to map persisted geometry values.
+	 *
+	 * @return the geometry type descriptor for this dialect
+	 */
 	public JTSGeometryType getGeometryType();
+
+	/**
+	 * Converts a JTS geometry into the database-specific value expected by Hibernate.
+	 *
+	 * @param geometry the geometry to persist; may be {@code null} when the caller is binding a nullable column
+	 * @return the dialect-specific persisted representation
+	 */
 	public Object convertToPersistedValue(Geometry geometry);
+
+	/**
+	 * Converts a database geometry payload back into a JTS geometry instance.
+	 *
+	 * @param geometry the database value returned by JDBC or Hibernate
+	 * @return the decoded geometry, or {@code null} when the database value is {@code null}
+	 */
 	public Geometry convertFromPersistedValue(Object geometry);
 	
+	/**
+	 * Determines whether schema migration should emit an alter-column statement for the supplied column.
+	 *
+	 * @param column the mapped Hibernate column definition
+	 * @param columnInfo the live database metadata for the column; may be {@code null} when the column does not yet exist
+	 * @return {@code true} when the existing database column must be modified to match the mapping
+	 */
 	public boolean isAlterTableColumnChangeRequired(Column column, ColumnInformation columnInfo);
+	
+	/**
+	 * Returns the vendor-specific SQL fragment used after {@code ALTER TABLE} when modifying a column definition.
+	 *
+	 * @return the dialect-specific column-modification fragment
+	 */
 	public String getModifyColumnString();
 	
+	/**
+	 * Identifies the underlying relational database family for this dialect.
+	 *
+	 * @return the owning {@link RDBMS}
+	 */
 	public RDBMS getRDBMS();
 }

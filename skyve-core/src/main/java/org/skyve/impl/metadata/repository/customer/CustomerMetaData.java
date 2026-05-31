@@ -96,159 +96,332 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
 	private Map<String, String> properties = new TreeMap<>();
 
+	/**
+	 * Returns the customer language tag.
+	 *
+	 * @return BCP-47 language tag, or {@code null}
+	 */
 	public String getLanguage() {
 		return language;
 	}
 
+	/**
+	 * Sets the customer language tag.
+	 *
+	 * @param language BCP-47 language tag
+	 */
 	@XmlAttribute
 	public void setLanguage(String language) {
 		this.language = Util.processStringValue(language);
 	}
 
+	/**
+	 * Returns customer-level UI resource overrides.
+	 *
+	 * @return UI resource metadata, or {@code null}
+	 */
 	public UIResources getUiResources() {
 		return uiResources;
 	}
 
+	/**
+	 * Sets customer-level UI resource overrides.
+	 *
+	 * @param uiResources UI resource metadata
+	 */
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE)
 	public void setUiResources(UIResources uiResources) {
 		this.uiResources = uiResources;
 	}
 
+	/**
+	 * Returns HTML resource customisation metadata.
+	 *
+	 * @return HTML resource metadata, or {@code null}
+	 */
 	public HTMLResourcesMetaData getHtmlResources() {
 		return htmlResources;
 	}
 
+	/**
+	 * Sets HTML resource customisation metadata.
+	 *
+	 * @param htmlResources HTML resource metadata
+	 */
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE)
 	public void setHtmlResources(HTMLResourcesMetaData htmlResources) {
 		this.htmlResources = htmlResources;
 	}
 
+	/**
+	 * Returns login resource customisation metadata.
+	 *
+	 * @return login resource metadata, or {@code null}
+	 */
 	public LoginResourcesMetaData getLoginResources() {
 		return loginResources;
 	}
 
+	/**
+	 * Sets login resource customisation metadata.
+	 *
+	 * @param loginResources login resource metadata
+	 */
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE)
 	public void setLoginResources(LoginResourcesMetaData loginResources) {
 		this.loginResources = loginResources;
 	}
 
+	/**
+	 * Returns the default converter for date attributes.
+	 *
+	 * @return configured date converter name
+	 */
 	public ConverterName getDefaultDateConverter() {
 		return defaultDateConverter;
 	}
 
+	/**
+	 * Sets the default converter for date attributes.
+	 *
+	 * @param defaultDateConverter configured date converter name
+	 */
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, required = true)
 	public void setDefaultDateConverter(ConverterName defaultDateConverter) {
 		this.defaultDateConverter = defaultDateConverter;
 	}
 
+	/**
+	 * Returns the default converter for date-time attributes.
+	 *
+	 * @return configured date-time converter name
+	 */
 	public ConverterName getDefaultDateTimeConverter() {
 		return defaultDateTimeConverter;
 	}
 
+	/**
+	 * Sets the default converter for date-time attributes.
+	 *
+	 * @param defaultDateTimeConverter configured date-time converter name
+	 */
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, required = true)
 	public void setDefaultDateTimeConverter(ConverterName defaultDateTimeConverter) {
 		this.defaultDateTimeConverter = defaultDateTimeConverter;
 	}
 
+	/**
+	 * Returns the default converter for time attributes.
+	 *
+	 * @return configured time converter name
+	 */
 	public ConverterName getDefaultTimeConverter() {
 		return defaultTimeConverter;
 	}
 
+	/**
+	 * Sets the default converter for time attributes.
+	 *
+	 * @param defaultTimeConverter configured time converter name
+	 */
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, required = true)
 	public void setDefaultTimeConverter(ConverterName defaultTimeConverter) {
 		this.defaultTimeConverter = defaultTimeConverter;
 	}
 
+	/**
+	 * Returns the default converter for timestamp attributes.
+	 *
+	 * @return configured timestamp converter name
+	 */
 	public ConverterName getDefaultTimestampConverter() {
 		return defaultTimestampConverter;
 	}
 
+	/**
+	 * Sets the default converter for timestamp attributes.
+	 *
+	 * @param defaultTimestampConverter configured timestamp converter name
+	 */
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, required = true)
 	public void setDefaultTimestampConverter(ConverterName defaultTimestampConverter) {
 		this.defaultTimestampConverter = defaultTimestampConverter;
 	}
 
+	/**
+	 * Returns module configuration metadata for the customer.
+	 *
+	 * @return customer module metadata, or {@code null}
+	 */
 	public CustomerModulesMetaData getModules() {
 		return modules;
 	}
 
+	/**
+	 * Sets module configuration metadata for the customer.
+	 *
+	 * @param modules customer module metadata
+	 */
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, required = true)
 	public void setModules(CustomerModulesMetaData modules) {
 		this.modules = modules;
 	}
 
+	/**
+	 * Returns composite role definitions for the customer.
+	 *
+	 * @return customer role metadata, or {@code null}
+	 */
 	public CustomerRolesMetaData getRoles() {
 		return roles;
 	}
 
+	/**
+	 * Sets composite role definitions for the customer.
+	 *
+	 * @param roles customer role metadata
+	 */
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, required = false)
 	public void setRoles(CustomerRolesMetaData roles) {
 		this.roles = roles;
 	}
 
+	/**
+	 * Returns feature roles allowed to perform text search operations.
+	 *
+	 * @return mutable list of text-search feature roles
+	 */
 	@XmlElementWrapper(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "textSearchRoles")
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "role", required = true)
 	public List<CustomerFeatureRoleMetaData> getTextSearchRoles() {
 		return textSearchRoles;
 	}
 	
+	/**
+	 * Returns feature roles allowed to access flag operations.
+	 *
+	 * @return mutable list of flag feature roles
+	 */
 	@XmlElementWrapper(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "flagRoles")
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "role", required = true)
 	public List<CustomerFeatureRoleMetaData> getFlagRoles() {
 		return flagRoles;
 	}
 	
+	/**
+	 * Returns feature roles allowed to switch mode.
+	 *
+	 * @return mutable list of switch-mode feature roles
+	 */
 	@XmlElementWrapper(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "switchModeRoles")
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "role", required = true)
 	public List<CustomerFeatureRoleMetaData> getSwitchModeRoles() {
 		return switchModeRoles;
 	}
 	
+	/**
+	 * Returns interceptor metadata declarations for this customer.
+	 *
+	 * @return mutable list of interceptor metadata
+	 */
 	@XmlElementWrapper(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "interceptors")
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "interceptor", required = true)
 	public List<InterceptorMetaDataImpl> getInterceptors() {
 		return interceptors;
 	}
 
+	/**
+	 * Returns observer metadata declarations for this customer.
+	 *
+	 * @return mutable list of observer metadata
+	 */
 	@XmlElementWrapper(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "observers")
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "observer", required = true)
 	public List<ObserverMetaDataImpl> getObservers() {
 		return observers;
 	}
 
+	/**
+	 * Returns the fully-qualified JFreeChart post-processor class name.
+	 *
+	 * @return JFreeChart post-processor class name, or {@code null}
+	 */
 	public String getJFreeChartPostProcessorClassName() {
 		return fullyQualifiedJFreeChartPostProcessorClassName;
 	}
 
+	/**
+	 * Sets the fully-qualified JFreeChart post-processor class name.
+	 *
+	 * @param fullyQualifiedJFreeChartPostProcessorClassName class name to use
+	 */
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE)
 	public void setJFreeChartPostProcessorClassName(String fullyQualifiedJFreeChartPostProcessorClassName) {
 		this.fullyQualifiedJFreeChartPostProcessorClassName = Util.processStringValue(fullyQualifiedJFreeChartPostProcessorClassName);
 	}
 
+	/**
+	 * Returns the fully-qualified PrimeFaces chart post-processor class name.
+	 *
+	 * @return PrimeFaces chart post-processor class name, or {@code null}
+	 */
 	public String getPrimeFacesChartPostProcessorClassName() {
 		return fullyQualifiedPrimeFacesChartPostProcessorClassName;
 	}
 
+	/**
+	 * Sets the fully-qualified PrimeFaces chart post-processor class name.
+	 *
+	 * @param fullyQualifiedPrimeFacesChartPostProcessorClassName class name to use
+	 */
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE)
 	public void setPrimeFacesChartPostProcessorClassName(String fullyQualifiedPrimeFacesChartPostProcessorClassName) {
 		this.fullyQualifiedPrimeFacesChartPostProcessorClassName = Util.processStringValue(fullyQualifiedPrimeFacesChartPostProcessorClassName);
 	}
 
+	/**
+	 * Returns the source metadata last-modified timestamp used for reload checks.
+	 *
+	 * @return source metadata last-modified timestamp in milliseconds
+	 */
 	@Override
 	public long getLastModifiedMillis() {
 		return lastModifiedMillis;
 	}
 
+	/**
+	 * Sets the source metadata last-modified timestamp used for reload checks.
+	 *
+	 * @param lastModifiedMillis source metadata last-modified timestamp in milliseconds
+	 */
 	@XmlTransient
 	public void setLastModifiedMillis(long lastModifiedMillis) {
 		this.lastModifiedMillis = lastModifiedMillis;
 	}
 	
+	/**
+	 * Returns decorator properties defined for this customer descriptor.
+	 *
+	 * @return mutable customer property map
+	 */
 	@Override
 	public Map<String, String> getProperties() {
 		return properties;
 	}
 
+	/**
+	 * Converts this JAXB customer descriptor into a runtime {@link CustomerImpl}.
+	 *
+	 * <p>Performs structural validation, resolves default converters by type,
+	 * flattens customer and feature roles to module-role mappings, and registers
+	 * interceptors and observers.
+	 *
+	 * <p>Side effects: populates dependency metadata on the returned customer.
+	 *
+	 * @param metaDataName metadata path used in validation error messages
+	 * @return the populated runtime customer metadata
+	 * @throws MetaDataException if required metadata is missing, duplicated, or invalid
+	 */
 	@Override
 	public CustomerImpl convert(String metaDataName) {
 		CustomerImpl result = new CustomerImpl();
@@ -408,14 +581,17 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	}
 	
 	/**
-	 * Populates and flattens feature roles to module roles. 
-	 * Feature roles include text search, flag and switch mode.
-	 * 
-	 * @param featureRoles
-	 * @param featureModuleRoles
-	 * @param metaDataName
-	 * @param roles
-	 * @param moduleEntries
+	 * Flattens feature-role declarations into module-role identifiers.
+	 *
+	 * <p>Feature roles may reference either a direct module role or a composite
+	 * customer role. Composite roles are expanded to all underlying module roles.
+	 *
+	 * @param featureRoles source feature-role declarations
+	 * @param featureModuleRoles destination set of {@code module.role} entries
+	 * @param metaDataName metadata path used in validation error messages
+	 * @param roles available composite customer roles
+	 * @param moduleEntries known customer modules
+	 * @throws MetaDataException if role/module references are invalid or duplicated
 	 */
 	private static void populateFeatureRoles(List<CustomerFeatureRoleMetaData> featureRoles, Set<String> featureModuleRoles,
 			String metaDataName, CustomerRolesMetaData roles, Map<String, FormLabelLayout> moduleEntries) {

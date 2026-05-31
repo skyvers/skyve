@@ -20,9 +20,10 @@ import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 
 /**
- * SmartClient query column definition encapsulates metadata used to render SmartClient list grid columns for query-based views.
- * This includes column-level metadata such as title, type, and alignment, as well as query-specific metadata such as filterability, sortability, and detail-only status.
- * It extends SmartClientAttributeDefinition to reuse attribute-based metadata such as domain type and value maps where applicable, but also supports
+ * Encapsulates SmartClient query-column metadata for list-grid and repeater rendering.
+ *
+ * <p>Instances enrich the base attribute definition with query-specific contract data
+ * such as filtering, sorting, detail-only rendering, and thumbnail handling.
  */
 public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefinition {
 	private boolean canFilter = true;

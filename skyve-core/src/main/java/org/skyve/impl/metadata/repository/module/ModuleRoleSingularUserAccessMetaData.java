@@ -22,6 +22,12 @@ import jakarta.xml.bind.annotation.XmlType;
 public class ModuleRoleSingularUserAccessMetaData extends ModuleRoleDocumentAggregateUserAccessMetaData {
 	private static final long serialVersionUID = 2888202790675893096L;
 	
+	/**
+	 * Creates a singular user access descriptor for the configured document.
+	 *
+	 * @param moduleName the owning module name
+	 * @return the runtime singular user access
+	 */
 	@Override
 	public UserAccess toUserAccess(String moduleName) {
 		return UserAccess.singular(moduleName, getDocumentName());

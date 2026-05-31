@@ -31,6 +31,9 @@ public abstract class AbstractBound implements Bound {
 		return binding;
 	}
 
+	/**
+	 * Sets the binding path after trimming and empty-string normalization.
+	 */
 	@Override
 	@XmlAttribute(required = false)
 	public void setBinding(String binding) {

@@ -28,15 +28,36 @@ public class ModuleRoleDocumentAggregateUserAccessMetaData extends ModuleRoleUse
 	
 	private String documentName;
 
+	/**
+	 * Returns the target document name for this aggregate-access grant.
+	 *
+	 * @return the target document name
+	 */
 	public String getDocumentName() {
 		return documentName;
 	}
 
+	/**
+	 * Sets the target document name for this aggregate-access grant.
+	 *
+	 * <p>Side effects: normalises the supplied value with
+	 * {@link UtilImpl#processStringValue(String)} before storing it.
+	 *
+	 * @param documentName the target document name; blank values become {@code null}
+	 */
 	@XmlAttribute(name = "document", required = true)
 	public void setDocumentName(String documentName) {
 		this.documentName = UtilImpl.processStringValue(documentName);
 	}
 	
+	/**
+	 * Validates that the configured document reference exists in the owning module.
+	 *
+	 * @param metaDataName the source metadata identifier used in validation errors
+	 * @param roleName the owning role name used in validation errors
+	 * @param module the module used to resolve document references
+	 * @throws MetaDataException if {@code document} is missing or does not resolve in {@code module}
+	 */
 	@Override
 	public void validate(String metaDataName, String roleName, Module module) {
 		if (documentName == null) {
@@ -47,6 +68,12 @@ public class ModuleRoleDocumentAggregateUserAccessMetaData extends ModuleRoleUse
 		}
 	}
 
+	/**
+	 * Creates a document-aggregate user access descriptor for the configured document.
+	 *
+	 * @param moduleName the owning module name
+	 * @return the runtime document-aggregate user access
+	 */
 	@Override
 	public UserAccess toUserAccess(String moduleName) {
 		return UserAccess.documentAggregate(moduleName, documentName);

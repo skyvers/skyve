@@ -12,28 +12,55 @@ import org.skyve.metadata.view.View;
  * layout that mirrors the view's sections and widget arrangement.
  */
 public class ViewReportDesignGenerator extends ReportDesignGenerator {
-
     private ReportViewVisitor visitor;
 
+    /**
+     * Creates a generator that lazily creates its own view visitor.
+     */
     public ViewReportDesignGenerator() { }
 
+    /**
+     * Creates a generator using a caller-supplied visitor.
+     *
+     * @param visitor The visitor used to extract fields and layout bands.
+     */
     public ViewReportDesignGenerator(ReportViewVisitor visitor) {
         this.visitor = visitor;
     }
 
+    /**
+     * Returns the current visitor instance.
+     *
+     * @return The configured visitor, or {@code null} when not initialised.
+     */
     public ReportViewVisitor getVisitor() {
         return visitor;
     }
 
+    /**
+     * Replaces the visitor used to traverse the source view.
+     *
+     * @param visitor The visitor to use for subsequent generation calls.
+     */
     public void setVisitor(ReportViewVisitor visitor) {
         this.visitor = visitor;
     }
 
+    /**
+     * Creates a sibling generator for collection subreports.
+     *
+     * @return A new view-based generator instance.
+     */
     @Override
     protected ViewReportDesignGenerator getSubreportGenerator() {
         return new ViewReportDesignGenerator();
     }
 
+    /**
+     * Adds fields discovered by visiting the configured view definition.
+     *
+     * @param design The design to populate.
+     */
     @Override
     protected void addFields(DesignSpecification design) {
         super.addFields(design);
@@ -45,6 +72,11 @@ public class ViewReportDesignGenerator extends ReportDesignGenerator {
         visitor.visit();
     }
 
+    /**
+     * Adds detail bands produced by the view visitor layout pass.
+     *
+     * @param design The design to populate.
+     */
     @Override
     protected void addBands(DesignSpecification design) {
         super.addBands(design);
@@ -58,6 +90,12 @@ public class ViewReportDesignGenerator extends ReportDesignGenerator {
         design.getBands().addAll(visitor.getDetailBands());
     }
 
+    /**
+     * Builds a title band for view-defined reports.
+     *
+     * @param design The design being generated.
+     * @return The title band.
+     */
     @Override
     protected ReportBand createTitleBand(DesignSpecification design) {
         ReportBand title = super.createTitleBand(design);

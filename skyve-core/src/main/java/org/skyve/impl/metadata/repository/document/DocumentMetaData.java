@@ -147,124 +147,259 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
 	private Map<String, String> properties = new TreeMap<>();
 
+	/**
+	 * Returns the document inheritance mode.
+	 *
+	 * @return inheritance strategy, or {@code null}
+	 */
 	public Extends getExtends() {
 		return inherits;
 	}
 
+	/**
+	 * Sets the document inheritance mode.
+	 *
+	 * @param inherits inheritance strategy
+	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setExtends(Extends inherits) {
 		this.inherits = inherits;
 	}
 
+	/**
+	 * Returns whether this document is abstract.
+	 *
+	 * @return {@code true} when abstract, otherwise {@code false} or {@code null}
+	 */
 	public java.lang.Boolean getAbstract() {
 		return abstractClass;
 	}
 
+	/**
+	 * Sets whether this document is abstract.
+	 *
+	 * @param abstractClass abstract flag
+	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setAbstract(java.lang.Boolean abstractClass) {
 		this.abstractClass = abstractClass;
 	}
 
+	/**
+	 * Returns persistence mapping metadata for this document.
+	 *
+	 * @return persistence metadata, or {@code null} for transient documents
+	 */
 	public Persistent getPersistent() {
 		return persistent;
 	}
 
+	/**
+	 * Sets persistence mapping metadata for this document.
+	 *
+	 * @param persistent persistence metadata
+	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, required = false)
 	public void setPersistent(Persistent persistent) {
 		this.persistent = persistent;
 	}
 
+	/**
+	 * Returns dynamic-behaviour metadata for this document.
+	 *
+	 * @return dynamic metadata, or {@code null}
+	 */
 	public Dynamic getDynamic() {
 		return dynamic;
 	}
 
+	/**
+	 * Sets dynamic-behaviour metadata for this document.
+	 *
+	 * @param dynamic dynamic metadata
+	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setDynamic(Dynamic dynamic) {
 		this.dynamic = dynamic;
 	}
 
+	/**
+	 * Returns the singular display alias.
+	 *
+	 * @return singular alias
+	 */
 	public String getSingularAlias() {
 		return singularAlias;
 	}
 
+	/**
+	 * Sets the singular display alias.
+	 *
+	 * @param singularAlias singular alias value
+	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, required = true)
 	public void setSingularAlias(String singularAlias) {
 		this.singularAlias = UtilImpl.processStringValue(singularAlias);
 	}
 
+	/**
+	 * Returns the plural display alias.
+	 *
+	 * @return plural alias
+	 */
 	public String getPluralAlias() {
 		return pluralAlias;
 	}
 
+	/**
+	 * Sets the plural display alias.
+	 *
+	 * @param pluralAlias plural alias value
+	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, required = true)
 	public void setPluralAlias(String pluralAlias) {
 		this.pluralAlias = UtilImpl.processStringValue(pluralAlias);
 	}
 
+	/**
+	 * Returns the relative path for the 16x16 document icon.
+	 *
+	 * @return 16x16 icon path, or {@code null}
+	 */
 	public String getIcon16x16RelativeFilePath() {
 		return icon16x16RelativeFilePath;
 	}
 
+	/**
+	 * Sets the relative path for the 16x16 document icon.
+	 *
+	 * @param icon16x16RelativeFilePath 16x16 icon path
+	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setIcon16x16RelativeFilePath(String icon16x16RelativeFilePath) {
 		this.icon16x16RelativeFilePath = UtilImpl.processStringValue(icon16x16RelativeFilePath);
 	}
 
+	/**
+	 * Returns the icon CSS class.
+	 *
+	 * @return icon style class, or {@code null}
+	 */
 	public String getIconStyleClass() {
 		return iconStyleClass;
 	}
 
+	/**
+	 * Sets the icon CSS class.
+	 *
+	 * @param iconStyleClass icon style class
+	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setIconStyleClass(String iconStyleClass) {
 		this.iconStyleClass = UtilImpl.processStringValue(iconStyleClass);
 	}
 
+	/**
+	 * Returns the relative path for the 32x32 document icon.
+	 *
+	 * @return 32x32 icon path, or {@code null}
+	 */
 	public String getIcon32x32RelativeFilePath() {
 		return icon32x32RelativeFilePath;
 	}
 
+	/**
+	 * Sets the relative path for the 32x32 document icon.
+	 *
+	 * @param icon32x32RelativeFilePath 32x32 icon path
+	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setIcon32x32RelativeFilePath(String icon32x32RelativeFilePath) {
 		this.icon32x32RelativeFilePath = UtilImpl.processStringValue(icon32x32RelativeFilePath);
 	}
 
+	/**
+	 * Returns whether auditing is enabled.
+	 *
+	 * @return audit flag, or {@code null} to use defaults
+	 */
 	public java.lang.Boolean getAudited() {
 		return audited;
 	}
 
+	/**
+	 * Sets whether auditing is enabled.
+	 *
+	 * @param audited audit flag
+	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setAudited(java.lang.Boolean audited) {
 		this.audited = audited;
 	}
 
+	/**
+	 * Returns the human-readable document description.
+	 *
+	 * @return document description, or {@code null}
+	 */
 	public String getDescription() {
 		return description;
 	}
 
+	/**
+	 * Sets the human-readable document description.
+	 *
+	 * @param description document description
+	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
 	public void setDescription(String description) {
 		this.description = UtilImpl.processStringValue(description);
 	}
 
+	/**
+	 * Returns parent-document linkage metadata.
+	 *
+	 * @return parent document metadata, or {@code null}
+	 */
 	public ParentDocument getParentDocument() {
 		return parentDocument;
 	}
 
+	/**
+	 * Sets parent-document linkage metadata.
+	 *
+	 * @param parentDocument parent document metadata
+	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setParentDocument(ParentDocument parentDocument) {
 		this.parentDocument = parentDocument;
 	}
 
+	/**
+	 * Returns business-key metadata for this document.
+	 *
+	 * @return business-key metadata, or {@code null}
+	 */
 	public BizKey getBizKey() {
 		return bizKey;
 	}
 
+	/**
+	 * Sets business-key metadata for this document.
+	 *
+	 * @param bizKey business-key metadata
+	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setBizKey(BizKey bizKey) {
 		this.bizKey = bizKey;
 	}
 
+	/**
+	 * Returns implemented interfaces declared for this document.
+	 *
+	 * @return mutable list of interface declarations
+	 */
 	@XmlElementWrapper(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "implements")
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE,
 			name = "interface",
@@ -273,7 +408,13 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 		return interfaces;
 	}
 
-	// Keep this in sync with ViewModelMetaData
+	/**
+	 * Returns declared document attributes in definition order.
+	 *
+	 * Keep this in sync with ViewModelMetaData
+	 * 
+	 * @return mutable list of document attributes
+	 */
 	@XmlElementWrapper(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "attributes", required = true)
 	@XmlElementRefs({@XmlElementRef(type = Text.class),
 						@XmlElementRef(type = Date.class),
@@ -302,43 +443,89 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 		return attributes;
 	}
 
+	/**
+	 * Returns declared document conditions.
+	 *
+	 * @return mutable list of condition metadata
+	 */
 	@XmlElementWrapper(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "conditions")
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "condition", required = true)
 	public List<ConditionMetaData> getConditions() {
 		return conditions;
 	}
 
+	/**
+	 * Returns declared unique constraints.
+	 *
+	 * @return mutable list of unique constraint metadata
+	 */
 	@XmlElementWrapper(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "uniqueConstraints")
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "constraint", required = false)
 	public List<UniqueConstraint> getUniqueConstraints() {
 		return uniqueConstraints;
 	}
 
+	/**
+	 * Returns long-form document documentation.
+	 *
+	 * @return documentation text, or {@code null}
+	 */
 	public String getDocumentation() {
 		return documentation;
 	}
 
+	/**
+	 * Sets long-form document documentation.
+	 *
+	 * @param documentation documentation text
+	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
 	public void setDocumentation(String documentation) {
 		this.documentation = UtilImpl.processStringValue(documentation);
 	}
 	
+	/**
+	 * Returns decorator properties defined on this document descriptor.
+	 *
+	 * @return mutable document property map
+	 */
 	@Override
 	public Map<String, String> getProperties() {
 		return properties;
 	}
 
+	/**
+	 * Returns the source metadata last-modified timestamp used for reload checks.
+	 *
+	 * @return source metadata last-modified timestamp in milliseconds
+	 */
 	@Override
 	public long getLastModifiedMillis() {
 		return lastModifiedMillis;
 	}
 
+	/**
+	 * Sets the source metadata last-modified timestamp used for reload checks.
+	 *
+	 * @param lastModifiedMillis source metadata last-modified timestamp in milliseconds
+	 */
 	@XmlTransient
 	public void setLastModifiedMillis(long lastModifiedMillis) {
 		this.lastModifiedMillis = lastModifiedMillis;
 	}
 
+	/**
+	 * Converts this JAXB document descriptor into runtime document metadata.
+	 *
+	 * <p>Validates required aliases, biz-key rules, dynamic mappings, attribute
+	 * names, converter compatibility, uniqueness constraints, and derived defaults
+	 * before returning a populated {@link DocumentImpl}.
+	 *
+	 * @param metaDataName metadata path used in validation error messages
+	 * @return the populated runtime document metadata
+	 * @throws MetaDataException if the descriptor is incomplete or internally inconsistent
+	 */
 	@Override
 	public Document convert(String metaDataName) {
 		DocumentImpl result = new DocumentImpl();

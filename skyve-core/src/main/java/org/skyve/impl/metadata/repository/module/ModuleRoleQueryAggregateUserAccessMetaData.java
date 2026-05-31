@@ -28,15 +28,36 @@ public class ModuleRoleQueryAggregateUserAccessMetaData extends ModuleRoleUserAc
 
 	private String queryName;
 
+	/**
+	 * Returns the target query name for this aggregate-access grant.
+	 *
+	 * @return the target query name
+	 */
 	public String getQueryName() {
 		return queryName;
 	}
 
+	/**
+	 * Sets the target query name for this aggregate-access grant.
+	 *
+	 * <p>Side effects: normalises the supplied value with
+	 * {@link UtilImpl#processStringValue(String)} before storing it.
+	 *
+	 * @param queryName the target query name; blank values become {@code null}
+	 */
 	@XmlAttribute(name = "query", required = true)
 	public void setQueryName(String queryName) {
 		this.queryName = UtilImpl.processStringValue(queryName);
 	}
 	
+	/**
+	 * Validates that the configured query reference exists in the owning module.
+	 *
+	 * @param metaDataName the source metadata identifier used in validation errors
+	 * @param roleName the owning role name used in validation errors
+	 * @param module the module used to resolve query references
+	 * @throws MetaDataException if {@code query} is missing or does not resolve in {@code module}
+	 */
 	@Override
 	public void validate(String metaDataName, String roleName, Module module) {
 		if (queryName == null) {
@@ -47,6 +68,12 @@ public class ModuleRoleQueryAggregateUserAccessMetaData extends ModuleRoleUserAc
 		}
 	}
 
+	/**
+	 * Creates a query-aggregate user access descriptor for the configured query.
+	 *
+	 * @param moduleName the owning module name
+	 * @return the runtime query-aggregate user access
+	 */
 	@Override
 	public UserAccess toUserAccess(String moduleName) {
 		return UserAccess.queryAggregate(moduleName, queryName);

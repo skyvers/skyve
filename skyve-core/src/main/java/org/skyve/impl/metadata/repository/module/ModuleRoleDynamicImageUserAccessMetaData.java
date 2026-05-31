@@ -29,15 +29,39 @@ public class ModuleRoleDynamicImageUserAccessMetaData extends ModuleRoleDocument
 
 	private String imageName;
 
+	/**
+	 * Returns the dynamic-image identifier for this access grant.
+	 *
+	 * @return the dynamic-image name
+	 */
 	public String getImageName() {
 		return imageName;
 	}
 
+	/**
+	 * Sets the dynamic-image identifier for this access grant.
+	 *
+	 * <p>Side effects: normalises the supplied value with
+	 * {@link UtilImpl#processStringValue(String)} before storing it.
+	 *
+	 * @param imageName the dynamic-image name; blank values become {@code null}
+	 */
 	@XmlAttribute(name = "image", required = true)
 	public void setImageName(String imageName) {
 		this.imageName = UtilImpl.processStringValue(imageName);
 	}
 	
+	/**
+	 * Validates this dynamic-image access declaration.
+	 *
+	 * <p>Validates common document requirements via {@code super.validate(...)} and
+	 * confirms an image binding name is supplied.
+	 *
+	 * @param metaDataName the source metadata identifier used in validation errors
+	 * @param roleName the owning role name used in validation errors
+	 * @param module the module used to resolve inherited document references
+	 * @throws MetaDataException if required attributes are missing
+	 */
 	@Override
 	public void validate(String metaDataName, String roleName, Module module) {
 		super.validate(metaDataName, roleName, module);
@@ -47,6 +71,12 @@ public class ModuleRoleDynamicImageUserAccessMetaData extends ModuleRoleDocument
 		// NB can't validate imageName exists until second pass validation in LocalDesignRepository.validateModuleForGenerateDomain()
 	}
 	
+	/**
+	 * Creates a dynamic-image user access descriptor for the configured document and image.
+	 *
+	 * @param moduleName the owning module name
+	 * @return the runtime dynamic-image user access
+	 */
 	@Override
 	public UserAccess toUserAccess(String moduleName) {
 		return UserAccess.dynamicImage(moduleName, getDocumentName(), imageName);

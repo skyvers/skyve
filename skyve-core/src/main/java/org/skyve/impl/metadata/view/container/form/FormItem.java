@@ -86,10 +86,22 @@ public class FormItem implements DecoratedMetaData {
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
 	private Map<String, String> properties = new TreeMap<>();
 
+	/**
+	 * Returns the configured widget metadata for this form cell.
+	 *
+	 * @return the widget descriptor, or {@code null} when not configured
+	 */
 	public MetaData getWidget() {
 		return widget;
 	}
 	
+	/**
+	 * Sets the widget metadata for this form cell.
+	 *
+	 * <p>Only one widget subtype from the declared JAXB element-ref set is valid.
+	 *
+	 * @param widget  the widget descriptor to render in this cell; may be {@code null}
+	 */
 	@XmlElementRefs({@XmlElementRef(type = DefaultWidget.class),
 						@XmlElementRef(type = ContentImage.class),
 						@XmlElementRef(type = ContentLink.class), 
@@ -122,109 +134,235 @@ public class FormItem implements DecoratedMetaData {
 		this.widget = widget;
 	}
 	
+	/**
+	 * Returns how many form columns this item spans.
+	 *
+	 * @return column span, or {@code null} when default spanning is used
+	 */
 	public Integer getColspan() {
 		return colspan;
 	}
 
+	/**
+	 * Sets how many form columns this item spans.
+	 *
+	 * @param colspan  column span value; may be {@code null}
+	 */
 	@XmlAttribute(required = false)
 	public void setColspan(Integer colspan) {
 		this.colspan = colspan;
 	}
 	
+	/**
+	 * Returns how many form rows this item spans.
+	 *
+	 * @return row span, or {@code null} when default spanning is used
+	 */
 	public Integer getRowspan() {
 		return rowspan;
 	}
 
+	/**
+	 * Sets how many form rows this item spans.
+	 *
+	 * @param rowspan  row span value; may be {@code null}
+	 */
 	@XmlAttribute(required = false)
 	public void setRowspan(Integer rowspan) {
 		this.rowspan = rowspan;
 	}
 
+	/**
+	 * Returns the horizontal alignment for this item's widget cell.
+	 *
+	 * @return widget-cell alignment, or {@code null} when renderer defaults are used
+	 */
 	public HorizontalAlignment getHorizontalAlignment() {
 		return horizontalAlignment;
 	}
 
+	/**
+	 * Sets the horizontal alignment for this item's widget cell.
+	 *
+	 * @param horizontalAlignment  widget-cell alignment to apply; may be {@code null}
+	 */
 	@XmlAttribute(name = "align", required = false)
 	public void setHorizontalAlignment(HorizontalAlignment horizontalAlignment) {
 		this.horizontalAlignment = horizontalAlignment;
 	}
 
+	/**
+	 * Returns the horizontal alignment for this item's label cell.
+	 *
+	 * @return label-cell alignment, or {@code null} when default label alignment is used
+	 */
 	@XmlAttribute(name = "labelAlign", required = false)
 	public HorizontalAlignment getLabelHorizontalAlignment() {
 		return labelHorizontalAlignment;
 	}
 
+	/**
+	 * Sets the horizontal alignment for this item's label cell.
+	 *
+	 * @param labelHorizontalAlignment  label-cell alignment to apply; may be {@code null}
+	 */
 	public void setLabelHorizontalAlignment(
 			HorizontalAlignment labelHorizontalAlignment) {
 		this.labelHorizontalAlignment = labelHorizontalAlignment;
 	}
 
+	/**
+	 * Returns the label override text for this item.
+	 *
+	 * @return label override text, or {@code null} when no override is configured
+	 */
 	public String getLabel() {
 		return label;
 	}
 
+	/**
+	 * Returns the field label translated for the current locale.
+	 *
+	 * @return the localised label, or {@code null} when no label override is configured
+	 */
 	public String getLocalisedLabel() {
 		return Util.i18n(label);
 	}
 	
+	/**
+	 * Sets the label override text for this item.
+	 *
+	 * <p>Side effects: trims and normalises the supplied value before storage.
+	 *
+	 * @param label  label override text; may be {@code null} or blank
+	 */
 	@XmlAttribute(required = false)
 	public void setLabel(String label) {
 		this.label = UtilImpl.processStringValue(label);
 	}
 
+	/**
+	 * Returns whether the label should be rendered.
+	 *
+	 * @return {@code true} to render the label, {@code false} to hide it, or {@code null} to use defaults
+	 */
 	public Boolean getShowLabel() {
 		return showLabel;
 	}
 
+	/**
+	 * Sets whether the label should be rendered.
+	 *
+	 * @param showLabel  label visibility flag; may be {@code null}
+	 */
 	@XmlAttribute(required = false)
 	public void setShowLabel(Boolean showLabel) {
 		this.showLabel = showLabel;
 	}
 
+	/**
+	 * Returns whether help text should be rendered.
+	 *
+	 * @return {@code true} to render help, {@code false} to hide it, or {@code null} to use defaults
+	 */
 	public Boolean getShowHelp() {
 		return showHelp;
 	}
 
+	/**
+	 * Sets whether help text should be rendered.
+	 *
+	 * @param showHelp  help visibility flag; may be {@code null}
+	 */
 	@XmlAttribute(required = false)
 	public void setShowHelp(Boolean showHelp) {
 		this.showHelp = showHelp;
 	}
 	
+	/**
+	 * Returns the help-text override for this item.
+	 *
+	 * @return help-text override, or {@code null} when no override is configured
+	 */
 	public String getHelp() {
 		return help;
 	}
 
+	/**
+	 * Returns the help text translated for the current locale.
+	 *
+	 * @return the localised help text, or {@code null} when no help override is configured
+	 */
 	public String getLocalisedHelp() {
 		return Util.i18n(help);
 	}
 	
+	/**
+	 * Sets the help-text override for this item.
+	 *
+	 * <p>Side effects: trims and normalises the supplied value before storage.
+	 *
+	 * @param help  help-text override; may be {@code null} or blank
+	 */
 	@XmlAttribute(required = false)
 	public void setHelp(String help) {
 		this.help = UtilImpl.processStringValue(help);
 	}
 
+	/**
+	 * Returns whether this item should be treated as required.
+	 *
+	 * @return {@code true} when required, {@code false} when optional, or {@code null} to inherit defaults
+	 */
 	public Boolean getRequired() {
 		return required;
 	}
 
+	/**
+	 * Sets whether this item should be treated as required.
+	 *
+	 * @param required  required flag; may be {@code null}
+	 */
 	@XmlAttribute(required = false)
 	public void setRequired(Boolean required) {
 		this.required = required;
 	}
 
+	/**
+	 * Returns the required-message override text.
+	 *
+	 * @return required-message override text, or {@code null} when no override is configured
+	 */
 	public String getRequiredMessage() {
 		return requiredMessage;
 	}
 
+	/**
+	 * Returns the required-message override translated for the current locale.
+	 *
+	 * @return the localised required message, or {@code null} when no override is configured
+	 */
 	public String getLocalisedRequiredMessage() {
 		return Util.i18n(requiredMessage);
 	}
 
+	/**
+	 * Sets the required-message override text.
+	 *
+	 * <p>Side effects: trims and normalises the supplied value before storage.
+	 *
+	 * @param requiredMessage  required-message override text; may be {@code null} or blank
+	 */
 	@XmlAttribute(required = false)
 	public void setRequiredMessage(String requiredMessage) {
 		this.requiredMessage = UtilImpl.processStringValue(requiredMessage);
 	}
 
+	/**
+	 * Returns the decorator property map for this form item.
+	 *
+	 * @return a mutable property map; never {@code null}
+	 */
 	@Override
 	public Map<String, String> getProperties() {
 		return properties;

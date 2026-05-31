@@ -323,784 +323,1035 @@ public class DesignSpecification {
 	 * Label Alignment
 	 **/
 	private ReportElement.ElementAlignment labelAlignmentOverride;
+
 	/**
-	 * Returns the name.
+	 * Returns the configured name.
+	 * @return The configured value.
 	 */
 	public String getName() {
 		return name;
 	}
+	
 	/**
-	 * Sets the name.
+	 * Sets the configured name.
+	 * @param name The name value.
 	 */
 	public void setName(String name) {
 		this.name = name;
 	}
+	
 	/**
-	 * Returns the mode.
+	 * Returns the configured mode.
+	 * @return The configured value.
 	 */
 	public Mode getMode() {
 		return mode;
 	}
+	
 	/**
-	 * Sets the mode.
+	 * Sets the configured mode.
+	 * @param mode The mode value.
 	 */
 	public void setMode(Mode mode) {
 		this.mode = mode;
 	}
+	
 	/**
-	 * Returns the definitionSource.
+	 * Returns the configured definitionSource.
+	 * @return The configured value.
 	 */
 	public DefinitionSource getDefinitionSource() {
 		return definitionSource;
 	}
+	
 	/**
-	 * Sets the definitionSource.
+	 * Sets the configured definitionSource.
+	 * @param definitionSource The definitionSource value.
 	 */
 	public void setDefinitionSource(DefinitionSource definitionSource) {
 		this.definitionSource = definitionSource;
 	}
+	
 	/**
-	 * Returns the reportType.
+	 * Returns the configured reportType.
+	 * @return The configured value.
 	 */
 	public ReportType getReportType() {
 		return reportType;
 	}
+	
 	/**
-	 * Sets the reportType.
+	 * Sets the configured reportType.
+	 * @param reportType The reportType value.
 	 */
 	public void setReportType(ReportType reportType) {
 		this.reportType = reportType;
 	}
+	
 	/**
-	 * Sets the moduleName.
+	 * Sets the configured moduleName.
+	 * @param moduleName The moduleName value.
 	 */
 	public void setModuleName(String moduleName) {
 		this.moduleName = moduleName;
 	}
+	
 	/**
-	 * Sets the documentName.
+	 * Sets the configured documentName.
+	 * @param documentName The documentName value.
 	 */
 	public void setDocumentName(String documentName) {
 		this.documentName = documentName;
 	}
-    /**
-     * Returns the queryName.
+   
+	/**
+     * Returns the configured queryName.
+     * @return The configured value.
      */
     public String getQueryName() {
         return queryName;
     }
+    
     /**
-     * Sets the queryName.
+     * Sets the configured queryName.
+     * @param queryName The queryName value.
      */
     public void setQueryName(String queryName) {
         this.queryName = queryName;
     }
     /**
-     * Returns the uxui.
+     * Returns the configured uxui.
+     * @return The configured value.
      */
     public String getUxui() {
 		return uxui;
 	}
-	/**
-	 * Sets the uxui.
+	
+    /**
+	 * Sets the configured uxui.
+	 * @param uxui The uxui value.
 	 */
 	public void setUxui(String uxui) {
 		this.uxui = uxui;
 	}
+	
 	/**
-	 * Returns the repositoryPath.
+	 * Returns the configured repositoryPath.
+	 * @return The configured value.
 	 */
 	public String getRepositoryPath() {
 		return repositoryPath;
 	}
+	
 	/**
-	 * Sets the repositoryPath.
+	 * Sets the configured repositoryPath.
+	 * @param repositoryPath The repositoryPath value.
 	 */
 	public void setRepositoryPath(String repositoryPath) {
 		this.repositoryPath = repositoryPath;
 	}
+	
 	/**
-	 * Returns the saveToDocumentPackage.
+	 * Returns the configured saveToDocumentPackage.
+	 * @return The configured value.
 	 */
 	public Boolean getSaveToDocumentPackage() {
 		return saveToDocumentPackage;
 	}
+	
 	/**
-	 * Sets the saveToDocumentPackage.
+	 * Sets the configured saveToDocumentPackage.
+	 * @param saveToDocumentPackage The saveToDocumentPackage value.
 	 */
 	public void setSaveToDocumentPackage(Boolean saveToDocumentPackage) {
 		this.saveToDocumentPackage = saveToDocumentPackage;
 	}
+	
 	/**
-	 * Returns the orientation.
+	 * Returns the configured orientation.
+	 * @return The configured value.
 	 */
 	public Orientation getOrientation() {
 		return orientation;
 	}
+	
 	/**
-	 * Sets the orientation.
+	 * Sets the configured orientation.
+	 * @param orientation The orientation value.
 	 */
 	public void setOrientation(Orientation orientation) {
 		this.orientation = orientation;
 	}
+	
 	/**
-	 * Returns the width.
+	 * Returns the configured width.
+	 * @return The configured value.
 	 */
 	public Integer getWidth() {
 		return width;
 	}
+	
 	/**
-	 * Sets the width.
+	 * Sets the configured width.
+	 * @param width The width value.
 	 */
 	public void setWidth(Integer width) {
 		this.width = width;
 	}
+	
 	/**
-	 * Returns the height.
+	 * Returns the configured height.
+	 * @return The configured value.
 	 */
 	public Integer getHeight() {
 		return height;
 	}
+	
 	/**
-	 * Sets the height.
+	 * Sets the configured height.
+	 * @param height The height value.
 	 */
 	public void setHeight(Integer height) {
 		this.height = height;
 	}
+	
 	/**
-	 * Returns the leftMargin.
+	 * Returns the configured leftMargin.
+	 * @return The configured value.
 	 */
 	public Integer getLeftMargin() {
 		return leftMargin;
 	}
+	
 	/**
-	 * Sets the leftMargin.
+	 * Sets the configured leftMargin.
+	 * @param leftMargin The leftMargin value.
 	 */
 	public void setLeftMargin(Integer leftMargin) {
 		this.leftMargin = leftMargin;
 	}
+	
 	/**
-	 * Returns the rightMargin.
+	 * Returns the configured rightMargin.
+	 * @return The configured value.
 	 */
 	public Integer getRightMargin() {
 		return rightMargin;
 	}
+	
 	/**
-	 * Sets the rightMargin.
+	 * Sets the configured rightMargin.
+	 * @param rightMargin The rightMargin value.
 	 */
 	public void setRightMargin(Integer rightMargin) {
 		this.rightMargin = rightMargin;
 	}
+	
 	/**
-	 * Returns the topMargin.
+	 * Returns the configured topMargin.
+	 * @return The configured value.
 	 */
 	public Integer getTopMargin() {
 		return topMargin;
 	}
+	
 	/**
-	 * Sets the topMargin.
+	 * Sets the configured topMargin.
+	 * @param topMargin The topMargin value.
 	 */
 	public void setTopMargin(Integer topMargin) {
 		this.topMargin = topMargin;
 	}
+	
 	/**
-	 * Returns the bottomMargin.
+	 * Returns the configured bottomMargin.
+	 * @return The configured value.
 	 */
 	public Integer getBottomMargin() {
 		return bottomMargin;
 	}
+	
 	/**
-	 * Sets the bottomMargin.
+	 * Sets the configured bottomMargin.
+	 * @param bottomMargin The bottomMargin value.
 	 */
 	public void setBottomMargin(Integer bottomMargin) {
 		this.bottomMargin = bottomMargin;
 	}
+	
 	/**
-	 * Returns the columnWidth.
+	 * Returns the configured columnWidth.
+	 * @return The configured value.
 	 */
 	public Integer getColumnWidth() {
 		return columnWidth;
 	}
+
 	/**
-	 * Sets the columnWidth.
+	 * Sets the configured columnWidth.
+	 * @param columnWidth The columnWidth value.
 	 */
 	public void setColumnWidth(Integer columnWidth) {
 		this.columnWidth = columnWidth;
 	}
+	
 	/**
-	 * Returns the defaultFontName.
+	 * Returns the configured defaultFontName.
+	 * @return The configured value.
 	 */
 	public String getDefaultFontName() {
 		return defaultFontName;
 	}
+	
 	/**
-	 * Sets the defaultFontName.
+	 * Sets the configured defaultFontName.
+	 * @param defaultFontName The defaultFontName value.
 	 */
 	public void setDefaultFontName(String defaultFontName) {
 		this.defaultFontName = defaultFontName;
 	}
+	
 	/**
-	 * Returns the titleFontSize.
+	 * Returns the configured titleFontSize.
+	 * @return The configured value.
 	 */
 	public Integer getTitleFontSize() {
 		return titleFontSize;
 	}
+	
 	/**
-	 * Sets the titleFontSize.
+	 * Sets the configured titleFontSize.
+	 * @param titleFontSize The titleFontSize value.
 	 */
 	public void setTitleFontSize(Integer titleFontSize) {
 		this.titleFontSize = titleFontSize;
 	}
+	
 	/**
-	 * Returns the defaultFontSize.
+	 * Returns the configured defaultFontSize.
+	 * @return The configured value.
 	 */
 	public Integer getDefaultFontSize() {
 		return defaultFontSize;
 	}
+	
 	/**
-	 * Sets the defaultFontSize.
+	 * Sets the configured defaultFontSize.
+	 * @param defaultFontSize The defaultFontSize value.
 	 */
 	public void setDefaultFontSize(Integer defaultFontSize) {
 		this.defaultFontSize = defaultFontSize;
 	}
+	
 	/**
-	 * Returns the renderLabelAsTextFields.
+	 * Returns the configured renderLabelAsTextFields.
+	 * @return The configured value.
 	 */
 	public Boolean getRenderLabelAsTextFields() {
 		return renderLabelAsTextFields;
 	}
+	
 	/**
-	 * Sets the renderLabelAsTextFields.
+	 * Sets the configured renderLabelAsTextFields.
+	 * @param renderLabelAsTextFields The renderLabelAsTextFields value.
 	 */
 	public void setRenderLabelAsTextFields(Boolean renderLabelAsTextFields) {
 		this.renderLabelAsTextFields = renderLabelAsTextFields;
 	}
+	
 	/**
-	 * Returns the defaultBorder.
+	 * Returns the configured defaultBorder.
+	 * @return The configured value.
 	 */
 	public Boolean getDefaultBorder() {
 		return defaultBorder;
 	}
+	
 	/**
-	 * Sets the defaultBorder.
+	 * Sets the configured defaultBorder.
+	 * @param defaultBorder The defaultBorder value.
 	 */
 	public void setDefaultBorder(Boolean defaultBorder) {
 		this.defaultBorder = defaultBorder;
 	}
+	
 	/**
-	 * Returns the defaultBorderTop.
+	 * Returns the configured defaultBorderTop.
+	 * @return The configured value.
 	 */
 	public Boolean getDefaultBorderTop() {
 		return defaultBorderTop;
 	}
+	
 	/**
-	 * Sets the defaultBorderTop.
+	 * Sets the configured defaultBorderTop.
+	 * @param defaultBorderTop The defaultBorderTop value.
 	 */
 	public void setDefaultBorderTop(Boolean defaultBorderTop) {
 		this.defaultBorderTop = defaultBorderTop;
 	}
+	
 	/**
-	 * Returns the defaultBorderLeft.
+	 * Returns the configured defaultBorderLeft.
+	 * @return The configured value.
 	 */
 	public Boolean getDefaultBorderLeft() {
 		return defaultBorderLeft;
 	}
+	
 	/**
-	 * Sets the defaultBorderLeft.
+	 * Sets the configured defaultBorderLeft.
+	 * @param defaultBorderLeft The defaultBorderLeft value.
 	 */
 	public void setDefaultBorderLeft(Boolean defaultBorderLeft) {
 		this.defaultBorderLeft = defaultBorderLeft;
 	}
+	
 	/**
-	 * Returns the defaultBorderBottom.
+	 * Returns the configured defaultBorderBottom.
+	 * @return The configured value.
 	 */
 	public Boolean getDefaultBorderBottom() {
 		return defaultBorderBottom;
 	}
+	
 	/**
-	 * Sets the defaultBorderBottom.
+	 * Sets the configured defaultBorderBottom.
+	 * @param defaultBorderBottom The defaultBorderBottom value.
 	 */
 	public void setDefaultBorderBottom(Boolean defaultBorderBottom) {
 		this.defaultBorderBottom = defaultBorderBottom;
 	}
+	
 	/**
-	 * Returns the defaultBorderRight.
+	 * Returns the configured defaultBorderRight.
+	 * @return The configured value.
 	 */
 	public Boolean getDefaultBorderRight() {
 		return defaultBorderRight;
 	}
 	/**
-	 * Sets the defaultBorderRight.
+	 * Sets the configured defaultBorderRight.
+	 * @param defaultBorderRight The defaultBorderRight value.
 	 */
 	public void setDefaultBorderRight(Boolean defaultBorderRight) {
 		this.defaultBorderRight = defaultBorderRight;
 	}
+	
 	/**
-	 * Returns the defaultLineColour.
+	 * Returns the configured defaultLineColour.
+	 * @return The configured value.
 	 */
 	public String getDefaultLineColour() {
 		return defaultLineColour;
 	}
+	
 	/**
-	 * Sets the defaultLineColour.
+	 * Sets the configured defaultLineColour.
+	 * @param defaultLineColour The defaultLineColour value.
 	 */
 	public void setDefaultLineColour(String defaultLineColour) {
 		this.defaultLineColour = defaultLineColour;
 	}
+	
 	/**
-	 * Returns the defaultLineWidth.
+	 * Returns the configured defaultLineWidth.
+	 * @return The configured value.
 	 */
 	public Decimal2 getDefaultLineWidth() {
 		return defaultLineWidth;
 	}
+	
 	/**
-	 * Sets the defaultLineWidth.
+	 * Sets the configured defaultLineWidth.
+	 * @param defaultLineWidth The defaultLineWidth value.
 	 */
 	public void setDefaultLineWidth(Decimal2 defaultLineWidth) {
 		this.defaultLineWidth = defaultLineWidth;
 	}
+	
 	/**
-	 * Returns the defaultElementHeight.
+	 * Returns the configured defaultElementHeight.
+	 * @return The configured value.
 	 */
 	public Integer getDefaultElementHeight() {
 		return defaultElementHeight;
 	}
+	
 	/**
-	 * Sets the defaultElementHeight.
+	 * Sets the configured defaultElementHeight.
+	 * @param defaultElementHeight The defaultElementHeight value.
 	 */
 	public void setDefaultElementHeight(Integer defaultElementHeight) {
 		this.defaultElementHeight = defaultElementHeight;
 	}
+	
 	/**
-	 * Returns the includePageNumbers.
+	 * Returns the configured includePageNumbers.
+	 * @return The configured value.
 	 */
 	public Boolean getIncludePageNumbers() {
 		return includePageNumbers;
 	}
+	
 	/**
-	 * Sets the includePageNumbers.
+	 * Sets the configured includePageNumbers.
+	 * @param includePageNumbers The includePageNumbers value.
 	 */
 	public void setIncludePageNumbers(Boolean includePageNumbers) {
 		this.includePageNumbers = includePageNumbers;
 	}
+	
 	/**
-	 * Returns the defaultCellTopPadding.
+	 * Returns the configured defaultCellTopPadding.
+	 * @return The configured value.
 	 */
 	public Integer getDefaultCellTopPadding() {
 		return defaultCellTopPadding;
 	}
+	
 	/**
-	 * Sets the defaultCellTopPadding.
+	 * Sets the configured defaultCellTopPadding.
+	 * @param defaultCellTopPadding The defaultCellTopPadding value.
 	 */
 	public void setDefaultCellTopPadding(Integer defaultCellTopPadding) {
 		this.defaultCellTopPadding = defaultCellTopPadding;
 	}
+	
 	/**
-	 * Returns the defaultCellLeftPadding.
+	 * Returns the configured defaultCellLeftPadding.
+	 * @return The configured value.
 	 */
 	public Integer getDefaultCellLeftPadding() {
 		return defaultCellLeftPadding;
 	}
+	
 	/**
-	 * Sets the defaultCellLeftPadding.
+	 * Sets the configured defaultCellLeftPadding.
+	 * @param defaultCellLeftPadding The defaultCellLeftPadding value.
 	 */
 	public void setDefaultCellLeftPadding(Integer defaultCellLeftPadding) {
 		this.defaultCellLeftPadding = defaultCellLeftPadding;
 	}
+	
 	/**
-	 * Returns the defaultCellBottomPadding.
+	 * Returns the configured defaultCellBottomPadding.
+	 * @return The configured value.
 	 */
 	public Integer getDefaultCellBottomPadding() {
 		return defaultCellBottomPadding;
 	}
+	
 	/**
-	 * Sets the defaultCellBottomPadding.
+	 * Sets the configured defaultCellBottomPadding.
+	 * @param defaultCellBottomPadding The defaultCellBottomPadding value.
 	 */
 	public void setDefaultCellBottomPadding(Integer defaultCellBottomPadding) {
 		this.defaultCellBottomPadding = defaultCellBottomPadding;
 	}
+	
 	/**
-	 * Returns the defaultCellRightPadding.
+	 * Returns the configured defaultCellRightPadding.
+	 * @return The configured value.
 	 */
 	public Integer getDefaultCellRightPadding() {
 		return defaultCellRightPadding;
 	}
+	
 	/**
-	 * Sets the defaultCellRightPadding.
+	 * Sets the configured defaultCellRightPadding.
+	 * @param defaultCellRightPadding The defaultCellRightPadding value.
 	 */
 	public void setDefaultCellRightPadding(Integer defaultCellRightPadding) {
 		this.defaultCellRightPadding = defaultCellRightPadding;
 	}
+	
 	/**
-	 * Returns the dynamicFlow.
+	 * Returns the configured dynamicFlow.
+	 * @return The configured value.
 	 */
 	public Boolean getDynamicFlow() {
 		return dynamicFlow;
 	}
+	
 	/**
-	 * Sets the dynamicFlow.
+	 * Sets the configured dynamicFlow.
+	 * @param dynamicFlow The dynamicFlow value.
 	 */
 	public void setDynamicFlow(Boolean dynamicFlow) {
 		this.dynamicFlow = dynamicFlow;
 	}
+	
 	/**
-	 * Returns the bandSplitType.
+	 * Returns the configured bandSplitType.
+	 * @return The configured value.
 	 */
 	public ReportBand.SplitType getBandSplitType() {
 		return bandSplitType;
 	}
+	
 	/**
-	 * Sets the bandSplitType.
+	 * Sets the configured bandSplitType.
+	 * @param bandSplitType The bandSplitType value.
 	 */
 	public void setBandSplitType(ReportBand.SplitType bandSplitType) {
 		this.bandSplitType = bandSplitType;
 	}
+	
 	/**
-	 * Returns the boldLabels.
+	 * Returns the configured boldLabels.
+	 * @return The configured value.
 	 */
 	public Boolean getBoldLabels() {
 		return boldLabels;
 	}
+	
 	/**
-	 * Sets the boldLabels.
+	 * Sets the configured boldLabels.
+	 * @param boldLabels The boldLabels value.
 	 */
 	public void setBoldLabels(Boolean boldLabels) {
 		this.boldLabels = boldLabels;
 	}
+	
 	/**
-	 * Returns the checkBoxFontName.
+	 * Returns the configured checkBoxFontName.
+	 * @return The configured value.
 	 */
 	public String getCheckBoxFontName() {
 		return checkBoxFontName;
 	}
+	
 	/**
-	 * Sets the checkBoxFontName.
+	 * Sets the configured checkBoxFontName.
+	 * @param checkBoxFontName The checkBoxFontName value.
 	 */
 	public void setCheckBoxFontName(String checkBoxFontName) {
 		this.checkBoxFontName = checkBoxFontName;
 	}
+	
 	/**
-	 * Returns the checkBoxDisplayExpression.
+	 * Returns the configured checkBoxDisplayExpression.
+	 * @return The configured value.
 	 */
 	public String getCheckBoxDisplayExpression() {
 		return checkBoxDisplayExpression;
 	}
+	
 	/**
-	 * Sets the checkBoxDisplayExpression.
+	 * Sets the configured checkBoxDisplayExpression.
+	 * @param checkBoxDisplayExpression The checkBoxDisplayExpression value.
 	 */
 	public void setCheckBoxDisplayExpression(String checkBoxDisplayExpression) {
 		this.checkBoxDisplayExpression = checkBoxDisplayExpression;
 	}
+	
 	/**
-	 * Returns the pixelToTwip.
+	 * Returns the configured pixelToTwip.
+	 * @return The configured value.
 	 */
 	public Decimal5 getPixelToTwip() {
 		return pixelToTwip;
 	}
+	
 	/**
-	 * Sets the pixelToTwip.
+	 * Sets the configured pixelToTwip.
+	 * @param pixelToTwip The pixelToTwip value.
 	 */
 	public void setPixelToTwip(Decimal5 pixelToTwip) {
 		this.pixelToTwip = pixelToTwip;
 	}
+	
 	/**
-	 * Returns the sectionBorderTop.
+	 * Returns the configured sectionBorderTop.
+	 * @return The configured value.
 	 */
 	public Boolean getSectionBorderTop() {
 		return sectionBorderTop;
 	}
+	
 	/**
-	 * Sets the sectionBorderTop.
+	 * Sets the configured sectionBorderTop.
+	 * @param sectionBorderTop The sectionBorderTop value.
 	 */
 	public void setSectionBorderTop(Boolean sectionBorderTop) {
 		this.sectionBorderTop = sectionBorderTop;
 	}
+	
 	/**
-	 * Returns the sectionBorderLeft.
+	 * Returns the configured sectionBorderLeft.
+	 * @return The configured value.
 	 */
 	public Boolean getSectionBorderLeft() {
 		return sectionBorderLeft;
 	}
+	
 	/**
-	 * Sets the sectionBorderLeft.
+	 * Sets the configured sectionBorderLeft.
+	 * @param sectionBorderLeft The sectionBorderLeft value.
 	 */
 	public void setSectionBorderLeft(Boolean sectionBorderLeft) {
 		this.sectionBorderLeft = sectionBorderLeft;
 	}
+	
 	/**
-	 * Returns the sectionBorderRight.
+	 * Returns the configured sectionBorderRight.
+	 * @return The configured value.
 	 */
 	public Boolean getSectionBorderRight() {
 		return sectionBorderRight;
 	}
+	
 	/**
-	 * Sets the sectionBorderRight.
+	 * Sets the configured sectionBorderRight.
+	 * @param sectionBorderRight The sectionBorderRight value.
 	 */
 	public void setSectionBorderRight(Boolean sectionBorderRight) {
 		this.sectionBorderRight = sectionBorderRight;
 	}
+	
 	/**
-	 * Returns the sectionBorderBottom.
+	 * Returns the configured sectionBorderBottom.
+	 * @return The configured value.
 	 */
 	public Boolean getSectionBorderBottom() {
 		return sectionBorderBottom;
 	}
+	
 	/**
-	 * Sets the sectionBorderBottom.
+	 * Sets the configured sectionBorderBottom.
+	 * @param sectionBorderBottom The sectionBorderBottom value.
 	 */
 	public void setSectionBorderBottom(Boolean sectionBorderBottom) {
 		this.sectionBorderBottom = sectionBorderBottom;
 	}
+	
 	/**
-	 * Returns the sectionTitleBorderTop.
+	 * Returns the configured sectionTitleBorderTop.
+	 * @return The configured value.
 	 */
 	public Boolean getSectionTitleBorderTop() {
 		return sectionTitleBorderTop;
 	}
+	
 	/**
-	 * Sets the sectionTitleBorderTop.
+	 * Sets the configured sectionTitleBorderTop.
+	 * @param sectionTitleBorderTop The sectionTitleBorderTop value.
 	 */
 	public void setSectionTitleBorderTop(Boolean sectionTitleBorderTop) {
 		this.sectionTitleBorderTop = sectionTitleBorderTop;
 	}
+	
 	/**
-	 * Returns the sectionTitleBorderLeft.
+	 * Returns the configured sectionTitleBorderLeft.
+	 * @return The configured value.
 	 */
 	public Boolean getSectionTitleBorderLeft() {
 		return sectionTitleBorderLeft;
 	}
+	
 	/**
-	 * Sets the sectionTitleBorderLeft.
+	 * Sets the configured sectionTitleBorderLeft.
+	 * @param sectionTitleBorderLeft The sectionTitleBorderLeft value.
 	 */
 	public void setSectionTitleBorderLeft(Boolean sectionTitleBorderLeft) {
 		this.sectionTitleBorderLeft = sectionTitleBorderLeft;
 	}
+	
 	/**
-	 * Returns the sectionTitleBorderRight.
+	 * Returns the configured sectionTitleBorderRight.
+	 * @return The configured value.
 	 */
 	public Boolean getSectionTitleBorderRight() {
 		return sectionTitleBorderRight;
 	}
+	
 	/**
-	 * Sets the sectionTitleBorderRight.
+	 * Sets the configured sectionTitleBorderRight.
+	 * @param sectionTitleBorderRight The sectionTitleBorderRight value.
 	 */
 	public void setSectionTitleBorderRight(Boolean sectionTitleBorderRight) {
 		this.sectionTitleBorderRight = sectionTitleBorderRight;
 	}
+	
 	/**
-	 * Returns the sectionTitleBorderBottom.
+	 * Returns the configured sectionTitleBorderBottom.
+	 * @return The configured value.
 	 */
 	public Boolean getSectionTitleBorderBottom() {
 		return sectionTitleBorderBottom;
 	}
+	
 	/**
-	 * Sets the sectionTitleBorderBottom.
+	 * Sets the configured sectionTitleBorderBottom.
+	 * @param sectionTitleBorderBottom The sectionTitleBorderBottom value.
 	 */
 	public void setSectionTitleBorderBottom(Boolean sectionTitleBorderBottom) {
 		this.sectionTitleBorderBottom = sectionTitleBorderBottom;
 	}
+	
 	/**
-	 * Returns the sectionTitleForeground.
+	 * Returns the configured sectionTitleForeground.
+	 * @return The configured value.
 	 */
 	public String getSectionTitleForeground() {
 		return sectionTitleForeground;
 	}
+	
 	/**
-	 * Sets the sectionTitleForeground.
+	 * Sets the configured sectionTitleForeground.
+	 * @param sectionTitleForeground The sectionTitleForeground value.
 	 */
 	public void setSectionTitleForeground(String sectionTitleForeground) {
 		this.sectionTitleForeground = sectionTitleForeground;
 	}
+	
 	/**
-	 * Returns the sectionTitleBackground.
+	 * Returns the configured sectionTitleBackground.
+	 * @return The configured value.
 	 */
 	public String getSectionTitleBackground() {
 		return sectionTitleBackground;
 	}
+	
 	/**
-	 * Sets the sectionTitleBackground.
+	 * Sets the configured sectionTitleBackground.
+	 * @param sectionTitleBackground The sectionTitleBackground value.
 	 */
 	public void setSectionTitleBackground(String sectionTitleBackground) {
 		this.sectionTitleBackground = sectionTitleBackground;
 	}
+	
 	/**
-	 * Returns the parameters.
+	 * Returns the configured parameters.
+	 * @return The configured value.
 	 */
 	public List<ReportParameter> getParameters() {
 		return parameters;
 	}
+
 	/**
-	 * Sets the parameters.
+	 * Sets the configured parameters.
+	 * @param parameters The parameters value.
 	 */
 	public void setParameters(List<ReportParameter> parameters) {
 		this.parameters = parameters;
 	}
+
 	/**
-	 * Returns the fields.
+	 * Returns the configured fields.
+	 * @return The configured value.
 	 */
 	public List<ReportField> getFields() {
 		return fields;
 	}
+
 	/**
-	 * Sets the fields.
+	 * Sets the configured fields.
+	 * @param fields The fields value.
 	 */
 	public void setFields(List<ReportField> fields) {
 		this.fields = fields;
 	}
+
 	/**
-	 * Returns the variables.
+	 * Returns the configured variables.
+	 * @return The configured value.
 	 */
 	public List<ReportVariable> getVariables() {
 		return variables;
 	}
+
 	/**
-	 * Sets the variables.
+	 * Sets the configured variables.
+	 * @param variables The variables value.
 	 */
 	public void setVariables(List<ReportVariable> variables) {
 		this.variables = variables;
 	}
+
 	/**
-	 * Returns the bands.
+	 * Returns the configured bands.
+	 * @return The configured value.
 	 */
 	public List<ReportBand> getBands() {
 		return bands;
 	}
+
 	/**
-	 * Sets the bands.
+	 * Sets the configured bands.
+	 * @param bands The bands value.
 	 */
 	public void setBands(List<ReportBand> bands) {
 		this.bands = bands;
 	}
+
 	/**
-	 * Returns the subReports.
+	 * Returns the configured subReports.
+	 * @return The configured value.
 	 */
 	public List<DesignSpecification> getSubReports() {
 		return subReports;
 	}
+
 	/**
-	 * Sets the subReports.
+	 * Sets the configured subReports.
+	 * @param subReports The subReports value.
 	 */
 	public void setSubReports(List<DesignSpecification> subReports) {
 		this.subReports = subReports;
 	}
+
 	/**
-	 * Returns the field.
+	 * Returns the configured field.
+	 * @return The configured value.
 	 */
 	public ReportField getField() {
 		return field;
 	}
+
 	/**
-	 * Sets the field.
+	 * Sets the configured field.
+	 * @param field The field value.
 	 */
 	public void setField(ReportField field) {
 		this.field = field;
 	}
+
 	/**
-	 * Returns the collectionType.
+	 * Returns the configured collectionType.
+	 * @return The configured value.
 	 */
 	public CollectionType getCollectionType() {
 		return collectionType;
 	}
+
 	/**
-	 * Sets the collectionType.
+	 * Sets the configured collectionType.
+	 * @param collectionType The collectionType value.
 	 */
 	public void setCollectionType(CollectionType collectionType) {
 		this.collectionType = collectionType;
 	}
+
 	/**
-	 * Returns the parentReportPersistentName.
+	 * Returns the configured parentReportPersistentName.
+	 * @return The configured value.
 	 */
 	public String getParentReportPersistentName() {
 		return parentReportPersistentName;
 	}
+
 	/**
-	 * Sets the parentReportPersistentName.
+	 * Sets the configured parentReportPersistentName.
+	 * @param parentReportPersistentName The parentReportPersistentName value.
 	 */
 	public void setParentReportPersistentName(String parentReportPersistentName) {
 		this.parentReportPersistentName = parentReportPersistentName;
 	}
+
 	/**
-	 * Returns the verticalise.
+	 * Returns the configured verticalise.
+	 * @return The configured value.
 	 */
 	public Boolean getVerticalise() {
 		return verticalise;
 	}
+
 	/**
-	 * Sets the verticalise.
+	 * Sets the configured verticalise.
+	 * @param verticalise The verticalise value.
 	 */
 	public void setVerticalise(Boolean verticalise) {
 		this.verticalise = verticalise;
 	}
+
 	/**
-	 * Returns the labelAlignmentOverride.
+	 * Returns the configured labelAlignmentOverride.
+	 * @return The configured value.
 	 */
 	public ReportElement.ElementAlignment getLabelAlignmentOverride() {
 		return labelAlignmentOverride;
 	}
+
 	/**
-	 * Sets the labelAlignmentOverride.
+	 * Sets the configured labelAlignmentOverride.
+	 * @param labelAlignmentOverride The labelAlignmentOverride value.
 	 */
 	public void setLabelAlignmentOverride(ReportElement.ElementAlignment labelAlignmentOverride) {
 		this.labelAlignmentOverride = labelAlignmentOverride;
 	}
 
 	/**
-	 * Returns the moduleName.
+	 * Returns the configured moduleName.
+	 * @return The configured value.
 	 */
 	public String getModuleName() {
 		return moduleName;
 	}
+
 	/**
-	 * Returns the documentName.
+	 * Returns the configured documentName.
+	 * @return The configured value.
 	 */
 	public String getDocumentName() {
 		return documentName;
 	}
 
 	/**
-	 * Returns the alias.
+	 * Returns the configured alias.
+	 * @return The configured value.
 	 */
 	public int getAlias() {
 		return alias;
 	}
 
 	/**
-	 * Sets the alias.
+	 * Sets the configured alias.
+	 * @param alias The alias value.
 	 */
 	public void setAlias(int alias) {
 		this.alias = alias;
 	}
 
 	/**
-	 * Returns the joinAlias.
+	 * Returns the configured joinAlias.
+	 * @return The configured value.
 	 */
 	public Map<String, String> getJoinAlias() {
 		return joinAlias;
 	}
 
 	/**
-	 * Sets the joinAlias.
+	 * Sets the configured joinAlias.
+	 * @param joinAlias The joinAlias value.
 	 */
 	public void setJoinAlias(Map<String, String> joinAlias) {
 		this.joinAlias = joinAlias;
 	}
 
 	/**
-	 * Returns the joins.
+	 * Returns the configured joins.
+	 * @return The configured value.
 	 */
 	public Map<String, String> getJoins() {
 		return joins;
 	}
 
 	/**
-	 * Sets the joins.
+	 * Sets the configured joins.
+	 * @param joins The joins value.
 	 */
 	public void setJoins(Map<String, String> joins) {
 		this.joins = joins;
 	}
 	
 	/**
-	 * Adds a join.
+	 * Registers a generated SQL join and its corresponding table alias.
+	 *
+	 * @param documentName The logical join key (document or join path).
+	 * @param alias The table alias assigned to the join.
+	 * @param join The SQL join fragment.
 	 */
 	public void addJoin(@SuppressWarnings("hiding") String documentName, @SuppressWarnings("hiding") String alias, String join){
 		if(joins==null){
@@ -1112,22 +1363,28 @@ public class DesignSpecification {
 	}
 
 	/**
-	 * Indicates whether isIncludeCustomerLogo is satisfied.
+	 * Indicates whether the title band should include the customer logo.
+	 *
+	 * @return {@code true} when customer branding should be rendered.
 	 */
 	public boolean isIncludeCustomerLogo() {
 		return includeCustomerLogo;
 	}
 
 	/**
-	 * Sets the includeCustomerLogo.
+	 * Sets whether the title band should include the customer logo.
+	 *
+	 * @param includeCustomerLogo The branding flag.
 	 */
 	public void setIncludeCustomerLogo(boolean includeCustomerLogo) {
 		this.includeCustomerLogo = includeCustomerLogo;
 	}
 
 	/**
-	 * Default constructor with defaults for A4 page
-	 * 
+	 * Creates a design with default report settings and A4 portrait metrics.
+	 *
+	 * <p>Side effects: initialises mutable collections and baseline rendering
+	 * options before calling {@link #resetDesign()}.
 	 */
 	public DesignSpecification(){
 		
@@ -1176,7 +1433,7 @@ public class DesignSpecification {
 	}
 	
 	/**
-	 * Performs resetDesign.
+	 * Recalculates page dimensions and column width from orientation and margins.
 	 */
 	public void resetDesign() {
 		if (Orientation.portrait.equals(getOrientation())) {
@@ -1191,7 +1448,9 @@ public class DesignSpecification {
 	}
 
 	/**
-	 * Returns the module.
+	 * Resolves the configured module from the current customer context.
+	 *
+	 * @return The resolved module metadata.
 	 */
 	public Module getModule() {
 		final Customer customer = CORE.getCustomer();
@@ -1199,7 +1458,9 @@ public class DesignSpecification {
 	}
 
 	/**
-	 * Returns the document.
+	 * Resolves the configured document from the current customer context.
+	 *
+	 * @return The resolved document metadata.
 	 */
 	public Document getDocument() {
 		final Customer customer = CORE.getCustomer();
@@ -1207,14 +1468,17 @@ public class DesignSpecification {
 	}
 
 	/**
-	 * Returns the language.
+	 * Returns the configured optional Jasper expression language override.
+	 *
+	 * @return The configured language, or {@code null} to use Jasper defaults.
 	 */
 	public String getLanguage() {
 		return language;
 	}
 
 	/**
-	 * Sets the language.
+	 * Sets the configured language.
+	 * @param language The language value.
 	 */
 	public void setLanguage(String language) {
 		this.language = language;

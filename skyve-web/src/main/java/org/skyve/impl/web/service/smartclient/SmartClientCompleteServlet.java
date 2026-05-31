@@ -48,7 +48,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
- * Service for complete mechanism.
+ * Completes SmartClient lookup and completion requests.
  */
 public class SmartClientCompleteServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
@@ -56,6 +56,14 @@ public class SmartClientCompleteServlet extends HttpServlet {
 	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SmartClientCompleteServlet.class);
 	private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
 
+	/**
+	 * Handles SmartClient completion requests submitted with HTTP GET.
+	 *
+	 * @param request inbound HTTP request
+	 * @param response outbound HTTP response
+	 * @throws ServletException if request validation fails
+	 * @throws IOException if the response cannot be written
+	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -64,6 +72,14 @@ public class SmartClientCompleteServlet extends HttpServlet {
 		processRequest(request, response);
 	}
 
+	/**
+	 * Handles SmartClient completion requests submitted with HTTP POST.
+	 *
+	 * @param request inbound HTTP request
+	 * @param response outbound HTTP response
+	 * @throws ServletException if request validation fails
+	 * @throws IOException if the response cannot be written
+	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)

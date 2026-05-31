@@ -31,7 +31,16 @@ public class ContentImageForReport {
 	}
 
 	/**
-	 * Performs image.
+	 * Loads and scales an attachment image for report rendering.
+	 *
+	 * <p>When {@code contentId} is blank, or when the content cannot be found,
+	 * this method returns a 1x1 transparent image so report generation can proceed.
+	 *
+	 * @param contentId The attachment content identifier.
+	 * @param imageWidth The target thumbnail width in pixels.
+	 * @param imageHeight The target thumbnail height in pixels.
+	 * @return A scaled image suitable for Jasper image fields.
+	 * @throws Exception If the attachment stream cannot be read.
 	 */
 	public static BufferedImage image(String contentId, int imageWidth, int imageHeight) throws Exception {
 		if (StringUtils.isBlank(contentId)) {
@@ -58,7 +67,12 @@ public class ContentImageForReport {
 	}
 
 	/**
-	 * Performs customerLogo.
+	 * Loads and scales the current customer's configured logo image.
+	 *
+	 * @param imageWidth The target thumbnail width in pixels.
+	 * @param imageHeight The target thumbnail height in pixels.
+	 * @return The scaled customer logo image.
+	 * @throws IOException If the logo resource cannot be read.
 	 */
 	public static BufferedImage customerLogo(int imageWidth, int imageHeight) throws IOException {
 		final Customer customer = CORE.getCustomer();

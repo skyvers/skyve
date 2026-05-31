@@ -37,11 +37,23 @@ public class FormRow implements DecoratedMetaData {
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
 	private Map<String, String> properties = new TreeMap<>();
 
+	/**
+	 * Returns the live ordered form items in this row.
+	 *
+	 * <p>Side effects: mutating the returned list mutates this metadata instance.
+	 *
+	 * @return a mutable list of row items; never {@code null}
+	 */
 	@XmlElementRef(type = FormItem.class)
 	public List<FormItem> getItems() {
 		return items;
 	}
 
+	/**
+	 * Returns the decorator property map for this form row.
+	 *
+	 * @return a mutable property map; never {@code null}
+	 */
 	@Override
 	public Map<String, String> getProperties() {
 		return properties;

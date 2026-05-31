@@ -36,7 +36,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
- * Generates views based on bizhub's XML view spec.
+ * Generates SmartClient JavaScript for edit and create views.
  */
 public class SmartClientGeneratorServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
@@ -45,6 +45,12 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 
 	private static Class<? extends SmartClientViewRenderer> RENDERER_CLASS = null;
 	
+	/**
+	 * Initialises the optional SmartClient renderer override from servlet configuration.
+	 *
+	 * @param config servlet configuration
+	 * @throws ServletException if the configured renderer class cannot be loaded
+	 */
 	@Override
 	@SuppressWarnings("unchecked")
 	public void init(ServletConfig config) throws ServletException {
@@ -61,6 +67,18 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 		}
 	}
 	
+	/**
+	 * Creates the renderer used to generate a SmartClient view script.
+	 *
+	 * @param user active user
+	 * @param module module containing the document
+	 * @param document document metadata to render
+	 * @param view view metadata to render
+	 * @param uxui active UX/UI profile name
+	 * @param noCreateView whether create-view container scaffolding should be skipped
+	 * @return the configured renderer
+	 * @throws DomainException if the configured renderer cannot be instantiated
+	 */
 	public static SmartClientViewRenderer newRenderer(User user, Module module, Document document, View view, String uxui, boolean noCreateView) {
 		if (RENDERER_CLASS == null) {
 			return new SmartClientViewRenderer(user, module, document, view, uxui, noCreateView);
@@ -74,6 +92,14 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 		}
 	}
 
+	/**
+	 * Handles the SmartClient view-generation request.
+	 *
+	 * @param request inbound HTTP request
+	 * @param response outbound HTTP response
+	 * @throws ServletException if request validation fails
+	 * @throws IOException if the response cannot be written
+	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
 	protected void doGet(HttpServletRequest request,

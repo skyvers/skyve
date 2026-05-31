@@ -30,16 +30,35 @@ public class ObserverMetaDataImpl implements ObserverMetaData {
 	private String className;
 	private volatile Observer observer;
 
+	/**
+	 * Returns the fully-qualified observer implementation class name.
+	 *
+	 * @return observer implementation class name, or {@code null}
+	 */
 	@Override
 	public String getClassName() {
 		return className;
 	}
 
+	/**
+	 * Sets the fully-qualified observer implementation class name.
+	 *
+	 * @param className observer implementation class name
+	 */
 	@XmlAttribute(required = true)
 	public void setClassName(String className) {
 		this.className = UtilImpl.processStringValue(className);
 	}
 
+	/**
+	 * Returns the lazily-instantiated observer implementation.
+	 *
+	 * <p>Threading: uses double-checked locking over a {@code volatile} field so
+	 * exactly one observer instance is created per metadata instance.
+	 *
+	 * @return the observer instance, never {@code null}
+	 * @throws MetaDataException if the configured class cannot be loaded or instantiated
+	 */
 	@Override
 	public Observer getObserver() {
 		if (observer == null) {

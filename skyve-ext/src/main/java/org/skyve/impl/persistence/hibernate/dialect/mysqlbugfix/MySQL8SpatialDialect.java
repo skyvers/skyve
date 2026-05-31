@@ -19,7 +19,7 @@ import org.hibernate.spatial.dialect.mysql.MySQLGeometryTypeDescriptor;
 import org.hibernate.spatial.dialect.mysql.MySQLSpatialDialect;
 
 /**
- * Created by Karel Maesen, Geovise BVBA on 2019-03-07.
+ * Provides the copied MySQL 8 spatial dialect variant used by Skyve's InnoDB wrapper dialects.
  */
 public class MySQL8SpatialDialect extends MySQL8Dialect implements SpatialDialect {
 	private static final long serialVersionUID = -7095042365788578524L;
@@ -28,7 +28,7 @@ public class MySQL8SpatialDialect extends MySQL8Dialect implements SpatialDialec
 	private MySQL8SpatialFunctions spatialFunctions = new MySQL8SpatialFunctions();
 
 	/**
-	 * Constructs an instance
+	 * Creates the MySQL 8 spatial dialect and registers the copied spatial function set.
 	 */
 	public MySQL8SpatialDialect() {
 		super();
@@ -41,11 +41,17 @@ public class MySQL8SpatialDialect extends MySQL8Dialect implements SpatialDialec
 		}
 	}
 
+	/**
+	 * Contributes MySQL spatial Hibernate types via the copied delegate dialect.
+	 */
 	@Override
 	public void contributeTypes(TypeContributions typeContributions, ServiceRegistry serviceRegistry) {
 		dialectDelegate.contributeTypes( typeContributions, serviceRegistry );
 	}
 
+	/**
+	 * Returns the SQL predicate for the requested spatial relation using MySQL 8 ST_* operators.
+	 */
 	@Override
 	public String getSpatialRelateSQL(String columnName, int spatialRelation) {
 		switch ( spatialRelation ) {
@@ -85,37 +91,58 @@ public class MySQL8SpatialDialect extends MySQL8Dialect implements SpatialDialec
 //		return dialectDelegate.remapSqlTypeDescriptor( sqlTypeDescriptor );
 //	}
 
+	/**
+	 * Returns the spatial filter expression for the supplied geometry column.
+	 */
 	@Override
 	public String getSpatialFilterExpression(String columnName) {
 		return dialectDelegate.getSpatialFilterExpression( columnName );
 	}
 
+	/**
+	 * Returns SQL for the requested spatial aggregate operation.
+	 */
 	@Override
 	public String getSpatialAggregateSQL(String columnName, int aggregation) {
 		return dialectDelegate.getSpatialAggregateSQL( columnName, aggregation );
 	}
 
+	/**
+	 * Returns SQL for distance-within comparisons against a geometry parameter.
+	 */
 	@Override
 	public String getDWithinSQL(String columnName) {
 		return dialectDelegate.getDWithinSQL( columnName );
 	}
 
+	/**
+	 * Returns SQL that checks the SRID of the geometry column against a bind value.
+	 */
 	@Override
 	public String getHavingSridSQL(String columnName) {
 		return " (ST_SRID(" + columnName + ") = ?) ";
 	}
 
+	/**
+	 * Returns SQL that tests whether the geometry column is empty or non-empty.
+	 */
 	@Override
 	public String getIsEmptySQL(String columnName, boolean isEmpty) {
 		final String emptyExpr = " ST_IsEmpty(" + columnName + ") ";
 		return isEmpty ? emptyExpr : "( NOT " + emptyExpr + ")";
 	}
 
+	/**
+	 * Indicates that this dialect supports spatial filtering predicates.
+	 */
 	@Override
 	public boolean supportsFiltering() {
 		return true;
 	}
 
+	/**
+	 * Indicates whether the given spatial function is registered by this dialect.
+	 */
 	@Override
 	public boolean supports(SpatialFunction function) {
 		return spatialFunctions.get( function.toString() ) != null;

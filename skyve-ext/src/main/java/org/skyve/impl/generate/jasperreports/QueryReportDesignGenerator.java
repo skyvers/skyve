@@ -12,12 +12,22 @@ import org.skyve.metadata.module.query.MetaDataQueryDefinition;
  * mapping query columns to report fields.
  */
 public class QueryReportDesignGenerator extends ReportDesignGenerator {
-
+    /**
+     * Indicates that query reports do not support collection subreport generation.
+     *
+     * @return Never returns normally.
+     * @throws UnsupportedOperationException Always.
+     */
     @Override
     protected QueryReportDesignGenerator getSubreportGenerator() {
         throw new UnsupportedOperationException("Subreports are not supported in query reports.");
     }
 
+    /**
+     * Adds report fields for query columns that map to attributes on the driving document.
+     *
+     * @param design The design being populated.
+     */
     @Override
     protected void addFields(DesignSpecification design) {
         super.addFields(design);
@@ -37,6 +47,11 @@ public class QueryReportDesignGenerator extends ReportDesignGenerator {
         }
     }
 
+    /**
+     * Creates one detail band per non-collection query field with a label/value pair.
+     *
+     * @param design The design being populated.
+     */
     @Override
     protected void addBands(DesignSpecification design) {
         super.addBands(design);

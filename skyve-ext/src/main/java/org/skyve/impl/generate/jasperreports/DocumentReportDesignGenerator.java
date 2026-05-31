@@ -10,12 +10,21 @@ import org.skyve.metadata.model.document.Document;
  * rendering all persistent attributes as report fields.
  */
 public class DocumentReportDesignGenerator extends ReportDesignGenerator {
-
+    /**
+     * Creates a generator instance for collection subreports.
+     *
+     * @return A new document-based generator.
+     */
     @Override
     protected DocumentReportDesignGenerator getSubreportGenerator() {
         return new DocumentReportDesignGenerator();
     }
 
+    /**
+     * Adds one report field for each supported document attribute.
+     *
+     * @param design The design being populated.
+     */
     @Override
     protected void addFields(DesignSpecification design) {
         super.addFields(design);
@@ -31,6 +40,11 @@ public class DocumentReportDesignGenerator extends ReportDesignGenerator {
         }
     }
 
+    /**
+     * Builds column/header/detail/footer bands for document and subreport modes.
+     *
+     * @param design The design being populated.
+     */
     @Override
     protected void addBands(DesignSpecification design) {
         super.addBands(design);
@@ -186,6 +200,12 @@ public class DocumentReportDesignGenerator extends ReportDesignGenerator {
         design.getBands().add(columnFooter);
     }
 
+    /**
+     * Builds the title band for document reports.
+     *
+     * @param design The design being generated.
+     * @return The title band.
+     */
     @Override
     protected ReportBand createTitleBand(DesignSpecification design) {
         ReportBand title = super.createTitleBand(design);

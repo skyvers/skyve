@@ -77,63 +77,140 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 /**
+ * File-system repository used by local design-time metadata validation flows.
+ *
+ * <p>This implementation enables scaffolded views and provides the full
+ * generate-domain validation pipeline for customers, modules, documents and
+ * views. Runtime-only user and scheduling operations are intentionally
+ * unsupported in this repository variant.
+ *
  * Do not instantiate directly, use CORE.getRepository().
  * 
- * @author Mike
+ * <p>Threading: intended for startup and tooling workflows; not designed for
+ * concurrent mutation.
  */
 public class LocalDesignRepository extends FileSystemRepository {
+	/**
+	 * Creates a repository rooted at the default Skyve base path.
+	 */
 	public LocalDesignRepository() {
 		super();
 	}
 
+	/**
+	 * Creates a repository rooted at the supplied absolute path.
+	 *
+	 * @param absolutePath absolute filesystem root that contains repository metadata
+	 */
 	public LocalDesignRepository(@Nonnull String absolutePath) {
 		super(absolutePath);
 	}
 
+	/**
+	 * Creates a repository rooted at the supplied path and class-loading mode.
+	 *
+	 * @param absolutePath absolute filesystem root that contains repository metadata
+	 * @param loadClasses whether Java metadata classes should be loaded reflectively
+	 */
 	public LocalDesignRepository(@Nonnull String absolutePath, boolean loadClasses) {
 		super(absolutePath, loadClasses);
 	}
 
+	/**
+	 * Enables scaffolded fallback views when explicit view metadata is absent.
+	 */
 	@Override
 	public boolean getUseScaffoldedViews() {
 		return true;
 	}
 	
+	/**
+	 * Unsupported in local design-time repository mode.
+	 *
+	 * @param userPrincipal ignored principal name
+	 * @return never returns normally
+	 * @throws UnsupportedOperationException always
+	 */
 	@Override
 	public UserImpl retrieveUser(String userPrincipal) {
 		throw new UnsupportedOperationException();
 	}
 	
+	/**
+	 * Unsupported in local design-time repository mode.
+	 *
+	 * @param user ignored
+	 * @return never returns normally
+	 * @throws UnsupportedOperationException always
+	 */
 	@Override
 	public boolean populatePermissions(User user) {
 		throw new UnsupportedOperationException();
 	}
 
+	/**
+	 * Unsupported in local design-time repository mode.
+	 *
+	 * @param user ignored
+	 * @throws UnsupportedOperationException always
+	 */
 	@Override
 	public void resetUserPermissions(User user) {
 		throw new UnsupportedOperationException();
 	}
 
+	/**
+	 * Unsupported in local design-time repository mode.
+	 *
+	 * @param user ignored
+	 * @param connection ignored
+	 * @return never returns normally
+	 * @throws UnsupportedOperationException always
+	 */
 	@Override
 	public boolean populateUser(User user, Connection connection) {
 		throw new UnsupportedOperationException();
 	}
 
+	/**
+	 * Unsupported in local design-time repository mode.
+	 *
+	 * @return never returns normally
+	 * @throws UnsupportedOperationException always
+	 */
 	@Override
 	public List<UserJobSchedule> retrieveAllScheduledJobsForAllCustomers() {
 		throw new UnsupportedOperationException();
 	}
 
+	/**
+	 * Unsupported in local design-time repository mode.
+	 *
+	 * @return never returns normally
+	 * @throws UnsupportedOperationException always
+	 */
 	@Override
 	public List<UserJobSchedule> retrieveAllScheduledReportsForAllCustomers() {
 		throw new UnsupportedOperationException();
 	}
 
+	/**
+	 * Unsupported in local design-time repository mode.
+	 *
+	 * @param customerName ignored customer name
+	 * @return never returns normally
+	 * @throws UnsupportedOperationException always
+	 */
 	@Override
 	public String retrievePublicUserName(String customerName) {
 		throw new UnsupportedOperationException();
 	}
 
+	/**
+	 * Rebuilds per-module user menus with inaccessible items removed.
+	 *
+	 * @param user the user whose module menus are recalculated
+	 */
 	@Override
 	public final void resetMenus(User user) {
 		UserImpl internalUser = (UserImpl) user;
@@ -144,6 +221,16 @@ public class LocalDesignRepository extends FileSystemRepository {
 		}
 	}
 
+	/**
+	 * Removes menu entries the user cannot access for the current module.
+	 *
+	 * <p>Side effects: mutates {@code menu} in place by pruning inaccessible
+	 * items and empty groups.
+	 *
+	 * @param moduleName the module context used for role checks
+	 * @param menu the menu tree to prune
+	 * @param user the user whose role membership is evaluated
+	 */
 	private static void removeInaccessibleItems(@Nonnull String moduleName, @Nonnull Menu menu, @Nonnull User user) {
 		// Check all the child items to see if we have access
 		Iterator<MenuItem> i = menu.getItems().iterator();
@@ -184,6 +271,15 @@ public class LocalDesignRepository extends FileSystemRepository {
 		}
 	}
 
+	/**
+	 * Validates customer-level references required for generate-domain.
+	 *
+	 * <p>This includes home module existence, module entry references and layout
+	 * compatibility, and module-qualified role references used by feature flags.
+	 *
+	 * @param customer the customer to validate
+	 * @throws MetaDataException when any customer-level reference is invalid
+	 */
 	@Override
 	public void validateCustomerForGenerateDomain(Customer customer) {
 		try {
@@ -253,6 +349,17 @@ public class LocalDesignRepository extends FileSystemRepository {
 		// TODO check the converter type corresponds to the type required.
 	}
 
+	/**
+	 * Validates module-level metadata required for generate-domain.
+	 *
+	 * <p>This checks home document constraints, imported query references,
+	 * query column bindings and formatter compatibility, menu item references,
+	 * action privileges, and role access targets.
+	 *
+	 * @param customer the customer context used for metadata resolution
+	 * @param module the module to validate
+	 * @throws MetaDataException when module metadata is inconsistent or invalid
+	 */
 	@Override
 	public void validateModuleForGenerateDomain(Customer customer, Module module) {
 		// if home document is transient then home ref had better be edit
@@ -539,6 +646,14 @@ public class LocalDesignRepository extends FileSystemRepository {
 		}
 	}
 
+	/**
+	 * Validates menu items recursively for document, query, model, and map integrity.
+	 *
+	 * @param items menu items to validate
+	 * @param customer the customer context used for metadata resolution; may be {@code null}
+	 * @param module the owning module
+	 * @throws MetaDataException when any menu item references invalid metadata
+	 */
 	private void checkMenu(@Nonnull List<MenuItem> items, @Nullable Customer customer, @Nonnull Module module) {
 		for (MenuItem item : items) {
 			if (item instanceof MenuGroup group) {
@@ -672,6 +787,17 @@ public class LocalDesignRepository extends FileSystemRepository {
 		}
 	}
 
+	/**
+	 * Validates document-level metadata required for generate-domain.
+	 *
+	 * <p>This checks condition expressions, bizKey expressions, parent document,
+	 * attribute defaults, relation targets, ordering bindings, inverse mappings,
+	 * and unique-constraint message bindings.
+	 *
+	 * @param customer the customer context used for metadata resolution
+	 * @param document the document to validate
+	 * @throws MetaDataException when document metadata is inconsistent or invalid
+	 */
 	@Override
 	public void validateDocumentForGenerateDomain(Customer customer, Document document) {
 		String documentIdentifier = document.getOwningModuleName() + '.' + document.getName();
@@ -913,6 +1039,18 @@ public class LocalDesignRepository extends FileSystemRepository {
 		// TODO check binding in uniqueConstraint.fieldReference.ref as above and ensure the binding is persistent
 	}
 
+	/**
+	 * Validates a view and its access declarations for generate-domain.
+	 *
+	 * <p>Runs structural validation via {@code ViewValidator} and then validates
+	 * model, image, binding, and report targets referenced by computed accesses.
+	 *
+	 * @param customer the customer context used for metadata resolution
+	 * @param document the document owning the view
+	 * @param view the view to validate
+	 * @param uxui the UX/UI variant key
+	 * @throws MetaDataException when view metadata or access targets are invalid
+	 */
 	@Override
 	public void validateViewForGenerateDomain(Customer customer, Document document, View view, String uxui) {
 		CustomerImpl customerImpl = (CustomerImpl) customer;
@@ -986,6 +1124,15 @@ public class LocalDesignRepository extends FileSystemRepository {
 	 * TODO This is a hack for the chicken and egg enum generation problem to be solved by making generate domain 2 phased.
 	 * Generated enum classes may not exist yet during generateDomain validation.
 	 * In this case, skip type compatibility checks and allow generation to continue.
+	 * 
+	 * Returns an attribute implementing type for validation when available.
+	 *
+	 * <p>During generate-domain validation, enum classes can be temporarily
+	 * unavailable because generation has not yet completed. In that specific case,
+	 * this method returns {@code null} so callers can defer strict type checks.
+	 *
+	 * @param attribute the attribute whose implementing type is required
+	 * @return the implementing type, or {@code null} when enum class loading is not yet possible
 	 */
 	static @Nullable Class<?> getImplementingTypeForGenerateDomainValidation(Attribute attribute) {
 		try {
@@ -1000,13 +1147,13 @@ public class LocalDesignRepository extends FileSystemRepository {
 	}
 
 	/**
-	 * Validates feature roles point to valid module roles.
-	 * 
-	 * We don't need to check the module name of the role as this is checked when the metadata 
-	 * is converted and we know all module names are correct from the validation performed prior.
-	 * 
-	 * @param customer
-	 * @param featureRoles
+	 * Validates module-qualified feature roles against declared module roles.
+	 *
+	 * <p>Each entry must be in {@code module.role} format and resolve to an
+	 * existing role in the referenced module.
+	 *
+	 * @param customer the owning customer context
+	 * @param featureRoles module-qualified role names to validate
 	 */
 	private void validateFeatureRoles(Customer customer, Set<String> featureRoles) {
 		for (String textSearchModuleRole : featureRoles) {

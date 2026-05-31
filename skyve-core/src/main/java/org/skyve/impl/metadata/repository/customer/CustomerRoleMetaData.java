@@ -47,39 +47,75 @@ public class CustomerRoleMetaData extends NamedMetaData implements CustomerRole 
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
 	private Map<String, String> properties = new TreeMap<>();
 	
+	/**
+	 * Returns the human-readable role description.
+	 *
+	 * @return role description text, or {@code null}
+	 */
 	@Override
 	public String getDescription() {
 		return description;
 	}
 
+	/**
+	 * Sets the human-readable role description.
+	 *
+	 * @param description role description text
+	 */
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, required = true)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
 	public void setDescription(String description) {
 		this.description = UtilImpl.processStringValue(description);
 	}
 
+	/**
+	 * Returns module role mappings that make up this composite customer role.
+	 *
+	 * @return mutable list of module role metadata
+	 */
 	@XmlElementWrapper(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "roles")
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "role", required = true)
 	public List<CustomerModuleRoleMetaData> getRoles() {
 		return roles;
 	}
 
+	/**
+	 * Returns long-form documentation for this role.
+	 *
+	 * @return role documentation text, or {@code null}
+	 */
 	@Override
 	public String getDocumentation() {
 		return documentation;
 	}
 
+	/**
+	 * Sets long-form documentation for this role.
+	 *
+	 * @param documentation role documentation text
+	 */
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
 	public void setDocumentation(String documentation) {
 		this.documentation = UtilImpl.processStringValue(documentation);
 	}
 	
+	/**
+	 * Returns decorator properties defined on this customer role descriptor.
+	 *
+	 * @return mutable role property map
+	 */
 	@Override
 	public Map<String, String> getProperties() {
 		return properties;
 	}
 	
+	/**
+	 * Resolves this customer role's configured module roles against a customer.
+	 *
+	 * @param customer the customer providing module definitions
+	 * @return resolved runtime module roles in declaration order
+	 */
 	public List<Role> getModuleRoles(Customer customer) {
 		List<Role> result = new ArrayList<>(roles.size());
 		for (CustomerModuleRoleMetaData role : roles) {

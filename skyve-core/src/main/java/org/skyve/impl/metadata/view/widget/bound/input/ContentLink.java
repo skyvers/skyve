@@ -24,7 +24,15 @@ import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
- * value is optional - defaults to "Content" or "Empty".
+ * Content-link widget that renders a clickable link for a
+ * bound content attribute.
+ *
+ * <p>Supports a configurable display value, editability, request parameters,
+ * and absolute width.
+ * 
+ * [value] is optional - defaults to "Content" or "Empty".
+ *
+ * <p>Threading: not thread-safe. Read-only after JAXB unmarshalling.
  */
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
@@ -41,46 +49,75 @@ public class ContentLink extends InputWidget implements Editable, Parameterizabl
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
 	private Map<String, String> properties = new TreeMap<>();
 
+	/**
+	 * Indicates that this widget renders with a form label by default.
+	 */
 	@Override
 	public boolean showsLabelByDefault() {
 		return true;
 	}
 	
+	/**
+	 * Returns the configured display value for the rendered link text.
+	 */
 	public String getValue() {
 		return value;
 	}
 	
+	/**
+	 * Returns the display value resolved through the i18n message source.
+	 *
+	 * @return the localised link label, or {@code null} when no value is configured
+	 */
 	public String getLocalisedValue() {
 		return Util.i18n(value);
 	}
 
+	/**
+	 * Sets the display value after trimming and empty-string normalisation.
+	 */
 	@XmlAttribute(required = false)
 	public void setValue(String value) {
 		this.value = UtilImpl.processStringValue(value);
 	}
 
+	/**
+	 * Returns whether link editing is explicitly enabled.
+	 */
 	@Override
 	public Boolean getEditable() {
 		return editable;
 	}
 
+	/**
+	 * Sets whether link editing is enabled.
+	 */
 	@Override
 	@XmlAttribute(name = "editable", required = false)
 	public void setEditable(Boolean editable) {
 		this.editable = editable;
 	}
 
+	/**
+	 * Returns the absolute pixel width, or {@code null} when renderer defaults apply.
+	 */
 	@Override
 	public Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
+	/**
+	 * Sets the absolute pixel width.
+	 */
 	@Override
 	@XmlAttribute(required = false)
 	public void setPixelWidth(Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 
+	/**
+	 * Returns the mutable parameter list forwarded when resolving link content.
+	 */
 	@Override
 	@XmlElementWrapper(namespace = XMLMetaData.VIEW_NAMESPACE, name = "parameters")
 	@XmlElement(name = "parameter", type = ParameterImpl.class, required = false)
@@ -88,6 +125,9 @@ public class ContentLink extends InputWidget implements Editable, Parameterizabl
 		return parameters;
 	}
 
+	/**
+	 * Returns the mutable decorator property map for this widget.
+	 */
 	@Override
 	public Map<String, String> getProperties() {
 		return properties;

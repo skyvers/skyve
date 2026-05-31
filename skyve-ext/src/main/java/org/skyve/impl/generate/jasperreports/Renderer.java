@@ -41,7 +41,12 @@ public class Renderer {
 	public static final int defaultReportHeight = 595;
 
 	/**
-	 * Performs eS.
+	 * Renders an opening XML element with optional attributes.
+	 *
+	 * @param string The XML element name.
+	 * @param attributes Attribute map to render.
+	 * @param withTerminator Whether to render as a self-closing tag.
+	 * @return The rendered tag fragment prefixed with a newline.
 	 */
 	public static String eS(String string, Map<String, String> attributes, boolean withTerminator) {
 		StringBuilder sb = new StringBuilder();
@@ -62,7 +67,13 @@ public class Renderer {
 	}
 
 	/**
-	 * Performs eS.
+	 * Renders an opening XML element with a single optional attribute.
+	 *
+	 * @param string The XML element name.
+	 * @param key Attribute key.
+	 * @param value Attribute value.
+	 * @param withTerminator Whether to render as a self-closing tag.
+	 * @return The rendered tag fragment.
 	 */
 	public static String eS(String string, String key, String value, boolean withTerminator) {
 		StringBuilder sb = new StringBuilder();
@@ -81,14 +92,26 @@ public class Renderer {
 	}
 
 	/**
-	 * Performs eS.
+	 * Renders a self-closing XML element with one optional attribute.
+	 *
+	 * @param string The XML element name.
+	 * @param key Attribute key.
+	 * @param value Attribute value.
+	 * @return The rendered tag fragment.
 	 */
 	public static String eS(String string, String key, String value) {
 		return eS(string, key, value, true);
 	}
 
 	/**
-	 * Performs eS.
+	 * Renders a self-closing XML element with up to two attributes.
+	 *
+	 * @param string The XML element name.
+	 * @param key1 First attribute key.
+	 * @param value1 First attribute value.
+	 * @param key2 Second attribute key.
+	 * @param value2 Second attribute value.
+	 * @return The rendered tag fragment.
 	 */
 	public static String eS(String string, String key1, String value1, String key2, String value2) {
 		StringBuilder sb = new StringBuilder();
@@ -107,7 +130,16 @@ public class Renderer {
 	}
 
 	/**
-	 * Performs eS.
+	 * Renders a self-closing XML element with up to three attributes.
+	 *
+	 * @param string The XML element name.
+	 * @param key1 First attribute key.
+	 * @param value1 First attribute value.
+	 * @param key2 Second attribute key.
+	 * @param value2 Second attribute value.
+	 * @param key3 Third attribute key.
+	 * @param value3 Third attribute value.
+	 * @return The rendered tag fragment.
 	 */
 	public static String eS(String string, String key1, String value1, String key2, String value2, String key3, String value3) {
 		StringBuilder sb = new StringBuilder();
@@ -130,7 +162,10 @@ public class Renderer {
 	}
 
 	/**
-	 * Performs eF.
+	 * Renders a closing XML tag.
+	 *
+	 * @param string The XML element name.
+	 * @return The rendered closing tag prefixed with a newline.
 	 */
 	public static String eF(String string) {
 		return "\n</" + string + ">";
@@ -776,11 +811,14 @@ public class Renderer {
 	}
 
 	/**
-	 * Skyve provides invisibleConditionName, so printWhenExpression must invert the polarity as well as render as jasper expression
-	 * 
-	 * @param design
-	 * @param invisibleConditionName
-	 * @return
+	 * Renders a Jasper {@code printWhenExpression} from a Skyve invisible-condition name.
+	 *
+	 * <p>Skyve condition names model invisibility, so the generated Jasper expression
+	 * inverts polarity to produce a print-when condition.
+	 *
+	 * @param design The report design context.
+	 * @param invisibleConditionName The Skyve invisible condition name.
+	 * @return A Jasper print-when expression fragment, or an empty string when no condition is provided.
 	 */
 	public static String renderPrintWhenExpression(DesignSpecification design, String invisibleConditionName) {
 		if (invisibleConditionName == null || StringUtils.isBlank(invisibleConditionName)) {
@@ -806,7 +844,12 @@ public class Renderer {
 	}
 
 	/**
-	 * Performs pathToReport.
+	 * Constructs the report directory path for a module/document pair.
+	 *
+	 * @param moduleName The module name.
+	 * @param documentName The document name.
+	 * @param enquote Whether to wrap the path in quotes.
+	 * @return The resolved path string.
 	 */
 	public static String pathToReport(String moduleName, String documentName, boolean enquote) {
 
@@ -843,7 +886,10 @@ public class Renderer {
 	}
 
 	/**
-	 * Returns the persistentIdentifierForDocument.
+	 * Returns the persistent table identifier for the supplied document.
+	 *
+	 * @param document The document metadata.
+	 * @return The persistent identifier, or {@code UnknownTable} when unavailable.
 	 */
 	public static String getPersistentIdentifierForDocument(Document document) {
 		String result = "UnknownTable";
@@ -855,7 +901,10 @@ public class Renderer {
 	}
 
 	/**
-	 * Returns the sqlEquivalentClass.
+	 * Maps a Skyve attribute type to the Java class name used in SQL report fields.
+	 *
+	 * @param aType The Skyve attribute type.
+	 * @return The fully qualified Java class name.
 	 */
 	public static String getSqlEquivalentClass(AttributeType aType) {
 
@@ -890,20 +939,26 @@ public class Renderer {
 	}
 
 	/**
-	 * Construct a report element and add it to the elements collection within the band
-	 * 
-	 * @param parent
-	 * @param type
-	 * @param name
-	 * @param valueExpression
-	 * @param fontName
-	 * @param fontSize
-	 * @param top
-	 * @param left
-	 * @param width
-	 * @param height
-	 * @return
-	 * @throws Exception
+	 * Creates and appends a report element to a band, applying inherited style defaults.
+	 *
+	 * @param band The destination band.
+	 * @param type The element type.
+	 * @param name The logical element name.
+	 * @param valueExpression The value expression or literal payload.
+	 * @param fontName Optional font name override.
+	 * @param fontSize Optional font size override.
+	 * @param top Optional top position.
+	 * @param left Optional left position.
+	 * @param width Optional width.
+	 * @param height Optional height.
+	 * @param border Optional border flag override.
+	 * @param alignment Optional alignment override.
+	 * @param bold Optional bold flag override.
+	 * @param italic Optional italic flag override.
+	 * @param foreColour Optional foreground colour override.
+	 * @param backColour Optional background colour override.
+	 * @param printWhenExpression Optional invisible-condition expression name.
+	 * @return The same band instance after element insertion.
 	 */
 	public static ReportBand addElement(ReportBand band, ReportElement.ElementType type, String name, String valueExpression, String fontName, Integer fontSize, Integer top,
 			Integer left,
@@ -977,10 +1032,10 @@ public class Renderer {
 	}
 
 	/**
-	 * returns the name of the inverse condition get method - e.g. from notGood <--> isGood
-	 * 
-	 * @param conditionName
-	 * @return
+	 * Converts a condition method name to its logical inverse form.
+	 *
+	 * @param conditionName The source condition name.
+	 * @return The inverse condition name, or {@code null} when input is {@code null}.
 	 */
 	public static String flipCondition(String conditionName) {
 		String result = null;
@@ -995,7 +1050,10 @@ public class Renderer {
 	}
 
 	/**
-	 * Performs rawConditionName.
+	 * Normalises a condition name to its non-prefixed form.
+	 *
+	 * @param conditionName The condition name (possibly prefixed with {@code not}).
+	 * @return The normalised condition name.
 	 */
 	public static String rawConditionName(String conditionName) {
 		String result = conditionName;
@@ -1122,11 +1180,11 @@ public class Renderer {
 	}
 
 	/**
-	 * Creates a method call expression for bound messages
-	 * 
-	 * @param design
-	 * @param msg
-	 * @return
+	 * Builds a report expression that resolves a bound message at runtime.
+	 *
+	 * @param design The design context used to select bean or SQL expression mode.
+	 * @param msg The message expression text.
+	 * @return A Jasper expression string that calls {@code BeanForReport.getMessage(...)}.
 	 */
 	public static String renderBoundMessage(DesignSpecification design, String msg) {
 		StringBuilder exp = new StringBuilder(64);

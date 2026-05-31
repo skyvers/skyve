@@ -24,15 +24,32 @@ public class ValidatableAction extends PositionableAction {
 
 	private Boolean clientValidation;
 
+	/**
+	 * Returns whether client-side validation should run before this action executes.
+	 *
+	 * @return {@code true} to perform client-side validation, {@code false} to bypass it,
+	 *         or {@code null} to use framework defaults
+	 */
 	public Boolean getClientValidation() {
 		return clientValidation;
 	}
 	
+	/**
+	 * Sets whether client-side validation should run before this action executes.
+	 *
+	 * @param clientValidation {@code true} to enforce client-side validation,
+	 *        {@code false} to skip it, or {@code null} to use framework defaults
+	 */
 	@XmlAttribute(required = false)
 	public void setClientValidation(Boolean clientValidation) {
 		this.clientValidation = clientValidation;
 	}
 
+	/**
+	 * Converts this descriptor to runtime metadata including validation behaviour.
+	 *
+	 * @return runtime action metadata with client-validation policy applied
+	 */
 	@Override
 	public ActionImpl toMetaDataAction() {
 		ActionImpl result = super.toMetaDataAction();

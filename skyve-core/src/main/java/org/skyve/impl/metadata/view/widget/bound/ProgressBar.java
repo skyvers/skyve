@@ -54,100 +54,190 @@ public class ProgressBar extends AbstractBound implements Invisible, AbsoluteSiz
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
 	private Map<String, String> properties = new TreeMap<>();
 
+	/**
+	 * Indicates progress bars render a label by default.
+	 *
+	 * @return {@code true} because progress bars show a field label by default
+	 */
 	@Override
 	public boolean showsLabelByDefault() {
 		return true;
 	}
 	
+	/**
+	 * Returns the absolute pixel width, or {@code null} when renderer defaults apply.
+	 *
+	 * @return the configured pixel width
+	 */
 	@Override
 	public Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
+	/**
+	 * Sets the absolute pixel width.
+	 *
+	 * @param pixelWidth the width in pixels
+	 */
 	@Override
 	@XmlAttribute(required = false)
 	public void setPixelWidth(Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 
+	/**
+	 * Returns the minimum pixel width constraint.
+	 *
+	 * @return the minimum width in pixels, or {@code null} when unconstrained
+	 */
 	@Override
 	public Integer getMinPixelWidth() {
 		return minPixelWidth;
 	}
 
+	/**
+	 * Sets the minimum pixel width constraint.
+	 *
+	 * @param minPixelWidth the minimum width in pixels
+	 */
 	@Override
 	@XmlAttribute(required = false)
 	public void setMinPixelWidth(Integer minPixelWidth) {
 		this.minPixelWidth = minPixelWidth;
 	}
 
+	/**
+	 * Returns the maximum pixel width constraint.
+	 *
+	 * @return the maximum width in pixels, or {@code null} when unconstrained
+	 */
 	@Override
 	public Integer getMaxPixelWidth() {
 		return maxPixelWidth;
 	}
 
+	/**
+	 * Sets the maximum pixel width constraint.
+	 *
+	 * @param maxPixelWidth the maximum width in pixels
+	 */
 	@Override
 	@XmlAttribute(required = false)
 	public void setMaxPixelWidth(Integer maxPixelWidth) {
 		this.maxPixelWidth = maxPixelWidth;
 	}
 
+	/**
+	 * Returns the absolute pixel height, or {@code null} when renderer defaults apply.
+	 *
+	 * @return the configured pixel height
+	 */
 	@Override
 	public Integer getPixelHeight() {
 		return pixelHeight;
 	}
 
+	/**
+	 * Sets the absolute pixel height.
+	 *
+	 * @param pixelHeight the height in pixels
+	 */
 	@Override
 	@XmlAttribute(required = false)
 	public void setPixelHeight(Integer pixelHeight) {
 		this.pixelHeight = pixelHeight;
 	}
 
+	/**
+	 * Returns the minimum pixel height constraint.
+	 *
+	 * @return the minimum height in pixels, or {@code null} when unconstrained
+	 */
 	@Override
 	public Integer getMinPixelHeight() {
 		return minPixelHeight;
 	}
 
+	/**
+	 * Sets the minimum pixel height constraint.
+	 *
+	 * @param minPixelHeight the minimum height in pixels
+	 */
 	@Override
 	@XmlAttribute(required = false)
 	public void setMinPixelHeight(Integer minPixelHeight) {
 		this.minPixelHeight = minPixelHeight;
 	}
 
+	/**
+	 * Returns the maximum pixel height constraint.
+	 *
+	 * @return the maximum height in pixels, or {@code null} when unconstrained
+	 */
 	@Override
 	public Integer getMaxPixelHeight() {
 		return maxPixelHeight;
 	}
 
+	/**
+	 * Sets the maximum pixel height constraint.
+	 *
+	 * @param maxPixelHeight the maximum height in pixels
+	 */
 	@Override
 	@XmlAttribute(required = false)
 	public void setMaxPixelHeight(Integer maxPixelHeight) {
 		this.maxPixelHeight = maxPixelHeight;
 	}
 
+	/**
+	 * Returns the internal invisible condition expression.
+	 *
+	 * @return the invisible condition expression
+	 */
 	@Override
 	public String getInvisibleConditionName() {
 		return invisibleConditionName;
 	}
 
+	/**
+	 * Sets the invisible condition expression directly.
+	 *
+	 * @param invisibleConditionName the invisible condition expression
+	 */
 	@Override
 	@XmlAttribute(name = "invisible", required = false)
 	public void setInvisibleConditionName(String invisibleConditionName) {
 		this.invisibleConditionName = UtilImpl.processStringValue(invisibleConditionName);
 	}
 
+	/**
+	 * JAXB-only placeholder for {@code visible}; value is derived via {@link #setVisibleConditionName(String)}.
+	 *
+	 * @return always {@code null}; JAXB writes via {@code setVisibleConditionName}
+	 */
 	// to enable JAXB XML marshaling
 	@SuppressWarnings("static-method")
 	String getVisibleConditionName() {
 		return null;
 	}
 
+	/**
+	 * Sets the visible condition by storing its negation as the internal invisible condition.
+	 *
+	 * @param visibleConditionName a condition expression that enables visibility
+	 */
 	@Override
 	@XmlAttribute(name = "visible", required = false)
 	public void setVisibleConditionName(String visibleConditionName) {
 		this.invisibleConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(visibleConditionName));
 	}
 
+	/**
+	 * Returns the mutable decorator property map for this widget.
+	 *
+	 * @return mutable decorator property map keyed by property name
+	 */
 	@Override
 	public Map<String, String> getProperties() {
 		return properties;

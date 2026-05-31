@@ -35,20 +35,34 @@ public abstract class ProvidedRepositoryFactory implements ProvidedRepository {
 
 	/**
 	 * Get the default repository or the session repository if set.
+	 *
+	 * @return the configured repository instance; never {@code null} after bootstrap
 	 */
 	public static @Nonnull ProvidedRepository get() {
 		return repository;
 	}
 
-	/**]
+	/**
 	 * Set the default repository.
+	 *
+	 * <p>Side effects: replaces the process-wide repository reference read by
+	 * {@link #get()} and by repository-dependent static helpers.
+	 *
+	 * @param repository the repository implementation to expose globally
 	 */
 	public static void set(@Nonnull ProvidedRepository repository) {
 		ProvidedRepositoryFactory.repository = repository;
 	}
 	
 	/**
-	 * Return a UserImpl with the customerName and name properties set from the user principal given.
+	 * Creates a transient user identity from a login principal string.
+	 *
+	 * <p>Supports principals in either {@code customer/user} format or plain
+	 * {@code user} format. When {@code UtilImpl.CUSTOMER} is configured, that value
+	 * overrides any customer portion parsed from the principal.
+	 *
+	 * @param userPrincipal the authenticated principal name; may be {@code null}
+	 * @return a populated {@link UserImpl}, or {@code null} when {@code userPrincipal} is {@code null}
 	 */
 	public static @Nullable UserImpl setCustomerAndUserFromPrincipal(@Nullable String userPrincipal) {
 		UserImpl result = null;

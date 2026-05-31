@@ -34,10 +34,20 @@ public abstract class StatementMetaData implements DecoratedMetaData {
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
 	private Map<String, String> properties = new TreeMap<>();
 
+	/**
+	 * Returns decorator properties attached to this statement metadata.
+	 *
+	 * @return mutable statement property map
+	 */
 	@Override
 	public Map<String, String> getProperties() {
 		return properties;
 	}
 
+	/**
+	 * Executes this statement against the supplied bean.
+	 *
+	 * @param bean the current document instance for statement evaluation
+	 */
 	public abstract void execute(Bean bean);
 }

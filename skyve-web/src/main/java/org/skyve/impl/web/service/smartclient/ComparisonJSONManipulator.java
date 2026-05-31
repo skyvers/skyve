@@ -28,6 +28,11 @@ import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.OWASP;
 
 /**
+ * Builds a SmartClient comparison tree for a composite mutation graph.
+ *
+ * <p>The returned structure is ordered depth-first and includes the display metadata
+ * needed by the web layer to render relationship rows, icons, and property deltas.
+ * 
  * Creates something like :-
  * 
  *          [
@@ -76,12 +81,27 @@ public final class ComparisonJSONManipulator {
 	private static final String DELETED_ICON = "icons/comparisonDeleted.png";
 	private static final String UPDATED_ICON = "icons/comparisonUpdated.png";
 
+	/**
+	 * Creates a manipulator for the supplied comparison graph.
+	 *
+	 * @param user active user for localisation and metadata lookups
+	 * @param customer active customer metadata
+	 * @param root comparison root to serialise; must not be {@code null}
+	 */
 	public ComparisonJSONManipulator(User user, CustomerImpl customer, ComparisonComposite root) {
 		this.user = user;
 		this.customer = customer;
 		this.root = root;
 	}
 
+	/**
+	 * Returns the comparison graph as a depth-first JSON-ready structure.
+	 *
+	 * <p>Side effects: determines mutations for the root comparison before traversal.
+	 *
+	 * @return ordered JSON-ready node maps; never {@code null}
+	 * @throws Exception if mutation discovery or property resolution fails
+	 */
 	public Iterable<Map<String, Object>> toJSONStructure() throws Exception {
 		List<Map<String, Object>> result = new ArrayList<>();
 		root.determineMutations();
@@ -89,6 +109,18 @@ public final class ComparisonJSONManipulator {
 		return result;
 	}
 
+	/**
+	 * Appends a comparison node and its descendants to the JSON output.
+	 *
+	 * <p>Side effects: resolves comparison metadata, builds child entries recursively,
+	 * and mutates the supplied JSON accumulator.
+	 *
+	 * @param node comparison node to serialise
+	 * @param referenceType reference discriminator passed through to the JSON payload
+	 * @param parent parent comparison node, or {@code null} for the root
+	 * @param json accumulator receiving the generated node maps
+	 * @throws Exception if node metadata resolution fails
+	 */
 	@SuppressWarnings("incomplete-switch")
 	private void processNode(ComparisonComposite node,
 								String referenceType,
@@ -142,6 +174,17 @@ public final class ComparisonJSONManipulator {
 	}
 
 	// property name -> JSON property map
+	/**
+	 * Converts comparison properties into SmartClient-ready property maps.
+	 *
+	 * <p>Side effects: resolves attribute metadata, domain value maps, and lookup
+	 * display values for each property.
+	 *
+	 * @param properties comparison properties to serialise
+	 * @param nodeDocument document metadata for the owning node, or {@code null}
+	 * @return ordered property maps; never {@code null}
+	 * @throws Exception if a property cannot be mapped to SmartClient metadata
+	 */
 	private List<Map<String, Object>> listOfMapOfProperties(List<ComparisonProperty> properties,
 																Document nodeDocument)
 	throws Exception {
@@ -240,6 +283,15 @@ public final class ComparisonJSONManipulator {
 		return result;
 	}
 
+	/**
+	 * Returns escaped constant-domain display values keyed by domain code.
+	 *
+	 * @param customer active customer metadata
+	 * @param document document owning the attribute
+	 * @param attribute constant-domain attribute to resolve
+	 * @param runtime whether runtime domain values should be used
+	 * @return escaped code-to-description map
+	 */
 	private static Map<String, String> getConstantDomainValueMap(CustomerImpl customer,
 																	Document document,
 																	Attribute attribute,
@@ -257,6 +309,12 @@ public final class ComparisonJSONManipulator {
 		return result;
 	}
 
+	/**
+	 * Wraps a changed comparison label in the SmartClient dirty-value markup.
+	 *
+	 * @param label plain label text
+	 * @return label wrapped in the dirty-value span markup
+	 */
 	private static String showDirty(String label) {
 		StringBuilder result = new StringBuilder(label);
 		result.insert(0, "<span style='color:red'>");

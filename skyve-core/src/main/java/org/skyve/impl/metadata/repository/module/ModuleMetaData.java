@@ -59,21 +59,6 @@ import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-@XmlRootElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "module")
-@XmlType(namespace = XMLMetaData.MODULE_NAMESPACE, 
-			name = "module",
-			propOrder = {"title",
-							"prototype",
-							"formLabelLayout",
-							"documentation", 
-							"homeRef",
-							"homeDocument",
-							"jobs",
-							"documents",
-							"roles",
-							"menu",
-							"queries",
-							"properties"})
 /**
  * JAXB root element for a module descriptor ({@code module.xml}), converted to a
  * runtime {@link Module} during repository bootstrap.
@@ -89,6 +74,21 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * @see Module
  * @see org.skyve.impl.metadata.module.ModuleImpl
  */
+@XmlRootElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "module")
+@XmlType(namespace = XMLMetaData.MODULE_NAMESPACE, 
+			name = "module",
+			propOrder = {"title",
+							"prototype",
+							"formLabelLayout",
+							"documentation", 
+							"homeRef",
+							"homeDocument",
+							"jobs",
+							"documents",
+							"roles",
+							"menu",
+							"queries",
+							"properties"})
 public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData<Module>, DecoratedMetaData {
 	private static final long serialVersionUID = -6257431975403255783L;
 
@@ -109,63 +109,140 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
 	private Map<String, String> properties = new TreeMap<>();
 
+	/**
+	 * Returns the module display title.
+	 *
+	 * @return the module title
+	 */
 	public String getTitle() {
 		return title;
 	}
 
+	/**
+	 * Sets the module display title.
+	 *
+	 * <p>Side effects: normalises the supplied value with
+	 * {@link UtilImpl#processStringValue(String)} before storing it.
+	 *
+	 * @param title the module title; blank values become {@code null}
+	 */
 	@XmlAttribute(required = true)
 	public void setTitle(String title) {
 		this.title = UtilImpl.processStringValue(title);
 	}
 
+	/**
+	 * Returns whether this module is marked as a prototype.
+	 *
+	 * @return {@code Boolean.TRUE} when prototype-mode is enabled, otherwise {@code null} or {@code Boolean.FALSE}
+	 */
 	public Boolean getPrototype() {
 		return prototype;
 	}
 
+	/**
+	 * Sets the prototype-mode marker for this module.
+	 *
+	 * @param prototype the prototype flag
+	 */
 	@XmlAttribute
 	public void setPrototype(Boolean prototype) {
 		this.prototype = prototype;
 	}
 
+	/**
+	 * Returns the home document name for the module.
+	 *
+	 * @return the home document name
+	 */
 	public String getHomeDocument() {
 		return homeDocument;
 	}
 
+	/**
+	 * Sets the default form label layout for views in this module.
+	 *
+	 * @param formLabelLayout the form label layout strategy
+	 */
 	@XmlAttribute
 	public void setFormLabelLayout(FormLabelLayout formLabelLayout) {
 		this.formLabelLayout = formLabelLayout;
 	}
 
+	/**
+	 * Returns the default form label layout for this module.
+	 *
+	 * @return the configured form label layout, or {@code null} when unspecified
+	 */
 	public FormLabelLayout getFormLabelLayout() {
 		return formLabelLayout;
 	}
 
+	/**
+	 * Sets the home document name for this module.
+	 *
+	 * <p>Side effects: normalises the supplied value with
+	 * {@link UtilImpl#processStringValue(String)} before storing it.
+	 *
+	 * @param homeDocument the home document name; blank values become {@code null}
+	 */
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, required = true)
 	public void setHomeDocument(String homeDocument) {
 		this.homeDocument = UtilImpl.processStringValue(homeDocument);
 	}
 
+	/**
+	 * Returns the home view reference for the module home document.
+	 *
+	 * @return the configured home view type, or {@code null} to default to list view during conversion
+	 */
 	public ViewType getHomeRef() {
 		return homeRef;
 	}
 
+	/**
+	 * Sets the home view reference for the module home document.
+	 *
+	 * @param homeRef the home view type
+	 */
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
 	public void setHomeRef(ViewType homeRef) {
 		this.homeRef = homeRef;
 	}
 
+	/**
+	 * Returns the configured job descriptors for this module.
+	 *
+	 * <p>Returns the live mutable list used by JAXB population.
+	 *
+	 * @return the mutable job metadata list, never {@code null}
+	 */
 	@XmlElementWrapper(namespace = XMLMetaData.MODULE_NAMESPACE, name = "jobs")
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "job", required = true)
 	public List<JobMetaDataImpl> getJobs() {
 		return jobs;
 	}
 
+	/**
+	 * Returns the configured document references for this module.
+	 *
+	 * <p>Returns the live mutable list used by JAXB population.
+	 *
+	 * @return the mutable document metadata list, never {@code null}
+	 */
 	@XmlElementWrapper(namespace = XMLMetaData.MODULE_NAMESPACE, name = "documents")
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "document", required = true)
 	public List<ModuleDocumentMetaData> getDocuments() {
 		return documents;
 	}
 
+	/**
+	 * Returns the configured query declarations and references for this module.
+	 *
+	 * <p>Returns the live mutable list used by JAXB population.
+	 *
+	 * @return the mutable query metadata list, never {@code null}
+	 */
 	@XmlElementWrapper(namespace = XMLMetaData.MODULE_NAMESPACE, name = "queries")
 	@XmlElementRefs({@XmlElementRef(type = MetaDataQueryMetaData.class),
 						@XmlElementRef(type = SQLMetaData.class),
@@ -177,46 +254,110 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 		return queries;
 	}
 
+	/**
+	 * Returns the configured role declarations for this module.
+	 *
+	 * <p>Returns the live mutable list used by JAXB population.
+	 *
+	 * @return the mutable role metadata list, never {@code null}
+	 */
 	@XmlElementWrapper(namespace = XMLMetaData.MODULE_NAMESPACE, name = "roles")
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "role", required = true)
 	public List<ModuleRoleMetaData> getRoles() {
 		return roles;
 	}
 
+	/**
+	 * Returns the module menu metadata descriptor.
+	 *
+	 * @return the menu descriptor
+	 */
 	public MenuMetaData getMenu() {
 		return menu;
 	}
 
+	/**
+	 * Sets the module menu metadata descriptor.
+	 *
+	 * @param menu the menu descriptor
+	 */
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, required = true)
 	public void setMenu(MenuMetaData menu) {
 		this.menu = menu;
 	}
 
+	/**
+	 * Returns developer-facing module documentation text.
+	 *
+	 * @return documentation text, or {@code null}
+	 */
 	public String getDocumentation() {
 		return documentation;
 	}
 
+	/**
+	 * Sets developer-facing module documentation text.
+	 *
+	 * <p>Side effects: normalises the supplied value with
+	 * {@link UtilImpl#processStringValue(String)} before storing it.
+	 *
+	 * @param documentation documentation text; blank values become {@code null}
+	 */
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
 	public void setDocumentation(String documentation) {
 		this.documentation = UtilImpl.processStringValue(documentation);
 	}
 
+	/**
+	 * Returns the source metadata last-modified timestamp.
+	 *
+	 * @return last-modified timestamp in milliseconds since epoch
+	 */
 	@Override
 	public long getLastModifiedMillis() {
 		return lastModifiedMillis;
 	}
 
+	/**
+	 * Sets the source metadata last-modified timestamp.
+	 *
+	 * @param lastModifiedMillis last-modified timestamp in milliseconds since epoch
+	 */
 	@XmlTransient
 	public void setLastModifiedMillis(long lastModifiedMillis) {
 		this.lastModifiedMillis = lastModifiedMillis;
 	}
 
+	/**
+	 * Returns module-level custom properties.
+	 *
+	 * <p>Returns the live mutable map used during metadata conversion.
+	 *
+	 * @return the mutable module property map, never {@code null}
+	 */
 	@Override
 	public Map<String, String> getProperties() {
 		return properties;
 	}
 	
+	/**
+	 * Converts this JAXB metadata descriptor into a validated runtime {@link Module}.
+	 *
+	 * <p>Side effects: populates a new {@link ModuleImpl} with copied module
+	 * properties, document references, jobs, queries, roles, and menu state.
+	 *
+	 * <p>Postconditions: returns a new module instance with required module identity,
+	 * title, and home-document metadata resolved; validation fails fast when required
+	 * names are missing or duplicated.
+	 *
+	 * <p>Complexity: O(d + j + q + r), where d is document refs, j is jobs,
+	 * q is queries, and r is roles defined in this metadata.
+	 *
+	 * @param metaDataName the source metadata identifier used in validation errors
+	 * @return a newly populated runtime module representation; never {@code null}
+	 * @throws MetaDataException if required fields are missing or duplicate names are detected
+	 */
 	@Override
 	public Module convert(String metaDataName) {
 		ModuleImpl result = new ModuleImpl();
@@ -722,6 +863,17 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 		return result;
 	}
 
+	/**
+	 * Converts menu action metadata into runtime menu items.
+	 *
+	 * <p>Side effects: appends converted runtime menu items to {@code items}.
+	 *
+	 * @param metaDataName the source metadata identifier used in validation errors
+	 * @param items the destination list to receive converted runtime menu items
+	 * @param actions source action metadata to convert
+	 * @param validRoleNames role names valid for grants within this module
+	 * @throws MetaDataException if required action attributes are missing or inconsistent
+	 */
 	private void populateModuleMenu(String metaDataName, 
 										List<MenuItem> items, 
 										List<ActionMetaData> actions, 
@@ -934,6 +1086,18 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 		}
 	}
 	
+	/**
+	 * Populates common runtime menu-item state from source metadata.
+	 *
+	 * <p>Side effects: mutates {@code result} by setting name, properties, role
+	 * grants, and UX/UI constraints.
+	 *
+	 * @param metaDataName the source metadata identifier used in validation errors
+	 * @param validRoleNames role names valid for grants within this module
+	 * @param result the destination runtime menu item
+	 * @param metadata the source item metadata
+	 * @throws MetaDataException if required name/grant attributes are missing, duplicated, or invalid
+	 */
 	private void populateItem(String metaDataName,
 								Set<String> validRoleNames,
 								AbstractMenuItem result,
@@ -972,6 +1136,16 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 		populateUxuis(metaDataName, result.getName(), metadata.getUxuis(), result.getUxUis());
 	}
 	
+	/**
+	 * Copies shared query-definition fields from repository metadata into a runtime query.
+	 *
+	 * @param queryMetaData the source query metadata
+	 * @param query the destination runtime query definition
+	 * @param metaDataName the source metadata identifier used in validation errors
+	 * @param queryNames accumulator used to detect duplicate query names
+	 * @param documentNames document names used to prevent query/document naming collisions
+	 * @throws MetaDataException if required fields are missing or naming rules are violated
+	 */
 	private static void populateQueryProperties(QueryDefinitionMetaData queryMetaData, 
 													QueryDefinitionImpl query, 
 													String metaDataName,
@@ -1000,6 +1174,15 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 		query.getProperties().putAll(queryMetaData.getProperties());
 	}
 	
+	/**
+	 * Validates that a query name is unique and does not clash with module document names.
+	 *
+	 * @param name the query name to validate
+	 * @param metaDataName the source metadata identifier used in validation errors
+	 * @param queryNames accumulator used to detect duplicate query names
+	 * @param documentNames document names used to prevent query/document naming collisions
+	 * @throws MetaDataException if the query name is duplicated or conflicts with a document name
+	 */
 	private static void validateQueryName(String name,
 											String metaDataName,
 											Set<String> queryNames,
@@ -1012,6 +1195,17 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 		}
 	}
 
+	/**
+	 * Validates and copies UX/UI applicability entries.
+	 *
+	 * <p>Side effects: adds validated UX/UI names into {@code uxuisToAddTo}.
+	 *
+	 * @param metaDataName the source metadata identifier used in validation errors
+	 * @param itemName the owning menu item name
+	 * @param uxuis source UX/UI applicability metadata
+	 * @param uxuisToAddTo destination set receiving validated UX/UI names
+	 * @throws MetaDataException if a UX/UI name is missing or duplicated
+	 */
 	private static void populateUxuis(String metaDataName, 
 										String itemName, 
 										List<ApplicableTo> uxuis, 

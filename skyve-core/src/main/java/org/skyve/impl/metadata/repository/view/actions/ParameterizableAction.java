@@ -29,6 +29,11 @@ public abstract class ParameterizableAction extends PositionableAction implement
 
 	private List<Parameter> parameters = new ArrayList<>();
 
+	/**
+	 * Returns parameters declared for this action descriptor.
+	 *
+	 * @return mutable parameter list in declaration order
+	 */
 	@Override
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE, 
 					name = "parameter",
@@ -38,6 +43,11 @@ public abstract class ParameterizableAction extends PositionableAction implement
 		return parameters;
 	}
 
+	/**
+	 * Converts this descriptor to runtime metadata including declared parameters.
+	 *
+	 * @return runtime action metadata with parameters appended in declaration order
+	 */
 	@Override
 	public ActionImpl toMetaDataAction() {
 		ActionImpl result = super.toMetaDataAction();

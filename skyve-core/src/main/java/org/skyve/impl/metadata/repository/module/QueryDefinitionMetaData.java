@@ -34,34 +34,75 @@ public abstract class QueryDefinitionMetaData extends QueryMetaData {
 	protected String description;
 	private Integer timeoutInSeconds;
 
+	/**
+	 * Returns developer-facing documentation for this query definition.
+	 *
+	 * @return the query documentation text, or {@code null} when unspecified
+	 */
 	public String getDocumentation() {
 		return documentation;
 	}
 
+	/**
+	 * Sets developer-facing documentation for this query definition.
+	 *
+	 * <p>Side effects: normalises the supplied value with
+	 * {@link UtilImpl#processStringValue(String)} before storing it.
+	 *
+	 * @param documentation the documentation text; blank values become {@code null}
+	 */
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
 	public void setDocumentation(String documentation) {
 		this.documentation = UtilImpl.processStringValue(documentation);
 	}
 
+	/**
+	 * Returns the untranslated description configured for this query definition.
+	 *
+	 * @return the raw description value, or {@code null} when unspecified
+	 */
 	public String getDescription() {
 		return description;
 	}
 
+	/**
+	 * Returns the description translated for the current locale.
+	 *
+	 * @return the localised description, or {@code null} when no description is defined
+	 */
 	public String getLocalisedDescription() {
 		return Util.i18n(description);
 	}
 	
+	/**
+	 * Sets the untranslated description configured for this query definition.
+	 *
+	 * <p>Side effects: normalises the supplied value with
+	 * {@link UtilImpl#processStringValue(String)} before storing it.
+	 *
+	 * @param description the raw description value; blank values become {@code null}
+	 */
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
 	public void setDescription(String description) {
 		this.description = UtilImpl.processStringValue(description);
 	}
 
+	/**
+	 * Returns the query execution timeout in seconds.
+	 *
+	 * @return the timeout in seconds, or {@code null} when no timeout is configured
+	 */
 	public Integer getTimeoutInSeconds() {
 		return timeoutInSeconds;
 	}
 
+	/**
+	 * Sets the query execution timeout in seconds.
+	 *
+	 * @param timeoutInSeconds the timeout in seconds; {@code null} disables timeout enforcement
+	 */
 	@XmlAttribute
 	public void setTimeoutInSeconds(Integer timeoutInSeconds) {
 		this.timeoutInSeconds = timeoutInSeconds;

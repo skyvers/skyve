@@ -17,5 +17,10 @@ public interface Box extends ShrinkWrapper, Invisible, DecoratedMetaData {
 	public Integer getPixelMemberPadding();
 	public void setPixelMemberPadding(Integer pixelMemberPadding);
 	
+	/**
+	 * Returns the collapse behavior for this box container.
+	 *
+	 * @return the collapse mode, or {@code null} when collapsibility is not configured
+	 */
 	public Collapsible getCollapsible();
 }

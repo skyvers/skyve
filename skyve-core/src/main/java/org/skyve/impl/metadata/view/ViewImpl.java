@@ -108,185 +108,392 @@ public class ViewImpl extends Container implements View {
 	// Accesses for this view only (not component fragments)
 	private transient Set<UserAccess> accesses = null;
 	
+	/**
+	 * Returns the condition name controlling auto-refresh, or {@code null} if auto-refresh is unconditional.
+	 *
+	 * @return the condition name, or {@code null} if auto-refresh fires unconditionally
+	 */
 	@Override
 	public String getRefreshConditionName() {
 		return refreshConditionName;
 	}
 
+	/**
+	 * Sets the condition name controlling auto-refresh.
+	 *
+	 * @param refreshConditionName the condition name to set
+	 */
 	public void setRefreshConditionName(String refreshConditionName) {
 		this.refreshConditionName = refreshConditionName;
 	}
 
+	/**
+	 * Returns the auto-refresh interval in seconds, or {@code null} if auto-refresh is disabled.
+	 *
+	 * @return the interval in seconds, or {@code null} if auto-refresh is disabled
+	 */
 	@Override
 	public Integer getRefreshTimeInSeconds() {
 		return refreshTimeInSeconds;
 	}
 
+	/**
+	 * Sets the auto-refresh interval in seconds.
+	 *
+	 * @param refreshTimeInSeconds the interval in seconds, or {@code null} to disable auto-refresh
+	 */
 	public void setRefreshTimeInSeconds(Integer refreshTimeInSeconds) {
 		this.refreshTimeInSeconds = refreshTimeInSeconds;
 	}
 
+	/**
+	 * Returns the action name executed on each auto-refresh, or {@code null} if none is configured.
+	 *
+	 * @return the action name, or {@code null} if none is configured
+	 */
 	@Override
 	public String getRefreshActionName() {
 		return refreshActionName;
 	}
 
+	/**
+	 * Sets the action name executed on each auto-refresh.
+	 *
+	 * @param refreshActionName the action name to set
+	 */
 	public void setRefreshActionName(String refreshActionName) {
 		this.refreshActionName = refreshActionName;
 	}
 
+	/**
+	 * Returns the logical name of this view (e.g. {@code edit}, {@code list}).
+	 *
+	 * @return the logical view name
+	 */
 	@Override
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * Sets the logical name of this view.
+	 *
+	 * @param name the logical name to assign
+	 */
 	public void setName(String name) {
 		this.name = name;
 	}
 
+	/**
+	 * Returns the last-modified timestamp of the view source file in epoch milliseconds.
+	 * Defaults to {@link Long#MAX_VALUE} when no file-system timestamp has been recorded.
+	 *
+	 * @return the last-modified timestamp in epoch milliseconds
+	 */
 	@Override
 	public long getLastModifiedMillis() {
 		return lastModifiedMillis;
 	}
 	
+	/**
+	 * Sets the last-modified timestamp of the view source file in epoch milliseconds.
+	 *
+	 * @param lastModifiedMillis the last-modified timestamp in epoch milliseconds
+	 */
 	public void setLastModifiedMillis(long lastModifiedMillis) {
 		this.lastModifiedMillis = lastModifiedMillis;
 	}
 	
+	/**
+	 * Returns the timestamp at which the view source was last polled for changes, in epoch milliseconds.
+	 * Initialised to {@link System#currentTimeMillis()} at construction.
+	 *
+	 * @return the last-polled timestamp in epoch milliseconds
+	 */
 	@Override
 	public long getLastCheckedMillis() {
 		return lastCheckedMillis;
 	}
 
+	/**
+	 * Sets the timestamp at which the view source was last polled for changes.
+	 *
+	 * @param lastCheckedMillis the last-polled timestamp in epoch milliseconds
+	 */
 	@Override
 	public void setLastCheckedMillis(long lastCheckedMillis) {
 		this.lastCheckedMillis = lastCheckedMillis;
 	}
 
+	/**
+	 * Returns the project-relative file name of the 32x32 icon for this view, or {@code null} if none.
+	 *
+	 * @return the project-relative icon file name, or {@code null} if none
+	 */
 	@Override
 	public String getIcon32x32RelativeFileName() {
 		return icon32x32RelativeFileName;
 	}
 
+	/**
+	 * Sets the project-relative file name of the 32x32 icon for this view.
+	 *
+	 * @param icon32x32RelativeFileName the project-relative icon file name
+	 */
 	public void setIcon32x32RelativeFileName(String icon32x32RelativeFileName) {
 		this.icon32x32RelativeFileName = icon32x32RelativeFileName;
 	}
 
+	/**
+	 * Returns the CSS style class for the view icon, or {@code null} if none.
+	 *
+	 * @return the CSS style class, or {@code null} if none
+	 */
 	@Override
 	public String getIconStyleClass() {
 		return iconStyleClass;
 	}
 
+	/**
+	 * Sets the CSS style class for the view icon.
+	 *
+	 * @param iconStyleClass the CSS style class
+	 */
 	public void setIconStyleClass(String iconStyleClass) {
 		this.iconStyleClass = iconStyleClass;
 	}
 
+	/**
+	 * Returns the project-relative file name of the help document, or {@code null} if none.
+	 *
+	 * @return the project-relative help document file name, or {@code null} if none
+	 */
 	@Override
 	public String getHelpRelativeFileName() {
 		return helpRelativeFileName;
 	}
 
+	/**
+	 * Sets the project-relative file name of the help document.
+	 *
+	 * @param helpRelativeFileName the project-relative help document file name
+	 */
 	public void setHelpRelativeFileName(String helpRelativeFileName) {
 		this.helpRelativeFileName = helpRelativeFileName;
 	}
 
+	/**
+	 * Returns the URL of the external help page, or {@code null} if none.
+	 *
+	 * @return the external help page URL, or {@code null} if none
+	 */
 	@Override
 	public String getHelpURL() {
 		return helpURL;
 	}
 
+	/**
+	 * Sets the URL of the external help page.
+	 *
+	 * @param helpURL the external help page URL
+	 */
 	public void setHelpURL(String helpURL) {
 		this.helpURL = helpURL;
 	}
 	
+	/**
+	 * Returns the display title of this view, or {@code null} if not explicitly set.
+	 *
+	 * @return the display title, or {@code null} if not explicitly set
+	 */
 	@Override
 	public String getTitle() {
 		return title;
 	}
 
+	/**
+	 * Sets the display title of this view.
+	 *
+	 * @param title the display title
+	 */
 	public void setTitle(String title) {
 		this.title = title;
 	}
 
+	/**
+	 * Returns the widget ID used to locate the actions area, or {@code null} for default positioning.
+	 *
+	 * @return the widget ID, or {@code null} for default positioning
+	 */
 	@Override
 	public String getActionsWidgetId() {
 		return actionsWidgetId;
 	}
 
+	/**
+	 * Sets the widget ID of the actions area.
+	 *
+	 * @param actionsWidgetId the widget ID of the actions area
+	 */
 	public void setActionsWidgetId(String actionsWidgetId) {
 		this.actionsWidgetId = actionsWidgetId;
 	}
 
+	/**
+	 * Returns the action registered under {@code actionName}, or {@code null} if not found.
+	 *
+	 * @param actionName the key to look up
+	 * @return the matching action, or {@code null} if not found
+	 */
 	@Override
 	public Action getAction(String actionName) {
 		return actions.get(actionName);
 	}
 
+	/**
+	 * Adds or replaces an action keyed by its resolved action name.
+	 *
+	 * <p>Side effects: mutates the internal action map for this view. If another action
+	 * already uses the same name, the existing entry is replaced.
+	 *
+	 * @param action the action metadata to register
+	 */
 	public void putAction(Action action) {
 		actions.put(action.getName(), action);
 	}
 
+	/**
+	 * Returns an ordered collection of all actions defined for this view.
+	 *
+	 * @return ordered collection of all actions; never {@code null}
+	 */
 	@Override
 	public Collection<Action> getActions() {
 		return actions.values();
 	}
 
+	/**
+	 * Returns the sidebar container, or {@code null} if this view has no sidebar.
+	 *
+	 * @return the sidebar container, or {@code null} if this view has no sidebar
+	 */
 	@Override
 	public Sidebar getSidebar() {
 		return sidebar;
 	}
 
+	/**
+	 * Sets the sidebar container for this view.
+	 *
+	 * @param sidebar the sidebar container, or {@code null} to remove it
+	 */
 	public void setSidebar(Sidebar sidebar) {
 		this.sidebar = sidebar;
 	}
 
 	/**
-	 * These represent parameters that are allowed to be populated when creating a new record.
+	 * Returns parameters that may be populated when creating a new record via URL or action navigation.
+	 *
+	 * @return the list of view parameters; never {@code null}
 	 */
 	@Override
 	public List<ViewParameter> getParameters() {
 		return parameters;
 	}
 
+	/**
+	 * Returns the documentation string for this view, or {@code null} if none.
+	 *
+	 * @return the documentation string, or {@code null} if none
+	 */
 	@Override
 	public String getDocumentation() {
 		return documentation;
 	}
 
+	/**
+	 * Sets the documentation string for this view.
+	 *
+	 * @param documentation the documentation string
+	 */
 	public void setDocumentation(String documentation) {
 		this.documentation = documentation;
 	}
 	
+	/**
+	 * Returns the inline model metadata registered under {@code modelName},
+	 * or {@code null} if the model is defined externally.
+	 *
+	 * @param modelName the key under which the model was registered
+	 * @return the inline model metadata, or {@code null} if the model is defined externally
+	 */
 	@Override
 	public ModelMetaData getInlineModel(String modelName) {
 		return inlineModels.get(modelName);
 	}
 	
+	/**
+	 * Returns the customer name this view overrides, or {@code null} if it is not a customer-specific override.
+	 *
+	 * @return the customer name, or {@code null} if this is not a customer-specific override
+	 */
 	@Override
 	public String getOverriddenCustomerName() {
 		return overriddenCustomerName;
 	}
 
+	/**
+	 * Sets the customer name this view overrides.
+	 *
+	 * @param overriddenCustomerName the customer name
+	 */
 	public void setOverriddenCustomerName(String overriddenCustomerName) {
 		this.overriddenCustomerName = overriddenCustomerName;
 	}
 
+	/**
+	 * Returns the UX/UI name this view overrides, or {@code null} if it is not a UX/UI-specific override.
+	 *
+	 * @return the UX/UI name, or {@code null} if this is not a UX/UI-specific override
+	 */
 	@Override
 	public String getOverriddenUxUiName() {
 		return overriddenUxUiName;
 	}
 
+	/**
+	 * Sets the UX/UI name this view overrides.
+	 *
+	 * @param overriddenUxUiName the UX/UI name
+	 */
 	public void setOverriddenUxUiName(String overriddenUxUiName) {
 		this.overriddenUxUiName = overriddenUxUiName;
 	}
 
+	/**
+	 * Returns the mutable property map for this view, sorted by key.
+	 *
+	 * @return the mutable, key-sorted property map; never {@code null}
+	 */
 	@Override
 	public Map<String, String> getProperties() {
 		return properties;
 	}
 
 	/**
-	 * Get accesses for this view and any component fragments recursively.
+	 * Returns the effective access set for this view, including linked component fragments.
+	 *
+	 * <p>When component fragments are present, this method translates component-local access
+	 * entries into the owning document context (module/document rebinding and binding-prefix
+	 * adjustments) before merging into the view-level set.
+	 *
+	 * <p>Side effects: may append translated access entries to the cached access set.
+	 *
+	 * @param customer the resolved customer used to load component fragments
+	 * @param document the owning document context for translation of component accesses
+	 * @param uxui the active UX/UI profile used to resolve component variants
+	 * @return the effective access set for this view and its component fragments,
+	 *         or {@code null} if access control has not been enabled and accesses have not been generated
 	 */
 	public Set<UserAccess> getAccesses(CustomerImpl customer, Document document, String uxui) {
 		Set<UserAccess> result = accesses;
@@ -357,6 +564,17 @@ public class ViewImpl extends Container implements View {
 		return result;
 	}
 
+	/**
+	 * Converts repository user-access metadata into this view's runtime access set.
+	 *
+	 * <p>Validates duplicate entries and UX/UI bindings before materialising
+	 * {@link UserAccess} instances.
+	 *
+	 * @param module the owning module
+	 * @param documentName the owning document name
+	 * @param metaDataName source metadata name for diagnostics
+	 * @param accessesMetaData repository access definitions, or {@code null}
+	 */
 	public void convertAccesses(Module module,
 									String documentName,
 									String metaDataName,
@@ -399,10 +617,19 @@ public class ViewImpl extends Container implements View {
 	}
 	
 	/**
-	 * Ensure that any component loaded matches the given UX/UI.
-	 * Ensure that inlined metadata model definitions are added to the implicit models map.
-	 * Convert and validate any accesses defined in the view metadata.
-	 * If accesses are not defined then determine them.
+	 * Resolves this view for a specific UX/UI and document context.
+	 *
+	 * <p>Resolution links component references, captures inline model definitions,
+	 * and either validates declared accesses or derives them by walking the view tree.
+	 *
+	 * <p>Side effects: mutates transient caches ({@code components}, {@code inlineModels},
+	 * and optionally {@code accesses}) based on the supplied context.
+	 *
+	 * @param uxui the target UX/UI profile
+	 * @param customer the active customer
+	 * @param module the owning module
+	 * @param document the owning document
+	 * @param generate whether missing accesses should be generated when access control is enabled
 	 */
 	public void resolve(String uxui, Customer customer, Module module, Document document, boolean generate) {
 		final String moduleName = module.getName();
@@ -637,6 +864,7 @@ public class ViewImpl extends Container implements View {
 					}
 				}
 			}
+			/** {@inheritDoc} */
 			
 			@Override
 			public void visitTreeGrid(TreeGrid grid, boolean parentVisible, boolean parentEnabled) {
@@ -644,6 +872,7 @@ public class ViewImpl extends Container implements View {
 					visitListGrid(grid, parentVisible, parentEnabled);
 				}
 			}
+			/** {@inheritDoc} */
 			
 			@Override
 			public void visitZoomIn(ZoomIn zoomIn, boolean parentVisible, boolean parentEnabled) {
@@ -668,7 +897,6 @@ public class ViewImpl extends Container implements View {
 					String relatedDocumentName = targetRelation.getDocumentName();
 					relatedDocument = module.getDocument(customer, relatedDocumentName);
 				}
-				@SuppressWarnings("null")
 				String relatedModuleName = relatedDocument.getOwningModuleName();
 				accesses.add(UserAccess.singular(relatedModuleName, relatedDocument.getName()));
 			}
@@ -705,8 +933,9 @@ public class ViewImpl extends Container implements View {
 	}
 	
 	/**
-	 * Reinstate transients after Deserialization
-	 * @return	this
+	 * Reinitialises transient runtime caches after deserialisation.
+	 *
+	 * @return this instance with transient state restored
 	 */
 	private Object readResolve() {
 		inlineModels = new TreeMap<>();
@@ -717,13 +946,17 @@ public class ViewImpl extends Container implements View {
 	}
 	
 	/**
-	 * Get a UI fragment for a component
-	 * @param c	The customer
-	 * @param m	The module
-	 * @param d	The document
-	 * @param uxui	The UX/UI
-	 * @param component	The component
-	 * @return	The fragment
+	 * Returns the resolved fragment view for a linked component.
+	 *
+	 * <p>The returned fragment is context-specific to customer, module, document,
+	 * and UX/UI, and preserves whether access metadata has already been resolved.
+	 *
+	 * @param c the customer context
+	 * @param m the module context
+	 * @param d the document context
+	 * @param uxui the active UX/UI profile
+	 * @param component the component whose fragment should be resolved
+	 * @return the resolved fragment view for the component
 	 */
 	public ViewImpl getFragment(CustomerImpl c, ModuleImpl m, DocumentImpl d, String uxui, Component component) {
 		return fragments.get(c, m, d, uxui, component, (accesses != null));

@@ -90,7 +90,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 /**
- * Service for list views.
+ * Serves SmartClient list-view requests and filter criteria processing.
  */
 public class SmartClientListServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
@@ -105,6 +105,14 @@ public class SmartClientListServlet extends HttpServlet {
 	static final String ISC_JSON_PREFIX = "<SCRIPT>//'\"]]>>isc_JSONResponseStart>>";
 	static final String ISC_JSON_SUFFIX = "//isc_JSONResponseEnd";
 
+	/**
+	 * Handles SmartClient list requests submitted with HTTP GET.
+	 *
+	 * @param request inbound HTTP request
+	 * @param response outbound HTTP response
+	 * @throws ServletException if request validation fails
+	 * @throws IOException if the response cannot be written
+	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -113,6 +121,14 @@ public class SmartClientListServlet extends HttpServlet {
 		processRequest(request, response);
 	}
 
+	/**
+	 * Handles SmartClient list requests submitted with HTTP POST.
+	 *
+	 * @param request inbound HTTP request
+	 * @param response outbound HTTP response
+	 * @throws ServletException if request validation fails
+	 * @throws IOException if the response cannot be written
+	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -707,15 +723,19 @@ public class SmartClientListServlet extends HttpServlet {
 	}
 
 	/**
-	 * Add simple criteria to the query.
-	 * 
-	 * @param module
-	 * @param document
-	 * @param customer
-	 * @param query          Add the filter criteria to this query.
-	 * @param filterOperator The default operator to use for all filter critiera.
-	 * @param criteria       A Map of name value pairs
-	 * @throws Exception
+	 * Adds simple SmartClient criteria to the active list-model filter.
+	 *
+	 * <p>Side effects: converts request values into typed filter parameters and mutates
+	 * the supplied model's parameter map and filter tree.
+	 *
+	 * @param module module containing the target document
+	 * @param document target document metadata
+	 * @param customer active customer metadata
+	 * @param filterOperator default operator to use for values that are not forced to equals
+	 * @param criteria name/value criteria map from the SmartClient request
+	 * @param tagId optional tag identifier used when constructing criteria metadata
+	 * @param model list model receiving the filter criteria
+	 * @throws Exception if metadata resolution or value conversion fails
 	 */
 	public static void addSimpleFilterCriteriaToQuery(Module module,
 														Document document,
@@ -855,16 +875,19 @@ public class SmartClientListServlet extends HttpServlet {
 	}
 
 	/**
-	 * Add advanced filter criteria to a query.
-	 * 
-	 * @param module
-	 * @param document
-	 * @param customer
-	 * @param user
-	 * @param query                  The query to add the filter criteria to.
-	 * @param compoundFilterOperator The compound filter operator to use between criteria
-	 * @param criteria               List of advanced critiera.
-	 * @throws Exception
+	 * Adds advanced SmartClient criteria to the active list-model filter.
+	 *
+	 * <p>Side effects: mutates the supplied model's filter tree and parameter map while
+	 * recursively normalising nested criterion groups.
+	 *
+	 * @param module module containing the target document
+	 * @param document target document metadata
+	 * @param user active user
+	 * @param compoundFilterOperator compound operator to apply between sibling criteria
+	 * @param criteria nested SmartClient advanced criteria structure
+	 * @param tagId optional tag identifier used when constructing criteria metadata
+	 * @param model list model receiving the filter criteria
+	 * @throws Exception if metadata resolution or value conversion fails
 	 */
 	public static void addAdvancedFilterCriteriaToQuery(Module module,
 															Document document,

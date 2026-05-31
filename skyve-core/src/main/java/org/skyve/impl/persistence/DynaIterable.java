@@ -28,9 +28,23 @@ import org.skyve.persistence.DataStore;
  * callers must ensure {@link #close()} is called (preferably via try-with-resources).
  */
 public class DynaIterable implements AutoClosingIterable<DynaBean> {
+	@SuppressWarnings("resource")
 	private final NamedParameterPreparedStatement ps;
+	@SuppressWarnings("resource")
 	private final ResultSet rs;
 	
+	/**
+	 * Executes the SQL query immediately and prepares lazy row iteration.
+	 *
+	 * <p>Side effects: opens a prepared statement and result set on the supplied
+	 * connection.
+	 *
+	 * @param c JDBC connection used to create and execute the statement
+	 * @param sql SQL query definition and bound parameters
+	 * @param ds data-store timeout configuration
+	 * @param dialect SQL dialect used for parameter conversion
+	 */
+	@SuppressWarnings("resource")
 	public DynaIterable(Connection c, AbstractSQL sql, DataStore ds, SkyveDialect dialect) {
 		try {
 			ps = new NamedParameterPreparedStatement(c, sql.toQueryString());
@@ -48,6 +62,11 @@ public class DynaIterable implements AutoClosingIterable<DynaBean> {
 		}
 	}
 
+	/**
+	 * Returns an iterator over detached dynamic rows from the active result set.
+	 *
+	 * @return iterator over query rows as {@link DynaBean} instances
+	 */
 	@Override
 	public Iterator<DynaBean> iterator() {
 		try {
@@ -59,6 +78,11 @@ public class DynaIterable implements AutoClosingIterable<DynaBean> {
 		}
 	}
 
+	/**
+	 * Closes the underlying JDBC result set and prepared statement.
+	 *
+	 * @throws Exception if closing either resource fails
+	 */
 	@Override
 	public void close() throws Exception {
 		if ((rs != null) && (! rs.isClosed())) {

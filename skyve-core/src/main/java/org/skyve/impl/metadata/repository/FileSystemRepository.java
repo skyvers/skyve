@@ -82,6 +82,12 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 * Absolute path constructor
 	 * Prevent external instantiation.
 	 * Use a ConcurrentHashMap for the cache as it is thread-safe and performant for mostly-read operations.
+	 *
+	 * <p>Normalises path separators, ensures a trailing slash, resolves a canonical
+	 * base path used by resource path traversal checks, and then discovers all
+	 * metadata keys.
+	 *
+	 * @param absolutePath absolute path to the repository root
 	 */
 	protected FileSystemRepository(@Nonnull String absolutePath) {
 		super(new ConcurrentHashMap<>());
@@ -103,6 +109,9 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	/**
 	 * Absolute path and load classes constructor
 	 * Prevent external instantiation.
+	 *
+	 * @param absolutePath absolute path to the repository root
+	 * @param loadClasses whether Java metadata classes should be loaded reflectively
 	 */
 	protected FileSystemRepository(@Nonnull String absolutePath, boolean loadClasses) {
 		this(absolutePath);
@@ -116,7 +125,13 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	protected FileSystemRepository() {
 		this(UtilImpl.getAbsoluteBasePath());
 	}
-
+	
+	/**
+	 * Rebuilds repository lookup keys by scanning customer and module filesystem locations.
+	 *
+	 * <p>This indexes modules, documents, actions, images, models, reports, views, and
+	 * document-level companions such as bizlets, extensions, and factories.
+	 */
 	@Override
 	public void populateKeys() {
 		// Add router key
@@ -368,7 +383,13 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 			}
 		} // if (module directory exists)
 	}
-
+	
+	/**
+	 * Loads the effective router by merging the global router and all discovered module routers.
+	 *
+	 * @return the merged router definition
+	 * @throws MetaDataException if no router files are found or router XML cannot be parsed
+	 */
 	@Override
 	public Router loadRouter() {
 		Router result = null;
@@ -397,7 +418,9 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	}
 
 	/**
-	 * Return the max(lastModified) from all the router files
+	 * Returns the latest modification timestamp across all router XML files.
+	 *
+	 * @return the newest router file timestamp, or {@link Long#MIN_VALUE} if no router exists
 	 */
 	@Override
 	public long routerLastModifiedMillis() {
@@ -460,6 +483,11 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return result;
 	}
 	
+	/**
+	 * Returns the global router definition only, without merging module routers.
+	 *
+	 * @return the converted global router, or {@code null} when no global router exists
+	 */
 	@Override
 	public Router getGlobalRouter() {
 		final Map<String, Long> routersFileInfo = routersFileInfo(true, false);
@@ -472,7 +500,9 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	}
 	
 	/**
-	 * @return A list of self-contained module Routers.
+	 * Returns module router definitions without the global router.
+	 *
+	 * @return converted, self-contained module routers in discovery order
 	 */
 	@Override
 	public List<Router> getModuleRouters() {
@@ -487,6 +517,11 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return result;
 	}
 
+	/**
+	 * Lists customer names available under the repository customer namespace.
+	 *
+	 * @return customer directory names that are not hidden entries
+	 */
 	@Override
 	public List<String> getAllCustomerNames() {
 		List<String> result = new ArrayList<>();
@@ -506,6 +541,14 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return result;
 	}
 
+	/**
+	 * Lists vanilla module names from the module namespace.
+	 *
+	 * <p>A module is considered valid only when its directory contains a module XML file
+	 * named after that module.
+	 *
+	 * @return valid vanilla module names
+	 */
 	@Override
 	public List<String> getAllVanillaModuleNames() {
 		List<String> result = new ArrayList<>();
@@ -542,6 +585,13 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return result.toString();
 	}
 	
+	/**
+	 * Loads customer metadata from the customer definition XML file.
+	 *
+	 * @param customerName the customer name to resolve
+	 * @return unmarshalled customer metadata
+	 * @throws MetaDataException if metadata cannot be loaded or the XML name does not match
+	 */
 	@Override
 	public CustomerMetaData loadCustomer(String customerName) {
 		CustomerMetaData result = null;
@@ -564,6 +614,12 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return result;
 	}
 	
+	/**
+	 * Returns the last modified timestamp of a customer metadata file.
+	 *
+	 * @param customerName the customer name to resolve
+	 * @return file timestamp in milliseconds, or {@link Long#MIN_VALUE} when the file is missing
+	 */
 	@Override
 	public long customerLastModifiedMillis(String customerName) {
 		String path = customerPath(customerName);
@@ -585,6 +641,14 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return result.toString();
 	}
 	
+	/**
+	 * Loads module metadata for a customer override or a vanilla module.
+	 *
+	 * @param customerName the customer name for override resolution; may be {@code null}
+	 * @param moduleName the module name
+	 * @return unmarshalled module metadata
+	 * @throws MetaDataException if metadata cannot be loaded or the XML name does not match
+	 */
 	@Override
 	public ModuleMetaData loadModule(String customerName, String moduleName) {
 		ModuleMetaData result = null;
@@ -607,6 +671,13 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return result;
 	}
 
+	/**
+	 * Returns the last modified timestamp of a module metadata file.
+	 *
+	 * @param customerName the customer name for override resolution; may be {@code null}
+	 * @param moduleName the module name
+	 * @return file timestamp in milliseconds, or {@link Long#MIN_VALUE} when the file is missing
+	 */
 	@Override
 	public long moduleLastModifiedMillis(String customerName, String moduleName) {
 		String path = modulePath(customerName, moduleName);
@@ -629,6 +700,15 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return result.toString();
 	}
 	
+	/**
+	 * Loads document metadata for a customer override or a vanilla module document.
+	 *
+	 * @param customerName the customer name for override resolution; may be {@code null}
+	 * @param moduleName the owning module name
+	 * @param documentName the document name
+	 * @return unmarshalled document metadata
+	 * @throws MetaDataException if metadata cannot be loaded or the XML name does not match
+	 */
 	@Override
 	public DocumentMetaData loadDocument(String customerName, String moduleName, String documentName) {
 		DocumentMetaData result = null;
@@ -651,6 +731,14 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return result;
 	}
 
+	/**
+	 * Returns the last modified timestamp of a document metadata file.
+	 *
+	 * @param customerName the customer name for override resolution; may be {@code null}
+	 * @param moduleName the owning module name
+	 * @param documentName the document name
+	 * @return file timestamp in milliseconds, or {@link Long#MIN_VALUE} when the file is missing
+	 */
 	@Override
 	public long documentLastModifiedMillis(String customerName, String moduleName, String documentName) {
 		String path = documentPath(customerName, moduleName, documentName);
@@ -681,6 +769,17 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return result.toString();
 	}
 	
+	/**
+	 * Loads a view metadata definition from the repository.
+	 *
+	 * @param customerName the customer name for override resolution; may be {@code null}
+	 * @param moduleName the owning module name
+	 * @param documentName the owning document name
+	 * @param uxui the UX/UI variant folder; may be {@code null}
+	 * @param viewName the view name
+	 * @return unmarshalled view metadata
+	 * @throws MetaDataException if metadata cannot be loaded or the XML name does not match
+	 */
 	@Override
 	public ViewMetaData loadView(String customerName, String moduleName, String documentName, String uxui, String viewName) {
 		ViewMetaData result = null;
@@ -703,6 +802,16 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return result;
 	}
 
+	/**
+	 * Returns the last modified timestamp of a view metadata file.
+	 *
+	 * @param customerName the customer name for override resolution; may be {@code null}
+	 * @param moduleName the owning module name
+	 * @param documentName the owning document name
+	 * @param uxui the UX/UI variant folder; may be {@code null}
+	 * @param viewName the view name
+	 * @return file timestamp in milliseconds, or {@link Long#MIN_VALUE} when the file is missing
+	 */
 	@Override
 	public long viewLastModifiedMillis(String customerName, String moduleName, String documentName, String uxui, String viewName) {
 		String path = viewPath(customerName, moduleName, documentName, uxui, viewName);
@@ -729,6 +838,16 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return result.toString();
 	}
 	
+	/**
+	 * Loads action metadata for a document action XML definition.
+	 *
+	 * @param customerName the customer name for override resolution; may be {@code null}
+	 * @param moduleName the owning module name
+	 * @param documentName the owning document name
+	 * @param actionName the action name
+	 * @return unmarshalled action metadata
+	 * @throws MetaDataException if metadata cannot be loaded or the XML name does not match
+	 */
 	@Override
 	public ActionMetaData loadMetaDataAction(String customerName, String moduleName, String documentName, String actionName) {
 		ActionMetaData result = null;
@@ -751,6 +870,15 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return result;
 	}
 
+	/**
+	 * Returns the last modified timestamp of an action metadata file.
+	 *
+	 * @param customerName the customer name for override resolution; may be {@code null}
+	 * @param moduleName the owning module name
+	 * @param documentName the owning document name
+	 * @param actionName the action name
+	 * @return file timestamp in milliseconds, or {@link Long#MIN_VALUE} when the file is missing
+	 */
 	@Override
 	public long metaDataActionLastModifiedMillis(String customerName, String moduleName, String documentName, String actionName) {
 		String path = actionPath(customerName, moduleName, documentName, actionName);
@@ -761,6 +889,18 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return Long.MIN_VALUE;
 	}
 
+	/**
+	 * Resolves and instantiates the Bizlet for a document.
+	 *
+	 * <p>Dynamic documents use the configured dynamic bizlet class name. Static documents
+	 * are resolved from the repository bizlet class convention.
+	 *
+	 * @param <T> the document bean type
+	 * @param customer the customer context used for class resolution
+	 * @param document the target document
+	 * @param runtime whether runtime dependency injection should be applied
+	 * @return the Bizlet instance, or {@code null} when no Bizlet is configured
+	 */
 	@Override
 	public <T extends Bean> Bizlet<T> getBizlet(Customer customer, Document document, boolean runtime) {
 		// If dynamic, use the bizletClassName if defined
@@ -795,6 +935,15 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return result.toString();
 	}
 	
+	/**
+	 * Loads Bizlet metadata for a document.
+	 *
+	 * @param customerName the customer name for override resolution; may be {@code null}
+	 * @param moduleName the owning module name
+	 * @param documentName the owning document name
+	 * @return unmarshalled Bizlet metadata
+	 * @throws MetaDataException if metadata cannot be loaded
+	 */
 	@Override
 	public BizletMetaData loadMetaDataBizlet(String customerName, String moduleName, String documentName) {
 		BizletMetaData result = null;
@@ -813,6 +962,14 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return result;
 	}
 
+	/**
+	 * Returns the last modified timestamp of a Bizlet metadata file.
+	 *
+	 * @param customerName the customer name for override resolution; may be {@code null}
+	 * @param moduleName the owning module name
+	 * @param documentName the owning document name
+	 * @return file timestamp in milliseconds, or {@link Long#MIN_VALUE} when the file is missing
+	 */
 	@Override
 	public long metaDataBizletLastModifiedMillis(String customerName, String moduleName, String documentName) {
 		String path = bizletPath(customerName, moduleName, documentName);
@@ -823,6 +980,17 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return Long.MIN_VALUE;
 	}
 
+	/**
+	 * Resolves and instantiates a dynamic image handler for a document image.
+	 *
+	 * @param <T> the document bean type
+	 * @param customer the customer context used for class resolution
+	 * @param document the target document
+	 * @param imageName the image action name
+	 * @param runtime whether runtime dependency injection should be applied
+	 * @return the dynamic image handler instance
+	 * @throws MetaDataException if the image is not configured for a dynamic document
+	 */
 	@Override
 	public <T extends Bean> DynamicImage<T> getDynamicImage(Customer customer, Document document, String imageName, boolean runtime) {
 		// If dynamic, use the images map
@@ -844,6 +1012,19 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return getJavaMetaData(customer, key.toString(), true, runtime);
 	}
 
+	/**
+	 * Resolves and instantiates a document model class by name.
+	 *
+	 * <p>Supports both dynamic document model mappings and filesystem-backed
+	 * model classes. The returned model is not post-constructed by this method.
+	 *
+	 * @param <T> the metadata model type
+	 * @param customer the customer context for vtable resolution; may be {@code null}
+	 * @param document the owning document
+	 * @param modelName the model key under {@code dynamic.models} or {@code models/}
+	 * @param runtime whether runtime dependency injection should be applied
+	 * @return an instantiated model metadata object
+	 */
 	protected @Nonnull <T extends MetaData> T getModel(@Nullable Customer customer,
 														@Nonnull Document document,
 														@Nonnull String modelName,
@@ -867,6 +1048,17 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return getJavaMetaData(customer, key.toString(), true, runtime);
 	}
 
+	/**
+	 * Resolves and post-constructs a comparison model.
+	 *
+	 * @param <T> the main bean type
+	 * @param <C> the comparison bean type
+	 * @param customer the customer context used for class resolution
+	 * @param document the target document
+	 * @param modelName the model name
+	 * @param runtime whether runtime dependency injection should be applied
+	 * @return an initialized comparison model
+	 */
 	@Override
 	public <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(Customer customer, 
 																						Document document, 
@@ -877,6 +1069,16 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return result;
 	}
 
+	/**
+	 * Resolves and post-constructs a map model.
+	 *
+	 * @param <T> the document bean type
+	 * @param customer the customer context used for class resolution
+	 * @param document the target document
+	 * @param modelName the model name
+	 * @param runtime whether runtime dependency injection should be applied
+	 * @return an initialized map model
+	 */
 	@Override
 	public <T extends Bean> MapModel<T> getMapModel(Customer customer, Document document, String modelName, boolean runtime) {
 		MapModel<T> result = getModel(customer, document, modelName, runtime);
@@ -884,6 +1086,16 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return result;
 	}
 
+	/**
+	 * Resolves and post-constructs a chart model.
+	 *
+	 * @param <T> the document bean type
+	 * @param customer the customer context used for class resolution
+	 * @param document the target document
+	 * @param modelName the model name
+	 * @param runtime whether runtime dependency injection should be applied
+	 * @return an initialized chart model
+	 */
 	@Override
 	public <T extends Bean> ChartModel<T> getChartModel(Customer customer,
 															Document document,
@@ -894,6 +1106,16 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return result;
 	}
 
+	/**
+	 * Resolves and post-constructs a list model.
+	 *
+	 * @param <T> the document bean type
+	 * @param customer the customer context used for class resolution
+	 * @param document the target document
+	 * @param modelName the model name
+	 * @param runtime whether runtime dependency injection should be applied
+	 * @return an initialized list model
+	 */
 	@Override
 	public <T extends Bean> ListModel<T> getListModel(Customer customer, Document document, String modelName, boolean runtime) {
 		ListModel<T> result = getModel(customer, document, modelName, runtime);
@@ -901,6 +1123,21 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return result;
 	}
 
+	/**
+	 * Resolves and instantiates a class-backed action by name.
+	 *
+	 * <p>Looks up dynamic action mappings first, then repository action classes.
+	 * When {@code assertExistence} is {@code true}, missing mappings raise
+	 * {@link MetaDataException}; otherwise this method returns {@code null}.
+	 *
+	 * @param <T> the action metadata type
+	 * @param customer the customer context for vtable resolution; may be {@code null}
+	 * @param document the owning document
+	 * @param actionName action key
+	 * @param assertExistence whether missing actions should fail fast
+	 * @param runtime whether runtime dependency injection should be applied
+	 * @return the instantiated action metadata, or {@code null} when not found and existence is not asserted
+	 */
 	protected @Nullable <T extends MetaData> T getClassAction(@Nullable Customer customer,
 																@Nonnull Document document,
 																@Nonnull String actionName,
@@ -928,6 +1165,15 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return getJavaMetaData(customer, key.toString(), assertExistence, runtime);
 	}
 	
+	/**
+	 * Resolves a server-side action class and returns it when class loading is enabled.
+	 *
+	 * @param customer the customer context used for class resolution
+	 * @param document the target document
+	 * @param actionName the action name
+	 * @param runtime whether runtime dependency injection should be applied
+	 * @return a server-side action instance, or {@code null} when class loading is disabled
+	 */
 	@Override
 	@SuppressWarnings("unchecked")
 	public ServerSideAction<Bean> getServerSideAction(Customer customer, Document document, String actionName, boolean runtime) {
@@ -939,6 +1185,15 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return null;
 	}
 
+	/**
+	 * Resolves a BizExport action class and returns it when class loading is enabled.
+	 *
+	 * @param customer the customer context used for class resolution
+	 * @param document the target document
+	 * @param exportActionName the export action name
+	 * @param runtime whether runtime dependency injection should be applied
+	 * @return a BizExport action instance, or {@code null} when class loading is disabled
+	 */
 	@Override
 	public BizExportAction getBizExportAction(Customer customer, Document document, String exportActionName, boolean runtime) {
 		MetaData result = getClassAction(customer, document, exportActionName, true, runtime);
@@ -949,6 +1204,15 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return null;
 	}
 
+	/**
+	 * Resolves a BizImport action class and returns it when class loading is enabled.
+	 *
+	 * @param customer the customer context used for class resolution
+	 * @param document the target document
+	 * @param importActionName the import action name
+	 * @param runtime whether runtime dependency injection should be applied
+	 * @return a BizImport action instance, or {@code null} when class loading is disabled
+	 */
 	@Override
 	public BizImportAction getBizImportAction(Customer customer, Document document, String importActionName, boolean runtime) {
 		MetaData result = getClassAction(customer, document, importActionName, true, runtime);
@@ -959,6 +1223,15 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return null;
 	}
 
+	/**
+	 * Resolves a download action class and returns it when class loading is enabled.
+	 *
+	 * @param customer the customer context used for class resolution
+	 * @param document the target document
+	 * @param downloadActionName the download action name
+	 * @param runtime whether runtime dependency injection should be applied
+	 * @return a download action instance, or {@code null} when class loading is disabled
+	 */
 	@Override
 	@SuppressWarnings("unchecked")
 	public DownloadAction<Bean> getDownloadAction(Customer customer, Document document, String downloadActionName, boolean runtime) {
@@ -970,11 +1243,31 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return null;
 	}
 
+	/**
+	 * Resolves an upload action class.
+	 *
+	 * @param customer the customer context used for class resolution
+	 * @param document the target document
+	 * @param uploadActionName the upload action name
+	 * @param runtime whether runtime dependency injection should be applied
+	 * @return an upload action instance
+	 */
 	@Override
 	public UploadAction<Bean> getUploadAction(Customer customer, Document document, String uploadActionName, boolean runtime) {
 		return getClassAction(customer, document, uploadActionName, true, runtime);
 	}
 
+	/**
+	 * Resolves and instantiates the document data factory class.
+	 *
+	 * <p>Dynamic documents use {@code dynamic.dataFactoryClassName} when configured;
+	 * otherwise the standard repository factory naming convention is used.
+	 *
+	 * @param customer the customer context used for class resolution
+	 * @param document the target document
+	 * @return a new data factory instance, or {@code null} when no data factory exists
+	 * @throws MetaDataException if the factory class exists but cannot be instantiated
+	 */
 	@Override
 	public Object getDataFactory(Customer customer, Document document) {
 		Object result = null;
@@ -1012,8 +1305,14 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	}
 
 	/**
-	 * 
-	 * @param customer if <code>null</code>, the entire repository goes.
+	 * Evicts cached metadata and resets persistence state after cache invalidation.
+	 *
+	 * <p>Side effects: disposes persistence instances when {@code customer} is
+	 * {@code null}, restores the calling user on the new persistence context,
+	 * clears Java class caches, and delegates metadata cache eviction to the
+	 * superclass.
+	 *
+	 * @param customer the customer whose metadata should be evicted, or {@code null} to evict all
 	 */
 	@Override
 	public void evictCachedMetaData(Customer customer) {
@@ -1034,6 +1333,16 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		super.evictCachedMetaData(customer);
 	}
 
+	/**
+	 * Resolves a Java class from the repository vtable and class cache.
+	 *
+	 * <p>When class loading is disabled, this method returns {@link WidgetReference} for
+	 * matching source files to support metadata-only scenarios.
+	 *
+	 * @param customer the customer context used for override resolution; may be {@code null}
+	 * @param key repository key to resolve
+	 * @return the resolved class, {@link WidgetReference}, or {@code null} if not found
+	 */
 	@Override
 	public Class<?> getJavaClass(Customer customer, String key) {
 		Class<?> result = null;
@@ -1066,15 +1375,17 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	}
 	
 	/**
-	 * If customer is null, we must be looking for a repository code that does not 
-	 * rely on the customer's vtable - not overloaded by a customer.
-	 * 
-	 * @param <T> The type of the metadata.
-	 * @param customer The customer to load the code for, or null
-	 * @param key
-	 * @param assertExistence
-	 * @param runtime	Are we really running or just generating etc.
-	 * @return a new instance of the specified java class name or null if it does not exist in the customers vtable
+	 * Instantiates a Java-backed metadata class resolved through the repository vtable.
+	 *
+	 * <p>When {@code customer} is provided, customer overrides are resolved first;
+	 * otherwise the vanilla repository namespace is used.
+	 *
+	 * @param <T> the metadata type
+	 * @param customer the customer context for vtable lookup, or {@code null}
+	 * @param key repository key for the Java metadata class
+	 * @param assertExistence whether a missing class should raise {@link MetaDataException}
+	 * @param runtime whether runtime dependency injection should be applied
+	 * @return a new metadata instance, or {@code null} when not found and existence is not asserted
 	 */
 	@SuppressWarnings("unchecked")
 	public final @Nullable <T extends MetaData> T getJavaMetaData(@Nullable Customer customer,
@@ -1106,6 +1417,17 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return result;
 	}
 
+	/**
+	 * Resolves the physical report output filename for a named document report.
+	 *
+	 * <p>Checks Jasper first, then Freemarker report variants using vtable resolution.
+	 * The returned path includes the repository root and output extension.
+	 *
+	 * @param customer the customer context used for override resolution; may be {@code null}
+	 * @param document the owning document
+	 * @param reportName the logical report name
+	 * @return the absolute report output filename, or {@code null} when no report exists
+	 */
 	@Override
 	public String getReportFileName(Customer customer, Document document, String reportName) {
 		StringBuilder path = new StringBuilder(64);
@@ -1139,15 +1461,16 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	}
 
 	/**
-	 * Check in &lt;customer-name&gt;/&lt;module-name&gt;/resources folder, 
-	 * check in &lt;module-name&gt;/resources folder, 
-	 * check in &lt;customer-name&gt;/resources folder, 
-	 * check in resources folder.
-	 * 
-	 * @param imagePath The relative path to the image
-	 * @param customerName The name of the customer.
-	 * @param moduleName The name of the module.
-	 * @return The resource file.
+	 * Resolves a resource file using repository override precedence.
+	 *
+	 * <p>Lookup order is customer module resources, module resources, customer
+	 * resources, then global resources. Returned files are canonicalised and
+	 * validated to stay under the configured repository root.
+	 *
+	 * @param resourcePath the relative resource path
+	 * @param customerName the customer name, or {@code null} for non-customer lookup
+	 * @param moduleName the module name, or {@code null} to skip module folders
+	 * @return the resolved file (which may not exist when only the final fallback is used)
 	 */
 	@Override
 	public final File findResourceFile(String resourcePath, String customerName, String moduleName) {
@@ -1207,7 +1530,13 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return protect(new File(path.toString()));
 	}
 
-	// Ensure that the file path asks for doesn't break out of the project / web root directory
+	/**
+	 * Ensures the resolved resource path remains within the repository root.
+	 *
+	 * @param file the candidate file
+	 * @return the same file when its canonical path is under the configured base path
+	 * @throws SecurityException when canonicalization fails or path traversal is detected
+	 */
 	private @Nonnull File protect(@Nonnull File file) {
 		// resolve ../ and symbolic links with canonical path
 		String pathToTest = null;
