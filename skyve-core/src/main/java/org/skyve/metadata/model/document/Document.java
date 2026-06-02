@@ -28,7 +28,7 @@ import jakarta.annotation.Nullable;
 
 /**
  * A Document represents a business domain concept in the Skyve framework.
- * It defines the structure, behavior, and persistence aspects of a business entity.
+ * It defines the structure, behaviour, and persistence aspects of a business entity.
  * Documents can be extended through inheritance and may have associated views,
  * actions, bizlets, and other metadata components.
  */
@@ -41,6 +41,7 @@ public interface Document extends Model, PersistentMetaData, ReloadableMetaData,
 	 * @return A new instance of the document bean
 	 * @throws Exception If the bean cannot be instantiated
 	 */
+	@SuppressWarnings("java:S112") // Exception is handled by Skyve
 	public @Nonnull <T extends Bean> T newInstance(@Nonnull User user) throws Exception;
 	
 	/**
@@ -82,7 +83,7 @@ public interface Document extends Model, PersistentMetaData, ReloadableMetaData,
 	 * @param name The name of the dynamic image
 	 * @return The dynamic image definition or null if not found
 	 */
-	public <T extends Bean> DynamicImage<T> getDynamicImage(Customer customer, String name);
+	public @Nonnull <T extends Bean> DynamicImage<T> getDynamicImage(Customer customer, String name);
 
 	/**
 	 * Gets all unique constraints defined directly on this document (not including those from parent documents).
@@ -97,7 +98,7 @@ public interface Document extends Model, PersistentMetaData, ReloadableMetaData,
 	 * @param referenceName The name of the reference to retrieve
 	 * @return The reference or null if not found
 	 */
-	public Reference getReferenceByName(String referenceName);
+	public @Nonnull Reference getReferenceByName(String referenceName);
 
 	/**
 	 * Retrieves the document that is related through the specified relation.
@@ -106,21 +107,21 @@ public interface Document extends Model, PersistentMetaData, ReloadableMetaData,
 	 * @param relationName The name of the relation
 	 * @return The related document or null if not found
 	 */
-	public Document getRelatedDocument(Customer customer, String relationName);
+	public @Nonnull Document getRelatedDocument(@Nonnull Customer customer, @Nonnull String relationName);
 	
 	/**
 	 * Gets all reference names defined in this document.
 	 * 
 	 * @return A set of reference names
 	 */
-	public Set<String> getReferenceNames();
+	public @Nonnull Set<String> getReferenceNames();
 	
 	/**
 	 * Gets all condition names defined in this document.
 	 * 
 	 * @return A set of condition names
 	 */
-	public Set<String> getConditionNames();
+	public @Nonnull Set<String> getConditionNames();
 	
 	/**
 	 * Retrieves a condition by its name.
@@ -128,21 +129,21 @@ public interface Document extends Model, PersistentMetaData, ReloadableMetaData,
 	 * @param conditionName The name of the condition to retrieve
 	 * @return The condition or null if not found
 	 */
-	public Condition getCondition(String conditionName);
+	public @Nullable Condition getCondition(@Nonnull String conditionName);
 
 	/**
 	 * Gets all defined action names for this document.
 	 * 
 	 * @return A set of action names
 	 */
-	public Set<String> getDefinedActionNames();
+	public @Nonnull Set<String> getDefinedActionNames();
 
 	/**
 	 * Gets the name of the parent document if this document extends another.
 	 * 
 	 * @return The parent document name or null if this is a base document
 	 */
-	public String getParentDocumentName();
+	public @Nullable String getParentDocumentName();
 	
 	/**
 	 * Indicates whether this document has ordered persistence.
@@ -195,7 +196,7 @@ public interface Document extends Model, PersistentMetaData, ReloadableMetaData,
 	 * @param runtime Whether to get the runtime version
 	 * @return The comparison model
 	 */
-	public <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(Customer customer, String modelName, boolean runtime);
+	public @Nonnull <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(@Nullable Customer customer, @Nonnull String modelName, boolean runtime);
 	
 	/**
 	 * Retrieves a map model for this document.
@@ -206,7 +207,7 @@ public interface Document extends Model, PersistentMetaData, ReloadableMetaData,
 	 * @param runtime Whether to get the runtime version
 	 * @return The map model
 	 */
-	public <T extends Bean> MapModel<T> getMapModel(Customer customer, String modelName, boolean runtime);
+	public @Nonnull <T extends Bean> MapModel<T> getMapModel(@Nullable Customer customer, @Nonnull String modelName, boolean runtime);
 	
 	/**
 	 * Retrieves a chart model for this document.
@@ -217,7 +218,7 @@ public interface Document extends Model, PersistentMetaData, ReloadableMetaData,
 	 * @param runtime Whether to get the runtime version
 	 * @return The chart model
 	 */
-	public <T extends Bean> ChartModel<T> getChartModel(Customer customer, String modelName, boolean runtime);
+	public @Nonnull <T extends Bean> ChartModel<T> getChartModel(@Nullable Customer customer, @Nonnull String modelName, boolean runtime);
 	
 	/**
 	 * Retrieves a list model for this document.
@@ -228,7 +229,7 @@ public interface Document extends Model, PersistentMetaData, ReloadableMetaData,
 	 * @param runtime Whether to get the runtime version
 	 * @return The list model
 	 */
-	public <T extends Bean> ListModel<T> getListModel(Customer customer, String modelName, boolean runtime);
+	public @Nonnull <T extends Bean> ListModel<T> getListModel(@Nullable Customer customer, @Nonnull String modelName, boolean runtime);
 
 	/**
 	 * Retrieves a server-side action for this document.
@@ -238,7 +239,7 @@ public interface Document extends Model, PersistentMetaData, ReloadableMetaData,
 	 * @param runtime Whether to get the runtime version
 	 * @return The server-side action
 	 */
-	public ServerSideAction<Bean> getServerSideAction(Customer customer, String className, boolean runtime);
+	public @Nonnull ServerSideAction<Bean> getServerSideAction(@Nullable Customer customer, @Nonnull String className, boolean runtime);
 	
 	/**
 	 * Retrieves a bizExport action for this document.
@@ -248,7 +249,7 @@ public interface Document extends Model, PersistentMetaData, ReloadableMetaData,
 	 * @param runtime Whether to get the runtime version
 	 * @return The business export action
 	 */
-	public BizExportAction getBizExportAction(Customer customer, String className, boolean runtime);
+	public @Nonnull BizExportAction getBizExportAction(@Nullable Customer customer, @Nonnull String className, boolean runtime);
 	
 	/**
 	 * Retrieves a bizImport action for this document.
@@ -258,7 +259,7 @@ public interface Document extends Model, PersistentMetaData, ReloadableMetaData,
 	 * @param runtime Whether to get the runtime version
 	 * @return The business import action
 	 */
-	public BizImportAction getBizImportAction(Customer customer, String className, boolean runtime);
+	public @Nonnull BizImportAction getBizImportAction(@Nullable Customer customer, @Nonnull String className, boolean runtime);
 	
 	/**
 	 * Retrieves a download action for this document.
@@ -269,7 +270,7 @@ public interface Document extends Model, PersistentMetaData, ReloadableMetaData,
 	 * @param runtime Whether to get the runtime version
 	 * @return The download action
 	 */
-	public DownloadAction<Bean> getDownloadAction(Customer customer, String className, boolean runtime);
+	public @Nonnull DownloadAction<Bean> getDownloadAction(@Nullable Customer customer, @Nonnull String className, boolean runtime);
 	
 	/**
 	 * Retrieves an upload action for this document.
@@ -280,5 +281,5 @@ public interface Document extends Model, PersistentMetaData, ReloadableMetaData,
 	 * @param runtime Whether to get the runtime version
 	 * @return The upload action
 	 */
-	public UploadAction<Bean> getUploadAction(Customer customer, String className, boolean runtime);
+	public @Nonnull UploadAction<Bean> getUploadAction(@Nullable Customer customer, @Nonnull String className, boolean runtime);
 }

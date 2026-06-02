@@ -22,6 +22,8 @@ import org.skyve.impl.util.TimeUtil;
  * <p>Iteration streams results in pages to avoid loading the full index result set into
  * memory at once.
  */
+
+@SuppressWarnings("resource")
 public class LuceneContentIterable implements ContentIterable {
 	private Directory directory = null;
 	
@@ -38,7 +40,7 @@ public class LuceneContentIterable implements ContentIterable {
 	 * Provides paged iteration over Lucene documents.
 	 */
 	class LuceneContentIterator implements ContentIterator {
-		private final int PAGE_SIZE = 1000;
+		private static final int PAGE_SIZE = 1000;
 		
 		private IndexReader reader = null;
 		private long totalHits = 0L;
@@ -66,38 +68,40 @@ public class LuceneContentIterable implements ContentIterable {
 		 * @return the next result, or {@code null} when no more results remain
 		 */
 		@Override
+		@SuppressWarnings("java:S2272") // NoSuchElement exception not required as this should be in a for loop
 		public SearchResult next() {
-			if ((scoreDocs != null) && (scoreDocs.length > index)) {
-				int doc = scoreDocs[index++].doc;
-				try {
-					Document document = reader.storedFields().document(doc);
-					SearchResult result = new SearchResult();
-					result.setAttributeName(document.get(AbstractContentManager.ATTRIBUTE_NAME));
-					result.setBizDataGroupId(document.get(Bean.DATA_GROUP_ID));
-					result.setContentId(document.get(AbstractContentManager.CONTENT_ID));
-					String bizId = document.get(Bean.DOCUMENT_ID);
-					if (result.isAttachment()) { // attachment content
-						result.setBizId(bizId);
-					}
-					else { // bean content
-						result.setBizId(bizId.substring(0, bizId.length() - 1)); // remove the '~'
-					}
-					result.setModuleName(document.get(Bean.MODULE_KEY));
-					result.setDocumentName(document.get(Bean.DOCUMENT_KEY));
-					result.setCustomerName(document.get(Bean.CUSTOMER_NAME));
-					result.setBizUserId(document.get(Bean.USER_ID));
-					result.setExcerpt(document.get(AbstractContentManager.CONTENT));
-					String lastModified = document.get(AbstractContentManager.LAST_MODIFIED);
-					if (lastModified != null) {
-						result.setLastModified(TimeUtil.parseISODate(lastModified));
-					}
-					return result;
-				}
-				catch (Exception e) {
-					throw new DomainException("Cannot get the document " + doc + " from the content index", e);
-				}
+			if ((scoreDocs == null) || (scoreDocs.length <= index)) {
+				return null;
 			}
-			return null;
+
+			int doc = scoreDocs[index++].doc;
+			try {
+				Document document = reader.storedFields().document(doc);
+				SearchResult result = new SearchResult();
+				result.setAttributeName(document.get(AbstractContentManager.ATTRIBUTE_NAME));
+				result.setBizDataGroupId(document.get(Bean.DATA_GROUP_ID));
+				result.setContentId(document.get(AbstractContentManager.CONTENT_ID));
+				String bizId = document.get(Bean.DOCUMENT_ID);
+				if (result.isAttachment()) { // attachment content
+					result.setBizId(bizId);
+				}
+				else { // bean content
+					result.setBizId(bizId.substring(0, bizId.length() - 1)); // remove the '~'
+				}
+				result.setModuleName(document.get(Bean.MODULE_KEY));
+				result.setDocumentName(document.get(Bean.DOCUMENT_KEY));
+				result.setCustomerName(document.get(Bean.CUSTOMER_NAME));
+				result.setBizUserId(document.get(Bean.USER_ID));
+				result.setExcerpt(document.get(AbstractContentManager.CONTENT));
+				String lastModified = document.get(AbstractContentManager.LAST_MODIFIED);
+				if (lastModified != null) {
+					result.setLastModified(TimeUtil.parseISODate(lastModified));
+				}
+				return result;
+			}
+			catch (Exception e) {
+				throw new DomainException("Cannot get the document " + doc + " from the content index", e);
+			}
 		}
 		
 		/**
@@ -116,7 +120,7 @@ public class LuceneContentIterable implements ContentIterable {
 				}
 				index = 0;
 			}
-			else if (scoreDocs.length == index) { // exhausted this page
+			else if ((scoreDocs.length > 0) && (scoreDocs.length == index)) { // exhausted this page
 				final ScoreDoc after = scoreDocs[index - 1]; // get the last one searched in the last page
 				try {
 					scoreDocs = searcher.searchAfter(after, new MatchAllDocsQuery(), PAGE_SIZE).scoreDocs;
@@ -128,15 +132,26 @@ public class LuceneContentIterable implements ContentIterable {
 			}
 
 			boolean more = scoreDocs.length > index;
-			if ((! more) && (reader != null)) {
-				try {
-					reader.close();
-				}
-				catch (IOException e) {
-					throw new DomainException("Cannot close the reader from the content index", e);
-				}
+			if (! more) {
+				closeReader();
 			}
 			return more;
+		}
+
+		private void closeReader() {
+			if (reader == null) {
+				return;
+			}
+
+			try {
+				reader.close();
+			}
+			catch (IOException e) {
+				throw new DomainException("Cannot close the reader from the content index", e);
+			}
+			finally {
+				reader = null;
+			}
 		}
 		
 		/**

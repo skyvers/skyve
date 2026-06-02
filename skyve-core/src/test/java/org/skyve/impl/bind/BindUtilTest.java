@@ -20,10 +20,12 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +34,7 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
@@ -51,19 +54,31 @@ import org.skyve.domain.types.Timestamp;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.OrderingImpl;
+import org.skyve.impl.metadata.model.document.AssociationImpl;
+import org.skyve.impl.metadata.model.document.CollectionImpl;
+import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.metadata.model.document.InverseMany;
+import org.skyve.impl.metadata.model.document.InverseOne;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Dynamic;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Condition;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Inverse;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.User;
 import org.skyve.domain.types.converters.Converter;
+import org.skyve.impl.metadata.model.document.field.ConvertibleField;
 import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter;
 import org.skyve.util.Binder.TargetMetaData;
 
@@ -92,6 +107,74 @@ class BindUtilTest {
 		}
 		catch (ReflectiveOperationException e) {
 			throw new AssertionError(e);
+		}
+	}
+
+	private static final class DynamicCollectionRepositoryFixture {
+		private final CustomerImpl customer;
+		private final ProvidedRepository previousRepository;
+
+		private DynamicCollectionRepositoryFixture(boolean includeInverse, boolean childHasParentDocument) {
+			customer = new CustomerImpl();
+			customer.setName("acme");
+			customer.getModuleEntries().put("sales", null);
+
+			Module module = mock(Module.class);
+			DocumentImpl ownerDocument = new DocumentImpl();
+			ownerDocument.setOwningModuleName("sales");
+			ownerDocument.setName("Order");
+
+			CollectionImpl items = new CollectionImpl();
+			items.setName("items");
+			items.setDocumentName("Item");
+			items.setType(CollectionType.child);
+			ownerDocument.putRelation(items);
+
+			DocumentImpl childDocument = new DocumentImpl();
+			childDocument.setOwningModuleName("sales");
+			childDocument.setName("Item");
+			childDocument.setDynamism(new Dynamic());
+			if (childHasParentDocument) {
+				childDocument.setParentDocumentName("Order");
+			}
+			if (includeInverse) {
+				InverseOne inverse = new InverseOne();
+				inverse.setName("order");
+				inverse.setDocumentName("Order");
+				inverse.setReferenceName("items");
+				childDocument.putRelation(inverse);
+			}
+
+			ProvidedRepository repository = mock(ProvidedRepository.class);
+			when(repository.getModule(customer, "sales")).thenReturn(module);
+			when(module.getDocument(customer, "Order")).thenReturn(ownerDocument);
+			when(module.getDocument(customer, "Item")).thenReturn(childDocument);
+
+			previousRepository = ProvidedRepositoryFactory.get();
+			ProvidedRepositoryFactory.set(repository);
+		}
+
+		private User user() {
+			User result = mock(User.class);
+			when(result.getCustomer()).thenReturn(customer);
+			return result;
+		}
+
+		private void close() {
+			ProvidedRepositoryFactory.set(previousRepository);
+		}
+
+		@SuppressWarnings("unchecked")
+		private void mapDerivedDocument(String documentName, String baseDocumentName) {
+			try {
+				Field derivationsField = CustomerImpl.class.getDeclaredField("derivations");
+				derivationsField.setAccessible(true);
+				Map<String, String> derivations = (Map<String, String>) derivationsField.get(customer);
+				derivations.put("sales." + documentName, "sales." + baseDocumentName);
+			}
+			catch (ReflectiveOperationException e) {
+				throw new AssertionError(e);
+			}
 		}
 	}
 
@@ -206,6 +289,22 @@ class BindUtilTest {
 	 */
 	@Test
 	@SuppressWarnings("static-method")
+	void formatMessageAppliesFunctionPostProcessorOverload() {
+		Bean bean = mock(Bean.class);
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		doReturn(customer).when(user).getCustomer();
+		doReturn("alice").when(user).getName();
+
+		withThreadLocalUser(user, () -> {
+			java.util.function.Function<String, String> upperCase = value -> value.toUpperCase(Locale.ROOT);
+			String result = BindUtil.formatMessage("Hello {USER}", upperCase, bean);
+			assertEquals("Hello ALICE", result);
+		});
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
 	void formatMessageAppliesPostProcessorToImplicitExpression() {
 		Bean bean = mock(Bean.class);
 		User user = mock(User.class);
@@ -214,10 +313,26 @@ class BindUtilTest {
 		doReturn("alice").when(user).getName();
 
 		withThreadLocalUser(user, () -> {
-			Function<String, String> upperCase = value -> value.toUpperCase(Locale.ROOT);
+			UnaryOperator<String> upperCase = value -> value.toUpperCase(Locale.ROOT);
 			String result = BindUtil.formatMessage("Hello {USER}", upperCase, bean);
 			assertEquals("Hello ALICE", result);
 		});
+		}
+
+		@Test
+		@SuppressWarnings("static-method")
+		void formatMessageWithUnaryOperatorThatModifiesDisplay() {
+			Bean bean = mock(Bean.class);
+			User user = mock(User.class);
+			Customer customer = mock(Customer.class);
+			doReturn(customer).when(user).getCustomer();
+			doReturn("world").when(user).getName();
+
+			withThreadLocalUser(user, () -> {
+				UnaryOperator<String> addPrefix = value -> "Hello " + value;
+				String result = BindUtil.formatMessage("{USER}", addPrefix, bean);
+				assertEquals("Hello world", result);
+			});
 		}
 
 		@Test
@@ -843,6 +958,13 @@ class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
+	void toDisplayCustomerValueOverloadReturnsStringForPrimitiveWrapper() {
+		String result = BindUtil.toDisplay(mock(Customer.class), Boolean.FALSE);
+		assertEquals("No", result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
 	void toDisplayBooleanFalseReturnsNo() {
 		// Covers the false branch of (bool.booleanValue() ? "Yes" : "No")
 		String result = BindUtil.toDisplay(mock(Customer.class), null, null, null, Boolean.FALSE);
@@ -854,6 +976,550 @@ class BindUtilTest {
 	void toDisplayNullValueReturnsEmptyString() {
 		String result = BindUtil.toDisplay(mock(Customer.class), null, null, null, null);
 		assertEquals("", result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getDisplayReturnsBizKeyWhenBindingResolvesToBean() {
+		Bean child = mock(Bean.class);
+		doReturn("child-key").when(child).getBizKey();
+
+		Map<String, Object> properties = new HashMap<>();
+		properties.put("child", child);
+		Bean parent = new DynamicBean("mod", "Doc", properties);
+
+		String result = BindUtil.getDisplay(mock(Customer.class), parent, "child");
+		assertEquals("child-key", result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getDisplayResolvesSimpleFieldMetadata() {
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		org.skyve.impl.metadata.model.document.DocumentImpl document = new org.skyve.impl.metadata.model.document.DocumentImpl();
+		document.setOwningModuleName("sales");
+		document.setName("Order");
+		org.skyve.impl.metadata.model.document.field.Text field = new org.skyve.impl.metadata.model.document.field.Text();
+		field.setName("status");
+		field.setLength(10);
+
+		Map<String, Object> properties = new HashMap<>();
+		properties.put("status", "A");
+		DynamicBean bean = new DynamicBean("sales", "Order", properties);
+
+		when(customer.getModule("sales")).thenReturn(module);
+		when(module.getDocument(customer, "Order")).thenReturn(document);
+		document.putAttribute(field);
+
+		String result = BindUtil.getDisplay(customer, bean, "status");
+		assertEquals("A", result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void resolveDisplayRealBeanReturnsWrappedBean() throws Exception {
+		Method method = BindUtil.class.getDeclaredMethod("resolveDisplayRealBean", Bean.class);
+		method.setAccessible(true);
+
+		Bean realBean = mock(Bean.class);
+		Map<String, Object> properties = new HashMap<>();
+		properties.put(DynamicBean.BEAN_PROPERTY_KEY, realBean);
+		DynamicBean wrapper = new DynamicBean("sales", "Order", properties);
+
+		assertSame(realBean, method.invoke(null, wrapper));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void resolveOwningBeanForBindingReturnsNestedBean() throws Exception {
+		Method method = BindUtil.class.getDeclaredMethod("resolveOwningBeanForBinding", Bean.class, String.class);
+		method.setAccessible(true);
+
+		Bean childBean = mock(Bean.class);
+		Map<String, Object> properties = new HashMap<>();
+		properties.put("parent", childBean);
+		DynamicBean owningBean = new DynamicBean("sales", "Order", properties);
+
+		assertSame(childBean, method.invoke(null, owningBean, "parent.status"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void dynamicCollectionFixtureAddAndRemoveMaintainsInverseReference() {
+		DynamicCollectionRepositoryFixture fixture = new DynamicCollectionRepositoryFixture(true, false);
+		try {
+			withThreadLocalUser(fixture.user(), () -> {
+				List<Bean> items = new ArrayList<>();
+				DynamicBean owner = new DynamicBean("sales", "Order", new HashMap<>(Map.of("items", items)));
+				Map<String, Object> itemProperties = new HashMap<>();
+				itemProperties.put(Bean.DOCUMENT_ID, "item-1");
+				itemProperties.put("order", null);
+				DynamicBean item = new DynamicBean("sales", "Item", itemProperties);
+
+				assertTrue(BindUtil.addElementToCollection(owner, "items", item));
+				assertSame(owner, BindUtil.get(item, "order"));
+				assertTrue(BindUtil.removeElementFromCollection(owner, "items", item));
+				assertNull(BindUtil.get(item, "order"));
+			});
+		}
+		finally {
+			fixture.close();
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void dynamicCollectionFixtureIndexedAddAndIndexedRemoveRoundTripsElement() {
+		DynamicCollectionRepositoryFixture fixture = new DynamicCollectionRepositoryFixture(true, false);
+		try {
+			withThreadLocalUser(fixture.user(), () -> {
+				Map<String, Object> existingProperties = new HashMap<>();
+				existingProperties.put(Bean.DOCUMENT_ID, "existing");
+				existingProperties.put("order", null);
+				DynamicBean existing = new DynamicBean("sales", "Item", existingProperties);
+				List<Bean> items = new ArrayList<>();
+				items.add(existing);
+				DynamicBean owner = new DynamicBean("sales", "Order", new HashMap<>(Map.of("items", items)));
+				Map<String, Object> insertedProperties = new HashMap<>();
+				insertedProperties.put(Bean.DOCUMENT_ID, "inserted");
+				insertedProperties.put("order", null);
+				DynamicBean inserted = new DynamicBean("sales", "Item", insertedProperties);
+
+				BindUtil.addElementToCollection(owner, "items", 0, inserted);
+				assertSame(inserted, items.get(0));
+				assertSame(owner, BindUtil.get(inserted, "order"));
+
+				Bean removed = BindUtil.removeElementFromCollection(owner, "items", 0);
+				assertSame(inserted, removed);
+				assertNull(BindUtil.get(inserted, "order"));
+			});
+		}
+		finally {
+			fixture.close();
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void dynamicCollectionFixtureAssignsAndClearsChildParent() {
+		DynamicCollectionRepositoryFixture fixture = new DynamicCollectionRepositoryFixture(false, true);
+		try {
+			withThreadLocalUser(fixture.user(), () -> {
+				List<Bean> items = new ArrayList<>();
+				DynamicBean owner = new DynamicBean("sales", "Order", new HashMap<>(Map.of("items", items)));
+				ChildBean<Bean> child = mock(ChildBean.class);
+				when(child.getBizModule()).thenReturn("sales");
+				when(child.getBizDocument()).thenReturn("Item");
+
+				assertTrue(BindUtil.addElementToCollection(owner, "items", child));
+				verify(child).setParent(owner);
+
+				assertTrue(BindUtil.removeElementFromCollection(owner, "items", child));
+				verify(child).setParent(null);
+			});
+		}
+		finally {
+			fixture.close();
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void dynamicCollectionFixtureAssignsParentViaDerivedBaseDocument() {
+		DynamicCollectionRepositoryFixture fixture = new DynamicCollectionRepositoryFixture(false, false);
+		try {
+			Module module = mock(Module.class);
+			DocumentImpl ownerDocument = new DocumentImpl();
+			ownerDocument.setOwningModuleName("sales");
+			ownerDocument.setName("Order");
+			CollectionImpl items = new CollectionImpl();
+			items.setName("items");
+			items.setDocumentName("Item");
+			items.setType(CollectionType.child);
+			ownerDocument.putRelation(items);
+
+			DocumentImpl childDocument = new DocumentImpl();
+			childDocument.setOwningModuleName("sales");
+			childDocument.setName("Item");
+			childDocument.setParentDocumentName("BaseOrder");
+			childDocument.setDynamism(new Dynamic());
+
+			DocumentImpl baseDocument = new DocumentImpl();
+			baseDocument.setOwningModuleName("sales");
+			baseDocument.setName("BaseOrder");
+
+			ProvidedRepository repository = mock(ProvidedRepository.class);
+			when(repository.getModule(fixture.customer, "sales")).thenReturn(module);
+			when(module.getDocument(fixture.customer, "Order")).thenReturn(ownerDocument);
+			when(module.getDocument(fixture.customer, "Item")).thenReturn(childDocument);
+			when(module.getDocument(fixture.customer, "BaseOrder")).thenReturn(baseDocument);
+			ProvidedRepositoryFactory.set(repository);
+			fixture.mapDerivedDocument("Order", "BaseOrder");
+
+			withThreadLocalUser(fixture.user(), () -> {
+				List<Bean> itemsList = new ArrayList<>();
+				DynamicBean owner = new DynamicBean("sales", "Order", new HashMap<>(Map.of("items", itemsList)));
+				ChildBean<Bean> child = mock(ChildBean.class);
+				when(child.getBizModule()).thenReturn("sales");
+				when(child.getBizDocument()).thenReturn("Item");
+
+				assertTrue(BindUtil.addElementToCollection(owner, "items", child));
+				verify(child).setParent(owner);
+			});
+		}
+		finally {
+			fixture.close();
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void orderInverseManyByMetaDataSortsByDeclaredOrdering() {
+		Map<String, Object> firstProps = new HashMap<>();
+		firstProps.put("name", "Zulu");
+		DynamicBean first = new DynamicBean("sales", "Item", firstProps);
+		Map<String, Object> secondProps = new HashMap<>();
+		secondProps.put("name", "Alpha");
+		DynamicBean second = new DynamicBean("sales", "Item", secondProps);
+		List<Bean> items = new ArrayList<>(Arrays.asList(first, second));
+		DynamicBean owner = new DynamicBean("sales", "Order", new HashMap<>(Map.of("items", items)));
+
+		InverseMany inverse = new InverseMany();
+		inverse.setName("items");
+		inverse.getOrdering().add(new OrderingImpl("name", SortDirection.ascending));
+
+		BindUtil.orderInverseManyByMetaData(owner, inverse);
+
+		assertSame(second, items.get(0));
+		assertSame(first, items.get(1));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void orderInverseManyByMetaDataWithNoOrderingLeavesListAsIs() {
+		DynamicBean first = new DynamicBean("sales", "Item", new HashMap<>(Map.of("name", "Zulu")));
+		DynamicBean second = new DynamicBean("sales", "Item", new HashMap<>(Map.of("name", "Alpha")));
+		List<Bean> items = new ArrayList<>(Arrays.asList(first, second));
+		DynamicBean owner = new DynamicBean("sales", "Order", new HashMap<>(Map.of("items", items)));
+
+		InverseMany inverse = new InverseMany();
+		inverse.setName("items");
+
+		BindUtil.orderInverseManyByMetaData(owner, inverse);
+
+		assertSame(first, items.get(0));
+		assertSame(second, items.get(1));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getPropertyTypeCompoundBindingReturnsNestedPropertyType() {
+		Map<String, Object> childProperties = new HashMap<>();
+		childProperties.put("name", "Alpha");
+		DynamicBean child = new DynamicBean("sales", "Item", childProperties);
+		Map<String, Object> ownerProperties = new HashMap<>();
+		ownerProperties.put("child", child);
+		DynamicBean owner = new DynamicBean("sales", "Order", ownerProperties);
+
+		assertEquals(String.class, BindUtil.getPropertyType(owner, "child.name"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getPropertyTypeCompoundBindingThrowsWhenPenultimateIsNull() {
+		Map<String, Object> ownerProperties = new HashMap<>();
+		ownerProperties.put("child", null);
+		DynamicBean owner = new DynamicBean("sales", "Order", ownerProperties);
+		assertThrows(MetaDataException.class, () -> BindUtil.getPropertyType(owner, "child.name"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getPropertyTypeDynamicAssociationUsesRelatedDocumentBeanClass() {
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document ownerDocument = mock(Document.class);
+		AssociationImpl association = new AssociationImpl();
+		association.setName("child");
+		association.setDocumentName("Item");
+		DocumentImpl relatedDocument = new DocumentImpl();
+		relatedDocument.setOwningModuleName("sales");
+		relatedDocument.setName("Item");
+		relatedDocument.setDynamism(new Dynamic());
+
+		User user = mock(User.class);
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("sales")).thenReturn(module);
+		when(module.getDocument(customer, "Order")).thenReturn(ownerDocument);
+		when(module.getDocument(customer, "Item")).thenReturn(relatedDocument);
+		when(ownerDocument.getPolymorphicAttribute(customer, "child")).thenReturn(association);
+
+		Map<String, Object> ownerProperties = new HashMap<>();
+		ownerProperties.put("child", null);
+		DynamicBean owner = new DynamicBean("sales", "Order", ownerProperties);
+
+		withThreadLocalUser(user, () -> assertEquals(DynamicBean.class, BindUtil.getPropertyType(owner, "child")));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getPropertyTypeDynamicCollectionElementByIdUsesRelatedDocumentBeanClass() {
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document ownerDocument = mock(Document.class);
+		CollectionImpl relation = new CollectionImpl();
+		relation.setName("items");
+		relation.setDocumentName("Item");
+		relation.setType(CollectionType.child);
+		DocumentImpl relatedDocument = new DocumentImpl();
+		relatedDocument.setOwningModuleName("sales");
+		relatedDocument.setName("Item");
+		relatedDocument.setDynamism(new Dynamic());
+
+		User user = mock(User.class);
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("sales")).thenReturn(module);
+		when(module.getDocument(customer, "Order")).thenReturn(ownerDocument);
+		when(module.getDocument(customer, "Item")).thenReturn(relatedDocument);
+		when(ownerDocument.getPolymorphicAttribute(customer, "items")).thenReturn(relation);
+
+		List<Bean> items = new ArrayList<>();
+		DynamicBean owner = new DynamicBean("sales", "Order", new HashMap<>(Map.of("items", items)));
+		String binding = BindUtil.createIdBinding("items", "missing");
+
+		withThreadLocalUser(user, () -> assertEquals(DynamicBean.class, BindUtil.getPropertyType(owner, binding)));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getPropertyTypeDynamicBindingReturnsObjectWhenMetadataAttributeMissing() {
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document ownerDocument = mock(Document.class);
+		User user = mock(User.class);
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("sales")).thenReturn(module);
+		when(module.getDocument(customer, "Order")).thenReturn(ownerDocument);
+		when(ownerDocument.getPolymorphicAttribute(customer, "missing")).thenReturn(null);
+
+		Map<String, Object> ownerProperties = new HashMap<>();
+		ownerProperties.put("missing", null);
+		DynamicBean owner = new DynamicBean("sales", "Order", ownerProperties);
+
+		withThreadLocalUser(user, () -> assertEquals(Object.class, BindUtil.getPropertyType(owner, "missing")));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getPropertyTypeDynamicAssociationThrowsMetaDataExceptionWhenRelatedClassCannotResolve() {
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document ownerDocument = mock(Document.class);
+		AssociationImpl association = new AssociationImpl();
+		association.setName("child");
+		association.setDocumentName("Item");
+		DocumentImpl relatedDocument = new DocumentImpl();
+		relatedDocument.setOwningModuleName("sales");
+		relatedDocument.setName("Item");
+		User user = mock(User.class);
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("sales")).thenReturn(module);
+		when(module.getDocument(customer, "Order")).thenReturn(ownerDocument);
+		when(module.getDocument(customer, "Item")).thenReturn(relatedDocument);
+		when(ownerDocument.getPolymorphicAttribute(customer, "child")).thenReturn(association);
+
+		Map<String, Object> ownerProperties = new HashMap<>();
+		ownerProperties.put("child", null);
+		DynamicBean owner = new DynamicBean("sales", "Order", ownerProperties);
+
+		withThreadLocalUser(user,
+				() -> assertThrows(MetaDataException.class, () -> BindUtil.getPropertyType(owner, "child")));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void extractDynamicElementBizIdReturnsBizIdPortion() throws Exception {
+		Method method = BindUtil.class.getDeclaredMethod("extractDynamicElementBizId", String.class);
+		method.setAccessible(true);
+
+		String binding = BindUtil.createIdBinding("items", "bean-99");
+		assertEquals("bean-99", method.invoke(null, binding));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void setDynamicElementByIdValueReplacesMatchingDynamicListElement() throws Exception {
+		Method method = BindUtil.class.getDeclaredMethod("setDynamicElementByIdValue",
+				Object.class,
+				String.class,
+				Bean.class,
+				String.class,
+				String.class,
+				Object.class);
+		method.setAccessible(true);
+
+		Map<String, Object> firstProps = new HashMap<>();
+		firstProps.put(Bean.DOCUMENT_ID, "bean-1");
+		DynamicBean first = new DynamicBean("sales", "Item", firstProps);
+		Map<String, Object> secondProps = new HashMap<>();
+		secondProps.put(Bean.DOCUMENT_ID, "bean-2");
+		DynamicBean second = new DynamicBean("sales", "Item", secondProps);
+		List<Bean> items = new ArrayList<>(Arrays.asList(first, second));
+		DynamicBean owner = new DynamicBean("sales", "Order", new HashMap<>(Map.of("items", items)));
+		DynamicBean replacement = new DynamicBean("sales",
+				"Item",
+				new HashMap<>(Map.of(Bean.DOCUMENT_ID, "replacement")));
+
+		String simpleBinding = BindUtil.createIdBinding("items", "bean-1");
+		method.invoke(null, owner, "items", owner, simpleBinding, "items", replacement);
+
+		assertSame(replacement, items.get(0));
+		assertSame(second, items.get(1));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void setDynamicElementByIdValueThrowsWhenValueIsNotBean() throws Exception {
+		Method method = BindUtil.class.getDeclaredMethod("setDynamicElementByIdValue",
+				Object.class,
+				String.class,
+				Bean.class,
+				String.class,
+				String.class,
+				Object.class);
+		method.setAccessible(true);
+
+		Map<String, Object> firstProps = new HashMap<>();
+		firstProps.put(Bean.DOCUMENT_ID, "bean-1");
+		DynamicBean first = new DynamicBean("sales", "Item", firstProps);
+		DynamicBean owner = new DynamicBean("sales",
+				"Order",
+				new HashMap<>(Map.of("items", new ArrayList<>(Arrays.asList(first)))));
+
+		String simpleBinding = BindUtil.createIdBinding("items", "bean-1");
+		assertThrows(InvocationTargetException.class,
+				() -> method.invoke(null, owner, "items", owner, simpleBinding, "items", "not-a-bean"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void setDynamicElementByIdValueThrowsWhenDynamicListIsNull() throws Exception {
+		Method method = BindUtil.class.getDeclaredMethod("setDynamicElementByIdValue",
+				Object.class,
+				String.class,
+				Bean.class,
+				String.class,
+				String.class,
+				Object.class);
+		method.setAccessible(true);
+
+		Map<String, Object> ownerProperties = new HashMap<>();
+		ownerProperties.put("items", null);
+		DynamicBean owner = new DynamicBean("sales", "Order", ownerProperties);
+		DynamicBean replacement = new DynamicBean("sales",
+				"Item",
+				new HashMap<>(Map.of(Bean.DOCUMENT_ID, "replacement")));
+
+		String simpleBinding = BindUtil.createIdBinding("items", "bean-1");
+		assertThrows(InvocationTargetException.class,
+				() -> method.invoke(null, owner, "items", owner, simpleBinding, "items", replacement));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void setDynamicElementByIdValueThrowsWhenElementNotFoundInList() throws Exception {
+		Method method = BindUtil.class.getDeclaredMethod("setDynamicElementByIdValue",
+				Object.class,
+				String.class,
+				Bean.class,
+				String.class,
+				String.class,
+				Object.class);
+		method.setAccessible(true);
+
+		Map<String, Object> firstProps = new HashMap<>();
+		firstProps.put(Bean.DOCUMENT_ID, "bean-1");
+		DynamicBean first = new DynamicBean("sales", "Item", firstProps);
+		DynamicBean owner = new DynamicBean("sales",
+				"Order",
+				new HashMap<>(Map.of("items", new ArrayList<>(Arrays.asList(first)))));
+		DynamicBean replacement = new DynamicBean("sales",
+				"Item",
+				new HashMap<>(Map.of(Bean.DOCUMENT_ID, "replacement")));
+
+		String simpleBinding = BindUtil.createIdBinding("items", "missing");
+		assertThrows(InvocationTargetException.class,
+				() -> method.invoke(null, owner, "items", owner, simpleBinding, "items", replacement));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void setIndexedDynamicValueSetsIndexedElement() throws Exception {
+		Method method = BindUtil.class.getDeclaredMethod("setIndexedDynamicValue",
+				Object.class,
+				String.class,
+				Bean.class,
+				String.class,
+				String.class,
+				Object.class);
+		method.setAccessible(true);
+
+		List<Object> values = new ArrayList<>(Arrays.asList("old-0", "old-1"));
+		DynamicBean owner = new DynamicBean("sales", "Order", new HashMap<>(Map.of("items", values)));
+
+		method.invoke(null, owner, "items[1]", owner, "items[1]", "items", "new-1");
+		assertEquals("old-0", values.get(0));
+		assertEquals("new-1", values.get(1));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void setIndexedDynamicValueThrowsWhenListIsNull() throws Exception {
+		Method method = BindUtil.class.getDeclaredMethod("setIndexedDynamicValue",
+				Object.class,
+				String.class,
+				Bean.class,
+				String.class,
+				String.class,
+				Object.class);
+		method.setAccessible(true);
+
+		Map<String, Object> ownerProperties = new HashMap<>();
+		ownerProperties.put("items", null);
+		DynamicBean owner = new DynamicBean("sales", "Order", ownerProperties);
+
+		assertThrows(InvocationTargetException.class,
+				() -> method.invoke(null, owner, "items[0]", owner, "items[0]", "items", "new-value"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void invokeStringValueOfReturnsConvertedValueWhenStaticValueOfExists() throws Exception {
+		Method method = BindUtil.class.getDeclaredMethod("invokeStringValueOf",
+				Class.class,
+				Object.class,
+				String.class,
+				Object.class);
+		method.setAccessible(true);
+
+		Object result = method.invoke(null, Integer.class, "42", "count", new Object());
+		assertEquals(Integer.valueOf(42), result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void invokeStringValueOfThrowsDomainExceptionWhenTypeHasNoValueOf() throws Exception {
+		Method method = BindUtil.class.getDeclaredMethod("invokeStringValueOf",
+				Class.class,
+				Object.class,
+				String.class,
+				Object.class);
+		method.setAccessible(true);
+
+		InvocationTargetException exception = assertThrows(InvocationTargetException.class,
+				() -> method.invoke(null, java.util.Date.class, "2026-06-01", "dateField", new Object()));
+		assertTrue(exception.getCause() instanceof DomainException);
 	}
 
 	// ---- toJavaInstanceIdentifier — leading digit replacement ----
@@ -1770,6 +2436,43 @@ class BindUtilTest {
 	}
 
 	@Test
+	@SuppressWarnings({"static-method", "boxing"})
+	void isDynamicDocumentTrueReturnsTrue() {
+		Document document = mock(Document.class);
+		when(document.isDynamic()).thenReturn(true);
+		assertTrue(BindUtil.isDynamic(null, mock(Module.class), document, null));
+	}
+
+	@Test
+	@SuppressWarnings({"static-method", "boxing"})
+	void isDynamicDocumentFalseDelegatesToRelationAndReturnsTrue() {
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		when(document.isDynamic()).thenReturn(false);
+
+		AssociationImpl relation = new AssociationImpl();
+		relation.setDocumentName("Item");
+		Document relatedDocument = mock(Document.class);
+		when(relatedDocument.isDynamic()).thenReturn(true);
+		when(module.getDocument(null, "Item")).thenReturn(relatedDocument);
+
+		assertTrue(BindUtil.isDynamic(null, module, document, relation));
+	}
+
+	@Test
+	@SuppressWarnings({"static-method", "boxing"})
+	void isDynamicRelationReturnsFalseWhenRelatedDocumentStatic() {
+		Module module = mock(Module.class);
+		AssociationImpl relation = new AssociationImpl();
+		relation.setDocumentName("Item");
+		Document relatedDocument = mock(Document.class);
+		when(relatedDocument.isDynamic()).thenReturn(false);
+		when(module.getDocument(null, "Item")).thenReturn(relatedDocument);
+
+		assertFalse(BindUtil.isDynamic(null, module, relation));
+	}
+
+	@Test
 	@SuppressWarnings("static-method")
 	void populatePropertiesReturnsWithoutErrorWhenBeanIsNull() {
 		SortedMap<String, Object> properties = new TreeMap<>();
@@ -1791,9 +2494,48 @@ class BindUtilTest {
 		properties.put("name", "value");
 
 		ValidationException exception = assertThrows(ValidationException.class,
-				() -> BindUtil.populateProperties(null, mock(Bean.class), properties, false));
+				() -> BindUtil.populateProperties(mock(User.class), mock(Bean.class), properties, false));
 
 		assertFalse(exception.getMessages().isEmpty());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void populatePropertiesSetsValidPropertyAndSkipsNullKey() {
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Attribute nameAttribute = mock(Attribute.class);
+		User user = mock(User.class);
+
+		Map<String, Object> props = new HashMap<>();
+		props.put("name", null);
+		DynamicBean bean = new DynamicBean("sales", "Order", props);
+
+		SortedMap<String, Object> properties = new TreeMap<>(Comparator.nullsFirst(String::compareTo));
+		properties.put(null, "ignored");
+		properties.put("name", "Alpha");
+
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("sales")).thenReturn(module);
+		when(module.getDocument(customer, "Order")).thenReturn(document);
+		when(document.getAttribute("name")).thenReturn(nameAttribute);
+		when(document.getExtends()).thenReturn(null);
+		when(nameAttribute.getAttributeType()).thenReturn(Attribute.AttributeType.text);
+		doReturn(String.class).when(nameAttribute).getImplementingType();
+
+		assertDoesNotThrow(() -> BindUtil.populateProperties(user, bean, properties, false));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void populatePropertiesWithOnlyNullKeyCompletesWithoutError() {
+		User user = mock(User.class);
+		DynamicBean bean = new DynamicBean("sales", "Order", new HashMap<>());
+		SortedMap<String, Object> properties = new TreeMap<>(Comparator.nullsFirst(String::compareTo));
+		properties.put(null, "ignored");
+
+		assertDoesNotThrow(() -> BindUtil.populateProperties(user, bean, properties, false));
 	}
 
 	@Test
@@ -1857,6 +2599,25 @@ class BindUtilTest {
 		int index = ((Integer) method.invoke(null, "orders[0].itemsElementById(a.b).name")).intValue();
 		assertEquals("orders[0].itemsElementById(a.b)".length(), index);
 		assertEquals(-1, ((Integer) method.invoke(null, "simpleBinding")).intValue());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getDynamicElementByIdReturnsMatchingElement() throws Exception {
+		Method method = BindUtil.class.getDeclaredMethod("getDynamicElementById", String.class, int.class, List.class);
+		method.setAccessible(true);
+
+		Map<String, Object> firstProps = new HashMap<>();
+		firstProps.put(Bean.DOCUMENT_ID, "bean-1");
+		DynamicBean first = new DynamicBean("mod", "Item", firstProps);
+		Map<String, Object> secondProps = new HashMap<>();
+		secondProps.put(Bean.DOCUMENT_ID, "bean-2");
+		DynamicBean second = new DynamicBean("mod", "Item", secondProps);
+		List<DynamicBean> list = Arrays.asList(first, second);
+		String binding = BindUtil.createIdBinding("items", "bean-1");
+
+		Bean result = (Bean) method.invoke(null, binding, Integer.valueOf(binding.indexOf("ElementById(")), list);
+		assertSame(first, result);
 	}
 
 	@Test
@@ -2709,6 +3470,58 @@ class BindUtilTest {
 		assertEquals("CA", result);
 	}
 
+	// ---- fromString with converter for scalar types ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void fromStringWithConverterForInteger() throws Exception {
+		// Covers fromString L584: !fromSerializedFormat && converter != null
+		Converter<Integer> converter = mock(Converter.class);
+		when(converter.fromDisplayValue("100")).thenReturn(Integer.valueOf(100));
+		Object result = BindUtil.fromString(null, converter, Integer.class, "100");
+		assertEquals(Integer.valueOf(100), result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void fromStringWithConverterForLong() throws Exception {
+		// Covers fromString L584: !fromSerializedFormat && converter != null
+		Converter<Long> converter = mock(Converter.class);
+		when(converter.fromDisplayValue("200")).thenReturn(Long.valueOf(200L));
+		Object result = BindUtil.fromString(null, converter, Long.class, "200");
+		assertEquals(Long.valueOf(200L), result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void fromStringWithConverterForFloat() throws Exception {
+		// Covers fromString L584: !fromSerializedFormat && converter != null
+		Converter<Float> converter = mock(Converter.class);
+		when(converter.fromDisplayValue("3.14")).thenReturn(Float.valueOf(3.14f));
+		Object result = BindUtil.fromString(null, converter, Float.class, "3.14");
+		assertEquals(Float.valueOf(3.14f), result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void fromStringWithConverterForDouble() throws Exception {
+		// Covers fromString L584: !fromSerializedFormat && converter != null
+		Converter<Double> converter = mock(Converter.class);
+		when(converter.fromDisplayValue("2.718")).thenReturn(Double.valueOf(2.718));
+		Object result = BindUtil.fromString(null, converter, Double.class, "2.718");
+		assertEquals(Double.valueOf(2.718), result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void fromStringWithConverterForBigDecimal() throws Exception {
+		// Covers fromString L584: !fromSerializedFormat && converter != null
+		Converter<BigDecimal> converter = mock(Converter.class);
+		when(converter.fromDisplayValue("123.45")).thenReturn(new BigDecimal("123.45"));
+		Object result = BindUtil.fromString(null, converter, BigDecimal.class, "123.45");
+		assertEquals(new BigDecimal("123.45"), result);
+	}
+
 	// ---- toDisplay with domainValues and Geometry ----
 
 	@Test
@@ -2746,6 +3559,25 @@ class BindUtilTest {
 		when(converter.toDisplayValue(Integer.valueOf(42))).thenReturn("42 items");
 		String result = BindUtil.toDisplay(mock(Customer.class), converter, Integer.class, null, Integer.valueOf(42));
 		assertEquals("42 items", result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void toDisplayWithConverterButNullImplementingTypeFallsThroughToStandard() {
+		// Covers L741: converter != null but implementingType == null -> falls through to standard display
+		Converter<Integer> converter = mock(Converter.class);
+		String result = BindUtil.toDisplay(mock(Customer.class), converter, null, null, Integer.valueOf(42));
+		// Should fall through to toStandardDisplayValue which calls toString()
+		assertEquals("42", result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void toDisplayWithNullConverterButImplementingTypeFallsThroughToStandard() {
+		// Covers L741: converter == null -> falls through to standard display
+		String result = BindUtil.toDisplay(mock(Customer.class), null, Integer.class, null, Integer.valueOf(42));
+		// Should fall through to toStandardDisplayValue which calls toString()
+		assertEquals("42", result);
 	}
 
 	@Test
@@ -2913,6 +3745,578 @@ class BindUtilTest {
 		};
 		String result = BindUtil.toDisplay(mock(Customer.class), null, null, null, obj);
 		assertEquals("custom-object", result);
+	}
+
+	// ---- populateProperty — additional type-conversion paths -----------------
+
+	/** Shared helper: build a standard mock chain for populateProperty tests. */
+	private static Object[] buildPopulatePropertyMocks(String property) {
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Attribute attribute = mock(Attribute.class);
+		User user = mock(User.class);
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("sales")).thenReturn(module);
+		when(module.getDocument(customer, "Order")).thenReturn(document);
+		when(document.getAttribute(property)).thenReturn(attribute);
+		when(document.getExtends()).thenReturn(null);
+		return new Object[]{user, customer, module, document, attribute};
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void populatePropertySetsDecimal2OnDynamicBean() {
+		Object[] mocks = buildPopulatePropertyMocks("price");
+		User user = (User) mocks[0];
+		Attribute attribute = (Attribute) mocks[4];
+		doReturn(Decimal2.class).when(attribute).getImplementingType();
+
+		Map<String, Object> props = new HashMap<>();
+		props.put("price", new Decimal2("0"));
+		DynamicBean bean = new DynamicBean("sales", "Order", props);
+
+		BindUtil.populateProperty(user, bean, "price", "3.14", false);
+
+		assertEquals(new Decimal2("3.14"), bean.get("price"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void populatePropertySetsDecimal5OnDynamicBean() {
+		Object[] mocks = buildPopulatePropertyMocks("amount");
+		User user = (User) mocks[0];
+		Attribute attribute = (Attribute) mocks[4];
+		doReturn(Decimal5.class).when(attribute).getImplementingType();
+
+		Map<String, Object> props = new HashMap<>();
+		props.put("amount", new Decimal5("0"));
+		DynamicBean bean = new DynamicBean("sales", "Order", props);
+
+		BindUtil.populateProperty(user, bean, "amount", "1.23456", false);
+
+		assertEquals(new Decimal5("1.23456"), bean.get("amount"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void populatePropertySetsDecimal10OnDynamicBean() {
+		Object[] mocks = buildPopulatePropertyMocks("total");
+		User user = (User) mocks[0];
+		Attribute attribute = (Attribute) mocks[4];
+		doReturn(Decimal10.class).when(attribute).getImplementingType();
+
+		Map<String, Object> props = new HashMap<>();
+		props.put("total", new Decimal10("0"));
+		DynamicBean bean = new DynamicBean("sales", "Order", props);
+
+		BindUtil.populateProperty(user, bean, "total", "9.1234567890", false);
+
+		assertEquals(new Decimal10("9.1234567890"), bean.get("total"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void populatePropertySetsBooleanOnDynamicBean() {
+		Object[] mocks = buildPopulatePropertyMocks("active");
+		User user = (User) mocks[0];
+		Attribute attribute = (Attribute) mocks[4];
+		doReturn(Boolean.class).when(attribute).getImplementingType();
+
+		Map<String, Object> props = new HashMap<>();
+		props.put("active", Boolean.FALSE);
+		DynamicBean bean = new DynamicBean("sales", "Order", props);
+
+		BindUtil.populateProperty(user, bean, "active", "true", false);
+
+		assertEquals(Boolean.TRUE, bean.get("active")); // NOSONAR - test assertion
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void populatePropertySetsLongOnDynamicBean() {
+		Object[] mocks = buildPopulatePropertyMocks("count");
+		User user = (User) mocks[0];
+		Attribute attribute = (Attribute) mocks[4];
+		doReturn(Long.class).when(attribute).getImplementingType();
+
+		Map<String, Object> props = new HashMap<>();
+		props.put("count", Long.valueOf(0L));
+		DynamicBean bean = new DynamicBean("sales", "Order", props);
+
+		BindUtil.populateProperty(user, bean, "count", "999", false);
+
+		assertEquals(Long.valueOf(999L), bean.get("count"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void populatePropertySetsDateOnlyFromSerializedFormat() {
+		// fromSerializedFormat=true → DateOnly(stringValue) constructor path
+		Object[] mocks = buildPopulatePropertyMocks("birthDate");
+		User user = (User) mocks[0];
+		Attribute attribute = (Attribute) mocks[4];
+		doReturn(DateOnly.class).when(attribute).getImplementingType();
+
+		Map<String, Object> props = new HashMap<>();
+		props.put("birthDate", new DateOnly(0L));
+		DynamicBean bean = new DynamicBean("sales", "Order", props);
+
+		BindUtil.populateProperty(user, bean, "birthDate", "2022-01-01", true);
+
+		assertNotNull(bean.get("birthDate"));
+		assertTrue(bean.get("birthDate") instanceof DateOnly);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void populatePropertyWithStringArrayValueSetsProperty() {
+		// Covers: value instanceof String[] array branch in convertPopulateIncomingValue
+		Object[] mocks = buildPopulatePropertyMocks("name");
+		User user = (User) mocks[0];
+		Attribute attribute = (Attribute) mocks[4];
+		doReturn(String.class).when(attribute).getImplementingType();
+
+		Map<String, Object> props = new HashMap<>();
+		props.put("name", "before");
+		DynamicBean bean = new DynamicBean("sales", "Order", props);
+
+		BindUtil.populateProperty(user, bean, "name", new String[]{"  hello  "}, false);
+
+		assertEquals("hello", bean.get("name"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void populatePropertyWithNonStringValuePassesThroughDirectly() {
+		// Covers: stringValue == null (non-string, non-String[]) → return value as-is
+		Object[] mocks = buildPopulatePropertyMocks("active");
+		User user = (User) mocks[0];
+		Attribute attribute = (Attribute) mocks[4];
+		doReturn(Boolean.class).when(attribute).getImplementingType();
+
+		Map<String, Object> props = new HashMap<>();
+		props.put("active", Boolean.FALSE);
+		DynamicBean bean = new DynamicBean("sales", "Order", props);
+
+		BindUtil.populateProperty(user, bean, "active", Boolean.TRUE, false);
+
+		assertEquals(Boolean.TRUE, bean.get("active"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void populatePropertyWithNullValueSetsNull() {
+		// Covers: value == null → convertPopulateIncomingValue returns null → sets null
+		Object[] mocks = buildPopulatePropertyMocks("name");
+		User user = (User) mocks[0];
+		Attribute attribute = (Attribute) mocks[4];
+		doReturn(String.class).when(attribute).getImplementingType();
+
+		Map<String, Object> props = new HashMap<>();
+		props.put("name", "existing");
+		DynamicBean bean = new DynamicBean("sales", "Order", props);
+
+		BindUtil.populateProperty(user, bean, "name", (Object) null, false);
+
+		assertNull(bean.get("name"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void populatePropertyWithStringArrayNullFirstElementPassesThroughArray() {
+		// Covers: value instanceof String[] array → array[0] == null → stringValue stays null
+		// → stringValue == null → return value (the array itself)
+		Object[] mocks = buildPopulatePropertyMocks("active");
+		User user = (User) mocks[0];
+		Attribute attribute = (Attribute) mocks[4];
+		doReturn(Boolean.class).when(attribute).getImplementingType();
+
+		Map<String, Object> props = new HashMap<>();
+		props.put("active", Boolean.FALSE);
+		DynamicBean bean = new DynamicBean("sales", "Order", props);
+
+		// String[] with null first element → passthrough (the array is returned as-is
+		// and convertAndSet coerces it to Boolean - but the primary branch is covered)
+		assertDoesNotThrow(() -> BindUtil.populateProperty(user, bean, "active", new String[]{null}, false));
+	}
+
+	// ---- setAssociation -------------------------------------------------------
+
+	@Test
+	@SuppressWarnings("static-method")
+	void setAssociationSetsValueOnStaticBean() {
+		// Covers: setAssociation static (isDynamic=false) path → set(associationOwner, name, value)
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Attribute attribute = mock(Attribute.class);
+		User user = mock(User.class);
+
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("sales")).thenReturn(module);
+		when(module.getDocument(customer, "Order")).thenReturn(document);
+		when(document.getPolymorphicAttribute(customer, "supplier")).thenReturn(attribute);
+		// attribute.isDynamic() returns false by default → static path
+
+		Map<String, Object> props = new HashMap<>();
+		props.put("supplier", null);
+		DynamicBean bean = new DynamicBean("sales", "Order", props);
+		DynamicBean newSupplier = new DynamicBean("sales", "Supplier", new HashMap<>());
+
+		withThreadLocalUser(user, () -> BindUtil.setAssociation(bean, "supplier", newSupplier));
+
+		assertSame(newSupplier, bean.get("supplier"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void setAssociationThrowsMetaDataExceptionForInvalidBinding() {
+		// Covers: a == null → throw MetaDataException
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		User user = mock(User.class);
+
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("sales")).thenReturn(module);
+		when(module.getDocument(customer, "Order")).thenReturn(document);
+		when(document.getPolymorphicAttribute(customer, "unknown")).thenReturn(null);
+
+		Map<String, Object> props = new HashMap<>();
+		props.put("unknown", null);
+		DynamicBean bean = new DynamicBean("sales", "Order", props);
+		DynamicBean newValue = new DynamicBean("sales", "Target", new HashMap<>());
+
+		assertThrows(MetaDataException.class,
+				() -> withThreadLocalUser(user, () -> BindUtil.setAssociation(bean, "unknown", newValue)));
+	}
+
+	// ---- getPropertyType — compound binding ----------------------------------
+	// (compound binding tests for getPropertyType already exist above; this section intentionally omitted)
+
+	// ---- populateProperty — resolvePopulateMetadata branches ----------------
+
+	@Test
+	@SuppressWarnings("static-method")
+	void populatePropertyWithEmptyStringCoversResolveMetadataElseBranch() {
+		Object[] mocks = buildPopulatePropertyMocks("name");
+		User user = (User) mocks[0];
+		Attribute attribute = (Attribute) mocks[4];
+		doReturn(String.class).when(attribute).getImplementingType();
+
+		Map<String, Object> props = new HashMap<>();
+		props.put("name", "existing");
+		DynamicBean bean = new DynamicBean("sales", "Order", props);
+
+		BindUtil.populateProperty(user, bean, "name", "", false);
+
+		assertNull(bean.get("name"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void populatePropertyWithConvertibleFieldAttributeUsesNullConverter() {
+		// Covers: attribute instanceof ConvertibleField cf → converter = cf.getConverterForCustomer(customer)
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		ConvertibleField cf = mock(ConvertibleField.class);
+		User user = mock(User.class);
+
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("sales")).thenReturn(module);
+		when(module.getDocument(customer, "Order")).thenReturn(document);
+		when(document.getAttribute("name")).thenReturn(cf);
+		when(document.getExtends()).thenReturn(null);
+		doReturn(String.class).when(cf).getImplementingType();
+		when(cf.getConverterForCustomer(customer)).thenReturn(null);
+
+		Map<String, Object> props = new HashMap<>();
+		props.put("name", "before");
+		DynamicBean bean = new DynamicBean("sales", "Order", props);
+
+		BindUtil.populateProperty(user, bean, "name", "hello", false);
+
+		assertEquals("hello", bean.get("name"));
+	}
+
+	// ---- formatMessage(Function, ...) null branch --------------------------
+
+	@Test
+	@SuppressWarnings("static-method")
+	void formatMessageWithNullFunctionPostProcessorPassesThroughDisplay() {
+		Map<String, Object> props = new HashMap<>();
+		props.put("name", "world");
+		DynamicBean bean = new DynamicBean("mod", "Doc", props);
+		String result = BindUtil.formatMessage("Hello", (Function<String, String>) null, bean);
+		assertEquals("Hello", result);
+	}
+
+	// ---- fromString - parseGeometryFromString catch / SkyveException rethrow ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void fromStringWithInvalidGeometryThrowsDomainException() {
+		assertThrows(DomainException.class,
+				() -> BindUtil.fromString(null, null, Geometry.class, "not valid wkt at all"));
+	}
+
+	// ---- toDisplay — Boolean TRUE / converter-only / catch block -----------
+
+	@Test
+	@SuppressWarnings("static-method")
+	void toDisplayBooleanTrueReturnsYes() {
+		String result = BindUtil.toDisplay(mock(Customer.class), null, null, null, Boolean.TRUE);
+		assertEquals("Yes", result);
+	}
+
+	@Test
+	@SuppressWarnings({"static-method", "rawtypes"})
+	void toDisplayWithNonNullConverterAndNullImplementingTypeUsesStandardDisplay() {
+		Converter converter = mock(Converter.class);
+		String result = BindUtil.toDisplay(mock(Customer.class), converter, null, null, "hello");
+		assertEquals("hello", result);
+	}
+
+	@Test
+	@SuppressWarnings({"static-method", "unchecked", "rawtypes"})
+	void toDisplayCatchBlockRethrowsSkyveException() {
+		Converter converter = mock(Converter.class);
+		DomainException expected = new DomainException("skyve-error");
+		when(converter.toDisplayValue("hello")).thenThrow(expected);
+		DomainException actual = assertThrows(DomainException.class,
+				() -> BindUtil.toDisplay(mock(Customer.class), converter, String.class, null, "hello"));
+		assertSame(expected, actual);
+	}
+
+	@Test
+	@SuppressWarnings({"static-method", "unchecked", "rawtypes"})
+	void toDisplayCatchBlockWrapsNonSkyveExceptionAsDomainException() {
+		Converter converter = mock(Converter.class);
+		when(converter.toDisplayValue("hello")).thenThrow(new RuntimeException("oops"));
+		assertThrows(DomainException.class,
+				() -> BindUtil.toDisplay(mock(Customer.class), converter, String.class, null, "hello"));
+	}
+
+	// ---- getDisplay — resolveDisplaySettings uncovered branches ------------
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getDisplayWithNullDocumentNameReturnsValueToString() {
+		Bean bean = mock(Bean.class);
+		when(bean.getBizDocument()).thenReturn(null);
+		String result = BindUtil.getDisplay(mock(Customer.class), bean, "name", "hello");
+		assertEquals("hello", result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getDisplayWithUnresolvableAttributeReturnsValueToString() {
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		when(customer.getModule("sales")).thenReturn(module);
+		when(module.getDocument(customer, "Order")).thenReturn(document);
+		when(document.getAttribute("name")).thenReturn(null);
+		when(document.getExtends()).thenReturn(null);
+
+		Map<String, Object> props = new HashMap<>();
+		props.put("name", "hello");
+		DynamicBean bean = new DynamicBean("sales", "Order", props);
+
+		String result = BindUtil.getDisplay(customer, bean, "name");
+		assertEquals("hello", result);
+	}
+
+	// ---- ensureElementIsInCollection ---------------------------------------
+
+	@Test
+	@SuppressWarnings("static-method")
+	void ensureElementIsInCollectionReturnsExistingWhenFound() {
+		Map<String, Object> existingProps = new HashMap<>();
+		existingProps.put(Bean.DOCUMENT_ID, "bean-1");
+		DynamicBean existing = new DynamicBean("sales", "Item", existingProps);
+		List<Bean> items = new ArrayList<>(Arrays.asList(existing));
+		DynamicBean owner = new DynamicBean("sales", "Order", new HashMap<>(Map.of("items", items)));
+
+		Map<String, Object> elementProps = new HashMap<>();
+		elementProps.put(Bean.DOCUMENT_ID, "bean-1");
+		DynamicBean element = new DynamicBean("sales", "Item", elementProps);
+
+		Bean result = BindUtil.ensureElementIsInCollection(owner, "items", element);
+		assertSame(existing, result);
+		assertEquals(1, items.size());
+	}
+
+	// ---- getElementInCollection(Bean, String, String) ----------------------
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getElementInCollectionBeanOwnerFindsMatchingBean() {
+		Map<String, Object> p = new HashMap<>();
+		p.put(Bean.DOCUMENT_ID, "bean-1");
+		DynamicBean bean = new DynamicBean("sales", "Item", p);
+		List<Bean> items = new ArrayList<>(Arrays.asList(bean));
+		DynamicBean owner = new DynamicBean("sales", "Order", new HashMap<>(Map.of("items", items)));
+
+		Bean result = BindUtil.getElementInCollection(owner, "items", "bean-1");
+		assertSame(bean, result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getElementInCollectionBeanOwnerReturnsNullWhenNotFound() {
+		Map<String, Object> p = new HashMap<>();
+		p.put(Bean.DOCUMENT_ID, "bean-1");
+		DynamicBean bean = new DynamicBean("sales", "Item", p);
+		List<Bean> items = new ArrayList<>(Arrays.asList(bean));
+		DynamicBean owner = new DynamicBean("sales", "Order", new HashMap<>(Map.of("items", items)));
+
+		assertNull(BindUtil.getElementInCollection(owner, "items", "no-such-id"));
+	}
+
+	// ---- orderCollectionByMetaData -----------------------------------------
+
+	@Test
+	@SuppressWarnings("static-method")
+	void orderCollectionByMetaDataChildOrderedSortsByOrdinal() {
+		DynamicBean first = new DynamicBean("sales", "Item", new HashMap<>(Map.of(Bean.ORDINAL_NAME, Integer.valueOf(2))));
+		DynamicBean second = new DynamicBean("sales", "Item", new HashMap<>(Map.of(Bean.ORDINAL_NAME, Integer.valueOf(1))));
+		List<Bean> items = new ArrayList<>(Arrays.asList(first, second));
+		DynamicBean owner = new DynamicBean("sales", "Order", new HashMap<>(Map.of("items", items)));
+
+		CollectionImpl collection = new CollectionImpl();
+		collection.setName("items");
+		collection.setType(CollectionType.child);
+		collection.setOrdered(Boolean.TRUE);
+
+		BindUtil.orderCollectionByMetaData(owner, collection);
+
+		assertEquals(Integer.valueOf(1), ((DynamicBean) items.get(0)).get(Bean.ORDINAL_NAME));
+		assertEquals(Integer.valueOf(2), ((DynamicBean) items.get(1)).get(Bean.ORDINAL_NAME));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void orderCollectionByMetaDataWithExplicitOrderingSortsByOrdering() {
+		DynamicBean first = new DynamicBean("sales", "Item", new HashMap<>(Map.of("name", "Zulu")));
+		DynamicBean second = new DynamicBean("sales", "Item", new HashMap<>(Map.of("name", "Alpha")));
+		List<Bean> items = new ArrayList<>(Arrays.asList(first, second));
+		DynamicBean owner = new DynamicBean("sales", "Order", new HashMap<>(Map.of("items", items)));
+
+		CollectionImpl collection = new CollectionImpl();
+		collection.setName("items");
+		collection.setType(CollectionType.child);
+		collection.setOrdered(Boolean.FALSE);
+		collection.getOrdering().add(new OrderingImpl("name", SortDirection.ascending));
+
+		BindUtil.orderCollectionByMetaData(owner, collection);
+
+		assertEquals("Alpha", ((DynamicBean) items.get(0)).get("name"));
+		assertEquals("Zulu", ((DynamicBean) items.get(1)).get("name"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void orderCollectionByMetaDataNoOrderingLeavesListUnchanged() {
+		DynamicBean first = new DynamicBean("sales", "Item", new HashMap<>(Map.of("name", "Zulu")));
+		DynamicBean second = new DynamicBean("sales", "Item", new HashMap<>(Map.of("name", "Alpha")));
+		List<Bean> items = new ArrayList<>(Arrays.asList(first, second));
+		DynamicBean owner = new DynamicBean("sales", "Order", new HashMap<>(Map.of("items", items)));
+
+		CollectionImpl collection = new CollectionImpl();
+		collection.setName("items");
+		collection.setType(CollectionType.child);
+		collection.setOrdered(Boolean.FALSE);
+
+		BindUtil.orderCollectionByMetaData(owner, collection);
+
+		assertEquals("Zulu", ((DynamicBean) items.get(0)).get("name"));
+		assertEquals("Alpha", ((DynamicBean) items.get(1)).get("name"));
+	}
+
+	// ---- orderByMetaData — compound binding path ---------------------------
+
+	@Test
+	@SuppressWarnings("static-method")
+	void orderByMetaDataCompoundBindingNavigatesToNestedCollection() {
+		Customer customer = mock(Customer.class);
+		User user = mock(User.class);
+		Module module = mock(Module.class);
+		Document childDocument = mock(Document.class);
+		Document rootDocument = mock(Document.class);
+		CollectionImpl collection = new CollectionImpl();
+		collection.setName("lines");
+		collection.setType(CollectionType.child);
+		collection.setOrdered(Boolean.TRUE);
+
+		DynamicBean firstLine = new DynamicBean("sales", "Line", new HashMap<>(Map.of(Bean.ORDINAL_NAME, Integer.valueOf(2))));
+		DynamicBean secondLine = new DynamicBean("sales", "Line", new HashMap<>(Map.of(Bean.ORDINAL_NAME, Integer.valueOf(1))));
+		List<Bean> lines = new ArrayList<>(Arrays.asList(firstLine, secondLine));
+		DynamicBean child = new DynamicBean("sales", "Child", new HashMap<>(Map.of("lines", lines)));
+		DynamicBean root = new DynamicBean("sales", "Order", new HashMap<>(Map.of("child", child)));
+
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("sales")).thenReturn(module);
+		when(module.getDocument(customer, "Order")).thenReturn(rootDocument);
+		when(module.getDocument(customer, "Child")).thenReturn(childDocument);
+		doReturn(collection).when(childDocument).getPolymorphicAttribute(customer, "lines");
+		when(childDocument.getAttribute("lines")).thenReturn(collection);
+		when(childDocument.getExtends()).thenReturn(null);
+
+		withThreadLocalUser(user, () -> BindUtil.orderByMetaData(root, "child.lines"));
+
+		assertEquals(Integer.valueOf(1), ((DynamicBean) lines.get(0)).get(Bean.ORDINAL_NAME));
+		assertEquals(Integer.valueOf(2), ((DynamicBean) lines.get(1)).get(Bean.ORDINAL_NAME));
+	}
+
+	// ---- orderByMetaData — inverseMany path --------------------------------
+
+	@Test
+	@SuppressWarnings("static-method")
+	void orderByMetaDataInverseManyOrdersByMetadata() {
+		Customer customer = mock(Customer.class);
+		User user = mock(User.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		InverseMany inverse = new InverseMany();
+		inverse.setName("peers");
+		inverse.getOrdering().add(new OrderingImpl("name", SortDirection.ascending));
+
+		DynamicBean first = new DynamicBean("sales", "Peer", new HashMap<>(Map.of("name", "Zulu")));
+		DynamicBean second = new DynamicBean("sales", "Peer", new HashMap<>(Map.of("name", "Alpha")));
+		List<Bean> peers = new ArrayList<>(Arrays.asList(first, second));
+		DynamicBean owner = new DynamicBean("sales", "Order", new HashMap<>(Map.of("peers", peers)));
+
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("sales")).thenReturn(module);
+		when(module.getDocument(customer, "Order")).thenReturn(document);
+		doReturn(inverse).when(document).getPolymorphicAttribute(customer, "peers");
+		when(document.getAttribute("peers")).thenReturn(inverse);
+		when(document.getExtends()).thenReturn(null);
+
+		withThreadLocalUser(user, () -> BindUtil.orderByMetaData(owner, "peers"));
+
+		assertEquals("Alpha", ((DynamicBean) peers.get(0)).get("name"));
+		assertEquals("Zulu", ((DynamicBean) peers.get(1)).get("name"));
+	}
+
+	// ---- order — unsorted list path ----------------------------------------
+
+	@Test
+	@SuppressWarnings("static-method")
+	void orderUnsortedListSortsByOrdering() {
+		NamedItem a = new NamedItem("zebra");
+		NamedItem b = new NamedItem("apple");
+		NamedItem c = new NamedItem("mango");
+		List<NamedItem> list = new ArrayList<>(Arrays.asList(a, b, c));
+
+		BindUtil.order(list, new OrderingImpl("name", SortDirection.ascending));
+
+		assertEquals("apple", list.get(0).getName());
+		assertEquals("mango", list.get(1).getName());
+		assertEquals("zebra", list.get(2).getName());
 	}
 }
 
