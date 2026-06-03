@@ -24,7 +24,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
-@SuppressWarnings({"static-method", "resource"})
+@SuppressWarnings({"static-method", "resource", "java:S5976"})
 class SmartClientCompleteServletTest {
 
 	private final ProvidedRepository originalRepository = ProvidedRepositoryFactory.get();
@@ -113,7 +113,7 @@ class SmartClientCompleteServletTest {
 		assertDoesNotThrow(() -> servlet.doGet(request, response));
 	}
 
-	private HttpServletRequest newRequestWithSessionUser() throws Exception {
+	private HttpServletRequest newRequestWithSessionUser() {
 		ProvidedRepository repository = mock(ProvidedRepository.class);
 		UserImpl user = new UserImpl();
 		user.setId("apiUserId");

@@ -13,7 +13,7 @@ import jakarta.faces.context.FacesContext;
 import jakarta.faces.event.PhaseEvent;
 import jakarta.faces.event.PhaseId;
 
-@SuppressWarnings("static-method")
+@SuppressWarnings({"static-method", "boxing"})
 class SkyveFacesPhaseListenerTest {
 	@Test
 	void getPhaseIdReturnsAnyPhase() {

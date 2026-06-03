@@ -144,6 +144,6 @@ class ArcTests extends AbstractSkyveTest {
 		test = p.retrieve(ao2o, test.getBizId());
 		Assert.assertNotNull(test);
 		Assert.assertNotNull(test.getArc());
-		Assert.assertEquals(arc2.getBizId(), test.getArc().getBizId());
+		assertThat(test.getArc().getBizId(), is(arc2.getBizId()));
 	}
 }

@@ -26,6 +26,7 @@ import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.user.User;
 import org.skyve.report.ReportFormat;
 
+@SuppressWarnings("static-method")
 class ViewJSONManipulatorHrefProcessorTest {
 	@Test
 	void actionReferenceUsesGeneratedWidgetIdAndBindingPrefix() throws Exception {

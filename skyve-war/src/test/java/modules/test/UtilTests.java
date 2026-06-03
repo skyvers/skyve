@@ -2,10 +2,11 @@ package modules.test;
 
 import java.awt.Color;
 import java.nio.charset.Charset;
+import java.util.Objects;
 
 import org.junit.Assert;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
@@ -16,13 +17,14 @@ class UtilTests extends AbstractSkyveTest {
 
 	@Test
 	void testPopulateFully() throws Exception {
-		AllAttributesPersistent test = Assertions.assertDoesNotThrow(() -> Util.constructRandomInstance(u, m, aapd, 5));
+		AllAttributesPersistent test = Objects.requireNonNull(
+				Assertions.assertDoesNotThrow(() -> Util.constructRandomInstance(u, m, aapd, 5)));
 		// Save and evict
-		test = p.save(test);
+		test = Objects.requireNonNull(p.save(test));
 		p.evictAllCached();
 
 		// Got the shell of the object back
-		test = p.retrieve(aapd, test.getBizId());
+		test = Objects.requireNonNull(p.retrieve(aapd, test.getBizId()));
 
 		Util.populateFully(test);
 
@@ -114,7 +116,7 @@ class UtilTests extends AbstractSkyveTest {
 		AllCodepointsIterator iterator = new AllCodepointsIterator();
 		while (iterator.hasNext()) {
 			String test = new String(Character.toChars(iterator.next()));
-			Assert.assertEquals(test.getBytes(utf8).length, Util.UTF8Length(test));
+			Assert.assertEquals(test.getBytes(utf8).length, Util.utf8Length(test));
 		}
 	}
 

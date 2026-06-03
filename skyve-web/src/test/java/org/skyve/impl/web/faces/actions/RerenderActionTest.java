@@ -1,5 +1,6 @@
 package org.skyve.impl.web.faces.actions;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -12,7 +13,7 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.user.User;
 
-@SuppressWarnings({"static-method", "boxing"})
+@SuppressWarnings("static-method")
 class RerenderActionTest {
 	@AfterEach
 	void tearDown() {
@@ -20,14 +21,14 @@ class RerenderActionTest {
 	}
 
 	@Test
-	void callbackReturnsWhenTargetBeanIsNull() throws Exception {
+	void callbackReturnsWhenTargetBeanIsNull() {
 		User user = mock(User.class);
 		bindPersistenceForUser(user);
 		FacesView facesView = mock(FacesView.class);
 		when(facesView.getBean()).thenReturn(null);
 
 		RerenderAction action = new RerenderAction(facesView, "source", false);
-		action.callback();
+		assertDoesNotThrow(action::callback);
 	}
 
 	private static void bindPersistenceForUser(User user) {

@@ -158,7 +158,7 @@ class GetSelectItemsActionTest {
 	}
 
 	@Test
-	void callbackReturnsEmptyListWhenBindingMetadataCannotBeResolved() throws Exception {
+	void callbackReturnsEmptyListWhenBindingMetadataCannotBeResolved() {
 		ModuleImpl module = new ModuleImpl();
 		module.setName("testModule");
 		DocumentImpl document = new DocumentImpl();
@@ -173,7 +173,8 @@ class GetSelectItemsActionTest {
 		when(customer.getModule("testModule")).thenReturn(module);
 		bindPersistence(customer);
 
-		assertThrows(MetaDataException.class, () -> new GetSelectItemsAction("testModule", "TestDoc", "missing", false).callback());
+		GetSelectItemsAction action = new GetSelectItemsAction("testModule", "TestDoc", "missing", false);
+		assertThrows(MetaDataException.class, action::callback);
 	}
 
 	private static void bindPersistence(CustomerImpl customer) {

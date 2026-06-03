@@ -9,7 +9,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -72,7 +71,9 @@ class RestServiceH2Test extends AbstractSkyveTest {
 		AllAttributesPersistent updated = (AllAttributesPersistent) JSON.unmarshall(u, result);
 		assertEquals(bean.getBizId(), updated.getBizId());
 		assertEquals(updatedText, updated.getText());
-		assertEquals(updatedText, ((AllAttributesPersistent) p.retrieve(aapd, bean.getBizId())).getText());
+		AllAttributesPersistent persisted = (AllAttributesPersistent) p.retrieve(aapd, bean.getBizId());
+		assertNotNull(persisted);
+		assertEquals(updatedText, persisted.getText());
 		verify(response).setContentType("application/json");
 	}
 
@@ -99,7 +100,7 @@ class RestServiceH2Test extends AbstractSkyveTest {
 		AllAttributesPersistent bean = new DataBuilder().fixture(FixtureType.crud)
 													 .build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
 		bean.setText("rest-query-" + System.nanoTime());
-		bean = p.save(bean);
+		p.save(bean);
 
 		HttpServletResponse response = mock(HttpServletResponse.class);
 		RestService service = newService(response);
@@ -126,7 +127,7 @@ class RestServiceH2Test extends AbstractSkyveTest {
 		AbstractPersistence persistence = (AbstractPersistence) CORE.getPersistence();
 		User originalUser = persistence.getUser();
 		User spyUser = spy(originalUser);
-		doReturn(false).when(spyUser).canFlag();
+		doReturn(Boolean.FALSE).when(spyUser).canFlag();
 
 		try {
 			persistence.setUser(spyUser);
@@ -174,7 +175,7 @@ class RestServiceH2Test extends AbstractSkyveTest {
 		AbstractPersistence persistence = (AbstractPersistence) CORE.getPersistence();
 		User originalUser = persistence.getUser();
 		User spyUser = spy(originalUser);
-		doReturn(false).when(spyUser).canReadDocument(any(Document.class));
+		doReturn(Boolean.FALSE).when(spyUser).canReadDocument(any(Document.class));
 
 		try {
 			persistence.setUser(spyUser);
@@ -221,7 +222,7 @@ class RestServiceH2Test extends AbstractSkyveTest {
 		AbstractPersistence persistence = (AbstractPersistence) CORE.getPersistence();
 		User originalUser = persistence.getUser();
 		User spyUser = spy(originalUser);
-		doReturn(false).when(spyUser).canReadDocument(any(Document.class));
+		doReturn(Boolean.FALSE).when(spyUser).canReadDocument(any(Document.class));
 
 		try {
 			persistence.setUser(spyUser);
@@ -242,7 +243,7 @@ class RestServiceH2Test extends AbstractSkyveTest {
 		AllAttributesPersistent bean = new DataBuilder().fixture(FixtureType.crud)
 													 .build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
 		bean.setText("retrieve-list-" + System.nanoTime());
-		bean = p.save(bean);
+		p.save(bean);
 
 		HttpServletResponse response = mock(HttpServletResponse.class);
 		RestService service = newService(response);
@@ -269,7 +270,7 @@ class RestServiceH2Test extends AbstractSkyveTest {
 		AbstractPersistence persistence = (AbstractPersistence) CORE.getPersistence();
 		User originalUser = persistence.getUser();
 		User spyUser = spy(originalUser);
-		doReturn(false).when(spyUser).canReadDocument(any(Document.class));
+		doReturn(Boolean.FALSE).when(spyUser).canReadDocument(any(Document.class));
 
 		try {
 			persistence.setUser(spyUser);
@@ -299,7 +300,7 @@ class RestServiceH2Test extends AbstractSkyveTest {
 		AbstractPersistence persistence = (AbstractPersistence) CORE.getPersistence();
 		User originalUser = persistence.getUser();
 		User spyUser = spy(originalUser);
-		doReturn(false).when(spyUser).canReadDocument(any(Document.class));
+		doReturn(Boolean.FALSE).when(spyUser).canReadDocument(any(Document.class));
 
 		try {
 			persistence.setUser(spyUser);
@@ -344,6 +345,7 @@ class RestServiceH2Test extends AbstractSkyveTest {
 		return result;
 	}
 
+	@SuppressWarnings("resource")
 	private static HttpServletResponse mockResponse() throws IOException {
 		HttpServletResponse response = mock(HttpServletResponse.class);
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -363,7 +365,7 @@ class RestServiceH2Test extends AbstractSkyveTest {
 				// Not needed for unit tests.
 			}
 		};
-		when(response.getOutputStream()).thenReturn(servletOut);
+		doReturn(servletOut).when(response).getOutputStream();
 		return response;
 	}
 

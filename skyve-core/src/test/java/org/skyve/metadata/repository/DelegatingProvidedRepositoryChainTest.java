@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.sql.Connection;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -177,13 +178,13 @@ class DelegatingProvidedRepositoryChainTest {
 		when(d2.retrieveUser("u")).thenReturn(userImpl);
 		assertSame(userImpl, chain.retrieveUser("u"));
 
-		when(d1.retrieveAllScheduledJobsForAllCustomers()).thenReturn(null);
+		when(d1.retrieveAllScheduledJobsForAllCustomers()).thenReturn(Collections.emptyList());
 		when(d2.retrieveAllScheduledJobsForAllCustomers()).thenReturn(scheduledJobs);
-		assertSame(scheduledJobs, chain.retrieveAllScheduledJobsForAllCustomers());
+		assertEquals(1, chain.retrieveAllScheduledJobsForAllCustomers().size());
 
-		when(d1.retrieveAllScheduledReportsForAllCustomers()).thenReturn(null);
+		when(d1.retrieveAllScheduledReportsForAllCustomers()).thenReturn(Collections.emptyList());
 		when(d2.retrieveAllScheduledReportsForAllCustomers()).thenReturn(scheduledReports);
-		assertSame(scheduledReports, chain.retrieveAllScheduledReportsForAllCustomers());
+		assertEquals(1, chain.retrieveAllScheduledReportsForAllCustomers().size());
 
 		when(d1.retrievePublicUserName("c")).thenReturn(null);
 		when(d2.retrievePublicUserName("c")).thenReturn("publicUser");
@@ -328,10 +329,10 @@ class DelegatingProvidedRepositoryChainTest {
 		Customer customer = mock(Customer.class);
 		Document document = mock(Document.class);
 		Module module = mock(Module.class);
-		when(d1.retrieveAllScheduledJobsForAllCustomers()).thenReturn(null);
-		when(d2.retrieveAllScheduledJobsForAllCustomers()).thenReturn(null);
-		when(d1.retrieveAllScheduledReportsForAllCustomers()).thenReturn(null);
-		when(d2.retrieveAllScheduledReportsForAllCustomers()).thenReturn(null);
+		when(d1.retrieveAllScheduledJobsForAllCustomers()).thenReturn(Collections.emptyList());
+		when(d2.retrieveAllScheduledJobsForAllCustomers()).thenReturn(Collections.emptyList());
+		when(d1.retrieveAllScheduledReportsForAllCustomers()).thenReturn(Collections.emptyList());
+		when(d2.retrieveAllScheduledReportsForAllCustomers()).thenReturn(Collections.emptyList());
 
 		assertTrue(chain.findResourceFile("r", "c", "m") == null);
 		assertTrue(chain.getRouter() == null);
@@ -350,8 +351,8 @@ class DelegatingProvidedRepositoryChainTest {
 		assertTrue(chain.getUploadAction(customer, document, "U", false) == null);
 		assertTrue(chain.getDataFactory(customer, document) == null);
 		assertTrue(chain.retrieveUser("u") == null);
-		assertTrue(chain.retrieveAllScheduledJobsForAllCustomers() == null);
-		assertTrue(chain.retrieveAllScheduledReportsForAllCustomers() == null);
+		assertTrue(chain.retrieveAllScheduledJobsForAllCustomers().isEmpty());
+		assertTrue(chain.retrieveAllScheduledReportsForAllCustomers().isEmpty());
 		assertTrue(chain.retrievePublicUserName("c") == null);
 		assertTrue(chain.getBizlet(customer, document, false) == null);
 		assertTrue(chain.getMetaDataBizlet(customer, document) == null);
@@ -397,3 +398,5 @@ class DelegatingProvidedRepositoryChainTest {
 		assertEquals("Invoice does not exist for module sales", documentException.getMessage());
 	}
 }
+
+

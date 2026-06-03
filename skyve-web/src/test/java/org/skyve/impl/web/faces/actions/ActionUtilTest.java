@@ -25,7 +25,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.User;
 
-@SuppressWarnings({"static-method", "boxing"})
+@SuppressWarnings("static-method")
 class ActionUtilTest {
 	@AfterEach
 	void tearDown() {

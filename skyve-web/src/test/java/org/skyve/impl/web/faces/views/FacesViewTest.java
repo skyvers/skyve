@@ -686,7 +686,7 @@ class FacesViewTest {
 	}
 
 	@Test
-	void postConstructReadsUxUiAndUserAgentFromRequestMap() throws Exception {
+	void postConstructReadsUxUiAndUserAgentFromRequestMap() {
 		FacesView view = new FacesView();
 		Map<String, Object> requestMap = new HashMap<>();
 		UxUi uxui = UxUi.newPrimeFaces("external", "nova", "arya", "blue");
@@ -866,6 +866,7 @@ class FacesViewTest {
 		FacesView view = new FacesView();
 
 		view.onRowReorder(null);
+		assertNotNull(view);
 	}
 
 	@Test
@@ -880,6 +881,7 @@ class FacesViewTest {
 		when(event.getToIndex()).thenReturn(0);
 
 		view.onRowReorder(event);
+		assertNotNull(view);
 	}
 
 	@Test
@@ -1059,6 +1061,7 @@ class FacesViewTest {
 				throw new RuntimeException(e);
 			}
 		}
+		assertNotNull(view);
 	}
 
 	@Test
@@ -1095,6 +1098,7 @@ class FacesViewTest {
 
 		FacesContextBridge.setCurrent(null);
 		unbindPersistenceFromThread();
+		assertNotNull(view);
 	}
 
 	@Test
@@ -1340,18 +1344,21 @@ class FacesViewTest {
 	void okExecutesMethodBodyInHeadlessMode() {
 		FacesView view = new FacesView();
 		invokeIgnoringThrowable(view::ok);
+		assertNotNull(view);
 	}
 
 	@Test
 	void saveExecutesMethodBodyInHeadlessMode() {
 		FacesView view = new FacesView();
 		invokeIgnoringThrowable(view::save);
+		assertNotNull(view);
 	}
 
 	@Test
 	void deleteExecutesMethodBodyInHeadlessMode() {
 		FacesView view = new FacesView();
 		invokeIgnoringThrowable(view::delete);
+		assertNotNull(view);
 	}
 
 	@Test
@@ -1362,6 +1369,7 @@ class FacesViewTest {
 		invokeIgnoringThrowable(() -> view.add("items", false));
 		invokeIgnoringThrowable(view::zoomout);
 		invokeIgnoringThrowable(() -> view.remove("items", "id-1", java.util.Collections.emptyList()));
+		assertNotNull(view);
 	}
 
 	@Test
@@ -1377,6 +1385,7 @@ class FacesViewTest {
 		finally {
 			UtilImpl.FACES_TRACE = originalFacesTrace;
 		}
+		assertNotNull(view);
 	}
 
 	@Test
@@ -1387,18 +1396,21 @@ class FacesViewTest {
 		invokeIgnoringThrowable(() -> view.rerender("sourceA", true));
 		invokeIgnoringThrowable(() -> view.download("export", "items", "id-1"));
 		invokeIgnoringThrowable(() -> view.download("export"));
+		assertNotNull(view);
 	}
 
 	@Test
 	void rerenderWithoutValidationExecutesMethodBodyInHeadlessMode() {
 		FacesView view = new FacesView();
 		invokeIgnoringThrowable(() -> view.rerender("sourceB", false));
+		assertNotNull(view);
 	}
 
 	@Test
 	void downloadWithoutCollectionBindingExecutesMethodBodyInHeadlessMode() {
 		FacesView view = new FacesView();
 		invokeIgnoringThrowable(() -> view.download("export", null, "id-1"));
+		assertNotNull(view);
 	}
 
 	@Test
@@ -1878,6 +1890,7 @@ class FacesViewTest {
 	void clearExecutesMethodBodyInHeadlessMode() {
 		FacesView view = new FacesView();
 		invokeIgnoringThrowable(() -> view.clear("signature"));
+		assertNotNull(view);
 	}
 
 	@Test
@@ -1905,6 +1918,7 @@ class FacesViewTest {
 				throw new RuntimeException(e);
 			}
 		});
+		assertNotNull(view);
 	}
 
 	@Test

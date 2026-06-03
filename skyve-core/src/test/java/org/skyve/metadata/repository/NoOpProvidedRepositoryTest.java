@@ -1,14 +1,31 @@
 package org.skyve.metadata.repository;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.mock;
+
+import java.sql.Connection;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
+import org.skyve.metadata.user.User;
+import org.skyve.metadata.view.View;
 
+@SuppressWarnings("all")
 class NoOpProvidedRepositoryTest {
 
 	private final NoOpProvidedRepository repo = new NoOpProvidedRepository();
+	private final Customer customer = mock(Customer.class);
+	private final Module module = mock(Module.class);
+	private final Document document = mock(Document.class);
+	private final User user = mock(User.class);
+	private final Connection connection = mock(Connection.class);
+	private final View view = mock(View.class);
 
 	@Test
 	void findResourceFileReturnsNull() {
@@ -27,67 +44,67 @@ class NoOpProvidedRepositoryTest {
 
 	@Test
 	void getDynamicImageReturnsNull() {
-		assertNull(repo.getDynamicImage(null, null, "image", false));
+		assertNull(repo.getDynamicImage(customer, document, "image", false));
 	}
 
 	@Test
 	void getViewReturnsNull() {
-		assertNull(repo.getView("desktop", null, null, "edit"));
+		assertNull(repo.getView("desktop", customer, document, "edit"));
 	}
 
 	@Test
 	void getMetaDataActionReturnsNull() {
-		assertNull(repo.getMetaDataAction(null, null, "Save"));
+		assertNull(repo.getMetaDataAction(customer, document, "Save"));
 	}
 
 	@Test
 	void getComparisonModelReturnsNull() {
-		assertNull(repo.getComparisonModel(null, null, "model", false));
+		assertNull(repo.getComparisonModel(customer, document, "model", false));
 	}
 
 	@Test
 	void getMapModelReturnsNull() {
-		assertNull(repo.getMapModel(null, null, "model", false));
+		assertNull(repo.getMapModel(customer, document, "model", false));
 	}
 
 	@Test
 	void getChartModelReturnsNull() {
-		assertNull(repo.getChartModel(null, null, "model", false));
+		assertNull(repo.getChartModel(customer, document, "model", false));
 	}
 
 	@Test
 	void getListModelReturnsNull() {
-		assertNull(repo.getListModel(null, null, "model", false));
+		assertNull(repo.getListModel(customer, document, "model", false));
 	}
 
 	@Test
 	void getServerSideActionReturnsNull() {
-		assertNull(repo.getServerSideAction(null, null, "Action", false));
+		assertNull(repo.getServerSideAction(customer, document, "Action", false));
 	}
 
 	@Test
 	void getBizExportActionReturnsNull() {
-		assertNull(repo.getBizExportAction(null, null, "Export", false));
+		assertNull(repo.getBizExportAction(customer, document, "Export", false));
 	}
 
 	@Test
 	void getBizImportActionReturnsNull() {
-		assertNull(repo.getBizImportAction(null, null, "Import", false));
+		assertNull(repo.getBizImportAction(customer, document, "Import", false));
 	}
 
 	@Test
 	void getDownloadActionReturnsNull() {
-		assertNull(repo.getDownloadAction(null, null, "Download", false));
+		assertNull(repo.getDownloadAction(customer, document, "Download", false));
 	}
 
 	@Test
 	void getUploadActionReturnsNull() {
-		assertNull(repo.getUploadAction(null, null, "Upload", false));
+		assertNull(repo.getUploadAction(customer, document, "Upload", false));
 	}
 
 	@Test
 	void getDataFactoryReturnsNull() {
-		assertNull(repo.getDataFactory(null, null));
+		assertNull(repo.getDataFactory(customer, document));
 	}
 
 	@Test
@@ -97,22 +114,22 @@ class NoOpProvidedRepositoryTest {
 
 	@Test
 	void populatePermissionsReturnsFalse() {
-		assertFalse(repo.populatePermissions(null));
+		assertFalse(repo.populatePermissions(user));
 	}
 
 	@Test
 	void populateUserReturnsFalse() {
-		assertFalse(repo.populateUser(null, null));
+		assertFalse(repo.populateUser(user, connection));
 	}
 
 	@Test
-	void retrieveAllScheduledJobsReturnsNull() {
-		assertNull(repo.retrieveAllScheduledJobsForAllCustomers());
+	void retrieveAllScheduledJobsReturnsEmptyList() {
+		assertEquals(List.of(), repo.retrieveAllScheduledJobsForAllCustomers());
 	}
 
 	@Test
-	void retrieveAllScheduledReportsReturnsNull() {
-		assertNull(repo.retrieveAllScheduledReportsForAllCustomers());
+	void retrieveAllScheduledReportsReturnsEmptyList() {
+		assertEquals(List.of(), repo.retrieveAllScheduledReportsForAllCustomers());
 	}
 
 	@Test
@@ -121,13 +138,13 @@ class NoOpProvidedRepositoryTest {
 	}
 
 	@Test
-	void getAllCustomerNamesReturnsNull() {
-		assertNull(repo.getAllCustomerNames());
+	void getAllCustomerNamesReturnsEmptyList() {
+		assertEquals(List.of(), repo.getAllCustomerNames());
 	}
 
 	@Test
-	void getAllVanillaModuleNamesReturnsNull() {
-		assertNull(repo.getAllVanillaModuleNames());
+	void getAllVanillaModuleNamesReturnsEmptyList() {
+		assertEquals(List.of(), repo.getAllVanillaModuleNames());
 	}
 
 	@Test
@@ -137,17 +154,17 @@ class NoOpProvidedRepositoryTest {
 
 	@Test
 	void getDocumentReturnsNull() {
-		assertNull(repo.getDocument(null, null, "User"));
+		assertNull(repo.getDocument(customer, module, "User"));
 	}
 
 	@Test
 	void getBizletReturnsNull() {
-		assertNull(repo.getBizlet(null, null, false));
+		assertNull(repo.getBizlet(customer, document, false));
 	}
 
 	@Test
 	void getMetaDataBizletReturnsNull() {
-		assertNull(repo.getMetaDataBizlet(null, null));
+		assertNull(repo.getMetaDataBizlet(customer, document));
 	}
 
 	@Test
@@ -156,13 +173,13 @@ class NoOpProvidedRepositoryTest {
 	}
 
 	@Test
-	void getModuleRoutersReturnsNull() {
-		assertNull(repo.getModuleRouters());
+	void getModuleRoutersReturnsEmptyList() {
+		assertEquals(List.of(), repo.getModuleRouters());
 	}
 
 	@Test
 	void getReportFileNameReturnsNull() {
-		assertNull(repo.getReportFileName(null, null, "report"));
+		assertNull(repo.getReportFileName(customer, document, "report"));
 	}
 
 	@Test
@@ -182,32 +199,32 @@ class NoOpProvidedRepositoryTest {
 
 	@Test
 	void resetMenusDoesNotThrow() {
-		assertDoesNotThrow(() -> repo.resetMenus(null));
+		assertDoesNotThrow(() -> repo.resetMenus(user));
 	}
 
 	@Test
 	void resetUserPermissionsDoesNotThrow() {
-		assertDoesNotThrow(() -> repo.resetUserPermissions(null));
+		assertDoesNotThrow(() -> repo.resetUserPermissions(user));
 	}
 
 	@Test
 	void validateCustomerForGenerateDomainDoesNotThrow() {
-		assertDoesNotThrow(() -> repo.validateCustomerForGenerateDomain(null));
+		assertDoesNotThrow(() -> repo.validateCustomerForGenerateDomain(customer));
 	}
 
 	@Test
 	void validateModuleForGenerateDomainDoesNotThrow() {
-		assertDoesNotThrow(() -> repo.validateModuleForGenerateDomain(null, null));
+		assertDoesNotThrow(() -> repo.validateModuleForGenerateDomain(customer, module));
 	}
 
 	@Test
 	void validateDocumentForGenerateDomainDoesNotThrow() {
-		assertDoesNotThrow(() -> repo.validateDocumentForGenerateDomain(null, null));
+		assertDoesNotThrow(() -> repo.validateDocumentForGenerateDomain(customer, document));
 	}
 
 	@Test
 	void validateViewForGenerateDomainDoesNotThrow() {
-		assertDoesNotThrow(() -> repo.validateViewForGenerateDomain(null, null, null, "desktop"));
+		assertDoesNotThrow(() -> repo.validateViewForGenerateDomain(customer, document, view, "desktop"));
 	}
 
 	@Test

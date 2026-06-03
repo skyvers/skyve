@@ -110,6 +110,17 @@ class SmartClientTagServletTest {
 	}
 
 	@Test
+	void doPostHandlesListActionWhenUserIsResolved() throws Exception {
+		SmartClientTagServlet servlet = new SmartClientTagServlet();
+		HttpServletRequest request = newRequestWithSessionUser("L");
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		when(response.getWriter()).thenReturn(mock(PrintWriter.class, Mockito.RETURNS_SELF));
+		when(request.getParameter(org.skyve.impl.web.AbstractWebContext.CSRF_TOKEN_NAME)).thenReturn("7");
+
+		assertDoesNotThrow(() -> servlet.doPost(request, response));
+	}
+
+	@Test
 	void appendUnexpectedWarningIncludesFailurePrefix() {
 		StringWriter sink = new StringWriter();
 		PrintWriter writer = new PrintWriter(sink);

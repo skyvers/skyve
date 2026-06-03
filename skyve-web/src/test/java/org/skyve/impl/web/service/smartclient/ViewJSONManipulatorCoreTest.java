@@ -33,7 +33,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.util.JSON;
 import org.skyve.web.BackgroundTask;
 
-@SuppressWarnings({"static-method", "unused"})
+@SuppressWarnings("static-method")
 class ViewJSONManipulatorCoreTest {
 	@Test
 	void visitViewAddsCoreConditionBindings() throws Exception {

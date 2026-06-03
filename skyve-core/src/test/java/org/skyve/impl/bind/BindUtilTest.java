@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -36,38 +37,42 @@ import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
+import org.junit.jupiter.api.Test;
+import org.locationtech.jts.geom.Geometry;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
-import org.skyve.domain.HierarchicalBean;
-import org.skyve.domain.types.OptimisticLock;
 import org.skyve.domain.DynamicBean;
+import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
-
-import org.junit.jupiter.api.Test;
-import org.skyve.domain.types.DateOnly;
-import org.skyve.domain.types.DateTime;
-import org.skyve.domain.types.Decimal2;
-import org.skyve.domain.types.Decimal5;
-import org.skyve.domain.types.Decimal10;
-import org.skyve.domain.types.TimeOnly;
-import org.skyve.domain.types.Timestamp;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.ValidationException;
-import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.domain.types.DateOnly;
+import org.skyve.domain.types.DateTime;
+import org.skyve.domain.types.Decimal10;
+import org.skyve.domain.types.Decimal2;
+import org.skyve.domain.types.Decimal5;
+import org.skyve.domain.types.OptimisticLock;
+import org.skyve.domain.types.TimeOnly;
+import org.skyve.domain.types.Timestamp;
+import org.skyve.domain.types.converters.Converter;
+import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter;
 import org.skyve.impl.metadata.OrderingImpl;
+import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.AssociationImpl;
 import org.skyve.impl.metadata.model.document.CollectionImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.InverseMany;
 import org.skyve.impl.metadata.model.document.InverseOne;
+import org.skyve.impl.metadata.model.document.field.ConvertibleField;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.model.Dynamic;
 import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.Dynamic;
+import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Condition;
@@ -77,12 +82,7 @@ import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.User;
-import org.skyve.domain.types.converters.Converter;
-import org.skyve.impl.metadata.model.document.field.ConvertibleField;
-import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter;
 import org.skyve.util.Binder.TargetMetaData;
-
-import org.locationtech.jts.geom.Geometry;
 
 class BindUtilTest {
 	private static void withThreadLocalUser(User user, Runnable run) {
@@ -430,14 +430,38 @@ class BindUtilTest {
 					BindUtil.validateMessageExpressions("Hello {name", customer, document));
 		}
 
-		@Test
-		@SuppressWarnings("static-method")
-		void validateMessageExpressionsIgnoresEscapedBraces() {
-			Customer customer = mock(Customer.class);
-			Document document = mock(Document.class);
+	@Test
+	@SuppressWarnings("static-method")
+	void validateMessageExpressionsIgnoresEscapedBraces() {
+		Customer customer = mock(Customer.class);
+		Document document = mock(Document.class);
 
-			assertNull(BindUtil.validateMessageExpressions("Hello \\{name\\}", customer, document));
-		}
+		assertNull(BindUtil.validateMessageExpressions("Hello \\{name\\}", customer, document));
+	}
+
+	// ---- prefixMessageExpressions ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void prefixMessageExpressionsNullMessageReturnsNull() {
+		assertNull(BindUtil.prefixMessageExpressions(null, "parent"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void prefixMessageExpressionsPrefixesEachUnescapedExpression() {
+		String result = BindUtil.prefixMessageExpressions("Hello {name} from {address.city}", "parent");
+
+		assertEquals("Hello {parent.name} from {parent.address.city}", result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void prefixMessageExpressionsLeavesEscapedExpressionLiteral() {
+		String result = BindUtil.prefixMessageExpressions("Hello \\{name}", "parent");
+
+		assertEquals("Hello \\{name}", result);
+	}
 
 		@Test
 		@SuppressWarnings("static-method")
@@ -801,6 +825,61 @@ class BindUtilTest {
 		assertEquals(TestBindEnum.VALUE_A, result);
 	}
 
+	@Test
+	@SuppressWarnings("static-method")
+	void nullSafeConvertNonNumericValueForNumericTypeReturnsUnchanged() {
+		String value = "not a number";
+
+		Object result = BindUtil.nullSafeConvert(Integer.class, value);
+
+		assertSame(value, result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void nullSafeConvertInvalidWktThrowsDomainException() {
+		DomainException exception = assertThrows(DomainException.class,
+				() -> BindUtil.nullSafeConvert(Geometry.class, "not WKT"));
+
+		assertTrue(exception.getMessage().contains("is not valid WKT"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertNullReturnsNull() {
+		assertNull(BindUtil.convert(String.class, null));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertNonNullDelegatesToNullSafeConvert() {
+		assertEquals(Integer.valueOf(12), BindUtil.convert(Integer.class, Long.valueOf(12L)));
+	}
+
+	// ---- fromString ----
+
+	@Test
+	@SuppressWarnings({"rawtypes", "static-method"})
+	void fromStringUsesConverterBeforeScalarParsing() {
+		Converter converter = mock(Converter.class);
+		doReturn(Integer.valueOf(42)).when(converter).fromDisplayValue("forty two");
+
+		Object result = BindUtil.fromString(null, converter, Integer.class, "forty two");
+
+		assertEquals(Integer.valueOf(42), result);
+	}
+
+	@Test
+	@SuppressWarnings({"static-method"})
+	void fromSerialisedDynamicEnumerationConverterUsesConverter() {
+		DynamicEnumerationConverter converter = mock(DynamicEnumerationConverter.class);
+		doReturn("resolved").when(converter).fromDisplayValue("code");
+
+		Object result = BindUtil.fromSerialised(converter, String.class, "code");
+
+		assertEquals("resolved", result);
+	}
+
 	// ---- fromSerialised ----
 
 	@Test
@@ -980,6 +1059,40 @@ class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
+	void toDisplayDomainValuesReturnsMatchingLocalisedDescription() {
+		DomainValue domainValue = mock(DomainValue.class);
+		doReturn("A").when(domainValue).getCode();
+		doReturn("Alpha").when(domainValue).getLocalisedDescription();
+
+		String result = BindUtil.toDisplay(mock(Customer.class), null, null, Arrays.asList(domainValue), "A");
+
+		assertEquals("Alpha", result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void toDisplayDomainValuesFallsBackToCodeWhenNoMatch() {
+		DomainValue domainValue = mock(DomainValue.class);
+		doReturn("A").when(domainValue).getCode();
+
+		String result = BindUtil.toDisplay(mock(Customer.class), null, null, Arrays.asList(domainValue), "B");
+
+		assertEquals("B", result);
+	}
+
+	@Test
+	@SuppressWarnings({"rawtypes", "static-method"})
+	void toDisplayConverterCoercesValueToImplementingType() {
+		Converter converter = mock(Converter.class);
+		doReturn("12.30").when(converter).toDisplayValue(new Decimal2("12.30"));
+
+		String result = BindUtil.toDisplay(mock(Customer.class), converter, Decimal2.class, null, "12.30");
+
+		assertEquals("12.30", result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
 	void getDisplayReturnsBizKeyWhenBindingResolvesToBean() {
 		Bean child = mock(Bean.class);
 		doReturn("child-key").when(child).getBizKey();
@@ -1042,6 +1155,29 @@ class BindUtilTest {
 		DynamicBean owningBean = new DynamicBean("sales", "Order", properties);
 
 		assertSame(childBean, method.invoke(null, owningBean, "parent.status"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void resolveDisplayDomainValuesReturnsNullForDynamicDomainWithoutWrappedRealBean() throws Exception {
+		Method method = BindUtil.class.getDeclaredMethod("resolveDisplayDomainValues",
+				Customer.class,
+				Bean.class,
+				String.class,
+				Document.class,
+				org.skyve.impl.metadata.model.document.field.Field.class);
+		method.setAccessible(true);
+		CustomerImpl customer = new CustomerImpl();
+		DocumentImpl document = new DocumentImpl();
+		document.setOwningModuleName("sales");
+		document.setName("Order");
+		org.skyve.impl.metadata.model.document.field.Text field =
+				new org.skyve.impl.metadata.model.document.field.Text();
+		field.setName("status");
+		field.setDomainType(org.skyve.metadata.model.document.DomainType.dynamic);
+		DynamicBean bean = new DynamicBean("sales", "Order", new HashMap<>(Map.of("status", "A")));
+
+		assertNull(method.invoke(null, customer, bean, "status", document, field));
 	}
 
 	@Test
@@ -4318,6 +4454,677 @@ class BindUtilTest {
 		assertEquals("mango", list.get(1).getName());
 		assertEquals("zebra", list.get(2).getName());
 	}
+
+
+	// ---- normalize helpers / metadata navigation guard — focused coverage additions ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void normaliseBindingTokenRemovesIndexedAndMappedSegments() throws Exception {
+		Method method = BindUtil.class.getDeclaredMethod("normaliseBindingToken", String.class);
+		method.setAccessible(true);
+
+		assertEquals("items", method.invoke(null, "items[0]"));
+		assertEquals("children", method.invoke(null, "childrenElementById(abc)"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertNumericWrapperReturnsInputForNonNumber() {
+		Object result = BindUtil.convert(Integer.class, "hello");
+		assertEquals("hello", result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertTemporalTypeReturnsInputForNonDate() {
+		Object result = BindUtil.convert(org.skyve.domain.types.DateOnly.class, "not-a-date");
+		assertEquals("not-a-date", result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void resolveNavigatingModuleFallsBackToProvidedRepositoryWhenCustomerIsNull() throws Exception {
+		Method method = BindUtil.class.getDeclaredMethod("resolveNavigatingModule", org.skyve.metadata.customer.Customer.class, Document.class);
+		method.setAccessible(true);
+
+		Module expected = mock(Module.class);
+		Document document = mock(Document.class);
+		when(document.getOwningModuleName()).thenReturn("sales");
+
+		org.skyve.metadata.repository.ProvidedRepository previous = ProvidedRepositoryFactory.get();
+		org.skyve.metadata.repository.ProvidedRepository repository = mock(org.skyve.metadata.repository.ProvidedRepository.class);
+		when(repository.getModule(null, "sales")).thenReturn(expected);
+
+		try {
+			ProvidedRepositoryFactory.set(repository);
+			Module actual = (Module) method.invoke(null, (Object) null, document);
+			assertSame(expected, actual);
+		}
+		finally {
+			ProvidedRepositoryFactory.set(previous);
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void resolveTerminalBindingTypeUsesRelationImplementingTypeIfRelationDocumentIsNotGenerated() throws Exception {
+		Method method = BindUtil.class.getDeclaredMethod("resolveTerminalBindingType",
+				org.skyve.metadata.customer.Customer.class,
+				Module.class,
+				Document.class,
+				String.class,
+				String.class,
+				org.skyve.metadata.model.Attribute.class);
+		method.setAccessible(true);
+
+		org.skyve.metadata.customer.Customer customer = mock(org.skyve.metadata.customer.Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		org.skyve.metadata.model.document.Relation relation = mock(org.skyve.metadata.model.document.Relation.class);
+		Document relatedDocument = mock(Document.class);
+
+		when(document.getOwningModuleName()).thenReturn("sales");
+		when(document.getName()).thenReturn("Order");
+		when(relation.getDocumentName()).thenReturn("Child");
+		when(relation.getImplementingType()).thenReturn(null);
+		when(module.getDocument(customer, "Child")).thenReturn(relatedDocument);
+
+		Object type = method.invoke(null,
+				customer,
+				module,
+				document,
+				"Order.child",
+				"child",
+				relation);
+
+		assertEquals(Bean.class, type);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void resolveTerminalBindingTypeWrapsClassNotFoundInMetadataException() throws Exception {
+		Method method = BindUtil.class.getDeclaredMethod("resolveTerminalBindingType",
+				org.skyve.metadata.customer.Customer.class,
+				Module.class,
+				Document.class,
+				String.class,
+				String.class,
+				org.skyve.metadata.model.Attribute.class);
+		method.setAccessible(true);
+
+		org.skyve.metadata.customer.Customer customer = mock(org.skyve.metadata.customer.Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		org.skyve.metadata.model.document.Relation relation = mock(org.skyve.metadata.model.document.Relation.class);
+		DocumentImpl relationDocument = new DocumentImpl();
+		relationDocument.setOwningModuleName("sales");
+		relationDocument.setName("Missing");
+
+		when(document.getOwningModuleName()).thenReturn("sales");
+		when(document.getName()).thenReturn("Order");
+		when(relation.getDocumentName()).thenReturn("Missing");
+		when(relation.getName()).thenReturn("missing");
+		when(module.getDocument(customer, "Missing")).thenReturn(relationDocument);
+
+		org.skyve.metadata.repository.ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
+		org.skyve.metadata.repository.ProvidedRepository repository = mock(org.skyve.metadata.repository.ProvidedRepository.class);
+		when(customer.getName()).thenReturn("acme");
+		when(repository.vtable(anyString(), anyString())).thenReturn(null);
+
+		try {
+			ProvidedRepositoryFactory.set(repository);
+			InvocationTargetException exception = assertThrows(
+					InvocationTargetException.class,
+					() -> method.invoke(null,
+							customer,
+							module,
+							document,
+							"Order.missing",
+							"missing",
+							relation));
+			assertTrue(exception.getCause() instanceof MetaDataException);
+		}
+		finally {
+			ProvidedRepositoryFactory.set(previousRepository);
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void evaluateConditionUsesMetadataExpressionAndNegation() {
+		Customer customer = mock(Customer.class);
+		User user = mock(User.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Condition condition = mock(Condition.class);
+		when(condition.getExpression()).thenReturn("{flag}");
+
+		Map<String, Object> values = new HashMap<>();
+		values.put("flag", Boolean.TRUE);
+		DynamicBean bean = new DynamicBean("sales", "Order", values);
+
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("sales")).thenReturn(module);
+		when(module.getDocument(customer, "Order")).thenReturn(document);
+		when(document.getCondition("active")).thenReturn(condition);
+
+		withThreadLocalUser(user, () -> {
+			assertFalse(BindUtil.evaluateCondition(bean, "notActive"));
+			assertTrue(BindUtil.evaluateCondition(bean, "active"));
+		});
+	}
+
+	// ---- private binding helper branches — focused coverage additions ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void parsePropertySelectorForIndexedBindingReturnsExpectedIndexAndName() throws Exception {
+		Method method = BindUtil.class.getDeclaredMethod("parsePropertySelector", String.class);
+		method.setAccessible(true);
+
+		Object selector = method.invoke(null, "items[7]");
+
+		assertEquals("items", ((BindUtil.PropertySelector) selector).propertyName);
+		assertEquals(7, ((BindUtil.PropertySelector) selector).index);
+		assertEquals(null, ((BindUtil.PropertySelector) selector).key);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void parsePropertySelectorForMappedBindingReturnsExpectedKeyAndName() throws Exception {
+		Method method = BindUtil.class.getDeclaredMethod("parsePropertySelector", String.class);
+		method.setAccessible(true);
+
+		BindUtil.PropertySelector selector = (BindUtil.PropertySelector) method.invoke(null, "customers(customer-1)");
+
+		assertEquals("customers", selector.propertyName);
+		assertEquals(-1, selector.index);
+		assertEquals("customer-1", selector.key);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void resolveParentDocumentNameUsesExtendsChain() throws Exception {
+		Method method = BindUtil.class.getDeclaredMethod("resolveParentDocumentName",
+				org.skyve.metadata.customer.Customer.class,
+				Module.class,
+				Document.class,
+				String.class,
+				String.class);
+		method.setAccessible(true);
+
+		org.skyve.metadata.customer.Customer customer = mock(org.skyve.metadata.customer.Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Document baseDocument = mock(Document.class);
+		Extends base = mock(Extends.class);
+
+		when(document.getOwningModuleName()).thenReturn("sales");
+		when(document.getName()).thenReturn("OrderItem");
+		when(document.getParentDocumentName()).thenReturn(null);
+		when(document.getExtends()).thenReturn(base);
+		when(base.getDocumentName()).thenReturn("Order");
+		when(module.getDocument(customer, "Order")).thenReturn(baseDocument);
+		when(baseDocument.getParentDocumentName()).thenReturn("Customer");
+		when(baseDocument.getExtends()).thenReturn(null);
+
+		String parent = (String) method.invoke(null, customer, module, document, ChildBean.PARENT_NAME, "sales.OrderItem.parent");
+		assertEquals("Customer", parent);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void resolveParentDocumentNameThrowsWhenNoParentDocument() throws Exception {
+		Method method = BindUtil.class.getDeclaredMethod("resolveParentDocumentName",
+				org.skyve.metadata.customer.Customer.class,
+				Module.class,
+				Document.class,
+				String.class,
+				String.class);
+		method.setAccessible(true);
+
+		org.skyve.metadata.customer.Customer customer = mock(org.skyve.metadata.customer.Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+
+		when(document.getOwningModuleName()).thenReturn("sales");
+		when(document.getName()).thenReturn("OrderItem");
+		when(document.getParentDocumentName()).thenReturn(null);
+		when(document.getExtends()).thenReturn(null);
+
+		InvocationTargetException ex = assertThrows(InvocationTargetException.class, () -> {
+			method.invoke(null, customer, module, document, ChildBean.PARENT_NAME, "sales.OrderItem.parent");
+		});
+		assertTrue(ex.getCause() instanceof MetaDataException);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void resolveNextNavigatingDocumentReturnsParentWhenBindingIsParent() throws Exception {
+		Method method = BindUtil.class.getDeclaredMethod("resolveNextNavigatingDocument",
+				org.skyve.metadata.customer.Customer.class,
+				Module.class,
+				Document.class,
+				String.class,
+				String.class,
+				org.skyve.metadata.model.Attribute.class,
+				String.class);
+		method.setAccessible(true);
+
+		org.skyve.metadata.customer.Customer customer = mock(org.skyve.metadata.customer.Customer.class);
+		Module module = mock(Module.class);
+		Document navigatingDocument = mock(Document.class);
+		Document parentDocument = mock(Document.class);
+
+		when(module.getDocument(customer, "Customer")).thenReturn(parentDocument);
+
+		Object result = method.invoke(null,
+				customer,
+				module,
+				navigatingDocument,
+				ChildBean.PARENT_NAME,
+				"Customer",
+				null,
+				"sales.OrderItem.parent");
+		assertSame(parentDocument, result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void resolveNextNavigatingDocumentThrowsForInvalidRelationTarget() throws Exception {
+		Method method = BindUtil.class.getDeclaredMethod("resolveNextNavigatingDocument",
+				org.skyve.metadata.customer.Customer.class,
+				Module.class,
+				Document.class,
+				String.class,
+				String.class,
+				org.skyve.metadata.model.Attribute.class,
+				String.class);
+		method.setAccessible(true);
+
+		org.skyve.metadata.customer.Customer customer = mock(org.skyve.metadata.customer.Customer.class);
+		Module module = mock(Module.class);
+		Document navigatingDocument = mock(Document.class);
+		Attribute attribute = mock(Attribute.class);
+
+		when(navigatingDocument.getOwningModuleName()).thenReturn("sales");
+		when(navigatingDocument.getName()).thenReturn("Order");
+
+		InvocationTargetException ex = assertThrows(InvocationTargetException.class, () -> {
+			method.invoke(null,
+					customer,
+					module,
+					navigatingDocument,
+					"invalid",
+					null,
+					attribute,
+					"sales.Order.invalid");
+		});
+		assertTrue(ex.getCause() instanceof MetaDataException);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void evaluateResolvedConditionExpressionHonoursNegation() throws Exception {
+		Method method = BindUtil.class.getDeclaredMethod("evaluateResolvedConditionExpression",
+				Bean.class,
+				String.class,
+				boolean.class);
+		method.setAccessible(true);
+
+		Map<String, Object> properties = new HashMap<>();
+		properties.put("flag", Boolean.TRUE);
+		DynamicBean bean = new DynamicBean("sales", "Order", properties);
+
+		assertEquals(Boolean.FALSE, method.invoke(null, bean, "{flag}", Boolean.TRUE));
+		assertEquals(Boolean.TRUE, method.invoke(null, bean, "{flag}", Boolean.FALSE));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void setDynamicIndexedBindingThroughPublicSetUpdatesListElement() {
+		List<Object> values = new ArrayList<>(Arrays.asList("before", "target"));
+		DynamicBean bean = new DynamicBean("sales", "Order", new HashMap<>(Map.of("items", values)));
+
+		BindUtil.set(bean, "items[1]", "after");
+
+		assertEquals("after", values.get(1));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void setDynamicElementByIdBindingThroughPublicSetReplacesElement() {
+		DynamicBean first = new DynamicBean("sales", "Item", new HashMap<>(Map.of(Bean.DOCUMENT_ID, "one")));
+		DynamicBean second = new DynamicBean("sales", "Item", new HashMap<>(Map.of(Bean.DOCUMENT_ID, "two")));
+		DynamicBean replacement = new DynamicBean("sales", "Item", new HashMap<>(Map.of(Bean.DOCUMENT_ID, "two")));
+		List<Bean> values = new ArrayList<>(Arrays.asList(first, second));
+		DynamicBean bean = new DynamicBean("sales", "Order", new HashMap<>(Map.of("items", values)));
+
+		BindUtil.set(bean, BindUtil.createIdBinding("items", "two"), replacement);
+
+		assertSame(replacement, values.get(1));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void setDynamicElementByIdBindingThroughPublicSetRejectsNonBeanValue() {
+		DynamicBean first = new DynamicBean("sales", "Item", new HashMap<>(Map.of(Bean.DOCUMENT_ID, "one")));
+		DynamicBean bean = new DynamicBean("sales", "Order", new HashMap<>(Map.of("items", new ArrayList<>(List.of(first)))));
+
+		MetaDataException exception = assertThrows(MetaDataException.class,
+				() -> BindUtil.set(bean, BindUtil.createIdBinding("items", "one"), "not a bean"));
+
+		assertNotNull(exception);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getPropertyTypeDynamicListPropertyReturnsConcreteListClassWhenValueExists() {
+		ArrayList<Object> values = new ArrayList<>();
+		DynamicBean bean = new DynamicBean("sales", "Order", new HashMap<>(Map.of("items", values)));
+
+		assertSame(ArrayList.class, BindUtil.getPropertyType(bean, "items"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void isMutableDynamicScalarReturnsTrueAndDynamicListReturnsFalse() {
+		DynamicBean bean = new DynamicBean("sales",
+				"Order",
+				new HashMap<>(Map.of("name", "Alpha", "items", new ArrayList<>())));
+
+		assertTrue(BindUtil.isMutable(bean, "name"));
+		assertFalse(BindUtil.isMutable(bean, "items"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getMetaDataForBindingTerminalParentReturnsImplicitBeanType() {
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+
+		when(document.getParentDocumentName()).thenReturn("Order");
+		when(document.getAttribute(ChildBean.PARENT_NAME)).thenReturn(null);
+		when(document.getExtends()).thenReturn(null);
+
+		TargetMetaData target = BindUtil.getMetaDataForBinding(null, module, document, ChildBean.PARENT_NAME);
+
+		assertSame(document, target.getDocument());
+		assertNull(target.getAttribute());
+		assertSame(Bean.class, target.getType());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getMetaDataForBindingResolvesParentDocumentNameFromBaseDocument() {
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document childDocument = mock(Document.class);
+		Document baseDocument = mock(Document.class);
+		Document parentDocument = mock(Document.class);
+		Extends inherits = mock(Extends.class);
+		Attribute name = mock(Attribute.class);
+
+		when(childDocument.getParentDocumentName()).thenReturn(null);
+		when(childDocument.getExtends()).thenReturn(inherits);
+		when(inherits.getDocumentName()).thenReturn("BaseChild");
+		when(module.getDocument(customer, "BaseChild")).thenReturn(baseDocument);
+		when(baseDocument.getParentDocumentName()).thenReturn("Parent");
+		when(baseDocument.getExtends()).thenReturn(null);
+		when(module.getDocument(customer, "Parent")).thenReturn(parentDocument);
+		when(parentDocument.getOwningModuleName()).thenReturn("sales");
+		when(customer.getModule("sales")).thenReturn(module);
+		when(parentDocument.getAttribute("name")).thenReturn(name);
+		when(parentDocument.getExtends()).thenReturn(null);
+		doReturn(String.class).when(name).getImplementingType();
+
+		TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, childDocument, "parent.name");
+
+		assertSame(parentDocument, target.getDocument());
+		assertSame(name, target.getAttribute());
+		assertSame(String.class, target.getType());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getMetaDataForBindingTerminalRelationFallsBackToRelationImplementingTypeForNonDocumentImpl() {
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Document relationDocument = mock(Document.class);
+		Relation relation = mock(Relation.class);
+
+		when(document.getAttribute("child")).thenReturn(relation);
+		when(document.getExtends()).thenReturn(null);
+		when(relation.getDocumentName()).thenReturn("Child");
+		when(module.getDocument(customer, "Child")).thenReturn(relationDocument);
+		doReturn(SampleChildBean.class).when(relation).getImplementingType();
+
+		TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, "child");
+
+		assertSame(document, target.getDocument());
+		assertSame(relation, target.getAttribute());
+		assertSame(SampleChildBean.class, target.getType());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void privateSetPopulateValueSetsIndexedAndMappedProperties() throws Exception {
+		Method parse = BindUtil.class.getDeclaredMethod("parsePropertySelector", String.class);
+		parse.setAccessible(true);
+		Class<?> selectorClass = Class.forName("org.skyve.impl.bind.BindUtil$PropertySelector");
+		Method setPopulateValue = BindUtil.class.getDeclaredMethod("setPopulateValue", Object.class, selectorClass, Object.class);
+		setPopulateValue.setAccessible(true);
+		IndexedMappedPojo pojo = new IndexedMappedPojo();
+
+		Object indexedSelector = parse.invoke(null, "values[1]");
+		setPopulateValue.invoke(null, pojo, indexedSelector, "indexed");
+		Object mappedSelector = parse.invoke(null, "attributes(home)");
+		setPopulateValue.invoke(null, pojo, mappedSelector, "mapped");
+		Object simpleSelector = parse.invoke(null, "name");
+		setPopulateValue.invoke(null, pojo, simpleSelector, "simple");
+
+		assertEquals("indexed", pojo.getValues().get(1));
+		assertEquals("mapped", pojo.getAttributes().get("home"));
+		assertEquals("simple", pojo.getName());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void privateParsePropertySelectorToleratesMalformedIndexAndKey() throws Exception {
+		Method parse = BindUtil.class.getDeclaredMethod("parsePropertySelector", String.class);
+		parse.setAccessible(true);
+		Class<?> selectorClass = Class.forName("org.skyve.impl.bind.BindUtil$PropertySelector");
+		java.lang.reflect.Field propertyName = selectorClass.getDeclaredField("propertyName");
+		java.lang.reflect.Field index = selectorClass.getDeclaredField("index");
+		java.lang.reflect.Field key = selectorClass.getDeclaredField("key");
+		propertyName.setAccessible(true);
+		index.setAccessible(true);
+		key.setAccessible(true);
+
+		Object badIndex = parse.invoke(null, "values[abc]");
+		Object badKey = parse.invoke(null, "attributes(home");
+
+		assertEquals("values", propertyName.get(badIndex));
+		assertEquals(Integer.valueOf(-1), index.get(badIndex));
+		assertNull(key.get(badIndex));
+		assertEquals("attributes", propertyName.get(badKey));
+		assertNull(key.get(badKey));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void isAScalarTypeRecognisesPrimitiveEnumAndObjectTypes() {
+		assertTrue(BindUtil.isAScalarType(Integer.TYPE));
+		assertTrue(BindUtil.isAScalarType(TestBindEnum.class));
+		assertFalse(BindUtil.isAScalarType(List.class));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void javaIdentifierHelpersCoverGetterSetterBooleanAndTitleCase() {
+		assertEquals("name", BindUtil.toJavaPropertyName("getName"));
+		assertEquals("active", BindUtil.toJavaPropertyName("setActive"));
+		assertEquals("enabled", BindUtil.toJavaPropertyName("isEnabled"));
+		assertEquals("plain", BindUtil.toJavaPropertyName("plain"));
+		assertEquals("DOB Value", BindUtil.toTitleCase("DOB Value"));
+		assertEquals("oneInvalidName", BindUtil.toJavaInstanceIdentifier("1 invalid_name"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void addElementToStaticCollectionInvokesGeneratedAddMethod() {
+		StaticCollectionBean owner = new StaticCollectionBean();
+		DynamicBean element = new DynamicBean("sales", "Item", new HashMap<>());
+
+		withThreadLocalUser(staticCollectionUser(owner), () -> assertTrue(BindUtil.addElementToCollection(owner, "items", element)));
+
+		assertEquals(List.of(element), owner.getItems());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void addElementToStaticCollectionAtIndexInvokesGeneratedIndexedAddMethod() {
+		DynamicBean existing = new DynamicBean("sales", "Item", new HashMap<>(Map.of(Bean.DOCUMENT_ID, "existing")));
+		DynamicBean inserted = new DynamicBean("sales", "Item", new HashMap<>(Map.of(Bean.DOCUMENT_ID, "inserted")));
+		StaticCollectionBean owner = new StaticCollectionBean();
+		owner.getItems().add(existing);
+
+		withThreadLocalUser(staticCollectionUser(owner), () -> BindUtil.addElementToCollection(owner, "items", 0, inserted));
+
+		assertEquals(Arrays.asList(inserted, existing), owner.getItems());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void removeElementFromStaticCollectionInvokesGeneratedRemoveMethod() {
+		DynamicBean element = new DynamicBean("sales", "Item", new HashMap<>());
+		StaticCollectionBean owner = new StaticCollectionBean();
+		owner.getItems().add(element);
+
+		withThreadLocalUser(staticCollectionUser(owner), () -> assertTrue(BindUtil.removeElementFromCollection(owner, "items", element)));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void removeElementFromStaticCollectionByIndexInvokesGeneratedIndexedRemoveMethod() {
+		DynamicBean first = new DynamicBean("sales", "Item", new HashMap<>(Map.of(Bean.DOCUMENT_ID, "first")));
+		DynamicBean second = new DynamicBean("sales", "Item", new HashMap<>(Map.of(Bean.DOCUMENT_ID, "second")));
+		StaticCollectionBean owner = new StaticCollectionBean();
+		owner.getItems().add(first);
+		owner.getItems().add(second);
+
+		DynamicBean removed = withStaticCollectionUserReturning(owner, () -> BindUtil.removeElementFromCollection(owner, "items", 1));
+
+		assertSame(second, removed);
+		assertEquals(List.of(first), owner.getItems());
+	}
+
+	@SuppressWarnings("boxing")
+	private static User staticCollectionUser(StaticCollectionBean owner) {
+		Customer customer = mock(Customer.class);
+		User user = mock(User.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Document relatedDocument = mock(Document.class);
+		org.skyve.metadata.model.document.Collection collection =
+				mock(org.skyve.metadata.model.document.Collection.class);
+
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("sales")).thenReturn(module);
+		when(module.getDocument(customer, "Order")).thenReturn(document);
+		when(module.getDocument(customer, "Item")).thenReturn(relatedDocument);
+		when(document.getPolymorphicAttribute(customer, "items")).thenReturn(collection);
+		when(collection.getDocumentName()).thenReturn("Item");
+		when(relatedDocument.isDynamic()).thenReturn(Boolean.FALSE);
+		owner.setModuleMetaData(module);
+		return user;
+	}
+
+	private static <T> T withStaticCollectionUserReturning(StaticCollectionBean owner, java.util.concurrent.Callable<T> run) {
+		final Object[] result = new Object[1];
+		withThreadLocalUser(staticCollectionUser(owner), () -> {
+			try {
+				result[0] = run.call();
+			}
+			catch (Exception e) {
+				throw new AssertionError(e);
+			}
+		});
+		@SuppressWarnings("unchecked")
+		T typed = (T) result[0];
+		return typed;
+	}
+
+	public static final class IndexedMappedPojo {
+		private final List<String> values = new ArrayList<>(Arrays.asList("zero", "one"));
+		private final Map<String, String> attributes = new HashMap<>();
+		private String name;
+
+		public List<String> getValues() {
+			return values;
+		}
+
+		public Map<String, String> getAttributes() {
+			return attributes;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+	}
+
+	public static final class SampleChildBean extends DynamicBean {
+		private static final long serialVersionUID = 1L;
+
+		public SampleChildBean() {
+			super("sales", "Child", new HashMap<>());
+		}
+	}
+
+	public static final class StaticCollectionBean extends DynamicBean {
+		private static final long serialVersionUID = 1L;
+
+		private Module moduleMetaData;
+
+		public StaticCollectionBean() {
+			super("sales", "Order", new HashMap<>(Map.of("items", new ArrayList<Bean>())));
+		}
+
+		@Override
+		public Module getModuleMetaData() {
+			return moduleMetaData;
+		}
+
+		public void setModuleMetaData(Module moduleMetaData) {
+			this.moduleMetaData = moduleMetaData;
+		}
+
+		@SuppressWarnings("unchecked")
+		public List<Bean> getItems() {
+			return (List<Bean>) get("items");
+		}
+
+		public boolean addItemsElement(Bean element) {
+			return getItems().add(element);
+		}
+
+		public void addItemsElement(int index, Bean element) {
+			getItems().add(index, element);
+		}
+
+		public boolean removeItemsElement(Bean element) {
+			getItems().remove(element);
+			return true;
+		}
+
+		public Bean removeItemsElement(int index) {
+			return getItems().remove(index);
+		}
+	}
 }
-
-

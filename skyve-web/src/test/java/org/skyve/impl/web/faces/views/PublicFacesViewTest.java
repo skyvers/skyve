@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 
-@SuppressWarnings("static-method")
+@SuppressWarnings({"static-method", "boxing"})
 class PublicFacesViewTest {
 	private abstract static class FacesContextBridge extends FacesContext {
 		static void setCurrent(FacesContext context) {

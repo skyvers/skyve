@@ -74,6 +74,11 @@ class BindUtilMoreTest {
 		assertTrue(BindUtil.containsSkyveExpressions("{first} and {second}"));
 	}
 
+	@Test
+	void containsSkyveExpressionsEscapedBraceFollowedByExpressionReturnsTrue() {
+		assertTrue(BindUtil.containsSkyveExpressions("\\{escaped} and {binding}"));
+	}
+
 	// --- isSkyveExpression ---
 
 	@Test
@@ -253,6 +258,20 @@ class BindUtilMoreTest {
 	}
 
 	@Test
+	void getWithDynamicElementByIdBindingReturnsMatchingElement() {
+		Map<String, Object> itemProps = new HashMap<>();
+		itemProps.put(Bean.DOCUMENT_ID, "bean-1");
+		DynamicBean item0 = new DynamicBean("mod", "Item", itemProps);
+		DynamicBean item1 = new DynamicBean("mod", "Item", new HashMap<>(Map.of(Bean.DOCUMENT_ID, "bean-2")));
+		Map<String, Object> props = new HashMap<>();
+		props.put("myList", new ArrayList<>(Arrays.asList(item0, item1)));
+		DynamicBean bean = new DynamicBean("mod", "Doc", props);
+
+		Object result = BindUtil.get(bean, BindUtil.createIdBinding("myList", "bean-1"));
+		assertSame(item0, result);
+	}
+
+	@Test
 	void getWithNullListInDynamicBeanReturnsNull() {
 		Map<String, Object> props = new HashMap<>();
 		props.put("myList", null);
@@ -260,6 +279,69 @@ class BindUtilMoreTest {
 
 		Object result = BindUtil.get(bean, "myList[0]");
 		assertNull(result);
+	}
+
+	@Test
+	void getElementInCollectionOwnerBindingReturnsMatchingBean() {
+		Map<String, Object> props = new HashMap<>();
+		Map<String, Object> existingProps = new HashMap<>();
+		existingProps.put(Bean.DOCUMENT_ID, "bean-1");
+		DynamicBean existing = new DynamicBean("mod", "Item", existingProps);
+		props.put("items", new ArrayList<>(Arrays.asList(existing)));
+		DynamicBean owner = new DynamicBean("mod", "Doc", props);
+
+		Bean result = BindUtil.getElementInCollection(owner, "items", "bean-1");
+		assertSame(existing, result);
+	}
+
+	@Test
+	void getElementInCollectionOwnerBindingReturnsNullWhenCollectionMissing() {
+		Map<String, Object> props = new HashMap<>();
+		props.put("items", null);
+		DynamicBean owner = new DynamicBean("mod", "Doc", props);
+
+		assertNull(BindUtil.getElementInCollection(owner, "items", "bean-1"));
+	}
+
+	@Test
+	void ensureElementIsInCollectionReturnsExistingMatchingBean() {
+		Map<String, Object> props = new HashMap<>();
+		Map<String, Object> existingProps = new HashMap<>();
+		existingProps.put(Bean.DOCUMENT_ID, "bean-1");
+		DynamicBean existing = new DynamicBean("mod", "Item", existingProps);
+		List<Bean> items = new ArrayList<>(Arrays.asList(existing));
+		props.put("items", items);
+		DynamicBean owner = new DynamicBean("mod", "Doc", props);
+		Map<String, Object> candidateProps = new HashMap<>();
+		candidateProps.put(Bean.DOCUMENT_ID, "bean-1");
+		DynamicBean candidate = new DynamicBean("mod", "Item", candidateProps);
+
+		Bean result = BindUtil.ensureElementIsInCollection(owner, "items", candidate);
+		assertSame(existing, result);
+		assertSame(existing, items.get(0));
+	}
+
+	@Test
+	void setElementInCollectionReplacesAllMatchingBizIds() {
+		Map<String, Object> firstProps = new HashMap<>();
+		firstProps.put(Bean.DOCUMENT_ID, "bean-1");
+		DynamicBean first = new DynamicBean("mod", "Item", firstProps);
+		Map<String, Object> secondProps = new HashMap<>();
+		secondProps.put(Bean.DOCUMENT_ID, "bean-1");
+		DynamicBean second = new DynamicBean("mod", "Item", secondProps);
+		Map<String, Object> otherProps = new HashMap<>();
+		otherProps.put(Bean.DOCUMENT_ID, "bean-2");
+		DynamicBean other = new DynamicBean("mod", "Item", otherProps);
+		List<DynamicBean> list = new ArrayList<>(Arrays.asList(first, second, other));
+		Map<String, Object> replacementProps = new HashMap<>();
+		replacementProps.put(Bean.DOCUMENT_ID, "bean-1");
+		DynamicBean replacement = new DynamicBean("mod", "Item", replacementProps);
+
+		BindUtil.setElementInCollection(list, replacement);
+
+		assertSame(replacement, list.get(0));
+		assertSame(replacement, list.get(1));
+		assertSame(other, list.get(2));
 	}
 
 	// --- DynamicBean indexed set ---

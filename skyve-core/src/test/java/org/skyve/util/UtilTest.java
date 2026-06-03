@@ -88,37 +88,37 @@ class UtilTest {
 
 	@Test
 	void utf8LengthEmptyStringIsZero() {
-		assertEquals(0, Util.UTF8Length(""));
+		assertEquals(0, Util.utf8Length(""));
 	}
 
 	@Test
 	void utf8LengthAsciiCharsEachCountOnebyte() {
-		assertEquals(5, Util.UTF8Length("hello"));
+		assertEquals(5, Util.utf8Length("hello"));
 	}
 
 	@Test
 	void utf8LengthTwoByteCharCounts2Bytes() {
 		// £ is U+00A3 which is 2 bytes in UTF-8
-		assertEquals(2, Util.UTF8Length("\u00A3"));
+		assertEquals(2, Util.utf8Length("\u00A3"));
 	}
 
 	@Test
 	void utf8LengthThreeByteCharCounts3Bytes() {
 		// € is U+20AC which is 3 bytes in UTF-8
-		assertEquals(3, Util.UTF8Length("\u20AC"));
+		assertEquals(3, Util.utf8Length("\u20AC"));
 	}
 
 	@Test
 	void utf8LengthMixedAsciiAndMultibyte() {
 		// "A" (1 byte) + "£" (2 bytes) = 3 bytes
-		assertEquals(3, Util.UTF8Length("A\u00A3"));
+		assertEquals(3, Util.utf8Length("A\u00A3"));
 	}
 
 	@Test
 	void utf8LengthSurrogatePairCounts4Bytes() {
 		// U+1F600 (emoji) is encoded as a surrogate pair in Java chars → 4 bytes in UTF-8
 		String emoji = new String(Character.toChars(0x1F600));
-		assertEquals(4, Util.UTF8Length(emoji));
+		assertEquals(4, Util.utf8Length(emoji));
 	}
 
 	// ---- lastIndexOfRegEx ----

@@ -19,8 +19,6 @@ import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.sail.mock.MockFacesContext;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilder;
-import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View.ViewType;
 

@@ -17,6 +17,7 @@ import org.skyve.domain.messages.SessionEndedException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
+@SuppressWarnings("static-method")
 class SmartClientWebContextTest {
 	@Test
 	void growlAndMessageInitialiseCollectionsAndStoreEntries() {

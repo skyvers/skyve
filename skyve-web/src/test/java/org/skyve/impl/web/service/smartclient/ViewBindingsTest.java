@@ -16,6 +16,7 @@ import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 
+@SuppressWarnings("static-method")
 class ViewBindingsTest {
 	@Test
 	void viewBindingMergePromotesFlagsAndSanitisation() {

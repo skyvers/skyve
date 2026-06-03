@@ -30,7 +30,6 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.models.BeanMapAdapter;
 import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.customer.Customer;
@@ -48,7 +47,7 @@ import jakarta.faces.component.html.HtmlInputText;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.context.PartialViewContext;
 
-@SuppressWarnings({"static-method", "boxing"})
+@SuppressWarnings({"static-method", "boxing", "java:S1130"})
 class FacesActionsCoverageTest {
 	private abstract static class FacesContextBridge extends FacesContext {
 		static void setCurrent(FacesContext context) {
@@ -366,7 +365,7 @@ class FacesActionsCoverageTest {
 		when(bean.isCreated()).thenReturn(Boolean.FALSE);
 		when(customer.getModule("admin")).thenReturn(module);
 		when(module.getDocument(customer, "Contact")).thenReturn(document);
-		when(document.getView(org.mockito.ArgumentMatchers.eq("desktop"), org.mockito.ArgumentMatchers.eq(customer), org.mockito.ArgumentMatchers.eq("create"))).thenReturn(view);
+			when(document.getView("desktop", customer, "create")).thenReturn(view);
 		when(view.getAction("myAction")).thenReturn(actionMeta);
 		when(actionMeta.getResourceName()).thenReturn("myAction");
 		when(actionMeta.getClientValidation()).thenReturn(Boolean.FALSE);
@@ -399,7 +398,7 @@ class FacesActionsCoverageTest {
 		when(bean.isNotPersisted()).thenReturn(Boolean.FALSE);
 		when(customer.getModule("admin")).thenReturn(module);
 		when(module.getDocument(customer, "Contact")).thenReturn(document);
-		when(document.getView(org.mockito.ArgumentMatchers.eq("desktop"), org.mockito.ArgumentMatchers.eq(customer), org.mockito.ArgumentMatchers.eq("create"))).thenReturn(view);
+			when(document.getView("desktop", customer, "create")).thenReturn(view);
 		when(view.getAction("myAction")).thenReturn(actionMeta);
 		when(actionMeta.getResourceName()).thenReturn("myAction");
 		when(actionMeta.getClientValidation()).thenReturn(Boolean.FALSE);
@@ -485,7 +484,7 @@ class FacesActionsCoverageTest {
 		when(bean.isCreated()).thenReturn(Boolean.FALSE);
 		when(customer.getModule("admin")).thenReturn(module);
 		when(module.getDocument(customer, "Contact")).thenReturn(document);
-		when(document.getView(org.mockito.ArgumentMatchers.eq("desktop"), org.mockito.ArgumentMatchers.eq(customer), org.mockito.ArgumentMatchers.eq("create"))).thenReturn(view);
+			when(document.getView("desktop", customer, "create")).thenReturn(view);
 		when(view.getAction("Save")).thenReturn(actionMeta);
 		when(actionMeta.getClientValidation()).thenReturn(Boolean.FALSE);
 
@@ -515,7 +514,7 @@ class FacesActionsCoverageTest {
 		when(bean.isCreated()).thenReturn(Boolean.FALSE);
 		when(customer.getModule("admin")).thenReturn(module);
 		when(module.getDocument(customer, "Contact")).thenReturn(document);
-		when(document.getView(org.mockito.ArgumentMatchers.eq("desktop"), org.mockito.ArgumentMatchers.eq(customer), org.mockito.ArgumentMatchers.eq("create"))).thenReturn(view);
+			when(document.getView("desktop", customer, "create")).thenReturn(view);
 		when(view.getAction("OK")).thenReturn(actionMeta);
 		when(actionMeta.getClientValidation()).thenReturn(Boolean.FALSE);
 

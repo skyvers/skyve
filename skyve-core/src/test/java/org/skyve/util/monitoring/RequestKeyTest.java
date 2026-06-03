@@ -18,8 +18,8 @@ class RequestKeyTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void noneToStringReturnsNull() {
-		assertNull(RequestKey.NONE.toString());
+	void noneToStringReturnsEmptyString() {
+		assertEquals("", RequestKey.NONE.toString());
 	}
 
 	@Test
@@ -102,7 +102,6 @@ class RequestKeyTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void fromStringWithModuleAndDocument() {
-		// format: {type}{module}.{document}
 		RequestKey key = RequestKey.fromString("Eadmin.User");
 		assertEquals('E', key.getType());
 		assertThat(key.getModuleName(), is("admin"));
@@ -113,7 +112,6 @@ class RequestKeyTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void fromStringWithModuleDocumentAndComponent() {
-		// format: {type}{module}.{document}^{component}
 		RequestKey key = RequestKey.fromString("Oadmin.Contact^firstName");
 		assertEquals('O', key.getType());
 		assertThat(key.getModuleName(), is("admin"));
@@ -124,7 +122,6 @@ class RequestKeyTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void fromStringWithModuleAndComponent() {
-		// format: {type}{module}^{component}
 		RequestKey key = RequestKey.fromString("Madmin^qAllContacts");
 		assertEquals('M', key.getType());
 		assertThat(key.getModuleName(), is("admin"));
@@ -135,7 +132,6 @@ class RequestKeyTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void fromStringWithModuleOnly() {
-		// format: {type}{module}
 		RequestKey key = RequestKey.fromString("Cadmin");
 		assertEquals('C', key.getType());
 		assertThat(key.getModuleName(), is("admin"));

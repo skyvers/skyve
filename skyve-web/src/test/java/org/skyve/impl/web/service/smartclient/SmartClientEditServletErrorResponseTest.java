@@ -42,6 +42,7 @@ import org.skyve.util.OWASP;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+@SuppressWarnings({"java:S5778", "java:S1130"})
 class SmartClientEditServletErrorResponseTest {
 	private static final String REFERENCE = "2f8f0e2c-3b93-4cc2-9d9d-5f24ec777a3d";
 
@@ -345,7 +346,7 @@ class SmartClientEditServletErrorResponseTest {
 	}
 
 	@Test
-	@SuppressWarnings({"static-method", "boxing"})
+	@SuppressWarnings("static-method")
 	void applyNewParametersUsesEditViewWhenBeanIsCreated() throws Exception {
 		org.skyve.metadata.customer.Customer customer = mock(org.skyve.metadata.customer.Customer.class);
 		org.skyve.metadata.user.User user = mock(org.skyve.metadata.user.User.class);
@@ -355,7 +356,7 @@ class SmartClientEditServletErrorResponseTest {
 		org.skyve.domain.Bean processBean = mock(org.skyve.domain.Bean.class);
 		View view = mock(View.class);
 
-		org.mockito.Mockito.doReturn(true).when(processBean).isCreated();
+		org.mockito.Mockito.doReturn(Boolean.TRUE).when(processBean).isCreated();
 		when(processDocument.getView("ux", customer, "edit")).thenReturn(view);
 		when(view.getParameters()).thenReturn(List.<View.ViewParameter>of());
 
@@ -372,7 +373,7 @@ class SmartClientEditServletErrorResponseTest {
 	}
 
 	@Test
-	@SuppressWarnings({"static-method", "boxing"})
+	@SuppressWarnings("static-method")
 	void applyNewParametersUsesCreateViewWhenBeanIsNotCreated() throws Exception {
 		org.skyve.metadata.customer.Customer customer = mock(org.skyve.metadata.customer.Customer.class);
 		org.skyve.metadata.user.User user = mock(org.skyve.metadata.user.User.class);
@@ -382,7 +383,7 @@ class SmartClientEditServletErrorResponseTest {
 		org.skyve.domain.Bean processBean = mock(org.skyve.domain.Bean.class);
 		View view = mock(View.class);
 
-		org.mockito.Mockito.doReturn(false).when(processBean).isCreated();
+		org.mockito.Mockito.doReturn(Boolean.FALSE).when(processBean).isCreated();
 		when(processDocument.getView("ux", customer, "create")).thenReturn(view);
 		when(view.getParameters()).thenReturn(List.<View.ViewParameter>of());
 
@@ -399,7 +400,7 @@ class SmartClientEditServletErrorResponseTest {
 	}
 
 	@Test
-	@SuppressWarnings({"static-method", "boxing"})
+	@SuppressWarnings("static-method")
 	void applyNewParametersSkipsWhenIncomingParameterNotDeclaredInView() throws Exception {
 		org.skyve.metadata.customer.Customer customer = mock(org.skyve.metadata.customer.Customer.class);
 		org.skyve.metadata.user.User user = mock(org.skyve.metadata.user.User.class);
@@ -409,7 +410,7 @@ class SmartClientEditServletErrorResponseTest {
 		org.skyve.domain.Bean processBean = mock(org.skyve.domain.Bean.class);
 		View view = mock(View.class);
 
-		org.mockito.Mockito.doReturn(true).when(processBean).isCreated();
+		org.mockito.Mockito.doReturn(Boolean.TRUE).when(processBean).isCreated();
 		when(processDocument.getView("ux", customer, "edit")).thenReturn(view);
 
 		View.ViewParameter declared = new View.ViewParameter();
@@ -558,10 +559,15 @@ class SmartClientEditServletErrorResponseTest {
 		values.put("targetValue", "before");
 		DynamicBean processBean = new DynamicBean("admin", "Contact", values);
 
+		when(module.getName()).thenReturn("admin");
+		when(processDocument.getName()).thenReturn("Contact");
+		when(processDocument.getOwningModuleName()).thenReturn("admin");
 		when(processDocument.getView("ux", customer, "edit")).thenReturn(view);
 		when(processDocument.getAttribute("manager")).thenReturn(association);
 		when(processDocument.getExtends()).thenReturn(null);
 		when(association.getName()).thenReturn("manager");
+		when(association.getAttributeType()).thenReturn(org.skyve.metadata.model.Attribute.AttributeType.text);
+		doReturn(String.class).when(association).getImplementingType();
 		when(processDocument.getRelatedDocument(customer, "manager")).thenReturn(relatedDocument);
 		when(persistence.retrieve(relatedDocument, "ref-1")).thenReturn(null);
 
@@ -601,10 +607,15 @@ class SmartClientEditServletErrorResponseTest {
 		values.put("targetValue", "before");
 		DynamicBean processBean = new DynamicBean("admin", "Contact", values);
 
+		when(module.getName()).thenReturn("admin");
+		when(processDocument.getName()).thenReturn("Contact");
+		when(processDocument.getOwningModuleName()).thenReturn("admin");
 		when(processDocument.getView("ux", customer, "edit")).thenReturn(view);
 		when(processDocument.getAttribute("manager")).thenReturn(association);
 		when(processDocument.getExtends()).thenReturn(null);
 		when(association.getName()).thenReturn("manager");
+		when(association.getAttributeType()).thenReturn(org.skyve.metadata.model.Attribute.AttributeType.text);
+		doReturn(String.class).when(association).getImplementingType();
 		when(processDocument.getRelatedDocument(customer, "manager")).thenReturn(relatedDocument);
 		when(persistence.retrieve(relatedDocument, "ref-2")).thenReturn(relatedBean);
 		when(relatedBean.getBizId()).thenReturn("rb1");
@@ -613,7 +624,7 @@ class SmartClientEditServletErrorResponseTest {
 		when(relatedBean.getBizCustomer()).thenReturn("cust");
 		when(relatedBean.getBizDataGroupId()).thenReturn("dg");
 		when(relatedBean.getBizUserId()).thenReturn("user1");
-		doReturn(false).when(user).canReadBean("rb1", "admin", "Contact", "cust", "dg", "user1");
+		doReturn(Boolean.FALSE).when(user).canReadBean("rb1", "admin", "Contact", "cust", "dg", "user1");
 
 		View.ViewParameter declared = new View.ViewParameter();
 		declared.setFromBinding("manager");
@@ -639,6 +650,112 @@ class SmartClientEditServletErrorResponseTest {
 
 	@Test
 	@SuppressWarnings("static-method")
+	void applyNewParametersAppliesAssociationBeanWhenReadable() throws Exception {
+		org.skyve.metadata.customer.Customer customer = mock(org.skyve.metadata.customer.Customer.class);
+		org.skyve.metadata.user.User user = mock(org.skyve.metadata.user.User.class);
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		org.skyve.metadata.module.Module module = mock(org.skyve.metadata.module.Module.class);
+		org.skyve.metadata.model.document.Document processDocument = mock(org.skyve.metadata.model.document.Document.class);
+		org.skyve.metadata.model.document.Document relatedDocument = mock(org.skyve.metadata.model.document.Document.class);
+		Association association = mock(Association.class);
+		Bean relatedBean = mock(Bean.class);
+		View view = mock(View.class);
+		java.util.HashMap<String, Object> values = new java.util.HashMap<>();
+		values.put("targetValue", "before");
+		DynamicBean processBean = new DynamicBean("admin", "Contact", values);
+
+		when(module.getName()).thenReturn("admin");
+		when(processDocument.getName()).thenReturn("Contact");
+		when(processDocument.getOwningModuleName()).thenReturn("admin");
+		when(processDocument.getView("ux", customer, "edit")).thenReturn(view);
+		when(processDocument.getAttribute("manager")).thenReturn(association);
+		when(processDocument.getExtends()).thenReturn(null);
+		when(association.getName()).thenReturn("manager");
+		when(association.getAttributeType()).thenReturn(org.skyve.metadata.model.Attribute.AttributeType.text);
+		doReturn(String.class).when(association).getImplementingType();
+		when(processDocument.getRelatedDocument(customer, "manager")).thenReturn(relatedDocument);
+		when(persistence.retrieve(relatedDocument, "ref-3")).thenReturn(relatedBean);
+		when(relatedBean.getBizId()).thenReturn("rb2");
+		when(relatedBean.getBizModule()).thenReturn("admin");
+		when(relatedBean.getBizDocument()).thenReturn("Contact");
+		when(relatedBean.getBizCustomer()).thenReturn("cust");
+		when(relatedBean.getBizDataGroupId()).thenReturn("dg");
+		when(relatedBean.getBizUserId()).thenReturn("user2");
+		doReturn(Boolean.TRUE).when(user).canReadBean("rb2", "admin", "Contact", "cust", "dg", "user2");
+
+		View.ViewParameter declared = new View.ViewParameter();
+		declared.setFromBinding("manager");
+		declared.setBoundTo("targetValue");
+		when(view.getParameters()).thenReturn(List.of(declared));
+
+		java.util.SortedMap<String, Object> parameters = new java.util.TreeMap<>();
+		parameters.put("manager", "ref-3");
+
+		SmartClientEditServlet.applyNewParameters(customer,
+				user,
+				persistence,
+				module,
+				processDocument,
+				processBean,
+				parameters,
+				"ux");
+
+		verify(user).canReadBean("rb2", "admin", "Contact", "cust", "dg", "user2");
+		assertEquals(relatedBean, processBean.get("targetValue"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void applyNewParametersUsesToStringPathForAssociationWhenIncomingValueIsNotString() throws Exception {
+		org.skyve.metadata.customer.Customer customer = mock(org.skyve.metadata.customer.Customer.class);
+		org.skyve.metadata.user.User user = mock(org.skyve.metadata.user.User.class);
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		org.skyve.metadata.module.Module module = mock(org.skyve.metadata.module.Module.class);
+		org.skyve.metadata.model.document.Document processDocument = mock(org.skyve.metadata.model.document.Document.class);
+		Association association = mock(Association.class);
+		View view = mock(View.class);
+		java.util.HashMap<String, Object> values = new java.util.HashMap<>();
+		values.put("targetValue", "before");
+		DynamicBean processBean = new DynamicBean("admin", "Contact", values);
+
+		when(module.getName()).thenReturn("admin");
+		when(processDocument.getName()).thenReturn("Contact");
+		when(processDocument.getOwningModuleName()).thenReturn("admin");
+		when(processDocument.getView("ux", customer, "edit")).thenReturn(view);
+		when(processDocument.getAttribute("manager")).thenReturn(association);
+		when(processDocument.getExtends()).thenReturn(null);
+		when(association.getAttributeType()).thenReturn(org.skyve.metadata.model.Attribute.AttributeType.text);
+		doReturn(String.class).when(association).getImplementingType();
+
+		View.ViewParameter declared = new View.ViewParameter();
+		declared.setFromBinding("manager");
+		declared.setBoundTo("targetValue");
+		when(view.getParameters()).thenReturn(List.of(declared));
+
+		Object nonStringValue = new Object() {
+			@Override
+			public String toString() {
+				return "converted-value";
+			}
+		};
+
+		java.util.SortedMap<String, Object> parameters = new java.util.TreeMap<>();
+		parameters.put("manager", nonStringValue);
+
+		SmartClientEditServlet.applyNewParameters(customer,
+				user,
+				persistence,
+				module,
+				processDocument,
+				processBean,
+				parameters,
+				"ux");
+
+		assertEquals("converted-value", processBean.get("targetValue"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
 	void removePrivateThrowsIllegalArgumentWhenSecurityExceptionLoggingNeedsPersistence() throws Exception {
 		AbstractWebContext webContext = mock(AbstractWebContext.class);
 		User user = mock(User.class);
@@ -647,7 +764,7 @@ class SmartClientEditServletErrorResponseTest {
 		PersistentBean beanToDelete = mock(PersistentBean.class);
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 
-		doReturn(false).when(user).canDeleteDocument(processDocument);
+		doReturn(Boolean.FALSE).when(user).canDeleteDocument(processDocument);
 
 		assertThrows(IllegalArgumentException.class,
 				() -> invokeRemovePrivate(webContext,
@@ -670,7 +787,7 @@ class SmartClientEditServletErrorResponseTest {
 		PersistentBean beanToDelete = mock(PersistentBean.class);
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 
-		doReturn(true).when(user).canDeleteDocument(processDocument);
+		doReturn(Boolean.TRUE).when(user).canDeleteDocument(processDocument);
 		when(beanToDelete.getBizId()).thenReturn("gone-1");
 		when(persistence.retrieve(processDocument, "gone-1")).thenReturn(null);
 
@@ -696,7 +813,7 @@ class SmartClientEditServletErrorResponseTest {
 		PersistentBean retrieved = mock(PersistentBean.class);
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 
-		doReturn(true).when(user).canDeleteDocument(processDocument);
+		doReturn(Boolean.TRUE).when(user).canDeleteDocument(processDocument);
 		when(beanToDelete.getBizId()).thenReturn("b1");
 		when(persistence.retrieve(processDocument, "b1")).thenReturn(retrieved);
 		when(retrieved.getBizId()).thenReturn("b1");
@@ -705,7 +822,7 @@ class SmartClientEditServletErrorResponseTest {
 		when(retrieved.getBizCustomer()).thenReturn("cust");
 		when(retrieved.getBizDataGroupId()).thenReturn("dg");
 		when(retrieved.getBizUserId()).thenReturn("user1");
-		doReturn(false).when(user).canReadBean("b1", "admin", "Contact", "cust", "dg", "user1");
+		doReturn(Boolean.FALSE).when(user).canReadBean("b1", "admin", "Contact", "cust", "dg", "user1");
 
 		assertThrows(IllegalArgumentException.class,
 				() -> invokeRemovePrivate(webContext,
@@ -729,7 +846,7 @@ class SmartClientEditServletErrorResponseTest {
 		PersistentBean retrieved = mock(PersistentBean.class);
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 
-		doReturn(true).when(user).canDeleteDocument(processDocument);
+		doReturn(Boolean.TRUE).when(user).canDeleteDocument(processDocument);
 		when(beanToDelete.getBizId()).thenReturn("b2");
 		when(beanToDelete.getBizLock()).thenReturn(new OptimisticLock("u1", new java.util.Date(10L)));
 		when(persistence.retrieve(processDocument, "b2")).thenReturn(retrieved);
@@ -739,7 +856,7 @@ class SmartClientEditServletErrorResponseTest {
 		when(retrieved.getBizCustomer()).thenReturn("cust");
 		when(retrieved.getBizDataGroupId()).thenReturn("dg");
 		when(retrieved.getBizUserId()).thenReturn("user1");
-		doReturn(true).when(user).canReadBean("b2", "admin", "Contact", "cust", "dg", "user1");
+		doReturn(Boolean.TRUE).when(user).canReadBean("b2", "admin", "Contact", "cust", "dg", "user1");
 		when(retrieved.getBizLock()).thenReturn(new OptimisticLock("u2", new java.util.Date(11L)));
 
 		assertThrows(OptimisticLockException.class,
@@ -766,7 +883,7 @@ class SmartClientEditServletErrorResponseTest {
 		StringWriter sink = new StringWriter();
 		PrintWriter pw = new PrintWriter(sink);
 
-		doReturn(true).when(user).canDeleteDocument(processDocument);
+		doReturn(Boolean.TRUE).when(user).canDeleteDocument(processDocument);
 		when(beanToDelete.getBizId()).thenReturn("b3");
 		OptimisticLock lock = new OptimisticLock("u3", new java.util.Date(12L));
 		when(beanToDelete.getBizLock()).thenReturn(lock);
@@ -778,12 +895,12 @@ class SmartClientEditServletErrorResponseTest {
 		when(retrieved.getBizDataGroupId()).thenReturn("dg");
 		when(retrieved.getBizUserId()).thenReturn("user1");
 		when(retrieved.getBizLock()).thenReturn(lock);
-		doReturn(true).when(user).canReadBean("b3", "admin", "Contact", "cust", "dg", "user1");
-		doReturn(true).when(customer).interceptBeforePreExecute(org.skyve.metadata.controller.ImplicitActionName.Delete,
+		doReturn(Boolean.TRUE).when(user).canReadBean("b3", "admin", "Contact", "cust", "dg", "user1");
+		doReturn(Boolean.TRUE).when(customer).interceptBeforePreExecute(org.skyve.metadata.controller.ImplicitActionName.Delete,
 				retrieved,
 				null,
 				webContext);
-		doReturn(true).when(customer).interceptBeforePostRender(retrieved, webContext);
+		doReturn(Boolean.TRUE).when(customer).interceptBeforePostRender(retrieved, webContext);
 
 		assertThrows(NullPointerException.class,
 				() -> invokeRemovePrivate(webContext, user, customer, processDocument, beanToDelete, null, persistence, pw));
@@ -802,13 +919,12 @@ class SmartClientEditServletErrorResponseTest {
 		Document processDocument = mock(Document.class);
 		PersistentBean beanToDelete = mock(PersistentBean.class);
 		PersistentBean retrieved = mock(PersistentBean.class);
-		@SuppressWarnings("unchecked")
 		Bizlet<PersistentBean> bizlet = mock(Bizlet.class);
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		StringWriter sink = new StringWriter();
 		PrintWriter pw = new PrintWriter(sink);
 
-		doReturn(true).when(user).canDeleteDocument(processDocument);
+		doReturn(Boolean.TRUE).when(user).canDeleteDocument(processDocument);
 		when(beanToDelete.getBizId()).thenReturn("b4");
 		OptimisticLock lock = new OptimisticLock("u4", new java.util.Date(13L));
 		when(beanToDelete.getBizLock()).thenReturn(lock);
@@ -820,8 +936,8 @@ class SmartClientEditServletErrorResponseTest {
 		when(retrieved.getBizDataGroupId()).thenReturn("dg");
 		when(retrieved.getBizUserId()).thenReturn("user1");
 		when(retrieved.getBizLock()).thenReturn(lock);
-		doReturn(true).when(user).canReadBean("b4", "admin", "Contact", "cust", "dg", "user1");
-		doReturn(false).when(customer).interceptBeforePreExecute(org.skyve.metadata.controller.ImplicitActionName.Delete,
+		doReturn(Boolean.TRUE).when(user).canReadBean("b4", "admin", "Contact", "cust", "dg", "user1");
+		doReturn(Boolean.FALSE).when(customer).interceptBeforePreExecute(org.skyve.metadata.controller.ImplicitActionName.Delete,
 				retrieved,
 				null,
 				webContext);
@@ -856,7 +972,7 @@ class SmartClientEditServletErrorResponseTest {
 		StringWriter sink = new StringWriter();
 		PrintWriter pw = new PrintWriter(sink);
 
-		doReturn(true).when(user).canDeleteDocument(processDocument);
+		doReturn(Boolean.TRUE).when(user).canDeleteDocument(processDocument);
 		when(beanToDelete.getBizId()).thenReturn("b4n");
 		OptimisticLock lock = new OptimisticLock("u4n", new java.util.Date(15L));
 		when(beanToDelete.getBizLock()).thenReturn(lock);
@@ -868,12 +984,12 @@ class SmartClientEditServletErrorResponseTest {
 		when(retrieved.getBizDataGroupId()).thenReturn("dg");
 		when(retrieved.getBizUserId()).thenReturn("user1");
 		when(retrieved.getBizLock()).thenReturn(lock);
-		doReturn(true).when(user).canReadBean("b4n", "admin", "Contact", "cust", "dg", "user1");
-		doReturn(false).when(customer).interceptBeforePreExecute(org.skyve.metadata.controller.ImplicitActionName.Delete,
+		doReturn(Boolean.TRUE).when(user).canReadBean("b4n", "admin", "Contact", "cust", "dg", "user1");
+		doReturn(Boolean.FALSE).when(customer).interceptBeforePreExecute(org.skyve.metadata.controller.ImplicitActionName.Delete,
 				retrieved,
 				null,
 				webContext);
-		doReturn(true).when(customer).interceptBeforePostRender(retrieved, webContext);
+		doReturn(Boolean.TRUE).when(customer).interceptBeforePostRender(retrieved, webContext);
 
 		assertThrows(NullPointerException.class,
 				() -> invokeRemovePrivate(webContext, user, customer, processDocument, beanToDelete, null, persistence, pw));
@@ -896,11 +1012,10 @@ class SmartClientEditServletErrorResponseTest {
 		Document processDocument = mock(Document.class);
 		PersistentBean beanToDelete = mock(PersistentBean.class);
 		PersistentBean retrieved = mock(PersistentBean.class);
-		@SuppressWarnings("unchecked")
 		Bizlet<PersistentBean> bizlet = mock(Bizlet.class);
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 
-		doReturn(true).when(user).canDeleteDocument(processDocument);
+		doReturn(Boolean.TRUE).when(user).canDeleteDocument(processDocument);
 		when(beanToDelete.getBizId()).thenReturn("b5");
 		OptimisticLock lock = new OptimisticLock("u5", new java.util.Date(14L));
 		when(beanToDelete.getBizLock()).thenReturn(lock);
@@ -912,8 +1027,8 @@ class SmartClientEditServletErrorResponseTest {
 		when(retrieved.getBizDataGroupId()).thenReturn("dg");
 		when(retrieved.getBizUserId()).thenReturn("user1");
 		when(retrieved.getBizLock()).thenReturn(lock);
-		doReturn(true).when(user).canReadBean("b5", "admin", "Contact", "cust", "dg", "user1");
-		doReturn(true).when(customer).interceptBeforePreExecute(org.skyve.metadata.controller.ImplicitActionName.Delete,
+		doReturn(Boolean.TRUE).when(user).canReadBean("b5", "admin", "Contact", "cust", "dg", "user1");
+		doReturn(Boolean.TRUE).when(customer).interceptBeforePreExecute(org.skyve.metadata.controller.ImplicitActionName.Delete,
 				retrieved,
 				null,
 				webContext);
@@ -947,7 +1062,7 @@ class SmartClientEditServletErrorResponseTest {
 		Bean bean = mock(Bean.class);
 		AbstractWebContext webContext = mock(AbstractWebContext.class);
 
-		doReturn(true).when(customer).interceptBeforePostRender(bean, webContext);
+		doReturn(Boolean.TRUE).when(customer).interceptBeforePostRender(bean, webContext);
 
 		invokePostRenderPrivate(customer, bizlet, bean, webContext);
 
@@ -963,7 +1078,7 @@ class SmartClientEditServletErrorResponseTest {
 		Bean bean = mock(Bean.class);
 		AbstractWebContext webContext = mock(AbstractWebContext.class);
 
-		doReturn(false).when(customer).interceptBeforePostRender(bean, webContext);
+		doReturn(Boolean.FALSE).when(customer).interceptBeforePostRender(bean, webContext);
 
 		invokePostRenderPrivate(customer, bizlet, bean, webContext);
 
@@ -978,7 +1093,7 @@ class SmartClientEditServletErrorResponseTest {
 		Bean bean = mock(Bean.class);
 		AbstractWebContext webContext = mock(AbstractWebContext.class);
 
-		doReturn(false).when(customer).interceptBeforePostRender(bean, webContext);
+		doReturn(Boolean.FALSE).when(customer).interceptBeforePostRender(bean, webContext);
 
 		invokePostRenderPrivate(customer, null, bean, webContext);
 

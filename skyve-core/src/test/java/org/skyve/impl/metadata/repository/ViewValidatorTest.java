@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -17,7 +18,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.model.document.AssociationImpl;
 import org.skyve.impl.metadata.model.document.CollectionImpl;
 import org.skyve.impl.metadata.model.document.ConditionImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
@@ -39,6 +43,7 @@ import org.skyve.impl.metadata.view.container.form.FormRow;
 import org.skyve.impl.metadata.view.model.chart.ChartBuilderMetaData;
 import org.skyve.impl.metadata.view.event.Addable;
 import org.skyve.impl.metadata.view.event.Changeable;
+import org.skyve.impl.metadata.view.event.Editable;
 import org.skyve.impl.metadata.view.event.EventAction;
 import org.skyve.impl.metadata.view.event.Focusable;
 import org.skyve.impl.metadata.view.event.Removable;
@@ -49,10 +54,13 @@ import org.skyve.impl.metadata.view.event.SetInvisibleEventAction;
 import org.skyve.impl.metadata.view.event.ServerSideActionEventAction;
 import org.skyve.impl.metadata.view.event.ToggleDisabledEventAction;
 import org.skyve.impl.metadata.view.event.ToggleVisibilityEventAction;
+import org.skyve.impl.metadata.view.reference.ActionReference;
 import org.skyve.impl.metadata.view.reference.DefaultListViewReference;
 import org.skyve.impl.metadata.view.reference.EditViewReference;
 import org.skyve.impl.metadata.view.reference.QueryListViewReference;
 import org.skyve.impl.metadata.view.reference.ReportReference;
+import org.skyve.impl.metadata.view.widget.FilterParameterImpl;
+import org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Chart;
 import org.skyve.impl.metadata.view.widget.DialogButton;
@@ -98,17 +106,24 @@ import org.skyve.metadata.FormatterName;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.domain.Bean;
+import org.skyve.metadata.model.Dynamic;
+import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
+import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.view.Action.ActionShow;
+import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.chart.ChartModel;
+import org.skyve.metadata.view.model.comparison.ComparisonModel;
 import org.skyve.metadata.view.model.list.ListModel;
+import org.skyve.report.ReportFormat;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.impl.metadata.model.document.field.Text;
+import org.skyve.persistence.DocumentQuery.AggregateFunction;
 
 @ExtendWith(MockitoExtension.class)
-@SuppressWarnings("java:S5976") // separate tests preferred over parameterized here as junit-jupiter-params is not on the classpath
+@SuppressWarnings("all")
 class ViewValidatorTest {
 
 	@Mock
@@ -126,6 +141,7 @@ class ViewValidatorTest {
 	@BeforeEach
 	void setUp() {
 		when(repository.getModule(any(), anyString())).thenReturn(module);
+		lenient().when(customer.getModule(anyString())).thenReturn(module);
 		ProvidedRepositoryFactory.set(repository);
 
 		document = new DocumentImpl();
@@ -472,7 +488,7 @@ class ViewValidatorTest {
 		childDocument.setName("ChildDoc");
 		childDocument.setParentDocumentName("ParentDoc");
 
-		when(module.getDocument(eq(customer), eq("ParentDoc"))).thenReturn(parentDocument);
+		when(module.getDocument(customer, "ParentDoc")).thenReturn(parentDocument);
 
 		ViewValidator v = newValidator(childDocument);
 		Object result = invokeValidateBinding(v,
@@ -728,7 +744,7 @@ class ViewValidatorTest {
 		extension.setDocumentName("BaseDoc");
 		childDocument.setExtends(extension);
 
-		when(module.getDocument(eq(customer), eq("BaseDoc"))).thenReturn(baseDocument);
+		when(module.getDocument(customer, "BaseDoc")).thenReturn(baseDocument);
 
 		Spacer s = new Spacer();
 		s.setInvisibleConditionName("baseFlag");
@@ -751,7 +767,7 @@ class ViewValidatorTest {
 		extension.setDocumentName("BaseDoc");
 		childDocument.setExtends(extension);
 
-		when(module.getDocument(eq(customer), eq("BaseDoc"))).thenReturn(baseDocument);
+		when(module.getDocument(customer, "BaseDoc")).thenReturn(baseDocument);
 
 		Spacer s = new Spacer();
 		s.setInvisibleConditionName("missingFlag");
@@ -2291,5 +2307,1318 @@ class ViewValidatorTest {
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(() -> v.visitDataGridContainerColumn(containerColumn, true, true));
 		assertDoesNotThrow(() -> v.visitInject(inject, true, true));
+	}
+
+	// ---- helper ----
+
+	private DocumentImpl addChildDoc(String childDocName, org.skyve.metadata.model.Attribute attr) {
+		CollectionImpl collection = new CollectionImpl();
+		collection.setName("items");
+		collection.setDocumentName(childDocName);
+		collection.setType(org.skyve.metadata.model.document.Collection.CollectionType.child);
+		document.putAttribute(collection);
+
+		DocumentImpl childDoc = new DocumentImpl();
+		childDoc.setOwningModuleName("testMod");
+		childDoc.setName(childDocName);
+		childDoc.setDynamism(new Dynamic());
+		if (attr != null) {
+			childDoc.putAttribute(attr);
+		}
+		lenient().when(module.getDocument(any(), eq(childDocName))).thenReturn(childDoc);
+		return childDoc;
+	}
+
+	private void addDataGrid(String binding, org.skyve.metadata.MetaData widget) {
+		DataGrid grid = new DataGrid();
+		grid.setBinding(binding);
+		DataGridContainerColumn col = new DataGridContainerColumn();
+		col.getWidgets().add(widget);
+		grid.getColumns().add(col);
+		view.getContained().add(grid);
+	}
+
+	// ---- checkBox in data grid ----
+
+	@Test
+	void checkBox_inDataGrid_noException() {
+		org.skyve.impl.metadata.model.document.field.Boolean boolAttr = new org.skyve.impl.metadata.model.document.field.Boolean();
+		boolAttr.setName("active");
+		addChildDoc("ItemDoc", boolAttr);
+		CheckBox cb = new CheckBox();
+		cb.setBinding("active");
+		addDataGrid("items", cb);
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(v::visit);
+	}
+
+	// ---- colourPicker in data grid ----
+
+	@Test
+	void colourPicker_inDataGrid_noException() {
+		org.skyve.impl.metadata.model.document.field.Colour colAttr = new org.skyve.impl.metadata.model.document.field.Colour();
+		colAttr.setName("tint");
+		addChildDoc("ItemDoc", colAttr);
+		ColourPicker cp = new ColourPicker();
+		cp.setBinding("tint");
+		addDataGrid("items", cp);
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(v::visit);
+	}
+
+	// ---- combo in data grid ----
+
+	@Test
+	void combo_inDataGrid_noException() {
+		Text status = new Text();
+		status.setName("status");
+		status.setLength(10);
+		status.setDomainType(org.skyve.metadata.model.document.DomainType.constant);
+		addChildDoc("ItemDoc", status);
+		Combo combo = new Combo();
+		combo.setBinding("status");
+		addDataGrid("items", combo);
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(v::visit);
+	}
+
+	// ---- contentImage in data grid ----
+
+	@Test
+	void contentImage_inDataGrid_noException() {
+		org.skyve.impl.metadata.model.document.field.Content contentAttr = new org.skyve.impl.metadata.model.document.field.Content();
+		contentAttr.setName("photo");
+		contentAttr.setAttributeType(org.skyve.metadata.model.Attribute.AttributeType.content);
+		addChildDoc("ItemDoc", contentAttr);
+		ContentImage ci = new ContentImage();
+		ci.setBinding("photo");
+		addDataGrid("items", ci);
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(v::visit);
+	}
+
+	// ---- contentSignature in data grid ----
+
+	@Test
+	void contentSignature_inDataGrid_noException() {
+		org.skyve.impl.metadata.model.document.field.Content contentAttr = new org.skyve.impl.metadata.model.document.field.Content();
+		contentAttr.setName("sig");
+		contentAttr.setAttributeType(org.skyve.metadata.model.Attribute.AttributeType.content);
+		addChildDoc("ItemDoc", contentAttr);
+		ContentSignature cs = new ContentSignature();
+		cs.setBinding("sig");
+		addDataGrid("items", cs);
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(v::visit);
+	}
+
+	// ---- html in data grid ----
+
+	@Test
+	void html_inDataGrid_noException() {
+		org.skyve.impl.metadata.model.document.field.Markup markupAttr = new org.skyve.impl.metadata.model.document.field.Markup();
+		markupAttr.setName("body");
+		addChildDoc("ItemDoc", markupAttr);
+		HTML html = new HTML();
+		html.setBinding("body");
+		addDataGrid("items", html);
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(v::visit);
+	}
+
+	// ---- textArea in data grid ----
+
+	@Test
+	void textArea_inDataGrid_noException() {
+		Text desc = new Text();
+		desc.setName("description");
+		desc.setLength(50);
+		addChildDoc("ItemDoc", desc);
+		TextArea ta = new TextArea();
+		ta.setBinding("description");
+		addDataGrid("items", ta);
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(v::visit);
+	}
+
+	// ---- textField in data grid ----
+
+	@Test
+	void textField_inDataGrid_noException() {
+		Text nameAttr = new Text();
+		nameAttr.setName("name");
+		nameAttr.setLength(20);
+		addChildDoc("ItemDoc", nameAttr);
+		TextField tf = new TextField();
+		tf.setBinding("name");
+		addDataGrid("items", tf);
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(v::visit);
+	}
+
+	// ---- blurb in data grid ----
+
+	@Test
+	void blurb_inDataGrid_noException() {
+		Text x = new Text();
+		x.setName("x");
+		x.setLength(1);
+		addChildDoc("ItemDoc", x);
+		Blurb b = new Blurb();
+		b.setMarkup("<p>Hello</p>");
+		addDataGrid("items", b);
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(v::visit);
+	}
+
+	// ---- label in data grid ----
+
+	@Test
+	void label_inDataGrid_noException() {
+		Text x = new Text();
+		x.setName("x");
+		x.setLength(1);
+		addChildDoc("ItemDoc", x);
+		Label l = new Label();
+		l.setValue("Hello");
+		addDataGrid("items", l);
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(v::visit);
+	}
+
+	// ---- contentSignature colour validation ----
+
+	@Test
+	void contentSignature_validBackgroundColour_noException() {
+		org.skyve.impl.metadata.model.document.field.Content contentAttr = new org.skyve.impl.metadata.model.document.field.Content();
+		contentAttr.setName("file");
+		contentAttr.setAttributeType(org.skyve.metadata.model.Attribute.AttributeType.content);
+		document.putAttribute(contentAttr);
+		ContentSignature sig = new ContentSignature();
+		sig.setBinding("file");
+		sig.setRgbHexBackgroundColour("#FFFFFF");
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(() -> v.visitContentSignature(sig, true, true));
+	}
+
+	@Test
+	void contentSignature_validForegroundColour_noException() {
+		org.skyve.impl.metadata.model.document.field.Content contentAttr = new org.skyve.impl.metadata.model.document.field.Content();
+		contentAttr.setName("file");
+		contentAttr.setAttributeType(org.skyve.metadata.model.Attribute.AttributeType.content);
+		document.putAttribute(contentAttr);
+		ContentSignature sig = new ContentSignature();
+		sig.setBinding("file");
+		sig.setRgbHexForegroundColour("#000000");
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(() -> v.visitContentSignature(sig, true, true));
+	}
+
+	@Test
+	void contentSignature_invalidBackgroundColour_throws() {
+		org.skyve.impl.metadata.model.document.field.Content contentAttr = new org.skyve.impl.metadata.model.document.field.Content();
+		contentAttr.setName("file");
+		contentAttr.setAttributeType(org.skyve.metadata.model.Attribute.AttributeType.content);
+		document.putAttribute(contentAttr);
+		ContentSignature sig = new ContentSignature();
+		sig.setBinding("file");
+		sig.setRgbHexBackgroundColour("notAColour");
+		ViewValidator v = newValidator();
+		assertThrows(MetaDataException.class, () -> v.visitContentSignature(sig, true, true));
+	}
+
+	@Test
+	void contentSignature_invalidForegroundColour_throws() {
+		org.skyve.impl.metadata.model.document.field.Content contentAttr = new org.skyve.impl.metadata.model.document.field.Content();
+		contentAttr.setName("file");
+		contentAttr.setAttributeType(org.skyve.metadata.model.Attribute.AttributeType.content);
+		document.putAttribute(contentAttr);
+		ContentSignature sig = new ContentSignature();
+		sig.setBinding("file");
+		sig.setRgbHexForegroundColour("notAColour");
+		ViewValidator v = newValidator();
+		assertThrows(MetaDataException.class, () -> v.visitContentSignature(sig, true, true));
+	}
+
+	// ---- link reference no-ops ----
+
+	@Test
+	void link_resourceReference_noException() {
+		Link link = new Link();
+		link.setValue("Download");
+		link.setReference(new org.skyve.impl.metadata.view.reference.ResourceReference());
+		view.getContained().add(link);
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(v::visit);
+	}
+
+	@Test
+	void link_implicitActionReference_noException() {
+		Link link = new Link();
+		link.setValue("Go");
+		link.setReference(new org.skyve.impl.metadata.view.reference.ImplicitActionReference());
+		view.getContained().add(link);
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(v::visit);
+	}
+
+	@Test
+	void link_externalReference_noException() {
+		Link link = new Link();
+		link.setValue("Visit");
+		link.setReference(new org.skyve.impl.metadata.view.reference.ExternalReference());
+		view.getContained().add(link);
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(v::visit);
+	}
+
+	// ---- link action reference ----
+
+	@Test
+	void link_actionReference_existingAction_noException() {
+		ActionImpl action = new ActionImpl();
+		action.setName("runIt");
+		action.setImplicitName(ImplicitActionName.Save);
+		view.putAction(action);
+		org.skyve.impl.metadata.view.reference.ActionReference reference = new org.skyve.impl.metadata.view.reference.ActionReference();
+		reference.setActionName("runIt");
+		Link link = new Link();
+		link.setValue("Execute");
+		link.setReference(reference);
+		view.getContained().add(link);
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(v::visit);
+	}
+
+	@Test
+	void link_actionReference_missingAction_throws() {
+		org.skyve.impl.metadata.view.reference.ActionReference reference = new org.skyve.impl.metadata.view.reference.ActionReference();
+		reference.setActionName("noSuchAction");
+		Link link = new Link();
+		link.setValue("Execute");
+		link.setReference(reference);
+		view.getContained().add(link);
+		ViewValidator v = newValidator();
+		assertThrows(MetaDataException.class, v::visit);
+	}
+
+	// ---- reportAction ----
+
+	@Test
+	void reportAction_jasperReport_noException() {
+		DocumentImpl reportDoc = new DocumentImpl();
+		reportDoc.setOwningModuleName("testMod");
+		reportDoc.setName("Invoice");
+		when(customer.getModule("testMod")).thenReturn(module);
+		when(module.getDocument(customer, "Invoice")).thenReturn(reportDoc);
+		when(repository.getReportFileName(any(), eq(reportDoc), eq("SalesReport"))).thenReturn("SalesReport.jasper");
+		ActionImpl action = new ActionImpl();
+		action.setResourceName("SalesReport");
+		ParameterImpl modP = new ParameterImpl();
+		modP.setName(AbstractWebContext.MODULE_NAME);
+		modP.setValue("testMod");
+		action.getParameters().add(modP);
+		ParameterImpl docP = new ParameterImpl();
+		docP.setName(AbstractWebContext.DOCUMENT_NAME);
+		docP.setValue("Invoice");
+		action.getParameters().add(docP);
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(() -> v.visitReportAction(action));
+	}
+
+	@Test
+	void reportAction_missingModuleAndDocument_throws() {
+		ActionImpl action = new ActionImpl();
+		action.setResourceName("SomeReport");
+		ViewValidator v = newValidator();
+		assertThrows(MetaDataException.class, () -> v.visitReportAction(action));
+	}
+
+	@Test
+	void reportAction_invalidFileNameExtension_throws() {
+		DocumentImpl reportDoc = new DocumentImpl();
+		reportDoc.setOwningModuleName("testMod");
+		reportDoc.setName("Invoice");
+		when(customer.getModule("testMod")).thenReturn(module);
+		when(module.getDocument(customer, "Invoice")).thenReturn(reportDoc);
+		when(repository.getReportFileName(any(), eq(reportDoc), eq("BadReport"))).thenReturn("BadReport.xml");
+		ActionImpl action = new ActionImpl();
+		action.setResourceName("BadReport");
+		ParameterImpl modP = new ParameterImpl();
+		modP.setName(AbstractWebContext.MODULE_NAME);
+		modP.setValue("testMod");
+		action.getParameters().add(modP);
+		ParameterImpl docP = new ParameterImpl();
+		docP.setName(AbstractWebContext.DOCUMENT_NAME);
+		docP.setValue("Invoice");
+		action.getParameters().add(docP);
+		ViewValidator v = newValidator();
+		assertThrows(MetaDataException.class, () -> v.visitReportAction(action));
+	}
+
+	@Test
+	void reportAction_withReportEngineParameter_noException() {
+		DocumentImpl reportDoc = new DocumentImpl();
+		reportDoc.setOwningModuleName("testMod");
+		reportDoc.setName("Invoice");
+		when(customer.getModule("testMod")).thenReturn(module);
+		when(module.getDocument(customer, "Invoice")).thenReturn(reportDoc);
+		when(repository.getReportFileName(any(), eq(reportDoc), eq("SalesReport"))).thenReturn("SalesReport.jasper");
+		ActionImpl action = new ActionImpl();
+		action.setResourceName("SalesReport");
+		ParameterImpl modP = new ParameterImpl();
+		modP.setName(AbstractWebContext.MODULE_NAME);
+		modP.setValue("testMod");
+		action.getParameters().add(modP);
+		ParameterImpl docP = new ParameterImpl();
+		docP.setName(AbstractWebContext.DOCUMENT_NAME);
+		docP.setValue("Invoice");
+		action.getParameters().add(docP);
+		ParameterImpl engineP = new ParameterImpl();
+		engineP.setName(AbstractWebContext.REPORT_ENGINE);
+		action.getParameters().add(engineP);
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(() -> v.visitReportAction(action));
+	}
+
+	// ---- onAdded/onEdited ----
+
+	@Test
+	void onAdded_onEdited_boundWidget_serverLast_noException() {
+		ServerSideActionEventAction server = new ServerSideActionEventAction();
+		server.setActionName("existingAction");
+		ActionImpl action = new ActionImpl();
+		action.setName("existingAction");
+		view.putAction(action);
+		Addable addable = mock(Addable.class);
+		when(addable.getAddedActions()).thenReturn(java.util.List.of(server));
+		Editable editable = mock(Editable.class);
+		when(editable.getEditedActions()).thenReturn(java.util.List.of(server));
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(() -> v.visitOnAddedEventHandler(addable, true, true));
+		assertDoesNotThrow(() -> v.visitOnEditedEventHandler(editable, true, true));
+	}
+
+	// ---- onRemoved/onSelected ----
+
+	@Test
+	void onRemoved_onSelected_boundWidget_serverLast_noException() {
+		ServerSideActionEventAction server = new ServerSideActionEventAction();
+		server.setActionName("existingAction");
+		ActionImpl action = new ActionImpl();
+		action.setName("existingAction");
+		view.putAction(action);
+		Removable removable = mock(Removable.class);
+		when(removable.getRemovedActions()).thenReturn(java.util.List.of(server));
+		Selectable selectable = mock(Selectable.class);
+		when(selectable.getSelectedActions()).thenReturn(java.util.List.of(server));
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(() -> v.visitOnRemovedEventHandler(removable, true, true));
+		assertDoesNotThrow(() -> v.visitOnSelectedEventHandler(selectable, true, true));
+	}
+
+	// ---- sidebar widths ----
+
+	@Test
+	void sidebar_responsiveWidth_noException() {
+		Sidebar sidebar = new Sidebar();
+		sidebar.setResponsiveWidth(Integer.valueOf(6));
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(() -> v.visitSidebar(sidebar, true, true));
+	}
+
+	@Test
+	void sidebar_percentageWidth_noException() {
+		Sidebar sidebar = new Sidebar();
+		sidebar.setPercentageWidth(Integer.valueOf(50));
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(() -> v.visitSidebar(sidebar, true, true));
+	}
+
+	// ---- collapsible with title no height ----
+
+	@Test
+	void hbox_collapsibleWithTitleButNoHeight_throws() {
+		HBox hbox = new HBox();
+		hbox.setBorderTitle("My Box");
+		hbox.setCollapsible(Collapsible.open);
+		view.getContained().add(hbox);
+		ViewValidator v = newValidator();
+		assertThrows(MetaDataException.class, v::visit);
+	}
+
+	// ---- formColumn valid sizes ----
+
+	@Test
+	void formColumn_validSizes_noException() {
+		FormColumn column = new FormColumn();
+		column.setPixelWidth(Integer.valueOf(200));
+		column.setPercentageWidth(Integer.valueOf(50));
+		column.setResponsiveWidth(Integer.valueOf(6));
+		column.setSm(Integer.valueOf(12));
+		column.setMd(Integer.valueOf(6));
+		column.setLg(Integer.valueOf(4));
+		column.setXl(Integer.valueOf(3));
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(() -> v.visitFormColumn(column, true, true));
+	}
+
+	// ---- dialogButton condition ----
+
+	@Test
+	void dialogButton_unknownDisabledCondition_throws() {
+		DialogButton button = new DialogButton();
+		button.setDialogName("confirmDelete");
+		button.setDisabledConditionName("noSuchCond");
+		ViewValidator v = newValidator();
+		assertThrows(MetaDataException.class, () -> v.visitDialogButton(button, true, true));
+	}
+
+	// ---- form condition ----
+
+	@Test
+	void form_withDisabledCondition_noException() {
+		document.getConditions().put("formDisabled", new ConditionImpl());
+		Form form = new Form();
+		form.setDisabledConditionName("formDisabled");
+		FormRow row = new FormRow();
+		FormItem item = new FormItem();
+		item.setWidget(new Spacer());
+		row.getItems().add(item);
+		form.getRows().add(row);
+		view.getContained().add(form);
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(v::visit);
+	}
+
+	@Test
+	void form_missingCondition_throws() {
+		Form form = new Form();
+		form.setDisabledConditionName("missingCond");
+		FormRow row = new FormRow();
+		FormItem item = new FormItem();
+		item.setWidget(new Spacer());
+		row.getItems().add(item);
+		form.getRows().add(row);
+		view.getContained().add(form);
+		ViewValidator v = newValidator();
+		assertThrows(MetaDataException.class, v::visit);
+	}
+
+	@Test
+	void form_withWidgetId_noException() {
+		Form form = new Form();
+		form.setWidgetId("myForm");
+		FormRow row = new FormRow();
+		FormItem item = new FormItem();
+		item.setWidget(new Spacer());
+		row.getItems().add(item);
+		form.getRows().add(row);
+		view.getContained().add(form);
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(v::visit);
+	}
+
+	// ---- treeGrid/listRepeater ----
+
+	@Test
+	void treeGrid_withValidQuery_noException() {
+		MetaDataQueryDefinition query = mock(MetaDataQueryDefinition.class);
+		when(module.getMetaDataQuery("treeQuery")).thenReturn(query);
+		when(query.getDocumentModule(customer)).thenReturn(module);
+		when(query.getDocumentName()).thenReturn("TestDoc");
+		when(module.getDocument(customer, "TestDoc")).thenReturn(document);
+		TreeGrid grid = new TreeGrid();
+		grid.setQueryName("treeQuery");
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(() -> v.visitTreeGrid(grid, true, true));
+	}
+
+	@Test
+	void listRepeater_withValidQuery_noException() {
+		MetaDataQueryDefinition query = mock(MetaDataQueryDefinition.class);
+		when(module.getMetaDataQuery("repeaterQuery")).thenReturn(query);
+		when(query.getDocumentModule(customer)).thenReturn(module);
+		when(query.getDocumentName()).thenReturn("TestDoc");
+		when(module.getDocument(customer, "TestDoc")).thenReturn(document);
+		ListRepeater repeater = new ListRepeater();
+		repeater.setQueryName("repeaterQuery");
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(() -> v.visitListRepeater(repeater, true, true));
+	}
+
+	// ---- map ----
+
+	@Test
+	void map_withValidModel_noException() {
+		when(repository.getMapModel(any(), any(), eq("validMapModel"), eq(false))).thenReturn(mock(org.skyve.metadata.view.model.map.MapModel.class));
+		MapDisplay map = new MapDisplay();
+		map.setModelName("validMapModel");
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(() -> v.visitMap(map, true, true));
+	}
+
+	// ---- staticImage/dynamicImage conditions ----
+
+	@Test
+	void staticImage_unknownCondition_throws() {
+		StaticImage image = new StaticImage();
+		image.setRelativeFile("logo.png");
+		image.setInvisibleConditionName("missingCond");
+		ViewValidator v = newValidator();
+		assertThrows(MetaDataException.class, () -> v.visitStaticImage(image, true, true));
+	}
+
+	@Test
+	void dynamicImage_unknownInvisibleCondition_throws() {
+		org.skyve.impl.metadata.view.widget.DynamicImage image = new org.skyve.impl.metadata.view.widget.DynamicImage();
+		image.setName("chart");
+		image.setInvisibleConditionName("missingCond");
+		ViewValidator v = newValidator();
+		assertThrows(MetaDataException.class, () -> v.visitDynamicImage(image, true, true));
+	}
+
+	// ---- label with value ----
+
+	@Test
+	void label_withValue_noException() {
+		Label label = new Label();
+		label.setValue("Hello");
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(() -> v.visitLabel(label, true, true));
+	}
+
+	// ---- link reportReference concrete + expression ----
+
+	@Test
+	void link_reportReference_concreteModuleExpressionDocument_noException() {
+		when(repository.getModule(any(), eq("knownModule"))).thenReturn(module);
+		ReportReference reference = new ReportReference();
+		reference.setModuleName("knownModule");
+		reference.setDocumentName("{docExpr}");
+		reference.setReportName("SomeReport");
+		Link link = new Link();
+		link.setValue("Report");
+		link.setReference(reference);
+		view.getContained().add(link);
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(v::visit);
+	}
+
+	// ---- view with parameter ----
+
+	@Test
+	void view_withParameter_noException() {
+		Text nameAttr = new Text();
+		nameAttr.setName("name");
+		nameAttr.setLength(20);
+		document.putAttribute(nameAttr);
+		org.skyve.metadata.view.View.ViewParameter param = new org.skyve.metadata.view.View.ViewParameter();
+		param.setFromBinding("name");
+		view.getParameters().add(param);
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(v::visit);
+	}
+
+	// ---- hbox/vbox widgetId ----
+
+	@Test
+	void hbox_withWidgetId_noException() {
+		HBox hbox = new HBox();
+		hbox.setWidgetId("myHBox");
+		view.getContained().add(hbox);
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(v::visit);
+	}
+
+	@Test
+	void vbox_withWidgetId_noException() {
+		VBox vbox = new VBox();
+		vbox.setWidgetId("myVBox");
+		view.getContained().add(vbox);
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(v::visit);
+	}
+
+	// ---- dataGrid with conditions ----
+
+	@Test
+	void dataGrid_withConditions_noException() {
+		CollectionImpl children = new CollectionImpl();
+		children.setName("items");
+		children.setDocumentName("ItemDoc");
+		children.setType(org.skyve.metadata.model.document.Collection.CollectionType.child);
+		document.putAttribute(children);
+		document.getConditions().put("dgFlag", new ConditionImpl());
+		DataGrid grid = new DataGrid();
+		grid.setBinding("items");
+		grid.setDisabledConditionName("dgFlag");
+		grid.setDisableAddConditionName("dgFlag");
+		grid.setDisableEditConditionName("dgFlag");
+		grid.setDisableRemoveConditionName("dgFlag");
+		grid.setDisableZoomConditionName("dgFlag");
+		view.getContained().add(grid);
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(v::visit);
+	}
+
+	// ---- listGrid CRUD conditions ----
+
+	@Test
+	void listGrid_withCRUDConditions_noException() {
+		document.getConditions().put("crudFlag", new ConditionImpl());
+		MetaDataQueryDefinition query = mock(MetaDataQueryDefinition.class);
+		when(module.getMetaDataQuery("crudQuery")).thenReturn(query);
+		when(query.getDocumentModule(customer)).thenReturn(module);
+		when(query.getDocumentName()).thenReturn("TestDoc");
+		when(module.getDocument(customer, "TestDoc")).thenReturn(document);
+		ListGrid grid = new ListGrid();
+		grid.setQueryName("crudQuery");
+		grid.setDisabledConditionName("crudFlag");
+		grid.setDisableAddConditionName("crudFlag");
+		grid.setDisableEditConditionName("crudFlag");
+		grid.setDisableZoomConditionName("crudFlag");
+		grid.setDisableRemoveConditionName("crudFlag");
+		grid.setPostRefreshConditionName("crudFlag");
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(() -> v.visitListGrid(grid, true, true));
+	}
+
+	// ---- treeGrid CRUD conditions ----
+
+	@Test
+	void treeGrid_withCRUDConditions_noException() {
+		document.getConditions().put("treeFlag", new ConditionImpl());
+		MetaDataQueryDefinition query = mock(MetaDataQueryDefinition.class);
+		when(module.getMetaDataQuery("treeQ")).thenReturn(query);
+		when(query.getDocumentModule(customer)).thenReturn(module);
+		when(query.getDocumentName()).thenReturn("TestDoc");
+		when(module.getDocument(customer, "TestDoc")).thenReturn(document);
+		TreeGrid grid = new TreeGrid();
+		grid.setQueryName("treeQ");
+		grid.setDisabledConditionName("treeFlag");
+		grid.setDisableAddConditionName("treeFlag");
+		grid.setDisableEditConditionName("treeFlag");
+		grid.setDisableZoomConditionName("treeFlag");
+		grid.setDisableRemoveConditionName("treeFlag");
+		grid.setPostRefreshConditionName("treeFlag");
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(() -> v.visitTreeGrid(grid, true, true));
+	}
+
+	// ---- listRepeater conditions ----
+
+	@Test
+	void listRepeater_withConditions_noException() {
+		document.getConditions().put("repFlag", new ConditionImpl());
+		MetaDataQueryDefinition query = mock(MetaDataQueryDefinition.class);
+		when(module.getMetaDataQuery("repQ")).thenReturn(query);
+		when(query.getDocumentModule(customer)).thenReturn(module);
+		when(query.getDocumentName()).thenReturn("TestDoc");
+		when(module.getDocument(customer, "TestDoc")).thenReturn(document);
+		ListRepeater repeater = new ListRepeater();
+		repeater.setQueryName("repQ");
+		repeater.setInvisibleConditionName("repFlag");
+		repeater.setPostRefreshConditionName("repFlag");
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(() -> v.visitListRepeater(repeater, true, true));
+	}
+
+	// ---- chart inline model via documentName ----
+
+	@Test
+	void chart_inlineModel_viaDocumentName_noException() {
+		DocumentImpl chartDoc = new DocumentImpl();
+		chartDoc.setOwningModuleName("testMod");
+		chartDoc.setName("ChartDoc");
+		org.skyve.impl.metadata.model.document.field.Integer amount = new org.skyve.impl.metadata.model.document.field.Integer();
+		amount.setName("amount");
+		chartDoc.putAttribute(amount);
+		when(module.getDocument(any(), eq("ChartDoc"))).thenReturn(chartDoc);
+		ChartBuilderMetaData model = new ChartBuilderMetaData();
+		model.setLabel("Sales");
+		model.setModuleName("testMod");
+		model.setDocumentName("ChartDoc");
+		model.setCategoryBinding(Bean.DOCUMENT_ID);
+		model.setValueBinding("amount");
+		Chart chart = new Chart();
+		chart.setModel(model);
+		view.getContained().add(chart);
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(v::visit);
+	}
+
+	// ---- chart inline model via queryName ----
+
+	@Test
+	void chart_inlineModel_viaQueryName_noException() {
+		DocumentImpl chartDoc = new DocumentImpl();
+		chartDoc.setOwningModuleName("testMod");
+		chartDoc.setName("ChartDoc");
+		org.skyve.impl.metadata.model.document.field.Integer amount = new org.skyve.impl.metadata.model.document.field.Integer();
+		amount.setName("amount");
+		chartDoc.putAttribute(amount);
+		MetaDataQueryDefinition query = mock(MetaDataQueryDefinition.class);
+		when(module.getMetaDataQuery("chartQuery")).thenReturn(query);
+		when(query.getDocumentModule(customer)).thenReturn(module);
+		when(query.getDocumentName()).thenReturn("ChartDoc");
+		when(module.getDocument(customer, "ChartDoc")).thenReturn(chartDoc);
+		ChartBuilderMetaData model = new ChartBuilderMetaData();
+		model.setLabel("Sales");
+		model.setModuleName("testMod");
+		model.setQueryName("chartQuery");
+		model.setCategoryBinding(Bean.DOCUMENT_ID);
+		model.setValueBinding("amount");
+		Chart chart = new Chart();
+		chart.setModel(model);
+		view.getContained().add(chart);
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(v::visit);
+	}
+
+	// ---- refactor coverage: widgets, lookup, references, charts ----
+
+	private AssociationImpl addAssociation(String name, String targetDocumentName, String queryName) {
+		AssociationImpl association = new AssociationImpl();
+		association.setName(name);
+		association.setDocumentName(targetDocumentName);
+		association.setType(AssociationType.aggregation);
+		if (queryName != null) {
+			association.setQueryName(queryName);
+		}
+		document.putAttribute(association);
+		return association;
+	}
+
+	private DocumentImpl addTargetDocument(String documentName, org.skyve.metadata.model.Attribute attribute) {
+		DocumentImpl target = new DocumentImpl();
+		target.setOwningModuleName("testMod");
+		target.setName(documentName);
+		target.setDynamism(new Dynamic());
+		if (attribute != null) {
+			target.putAttribute(attribute);
+		}
+		lenient().when(module.getDocument(any(), eq(documentName))).thenReturn(target);
+		return target;
+	}
+
+	private void addLookupInDataGrid(String collectionBinding,
+									String childDocName,
+									org.skyve.metadata.model.Attribute childAttribute,
+									String queryName,
+									DocumentImpl drivingDocument,
+									String descriptionBinding,
+									String... queryColumnNames) {
+		addChildDoc(childDocName, childAttribute);
+		stubLookupQuery(queryName, drivingDocument, queryColumnNames);
+		LookupDescription lookup = new LookupDescription();
+		lookup.setDescriptionBinding(descriptionBinding);
+		lookup.setQuery(queryName);
+		addDataGrid(collectionBinding, lookup);
+	}
+
+	private MetaDataQueryDefinition stubLookupQuery(String queryName, DocumentImpl drivingDocument, String... columnNames) {
+		MetaDataQueryDefinition query = mock(MetaDataQueryDefinition.class);
+		lenient().when(module.getMetaDataQuery(queryName)).thenReturn(query);
+		when(module.getNullSafeMetaDataQuery(queryName)).thenReturn(query);
+		lenient().when(query.getDocumentModule(customer)).thenReturn(module);
+		lenient().when(query.getDocumentName()).thenReturn(drivingDocument.getName());
+		lenient().when(module.getDocument(customer, drivingDocument.getName())).thenReturn(drivingDocument);
+		List<MetaDataQueryProjectedColumn> columns = new ArrayList<>();
+		for (String columnName : columnNames) {
+			MetaDataQueryProjectedColumn column = mock(MetaDataQueryProjectedColumn.class);
+			when(column.getName()).thenReturn(columnName);
+			lenient().when(column.getBinding()).thenReturn(columnName);
+			lenient().when(column.isProjected()).thenReturn(Boolean.TRUE);
+			columns.add(column);
+		}
+		when(query.getColumns()).thenReturn(new ArrayList<>(columns));
+		return query;
+	}
+
+	@Test
+	void visitZoomIn_validAssociation_noException() {
+		addAssociation("contact", "ContactDoc", null);
+		addTargetDocument("ContactDoc", null);
+		ZoomIn zoomIn = new ZoomIn();
+		zoomIn.setBinding("contact");
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(() -> v.visitZoomIn(zoomIn, true, true));
+	}
+
+	@Test
+	void visitZoomIn_iconShowWithoutIcon_throws() {
+		addAssociation("contact", "ContactDoc", null);
+		addTargetDocument("ContactDoc", null);
+		ZoomIn zoomIn = new ZoomIn();
+		zoomIn.setBinding("contact");
+		zoomIn.setShow(ActionShow.icon);
+		ViewValidator v = newValidator();
+		assertThrows(MetaDataException.class, () -> v.visitZoomIn(zoomIn, true, true));
+	}
+
+	@Test
+	void visitCheckMembership_validCollectionWithDomain_noException() {
+		CollectionImpl tags = new CollectionImpl();
+		tags.setName("tags");
+		tags.setDocumentName("TagDoc");
+		tags.setType(org.skyve.metadata.model.document.Collection.CollectionType.child);
+		tags.setDomainType(org.skyve.metadata.model.document.DomainType.constant);
+		document.putAttribute(tags);
+		addTargetDocument("TagDoc", null);
+		CheckMembership membership = new CheckMembership();
+		membership.setBinding("tags");
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(() -> v.visitCheckMembership(membership, true, true));
+	}
+
+	@Test
+	void visitListMembership_validCollectionWithDomain_noException() {
+		CollectionImpl tags = new CollectionImpl();
+		tags.setName("tags");
+		tags.setDocumentName("TagDoc");
+		tags.setType(org.skyve.metadata.model.document.Collection.CollectionType.child);
+		tags.setDomainType(org.skyve.metadata.model.document.DomainType.constant);
+		document.putAttribute(tags);
+		addTargetDocument("TagDoc", null);
+		ListMembership membership = new ListMembership();
+		membership.setBinding("tags");
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(() -> v.visitListMembership(membership, true, true));
+	}
+
+	@Test
+	void visitComparison_validAssociationAndModel_noException() {
+		addAssociation("contact", "ContactDoc", null);
+		addTargetDocument("ContactDoc", null);
+		when(repository.getComparisonModel(any(), any(), eq("compareModel"), eq(false)))
+				.thenReturn(mock(ComparisonModel.class));
+		Comparison comparison = new Comparison();
+		comparison.setBinding("contact");
+		comparison.setModelName("compareModel");
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(() -> v.visitComparison(comparison, true, true));
+	}
+
+	@Test
+	void visitComparison_invalidModel_throws() {
+		addAssociation("contact", "ContactDoc", null);
+		addTargetDocument("ContactDoc", null);
+		when(repository.getComparisonModel(any(), any(), eq("missingModel"), eq(false)))
+				.thenThrow(new RuntimeException("missing"));
+		Comparison comparison = new Comparison();
+		comparison.setBinding("contact");
+		comparison.setModelName("missingModel");
+		ViewValidator v = newValidator();
+		assertThrows(MetaDataException.class, () -> v.visitComparison(comparison, true, true));
+	}
+
+	@Test
+	void visitLookupDescription_inDataGrid_withQuery_noException() {
+		Text description = new Text();
+		description.setName("description");
+		description.setLength(50);
+		DocumentImpl drivingDoc = addTargetDocument("DrivingDoc", description);
+		addLookupInDataGrid("items", "ItemDoc", description, "lookupQuery", drivingDoc, "description", Bean.BIZ_KEY, "description");
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(v::visit);
+	}
+
+	@Test
+	void visitLookupDescription_inDataGrid_dropDownColumnNotProjected_throws() {
+		DocumentImpl drivingDoc = addTargetDocument("DrivingDoc", null);
+		MetaDataQueryProjectedColumn extra = mock(MetaDataQueryProjectedColumn.class);
+		when(extra.getName()).thenReturn("extra");
+		when(extra.isProjected()).thenReturn(Boolean.FALSE);
+		MetaDataQueryDefinition query = mock(MetaDataQueryDefinition.class);
+		when(module.getMetaDataQuery("lookupQuery")).thenReturn(query);
+		when(module.getNullSafeMetaDataQuery("lookupQuery")).thenReturn(query);
+		when(query.getDocumentModule(customer)).thenReturn(module);
+		when(query.getDocumentName()).thenReturn(drivingDoc.getName());
+		lenient().when(module.getDocument(customer, drivingDoc.getName())).thenReturn(drivingDoc);
+		when(query.getColumns()).thenReturn(new ArrayList<>(List.of(extra)));
+		addChildDoc("ItemDoc", null);
+		LookupDescription lookup = new LookupDescription();
+		lookup.setDescriptionBinding(Bean.BIZ_KEY);
+		lookup.setQuery("lookupQuery");
+		LookupDescriptionColumn dropDown = new LookupDescriptionColumn();
+		dropDown.setName("extra");
+		lookup.getDropDownColumns().add(dropDown);
+		addDataGrid("items", lookup);
+		ViewValidator v = newValidator();
+		assertThrows(MetaDataException.class, v::visit);
+	}
+
+	@Test
+	void visitLookupDescription_inDataGrid_parameterNameWithColon_throws() {
+		DocumentImpl drivingDoc = addTargetDocument("DrivingDoc", null);
+		addChildDoc("ItemDoc", null);
+		MetaDataQueryDefinition query = mock(MetaDataQueryDefinition.class);
+		when(module.getMetaDataQuery("lookupQuery")).thenReturn(query);
+		when(query.getDocumentModule(customer)).thenReturn(module);
+		when(query.getDocumentName()).thenReturn(drivingDoc.getName());
+		LookupDescription lookup = new LookupDescription();
+		lookup.setDescriptionBinding(Bean.BIZ_KEY);
+		lookup.setQuery("lookupQuery");
+		ParameterImpl parameter = new ParameterImpl();
+		parameter.setName("bad:param");
+		parameter.setValue("x");
+		lookup.getParameters().add(parameter);
+		addDataGrid("items", lookup);
+		ViewValidator v = newValidator();
+		assertThrows(MetaDataException.class, v::visit);
+	}
+
+	@Test
+	void visitLookupDescription_inDataGrid_descriptionBindingMissingFromQuery_throws() {
+		Text description = new Text();
+		description.setName("description");
+		description.setLength(50);
+		DocumentImpl drivingDoc = addTargetDocument("DrivingDoc", description);
+		addChildDoc("ItemDoc", description);
+		MetaDataQueryProjectedColumn column = mock(MetaDataQueryProjectedColumn.class);
+		when(column.getName()).thenReturn(Bean.BIZ_KEY);
+		MetaDataQueryDefinition query = mock(MetaDataQueryDefinition.class);
+		when(module.getMetaDataQuery("lookupQuery")).thenReturn(query);
+		when(module.getNullSafeMetaDataQuery("lookupQuery")).thenReturn(query);
+		when(query.getDocumentModule(customer)).thenReturn(module);
+		when(query.getDocumentName()).thenReturn(drivingDoc.getName());
+		lenient().when(module.getDocument(customer, drivingDoc.getName())).thenReturn(drivingDoc);
+		when(query.getColumns()).thenReturn(new ArrayList<>(List.of(column)));
+		LookupDescription lookup = new LookupDescription();
+		lookup.setDescriptionBinding("description");
+		lookup.setQuery("lookupQuery");
+		addDataGrid("items", lookup);
+		ViewValidator v = newValidator();
+		assertThrows(MetaDataException.class, v::visit);
+	}
+
+	@Test
+	void visitListGrid_filterBindingOnDrivingDocument_noException() {
+		Text status = new Text();
+		status.setName("status");
+		status.setLength(10);
+		document.putAttribute(status);
+		MetaDataQueryDefinition query = mock(MetaDataQueryDefinition.class);
+		when(module.getMetaDataQuery("gridQuery")).thenReturn(query);
+		when(query.getDocumentModule(customer)).thenReturn(module);
+		when(query.getDocumentName()).thenReturn("TestDoc");
+		when(module.getDocument(customer, "TestDoc")).thenReturn(document);
+		FilterParameterImpl filter = new FilterParameterImpl();
+		filter.setFilterBinding("status");
+		filter.setOperator(FilterOperator.equal);
+		filter.setValue("open");
+		ListGrid grid = new ListGrid();
+		grid.setQueryName("gridQuery");
+		grid.getFilterParameters().add(filter);
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(() -> v.visitListGrid(grid, true, true));
+	}
+
+	@Test
+	void visitListGrid_listModelReturnsNull_throws() {
+		when(repository.getListModel(any(), any(), eq("nullModel"), eq(false))).thenReturn(null);
+		ListGrid grid = new ListGrid();
+		grid.setModelName("nullModel");
+		ViewValidator v = newValidator();
+		assertThrows(MetaDataException.class, () -> v.visitListGrid(grid, true, true));
+	}
+
+	@Test
+	void dataGridBoundColumn_compatibleFormatter_noException() {
+		org.skyve.impl.metadata.model.document.field.Date created = new org.skyve.impl.metadata.model.document.field.Date();
+		created.setName("created");
+		addChildDoc("ItemDoc", created);
+		DataGridBoundColumn column = new DataGridBoundColumn();
+		column.setTitle("Created");
+		column.setBinding("created");
+		column.setFormatterName(FormatterName.DD_MM_YYYY);
+		DataGrid grid = new DataGrid();
+		grid.setBinding("items");
+		grid.getColumns().add(column);
+		view.getContained().add(grid);
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(v::visit);
+	}
+
+	@Test
+	void dataGridBoundColumn_compatibleCustomFormatter_noException() {
+		org.skyve.impl.metadata.model.document.field.Integer amount = new org.skyve.impl.metadata.model.document.field.Integer();
+		amount.setName("amount");
+		addChildDoc("ItemDoc", amount);
+		DataGridBoundColumn column = new DataGridBoundColumn();
+		column.setTitle("Amount");
+		column.setBinding("amount");
+		column.setCustomFormatterName(FormatterName.Integer.name());
+		DataGrid grid = new DataGrid();
+		grid.setBinding("items");
+		grid.getColumns().add(column);
+		view.getContained().add(grid);
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(v::visit);
+	}
+
+	@Test
+	void hbox_inDataGrid_withBorderTitle_noException() {
+		Text description = new Text();
+		description.setName("description");
+		description.setLength(50);
+		addChildDoc("ItemDoc", description);
+		HBox hbox = new HBox();
+		hbox.setBorderTitle("Line item");
+		addDataGrid("items", hbox);
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(v::visit);
+	}
+
+	@Test
+	void link_actionReference_inDataGrid_existingAction_noException() {
+		org.skyve.impl.metadata.model.document.field.Boolean active = new org.skyve.impl.metadata.model.document.field.Boolean();
+		active.setName("active");
+		DocumentImpl itemDoc = addChildDoc("ItemDoc", active);
+		ViewImpl itemView = new ViewImpl();
+		itemView.setName(ViewType.edit.toString());
+		ActionImpl gridAction = new ActionImpl();
+		gridAction.setName("gridAction");
+		itemView.putAction(gridAction);
+		when(repository.getView(eq("desktop"), any(), eq(itemDoc), eq(ViewType.edit.toString()))).thenReturn(itemView);
+		ActionReference reference = new ActionReference();
+		reference.setActionName("gridAction");
+		Link link = new Link();
+		link.setValue("Run");
+		link.setReference(reference);
+		addDataGrid("items", link);
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(v::visit);
+	}
+
+	@Test
+	void link_actionReference_inDataGrid_missingAction_throws() {
+		org.skyve.impl.metadata.model.document.field.Boolean active = new org.skyve.impl.metadata.model.document.field.Boolean();
+		active.setName("active");
+		DocumentImpl itemDoc = addChildDoc("ItemDoc", active);
+		ViewImpl itemView = new ViewImpl();
+		itemView.setName(ViewType.edit.toString());
+		when(repository.getView(eq("desktop"), any(), eq(itemDoc), eq(ViewType.edit.toString()))).thenReturn(itemView);
+		ActionReference reference = new ActionReference();
+		reference.setActionName("missingAction");
+		Link link = new Link();
+		link.setValue("Run");
+		link.setReference(reference);
+		addDataGrid("items", link);
+		ViewValidator v = newValidator();
+		assertThrows(MetaDataException.class, v::visit);
+	}
+
+	@Test
+	void chart_inlineModel_implicitValueBindingWithoutFunction_throws() {
+		DocumentImpl chartDoc = new DocumentImpl();
+		chartDoc.setOwningModuleName("testMod");
+		chartDoc.setName("ChartDoc");
+		when(module.getDocument(any(), eq("ChartDoc"))).thenReturn(chartDoc);
+		ChartBuilderMetaData model = new ChartBuilderMetaData();
+		model.setLabel("Counts");
+		model.setModuleName("testMod");
+		model.setDocumentName("ChartDoc");
+		model.setCategoryBinding(Bean.DOCUMENT_ID);
+		model.setValueBinding(Bean.DOCUMENT_ID);
+		Chart chart = new Chart();
+		chart.setModel(model);
+		view.getContained().add(chart);
+		ViewValidator v = newValidator();
+		assertThrows(MetaDataException.class, v::visit);
+	}
+
+	@Test
+	void chart_inlineModel_nonNumericValueBindingWithoutFunction_throws() {
+		DocumentImpl chartDoc = new DocumentImpl();
+		chartDoc.setOwningModuleName("testMod");
+		chartDoc.setName("ChartDoc");
+		Text name = new Text();
+		name.setName("name");
+		name.setLength(20);
+		chartDoc.putAttribute(name);
+		when(module.getDocument(any(), eq("ChartDoc"))).thenReturn(chartDoc);
+		ChartBuilderMetaData model = new ChartBuilderMetaData();
+		model.setLabel("Names");
+		model.setModuleName("testMod");
+		model.setDocumentName("ChartDoc");
+		model.setCategoryBinding(Bean.DOCUMENT_ID);
+		model.setValueBinding("name");
+		Chart chart = new Chart();
+		chart.setModel(model);
+		view.getContained().add(chart);
+		ViewValidator v = newValidator();
+		assertThrows(MetaDataException.class, v::visit);
+	}
+
+	@Test
+	void chart_inlineModel_sumOnNonNumericValueBinding_throws() {
+		DocumentImpl chartDoc = new DocumentImpl();
+		chartDoc.setOwningModuleName("testMod");
+		chartDoc.setName("ChartDoc");
+		Text name = new Text();
+		name.setName("name");
+		name.setLength(20);
+		chartDoc.putAttribute(name);
+		when(module.getDocument(any(), eq("ChartDoc"))).thenReturn(chartDoc);
+		ChartBuilderMetaData model = new ChartBuilderMetaData();
+		model.setLabel("Names");
+		model.setModuleName("testMod");
+		model.setDocumentName("ChartDoc");
+		model.setCategoryBinding(Bean.DOCUMENT_ID);
+		model.setValueBinding("name");
+		model.setValueFunction(AggregateFunction.Sum);
+		Chart chart = new Chart();
+		chart.setModel(model);
+		view.getContained().add(chart);
+		ViewValidator v = newValidator();
+		assertThrows(MetaDataException.class, v::visit);
+	}
+
+	@Test
+	void chart_inlineModel_countOnTextValueBinding_noException() {
+		DocumentImpl chartDoc = new DocumentImpl();
+		chartDoc.setOwningModuleName("testMod");
+		chartDoc.setName("ChartDoc");
+		Text name = new Text();
+		name.setName("name");
+		name.setLength(20);
+		chartDoc.putAttribute(name);
+		when(module.getDocument(any(), eq("ChartDoc"))).thenReturn(chartDoc);
+		ChartBuilderMetaData model = new ChartBuilderMetaData();
+		model.setLabel("Counts");
+		model.setModuleName("testMod");
+		model.setDocumentName("ChartDoc");
+		model.setCategoryBinding(Bean.DOCUMENT_ID);
+		model.setValueBinding("name");
+		model.setValueFunction(AggregateFunction.Count);
+		Chart chart = new Chart();
+		chart.setModel(model);
+		view.getContained().add(chart);
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(v::visit);
+	}
+
+	@Test
+	void reportAction_freemarkerReport_invalidFormat_throws() {
+		DocumentImpl reportDoc = new DocumentImpl();
+		reportDoc.setOwningModuleName("testMod");
+		reportDoc.setName("Invoice");
+		when(customer.getModule("testMod")).thenReturn(module);
+		when(module.getDocument(customer, "Invoice")).thenReturn(reportDoc);
+		when(repository.getReportFileName(any(), eq(reportDoc), eq("TemplateReport"))).thenReturn("TemplateReport.flth");
+		ActionImpl action = new ActionImpl();
+		action.setResourceName("TemplateReport");
+		ParameterImpl modP = new ParameterImpl();
+		modP.setName(AbstractWebContext.MODULE_NAME);
+		modP.setValue("testMod");
+		action.getParameters().add(modP);
+		ParameterImpl docP = new ParameterImpl();
+		docP.setName(AbstractWebContext.DOCUMENT_NAME);
+		docP.setValue("Invoice");
+		action.getParameters().add(docP);
+		ParameterImpl formatP = new ParameterImpl();
+		formatP.setName(AbstractWebContext.REPORT_FORMAT);
+		formatP.setValue("html");
+		action.getParameters().add(formatP);
+		ViewValidator v = newValidator();
+		assertThrows(MetaDataException.class, () -> v.visitReportAction(action));
+	}
+
+	@Test
+	void reportAction_freemarkerReport_pdfFormat_noException() {
+		DocumentImpl reportDoc = new DocumentImpl();
+		reportDoc.setOwningModuleName("testMod");
+		reportDoc.setName("Invoice");
+		when(customer.getModule("testMod")).thenReturn(module);
+		when(module.getDocument(customer, "Invoice")).thenReturn(reportDoc);
+		when(repository.getReportFileName(any(), eq(reportDoc), eq("TemplateReport"))).thenReturn("TemplateReport.flth");
+		ActionImpl action = new ActionImpl();
+		action.setResourceName("TemplateReport");
+		ParameterImpl modP = new ParameterImpl();
+		modP.setName(AbstractWebContext.MODULE_NAME);
+		modP.setValue("testMod");
+		action.getParameters().add(modP);
+		ParameterImpl docP = new ParameterImpl();
+		docP.setName(AbstractWebContext.DOCUMENT_NAME);
+		docP.setValue("Invoice");
+		action.getParameters().add(docP);
+		ParameterImpl formatP = new ParameterImpl();
+		formatP.setName(AbstractWebContext.REPORT_FORMAT);
+		formatP.setValue(ReportFormat.pdf.toString());
+		action.getParameters().add(formatP);
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(() -> v.visitReportAction(action));
+	}
+
+	@Test
+	void setAndToggleEventActions_validBoolBinding_noException() {
+		org.skyve.impl.metadata.model.document.field.Boolean flag = new org.skyve.impl.metadata.model.document.field.Boolean();
+		flag.setName("published");
+		document.putAttribute(flag);
+		document.getConditions().put("showFlag", new ConditionImpl());
+		SetDisabledEventAction setDisabled = new SetDisabledEventAction();
+		setDisabled.setBinding("published");
+		setDisabled.setDisabledConditionName("showFlag");
+		SetInvisibleEventAction setInvisible = new SetInvisibleEventAction();
+		setInvisible.setBinding("published");
+		setInvisible.setInvisibleConditionName("showFlag");
+		ToggleDisabledEventAction toggleDisabled = new ToggleDisabledEventAction();
+		toggleDisabled.setBinding("published");
+		ToggleVisibilityEventAction toggleVisibility = new ToggleVisibilityEventAction();
+		toggleVisibility.setBinding("published");
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(() -> v.visitSetDisabledEventAction(setDisabled, true, true));
+		assertDoesNotThrow(() -> v.visitSetInvisibleEventAction(setInvisible, true, true));
+		assertDoesNotThrow(() -> v.visitToggleDisabledEventAction(toggleDisabled, true, true));
+		assertDoesNotThrow(() -> v.visitToggleVisibilityEventAction(toggleVisibility, true, true));
+	}
+
+	@Test
+	void onFocus_onBlur_textField_noException() {
+		Text name = new Text();
+		name.setName("name");
+		name.setLength(20);
+		document.putAttribute(name);
+		TextField textField = new TextField();
+		textField.setBinding("name");
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(() -> v.visitOnFocusEventHandler(textField, true, true));
+		assertDoesNotThrow(() -> v.visitOnBlurEventHandler(textField, true, true));
+	}
+
+	@Test
+	void onChanged_textField_noException() {
+		Text name = new Text();
+		name.setName("name");
+		name.setLength(20);
+		document.putAttribute(name);
+		TextField textField = new TextField();
+		textField.setBinding("name");
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(() -> v.visitOnChangedEventHandler(textField, true, true));
+	}
+
+	@Test
+	void onEdited_listGrid_serverLast_noException() {
+		ServerSideActionEventAction server = new ServerSideActionEventAction();
+		server.setActionName("existingAction");
+		ActionImpl action = new ActionImpl();
+		action.setName("existingAction");
+		view.putAction(action);
+		ListGrid grid = new ListGrid();
+		grid.getEditedActions().add(server);
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(() -> v.visitOnEditedEventHandler(grid, true, true));
+	}
+
+	@Test
+	void hbox_percentageWidthOver100_throws() {
+		HBox hbox = new HBox();
+		hbox.setPercentageWidth(Integer.valueOf(150));
+		view.getContained().add(hbox);
+		ViewValidator v = newValidator();
+		assertThrows(MetaDataException.class, v::visit);
 	}
 }

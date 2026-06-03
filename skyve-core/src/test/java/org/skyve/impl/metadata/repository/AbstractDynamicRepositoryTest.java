@@ -1,5 +1,6 @@
 package org.skyve.impl.metadata.repository;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -130,7 +131,7 @@ class AbstractDynamicRepositoryTest {
 
 	@Test
 	void getModuleRoutersReturnsNull() {
-		assertNull(repo.getModuleRouters());
+		assertTrue(repo.getModuleRouters().isEmpty());
 	}
 
 	@Test
@@ -176,12 +177,12 @@ class AbstractDynamicRepositoryTest {
 
 	@Test
 	void retrieveAllScheduledJobsForAllCustomersReturnsNull() {
-		assertNull(repo.retrieveAllScheduledJobsForAllCustomers());
+		assertTrue(repo.retrieveAllScheduledJobsForAllCustomers().isEmpty());
 	}
 
 	@Test
 	void retrieveAllScheduledReportsForAllCustomersReturnsNull() {
-		assertNull(repo.retrieveAllScheduledReportsForAllCustomers());
+		assertTrue(repo.retrieveAllScheduledReportsForAllCustomers().isEmpty());
 	}
 
 	@Test
@@ -199,3 +200,5 @@ class AbstractDynamicRepositoryTest {
 		assertNull(repo.getDataFactory(customer, document));
 	}
 }
+
+

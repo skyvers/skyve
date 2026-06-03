@@ -3,6 +3,7 @@ package org.skyve.impl.sail.mock;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
@@ -10,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import jakarta.faces.component.UIViewRoot;
 import jakarta.faces.context.ResponseWriter;
 
-@SuppressWarnings("static-method")
+@SuppressWarnings({"static-method", "resource"})
 class MockFacesContextTest {
 	@Test
 	void defaultStateAndAccessorsBehaveAsDocumented() {
@@ -44,8 +45,8 @@ class MockFacesContextTest {
 		context.renderResponse();
 		context.responseComplete();
 
-		assertTrue(context.getViewRoot() == root);
-		assertTrue(context.getResponseWriter() == writer);
+		assertSame(root, context.getViewRoot());
+		assertSame(writer, context.getResponseWriter());
 		assertFalse(context.isReleased());
 		context.release();
 		assertTrue(context.isReleased());

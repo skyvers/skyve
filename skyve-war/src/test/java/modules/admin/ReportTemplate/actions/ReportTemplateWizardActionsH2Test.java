@@ -17,6 +17,7 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.admin.ReportTemplate.ReportTemplateExtension;
 import modules.admin.domain.ReportTemplate;
+import modules.admin.domain.ReportTemplate.GenerateExisting;
 import modules.admin.domain.ReportTemplate.WizardState;
 import util.AbstractH2Test;
 
@@ -79,6 +80,7 @@ class ReportTemplateWizardActionsH2Test extends AbstractH2Test {
 	void nextFromEnterDetailsResetsState() throws Exception {
 		ReportTemplateExtension bean = db.build(ReportTemplate.MODULE_NAME, ReportTemplate.DOCUMENT_NAME);
 		bean.setWizardState(WizardState.enterDetails);
+		bean.setGenerateExisting(GenerateExisting.existing);
 		bean.setTemplate("some markup");
 
 		Next action = new Next();

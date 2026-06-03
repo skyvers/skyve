@@ -65,6 +65,112 @@ class SessionScopedDelegatingProvidedRepositoryTest {
 		clearPersistenceThreadLocal();
 	}
 
+	private static void assertDefaultLookupMethodsReturnNull(SessionScopedDelegatingProvidedRepository repo,
+												Customer customer,
+												Document document) {
+		assertNull(repo.getRouter());
+		assertNull(repo.getCustomer("c"));
+		assertNull(repo.getDynamicImage(customer, document, "img", false));
+		assertNull(repo.getView("ux", customer, document, "v"));
+		assertNull(repo.getMetaDataAction(customer, document, "a"));
+		assertNull(repo.getComparisonModel(customer, document, "cmp", false));
+		assertNull(repo.getMapModel(customer, document, "map", false));
+		assertNull(repo.getChartModel(customer, document, "chart", false));
+		assertNull(repo.getListModel(customer, document, "list", false));
+		assertNull(repo.getServerSideAction(customer, document, "S", false));
+		assertNull(repo.getBizExportAction(customer, document, "E", false));
+		assertNull(repo.getBizImportAction(customer, document, "I", false));
+		assertNull(repo.getDownloadAction(customer, document, "D", false));
+		assertNull(repo.getUploadAction(customer, document, "U", false));
+		assertNull(repo.getDataFactory(customer, document));
+		assertNull(repo.retrieveUser("u"));
+		assertNull(repo.retrievePublicUserName("c"));
+		assertNull(repo.getGlobalRouter());
+		assertNull(repo.getReportFileName(customer, document, "rpt"));
+		assertNull(repo.getJavaClass(customer, "key"));
+		assertNull(repo.vtable("cust", "key"));
+	}
+
+	private static void assertDefaultCollectionAndModuleResults(SessionScopedDelegatingProvidedRepository repo,
+												   Customer customer,
+												   Module module,
+												   Document document,
+												   User user,
+												   Connection connection) {
+		assertEquals(Collections.emptyList(), repo.retrieveAllScheduledJobsForAllCustomers());
+		assertEquals(Collections.emptyList(), repo.retrieveAllScheduledReportsForAllCustomers());
+		assertFalse(repo.populatePermissions(user));
+		assertFalse(repo.populateUser(user, connection));
+		assertEquals(Collections.emptyList(), repo.getAllCustomerNames());
+		assertEquals(Collections.emptyList(), repo.getAllVanillaModuleNames());
+		assertNull(repo.getModule(customer, "mod"));
+		assertNull(repo.getDocument(customer, module, "doc"));
+		assertNull(repo.getBizlet(customer, document, false));
+		assertNull(repo.getMetaDataBizlet(customer, document));
+		assertEquals(Collections.emptyList(), repo.getModuleRouters());
+		assertFalse(repo.getUseScaffoldedViews());
+	}
+
+	private static void assertDelegatedLookupResults(SessionScopedDelegatingProvidedRepository repo,
+											   User user,
+											   Customer customer,
+											   Document document,
+											   Module module,
+											   Connection connection,
+											   Router router,
+											   File file,
+											   DynamicImage<Bean> dynamicImage,
+											   View view,
+											   ActionMetaData actionMetaData,
+											   ComparisonModel<Bean, Bean> comparisonModel,
+											   MapModel<Bean> mapModel,
+											   ChartModel<Bean> chartModel,
+											   ListModel<Bean> listModel,
+											   ServerSideAction<Bean> serverAction,
+											   BizExportAction bizExportAction,
+											   BizImportAction bizImportAction,
+											   DownloadAction<Bean> downloadAction,
+											   UploadAction<Bean> uploadAction,
+											   UserImpl userImpl,
+											   Object dataFactory,
+											   Bizlet<Bean> bizlet,
+											   BizletMetaData bizletMetaData) {
+		assertSame(file, repo.findResourceFile("r", "c", "m"));
+		assertSame(router, repo.getRouter());
+		assertSame(customer, repo.getCustomer("c"));
+		assertSame(dynamicImage, repo.getDynamicImage(customer, document, "img", true));
+		assertSame(view, repo.getView("ux", customer, document, "v"));
+		assertSame(actionMetaData, repo.getMetaDataAction(customer, document, "a"));
+		assertSame(comparisonModel, repo.getComparisonModel(customer, document, "cmp", true));
+		assertSame(mapModel, repo.getMapModel(customer, document, "map", true));
+		assertSame(chartModel, repo.getChartModel(customer, document, "chart", true));
+		assertSame(listModel, repo.getListModel(customer, document, "list", true));
+		assertSame(serverAction, repo.getServerSideAction(customer, document, "S", true));
+		assertSame(bizExportAction, repo.getBizExportAction(customer, document, "E", true));
+		assertSame(bizImportAction, repo.getBizImportAction(customer, document, "I", true));
+		assertSame(downloadAction, repo.getDownloadAction(customer, document, "D", true));
+		assertSame(uploadAction, repo.getUploadAction(customer, document, "U", true));
+		assertSame(dataFactory, repo.getDataFactory(customer, document));
+		assertSame(userImpl, repo.retrieveUser("u"));
+		assertEquals(1, repo.retrieveAllScheduledJobsForAllCustomers().size());
+		assertEquals(1, repo.retrieveAllScheduledReportsForAllCustomers().size());
+		assertEquals("public", repo.retrievePublicUserName("c"));
+		assertTrue(repo.populatePermissions(user));
+		assertTrue(repo.populateUser(user, connection));
+		assertEquals(List.of("a"), repo.getAllCustomerNames());
+		assertEquals(List.of("m"), repo.getAllVanillaModuleNames());
+		assertSame(module, repo.getModule(customer, "mod"));
+		assertSame(document, repo.getDocument(customer, module, "doc"));
+		assertSame(bizlet, repo.getBizlet(customer, document, true));
+		assertSame(bizletMetaData, repo.getMetaDataBizlet(customer, document));
+		assertSame(router, repo.getGlobalRouter());
+		assertEquals(1, repo.getModuleRouters().size());
+		assertEquals("report", repo.getReportFileName(customer, document, "rpt"));
+		assertSame(String.class, repo.getJavaClass(customer, "key"));
+		assertEquals("vt", repo.vtable("cust", "key"));
+		assertTrue(repo.getUseScaffoldedViews());
+	}
+
 	@Test
 	void defaultsAreReturnedWhenNoSessionDelegateAvailable() {
 		SessionScopedDelegatingProvidedRepository repo = new SessionScopedDelegatingProvidedRepository();
@@ -74,8 +180,8 @@ class SessionScopedDelegatingProvidedRepositoryTest {
 		User user = mock(User.class);
 		Connection connection = mock(Connection.class);
 
-		assertTrue(repo.getSessionDelegate() == null);
-		assertTrue(repo.findResourceFile("r", "c", "m") == null);
+		assertNull(repo.getSessionDelegate());
+		assertNull(repo.findResourceFile("r", "c", "m"));
 		repo.evictCachedMetaData(customer);
 		repo.resetMenus(user);
 		repo.resetUserPermissions(user);
@@ -83,39 +189,8 @@ class SessionScopedDelegatingProvidedRepositoryTest {
 		repo.validateModuleForGenerateDomain(customer, module);
 		repo.validateDocumentForGenerateDomain(customer, document);
 		repo.validateViewForGenerateDomain(customer, document, mock(View.class), "ux");
-		assertTrue(repo.getRouter() == null);
-		assertTrue(repo.getCustomer("c") == null);
-		assertTrue(repo.getDynamicImage(customer, document, "img", false) == null);
-		assertTrue(repo.getView("ux", customer, document, "v") == null);
-		assertTrue(repo.getMetaDataAction(customer, document, "a") == null);
-		assertTrue(repo.getComparisonModel(customer, document, "cmp", false) == null);
-		assertTrue(repo.getMapModel(customer, document, "map", false) == null);
-		assertTrue(repo.getChartModel(customer, document, "chart", false) == null);
-		assertTrue(repo.getListModel(customer, document, "list", false) == null);
-		assertTrue(repo.getServerSideAction(customer, document, "S", false) == null);
-		assertTrue(repo.getBizExportAction(customer, document, "E", false) == null);
-		assertTrue(repo.getBizImportAction(customer, document, "I", false) == null);
-		assertTrue(repo.getDownloadAction(customer, document, "D", false) == null);
-		assertTrue(repo.getUploadAction(customer, document, "U", false) == null);
-		assertTrue(repo.getDataFactory(customer, document) == null);
-		assertTrue(repo.retrieveUser("u") == null);
-		assertTrue(repo.retrieveAllScheduledJobsForAllCustomers() == null);
-		assertTrue(repo.retrieveAllScheduledReportsForAllCustomers() == null);
-		assertTrue(repo.retrievePublicUserName("c") == null);
-		assertFalse(repo.populatePermissions(user));
-		assertFalse(repo.populateUser(user, connection));
-		assertEquals(Collections.emptyList(), repo.getAllCustomerNames());
-		assertEquals(Collections.emptyList(), repo.getAllVanillaModuleNames());
-		assertTrue(repo.getModule(customer, "mod") == null);
-		assertTrue(repo.getDocument(customer, module, "doc") == null);
-		assertTrue(repo.getBizlet(customer, document, false) == null);
-		assertTrue(repo.getMetaDataBizlet(customer, document) == null);
-		assertTrue(repo.getGlobalRouter() == null);
-		assertEquals(Collections.emptyList(), repo.getModuleRouters());
-		assertTrue(repo.getReportFileName(customer, document, "rpt") == null);
-		assertTrue(repo.getJavaClass(customer, "key") == null);
-		assertTrue(repo.vtable("cust", "key") == null);
-		assertFalse(repo.getUseScaffoldedViews());
+		assertDefaultLookupMethodsReturnNull(repo, customer, document);
+		assertDefaultCollectionAndModuleResults(repo, customer, module, document, user, connection);
 	}
 
 	@Test
@@ -192,40 +267,30 @@ class SessionScopedDelegatingProvidedRepositoryTest {
 
 		assertSame(delegate, repo.getSessionDelegate());
 		assertSame(delegate, repo.getSessionDelegate(user));
-		assertSame(file, repo.findResourceFile("r", "c", "m"));
-		assertSame(router, repo.getRouter());
-		assertSame(customer, repo.getCustomer("c"));
-		assertSame(dynamicImage, repo.getDynamicImage(customer, document, "img", true));
-		assertSame(view, repo.getView("ux", customer, document, "v"));
-		assertSame(actionMetaData, repo.getMetaDataAction(customer, document, "a"));
-		assertSame(comparisonModel, repo.getComparisonModel(customer, document, "cmp", true));
-		assertSame(mapModel, repo.getMapModel(customer, document, "map", true));
-		assertSame(chartModel, repo.getChartModel(customer, document, "chart", true));
-		assertSame(listModel, repo.getListModel(customer, document, "list", true));
-		assertSame(serverAction, repo.getServerSideAction(customer, document, "S", true));
-		assertSame(bizExportAction, repo.getBizExportAction(customer, document, "E", true));
-		assertSame(bizImportAction, repo.getBizImportAction(customer, document, "I", true));
-		assertSame(downloadAction, repo.getDownloadAction(customer, document, "D", true));
-		assertSame(uploadAction, repo.getUploadAction(customer, document, "U", true));
-		assertSame(dataFactory, repo.getDataFactory(customer, document));
-		assertSame(userImpl, repo.retrieveUser("u"));
-		assertEquals(1, repo.retrieveAllScheduledJobsForAllCustomers().size());
-		assertEquals(1, repo.retrieveAllScheduledReportsForAllCustomers().size());
-		assertEquals("public", repo.retrievePublicUserName("c"));
-		assertTrue(repo.populatePermissions(user));
-		assertTrue(repo.populateUser(user, connection));
-		assertEquals(List.of("a"), repo.getAllCustomerNames());
-		assertEquals(List.of("m"), repo.getAllVanillaModuleNames());
-		assertSame(module, repo.getModule(customer, "mod"));
-		assertSame(document, repo.getDocument(customer, module, "doc"));
-		assertSame(bizlet, repo.getBizlet(customer, document, true));
-		assertSame(bizletMetaData, repo.getMetaDataBizlet(customer, document));
-		assertSame(router, repo.getGlobalRouter());
-		assertEquals(1, repo.getModuleRouters().size());
-		assertEquals("report", repo.getReportFileName(customer, document, "rpt"));
-		assertSame(String.class, repo.getJavaClass(customer, "key"));
-		assertEquals("vt", repo.vtable("cust", "key"));
-		assertTrue(repo.getUseScaffoldedViews());
+		assertDelegatedLookupResults(repo,
+				user,
+				customer,
+				document,
+				module,
+				connection,
+				router,
+				file,
+				dynamicImage,
+				view,
+				actionMetaData,
+				comparisonModel,
+				mapModel,
+				chartModel,
+				listModel,
+				serverAction,
+				bizExportAction,
+				bizImportAction,
+				downloadAction,
+				uploadAction,
+				userImpl,
+				dataFactory,
+				bizlet,
+				bizletMetaData);
 
 		repo.resetMenus(user);
 		repo.resetUserPermissions(user);

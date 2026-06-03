@@ -34,7 +34,7 @@ import org.skyve.impl.metadata.model.document.field.Text;
 
 import jakarta.servlet.http.HttpServletRequest;
 
-@SuppressWarnings("static-method")
+@SuppressWarnings({"static-method", "boxing"})
 class SmartClientListServletHelperTest {
 
 	@Test
@@ -359,7 +359,6 @@ class SmartClientListServletHelperTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
 	void addAdvancedFilterCriteriaToQueryDoesNotAddEmptyGeneratedFilter() throws Exception {
 		ListModel<?> model = mock(ListModel.class);
 		Filter outerFilter = mock(Filter.class);
@@ -381,7 +380,6 @@ class SmartClientListServletHelperTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
 	void addAdvancedFilterCriteriaToQueryAddsGeneratedFilterForParameterCriteria() throws Exception {
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -414,7 +412,6 @@ class SmartClientListServletHelperTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
 	void addAdvancedFilterCriteriaInternalAddsOrForAdvancedSubFilter() throws Exception {
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -452,7 +449,6 @@ class SmartClientListServletHelperTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
 	void addAdvancedFilterCriteriaInternalAddsAndForAdvancedSubFilter() throws Exception {
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -490,7 +486,6 @@ class SmartClientListServletHelperTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
 	void addAdvancedFilterCriteriaInternalSkipsEmptyAdvancedSubFilter() throws Exception {
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -529,7 +524,6 @@ class SmartClientListServletHelperTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
 	void addAdvancedFilterCriteriaInternalAddsAndWhenCompoundIsNot() throws Exception {
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -567,7 +561,6 @@ class SmartClientListServletHelperTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
 	void addSimpleFilterCriteriaToQueryUsesStringMetadataAndContainsOperator() throws Exception {
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -596,7 +589,6 @@ class SmartClientListServletHelperTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
 	void addSimpleFilterCriteriaToQueryForcesEqualsForConstantDomainFields() throws Exception {
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -626,7 +618,6 @@ class SmartClientListServletHelperTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
 	void addSimpleFilterCriteriaToQueryForcesEqualsForNumericFields() throws Exception {
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -685,7 +676,6 @@ class SmartClientListServletHelperTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
 	void addAdvancedFilterCriteriaInternalUsesOrBranchForSecondSimpleCriterion() throws Exception {
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -728,7 +718,6 @@ class SmartClientListServletHelperTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
 	void addAdvancedFilterCriteriaInternalNotInvertsStringAndSetOperators() throws Exception {
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -779,7 +768,6 @@ class SmartClientListServletHelperTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
 	void addAdvancedFilterCriteriaInternalNotInvertsRangeAndNullOperators() throws Exception {
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -824,7 +812,6 @@ class SmartClientListServletHelperTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
 	void addAdvancedFilterCriteriaInternalNotInvertsStartsEndsAndEqualityOperators() throws Exception {
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -887,7 +874,6 @@ class SmartClientListServletHelperTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
 	void addAdvancedFilterCriteriaInternalNotInvertsRelationalAndBetweenOperators() throws Exception {
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -928,7 +914,6 @@ class SmartClientListServletHelperTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
 	void addAdvancedFilterCriteriaInternalNotNoOpsForFieldPatternGeoAndLogicalOperators() throws Exception {
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);

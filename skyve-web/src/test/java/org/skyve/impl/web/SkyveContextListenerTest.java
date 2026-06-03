@@ -25,16 +25,33 @@ import java.util.Optional;
 
 import org.junit.After;
 import org.junit.Test;
+import org.skyve.cache.CacheConfig;
+import org.skyve.cache.EHCacheConfig;
+import org.skyve.cache.HibernateCacheConfig;
+import org.skyve.cache.JCacheConfig;
+import org.skyve.domain.number.NumberGenerator;
+import org.skyve.impl.domain.number.NumberGeneratorStaticSingleton;
+import org.skyve.impl.geoip.GeoIPServiceStaticSingleton;
 import org.skyve.impl.mail.MailServiceStaticSingleton;
 import org.skyve.impl.mail.NoOpMailService;
+import org.skyve.impl.metadata.controller.CustomisationsStaticSingleton;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
+import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.sms.SMSServiceStaticSingleton;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.filter.ResponseHeaderFilter;
+import org.skyve.metadata.controller.Customisations;
+import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.repository.ProvidedRepository;
+import org.skyve.persistence.DataStore;
 import org.skyve.persistence.DynamicPersistence;
+import org.skyve.report.ReportFormat;
+import org.skyve.util.GeoIPService;
+import org.skyve.util.IPGeolocation;
 import org.skyve.util.Mail;
 import org.skyve.util.MailService;
+import org.skyve.util.SMSService;
 
 import jakarta.servlet.FilterRegistration;
 import jakarta.servlet.ServletContext;
@@ -327,6 +344,64 @@ public class SkyveContextListenerTest {
 		@Override
 		public void sendBulkMail(List<Mail> mails) {
 			// no-op
+		}
+	}
+
+	public static class TestNumberGenerator implements NumberGenerator {
+		@Override
+		public String next(String moduleName, String documentName, String fieldName, String name, int length) {
+			return "TEST";
+		}
+	}
+
+	public static class TestCustomisations implements Customisations {
+		@Override
+		public HorizontalAlignment determineDefaultWidgetTextAlignment(String widgetType, AttributeType attributeType) {
+			return null;
+		}
+
+		@Override
+		public HorizontalAlignment determineDefaultColumnTextAlignment(String widgetType, AttributeType attributeType) {
+			return null;
+		}
+
+		@Override
+		public Integer determineDefaultColumnWidth(String widgetType, AttributeType attributeType) {
+			return null;
+		}
+
+		@Override
+		public void registerCustomExpressions() {
+			// no-op
+		}
+
+		@Override
+		public void registerCustomFormatters() {
+			// no-op
+		}
+
+		@Override
+		public ReportFormat[] listGridExportFormats() {
+			return new ReportFormat[0];
+		}
+	}
+
+	public static class TestGeoIPService implements GeoIPService {
+		@Override
+		public IPGeolocation geolocate(String ipAddress) {
+			return null;
+		}
+	}
+
+	public static class TestSMSService implements SMSService {
+		@Override
+		public boolean text(String phoneNumber, String message) {
+			return true;
+		}
+
+		@Override
+		public boolean text(String customerName, String phoneNumber, String message) {
+			return true;
 		}
 	}
 
@@ -999,6 +1074,93 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
+	public void testIsMultiTenantReturnsTrueWhenCustomerNull() throws Exception {
+		String savedCustomer = UtilImpl.CUSTOMER;
+		try {
+			UtilImpl.CUSTOMER = null;
+			Boolean result = (Boolean) invokePrivateStatic("isMultiTenant", new Class<?>[] {});
+			assertTrue(result.booleanValue());
+		}
+		finally {
+			UtilImpl.CUSTOMER = savedCustomer;
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testIsMultiTenantReturnsFalseWhenCustomerSet() throws Exception {
+		String savedCustomer = UtilImpl.CUSTOMER;
+		try {
+			UtilImpl.CUSTOMER = "demo";
+			Boolean result = (Boolean) invokePrivateStatic("isMultiTenant", new Class<?>[] {});
+			assertFalse(result.booleanValue());
+		}
+		finally {
+			UtilImpl.CUSTOMER = savedCustomer;
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testToStringMapReturnsEmptyForNull() throws Exception {
+		@SuppressWarnings("unchecked")
+		java.util.TreeMap<String, String> result = (java.util.TreeMap<String, String>)
+			invokePrivateStatic("toStringMap", new Class<?>[] {Map.class}, (Object) null);
+		assertNotNull(result);
+		assertTrue(result.isEmpty());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testToStringMapConvertsValues() throws Exception {
+		Map<String, Object> input = new HashMap<>();
+		input.put("key1", "value1");
+		input.put("key2", Integer.valueOf(42));
+		input.put(null, "ignored");
+		input.put("key3", null);
+
+		@SuppressWarnings("unchecked")
+		java.util.TreeMap<String, String> result = (java.util.TreeMap<String, String>)
+			invokePrivateStatic("toStringMap", new Class<?>[] {Map.class}, input);
+
+		// Only non-null key+value pairs should be included
+		assertEquals(2, result.size());
+		assertEquals("value1", result.get("key1"));
+		assertEquals("42", result.get("key2"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testValidateRegexAcceptsValidPattern() throws Exception {
+		// Should not throw
+		invokePrivateStatic("validateRegex", new Class<?>[] {String.class, String.class}, "test", "[a-z]+");
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testValidateRegexRejectsInvalidPattern() {
+		InvocationTargetException thrown = assertThrows(InvocationTargetException.class,
+				() -> invokePrivateStatic("validateRegex", new Class<?>[] {String.class, String.class}, "test", "[unclosed"));
+		assertThat(thrown.getCause(), instanceOf(IllegalStateException.class));
+		assertTrue(thrown.getCause().getMessage().contains("not a valid regex pattern"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testCleanupDirectoryRemovesTrailingBackslash() {
+		String result = SkyveContextListener.cleanupDirectory("C:\\workspace\\content\\");
+		assertEquals("C:/workspace/content/", result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testCleanupDirectoryHandlesMixedSeparators() {
+		String result = SkyveContextListener.cleanupDirectory("C:\\workspace/content\\");
+		assertEquals("C:/workspace/content/", result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
 	public void testIsMultiTenantReflectsConfiguredCustomer() throws Exception {
 		String originalCustomerValue = UtilImpl.CUSTOMER;
 		try {
@@ -1052,10 +1214,11 @@ public class SkyveContextListenerTest {
 	public void testTestWritableDirectoryAcceptsWritableDirectory() throws Exception {
 		Path tempDirectory = Files.createTempDirectory("skyve-context-listener-writable");
 		try {
-			invokePrivateStatic("testWritableDirectory",
+			Object result = invokePrivateStatic("testWritableDirectory",
 					new Class<?>[] {String.class, String.class},
 					"content.directory",
 					tempDirectory.toString());
+			assertNull(result);
 		}
 		finally {
 			deleteTree(tempDirectory);
@@ -1064,16 +1227,566 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testClearRepositoryFactorySetsRepositoryToNull() throws Exception {
-		ProvidedRepository originalRepository = ProvidedRepositoryFactory.get();
-		ProvidedRepositoryFactory.set(mock(ProvidedRepository.class));
+	public void testReadExpandedConfigurationThrowsForMissingFile() {
+		InvocationTargetException thrown = assertThrows(InvocationTargetException.class,
+				() -> invokePrivateStatic("readExpandedConfiguration",
+						new Class<?>[] {java.io.File.class},
+						new java.io.File("/path/that/does/not/exist/skyve.json")));
+
+		assertThat(thrown.getCause(), instanceOf(IllegalStateException.class));
+		assertTrue(thrown.getCause().getMessage().contains("Cannot open or read"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testConfigureApplicationCachesAddsJCacheAndEhcache() throws Exception {
+		List<CacheConfig<? extends java.io.Serializable, ? extends java.io.Serializable>> originalCaches = UtilImpl.APP_CACHES;
 		try {
-			invokePrivateStatic("clearRepositoryFactory", new Class<?>[0]);
-			assertNull(ProvidedRepositoryFactory.get());
+			UtilImpl.APP_CACHES = new java.util.ArrayList<>();
+			Map<String, Object> properties = new HashMap<>();
+			properties.put("caches", Map.of(
+					"local", Map.of(
+							"type", "jcache",
+							"heapSizeEntries", Integer.valueOf(25),
+							"offHeapSizeMB", Integer.valueOf(2),
+							"expiryTimeMinutes", Integer.valueOf(15),
+							"keyClass", String.class.getName(),
+							"valueClass", Integer.class.getName()),
+					"disk", Map.of(
+							"type", "ehcache",
+							"heapSizeEntries", Integer.valueOf(50),
+							"offHeapSizeMB", Integer.valueOf(4),
+							"diskSizeGB", Integer.valueOf(3),
+							"expiryPolicy", "timeToLive",
+							"expiryTimeMinutes", Integer.valueOf(30),
+							"persistent", Boolean.TRUE,
+							"keyClass", String.class.getName(),
+							"valueClass", String.class.getName())));
+
+			invokePrivateStatic("configureApplicationCaches", new Class<?>[] {Map.class}, properties);
+
+			assertEquals(2, UtilImpl.APP_CACHES.size());
+			CacheConfig<? extends java.io.Serializable, ? extends java.io.Serializable> local = UtilImpl.APP_CACHES.stream()
+					.filter(cache -> "local".equals(cache.getName()))
+					.findFirst()
+					.orElseThrow();
+			CacheConfig<? extends java.io.Serializable, ? extends java.io.Serializable> disk = UtilImpl.APP_CACHES.stream()
+					.filter(cache -> "disk".equals(cache.getName()))
+					.findFirst()
+					.orElseThrow();
+			assertThat(local, instanceOf(JCacheConfig.class));
+			assertThat(disk, instanceOf(EHCacheConfig.class));
+			assertEquals(25L, local.getHeapSizeEntries());
+			assertEquals(2L, local.getOffHeapSizeInMB());
+			EHCacheConfig<?, ?> ehcache = (EHCacheConfig<?, ?>) disk;
+			assertEquals(3L * 1024L, ehcache.getDiskSizeInMB());
+			assertTrue(ehcache.isPersistent());
 		}
 		finally {
-			ProvidedRepositoryFactory.set(originalRepository);
+			UtilImpl.APP_CACHES = originalCaches;
 		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testConfigureApplicationCachesRejectsUnknownType() {
+		List<CacheConfig<? extends java.io.Serializable, ? extends java.io.Serializable>> originalCaches = UtilImpl.APP_CACHES;
+		try {
+			UtilImpl.APP_CACHES = new java.util.ArrayList<>();
+			Map<String, Object> properties = new HashMap<>();
+			properties.put("caches", Map.of("broken", Map.of(
+					"type", "unknown",
+					"heapSizeEntries", Integer.valueOf(1),
+					"keyClass", String.class.getName(),
+					"valueClass", String.class.getName())));
+
+			InvocationTargetException thrown = assertThrows(InvocationTargetException.class,
+					() -> invokePrivateStatic("configureApplicationCaches", new Class<?>[] {Map.class}, properties));
+
+			assertThat(thrown.getCause(), instanceOf(IllegalStateException.class));
+			assertTrue(thrown.getCause().getMessage().contains("Cache type unknown"));
+		}
+		finally {
+			UtilImpl.APP_CACHES = originalCaches;
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testConfigureDataStoresReadsJdbcAndHibernateCaches() throws Exception {
+		Map<String, DataStore> originalDataStores = UtilImpl.DATA_STORES;
+		DataStore originalDataStore = UtilImpl.DATA_STORE;
+		List<HibernateCacheConfig> originalHibernateCaches = UtilImpl.HIBERNATE_CACHES;
+		try {
+			UtilImpl.DATA_STORES = new HashMap<>();
+			UtilImpl.HIBERNATE_CACHES = new java.util.ArrayList<>();
+			Map<String, Object> properties = new HashMap<>();
+			properties.put("dataStores", Map.of("jdbc", Map.of(
+					"driver", "org.h2.Driver",
+					"url", "jdbc:h2:mem:skyve_context_listener",
+					"user", "sa",
+					"password", "",
+					"dialect", "org.skyve.impl.persistence.hibernate.dialect.H2SpatialDialect",
+					"oltpConnectionTimeoutInSeconds", Integer.valueOf(11),
+					"asyncConnectionTimeoutInSeconds", Integer.valueOf(22))));
+			properties.put("hibernate", Map.of(
+					"dataStore", "jdbc",
+					"ddlSync", Boolean.FALSE,
+					"catalog", "CAT",
+					"schema", "PUBLIC",
+					"prettySql", Boolean.TRUE,
+					"caches", Map.of("domain", Map.of(
+							"heapSizeEntries", Integer.valueOf(100),
+							"offHeapSizeMB", Integer.valueOf(8),
+							"expiryPolicy", "timeToIdle",
+							"expiryTimeMinutes", Integer.valueOf(60)))));
+
+			invokePrivateStatic("configureDataStores", new Class<?>[] {Map.class}, properties);
+			invokePrivateStatic("configureHibernateSettings", new Class<?>[] {Map.class}, properties);
+
+			DataStore store = UtilImpl.DATA_STORES.get("jdbc");
+			assertNotNull(store);
+			assertEquals("org.h2.Driver", store.getJdbcDriverClassName());
+			assertEquals("jdbc:h2:mem:skyve_context_listener", store.getJdbcUrl());
+			assertEquals(11, store.getOltpConnectionTimeoutInSeconds());
+			assertEquals(store, UtilImpl.DATA_STORE);
+			assertTrue(UtilImpl.PRETTY_SQL_OUTPUT);
+			assertEquals(1, UtilImpl.HIBERNATE_CACHES.size());
+			assertEquals("domain", UtilImpl.HIBERNATE_CACHES.get(0).getName());
+		}
+		finally {
+			UtilImpl.DATA_STORES = originalDataStores;
+			UtilImpl.DATA_STORE = originalDataStore;
+			UtilImpl.HIBERNATE_CACHES = originalHibernateCaches;
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testConfigureHibernateSettingsRejectsMissingDataStore() {
+		Map<String, DataStore> originalDataStores = UtilImpl.DATA_STORES;
+		DataStore originalDataStore = UtilImpl.DATA_STORE;
+		try {
+			UtilImpl.DATA_STORES = new HashMap<>();
+			Map<String, Object> properties = Map.of("hibernate", Map.of(
+					"dataStore", "missing",
+					"ddlSync", Boolean.FALSE,
+					"prettySql", Boolean.FALSE));
+
+			InvocationTargetException thrown = assertThrows(InvocationTargetException.class,
+					() -> invokePrivateStatic("configureHibernateSettings", new Class<?>[] {Map.class}, properties));
+
+			assertThat(thrown.getCause(), instanceOf(IllegalStateException.class));
+			assertTrue(thrown.getCause().getMessage().contains("hibernate.dataStore missing"));
+		}
+		finally {
+			UtilImpl.DATA_STORES = originalDataStores;
+			UtilImpl.DATA_STORE = originalDataStore;
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testConfigureArchivePropertiesReadsCacheAndSchedule() throws Exception {
+		UtilImpl.ArchiveConfig originalConfig = UtilImpl.ARCHIVE_CONFIG;
+		String originalCustomer = UtilImpl.CUSTOMER;
+		try {
+			UtilImpl.CUSTOMER = "demo";
+			Map<String, Object> document = Map.of(
+					"module", "admin",
+					"document", "Audit",
+					"directory", "audit",
+					"retainDeletedDocumentsDays", Integer.valueOf(14));
+			Map<String, Object> properties = Map.of("archive", Map.of(
+					"exportRuntimeSec", Integer.valueOf(600),
+					"exportBatchSize", Integer.valueOf(200),
+					"documents", List.of(document),
+					"cache", Map.of(
+							"heapSizeEntries", Integer.valueOf(123),
+							"expiryTimeMinutes", Integer.valueOf(45)),
+					"schedule", Map.of("cron", "0 0 1 * * ?")));
+
+			invokePrivateStatic("configureArchiveProperties", new Class<?>[] {Map.class}, properties);
+
+			assertEquals(600, UtilImpl.ARCHIVE_CONFIG.exportRuntimeSec());
+			assertEquals(200, UtilImpl.ARCHIVE_CONFIG.exportBatchSize());
+			assertTrue(UtilImpl.ARCHIVE_CONFIG.findArchiveDocConfig("admin", "Audit").isPresent());
+			assertEquals("0 0 1 * * ?", UtilImpl.ARCHIVE_CONFIG.schedule().cron());
+			assertEquals("demo", UtilImpl.ARCHIVE_CONFIG.schedule().customerName());
+		}
+		finally {
+			UtilImpl.ARCHIVE_CONFIG = originalConfig;
+			UtilImpl.CUSTOMER = originalCustomer;
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testConfigureArchivePropertiesRejectsMultiTenantArchive() {
+		String originalCustomer = UtilImpl.CUSTOMER;
+		try {
+			UtilImpl.CUSTOMER = null;
+			Map<String, Object> properties = Map.of("archive", Map.of(
+					"exportRuntimeSec", Integer.valueOf(1),
+					"exportBatchSize", Integer.valueOf(1),
+					"documents", List.of()));
+
+			InvocationTargetException thrown = assertThrows(InvocationTargetException.class,
+					() -> invokePrivateStatic("configureArchiveProperties", new Class<?>[] {Map.class}, properties));
+
+			assertThat(thrown.getCause(), instanceOf(IllegalArgumentException.class));
+			assertTrue(thrown.getCause().getMessage().contains("multi-tenancy"));
+		}
+		finally {
+			UtilImpl.CUSTOMER = originalCustomer;
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testConfigureUploadsSettingsReadsRegexesAndSizes() throws Exception {
+		String originalFileRegex = UtilImpl.UPLOADS_FILE_WHITELIST_REGEX;
+		String originalContentRegex = UtilImpl.UPLOADS_CONTENT_WHITELIST_REGEX;
+		String originalImageRegex = UtilImpl.UPLOADS_IMAGE_WHITELIST_REGEX;
+		String originalBizportRegex = UtilImpl.UPLOADS_BIZPORT_WHITELIST_REGEX;
+		try {
+			Map<String, Object> category = Map.of("whitelistRegex", ".*\\.txt", "maximumSizeMB", Integer.valueOf(9));
+			Map<String, Object> properties = Map.of("uploads", Map.of(
+					"file", category,
+					"content", category,
+					"image", category,
+					"bizport", category));
+
+			invokePrivateStatic("configureUploadsSettings", new Class<?>[] {Map.class}, properties);
+
+			assertEquals(".*\\.txt", UtilImpl.UPLOADS_FILE_WHITELIST_REGEX);
+			assertEquals(".*\\.txt", UtilImpl.UPLOADS_CONTENT_WHITELIST_REGEX);
+			assertEquals(".*\\.txt", UtilImpl.UPLOADS_IMAGE_WHITELIST_REGEX);
+			assertEquals(".*\\.txt", UtilImpl.UPLOADS_BIZPORT_WHITELIST_REGEX);
+			assertEquals(9, UtilImpl.UPLOADS_FILE_MAXIMUM_SIZE_IN_MB);
+		}
+		finally {
+			UtilImpl.UPLOADS_FILE_WHITELIST_REGEX = originalFileRegex;
+			UtilImpl.UPLOADS_CONTENT_WHITELIST_REGEX = originalContentRegex;
+			UtilImpl.UPLOADS_IMAGE_WHITELIST_REGEX = originalImageRegex;
+			UtilImpl.UPLOADS_BIZPORT_WHITELIST_REGEX = originalBizportRegex;
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testConfigurePushSettingsRejectsInvalidLimits() {
+		assertInvalidPrivateConfiguration("configurePushSettings",
+				Map.of("push", Map.of("keepAliveTimeInSeconds", Integer.valueOf(0))),
+				"push.keepAliveTimeInSeconds");
+		assertInvalidPrivateConfiguration("configurePushSettings",
+				Map.of("push", Map.of("keepAliveTimeInSeconds", Integer.valueOf(1), "queueSize", Integer.valueOf(0))),
+				"push.queueSize");
+		assertInvalidPrivateConfiguration("configurePushSettings",
+				Map.of("push", Map.of("keepAliveTimeInSeconds", Integer.valueOf(1), "maxReceiversPerUser", Integer.valueOf(-1))),
+				"push.maxReceiversPerUser");
+		assertInvalidPrivateConfiguration("configurePushSettings",
+				Map.of("push", Map.of("keepAliveTimeInSeconds", Integer.valueOf(1), "maxReceiversTotal", Integer.valueOf(-1))),
+				"push.maxReceiversTotal");
+		assertInvalidPrivateConfiguration("configurePushSettings",
+				Map.of("push", Map.of("keepAliveTimeInSeconds", Integer.valueOf(1), "staleReceiverTimeoutInSeconds", Integer.valueOf(-1))),
+				"push.staleReceiverTimeoutInSeconds");
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testConfigureAccountSettingsReadsOptionalPolicyAndTfaCustomers() throws Exception {
+		java.util.Set<String> originalCustomers = UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS;
+		int originalResendCooldown = UtilImpl.TWO_FACTOR_AUTH_RESEND_COOLDOWN_SECONDS;
+		try {
+			Map<String, Object> properties = Map.of("account", Map.of(
+					"passwordHashingAlgorithm", "argon2",
+					"passwordExpiryInDays", Integer.valueOf(90),
+					"passwordHistoryRetention", Integer.valueOf(5),
+					"accountLockoutThreshold", Integer.valueOf(4),
+					"accountLockoutDurationMultipleInSeconds", Integer.valueOf(20),
+					"allowUserSelfRegistration", Boolean.TRUE,
+					"tfaCustomers", List.of("demo", "  ", "admin"),
+					"tfaResendCooldownSeconds", Integer.valueOf(30)));
+
+			invokePrivateStatic("configureAccountSettings", new Class<?>[] {Map.class}, properties);
+
+			assertEquals(90, UtilImpl.PASSWORD_EXPIRY_IN_DAYS);
+			assertEquals(5, UtilImpl.PASSWORD_HISTORY_RETENTION);
+			assertEquals(4, UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD);
+			assertEquals(20, UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS);
+			assertTrue(UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION);
+			assertTrue(UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS.contains("demo"));
+			assertTrue(UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS.contains("admin"));
+			assertEquals(30, UtilImpl.TWO_FACTOR_AUTH_RESEND_COOLDOWN_SECONDS);
+		}
+		finally {
+			UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS = originalCustomers;
+			UtilImpl.TWO_FACTOR_AUTH_RESEND_COOLDOWN_SECONDS = originalResendCooldown;
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testConfigureEnvironmentSettingsRejectsDevLoginFilterWithoutEnvironmentIdentifier() {
+		boolean originalDevLogin = UtilImpl.DEV_LOGIN_FILTER_USED;
+		try {
+			UtilImpl.DEV_LOGIN_FILTER_USED = true;
+			Map<String, Object> environment = new HashMap<>();
+			environment.put("identifier", null);
+			environment.put("devMode", Boolean.FALSE);
+			environment.put("jobScheduler", Boolean.FALSE);
+			environment.put("showSetup", Boolean.FALSE);
+			Map<String, Object> properties = Map.of("environment", environment);
+
+			InvocationTargetException thrown = assertThrows(InvocationTargetException.class,
+					() -> invokePrivateStatic("configureEnvironmentSettings", new Class<?>[] {Map.class}, properties));
+
+			assertThat(thrown.getCause(), instanceOf(IllegalStateException.class));
+			assertTrue(thrown.getCause().getMessage().contains("DevLoginFilter"));
+		}
+		finally {
+			UtilImpl.DEV_LOGIN_FILTER_USED = originalDevLogin;
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testConfigureEnvironmentSettingsValidatesModuleDirectory() throws Exception {
+		String originalModuleDirectory = UtilImpl.MODULE_DIRECTORY;
+		Path tempDirectory = Files.createTempDirectory("skyve-context-listener-modules");
+		try {
+			Files.createDirectories(tempDirectory.resolve("modules"));
+			Map<String, Object> properties = Map.of("environment", Map.of(
+					"identifier", "test",
+					"devMode", Boolean.TRUE,
+					"jobScheduler", Boolean.FALSE,
+					"moduleDirectory", tempDirectory.toString(),
+					"showSetup", Boolean.FALSE));
+
+			invokePrivateStatic("configureEnvironmentSettings", new Class<?>[] {Map.class}, properties);
+
+			assertTrue(UtilImpl.MODULE_DIRECTORY.endsWith("/modules/"));
+		}
+		finally {
+			UtilImpl.MODULE_DIRECTORY = originalModuleDirectory;
+			deleteTree(tempDirectory);
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testConfigureDirectoryBackedSettingsValidateWritableDirectories() throws Exception {
+		String originalBackupDirectory = UtilImpl.BACKUP_DIRECTORY;
+		String originalThumbnailDirectory = UtilImpl.THUMBNAIL_DIRECTORY;
+		String originalCacheDirectory = UtilImpl.CACHE_DIRECTORY;
+		Path backupDirectory = Files.createTempDirectory("skyve-context-listener-backup-dir");
+		Path thumbnailDirectory = Files.createTempDirectory("skyve-context-listener-thumbnail-dir");
+		Path cacheDirectory = Files.createTempDirectory("skyve-context-listener-cache-dir");
+		try {
+			invokePrivateStatic("configureBackupSettings",
+					new Class<?>[] {Map.class},
+					Map.of("backup", Map.of("directory", backupDirectory.toString())));
+			invokePrivateStatic("configureThumbnailSettings",
+					new Class<?>[] {Map.class},
+					Map.of("thumbnail", Map.of(
+							"concurrentThreads", Integer.valueOf(2),
+							"subsamplingMinimumTargetSize", Integer.valueOf(20),
+							"fileStorage", Boolean.TRUE,
+							"directory", thumbnailDirectory.toString())));
+
+			Map<String, Object> state = new HashMap<>();
+			state.put("directory", cacheDirectory.toString());
+			state.put("multiple", Boolean.TRUE);
+			state.put("conversations", cacheSettings());
+			state.put("csrfTokens", cacheSettings());
+			state.put("sessions", cacheSettings());
+			state.put("geoIPs", cacheSettings());
+			invokePrivateStatic("configureStateSettings", new Class<?>[] {Map.class}, Map.of("state", state));
+
+			assertTrue(UtilImpl.BACKUP_DIRECTORY.endsWith("/"));
+			assertTrue(UtilImpl.THUMBNAIL_DIRECTORY.endsWith("/"));
+			assertTrue(UtilImpl.CACHE_DIRECTORY.endsWith("/"));
+		}
+		finally {
+			UtilImpl.BACKUP_DIRECTORY = originalBackupDirectory;
+			UtilImpl.THUMBNAIL_DIRECTORY = originalThumbnailDirectory;
+			UtilImpl.CACHE_DIRECTORY = originalCacheDirectory;
+			deleteTree(backupDirectory);
+			deleteTree(thumbnailDirectory);
+			deleteTree(cacheDirectory);
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testConfigureContentMapBootstrapAndPrimeFlexOptionalValues() throws Exception {
+		int originalGcEligibleAge = UtilImpl.CONTENT_GC_ELIGIBLE_AGE_MINUTES;
+		int originalMapZoom = UtilImpl.MAP_ZOOM;
+		String originalBootstrapEmail = UtilImpl.BOOTSTRAP_EMAIL;
+		boolean originalPrimeFlex = UtilImpl.PRIMEFLEX;
+		try {
+			invokePrivateStatic("configureContentSettings",
+					new Class<?>[] {Map.class},
+					Map.of(
+							"gcCron", "0 0 * * * ?",
+							"gcEligibleAgeMinutes", Integer.valueOf(77),
+							"fileStorage", Boolean.TRUE,
+							"fileSuffixes", Boolean.FALSE));
+			invokePrivateStatic("configureMapSettings",
+					new Class<?>[] {Map.class},
+					Map.of("map", Map.of(
+							"type", "leaflet",
+							"layers", "[]",
+							"zoom", Integer.valueOf(13))));
+			invokePrivateStatic("configureBootstrapSettings",
+					new Class<?>[] {Map.class},
+					Map.of("bootstrap", Map.of(
+							"customer", "demo",
+							"user", "admin",
+							"password", "secret")));
+
+			ServletContext context = mock(ServletContext.class);
+			when(context.getInitParameter("org.skyve.web.faces.PRIMEFLEX")).thenReturn("true");
+			invokePrivateStatic("configurePrimeFlex", new Class<?>[] {ServletContext.class}, context);
+
+			assertEquals(77, UtilImpl.CONTENT_GC_ELIGIBLE_AGE_MINUTES);
+			assertEquals(13, UtilImpl.MAP_ZOOM);
+			assertEquals("pleaseupdate@test.com", UtilImpl.BOOTSTRAP_EMAIL);
+			assertTrue(UtilImpl.PRIMEFLEX);
+		}
+		finally {
+			UtilImpl.CONTENT_GC_ELIGIBLE_AGE_MINUTES = originalGcEligibleAge;
+			UtilImpl.MAP_ZOOM = originalMapZoom;
+			UtilImpl.BOOTSTRAP_EMAIL = originalBootstrapEmail;
+			UtilImpl.PRIMEFLEX = originalPrimeFlex;
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testConfigureMailServiceRejectsUnknownConfiguredClass() {
+		Map<String, Object> factories = Map.of("mailServiceClass", "does.not.Exist");
+
+		InvocationTargetException thrown = assertThrows(InvocationTargetException.class,
+				() -> invokePrivateStatic("configureMailServiceAndSmtp",
+						new Class<?>[] {Map.class, Map.class},
+						new HashMap<>(),
+						factories));
+
+		assertThat(thrown.getCause(), instanceOf(IllegalStateException.class));
+		assertTrue(thrown.getCause().getMessage().contains("factories.mailServiceClass"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testLoadAndInstantiateFactoryErrors() {
+		InvocationTargetException missing = assertThrows(InvocationTargetException.class,
+				() -> invokePrivateStatic("loadFactoryClass",
+						new Class<?>[] {String.class, String.class},
+						"does.not.Exist",
+						"factories.example"));
+		assertThat(missing.getCause(), instanceOf(IllegalStateException.class));
+		assertTrue(missing.getCause().getMessage().contains("Could not find factories.example"));
+
+		InvocationTargetException wrongType = assertThrows(InvocationTargetException.class,
+				() -> invokePrivateStatic("instantiateFactory",
+						new Class<?>[] {Class.class, String.class, String.class},
+						MailService.class,
+						String.class.getName(),
+						"factories.mailServiceClass"));
+		assertThat(wrongType.getCause(), instanceOf(IllegalStateException.class));
+		assertTrue(wrongType.getCause().getMessage().contains("Could not create factories.mailServiceClass"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testConfigureCustomSingletonAndServiceFactories() throws Exception {
+		NumberGenerator originalNumberGenerator = NumberGeneratorStaticSingleton.get();
+		Customisations originalCustomisations = CustomisationsStaticSingleton.get();
+		GeoIPService originalGeoIpService = GeoIPServiceStaticSingleton.get();
+		SMSService originalSmsService = SMSServiceStaticSingleton.get();
+		try {
+			Map<String, Object> factories = Map.of(
+					"numberGeneratorClass", TestNumberGenerator.class.getName(),
+					"customisationsClass", TestCustomisations.class.getName(),
+					"geoIPServiceClass", TestGeoIPService.class.getName(),
+					"smsServiceClass", TestSMSService.class.getName());
+
+			invokePrivateStatic("configureSingletonFactories", new Class<?>[] {Map.class}, factories);
+			invokePrivateStatic("configureServiceFactories", new Class<?>[] {Map.class}, factories);
+
+			assertThat(NumberGeneratorStaticSingleton.get(), instanceOf(TestNumberGenerator.class));
+			assertThat(CustomisationsStaticSingleton.get(), instanceOf(TestCustomisations.class));
+			assertThat(GeoIPServiceStaticSingleton.get(), instanceOf(TestGeoIPService.class));
+			assertThat(SMSServiceStaticSingleton.get(), instanceOf(TestSMSService.class));
+		}
+		finally {
+			if (originalNumberGenerator == null) {
+				NumberGeneratorStaticSingleton.setDefault();
+			}
+			else {
+				NumberGeneratorStaticSingleton.set(originalNumberGenerator);
+			}
+			if (originalCustomisations == null) {
+				CustomisationsStaticSingleton.setDefault();
+			}
+			else {
+				CustomisationsStaticSingleton.set(originalCustomisations);
+			}
+			GeoIPServiceStaticSingleton.set(originalGeoIpService);
+			SMSServiceStaticSingleton.set(originalSmsService);
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testConfigureOptionalBranchesThatReturnEarlyOrRejectValues() {
+		assertInvalidPrivateConfiguration("configureAccountSettings",
+				Map.of("account", Map.of(
+						"passwordHashingAlgorithm", "argon2",
+						"allowUserSelfRegistration", Boolean.FALSE,
+						"tfaResendCooldownSeconds", Integer.valueOf(0))),
+				"account.tfaResendCooldownSeconds");
+		assertInvalidPrivateConfiguration("configureEnvironmentSettings",
+				Map.of("environment", Map.of(
+						"identifier", "test",
+						"devMode", Boolean.FALSE,
+						"jobScheduler", Boolean.FALSE,
+						"moduleDirectory", "/path/that/does/not/exist/skyve/modules",
+						"showSetup", Boolean.FALSE)),
+				"environment.moduleDirectory");
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testMergeAppliesNullOverrideValues() throws Exception {
+		Map<String, Object> original = new HashMap<>();
+		original.put("name", "demo");
+		original.put("enabled", Boolean.TRUE);
+		Map<String, Object> overrides = new HashMap<>();
+		overrides.put("name", null);
+		overrides.put("enabled", null);
+
+		invokePrivateStatic("merge", new Class<?>[] {Map.class, Map.class}, overrides, original);
+
+		assertNull(original.get("name"));
+		assertNull(original.get("enabled"));
+	}
+
+	private static Map<String, Object> cacheSettings() {
+		return Map.of(
+				"heapSizeEntries", Integer.valueOf(10),
+				"offHeapSizeMB", Integer.valueOf(0),
+				"diskSizeGB", Integer.valueOf(0),
+				"expiryTimeMinutes", Integer.valueOf(10));
+	}
+
+	private static void assertInvalidPrivateConfiguration(String methodName, Map<String, Object> properties, String expectedMessage) {
+		InvocationTargetException thrown = assertThrows(InvocationTargetException.class,
+				() -> invokePrivateStatic(methodName, new Class<?>[] {Map.class}, properties));
+		assertThat(thrown.getCause(), instanceOf(IllegalStateException.class));
+		assertTrue(thrown.getCause().getMessage().contains(expectedMessage));
 	}
 
 	private static Object invokePrivateStatic(String methodName, Class<?>[] parameterTypes, Object... args) throws Exception {

@@ -4,13 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 
-import sun.misc.Unsafe;
-
+@SuppressWarnings("static-method")
 class SmartClientQueryColumnDefinitionUnsafeTest {
 	@Test
 	void toJavascriptIncludesProjectedFlagsSortAndEqualsOperators() throws Exception {
@@ -106,9 +106,11 @@ class SmartClientQueryColumnDefinitionUnsafeTest {
 	}
 
 	private static <T> T allocate(Class<T> type) throws Exception {
-		Field f = Unsafe.class.getDeclaredField("theUnsafe");
+		Class<?> unsafeType = Class.forName("sun.misc.Unsafe");
+		Field f = unsafeType.getDeclaredField("theUnsafe");
 		f.setAccessible(true);
-		Unsafe unsafe = (Unsafe) f.get(null);
-		return type.cast(unsafe.allocateInstance(type));
+		Object unsafe = f.get(null);
+		Method allocateInstance = unsafeType.getMethod("allocateInstance", Class.class);
+		return type.cast(allocateInstance.invoke(unsafe, type));
 	}
 }

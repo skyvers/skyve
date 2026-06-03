@@ -21,6 +21,7 @@ import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.util.Binder.TargetMetaData;
 
+@SuppressWarnings({"static-method", "boxing"})
 class VueListGridScriptColumnMetaDataTest {
 	@Test
 	void toMapUsesImplicitTypeConversionWhenAttributeMissing() throws Exception {

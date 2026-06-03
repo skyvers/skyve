@@ -6,14 +6,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 
-import sun.misc.Unsafe;
-
+@SuppressWarnings({"static-method", "boxing"})
 class SmartClientFieldAndDataGridDefinitionUnsafeTest {
 	@Test
 	void fieldToJavascriptIncludesLookupMaskValidationHelpAndTextAlign() throws Exception {
@@ -177,9 +177,11 @@ class SmartClientFieldAndDataGridDefinitionUnsafeTest {
 	}
 
 	private static <T> T allocate(Class<T> type) throws Exception {
-		Field f = Unsafe.class.getDeclaredField("theUnsafe");
+		Class<?> unsafeType = Class.forName("sun.misc.Unsafe");
+		Field f = unsafeType.getDeclaredField("theUnsafe");
 		f.setAccessible(true);
-		Unsafe unsafe = (Unsafe) f.get(null);
-		return type.cast(unsafe.allocateInstance(type));
+		Object unsafe = f.get(null);
+		Method allocateInstance = unsafeType.getMethod("allocateInstance", Class.class);
+		return type.cast(allocateInstance.invoke(unsafe, type));
 	}
 }

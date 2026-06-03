@@ -1,7 +1,9 @@
 package org.skyve.impl.web.faces;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -42,6 +44,7 @@ class FacesUtilTest {
 	private static final class StyledComponent extends UIComponentBase {
 		private String styleClass;
 
+		@SuppressWarnings("unused")
 		public void setStyleClass(String styleClass) {
 			this.styleClass = styleClass;
 		}
@@ -122,7 +125,7 @@ class FacesUtilTest {
 		when(context.getELContext()).thenReturn(elContext);
 		when(context.getApplication()).thenReturn(application);
 		when(application.getExpressionFactory()).thenReturn(expressionFactory);
-		when(expressionFactory.createValueExpression(eq(elContext), eq("#{bean.value}"), eq(Object.class))).thenReturn(valueExpression);
+		when(expressionFactory.createValueExpression(elContext, "#{bean.value}", Object.class)).thenReturn(valueExpression);
 		FacesContextBridge.setCurrent(context);
 
 		FacesUtil.set("abc", "#{bean.value}");
@@ -141,7 +144,7 @@ class FacesUtilTest {
 		when(context.getELContext()).thenReturn(elContext);
 		when(context.getApplication()).thenReturn(application);
 		when(application.getExpressionFactory()).thenReturn(expressionFactory);
-		when(expressionFactory.createMethodExpression(eq(elContext), eq("#{bean.run}"), eq(Void.class), any(Class[].class))).thenReturn(methodExpression);
+		when(expressionFactory.createMethodExpression(any(), eq("#{bean.run}"), eq(Void.class), any(Class[].class))).thenReturn(methodExpression);
 		FacesContextBridge.setCurrent(context);
 
 		assertEquals(methodExpression,
@@ -196,7 +199,7 @@ class FacesUtilTest {
 
 	@Test
 	void setStyleClassAllowsNullComponent() {
-		FacesUtil.setStyleCLass(null, "x");
+		assertDoesNotThrow(() -> FacesUtil.setStyleCLass(null, "x"));
 	}
 
 	@Test
@@ -225,6 +228,6 @@ class FacesUtilTest {
 
 		FacesContextBridge.setCurrent(mock(FacesContext.class));
 		FacesUtil.resetSailFacesContextIfNeeded();
-		assertTrue(FacesContext.getCurrentInstance() != null);
+		assertNotNull(FacesContext.getCurrentInstance());
 	}
 }

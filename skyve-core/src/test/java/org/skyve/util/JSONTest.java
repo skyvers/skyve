@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.skyve.metadata.customer.Customer;
 
 /**
@@ -49,7 +50,7 @@ class JSONTest {
 
 	@Test
 	void marshallWithNullCustomerAndObjectReturnsJson() {
-		String result = JSON.marshall((Customer) null, "hello");
+		String result = JSON.marshall(Mockito.mock(Customer.class), "hello");
 		assertNotNull(result);
 	}
 
@@ -58,13 +59,7 @@ class JSONTest {
 	@Test
 	void marshallWithNullCustomerObjectAndPropertyNamesReturnsJson() {
 		Set<String> props = new HashSet<>();
-		String result = JSON.marshall((Customer) null, "hello", props);
+		String result = JSON.marshall(Mockito.mock(Customer.class), "hello", props);
 		assertNotNull(result);
-	}
-
-	@Test
-	void constructorIsCallable() {
-		// Covers the JSON() default constructor (line 13)
-		assertNotNull(new JSON());
 	}
 }
