@@ -60,7 +60,9 @@ public class WebStatsUtil {
 		BindUtil.set(loginRecord, AppConstants.IP_ADDRESS_ATTRIBUTE_NAME, userIPAddress);
 
 		// Save the new record. Country code is added in the preSave method of UserLoginRecordBizlet
-		AbstractPersistence.get().save(loginRecordDocument, loginRecord);
+		AbstractPersistence persistence = AbstractPersistence.get();
+		persistence.setUser(user);
+		persistence.save(loginRecordDocument, loginRecord);
 
 		// NO COMMIT
 	}

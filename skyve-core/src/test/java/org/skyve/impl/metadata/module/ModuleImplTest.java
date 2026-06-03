@@ -26,6 +26,7 @@ import org.skyve.impl.metadata.module.query.MetaDataQueryDefinitionImpl;
 import org.skyve.impl.metadata.module.query.SQLDefinitionImpl;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -451,7 +452,7 @@ class ModuleImplTest {
 		when(repository.getDocument(customer, m, "MissingDoc")).thenReturn(null);
 		setRepository(repository);
 		try {
-			assertThrows(IllegalStateException.class, () -> m.getDocument(customer, "MissingDoc"));
+			assertThrows(MetaDataException.class, () -> m.getDocument(customer, "MissingDoc"));
 		}
 		finally {
 			setRepository(originalRepository);

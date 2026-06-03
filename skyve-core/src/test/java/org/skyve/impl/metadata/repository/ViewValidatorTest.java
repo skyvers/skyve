@@ -1351,7 +1351,7 @@ class ViewValidatorTest {
 	@Test
 	void link_defaultListViewReference_invalidDocument_throws() {
 		when(repository.getModule(any(), eq("knownModule"))).thenReturn(module);
-		when(module.getDocument(any(), eq("missingDocument"))).thenReturn(null);
+		when(module.getDocument(any(), eq("missingDocument"))).thenThrow(new MetaDataException("missing document"));
 
 		DefaultListViewReference reference = new DefaultListViewReference();
 		reference.setModuleName("knownModule");

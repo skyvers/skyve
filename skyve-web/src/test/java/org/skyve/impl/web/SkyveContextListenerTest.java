@@ -1,10 +1,10 @@
 package org.skyve.impl.web;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -357,12 +357,12 @@ public class SkyveContextListenerTest {
 	public static class TestCustomisations implements Customisations {
 		@Override
 		public HorizontalAlignment determineDefaultWidgetTextAlignment(String widgetType, AttributeType attributeType) {
-			return null;
+			return HorizontalAlignment.centre;
 		}
 
 		@Override
 		public HorizontalAlignment determineDefaultColumnTextAlignment(String widgetType, AttributeType attributeType) {
-			return null;
+			return HorizontalAlignment.centre;
 		}
 
 		@Override
@@ -389,7 +389,7 @@ public class SkyveContextListenerTest {
 	public static class TestGeoIPService implements GeoIPService {
 		@Override
 		public IPGeolocation geolocate(String ipAddress) {
-			return null;
+			return mock(IPGeolocation.class);
 		}
 	}
 
@@ -1132,8 +1132,8 @@ public class SkyveContextListenerTest {
 	@Test
 	@SuppressWarnings("static-method")
 	public void testValidateRegexAcceptsValidPattern() throws Exception {
-		// Should not throw
-		invokePrivateStatic("validateRegex", new Class<?>[] {String.class, String.class}, "test", "[a-z]+");
+		Object result = invokePrivateStatic("validateRegex", new Class<?>[] {String.class, String.class}, "test", "[a-z]+");
+		assertNull(result);
 	}
 
 	@Test
@@ -1389,7 +1389,7 @@ public class SkyveContextListenerTest {
 	@SuppressWarnings("static-method")
 	public void testConfigureArchivePropertiesReadsCacheAndSchedule() throws Exception {
 		UtilImpl.ArchiveConfig originalConfig = UtilImpl.ARCHIVE_CONFIG;
-		String originalCustomer = UtilImpl.CUSTOMER;
+		String savedCustomer = UtilImpl.CUSTOMER;
 		try {
 			UtilImpl.CUSTOMER = "demo";
 			Map<String, Object> document = Map.of(
@@ -1416,14 +1416,14 @@ public class SkyveContextListenerTest {
 		}
 		finally {
 			UtilImpl.ARCHIVE_CONFIG = originalConfig;
-			UtilImpl.CUSTOMER = originalCustomer;
+			UtilImpl.CUSTOMER = savedCustomer;
 		}
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
 	public void testConfigureArchivePropertiesRejectsMultiTenantArchive() {
-		String originalCustomer = UtilImpl.CUSTOMER;
+		String savedCustomer = UtilImpl.CUSTOMER;
 		try {
 			UtilImpl.CUSTOMER = null;
 			Map<String, Object> properties = Map.of("archive", Map.of(
@@ -1438,7 +1438,7 @@ public class SkyveContextListenerTest {
 			assertTrue(thrown.getCause().getMessage().contains("multi-tenancy"));
 		}
 		finally {
-			UtilImpl.CUSTOMER = originalCustomer;
+			UtilImpl.CUSTOMER = savedCustomer;
 		}
 	}
 
@@ -1449,6 +1449,10 @@ public class SkyveContextListenerTest {
 		String originalContentRegex = UtilImpl.UPLOADS_CONTENT_WHITELIST_REGEX;
 		String originalImageRegex = UtilImpl.UPLOADS_IMAGE_WHITELIST_REGEX;
 		String originalBizportRegex = UtilImpl.UPLOADS_BIZPORT_WHITELIST_REGEX;
+		int originalFileSizeMb = UtilImpl.UPLOADS_FILE_MAXIMUM_SIZE_IN_MB;
+		int originalContentSizeMb = UtilImpl.UPLOADS_CONTENT_MAXIMUM_SIZE_IN_MB;
+		int originalImageSizeMb = UtilImpl.UPLOADS_IMAGE_MAXIMUM_SIZE_IN_MB;
+		int originalBizportSizeMb = UtilImpl.UPLOADS_BIZPORT_MAXIMUM_SIZE_IN_MB;
 		try {
 			Map<String, Object> category = Map.of("whitelistRegex", ".*\\.txt", "maximumSizeMB", Integer.valueOf(9));
 			Map<String, Object> properties = Map.of("uploads", Map.of(
@@ -1464,12 +1468,19 @@ public class SkyveContextListenerTest {
 			assertEquals(".*\\.txt", UtilImpl.UPLOADS_IMAGE_WHITELIST_REGEX);
 			assertEquals(".*\\.txt", UtilImpl.UPLOADS_BIZPORT_WHITELIST_REGEX);
 			assertEquals(9, UtilImpl.UPLOADS_FILE_MAXIMUM_SIZE_IN_MB);
+			assertEquals(9, UtilImpl.UPLOADS_CONTENT_MAXIMUM_SIZE_IN_MB);
+			assertEquals(9, UtilImpl.UPLOADS_IMAGE_MAXIMUM_SIZE_IN_MB);
+			assertEquals(9, UtilImpl.UPLOADS_BIZPORT_MAXIMUM_SIZE_IN_MB);
 		}
 		finally {
 			UtilImpl.UPLOADS_FILE_WHITELIST_REGEX = originalFileRegex;
 			UtilImpl.UPLOADS_CONTENT_WHITELIST_REGEX = originalContentRegex;
 			UtilImpl.UPLOADS_IMAGE_WHITELIST_REGEX = originalImageRegex;
 			UtilImpl.UPLOADS_BIZPORT_WHITELIST_REGEX = originalBizportRegex;
+			UtilImpl.UPLOADS_FILE_MAXIMUM_SIZE_IN_MB = originalFileSizeMb;
+			UtilImpl.UPLOADS_CONTENT_MAXIMUM_SIZE_IN_MB = originalContentSizeMb;
+			UtilImpl.UPLOADS_IMAGE_MAXIMUM_SIZE_IN_MB = originalImageSizeMb;
+			UtilImpl.UPLOADS_BIZPORT_MAXIMUM_SIZE_IN_MB = originalBizportSizeMb;
 		}
 	}
 

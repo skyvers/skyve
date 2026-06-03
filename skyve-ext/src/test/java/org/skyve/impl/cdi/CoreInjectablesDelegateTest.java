@@ -168,6 +168,7 @@ public class CoreInjectablesDelegateTest {
 		when(customer.getHtmlResources()).thenReturn(html);
 		when(customer.getLoginResources()).thenReturn(login);
 		when(customer.getJFreeChartPostProcessorClassName()).thenReturn("JFree");
+		when(customer.getPrimeFacesChartPostProcessorClassName()).thenReturn("PrimeFaces");
 		when(customer.getConstantDomainValues(bizlet, "m", "d", attribute)).thenReturn(values);
 
 		withThreadLocalPersistence(user, () -> {
@@ -193,7 +194,7 @@ public class CoreInjectablesDelegateTest {
 			assertSame(html, injectable.getHtmlResources());
 			assertSame(login, injectable.getLoginResources());
 			assertSame("JFree", injectable.getJFreeChartPostProcessorClassName());
-			assertSame("JFree", injectable.getPrimeFacesChartPostProcessorClassName());
+			assertSame("PrimeFaces", injectable.getPrimeFacesChartPostProcessorClassName());
 			assertSame(values, injectable.getConstantDomainValues(bizlet, "m", "d", attribute));
 			injectable.determineDependencies();
 		});
