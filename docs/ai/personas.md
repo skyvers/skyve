@@ -7,7 +7,7 @@ Use one primary persona per task. If a task spans multiple areas, execute in pha
 | Task Type | Primary Persona | Secondary Persona | Required Docs |
 |---|---|---|---|
 | Bug fix in Java/runtime code | Coder | Tester | `project-agent-guide.md`, `performance-and-coding-conventions.md`, `testing-and-coverage.md` |
-| Coverage uplift | Tester | Coder | `testing-and-coverage.md`, `test-patterns.md`, `../coverage-plan.md` |
+| Coverage uplift | Tester | Coder | `testing-and-coverage.md`, `test-patterns.md`, `../coverage-plan.md` (skip `coverage-execution-log.md` unless troubleshooting) |
 | API/Javadoc quality pass | Documenter | Coder | `javadoc-standards.md`, `project-agent-guide.md` |
 | Milestone plan creation | Planner | Documenter | `plan.md`, `project-agent-guide.md`, `learnings.md` |
 | Milestone plan execution | Coder | Tester | `plan.md`, `project-agent-guide.md`, `testing-and-coverage.md` |
@@ -55,8 +55,7 @@ Prove behavior and reduce regression risk with the narrowest meaningful tests.
 - [testing-and-coverage.md](testing-and-coverage.md)
 - [test-patterns.md](test-patterns.md)
 - [learnings.md](learnings.md)
-- [../coverage-plan.md](../coverage-plan.md) for coverage work
-
+- [../coverage-plan.md](../coverage-plan.md) for coverage work (skip `coverage-execution-log.md` unless replaying a wave or diagnosing a flaky test)
 ### Must Do
 - Choose the correct test base (pure unit, Mockito, or H2-backed).
 - Prefer targeted tests first, then widen validation as needed.
@@ -110,7 +109,7 @@ Produce executable milestone plans with clear scope, compatibility, and validati
 - [project-agent-guide.md](project-agent-guide.md)
 - [learnings.md](learnings.md)
 - [../architecture.md](../architecture.md)
-- [../coverage-plan.md](../coverage-plan.md) for coverage milestones
+- [../coverage-plan.md](../coverage-plan.md) for coverage milestones (skip `coverage-execution-log.md` unless troubleshooting)
 
 ### Must Do
 - Capture current-state observations from repository evidence.
@@ -127,3 +126,4 @@ Produce executable milestone plans with clear scope, compatibility, and validati
 - Milestone plan is self-contained and signoff-ready.
 - Risks and assumptions are explicit.
 - Validation plan is concrete and reproducible.
+

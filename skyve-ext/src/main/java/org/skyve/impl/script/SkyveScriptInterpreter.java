@@ -52,7 +52,6 @@ import org.skyve.util.logging.SkyveLoggerFactory;
  * Parses and interprets Skyve Markdown script into module and document metadata models.
  */
 public class SkyveScriptInterpreter {
-
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SkyveScriptInterpreter.class);
 
 	private List<DocumentMetaData> documents;
@@ -346,6 +345,11 @@ public class SkyveScriptInterpreter {
 
 					if (isDisplayName(text.getLiteral())) {
 						moduleTitle = extractDisplayName(text.getLiteral());
+						if (moduleTitle == null) {
+							addCritical("Invalid module definition supplied");
+							process(heading.getNext());
+							return;
+						}
 						moduleName = BindUtil.toJavaInstanceIdentifier(moduleTitle).toLowerCase();
 					} else {
 						moduleName = text.getLiteral().toLowerCase();
@@ -358,7 +362,9 @@ public class SkyveScriptInterpreter {
 					addCritical("Invalid module definition supplied");
 				}
 
-				getModules().add(currentModule);
+				if (currentModule.getName() != null) {
+					getModules().add(currentModule);
+				}
 				process(heading.getNext());
 			} else if (isHeading2(heading)) {
 				currentLine++;
@@ -372,6 +378,11 @@ public class SkyveScriptInterpreter {
 
 					if (isDisplayName(text.getLiteral().trim())) {
 						singularAlias = extractDisplayName(text.getLiteral());
+						if (singularAlias == null) {
+							addError(String.format("Unsupported document name declaratation: %s", text.getLiteral()));
+							process(heading.getNext());
+							return;
+						}
 						documentName = BindUtil.toJavaTypeIdentifier(singularAlias);
 					} else {
 						documentName = text.getLiteral().trim();
@@ -406,22 +417,26 @@ public class SkyveScriptInterpreter {
 					}
 				}
 
-				getDocuments().add(currentDocument);
+				if (currentDocument.getName() != null) {
+					getDocuments().add(currentDocument);
+				}
 
 				// add this document to the module
 				if (currentModule == null) {
 					initialiseDefaultModule();
 				}
 
-				ModuleDocumentMetaData md = new ModuleDocumentMetaData();
-				md.setRef(currentDocument.getName());
-				currentModule.getDocuments().add(md);
+				if (currentDocument.getName() != null) {
+					ModuleDocumentMetaData md = new ModuleDocumentMetaData();
+					md.setRef(currentDocument.getName());
+					currentModule.getDocuments().add(md);
+				}
 
 				appendRole(currentModule, currentDocument);
 				appendMenu(currentModule, currentDocument);
 
 				// set the module home document if not set
-				if (currentModule.getHomeDocument() == null) {
+				if ((currentModule.getHomeDocument() == null) && (currentDocument.getName() != null)) {
 					currentModule.setHomeDocument(currentDocument.getName());
 					currentModule.setHomeRef(currentDocument.getPersistent() != null ? ViewType.list : ViewType.edit);
 				}
@@ -640,6 +655,10 @@ public class SkyveScriptInterpreter {
 
 			if (isDisplayName(attributeName)) {
 				displayName = extractDisplayName(attributeName);
+				if (displayName == null) {
+					addError(String.format("Unsupported attribute display name declaration: %s", attributeName));
+					return;
+				}
 				name = BindUtil.toJavaInstanceIdentifier(displayName);
 			} else {
 				name = attributeName;
@@ -763,7 +782,6 @@ public class SkyveScriptInterpreter {
 	/**
 	 * Creates a new Collection ready to be added to the current document.
 	 */
-	@SuppressWarnings("boxing")
 	private static CollectionImpl createCollection(boolean required, String type, String name, String displayName, Node line) {
 		CollectionType collectionType = extractCollectionType(line);
 

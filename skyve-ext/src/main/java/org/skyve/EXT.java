@@ -128,6 +128,9 @@ import jakarta.servlet.http.HttpServletResponse;
 public class EXT {
 
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(EXT.class);
+	private static final String WITH_BINDING = " with binding ";
+	private static final String WITH_UX_UI = " with UX/UI ";
+	private static final String NAMED = " named ";
 
 	/**
 	 * Disallow instantiation
@@ -358,7 +361,7 @@ public class EXT {
 		for (String key : loader.getBeanKeys()) {
 			Bean bean = loader.getBean(key);
 			if (bean == null) {
-				loader.addError(c, bean, new IllegalStateException("Bean with key " + key + " not found"));
+				problems.addError(new UploadException.Problem("Bean with key " + key + " not found", key));
 			}
 			else {
 				Module module = c.getModule(bean.getBizModule());
@@ -383,7 +386,7 @@ public class EXT {
 		try {
 			for (Bean bean : beans) {
 				persistentBean = (PersistentBean) bean;
-				persistentBean = p.save(persistentBean);
+				p.save(persistentBean);
 			}
 		}
 		catch (DomainException e) {
@@ -410,7 +413,8 @@ public class EXT {
 	 * @param mail The email to write.
 	 * @param out The stream to write to.
 	 */
-	@Deprecated
+	@SuppressWarnings("java:S1133") // deprecated
+	@Deprecated(since = "10.0.0", forRemoval = false)
 	public static void writeMail(@Nonnull Mail mail, @Nonnull OutputStream out) {
 		getMailService().writeMail(mail, out);
 	}
@@ -422,7 +426,8 @@ public class EXT {
 	 *             to ensure any global pre-processing is applied.
 	 * @param mail The email to send.
 	 */
-	@Deprecated
+	@SuppressWarnings("java:S1133") // deprecated
+	@Deprecated(since = "10.0.0", forRemoval = false)
 	public static void sendMail(@Nonnull Mail mail) {
 		getMailService().sendMail(mail);
 	}
@@ -566,6 +571,7 @@ public class EXT {
 	 * 
 	 * @return A connection.
 	 */
+	@SuppressWarnings("resource")
 	public static @Nonnull Connection getDataStoreConnection() {
 		return getDataStoreConnection(UtilImpl.DATA_STORE, true);
 	}
@@ -595,6 +601,7 @@ public class EXT {
 	 * 
 	 * @return A SQLDataAccess.
 	 */
+	@SuppressWarnings("resource")
 	public static @Nonnull SQLDataAccess newSQLDataAccess() {
 		return new SQLDataAccessImpl(UtilImpl.DATA_STORE);
 	}
@@ -605,6 +612,7 @@ public class EXT {
 	 * 
 	 * @return A SQLDataAccess.
 	 */
+	@SuppressWarnings("resource")
 	public static @Nonnull SQLDataAccess newSQLDataAccess(@Nonnull DataStore dataStore) {
 		return new SQLDataAccessImpl(dataStore);
 	}
@@ -638,8 +646,8 @@ public class EXT {
 		catch (SkyveException e) {
 			throw e;
 		}
-		catch (Throwable t) {
-			throw new DomainException("Cannot create new list model", t);
+		catch (Exception e) {
+			throw new DomainException("Cannot create new list model", e);
 		}
 	}
 	
@@ -782,52 +790,52 @@ public class EXT {
 			final String component = access.getComponent();
 			final StringBuilder warning = new StringBuilder(256);
 			final String resource;
-			warning.append("User ").append(OWASP.sanitiseLog(userName)).append(" cannot access ");
+	    		warning.append("User ").append(OWASP.sanitiseLog(userName)).append(" cannot access ");
 			if (access.isContent()) {
-				warning.append("content for document ").append(OWASP.sanitiseLog(moduleName)).append('.').append(OWASP.sanitiseLog(documentName));
-				warning.append(" with binding ").append(OWASP.sanitiseLog(component));
-				warning.append(" with UX/UI ").append(OWASP.sanitiseLog(uxui));
+    			warning.append("content for document ").append(OWASP.sanitiseLog(moduleName)).append('.').append(OWASP.sanitiseLog(documentName));
+    			warning.append(WITH_BINDING).append(OWASP.sanitiseLog(component));
+    			warning.append(WITH_UX_UI).append(OWASP.sanitiseLog(uxui));
 				resource = "this content";
 			}
 			else if (access.isDocumentAggregate()) {
-				warning.append("default query for document ").append(OWASP.sanitiseLog(moduleName)).append('.').append(OWASP.sanitiseLog(component));
-				warning.append(" with UX/UI ").append(OWASP.sanitiseLog(uxui));
+    			warning.append("default query for document ").append(OWASP.sanitiseLog(moduleName)).append('.').append(OWASP.sanitiseLog(component));
+    			warning.append(WITH_UX_UI).append(OWASP.sanitiseLog(uxui));
 				resource = "this query";
 			}
 			else if (access.isDynamicImage()) {
-				warning.append("dynamic image for document ").append(OWASP.sanitiseLog(moduleName)).append('.').append(OWASP.sanitiseLog(documentName));
-				warning.append(" with binding ").append(OWASP.sanitiseLog(component));
-				warning.append(" and UX/UI ").append(OWASP.sanitiseLog(uxui));
+    			warning.append("dynamic image for document ").append(OWASP.sanitiseLog(moduleName)).append('.').append(OWASP.sanitiseLog(documentName));
+    			warning.append(WITH_BINDING).append(OWASP.sanitiseLog(component));
+    			warning.append(WITH_UX_UI).append(OWASP.sanitiseLog(uxui));
 				resource = "this dynamic image";
 			}
 			else if (access.isModelAggregate()) {
-				warning.append("model for document ").append(OWASP.sanitiseLog(moduleName)).append('.').append(OWASP.sanitiseLog(documentName));
-				warning.append(" named ").append(OWASP.sanitiseLog(component));
-				warning.append(" with UX/UI ").append(OWASP.sanitiseLog(uxui));
+    			warning.append("model for document ").append(OWASP.sanitiseLog(moduleName)).append('.').append(OWASP.sanitiseLog(documentName));
+    			warning.append(NAMED).append(OWASP.sanitiseLog(component));
+    			warning.append(WITH_UX_UI).append(OWASP.sanitiseLog(uxui));
 				resource = "this model";
 			}
 			else if (access.isPreviousComplete()) {
-				warning.append("previous complete for document ").append(OWASP.sanitiseLog(moduleName)).append('.').append(OWASP.sanitiseLog(documentName));
-				warning.append(" with binding ").append(OWASP.sanitiseLog(component));
-				warning.append(" and UX/UI ").append(OWASP.sanitiseLog(uxui));
+    			warning.append("previous complete for document ").append(OWASP.sanitiseLog(moduleName)).append('.').append(OWASP.sanitiseLog(documentName));
+    			warning.append(WITH_BINDING).append(OWASP.sanitiseLog(component));
+    			warning.append(WITH_UX_UI).append(OWASP.sanitiseLog(uxui));
 				resource = "this previous data";
 			}
 			else if (access.isQueryAggregate()) {
-				warning.append("query for module ").append(OWASP.sanitiseLog(moduleName));
-				warning.append(" named ").append(OWASP.sanitiseLog(component));
-				warning.append(" with UX/UI ").append(OWASP.sanitiseLog(uxui));
+    			warning.append("query for module ").append(OWASP.sanitiseLog(moduleName));
+    			warning.append(NAMED).append(OWASP.sanitiseLog(component));
+    			warning.append(WITH_UX_UI).append(OWASP.sanitiseLog(uxui));
 				resource = "this query";
 			}
 			else if (access.isReport()) {
-				warning.append("report for document ").append(OWASP.sanitiseLog(moduleName)).append('.').append(OWASP.sanitiseLog(documentName));
-				warning.append(" named ").append(OWASP.sanitiseLog(component));
-				warning.append(" with UX/UI ").append(OWASP.sanitiseLog(uxui));
+    			warning.append("report for document ").append(OWASP.sanitiseLog(moduleName)).append('.').append(OWASP.sanitiseLog(documentName));
+    			warning.append(NAMED).append(OWASP.sanitiseLog(component));
+    			warning.append(WITH_UX_UI).append(OWASP.sanitiseLog(uxui));
 				resource = "this report";
 			}
 			else if (access.isSingular()) {
-				warning.append("view for document ").append(OWASP.sanitiseLog(moduleName)).append('.').append(OWASP.sanitiseLog(documentName));
-				warning.append(" named ").append(OWASP.sanitiseLog(component));
-				warning.append(" with UX/UI ").append(OWASP.sanitiseLog(uxui));
+    			warning.append("view for document ").append(OWASP.sanitiseLog(moduleName)).append('.').append(OWASP.sanitiseLog(documentName));
+    			warning.append(NAMED).append(OWASP.sanitiseLog(component));
+    			warning.append(WITH_UX_UI).append(OWASP.sanitiseLog(uxui));
 				resource = "this view";
 			}
 			else {

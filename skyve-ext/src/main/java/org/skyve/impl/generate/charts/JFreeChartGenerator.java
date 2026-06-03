@@ -10,6 +10,7 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PiePlot;
+import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.PolarPlot;
 import org.jfree.chart.plot.SpiderWebPlot;
@@ -198,7 +199,7 @@ public class JFreeChartGenerator {
 	 * Performs pie.
 	 */
 	public JFreeChart pie() {
-		PieDataset dataSet = pieDataSet();
+		PieDataset<?> dataSet = pieDataSet();
 		JFreeChart result = ChartFactory.createPieChart(data.getTitle(), dataSet, true, false, false);
 		configurePieChart(result);
 
@@ -210,7 +211,7 @@ public class JFreeChartGenerator {
 	 * Performs doughnut.
 	 */
 	public JFreeChart doughnut() {
-		PieDataset dataSet = pieDataSet();
+		PieDataset<?> dataSet = pieDataSet();
 		JFreeChart result = ChartFactory.createRingChart(data.getTitle(), dataSet, true, false, false);
 		configurePieChart(result);
 
@@ -232,8 +233,8 @@ public class JFreeChartGenerator {
 			XYSeries series = new XYSeries(labels.get(i));
 			series.setNotify(false);
 			series.add(0, 0);
-			series.add(i * 360 / l, values.get(i));
-			series.add((i + 1) * 360 / l, values.get(i));
+			series.add(i * 360.0 / l, values.get(i));
+			series.add((i + 1) * 360.0 / l, values.get(i));
 			dataSet.addSeries(series);
 		}
 
@@ -262,8 +263,6 @@ public class JFreeChartGenerator {
 			renderer.setSeriesOutlinePaint(i, borders.get(i));
 		}
 
-		renderer.setItemLabelAnchorOffset(0);
-		
 		LegendTitle legend = result.getLegend();
 		legend.setItemFont(THEME_LEGEND_FONT);
 
@@ -311,7 +310,7 @@ public class JFreeChartGenerator {
 		return result;
 	}
 	
-	private PieDataset pieDataSet() {
+	private PieDataset<?> pieDataSet() {
 		return new CategoryToPieDataset(dataSet(), TableOrder.BY_ROW, 0);
 	}
 	
@@ -334,8 +333,6 @@ public class JFreeChartGenerator {
 		renderer.setSeriesOutlineStroke(0, new BasicStroke(1));
 		renderer.setSeriesFillPaint(0, data.getBackground());
 
-		renderer.setItemLabelAnchorOffset(0);
-		
 		LegendTitle legend = chart.getLegend();
 		if (legend != null) {
 			legend.setItemFont(THEME_LEGEND_FONT);
@@ -354,10 +351,14 @@ public class JFreeChartGenerator {
 		chart.setBackgroundPaint(null);
 	    chart.setBorderVisible(false);
 
-		PiePlot plot = (PiePlot) chart.getPlot();
-		plot.setBackgroundPaint(null);
-		plot.setNoDataMessage(NO_DATA_AVAILABLE);
-		plot.setOutlineVisible(false);
+		Plot plot = chart.getPlot();
+		if (! (plot instanceof PiePlot<?> piePlot)) {
+			throw new IllegalArgumentException("Chart plot is not a pie plot.");
+		}
+
+		piePlot.setBackgroundPaint(null);
+		piePlot.setNoDataMessage(NO_DATA_AVAILABLE);
+		piePlot.setOutlineVisible(false);
 
 		List<String> labels = data.getLabels();
 		List<Color> backgrounds = data.getBackgrounds();
@@ -365,8 +366,8 @@ public class JFreeChartGenerator {
 		
 		for (int i = 0, l = backgrounds.size(); i < l; i++) {
 			String label = labels.get(i);
-			plot.setSectionPaint(label, backgrounds.get(i));
-			plot.setSectionOutlinePaint(label, borders.get(i));
+			piePlot.setSectionPaint(label, backgrounds.get(i));
+			piePlot.setSectionOutlinePaint(label, borders.get(i));
 		}
 		
 		LegendTitle legend = chart.getLegend();

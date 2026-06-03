@@ -313,6 +313,13 @@ public class FacesViewRenderer extends ViewRenderer {
 	@Override
 	public void renderTabPane(TabPane tabPane) {
 		UIComponent component = cb.tabPane(null, tabPane, module.getName(), document.getName());
+		boolean renderingThisFragment = (widgetId != null) && widgetId.equals(tabPane.getWidgetId());
+
+		// Mark the fragment before container insertion so fragment-only layout builders keep an active container.
+		if (renderingThisFragment) {
+			fragment = component;
+		}
+
 		addToContainer(component,
 						tabPane.getPixelWidth(),
 						tabPane.getResponsiveWidth(),
@@ -323,9 +330,8 @@ public class FacesViewRenderer extends ViewRenderer {
 						tabPane.getXl(),
 						tabPane.getInvisibleConditionName());
 
-		// start rendering if appropriate
-		if ((widgetId != null) && (widgetId.equals(tabPane.getWidgetId()))) {
-			fragment = component;
+		if (renderingThisFragment && (current == null)) {
+			current = component;
 		}
 
 		// These are added in the order they are encountered to ensure rendering works for nested tab panes correctly
@@ -342,13 +348,13 @@ public class FacesViewRenderer extends ViewRenderer {
 	 */
 	@Override
 	public void renderedTabPane(TabPane tabPane) {
-		addedToContainer();
+		if (current != null) {
+			addedToContainer();
+		}
 
 		// stop rendering if appropriate
 		if ((widgetId != null) && (widgetId.equals(tabPane.getWidgetId()))) {
-			current.getChildren().remove(fragment);
-			fragment.setParent(null);
-			facesView.getChildren().add(fragment);
+			moveFragmentToFacesView();
 			fragment = null;
 			// Add the scripts required for this fragment here (and not in renderedView()
 			facesView.getChildren().addAll(scripts);
@@ -3295,11 +3301,26 @@ public class FacesViewRenderer extends ViewRenderer {
 
 		// stop rendering if appropriate
 		if ((widgetId != null) && (widgetId.equals(thisWidgetId))) {
-			current.getChildren().remove(fragment);
-			fragment.setParent(null);
-			facesView.getChildren().add(fragment);
+			moveFragmentToFacesView();
 			fragment = null;
 		}
+	}
+
+	private void moveFragmentToFacesView() {
+		if (fragment == null) {
+			return;
+		}
+
+		UIComponent parent = fragment.getParent();
+		if (parent != null) {
+			parent.getChildren().remove(fragment);
+		}
+		else if (current != null) {
+			current.getChildren().remove(fragment);
+		}
+
+		fragment.setParent(null);
+		facesView.getChildren().add(fragment);
 	}
 	
 	/**

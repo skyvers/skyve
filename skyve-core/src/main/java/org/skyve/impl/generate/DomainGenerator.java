@@ -26,8 +26,8 @@ import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
-import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
+import org.slf4j.Logger;
 
 import jakarta.annotation.Nullable;
 
@@ -260,7 +260,11 @@ public abstract class DomainGenerator {
 				Document document = module.getDocument(customer, documentName);
 				if (debug) System.out.println("Validate document " + documentName);
 				repository.validateDocumentForGenerateDomain(customer, document);
-				if (repository.getGlobalRouter().getUxuiSelectorClassName() == null) {
+				Router globalRouter = repository.getGlobalRouter();
+				if (globalRouter == null) {
+					throw new MetaDataException("Global router must be defined.");
+				}
+				if (globalRouter.getUxuiSelectorClassName() == null) {
 					throw new MetaDataException("uxuiSelectorClassName attribute must be defined in the global router.");
 				}
 				for (Router moduleRouter : repository.getModuleRouters()) {
@@ -268,7 +272,11 @@ public abstract class DomainGenerator {
 						throw new MetaDataException("uxuiSelectorClassName attribute must only be defined in the global router.");
 					}
 				}
-				for (UxUiMetadata uxui : repository.getRouter().getUxUis()) {
+				Router router = repository.getRouter();
+				if (router == null) {
+					throw new MetaDataException("Router must be defined.");
+				}
+				for (UxUiMetadata uxui : router.getUxUis()) {
 					String uxuiName = uxui.getName();
 					if (debug) System.out.println("Get edit view for document " + documentName + " and uxui " + uxuiName);
 					View view = repository.getView(uxuiName, customer, document, ViewType.edit.toString());

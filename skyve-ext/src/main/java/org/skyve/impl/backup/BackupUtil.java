@@ -30,7 +30,6 @@ import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 import org.skyve.CORE;
 import org.skyve.EXT;
-import org.skyve.content.ContentManager;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.DomainException;
@@ -105,18 +104,14 @@ final class BackupUtil {
 		user.setName("backup");
 		AbstractPersistence.get().setUser(user);
 		
-		try (ContentManager cm = EXT.newContentManager()) {
-			@SuppressWarnings("resource")
-			AbstractContentManager acm = (AbstractContentManager) cm;
+		try (AbstractContentManager acm = (AbstractContentManager) EXT.newContentManager()) {
 			acm.startup();
 			Thread.sleep(2000);
 		}
 	}
 	
 	static void finalise() throws Exception {
-		try (ContentManager cm = EXT.newContentManager()) {
-			@SuppressWarnings("resource")
-			AbstractContentManager acm = (AbstractContentManager) cm;
+		try (AbstractContentManager acm = (AbstractContentManager) EXT.newContentManager()) {
 			acm.shutdown();
 			Thread.sleep(2000);
 		}
@@ -249,7 +244,9 @@ final class BackupUtil {
 	private static void addOrUpdate(Map<String, Table> tables, Customer customer, Document document) {
 		Persistent persistent = document.getPersistent();
 		if ((! document.isDynamic()) && document.isPersistable()) { // static persistent document
-			@SuppressWarnings("null") // test above
+			if (persistent == null) {
+				throw new MetaDataException(document.getName() + " is marked persistable but has no persistent metadata.");
+			}
 			String persistentIdentifier = persistent.getPersistentIdentifier();
 			String agnosticIdentifier = persistent.getAgnosticIdentifier();
 			Table table = tables.get(agnosticIdentifier);
@@ -290,7 +287,9 @@ final class BackupUtil {
 	
 											if (derivedDocument.isPersistable()) {
 												Persistent derivedPersistent = derivedDocument.getPersistent();
-												@SuppressWarnings("null") // tested above in isPersistable()
+												if (derivedPersistent == null) {
+													throw new MetaDataException(derivedDocument.getName() + " is persistable but has no persistent metadata.");
+												}
 												String ai = derivedPersistent.getAgnosticIdentifier();
 												ownerAgnosticIdentifier = ai;
 												ownerPersistentIdentifier = derivedPersistent.getPersistentIdentifier();
@@ -317,7 +316,9 @@ final class BackupUtil {
 		
 											if (baseDocument.isPersistable()) {
 												Persistent basePersistent = baseDocument.getPersistent();
-												@SuppressWarnings("null") // tested above
+												if (basePersistent == null) {
+													throw new MetaDataException(baseDocument.getName() + " is persistable but has no persistent metadata.");
+												}
 												ExtensionStrategy baseStrategy = basePersistent.getStrategy();
 												// keep looking if joined
 												if (ExtensionStrategy.joined.equals(baseStrategy)) {
@@ -333,12 +334,16 @@ final class BackupUtil {
 										}
 
 										Persistent ultimatePersistent = ultimateDocument.getPersistent();
-										@SuppressWarnings("null") // tested above at baseDocument.isPersistable()
+										if (ultimatePersistent == null) {
+											throw new MetaDataException(ultimateDocument.getName() + " is persistable but has no persistent metadata.");
+										}
 										String ai = ultimatePersistent.getAgnosticIdentifier();
 										ownerAgnosticIdentifier = ai;
 										ownerPersistentIdentifier = ultimatePersistent.getPersistentIdentifier();
 										Persistent referencedPersistent = referencedDocument.getPersistent();
-										@SuppressWarnings("null") // tested above at baseDocument.isPersistable()
+										if (referencedPersistent == null) {
+											throw new MetaDataException(referencedDocument.getName() + " is persistable but has no persistent metadata.");
+										}
 										String joinAgnosticIdentifier = referencedPersistent.getAgnosticIdentifier() + '_' + referenceFieldName;
 										String joinPersistentIdentifier = referencedPersistent.getPersistentIdentifier() + '_' + referenceFieldName;
 										if (! tables.containsKey(joinAgnosticIdentifier)) {

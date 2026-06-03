@@ -422,13 +422,11 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 */
 	@Override
 	public List<UserJobSchedule> retrieveAllScheduledJobsForAllCustomers() {
+		List<UserJobSchedule> result = new ArrayList<>(10);
 		for (ProvidedRepository delegate : delegates) {
-			List<UserJobSchedule> result = delegate.retrieveAllScheduledJobsForAllCustomers();
-			if (result != null) {
-				return result;
-			}
+			result.addAll(delegate.retrieveAllScheduledJobsForAllCustomers());
 		}
-		return null;
+		return result;
 	}
 
 	/**
@@ -437,13 +435,11 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 */
 	@Override
 	public List<UserJobSchedule> retrieveAllScheduledReportsForAllCustomers() {
+		List<UserJobSchedule> result = new ArrayList<>(10);
 		for (ProvidedRepository delegate : delegates) {
-			List<UserJobSchedule> result = delegate.retrieveAllScheduledReportsForAllCustomers();
-			if (result != null) {
-				return result;
-			}
+			result.addAll(delegate.retrieveAllScheduledReportsForAllCustomers());
 		}
-		return null;
+		return result;
 	}
 	
 	/**
@@ -524,10 +520,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	public List<String> getAllCustomerNames() {
 		List<String> result = new ArrayList<>(10);
 		for (ProvidedRepository delegate : delegates) {
-			List<String> customerNames = delegate.getAllCustomerNames();
-			if (customerNames != null) {
-				result.addAll(customerNames);
-			}
+			result.addAll(delegate.getAllCustomerNames());
 		}
 		return result;
 	}
@@ -540,10 +533,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	public List<String> getAllVanillaModuleNames() {
 		List<String> result = new ArrayList<>(10);
 		for (ProvidedRepository delegate : delegates) {
-			List<String> moduleNames = delegate.getAllVanillaModuleNames();
-			if (moduleNames != null) {
-				result.addAll(moduleNames);
-			}
+			result.addAll(delegate.getAllVanillaModuleNames());
 		}
 		return result;
 	}
@@ -690,10 +680,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	public List<Router> getModuleRouters() {
 		List<Router> result = new ArrayList<>(10);
 		for (ProvidedRepository delegate : delegates) {
-			List<Router> routers = delegate.getModuleRouters();
-			if (routers != null) {
-				result.addAll(routers);
-			}
+			result.addAll(delegate.getModuleRouters());
 		}
 		return result;
 	}

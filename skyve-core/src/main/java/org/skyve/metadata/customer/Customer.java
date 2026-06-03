@@ -18,6 +18,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.module.Module;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * The root metadata contract for a Skyve tenant (customer).
@@ -38,42 +39,42 @@ public interface Customer extends NamedMetaData, PersistentMetaData, ReloadableM
 	 *
 	 * @return a BCP 47 language tag (e.g. {@code "en-AU"}); may be {@code null} if not configured
 	 */
-	public String getLanguageTag();
+	public @Nullable String getLanguageTag();
 	
 	/**
 	 * Returns the default converter used to format and parse {@link org.skyve.domain.types.DateOnly} values.
 	 *
 	 * @return the date converter; never {@code null}
 	 */
-	public Converter<DateOnly> getDefaultDateConverter();
+	public @Nonnull Converter<DateOnly> getDefaultDateConverter();
 
 	/**
 	 * Returns the default converter used to format and parse {@link org.skyve.domain.types.DateTime} values.
 	 *
 	 * @return the date-time converter; never {@code null}
 	 */
-	public Converter<DateTime> getDefaultDateTimeConverter();
+	public @Nonnull Converter<DateTime> getDefaultDateTimeConverter();
 	
 	/**
 	 * Returns the default converter used to format and parse {@link org.skyve.domain.types.TimeOnly} values.
 	 *
 	 * @return the time converter; never {@code null}
 	 */
-	public Converter<TimeOnly> getDefaultTimeConverter();
+	public @Nonnull Converter<TimeOnly> getDefaultTimeConverter();
 	
 	/**
 	 * Returns the default converter used to format and parse {@link org.skyve.domain.types.Timestamp} values.
 	 *
 	 * @return the timestamp converter; never {@code null}
 	 */
-	public Converter<Timestamp> getDefaultTimestampConverter();
+	public @Nonnull Converter<Timestamp> getDefaultTimestampConverter();
 	
 	/**
 	 * Returns the module that is shown first after a user logs in.
 	 *
 	 * @return the home module; may be {@code null} if not configured
 	 */
-	public Module getHomeModule();
+	public @Nullable Module getHomeModule();
 	
 	/**
 	 * Returns the named module, resolving any customer override.
@@ -89,14 +90,14 @@ public interface Customer extends NamedMetaData, PersistentMetaData, ReloadableM
 	 *
 	 * @return an ordered, unmodifiable list; never {@code null}
 	 */
-	public List<Module> getModules();
+	public @Nonnull List<Module> getModules();
 	
 	/**
 	 * Returns all customer-level roles declared in the customer XML.
 	 *
 	 * @return a collection of customer roles; never {@code null}
 	 */
-	public Collection<CustomerRole> getRoles();
+	public @Nonnull Collection<CustomerRole> getRoles();
 	
 	/**
 	 * Returns the named customer-level role.
@@ -104,7 +105,7 @@ public interface Customer extends NamedMetaData, PersistentMetaData, ReloadableM
 	 * @param roleName  the role name to look up
 	 * @return the role, or {@code null} if no role with that name exists
 	 */
-	public CustomerRole getRole(String roleName);
+	public @Nullable CustomerRole getRole(String roleName);
 	
 	/**
 	 * Returns whether users of this customer may be assigned module-level roles directly,
@@ -119,35 +120,35 @@ public interface Customer extends NamedMetaData, PersistentMetaData, ReloadableM
 	 *
 	 * @return the interceptor metadata collection; never {@code null}
 	 */
-	public Collection<InterceptorMetaData> getInterceptors();
+	public @Nonnull Collection<InterceptorMetaData> getInterceptors();
 
 	/**
 	 * Returns the observer registrations declared in the customer XML.
 	 *
 	 * @return the observer metadata collection; never {@code null}
 	 */
-	public Collection<ObserverMetaData> getObservers();
+	public @Nonnull Collection<ObserverMetaData> getObservers();
 
 	/**
 	 * Returns the customer-specific UI resource overrides (logo path, etc.).
 	 *
 	 * @return the UI resources; may be {@code null} if not configured
 	 */
-	public UIResources getUiResources();
+	public @Nullable UIResources getUiResources();
 	
 	/**
 	 * Returns the customer-specific HTML resource overrides (CSS path, etc.).
 	 *
 	 * @return the HTML resources; may be {@code null} if not configured
 	 */
-	public HTMLResources getHtmlResources();
+	public @Nullable HTMLResources getHtmlResources();
 
 	/**
 	 * Returns the customer-specific login and logout page URL overrides.
 	 *
 	 * @return the login resources; may be {@code null} if not configured
 	 */
-	public LoginResources getLoginResources();
+	public @Nullable LoginResources getLoginResources();
 
 	/**
 	 * Returns the fully-qualified class name of a JFreeChart post-processor to apply
@@ -155,7 +156,7 @@ public interface Customer extends NamedMetaData, PersistentMetaData, ReloadableM
 	 *
 	 * @return the class name, or {@code null} if not configured
 	 */
-	public String getJFreeChartPostProcessorClassName();
+	public @Nullable String getJFreeChartPostProcessorClassName();
 
 	/**
 	 * Returns the fully-qualified class name of a PrimeFaces chart post-processor to apply
@@ -163,7 +164,7 @@ public interface Customer extends NamedMetaData, PersistentMetaData, ReloadableM
 	 *
 	 * @return the class name, or {@code null} if not configured
 	 */
-	public String getPrimeFacesChartPostProcessorClassName();
+	public @Nullable String getPrimeFacesChartPostProcessorClassName();
 	
 	/**
 	 * Resolves and returns the constant domain values for a document attribute, applying
@@ -173,17 +174,18 @@ public interface Customer extends NamedMetaData, PersistentMetaData, ReloadableM
 	 * @param moduleName   the owning module name
 	 * @param documentName the owning document name
 	 * @param attribute    the attribute whose domain values are requested
-	 * @return the list of domain values; never {@code null}
+	 * @return the list of domain values; or {@code null} if there are none
 	 * @throws Exception if the Bizlet call fails
 	 */
-	public <T extends Bean> List<DomainValue> getConstantDomainValues(Bizlet<T> bizlet,
-																		String moduleName,
-																		String documentName,
-																		Attribute attribute)
+	@SuppressWarnings("java:S112") // Allow generic exception to propagate from Bizlet call; Skyve will handle appropriately
+	public @Nonnull <T extends Bean> List<DomainValue> getConstantDomainValues(Bizlet<T> bizlet,
+																				String moduleName,
+																				String documentName,
+																				Attribute attribute)
 	throws Exception;
 	
 	/**
-	 * Initialize the dependencies on this customer given their modules and overrides.
+	 * Initialise the dependencies on this customer given their modules and overrides.
 	 */
 	public void determineDependencies();
 }

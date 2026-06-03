@@ -2832,7 +2832,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			double range = max.doubleValue() - min.doubleValue();
 			double step = range / numberOfDiscreteValues.doubleValue();
 			if (precision != null) {
-				step = new BigDecimal(step).setScale(precision.intValue(), RoundingMode.HALF_UP).doubleValue();
+				step = BigDecimal.valueOf(step).setScale(precision.intValue(), RoundingMode.HALF_UP).doubleValue();
 			}
 			sliderComponent.setStep(step);
 		}

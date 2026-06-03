@@ -2,6 +2,7 @@ package org.skyve.metadata.repository;
 
 import java.io.File;
 import java.sql.Connection;
+import java.util.Collections;
 import java.util.List;
 
 import org.skyve.domain.Bean;
@@ -293,7 +294,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 */
 	@Override
 	public List<UserJobSchedule> retrieveAllScheduledJobsForAllCustomers() {
-		return null;
+		return Collections.emptyList();
 	}
 
 	/**
@@ -302,7 +303,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 */
 	@Override
 	public List<UserJobSchedule> retrieveAllScheduledReportsForAllCustomers() {
-		return null;
+		return Collections.emptyList();
 	}
 
 	/**
@@ -321,7 +322,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 */
 	@Override
 	public List<String> getAllCustomerNames() {
-		return null;
+		return Collections.emptyList();
 	}
 
 	/**
@@ -330,7 +331,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 */
 	@Override
 	public List<String> getAllVanillaModuleNames() {
-		return null;
+		return Collections.emptyList();
 	}
 
 	/**
@@ -435,7 +436,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 */
 	@Override
 	public List<Router> getModuleRouters() {
-		return null;
+		return Collections.emptyList();
 	}
 
 	/**

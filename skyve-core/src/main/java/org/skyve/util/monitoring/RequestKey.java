@@ -178,12 +178,12 @@ public class RequestKey {
 	/**
 	 * Serialises this key to the compact wire format used by monitoring maps.
 	 *
-	 * @return serialised key string, or {@code null} for {@link #NONE}
+	 * @return serialised key string, or empty string for {@link #NONE}
 	 */
 	@Override
 	public String toString() {
 		if (this == NONE) {
-			return null;
+			return "";
 		}
 
 		StringBuilder result = new StringBuilder(128);
@@ -204,6 +204,10 @@ public class RequestKey {
 	 * @return reconstructed request key
 	 */
 	public static @Nonnull RequestKey fromString(@Nonnull String keyCode) {
+		if (keyCode.isEmpty()) {
+			return NONE;
+		}
+
 		char type = keyCode.charAt(0);
 		String remaining = keyCode.substring(1);
 

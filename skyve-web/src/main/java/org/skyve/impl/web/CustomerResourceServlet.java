@@ -1,14 +1,15 @@
 package org.skyve.impl.web;
 
 import java.io.File;
+import java.util.Objects;
 import java.io.IOException;
 
 import org.skyve.CORE;
 import org.skyve.content.MimeType;
 import org.skyve.metadata.repository.Repository;
 import org.skyve.util.Thumbnail;
-import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
+import org.slf4j.Logger;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -148,20 +149,21 @@ public class CustomerResourceServlet extends AbstractResourceServlet {
 			LOGGER.error("No resource file name or data file name in the URL");
 		}
 		else {
+			String resourceFileName = Objects.requireNonNull(params.resourceFileName());
 			Repository repository = CORE.getRepository();
-			File tempFile = repository.findResourceFile(params.resourceFileName(), params.customerName(), params.moduleName());
-			if (tempFile.exists()) {
+			File tempFile = repository.findResourceFile(resourceFileName, params.customerName(), params.moduleName());
+			if ((tempFile != null) && tempFile.exists()) {
 				resource.file = tempFile;
 			}
 			else {
-				int underscoreIndex = params.resourceFileName().lastIndexOf('_');
+				int underscoreIndex = resourceFileName.lastIndexOf('_');
 				if (underscoreIndex > 0) {
-					int dotIndex = params.resourceFileName().lastIndexOf('.');
+					int dotIndex = resourceFileName.lastIndexOf('.');
 					if (dotIndex > underscoreIndex) {
-						String baseFileName = params.resourceFileName().substring(0, underscoreIndex) +
-												params.resourceFileName().substring(dotIndex);
+						String baseFileName = resourceFileName.substring(0, underscoreIndex) +
+												resourceFileName.substring(dotIndex);
 						tempFile = repository.findResourceFile(baseFileName, params.customerName(), params.moduleName());
-						if (tempFile.exists()) {
+						if ((tempFile != null) && tempFile.exists()) {
 							resource.file = tempFile;
 						}
 					}

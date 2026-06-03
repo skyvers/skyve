@@ -103,6 +103,10 @@ public final class POIWorkbook implements BizPortWorkbook {
 			String documentName = documentCell == null ? null : documentCell.getStringCellValue();
 			Cell collectionCell = row.getCell(POISheet.COLLECTION_COLUMN, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
 			String binding = collectionCell == null ? null : collectionCell.getStringCellValue();
+			if ((moduleName == null) || (documentName == null)) {
+				e.addError(new UploadException.Problem("Invalid sheet header metadata", sheet.getSheetName()));
+				continue;
+			}
 
 			SheetKey key = new SheetKey(moduleName, documentName, binding);
 

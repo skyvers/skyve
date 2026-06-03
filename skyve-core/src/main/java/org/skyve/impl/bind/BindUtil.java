@@ -1,9 +1,11 @@
 package org.skyve.impl.bind;
 
 import java.beans.Introspector;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -12,12 +14,12 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.StringTokenizer;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import org.apache.commons.collections.comparators.ComparatorChain;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 import org.locationtech.jts.io.WKTWriter;
 import org.skyve.CORE;
@@ -71,8 +73,8 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.ExpressionEvaluator;
-import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
+import org.slf4j.Logger;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -103,91 +105,44 @@ import jakarta.annotation.Nullable;
  */
 public final class BindUtil {
 	private static final String DEFAULT_DISPLAY_DATE_FORMAT = "dd/MM/yyyy";
+	private static final String ELEMENT = "Element";
+	private static final String ELEMENT_BY_ID = "ElementById(";
+	private static final Object UNRESOLVED = new Object();
 	private static final DeproxyingPropertyUtilsBean PROPERTY_UTILS = new DeproxyingPropertyUtilsBean();
 	
 	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(BindUtil.class); 
+
+	private BindUtil() {
+		// prevent instantiation
+	}
 	
 	public static @Nonnull String formatMessage(@Nonnull String message, @Nonnull Bean... beans) {
-		return formatMessage(message, null, beans);
+		return formatMessage(message, (UnaryOperator<String>) null, beans);
+	}
+
+	/**
+	 * Backward-compatible overload retained for callers compiled against a previous
+	 * signature that accepted {@link Function}.
+	 */
+	public static @Nonnull String formatMessage(@Nonnull String message,
+												@SuppressWarnings("java:S4276") // Allow null for backward compatibility
+												@Nullable Function<String, String> postEvaluateDisplayValue,
+												@Nonnull Bean... beans) {
+		UnaryOperator<String> unaryOperator = (postEvaluateDisplayValue == null) ? null : postEvaluateDisplayValue::apply;
+		return formatMessage(message, unaryOperator, beans);
 	}
 	
 	public static @Nonnull String formatMessage(@Nonnull String message, 
-													@Nullable Function<String, String> postEvaluateDisplayValue,
+													@Nullable UnaryOperator<String> postEvaluateDisplayValue,
 													@Nonnull Bean... beans) {
 		StringBuilder result = new StringBuilder(message);
-		int openCurlyBraceIndex = result.indexOf("{");
+		int openCurlyBraceIndex = nextMessageExpressionStart(result, 0);
 		while (openCurlyBraceIndex >= 0) {
-			if ((openCurlyBraceIndex == 0) || // first char is '{' 
-					// '{' is present and not escaped with a preceding '\' - ie \{ is escaped
-					((openCurlyBraceIndex > 0) && (result.charAt(openCurlyBraceIndex - 1) != '\\'))) {
-
-				int closedCurlyBraceIndex = result.indexOf("}", openCurlyBraceIndex);
-				if (closedCurlyBraceIndex < openCurlyBraceIndex) {
-					throw new MetaDataException('[' + message + "] does not have a matching '}' for the '{' at position " + (openCurlyBraceIndex + 1));
-				}
-				String expression = result.substring(openCurlyBraceIndex, closedCurlyBraceIndex + 1);
-				boolean success = false;
-				Exception cause = null;
-				for (Bean bean : beans) {
-// The document name null check was commented out because PersistenceTest did not pass.
-// Genn'd EL expressions in AllAttributesPersistent didn't get past the documentName test below
-// because they were a hibernate proxy getting initiailised on construction.
-// I can't work out why this test was here but it must have been guarding something.
-// Maybe MapBean (now DynamicBean) never used to set the document name.
-//					String documentName = bean.getBizDocument();
-//					if (documentName != null) {
-					try {
-						// Try to get the value from this bean
-						// Do not use BindUtil.getMetaDataForBinding as it may not be a document
-						// property, it could be a condition or an implicit property.
-						String displayValue = ExpressionEvaluator.format(expression, bean);
-						// if there is a postEvaluateDisplayValue function, apply it
-						if (postEvaluateDisplayValue != null) {
-							displayValue = postEvaluateDisplayValue.apply(displayValue);
-						}
-						result.replace(openCurlyBraceIndex, closedCurlyBraceIndex + 1, displayValue);
-						// move the openCurlyBraceIndex along by the display value length so that
-						// any '{' occurrences replaced in as literals above are skipped.
-						openCurlyBraceIndex += displayValue.length();
-						// find the next occurrence
-						openCurlyBraceIndex = result.indexOf("{", openCurlyBraceIndex);
-						success = true;
-						
-						break;
-					}
-					catch (Exception e) {
-						cause = e;
-					}
-//					}
-				}
-				
-				if (! success) {
-					StringBuilder exMessage = new StringBuilder();
-					exMessage.append("Expression ").append(expression).append(" cannot be evaluated against bean");
-					if (beans.length > 1) {
-						exMessage.append("s");
-					}
-					exMessage.append(" - ");
-					
-					for (int offset = 0; offset < beans.length; offset++) {
-						Bean bean = beans[offset];
-						exMessage.append(bean.getBizDocument());
-						
-						if ((offset - 1) < beans.length) {
-							exMessage.append(", ");
-						}
-					}
-					
-					if (cause == null) {
-						throw new MetaDataException(exMessage.toString());
-					}
-					throw new MetaDataException(exMessage.toString(), cause);
-				}
-			}
-			else { // escaped { found - ie "\{" - remove the escape chars and move on to the next pair of {}
-				result.replace(openCurlyBraceIndex - 1, openCurlyBraceIndex, "");
-				openCurlyBraceIndex = result.indexOf("{", openCurlyBraceIndex); // NB openCurlyBracedIndex was not decremented but a char was removed
-			}
+			int closedCurlyBraceIndex = findClosingBrace(message, result, openCurlyBraceIndex);
+			String expression = result.substring(openCurlyBraceIndex, closedCurlyBraceIndex + 1);
+			String displayValue = formatExpression(expression, postEvaluateDisplayValue, beans);
+			result.replace(openCurlyBraceIndex, closedCurlyBraceIndex + 1, displayValue);
+			openCurlyBraceIndex = nextMessageExpressionStart(result, openCurlyBraceIndex + displayValue.length());
 		}
 
 		return result.toString().replace("\\}", "}"); // remove any escaped closing curly braces now
@@ -220,38 +175,16 @@ public final class BindUtil {
 		String error = null;
 		
 		StringBuilder result = new StringBuilder(message);
-		int openCurlyBraceIndex = result.indexOf("{");
+		int openCurlyBraceIndex = nextMessageExpressionStart(result, 0);
 		while ((error == null) && (openCurlyBraceIndex >= 0)) {
-			if ((openCurlyBraceIndex == 0) || // first char is '{' 
-					// '{' is present and not escaped with a preceding '\' - ie \{ is escaped
-					((openCurlyBraceIndex > 0) && (result.charAt(openCurlyBraceIndex - 1) != '\\'))) {
-
-				int closedCurlyBraceIndex = result.indexOf("}", openCurlyBraceIndex);
-				if (closedCurlyBraceIndex < 0) {
-					error = "Opening '{' with no closing '}'";
-				}
-				else {
-					String expression = result.substring(openCurlyBraceIndex, closedCurlyBraceIndex + 1);
-					boolean success = false;
-					StringBuilder errors = new StringBuilder(128);
-					for (Document document : documents) {
-						Module module = customer.getModule(document.getOwningModuleName());
-						error = ExpressionEvaluator.validate(expression, null, customer, module, document);
-						if (error == null) {
-							success = true;
-							break;
-						}
-						errors.append((errors.length() == 0) ? error : ". " + error);
-					}
-					if (! success) {
-						error = errors.toString();
-					}
-					openCurlyBraceIndex = result.indexOf("{", openCurlyBraceIndex + 1);
-				}
+			int closedCurlyBraceIndex = result.indexOf("}", openCurlyBraceIndex);
+			if (closedCurlyBraceIndex < 0) {
+				error = "Opening '{' with no closing '}'";
 			}
-			else { // escaped { found - ie "\{" - remove the escape chars and move on to the next pair of {}
-				result.replace(openCurlyBraceIndex - 1, openCurlyBraceIndex, "");
-				openCurlyBraceIndex = result.indexOf("{", openCurlyBraceIndex); // NB openCurlyBracedIndex was not decremented but a char was removed
+			else {
+				String expression = result.substring(openCurlyBraceIndex, closedCurlyBraceIndex + 1);
+				error = validateMessageExpression(expression, customer, documents);
+				openCurlyBraceIndex = nextMessageExpressionStart(result, openCurlyBraceIndex + 1);
 			}
 		}
 
@@ -262,49 +195,9 @@ public final class BindUtil {
 															@Nonnull Module module,
 															@Nonnull Document document,
 															@Nonnull String binding) {
-		Document contextDocument = document;
-		String ultimateBinding = binding;
-		int lastDotIndex = binding.lastIndexOf('.');
-		if (lastDotIndex > 0) {
-			String penultimateBinding = binding.substring(0, lastDotIndex);
-			ultimateBinding = binding.substring(lastDotIndex + 1);
-			try {
-				TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, penultimateBinding);
-				Attribute relation = target.getAttribute();
-				if (relation instanceof Relation r) {
-					Module owningModule = customer.getModule(target.getDocument().getOwningModuleName());
-					String contextDocumentName = r.getDocumentName();
-					contextDocument = owningModule.getDocument(customer, contextDocumentName);
-				}
-				else {
-					if (ChildBean.PARENT_NAME.equals(penultimateBinding) || penultimateBinding.endsWith(ChildBean.CHILD_PARENT_NAME_SUFFIX)) {
-						contextDocument = target.getDocument();
-						contextDocument = contextDocument.getParentDocument(customer);
-						if (contextDocument == null) {
-							throw new MetaDataException("Binding " + penultimateBinding + " does not resolve to a parent document.");
-						}
-					}
-					else {
-						throw new MetaDataException("Binding " + penultimateBinding + " does not resolve to a relation.");
-					}
-				}
-			}
-			catch (MetaDataException e) {
-				throw e;
-			}
-			catch (Exception e) {
-				throw new MetaDataException("Binding " + penultimateBinding + " does not resolve to a document attribute.", e);
-			}
-		}
-		
-		if (contextDocument == null) {
-			throw new MetaDataException("Binding " + binding + " does not resolve to a document attribute.");
-		}
-		
-		String testConditionName = ultimateBinding;
-		if (testConditionName.startsWith("not")) {
-			testConditionName = Character.toLowerCase(testConditionName.charAt(3)) + testConditionName.substring(4);
-		}
+		String ultimateBinding = determineUltimateBinding(binding);
+		Document contextDocument = resolveBindingValidationContext(customer, module, document, binding, ultimateBinding);
+		String testConditionName = normaliseConditionBindingName(ultimateBinding);
 
 		if (contextDocument.getCondition(testConditionName) != null) {
 			return new TargetMetaData(contextDocument, null, Boolean.class);
@@ -312,6 +205,145 @@ public final class BindUtil {
 
 		Module contextModule = customer.getModule(contextDocument.getOwningModuleName());
 		return BindUtil.getMetaDataForBinding(customer, contextModule, contextDocument, ultimateBinding);
+	}
+
+	private static int nextMessageExpressionStart(@Nonnull StringBuilder value, int fromIndex) {
+		int openCurlyBraceIndex = value.indexOf("{", fromIndex);
+		while (openCurlyBraceIndex >= 0) {
+			if (isUnescapedOpeningBrace(value, openCurlyBraceIndex)) {
+				return openCurlyBraceIndex;
+			}
+			value.deleteCharAt(openCurlyBraceIndex - 1);
+			openCurlyBraceIndex = value.indexOf("{", openCurlyBraceIndex);
+		}
+
+		return -1;
+	}
+
+	private static boolean isUnescapedOpeningBrace(@Nonnull CharSequence value, int openCurlyBraceIndex) {
+		return (openCurlyBraceIndex == 0) || (value.charAt(openCurlyBraceIndex - 1) != '\\');
+	}
+
+	private static int findClosingBrace(@Nonnull String message,
+											@Nonnull StringBuilder result,
+											int openCurlyBraceIndex) {
+		int closedCurlyBraceIndex = result.indexOf("}", openCurlyBraceIndex);
+		if (closedCurlyBraceIndex < 0) {
+			throw new MetaDataException('[' + message + "] does not have a matching '}' for the '{' at position " + (openCurlyBraceIndex + 1));
+		}
+
+		return closedCurlyBraceIndex;
+	}
+
+	private static @Nonnull String formatExpression(@Nonnull String expression,
+											   @Nullable UnaryOperator<String> postEvaluateDisplayValue,
+											   @Nonnull Bean... beans) {
+		Exception cause = null;
+		for (Bean bean : beans) {
+			try {
+				String displayValue = ExpressionEvaluator.format(expression, bean);
+				return (postEvaluateDisplayValue == null) ? displayValue : postEvaluateDisplayValue.apply(displayValue);
+			}
+			catch (Exception e) {
+				cause = e;
+			}
+		}
+
+		throw expressionEvaluationException(expression, cause, beans);
+	}
+
+	private static @Nonnull MetaDataException expressionEvaluationException(@Nonnull String expression,
+														   @Nullable Exception cause,
+														   @Nonnull Bean... beans) {
+		StringBuilder message = new StringBuilder(64);
+		message.append("Expression ").append(expression).append(" cannot be evaluated against bean");
+		if (beans.length > 1) {
+			message.append('s');
+		}
+		message.append(" - ");
+		for (int offset = 0; offset < beans.length; offset++) {
+			if (offset > 0) {
+				message.append(", ");
+			}
+			message.append(beans[offset].getBizDocument());
+		}
+
+		return (cause == null) ? new MetaDataException(message.toString()) : new MetaDataException(message.toString(), cause);
+	}
+
+	private static @Nullable String validateMessageExpression(@Nonnull String expression,
+											  @Nonnull Customer customer,
+											  @Nonnull Document... documents) {
+		StringBuilder errors = new StringBuilder(128);
+		for (Document document : documents) {
+			Module module = customer.getModule(document.getOwningModuleName());
+			String error = ExpressionEvaluator.validate(expression, null, customer, module, document);
+			if (error == null) {
+				return null;
+			}
+			if (! errors.isEmpty()) {
+				errors.append(". ");
+			}
+			errors.append(error);
+		}
+
+		return errors.toString();
+	}
+
+	private static @Nonnull String determineUltimateBinding(@Nonnull String binding) {
+		int lastDotIndex = binding.lastIndexOf('.');
+		return (lastDotIndex > 0) ? binding.substring(lastDotIndex + 1) : binding;
+	}
+
+	private static @Nonnull Document resolveBindingValidationContext(@Nonnull Customer customer,
+														 @Nonnull Module module,
+														 @Nonnull Document document,
+														 @Nonnull String binding,
+														 @Nonnull String ultimateBinding) {
+		int lastDotIndex = binding.lastIndexOf('.');
+		if (lastDotIndex <= 0) {
+			return document;
+		}
+
+		String penultimateBinding = binding.substring(0, lastDotIndex);
+		TargetMetaData target = resolvePenultimateBinding(customer, module, document, penultimateBinding);
+		Attribute relation = target.getAttribute();
+		if (relation instanceof Relation r) {
+			Module owningModule = customer.getModule(target.getDocument().getOwningModuleName());
+			return owningModule.getDocument(customer, r.getDocumentName());
+		}
+		if (ChildBean.PARENT_NAME.equals(penultimateBinding) || penultimateBinding.endsWith(ChildBean.CHILD_PARENT_NAME_SUFFIX)) {
+			Document parentDocument = target.getDocument().getParentDocument(customer);
+			if (parentDocument != null) {
+				return parentDocument;
+			}
+			throw new MetaDataException("Binding " + penultimateBinding + " does not resolve to a parent document.");
+		}
+
+		throw new MetaDataException("Binding " + penultimateBinding + " does not resolve to a relation for " + ultimateBinding + '.');
+	}
+
+	private static @Nonnull TargetMetaData resolvePenultimateBinding(@Nonnull Customer customer,
+														 @Nonnull Module module,
+														 @Nonnull Document document,
+														 @Nonnull String penultimateBinding) {
+		try {
+			return BindUtil.getMetaDataForBinding(customer, module, document, penultimateBinding);
+		}
+		catch (MetaDataException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			throw new MetaDataException("Binding " + penultimateBinding + " does not resolve to a document attribute.", e);
+		}
+	}
+
+	private static @Nonnull String normaliseConditionBindingName(@Nonnull String binding) {
+		if (! binding.startsWith("not")) {
+			return binding;
+		}
+
+		return Character.toLowerCase(binding.charAt(3)) + binding.substring(4);
 	}
 	
 	/**
@@ -350,52 +382,49 @@ public final class BindUtil {
 	}
 
 	public static boolean evaluateCondition(@Nonnull Bean bean, @Nonnull String condition) {
-		boolean result = false;
-
 		if (String.valueOf(true).equals(condition)) {
-			result = true;
+			return true;
 		}
-		else if (! String.valueOf(false).equals(condition)) {
-			try {
-				if (BindUtil.isSkyveExpression(condition)) {
-					result = Boolean.TRUE.equals(ExpressionEvaluator.evaluate(condition, bean));
-				}
-				else {
-					boolean negated = false;
-					String conditionName = condition;
-					if (condition.startsWith("not")) {
-						conditionName = Introspector.decapitalize(condition.substring(3));
-						negated = true;
-					}
-					Customer c = CORE.getCustomer();
-					Module m = c.getModule(bean.getBizModule());
-					Document d = m.getDocument(c, bean.getBizDocument());
-					Condition condish = d.getCondition(conditionName);
-					if (condish != null) { // could be null if an implicit condition (created or persisted etc)
-						String expression = condish.getExpression();
-						if (BindUtil.isSkyveExpression(expression)) { // condition expression
-							if (negated) {
-								result = Boolean.FALSE.equals(ExpressionEvaluator.evaluate(expression, bean));
-							}
-							else {
-								result = Boolean.TRUE.equals(ExpressionEvaluator.evaluate(expression, bean));
-							}
-						}
-						else { // condition name
-							result = (Boolean.TRUE.equals(BindUtil.get(bean, condition)));
-						}
-					}
-					else { // implicit condition
-						result = (Boolean.TRUE.equals(BindUtil.get(bean, condition)));
-					}
-				}
-			}
-			catch (Exception e) {
-				throw new MetaDataException("Condition " + bean.getBizModule() + "." + bean.getBizDocument() + "." + condition + " is not valid", e);
-			}
+		if (String.valueOf(false).equals(condition)) {
+			return false;
 		}
 
-		return result;
+		try {
+			return isSkyveExpression(condition) ? evaluateConditionExpression(bean, condition)
+					: evaluateNamedCondition(bean, condition);
+		}
+		catch (Exception e) {
+			throw new MetaDataException("Condition " + bean.getBizModule() + "." + bean.getBizDocument() + "." + condition + " is not valid", e);
+		}
+	}
+
+	private static boolean evaluateConditionExpression(@Nonnull Bean bean, @Nonnull String expression) {
+		return Boolean.TRUE.equals(ExpressionEvaluator.evaluate(expression, bean));
+	}
+
+	private static boolean evaluateNamedCondition(@Nonnull Bean bean, @Nonnull String condition) {
+		boolean negated = condition.startsWith("not");
+		String conditionName = negated ? Introspector.decapitalize(condition.substring(3)) : condition;
+		Condition metadataCondition = getBeanCondition(bean, conditionName);
+		if ((metadataCondition != null) && isSkyveExpression(metadataCondition.getExpression())) {
+			return evaluateResolvedConditionExpression(bean, metadataCondition.getExpression(), negated);
+		}
+
+		return Boolean.TRUE.equals(BindUtil.get(bean, condition));
+	}
+
+	private static @Nullable Condition getBeanCondition(@Nonnull Bean bean, @Nonnull String conditionName) {
+		Customer customer = CORE.getCustomer();
+		Module module = customer.getModule(bean.getBizModule());
+		Document document = module.getDocument(customer, bean.getBizDocument());
+		return document.getCondition(conditionName);
+	}
+
+	private static boolean evaluateResolvedConditionExpression(@Nonnull Bean bean,
+													   @Nonnull String expression,
+													   boolean negated) {
+		Boolean value = (Boolean) ExpressionEvaluator.evaluate(expression, bean);
+		return negated ? Boolean.FALSE.equals(value) : Boolean.TRUE.equals(value);
 	}
 
 	public static @Nullable String negateCondition(@Nullable String condition) {
@@ -413,7 +442,7 @@ public final class BindUtil {
 	        }
 	        else {
 	            StringBuilder sb = new StringBuilder(condition.length() + 3);
-	            sb.append("not").append(Character.valueOf(Character.toUpperCase(condition.charAt(0))));
+	            sb.append("not").append(Character.toUpperCase(condition.charAt(0)));
 	            sb.append(condition.substring(1));
 	            result = sb.toString();
 	        }
@@ -431,120 +460,144 @@ public final class BindUtil {
 	 * @return	A non-null converted value
 	 */
 	public static @Nonnull Object nullSafeConvert(@Nonnull Class<?> type, @Nonnull Object value) {
-		@Nonnull Object result = value;
-		
-		if (type.equals(Integer.class)) {
-			if ((! (value instanceof Integer)) && (value instanceof Number)) {
-				result = Integer.valueOf(((Number) value).intValue());
-			}
+		if (isNumericWrapperType(type)) {
+			return convertNumericWrapper(type, value);
 		}
-		else if (type.equals(Long.class)) {
-			if ((! (value instanceof Long)) && (value instanceof Number)) {
-				result = Long.valueOf(((Number) value).longValue());
-			}
+		if (isDecimalType(type)) {
+			return convertDecimalType(type, value);
 		}
-		else if (type.equals(Short.class)) {
-			if ((! (value instanceof Short)) && (value instanceof Number)) {
-				result = Short.valueOf(((Number) value).shortValue());
-			}
+		if (isTemporalType(type)) {
+			return convertTemporalType(type, value);
 		}
-		else if (type.equals(Float.class)) {
-			if ((! (value instanceof Float)) && (value instanceof Number)) {
-				result = Float.valueOf(((Number) value).floatValue());
-			}
+		if (Geometry.class.equals(type)) {
+			return convertGeometryValue(value);
 		}
-		else if (type.equals(Double.class)) {
-			if ((! (value instanceof Double)) && (value instanceof Number)) {
-				result = Double.valueOf(((Number) value).doubleValue());
-			}
-		}
-		else if (type.equals(BigDecimal.class)) {
-			if (! (value instanceof BigDecimal)) {
-				result = new BigDecimal(value.toString());
-			}
-		}
-		else if (type.equals(Decimal2.class)) {
-			if (! (value instanceof Decimal2)) {
-				result = new Decimal2(value.toString());
-			}
-		}
-		else if (type.equals(Decimal5.class)) {
-			if (! (value instanceof Decimal5)) {
-				result = new Decimal5(value.toString());
-			}
-		}
-		else if (type.equals(Decimal10.class)) {
-			if (! (value instanceof Decimal10)) {
-				result = new Decimal10(value.toString());
-			}
-		}
-		else if (type.equals(DateOnly.class)) {
-			if ((! (value instanceof DateOnly)) && (value instanceof Date)) {
-				result = new DateOnly(((Date) value).getTime());
-			}
-		}
-		else if (type.equals(TimeOnly.class)) {
-			if ((! (value instanceof TimeOnly)) && (value instanceof Date)) {
-				result = new TimeOnly(((Date) value).getTime());
-			}
-		}
-		else if (type.equals(DateTime.class)) {
-			if ((! (value instanceof DateTime)) && (value instanceof Date)) {
-				result = new DateTime(((Date) value).getTime());
-			}
-		}
-		else if (type.equals(Timestamp.class)) {
-			if ((! (value instanceof Timestamp)) && (value instanceof Date)) {
-				result = new Timestamp(((Date) value).getTime());
-			}
-		}
-		else if (type.equals(Geometry.class)) {
-			if (value instanceof String string) {
-				try {
-					result = new WKTReader().read(string);
-				}
-				catch (ParseException e) {
-					throw new DomainException(value + " is not valid WKT", e);
-				}
-			}
-		}
-		// NB type.isEnum() doesn't work as our enums implement another interface
-		// NB Enumeration.class.isAssignableFrom(type) doesn't work as enums are not assignable as they are a synthesised class
-		else if (Enum.class.isAssignableFrom(type)) {
-			if (value instanceof String string) {
-				// Since we can't test for assignable, see if we can see the Enumeration interface
-				Class<?>[] interfaces = type.getInterfaces();
-				Object enumeration = null;
-				if ((interfaces.length == 1) && (Enumeration.class.equals(interfaces[0]))) {
-					try {
-						enumeration = type.getMethod(Enumeration.FROM_CODE_METHOD_NAME, String.class).invoke(null, value);
-						if (enumeration == null) {
-							enumeration = type.getMethod(Enumeration.FROM_LOCALISED_DESCRIPTION_METHOD_NAME, String.class).invoke(null, value);
-						}
-					}
-					catch (Exception e) {
-						throw new DomainException(value + " is not a valid enumerated value in type " + type, e);
-					}
-				}
-				if (enumeration == null) {
-					@SuppressWarnings("unchecked")
-					Object temp = Enum.valueOf(type.asSubclass(Enum.class), string);
-					enumeration = temp;
-				}
-				if (enumeration == null) {
-					throw new IllegalArgumentException(value + " is not a valid enumeration value");
-				}
-				result = enumeration;
-			}
-			else if (value instanceof Enumeration enumeration) {
-				result = nullSafeConvert(type, enumeration.toCode());
-			}
-			else { // hopefully value is an enum
-				result = nullSafeConvert(type, value.toString());
-			}
+		if (Enum.class.isAssignableFrom(type)) {
+			return convertEnumValue(type, value);
 		}
 
-		return result;
+		return value;
+	}
+
+	private static boolean isNumericWrapperType(@Nonnull Class<?> type) {
+		return type.equals(Integer.class) || type.equals(Long.class) || type.equals(Short.class) ||
+				type.equals(Float.class) || type.equals(Double.class);
+	}
+
+	private static boolean isDecimalType(@Nonnull Class<?> type) {
+		return type.equals(BigDecimal.class) || type.equals(Decimal2.class) ||
+				type.equals(Decimal5.class) || type.equals(Decimal10.class);
+	}
+
+	private static boolean isTemporalType(@Nonnull Class<?> type) {
+		return type.equals(DateOnly.class) || type.equals(TimeOnly.class) ||
+				type.equals(DateTime.class) || type.equals(Timestamp.class);
+	}
+
+	private static @Nonnull Object convertNumericWrapper(@Nonnull Class<?> type, @Nonnull Object value) {
+		if (! (value instanceof Number number)) {
+			return value;
+		}
+		if (type.equals(Integer.class) && (! (value instanceof Integer))) {
+			return Integer.valueOf(number.intValue());
+		}
+		if (type.equals(Long.class) && (! (value instanceof Long))) {
+			return Long.valueOf(number.longValue());
+		}
+		if (type.equals(Short.class) && (! (value instanceof Short))) {
+			return Short.valueOf(number.shortValue());
+		}
+		if (type.equals(Float.class) && (! (value instanceof Float))) {
+			return Float.valueOf(number.floatValue());
+		}
+		if (type.equals(Double.class) && (! (value instanceof Double))) {
+			return Double.valueOf(number.doubleValue());
+		}
+
+		return value;
+	}
+
+	private static @Nonnull Object convertDecimalType(@Nonnull Class<?> type, @Nonnull Object value) {
+		if (type.equals(BigDecimal.class) && (! (value instanceof BigDecimal))) {
+			return new BigDecimal(value.toString());
+		}
+		if (type.equals(Decimal2.class) && (! (value instanceof Decimal2))) {
+			return new Decimal2(value.toString());
+		}
+		if (type.equals(Decimal5.class) && (! (value instanceof Decimal5))) {
+			return new Decimal5(value.toString());
+		}
+		if (type.equals(Decimal10.class) && (! (value instanceof Decimal10))) {
+			return new Decimal10(value.toString());
+		}
+
+		return value;
+	}
+
+	private static @Nonnull Object convertTemporalType(@Nonnull Class<?> type, @Nonnull Object value) {
+		if (! (value instanceof Date date)) {
+			return value;
+		}
+		if (type.equals(DateOnly.class) && (! (value instanceof DateOnly))) {
+			return new DateOnly(date.getTime());
+		}
+		if (type.equals(TimeOnly.class) && (! (value instanceof TimeOnly))) {
+			return new TimeOnly(date.getTime());
+		}
+		if (type.equals(DateTime.class) && (! (value instanceof DateTime))) {
+			return new DateTime(date.getTime());
+		}
+		if (type.equals(Timestamp.class) && (! (value instanceof Timestamp))) {
+			return new Timestamp(date.getTime());
+		}
+
+		return value;
+	}
+
+	private static @Nonnull Object convertGeometryValue(@Nonnull Object value) {
+		if (! (value instanceof String string)) {
+			return value;
+		}
+		try {
+			return new WKTReader().read(string);
+		}
+		catch (org.locationtech.jts.io.ParseException e) {
+			throw new DomainException(value + " is not valid WKT", e);
+		}
+	}
+
+	private static @Nonnull Object convertEnumValue(@Nonnull Class<?> type, @Nonnull Object value) {
+		if (value instanceof Enumeration enumeration) {
+			return convertEnumValue(type, enumeration.toCode());
+		}
+
+		String stringValue = (value instanceof String string) ? string : value.toString();
+		Object enumeration = resolveSkyveEnumeration(type, stringValue);
+		if (enumeration == null) {
+			enumeration = Enum.valueOf(type.asSubclass(Enum.class), stringValue);
+		}
+		if (enumeration == null) {
+			throw new IllegalArgumentException(value + " is not a valid enumeration value");
+		}
+
+		return enumeration;
+	}
+
+	private static @Nullable Object resolveSkyveEnumeration(@Nonnull Class<?> type, @Nonnull String value) {
+		Class<?>[] interfaces = type.getInterfaces();
+		if ((interfaces.length != 1) || (! Enumeration.class.equals(interfaces[0]))) {
+			return null;
+		}
+		try {
+			Object enumeration = type.getMethod(Enumeration.FROM_CODE_METHOD_NAME, String.class).invoke(null, value);
+			if (enumeration == null) {
+				enumeration = type.getMethod(Enumeration.FROM_LOCALISED_DESCRIPTION_METHOD_NAME, String.class).invoke(null, value);
+			}
+			return enumeration;
+		}
+		catch (Exception e) {
+			throw new DomainException(value + " is not a valid enumerated value in type " + type, e);
+		}
 	}
 
 	/**
@@ -597,117 +650,8 @@ public final class BindUtil {
 												@Nonnull Class<?> type,
 												@Nonnull String stringValue,
 												boolean fromSerializedFormat) {
-		Object result;
-
 		try {
-			// use the converter if this is not from a serialized value
-			if ((! fromSerializedFormat) && (converter != null)) {
-				result = converter.fromDisplayValue(stringValue);
-			}
-			// cater for dynamic enum conversion to String
-			else if (fromSerializedFormat && (converter instanceof DynamicEnumerationConverter)) {
-				result = converter.fromDisplayValue(stringValue);
-			}
-			else if (type.equals(String.class)) {
-				result = stringValue;
-			}
-			else if (type.equals(Integer.class)) {
-				if (converter != null) {
-					result = converter.fromDisplayValue(stringValue);
-				}
-				else {
-					result = Integer.valueOf(stringValue);
-				}
-			}
-			else if (type.equals(Long.class)) {
-				result = Long.valueOf(stringValue);
-			}
-			else if (type.equals(Float.class)) {
-				result = Float.valueOf(stringValue);
-			}
-			else if (type.equals(Double.class)) {
-				result = Double.valueOf(stringValue);
-			}
-			else if (type.equals(BigDecimal.class)) {
-				result = new BigDecimal(stringValue);
-			}
-			else if (type.equals(Decimal2.class)) {
-				result = new Decimal2(stringValue);
-			}
-			else if (type.equals(Decimal5.class)) {
-				result = new Decimal5(stringValue);
-			}
-			else if (type.equals(Decimal10.class)) {
-				result = new Decimal10(stringValue);
-			}
-			else if (type.equals(Boolean.class)) {
-				result = Boolean.valueOf(stringValue.equals("true"));
-			}
-			else if (type.equals(DateOnly.class)) {
-				if (fromSerializedFormat) {
-					result = new DateOnly(stringValue);
-				}
-				else if (customer != null) {
-					Date date = customer.getDefaultDateConverter().fromDisplayValue(stringValue);
-					result = new DateOnly(date.getTime());
-				}
-				else {
-					throw new IllegalStateException("BindUtil.fromString() - Can't convert " + stringValue + " to DateOnly");
-				}
-			}
-			else if (type.equals(TimeOnly.class)) {
-				if (fromSerializedFormat) {
-					result = new TimeOnly(stringValue);
-				}
-				else if (customer != null) {
-					Date date = customer.getDefaultTimeConverter().fromDisplayValue(stringValue);
-					result = new TimeOnly(date.getTime());
-				}
-				else {
-					throw new IllegalStateException("BindUtil.fromString() - Can't convert " + stringValue + " to TimeOnly");
-				}
-			}
-			else if (type.equals(DateTime.class)) {
-				if (fromSerializedFormat) {
-					result = new DateTime(stringValue);
-				}
-				else if (customer != null) {
-					Date date = customer.getDefaultDateTimeConverter().fromDisplayValue(stringValue);
-					result = new DateTime(date.getTime());
-				}
-				else {
-					throw new IllegalStateException("BindUtil.fromString() - Can't convert " + stringValue + " to DateTime");
-				}
-			}
-			else if (type.equals(Timestamp.class)) {
-				if (fromSerializedFormat) {
-					result = new Timestamp(stringValue);
-				}
-				else if (customer != null) {
-					Date date = customer.getDefaultTimestampConverter().fromDisplayValue(stringValue);
-					result = new Timestamp(date.getTime());
-				}
-				else {
-					throw new IllegalStateException("BindUtil.fromString() - Can't convert " + stringValue + " to Timestamp");
-				}
-			}
-			else if (Geometry.class.isAssignableFrom(type)) {
-				result = new WKTReader().read(stringValue);
-			}
-			else if (Date.class.isAssignableFrom(type)) {
-				result = new java.sql.Timestamp(CORE.getDateFormat(DEFAULT_DISPLAY_DATE_FORMAT).parse(stringValue).getTime());
-			}
-			else if (type.equals(OptimisticLock.class)) {
-				result = new OptimisticLock(stringValue);
-			}
-			// NB type.isEnum() doesn't work as our enums implement another interface
-			// NB Enumeration.class.isAssignableFrom(type) doesn't work as enums are not assignable as they are a synthesised class
-			else if (Enum.class.isAssignableFrom(type)) {
-				result = nullSafeConvert(type, stringValue);
-			}
-			else {
-				throw new IllegalStateException("BindUtil.fromString() - Can't convert type " + type);
-			}
+			return fromStringInternal(customer, converter, type, stringValue, fromSerializedFormat);
 		}
 		catch (Exception e) {
 			if (e instanceof SkyveException se) {
@@ -715,8 +659,162 @@ public final class BindUtil {
 			}
 			throw new DomainException(e);
 		}
-		
-		return result;
+	}
+
+	private static @Nonnull Object fromStringInternal(@Nullable Customer customer,
+														 @Nullable Converter<?> converter,
+														 @Nonnull Class<?> type,
+														 @Nonnull String stringValue,
+														 boolean fromSerializedFormat) throws ParseException {
+		if ((! fromSerializedFormat) && (converter != null)) {
+			return converter.fromDisplayValue(stringValue);
+		}
+		if (fromSerializedFormat && (converter instanceof DynamicEnumerationConverter)) {
+			return converter.fromDisplayValue(stringValue);
+		}
+
+		Object scalarValue = fromStringScalar(converter, type, stringValue);
+		if (scalarValue != UNRESOLVED) {
+			return scalarValue;
+		}
+
+		Object temporalValue = fromStringTemporal(customer, type, stringValue, fromSerializedFormat);
+		if (temporalValue != UNRESOLVED) {
+			return temporalValue;
+		}
+
+		if (Geometry.class.isAssignableFrom(type)) {
+			return parseGeometryFromString(stringValue);
+		}
+		if (Date.class.isAssignableFrom(type)) {
+			return new java.sql.Timestamp(CORE.getDateFormat(DEFAULT_DISPLAY_DATE_FORMAT).parse(stringValue).getTime());
+		}
+		if (type.equals(OptimisticLock.class)) {
+			return new OptimisticLock(stringValue);
+		}
+		if (Enum.class.isAssignableFrom(type)) {
+			return nullSafeConvert(type, stringValue);
+		}
+
+		throw new IllegalStateException("BindUtil.fromString() - Can't convert type " + type);
+	}
+
+	private static @Nonnull Object fromStringScalar(@Nullable Converter<?> converter,
+													@Nonnull Class<?> type,
+													@Nonnull String stringValue) {
+		if (type.equals(String.class)) {
+			return stringValue;
+		}
+		if (type.equals(Integer.class)) {
+			return (converter != null) ? converter.fromDisplayValue(stringValue) : Integer.valueOf(stringValue);
+		}
+		if (type.equals(Long.class)) {
+			return Long.valueOf(stringValue);
+		}
+		if (type.equals(Float.class)) {
+			return Float.valueOf(stringValue);
+		}
+		if (type.equals(Double.class)) {
+			return Double.valueOf(stringValue);
+		}
+		if (type.equals(BigDecimal.class)) {
+			return new BigDecimal(stringValue);
+		}
+		if (type.equals(Decimal2.class)) {
+			return new Decimal2(stringValue);
+		}
+		if (type.equals(Decimal5.class)) {
+			return new Decimal5(stringValue);
+		}
+		if (type.equals(Decimal10.class)) {
+			return new Decimal10(stringValue);
+		}
+		if (type.equals(Boolean.class)) {
+			return Boolean.valueOf(stringValue.equals("true"));
+		}
+
+		return UNRESOLVED;
+	}
+
+	private static @Nonnull Object fromStringTemporal(@Nullable Customer customer,
+													  @Nonnull Class<?> type,
+													  @Nonnull String stringValue,
+													  boolean fromSerializedFormat) throws ParseException {
+		if (type.equals(DateOnly.class)) {
+			return fromStringDateOnly(customer, stringValue, fromSerializedFormat);
+		}
+		if (type.equals(TimeOnly.class)) {
+			return fromStringTimeOnly(customer, stringValue, fromSerializedFormat);
+		}
+		if (type.equals(DateTime.class)) {
+			return fromStringDateTime(customer, stringValue, fromSerializedFormat);
+		}
+		if (type.equals(Timestamp.class)) {
+			return fromStringTimestamp(customer, stringValue, fromSerializedFormat);
+		}
+
+		return UNRESOLVED;
+	}
+
+	private static @Nonnull Geometry parseGeometryFromString(@Nonnull String value) {
+		try {
+			return new WKTReader().read(value);
+		}
+		catch (org.locationtech.jts.io.ParseException e) {
+			throw new DomainException(value + " is not valid WKT", e);
+		}
+	}
+
+	private static @Nonnull Object fromStringDateOnly(@Nullable Customer customer,
+													 @Nonnull String stringValue,
+													 boolean fromSerializedFormat) throws ParseException {
+		if (fromSerializedFormat) {
+			return new DateOnly(stringValue);
+		}
+		if (customer != null) {
+			Date date = customer.getDefaultDateConverter().fromDisplayValue(stringValue);
+			return new DateOnly(date.getTime());
+		}
+		throw new IllegalStateException("BindUtil.fromString() - Can't convert " + stringValue + " to DateOnly");
+	}
+
+	private static @Nonnull Object fromStringTimeOnly(@Nullable Customer customer,
+													 @Nonnull String stringValue,
+													 boolean fromSerializedFormat) throws ParseException {
+		if (fromSerializedFormat) {
+			return new TimeOnly(stringValue);
+		}
+		if (customer != null) {
+			Date date = customer.getDefaultTimeConverter().fromDisplayValue(stringValue);
+			return new TimeOnly(date.getTime());
+		}
+		throw new IllegalStateException("BindUtil.fromString() - Can't convert " + stringValue + " to TimeOnly");
+	}
+
+	private static @Nonnull Object fromStringDateTime(@Nullable Customer customer,
+													 @Nonnull String stringValue,
+													 boolean fromSerializedFormat) throws ParseException {
+		if (fromSerializedFormat) {
+			return new DateTime(stringValue);
+		}
+		if (customer != null) {
+			Date date = customer.getDefaultDateTimeConverter().fromDisplayValue(stringValue);
+			return new DateTime(date.getTime());
+		}
+		throw new IllegalStateException("BindUtil.fromString() - Can't convert " + stringValue + " to DateTime");
+	}
+
+	private static @Nonnull Object fromStringTimestamp(@Nullable Customer customer,
+													 @Nonnull String stringValue,
+													 boolean fromSerializedFormat) throws ParseException {
+		if (fromSerializedFormat) {
+			return new Timestamp(stringValue);
+		}
+		if (customer != null) {
+			Date date = customer.getDefaultTimestampConverter().fromDisplayValue(stringValue);
+			return new Timestamp(date.getTime());
+		}
+		throw new IllegalStateException("BindUtil.fromString() - Can't convert " + stringValue + " to Timestamp");
 	}
 
 	public static @Nonnull String toDisplay(@Nonnull Customer customer, @Nullable Object value) {
@@ -730,62 +828,13 @@ public final class BindUtil {
 	 * @param object
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public static synchronized @Nonnull String toDisplay(@Nonnull Customer customer, 
 															@Nullable @SuppressWarnings("rawtypes") Converter converter,
 															@Nullable Class<?> implementingType,
 															@Nullable List<DomainValue> domainValues, 
 															@Nullable Object value) {
-		String result = "";
 		try {
-			if (value != null) { // result is already empty
-				if (domainValues != null) {
-					if (value instanceof Enumeration enumeration) {
-						result = enumeration.toLocalisedDescription();
-					}
-					else {
-						boolean found = false;
-						String codeValue = value.toString();
-						for (DomainValue domainValue : domainValues) {
-							if (domainValue.getCode().equals(codeValue)) {
-								result = domainValue.getLocalisedDescription();
-								found = true;
-								break;
-							}
-						}
-						if (! found) {
-							result = codeValue;
-						}
-					}
-				}
-				else if ((converter != null) && (implementingType != null)) {
-					result = converter.toDisplayValue(nullSafeConvert(implementingType, value));
-				}
-				else if (value instanceof DateOnly date) {
-					result = customer.getDefaultDateConverter().toDisplayValue(date);
-				}
-				else if (value instanceof TimeOnly time) {
-					result = customer.getDefaultTimeConverter().toDisplayValue(time);
-				}
-				else if (value instanceof DateTime date) {
-					result = customer.getDefaultDateTimeConverter().toDisplayValue(date);
-				}
-				else if (value instanceof Timestamp time) {
-					result = customer.getDefaultTimestampConverter().toDisplayValue(time);
-				}
-				else if (value instanceof Date date) {
-					result = CORE.getDateFormat(DEFAULT_DISPLAY_DATE_FORMAT).format(date);
-				}
-				else if (value instanceof Boolean bool) {
-					result = (bool.booleanValue() ? "Yes" : "No");
-				}
-				else if (value instanceof Geometry geometry) {
-					result = new WKTWriter().write(geometry);
-				}
-				else {
-					result = value.toString();
-				}
-			}
+			return toDisplayInternal(customer, converter, implementingType, domainValues, value);
 		}
 		catch (Exception e) {
 			if (e instanceof SkyveException se) {
@@ -794,7 +843,73 @@ public final class BindUtil {
 
 			throw new DomainException(e);
 		}
-		return result;
+	}
+
+	private static @Nonnull String toDisplayInternal(@Nonnull Customer customer,
+															  @Nullable @SuppressWarnings("rawtypes") Converter converter,
+															  @Nullable Class<?> implementingType,
+															  @Nullable List<DomainValue> domainValues,
+															  @Nullable Object value) {
+		if (value == null) {
+			return "";
+		}
+		if (domainValues != null) {
+			return toDomainDisplayValue(domainValues, value);
+		}
+		if ((converter != null) && (implementingType != null)) {
+			return toConverterDisplayValue(converter, implementingType, value);
+		}
+
+		return toStandardDisplayValue(customer, value);
+	}
+
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	private static @Nonnull String toConverterDisplayValue(@Nonnull Converter converter,
+														 @Nonnull Class<?> implementingType,
+														 @Nonnull Object value) {
+		return converter.toDisplayValue(nullSafeConvert(implementingType, value));
+	}
+
+	private static @Nonnull String toDomainDisplayValue(@Nonnull List<DomainValue> domainValues,
+														 @Nonnull Object value) {
+		if (value instanceof Enumeration enumeration) {
+			return enumeration.toLocalisedDescription();
+		}
+
+		String codeValue = value.toString();
+		for (DomainValue domainValue : domainValues) {
+			if (domainValue.getCode().equals(codeValue)) {
+				return domainValue.getLocalisedDescription();
+			}
+		}
+
+		return codeValue;
+	}
+
+	private static @Nonnull String toStandardDisplayValue(@Nonnull Customer customer, @Nonnull Object value) {
+		if (value instanceof DateOnly date) {
+			return customer.getDefaultDateConverter().toDisplayValue(date);
+		}
+		if (value instanceof TimeOnly time) {
+			return customer.getDefaultTimeConverter().toDisplayValue(time);
+		}
+		if (value instanceof DateTime date) {
+			return customer.getDefaultDateTimeConverter().toDisplayValue(date);
+		}
+		if (value instanceof Timestamp time) {
+			return customer.getDefaultTimestampConverter().toDisplayValue(time);
+		}
+		if (value instanceof Date date) {
+			return CORE.getDateFormat(DEFAULT_DISPLAY_DATE_FORMAT).format(date);
+		}
+		if (value instanceof Boolean bool) {
+			return bool.booleanValue() ? "Yes" : "No";
+		}
+		if (value instanceof Geometry geometry) {
+			return new WKTWriter().write(geometry);
+		}
+
+		return value.toString();
 	}
 
 	public static @Nonnull String getDisplay(@Nonnull Customer customer,
@@ -811,66 +926,116 @@ public final class BindUtil {
 			return b.getBizKey();
 		}
 
-		Converter<?> converter = null;
-		Class<?> implementingType = null;
-		List<DomainValue> domainValues = null;
+		DisplaySettings displaySettings = resolveDisplaySettings(customer, bean, binding);
+		return toDisplay(customer,
+					displaySettings.converter,
+					displaySettings.implementingType,
+					displaySettings.domainValues,
+					value);
+	}
 
+	private static @Nonnull DisplaySettings resolveDisplaySettings(@Nonnull Customer customer,
+														   @Nonnull Bean bean,
+														   @Nonnull String binding) {
 		String documentName = bean.getBizDocument();
-		if (documentName != null) {
-			Module module = customer.getModule(bean.getBizModule());
-			Document document = module.getDocument(customer, documentName);
-			TargetMetaData target = null;
-			Attribute attribute = null;
-			try {
-				target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
-				document = target.getDocument();
-				attribute = target.getAttribute();
-			}
-			catch (@SuppressWarnings("unused") MetaDataException e) {
-				// do nothing
-			}
-			
-			if (attribute instanceof Field field) {
-				if (field instanceof ConvertibleField convertibleField) {
-					converter = convertibleField.getConverterForCustomer(customer);
-				}
-				implementingType = field.getImplementingType();
-				DomainType domainType = field.getDomainType();
-				if (domainType != null) {
-					DocumentImpl internalDocument = (DocumentImpl) document;
-					if (DomainType.dynamic.equals(domainType)) {
-						// Get the real deal if this is a DynamicBean from a query
-						Bean realBean = bean;
-						if (bean instanceof DynamicBean dynamicBean) {
-							if (dynamicBean.isProperty(DynamicBean.BEAN_PROPERTY_KEY)) {
-								realBean = (Bean) dynamicBean.get(DynamicBean.BEAN_PROPERTY_KEY);
-							}
-							else { // no THIS_ALIAS in this DynamicBean (maybe its an app coder's list model)
-								realBean = null;
-							}
-						}
-						
-						if (realBean != null) {
-							int lastDotIndex = binding.lastIndexOf('.');
-							if (lastDotIndex >= 0) {
-								Bean owningBean = (Bean) get(realBean, binding.substring(0, lastDotIndex));
-								if ((owningBean != null) && (target != null)) {
-									domainValues = internalDocument.getDomainValues((CustomerImpl) customer, domainType, field, owningBean, true);
-								}
-							}
-							else {
-								domainValues = internalDocument.getDomainValues((CustomerImpl) customer, domainType, field, realBean, true);							
-							}
-						}
-					}
-					else {
-						domainValues = internalDocument.getDomainValues((CustomerImpl) customer, domainType, field, null, true);
-					}
-				}
-			}
+		if (documentName == null) {
+			return DisplaySettings.EMPTY;
 		}
 
-		return toDisplay(customer, converter, implementingType, domainValues, value);
+		Module module = customer.getModule(bean.getBizModule());
+		Document document = module.getDocument(customer, documentName);
+		TargetMetaData target = resolveDisplayTarget(customer, module, document, binding);
+		Attribute attribute = (target == null) ? null : target.getAttribute();
+		Document targetDocument = (target == null) ? document : target.getDocument();
+		if (! (attribute instanceof Field field)) {
+			return DisplaySettings.EMPTY;
+		}
+
+		Converter<?> converter = (field instanceof ConvertibleField convertibleField)
+				? convertibleField.getConverterForCustomer(customer)
+				: null;
+		Class<?> implementingType = field.getImplementingType();
+		List<DomainValue> domainValues = resolveDisplayDomainValues(customer, bean, binding, targetDocument, field);
+		return new DisplaySettings(converter, implementingType, domainValues);
+	}
+
+	private static @Nullable TargetMetaData resolveDisplayTarget(@Nonnull Customer customer,
+														 @Nonnull Module module,
+														 @Nonnull Document document,
+														 @Nonnull String binding) {
+		try {
+			return BindUtil.getMetaDataForBinding(customer, module, document, binding);
+		}
+		catch (MetaDataException e) {
+			if (LOGGER.isTraceEnabled()) {
+				LOGGER.trace("Unable to resolve display target for binding {}", binding, e);
+			}
+			return null;
+		}
+	}
+
+	private static @Nullable List<DomainValue> resolveDisplayDomainValues(@Nonnull Customer customer,
+															@Nonnull Bean bean,
+															@Nonnull String binding,
+															@Nonnull Document document,
+															@Nonnull Field field) {
+		DomainType domainType = field.getDomainType();
+		if (domainType == null) {
+			return null;
+		}
+
+		DocumentImpl internalDocument = (DocumentImpl) document;
+		if (! DomainType.dynamic.equals(domainType)) {
+			return internalDocument.getDomainValues((CustomerImpl) customer, domainType, field, null, true);
+		}
+
+		Bean realBean = resolveDisplayRealBean(bean);
+		if (realBean == null) {
+			return null;
+		}
+
+		Bean owningBean = resolveOwningBeanForBinding(realBean, binding);
+		if (owningBean == null) {
+			return null;
+		}
+
+		return internalDocument.getDomainValues((CustomerImpl) customer, domainType, field, owningBean, true);
+	}
+
+	private static @Nullable Bean resolveDisplayRealBean(@Nonnull Bean bean) {
+		if (! (bean instanceof DynamicBean dynamicBean)) {
+			return bean;
+		}
+		if (! dynamicBean.isProperty(DynamicBean.BEAN_PROPERTY_KEY)) {
+			return null;
+		}
+
+		return (Bean) dynamicBean.get(DynamicBean.BEAN_PROPERTY_KEY);
+	}
+
+	private static @Nullable Bean resolveOwningBeanForBinding(@Nonnull Bean realBean, @Nonnull String binding) {
+		int lastDotIndex = binding.lastIndexOf('.');
+		if (lastDotIndex < 0) {
+			return realBean;
+		}
+
+		return (Bean) get(realBean, binding.substring(0, lastDotIndex));
+	}
+
+	private static final class DisplaySettings {
+		private static final DisplaySettings EMPTY = new DisplaySettings(null, null, null);
+
+		private final Converter<?> converter;
+		private final Class<?> implementingType;
+		private final List<DomainValue> domainValues;
+
+		private DisplaySettings(@Nullable Converter<?> converter,
+								   @Nullable Class<?> implementingType,
+								   @Nullable List<DomainValue> domainValues) {
+			this.converter = converter;
+			this.implementingType = implementingType;
+			this.domainValues = domainValues;
+		}
 	}
 
 	/**
@@ -907,7 +1072,7 @@ public final class BindUtil {
 	public static @Nonnull String createIdBinding(@Nonnull String binding, @Nonnull String bizId) {
 		StringBuilder result = new StringBuilder(64);
 
-		result.append(binding).append("ElementById(").append(bizId).append(')');
+		result.append(binding).append(ELEMENT_BY_ID).append(bizId).append(')');
 
 		return result.toString();
 	}
@@ -1022,41 +1187,54 @@ public final class BindUtil {
 											@Nullable Bean element,
 											@Nullable Bean parent) {
 		// Set the parent of a child bean, if applicable
-		if (element instanceof ChildBean<?>) {
-			String relatedDocumentName = relation.getDocumentName();
-			Document relatedDocument = module.getDocument(customer, relatedDocumentName);
-			Document parentDocument = relatedDocument.getParentDocument(customer);
-			if (parentDocument != null) {
-				String parentModuleName = parentDocument.getOwningModuleName();
-				String parentDocumentName = parentDocument.getName();
-	
-				// Check if processBean.setParent() can be called or not.
-				// The processBean may be a child of some other bean and just being added to another collection here.
-				// Or it could be a derived document, so need to check inheritance as well.
-				CustomerImpl internalCustomer = (CustomerImpl) customer;
-				Document parentBeanDocument = document;
-				while (parentBeanDocument != null) {
-					if (parentModuleName.equals(parentBeanDocument.getOwningModuleName()) &&
-							parentDocumentName.equals(parentBeanDocument.getName())) {
-						@SuppressWarnings("unchecked")
-						ChildBean<Bean> uncheckedNewBean = (ChildBean<Bean>) element;
-						uncheckedNewBean.setParent(parent);
-						parentBeanDocument = null;
-					}
-					else {
-						String baseDocumentName = internalCustomer.getBaseDocument(parentBeanDocument);
-	    				if (baseDocumentName == null) {
-	    					parentBeanDocument = null;
-	    				}
-	    				else {
-	        				int dotIndex = baseDocumentName.indexOf('.');
-	        				Module baseModule = customer.getModule(baseDocumentName.substring(0, dotIndex));
-	        				parentBeanDocument = baseModule.getDocument(customer, baseDocumentName.substring(dotIndex + 1));
-	    				}
-					}
-				}
-			}
+		if (! (element instanceof ChildBean<?>)) {
+			return;
 		}
+
+		Document parentDocument = getRelatedParentDocument(customer, module, relation);
+		if ((parentDocument != null) && canAssignParentDocument(customer, document, parentDocument)) {
+			@SuppressWarnings("unchecked")
+			ChildBean<Bean> uncheckedNewBean = (ChildBean<Bean>) element;
+			uncheckedNewBean.setParent(parent);
+		}
+	}
+
+	private static @Nullable Document getRelatedParentDocument(@Nonnull Customer customer,
+													   @Nonnull Module module,
+													   @Nonnull Relation relation) {
+		Document relatedDocument = module.getDocument(customer, relation.getDocumentName());
+		return relatedDocument.getParentDocument(customer);
+	}
+
+	private static boolean canAssignParentDocument(@Nonnull Customer customer,
+											 @Nonnull Document document,
+											 @Nonnull Document parentDocument) {
+		String parentModuleName = parentDocument.getOwningModuleName();
+		String parentDocumentName = parentDocument.getName();
+		CustomerImpl internalCustomer = (CustomerImpl) customer;
+		Document parentBeanDocument = document;
+		while (parentBeanDocument != null) {
+			if (parentModuleName.equals(parentBeanDocument.getOwningModuleName()) &&
+					parentDocumentName.equals(parentBeanDocument.getName())) {
+				return true;
+			}
+			parentBeanDocument = getBaseDocument(customer, internalCustomer, parentBeanDocument);
+		}
+
+		return false;
+	}
+
+	private static @Nullable Document getBaseDocument(@Nonnull Customer customer,
+											 @Nonnull CustomerImpl internalCustomer,
+											 @Nonnull Document document) {
+		String baseDocumentName = internalCustomer.getBaseDocument(document);
+		if (baseDocumentName == null) {
+			return null;
+		}
+
+		int dotIndex = baseDocumentName.indexOf('.');
+		Module baseModule = customer.getModule(baseDocumentName.substring(0, dotIndex));
+		return baseModule.getDocument(customer, baseDocumentName.substring(dotIndex + 1));
 	}
 	
 	private static void setRelationInverse(@Nonnull Customer customer,
@@ -1071,17 +1249,7 @@ public final class BindUtil {
 			attributeName = inverse.getReferenceName();
 		}
 		else { // lets see if there is an inverse on the element side
-			Module elementModule = customer.getModule(value.getBizModule());
-			Document elementDocument = elementModule.getDocument(customer, value.getBizDocument());
-			String ownerDocumentName = document.getName(); // owner could be null
-			for (Attribute a : elementDocument.getAllAttributes(customer)) {
-				if (a instanceof Inverse i) {
-					if (ownerDocumentName.equals(i.getDocumentName()) && relationName.equals(i.getReferenceName())) {
-						attributeName = i.getName();
-						break;
-					}
-				}
-			}
+			attributeName = findInverseAttributeName(customer, document, relationName, value);
 		}
 		
 		if (attributeName != null) {
@@ -1100,6 +1268,24 @@ public final class BindUtil {
 				set(value, attributeName, remove ? null : owner);
 			}
 		}
+	}
+
+	private static @Nullable String findInverseAttributeName(@Nonnull Customer customer,
+													  @Nonnull Document document,
+													  @Nonnull String relationName,
+													  @Nonnull Bean value) {
+		Module elementModule = customer.getModule(value.getBizModule());
+		Document elementDocument = elementModule.getDocument(customer, value.getBizDocument());
+		String ownerDocumentName = document.getName();
+		for (Attribute attribute : elementDocument.getAllAttributes(customer)) {
+			if ((attribute instanceof Inverse inverse) &&
+					ownerDocumentName.equals(inverse.getDocumentName()) &&
+					relationName.equals(inverse.getReferenceName())) {
+				return inverse.getName();
+			}
+		}
+
+		return null;
 	}
 	
 	/**
@@ -1185,11 +1371,9 @@ public final class BindUtil {
 
 			// Static collection - use the add method
 			StringBuilder sb = new StringBuilder(collectionName.length() + 10);
-			sb.append("add").append(Character.toUpperCase(collectionName.charAt(0))).append(collectionName.substring(1)).append("Element");
+			sb.append("add").append(Character.toUpperCase(collectionName.charAt(0))).append(collectionName.substring(1)).append(ELEMENT);
 			String methodName = sb.toString();
 			
-			// NB - cant use getMethod directly as element may not be the exact class - ie dynamic proxy subclass etc
-			// Method m = collectionOwner.getClass().getMethod(methodName.toString(), element.getClass());
 			Method[] methods = collectionOwner.getClass().getMethods(); 
 			for (Method method : methods) {
 				if (methodName.equals(method.getName()) && (method.getParameterTypes().length == 1)) {
@@ -1247,11 +1431,9 @@ public final class BindUtil {
 
 			// Static collection - use the add method
 			StringBuilder sb = new StringBuilder(collectionName.length() + 10);
-			sb.append("add").append(Character.toUpperCase(collectionName.charAt(0))).append(collectionName.substring(1)).append("Element");
+			sb.append("add").append(Character.toUpperCase(collectionName.charAt(0))).append(collectionName.substring(1)).append(ELEMENT);
 			String methodName = sb.toString();
 			
-			// NB - cant use getMethod directly as element may not be the exact class - ie dynamic proxy subclass etc
-			// Method m = collectionOwner.getClass().getMethod(methodName.toString(), Integer.TYPE, element.getClass());
 			Method[] methods = collectionOwner.getClass().getMethods(); 
 			for (Method method : methods) {
 				if (methodName.equals(method.getName()) && (method.getParameterTypes().length == 2)) {
@@ -1307,11 +1489,9 @@ public final class BindUtil {
 
 			// Static collection - use the remove method
 			StringBuilder sb = new StringBuilder(collectionName.length() + 13);
-			sb.append("remove").append(Character.toUpperCase(collectionName.charAt(0))).append(collectionName.substring(1)).append("Element");
+			sb.append("remove").append(Character.toUpperCase(collectionName.charAt(0))).append(collectionName.substring(1)).append(ELEMENT);
 			String methodName = sb.toString();
 			
-			// NB - cant use getMethod directly as element may not be the exact class - ie dynamic proxy subclass etc
-			// Method m = collectionOwner.getClass().getMethod(methodName.toString(), element.getClass());
 			Method[] methods = collectionOwner.getClass().getMethods(); 
 			for (Method method : methods) {
 				if (methodName.equals(method.getName())) {
@@ -1374,7 +1554,7 @@ public final class BindUtil {
 
 			// Static collection - use the remove method
 			StringBuilder methodName = new StringBuilder(collectionName.length() + 13);
-			methodName.append("remove").append(Character.toUpperCase(collectionName.charAt(0))).append(collectionName.substring(1)).append("Element");
+			methodName.append("remove").append(Character.toUpperCase(collectionName.charAt(0))).append(collectionName.substring(1)).append(ELEMENT);
 			Method method = collectionOwner.getClass().getMethod(methodName.toString(), Integer.TYPE);
 			@SuppressWarnings("unchecked")
 			T result = (T) method.invoke(collectionOwner, Integer.valueOf(index));
@@ -1517,41 +1697,7 @@ public final class BindUtil {
 		while (tokenizer.hasMoreTokens()) {
 			String simpleBinding = tokenizer.nextToken();
 			try {
-				if (currentBean instanceof Bean b) {
-					String attributeName = simpleBinding;
-					boolean indexed = false;
-					int braceIndex = simpleBinding.indexOf('[');
-					if (braceIndex < 0) {
-						braceIndex = simpleBinding.indexOf("ElementById(");
-					}
-					else {
-						indexed = true;
-					}
-					if (braceIndex >= 0) {
-						attributeName = simpleBinding.substring(0, braceIndex);
-					}
-					if (b.isDynamic(attributeName)) {
-						result = b.getDynamic(attributeName);
-						if ((result != null) && (braceIndex > 0)) {
-							@SuppressWarnings("unchecked")
-							List<? extends Bean> list = (List<? extends Bean>) result;
-							if (indexed) {
-								int index = Integer.parseInt(simpleBinding.substring(braceIndex + 1, simpleBinding.length() - 1)); // substring between '[' and ']'
-								result = list.get(index);
-							}
-							else { // by Id
-								String bizId = simpleBinding.substring(braceIndex + 12, simpleBinding.length() - 1); // substring between '(' and ')'
-								result = list.stream().filter(e -> bizId.equals(e.getBizId())).findFirst().orElse(null);
-							}
-						}
-					}
-					else {
-						result = PROPERTY_UTILS.getProperty(currentBean, simpleBinding);
-					}
-				}
-				else {
-					result = PROPERTY_UTILS.getProperty(currentBean, simpleBinding);
-				}
+				result = resolveBoundValue(currentBean, simpleBinding);
 			}
 			catch (Exception e) {
 				LOGGER.error("Could not BindUtil.get({}, {})!", bean, binding);
@@ -1570,6 +1716,64 @@ public final class BindUtil {
 		}
 
 		return result;
+	}
+
+	private static @Nullable Object resolveBoundValue(@Nonnull Object currentBean,
+													 @Nonnull String simpleBinding)
+			throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+		if (currentBean instanceof Bean bean) {
+			return resolveBeanBoundValue(bean, currentBean, simpleBinding);
+		}
+
+		return PROPERTY_UTILS.getProperty(currentBean, simpleBinding);
+	}
+
+	private static @Nullable Object resolveBeanBoundValue(@Nonnull Bean bean,
+													 @Nonnull Object currentBean,
+													 @Nonnull String simpleBinding)
+				throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+		String attributeName = getDynamicAttributeName(simpleBinding);
+		if (! bean.isDynamic(attributeName)) {
+			return PROPERTY_UTILS.getProperty(currentBean, simpleBinding);
+		}
+
+		Object result = bean.getDynamic(attributeName);
+		return resolveDynamicBindingValue(simpleBinding, result);
+	}
+
+	private static @Nonnull String getDynamicAttributeName(@Nonnull String simpleBinding) {
+		int braceIndex = getDynamicBindingIndex(simpleBinding);
+		return (braceIndex >= 0) ? simpleBinding.substring(0, braceIndex) : simpleBinding;
+	}
+
+	private static int getDynamicBindingIndex(@Nonnull String simpleBinding) {
+		int braceIndex = simpleBinding.indexOf('[');
+		return (braceIndex >= 0) ? braceIndex : simpleBinding.indexOf(ELEMENT_BY_ID);
+	}
+
+	private static @Nullable Object resolveDynamicBindingValue(@Nonnull String simpleBinding,
+													  @Nullable Object result) {
+		int braceIndex = getDynamicBindingIndex(simpleBinding);
+		if ((result == null) || (braceIndex <= 0)) {
+			return result;
+		}
+
+		@SuppressWarnings("unchecked")
+		List<? extends Bean> list = (List<? extends Bean>) result;
+		return isIndexedDynamicBinding(simpleBinding)
+				? list.get(Integer.parseInt(simpleBinding.substring(braceIndex + 1, simpleBinding.length() - 1)))
+				: getDynamicElementById(simpleBinding, braceIndex, list);
+	}
+
+	private static boolean isIndexedDynamicBinding(@Nonnull String simpleBinding) {
+		return simpleBinding.indexOf('[') >= 0;
+	}
+
+	private static @Nullable Bean getDynamicElementById(@Nonnull String simpleBinding,
+													 int braceIndex,
+													 @Nonnull List<? extends Bean> list) {
+		String bizId = simpleBinding.substring(braceIndex + ELEMENT_BY_ID.length(), simpleBinding.length() - 1);
+		return list.stream().filter(element -> bizId.equals(element.getBizId())).findFirst().orElse(null);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -1617,115 +1821,24 @@ public final class BindUtil {
 	 */
 	public static void set(@Nonnull Object bean, @Nonnull String binding, @Nullable Object value) {
 		try {
-			Object valueToSet = value;
-			// empty strings to null
-			if ((valueToSet != null) && valueToSet.equals("")) {
-				valueToSet = null;
-			}
+			Object valueToSet = normaliseBoundValue(value);
 	
 			if ((bean instanceof DynamicBean b) && b.isProperty(binding)) {
 				b.set(binding, valueToSet);
 			}
 			else {
-				// Get the penultimate object to ensure we traverse static and dynamic beans correctly
-				String simpleBinding = binding;
-				Object penultimate = bean;
-				int lastDotIndex = binding.lastIndexOf('.');
-				if (lastDotIndex >= 0) {
-					penultimate = get(bean, binding.substring(0, lastDotIndex));
-					simpleBinding = binding.substring(lastDotIndex + 1);
+				Pair<Object, String> target = resolvePenultimateTarget(bean, binding);
+				Object penultimate = target.getLeft();
+				String simpleBinding = target.getRight();
+				if (penultimate == null) {
+					throw new MetaDataException("Binding " + binding + " does not resolve to a target bean.");
 				}
 
 				if (valueToSet != null) {
-					Class<?> propertyType = BindUtil.getPropertyType(penultimate, simpleBinding);
-		
-					// if we are setting a String value to a non-string property then
-					// use an appropriate constructor or static valueOf()
-					// NB ensure we are not dealing with Object.clas as a property type.
-					// 	Returned by getPropertyType either directly if bean is dynamic or through apache BeanUtils
-					if (String.class.equals(valueToSet.getClass()) && 
-							(! String.class.equals(propertyType)) && 
-							(! Object.class.equals(propertyType))) {
-						try {
-							valueToSet = propertyType.getConstructor(valueToSet.getClass()).newInstance(valueToSet);
-						}
-						catch (@SuppressWarnings("unused") NoSuchMethodException e) {
-							try {
-								valueToSet = propertyType.getMethod("valueOf", String.class).invoke(null, valueToSet);
-							}
-							catch (@SuppressWarnings("unused") NoSuchMethodException e1) {
-								throw new DomainException("Cannot coerce String value " + valueToSet + " to type " + propertyType + " for setting for binding " + binding + " on bean " + bean);
-							}
-						}
-					}
-			
-					// Convert the value to String if required
-					if (String.class.equals(propertyType)) {
-						valueToSet = valueToSet.toString();
-					} // if (we have a String property)
+					valueToSet = coerceValueForProperty(bean, binding, penultimate, simpleBinding, valueToSet);
 				}
-				
-				// Set static and dynamic beans
-				if (penultimate instanceof Bean b) {
-					String attributeName = simpleBinding;
-					boolean indexed = true;
-					int braceIndex = simpleBinding.indexOf('[');
-					if (braceIndex < 0) {
-						indexed = false;
-						braceIndex = simpleBinding.indexOf("ElementById(");
-					}
-					if (braceIndex >= 0) {
-						attributeName = simpleBinding.substring(0, braceIndex);
-					}
-					if (b.isDynamic(attributeName)) {
-						if (braceIndex < 0) {
-							b.setDynamic(simpleBinding, valueToSet);
-						}
-						else {
-							if (indexed) {
-								@SuppressWarnings("unchecked")
-								List<Object> list = (List<Object>) b.getDynamic(attributeName);
-								if (list != null) {
-									int index = Integer.parseInt(simpleBinding.substring(braceIndex + 1, simpleBinding.length() - 1));
-									list.set(index, valueToSet);
-								}
-								else {
-									throw new IllegalStateException("Attempt to set " + binding + " in " + bean + " to " + valueToSet + " but the list is null");
-								}
-							}
-							else { // by Id
-								if (valueToSet instanceof Bean beanToSet) {
-									@SuppressWarnings("unchecked")
-									List<Bean> list = (List<Bean>) b.getDynamic(attributeName);
-									if (list != null) {
-										String bizId = simpleBinding.substring(braceIndex + 12, simpleBinding.length() - 1);
-										Bean result = list.stream().filter(e -> bizId.equals(e.getBizId())).findFirst().orElse(null);
-										if (result != null) {
-											int index = list.indexOf(result);
-											list.set(index, beanToSet);
-										}
-										else {
-											throw new IllegalStateException("Attempt to set " + binding + " in " + bean + " to " + valueToSet + " but the element was not in the list");
-										}
-									}
-									else {
-										throw new IllegalStateException("Attempt to set " + binding + " in " + bean + " to " + valueToSet + " but the list is null");
-									}
-								}
-								else {
-									throw new IllegalStateException("Attempt to set " + binding + " in " + bean + " to " + valueToSet + " but valueToSet should be a Bean");
-								}
-							}
-						}
-					}
-					else {
-						PROPERTY_UTILS.setProperty(penultimate, simpleBinding, valueToSet);
-					}
-				}
-				// Set anything else
-				else {
-					PROPERTY_UTILS.setProperty(penultimate, simpleBinding, valueToSet);
-				}
+
+				setResolvedValue(bean, binding, penultimate, simpleBinding, valueToSet);
 			}
 		}
 		catch (Exception e) {
@@ -1737,68 +1850,158 @@ public final class BindUtil {
 		}
 	}
 
+	private static @Nullable Object normaliseBoundValue(@Nullable Object value) {
+		return "".equals(value) ? null : value;
+	}
+
+	private static @Nonnull Pair<Object, String> resolvePenultimateTarget(@Nonnull Object bean, @Nonnull String binding) {
+		int lastDotIndex = binding.lastIndexOf('.');
+		if (lastDotIndex < 0) {
+			return new ImmutablePair<>(bean, binding);
+		}
+
+		Object penultimate = get(bean, binding.substring(0, lastDotIndex));
+		String simpleBinding = binding.substring(lastDotIndex + 1);
+		return new ImmutablePair<>(penultimate, simpleBinding);
+	}
+
+	private static @Nonnull Object coerceValueForProperty(@Nonnull Object bean,
+													 @Nonnull String binding,
+													 @Nonnull Object penultimate,
+													 @Nonnull String simpleBinding,
+													 @Nonnull Object valueToSet)
+			throws ReflectiveOperationException {
+		Class<?> propertyType = BindUtil.getPropertyType(penultimate, simpleBinding);
+		Object result = coerceStringValue(propertyType, valueToSet, binding, bean);
+		return String.class.equals(propertyType) ? result.toString() : result;
+	}
+
+	private static @Nonnull Object coerceStringValue(@Nonnull Class<?> propertyType,
+													 @Nonnull Object valueToSet,
+													 @Nonnull String binding,
+													 @Nonnull Object bean)
+			throws ReflectiveOperationException {
+		if ((! String.class.equals(valueToSet.getClass())) || String.class.equals(propertyType) || Object.class.equals(propertyType)) {
+			return valueToSet;
+		}
+
+		try {
+			return propertyType.getConstructor(valueToSet.getClass()).newInstance(valueToSet);
+		}
+		catch (@SuppressWarnings("unused") NoSuchMethodException e) {
+			return invokeStringValueOf(propertyType, valueToSet, binding, bean);
+		}
+	}
+
+	private static @Nonnull Object invokeStringValueOf(@Nonnull Class<?> propertyType,
+													  @Nonnull Object valueToSet,
+													  @Nonnull String binding,
+													  @Nonnull Object bean)
+			throws IllegalAccessException, InvocationTargetException {
+		try {
+			return propertyType.getMethod("valueOf", String.class).invoke(null, valueToSet);
+		}
+		catch (@SuppressWarnings("unused") NoSuchMethodException e) {
+			throw new DomainException("Cannot coerce String value " + valueToSet + " to type " + propertyType + " for setting for binding " + binding + " on bean " + bean);
+		}
+	}
+
+	private static void setResolvedValue(@Nonnull Object bean,
+												 @Nonnull String binding,
+												 @Nonnull Object penultimate,
+												 @Nonnull String simpleBinding,
+												 @Nullable Object valueToSet)
+			throws ReflectiveOperationException {
+		if (penultimate instanceof Bean targetBean) {
+			String attributeName = getDynamicAttributeName(simpleBinding);
+			int braceIndex = getDynamicBindingIndex(simpleBinding);
+			if (targetBean.isDynamic(attributeName)) {
+				setDynamicResolvedValue(bean, binding, targetBean, simpleBinding, attributeName, braceIndex, valueToSet);
+				return;
+			}
+		}
+
+		PROPERTY_UTILS.setProperty(penultimate, simpleBinding, valueToSet);
+	}
+
+	private static void setDynamicResolvedValue(@Nonnull Object bean,
+													 @Nonnull String binding,
+													 @Nonnull Bean targetBean,
+													 @Nonnull String simpleBinding,
+													 @Nonnull String attributeName,
+													 int braceIndex,
+													 @Nullable Object valueToSet) {
+		if (braceIndex < 0) {
+			targetBean.setDynamic(simpleBinding, valueToSet);
+			return;
+		}
+		if (isIndexedDynamicBinding(simpleBinding)) {
+			setIndexedDynamicValue(bean, binding, targetBean, simpleBinding, attributeName, valueToSet);
+			return;
+		}
+		setDynamicElementByIdValue(bean, binding, targetBean, simpleBinding, attributeName, valueToSet);
+	}
+
+	private static void setIndexedDynamicValue(@Nonnull Object bean,
+												  @Nonnull String binding,
+												  @Nonnull Bean targetBean,
+												  @Nonnull String simpleBinding,
+												  @Nonnull String attributeName,
+												  @Nullable Object valueToSet) {
+		@SuppressWarnings("unchecked")
+		List<Object> list = (List<Object>) targetBean.getDynamic(attributeName);
+		if (list == null) {
+			throw new IllegalStateException("Attempt to set " + binding + " in " + bean + " to " + valueToSet + " but the list is null");
+		}
+
+		int braceIndex = simpleBinding.indexOf('[');
+		int index = Integer.parseInt(simpleBinding.substring(braceIndex + 1, simpleBinding.length() - 1));
+		list.set(index, valueToSet);
+	}
+
+	private static void setDynamicElementByIdValue(@Nonnull Object bean,
+													 @Nonnull String binding,
+													 @Nonnull Bean targetBean,
+													 @Nonnull String simpleBinding,
+													 @Nonnull String attributeName,
+													 @Nullable Object valueToSet) {
+		if (! (valueToSet instanceof Bean beanToSet)) {
+			throw new IllegalStateException("Attempt to set " + binding + " in " + bean + " to " + valueToSet + " but valueToSet should be a Bean");
+		}
+
+		@SuppressWarnings("unchecked")
+		List<Bean> list = (List<Bean>) targetBean.getDynamic(attributeName);
+		if (list == null) {
+			throw new IllegalStateException("Attempt to set " + binding + " in " + bean + " to " + valueToSet + " but the list is null");
+		}
+
+		String bizId = extractDynamicElementBizId(simpleBinding);
+		Bean result = list.stream().filter(element -> bizId.equals(element.getBizId())).findFirst().orElse(null);
+		if (result == null) {
+			throw new IllegalStateException("Attempt to set " + binding + " in " + bean + " to " + valueToSet + " but the element was not in the list");
+		}
+
+		list.set(list.indexOf(result), beanToSet);
+	}
+
+	private static @Nonnull String extractDynamicElementBizId(@Nonnull String simpleBinding) {
+		int braceIndex = simpleBinding.indexOf(ELEMENT_BY_ID);
+		return simpleBinding.substring(braceIndex + ELEMENT_BY_ID.length(), simpleBinding.length() - 1);
+	}
+
 	public static @Nonnull Class<?> getPropertyType(@Nonnull Object bean, @Nonnull String binding) {
 		if (bean instanceof Bean b) {
-			// NB true if a DynamicBean or where the binding is to a dynamic attribute name
-			boolean dynamic = b.isDynamic(binding);
 			int lastDotIndex = binding.lastIndexOf('.');
-			String attributeName = null;
-			if (lastDotIndex < 0) { // not compound binding
-				attributeName = binding;
-				// If not dynamic, remove any braces on the expression and re-test if its dynamic
-				if (! dynamic) {
-					int braceIndex = binding.lastIndexOf('[');
-					if (braceIndex < 0) {
-						braceIndex = binding.indexOf("ElementById(");
-					}
-					if (braceIndex >= 0) {
-						attributeName = binding.substring(0, braceIndex);
-						dynamic = b.isDynamic(attributeName);
-					}
+			if (lastDotIndex < 0) {
+				String attributeName = resolveDynamicPropertyName(b, binding);
+				if (attributeName != null) {
+					return resolveDynamicPropertyType(b, binding, attributeName);
 				}
-			}
-			
-			if (dynamic) {
-				Object value = get(b, binding);
-				if (value == null) {
-					if (attributeName != null) { // not compound binding - possible attribute
-						// Get the property type via the document
-						Customer c = CORE.getCustomer();
-						Module m = c.getModule(b.getBizModule());
-						Document d = m.getDocument(c, b.getBizDocument());
-						Attribute a = d.getPolymorphicAttribute(c, attributeName);
-						if (a != null) {
-							try {
-								// binding expression to Association or InverseOne
-								if ((a instanceof Association) || (a instanceof InverseOne)) {
-									d = m.getDocument(c, ((Reference) a).getDocumentName());
-									return ((DocumentImpl) d).getBeanClass(c);
-								}
-								// indexed or mapped binding expression to Collection or InverseMany
-								if ((! attributeName.equals(binding)) && 
-										((a instanceof Collection) || (a instanceof InverseMany))) {
-									d = m.getDocument(c, ((Reference) a).getDocumentName());
-									return ((DocumentImpl) d).getBeanClass(c);
-								}
-							}
-							catch (Exception e) {
-								throw new MetaDataException(e);
-							}
-							
-							return a.getImplementingType();
-						}
-					}
-					
-					return Object.class;
-				}
-				return value.getClass();
 			}
 
 			// Could be a compound, indexed or mapped binding if we reach here
 			if (lastDotIndex >= 0) { // compound binding
-				// Navigate through static and dynamic beans as required to the penultimate object, then find the property type
-				Object penultimate = get(bean, binding.substring(0, lastDotIndex));
-				return getPropertyType(penultimate, binding.substring(lastDotIndex + 1));
+				return resolveCompoundPropertyType(bean, binding, lastDotIndex);
 			}
 		}
 
@@ -1808,6 +2011,75 @@ public final class BindUtil {
 		catch (Exception e) {
 			throw new MetaDataException(e);
 		}
+	}
+
+	private static @Nullable String resolveDynamicPropertyName(@Nonnull Bean bean, @Nonnull String binding) {
+		if (bean.isDynamic(binding)) {
+			return binding;
+		}
+
+		String attributeName = getDynamicAttributeName(binding);
+		return (! attributeName.equals(binding) && bean.isDynamic(attributeName)) ? attributeName : null;
+	}
+
+	private static @Nonnull Class<?> resolveDynamicPropertyType(@Nonnull Bean bean,
+													   @Nonnull String binding,
+													   @Nonnull String attributeName) {
+		Object value = get(bean, binding);
+		if (value != null) {
+			return value.getClass();
+		}
+
+		Attribute attribute = getDynamicMetadataAttribute(bean, attributeName);
+		if (attribute == null) {
+			return Object.class;
+		}
+
+		Class<?> relationType = resolveRelatedDynamicPropertyType(bean, binding, attributeName, attribute);
+		return (relationType != null) ? relationType : attribute.getImplementingType();
+	}
+
+	private static @Nullable Attribute getDynamicMetadataAttribute(@Nonnull Bean bean, @Nonnull String attributeName) {
+		Customer customer = CORE.getCustomer();
+		Module module = customer.getModule(bean.getBizModule());
+		Document document = module.getDocument(customer, bean.getBizDocument());
+		return document.getPolymorphicAttribute(customer, attributeName);
+	}
+
+	private static @Nullable Class<?> resolveRelatedDynamicPropertyType(@Nonnull Bean bean,
+														@Nonnull String binding,
+														@Nonnull String attributeName,
+														@Nonnull Attribute attribute) {
+		try {
+			if ((attribute instanceof Association) || (attribute instanceof InverseOne)) {
+				return resolveRelationBeanClass(bean, (Reference) attribute);
+			}
+			if ((! attributeName.equals(binding)) && ((attribute instanceof Collection) || (attribute instanceof InverseMany))) {
+				return resolveRelationBeanClass(bean, (Reference) attribute);
+			}
+			return null;
+		}
+		catch (Exception e) {
+			throw new MetaDataException(e);
+		}
+	}
+
+	private static @Nonnull Class<?> resolveRelationBeanClass(@Nonnull Bean bean,
+													   @Nonnull Reference reference) throws ClassNotFoundException {
+		Customer customer = CORE.getCustomer();
+		Module module = customer.getModule(bean.getBizModule());
+		Document document = module.getDocument(customer, reference.getDocumentName());
+		return ((DocumentImpl) document).getBeanClass(customer);
+	}
+
+	private static @Nonnull Class<?> resolveCompoundPropertyType(@Nonnull Object bean,
+													 @Nonnull String binding,
+													 int lastDotIndex) {
+		Object penultimate = get(bean, binding.substring(0, lastDotIndex));
+		if (penultimate == null) {
+			throw new MetaDataException("Binding " + binding + " does not resolve to a target bean.");
+		}
+		return getPropertyType(penultimate, binding.substring(lastDotIndex + 1));
 	}
 
 	public static boolean isMutable(@Nonnull Object bean, @Nonnull String simplePropertyName) {
@@ -1826,10 +2098,7 @@ public final class BindUtil {
 			}
 			
 			if (dynamic) {
-				if (List.class.isAssignableFrom(BindUtil.getPropertyType(bean, simplePropertyName))) {
-					return false;
-				}
-				return true;
+				return ! List.class.isAssignableFrom(BindUtil.getPropertyType(bean, simplePropertyName));
 			}
 		}
 
@@ -1999,12 +2268,13 @@ public final class BindUtil {
 		}
 
 		// Loop through the property name/value pairs to be set
-		for (String name : properties.keySet()) {
+		for (Map.Entry<String, Object> entry : properties.entrySet()) {
 			// Identify the property name and value(s) to be assigned
+			String name = entry.getKey();
 			if (name == null) {
 				continue;
 			}
-			Object value = properties.get(name);
+			Object value = entry.getValue();
 
 			// Perform the assignment for this property
 			try {
@@ -2026,100 +2296,102 @@ public final class BindUtil {
 											@Nonnull String bindingName, 
 											@Nullable Object bindingValue, 
 											boolean fromSerializedFormat) {
-		String name = bindingName;
-		Object value = bindingValue;
-		
 		Customer customer = user.getCustomer();
 		Module beanModule = customer.getModule(bean.getBizModule());
 		Document beanDocument = beanModule.getDocument(customer, bean.getBizDocument());
 
-		// Resolve any nested expression to get the actual target bean
-		Object target = bean;
-		int delim = findLastNestedIndex(name);
-		String targetBinding = null;
-		if (delim >= 0) {
-			targetBinding = name.substring(0, delim);
-			target = BindUtil.instantiateAndGet(user, beanModule, beanDocument, bean, targetBinding);
-			name = name.substring(delim + 1);
-		}
-
+		Pair<Object, String> targetAndName = resolvePopulateTarget(user, beanModule, beanDocument, bean, bindingName);
+		Object target = targetAndName.getLeft();
 		if (target == null) {
-			if ((value == null) || value.equals("") || (targetBinding == null)) {
-				return;
-			}
+			return;
 		}
 
-		// Declare local variables we will require
-		String propName = null; // Simple name of target property
-		Class<?> type = null; // Java type of target property
-		int index = -1; // Indexed subscript value (if any)
-		String key = null; // Mapped key value (if any)
-
-		// Calculate the property name, index, and key values
-		propName = name;
-		int i = propName.indexOf('[');
-		if (i >= 0) {
-			int k = propName.indexOf(']');
-			try {
-				index = Integer.parseInt(propName.substring(i + 1, k));
-			}
-			catch (@SuppressWarnings("unused") NumberFormatException e) {
-				// do nothing
-			}
-			propName = propName.substring(0, i);
-		}
-		int j = propName.indexOf('(');
-		if (j >= 0) {
-			int k = propName.indexOf(')');
-			try {
-				key = propName.substring(j + 1, k);
-			}
-			catch (@SuppressWarnings("unused") IndexOutOfBoundsException e) {
-				// do nothing
-			}
-			propName = propName.substring(0, j);
+		PropertySelector selector = parsePropertySelector(targetAndName.getRight());
+		Class<?> type = resolvePopulatePropertyType(target, selector.propertyName);
+		if ((type == null) || ((! List.class.isAssignableFrom(type)) && (! BindUtil.isMutable(target, selector.propertyName)))) {
+			return;
 		}
 
+		PopulateMetadata metadata = resolvePopulateMetadata(user,
+														 bean,
+														 target,
+														 targetAndName.getRight(),
+														 selector.propertyName,
+														 bindingValue);
+
+		Object newValue = convertPopulateIncomingValue(user.getCustomer(),
+														 metadata.converter,
+														 type,
+														 metadata.value,
+														 fromSerializedFormat);
+
+		setPopulateValue(target, selector, newValue);
+	}
+
+	private static @Nonnull Pair<Object, String> resolvePopulateTarget(@Nonnull User user,
+															 @Nonnull Module beanModule,
+															 @Nonnull Document beanDocument,
+															 @Nonnull Bean bean,
+															 @Nonnull String bindingName) {
+		int delim = findLastNestedIndex(bindingName);
+		if (delim < 0) {
+			return new ImmutablePair<>(bean, bindingName);
+		}
+
+		String targetBinding = bindingName.substring(0, delim);
+		Object target = BindUtil.instantiateAndGet(user, beanModule, beanDocument, bean, targetBinding);
+		String name = bindingName.substring(delim + 1);
+		return new ImmutablePair<>(target, name);
+	}
+
+	private static @Nullable Class<?> resolvePopulatePropertyType(@Nonnull Object target, @Nonnull String propertyName) {
 		try {
-			type = getPropertyType(target, propName);
+			return getPropertyType(target, propertyName);
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
-			return;
+			return null;
 		}
-		
-		if ((! List.class.isAssignableFrom(type)) && (! BindUtil.isMutable(target, propName))) {
-			return;
-		}
+	}
+
+	private static @Nonnull PopulateMetadata resolvePopulateMetadata(@Nonnull User user,
+															 @Nonnull Bean bean,
+															 @Nonnull Object target,
+															 @Nonnull String bindingName,
+															 @Nonnull String propName,
+															 @Nullable Object value) {
+		Customer customer = user.getCustomer();
+		Module beanModule = customer.getModule(bean.getBizModule());
+		Document beanDocument = beanModule.getDocument(customer, bean.getBizDocument());
 
 		Converter<?> converter = null;
-
-		// Calculate the property type
+		Object adjustedValue = value;
 		if (target instanceof Bean targetBean) {
 			String documentName = targetBean.getBizDocument();
 			if (documentName != null) {
 				Module module = customer.getModule(targetBean.getBizModule());
 				Document document = module.getDocument(customer, documentName);
-				// NB Use getMetaDataForBinding() to ensure we find attributes from base documents inherited
 				TargetMetaData propertyTarget = BindUtil.getMetaDataForBinding(customer, module, document, propName);
 				Attribute attribute = propertyTarget.getAttribute();
 				if (attribute instanceof ConvertibleField cf) {
-					converter = cf.getConverterForCustomer(user.getCustomer());
+					converter = cf.getConverterForCustomer(customer);
 				}
 				else if (attribute instanceof Collection) {
-					// ensure that collection elements are filled for the binding
-					BindUtil.instantiateAndGet(user, beanModule, beanDocument, bean, name);
+					BindUtil.instantiateAndGet(user, beanModule, beanDocument, bean, bindingName);
 				}
-				else { // id of a reference here
-					if ("".equals(value)) {
-						value = null;
-					}
+				else if ("".equals(adjustedValue)) {
+					adjustedValue = null;
 				}
 			}
 		}
 
-		// Convert the specified value to the required type
-		Object newValue = null;
+		return new PopulateMetadata(converter, adjustedValue);
+	}
 
+	private static @Nullable Object convertPopulateIncomingValue(@Nonnull Customer customer,
+															  @Nullable Converter<?> converter,
+															  @Nonnull Class<?> type,
+															  @Nullable Object value,
+															  boolean fromSerializedFormat) {
 		String stringValue = null;
 		if (value instanceof String string) {
 			stringValue = string.trim();
@@ -2130,29 +2402,87 @@ public final class BindUtil {
 				stringValue = stringValue.trim();
 			}
 		}
-		if (stringValue != null) {
-			if (! stringValue.isEmpty()) {
-				newValue = fromString(user.getCustomer(), converter, type, stringValue, fromSerializedFormat);
-			}
+
+		if (stringValue == null) {
+			return value;
 		}
-		else {
-			newValue = value;
+		if (stringValue.isEmpty()) {
+			return null;
 		}
 
-		// Invoke the setter method
+		return fromString(customer, converter, type, stringValue, fromSerializedFormat);
+	}
+
+	private static void setPopulateValue(@Nonnull Object target,
+												 @Nonnull PropertySelector selector,
+												 @Nullable Object newValue) {
 		try {
-			if (index >= 0) {
-				PROPERTY_UTILS.setIndexedProperty(target, propName, index, newValue);
+			if (selector.index >= 0) {
+				PROPERTY_UTILS.setIndexedProperty(target, selector.propertyName, selector.index, newValue);
 			}
-			else if (key != null) {
-				PROPERTY_UTILS.setMappedProperty(target, propName, key, newValue);
+			else if (selector.key != null) {
+				PROPERTY_UTILS.setMappedProperty(target, selector.propertyName, selector.key, newValue);
 			}
 			else {
-				convertAndSet(target, propName, newValue);
+				convertAndSet(target, selector.propertyName, newValue);
 			}
 		}
 		catch (Exception e) {
-			throw new MetaDataException("Cannot set " + propName, e);
+			throw new MetaDataException("Cannot set " + selector.propertyName, e);
+		}
+	}
+
+	private static @Nonnull PropertySelector parsePropertySelector(@Nonnull String name) {
+		String propName = name;
+		int index = -1;
+		String key = null;
+
+		int openSquareIndex = propName.indexOf('[');
+		if (openSquareIndex >= 0) {
+			int closeSquareIndex = propName.indexOf(']');
+			try {
+				index = Integer.parseInt(propName.substring(openSquareIndex + 1, closeSquareIndex));
+			}
+			catch (@SuppressWarnings("unused") NumberFormatException e) {
+				// do nothing
+			}
+			propName = propName.substring(0, openSquareIndex);
+		}
+
+		int openParenIndex = propName.indexOf('(');
+		if (openParenIndex >= 0) {
+			int closeParenIndex = propName.indexOf(')');
+			try {
+				key = propName.substring(openParenIndex + 1, closeParenIndex);
+			}
+			catch (@SuppressWarnings("unused") IndexOutOfBoundsException e) {
+				// do nothing
+			}
+			propName = propName.substring(0, openParenIndex);
+		}
+
+		return new PropertySelector(propName, index, key);
+	}
+
+	private static final class PopulateMetadata {
+		private final Converter<?> converter;
+		private final Object value;
+
+		private PopulateMetadata(@Nullable Converter<?> converter, @Nullable Object value) {
+			this.converter = converter;
+			this.value = value;
+		}
+	}
+
+	static final class PropertySelector {
+		final String propertyName;
+		final int index;
+		final String key;
+
+		private PropertySelector(@Nonnull String propertyName, int index, @Nullable String key) {
+			this.propertyName = propertyName;
+			this.index = index;
+			this.key = key;
 		}
 	}
 
@@ -2193,25 +2523,23 @@ public final class BindUtil {
 
 		for (final Attribute attribute : d.getAllAttributes(c)) {
 			final String attributeName = attribute.getName();
+			AttributeType attributeType = attribute.getAttributeType();
 
-			if (AttributeType.collection.equals(attribute.getAttributeType())) {
+			if (AttributeType.collection.equals(attributeType)) {
 				copyCollection(from,
 								to,
 								attributeName,
 								CollectionType.child.equals(((Collection) attribute).getType()));
-				continue;
 			}
-
-			if (AttributeType.inverseMany.equals(attribute.getAttributeType())) {
+			else if (AttributeType.inverseMany.equals(attributeType)) {
 				copyCollection(from, to, attributeName, false);
-				continue;
 			}
-
-			BindUtil.set(to, attributeName, BindUtil.get(from, attributeName));
+			else {
+				BindUtil.set(to, attributeName, BindUtil.get(from, attributeName));
+			}
 		}
 	}
 
-	// TODO clearing colTo issues a delete statement in hibernate, this method should process each collection item.
 	@SuppressWarnings("unchecked")
 	private static void copyCollection(@Nonnull final Bean from,
 										@Nonnull final Bean to,
@@ -2220,11 +2548,20 @@ public final class BindUtil {
 		List<Bean> colFrom = (List<Bean>) BindUtil.get(from, attributeName);
 		List<Bean> colTo = (List<Bean>) BindUtil.get(to, attributeName);
 		if (colTo != null) {
-			colTo.clear();
-			colTo.addAll(colFrom);
-			if (reparent) {
-				colTo.forEach(e -> ((ChildBean<Bean>) e).setParent(to));
+			replaceCollectionContents(colTo, colFrom);
+			if (reparent && (colFrom != null)) {
+				colFrom.forEach(e -> ((ChildBean<Bean>) e).setParent(to));
 			}
+		}
+	}
+
+	private static void replaceCollectionContents(@Nonnull List<Bean> targetCollection,
+												   @Nullable List<Bean> sourceCollection) {
+		for (int i = targetCollection.size() - 1; i >= 0; i--) {
+			targetCollection.remove(i);
+		}
+		if (sourceCollection != null) {
+			targetCollection.addAll(sourceCollection);
 		}
 	}
 
@@ -2256,101 +2593,181 @@ public final class BindUtil {
 
 		StringTokenizer tokenizer = new StringTokenizer(binding, ".");
 		while (tokenizer.hasMoreTokens()) {
-			String attributeName = tokenizer.nextToken();
-			String parentDocumentName = null;
-			if (attributeName.equals(ChildBean.PARENT_NAME)) {
-				parentDocumentName = navigatingDocument.getParentDocumentName();
-				Extends inherits = navigatingDocument.getExtends();
-				while ((parentDocumentName == null) && (inherits != null)) {
-					Document baseDocument = navigatingModule.getDocument(customer, inherits.getDocumentName());
-					parentDocumentName = baseDocument.getParentDocumentName();
-					inherits = baseDocument.getExtends();
-				}
-				if (parentDocumentName == null) {
-					throw new MetaDataException(navigatingDocument.getOwningModuleName() + '.' + 
-							navigatingDocument.getName() + " @ " + binding + 
-							" does not exist (token [parent] doesn't check out as " + navigatingDocument.getName() + 
-							" is not a child document)");
-				}
-			}
-			int openBraceIndex = attributeName.indexOf('[');
-			if (openBraceIndex > -1) {
-				attributeName = attributeName.substring(0, openBraceIndex);
-			}
-			int openParenthesisIndex = attributeName.indexOf("ElementById(");
-			if (openParenthesisIndex > -1) {
-				attributeName = attributeName.substring(0, openParenthesisIndex);
-			}
-			attribute = navigatingDocument.getAttribute(attributeName);
-			Extends inherits = navigatingDocument.getExtends();
-			while ((attribute == null) && (inherits != null)) {
-				Document baseDocument = navigatingModule.getDocument(customer, inherits.getDocumentName());
-				attribute = baseDocument.getAttribute(attributeName);
-				inherits = baseDocument.getExtends();
-			}
+			String attributeName = normaliseBindingToken(tokenizer.nextToken());
+			String parentDocumentName = resolveParentDocumentName(customer,
+																 navigatingModule,
+																 navigatingDocument,
+																 attributeName,
+																 binding);
+			attribute = resolveInheritedAttribute(customer, navigatingModule, navigatingDocument, attributeName);
 			if (tokenizer.hasMoreTokens()) {
-				if (ChildBean.PARENT_NAME.equals(attributeName)) {
-					if (parentDocumentName == null) {
-						throw new MetaDataException(navigatingDocument.getOwningModuleName() + '.' + 
-														navigatingDocument.getName() + " @ " + binding + 
-														" does not exist (token [parent] doesn't check out as " + navigatingDocument.getName() + 
-														" is not a child document)");
-					}
-					navigatingDocument = navigatingModule.getDocument(customer, parentDocumentName);
-				}
-				else if (attribute instanceof Relation relation) {
-					navigatingDocument = navigatingModule.getDocument(customer, relation.getDocumentName());
-				}
-				else {
-					throw new MetaDataException(navigatingDocument.getOwningModuleName() + '.' + 
-													navigatingDocument.getName() + " @ " + binding + 
-													" does not exist (token [" + 
-													attributeName +
-													"] doesn't check out)");
-				}
-				navigatingModule = (customer == null) ?
-										ProvidedRepositoryFactory.get().getModule(null, navigatingDocument.getOwningModuleName()) :
-										customer.getModule(navigatingDocument.getOwningModuleName());
+				navigatingDocument = resolveNextNavigatingDocument(customer,
+																	 navigatingModule,
+																	 navigatingDocument,
+																	 attributeName,
+																	 parentDocumentName,
+																	 attribute,
+																	 binding);
+				navigatingModule = resolveNavigatingModule(customer, navigatingDocument);
 			}
 			else {
-				if (attribute != null) { // explicit attribute
-					AttributeType attributeType = attribute.getAttributeType();
-					if ((AttributeType.association == attributeType) || (AttributeType.inverseOne == attributeType)) {
-						DocumentImpl d = (DocumentImpl) navigatingModule.getDocument(customer, ((Relation) attribute).getDocumentName());
-						try {
-							type = d.getBeanClass(customer);
-						}
-						catch (ClassNotFoundException e) {
-							throw new MetaDataException("Binding " + binding + " resolves to an attribute of type " + attributeType + 
-															" but the document class for document " + d.getOwningModuleName() +
-															'.' + d.getName() + " cannot be loaded.", e);
-						}
-					}
-				else {
-					// TODO This is a hack for the chicken and egg enum generation problem to be solved by making generate domain 2 phased.
-					// type = attribute.getImplementingType();
-					type = getImplementingTypeForGenerateDomainValidation(attribute);
-				}
+				type = resolveTerminalBindingType(customer,
+													 navigatingModule,
+													 navigatingDocument,
+													 binding,
+													 attributeName,
+													 attribute);
 			}
-			else {
-				Class<?> implicitType = implicitAttributeType(attributeName);
-					if (implicitType != null) { // implicit attribute
-						type = implicitType;
-					}
-					else { // not an explicit or implicit attribute
-						throw new MetaDataException(navigatingDocument.getOwningModuleName() + '.' + 
-														navigatingDocument.getName() + " @ " + binding + 
-														" does not exist (last attribute not in document)");
-					}
-				}
-			}
+		}
+
+		if (type == null) {
+			throw new MetaDataException(navigatingDocument.getOwningModuleName() + '.' + navigatingDocument.getName() +
+					" @ " + binding + " does not resolve to a concrete attribute type.");
 		}
 
 		return new TargetMetaData(navigatingDocument, attribute, type);
 	}
 
+	private static @Nonnull String normaliseBindingToken(@Nonnull String token) {
+		String result = token;
+		int openBraceIndex = result.indexOf('[');
+		if (openBraceIndex > -1) {
+			result = result.substring(0, openBraceIndex);
+		}
+		int openParenthesisIndex = result.indexOf(ELEMENT_BY_ID);
+		if (openParenthesisIndex > -1) {
+			result = result.substring(0, openParenthesisIndex);
+		}
+		return result;
+	}
+
+	private static @Nullable String resolveParentDocumentName(@Nullable Customer customer,
+														  @Nonnull Module navigatingModule,
+														  @Nonnull Document navigatingDocument,
+														  @Nonnull String attributeName,
+														  @Nonnull String binding) {
+		if (! ChildBean.PARENT_NAME.equals(attributeName)) {
+			return null;
+		}
+
+		String parentDocumentName = navigatingDocument.getParentDocumentName();
+		Extends inherits = navigatingDocument.getExtends();
+		while ((parentDocumentName == null) && (inherits != null)) {
+			Document baseDocument = navigatingModule.getDocument(customer, inherits.getDocumentName());
+			parentDocumentName = baseDocument.getParentDocumentName();
+			inherits = baseDocument.getExtends();
+		}
+		if (parentDocumentName == null) {
+			throw new MetaDataException(navigatingDocument.getOwningModuleName() + '.' +
+						navigatingDocument.getName() + " @ " + binding +
+						" does not exist (token [parent] doesn't check out as " + navigatingDocument.getName() +
+						" is not a child document)");
+		}
+
+		return parentDocumentName;
+	}
+
+	private static @Nullable Attribute resolveInheritedAttribute(@Nullable Customer customer,
+														   @Nonnull Module navigatingModule,
+														   @Nonnull Document navigatingDocument,
+														   @Nonnull String attributeName) {
+		Attribute attribute = navigatingDocument.getAttribute(attributeName);
+		if ((attribute == null) && (customer != null)) {
+			attribute = navigatingDocument.getPolymorphicAttribute(customer, attributeName);
+		}
+		Extends inherits = navigatingDocument.getExtends();
+		while ((attribute == null) && (inherits != null)) {
+			Document baseDocument = navigatingModule.getDocument(customer, inherits.getDocumentName());
+			attribute = baseDocument.getAttribute(attributeName);
+			if ((attribute == null) && (customer != null)) {
+				attribute = baseDocument.getPolymorphicAttribute(customer, attributeName);
+			}
+			inherits = baseDocument.getExtends();
+		}
+
+		return attribute;
+	}
+
+	private static @Nonnull Document resolveNextNavigatingDocument(@Nullable Customer customer,
+														   @Nonnull Module navigatingModule,
+														   @Nonnull Document navigatingDocument,
+														   @Nonnull String attributeName,
+														   @Nullable String parentDocumentName,
+														   @Nullable Attribute attribute,
+														   @Nonnull String binding) {
+		if (ChildBean.PARENT_NAME.equals(attributeName)) {
+			if (parentDocumentName == null) {
+				throw new MetaDataException(navigatingDocument.getOwningModuleName() + '.' +
+							navigatingDocument.getName() + " @ " + binding +
+							" does not exist (token [parent] doesn't check out as " + navigatingDocument.getName() +
+							" is not a child document)");
+			}
+			return navigatingModule.getDocument(customer, parentDocumentName);
+		}
+		if (attribute instanceof Relation relation) {
+			return navigatingModule.getDocument(customer, relation.getDocumentName());
+		}
+
+		throw new MetaDataException(navigatingDocument.getOwningModuleName() + '.' +
+					navigatingDocument.getName() + " @ " + binding +
+					" does not exist (token [" + attributeName + "] doesn't check out)");
+	}
+
+	private static @Nonnull Module resolveNavigatingModule(@Nullable Customer customer,
+														 @Nonnull Document navigatingDocument) {
+		Module module = (customer == null)
+				? ProvidedRepositoryFactory.get().getModule(null, navigatingDocument.getOwningModuleName())
+				: customer.getModule(navigatingDocument.getOwningModuleName());
+		if (module == null) {
+			throw new MetaDataException("Module " + navigatingDocument.getOwningModuleName() +
+						" does not exist for navigating document " + navigatingDocument.getName());
+		}
+		return module;
+	}
+
+	private static @Nonnull Class<?> resolveTerminalBindingType(@Nullable Customer customer,
+														  @Nonnull Module navigatingModule,
+														  @Nonnull Document navigatingDocument,
+														  @Nonnull String binding,
+														  @Nonnull String attributeName,
+														  @Nullable Attribute attribute) {
+		if (attribute == null) {
+			Class<?> implicitType = implicitAttributeType(attributeName);
+			if (implicitType != null) {
+				return implicitType;
+			}
+			throw new MetaDataException(navigatingDocument.getOwningModuleName() + '.' +
+						navigatingDocument.getName() + " @ " + binding +
+						" does not exist (last attribute not in document)");
+		}
+
+		if ((attribute instanceof Collection) || (attribute instanceof InverseMany)) {
+			return List.class;
+		}
+
+		if (attribute instanceof Relation relation) {
+			Document relationDocument = navigatingModule.getDocument(customer, relation.getDocumentName());
+			if (! (relationDocument instanceof DocumentImpl relationDocumentImpl)) {
+				Object relationType = relation.getImplementingType();
+				return (relationType instanceof Class<?> relationClass) ? relationClass : Bean.class;
+			}
+
+			Customer resolvedCustomer = (customer == null) ? CORE.getCustomer() : customer;
+			try {
+				return relationDocumentImpl.getBeanClass(resolvedCustomer);
+			}
+			catch (ClassNotFoundException e) {
+				throw new MetaDataException("Binding " + binding + " resolves to relation attribute " + relation.getName() +
+						" but the document class for document " + relationDocumentImpl.getOwningModuleName() +
+						'.' + relationDocumentImpl.getName() + " cannot be loaded.", e);
+			}
+		}
+
+		// Generate-domain validation can run before enum classes exist, so use the metadata-safe fallback.
+		return getImplementingTypeForGenerateDomainValidation(attribute);
+	}
+
 	/**
-	 * TODO This is a hack for the chicken and egg enum generation problem to be solved by making generate domain 2 phased.
 	 * Resolve an attribute implementing type for metadata validation.
 	 * <p>
 	 * This is primarily used by generateDomain/bootstrap flows where generated enum classes
@@ -2370,7 +2787,6 @@ public final class BindUtil {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public static @Nullable Object instantiateAndGet(@Nonnull User user,
 														@Nonnull Module module,
 														@Nonnull Document document,
@@ -2378,7 +2794,6 @@ public final class BindUtil {
 														@Nonnull String binding) {
 		Customer customer = user.getCustomer();
 		Document navigatingDocument = document;
-		Attribute attribute = null;
 		Object owner = bean;
 		Object value = null;
 
@@ -2390,63 +2805,25 @@ public final class BindUtil {
 			if (openBraceIndex > -1) {
 				fieldName = fieldName.substring(0, openBraceIndex);
 			}
-
-			// Cater for the "parent" property
-			if (ChildBean.PARENT_NAME.equals(fieldName)) {
-				navigatingDocument = navigatingDocument.getParentDocument(customer);
-				if (navigatingDocument == null) {
-					throw new MetaDataException(binding + " should point to a parent document but parent document does not exist");
-				}
-			}
-			else {
-				// NB Use getMetaDataForBinding() to ensure we find attributes from base documents inherited
-				TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, navigatingDocument, fieldName);
-				attribute = target.getAttribute();
-				if (attribute == null) {
-					throw new IllegalArgumentException(fieldName + " within " + binding + "doesn't check out");
-				}
-				navigatingDocument = module.getDocument(customer, ((Relation) attribute).getDocumentName());
-				if ((tokenizer.hasMoreTokens()) && (attribute instanceof Relation)) {
-					// do nothing here
-				}
-				else {
-					if (tokenizer.hasMoreTokens()) {
-						throw new MetaDataException(binding + 
-														" does not exist (token " + 
-														tokenizer.nextToken() +
-														" doesn't check out)");
-					}
-				}
-			}
+			Pair<Document, Attribute> navigation = resolveInstantiationNavigation(customer,
+																			 module,
+																			 navigatingDocument,
+																			 fieldName,
+																			 binding,
+																			 tokenizer);
+			navigatingDocument = navigation.getLeft();
+			Attribute attribute = navigation.getRight();
 
 			try {
-				try {
-					value = BindUtil.get(owner, bindingPart);
-				}
-				catch (@SuppressWarnings("unused") IndexOutOfBoundsException e) {
-					if (attribute != null) {
-						Document collectionDocument = module.getDocument(customer, ((Relation) attribute).getDocumentName());
-	
-						// Get the collection and add the new instance
-						int closedBraceIndex = bindingPart.length() - 1;
-						String collectionBinding = bindingPart.substring(0, openBraceIndex);
-						int collectionIndex = Integer.parseInt(bindingPart.substring(openBraceIndex + 1, closedBraceIndex));
-						List<Bean> collection = (List<Bean>) BindUtil.get(owner, collectionBinding);
-						if (collection != null) {
-							// parameters are ordered alphabetically,
-							// so we should receive the array bindings in ascending order
-							// but they may not be contiguous (some are deleted)
-							while (collection.size() <= collectionIndex) {
-								Bean fillerElement = collectionDocument.newInstance(user);
-								BindUtil.addElementToCollection((Bean) owner, collectionBinding, fillerElement);
-							}
-							value = collection.get(collectionIndex);
-						}
-					}
-				}
+				value = resolveExistingOrIndexedValue(user,
+														 module,
+														 customer,
+														 owner,
+														 bindingPart,
+														 openBraceIndex,
+														 attribute);
 				if (value == null) {
-					value = navigatingDocument.newInstance(user);
-					BindUtil.setAssociation((Bean) owner, bindingPart, (Bean) value);
+					value = createAndAssociateNavigatingValue(user, navigatingDocument, owner, bindingPart);
 				}
 				owner = value;
 			}
@@ -2456,6 +2833,87 @@ public final class BindUtil {
 		}
 
 		return value;
+	}
+
+	private static @Nonnull Pair<Document, Attribute> resolveInstantiationNavigation(@Nonnull Customer customer,
+																			  @Nonnull Module module,
+																			  @Nonnull Document navigatingDocument,
+																			  @Nonnull String fieldName,
+																			  @Nonnull String binding,
+																			  @Nonnull StringTokenizer tokenizer) {
+		if (ChildBean.PARENT_NAME.equals(fieldName)) {
+			Document parentDocument = navigatingDocument.getParentDocument(customer);
+			if (parentDocument == null) {
+				throw new MetaDataException(binding + " should point to a parent document but parent document does not exist");
+			}
+			return new ImmutablePair<>(parentDocument, null);
+		}
+
+		TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, navigatingDocument, fieldName);
+		Attribute attribute = target.getAttribute();
+		if (attribute == null) {
+			throw new IllegalArgumentException(fieldName + " within " + binding + "doesn't check out");
+		}
+
+		if (! (attribute instanceof Relation relation)) {
+			String badToken = tokenizer.hasMoreTokens() ? tokenizer.nextToken() : fieldName;
+			throw new MetaDataException(binding + " does not exist (token " + badToken + " doesn't check out)");
+		}
+
+		Document targetDocument = module.getDocument(customer, relation.getDocumentName());
+		return new ImmutablePair<>(targetDocument, attribute);
+	}
+
+	@SuppressWarnings("unchecked")
+	private static @Nullable Object resolveExistingOrIndexedValue(@Nonnull User user,
+															   @Nonnull Module module,
+															   @Nonnull Customer customer,
+															   @Nonnull Object owner,
+															   @Nonnull String bindingPart,
+															   int openBraceIndex,
+															   @Nullable Attribute attribute) {
+		try {
+			return BindUtil.get(owner, bindingPart);
+		}
+		catch (@SuppressWarnings("unused") IndexOutOfBoundsException e) {
+			if ((attribute == null) || (openBraceIndex < 0)) {
+				return null;
+			}
+
+			Document collectionDocument = module.getDocument(customer, ((Relation) attribute).getDocumentName());
+			String collectionBinding = bindingPart.substring(0, openBraceIndex);
+			int collectionIndex = Integer.parseInt(bindingPart.substring(openBraceIndex + 1, bindingPart.length() - 1));
+			List<Bean> collection = (List<Bean>) BindUtil.get(owner, collectionBinding);
+			if (collection == null) {
+				return null;
+			}
+
+			while (collection.size() <= collectionIndex) {
+				try {
+					Bean fillerElement = collectionDocument.newInstance(user);
+					BindUtil.addElementToCollection((Bean) owner, collectionBinding, fillerElement);
+				}
+				catch (Exception exception) {
+					throw new MetaDataException(exception);
+				}
+			}
+
+			return collection.get(collectionIndex);
+		}
+	}
+
+	private static @Nonnull Object createAndAssociateNavigatingValue(@Nonnull User user,
+															  @Nonnull Document navigatingDocument,
+															  @Nonnull Object owner,
+															  @Nonnull String bindingPart) {
+		try {
+			Object value = navigatingDocument.newInstance(user);
+			BindUtil.setAssociation((Bean) owner, bindingPart, (Bean) value);
+			return value;
+		}
+		catch (Exception exception) {
+			throw new MetaDataException(exception);
+		}
 	}
 	
 	/**
@@ -2580,64 +3038,79 @@ public final class BindUtil {
 		while (i < sb.length()) {
 			char charAt = sb.charAt(i);
 			if (i == 0) {
-				// Allow java start char except '_' which is reserved in skyve
-				// plus digits which are converted to words below.
-				if ((Character.isJavaIdentifierStart(charAt) && (charAt != '_')) || Character.isDigit(charAt)) {
-					i++;
-				}
-				else {
-					sb.deleteCharAt(0);
-				}
+				i = processLeadingIdentifierCharacter(sb, charAt);
 			}
 			else {
+				whiteSpaceOrUnderscore = processIdentifierCharacter(sb, i, charAt, whiteSpaceOrUnderscore);
 				if (Character.isJavaIdentifierPart(charAt) && (charAt != '_')) {
-					if (whiteSpaceOrUnderscore) {
-						sb.setCharAt(i, Character.toUpperCase(charAt));
-					}
-					whiteSpaceOrUnderscore = false;
 					i++;
-				}
-				else {
-					if (Character.isWhitespace(charAt) || (charAt == '_')) {
-						whiteSpaceOrUnderscore = true;
-					}
-					sb.deleteCharAt(i);
 				}
 			}
 		}
 		
-		if (sb.length() > 0) {
-			char firstChar = sb.charAt(0);
-			if (firstChar == '0') {
-				sb.replace(0, 1, "zero");
+		if (! sb.isEmpty()) {
+			replaceLeadingDigit(sb);
+		}
+	}
+
+	private static int processLeadingIdentifierCharacter(@Nonnull StringBuilder sb, char charAt) {
+		// Allow java start char except '_' which is reserved in skyve
+		// plus digits which are converted to words below.
+		if ((Character.isJavaIdentifierStart(charAt) && (charAt != '_')) || Character.isDigit(charAt)) {
+			return 1;
+		}
+		sb.deleteCharAt(0);
+		return 0;
+	}
+
+	private static boolean processIdentifierCharacter(@Nonnull StringBuilder sb,
+												   int index,
+												   char charAt,
+												   boolean whiteSpaceOrUnderscore) {
+		if (Character.isJavaIdentifierPart(charAt) && (charAt != '_')) {
+			if (whiteSpaceOrUnderscore) {
+				sb.setCharAt(index, Character.toUpperCase(charAt));
 			}
-			else if (firstChar == '1') {
-				sb.replace(0, 1, "one");
-			}
-			else if (firstChar == '2') {
-				sb.replace(0, 1, "two");
-			}
-			else if (firstChar == '3') {
-				sb.replace(0, 1, "three");
-			}
-			else if (firstChar == '4') {
-				sb.replace(0, 1, "four");
-			}
-			else if (firstChar == '5') {
-				sb.replace(0, 1, "five");
-			}
-			else if (firstChar == '6') {
-				sb.replace(0, 1, "six");
-			}
-			else if (firstChar == '7') {
-				sb.replace(0, 1, "seven");
-			}
-			else if (firstChar == '8') {
-				sb.replace(0, 1, "eight");
-			}
-			else if (firstChar == '9') {
-				sb.replace(0, 1, "nine");
-			}
+			return false;
+		}
+		boolean nextUpperCase = Character.isWhitespace(charAt) || (charAt == '_');
+		sb.deleteCharAt(index);
+		return nextUpperCase;
+	}
+
+	private static void replaceLeadingDigit(@Nonnull StringBuilder sb) {
+		switch (sb.charAt(0)) {
+		case '0':
+			sb.replace(0, 1, "zero");
+			break;
+		case '1':
+			sb.replace(0, 1, "one");
+			break;
+		case '2':
+			sb.replace(0, 1, "two");
+			break;
+		case '3':
+			sb.replace(0, 1, "three");
+			break;
+		case '4':
+			sb.replace(0, 1, "four");
+			break;
+		case '5':
+			sb.replace(0, 1, "five");
+			break;
+		case '6':
+			sb.replace(0, 1, "six");
+			break;
+		case '7':
+			sb.replace(0, 1, "seven");
+			break;
+		case '8':
+			sb.replace(0, 1, "eight");
+			break;
+		case '9':
+			sb.replace(0, 1, "nine");
+			break;
+		default:
 		}
 	}
 }

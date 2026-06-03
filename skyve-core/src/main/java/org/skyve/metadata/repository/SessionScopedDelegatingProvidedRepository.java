@@ -4,6 +4,7 @@ import java.io.File;
 import java.sql.Connection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.skyve.domain.Bean;
@@ -54,10 +55,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 	 */
 	public @Nullable ProvidedRepository getSessionDelegate() {
 		if (AbstractPersistence.isPresent()) {
-			User user = AbstractPersistence.get().getUser();
-			if (user != null) {
-				return getSessionDelegate(user);
-			}
+			return Optional.ofNullable(AbstractPersistence.get().getUser()).map(this::getSessionDelegate).orElse(null);
 		}
 		return null;
 	}
@@ -78,10 +76,8 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 	 */
 	public void setSessionDelegate(@Nonnull ProvidedRepository delegate) {
 		if (AbstractPersistence.isPresent()) {
-			User user = AbstractPersistence.get().getUser();
-			if (user == null) {
-				throw new IllegalStateException("No user on the persistence on this thread");
-			}
+			User user = Optional.ofNullable(AbstractPersistence.get().getUser())
+								.orElseThrow(() -> new IllegalStateException("No user on the persistence on this thread"));
 			setSessionDelegate(user, delegate);
 		}
 		else {
@@ -107,10 +103,8 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 	 */
 	public void removeSessionDelegate() {
 		if (AbstractPersistence.isPresent()) {
-			User user = AbstractPersistence.get().getUser();
-			if (user == null) {
-				throw new IllegalStateException("No user on the persistence on this thread");
-			}
+			User user = Optional.ofNullable(AbstractPersistence.get().getUser())
+								.orElseThrow(() -> new IllegalStateException("No user on the persistence on this thread"));
 			removeSessionDelegate(user);
 		}
 		else {
@@ -445,7 +439,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		if (delegate != null) {
 			result = delegate.retrieveAllScheduledJobsForAllCustomers();
 		}
-		return result;
+		return (result == null) ? Collections.emptyList() : result;
 	}
 
 	/**
@@ -459,7 +453,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		if (delegate != null) {
 			result = delegate.retrieveAllScheduledReportsForAllCustomers();
 		}
-		return result;
+		return (result == null) ? Collections.emptyList() : result;
 	}
 	
 	/**

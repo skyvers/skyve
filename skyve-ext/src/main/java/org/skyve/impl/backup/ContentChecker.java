@@ -26,8 +26,8 @@ import org.skyve.metadata.view.model.list.RDBMSDynamicPersistenceListModel;
 import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
 import org.skyve.util.JSON;
-import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
+import org.slf4j.Logger;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -78,7 +78,7 @@ public class ContentChecker {
 	 * @param customerName customer name for filtering
 	 * @throws Exception if validation fails
 	 */
-	@SuppressWarnings("java:S3776") // complexity OK
+	@SuppressWarnings({ "java:S3776", "resource" }) // complexity OK; cm is managed by caller
 	private void checkStaticContent(Connection connection, ContentManager cm, Customer customer, String customerName) throws Exception {
 		for (Table table : BackupUtil.getTables()) {
 			if (! hasContent(table)) {
@@ -337,8 +337,8 @@ public class ContentChecker {
 				String attributeName = fields.substring(previousDoubleQuoteIndex + 1);
 				Customer c = r.getCustomer((String) row[1]);
 				Module m = r.getModule(c, (String) row[2]);
-				Document d = m.getDocument(c, (String) row[3]);
-				Attribute a = (c == null) ? null : d.getPolymorphicAttribute(c, attributeName);
+				Document d = (m == null) ? null : m.getDocument(c, (String) row[3]);
+				Attribute a = ((c == null) || (d == null)) ? null : d.getPolymorphicAttribute(c, attributeName);
 				if (a != null) {
 					AttributeType t = a.getAttributeType();
 					if ((t == AttributeType.content) || (t == AttributeType.image)) {

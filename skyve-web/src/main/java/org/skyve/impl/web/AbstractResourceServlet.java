@@ -11,9 +11,9 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Thumbnail;
 import org.skyve.util.Util;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
-import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -377,7 +377,8 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 	 * @throws Exception if there is a problem creating the resource, including SecurityException if access should be denied
 	 */
 	@SuppressWarnings("java:S112") // Allow throwing generic Exception to cover all possible issues in resource creation, including IO and security exceptions.
-	protected abstract @Nonnull Resource createResource(HttpServletRequest request, RequestParams params) throws Exception;
+	protected abstract @Nonnull Resource createResource(@Nonnull HttpServletRequest request,
+															@Nonnull RequestParams params) throws Exception;
 
 	/**
 	 * Called after the response content type is set, before bytes are written.
@@ -400,7 +401,7 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 	 * @param moduleName		The module name in the request - may be null.
 	 * @param documentName		The document name in the request - may be null.
 	 * @param binding			The binding in the request - can be null.
-	 * @param resourceFileName	The file/content identifier - never null.
+	 * @param resourceFileName	The file/content identifier - can be null.
 	 * @param user				The logged in user or null if not logged in.
 	 * @param uxui				UxUi name for access checking.
 	 * @throws SecurityException
@@ -409,7 +410,7 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 									@Nullable String moduleName,
 									@Nullable String documentName,
 									@Nullable String binding,
-									@Nonnull String resourceFileName,
+									@Nullable String resourceFileName,
 									@Nullable User user,
 									@Nullable String uxui)
 	throws SecurityException {
@@ -424,7 +425,7 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 	 * @return the parsed request parameters - never null
 	 */
 	@SuppressWarnings("java:S3776") // complexity is justified by having all the parameters processed in one place
-	private static RequestParams parseRequestParams(HttpServletRequest request) {
+	private static @Nonnull RequestParams parseRequestParams(@Nonnull HttpServletRequest request) {
 		String documentName = Util.processStringValue(request.getParameter(AbstractWebContext.DOCUMENT_NAME));
 		String moduleName = null;
 		if (documentName != null) {

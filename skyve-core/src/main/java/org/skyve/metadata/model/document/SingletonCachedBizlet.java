@@ -38,10 +38,10 @@ public abstract class SingletonCachedBizlet<T extends PersistentBean> extends Si
 	 */
 	@Override
 	public T newInstance(T bean) throws Exception {
-		return monomorphicNewInstance(bean);
+		return resolveCachedNewInstance(bean);
 	}
 	
-	private @Nonnull T monomorphicNewInstance(@Nonnull T bean) throws Exception {
+	private @Nonnull T resolveCachedNewInstance(@Nonnull T bean) throws Exception {
 		String bizModule = bean.getBizModule();
 		String bizDocument = bean.getBizDocument();
 		User u = CORE.getUser();
@@ -97,15 +97,17 @@ public abstract class SingletonCachedBizlet<T extends PersistentBean> extends Si
 	 */
 	@Override
 	public @Nonnull T newInstance(@Nonnull T bean, @Nonnull DocumentPermissionScope scope) throws Exception {
-		@SuppressWarnings("null")
-		@Nonnull T result = CORE.getPersistence().withDocumentPermissionScopes(scope, p -> {
+		T result = CORE.getPersistence().withDocumentPermissionScopes(scope, p -> {
 			try {
-				return monomorphicNewInstance(bean);
+				return resolveCachedNewInstance(bean);
 			}
 			catch (Exception e) {
 				throw new DomainException(e);
 			}
 		});
+		if (result == null) {
+			throw new IllegalStateException("Singleton cached newInstance returned null for " + bean.getBizModule() + '.' + bean.getBizDocument());
+		}
 		return result;
 	}
 

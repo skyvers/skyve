@@ -43,6 +43,7 @@ public class SpringSecurityConfig {
 	/**
 	 * Default constructor for Spring.
 	 */
+	@Autowired
 	public SpringSecurityConfig() {
 		// Spring injects after construction.
 	}

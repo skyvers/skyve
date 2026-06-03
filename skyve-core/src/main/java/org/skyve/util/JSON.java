@@ -19,6 +19,10 @@ import jakarta.annotation.Nullable;
  * maps, or plain Java objects depending on the JSON payload.
  */
 public class JSON {
+	private JSON() {
+		// disallow instantiation
+	}
+
 	/**
 	 * Create JSON.
 	 * 
@@ -27,7 +31,7 @@ public class JSON {
 	 * @param propertyNames Needed for marshalling the result of executing a Query.
 	 * @return The JSON.
 	 */
-	public static final @Nonnull String marshall(@Nonnull Customer customer,
+	public static final @Nonnull String marshall(@Nullable Customer customer,
 													@Nullable Object beanOrBeans,
 													@Nonnull Set<String> propertyNames) {
 		JSONWriter writer = new JSONWriter(customer);
@@ -41,7 +45,7 @@ public class JSON {
 	 * @param beanOrBeans Either a Bean or List<Bean> or a Java Bean
 	 * @return The JSON.
 	 */
-	@SuppressWarnings("null") // call-through with nulls
+	@SuppressWarnings({"null", "java:S2637"}) // call-through with nulls
 	public static final @Nonnull String marshall(@Nonnull Customer customer,
 													@Nullable Object beanOrBeans) {
 		return marshall(customer, beanOrBeans, null);
@@ -53,7 +57,7 @@ public class JSON {
 	 * @param beanOrBeans Either a Bean or List<Bean> or a Java Bean
 	 * @return The JSON.
 	 */
-	@SuppressWarnings("null") // call-through with nulls
+	@SuppressWarnings({"null", "java:S2637"}) // call-through with nulls
 	public static final @Nonnull String marshall(@Nullable Object beanOrBeans) {
 		return marshall(null, beanOrBeans, null);
 	}
@@ -77,6 +81,7 @@ public class JSON {
 	 * @param json
 	 * @return a Bean or List<Bean> or a Map or a Java bean.
 	 */
+	@SuppressWarnings({"null", "java:S2637"}) // call-through with nulls
 	public static final Object unmarshall(@Nonnull String json) 
 	throws Exception {
 		return unmarshall(null, json);

@@ -27,9 +27,9 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.skyve.util.test.TestUtil;
 import org.slf4j.Logger;
-import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -54,7 +54,8 @@ public class Util {
      *             see the Typical usage pattern suggested by slf4j</a>.
      * 
      */
-    @Deprecated(since = "9.3.0", forRemoval = true)
+	@SuppressWarnings({"removal", "java:S1133"})
+	@Deprecated(since = "9.3.0", forRemoval = true)
     public static final java.util.logging.Logger LOGGER = UtilImpl.LOGGER;
 
     private static final Logger utilLogger = SkyveLoggerFactory.getLogger(Util.class);
@@ -150,6 +151,7 @@ public class Util {
 	/**
 	 * Internationalises a string for a particular locale and performs message formatting on tokens like {0}, {1} etc.
 	 */
+	@SuppressWarnings("java:S3776") // complexity OK
 	public static @Nonnull String nullSafeI18n(@Nonnull String key, @Nullable Locale locale, String... values) {
 		String result = null;
 
@@ -232,7 +234,7 @@ public class Util {
 	 * @param sequence	To determine the byte length of.
 	 * @return	The byte length.
 	 */
-	public static int UTF8Length(@Nonnull CharSequence sequence) {
+	public static int utf8Length(@Nonnull CharSequence sequence) {
 		int count = 0;
 		for (int i = 0, len = sequence.length(); i < len; i++) {
 			char ch = sequence.charAt(i);
@@ -351,7 +353,7 @@ public class Util {
 		if (secureUrl == null) {
 			synchronized (Util.class) {
 				if (secureUrl == null) {
-					secureUrl = Boolean.valueOf((UtilImpl.SERVER_URL == null) ? false : UtilImpl.SERVER_URL.startsWith("https://"));
+					secureUrl = Boolean.valueOf((UtilImpl.SERVER_URL != null) && UtilImpl.SERVER_URL.startsWith("https://"));
 				}
 			}
 		}

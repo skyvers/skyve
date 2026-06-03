@@ -510,7 +510,11 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	 */
 	@Override
 	public <T extends Bean> DynamicImage<T> getDynamicImage(Customer customer, String name) {
-		return ProvidedRepositoryFactory.get().getDynamicImage(customer, this, name, true);
+		DynamicImage<T> result = ProvidedRepositoryFactory.get().getDynamicImage(customer, this, name, true);
+		if (result == null) {
+			throw new MetaDataException("Document " + getName() + " has no dynamic image defined for " + name);
+		}
+		return result;
 	}
 
 	/**
@@ -704,10 +708,12 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		String bizKey = null;
 		if (isDynamic()) {
 			try {
-				bizKey = BindUtil.formatMessage(getBizKeyExpression(), bean);
+				if (bizKeyExpression != null) {
+					bizKey = BindUtil.formatMessage(bizKeyExpression, bean);
+				}
 			}
 			catch (@SuppressWarnings("unused") Exception e) {
-				bizKey = null;
+				// nothing to do here
 			}
 		}
 		else {
@@ -770,11 +776,18 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		Document result = null;
 
 		if (parentDocumentName != null) {
+			String owningModuleName = getOwningModuleName();
 			if (customer == null) {
-				result = ProvidedRepositoryFactory.get().getModule(null, getOwningModuleName()).getDocument(null, parentDocumentName);
+				Module owningModule = ProvidedRepositoryFactory.get().getModule(null, owningModuleName);
+				if (owningModule != null) {
+					result = owningModule.getDocument(null, parentDocumentName);
+				}
+				else {
+					throw new MetaDataException("Owning module " + owningModuleName + " not found in repository");
+				}
 			}
 			else {
-				result = customer.getModule(getOwningModuleName()).getDocument(customer, parentDocumentName);
+				result = customer.getModule(owningModuleName).getDocument(customer, parentDocumentName);
 			}
 		}
 
@@ -812,7 +825,11 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	 */
 	@Override
 	public <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(Customer customer, String modelName, boolean runtime) {
-		return ProvidedRepositoryFactory.get().getComparisonModel(customer, this, modelName, runtime);
+		ComparisonModel<T, C> result = ProvidedRepositoryFactory.get().getComparisonModel(customer, this, modelName, runtime);
+		if (result == null) {
+			throw new MetaDataException("Document " + getName() + " has no comparison model defined for " + modelName);
+		}
+		return result;
 	}
 
 	/**
@@ -825,7 +842,11 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	 */
 	@Override
 	public <T extends Bean> MapModel<T> getMapModel(Customer customer, String modelName, boolean runtime) {
-		return ProvidedRepositoryFactory.get().getMapModel(customer, this, modelName, runtime);
+		MapModel<T> result = ProvidedRepositoryFactory.get().getMapModel(customer, this, modelName, runtime);
+		if (result == null) {
+			throw new MetaDataException("Document " + getName() + " has no map model defined for " + modelName);
+		}
+		return result;
 	}
 
 	/**
@@ -838,7 +859,11 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	 */
 	@Override
 	public <T extends Bean> ChartModel<T> getChartModel(Customer customer, String modelName, boolean runtime) {
-		return ProvidedRepositoryFactory.get().getChartModel(customer, this, modelName, runtime);
+		ChartModel<T> result = ProvidedRepositoryFactory.get().getChartModel(customer, this, modelName, runtime);
+		if (result == null) {
+			throw new MetaDataException("Document " + getName() + " has no chart model defined for " + modelName);
+		}
+		return result;
 	}
 
 	/**
@@ -851,7 +876,11 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	 */
 	@Override
 	public <T extends Bean> ListModel<T> getListModel(Customer customer, String modelName, boolean runtime) {
-		return ProvidedRepositoryFactory.get().getListModel(customer, this, modelName, runtime);
+		ListModel<T> result = ProvidedRepositoryFactory.get().getListModel(customer, this, modelName, runtime);
+		if (result == null) {
+			throw new MetaDataException("Document " + getName() + " has no list model defined for " + modelName);
+		}
+		return result;
 	}
 
 	/**
@@ -872,7 +901,12 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		if (metaDataAction != null) {
 			return new ServerSideMetaDataAction(metaDataAction);
 		}
-		return repository.getServerSideAction(customer, this, className, runtime);
+		
+		ServerSideAction<Bean> result = repository.getServerSideAction(customer, this, className, runtime);
+		if (result == null) {
+			throw new MetaDataException("Document " + getName() + " has no server-side action defined for " + className);
+		}
+		return result;
 	}
 
 	/**
@@ -885,7 +919,11 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	 */
 	@Override
 	public BizExportAction getBizExportAction(Customer customer, String className, boolean runtime) {
-		return ProvidedRepositoryFactory.get().getBizExportAction(customer, this, className, runtime);
+		BizExportAction result = ProvidedRepositoryFactory.get().getBizExportAction(customer, this, className, runtime);
+		if (result == null) {
+			throw new MetaDataException("Document " + getName() + " has no BizPort export action defined for " + className);
+		}
+		return result;
 	}
 
 	/**
@@ -898,7 +936,11 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	 */
 	@Override
 	public BizImportAction getBizImportAction(Customer customer, String className, boolean runtime) {
-		return ProvidedRepositoryFactory.get().getBizImportAction(customer, this, className, runtime);
+		BizImportAction result = ProvidedRepositoryFactory.get().getBizImportAction(customer, this, className, runtime);
+		if (result == null) {
+			throw new MetaDataException("Document " + getName() + " has no BizPort import action defined for " + className);
+		}
+		return result;
 	}
 
 	/**
@@ -911,7 +953,11 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	 */
 	@Override
 	public DownloadAction<Bean> getDownloadAction(Customer customer, String className, boolean runtime) {
-		return ProvidedRepositoryFactory.get().getDownloadAction(customer, this, className, runtime);
+		DownloadAction<Bean> result = ProvidedRepositoryFactory.get().getDownloadAction(customer, this, className, runtime);
+		if (result == null) {
+			throw new MetaDataException("Document " + getName() + " has no download action defined for " + className);
+		}
+		return result;
 	}
 
 	/**
@@ -924,7 +970,11 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	 */
 	@Override
 	public UploadAction<Bean> getUploadAction(Customer customer, String className, boolean runtime) {
-		return ProvidedRepositoryFactory.get().getUploadAction(customer, this, className, runtime);
+		UploadAction<Bean> result = ProvidedRepositoryFactory.get().getUploadAction(customer, this, className, runtime);
+		if (result == null) {
+			throw new MetaDataException("Document " + getName() + " has no upload action defined for " + className);
+		}
+		return result;
 	}
 
 	/**
@@ -942,6 +992,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	 * @return the resolved domain values, never {@code null}.
 	 * @throws MetaDataException if bizlet or query-based resolution fails.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public <T extends Bean> List<DomainValue> getDomainValues(CustomerImpl customer,
 																DomainType domainType,
 																Attribute attribute,
@@ -1017,10 +1068,8 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	 * @param attribute the reference attribute driving the lookup.
 	 * @return the resolved query-backed domain values, an empty list for transient targets,
 	 *         or {@code null} when the attribute is not query-backed.
-	 * @throws Exception if query construction or execution fails.
 	 */
-	private List<DomainValue> useQuery(Customer customer, Attribute attribute)
-	throws Exception {
+	private List<DomainValue> useQuery(Customer customer, Attribute attribute) {
 		List<DomainValue> result = null;
 		
 		if (attribute instanceof Reference reference) {
@@ -1110,6 +1159,10 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		// if we want a create view and there isn't one, get the edit view instead
 		if ((view == null) && (ViewType.create.toString().equals(name))) {
 			view = repository.getView(uxui, customer, this, ViewType.edit.toString());
+		}
+		
+		if (view == null) {
+			throw new MetaDataException("Document " + getName() + " has no view defined for " + name);
 		}
 
 		return view;

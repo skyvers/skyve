@@ -130,8 +130,6 @@ import org.skyve.report.ReportFormat;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 
-import jakarta.annotation.Nonnull;
-
 // TODO check suggestion attributes on text fields etc
 /**
  * Validates view metadata for a given customer, module, and document after
@@ -452,13 +450,19 @@ class ViewValidator extends ViewVisitor {
 	private Document validateListModelName(String modelName, String widgetIdentifier) {
 		Document result = null;
 		if (modelName != null) {
+			ListModel<Bean> model = null;
 			try {
-				ListModel<Bean> model = repository.getListModel(customer, document, modelName, false);
-				// Check driving document can be obtained to ensure bindings and accesses can be calculated
-				result = model.getDrivingDocument();
+				model = repository.getListModel(customer, document, modelName, false);
+				if (model != null) {
+					// Check driving document can be obtained to ensure bindings and accesses can be calculated
+					result = model.getDrivingDocument();
+				}
 			}
 			catch (Exception e) {
 				throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " does not reference a valid list model of " + modelName, e);
+			}
+			if (model == null) {
+				throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " does not reference a list model called " + modelName);
 			}
 		}
 		return result;
@@ -1045,6 +1049,9 @@ class ViewValidator extends ViewVisitor {
 		catch (Exception e) {
 			throw new MetaDataException(chartIdentifier + " in " + viewIdentifier + " has an invalid moduleName of " + model.getModuleName(), e);
 		}
+		if (contextModule == null) {
+			throw new MetaDataException(chartIdentifier + " in " + viewIdentifier + " has an invalid moduleName of " + model.getModuleName());
+		}
 		
 		String documentName = model.getDocumentName();
 		String queryName = model.getQueryName();
@@ -1355,8 +1362,7 @@ class ViewValidator extends ViewVisitor {
     	}
 		else {
 			// NB Use getMetaDataForBinding() to ensure we find attributes from base documents inherited
-			@SuppressWarnings("null")
-			@Nonnull String fullBinding = binding;
+			String fullBinding = binding;
 			if (dataWidgetBinding != null) {
 				if (binding == null) {
 					fullBinding = dataWidgetBinding;
@@ -1364,6 +1370,9 @@ class ViewValidator extends ViewVisitor {
 				else {
 					fullBinding = BindUtil.createCompoundBinding(dataWidgetBinding, binding);
 				}
+			}
+			if (fullBinding == null) {
+				throw new MetaDataException(lookupIdentifier + " in " + viewIdentifier + " - binding is required.");
 			}
 			TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, fullBinding);
     		Relation relation = (Relation) target.getAttribute();
@@ -1633,7 +1642,7 @@ class ViewValidator extends ViewVisitor {
 					try {
 						result = (ModuleImpl) repository.getModule(customer, referenceModuleName);
 						if (result == null) {
-							throw new MetaDataException(referenceModuleName + " DNE");
+							throw new MetaDataException("Module " + referenceModuleName + " DNE");
 						}
 					}
 					catch (Exception e) {
@@ -1656,10 +1665,6 @@ class ViewValidator extends ViewVisitor {
 				if (referenceDocumentName.indexOf('{') < 0) {
 					try {
 						result = (DocumentImpl) referenceModule.getDocument(customer, referenceDocumentName);
-						if (result == null) {
-							throw new MetaDataException(referenceDocumentName + " DNE");
-						}
-						return result;
 					}
 					catch (Exception e) {
 						throw new MetaDataException(linkIdentifier + " in " + 
@@ -1691,10 +1696,6 @@ class ViewValidator extends ViewVisitor {
 				if (bindingToTest != null) {
 					try {
 						result = BindUtil.getMetaDataForBinding(customer, module, document, bindingToTest);
-						if (result == null) {
-							throw new IllegalStateException("Target DNE");
-						}
-						return result;
 					}
 					catch (MetaDataException e) {
 						throw new MetaDataException(linkIdentifier + " in " + viewIdentifier + 
@@ -1809,11 +1810,17 @@ class ViewValidator extends ViewVisitor {
 					String actionName = reference.getActionName();
 					try {
 						TargetMetaData target = validateReferenceBinding(null, "an action reference");
+						if (target == null) {
+							throw new MetaDataException("Target metadata for " + dataWidgetBinding + " DNE");
+						}
 						Reference targetReference = (Reference) target.getAttribute();
 						if (targetReference == null) {
 							throw new MetaDataException("Target Reference " + dataWidgetBinding + " DNE");
 						}
 						ModuleImpl targetModule = (ModuleImpl) repository.getModule(customer, target.getDocument().getOwningModuleName());
+						if (targetModule == null) {
+							throw new MetaDataException("Target module " + target.getDocument().getOwningModuleName() + " DNE");
+						}
 						DocumentImpl targetDocument = (DocumentImpl) targetModule.getDocument(customer, targetReference.getDocumentName());
 						
 						// This is a container column of an existing row in a table/grid - so get the edit view
@@ -2161,6 +2168,11 @@ class ViewValidator extends ViewVisitor {
 		}
 		
 		Document reportDocument = null;
+		if ((moduleName == null) || (documentName == null)) {
+			throw new MetaDataException("Report Action for report " + action.getResourceName() +
+											" in view " + viewIdentifier +
+											" is missing moduleName and/or documentName parameters");
+		}
 		try {
 			reportDocument = customer.getModule(moduleName).getDocument(customer, documentName);
 		}

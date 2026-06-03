@@ -11,6 +11,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.AbstractMetaDataMap;
+import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.field.Content;
 import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.metadata.module.query.MetaDataQueryContentColumnImpl;
@@ -205,6 +206,7 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 		return result;
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void processColumns(Customer customer,
 									Document document,
 									List<MetaDataQueryColumn> columns,
@@ -301,7 +303,7 @@ ie Link from an external module to admin.User and domain generation will moan ab
 	public Document getDocument(Customer customer, String documentName) {
 		Document result = ProvidedRepositoryFactory.get().getDocument(customer, this, documentName);
 		if (result == null) {
-			throw new IllegalStateException("Document " + documentName + " does not exist in module " + getName());
+			throw new MetaDataException("Document " + documentName + " does not exist in module " + getName());
 		}
 
 		return result;

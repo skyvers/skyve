@@ -195,7 +195,7 @@ public interface Module extends NamedMetaData, PersistentMetaData, ReloadableMet
 	 * 
 	 * @return The form label layout for this module
 	 */
-	FormLabelLayout getFormLabelLayout();
+	@Nullable FormLabelLayout getFormLabelLayout();
 	
 	/**
 	 * Returns a map of document references belonging to this module.

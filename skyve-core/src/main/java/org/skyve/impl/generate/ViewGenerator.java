@@ -63,8 +63,11 @@ import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
-import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
+import org.slf4j.Logger;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Generates server-side view helper classes from view metadata descriptors.
@@ -563,12 +566,12 @@ public class ViewGenerator {
 		return XMLMetaData.marshalView(generateEditView(customer, document), customerOverridden, uxuiOverridden);
 	}
 
-	private void writeEditView(String srcPath,
-								Module module,
-								Document document,
-								Customer customer,
+	private void writeEditView(@Nonnull String srcPath,
+								@Nonnull Module module,
+								@Nonnull Document document,
+								@Nonnull Customer customer,
 								boolean customerOverridden,
-								String uxui)
+								@Nullable String uxui)
 	throws IOException {
 		StringBuilder filePath = new StringBuilder(64);
 		filePath.append(srcPath);
@@ -623,15 +626,18 @@ public class ViewGenerator {
 			System.err.println("Usage: org.skyve.impl.generate.ViewGenerator sourcePath (usually \"src/skyve/\") customerName moduleName documentName customerOverridden (boolean) uxui (optional)");
 			System.exit(1);
 		}
+		if ((srcPath == null) || (customerName == null)) {
+			throw new MetaDataException("sourcePath and customerName are required");
+		}
 
 		ProvidedRepository repository = new LocalDesignRepository();
 		Customer customer = repository.getCustomer(customerName);
+		if (customer == null) {
+			throw new MetaDataException("Customer " + customerName + " does not exist.");
+		}
 
 		// If the module and/or document was not specified, we will just generate all edit views.
 		if ((moduleName == null) || (documentName == null)) {
-			if (customer == null) {
-				throw new MetaDataException("Customer " + customerName + " does not exist.");
-			}
 			for (Module module : customer.getModules()) {
 				for (Map.Entry<String, Module.DocumentRef> entry : module.getDocumentRefs().entrySet()) {
 					Module.DocumentRef documentRef = entry.getValue();
@@ -650,7 +656,13 @@ public class ViewGenerator {
 		}
 		else {
 			Module module = repository.getModule(customer, moduleName);
+			if (module == null) {
+				throw new MetaDataException("Module " + moduleName + " does not exist.");
+			}
 			Document document = repository.getDocument(customer, module, documentName);
+			if (document == null) {
+				throw new MetaDataException("Document " + moduleName + '.' + documentName + " does not exist.");
+			}
 			new ViewGenerator(repository).writeEditView(srcPath, module, document, customer, customerOverridden, uxui);
 		}
 	}

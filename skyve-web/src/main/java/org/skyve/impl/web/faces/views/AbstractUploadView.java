@@ -27,7 +27,7 @@ public abstract class AbstractUploadView extends LocalisableView {
 	/**
 	 * Number of bytes in one megabyte.
 	 */
-	public static long MB_IN_BYTES = 1024 * 1024;
+	public static final long MB_IN_BYTES = 1024L * 1024L;
 
 	@Inject
 	@ManagedProperty(value = "#{param." + AbstractWebContext.CONTEXT_NAME + "}")
@@ -140,7 +140,9 @@ public abstract class AbstractUploadView extends LocalisableView {
 	protected boolean validFile(UploadedFile file, FacesContext fc) {
 		long size = file.getSize();
 		if (size > maximumSizeInBytes) {
-			LOGGER.warn("FileUpload - File size of {} > maximumSizeInBytes of {}", size, maximumSizeInBytes);
+			if (LOGGER.isWarnEnabled()) {
+				LOGGER.warn("FileUpload - File size of {} > maximumSizeInBytes of {}", Long.toString(size), Long.toString(maximumSizeInBytes));
+			}
 			FacesMessage msg = new FacesMessage("Failure", "File is too large");
 			fc.addMessage(null, msg);
 			return false;
@@ -148,17 +150,16 @@ public abstract class AbstractUploadView extends LocalisableView {
 
 		String name = file.getFileName();
 		// NB PatternSyntaxException is caught in SkyveContextListener at startup
-		if (name != null) {
-			if (((whitelistRegex != null) && 
-					// Check whitelist regex if defined
-					(! Pattern.compile(whitelistRegex, Pattern.CASE_INSENSITIVE | Pattern.MULTILINE).matcher(name).matches())) ||
-					// Always disallow files starting with . or any path segment starting with .
-					name.startsWith(".") || name.contains("/.") || name.contains("\\.")) {
-				LOGGER.warn("FileUpload - Filename {} does not match {}", name, whitelistRegex);
-				FacesMessage msg = new FacesMessage("Failure", "Filename " + name + " is not allowed");
-				fc.addMessage(null, msg);
-				return false;
-			}
+		if ((name != null) &&
+				(((whitelistRegex != null) &&
+				// Check whitelist regex if defined
+				(! Pattern.compile(whitelistRegex, Pattern.CASE_INSENSITIVE | Pattern.MULTILINE).matcher(name).matches())) ||
+				// Always disallow files starting with . or any path segment starting with .
+				name.startsWith(".") || name.contains("/.") || name.contains("\\."))) {
+			LOGGER.warn("FileUpload - Filename {} does not match {}", name, whitelistRegex);
+			FacesMessage msg = new FacesMessage("Failure", "Filename " + name + " is not allowed");
+			fc.addMessage(null, msg);
+			return false;
 		}
 		
 		return true;

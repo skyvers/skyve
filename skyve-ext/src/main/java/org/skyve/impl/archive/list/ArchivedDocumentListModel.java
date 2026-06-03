@@ -57,7 +57,7 @@ import com.google.common.base.Stopwatch;
  */
 public abstract class ArchivedDocumentListModel<U extends Bean> extends ListModel<U> {
 	// NB An instance member LOGGER is OK here as this is not Serializable
-    private final Logger LOGGER = SkyveLoggerFactory.getLogger(getClass());
+    private final Logger logger = SkyveLoggerFactory.getLogger(getClass());
 
     private LuceneFilter filter = new LuceneFilter();
 
@@ -92,10 +92,12 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
     @Override
     public Page fetch() throws Exception {
 
-        LOGGER.debug("Executing fetch, filter={}, start={}, end={}", filter, getStartRow(), getEndRow());
+        if (logger.isDebugEnabled()) {
+            logger.debug("Executing fetch, filter={}, start={}, end={}", filter, Integer.toString(getStartRow()), Integer.toString(getEndRow()));
+        }
 
         if (findArchiveDocumentConfig().isEmpty()) {
-            LOGGER.debug("No archive config for {}.{} returning an empty page", getModule(), getDocument());
+            logger.debug("No archive config for {}.{} returning an empty page", getModule(), getDocument());
             return emptyPage();
         }
 
@@ -109,12 +111,11 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
 
             return p;
         } catch (IndexNotFoundException e) {
-            LOGGER.atWarn()
+            logger.atWarn()
                   .setCause(e)
                   .log("No index found, returning empty Page");
 
-            Page p = emptyPage();
-            return p;
+            return emptyPage();
         }
     }
 
@@ -134,11 +135,11 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
                 for (MetaDataQueryColumn column : getColumns()) {
                     String binding = column.getBinding();
 
-                    props.put(binding, rowCount);
+                    props.put(binding, Long.valueOf(rowCount));
                 }
             } else {
                 // We probably can't support the other aggregations types
-                LOGGER.warn("Aggregate function {} not supported by {}", getSummary(), this);
+                logger.warn("Aggregate function {} not supported by {}", getSummary(), this);
             }
         }
 
@@ -158,7 +159,9 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
             lri.iterator()
                .forEachRemaining(rows::add);
 
-            LOGGER.debug("Got {} results of {}; took {}", rows.size(), lri.totalHits(), t);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Got {} results of {}; took {}", Integer.toString(rows.size()), lri.totalHits(), t);
+            }
 
             return new Result(rows, hits.value);
         }
@@ -169,11 +172,11 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
         SortParameter[] params = getSortParameters();
         if (params == null || params.length == 0) {
             Sort defaultSort = getDefaultSort();
-            LOGGER.debug("No sorting defined, using {}", defaultSort);
+            logger.debug("No sorting defined, using {}", defaultSort);
             return defaultSort;
         }
 
-        LOGGER.atDebug()
+		logger.atDebug()
               .addArgument(() -> Arrays.asList(params))
               .log("SortParameters: {}");
 
@@ -185,7 +188,7 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
             String binding = toSortBinding(sp.getBy());
             SortField sf = new SortField(binding, Type.STRING, reverse);
 
-            LOGGER.debug("Sorting by {}", sf);
+            logger.debug("Sorting by {}", sf);
 
             sortFields.add(sf);
         }
@@ -201,6 +204,7 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
      *
      * @return the default sort strategy, never {@code null}
      */
+	@SuppressWarnings("static-method")
     protected Sort getDefaultSort() {
         return Sort.RELEVANCE;
     }
@@ -245,7 +249,8 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
     private static record Result(List<Bean> rows, long totalRowCount) {
     }
 
-    @Override
+	@Override
+    @SuppressWarnings("resource")
     public AutoClosingIterable<Bean> iterate() throws Exception {
         return this.new LuceneResultsIterable(0, Integer.MAX_VALUE);
     }
@@ -293,7 +298,7 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
     protected Path getIndexDirectory() {
         return Util.getArchiveConfig()
                    .findArchiveDocConfig(getModule(), getDocument())
-                   .get()
+				   .orElseThrow(() -> new NoSuchElementException(getModule() + '.' + getDocument() + " is not configured for archive indexing."))
                    .getIndexDirectory();
     }
     
@@ -312,8 +317,9 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
     /**
      * NB Not a static class, accesses state from outer class (filter, sort)
      */
+	@SuppressWarnings("resource")
     private class LuceneResultsIterable implements AutoClosingIterable<Bean> {
-        private final Logger LRI_LOGGER = SkyveLoggerFactory.getLogger(LuceneResultsIterable.class);
+        private final Logger luceneResultsLogger = SkyveLoggerFactory.getLogger(LuceneResultsIterable.class);
 
         private int readNextRowIdx = 0;
         private final ScoreDoc[] scoreDocs;
@@ -325,10 +331,10 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
 
             // open the index
             Path indexPath = getIndexDirectory();
-            LRI_LOGGER.debug("Using index at {}", indexPath);
+            luceneResultsLogger.debug("Using index at {}", indexPath);
             ArchiveDocConfig archiveDocConfig = Util.getArchiveConfig()
 					.findArchiveDocConfig(getModule(), getDocument())
-					.get();
+					.orElseThrow(() -> new NoSuchElementException(getModule() + '.' + getDocument() + " is not configured for archive indexing."));
             directory = archiveLuceneIndexerSingleton
 					.getLuceneConfigs()
 					.get(archiveDocConfig).indexDirectory();
@@ -342,18 +348,20 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
                 // If no criteria have been set search for "bizId is not null" 
                 // so that some results are displayed
                 query = new FieldExistsQuery(Bean.DOCUMENT_ID);
-                LRI_LOGGER.debug("Filter is empty, using default query: {}", query);
+                luceneResultsLogger.debug("Filter is empty, using default query: {}", query);
             } else {
                 // Otherwise run the actual criteria supplied
                 query = filter.toQuery();
             }
-            LRI_LOGGER.debug("Executing filter {}; query '{}'", filter, query);
+            luceneResultsLogger.debug("Executing filter {}; query '{}'", filter, query);
             topDocs = isearcher.search(query, endRow, getSort());
 
             // set aside scoredocs
             ScoreDoc[] allScoreDocs = topDocs.scoreDocs;
             scoreDocs = ArrayUtils.subarray(allScoreDocs, startRow, endRow);
-            LRI_LOGGER.debug("Got {} results, retained {}", allScoreDocs.length, scoreDocs.length);
+            if (luceneResultsLogger.isDebugEnabled()) {
+				luceneResultsLogger.debug("Got {} results, retained {}", Integer.toString(allScoreDocs.length), Integer.toString(scoreDocs.length));
+			}
         }
 
         /**
@@ -380,7 +388,7 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
             try {
                 ac.close();
             } catch (Exception e) {
-                LRI_LOGGER.atWarn()
+                luceneResultsLogger.atWarn()
                           .setCause(e)
                           .log("Could not close {}", ac);
             }
@@ -402,6 +410,9 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
 
             @Override
             public Bean next() {
+				if (! hasNext()) {
+					throw new NoSuchElementException();
+				}
                 int docId = scoreDocs[readNextRowIdx].doc;
                 ++readNextRowIdx;
 
@@ -409,7 +420,7 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
                     Document doc = readStoredDocument(dirReader, docId);
                     return convertToBean(doc);
                 } catch (IOException ioe) {
-                    throw new RuntimeException("Unable to retrieve doc #" + docId, ioe);
+					throw new IllegalStateException("Unable to retrieve doc #" + docId, ioe);
                 }
             }
         }

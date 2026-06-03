@@ -2,7 +2,7 @@ package org.skyve.util;
 
 import java.util.List;
 import java.util.SortedMap;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -70,9 +70,11 @@ public class Binder {
 	 * @return the formatted message with post-processed display values where applicable
 	 */
 	public static @Nonnull String formatMessage(@Nonnull String message,
-													@Nullable Function<String, String> postEvaluateDisplayValue,
+													@Nullable UnaryOperator<String> postEvaluateDisplayValue,
 													@Nonnull Bean... beans) {
-		return BindUtil.formatMessage(message, postEvaluateDisplayValue, beans);
+		return BindUtil.formatMessage(message,
+									(postEvaluateDisplayValue == null) ? null : postEvaluateDisplayValue::apply,
+									beans);
 	}
 
 	/**

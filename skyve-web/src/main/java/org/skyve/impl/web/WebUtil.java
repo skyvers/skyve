@@ -86,11 +86,10 @@ public class WebUtil {
 	 * @param request active HTTP request
 	 * @param userPrincipal optional authenticated principal name
 	 * @return resolved user, or {@code null} when no authenticated user is available
-	 * @throws Exception when session restoration or user resolution fails
 	 */
+	@SuppressWarnings({"java:S3776", "java:S1871"}) // complexity OK
 	public static User processUserPrincipalForRequest(@Nonnull HttpServletRequest request,
-														@Nullable String userPrincipal)
-	throws Exception {
+														@Nullable String userPrincipal) {
 		HttpSession session = request.getSession(false);
 		UserImpl user = null;
 		if (session != null) {
@@ -178,11 +177,9 @@ public class WebUtil {
 	 * @param webContext current web context, or {@code null}
 	 * @param request active HTTP request
 	 * @return resolved bean for the request context, or {@code null}
-	 * @throws Exception when binding resolution fails
 	 */
 	public static @Nullable Bean getConversationBeanFromRequest(@Nullable AbstractWebContext webContext,
-																	@Nonnull HttpServletRequest request)
-	throws Exception {
+																	@Nonnull HttpServletRequest request) {
 		// Find the context bean
 		// Note - if there is no form in the view then there is no web context
 		Bean result = null;
@@ -372,6 +369,7 @@ public class WebUtil {
 	 * @param response active HTTP response
 	 * @param names optional explicit cookie names to delete
 	 */
+	@SuppressWarnings("java:S3776") // complexity OK
 	public static void deleteCookies(@Nonnull HttpServletRequest request,
 										@Nonnull HttpServletResponse response,
 										@Nonnull String... names) {
@@ -508,6 +506,7 @@ public class WebUtil {
 	 * @param email target email address
 	 * @throws Exception when token generation, persistence, or mail delivery fails unexpectedly
 	 */
+	@SuppressWarnings("java:S3776") // complexity OK
 	public static void requestPasswordReset(@Nonnull String customer, @Nonnull String email)
 	throws Exception {
 		SuperUser u = new SuperUser();
@@ -558,6 +557,9 @@ public class WebUtil {
 					if (firstUser == null) {
 						firstUser = user;
 					}
+				}
+				if (firstUser == null) { // should never happen
+					throw new IllegalStateException("No users found with email " + email);
 				}
 
 				// send a single email to the user's email address 
@@ -669,6 +671,7 @@ public class WebUtil {
 	 * when the password reset succeeds
 	 * @throws Exception when persistence or password-change execution fails unexpectedly
 	 */
+	@SuppressWarnings("java:S3776") // complexity OK
 	public static @Nullable String resetPassword(@Nonnull String passwordResetToken,
 													@Nonnull String newPassword,
 													@Nonnull String confirmPassword)
@@ -775,10 +778,8 @@ public class WebUtil {
 			}
 			catch (Exception e) {
                 LOGGER.error("Failed to resolve document {}.{} with bizId {}",
-                        referenceDocument.getOwningModuleName(), referenceDocument.getName(), bizId, e);
-				throw new MetaDataException(String.format("Failed to resolve this %s.", 
-															referenceDocument.getLocalisedSingularAlias()),
-												e);
+                				referenceDocument.getOwningModuleName(), referenceDocument.getName(), bizId);
+				throw new MetaDataException("Failed to resolve this " + referenceDocument.getLocalisedSingularAlias(), e);
 				
 			}
 		}
@@ -862,6 +863,7 @@ public class WebUtil {
 	 * @param response the client verification token submitted by the captcha control
 	 * @return {@code true} when the remote verification service reports success, otherwise {@code false}
 	 */
+	@SuppressWarnings("java:S3776") // complexity OK
 	public static boolean validateRecaptcha(@Nullable String response) {
 		boolean valid = true;
 		String recaptchaSecretKey = null;

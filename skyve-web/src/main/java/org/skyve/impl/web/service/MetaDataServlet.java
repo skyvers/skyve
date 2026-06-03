@@ -2,7 +2,6 @@ package org.skyve.impl.web.service;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.List;
@@ -245,33 +244,28 @@ public class MetaDataServlet extends HttpServlet {
 			AbstractPersistence persistence = AbstractPersistence.get();
 			String documentName = null;
 			try {
-				try {
-					persistence.begin();
-			    	Principal userPrincipal = request.getUserPrincipal();
-			    	User user = WebUtil.processUserPrincipalForRequest(request, (userPrincipal == null) ? null : userPrincipal.getName());
-					if (user == null) {
-						throw new SessionEndedException(request.getLocale());
-					}
-					persistence.setUser(user);
-
-					String uxui = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.UXUI)));
-					if (uxui == null) {
-						uxui = UserAgent.getUxUi(request).getName();
-					}
-					String moduleName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.MODULE_NAME)));
-					documentName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.DOCUMENT_NAME)));
-					if (documentName != null) {
-						EXT.checkAccess(user, UserAccess.singular(moduleName, documentName), uxui);
-
-						String top = Util.processStringValue(request.getParameter(AbstractWebContext.TOP_FORM_LABELS_NAME));
-						Util.chunkCharsToWriter(view(user, uxui, moduleName, documentName, Boolean.TRUE.toString().equals(top)), pw);
-					}
-					else {
-						metadata(user, uxui, moduleName, pw);
-					}
+				persistence.begin();
+		    	Principal userPrincipal = request.getUserPrincipal();
+		    	User user = WebUtil.processUserPrincipalForRequest(request, (userPrincipal == null) ? null : userPrincipal.getName());
+				if (user == null) {
+					throw new SessionEndedException(request.getLocale());
 				}
-				catch (InvocationTargetException e) {
-					throw e.getTargetException();
+				persistence.setUser(user);
+
+				String uxui = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.UXUI)));
+				if (uxui == null) {
+					uxui = UserAgent.getUxUi(request).getName();
+				}
+				String moduleName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.MODULE_NAME)));
+				documentName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.DOCUMENT_NAME)));
+				if (documentName != null) {
+					EXT.checkAccess(user, UserAccess.singular(moduleName, documentName), uxui);
+
+					String top = Util.processStringValue(request.getParameter(AbstractWebContext.TOP_FORM_LABELS_NAME));
+					Util.chunkCharsToWriter(view(user, uxui, moduleName, documentName, Boolean.TRUE.toString().equals(top)), pw);
+				}
+				else {
+					metadata(user, uxui, moduleName, pw);
 				}
 			}
 			catch (Throwable t) {

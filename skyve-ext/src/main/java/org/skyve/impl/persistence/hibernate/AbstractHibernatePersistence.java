@@ -197,6 +197,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
     /**
      * Shared Hibernate session factory for all persistence instances.
      */
+	@SuppressWarnings("resource") // static lifecycle is controlled by configure()/shutdown hooks
 	private static SessionFactory sf = null;
 	
 	/**
@@ -221,16 +222,19 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	/**
 	 * JPA EntityManager for the current persistence instance.
 	 */
+	@SuppressWarnings("resource") // closed by persistence lifecycle
 	private EntityManager em = null;
 	
 	/**
 	 * Hibernate Session unwrapped from the EntityManager.
 	 */
+	@SuppressWarnings("resource") // closed by persistence lifecycle
 	private Session session = null;
 	
 	/**
 	 * Create a new persistence instance with a manual-flush Hibernate session.
 	 */
+	@SuppressWarnings("resource") // em/session are closed by close() lifecycle
 	protected AbstractHibernatePersistence() {
 		em = sf.createEntityManager();
 		session = em.unwrap(Session.class);
@@ -823,6 +827,9 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		for (String moduleName : repository.getAllVanillaModuleNames()) {
 			Customer moduleCustomer = (accessibleModuleNames.contains(moduleName) ? user.getCustomer() : null);
 			Module module = repository.getModule(moduleCustomer, moduleName);
+			if (module == null) {
+				continue;
+			}
 
 			for (String documentName : module.getDocumentRefs().keySet()) {
 				Document document = module.getDocument(moduleCustomer, documentName);
@@ -847,14 +854,15 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		for (String moduleName : repository.getAllVanillaModuleNames()) {
 			Customer moduleCustomer = (accessibleModuleNames.contains(moduleName) ? user.getCustomer() : null);
 			Module module = repository.getModule(moduleCustomer, moduleName);
-
-			for (String documentName : module.getDocumentRefs().keySet()) {
-				Document document = module.getDocument(moduleCustomer, documentName);
-				if ((! document.isDynamic()) && // is not dynamic
-						(document.isPersistable()) && // is persistent document
-						(repository.findNearestPersistentSingleOrJoinedSuperDocument(moduleCustomer, module, document) == null) && // not an ORM sub-class (which don't have filters)
-						moduleName.equals(document.getOwningModuleName())) { // document belongs to this module
-					resetFilters(document);
+			if (module != null) {
+				for (String documentName : module.getDocumentRefs().keySet()) {
+					Document document = module.getDocument(moduleCustomer, documentName);
+					if ((! document.isDynamic()) && // is not dynamic
+							(document.isPersistable()) && // is persistent document
+							(repository.findNearestPersistentSingleOrJoinedSuperDocument(moduleCustomer, module, document) == null) && // not an ORM sub-class (which don't have filters)
+							moduleName.equals(document.getOwningModuleName())) { // document belongs to this module
+						resetFilters(document);
+					}
 				}
 			}
 		}
@@ -879,6 +887,9 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		while (tempFilterDocument != null) {
 			Customer moduleCustomer = (accessibleModuleNames.contains(moduleName) ? customer : null);
 			Module module = repository.getModule(moduleCustomer, moduleName);
+			if (module == null) {
+				break;
+			}
 
 			tempFilterDocument = repository.findNearestPersistentSingleOrJoinedSuperDocument(moduleCustomer, 
 																								module,
@@ -1348,6 +1359,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 * @param beanToSave The root bean being saved.
 	 * @param beansToMerge Optional map of static beans reachable via dynamic relations.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void setMandatories(@Nonnull Document document,
 									final @Nonnull PersistentBean beanToSave,
 									@Nullable Map<PersistentBean, PersistentBean> beansToMerge) {
@@ -1397,15 +1409,14 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 
 						// Add non-dynamic (static) unpersisted (transient) beans reachable by persistent dynamic relations to the Set to persist later (excluding top-level).
 						// This implements persistence by reachability for dynamic -> static beans in mixed graphs
-						if (beansToMerge != null) {
-							if ((owningRelation != null) && // not the top-level bean or parent
-									(owningDocument != null) && // not the top-level bean or parent
-									(persistentBean != beanToSave) && // not a reference to the top level bean
-									(! document.isDynamic()) && // bean is not dynamic
-										owningRelation.isPersistent() && // persistent relation
-										owningDocument.isDynamic()) { // dynamic relation
-								beansToMerge.put(persistentBean, null);
-							}
+						if ((beansToMerge != null) && 
+								(owningRelation != null) && // not the top-level bean or parent
+								(owningDocument != null) && // not the top-level bean or parent
+								(persistentBean != beanToSave) && // not a reference to the top level bean
+								(! document.isDynamic()) && // bean is not dynamic
+									owningRelation.isPersistent() && // persistent relation
+									owningDocument.isDynamic()) { // dynamic relation
+							beansToMerge.put(persistentBean, null);
 						}
 					}
 				}
@@ -3360,6 +3371,7 @@ if (document.isDynamic()) return;
 		while (currentExtends != null);
 	}
 
+	@SuppressWarnings("resource") // connection lifecycle remains owned by the underlying session
 	public final @Nonnull Connection getConnection() {
 /*
 Maybe use this...

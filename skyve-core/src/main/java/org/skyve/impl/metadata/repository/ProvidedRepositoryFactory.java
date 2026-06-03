@@ -41,6 +41,15 @@ public abstract class ProvidedRepositoryFactory implements ProvidedRepository {
 	public static @Nonnull ProvidedRepository get() {
 		return repository;
 	}
+    
+	/**
+	 * Indicates whether a default repository has been installed.
+	 *
+	 * @return {@code true} when bootstrap has configured the repository singleton
+	 */
+	public static boolean isConfigured() {
+		return repository != null;
+	}
 
 	/**
 	 * Set the default repository.
@@ -53,6 +62,18 @@ public abstract class ProvidedRepositoryFactory implements ProvidedRepository {
 	public static void set(@Nonnull ProvidedRepository repository) {
 		ProvidedRepositoryFactory.repository = repository;
 	}
+	
+	/**
+	 * Clear the default repository reference.
+	 *
+	 * <p>Intended for shutdown purposes only.
+	 * After this method is called, {@link #get()} will return {@code null}
+	 * until a new repository is set.
+	 */
+	public static void clear() {
+		ProvidedRepositoryFactory.repository = null;
+	}
+	
 	
 	/**
 	 * Creates a transient user identity from a login principal string.

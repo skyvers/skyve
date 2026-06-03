@@ -27,6 +27,7 @@ import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.customer.CustomerRoleMetaData;
 import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.Download;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.controller.ServerSideActionResult;
@@ -359,8 +360,12 @@ public class CustomerImpl implements Customer {
 	 * @return the module metadata, or {@code null} if the repository does not expose it.
 	 */
 	@Override
-	public final Module getModule(String moduleName) {
-		return ProvidedRepositoryFactory.get().getModule(this, moduleName);
+	public Module getModule(String moduleName) {
+		Module result = ProvidedRepositoryFactory.get().getModule(this, moduleName);
+		if (result == null) {
+			throw new MetaDataException("No module named '" + moduleName + "' is available to customer '" + name + "'.");
+		}
+		return result;
 	}
 
 	/**
@@ -606,6 +611,7 @@ public class CustomerImpl implements Customer {
 	 * domain generation.
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void determineDependencies() {
 		derivations.clear();
 		exportedReferences.clear();
@@ -667,9 +673,9 @@ public class CustomerImpl implements Customer {
 							refs.add(ref);
 						}
 					}
-				} // if (persistent docs defined in the module)
-			} // for (all docs in this module)
-		} // for (all modules for this customer)
+				}
+			}
+		}
 	}
 
 	/**
@@ -734,7 +740,7 @@ public class CustomerImpl implements Customer {
 	 * @throws Exception if bizlet execution or interceptor processing fails.
 	 */
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "java:S3776"}) // Complexity OK
 	public synchronized <T extends Bean> List<DomainValue> getConstantDomainValues(Bizlet<T> bizlet, 
 																					String moduleName,
 																					String documentName, 
@@ -780,6 +786,10 @@ public class CustomerImpl implements Customer {
 			interceptAfterGetConstantDomainValues(attributeName, result);
 		}
 
+		if (result == null) {
+			result = Collections.emptyList();
+		}
+		
 		return result;
 	}
 

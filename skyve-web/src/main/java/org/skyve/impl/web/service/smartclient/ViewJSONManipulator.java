@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.UnaryOperator;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
@@ -446,10 +447,14 @@ public class ViewJSONManipulator extends ViewVisitor {
 				// now format the message
 				Sanitisation sanitisation = viewFormat.getSanitise();
 				if (viewFormat.isEscape()) {
-					format = BindUtil.formatMessage(format, displayValue -> OWASP.sanitiseAndEscapeHtml(sanitisation, displayValue), aBean);
+					format = BindUtil.formatMessage(format,
+											(UnaryOperator<String>) displayValue -> OWASP.sanitiseAndEscapeHtml(sanitisation, displayValue),
+											aBean);
 				}
 				else {
-					format = BindUtil.formatMessage(format, displayValue -> OWASP.sanitise(sanitisation, displayValue), aBean);
+					format = BindUtil.formatMessage(format,
+											(UnaryOperator<String>) displayValue -> OWASP.sanitise(sanitisation, displayValue),
+											aBean);
 				}
 				// remove the display style if its true
 				format = format.replace("display:true;", "");
@@ -499,6 +504,10 @@ public class ViewJSONManipulator extends ViewVisitor {
 
 		for (String childBindingPrefix : bindings.getChildren()) {
 			ViewBindings childBindings = bindings.putOrGetChild(childBindingPrefix, null);
+			String unsanitisedChildBindingPrefix = BindUtil.unsanitiseBinding(childBindingPrefix);
+			if (unsanitisedChildBindingPrefix == null) {
+				continue;
+			}
 			// Get the reference target metadata
 			TargetMetaData target = BindUtil.getMetaDataForBinding(customer, 
 																	module, 
@@ -521,7 +530,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 				// the rows should exist this will be a List of bizId Strings.
 				// If the rows are aggregated/composed (grid widget),
 				// then each row property is updated to add or modify the rows.
-				List<Object> requestList = (List<Object>) BindUtil.get(values, BindUtil.unsanitiseBinding(childBindingPrefix));
+				List<Object> requestList = (List<Object>) BindUtil.get(values, unsanitisedChildBindingPrefix);
 				// If the requestList is null then it was not sent from the client - it is irrelevant.
 				// A data grid binding can be struck out of the request when a zoom out occurs.
 				// This ensures that old values are not updated when the view is refreshed - see EditView.js where action == 'ZoomOut'
@@ -566,6 +575,9 @@ public class ViewJSONManipulator extends ViewVisitor {
 	
 						if (thisBean == null) { // DNE in beanList
 							if (thisMap == null) { // reference
+								if (thisBizId == null) {
+									throw new MetaDataException("Missing bizId for child binding " + childBindingPrefix);
+								}
 								thisBean = WebUtil.findReferencedBean(relatedDocument, thisBizId, persistence, bean, webContext);
 							}
 							else {
@@ -612,7 +624,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 			else { // relation is an association (or one to one / one to many inverse)
 				// Get the existing bean referenced
 				Bean referencedBean = (Bean) BindUtil.get(appliedTo, childBindingPrefix);
-				Object requestObject = BindUtil.get(values, BindUtil.unsanitiseBinding(childBindingPrefix));
+				Object requestObject = BindUtil.get(values, unsanitisedChildBindingPrefix);
 				if (requestObject == null) {
 					if (referencedBean != null) {
 						BindUtil.setAssociation(appliedTo, childBindingPrefix, null);
@@ -1899,6 +1911,9 @@ public class ViewJSONManipulator extends ViewVisitor {
 				RequestKey key = RequestKey.model(document, modelName);
 				ProvidedRepository repository = ProvidedRepositoryFactory.get();
 				ComparisonModel<Bean, Bean> model = repository.getComparisonModel(customer, document, modelName, true);
+				if (model == null) {
+					throw new MetaDataException("Could not resolve comparison model [" + modelName + "]");
+				}
 				model.setBean(bean);
 				ComparisonComposite root = model.getComparisonComposite((Bean) BindUtil.get(bean, referenceName));
 				if (! forApply) {

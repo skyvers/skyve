@@ -24,6 +24,11 @@ public class HIBPPasswordValidator {
 
 	private static final String HIBP_API_URL = "https://api.pwnedpasswords.com/range/";
 
+	@SuppressWarnings({"java:S1118", "java:S1186"})
+	public HIBPPasswordValidator() {
+		// Public no-op constructor retained for compatibility and test harnesses.
+	}
+
 	/**
 	 * Returns true if the passed password has been breached, using <code>IHaveBeenPwned</code> API.
 	 * 
@@ -54,7 +59,12 @@ public class HIBPPasswordValidator {
 					.toUpperCase();
 			
 			return isHashSuffixPresent(body, suffix);
-		} catch (Exception e) {
+		}
+		catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			LOGGER.warn("HaveIBeenPwned API call interrupted", e);
+		}
+		catch (Exception e) {
 			LOGGER.warn("HaveIBeenPwned API call failed", e);
 		}
 

@@ -7,6 +7,7 @@ import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.app.AppConstants;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.bind.BindUtil;
@@ -40,12 +41,19 @@ public class WebStatsUtil {
 	 * @param userIPAddress Source IP address string
 	 * @throws Exception If record creation fails
 	 */
-	public static void recordLogin(User user, String userIPAddress)
-	throws Exception {
+	public static void recordLogin(User user, String userIPAddress) {
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(AppConstants.ADMIN_MODULE_NAME);
 		Document loginRecordDocument = module.getDocument(customer, AppConstants.USER_LOGIN_RECORD_DOCUMENT_NAME);
-		AbstractPersistentBean loginRecord = loginRecordDocument.newInstance(user);
+		
+		AbstractPersistentBean loginRecord;
+		try {
+			loginRecord = loginRecordDocument.newInstance(user);
+		}
+		catch (Exception e) {
+			throw new DomainException("Failed to create login record", e);
+		}
+		
 		BindUtil.set(loginRecord, AppConstants.USER_NAME_ATTRIBUTE_NAME, user.getName());
 		BindUtil.set(loginRecord, AppConstants.LOGIN_DATE_TIME_ATTRIBUTE_NAME, new DateTime(System.currentTimeMillis()));
 		BindUtil.set(loginRecord, AppConstants.FAILED_ATTRIBUTE_NAME, Boolean.FALSE);

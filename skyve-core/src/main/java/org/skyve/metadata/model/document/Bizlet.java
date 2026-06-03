@@ -9,9 +9,9 @@ import org.skyve.impl.metadata.repository.behaviour.BizletMetaData;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.util.Util;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
-import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nonnull;
 
@@ -162,7 +162,7 @@ public class Bizlet<T extends Bean> implements MetaData {
 	 * and at startup for a fat client.
 	 *
 	 * @param attributeName	The name of the attribute to get the domain for.
-	 * @return the meta-data bizlet's domain values or null.
+	 * @return the meta-data bizlet's domain values or null if not defined.
 	 */
 	public List<DomainValue> getConstantDomainValues(String attributeName) throws Exception {
 		// Execute the metaDataBizlet if one exists

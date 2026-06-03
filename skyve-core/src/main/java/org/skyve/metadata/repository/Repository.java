@@ -35,16 +35,16 @@ public interface Repository {
 	 * @param resourcePath  the relative path to the resource; must not be {@code null}
 	 * @param customerName  the customer name to scope the search; may be {@code null}
 	 * @param moduleName    the module name to scope the search; may be {@code null}
-	 * @return the resolved resource {@link File}; never {@code null}
+	 * @return the resolved resource {@link File}, or {@code null} when not found
 	 */
-	@Nonnull File findResourceFile(@Nonnull String resourcePath, @Nullable String customerName, @Nullable String moduleName);
+	@Nullable File findResourceFile(@Nonnull String resourcePath, @Nullable String customerName, @Nullable String moduleName);
 	
 	/**
 	 * Returns the merged router combining the global router and all module-level routers.
 	 *
-	 * @return the active merged router; never {@code null}
+	 * @return the active merged router, or {@code null} when no router metadata exists
 	 */
-	@Nonnull Router getRouter();
+	@Nullable Router getRouter();
 
 	/**
 	 * Returns the customer configuration for the given customer name, or {@code null}
