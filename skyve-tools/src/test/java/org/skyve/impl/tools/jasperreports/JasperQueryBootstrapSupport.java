@@ -19,12 +19,12 @@ import org.skyve.impl.metadata.repository.LocalDesignRepository;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.persistence.hibernate.dialect.H2SpatialDialect;
+import org.skyve.impl.tools.TestPaths;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.persistence.DataStore;
 
 abstract class JasperQueryBootstrapSupport {
-	private static final String REPOSITORY_PATH = "/Users/mike/_/skyve/skyve-war/src/main/java/";
 	private static final String JDBC_URL = "jdbc:h2:mem:skyve_tools_jasper;DB_CLOSE_DELAY=-1";
 
 	private static ProvidedRepository originalRepository;
@@ -39,7 +39,8 @@ abstract class JasperQueryBootstrapSupport {
 		URL ormResource = Thread.currentThread().getContextClassLoader().getResource("modules/admin/domain/admin_orm.hbm.xml");
 		assertNotNull(ormResource, "Expected modules/admin/domain/admin_orm.hbm.xml on the test classpath");
 		bootstrapBasePath = Files.createTempDirectory("skyve-tools-jasper-");
-		Path schemaSource = Paths.get(REPOSITORY_PATH, "schemas");
+		String repositoryPath = TestPaths.skyveWarMainJava().toString().replace('\\', '/') + '/';
+		Path schemaSource = Paths.get(repositoryPath, "schemas");
 		copyDirectory(schemaSource, bootstrapBasePath.resolve("schemas"));
 		copyDirectory(schemaSource, bootstrapBasePath.resolve("modules/schemas"));
 		copyDirectory(schemaSource, bootstrapBasePath.resolve("customers/schemas"));
@@ -55,7 +56,7 @@ abstract class JasperQueryBootstrapSupport {
 		UtilImpl.QUERY_TRACE = false;
 		UtilImpl.HIBERNATE_FAIL_ON_MISSING_CACHE = false;
 
-		ProvidedRepositoryFactory.set(new LocalDesignRepository(REPOSITORY_PATH));
+		ProvidedRepositoryFactory.set(new LocalDesignRepository(repositoryPath));
 		createTables();
 		bootstrapComplete = true;
 	}

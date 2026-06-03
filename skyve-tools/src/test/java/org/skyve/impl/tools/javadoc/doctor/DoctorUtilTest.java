@@ -29,6 +29,7 @@ import org.skyve.impl.metadata.user.ActionPrivilege;
 import org.skyve.impl.metadata.user.DocumentPrivilege;
 import org.skyve.impl.metadata.user.Privilege;
 import org.skyve.impl.metadata.user.RoleImpl;
+import org.skyve.impl.tools.TestPaths;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
@@ -65,7 +66,7 @@ class DoctorUtilTest {
 
 	@Test
 	void mainGeneratesOverviewAndPackageFiles(@TempDir java.nio.file.Path tempDir) throws Exception {
-		UtilImpl.APPS_JAR_DIRECTORY = "/Users/mike/_/skyve/skyve-war/src/main/java/";
+		UtilImpl.APPS_JAR_DIRECTORY = TestPaths.skyveWarMainJava().toString().replace('\\', '/') + '/';
 		java.nio.file.Files.createDirectories(tempDir.resolve("modules/admin/domain"));
 		java.nio.file.Files.createDirectories(tempDir.resolve("modules/test/domain"));
 		java.nio.file.Files.createDirectories(tempDir.resolve("modules/kitchensink/domain"));
@@ -78,7 +79,7 @@ class DoctorUtilTest {
 
 	@Test
 	void mainThrowsForUnknownCustomer(@TempDir java.nio.file.Path tempDir) {
-		UtilImpl.APPS_JAR_DIRECTORY = "/Users/mike/_/skyve/skyve-war/src/main/java/";
+		UtilImpl.APPS_JAR_DIRECTORY = TestPaths.skyveWarMainJava().toString().replace('\\', '/') + '/';
 		String outputRoot = tempDir.toAbsolutePath().toString() + File.separator;
 
 		IllegalArgumentException error = assertThrows(IllegalArgumentException.class,

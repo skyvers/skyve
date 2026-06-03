@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.tools.TestPaths;
 import org.skyve.impl.util.UtilImpl;
 
 import net.sf.jasperreports.engine.JRDataset;
@@ -54,7 +55,7 @@ class SkyveFieldProvidersTest {
 
 	@Test
 	void skyveDocumentFieldsProviderResolvesDocumentMetadata() throws Exception {
-		UtilImpl.APPS_JAR_DIRECTORY = "/Users/mike/_/skyve/skyve-war/src/main/java/";
+		UtilImpl.APPS_JAR_DIRECTORY = TestPaths.skyveWarMainJava().toString().replace('\\', '/') + '/';
 		JRField[] fields = new SkyveDocumentFieldsProvider().getFields(null, dataset("admin.DocumentNumber"), null);
 
 		assertNotNull(SkyveDocumentFieldsProvider.getDocument("admin.DocumentNumber"));
