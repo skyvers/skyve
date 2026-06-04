@@ -27,6 +27,8 @@ public class Icons {
 
 	public static final String FONT_UPLOAD = "fa-solid fa-upload";
 	public static final String IMAGE_UPLOAD = "actions/Upload.png";
+
+	public static final String FONT_CAMERA = "fa-solid fa-camera";
 	
 	public static final String FONT_CANCEL = "fa-solid fa-chevron-left";
 	public static final String IMAGE_CANCEL = "actions/Cancel.gif";

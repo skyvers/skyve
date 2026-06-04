@@ -60,6 +60,25 @@ class UploadViewsStateTest {
 	}
 
 	@Test
+	void imageUploadPostConstructParsesCameraMode() throws Exception {
+		FacesContext context = Mockito.mock(FacesContext.class);
+		ExternalContext externalContext = Mockito.mock(ExternalContext.class);
+		when(context.getExternalContext()).thenReturn(externalContext);
+		when(externalContext.getSession(false)).thenReturn(null);
+		FacesContextBridge.setCurrent(context);
+
+		ImageUploadView view = new ImageUploadView();
+		setField(AbstractUploadView.class, view, "context", "ctx");
+		setField(AbstractUploadView.class, view, "binding", "beanBinding");
+		setField(ContentUploadView.class, view, "contentBinding", "contentId");
+		setField(ImageUploadView.class, view, "camera", "true");
+
+		view.postConstruct();
+
+		assertTrue(view.isCamera());
+	}
+
+	@Test
 	void fileUploadDefaultsAndNoAccessBranchAreStable() {
 		FileUploadView view = new FileUploadView();
 		FileUploadEvent event = Mockito.mock(FileUploadEvent.class);

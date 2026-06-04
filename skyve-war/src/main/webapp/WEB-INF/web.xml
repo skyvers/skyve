@@ -18,7 +18,8 @@
 				/pages/css/
 				/ckeditor/
 				/codemirror/
-				/croppie/
+				/cropperjs/
+				/excalidraw/
 				/fontawesome-4.7.0/
 				/fontawesome-6.5.1/
 				/images/
@@ -27,7 +28,10 @@
 				/primevue-3.12.6/
 				/semantic24/
 				/skyve/
+				/skyvevue/
+				/sse/
 				/wicket/
+				/zxcvbn/
 			]]>
 		</param-value>
 	</context-param>

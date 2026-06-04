@@ -626,6 +626,7 @@ public class FacesView extends HarnessView {
 	 * else if actionName is "false" - rerender with no validation.
 	 * else run the action.
 	 */
+	@SuppressWarnings("java:S3776") // complexity OK
 	public void selectGridRow(SelectEvent<?> evt) {
 		UIComponent component = evt.getComponent();
 		Map<String, Object> attributes = component.getAttributes();
@@ -755,6 +756,7 @@ public class FacesView extends HarnessView {
 	/**
 	 * Returns (and lazily creates) a cached lazy data model for the supplied query/model key.
 	 */
+	@SuppressWarnings("java:S3776") // complexity OK
 	public SkyveLazyDataModel getLazyDataModel(String moduleName, 
 												String documentName, 
 												String queryName,
@@ -857,10 +859,25 @@ public class FacesView extends HarnessView {
 	 * @return upload endpoint URL
 	 */
 	public String getContentUploadUrl(String sanitisedBinding, boolean image) {
+		return getContentUploadUrl(sanitisedBinding, image, false);
+	}
+
+	/**
+	 * Builds upload endpoint URL for content/image widgets in the current view context.
+	 *
+	 * @param sanitisedBinding sanitised binding for the target content field
+	 * @param image whether the upload endpoint is for an image
+	 * @param camera whether the image upload endpoint should prefer native camera capture
+	 * @return upload endpoint URL
+	 */
+	public String getContentUploadUrl(String sanitisedBinding, boolean image, boolean camera) {
 		StringBuilder result = new StringBuilder(128);
 		result.append(Util.getSkyveContextUrl()).append(image ? "/image" : "/content").append("Upload.xhtml?");
 		result.append(AbstractWebContext.RESOURCE_FILE_NAME).append('=').append(sanitisedBinding);
 		result.append('&').append(AbstractWebContext.CONTEXT_NAME).append('=').append(webContext.getWebId());
+		if (image && camera) {
+			result.append('&').append(AbstractWebContext.CAMERA_NAME).append("=true");
+		}
 		if (viewBinding != null) {
 			result.append('&').append(AbstractWebContext.BINDING_NAME).append('=').append(viewBinding);
 		}
@@ -1108,6 +1125,7 @@ public class FacesView extends HarnessView {
 	 * @param includeScriptTag whether to wrap the result in a script tag
 	 * @return generated map script
  	 */
+	@SuppressWarnings("java:S107") // lots of parameters
 	public String getMapScript(String elementId,
 								String moduleName,
 								String queryName,

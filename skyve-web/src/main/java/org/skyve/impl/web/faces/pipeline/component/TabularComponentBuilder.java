@@ -2219,7 +2219,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		HtmlPanelGrid result = (HtmlPanelGrid) a.createComponent(HtmlPanelGrid.COMPONENT_TYPE);
 		setId(result, null);
 		boolean showMarkup = (! Boolean.FALSE.equals(image.getShowMarkup()));
-		result.setColumns(showMarkup ? 6 : 5);
+		boolean editable = (! Boolean.FALSE.equals(image.getEditable()));
+		result.setColumns((showMarkup ? 6 : 5) + (editable ? 1 : 0));
 		String id = result.getId();
 		List<UIComponent> toAddTo = result.getChildren();
 
@@ -2236,7 +2237,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		// Set the id of the inner image element
 		contentImage.getChildren().get(0).setId(String.format("%s_%s_image", id, sanitisedBinding));
 		toAddTo.add(contentImage);
-		if (! Boolean.FALSE.equals(image.getEditable())) {
+		if (editable) {
 			editableContent(toAddTo,
 								id,
 								binding,
@@ -2511,7 +2512,18 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 		String var = sanitisedBinding + "Overlay";
 		if (image) {
-			uploadButton.setOnclick("PF('" + var + "').show();PF('" + var + "').toggleMaximize()");
+			setContentUploadDialogOnclick(uploadButton, id, sanitisedBinding, var, false);
+			CommandButton cameraButton = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
+			setId(cameraButton, null);
+			cameraButton.setIcon(Icons.FONT_CAMERA);
+			cameraButton.setTitle("Take Photo");
+			cameraButton.setValue(null);
+			cameraButton.setType("button"); // no process or update required
+			setDisabled(cameraButton, disabledConditionName, formDisabledConditionName);
+			// for admin theme
+			setSizeAndTextAlignStyle(cameraButton, null, Integer.valueOf(30), null, null, Integer.valueOf(30), null, null);
+			setContentUploadDialogOnclick(cameraButton, id, sanitisedBinding, var, true);
+			toAddTo.add(cameraButton);
 		}
 
 		UIPanel panel = null;
@@ -2543,18 +2555,22 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			panel = overlay;
 		}
 
-		// $(PrimeFaces.escapeClientId('<id>')).attr('src', '<url>')
 		StringBuilder value = new StringBuilder(64);
-		value.append("#{'SKYVE.PF.contentOverlayOnShow(\\'").append(id).append("\\',\\''.concat(");
-		value.append(managedBeanName).append(".getContentUploadUrl('").append(sanitisedBinding).append("',");
-		value.append(image).append(")).concat('\\')')}");
-		panel.setValueExpression("onShow", ef.createValueExpression(elc, value.toString(), String.class));
+		if (! image) {
+			// $(PrimeFaces.escapeClientId('<id>')).attr('src', '<url>')
+			value.append("#{'SKYVE.PF.contentOverlayOnShow(\\'").append(id).append("\\',\\''.concat(");
+			value.append(managedBeanName).append(".getContentUploadUrl('").append(sanitisedBinding).append("',");
+			value.append(image).append(")).concat('\\')')}");
+			panel.setValueExpression("onShow", ef.createValueExpression(elc, value.toString(), String.class));
+		}
 		toAddTo.add(panel);
 
 		// <iframe id="s06" src="" style="width:100%;height:280px;border:none"></iframe>
 		HtmlOutputText iframe = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
 		iframe.setEscape(false);
-		iframe.setValue(String.format("<iframe id=\"%s_overlayiframe\" src=\"\" style=\"width:100%%;height:%s;border:none\"></iframe>", id, image ? "100%" : "300px"));
+		String iframeAttributes = image ? " scrolling=\"no\" style=\"width:100%;height:100%;border:none;overflow:hidden\""
+											: " style=\"width:100%;height:300px;border:none\"";
+		iframe.setValue(String.format("<iframe id=\"%s_overlayiframe\" src=\"\"%s></iframe>", id, iframeAttributes));
 		setId(iframe, null);
 		panel.getChildren().add(iframe);
 
@@ -2618,6 +2634,15 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			setId(iframe, null);
 			dialog.getChildren().add(iframe);
 		}
+	}
+
+	private void setContentUploadDialogOnclick(CommandButton button, String id, String sanitisedBinding, String var, boolean camera) {
+		StringBuilder value = new StringBuilder(192);
+		value.append("#{'SKYVE.PF.contentOverlayOnShow(\\'").append(id).append("\\',\\''.concat(");
+		value.append(managedBeanName).append(".getContentUploadUrl('").append(sanitisedBinding).append("',true,");
+		value.append(camera).append(")).concat('\\');PF(\\'").append(var);
+		value.append("\\').show();PF(\\'").append(var).append("\\').toggleMaximize();return false')}");
+		button.setValueExpression("onclick", ef.createValueExpression(elc, value.toString(), String.class));
 	}
 
 	@Override

@@ -43,6 +43,7 @@ import org.primefaces.component.commandbutton.CommandButton;
 import org.primefaces.component.commandlink.CommandLink;
 import org.primefaces.component.contextmenu.ContextMenu;
 import org.primefaces.component.datatable.DataTable;
+import org.primefaces.component.dialog.Dialog;
 import org.primefaces.component.graphicimage.GraphicImage;
 import org.primefaces.component.inputmask.InputMask;
 import org.primefaces.component.inputtext.InputText;
@@ -1426,6 +1427,83 @@ class TabularComponentBuilderTest {
 		assertSame(imageContainer, panelChildren.get(0));
 		verify(panelGrid).setColumns(5);
 		verify(image).setId("contentImageGrid_doc_image_image");
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testEditableContentImageAddsUploadAndCameraButtons() {
+		clearInvocations(mockExpressionFactory);
+
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		HtmlPanelGrid panelGrid = mock(HtmlPanelGrid.class);
+		HtmlPanelGroup imageContainer = mock(HtmlPanelGroup.class);
+		GraphicImage image = mock(GraphicImage.class);
+		HtmlInputHidden hidden = mock(HtmlInputHidden.class);
+		CommandButton uploadButton = mock(CommandButton.class);
+		CommandButton cameraButton = mock(CommandButton.class);
+		Dialog dialog = mock(Dialog.class);
+		HtmlOutputText iframe = mock(HtmlOutputText.class);
+		CommandButton clearButton = mock(CommandButton.class);
+		List<UIComponent> panelChildren = new ArrayList<>();
+		List<UIComponent> imageChildren = new ArrayList<>();
+		List<UIComponent> dialogChildren = new ArrayList<>();
+		ValueExpression valueExpression = mock(ValueExpression.class);
+		ValueExpression uploadOnclickExpression = mock(ValueExpression.class);
+		ValueExpression cameraOnclickExpression = mock(ValueExpression.class);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("contentImageGrid",
+												"contentImageInner",
+												"contentImageTag",
+												"hiddenId",
+												"uploadId",
+												"cameraId",
+												"dialogId",
+												"iframeId",
+												"clearId");
+		builder.setManagedBeanForTest(managedBean);
+
+		when(panelGrid.getId()).thenReturn("contentImageGrid");
+		when(panelGrid.getChildren()).thenReturn(panelChildren);
+		when(imageContainer.getChildren()).thenReturn(imageChildren);
+		when(dialog.getChildren()).thenReturn(dialogChildren);
+		when(mockApplication.createComponent(HtmlPanelGrid.COMPONENT_TYPE)).thenReturn(panelGrid);
+		when(mockApplication.createComponent(HtmlPanelGroup.COMPONENT_TYPE)).thenReturn(imageContainer);
+		when(mockApplication.createComponent(GraphicImage.COMPONENT_TYPE)).thenReturn(image);
+		when(mockApplication.createComponent(HtmlInputHidden.COMPONENT_TYPE)).thenReturn(hidden);
+		when(mockApplication.createComponent(CommandButton.COMPONENT_TYPE)).thenReturn(uploadButton, cameraButton, clearButton);
+		when(mockApplication.createComponent(Dialog.COMPONENT_TYPE)).thenReturn(dialog);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(iframe);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(Object.class))).thenReturn(valueExpression);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(String.class))).thenReturn(uploadOnclickExpression,
+																														cameraOnclickExpression);
+
+		ContentImage contentImage = new ContentImage();
+		contentImage.setBinding("doc.image");
+		contentImage.setEditable(Boolean.TRUE);
+		contentImage.setShowMarkup(Boolean.FALSE);
+		UIComponent result = builder.contentImage(null, "row", contentImage, null, "Image", null);
+
+		assertSame(panelGrid, result);
+		assertEquals(6, panelChildren.size());
+		assertSame(imageContainer, panelChildren.get(0));
+		assertSame(hidden, panelChildren.get(1));
+		assertSame(uploadButton, panelChildren.get(2));
+		assertSame(cameraButton, panelChildren.get(3));
+		assertSame(dialog, panelChildren.get(4));
+		assertSame(clearButton, panelChildren.get(5));
+		assertSame(iframe, dialogChildren.get(0));
+		verify(panelGrid).setColumns(6);
+		verify(uploadButton).setTitle("Upload Image");
+		verify(cameraButton).setIcon("fa-solid fa-camera");
+		verify(cameraButton).setTitle("Take Photo");
+		verify(uploadButton).setValueExpression(eq("onclick"), any(ValueExpression.class));
+		verify(cameraButton).setValueExpression(eq("onclick"), any(ValueExpression.class));
+		ArgumentCaptor<String> onclickExpressions = ArgumentCaptor.forClass(String.class);
+		verify(mockExpressionFactory, atLeastOnce()).createValueExpression(any(ELContext.class),
+																			onclickExpressions.capture(),
+																			eq(String.class));
+		assertTrue(onclickExpressions.getAllValues().stream().anyMatch(value -> value.contains("getContentUploadUrl('doc_image',true,false)")));
+		assertTrue(onclickExpressions.getAllValues().stream().anyMatch(value -> value.contains("getContentUploadUrl('doc_image',true,true)")));
 	}
 
 	@SuppressWarnings("static-method")

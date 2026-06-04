@@ -396,6 +396,36 @@ class FacesViewTest {
 	}
 
 	@Test
+	void getContentUploadUrlImageEndpointIncludesCameraModeWhenRequested() {
+		FacesView view = new FacesView();
+		MockWebContext webContext = new MockWebContext();
+		webContext.setKey("web123");
+		view.setWebContext(webContext);
+
+		String url = view.getContentUploadUrl("bean.image", true, true);
+
+		assertTrue(url.contains("/imageUpload.xhtml?"));
+		assertTrue(url.contains("_n=bean.image"));
+		assertTrue(url.contains("_c=web123"));
+		assertTrue(url.contains("_camera=true"));
+	}
+
+	@Test
+	void getContentUploadUrlContentEndpointIgnoresCameraMode() {
+		FacesView view = new FacesView();
+		MockWebContext webContext = new MockWebContext();
+		webContext.setKey("web123");
+		view.setWebContext(webContext);
+
+		String url = view.getContentUploadUrl("bean.attachment", false, true);
+
+		assertTrue(url.contains("/contentUpload.xhtml?"));
+		assertTrue(url.contains("_n=bean.attachment"));
+		assertTrue(url.contains("_c=web123"));
+		assertFalse(url.contains("_camera=true"));
+	}
+
+	@Test
 	void getDynamicImageUrlUsesInitialDimensionsWhenPrimaryDimensionsAreNull() {
 		FacesView view = new FacesView();
 		MockWebContext webContext = new MockWebContext();
