@@ -566,6 +566,7 @@ public final class BindUtil {
 		}
 	}
 
+	@SuppressWarnings("unchecked") // unchecked for enum conversion
 	private static @Nonnull Object convertEnumValue(@Nonnull Class<?> type, @Nonnull Object value) {
 		if (value instanceof Enumeration enumeration) {
 			return convertEnumValue(type, enumeration.toCode());
@@ -1704,7 +1705,6 @@ public final class BindUtil {
 				LOGGER.error("The subsequent stack trace relates to obtaining bean property {} from {}", simpleBinding, currentBean);
 				LOGGER.error("If the stack trace contains something like \"Unknown property '{}\' on class 'class <blahblah>$$EnhancerByCGLIB$$$<blahblah>'\"  then you'll need to use Util.deproxy() before trying to bind to properties in the hibernate proxy.", simpleBinding); 
 				LOGGER.error("See https://github.com/skyvers/skyve-cookbook/blob/master/README.md#deproxy for details");
-				LOGGER.error("Exception message = {}", e.getMessage());
 				throw new MetaDataException(e);
 			}
 
@@ -1939,7 +1939,10 @@ public final class BindUtil {
 			setIndexedDynamicValue(bean, binding, targetBean, simpleBinding, attributeName, valueToSet);
 			return;
 		}
-		setDynamicElementByIdValue(bean, binding, targetBean, simpleBinding, attributeName, valueToSet);
+		if (! (valueToSet instanceof Bean beanToSet)) {
+			throw new IllegalStateException("Attempt to set " + binding + " in " + bean + " to " + valueToSet + " but valueToSet should be a Bean");
+		}
+		setDynamicElementByIdValue(bean, binding, targetBean, simpleBinding, attributeName, beanToSet);
 	}
 
 	private static void setIndexedDynamicValue(@Nonnull Object bean,
@@ -1964,24 +1967,22 @@ public final class BindUtil {
 													 @Nonnull Bean targetBean,
 													 @Nonnull String simpleBinding,
 													 @Nonnull String attributeName,
-													 @Nullable Object valueToSet) {
-		if (! (valueToSet instanceof Bean beanToSet)) {
-			throw new IllegalStateException("Attempt to set " + binding + " in " + bean + " to " + valueToSet + " but valueToSet should be a Bean");
-		}
-
+													 @Nonnull Bean beanToSet) {
 		@SuppressWarnings("unchecked")
 		List<Bean> list = (List<Bean>) targetBean.getDynamic(attributeName);
 		if (list == null) {
-			throw new IllegalStateException("Attempt to set " + binding + " in " + bean + " to " + valueToSet + " but the list is null");
+			throw new IllegalStateException("Attempt to set " + binding + " in " + bean + " to " + beanToSet + " but the list is null");
 		}
 
 		String bizId = extractDynamicElementBizId(simpleBinding);
-		Bean result = list.stream().filter(element -> bizId.equals(element.getBizId())).findFirst().orElse(null);
-		if (result == null) {
-			throw new IllegalStateException("Attempt to set " + binding + " in " + bean + " to " + valueToSet + " but the element was not in the list");
+		for (int i = 0, l = list.size(); i < l; i++) {
+			if (bizId.equals(list.get(i).getBizId())) {
+				list.set(i, beanToSet);
+				return;
+			}
 		}
 
-		list.set(list.indexOf(result), beanToSet);
+		throw new IllegalStateException("Attempt to set " + binding + " in " + bean + " to " + beanToSet + " but the element was not in the list");
 	}
 
 	private static @Nonnull String extractDynamicElementBizId(@Nonnull String simpleBinding) {

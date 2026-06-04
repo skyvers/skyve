@@ -1492,7 +1492,7 @@ class BindUtilTest {
 				Bean.class,
 				String.class,
 				String.class,
-				Object.class);
+				Bean.class);
 		method.setAccessible(true);
 
 		Map<String, Object> firstProps = new HashMap<>();
@@ -1516,30 +1516,6 @@ class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void setDynamicElementByIdValueThrowsWhenValueIsNotBean() throws Exception {
-		Method method = BindUtil.class.getDeclaredMethod("setDynamicElementByIdValue",
-				Object.class,
-				String.class,
-				Bean.class,
-				String.class,
-				String.class,
-				Object.class);
-		method.setAccessible(true);
-
-		Map<String, Object> firstProps = new HashMap<>();
-		firstProps.put(Bean.DOCUMENT_ID, "bean-1");
-		DynamicBean first = new DynamicBean("sales", "Item", firstProps);
-		DynamicBean owner = new DynamicBean("sales",
-				"Order",
-				new HashMap<>(Map.of("items", new ArrayList<>(Arrays.asList(first)))));
-
-		String simpleBinding = BindUtil.createIdBinding("items", "bean-1");
-		assertThrows(InvocationTargetException.class,
-				() -> method.invoke(null, owner, "items", owner, simpleBinding, "items", "not-a-bean"));
-	}
-
-	@Test
-	@SuppressWarnings("static-method")
 	void setDynamicElementByIdValueThrowsWhenDynamicListIsNull() throws Exception {
 		Method method = BindUtil.class.getDeclaredMethod("setDynamicElementByIdValue",
 				Object.class,
@@ -1547,7 +1523,7 @@ class BindUtilTest {
 				Bean.class,
 				String.class,
 				String.class,
-				Object.class);
+				Bean.class);
 		method.setAccessible(true);
 
 		Map<String, Object> ownerProperties = new HashMap<>();
@@ -1571,7 +1547,7 @@ class BindUtilTest {
 				Bean.class,
 				String.class,
 				String.class,
-				Object.class);
+				Bean.class);
 		method.setAccessible(true);
 
 		Map<String, Object> firstProps = new HashMap<>();
@@ -4814,6 +4790,18 @@ class BindUtilTest {
 
 		MetaDataException exception = assertThrows(MetaDataException.class,
 				() -> BindUtil.set(bean, BindUtil.createIdBinding("items", "one"), "not a bean"));
+
+		assertNotNull(exception);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void setDynamicElementByIdBindingThroughPublicSetRejectsNullValue() {
+		DynamicBean first = new DynamicBean("sales", "Item", new HashMap<>(Map.of(Bean.DOCUMENT_ID, "one")));
+		DynamicBean bean = new DynamicBean("sales", "Order", new HashMap<>(Map.of("items", new ArrayList<>(List.of(first)))));
+
+		MetaDataException exception = assertThrows(MetaDataException.class,
+				() -> BindUtil.set(bean, BindUtil.createIdBinding("items", "one"), null));
 
 		assertNotNull(exception);
 	}
