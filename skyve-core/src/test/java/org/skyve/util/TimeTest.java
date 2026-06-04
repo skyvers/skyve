@@ -17,7 +17,7 @@ import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.TimeOnly;
 
-@SuppressWarnings("static-method")
+@SuppressWarnings({ "static-method", "java:S8692" }) // system clock OK
 class TimeTest {
 
 	@Test

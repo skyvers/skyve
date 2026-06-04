@@ -8,6 +8,7 @@ import java.util.Date;
 
 import org.junit.Test;
 
+@SuppressWarnings("java:S8692") // system clock OK
 public class DocumentConverterTest {
 
 	@Test

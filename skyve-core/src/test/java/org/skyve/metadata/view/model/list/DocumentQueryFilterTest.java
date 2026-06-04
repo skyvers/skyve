@@ -26,7 +26,7 @@ import org.skyve.persistence.DocumentFilter;
  * Comprehensive tests for DocumentQueryFilter.
  * The constructor is package-private, so this test lives in the same package.
  */
-@SuppressWarnings("java:S4144")
+@SuppressWarnings({ "java:S4144", "java:S8692" }) // system clock OK
 class DocumentQueryFilterTest {
 
 	private DocumentFilter detailFilter;

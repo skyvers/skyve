@@ -20,6 +20,7 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.SQL;
 
+@SuppressWarnings("java:S8692") // system clock OK
 class SQLFilterTest {
 
 	private SQLFilter filter;

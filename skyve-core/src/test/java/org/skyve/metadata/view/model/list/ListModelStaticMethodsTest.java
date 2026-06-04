@@ -17,7 +17,7 @@ import org.skyve.domain.types.Decimal2;
  *
  * Uses a mocked {@link Filter} to verify the correct overload is dispatched.
  */
-@SuppressWarnings("java:S5778")
+@SuppressWarnings({ "java:S5778", "java:S8692" }) // system clock OK
 class ListModelStaticMethodsTest {
 
 	private Filter filter;

@@ -30,7 +30,7 @@ import org.skyve.persistence.SQL;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-@SuppressWarnings({"static-method", "rawtypes", "resource"})
+@SuppressWarnings({"static-method", "rawtypes", "resource", "java:S8692"}) // system clock OK
 class HibernateSQLTest {
 
 	@BeforeAll

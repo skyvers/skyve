@@ -11,7 +11,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-@SuppressWarnings("boxing")
+@SuppressWarnings({ "boxing", "java:S8692" }) // system clock OK
 class ResourceMeasurementsTest {
 
 	@Test

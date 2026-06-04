@@ -14,6 +14,7 @@ import java.util.UUID;
 import org.junit.Test;
 import org.skyve.impl.util.UUIDv7;
 
+@SuppressWarnings("java:S8692") // system clock OK
 public class UUIDv7Test {
 
     private final int iterationCount = 100_000;

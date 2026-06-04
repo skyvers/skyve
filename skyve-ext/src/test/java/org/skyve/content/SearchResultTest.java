@@ -13,7 +13,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-@SuppressWarnings("static-method")
+@SuppressWarnings({ "static-method", "java:S8692" }) // system clock OK
 public class SearchResultTest {
 
 	// ---- SearchResult ----

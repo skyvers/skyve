@@ -19,6 +19,7 @@ import modules.test.domain.AllAttributesPersistent.Enum3;
  * Tests for DocumentQueryFilter through DocumentQueryListModel.
  * Covers all the delegate methods in DocumentQueryFilter.
  */
+@SuppressWarnings("java:S8692") // system clock OK
 class DocumentQueryFilterTest extends AbstractSkyveTest {
 
 	private static final Geometry POINT = new GeometryFactory().createPoint(new Coordinate(0, 0));

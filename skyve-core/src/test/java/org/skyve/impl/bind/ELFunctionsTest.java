@@ -17,6 +17,7 @@ import org.skyve.domain.types.Decimal2;
 import org.skyve.domain.types.Decimal5;
 import org.skyve.domain.types.TimeOnly;
 
+@SuppressWarnings("java:S8692") // system clock OK
 class ELFunctionsTest {
 
 	@Test

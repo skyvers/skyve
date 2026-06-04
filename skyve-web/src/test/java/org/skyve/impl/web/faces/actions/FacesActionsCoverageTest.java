@@ -47,7 +47,7 @@ import jakarta.faces.component.html.HtmlInputText;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.context.PartialViewContext;
 
-@SuppressWarnings({"static-method", "boxing", "java:S1130"})
+@SuppressWarnings({"static-method", "boxing", "java:S1130", "java:S8692"}) // system clock OK
 class FacesActionsCoverageTest {
 	private abstract static class FacesContextBridge extends FacesContext {
 		static void setCurrent(FacesContext context) {

@@ -84,6 +84,7 @@ import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Binder.TargetMetaData;
 
+@SuppressWarnings("java:S8692") // system clock OK
 class BindUtilTest {
 	private static void withThreadLocalUser(User user, Runnable run) {
 		AbstractPersistence persistence = mock(AbstractPersistence.class, withSettings().defaultAnswer(CALLS_REAL_METHODS));

@@ -28,7 +28,7 @@ import org.skyve.metadata.user.User;
 
 /** Unit tests for domain message and exception classes. */
 @ExtendWith(MockitoExtension.class)
-@SuppressWarnings("static-method")
+@SuppressWarnings({ "static-method", "java:S8692" }) // system clock OK
 class DomainMessagesTest {
 
 	@Mock

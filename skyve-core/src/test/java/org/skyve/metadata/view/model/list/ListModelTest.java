@@ -12,6 +12,7 @@ import org.skyve.domain.types.Decimal2;
 /**
  * Tests for the static filter-helper methods on {@link ListModel}.
  */
+@SuppressWarnings("java:S8692") // system clock OK
 class ListModelTest {
 
 	// ----- addEquals --------------------------------------------------------

@@ -16,7 +16,7 @@ import org.skyve.domain.types.Decimal10;
 /**
  * Tests for the static type-dispatch methods of {@link ListModel}.
  */
-@SuppressWarnings("static-method")
+@SuppressWarnings({ "static-method", "java:S8692" }) // system clock OK
 class ListModelStaticMethodTest {
 
 	// ===== addEquals =====

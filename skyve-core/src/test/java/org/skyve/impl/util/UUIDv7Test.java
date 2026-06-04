@@ -9,7 +9,7 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 
-@SuppressWarnings("static-method")
+@SuppressWarnings({ "static-method", "java:S8692" }) // system clock OK
 class UUIDv7Test {
 
 	@Test

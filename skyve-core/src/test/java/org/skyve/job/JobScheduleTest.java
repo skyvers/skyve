@@ -8,6 +8,7 @@ import java.util.Date;
 
 import org.junit.jupiter.api.Test;
 
+@SuppressWarnings("java:S8692") // system clock OK
 class JobScheduleTest {
 
 	@Test

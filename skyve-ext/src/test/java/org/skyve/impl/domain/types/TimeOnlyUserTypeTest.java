@@ -8,7 +8,7 @@ import java.util.Calendar;
 import org.junit.Test;
 import org.skyve.domain.types.TimeOnly;
 
-@SuppressWarnings("static-method")
+@SuppressWarnings({ "static-method", "java:S8692" }) // system clock OK
 public class TimeOnlyUserTypeTest {
 
 	@Test

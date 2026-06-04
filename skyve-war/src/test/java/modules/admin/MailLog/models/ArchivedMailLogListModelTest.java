@@ -23,6 +23,7 @@ import org.skyve.util.Binder;
 
 import modules.admin.domain.MailLog;
 
+@SuppressWarnings("java:S8692") // system clock OK
 class ArchivedMailLogListModelTest {
 
 	@Test

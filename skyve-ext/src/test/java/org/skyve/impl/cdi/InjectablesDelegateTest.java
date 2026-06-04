@@ -44,7 +44,7 @@ import org.skyve.util.MailDispatchOutcome;
 import org.skyve.util.MailService;
 import org.skyve.web.BackgroundTask;
 
-@SuppressWarnings({ "static-method", "boxing" })
+@SuppressWarnings({ "static-method", "boxing", "java:S8692" }) // system clock OK
 public class InjectablesDelegateTest {
 	@Test
 	public void repositoryInjectableDelegatesToCoreRepository() throws Exception {

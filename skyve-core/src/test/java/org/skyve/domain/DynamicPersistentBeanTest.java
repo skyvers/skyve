@@ -10,6 +10,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.types.OptimisticLock;
 
+@SuppressWarnings("java:S8692") // system clock OK
 class DynamicPersistentBeanTest {
 
 	private static Map<String, Object> mapWithPersistentKeys() {

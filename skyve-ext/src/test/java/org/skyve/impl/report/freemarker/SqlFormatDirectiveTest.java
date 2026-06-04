@@ -36,7 +36,7 @@ import freemarker.template.TemplateScalarModel;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 
-@SuppressWarnings({"static-method", "unchecked"})
+@SuppressWarnings({"static-method", "unchecked", "java:S8692"}) // system clock OK
 class SqlFormatDirectiveTest {
 	@AfterEach
 	void tearDown() throws Exception {

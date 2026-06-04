@@ -18,7 +18,7 @@ import org.skyve.bizport.SheetKey;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.metadata.model.Attribute.AttributeType;
 
-@SuppressWarnings("static-method")
+@SuppressWarnings({ "static-method", "java:S8692" }) // system clock OK
 public class POIWorkbookTest {
 
 	@Test

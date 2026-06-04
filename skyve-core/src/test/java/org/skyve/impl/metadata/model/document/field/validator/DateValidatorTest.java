@@ -14,6 +14,7 @@ import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.metadata.user.SuperUser;
 
+@SuppressWarnings("java:S8692") // system clock OK
 class DateValidatorTest {
 
 	private DateValidator validator;

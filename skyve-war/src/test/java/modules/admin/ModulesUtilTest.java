@@ -28,7 +28,7 @@ import modules.admin.domain.GroupRole;
 import modules.test.domain.AllAttributesPersistent;
 import util.AbstractH2Test;
 
-@SuppressWarnings("deprecation")
+@SuppressWarnings({ "deprecation", "java:S8692" }) // system clock OK
 class ModulesUtilTest extends AbstractH2Test {
 
 	@AfterEach

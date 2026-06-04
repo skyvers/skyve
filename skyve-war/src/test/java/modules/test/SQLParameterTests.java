@@ -25,6 +25,7 @@ import org.skyve.util.Util;
 import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.AllAttributesPersistent.Enum3;
 
+@SuppressWarnings("java:S8692") // system clock OK
 class SQLParameterTests extends AbstractSkyveTest {
 
 	private static BigDecimal largeFloater = new BigDecimal(0.123456789123456789);

@@ -45,7 +45,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.user.User;
 
-@SuppressWarnings("static-method")
+@SuppressWarnings({ "static-method", "java:S8692" }) // system clock OK
 class LuceneContentManagerLifecycleTest {
 	private final String originalContentDirectory = UtilImpl.CONTENT_DIRECTORY;
 	private final boolean originalContentFileStorage = UtilImpl.CONTENT_FILE_STORAGE;

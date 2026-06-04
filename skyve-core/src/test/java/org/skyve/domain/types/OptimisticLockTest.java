@@ -13,6 +13,7 @@ import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.messages.DomainException;
 
+@SuppressWarnings("java:S8692") // system clock OK
 class OptimisticLockTest {
 	@Test
 	@SuppressWarnings("static-method")

@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.types.OptimisticLock;
 
+@SuppressWarnings("java:S8692") // system clock OK
 class AbstractPersistentBeanTest {
 
 	/** Minimal concrete subclass for testing */
