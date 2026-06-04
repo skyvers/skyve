@@ -102,6 +102,7 @@ SKYVE.BizMap = function() {
 			}
 
 			display._objects = {}; // if we are building a new map, there will be no layers, so clear our state
+			display._markerClusterGroup = null;
 			display.webmap = L.map(SKYVE.PF.getByIdEndsWith(options.elementId)[0], mapOptions);
 
 			if (options.showRefresh) {

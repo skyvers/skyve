@@ -367,14 +367,20 @@ SKYVE.PF = function() {
 					SKYVE.Util.loadJS('leaflet/leaflet.js?v=' + SKYVE.Util.v, function() {
 						SKYVE.Util.loadJS('leaflet/Path.Drag.js?v=' + SKYVE.Util.v, function() {
 							SKYVE.Util.loadJS('leaflet/Leaflet.Editable.js?v=' + SKYVE.Util.v, function() {
-								SKYVE.Util.loadCSS('leaflet/leaflet.fullscreen.css?v=' + SKYVE.Util.v, function() {
-									SKYVE.Util.loadJS('leaflet/Leaflet.fullscreen.min.js?v=' + SKYVE.Util.v, function() {
-										SKYVE.Util.loadJS('skyve/prime/skyve-leaflet-min.js?v=' + SKYVE.Util.v, function() {
-											loadingMap = false;
-											if (options.queryName || options.modelName) {
-												return SKYVE.BizMap.create(options);
-											}
-											return SKYVE.BizMapPicker.create(options);
+								SKYVE.Util.loadCSS('leaflet/MarkerCluster.css?v=' + SKYVE.Util.v, function() {
+									SKYVE.Util.loadCSS('leaflet/MarkerCluster.Default.css?v=' + SKYVE.Util.v, function() {
+										SKYVE.Util.loadJS('leaflet/leaflet.markercluster.js?v=' + SKYVE.Util.v, function() {
+											SKYVE.Util.loadCSS('leaflet/leaflet.fullscreen.css?v=' + SKYVE.Util.v, function() {
+												SKYVE.Util.loadJS('leaflet/Leaflet.fullscreen.min.js?v=' + SKYVE.Util.v, function() {
+													SKYVE.Util.loadJS('skyve/prime/skyve-leaflet-min.js?v=' + SKYVE.Util.v, function() {
+														loadingMap = false;
+														if (options.queryName || options.modelName) {
+															return SKYVE.BizMap.create(options);
+														}
+														return SKYVE.BizMapPicker.create(options);
+													});
+												});
+											});
 										});
 									});
 								});

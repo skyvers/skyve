@@ -22,18 +22,27 @@ isc.BizMap.addClassMethods({
 				SKYVE.Util.loadJS(`leaflet/leaflet.js?v=${SKYVE.Util.v}`, () => {
 					SKYVE.Util.loadJS(`leaflet/Path.Drag.js?v=${SKYVE.Util.v}`, () => {
 						SKYVE.Util.loadJS(`leaflet/Leaflet.Editable.js?v=${SKYVE.Util.v}`, () => {
-							SKYVE.Util.loadCSS(
-								`leaflet/leaflet.fullscreen.css?v=${SKYVE.Util.v}`,
-								() => {
+							SKYVE.Util.loadCSS(`leaflet/MarkerCluster.css?v=${SKYVE.Util.v}`, () => {
+								SKYVE.Util.loadCSS(`leaflet/MarkerCluster.Default.css?v=${SKYVE.Util.v}`, () => {
 									SKYVE.Util.loadJS(
-										`leaflet/Leaflet.fullscreen.min.js?v=${SKYVE.Util.v}`,
+										`leaflet/leaflet.markercluster.js?v=${SKYVE.Util.v}`,
 										() => {
-											isc.BizMap.loadingLeaflet = false;
-											callback();
+											SKYVE.Util.loadCSS(
+												`leaflet/leaflet.fullscreen.css?v=${SKYVE.Util.v}`,
+												() => {
+													SKYVE.Util.loadJS(
+														`leaflet/Leaflet.fullscreen.min.js?v=${SKYVE.Util.v}`,
+														() => {
+															isc.BizMap.loadingLeaflet = false;
+															callback();
+														},
+													);
+												},
+											);
 										},
 									);
-								},
-							);
+								});
+							});
 						});
 					});
 				});
@@ -146,6 +155,7 @@ isc.BizMap.addMethods({
 			}
 
 			this._objects = {};
+			this._markerClusterGroup = null;
 			const element = document.getElementById(`${this.ID}_map`);
 			element.innerHTML = "";
 			this.webmap = L.map(element, mapOptions);
