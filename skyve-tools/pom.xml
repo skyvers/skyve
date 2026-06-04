@@ -11,7 +11,7 @@
 	<artifactId>skyve-tools</artifactId>
 
 	<build>
-		<sourceDirectory>src</sourceDirectory>
+		<sourceDirectory>src/main/java</sourceDirectory>
 		<testSourceDirectory>src/test/java</testSourceDirectory>
 		<plugins>
 			<plugin>
