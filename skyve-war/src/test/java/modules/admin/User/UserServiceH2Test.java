@@ -21,7 +21,6 @@ import org.skyve.util.DataBuilder;
 import org.skyve.util.Util;
 import org.skyve.util.test.SkyveFixture;
 
-import jakarta.annotation.Nonnull;
 import jakarta.inject.Inject;
 import modules.admin.Contact.ContactExtension;
 import modules.admin.Group.GroupExtension;
@@ -124,7 +123,8 @@ class UserServiceH2Test extends AbstractH2Test {
 		// then
 		DocumentQuery q = CORE.getPersistence().newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME);
 		q.getFilter().addEquals(UserProxy.userNamePropertyName, contact.getEmail1());
-		@Nonnull UserExtension result = q.beanResult();
+		UserExtension result = q.beanResult();
+		assertNotNull(result);
 
 		assertThat(result, is(notNullValue()));
 		assertThat(result.getContact(), is(contact));
@@ -155,6 +155,54 @@ class UserServiceH2Test extends AbstractH2Test {
 	}
 
 	@Test
+	void validateUserContactAddsErrorsForMissingContactDetails() {
+		UserExtension user = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		user.setContact(null);
+		ValidationException e = new ValidationException();
+		userService.validateUserContact(user, e);
+		assertThat(e.getMessages().get(0).getText(), containsString("contact person"));
+
+		ContactExtension contactWithoutName = Contact.newInstance();
+		user.setContact(contactWithoutName);
+		e = new ValidationException();
+		userService.validateUserContact(user, e);
+		assertThat(e.getMessages().get(0).getText(), containsString("enter a name"));
+
+		contactWithoutName.setName("No Email");
+		e = new ValidationException();
+		userService.validateUserContact(user, e);
+		assertThat(e.getMessages().get(0).getText(), containsString("email address"));
+	}
+
+	@Test
+	void validateUserNameAndPasswordAddsErrorsForMissingAndMismatchedValues() throws Exception {
+		UserExtension user = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		user.setUserName(null);
+		ValidationException e = new ValidationException();
+		userService.validateUserNameAndPassword(user, e);
+		assertThat(e.getMessages().get(0).getText(), containsString("Username is required"));
+
+		user.setUserName("ab");
+		e = new ValidationException();
+		userService.validateUserNameAndPassword(user, e);
+		assertThat(e.getMessages().get(0).getText(), containsString("Username is too short"));
+
+		user.setUserName("user-service-" + System.nanoTime() + "@example.com");
+		user.setPassword(null);
+		user.setNewPassword(null);
+		user.setConfirmPassword(null);
+		e = new ValidationException();
+		userService.validateUserNameAndPassword(user, e);
+		assertThat(e.getMessages().get(0).getText(), containsString("password is required"));
+
+		user.setNewPassword("Password1!");
+		user.setConfirmPassword("Different1!");
+		e = new ValidationException();
+		userService.validateUserNameAndPassword(user, e);
+		assertThat(e.getMessages().get(0).getText(), containsString("same password"));
+	}
+
+	@Test
 	void getCustomerRoleValuesReturnsNonNullList() {
 		assertNotNull(userService.getCustomerRoleValues(CORE.getUser()));
 	}
@@ -178,5 +226,20 @@ class UserServiceH2Test extends AbstractH2Test {
 		user.setWizardState(modules.admin.domain.User.WizardState.confirmContact);
 
 		assertThrows(ValidationException.class, () -> userService.next(user));
+	}
+
+	@Test
+	void nextFromCreateContactSetsUserNameAndAdvancesWizard() throws Exception {
+		UserExtension user = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		ContactExtension wizardContact = Contact.newInstance();
+		wizardContact.setName("Wizard Contact");
+		wizardContact.setEmail1("wizard-" + System.nanoTime() + "@example.com");
+		user.setContact(wizardContact);
+		user.setWizardState(modules.admin.domain.User.WizardState.createContact);
+
+		userService.next(user);
+
+		assertThat(user.getUserName(), is(wizardContact.getEmail1()));
+		assertThat(user.getWizardState(), is(modules.admin.domain.User.WizardState.confirmUserNameAndPassword));
 	}
 }

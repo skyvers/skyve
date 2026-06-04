@@ -3,6 +3,7 @@ package modules.admin.Audit.models;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
@@ -34,7 +35,7 @@ class AuditComparisonModelH2Test extends AbstractH2Test {
 		assertNull(root.getReferenceName());
 		assertNull(root.getDocument());
 		assertThat(root.getMutation(), is(Mutation.added));
-		assertThat(root.getProperties().size(), is(1));
+		assertEquals(1, root.getProperties().size());
 		ComparisonProperty property = root.getProperties().get(0);
 		assertThat(property.getName(), is("name"));
 		assertThat(property.getTitle(), is("name"));
@@ -68,7 +69,7 @@ class AuditComparisonModelH2Test extends AbstractH2Test {
 		ComparisonComposite root = model.getComparisonComposite(audit);
 
 		assertThat(root.getMutation(), is(Mutation.updated));
-		assertThat(root.getProperties().size(), is(2));
+		assertEquals(2, root.getProperties().size());
 		ComparisonProperty changed = root.getProperties().get(0);
 		assertThat(changed.getName(), is("name"));
 		assertThat(changed.getNewValue(), is("New"));
@@ -77,6 +78,39 @@ class AuditComparisonModelH2Test extends AbstractH2Test {
 		assertThat(removed.getName(), is("removed"));
 		assertNull(removed.getNewValue());
 		assertThat(removed.getOldValue(), is("Gone"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void comparisonAuditWithSameValuesLeavesNodeUnchanged() throws Exception {
+		AuditComparisonModel model = new AuditComparisonModel();
+		Audit audit = audit(Operation.update,
+				detail("same-id", "Same key", "\"name\":\"Same\""),
+				detail("same-id", "Same key", "\"name\":\"Same\""));
+
+		ComparisonComposite root = model.getComparisonComposite(audit);
+
+		assertThat(root.getMutation(), is(Mutation.unchanged));
+		ComparisonProperty property = root.getProperties().get(0);
+		assertThat(property.getNewValue(), is("Same"));
+		assertThat(property.getOldValue(), is("Same"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void comparisonOnlyRootBindingCreatesDeletedNode() throws Exception {
+		AuditComparisonModel model = new AuditComparisonModel();
+		Audit audit = audit(Operation.update,
+				"{\"items[0]\":" + object("child-id", "Child", "\"description\":\"Child value\"") + "}",
+				detail("removed-root", "Removed root", "\"name\":\"Old root\""));
+
+		ComparisonComposite root = model.getComparisonComposite(audit);
+
+		assertThat(root.getBizId(), is("removed-root"));
+		assertThat(root.getMutation(), is(Mutation.deleted));
+		ComparisonProperty property = root.getProperties().get(0);
+		assertNull(property.getNewValue());
+		assertThat(property.getOldValue(), is("Old root"));
 	}
 
 	@Test
@@ -91,7 +125,7 @@ class AuditComparisonModelH2Test extends AbstractH2Test {
 
 		ComparisonComposite root = model.getComparisonComposite(audit);
 
-		assertThat(root.getChildren().size(), is(1));
+		assertEquals(1, root.getChildren().size());
 		ComparisonComposite child = root.getChildren().get(0);
 		assertThat(child.getBizId(), is("child-id"));
 		assertThat(child.getBusinessKeyDescription(), is("Child"));

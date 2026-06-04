@@ -58,6 +58,7 @@ import modules.admin.User.UserExtension;
 import modules.admin.Configuration.ConfigurationExtension;
 import modules.admin.Startup.StartupBizlet;
 import modules.admin.domain.Configuration;
+import modules.admin.domain.UserRole;
 import util.AbstractH2Test;
 
 @SuppressWarnings({"static-method", "boxing"})
@@ -121,6 +122,7 @@ class WebUtilH2Test extends AbstractH2Test {
 		String email = "reset-" + System.nanoTime() + "@skyve.org";
 		user.setUserName("reset." + System.nanoTime());
 		user.getContact().setEmail1(email);
+		useDirectBasicUserRole(user);
 		CORE.getPersistence().save(user);
 		applyTestUser();
 		int beforeLogCount = CORE.getPersistence()
@@ -168,6 +170,7 @@ class WebUtilH2Test extends AbstractH2Test {
 		String email = "failed-reset-" + System.nanoTime() + "@skyve.org";
 		user.setUserName("failed.reset." + System.nanoTime());
 		user.getContact().setEmail1(email);
+		useDirectBasicUserRole(user);
 		CORE.getPersistence().save(user);
 		applyTestUser();
 		MailService throwingMailService = mock(MailService.class);
@@ -179,15 +182,17 @@ class WebUtilH2Test extends AbstractH2Test {
 
 	@Test
 	void testResetPasswordProcessesExistingTokenWithRealPersistence() throws Exception {
-		String token = "token-" + System.nanoTime();
+		long suffix = System.nanoTime();
+		String token = "token-" + suffix;
 		UserExtension user = new DataBuilder().fixture(FixtureType.crud).build(modules.admin.domain.User.MODULE_NAME,
 				modules.admin.domain.User.DOCUMENT_NAME);
-		user.setBizId("reset-token-user");
-		user.setUserName("reset.token." + System.nanoTime());
+		user.setBizId("rtu-" + suffix);
+		user.setUserName("reset.token." + suffix);
 		user.setPassword(EXT.hashPassword("OldPassword0!"));
 		user.setPasswordHistory(null);
 		user.setPasswordResetToken(token);
 		user.setPasswordResetTokenCreationTimestamp(new Timestamp());
+		useDirectBasicUserRole(user);
 		CORE.getPersistence().save(user);
 		CORE.getPersistence().commit(false);
 		CORE.getPersistence().begin();
@@ -200,15 +205,17 @@ class WebUtilH2Test extends AbstractH2Test {
 	@Test
 	void testResetPasswordReturnsExpiredMessageForExpiredToken() throws Exception {
 		ensurePasswordResetExpiryMinutes(1);
-		String token = "expired-token-" + System.nanoTime();
+		long suffix = System.nanoTime();
+		String token = "expired-token-" + suffix;
 		UserExtension user = new DataBuilder().fixture(FixtureType.crud).build(modules.admin.domain.User.MODULE_NAME,
 				modules.admin.domain.User.DOCUMENT_NAME);
-		user.setBizId("expired-reset-token-user");
-		user.setUserName("expired.reset." + System.nanoTime());
+		user.setBizId("ertu-" + suffix);
+		user.setUserName("expired.reset." + suffix);
 		user.setPassword(EXT.hashPassword("OldPassword0!"));
 		user.setPasswordHistory(null);
 		user.setPasswordResetToken(token);
 		user.setPasswordResetTokenCreationTimestamp(new Timestamp(System.currentTimeMillis() - 120_000L));
+		useDirectBasicUserRole(user);
 		CORE.getPersistence().save(user);
 		CORE.getPersistence().commit(false);
 		CORE.getPersistence().begin();
@@ -224,6 +231,7 @@ class WebUtilH2Test extends AbstractH2Test {
 				modules.admin.domain.User.DOCUMENT_NAME);
 		user.setUserName("registration.email." + System.nanoTime());
 		user.setActivated(Boolean.FALSE);
+		useDirectBasicUserRole(user);
 		user = CORE.getPersistence().save(user);
 		CORE.getPersistence().commit(false);
 		CORE.getPersistence().begin();
@@ -315,7 +323,7 @@ class WebUtilH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	void processUserPrincipalForRequestEstablishesUserFromPrincipal() throws Exception {
+	void processUserPrincipalForRequestEstablishesUserFromPrincipal() {
 		UtilImpl.CONCURRENT_SESSION_WARNINGS = false;
 		HttpSession session = session("principal-session");
 		HttpServletRequest request = mock(HttpServletRequest.class);
@@ -505,6 +513,14 @@ class WebUtilH2Test extends AbstractH2Test {
 		user.setName(USER);
 		user.setId(USER);
 		AbstractPersistence.get().setUser(user);
+	}
+
+	private static void useDirectBasicUserRole(UserExtension user) {
+		user.getGroups().clear();
+		user.getRoles().clear();
+		UserRole role = UserRole.newInstance();
+		role.setRoleName("admin.BasicUser");
+		user.addRolesElement(role);
 	}
 
 	private static HttpSession session(String id) {

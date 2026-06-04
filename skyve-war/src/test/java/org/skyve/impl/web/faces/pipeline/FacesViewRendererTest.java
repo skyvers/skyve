@@ -1,6 +1,7 @@
 package org.skyve.impl.web.faces.pipeline;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -23,6 +24,7 @@ import org.skyve.impl.metadata.repository.view.actions.ZoomOutAction;
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.container.HBox;
+import org.skyve.impl.metadata.view.container.Collapsible;
 import org.skyve.impl.metadata.view.container.Sidebar;
 import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.container.TabPane;
@@ -627,6 +629,49 @@ class FacesViewRendererTest extends AbstractSkyveTest {
 		view.getContained().add(hbox);
 
 		FacesViewRenderer renderer = createRenderer(view);
+		renderer.visit();
+		assertNotNull(renderer.getFacesView());
+	}
+
+	@Test
+	void renderViewWithWidgetIdMatchedVBoxFragment() {
+		ViewImpl view = createEditView();
+		VBox vbox = new VBox();
+		vbox.setWidgetId("vbox-fragment");
+		vbox.getContained().add(createFormWithTextField());
+		view.getContained().add(vbox);
+		view.getContained().add(createFormWithTextField());
+
+		FacesViewRenderer renderer = createRenderer(view, "vbox-fragment");
+		renderer.visit();
+		assertNotNull(renderer.getFacesView());
+	}
+
+	@Test
+	void renderViewWithWidgetIdMatchedBorderedHBoxFragment() {
+		ViewImpl view = createEditView();
+		HBox hbox = new HBox();
+		hbox.setWidgetId("hbox-fragment");
+		hbox.setBorderTitle("HBox Fragment");
+		hbox.getContained().add(createFormWithTextField());
+		view.getContained().add(hbox);
+		view.getContained().add(createFormWithTextField());
+
+		FacesViewRenderer renderer = createRenderer(view, "hbox-fragment");
+		renderer.visit();
+		assertNotNull(renderer.getFacesView());
+	}
+
+	@Test
+	void renderViewWithWidgetIdMatchedBorderedFormFragment() {
+		ViewImpl view = createEditView();
+		Form form = createFormWithTextField();
+		form.setWidgetId("form-fragment");
+		form.setBorderTitle("Form Fragment");
+		view.getContained().add(form);
+		view.getContained().add(createFormWithTextField());
+
+		FacesViewRenderer renderer = createRenderer(view, "form-fragment");
 		renderer.visit();
 		assertNotNull(renderer.getFacesView());
 	}
@@ -1732,6 +1777,138 @@ class FacesViewRendererTest extends AbstractSkyveTest {
 		col.getWidgets().add(cs);
 		dr.getColumns().add(col);
 		view.getContained().add(dr);
+
+		FacesViewRenderer renderer = createRenderer(view);
+		renderer.visit();
+		assertNotNull(renderer.getFacesView());
+	}
+
+	@Test
+	void renderViewWithWidgetIdMatchedDataGridFragment() {
+		ViewImpl view = createEditView();
+		DataGrid grid = new DataGrid();
+		grid.setBinding("aggregatedCollection");
+		grid.setWidgetId("grid-fragment");
+		DataGridBoundColumn col = new DataGridBoundColumn();
+		col.setBinding("bizKey");
+		grid.getColumns().add(col);
+		view.getContained().add(grid);
+		view.getContained().add(createFormWithTextField());
+
+		FacesViewRenderer renderer = createRenderer(view, "grid-fragment");
+		renderer.visit();
+		assertNotNull(renderer.getFacesView());
+	}
+
+	@Test
+	void renderInlineDataGridAddsEditableBoundColumnComponent() {
+		ViewImpl view = createEditView();
+		DataGrid grid = new DataGrid();
+		grid.setBinding("aggregatedCollection");
+		grid.setInline(Boolean.TRUE);
+		DataGridBoundColumn col = new DataGridBoundColumn();
+		col.setBinding("text");
+		col.setEditable(Boolean.TRUE);
+		WidgetReference wr = new WidgetReference();
+		TextField tf = new TextField();
+		tf.setBinding("text");
+		wr.setWidget(tf);
+		col.setInputWidget(wr);
+		grid.getColumns().add(col);
+		view.getContained().add(grid);
+
+		FacesViewRenderer renderer = createRenderer(view);
+		renderer.visit();
+		assertNotNull(renderer.getFacesView());
+	}
+
+	@Test
+	void renderListGridWithoutZoomContextMenuWhenConversationContinues() {
+		ViewImpl view = createEditView();
+		ListGrid listGrid = new ListGrid();
+		listGrid.setQueryName("qExpressionQuery");
+		listGrid.setContinueConversation(true);
+		view.getContained().add(listGrid);
+		view.getContained().add(createFormWithTextField());
+
+		FacesViewRenderer renderer = createRenderer(view);
+		renderer.visit();
+		assertNotNull(renderer.getFacesView());
+	}
+
+	@Test
+	void renderListGridWithoutZoomContextMenuWhenZoomHidden() {
+		ViewImpl view = createEditView();
+		ListGrid listGrid = new ListGrid();
+		listGrid.setQueryName("qExpressionQuery");
+		listGrid.setShowZoom(Boolean.FALSE);
+		view.getContained().add(listGrid);
+		view.getContained().add(createFormWithTextField());
+
+		FacesViewRenderer renderer = createRenderer(view);
+		renderer.visit();
+		assertNotNull(renderer.getFacesView());
+	}
+
+	@Test
+	void renderLookupDescriptionWithClearedHandler() {
+		ViewImpl view = createEditView();
+		LookupDescription ld = new LookupDescription();
+		ld.setBinding("aggregatedAssociation");
+		RerenderEventAction cleared = new RerenderEventAction();
+		ld.getClearedActions().add(cleared);
+		view.getContained().add(createFormWithWidget(ld));
+
+		FacesViewRenderer renderer = createRenderer(view);
+		renderer.visit();
+		assertNotNull(renderer.getFacesView());
+	}
+
+	@Test
+	void renderCollapsibleFormRequiresBorderTitle() {
+		ViewImpl view = createEditView();
+		Form form = createFormWithTextField();
+		form.setCollapsible(Collapsible.open);
+		view.getContained().add(form);
+
+		FacesViewRenderer renderer = createRenderer(view);
+		assertThrows(org.skyve.metadata.MetaDataException.class, renderer::visit);
+	}
+
+	@Test
+	void renderCollapsibleHBoxRequiresBorderTitle() {
+		ViewImpl view = createEditView();
+		HBox hbox = new HBox();
+		hbox.setCollapsible(Collapsible.open);
+		hbox.getContained().add(createFormWithTextField());
+		view.getContained().add(hbox);
+
+		FacesViewRenderer renderer = createRenderer(view);
+		assertThrows(org.skyve.metadata.MetaDataException.class, renderer::visit);
+	}
+
+	@Test
+	void renderCollapsibleVBoxWithBorderTitle() {
+		ViewImpl view = createEditView();
+		VBox vbox = new VBox();
+		vbox.setBorderTitle("Collapsible Section");
+		vbox.setCollapsible(Collapsible.closed);
+		vbox.getContained().add(createFormWithTextField());
+		view.getContained().add(vbox);
+
+		FacesViewRenderer renderer = createRenderer(view);
+		renderer.visit();
+		assertNotNull(renderer.getFacesView());
+	}
+
+	@Test
+	void renderCollapsibleHBoxWithBorderTitle() {
+		ViewImpl view = createEditView();
+		HBox hbox = new HBox();
+		hbox.setBorderTitle("Collapsible HBox");
+		hbox.setCollapsible(Collapsible.closed);
+		hbox.getContained().add(createFormWithTextField());
+		view.getContained().add(hbox);
 
 		FacesViewRenderer renderer = createRenderer(view);
 		renderer.visit();

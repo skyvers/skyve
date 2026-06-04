@@ -2,6 +2,8 @@ package modules.admin.Audit;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -18,9 +20,9 @@ import modules.admin.domain.Audit;
 import modules.admin.domain.Audit.Operation;
 import util.AbstractH2Test;
 
+@SuppressWarnings("static-method")
 class AuditServiceH2Test extends AbstractH2Test {
 	@Test
-	@SuppressWarnings("static-method")
 	void mergePrefersArchiveVersionsWhenDatabaseContainsSameBizId() throws Exception {
 		Audit archivedDuplicate = audit("same", "Archived duplicate", 30L, Operation.update);
 		Audit archivedOnly = audit("archived", "Archived only", 20L, Operation.delete);
@@ -31,7 +33,7 @@ class AuditServiceH2Test extends AbstractH2Test {
 				List.of(archivedDuplicate, archivedOnly),
 				List.of(databaseDuplicate, databaseOnly));
 
-		assertThat(merged.size(), is(3));
+		assertEquals(3, merged.size());
 		assertThat(merged.get(0), is(archivedDuplicate));
 		assertThat(merged.get(1), is(archivedOnly));
 		assertThat(merged.get(2), is(databaseOnly));
@@ -47,27 +49,71 @@ class AuditServiceH2Test extends AbstractH2Test {
 
 		invokeCleanSortAuditList(new AuditService(), audits);
 
-		assertThat(audits.size(), is(3));
+		assertEquals(3, audits.size());
 		assertThat(audits.get(0), is(newestUpdate));
 		assertThat(audits.get(1), is(olderUpdate));
 		assertThat(audits.get(2), is(oldestInsert));
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void convertToDomainValuesUsesDocumentIdAndBizKey() throws Exception {
 		List<DomainValue> values = invokeConvertToDomainValues(List.of(
 				projectedAudit("audit-1", "First audit", 20L, Operation.update),
 				projectedAudit("audit-2", "Second audit", 10L, Operation.delete)));
 
-		assertThat(values.size(), is(2));
+		assertEquals(2, values.size());
 		assertThat(values.get(0).getCode(), is("audit-1"));
 		assertThat(values.get(0).getLocalisedDescription(), is("First audit"));
 		assertThat(values.get(1).getCode(), is("audit-2"));
 		assertThat(values.get(1).getLocalisedDescription(), is("Second audit"));
 	}
 
-	private static Audit audit(String bizId, String bizKey, long millis, Operation operation) throws Exception {
+	@Test
+	void retrieveFromArchivesReturnsNullWhenArchiveIsNotConfigured() {
+		assertNull(new AuditService().retrieveFromArchives("missing-audit"));
+	}
+
+	@Test
+	void sourceVersionChangedClearsComparisonForNonUpdateSource() {
+		Audit bean = audit("bean", "Bean", 30L, Operation.update);
+		Audit source = audit("source", "Source", 20L, Operation.delete);
+		Audit comparison = audit("comparison", "Comparison", 10L, Operation.insert);
+		bean.setSourceVersion(source);
+		bean.setComparisonVersion(comparison);
+
+		new AuditService().sourceVersionChanged(bean);
+
+		assertThat(bean.getMe(), is(bean));
+		assertNull(bean.getComparisonVersion());
+	}
+
+	@Test
+	void sourceVersionChangedUsesFirstLesserVersionFromRdbms() {
+		Audit bean = audit("bean", "Bean", 40L, Operation.update);
+		Audit source = audit("source", "Source", 30L, Operation.update);
+		Audit comparison = audit("comparison", "Comparison", 20L, Operation.update);
+		bean.setSourceVersion(source);
+		TestAuditService service = new TestAuditService(List.of(new DomainValue("comparison", "Comparison")), comparison);
+
+		service.sourceVersionChanged(bean);
+
+		assertThat(bean.getComparisonVersion(), is(comparison));
+	}
+
+	@Test
+	void sourceVersionChangedClearsComparisonWhenNoLesserVersionsExist() {
+		Audit bean = audit("bean", "Bean", 40L, Operation.update);
+		Audit source = audit("source", "Source", 30L, Operation.update);
+		Audit comparison = audit("comparison", "Comparison", 20L, Operation.update);
+		bean.setSourceVersion(source);
+		bean.setComparisonVersion(comparison);
+
+		new TestAuditService(List.of(), comparison).sourceVersionChanged(bean);
+
+		assertNull(bean.getComparisonVersion());
+	}
+
+	private static Audit audit(String bizId, String bizKey, long millis, Operation operation) {
 		Audit audit = Audit.newInstance();
 		audit.setBizId(bizId);
 		audit.setBizKey(bizKey);
@@ -103,5 +149,25 @@ class AuditServiceH2Test extends AbstractH2Test {
 		Method method = AuditService.class.getDeclaredMethod("convertToDomainValues", List.class);
 		method.setAccessible(true);
 		return (List<DomainValue>) method.invoke(null, versions);
+	}
+
+	private static final class TestAuditService extends AuditService {
+		private final List<DomainValue> versions;
+		private final Audit rdbmsAudit;
+
+		private TestAuditService(List<DomainValue> versions, Audit rdbmsAudit) {
+			this.versions = versions;
+			this.rdbmsAudit = rdbmsAudit;
+		}
+
+		@Override
+		public List<DomainValue> getVersions(Audit bean, boolean forComparison) {
+			return versions;
+		}
+
+		@Override
+		public Audit retrieveFromRdbms(String bizId) {
+			return rdbmsAudit;
+		}
 	}
 }
