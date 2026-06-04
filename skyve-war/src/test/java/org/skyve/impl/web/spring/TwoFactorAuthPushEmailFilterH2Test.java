@@ -126,6 +126,7 @@ class TwoFactorAuthPushEmailFilterH2Test extends AbstractH2Test {
 						"update ADM_Configuration set twoFactorEmailSubject = null, twoFactorEmailBody = null where bizCustomer = ?")) {
 			s.setString(1, CUSTOMER);
 			s.executeUpdate();
+			c.commit();
 		}
 	}
 
