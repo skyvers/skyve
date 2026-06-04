@@ -5,6 +5,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.UUID;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.CORE;
@@ -22,15 +24,17 @@ class CheckTest extends AbstractH2Test {
 	private DataBuilder db;
 	private UserExtension user1, user2;
 	private Check action;
+	private String searchToken;
 
 	@BeforeEach
 	void setup() {
 		db = new DataBuilder().fixture(FixtureType.crud);
+		searchToken = "check" + UUID.randomUUID().toString().replace("-", "");
 
 		user1 = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
-		user1.getContact().setEmail1("check1@check.com");
+		user1.getContact().setEmail1(searchToken + "1@check.com");
 		user2 = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
-		user2.getContact().setEmail1("check2@check.com");
+		user2.getContact().setEmail1(searchToken + "2@check.com");
 
 		user1 = CORE.getPersistence().save(user1);
 		user2 = CORE.getPersistence().save(user2);
@@ -74,7 +78,7 @@ class CheckTest extends AbstractH2Test {
 	void testExecuteEmailSearchCleansSearchString() throws Exception {
 		// create the test data
 		UserExtension searchUser = User.newInstance();
-		searchUser.setSearchEmail("check 2 @check.com ");
+		searchUser.setSearchEmail(searchToken + " 2 @check.com ");
 
 		// call the method under test
 		ServerSideActionResult<UserExtension> result = action.execute(searchUser, null);
@@ -102,7 +106,7 @@ class CheckTest extends AbstractH2Test {
 	void testExecuteEmailSearchMatchesForward() throws Exception {
 		// create the test data
 		UserExtension searchUser = User.newInstance();
-		searchUser.setSearchEmail("check");
+		searchUser.setSearchEmail(searchToken);
 
 		// call the method under test
 		ServerSideActionResult<UserExtension> result = action.execute(searchUser, null);
@@ -115,7 +119,7 @@ class CheckTest extends AbstractH2Test {
 	void testExecuteEmailSearchMatchesWithin() throws Exception {
 		// create the test data
 		UserExtension searchUser = User.newInstance();
-		searchUser.setSearchEmail("heck");
+		searchUser.setSearchEmail(searchToken.substring(1));
 
 		// call the method under test
 		ServerSideActionResult<UserExtension> result = action.execute(searchUser, null);
