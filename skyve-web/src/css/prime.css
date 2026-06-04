@@ -235,6 +235,23 @@ th.hiddenFilter input.ui-column-filter, th.hiddenFilter div.ui-column-customfilt
 	color: rgb(5, 116, 218);
 }
 
+button.skyveContentActionButton.ui-button-icon-only,
+button.skyveContentActionButton.ui-button-text-icon-left {
+	padding: 0 !important;
+	position: relative;
+}
+button.skyveContentActionButton .ui-button-icon-left {
+	left: 50% !important;
+	margin: 0 !important;
+	position: absolute !important;
+	top: 50% !important;
+	transform: translate(-50%, -50%) !important;
+}
+button.skyveContentActionButton .ui-button-text {
+	padding: 0 !important;
+	text-indent: -9999999px;
+}
+
 /* ensure radio button groups have a text wrap that looks like its in a table */
 .ui-selectoneradio tbody tr td {
 	display: inline-flex;
@@ -263,4 +280,3 @@ th.hiddenFilter input.ui-column-filter, th.hiddenFilter div.ui-column-customfilt
     padding: 5px;
     margin: 3px;
 }
-

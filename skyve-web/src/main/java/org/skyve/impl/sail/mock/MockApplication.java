@@ -29,6 +29,7 @@ import org.primefaces.component.inputmask.InputMask;
 import org.primefaces.component.inputtext.InputText;
 import org.primefaces.component.inputtextarea.InputTextarea;
 import org.primefaces.component.linechart.LineChart;
+import org.primefaces.component.menubutton.MenuButton;
 import org.primefaces.component.menuitem.UIMenuItem;
 import org.primefaces.component.message.Message;
 import org.primefaces.component.outputlabel.OutputLabel;
@@ -214,6 +215,9 @@ public class MockApplication extends Application {
 		}
 		else if (LineChart.COMPONENT_TYPE.equals(componentType)) {
 			return new LineChart();
+		}
+		else if (MenuButton.COMPONENT_TYPE.equals(componentType)) {
+			return new MenuButton();
 		}
 		else if (ListGrid.COMPONENT_TYPE.equals(componentType)) {
 			return new ListGrid();

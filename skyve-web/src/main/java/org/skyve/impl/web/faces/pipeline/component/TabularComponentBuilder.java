@@ -29,6 +29,7 @@ import org.primefaces.component.inputmask.InputMask;
 import org.primefaces.component.inputtext.InputText;
 import org.primefaces.component.inputtextarea.InputTextarea;
 import org.primefaces.component.linechart.LineChart;
+import org.primefaces.component.menubutton.MenuButton;
 import org.primefaces.component.menuitem.UIMenuItem;
 import org.primefaces.component.message.Message;
 import org.primefaces.component.outputlabel.OutputLabel;
@@ -2220,7 +2221,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		setId(result, null);
 		boolean showMarkup = (! Boolean.FALSE.equals(image.getShowMarkup()));
 		boolean editable = (! Boolean.FALSE.equals(image.getEditable()));
-		result.setColumns((showMarkup ? 6 : 5) + (editable ? 1 : 0));
+		result.setColumns(editable ? 2 : 1);
 		String id = result.getId();
 		List<UIComponent> toAddTo = result.getChildren();
 
@@ -2271,7 +2272,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 		HtmlPanelGrid result = (HtmlPanelGrid) a.createComponent(HtmlPanelGrid.COMPONENT_TYPE);
 		setId(result, null);
-		result.setColumns(5);
+		boolean editable = (! Boolean.FALSE.equals(link.getEditable()));
+		result.setColumns(editable ? 2 : 1);
 		String id = result.getId();
 		List<UIComponent> toAddTo = result.getChildren();
 
@@ -2280,7 +2282,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		HtmlOutputLink contentLink = contentLink(link.getPixelWidth(), textAlignment, binding);
 		contentLink.setId(String.format("%s_%s_link", id, sanitisedBinding));
 		toAddTo.add(contentLink);
-		if (! Boolean.FALSE.equals(link.getEditable())) {
+		if (editable) {
 			editableContent(toAddTo,
 								id,
 								binding,
@@ -2496,34 +2498,43 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 									boolean showMarkup) {
 		HtmlInputHidden hidden = (HtmlInputHidden) input(HtmlInputHidden.COMPONENT_TYPE, null, binding, null, requiredMessage, null, null);
 		setId(hidden, String.format("%s_%s_hidden", id, sanitisedBinding));
+
+		HtmlPanelGroup actionGroup = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
+		setId(actionGroup, null);
+		toAddTo.add(actionGroup);
+		toAddTo = actionGroup.getChildren();
 		toAddTo.add(hidden);
 
-		CommandButton uploadButton = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
-		setId(uploadButton, null);
-		String uploadButtonId = uploadButton.getId();
-		uploadButton.setIcon(Icons.FONT_UPLOAD);
-		uploadButton.setTitle(image ? "Upload Image" : "Upload Content");
-		uploadButton.setValue(null);
-		uploadButton.setType("button"); // no process or update required
-		setDisabled(uploadButton, disabledConditionName, formDisabledConditionName);
-		// for admin theme
-		setSizeAndTextAlignStyle(uploadButton, null, Integer.valueOf(30), null, null, Integer.valueOf(30), null, null);
-		toAddTo.add(uploadButton);
+		MenuButton actionButton = (MenuButton) a.createComponent(MenuButton.COMPONENT_TYPE);
+		setId(actionButton, null);
+		actionButton.setIcon("fa-solid fa-ellipsis-vertical");
+		actionButton.setTitle(image ? "Image Actions" : "Content Actions");
+		actionButton.setAriaLabel(image ? "Image Actions" : "Content Actions");
+		actionButton.setValue(null);
+		actionButton.setButtonStyle("width:30px;height:30px;text-align:center");
+		actionButton.setButtonStyleClass("skyveContentActionButton");
+		setDisabled(actionButton, disabledConditionName, formDisabledConditionName);
+		toAddTo.add(actionButton);
+		List<UIComponent> actionItems = actionButton.getChildren();
+
+		UIMenuItem uploadItem = createContentMenuItem(image ? "Upload Image" : "Upload Content",
+														Icons.FONT_UPLOAD,
+														null,
+														disabledConditionName,
+														formDisabledConditionName);
+		String uploadItemId = uploadItem.getId();
+		actionItems.add(uploadItem);
 
 		String var = sanitisedBinding + "Overlay";
 		if (image) {
-			setContentUploadDialogOnclick(uploadButton, id, sanitisedBinding, var, false);
-			CommandButton cameraButton = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
-			setId(cameraButton, null);
-			cameraButton.setIcon(Icons.FONT_CAMERA);
-			cameraButton.setTitle("Take Photo");
-			cameraButton.setValue(null);
-			cameraButton.setType("button"); // no process or update required
-			setDisabled(cameraButton, disabledConditionName, formDisabledConditionName);
-			// for admin theme
-			setSizeAndTextAlignStyle(cameraButton, null, Integer.valueOf(30), null, null, Integer.valueOf(30), null, null);
-			setContentUploadDialogOnclick(cameraButton, id, sanitisedBinding, var, true);
-			toAddTo.add(cameraButton);
+			setContentUploadDialogOnclick(uploadItem, id, sanitisedBinding, var, false);
+			UIMenuItem cameraItem = createContentMenuItem("Take Photo",
+															Icons.FONT_CAMERA,
+															null,
+															disabledConditionName,
+															formDisabledConditionName);
+			setContentUploadDialogOnclick(cameraItem, id, sanitisedBinding, var, true);
+			actionItems.add(cameraItem);
 		}
 
 		UIPanel panel = null;
@@ -2544,7 +2555,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			OverlayPanel overlay = (OverlayPanel) a.createComponent(OverlayPanel.COMPONENT_TYPE);
 			setId(overlay, null);
 			overlay.setWidgetVar(sanitisedBinding + "Overlay");
-			overlay.setFor(uploadButtonId);
+			overlay.setFor(uploadItemId);
 			overlay.setDynamic(false);
 			overlay.setShowCloseIcon(true);
 			overlay.setModal(false); // modal on PF8 causes the transparent modal mask to sit over the top of the overlay panel
@@ -2562,6 +2573,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			value.append(managedBeanName).append(".getContentUploadUrl('").append(sanitisedBinding).append("',");
 			value.append(image).append(")).concat('\\')')}");
 			panel.setValueExpression("onShow", ef.createValueExpression(elc, value.toString(), String.class));
+			uploadItem.setOnclick("PF('" + var + "').show();return false");
 		}
 		toAddTo.add(panel);
 
@@ -2574,40 +2586,34 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		setId(iframe, null);
 		panel.getChildren().add(iframe);
 
-		CommandButton clearButton = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
-		setId(clearButton, null);
-		clearButton.setIcon(Icons.FONT_CLEAR);
-		clearButton.setTitle("Clear Content");
-		clearButton.setValue(null);
-		clearButton.setType("button"); // no process or update required
+		UIMenuItem clearItem = createContentMenuItem("Clear Content",
+														Icons.FONT_CLEAR,
+														null,
+														disabledConditionName,
+														formDisabledConditionName);
 		if (image) {
-			clearButton.setOnclick(String.format("SKYVE.PF.clearContentImage('%s')", sanitisedBinding));
+			clearItem.setOnclick(String.format("SKYVE.PF.clearContentImage('%s');return false", sanitisedBinding));
 		}
 		else {
-			clearButton.setOnclick(String.format("SKYVE.PF.clearContentLink('%s')", sanitisedBinding));
+			clearItem.setOnclick(String.format("SKYVE.PF.clearContentLink('%s');return false", sanitisedBinding));
 		}
-		setDisabled(clearButton, disabledConditionName, formDisabledConditionName);
-		// for admin theme
-		setSizeAndTextAlignStyle(clearButton, null, Integer.valueOf(30), null, null, Integer.valueOf(30), null, null);
-		toAddTo.add(clearButton);
+		actionItems.add(clearItem);
 		
 		// Markup button (if required)
 		if (showMarkup) {
-			CommandButton markupButton = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
-			setId(markupButton, null);
-			markupButton.setIcon(Icons.FONT_EDIT);
-			markupButton.setTitle("Mark Up Image");
-			markupButton.setValue(null);
-			markupButton.setType("button"); // no process or update required
-			setDisabled(markupButton, disabledConditionName, formDisabledConditionName);
-			// for admin theme
-			setSizeAndTextAlignStyle(markupButton, null, Integer.valueOf(30), null, null, Integer.valueOf(30), null, null);
-			toAddTo.add(markupButton);
+			UIMenuItem markupItem = createContentMenuItem("Mark Up Image",
+															Icons.FONT_EDIT,
+															null,
+															disabledConditionName,
+															formDisabledConditionName);
+			actionItems.add(markupItem);
 	
 			var = sanitisedBinding + "Markup";
 			value.setLength(0);
-			value.append("if($('[id$=\"_").append(sanitisedBinding).append("_hidden\"]').val().length==0){return false}else{PF('" + var + "').show();PF('" + var + "').toggleMaximize()}"); 
-			markupButton.setOnclick(value.toString());
+			value.append("event.preventDefault();var contentId=$('[id$=\"_").append(sanitisedBinding);
+			value.append("_hidden\"]').val();if(!contentId){return false}PF('").append(var);
+			value.append("').show();PF('").append(var).append("').toggleMaximize();return false");
+			markupItem.setOnclick(value.toString());
 	
 			Dialog dialog = (Dialog) a.createComponent(Dialog.COMPONENT_TYPE);
 			setId(dialog, null);
@@ -2636,13 +2642,31 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		}
 	}
 
-	private void setContentUploadDialogOnclick(CommandButton button, String id, String sanitisedBinding, String var, boolean camera) {
+	private UIMenuItem createContentMenuItem(String value,
+												String icon,
+												@Nullable String onclick,
+												String disabledConditionName,
+												String formDisabledConditionName) {
+		UIMenuItem result = (UIMenuItem) a.createComponent(UIMenuItem.COMPONENT_TYPE);
+		setId(result, null);
+		result.setValue(value);
+		result.setIcon(icon);
+		result.setUrl("javascript:void(0)");
+		result.setAjax(false);
+		if (onclick != null) {
+			result.setOnclick(onclick);
+		}
+		setDisabled(result, disabledConditionName, formDisabledConditionName);
+		return result;
+	}
+
+	private void setContentUploadDialogOnclick(UIMenuItem item, String id, String sanitisedBinding, String var, boolean camera) {
 		StringBuilder value = new StringBuilder(192);
 		value.append("#{'SKYVE.PF.contentOverlayOnShow(\\'").append(id).append("\\',\\''.concat(");
 		value.append(managedBeanName).append(".getContentUploadUrl('").append(sanitisedBinding).append("',true,");
 		value.append(camera).append(")).concat('\\');PF(\\'").append(var);
 		value.append("\\').show();PF(\\'").append(var).append("\\').toggleMaximize();return false')}");
-		button.setValueExpression("onclick", ef.createValueExpression(elc, value.toString(), String.class));
+		item.setValueExpression("onclick", ef.createValueExpression(elc, value.toString(), String.class));
 	}
 
 	@Override
