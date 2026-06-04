@@ -132,6 +132,9 @@
 				var fileName = null;
 				var fileFormat = 'png';
 				var cameraMode = #{_skyveImage.camera};
+				var maximumUploadSizeInBytes = #{_skyveImage.maximumSizeInBytes};
+				var maximumImageDimension = 4096;
+				var minimumImageDimension = 320;
 				var currentImageUrl = null;
 				var resizeTimer = null;
 				function sizeCropperImage(image) {
@@ -179,16 +182,100 @@
 					image.src = '';
 					image.src = imageUrl;
 				}
-				function cropAndUpload() {
+				function canvasToBlob(canvas, mimeType, quality) {
+					var outputCanvas = canvasForMimeType(canvas, mimeType);
+					return new Promise(function(resolve, reject) {
+						outputCanvas.toBlob(function(blob) {
+							if (blob == null) {
+								reject(new Error('Could not encode cropped image'));
+							}
+							else {
+								resolve(blob);
+							}
+						}, mimeType, quality);
+					});
+				}
+				function canvasForMimeType(canvas, mimeType) {
+					if (mimeType != 'image/jpeg') {
+						return canvas;
+					}
+					var targetCanvas = document.createElement('canvas');
+					targetCanvas.width = canvas.width;
+					targetCanvas.height = canvas.height;
+					var context = targetCanvas.getContext('2d');
+					context.fillStyle = '#fff';
+					context.fillRect(0, 0, targetCanvas.width, targetCanvas.height);
+					context.drawImage(canvas, 0, 0);
+					return targetCanvas;
+				}
+				function createScaledCanvas(sourceCanvas, width, height) {
+					var targetCanvas = document.createElement('canvas');
+					targetCanvas.width = width;
+					targetCanvas.height = height;
+					var context = targetCanvas.getContext('2d');
+					context.imageSmoothingEnabled = true;
+					context.imageSmoothingQuality = 'high';
+					context.drawImage(sourceCanvas, 0, 0, width, height);
+					return targetCanvas;
+				}
+				function scaleCanvas(sourceCanvas, scale) {
+					var width = Math.max(1, Math.round(sourceCanvas.width * scale));
+					var height = Math.max(1, Math.round(sourceCanvas.height * scale));
+					return createScaledCanvas(sourceCanvas, width, height);
+				}
+				function scaleCanvasToMaximumDimension(sourceCanvas, maximumDimension) {
+					var dimension = Math.max(sourceCanvas.width, sourceCanvas.height);
+					if (! (dimension > maximumDimension)) {
+						return sourceCanvas;
+					}
+					return scaleCanvas(sourceCanvas, maximumDimension / dimension);
+				}
+				function fileExtension(format) {
+					return format == 'jpeg' ? 'jpg' : format;
+				}
+				function croppedFileName(format) {
+					var baseName = file.name.replace(/\.[^/.]+$/, '');
+					return baseName + '.cropped.' + fileExtension(format);
+				}
+				async function encodeCanvasForUpload(croppedCanvas) {
+					var outputFormat = cameraMode ? 'jpeg' : fileFormat;
+					var mimeType = 'image/' + outputFormat;
+					var canvas = scaleCanvasToMaximumDimension(croppedCanvas, maximumImageDimension);
+					var quality = outputFormat == 'jpeg' ? 0.92 : 1;
+					var blob = await canvasToBlob(canvas, mimeType, quality);
+
+					if (blob.size > maximumUploadSizeInBytes) {
+						outputFormat = 'jpeg';
+						mimeType = 'image/jpeg';
+						quality = 0.92;
+						blob = await canvasToBlob(canvas, mimeType, quality);
+					}
+
+					while ((blob.size > maximumUploadSizeInBytes) &amp;&amp; (quality > 0.55)) {
+						quality = Math.max(0.55, quality - 0.07);
+						blob = await canvasToBlob(canvas, mimeType, quality);
+					}
+
+					while ((blob.size > maximumUploadSizeInBytes) &amp;&amp;
+							(Math.max(canvas.width, canvas.height) > minimumImageDimension)) {
+						canvas = scaleCanvas(canvas, 0.85);
+						quality = 0.82;
+						blob = await canvasToBlob(canvas, mimeType, quality);
+					}
+
+					fileName = croppedFileName(outputFormat);
+					return blob;
+				}
+				async function cropAndUpload() {
 					if (cropper == null) {
 						return;
 					}
-					cropper.getCroppedCanvas({
+					var croppedCanvas = cropper.getCroppedCanvas({
 						imageSmoothingEnabled: true,
 						imageSmoothingQuality: 'high'
-					}).toBlob(function(blob) {
-						uploadCropped(blob);
-					}, 'image/' + fileFormat, 1);
+					});
+					var blob = await encodeCanvasForUpload(croppedCanvas);
+					uploadCropped(blob);
 				}
 				<!-- Load the image into Cropper.js, show the cropper bar, and container and hide the file upload -->
 				function editImage() {
@@ -196,7 +283,7 @@
 					if (file.type == 'image/jpeg') {
 						fileFormat = 'jpeg';
 					}
-					fileName = file.name + '.cropped.' + fileFormat;
+					fileName = croppedFileName(fileFormat);
 					$('#cropperBar').css({display: 'block'});
 					$('#cropperContainer').css({display: 'flex'});
 					var reader = new FileReader();
