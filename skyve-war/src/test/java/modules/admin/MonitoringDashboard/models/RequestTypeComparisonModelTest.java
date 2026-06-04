@@ -6,12 +6,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.view.model.chart.ChartData;
 
 import org.skyve.util.monitoring.Monitoring;
+import org.skyve.util.monitoring.RequestKey;
 
 import modules.admin.domain.MonitoringDashboard;
 import modules.admin.domain.MonitoringDashboard.Metric;
@@ -33,6 +35,11 @@ class RequestTypeComparisonModelTest {
 		model = new RequestTypeComparisonModel();
 		bean = new MonitoringDashboard();
 		model.setBean(bean);
+	}
+
+	@AfterEach
+	void tearDown() {
+		Monitoring.purge();
 	}
 
 	// --- null field guards ---
@@ -226,6 +233,103 @@ class RequestTypeComparisonModelTest {
 		assertTrue(cd.getTitle().contains("5"), "custom topN should appear in title");
 	}
 
+	// --- seeded monitoring data paths ---
+
+	@Test
+	void testGetChartDataWithAllRequestTypesSortsAndLimitsSeededMonitoringData() {
+		seedRequestMeasurement(RequestKey.queryListModel("admin", "Users"), 10, (short) 200, (short) 300, (short) 400);
+		seedRequestMeasurement(RequestKey.queryListModel("admin", "Roles"), 25, (short) 500, (short) 600, (short) 700);
+
+		bean.setRequestType(RequestType.all);
+		bean.setMetric(Metric.elapsedRequestTime);
+		bean.setPeriod(Period.currentMinute);
+		bean.setTopN(Integer.valueOf(1));
+
+		ChartData cd = model.getChartData();
+
+		assertEquals("Top 1 All Request Types Elapsed Requst Time (ms) - Current Minute", cd.getTitle());
+		assertEquals("Elapsed Requst Time (ms)", cd.getLabel());
+		assertEquals(List.of("Model admin Roles"), cd.getLabels());
+		assertEquals(1, cd.getValues().size());
+		assertTrue(cd.getValues().get(0).doubleValue() >= 25D);
+		assertEquals(1, cd.getBackgrounds().size());
+		assertEquals(1, cd.getBorders().size());
+	}
+
+	@Test
+	void testGetChartDataWithSpecificModelRequestTypeIncludesOnlyModelMeasurements() {
+		seedRequestMeasurement(RequestKey.queryListModel("admin", "Users"), 10, (short) 200, (short) 300, (short) 400);
+
+		bean.setRequestType(RequestType.M);
+		bean.setMetric(Metric.elapsedRequestTime);
+		bean.setPeriod(Period.currentMinute);
+		bean.setTopN(Integer.valueOf(10));
+
+		ChartData cd = model.getChartData();
+
+		assertEquals(List.of("Model admin Users"), cd.getLabels());
+		assertTrue(cd.getValues().get(0).doubleValue() >= 10D);
+	}
+
+	@Test
+	void testGetChartDataWithDifferentSpecificRequestTypeIgnoresSeededModelMeasurements() {
+		seedRequestMeasurement(RequestKey.queryListModel("admin", "Users"), 10, (short) 200, (short) 300, (short) 400);
+
+		bean.setRequestType(RequestType.A);
+		bean.setMetric(Metric.elapsedRequestTime);
+		bean.setPeriod(Period.currentMinute);
+
+		ChartData cd = model.getChartData();
+
+		assertTrue(cd.getTitle().contains("No Data"));
+		assertHasNoDataLabel(cd);
+	}
+
+	@Test
+	void testGetChartDataRequestCpuUtilisationUsesSeededMonitoringData() {
+		seedRequestMeasurement(RequestKey.queryListModel("admin", "Users"), 10, (short) 1234, (short) 300, (short) 400);
+
+		bean.setRequestType(RequestType.M);
+		bean.setMetric(Metric.requestCPUUtilisation);
+		bean.setPeriod(Period.currentMinute);
+
+		ChartData cd = model.getChartData();
+
+		assertEquals("Request CPU Utilisation (%)", cd.getLabel());
+		assertEquals(List.of("Model admin Users"), cd.getLabels());
+		assertEquals(12.34D, cd.getValues().get(0).doubleValue(), 0.01D);
+	}
+
+	@Test
+	void testGetChartDataSystemCpuUsageUsesSeededMonitoringData() {
+		seedRequestMeasurement(RequestKey.queryListModel("admin", "Users"), 10, (short) 200, (short) 987, (short) 400);
+
+		bean.setRequestType(RequestType.M);
+		bean.setMetric(Metric.systemCPUUsage);
+		bean.setPeriod(Period.currentMinute);
+
+		ChartData cd = model.getChartData();
+
+		assertEquals("System CPU Usage (%)", cd.getLabel());
+		assertEquals(List.of("Model admin Users"), cd.getLabels());
+		assertEquals(9.87D, cd.getValues().get(0).doubleValue(), 0.01D);
+	}
+
+	@Test
+	void testGetChartDataSystemRamUsageUsesSeededMonitoringData() {
+		seedRequestMeasurement(RequestKey.queryListModel("admin", "Users"), 10, (short) 200, (short) 300, (short) 765);
+
+		bean.setRequestType(RequestType.M);
+		bean.setMetric(Metric.systemRAMUsage);
+		bean.setPeriod(Period.currentMinute);
+
+		ChartData cd = model.getChartData();
+
+		assertEquals("Heap RAM Usage (%)", cd.getLabel());
+		assertEquals(List.of("Model admin Users"), cd.getLabels());
+		assertEquals(7.65D, cd.getValues().get(0).doubleValue(), 0.01D);
+	}
+
 	// --- all request type codes ---
 
 	@Test
@@ -328,5 +432,19 @@ class RequestTypeComparisonModelTest {
 		List<String> labels = cd.getLabels();
 		assertNotNull(labels, "labels should not be null");
 		assertTrue(labels.contains("No Data Available"), "labels should contain 'No Data Available'");
+	}
+
+	private static void seedRequestMeasurement(RequestKey key,
+			int millis,
+			short cpuUtilisation,
+			short systemCpuUsage,
+			short heapRamUsage) {
+		Monitoring.start();
+		Monitoring.measure(key);
+		Monitoring.getRequestMeasurements(key.toString())
+				.updateMeasurements(millis,
+						cpuUtilisation,
+						systemCpuUsage,
+						heapRamUsage);
 	}
 }

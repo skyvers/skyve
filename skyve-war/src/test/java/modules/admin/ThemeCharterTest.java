@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.jfree.data.general.DefaultPieDataset;
 
 import modules.admin.ThemeCharter.SectionColouriser;
 
@@ -297,6 +298,47 @@ class ThemeCharterTest {
 		objects.add(new Object[] { "Y", BigInteger.TEN });
 		BufferedImage img = tc.getFabulator(200, 150, objects, null);
 		assertNotNull(img);
+	}
+
+	@Test
+	void getFabulatorWithTinyHeightStillReturnsImage() {
+		ThemeCharter tc = new ThemeCharter();
+		List<Object[]> objects = new ArrayList<>();
+		objects.add(new Object[] { "Tiny", BigInteger.ONE });
+		BufferedImage img = tc.getFabulator(120, 1, objects, null);
+		assertNotNull(img);
+		assertEquals(120, img.getWidth());
+		assertEquals(1, img.getHeight());
+	}
+
+	@Test
+	void getPieChartImageWithLabelsAndLegendReturnsImage() throws Exception {
+		ThemeCharter tc = new ThemeCharter(Color.BLUE);
+		DefaultPieDataset data = new DefaultPieDataset();
+		data.setValue("Alpha", 10);
+		data.setValue("Beta", 20);
+
+		BufferedImage img = tc.getPieChartImage("Pie", Integer.valueOf(0), 220, 160, true, data);
+
+		assertNotNull(img);
+		assertEquals(220, img.getWidth());
+		assertEquals(160, img.getHeight());
+	}
+
+	@Test
+	void getPieChartImageWithoutLabelsOrLegendReturnsImage() throws Exception {
+		ThemeCharter tc = new ThemeCharter(Color.GREEN);
+		tc.setColouriserTheme(SectionColouriser.Colouriser.MULTI_COLOUR);
+		tc.setColourPalette(new String[] { "#FF0000", "#00FF00" });
+		DefaultPieDataset data = new DefaultPieDataset();
+		data.setValue("Alpha", 10);
+		data.setValue("Beta", 20);
+
+		BufferedImage img = tc.getPieChartImage("Pie", null, 200, 120, false, data);
+
+		assertNotNull(img);
+		assertEquals(200, img.getWidth());
+		assertEquals(120, img.getHeight());
 	}
 
 	// ---- Colouriser enum ----

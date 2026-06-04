@@ -237,6 +237,12 @@
 					var baseName = file.name.replace(/\.[^/.]+$/, '');
 					return baseName + '.cropped.' + fileExtension(format);
 				}
+				function formatBytes(bytes) {
+					if (bytes >= 1048576) {
+						return (bytes / 1048576).toFixed(1) + 'MB';
+					}
+					return Math.ceil(bytes / 1024) + 'KB';
+				}
 				async function encodeCanvasForUpload(croppedCanvas) {
 					var outputFormat = cameraMode ? 'jpeg' : fileFormat;
 					var mimeType = 'image/' + outputFormat;
@@ -270,12 +276,22 @@
 					if (cropper == null) {
 						return;
 					}
-					var croppedCanvas = cropper.getCroppedCanvas({
-						imageSmoothingEnabled: true,
-						imageSmoothingQuality: 'high'
-					});
-					var blob = await encodeCanvasForUpload(croppedCanvas);
-					uploadCropped(blob);
+					try {
+						var croppedCanvas = cropper.getCroppedCanvas({
+							imageSmoothingEnabled: true,
+							imageSmoothingQuality: 'high'
+						});
+						var blob = await encodeCanvasForUpload(croppedCanvas);
+						if (blob.size > maximumUploadSizeInBytes) {
+							alert('The cropped image is still too large to upload. Maximum size is ' +
+									formatBytes(maximumUploadSizeInBytes) + '. Encoded size is ' + formatBytes(blob.size) + '.');
+							return;
+						}
+						uploadCropped(blob);
+					}
+					catch (e) {
+						alert(e.message || 'Could not process cropped image');
+					}
 				}
 				<!-- Load the image into Cropper.js, show the cropper bar, and container and hide the file upload -->
 				function editImage() {

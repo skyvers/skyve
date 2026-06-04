@@ -2,27 +2,49 @@ package modules.admin.MonitoringDashboard.models;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.skyve.CORE;
+import org.skyve.domain.Bean;
+import org.skyve.metadata.module.query.MetaDataQueryColumn;
+import org.skyve.util.monitoring.Monitoring;
+import org.skyve.util.monitoring.RequestKey;
 import org.skyve.util.monitoring.RequestMeasurements;
 
+import modules.admin.domain.Generic;
 import modules.admin.domain.MonitoringDashboard.Period;
+import util.AbstractH2Test;
 
 /**
  * Unit tests for the static helper methods in RequestListModel.
  * These methods are package-private and testable without H2.
  */
 @SuppressWarnings("static-method")
-class RequestListModelTest {
+class RequestListModelTest extends AbstractH2Test {
 
 	private static final long TEST_TIME_MILLIS = Instant.parse("2024-06-15T10:30:45Z")
 			.toEpochMilli();
+
+	@BeforeEach
+	void purgeMonitoringBefore() {
+		Monitoring.purge();
+	}
+
+	@AfterEach
+	void purgeMonitoringAfter() {
+		Monitoring.purge();
+	}
 
 	// ---- calculateTimestampForIndex ----
 
@@ -248,5 +270,55 @@ class RequestListModelTest {
 		RequestMeasurements m = new RequestMeasurements();
 		Map<Integer, Float> result = RequestListModel.extractHeapRamUsageForTimePeriod(m, Period.currentYear);
 		assertNotNull(result);
+	}
+
+	@Test
+	void postConstructDefinesGenericDrivingDocumentAndReadOnlyColumns() {
+		RequestListModel model = new RequestListModel();
+
+		model.postConstruct(CORE.getCustomer(), false);
+
+		assertEquals("Requests", model.getDescription());
+		assertEquals(Generic.DOCUMENT_NAME, model.getDrivingDocument().getName());
+		List<MetaDataQueryColumn> columns = model.getColumns();
+		assertEquals(6, columns.size());
+		assertEquals(Generic.timestamp1PropertyName, columns.get(0).getBinding());
+		assertEquals("Time", columns.get(0).getDisplayName());
+		assertEquals(Generic.memo1PropertyName, columns.get(1).getBinding());
+		assertEquals(Integer.valueOf(75), columns.get(2).getPixelWidth());
+		assertEquals(Integer.valueOf(125), columns.get(3).getPixelWidth());
+	}
+
+	@Test
+	void getRowsReturnsEmptyListWhenMonitoringHasNoRequestMeasurements() throws Exception {
+		RequestListModel model = new RequestListModel();
+
+		assertTrue(model.getRows().isEmpty());
+	}
+
+	@Test
+	void getRowsMaterialisesSeededMonitoringMeasurements() throws Exception {
+		Monitoring.start();
+		Monitoring.measure(RequestKey.queryListModel("admin", "Users"));
+
+		RequestListModel model = new RequestListModel();
+		List<Bean> rows = model.getRows();
+
+		assertEquals(1, rows.size());
+		Generic row = (Generic) rows.get(0);
+		assertNotNull(row.getTimestamp1());
+		assertEquals("Model admin Users", row.getMemo1());
+		assertNotNull(row.getInteger1());
+		assertNotNull(row.getDecimal21());
+		assertNotNull(row.getDecimal22());
+		assertNotNull(row.getDecimal23());
+	}
+
+	@Test
+	void unsupportedListModelOperationsThrow() throws Exception {
+		RequestListModel model = new RequestListModel();
+
+		assertThrows(IllegalStateException.class, () -> model.update("id", new TreeMap<>()));
+		assertThrows(IllegalStateException.class, () -> model.remove("id"));
 	}
 }

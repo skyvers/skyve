@@ -67,6 +67,7 @@ class MockApplicationTest {
 				"org.primefaces.component.inputtext.InputText",
 				"org.primefaces.component.inputtextarea.InputTextarea",
 				"org.primefaces.component.linechart.LineChart",
+				"org.primefaces.component.menubutton.MenuButton",
 				"org.primefaces.component.menuitem.UIMenuItem",
 				"org.primefaces.component.message.Message",
 				"org.primefaces.component.outputpanel.OutputPanel",

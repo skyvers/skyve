@@ -19,6 +19,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.skyve.domain.app.admin.ReportDataset.DatasetType;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.types.DateOnly;
 
 import modules.admin.ReportDataset.ReportDatasetExtension.SubstitutedQueryResult;
 import modules.admin.ReportParameter.ReportParameterExtension;
@@ -201,6 +202,39 @@ class ReportDatasetExtensionTest {
 	}
 
 	@Test
+	void testGetSubstitutedQueryWithDuplicateDateExpressionReplacesBothWithOneParameter() {
+		doReturn(DatasetType.bizQL).when(bean).getDatasetType();
+		doReturn("SELECT b FROM admin$Audit b WHERE b.createdDate = {DATE} OR b.updatedDate = {DATE}").when(bean).getQuery();
+
+		SubstitutedQueryResult result = bean.getSubstitutedQuery();
+
+		assertThat(result, is(notNullValue()));
+		assertThat(result.getQuery(), containsString(":d_"));
+		assertFalse(result.getQuery().contains("{DATE}"));
+		assertEquals(1, result.getParameters().size());
+	}
+
+	@Test
+	void testGetSubstitutedQueryWithInvalidDateExpressionThrows() {
+		doReturn(DatasetType.bizQL).when(bean).getDatasetType();
+		doReturn("SELECT b FROM admin$Audit b WHERE b.timestamp > {DATE+abc}").when(bean).getQuery();
+
+		IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> bean.getSubstitutedQuery());
+
+		assertThat(thrown.getMessage(), containsString("Invalid date expression"));
+	}
+
+	@Test
+	void testGetSubstitutedQueryWithUnsupportedUppercaseModifierThrows() {
+		doReturn(DatasetType.bizQL).when(bean).getDatasetType();
+		doReturn("SELECT b FROM admin$Audit b WHERE b.timestamp > {DATE+1D}").when(bean).getQuery();
+
+		IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> bean.getSubstitutedQuery());
+
+		assertThat(thrown.getMessage(), containsString("D is not catered for"));
+	}
+
+	@Test
 	void testExecuteQueryThrowsForNonBizQLType() {
 		doReturn(DatasetType.SQL).when(bean).getDatasetType();
 
@@ -238,5 +272,24 @@ class ReportDatasetExtensionTest {
 		assertThat(result.getQuery(), is("SELECT * FROM ADM_User"));
 		assertThat(result.getParameters(), is(notNullValue()));
 		assertTrue(result.getParameters().isEmpty());
+	}
+
+	@Test
+	void testSubstitutedQueryResultConstructorHandlesNullParameters() {
+		SubstitutedQueryResult result = bean.new SubstitutedQueryResult("SELECT 1", null);
+
+		assertThat(result.getQuery(), is("SELECT 1"));
+		assertThat(result.getParameters(), is(notNullValue()));
+		assertTrue(result.getParameters().isEmpty());
+	}
+
+	@Test
+	void testSubstitutedQueryResultConstructorKeepsSuppliedParameters() {
+		java.util.Map<String, DateOnly> parameters = java.util.Map.of("dateParam", new DateOnly());
+
+		SubstitutedQueryResult result = bean.new SubstitutedQueryResult("SELECT :dateParam", parameters);
+
+		assertThat(result.getQuery(), is("SELECT :dateParam"));
+		assertThat(result.getParameters(), is(parameters));
 	}
 }
