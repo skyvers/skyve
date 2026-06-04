@@ -58,7 +58,7 @@
 	}
 %>
 <!DOCTYPE html>
-<html dir="<%=Util.isRTL(locale) ? "rtl" : "ltr"%>">
+<html dir="<%=Util.isRTL(locale) ? "rtl" : "ltr"%>" lang="<%=locale.getLanguage()%>" xml:lang="<%=locale.getLanguage()%>">
 	<head>
 		<!-- Standard Meta -->
 	    <meta charset="utf-8" />
@@ -187,6 +187,13 @@
 								<div class="field">
 									<!-- A table to brute force the captcha to centre as it is an iframe -->
 									<table>
+										<thead style="display:none">
+											<tr>
+												<th scope="col">Left spacing</th>
+												<th scope="col">Captcha</th>
+												<th scope="col">Right spacing</th>
+											</tr>
+										</thead>
 										<tr>
 											<td style="width:50%" />
 											<td>

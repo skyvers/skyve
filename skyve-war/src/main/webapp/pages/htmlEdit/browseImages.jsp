@@ -16,7 +16,7 @@
 	Locale locale = (user == null) ? request.getLocale() : user.getLocale();
 %>
 <!DOCTYPE html>
-<html dir="<%=Util.isRTL(locale) ? "rtl" : "ltr"%>">
+<html dir="<%=Util.isRTL(locale) ? "rtl" : "ltr"%>" lang="<%=locale.getLanguage()%>" xml:lang="<%=locale.getLanguage()%>">
 	<head>
 		<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 		<meta http-equiv="Content-Type" CONTENT="text/html; CHARSET=utf-8">

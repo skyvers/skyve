@@ -6,6 +6,7 @@
 	<artifactId>skyve-parent</artifactId>
 	<version>10.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
+	<description>Skyve</description>
 
 	<modules>
 		<module>skyve-core</module>

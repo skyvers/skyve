@@ -8,13 +8,14 @@ import java.util.Map;
 import java.util.Set;
 
 import org.skyve.CORE;
+import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Util;
 import org.skyve.util.logging.Category;
-import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
+import org.slf4j.Logger;
 
 import jakarta.faces.context.FacesContext;
 
@@ -148,12 +149,28 @@ public abstract class LocalisableView implements Serializable {
 
 	
 	private String dir;
+
+	private String languageTag;
+
 	/**
 	 * Used in the faces html tag.
 	 * @return	The text direction - rtl or ltr.
 	 */
 	public String getDir() {
 		return dir;
+	}
+
+	/**
+	 * Returns the BCP 47 language tag for the rendered page.
+	 *
+	 * <p>Used by Faces templates when rendering the root {@code html} element's
+	 * {@code lang} attribute.
+	 *
+	 * @return the request or user locale as a BCP 47 language tag; defaults to {@code en}
+	 *         when no locale is available
+	 */
+	public String getLanguageTag() {
+		return languageTag;
 	}
 
 	/**
@@ -166,20 +183,41 @@ public abstract class LocalisableView implements Serializable {
 	}
 	
 	private I18nMapAdapter i18n = new I18nMapAdapter();
+
+	/**
+	 * Returns the map adapter used by JSF expressions to resolve localised labels.
+	 *
+	 * @return a request-view adapter that resolves values from the locale set during
+	 *         {@link #initialise()}
+	 */
 	public Map<String, String> getI18n() {
 		return i18n;
 	}
 	
+	/**
+	 * Initialises locale-dependent view state for the current Faces request.
+	 *
+	 * <p>Side effects: reads the current Faces request locale and Skyve user, updates
+	 * the text direction, language tag and {@code i18n} lookup locale for this view
+	 * instance.
+	 */
 	protected void initialise() {
 		Locale locale = FacesContext.getCurrentInstance().getExternalContext().getRequestLocale();
-		User user = CORE.getUser();
+		User user = AbstractPersistence.isPresent() ? CORE.getUser() : null;
 		if (user != null) {
 			Locale userLocale = user.getLocale();
 			if (userLocale != null) {
 				locale = userLocale;
 			}
 		}
-		dir = (locale != null) ? (Util.isRTL(locale) ? "rtl" : "ltr") : "ltr";
+		if (locale == null) {
+			dir = "ltr";
+			languageTag = Locale.ENGLISH.toLanguageTag();
+		}
+		else {
+			dir = Util.isRTL(locale) ? "rtl" : "ltr";
+			languageTag = locale.toLanguageTag();
+		}
 		i18n.setLocale(locale);
 	}
 	
@@ -192,6 +230,11 @@ public abstract class LocalisableView implements Serializable {
 		return UtilImpl.ENVIRONMENT_IDENTIFIER;
 	}
 	
+	/**
+	 * Returns the cache-busting version for web resource URLs.
+	 *
+	 * @return the configured web resource file version
+	 */
 	@SuppressWarnings("static-method")
 	public String getWebResourceFileVersion() {
 		return UtilImpl.WEB_RESOURCE_FILE_VERSION;

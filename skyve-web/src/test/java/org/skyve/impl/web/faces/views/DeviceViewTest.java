@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import org.junit.jupiter.api.AfterEach;
@@ -40,6 +41,7 @@ class DeviceViewTest {
 
 		when(context.getExternalContext()).thenReturn(externalContext);
 		when(externalContext.getRequestParameterMap()).thenReturn(params);
+		when(externalContext.getRequestLocale()).thenReturn(Locale.forLanguageTag("ar"));
 		FacesContextBridge.setCurrent(context);
 
 		Method postConstruct = DeviceView.class.getDeclaredMethod("postConstruct");
@@ -51,6 +53,8 @@ class DeviceViewTest {
 		assertTrue(view.getClickDeviceJspUrl().contains("d=User"));
 		assertTrue(view.getClickDeviceJspUrl().endsWith("ua="));
 		assertTrue(view.getStartingDeviceJspUrl().endsWith("ua=tablet"));
+		assertEquals("rtl", view.getDir());
+		assertEquals("ar", view.getLanguageTag());
 	}
 
 	@Test
@@ -63,6 +67,7 @@ class DeviceViewTest {
 
 		when(context.getExternalContext()).thenReturn(externalContext);
 		when(externalContext.getRequestParameterMap()).thenReturn(params);
+		when(externalContext.getRequestLocale()).thenReturn(Locale.ENGLISH);
 		FacesContextBridge.setCurrent(context);
 
 		Method postConstruct = DeviceView.class.getDeclaredMethod("postConstruct");
@@ -71,5 +76,7 @@ class DeviceViewTest {
 
 		assertTrue(view.getStartingDeviceJspUrl().endsWith("ua=phone"));
 		assertEquals(view.getContextUrl(), view.getContextUrl());
+		assertEquals("ltr", view.getDir());
+		assertEquals("en", view.getLanguageTag());
 	}
 }
