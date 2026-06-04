@@ -1,6 +1,7 @@
 package org.skyve.impl.content.jdbc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -76,8 +77,10 @@ class JDBCRemoteContentManagerClientTest {
 	@Test
 	void testLifecycleMethodsAreNoOp() throws Exception {
 		try (JDBCRemoteContentManagerClient client = new JDBCRemoteContentManagerClient()) {
-			client.startup();
-			client.shutdown();
+			assertDoesNotThrow(() -> {
+				client.startup();
+				client.shutdown();
+			});
 		}
 	}
 

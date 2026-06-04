@@ -1,5 +1,6 @@
 package org.skyve.impl.content.jdbc;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -91,14 +92,14 @@ class JDBCRemoteServerWrappersTest {
 	@Test
 	void testLuceneWrapperShutdownWithoutStartup() throws Exception {
 		try (JDBCRemoteLuceneContentManagerServer wrapper = new JDBCRemoteLuceneContentManagerServer()) {
-			wrapper.shutdown();
+			assertDoesNotThrow(wrapper::shutdown);
 		}
 	}
 
 	@Test
 	void testElasticWrapperShutdownWithoutStartup() throws Exception {
 		try (JDBCRemoteElasticContentManagerServer wrapper = new JDBCRemoteElasticContentManagerServer()) {
-			wrapper.shutdown();
+			assertDoesNotThrow(wrapper::shutdown);
 		}
 	}
 

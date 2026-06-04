@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field.Store;
@@ -300,9 +301,12 @@ public class ArchivedDocumentListModelTest {
 		try (var iterable = new ConfiguredArchivedDocumentListModel().iterate()) {
 			Method tryClose = iterable.getClass().getDeclaredMethod("tryClose", AutoCloseable.class);
 			tryClose.setAccessible(true);
+			AtomicBoolean closeAttempted = new AtomicBoolean();
 			tryClose.invoke(iterable, (AutoCloseable) () -> {
+				closeAttempted.set(true);
 				throw new Exception("boom");
 			});
+			assertTrue(closeAttempted.get());
 		}
 		finally {
 			singleton.shutdown();

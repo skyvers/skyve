@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.view.widget.bound.input.CompleteType;
 import org.skyve.impl.sail.mock.MockFacesContext;
 
+import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.UIPanel;
 import jakarta.faces.context.FacesContext;
 
@@ -45,6 +46,7 @@ class FacesViewFacesRuntimeTest {
 		component.getAttributes().put("query", "");
 		component.getAttributes().put("display", "name");
 		component.pushComponentToEL(context, component);
+		assertNotNull(UIComponent.getCurrentComponent(context));
 
 		FacesView view = new FacesView();
 		invokeIgnoringThrowable(() -> view.complete("abc"));
