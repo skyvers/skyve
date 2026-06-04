@@ -3,4 +3,4 @@ org.eclipse.core.resources.prefs
 **/.classpath
 **/.project
 **/.settings/
-**/.vscode
+**/target/

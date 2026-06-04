@@ -9,12 +9,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.OutputStream;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.skyve.EXT;
 import org.skyve.impl.mail.MailServiceStaticSingleton;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Mail;
@@ -31,7 +35,7 @@ class TwoFactorAuthPushEmailFilterH2Test extends AbstractH2Test {
 	private boolean originalSmtpTestBogusSend;
 
 	@BeforeEach
-	void beforeEach() {
+	void beforeEach() throws SQLException {
 		MailServiceStaticSingleton.setDefault();
 		originalMailService = MailServiceStaticSingleton.get();
 		originalSmtpTestRecipient = UtilImpl.SMTP_TEST_RECIPIENT;
@@ -40,6 +44,7 @@ class TwoFactorAuthPushEmailFilterH2Test extends AbstractH2Test {
 		MailServiceStaticSingleton.set(capture);
 		UtilImpl.SMTP_TEST_RECIPIENT = null;
 		UtilImpl.SMTP_TEST_BOGUS_SEND = false;
+		clearConfiguredEmailTemplate();
 	}
 
 	@AfterEach
@@ -112,6 +117,15 @@ class TwoFactorAuthPushEmailFilterH2Test extends AbstractH2Test {
 
 		private void send(TwoFactorAuthUser user, String code) {
 			pushNotification(user, code);
+		}
+	}
+
+	private static void clearConfiguredEmailTemplate() throws SQLException {
+		try (Connection c = EXT.getDataStoreConnection();
+				PreparedStatement s = c.prepareStatement(
+						"update ADM_Configuration set twoFactorEmailSubject = null, twoFactorEmailBody = null where bizCustomer = ?")) {
+			s.setString(1, CUSTOMER);
+			s.executeUpdate();
 		}
 	}
 
