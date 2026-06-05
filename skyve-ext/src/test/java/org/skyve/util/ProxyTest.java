@@ -3,6 +3,7 @@ package org.skyve.util;
 import static org.junit.Assert.assertSame;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -12,7 +13,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.messages.DomainException;
 
-@SuppressWarnings("static-method")
+@SuppressWarnings({"static-method", "java:S116", "java:S5778"})
 class ProxyTest {
 	public static class Counter {
 		private int value = 0;
@@ -28,6 +29,11 @@ class ProxyTest {
 		public void throwingMethod() {
 			throw new IllegalArgumentException("original-cause");
 		}
+	}
+
+	public static class FieldCompatibleProxy extends Counter {
+		public Counter _skyve_proxied;
+		public ProxyDelegate<Counter> _skyve_delegate;
 	}
 
 	@Test
@@ -62,6 +68,61 @@ class ProxyTest {
 		} catch (IllegalArgumentException e) {
 			assertEquals("original-cause", e.getMessage());
 		}
+	}
+
+	@Test
+	void isProxyReturnsTrueForObjectWithProxyField() {
+		assertTrue(Proxy.isProxy(new FieldCompatibleProxy()));
+	}
+
+	@Test
+	void deproxyReturnsFieldCompatibleProxiedObject() {
+		Counter counter = new Counter();
+		FieldCompatibleProxy proxy = new FieldCompatibleProxy();
+		proxy._skyve_proxied = counter;
+
+		assertSame(counter, Proxy.deproxy((Counter) proxy));
+	}
+
+	@Test
+	void reproxySetsFieldCompatibleProxiedObject() {
+		Counter replacement = new Counter();
+		FieldCompatibleProxy proxy = new FieldCompatibleProxy();
+
+		Proxy.reproxy(proxy, replacement);
+
+		assertSame(replacement, proxy._skyve_proxied);
+	}
+
+	@Test
+	void getDelegateReturnsFieldCompatibleDelegate() {
+		ProxyDelegate<Counter> delegate = new ProxyDelegate<>();
+		FieldCompatibleProxy proxy = new FieldCompatibleProxy();
+		proxy._skyve_delegate = delegate;
+
+		assertSame(delegate, Proxy.getDelegate((Counter) proxy));
+	}
+
+	@Test
+	void ofRejectsFieldCompatibleProxyBeforeCreatingByteBuddyProxy() {
+		FieldCompatibleProxy proxy = new FieldCompatibleProxy();
+
+		assertThrows(IllegalArgumentException.class, () -> Proxy.of(proxy, new ProxyDelegate<>()));
+	}
+
+	@Test
+	void deproxyOnPlainObjectThrowsDomainException() {
+		assertThrows(DomainException.class, () -> Proxy.deproxy(new Counter()));
+	}
+
+	@Test
+	void reproxyOnPlainObjectThrowsDomainException() {
+		assertThrows(DomainException.class, () -> Proxy.reproxy(new Counter(), new Counter()));
+	}
+
+	@Test
+	void getDelegateOnPlainObjectThrowsDomainException() {
+		assertThrows(DomainException.class, () -> Proxy.getDelegate(new Counter()));
 	}
 
 	@Disabled("ByteBuddy requires --add-opens java.base/java.lang not set in surefire")
@@ -153,7 +214,7 @@ class ProxyTest {
 
 	@Disabled("ByteBuddy requires --add-opens java.base/java.lang not set in surefire")
 	@Test
-	public void deproxyOnNonProxyThrowsDomainException() {
+	void deproxyOnNonProxyThrowsDomainException() {
 		// Covers Proxy.java lines 185-186: deproxy on a non-proxy throws DomainException
 		Counter counter = new Counter();
 		boolean threw = false;

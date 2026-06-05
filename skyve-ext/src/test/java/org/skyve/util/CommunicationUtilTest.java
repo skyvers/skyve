@@ -5,26 +5,40 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.function.Function;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
 import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.app.admin.Communication;
 import org.skyve.domain.app.admin.Communication.ActionType;
+import org.skyve.domain.app.admin.Subscription;
 import org.skyve.domain.app.admin.Tag;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateTime;
+import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.user.DocumentPermissionScope;
+import org.skyve.metadata.user.User;
+import org.skyve.persistence.DocumentFilter;
+import org.skyve.persistence.DocumentQuery;
+import org.skyve.persistence.Persistence;
 import org.skyve.util.CommunicationUtil.CommunicationCalendarItem;
 import org.skyve.util.CommunicationUtil.ResponseMode;
 
@@ -36,6 +50,12 @@ class CommunicationUtilTest {
 	void setup() {
 		// setup mocks
 		communication = mock(Communication.class);
+	}
+
+	@AfterEach
+	@SuppressWarnings("static-method")
+	void teardown() throws Exception {
+		unbindPersistenceFromThread();
 	}
 
 	@Test
@@ -88,6 +108,15 @@ class CommunicationUtilTest {
 		assertThat(result, is("1 communications for Communication will be tested."));
 	}
 
+	@Test
+	void testGetResultsWithNoActionOnlyReportsCountAndDocument() throws Exception {
+		communication = communicationForResults(null, 2L);
+
+		String result = CommunicationUtil.getResults(communication);
+
+		assertThat(result, is("2 communications for Communication"));
+	}
+
 	@SuppressWarnings("static-method")
 	@Test
 	void testFormatCommunicationMessageReturnsNullForNullExpression() throws Exception {
@@ -134,10 +163,39 @@ class CommunicationUtilTest {
 
 	@SuppressWarnings("static-method")
 	@Test
+	void testFormatCommunicationMessageWithEmptyBeansOnlyReplacesResetPasswordPlaceholder() throws Exception {
+		String expression = CommunicationUtil.SPECIAL_BEAN_URL + " " + CommunicationUtil.SPECIAL_CONTEXT + " " + CommunicationUtil.SPECIAL_LOGOUT_URL;
+
+		String result = CommunicationUtil.formatCommunicationMessage(null, expression, new Bean[0]);
+
+		assertThat(result, containsString(CommunicationUtil.SPECIAL_BEAN_URL));
+		assertThat(result, containsString(CommunicationUtil.SPECIAL_CONTEXT));
+		assertFalse(result.contains(CommunicationUtil.SPECIAL_LOGOUT_URL));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
 	void testHtmlEncloseWrapsAndConvertsPlainText() throws Exception {
 		String result = (String) invokePrivate("htmlEnclose", new Class<?>[] { String.class }, "Line one\nLine two");
 
 		assertThat(result, is("<html><body>Line one<br>\nLine two<br>\n</body></html>"));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testHtmlEnclosePreservesExistingHtmlAndSkipsBreaksAfterTags() throws Exception {
+		String result = (String) invokePrivate("htmlEnclose", new Class<?>[] { String.class },
+				"<html>\n<body>\n<p>Hello</p>\nPlain\n</body>\n</html>");
+
+		assertThat(result, is("<html>\n<body>\n<p>Hello</p>\nPlain<br>\n</body>\n</html>\n"));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testHtmlEncloseAddsOnlyMissingClosingMarkup() throws Exception {
+		String result = (String) invokePrivate("htmlEnclose", new Class<?>[] { String.class }, "<html><body>Plain");
+
+		assertThat(result, is("<html><body>Plain<br>\n</body></html>"));
 	}
 
 	@SuppressWarnings("static-method")
@@ -152,6 +210,95 @@ class CommunicationUtilTest {
 				null);
 
 		assertTrue(result.isEmpty());
+	}
+
+	@SuppressWarnings({"unchecked", "static-method"})
+	@Test
+	void testResolveAndValidateEmailAddressListUsesSubscriptionPreferredAddress() throws Exception {
+		AbstractPersistence persistence = bindMockPersistenceWithUser();
+		Persistence callbackPersistence = mock(Persistence.class);
+		DocumentQuery query = mock(DocumentQuery.class);
+		DocumentFilter filter = mock(DocumentFilter.class);
+		Subscription subscription = mock(Subscription.class);
+		when(persistence.withDocumentPermissionScopes(eq(DocumentPermissionScope.customer), any(Function.class)))
+				.thenAnswer(invocation -> ((Function<Persistence, String>) invocation.getArgument(1)).apply(callbackPersistence));
+		when(callbackPersistence.newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.SUBSCRIPTION_DOCUMENT_NAME)).thenReturn(query);
+		when(query.getFilter()).thenReturn(filter);
+		when(query.beanResult()).thenReturn(subscription);
+		when(subscription.getPreferredReceiverIdentifier()).thenReturn("preferred@example.com");
+
+		List<String> result = (List<String>) invokePrivate("resolveAndValidateEmailAddressList",
+				new Class<?>[] { String.class, ResponseMode.class, Document.class, Document.class },
+				" original@example.com ",
+				ResponseMode.EXPLICIT,
+				mock(Document.class),
+				mock(Document.class));
+
+		assertThat(result, is(List.of("preferred@example.com")));
+	}
+
+	@SuppressWarnings({"unchecked", "static-method"})
+	@Test
+	void testResolveAndValidateEmailAddressListThrowsForDeclinedSubscriptionInExplicitMode() throws Exception {
+		AbstractPersistence persistence = bindMockPersistenceWithUser();
+		Persistence callbackPersistence = mock(Persistence.class);
+		DocumentQuery query = mock(DocumentQuery.class);
+		DocumentFilter filter = mock(DocumentFilter.class);
+		Subscription subscription = mock(Subscription.class);
+		Document communicationDoc = mock(Document.class);
+		Document subscriptionDoc = mock(Document.class);
+		when(persistence.withDocumentPermissionScopes(eq(DocumentPermissionScope.customer), any(Function.class)))
+				.thenAnswer(invocation -> ((Function<Persistence, String>) invocation.getArgument(1)).apply(callbackPersistence));
+		when(callbackPersistence.newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.SUBSCRIPTION_DOCUMENT_NAME)).thenReturn(query);
+		when(query.getFilter()).thenReturn(filter);
+		when(query.beanResult()).thenReturn(subscription);
+		when(subscription.getDeclined()).thenReturn(Boolean.TRUE);
+		when(communicationDoc.getLocalisedSingularAlias()).thenReturn("Communication");
+		when(subscriptionDoc.getLocalisedSingularAlias()).thenReturn("Subscription");
+
+		DomainException e = assertThrows(DomainException.class, () -> invokePrivate("resolveAndValidateEmailAddressList",
+				new Class<?>[] { String.class, ResponseMode.class, Document.class, Document.class },
+				"declined@example.com",
+				ResponseMode.EXPLICIT,
+				communicationDoc,
+				subscriptionDoc));
+
+		assertThat(e.getMessage(), containsString("declined@example.com"));
+		assertThat(e.getMessage(), containsString(AppConstants.DECLINED_ATTRIBUTE_NAME));
+	}
+
+	@SuppressWarnings({"unchecked", "static-method"})
+	@Test
+	void testResolveAndValidateEmailAddressListThrowsForInvalidAddressInExplicitMode() throws Exception {
+		AbstractPersistence persistence = bindMockPersistenceWithUser();
+		when(persistence.withDocumentPermissionScopes(eq(DocumentPermissionScope.customer), any(Function.class)))
+				.thenReturn("not-an-email");
+
+		assertThrows(ValidationException.class, () -> invokePrivate("resolveAndValidateEmailAddressList",
+				new Class<?>[] { String.class, ResponseMode.class, Document.class, Document.class },
+				"not-an-email",
+				ResponseMode.EXPLICIT,
+				mock(Document.class),
+				mock(Document.class)));
+	}
+
+	@SuppressWarnings({"unchecked", "static-method"})
+	@Test
+	void testGetSystemCommunicationByDescriptionQueriesByDescription() throws Exception {
+		AbstractPersistence persistence = bindMockPersistenceWithUser();
+		Persistence callbackPersistence = mock(Persistence.class);
+		DocumentQuery query = mock(DocumentQuery.class);
+		DocumentFilter filter = mock(DocumentFilter.class);
+		Communication expected = mock(Communication.class);
+		when(persistence.withDocumentPermissionScopes(eq(DocumentPermissionScope.customer), any(Function.class)))
+				.thenAnswer(invocation -> ((Function<Persistence, Communication>) invocation.getArgument(1)).apply(callbackPersistence));
+		when(callbackPersistence.newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.COMMUNICATION_DOCUMENT_NAME)).thenReturn(query);
+		when(query.getFilter()).thenReturn(filter);
+		when(query.beanResult()).thenReturn(expected);
+
+		Communication result = CommunicationUtil.getSystemCommunicationByDescription("System notification");
+
+		assertThat(result, is(expected));
 	}
 
 	@Test
@@ -174,6 +321,23 @@ class CommunicationUtilTest {
 		assertThat(ics, containsString("SUMMARY:Team Sync"));
 	}
 
+	@Test
+	void testGenerateCalendarAttachmentsHandlesNullTitleAndDescription() throws Exception {
+		when(communication.getCalendarStartTime()).thenReturn(new DateTime(1_700_000_000_000L));
+		when(communication.getCalendarEndTime()).thenReturn(new DateTime(1_700_000_360_000L));
+
+		CommunicationCalendarItem item = (CommunicationCalendarItem) invokePrivate("generateCalendarAttachments",
+				new Class<?>[] { Customer.class, Communication.class, Bean[].class },
+				null,
+				communication,
+				new Bean[0]);
+
+		String ics = new String(item.getIcsFileAttachment(), StandardCharsets.UTF_8);
+		assertThat(item.getGoogleCalendarLink(), containsString("text=null"));
+		assertThat(item.getYahooCalendarLink(), containsString("title=null"));
+		assertThat(ics, containsString("SUMMARY:null"));
+	}
+
 	@SuppressWarnings("boxing")
 	private static Communication communicationForResults(ActionType actionType, long count) {
 		Communication communication = mock(Communication.class);
@@ -189,7 +353,43 @@ class CommunicationUtilTest {
 	private static Object invokePrivate(String methodName, Class<?>[] parameterTypes, Object... args) throws Exception {
 		Method method = CommunicationUtil.class.getDeclaredMethod(methodName, parameterTypes);
 		method.setAccessible(true);
-		return method.invoke(null, args);
+		try {
+			return method.invoke(null, args);
+		}
+		catch (InvocationTargetException e) {
+			Throwable cause = e.getCause();
+			if (cause instanceof Exception exception) {
+				throw exception;
+			}
+			if (cause instanceof Error error) {
+				throw error;
+			}
+			throw new RuntimeException(cause);
+		}
+	}
+
+	private static AbstractPersistence bindMockPersistenceWithUser() throws Exception {
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		User user = mock(User.class);
+		when(persistence.getUser()).thenReturn(user);
+		bindPersistenceToThread(persistence);
+		return persistence;
+	}
+
+	private static void bindPersistenceToThread(AbstractPersistence persistence) throws Exception {
+		Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
+		field.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		ThreadLocal<AbstractPersistence> threadLocal = (ThreadLocal<AbstractPersistence>) field.get(null);
+		threadLocal.set(persistence);
+	}
+
+	private static void unbindPersistenceFromThread() throws Exception {
+		Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
+		field.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		ThreadLocal<AbstractPersistence> threadLocal = (ThreadLocal<AbstractPersistence>) field.get(null);
+		threadLocal.remove();
 	}
 
 	// ======== CommunicationCalendarItem ========

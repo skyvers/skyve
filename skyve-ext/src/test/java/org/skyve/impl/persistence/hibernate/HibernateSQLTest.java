@@ -1,6 +1,7 @@
 package org.skyve.impl.persistence.hibernate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -17,6 +18,7 @@ import org.hibernate.query.NativeQuery;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Decimal2;
@@ -27,8 +29,6 @@ import org.skyve.domain.types.Timestamp;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.SQL;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @SuppressWarnings({"static-method", "rawtypes", "resource", "java:S8692"}) // system clock OK
 class HibernateSQLTest {
@@ -98,7 +98,7 @@ class HibernateSQLTest {
 		AbstractHibernatePersistenceTest.TestHibernatePersistence persistence = new AbstractHibernatePersistenceTest.TestHibernatePersistence();
 		try {
 			HibernateSQL sql = new HibernateSQL("select 1", persistence);
-			org.junit.jupiter.api.Assertions.assertThrows(DomainException.class, () -> sql.beanResults());
+			org.junit.jupiter.api.Assertions.assertThrows(DomainException.class, sql::beanResults);
 		}
 		finally {
 			persistence.close();
@@ -110,7 +110,7 @@ class HibernateSQLTest {
 		AbstractHibernatePersistenceTest.TestHibernatePersistence persistence = new AbstractHibernatePersistenceTest.TestHibernatePersistence();
 		try {
 			HibernateSQL sql = new HibernateSQL("select 1", persistence);
-			org.junit.jupiter.api.Assertions.assertThrows(DomainException.class, () -> sql.beanIterable());
+			org.junit.jupiter.api.Assertions.assertThrows(DomainException.class, sql::beanIterable);
 		}
 		finally {
 			persistence.close();
@@ -285,7 +285,7 @@ class HibernateSQLTest {
 	}
 
 	@Test
-	void dynaIterableScrollsAgainstH2() throws Exception {
+	void dynaIterableScrollsAgainstH2() {
 		// dynaResults/dynaIterable use NamedParameterPreparedStatement with the Hibernate
 		// session's JDBC connection. This path is covered by integration tests in skyve-war.
 		// Verify that the constructor and parameter setter code is exercised via the SQL
@@ -507,6 +507,56 @@ class HibernateSQLTest {
 		finally {
 			p.close();
 		}
+	}
+
+	@Test
+	void testScalarAttributeTypeParameterDispatch() {
+		assertParameterDispatch("flag", Boolean.TRUE, AttributeType.bool);
+		assertParameterDispatch("text", "plain", AttributeType.text);
+		assertParameterDispatch("memo", "long text", AttributeType.memo);
+		assertParameterDispatch("date", new java.sql.Date(System.currentTimeMillis()), AttributeType.date);
+		assertParameterDispatch("dt", new java.sql.Timestamp(System.currentTimeMillis()), AttributeType.dateTime);
+		assertParameterDispatch("ts", new java.sql.Timestamp(System.currentTimeMillis()), AttributeType.timestamp);
+		assertParameterDispatch("decimal", new Decimal2("12.34"), AttributeType.decimal10);
+		assertParameterDispatch("int", Integer.valueOf(7), AttributeType.integer);
+		assertParameterDispatch("long", Long.valueOf(8L), AttributeType.longInteger);
+		assertParameterDispatch("time", new java.sql.Time(System.currentTimeMillis()), AttributeType.time);
+		assertParameterDispatch("id", "bean-id", AttributeType.id);
+	}
+
+	@Test
+	void testArrayAttributeTypeParameterDispatch() {
+		assertParameterDispatch("memos", new String[] {"a", "b"}, AttributeType.memo);
+		assertParameterDispatch("dates", new java.sql.Date[] {new java.sql.Date(System.currentTimeMillis())}, AttributeType.date);
+		assertParameterDispatch("timestamps", new java.sql.Timestamp[] {new java.sql.Timestamp(System.currentTimeMillis())}, AttributeType.timestamp);
+		assertParameterDispatch("ints", new Integer[] {Integer.valueOf(1)}, AttributeType.integer);
+		assertParameterDispatch("longs", new Long[] {Long.valueOf(1L)}, AttributeType.longInteger);
+		assertParameterDispatch("times", new java.sql.Time[] {new java.sql.Time(System.currentTimeMillis())}, AttributeType.time);
+	}
+
+	@Test
+	void testEnumerationCollectionAndArrayConvertEnumerationValues() {
+		Enumeration collectionEnumeration = mock(Enumeration.class);
+		when(collectionEnumeration.toCode()).thenReturn("COLLECTION_CODE");
+		Enumeration arrayEnumeration = mock(Enumeration.class);
+		when(arrayEnumeration.toCode()).thenReturn("ARRAY_CODE");
+
+		assertParameterDispatch("enums", List.of(collectionEnumeration, "PLAIN_CODE"), AttributeType.enumeration);
+		assertParameterDispatch("enums", new Object[] {arrayEnumeration, "PLAIN_CODE"}, AttributeType.enumeration);
+	}
+
+	@Test
+	void testAssociationCollectionArrayAndScalarConvertBeanValues() {
+		Bean collectionBean = mock(Bean.class);
+		when(collectionBean.getBizId()).thenReturn("collection-id");
+		Bean arrayBean = mock(Bean.class);
+		when(arrayBean.getBizId()).thenReturn("array-id");
+		Bean scalarBean = mock(Bean.class);
+		when(scalarBean.getBizId()).thenReturn("scalar-id");
+
+		assertParameterDispatch("associations", List.of(collectionBean, "plain-id"), AttributeType.association);
+		assertParameterDispatch("associations", new Object[] {arrayBean, "plain-id"}, AttributeType.association);
+		assertParameterDispatch("association", scalarBean, AttributeType.association);
 	}
 
 	/** Covers the Collection path for AttributeType.enumeration (String codes in list). */
@@ -751,6 +801,7 @@ class HibernateSQLTest {
 
 	/** Covers the else (unrecognised type) fallback in createQueryFromSQL(). */
 	@Test
+	@SuppressWarnings("null")
 	void testUnrecognisedTypeParameterFallback() {
 		AbstractHibernatePersistenceTest.TestHibernatePersistence p = new AbstractHibernatePersistenceTest.TestHibernatePersistence();
 		try {
@@ -763,6 +814,24 @@ class HibernateSQLTest {
 			HibernateSQL sql = new HibernateSQL("SELECT 1", p);
 			// null type falls into the else-branch: result.setParameter(name, value)
 			sql.putParameter("x", Integer.valueOf(42), null);
+			assertNotNull(sql.scalarResults(Integer.class));
+		}
+		finally {
+			p.close();
+		}
+	}
+
+	private static void assertParameterDispatch(String name, Object value, AttributeType type) {
+		AbstractHibernatePersistenceTest.TestHibernatePersistence p = new AbstractHibernatePersistenceTest.TestHibernatePersistence();
+		try {
+			Session session = mock(Session.class);
+			setSession(p, session);
+			NativeQuery q = mock(NativeQuery.class);
+			when(session.createNativeQuery(anyString())).thenReturn(q);
+			when(q.list()).thenReturn(List.of());
+
+			HibernateSQL sql = new HibernateSQL("SELECT 1", p);
+			sql.putParameter(name, value, type);
 			assertNotNull(sql.scalarResults(Integer.class));
 		}
 		finally {

@@ -14,6 +14,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.skyve.cache.CSRFTokenCacheConfig;
+import org.skyve.cache.ConversationCacheConfig;
+import org.skyve.cache.GeoIPCacheConfig;
 import org.skyve.cache.SessionCacheConfig;
 import org.skyve.impl.util.UtilImpl;
 
@@ -30,6 +32,8 @@ public class SessionTrackingTest {
 	private String originalCacheDirectory;
 	private SessionCacheConfig originalSessionCache;
 	private CSRFTokenCacheConfig originalCsrfTokenCache;
+	private ConversationCacheConfig originalConversationCache;
+	private GeoIPCacheConfig originalGeoIPCache;
 	private Path cacheDirectory;
 
 	@Before
@@ -38,12 +42,16 @@ public class SessionTrackingTest {
 		originalCacheDirectory = UtilImpl.CACHE_DIRECTORY;
 		originalSessionCache = UtilImpl.SESSION_CACHE;
 		originalCsrfTokenCache = UtilImpl.CSRF_TOKEN_CACHE;
+		originalConversationCache = UtilImpl.CONVERSATION_CACHE;
+		originalGeoIPCache = UtilImpl.GEO_IP_CACHE;
 
 		cacheDirectory = Files.createTempDirectory("skyve-stateutil-cache");
 		UtilImpl.FORCE_NON_PERSISTENT_CACHING = true;
 		UtilImpl.CACHE_DIRECTORY = cacheDirectory.toString() + File.separator;
 		UtilImpl.SESSION_CACHE = new SessionCacheConfig(100, 10);
 		UtilImpl.CSRF_TOKEN_CACHE = new CSRFTokenCacheConfig(100, 10);
+		UtilImpl.CONVERSATION_CACHE = new ConversationCacheConfig(100, 10);
+		UtilImpl.GEO_IP_CACHE = new GeoIPCacheConfig(100, 10);
 
 		DefaultCaching.get().shutdown();
 		DefaultCaching.get().startup();
@@ -59,6 +67,8 @@ public class SessionTrackingTest {
 		UtilImpl.CACHE_DIRECTORY = originalCacheDirectory;
 		UtilImpl.SESSION_CACHE = originalSessionCache;
 		UtilImpl.CSRF_TOKEN_CACHE = originalCsrfTokenCache;
+		UtilImpl.CONVERSATION_CACHE = originalConversationCache;
+		UtilImpl.GEO_IP_CACHE = originalGeoIPCache;
 
 		if (cacheDirectory != null) {
 			try (Stream<Path> paths = Files.walk(cacheDirectory)) {
@@ -224,6 +234,54 @@ public class SessionTrackingTest {
 	}
 
 	@Test
+	public void clearTokensHttpSessionOverloadRemovesAllTokensForSession() {
+		HttpSession session = session("clear-http-session-" + System.nanoTime());
+		Integer token = StateUtil.createToken();
+		StateUtil.replaceToken(session.getId(), null, token);
+		StateUtil.clearTokens(session);
+		assertThat(StateUtil.checkToken(session, token), is(false));
+	}
+
+	@Test
+	public void replaceTokenHttpSessionOverloadAddsTokenForSession() {
+		HttpSession session = session("replace-http-session-" + System.nanoTime());
+		Integer token = StateUtil.createToken();
+		StateUtil.replaceToken(session, null, token);
+		assertThat(StateUtil.checkToken(session, token), is(true));
+		StateUtil.clearTokens(session);
+	}
+
+	@Test
+	public void evictExpiredSessionTokensTouchesExistingEntries() {
+		String sessionId = "evict-token-session-" + System.nanoTime();
+		Integer token = StateUtil.createToken();
+		StateUtil.replaceToken(sessionId, null, token);
+		StateUtil.evictExpiredSessionTokens();
+		assertThat(StateUtil.checkToken(sessionId, token), is(true));
+		StateUtil.clearTokens(sessionId);
+	}
+
+	@Test
+	public void evictExpiredConversationsTouchesExistingEntries() {
+		String cacheName = UtilImpl.CONVERSATION_CACHE.getName();
+		DefaultCaching.get().getEHCache(cacheName, String.class, byte[].class)
+						.put("conversation-" + System.nanoTime(), new byte[] { 1, 2, 3 });
+		StateUtil.evictExpiredConversations();
+		assertThat(DefaultCaching.get().getEHCache(cacheName, String.class, byte[].class) != null, is(true));
+	}
+
+	@Test
+	public void getGeoIPsReturnsConfiguredCache() {
+		assertThat(StateUtil.getGeoIPs(), is(org.hamcrest.CoreMatchers.notNullValue()));
+	}
+
+	@Test
+	public void logStateStatsRunsWithConfiguredCaches() {
+		StateUtil.logStateStats();
+		assertThat(StateUtil.getSessionCount(USER_ID), is(0));
+	}
+
+	@Test
 	public void replaceTokenWithSameOldAndNewDoesNothing() {
 		String sessionId = "same-token-" + System.nanoTime();
 		Integer token = StateUtil.createToken();
@@ -238,4 +296,3 @@ public class SessionTrackingTest {
 		return session;
 	}
 }
-

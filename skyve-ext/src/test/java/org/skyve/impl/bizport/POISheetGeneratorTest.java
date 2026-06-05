@@ -2,15 +2,31 @@ package org.skyve.impl.bizport;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.skyve.content.MimeType;
+import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.metadata.controller.Download;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
+import org.skyve.metadata.user.User;
 
-@SuppressWarnings("static-method")
+@SuppressWarnings({"static-method", "unchecked"})
 class POISheetGeneratorTest {
+	@AfterEach
+	void tearDown() throws Exception {
+		unbindPersistenceFromThread();
+	}
 
 	@Test
 	void constructorSetsModuleAndDocument() {
@@ -102,5 +118,53 @@ class POISheetGeneratorTest {
 		assertEquals("Col1", fields.get(0).getFieldTitle());
 		assertEquals("Col2", fields.get(1).getFieldTitle());
 		assertEquals("Col3", fields.get(2).getFieldTitle());
+	}
+
+	@Test
+	void getDownloadReturnsNullWhenModuleOrDocumentMissing() throws Exception {
+		assertNull(new POISheetGenerator(null, "Document").getDownload());
+		assertNull(new POISheetGenerator("module", null).getDownload());
+	}
+
+	@Test
+	void getDownloadCanGenerateTitleOnlyWorkbook() throws Exception {
+		bindPersistenceWithCustomer(customer());
+		POISheetGenerator gen = new POISheetGenerator("sales", "Order");
+		gen.setDownloadName("orders");
+		gen.setColumnTitlesOnly(Boolean.TRUE);
+		gen.addField("Name", "name");
+		gen.addField("Amount", "amount");
+
+		Download download = gen.getDownload();
+
+		assertEquals("orders.xlsx", download.getFileName());
+		assertEquals(MimeType.xlsx, download.getMimeType());
+		assertNotNull(download.getBytes());
+		assertTrue(download.getBytes().length > 0);
+	}
+
+	private static Customer customer() {
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		when(customer.getModule("sales")).thenReturn(module);
+		when(module.getDocument(customer, "Order")).thenReturn(document);
+		return customer;
+	}
+
+	private static void bindPersistenceWithCustomer(Customer customer) throws Exception {
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		User user = mock(User.class);
+		when(user.getCustomer()).thenReturn(customer);
+		when(persistence.getUser()).thenReturn(user);
+		Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
+		field.setAccessible(true);
+		((ThreadLocal<AbstractPersistence>) field.get(null)).set(persistence);
+	}
+
+	private static void unbindPersistenceFromThread() throws Exception {
+		Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
+		field.setAccessible(true);
+		((ThreadLocal<AbstractPersistence>) field.get(null)).remove();
 	}
 }

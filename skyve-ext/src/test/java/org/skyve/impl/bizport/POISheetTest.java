@@ -5,6 +5,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
 
@@ -13,6 +15,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.Test;
 import org.skyve.bizport.BizPortColumn;
 import org.skyve.bizport.SheetKey;
+import org.skyve.domain.ChildBean;
+import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
@@ -21,7 +25,10 @@ import org.skyve.domain.types.Decimal5;
 import org.skyve.domain.types.Decimal10;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
+import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
 
 @SuppressWarnings("static-method")
 public class POISheetTest {
@@ -473,5 +480,68 @@ public class POISheetTest {
 		sheet.setValue("num", Integer.valueOf(99));
 		String result = sheet.getValue("num", AttributeType.text, null);
 		assertNotNull(result);
+	}
+
+	@Test
+	public void existingChildDocumentSheetSetsParentReferenceWithoutDataRows() throws Exception {
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Document parentDocument = mock(Document.class);
+		when(customer.getModule("sales")).thenReturn(module);
+		when(module.getDocument(customer, "Order")).thenReturn(document);
+		when(document.getParentDocument(customer)).thenReturn(parentDocument);
+		when(parentDocument.getOwningModuleName()).thenReturn("sales");
+		when(parentDocument.getName()).thenReturn("Order");
+
+		try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+			XSSFSheet existing = existingSheet(workbook, null, ChildBean.PARENT_NAME);
+
+			POISheet sheet = new POISheet(customer, new POIWorkbook(true), existing, new UploadException());
+
+			assertEquals(existing.getSheetName(), sheet.getTitle());
+			BizPortColumn parentColumn = sheet.getColumn(ChildBean.PARENT_NAME);
+			assertNotNull(parentColumn);
+			assertEquals(new SheetKey("sales", "Order"), parentColumn.getReferencedSheet());
+			assertFalse(sheet.nextRow());
+		}
+	}
+
+	@Test
+	public void existingCollectionSheetSetsSimpleOwnerReferenceWithoutDataRows() throws Exception {
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		when(customer.getModule("sales")).thenReturn(module);
+		when(module.getDocument(customer, "Order")).thenReturn(document);
+
+		try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+			XSSFSheet existing = existingSheet(workbook, "lines", PersistentBean.OWNER_COLUMN_NAME);
+
+			POISheet sheet = new POISheet(customer, new POIWorkbook(true), existing, new UploadException());
+
+			BizPortColumn ownerColumn = sheet.getColumn(PersistentBean.OWNER_COLUMN_NAME);
+			assertNotNull(ownerColumn);
+			assertEquals(new SheetKey("sales", "Order"), ownerColumn.getReferencedSheet());
+			assertFalse(sheet.nextRow());
+		}
+	}
+
+	private static XSSFSheet existingSheet(XSSFWorkbook workbook, String collectionBinding, String... bindings) {
+		XSSFSheet sheet = workbook.createSheet("existing" + workbook.getNumberOfSheets());
+		sheet.createRow(POISheet.NAME_ROW);
+		sheet.getRow(POISheet.NAME_ROW).createCell(POISheet.MODULE_COLUMN).setCellValue("sales");
+		sheet.getRow(POISheet.NAME_ROW).createCell(POISheet.DOCUMENT_COLUMN).setCellValue("Order");
+		if (collectionBinding != null) {
+			sheet.getRow(POISheet.NAME_ROW).createCell(POISheet.COLLECTION_COLUMN).setCellValue(collectionBinding);
+		}
+
+		sheet.createRow(1);
+		sheet.createRow(2);
+		for (int i = 0; i < bindings.length; i++) {
+			sheet.getRow(1).createCell(i).setCellValue(bindings[i]);
+			sheet.getRow(2).createCell(i).setCellValue("Title " + i);
+		}
+		return sheet;
 	}
 }

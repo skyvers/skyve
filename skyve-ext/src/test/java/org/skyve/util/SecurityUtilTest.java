@@ -90,6 +90,59 @@ class SecurityUtilTest {
 		assertThat(capture.lastSend.getBody(), containsString("Event Message: Bad password"));
 	}
 
+	@Test
+	void testEmailFallsBackToSupportAddressAndIncludesOptionalFields() throws Exception {
+		UtilImpl.SECURITY_NOTIFICATIONS_EMAIL_ADDRESS = null;
+		SecurityLog securityLog = mock(SecurityLog.class);
+		when(securityLog.getTimestamp()).thenReturn(new Timestamp());
+		when(securityLog.getThreadId()).thenReturn(Long.valueOf(42));
+		when(securityLog.getThreadName()).thenReturn("worker");
+		when(securityLog.getSourceIP()).thenReturn("192.0.2.7");
+		when(securityLog.getUsername()).thenReturn("admin");
+		when(securityLog.getLoggedInUserId()).thenReturn("U1");
+		when(securityLog.getEventType()).thenReturn("Password Change");
+		when(securityLog.getEventMessage()).thenReturn("Changed");
+		when(securityLog.getProvenance()).thenReturn("SecurityUtilTest.java:1");
+
+		invokeEmail(securityLog);
+
+		assertEquals(1, capture.sendCount);
+		assertTrue(capture.lastSend.getRecipientEmailAddresses().contains("support@skyve.org"));
+		assertThat(capture.lastSend.getBody(), containsString("Thread ID: 42"));
+		assertThat(capture.lastSend.getBody(), containsString("Thread Name: worker"));
+		assertThat(capture.lastSend.getBody(), containsString("Username: admin"));
+		assertThat(capture.lastSend.getBody(), containsString("Logged in User ID: U1"));
+		assertThat(capture.lastSend.getBody(), containsString("Provenance: SecurityUtilTest.java:1"));
+	}
+
+	@Test
+	void testEmailDoesNotSendWithoutRecipientAddress() throws Exception {
+		UtilImpl.SECURITY_NOTIFICATIONS_EMAIL_ADDRESS = null;
+		UtilImpl.SUPPORT_EMAIL_ADDRESS = null;
+
+		invokeEmail(mock(SecurityLog.class));
+
+		assertEquals(0, capture.sendCount);
+	}
+
+	@Test
+	void testEmailDoesNotSendWhenSmtpIsLocalhost() throws Exception {
+		UtilImpl.SMTP = "localhost";
+
+		invokeEmail(mock(SecurityLog.class));
+
+		assertEquals(0, capture.sendCount);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testFormatTimestampReturnsNullForNullTimestamp() throws Exception {
+		Method method = SecurityUtil.class.getDeclaredMethod("formatTimestampWithServerAndUTCZone", Timestamp.class);
+		method.setAccessible(true);
+
+		org.junit.jupiter.api.Assertions.assertNull(method.invoke(null, new Object[] { null }));
+	}
+
 	private static void invokeEmail(SecurityLog securityLog) throws Exception {
 		Method method = SecurityUtil.class.getDeclaredMethod("email", SecurityLog.class);
 		method.setAccessible(true);
