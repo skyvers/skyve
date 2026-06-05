@@ -39,6 +39,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.skyve</groupId>
+			<artifactId>skyve-maven-plugin</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.skyve</groupId>
 			<artifactId>skyve-war</artifactId>
 			<version>${project.version}</version>
 			<classifier>classes</classifier>
