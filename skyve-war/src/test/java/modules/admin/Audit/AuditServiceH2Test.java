@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -74,6 +75,15 @@ class AuditServiceH2Test extends AbstractH2Test {
 	}
 
 	@Test
+	void getRdbmsVersionsReturnsEmptyWhenComparingNonUpdateSource() {
+		Audit source = audit("source", "Source", 20L, Operation.delete);
+
+		List<Bean> versions = new AuditService().getRdbmsVersions(source, true);
+
+		assertTrue(versions.isEmpty());
+	}
+
+	@Test
 	void sourceVersionChangedClearsComparisonForNonUpdateSource() {
 		Audit bean = audit("bean", "Bean", 30L, Operation.update);
 		Audit source = audit("source", "Source", 20L, Operation.delete);
@@ -98,6 +108,32 @@ class AuditServiceH2Test extends AbstractH2Test {
 		service.sourceVersionChanged(bean);
 
 		assertThat(bean.getComparisonVersion(), is(comparison));
+	}
+
+	@Test
+	void sourceVersionChangedFallsBackToArchivesWhenRdbmsDoesNotContainVersion() {
+		Audit bean = audit("bean", "Bean", 40L, Operation.update);
+		Audit source = audit("source", "Source", 30L, Operation.update);
+		Audit comparison = audit("comparison", "Comparison", 20L, Operation.update);
+		bean.setSourceVersion(source);
+		TestAuditService service = new TestAuditService(List.of(new DomainValue("comparison", "Comparison")), null);
+		service.archiveAudit = comparison;
+
+		service.sourceVersionChanged(bean);
+
+		assertThat(bean.getComparisonVersion(), is(comparison));
+	}
+
+	@Test
+	void sourceVersionChangedLeavesComparisonNullWhenSelectedVersionCannotBeRetrieved() {
+		Audit bean = audit("bean", "Bean", 40L, Operation.update);
+		Audit source = audit("source", "Source", 30L, Operation.update);
+		bean.setSourceVersion(source);
+		TestAuditService service = new TestAuditService(List.of(new DomainValue("missing", "Missing")), null);
+
+		service.sourceVersionChanged(bean);
+
+		assertNull(bean.getComparisonVersion());
 	}
 
 	@Test
@@ -154,6 +190,7 @@ class AuditServiceH2Test extends AbstractH2Test {
 	private static final class TestAuditService extends AuditService {
 		private final List<DomainValue> versions;
 		private final Audit rdbmsAudit;
+		private Audit archiveAudit;
 
 		private TestAuditService(List<DomainValue> versions, Audit rdbmsAudit) {
 			this.versions = versions;
@@ -168,6 +205,11 @@ class AuditServiceH2Test extends AbstractH2Test {
 		@Override
 		public Audit retrieveFromRdbms(String bizId) {
 			return rdbmsAudit;
+		}
+
+		@Override
+		public Audit retrieveFromArchives(String bizId) {
+			return archiveAudit;
 		}
 	}
 }

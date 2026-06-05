@@ -114,8 +114,7 @@ public class FlutterInitMojo extends AbstractSkyveMojo {
 	
 	            modocWhitelist.forEach(config::addModocWhitelistEntry);
 	
-	            FlutterGenerator generator = new FlutterGenerator(config);
-	            generator.generate();
+	            generate(config);
             }
 	        finally {
                 weld.shutdown();
@@ -136,8 +135,8 @@ public class FlutterInitMojo extends AbstractSkyveMojo {
      * @throws DependencyResolutionRequiredException if Maven cannot resolve the test classpath
      * @throws MalformedURLException if a classpath element cannot be converted to a URL
      */
-    @SuppressWarnings("resource") // NB for weld use
-	private Weld bootstrapSkyve() throws DependencyResolutionRequiredException, MalformedURLException {
+    @SuppressWarnings("java:S2696") // Part of init and only ever called once, so static mutability is acceptable here.
+	Weld bootstrapSkyve() throws DependencyResolutionRequiredException, MalformedURLException {
         configureClasspath(srcDir);
 
         String output = project.getBuild()
@@ -151,8 +150,7 @@ public class FlutterInitMojo extends AbstractSkyveMojo {
         final String DB_DIALECT = "org.skyve.impl.persistence.hibernate.dialect.H2SpatialDialect";
 
         Weld weld = new Weld();
-        weld.addPackage(true, SkyveCDIProducer.class);
-        weld.initialize();
+        initialize(weld);
 
         Class<BeforeShutdownImpl> bsi = BeforeShutdownImpl.class;
         debug(bsi + "");
@@ -168,18 +166,34 @@ public class FlutterInitMojo extends AbstractSkyveMojo {
         UtilImpl.JOB_SCHEDULER = false;
         UtilImpl.CONFIGURATION = new TreeMap<>();
 
-        ProvidedRepositoryFactory.set(new LocalDesignRepository());
+        setRepository();
 
-        String MOJO_USERNAME = "flutter-gen-user";
+        String mojoUsername = "flutter-gen-user";
         final SuperUser user = new SuperUser();
         user.setCustomerName(customer);
-        user.setName(MOJO_USERNAME);
-        user.setId(MOJO_USERNAME);
+        user.setName(mojoUsername);
+        user.setId(mojoUsername);
 
-        final AbstractPersistence persistence = AbstractPersistence.get();
+        final AbstractPersistence persistence = getPersistence();
         persistence.setUser(user);
 
         return weld;
+    }
+
+	@SuppressWarnings({"static-method", "resource"}) // test seam
+	void initialize(Weld weld) {
+        weld.addPackage(true, SkyveCDIProducer.class);
+        weld.initialize();
+    }
+
+	@SuppressWarnings("static-method") // test seam
+	void setRepository() {
+        ProvidedRepositoryFactory.set(new LocalDesignRepository());
+    }
+
+	@SuppressWarnings("static-method") // test seam
+	AbstractPersistence getPersistence() {
+        return AbstractPersistence.get();
     }
 
     /**
@@ -191,6 +205,7 @@ public class FlutterInitMojo extends AbstractSkyveMojo {
      * @throws MojoFailureException if the directory already exists and {@code clear} is {@code false}
      * @throws MojoExecutionException if the directory cannot be created or cleared
      */
+	@SuppressWarnings("java:S3776") // complexity OK
 	private Path prepareTargetDirectory(String dir, boolean clear) throws MojoFailureException, MojoExecutionException {
         Path root = Path.of(dir);
         if (root.toFile()
@@ -238,7 +253,6 @@ public class FlutterInitMojo extends AbstractSkyveMojo {
      * @param msg the message to log
      */
 	private void debug(CharSequence msg) {
-
         getLog().debug("[flutter-init] " + msg);
     }
 
@@ -248,7 +262,6 @@ public class FlutterInitMojo extends AbstractSkyveMojo {
      * @param msg the message to log
      */
 	private void info(CharSequence msg) {
-
         getLog().info("[flutter-init] " + msg);
     }
 
@@ -259,8 +272,12 @@ public class FlutterInitMojo extends AbstractSkyveMojo {
      * @param value the parameter value
      */
 	private void debugParam(String name, Object value) {
-
         debug(name + "=" + value);
     }
 
+	@SuppressWarnings("static-method") // test seam
+	void generate(GeneratorConfig config) throws IOException {
+        FlutterGenerator generator = new FlutterGenerator(config);
+        generator.generate();
+    }
 }

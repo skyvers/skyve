@@ -2,7 +2,8 @@ package modules.admin.UserProxy;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 import org.skyve.CORE;
@@ -14,9 +15,16 @@ import modules.admin.domain.User;
 import util.AbstractH2TestForJUnit4;
 
 public class UserProxyExtensionTest extends AbstractH2TestForJUnit4 {
+	@Test
+	@SuppressWarnings("static-method")
+	public void testUnpersistedUserProxyHasNoMetadataUser() {
+		UserProxyExtension userProxy = new UserProxyExtension();
+
+		assertNull(userProxy.toMetaDataUser());
+	}
 
 	@Test
-	@SuppressWarnings({ "deprecation", "static-method" })
+	@SuppressWarnings("static-method")
 	public void testUserFromUserProxy() throws Exception {
 		// setup test data
 		UserExtension ue = new DataBuilder().fixture(FixtureType.crud).build(User.MODULE_NAME, User.DOCUMENT_NAME);

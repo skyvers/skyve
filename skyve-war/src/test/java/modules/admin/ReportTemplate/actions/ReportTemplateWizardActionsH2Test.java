@@ -15,7 +15,10 @@ import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
+import modules.admin.User.UserExtension;
 import modules.admin.ReportTemplate.ReportTemplateExtension;
+import modules.admin.domain.Generic;
+import modules.admin.domain.User;
 import modules.admin.domain.ReportTemplate;
 import modules.admin.domain.ReportTemplate.GenerateExisting;
 import modules.admin.domain.ReportTemplate.WizardState;
@@ -114,6 +117,37 @@ class ReportTemplateWizardActionsH2Test extends AbstractH2Test {
 		bean.setNewUserToEmail(null);
 
 		AddUserToEmail action = new AddUserToEmail();
+		Assertions.assertThrows(
+				org.skyve.domain.messages.ValidationException.class,
+				() -> action.execute(bean, webContext));
+	}
+
+	@Test
+	void addUserToEmailAddsSelectedUserAndEmailEntry() throws Exception {
+		ReportTemplate bean = db.build(ReportTemplate.MODULE_NAME, ReportTemplate.DOCUMENT_NAME);
+		UserExtension user = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		bean.setNewUserToEmail(user);
+
+		ServerSideActionResult<ReportTemplate> result = new AddUserToEmail().execute(bean, webContext);
+
+		assertThat(result.getBean(), is(bean));
+		assertTrue(bean.getUsersToEmail().contains(user));
+		assertEquals(1, bean.getEditUsersToEmail().size());
+		Generic emailEntry = bean.getEditUsersToEmail().get(0);
+		assertEquals(user.getBizId(), emailEntry.getId1());
+		assertEquals(user.getContact().getEmail1(), emailEntry.getText5001());
+		assertThat(bean.getNewUserToEmail(), is(nullValue()));
+	}
+
+	@Test
+	void addUserToEmailRejectsDuplicateSelectedUser() {
+		ReportTemplate bean = db.build(ReportTemplate.MODULE_NAME, ReportTemplate.DOCUMENT_NAME);
+		UserExtension user = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		bean.getUsersToEmail().add(user);
+		bean.setNewUserToEmail(user);
+
+		AddUserToEmail action = new AddUserToEmail();
+
 		Assertions.assertThrows(
 				org.skyve.domain.messages.ValidationException.class,
 				() -> action.execute(bean, webContext));

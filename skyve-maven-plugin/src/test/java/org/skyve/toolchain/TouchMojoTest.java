@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,5 +52,16 @@ class TouchMojoTest {
 		Files.createDirectories(tempDir.resolve("deployments"));
 		mojo.execute();
 		assertTrue(tempDir.resolve("deployments/relative.txt").toFile().exists());
+	}
+
+	@Test
+	void executeWrapsTouchFailure() throws Exception {
+		Files.writeString(tempDir.resolve("not-a-directory"), "");
+		ReflectionTestUtils.setField(mojo, "touchFile", "not-a-directory/child.txt");
+
+		MojoExecutionException exception = org.junit.jupiter.api.Assertions.assertThrows(MojoExecutionException.class,
+				mojo::execute);
+
+		assertTrue(exception.getMessage().contains("Failed to touch"));
 	}
 }

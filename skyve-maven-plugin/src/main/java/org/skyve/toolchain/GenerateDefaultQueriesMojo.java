@@ -43,11 +43,16 @@ public class GenerateDefaultQueriesMojo extends AbstractSkyveMojo {
 			final boolean includeAssociationBizKeys = (generateDefaultQueriesConfig != null) && generateDefaultQueriesConfig.isIncludeAssociationBizKeys();
 
 			configureClasspath();
-			QueryGenerator.main(new String[] {customerName, moduleName, String.valueOf(includeAssociationBizKeys)});
+			generateDefaultQueries(new String[] {customerName, moduleName, String.valueOf(includeAssociationBizKeys)});
 		}
 		catch (Exception e) {
-			LOGGER.error("Failed to generated default queries.", e);
+			LOGGER.error("Failed to generated default queries.");
 			throw new MojoExecutionException("Failed to generate default queries.", e);
 		}
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	void generateDefaultQueries(String[] arguments) throws Exception {
+		QueryGenerator.main(arguments);
 	}
 }

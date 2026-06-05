@@ -61,17 +61,27 @@ public class GenerateEditViewMojo extends AbstractSkyveMojo {
 			final String overridenViewName = (generateEditViewConfig != null) ? generateEditViewConfig.getOverridenViewName() : null;
 
 			configureClasspath(srcDir);
-			ProvidedRepositoryFactory.set(new LocalDesignRepository(srcDir, false));
-			ViewGenerator.main(new String[] {srcDir,
-												customerName,
-												moduleName,
-												documentName,
-												Boolean.toString(isCustomerOverriden),
-												overridenViewName });
+			setRepository();
+			generateEditView(new String[] {srcDir,
+											customerName,
+											moduleName,
+											documentName,
+											Boolean.toString(isCustomerOverriden),
+											overridenViewName });
 		}
 		catch (Exception e) {
-			LOGGER.error("Failed to generate edit view.", e);
+			LOGGER.error("Failed to generate edit view.");
 			throw new MojoExecutionException("Failed to generate edit view.", e);
 		}
+	}
+
+	// test seam
+	void setRepository() {
+		ProvidedRepositoryFactory.set(new LocalDesignRepository(srcDir, false));
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	void generateEditView(String[] arguments) throws Exception {
+		ViewGenerator.main(arguments);
 	}
 }

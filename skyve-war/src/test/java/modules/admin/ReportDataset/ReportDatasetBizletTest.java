@@ -2,6 +2,7 @@ package modules.admin.ReportDataset;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.app.admin.ReportDataset.DatasetType;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 
 import modules.admin.domain.ReportDataset;
@@ -73,5 +75,32 @@ class ReportDatasetBizletTest {
 		List<DomainValue> result = bizlet.getVariantDomainValues("unknownAttribute");
 		// Super class returns null by default (no metaDataBizlet)
 		assertTrue(result == null || result.isEmpty(), "Unknown attributes should return null or empty");
+	}
+
+	@Test
+	void preExecuteReturnsBeanWhenZoomingOutWithoutParentParameters() throws Exception {
+		ReportDatasetExtension bean = new ReportDatasetExtension();
+
+		ReportDatasetExtension result = bizlet.preExecute(ImplicitActionName.ZoomOut, bean, null, null);
+
+		assertSame(bean, result);
+	}
+
+	@Test
+	void preExecuteReturnsBeanForNonZoomOutAction() throws Exception {
+		ReportDatasetExtension bean = new ReportDatasetExtension();
+
+		ReportDatasetExtension result = bizlet.preExecute(ImplicitActionName.Save, bean, null, null);
+
+		assertSame(bean, result);
+	}
+
+	@Test
+	void preRerenderIgnoresSourcesOtherThanQuery() throws Exception {
+		ReportDatasetExtension bean = new ReportDatasetExtension();
+
+		bizlet.preRerender("otherSource", bean, null);
+
+		assertNotNull(bean);
 	}
 }

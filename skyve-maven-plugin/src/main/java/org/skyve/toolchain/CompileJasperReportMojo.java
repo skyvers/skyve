@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.sf.jasperreports.engine.DefaultJasperReportsContext;
+import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperReportsContext;
 import net.sf.jasperreports.engine.query.QueryExecuterFactory;
@@ -51,12 +52,12 @@ public class CompileJasperReportMojo extends AbstractSkyveMojo {
 												SkyveDocumentExecuterFactory.class.getCanonicalName());
 			for (File report : reportsToCompile) {
 				final String compiledReportFilename = report.getAbsolutePath().replace(JRXML_EXTENSION, JASPER_EXTENSION);
-				JasperCompileManager.compileReportToFile(report.getAbsolutePath(), compiledReportFilename);
+				compileReport(report, compiledReportFilename);
 				LOGGER.info("Successfully compiled report {} to {}.", report.getAbsolutePath(), compiledReportFilename);
 			}
 		}
 		catch (Exception e) {
-			LOGGER.error("Failed to compile report.", e);
+			LOGGER.error("Failed to compile report.");
 			throw new MojoExecutionException("Failed to compile report.", e);
 		}
 	}
@@ -68,7 +69,7 @@ public class CompileJasperReportMojo extends AbstractSkyveMojo {
 	 * @return the matching report templates
 	 * @throws FileNotFoundException if the Skyve modules directory cannot be found
 	 */
-	private List<File> getReports(String reportName) throws FileNotFoundException {
+	List<File> getReports(String reportName) throws FileNotFoundException {
 		final Path modulesDirectory = getModulesDirectory();
 		LOGGER.info("Searching for reports in {}.", modulesDirectory);
 		final String extension = "." + JRXML_EXTENSION;
@@ -78,5 +79,10 @@ public class CompileJasperReportMojo extends AbstractSkyveMojo {
 																new String[] {JRXML_EXTENSION},
 																true);
 		return reports.stream().filter(report -> report.getName().equals(reportNameWithExtension)).toList();
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	void compileReport(File report, String compiledReportFilename) throws JRException {
+		JasperCompileManager.compileReportToFile(report.getAbsolutePath(), compiledReportFilename);
 	}
 }

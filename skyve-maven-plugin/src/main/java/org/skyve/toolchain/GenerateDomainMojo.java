@@ -62,19 +62,44 @@ public class GenerateDomainMojo extends AbstractSkyveMojo {
 
 		try {
 			configureClasspath(srcDir);
-			DomainGenerator.registerCustomisations(generateDomainConfig.getCustomisationsClass());
-			DomainGenerator.generate(generateDomainConfig.isDebug(),
-										generateDomainConfig.isMultiTenant(),
-										DialectOptions.valueOf(generateDomainConfig.getDialect()),
-										srcDir,
-										generatedDir,
-										testDir,
-										generatedTestDir,
-										generateDomainConfig.getExcludedModules().split(","));
-		}
-		catch (Exception e) {
-			LOGGER.error("Failed to generated domain.", e);
+				registerCustomisations(generateDomainConfig.getCustomisationsClass());
+				generateDomain(generateDomainConfig.isDebug(),
+								generateDomainConfig.isMultiTenant(),
+								DialectOptions.valueOf(generateDomainConfig.getDialect()),
+								srcDir,
+								generatedDir,
+								testDir,
+								generatedTestDir,
+								generateDomainConfig.getExcludedModules().split(","));
+			}
+			catch (Exception e) {
+				LOGGER.error("Failed to generated domain.");
 			throw new MojoExecutionException("Failed to generate domain.", e);
+			}
 		}
+
+	@SuppressWarnings("static-method") // test seam
+	void registerCustomisations(String customisationsClassName) throws Exception {
+		DomainGenerator.registerCustomisations(customisationsClassName);
+	}
+
+	@SuppressWarnings({"static-method", "java:S107"}) // test seam
+	void generateDomain(boolean debug,
+							boolean multiTenant,
+							DialectOptions dialect,
+							String sourceDirectory,
+							String generatedDirectory,
+							String testDirectory,
+							String generatedTestDirectory,
+							String[] excludedModules)
+	throws Exception {
+		DomainGenerator.generate(debug,
+									multiTenant,
+									dialect,
+									sourceDirectory,
+									generatedDirectory,
+									testDirectory,
+									generatedTestDirectory,
+									excludedModules);
 	}
 }

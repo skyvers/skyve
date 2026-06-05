@@ -119,6 +119,7 @@ public class SystemDocumentationMojo extends AbstractSkyveMojo {
 	 * @throws MojoExecutionException if report generation fails
 	 */
 	@Override
+	@SuppressWarnings("java:S2696") // set statics here as this is single threaded
 	public void execute() throws MojoExecutionException {
 		try {
 			configureClasspath(srcDir);
@@ -146,11 +147,11 @@ public class SystemDocumentationMojo extends AbstractSkyveMojo {
 			UtilImpl.SESSION_CACHE = new SessionCacheConfig(10, 0, 0, 60);
 			UtilImpl.GEO_IP_CACHE = new GeoIPCacheConfig(10, 0, 0, 60);
 
-			ProvidedRepositoryFactory.set(new DefaultRepository());
-			Customer c = ProvidedRepositoryFactory.get().getCustomer(customer);
-			if (c == null) {
-				throw new IllegalStateException("Customer " + customer + " does not exist");
-			}
+				ProvidedRepositoryFactory.set(new DefaultRepository());
+				Customer c = getCustomer(customer);
+				if (c == null) {
+					throw new IllegalStateException("Customer " + customer + " does not exist");
+				}
 
 			final SuperUser user = new SuperUser();
 			user.setCustomerName(customer);
@@ -160,16 +161,16 @@ public class SystemDocumentationMojo extends AbstractSkyveMojo {
 			AbstractPersistence.IMPLEMENTATION_CLASS = HibernateContentPersistence.class;
 			AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = RDBMSDynamicPersistence.class;
 
-			final AbstractPersistence persistence = AbstractPersistence.get();
-			persistence.setUser(user);
+				final AbstractPersistence persistence = getPersistence();
+				persistence.setUser(user);
 
-			File temp = pdf();
-			FileUtil.copy(temp, new File("./target/system-documentation.pdf"));
-			FileUtil.delete(new File("./target/temp"));
+				File temp = pdf();
+				copy(temp, new File("./target/system-documentation.pdf"));
+				delete(new File("./target/temp"));
 			
 		}
 		catch (Exception e) {
-			LOGGER.error("Failed to generate system documentation.", e);
+			LOGGER.error("Failed to generate system documentation.");
 			throw new MojoExecutionException("Failed to generate system documentation.", e);
 		}
 	}
@@ -191,9 +192,10 @@ public class SystemDocumentationMojo extends AbstractSkyveMojo {
 	 * @return the template parameter map
 	 * @throws IOException if report assets cannot be loaded
 	 */
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	private Map<String, Object> prepareParameters() throws IOException {
 		Map<String, Object> result = new HashMap<>();
-		Customer c = CORE.getCustomer();
+		Customer c = getCustomer();
 
 		String[] excludedModuleNames = (excludedModules == null) ? new String[0] : excludedModules.split(",");
 
@@ -292,9 +294,11 @@ public class SystemDocumentationMojo extends AbstractSkyveMojo {
 				for (String conditionName : document.getConditionNames()) {
 					Map<String, Object> conditionData = new HashMap<>();
 					Condition condition = document.getCondition(conditionName);
-					conditionData.put("name", conditionName);
-					conditionData.put("documentation", condition.getDocumentation());
-					conditions.add(conditionData);
+					if (condition != null) {
+						conditionData.put("name", conditionName);
+						conditionData.put("documentation", condition.getDocumentation());
+						conditions.add(conditionData);
+					}
 				}
 				documentData.put("conditions", conditions);
 
@@ -405,6 +409,31 @@ public class SystemDocumentationMojo extends AbstractSkyveMojo {
 		
 		return result;
 	}
+
+	@SuppressWarnings("static-method") // test seam
+	Customer getCustomer() {
+		return CORE.getCustomer();
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	Customer getCustomer(String customerName) {
+		return ProvidedRepositoryFactory.get().getCustomer(customerName);
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	AbstractPersistence getPersistence() {
+		return AbstractPersistence.get();
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	void copy(File source, File destination) throws IOException {
+		FileUtil.copy(source, destination);
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	void delete(File file) throws IOException {
+		FileUtil.delete(file);
+	}
 	
 	/**
 	 * Generates a PlantUML diagram for the supplied document when the document has relationships to model.
@@ -413,6 +442,7 @@ public class SystemDocumentationMojo extends AbstractSkyveMojo {
 	 * @param customer the current customer context used for attribute resolution
 	 * @return the generated PlantUML markup, or {@code null} when no relationships are present
 	 */
+	@SuppressWarnings("java:S3776") // complexity OK
 	private static String generateDiagram(final Document document, final Customer customer) {
 		boolean noDiagram = true; // determines whether to return a diagram or null
 
@@ -527,6 +557,7 @@ public class SystemDocumentationMojo extends AbstractSkyveMojo {
 		
 		// append the referenced document names
 		for (String name : relatedNames) {
+			@SuppressWarnings("java:S2692") // must be > 0
 			boolean interfaceName = (name.indexOf('.') > 0); // interface class name, not a document
 			result.append(interfaceName ? "interface " : "class ");
 			result.append(name).append("\n");

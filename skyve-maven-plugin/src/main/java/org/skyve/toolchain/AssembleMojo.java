@@ -68,7 +68,7 @@ public class AssembleMojo extends AbstractMojo {
 				}
 			}
 
-			final MavenSkyveProjectCreator creator = new MavenSkyveProjectCreator()
+			final MavenSkyveProjectCreator creator = newProjectCreator()
 														.projectName(project.getName())
 														.projectDirectory(project.getBasedir().getAbsolutePath())
 														.customerName(customer)
@@ -79,12 +79,32 @@ public class AssembleMojo extends AbstractMojo {
 				creator.copyFromProject(true);
 			}
 
-			final MavenSkyveProject me = creator.initialise();
-			me.clearBeforeAssemble();
-			me.assemble();
+			final MavenSkyveProject me = initialise(creator);
+			clearBeforeAssemble(me);
+			assemble(me);
 		}
 		catch (Exception e) {
 			throw new MojoExecutionException("Failed to assemble.", e);
 		}
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	MavenSkyveProjectCreator newProjectCreator() {
+		return new MavenSkyveProjectCreator();
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	MavenSkyveProject initialise(MavenSkyveProjectCreator creator) {
+		return creator.initialise();
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	void clearBeforeAssemble(MavenSkyveProject projectToAssemble) {
+		projectToAssemble.clearBeforeAssemble();
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	void assemble(MavenSkyveProject projectToAssemble) throws IOException {
+		projectToAssemble.assemble();
 	}
 }

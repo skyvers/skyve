@@ -20,6 +20,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.skyve.CORE;
+import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.content.MimeType;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.domain.messages.ValidationException;
@@ -115,6 +116,16 @@ class DataMaintenanceActionsH2Test extends AbstractH2Test {
 		ServerSideActionResult<DataMaintenance> result = action.execute(bean, webContext);
 		assertThat(result, is(notNullValue()));
 		assertThat(result.getBean(), is(notNullValue()));
+	}
+
+	@Test
+	void dataMaintenanceExportWithNoSelectedDocumentReturnsWorkbook() throws Exception {
+		bean.setModDocName(null);
+		webContext.setCurrentBean(bean);
+
+		BizPortWorkbook workbook = new DataMaintenanceExportAction().bizExport(webContext);
+
+		assertThat(workbook, is(notNullValue()));
 	}
 
 	// ---- DeleteBackup action ----

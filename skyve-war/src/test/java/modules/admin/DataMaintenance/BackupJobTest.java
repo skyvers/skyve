@@ -90,6 +90,35 @@ class BackupJobTest extends AbstractH2Test {
 	}
 
 	@Test
+	void executeWithNoDailyRetentionSkipsBackupAndCompletes() throws Exception {
+		modules.admin.domain.DataMaintenance dm = modules.admin.domain.DataMaintenance.newInstance();
+		dm.setWeeklyBackupRetention(Integer.valueOf(1));
+		BackupJob job = new LocalBackupJob(dm, tempDir.resolve("unused.zip").toFile());
+
+		job.execute();
+
+		assertEquals(100, job.getPercentComplete());
+		assertTrue(job.getLog().stream().anyMatch(entry -> entry.contains("No daily backup taken")));
+		assertTrue(job.getLog().stream().anyMatch(entry -> entry.contains("Finished Backup")));
+		assertFalse(Files.exists(tempDir.resolve("unused.zip")));
+	}
+
+	@Test
+	void executeWithDailyOnlyRetentionLogsSkippedWeeklyAndMonthlyCopies() throws Exception {
+		Path sourceZip = createFile("daily-only.zip");
+		modules.admin.domain.DataMaintenance dm = modules.admin.domain.DataMaintenance.newInstance();
+		dm.setDailyBackupRetention(Integer.valueOf(1));
+		BackupJob job = new LocalBackupJob(dm, sourceZip.toFile());
+
+		job.execute();
+
+		assertEquals(100, job.getPercentComplete());
+		assertTrue(Files.exists(tempDir.resolve("DAILY_daily-only.zip")));
+		assertTrue(job.getLog().stream().anyMatch(entry -> entry.contains("No weekly backup taken")));
+		assertTrue(job.getLog().stream().anyMatch(entry -> entry.contains("No monthly backup taken")));
+	}
+
+	@Test
 	void defaultFactoriesCreateBackupCollaborators() {
 		ExposedBackupJob job = new ExposedBackupJob();
 

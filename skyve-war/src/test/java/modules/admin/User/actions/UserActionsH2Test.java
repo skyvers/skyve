@@ -3,7 +3,10 @@ package modules.admin.User.actions;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.lang.reflect.Field;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,23 +17,28 @@ import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
+import jakarta.inject.Inject;
+import modules.admin.User.UserService;
 import modules.admin.User.UserExtension;
 import modules.admin.domain.Contact;
 import modules.admin.domain.Contact.ContactType;
 import modules.admin.domain.User;
+import modules.admin.domain.User.WizardState;
 import util.AbstractH2Test;
 
 /**
  * H2-backed tests for User actions: GenerateUniqueUserName and Check validation.
  */
-public class UserActionsH2Test extends AbstractH2Test {
+class UserActionsH2Test extends AbstractH2Test {
 
 	private DataBuilder db;
 	private UserExtension userBean;
 	private MockWebContext webContext;
+	@Inject
+	private transient UserService userService;
 
 	@BeforeEach
-	void setup() throws Exception {
+	void setup() {
 		db = new DataBuilder().fixture(FixtureType.crud);
 		userBean = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
 		webContext = new MockWebContext();
@@ -102,5 +110,30 @@ public class UserActionsH2Test extends AbstractH2Test {
 		Check action = new Check();
 		ServerSideActionResult<UserExtension> result = action.execute(userBean, webContext);
 		assertThat(result, is(notNullValue()));
+	}
+
+	@Test
+	void newActionSeedsContactFromSearchAndAdvancesWizard() throws Exception {
+		userBean.setSearchContactName("New Contact");
+		userBean.setSearchEmail("new-contact-" + System.nanoTime() + "@example.com");
+		userBean.setWizardState(WizardState.confirmContact);
+		New action = new New();
+		injectUserService(action);
+
+		ServerSideActionResult<UserExtension> result = action.execute(userBean, webContext);
+
+		assertThat(result.getBean(), is(userBean));
+		assertTrue(userBean.getCandidateContacts().isEmpty());
+		assertThat(userBean.getContact(), is(notNullValue()));
+		assertThat(userBean.getContact().getName(), is("New Contact"));
+		assertThat(userBean.getContact().getEmail1(), is(notNullValue()));
+		assertThat(userBean.getContact().getContactType(), is(ContactType.person));
+		assertThat(userBean.getWizardState(), is(WizardState.confirmUserNameAndPassword));
+	}
+
+	private void injectUserService(New action) throws Exception {
+		Field field = New.class.getDeclaredField("userService");
+		field.setAccessible(true);
+		field.set(action, userService);
 	}
 }
