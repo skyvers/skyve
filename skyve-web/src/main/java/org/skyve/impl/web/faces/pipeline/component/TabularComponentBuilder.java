@@ -4373,6 +4373,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		// The control sets its width by default based on the font metrics of the drop-down values.
 		// Note: We can't set text alignment of a selectOneMenu easily through inline styling
 		setSizeAndTextAlignStyle(result, null, pixelWidth, null, null, null, null, null);
+		result.setFilter(true);
+		result.setFilterMatchMode("contains");
+		result.setFilterPlaceholder("Search");
 		result.setConverter(new SelectItemsBeanConverter());
 		return result;
 	}

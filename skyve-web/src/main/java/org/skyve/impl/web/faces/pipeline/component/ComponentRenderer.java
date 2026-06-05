@@ -421,6 +421,11 @@ public class ComponentRenderer {
 		else if (component instanceof SelectOneMenu pick) {
 			tagName = "p:selectOneMenu";
 			
+			if (pick.isFilter()) {
+				putValue(attributes, "filter", Boolean.TRUE);
+				putValue(attributes, "filterMatchMode", pick.getFilterMatchMode());
+				putValue(attributes, "filterPlaceholder", pick.getFilterPlaceholder());
+			}
 			putValue(attributes, "style", pick.getStyle());
 			putValue(attributes, "styleClass", pick.getStyleClass());
 		}
