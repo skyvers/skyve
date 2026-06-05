@@ -15,6 +15,9 @@ import org.skyve.metadata.view.model.comparison.ComparisonProperty;
 
 import modules.admin.domain.Audit;
 import modules.admin.domain.Audit.Operation;
+import modules.admin.domain.Contact;
+import modules.admin.domain.User;
+import modules.admin.domain.UserProxy;
 import util.AbstractH2Test;
 
 class AuditComparisonModelH2Test extends AbstractH2Test {
@@ -133,12 +136,66 @@ class AuditComparisonModelH2Test extends AbstractH2Test {
 		assertThat(child.getProperties().get(0).getName(), is("description"));
 	}
 
+	@Test
+	@SuppressWarnings("static-method")
+	void rootBindingUsesDocumentMetadataWhenAvailable() throws Exception {
+		AuditComparisonModel model = new AuditComparisonModel();
+		Audit audit = metadataAudit(Operation.insert,
+				"{\"\":" + objectWithoutBizKey("user-id", "\"" + UserProxy.userNamePropertyName + "\":\"person@example.com\"") + "}",
+				null);
+
+		ComparisonComposite root = model.getComparisonComposite(audit);
+
+		assertThat(root.getBizId(), is("user-id"));
+		assertThat(root.getDocument().getName(), is(User.DOCUMENT_NAME));
+		assertThat(root.getRelationshipDescription(), is(root.getDocument().getLocalisedSingularAlias()));
+		assertThat(root.getBusinessKeyDescription(), is(root.getDocument().getLocalisedSingularAlias()));
+		ComparisonProperty property = root.getProperties().get(0);
+		assertThat(property.getName(), is(UserProxy.userNamePropertyName));
+		assertThat(property.getNewValue(), is("person@example.com"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void childBindingUsesReferenceMetadataWhenAvailable() throws Exception {
+		AuditComparisonModel model = new AuditComparisonModel();
+		String sourceDetail = "{"
+				+ "\"\":" + object("user-id", "User key", "\"" + UserProxy.userNamePropertyName + "\":\"person@example.com\"") + ","
+				+ "\"" + UserProxy.contactPropertyName + "\":" + object("contact-id", "Contact key", "\"" + Contact.namePropertyName + "\":\"Person\"")
+				+ "}";
+		Audit audit = metadataAudit(Operation.insert, sourceDetail, null);
+
+		ComparisonComposite root = model.getComparisonComposite(audit);
+
+		assertEquals(1, root.getChildren().size());
+		ComparisonComposite child = root.getChildren().get(0);
+		assertThat(child.getBizId(), is("contact-id"));
+		assertThat(child.getReferenceName(), is(UserProxy.contactPropertyName));
+		assertThat(child.getDocument().getName(), is(Contact.DOCUMENT_NAME));
+		assertThat(child.getProperties().get(0).getName(), is(Contact.namePropertyName));
+	}
+
 	private static Audit audit(Operation operation, String sourceDetail, String comparisonDetail) {
 		Audit selected = Audit.newInstance();
 		Audit source = version(operation, sourceDetail);
 		selected.setSourceVersion(source);
 		if (comparisonDetail != null) {
 			selected.setComparisonVersion(version(Operation.update, comparisonDetail));
+		}
+		return selected;
+	}
+
+	private static Audit metadataAudit(Operation operation, String sourceDetail, String comparisonDetail) {
+		Audit selected = Audit.newInstance();
+		Audit source = version(operation, sourceDetail);
+		source.setAuditModuleName(User.MODULE_NAME);
+		source.setAuditDocumentName(User.DOCUMENT_NAME);
+		selected.setSourceVersion(source);
+		if (comparisonDetail != null) {
+			Audit comparison = version(Operation.update, comparisonDetail);
+			comparison.setAuditModuleName(User.MODULE_NAME);
+			comparison.setAuditDocumentName(User.DOCUMENT_NAME);
+			selected.setComparisonVersion(comparison);
 		}
 		return selected;
 	}
@@ -159,5 +216,9 @@ class AuditComparisonModelH2Test extends AbstractH2Test {
 	private static String object(String bizId, String bizKey, String properties) {
 		return "{\"" + Bean.DOCUMENT_ID + "\":\"" + bizId + "\",\""
 				+ Bean.BIZ_KEY + "\":\"" + bizKey + "\"," + properties + "}";
+	}
+
+	private static String objectWithoutBizKey(String bizId, String properties) {
+		return "{\"" + Bean.DOCUMENT_ID + "\":\"" + bizId + "\"," + properties + "}";
 	}
 }

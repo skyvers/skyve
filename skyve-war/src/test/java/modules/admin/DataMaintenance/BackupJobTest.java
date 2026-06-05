@@ -6,6 +6,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
@@ -59,6 +60,41 @@ class BackupJobTest extends AbstractH2Test {
 		assertEquals(0, job.getPercentComplete());
 		assertEquals(1, job.getLog().size());
 		assertThat(job.getLog().get(0), containsString("no retention periods were set"));
+	}
+
+	@Test
+	void executeWithLocalRetentionMovesCopiesAndCullsBackups() throws Exception {
+		Path sourceZip = createFile("backup.zip");
+		createFile("DAILY_20200102000000.zip");
+		Path oldDaily = createFile("DAILY_20200101000000.zip");
+		createFile("WEEKLY_20200101000000.zip");
+		createFile("MONTHLY_20200101000000.zip");
+		createFile("YEARLY_20200101000000_PROBLEMS.zip");
+		modules.admin.domain.DataMaintenance dm = modules.admin.domain.DataMaintenance.newInstance();
+		dm.setDailyBackupRetention(Integer.valueOf(1));
+		dm.setWeeklyBackupRetention(Integer.valueOf(1));
+		dm.setMonthlyBackupRetention(Integer.valueOf(1));
+		dm.setYearlyBackupRetention(Integer.valueOf(1));
+		BackupJob job = new LocalBackupJob(dm, sourceZip.toFile());
+
+		job.execute();
+
+		assertEquals(100, job.getPercentComplete());
+		assertFalse(Files.exists(sourceZip));
+		assertTrue(Files.exists(tempDir.resolve("DAILY_backup.zip")));
+		assertFalse(Files.exists(oldDaily));
+		assertTrue(hasFileStartingWith("WEEKLY_"));
+		assertTrue(hasFileStartingWith("MONTHLY_"));
+		assertTrue(hasFileStartingWith("YEARLY_"));
+		assertTrue(job.getLog().stream().anyMatch(entry -> entry.contains("Finished Backup")));
+	}
+
+	@Test
+	void defaultFactoriesCreateBackupCollaborators() {
+		ExposedBackupJob job = new ExposedBackupJob();
+
+		assertNotNull(job.callCreateDataMaintenance());
+		assertNotNull(job.callCreateBackupJob());
 	}
 
 	@Test
@@ -172,6 +208,12 @@ class BackupJobTest extends AbstractH2Test {
 		return path;
 	}
 
+	private boolean hasFileStartingWith(String prefix) throws Exception {
+		try (var files = Files.list(tempDir)) {
+			return files.anyMatch(path -> path.getFileName().toString().startsWith(prefix));
+		}
+	}
+
 	private static void invokeCull(BackupJob job, File backupDir, String prefix, int retain) throws Exception {
 		Method method = BackupJob.class.getDeclaredMethod("cull", File.class, String.class, int.class);
 		method.setAccessible(true);
@@ -182,6 +224,46 @@ class BackupJobTest extends AbstractH2Test {
 		Method method = BackupJob.class.getDeclaredMethod("cull", File.class, String.class, String.class, int.class);
 		method.setAccessible(true);
 		method.invoke(job, backupDir, prefix, suffix, Integer.valueOf(retain));
+	}
+
+	private static class LocalBackupJob extends BackupJob {
+		private final modules.admin.domain.DataMaintenance dm;
+		private final File sourceZip;
+
+		private LocalBackupJob(modules.admin.domain.DataMaintenance dm, File sourceZip) {
+			this.dm = dm;
+			this.sourceZip = sourceZip;
+		}
+
+		@Override
+		protected modules.admin.domain.DataMaintenance createDataMaintenance() {
+			return dm;
+		}
+
+		@Override
+		protected org.skyve.impl.backup.BackupJob createBackupJob() {
+			return new org.skyve.impl.backup.BackupJob() {
+				@Override
+				public void execute() {
+					// The file is created by the test fixture; this job only reports it.
+				}
+
+				@Override
+				public File getBackupZip() {
+					return sourceZip;
+				}
+			};
+		}
+	}
+
+	private static class ExposedBackupJob extends BackupJob {
+		private modules.admin.domain.DataMaintenance callCreateDataMaintenance() {
+			return createDataMaintenance();
+		}
+
+		private org.skyve.impl.backup.BackupJob callCreateBackupJob() {
+			return createBackupJob();
+		}
 	}
 
 	public static class FakeExternalBackup implements ExternalBackup {

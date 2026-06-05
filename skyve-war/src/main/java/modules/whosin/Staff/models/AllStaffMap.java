@@ -30,11 +30,7 @@ public class AllStaffMap extends MapModel<Staff> {
 	public MapResult getResult(Geometry mapBounds) throws Exception {
 		List<MapItem> items = new ArrayList<>();
 
-		Persistence p = CORE.getPersistence();
-		DocumentQuery q = p.newDocumentQuery(Staff.MODULE_NAME, Staff.DOCUMENT_NAME);
-
-		List<Staff> staff = q.beanResults();
-		for (Staff member : staff) {
+		for (Staff member : staffForMap()) {
 			if (mapBounds.intersects(member.getLocation())) {
 				MapItem item = new MapItem();
 				item.setBizId(member.getBizId());
@@ -61,5 +57,12 @@ public class AllStaffMap extends MapModel<Staff> {
 		}
 
 		return new MapResult(items, null);
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	protected List<Staff> staffForMap() {
+		Persistence p = CORE.getPersistence();
+		DocumentQuery q = p.newDocumentQuery(Staff.MODULE_NAME, Staff.DOCUMENT_NAME);
+		return q.beanResults();
 	}
 }

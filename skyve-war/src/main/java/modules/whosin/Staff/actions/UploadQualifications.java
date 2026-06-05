@@ -37,7 +37,7 @@ public class UploadQualifications extends UploadAction<Staff> {
 		if (upload.getFileName().endsWith(MimeType.xlsx.getStandardFileSuffix())) {
 			try (InputStream is = upload.getInputStream()) {
 				int sheetIndex = 0;
-				POISheetLoader pl = new POISheetLoader(LoaderActivityType.CREATE_ALL, is, sheetIndex, exception,
+				QualificationLoader pl = newPOISheetLoader(LoaderActivityType.CREATE_ALL, is, sheetIndex, exception,
 						StaffQualification.MODULE_NAME, 
 						StaffQualification.DOCUMENT_NAME);
 				
@@ -55,7 +55,7 @@ public class UploadQualifications extends UploadAction<Staff> {
 			}
 		} else if (upload.getFileName().endsWith(MimeType.csv.getStandardFileSuffix())) {
 			try (InputStream is = upload.getInputStream()) {
-				CSVLoader dl = new CSVLoader(LoaderActivityType.CREATE_ALL, is, exception,
+				QualificationLoader dl = newCSVLoader(LoaderActivityType.CREATE_ALL, is, exception,
 						StaffQualification.MODULE_NAME, 
 						StaffQualification.DOCUMENT_NAME,
 						StaffQualification.namePropertyName, 
@@ -76,8 +76,96 @@ public class UploadQualifications extends UploadAction<Staff> {
 			q.setParent(bean);
 			bean.getQualifications().add(q);
 		}
-//		bean = CORE.getPersistence().save(bean);
 
 		return bean;
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	protected QualificationLoader newPOISheetLoader(LoaderActivityType activityType,
+			InputStream is,
+			int sheetIndex,
+			UploadException exception,
+			String moduleName,
+			String documentName)
+	throws Exception {
+		return new POISheetQualificationLoader(new POISheetLoader(activityType, is, sheetIndex, exception, moduleName, documentName));
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	protected QualificationLoader newCSVLoader(LoaderActivityType activityType,
+			InputStream is,
+			UploadException exception,
+			String moduleName,
+			String documentName,
+			String... bindings) {
+		return new CSVQualificationLoader(new CSVLoader(activityType, is, exception, moduleName, documentName, bindings));
+	}
+
+	protected interface QualificationLoader {
+		void addFields(String... bindings);
+
+		void setDebugMode(boolean debugMode);
+
+		void setDataIndex(int dataIndex);
+
+		List<StaffQualification> beanResults();
+	}
+
+	private static class POISheetQualificationLoader implements QualificationLoader {
+		private final POISheetLoader loader;
+
+		private POISheetQualificationLoader(POISheetLoader loader) {
+			this.loader = loader;
+		}
+
+		@Override
+		public void addFields(String... bindings) {
+			loader.addFields(bindings);
+		}
+
+		@Override
+		public void setDebugMode(boolean debugMode) {
+			loader.setDebugMode(debugMode);
+		}
+
+		@Override
+		public void setDataIndex(int dataIndex) {
+			loader.setDataIndex(dataIndex);
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public List<StaffQualification> beanResults() {
+			return (List<StaffQualification>) (List<?>) loader.beanResults();
+		}
+	}
+
+	private static class CSVQualificationLoader implements QualificationLoader {
+		private final CSVLoader loader;
+
+		private CSVQualificationLoader(CSVLoader loader) {
+			this.loader = loader;
+		}
+
+		@Override
+		public void addFields(String... bindings) {
+			loader.addFields(bindings);
+		}
+
+		@Override
+		public void setDebugMode(boolean debugMode) {
+			loader.setDebugMode(debugMode);
+		}
+
+		@Override
+		public void setDataIndex(int dataIndex) {
+			loader.setDataIndex(dataIndex);
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public List<StaffQualification> beanResults() {
+			return (List<StaffQualification>) (List<?>) loader.beanResults();
+		}
 	}
 }

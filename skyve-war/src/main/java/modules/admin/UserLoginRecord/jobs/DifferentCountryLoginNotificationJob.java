@@ -68,23 +68,23 @@ public class DifferentCountryLoginNotificationJob extends Job {
 		String country = loginRecord.getCountryName();
 
 		if (country != null) {
-			Contact contact = contactService.getCurrentUserContact();
+			Contact contact = getCurrentUserContact();
 			String userEmail = contact.getEmail1();
 			String userName = contact.getName();
 
 			try {
 				// Get startup configuration
-				Startup startup = Startup.newInstance();
+				Startup startup = newStartup();
 				if (startup.getEnvironmentSupportEmail() == null) {
 					String warningMessage = "There is no environment support email specified. Failed to send different country login notification.";
 					log.add(warningMessage);
 					LOGGER.warn(warningMessage);
+					setPercentComplete(100);
 					return;
 				}
 
 				// Send
-				CommunicationUtil.sendFailSafeSystemCommunication(EMAIL_DESCRIPTION,
-						EMAIL_SUBJECT, EMAIL_BODY, CommunicationUtil.ResponseMode.EXPLICIT, null, contact, loginRecord, startup);
+				sendNotification(contact, loginRecord, startup);
 
 				String successMessage = String.format("Successfully sent email warning of unusual login activity to %s", userEmail);
 				log.add(successMessage);
@@ -98,5 +98,21 @@ public class DifferentCountryLoginNotificationJob extends Job {
 			}
 		}
 		setPercentComplete(100);
+	}
+
+	// test seam
+	protected Contact getCurrentUserContact() {
+		return contactService.getCurrentUserContact();
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	protected Startup newStartup() {
+		return Startup.newInstance();
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	protected void sendNotification(Contact contact, UserLoginRecord loginRecord, Startup startup) throws Exception {
+		CommunicationUtil.sendFailSafeSystemCommunication(EMAIL_DESCRIPTION,
+				EMAIL_SUBJECT, EMAIL_BODY, CommunicationUtil.ResponseMode.EXPLICIT, null, contact, loginRecord, startup);
 	}
 }

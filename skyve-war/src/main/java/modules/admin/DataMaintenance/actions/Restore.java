@@ -27,31 +27,48 @@ public class Restore implements ServerSideAction<DataMaintenance> {
 	public ServerSideActionResult<DataMaintenance> execute(DataMaintenance bean, WebContext webContext)
 			throws Exception {
 		if (bean.getContentRestoreOption() == null) {
-			Document d = bean.getDocumentMetaData();
-			@SuppressWarnings("null")
-			String desc = d.getAttribute(DataMaintenance.contentRestoreOptionPropertyName).getLocalisedDisplayName();
-			String msg = Util.nullSafeI18n("admin.dataMaintenance.actions.restore.selectContentRestoreOptionException", desc);
+			String msg = i18n("admin.dataMaintenance.actions.restore.selectContentRestoreOptionException",
+					attributeDisplayName(bean, DataMaintenance.contentRestoreOptionPropertyName));
 			throw new ValidationException(DataMaintenance.contentRestoreOptionPropertyName, msg);
 		}
 		if (bean.getRestoreIndexingOption() == null) {
-			Document d = bean.getDocumentMetaData();
-			@SuppressWarnings("null")
-			String desc = d.getAttribute(DataMaintenance.restoreIndexingOptionPropertyName).getLocalisedDisplayName();
-			String msg = Util.nullSafeI18n("admin.dataMaintenance.actions.restore.selectRestoreIndexingOptionException", desc);
+			String msg = i18n("admin.dataMaintenance.actions.restore.selectRestoreIndexingOptionException",
+					attributeDisplayName(bean, DataMaintenance.restoreIndexingOptionPropertyName));
 			throw new ValidationException(DataMaintenance.restoreIndexingOptionPropertyName, msg);
 		}
 
 		if (bean.getRestorePreProcess() == null) {
-			Document d = bean.getDocumentMetaData();
-			@SuppressWarnings("null")
-			String desc = d.getAttribute(DataMaintenance.restorePreProcessPropertyName).getLocalisedDisplayName();
-			String msg = Util.nullSafeI18n("admin.dataMaintenance.actions.restore.selectPreProcessException", desc);
+			String msg = i18n("admin.dataMaintenance.actions.restore.selectPreProcessException",
+					attributeDisplayName(bean, DataMaintenance.restorePreProcessPropertyName));
 			throw new ValidationException(new Message(DataMaintenance.restorePreProcessPropertyName, msg));
 		}
 
-		EXT.getJobScheduler().restore(bean);
-		webContext.growl(MessageSeverity.info, Util.nullSafeI18n("admin.dataMaintenance.actions.restore.restoreJobCommenced"));
+		restore(bean);
+		growl(webContext);
 
 		return new ServerSideActionResult<>(bean);
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	protected String attributeDisplayName(DataMaintenance bean, String attributeName) {
+		Document d = bean.getDocumentMetaData();
+		@SuppressWarnings("null")
+		String desc = d.getAttribute(attributeName).getLocalisedDisplayName();
+		return desc;
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	protected String i18n(String key, String... args) {
+		return Util.nullSafeI18n(key, args);
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	protected void restore(DataMaintenance bean) {
+		EXT.getJobScheduler().restore(bean);
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	protected void growl(WebContext webContext) {
+		webContext.growl(MessageSeverity.info, Util.nullSafeI18n("admin.dataMaintenance.actions.restore.restoreJobCommenced"));
 	}
 }

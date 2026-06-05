@@ -6,7 +6,6 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.skyve.CORE;
 import org.skyve.domain.types.DateOnly;
@@ -36,9 +35,10 @@ public class BackupJob extends Job {
 	 * @throws Exception if the operation fails
 	 */
 	@Override
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	public void execute() throws Exception {
 		DateOnly now = new DateOnly();
-		DataMaintenance dm = DataMaintenance.newInstance();
+		DataMaintenance dm = createDataMaintenance();
 		File backupZip = null;
 		List<String> log = getLog();
 		String trace;
@@ -65,7 +65,7 @@ public class BackupJob extends Job {
 			trace = "Take backup...";
 			log.add(trace);
 			LOGGER.warn(trace);
-			org.skyve.impl.backup.BackupJob backupJob = new org.skyve.impl.backup.BackupJob();
+			org.skyve.impl.backup.BackupJob backupJob = createBackupJob();
 			execute(backupJob);
 			backupZip = backupJob.getBackupZip();
 		} else {
@@ -195,6 +195,16 @@ public class BackupJob extends Job {
 		LOGGER.info(trace);
 	}
 
+	@SuppressWarnings("static-method") // test seam
+	protected DataMaintenance createDataMaintenance() {
+		return DataMaintenance.newInstance();
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	protected org.skyve.impl.backup.BackupJob createBackupJob() {
+		return new org.skyve.impl.backup.BackupJob();
+	}
+
 	private void cull(File backupDir, String prefix, int retain)
 			throws IOException {
 		cull(backupDir, prefix, "", retain);
@@ -220,7 +230,7 @@ public class BackupJob extends Job {
 				final ExternalBackup externalBackup = ExternalBackup.getInstance();
 				final List<String> backups = externalBackup.listBackups();
 				final List<String> matchingBackups = backups.stream().filter(backup -> backup.matches(regex))
-						.collect(Collectors.toList());
+						.toList();
 				for (int i = retain, l = matchingBackups.size(); i < l; i++) {
 					String trace = String.format("Cull backup %s - retention is set to %d",
 							matchingBackups.get(i),

@@ -17,6 +17,7 @@ import org.skyve.content.SearchResult;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.content.AbstractContentManager;
@@ -28,8 +29,8 @@ import org.skyve.metadata.view.model.list.Filter;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.list.Page;
 import org.skyve.persistence.AutoClosingIterable;
-import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
+import org.slf4j.Logger;
 
 import modules.admin.domain.Content;
 import modules.admin.domain.DataMaintenance;
@@ -172,10 +173,10 @@ public class ContentModel extends ListModel<DataMaintenance> {
 	 * @return the operation result
 	 * @throws Exception if the operation fails
 	 */
-	@SuppressWarnings("boxing")
 	@Override
+	@SuppressWarnings({"boxing", "java:S3776"}) // complexity OK
 	public Page fetch() throws Exception {
-		try (ContentManager cm = EXT.newContentManager()) {
+		try (ContentManager cm = newContentManager()) {
 			int start = getStartRow();
 			int end = getEndRow();
 
@@ -193,7 +194,7 @@ public class ContentModel extends ListModel<DataMaintenance> {
 				String bizUserId = hit.getBizUserId();
 				String bizId = hit.getBizId();
 				String attributeName = hit.getAttributeName();
-				if (AbstractContentManager.canAccessContent(bizCustomer,
+				if (canAccessContent(bizCustomer,
 						bizModule,
 						bizDocument,
 						bizDataGroupId,
@@ -241,6 +242,28 @@ public class ContentModel extends ListModel<DataMaintenance> {
 			page.setSummary(new DynamicBean(Content.MODULE_NAME, Content.DOCUMENT_NAME, properties));
 			return page;
 		}
+	}
+
+	@SuppressWarnings({ "static-method", "resource" }) // test seam
+	protected ContentManager newContentManager() throws DomainException {
+		return EXT.newContentManager();
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	protected boolean canAccessContent(String bizCustomer,
+										String bizModule,
+										String bizDocument,
+										String bizDataGroupId,
+										String bizUserId,
+										String bizId,
+										String attributeName) {
+		return AbstractContentManager.canAccessContent(bizCustomer,
+				bizModule,
+				bizDocument,
+				bizDataGroupId,
+				bizUserId,
+				bizId,
+				attributeName);
 	}
 
 	/**

@@ -36,6 +36,8 @@ class RegisterTest extends AbstractH2Test {
 		WebContainer.clear();
 		UtilImpl.GEO_IP_COUNTRY_CODES = null;
 		UtilImpl.GEO_IP_WHITELIST = false;
+		UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY = null;
+		UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY = null;
 	}
 
 	@Test
@@ -92,6 +94,26 @@ class RegisterTest extends AbstractH2Test {
 
 		assertSame(bean, result.getBean());
 		assertSame(Boolean.TRUE, bean.getPassSilently());
+	}
+
+	@Test
+	void executeWithMissingGoogleRecaptchaThrowsValidationException() {
+		SelfRegistrationExtension bean = registrationWithUserAndContact("person@example.com", "person@example.com");
+		UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY = "google-key";
+		WebContainer.setHttpServletRequestResponse(new MockHttpServletRequest(), new MockHttpServletResponse());
+		Register register = registerWithGeoIpNotBlocking();
+
+		assertThrows(ValidationException.class, () -> register.execute(bean, null));
+	}
+
+	@Test
+	void executeWithMissingCloudflareTurnstileThrowsValidationException() {
+		SelfRegistrationExtension bean = registrationWithUserAndContact("person@example.com", "person@example.com");
+		UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY = "cloudflare-key";
+		WebContainer.setHttpServletRequestResponse(new MockHttpServletRequest(), new MockHttpServletResponse());
+		Register register = registerWithGeoIpNotBlocking();
+
+		assertThrows(ValidationException.class, () -> register.execute(bean, null));
 	}
 
 	private static SelfRegistrationExtension registrationWithUserAndContact(String email, String confirmEmail) {

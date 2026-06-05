@@ -14,6 +14,7 @@ import org.skyve.impl.bizport.DataFileField.LoadAction;
 import org.skyve.impl.bizport.POISheetLoader;
 import org.skyve.metadata.controller.Upload;
 import org.skyve.metadata.controller.UploadAction;
+import org.skyve.tag.TagManager;
 import org.skyve.web.WebContext;
 
 import modules.admin.Tag.TagExtension;
@@ -47,7 +48,7 @@ public class UploadTagCriteria extends UploadAction<TagExtension> {
 		}
 
 		try (InputStream is = upload.getInputStream()) {
-			POISheetLoader loader = new POISheetLoader(is, 0, tag.getUploadModuleName(), tag.getUploadDocumentName(), exception);
+			SheetLoader loader = newSheetLoader(is, tag, exception);
 			loader.setActivityType(LoaderActivityType.FIND);
 			if (Boolean.TRUE.equals(tag.getFileHasHeaders())) {
 				// skip headers
@@ -76,13 +77,14 @@ public class UploadTagCriteria extends UploadAction<TagExtension> {
 			loader.addField(searchField);
 
 			List<Bean> beansToTag = loader.beanResults();
+			TagManager tagManager = tagManager();
 			for (Bean bean : beansToTag) {
 
 				if (FilterAction.tagRecordsThatMatch.equals(tag.getFilterAction())) {
-					EXT.getTagManager().tag(tag.getBizId(), bean);
+					tagManager.tag(tag.getBizId(), bean);
 				} else if (FilterAction.unTagRecordsThatMatch.equals(tag.getFilterAction())) {
 					// remove the tagged record
-					EXT.getTagManager().untag(tag.getBizId(), bean);
+					tagManager.untag(tag.getBizId(), bean);
 				}
 			}
 			tag.setUploaded(Long.valueOf(loader.getDataIndex()));
@@ -94,5 +96,67 @@ public class UploadTagCriteria extends UploadAction<TagExtension> {
 		}
 
 		return tag;
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	protected SheetLoader newSheetLoader(InputStream is, TagExtension tag, UploadException exception) throws Exception {
+		return new POISheetLoaderAdapter(new POISheetLoader(is, 0, tag.getUploadModuleName(), tag.getUploadDocumentName(), exception));
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	protected TagManager tagManager() {
+		return EXT.getTagManager();
+	}
+
+	protected interface SheetLoader {
+		void setActivityType(LoaderActivityType activityType);
+
+		void setDataIndex(int dataIndex);
+
+		void setDebugMode(boolean debugMode);
+
+		void addField(DataFileField field);
+
+		List<Bean> beanResults();
+
+		int getDataIndex();
+	}
+
+	private static class POISheetLoaderAdapter implements SheetLoader {
+		private final POISheetLoader loader;
+
+		private POISheetLoaderAdapter(POISheetLoader loader) {
+			this.loader = loader;
+		}
+
+		@Override
+		public void setActivityType(LoaderActivityType activityType) {
+			loader.setActivityType(activityType);
+		}
+
+		@Override
+		public void setDataIndex(int dataIndex) {
+			loader.setDataIndex(dataIndex);
+		}
+
+		@Override
+		public void setDebugMode(boolean debugMode) {
+			loader.setDebugMode(debugMode);
+		}
+
+		@Override
+		public void addField(DataFileField field) {
+			loader.addField(field);
+		}
+
+		@Override
+		public List<Bean> beanResults() {
+			return loader.beanResults();
+		}
+
+		@Override
+		public int getDataIndex() {
+			return loader.getDataIndex();
+		}
 	}
 }
