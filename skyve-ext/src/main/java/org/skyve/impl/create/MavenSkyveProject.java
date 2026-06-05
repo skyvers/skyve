@@ -19,8 +19,8 @@ import org.skyve.domain.app.AppConstants;
 import org.skyve.impl.metadata.repository.document.DocumentMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleMetaData;
 import org.skyve.impl.script.SkyveScriptInterpreter;
-import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
+import org.slf4j.Logger;
 
 /**
  * Utility class for creating a new Skyve Maven project from template artefacts.
@@ -704,7 +704,7 @@ public class MavenSkyveProject {
 	 * @throws IOException if any copy operation fails.
 	 */
 	private void copySkyveGeneratedTestFiles() throws IOException {
-		final Path relativeGeneratedTestPath = copyFromProject ? Paths.get("src").resolve("generated").resolve("java") : SKYVE_GENERATED_TEST_PATH;
+		final Path relativeGeneratedTestPath = copyFromProject ? Paths.get("src").resolve("generatedTest").resolve("java") : SKYVE_GENERATED_TEST_PATH;
 		final Path absoluteGeneratedTestPath = skyveDirectory.resolve(relativeGeneratedTestPath);
 		final File targetDir = projectDirectory.resolve(generatedTestDirectory).toFile();
 
