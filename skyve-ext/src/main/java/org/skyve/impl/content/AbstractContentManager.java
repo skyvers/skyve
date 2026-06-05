@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -60,6 +61,7 @@ public abstract class AbstractContentManager implements ContentManager {
 	 * @return a new {@link AbstractContentManager} instance.
 	 * @throws IllegalArgumentException if the configured implementation cannot be instantiated.
 	 */
+	@SuppressWarnings("resource") // handled by caller
 	public static AbstractContentManager get() {
 		try {
 			return IMPLEMENTATION_CLASS.getDeclaredConstructor().newInstance();
@@ -76,6 +78,7 @@ public abstract class AbstractContentManager implements ContentManager {
 	 * @param index True to index; false to remove from the index.
 	 * @throws Exception if the reindex operation fails.
 	 */
+	@SuppressWarnings("java:S112") // allow throws Exception for implementations
 	public abstract void reindex(AttachmentContent attachment, boolean index) throws Exception;
 	
 	/**
@@ -374,6 +377,9 @@ public abstract class AbstractContentManager implements ContentManager {
 				int lastDot = fileName.lastIndexOf('.');
 				if (lastDot > -1) {
 					suffix = UtilImpl.processStringValue(fileName.substring(lastDot + 1));
+					if (suffix != null) {
+						suffix = suffix.toLowerCase(Locale.ROOT);
+					}
 				}
 			}
 	
