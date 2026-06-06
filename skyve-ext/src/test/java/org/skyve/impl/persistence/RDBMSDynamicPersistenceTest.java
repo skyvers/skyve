@@ -65,6 +65,16 @@ class RDBMSDynamicPersistenceTest {
 	}
 
 	@Test
+	void populateReturnsCachedDynamicBeanWithoutQueryingPersistence() throws Exception {
+		try (RDBMSDynamicPersistence dynamicPersistence = new RDBMSDynamicPersistence()) {
+			DynamicPersistentBean cachedBean = mock(DynamicPersistentBean.class);
+			cache(dynamicPersistence).put("dynamic-1", cachedBean);
+
+			assertSame(cachedBean, dynamicPersistence.populate("dynamic-1"));
+		}
+	}
+
+	@Test
 	void insertEntityBuildsDynamicEntityInsertAndBindsBeanValues() throws Exception {
 		try (RDBMSDynamicPersistence dynamicPersistence = new RDBMSDynamicPersistence()) {
 			Persistence persistence = mock(Persistence.class);
@@ -126,11 +136,24 @@ class RDBMSDynamicPersistenceTest {
 			collectionRelated.putDynamic(Bean.DOCUMENT_ID, "order-1");
 			DynamicBean embeddedRelated = new DynamicBean("admin", "Embedded", new TreeMap<>());
 			embeddedRelated.putDynamic(Bean.DOCUMENT_ID, "embedded-1");
+			DynamicBean staticAssociation = new DynamicBean("sales", "Order", new TreeMap<>());
+			staticAssociation.putDynamic(Bean.DOCUMENT_ID, "order-2");
+			DynamicBean dynamicAssociation = new DynamicBean("dynamic", "Runtime", new TreeMap<>());
+			dynamicAssociation.putDynamic(Bean.DOCUMENT_ID, "dynamic-2");
 			owner.putDynamic("items", List.of(collectionRelated));
 			owner.putDynamic("embedded", embeddedRelated);
+			owner.putDynamic("staticAssociation", staticAssociation);
+			owner.putDynamic("dynamicAssociation", dynamicAssociation);
 			Map<String, Boolean> references = new TreeMap<>();
+			references.put("dynamicAssociation", Boolean.FALSE);
 			references.put("items", Boolean.FALSE);
 			references.put("embedded", Boolean.TRUE);
+			references.put("staticAssociation", Boolean.FALSE);
+			Module dynamicModule = mock(Module.class);
+			Document dynamicDocument = mock(Document.class);
+			when(customer.getModule("dynamic")).thenReturn(dynamicModule);
+			when(dynamicModule.getDocument(customer, "Runtime")).thenReturn(dynamicDocument);
+			when(dynamicDocument.isDynamic()).thenReturn(true);
 			dynamicPersistence.postConstruct(persistence);
 			setField(dynamicPersistence, "dynamicRelationPersistentIdentifier", "ADM_DynamicRelation");
 
@@ -138,18 +161,24 @@ class RDBMSDynamicPersistenceTest {
 
 			verify(sql).putParameter("parent_id", "owner-1", false);
 			verify(sql).putParameter(Bean.BIZ_KEY, "owner-1->order-1", false);
-			verify(sql).putParameter("relatedModuleName", "sales", false);
-			verify(sql).putParameter("relatedDocumentName", "Order", false);
+			verify(sql, times(2)).putParameter("relatedModuleName", "sales", false);
+			verify(sql, times(2)).putParameter("relatedDocumentName", "Order", false);
 			verify(sql).putParameter("relatedId", "order-1", false);
 			verify(sql).putParameter("attributeName", "items", false);
 			verify(sql).putParameter("ordinal", Integer.valueOf(0));
 			verify(sql).putParameter(Bean.BIZ_KEY, "owner-1->embedded-1", false);
-			verify(sql).putParameter("relatedModuleName", (String) null, false);
-			verify(sql).putParameter("relatedDocumentName", (String) null, false);
+			verify(sql, times(2)).putParameter("relatedModuleName", (String) null, false);
+			verify(sql, times(2)).putParameter("relatedDocumentName", (String) null, false);
 			verify(sql).putParameter("relatedId", "embedded-1", false);
 			verify(sql).putParameter("attributeName", "embedded", false);
-			verify(sql).putParameter("ordinal", null, false);
-			verify(sql, times(2)).execute();
+			verify(sql, times(3)).putParameter("ordinal", null, false);
+			verify(sql).putParameter(Bean.BIZ_KEY, "owner-1->order-2", false);
+			verify(sql).putParameter("relatedId", "order-2", false);
+			verify(sql).putParameter("attributeName", "staticAssociation", false);
+			verify(sql).putParameter(Bean.BIZ_KEY, "owner-1->dynamic-2", false);
+			verify(sql).putParameter("relatedId", "dynamic-2", false);
+			verify(sql).putParameter("attributeName", "dynamicAssociation", false);
+			verify(sql, times(4)).execute();
 		}
 	}
 

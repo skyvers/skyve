@@ -313,6 +313,97 @@ class ReportViewVisitorLayoutTest {
 		assertThat(rowOne.getElementTop(), is(Integer.valueOf(15)));
 	}
 
+	@Test
+	void noOpVisitorHooksAndViewLifecycleAreSafe() {
+		visitor.visitView();
+		visitor.visitedView();
+		assertThat(visitor.isVisited(), is(true));
+
+		visitor.visitBlurb(null, true, true);
+		visitor.visitButton(null, true, true);
+		visitor.visitZoomIn(null, true, true);
+		visitor.visitCheckMembership(null, true, true);
+		visitor.visitComparison(null, true, true);
+		visitor.visitContentLink(null, true, true);
+		visitor.visitDataGridBoundColumn(null, true, true);
+		visitor.visitDataGridContainerColumn(null, true, true);
+		visitor.visitDialogButton(null, true, true);
+		visitor.visitHTML(null, true, true);
+		visitor.visitInject(null, true, true);
+		visitor.visitLabel(null, true, true);
+		visitor.visitLink(null, true, true);
+		visitor.visitMap(null, true, true);
+		visitor.visitChart(null, true, true);
+		visitor.visitProgressBar(null, true, true);
+		visitor.visitRerenderEventAction(null, null, true, true);
+		visitor.visitServerSideActionEventAction(null, true, true);
+		visitor.visitSetDisabledEventAction(null, true, true);
+		visitor.visitSetInvisibleEventAction(null, true, true);
+		visitor.visitTabPane(null, true, true);
+		visitor.visitToggleDisabledEventAction(null, true, true);
+		visitor.visitToggleVisibilityEventAction(null, true, true);
+		visitor.visitTreeGrid(null, true, true);
+		visitor.visitSidebar(null, true, true);
+		visitor.visitedSidebar(null, true, true);
+
+		visitor.visitOnAddedEventHandler(null, true, true);
+		visitor.visitOnBlurEventHandler(null, true, true);
+		visitor.visitOnChangedEventHandler(null, true, true);
+		visitor.visitOnClearedEventHandler(null, true, true);
+		visitor.visitOnEditedEventHandler(null, true, true);
+		visitor.visitOnFocusEventHandler(null, true, true);
+		visitor.visitOnPickedEventHandler(null, true, true);
+		visitor.visitOnRemovedEventHandler(null, true, true);
+		visitor.visitOnSelectedEventHandler(null, true, true);
+
+		visitor.visitedCheckBox(null, true, true);
+		visitor.visitedCheckMembership(null, true, true);
+		visitor.visitedColourPicker(null, true, true);
+		visitor.visitedCombo(null, true, true);
+		visitor.visitedDataGridBoundColumn(null, true, true);
+		visitor.visitedFormItem(null, true, true);
+		visitor.visitedGeometry(null, true, true);
+		visitor.visitedGeometryMap(null, true, true);
+		visitor.visitedLookupDescription(null, true, true);
+		visitor.visitedOnAddedEventHandler(null, true, true);
+		visitor.visitedOnBlurEventHandler(null, true, true);
+		visitor.visitedOnChangedEventHandler(null, true, true);
+		visitor.visitedOnClearedEventHandler(null, true, true);
+		visitor.visitedOnEditedEventHandler(null, true, true);
+		visitor.visitedOnFocusEventHandler(null, true, true);
+		visitor.visitedOnPickedEventHandler(null, true, true);
+		visitor.visitedOnRemovedEventHandler(null, true, true);
+		visitor.visitedOnSelectedEventHandler(null, true, true);
+		visitor.visitedPassword(null, true, true);
+		visitor.visitedRadio(null, true, true);
+		visitor.visitedRichText(null, true, true);
+		visitor.visitedSlider(null, true, true);
+		visitor.visitedSpinner(null, true, true);
+		visitor.visitedTabPane(null, true, true);
+		visitor.visitedTextArea(null, true, true);
+		visitor.visitedTextField(null, true, true);
+		visitor.visitedTreeGrid(null, true, true);
+
+		visitor.visitAddAction(null);
+		visitor.visitBizExportAction(null);
+		visitor.visitBizImportAction(null);
+		visitor.visitCancelAction(null);
+		visitor.visitCustomAction(null);
+		visitor.visitDeleteAction(null);
+		visitor.visitDownloadAction(null);
+		visitor.visitEditAction(null);
+		visitor.visitFilterParameter(null, true, true);
+		visitor.visitNavigateAction(null);
+		visitor.visitNewAction(null);
+		visitor.visitOKAction(null);
+		visitor.visitParameter(null, true, true);
+		visitor.visitRemoveAction(null);
+		visitor.visitReportAction(null);
+		visitor.visitSaveAction(null);
+		visitor.visitUploadAction(null);
+		visitor.visitZoomOutAction(null);
+	}
+
 	private static final class TestVisitor extends ReportViewVisitor {
 		private TestVisitor() {
 			super(null, null, null, null, new ViewImpl(), "desktop");

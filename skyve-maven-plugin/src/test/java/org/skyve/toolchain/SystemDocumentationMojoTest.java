@@ -49,6 +49,7 @@ import org.skyve.metadata.model.document.UniqueConstraint.DocumentScope;
 import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
+import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.Role;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.w3c.dom.Document;
@@ -315,13 +316,16 @@ class SystemDocumentationMojoTest {
 		when(document.getAllAttributes(customer)).thenReturn(List.of());
 		when(document.getInterfaces()).thenReturn(List.of());
 
-		Text name = new Text();
-		name.setName("name");
-		name.setDisplayName("Name");
-		name.setDescription("Customer name");
-		name.setDocumentation("Name docs");
-		name.setLength(80);
-		name.setRequired(true);
+		Text name = mock(Text.class);
+		when(name.getName()).thenReturn("name");
+		when(name.getLocalisedDisplayName()).thenReturn("Name");
+		when(name.getAttributeType()).thenReturn(Attribute.AttributeType.text);
+		when(name.isRequired()).thenReturn(Boolean.TRUE);
+		when(name.isPersistent()).thenReturn(Boolean.TRUE);
+		when(name.getLocalisedDescription()).thenReturn("Customer name");
+		when(name.getDocumentation()).thenReturn("Name docs");
+		when(name.isDeprecated()).thenReturn(Boolean.FALSE);
+		when(name.getLength()).thenReturn(80);
 		doReturn(List.of(name)).when(document).getAttributes();
 
 		Reference reference = mock(Reference.class);
@@ -496,6 +500,11 @@ class SystemDocumentationMojoTest {
 		Customer getCustomer(String requestedCustomerName) {
 			this.customerName = requestedCustomerName;
 			return customerMetadata;
+		}
+
+		@Override
+		ProvidedRepository newRepository() {
+			return mock(ProvidedRepository.class);
 		}
 
 		@Override

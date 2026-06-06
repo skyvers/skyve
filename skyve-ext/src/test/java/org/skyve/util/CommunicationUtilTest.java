@@ -4,14 +4,17 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -26,14 +29,21 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.app.admin.Communication;
 import org.skyve.domain.app.admin.Communication.ActionType;
+import org.skyve.domain.app.admin.Communication.FormatType;
+import org.skyve.domain.app.admin.Contact;
 import org.skyve.domain.app.admin.Subscription;
 import org.skyve.domain.app.admin.Tag;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateTime;
+import org.skyve.impl.content.AbstractContentManager;
+import org.skyve.impl.content.NoOpContentManager;
+import org.skyve.impl.mail.MailServiceStaticSingleton;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentFilter;
@@ -41,21 +51,34 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.CommunicationUtil.CommunicationCalendarItem;
 import org.skyve.util.CommunicationUtil.ResponseMode;
+import org.skyve.web.WebContext;
 
 class CommunicationUtilTest {
 
 	private Communication communication;
+	private MailService originalMailService;
+	private Class<? extends AbstractContentManager> originalContentManagerClass;
 
 	@BeforeEach
 	void setup() {
 		// setup mocks
 		communication = mock(Communication.class);
+		try {
+			originalMailService = MailServiceStaticSingleton.get();
+		}
+		catch (@SuppressWarnings("unused") IllegalStateException e) {
+			originalMailService = null;
+		}
+		originalContentManagerClass = AbstractContentManager.IMPLEMENTATION_CLASS;
 	}
 
 	@AfterEach
-	@SuppressWarnings("static-method")
 	void teardown() throws Exception {
 		unbindPersistenceFromThread();
+		if (originalMailService != null) {
+			MailServiceStaticSingleton.set(originalMailService);
+		}
+		AbstractContentManager.IMPLEMENTATION_CLASS = originalContentManagerClass;
 	}
 
 	@Test
@@ -338,6 +361,49 @@ class CommunicationUtilTest {
 		assertThat(ics, containsString("SUMMARY:null"));
 	}
 
+	@Test
+	@SuppressWarnings("boxing")
+	void testSendActionBuildsMailAndGrowls() throws Exception {
+		CaptureMailService mailService = new CaptureMailService();
+		MailServiceStaticSingleton.set(mailService);
+		AbstractContentManager.IMPLEMENTATION_CLASS = NoOpContentManager.class;
+		configureExecutableCommunication("sender@example.com", "to@example.com; alt@example.com", "cc@example.com", true);
+		when(communication.getIncludeCalendar()).thenReturn(Boolean.TRUE);
+		when(communication.getCalendarTitleExpression()).thenReturn("Team Sync");
+		when(communication.getCalendarDescriptionExpression()).thenReturn("Weekly status meeting");
+		when(communication.getCalendarStartTime()).thenReturn(new DateTime(1_700_000_000_000L));
+		when(communication.getCalendarEndTime()).thenReturn(new DateTime(1_700_000_360_000L));
+		WebContext webContext = mock(WebContext.class);
+
+		CommunicationUtil.send(webContext, communication, CommunicationUtil.RunMode.ACTION, ResponseMode.EXPLICIT,
+				new MailAttachment[] { new MailAttachment("extra.txt", "extra".getBytes(StandardCharsets.UTF_8), org.skyve.content.MimeType.plain) });
+
+		assertThat(mailService.sendCount, is(1));
+		assertThat(mailService.lastSend.getSenderEmailAddress(), is("sender@example.com"));
+		assertThat(mailService.lastSend.getRecipientEmailAddresses(), is(java.util.Set.of("alt@example.com", "to@example.com")));
+		assertThat(mailService.lastSend.getCcEmailAddresses(), is(java.util.Set.of("cc@example.com")));
+		assertThat(mailService.lastSend.getBccEmailAddresses(), is(java.util.Set.of("admin@example.com")));
+		assertThat(mailService.lastSend.getSubject(), is("Subject"));
+		assertThat(mailService.lastSend.getBody(), containsString("<html><body>Body<br>"));
+		assertThat(mailService.lastSend.getBody(), containsString("google.com/calendar/render"));
+		assertThat(mailService.lastSend.getAttachments().size(), is(3));
+		verify(webContext).growl(MessageSeverity.info, CommunicationUtil.SENT_SUCCESSFULLY_MESSAGE);
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	void testSendTestModeValidatesButDoesNotDispatchMail() throws Exception {
+		CaptureMailService mailService = new CaptureMailService();
+		MailServiceStaticSingleton.set(mailService);
+		AbstractContentManager.IMPLEMENTATION_CLASS = NoOpContentManager.class;
+		configureExecutableCommunication(null, "to@example.com", null, false);
+
+		CommunicationUtil.send(communication, CommunicationUtil.RunMode.TEST, ResponseMode.EXPLICIT, null);
+
+		assertThat(mailService.sendCount, is(0));
+		assertThat(mailService.writeCount, is(0));
+	}
+
 	@SuppressWarnings("boxing")
 	private static Communication communicationForResults(ActionType actionType, long count) {
 		Communication communication = mock(Communication.class);
@@ -376,12 +442,58 @@ class CommunicationUtilTest {
 		return persistence;
 	}
 
+	@SuppressWarnings("unchecked")
+	private void configureExecutableCommunication(String sendFrom, String sendTo, String ccTo, boolean monitorBcc) throws Exception {
+		AbstractPersistence persistence = bindMockPersistenceWithUser();
+		User user = persistence.getUser();
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document communicationDocument = mock(Document.class);
+		Document subscriptionDocument = mock(Document.class);
+		org.skyve.domain.app.admin.User adminUser = mock(org.skyve.domain.app.admin.User.class);
+		Contact contact = mock(Contact.class);
+		Persistence callbackPersistence = mock(Persistence.class);
+		DocumentQuery query = mock(DocumentQuery.class);
+		DocumentFilter filter = mock(DocumentFilter.class);
+
+		when(user.getCustomer()).thenReturn(customer);
+		when(user.getId()).thenReturn("admin-user");
+		when(customer.getModule(AppConstants.ADMIN_MODULE_NAME)).thenReturn(module);
+		when(module.getDocument(customer, AppConstants.COMMUNICATION_DOCUMENT_NAME)).thenReturn(communicationDocument);
+		when(module.getDocument(customer, AppConstants.SUBSCRIPTION_DOCUMENT_NAME)).thenReturn(subscriptionDocument);
+		setPersistenceUser(persistence, user);
+		when(module.getDocument(customer, AppConstants.USER_DOCUMENT_NAME)).thenReturn(communicationDocument);
+		doReturn(adminUser).when(persistence).retrieve(communicationDocument, "admin-user");
+		when(adminUser.getContact()).thenReturn(contact);
+		when(contact.getEmail1()).thenReturn("admin@example.com");
+		when(persistence.withDocumentPermissionScopes(eq(DocumentPermissionScope.customer), any(Function.class)))
+				.thenAnswer(invocation -> ((Function<Persistence, String>) invocation.getArgument(1)).apply(callbackPersistence));
+		when(callbackPersistence.newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.SUBSCRIPTION_DOCUMENT_NAME)).thenReturn(query);
+		when(query.getFilter()).thenReturn(filter);
+		when(query.beanResult()).thenReturn(null);
+
+		when(communication.getSendFrom()).thenReturn(sendFrom);
+		when(communication.getSendTo()).thenReturn(sendTo);
+		when(communication.getCcTo()).thenReturn(ccTo);
+		when(communication.getMonitorBcc()).thenReturn(Boolean.valueOf(monitorBcc));
+		when(communication.getSubject()).thenReturn("Subject");
+		when(communication.getBody()).thenReturn("Body");
+		when(communication.getFormatType()).thenReturn(FormatType.email);
+		when(communication.getIncludeCalendar()).thenReturn(Boolean.FALSE);
+	}
+
 	private static void bindPersistenceToThread(AbstractPersistence persistence) throws Exception {
 		Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
 		field.setAccessible(true);
 		@SuppressWarnings("unchecked")
 		ThreadLocal<AbstractPersistence> threadLocal = (ThreadLocal<AbstractPersistence>) field.get(null);
 		threadLocal.set(persistence);
+	}
+
+	private static void setPersistenceUser(AbstractPersistence persistence, User user) throws Exception {
+		Field field = AbstractPersistence.class.getDeclaredField("user");
+		field.setAccessible(true);
+		field.set(persistence, user);
 	}
 
 	private static void unbindPersistenceFromThread() throws Exception {
@@ -428,8 +540,30 @@ class CommunicationUtilTest {
 
         @SuppressWarnings("static-method")
         @Test
-        void testResponseModeEnumsAreAccessible() {
-                assertThat(CommunicationUtil.ResponseMode.EXPLICIT, notNullValue());
-                assertThat(CommunicationUtil.ResponseMode.SILENT, notNullValue());
-        }
-}
+	        void testResponseModeEnumsAreAccessible() {
+	                assertThat(CommunicationUtil.ResponseMode.EXPLICIT, notNullValue());
+	                assertThat(CommunicationUtil.ResponseMode.SILENT, notNullValue());
+	        }
+
+	private static class CaptureMailService implements MailService {
+		int sendCount;
+		int writeCount;
+		Mail lastSend;
+
+		@Override
+		public void writeMail(@jakarta.annotation.Nonnull Mail mail, @jakarta.annotation.Nonnull OutputStream out) {
+			writeCount++;
+		}
+
+		@Override
+		public void sendMail(@jakarta.annotation.Nonnull Mail mail) {
+			sendCount++;
+			lastSend = mail;
+		}
+
+		@Override
+		public void sendBulkMail(@jakarta.annotation.Nonnull List<Mail> mails) {
+			// not used by these tests
+		}
+	}
+	}

@@ -5,11 +5,14 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +20,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.bizport.AbstractDataFileLoader.LoaderActivityType;
+import org.skyve.impl.bizport.DataFileField.LoadAction;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -129,6 +133,81 @@ class AbstractDataFileLoaderTest {
 	}
 
 	@Test
+	void beanResultFallsBackToDateConversionWhenConverterReturnsNull() throws Exception {
+		UploadException problems = new UploadException();
+		Bean bean = mock(Bean.class);
+		bindPersistence(persistence(customer(), bean, null));
+		TestLoader loader = new TestLoader(LoaderActivityType.CREATE_FIND, problems);
+		@SuppressWarnings("rawtypes")
+		Converter converter = mock(Converter.class);
+		when(converter.fromDisplayValue("yes")).thenReturn(null);
+		DataFileField field = field("convertedBinding", AttributeType.dateTime);
+		field.setIndex(0);
+		field.setConverter(converter);
+		loader.getFields().add(field);
+
+		assertSame(bean, loader.beanResult());
+		verify(converter).fromDisplayValue("yes");
+	}
+
+	@Test
+	void beanResultAddsWarningWhenRequiredFieldValueIsMissing() throws Exception {
+		UploadException problems = new UploadException();
+		Bean bean = mock(Bean.class);
+		bindPersistence(persistence(customer(), bean, null));
+		TestLoader loader = new TestLoader(LoaderActivityType.CREATE_FIND, problems);
+		loader.nullStringIndexes.add(Integer.valueOf(0));
+		DataFileField field = field("requiredText", AttributeType.text);
+		field.setIndex(0);
+		field.setRequired(true);
+		loader.getFields().add(field);
+
+		assertSame(bean, loader.beanResult());
+
+		assertThat(problems.getWarnings().iterator().hasNext(), is(true));
+		assertThat(problems.getWarnings().iterator().next().getWhat(), containsString("A value was expected"));
+	}
+
+	@Test
+	void beanResultIgnoresFieldsWithoutBinding() throws Exception {
+		UploadException problems = new UploadException();
+		Bean bean = mock(Bean.class);
+		bindPersistence(persistence(customer(), bean, null));
+		TestLoader loader = new TestLoader(LoaderActivityType.CREATE_FIND, problems);
+		loader.getFields().add(field(null, AttributeType.text));
+
+		assertSame(bean, loader.beanResult());
+		assertThat(problems.hasProblems(), is(false));
+	}
+
+	@Test
+	void findBeanResultBuildsEqualsLikeAndContainsFilters() throws Exception {
+		UploadException problems = new UploadException();
+		DocumentFilter filter = mock(DocumentFilter.class);
+		when(filter.isEmpty()).thenReturn(false);
+		bindPersistence(persistence(customer(), null, filter));
+		TestLoader loader = new TestLoader(LoaderActivityType.FIND, problems);
+		DataFileField equals = field("name", AttributeType.text);
+		equals.setLoadAction(LoadAction.LOOKUP_EQUALS);
+		equals.setIndex(0);
+		DataFileField like = field("description", AttributeType.text);
+		like.setLoadAction(LoadAction.LOOKUP_LIKE);
+		like.setIndex(1);
+		DataFileField contains = field("notes", AttributeType.text);
+		contains.setLoadAction(LoadAction.LOOKUP_CONTAINS);
+		contains.setIndex(2);
+		loader.getFields().add(equals);
+		loader.getFields().add(like);
+		loader.getFields().add(contains);
+
+		assertThat(loader.beanResult(), is((Bean) null));
+
+		verify(filter).addEquals("name", "yes");
+		verify(filter).addLike("description", "cell-1");
+		verify(filter).addLike("notes", "%cell-2%");
+	}
+
+	@Test
 	void beanResultsStopsAtNoDataAndAddsWarningWhenNothingLoaded() throws Exception {
 		UploadException problems = new UploadException();
 		bindPersistence(persistence(customer(), null, null));
@@ -195,6 +274,7 @@ class AbstractDataFileLoaderTest {
 	private static final class TestLoader extends AbstractDataFileLoader {
 		private boolean hasNext;
 		private boolean noData;
+		private final Set<Integer> nullStringIndexes = new HashSet<>();
 
 		private TestLoader(LoaderActivityType activityType, UploadException exception) {
 			super(activityType, exception, "sales", "Order");
@@ -221,6 +301,9 @@ class AbstractDataFileLoaderTest {
 
 		@Override
 		String getStringFieldValue(int index, boolean emptyAsNull) {
+			if (nullStringIndexes.contains(Integer.valueOf(index))) {
+				return null;
+			}
 			return (index == 0) ? "yes" : "cell-" + index;
 		}
 

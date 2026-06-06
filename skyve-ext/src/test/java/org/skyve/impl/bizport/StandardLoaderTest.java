@@ -203,6 +203,55 @@ public class StandardLoaderTest {
 	}
 
 	@Test
+	public void populateCollectionFromRowAddsErrorWhenOwnerRowIsMissing() throws Exception {
+		UploadException problems = new UploadException();
+		BizPortWorkbook workbook = mockWorkbook();
+		StandardLoader loader = new StandardLoader(workbook, problems);
+		Document ownerDocument = document("sales", "Order");
+		Document elementDocument = document("sales", "Line");
+		BizPortSheet sheet = collectionSheet(problems, "O1", "E1");
+		BizPortColumn ownerColumn = sheet.getColumn(PersistentBean.OWNER_COLUMN_NAME);
+		BizPortColumn elementColumn = sheet.getColumn(PersistentBean.ELEMENT_COLUMN_NAME);
+		SheetKey ownerKey = new SheetKey("sales", "Order");
+		SheetKey elementKey = new SheetKey("sales", "Line");
+		BizPortSheet ownerSheet = mock(BizPortSheet.class);
+		when(ownerSheet.getTitle()).thenReturn("Orders");
+		ownerColumn.setReferencedSheet(ownerKey);
+		elementColumn.setReferencedSheet(elementKey);
+		when(workbook.getSheet(ownerKey)).thenReturn(ownerSheet);
+
+		invokePopulateCollectionFromRow(loader, "items", ownerDocument, elementDocument, sheet);
+
+		verify(sheet).addErrorAtCurrentRow(eq(problems), eq(ownerColumn), contains("collection owner does not exist"));
+	}
+
+	@Test
+	public void populateCollectionFromRowAddsErrorWhenElementRowIsMissing() throws Exception {
+		UploadException problems = new UploadException();
+		BizPortWorkbook workbook = mockWorkbook();
+		StandardLoader loader = new StandardLoader(workbook, problems);
+		Document ownerDocument = document("sales", "Order");
+		Document elementDocument = document("sales", "Line");
+		BizPortSheet sheet = collectionSheet(problems, "O1", "E1");
+		BizPortColumn ownerColumn = sheet.getColumn(PersistentBean.OWNER_COLUMN_NAME);
+		BizPortColumn elementColumn = sheet.getColumn(PersistentBean.ELEMENT_COLUMN_NAME);
+		SheetKey ownerKey = new SheetKey("sales", "Order");
+		SheetKey elementKey = new SheetKey("sales", "Line");
+		BizPortSheet ownerSheet = mock(BizPortSheet.class);
+		BizPortSheet elementSheet = mock(BizPortSheet.class);
+		when(elementSheet.getTitle()).thenReturn("Lines");
+		ownerColumn.setReferencedSheet(ownerKey);
+		elementColumn.setReferencedSheet(elementKey);
+		when(workbook.getSheet(ownerKey)).thenReturn(ownerSheet);
+		when(workbook.getSheet(elementKey)).thenReturn(elementSheet);
+		putMappedBean(loader, ownerDocument, "O1", mock(Bean.class));
+
+		invokePopulateCollectionFromRow(loader, "items", ownerDocument, elementDocument, sheet);
+
+		verify(sheet).addErrorAtCurrentRow(eq(problems), eq(elementColumn), contains("collection element does not exist"));
+	}
+
+	@Test
 	public void linkParentFromRowIgnoresEmptyRows() throws Exception {
 		UploadException problems = new UploadException();
 		StandardLoader loader = new StandardLoader(mockWorkbook(), problems);

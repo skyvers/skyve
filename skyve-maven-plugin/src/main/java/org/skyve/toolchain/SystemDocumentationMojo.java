@@ -55,6 +55,7 @@ import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.QueryDefinition;
+import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.Role;
 import org.skyve.persistence.DataStore;
 import org.skyve.toolchain.freemarker.PlantUMLDirective;
@@ -147,7 +148,7 @@ public class SystemDocumentationMojo extends AbstractSkyveMojo {
 			UtilImpl.SESSION_CACHE = new SessionCacheConfig(10, 0, 0, 60);
 			UtilImpl.GEO_IP_CACHE = new GeoIPCacheConfig(10, 0, 0, 60);
 
-				ProvidedRepositoryFactory.set(new DefaultRepository());
+				ProvidedRepositoryFactory.set(newRepository());
 				Customer c = getCustomer(customer);
 				if (c == null) {
 					throw new IllegalStateException("Customer " + customer + " does not exist");
@@ -418,6 +419,11 @@ public class SystemDocumentationMojo extends AbstractSkyveMojo {
 	@SuppressWarnings("static-method") // test seam
 	Customer getCustomer(String customerName) {
 		return ProvidedRepositoryFactory.get().getCustomer(customerName);
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	ProvidedRepository newRepository() {
+		return new DefaultRepository();
 	}
 
 	@SuppressWarnings("static-method") // test seam

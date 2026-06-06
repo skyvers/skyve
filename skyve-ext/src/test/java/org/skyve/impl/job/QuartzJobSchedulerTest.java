@@ -13,23 +13,34 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatcher;
+import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
+import org.quartz.JobKey;
 import org.quartz.ObjectAlreadyExistsException;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.quartz.TriggerKey;
 import org.quartz.UnableToInterruptJobException;
+import org.quartz.impl.matchers.GroupMatcher;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.ValidationException;
+import org.skyve.impl.backup.RestoreJob;
+import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.job.JobDescription;
 import org.skyve.job.JobSchedule;
 import org.skyve.job.ViewBackgroundTask;
 import org.skyve.metadata.customer.Customer;
@@ -52,6 +63,7 @@ public class QuartzJobSchedulerTest {
 	@After
 	public void tearDown() throws Exception {
 		setScheduler(originalScheduler);
+		unbindPersistenceFromThread();
 	}
 
 	@Test
@@ -277,6 +289,126 @@ public class QuartzJobSchedulerTest {
 		verify(scheduler).shutdown();
 	}
 
+	@Test
+	public void getCustomerRunningJobsReturnsOnlySkyveJobsForCurrentCustomer() throws Exception {
+		User currentUser = user("customer");
+		bindPersistenceWithUser(currentUser);
+		TestQuartzJob customerJob = new TestQuartzJob();
+		customerJob.setDisplayName("Customer Job");
+		customerJob.setPercentComplete(42);
+		customerJob.getLog().add("running");
+		JobExecutionContext matchingContext = context(customerJob, "customer", "fire-1", currentUser);
+		JobExecutionContext otherCustomerContext = context(new TestQuartzJob(), "other", "fire-2", currentUser);
+		JobExecutionContext nonSkyveContext = mock(JobExecutionContext.class);
+		when(nonSkyveContext.getJobInstance()).thenReturn(mock(org.quartz.Job.class));
+		when(scheduler.getCurrentlyExecutingJobs()).thenReturn(List.of(matchingContext, otherCustomerContext, nonSkyveContext));
+
+		List<JobDescription> result = new QuartzJobScheduler().getCustomerRunningJobs();
+
+		assertThat(result.size(), is(1));
+		JobDescription description = result.get(0);
+		assertThat(description.getUser(), is(sameInstance(currentUser)));
+		assertThat(description.getName(), is("Customer Job"));
+		assertThat(description.getPercentComplete(), is(42));
+		assertThat(description.getLogging(), is("running\n"));
+		assertThat(description.getInstanceId(), is("fire-1"));
+	}
+
+	@Test
+	public void getCustomerRunningJobsWrapsSchedulerException() throws Exception {
+		bindPersistenceWithUser(user("customer"));
+		when(scheduler.getCurrentlyExecutingJobs()).thenThrow(new SchedulerException("boom"));
+
+		assertThrows(DomainException.class, () -> new QuartzJobScheduler().getCustomerRunningJobs());
+	}
+
+	@Test
+	public void preRestorePausesInternalJobsAndUnschedulesCustomerTriggers() throws Exception {
+		boolean originalJobScheduler = UtilImpl.JOB_SCHEDULER;
+		try {
+			UtilImpl.JOB_SCHEDULER = true;
+			bindPersistenceWithUser(user("customer"));
+			when(scheduler.getCurrentlyExecutingJobs()).thenReturn(Collections.emptyList());
+			when(scheduler.getTriggerKeys(any(GroupMatcher.class))).thenReturn(Set.of(new TriggerKey("job-1", "customer")));
+
+			new QuartzJobScheduler().preRestore();
+
+			verify(scheduler).pauseJobs(jobGroupMatcher("INTERNAL"));
+			verify(scheduler).getTriggerKeys(triggerGroupMatcher("customer"));
+			verify(scheduler).unscheduleJobs(List.of(new TriggerKey("job-1", "customer")));
+		}
+		finally {
+			UtilImpl.JOB_SCHEDULER = originalJobScheduler;
+		}
+	}
+
+	@Test
+	public void preRestoreThrowsValidationExceptionWhenCustomerOrInternalJobIsRunning() throws Exception {
+		User user = user("customer");
+		bindPersistenceWithUser(user);
+		JobExecutionContext context = context(new TestQuartzJob(), "INTERNAL", "fire-1", user);
+		when(scheduler.getCurrentlyExecutingJobs()).thenReturn(List.of(context));
+
+		assertThrows(ValidationException.class, () -> new QuartzJobScheduler().preRestore());
+	}
+
+	@Test
+	public void preRestoreWrapsSchedulerException() throws Exception {
+		bindPersistenceWithUser(user("customer"));
+		when(scheduler.getCurrentlyExecutingJobs()).thenThrow(new SchedulerException("boom"));
+
+		assertThrows(DomainException.class, () -> new QuartzJobScheduler().preRestore());
+	}
+
+	@Test
+	public void runRestoreJobSchedulesRestoreJobWithCurrentUserAndOptions() throws Exception {
+		User user = user("customer");
+		bindPersistenceWithUser(user);
+		Bean options = mock(Bean.class);
+
+		new QuartzJobScheduler().runRestoreJob(options);
+
+		ArgumentCaptor<org.quartz.JobDetail> detail = ArgumentCaptor.forClass(org.quartz.JobDetail.class);
+		ArgumentCaptor<Trigger> trigger = ArgumentCaptor.forClass(Trigger.class);
+		verify(scheduler).scheduleJob(detail.capture(), trigger.capture());
+		assertSame(RestoreJob.class, detail.getValue().getJobClass());
+		assertThat(detail.getValue().getKey().getGroup(), is("customer"));
+		assertThat(trigger.getValue().getKey().getGroup(), is("customer"));
+		assertThat(trigger.getValue().getJobDataMap().get(AbstractSkyveJob.DISPLAY_NAME_JOB_PARAMETER_KEY), is(RestoreJob.class.getSimpleName()));
+		assertThat(trigger.getValue().getJobDataMap().get(AbstractSkyveJob.USER_JOB_PARAMETER_KEY), is(sameInstance(user)));
+		assertThat(trigger.getValue().getJobDataMap().get(AbstractSkyveJob.BEAN_JOB_PARAMETER_KEY), is(sameInstance(options)));
+	}
+
+	@Test
+	public void runRestoreJobWrapsSchedulerException() throws Exception {
+		bindPersistenceWithUser(user("customer"));
+		doThrow(new SchedulerException("boom")).when(scheduler).scheduleJob(any(org.quartz.JobDetail.class), any(Trigger.class));
+
+		assertThrows(DomainException.class, () -> new QuartzJobScheduler().runRestoreJob(mock(Bean.class)));
+	}
+
+	@Test
+	public void postRestoreAlwaysResumesInternalJobs() throws Exception {
+		boolean originalJobScheduler = UtilImpl.JOB_SCHEDULER;
+		try {
+			UtilImpl.JOB_SCHEDULER = false;
+
+			new QuartzJobScheduler().postRestore(true);
+
+			verify(scheduler).resumeJobs(jobGroupMatcher("INTERNAL"));
+		}
+		finally {
+			UtilImpl.JOB_SCHEDULER = originalJobScheduler;
+		}
+	}
+
+	@Test
+	public void postRestoreWrapsSchedulerException() throws Exception {
+		doThrow(new SchedulerException("boom")).when(scheduler).resumeJobs(any(GroupMatcher.class));
+
+		assertThrows(DomainException.class, () -> new QuartzJobScheduler().postRestore(false));
+	}
+
 	private static Trigger scheduledTrigger() throws Exception {
 		ArgumentCaptor<Trigger> trigger = ArgumentCaptor.forClass(Trigger.class);
 		verify(getScheduler()).scheduleJob(trigger.capture());
@@ -297,6 +429,45 @@ public class QuartzJobSchedulerTest {
 		User result = mock(User.class);
 		when(result.getCustomer()).thenReturn(customer);
 		return result;
+	}
+
+	private static JobExecutionContext context(AbstractSkyveJob job, String triggerGroup, String fireInstanceId, User user) throws Exception {
+		Trigger trigger = mock(Trigger.class);
+		when(trigger.getKey()).thenReturn(new TriggerKey("trigger", triggerGroup));
+		JobDataMap dataMap = new JobDataMap();
+		dataMap.put(AbstractSkyveJob.USER_JOB_PARAMETER_KEY, user);
+		JobExecutionContext context = mock(JobExecutionContext.class);
+		when(context.getJobInstance()).thenReturn(job);
+		when(context.getTrigger()).thenReturn(trigger);
+		when(context.getMergedJobDataMap()).thenReturn(dataMap);
+		when(context.getFireInstanceId()).thenReturn(fireInstanceId);
+		return context;
+	}
+
+	private static GroupMatcher<JobKey> jobGroupMatcher(String expectedGroup) {
+		return org.mockito.ArgumentMatchers.argThat((ArgumentMatcher<GroupMatcher<JobKey>>) matcher -> matcher != null && expectedGroup.equals(matcher.getCompareToValue()));
+	}
+
+	private static GroupMatcher<TriggerKey> triggerGroupMatcher(String expectedGroup) {
+		return org.mockito.ArgumentMatchers.argThat((ArgumentMatcher<GroupMatcher<TriggerKey>>) matcher -> matcher != null && expectedGroup.equals(matcher.getCompareToValue()));
+	}
+
+	private static void bindPersistenceWithUser(User user) throws Exception {
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		when(persistence.getUser()).thenReturn(user);
+		Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
+		field.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		ThreadLocal<AbstractPersistence> threadLocal = (ThreadLocal<AbstractPersistence>) field.get(null);
+		threadLocal.set(persistence);
+	}
+
+	private static void unbindPersistenceFromThread() throws Exception {
+		Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
+		field.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		ThreadLocal<AbstractPersistence> threadLocal = (ThreadLocal<AbstractPersistence>) field.get(null);
+		threadLocal.remove();
 	}
 
 	private static Scheduler getScheduler() throws Exception {
