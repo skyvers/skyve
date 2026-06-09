@@ -8,10 +8,10 @@ import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.router.UxUiSelector;
 import org.skyve.metadata.user.User;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.skyve.web.UserAgentType;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
-import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -58,7 +58,8 @@ public class DefaultUxUiSelector implements UxUiSelector {
 		User user = (session == null) ? null : (User) session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
 		if (user != null && user.isInRole(Startup.MODULE_NAME, "SecurityAdministrator") && UtilImpl.SHOW_SETUP) {
 			// check the user has not already dismissed the startup page this session
-			Object dismissed = session != null ? session.getAttribute(DISMISS_STARTUP) : null;
+			@SuppressWarnings("null") // session cannot be null here as user is not null
+			Object dismissed = session.getAttribute(DISMISS_STARTUP);
 			if (! Boolean.TRUE.equals(dismissed)) {
 				LOGGER.info("ROUTING TO STARTUP");
 				return UxUis.STARTUP;

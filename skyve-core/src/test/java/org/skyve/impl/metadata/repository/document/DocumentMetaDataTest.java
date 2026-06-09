@@ -1228,6 +1228,53 @@ class DocumentMetaDataTest {
 
 	@Test
 	@SuppressWarnings("static-method")
+	void convertThrowsWhenAttributeNameContainsUnicodeLetter() {
+		DocumentMetaData d = minimalTransientDoc();
+		Text textAttr = new Text();
+		textAttr.setName("myFieldé");
+		textAttr.setDisplayName("My Field");
+		textAttr.setLength(50);
+		d.getAttributes().add(textAttr);
+
+		assertThrows(MetaDataException.class, () -> d.convert("test.TestDoc"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenLongAttributeNameContainsUnicodeLetter() {
+		DocumentMetaData d = minimalTransientDoc();
+		StringBuilder name = new StringBuilder("myField");
+		for (int i = 0; i < 10000; i++) {
+			name.append('a');
+		}
+		name.append('é');
+		Text textAttr = new Text();
+		textAttr.setName(name.toString());
+		textAttr.setDisplayName("My Field");
+		textAttr.setLength(50);
+		d.getAttributes().add(textAttr);
+
+		assertThrows(MetaDataException.class, () -> d.convert("test.TestDoc"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertSucceedsWhenAttributeNameContainsAsciiIdentifierCharacters() {
+		DocumentMetaData d = minimalTransientDoc();
+		Text textAttr = new Text();
+		textAttr.setName("myField$1");
+		textAttr.setDisplayName("My Field");
+		textAttr.setLength(50);
+		d.getAttributes().add(textAttr);
+
+		org.skyve.metadata.model.document.Document result = d.convert("test.TestDoc");
+
+		assertNotNull(result);
+		assertNotNull(result.getAttribute("myField$1"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
 	void convertWithDateAttributeSucceeds() {
 		DocumentMetaData d = minimalTransientDoc();
 		Date dateAttr = new Date();

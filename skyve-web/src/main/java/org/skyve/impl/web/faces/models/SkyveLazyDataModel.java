@@ -25,7 +25,6 @@ import org.skyve.impl.metadata.model.document.field.ConvertibleField;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.SortParameterImpl;
 import org.skyve.impl.web.faces.views.FacesView;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -45,11 +44,11 @@ import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 import org.skyve.util.logging.Category;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.skyve.util.monitoring.Monitoring;
 import org.skyve.util.monitoring.RequestKey;
 import org.skyve.web.SortParameter;
 import org.slf4j.Logger;
-import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nonnull;
 
@@ -83,6 +82,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 	 * @param parameters optional query parameter metadata
 	 * @param escape whether list row values should be HTML-escaped
 	 */
+	@SuppressWarnings("java:S107") // too many params OK
 	public SkyveLazyDataModel(@Nonnull FacesView view,
 								String moduleName, 
 								String documentName, 
@@ -122,6 +122,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 	 * @return the adapted page rows for JSF rendering
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // complexity OK
 	public List<BeanMapAdapter> load(int first,
 										int pageSize,
 										Map<String, SortMeta> multiSortMeta,
@@ -140,9 +141,6 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 			EXT.checkAccess(u, UserAccess.modelAggregate(moduleName, documentName, modelName), uxui);
 			d = m.getDocument(c, documentName);
 			model = d.getListModel(c, modelName, true);
-			if (model == null) {
-				throw new MetaDataException(modelName + " is not a valid ListModel");
-			}
 			key = RequestKey.model(d, modelName);
 		}
 		// query type of request
@@ -281,6 +279,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 	 * @param customer the current customer metadata
 	 * @throws Exception if metadata resolution or conversion fails
 	 */
+	@SuppressWarnings({"java:S3776", "java:S6541", "java:S112"}) // complex method OK
 	private static void filter(Map<String, FilterMeta> filters, ListModel<Bean> model, Customer customer)
 	throws Exception {
 		Document drivingDocument = model.getDrivingDocument();

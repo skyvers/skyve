@@ -943,16 +943,18 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 				}
 				else {
 					Document d = m.getDocument(c, context.getDocumentName());
-					ListModel<Bean> lm = d.getListModel(c, key, false);
-					if (lm != null) {
+					try {
+						ListModel<Bean> lm = d.getListModel(c, key, false);
 						d = lm.getDrivingDocument();
 						result.setModuleName(d.getOwningModuleName());
 						result.setDocumentName(d.getName());
 					}
-					else {
+					catch (MetaDataException e) {
 						throw new MetaDataException(String.format("<%s /> with identifier [%s] requires queryName, documentName or modelName defined.",
 																	step.getClass().getSimpleName(),
-																	step.getIdentifier(context)));
+																	step.getIdentifier(context)),
+													e);
+						
 					}
 				}
 			}

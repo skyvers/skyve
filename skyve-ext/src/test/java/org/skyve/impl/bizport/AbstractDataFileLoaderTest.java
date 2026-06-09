@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -26,6 +27,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentFilter;
@@ -68,6 +70,88 @@ class AbstractDataFileLoaderTest {
 		loader.setDataIndex(5);
 
 		assertThat(loader.debugData(), is("Row 5 has no data."));
+	}
+
+	@Test
+	void settersAndNullBindingFieldsUpdateLoaderStateWithoutMetadataLookup() throws Exception {
+		UploadException first = new UploadException();
+		UploadException second = new UploadException();
+		bindPersistence(persistence(customer(), null, null));
+		TestLoader loader = new TestLoader(LoaderActivityType.CREATE_ALL, first);
+
+		loader.setFieldIndex(3);
+		loader.setException(second);
+		loader.setActivityType(LoaderActivityType.FIND);
+		loader.addField((String) null);
+		loader.addField(null, LoadAction.CONFIRM_VALUE, true, null);
+
+		assertSame(second, loader.getException());
+		assertThat(loader.getFields().size(), is(2));
+		assertThat(loader.getFields().get(0).getIndex(), is(Integer.valueOf(0)));
+		assertThat(loader.getFields().get(1).getIndex(), is(Integer.valueOf(1)));
+		assertThat(loader.getFields().get(1).getLoadAction(), is(LoadAction.CONFIRM_VALUE));
+		assertThat(loader.getFields().get(1).isRequired(), is(true));
+	}
+
+	@Test
+	void addFieldStripsExpressionBracesAndFinalisesScalarAttribute() throws Exception {
+		Customer customer = customer();
+		Document document = customer.getModule("sales").getDocument(customer, "Order");
+		Attribute name = attribute("name", AttributeType.text);
+		doReturn(String.class).when(name).getImplementingType();
+		when(document.getAttribute("name")).thenReturn(name);
+		bindPersistence(persistence(customer, null, null));
+		TestLoader loader = new TestLoader(LoaderActivityType.CREATE_ALL, new UploadException());
+
+		loader.addField("{name}");
+
+		DataFileField field = loader.getFields().get(0);
+		assertThat(field.getBinding(), is("name"));
+		assertThat(field.getAttribute(), is(name));
+		assertThat(field.getLoadAction(), is(LoadAction.SET_VALUE));
+		assertThat(field.getIndex(), is(Integer.valueOf(0)));
+	}
+
+	@Test
+	void addFieldDefaultsCompoundBindingsToLookupEqualsForCreateFind() throws Exception {
+		Customer customer = customer();
+		Module module = customer.getModule("sales");
+		Document order = module.getDocument(customer, "Order");
+		Document company = mock(Document.class);
+		Relation companyRelation = relation("company", "Company");
+		Attribute companyName = attribute("name", AttributeType.text);
+		doReturn(String.class).when(companyName).getImplementingType();
+		when(order.getAttribute("company")).thenReturn(companyRelation);
+		when(module.getDocument(customer, "Company")).thenReturn(company);
+		when(company.getOwningModuleName()).thenReturn("sales");
+		when(company.getName()).thenReturn("Company");
+		when(company.getAttribute("name")).thenReturn(companyName);
+		bindPersistence(persistence(customer, null, null));
+		TestLoader loader = new TestLoader(LoaderActivityType.CREATE_FIND, new UploadException());
+
+		loader.addField("company.name");
+
+		DataFileField field = loader.getFields().get(0);
+		assertThat(field.getBinding(), is("company.name"));
+		assertThat(field.getAttribute(), is(companyName));
+		assertThat(field.getLoadAction(), is(LoadAction.LOOKUP_EQUALS));
+	}
+
+	@Test
+	void addFieldRedirectsAssociationBindingToBizKeyLookupContains() throws Exception {
+		Customer customer = customer();
+		Document document = customer.getModule("sales").getDocument(customer, "Order");
+		Relation company = relation("company", "Company");
+		when(document.getAttribute("company")).thenReturn(company);
+		bindPersistence(persistence(customer, null, null));
+		TestLoader loader = new TestLoader(LoaderActivityType.CREATE_ALL, new UploadException());
+
+		loader.addField("company");
+
+		DataFileField field = loader.getFields().get(0);
+		assertThat(field.getBinding(), is("company.bizKey"));
+		assertThat(field.getAttribute(), is(company));
+		assertThat(field.getLoadAction(), is(LoadAction.LOOKUP_CONTAINS));
 	}
 
 	@Test
@@ -222,6 +306,20 @@ class AbstractDataFileLoaderTest {
 		assertThat(problems.getWarnings().iterator().next().getWhat(), is("No data has been loaded"));
 	}
 
+	@Test
+	void beanResultsAddsNonNullBeanResultWithoutNoDataWarning() throws Exception {
+		UploadException problems = new UploadException();
+		Bean bean = mock(Bean.class);
+		bindPersistence(persistence(customer(), bean, null));
+		TestLoader loader = new TestLoader(LoaderActivityType.CREATE_ALL, problems);
+		loader.hasNext = true;
+
+		List<Bean> results = loader.beanResults();
+
+		assertThat(results, is(List.of(bean)));
+		assertThat(hasWarning(problems, "No data has been loaded"), is(false));
+	}
+
 	private static Customer customer() {
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
@@ -257,6 +355,24 @@ class AbstractDataFileLoaderTest {
 		when(attribute.getAttributeType()).thenReturn(type);
 		when(attribute.getLocalisedDisplayName()).thenReturn(name);
 		return attribute;
+	}
+
+	private static Relation relation(String name, String documentName) {
+		Relation relation = mock(Relation.class);
+		when(relation.getName()).thenReturn(name);
+		when(relation.getAttributeType()).thenReturn(AttributeType.association);
+		when(relation.getLocalisedDisplayName()).thenReturn(name);
+		when(relation.getDocumentName()).thenReturn(documentName);
+		return relation;
+	}
+
+	private static boolean hasWarning(UploadException problems, String warning) {
+		for (UploadException.Problem problem : problems.getWarnings()) {
+			if (warning.equals(problem.getWhat())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private static void bindPersistence(AbstractPersistence persistence) throws Exception {

@@ -7,7 +7,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.apache.commons.lang3.StringUtils;
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.bind.BindUtil;
@@ -122,6 +121,43 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  */
 public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaData<Document>, DecoratedMetaData {
 	private static final long serialVersionUID = 222166383815547958L;
+
+	private static boolean isAsciiJavaIdentifierPath(String value) {
+		boolean expectingIdentifierStart = true;
+		boolean foundIdentifierPart = false;
+		for (int i = 0, l = value.length(); i < l; i++) {
+			char character = value.charAt(i);
+			if (Character.isWhitespace(character)) {
+				continue;
+			}
+			if (expectingIdentifierStart) {
+				if (! isAsciiJavaIdentifierStart(character)) {
+					return false;
+				}
+				expectingIdentifierStart = false;
+				foundIdentifierPart = true;
+			}
+			else if (character == '.') {
+				expectingIdentifierStart = true;
+			}
+			else if (! isAsciiJavaIdentifierPart(character)) {
+				return false;
+			}
+		}
+		return foundIdentifierPart && (! expectingIdentifierStart);
+	}
+
+	private static boolean isAsciiJavaIdentifierStart(char character) {
+		return (character == '_') ||
+				(character == '$') ||
+				((character >= 'a') && (character <= 'z')) ||
+				((character >= 'A') && (character <= 'Z'));
+	}
+
+	private static boolean isAsciiJavaIdentifierPart(char character) {
+		return isAsciiJavaIdentifierStart(character) ||
+				((character >= '0') && (character <= '9'));
+	}
 
 	private Extends inherits;
 	private java.lang.Boolean abstractClass;
@@ -683,7 +719,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 					throw new MetaDataException(metaDataName + " : The attribute named " + value + " is not a valid attribute name. This should be camel case with no punctuation");
 				}
 				// do not allow unicode document names, see https://hibernate.atlassian.net/browse/HHH-13383
-				if (! StringUtils.deleteWhitespace(value).matches("^([a-zA-Z_$][a-zA-Z\\d_$]*\\.)*[a-zA-Z_$][a-zA-Z\\d_$]*$")) {
+				if (! isAsciiJavaIdentifierPath(value)) {
 					throw new MetaDataException(metaDataName + " : The attribute named " + value + " must only contain non-unicode letters and digits.");
 				}
 				// not required but has a required message

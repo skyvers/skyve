@@ -135,6 +135,18 @@ class SecurityUtilTest {
 	}
 
 	@Test
+	void testEmailUsesArchiveNameOnlyAndUnknownEventWhenOptionalFieldsAreNull() throws Exception {
+		UtilImpl.ENVIRONMENT_IDENTIFIER = null;
+		SecurityLog securityLog = mock(SecurityLog.class);
+
+		invokeEmail(securityLog);
+
+		assertEquals(1, capture.sendCount);
+		assertThat(capture.lastSend.getSubject(), is("[SkyveTest] Security Log Entry - Unknown"));
+		assertThat(capture.lastSend.getBody(), containsString("A new security event has been logged for application: [SkyveTest]"));
+	}
+
+	@Test
 	@SuppressWarnings("static-method")
 	void testFormatTimestampReturnsNullForNullTimestamp() throws Exception {
 		Method method = SecurityUtil.class.getDeclaredMethod("formatTimestampWithServerAndUTCZone", Timestamp.class);
@@ -181,6 +193,17 @@ class SecurityUtilTest {
 		when(request.getHeader("X-Forwarded-For")).thenReturn("198.51.100.10, 192.0.2.1");
 		String ip = SecurityUtil.getSourceIpAddress(request);
 		assertThat(ip, is("198.51.100.10"));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testGetSourceIpAddressWithEmptyXForwardedForHeaderFallsBackToRemoteAddr() {
+		jakarta.servlet.http.HttpServletRequest request = mock(jakarta.servlet.http.HttpServletRequest.class);
+		when(request.getHeader("Forwarded")).thenReturn(null);
+		when(request.getHeader("X-Forwarded-For")).thenReturn("");
+		when(request.getRemoteAddr()).thenReturn("10.0.0.3");
+		String ip = SecurityUtil.getSourceIpAddress(request);
+		assertThat(ip, is("10.0.0.3"));
 	}
 
 	@SuppressWarnings("static-method")

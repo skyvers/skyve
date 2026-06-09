@@ -175,6 +175,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	/**
 	 * Build vanilla document metadata, then refine based on customer overrides.
 	 */
+	@SuppressWarnings({"java:S3776", "java:S112"}) // complexity OK
 	private void populateDataStructures() throws Exception {
 		// Populate Base Data Structure with Vanilla definitions
 		for (String moduleName : repository.getAllVanillaModuleNames()) {
@@ -266,6 +267,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	/**
 	 * Populate derived document mappings and validate extension strategies.
 	 */
+	@SuppressWarnings({"java:S6541", "java:S3776", "java:S2583"}) // complexity OK
 	private void populateModocDerivations(Module module,
 											Document document,
 											ExtensionStrategy strategyToAssert) {
@@ -279,12 +281,13 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			throw new MetaDataException("Document " + document.getName() + " cannot extend dynamic document " + baseDocument.getName() + " as it is not a dynamic document");
 		}
 		
-		if (persistent != null) {
-			if ((strategyToAssert != null) && (! mapped) && (! strategyToAssert.equals(strategy))) {
-				throw new MetaDataException("Document " + document.getName() +
-												((strategy == null) ? " has no extension strategy" : " uses extension strategy " + strategy) +
-												" which conflicts with other extensions in the hierarchy using strategy " + strategyToAssert);
-			}
+		if ((persistent != null) &&
+				(strategyToAssert != null) &&
+				(! mapped) &&
+				(! strategyToAssert.equals(strategy))) {
+			throw new MetaDataException("Document " + document.getName() +
+											((strategy == null) ? " has no extension strategy" : " uses extension strategy " + strategy) +
+											" which conflicts with other extensions in the hierarchy using strategy " + strategyToAssert);
 		}
 
 		if ((inherits != null) && (persistent != null)) {
@@ -369,6 +372,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	/**
 	 * Generate base domain classes and ORM mapping for a vanilla module.
 	 */
+	@SuppressWarnings({"java:S3776", "java:S112"}) // complexity OK
 	private void generateVanilla(final Module module) throws Exception {
 		final String moduleName = module.getName();
 
@@ -470,12 +474,12 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 							// don't generate a test if the developer has created a domain test in this location in the test directory
 							if (testAlreadyExists(testFilePath)) {
 								if (debug) {
-									System.out.println(new StringBuilder(256).append("Skipping domain test generation for ")
+									LOGGER.info(new StringBuilder(256).append("Skipping domain test generation for ")
 																				.append(packagePath.replaceAll("\\\\|\\/", "."))
 																				.append('.')
 																				.append(documentName)
 																				.append(", file already exists in ")
-																				.append(testPath));
+																				.append(testPath).toString());
 								}
 							}
 							else {
@@ -490,7 +494,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						}
 						else {
 							if (debug) {
-								System.out.println(new StringBuilder(256).append("Skipping domain test generation for ")
+								LOGGER.info(new StringBuilder(256).append("Skipping domain test generation for ")
 																			.append(packagePath.replaceAll("\\\\|\\/", "."))
 																			.append('.')
 																			.append(documentName).toString());
@@ -536,6 +540,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		return annotation;
 	}
 
+	@SuppressWarnings({"java:S3776", "java:S112"}) // complexity OK
 	private void generateOverridden(final Customer customer, final String modulesPath)
 	throws Exception {
 		// Make the orm.hbm.xml file
@@ -706,11 +711,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 								String packagePathPrefix,
 								boolean forExt,
 								Customer customer,
-								StringBuilder filterDefinitions)
-	throws Exception {
+								StringBuilder filterDefinitions) {
 		generateORM(contents, module, document, packagePathPrefix, forExt, false, customer, filterDefinitions, "");
 	}
 
+	@SuppressWarnings({"java:S3776", "java:S6541", "java:S107"}) // complexity OK
 	private void generateORM(StringBuilder contents,
 								Module module,
 								Document document,
@@ -743,13 +748,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		String entityName = null;
 
 		if (debug) {
-			System.out.println(new StringBuilder(256).append("Generate ORM for ")
-														.append(packagePathPrefix)
-														.append(moduleName)
-														.append('.')
-														.append(ProvidedRepository.DOMAIN_NAME)
-														.append('.')
-														.append(documentName).toString());
+			LOGGER.info("Generate ORM for {}{}.{}.{}", packagePathPrefix, moduleName, ProvidedRepository.DOMAIN_NAME, documentName);
 		}
 
 		// class defn
@@ -783,7 +782,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 																.append(documentName)
 																.append("Extension.java").toString();
 				if (new File(extensionPath).exists()) {
-					if (debug) System.out.println("    Generate ORM using " + extensionPath);
+					if (debug) {
+						LOGGER.info("    Generate ORM using {}", extensionPath);
+					}
 					contents.append(packagePathPrefix).append(moduleName).append('.').append(documentName).append('.').append(documentName).append("Extension");
 				}
 				else {

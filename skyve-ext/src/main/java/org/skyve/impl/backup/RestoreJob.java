@@ -16,8 +16,10 @@ import java.sql.PreparedStatement;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Map;
+import java.util.TimeZone;
 
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.WKTReader;
@@ -51,6 +53,8 @@ import org.supercsv.prefs.CsvPreference;
  * binary content according to the {@link RestoreOptions} provided.
  */
 public class RestoreJob extends CancellableJob {
+	private Calendar gmt = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+
 	/**
 	 * Executes a restore job when invoked with {@link RestoreOptions}.
 	 * Logs a user-facing message if the job is triggered with the wrong bean type.
@@ -427,14 +431,14 @@ public class RestoreJob extends CancellableJob {
 										statement.setBoolean(index++, Boolean.parseBoolean(stringValue));
 									}
 									else if (AttributeType.date.equals(attributeType)) {
-										statement.setDate(index++, new Date(Long.parseLong(stringValue)), BackupUtil.GMT);
+										statement.setDate(index++, new Date(Long.parseLong(stringValue)), gmt);
 									}
 									else if (AttributeType.time.equals(attributeType)) {
-										statement.setTime(index++, new Time(Long.parseLong(stringValue)), BackupUtil.GMT);
+										statement.setTime(index++, new Time(Long.parseLong(stringValue)), gmt);
 									}
 									else if (AttributeType.dateTime.equals(attributeType) ||
 												AttributeType.timestamp.equals(attributeType)) {
-										statement.setTimestamp(index++, new Timestamp(Long.parseLong(stringValue)), BackupUtil.GMT);
+										statement.setTimestamp(index++, new Timestamp(Long.parseLong(stringValue)), gmt);
 									}
 									else if (AttributeType.decimal2.equals(attributeType) ||
 												AttributeType.decimal5.equals(attributeType) ||

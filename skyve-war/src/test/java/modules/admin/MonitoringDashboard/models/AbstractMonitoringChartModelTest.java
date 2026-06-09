@@ -5,6 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.reflect.Field;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -56,6 +59,14 @@ class AbstractMonitoringChartModelTest extends AbstractSkyveTest {
 		}
 	}
 
+	private static RequestMeasurements measurementsUpdatedAt(Instant updateTime) throws ReflectiveOperationException {
+		RequestMeasurements result = new RequestMeasurements();
+		Field field = RequestMeasurements.class.getDeclaredField("timeLastUpdate");
+		field.setAccessible(true);
+		field.setLong(result, updateTime.toEpochMilli());
+		return result;
+	}
+
 	// ---- isDataValidForCurrentPeriod ----
 
 	@Test
@@ -77,6 +88,28 @@ class AbstractMonitoringChartModelTest extends AbstractSkyveTest {
 		measurements.updateMeasurements(50, (short) 50, (short) 50, (short) 50);
 		// Should be valid for currentMinute (updated less than 2 minutes ago)
 		assertTrue(TestChartModel.testIsDataValid(measurements, Period.currentMinute));
+	}
+
+	@Test
+	void isDataValidForCurrentPeriodReturnsTrueInsideStalenessThresholds() throws ReflectiveOperationException {
+		Instant now = Instant.now();
+
+		assertTrue(TestChartModel.testIsDataValid(measurementsUpdatedAt(now.minus(1, ChronoUnit.MINUTES)), Period.currentMinute));
+		assertTrue(TestChartModel.testIsDataValid(measurementsUpdatedAt(now.minus(1, ChronoUnit.HOURS)), Period.currentHour));
+		assertTrue(TestChartModel.testIsDataValid(measurementsUpdatedAt(now.minus(1, ChronoUnit.DAYS)), Period.currentDay));
+		assertTrue(TestChartModel.testIsDataValid(measurementsUpdatedAt(now.minus(13, ChronoUnit.DAYS)), Period.currentWeek));
+		assertTrue(TestChartModel.testIsDataValid(measurementsUpdatedAt(now.minus(55, ChronoUnit.DAYS)), Period.currentYear));
+	}
+
+	@Test
+	void isDataValidForCurrentPeriodReturnsFalseAtStalenessThresholds() throws ReflectiveOperationException {
+		Instant now = Instant.now();
+
+		assertFalse(TestChartModel.testIsDataValid(measurementsUpdatedAt(now.minus(2, ChronoUnit.MINUTES)), Period.currentMinute));
+		assertFalse(TestChartModel.testIsDataValid(measurementsUpdatedAt(now.minus(2, ChronoUnit.HOURS)), Period.currentHour));
+		assertFalse(TestChartModel.testIsDataValid(measurementsUpdatedAt(now.minus(2, ChronoUnit.DAYS)), Period.currentDay));
+		assertFalse(TestChartModel.testIsDataValid(measurementsUpdatedAt(now.minus(14, ChronoUnit.DAYS)), Period.currentWeek));
+		assertFalse(TestChartModel.testIsDataValid(measurementsUpdatedAt(now.minus(56, ChronoUnit.DAYS)), Period.currentYear));
 	}
 
 	// ---- getTimePeriodLabel ----

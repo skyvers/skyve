@@ -1,6 +1,7 @@
 package org.skyve.impl.metadata.view.reference;
 
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
@@ -87,14 +88,16 @@ public abstract class ReferenceProcessor {
 		final ViewType[] viewTypesToSearch = new ViewType[] { ViewType.edit, ViewType.create };
 		Action result = null;
 		for (ViewType viewType : viewTypesToSearch) {
-			final View listDocumentView = listDocument.getView(userAgentType.name(), customer, viewType.name());
-			if (listDocumentView == null) {
-				continue;
+			try {
+				final View listDocumentView = listDocument.getView(userAgentType.name(), customer, viewType.name());
+				result = listDocumentView.getAction(reference.getActionName());
+				if (result != null) {
+					// Found the action, we can stop looking.
+					break;
+				}
 			}
-			result = listDocumentView.getAction(reference.getActionName());
-			if (result != null) {
-				// Found the action, we can stop looking.
-				break;
+			catch (@SuppressWarnings("unused") MetaDataException e) {
+				// No view of this type, skip to the next.
 			}
 		}
 

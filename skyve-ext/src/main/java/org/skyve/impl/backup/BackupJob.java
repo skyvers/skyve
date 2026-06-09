@@ -18,9 +18,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.TreeMap;
 
 import org.hibernate.engine.spi.SessionImplementor;
@@ -74,8 +76,9 @@ import jakarta.annotation.Nullable;
  * of the content node - ie module name and document name are not known to the table.
  */
 public class BackupJob extends CancellableJob {
-    
     private static final Logger SLOGGER = SkyveLoggerFactory.getLogger(BackupJob.class);
+
+	private Calendar gmt = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
 
 	private File backupZip;
 
@@ -281,7 +284,7 @@ public class BackupJob extends CancellableJob {
 																}
 															}
 															else if (AttributeType.date.equals(attributeType)) {
-																Date date = resultSet.getDate(name, BackupUtil.GMT);
+																Date date = resultSet.getDate(name, gmt);
 																if (resultSet.wasNull()) {
 																	value = "";
 																}
@@ -295,7 +298,7 @@ public class BackupJob extends CancellableJob {
 																}
 															}
 															else if (AttributeType.time.equals(attributeType)) {
-																Time time = resultSet.getTime(name, BackupUtil.GMT);
+																Time time = resultSet.getTime(name, gmt);
 																if (resultSet.wasNull()) {
 																	value = "";
 																}
@@ -310,7 +313,7 @@ public class BackupJob extends CancellableJob {
 															}
 															else if (AttributeType.dateTime.equals(attributeType) ||
 																	AttributeType.timestamp.equals(attributeType)) {
-																Timestamp timestamp = resultSet.getTimestamp(name, BackupUtil.GMT);
+																Timestamp timestamp = resultSet.getTimestamp(name, gmt);
 																if (resultSet.wasNull()) {
 																	value = "";
 																}

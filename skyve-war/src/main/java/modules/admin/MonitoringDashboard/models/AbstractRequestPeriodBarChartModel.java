@@ -1,10 +1,6 @@
 package modules.admin.MonitoringDashboard.models;
 
 import java.awt.Color;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -60,43 +56,6 @@ public abstract class AbstractRequestPeriodBarChartModel extends AbstractMonitor
 	 */
 	protected static boolean isSignificantValue(Number value) {
 		return value != null && value.doubleValue() != 0.0;
-	}
-
-	/**
-	 * Check if data is valid for a specific time period based on the last update time.
-	 * If the last update was too long ago, certain periods should not be shown.
-	 * @param measurements the measurements value
-	 * @param period the period value
-	 * @return the result
-	 */
-	protected static boolean isDataValidForPeriod(RequestMeasurements measurements, Period period) {
-		if (measurements == null) {
-			return false;
-		}
-
-		long lastUpdateTime = measurements.getTimeLastUpdate();
-		if (lastUpdateTime <= 0) {
-			return false; // No data recorded yet
-		}
-
-		LocalDateTime lastUpdate = LocalDateTime.ofInstant(Instant.ofEpochMilli(lastUpdateTime), ZoneId.systemDefault());
-		LocalDateTime now = LocalDateTime.now();
-
-		// Calculate how long ago the last update was
-		long minutesAgo = ChronoUnit.MINUTES.between(lastUpdate, now);
-		long hoursAgo = ChronoUnit.HOURS.between(lastUpdate, now);
-		long daysAgo = ChronoUnit.DAYS.between(lastUpdate, now);
-		long weeksAgo = ChronoUnit.WEEKS.between(lastUpdate, now);
-
-		// Determine validity based on time period and staleness
-		return switch (period) {
-			case currentMinute -> minutesAgo < 2; // Current minute: valid if updated within last 2 minutes
-			case currentHour -> hoursAgo < 2; // Current hour: valid if updated within last 2 hours
-			case currentDay -> daysAgo < 2; // Current day: valid if updated within last 2 days
-			case currentWeek -> weeksAgo < 2; // Current week: valid if updated within last 2 weeks
-			case currentYear -> weeksAgo < 8; // Current year: valid if updated within last ~2 months
-			default -> false;
-		};
 	}
 
 	/**

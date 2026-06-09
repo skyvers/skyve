@@ -3,7 +3,6 @@ package org.skyve.impl.metadata.repository;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -425,12 +424,14 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	@Override
 	public long routerLastModifiedMillis() {
 		final Map<String, Long> routersFileInfo = routersFileInfo(true, true);
-		if (routersFileInfo.isEmpty()) {
-			return Long.MIN_VALUE;
+		long result = Long.MIN_VALUE;
+		for (Long lastModifiedMillis : routersFileInfo.values()) {
+			result = Math.max(result, lastModifiedMillis.longValue());
 		}
- 		return routersFileInfo.values().stream().max(Comparator.naturalOrder()).get().longValue();
+		return result;
 	}
 	
+	@SuppressWarnings("java:S3776") // complexity OK
 	private @Nonnull Map<String, Long> routersFileInfo(boolean includeGlobal, boolean includeModule) {
 		Map<String, Long> result = new LinkedHashMap<>(); // keep the global one first
 		StringBuilder sb = new StringBuilder(256);

@@ -6,10 +6,16 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("static-method")
 class DefaultReportingTest {
+	@BeforeEach
+	void beforeEach() {
+		DefaultReporting.get().startup();
+	}
+
 	@Test
 	void getReturnsSingletonAndLifecycleMethodsComplete() {
 		DefaultReporting reporting = DefaultReporting.get();
@@ -24,5 +30,12 @@ class DefaultReportingTest {
 		DefaultReporting reporting = DefaultReporting.get();
 
 		assertThrows(IllegalArgumentException.class, () -> reporting.getMailAttachmentFromJasperReport(List.of()));
+	}
+
+	@Test
+	void addTemplateFacadeAcceptsInMemoryTemplate() {
+		DefaultReporting reporting = DefaultReporting.get();
+
+		assertDoesNotThrow(() -> reporting.addTemplate("default-reporting-template.flth", "Hello ${name}"));
 	}
 }

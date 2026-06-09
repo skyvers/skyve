@@ -32,8 +32,8 @@ import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.report.ReportFormat;
-import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
+import org.slf4j.Logger;
 
 import net.sf.jasperreports.engine.DefaultJasperReportsContext;
 import net.sf.jasperreports.engine.JRBand;
@@ -840,20 +840,20 @@ public class JasperReportRenderer {
 			StringBuilder sql = new StringBuilder();
 			for (ReportField f : designSpecification.getFields()) {
 				if (! Boolean.TRUE.equals(f.getCollection())) {
-					if (sql.length() > 0) {
+					if (! sql.isEmpty()) {
 						sql.append("\n ,");
 					}
 					sql.append((f.getNameSql() == null ? sqlName + "." + f.getName() : f.getNameSql()));
 				}
 			}
-
+/*
 			if (DesignSpecification.ReportType.report.equals(designSpecification.getReportType())) {
 				// not implemented
 			}
 			else {
 				// nothing
 			}
-
+*/
 			query.addTextChunk("select " + sql.toString() + " from " + Renderer.getPersistentIdentifierForDocument(document) + " a");
 
 			// joins

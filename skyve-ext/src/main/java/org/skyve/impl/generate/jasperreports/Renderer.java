@@ -26,8 +26,8 @@ import org.skyve.metadata.model.Persistent.ExtensionStrategy;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
-import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
+import org.slf4j.Logger;
 
 /**
  * Drives the complete JasperReports rendering pipeline: load or compile the
@@ -733,13 +733,14 @@ public class Renderer {
 					}
 				}
 
+/*
 				if (ReportType.report.equals(design.getReportType())) {
 					// not implemented
 				}
 				else {
 					// nothing
 				}
-
+*/
 				sb.append("select ").append(sql).append(" from ").append(getPersistentIdentifierForDocument(document)).append(" a");
 
 				// joins

@@ -23,10 +23,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.apache.commons.beanutils.DynaBean;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
+import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.app.admin.ReportDataset;
 import org.skyve.domain.app.admin.ReportDataset.DatasetType;
@@ -34,9 +36,12 @@ import org.skyve.domain.app.admin.ReportParameter;
 import org.skyve.domain.app.admin.ReportParameter.Type;
 import org.skyve.domain.app.admin.ReportTemplate;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.types.DateOnly;
+import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.controller.Download;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.DocumentPermissionScope;
@@ -44,6 +49,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentFilter;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
+import org.skyve.report.ReportFormat;
 import org.xhtmlrenderer.pdf.ITextOutputDevice;
 
 import freemarker.template.Template;
@@ -194,6 +200,174 @@ class FreemarkerReportUtilTest {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
+	void runReportFormatsDateParameters() throws Exception {
+		DateOnly date = new DateOnly(0L);
+		Converter<DateOnly> converter = mock(Converter.class);
+		ReportParameter parameter = mock(ReportParameter.class);
+		when(parameter.getName()).thenReturn("asAt");
+		when(parameter.getType()).thenReturn(Type.date);
+		when(converter.toDisplayValue(date)).thenReturn("01-Jan-1970");
+
+		ReportTemplate reportTemplate = reportTemplate("unit-date-parameter.flth", "${reportParameters?size}",
+				List.of(parameter),
+				List.of());
+		bindPersistenceThatExecutesScopedFunctions(reportTemplate, converter);
+
+		String result = FreemarkerReportUtil.runReport("unit-date-parameter.flth", Map.of("asAt", date));
+
+		assertEquals("1", result);
+		verify(parameter).setReportInputValue("01-Jan-1970");
+	}
+
+	@Test
+	void runReportHandlesNullReportParameters() throws Exception {
+		ReportParameter parameter = mock(ReportParameter.class);
+		when(parameter.getName()).thenReturn("title");
+		when(parameter.getType()).thenReturn(Type.text);
+
+		ReportTemplate reportTemplate = reportTemplate("unit-null-parameters.flth", "${reportParameters?size}",
+				List.of(parameter),
+				List.of());
+		bindPersistenceThatExecutesScopedFunctions(reportTemplate);
+
+		String result = FreemarkerReportUtil.runReport("unit-null-parameters.flth", null);
+
+		assertEquals("1", result);
+	}
+
+	@Test
+	void runReportAddsBizQLDatasetResults() throws Exception {
+		Bean row = mock(Bean.class);
+		ReportDataset dataset = mock(ReportDataset.class);
+		when(dataset.getDatasetType()).thenReturn(DatasetType.bizQL);
+		when(dataset.getDatasetName()).thenReturn("rows");
+		when(dataset.executeQuery()).thenReturn(List.of(row));
+		ReportTemplate reportTemplate = reportTemplate("unit-bizql-dataset.flth", "${rows?size}",
+				List.of(),
+				List.of(dataset));
+		bindPersistenceThatExecutesScopedFunctions(reportTemplate);
+
+		String result = FreemarkerReportUtil.runReport("unit-bizql-dataset.flth", Map.of());
+
+		assertEquals("1", result);
+	}
+
+	@Test
+	void runReportAddsSQLDatasetResults() throws Exception {
+		DynaBean row = mock(DynaBean.class);
+		ReportDataset dataset = mock(ReportDataset.class);
+		when(dataset.getDatasetType()).thenReturn(DatasetType.SQL);
+		when(dataset.getDatasetName()).thenReturn("rows");
+		when(dataset.executeSQLQuery()).thenReturn(List.of(row));
+		ReportTemplate reportTemplate = reportTemplate("unit-sql-dataset.flth", "${rows?size}",
+				List.of(),
+				List.of(dataset));
+		bindPersistenceThatExecutesScopedFunctions(reportTemplate);
+
+		String result = FreemarkerReportUtil.runReport("unit-sql-dataset.flth", Map.of());
+
+		assertEquals("1", result);
+	}
+
+	@Test
+	void runReportAddsClassDatasetResults() throws Exception {
+		DynaBean row = mock(DynaBean.class);
+		ReportDataset dataset = mock(ReportDataset.class);
+		when(dataset.getDatasetType()).thenReturn(DatasetType.classValue);
+		when(dataset.getDatasetName()).thenReturn("rows");
+		when(dataset.executeClass()).thenReturn(List.of(row));
+		ReportTemplate reportTemplate = reportTemplate("unit-class-dataset.flth", "${rows?size}",
+				List.of(),
+				List.of(dataset));
+		bindPersistenceThatExecutesScopedFunctions(reportTemplate);
+
+		String result = FreemarkerReportUtil.runReport("unit-class-dataset.flth", Map.of());
+
+		assertEquals("1", result);
+	}
+
+	@Test
+	void runReportSkipsNullDatasetType() throws Exception {
+		ReportDataset dataset = mock(ReportDataset.class);
+		when(dataset.getDatasetType()).thenReturn(null);
+		when(dataset.getDatasetName()).thenReturn("rows");
+		ReportTemplate reportTemplate = reportTemplate("unit-null-dataset.flth", "${rows!'missing'}",
+				List.of(),
+				List.of(dataset));
+		bindPersistenceThatExecutesScopedFunctions(reportTemplate);
+
+		String result = FreemarkerReportUtil.runReport("unit-null-dataset.flth", Map.of());
+
+		assertEquals("missing", result);
+	}
+
+	@Test
+	void runReportSkipsNullDatasetResults() throws Exception {
+		ReportDataset bizql = mock(ReportDataset.class);
+		when(bizql.getDatasetType()).thenReturn(DatasetType.bizQL);
+		when(bizql.getDatasetName()).thenReturn("bizqlRows");
+		when(bizql.executeQuery()).thenReturn(null);
+		ReportDataset sql = mock(ReportDataset.class);
+		when(sql.getDatasetType()).thenReturn(DatasetType.SQL);
+		when(sql.getDatasetName()).thenReturn("sqlRows");
+		when(sql.executeSQLQuery()).thenReturn(null);
+		ReportDataset classValue = mock(ReportDataset.class);
+		when(classValue.getDatasetType()).thenReturn(DatasetType.classValue);
+		when(classValue.getDatasetName()).thenReturn("classRows");
+		when(classValue.executeClass()).thenReturn(null);
+		ReportTemplate reportTemplate = reportTemplate("unit-null-dataset-results.flth",
+				"${bizqlRows!'missing'} ${sqlRows!'missing'} ${classRows!'missing'}",
+				List.of(),
+				List.of(bizql, sql, classValue));
+		bindPersistenceThatExecutesScopedFunctions(reportTemplate);
+
+		String result = FreemarkerReportUtil.runReport("unit-null-dataset-results.flth", Map.of());
+
+		assertEquals("missing missing missing", result);
+	}
+
+	@Test
+	void runReportLeavesMissingSuppliedParameterUnchanged() throws Exception {
+		ReportParameter parameter = mock(ReportParameter.class);
+		when(parameter.getName()).thenReturn("title");
+		when(parameter.getType()).thenReturn(Type.text);
+		ReportTemplate reportTemplate = reportTemplate("unit-missing-parameter.flth", "${reportParameters?size}",
+				List.of(parameter),
+				List.of());
+		bindPersistenceThatExecutesScopedFunctions(reportTemplate);
+
+		String result = FreemarkerReportUtil.runReport("unit-missing-parameter.flth", Map.of("other", "value"));
+
+		assertEquals("1", result);
+	}
+
+	@Test
+	void downloadReportReturnsCsvDownloadWithoutPdfRendering() throws Exception {
+		ReportDataset dataset = mock(ReportDataset.class);
+		when(dataset.getDatasetType()).thenReturn(DatasetType.constant);
+		when(dataset.getDatasetName()).thenReturn("summary");
+		when(dataset.getQuery()).thenReturn("csv-content");
+		ReportTemplate reportTemplate = reportTemplate("unit-download.flth", "${summary}",
+				List.of(),
+				List.of(dataset));
+		bindPersistenceThatExecutesScopedFunctions(reportTemplate);
+
+		Download result = FreemarkerReportUtil.downloadReport("unit-download.flth", Map.of(), ReportFormat.csv, "download-name");
+
+		assertEquals("download-name.csv", result.getFileName());
+		assertEquals(MimeType.csv, result.getMimeType());
+		assertEquals("csv-content", new String(result.getBytes(), StandardCharsets.UTF_8));
+	}
+
+	@Test
+	void runReportThrowsDomainExceptionWhenReportTemplateIsMissing() throws Exception {
+		bindPersistenceThatExecutesScopedFunctions(null);
+
+		assertThrows(DomainException.class, () -> FreemarkerReportUtil.runReport("missing-template.flth", Map.of()));
+	}
+
+	@Test
 	void resourceLoaderUserAgentResolveAndOpenStreamHandlesUnknownUri() throws Exception {
 		Class<?> clazz = Class.forName("org.skyve.impl.report.freemarker.FreemarkerReportUtil$ResourceLoaderUserAgent");
 		Constructor<?> constructor = clazz.getDeclaredConstructor(ITextOutputDevice.class, int.class);
@@ -224,6 +398,10 @@ class FreemarkerReportUtilTest {
 	}
 
 	private static void bindPersistenceThatExecutesScopedFunctions(ReportTemplate reportTemplate) throws Exception {
+		bindPersistenceThatExecutesScopedFunctions(reportTemplate, null);
+	}
+
+	private static void bindPersistenceThatExecutesScopedFunctions(ReportTemplate reportTemplate, Converter<DateOnly> dateConverter) throws Exception {
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		DocumentQuery query = mock(DocumentQuery.class);
 		DocumentFilter filter = mock(DocumentFilter.class);
@@ -234,6 +412,7 @@ class FreemarkerReportUtilTest {
 		when(persistence.getUser()).thenReturn(user);
 		when(user.getName()).thenReturn("Unit Tester");
 		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getDefaultDateConverter()).thenReturn(dateConverter);
 		when(customer.getModule("admin")).thenReturn(adminModule);
 		when(adminModule.getDocument(customer, "ReportTemplate")).thenReturn(reportTemplateDocument);
 		when(persistence.newDocumentQuery("admin", "ReportTemplate")).thenReturn(query);
@@ -248,6 +427,15 @@ class FreemarkerReportUtilTest {
 				return function.apply(persistence);
 			});
 		bindPersistenceToThread(persistence);
+	}
+
+	private static ReportTemplate reportTemplate(String templateName, String templateMarkup, List<ReportParameter> parameters, List<ReportDataset> datasets) {
+		ReportTemplate reportTemplate = mock(ReportTemplate.class);
+		when(reportTemplate.getBizId()).thenReturn(templateName + "-id");
+		when(reportTemplate.getTemplate()).thenReturn(templateMarkup);
+		doReturn(parameters).when(reportTemplate).getParameters();
+		doReturn(datasets).when(reportTemplate).getDatasets();
+		return reportTemplate;
 	}
 
 	private static void bindPersistenceToThread(AbstractPersistence persistence) throws Exception {

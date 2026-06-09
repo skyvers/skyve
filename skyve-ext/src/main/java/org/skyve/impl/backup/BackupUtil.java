@@ -14,12 +14,10 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.TimeZone;
 import java.util.TreeMap;
 
 import org.locationtech.jts.geom.Coordinate;
@@ -61,8 +59,8 @@ import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.persistence.DataStore;
 import org.skyve.util.Util;
 import org.skyve.util.logging.Category;
-import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
+import org.slf4j.Logger;
 
 import jakarta.annotation.Nullable;
 
@@ -74,8 +72,6 @@ final class BackupUtil {
 	private BackupUtil() {
 		// nothing to see here
 	}
-
-	static Calendar GMT = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
 
 	static void initialise(String customerName,
 							String contentDirectory,

@@ -1,8 +1,6 @@
 package modules.admin.MonitoringDashboard.models;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +26,17 @@ public abstract class AbstractMonitoringChartModel extends ChartModel<Monitoring
 	 * @return the result
 	 */
 	protected static boolean isDataValidForCurrentPeriod(RequestMeasurements measurements, Period period) {
+		return isDataValidForPeriod(measurements, period);
+	}
+
+	/**
+	 * Check if the request data is valid for the specified period based on the last update time.
+	 * If the last update was too long ago, the data should not be displayed.
+	 * @param measurements the measurements value
+	 * @param period the period value
+	 * @return the result
+	 */
+	protected static boolean isDataValidForPeriod(RequestMeasurements measurements, Period period) {
 		if (measurements == null) {
 			return false;
 		}
@@ -37,16 +46,14 @@ public abstract class AbstractMonitoringChartModel extends ChartModel<Monitoring
 			return false; // No data recorded yet
 		}
 
-		LocalDateTime lastUpdate = LocalDateTime.ofInstant(
-				Instant.ofEpochMilli(lastUpdateTime),
-				ZoneId.systemDefault());
-		LocalDateTime now = LocalDateTime.now();
+		Instant lastUpdate = Instant.ofEpochMilli(lastUpdateTime);
+		Instant now = Instant.now();
 
 		// Calculate how long ago the last update was
 		long minutesAgo = ChronoUnit.MINUTES.between(lastUpdate, now);
 		long hoursAgo = ChronoUnit.HOURS.between(lastUpdate, now);
 		long daysAgo = ChronoUnit.DAYS.between(lastUpdate, now);
-		long weeksAgo = ChronoUnit.WEEKS.between(lastUpdate, now);
+		long weeksAgo = daysAgo / 7;
 
 		// Determine validity based on time period and staleness
 		return switch (period) {

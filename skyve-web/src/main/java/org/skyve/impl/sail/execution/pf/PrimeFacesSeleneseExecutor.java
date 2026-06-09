@@ -985,6 +985,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param step the originating list-grid step
 	 * @return a populated push-edit context for the target document
 	 */
+	@SuppressWarnings("java:S3776") // complexity OK
 	private PushEditContext listGridContext(String queryName, String documentName, String modelName, Step step) {
 		PushEditContext result = new PushEditContext();
 
@@ -1016,16 +1017,17 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 				}
 				else {
 					Document d = m.getDocument(c, context.getDocumentName());
-					ListModel<Bean> lm = d.getListModel(c, key, false);
-					if (lm != null) {
+					try {
+						ListModel<Bean> lm = d.getListModel(c, key, false);
 						d = lm.getDrivingDocument();
 						result.setModuleName(d.getOwningModuleName());
 						result.setDocumentName(d.getName());
 					}
-					else {
+					catch (MetaDataException e) {
 						throw new MetaDataException(String.format("<%s /> with identifier [%s] requires queryName, documentName or modelName defined.",
 																	step.getClass().getSimpleName(),
-																	step.getIdentifier(context)));
+																	step.getIdentifier(context)),
+														e);
 					}
 				}
 			}

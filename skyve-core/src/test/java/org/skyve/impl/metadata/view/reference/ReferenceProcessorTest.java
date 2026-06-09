@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -164,7 +165,7 @@ class ReferenceProcessorTest {
 		when(document.getExtends()).thenReturn(null);
 		when(attribute.getAttributeType()).thenReturn(AttributeType.text);
 		doReturn(String.class).when(attribute).getImplementingType();
-		when(document.getView(UserAgentType.desktop.name(), customer, "edit")).thenReturn(null);
+		when(document.getView(UserAgentType.desktop.name(), customer, "edit")).thenThrow(new MetaDataException("No edit view"));
 		when(document.getView(UserAgentType.desktop.name(), customer, "create")).thenReturn(createView);
 		when(createView.getAction("approve")).thenReturn(action);
 
@@ -191,7 +192,7 @@ class ReferenceProcessorTest {
 		doReturn(String.class).when(attribute).getImplementingType();
 		when(document.getView(UserAgentType.desktop.name(), customer, "edit")).thenReturn(editView);
 		when(editView.getAction("approve")).thenReturn(null);
-		when(document.getView(UserAgentType.desktop.name(), customer, "create")).thenReturn(null);
+		when(document.getView(UserAgentType.desktop.name(), customer, "create")).thenThrow(new MetaDataException("No create view"));
 
 		Action result = ReferenceProcessor.obtainActionForActionReference(ref, customer, module, document, "status", UserAgentType.desktop);
 

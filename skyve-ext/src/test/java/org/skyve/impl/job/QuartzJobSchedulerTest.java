@@ -13,6 +13,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -23,17 +25,23 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
+import org.quartz.CronScheduleBuilder;
+import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobKey;
 import org.quartz.ObjectAlreadyExistsException;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
 import org.quartz.TriggerKey;
 import org.quartz.UnableToInterruptJobException;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.skyve.domain.Bean;
+import org.skyve.domain.DynamicBean;
+import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.backup.RestoreJob;
@@ -388,6 +396,65 @@ public class QuartzJobSchedulerTest {
 	}
 
 	@Test
+	public void scheduleReportAddsUserAndDynamicReportBeanToTriggerData() throws Exception {
+		User user = user("customer");
+		JobDetail detail = reportDetail("report-id", "customer", "Report Sales");
+		Trigger trigger = reportTrigger(detail, "report-id", "customer");
+
+		invokeScheduleReport(detail, user, trigger);
+
+		ArgumentCaptor<JobDetail> scheduledDetail = ArgumentCaptor.forClass(JobDetail.class);
+		ArgumentCaptor<Trigger> scheduledTrigger = ArgumentCaptor.forClass(Trigger.class);
+		verify(scheduler).scheduleJob(scheduledDetail.capture(), scheduledTrigger.capture());
+		assertThat(scheduledDetail.getValue(), is(sameInstance(detail)));
+		JobDataMap dataMap = scheduledTrigger.getValue().getJobDataMap();
+		assertThat(dataMap.get(AbstractSkyveJob.DISPLAY_NAME_JOB_PARAMETER_KEY), is("Report Sales"));
+		assertThat(dataMap.get(AbstractSkyveJob.USER_JOB_PARAMETER_KEY), is(sameInstance(user)));
+		DynamicBean parameter = (DynamicBean) dataMap.get(AbstractSkyveJob.BEAN_JOB_PARAMETER_KEY);
+		assertThat(parameter.getBizModule(), is(AppConstants.ADMIN_MODULE_NAME));
+		assertThat(parameter.getBizDocument(), is(AppConstants.REPORT_TEMPLATE_DOCUMENT_NAME));
+		assertThat(parameter.getBizId(), is("report-id"));
+	}
+
+	@Test
+	public void scheduleReportSkipsExpiredTriggerButStillPopulatesJobData() throws Exception {
+		User user = user("customer");
+		JobDetail detail = reportDetail("report-id", "customer", "Report Sales");
+		Date now = new Date();
+		Trigger expired = TriggerBuilder.newTrigger()
+										.withIdentity("report-id", "customer")
+										.forJob(detail)
+										.startAt(new Date(now.getTime() - 120_000L))
+										.endAt(new Date(now.getTime() - 60_000L))
+										.build();
+
+		invokeScheduleReport(detail, user, expired);
+
+		verify(scheduler, never()).scheduleJob(any(JobDetail.class), any(Trigger.class));
+		assertThat(expired.getJobDataMap().get(AbstractSkyveJob.DISPLAY_NAME_JOB_PARAMETER_KEY), is("Report Sales"));
+		assertThat(expired.getJobDataMap().get(AbstractSkyveJob.USER_JOB_PARAMETER_KEY), is(sameInstance(user)));
+		assertThat(((DynamicBean) expired.getJobDataMap().get(AbstractSkyveJob.BEAN_JOB_PARAMETER_KEY)).getBizId(), is("report-id"));
+	}
+
+	@Test
+	public void scheduleReportConvertsDuplicateTriggerToValidationException() throws Exception {
+		doThrow(new ObjectAlreadyExistsException("duplicate")).when(scheduler).scheduleJob(any(JobDetail.class), any(Trigger.class));
+		JobDetail detail = reportDetail("report-id", "customer", "Report Sales");
+
+		assertThrows(ValidationException.class,
+				() -> invokeScheduleReport(detail, user("customer"), reportTrigger(detail, "report-id", "customer")));
+	}
+
+	@Test
+	public void scheduleReportWrapsSchedulerException() throws Exception {
+		doThrow(new SchedulerException("boom")).when(scheduler).scheduleJob(any(JobDetail.class), any(Trigger.class));
+		JobDetail detail = reportDetail("report-id", "customer", "Report Sales");
+
+		assertThrows(DomainException.class,
+				() -> invokeScheduleReport(detail, user("customer"), reportTrigger(detail, "report-id", "customer")));
+	}
+
+	@Test
 	public void postRestoreAlwaysResumesInternalJobs() throws Exception {
 		boolean originalJobScheduler = UtilImpl.JOB_SCHEDULER;
 		try {
@@ -413,6 +480,39 @@ public class QuartzJobSchedulerTest {
 		ArgumentCaptor<Trigger> trigger = ArgumentCaptor.forClass(Trigger.class);
 		verify(getScheduler()).scheduleJob(trigger.capture());
 		return trigger.getValue();
+	}
+
+	private static JobDetail reportDetail(String name, String group, String description) {
+		return JobBuilder.newJob(TestQuartzJob.class)
+							.withIdentity(name, group)
+							.withDescription(description)
+							.build();
+	}
+
+	private static Trigger reportTrigger(JobDetail detail, String name, String group) {
+		return TriggerBuilder.newTrigger()
+								.withIdentity(name, group)
+								.forJob(detail)
+								.withSchedule(CronScheduleBuilder.cronSchedule("0 0 12 * * ?"))
+								.build();
+	}
+
+	private static void invokeScheduleReport(JobDetail detail, User user, Trigger trigger) throws Exception {
+		Method method = QuartzJobScheduler.class.getDeclaredMethod("scheduleReport", JobDetail.class, User.class, Trigger.class);
+		method.setAccessible(true);
+		try {
+			method.invoke(null, detail, user, trigger);
+		}
+		catch (InvocationTargetException e) {
+			Throwable cause = e.getCause();
+			if (cause instanceof RuntimeException runtimeException) {
+				throw runtimeException;
+			}
+			if (cause instanceof Error error) {
+				throw error;
+			}
+			throw e;
+		}
 	}
 
 	private static JobMetaData job(String moduleName, String jobName, String displayName) {

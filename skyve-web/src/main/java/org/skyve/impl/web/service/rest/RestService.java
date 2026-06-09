@@ -526,10 +526,14 @@ public class RestService {
 				throw new SecurityException(module + '.' + document + '.' + attributeName, u.getName());
 			}
 
-			final PersistentBean bean = CORE.getPersistence().retrieveAndLock(module, document, id);
-			if (bean == null) {
-			    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-			    return null;
+			PersistentBean bean = null;
+			try {
+				bean = CORE.getPersistence().retrieveAndLock(module, document, id);
+			}
+			catch (@SuppressWarnings("unused") NoResultsException e) {
+				LOGGER.info("{} not found", request.getRequestURI());
+				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+				return null;
 			}
 
 			try (final ContentManager cm = EXT.newContentManager()) {

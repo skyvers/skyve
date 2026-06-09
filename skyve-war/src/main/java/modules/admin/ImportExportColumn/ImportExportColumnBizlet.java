@@ -67,17 +67,10 @@ public class ImportExportColumnBizlet extends Bizlet<ImportExportColumn> {
 							&& !AttributeType.image.equals(a.getAttributeType())
 							&& !AttributeType.geometry.equals(a.getAttributeType())
 							&& !AttributeType.inverseMany.equals(a.getAttributeType())
-							&& !AttributeType.inverseOne.equals(a.getAttributeType())) {
-
-						// also exclude non persistent fields
-						if (a.isPersistent()) {
-							if (AttributeType.association.equals(a.getAttributeType())) {
-								// bindings.add(new DomainValue(a.getName() + Bean.BIZ_KEY, a.getDisplayName()));
-								bindings.add(new DomainValue(a.getName(), a.getLocalisedDisplayName()));
-							} else {
-								bindings.add(new DomainValue(a.getName(), a.getLocalisedDisplayName()));
-							}
-						}
+							&& !AttributeType.inverseOne.equals(a.getAttributeType())
+							// also exclude non persistent fields
+							&& a.isPersistent()) {
+						bindings.add(new DomainValue(a.getName(), a.getLocalisedDisplayName()));
 					}
 				}
 
@@ -122,17 +115,10 @@ public class ImportExportColumnBizlet extends Bizlet<ImportExportColumn> {
 							&& !AttributeType.image.equals(a.getAttributeType())
 							&& !AttributeType.geometry.equals(a.getAttributeType())
 							&& !AttributeType.inverseMany.equals(a.getAttributeType())
-							&& !AttributeType.inverseOne.equals(a.getAttributeType())) {
-
-						// also exclude non persistent fields
-						if (a.isPersistent()) {
-							if (AttributeType.association.equals(a.getAttributeType())) {
-								// bindings.add(new DomainValue(a.getName() + Bean.BIZ_KEY, a.getDisplayName()));
-								bindingsList.add(a.getName());
-							} else {
-								bindingsList.add(a.getName());
-							}
-						}
+							&& !AttributeType.inverseOne.equals(a.getAttributeType())
+							// also exclude non persistent fields
+							&& a.isPersistent()) {
+						bindingsList.add(a.getName());
 					}
 				}
 

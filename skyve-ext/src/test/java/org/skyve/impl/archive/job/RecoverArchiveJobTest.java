@@ -17,10 +17,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.skyve.archive.support.CorruptArchiveError;
 import org.skyve.archive.support.CorruptArchiveError.Resolution;
+import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.util.UtilImpl.ArchiveConfig;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
 import org.skyve.persistence.DocumentFilter;
 import org.skyve.persistence.DocumentQuery;
@@ -28,8 +31,17 @@ import org.skyve.persistence.Persistence;
 
 @SuppressWarnings("static-method")
 class RecoverArchiveJobTest {
+	private final ArchiveConfig originalArchiveConfig = UtilImpl.ARCHIVE_CONFIG;
+	private final String originalContentDirectory = UtilImpl.CONTENT_DIRECTORY;
+
 	@TempDir
 	Path tempDir;
+
+	@AfterEach
+	void afterEach() {
+		UtilImpl.ARCHIVE_CONFIG = originalArchiveConfig;
+		UtilImpl.CONTENT_DIRECTORY = originalContentDirectory;
+	}
 
 	@Test
 	void undoSoftDeleteSQLFormatsArchiveColumns() throws Exception {
@@ -126,6 +138,53 @@ class RecoverArchiveJobTest {
 		verify(filter).addEquals(CorruptArchiveError.resolutionPropertyName, Resolution.unresolved);
 	}
 
+	@Test
+	void findConfigReturnsMatchingArchiveDocConfig() throws Exception {
+		RecoverArchiveJob job = new RecoverArchiveJob();
+		ArchiveDocConfig docConfig = new ArchiveDocConfig("admin", "Audit", "audit", 30);
+		UtilImpl.ARCHIVE_CONFIG = new ArchiveConfig(10, 100, List.of(docConfig), ArchiveConfig.DISABLED.cacheConfig(),
+				ArchiveConfig.DISABLED.schedule());
+		CorruptArchiveError error = mock(CorruptArchiveError.class);
+		when(error.getArchiveTypeModule()).thenReturn("admin");
+		when(error.getArchiveTypeDocument()).thenReturn("Audit");
+
+		assertEquals(docConfig, invokeFindConfig(job, error));
+	}
+
+	@Test
+	void findConfigThrowsWhenArchiveDocConfigIsMissing() throws Exception {
+		RecoverArchiveJob job = new RecoverArchiveJob();
+		UtilImpl.ARCHIVE_CONFIG = ArchiveConfig.DISABLED;
+		CorruptArchiveError error = mock(CorruptArchiveError.class);
+		when(error.getArchiveTypeModule()).thenReturn("admin");
+		when(error.getArchiveTypeDocument()).thenReturn("Audit");
+
+		InvocationTargetException thrown = assertThrows(InvocationTargetException.class,
+				() -> findConfigMethod().invoke(job, error));
+
+		assertEquals("Unable to find archive config for admin.Audit", thrown.getCause().getMessage());
+	}
+
+	@Test
+	void attemptRecoveryRejectsMissingConfiguredArchiveFileBeforeLocking() throws Exception {
+		RecoverArchiveJob job = new RecoverArchiveJob();
+		UtilImpl.CONTENT_DIRECTORY = tempDir.toString();
+		ArchiveDocConfig docConfig = new ArchiveDocConfig("admin", "Audit", "audit", 30);
+		UtilImpl.ARCHIVE_CONFIG = new ArchiveConfig(10, 100, List.of(docConfig), ArchiveConfig.DISABLED.cacheConfig(),
+				ArchiveConfig.DISABLED.schedule());
+		CorruptArchiveError error = mock(CorruptArchiveError.class);
+		when(error.getBizKey()).thenReturn("audit-1");
+		when(error.getArchiveTypeModule()).thenReturn("admin");
+		when(error.getArchiveTypeDocument()).thenReturn("Audit");
+		when(error.getFilename()).thenReturn("missing.archive");
+
+		InvocationTargetException thrown = assertThrows(InvocationTargetException.class,
+				() -> attemptRecoveryMethod().invoke(job, error));
+
+		assertTrue(thrown.getCause().getMessage().contains("Corrupt archive path"));
+		assertEquals(thrown.getCause().getMessage(), job.getLog().get(0));
+	}
+
 	private static String invokeUndoSoftDeleteSQL(RecoverArchiveJob job, String tableName) throws Exception {
 		Method method = RecoverArchiveJob.class.getDeclaredMethod("undoSoftDeleteSQL", String.class);
 		method.setAccessible(true);
@@ -187,5 +246,21 @@ class RecoverArchiveJobTest {
 		Field field = RecoverArchiveJob.class.getDeclaredField("persistence");
 		field.setAccessible(true);
 		field.set(job, persistence);
+	}
+
+	private static ArchiveDocConfig invokeFindConfig(RecoverArchiveJob job, CorruptArchiveError error) throws Exception {
+		return (ArchiveDocConfig) findConfigMethod().invoke(job, error);
+	}
+
+	private static Method findConfigMethod() throws Exception {
+		Method method = RecoverArchiveJob.class.getDeclaredMethod("findConfig", CorruptArchiveError.class);
+		method.setAccessible(true);
+		return method;
+	}
+
+	private static Method attemptRecoveryMethod() throws Exception {
+		Method method = RecoverArchiveJob.class.getDeclaredMethod("attemptRecovery", CorruptArchiveError.class);
+		method.setAccessible(true);
+		return method;
 	}
 }

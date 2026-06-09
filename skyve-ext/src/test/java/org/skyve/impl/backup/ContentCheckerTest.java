@@ -18,7 +18,9 @@ import org.junit.After;
 import org.junit.Test;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -26,13 +28,24 @@ import org.skyve.metadata.model.Attribute.Sensitivity;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.persistence.SQL;
 
 @SuppressWarnings({"static-method", "boxing"})
 public class ContentCheckerTest {
+	private final String originalCustomer = UtilImpl.CUSTOMER;
+	private final ProvidedRepository originalRepository = ProvidedRepositoryFactory.get();
+
 	@After
 	public void teardown() throws Exception {
 		unbindPersistenceFromThread();
+		UtilImpl.CUSTOMER = originalCustomer;
+		if (originalRepository == null) {
+			ProvidedRepositoryFactory.clear();
+		}
+		else {
+			ProvidedRepositoryFactory.set(originalRepository);
+		}
 	}
 
 	@Test
@@ -198,6 +211,25 @@ public class ContentCheckerTest {
 	}
 
 	@Test
+	@SuppressWarnings("resource")
+	public void checkDynamicContentOmitsCustomerFilterWhenSingleCustomerConfigured() throws Exception {
+		ContentChecker checker = new ContentChecker();
+		UtilImpl.CUSTOMER = "demo";
+		Connection connection = mock(Connection.class);
+		Statement statement = mock(Statement.class);
+		ResultSet resultSet = mock(ResultSet.class);
+		ContentManager cm = mock(ContentManager.class);
+		Customer customer = mock(Customer.class);
+		when(connection.createStatement()).thenReturn(statement);
+		when(statement.getResultSet()).thenReturn(resultSet);
+		when(resultSet.next()).thenReturn(false);
+
+		invokeCheckDynamicContent(checker, connection, cm, customer, "demo", "DYN_ENTITY");
+
+		org.mockito.Mockito.verify(statement).execute("select bizId, moduleName, documentName, fields from DYN_ENTITY");
+	}
+
+	@Test
 	public void bogusStaticContentReferenceReturnsFirstTableAndBizId() throws Exception {
 		ContentChecker checker = new ContentChecker();
 		AbstractPersistence persistence = bindMockPersistence();
@@ -230,6 +262,52 @@ public class ContentCheckerTest {
 		when(sql.scalarResult(String.class)).thenReturn(null);
 
 		String result = invokeBogusStaticContentReference(checker, "content-id");
+
+		assertThat(result, is((String) null));
+	}
+
+	@Test
+	public void bogusDynamicContentReferenceReturnsDynamicEntityReferenceForContentAttribute() throws Exception {
+		AbstractPersistence persistence = bindMockPersistence();
+		SQL sql = mock(SQL.class);
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Attribute upload = attribute("upload", AttributeType.content);
+		ProvidedRepositoryFactory.set(repository);
+		when(persistence.newSQL("select bizId, bizCustomer, moduleName, documentName, fields from DYN_ENTITY where fields like :like")).thenReturn(sql);
+		when(sql.putParameter("like", "%\":\"content-id\"%", false)).thenReturn(sql);
+		when(sql.tupleResults()).thenReturn(List.<Object[]> of(new Object[] {"dyn-id", "demo", "admin", "Invoice", "{\"upload\":\"content-id\"}"}));
+		when(repository.getCustomer("demo")).thenReturn(customer);
+		when(repository.getModule(customer, "admin")).thenReturn(module);
+		when(module.getDocument(customer, "Invoice")).thenReturn(document);
+		when(document.getPolymorphicAttribute(customer, "upload")).thenReturn(upload);
+
+		String result = invokeBogusDynamicContentReference("content-id", "DYN_ENTITY");
+
+		assertThat(result, is("DYN_ENTITY#dyn-id"));
+	}
+
+	@Test
+	public void bogusDynamicContentReferenceReturnsNullWhenMatchedAttributeIsNotContent() throws Exception {
+		AbstractPersistence persistence = bindMockPersistence();
+		SQL sql = mock(SQL.class);
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Attribute text = attribute("name", AttributeType.text);
+		ProvidedRepositoryFactory.set(repository);
+		when(persistence.newSQL("select bizId, bizCustomer, moduleName, documentName, fields from DYN_ENTITY where fields like :like")).thenReturn(sql);
+		when(sql.putParameter("like", "%\":\"content-id\"%", false)).thenReturn(sql);
+		when(sql.tupleResults()).thenReturn(List.<Object[]> of(new Object[] {"dyn-id", "demo", "admin", "Invoice", "{\"name\":\"content-id\"}"}));
+		when(repository.getCustomer("demo")).thenReturn(customer);
+		when(repository.getModule(customer, "admin")).thenReturn(module);
+		when(module.getDocument(customer, "Invoice")).thenReturn(document);
+		when(document.getPolymorphicAttribute(customer, "name")).thenReturn(text);
+
+		String result = invokeBogusDynamicContentReference("content-id", "DYN_ENTITY");
 
 		assertThat(result, is((String) null));
 	}
@@ -276,6 +354,12 @@ public class ContentCheckerTest {
 		Method method = ContentChecker.class.getDeclaredMethod("bogusStaticContentReference", String.class);
 		method.setAccessible(true);
 		return (String) method.invoke(checker, contentId);
+	}
+
+	private static String invokeBogusDynamicContentReference(String contentId, String dynamicEntityPersistentIdentifier) throws Exception {
+		Method method = ContentChecker.class.getDeclaredMethod("bogusDynamicContentReference", String.class, String.class);
+		method.setAccessible(true);
+		return (String) method.invoke(null, contentId, dynamicEntityPersistentIdentifier);
 	}
 
 	private static boolean invokeHasContent(Table table) throws Exception {
