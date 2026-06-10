@@ -401,7 +401,7 @@ class TileTest {
 	@SuppressWarnings("static-method")
 	@Test
 	void testTwoWeeksAgoIsInThePast() {
-		assertTrue(UserDashboardExtension.TWO_WEEKS_AGO.longValue() < System.currentTimeMillis());
+		assertTrue(UserDashboardExtension.twoWeeksAgo().longValue() < System.currentTimeMillis());
 	}
 
 	@SuppressWarnings("static-method")
@@ -409,7 +409,7 @@ class TileTest {
 	void testTwoWeeksAgoIsApproximately14DaysAgo() {
 		long twoWeeksInMs = 1209600000L;
 		long now = System.currentTimeMillis();
-		long diff = now - UserDashboardExtension.TWO_WEEKS_AGO.longValue();
+		long diff = now - UserDashboardExtension.twoWeeksAgo().longValue();
 		// should be within 1 minute of expected value
 		assertTrue(Math.abs(diff - twoWeeksInMs) < 60000L);
 	}

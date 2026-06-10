@@ -45,11 +45,18 @@ public class UserDashboardExtension extends UserDashboard {
 
 	private static final String DEFAULT_ICON_CLASS = "fa-regular fa-file";
 	private static final int TILE_COUNT_LIMIT = 6;
+	private static final long TWO_WEEKS_IN_MILLIS = 1_209_600_000L;
 
 	private final Set<Tile> tiles = new HashSet<>();
 
-	// used for 14 day dashboard calculations
-	public static final Long TWO_WEEKS_AGO = Long.valueOf(System.currentTimeMillis() - 1209600000L);
+	/**
+	 * Returns the lower-bound timestamp used for 14 day dashboard calculations.
+	 *
+	 * @return Current time minus fourteen days, in milliseconds.
+	 */
+	public static Long twoWeeksAgo() {
+		return Long.valueOf(System.currentTimeMillis() - TWO_WEEKS_IN_MILLIS);
+	}
 
 	/**
 	 * Returns true if the current logged in user has access to the Jobs document.
@@ -146,7 +153,7 @@ public class UserDashboardExtension extends UserDashboard {
 	private List<Bean> popularUpdates(UserExtension filterUser) {
 
 		DocumentQuery q = persistence.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
-		q.getFilter().addGreaterThan(Audit.millisPropertyName, TWO_WEEKS_AGO);
+		q.getFilter().addGreaterThan(Audit.millisPropertyName, twoWeeksAgo());
 		q.getFilter().addNotEquals(Audit.operationPropertyName, Operation.delete);
 		if (filterUser != null) {
 			q.getFilter().addEquals(Audit.userNamePropertyName, filterUser.getUserName());
@@ -174,7 +181,7 @@ public class UserDashboardExtension extends UserDashboard {
 	 */
 	private List<Bean> recentInsertDocuments(UserExtension filterUser) {
 		DocumentQuery q = persistence.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
-		q.getFilter().addGreaterThan(Audit.millisPropertyName, TWO_WEEKS_AGO);
+		q.getFilter().addGreaterThan(Audit.millisPropertyName, twoWeeksAgo());
 		q.getFilter().addEquals(Audit.operationPropertyName, Operation.insert);
 		q.getFilter().addNotEquals(Audit.auditModuleNamePropertyName, Audit.MODULE_NAME);
 		if (filterUser != null) {
@@ -474,7 +481,7 @@ public class UserDashboardExtension extends UserDashboard {
 	private List<Bean> recentUpdates(UserExtension filterUser) {
 
 		DocumentQuery q = persistence.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
-		q.getFilter().addGreaterThan(Audit.millisPropertyName, TWO_WEEKS_AGO);
+		q.getFilter().addGreaterThan(Audit.millisPropertyName, twoWeeksAgo());
 		q.getFilter().addNotEquals(Audit.operationPropertyName, Operation.delete);
 		if (filterUser != null) {
 			q.getFilter().addEquals(Audit.userNamePropertyName, filterUser.getUserName());
