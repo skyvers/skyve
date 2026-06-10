@@ -325,6 +325,42 @@ class EXTTest {
 
 	@Test
 	@SuppressWarnings({ "static-method", "boxing" })
+	void testCheckAccessThrowsForDocumentAggregateAccess() {
+		User user = mock(User.class);
+		UserAccess access = UserAccess.documentAggregate("admin", "User");
+
+		when(user.canAccess(access, "desktop")).thenReturn(false);
+		when(user.getName()).thenReturn("tester");
+
+		assertThrows(IllegalArgumentException.class, () -> EXT.checkAccess(user, access, "desktop"));
+	}
+
+	@Test
+	@SuppressWarnings({ "static-method", "boxing" })
+	void testCheckAccessThrowsForPreviousCompleteAccess() {
+		User user = mock(User.class);
+		UserAccess access = UserAccess.previousComplete("admin", "User", "contact.email1");
+
+		when(user.canAccess(access, "desktop")).thenReturn(false);
+		when(user.getName()).thenReturn("tester");
+
+		assertThrows(IllegalArgumentException.class, () -> EXT.checkAccess(user, access, "desktop"));
+	}
+
+	@Test
+	@SuppressWarnings({ "static-method", "boxing" })
+	void testCheckAccessThrowsForQueryAggregateAccess() {
+		User user = mock(User.class);
+		UserAccess access = UserAccess.queryAggregate("admin", "qUsers");
+
+		when(user.canAccess(access, "desktop")).thenReturn(false);
+		when(user.getName()).thenReturn("tester");
+
+		assertThrows(IllegalArgumentException.class, () -> EXT.checkAccess(user, access, "desktop"));
+	}
+
+	@Test
+	@SuppressWarnings({ "static-method", "boxing" })
 	void testCheckAccessThrowsForReportAccess() {
 		User user = mock(User.class);
 		UserAccess access = UserAccess.report("admin", "User", "UserSummary");

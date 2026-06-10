@@ -1,16 +1,31 @@
 package org.skyve.impl.archive.support;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field.Store;
+import org.apache.lucene.document.StoredField;
+import org.apache.lucene.document.StringField;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.store.ByteBuffersDirectory;
+import org.apache.lucene.store.Directory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.skyve.domain.Bean;
+import org.skyve.impl.archive.job.IndexArchivesJob;
+import org.skyve.impl.archive.list.LuceneFilter;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
 
@@ -84,6 +99,151 @@ class ArchiveRetrieverTest {
 				() -> invokeGetArchiveFilePath(method, entry));
 	}
 
+	@Test
+	void searchIndexReturnsEmptyListWhenNoDocumentsMatch() throws Exception {
+		ArchiveDocConfig docConfig = new ArchiveDocConfig("sales", "Order", "orders", 30);
+		LuceneFilter filter = new LuceneFilter();
+		filter.addEquals(Bean.DOCUMENT_ID, "missing");
+		Method method = ArchiveRetriever.class.getDeclaredMethod("searchIndex", ArchiveDocConfig.class, LuceneFilter.class, int.class);
+		method.setAccessible(true);
+
+		try (Directory directory = new ByteBuffersDirectory()) {
+			writeArchiveIndex(directory, archiveDocument("order-1", "orders.archive", 12L, 34L));
+			ArchiveLuceneIndexerSingleton.getInstance()
+											.getLuceneConfigs()
+											.put(docConfig, new ArchiveLuceneIndexerSingleton.LuceneConfig(null, directory));
+
+			@SuppressWarnings("unchecked")
+			List<Object> result = (List<Object>) method.invoke(ArchiveRetriever.getInstance(), docConfig, filter, Integer.valueOf(10));
+
+			assertTrue(result.isEmpty());
+		}
+		finally {
+			ArchiveLuceneIndexerSingleton.getInstance()
+											.getLuceneConfigs()
+											.remove(docConfig);
+		}
+	}
+
+	@Test
+	void searchIndexReturnsArchiveEntriesForMatchedDocuments() throws Exception {
+		ArchiveDocConfig docConfig = new ArchiveDocConfig("sales", "Order", "orders", 30);
+		LuceneFilter filter = new LuceneFilter();
+		filter.addEquals(Bean.DOCUMENT_ID, "order-1");
+		Method method = ArchiveRetriever.class.getDeclaredMethod("searchIndex", ArchiveDocConfig.class, LuceneFilter.class, int.class);
+		method.setAccessible(true);
+
+		try (Directory directory = new ByteBuffersDirectory()) {
+			writeArchiveIndex(directory,
+								archiveDocument("order-1", "orders.archive", 12L, 34L),
+								archiveDocument("order-2", "other.archive", 56L, 78L));
+			ArchiveLuceneIndexerSingleton.getInstance()
+											.getLuceneConfigs()
+											.put(docConfig, new ArchiveLuceneIndexerSingleton.LuceneConfig(null, directory));
+
+			@SuppressWarnings("unchecked")
+			List<Object> result = (List<Object>) method.invoke(ArchiveRetriever.getInstance(), docConfig, filter, Integer.valueOf(10));
+
+			assertEquals(1, result.size());
+			Object entry = result.get(0);
+			assertEquals(docConfig, invokeRecordAccessor(entry, "docConfig"));
+			assertEquals("orders.archive", invokeRecordAccessor(entry, "fileName"));
+			assertEquals(Long.valueOf(12L), invokeRecordAccessor(entry, "offset"));
+			assertEquals(Long.valueOf(34L), invokeRecordAccessor(entry, "length"));
+		}
+		finally {
+			ArchiveLuceneIndexerSingleton.getInstance()
+											.getLuceneConfigs()
+											.remove(docConfig);
+		}
+	}
+
+	@Test
+	void retrieveByBizIdReturnsEmptyWhenIndexHasNoMatchingDocument() throws Exception {
+		ArchiveDocConfig docConfig = new ArchiveDocConfig("sales", "Order", "orders", 30);
+
+		try (Directory directory = new ByteBuffersDirectory()) {
+			writeArchiveIndex(directory, archiveDocument("order-1", "orders.archive", 12L, 34L));
+			ArchiveLuceneIndexerSingleton.getInstance()
+											.getLuceneConfigs()
+											.put(docConfig, new ArchiveLuceneIndexerSingleton.LuceneConfig(null, directory));
+
+			assertFalse(ArchiveRetriever.getInstance()
+											.retrieveByBizId(docConfig, "missing")
+											.isPresent());
+		}
+		finally {
+			ArchiveLuceneIndexerSingleton.getInstance()
+											.getLuceneConfigs()
+											.remove(docConfig);
+		}
+	}
+
+	@Test
+	void retrieveByBizIdReturnsEmptyWhenIndexIsMissing() throws Exception {
+		ArchiveDocConfig docConfig = new ArchiveDocConfig("sales", "Order", "orders", 30);
+
+		try (Directory directory = new ByteBuffersDirectory()) {
+			ArchiveLuceneIndexerSingleton.getInstance()
+											.getLuceneConfigs()
+											.put(docConfig, new ArchiveLuceneIndexerSingleton.LuceneConfig(null, directory));
+
+			assertFalse(ArchiveRetriever.getInstance()
+											.retrieveByBizId(docConfig, "missing")
+											.isPresent());
+		}
+		finally {
+			ArchiveLuceneIndexerSingleton.getInstance()
+											.getLuceneConfigs()
+											.remove(docConfig);
+		}
+	}
+
+	@Test
+	void retrieveAllReturnsEmptyWhenIndexHasNoMatchingDocuments() throws Exception {
+		ArchiveDocConfig docConfig = new ArchiveDocConfig("sales", "Order", "orders", 30);
+		LuceneFilter filter = new LuceneFilter();
+		filter.addEquals(Bean.DOCUMENT_ID, "missing");
+
+		try (Directory directory = new ByteBuffersDirectory()) {
+			writeArchiveIndex(directory, archiveDocument("order-1", "orders.archive", 12L, 34L));
+			ArchiveLuceneIndexerSingleton.getInstance()
+											.getLuceneConfigs()
+											.put(docConfig, new ArchiveLuceneIndexerSingleton.LuceneConfig(null, directory));
+
+			assertTrue(ArchiveRetriever.getInstance()
+										.retrieveAll(docConfig, filter, 10)
+										.isEmpty());
+		}
+		finally {
+			ArchiveLuceneIndexerSingleton.getInstance()
+											.getLuceneConfigs()
+											.remove(docConfig);
+		}
+	}
+
+	@Test
+	void retrieveAllReturnsEmptyWhenIndexIsMissing() throws Exception {
+		ArchiveDocConfig docConfig = new ArchiveDocConfig("sales", "Order", "orders", 30);
+		LuceneFilter filter = new LuceneFilter();
+		filter.addEquals(Bean.DOCUMENT_ID, "missing");
+
+		try (Directory directory = new ByteBuffersDirectory()) {
+			ArchiveLuceneIndexerSingleton.getInstance()
+											.getLuceneConfigs()
+											.put(docConfig, new ArchiveLuceneIndexerSingleton.LuceneConfig(null, directory));
+
+			assertTrue(ArchiveRetriever.getInstance()
+										.retrieveAll(docConfig, filter, 10)
+										.isEmpty());
+		}
+		finally {
+			ArchiveLuceneIndexerSingleton.getInstance()
+											.getLuceneConfigs()
+											.remove(docConfig);
+		}
+	}
+
 	private static Object newArchiveEntry(ArchiveDocConfig docConfig, String fileName, long offset, long length)
 	throws Exception {
 		Class<?> clazz = Class.forName("org.skyve.impl.archive.support.ArchiveRetriever$ArchiveEntry");
@@ -108,5 +268,31 @@ class ArchiveRetrieverTest {
 		catch (ReflectiveOperationException e) {
 			throw e.getCause();
 		}
+	}
+
+	private static Document archiveDocument(String bizId, String fileName, long offset, long length) {
+		Document document = new Document();
+		document.add(new StringField(Bean.DOCUMENT_ID, bizId, Store.YES));
+		document.add(new StringField(IndexArchivesJob.FILENAME_FIELD, fileName, Store.YES));
+		document.add(new StoredField(IndexArchivesJob.OFFSET_FIELD, offset));
+		document.add(new StoredField(IndexArchivesJob.LENGTH_FIELD, length));
+		return document;
+	}
+
+	@SuppressWarnings("resource")
+	private static void writeArchiveIndex(Directory directory, Document... documents) throws Exception {
+		try (IndexWriter writer = new IndexWriter(directory, new IndexWriterConfig(new StandardAnalyzer()))) {
+			for (Document document : documents) {
+				writer.addDocument(document);
+			}
+			writer.commit();
+		}
+	}
+
+	private static Object invokeRecordAccessor(Object entry, String name) throws Exception {
+		Method method = entry.getClass()
+								.getDeclaredMethod(name);
+		method.setAccessible(true);
+		return method.invoke(entry);
 	}
 }

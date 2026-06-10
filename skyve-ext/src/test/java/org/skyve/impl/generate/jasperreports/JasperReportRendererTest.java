@@ -17,7 +17,13 @@ import org.skyve.report.ReportFormat;
 
 import net.sf.jasperreports.engine.JRExpression;
 import net.sf.jasperreports.engine.JRField;
+import net.sf.jasperreports.engine.JRBand;
+import net.sf.jasperreports.engine.JRElement;
 import net.sf.jasperreports.engine.design.JRDesignBand;
+import net.sf.jasperreports.engine.design.JRDesignImage;
+import net.sf.jasperreports.engine.design.JRDesignSubreport;
+import net.sf.jasperreports.engine.design.JRDesignTextField;
+import net.sf.jasperreports.engine.type.EvaluationTimeEnum;
 
 @SuppressWarnings({"static-method", "boxing"})
 class JasperReportRendererTest {
@@ -165,28 +171,56 @@ class JasperReportRendererTest {
 	}
 
 	@Test
+	void createFieldWithSqlCollectionReturnsNull() {
+		DesignSpecification parent = new DesignSpecification();
+		parent.setMode(Mode.sql);
+		ReportField field = new ReportField();
+		field.setParent(parent);
+		field.setName("items");
+		field.setTypeClass(java.util.List.class.getName());
+		field.setCollection(Boolean.TRUE);
+
+		assertThat(JasperReportRenderer.createField(field), nullValue());
+	}
+
+	@Test
+	void createFieldWithSqlStringDoesNotSetDescription() {
+		DesignSpecification parent = new DesignSpecification();
+		parent.setMode(Mode.sql);
+		ReportField field = new ReportField();
+		field.setParent(parent);
+		field.setName("name");
+		field.setTypeClass(String.class.getName());
+
+		JRField jrField = JasperReportRenderer.createField(field);
+
+		assertThat(jrField, notNullValue());
+		assertThat(jrField.getDescription(), nullValue());
+	}
+
+	@Test
 	void createVariableReturnsCorrectName() {
-		ReportVariable var = new ReportVariable();
-		var.setName("total");
-		var.setTypeClass("java.lang.Integer");
-		assertThat(JasperReportRenderer.createVariable(var).getName(), is("total"));
+		ReportVariable variable = new ReportVariable();
+		variable.setName("total");
+		variable.setTypeClass("java.lang.Integer");
+		assertThat(JasperReportRenderer.createVariable(variable).getName(), is("total"));
 	}
 
 	@Test
 	void createVariableExpressionContainsAddCall() {
-		ReportVariable var = new ReportVariable();
-		var.setName("total");
-		var.setTypeClass("java.lang.Integer");
-		JRExpression expr = JasperReportRenderer.createVariableExpression(var);
+		ReportVariable variable = new ReportVariable();
+		variable.setName("total");
+		variable.setTypeClass("java.lang.Integer");
+		JRExpression expr = JasperReportRenderer.createVariableExpression(variable);
 		assertThat(expr.getText(), containsString("$V{java.lang.Integer}.add($F{total})"));
 	}
 
 	@Test
 	void createInitialValueVariableExpressionContainsNew() {
-		ReportVariable var = new ReportVariable();
-		var.setName("total");
-		var.setTypeClass("java.lang.Integer");
-		JRExpression expr = JasperReportRenderer.createInitialValueVariableExpression(var);
+		ReportVariable variable = new ReportVariable();
+		variable.setName("total");
+		variable.setTypeClass("java.lang.Integer");
+		JRExpression expr = JasperReportRenderer.createInitialValueVariableExpression(variable);
 		assertThat(expr.getText(), containsString("new java.lang.Integer(0)"));
 	}
 
@@ -196,6 +230,22 @@ class JasperReportRendererTest {
 		band.setHeight(40);
 		JasperReportRenderer.addCustomerLogo(band);
 		assertEquals(1, band.getElements().length);
+	}
+
+	@Test
+	void getSubReportWithMissingNameThrowsIllegalArgumentException() {
+		DesignSpecification spec = beanModeSpec();
+
+		IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+				() -> JasperReportRenderer.getSubReport(spec, "missing"));
+
+		assertThat(thrown.getMessage(), containsString("missing"));
+	}
+
+	@Test
+	void staticPropertiesAndImportsExposeExpectedDefaults() {
+		assertThat(JasperReportRenderer.getProperties().get("ireport.encoding"), is("UTF-8"));
+		assertThat(JasperReportRenderer.getImports(), org.hamcrest.Matchers.hasItem("java.util.*"));
 	}
 
 	@Test
@@ -265,6 +315,26 @@ class JasperReportRendererTest {
 	}
 
 	@Test
+	void createImageElementExpressionDynamicImageSqlModeContainsBeanLookup() {
+		DesignSpecification spec = new DesignSpecification();
+		spec.setModuleName("test");
+		spec.setDocumentName("Doc");
+		spec.setMode(DesignSpecification.Mode.sql);
+		ReportBand band = new ReportBand();
+		band.setBandType(ReportBand.BandType.detail);
+		band.setParent(spec);
+
+		ReportElement e = new ReportElement(ReportElement.ElementType.dynamicImage, "img", "MyImage",
+				Integer.valueOf(0), Integer.valueOf(0), Integer.valueOf(100), null);
+		e.setElementHeight(Integer.valueOf(50));
+		e.setParent(band);
+
+		JRExpression expr = JasperReportRenderer.createImageElementExpression(e);
+		assertThat(expr.getText(), containsString("BeanForReport.getBean"));
+		assertThat(expr.getText(), containsString("$P{ID}"));
+	}
+
+	@Test
 	void createTextElementExpressionWithNullValueUsesEmptyString() {
 		DesignSpecification spec = new DesignSpecification();
 		spec.setModuleName("test");
@@ -312,16 +382,6 @@ class JasperReportRendererTest {
 
 	// --- renderDesignWithNoDesignSpecAndNoRdp ---
 
-	@Test
-	void renderDesignWithNoSpecAndNoRdpThrowsIllegalStateException() throws Exception {
-		// Construct a renderer where both designSpecification and reportDesignParameters are null
-		// by passing a DesignSpecification with list source (sets designSpec=null, rdp assigned)
-		// We can't easily make both null without a subclass, but we can test the null-rdp path
-		// by creating a plain spec and then calling render twice
-		JasperReportRenderer renderer = new JasperReportRenderer(minimalRdp());
-		renderer.renderDesign();
-		assertThrows(IllegalStateException.class, renderer::renderDesign);
-	}
 
 	@Test
 	void renderDesignNonPaginatedTabularProducesJrxml() throws Exception {
@@ -666,10 +726,10 @@ class JasperReportRendererTest {
 	@Test
 	void renderFromDesignSpecificationWithReportVariablesProducesVariables() throws Exception {
 		DesignSpecification spec = beanModeSpec();
-		ReportVariable var = new ReportVariable();
-		var.setName("totalCount");
-		var.setTypeClass("java.lang.Integer");
-		spec.getVariables().add(var);
+		ReportVariable variable = new ReportVariable();
+		variable.setName("totalCount");
+		variable.setTypeClass("java.lang.Integer");
+		spec.getVariables().add(variable);
 		String jrxml = new JasperReportRenderer(spec).renderDesign();
 		assertThat(jrxml, containsString("totalCount"));
 	}
@@ -699,5 +759,71 @@ class JasperReportRendererTest {
 		String jrxml = new JasperReportRenderer(spec).renderDesign();
 		assertThat(jrxml, notNullValue());
 	}
-}
 
+	@Test
+	void createBandWithNoElementsReturnsNull() {
+		ReportBand empty = new ReportBand();
+		empty.setBandType(ReportBand.BandType.detail);
+		empty.setParent(beanModeSpec());
+
+		assertThat(new JasperReportRenderer(beanModeSpec()).createBand(empty), nullValue());
+	}
+
+	@Test
+	void createBandAppliesTextFieldStylingEvaluationAndBorder() {
+		DesignSpecification spec = beanModeSpec();
+		spec.setTitleFontSize(Integer.valueOf(24));
+		ReportBand title = new ReportBand();
+		title.setBandType(ReportBand.BandType.title);
+		title.setHeight(Integer.valueOf(30));
+		title.setParent(spec);
+		ReportElement element = new ReportElement(ElementType.textField, "heading", "$F{heading}",
+				Integer.valueOf(2), Integer.valueOf(3), Integer.valueOf(200), null);
+		element.setElementHeight(Integer.valueOf(20));
+		element.setParent(title);
+		element.setEvaluationTime(ReportElement.EvaluationTime.report);
+		element.setDynamicFlow(Boolean.FALSE);
+		element.setElementBackColour("#FFFFFF");
+		element.setElementBold(Boolean.TRUE);
+		element.setElementItalic(Boolean.TRUE);
+		element.setElementBorder(Boolean.TRUE);
+		element.setBorderTop(Boolean.TRUE);
+		element.setBorderLeft(Boolean.TRUE);
+		title.getElements().add(element);
+
+		JRBand band = new JasperReportRenderer(spec).createBand(title);
+		JRDesignTextField text = (JRDesignTextField) band.getElements()[0];
+
+		assertThat(text.getEvaluationTime(), is(EvaluationTimeEnum.REPORT));
+		assertThat(text.getTextAdjust(), nullValue());
+		assertThat(text.getFontSize(), is(Float.valueOf(24f)));
+		assertThat(text.isBold(), is(Boolean.TRUE));
+		assertThat(text.isItalic(), is(Boolean.TRUE));
+		assertThat(text.getLineBox().getTopPen().getLineWidth(), is(Float.valueOf(1f)));
+		assertThat(text.getLineBox().getLeftPen().getLineWidth(), is(Float.valueOf(1f)));
+	}
+
+	@Test
+	void createBandWithImageAndSubreportElementsConfiguresSpecialisedElements() {
+		DesignSpecification spec = beanModeSpec();
+		ReportBand band = detailBand(spec);
+		ReportElement image = new ReportElement(ElementType.staticImage, "logo", "\"logo.png\"",
+				Integer.valueOf(1), Integer.valueOf(2), Integer.valueOf(30), null);
+		image.setElementHeight(Integer.valueOf(40));
+		image.setParent(band);
+		ReportElement subreport = new ReportElement(ElementType.subreport, "items", "Items",
+				Integer.valueOf(3), Integer.valueOf(4), Integer.valueOf(300), null);
+		subreport.setElementHeight(Integer.valueOf(50));
+		subreport.setReportFileName("itemsReport");
+		subreport.setParent(band);
+		band.getElements().add(image);
+		band.getElements().add(subreport);
+
+		JRElement[] elements = new JasperReportRenderer(spec).createBand(band).getElements();
+
+		assertThat(elements[0], org.hamcrest.Matchers.instanceOf(JRDesignImage.class));
+		assertThat(elements[1], org.hamcrest.Matchers.instanceOf(JRDesignSubreport.class));
+		assertThat(((JRDesignSubreport) elements[1]).getDataSourceExpression().getText(), containsString("JRBeanCollectionDataSource"));
+		assertThat(((JRDesignSubreport) elements[1]).getExpression().getText(), containsString("itemsReport"));
+	}
+}

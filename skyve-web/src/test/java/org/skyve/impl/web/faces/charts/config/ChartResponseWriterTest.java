@@ -27,6 +27,22 @@ class ChartResponseWriterTest {
 	}
 
 	@Test
+	void structuralWriterMethodsAreNoOpsForJsonOutput() throws Exception {
+		try (ChartResponseWriter writer = new ChartResponseWriter()) {
+			writer.startDocument();
+			writer.startElement("span", null);
+			writer.writeAttribute("data-x", "1", null);
+			writer.writeURIAttribute("href", "/x", null);
+			writer.writeComment("ignored");
+			writer.endElement("span");
+			writer.endDocument();
+			writer.writeText(new char[] {'{', '}'}, 0, 2);
+
+			assertEquals("{}", writer.getStringWriter().toString());
+		}
+	}
+
+	@Test
 	void spruceConvertsLeadingCommaToJsonObjectBraces() throws Exception {
 		try (ChartResponseWriter writer = new ChartResponseWriter()) {
 			writer.writeText(",\"labels\":[\"A\"]", null);

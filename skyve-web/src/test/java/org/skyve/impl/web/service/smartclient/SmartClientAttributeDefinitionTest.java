@@ -3,6 +3,7 @@ package org.skyve.impl.web.service.smartclient;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -18,7 +19,6 @@ import org.skyve.impl.metadata.controller.CustomisationsStaticSingleton;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator;
-import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.domain.types.converters.Format.TextCase;
 import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.metadata.model.document.field.TextFormat;
@@ -83,7 +83,7 @@ class SmartClientAttributeDefinitionTest {
 			assertEquals("enum", definition.getType());
 			assertEquals(HorizontalAlignment.left, definition.getAlign());
 			assertEquals(Integer.valueOf(88), definition.getPixelWidth());
-			assertTrue(definition.required == false);
+			assertFalse(definition.required);
 			assertNotNull(definition.valueMap);
 			assertEquals("Alpha", definition.valueMap.get("A"));
 			assertEquals("Beta", definition.valueMap.get("B"));
@@ -95,7 +95,7 @@ class SmartClientAttributeDefinitionTest {
 	}
 
 	@Test
-	void constructorWithTextBindingUsesValidatorMaskAndCustomisations() throws Exception {
+	void constructorWithTextBindingUsesValidatorMaskAndCustomisations() {
 		User user = mock(User.class);
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
@@ -140,7 +140,7 @@ class SmartClientAttributeDefinitionTest {
 			assertEquals("Code required", definition.requiredMessage);
 			assertEquals(">AA-##", definition.mask);
 			assertEquals("{expression:'^[A-Z0-9-]+$',type:'regexp',errorMessage:'Code is not formatted correctly.'}", definition.validation);
-			assertTrue(definition.valueMap == null);
+			assertNull(definition.valueMap);
 		}
 		finally {
 			CustomisationsStaticSingleton.set(previousCustomisations);

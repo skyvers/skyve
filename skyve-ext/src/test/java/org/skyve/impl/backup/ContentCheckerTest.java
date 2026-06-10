@@ -153,6 +153,35 @@ public class ContentCheckerTest {
 	}
 
 	@Test
+	public void checkContentAcceptsEmbeddedFieldNameSuffixAndSkipsPersistentIdentifierMismatch() throws Exception {
+		ContentChecker checker = new ContentChecker();
+		@SuppressWarnings("resource")
+		ContentManager cm = mock(ContentManager.class);
+		Customer customer = mock(Customer.class);
+		document(customer, "OTHER_DOC", attribute("upload", AttributeType.content));
+		when(cm.getAttachment("content-id")).thenReturn(attachment("upload"));
+
+		invokeCheckContent(checker, "content-id", cm, "embedded_upload", "DOC", AttributeType.content, customer, false);
+
+		assertThat(counter(checker, "missingContentCount"), is(0));
+		assertThat(counter(checker, "erroneousContentCount"), is(0));
+	}
+
+	@Test
+	public void checkContentCountsMissingContentDocument() throws Exception {
+		ContentChecker checker = new ContentChecker();
+		@SuppressWarnings("resource")
+		ContentManager cm = mock(ContentManager.class);
+		Customer customer = mock(Customer.class);
+		when(cm.getAttachment("content-id")).thenReturn(attachment("upload"));
+		when(customer.getModule("admin")).thenThrow(new IllegalStateException("missing module"));
+
+		invokeCheckContent(checker, "content-id", cm, "upload", "DOC", AttributeType.content, customer, false);
+
+		assertThat(counter(checker, "erroneousContentCount"), is(1));
+	}
+
+	@Test
 	public void checkContentAcceptsMatchingDynamicDocumentContent() throws Exception {
 		ContentChecker checker = new ContentChecker();
 		@SuppressWarnings("resource")
@@ -306,6 +335,133 @@ public class ContentCheckerTest {
 		when(repository.getModule(customer, "admin")).thenReturn(module);
 		when(module.getDocument(customer, "Invoice")).thenReturn(document);
 		when(document.getPolymorphicAttribute(customer, "name")).thenReturn(text);
+
+		String result = invokeBogusDynamicContentReference("content-id", "DYN_ENTITY");
+
+		assertThat(result, is((String) null));
+	}
+
+	@Test
+	public void bogusDynamicContentReferenceReturnsDynamicEntityReferenceForImageAttribute() throws Exception {
+		AbstractPersistence persistence = bindMockPersistence();
+		SQL sql = mock(SQL.class);
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Attribute image = attribute("photo", AttributeType.image);
+		ProvidedRepositoryFactory.set(repository);
+		when(persistence.newSQL("select bizId, bizCustomer, moduleName, documentName, fields from DYN_ENTITY where fields like :like")).thenReturn(sql);
+		when(sql.putParameter("like", "%\":\"content-id\"%", false)).thenReturn(sql);
+		when(sql.tupleResults()).thenReturn(List.<Object[]> of(new Object[] {"dyn-id", "demo", "admin", "Invoice", "{\"photo\":\"content-id\"}"}));
+		when(repository.getCustomer("demo")).thenReturn(customer);
+		when(repository.getModule(customer, "admin")).thenReturn(module);
+		when(module.getDocument(customer, "Invoice")).thenReturn(document);
+		when(document.getPolymorphicAttribute(customer, "photo")).thenReturn(image);
+
+		String result = invokeBogusDynamicContentReference("content-id", "DYN_ENTITY");
+
+		assertThat(result, is("DYN_ENTITY#dyn-id"));
+	}
+
+	@Test
+	public void bogusDynamicContentReferenceReturnsNullWhenCustomerCannotBeResolved() throws Exception {
+		AbstractPersistence persistence = bindMockPersistence();
+		SQL sql = mock(SQL.class);
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		ProvidedRepositoryFactory.set(repository);
+		when(persistence.newSQL("select bizId, bizCustomer, moduleName, documentName, fields from DYN_ENTITY where fields like :like")).thenReturn(sql);
+		when(sql.putParameter("like", "%\":\"content-id\"%", false)).thenReturn(sql);
+		when(sql.tupleResults()).thenReturn(List.<Object[]> of(new Object[] {"dyn-id", "demo", "admin", "Invoice", "{\"upload\":\"content-id\"}"}));
+		when(repository.getCustomer("demo")).thenReturn(null);
+
+		String result = invokeBogusDynamicContentReference("content-id", "DYN_ENTITY");
+
+		assertThat(result, is((String) null));
+	}
+
+	@Test
+	public void bogusDynamicContentReferenceReturnsNullWhenModuleCannotBeResolved() throws Exception {
+		AbstractPersistence persistence = bindMockPersistence();
+		SQL sql = mock(SQL.class);
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		Customer customer = mock(Customer.class);
+		ProvidedRepositoryFactory.set(repository);
+		when(persistence.newSQL("select bizId, bizCustomer, moduleName, documentName, fields from DYN_ENTITY where fields like :like")).thenReturn(sql);
+		when(sql.putParameter("like", "%\":\"content-id\"%", false)).thenReturn(sql);
+		when(sql.tupleResults()).thenReturn(List.<Object[]> of(new Object[] {"dyn-id", "demo", "admin", "Invoice", "{\"upload\":\"content-id\"}"}));
+		when(repository.getCustomer("demo")).thenReturn(customer);
+		when(repository.getModule(customer, "admin")).thenReturn(null);
+
+		String result = invokeBogusDynamicContentReference("content-id", "DYN_ENTITY");
+
+		assertThat(result, is((String) null));
+	}
+
+	@Test
+	public void bogusDynamicContentReferenceReturnsNullWhenDocumentCannotBeResolved() throws Exception {
+		AbstractPersistence persistence = bindMockPersistence();
+		SQL sql = mock(SQL.class);
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		ProvidedRepositoryFactory.set(repository);
+		when(persistence.newSQL("select bizId, bizCustomer, moduleName, documentName, fields from DYN_ENTITY where fields like :like")).thenReturn(sql);
+		when(sql.putParameter("like", "%\":\"content-id\"%", false)).thenReturn(sql);
+		when(sql.tupleResults()).thenReturn(List.<Object[]> of(new Object[] {"dyn-id", "demo", "admin", "Invoice", "{\"upload\":\"content-id\"}"}));
+		when(repository.getCustomer("demo")).thenReturn(customer);
+		when(repository.getModule(customer, "admin")).thenReturn(module);
+		when(module.getDocument(customer, "Invoice")).thenReturn(null);
+
+		String result = invokeBogusDynamicContentReference("content-id", "DYN_ENTITY");
+
+		assertThat(result, is((String) null));
+	}
+
+	@Test
+	public void bogusDynamicContentReferenceReturnsNullWhenPolymorphicAttributeCannotBeResolved() throws Exception {
+		AbstractPersistence persistence = bindMockPersistence();
+		SQL sql = mock(SQL.class);
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		ProvidedRepositoryFactory.set(repository);
+		when(persistence.newSQL("select bizId, bizCustomer, moduleName, documentName, fields from DYN_ENTITY where fields like :like")).thenReturn(sql);
+		when(sql.putParameter("like", "%\":\"content-id\"%", false)).thenReturn(sql);
+		when(sql.tupleResults()).thenReturn(List.<Object[]> of(new Object[] {"dyn-id", "demo", "admin", "Invoice", "{\"upload\":\"content-id\"}"}));
+		when(repository.getCustomer("demo")).thenReturn(customer);
+		when(repository.getModule(customer, "admin")).thenReturn(module);
+		when(module.getDocument(customer, "Invoice")).thenReturn(document);
+		when(document.getPolymorphicAttribute(customer, "upload")).thenReturn(null);
+
+		String result = invokeBogusDynamicContentReference("content-id", "DYN_ENTITY");
+
+		assertThat(result, is((String) null));
+	}
+
+	@Test
+	public void bogusDynamicContentReferenceReturnsNullWhenNoRowsReferenceContent() throws Exception {
+		AbstractPersistence persistence = bindMockPersistence();
+		SQL sql = mock(SQL.class);
+		when(persistence.newSQL("select bizId, bizCustomer, moduleName, documentName, fields from DYN_ENTITY where fields like :like")).thenReturn(sql);
+		when(sql.putParameter("like", "%\":\"content-id\"%", false)).thenReturn(sql);
+		when(sql.tupleResults()).thenReturn(List.of());
+
+		String result = invokeBogusDynamicContentReference("content-id", "DYN_ENTITY");
+
+		assertThat(result, is((String) null));
+	}
+
+	@Test
+	public void bogusDynamicContentReferenceReturnsNullWhenAttributeNameCannotBeParsed() throws Exception {
+		AbstractPersistence persistence = bindMockPersistence();
+		SQL sql = mock(SQL.class);
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		ProvidedRepositoryFactory.set(repository);
+		when(persistence.newSQL("select bizId, bizCustomer, moduleName, documentName, fields from DYN_ENTITY where fields like :like")).thenReturn(sql);
+		when(sql.putParameter("like", "%\":\"content-id\"%", false)).thenReturn(sql);
+		when(sql.tupleResults()).thenReturn(List.<Object[]> of(new Object[] {"dyn-id", "demo", "admin", "Invoice", "\":\"content-id\""}));
 
 		String result = invokeBogusDynamicContentReference("content-id", "DYN_ENTITY");
 

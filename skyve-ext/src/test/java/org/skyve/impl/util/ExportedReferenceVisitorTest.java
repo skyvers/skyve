@@ -24,6 +24,7 @@ import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.customer.ExportedReference;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.model.Persistent;
+import org.skyve.metadata.model.Persistent.ExtensionStrategy;
 import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
@@ -95,6 +96,37 @@ class ExportedReferenceVisitorTest {
 	}
 
 	@Test
+	void visitBeanExpandsPolymorphicReferenceToImmediatePersistableDerivations() throws Exception {
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Document target = document("admin", "Target", persistent("TARGET"));
+		Document mappedReference = document("admin", "MappedReference", polymorphicPersistent());
+		Document abstractDerived = document("admin", "AbstractDerived", null);
+		Document concreteDerived = document("admin", "ConcreteDerived", persistent("CONCRETE"));
+		Module module = mock(Module.class);
+		ExportedReference ref = new ExportedReference();
+		ref.setModuleName("admin");
+		ref.setDocumentName("MappedReference");
+		ref.setReferenceFieldName("target");
+		ref.setType(AssociationType.aggregation);
+		when(customer.getExportedReferences(target)).thenReturn(List.of(ref));
+		when(customer.getModule("admin")).thenReturn(module);
+		when(module.getDocument(customer, "MappedReference")).thenReturn(mappedReference);
+		when(module.getDocument(customer, "AbstractDerived")).thenReturn(abstractDerived);
+		when(module.getDocument(customer, "ConcreteDerived")).thenReturn(concreteDerived);
+		when(customer.getBaseDocument(target)).thenReturn(null);
+		when(customer.getDerivedDocuments(target)).thenReturn(List.of());
+		when(customer.getDerivedDocuments(mappedReference)).thenReturn(List.of("admin.AbstractDerived"));
+		when(customer.getDerivedDocuments(abstractDerived)).thenReturn(List.of("admin.ConcreteDerived"));
+		when(target.getParentDocument(customer)).thenReturn(null);
+		RecordingVisitor visitor = new RecordingVisitor();
+
+		invokeVisitBean(visitor, customer, target, "target-id");
+
+		assertThat(visitor.references, is(List.of("admin.Target:target-id->admin.ConcreteDerived")));
+		assertTrue(visitor.parents.isEmpty());
+	}
+
+	@Test
 	void dereferencerUpdatesRequiredCollectionReferenceToDefaultOwner() throws Exception {
 		AbstractPersistence persistence = bindMockPersistence();
 		SQL sql = fluentSQL();
@@ -124,6 +156,36 @@ class ExportedReferenceVisitorTest {
 		invokeAcceptReference(new ExportedReferenceVisitor.Dereferencer(), target, "target-id", ref, referenceDocument);
 
 		org.mockito.Mockito.verify(sql).putParameter(Bean.DOCUMENT_ID, "target-id", false);
+		org.mockito.Mockito.verify(sql).execute();
+	}
+
+	@Test
+	void dereferencerIgnoresChildCollectionReference() throws Exception {
+		AbstractPersistence persistence = bindMockPersistence();
+		Document target = document("admin", "Target", persistent("TARGET"));
+		Document referenceDocument = document("admin", "Reference", persistent("REFERENCE"));
+		ExportedReference ref = exportedReference(CollectionType.child, false);
+
+		invokeAcceptReference(new ExportedReferenceVisitor.Dereferencer(), target, "target-id", ref, referenceDocument);
+
+		org.mockito.Mockito.verifyNoInteractions(persistence);
+	}
+
+	@Test
+	void dereferencerUpdatesRequiredScalarReferenceToDefault() throws Exception {
+		AbstractPersistence persistence = bindMockPersistence();
+		SQL sql = fluentSQL();
+		when(persistence.newSQL("update REFERENCE set target_id = :newBizId where target_id = :bizId")).thenReturn(sql);
+		Document target = document("admin", "Target", persistent("TARGET"));
+		Document referenceDocument = document("admin", "Reference", persistent("REFERENCE"));
+		ExportedReference ref = exportedReference(AssociationType.aggregation, true);
+		ExportedReferenceVisitor.Dereferencer dereferencer = new ExportedReferenceVisitor.Dereferencer()
+				.putDefault("admin", "Reference", "replacement-reference");
+
+		invokeAcceptReference(dereferencer, target, "target-id", ref, referenceDocument);
+
+		org.mockito.Mockito.verify(sql).putParameter(Bean.DOCUMENT_ID, "target-id", false);
+		org.mockito.Mockito.verify(sql).putParameter("newBizId", "replacement-reference", false);
 		org.mockito.Mockito.verify(sql).execute();
 	}
 
@@ -247,6 +309,12 @@ class ExportedReferenceVisitorTest {
 	private static Persistent persistent(String identifier) {
 		Persistent persistent = new Persistent();
 		persistent.setName(identifier);
+		return persistent;
+	}
+
+	private static Persistent polymorphicPersistent() {
+		Persistent persistent = new Persistent();
+		persistent.setStrategy(ExtensionStrategy.mapped);
 		return persistent;
 	}
 

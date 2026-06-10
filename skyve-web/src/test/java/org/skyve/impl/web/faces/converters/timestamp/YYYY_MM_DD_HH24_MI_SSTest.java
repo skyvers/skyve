@@ -9,7 +9,7 @@ import org.skyve.domain.types.Timestamp;
 import org.skyve.util.Time;
 
 import jakarta.faces.convert.ConverterException;
-class YYYY_MM_DD_HH24_MI_SSTest {
+public class YYYY_MM_DD_HH24_MI_SSTest {
 	private YYYY_MM_DD_HH24_MI_SS converter = new YYYY_MM_DD_HH24_MI_SS();
 
 	@Test(expected = ConverterException.class)

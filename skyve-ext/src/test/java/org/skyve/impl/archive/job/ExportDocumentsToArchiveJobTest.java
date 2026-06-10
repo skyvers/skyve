@@ -2,6 +2,7 @@ package org.skyve.impl.archive.job;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -14,6 +15,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.io.File;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -70,6 +72,25 @@ class ExportDocumentsToArchiveJobTest {
 				+ ArchiveableBean.class.getName()
 				+ " and cannot be archived", thrown.getMessage());
 		assertEquals(List.of(thrown.getMessage()), job.getLog());
+	}
+
+	@Test
+	void executeStopsImmediatelyWhenBatchSizeIsInvalid() throws Exception {
+		ExportDocumentsToArchiveJob job = newJob();
+		setField(job, "batchSize", Integer.valueOf(0));
+
+		job.execute();
+
+		assertEquals(List.of("Invalid batch size configured, job ending"), job.getLog());
+	}
+
+	@Test
+	void timesUpReflectsTargetEndTime() throws Exception {
+		ExportDocumentsToArchiveJob job = newJob();
+		setField(job, "targetEndTime", Instant.now()
+												.minusSeconds(1));
+
+		assertTrue(job.timesUp());
 	}
 
 	@Test
@@ -204,6 +225,82 @@ class ExportDocumentsToArchiveJobTest {
 		assertEquals(List.of("order-1"), method.invoke(substance));
 		verify(query).addBoundProjection("bizId");
 		verify(filter).addLessThanOrEqualTo(eq(ArchiveableBean.archiveTimestampPropertyName), any(Timestamp.class));
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	void jobSubstanceDeleteExportedDocumentsDeletesBatchesUntilNoIdsRemain() throws Exception {
+		ExportDocumentsToArchiveJob job = newJob();
+		setField(job, "batchSize", Integer.valueOf(2));
+		setField(job, "targetEndTime", Instant.now()
+												.plusSeconds(60));
+		Persistence persistence = mock(Persistence.class);
+		DocumentQuery firstQuery = mock(DocumentQuery.class);
+		DocumentQuery emptyQuery = mock(DocumentQuery.class);
+		DocumentFilter firstFilter = mock(DocumentFilter.class);
+		DocumentFilter emptyFilter = mock(DocumentFilter.class);
+		SQL sql = mock(SQL.class);
+		Document document = persistentDocument("orders_table");
+		when(persistence.newDocumentQuery(document)).thenReturn(firstQuery, emptyQuery);
+		when(firstQuery.setMaxResults(2)).thenReturn(firstQuery);
+		when(firstQuery.addBoundProjection("bizId")).thenReturn(firstQuery);
+		when(firstQuery.getFilter()).thenReturn(firstFilter);
+		when(firstFilter.addLessThanOrEqualTo(eq(ArchiveableBean.archiveTimestampPropertyName), any(Timestamp.class))).thenReturn(firstFilter);
+		when(firstQuery.scalarResults(String.class)).thenReturn(List.of("order-1", "order-2"));
+		when(emptyQuery.setMaxResults(2)).thenReturn(emptyQuery);
+		when(emptyQuery.addBoundProjection("bizId")).thenReturn(emptyQuery);
+		when(emptyQuery.getFilter()).thenReturn(emptyFilter);
+		when(emptyFilter.addLessThanOrEqualTo(eq(ArchiveableBean.archiveTimestampPropertyName), any(Timestamp.class))).thenReturn(emptyFilter);
+		when(emptyQuery.scalarResults(String.class)).thenReturn(List.of());
+		when(persistence.newSQL("delete from orders_table where bizId in :ids")).thenReturn(sql);
+		when(sql.putParameter("ids", List.of("order-1", "order-2"), org.skyve.metadata.model.Attribute.AttributeType.collection)).thenReturn(sql);
+		when(sql.execute()).thenReturn(Integer.valueOf(2));
+		setField(job, "persistence", persistence);
+		Object substance = newJobSubstance(job, document, new ArchiveDocConfig("sales", "Order", "orders", 30));
+		Method method = substance.getClass()
+								.getDeclaredMethod("deleteExportedDocuments");
+		method.setAccessible(true);
+
+		assertEquals(Integer.valueOf(2), method.invoke(substance));
+		verify(persistence).begin();
+		verify(persistence).commit(false);
+		verify(sql).execute();
+	}
+
+	@Test
+	void jobSubstanceExecuteReturnsZeroWhenNoDocumentsAreAvailable() throws Exception {
+		UtilImpl.CONTENT_DIRECTORY = tempDir.toString();
+		ExportDocumentsToArchiveJob job = newJob();
+		setField(job, "batchSize", Integer.valueOf(5));
+		setField(job, "targetEndTime", Instant.now()
+												.plusSeconds(60));
+		setField(job, "repo", org.skyve.impl.archive.support.FileLockRepo.getInstance());
+		Persistence persistence = mock(Persistence.class);
+		DocumentQuery query = mock(DocumentQuery.class);
+		DocumentFilter filter = mock(DocumentFilter.class);
+		Document document = persistentDocument("orders_table");
+		when(persistence.newDocumentQuery(document)).thenReturn(query);
+		when(query.setMaxResults(5)).thenReturn(query);
+		when(query.getFilter()).thenReturn(filter);
+		when(filter.addNull(ArchiveableBean.archiveTimestampPropertyName)).thenReturn(filter);
+		doReturn(List.of()).when(query)
+							.projectedResults();
+		setField(job, "persistence", persistence);
+		Object substance = newJobSubstance(job, document, new ArchiveDocConfig("sales", "Order", "orders", 30));
+		Method method = substance.getClass()
+								.getDeclaredMethod("execute");
+		method.setAccessible(true);
+
+		assertEquals(Integer.valueOf(0), method.invoke(substance));
+		assertEquals(1, job.getLog()
+							.size());
+		assertTrue(job.getLog()
+						.get(0)
+						.startsWith("Exporting documents to order-"));
+		assertTrue(job.getLog()
+						.get(0)
+						.endsWith(".archive"));
+		verify(filter).addNull(ArchiveableBean.archiveTimestampPropertyName);
 	}
 
 	private static ExportDocumentsToArchiveJob newJob() {

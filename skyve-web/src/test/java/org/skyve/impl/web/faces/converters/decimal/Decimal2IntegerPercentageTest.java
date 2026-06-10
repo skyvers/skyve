@@ -9,7 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import jakarta.faces.convert.ConverterException;
-class Decimal2IntegerPercentageTest {
+public class Decimal2IntegerPercentageTest {
 	private Decimal2IntegerPercentage converter;
 
 	@Before

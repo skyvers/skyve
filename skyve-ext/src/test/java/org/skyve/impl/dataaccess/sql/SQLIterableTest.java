@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -20,6 +22,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.SQLTimeoutException;
+import java.sql.Types;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -27,9 +30,14 @@ import java.util.TreeMap;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.locationtech.jts.geom.Geometry;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.TimeoutException;
+import org.skyve.domain.types.DateTime;
+import org.skyve.domain.types.TimeOnly;
+import org.skyve.domain.types.Timestamp;
+import org.skyve.impl.domain.AbstractBean;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect;
 import org.skyve.metadata.customer.Customer;
@@ -163,6 +171,93 @@ class SQLIterableTest {
 	}
 
 	@Test
+	void constructorRethrowsSkyveExceptionFromSqlPreparation() throws Exception {
+		Fixture fixture = fixture(null);
+		DomainException expected = new DomainException("prepared badly");
+		doThrow(expected).when(fixture.sql).prepareStatement(any(), any(), any());
+
+		DomainException actual = assertThrows(DomainException.class,
+				() -> new SQLIterable<>(null, fixture.dataAccess, fixture.sql, null));
+
+		assertSame(expected, actual);
+	}
+
+	@Test
+	void constructorWrapsSetupException() throws Exception {
+		Connection connection = mock(Connection.class);
+		when(connection.prepareStatement(any(String.class))).thenThrow(new SQLException("no statement"));
+		SQLDataAccessSQL sql = mock(SQLDataAccessSQL.class);
+		when(sql.toQueryString()).thenReturn("select 1");
+		TestSQLDataAccessImpl dataAccess = new TestSQLDataAccessImpl(connection);
+
+		DomainException e = assertThrows(DomainException.class, () -> new SQLIterable<>(null, dataAccess, sql, null));
+
+		assertEquals("Cannot setup an SQLIterable", e.getMessage());
+		assertTrue(e.getCause() instanceof SQLException);
+	}
+
+	@Test
+	void nextBeanPopulatesTextTemporalAndNullValues() throws Exception {
+		User user = bindMockUser();
+		Customer customer = user.getCustomer();
+		Document document = mock(Document.class);
+		TemporalBean bean = new TemporalBean();
+		when(document.newInstance(user)).thenReturn(bean);
+		doReturn(List.of(
+				attribute("description", AttributeType.text),
+				attribute("orderDate", AttributeType.date),
+				attribute("updatedAt", AttributeType.dateTime),
+				attribute("finishTime", AttributeType.time),
+				attribute("auditStamp", AttributeType.timestamp),
+				attribute("optionalNumber", AttributeType.integer))).when(document).getAllAttributes(customer);
+		Fixture fixture = fixture(null);
+		java.sql.Date date = java.sql.Date.valueOf("2026-06-10");
+		java.sql.Time time = java.sql.Time.valueOf("13:14:15");
+		when(fixture.resultSet.getString("description")).thenReturn("packed");
+		when(fixture.resultSet.getDate("orderDate")).thenReturn(date);
+		when(fixture.resultSet.getTime("updatedAt")).thenReturn(time);
+		when(fixture.resultSet.getTime("finishTime")).thenReturn(time);
+		when(fixture.resultSet.getDate("auditStamp")).thenReturn(date);
+		when(fixture.resultSet.getInt("optionalNumber")).thenReturn(Integer.valueOf(0));
+		when(fixture.resultSet.wasNull()).thenReturn(Boolean.TRUE);
+		SQLIterable<TemporalBean> iterable = new SQLIterable<>(document, fixture.dataAccess, fixture.sql, null);
+
+		TemporalBean result = iterable.iterator().next();
+
+		assertSame(bean, result);
+		assertEquals("packed", result.description);
+		assertNotNull(result.orderDate);
+		assertNotNull(result.updatedAt);
+		assertNotNull(result.finishTime);
+		assertNotNull(result.auditStamp);
+		assertNull(result.optionalNumber);
+	}
+
+	@Test
+	void nextBeanPopulatesGeometryUsingDialect() throws Exception {
+		User user = bindMockUser();
+		Customer customer = user.getCustomer();
+		Document document = mock(Document.class);
+		Map<String, Object> properties = new TreeMap<>();
+		properties.put("shape", null);
+		DynamicBean bean = new DynamicBean("sales", "Order", properties);
+		when(document.newInstance(user)).thenReturn(bean);
+		doReturn(List.of(attribute("shape", AttributeType.geometry))).when(document).getAllAttributes(customer);
+		Fixture fixture = fixture(null);
+		SkyveDialect dialect = mock(SkyveDialect.class);
+		Geometry geometry = mock(Geometry.class);
+		when(dialect.getGeometrySqlType()).thenReturn(Integer.valueOf(Types.OTHER));
+		when(dialect.convertFromPersistedValue("persisted")).thenReturn(geometry);
+		fixture.dataAccess.setDialect(dialect);
+		when(fixture.resultSet.getObject("shape")).thenReturn("persisted");
+		SQLIterable<DynamicBean> iterable = new SQLIterable<>(document, fixture.dataAccess, fixture.sql, null);
+
+		DynamicBean result = iterable.iterator().next();
+
+		assertSame(geometry, result.get("shape"));
+	}
+
+	@Test
 	void nextScalarWrapsResultSetException() throws Exception {
 		Fixture fixture = fixture(null);
 		when(fixture.resultSet.getObject(1)).thenThrow(new SQLException("scalar broken"));
@@ -249,12 +344,126 @@ class SQLIterableTest {
 		}
 	}
 
+	public static final class TemporalBean extends AbstractBean {
+		private static final long serialVersionUID = 1L;
+
+		private String description;
+		private java.util.Date orderDate;
+		private DateTime updatedAt;
+		private TimeOnly finishTime;
+		private Timestamp auditStamp;
+		private Integer optionalNumber;
+
+		@Override
+		public String getBizId() {
+			return null;
+		}
+
+		@Override
+		public String getBizModule() {
+			return "sales";
+		}
+
+		@Override
+		public String getBizDocument() {
+			return "Order";
+		}
+
+		@Override
+		public String getBizCustomer() {
+			return null;
+		}
+
+		@Override
+		public void setBizCustomer(String bizCustomer) {
+			// test bean only
+		}
+
+		@Override
+		public String getBizDataGroupId() {
+			return null;
+		}
+
+		@Override
+		public void setBizDataGroupId(String bizDataGroupId) {
+			// test bean only
+		}
+
+		@Override
+		public String getBizUserId() {
+			return null;
+		}
+
+		@Override
+		public void setBizUserId(String bizUserId) {
+			// test bean only
+		}
+
+		@Override
+		public String getBizKey() {
+			return null;
+		}
+
+		public String getDescription() {
+			return description;
+		}
+
+		public void setDescription(String description) {
+			this.description = description;
+		}
+
+		public java.util.Date getOrderDate() {
+			return orderDate;
+		}
+
+		public void setOrderDate(java.util.Date orderDate) {
+			this.orderDate = orderDate;
+		}
+
+		public DateTime getUpdatedAt() {
+			return updatedAt;
+		}
+
+		public void setUpdatedAt(DateTime updatedAt) {
+			this.updatedAt = updatedAt;
+		}
+
+		public TimeOnly getFinishTime() {
+			return finishTime;
+		}
+
+		public void setFinishTime(TimeOnly finishTime) {
+			this.finishTime = finishTime;
+		}
+
+		public Timestamp getAuditStamp() {
+			return auditStamp;
+		}
+
+		public void setAuditStamp(Timestamp auditStamp) {
+			this.auditStamp = auditStamp;
+		}
+
+		public Integer getOptionalNumber() {
+			return optionalNumber;
+		}
+
+		public void setOptionalNumber(Integer optionalNumber) {
+			this.optionalNumber = optionalNumber;
+		}
+	}
+
 	private static final class TestSQLDataAccessImpl extends SQLDataAccessImpl {
 		private final Connection connection;
+		private SkyveDialect dialect;
 
 		private TestSQLDataAccessImpl(Connection connection) {
 			super(null);
 			this.connection = connection;
+		}
+
+		void setDialect(SkyveDialect dialect) {
+			this.dialect = dialect;
 		}
 
 		@Override
@@ -264,7 +473,7 @@ class SQLIterableTest {
 
 		@Override
 		SkyveDialect getDialect() {
-			return null;
+			return dialect;
 		}
 	}
 }

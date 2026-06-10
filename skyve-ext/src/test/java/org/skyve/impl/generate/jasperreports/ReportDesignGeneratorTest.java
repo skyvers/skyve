@@ -5,17 +5,20 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.skyve.impl.metadata.model.document.AssociationImpl;
 import org.skyve.impl.metadata.model.document.CollectionImpl;
 import org.skyve.impl.metadata.model.document.field.Decimal2;
 import org.skyve.impl.metadata.model.document.field.Decimal5;
@@ -23,10 +26,15 @@ import org.skyve.impl.metadata.model.document.field.Decimal10;
 import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.metadata.model.document.field.LongInteger;
 import org.skyve.impl.metadata.model.document.field.Integer;
+import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Extends;
+import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
+import org.skyve.metadata.user.User;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("static-method")
@@ -95,6 +103,99 @@ class ReportDesignGeneratorTest {
 		ReportDesignGenerator.addParameters(design);
 
 		assertThat(design.getParameters().get(2).getDefaultValueExpression(), is((String) null));
+	}
+
+	@Test
+	void populateDesignClearsGeneratedCollectionsAndInitialisesBaseState() {
+		DesignSpecification design = new DesignSpecification();
+		design.setModuleName("sales");
+		design.setDocumentName("Order");
+		design.setReportType(DesignSpecification.ReportType.report);
+		design.getFields().add(new ReportField());
+		design.getParameters().add(new ReportParameter());
+		design.getVariables().add(new ReportVariable());
+		design.getSubReports().add(new DesignSpecification());
+		design.getBands().add(new ReportBand());
+
+		DesignSpecification result = new MinimalReportDesignGenerator().populateDesign(design);
+
+		assertThat(result, is(design));
+		assertThat(Character.toString((char) design.getAlias()), is("a"));
+		assertTrue(design.getJoins().isEmpty());
+		assertTrue(design.getJoinAlias().isEmpty());
+		assertEquals(3, design.getParameters().size());
+		assertEquals(1, design.getFields().size());
+		assertThat(design.getFields().get(0).getName(), is("generated"));
+		assertEquals(0, design.getVariables().size());
+		assertEquals(0, design.getSubReports().size());
+		assertEquals(1, design.getBands().size());
+	}
+
+	@Test
+	void generateDesignPopulatesAFreshDesignInstance() {
+		DesignSpecification result = new GenerateOnlyReportDesignGenerator().generateDesign();
+
+		assertThat(result.getName(), is("generated"));
+	}
+
+	@Test
+	void addFieldsForBeanModeReportAddsImplicitThisUserAndBizKeyFields() throws Exception {
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Persistent persistent = new Persistent();
+		persistent.setName("ORDER");
+		when(module.getName()).thenReturn("sales");
+		when(document.getName()).thenReturn("Order");
+		when(document.getPersistent()).thenReturn(persistent);
+		when(document.getExtends()).thenReturn(null);
+
+		DesignSpecification design = new FixedMetadataDesignSpecification(module, document);
+		design.setModuleName("sales");
+		design.setDocumentName("Order");
+		design.setReportType(DesignSpecification.ReportType.report);
+
+		withThreadLocalCustomer(customer, () -> new BaseFieldReportDesignGenerator().addFields(design));
+
+		assertEquals(3, design.getFields().size());
+		assertThat(design.getFields().get(0).getName(), is("THIS"));
+		assertThat(design.getFields().get(0).getTypeClass(), is("modules.sales.domain.Order"));
+		assertThat(design.getFields().get(1).getName(), is("USER"));
+		assertThat(design.getFields().get(2).getName(), is("bizKey"));
+		assertThat(design.getFields().get(2).getNameSql(), is("a.bizKey"));
+	}
+
+	@Test
+	void addFieldsForJoinedDocumentAddsBizKeyJoinToBaseDocument() throws Exception {
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Document baseDocument = document("BaseOrder", "BASE_ORDER");
+		Extends inherits = new Extends();
+		inherits.setDocumentName("BaseOrder");
+		Persistent persistent = new Persistent();
+		persistent.setName("SPECIAL_ORDER");
+		persistent.setStrategy(Persistent.ExtensionStrategy.joined);
+		when(document.getPersistent()).thenReturn(persistent);
+		when(document.getExtends()).thenReturn(inherits);
+		when(module.getDocument(customer, "BaseOrder")).thenReturn(baseDocument);
+
+		DesignSpecification design = new FixedMetadataDesignSpecification(module, document);
+		design.setModuleName("sales");
+		design.setDocumentName("SpecialOrder");
+		design.setReportType(DesignSpecification.ReportType.report);
+		design.setMode(DesignSpecification.Mode.sql);
+		design.setJoins(new HashMap<>());
+		design.setJoinAlias(new HashMap<>());
+		design.setAlias('a');
+
+		withThreadLocalCustomer(customer, () -> new BaseFieldReportDesignGenerator().addFields(design));
+
+		ReportField bizKey = design.getFields().get(0);
+		assertThat(bizKey.getName(), is("bizKey"));
+		assertThat(bizKey.getJoinSql(), is(" join BASE_ORDER b on a.bizId = b.bizId"));
+		assertThat(bizKey.getNameSql(), is("b.bizKey "));
+		assertTrue(design.getJoins().containsKey("BaseOrder"));
 	}
 
 	@Test
@@ -197,7 +298,7 @@ class ReportDesignGeneratorTest {
 		assertThat(result.getSkyveType(), is(AttributeType.collection.name()));
 		assertThat(result.getDocumentName(), is("Item"));
 		assertThat(result.getTypeClass(), is("java.util.List"));
-		assertTrue(Boolean.TRUE.equals(result.getCollection()));
+		assertEquals(Boolean.TRUE, result.getCollection());
 	}
 
 	@Test
@@ -237,7 +338,7 @@ class ReportDesignGeneratorTest {
 
 		ReportField result = ReportDesignGenerator.fieldFromAttribute(spec, customer, document, intAttr, new StringBuilder(), new StringBuilder());
 
-		assertTrue(Boolean.TRUE.equals(result.getIncludeTotal()));
+		assertEquals(Boolean.TRUE, result.getIncludeTotal());
 	}
 
 	@Test
@@ -255,7 +356,7 @@ class ReportDesignGeneratorTest {
 
 		ReportField result = ReportDesignGenerator.fieldFromAttribute(spec, customer, document, longAttr, new StringBuilder(), new StringBuilder());
 
-		assertTrue(Boolean.TRUE.equals(result.getIncludeTotal()));
+		assertEquals(Boolean.TRUE, result.getIncludeTotal());
 	}
 
 	@Test
@@ -294,7 +395,7 @@ class ReportDesignGeneratorTest {
 
 		ReportField result = ReportDesignGenerator.fieldFromAttribute(spec, customer, document, attr, new StringBuilder(), new StringBuilder());
 
-		assertTrue(Boolean.TRUE.equals(result.getIncludeTotal()));
+		assertEquals(Boolean.TRUE, result.getIncludeTotal());
 		assertThat(result.getSkyveType(), is(AttributeType.decimal2.name()));
 	}
 
@@ -313,7 +414,7 @@ class ReportDesignGeneratorTest {
 
 		ReportField result = ReportDesignGenerator.fieldFromAttribute(spec, customer, document, attr, new StringBuilder(), new StringBuilder());
 
-		assertTrue(Boolean.TRUE.equals(result.getIncludeTotal()));
+		assertEquals(Boolean.TRUE, result.getIncludeTotal());
 		assertThat(result.getSkyveType(), is(AttributeType.decimal5.name()));
 	}
 
@@ -332,7 +433,7 @@ class ReportDesignGeneratorTest {
 
 		ReportField result = ReportDesignGenerator.fieldFromAttribute(spec, customer, document, attr, new StringBuilder(), new StringBuilder());
 
-		assertTrue(Boolean.TRUE.equals(result.getIncludeTotal()));
+		assertEquals(Boolean.TRUE, result.getIncludeTotal());
 		assertThat(result.getSkyveType(), is(AttributeType.decimal10.name()));
 	}
 
@@ -372,6 +473,142 @@ class ReportDesignGeneratorTest {
 		ReportField result = ReportDesignGenerator.fieldFromBinding(spec, customer, document, "unknown");
 
 		assertThat(result, org.hamcrest.CoreMatchers.nullValue());
+	}
+
+	@Test
+	void fieldFromBindingDottedAssociationBuildsJoinAndPrefixedSqlField() {
+		DesignSpecification spec = designWithJoinState();
+		spec.setMode(DesignSpecification.Mode.sql);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Document associatedDocument = document("Customer", "CUSTOMER");
+		AssociationImpl association = association("customer", "Customer", false);
+		Text name = new Text();
+		name.setName("name");
+		name.setDisplayName("Name");
+
+		when(document.getName()).thenReturn("Order");
+		when(document.getAttribute("customer")).thenReturn(association);
+		when(document.getAttribute("name")).thenReturn(name);
+		when(customer.getModule("mod")).thenReturn(module);
+		when(module.getDocument(customer, "Customer")).thenReturn(associatedDocument);
+
+		ReportField result = ReportDesignGenerator.fieldFromBinding(spec, customer, document, "customer.name");
+
+		assertThat(result.getName(), is("customer_name"));
+		assertThat(result.getBinding(), is("customer.name"));
+		assertThat(result.getJoinSql(), is(" left join CUSTOMER b on a.bizId =  b.customer_id"));
+		assertThat(result.getNameSql(), is("b.name as customer_name"));
+	}
+
+	@Test
+	void fieldFromAttributeAssociationInBeanModeBuildsLeftJoinAndBizKeyField() {
+		DesignSpecification spec = designWithJoinState();
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Document associatedDocument = document("Address", "ADDRESS");
+		AssociationImpl association = association("address", "Address", false);
+
+		when(document.getName()).thenReturn("Person");
+		when(customer.getModule("mod")).thenReturn(module);
+		when(module.getDocument(customer, "Address")).thenReturn(associatedDocument);
+
+		ReportField result = ReportDesignGenerator.fieldFromAttribute(spec, customer, document, association, new StringBuilder(), new StringBuilder());
+
+		assertEquals("address.bizKey", result.getName());
+		assertEquals("java.lang.String", result.getTypeClass());
+		assertTrue(result.getJoinSql().contains(" left join ADDRESS b on a.bizId =  b.address_id"));
+		assertEquals("association", result.getSkyveType());
+	}
+
+	@Test
+	void fieldFromAttributeAssociationInSqlModeBuildsInnerJoinAndAliasExpression() {
+		DesignSpecification spec = designWithJoinState();
+		spec.setMode(DesignSpecification.Mode.sql);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Document associatedDocument = document("Customer", "CUSTOMER");
+		AssociationImpl association = association("customer", "Customer", true);
+
+		when(document.getName()).thenReturn("Order");
+		when(customer.getModule("mod")).thenReturn(module);
+		when(module.getDocument(customer, "Customer")).thenReturn(associatedDocument);
+
+		ReportField result = ReportDesignGenerator.fieldFromAttribute(spec, customer, document, association, new StringBuilder(), new StringBuilder());
+
+		assertEquals("customer_bizKey", result.getName());
+		assertEquals("customer.bizKey as customer_bizKey", result.getNameSql());
+		assertTrue(result.getJoinSql().contains(" join CUSTOMER b on a.bizId =  b.customer_id"));
+	}
+
+	@Test
+	void fieldFromBindingSqlModeSkipsNonPersistentSimpleAttribute() {
+		DesignSpecification spec = new DesignSpecification();
+		spec.setMode(DesignSpecification.Mode.sql);
+		Customer customer = mock(Customer.class);
+		Document document = mock(Document.class);
+		Text transientText = new Text();
+		transientText.setName("calculated");
+		transientText.setDisplayName("Calculated");
+		transientText.setPersistent(false);
+
+		when(document.getAttribute("calculated")).thenReturn(transientText);
+
+		assertNull(ReportDesignGenerator.fieldFromBinding(spec, customer, document, "calculated"));
+	}
+
+	@Test
+	void constructSubreportFromFieldCopiesCollectionContextAndAddsSubreport() {
+		org.skyve.impl.metadata.model.document.DocumentImpl document = document("Parent", "PARENT");
+		CollectionImpl collection = new CollectionImpl();
+		collection.setName("items");
+		collection.setDisplayName("Items");
+		collection.setDocumentName("Item");
+		collection.setType(org.skyve.metadata.model.document.Collection.CollectionType.child);
+		document.putAttribute(collection);
+
+		TestDesignSpecification design = new TestDesignSpecification(document);
+		design.setName("ParentReport");
+		design.setMode(DesignSpecification.Mode.sql);
+		design.setUxui("desktop");
+		design.setRepositoryPath("/reports");
+		design.setSaveToDocumentPackage(Boolean.TRUE);
+
+		ReportField field = new ReportField();
+		field.setName("items");
+		field.setOwningModuleName("sales");
+		field.setDocumentName("Item");
+
+		CapturingDocumentReportDesignGenerator generator = new CapturingDocumentReportDesignGenerator();
+		generator.constructSubreportFromField(design, field, java.lang.Integer.valueOf(320));
+
+		DesignSpecification subreport = design.getSubReports().get(0);
+		assertEquals(subreport, generator.capturedSubreport);
+		assertEquals("ParentReport_items", subreport.getName());
+		assertEquals("sales", subreport.getModuleName());
+		assertEquals("Item", subreport.getDocumentName());
+		assertEquals(java.lang.Integer.valueOf(320), subreport.getColumnWidth());
+		assertEquals(org.skyve.metadata.model.document.Collection.CollectionType.child, subreport.getCollectionType());
+		assertEquals("PARENT", subreport.getParentReportPersistentName());
+	}
+
+	@Test
+	void addSubreportsLeavesExistingManualSubreportsUntouched() {
+		DesignSpecification design = new DesignSpecification();
+		design.setReportType(DesignSpecification.ReportType.report);
+		DesignSpecification manualSubreport = new DesignSpecification();
+		design.getSubReports().add(manualSubreport);
+		ReportField collectionField = new ReportField();
+		collectionField.setSkyveType(AttributeType.collection.name());
+		design.getFields().add(collectionField);
+
+		new BaseFieldReportDesignGenerator().addSubreports(design);
+
+		assertEquals(1, design.getSubReports().size());
+		assertThat(design.getSubReports().get(0), is(manualSubreport));
 	}
 
 	@Test
@@ -570,5 +807,156 @@ class ReportDesignGeneratorTest {
 		gen.addBands(design);
 
 		assertTrue(design.getBands().size() > 0);
+	}
+
+	private static DesignSpecification designWithJoinState() {
+		DesignSpecification spec = new DesignSpecification();
+		spec.setModuleName("mod");
+		spec.setDocumentName("doc");
+		spec.setJoins(new HashMap<>());
+		spec.setJoinAlias(new HashMap<>());
+		spec.setAlias('a');
+		return spec;
+	}
+
+	private static AssociationImpl association(String name, String documentName, boolean required) {
+		AssociationImpl association = new AssociationImpl();
+		association.setName(name);
+		association.setDisplayName(name);
+		association.setDocumentName(documentName);
+		association.setRequired(required);
+		return association;
+	}
+
+	private static org.skyve.impl.metadata.model.document.DocumentImpl document(String name, String persistentName) {
+		org.skyve.impl.metadata.model.document.DocumentImpl document = new org.skyve.impl.metadata.model.document.DocumentImpl();
+		document.setName(name);
+		Persistent persistent = new Persistent();
+		persistent.setName(persistentName);
+		document.setPersistent(persistent);
+		return document;
+	}
+
+	private static final class TestDesignSpecification extends DesignSpecification {
+		private final Document document;
+
+		private TestDesignSpecification(Document document) {
+			this.document = document;
+		}
+
+		@Override
+		public Document getDocument() {
+			return document;
+		}
+	}
+
+	private static final class FixedMetadataDesignSpecification extends DesignSpecification {
+		private final Module module;
+		private final Document document;
+
+		private FixedMetadataDesignSpecification(Module module, Document document) {
+			this.module = module;
+			this.document = document;
+		}
+
+		@Override
+		public Module getModule() {
+			return module;
+		}
+
+		@Override
+		public Document getDocument() {
+			return document;
+		}
+	}
+
+	private static final class CapturingDocumentReportDesignGenerator extends DocumentReportDesignGenerator {
+		private DesignSpecification capturedSubreport;
+
+		@Override
+		protected DocumentReportDesignGenerator getSubreportGenerator() {
+			return new DocumentReportDesignGenerator() {
+				@Override
+				public DesignSpecification populateDesign(DesignSpecification design) {
+					capturedSubreport = design;
+					return design;
+				}
+			};
+		}
+	}
+
+	private static final class MinimalReportDesignGenerator extends ReportDesignGenerator {
+		@Override
+		protected ReportDesignGenerator getSubreportGenerator() {
+			return this;
+		}
+
+		@Override
+		protected void addFields(DesignSpecification design) {
+			ReportField field = new ReportField();
+			field.setName("generated");
+			design.getFields().add(field);
+		}
+
+		@Override
+		protected void addBands(DesignSpecification design) {
+			ReportBand band = new ReportBand();
+			band.setBandType(ReportBand.BandType.detail);
+			design.getBands().add(band);
+		}
+	}
+
+	private static final class BaseFieldReportDesignGenerator extends ReportDesignGenerator {
+		@Override
+		protected ReportDesignGenerator getSubreportGenerator() {
+			return this;
+		}
+	}
+
+	private static final class GenerateOnlyReportDesignGenerator extends ReportDesignGenerator {
+		@Override
+		public DesignSpecification populateDesign(DesignSpecification design) {
+			design.setName("generated");
+			return design;
+		}
+
+		@Override
+		protected ReportDesignGenerator getSubreportGenerator() {
+			return this;
+		}
+	}
+
+	private static void withThreadLocalCustomer(Customer customer, ThrowingRunnable runnable) throws Exception {
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		User user = mock(User.class);
+		when(persistence.getUser()).thenReturn(user);
+		when(user.getCustomer()).thenReturn(customer);
+		ThreadLocal<AbstractPersistence> threadLocal = getThreadLocalPersistence();
+		AbstractPersistence previous = threadLocal.get();
+		try {
+			threadLocal.set(persistence);
+			runnable.run();
+		}
+		finally {
+			if (previous == null) {
+				threadLocal.remove();
+			}
+			else {
+				threadLocal.set(previous);
+			}
+		}
+	}
+
+	private static ThreadLocal<AbstractPersistence> getThreadLocalPersistence() throws Exception {
+		Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
+		field.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		ThreadLocal<AbstractPersistence> threadLocal = (ThreadLocal<AbstractPersistence>) field.get(null);
+		return threadLocal;
+	}
+
+	@FunctionalInterface
+	private interface ThrowingRunnable {
+		void run() throws Exception;
 	}
 }

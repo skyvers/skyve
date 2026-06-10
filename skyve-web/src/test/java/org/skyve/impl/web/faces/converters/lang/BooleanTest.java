@@ -5,7 +5,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.junit.Before;
 import org.junit.Test;
-class BooleanTest {
+public class BooleanTest {
 
 	private Boolean converter;
 

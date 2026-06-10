@@ -2,12 +2,17 @@ package org.skyve.impl.cache;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import org.junit.After;
@@ -17,8 +22,16 @@ import org.skyve.cache.CSRFTokenCacheConfig;
 import org.skyve.cache.ConversationCacheConfig;
 import org.skyve.cache.GeoIPCacheConfig;
 import org.skyve.cache.SessionCacheConfig;
+import org.skyve.domain.Bean;
+import org.skyve.domain.DynamicBean;
+import org.skyve.domain.messages.ConversationEndedException;
+import org.skyve.domain.messages.MessageSeverity;
+import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.web.BackgroundTask;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
 /**
@@ -181,6 +194,77 @@ public class SessionTrackingTest {
 	}
 
 	@Test
+	public void getSessionsReturnsEmptySetForUnknownUser() {
+		assertThat(StateUtil.getSessions("unknown-user-" + System.nanoTime()).isEmpty(), is(true));
+	}
+
+	@Test
+	public void getCachedConversationThrowsWhenConversationCacheMisses() {
+		String webId = "12345678-1234-1234-1234-123456789012bean-id";
+
+		assertThrows(ConversationEndedException.class, () -> StateUtil.getCachedConversation(webId, null));
+	}
+
+	@Test
+	public void getCachedConversationRestoresConversationForMatchingSession() throws Exception {
+		DynamicBean bean = bean("bean-id");
+		TestWebContext context = new TestWebContext("12345678-1234-1234-1234-123456789012", "session-1");
+		context.setCurrentBean(bean);
+		StateUtil.cacheConversation(context);
+
+		AbstractWebContext result = StateUtil.getCachedConversation(context.getWebId(), request(session("session-1")));
+
+		assertNotNull(result);
+		assertThat(result.getKey(), is("12345678-1234-1234-1234-123456789012"));
+		assertThat(result.getCurrentBean().getBizId(), is("bean-id"));
+	}
+
+	@Test
+	public void getCachedConversationRestoresConversationWhenNoRequestIsSupplied() throws Exception {
+		TestWebContext context = new TestWebContext("12345678-1234-1234-1234-123456789012", null);
+		context.setCurrentBean(bean("bean-id"));
+		StateUtil.cacheConversation(context);
+
+		AbstractWebContext result = StateUtil.getCachedConversation(context.getWebId(), null);
+
+		assertNotNull(result);
+		assertThat(result.getCurrentBean().getBizId(), is("bean-id"));
+	}
+
+	@Test
+	public void getCachedConversationThrowsWhenRequestHasNoSession() throws Exception {
+		TestWebContext context = new TestWebContext("12345678-1234-1234-1234-123456789012", "session-1");
+		context.setCurrentBean(bean("bean-id"));
+		StateUtil.cacheConversation(context);
+
+		String webId1 = context.getWebId();
+		HttpServletRequest noSessionRequest = request(null);
+		assertThrows(SessionEndedException.class, () -> StateUtil.getCachedConversation(webId1, noSessionRequest));
+	}
+
+	@Test
+	public void getCachedConversationThrowsWhenSessionIdDiffers() throws Exception {
+		TestWebContext context = new TestWebContext("12345678-1234-1234-1234-123456789012", "session-1");
+		context.setCurrentBean(bean("bean-id"));
+		StateUtil.cacheConversation(context);
+
+		String webId2 = context.getWebId();
+		HttpServletRequest differentSessionRequest = request(session("session-2"));
+		assertThrows(ConversationEndedException.class, () -> StateUtil.getCachedConversation(webId2, differentSessionRequest));
+	}
+
+	@Test
+	public void getCachedConversationThrowsWhenStoredConversationHasNoSessionId() throws Exception {
+		TestWebContext context = new TestWebContext("12345678-1234-1234-1234-123456789012", null);
+		context.setCurrentBean(bean("bean-id"));
+		StateUtil.cacheConversation(context);
+
+		String webId3 = context.getWebId();
+		HttpServletRequest differentSessionRequest2 = request(session("session-1"));
+		assertThrows(ConversationEndedException.class, () -> StateUtil.getCachedConversation(webId3, differentSessionRequest2));
+	}
+
+	@Test
 	public void hasOtherSessionReturnsFalseWhenNoSessions() {
 		HttpSession sessionA = session("no-session-" + System.nanoTime());
 		assertThat(StateUtil.hasOtherSession("unknown-user-" + System.nanoTime(), sessionA), is(false));
@@ -294,5 +378,62 @@ public class SessionTrackingTest {
 		HttpSession session = mock(HttpSession.class);
 		when(session.getId()).thenReturn(id);
 		return session;
+	}
+
+	private static HttpServletRequest request(HttpSession session) {
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		when(request.getSession(false)).thenReturn(session);
+		when(request.getLocale()).thenReturn(java.util.Locale.ENGLISH);
+		return request;
+	}
+
+	private static DynamicBean bean(String bizId) {
+		Map<String, Object> properties = new java.util.HashMap<>();
+		properties.put(Bean.DOCUMENT_ID, bizId);
+		return new DynamicBean("admin", "User", properties);
+	}
+
+	private static final class TestWebContext extends AbstractWebContext {
+		private static final long serialVersionUID = 1L;
+
+		private TestWebContext(String key, String sessionId) {
+			super(key);
+			this.sessionId = sessionId;
+		}
+
+		@Override
+		public List<Map<String, String>> getGrowls() {
+			return Collections.emptyList();
+		}
+
+		@Override
+		public List<Map<String, String>> getMessages() {
+			return Collections.emptyList();
+		}
+
+		@Override
+		public void message(MessageSeverity severity, String message) {
+			// no-op for cache serialization tests
+		}
+
+		@Override
+		public void growl(MessageSeverity severity, String message) {
+			// no-op for cache serialization tests
+		}
+
+		@Override
+		public void cacheConversation() throws Exception {
+			StateUtil.cacheConversation(this);
+		}
+
+		@Override
+		public <T extends Bean> void background(Class<? extends BackgroundTask<T>> taskClass) {
+			// no-op for cache serialization tests
+		}
+
+		@Override
+		public <T extends Bean> void backgroundWithoutCachingConversation(Class<? extends BackgroundTask<T>> taskClass) {
+			// no-op for cache serialization tests
+		}
 	}
 }

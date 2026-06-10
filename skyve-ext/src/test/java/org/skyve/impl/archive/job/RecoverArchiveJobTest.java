@@ -5,23 +5,30 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.lang.reflect.Field;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.store.Directory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.skyve.archive.support.CorruptArchiveError;
 import org.skyve.archive.support.CorruptArchiveError.Resolution;
+import org.skyve.impl.archive.support.ArchiveLuceneIndexerSingleton;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
@@ -185,6 +192,87 @@ class RecoverArchiveJobTest {
 		assertEquals(thrown.getCause().getMessage(), job.getLog().get(0));
 	}
 
+	@Test
+	void executeMarksErrorFailedWhenRecoveryThrows() throws Exception {
+		RecoverArchiveJob job = new RecoverArchiveJob();
+		UtilImpl.CONTENT_DIRECTORY = tempDir.toString();
+		ArchiveDocConfig docConfig = new ArchiveDocConfig("admin", "Audit", "audit", 30);
+		UtilImpl.ARCHIVE_CONFIG = new ArchiveConfig(10, 100, List.of(docConfig), ArchiveConfig.DISABLED.cacheConfig(),
+				ArchiveConfig.DISABLED.schedule());
+		Persistence persistence = mock(Persistence.class);
+		DocumentQuery query = mock(DocumentQuery.class);
+		DocumentFilter filter = mock(DocumentFilter.class);
+		CorruptArchiveError error = mock(CorruptArchiveError.class);
+		when(persistence.newDocumentQuery(CorruptArchiveError.MODULE_NAME, CorruptArchiveError.DOCUMENT_NAME)).thenReturn(query);
+		when(query.getFilter()).thenReturn(filter);
+		when(filter.addEquals(CorruptArchiveError.resolutionPropertyName, Resolution.unresolved)).thenReturn(filter);
+		when(query.beanResults()).thenReturn(List.of(error));
+		when(error.getBizKey()).thenReturn("audit-1");
+		when(error.getArchiveTypeModule()).thenReturn("admin");
+		when(error.getArchiveTypeDocument()).thenReturn("Audit");
+		when(error.getFilename()).thenReturn("missing.archive");
+		setPersistence(job, persistence);
+
+		job.execute();
+
+		assertEquals("1 errors to resolve", job.getLog().get(0));
+		assertTrue(job.getLog().stream()
+						.anyMatch(message -> message.startsWith("Recovery encountered an error")));
+		assertEquals("Recovery done", job.getLog().get(job.getLog().size() - 1));
+		verify(error).setResolution(Resolution.failed);
+		verify(persistence).begin();
+		verify(persistence).save(error);
+		verify(persistence).commit(false);
+	}
+
+	@Test
+	@SuppressWarnings("resource")
+	void deleteIndexReferencesRemovesArchiveAndProgressEntries() throws Exception {
+		RecoverArchiveJob job = new RecoverArchiveJob();
+		ArchiveDocConfig config = new ArchiveDocConfig("admin", "Audit", "audit", 30);
+		IndexWriter writer = mock(IndexWriter.class);
+		Directory directory = mock(Directory.class);
+		ArchiveLuceneIndexerSingleton.getInstance()
+										.addIndexWriter(config, writer, directory);
+		try {
+			invokeDeleteIndexReferences(job, config, "audit.archive");
+
+			verify(writer).deleteDocuments(any(Query.class), any(Query.class));
+		}
+		finally {
+			ArchiveLuceneIndexerSingleton.getInstance()
+											.getLuceneConfigs()
+											.remove(config);
+		}
+	}
+
+	@Test
+	@SuppressWarnings("resource")
+	void deleteIndexReferencesWrapsIndexWriterIOException() throws Exception {
+		RecoverArchiveJob job = new RecoverArchiveJob();
+		ArchiveDocConfig config = new ArchiveDocConfig("admin", "Audit", "audit", 30);
+		IndexWriter writer = mock(IndexWriter.class);
+		Directory directory = mock(Directory.class);
+		doThrow(new IOException("index locked")).when(writer)
+												.deleteDocuments(any(Query.class), any(Query.class));
+		ArchiveLuceneIndexerSingleton.getInstance()
+										.addIndexWriter(config, writer, directory);
+		try {
+			InvocationTargetException thrown = assertThrows(InvocationTargetException.class,
+					() -> deleteIndexReferencesMethod().invoke(job, config, "audit.archive"));
+
+			assertEquals("Encountered an error interacting with index", thrown.getCause().getMessage());
+			assertEquals("index locked", thrown.getCause()
+												.getCause()
+												.getMessage());
+		}
+		finally {
+			ArchiveLuceneIndexerSingleton.getInstance()
+											.getLuceneConfigs()
+											.remove(config);
+		}
+	}
+
 	private static String invokeUndoSoftDeleteSQL(RecoverArchiveJob job, String tableName) throws Exception {
 		Method method = RecoverArchiveJob.class.getDeclaredMethod("undoSoftDeleteSQL", String.class);
 		method.setAccessible(true);
@@ -260,6 +348,16 @@ class RecoverArchiveJobTest {
 
 	private static Method attemptRecoveryMethod() throws Exception {
 		Method method = RecoverArchiveJob.class.getDeclaredMethod("attemptRecovery", CorruptArchiveError.class);
+		method.setAccessible(true);
+		return method;
+	}
+
+	private static void invokeDeleteIndexReferences(RecoverArchiveJob job, ArchiveDocConfig config, String filename) throws Exception {
+		deleteIndexReferencesMethod().invoke(job, config, filename);
+	}
+
+	private static Method deleteIndexReferencesMethod() throws Exception {
+		Method method = RecoverArchiveJob.class.getDeclaredMethod("deleteIndexReferences", ArchiveDocConfig.class, String.class);
 		method.setAccessible(true);
 		return method;
 	}

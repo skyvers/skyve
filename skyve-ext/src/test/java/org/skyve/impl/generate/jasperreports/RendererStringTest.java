@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
@@ -23,9 +24,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.skyve.impl.generate.jasperreports.DesignSpecification.Mode;
-import org.skyve.metadata.model.Persistent;
+import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.Persistent;
+import org.skyve.metadata.module.Module;
+import org.skyve.metadata.user.User;
 
 @SuppressWarnings({"static-method", "boxing"})
 class RendererStringTest {
@@ -852,6 +857,77 @@ class RendererStringTest {
 	}
 
 	@Test
+	void renderDesignBeanModeIncludesMetadataAndRenderedParts() throws Exception {
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		when(customer.getModule("sales")).thenReturn(module);
+		when(module.getDocument(customer, "Order")).thenReturn(document);
+
+		withThreadLocalCustomer(customer, () -> {
+			DesignSpecification design = newRenderableDesign();
+			design.setMode(DesignSpecification.Mode.bean);
+			design.setReportType(DesignSpecification.ReportType.report);
+			design.getParameters().add(parameter("ID", "java.lang.String", design));
+			design.getFields().add(field("bizKey", "java.lang.String", design));
+			design.getVariables().add(variable("total", "java.lang.Integer", design));
+			design.getBands().add(band(ReportBand.BandType.title, design));
+			design.getBands().add(band(ReportBand.BandType.detail, design));
+			design.getBands().add(band(ReportBand.BandType.summary, design));
+
+			String result = Renderer.renderDesign(design);
+
+			assertThat(result, containsString("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"));
+			assertThat(result, containsString("name=\"OrderReport\""));
+			assertThat(result, containsString("<queryString language=\"document\">"));
+			assertThat(result, containsString("<![CDATA[sales.Order]]>"));
+			assertThat(result, containsString("<parameter name=\"ID\" class=\"java.lang.String\""));
+			assertThat(result, containsString("<defaultValueExpression><![CDATA[]]>"));
+			assertThat(result, containsString("<field name=\"bizKey\" class=\"java.lang.String\">"));
+			assertThat(result, containsString("<variable name=\"total\" class=\"java.lang.Integer\""));
+			assertThat(result, containsString("<title>"));
+			assertThat(result, containsString("<detail>"));
+			assertThat(result, containsString("<summary>"));
+			assertThat(result, containsString("</jasperReport>"));
+		});
+	}
+
+	@Test
+	void renderDesignSqlModeIncludesSelectFromJoinsAndReportFilter() throws Exception {
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Persistent persistent = new Persistent();
+		persistent.setName("ORDER_TABLE");
+		when(customer.getModule("sales")).thenReturn(module);
+		when(module.getDocument(customer, "Order")).thenReturn(document);
+		when(document.getExtends()).thenReturn(null);
+		when(document.getPersistent()).thenReturn(persistent);
+
+		withThreadLocalCustomer(customer, () -> {
+			DesignSpecification design = newRenderableDesign();
+			design.setMode(DesignSpecification.Mode.sql);
+			design.setReportType(DesignSpecification.ReportType.report);
+			ReportField bizKey = field("bizKey", "java.lang.String", design);
+			bizKey.setNameSql("a.bizKey");
+			ReportField collection = field("items", "java.util.List", design);
+			collection.setCollection(Boolean.TRUE);
+			design.getFields().add(bizKey);
+			design.getFields().add(collection);
+			design.addJoin("customer", "c", "join CUSTOMER c on c.bizId = a.customer_id");
+
+			String result = Renderer.renderDesign(design);
+
+			assertThat(result, containsString("<queryString>"));
+			assertThat(result, containsString("select a.bizKey from ORDER_TABLE a"));
+			assertThat(result, containsString("join CUSTOMER c on c.bizId = a.customer_id"));
+			assertThat(result, containsString("where a.bizId = $P{ID}"));
+			assertThat(result, containsString("<field name=\"bizKey\" class=\"java.lang.String\"/>"));
+			assertFalse(result.contains("<field name=\"items\""), "collection fields are not rendered for SQL mode");
+		});
+	}
+
+	@Test
 	void addElementCreatesAndAddsToTheBand() {
 		DesignSpecification spec = new DesignSpecification();
 		ReportBand band = new ReportBand();
@@ -955,6 +1031,23 @@ class RendererStringTest {
 	}
 
 	@Test
+	void saveJrxmlDefaultOverloadWritesDocumentPackageWhenRepositoryPathAlreadyModules() throws Exception {
+		DesignSpecification design = new DesignSpecification();
+		design.setName("ModuleDefault");
+		design.setModuleName("test");
+		design.setDocumentName("AllAttributesPersistent");
+		Path modulesPath = tempDir.resolve("modules");
+		Files.createDirectories(modulesPath);
+		design.setRepositoryPath(modulesPath.toString());
+		design.setSaveToDocumentPackage(Boolean.TRUE);
+
+		Renderer.saveJrxml(design);
+
+		Path reportFile = modulesPath.resolve("test").resolve("AllAttributesPersistent").resolve("reports").resolve("ModuleDefault.jrxml");
+		assertTrue(Files.exists(reportFile));
+	}
+
+	@Test
 	void saveJrxmlPathOverloadWritesFileAtProvidedPath() throws Exception {
 		DesignSpecification design = new DesignSpecification();
 		design.setName("PathOnly");
@@ -969,5 +1062,88 @@ class RendererStringTest {
 
 		assertTrue(Files.exists(outputPath.resolve("PathOnly.jrxml")));
 	}
-}
 
+	@Test
+	void saveJrxmlPathOverloadThrowsWhenRepositoryPathMissing() throws Exception {
+		DesignSpecification design = new DesignSpecification();
+		design.setName("PathMissingRepository");
+
+		Path outputPath = tempDir.resolve("customOutput");
+		Files.createDirectories(outputPath);
+
+		assertThrows(org.skyve.metadata.MetaDataException.class, () -> Renderer.saveJrxml(design, outputPath));
+	}
+
+	private static DesignSpecification newRenderableDesign() {
+		DesignSpecification design = new DesignSpecification();
+		design.setName("OrderReport");
+		design.setModuleName("sales");
+		design.setDocumentName("Order");
+		return design;
+	}
+
+	private static ReportParameter parameter(String name, String typeClass, DesignSpecification parent) {
+		ReportParameter parameter = new ReportParameter();
+		parameter.setName(name);
+		parameter.setTypeClass(typeClass);
+		parameter.setParent(parent);
+		return parameter;
+	}
+
+	private static ReportField field(String name, String typeClass, DesignSpecification parent) {
+		ReportField field = new ReportField();
+		field.setName(name);
+		field.setTypeClass(typeClass);
+		field.setParent(parent);
+		return field;
+	}
+
+	private static ReportVariable variable(String name, String typeClass, DesignSpecification parent) {
+		ReportVariable variable = new ReportVariable();
+		variable.setName(name);
+		variable.setTypeClass(typeClass);
+		variable.setParent(parent);
+		return variable;
+	}
+
+	private static ReportBand band(ReportBand.BandType type, DesignSpecification parent) {
+		ReportBand band = new ReportBand();
+		band.setBandType(type);
+		band.setParent(parent);
+		return band;
+	}
+
+	private static void withThreadLocalCustomer(Customer customer, ThrowingRunnable runnable) throws Exception {
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		User user = mock(User.class);
+		when(persistence.getUser()).thenReturn(user);
+		when(user.getCustomer()).thenReturn(customer);
+		ThreadLocal<AbstractPersistence> threadLocal = getThreadLocalPersistence();
+		AbstractPersistence previous = threadLocal.get();
+		try {
+			threadLocal.set(persistence);
+			runnable.run();
+		}
+		finally {
+			if (previous == null) {
+				threadLocal.remove();
+			}
+			else {
+				threadLocal.set(previous);
+			}
+		}
+	}
+
+	private static ThreadLocal<AbstractPersistence> getThreadLocalPersistence() throws Exception {
+		Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
+		field.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		ThreadLocal<AbstractPersistence> threadLocal = (ThreadLocal<AbstractPersistence>) field.get(null);
+		return threadLocal;
+	}
+
+	@FunctionalInterface
+	private interface ThrowingRunnable {
+		void run() throws Exception;
+	}
+}

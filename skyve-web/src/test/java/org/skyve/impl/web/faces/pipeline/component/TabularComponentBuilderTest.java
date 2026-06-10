@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.same;
@@ -1431,7 +1430,7 @@ class TabularComponentBuilderTest {
 		verify(image).setId("contentImageGrid_doc_image_image");
 	}
 
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "java:S5961"})
 	@Test
 	void testEditableContentImageAddsActionMenuItems() {
 		clearInvocations(mockExpressionFactory);
@@ -1521,7 +1520,7 @@ class TabularComponentBuilderTest {
 		verify(clearItem).setUrl("javascript:void(0)");
 		verify(uploadItem).setValueExpression(eq("onclick"), any(ValueExpression.class));
 		verify(cameraItem).setValueExpression(eq("onclick"), any(ValueExpression.class));
-		verify(clearItem).setOnclick("SKYVE.PF.clearContentImage('doc_image');return false");
+		verify(clearItem).setOnclick("SKYVE.PF.clearContentImage('doc_image','contentImageGrid');return false");
 		ArgumentCaptor<String> onclickExpressions = ArgumentCaptor.forClass(String.class);
 		verify(mockExpressionFactory, atLeastOnce()).createValueExpression(any(ELContext.class),
 																			onclickExpressions.capture(),
@@ -1608,8 +1607,8 @@ class TabularComponentBuilderTest {
 		ArgumentCaptor<String> markupOnclickCaptor = ArgumentCaptor.forClass(String.class);
 		verify(markupItem).setOnclick(markupOnclickCaptor.capture());
 		assertTrue(markupOnclickCaptor.getValue().contains("event.preventDefault()"));
-		assertTrue(markupOnclickCaptor.getValue().contains("PF('doc_imageMarkup').show()"));
-		assertTrue(markupOnclickCaptor.getValue().contains("PF('doc_imageMarkup').toggleMaximize();return false"));
+		assertTrue(markupOnclickCaptor.getValue().contains("PF('contentImageGrid_doc_imageMarkup').show()"));
+		assertTrue(markupOnclickCaptor.getValue().contains("PF('contentImageGrid_doc_imageMarkup').toggleMaximize();return false"));
 	}
 
 	@SuppressWarnings("static-method")
@@ -1714,11 +1713,11 @@ class TabularComponentBuilderTest {
 		verify(actionButton).setButtonStyleClass("skyveContentActionButton");
 		verify(uploadItem).setValue("Upload Content");
 		verify(uploadItem).setUrl("javascript:void(0)");
-		verify(uploadItem).setOnclick("PF('doc_attachmentOverlay').show();return false");
+		verify(uploadItem).setOnclick("PF('contentLinkGrid_doc_attachmentOverlay').show();return false");
 		verify(overlay).setFor("uploadItemId");
 		verify(clearItem).setValue("Clear Content");
 		verify(clearItem).setUrl("javascript:void(0)");
-		verify(clearItem).setOnclick("SKYVE.PF.clearContentLink('doc_attachment');return false");
+		verify(clearItem).setOnclick("SKYVE.PF.clearContentLink('doc_attachment','contentLinkGrid');return false");
 	}
 
 	@SuppressWarnings("static-method")

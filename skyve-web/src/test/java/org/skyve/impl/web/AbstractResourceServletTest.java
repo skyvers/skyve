@@ -170,6 +170,33 @@ class AbstractResourceServletTest {
 	}
 
 	@Test
+	void resourceDefaultLastModifiedIsUnknown() {
+		AbstractResourceServlet.Resource resource = new AbstractResourceServlet.Resource() {
+			@Override
+			public void dispose() {
+				// no-op
+			}
+
+			@Override
+			public byte[] getBytes() {
+				return null;
+			}
+
+			@Override
+			public String getContentType() {
+				return null;
+			}
+
+			@Override
+			public String getFileName() {
+				return null;
+			}
+		};
+
+		assertEquals(-1L, resource.getLastModified());
+	}
+
+	@Test
 	void parseRequestParamsUsesCookieCustomerAndResetsMalformedImageSize() {
 		String originalCustomer = UtilImpl.CUSTOMER;
 		try {

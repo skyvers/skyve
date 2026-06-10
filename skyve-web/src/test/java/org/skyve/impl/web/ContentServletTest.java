@@ -1,6 +1,9 @@
 package org.skyve.impl.web;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.mock;
@@ -9,10 +12,12 @@ import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.util.Date;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.content.AttachmentContent;
+import org.skyve.content.ContentManager;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.Text;
@@ -116,6 +121,42 @@ class ContentServletTest {
 		assertDoesNotThrow(() -> servlet.secureResource(resource, "admin", "Contact", "name", "contentId", user, "desktop"));
 	}
 
+	@Test
+	void contentResourceExposesAttachmentMetadataAndBytes() throws Exception {
+		AttachmentContent content = newAttachmentContent("report.txt");
+		content.setLastModified(new Date(12345L));
+		AbstractResourceServlet.Resource resource = newContentResource(content);
+
+		assertEquals(12345L, resource.getLastModified());
+		assertEquals("text/plain", resource.getContentType());
+		assertEquals("report.txt", resource.getFileName());
+		assertArrayEquals(new byte[] {1}, resource.getBytes());
+	}
+
+	@Test
+	void contentResourceReturnsDefaultsWhenContentMissing() throws Exception {
+		AbstractResourceServlet.Resource resource = newContentResource(null);
+
+		assertEquals(-1L, resource.getLastModified());
+		assertNull(resource.getContentType());
+		assertNull(resource.getFileName());
+		assertNull(resource.getBytes());
+	}
+
+	@Test
+	void contentResourceDisposeClosesContentManagerAndClearsContent() throws Exception {
+		AbstractResourceServlet.Resource resource = newContentResource(newAttachmentContent("report.txt"));
+		try (ContentManager contentManager = mock(ContentManager.class)) {
+			setContentManager(resource, contentManager);
+
+			resource.dispose();
+
+			verify(contentManager).close();
+			assertNull(resource.getContentType());
+			assertNull(resource.getFileName());
+		}
+	}
+
 	private static AttachmentContent newAttachmentContent(String fileName) {
 		return new AttachmentContent("testCustomer", "admin", "Contact", "group", "user", "bizId", "name")
 				.attachment(fileName, "text/plain", new byte[] {1});
@@ -132,6 +173,12 @@ class ContentServletTest {
 		contentField.set(resource, content);
 
 		return (AbstractResourceServlet.Resource) resource;
+	}
+
+	private static void setContentManager(AbstractResourceServlet.Resource resource, ContentManager contentManager) throws Exception {
+		Field contentManagerField = resource.getClass().getDeclaredField("cm");
+		contentManagerField.setAccessible(true);
+		contentManagerField.set(resource, contentManager);
 	}
 
 	private static User newContentUser(Customer customer) {

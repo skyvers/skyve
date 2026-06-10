@@ -3,6 +3,8 @@ package org.skyve.impl.persistence.hibernate.dialect;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -111,6 +113,29 @@ public class DDLDelegateTest {
 
 		assertEquals(1, sql.size());
 		assertEquals("alter table dbo.Customer alter column name varchar(64) default 'unknown' not null", sql.get(0));
+	}
+
+	@Test
+	public void sqlAlterTableDDLBuildsPostgreSQLTypeAlterForNullableColumn() throws Exception {
+		Table table = new Table("Customer");
+		Column column = new Column("name");
+		column.setLength(128);
+		column.setSqlType("varchar(128)");
+		column.setNullable(true);
+		table.addColumn(column);
+		PostgreSQL10SpatialDialect dialect = new PostgreSQL10SpatialDialect();
+		TableInformation tableInfo = mock(TableInformation.class);
+		SqlStringGenerationContext context = mock(SqlStringGenerationContext.class);
+		QualifiedTableName tableName = mock(QualifiedTableName.class);
+		ColumnInformation nameColumnInfo = columnInfo(Types.VARCHAR, 64, 0);
+		when(tableInfo.getName()).thenReturn(tableName);
+		when(tableInfo.getColumn(any())).thenReturn(nameColumnInfo);
+		when(context.format(any(QualifiedTableName.class))).thenReturn("public.customer");
+
+		List<String> sql = sqlAlterTableDDL(dialect, table, tableInfo, context, mock(Metadata.class));
+
+		assertEquals(1, sql.size());
+		assertThat(sql.get(0), containsString("alter column name type varchar(128)"));
 	}
 
 	@SuppressWarnings("boxing")

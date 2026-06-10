@@ -105,6 +105,46 @@ class UploadViewsStateTest {
 	}
 
 	@Test
+	void fileUploadPostConstructSanitisesActionParameter() throws Exception {
+		FacesContext context = Mockito.mock(FacesContext.class);
+		ExternalContext externalContext = Mockito.mock(ExternalContext.class);
+		when(context.getExternalContext()).thenReturn(externalContext);
+		when(externalContext.getSession(false)).thenReturn(null);
+		FacesContextBridge.setCurrent(context);
+
+		FileUploadView view = new FileUploadView();
+		setField(AbstractUploadView.class, view, "context", "ctx");
+		setField(AbstractUploadView.class, view, "binding", "beanBinding");
+		setField(FileUploadView.class, view, "action", " uploadAction ");
+
+		view.postConstruct();
+
+		assertEquals("uploadAction", view.getAction());
+		assertEquals("ctx", view.getContext());
+		assertEquals("beanBinding", view.getBinding());
+	}
+
+	@Test
+	void bizportImportPostConstructSanitisesActionParameter() throws Exception {
+		FacesContext context = Mockito.mock(FacesContext.class);
+		ExternalContext externalContext = Mockito.mock(ExternalContext.class);
+		when(context.getExternalContext()).thenReturn(externalContext);
+		when(externalContext.getSession(false)).thenReturn(null);
+		FacesContextBridge.setCurrent(context);
+
+		BizportImportView view = new BizportImportView();
+		setField(AbstractUploadView.class, view, "context", "ctx");
+		setField(AbstractUploadView.class, view, "binding", "beanBinding");
+		setField(BizportImportView.class, view, "action", " importAction ");
+
+		view.postConstruct();
+
+		assertEquals("importAction", view.getAction());
+		assertEquals("ctx", view.getContext());
+		assertEquals("beanBinding", view.getBinding());
+	}
+
+	@Test
 	void fileUploadHandleFileUploadShowsMalformedUrlMessageWhenContextMissing() throws Exception {
 		FacesContext context = Mockito.mock(FacesContext.class);
 		FacesContextBridge.setCurrent(context);

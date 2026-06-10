@@ -57,6 +57,18 @@ class ContentDirectiveValidationTest {
 		assertThrows(TemplateModelException.class, () -> directive.execute(null, params, new TemplateModel[0], null));
 	}
 
+	@Test
+	void executeReportsMissingRequiredParametersInOrder() {
+		ContentDirective directive = new ContentDirective();
+
+		assertThrows(TemplateModelException.class,
+				() -> directive.execute(null, Map.of("module", scalar("admin"), "document", scalar("User")), new TemplateModel[0], null));
+		assertThrows(TemplateModelException.class,
+				() -> directive.execute(null, Map.of("module", scalar("admin"), "attribute", scalar("image")), new TemplateModel[0], null));
+		assertThrows(TemplateModelException.class,
+				() -> directive.execute(null, Map.of("document", scalar("User"), "attribute", scalar("image")), new TemplateModel[0], null));
+	}
+
 	private static TemplateScalarModel scalar(String value) {
 		return () -> value;
 	}

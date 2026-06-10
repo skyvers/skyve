@@ -105,6 +105,19 @@ class SmartClientFieldAndDataGridDefinitionUnsafeTest {
 	}
 
 	@Test
+	void dataGridEditableGetterReflectsSetterAndAllowsEditingInJavascript() throws Exception {
+		SmartClientDataGridFieldDefinition def = allocate(SmartClientDataGridFieldDefinition.class);
+		def.name = "description";
+		def.title = "Description";
+		def.type = "text";
+
+		def.setEditable(true);
+
+		assertTrue(def.getEditable());
+		assertFalse(def.toJavascript().contains("canEdit:false"));
+	}
+
+	@Test
 	void dataGridToJavascriptIncludesLookupEditorPropertiesWhenNotBindingToGrid() throws Exception {
 		SmartClientDataGridFieldDefinition def = allocate(SmartClientDataGridFieldDefinition.class);
 		def.name = "customerId";

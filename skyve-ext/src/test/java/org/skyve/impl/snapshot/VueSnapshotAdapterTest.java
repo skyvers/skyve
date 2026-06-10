@@ -2,15 +2,28 @@ package org.skyve.impl.snapshot;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.snapshot.Snapshot.AdvancedSearchType;
 import org.skyve.metadata.SortDirection;
+import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
+import org.skyve.util.JSON;
 
 /**
  * Tests for {@code VueSnapshotAdapter#toClientPayload(Snapshot)}.
@@ -18,6 +31,10 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
  */
 @SuppressWarnings("static-method")
 class VueSnapshotAdapterTest {
+	@AfterEach
+	void tearDown() throws Exception {
+		unbindPersistenceFromThread();
+	}
 
 	@Test
 	void toClientPayloadEmptySnapshotContainsDefaultOperatorAndEmptyLists() {
@@ -162,7 +179,7 @@ class VueSnapshotAdapterTest {
 		// criterion with null operator inside criteria — not in VUE_ALLOWED_CONSTRAINT_OPERATORS
 		SnapshotCriterion criterion = new SnapshotCriterion();
 		criterion.setColumn("name");
-		criterion.setOperator(null); // null operator → not in VUE_ALLOWED_CONSTRAINT_OPERATORS
+		setField(criterion, "operator", null); // null operator → not in VUE_ALLOWED_CONSTRAINT_OPERATORS
 		criterion.setValue("a");
 		criteria.getFilters().add(criterion);
 		snapshot.setFilter(criteria);
@@ -231,7 +248,7 @@ class VueSnapshotAdapterTest {
 	void toClientPayloadWithNullOperatorCriteriaReturnsNull() {
 		Snapshot snapshot = new Snapshot();
 		SnapshotCriteria criteria = new SnapshotCriteria();
-		criteria.setOperator(null);
+		setField(criteria, "operator", null);
 		snapshot.setFilter(criteria);
 		String payload = SnapshotAdapter.VUE.toClientPayload(snapshot);
 		assertNull(payload);
@@ -420,5 +437,143 @@ class VueSnapshotAdapterTest {
 		assertNotNull(payload, "Expected valid payload when nested criteria for same column have compatible operators");
 		assertThat(payload, containsString("name"));
 	}
-}
 
+	@Test
+	void fromClientPayloadParsesColumnsFiltersSortsAndSummary() throws Exception {
+		bindMockUser();
+
+		Map<String, Object> statusFilter = filter("and", constraints(
+				constraint(SmartClientFilterOperator.equals, "active")));
+		Map<String, Object> nameFilter = filter("or", constraints(
+				constraint(SmartClientFilterOperator.iStartsWith, "Al"),
+				constraint(SmartClientFilterOperator.iContains, null),
+				constraint(SmartClientFilterOperator.iContains, "Bob")));
+		Map<String, Object> filters = new LinkedHashMap<>();
+		filters.put("status", statusFilter);
+		filters.put("name", nameFilter);
+
+		Snapshot result = SnapshotAdapter.VUE.fromClientPayload(vuePayloadJson(filters,
+				List.of(),
+				List.of(Integer.valueOf(120)),
+				"and",
+				List.of("status", "-createdDate", "", " "),
+				AggregateFunction.Count.toString()));
+
+		assertNotNull(result);
+		assertEquals(Integer.valueOf(120), result.getColumns().get("status"));
+		assertTrue(result.getColumns().containsKey("name"));
+		assertNull(result.getColumns().get("name"));
+		assertEquals(SortDirection.ascending, result.getSorts().get("status"));
+		assertEquals(SortDirection.descending, result.getSorts().get("createdDate"));
+		assertEquals(AggregateFunction.Count, result.getSummary());
+		assertEquals(AdvancedSearchType.bracket, result.getAdvanced());
+
+		SnapshotCriteria top = assertInstanceOf(SnapshotCriteria.class, result.getFilter());
+		assertEquals(CompoundFilterOperator.and, top.getOperator());
+		assertEquals(2, top.getFilters().size());
+		SnapshotCriterion status = assertInstanceOf(SnapshotCriterion.class, top.getFilters().get(0));
+		assertEquals("status", status.getColumn());
+		assertEquals(SmartClientFilterOperator.equals, status.getOperator());
+		assertEquals("active", status.getValue());
+		SnapshotCriteria name = assertInstanceOf(SnapshotCriteria.class, top.getFilters().get(1));
+		assertEquals(CompoundFilterOperator.or, name.getOperator());
+		assertEquals(2, name.getFilters().size());
+	}
+
+	@Test
+	void fromClientPayloadReturnsNullForMalformedPayloadSections() throws Exception {
+		bindMockUser();
+
+		List<Map<String, Object>> malformedPayloads = List.of(
+				vuePayload("notAMap", List.of("name"), List.of(), "and", List.of(), ""),
+				vuePayload(new LinkedHashMap<>(), List.of("name"), "notAList", "and", List.of(), ""),
+				vuePayload(new LinkedHashMap<>(), "notAList", List.of(), "and", List.of(), ""),
+				vuePayload(new LinkedHashMap<>(), List.of("name"), List.of(), Integer.valueOf(42), List.of(), ""),
+				vuePayload(Map.of("name", "notAMap"), List.of("name"), List.of(), "and", List.of(), ""),
+				vuePayload(Map.of("name", Map.of("constraints", "notAList")), List.of("name"), List.of(), "and", List.of(), ""),
+				vuePayload(Map.of("name", filter(Integer.valueOf(42), constraints(
+						constraint(SmartClientFilterOperator.equals, "active"),
+						constraint(SmartClientFilterOperator.iContains, "pending")))), List.of("name"), List.of(), "and", List.of(), ""),
+				vuePayload(Map.of("name", filter("and", constraints(Map.of("value", "active")))), List.of("name"), List.of(), "and", List.of(), ""),
+				vuePayload(new LinkedHashMap<>(), List.of("name"), List.of(), "and", "notAList", ""),
+				vuePayload(new LinkedHashMap<>(), List.of("name"), List.of(), "and", List.of(), Integer.valueOf(42)));
+
+		for (Map<String, Object> payload : malformedPayloads) {
+			assertNull(SnapshotAdapter.VUE.fromClientPayload(JSON.marshall(payload)));
+		}
+	}
+
+	private static Map<String, Object> vuePayload(Object filters,
+													Object visibleColumns,
+													Object columnWidths,
+													Object operator,
+													Object sortColumns,
+													Object summarySelection) {
+		Map<String, Object> payload = new LinkedHashMap<>();
+		payload.put("filters", filters);
+		payload.put("visibleColumns", visibleColumns);
+		payload.put("columnWidths", columnWidths);
+		payload.put("operator", operator);
+		payload.put("sortColumns", sortColumns);
+		payload.put("summarySelection", summarySelection);
+		return payload;
+	}
+
+	private static String vuePayloadJson(Map<String, Object> filters,
+											List<String> visibleColumns,
+											List<Integer> columnWidths,
+											String operator,
+											List<String> sortColumns,
+											String summarySelection)
+	{
+		return JSON.marshall(vuePayload(filters, visibleColumns, columnWidths, operator, sortColumns, summarySelection));
+	}
+
+	private static void setField(Object target, String fieldName, Object value) {
+		try {
+			Field field = target.getClass().getDeclaredField(fieldName);
+			field.setAccessible(true);
+			field.set(target, value);
+		}
+		catch (ReflectiveOperationException e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	private static Map<String, Object> filter(Object operator, List<Map<String, Object>> constraints) {
+		Map<String, Object> filter = new LinkedHashMap<>();
+		filter.put("operator", operator);
+		filter.put("constraints", constraints);
+		return filter;
+	}
+
+	@SafeVarargs
+	private static List<Map<String, Object>> constraints(Map<String, Object>... constraints) {
+		return Arrays.asList(constraints);
+	}
+
+	private static Map<String, Object> constraint(SmartClientFilterOperator matchMode, Object value) {
+		Map<String, Object> constraint = new LinkedHashMap<>();
+		constraint.put("matchMode", matchMode.toString());
+		constraint.put("value", value);
+		return constraint;
+	}
+
+	private static void bindMockUser() throws Exception {
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		when(persistence.getUser()).thenReturn(mock(User.class));
+		Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
+		field.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		ThreadLocal<AbstractPersistence> threadLocal = (ThreadLocal<AbstractPersistence>) field.get(null);
+		threadLocal.set(persistence);
+	}
+
+	private static void unbindPersistenceFromThread() throws Exception {
+		Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
+		field.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		ThreadLocal<AbstractPersistence> threadLocal = (ThreadLocal<AbstractPersistence>) field.get(null);
+		threadLocal.remove();
+	}
+}

@@ -83,6 +83,13 @@ class BackupJobTest {
 		assertThat(capture.lastSend.getBody(), containsString("a problem:- simulated failure"));
 	}
 
+	@Test
+	void newBackupJobHasNoGeneratedZip() {
+		BackupJob job = new BackupJob();
+
+		assertEquals(null, job.getBackupZip());
+	}
+
 		@Test
 		void testEmailProblemWithNullProblemSendsGenericMessage() throws Exception {
                 List<String> jobLog = new ArrayList<>();

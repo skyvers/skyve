@@ -7,19 +7,24 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayInputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.content.MimeType;
+import org.skyve.domain.Bean;
+import org.skyve.domain.DynamicBean;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.controller.Download;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.persistence.DocumentQuery;
 
 @SuppressWarnings({"static-method", "unchecked"})
 class POISheetGeneratorTest {
@@ -143,6 +148,23 @@ class POISheetGeneratorTest {
 		assertTrue(download.getBytes().length > 0);
 	}
 
+	@Test
+	void getDownloadGeneratesRowsUsingFallbackBindingExpression() throws Exception {
+		Bean bean = new DynamicBean("sales", "Order",
+				new java.util.HashMap<>(java.util.Map.of(Bean.DOCUMENT_ID, "order-1")));
+		bindPersistenceWithCustomer(customer(), List.of(bean));
+		POISheetGenerator gen = new POISheetGenerator("sales", "Order");
+		gen.setDownloadName("orders");
+		gen.addField("Identifier", "Order {bizId}");
+
+		Download download = gen.getDownload();
+
+		try (XSSFWorkbook workbook = new XSSFWorkbook(new ByteArrayInputStream(download.getBytes()))) {
+			assertEquals("Identifier", workbook.getSheetAt(0).getRow(0).getCell(0).getStringCellValue());
+			assertEquals("Order order-1", workbook.getSheetAt(0).getRow(1).getCell(0).getStringCellValue());
+		}
+	}
+
 	private static Customer customer() {
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
@@ -153,10 +175,17 @@ class POISheetGeneratorTest {
 	}
 
 	private static void bindPersistenceWithCustomer(Customer customer) throws Exception {
+		bindPersistenceWithCustomer(customer, List.of());
+	}
+
+	private static void bindPersistenceWithCustomer(Customer customer, List<Bean> beans) throws Exception {
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		DocumentQuery query = mock(DocumentQuery.class);
 		User user = mock(User.class);
 		when(user.getCustomer()).thenReturn(customer);
 		when(persistence.getUser()).thenReturn(user);
+		when(persistence.newDocumentQuery("sales", "Order")).thenReturn(query);
+		when(query.beanResults()).thenReturn(beans);
 		Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
 		field.setAccessible(true);
 		((ThreadLocal<AbstractPersistence>) field.get(null)).set(persistence);

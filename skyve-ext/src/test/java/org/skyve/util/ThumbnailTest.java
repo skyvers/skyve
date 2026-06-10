@@ -33,17 +33,21 @@ class ThumbnailTest {
 
 	/** Saves and restores THUMBNAIL_DIRECTORY so tests don't affect each other. */
 	private String savedThumbnailDirectory;
+	private boolean savedThumbnailFileStorage;
 
 	@BeforeEach
 	void setUp() {
 		savedThumbnailDirectory = UtilImpl.THUMBNAIL_DIRECTORY;
+		savedThumbnailFileStorage = UtilImpl.THUMBNAIL_FILE_STORAGE;
 		// Point thumbnails at our temp dir so Thumbnail(File,int,int) can write
 		UtilImpl.THUMBNAIL_DIRECTORY = tempDir.getAbsolutePath() + "/thumbnails/";
+		UtilImpl.THUMBNAIL_FILE_STORAGE = true;
 	}
 
 	@AfterEach
 	void tearDown() {
 		UtilImpl.THUMBNAIL_DIRECTORY = savedThumbnailDirectory;
+		UtilImpl.THUMBNAIL_FILE_STORAGE = savedThumbnailFileStorage;
 	}
 
 	/** Writes a minimal 2×2 PNG to a temp file and returns it. */
@@ -138,6 +142,7 @@ class ThumbnailTest {
 		byte[] pngBytes = Files.readAllBytes(pngFile.toPath());
 		AttachmentContent content = new AttachmentContent("testCustomer", "testModule", "testDocument", null, "testUser", "testId", "testAttr");
 		content.attachment("content.png", MimeType.png, pngBytes);
+		content.setContentId("0123456789abcdef0123456789abcdef");
 		return content;
 	}
 
@@ -164,6 +169,28 @@ class ThumbnailTest {
 		Thumbnail t = new Thumbnail(content, 0, 0);
 		assertNotNull(t.getBytes());
 		assertArrayEquals(expected, t.getBytes());
+	}
+
+	@Test
+	void contentConstructorWithDimensionsProducesCachedPngThumbnail() throws IOException {
+		AttachmentContent content = createPngContent();
+
+		Thumbnail first = new Thumbnail(content, 4, 4);
+		Thumbnail second = new Thumbnail(content, 4, 4);
+
+		assertNotNull(first.getBytes());
+		assertEquals(MimeType.png, first.getMimeType());
+		assertArrayEquals(first.getBytes(), second.getBytes());
+	}
+
+	@Test
+	void contentConstructorProcessesMarkupPath() throws IOException {
+		AttachmentContent content = createPngContent().markup("<svg><not-valid");
+
+		Thumbnail t = new Thumbnail(content, 4, 4);
+
+		assertNotNull(t.getBytes());
+		assertEquals(MimeType.png, t.getMimeType());
 	}
 
 	// ---- InputStream constructor ----

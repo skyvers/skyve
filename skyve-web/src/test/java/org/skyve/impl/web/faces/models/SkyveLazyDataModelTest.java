@@ -2,6 +2,8 @@ package org.skyve.impl.web.faces.models;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -19,6 +21,8 @@ import org.skyve.domain.Bean;
 import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.view.model.list.Filter;
@@ -143,5 +147,109 @@ class SkyveLazyDataModelTest {
 		invokeFilter(Map.of(), listModel, customer);
 
 		verifyNoInteractions(modelFilter);
+	}
+
+	@Test
+	void filterAddsContainsForImplicitBizKey() throws Exception {
+		FilterMeta filterMeta = mock(FilterMeta.class);
+		when(filterMeta.getFilterValue()).thenReturn("abc");
+
+		Filter modelFilter = mock(Filter.class);
+		ListModel<Bean> listModel = listModelWithFilter(modelFilter);
+		Customer customer = customerForSalesModule();
+
+		invokeFilter(Map.of(Bean.BIZ_KEY, filterMeta), listModel, customer);
+
+		verify(modelFilter).addContains(Bean.BIZ_KEY, "abc");
+	}
+
+	@Test
+	void filterAddsContainsForTextAttributeWithoutDomainType() throws Exception {
+		FilterMeta filterMeta = mock(FilterMeta.class);
+		when(filterMeta.getFilterValue()).thenReturn("widget");
+
+		Attribute attribute = mock(Attribute.class);
+		when(attribute.getAttributeType()).thenReturn(AttributeType.text);
+		doReturn(String.class).when(attribute).getImplementingType();
+
+		Filter modelFilter = mock(Filter.class);
+		ListModel<Bean> listModel = listModelWithFilter(modelFilter);
+		when(listModel.getDrivingDocument().getAttribute("description")).thenReturn(attribute);
+		Customer customer = customerForSalesModule();
+
+		invokeFilter(Map.of("description", filterMeta), listModel, customer);
+
+		verify(modelFilter).addContains("description", "widget");
+	}
+
+	@Test
+	void filterCoercesStringValueForIntegerAttribute() throws Exception {
+		FilterMeta filterMeta = mock(FilterMeta.class);
+		when(filterMeta.getFilterValue()).thenReturn("42");
+
+		Attribute attribute = mock(Attribute.class);
+		when(attribute.getAttributeType()).thenReturn(AttributeType.integer);
+		doReturn(Integer.class).when(attribute).getImplementingType();
+
+		Filter modelFilter = mock(Filter.class);
+		ListModel<Bean> listModel = listModelWithFilter(modelFilter);
+		when(listModel.getDrivingDocument().getAttribute("quantity")).thenReturn(attribute);
+		Customer customer = customerForSalesModule();
+
+		invokeFilter(Map.of("quantity", filterMeta), listModel, customer);
+
+		verify(modelFilter).addEquals("quantity", Integer.valueOf(42));
+	}
+
+	@Test
+	void filterAddsContainsAgainstBizKeyForAssociationAttribute() throws Exception {
+		FilterMeta filterMeta = mock(FilterMeta.class);
+		when(filterMeta.getFilterValue()).thenReturn("Acme");
+
+		Attribute attribute = mock(Attribute.class);
+		when(attribute.getAttributeType()).thenReturn(AttributeType.association);
+		doReturn(Bean.class).when(attribute).getImplementingType();
+
+		Filter modelFilter = mock(Filter.class);
+		ListModel<Bean> listModel = listModelWithFilter(modelFilter);
+		when(listModel.getDrivingDocument().getAttribute("customer")).thenReturn(attribute);
+		Customer customer = customerForSalesModule();
+
+		invokeFilter(Map.of("customer", filterMeta), listModel, customer);
+
+		verify(modelFilter).addContains("customer." + Bean.BIZ_KEY, "Acme");
+	}
+
+	@Test
+	void filterThrowsForUnsupportedValueType() {
+		FilterMeta filterMeta = mock(FilterMeta.class);
+		Object unsupportedValue = new Object();
+		when(filterMeta.getFilterValue()).thenReturn(unsupportedValue);
+
+		Filter modelFilter = mock(Filter.class);
+		ListModel<Bean> listModel = listModelWithFilter(modelFilter);
+		Customer customer = customerForSalesModule();
+
+		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+				() -> invokeFilter(Map.of(Bean.DOCUMENT_ID, filterMeta), listModel, customer));
+
+		assertEquals(unsupportedValue + " is not a valid value for param " + Bean.DOCUMENT_ID, exception.getMessage());
+	}
+
+	private static ListModel<Bean> listModelWithFilter(Filter modelFilter) {
+		ListModel<Bean> listModel = mock(ListModel.class);
+		when(listModel.getFilter()).thenReturn(modelFilter);
+		Document document = mock(Document.class);
+		when(document.getOwningModuleName()).thenReturn("sales");
+		when(document.getName()).thenReturn("Order");
+		when(listModel.getDrivingDocument()).thenReturn(document);
+		return listModel;
+	}
+
+	private static Customer customerForSalesModule() {
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		when(customer.getModule("sales")).thenReturn(module);
+		return customer;
 	}
 }

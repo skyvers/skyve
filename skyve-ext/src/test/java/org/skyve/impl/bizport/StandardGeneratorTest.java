@@ -100,6 +100,72 @@ class StandardGeneratorTest {
 	}
 
 	@Test
+	void generateDataWithSingleNonHierarchicalBeanAddsOneRow() {
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = document("admin", "Communication", "Communication");
+		BizPortWorkbook workbook = mock(BizPortWorkbook.class);
+		BizPortSheet sheet = mock(BizPortSheet.class);
+		Bean bean = new DynamicBean("admin", "Communication",
+				new java.util.HashMap<>(Map.of(Bean.DOCUMENT_ID, "c1")));
+		when(customer.getModule("admin")).thenReturn(module);
+		when(module.getDocument(customer, "Communication")).thenReturn(document);
+		when(document.getParentDocumentName()).thenReturn(null);
+		when(workbook.getSheet(new SheetKey("admin", "Communication"))).thenReturn(sheet);
+		when(sheet.moveToRow("c1")).thenReturn(false);
+		when(sheet.getColumnBindings()).thenReturn(Set.of(Bean.DOCUMENT_ID));
+
+		new StandardGenerator(customer, document).generateData(workbook, bean);
+
+		verify(sheet).addRow("c1");
+		verify(sheet).setValue(Bean.DOCUMENT_ID, "c1");
+	}
+
+	@Test
+	void generateDataAddsChildCollectionParentAndOrdinalValues() {
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document rootDocument = document("admin", "Invoice", "Invoice");
+		Document childDocument = document("admin", "Line", "Line");
+		Collection collection = mock(Collection.class);
+		BizPortWorkbook workbook = mock(BizPortWorkbook.class);
+		BizPortSheet rootSheet = mock(BizPortSheet.class);
+		BizPortSheet childSheet = mock(BizPortSheet.class);
+		DynamicBean root = new DynamicBean("admin", "Invoice",
+				new java.util.HashMap<>(Map.of(Bean.DOCUMENT_ID, "i1",
+												"lines", List.of())));
+		DynamicBean child = new DynamicBean("admin", "Line",
+				new java.util.HashMap<>(Map.of(Bean.DOCUMENT_ID, "l1",
+												org.skyve.domain.ChildBean.PARENT_NAME, root,
+												Bean.ORDINAL_NAME, Integer.valueOf(3))));
+		child.set(org.skyve.domain.ChildBean.PARENT_NAME, root);
+		root.set("lines", List.of(child));
+		when(customer.getModule("admin")).thenReturn(module);
+		when(module.getDocument(customer, "Line")).thenReturn(childDocument);
+		doReturn(List.<Attribute> of(collection)).when(rootDocument).getAllAttributes(customer);
+		when(collection.getAttributeType()).thenReturn(AttributeType.collection);
+		when(collection.getName()).thenReturn("lines");
+		when(collection.getDocumentName()).thenReturn("Line");
+		when(collection.getType()).thenReturn(CollectionType.child);
+		when(collection.getOrdered()).thenReturn(Boolean.TRUE);
+		when(childDocument.getParentDocumentName()).thenReturn("Invoice");
+		when(workbook.getSheet(new SheetKey("admin", "Invoice"))).thenReturn(rootSheet);
+		when(workbook.getSheet(new SheetKey("admin", "Line", "lines"))).thenReturn(childSheet);
+		when(rootSheet.moveToRow("i1")).thenReturn(false);
+		when(rootSheet.getColumnBindings()).thenReturn(Set.of(Bean.DOCUMENT_ID));
+		when(childSheet.moveToRow("l1")).thenReturn(false);
+		when(childSheet.getColumnBindings()).thenReturn(Set.of(Bean.DOCUMENT_ID,
+																org.skyve.domain.ChildBean.PARENT_NAME,
+																Bean.ORDINAL_NAME));
+
+		new StandardGenerator(customer, rootDocument).generateData(workbook, List.of(root));
+
+		verify(childSheet).addRow("l1");
+		verify(childSheet).setValue(org.skyve.domain.ChildBean.PARENT_NAME, "i1");
+		verify(childSheet).setValue(Bean.ORDINAL_NAME, Integer.valueOf(3));
+	}
+
+	@Test
 	void generateStructureAddsDocumentAndCollectionSheetsForNullableGraph() {
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
@@ -200,6 +266,39 @@ class StandardGeneratorTest {
 		assertThat(sheet.getColumn("status").getRangeValues(), arrayContaining("A", "I"));
 		assertThat(sheet.getColumn("owner").getTitle(), is("Owner ID"));
 		assertThat(sheet.getColumn("owner").getReferencedSheet(), is(new SheetKey("admin", "User")));
+	}
+
+	@Test
+	void generateAndAddDocumentSheetFlattensEmbeddedAssociationColumns() throws Exception {
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = document("admin", "Communication", "Communication");
+		Document embeddedDocument = document("admin", "Contact", "Contact");
+		Association contact = mock(Association.class);
+		Attribute email = attribute("email1", "Email", AttributeType.text, null);
+		BizPortWorkbook workbook = mock(BizPortWorkbook.class);
+		when(contact.getAttributeType()).thenReturn(AttributeType.association);
+		when(contact.getName()).thenReturn("contact");
+		when(contact.getLocalisedDisplayName()).thenReturn("Contact");
+		when(contact.getLocalisedDescription()).thenReturn("Contact description");
+		when(contact.getType()).thenReturn(AssociationType.embedded);
+		when(contact.getDocumentName()).thenReturn("Contact");
+		doReturn(List.<Attribute> of(contact)).when(document).getAllAttributes(customer);
+		doReturn(List.<Attribute> of(email)).when(embeddedDocument).getAllAttributes(customer);
+		when(customer.getModule("admin")).thenReturn(module);
+		when(module.getDocument(customer, "Contact")).thenReturn(embeddedDocument);
+		StandardGenerator generator = new StandardGenerator(customer, document);
+
+		invokePrivate(generator,
+				"generateAndAddDocumentSheet",
+				new Class<?>[] { Document.class, org.skyve.metadata.model.document.Relation.class, BizPortWorkbook.class },
+				document,
+				null,
+				workbook);
+
+		BizPortSheet sheet = capturedSheet(workbook);
+		assertThat(sheet.getColumnBindings().contains("contact.email1"), is(true));
+		assertThat(sheet.getColumn("contact.email1").getTitle(), is("Contact Email"));
 	}
 
 	@Test

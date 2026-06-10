@@ -169,6 +169,30 @@ class MailServiceTest {
 		assertThat(capture.lastSend.getRecipientEmailAddresses(), is(setOf("redirect@skyve.org")));
 	}
 
+	@SuppressWarnings({"static-method", "deprecation"})
+	@Test
+	void testExtSendMailDelegatesToEffectiveMailService() {
+		CaptureMailService capture = new CaptureMailService();
+		MailServiceStaticSingleton.set(capture);
+
+		EXT.sendMail(new Mail().from("sender@skyve.org").addTo("to@skyve.org").subject("subject").body("body"));
+
+		assertEquals(1, capture.sendCount);
+		assertThat(capture.lastSend.getRecipientEmailAddresses(), is(setOf("to@skyve.org")));
+	}
+
+	@SuppressWarnings({"static-method", "deprecation"})
+	@Test
+	void testExtWriteMailDelegatesToEffectiveMailService() {
+		CaptureMailService capture = new CaptureMailService();
+		MailServiceStaticSingleton.set(capture);
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+		EXT.writeMail(new Mail().from("sender@skyve.org").addTo("to@skyve.org").subject("subject").body("body"), out);
+
+		assertEquals(1, capture.writeCount);
+	}
+
 	@SuppressWarnings("static-method")
 	@Test
 	void testGetEffectiveReturnsDecoratedMailService() {

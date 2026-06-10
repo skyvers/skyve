@@ -9,7 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import jakarta.faces.convert.ConverterException;
-class Decimal10DollarsAndCentsTest {
+public class Decimal10DollarsAndCentsTest {
 	private Decimal10DollarsAndCents converter;
 
 	@Before

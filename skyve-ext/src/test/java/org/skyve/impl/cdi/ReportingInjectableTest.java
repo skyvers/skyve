@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -40,29 +42,29 @@ class ReportingInjectableTest {
 		invokeIgnoringExceptions(() -> invokeByName(injectable,
 				"runJasperBeanReport",
 				new Class<?>[] { classForName("org.skyve.metadata.user.User"), classForName("org.skyve.metadata.model.document.Document"), String.class, Map.class,
-						classForName("org.skyve.domain.Bean"), classForName("org.skyve.report.ReportFormat"), ByteArrayOutputStream.class },
+						classForName("org.skyve.domain.Bean"), classForName("org.skyve.report.ReportFormat"), OutputStream.class },
 				new Object[] { null, null, "missing", parameters, null, reportFormatPdf, out }));
 		invokeIgnoringExceptions(() -> invokeByName(injectable,
 				"runJasperSQLReport",
 				new Class<?>[] { classForName("org.skyve.metadata.user.User"), classForName("org.skyve.metadata.model.document.Document"), String.class, Map.class,
-						classForName("org.skyve.report.ReportFormat"), ByteArrayOutputStream.class },
+						classForName("org.skyve.report.ReportFormat"), OutputStream.class },
 				new Object[] { null, null, "missing", parameters, reportFormatPdf, out }));
 		invokeIgnoringExceptions(() -> invokeByName(injectable,
 				"runJasperReport",
 				new Class<?>[] { classForName("org.skyve.metadata.user.User"), classForName("org.skyve.metadata.model.document.Document"), String.class, Map.class,
-						classForName("org.skyve.domain.Bean"), classForName("org.skyve.report.ReportFormat"), ByteArrayOutputStream.class },
+						classForName("org.skyve.domain.Bean"), classForName("org.skyve.report.ReportFormat"), OutputStream.class },
 				new Object[] { null, null, "missing", parameters, null, reportFormatPdf, out }));
 		invokeIgnoringExceptions(() -> invokeByName(injectable,
 				"runJasperReport",
-				new Class<?>[] { classForName("org.skyve.metadata.user.User"), List.class, classForName("org.skyve.report.ReportFormat"), ByteArrayOutputStream.class },
+				new Class<?>[] { classForName("org.skyve.metadata.user.User"), List.class, classForName("org.skyve.report.ReportFormat"), OutputStream.class },
 				new Object[] { null, List.of(), reportFormatPdf, out }));
 		invokeIgnoringExceptions(() -> invokeByName(injectable,
 				"runJasperReport",
-				new Class<?>[] { List.class, classForName("org.skyve.report.ReportFormat"), ByteArrayOutputStream.class },
+				new Class<?>[] { List.class, classForName("org.skyve.report.ReportFormat"), OutputStream.class },
 				new Object[] { null, reportFormatPdf, out }));
 		invokeIgnoringExceptions(() -> invokeByName(injectable,
 				"runJasperReport",
-				new Class<?>[] { classForName("net.sf.jasperreports.engine.JasperPrint"), classForName("org.skyve.report.ReportFormat"), ByteArrayOutputStream.class },
+				new Class<?>[] { classForName("net.sf.jasperreports.engine.JasperPrint"), classForName("org.skyve.report.ReportFormat"), OutputStream.class },
 				new Object[] { null, reportFormatPdf, out }));
 		invokeIgnoringExceptions(
 				() -> injectable.getMailAttachmentFromJasperReport("admin", "User", "missing", parameters));
@@ -74,7 +76,10 @@ class ReportingInjectableTest {
 		invokeIgnoringExceptions(() -> injectable.generateFreemarkerPDFFromHTMLURL("missing", outputFile));
 		invokeIgnoringExceptions(() -> injectable.generateFreemarkerPDFFromHTML((String) null, out));
 		invokeIgnoringExceptions(() -> injectable.generateFreemarkerPDFFromHTML(in, (File) null));
-		invokeIgnoringExceptions(() -> injectable.generateFreemarkerPDFFromHTML(in, (ByteArrayOutputStream) null));
+		invokeIgnoringExceptions(() -> invokeByName(injectable,
+				"generateFreemarkerPDFFromHTML",
+				new Class<?>[] { InputStream.class, OutputStream.class },
+				new Object[] { in, null }));
 		invokeIgnoringExceptions(() -> invokeByName(injectable,
 				"createFreemarkerBeanReport",
 				new Class<?>[] { classForName("org.skyve.domain.Bean"), String.class, Map.class },

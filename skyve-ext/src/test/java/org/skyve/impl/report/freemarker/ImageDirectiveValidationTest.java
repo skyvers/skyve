@@ -17,7 +17,12 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.skyve.content.AttachmentContent;
+import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
+import org.skyve.domain.DynamicBean;
+import org.skyve.impl.content.AbstractContentManager;
+import org.skyve.impl.content.NoOpContentManager;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.customer.Customer;
@@ -129,6 +134,35 @@ class ImageDirectiveValidationTest {
 
 		params.put("module", scalar("module"));
 		assertThrows(TemplateModelException.class, () -> directive.execute(null, params, new TemplateModel[0], null));
+	}
+
+	@Test
+	void contentRendersAttachmentAsDataUrlWithOptionalAttributes() throws Exception {
+		Class<? extends AbstractContentManager> previousContentManager = AbstractContentManager.IMPLEMENTATION_CLASS;
+		AttachmentContent attachment = new AttachmentContent("demo", "admin", "User", null, "user1", "bean1", "image")
+				.attachment("avatar.png", MimeType.png, "png".getBytes());
+		attachment.setContentId("content-1");
+		RecordingContentManager.attachment = attachment;
+		AbstractContentManager.IMPLEMENTATION_CLASS = RecordingContentManager.class;
+
+		try {
+			Bean bean = new DynamicBean("admin", "User", new HashMap<>(Map.of("image", "content-1")));
+			String output = renderDirective("content",
+					new ContentDirective(),
+					"<@content bean=user module='admin' document='User' attribute='image' height=12 class='avatar' style='display:block' />",
+					Map.of("user", bean));
+
+			assertTrue(output.startsWith("<img src='data:image/png;base64,"));
+			assertTrue(output.contains("cG5n"));
+			assertTrue(output.contains(" alt='image'"));
+			assertTrue(output.contains(" height='12'"));
+			assertTrue(output.contains(" class='avatar'"));
+			assertTrue(output.contains(" style='display:block'"));
+		}
+		finally {
+			RecordingContentManager.attachment = null;
+			AbstractContentManager.IMPLEMENTATION_CLASS = previousContentManager;
+		}
 	}
 
 	@Test
@@ -278,6 +312,15 @@ class ImageDirectiveValidationTest {
 		}
 		else {
 			ProvidedRepositoryFactory.set(previousRepository);
+		}
+	}
+
+	public static class RecordingContentManager extends NoOpContentManager {
+		private static AttachmentContent attachment;
+
+		@Override
+		public AttachmentContent getAttachment(String contentId) {
+			return "content-1".equals(contentId) ? attachment : null;
 		}
 	}
 }

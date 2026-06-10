@@ -35,7 +35,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.core.MediaType;
 
-@SuppressWarnings({"static-method", "resource"})
+@SuppressWarnings({"static-method", "resource", "null"})
 class BasicAuthFilterTest {
 
 	private static class CapturingOutputStream extends ServletOutputStream {
@@ -225,9 +225,7 @@ class BasicAuthFilterTest {
 			filter.doFilter(request, response, chain);
 		}
 		finally {
-			if (previousRepository != null) {
-				ProvidedRepositoryFactory.set(previousRepository);
-			}
+			ProvidedRepositoryFactory.set(previousRepository);
 			if (previousPersistence != null) {
 				threadLocal.set(previousPersistence);
 			}
@@ -274,9 +272,7 @@ class BasicAuthFilterTest {
 			filter.doFilter(request, response, chain);
 		}
 		finally {
-			if (previousRepository != null) {
-				ProvidedRepositoryFactory.set(previousRepository);
-			}
+			ProvidedRepositoryFactory.set(previousRepository);
 			if (previousPersistence != null) {
 				threadLocal.set(previousPersistence);
 			}
@@ -326,9 +322,7 @@ class BasicAuthFilterTest {
 			filter.doFilter(request, response, chain);
 		}
 		finally {
-			if (previousRepository != null) {
-				ProvidedRepositoryFactory.set(previousRepository);
-			}
+			ProvidedRepositoryFactory.set(previousRepository);
 			if (previousPersistence != null) {
 				threadLocal.set(previousPersistence);
 			}
@@ -387,9 +381,7 @@ class BasicAuthFilterTest {
 			filter.doFilter(request, response, chain);
 		}
 		finally {
-			if (previousRepository != null) {
-				ProvidedRepositoryFactory.set(previousRepository);
-			}
+			ProvidedRepositoryFactory.set(previousRepository);
 			if (previousPersistence != null) {
 				threadLocal.set(previousPersistence);
 			}
@@ -445,9 +437,7 @@ class BasicAuthFilterTest {
 		}
 		finally {
 			UtilImpl.CUSTOMER = previousCustomer;
-			if (previousRepository != null) {
-				ProvidedRepositoryFactory.set(previousRepository);
-			}
+			ProvidedRepositoryFactory.set(previousRepository);
 			if (previousPersistence != null) {
 				threadLocal.set(previousPersistence);
 			}
@@ -501,9 +491,7 @@ class BasicAuthFilterTest {
 		}
 		finally {
 			UtilImpl.CUSTOMER = previousCustomer;
-			if (previousRepository != null) {
-				ProvidedRepositoryFactory.set(previousRepository);
-			}
+			ProvidedRepositoryFactory.set(previousRepository);
 			if (previousPersistence != null) {
 				threadLocal.set(previousPersistence);
 			}
@@ -558,9 +546,7 @@ class BasicAuthFilterTest {
 		}
 		finally {
 			UtilImpl.CUSTOMER = previousCustomer;
-			if (previousRepository != null) {
-				ProvidedRepositoryFactory.set(previousRepository);
-			}
+			ProvidedRepositoryFactory.set(previousRepository);
 			if (previousPersistence != null) {
 				threadLocal.set(previousPersistence);
 			}
@@ -617,9 +603,7 @@ class BasicAuthFilterTest {
 		}
 		finally {
 			UtilImpl.CUSTOMER = previousCustomer;
-			if (previousRepository != null) {
-				ProvidedRepositoryFactory.set(previousRepository);
-			}
+			ProvidedRepositoryFactory.set(previousRepository);
 			if (previousPersistence != null) {
 				threadLocal.set(previousPersistence);
 			}
@@ -676,9 +660,7 @@ class BasicAuthFilterTest {
 		}
 		finally {
 			UtilImpl.CUSTOMER = previousCustomer;
-			if (previousRepository != null) {
-				ProvidedRepositoryFactory.set(previousRepository);
-			}
+			ProvidedRepositoryFactory.set(previousRepository);
 			if (previousPersistence != null) {
 				threadLocal.set(previousPersistence);
 			}

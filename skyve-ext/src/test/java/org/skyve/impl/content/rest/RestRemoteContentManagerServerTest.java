@@ -135,6 +135,15 @@ class RestRemoteContentManagerServerTest {
 	}
 
 	@Test
+	void getAttachmentReturnsServerErrorWhenContentManagerThrows() {
+		CapturingContentManager.throwOnGet = true;
+
+		Response response = new RestRemoteContentManagerServer().getAttachment("content-1");
+
+		assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
+	}
+
+	@Test
 	void removeMethodsReturnOk() {
 		RestRemoteContentManagerServer server = new RestRemoteContentManagerServer();
 
@@ -142,6 +151,18 @@ class RestRemoteContentManagerServerTest {
 		assertEquals(Response.Status.OK.getStatusCode(), server.removeAttachment("content-1").getStatus());
 		assertTrue(CapturingContentManager.beanRemoved);
 		assertTrue(CapturingContentManager.attachmentRemoved);
+	}
+
+	@Test
+	void removeMethodsReturnServerErrorWhenContentManagerThrows() {
+		RestRemoteContentManagerServer server = new RestRemoteContentManagerServer();
+
+		CapturingContentManager.throwOnRemoveBean = true;
+		assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), server.removeBean("bean-1").getStatus());
+
+		CapturingContentManager.throwOnRemoveBean = false;
+		CapturingContentManager.throwOnRemoveAttachment = true;
+		assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), server.removeAttachment("content-1").getStatus());
 	}
 
 	private static BeanContent beanContent() {
@@ -171,6 +192,9 @@ class RestRemoteContentManagerServerTest {
 		private static boolean beanRemoved;
 		private static boolean attachmentRemoved;
 		private static AttachmentContent attachmentToReturn;
+		private static boolean throwOnGet;
+		private static boolean throwOnRemoveBean;
+		private static boolean throwOnRemoveAttachment;
 
 		private static void reset() {
 			beanPut = false;
@@ -179,6 +203,9 @@ class RestRemoteContentManagerServerTest {
 			beanRemoved = false;
 			attachmentRemoved = false;
 			attachmentToReturn = null;
+			throwOnGet = false;
+			throwOnRemoveBean = false;
+			throwOnRemoveAttachment = false;
 		}
 
 		@Override
@@ -198,16 +225,25 @@ class RestRemoteContentManagerServerTest {
 
 		@Override
 		public AttachmentContent getAttachment(String contentId) {
+			if (throwOnGet) {
+				throw new IllegalStateException("get failed");
+			}
 			return attachmentToReturn;
 		}
 
 		@Override
 		public void removeBean(String bizId) {
+			if (throwOnRemoveBean) {
+				throw new IllegalStateException("remove bean failed");
+			}
 			beanRemoved = true;
 		}
 
 		@Override
 		public void removeAttachment(String contentId) {
+			if (throwOnRemoveAttachment) {
+				throw new IllegalStateException("remove attachment failed");
+			}
 			attachmentRemoved = true;
 		}
 	}

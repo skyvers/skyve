@@ -21,13 +21,16 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.skyve.content.AttachmentContent;
 import org.skyve.domain.Bean;
 import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.app.admin.Communication;
@@ -313,6 +316,38 @@ class CommunicationUtilTest {
 
 	@SuppressWarnings({"unchecked", "static-method"})
 	@Test
+	void testResolveAndValidateEmailAddressListKeepsInvalidAddressInSilentMode() throws Exception {
+		AbstractPersistence persistence = bindMockPersistenceWithUser();
+		when(persistence.withDocumentPermissionScopes(eq(DocumentPermissionScope.customer), any(Function.class)))
+				.thenReturn("not-an-email");
+
+		List<String> result = (List<String>) invokePrivate("resolveAndValidateEmailAddressList",
+				new Class<?>[] { String.class, ResponseMode.class, Document.class, Document.class },
+				"not-an-email",
+				ResponseMode.SILENT,
+				mock(Document.class),
+				mock(Document.class));
+
+		assertThat(result, is(List.of("not-an-email")));
+	}
+
+	@SuppressWarnings({"unchecked", "static-method"})
+	@Test
+	void testResolveAndValidateEmailAddressListRejectsBlankResolvedAddress() throws Exception {
+		AbstractPersistence persistence = bindMockPersistenceWithUser();
+		when(persistence.withDocumentPermissionScopes(eq(DocumentPermissionScope.customer), any(Function.class)))
+				.thenReturn(" ");
+
+		assertThrows(IllegalArgumentException.class, () -> invokePrivate("resolveAndValidateEmailAddressList",
+				new Class<?>[] { String.class, ResponseMode.class, Document.class, Document.class },
+				"blank@example.com",
+				ResponseMode.SILENT,
+				mock(Document.class),
+				mock(Document.class)));
+	}
+
+	@SuppressWarnings({"unchecked", "static-method"})
+	@Test
 	void testResolveAndValidateEmailAddressListKeepsDeclinedAddressInSilentMode() throws Exception {
 		AbstractPersistence persistence = bindMockPersistenceWithUser();
 		Persistence callbackPersistence = mock(Persistence.class);
@@ -342,6 +377,29 @@ class CommunicationUtilTest {
 
 	@SuppressWarnings({"unchecked", "static-method"})
 	@Test
+	void testResolveAndValidateEmailAddressListTrimsCommaAndSemicolonSeparatedAddresses() throws Exception {
+		AbstractPersistence persistence = bindMockPersistenceWithUser();
+		Persistence callbackPersistence = mock(Persistence.class);
+		DocumentQuery query = mock(DocumentQuery.class);
+		DocumentFilter filter = mock(DocumentFilter.class);
+		when(persistence.withDocumentPermissionScopes(eq(DocumentPermissionScope.customer), any(Function.class)))
+				.thenAnswer(invocation -> ((Function<Persistence, String>) invocation.getArgument(1)).apply(callbackPersistence));
+		when(callbackPersistence.newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.SUBSCRIPTION_DOCUMENT_NAME)).thenReturn(query);
+		when(query.getFilter()).thenReturn(filter);
+		when(query.beanResult()).thenReturn(null);
+
+		List<String> result = (List<String>) invokePrivate("resolveAndValidateEmailAddressList",
+				new Class<?>[] { String.class, ResponseMode.class, Document.class, Document.class },
+				" first@example.com ; second@example.com, third@example.com ",
+				ResponseMode.EXPLICIT,
+				mock(Document.class),
+				mock(Document.class));
+
+		assertThat(result, is(List.of("first@example.com", "second@example.com", "third@example.com")));
+	}
+
+	@SuppressWarnings({"unchecked", "static-method"})
+	@Test
 	void testGetSystemCommunicationByDescriptionQueriesByDescription() throws Exception {
 		AbstractPersistence persistence = bindMockPersistenceWithUser();
 		Persistence callbackPersistence = mock(Persistence.class);
@@ -357,6 +415,19 @@ class CommunicationUtilTest {
 		Communication result = CommunicationUtil.getSystemCommunicationByDescription("System notification");
 
 		assertThat(result, is(expected));
+	}
+
+	@SuppressWarnings({"unchecked", "static-method"})
+	@Test
+	void testInitialiseSystemCommunicationReturnsExistingCommunication() throws Exception {
+		AbstractPersistence persistence = bindMockPersistenceWithUser();
+		Communication existing = mock(Communication.class);
+		when(persistence.withDocumentPermissionScopes(eq(DocumentPermissionScope.customer), any(Function.class)))
+				.thenReturn(existing);
+
+		Communication result = CommunicationUtil.initialiseSystemCommunication("Existing", "Subject", "Body");
+
+		assertThat(result, is(existing));
 	}
 
 	@Test
@@ -394,6 +465,37 @@ class CommunicationUtilTest {
 		assertThat(item.getGoogleCalendarLink(), containsString("text=null"));
 		assertThat(item.getYahooCalendarLink(), containsString("title=null"));
 		assertThat(ics, containsString("SUMMARY:null"));
+	}
+
+	@SuppressWarnings("boxing")
+	@Test
+	void testGetDefinedAttachmentsLoadsConfiguredAttachmentSlots() throws Exception {
+		AbstractContentManager.IMPLEMENTATION_CLASS = CaptureContentManager.class;
+		CaptureContentManager.attachments.clear();
+		CaptureContentManager.attachments.put("content-1", attachment("one.txt", org.skyve.content.MimeType.plain, "one"));
+		CaptureContentManager.attachments.put("content-2", attachment("two.pdf", org.skyve.content.MimeType.pdf, "two"));
+		CaptureContentManager.attachments.put("content-3", attachment("three.csv", org.skyve.content.MimeType.csv, "three"));
+		when(communication.getAttachmentFileName1()).thenReturn("first.txt");
+		when(communication.getAttachment1()).thenReturn("content-1");
+		when(communication.getAttachmentFileName2()).thenReturn("second.pdf");
+		when(communication.getAttachment2()).thenReturn("content-2");
+		when(communication.getAttachmentFileName3()).thenReturn("third.csv");
+		when(communication.getAttachment3()).thenReturn("content-3");
+
+		MailAttachment[] result = (MailAttachment[]) invokePrivate("getDefinedAttachments",
+				new Class<?>[] { Communication.class },
+				communication);
+
+		assertThat(result.length, is(3));
+		assertThat(result[0].getAttachmentFileName(), is("first.txt"));
+		assertThat(new String(result[0].getAttachment(), StandardCharsets.UTF_8), is("one"));
+		assertThat(result[0].getAttachmentContentType(), is(org.skyve.content.MimeType.plain.toString()));
+		assertThat(result[1].getAttachmentFileName(), is("second.pdf"));
+		assertThat(new String(result[1].getAttachment(), StandardCharsets.UTF_8), is("two"));
+		assertThat(result[1].getAttachmentContentType(), is(org.skyve.content.MimeType.pdf.toString()));
+		assertThat(result[2].getAttachmentFileName(), is("third.csv"));
+		assertThat(new String(result[2].getAttachment(), StandardCharsets.UTF_8), is("three"));
+		assertThat(result[2].getAttachmentContentType(), is(org.skyve.content.MimeType.csv.toString()));
 	}
 
 	@Test
@@ -479,6 +581,22 @@ class CommunicationUtilTest {
 		assertTrue(Files.exists(Path.of(result)));
 	}
 
+	@Test
+	@SuppressWarnings("boxing")
+	void testFailSafeSystemCommunicationOverloadsSendExistingCommunication() throws Exception {
+		CaptureMailService mailService = new CaptureMailService();
+		MailServiceStaticSingleton.set(mailService);
+		AbstractContentManager.IMPLEMENTATION_CLASS = NoOpContentManager.class;
+		configureExistingSystemCommunication("sender@example.com", "to@example.com", null, false);
+
+		CommunicationUtil.sendFailSafeSystemCommunication("Existing", "Default subject", "Default body", ResponseMode.EXPLICIT, null);
+		CommunicationUtil.sendFailSafeSystemCommunication("Existing", "to@example.com", null, "Default subject", "Default body", ResponseMode.EXPLICIT, null);
+
+		assertThat(mailService.sendCount, is(2));
+		assertThat(mailService.lastSend.getSenderEmailAddress(), is("sender@example.com"));
+		assertThat(mailService.lastSend.getRecipientEmailAddresses(), is(java.util.Set.of("to@example.com")));
+	}
+
 	@SuppressWarnings("boxing")
 	private static Communication communicationForResults(ActionType actionType, long count) {
 		Communication communication = mock(Communication.class);
@@ -557,6 +675,51 @@ class CommunicationUtilTest {
 		when(communication.getIncludeCalendar()).thenReturn(Boolean.FALSE);
 	}
 
+	@SuppressWarnings("unchecked")
+	private void configureExistingSystemCommunication(String sendFrom, String sendTo, String ccTo, boolean monitorBcc) throws Exception {
+		AbstractPersistence persistence = bindMockPersistenceWithUser();
+		User user = persistence.getUser();
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document communicationDocument = mock(Document.class);
+		Document subscriptionDocument = mock(Document.class);
+		org.skyve.domain.app.admin.User adminUser = mock(org.skyve.domain.app.admin.User.class);
+		Contact contact = mock(Contact.class);
+		Persistence callbackPersistence = mock(Persistence.class);
+		DocumentQuery communicationQuery = mock(DocumentQuery.class);
+		DocumentFilter communicationFilter = mock(DocumentFilter.class);
+		DocumentQuery subscriptionQuery = mock(DocumentQuery.class);
+		DocumentFilter subscriptionFilter = mock(DocumentFilter.class);
+
+		when(user.getCustomer()).thenReturn(customer);
+		when(user.getId()).thenReturn("admin-user");
+		when(customer.getModule(AppConstants.ADMIN_MODULE_NAME)).thenReturn(module);
+		when(module.getDocument(customer, AppConstants.COMMUNICATION_DOCUMENT_NAME)).thenReturn(communicationDocument);
+		when(module.getDocument(customer, AppConstants.SUBSCRIPTION_DOCUMENT_NAME)).thenReturn(subscriptionDocument);
+		when(module.getDocument(customer, AppConstants.USER_DOCUMENT_NAME)).thenReturn(communicationDocument);
+		setPersistenceUser(persistence, user);
+		doReturn(adminUser).when(persistence).retrieve(communicationDocument, "admin-user");
+		when(adminUser.getContact()).thenReturn(contact);
+		when(contact.getEmail1()).thenReturn("admin@example.com");
+		when(persistence.withDocumentPermissionScopes(eq(DocumentPermissionScope.customer), any(Function.class)))
+				.thenAnswer(invocation -> ((Function<Persistence, Object>) invocation.getArgument(1)).apply(callbackPersistence));
+		when(callbackPersistence.newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.COMMUNICATION_DOCUMENT_NAME)).thenReturn(communicationQuery);
+		when(callbackPersistence.newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.SUBSCRIPTION_DOCUMENT_NAME)).thenReturn(subscriptionQuery);
+		when(communicationQuery.getFilter()).thenReturn(communicationFilter);
+		when(subscriptionQuery.getFilter()).thenReturn(subscriptionFilter);
+		when(communicationQuery.beanResult()).thenReturn(communication);
+		when(subscriptionQuery.beanResult()).thenReturn(null);
+
+		when(communication.getSendFrom()).thenReturn(sendFrom);
+		when(communication.getSendTo()).thenReturn(sendTo);
+		when(communication.getCcTo()).thenReturn(ccTo);
+		when(communication.getMonitorBcc()).thenReturn(Boolean.valueOf(monitorBcc));
+		when(communication.getSubject()).thenReturn("Subject");
+		when(communication.getBody()).thenReturn("Body");
+		when(communication.getFormatType()).thenReturn(FormatType.email);
+		when(communication.getIncludeCalendar()).thenReturn(Boolean.FALSE);
+	}
+
 	private static void bindPersistenceToThread(AbstractPersistence persistence) throws Exception {
 		Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
 		field.setAccessible(true);
@@ -577,6 +740,11 @@ class CommunicationUtilTest {
 		@SuppressWarnings("unchecked")
 		ThreadLocal<AbstractPersistence> threadLocal = (ThreadLocal<AbstractPersistence>) field.get(null);
 		threadLocal.remove();
+	}
+
+	private static AttachmentContent attachment(String fileName, org.skyve.content.MimeType mimeType, String content) {
+		return new AttachmentContent("demo", "admin", "Communication", null, "user", "biz", "attachment")
+				.attachment(fileName, mimeType, content.getBytes(StandardCharsets.UTF_8));
 	}
 
 	// ======== CommunicationCalendarItem ========
@@ -641,6 +809,15 @@ class CommunicationUtilTest {
 		@Override
 		public void sendBulkMail(@jakarta.annotation.Nonnull List<Mail> mails) {
 			// not used by these tests
+		}
+	}
+
+	public static class CaptureContentManager extends NoOpContentManager {
+		private static final Map<String, AttachmentContent> attachments = new HashMap<>();
+
+		@Override
+		public AttachmentContent getAttachment(String contentId) {
+			return attachments.get(contentId);
 		}
 	}
 }

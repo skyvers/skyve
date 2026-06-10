@@ -24,6 +24,24 @@ import org.skyve.impl.metadata.view.widget.DynamicImage;
 import org.skyve.impl.metadata.view.widget.Spacer;
 import org.skyve.impl.metadata.view.widget.StaticImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
+import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
+import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
+import org.skyve.impl.metadata.view.widget.bound.input.Combo;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
+import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
+import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
+import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
+import org.skyve.impl.metadata.view.widget.bound.input.Password;
+import org.skyve.impl.metadata.view.widget.bound.input.Radio;
+import org.skyve.impl.metadata.view.widget.bound.input.RichText;
+import org.skyve.impl.metadata.view.widget.bound.input.Slider;
+import org.skyve.impl.metadata.view.widget.bound.input.Spinner;
+import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
+import org.skyve.impl.metadata.view.widget.bound.input.TextField;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
 
@@ -120,6 +138,30 @@ class ReportViewVisitorLayoutTest {
 	}
 
 	@Test
+	void visitBoundWidgetsWithNullBindingsDoNotCreateFields() {
+		visitor.currentContainer = new Container(Integer.valueOf(0), Integer.valueOf(0), Integer.valueOf(800), false, ContainerType.vbox);
+
+		visitor.visitCheckBox(new CheckBox(), true, true);
+		visitor.visitColourPicker(new ColourPicker(), true, true);
+		visitor.visitCombo(new Combo(), true, true);
+		visitor.visitContentImage(new ContentImage(), true, true);
+		visitor.visitContentSignature(new ContentSignature(), true, true);
+		visitor.visitGeometry(new Geometry(), true, true);
+		visitor.visitGeometryMap(new GeometryMap(), true, true);
+		visitor.visitLookupDescription(new LookupDescription(), true, true);
+		visitor.visitPassword(new Password(), true, true);
+		visitor.visitRadio(new Radio(), true, true);
+		visitor.visitRichText(new RichText(), true, true);
+		visitor.visitSlider(new Slider(), true, true);
+		visitor.visitSpinner(new Spinner(), true, true);
+		visitor.visitTextArea(new TextArea(), true, true);
+		visitor.visitTextField(new TextField(), true, true);
+
+		assertThat(design.getFields().size(), is(0));
+		assertThat(visitor.currentContainer.getElements().size(), is(0));
+	}
+
+	@Test
 	void visitContainerAndStateOnlyWidgetsUpdateTraversalState() {
 		Form form = new Form();
 		form.setWidgetId("editForm");
@@ -149,6 +191,51 @@ class ReportViewVisitorLayoutTest {
 		visitor.subreport = false;
 		visitor.visitListMembership(new ListMembership(), true, true);
 		assertThat(visitor.subreport, is(true));
+	}
+
+	@Test
+	void visitedTabularWidgetsResetSubreportAndCloseContainers() {
+		visitor.subreport = true;
+		visitor.addContainer("grid", "Grid", Boolean.FALSE, null, null, null, Boolean.FALSE, ContainerType.subreport, null);
+		visitor.currentContainer.getElements().add(new ReportElement(ElementType.staticImage, "placeholder", "placeholder.png", null, null, null, null, null, Integer.valueOf(20), null, null, null, null, null));
+		visitor.visitedDataGrid(new DataGrid(), true, true);
+		assertThat(visitor.subreport, is(false));
+		assertThat(visitor.currentContainer, nullValue());
+
+		visitor.subreport = true;
+		visitor.addContainer("repeater", "Repeater", Boolean.FALSE, null, null, null, Boolean.FALSE, ContainerType.subreport, null);
+		visitor.currentContainer.getElements().add(new ReportElement(ElementType.staticImage, "placeholder", "placeholder.png", null, null, null, null, null, Integer.valueOf(20), null, null, null, null, null));
+		visitor.visitedDataRepeater(new DataRepeater(), true, true);
+		assertThat(visitor.subreport, is(false));
+		assertThat(visitor.currentContainer, nullValue());
+
+		visitor.addContainer("parent", "Parent", Boolean.FALSE, null, null, null, Boolean.FALSE, ContainerType.vbox, null);
+		Container parent = visitor.currentContainer;
+		visitor.addContainer("column", "Column", Boolean.FALSE, null, null, null, Boolean.FALSE, ContainerType.column, null);
+		visitor.visitedDataGridContainerColumn(new DataGridContainerColumn(), true, true);
+		assertThat(visitor.currentContainer, is(parent));
+	}
+
+	@Test
+	void visitedListWidgetsResetSubreportAndHBoxClosesContainer() {
+		visitor.addContainer("box", "Box", Boolean.FALSE, null, null, null, Boolean.FALSE, ContainerType.hbox, null);
+		visitor.currentContainer.getElements().add(new ReportElement(ElementType.staticImage, "placeholder", "placeholder.png", null, null, null, null, null, Integer.valueOf(20), null, null, null, null, null));
+
+		visitor.visitedHBox(new HBox(), true, true);
+
+		assertThat(visitor.currentContainer, nullValue());
+
+		visitor.subreport = true;
+		visitor.visitedListGrid(new ListGrid(), true, true);
+		assertThat(visitor.subreport, is(false));
+
+		visitor.subreport = true;
+		visitor.visitedListRepeater(new ListRepeater(), true, true);
+		assertThat(visitor.subreport, is(false));
+
+		visitor.subreport = true;
+		visitor.visitedListMembership(new ListMembership(), true, true);
+		assertThat(visitor.subreport, is(false));
 	}
 
 	@Test

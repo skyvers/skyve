@@ -5,10 +5,16 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.PrintStream;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,7 +26,12 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.skyve.content.AttachmentContent;
+import org.skyve.domain.messages.DomainException;
+import org.skyve.impl.metadata.user.SuperUser;
+import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.user.User;
 
 @SuppressWarnings({"static-method", "boxing"})
 public class AbstractContentManagerFileSystemTest {
@@ -38,8 +49,9 @@ public class AbstractContentManagerFileSystemTest {
 	}
 
 	@After
-	public void tearDown() {
+	public void tearDown() throws Exception {
 		UtilImpl.CONTENT_FILE_SUFFIXES = originalContentFileSuffixes;
+		unbindPersistenceFromThread();
 	}
 
 	@Test
@@ -54,6 +66,22 @@ public class AbstractContentManagerFileSystemTest {
 	@Test
 	public void mainRequiresContentIdArgument() {
 		assertThrows(IllegalArgumentException.class, () -> AbstractContentManager.main(new String[0]));
+	}
+
+	@Test
+	public void mainPrintsBalancedFolderPathForContentId() {
+		PrintStream originalOut = System.out;
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		try {
+			System.setOut(new PrintStream(out, true, StandardCharsets.UTF_8));
+
+			AbstractContentManager.main(new String[] { CONTENT_ID });
+
+			assertEquals("12/34/56/abcde12fgh34ijk56lmnop/" + System.lineSeparator(), out.toString(StandardCharsets.UTF_8));
+		}
+		finally {
+			System.setOut(originalOut);
+		}
 	}
 
 	@Test
@@ -137,6 +165,20 @@ public class AbstractContentManagerFileSystemTest {
 	}
 
 	@Test
+	public void writeExternalContentFileUsesDefaultNameWhenAttachmentHasContentTypeOnly() throws Exception {
+		Path external = temp.getRoot().toPath().resolve("unsafe name.txt");
+		Files.writeString(external, "external");
+		AttachmentContent attachment = attachment(null, "text/plain");
+		attachment.setExternalAbsoluteFilePath(external.toString());
+
+		AbstractContentManager.writeExternalContentFile(rootBuilder(), attachment);
+
+		AttachmentContent read = AbstractContentManager.getFromFileSystem(rootBuilder(), CONTENT_ID, false);
+		assertNotNull(read);
+		assertThat(read.getFileName(), is("content.txt"));
+	}
+
+	@Test
 	public void getFromFileSystemReturnsNullForMissingFolderMetaOrContent() throws Exception {
 		assertNull(AbstractContentManager.getFromFileSystem(rootBuilder(), CONTENT_ID, false));
 
@@ -161,6 +203,34 @@ public class AbstractContentManagerFileSystemTest {
 		}
 	}
 
+	@Test
+	public void canAccessContentAllowsSuperUserWithoutDelegatingPermissionChecks() throws Exception {
+		bindUserToThread(new SuperUser());
+
+		assertThat(AbstractContentManager.canAccessContent("customer", "module", "document", "group", "user", "biz", "attachment"), is(true));
+	}
+
+	@Test
+	public void canAccessContentUsesBeanPermissionWhenAttributeNameIsNull() throws Exception {
+		User user = mock(User.class);
+		bindUserToThread(user);
+		when(user.canReadBean("biz", "module", "document", "customer", "group", "user")).thenReturn(Boolean.TRUE);
+
+		assertThat(AbstractContentManager.canAccessContent("customer", "module", "document", "group", "user", "biz", null), is(true));
+	}
+
+	@Test
+	public void canAccessContentReturnsFalseWhenPermissionCheckCannotResolveMetadataOrBean() throws Exception {
+		User user = mock(User.class);
+		bindUserToThread(user);
+		when(user.canAccessContent("biz", "module", "document", "customer", "group", "user", "attachment"))
+				.thenThrow(new MetaDataException("missing document"))
+				.thenThrow(new DomainException("missing bean"));
+
+		assertThat(AbstractContentManager.canAccessContent("customer", "module", "document", "group", "user", "biz", "attachment"), is(false));
+		assertThat(AbstractContentManager.canAccessContent("customer", "module", "document", "group", "user", "biz", "attachment"), is(false));
+	}
+
 	private AttachmentContent attachment(String fileName, String contentType) {
 		AttachmentContent result = new AttachmentContent("customer", "module", "document", "group", "user", "biz", "attribute")
 				.attachment(fileName, contentType, new byte[] { 1, 2, 3 })
@@ -176,6 +246,24 @@ public class AbstractContentManagerFileSystemTest {
 
 	private Path balancedPath() {
 		return temp.getRoot().toPath().resolve("12").resolve("34").resolve("56").resolve(CONTENT_ID.toLowerCase());
+	}
+
+	private static void bindUserToThread(User user) throws Exception {
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		when(persistence.getUser()).thenReturn(user);
+		Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
+		field.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		ThreadLocal<AbstractPersistence> threadLocal = (ThreadLocal<AbstractPersistence>) field.get(null);
+		threadLocal.set(persistence);
+	}
+
+	private static void unbindPersistenceFromThread() throws Exception {
+		Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
+		field.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		ThreadLocal<AbstractPersistence> threadLocal = (ThreadLocal<AbstractPersistence>) field.get(null);
+		threadLocal.remove();
 	}
 
 	public static final class BadContentManager extends NoOpContentManager {

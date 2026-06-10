@@ -3,16 +3,21 @@ package org.skyve.impl.bizport;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Date;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -89,6 +94,50 @@ class POISheetLoaderTest {
 		assertThat(POISheetLoader.getPOIWorksheetColumnName(701), is("ZZ"));
 	}
 
+	@Test
+	void convenienceConstructorSetsActivityTypeAndNextDataAdvancesRows() throws Exception {
+		bindPersistenceWithCustomer(customer(null));
+		POISheetLoader loader = new POISheetLoader(AbstractDataFileLoader.LoaderActivityType.FIND,
+				new ByteArrayInputStream(workbookBytes(row -> row.createCell(0).setCellValue("first"))),
+				0,
+				new UploadException(),
+				"sales",
+				"Order");
+
+		assertThat(activityType(loader), is(AbstractDataFileLoader.LoaderActivityType.FIND));
+		assertTrue(loader.hasNextData());
+
+		loader.nextData();
+		assertThat(loader.getStringFieldValue(0, true), is("first"));
+
+		loader.nextData();
+		assertTrue(loader.isNoData());
+		assertThat(loader.getStringFieldValue(0, false), is(""));
+	}
+
+	@Test
+	void isNoDataDefaultsMissingFieldIndexToFirstColumn() throws Exception {
+		bindPersistenceWithCustomer(customer(null));
+		POISheetLoader loader = loader(workbookBytes(row -> row.createCell(0).setCellValue("value")));
+		loader.addField(new DataFileField(null));
+		loader.nextData();
+
+		assertFalse(loader.isNoData());
+	}
+
+	@Test
+	void poiCellTypeDescriptionsCoverCommonCellTypes() throws Exception {
+		assertThat(invokeCellTypeDescription(null), is("unknown"));
+		assertThat(invokeCellTypeDescription(cell(CellType.BOOLEAN, null)), is("Boolean"));
+		assertThat(invokeCellTypeDescription(cell(CellType.NUMERIC, null)), is("Numeric"));
+		assertThat(invokeCellTypeDescription(cell(CellType.BLANK, null)), is("Blank"));
+		assertThat(invokeCellTypeDescription(cell(CellType.ERROR, null)), is("Error"));
+		assertThat(invokeCellTypeDescription(cell(CellType.STRING, null)), is("String"));
+		assertThat(invokeCellTypeDescription(cell(CellType.FORMULA, CellType.NUMERIC)), is("Numeric Formula"));
+		assertThat(invokeCellTypeDescription(cell(CellType.FORMULA, CellType.STRING)), is("String Formula"));
+		assertThat(invokeCellTypeDescription(cell(CellType.FORMULA, CellType.BOOLEAN)), is("Rich Text Formula"));
+	}
+
 	private static POISheetLoader loader(byte[] workbookBytes) throws Exception {
 		return new POISheetLoader(new ByteArrayInputStream(workbookBytes), 0, "sales", "Order", new UploadException());
 	}
@@ -136,6 +185,27 @@ class POISheetLoaderTest {
 		Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
 		field.setAccessible(true);
 		((ThreadLocal<AbstractPersistence>) field.get(null)).remove();
+	}
+
+	private static AbstractDataFileLoader.LoaderActivityType activityType(POISheetLoader loader) throws Exception {
+		Field field = AbstractDataFileLoader.class.getDeclaredField("activityType");
+		field.setAccessible(true);
+		return (AbstractDataFileLoader.LoaderActivityType) field.get(loader);
+	}
+
+	private static Cell cell(CellType cellType, CellType cachedFormulaResultType) {
+		Cell cell = mock(Cell.class);
+		when(cell.getCellType()).thenReturn(cellType);
+		if (cachedFormulaResultType != null) {
+			when(cell.getCachedFormulaResultType()).thenReturn(cachedFormulaResultType);
+		}
+		return cell;
+	}
+
+	private static String invokeCellTypeDescription(Cell cell) throws Exception {
+		Method method = POISheetLoader.class.getDeclaredMethod("getPOICellTypeDescription", Cell.class);
+		method.setAccessible(true);
+		return (String) method.invoke(null, cell);
 	}
 
 	@FunctionalInterface

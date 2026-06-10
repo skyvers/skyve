@@ -9,15 +9,19 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
+import java.util.Iterator;
 
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.junit.Test;
 import org.skyve.bizport.BizPortColumn;
 import org.skyve.bizport.SheetKey;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.UploadException;
+import org.skyve.domain.messages.UploadException.Problem;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Decimal2;
@@ -27,6 +31,7 @@ import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 
@@ -152,6 +157,15 @@ public class POISheetTest {
 			throw new RuntimeException(e);
 		}
 		sheet.addColumn("col", new BizPortColumn("Col", null));
+	}
+
+	@Test(expected = IllegalStateException.class)
+	public void removeColumnThrowsWhenMaterialised() throws Exception {
+		POISheet sheet = new POISheet("TestSheet");
+		sheet.addColumn("col", new BizPortColumn("Col", null));
+		try (XSSFWorkbook wb = materialize(sheet)) {
+			sheet.removeColumn("col");
+		}
 	}
 
 	// ---- Materialized sheet tests ----
@@ -281,6 +295,16 @@ public class POISheetTest {
 	}
 
 	@Test
+	public void moveToRowAcceptsCompositeRowKey() throws Exception {
+		POISheet sheet = new POISheet("TestSheet");
+		try (XSSFWorkbook wb = materialize(sheet)) {
+			sheet.addRow("owner", "element");
+
+			assertTrue(sheet.moveToRow("owner", "element"));
+		}
+	}
+
+	@Test
 	public void nextRowReturnsFalseOnEmptySheet() throws Exception {
 		POISheet sheet = new POISheet("TestSheet");
 		try (XSSFWorkbook wb = materialize(sheet)) {
@@ -300,6 +324,19 @@ public class POISheetTest {
 			assertTrue(sheet.nextRow());
 			assertTrue(sheet.nextRow());
 			assertFalse(sheet.nextRow());
+		}
+	}
+
+	@Test
+	public void nextRowSkipsBlankRows() throws Exception {
+		POISheet sheet = new POISheet("TestSheet");
+		try (XSSFWorkbook wb = materialize(sheet)) {
+			XSSFSheet xssfSheet = wb.getSheet("data");
+			xssfSheet.createRow(5);
+			sheet.resetRow();
+
+			assertTrue(sheet.nextRow());
+			assertEquals(5, xssfSheet.getRow(5).getRowNum());
 		}
 	}
 
@@ -326,6 +363,21 @@ public class POISheetTest {
 			UploadException problems = new UploadException();
 			sheet.addWarningAtCurrentRow(problems, col, "test warning");
 			assertTrue(problems.hasProblems());
+		}
+	}
+
+	@Test
+	public void addErrorWithoutCurrentRowUsesRefPlaceholder() throws Exception {
+		POISheet sheet = new POISheet("TestSheet");
+		BizPortColumn col = new BizPortColumn("Name", null);
+		sheet.addColumn("name", col);
+		try (XSSFWorkbook wb = materialize(sheet)) {
+			UploadException problems = new UploadException();
+
+			sheet.addErrorAtCurrentRow(problems, col, "test error");
+
+			Problem problem = first(problems.getErrors());
+			assertEquals("TestSheet!#REF", problem.getWhere());
 		}
 	}
 
@@ -469,6 +521,49 @@ public class POISheetTest {
 	}
 
 	@Test
+	public void setValueEnumerationWritesCode() throws Exception {
+		POISheet sheet = new POISheet("TestSheet");
+		sheet.addColumn("status", new BizPortColumn("Status", null));
+		try (XSSFWorkbook wb = materialize(sheet)) {
+			sheet.addRow("r1");
+
+			sheet.setValue("status", new org.skyve.domain.types.Enumeration() {
+				private static final long serialVersionUID = 1L;
+
+				@Override
+				public String toCode() {
+					return "OPEN";
+				}
+
+				@Override
+				public String toLocalisedDescription() {
+					return "Open";
+				}
+
+				@Override
+				public DomainValue toDomainValue() {
+					return null;
+				}
+			});
+
+			assertEquals("OPEN", sheet.getValue("status", AttributeType.text, null));
+		}
+	}
+
+	@Test
+	public void setValueGeometryWritesWkt() throws Exception {
+		POISheet sheet = new POISheet("TestSheet");
+		sheet.addColumn("location", new BizPortColumn("Location", null));
+		try (XSSFWorkbook wb = materialize(sheet)) {
+			sheet.addRow("r1");
+
+			sheet.setValue("location", new GeometryFactory().createPoint(new Coordinate(1.0, 2.0)));
+
+			assertEquals("POINT (1 2)", sheet.getValue("location", AttributeType.geometry, null));
+		}
+	}
+
+	@Test
 	public void numericCellWithStringTypeReturnsStringConversion() {
 		POIWorkbook wb = new POIWorkbook(true);
 		POISheet sheet = new POISheet("TestSheet");
@@ -480,6 +575,87 @@ public class POISheetTest {
 		sheet.setValue("num", Integer.valueOf(99));
 		String result = sheet.getValue("num", AttributeType.text, null);
 		assertNotNull(result);
+	}
+
+	@Test
+	public void booleanCellWithTextTypeAddsError() throws Exception {
+		POISheet sheet = new POISheet("TestSheet");
+		sheet.addColumn("flag", new BizPortColumn("Flag", null));
+		try (XSSFWorkbook wb = materialize(sheet)) {
+			sheet.addRow("r1");
+			sheet.setValue("flag", Boolean.TRUE);
+			UploadException problems = new UploadException();
+
+			String result = sheet.getValue("flag", AttributeType.text, problems);
+
+			assertNull(result);
+			assertTrue(problems.hasErrors());
+		}
+	}
+
+	@Test
+	public void dateCellWithIntegerTypeAddsError() {
+		POIWorkbook wb = new POIWorkbook(true);
+		POISheet sheet = new POISheet("TestSheet");
+		sheet.addColumn("date", new BizPortColumn("Date", null, AttributeType.date));
+		wb.addSheet(new SheetKey("m", "d"), sheet);
+		wb.materialise();
+		sheet.addRow("r1");
+		sheet.setValue("date", new DateOnly());
+		UploadException problems = new UploadException();
+
+		Integer result = sheet.getValue("date", AttributeType.integer, problems);
+
+		assertNull(result);
+		assertTrue(problems.hasErrors());
+	}
+
+	@Test
+	public void numericCellWithBooleanTypeAddsError() {
+		POIWorkbook wb = new POIWorkbook(true);
+		POISheet sheet = new POISheet("TestSheet");
+		sheet.addColumn("num", new BizPortColumn("Num", null, AttributeType.integer));
+		wb.addSheet(new SheetKey("m", "d"), sheet);
+		wb.materialise();
+		sheet.addRow("r1");
+		sheet.setValue("num", Integer.valueOf(7));
+		UploadException problems = new UploadException();
+
+		Boolean result = sheet.getValue("num", AttributeType.bool, problems);
+
+		assertNull(result);
+		assertTrue(problems.hasErrors());
+	}
+
+	@Test
+	public void setValueOnReferencedColumnAddsLookupFormula() {
+		POIWorkbook wb = new POIWorkbook(true);
+		POISheet referenceSheet = new POISheet("Customers");
+		wb.addSheet(new SheetKey("crm", "Customer"), referenceSheet);
+		POISheet sheet = new POISheet("Orders");
+		BizPortColumn customerColumn = new BizPortColumn("Customer", null, AttributeType.text);
+		customerColumn.setReferencedSheet(new SheetKey("crm", "Customer"));
+		sheet.addColumn("customerId", customerColumn);
+		wb.addSheet(new SheetKey("sales", "Order"), sheet);
+		wb.materialise();
+		sheet.addRow("r1");
+
+		sheet.setValue("customerId", "CUST-1");
+
+		assertNotNull(sheet.sheet.getRow(3).getCell(1));
+		assertTrue(sheet.sheet.getRow(3).getCell(1).getCellFormula().contains("'Customers'"));
+	}
+
+	@Test
+	public void setTitleUpdatesMaterialisedWorkbookSheetName() {
+		POIWorkbook wb = new POIWorkbook(true);
+		POISheet sheet = new POISheet("OldName");
+		wb.addSheet(new SheetKey("m", "d"), sheet);
+		wb.materialise();
+
+		sheet.setTitle("NewName");
+
+		assertEquals("NewName", sheet.getTitle());
 	}
 
 	@Test
@@ -543,5 +719,11 @@ public class POISheetTest {
 			sheet.getRow(2).createCell(i).setCellValue("Title " + i);
 		}
 		return sheet;
+	}
+
+	private static Problem first(Iterable<Problem> problems) {
+		Iterator<Problem> iterator = problems.iterator();
+		assertTrue(iterator.hasNext());
+		return iterator.next();
 	}
 }

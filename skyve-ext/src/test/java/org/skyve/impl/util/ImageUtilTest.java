@@ -4,18 +4,42 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 
 import javax.imageio.ImageIO;
 
+import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
+import org.skyve.metadata.repository.ProvidedRepository;
 
 @SuppressWarnings("static-method")
 public class ImageUtilTest {
+	@Rule
+	public TemporaryFolder temp = new TemporaryFolder();
+
+	private final ProvidedRepository originalRepository = ProvidedRepositoryFactory.get();
+
+	@After
+	public void teardown() {
+		if (originalRepository == null) {
+			ProvidedRepositoryFactory.clear();
+		}
+		else {
+			ProvidedRepositoryFactory.set(originalRepository);
+		}
+	}
 
 	@Test
 	public void signatureWithNullColorsRendersTransparentPng() throws Exception {
@@ -79,6 +103,34 @@ public class ImageUtilTest {
 	}
 
 	@Test
+	public void svgWithoutExtensionUsesBlankIconAndAddsDimensions() throws Exception {
+		File blank = svgFile("blank.svg", "<svg viewBox=\"0 0 10 10\"><rect width=\"10\" height=\"10\"/></svg>");
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		when(repository.findResourceFile("files/blank.svg", null, null)).thenReturn(blank);
+		ProvidedRepositoryFactory.set(repository);
+
+		String result = new String(ImageUtil.svg("README", 32, 24), StandardCharsets.UTF_8);
+
+		assertTrue(result.startsWith("<svg width=\"32px\" height=\"24px\" "));
+		assertTrue(result.contains("viewBox=\"0 0 10 10\""));
+	}
+
+	@Test
+	public void svgFallsBackToBlankIconWhenSpecificIconDoesNotExist() throws Exception {
+		File missingSpecificIcon = new File(temp.getRoot(), "missing.svg");
+		File blank = svgFile("blank.svg", "<svg viewBox=\"0 0 20 20\"><circle r=\"4\"/></svg>");
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		when(repository.findResourceFile("files/pdf.svg", null, null)).thenReturn(missingSpecificIcon);
+		when(repository.findResourceFile("files/blank.svg", null, null)).thenReturn(blank);
+		ProvidedRepositoryFactory.set(repository);
+
+		String result = new String(ImageUtil.svg("REPORT.PDF", 48, 48), StandardCharsets.UTF_8);
+
+		assertTrue(result.startsWith("<svg width=\"48px\" height=\"48px\" "));
+		assertTrue(result.contains("viewBox=\"0 0 20 20\""));
+	}
+
+	@Test
 	public void burnSvgWithSimpleRectRendersOntoImage() throws Exception {
 		BufferedImage image = new BufferedImage(100, 100, BufferedImage.TYPE_INT_ARGB);
 		assertEquals(100, image.getWidth());
@@ -121,5 +173,11 @@ public class ImageUtilTest {
 				+ "<rect width=\"50\" height=\"50\" fill=\"red\"/>"
 				+ "</svg>";
 		ImageUtil.burnSvg(image, svg);
+	}
+
+	private File svgFile(String name, String xml) throws Exception {
+		File file = temp.newFile(name);
+		Files.writeString(file.toPath(), xml, StandardCharsets.UTF_8);
+		return file;
 	}
 }

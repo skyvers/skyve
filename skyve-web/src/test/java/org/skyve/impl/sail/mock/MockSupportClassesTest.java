@@ -30,6 +30,7 @@ class MockSupportClassesTest {
 	}
 
 	@Test
+	@SuppressWarnings("null")
 	void mockWebContextNoOpsAndCollectionsAreStable() throws Exception {
 		MockWebContext context = new MockWebContext();
 

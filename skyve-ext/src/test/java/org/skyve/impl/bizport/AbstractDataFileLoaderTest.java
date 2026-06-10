@@ -3,7 +3,9 @@ package org.skyve.impl.bizport;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -14,14 +16,18 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
+import org.skyve.domain.DynamicBean;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.bizport.AbstractDataFileLoader.LoaderActivityType;
 import org.skyve.impl.bizport.DataFileField.LoadAction;
+import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -32,6 +38,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentFilter;
 import org.skyve.persistence.DocumentQuery;
+import org.skyve.util.Binder;
 
 @SuppressWarnings({"static-method", "unchecked", "boxing"})
 class AbstractDataFileLoaderTest {
@@ -113,6 +120,26 @@ class AbstractDataFileLoaderTest {
 	}
 
 	@Test
+	void addFieldUsesConvertibleFieldConverterWhenNoFieldConverterProvided() throws Exception {
+		Customer customer = customer();
+		Document document = customer.getModule("sales").getDocument(customer, "Order");
+		Text name = new Text();
+		name.setName("name");
+		name.setDisplayName("name");
+		name.setLength(50);
+		@SuppressWarnings("rawtypes")
+		Converter converter = mock(Converter.class);
+		name.setConverter(converter);
+		when(document.getAttribute("name")).thenReturn(name);
+		bindPersistence(persistence(customer, null, null));
+		TestLoader loader = new TestLoader(LoaderActivityType.CREATE_ALL, new UploadException());
+
+		loader.addField("name");
+
+		assertSame(converter, loader.getFields().get(0).getConverter());
+	}
+
+	@Test
 	void addFieldDefaultsCompoundBindingsToLookupEqualsForCreateFind() throws Exception {
 		Customer customer = customer();
 		Module module = customer.getModule("sales");
@@ -155,6 +182,37 @@ class AbstractDataFileLoaderTest {
 	}
 
 	@Test
+	void addFieldsInDebugModeFinalisesScalarAndAssociationFields() throws Exception {
+		Customer customer = customer();
+		Document document = customer.getModule("sales").getDocument(customer, "Order");
+		Attribute name = attribute("name", AttributeType.text);
+		Relation company = relation("company", "Company");
+		doReturn(String.class).when(name).getImplementingType();
+		when(document.getAttribute("name")).thenReturn(name);
+		when(document.getAttribute("company")).thenReturn(company);
+		bindPersistence(persistence(customer, null, null));
+		TestLoader loader = new TestLoader(LoaderActivityType.CREATE_ALL, new UploadException());
+		loader.setDebugMode(true);
+
+		loader.addFields("name", "company");
+
+		assertThat(loader.getFields().get(0).getBinding(), is("name"));
+		assertThat(loader.getFields().get(0).getAttribute(), is(name));
+		assertThat(loader.getFields().get(1).getBinding(), is("company.bizKey"));
+		assertThat(loader.getFields().get(1).getAttribute(), is(company));
+	}
+
+	@Test
+	void addDataFileFieldAssignsNextIndexWhenIndexIsNull() throws Exception {
+		bindPersistence(persistence(customer(), null, null));
+		TestLoader loader = new TestLoader(LoaderActivityType.CREATE_ALL, new UploadException());
+
+		loader.addField(new DataFileField(null));
+
+		assertThat(loader.getFields().get(0).getIndex(), is(Integer.valueOf(0)));
+	}
+
+	@Test
 	void beanResultAddsErrorWhenNoFieldsWereProvided() throws Exception {
 		UploadException problems = new UploadException();
 		Bean bean = mock(Bean.class);
@@ -184,6 +242,7 @@ class AbstractDataFileLoaderTest {
 		Bean bean = mock(Bean.class);
 		bindPersistence(persistence(customer(), bean, null));
 		TestLoader loader = new TestLoader(LoaderActivityType.CREATE_FIND, problems);
+		loader.setDebugMode(true);
 		loader.addTestField("boolBinding", AttributeType.bool);
 		loader.addTestField("textBinding", AttributeType.text);
 		loader.addTestField("dateBinding", AttributeType.date);
@@ -235,6 +294,41 @@ class AbstractDataFileLoaderTest {
 	}
 
 	@Test
+	void beanResultAddsConverterWarningWhenStringValueCannotBeRead() throws Exception {
+		UploadException problems = new UploadException();
+		Bean bean = mock(Bean.class);
+		bindPersistence(persistence(customer(), bean, null));
+		TestLoader loader = new TestLoader(LoaderActivityType.CREATE_FIND, problems);
+		loader.throwStringIndexes.add(Integer.valueOf(0));
+		@SuppressWarnings("rawtypes")
+		Converter converter = mock(Converter.class);
+		DataFileField field = field("convertedBinding", AttributeType.text);
+		field.setIndex(0);
+		field.setConverter(converter);
+		loader.getFields().add(field);
+
+		assertSame(bean, loader.beanResult());
+
+		assertThat(problems.getWarnings().iterator().next().getWhat(), containsString("using Converter"));
+	}
+
+	@Test
+	void beanResultAddsErrorWhenNumericValueCannotBeConverted() throws Exception {
+		UploadException problems = new UploadException();
+		Bean bean = mock(Bean.class);
+		bindPersistence(persistence(customer(), bean, null));
+		TestLoader loader = new TestLoader(LoaderActivityType.CREATE_FIND, problems);
+		loader.throwNumericIndexes.add(Integer.valueOf(0));
+		DataFileField field = field("amount", AttributeType.decimal2);
+		field.setIndex(0);
+		loader.getFields().add(field);
+
+		assertSame(bean, loader.beanResult());
+
+		assertThat(problems.getErrors().iterator().next().getWhat(), containsString("invalid or the wrong type"));
+	}
+
+	@Test
 	void beanResultAddsWarningWhenRequiredFieldValueIsMissing() throws Exception {
 		UploadException problems = new UploadException();
 		Bean bean = mock(Bean.class);
@@ -265,12 +359,30 @@ class AbstractDataFileLoaderTest {
 	}
 
 	@Test
+	void beanResultAddsErrorWhenBindingHasNoResolvedAttribute() throws Exception {
+		UploadException problems = new UploadException();
+		Bean bean = mock(Bean.class);
+		bindPersistence(persistence(customer(), bean, null));
+		TestLoader loader = new TestLoader(LoaderActivityType.CREATE_FIND, problems);
+		loader.setDebugMode(true);
+		DataFileField field = new DataFileField("missing");
+		field.setIndex(0);
+		loader.getFields().add(field);
+
+		assertSame(bean, loader.beanResult());
+
+		assertThat(problems.hasErrors(), is(true));
+		assertThat(problems.getErrors().iterator().next().getWhat(), containsString("missing"));
+	}
+
+	@Test
 	void findBeanResultBuildsEqualsLikeAndContainsFilters() throws Exception {
 		UploadException problems = new UploadException();
 		DocumentFilter filter = mock(DocumentFilter.class);
 		when(filter.isEmpty()).thenReturn(false);
 		bindPersistence(persistence(customer(), null, filter));
 		TestLoader loader = new TestLoader(LoaderActivityType.FIND, problems);
+		loader.setDebugMode(true);
 		DataFileField equals = field("name", AttributeType.text);
 		equals.setLoadAction(LoadAction.LOOKUP_EQUALS);
 		equals.setIndex(0);
@@ -289,6 +401,164 @@ class AbstractDataFileLoaderTest {
 		verify(filter).addEquals("name", "yes");
 		verify(filter).addLike("description", "cell-1");
 		verify(filter).addLike("notes", "%cell-2%");
+	}
+
+	@Test
+	void findBeanResultReturnsMatchedBeanWhenFilterIsNotEmpty() throws Exception {
+		UploadException problems = new UploadException();
+		Bean bean = mock(Bean.class);
+		when(bean.getBizKey()).thenReturn("Order 1");
+		DocumentFilter filter = mock(DocumentFilter.class);
+		when(filter.isEmpty()).thenReturn(false);
+		bindPersistence(persistence(customer(), bean, filter));
+		TestLoader loader = new TestLoader(LoaderActivityType.FIND, problems);
+		loader.setDebugMode(true);
+		DataFileField equals = field("name", AttributeType.text);
+		equals.setLoadAction(LoadAction.LOOKUP_EQUALS);
+		equals.setIndex(0);
+		loader.getFields().add(equals);
+
+		assertSame(bean, loader.beanResult());
+		verify(filter).addEquals("name", "yes");
+	}
+
+	@Test
+	void lookupBeanInFindModeThrowsWhenNoExistingBeanMatches() throws Exception {
+		Customer customer = customer();
+		Module module = customer.getModule("sales");
+		Document order = module.getDocument(customer, "Order");
+		Document company = mock(Document.class);
+		Relation companyRelation = relation("company", "Company");
+		when(order.getAttribute("company")).thenReturn(companyRelation);
+		when(order.getOwningModuleName()).thenReturn("sales");
+		when(order.getName()).thenReturn("Order");
+		when(order.getLocalisedSingularAlias()).thenReturn("Order");
+		when(order.getLocalisedPluralAlias()).thenReturn("Orders");
+		when(module.getDocument(customer, "Company")).thenReturn(company);
+		when(company.getOwningModuleName()).thenReturn("sales");
+		when(company.getName()).thenReturn("Company");
+		when(company.getLocalisedSingularAlias()).thenReturn("Company");
+		when(company.getLocalisedPluralAlias()).thenReturn("Companies");
+		AbstractPersistence persistence = persistence(customer, null, null);
+		DocumentQuery lookup = mock(DocumentQuery.class);
+		DocumentFilter filter = mock(DocumentFilter.class);
+		when(persistence.newDocumentQuery(anyString(), anyString())).thenReturn(lookup);
+		when(lookup.getFilter()).thenReturn(filter);
+		when(filter.addEquals("company", "Acme")).thenReturn(filter);
+		when(lookup.beanResult()).thenReturn(null);
+		bindPersistence(persistence);
+		TestLoader loader = new TestLoader(LoaderActivityType.FIND, new UploadException());
+		DataFileField field = field("company", AttributeType.association);
+		field.setLoadAction(LoadAction.LOOKUP_EQUALS);
+
+		DomainException thrown = assertThrows(DomainException.class,
+				() -> loader.lookupBean(mock(Bean.class), field, "Acme", new StringBuilder()));
+
+		assertThat(thrown.getMessage(), containsString("doesn't match any existing Orders"));
+		verify(filter).addEquals("company", "Acme");
+	}
+
+	@Test
+	void lookupBeanSetsFoundReferenceForCreateFindCompoundBinding() throws Exception {
+		Customer customer = customer();
+		stubCompanyLookupMetadata(customer);
+		AbstractPersistence persistence = persistence(customer, null, null);
+		DocumentQuery lookup = mock(DocumentQuery.class);
+		DocumentFilter filter = mock(DocumentFilter.class);
+		Bean found = new DynamicBean("sales", "Company", new TreeMap<>());
+		when(persistence.newDocumentQuery("sales", "Company")).thenReturn(lookup);
+		when(lookup.getFilter()).thenReturn(filter);
+		when(lookup.beanResult()).thenReturn(found);
+		bindPersistence(persistence);
+		TestLoader loader = new TestLoader(LoaderActivityType.CREATE_FIND, new UploadException());
+		DataFileField field = field("company.name", AttributeType.text);
+		field.setLoadAction(LoadAction.LOOKUP_CONTAINS);
+		TreeMap<String, Object> properties = new TreeMap<>();
+		properties.put("company", null);
+		Bean order = new DynamicBean("sales", "Order", properties);
+
+		loader.lookupBean(order, field, "Acme", new StringBuilder());
+
+		verify(filter).addLike("name", "%Acme%");
+		assertSame(found, Binder.get(order, "company"));
+	}
+
+	@Test
+	void lookupBeanUsesLikeLookupAndSetsFoundReferenceInDebugMode() throws Exception {
+		Customer customer = customer();
+		stubCompanyLookupMetadata(customer);
+		AbstractPersistence persistence = persistence(customer, null, null);
+		DocumentQuery lookup = mock(DocumentQuery.class);
+		DocumentFilter filter = mock(DocumentFilter.class);
+		TreeMap<String, Object> foundProperties = new TreeMap<>();
+		foundProperties.put(Bean.DOCUMENT_ID, "company-1");
+		Bean found = new DynamicBean("sales", "Company", foundProperties);
+		when(persistence.newDocumentQuery("sales", "Company")).thenReturn(lookup);
+		when(lookup.getFilter()).thenReturn(filter);
+		when(lookup.beanResult()).thenReturn(found);
+		bindPersistence(persistence);
+		TestLoader loader = new TestLoader(LoaderActivityType.CREATE_FIND, new UploadException());
+		loader.setDebugMode(true);
+		DataFileField field = field("company.name", AttributeType.text);
+		field.setLoadAction(LoadAction.LOOKUP_LIKE);
+		Bean order = dynamicOrder();
+
+		loader.lookupBean(order, field, "Acme", new StringBuilder());
+
+		verify(filter).addLike("name", "Acme");
+		assertSame(found, Binder.get(order, "company"));
+	}
+
+	@Test
+	void lookupBeanConfirmValueRejectsDifferentExistingReference() throws Exception {
+		Customer customer = customer();
+		stubCompanyLookupMetadata(customer);
+		AbstractPersistence persistence = persistence(customer, null, null);
+		DocumentQuery lookup = mock(DocumentQuery.class);
+		DocumentFilter filter = mock(DocumentFilter.class);
+		Bean existing = new DynamicBean("sales", "Company", new TreeMap<>());
+		Bean found = new DynamicBean("sales", "Company", new TreeMap<>());
+		when(persistence.newDocumentQuery("sales", "Company")).thenReturn(lookup);
+		when(lookup.getFilter()).thenReturn(filter);
+		when(lookup.beanResult()).thenReturn(found);
+		bindPersistence(persistence);
+		TestLoader loader = new TestLoader(LoaderActivityType.CREATE_FIND, new UploadException());
+		DataFileField field = field("company.name", AttributeType.text);
+		field.setLoadAction(LoadAction.CONFIRM_VALUE);
+		TreeMap<String, Object> properties = new TreeMap<>();
+		properties.put("company", null);
+		Bean order = new DynamicBean("sales", "Order", properties);
+		Binder.set(order, "company", existing);
+
+		DomainException thrown = assertThrows(DomainException.class,
+				() -> loader.lookupBean(order, field, "Acme", new StringBuilder()));
+
+		verify(filter).addEquals("name", "Acme");
+		assertThat(thrown.getMessage(), containsString("doesn't match the existing value"));
+	}
+
+	@Test
+	void lookupBeanConfirmValueAcceptsMatchingExistingReference() throws Exception {
+		Customer customer = customer();
+		stubCompanyLookupMetadata(customer);
+		AbstractPersistence persistence = persistence(customer, null, null);
+		DocumentQuery lookup = mock(DocumentQuery.class);
+		DocumentFilter filter = mock(DocumentFilter.class);
+		Bean existing = mock(Bean.class);
+		when(persistence.newDocumentQuery("sales", "Company")).thenReturn(lookup);
+		when(lookup.getFilter()).thenReturn(filter);
+		when(lookup.beanResult()).thenReturn(existing);
+		bindPersistence(persistence);
+		TestLoader loader = new TestLoader(LoaderActivityType.CREATE_FIND, new UploadException());
+		DataFileField field = field("company.name", AttributeType.text);
+		field.setLoadAction(LoadAction.CONFIRM_VALUE);
+		Bean order = dynamicOrder();
+		Binder.set(order, "company", existing);
+
+		loader.lookupBean(order, field, "Acme", new StringBuilder());
+
+		verify(filter).addEquals("name", "Acme");
+		assertSame(existing, Binder.get(order, "company"));
 	}
 
 	@Test
@@ -337,6 +607,7 @@ class AbstractDataFileLoaderTest {
 		DocumentQuery query = mock(DocumentQuery.class);
 		DocumentFilter effectiveFilter = (filter == null) ? mock(DocumentFilter.class) : filter;
 		when(query.getFilter()).thenReturn(effectiveFilter);
+		when(query.beanResult()).thenReturn(newBean);
 		when(persistence.newDocumentQuery("sales", "Order")).thenReturn(query);
 		Document document = customer.getModule("sales").getDocument(customer, "Order");
 		when(document.newInstance(user)).thenReturn(newBean);
@@ -366,6 +637,30 @@ class AbstractDataFileLoaderTest {
 		return relation;
 	}
 
+	private static void stubCompanyLookupMetadata(Customer customer) {
+		Module module = customer.getModule("sales");
+		Document order = module.getDocument(customer, "Order");
+		Document company = mock(Document.class);
+		Relation companyRelation = relation("company", "Company");
+		Text companyName = new Text();
+		companyName.setName("name");
+		companyName.setDisplayName("name");
+		companyName.setLength(50);
+		when(order.getAttribute("company")).thenReturn(companyRelation);
+		when(order.getOwningModuleName()).thenReturn("sales");
+		when(order.getName()).thenReturn("Order");
+		when(module.getDocument(customer, "Company")).thenReturn(company);
+		when(company.getOwningModuleName()).thenReturn("sales");
+		when(company.getName()).thenReturn("Company");
+		when(company.getAttribute("name")).thenReturn(companyName);
+	}
+
+	private static Bean dynamicOrder() {
+		TreeMap<String, Object> properties = new TreeMap<>();
+		properties.put("company", null);
+		return new DynamicBean("sales", "Order", properties);
+	}
+
 	private static boolean hasWarning(UploadException problems, String warning) {
 		for (UploadException.Problem problem : problems.getWarnings()) {
 			if (warning.equals(problem.getWhat())) {
@@ -391,6 +686,8 @@ class AbstractDataFileLoaderTest {
 		private boolean hasNext;
 		private boolean noData;
 		private final Set<Integer> nullStringIndexes = new HashSet<>();
+		private final Set<Integer> throwStringIndexes = new HashSet<>();
+		private final Set<Integer> throwNumericIndexes = new HashSet<>();
 
 		private TestLoader(LoaderActivityType activityType, UploadException exception) {
 			super(activityType, exception, "sales", "Order");
@@ -417,6 +714,9 @@ class AbstractDataFileLoaderTest {
 
 		@Override
 		String getStringFieldValue(int index, boolean emptyAsNull) {
+			if (throwStringIndexes.contains(Integer.valueOf(index))) {
+				throw new IllegalStateException("bad string");
+			}
 			if (nullStringIndexes.contains(Integer.valueOf(index))) {
 				return null;
 			}
@@ -425,6 +725,9 @@ class AbstractDataFileLoaderTest {
 
 		@Override
 		Double getNumericFieldValue(int index, boolean emptyAsZero) {
+			if (throwNumericIndexes.contains(Integer.valueOf(index))) {
+				throw new IllegalStateException("bad number");
+			}
 			return Double.valueOf(12.5);
 		}
 

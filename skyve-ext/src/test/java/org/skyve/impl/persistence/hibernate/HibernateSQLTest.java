@@ -6,11 +6,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Date;
+import java.util.Collections;
 import java.util.List;
 
 import org.hibernate.Session;
@@ -20,6 +22,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.messages.TimeoutException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Decimal2;
 import org.skyve.domain.types.Enumeration;
@@ -184,6 +187,87 @@ class HibernateSQLTest {
 
 			assertNotNull(results);
 			assertEquals(1, results.size());
+		}
+		finally {
+			persistence.close();
+		}
+	}
+
+	@Test
+	void scalarResultsRejectsTupleRows() {
+		AbstractHibernatePersistenceTest.TestHibernatePersistence persistence = new AbstractHibernatePersistenceTest.TestHibernatePersistence();
+		try {
+			Session session = mock(Session.class);
+			setSession(persistence, session);
+
+			NativeQuery q = mock(NativeQuery.class);
+			when(session.createNativeQuery(anyString())).thenReturn(q);
+			when(q.list()).thenReturn(Collections.singletonList(new Object[] {"name", "active"}));
+
+			HibernateSQL sql = new HibernateSQL("select name, status from Contact", persistence);
+
+			org.junit.jupiter.api.Assertions.assertThrows(DomainException.class, () -> sql.scalarResults(String.class));
+		}
+		finally {
+			persistence.close();
+		}
+	}
+
+	@Test
+	void tupleResultsRejectsScalarRows() {
+		AbstractHibernatePersistenceTest.TestHibernatePersistence persistence = new AbstractHibernatePersistenceTest.TestHibernatePersistence();
+		try {
+			Session session = mock(Session.class);
+			setSession(persistence, session);
+
+			NativeQuery q = mock(NativeQuery.class);
+			when(session.createNativeQuery(anyString())).thenReturn(q);
+			when(q.list()).thenReturn(List.of("name"));
+
+			HibernateSQL sql = new HibernateSQL("select name from Contact", persistence);
+
+			org.junit.jupiter.api.Assertions.assertThrows(DomainException.class, sql::tupleResults);
+		}
+		finally {
+			persistence.close();
+		}
+	}
+
+	@Test
+	void scalarResultsWrapsQueryTimeoutAsTimeoutException() {
+		AbstractHibernatePersistenceTest.TestHibernatePersistence persistence = new AbstractHibernatePersistenceTest.TestHibernatePersistence();
+		try {
+			Session session = mock(Session.class);
+			setSession(persistence, session);
+
+			NativeQuery q = mock(NativeQuery.class);
+			when(session.createNativeQuery(anyString())).thenReturn(q);
+			when(q.list()).thenThrow(new jakarta.persistence.QueryTimeoutException("slow"));
+
+			HibernateSQL sql = new HibernateSQL("select name from Contact", persistence);
+
+			org.junit.jupiter.api.Assertions.assertThrows(TimeoutException.class, () -> sql.scalarResults(String.class));
+		}
+		finally {
+			persistence.close();
+		}
+	}
+
+	@Test
+	void executeWrapsUnexpectedNativeQueryFailure() {
+		AbstractHibernatePersistenceTest.TestHibernatePersistence persistence = new AbstractHibernatePersistenceTest.TestHibernatePersistence();
+		try {
+			Session session = mock(Session.class);
+			setSession(persistence, session);
+
+			NativeQuery q = mock(NativeQuery.class);
+			when(session.createNativeQuery(anyString())).thenReturn(q);
+			doThrow(new IllegalStateException("database unavailable")).when(q).executeUpdate();
+
+			HibernateSQL sql = new HibernateSQL("update Contact set name = 'X'", persistence);
+
+			DomainException thrown = org.junit.jupiter.api.Assertions.assertThrows(DomainException.class, sql::execute);
+			assertEquals(IllegalStateException.class, thrown.getCause().getClass());
 		}
 		finally {
 			persistence.close();

@@ -9,7 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import jakarta.faces.convert.ConverterException;
-class SimplePercentageTest {
+public class SimplePercentageTest {
 	private SimplePercentage converter;
 
 	@Before

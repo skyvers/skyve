@@ -3,6 +3,7 @@ package org.skyve.impl.mail;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -20,6 +21,7 @@ import org.mockito.Mockito;
 import org.skyve.content.MimeType;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Mail;
@@ -203,6 +205,23 @@ class MailLogUtilTest {
 		}
 	}
 
+	@SuppressWarnings("static-method")
+	@Test
+	void testCreateMailLogUserUsesDefaultCustomerWhenCurrentUserIsNull() throws Exception {
+		String originalCustomer = UtilImpl.CUSTOMER;
+		try {
+			UtilImpl.CUSTOMER = "default-customer";
+
+			SuperUser result = (SuperUser) invokePrivate("createMailLogUser", new Class<?>[] { User.class }, new Object[] { null });
+
+			assertThat(result.getId(), is("mailLogUser"));
+			assertThat(result.getCustomerName(), is("default-customer"));
+		}
+		finally {
+			UtilImpl.CUSTOMER = originalCustomer;
+		}
+	}
+
 	@Test
 	void testLogMailTimestampIsPopulated() {
 		MailLogUtil.logMail(new Mail().addTo("to@skyve.org").subject("Subject").body("Body"),
@@ -278,6 +297,26 @@ class MailLogUtilTest {
 		assertEquals(1, entries.size());
 	}
 
+	@SuppressWarnings("static-method")
+	@Test
+	void testPlainTextBodyNormalisesHtmlWhitespaceAndMasksSensitiveCode() throws Exception {
+		String result = (String) invokePrivate("plainTextBody",
+				new Class<?>[] { String.class },
+				"<p>Hello\t there</p><br/>security code: 123456\n\n\nDone");
+
+		assertEquals("Hello there\n\nsecurity code: ******\n\nDone", result);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testPlainTextBodyReturnsNullAfterFinalTrim() throws Exception {
+		String result = (String) invokePrivate("plainTextBody",
+				new Class<?>[] { String.class },
+				"<br/> <br/>");
+
+		assertEquals(null, result);
+	}
+
 	// ---- startsWithWord: word char immediately before 'is' position ----
 
 	@Test
@@ -322,6 +361,26 @@ class MailLogUtilTest {
 				new Class<?>[] { String.class },
 				"security code: 12345a");
 		assertEquals("security code: 12345a", result);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testMaskSensitiveCodesIgnoresEmbeddedPrefixAndOversizedCode() throws Exception {
+		String result = (String) invokePrivate("maskSensitiveCodes",
+				new Class<?>[] { String.class },
+				"mysecurity code: 123456 and security code: 12345678901");
+
+		assertEquals("mysecurity code: 123456 and security code: 12345678901", result);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testMaskSensitiveCodesMasksCodeAtEndOfString() throws Exception {
+		String result = (String) invokePrivate("maskSensitiveCodes",
+				new Class<?>[] { String.class },
+				"pin code=9876");
+
+		assertEquals("pin code=****", result);
 	}
 
 	// ---- startsWithWord: end exceeds length (L343) ----
@@ -385,5 +444,43 @@ class MailLogUtilTest {
 		Mail mail = new Mail().addTo("to@skyve.org").subject("Subject").body("before</div extra>after");
 		MailLogUtil.logMail(mail, MailDispatchOutcome.sent("smtp"));
 		assertEquals(1, entries.size());
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testTrimSpacesAroundNewlinesRemovesSpaceAfterNewline() throws Exception {
+		String result = (String) invokePrivate("trimSpacesAroundNewlines",
+				new Class<?>[] { String.class },
+				"one\n two");
+
+		assertEquals("one\ntwo", result);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testTrimSpacesAroundNewlinesRemovesSpaceBeforeNewline() throws Exception {
+		String result = (String) invokePrivate("trimSpacesAroundNewlines",
+				new Class<?>[] { String.class },
+				"one \ntwo");
+
+		assertEquals("one\ntwo", result);
+	}
+
+	@SuppressWarnings({ "static-method", "boxing" })
+	@Test
+	void testStartsWithWordReturnsTrueWhenFollowedByPunctuation() throws Exception {
+		boolean result = (boolean) invokePrivate("startsWithWord",
+				new Class<?>[] { String.class, int.class, String.class },
+				"is:", Integer.valueOf(0), "is");
+
+		assertTrue(result);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testCloseQuietlyIgnoresNullPersistence() {
+		assertDoesNotThrow(() -> invokePrivate("closeQuietly",
+				new Class<?>[] { AbstractHibernatePersistence.class },
+				new Object[] { null }));
 	}
 }

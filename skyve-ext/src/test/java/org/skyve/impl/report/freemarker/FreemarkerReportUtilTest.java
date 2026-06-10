@@ -1,6 +1,7 @@
 package org.skyve.impl.report.freemarker;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -13,11 +14,13 @@ import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +30,7 @@ import org.apache.commons.beanutils.DynaBean;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentMatchers;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
@@ -40,6 +44,7 @@ import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.controller.Download;
 import org.skyve.metadata.model.document.Document;
@@ -50,12 +55,17 @@ import org.skyve.persistence.DocumentFilter;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.report.ReportFormat;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.xhtmlrenderer.pdf.ITextOutputDevice;
+import org.xhtmlrenderer.pdf.ITextRenderer;
 
 import freemarker.template.Template;
 
 @SuppressWarnings("static-method")
 class FreemarkerReportUtilTest {
+	@TempDir
+	Path tempDir;
 
 	@BeforeAll
 	static void initFreeMarker() {
@@ -124,6 +134,58 @@ class FreemarkerReportUtilTest {
 	}
 
 	@Test
+	void privateFontResourceLookupsReturnLists() throws Exception {
+		Field resolverField = FreemarkerReportUtil.class.getDeclaredField("resolver");
+		resolverField.setAccessible(true);
+		Object previousResolver = resolverField.get(null);
+		PathMatchingResourcePatternResolver resolver = mock(PathMatchingResourcePatternResolver.class);
+		when(resolver.getResources("classpath:fonts/*.ttf")).thenReturn(new Resource[0]);
+		when(resolver.getResources("classpath:fonts/unicode/*.ttf")).thenReturn(new Resource[0]);
+
+		try {
+			resolverField.set(null, resolver);
+			Method fontMethod = FreemarkerReportUtil.class.getDeclaredMethod("getFontResources");
+			Method unicodeFontMethod = FreemarkerReportUtil.class.getDeclaredMethod("getUnicodeFontResources");
+			fontMethod.setAccessible(true);
+			unicodeFontMethod.setAccessible(true);
+
+			assertNotNull(fontMethod.invoke(null));
+			assertNotNull(unicodeFontMethod.invoke(null));
+		}
+		finally {
+			resolverField.set(null, previousResolver);
+		}
+	}
+
+	@Test
+	void privateLoadFontsCompletesWhenNoClasspathFontsExist() throws Exception {
+		Method method = FreemarkerReportUtil.class.getDeclaredMethod("loadFonts", ITextRenderer.class);
+		method.setAccessible(true);
+
+		assertDoesNotThrow(() -> method.invoke(null, new ITextRenderer()));
+	}
+
+	@Test
+	void privateLoadFontsSwallowsMissingFontDirectory() throws Exception {
+		Field resolverField = FreemarkerReportUtil.class.getDeclaredField("resolver");
+		resolverField.setAccessible(true);
+		Object previousResolver = resolverField.get(null);
+		PathMatchingResourcePatternResolver resolver = mock(PathMatchingResourcePatternResolver.class);
+		when(resolver.getResources("classpath:fonts/*.ttf")).thenThrow(new FileNotFoundException("missing fonts"));
+
+		try {
+			resolverField.set(null, resolver);
+			Method method = FreemarkerReportUtil.class.getDeclaredMethod("loadFonts", ITextRenderer.class);
+			method.setAccessible(true);
+
+			assertDoesNotThrow(() -> method.invoke(null, new ITextRenderer()));
+		}
+		finally {
+			resolverField.set(null, previousResolver);
+		}
+	}
+
+	@Test
 	void createReportMergesInMemoryTemplate() throws Exception {
 		bindPersistenceThatExecutesScopedFunctions();
 		FreemarkerReportUtil.addTemplate("unit-create-report.ftl", "Hello ${name}!");
@@ -140,9 +202,10 @@ class FreemarkerReportUtilTest {
 	@Test
 	void createReportWrapsMissingTemplateAsDomainException() throws Exception {
 		bindPersistenceThatExecutesScopedFunctions();
+		Map<String, Object> model = Map.of();
 
 		assertThrows(DomainException.class,
-						() -> FreemarkerReportUtil.createReport("unit-missing-template.ftl", Map.of()));
+						() -> FreemarkerReportUtil.createReport("unit-missing-template.ftl", model));
 	}
 
 	@Test
@@ -159,6 +222,47 @@ class FreemarkerReportUtilTest {
 		}
 		finally {
 			FreemarkerReportUtil.removeTemplate("sales/Order/reports/summary.ftl");
+		}
+	}
+
+	@Test
+	void createReportPDFWritesGeneratedFileInTempContentDirectory() throws Exception {
+		bindPersistenceThatExecutesScopedFunctions();
+		String previousContentDirectory = UtilImpl.CONTENT_DIRECTORY;
+		UtilImpl.CONTENT_DIRECTORY = tempDir.toString();
+		FreemarkerReportUtil.addTemplate("unit-pdf-template.ftl", "<html><body><p>${message}</p></body></html>");
+		try {
+			File result = FreemarkerReportUtil.createReportPDF("unit-pdf-template.ftl", Map.of("message", "PDF"), "unit-pdf");
+
+			assertNotNull(result);
+			assertTrue(result.exists());
+			assertEquals("unit-pdf.pdf", result.getName());
+		}
+		finally {
+			FreemarkerReportUtil.removeTemplate("unit-pdf-template.ftl");
+			UtilImpl.CONTENT_DIRECTORY = previousContentDirectory;
+		}
+	}
+
+	@Test
+	void createBeanReportPDFWritesGeneratedFileForDocumentScopedTemplate() throws Exception {
+		bindPersistenceThatExecutesScopedFunctions();
+		String previousContentDirectory = UtilImpl.CONTENT_DIRECTORY;
+		UtilImpl.CONTENT_DIRECTORY = tempDir.toString();
+		Bean bean = mock(Bean.class);
+		when(bean.getBizModule()).thenReturn("sales");
+		when(bean.getBizDocument()).thenReturn("Order");
+		FreemarkerReportUtil.addTemplate("sales/Order/reports/unit-bean-pdf.ftl", "<html><body><p>${message}</p></body></html>");
+		try {
+			File result = FreemarkerReportUtil.createBeanReportPDF(bean, "unit-bean-pdf.ftl", Map.of("message", "PDF"), "unit-bean-pdf");
+
+			assertNotNull(result);
+			assertTrue(result.exists());
+			assertEquals("unit-bean-pdf.pdf", result.getName());
+		}
+		finally {
+			FreemarkerReportUtil.removeTemplate("sales/Order/reports/unit-bean-pdf.ftl");
+			UtilImpl.CONTENT_DIRECTORY = previousContentDirectory;
 		}
 	}
 
@@ -200,7 +304,6 @@ class FreemarkerReportUtilTest {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	void runReportFormatsDateParameters() throws Exception {
 		DateOnly date = new DateOnly(0L);
 		Converter<DateOnly> converter = mock(Converter.class);
@@ -361,10 +464,29 @@ class FreemarkerReportUtilTest {
 	}
 
 	@Test
+	void downloadReportReturnsPdfDownloadForHtmlReport() throws Exception {
+		ReportDataset dataset = mock(ReportDataset.class);
+		when(dataset.getDatasetType()).thenReturn(DatasetType.constant);
+		when(dataset.getDatasetName()).thenReturn("summary");
+		when(dataset.getQuery()).thenReturn("<html><body><p>pdf-content</p></body></html>");
+		ReportTemplate reportTemplate = reportTemplate("unit-download-pdf.flth", "${summary}",
+				List.of(),
+				List.of(dataset));
+		bindPersistenceThatExecutesScopedFunctions(reportTemplate);
+
+		Download result = FreemarkerReportUtil.downloadReport("unit-download-pdf.flth", Map.of(), ReportFormat.pdf, "download-name");
+
+		assertEquals("download-name.pdf", result.getFileName());
+		assertEquals(MimeType.pdf, result.getMimeType());
+		assertTrue(result.getBytes().length > 0);
+	}
+
+	@Test
 	void runReportThrowsDomainExceptionWhenReportTemplateIsMissing() throws Exception {
 		bindPersistenceThatExecutesScopedFunctions(null);
+		Map<String, Object> model = Map.of();
 
-		assertThrows(DomainException.class, () -> FreemarkerReportUtil.runReport("missing-template.flth", Map.of()));
+		assertThrows(DomainException.class, () -> FreemarkerReportUtil.runReport("missing-template.flth", model));
 	}
 
 	@Test

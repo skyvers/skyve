@@ -6,15 +6,22 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 
 import org.junit.Test;
@@ -24,16 +31,21 @@ import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.bizport.SheetKey;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
+import org.skyve.domain.DynamicBean;
 import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.UploadException;
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.user.User;
+import org.skyve.persistence.Persistence;
 
 @SuppressWarnings("static-method")
 public class StandardLoaderTest {
@@ -126,6 +138,175 @@ public class StandardLoaderTest {
 		when(doc.getName()).thenReturn("");
 		String key = StandardLoader.createSheetKey(doc, "id");
 		assertEquals("..id", key);
+	}
+
+	@Test
+	public void getBeanForRowCreatesNewBeanWhenIdColumnIsMissing() throws Exception {
+		ExposedStandardLoader loader = new ExposedStandardLoader(mockWorkbook(), new UploadException());
+		Persistence persistence = mock(Persistence.class);
+		User user = mock(User.class);
+		Document document = document("sales", "Order");
+		Bean bean = mock(Bean.class);
+		BizPortSheet sheet = mock(BizPortSheet.class);
+		when(sheet.getColumn(Bean.DOCUMENT_ID)).thenReturn(null);
+		when(document.newInstance(user)).thenReturn(bean);
+
+		assertEquals(bean, loader.getBeanForRow(persistence, user, document, sheet));
+	}
+
+	@Test
+	public void getBeanForRowReturnsNullForEmptyRowWithIdColumn() throws Exception {
+		UploadException problems = new UploadException();
+		ExposedStandardLoader loader = new ExposedStandardLoader(mockWorkbook(), problems);
+		BizPortSheet sheet = mock(BizPortSheet.class);
+		when(sheet.getColumn(Bean.DOCUMENT_ID)).thenReturn(new BizPortColumn("ID", null));
+		when(sheet.getValue(Bean.DOCUMENT_ID, AttributeType.text, problems)).thenReturn(null);
+
+		assertNull(loader.getBeanForRow(mock(Persistence.class), mock(User.class), document("sales", "Order"), sheet));
+	}
+
+	@Test
+	public void getBeanForRowReturnsRetrievedBeanWhenFound() throws Exception {
+		UploadException problems = new UploadException();
+		ExposedStandardLoader loader = new ExposedStandardLoader(mockWorkbook(), problems);
+		Persistence persistence = mock(Persistence.class);
+		User user = mock(User.class);
+		Document document = document("sales", "Order");
+		Bean bean = mock(Bean.class);
+		BizPortSheet sheet = mock(BizPortSheet.class);
+		when(sheet.getColumn(Bean.DOCUMENT_ID)).thenReturn(new BizPortColumn("ID", null));
+		when(sheet.getValue(Bean.DOCUMENT_ID, AttributeType.text, problems)).thenReturn("B1");
+		when(persistence.retrieve(document, "B1")).thenReturn(bean);
+
+		assertEquals(bean, loader.getBeanForRow(persistence, user, document, sheet));
+	}
+
+	@Test
+	public void getBeanForRowCreatesNewBeanWhenRetrieveMisses() throws Exception {
+		UploadException problems = new UploadException();
+		ExposedStandardLoader loader = new ExposedStandardLoader(mockWorkbook(), problems);
+		Persistence persistence = mock(Persistence.class);
+		User user = mock(User.class);
+		Document document = document("sales", "Order");
+		Bean bean = mock(Bean.class);
+		BizPortSheet sheet = mock(BizPortSheet.class);
+		when(sheet.getColumn(Bean.DOCUMENT_ID)).thenReturn(new BizPortColumn("ID", null));
+		when(sheet.getValue(Bean.DOCUMENT_ID, AttributeType.text, problems)).thenReturn("B1");
+		when(persistence.retrieve(document, "B1")).thenReturn(null);
+		when(document.newInstance(user)).thenReturn(bean);
+
+		assertEquals(bean, loader.getBeanForRow(persistence, user, document, sheet));
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	public void populateBeansFromSheetMapsRowBeansAndResetsSheet() throws Exception {
+		UploadException problems = new UploadException();
+		DynamicBean bean = dynamicBean("sales", "Order", "B1", Map.of());
+		FixedRowLoader loader = new FixedRowLoader(mockWorkbook(), problems, bean);
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		when(user.getCustomer()).thenReturn(customer);
+		Document document = document("sales", "Order");
+		doReturn(List.<Attribute>of()).when(document).getAllAttributes(customer);
+		BizPortSheet sheet = mock(BizPortSheet.class);
+		when(sheet.nextRow()).thenReturn(true, false);
+		when(sheet.getValue(Bean.DOCUMENT_ID, AttributeType.text, problems)).thenReturn("row-1");
+		List<Bean> beans = new ArrayList<>();
+
+		invokePopulateBeansFromSheet(loader, mock(Persistence.class), user, document, new SheetKey("sales", "Order"), sheet, beans);
+
+		assertEquals(List.of(bean), beans);
+		assertEquals(bean, loader.getBean("sales.Order.row-1"));
+		assertEquals("row-1", loader.getSheetRowIdFromBizId("B1"));
+		verify(sheet).resetRow();
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	public void populateBeansFromSheetSkipsSystemBindings() throws Exception {
+		UploadException problems = new UploadException();
+		DynamicBean bean = dynamicBean("sales", "Order", "B2", Map.of());
+		FixedRowLoader loader = new FixedRowLoader(mockWorkbook(), problems, bean);
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		when(user.getCustomer()).thenReturn(customer);
+		Document document = document("sales", "Order");
+		doReturn(List.<Attribute>of(attribute(Bean.DOCUMENT_ID, AttributeType.text),
+									attribute(PersistentBean.OWNER_COLUMN_NAME, AttributeType.text),
+									attribute(PersistentBean.ELEMENT_COLUMN_NAME, AttributeType.text),
+									attribute(Bean.BIZ_KEY, AttributeType.text))).when(document).getAllAttributes(customer);
+		BizPortSheet sheet = mock(BizPortSheet.class);
+		when(sheet.nextRow()).thenReturn(true, false);
+		when(sheet.getValue(Bean.DOCUMENT_ID, AttributeType.text, problems)).thenReturn("row-2");
+
+		invokePopulateBeansFromSheet(loader, mock(Persistence.class), user, document, new SheetKey("sales", "Order"), sheet, null);
+
+		assertEquals(bean, loader.getBean("sales.Order.row-2"));
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	public void populateBeansFromSheetWarnsWhenAttributeColumnIsMissing() throws Exception {
+		UploadException problems = new UploadException();
+		Map<String, Object> properties = new HashMap<>();
+		properties.put("name", null);
+		DynamicBean bean = dynamicBean("sales", "Order", "B3", properties);
+		FixedRowLoader loader = new FixedRowLoader(mockWorkbook(), problems, bean);
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		when(user.getCustomer()).thenReturn(customer);
+		Document document = document("sales", "Order");
+		Attribute name = attribute("name", AttributeType.text);
+		doReturn(List.<Attribute>of(name)).when(document).getAllAttributes(customer);
+		BizPortSheet sheet = mock(BizPortSheet.class);
+		when(sheet.nextRow()).thenReturn(true, false);
+		when(sheet.getColumn("name")).thenReturn(null);
+		when(sheet.getTitle()).thenReturn("Orders");
+		when(sheet.getValue(Bean.DOCUMENT_ID, AttributeType.text, problems)).thenReturn("row-3");
+
+		invokePopulateBeansFromSheet(loader, mock(Persistence.class), user, document, new SheetKey("sales", "Order"), sheet, null);
+
+		verify(sheet).addWarningAtCurrentRow(eq(problems), eq(null), contains("Column with binding name does not exist"));
+		assertNull(BindUtil.get(bean, "name"));
+	}
+
+	@Test
+	public void populateReturnsBeansFromFirstDocumentSheetAndMapsLaterDocumentSheets() throws Exception {
+		UploadException problems = new UploadException();
+		BizPortWorkbook workbook = mock(BizPortWorkbook.class);
+		SheetKey orderKey = new SheetKey("sales", "Order");
+		SheetKey customerKey = new SheetKey("sales", "Customer");
+		when(workbook.getSheetKeys()).thenReturn(new LinkedHashSet<>(List.of(orderKey, customerKey)));
+		BizPortSheet orderSheet = simpleDocumentSheet(problems, "order-row");
+		BizPortSheet customerSheet = simpleDocumentSheet(problems, "customer-row");
+		when(workbook.getSheet(orderKey)).thenReturn(orderSheet);
+		when(workbook.getSheet(customerKey)).thenReturn(customerSheet);
+		DynamicBean order = dynamicBean("sales", "Order", "O1", Map.of());
+		DynamicBean customerBean = dynamicBean("sales", "Customer", "C1", Map.of());
+		QueuedRowLoader loader = new QueuedRowLoader(workbook, problems, order, customerBean);
+		Persistence persistence = mock(Persistence.class);
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document orderDocument = document("sales", "Order");
+		Document customerDocument = document("sales", "Customer");
+		when(persistence.getUser()).thenReturn(user);
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("sales")).thenReturn(module);
+		when(module.getDocument(customer, "Order")).thenReturn(orderDocument);
+		when(module.getDocument(customer, "Customer")).thenReturn(customerDocument);
+		doReturn(List.<Attribute>of()).when(orderDocument).getAllAttributes(customer);
+		doReturn(List.<Attribute>of()).when(customerDocument).getAllAttributes(customer);
+
+		List<Bean> result = loader.populate(persistence);
+
+		assertEquals(List.of(order), result);
+		assertEquals(order, loader.getBean("sales.Order.order-row"));
+		assertEquals(customerBean, loader.getBean("sales.Customer.customer-row"));
+		assertEquals("customer-row", loader.getSheetRowIdFromBizId("C1"));
+		verify(orderSheet).resetRow();
+		verify(customerSheet).resetRow();
 	}
 
 	@Test
@@ -252,6 +433,60 @@ public class StandardLoaderTest {
 	}
 
 	@Test
+	public void populateCollectionFromRowAddsElementToLastBindingSegment() throws Exception {
+		UploadException problems = new UploadException();
+		BizPortWorkbook workbook = mockWorkbook();
+		StandardLoader loader = new StandardLoader(workbook, problems);
+		Document ownerDocument = document("sales", "Order");
+		Document elementDocument = document("sales", "Line");
+		BizPortSheet sheet = collectionSheet(problems, "O1", "E1");
+		BizPortColumn ownerColumn = sheet.getColumn(PersistentBean.OWNER_COLUMN_NAME);
+		BizPortColumn elementColumn = sheet.getColumn(PersistentBean.ELEMENT_COLUMN_NAME);
+		SheetKey ownerKey = new SheetKey("sales", "Order");
+		SheetKey elementKey = new SheetKey("sales", "Line");
+		ownerColumn.setReferencedSheet(ownerKey);
+		elementColumn.setReferencedSheet(elementKey);
+		when(workbook.getSheet(ownerKey)).thenReturn(mock(BizPortSheet.class));
+		when(workbook.getSheet(elementKey)).thenReturn(mock(BizPortSheet.class));
+		DynamicBean element = dynamicBean("sales", "Line", "E1", Map.of());
+		DynamicBean owner = dynamicBean("sales", "Order", "O1", Map.of("lines", new ArrayList<Bean>(List.of(element))));
+		putMappedBean(loader, ownerDocument, "O1", owner);
+		putMappedBean(loader, elementDocument, "E1", element);
+
+		invokePopulateCollectionFromRow(loader, "nested.lines", ownerDocument, elementDocument, sheet);
+
+		assertEquals(List.of(element), BindUtil.get(owner, "lines"));
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	public void populateCollectionFromSheetProcessesEachRow() throws Exception {
+		UploadException problems = new UploadException();
+		BizPortWorkbook workbook = mockWorkbook();
+		StandardLoader loader = new StandardLoader(workbook, problems);
+		Document ownerDocument = document("sales", "Order");
+		Document elementDocument = document("sales", "Line");
+		BizPortSheet sheet = collectionSheet(problems, "O1", "E1");
+		BizPortColumn ownerColumn = sheet.getColumn(PersistentBean.OWNER_COLUMN_NAME);
+		BizPortColumn elementColumn = sheet.getColumn(PersistentBean.ELEMENT_COLUMN_NAME);
+		SheetKey ownerKey = new SheetKey("sales", "Order");
+		SheetKey elementKey = new SheetKey("sales", "Line");
+		ownerColumn.setReferencedSheet(ownerKey);
+		elementColumn.setReferencedSheet(elementKey);
+		when(sheet.nextRow()).thenReturn(true, true, false);
+		when(workbook.getSheet(ownerKey)).thenReturn(mock(BizPortSheet.class));
+		when(workbook.getSheet(elementKey)).thenReturn(mock(BizPortSheet.class));
+		DynamicBean element = dynamicBean("sales", "Line", "E1", Map.of());
+		DynamicBean owner = dynamicBean("sales", "Order", "O1", Map.of("lines", new ArrayList<Bean>(List.of(element))));
+		putMappedBean(loader, ownerDocument, "O1", owner);
+		putMappedBean(loader, elementDocument, "E1", element);
+
+		invokePopulateCollectionFromSheet(loader, "lines", ownerDocument, elementDocument, sheet);
+
+		assertEquals(List.of(element), BindUtil.get(owner, "lines"));
+	}
+
+	@Test
 	public void linkParentFromRowIgnoresEmptyRows() throws Exception {
 		UploadException problems = new UploadException();
 		StandardLoader loader = new StandardLoader(mockWorkbook(), problems);
@@ -346,6 +581,30 @@ public class StandardLoaderTest {
 	}
 
 	@Test
+	public void linkParentFromRowAddsChildToParentCollection() throws Exception {
+		UploadException problems = new UploadException();
+		BizPortWorkbook workbook = mockWorkbook();
+		StandardLoader loader = new StandardLoader(workbook, problems);
+		BizPortSheet sheet = parentLinkSheet(problems, "P1", "C1");
+		BizPortColumn parentColumn = sheet.getColumn(ChildBean.PARENT_NAME);
+		SheetKey parentKey = new SheetKey("sales", "Order");
+		parentColumn.setReferencedSheet(parentKey);
+		when(workbook.getSheet(parentKey)).thenReturn(mock(BizPortSheet.class));
+		Customer customer = mock(Customer.class);
+		Document childDocument = document("sales", "Line");
+		Document parentDocument = document("sales", "Order");
+		when(childDocument.getParentDocument(customer)).thenReturn(parentDocument);
+		TestChildBean child = new TestChildBean("sales", "Line", Map.of(Bean.DOCUMENT_ID, "C1"));
+		DynamicBean parent = dynamicBean("sales", "Order", "P1", Map.of("lines", new ArrayList<Bean>(List.of(child))));
+		putMappedBean(loader, parentDocument, "P1", parent);
+		putMappedBean(loader, childDocument, "C1", child);
+
+		invokeLinkParentFromRow(loader, sheet, customer, childDocument, "lines");
+
+		assertEquals(List.of(child), BindUtil.get(parent, "lines"));
+	}
+
+	@Test
 	public void linkHierarchyFromRowAddsErrorWhenCurrentIdMissing() throws Exception {
 		UploadException problems = new UploadException();
 		StandardLoader loader = new StandardLoader(mockWorkbook(), problems);
@@ -381,6 +640,51 @@ public class StandardLoaderTest {
 		invokeLinkHierarchyFromRow(loader, sheet, document);
 
 		verify(bean).setBizParentId("P1");
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	public void linkAssociationsFromSheetDispatchesHierarchyRows() throws Exception {
+		UploadException problems = new UploadException();
+		StandardLoader loader = new StandardLoader(mockWorkbook(), problems);
+		BizPortSheet sheet = hierarchySheet(problems, "P1", "C1");
+		when(sheet.getColumnBindings()).thenReturn(Set.of());
+		when(sheet.nextRow()).thenReturn(true, false);
+		Document document = document("sales", "Category");
+		doReturn(List.<Attribute>of()).when(document).getAllAttributes(nullable(Customer.class));
+		when(document.getParentDocumentName()).thenReturn("Category");
+		HierarchicalBean<Bean> bean = mock(HierarchicalBean.class);
+		putMappedBean(loader, document, "C1", bean);
+
+		invokeLinkAssociationsFromSheet(loader, null, mock(Module.class), document, new SheetKey("sales", "Category"), sheet);
+
+		verify(bean).setBizParentId("P1");
+	}
+
+	@Test
+	public void linkAssociationsFromRowClearsNullAssociationValue() throws Exception {
+		UploadException problems = new UploadException();
+		StandardLoader loader = new StandardLoader(mockWorkbook(), problems);
+		DynamicBean master = dynamicBean("sales", "Order", "O1", Map.of("customer", mock(Bean.class)));
+		BizPortSheet sheet = associationSheet(problems, "customer", null);
+		Association association = association("customer", "Customer");
+
+		invokeLinkAssociationsFromRow(loader, sheet, mock(Customer.class), mock(Module.class), master, List.of(association));
+
+		assertNull(BindUtil.get(master, "customer"));
+	}
+
+	@Test
+	public void linkAssociationsFromRowSkipsColumnsWithoutReferencedSheet() throws Exception {
+		UploadException problems = new UploadException();
+		StandardLoader loader = new StandardLoader(mockWorkbook(), problems);
+		DynamicBean master = dynamicBean("sales", "Order", "O1", Map.of("customer", mock(Bean.class)));
+		BizPortSheet sheet = associationSheet(problems, "customer", "C1");
+		Association association = association("customer", "Customer");
+
+		invokeLinkAssociationsFromRow(loader, sheet, mock(Customer.class), mock(Module.class), master, List.of(association));
+
+		assertNotNull(BindUtil.get(master, "customer"));
 	}
 
 	@Test
@@ -421,6 +725,61 @@ public class StandardLoaderTest {
 		invokeLinkAssociationsFromRow(loader, sheet, customer, module, mock(Bean.class), List.of(association));
 
 		verify(sheet).addErrorAtCurrentRow(eq(problems), eq(column), contains("referencedRowDoesNotExist"));
+	}
+
+	@Test
+	public void linkAssociationsFromRowSetsReferencedBeanWhenFound() throws Exception {
+		UploadException problems = new UploadException();
+		BizPortWorkbook workbook = mockWorkbook();
+		StandardLoader loader = new StandardLoader(workbook, problems);
+		DynamicBean master = dynamicBean("sales", "Order", "O1", Map.of("customer", mock(Bean.class)));
+		BizPortSheet sheet = associationSheet(problems, "customer", "C1");
+		BizPortColumn column = sheet.getColumn("customer");
+		SheetKey customerKey = new SheetKey("sales", "Customer");
+		column.setReferencedSheet(customerKey);
+		when(workbook.getSheet(customerKey)).thenReturn(mock(BizPortSheet.class));
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document customerDocument = document("sales", "Customer");
+		when(module.getDocument(customer, "Customer")).thenReturn(customerDocument);
+		DynamicBean customerBean = dynamicBean("sales", "Customer", "C1", Map.of());
+		putMappedBean(loader, customerDocument, "C1", customerBean);
+		Association association = association("customer", "Customer");
+
+		invokeLinkAssociationsFromRow(loader, sheet, customer, module, master, List.of(association));
+
+		assertEquals(customerBean, BindUtil.get(master, "customer"));
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	public void linkAssociationsFromSheetLinksAssociationColumns() throws Exception {
+		UploadException problems = new UploadException();
+		BizPortWorkbook workbook = mockWorkbook();
+		StandardLoader loader = new StandardLoader(workbook, problems);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document orderDocument = document("sales", "Order");
+		Document customerDocument = document("sales", "Customer");
+		Association association = association("customer", "Customer");
+		BizPortSheet sheet = associationSheet(problems, "customer", "C1");
+		BizPortColumn column = sheet.getColumn("customer");
+		SheetKey customerKey = new SheetKey("sales", "Customer");
+		column.setReferencedSheet(customerKey);
+		when(sheet.getColumnBindings()).thenReturn(Set.of("customer"));
+		when(sheet.nextRow()).thenReturn(true, false);
+		when(sheet.getValue(Bean.DOCUMENT_ID, AttributeType.text, problems)).thenReturn("O1");
+		doReturn(List.<Attribute>of(association)).when(orderDocument).getAllAttributes(customer);
+		when(workbook.getSheet(customerKey)).thenReturn(mock(BizPortSheet.class));
+		when(module.getDocument(customer, "Customer")).thenReturn(customerDocument);
+		DynamicBean order = dynamicBean("sales", "Order", "O1", Map.of("customer", mock(Bean.class)));
+		DynamicBean customerBean = dynamicBean("sales", "Customer", "C1", Map.of());
+		putMappedBean(loader, orderDocument, "O1", order);
+		putMappedBean(loader, customerDocument, "C1", customerBean);
+
+		invokeLinkAssociationsFromSheet(loader, customer, module, orderDocument, new SheetKey("sales", "Order"), sheet);
+
+		assertEquals(customerBean, BindUtil.get(order, "customer"));
 	}
 
 	@Test
@@ -507,6 +866,35 @@ public class StandardLoaderTest {
 		verify(sheet).addErrorAtCurrentRow(problems, idColumn, "General failure");
 	}
 
+	@Test
+	public void addErrorFallsBackToIdColumnWhenSimpleBindingColumnIsMissing() throws Exception {
+		UploadException problems = new UploadException();
+		BizPortWorkbook workbook = mockWorkbook();
+		StandardLoader loader = new StandardLoader(workbook, problems);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = document("sales", "Order");
+		when(customer.getModule("sales")).thenReturn(module);
+		when(module.getDocument(customer, "Order")).thenReturn(document);
+		Bean bean = mock(Bean.class);
+		when(bean.getBizId()).thenReturn("B4");
+		when(bean.getBizModule()).thenReturn("sales");
+		when(bean.getBizDocument()).thenReturn("Order");
+		BizPortSheet sheet = mock(BizPortSheet.class);
+		BizPortColumn idColumn = new BizPortColumn("ID", null);
+		SheetKey key = new SheetKey("sales", "Order");
+		when(workbook.getSheet(key)).thenReturn(sheet);
+		when(sheet.getColumn(Bean.DOCUMENT_ID)).thenReturn(idColumn);
+		when(sheet.getColumn("missing")).thenReturn(null);
+		putPrivateMapValue(loader, "bizIdToSheetKey", "B4", key);
+		putPrivateMapValue(loader, "bizIdToSheetRowId", "B4", "row-4");
+
+		loader.addError(customer, bean, new TestMessageException(new Message("missing", "Missing column")));
+
+		verify(sheet).moveToRow("row-4");
+		verify(sheet).addErrorAtCurrentRow(problems, idColumn, "Missing column");
+	}
+
 	private static Document document(String moduleName, String documentName) {
 		Document document = mock(Document.class);
 		when(document.getOwningModuleName()).thenReturn(moduleName);
@@ -555,11 +943,45 @@ public class StandardLoaderTest {
 		return sheet;
 	}
 
+	@SuppressWarnings("boxing")
+	private static BizPortSheet simpleDocumentSheet(UploadException problems, String rowId) {
+		BizPortSheet sheet = mock(BizPortSheet.class);
+		when(sheet.nextRow()).thenReturn(true, false);
+		when(sheet.getValue(Bean.DOCUMENT_ID, AttributeType.text, problems)).thenReturn(rowId);
+		when(sheet.getColumnBindings()).thenReturn(Set.of());
+		return sheet;
+	}
+
 	private static Association association(String name, String documentName) {
 		Association association = mock(Association.class);
 		when(association.getName()).thenReturn(name);
 		when(association.getDocumentName()).thenReturn(documentName);
 		return association;
+	}
+
+	private static Attribute attribute(String name, AttributeType type) {
+		Attribute attribute = mock(Attribute.class);
+		when(attribute.getName()).thenReturn(name);
+		when(attribute.getAttributeType()).thenReturn(type);
+		return attribute;
+	}
+
+	private static DynamicBean dynamicBean(String moduleName, String documentName, String bizId, Map<String, Object> properties) {
+		Map<String, Object> values = new HashMap<>(properties);
+		values.put(Bean.DOCUMENT_ID, bizId);
+		return new DynamicBean(moduleName, documentName, values);
+	}
+
+	private static void invokePopulateBeansFromSheet(StandardLoader loader,
+														Persistence persistence,
+														User user,
+														Document document,
+														SheetKey key,
+														BizPortSheet sheet,
+														List<Bean> beans) throws Exception {
+		Method method = StandardLoader.class.getDeclaredMethod("populateBeansFromSheet", Persistence.class, User.class, Document.class, SheetKey.class, BizPortSheet.class, List.class);
+		method.setAccessible(true);
+		method.invoke(loader, persistence, user, document, key, sheet, beans);
 	}
 
 	private static void invokePopulateCollectionFromRow(StandardLoader loader,
@@ -568,6 +990,16 @@ public class StandardLoaderTest {
 															Document elementDocument,
 															BizPortSheet sheet) throws Exception {
 		Method method = StandardLoader.class.getDeclaredMethod("populateCollectionFromRow", String.class, Document.class, Document.class, BizPortSheet.class);
+		method.setAccessible(true);
+		method.invoke(loader, collectionBinding, ownerDocument, elementDocument, sheet);
+	}
+
+	private static void invokePopulateCollectionFromSheet(StandardLoader loader,
+															String collectionBinding,
+															Document ownerDocument,
+															Document elementDocument,
+															BizPortSheet sheet) throws Exception {
+		Method method = StandardLoader.class.getDeclaredMethod("populateCollectionFromSheet", String.class, Document.class, Document.class, BizPortSheet.class);
 		method.setAccessible(true);
 		method.invoke(loader, collectionBinding, ownerDocument, elementDocument, sheet);
 	}
@@ -586,6 +1018,17 @@ public class StandardLoaderTest {
 		Method method = StandardLoader.class.getDeclaredMethod("linkHierarchyFromRow", BizPortSheet.class, Document.class);
 		method.setAccessible(true);
 		method.invoke(loader, sheet, childDocument);
+	}
+
+	private static void invokeLinkAssociationsFromSheet(StandardLoader loader,
+															Customer customer,
+															Module module,
+															Document document,
+															SheetKey key,
+															BizPortSheet sheet) throws Exception {
+		Method method = StandardLoader.class.getDeclaredMethod("linkAssociationsFromSheet", Customer.class, Module.class, Document.class, SheetKey.class, BizPortSheet.class);
+		method.setAccessible(true);
+		method.invoke(loader, customer, module, document, key, sheet);
 	}
 
 	private static void invokeLinkAssociationsFromRow(StandardLoader loader,
@@ -621,6 +1064,75 @@ public class StandardLoaderTest {
 		@Override
 		public List<Message> getMessages() {
 			return messages;
+		}
+	}
+
+	private static final class ExposedStandardLoader extends StandardLoader {
+		private ExposedStandardLoader(BizPortWorkbook workbook, UploadException problems) {
+			super(workbook, problems);
+		}
+
+		@Override
+		protected <T extends Bean> T getBeanForRow(Persistence persistence, User user, Document document, BizPortSheet sheet) throws Exception {
+			return super.getBeanForRow(persistence, user, document, sheet);
+		}
+	}
+
+	private static final class FixedRowLoader extends StandardLoader {
+		private final Bean bean;
+
+		private FixedRowLoader(BizPortWorkbook workbook, UploadException problems, Bean bean) {
+			super(workbook, problems);
+			this.bean = bean;
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		protected <T extends Bean> T getBeanForRow(Persistence persistence, User user, Document document, BizPortSheet sheet) {
+			return (T) bean;
+		}
+	}
+
+	private static final class QueuedRowLoader extends StandardLoader {
+		private final Queue<Bean> beans;
+
+		private QueuedRowLoader(BizPortWorkbook workbook, UploadException problems, Bean... beans) {
+			super(workbook, problems);
+			this.beans = new ArrayDeque<>(List.of(beans));
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		protected <T extends Bean> T getBeanForRow(Persistence persistence, User user, Document document, BizPortSheet sheet) {
+			return (T) beans.remove();
+		}
+	}
+
+	private static final class TestChildBean extends DynamicBean implements ChildBean<Bean> {
+		private static final long serialVersionUID = 1L;
+
+		private TestChildBean(String bizModule, String bizDocument, Map<String, Object> properties) {
+			super(bizModule, bizDocument, new HashMap<>(properties));
+		}
+
+		@Override
+		public Bean getParent() {
+			return (Bean) get(PARENT_NAME);
+		}
+
+		@Override
+		public void setParent(Bean parent) {
+			set(PARENT_NAME, parent);
+		}
+
+		@Override
+		public Integer getBizOrdinal() {
+			return (Integer) get(Bean.ORDINAL_NAME);
+		}
+
+		@Override
+		public void setBizOrdinal(Integer bizOrdinal) {
+			set(Bean.ORDINAL_NAME, bizOrdinal);
 		}
 	}
 }

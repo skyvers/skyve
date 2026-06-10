@@ -14,6 +14,7 @@ import static org.skyve.impl.backup.BackupUtil.redactData;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.sql.Date;
@@ -1112,6 +1113,95 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
+	public void validateSkyveBackupThrowsWhenRootContainsNoCsvFiles() throws Exception {
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		User user = mock(User.class);
+		when(persistence.getUser()).thenReturn(user);
+		when(user.getCustomerName()).thenReturn("noCsvCustomer");
+		String previousBackupDirectory = UtilImpl.BACKUP_DIRECTORY;
+		File root = Files.createTempDirectory("skyve-backup-util-").toFile();
+		String extractName = "extract";
+		File backupDirectory = new File(new File(root, "backup_noCsvCustomer"), extractName);
+		assertTrue(backupDirectory.mkdirs());
+		UtilImpl.BACKUP_DIRECTORY = root.getAbsolutePath() + File.separator;
+
+		try {
+			withThreadLocalPersistence(persistence, () -> {
+				try {
+					BackupUtil.validateSkyveBackup(extractName);
+				}
+				catch (DomainException e) {
+					assertThat(e.getMessage(), containsString("No valid Skyve CSV files"));
+					return;
+				}
+				org.junit.Assert.fail("Expected DomainException");
+			});
+		}
+		finally {
+			UtilImpl.BACKUP_DIRECTORY = previousBackupDirectory;
+			backupDirectory.delete();
+			backupDirectory.getParentFile().delete();
+			root.delete();
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void validateSkyveBackupReturnsDirectoryWhenRootContainsCsvFile() throws Exception {
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		User user = mock(User.class);
+		when(persistence.getUser()).thenReturn(user);
+		when(user.getCustomerName()).thenReturn("csvCustomer");
+		String previousBackupDirectory = UtilImpl.BACKUP_DIRECTORY;
+		File root = Files.createTempDirectory("skyve-backup-util-").toFile();
+		String extractName = "extract";
+		File backupDirectory = new File(new File(root, "backup_csvCustomer"), extractName);
+		assertTrue(backupDirectory.mkdirs());
+		File csv = new File(backupDirectory, "Document.CSV");
+		assertTrue(csv.createNewFile());
+		UtilImpl.BACKUP_DIRECTORY = root.getAbsolutePath() + File.separator;
+
+		try {
+			withThreadLocalPersistence(persistence, () -> {
+				File result = BackupUtil.validateSkyveBackup(extractName);
+
+				assertThat(result, is(backupDirectory));
+			});
+		}
+		finally {
+			UtilImpl.BACKUP_DIRECTORY = previousBackupDirectory;
+			csv.delete();
+			backupDirectory.delete();
+			backupDirectory.getParentFile().delete();
+			root.delete();
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void privateRedactStringReturnsNullForNullInput() throws Exception {
+		assertThat(invokePrivate("redactString", new Class<?>[] { String.class, Integer.class }, null, Integer.valueOf(10)), is(nullValue()));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void privateRedactNumericReturnsNullForNullInputAndUnsupportedNumber() throws Exception {
+		assertThat(invokePrivate("redactNumeric", new Class<?>[] { Number.class }, new Object[] { null }), is(nullValue()));
+		assertThat(invokePrivate("redactNumeric", new Class<?>[] { Number.class }, Short.valueOf((short) 7)), is(nullValue()));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void privateRedactGeometryReturnsOriginalForUnsupportedGeometryType() throws Exception {
+		Geometry geometry = new GeometryFactory().createMultiPointFromCoords(new Coordinate[] { new Coordinate(1.2, 3.4), new Coordinate(5.6, 7.8) });
+
+		Object result = invokePrivate("redactGeometry", new Class<?>[] { Geometry.class }, geometry);
+
+		assertThat(result, is(geometry));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
 	public void executeScriptThrowsWhenPersistenceIsNotHibernate() throws Exception {
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		SQL sql = mock(SQL.class);
@@ -1239,6 +1329,12 @@ public class BackupUtilTest {
 		@SuppressWarnings("unchecked")
 		ThreadLocal<AbstractPersistence> threadLocal = (ThreadLocal<AbstractPersistence>) field.get(null);
 		return threadLocal;
+	}
+
+	private static Object invokePrivate(String name, Class<?>[] parameterTypes, Object... args) throws Exception {
+		Method method = BackupUtil.class.getDeclaredMethod(name, parameterTypes);
+		method.setAccessible(true);
+		return method.invoke(null, args);
 	}
 
 	@FunctionalInterface

@@ -135,6 +135,9 @@ class BeanMapAdapterTest {
 		assertEquals(2, adapter.size());
 		assertTrue(adapter.containsKey("a"));
 		assertTrue(adapter.containsValue("beta"));
+		assertTrue(adapter.keySet().contains("a"));
+		assertTrue(adapter.values().contains("alpha"));
+		assertEquals(2, adapter.entrySet().size());
 		assertEquals("alpha", adapter.remove("a"));
 		assertFalse(adapter.containsKey("a"));
 		adapter.clear();
@@ -194,6 +197,19 @@ class BeanMapAdapterTest {
 		assertEquals(1, adaptedList.size());
 		assertTrue(adaptedList.get(0) instanceof BeanMapAdapter);
 		assertSame(child, ((BeanMapAdapter) adaptedList.get(0)).getBean());
+	}
+
+	@Test
+	void getCanEscapeStringValuesAndNormaliseEscapedOpeningBraces() {
+		FacesContextBridge.setCurrent(createFacesContext());
+		bindPersistenceForUser(mock(User.class));
+
+		HashMap<String, Object> values = new HashMap<>();
+		values.put("label", "<b>\\{status}</b>");
+		DynamicBean bean = new DynamicBean("sales", "Order", values);
+		BeanMapAdapter adapter = new BeanMapAdapter(bean, null);
+
+		assertEquals("&lt;b&gt;{status}&lt;/b&gt;", adapter.get("label", true, "none"));
 	}
 
 	@Test

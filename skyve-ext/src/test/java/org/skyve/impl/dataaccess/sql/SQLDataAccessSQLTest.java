@@ -3,6 +3,7 @@ package org.skyve.impl.dataaccess.sql;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -119,6 +120,87 @@ class SQLDataAccessSQLTest {
 		assertInstanceOf(SQLException.class, e.getCause());
 	}
 
+	@Test
+	void dynaResultsWrapsSQLExceptionAsDomainException() throws Exception {
+		Connection connection = mock(Connection.class);
+		when(connection.prepareStatement(org.mockito.ArgumentMatchers.any(String.class))).thenThrow(new SQLException("dyna fail"));
+		SQLDataAccessSQL sql = new SQLDataAccessSQL("select * from t", new TestSQLDataAccessImpl(connection));
+		sql.noTimeout();
+
+		DomainException e = assertThrows(DomainException.class, sql::dynaResults);
+
+		assertInstanceOf(SQLException.class, e.getCause());
+	}
+
+	@Test
+	void dynaResultsRethrowsSkyveException() {
+		DomainException expected = new DomainException("connection failed");
+		SQLDataAccessSQL sql = new SQLDataAccessSQL("select * from t", new FailingSQLDataAccessImpl(expected));
+		sql.noTimeout();
+
+		DomainException e = assertThrows(DomainException.class, sql::dynaResults);
+
+		assertSame(expected, e);
+	}
+
+	@Test
+	void dynaResultsReturnsDetachedRows() throws Exception {
+		ResultSetMetaData metaData = mock(ResultSetMetaData.class);
+		Fixture fixture = fixture(metaData);
+		when(metaData.getColumnCount()).thenReturn(Integer.valueOf(2));
+		when(metaData.getColumnLabel(1)).thenReturn("name");
+		when(metaData.getColumnName(1)).thenReturn("name");
+		when(metaData.getColumnLabel(2)).thenReturn("score");
+		when(metaData.getColumnName(2)).thenReturn("score");
+		when(fixture.resultSet.next()).thenReturn(Boolean.TRUE, Boolean.FALSE);
+		when(fixture.resultSet.getObject(1)).thenReturn("alpha");
+		when(fixture.resultSet.getObject(2)).thenReturn(Integer.valueOf(7));
+		when(fixture.resultSet.getObject("name")).thenReturn("alpha");
+		when(fixture.resultSet.getObject("score")).thenReturn(Integer.valueOf(7));
+		SQLDataAccessSQL sql = new SQLDataAccessSQL("select name, score from t", fixture.dataAccess);
+		sql.noTimeout();
+
+		List<org.apache.commons.beanutils.DynaBean> results = sql.dynaResults();
+
+		assertEquals(1, results.size());
+		assertEquals("alpha", results.get(0).get("name"));
+		assertEquals(Integer.valueOf(7), results.get(0).get("score"));
+	}
+
+	@Test
+	void dynaIterableWrapsSQLExceptionAsDomainException() throws Exception {
+		Connection connection = mock(Connection.class);
+		when(connection.prepareStatement(org.mockito.ArgumentMatchers.any(String.class))).thenThrow(new SQLException("iterable fail"));
+		SQLDataAccessSQL sql = new SQLDataAccessSQL("select * from t", new TestSQLDataAccessImpl(connection));
+		sql.noTimeout();
+
+		DomainException e = assertThrows(DomainException.class, sql::dynaIterable);
+
+		assertInstanceOf(SQLException.class, e.getCause());
+	}
+
+	@Test
+	void dynaIterableRethrowsSkyveException() {
+		DomainException expected = new DomainException("connection failed");
+		SQLDataAccessSQL sql = new SQLDataAccessSQL("select * from t", new FailingSQLDataAccessImpl(expected));
+		sql.noTimeout();
+
+		DomainException e = assertThrows(DomainException.class, sql::dynaIterable);
+
+		assertSame(expected, e);
+	}
+
+	@Test
+	void executeRethrowsSkyveException() {
+		DomainException expected = new DomainException("connection failed");
+		SQLDataAccessSQL sql = new SQLDataAccessSQL("update t set c = 1", new FailingSQLDataAccessImpl(expected));
+		sql.noTimeout();
+
+		DomainException e = assertThrows(DomainException.class, sql::execute);
+
+		assertSame(expected, e);
+	}
+
 	private static Fixture fixture(ResultSetMetaData metaData) throws SQLException {
 		Connection connection = mock(Connection.class);
 		PreparedStatement preparedStatement = mock(PreparedStatement.class);
@@ -162,6 +244,20 @@ class SQLDataAccessSQLTest {
 		@Override
 		SkyveDialect getDialect() {
 			return null;
+		}
+	}
+
+	private static final class FailingSQLDataAccessImpl extends SQLDataAccessImpl {
+		private final DomainException exception;
+
+		private FailingSQLDataAccessImpl(DomainException exception) {
+			super(null);
+			this.exception = exception;
+		}
+
+		@Override
+		Connection getConnection() {
+			throw exception;
 		}
 	}
 }

@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.skyve.persistence.DynamicPersistence;
@@ -24,7 +25,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Statement;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.AfterAll;
@@ -32,6 +35,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.skyve.content.BeanContent;
 import org.skyve.domain.Bean;
+import org.skyve.domain.DynamicBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.messages.NoResultsException;
@@ -43,6 +47,9 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.BizQLDefinition;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
+import org.skyve.metadata.module.query.SQLDefinition;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
@@ -643,6 +650,37 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
+	void testCachedDelegatesDynamicBeanToDynamicPersistence() {
+		TestHibernatePersistence persistence = new TestHibernatePersistence();
+		DynamicPersistence dynamicPersistence = mock(DynamicPersistence.class);
+		DynamicBean bean = new DynamicBean("admin", "Contact", new HashMap<>(Map.of(Bean.DOCUMENT_ID, "dynamic-1")));
+		when(dynamicPersistence.cached(bean)).thenReturn(Boolean.TRUE);
+		persistence.injectDynamicPersistence(dynamicPersistence);
+		try {
+			assertTrue(persistence.cached(bean));
+		}
+		finally {
+			persistence.close();
+		}
+	}
+
+	@Test
+	void testEvictCachedDelegatesDynamicBeanToDynamicPersistence() {
+		TestHibernatePersistence persistence = new TestHibernatePersistence();
+		DynamicPersistence dynamicPersistence = mock(DynamicPersistence.class);
+		DynamicBean bean = new DynamicBean("admin", "Contact", new HashMap<>(Map.of(Bean.DOCUMENT_ID, "dynamic-2")));
+		persistence.injectDynamicPersistence(dynamicPersistence);
+		try {
+			persistence.evictCached(bean);
+
+			verify(dynamicPersistence).evictCached(bean);
+		}
+		finally {
+			persistence.close();
+		}
+	}
+
+	@Test
 	void testEvictAllSharedCacheOnlyEvictsEntityData() {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -679,6 +717,14 @@ class AbstractHibernatePersistenceTest {
 		org.skyve.impl.metadata.user.UserImpl u = new org.skyve.impl.metadata.user.UserImpl();
 		u.setCustomerName("");
 		return u;
+	}
+
+	private static User userForModule(Module module) {
+		Customer customer = mock(Customer.class);
+		when(customer.getModule("admin")).thenReturn(module);
+		User user = createTestUser();
+		when(user.getCustomer()).thenReturn(customer);
+		return user;
 	}
 
 	@Test
@@ -1883,7 +1929,7 @@ class AbstractHibernatePersistenceTest {
 			persistence.setUser(createTestUser());
 			bindPersistenceToThread(persistence);
 			Module module = mock(Module.class);
-			org.skyve.metadata.module.query.MetaDataQueryDefinition queryDef = mock(org.skyve.metadata.module.query.MetaDataQueryDefinition.class);
+			MetaDataQueryDefinition queryDef = mock(MetaDataQueryDefinition.class);
 			Document doc = mock(Document.class);
 			when(doc.getOwningModuleName()).thenReturn("admin");
 			when(doc.getName()).thenReturn("Contact");
@@ -1897,6 +1943,68 @@ class AbstractHibernatePersistenceTest {
 		}
 		finally {
 			unbindPersistenceFromThread();
+			persistence.close();
+		}
+	}
+
+	@Test
+	void testNewNamedSQLVariantsCreateWrappers() {
+		TestHibernatePersistence persistence = new TestHibernatePersistence();
+		try {
+			Module module = mock(Module.class);
+			SQLDefinition sql = mock(SQLDefinition.class);
+			when(sql.getQuery()).thenReturn("select 1");
+			when(sql.getTimeoutInSeconds()).thenReturn(Integer.valueOf(7));
+			when(module.getSQL("namedSql")).thenReturn(sql);
+			persistence.setUser(userForModule(module));
+
+			Document document = mock(Document.class);
+			when(document.getOwningModuleName()).thenReturn("admin");
+			when(document.getName()).thenReturn("Contact");
+
+			assertNotNull(persistence.newNamedSQL(module, "namedSql"));
+			assertNotNull(persistence.newNamedSQL("admin", "namedSql"));
+			assertNotNull(persistence.newNamedSQL("admin", "Contact", "namedSql"));
+			assertNotNull(persistence.newNamedSQL(document, "namedSql"));
+		}
+		finally {
+			persistence.close();
+		}
+	}
+
+	@Test
+	void testNewNamedBizQLVariantsCreateWrappers() {
+		TestHibernatePersistence persistence = new TestHibernatePersistence();
+		try {
+			Module module = mock(Module.class);
+			BizQLDefinition bizql = mock(BizQLDefinition.class);
+			when(bizql.getQuery()).thenReturn("from adminContact bean");
+			when(bizql.getTimeoutInSeconds()).thenReturn(Integer.valueOf(11));
+			when(module.getBizQL("namedBizql")).thenReturn(bizql);
+			persistence.setUser(userForModule(module));
+
+			assertNotNull(persistence.newNamedBizQL(module, "namedBizql"));
+			assertNotNull(persistence.newNamedBizQL("admin", "namedBizql"));
+		}
+		finally {
+			persistence.close();
+		}
+	}
+
+	@Test
+	void testNewNamedDocumentQueryFromModuleNameReturnsDefinitionResult() {
+		TestHibernatePersistence persistence = new TestHibernatePersistence();
+		try {
+			Module module = mock(Module.class);
+			MetaDataQueryDefinition queryDef = mock(MetaDataQueryDefinition.class);
+			DocumentQuery documentQuery = mock(DocumentQuery.class);
+			when(module.getNullSafeMetaDataQuery("namedQuery")).thenReturn(queryDef);
+			when(queryDef.constructDocumentQuery(null, null)).thenReturn(documentQuery);
+			persistence.setUser(userForModule(module));
+
+			assertSame(documentQuery, persistence.newNamedDocumentQuery("admin", "namedQuery"));
+		}
+		finally {
 			persistence.close();
 		}
 	}

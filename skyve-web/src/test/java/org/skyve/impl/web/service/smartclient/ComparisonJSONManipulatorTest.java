@@ -3,6 +3,7 @@ package org.skyve.impl.web.service.smartclient;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -13,10 +14,17 @@ import java.util.Map;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.metadata.controller.CustomisationsStaticSingleton;
 import org.skyve.impl.metadata.customer.CustomerImpl;
-import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.model.document.CollectionImpl;
+import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.metadata.model.document.field.Text;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
+import org.skyve.impl.metadata.view.HorizontalAlignment;
+import org.skyve.metadata.controller.Customisations;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.User;
@@ -27,10 +35,12 @@ import org.skyve.metadata.view.model.comparison.ComparisonProperty;
 @SuppressWarnings("static-method")
 class ComparisonJSONManipulatorTest {
 	private final ProvidedRepository originalRepository = ProvidedRepositoryFactory.get();
+	private final Customisations originalCustomisations = CustomisationsStaticSingleton.get();
 
 	@AfterEach
 	void tearDown() {
 		ProvidedRepositoryFactory.set(originalRepository);
+		CustomisationsStaticSingleton.set(originalCustomisations);
 	}
 
 	@Test
@@ -179,6 +189,60 @@ class ComparisonJSONManipulatorTest {
 		assertEquals("text", property.get("type"));
 		assertEquals("oldValue", property.get("oldValue"));
 		assertEquals("newValue", property.get("newValue"));
+	}
+
+	@Test
+	void toJSONStructureUsesMetadataFieldDefinitionForConstantDomainProperty() throws Exception {
+		User user = mock(User.class);
+		CustomerImpl customer = org.mockito.Mockito.spy(new CustomerImpl());
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		Module module = mock(Module.class);
+		DocumentImpl document = new DocumentImpl();
+		document.setOwningModuleName("sales");
+		document.setName("Order");
+
+		Text status = new Text();
+		status.setName("status");
+		status.setDisplayName("Status");
+		status.setLength(12);
+		status.setRequired(true);
+		status.setRequiredMessage("Status required");
+		status.setDomainType(DomainType.constant);
+		document.putAttribute(status);
+
+		when(repository.getModule(customer, "sales")).thenReturn(module);
+		when(module.getDocument(customer, "Order")).thenReturn(document);
+		doReturn(List.of(new DomainValue("A", "Active"), new DomainValue("I", "Inactive")))
+				.when(customer).getConstantDomainValues(null, "sales", "Order", status);
+
+		Customisations customisations = mock(Customisations.class);
+		when(customisations.determineDefaultWidgetTextAlignment("desktop", org.skyve.metadata.model.Attribute.AttributeType.text))
+				.thenReturn(HorizontalAlignment.left);
+		when(customisations.determineDefaultColumnWidth("desktop", org.skyve.metadata.model.Attribute.AttributeType.text))
+				.thenReturn(Integer.valueOf(90));
+		ProvidedRepositoryFactory.set(repository);
+		CustomisationsStaticSingleton.set(customisations);
+
+		ComparisonComposite root = new ComparisonComposite("71", "Root", "", "RootRel", Mutation.unchanged, document);
+		root.getProperties().add(new ComparisonProperty("status", "Status", null, "A", "I"));
+
+		ComparisonJSONManipulator manipulator = new ComparisonJSONManipulator(user, customer, root);
+		List<Map<String, Object>> rows = toList(manipulator.toJSONStructure());
+
+		@SuppressWarnings("unchecked")
+		List<Map<String, Object>> properties = (List<Map<String, Object>>) rows.get(0).get("properties");
+		Map<String, Object> property = properties.get(0);
+		assertEquals("status", property.get("name"));
+		assertEquals("<span style='color:red'>Status *</span>", property.get("title"));
+		assertEquals("text", property.get("type"));
+		assertEquals(Integer.valueOf(12), property.get("length"));
+		assertEquals(Boolean.TRUE, property.get("required"));
+		assertEquals("I", property.get("oldValue"));
+		assertEquals("A", property.get("newValue"));
+		@SuppressWarnings("unchecked")
+		Map<String, String> valueMap = (Map<String, String>) property.get("valueMap");
+		assertEquals("Active", valueMap.get("A"));
+		assertEquals("Inactive", valueMap.get("I"));
 	}
 
 	@Test

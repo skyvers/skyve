@@ -1,11 +1,12 @@
 package org.skyve.impl.web.faces.converters.select;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
 import org.skyve.impl.web.faces.models.BeanMapAdapter;
 import org.skyve.web.WebContext;
@@ -13,23 +14,33 @@ class AssociationAutoCompleteConverterTest {
 
 	private AssociationAutoCompleteConverter converter;
 
-	@Before
-	public void before() {
+	@BeforeEach
+	void before() {
 		converter = new AssociationAutoCompleteConverter();
 	}
 
 	@Test
-	public void getAsStringReturnsEmptyStringForNull() {
+	void getAsStringReturnsEmptyStringForNull() {
 		assertEquals("", converter.getAsString(null, null, null));
 	}
 
 	@Test
-	public void getAsStringReturnsEmptyStringForOtherObject() {
+	void getAsObjectReturnsNullForNull() {
+		assertNull(converter.getAsObject(null, null, null));
+	}
+
+	@Test
+	void getAsObjectReturnsNullForBlank() {
+		assertNull(converter.getAsObject(null, null, "  "));
+	}
+
+	@Test
+	void getAsStringReturnsEmptyStringForOtherObject() {
 		assertEquals("", converter.getAsString(null, null, "notABean"));
 	}
 
 	@Test
-	public void getAsStringFormatsBean() {
+	void getAsStringFormatsBean() {
 		Bean bean = mock(Bean.class);
 		when(bean.getBizModule()).thenReturn("modName");
 		when(bean.getBizDocument()).thenReturn("docName");
@@ -38,7 +49,7 @@ class AssociationAutoCompleteConverterTest {
 	}
 
 	@Test
-	public void getAsStringFormatsBeanMapAdapter() {
+	void getAsStringFormatsBeanMapAdapter() {
 		Bean bean = mock(Bean.class);
 		when(bean.getBizModule()).thenReturn("mod");
 		when(bean.getBizDocument()).thenReturn("doc");
