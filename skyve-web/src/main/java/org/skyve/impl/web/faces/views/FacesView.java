@@ -420,8 +420,7 @@ public class FacesView extends HarnessView {
 	 * @param bean conversation bean to set
 	 * @throws Exception when adapter refresh fails
 	 */
-	public void setBean(Bean bean)
-	throws Exception {
+	public void setBean(Bean bean) {
 		if (webContext != null) {
 			webContext.setCurrentBean(bean);
 		}
@@ -585,6 +584,7 @@ public class FacesView extends HarnessView {
 	/**
 	 * Executes a named server-side action with optional row-selection context.
 	 */
+	@SuppressWarnings("java:S2629") // log.toString() is efficient here
 	public void action(String actionName, String dataWidgetBinding, String bizId) {
 		String collectionBinding = UtilImpl.processStringValue(dataWidgetBinding);
 		String elementBizId = UtilImpl.processStringValue(bizId);
@@ -609,6 +609,7 @@ public class FacesView extends HarnessView {
 	/**
 	 * Triggers rerender processing for a source component with optional validation.
 	 */
+	@SuppressWarnings("java:S2629") // log.toString() is efficient here
 	public void rerender(String source, boolean validate) {
 		StringBuilder log = new StringBuilder(128);
 		log.append("FacesView - rerender from source ").append(source);
@@ -731,10 +732,7 @@ public class FacesView extends HarnessView {
 			final String collectionBinding = (String) event.getComponent().getAttributes().get(ComponentBuilder.COLLECTION_BINDING_ATTRIBUTE_KEY);
 			final int fromIndex = event.getFromIndex();
 			final int toIndex = event.getToIndex();
-			StringBuilder log = new StringBuilder(128);
-			log.append("FacesView - reorderGridRow ").append(collectionBinding);
-			log.append(" from ").append(fromIndex).append(" to ").append(toIndex);
-			LOGGER.info(log.toString());
+			LOGGER.info("FacesView - reorderGridRow {} from {} to {}", collectionBinding, Integer.valueOf(fromIndex), Integer.valueOf(toIndex));
 			if (collectionBinding != null) {
 				@SuppressWarnings("unchecked")
 				final List<Bean> list = (List<Bean>) BindUtil.get(getCurrentBean().getBean(), collectionBinding);
@@ -824,6 +822,7 @@ public class FacesView extends HarnessView {
 	/**
 	 * Executes a download action against an optional selected grid row context.
 	 */
+	@SuppressWarnings("java:S3776") // complexity OK
 	public void download(String actionName, String dataWidgetBinding, String bizId) {
 		String collectionBinding = UtilImpl.processStringValue(dataWidgetBinding);
 		String elementBizId = UtilImpl.processStringValue(bizId);
@@ -1308,8 +1307,7 @@ public class FacesView extends HarnessView {
 	 * @throws Exception if bean restoration fails
 	 */
  	// restore the webContext and current bean etc
-	public void hydrate(AbstractWebContext newWebContext)
-	throws Exception {
+	public void hydrate(AbstractWebContext newWebContext) {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("FacesView - hydrate");
 		webContext = newWebContext;
 		dehydratedWebId = null;
