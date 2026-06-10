@@ -1165,7 +1165,6 @@ SKYVE.Leaflet = (function () {
 				spiderfyOnMaxZoom: true,
 				removeOutsideVisibleBounds: true,
 				maxClusterRadius: 40,
-				disableClusteringAtZoom: 18,
 				spiderLegPolylineOptions: {
 					weight: 1.5,
 					color: "#333",
