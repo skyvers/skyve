@@ -93,12 +93,7 @@
 							<a href="<%=Util.getBaseUrl()%>" class="ui fluid large blue submit button"><%=Util.i18n("page.loginError.retry", locale)%></a>
 						</div>
 						<div class="field">
-<<<<<<< HEAD
-							<a href="mailto:<%=org.skyve.util.Util.getSupportEmailAddress()%>?subject=Exception Report&body=<%=(exception == null) ? Util.i18n("page.error.noMessage", locale) : exception.getLocalizedMessage()%> for <%=(request.getUserPrincipal() != null) ? OWASP.sanitiseAndEscapeHtml(Sanitisation.text, request.getUserPrincipal().getName()) : Util.i18n("page.error.notLoggedIn", locale)%> at <%=new java.util.Date()%>"
-=======
-							<a href="<%=mailto%>"
->>>>>>> refs/heads/skyve-9.4.2
-									class="ui fluid large blue basic button">
+							<a href="<%=mailto%>" class="ui fluid large blue basic button">
 								<i class="envelope icon"></i><%=Util.i18n("page.loginError.report", locale)%>
 							</a>
 					 	</div>
