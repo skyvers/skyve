@@ -2525,7 +2525,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		String uploadItemId = uploadItem.getId();
 		actionItems.add(uploadItem);
 
-		String var = sanitisedBinding + "Overlay";
+		String var = id + "_" + sanitisedBinding + "Overlay";
 		if (image) {
 			setContentUploadDialogOnclick(uploadItem, id, sanitisedBinding, var, false);
 			UIMenuItem cameraItem = createContentMenuItem("Take Photo",
@@ -2554,7 +2554,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		else {
 			OverlayPanel overlay = (OverlayPanel) a.createComponent(OverlayPanel.COMPONENT_TYPE);
 			setId(overlay, null);
-			overlay.setWidgetVar(sanitisedBinding + "Overlay");
+			overlay.setWidgetVar(var);
 			overlay.setFor(uploadItemId);
 			overlay.setDynamic(false);
 			overlay.setShowCloseIcon(true);
@@ -2592,10 +2592,10 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 														disabledConditionName,
 														formDisabledConditionName);
 		if (image) {
-			clearItem.setOnclick(String.format("SKYVE.PF.clearContentImage('%s');return false", sanitisedBinding));
+			clearItem.setOnclick(String.format("SKYVE.PF.clearContentImage('%s','%s');return false", sanitisedBinding, id));
 		}
 		else {
-			clearItem.setOnclick(String.format("SKYVE.PF.clearContentLink('%s');return false", sanitisedBinding));
+			clearItem.setOnclick(String.format("SKYVE.PF.clearContentLink('%s','%s');return false", sanitisedBinding, id));
 		}
 		actionItems.add(clearItem);
 		
@@ -2608,9 +2608,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 															formDisabledConditionName);
 			actionItems.add(markupItem);
 	
-			var = sanitisedBinding + "Markup";
+			var = id + "_" + sanitisedBinding + "Markup";
 			value.setLength(0);
-			value.append("event.preventDefault();var contentId=$('[id$=\"_").append(sanitisedBinding);
+			value.append("event.preventDefault();var contentId=$('[id$=\"").append(id).append('_').append(sanitisedBinding);
 			value.append("_hidden\"]').val();if(!contentId){return false}PF('").append(var);
 			value.append("').show();PF('").append(var).append("').toggleMaximize();return false");
 			markupItem.setOnclick(value.toString());
