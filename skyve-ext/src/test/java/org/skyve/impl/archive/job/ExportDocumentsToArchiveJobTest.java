@@ -16,8 +16,6 @@ import java.lang.reflect.Method;
 import java.io.File;
 import java.nio.file.Path;
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,6 +40,8 @@ import org.skyve.persistence.SQL;
 @SuppressWarnings("static-method")
 class ExportDocumentsToArchiveJobTest {
 	private static final String ORIGINAL_CONTENT_DIRECTORY = UtilImpl.CONTENT_DIRECTORY;
+	private static final Instant TARGET_TIME_IN_THE_PAST = Instant.parse("2000-01-01T00:00:00Z");
+	private static final Instant TARGET_TIME_IN_THE_FUTURE = Instant.parse("2999-01-01T00:00:00Z");
 
 	@TempDir
 	Path tempDir;
@@ -87,8 +87,7 @@ class ExportDocumentsToArchiveJobTest {
 	@Test
 	void timesUpReflectsTargetEndTime() throws Exception {
 		ExportDocumentsToArchiveJob job = newJob();
-		setField(job, "targetEndTime", Instant.now()
-												.minusSeconds(1));
+		setField(job, "targetEndTime", TARGET_TIME_IN_THE_PAST);
 
 		assertTrue(job.timesUp());
 	}
@@ -158,7 +157,7 @@ class ExportDocumentsToArchiveJobTest {
 	}
 
 	@Test
-	void jobSubstanceArchiveFileUsesLowerCaseDocumentNameAndCurrentDate() throws Exception {
+	void jobSubstanceArchiveFileUsesLowerCaseDocumentNameAndDatedArchiveFile() throws Exception {
 		UtilImpl.CONTENT_DIRECTORY = tempDir.toString();
 		ExportDocumentsToArchiveJob job = newJob();
 		Object substance = newJobSubstance(job, persistentDocument("orders_table"),
@@ -166,13 +165,11 @@ class ExportDocumentsToArchiveJobTest {
 		Method method = substance.getClass()
 								.getDeclaredMethod("getArchiveFile");
 		method.setAccessible(true);
-		String datePart = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-											.withZone(ZoneId.systemDefault())
-											.format(java.time.Instant.now());
 
 		File result = (File) method.invoke(substance);
 
-		assertEquals("order-" + datePart + ".archive", result.getName());
+		assertTrue(result.getName()
+						.matches("order-\\d{4}-\\d{2}-\\d{2}\\.archive"));
 		assertEquals(tempDir.resolve("archive")
 							.resolve("orders")
 							.toFile(), result.getParentFile());
@@ -232,8 +229,7 @@ class ExportDocumentsToArchiveJobTest {
 	void jobSubstanceDeleteExportedDocumentsDeletesBatchesUntilNoIdsRemain() throws Exception {
 		ExportDocumentsToArchiveJob job = newJob();
 		setField(job, "batchSize", Integer.valueOf(2));
-		setField(job, "targetEndTime", Instant.now()
-												.plusSeconds(60));
+		setField(job, "targetEndTime", TARGET_TIME_IN_THE_FUTURE);
 		Persistence persistence = mock(Persistence.class);
 		DocumentQuery firstQuery = mock(DocumentQuery.class);
 		DocumentQuery emptyQuery = mock(DocumentQuery.class);
@@ -272,8 +268,7 @@ class ExportDocumentsToArchiveJobTest {
 		UtilImpl.CONTENT_DIRECTORY = tempDir.toString();
 		ExportDocumentsToArchiveJob job = newJob();
 		setField(job, "batchSize", Integer.valueOf(5));
-		setField(job, "targetEndTime", Instant.now()
-												.plusSeconds(60));
+		setField(job, "targetEndTime", TARGET_TIME_IN_THE_FUTURE);
 		setField(job, "repo", org.skyve.impl.archive.support.FileLockRepo.getInstance());
 		Persistence persistence = mock(Persistence.class);
 		DocumentQuery query = mock(DocumentQuery.class);

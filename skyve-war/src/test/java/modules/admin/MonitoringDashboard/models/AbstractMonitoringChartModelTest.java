@@ -38,7 +38,11 @@ class AbstractMonitoringChartModelTest extends AbstractSkyveTest {
 
 		// Bridge methods to test the protected statics
 		static boolean testIsDataValid(RequestMeasurements m, Period p) {
-			return isDataValidForCurrentPeriod(m, p);
+			return isDataValidForPeriod(m, p);
+		}
+
+		static boolean testIsDataValid(RequestMeasurements m, Period p, Instant now) {
+			return isDataValidForPeriod(m, p, now);
 		}
 
 		static String testGetTimePeriodLabel(Period p) {
@@ -92,24 +96,26 @@ class AbstractMonitoringChartModelTest extends AbstractSkyveTest {
 
 	@Test
 	void isDataValidForCurrentPeriodReturnsTrueInsideStalenessThresholds() throws ReflectiveOperationException {
-		Instant now = Instant.now();
+		Instant now = Instant.parse("2026-06-11T12:00:00Z");
 
-		assertTrue(TestChartModel.testIsDataValid(measurementsUpdatedAt(now.minus(1, ChronoUnit.MINUTES)), Period.currentMinute));
-		assertTrue(TestChartModel.testIsDataValid(measurementsUpdatedAt(now.minus(1, ChronoUnit.HOURS)), Period.currentHour));
-		assertTrue(TestChartModel.testIsDataValid(measurementsUpdatedAt(now.minus(1, ChronoUnit.DAYS)), Period.currentDay));
-		assertTrue(TestChartModel.testIsDataValid(measurementsUpdatedAt(now.minus(13, ChronoUnit.DAYS)), Period.currentWeek));
-		assertTrue(TestChartModel.testIsDataValid(measurementsUpdatedAt(now.minus(55, ChronoUnit.DAYS)), Period.currentYear));
+		assertTrue(
+				TestChartModel.testIsDataValid(measurementsUpdatedAt(now.minus(1, ChronoUnit.MINUTES)), Period.currentMinute, now));
+		assertTrue(TestChartModel.testIsDataValid(measurementsUpdatedAt(now.minus(1, ChronoUnit.HOURS)), Period.currentHour, now));
+		assertTrue(TestChartModel.testIsDataValid(measurementsUpdatedAt(now.minus(1, ChronoUnit.DAYS)), Period.currentDay, now));
+		assertTrue(TestChartModel.testIsDataValid(measurementsUpdatedAt(now.minus(13, ChronoUnit.DAYS)), Period.currentWeek, now));
+		assertTrue(TestChartModel.testIsDataValid(measurementsUpdatedAt(now.minus(55, ChronoUnit.DAYS)), Period.currentYear, now));
 	}
 
 	@Test
 	void isDataValidForCurrentPeriodReturnsFalseAtStalenessThresholds() throws ReflectiveOperationException {
-		Instant now = Instant.now();
+		Instant now = Instant.parse("2026-06-11T12:00:00Z");
 
-		assertFalse(TestChartModel.testIsDataValid(measurementsUpdatedAt(now.minus(2, ChronoUnit.MINUTES)), Period.currentMinute));
-		assertFalse(TestChartModel.testIsDataValid(measurementsUpdatedAt(now.minus(2, ChronoUnit.HOURS)), Period.currentHour));
-		assertFalse(TestChartModel.testIsDataValid(measurementsUpdatedAt(now.minus(2, ChronoUnit.DAYS)), Period.currentDay));
-		assertFalse(TestChartModel.testIsDataValid(measurementsUpdatedAt(now.minus(14, ChronoUnit.DAYS)), Period.currentWeek));
-		assertFalse(TestChartModel.testIsDataValid(measurementsUpdatedAt(now.minus(56, ChronoUnit.DAYS)), Period.currentYear));
+		assertFalse(
+				TestChartModel.testIsDataValid(measurementsUpdatedAt(now.minus(2, ChronoUnit.MINUTES)), Period.currentMinute, now));
+		assertFalse(TestChartModel.testIsDataValid(measurementsUpdatedAt(now.minus(2, ChronoUnit.HOURS)), Period.currentHour, now));
+		assertFalse(TestChartModel.testIsDataValid(measurementsUpdatedAt(now.minus(2, ChronoUnit.DAYS)), Period.currentDay, now));
+		assertFalse(TestChartModel.testIsDataValid(measurementsUpdatedAt(now.minus(14, ChronoUnit.DAYS)), Period.currentWeek, now));
+		assertFalse(TestChartModel.testIsDataValid(measurementsUpdatedAt(now.minus(56, ChronoUnit.DAYS)), Period.currentYear, now));
 	}
 
 	// ---- getTimePeriodLabel ----

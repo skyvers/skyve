@@ -21,6 +21,7 @@ public abstract class AbstractMonitoringChartModel extends ChartModel<Monitoring
 	/**
 	 * Check if the request data is valid for the current period based on the last update time.
 	 * If the last update was too long ago, the data should not be displayed.
+	 *
 	 * @param measurements the measurements value
 	 * @param period the period value
 	 * @return the result
@@ -32,11 +33,16 @@ public abstract class AbstractMonitoringChartModel extends ChartModel<Monitoring
 	/**
 	 * Check if the request data is valid for the specified period based on the last update time.
 	 * If the last update was too long ago, the data should not be displayed.
+	 *
 	 * @param measurements the measurements value
 	 * @param period the period value
 	 * @return the result
 	 */
 	protected static boolean isDataValidForPeriod(RequestMeasurements measurements, Period period) {
+		return isDataValidForPeriod(measurements, period, Instant.now());
+	}
+
+	static boolean isDataValidForPeriod(RequestMeasurements measurements, Period period, Instant now) {
 		if (measurements == null) {
 			return false;
 		}
@@ -47,7 +53,6 @@ public abstract class AbstractMonitoringChartModel extends ChartModel<Monitoring
 		}
 
 		Instant lastUpdate = Instant.ofEpochMilli(lastUpdateTime);
-		Instant now = Instant.now();
 
 		// Calculate how long ago the last update was
 		long minutesAgo = ChronoUnit.MINUTES.between(lastUpdate, now);
@@ -67,6 +72,7 @@ public abstract class AbstractMonitoringChartModel extends ChartModel<Monitoring
 
 	/**
 	 * Get a human-readable label for the time period.
+	 *
 	 * @param period the period value
 	 * @return the result
 	 */
@@ -82,6 +88,7 @@ public abstract class AbstractMonitoringChartModel extends ChartModel<Monitoring
 
 	/**
 	 * Build time series data, only including time points with meaningful values.
+	 *
 	 * @param timeLabels the output list of formatted time labels
 	 * @param values the output list of numeric values
 	 * @param data the source time-indexed data map
@@ -123,6 +130,7 @@ public abstract class AbstractMonitoringChartModel extends ChartModel<Monitoring
 	/**
 	 * Build a request key from the bean's request stats selections.
 	 * Format: {type}{module}.{document}^{component}
+	 *
 	 * @param bean the bean value
 	 * @return the result
 	 */
@@ -156,6 +164,7 @@ public abstract class AbstractMonitoringChartModel extends ChartModel<Monitoring
 
 	/**
 	 * Get a human-readable description of the request selection.
+	 *
 	 * @param bean the bean value
 	 * @return the result
 	 */

@@ -1,6 +1,7 @@
 package modules.admin.ReportDataset;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -94,9 +95,9 @@ public class ReportDatasetExtension extends ReportDataset {
 	 * Checks if the query in this dataset contains the specified parameter. Used
 	 * when testing and executing the query in case the parameter is defined for the
 	 * template but is not required for this dataset.
-	 * 
+	 *
 	 * This only applies for BizQL and SQL datasets.
-	 * 
+	 *
 	 * @param parameter The parameter to check if is in use in this dataset
 	 * @return true if the parameter is in use, false otherwise
 	 */
@@ -119,7 +120,7 @@ public class ReportDatasetExtension extends ReportDataset {
 	/**
 	 * Executes the BeanReportDataset class specified in this ReportDataset and injects
 	 * any supplied parameters.
-	 * 
+	 *
 	 * @return The list of beans from the class dataset
 	 */
 	@Override
@@ -143,7 +144,7 @@ public class ReportDatasetExtension extends ReportDataset {
 	/**
 	 * Executes the BizQL query supplied in a ReportDataset and injects any supplied parameters in
 	 * use by the dataset query.
-	 * 
+	 *
 	 * @return The list of beans from the query
 	 * @throws Exception
 	 */
@@ -207,14 +208,15 @@ public class ReportDatasetExtension extends ReportDataset {
 	/**
 	 * Executes the SQL query supplied in a ReportDataset using the supplied parameter values
 	 * in use by the dataset.
-	 * 
+	 *
 	 * @return The list of beans from the query
 	 * @throws Exception if the operation fails
 	 */
 	@Override
 	public List<DynaBean> executeSQLQuery() throws Exception {
 		if (DatasetType.SQL != getDatasetType()) {
-			throw new IllegalArgumentException(String.format(DATASET_TYPE_REQUIRED_FORMAT, DatasetType.SQL.toLocalisedDescription()));
+			throw new IllegalArgumentException(
+					String.format(DATASET_TYPE_REQUIRED_FORMAT, DatasetType.SQL.toLocalisedDescription()));
 		}
 
 		final SQL sql = CORE.getPersistence().newSQL(getQuery());
@@ -264,7 +266,7 @@ public class ReportDatasetExtension extends ReportDataset {
 	/**
 	 * Executes the BeanReportDataset class specified in this ReportDataset and injects
 	 * any supplied test parameters.
-	 * 
+	 *
 	 * @return The list of beans from the class dataset
 	 */
 	public List<DynaBean> executeTestClass() {
@@ -274,7 +276,7 @@ public class ReportDatasetExtension extends ReportDataset {
 	/**
 	 * Executes the BizQL query supplied in a ReportDataset using the supplied test parameter
 	 * values in use by the dataset query.
-	 * 
+	 *
 	 * @return The list of beans from the query
 	 */
 	public List<Bean> executeTestQuery() {
@@ -318,13 +320,14 @@ public class ReportDatasetExtension extends ReportDataset {
 	/**
 	 * Executes the SQL query supplied in a ReportDataset using the supplied test parameter values
 	 * in use by the dataset query.
-	 * 
+	 *
 	 * @return The list of beans from the query
 	 * @throws Exception if the operation fails
 	 */
 	public List<DynaBean> executeTestSQLQuery() throws Exception {
 		if (DatasetType.SQL != getDatasetType()) {
-			throw new IllegalArgumentException(String.format(DATASET_TYPE_REQUIRED_FORMAT, DatasetType.SQL.toLocalisedDescription()));
+			throw new IllegalArgumentException(
+					String.format(DATASET_TYPE_REQUIRED_FORMAT, DatasetType.SQL.toLocalisedDescription()));
 		}
 
 		final SQL sql = CORE.getPersistence().newSQL(getQuery());
@@ -355,7 +358,7 @@ public class ReportDatasetExtension extends ReportDataset {
 	/**
 	 * If this dataset is BizQL, returns a substituted query replacing any date/datetime
 	 * sentinels with a Java date value. If this is not a BizQL dataset, returns the query.
-	 * 
+	 *
 	 * @return A substituted query replacing any date sentinels with the date parameters to use, or the original query
 	 */
 	public SubstitutedQueryResult getSubstitutedQuery() {
@@ -404,7 +407,8 @@ public class ReportDatasetExtension extends ReportDataset {
 					// check it hasn't already been replaced
 					if (query.contains(dateExpression)) {
 						String dateParameterName = String.format(DATE_PARAMETER_STRING_FORMAT,
-								DATE_PARAMETER_DATE_FORMAT.format(LocalDateTime.now()), Integer.valueOf(dateCount));
+								DATE_PARAMETER_DATE_FORMAT.format(LocalDateTime.now(ZoneId.systemDefault())),
+								Integer.valueOf(dateCount));
 
 						// update the original query string to use the new date parameter name
 						query = query.replace(dateExpression, PARAMETER_PREFIX + dateParameterName);
@@ -441,6 +445,7 @@ public class ReportDatasetExtension extends ReportDataset {
 
 		/**
 		 * Creates a substituted query result with no date parameters.
+		 *
 		 * @param query the substituted query text
 		 */
 		public SubstitutedQueryResult(String query) {
@@ -450,6 +455,7 @@ public class ReportDatasetExtension extends ReportDataset {
 
 		/**
 		 * Creates a substituted query result with query text and replacement parameters.
+		 *
 		 * @param query the substituted query text
 		 * @param parameters the replacement date parameters keyed by generated parameter name
 		 */
@@ -460,6 +466,7 @@ public class ReportDatasetExtension extends ReportDataset {
 
 		/**
 		 * Executes getQuery.
+		 *
 		 * @return the result
 		 */
 		public String getQuery() {
@@ -468,6 +475,7 @@ public class ReportDatasetExtension extends ReportDataset {
 
 		/**
 		 * Executes getParameters.
+		 *
 		 * @return the result
 		 */
 		public Map<String, DateOnly> getParameters() {

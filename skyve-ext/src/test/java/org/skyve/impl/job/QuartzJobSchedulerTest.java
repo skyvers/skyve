@@ -440,12 +440,11 @@ public class QuartzJobSchedulerTest {
 	public void scheduleReportSkipsExpiredTriggerButStillPopulatesJobData() throws Exception {
 		User user = user("customer");
 		JobDetail detail = reportDetail("report-id", "customer", "Report Sales");
-		Date now = new Date();
 		Trigger expired = TriggerBuilder.newTrigger()
 										.withIdentity("report-id", "customer")
 										.forJob(detail)
-										.startAt(new Date(now.getTime() - 120_000L))
-										.endAt(new Date(now.getTime() - 60_000L))
+										.startAt(new Date(946_684_800_000L))
+										.endAt(new Date(946_684_860_000L))
 										.build();
 
 		invokeScheduleReport(detail, user, expired);
