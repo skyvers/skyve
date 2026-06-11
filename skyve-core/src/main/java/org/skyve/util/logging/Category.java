@@ -31,7 +31,7 @@ public enum Category {
 
     /**
      * This logging category prefix is shared by all of these categories. 
-     * It starts with "SKYVE" to maintain some backwards compatability with
+     * It starts with "SKYVE" to maintain some backwards compatibility with
      * any existing logging configurations that may be in use (ie: any 
      * handlers which filter on "SKYVE" will still capture all of these 
      * categories).
@@ -51,13 +51,13 @@ public enum Category {
     }
 
     /**
-     * Returns a sanitizing {@link SkyveLoggerFactory} named for this category.
+     * Returns a sanitising {@link SkyveLoggerFactory} named for this category.
      *
      * <p>The returned logger strips CR, LF, and other ASCII control characters
      * from messages and {@link String} arguments before passing them to the
      * underlying SLF4J backend, preventing log injection attacks.
      *
-     * @return a sanitizing {@link Logger}; never {@code null}
+     * @return a sanitising {@link Logger}; never {@code null}
      */
     public Logger logger() {
         return SkyveLoggerFactory.getLogger(this);
