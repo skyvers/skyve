@@ -160,7 +160,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 				}
 			}
 			if (unsizedCols > 0) {
-				mutablePercentageWidth = Integer.valueOf(LayoutUtil.responsiveWidthToPercentageWidth(mediumColsRemaining / unsizedCols));
+				mutablePercentageWidth = Integer.valueOf(LayoutUtil.responsiveWidthToPercentageWidth(((double) mediumColsRemaining) / unsizedCols));
 			}
 		}
 		HtmlPanelGroup div = responsiveColumn(pixelWidth, responsiveWidth, mutablePercentageWidth, sm, md, lg, xl, widgetInvisible, nopad);

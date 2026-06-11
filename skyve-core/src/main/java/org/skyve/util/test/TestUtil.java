@@ -406,8 +406,8 @@ public class TestUtil {
 	 * @return A pseudo-random email string
 	 */
 	public static String randomEmail(int length) {
-		int addressLength = (int) Math.floor((length - 2) / 2);
-		int domainLength = (int) Math.floor((length - 2) / 2) - 2;
+		int addressLength = (int) Math.floor((length - 2) / 2.0);
+		int domainLength = (int) Math.floor((length - 2) / 2.0) - 2;
 
 		char[] address = new char[addressLength];
 		for (int i = 0; i < addressLength; i++) {
