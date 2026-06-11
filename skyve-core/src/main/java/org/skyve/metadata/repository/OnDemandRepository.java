@@ -20,8 +20,9 @@ import jakarta.annotation.Nullable;
  * timestamp so the caching layer ({@link CachedRepository}) can decide whether a
  * reload is necessary.
  *
- * <p>All {@code load*} methods return fully-parsed (but not yet resolved) raw metadata
- * objects that the {@link MutableRepository} then converts to the runtime representation.
+ * <p>{@code load*} methods return fully-parsed (but not yet resolved) raw metadata
+ * objects that the {@link MutableRepository} then converts to the runtime representation,
+ * or {@code null} when the backing store has no artefact for the requested key.
  *
  * @see MutableRepository
  * @see CachedRepository
@@ -40,17 +41,17 @@ public interface OnDemandRepository {
 	/**
 	 * Loads and returns the router metadata.
 	 *
-	 * @return the parsed router; never {@code null}
+	 * @return the parsed router, or {@code null} when no router is available
 	 */
-	@Nonnull Router loadRouter();
+	@Nullable Router loadRouter();
 
 	/**
 	 * Loads and returns the customer metadata for {@code customerName}.
 	 *
 	 * @param customerName the customer name; must not be {@code null}
-	 * @return the parsed customer metadata; never {@code null}
+	 * @return the parsed customer metadata, or {@code null} when no customer is available
 	 */
-	@Nonnull CustomerMetaData loadCustomer(@Nonnull String customerName);
+	@Nullable CustomerMetaData loadCustomer(@Nonnull String customerName);
 
 	/**
 	 * Loads and returns the module metadata for {@code moduleName}, optionally scoped
@@ -58,9 +59,9 @@ public interface OnDemandRepository {
 	 *
 	 * @param customerName the customer name, or {@code null} for the default module
 	 * @param moduleName   the module name; must not be {@code null}
-	 * @return the parsed module metadata; never {@code null}
+	 * @return the parsed module metadata, or {@code null} when no module is available
 	 */
-	@Nonnull ModuleMetaData loadModule(@Nullable String customerName, @Nonnull String moduleName);
+	@Nullable ModuleMetaData loadModule(@Nullable String customerName, @Nonnull String moduleName);
 
 	/**
 	 * Loads and returns the document metadata for {@code documentName} within the
@@ -69,9 +70,9 @@ public interface OnDemandRepository {
 	 * @param customerName the customer name, or {@code null} for the default document
 	 * @param moduleName   the module name; must not be {@code null}
 	 * @param documentName the document name; must not be {@code null}
-	 * @return the parsed document metadata; never {@code null}
+	 * @return the parsed document metadata, or {@code null} when no document is available
 	 */
-	@Nonnull DocumentMetaData loadDocument(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName);
+	@Nullable DocumentMetaData loadDocument(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName);
 
 	/**
 	 * Loads and returns the view metadata for {@code viewName} on the given document,
@@ -83,9 +84,9 @@ public interface OnDemandRepository {
 	 * @param uxui         the UX/UI variant such as {@code "desktop"} or {@code "responsive"},
 	 *                     or {@code null} for the default variant
 	 * @param viewName     the view name; must not be {@code null}
-	 * @return the parsed view metadata; never {@code null}
+	 * @return the parsed view metadata, or {@code null} when no view is available
 	 */
-	@Nonnull ViewMetaData loadView(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName, @Nullable String uxui, @Nonnull String viewName);
+	@Nullable ViewMetaData loadView(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName, @Nullable String uxui, @Nonnull String viewName);
 
 	/**
 	 * Loads and returns the action metadata for {@code actionName} on the given document.
@@ -94,9 +95,9 @@ public interface OnDemandRepository {
 	 * @param moduleName   the module name; must not be {@code null}
 	 * @param documentName the document name; must not be {@code null}
 	 * @param actionName   the action name; must not be {@code null}
-	 * @return the parsed action metadata; never {@code null}
+	 * @return the parsed action metadata, or {@code null} when no action is available
 	 */
-	@Nonnull ActionMetaData loadMetaDataAction(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName, @Nonnull String actionName);
+	@Nullable ActionMetaData loadMetaDataAction(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName, @Nonnull String actionName);
 
 	/**
 	 * Loads and returns the bizlet metadata for the given document.
@@ -104,15 +105,15 @@ public interface OnDemandRepository {
 	 * @param customerName the customer name, or {@code null} for the default bizlet
 	 * @param moduleName   the module name; must not be {@code null}
 	 * @param documentName the document name; must not be {@code null}
-	 * @return the parsed bizlet metadata; never {@code null}
+	 * @return the parsed bizlet metadata, or {@code null} when no bizlet is available
 	 */
-	@Nonnull BizletMetaData loadMetaDataBizlet(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName);
+	@Nullable BizletMetaData loadMetaDataBizlet(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName);
 
 	/**
 	 * Returns the last-modified timestamp of the router source, in milliseconds since
 	 * the epoch.
 	 *
-	 * @return last-modified time, or {@code 0} if not available
+	 * @return last-modified time, or {@code Long.MIN_VALUE} if not available
 	 */
 	long routerLastModifiedMillis();
 
@@ -121,7 +122,7 @@ public interface OnDemandRepository {
 	 * {@code customerName}, in milliseconds since the epoch.
 	 *
 	 * @param customerName the customer name; must not be {@code null}
-	 * @return last-modified time, or {@code 0} if not available
+	 * @return last-modified time, or {@code Long.MIN_VALUE} if not available
 	 */
 	long customerLastModifiedMillis(@Nonnull String customerName);
 
@@ -131,7 +132,7 @@ public interface OnDemandRepository {
 	 *
 	 * @param customerName the customer name, or {@code null} for the default module
 	 * @param moduleName   the module name; must not be {@code null}
-	 * @return last-modified time, or {@code 0} if not available
+	 * @return last-modified time, or {@code Long.MIN_VALUE} if not available
 	 */
 	long moduleLastModifiedMillis(@Nullable String customerName, @Nonnull String moduleName);
 
@@ -142,7 +143,7 @@ public interface OnDemandRepository {
 	 * @param customerName the customer name, or {@code null} for the default document
 	 * @param moduleName   the module name; must not be {@code null}
 	 * @param documentName the document name; must not be {@code null}
-	 * @return last-modified time, or {@code 0} if not available
+	 * @return last-modified time, or {@code Long.MIN_VALUE} if not available
 	 */
 	long documentLastModifiedMillis(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName);
 
@@ -155,7 +156,7 @@ public interface OnDemandRepository {
 	 * @param documentName the document name; must not be {@code null}
 	 * @param uxui         the UX/UI variant, or {@code null} for the default variant
 	 * @param viewName     the view name; must not be {@code null}
-	 * @return last-modified time, or {@code 0} if not available
+	 * @return last-modified time, or {@code Long.MIN_VALUE} if not available
 	 */
 	long viewLastModifiedMillis(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName, @Nullable String uxui, @Nonnull String viewName);
 
@@ -167,7 +168,7 @@ public interface OnDemandRepository {
 	 * @param moduleName   the module name; must not be {@code null}
 	 * @param documentName the document name; must not be {@code null}
 	 * @param actionName   the action name; must not be {@code null}
-	 * @return last-modified time, or {@code 0} if not available
+	 * @return last-modified time, or {@code Long.MIN_VALUE} if not available
 	 */
 	long metaDataActionLastModifiedMillis(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName, @Nonnull String actionName);
 
@@ -178,7 +179,7 @@ public interface OnDemandRepository {
 	 * @param customerName the customer name, or {@code null} for the default bizlet
 	 * @param moduleName   the module name; must not be {@code null}
 	 * @param documentName the document name; must not be {@code null}
-	 * @return last-modified time, or {@code 0} if not available
+	 * @return last-modified time, or {@code Long.MIN_VALUE} if not available
 	 */
 	long metaDataBizletLastModifiedMillis(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName);
 }

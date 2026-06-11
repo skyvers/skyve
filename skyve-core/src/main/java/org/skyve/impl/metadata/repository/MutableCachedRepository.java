@@ -142,9 +142,11 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 			// Load if empty
 			if (result.isEmpty()) {
 				Router router = loadRouter();
-				router = router.convert(ROUTER_NAME);
-				result = Optional.of(router);
-				cache.put(ROUTER_KEY, result);
+				if (router != null) {
+					router = router.convert(ROUTER_NAME);
+					result = Optional.of(router);
+					cache.put(ROUTER_KEY, result);
+				}
 			}
 			else {
 				// Load if dev mode and new repository version
@@ -156,16 +158,18 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 						
 						if (r.getLastModifiedMillis() < routerLastModifiedMillis()) {
 							Router router = loadRouter();
-							router = router.convert(ROUTER_NAME);
-							result = Optional.of(router);
-							cache.put(ROUTER_KEY, result);
+							if (router != null) {
+								router = router.convert(ROUTER_NAME);
+								result = Optional.of(router);
+								cache.put(ROUTER_KEY, result);
+							}
 						}
 					}
 				}
 			}
 		}
 
-		return (result == null) ? null : (Router) result.get();
+		return ((result == null) || result.isEmpty()) ? null : (Router) result.get();
 	}
 	
 	/**
@@ -200,9 +204,11 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 			// Load if empty
 			if (result.isEmpty()) {
 				CustomerMetaData customerMetaData = loadCustomer(customerName);
-				Customer customer = customerMetaData.convert(customerName);
-				result = Optional.of(customer);
-				cache.put(customerKey, result);
+				if (customerMetaData != null) {
+					Customer customer = customerMetaData.convert(customerName);
+					result = Optional.of(customer);
+					cache.put(customerKey, result);
+				}
 			}
 			else {
 				// Load if dev mode and new repository version
@@ -214,18 +220,20 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 						
 						if (c.getLastModifiedMillis() < customerLastModifiedMillis(customerName)) {
 							CustomerMetaData customerMetaData = loadCustomer(customerName);
-							Customer customer = customerMetaData.convert(customerName);
-							result = Optional.of(customer);
-							cache.put(customerKey, result);
-							// Validate the current customer if we are in dev mode and the metadata has been touched
-							DomainGenerator.validate(customerName);
+							if (customerMetaData != null) {
+								Customer customer = customerMetaData.convert(customerName);
+								result = Optional.of(customer);
+								cache.put(customerKey, result);
+								// Validate the current customer if we are in dev mode and the metadata has been touched
+								DomainGenerator.validate(customerName);
+							}
 						}
 					}
 				}
 			}
 		}
 		
-		return (result == null) ? null : (Customer) result.get();
+		return ((result == null) || result.isEmpty()) ? null : (Customer) result.get();
 	}
 	
 	/**
@@ -282,9 +290,11 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 			// Load if empty
 			if (result.isEmpty()) {
 				ModuleMetaData moduleMetaData = loadModule(customerName, moduleName);
-				Module module = convertModule(customerName, moduleName, moduleMetaData);
-				result = Optional.of(module);
-				cache.put(moduleKey, result);
+				if (moduleMetaData != null) {
+					Module module = convertModule(customerName, moduleName, moduleMetaData);
+					result = Optional.of(module);
+					cache.put(moduleKey, result);
+				}
 			}
 			else {
 				// Load if dev mode and new repository version
@@ -296,18 +306,20 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 						
 						if (m.getLastModifiedMillis() < moduleLastModifiedMillis(customerName, moduleName)) {
 							ModuleMetaData moduleMetaData = loadModule(customerName, moduleName);
-							Module module = convertModule(customerName, moduleName, moduleMetaData);
-							result = Optional.of(module);
-							cache.put(moduleKey, result);
-							// Validate the current customer if we are in dev mode and the metadata has been touched
-							DomainGenerator.validate((customerName == null) ? CORE.getCustomer().getName() : customerName);
+							if (moduleMetaData != null) {
+								Module module = convertModule(customerName, moduleName, moduleMetaData);
+								result = Optional.of(module);
+								cache.put(moduleKey, result);
+								// Validate the current customer if we are in dev mode and the metadata has been touched
+								DomainGenerator.validate((customerName == null) ? CORE.getCustomer().getName() : customerName);
+							}
 						}
 					}
 				}
 			}
 		}
 		
-		return (result == null) ? null : (Module) result.get();
+		return ((result == null) || result.isEmpty()) ? null : (Module) result.get();
 	}
 
 	private static @Nonnull Module convertModule(@Nullable String customerName, @Nonnull String moduleName, @Nonnull ModuleMetaData module) {
@@ -394,7 +406,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		}
 		else {
 			documentModuleName = referencedModuleName;
-			documentModule = ProvidedRepositoryFactory.get().getModule(customer, documentModuleName);
+			documentModule = requireModule(ProvidedRepositoryFactory.get().getModule(customer, documentModuleName), documentModuleName);
 		}
 
 		final String customerName = (customer == null) ? null : customer.getName();
@@ -409,9 +421,11 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 			// Load if empty
 			if (result.isEmpty()) {
 				DocumentMetaData documentMetaData = loadDocument(customerOverride ? customerName : null, documentModuleName, documentName);
-				Document document = convertDocument(customerName, documentModuleName, documentModule, documentName, documentMetaData);
-				result = Optional.of(document);
-				cache.put(documentKey, result);
+				if (documentMetaData != null) {
+					Document document = convertDocument(customerName, documentModuleName, documentModule, documentName, documentMetaData);
+					result = Optional.of(document);
+					cache.put(documentKey, result);
+				}
 			}
 			else {
 				// Load if dev mode and new repository version
@@ -423,18 +437,20 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 						
 						if (d.getLastModifiedMillis() < documentLastModifiedMillis(customerOverride ? customerName : null, documentModuleName, documentName)) {
 							DocumentMetaData documentMetaData = loadDocument(customerOverride ? customerName : null, documentModuleName, documentName);
-							Document document = convertDocument(customerName, documentModuleName, documentModule, documentName, documentMetaData);
-							result = Optional.of(document);
-							cache.put(documentKey, result);
-							// Validate the current customer if we are in dev mode and the metadata has been touched
-							DomainGenerator.validate((customerName == null) ? CORE.getCustomer().getName() : customerName);
+							if (documentMetaData != null) {
+								Document document = convertDocument(customerName, documentModuleName, documentModule, documentName, documentMetaData);
+								result = Optional.of(document);
+								cache.put(documentKey, result);
+								// Validate the current customer if we are in dev mode and the metadata has been touched
+								DomainGenerator.validate((customerName == null) ? CORE.getCustomer().getName() : customerName);
+							}
 						}
 					}
 				}
 			}
 		}
 		
-		return (result == null) ? null : (Document) result.get();
+		return ((result == null) || result.isEmpty()) ? null : (Document) result.get();
 	}
 
 	private static @Nonnull Document convertDocument(@Nullable String customerName,
@@ -483,6 +499,13 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		}
 		
 		return result;
+	}
+
+	private static @Nonnull Module requireModule(@Nullable Module module, @Nonnull String moduleName) {
+		if (module == null) {
+			throw new MetaDataException("Module " + moduleName + " does not exist.");
+		}
+		return module;
 	}
 	
 	/**
@@ -547,7 +570,8 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 							Document document, 
 							String name) {
 		View result = null;
-		Module owningModule = ProvidedRepositoryFactory.get().getModule(customer, document.getOwningModuleName());
+		String owningModuleName = document.getOwningModuleName();
+		Module owningModule = requireModule(ProvidedRepositoryFactory.get().getModule(customer, owningModuleName), owningModuleName);
 		if (customer != null) {
 			String searchCustomerName = customer.getName();
 			// get customer overridden
@@ -619,14 +643,11 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 			if (result.isEmpty()) {
 				// Load the view using the searchUxUi
 				ViewMetaData viewMetaData = loadView(searchCustomerName, moduleName, documentName, searchUxUi, viewName);
-				View view = null;
 				if (viewMetaData != null) {
 					// Convert the view ensuring view components within vanilla views are resolved with the current uxui
-					view = convertView(searchCustomerName, searchUxUi, customer, moduleName, module, documentName, document, uxui, viewMetaData);
-					if (view != null) {
-						result = Optional.of(view);
-						cache.put(viewKey, result);
-					}
+					View view = convertView(searchCustomerName, searchUxUi, customer, moduleName, module, documentName, document, uxui, viewMetaData);
+					result = Optional.of(view);
+					cache.put(viewKey, result);
 				}
 			}
 			else {
@@ -641,16 +662,13 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 						if (view.getLastModifiedMillis() < viewLastModifiedMillis(searchCustomerName, moduleName, documentName, searchUxUi, viewName)) {
 							// Load the view using the searchUxUi
 							ViewMetaData viewMetaData = loadView(searchCustomerName, moduleName, documentName, searchUxUi, viewName);
-							View newView = null;
 							if (viewMetaData != null) {
 								// Convert the view ensuring view components within vanilla views are resolved with the current uxui
-								newView = convertView(searchCustomerName, searchUxUi, customer, moduleName, module, documentName, document, uxui, viewMetaData);
-								if (newView != null) {
-									result = Optional.of(newView);
-									cache.put(viewKey, result);
-									// Validate the current customer if we are in dev mode and the metadata has been touched
-									DomainGenerator.validate((customer == null) ? CORE.getCustomer().getName() : customer.getName());
-								}
+								View newView = convertView(searchCustomerName, searchUxUi, customer, moduleName, module, documentName, document, uxui, viewMetaData);
+								result = Optional.of(newView);
+								cache.put(viewKey, result);
+								// Validate the current customer if we are in dev mode and the metadata has been touched
+								DomainGenerator.validate((customer == null) ? CORE.getCustomer().getName() : customer.getName());
 							}
 						}
 					}
@@ -658,7 +676,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 			}
 		}
 		
-		return (result == null) ? null : (View) result.get();
+		return ((result == null) || result.isEmpty()) ? null : (View) result.get();
 	}
 
 	@SuppressWarnings("java:S107")
@@ -725,7 +743,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		String customerName = customer.getName();
 		String documentName = document.getName();
 		String owningModuleName = document.getOwningModuleName();
-		Module owningModule = ProvidedRepositoryFactory.get().getModule(null, owningModuleName);
+		Module owningModule = requireModule(ProvidedRepositoryFactory.get().getModule(null, owningModuleName), owningModuleName);
 		View result = convertView(customerName, uxui, customer, owningModuleName, owningModule, documentName, document, uxui, view);
 		
 		StringBuilder viewKey = new StringBuilder(128);
@@ -750,7 +768,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	public View putView(String uxui, Document document, ViewMetaData view) {
 		String documentName = document.getName();
 		String owningModuleName = document.getOwningModuleName();
-		Module owningModule = ProvidedRepositoryFactory.get().getModule(null, owningModuleName);
+		Module owningModule = requireModule(ProvidedRepositoryFactory.get().getModule(null, owningModuleName), owningModuleName);
 		View result = convertView(null, uxui, null, owningModuleName, owningModule, documentName, document, uxui, view);
 		
 		StringBuilder viewKey = new StringBuilder(128);
@@ -775,7 +793,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		String customerName = customer.getName();
 		String documentName = document.getName();
 		String owningModuleName = document.getOwningModuleName();
-		Module owningModule = ProvidedRepositoryFactory.get().getModule(customer, owningModuleName);
+		Module owningModule = requireModule(ProvidedRepositoryFactory.get().getModule(customer, owningModuleName), owningModuleName);
 		View result = convertView(customerName, null, customer, owningModuleName, owningModule, documentName, document, null, view);
 		
 		StringBuilder viewKey = new StringBuilder(128);
@@ -799,7 +817,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	public View putView(Document document, ViewMetaData view) {
 		String documentName = document.getName();
 		String owningModuleName = document.getOwningModuleName();
-		Module owningModule = ProvidedRepositoryFactory.get().getModule(null, owningModuleName);
+		Module owningModule = requireModule(ProvidedRepositoryFactory.get().getModule(null, owningModuleName), owningModuleName);
 		View result = convertView(null, null, null, owningModuleName, owningModule, documentName, document, null, view);
 		
 		StringBuilder viewKey = new StringBuilder(128);
@@ -854,10 +872,8 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 				ActionMetaData action = loadMetaDataAction(customerName, documentModuleName, documentName, actionName);
 				if (action != null) {
 					action = convertMetaDataAction(customerName, documentModuleName, documentName, action);
-					if (action != null) {
-						result = Optional.of(action);
-						cache.put(actionKey, result);
-					}
+					result = Optional.of(action);
+					cache.put(actionKey, result);
 				}
 			}
 			else {
@@ -874,10 +890,8 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 							ActionMetaData newAction = loadMetaDataAction(customerName, documentModuleName, documentName, actionName);
 							if (newAction != null) {
 								newAction = convertMetaDataAction(customerName, documentModuleName, documentName, newAction);
-								if (newAction != null) {
-									result = Optional.of(newAction);
-									cache.put(actionKey, result);
-								}
+								result = Optional.of(newAction);
+								cache.put(actionKey, result);
 							}
 						}
 					}
@@ -885,7 +899,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 			}
 		}
 		
-		return (result == null) ? null : (ActionMetaData) result.get();
+		return ((result == null) || result.isEmpty()) ? null : (ActionMetaData) result.get();
 	}
 
 	private static @Nonnull ActionMetaData convertMetaDataAction(@Nullable String customerName,
@@ -991,10 +1005,8 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 				BizletMetaData bizlet = loadMetaDataBizlet(customerName, documentModuleName, documentName);
 				if (bizlet != null) {
 					bizlet = convertMetaDataBizlet(customerName, documentModuleName, documentName, bizlet);
-					if (bizlet != null) {
-						result = Optional.of(bizlet);
-						cache.put(bizletKey, result);
-					}
+					result = Optional.of(bizlet);
+					cache.put(bizletKey, result);
 				}
 			}
 			else {
@@ -1011,10 +1023,8 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 							BizletMetaData newBizlet = loadMetaDataBizlet(customerName, documentModuleName, documentName);
 							if (newBizlet != null) {
 								newBizlet = convertMetaDataBizlet(customerName, documentModuleName, documentName, newBizlet);
-								if (newBizlet != null) {
-									result = Optional.of(newBizlet);
-									cache.put(bizletKey, result);
-								}
+								result = Optional.of(newBizlet);
+								cache.put(bizletKey, result);
 							}
 						}
 					}
@@ -1022,7 +1032,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 			}
 		}
 		
-		return (result == null) ? null : (BizletMetaData) result.get();
+		return ((result == null) || result.isEmpty()) ? null : (BizletMetaData) result.get();
 	}
 
 	private static @Nonnull BizletMetaData convertMetaDataBizlet(@Nullable String customerName,

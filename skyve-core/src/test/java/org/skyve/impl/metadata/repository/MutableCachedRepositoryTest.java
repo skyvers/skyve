@@ -7,10 +7,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
 import java.nio.file.Path;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -27,6 +29,7 @@ import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.repository.ProvidedRepository;
 
 /**
  * Tests for MutableCachedRepository cache operations (put/get/evict) via the
@@ -38,10 +41,37 @@ class MutableCachedRepositoryTest {
 	Path tempDir;
 
 	private String basePath;
+	private ProvidedRepository previousRepository;
 
 	@BeforeEach
 	void setUp() {
 		basePath = tempDir.toAbsolutePath().toString();
+		previousRepository = ProvidedRepositoryFactory.get();
+	}
+
+	@AfterEach
+	void tearDown() {
+		if (previousRepository == null) {
+			ProvidedRepositoryFactory.clear();
+		}
+		else {
+			ProvidedRepositoryFactory.set(previousRepository);
+		}
+	}
+
+	private static final class NullLoadingRepository extends UnsynchronisedDynamicRepository {
+		private void addEmptyKey(String key) {
+			addKey(key);
+		}
+
+		private void addRouterKey() {
+			addKey(ROUTER_KEY);
+		}
+	}
+
+	private NullLoadingRepository newNullLoadingRepository() {
+		assertNotNull(basePath);
+		return new NullLoadingRepository();
 	}
 
 	/**
@@ -96,6 +126,16 @@ class MutableCachedRepositoryTest {
 	void getModuleNullCustomerReturnsNullWhenNotInCache() {
 		LocalDesignRepository repo = new LocalDesignRepository(basePath);
 		Module retrieved = repo.getModule(null, "nonexistent");
+		assertNull(retrieved);
+	}
+
+	@Test
+	void getModuleNullCustomerReturnsNullWhenEmptyKeyLoadsNull() {
+		NullLoadingRepository repo = newNullLoadingRepository();
+		repo.addEmptyKey("modules/admin");
+
+		Module retrieved = repo.getModule(null, "admin");
+
 		assertNull(retrieved);
 	}
 
@@ -191,6 +231,17 @@ class MutableCachedRepositoryTest {
 		assertThrows(IllegalArgumentException.class, () -> repo.getDocument(null, module, "NonExistent"));
 	}
 
+	@Test
+	void getDocumentReturnsNullWhenEmptyKeyLoadsNull() {
+		NullLoadingRepository repo = newNullLoadingRepository();
+		Module module = repo.putModule(minimalModule("admin", "User"));
+		repo.addEmptyKey("modules/admin/User");
+
+		Document retrieved = repo.getDocument(null, module, "User");
+
+		assertNull(retrieved);
+	}
+
 	// ---- putDocument(Customer, Module, DocumentMetaData) ----
 
 	@Test
@@ -256,6 +307,39 @@ class MutableCachedRepositoryTest {
 		// populateKeys() adds ROUTER_KEY as empty Optional; getRouter() tries to load
 		// from disk but finds no router files, so throws MetaDataException
 		assertThrows(org.skyve.metadata.MetaDataException.class, repo::getRouter);
+	}
+
+	@Test
+	void getRouterReturnsNullWhenEmptyKeyLoadsNull() {
+		NullLoadingRepository repo = newNullLoadingRepository();
+		repo.addRouterKey();
+
+		Router retrieved = repo.getRouter();
+
+		assertNull(retrieved);
+	}
+
+	@Test
+	void getCustomerReturnsNullWhenEmptyKeyLoadsNull() {
+		NullLoadingRepository repo = newNullLoadingRepository();
+		repo.addEmptyKey("customers/acme");
+
+		Customer retrieved = repo.getCustomer("acme");
+
+		assertNull(retrieved);
+	}
+
+	@Test
+	void getViewReturnsNullWhenEmptyKeyLoadsNull() {
+		NullLoadingRepository repo = newNullLoadingRepository();
+		repo.putModule(minimalModule("admin", "User"));
+		repo.addEmptyKey("modules/admin/User/views/edit");
+		ProvidedRepositoryFactory.set(repo);
+		Document document = mockDocument("admin", "User");
+
+		org.skyve.metadata.view.View retrieved = repo.getView(null, null, document, "edit");
+
+		assertNull(retrieved);
 	}
 
 	// ---- vtable ----
@@ -347,6 +431,17 @@ class MutableCachedRepositoryTest {
 	}
 
 	@Test
+	void getMetaDataActionReturnsNullWhenEmptyKeyLoadsNull() {
+		NullLoadingRepository repo = newNullLoadingRepository();
+		Document document = mockDocument("admin", "User");
+		repo.addEmptyKey("modules/admin/User/actions/Save.xml");
+
+		ActionMetaData result = repo.getMetaDataAction(null, document, "Save");
+
+		assertNull(result);
+	}
+
+	@Test
 	void putMetaDataActionWithCustomerReturnsConvertedAction() {
 		LocalDesignRepository repo = new LocalDesignRepository(basePath);
 		Document doc = mockDocument("admin", "User");
@@ -419,6 +514,17 @@ class MutableCachedRepositoryTest {
 	}
 
 	@Test
+	void getMetaDataBizletReturnsNullWhenEmptyKeyLoadsNull() {
+		NullLoadingRepository repo = newNullLoadingRepository();
+		Document document = mockDocument("admin", "User");
+		repo.addEmptyKey("modules/admin/User/UserBizlet.xml");
+
+		BizletMetaData result = repo.getMetaDataBizlet(null, document);
+
+		assertNull(result);
+	}
+
+	@Test
 	void putMetaDataBizletWithCustomerReturnsConvertedBizlet() {
 		LocalDesignRepository repo = new LocalDesignRepository(basePath);
 		Document doc = mockDocument("admin", "User");
@@ -467,7 +573,7 @@ class MutableCachedRepositoryTest {
 	void localDesignRepositoryPopulateUserThrowsUnsupportedOperationException() {
 		LocalDesignRepository repo = new LocalDesignRepository(basePath);
 		assertThrows(UnsupportedOperationException.class,
-				() -> repo.populateUser(mock(org.skyve.metadata.user.User.class), null));
+				() -> repo.populateUser(mock(org.skyve.metadata.user.User.class), mock(Connection.class)));
 	}
 
 	@Test
@@ -491,4 +597,3 @@ class MutableCachedRepositoryTest {
 		assertNotNull(repo);
 	}
 }
-
