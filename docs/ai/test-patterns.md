@@ -172,7 +172,7 @@ Tests written in `skyve-war` that call `skyve-core` classes **count toward `skyv
 
 ### Eclipse JDT warning suppression
 
-The project commits `.settings/org.eclipse.jdt.core.prefs` files that configure Eclipse JDT warning levels. VS Code surfaces these via `get_errors`. In test code, the most common warning is "method can be declared static" on `@Test` methods. Suppress it at the method or class level:
+The project commits `.settings/org.eclipse.jdt.core.prefs` files that configure Eclipse JDT warning levels. VS Code Problems surfaces these via the `get_errors` MCP tool. In test code, the most common warning is "method can be declared static" on `@Test` methods. Suppress it at the method or class level:
 
 ```java
 @Test

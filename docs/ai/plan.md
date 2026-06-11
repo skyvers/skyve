@@ -170,7 +170,7 @@ If the user asks you to execute a milestone plan, these are the steps to take.
    - See `docs/ai/learnings.md` for Eclipse class file conflicts that require `clean compile` first.
 6. Validate continuously while implementing.
    - Run the smallest meaningful compile or test step first.
-   - After editing any Java file, call `get_errors` and resolve all warnings before moving on.
+   - After editing any Java file, call the `get_errors` MCP tool and resolve all warnings before moving on.
    - Follow `docs/ai/test-patterns.md` for test placement and base class selection.
    - For coverage work, use the build commands in `docs/coverage-plan.md`.
    - Broaden validation before handoff: `mvn -B package` is the baseline CI-aligned build.
