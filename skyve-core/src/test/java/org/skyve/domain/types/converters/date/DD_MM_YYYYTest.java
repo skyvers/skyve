@@ -76,7 +76,7 @@ class DD_MM_YYYYTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({ "static-method", "null" })
 	void testToDisplayValueNullThrows() {
 		assertThrows(ConversionException.class, () -> new DD_MM_YYYY().toDisplayValue(null));
 	}

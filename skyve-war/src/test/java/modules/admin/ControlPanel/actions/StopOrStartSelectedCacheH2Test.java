@@ -77,19 +77,17 @@ class StopOrStartSelectedCacheH2Test extends AbstractH2Test {
 		// Clean up any test caches that may have been created
 		try {
 			Caching caching = EXT.getCaching();
-			if (caching != null) {
-				try {
-					caching.removeEHCache(TEST_EH_CACHE_NAME);
-				} catch (Exception ignored) {
-			assertThat(ignored, notNullValue());
-					// Ignore - cache may not exist
-				}
-				try {
-					caching.destroyJCache(TEST_JCACHE_NAME);
-				} catch (Exception ignored) {
-			assertThat(ignored, notNullValue());
-					// Ignore - cache may not exist
-				}
+			try {
+				caching.removeEHCache(TEST_EH_CACHE_NAME);
+			} catch (Exception ignored) {
+				assertThat(ignored, notNullValue());
+				// Ignore - cache may not exist
+			}
+			try {
+				caching.destroyJCache(TEST_JCACHE_NAME);
+			} catch (Exception ignored) {
+				assertThat(ignored, notNullValue());
+				// Ignore - cache may not exist
 			}
 		} catch (Exception ignored) {
 			assertThat(ignored, notNullValue());
@@ -234,19 +232,17 @@ class StopOrStartSelectedCacheH2Test extends AbstractH2Test {
 		controlPanel.setSelectedCache(TEST_EH_CACHE_NAME);
 
 		try {
-			Caching caching = EXT.getCaching();
-			if (caching != null) {
-				// First call should start (create) the cache
-				ServerSideActionResult<ControlPanelExtension> result1 = action.execute(controlPanel, webContext);
-				assertThat(result1, is(notNullValue()));
-				assertThat(controlPanel.getTabIndex(), is(nullValue()));
+			EXT.getCaching();
+			// First call should start (create) the cache
+			ServerSideActionResult<ControlPanelExtension> result1 = action.execute(controlPanel, webContext);
+			assertThat(result1, is(notNullValue()));
+			assertThat(controlPanel.getTabIndex(), is(nullValue()));
 
-				// Second call should stop (remove) the cache since it now exists
-				controlPanel.setTabIndex(Integer.valueOf(2));
-				ServerSideActionResult<ControlPanelExtension> result2 = action.execute(controlPanel, webContext);
-				assertThat(result2, is(notNullValue()));
-				assertThat(controlPanel.getTabIndex(), is(nullValue()));
-			}
+			// Second call should stop (remove) the cache since it now exists
+			controlPanel.setTabIndex(Integer.valueOf(2));
+			ServerSideActionResult<ControlPanelExtension> result2 = action.execute(controlPanel, webContext);
+			assertThat(result2, is(notNullValue()));
+			assertThat(controlPanel.getTabIndex(), is(nullValue()));
 		} catch (Exception ignored) {
 			assertThat(ignored, notNullValue());
 			// Caching may not be fully available in test environment
@@ -273,19 +269,17 @@ class StopOrStartSelectedCacheH2Test extends AbstractH2Test {
 		controlPanel.setSelectedCache(TEST_JCACHE_NAME);
 
 		try {
-			Caching caching = EXT.getCaching();
-			if (caching != null) {
-				// First call should start (create) the cache
-				ServerSideActionResult<ControlPanelExtension> result1 = action.execute(controlPanel, webContext);
-				assertThat(result1, is(notNullValue()));
-				assertThat(controlPanel.getTabIndex(), is(nullValue()));
+			EXT.getCaching();
+			// First call should start (create) the cache
+			ServerSideActionResult<ControlPanelExtension> result1 = action.execute(controlPanel, webContext);
+			assertThat(result1, is(notNullValue()));
+			assertThat(controlPanel.getTabIndex(), is(nullValue()));
 
-				// Second call should stop (destroy) the cache since it now exists
-				controlPanel.setTabIndex(Integer.valueOf(2));
-				ServerSideActionResult<ControlPanelExtension> result2 = action.execute(controlPanel, webContext);
-				assertThat(result2, is(notNullValue()));
-				assertThat(controlPanel.getTabIndex(), is(nullValue()));
-			}
+			// Second call should stop (destroy) the cache since it now exists
+			controlPanel.setTabIndex(Integer.valueOf(2));
+			ServerSideActionResult<ControlPanelExtension> result2 = action.execute(controlPanel, webContext);
+			assertThat(result2, is(notNullValue()));
+			assertThat(controlPanel.getTabIndex(), is(nullValue()));
 		} catch (Exception ignored) {
 			assertThat(ignored, notNullValue());
 			// Caching may not be fully available in test environment
@@ -325,4 +319,3 @@ class StopOrStartSelectedCacheH2Test extends AbstractH2Test {
 		// Empty string won't match any cache in APP_CACHES, so error growl shown
 	}
 }
-

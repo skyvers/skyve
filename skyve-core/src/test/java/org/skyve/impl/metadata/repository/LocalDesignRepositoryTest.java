@@ -554,6 +554,7 @@ class LocalDesignRepositoryTest {
 	}
 
 	@Test
+	@SuppressWarnings("null")
 	void validateModuleForGenerateDomainThrowsWhenMapModelCannotBeResolved() {
 		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
@@ -875,6 +876,7 @@ class LocalDesignRepositoryTest {
 	}
 
 	@Test
+	@SuppressWarnings("null")
 	void validateModuleForGenerateDomainPassesWhenMapModelResolves() {
 		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
 		Customer customer = mock(Customer.class);

@@ -40,6 +40,7 @@ import java.awt.image.BufferedImage;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 import java.util.List;
 import java.util.SortedMap;
 
@@ -887,10 +888,11 @@ class FileSystemRepositoryTest {
 		Files.createDirectories(customerModuleDir);
 		Files.writeString(customerModuleDir.resolve("logo.png"), "customer-override");
 		Path moduleDir = tempDir.resolve("modules").resolve("myModule").resolve("resources");
-		Files.createDirectories(moduleDir);
-		Files.writeString(moduleDir.resolve("logo.png"), "vanilla");
-		java.io.File result = repo.findResourceFile("logo.png", "acme", "myModule");
-		assertTrue(result.exists());
+			Files.createDirectories(moduleDir);
+			Files.writeString(moduleDir.resolve("logo.png"), "vanilla");
+			java.io.File result = repo.findResourceFile("logo.png", "acme", "myModule");
+			result = Objects.requireNonNull(result);
+			assertTrue(result.exists());
 		// Should return the customer-module specific one
 		assertTrue(result.getPath().replace('\\', '/').contains("customers/acme/myModule/resources/logo.png"));
 	}

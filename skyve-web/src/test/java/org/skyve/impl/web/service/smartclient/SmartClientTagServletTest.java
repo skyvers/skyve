@@ -121,6 +121,27 @@ class SmartClientTagServletTest {
 	}
 
 	@Test
+	void mutatingActionsRenderWarningWhenRuntimeStateIsUnavailable() throws Exception {
+		for (String action : new String[] {"T", "U", "C", "N", "D"}) {
+			SmartClientTagServlet servlet = new SmartClientTagServlet();
+			HttpServletRequest request = newRequestWithSessionUser(action);
+			StringWriter sink = new StringWriter();
+			HttpServletResponse response = mock(HttpServletResponse.class);
+			when(response.getWriter()).thenReturn(new PrintWriter(sink));
+			when(request.getParameter(org.skyve.impl.web.AbstractWebContext.CSRF_TOKEN_NAME)).thenReturn("7");
+			when(request.getParameter("ID")).thenReturn("menu");
+			when(request.getParameter("t")).thenReturn("tag-1");
+			when(request.getParameter("n")).thenReturn("Tag");
+			when(request.getParameter("c")).thenReturn("{}");
+			when(request.getParameter("d")).thenReturn("admin_User");
+
+			assertDoesNotThrow(() -> servlet.doGet(request, response));
+
+			assertTrue(sink.toString().contains("The tag operation was unsuccessful."));
+		}
+	}
+
+	@Test
 	void appendUnexpectedWarningIncludesFailurePrefix() {
 		StringWriter sink = new StringWriter();
 		PrintWriter writer = new PrintWriter(sink);

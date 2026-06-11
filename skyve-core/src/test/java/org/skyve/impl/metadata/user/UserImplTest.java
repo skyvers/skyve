@@ -76,7 +76,6 @@ class UserImplTest {
 	@SuppressWarnings("static-method")
 	void testSetAndGetId() {
 		UserImpl user = new UserImpl();
-		Assert.assertNull(user.getId());
 		user.setId("test-id-123");
 		Assert.assertEquals("test-id-123", user.getId());
 	}

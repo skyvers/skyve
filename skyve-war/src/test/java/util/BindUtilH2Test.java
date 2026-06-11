@@ -184,7 +184,9 @@ class BindUtilH2Test extends AbstractH2Test {
 		var target = BindUtil.validateBinding(customer, module, document,
 				AllAttributesPersistent.textPropertyName);
 		assertNotNull(target);
-		assertEquals("text", target.getAttribute().getName());
+		Attribute attribute = target.getAttribute();
+		assertNotNull(attribute);
+		assertEquals("text", attribute.getName());
 	}
 
 	@Test

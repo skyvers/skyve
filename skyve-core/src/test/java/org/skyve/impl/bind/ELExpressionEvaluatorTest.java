@@ -13,8 +13,8 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.skyve.metadata.customer.Customer;
 
-@SuppressWarnings("static-method")
-class ELExpressionEvaluatorTest {
+	@SuppressWarnings({ "static-method", "null" })
+	class ELExpressionEvaluatorTest {
 
 	// ---- validateWithoutPrefixOrSuffix ----
 

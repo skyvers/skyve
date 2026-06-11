@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import java.lang.reflect.Field;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.sail.mock.MockWebContext;
 
 import modules.admin.domain.MailLog;
 
@@ -23,7 +24,7 @@ class MailLogBizletTest {
 		MailLogBizlet bizlet = new MailLogBizlet();
 		injectService(bizlet, service);
 
-		assertThat(bizlet.resolve("mail-1", null, null), is(archived));
+		assertThat(bizlet.resolve("mail-1", null, new MockWebContext()), is(archived));
 	}
 
 	@Test
@@ -34,7 +35,7 @@ class MailLogBizletTest {
 		MailLogBizlet bizlet = new MailLogBizlet();
 		injectService(bizlet, service);
 
-		assertThat(bizlet.resolve("missing", null, null), is((MailLog) null));
+		assertThat(bizlet.resolve("missing", null, new MockWebContext()), is((MailLog) null));
 	}
 
 	private static void injectService(MailLogBizlet bizlet, MailLogService service) throws Exception {

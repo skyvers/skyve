@@ -27,6 +27,7 @@ import org.skyve.util.Util;
 import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.AllAttributesPersistent.Enum3;
 
+@SuppressWarnings("null")
 class SQLDataAccessTests extends AbstractSkyveTestDispose {
 
 	private String persistentIdentifier;

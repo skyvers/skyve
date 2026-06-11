@@ -14,6 +14,8 @@ import java.io.File;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -29,7 +31,6 @@ import org.skyve.impl.metadata.user.ActionPrivilege;
 import org.skyve.impl.metadata.user.DocumentPrivilege;
 import org.skyve.impl.metadata.user.Privilege;
 import org.skyve.impl.metadata.user.RoleImpl;
-import org.skyve.impl.tools.TestPaths;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
@@ -66,7 +67,7 @@ class DoctorUtilTest {
 
 	@Test
 	void mainGeneratesOverviewAndPackageFiles(@TempDir java.nio.file.Path tempDir) throws Exception {
-		UtilImpl.APPS_JAR_DIRECTORY = TestPaths.skyveWarMainJava().toString().replace('\\', '/') + '/';
+		UtilImpl.APPS_JAR_DIRECTORY = skyveWarMainJava().toString().replace('\\', '/') + '/';
 		java.nio.file.Files.createDirectories(tempDir.resolve("modules/admin/domain"));
 		java.nio.file.Files.createDirectories(tempDir.resolve("modules/test/domain"));
 		java.nio.file.Files.createDirectories(tempDir.resolve("modules/kitchensink/domain"));
@@ -79,13 +80,29 @@ class DoctorUtilTest {
 
 	@Test
 	void mainThrowsForUnknownCustomer(@TempDir java.nio.file.Path tempDir) {
-		UtilImpl.APPS_JAR_DIRECTORY = TestPaths.skyveWarMainJava().toString().replace('\\', '/') + '/';
+		UtilImpl.APPS_JAR_DIRECTORY = skyveWarMainJava().toString().replace('\\', '/') + '/';
 		String outputRoot = tempDir.toAbsolutePath().toString() + File.separator;
 
 		IllegalArgumentException error = assertThrows(IllegalArgumentException.class,
 				() -> DoctorUtil.main(new String[] {outputRoot, "missingCustomer", "admin"}));
 
 		assertTrue(error.getMessage().contains("missingCustomer"));
+	}
+
+	private static Path skyveWarMainJava() {
+		return repositoryRoot().resolve("skyve-war").resolve("src").resolve("main").resolve("java");
+	}
+
+	private static Path repositoryRoot() {
+		Path root = Path.of(System.getProperty("maven.multiModuleProjectDirectory", System.getProperty("user.dir")));
+		if (Files.exists(root.resolve("skyve-war"))) {
+			return root;
+		}
+		Path parent = root.getParent();
+		if ((parent != null) && Files.exists(parent.resolve("skyve-war"))) {
+			return parent;
+		}
+		return root;
 	}
 
 	private static Text textAttribute(String name, int length) {

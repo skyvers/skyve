@@ -1,5 +1,7 @@
 package modules.test;
 
+import java.util.Objects;
+
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.util.ExportedReferenceVisitor.Dereferencer;
@@ -21,14 +23,14 @@ class ExportedReferenceVisitorTests extends AbstractSkyveTest {
 
 		p.evictCached(child);
 
-		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_Hierarchical").scalarResult(Number.class).intValue());
+		Assert.assertEquals(2, Objects.requireNonNull(p.newSQL("select count(1) from TEST_Hierarchical").scalarResult(Number.class)).intValue());
 
 		new Dereferencer().visit(hd, root);
-		child = p.retrieve(hd, child.getBizId());
+		child = Objects.requireNonNull(p.retrieve(hd, child.getBizId()));
 		Assert.assertNull(child.getParent());
 		p.delete(root);
 
-		Assert.assertEquals(1, p.newSQL("select count(1) from TEST_Hierarchical").scalarResult(Number.class).intValue());
+		Assert.assertEquals(1, Objects.requireNonNull(p.newSQL("select count(1) from TEST_Hierarchical").scalarResult(Number.class)).intValue());
 	}
 
 	@Test

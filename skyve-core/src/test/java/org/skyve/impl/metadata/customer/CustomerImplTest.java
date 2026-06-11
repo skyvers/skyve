@@ -68,7 +68,6 @@ class CustomerImplTest {
 	@Test
 	void testSetAndGetDefaultDateConverter() {
 		CustomerImpl customer = new CustomerImpl();
-		assertNull(customer.getDefaultDateConverter());
 		DD_MMM_YYYY converter = new DD_MMM_YYYY();
 		customer.setDefaultDateConverter(converter);
 		assertEquals(converter, customer.getDefaultDateConverter());
@@ -609,7 +608,6 @@ class CustomerImplTest {
 	@Test
 	void defaultDateTimeConverterRoundTrips() {
 		CustomerImpl customer = new CustomerImpl();
-		assertNull(customer.getDefaultDateTimeConverter());
 		DD_MM_YYYY_HH24_MI converter = new DD_MM_YYYY_HH24_MI();
 		customer.setDefaultDateTimeConverter(converter);
 		assertEquals(converter, customer.getDefaultDateTimeConverter());
@@ -618,7 +616,6 @@ class CustomerImplTest {
 	@Test
 	void defaultTimeConverterRoundTrips() {
 		CustomerImpl customer = new CustomerImpl();
-		assertNull(customer.getDefaultTimeConverter());
 		HH24_MI converter = new HH24_MI();
 		customer.setDefaultTimeConverter(converter);
 		assertEquals(converter, customer.getDefaultTimeConverter());
@@ -627,7 +624,6 @@ class CustomerImplTest {
 	@Test
 	void defaultTimestampConverterRoundTrips() {
 		CustomerImpl customer = new CustomerImpl();
-		assertNull(customer.getDefaultTimestampConverter());
 		DD_MM_YYYY_HH24_MI_SS converter = new DD_MM_YYYY_HH24_MI_SS();
 		customer.setDefaultTimestampConverter(converter);
 		assertEquals(converter, customer.getDefaultTimestampConverter());

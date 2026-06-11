@@ -43,7 +43,7 @@ import modules.test.domain.MappedSubclassedJoinedStrategy;
 import modules.test.domain.MappedSubclassedSingleStrategy;
 import modules.test.domain.Reachability;
 
-@SuppressWarnings({"java:S5778", "java:S5961", "java:S1874", "java:S1130", "java:S2699", "java:S8692"}) // system clock OK
+@SuppressWarnings({"java:S5778", "java:S5961", "java:S1874", "java:S1130", "java:S2699", "java:S8692", "null"}) // system clock OK
 class PersistenceTests extends AbstractSkyveTestDispose {
 
 	@Test
@@ -1824,4 +1824,3 @@ class PersistenceTests extends AbstractSkyveTestDispose {
 		Assert.assertEquals(bizId, results.get(0).getBizId());
 	}
 }
-

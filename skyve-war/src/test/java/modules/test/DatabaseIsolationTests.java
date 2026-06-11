@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import java.util.Objects;
 import java.util.UUID;
 
 import org.junit.Assert;
@@ -115,7 +116,7 @@ class DatabaseIsolationTests extends AbstractSkyveTestDispose {
 			new SaveThread(u, text).start();
 		}
 		Thread.sleep(80000);
-		Number count = p.newSQL("select count(1) from TEST_UniqueConstraintNonNullable").scalarResult(Number.class);
+		Number count = Objects.requireNonNull(p.newSQL("select count(1) from TEST_UniqueConstraintNonNullable").scalarResult(Number.class));
 		System.out.println("Data count = " + count);
 		if (count.intValue() != iterations) {
 			throw new DomainException("Should be " + iterations + " rows committed in database");

@@ -17,14 +17,46 @@ import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.controller.CustomisationsStaticSingleton;
 import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.model.document.CollectionImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.metadata.model.document.field.Colour;
+import org.skyve.impl.metadata.model.document.field.Date;
+import org.skyve.impl.metadata.model.document.field.DateTime;
+import org.skyve.impl.metadata.model.document.field.Decimal10;
+import org.skyve.impl.metadata.model.document.field.Decimal2;
+import org.skyve.impl.metadata.model.document.field.Decimal5;
+import org.skyve.impl.metadata.model.document.field.Enumeration;
+import org.skyve.impl.metadata.model.document.field.Geometry;
+import org.skyve.impl.metadata.model.document.field.LongInteger;
+import org.skyve.impl.metadata.model.document.field.Markup;
+import org.skyve.impl.metadata.model.document.field.Memo;
+import org.skyve.impl.metadata.model.document.field.Time;
+import org.skyve.impl.metadata.model.document.field.Timestamp;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator;
+import org.skyve.domain.Bean;
+import org.skyve.domain.types.converters.decimal.Decimal10TwoDecimalPlaces;
+import org.skyve.domain.types.converters.decimal.Decimal2Integer;
+import org.skyve.domain.types.converters.decimal.Decimal2IntegerPercentage;
+import org.skyve.domain.types.converters.decimal.Decimal2OneDecimalPlace;
+import org.skyve.domain.types.converters.decimal.Decimal5Integer;
+import org.skyve.domain.types.converters.decimal.Decimal5IntegerPercentage;
+import org.skyve.domain.types.converters.decimal.Decimal5TimeDuration;
+import org.skyve.domain.types.converters.decimal.Decimal5TwoDecimalPlaces;
+import org.skyve.domain.types.converters.decimal.Decimal5TwoDecimalPlacesPercentage;
+import org.skyve.domain.types.converters.decimal.currency.Decimal2DollarsAndCents;
+import org.skyve.domain.types.converters.decimal.currency.Decimal2DollarsAndCentsAbsolute;
+import org.skyve.domain.types.converters.decimal.currency.Decimal5DollarsAndCents;
+import org.skyve.domain.types.converters.integer.IntegerSeparator;
+import org.skyve.domain.types.converters.integer.LongIntegerSeparator;
+import org.skyve.domain.types.converters.integer.SimplePercentage;
 import org.skyve.domain.types.converters.Format.TextCase;
 import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.metadata.model.document.field.TextFormat;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
+import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.metadata.controller.Customisations;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.repository.ProvidedRepository;
@@ -145,6 +177,197 @@ class SmartClientAttributeDefinitionTest {
 		finally {
 			CustomisationsStaticSingleton.set(previousCustomisations);
 		}
+	}
+
+	@Test
+	void constructorMapsMemoAndMarkupAttributesToSmartClientTypes() {
+		Memo memo = new Memo();
+		memo.setName("notes");
+		memo.setDisplayName("Notes");
+		TestDefinition memoDefinition = definitionFor(memo);
+		assertEquals("text", memoDefinition.getType());
+		assertEquals("TextAreaItem", memoDefinition.getEditorType());
+
+		Markup markup = new Markup();
+		markup.setName("description");
+		markup.setDisplayName("Description");
+		TestDefinition markupDefinition = definitionFor(markup);
+		assertEquals("richText", markupDefinition.getType());
+		assertEquals("text", markupDefinition.filterEditorType);
+	}
+
+	@Test
+	void constructorMapsBooleanCheckboxTriStateConfiguration() {
+		org.skyve.impl.metadata.model.document.field.Boolean flag = new org.skyve.impl.metadata.model.document.field.Boolean();
+		flag.setName("flag");
+		flag.setDisplayName("Flag");
+		CheckBox checkBox = new CheckBox();
+		checkBox.setTriState(Boolean.TRUE);
+		flag.setDefaultInputWidget(checkBox);
+
+		TestDefinition definition = definitionFor(flag);
+
+		assertEquals("boolean", definition.getType());
+		assertTrue(definition.triStateCheckBox);
+	}
+
+	@Test
+	void constructorMapsDecimalConvertersToSmartClientTypes() {
+		Decimal2 wholeNumber = new Decimal2();
+		wholeNumber.setName("wholeNumber");
+		wholeNumber.setDisplayName("Whole Number");
+		wholeNumber.setConverter(new Decimal2Integer());
+		assertEquals("bizDecimal0", definitionFor(wholeNumber).getType());
+
+		Decimal2 cents = new Decimal2();
+		cents.setName("cents");
+		cents.setDisplayName("Cents");
+		cents.setConverter(new Decimal2DollarsAndCents());
+		assertEquals("bizDollarsAndCents", definitionFor(cents).getType());
+
+		Decimal2 absoluteCents = new Decimal2();
+		absoluteCents.setName("absoluteCents");
+		absoluteCents.setDisplayName("Absolute Cents");
+		absoluteCents.setConverter(new Decimal2DollarsAndCentsAbsolute());
+		assertEquals("bizDollarsAndCents", definitionFor(absoluteCents).getType());
+
+		Decimal2 percentage = new Decimal2();
+		percentage.setName("percentage");
+		percentage.setDisplayName("Percentage");
+		percentage.setConverter(new Decimal2IntegerPercentage());
+		assertEquals("bizIntegerPercentage", definitionFor(percentage).getType());
+
+		Decimal2 oneDecimalPlace = new Decimal2();
+		oneDecimalPlace.setName("oneDecimalPlace");
+		oneDecimalPlace.setDisplayName("One Decimal Place");
+		oneDecimalPlace.setConverter(new Decimal2OneDecimalPlace());
+		assertEquals("bizDecimal1", definitionFor(oneDecimalPlace).getType());
+
+		Decimal5 duration = new Decimal5();
+		duration.setName("duration");
+		duration.setDisplayName("Duration");
+		duration.setConverter(new Decimal5TimeDuration());
+		assertEquals("bizTimeDuration", definitionFor(duration).getType());
+	}
+
+	@Test
+	void constructorMapsDecimal5AndDecimal10ConvertersToSmartClientTypes() {
+		Decimal5 cents = new Decimal5();
+		cents.setName("cents");
+		cents.setDisplayName("Cents");
+		cents.setConverter(new Decimal5DollarsAndCents());
+		assertEquals("bizDollarsAndCents", definitionFor(cents).getType());
+
+		Decimal5 wholeNumber = new Decimal5();
+		wholeNumber.setName("wholeNumber");
+		wholeNumber.setDisplayName("Whole Number");
+		wholeNumber.setConverter(new Decimal5Integer());
+		assertEquals("bizDecimal0", definitionFor(wholeNumber).getType());
+
+		Decimal5 percentage = new Decimal5();
+		percentage.setName("percentage");
+		percentage.setDisplayName("Percentage");
+		percentage.setConverter(new Decimal5IntegerPercentage());
+		assertEquals("bizIntegerPercentage", definitionFor(percentage).getType());
+
+		Decimal5 oneDecimalPlace = new Decimal5();
+		oneDecimalPlace.setName("oneDecimalPlace");
+		oneDecimalPlace.setDisplayName("One Decimal Place");
+		oneDecimalPlace.setConverter(new org.skyve.domain.types.converters.decimal.Decimal5OneDecimalPlace());
+		assertEquals("bizDecimal1", definitionFor(oneDecimalPlace).getType());
+
+		Decimal5 twoDecimalPlaces = new Decimal5();
+		twoDecimalPlaces.setName("twoDecimalPlaces");
+		twoDecimalPlaces.setDisplayName("Two Decimal Places");
+		twoDecimalPlaces.setConverter(new Decimal5TwoDecimalPlaces());
+		assertEquals("bizDecimal2", definitionFor(twoDecimalPlaces).getType());
+
+		Decimal5 twoDecimalPercentage = new Decimal5();
+		twoDecimalPercentage.setName("twoDecimalPercentage");
+		twoDecimalPercentage.setDisplayName("Two Decimal Percentage");
+		twoDecimalPercentage.setConverter(new Decimal5TwoDecimalPlacesPercentage());
+		assertEquals("bizTwoDecimalPlacesPercentage", definitionFor(twoDecimalPercentage).getType());
+
+		Decimal10 decimal10 = new Decimal10();
+		decimal10.setName("decimal10");
+		decimal10.setDisplayName("Decimal 10");
+		decimal10.setConverter(new Decimal10TwoDecimalPlaces());
+		assertEquals("bizDecimal2", definitionFor(decimal10).getType());
+	}
+
+	@Test
+	void constructorMapsIntegerConverterAndTemporalDefaults() {
+		org.skyve.impl.metadata.model.document.field.Integer count = new org.skyve.impl.metadata.model.document.field.Integer();
+		count.setName("count");
+		count.setDisplayName("Count");
+		count.setConverter(new IntegerSeparator());
+		assertEquals("bizIntegerSeparator", definitionFor(count).getType());
+
+		org.skyve.impl.metadata.model.document.field.Integer percentage = new org.skyve.impl.metadata.model.document.field.Integer();
+		percentage.setName("percentage");
+		percentage.setDisplayName("Percentage");
+		percentage.setConverter(new SimplePercentage());
+		assertEquals("bizIntegerPercentage", definitionFor(percentage).getType());
+
+		LongInteger longCount = new LongInteger();
+		longCount.setName("longCount");
+		longCount.setDisplayName("Long Count");
+		longCount.setConverter(new LongIntegerSeparator());
+		assertEquals("bizIntegerSeparator", definitionFor(longCount).getType());
+
+		Date dueDate = new Date();
+		dueDate.setName("dueDate");
+		dueDate.setDisplayName("Due Date");
+		assertEquals("DD_MMM_YYYY", definitionFor(dueDate).getType());
+
+		DateTime dueAt = new DateTime();
+		dueAt.setName("dueAt");
+		dueAt.setDisplayName("Due At");
+		assertEquals("DD_MMM_YYYY", definitionFor(dueAt).getType());
+
+		Time dueTime = new Time();
+		dueTime.setName("dueTime");
+		dueTime.setDisplayName("Due Time");
+		assertEquals("HH24_MI", definitionFor(dueTime).getType());
+
+		Timestamp stampedAt = new Timestamp();
+		stampedAt.setName("stampedAt");
+		stampedAt.setDisplayName("Stamped At");
+		assertEquals("DD_MMM_YYYY", definitionFor(stampedAt).getType());
+	}
+
+	@Test
+	void constructorMapsColourEnumerationGeometryAndAssociationStyleTypes() {
+		Colour colour = new Colour();
+		colour.setName("colour");
+		colour.setDisplayName("Colour");
+		TestDefinition colourDefinition = definitionFor(colour);
+		assertEquals("text", colourDefinition.getType());
+		assertEquals("ColorItem", colourDefinition.getEditorType());
+
+		Enumeration choice = new Enumeration();
+		choice.setName("choice");
+		choice.setDisplayName("Choice");
+		TestDefinition choiceDefinition = definitionFor(choice);
+		assertEquals("enum", choiceDefinition.getType());
+		assertEquals("select", choiceDefinition.getEditorType());
+
+		Geometry geometry = new Geometry();
+		geometry.setName("geometry");
+		geometry.setDisplayName("Geometry");
+		assertEquals("geometry", definitionFor(geometry).getType());
+	}
+
+	@Test
+	void constructorMapsCollectionBindingToDocumentIdEnum() {
+		CollectionImpl contacts = new CollectionImpl();
+		contacts.setName("contacts");
+		contacts.setDisplayName("Contacts");
+
+		TestDefinition definition = definitionFor(contacts);
+
+		assertEquals(Bean.DOCUMENT_ID, definition.getName());
+		assertEquals("enum", definition.getType());
 	}
 
 	@Test
@@ -448,6 +671,36 @@ class SmartClientAttributeDefinitionTest {
 		String result = js.toString();
 		assertTrue(result.contains("_w=64&_h=64"));
 		assertTrue(result.contains("if(rec && rec.bizId){return ''}"));
+	}
+
+	private static TestDefinition definitionFor(Attribute attribute) {
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		DocumentImpl document = new DocumentImpl();
+		document.setName("Contact");
+		document.setOwningModuleName("sales");
+		if (attribute instanceof Enumeration enumeration) {
+			enumeration.setOwningDocument(document);
+		}
+		document.putAttribute(attribute);
+
+		when(customer.getModule("sales")).thenReturn(module);
+		when(module.getDocument(customer, "Contact")).thenReturn(document);
+
+		Customisations customisations = mock(Customisations.class);
+		when(customisations.determineDefaultColumnTextAlignment("desktop", attribute.getAttributeType()))
+				.thenReturn(HorizontalAlignment.left);
+		when(customisations.determineDefaultColumnWidth("desktop", attribute.getAttributeType()))
+				.thenReturn(Integer.valueOf(100));
+		Customisations previousCustomisations = CustomisationsStaticSingleton.get();
+		try {
+			CustomisationsStaticSingleton.set(customisations);
+			return new TestDefinition(user, customer, module, document, attribute.getName(), null, false, false, false, "desktop");
+		}
+		finally {
+			CustomisationsStaticSingleton.set(previousCustomisations);
+		}
 	}
 
 	private static final class TestDefinition extends SmartClientAttributeDefinition {

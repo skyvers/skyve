@@ -26,6 +26,7 @@ import org.skyve.util.Util;
 import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.AllDynamicAttributesPersistent;
 
+@SuppressWarnings("null")
 class DynamicPersistenceTests extends AbstractSkyveTestDispose {
 
 	@Test

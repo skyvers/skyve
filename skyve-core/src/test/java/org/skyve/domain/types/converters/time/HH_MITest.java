@@ -102,7 +102,7 @@ class HH_MITest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({ "static-method", "null" })
 	void testToDisplayValueNullThrows() {
 		assertThrows(ConversionException.class, () -> new HH_MI().toDisplayValue(null));
 	}

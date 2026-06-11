@@ -3,6 +3,7 @@ package modules.test;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -105,7 +106,7 @@ class BizPortTest extends AbstractSkyveTest {
 				UploadException problems = new UploadException();
 				EXT.standardBizImport(bais, problems);
 				
-				Bean importedBean = CORE.getPersistence().retrieve(bean.getBizModule(), bean.getBizDocument(), bean.getBizId());
+				Bean importedBean = Objects.requireNonNull(CORE.getPersistence().retrieve(bean.getBizModule(), bean.getBizDocument(), bean.getBizId()));
 				Assert.assertTrue("Beans not the same", same(bean, importedBean));
 			}
 			catch (UploadException e ) {

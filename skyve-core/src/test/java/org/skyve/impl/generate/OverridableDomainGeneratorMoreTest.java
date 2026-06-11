@@ -4438,7 +4438,7 @@ class OverridableDomainGeneratorMoreTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
+	@SuppressWarnings({ "boxing", "null" })
 	void generateORMWithPersistentDocumentGeneratesClassElement() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
@@ -5060,4 +5060,3 @@ class OverridableDomainGeneratorMoreTest {
 		assertTrue(java.contains("addMtmBackRefsElement"), "manyToMany should have add method, got: " + java);
 	}
 }
-

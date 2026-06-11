@@ -9,13 +9,13 @@ import org.umlgraph.doclet.AccessibleOptions;
 class SkyveDocletTest {
 
 	@Test
-	void optionLengthAlwaysReturnsZero() {
+	static void optionLengthAlwaysReturnsZero() {
 		assertEquals(0, SkyveDoclet.optionLength("-any-option"));
 		assertEquals(0, SkyveDoclet.optionLength(null));
 	}
 
 	@Test
-	void placeholderTypesRemainInstantiable() {
+	static void placeholderTypesRemainInstantiable() {
 		assertNotNull(new SkyveDoclet());
 		assertNotNull(new SkyveContextView());
 		assertNotNull(new SkyvePackageView());

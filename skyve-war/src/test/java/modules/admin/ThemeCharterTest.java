@@ -314,7 +314,7 @@ class ThemeCharterTest {
 	@Test
 	void getPieChartImageWithLabelsAndLegendReturnsImage() throws Exception {
 		ThemeCharter tc = new ThemeCharter(Color.BLUE);
-		DefaultPieDataset data = new DefaultPieDataset();
+		DefaultPieDataset<String> data = new DefaultPieDataset<>();
 		data.setValue("Alpha", 10);
 		data.setValue("Beta", 20);
 
@@ -330,7 +330,7 @@ class ThemeCharterTest {
 		ThemeCharter tc = new ThemeCharter(Color.GREEN);
 		tc.setColouriserTheme(SectionColouriser.Colouriser.MULTI_COLOUR);
 		tc.setColourPalette(new String[] { "#FF0000", "#00FF00" });
-		DefaultPieDataset data = new DefaultPieDataset();
+		DefaultPieDataset<String> data = new DefaultPieDataset<>();
 		data.setValue("Alpha", 10);
 		data.setValue("Beta", 20);
 

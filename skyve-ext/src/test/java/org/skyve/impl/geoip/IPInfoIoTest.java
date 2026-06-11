@@ -15,6 +15,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.URI;
 import java.io.IOException;
+import java.util.Objects;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.util.IPGeolocation;
@@ -74,8 +75,9 @@ class IPInfoIoTest {
 		assertEquals("SA", geolocation.region());
 		assertEquals("AU", geolocation.countryCode());
 		assertNotNull(geolocation.location());
-		assertEquals(Double.valueOf(138.6007d), Double.valueOf(geolocation.location().getX()));
-		assertEquals(Double.valueOf(-34.9285d), Double.valueOf(geolocation.location().getY()));
+		var location = Objects.requireNonNull(geolocation.location());
+		assertEquals(Double.valueOf(138.6007d), Double.valueOf(location.getX()));
+		assertEquals(Double.valueOf(-34.9285d), Double.valueOf(location.getY()));
 	}
 
 	@Test

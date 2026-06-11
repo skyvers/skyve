@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import java.util.List;
 
@@ -14,6 +15,7 @@ import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.metadata.repository.behaviour.BizletMetaData;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.web.WebContext;
 
 class BizletTest {
 
@@ -108,7 +110,7 @@ class BizletTest {
 	@SuppressWarnings("static-method")
 	void bizletResolveReturnsNullWhenNoMetaDataBizlet() throws Exception {
 		Bizlet<org.skyve.domain.Bean> bizlet = new Bizlet<>();
-		org.skyve.domain.Bean result = bizlet.resolve("bizId", null, null);
+		org.skyve.domain.Bean result = bizlet.resolve("bizId", null, mock(WebContext.class));
 		assertNull(result);
 	}
 
@@ -229,7 +231,7 @@ class BizletTest {
 	void bizletResolveDelegatesToMetaDataBizlet() throws Exception {
 		Bizlet<org.skyve.domain.Bean> bizlet = new Bizlet<>();
 		bizlet.setMetaDataBizlet(new BizletMetaData());
-		org.skyve.domain.Bean result = bizlet.resolve("id", null, null);
+		org.skyve.domain.Bean result = bizlet.resolve("id", null, mock(WebContext.class));
 		assertNull(result);
 	}
 

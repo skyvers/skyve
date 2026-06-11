@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
 import org.skyve.domain.DynamicPersistentBean;
 import org.skyve.domain.messages.ValidationException;
+import org.skyve.impl.sail.mock.MockWebContext;
 import org.skyve.metadata.controller.ImplicitActionName;
 
 @SuppressWarnings({ "static-method", "java:S1130" })
@@ -55,7 +56,7 @@ class TestBizletTest {
 
 	@Test
 	void resolveReturnsNull() throws Exception {
-		assertNull(bizlet.resolve("some-id", null, null));
+		assertNull(bizlet.resolve("some-id", null, new MockWebContext()));
 	}
 
 	@Test

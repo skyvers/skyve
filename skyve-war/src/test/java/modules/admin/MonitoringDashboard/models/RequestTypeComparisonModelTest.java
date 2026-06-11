@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -441,7 +442,7 @@ class RequestTypeComparisonModelTest {
 			short heapRamUsage) {
 		Monitoring.start();
 		Monitoring.measure(key);
-		Monitoring.getRequestMeasurements(key.toString())
+		Objects.requireNonNull(Monitoring.getRequestMeasurements(key.toString()))
 				.updateMeasurements(millis,
 						cpuUtilisation,
 						systemCpuUsage,

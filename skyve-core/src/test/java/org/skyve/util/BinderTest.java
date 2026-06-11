@@ -18,6 +18,7 @@ import static org.mockito.Mockito.withSettings;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.TreeMap;
 
 import org.junit.jupiter.api.Test;
@@ -800,6 +801,7 @@ class BinderTest {
 	@Test
 	void prefixMessageExpressionsWithExpressionPrefixesBinding() {
 		String result = BindUtil.prefixMessageExpressions("{name}", "contact");
+		result = Objects.requireNonNull(result);
 		assertTrue(result.contains("contact"), "Result should contain prefix: " + result);
 	}
 

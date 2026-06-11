@@ -119,6 +119,7 @@ class StashExpressionEvaluatorTest {
 	}
 
 	@Test
+	@SuppressWarnings("null")
 	void testCompleteWithoutPrefixOrSuffix() {
 		// setup the test data
 		String fragment = "test";

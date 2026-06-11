@@ -123,6 +123,25 @@ class SmartClientSnapServletTest {
 	}
 
 	@Test
+	void mutatingActionsRenderWarningWhenRuntimeStateIsUnavailable() throws Exception {
+		for (String action : new String[] {"U", "N", "D"}) {
+			SmartClientSnapServlet servlet = new SmartClientSnapServlet();
+			HttpServletRequest request = newRequestWithSessionUser(action);
+			StringWriter sink = new StringWriter();
+			HttpServletResponse response = mock(HttpServletResponse.class);
+			when(response.getWriter()).thenReturn(new PrintWriter(sink));
+			when(request.getParameter(org.skyve.impl.web.AbstractWebContext.CSRF_TOKEN_NAME)).thenReturn("7");
+			when(request.getParameter("i")).thenReturn("snap-1");
+			when(request.getParameter("n")).thenReturn("Snapshot");
+			when(request.getParameter("s")).thenReturn("{}");
+
+			assertDoesNotThrow(() -> servlet.doGet(request, response));
+
+			assertTrue(sink.toString().contains("The Snapshot operation was unsuccessful."));
+		}
+	}
+
+	@Test
 	void appendUnexpectedWarningIncludesFailurePrefix() {
 		StringWriter sink = new StringWriter();
 		PrintWriter writer = new PrintWriter(sink);

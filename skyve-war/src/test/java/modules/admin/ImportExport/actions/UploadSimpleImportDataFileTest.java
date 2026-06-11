@@ -21,7 +21,6 @@ import util.AbstractH2Test;
 /**
  * Tests spreadsheet column inference for simple import uploads.
  */
-@SuppressWarnings("static-method")
 class UploadSimpleImportDataFileTest extends AbstractH2Test {
 	@TempDir
 	private Path tempDir;

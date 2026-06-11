@@ -20,7 +20,6 @@ import modules.admin.domain.Subscription;
 /**
  * Unit tests for anonymous subscription SQL orchestration.
  */
-@SuppressWarnings("static-method")
 class SubscriptionServiceTest {
 	private static final String CUSTOMER = "cust";
 	private static final String COMMUNICATION_ID = "communication-1";

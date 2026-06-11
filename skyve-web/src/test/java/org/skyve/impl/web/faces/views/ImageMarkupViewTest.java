@@ -1,10 +1,14 @@
 package org.skyve.impl.web.faces.views;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
@@ -115,6 +119,26 @@ class ImageMarkupViewTest {
 		assertTrue(backgroundUrl.contains("content?_nm&_n=content-123"));
 		assertTrue(backgroundUrl.contains("&_doc=admin.Document"));
 		assertTrue(backgroundUrl.endsWith("&_b=attachment.contentId"));
+	}
+
+	@Test
+	void applyReturnsWithoutFacesContextWhenAccessDenied() {
+		ImageMarkupView view = new ImageMarkupView();
+
+		assertDoesNotThrow(view::apply);
+	}
+
+	@Test
+	void applyAddsMalformedUrlMessageWhenRequiredParametersAreMissing() throws Exception {
+		FacesContext context = mock(FacesContext.class);
+		FacesContextBridge.setCurrent(context);
+		ImageMarkupView view = new ImageMarkupView();
+		setField(view, "canAccess", Boolean.TRUE);
+		view.setContextParameter("ctx");
+
+		assertDoesNotThrow(view::apply);
+
+		verify(context).addMessage(isNull(), any());
 	}
 
 	private static FacesContext mockFacesContextWithSession(HttpSession session) {

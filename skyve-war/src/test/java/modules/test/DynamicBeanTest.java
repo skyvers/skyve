@@ -2,6 +2,7 @@ package modules.test;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 
 import org.junit.Assert;
@@ -190,6 +191,7 @@ class DynamicBeanTest extends AbstractSkyveTest {
 		// Id collection to scalar
 		@SuppressWarnings("unchecked")
 		List<? extends Bean> elements = (List<? extends Bean>) Binder.get(bean, collectionPropertyName);
+		elements = Objects.requireNonNull(elements);
 		// its a test - let in NPE
 		String bizId = elements.get(1).getBizId();
 		binding = Binder.createCompoundBinding(Binder.createIdBinding(collectionPropertyName, bizId), AllAttributesPersistent.normalIntegerPropertyName);

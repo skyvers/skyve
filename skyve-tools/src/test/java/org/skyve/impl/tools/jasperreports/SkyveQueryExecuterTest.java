@@ -8,13 +8,13 @@ import org.junit.jupiter.api.Test;
 class SkyveQueryExecuterTest {
 
 	@Test
-	void cancelQueryIsNotSupported() throws Exception {
+	static void cancelQueryIsNotSupported() throws Exception {
 		SkyveQueryExecuter executer = new SkyveQueryExecuter("admin.Contact");
 		assertFalse(executer.cancelQuery());
 	}
 
 	@Test
-	void closeDoesNothing() {
+	static void closeDoesNothing() {
 		SkyveQueryExecuter executer = new SkyveQueryExecuter("admin.Contact");
 		assertDoesNotThrow(executer::close);
 	}

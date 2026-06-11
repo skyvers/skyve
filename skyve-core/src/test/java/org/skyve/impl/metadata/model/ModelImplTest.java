@@ -10,12 +10,14 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.Text;
+import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Dynamic;
 
@@ -169,6 +171,7 @@ class ModelImplTest {
 	@Test
 	void getAllAttributesWithNoInheritanceReturnsOwnAttributes() {
 		DocumentImpl d = new DocumentImpl();
+		Customer customer = mock(Customer.class);
 		Text attr1 = new Text();
 		attr1.setName("firstName");
 		Text attr2 = new Text();
@@ -176,7 +179,7 @@ class ModelImplTest {
 		d.putAttribute(attr1);
 		d.putAttribute(attr2);
 		// No inheritance (inherits is null), so Customer parameter is not used
-		List<? extends Attribute> all = d.getAllAttributes(null);
+		List<? extends Attribute> all = d.getAllAttributes(customer);
 		assertEquals(2, all.size());
 		assertEquals("firstName", all.get(0).getName());
 		assertEquals("lastName", all.get(1).getName());
@@ -185,7 +188,8 @@ class ModelImplTest {
 	@Test
 	void getAllAttributesReturnsEmptyListWhenNoAttributes() {
 		DocumentImpl d = new DocumentImpl();
-		List<? extends Attribute> all = d.getAllAttributes(null);
+		Customer customer = mock(Customer.class);
+		List<? extends Attribute> all = d.getAllAttributes(customer);
 		assertNotNull(all);
 		assertTrue(all.isEmpty());
 	}
@@ -193,22 +197,24 @@ class ModelImplTest {
 	@Test
 	void getPolymorphicAttributeReturnsNullWhenNoInheritanceAndNotFound() {
 		DocumentImpl d = new DocumentImpl();
+		Customer customer = mock(Customer.class);
 		Text attr = new Text();
 		attr.setName("name");
 		d.putAttribute(attr);
 		// "missing" does not exist, no inheritance
-		Attribute result = d.getPolymorphicAttribute(null, "missing");
+		Attribute result = d.getPolymorphicAttribute(customer, "missing");
 		assertNull(result);
 	}
 
 	@Test
 	void getPolymorphicAttributeReturnsDirectMatchWithoutCustomer() {
 		DocumentImpl d = new DocumentImpl();
+		Customer customer = mock(Customer.class);
 		Text attr = new Text();
 		attr.setName("name");
 		d.putAttribute(attr);
 		// Found directly — no inheritance lookup needed
-		Attribute result = d.getPolymorphicAttribute(null, "name");
+		Attribute result = d.getPolymorphicAttribute(customer, "name");
 		assertNotNull(result);
 		assertEquals("name", result.getName());
 	}
