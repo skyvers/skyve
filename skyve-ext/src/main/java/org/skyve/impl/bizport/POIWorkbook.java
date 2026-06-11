@@ -108,7 +108,7 @@ public final class POIWorkbook implements BizPortWorkbook {
 				continue;
 			}
 
-			SheetKey key = new SheetKey(moduleName, documentName, binding);
+			SheetKey key = (binding == null) ? new SheetKey(moduleName, documentName) : new SheetKey(moduleName, documentName, binding);
 
 			sheets.put(key, sheetData);
 		}

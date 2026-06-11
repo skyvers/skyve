@@ -37,6 +37,7 @@ import org.skyve.bizport.SheetKey;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.messages.UploadException.Problem;
 import org.skyve.domain.types.DateOnly;
@@ -153,7 +154,13 @@ public final class POISheet implements BizPortSheet {
 		Cell documentCell = nameRow.getCell(DOCUMENT_COLUMN, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
 		Cell collectionCell = nameRow.getCell(COLLECTION_COLUMN, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
 		String moduleName = (moduleCell == null) ? null : moduleCell.getStringCellValue();
+		if (moduleName == null) {
+			throw new DomainException("Sheet " + title + " does not have a module name specified in cell A1");
+		}
 		String documentName = (documentCell == null) ? null : documentCell.getStringCellValue();
+		if (documentName == null) {
+			throw new DomainException("Sheet " + title + " does not have a document name specified in cell B1");
+		}
 		String collectionBinding = (collectionCell == null) ? null : collectionCell.getStringCellValue();
 		Module module = customer.getModule(moduleName);
 		Document document = module.getDocument(customer, documentName);

@@ -14,6 +14,7 @@ import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * A bizlet allows callbacks to be made at pertinent times in the Skyve server processing.
@@ -236,7 +237,9 @@ public class Bizlet<T extends Bean> implements MetaData {
 	 * @return	The bean or null if it can't be resolved.
 	 * @throws Exception
 	 */
-	public T resolve(String bizId, Bean conversationBean, WebContext webContext) throws Exception {
+	public @Nullable T resolve(@Nonnull String bizId,
+								@Nullable Bean conversationBean,
+								@Nonnull WebContext webContext) throws Exception {
 		// Execute the metaDataBizlet if one exists
 		if (metaDataBizlet != null) {
 			@SuppressWarnings("unchecked")

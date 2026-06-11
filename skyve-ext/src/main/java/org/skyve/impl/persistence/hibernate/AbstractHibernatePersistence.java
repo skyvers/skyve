@@ -2018,6 +2018,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 * @param unmergedBean The original instance, if available.
 	 * @param otherMergedBeans Mapping of original to merged beans.
 	 */
+	@SuppressWarnings({"java:S2637", "java:S3776"}) // Complexity OK & False positive - merged bean is never null
 	private void prepareMergedBean(@Nonnull Document document,
 									@Nonnull final PersistentBean mergedBean,
 									@Nullable final PersistentBean unmergedBean,

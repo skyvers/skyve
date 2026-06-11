@@ -1,7 +1,6 @@
 package org.skyve.impl.bizport;
 
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.TreeMap;
 
@@ -62,9 +61,6 @@ public class POISheetLoader extends AbstractDataFileLoader {
 		this.dataIndex = 0;
 		this.fieldIndex = 0;
 		this.row = sheet.getRow(dataIndex);
-
-		this.fields = new ArrayList<>();
-		this.results = new ArrayList<>();
 	}
 
 	/**

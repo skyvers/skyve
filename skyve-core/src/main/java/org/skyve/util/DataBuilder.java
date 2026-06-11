@@ -1,8 +1,10 @@
 package org.skyve.util;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,9 +34,11 @@ import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.skyve.util.test.SkyveFixture;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 import org.skyve.util.test.TestUtil;
+import org.slf4j.Logger;
 
 /**
  * <p>
@@ -95,6 +99,8 @@ import org.skyve.util.test.TestUtil;
  * @author mike
  */
 public class DataBuilder {
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(DataBuilder.class);
+	
 	private static boolean trace = false;
 	
 	@SuppressWarnings("java:S2245") // It's ok that this is not cryptographically strong as it's only used for generating test data
@@ -262,7 +268,7 @@ public class DataBuilder {
 	 */
 	public DataBuilder type(AttributeType type, boolean include) {
 		if (types == null) {
-			types = new HashMap<>();
+			types = new EnumMap<>(AttributeType.class);
 		}
 		types.put(type, Boolean.valueOf(include));
 		return this;
@@ -429,6 +435,7 @@ public class DataBuilder {
 	 * @param currentDepth
 	 * @return
 	 */
+	@SuppressWarnings({"java:S3776", "java:S6541", "java:S1066", "java:S135"}) // Complexity OK, "for" and "if" OK
 	private synchronized <T extends Bean> T build(Module module,
 													Document document,
 													String binding,
@@ -512,7 +519,7 @@ public class DataBuilder {
 									cardinality = collectionCardinality.intValue();
 								}
 							}
-		
+
 							Document collectionDocument = collectionModule.getDocument(customer, collection.getDocumentName());
 							for (int i = 0; i < cardinality; i++) {
 								String newBinding = binding.isEmpty() ? name : BindUtil.createIndexedBinding(BindUtil.createCompoundBinding(binding, name), i);
@@ -533,6 +540,7 @@ public class DataBuilder {
 		
 		return result;
 	}
+
 	/**
 	 * Create and assign random scalar data.
 	 * @param module
@@ -540,7 +548,6 @@ public class DataBuilder {
 	 * @return
 	 * @throws Exception
 	 */
-	@SuppressWarnings("incomplete-switch")
 	private <T extends Bean> T randomBean(Module module, Document document)
 	throws Exception {
 		T result = document.newInstance(user);
@@ -568,19 +575,13 @@ public class DataBuilder {
 					case colour:
 						BindUtil.set(result, name, "#FFFFFF");
 						break;
-					case date:
-					case dateTime:
-					case time:
-					case timestamp:
+					case date, dateTime, time, timestamp:
 						BindUtil.convertAndSet(result, name, new Date());
 						break;
-					case decimal10:
-					case decimal2:
-					case decimal5:
+					case decimal10, decimal2, decimal5:
 						BindUtil.convertAndSet(result, name, TestUtil.randomDecimal(attribute));
 						break;
-					case integer:
-					case longInteger:
+					case integer, longInteger:
 						BindUtil.convertAndSet(result, name, TestUtil.randomInteger(attribute));
 						break;
 					case enumeration:
@@ -590,16 +591,16 @@ public class DataBuilder {
 						BindUtil.set(result, name, TestUtil.randomEnum(clazz, null));
 						break;
 					case geometry:
-						BindUtil.set(result, name, new GeometryFactory().createPoint(new Coordinate(RANDOM.nextInt(180) - RANDOM.nextInt(180), RANDOM.nextInt(90) - RANDOM.nextInt(90))));
+						BindUtil.set(result, name, new GeometryFactory().createPoint(new Coordinate((RANDOM.nextDouble() * 360.0) - 180.0, (RANDOM.nextDouble() * 180.0) - 90.0)));
 						break;
 					case id:
 						BindUtil.set(result, name, UUIDv7.create().toString());
 						break;
-					case markup:
-					case memo:
-					case text:
+					case markup, memo, text:
 						BindUtil.set(result, name, TestUtil.randomText(user.getCustomerName(), module, document, attribute));
 						break;
+					default:
+						LOGGER.warn("DataBuilder does not know how to create random data for attribute {} of type {} on document {}.{}", name, type, module.getName(), document.getName());
 				}
 			}
 		}
@@ -612,6 +613,7 @@ public class DataBuilder {
 	 * @param attribute
 	 * @return
 	 */
+	@SuppressWarnings({"java:S3776", "java:S1126"}) // complexity OK
 	private boolean filter(Attribute attribute) {
 		String name = attribute.getName();
 		AttributeType type = attribute.getAttributeType();
@@ -640,6 +642,7 @@ public class DataBuilder {
 				}
 			}
 		}
+
 		if (attribute.isPersistent()) {
 			if (! persistent) {
 				return true;
@@ -650,39 +653,34 @@ public class DataBuilder {
 				return true;
 			}
 		}
+
 		UsageType usage = attribute.getUsage();
-		if (UsageType.view.equals(usage)) {
-			if (! view) {
-				return true;
-			}
+		if (UsageType.view.equals(usage) && (! view)) {
+			return true;
 		}
-		if (UsageType.domain.equals(usage)) {
-			if (! domain) {
-				return true;
-			}
+		
+		if (UsageType.domain.equals(usage) && (! domain)) {
+			return true;
 		}
-		if (attribute.isDeprecated()) {
-			if (! deprecated) {
-				return true;
-			}
+		
+		if (attribute.isDeprecated() && (! deprecated)) {
+			return true;
 		}
-		if (types != null) {
-			if (Boolean.FALSE.equals(types.get(type))) {
-				return true;
-			}
+		
+		if ((types != null) && Boolean.FALSE.equals(types.get(type))) {
+			return true;
 		}
-		if (names != null) {
-			if (Boolean.FALSE.equals(names.get(name))) {
-				return true;
-			}
+		
+		if ((names != null) && Boolean.FALSE.equals(names.get(name))) {
+			return true;
 		}
 		
 		return false;
 	}
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "java:S3776"}) // complexity OK
 	private <T extends Bean> T dataFactory(DocumentImpl document, int currentDepth)
-	throws Exception {
+	throws ClassNotFoundException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		T result = null;
 		
 		// If we have a data factory defined for this document,
@@ -774,6 +772,7 @@ public class DataBuilder {
 		return result;
 	}
 	
+	@SuppressWarnings("java:S106") // Trace mode intentionally writes to stdout for test fixture generation visibility.
 	private static void trace(@SuppressWarnings("hiding") StringBuilder trace, int currentDepth) {
 		for (int i = 0; i < currentDepth; i++) {
 			trace.insert(0, "    ");

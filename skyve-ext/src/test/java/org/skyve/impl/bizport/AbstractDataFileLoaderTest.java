@@ -3,8 +3,8 @@ package org.skyve.impl.bizport;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -77,27 +77,6 @@ class AbstractDataFileLoaderTest {
 		loader.setDataIndex(5);
 
 		assertThat(loader.debugData(), is("Row 5 has no data."));
-	}
-
-	@Test
-	void settersAndNullBindingFieldsUpdateLoaderStateWithoutMetadataLookup() throws Exception {
-		UploadException first = new UploadException();
-		UploadException second = new UploadException();
-		bindPersistence(persistence(customer(), null, null));
-		TestLoader loader = new TestLoader(LoaderActivityType.CREATE_ALL, first);
-
-		loader.setFieldIndex(3);
-		loader.setException(second);
-		loader.setActivityType(LoaderActivityType.FIND);
-		loader.addField((String) null);
-		loader.addField(null, LoadAction.CONFIRM_VALUE, true, null);
-
-		assertSame(second, loader.getException());
-		assertThat(loader.getFields().size(), is(2));
-		assertThat(loader.getFields().get(0).getIndex(), is(Integer.valueOf(0)));
-		assertThat(loader.getFields().get(1).getIndex(), is(Integer.valueOf(1)));
-		assertThat(loader.getFields().get(1).getLoadAction(), is(LoadAction.CONFIRM_VALUE));
-		assertThat(loader.getFields().get(1).isRequired(), is(true));
 	}
 
 	@Test

@@ -159,11 +159,14 @@ public class ListGrid extends HtmlPanelGroup {
 			listGrid.setQueryName(queryName);
 			name = queryName;
 		}
-		else {
+		else if (modelName != null) {
 			Document document = module.getDocument(customer, documentName);
 			model = document.getListModel(customer, modelName, true);
 			listGrid.setModelName(modelName);
 			name = modelName;
+		}
+		else {
+			throw new DomainException("A query or model name must be provided for a list grid");
 		}
 
 		listGrid.setTitle(model.getDescription()); // no localisation here as listGrid.getLocalisedTitle() would be called

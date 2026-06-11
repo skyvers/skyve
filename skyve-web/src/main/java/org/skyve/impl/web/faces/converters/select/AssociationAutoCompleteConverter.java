@@ -31,6 +31,7 @@ public class AssociationAutoCompleteConverter implements Converter<Object> {
 	 * @return the resolved referenced bean, or {@code null} when the submitted value is empty
 	 */
     @Override
+    @SuppressWarnings("java:S3776") // Complexity OK
     public Object getAsObject(FacesContext context, UIComponent component, String value) {
     	Bean result = null;
     	
@@ -46,8 +47,6 @@ public class AssociationAutoCompleteConverter implements Converter<Object> {
 		            String bizId = documentName.substring(pos + 1);
 		            documentName = documentName.substring(0, pos);
 
-		            Bean bean = null;
-		            WebContext webContext = null;
 					UIViewRoot root = context.getViewRoot();
 					if (root != null) {
 						String managedBeanName = (String) root.getAttributes().get(FacesUtil.MANAGED_BEAN_NAME_KEY);
@@ -55,18 +54,20 @@ public class AssociationAutoCompleteConverter implements Converter<Object> {
 							FacesView view = (FacesView) FacesUtil.getNamed(managedBeanName);
 							if (view != null) {
 								BeanMapAdapter adapter = view.getCurrentBean();
+								Bean bean = null;
 								if (adapter != null) {
 									bean = adapter.getBean();
 								}
-								webContext = view.getWebContext();
+								
+								WebContext webContext = view.getWebContext();
+					            Customer c = CORE.getCustomer();
+					            Module m  = c.getModule(moduleName);
+					            Document d = m.getDocument(c, documentName);
+					        	return WebUtil.findReferencedBean(d, bizId, CORE.getPersistence(), bean, webContext);
 							}
 						}
 					}
-					
-		            Customer c = CORE.getCustomer();
-		            Module m  = c.getModule(moduleName);
-		            Document d = m.getDocument(c, documentName);
-		        	return WebUtil.findReferencedBean(d, bizId, CORE.getPersistence(), bean, webContext);
+					return null;
 				}
 			}.execute();
         }

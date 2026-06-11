@@ -15,6 +15,8 @@ import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.ReloadableMetaData;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
@@ -216,8 +218,8 @@ public class BizletMetaData implements ConvertibleMetaData<BizletMetaData>, Relo
 	 * @return resolved bean, or {@code null} when unresolved
 	 * @throws Exception if resolution fails
 	 */
-	@SuppressWarnings("static-method")
-	public Bean resolve(String bizId, Bean conversationBean) throws Exception {
+	@SuppressWarnings({"static-method", "java:S112"}) // Part of the API
+	public @Nullable Bean resolve(@Nonnull String bizId, @Nullable Bean conversationBean) throws Exception {
 		return null;
 	}
 	

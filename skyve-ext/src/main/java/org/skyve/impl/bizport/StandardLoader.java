@@ -30,8 +30,8 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
-import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
+import org.slf4j.Logger;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -171,7 +171,7 @@ public class StandardLoader {
 		while (sheet.nextRow()) {
 			T bean = populateBeanFromRow(persistence, user, document, sheet);
 			Object sheetRowId = sheet.getValue(Bean.DOCUMENT_ID, AttributeType.text, problems);
-			if (sheetRowId != null) {
+			if ((bean != null) && (sheetRowId != null)) { // a real non-empty row with an ID
 				beansBySheetKey.put(createSheetKey(document, sheetRowId), bean);
 				String bizId = bean.getBizId();
 				bizIdToSheetRowId.put(bizId, sheetRowId);
@@ -193,10 +193,10 @@ public class StandardLoader {
 	 * @param document	The document of the bean to create.
 	 * @param sheet	The Excel sheet we are populating from.
 	 * @param listToAddBeanTo	The list to add the constructed bean to.
-	 * @return	The constructed bean.
+	 * @return	The constructed bean or null.
 	 * @throws Exception
 	 */
-	private @Nonnull <T extends Bean> T populateBeanFromRow(@Nonnull Persistence persistence, 
+	private @Nullable <T extends Bean> T populateBeanFromRow(@Nonnull Persistence persistence, 
 																@Nonnull User user,
 																@Nonnull Document document,
 																@Nonnull BizPortSheet sheet) 

@@ -29,10 +29,10 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.user.UserAccess;
 import org.skyve.util.logging.Category;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.skyve.util.monitoring.Monitoring;
 import org.skyve.util.monitoring.RequestKey;
 import org.slf4j.Logger;
-import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
@@ -148,9 +148,13 @@ public class EditAction extends FacesAction<Void> {
 						if (! vetoed) {
 							Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 							if (bizlet != null) {
-								if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.preExecute: {}, {}, null, , {}", bizlet.getClass().getName(), ImplicitActionName.New, bean, webContext);
+								if (UtilImpl.BIZLET_TRACE) {
+									BIZLET_LOGGER.info("Entering {}.preExecute: {}, {}, null, , {}", bizlet.getClass().getName(), ImplicitActionName.New, bean, webContext);
+								}
 				    			bean = bizlet.preExecute(ImplicitActionName.New, bean, null, webContext);
-								if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.preExecute: {}", bizlet.getClass().getName(), bean);
+								if (UtilImpl.BIZLET_TRACE) {
+									BIZLET_LOGGER.info("Exiting {}.preExecute: {}", bizlet.getClass().getName(), bean);
+								}
 							}
 							internalCustomer.interceptAfterPreExecute(ImplicitActionName.New, bean, null, webContext);
 							
@@ -162,13 +166,13 @@ public class EditAction extends FacesAction<Void> {
 				}
 				else {
 					AbstractPersistence persistence = AbstractPersistence.get();
+					webContext = new FacesWebContext();
+					webContext.setConversation(persistence);
 					try {
 						// NB can throw NoResultsException or SecurityException
 						bean = WebUtil.findReferencedBean(document, bizId, persistence, null, webContext);
 					}
 					finally {
-						webContext = new FacesWebContext();
-						webContext.setConversation(persistence);
 						webContext.setCurrentBean(bean);
 					}
 					
@@ -185,9 +189,13 @@ public class EditAction extends FacesAction<Void> {
 						if (! vetoed) {
 							Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 							if (bizlet != null) {
-								if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.preExecute: {}, {}, null, , {}", bizlet.getClass().getName(), ImplicitActionName.Edit, bean, webContext);
+								if (UtilImpl.BIZLET_TRACE) {
+									BIZLET_LOGGER.info("Entering {}.preExecute: {}, {}, null, , {}", bizlet.getClass().getName(), ImplicitActionName.Edit, bean, webContext);
+								}
 				    			bean = bizlet.preExecute(ImplicitActionName.Edit, bean, null, webContext);
-								if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.preExecute: {}", bizlet.getClass().getName(), bean);
+								if (UtilImpl.BIZLET_TRACE) {
+									BIZLET_LOGGER.info("Exiting {}.preExecute: {}", bizlet.getClass().getName(), bean);
+								}
 							}
 							internalCustomer.interceptAfterPreExecute(ImplicitActionName.Edit, bean, null, webContext);
 							

@@ -761,7 +761,7 @@ public class WebUtil {
 	public static @Nonnull Bean findReferencedBean(@Nonnull Document referenceDocument, 
 													@Nonnull String bizId, 
 													@Nonnull Persistence persistence,
-													@Nonnull Bean conversationBean,
+													@Nullable Bean conversationBean,
 													@Nonnull WebContext webContext)
 	throws NoResultsException, SecurityException {
 		Bean result = null;

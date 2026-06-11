@@ -22,9 +22,9 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
-import org.skyve.util.logging.SkyveLoggerFactory;
 
 import modules.admin.ImportExport.ImportExportUtil;
 import modules.admin.domain.ImportExport;
@@ -190,25 +190,26 @@ public class RunImport implements ServerSideAction<ImportExport> {
 						}
 					}
 					try {
-						if (b != null && (b.getBizKey() == null || b.getBizKey().trim().length() == 0)) {
+						if (b != null && (b.getBizKey() == null || b.getBizKey().trim().isEmpty())) {
 							String msg = "The new record has no value for bizKey at row " + created + ".";
 							ValidationException ve = new ValidationException(new Message(msg));
 							throw ve;
 						}
 
-						b = persistence.save(b);
-						if (loader.isDebugMode()) {
-							LOGGER.info("{} - Saved successfully", b.getBizKey());
+						if (b != null) {
+							b = persistence.save(b);
+							if (loader.isDebugMode()) {
+								LOGGER.info("{} - Saved successfully", b.getBizKey());
+							}
+							persistence.evictCached(b);
+							
+							// commit and start a new transaction if selected
+							if (RollbackErrors.noRollbackErrors.equals(bean.getRollbackErrors())) {
+								persistence.commit(false);
+								persistence.begin();
+							}
+							created++;
 						}
-						persistence.evictCached(b);
-
-						// commit and start a new transaction if selected
-						if (RollbackErrors.noRollbackErrors.equals(bean.getRollbackErrors())) {
-							persistence.commit(false);
-							persistence.begin();
-						}
-						created++;
-
 					} catch (ValidationException ve) {
 						LOGGER.error(ve.getMessage(), ve);
 						StringBuilder msg = new StringBuilder();
