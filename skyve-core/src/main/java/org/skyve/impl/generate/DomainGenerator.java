@@ -305,9 +305,15 @@ public abstract class DomainGenerator {
 															String testPath,
 															String generatedTestPath,
 															String... excludedModules) {
-		return (UtilImpl.USING_JPA ? 
-					new JPADomainGenerator(debug, multiTenant, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules) : 
-					new OverridableDomainGenerator(write, debug, multiTenant, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules));
+		return new OverridableDomainGenerator(write,
+												debug,
+												multiTenant,
+												dialectOptions,
+												srcPath,
+												generatedSrcPath,
+												testPath,
+												generatedTestPath,
+												excludedModules);
 	}
 	
 	/**

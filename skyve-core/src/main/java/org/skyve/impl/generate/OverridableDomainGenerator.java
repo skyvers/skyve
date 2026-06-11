@@ -1317,6 +1317,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						currentExtends = currentDocument.getExtends();
 						if (currentExtends != null) {
 							currentModule = repository.getModule(customer, currentDocument.getOwningModuleName());
+							if (currentModule == null) {
+								throw new MetaDataException("Owning module " + currentDocument.getOwningModuleName() + " was not found");
+							}
 							currentDocument = currentModule.getDocument(customer, currentExtends.getDocumentName());
 						}
 					}
@@ -3945,6 +3948,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		if (currentInherits != null) {
 			while (currentInherits != null) {
 				Module module = repository.getModule(null, document.getOwningModuleName());
+				if (module == null) {
+					throw new MetaDataException("Owning module " + document.getOwningModuleName() + " was not found");
+				}
 				Document baseDocument = module.getDocument(null, currentInherits.getDocumentName());
 				result.addAll(baseDocument.getAttributes());
 				currentInherits = baseDocument.getExtends();
@@ -4101,21 +4107,21 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		final File[] generatedFiles = generatedDirectory.toFile().listFiles();
 		if (generatedFiles != null) {
 			for (File child : generatedFiles) {
-				if (child.isDirectory()) {
-					String childName = child.getName();
-					if (moduleNames.contains(childName)) {
-						final Path packagePath = generatedDirectory.resolve(childName).resolve(ProvidedRepository.DOMAIN_NAME);
-						if (Files.exists(packagePath)) {
-							File[] domainFiles = packagePath.toFile().listFiles();
-							if (domainFiles != null) {
-								for (File domainFile : domainFiles) {
-									domainFile.delete();
+					if (child.isDirectory()) {
+						String childName = child.getName();
+						if (moduleNames.contains(childName)) {
+							final Path packagePath = generatedDirectory.resolve(childName).resolve(ProvidedRepository.DOMAIN_NAME);
+							if (Files.exists(packagePath)) {
+								File[] domainFiles = packagePath.toFile().listFiles();
+								if (domainFiles != null) {
+									for (File domainFile : domainFiles) {
+										Files.delete(domainFile.toPath());
+									}
 								}
 							}
-						}
-						else {
-							Files.createDirectories(packagePath);
-						}
+							else {
+								Files.createDirectories(packagePath);
+							}
 					}
 					else {
 						if (debug) System.out.println("Deleting unreferenced module source directory " + child.getPath());

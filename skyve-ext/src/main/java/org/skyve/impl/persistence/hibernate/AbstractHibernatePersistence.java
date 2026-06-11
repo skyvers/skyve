@@ -433,39 +433,33 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		sources.addAnnotatedClass(UniquenessEntity.class);
 
 		ProvidedRepository repository = ProvidedRepositoryFactory.get();
-		if (UtilImpl.USING_JPA) {
-			// cfg.configure("bizhub", null);
-			// emf = javax.persistence.Persistence.createEntityManagerFactory("bizhub");
-		}
-		else {
-			StringBuilder sb = new StringBuilder(64);
+		StringBuilder sb = new StringBuilder(64);
 
-			for (String moduleName : repository.getAllVanillaModuleNames()) {
-				// repository.REPOSITORY_DIRECTORY
-				sb.setLength(0);
-				sb.append(ProvidedRepository.MODULES_NAME).append('/');
-				sb.append(moduleName).append('/');
-				sb.append(ProvidedRepository.DOMAIN_NAME).append('/');
-				sb.append(moduleName).append("_orm.hbm.xml");
-				String mappingPath = sb.toString();
+		for (String moduleName : repository.getAllVanillaModuleNames()) {
+			// repository.REPOSITORY_DIRECTORY
+			sb.setLength(0);
+			sb.append(ProvidedRepository.MODULES_NAME).append('/');
+			sb.append(moduleName).append('/');
+			sb.append(ProvidedRepository.DOMAIN_NAME).append('/');
+			sb.append(moduleName).append("_orm.hbm.xml");
+			String mappingPath = sb.toString();
 
-				File mappingFile = new File(UtilImpl.getAbsoluteBasePath() + mappingPath);
-				if (mappingFile.exists()) {
-					sources.addResource(mappingPath);
-				}
+			File mappingFile = new File(UtilImpl.getAbsoluteBasePath() + mappingPath);
+			if (mappingFile.exists()) {
+				sources.addResource(mappingPath);
 			}
+		}
 
-			// Check for customer overridden ORMs
-			for (String customerName : repository.getAllCustomerNames()) {
-				sb.setLength(0);
-				sb.append(ProvidedRepository.CUSTOMERS_NAMESPACE).append(customerName).append('/');
-				sb.append(ProvidedRepository.MODULES_NAME).append("/orm.hbm.xml");
-				String ormResourcePath = sb.toString();
-				
-				File ormFile = new File(UtilImpl.getAbsoluteBasePath() + ormResourcePath);
-				if (ormFile.exists()) {
-					sources.addResource(ormResourcePath);
-				}
+		// Check for customer overridden ORMs
+		for (String customerName : repository.getAllCustomerNames()) {
+			sb.setLength(0);
+			sb.append(ProvidedRepository.CUSTOMERS_NAMESPACE).append(customerName).append('/');
+			sb.append(ProvidedRepository.MODULES_NAME).append("/orm.hbm.xml");
+			String ormResourcePath = sb.toString();
+			
+			File ormFile = new File(UtilImpl.getAbsoluteBasePath() + ormResourcePath);
+			if (ormFile.exists()) {
+				sources.addResource(ormResourcePath);
 			}
 		}
 
@@ -2887,9 +2881,6 @@ if (document.isDynamic()) return;
 		String entityName = getDocumentEntityName(document.getOwningModuleName(), document.getName());
 		Customer customer = user.getCustomer();
 		try {
-			if (UtilImpl.USING_JPA && (! entityName.startsWith(customer.getName()))) {
-				beanClass = ((DocumentImpl) document).getBeanClass(customer);
-			}
 			if (document.isDynamic()) {
 				try {
 					result = (T) dynamicPersistence.populate(id);

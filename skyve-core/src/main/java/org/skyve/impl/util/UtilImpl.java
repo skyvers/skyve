@@ -294,8 +294,6 @@ public class UtilImpl {
 	// The directory used for temp files for file uploads etc
 	public static final String TEMP_DIRECTORY = System.getProperty("java.io.tmpdir");
 
-	public static boolean USING_JPA = false;
-
 	// For caches
 	// Cache folder - defaults to <content.directory>/SKYVE_CACHE/
 	// Skyve will create this folder at startup but if defined it must exist at startup.
@@ -852,8 +850,6 @@ public class UtilImpl {
     	SKYVE_GEOIP_SERVICE_CLASS = null;
     	SKYVE_MAIL_SERVICE_CLASS = null;
     	SKYVE_SMS_SERVICE_CLASS = null;
-
-    	USING_JPA = false;
 
     	CACHE_DIRECTORY = null;
     	CACHE_MULTIPLE = false;
