@@ -2888,9 +2888,7 @@ if (document.isDynamic()) return;
 	@SuppressWarnings("unchecked")
 	private final @Nullable <T extends Bean> T retrieve(@Nonnull Document document, @Nonnull String id, boolean forUpdate) {
 		T result = null;
-		Class<?> beanClass = null;
 		String entityName = getDocumentEntityName(document.getOwningModuleName(), document.getName());
-		Customer customer = user.getCustomer();
 		try {
 			if (document.isDynamic()) {
 				try {
@@ -2903,21 +2901,11 @@ if (document.isDynamic()) return;
 			}
 			else {
 				if (forUpdate) {
-					if (beanClass != null) {
-						result = (T) session.load(beanClass, id, LockMode.PESSIMISTIC_WRITE);
-					}
-					else {
-						result = (T) session.load(entityName, id, LockMode.PESSIMISTIC_WRITE);
-					}
+					result = (T) session.load(entityName, id, LockMode.PESSIMISTIC_WRITE);
 				}
 				else // works with transient instances
 				{
-					if (beanClass != null) {
-						result = (T) em.find(beanClass, id);
-					}
-					else {
-						result = (T) session.get(entityName, id);
-					}
+					result = (T) session.get(entityName, id);
 				}
 			}
 		}
@@ -2926,12 +2914,7 @@ if (document.isDynamic()) return;
 			// The select for update is by [bizId] and [bizVersion] and other transaction changed the bizVersion
 			// so it cannot be found.
 			// The result is null here, so retrieve it again (from the database) without trying to lock
-			if (beanClass != null) {
-				result = (T) em.find(beanClass, id);
-			}
-			else {
-				result = (T) session.get(entityName, id);
-			}
+			result = (T) session.get(entityName, id);
 
 			session.refresh(result, LockMode.PESSIMISTIC_WRITE);
 		}
