@@ -1,15 +1,5 @@
 package org.skyve.impl.content.elastic;
 
-//import java.util.Collections;
-//import java.util.Iterator;
-
-//import org.elasticsearch.action.search.SearchResponse;
-//import org.elasticsearch.client.Client;
-//import org.elasticsearch.common.unit.TimeValue;
-//import org.elasticsearch.index.query.QueryBuilders;
-//import org.elasticsearch.search.SearchHit;
-//import org.elasticsearch.search.SearchHits;
-
 import org.skyve.content.ContentIterable;
 import org.skyve.content.SearchResult;
 
@@ -19,7 +9,19 @@ import org.skyve.content.SearchResult;
  * <p>Current implementation is a placeholder that returns no results while legacy
  * Elasticsearch integration remains disabled.
  */
+@SuppressWarnings({"java:S125", "java:S2272"})
 class ElasticContentIterable implements ContentIterable {
+	//import java.util.Collections;
+	//import java.util.Iterator;
+
+	//import org.elasticsearch.action.search.SearchResponse;
+	//import org.elasticsearch.client.Client;
+	//import org.elasticsearch.common.unit.TimeValue;
+	//import org.elasticsearch.index.query.QueryBuilders;
+	//import org.elasticsearch.search.SearchHit;
+	//import org.elasticsearch.search.SearchHits;
+	
+	
 //	private Client client = null;
 /*
 	ElasticContentIterable(Client client) {

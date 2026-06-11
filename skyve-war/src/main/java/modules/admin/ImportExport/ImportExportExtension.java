@@ -1,8 +1,11 @@
 package modules.admin.ImportExport;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.skyve.CORE;
+import org.skyve.domain.messages.DomainException;
+import org.skyve.util.FileUtil;
 import org.skyve.util.Util;
 
 import modules.admin.domain.ImportExport;
@@ -50,9 +53,16 @@ public class ImportExportExtension extends ImportExport {
 		if (getImportFileAbsolutePath() != null) {
 			File previous = new File(getImportFileAbsolutePath());
 			if (previous.exists()) {
-				previous.delete();
-				File folder = new File(baseFolder());
-				folder.delete();
+				try {
+					FileUtil.delete(previous);
+					File folder = new File(baseFolder());
+					if (folder.exists()) {
+						FileUtil.delete(folder);
+					}
+				}
+				catch (IOException e) {
+					throw new DomainException("Unable to clean up import file.", e);
+				}
 
 				setImportFileAbsolutePath(null);
 			}

@@ -1,6 +1,7 @@
 package modules.test;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.util.List;
 
 import org.junit.AfterClass;
@@ -159,6 +160,8 @@ class BackupTest extends AbstractSkyveTestDispose {
 					List<Bean> ones = (List<Bean>) Binder.get(one, n);
 					@SuppressWarnings("unchecked")
 					List<Bean> others = (List<Bean>) Binder.get(other, n);
+					Assert.assertNotNull(n, ones);
+					Assert.assertNotNull(n, others);
 					Assert.assertEquals(n + " sizes", ones.size(), others.size());
 					for (int i = 0, l = ones.size(); i < l; i++) {
 						compare(ones.get(i), others.get(i));
@@ -172,9 +175,9 @@ class BackupTest extends AbstractSkyveTestDispose {
 	 * Delete the backup zip file
 	 */
 	@AfterClass
-	public static void afterClass() {
+	public static void afterClass() throws Exception {
 		if (backupZip != null) {
-			backupZip.delete();
+			Files.delete(backupZip.toPath());
 		}
 	}
 }

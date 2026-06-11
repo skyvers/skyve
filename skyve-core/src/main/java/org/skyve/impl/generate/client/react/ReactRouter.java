@@ -3,6 +3,7 @@ package org.skyve.impl.generate.client.react;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -36,7 +37,7 @@ public class ReactRouter {
 	void create() throws IOException {
 		File router = new File(generator.srcSkyvePath, "Router.js");
 		if (router.exists()) {
-			router.delete();
+			Files.delete(router.toPath());
 		}
 
 		try (FileWriter fw = new FileWriter(router)) {

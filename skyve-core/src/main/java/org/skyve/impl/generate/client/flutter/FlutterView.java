@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -41,7 +42,7 @@ abstract class FlutterView implements Comparable<FlutterView> {
         modulePath.mkdir();
         File component = new File(modulePath, fileName);
         if (component.exists()) {
-            component.delete();
+            Files.delete(component.toPath());
         }
 
         LOGGER.debug("Generating: {}", component);

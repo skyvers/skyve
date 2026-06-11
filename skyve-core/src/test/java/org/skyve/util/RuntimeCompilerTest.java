@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
 import java.util.Arrays;
 
 import javax.tools.JavaFileObject;
@@ -62,7 +63,7 @@ class RuntimeCompilerTest {
 		} finally {
 			File classFile = new File(UtilImpl.TEMP_DIRECTORY, "SimpleCalc.class");
 			if (classFile.exists()) {
-				classFile.delete();
+				Files.delete(classFile.toPath());
 			}
 		}
 	}

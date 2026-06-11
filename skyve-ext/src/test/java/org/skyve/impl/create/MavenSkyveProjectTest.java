@@ -566,7 +566,7 @@ public class MavenSkyveProjectTest {
 			new File(base, rel).mkdirs();
 		}
 		// Add a placeholder .java file in modules so listFiles returns something
-		new File(base, "skyve-war/src/main/java/modules/Placeholder.java").createNewFile();
+		Files.createFile(new File(base, "skyve-war/src/main/java/modules/Placeholder.java").toPath());
 		return base;
 	}
 

@@ -1,7 +1,9 @@
 package org.skyve.impl.content;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.Date;
 import java.util.UUID;
 
@@ -118,7 +120,7 @@ public class FileSystemContentManager extends AbstractContentManager {
 	 * @throws Exception If deletion fails.
 	 */
 	@Override
-	@SuppressWarnings({"java:S3776", "java:S4042", "java:S1066", "java:S899"}) // complexity OK
+	@SuppressWarnings({"java:S3776", "java:S4042", "java:S1066"}) // complexity OK
 	public void removeAttachment(String contentId) throws Exception {
 		if (UtilImpl.CONTENT_FILE_STORAGE) {
 			StringBuilder path = new StringBuilder(128);
@@ -134,18 +136,27 @@ public class FileSystemContentManager extends AbstractContentManager {
 			// Delete the folder structure housing the content file, if empty.
 			if ((thirdDir != null) && thirdDir.exists() && thirdDir.isDirectory()) {
 				File secondDir = thirdDir.getParentFile();
-				if (thirdDir.delete()) {
-					if ((secondDir != null) && secondDir.exists() && secondDir.isDirectory()) {
-						File firstDir = secondDir.getParentFile();
-						if (secondDir.delete()) {
-							if ((firstDir != null) && firstDir.exists() && firstDir.isDirectory()) {
-								firstDir.delete();
+				if (deleteIfEmpty(thirdDir)) {
+						if ((secondDir != null) && secondDir.exists() && secondDir.isDirectory()) {
+							File firstDir = secondDir.getParentFile();
+							if (deleteIfEmpty(secondDir)) {
+								if ((firstDir != null) && firstDir.exists() && firstDir.isDirectory()) {
+									deleteIfEmpty(firstDir);
+								}
 							}
 						}
 					}
 				}
 			}
 		}
+
+	private static boolean deleteIfEmpty(File directory) throws IOException {
+		String[] children = directory.list();
+		if ((children != null) && (children.length == 0)) {
+			Files.delete(directory.toPath());
+			return true;
+		}
+		return false;
 	}
 
 	/**

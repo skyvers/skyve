@@ -482,7 +482,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 		currentFormItem = item;
 	}
 
-	public abstract void renderFormItem(@Nonnull String label,
+	public abstract void renderFormItem(@Nullable String label,
 											@Nullable String requiredMessage,
 											@Nullable String help,
 											boolean showsLabel,

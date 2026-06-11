@@ -8,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,10 +43,10 @@ class DeleteBatchH2Test extends AbstractH2Test {
 	}
 
 	@AfterEach
-	void cleanup() {
+	void cleanup() throws IOException {
 		// Clean up test batch directory if it exists
 		if (testBatchDir != null && testBatchDir.exists()) {
-			testBatchDir.delete();
+			Files.delete(testBatchDir.toPath());
 		}
 	}
 

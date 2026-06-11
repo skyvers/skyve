@@ -223,7 +223,7 @@ public class FlutterInitMojo extends AbstractSkyveMojo {
 	                        if (file.isDirectory()) {
 	                            FileUtils.deleteDirectory(path.toFile());
 	                        } else {
-	                            file.delete();
+	                            Files.delete(path);
 	                        }
 	                    }
                     }

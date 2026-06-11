@@ -94,9 +94,8 @@ reworked. All of these need rewriting:
 - `EnumUserType`
 - `OptimisticLockUserType`
 
-Type bindings are declared via `<typedef>` in generated hbm.xml files and via
-`@Type(type="...")` in generated Java domain classes (emitted by `JPADomainGenerator`).
-Both need updating.
+Type bindings are declared via `<typedef>` in generated hbm.xml files emitted by
+`OverridableDomainGenerator`. These need updating or confirming under H6.
 
 ### HIGH — DDL and schema evolution
 
@@ -126,8 +125,6 @@ Both need updating.
 
 ### MEDIUM — Generator update
 
-- `JPADomainGenerator` emits `@Type(type="org.skyve...")` — H6 requires
-  `@Type(SomeType.class)`
 - `OverridableDomainGenerator` emits hbm.xml `<typedef>` blocks — still supported
   in H6 but verify
 - After generator changes, run `mvn skyve:generateDomain` from `skyve-war/` and
@@ -182,7 +179,8 @@ Fix removed/changed APIs in `AbstractHibernatePersistence`,
 
 ### Phase 7 — Generator + regeneration *(1–2 days)*
 
-Update `@Type` emission in `JPADomainGenerator`; run `mvn skyve:generateDomain`.
+Verify `OverridableDomainGenerator` hbm.xml type emission under H6; run
+`mvn skyve:generateDomain`.
 
 ### Phase 8 — Mockito cleanup *(hours)*
 

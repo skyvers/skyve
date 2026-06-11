@@ -2,10 +2,11 @@ package modules.admin.ReportManager.actions;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -119,13 +120,18 @@ class ExportReportSpecificationsTest extends AbstractH2Test {
 		@Override
 		public void cleanUpTemporaryFiles() {
 			cleanedUp = true;
-			File[] files = folder.listFiles();
-			if (files != null) {
-				for (File file : files) {
-					file.delete();
+			try {
+				File[] files = folder.listFiles();
+				if (files != null) {
+					for (File file : files) {
+						Files.delete(file.toPath());
+					}
 				}
+				Files.delete(folder.toPath());
 			}
-			folder.delete();
+			catch (IOException e) {
+				throw new AssertionError("Failed to clean up temporary report files", e);
+			}
 		}
 	}
 }

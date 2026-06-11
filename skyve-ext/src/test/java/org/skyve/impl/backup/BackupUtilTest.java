@@ -548,7 +548,7 @@ public class BackupUtilTest {
 			assertThat(result.get(1), is("UPDATE bar SET x = 2"));
 		}
 		finally {
-			tempFile.delete();
+			Files.delete(tempFile.toPath());
 		}
 	}
 
@@ -564,7 +564,7 @@ public class BackupUtilTest {
 			assertThat(result.get(0), is("SELECT 1"));
 		}
 		finally {
-			tempFile.delete();
+			Files.delete(tempFile.toPath());
 		}
 	}
 
@@ -658,7 +658,7 @@ public class BackupUtilTest {
 			assertEquals(2, result.size());
 		}
 		finally {
-			tempFile.delete();
+			Files.delete(tempFile.toPath());
 		}
 	}
 
@@ -682,7 +682,7 @@ public class BackupUtilTest {
 			assertTrue(restored.fields.containsKey("assocField"));
 		}
 		finally {
-			tempFile.delete();
+			Files.delete(tempFile.toPath());
 		}
 	}
 
@@ -1139,9 +1139,9 @@ public class BackupUtilTest {
 		}
 		finally {
 			UtilImpl.BACKUP_DIRECTORY = previousBackupDirectory;
-			backupDirectory.delete();
-			backupDirectory.getParentFile().delete();
-			root.delete();
+			Files.delete(backupDirectory.toPath());
+			Files.delete(backupDirectory.getParentFile().toPath());
+			Files.delete(root.toPath());
 		}
 	}
 
@@ -1170,10 +1170,10 @@ public class BackupUtilTest {
 		}
 		finally {
 			UtilImpl.BACKUP_DIRECTORY = previousBackupDirectory;
-			csv.delete();
-			backupDirectory.delete();
-			backupDirectory.getParentFile().delete();
-			root.delete();
+			Files.delete(csv.toPath());
+			Files.delete(backupDirectory.toPath());
+			Files.delete(backupDirectory.getParentFile().toPath());
+			Files.delete(root.toPath());
 		}
 	}
 

@@ -3,6 +3,7 @@ package org.skyve.impl.generate.client.react;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 
 abstract class ReactComponent implements Comparable<ReactComponent> {
 	protected ReactGenerator generator;
@@ -28,7 +29,7 @@ abstract class ReactComponent implements Comparable<ReactComponent> {
 System.out.println(modulePath);
 		File component = new File(modulePath, componentName + ".js");
 		if (component.exists()) {
-			component.delete();
+			Files.delete(component.toPath());
 		}
 System.out.println(component);
 
@@ -38,5 +39,5 @@ System.out.println(component);
 		}
 	}
 	
-	protected abstract void create(FileWriter fw) throws IOException;}
-
+	protected abstract void create(FileWriter fw) throws IOException;
+}
