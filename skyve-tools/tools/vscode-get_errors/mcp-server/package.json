@@ -1,0 +1,23 @@
+{
+  "name": "vscode-get_errors-mcp",
+  "version": "0.1.0",
+  "description": "MCP server exposing VS Code Problems diagnostics to Codex.",
+  "license": "UNLICENSED",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "vscode-get_errors-mcp": "./dist/server.js"
+  },
+  "scripts": {
+    "build": "tsc -p ./",
+    "start": "node ./dist/server.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.0",
+    "typescript": "^5.9.3"
+  }
+}
