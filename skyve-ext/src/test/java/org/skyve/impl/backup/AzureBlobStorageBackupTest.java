@@ -73,7 +73,7 @@ public class AzureBlobStorageBackupTest {
 		withThreadLocalPersistence(persistence, () -> assertEquals("backup-acmecorp/", invokePrivateConfig("getDirectoryName")));
 	}
 
-	private static void assertPrivateConfigThrows(String methodName) throws Exception {
+	private static void assertPrivateConfigThrows(String methodName) {
 		InvocationTargetException thrown = assertThrows(InvocationTargetException.class, () -> invokePrivateConfig(methodName));
 		assertEquals(IllegalStateException.class, thrown.getCause().getClass());
 	}

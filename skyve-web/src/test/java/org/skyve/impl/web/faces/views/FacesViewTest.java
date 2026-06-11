@@ -1712,7 +1712,7 @@ class FacesViewTest {
 	}
 
 	@Test
-	void setBeanWithWebContextInitialisesCurrentBeanAdapter() throws Exception {
+	void setBeanWithWebContextInitialisesCurrentBeanAdapter() {
 		FacesView view = new FacesView();
 		MockWebContext webContext = new MockWebContext();
 		Bean bean = mock(Bean.class);
@@ -1791,7 +1791,7 @@ class FacesViewTest {
 	}
 
 	@Test
-	void hydrateRestoresWebContextAndClearsDehydratedWebId() throws Exception {
+	void hydrateRestoresWebContextAndClearsDehydratedWebId() {
 		FacesView view = new FacesView();
 		MockWebContext initialContext = new MockWebContext();
 		Bean bean = mock(Bean.class);
@@ -1812,7 +1812,7 @@ class FacesViewTest {
 	}
 
 	@Test
-	void hydrateWithFacesTraceEnabledRestoresWebContextAndClearsDehydratedWebId() throws Exception {
+	void hydrateWithFacesTraceEnabledRestoresWebContextAndClearsDehydratedWebId() {
 		FacesView view = new FacesView();
 		MockWebContext initialContext = new MockWebContext();
 		Bean bean = mock(Bean.class);

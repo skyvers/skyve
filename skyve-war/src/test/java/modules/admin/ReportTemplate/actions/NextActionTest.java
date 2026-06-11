@@ -10,7 +10,7 @@ import modules.admin.ReportTemplate.ReportTemplateExtension;
 import modules.admin.domain.ReportTemplate.WizardState;
 
 @SuppressWarnings("static-method")
-public class NextActionTest {
+class NextActionTest {
 
 	@Test
 	void executeWithEnterDetailsStateAdvancesToEnterMarkup() throws Exception {

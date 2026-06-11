@@ -8,7 +8,7 @@ import org.skyve.domain.app.admin.ReportParameter.Type;
 import org.skyve.domain.messages.ValidationException;
 
 @SuppressWarnings("static-method")
-public class ReportParameterBizletTest {
+class ReportParameterBizletTest {
 
 	private static final ReportParameterBizlet bizlet = new ReportParameterBizlet();
 

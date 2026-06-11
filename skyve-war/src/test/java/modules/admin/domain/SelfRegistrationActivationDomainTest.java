@@ -7,11 +7,11 @@ import org.junit.jupiter.api.Test;
 
 import modules.test.AbstractSkyveTest;
 
-public class SelfRegistrationActivationDomainTest extends AbstractSkyveTest {
+class SelfRegistrationActivationDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void newInstanceCreatesSelfRegistrationActivation() throws Exception {
+	void newInstanceCreatesSelfRegistrationActivation() {
 		SelfRegistrationActivation bean = SelfRegistrationActivation.newInstance();
 		assertNotNull(bean);
 		assertEquals("admin", bean.getBizModule());
@@ -20,7 +20,7 @@ public class SelfRegistrationActivationDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void resultSuccessSetAndGet() throws Exception {
+	void resultSuccessSetAndGet() {
 		SelfRegistrationActivation bean = SelfRegistrationActivation.newInstance();
 		bean.setResult(SelfRegistrationActivation.Result.SUCCESS);
 		assertEquals(SelfRegistrationActivation.Result.SUCCESS, bean.getResult());
@@ -29,7 +29,7 @@ public class SelfRegistrationActivationDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void resultAlreadyActivatedSetAndGet() throws Exception {
+	void resultAlreadyActivatedSetAndGet() {
 		SelfRegistrationActivation bean = SelfRegistrationActivation.newInstance();
 		bean.setResult(SelfRegistrationActivation.Result.ALREADYACTIVATED);
 		assertEquals(SelfRegistrationActivation.Result.ALREADYACTIVATED, bean.getResult());
@@ -37,7 +37,7 @@ public class SelfRegistrationActivationDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void resultExpiredSetAndGet() throws Exception {
+	void resultExpiredSetAndGet() {
 		SelfRegistrationActivation bean = SelfRegistrationActivation.newInstance();
 		bean.setResult(SelfRegistrationActivation.Result.EXPIRED);
 		assertEquals(SelfRegistrationActivation.Result.EXPIRED, bean.getResult());
@@ -45,7 +45,7 @@ public class SelfRegistrationActivationDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void resultFailureSetAndGet() throws Exception {
+	void resultFailureSetAndGet() {
 		SelfRegistrationActivation bean = SelfRegistrationActivation.newInstance();
 		bean.setResult(SelfRegistrationActivation.Result.FAILURE);
 		assertEquals(SelfRegistrationActivation.Result.FAILURE, bean.getResult());

@@ -36,7 +36,7 @@ class ResendActivationTest {
 	}
 
 	@Test
-	void executeWithNullEmailThrowsDomainException() throws Exception {
+	void executeWithNullEmailThrowsDomainException() {
 		ResendActivation action = new ResendActivation();
 		UserExtension user = new UserExtension();
 		ContactExtension contact = new ContactExtension();

@@ -13,7 +13,7 @@ import util.AbstractH2Test;
 class ReachabilityDomainTest extends AbstractH2Test {
 
         @Test
-        void bizModuleAndDocument() throws Exception {
+        void bizModuleAndDocument() {
                 Reachability bean = Reachability.newInstance();
                 assertEquals("test", bean.getBizModule());
                 assertEquals("Reachability", bean.getBizDocument());

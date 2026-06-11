@@ -13,7 +13,7 @@ import util.AbstractH2Test;
 class ListAttributesDomainTest extends AbstractH2Test {
 
         @Test
-        void bizModuleAndDocument() throws Exception {
+        void bizModuleAndDocument() {
                 ListAttributes bean = ListAttributes.newInstance();
                 assertEquals("kitchensink", bean.getBizModule());
                 assertEquals("ListAttributes", bean.getBizDocument());

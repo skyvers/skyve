@@ -16,7 +16,7 @@ class DocumentNumberTests extends AbstractSkyveTestDispose {
 	DocumentNumberAutonomousTransactionGenerator autonomousGenerator = new DocumentNumberAutonomousTransactionGenerator();
 
 	@BeforeEach
-	void setup() throws Exception {
+	void setup() {
 		dN = DocumentNumber.newInstance();
 		dN.setModuleName(AllAttributesPersistent.MODULE_NAME);
 		dN.setDocumentName(AllAttributesPersistent.DOCUMENT_NAME);
@@ -28,7 +28,7 @@ class DocumentNumberTests extends AbstractSkyveTestDispose {
 	}
 
 	@Test
-	void testDefaultGetNumberReturnsNextNumber() throws Exception {
+	void testDefaultGetNumberReturnsNextNumber() {
 		generator.next(null, AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME,
 				AllAttributesPersistent.textPropertyName, 1);
 		p.evictAllCached();
@@ -50,7 +50,7 @@ class DocumentNumberTests extends AbstractSkyveTestDispose {
 	}
 
 	@Test
-	void testAutonomousGetNumberReturnsNextNumber() throws Exception {
+	void testAutonomousGetNumberReturnsNextNumber() {
 		autonomousGenerator.next(null, AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME,
 				AllAttributesPersistent.textPropertyName, 1);
 		p.evictAllCached();
@@ -71,7 +71,7 @@ class DocumentNumberTests extends AbstractSkyveTestDispose {
 	}
 
 	@Test
-	void testDefaultRollbackDoesNotCommit() throws Exception {
+	void testDefaultRollbackDoesNotCommit() {
 		p.evictAllCached();
 
 		generator.next(null, AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME,
@@ -96,7 +96,7 @@ class DocumentNumberTests extends AbstractSkyveTestDispose {
 	}
 
 	@Test
-	void testAutonomousNextNumberRollbackIncrements() throws Exception {
+	void testAutonomousNextNumberRollbackIncrements() {
 		p.evictAllCached();
 
 		autonomousGenerator.next(null, AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME,

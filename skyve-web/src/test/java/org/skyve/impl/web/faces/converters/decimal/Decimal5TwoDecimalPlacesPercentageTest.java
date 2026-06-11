@@ -18,35 +18,35 @@ public class Decimal5TwoDecimalPlacesPercentageTest {
 	}
 
 	@Test
-	public void testGetAsObjectNullValue() throws Exception {
+	public void testGetAsObjectNullValue() {
 		assertThat(converter.getAsObject(null, null, null), nullValue());
 	}
 
 	@Test
-	public void testGetAsObjectEmptyValue() throws Exception {
+	public void testGetAsObjectEmptyValue() {
 		assertThat(converter.getAsObject(null, null, ""), nullValue());
 	}
 
 	@Test(expected = ConverterException.class)
-	public void testGetAsObjectInvalidValue() throws Exception {
+	public void testGetAsObjectInvalidValue() {
 		converter.getAsObject(null, null, "not a decimal");
 		fail("Should throw exception before this line.");
 	}
 
 	@Test
-	public void testGetAsObjectValidValue() throws Exception {
+	public void testGetAsObjectValidValue() {
 		// "50%" represents 50% i.e. 0.50 as a Decimal5
 		org.skyve.domain.types.Decimal5 result = converter.getAsObject(null, null, "50%");
 		assertThat(converter.getAsString(null, null, result), is("50.00%"));
 	}
 
 	@Test
-	public void testGetAsStringNullValue() throws Exception {
+	public void testGetAsStringNullValue() {
 		assertThat(converter.getAsString(null, null, null), is(""));
 	}
 
 	@Test
-	public void testGetAsStringValidValue() throws Exception {
+	public void testGetAsStringValidValue() {
 		// 0.5 Decimal5 → 50.00%
 		org.skyve.domain.types.Decimal5 value = new org.skyve.domain.types.Decimal5("0.5");
 		assertThat(converter.getAsString(null, null, value), is("50.00%"));

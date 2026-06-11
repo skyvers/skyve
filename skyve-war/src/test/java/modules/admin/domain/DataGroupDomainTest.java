@@ -10,10 +10,10 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
-public class DataGroupDomainTest extends AbstractH2Test {
+class DataGroupDomainTest extends AbstractH2Test {
 
 	@Test
-	void dataBuilderCreatesBean() throws Exception {
+	void dataBuilderCreatesBean() {
 		DataGroup bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(DataGroup.MODULE_NAME, DataGroup.DOCUMENT_NAME);
@@ -21,21 +21,21 @@ public class DataGroupDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void moduleAndDocumentNames() throws Exception {
+	void moduleAndDocumentNames() {
 		DataGroup bean = DataGroup.newInstance();
 		assertEquals("admin", bean.getBizModule());
 		assertEquals("DataGroup", bean.getBizDocument());
 	}
 
 	@Test
-	void nameSetAndGet() throws Exception {
+	void nameSetAndGet() {
 		DataGroup bean = DataGroup.newInstance();
 		bean.setName("TestGroup");
 		assertEquals("TestGroup", bean.getName());
 	}
 
 	@Test
-	void descriptionSetAndGet() throws Exception {
+	void descriptionSetAndGet() {
 		DataGroup bean = DataGroup.newInstance();
 		bean.setDescription("A test group description");
 		assertEquals("A test group description", bean.getDescription());

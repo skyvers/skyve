@@ -8,7 +8,7 @@ import modules.admin.DataMaintenance.DataMaintenanceExtension;
 import modules.admin.domain.GroupRole;
 
 @SuppressWarnings("static-method")
-public class GroupRoleBizletTest {
+class GroupRoleBizletTest {
 
 	private static final GroupRoleBizlet bizlet = new GroupRoleBizlet();
 

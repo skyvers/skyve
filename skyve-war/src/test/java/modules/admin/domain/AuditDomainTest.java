@@ -12,11 +12,11 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import util.AbstractH2Test;
 
-public class AuditDomainTest extends AbstractH2Test {
+class AuditDomainTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void dataBuilderCreatesAudit() throws Exception {
+	void dataBuilderCreatesAudit() {
 		Audit bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
@@ -25,7 +25,7 @@ public class AuditDomainTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void moduleAndDocumentNames() throws Exception {
+	void moduleAndDocumentNames() {
 		Audit bean = new Audit();
 		assertEquals("admin", bean.getBizModule());
 		assertEquals("Audit", bean.getBizDocument());
@@ -33,7 +33,7 @@ public class AuditDomainTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void auditModuleNameSetAndGet() throws Exception {
+	void auditModuleNameSetAndGet() {
 		Audit bean = new Audit();
 		bean.setAuditModuleName("admin");
 		assertEquals("admin", bean.getAuditModuleName());
@@ -41,7 +41,7 @@ public class AuditDomainTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void auditDocumentNameSetAndGet() throws Exception {
+	void auditDocumentNameSetAndGet() {
 		Audit bean = new Audit();
 		bean.setAuditDocumentName("User");
 		assertEquals("User", bean.getAuditDocumentName());
@@ -49,7 +49,7 @@ public class AuditDomainTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void auditBizIdSetAndGet() throws Exception {
+	void auditBizIdSetAndGet() {
 		Audit bean = new Audit();
 		bean.setAuditBizId("test-biz-id-123");
 		assertEquals("test-biz-id-123", bean.getAuditBizId());
@@ -57,7 +57,7 @@ public class AuditDomainTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void auditBizKeySetAndGet() throws Exception {
+	void auditBizKeySetAndGet() {
 		Audit bean = new Audit();
 		bean.setAuditBizKey("Test Biz Key");
 		assertEquals("Test Biz Key", bean.getAuditBizKey());
@@ -65,7 +65,7 @@ public class AuditDomainTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void operationInsertSetAndGet() throws Exception {
+	void operationInsertSetAndGet() {
 		Audit bean = new Audit();
 		bean.setOperation(Audit.Operation.insert);
 		assertEquals(Audit.Operation.insert, bean.getOperation());
@@ -73,7 +73,7 @@ public class AuditDomainTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void operationUpdateSetAndGet() throws Exception {
+	void operationUpdateSetAndGet() {
 		Audit bean = new Audit();
 		bean.setOperation(Audit.Operation.update);
 		assertEquals(Audit.Operation.update, bean.getOperation());
@@ -81,7 +81,7 @@ public class AuditDomainTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void operationDeleteSetAndGet() throws Exception {
+	void operationDeleteSetAndGet() {
 		Audit bean = new Audit();
 		bean.setOperation(Audit.Operation.delete);
 		assertEquals(Audit.Operation.delete, bean.getOperation());
@@ -97,7 +97,7 @@ public class AuditDomainTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void timestampSetAndGet() throws Exception {
+	void timestampSetAndGet() {
 		Audit bean = new Audit();
 		Timestamp ts = new Timestamp();
 		bean.setTimestamp(ts);
@@ -106,7 +106,7 @@ public class AuditDomainTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void millisSetAndGet() throws Exception {
+	void millisSetAndGet() {
 		Audit bean = new Audit();
 		bean.setMillis(Long.valueOf(12345L));
 		assertEquals(Long.valueOf(12345L), bean.getMillis());
@@ -114,7 +114,7 @@ public class AuditDomainTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void userNameSetAndGet() throws Exception {
+	void userNameSetAndGet() {
 		Audit bean = new Audit();
 		bean.setUserName("testuser");
 		assertEquals("testuser", bean.getUserName());
@@ -122,7 +122,7 @@ public class AuditDomainTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void auditDetailSetAndGet() throws Exception {
+	void auditDetailSetAndGet() {
 		Audit bean = new Audit();
 		bean.setAuditDetail("{\"field\":\"value\"}");
 		assertEquals("{\"field\":\"value\"}", bean.getAuditDetail());

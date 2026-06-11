@@ -11,11 +11,11 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 import modules.admin.domain.Contact.ContactType;
 import util.AbstractH2Test;
 
-public class ContactDomainTest extends AbstractH2Test {
+class ContactDomainTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void dataBuilderCreatesContact() throws Exception {
+	void dataBuilderCreatesContact() {
 		Contact bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
@@ -24,7 +24,7 @@ public class ContactDomainTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void moduleAndDocumentNames() throws Exception {
+	void moduleAndDocumentNames() {
 		Contact bean = Contact.newInstance();
 		assertEquals("admin", bean.getBizModule());
 		assertEquals("Contact", bean.getBizDocument());
@@ -32,7 +32,7 @@ public class ContactDomainTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void nameSetAndGet() throws Exception {
+	void nameSetAndGet() {
 		Contact bean = Contact.newInstance();
 		bean.setName("Jane Smith");
 		assertEquals("Jane Smith", bean.getName());
@@ -40,7 +40,7 @@ public class ContactDomainTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void contactTypePersonSetAndGet() throws Exception {
+	void contactTypePersonSetAndGet() {
 		Contact bean = Contact.newInstance();
 		bean.setContactType(Contact.ContactType.person);
 		assertEquals(Contact.ContactType.person, bean.getContactType());
@@ -48,7 +48,7 @@ public class ContactDomainTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void contactTypeOrganisationSetAndGet() throws Exception {
+	void contactTypeOrganisationSetAndGet() {
 		Contact bean = Contact.newInstance();
 		bean.setContactType(Contact.ContactType.organisation);
 		assertEquals(Contact.ContactType.organisation, bean.getContactType());
@@ -63,7 +63,7 @@ public class ContactDomainTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void email1SetAndGet() throws Exception {
+	void email1SetAndGet() {
 		Contact bean = Contact.newInstance();
 		bean.setEmail1("jane@example.com");
 		assertEquals("jane@example.com", bean.getEmail1());
@@ -71,7 +71,7 @@ public class ContactDomainTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void mobileSetAndGet() throws Exception {
+	void mobileSetAndGet() {
 		Contact bean = Contact.newInstance();
 		bean.setMobile("+61400000000");
 		assertEquals("+61400000000", bean.getMobile());
@@ -79,7 +79,7 @@ public class ContactDomainTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void imageSetAndGet() throws Exception {
+	void imageSetAndGet() {
 		Contact bean = Contact.newInstance();
 		bean.setImage("content-id-abc123");
 		assertEquals("content-id-abc123", bean.getImage());

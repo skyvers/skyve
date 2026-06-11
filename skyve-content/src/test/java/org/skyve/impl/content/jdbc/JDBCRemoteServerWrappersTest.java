@@ -56,7 +56,7 @@ class JDBCRemoteServerWrappersTest {
 	}
 
 	@Test
-	void testElasticWrapperStartupPropagatesServerGuardFailure() throws Exception {
+	void testElasticWrapperStartupPropagatesServerGuardFailure() {
 		UtilImpl.CONTENT_JDBC_SERVER_ARGS = null;
 
 		try (JDBCRemoteElasticContentManagerServer wrapper = new JDBCRemoteElasticContentManagerServer()) {
@@ -97,7 +97,7 @@ class JDBCRemoteServerWrappersTest {
 	}
 
 	@Test
-	void testElasticWrapperShutdownWithoutStartup() throws Exception {
+	void testElasticWrapperShutdownWithoutStartup() {
 		try (JDBCRemoteElasticContentManagerServer wrapper = new JDBCRemoteElasticContentManagerServer()) {
 			assertDoesNotThrow(wrapper::shutdown);
 		}

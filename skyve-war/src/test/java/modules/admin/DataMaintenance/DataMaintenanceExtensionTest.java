@@ -10,7 +10,7 @@ import modules.admin.domain.DataMaintenance.RestoreIndexingOption;
 import modules.admin.domain.DataMaintenance.RestorePreProcess;
 
 @SuppressWarnings("static-method")
-public class DataMaintenanceExtensionTest {
+class DataMaintenanceExtensionTest {
 
 	@Test
 	void getPreProcessMapsNoProcessing() {

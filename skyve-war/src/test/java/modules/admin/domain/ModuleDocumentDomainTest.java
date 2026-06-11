@@ -10,10 +10,10 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
-public class ModuleDocumentDomainTest extends AbstractH2Test {
+class ModuleDocumentDomainTest extends AbstractH2Test {
 
 	@Test
-	void dataBuilderCreatesBean() throws Exception {
+	void dataBuilderCreatesBean() {
 		ModuleDocument bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(ModuleDocument.MODULE_NAME, ModuleDocument.DOCUMENT_NAME);
@@ -21,28 +21,28 @@ public class ModuleDocumentDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void moduleAndDocumentNames() throws Exception {
+	void moduleAndDocumentNames() {
 		ModuleDocument bean = ModuleDocument.newInstance();
 		assertEquals("admin", bean.getBizModule());
 		assertEquals("ModuleDocument", bean.getBizDocument());
 	}
 
 	@Test
-	void moduleNameSetAndGet() throws Exception {
+	void moduleNameSetAndGet() {
 		ModuleDocument bean = ModuleDocument.newInstance();
 		bean.setModuleName("admin");
 		assertEquals("admin", bean.getModuleName());
 	}
 
 	@Test
-	void documentNameSetAndGet() throws Exception {
+	void documentNameSetAndGet() {
 		ModuleDocument bean = ModuleDocument.newInstance();
 		bean.setDocumentName("User");
 		assertEquals("User", bean.getDocumentName());
 	}
 
 	@Test
-	void includeSetAndGet() throws Exception {
+	void includeSetAndGet() {
 		ModuleDocument bean = ModuleDocument.newInstance();
 		bean.setInclude(Boolean.TRUE);
 		assertEquals(Boolean.TRUE, bean.getInclude());

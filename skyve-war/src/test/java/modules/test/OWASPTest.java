@@ -23,7 +23,7 @@ class OWASPTest extends AbstractSkyveTest {
 	private final Map<String, String> both = new TreeMap<>();
 	
 	@BeforeEach
-	void setup() throws Exception {
+	void setup() {
 		escape.put("poo@wee.com", "poo@wee.com");
 		escape.put("<h1>test</h1>", "&lt;h1&gt;test&lt;/h1&gt;");
 		escape.put("<h1>test<script>alert(1)</script></h1>", "&lt;h1&gt;test&lt;script&gt;alert(1)&lt;/script&gt;&lt;/h1&gt;");
@@ -38,21 +38,21 @@ class OWASPTest extends AbstractSkyveTest {
 	}
 	
 	@Test
-	void testEscape() throws Exception {
+	void testEscape() {
 		for (Entry<String, String> entry : escape.entrySet()) {
 			Assert.assertEquals("Escape not working", entry.getValue(), OWASP.escapeHtml(entry.getKey()));
 		}
 	}
 
 	@Test
-	void testSanitise() throws Exception {
+	void testSanitise() {
 		for (Entry<String, String> entry : sanitise.entrySet()) {
 			Assert.assertEquals("Sanitise not working", entry.getValue(), OWASP.sanitise(Sanitisation.relaxed, entry.getKey()));
 		}
 	}
 
 	@Test
-	void testBoth() throws Exception {
+	void testBoth() {
 		for (Entry<String, String> entry : both.entrySet()) {
 			Assert.assertEquals("Sanitise and escape not as expected", entry.getValue(), OWASP.sanitiseAndEscapeHtml(Sanitisation.relaxed, entry.getKey()));
 		}
@@ -70,7 +70,7 @@ class OWASPTest extends AbstractSkyveTest {
 	
 	@Test
 	@SuppressWarnings("static-method")
-	void testSanitiseBindings() throws Exception {
+	void testSanitiseBindings() {
 		Assert.assertEquals("Sanitise should leave bindings alone",
 								"user.contacts(1234567890).poo[0]",
 								OWASP.sanitise(Sanitisation.text, "user.contacts(1234567890).poo[0]"));
@@ -78,7 +78,7 @@ class OWASPTest extends AbstractSkyveTest {
 	
 	@Test
 	@SuppressWarnings("static-method")
-	void testSanitiseUUIDs() throws Exception {
+	void testSanitiseUUIDs() {
 		String uuid = UUID.randomUUID().toString();
 		Assert.assertEquals("Sanitise should leave UUIDs alone",
 								uuid,

@@ -256,7 +256,7 @@ class ELFunctionsTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void newOptimisticLockFromString() throws Exception {
+	void newOptimisticLockFromString() {
 		// Format: 17 chars for timestamp + username
 		// LOCK_TIMESTAMP_FORMAT = "yyyyMMddHHmmssSSS"
 		// Build a valid lock string: 17-char date + username

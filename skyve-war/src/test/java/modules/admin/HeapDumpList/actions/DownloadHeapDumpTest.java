@@ -9,7 +9,7 @@ import modules.admin.domain.HeapDumpList;
 import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
-public class DownloadHeapDumpTest extends AbstractH2Test {
+class DownloadHeapDumpTest extends AbstractH2Test {
 
 	@Test
 	void prepareWithNonExistentFileThrowsValidationException() {

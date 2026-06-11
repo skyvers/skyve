@@ -18,7 +18,7 @@ import util.AbstractH2Test;
 /**
  * H2-backed tests for RunJobNow action covering validation and execution paths.
  */
-public class RunJobNowH2Test extends AbstractH2Test {
+class RunJobNowH2Test extends AbstractH2Test {
 
 	private JobSchedule bean;
 	private MockWebContext webContext;

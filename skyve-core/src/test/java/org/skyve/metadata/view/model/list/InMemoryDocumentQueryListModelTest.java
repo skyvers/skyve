@@ -73,7 +73,7 @@ class InMemoryDocumentQueryListModelTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void removeDoesNotThrow() throws Exception {
+	void removeDoesNotThrow() {
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
 		DocumentQuery query = mock(DocumentQuery.class);

@@ -10,7 +10,7 @@ import org.skyve.domain.types.DateTime;
 
 import jakarta.faces.convert.ConverterException;
 @SuppressWarnings({"static-method", "java:S5778"})
-public class DateTimeConverterTest {
+class DateTimeConverterTest {
 
 	// ---- DD_MM_YYYY ----
 

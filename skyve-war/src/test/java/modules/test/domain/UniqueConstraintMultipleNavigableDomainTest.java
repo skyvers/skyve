@@ -9,41 +9,41 @@ import org.junit.jupiter.api.Test;
 import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
-public class UniqueConstraintMultipleNavigableDomainTest extends AbstractH2Test {
+class UniqueConstraintMultipleNavigableDomainTest extends AbstractH2Test {
 
 	@Test
-	void bizModuleIsTest() throws Exception {
+	void bizModuleIsTest() {
 		UniqueConstraintMultipleNavigable bean = UniqueConstraintMultipleNavigable.newInstance();
 		assertEquals("test", bean.getBizModule());
 	}
 
 	@Test
-	void bizDocumentIsUniqueConstraintMultipleNavigable() throws Exception {
+	void bizDocumentIsUniqueConstraintMultipleNavigable() {
 		UniqueConstraintMultipleNavigable bean = UniqueConstraintMultipleNavigable.newInstance();
 		assertEquals("UniqueConstraintMultipleNavigable", bean.getBizDocument());
 	}
 
 	@Test
-	void getBizKeyNotNull() throws Exception {
+	void getBizKeyNotNull() {
 		UniqueConstraintMultipleNavigable bean = UniqueConstraintMultipleNavigable.newInstance();
 		assertNotNull(bean.getBizKey());
 	}
 
 	@Test
-	void uniqueNameSetAndGet() throws Exception {
+	void uniqueNameSetAndGet() {
 		UniqueConstraintMultipleNavigable bean = UniqueConstraintMultipleNavigable.newInstance();
 		bean.setUniqueName("testName");
 		assertEquals("testName", bean.getUniqueName());
 	}
 
 	@Test
-	void aggAssociationNullByDefault() throws Exception {
+	void aggAssociationNullByDefault() {
 		UniqueConstraintMultipleNavigable bean = UniqueConstraintMultipleNavigable.newInstance();
 		assertNull(bean.getAggAssociation());
 	}
 
 	@Test
-	void aggAssociationSetAndGet() throws Exception {
+	void aggAssociationSetAndGet() {
 		UniqueConstraintMultipleNavigable bean = UniqueConstraintMultipleNavigable.newInstance();
 		UniqueConstraintMultipleNavigable assoc = UniqueConstraintMultipleNavigable.newInstance();
 		bean.setAggAssociation(assoc);
@@ -51,7 +51,7 @@ public class UniqueConstraintMultipleNavigableDomainTest extends AbstractH2Test 
 	}
 
 	@Test
-	void settingAggAssociationSetsInverseOnAssoc() throws Exception {
+	void settingAggAssociationSetsInverseOnAssoc() {
 		UniqueConstraintMultipleNavigable bean = UniqueConstraintMultipleNavigable.newInstance();
 		UniqueConstraintMultipleNavigable assoc = UniqueConstraintMultipleNavigable.newInstance();
 		bean.setAggAssociation(assoc);
@@ -59,7 +59,7 @@ public class UniqueConstraintMultipleNavigableDomainTest extends AbstractH2Test 
 	}
 
 	@Test
-	void nullAggAssociationClearsField() throws Exception {
+	void nullAggAssociationClearsField() {
 		UniqueConstraintMultipleNavigable bean = UniqueConstraintMultipleNavigable.newInstance();
 		UniqueConstraintMultipleNavigable assoc = UniqueConstraintMultipleNavigable.newInstance();
 		bean.setAggAssociation(assoc);
@@ -68,13 +68,13 @@ public class UniqueConstraintMultipleNavigableDomainTest extends AbstractH2Test 
 	}
 
 	@Test
-	void invAggAssociationNullByDefault() throws Exception {
+	void invAggAssociationNullByDefault() {
 		UniqueConstraintMultipleNavigable bean = UniqueConstraintMultipleNavigable.newInstance();
 		assertNull(bean.getInvAggAssociation());
 	}
 
 	@Test
-	void nullInvAggAssociationClearsField() throws Exception {
+	void nullInvAggAssociationClearsField() {
 		UniqueConstraintMultipleNavigable bean = UniqueConstraintMultipleNavigable.newInstance();
 		UniqueConstraintMultipleNavigable inv = UniqueConstraintMultipleNavigable.newInstance();
 		bean.setInvAggAssociation(inv);

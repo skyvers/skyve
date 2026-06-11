@@ -540,7 +540,7 @@ public class ContentCheckerTest {
 		return new AttachmentContent("demo", "admin", "Invoice", null, "user", "biz-id", attributeName);
 	}
 
-	private static Document document(Customer customer, String persistentIdentifier, Attribute... attributes) throws Exception {
+	private static Document document(Customer customer, String persistentIdentifier, Attribute... attributes) {
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
 		Persistent persistent = new Persistent();

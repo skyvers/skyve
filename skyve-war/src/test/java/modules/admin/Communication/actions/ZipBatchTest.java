@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import modules.admin.Communication.CommunicationExtension;
 
 @SuppressWarnings("static-method")
-public class ZipBatchTest {
+class ZipBatchTest {
 
 	@Test
 	void prepareSetRefreshBatchesToFalse() throws Exception {

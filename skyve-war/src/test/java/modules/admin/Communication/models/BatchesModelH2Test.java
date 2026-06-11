@@ -3,8 +3,10 @@ package modules.admin.Communication.models;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -35,10 +37,10 @@ class BatchesModelH2Test extends AbstractH2Test {
 
 		assertThat(model.getDescription(), is("All DownloadFolders"));
 		assertThat(model.getDrivingDocument().getName(), is(DownloadFolder.DOCUMENT_NAME));
-		assertThat(model.getColumns().size(), is(1));
+		assertEquals(1, model.getColumns().size());
 		assertThat(model.getColumns().get(0).getBinding(), is(DownloadFolder.namePropertyName));
-		assertThat(model.getProjections().contains(Bean.DOCUMENT_ID), is(true));
-		assertThat(model.getProjections().contains(DownloadFolder.namePropertyName), is(true));
+		assertTrue(model.getProjections().contains(Bean.DOCUMENT_ID));
+		assertTrue(model.getProjections().contains(DownloadFolder.namePropertyName));
 		assertNull(model.getFilter());
 		assertNull(model.newFilter());
 		model.putParameter("ignored", "ignored");
@@ -61,8 +63,8 @@ class BatchesModelH2Test extends AbstractH2Test {
 
 		Page page = model.fetch();
 
-		assertThat(page.getTotalRows(), is(2L));
-		assertThat(page.getRows().size(), is(1));
+		assertEquals(2L, page.getTotalRows());
+		assertEquals(1, page.getRows().size());
 		Bean row = page.getRows().get(0);
 		assertThat(row, instanceOf(DynamicBean.class));
 		DynamicBean dynamicRow = (DynamicBean) row;
@@ -74,7 +76,7 @@ class BatchesModelH2Test extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void unsupportedListModelOperationsThrow() throws Exception {
+	void unsupportedListModelOperationsThrow() {
 		BatchesModel model = new BatchesModel();
 
 		assertThrows(IllegalStateException.class, model::iterate);

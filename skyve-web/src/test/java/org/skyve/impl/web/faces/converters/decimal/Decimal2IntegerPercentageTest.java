@@ -18,34 +18,34 @@ public class Decimal2IntegerPercentageTest {
 	}
 
 	@Test
-	public void testGetAsObjectNullValue() throws Exception {
+	public void testGetAsObjectNullValue() {
 		assertThat(converter.getAsObject(null, null, null), nullValue());
 	}
 
 	@Test
-	public void testGetAsObjectEmptyValue() throws Exception {
+	public void testGetAsObjectEmptyValue() {
 		assertThat(converter.getAsObject(null, null, ""), nullValue());
 	}
 
 	@Test(expected = ConverterException.class)
-	public void testGetAsObjectInvalidValue() throws Exception {
+	public void testGetAsObjectInvalidValue() {
 		converter.getAsObject(null, null, "not a decimal");
 		fail("Should throw exception before this line.");
 	}
 
 	@Test
-	public void testGetAsObjectValidValue() throws Exception {
+	public void testGetAsObjectValidValue() {
 		org.skyve.domain.types.Decimal2 result = converter.getAsObject(null, null, "50%");
 		assertThat(converter.getAsString(null, null, result), is("50%"));
 	}
 
 	@Test
-	public void testGetAsStringNullValue() throws Exception {
+	public void testGetAsStringNullValue() {
 		assertThat(converter.getAsString(null, null, null), is(""));
 	}
 
 	@Test
-	public void testGetAsStringValidValue() throws Exception {
+	public void testGetAsStringValidValue() {
 		org.skyve.domain.types.Decimal2 value = new org.skyve.domain.types.Decimal2("0.5");
 		assertThat(converter.getAsString(null, null, value), is("50%"));
 	}

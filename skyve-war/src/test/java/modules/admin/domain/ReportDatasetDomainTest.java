@@ -10,11 +10,11 @@ import org.skyve.domain.app.admin.ReportDataset.DatasetType;
 import modules.admin.ReportDataset.ReportDatasetExtension;
 import modules.test.AbstractSkyveTest;
 
-public class ReportDatasetDomainTest extends AbstractSkyveTest {
+class ReportDatasetDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void moduleAndDocumentNames() throws Exception {
+	void moduleAndDocumentNames() {
 		ReportDatasetExtension bean = new ReportDatasetExtension();
 		assertEquals("admin", bean.getBizModule());
 		assertEquals("ReportDataset", bean.getBizDocument());
@@ -22,7 +22,7 @@ public class ReportDatasetDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void datasetNameSetAndGet() throws Exception {
+	void datasetNameSetAndGet() {
 		ReportDatasetExtension bean = new ReportDatasetExtension();
 		bean.setDatasetName("mainDataset");
 		assertEquals("mainDataset", bean.getDatasetName());
@@ -30,14 +30,14 @@ public class ReportDatasetDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void datasetTypeDefaultIsBizQL() throws Exception {
+	void datasetTypeDefaultIsBizQL() {
 		ReportDatasetExtension bean = new ReportDatasetExtension();
 		assertEquals(DatasetType.bizQL, bean.getDatasetType());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	void datasetTypeSetToSQL() throws Exception {
+	void datasetTypeSetToSQL() {
 		ReportDatasetExtension bean = new ReportDatasetExtension();
 		bean.setDatasetType(DatasetType.SQL);
 		assertEquals(DatasetType.SQL, bean.getDatasetType());
@@ -46,7 +46,7 @@ public class ReportDatasetDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void datasetTypeSetToConstant() throws Exception {
+	void datasetTypeSetToConstant() {
 		ReportDatasetExtension bean = new ReportDatasetExtension();
 		bean.setDatasetType(DatasetType.constant);
 		assertEquals(DatasetType.constant, bean.getDatasetType());
@@ -55,7 +55,7 @@ public class ReportDatasetDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void datasetTypeSetToClass() throws Exception {
+	void datasetTypeSetToClass() {
 		ReportDatasetExtension bean = new ReportDatasetExtension();
 		bean.setDatasetType(DatasetType.classValue);
 		assertEquals(DatasetType.classValue, bean.getDatasetType());
@@ -64,7 +64,7 @@ public class ReportDatasetDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void querySetAndGet() throws Exception {
+	void querySetAndGet() {
 		ReportDatasetExtension bean = new ReportDatasetExtension();
 		bean.setQuery("select bean from {admin.User} bean");
 		assertEquals("select bean from {admin.User} bean", bean.getQuery());
@@ -72,7 +72,7 @@ public class ReportDatasetDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void resultsSetAndGet() throws Exception {
+	void resultsSetAndGet() {
 		ReportDatasetExtension bean = new ReportDatasetExtension();
 		bean.setResults("[{\"row\":1}]");
 		assertEquals("[{\"row\":1}]", bean.getResults());
@@ -80,14 +80,14 @@ public class ReportDatasetDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void isBizQLTypeWhenDefault() throws Exception {
+	void isBizQLTypeWhenDefault() {
 		ReportDatasetExtension bean = new ReportDatasetExtension();
 		assertTrue(bean.isTypeQuery());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	void isNotConstantTypeWhenDefault() throws Exception {
+	void isNotConstantTypeWhenDefault() {
 		ReportDatasetExtension bean = new ReportDatasetExtension();
 		assertEquals(DatasetType.bizQL, bean.getDatasetType());
 		assertNotNull(bean.getDatasetType());

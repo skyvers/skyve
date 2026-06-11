@@ -10,10 +10,10 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
-public class JobsDomainTest extends AbstractH2Test {
+class JobsDomainTest extends AbstractH2Test {
 
 	@Test
-	void dataBuilderCreatesBean() throws Exception {
+	void dataBuilderCreatesBean() {
 		Jobs bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(Jobs.MODULE_NAME, Jobs.DOCUMENT_NAME);
@@ -21,14 +21,14 @@ public class JobsDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void moduleAndDocumentNames() throws Exception {
+	void moduleAndDocumentNames() {
 		Jobs bean = Jobs.newInstance();
 		assertEquals("admin", bean.getBizModule());
 		assertEquals("Jobs", bean.getBizDocument());
 	}
 
 	@Test
-	void runningJobsListInitialized() throws Exception {
+	void runningJobsListInitialized() {
 		Jobs bean = Jobs.newInstance();
 		assertNotNull(bean.getRunningJobs());
 	}

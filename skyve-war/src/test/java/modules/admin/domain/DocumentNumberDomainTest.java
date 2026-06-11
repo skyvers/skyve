@@ -10,10 +10,10 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
-public class DocumentNumberDomainTest extends AbstractH2Test {
+class DocumentNumberDomainTest extends AbstractH2Test {
 
 	@Test
-	void dataBuilderCreatesBean() throws Exception {
+	void dataBuilderCreatesBean() {
 		DocumentNumber bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(DocumentNumber.MODULE_NAME, DocumentNumber.DOCUMENT_NAME);
@@ -21,41 +21,41 @@ public class DocumentNumberDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void moduleAndDocumentNames() throws Exception {
+	void moduleAndDocumentNames() {
 		DocumentNumber bean = DocumentNumber.newInstance();
 		assertEquals("admin", bean.getBizModule());
 		assertEquals("DocumentNumber", bean.getBizDocument());
 	}
 
 	@Test
-	void moduleNameSetAndGet() throws Exception {
+	void moduleNameSetAndGet() {
 		DocumentNumber bean = DocumentNumber.newInstance();
 		bean.setModuleName("myModule");
 		assertEquals("myModule", bean.getModuleName());
 	}
 
 	@Test
-	void documentNameSetAndGet() throws Exception {
+	void documentNameSetAndGet() {
 		DocumentNumber bean = DocumentNumber.newInstance();
 		bean.setDocumentName("myDocument");
 		assertEquals("myDocument", bean.getDocumentName());
 	}
 
 	@Test
-	void sequenceNameSetAndGet() throws Exception {
+	void sequenceNameSetAndGet() {
 		DocumentNumber bean = DocumentNumber.newInstance();
 		bean.setSequenceName("mySequence");
 		assertEquals("mySequence", bean.getSequenceName());
 	}
 
         @Test
-        void getBizKeyNotNull() throws Exception {
+        void getBizKeyNotNull() {
                 DocumentNumber bean = DocumentNumber.newInstance();
                 assertNotNull(bean.getBizKey());
         }
 
         @Test
-        void documentNumberSetAndGet() throws Exception {
+        void documentNumberSetAndGet() {
                 DocumentNumber bean = DocumentNumber.newInstance();
                 bean.setDocumentNumber("00042");
                 assertEquals("00042", bean.getDocumentNumber());

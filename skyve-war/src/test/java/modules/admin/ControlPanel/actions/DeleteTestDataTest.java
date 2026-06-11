@@ -8,7 +8,7 @@ import org.skyve.domain.messages.ValidationException;
 import modules.admin.ControlPanel.ControlPanelExtension;
 
 @SuppressWarnings("static-method")
-public class DeleteTestDataTest {
+class DeleteTestDataTest {
 
 	@Test
 	void executeWithNullTestTagNameThrowsValidationException() {

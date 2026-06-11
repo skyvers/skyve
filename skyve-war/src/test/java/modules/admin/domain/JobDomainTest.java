@@ -11,10 +11,10 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
-public class JobDomainTest extends AbstractH2Test {
+class JobDomainTest extends AbstractH2Test {
 
 	@Test
-	void dataBuilderCreatesBean() throws Exception {
+	void dataBuilderCreatesBean() {
 		Job bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(Job.MODULE_NAME, Job.DOCUMENT_NAME);
@@ -22,42 +22,42 @@ public class JobDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void moduleAndDocumentNames() throws Exception {
+	void moduleAndDocumentNames() {
 		Job bean = Job.newInstance();
 		assertEquals("admin", bean.getBizModule());
 		assertEquals("Job", bean.getBizDocument());
 	}
 
 	@Test
-	void displayNameSetAndGet() throws Exception {
+	void displayNameSetAndGet() {
 		Job bean = Job.newInstance();
 		bean.setDisplayName("My Background Job");
 		assertEquals("My Background Job", bean.getDisplayName());
 	}
 
 	@Test
-	void percentCompleteSetAndGet() throws Exception {
+	void percentCompleteSetAndGet() {
 		Job bean = Job.newInstance();
 		bean.setPercentComplete(Integer.valueOf(75));
 		assertEquals(Integer.valueOf(75), bean.getPercentComplete());
 	}
 
 	@Test
-	void statusSetAndGet() throws Exception {
+	void statusSetAndGet() {
 		Job bean = Job.newInstance();
 		bean.setStatus("running");
 		assertEquals("running", bean.getStatus());
 	}
 
 	@Test
-	void logSetAndGet() throws Exception {
+	void logSetAndGet() {
 		Job bean = Job.newInstance();
 		bean.setLog("Step 1 complete");
 		assertEquals("Step 1 complete", bean.getLog());
 	}
 
 	@Test
-	void startTimeSetAndGet() throws Exception {
+	void startTimeSetAndGet() {
 		Job bean = Job.newInstance();
 		Timestamp now = new Timestamp();
 		bean.setStartTime(now);
@@ -65,7 +65,7 @@ public class JobDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void beanModuleAndDocumentNamesSetAndGet() throws Exception {
+	void beanModuleAndDocumentNamesSetAndGet() {
 		Job bean = Job.newInstance();
 		bean.setBeanModuleName("admin");
 		bean.setBeanDocumentName("User");

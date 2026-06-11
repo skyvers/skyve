@@ -3,8 +3,10 @@ package modules.admin.DataMaintenance.models;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -50,11 +52,11 @@ class BackupsModelH2Test extends AbstractH2Test {
 
 		assertThat(model.getDescription(), is("All DownloadFolders"));
 		assertThat(model.getDrivingDocument().getName(), is(DownloadFolder.DOCUMENT_NAME));
-		assertThat(model.getColumns().size(), is(2));
+		assertEquals(2, model.getColumns().size());
 		assertThat(model.getColumns().get(0).getBinding(), is(DownloadFolder.namePropertyName));
 		assertThat(model.getColumns().get(1).getBinding(), is(DownloadFolder.sizePropertyName));
-		assertThat(model.getProjections().contains(Bean.DOCUMENT_ID), is(true));
-		assertThat(model.getProjections().contains(DownloadFolder.sizePropertyName), is(true));
+		assertTrue(model.getProjections().contains(Bean.DOCUMENT_ID));
+		assertTrue(model.getProjections().contains(DownloadFolder.sizePropertyName));
 		assertNull(model.getFilter());
 		assertNull(model.newFilter());
 		model.putParameter("ignored", "ignored");
@@ -69,8 +71,8 @@ class BackupsModelH2Test extends AbstractH2Test {
 
 		Page page = BackupsModel.fetchFolders(tempDir.toString(), 0, 0);
 
-		assertThat(page.getTotalRows(), is(2L));
-		assertThat(page.getRows().size(), is(1));
+		assertEquals(2L, page.getTotalRows());
+		assertEquals(1, page.getRows().size());
 		Bean row = page.getRows().get(0);
 		assertThat(row, instanceOf(DynamicBean.class));
 		DynamicBean dynamicRow = (DynamicBean) row;
@@ -84,8 +86,8 @@ class BackupsModelH2Test extends AbstractH2Test {
 	void fetchFoldersReturnsEmptyPageWhenDirectoryHasNoMatchingFolders() {
 		Page page = BackupsModel.fetchFolders(tempDir.toString(), 0, 10);
 
-		assertThat(page.getTotalRows(), is(0L));
-		assertThat(page.getRows().isEmpty(), is(true));
+		assertEquals(0L, page.getTotalRows());
+		assertTrue(page.getRows().isEmpty());
 		assertThat(page.getSummary().getBizModule(), is(DownloadFolder.MODULE_NAME));
 	}
 
@@ -97,8 +99,8 @@ class BackupsModelH2Test extends AbstractH2Test {
 
 		Page page = BackupsModel.fetchBackups(tempDir.toString(), 0, 1);
 
-		assertThat(page.getTotalRows(), is(2L));
-		assertThat(page.getRows().size(), is(2));
+		assertEquals(2L, page.getTotalRows());
+		assertEquals(2, page.getRows().size());
 		DynamicBean first = (DynamicBean) page.getRows().get(0);
 		DynamicBean second = (DynamicBean) page.getRows().get(1);
 		assertThat(first.get(DownloadFolder.namePropertyName), is("alpha.zip"));
@@ -113,14 +115,14 @@ class BackupsModelH2Test extends AbstractH2Test {
 
 		Page page = BackupsModel.fetchBackups(tempDir.toString(), 0, 10);
 
-		assertThat(page.getTotalRows(), is(0L));
-		assertThat(page.getRows().isEmpty(), is(true));
+		assertEquals(0L, page.getTotalRows());
+		assertTrue(page.getRows().isEmpty());
 		assertThat(page.getSummary().getBizDocument(), is(DownloadFolder.DOCUMENT_NAME));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	void unsupportedListModelOperationsThrow() throws Exception {
+	void unsupportedListModelOperationsThrow() {
 		BackupsModel model = new BackupsModel();
 
 		assertThrows(IllegalStateException.class, model::iterate);

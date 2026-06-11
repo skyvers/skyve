@@ -11,10 +11,10 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
-public class AuditListDomainTest extends AbstractH2Test {
+class AuditListDomainTest extends AbstractH2Test {
 
 	@Test
-	void dataBuilderCreatesBean() throws Exception {
+	void dataBuilderCreatesBean() {
 		AuditList bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(AuditList.MODULE_NAME, AuditList.DOCUMENT_NAME);
@@ -22,26 +22,26 @@ public class AuditListDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void moduleAndDocumentNames() throws Exception {
+	void moduleAndDocumentNames() {
 		AuditList bean = AuditList.newInstance();
 		assertEquals("admin", bean.getBizModule());
 		assertEquals("AuditList", bean.getBizDocument());
 	}
 
 	@Test
-	void getBizKeyNotNull() throws Exception {
+	void getBizKeyNotNull() {
 		AuditList bean = AuditList.newInstance();
 		assertNotNull(bean.getBizKey());
 	}
 
 	@Test
-	void isShowNonArchivedReturnsTrue() throws Exception {
+	void isShowNonArchivedReturnsTrue() {
 		AuditList bean = AuditList.newInstance();
 		assertTrue(bean.isShowNonArchived());
 	}
 
 	@Test
-	void isNotShowNonArchivedReturnsFalse() throws Exception {
+	void isNotShowNonArchivedReturnsFalse() {
 		AuditList bean = AuditList.newInstance();
 		assertTrue(!bean.isNotShowNonArchived());
 	}

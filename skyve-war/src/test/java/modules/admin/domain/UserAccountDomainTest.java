@@ -11,10 +11,10 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
-public class UserAccountDomainTest extends AbstractH2Test {
+class UserAccountDomainTest extends AbstractH2Test {
 
 	@Test
-	void dataBuilderCreatesBean() throws Exception {
+	void dataBuilderCreatesBean() {
 		UserAccount bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(UserAccount.MODULE_NAME, UserAccount.DOCUMENT_NAME);
@@ -22,20 +22,20 @@ public class UserAccountDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void moduleAndDocumentNames() throws Exception {
+	void moduleAndDocumentNames() {
 		UserAccount bean = UserAccount.newInstance();
 		assertEquals("admin", bean.getBizModule());
 		assertEquals("UserAccount", bean.getBizDocument());
 	}
 
 	@Test
-	void sessionsListInitialized() throws Exception {
+	void sessionsListInitialized() {
 		UserAccount bean = UserAccount.newInstance();
 		assertNotNull(bean.getSessions());
 	}
 
 	@Test
-	void secondFactorPreferredMethodSetAndGet() throws Exception {
+	void secondFactorPreferredMethodSetAndGet() {
 		UserAccount bean = UserAccount.newInstance();
 		bean.setSecondFactorPreferredMethod(UserAccount.SecondFactorPreferredMethod.email);
 		assertEquals(UserAccount.SecondFactorPreferredMethod.email, bean.getSecondFactorPreferredMethod());

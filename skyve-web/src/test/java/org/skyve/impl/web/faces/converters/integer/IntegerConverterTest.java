@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import jakarta.faces.convert.ConverterException;
 @SuppressWarnings("static-method")
-public class IntegerConverterTest {
+class IntegerConverterTest {
 
 	// ---- IntegerConverter ----
 

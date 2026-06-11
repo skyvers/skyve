@@ -159,7 +159,7 @@ class RecoverArchiveJobTest {
 	}
 
 	@Test
-	void findConfigThrowsWhenArchiveDocConfigIsMissing() throws Exception {
+	void findConfigThrowsWhenArchiveDocConfigIsMissing() {
 		RecoverArchiveJob job = new RecoverArchiveJob();
 		UtilImpl.ARCHIVE_CONFIG = ArchiveConfig.DISABLED;
 		CorruptArchiveError error = mock(CorruptArchiveError.class);
@@ -173,7 +173,7 @@ class RecoverArchiveJobTest {
 	}
 
 	@Test
-	void attemptRecoveryRejectsMissingConfiguredArchiveFileBeforeLocking() throws Exception {
+	void attemptRecoveryRejectsMissingConfiguredArchiveFileBeforeLocking() {
 		RecoverArchiveJob job = new RecoverArchiveJob();
 		UtilImpl.CONTENT_DIRECTORY = tempDir.toString();
 		ArchiveDocConfig docConfig = new ArchiveDocConfig("admin", "Audit", "audit", 30);

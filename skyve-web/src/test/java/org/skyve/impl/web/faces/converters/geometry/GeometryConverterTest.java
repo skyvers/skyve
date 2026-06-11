@@ -19,34 +19,34 @@ public class GeometryConverterTest {
 	}
 
 	@Test
-	public void testGetAsObjectNullValue() throws Exception {
+	public void testGetAsObjectNullValue() {
 		assertThat(converter.getAsObject(null, null, null), nullValue());
 	}
 
 	@Test
-	public void testGetAsObjectEmptyValue() throws Exception {
+	public void testGetAsObjectEmptyValue() {
 		assertThat(converter.getAsObject(null, null, ""), nullValue());
 	}
 
 	@Test(expected = ConverterException.class)
-	public void testGetAsObjectInvalidValue() throws Exception {
+	public void testGetAsObjectInvalidValue() {
 		converter.getAsObject(null, null, "not a geometry");
 		fail("Should throw exception before this line.");
 	}
 
 	@Test
-	public void testGetAsObjectValidWkt() throws Exception {
+	public void testGetAsObjectValidWkt() {
 		Geometry result = converter.getAsObject(null, null, "POINT (1 2)");
 		assertThat(result.getGeometryType(), is("Point"));
 	}
 
 	@Test
-	public void testGetAsStringNullValue() throws Exception {
+	public void testGetAsStringNullValue() {
 		assertThat(converter.getAsString(null, null, null), is(""));
 	}
 
 	@Test
-	public void testGetAsStringValidValue() throws Exception {
+	public void testGetAsStringValidValue() {
 		Geometry geometry = converter.getAsObject(null, null, "POINT (1 2)");
 		String result = converter.getAsString(null, null, geometry);
 		assertThat(result, is("POINT (1 2)"));

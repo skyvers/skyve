@@ -15,10 +15,10 @@ import modules.admin.domain.MonitoringDashboard.RequestType;
 import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
-public class MonitoringDashboardDomainTest extends AbstractH2Test {
+class MonitoringDashboardDomainTest extends AbstractH2Test {
 
 	@Test
-	void dataBuilderCreatesBean() throws Exception {
+	void dataBuilderCreatesBean() {
 		MonitoringDashboard bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(MonitoringDashboard.MODULE_NAME, MonitoringDashboard.DOCUMENT_NAME);
@@ -26,141 +26,141 @@ public class MonitoringDashboardDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void moduleAndDocumentNames() throws Exception {
+	void moduleAndDocumentNames() {
 		MonitoringDashboard bean = MonitoringDashboard.newInstance();
 		assertEquals("admin", bean.getBizModule());
 		assertEquals("MonitoringDashboard", bean.getBizDocument());
 	}
 
 	@Test
-	void topNSetAndGet() throws Exception {
+	void topNSetAndGet() {
 		MonitoringDashboard bean = MonitoringDashboard.newInstance();
 		bean.setTopN(Integer.valueOf(10));
 		assertEquals(Integer.valueOf(10), bean.getTopN());
 	}
 
 	@Test
-	void requestTypeSetAndGet() throws Exception {
+	void requestTypeSetAndGet() {
 		MonitoringDashboard bean = MonitoringDashboard.newInstance();
 		bean.setRequestType(RequestType.all);
 		assertEquals(RequestType.all, bean.getRequestType());
 	}
 
 	@Test
-	void metricSetAndGet() throws Exception {
+	void metricSetAndGet() {
 		MonitoringDashboard bean = MonitoringDashboard.newInstance();
 		bean.setMetric(Metric.elapsedRequestTime);
 		assertEquals(Metric.elapsedRequestTime, bean.getMetric());
 	}
 
 	@Test
-	void periodSetAndGet() throws Exception {
+	void periodSetAndGet() {
 		MonitoringDashboard bean = MonitoringDashboard.newInstance();
 		bean.setPeriod(Period.currentHour);
 		assertEquals(Period.currentHour, bean.getPeriod());
 	}
 
 	@Test
-	void requestTypeEnumFromCode() throws Exception {
+	void requestTypeEnumFromCode() {
 		assertEquals(RequestType.all, RequestType.fromCode("all"));
 		assertNull(RequestType.fromCode("nonexistent"));
 	}
 
 	@Test
-	void requestTypeEnumToCode() throws Exception {
+	void requestTypeEnumToCode() {
 		assertNotNull(RequestType.all.toCode());
 	}
 
 	@Test
-	void requestTypeEnumToLocalisedDescription() throws Exception {
+	void requestTypeEnumToLocalisedDescription() {
 		assertNotNull(RequestType.all.toLocalisedDescription());
 	}
 
 	@Test
-	void requestTypeEnumToDomainValue() throws Exception {
+	void requestTypeEnumToDomainValue() {
 		assertNotNull(RequestType.all.toDomainValue());
 	}
 
 	@Test
-	void requestTypeEnumToDomainValues() throws Exception {
+	void requestTypeEnumToDomainValues() {
 		assertNotNull(RequestType.toDomainValues());
 		assertFalse(RequestType.toDomainValues().isEmpty());
 	}
 
 	@Test
-	void requestTypeEnumFromLocalisedDescription() throws Exception {
+	void requestTypeEnumFromLocalisedDescription() {
 		String desc = RequestType.all.toLocalisedDescription();
 		assertEquals(RequestType.all, RequestType.fromLocalisedDescription(desc));
 	}
 
 	@Test
-	void requestTypeEnumFromLocalisedDescriptionUnknownReturnsNull() throws Exception {
+	void requestTypeEnumFromLocalisedDescriptionUnknownReturnsNull() {
 		assertNull(RequestType.fromLocalisedDescription("nonexistent xyz description"));
 	}
 
 	@Test
-	void metricEnumFromCode() throws Exception {
+	void metricEnumFromCode() {
 		assertEquals(Metric.elapsedRequestTime, Metric.fromCode("t"));
 		assertNull(Metric.fromCode("nonexistent"));
 	}
 
 	@Test
-	void metricEnumToLocalisedDescription() throws Exception {
+	void metricEnumToLocalisedDescription() {
 		assertNotNull(Metric.elapsedRequestTime.toLocalisedDescription());
 	}
 
 	@Test
-	void metricEnumToDomainValue() throws Exception {
+	void metricEnumToDomainValue() {
 		assertNotNull(Metric.elapsedRequestTime.toDomainValue());
 	}
 
 	@Test
-	void metricEnumToDomainValues() throws Exception {
+	void metricEnumToDomainValues() {
 		assertNotNull(Metric.toDomainValues());
 		assertFalse(Metric.toDomainValues().isEmpty());
 	}
 
 	@Test
-	void metricEnumFromLocalisedDescription() throws Exception {
+	void metricEnumFromLocalisedDescription() {
 		String desc = Metric.elapsedRequestTime.toLocalisedDescription();
 		assertEquals(Metric.elapsedRequestTime, Metric.fromLocalisedDescription(desc));
 	}
 
 	@Test
-	void metricEnumFromLocalisedDescriptionUnknownReturnsNull() throws Exception {
+	void metricEnumFromLocalisedDescriptionUnknownReturnsNull() {
 		assertNull(Metric.fromLocalisedDescription("nonexistent xyz description"));
 	}
 
 	@Test
-	void periodEnumFromCode() throws Exception {
+	void periodEnumFromCode() {
 		assertEquals(Period.currentHour, Period.fromCode("h"));
 		assertNull(Period.fromCode("nonexistent"));
 	}
 
 	@Test
-	void periodEnumToLocalisedDescription() throws Exception {
+	void periodEnumToLocalisedDescription() {
 		assertNotNull(Period.currentHour.toLocalisedDescription());
 	}
 
 	@Test
-	void periodEnumToDomainValue() throws Exception {
+	void periodEnumToDomainValue() {
 		assertNotNull(Period.currentHour.toDomainValue());
 	}
 
 	@Test
-	void periodEnumToDomainValues() throws Exception {
+	void periodEnumToDomainValues() {
 		assertNotNull(Period.toDomainValues());
 		assertFalse(Period.toDomainValues().isEmpty());
 	}
 
 	@Test
-	void periodEnumFromLocalisedDescription() throws Exception {
+	void periodEnumFromLocalisedDescription() {
 		String desc = Period.currentHour.toLocalisedDescription();
 		assertEquals(Period.currentHour, Period.fromLocalisedDescription(desc));
 	}
 
 	@Test
-	void periodEnumFromLocalisedDescriptionUnknownReturnsNull() throws Exception {
+	void periodEnumFromLocalisedDescriptionUnknownReturnsNull() {
 		assertNull(Period.fromLocalisedDescription("nonexistent xyz description"));
 	}
 }

@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
  * Tests for all concrete AbstractRequestPeriodBarChartModel implementations.
  */
 @SuppressWarnings("static-method")
-public class RequestPeriodBarModelsTest {
+class RequestPeriodBarModelsTest {
 
 	@Test
 	void cpuPeriodBarChartLabelReturnsAvgCpu() {

@@ -114,12 +114,12 @@ public class Decimal10Test {
 	}
 
 	@Test
-	public void testGetAsObjectNullValue() throws Exception {
+	public void testGetAsObjectNullValue() {
 		assertNull(converter.getAsObject(null, null, null));
 	}
 
 	@Test
-	public void testGetAsStringNullValue() throws Exception {
+	public void testGetAsStringNullValue() {
 		assertThat(converter.getAsString(null, null, null), is(""));
 	}
 }

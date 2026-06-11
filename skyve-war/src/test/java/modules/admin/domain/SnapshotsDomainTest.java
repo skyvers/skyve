@@ -10,10 +10,10 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
-public class SnapshotsDomainTest extends AbstractH2Test {
+class SnapshotsDomainTest extends AbstractH2Test {
 
 	@Test
-	void dataBuilderCreatesBean() throws Exception {
+	void dataBuilderCreatesBean() {
 		Snapshots bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(Snapshots.MODULE_NAME, Snapshots.DOCUMENT_NAME);
@@ -21,28 +21,28 @@ public class SnapshotsDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void moduleAndDocumentNames() throws Exception {
+	void moduleAndDocumentNames() {
 		Snapshots bean = Snapshots.newInstance();
 		assertEquals("admin", bean.getBizModule());
 		assertEquals("Snapshots", bean.getBizDocument());
 	}
 
 	@Test
-	void moduleNameSetAndGet() throws Exception {
+	void moduleNameSetAndGet() {
 		Snapshots bean = Snapshots.newInstance();
 		bean.setModuleName("admin");
 		assertEquals("admin", bean.getModuleName());
 	}
 
 	@Test
-	void queryNameSetAndGet() throws Exception {
+	void queryNameSetAndGet() {
 		Snapshots bean = Snapshots.newInstance();
 		bean.setQueryName("qUsers");
 		assertEquals("qUsers", bean.getQueryName());
 	}
 
 	@Test
-	void snapshotsToReorderListInitialized() throws Exception {
+	void snapshotsToReorderListInitialized() {
 		Snapshots bean = Snapshots.newInstance();
 		assertNotNull(bean.getSnapshotsToReorder());
 	}

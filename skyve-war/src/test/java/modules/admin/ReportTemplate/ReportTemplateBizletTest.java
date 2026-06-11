@@ -73,7 +73,7 @@ class ReportTemplateBizletTest extends AbstractSkyveTest {
 		// When not scheduled, no scheduling errors should be added
 		boolean hasScheduleError = ve.getMessages()
 				.stream()
-				.anyMatch(msg -> msg.getText() != null && msg.getText().contains("scheduled"));
+				.anyMatch(msg -> msg.getText().contains("scheduled"));
 		assertFalse(hasScheduleError, "No schedule-related errors expected when not scheduled");
 	}
 
@@ -90,7 +90,7 @@ class ReportTemplateBizletTest extends AbstractSkyveTest {
 		bizlet.validate(bean, ve);
 		boolean hasRequiredError = ve.getMessages()
 				.stream()
-				.anyMatch(msg -> msg.getText() != null && msg.getText().contains("required parameters"));
+				.anyMatch(msg -> msg.getText().contains("required parameters"));
 		assertTrue(hasRequiredError, "Should have error about required parameters");
 	}
 
@@ -350,7 +350,7 @@ class ReportTemplateBizletTest extends AbstractSkyveTest {
 	}
 
 	@Test
-	void preSaveWhenScheduledWithoutRunAsThrowsValidationException() throws Exception {
+	void preSaveWhenScheduledWithoutRunAsThrowsValidationException() {
 		ReportTemplateExtension bean = ReportTemplate.newInstance();
 		bean.setScheduled(Boolean.TRUE);
 

@@ -13,7 +13,7 @@ import util.AbstractH2Test;
 class MappedBaseDomainTest extends AbstractH2Test {
 
         @Test
-        void bizModuleAndDocument() throws Exception {
+        void bizModuleAndDocument() {
                 MappedBase bean = MappedBase.newInstance();
                 assertEquals("test", bean.getBizModule());
                 assertEquals("MappedBase", bean.getBizDocument());

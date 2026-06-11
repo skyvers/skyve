@@ -9,7 +9,7 @@ import modules.test.MappedBase.MappedBaseBizlet;
 import modules.test.domain.MappedBase;
 
 @SuppressWarnings("static-method")
-public class MappedExtensionSingleStrategyBizletTest {
+class MappedExtensionSingleStrategyBizletTest {
 
 	private static final MappedExtensionSingleStrategyBizlet bizlet = new MappedExtensionSingleStrategyBizlet();
 	private static final MappedBaseBizlet baseBizlet = new MappedBaseBizlet();

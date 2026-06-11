@@ -10,10 +10,10 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
-public class UserRoleDomainTest extends AbstractH2Test {
+class UserRoleDomainTest extends AbstractH2Test {
 
 	@Test
-	void dataBuilderCreatesBean() throws Exception {
+	void dataBuilderCreatesBean() {
 		UserRole bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(UserRole.MODULE_NAME, UserRole.DOCUMENT_NAME);
@@ -21,28 +21,28 @@ public class UserRoleDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void moduleAndDocumentNames() throws Exception {
+	void moduleAndDocumentNames() {
 		UserRole bean = UserRole.newInstance();
 		assertEquals("admin", bean.getBizModule());
 		assertEquals("UserRole", bean.getBizDocument());
 	}
 
 	@Test
-	void roleNameSetAndGet() throws Exception {
+	void roleNameSetAndGet() {
 		UserRole bean = UserRole.newInstance();
 		bean.setRoleName("admin.BasicUser");
 		assertEquals("admin.BasicUser", bean.getRoleName());
 	}
 
 	@Test
-	void bizOrdinalSetAndGet() throws Exception {
+	void bizOrdinalSetAndGet() {
 		UserRole bean = UserRole.newInstance();
 		bean.setBizOrdinal(Integer.valueOf(2));
 		assertEquals(Integer.valueOf(2), bean.getBizOrdinal());
 	}
 
         @Test
-        void getBizKeyNotNull() throws Exception {
+        void getBizKeyNotNull() {
                 UserRole bean = UserRole.newInstance();
                 assertNotNull(bean.getBizKey());
         }

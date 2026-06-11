@@ -11,7 +11,7 @@ import org.skyve.metadata.view.model.map.MapResult;
 import org.skyve.util.IPGeolocation;
 
 @SuppressWarnings("static-method")
-public class GeoIPMapTest {
+class GeoIPMapTest {
 
 	@Test
 	void mapModelWithEmptyGeoIPReturnsEmptyList() {

@@ -12,7 +12,7 @@ import org.skyve.domain.types.Decimal10;
 
 import jakarta.faces.convert.ConverterException;
 @SuppressWarnings({"static-method", "java:S5778"})
-public class DecimalConverterTest {
+class DecimalConverterTest {
 
 	// ---- Decimal2Converter ----
 

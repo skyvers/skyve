@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
  * Tests for all concrete AbstractQueryChartModel implementations.
  */
 @SuppressWarnings("static-method")
-public class QueryModelsTest {
+class QueryModelsTest {
 
 	@Test
 	void queryCpuChartLabelReturnsCpuUtilisation() {

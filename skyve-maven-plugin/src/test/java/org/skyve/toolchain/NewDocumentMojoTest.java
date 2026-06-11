@@ -206,7 +206,7 @@ class NewDocumentMojoTest {
 	}
 
 	@Test
-	void executeThrowsWhenModuleDirectoryDoesNotExist() throws Exception {
+	void executeThrowsWhenModuleDirectoryDoesNotExist() {
 		// Change config to request a module that doesn't exist
 		org.skyve.toolchain.config.NewDocumentConfig config = new org.skyve.toolchain.config.NewDocumentConfig();
 		config.setDefaultModule("nonExistentModule");

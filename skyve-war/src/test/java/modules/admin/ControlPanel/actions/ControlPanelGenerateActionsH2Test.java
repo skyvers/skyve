@@ -20,7 +20,7 @@ import util.AbstractH2Test;
  * H2-backed tests for ControlPanel GenerateTestData, DeleteTestData actions,
  * and GenerateSAIL validation.
  */
-public class ControlPanelGenerateActionsH2Test extends AbstractH2Test {
+class ControlPanelGenerateActionsH2Test extends AbstractH2Test {
 
 	@Inject
 	private GenerateMenuSAIL generateMenuSAIL;

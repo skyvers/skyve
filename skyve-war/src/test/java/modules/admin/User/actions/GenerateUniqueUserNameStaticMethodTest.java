@@ -8,7 +8,7 @@ import org.skyve.domain.messages.ValidationException;
 import modules.admin.User.UserExtension;
 
 @SuppressWarnings("static-method")
-public class GenerateUniqueUserNameStaticMethodTest {
+class GenerateUniqueUserNameStaticMethodTest {
 
 	@Test
 	void generateUniqueUserNameWithNullContactThrowsValidationException() {

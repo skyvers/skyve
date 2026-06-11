@@ -18,34 +18,34 @@ public class Decimal2DollarsAndCentsTest {
 	}
 
 	@Test
-	public void testGetAsObjectNullValue() throws Exception {
+	public void testGetAsObjectNullValue() {
 		assertThat(converter.getAsObject(null, null, null), nullValue());
 	}
 
 	@Test
-	public void testGetAsObjectEmptyValue() throws Exception {
+	public void testGetAsObjectEmptyValue() {
 		assertThat(converter.getAsObject(null, null, ""), nullValue());
 	}
 
 	@Test(expected = ConverterException.class)
-	public void testGetAsObjectInvalidValue() throws Exception {
+	public void testGetAsObjectInvalidValue() {
 		converter.getAsObject(null, null, "not a decimal");
 		fail("Should throw exception before this line.");
 	}
 
 	@Test
-	public void testGetAsObjectValidValue() throws Exception {
+	public void testGetAsObjectValidValue() {
 		org.skyve.domain.types.Decimal2 expected = new org.skyve.domain.types.Decimal2("3.14");
 		assertThat(converter.getAsObject(null, null, "3.14"), is(expected));
 	}
 
 	@Test
-	public void testGetAsStringNullValue() throws Exception {
+	public void testGetAsStringNullValue() {
 		assertThat(converter.getAsString(null, null, null), is(""));
 	}
 
 	@Test
-	public void testGetAsStringValidValue() throws Exception {
+	public void testGetAsStringValidValue() {
 		org.skyve.domain.types.Decimal2 value = org.skyve.domain.types.Decimal2.ONE_HUNDRED;
 		assertThat(converter.getAsString(null, null, value), is("100.00"));
 	}

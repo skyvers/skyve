@@ -18,35 +18,35 @@ public class Decimal5TimeDurationTest {
 	}
 
 	@Test
-	public void testGetAsObjectNullValue() throws Exception {
+	public void testGetAsObjectNullValue() {
 		assertThat(converter.getAsObject(null, null, null), nullValue());
 	}
 
 	@Test
-	public void testGetAsObjectEmptyValue() throws Exception {
+	public void testGetAsObjectEmptyValue() {
 		assertThat(converter.getAsObject(null, null, ""), nullValue());
 	}
 
 	@Test(expected = ConverterException.class)
-	public void testGetAsObjectInvalidValue() throws Exception {
+	public void testGetAsObjectInvalidValue() {
 		converter.getAsObject(null, null, "not a duration");
 		fail("Should throw exception before this line.");
 	}
 
 	@Test
-	public void testGetAsObjectValidValue() throws Exception {
+	public void testGetAsObjectValidValue() {
 		// "1:30" represents 1 hour 30 minutes = 1.5
 		org.skyve.domain.types.Decimal5 expected = new org.skyve.domain.types.Decimal5("1.5");
 		assertThat(converter.getAsObject(null, null, "1:30"), is(expected));
 	}
 
 	@Test
-	public void testGetAsStringNullValue() throws Exception {
+	public void testGetAsStringNullValue() {
 		assertThat(converter.getAsString(null, null, null), is(""));
 	}
 
 	@Test
-	public void testGetAsStringValidValue() throws Exception {
+	public void testGetAsStringValidValue() {
 		org.skyve.domain.types.Decimal5 value = new org.skyve.domain.types.Decimal5("1.5");
 		assertThat(converter.getAsString(null, null, value), is("1:30"));
 	}

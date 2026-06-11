@@ -10,7 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("static-method")
-public class MyStatusDomainTest {
+class MyStatusDomainTest {
 
 	private MyStatus bean;
 

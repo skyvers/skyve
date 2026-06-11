@@ -15,10 +15,10 @@ import util.AbstractH2Test;
  * Tests for ReportTemplateExtension methods that require H2 context.
  */
 @SuppressWarnings("static-method")
-public class ReportTemplateExtensionH2Test extends AbstractH2Test {
+class ReportTemplateExtensionH2Test extends AbstractH2Test {
 
 	@Test
-	void generateInitialFreemarkerTemplatePopulatesTemplate() throws Exception {
+	void generateInitialFreemarkerTemplatePopulatesTemplate() {
 		ReportTemplateExtension bean = ReportTemplate.newInstance();
 		bean.setGenerateModuleName("admin");
 		bean.setGenerateDocumentName("User");
@@ -29,7 +29,7 @@ public class ReportTemplateExtensionH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	void generateInitialDatasetAddsTwoDatasets() throws Exception {
+	void generateInitialDatasetAddsTwoDatasets() {
 		ReportTemplateExtension bean = ReportTemplate.newInstance();
 		bean.setGenerateModuleName("admin");
 		bean.setGenerateDocumentName("User");

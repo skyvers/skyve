@@ -13,7 +13,7 @@ import util.AbstractH2Test;
 class InverseManyToManyPersistentDomainTest extends AbstractH2Test {
 
         @Test
-        void bizModuleAndDocument() throws Exception {
+        void bizModuleAndDocument() {
                 InverseManyToManyPersistent bean = InverseManyToManyPersistent.newInstance();
                 assertEquals("test", bean.getBizModule());
                 assertEquals("InverseManyToManyPersistent", bean.getBizDocument());

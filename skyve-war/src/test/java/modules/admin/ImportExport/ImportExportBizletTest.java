@@ -13,13 +13,13 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import modules.admin.domain.ImportExport;
 import util.AbstractH2Test;
 
-public class ImportExportBizletTest extends AbstractH2Test {
+class ImportExportBizletTest extends AbstractH2Test {
 
 	private ImportExportBizlet bizlet;
 	private ImportExportExtension bean;
 
 	@BeforeEach
-	void initBizlet() throws Exception {
+	void initBizlet() {
 		bizlet = new ImportExportBizlet();
 		bean = ImportExport.newInstance();
 	}

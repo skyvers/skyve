@@ -68,12 +68,12 @@ public class MMM_DD_YYYY_HH24_MI_SSTest {
 	}
 
 	@Test
-	public void testGetAsObjectNullValue() throws Exception {
+	public void testGetAsObjectNullValue() {
 		assertNull(formatter.getAsObject(null, null, null));
 	}
 
 	@Test
-	public void testGetAsStringNullValue() throws Exception {
+	public void testGetAsStringNullValue() {
 		assertThat(formatter.getAsString(null, null, null), is(""));
 	}
 }

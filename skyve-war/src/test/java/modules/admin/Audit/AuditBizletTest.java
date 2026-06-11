@@ -8,10 +8,10 @@ import org.skyve.metadata.controller.ImplicitActionName;
 
 import modules.admin.domain.Audit;
 @SuppressWarnings("static-method")
-public class AuditBizletTest {
+class AuditBizletTest {
 
 	@Test
-	void preExecuteNewReturnsBean() throws Exception {
+	void preExecuteNewReturnsBean() {
 		AuditBizlet bizlet = new AuditBizlet();
 		Audit bean = new Audit();
 		Audit result = bizlet.preExecute(ImplicitActionName.New, bean, null, null);

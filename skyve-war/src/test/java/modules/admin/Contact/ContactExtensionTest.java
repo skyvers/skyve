@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import modules.admin.domain.Contact.ContactType;
 
 @SuppressWarnings("static-method")
-public class ContactExtensionTest {
+class ContactExtensionTest {
 
 	@Test
 	void bizKeyWithNullNameReturnsUnnamedContact() {

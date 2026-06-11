@@ -13,7 +13,7 @@ import util.AbstractH2Test;
 class UniqueConstraintNonNullableDomainTest extends AbstractH2Test {
 
         @Test
-        void bizModuleAndDocument() throws Exception {
+        void bizModuleAndDocument() {
                 UniqueConstraintNonNullable bean = UniqueConstraintNonNullable.newInstance();
                 assertEquals("test", bean.getBizModule());
                 assertEquals("UniqueConstraintNonNullable", bean.getBizDocument());

@@ -10,7 +10,7 @@ import org.skyve.domain.types.TimeOnly;
 
 import jakarta.faces.convert.ConverterException;
 @SuppressWarnings({"static-method", "java:S5778"})
-public class TimeConverterTest {
+class TimeConverterTest {
 
 	// ---- HH_MI ----
 

@@ -12,10 +12,10 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
-public class CorruptArchiveErrorDomainTest extends AbstractH2Test {
+class CorruptArchiveErrorDomainTest extends AbstractH2Test {
 
 	@Test
-	void dataBuilderCreatesBean() throws Exception {
+	void dataBuilderCreatesBean() {
 		CorruptArchiveError bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(CorruptArchiveError.MODULE_NAME, CorruptArchiveError.DOCUMENT_NAME);
@@ -23,35 +23,35 @@ public class CorruptArchiveErrorDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void moduleAndDocumentNames() throws Exception {
+	void moduleAndDocumentNames() {
 		CorruptArchiveError bean = CorruptArchiveError.newInstance();
 		assertEquals("admin", bean.getBizModule());
 		assertEquals("CorruptArchiveError", bean.getBizDocument());
 	}
 
 	@Test
-	void filenameSetAndGet() throws Exception {
+	void filenameSetAndGet() {
 		CorruptArchiveError bean = CorruptArchiveError.newInstance();
 		bean.setFilename("archive.zip");
 		assertEquals("archive.zip", bean.getFilename());
 	}
 
 	@Test
-	void archiveTypeModuleSetAndGet() throws Exception {
+	void archiveTypeModuleSetAndGet() {
 		CorruptArchiveError bean = CorruptArchiveError.newInstance();
 		bean.setArchiveTypeModule("admin");
 		assertEquals("admin", bean.getArchiveTypeModule());
 	}
 
 	@Test
-	void archiveTypeDocumentSetAndGet() throws Exception {
+	void archiveTypeDocumentSetAndGet() {
 		CorruptArchiveError bean = CorruptArchiveError.newInstance();
 		bean.setArchiveTypeDocument("User");
 		assertEquals("User", bean.getArchiveTypeDocument());
 	}
 
 	@Test
-	void timestampSetAndGet() throws Exception {
+	void timestampSetAndGet() {
 		CorruptArchiveError bean = CorruptArchiveError.newInstance();
 		Timestamp ts = new Timestamp(System.currentTimeMillis());
 		bean.setTimestamp(ts);
@@ -59,14 +59,14 @@ public class CorruptArchiveErrorDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void resolutionSetAndGet() throws Exception {
+	void resolutionSetAndGet() {
 		CorruptArchiveError bean = CorruptArchiveError.newInstance();
 		bean.setResolution(Resolution.unresolved);
 		assertEquals(Resolution.unresolved, bean.getResolution());
 	}
 
 	@Test
-	void getBizKeyWithNoFieldsNotNull() throws Exception {
+	void getBizKeyWithNoFieldsNotNull() {
 		CorruptArchiveError bean = CorruptArchiveError.newInstance();
 		assertNotNull(bean.getBizKey());
 	}

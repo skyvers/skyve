@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import modules.admin.Tag.TagExtension;
 
 @SuppressWarnings("static-method")
-public class PrepareExplanationTest {
+class PrepareExplanationTest {
 
 	@Test
 	void executeWithNullOperandTagSetsCombinationExplanationToEmpty() throws Exception {

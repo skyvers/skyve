@@ -11,11 +11,11 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 import modules.admin.domain.ReportManager.ImportActionType;
 import modules.test.AbstractSkyveTest;
 
-public class ReportManagerDomainTest extends AbstractSkyveTest {
+class ReportManagerDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void dataBuilderCreatesReportManager() throws Exception {
+	void dataBuilderCreatesReportManager() {
 		ReportManager bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(ReportManager.MODULE_NAME, ReportManager.DOCUMENT_NAME);
@@ -24,14 +24,14 @@ public class ReportManagerDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void newInstanceCreatesReportManager() throws Exception {
+	void newInstanceCreatesReportManager() {
 		ReportManager bean = ReportManager.newInstance();
 		assertNotNull(bean);
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	void moduleAndDocumentNames() throws Exception {
+	void moduleAndDocumentNames() {
 		ReportManager bean = ReportManager.newInstance();
 		assertEquals("admin", bean.getBizModule());
 		assertEquals("ReportManager", bean.getBizDocument());
@@ -39,7 +39,7 @@ public class ReportManagerDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void pathToZipSetAndGet() throws Exception {
+	void pathToZipSetAndGet() {
 		ReportManager bean = ReportManager.newInstance();
 		bean.setPathToZip("/tmp/reports.zip");
 		assertEquals("/tmp/reports.zip", bean.getPathToZip());
@@ -47,7 +47,7 @@ public class ReportManagerDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void importActionTypeValidate() throws Exception {
+	void importActionTypeValidate() {
 		ReportManager bean = ReportManager.newInstance();
 		bean.setImportActionType(ImportActionType.validateOnlyReportConfigurationsAndTemplates);
 		assertEquals(ImportActionType.validateOnlyReportConfigurationsAndTemplates, bean.getImportActionType());
@@ -55,7 +55,7 @@ public class ReportManagerDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void importActionTypeImport() throws Exception {
+	void importActionTypeImport() {
 		ReportManager bean = ReportManager.newInstance();
 		bean.setImportActionType(ImportActionType.validateThenImportReportConfigurationsAndTemplates);
 		assertEquals(ImportActionType.validateThenImportReportConfigurationsAndTemplates, bean.getImportActionType());
@@ -63,7 +63,7 @@ public class ReportManagerDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void currentReportsListIsNotNull() throws Exception {
+	void currentReportsListIsNotNull() {
 		ReportManager bean = ReportManager.newInstance();
 		assertNotNull(bean.getCurrentReports());
 	}

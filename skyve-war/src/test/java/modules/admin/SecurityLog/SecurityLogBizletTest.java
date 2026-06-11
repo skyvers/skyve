@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.skyve.metadata.controller.ImplicitActionName;
 
 @SuppressWarnings("static-method")
-public class SecurityLogBizletTest {
+class SecurityLogBizletTest {
 
 	private static final SecurityLogBizlet bizlet = new SecurityLogBizlet();
 

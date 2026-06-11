@@ -163,7 +163,7 @@ class UploadViewsStateTest {
 	}
 
 	@Test
-	void bizportImportHandleFileUploadShowsMalformedUrlMessageWhenContextMissing() throws Exception {
+	void bizportImportHandleFileUploadShowsMalformedUrlMessageWhenContextMissing() {
 		FacesContext context = Mockito.mock(FacesContext.class);
 		FacesContextBridge.setCurrent(context);
 		BizportImportView view = new BizportImportView();

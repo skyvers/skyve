@@ -11,10 +11,10 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
-public class GroupRoleDomainTest extends AbstractH2Test {
+class GroupRoleDomainTest extends AbstractH2Test {
 
 	@Test
-	void dataBuilderCreatesBean() throws Exception {
+	void dataBuilderCreatesBean() {
 		GroupRole bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(GroupRole.MODULE_NAME, GroupRole.DOCUMENT_NAME);
@@ -22,28 +22,28 @@ public class GroupRoleDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void moduleAndDocumentNames() throws Exception {
+	void moduleAndDocumentNames() {
 		GroupRole bean = GroupRole.newInstance();
 		assertEquals("admin", bean.getBizModule());
 		assertEquals("GroupRole", bean.getBizDocument());
 	}
 
 	@Test
-	void roleNameSetAndGet() throws Exception {
+	void roleNameSetAndGet() {
 		GroupRole bean = GroupRole.newInstance();
 		bean.setRoleName("admin.BasicUser");
 		assertEquals("admin.BasicUser", bean.getRoleName());
 	}
 
 	@Test
-	void bizOrdinalSetAndGet() throws Exception {
+	void bizOrdinalSetAndGet() {
 		GroupRole bean = GroupRole.newInstance();
 		bean.setBizOrdinal(Integer.valueOf(5));
 		assertEquals(Integer.valueOf(5), bean.getBizOrdinal());
 	}
 
         @Test
-        void getBizKeyNotNull() throws Exception {
+        void getBizKeyNotNull() {
                 GroupRole bean = GroupRole.newInstance();
                 assertNotNull(bean.getBizKey());
         }

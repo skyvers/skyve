@@ -18,7 +18,7 @@ import util.AbstractH2Test;
 class MailLogDomainTest extends AbstractH2Test {
 
 	@Test
-	void dataBuilderPopulatesMailLogBean() throws Exception {
+	void dataBuilderPopulatesMailLogBean() {
 		MailLog bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(MailLog.MODULE_NAME, MailLog.DOCUMENT_NAME);

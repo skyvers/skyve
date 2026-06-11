@@ -16,7 +16,7 @@ import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import modules.admin.domain.Audit;
 
 @SuppressWarnings("static-method")
-public class ArchivedAuditListModelTest {
+class ArchivedAuditListModelTest {
 
 	@Test
 	void getDescriptionReturnsNonEmptyString() {

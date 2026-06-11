@@ -9,11 +9,11 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.test.AbstractSkyveTest;
 
-public class UserDashboardDomainTest extends AbstractSkyveTest {
+class UserDashboardDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void dataBuilderCreatesUserDashboard() throws Exception {
+	void dataBuilderCreatesUserDashboard() {
 		UserDashboard bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(UserDashboard.MODULE_NAME, UserDashboard.DOCUMENT_NAME);
@@ -22,14 +22,14 @@ public class UserDashboardDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void newInstanceCreatesUserDashboard() throws Exception {
+	void newInstanceCreatesUserDashboard() {
 		UserDashboard bean = UserDashboard.newInstance();
 		assertNotNull(bean);
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	void moduleAndDocumentNames() throws Exception {
+	void moduleAndDocumentNames() {
 		UserDashboard bean = UserDashboard.newInstance();
 		assertEquals("admin", bean.getBizModule());
 		assertEquals("UserDashboard", bean.getBizDocument());
@@ -37,7 +37,7 @@ public class UserDashboardDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void favouritesListIsNotNull() throws Exception {
+	void favouritesListIsNotNull() {
 		UserDashboard bean = UserDashboard.newInstance();
 		assertNotNull(bean.getFavourites());
 	}

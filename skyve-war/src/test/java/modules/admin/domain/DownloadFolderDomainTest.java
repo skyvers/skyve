@@ -10,10 +10,10 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
-public class DownloadFolderDomainTest extends AbstractH2Test {
+class DownloadFolderDomainTest extends AbstractH2Test {
 
 	@Test
-	void dataBuilderCreatesBean() throws Exception {
+	void dataBuilderCreatesBean() {
 		DownloadFolder bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(DownloadFolder.MODULE_NAME, DownloadFolder.DOCUMENT_NAME);
@@ -21,14 +21,14 @@ public class DownloadFolderDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void moduleAndDocumentNames() throws Exception {
+	void moduleAndDocumentNames() {
 		DownloadFolder bean = DownloadFolder.newInstance();
 		assertEquals("admin", bean.getBizModule());
 		assertEquals("DownloadFolder", bean.getBizDocument());
 	}
 
 	@Test
-	void nameSetAndGet() throws Exception {
+	void nameSetAndGet() {
 		DownloadFolder bean = DownloadFolder.newInstance();
 		bean.setName("Downloads");
 		assertEquals("Downloads", bean.getName());

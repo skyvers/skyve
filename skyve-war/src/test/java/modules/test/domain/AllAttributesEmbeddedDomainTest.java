@@ -13,7 +13,7 @@ import util.AbstractH2Test;
 class AllAttributesEmbeddedDomainTest extends AbstractH2Test {
 
         @Test
-        void bizModuleAndDocument() throws Exception {
+        void bizModuleAndDocument() {
                 AllAttributesEmbedded bean = AllAttributesEmbedded.newInstance();
                 assertEquals("test", bean.getBizModule());
                 assertEquals("AllAttributesEmbedded", bean.getBizDocument());

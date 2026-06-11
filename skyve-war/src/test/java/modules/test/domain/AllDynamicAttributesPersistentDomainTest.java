@@ -11,34 +11,34 @@ import org.junit.jupiter.api.Test;
 import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
-public class AllDynamicAttributesPersistentDomainTest extends AbstractH2Test {
+class AllDynamicAttributesPersistentDomainTest extends AbstractH2Test {
 
 	@Test
-	void bizModuleIsTest() throws Exception {
+	void bizModuleIsTest() {
 		AllDynamicAttributesPersistent bean = AllDynamicAttributesPersistent.newInstance();
 		assertEquals("test", bean.getBizModule());
 	}
 
 	@Test
-	void bizDocumentIsAllDynamicAttributesPersistent() throws Exception {
+	void bizDocumentIsAllDynamicAttributesPersistent() {
 		AllDynamicAttributesPersistent bean = AllDynamicAttributesPersistent.newInstance();
 		assertEquals("AllDynamicAttributesPersistent", bean.getBizDocument());
 	}
 
 	@Test
-	void getBizKeyNotNull() throws Exception {
+	void getBizKeyNotNull() {
 		AllDynamicAttributesPersistent bean = AllDynamicAttributesPersistent.newInstance();
 		assertNotNull(bean.getBizKey());
 	}
 
 	@Test
-	void aggregatedAssociationNullByDefault() throws Exception {
+	void aggregatedAssociationNullByDefault() {
 		AllDynamicAttributesPersistent bean = AllDynamicAttributesPersistent.newInstance();
 		assertNull(bean.getAggregatedAssociation());
 	}
 
 	@Test
-	void aggregatedAssociationSetAndGet() throws Exception {
+	void aggregatedAssociationSetAndGet() {
 		AllDynamicAttributesPersistent bean = AllDynamicAttributesPersistent.newInstance();
 		AllDynamicAttributesPersistent assoc = AllDynamicAttributesPersistent.newInstance();
 		bean.setAggregatedAssociation(assoc);
@@ -46,7 +46,7 @@ public class AllDynamicAttributesPersistentDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void nullAggregatedAssociation() throws Exception {
+	void nullAggregatedAssociation() {
 		AllDynamicAttributesPersistent bean = AllDynamicAttributesPersistent.newInstance();
 		AllDynamicAttributesPersistent assoc = AllDynamicAttributesPersistent.newInstance();
 		bean.setAggregatedAssociation(assoc);
@@ -55,13 +55,13 @@ public class AllDynamicAttributesPersistentDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void composedAssociationNullByDefault() throws Exception {
+	void composedAssociationNullByDefault() {
 		AllDynamicAttributesPersistent bean = AllDynamicAttributesPersistent.newInstance();
 		assertNull(bean.getComposedAssociation());
 	}
 
 	@Test
-	void composedAssociationSetAndGet() throws Exception {
+	void composedAssociationSetAndGet() {
 		AllDynamicAttributesPersistent bean = AllDynamicAttributesPersistent.newInstance();
 		AllDynamicAttributesPersistent assoc = AllDynamicAttributesPersistent.newInstance();
 		bean.setComposedAssociation(assoc);
@@ -69,14 +69,14 @@ public class AllDynamicAttributesPersistentDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void composedCollectionEmptyByDefault() throws Exception {
+	void composedCollectionEmptyByDefault() {
 		AllDynamicAttributesPersistent bean = AllDynamicAttributesPersistent.newInstance();
 		assertNotNull(bean.getComposedCollection());
 		assertTrue(bean.getComposedCollection().isEmpty());
 	}
 
 	@Test
-	void addComposedCollectionElement() throws Exception {
+	void addComposedCollectionElement() {
 		AllDynamicAttributesPersistent bean = AllDynamicAttributesPersistent.newInstance();
 		AllDynamicAttributesPersistent child = AllDynamicAttributesPersistent.newInstance();
 		assertTrue(bean.addComposedCollectionElement(child));
@@ -84,7 +84,7 @@ public class AllDynamicAttributesPersistentDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void addComposedCollectionElementAtIndex() throws Exception {
+	void addComposedCollectionElementAtIndex() {
 		AllDynamicAttributesPersistent bean = AllDynamicAttributesPersistent.newInstance();
 		AllDynamicAttributesPersistent child1 = AllDynamicAttributesPersistent.newInstance();
 		AllDynamicAttributesPersistent child2 = AllDynamicAttributesPersistent.newInstance();
@@ -94,7 +94,7 @@ public class AllDynamicAttributesPersistentDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void removeComposedCollectionElement() throws Exception {
+	void removeComposedCollectionElement() {
 		AllDynamicAttributesPersistent bean = AllDynamicAttributesPersistent.newInstance();
 		AllDynamicAttributesPersistent child = AllDynamicAttributesPersistent.newInstance();
 		bean.addComposedCollectionElement(child);
@@ -103,14 +103,14 @@ public class AllDynamicAttributesPersistentDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void removeComposedCollectionElementNotPresent() throws Exception {
+	void removeComposedCollectionElementNotPresent() {
 		AllDynamicAttributesPersistent bean = AllDynamicAttributesPersistent.newInstance();
 		AllDynamicAttributesPersistent child = AllDynamicAttributesPersistent.newInstance();
 		assertFalse(bean.removeComposedCollectionElement(child));
 	}
 
 	@Test
-	void removeComposedCollectionElementByIndex() throws Exception {
+	void removeComposedCollectionElementByIndex() {
 		AllDynamicAttributesPersistent bean = AllDynamicAttributesPersistent.newInstance();
 		AllDynamicAttributesPersistent child = AllDynamicAttributesPersistent.newInstance();
 		bean.addComposedCollectionElement(child);
@@ -120,14 +120,14 @@ public class AllDynamicAttributesPersistentDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void inverseAggregatedAssociationEmptyByDefault() throws Exception {
+	void inverseAggregatedAssociationEmptyByDefault() {
 		AllDynamicAttributesPersistent bean = AllDynamicAttributesPersistent.newInstance();
 		assertNotNull(bean.getInverseAggregatedAssociation());
 		assertTrue(bean.getInverseAggregatedAssociation().isEmpty());
 	}
 
 	@Test
-	void addInverseAggregatedAssociationElement() throws Exception {
+	void addInverseAggregatedAssociationElement() {
 		AllDynamicAttributesPersistent bean = AllDynamicAttributesPersistent.newInstance();
 		AllDynamicAttributesPersistent child = AllDynamicAttributesPersistent.newInstance();
 		assertTrue(bean.addInverseAggregatedAssociationElement(child));
@@ -135,7 +135,7 @@ public class AllDynamicAttributesPersistentDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void removeInverseAggregatedAssociationElement() throws Exception {
+	void removeInverseAggregatedAssociationElement() {
 		AllDynamicAttributesPersistent bean = AllDynamicAttributesPersistent.newInstance();
 		AllDynamicAttributesPersistent child = AllDynamicAttributesPersistent.newInstance();
 		bean.addInverseAggregatedAssociationElement(child);
@@ -144,13 +144,13 @@ public class AllDynamicAttributesPersistentDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void getInverseAggregatedAssociationElementByIdReturnsNull() throws Exception {
+	void getInverseAggregatedAssociationElementByIdReturnsNull() {
 		AllDynamicAttributesPersistent bean = AllDynamicAttributesPersistent.newInstance();
 		assertNull(bean.getInverseAggregatedAssociationElementById("nonexistent"));
 	}
 
         @Test
-        void embeddedAssociationSetAndGet() throws Exception {
+        void embeddedAssociationSetAndGet() {
                 AllDynamicAttributesPersistent bean = AllDynamicAttributesPersistent.newInstance();
                 assertNull(bean.getEmbeddedAssociation());
                 AllAttributesEmbedded embedded = new AllAttributesEmbedded();
@@ -159,7 +159,7 @@ public class AllDynamicAttributesPersistentDomainTest extends AbstractH2Test {
         }
 
         @Test
-        void composedCollectionGetById() throws Exception {
+        void composedCollectionGetById() {
                 AllDynamicAttributesPersistent bean = AllDynamicAttributesPersistent.newInstance();
                 assertNull(bean.getComposedCollectionElementById("nonexistent"));
                 AllDynamicAttributesPersistent element = new AllDynamicAttributesPersistent();
@@ -168,7 +168,7 @@ public class AllDynamicAttributesPersistentDomainTest extends AbstractH2Test {
         }
 
         @Test
-        void inverseAggregatedAssociationAddAtIndexAndRemoveByIndex() throws Exception {
+        void inverseAggregatedAssociationAddAtIndexAndRemoveByIndex() {
                 AllDynamicAttributesPersistent bean = AllDynamicAttributesPersistent.newInstance();
                 AllDynamicAttributesPersistent child = new AllDynamicAttributesPersistent();
                 bean.addInverseAggregatedAssociationElement(0, child);
@@ -178,7 +178,7 @@ public class AllDynamicAttributesPersistentDomainTest extends AbstractH2Test {
         }
 
         @Test
-        void composedCollectionSetElementById() throws Exception {
+        void composedCollectionSetElementById() {
                 AllDynamicAttributesPersistent bean = AllDynamicAttributesPersistent.newInstance();
                 AllDynamicAttributesPersistent element = new AllDynamicAttributesPersistent();
                 bean.addComposedCollectionElement(element);
@@ -190,7 +190,7 @@ public class AllDynamicAttributesPersistentDomainTest extends AbstractH2Test {
         }
 
         @Test
-        void inverseAggregatedAssociationSetElementById() throws Exception {
+        void inverseAggregatedAssociationSetElementById() {
                 AllDynamicAttributesPersistent bean = AllDynamicAttributesPersistent.newInstance();
                 AllDynamicAttributesPersistent element = new AllDynamicAttributesPersistent();
                 bean.addInverseAggregatedAssociationElement(element);
@@ -202,7 +202,7 @@ public class AllDynamicAttributesPersistentDomainTest extends AbstractH2Test {
         }
 
         @Test
-        void inverseAggregatedAssociationGetElementByIdFound() throws Exception {
+        void inverseAggregatedAssociationGetElementByIdFound() {
                 AllDynamicAttributesPersistent bean = AllDynamicAttributesPersistent.newInstance();
                 AllDynamicAttributesPersistent element = new AllDynamicAttributesPersistent();
                 bean.addInverseAggregatedAssociationElement(element);

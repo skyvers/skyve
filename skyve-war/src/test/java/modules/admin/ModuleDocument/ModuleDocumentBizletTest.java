@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import modules.admin.DataMaintenance.DataMaintenanceExtension;
 
 @SuppressWarnings("static-method")
-public class ModuleDocumentBizletTest {
+class ModuleDocumentBizletTest {
 
 	private static final ModuleDocumentBizlet bizlet = new ModuleDocumentBizlet();
 

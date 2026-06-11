@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import modules.admin.domain.ChangePassword;
 
 @SuppressWarnings("static-method")
-public class ChangePasswordBizletTest {
+class ChangePasswordBizletTest {
 
 	private static final ChangePasswordBizlet bizlet = new ChangePasswordBizlet();
 

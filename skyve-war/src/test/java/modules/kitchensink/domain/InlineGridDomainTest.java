@@ -17,10 +17,10 @@ import util.AbstractH2Test;
  * Tests for the {@link InlineGrid} kitchensink domain bean.
  */
 @SuppressWarnings("static-method")
-public class InlineGridDomainTest extends AbstractH2Test {
+class InlineGridDomainTest extends AbstractH2Test {
 
 	@Test
-	void dataBuilderCreatesBean() throws Exception {
+	void dataBuilderCreatesBean() {
 		InlineGrid bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(InlineGrid.MODULE_NAME, InlineGrid.DOCUMENT_NAME);
@@ -28,14 +28,14 @@ public class InlineGridDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void moduleAndDocumentNames() throws Exception {
+	void moduleAndDocumentNames() {
 		InlineGrid bean = InlineGrid.newInstance();
 		assertEquals(InlineGrid.MODULE_NAME, bean.getBizModule());
 		assertEquals(InlineGrid.DOCUMENT_NAME, bean.getBizDocument());
 	}
 
 	@Test
-	void setAndGetProperties() throws Exception {
+	void setAndGetProperties() {
 		InlineGrid bean = InlineGrid.newInstance();
 		bean.setConstantEnum(ConstantEnum.two2);
 		bean.setConstantDomain("constVal");
@@ -75,7 +75,7 @@ public class InlineGridDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void getBizKeyNotNull() throws Exception {
+	void getBizKeyNotNull() {
 		InlineGrid bean = InlineGrid.newInstance();
 		assertNotNull(bean.getBizKey());
 	}

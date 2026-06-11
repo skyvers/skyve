@@ -10,11 +10,11 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import util.AbstractH2Test;
 
-public class ContentDomainTest extends AbstractH2Test {
+class ContentDomainTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void dataBuilderCreatesContent() throws Exception {
+	void dataBuilderCreatesContent() {
 		Content bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(Content.MODULE_NAME, Content.DOCUMENT_NAME);
@@ -23,7 +23,7 @@ public class ContentDomainTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void moduleAndDocumentNames() throws Exception {
+	void moduleAndDocumentNames() {
 		Content bean = new Content();
 		assertEquals("admin", bean.getBizModule());
 		assertEquals("Content", bean.getBizDocument());
@@ -31,7 +31,7 @@ public class ContentDomainTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void contentIdSetAndGet() throws Exception {
+	void contentIdSetAndGet() {
 		Content bean = new Content();
 		bean.setContentId("test-content-id-123");
 		assertEquals("test-content-id-123", bean.getContentId());
@@ -39,7 +39,7 @@ public class ContentDomainTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void customerNameSetAndGet() throws Exception {
+	void customerNameSetAndGet() {
 		Content bean = new Content();
 		bean.setCustomerName("demo");
 		assertEquals("demo", bean.getCustomerName());
@@ -47,7 +47,7 @@ public class ContentDomainTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void moduleNameSetAndGet() throws Exception {
+	void moduleNameSetAndGet() {
 		Content bean = new Content();
 		bean.setModuleName("admin");
 		assertEquals("admin", bean.getModuleName());
@@ -55,7 +55,7 @@ public class ContentDomainTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void documentNameSetAndGet() throws Exception {
+	void documentNameSetAndGet() {
 		Content bean = new Content();
 		bean.setDocumentName("Contact");
 		assertEquals("Contact", bean.getDocumentName());
@@ -63,7 +63,7 @@ public class ContentDomainTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void contentBizIdSetAndGet() throws Exception {
+	void contentBizIdSetAndGet() {
 		Content bean = new Content();
 		bean.setContentBizId("biz-id-456");
 		assertEquals("biz-id-456", bean.getContentBizId());
@@ -71,7 +71,7 @@ public class ContentDomainTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void attributeNameSetAndGet() throws Exception {
+	void attributeNameSetAndGet() {
 		Content bean = new Content();
 		bean.setAttributeName("image");
 		assertEquals("image", bean.getAttributeName());
@@ -79,7 +79,7 @@ public class ContentDomainTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void lastModifiedSetAndGet() throws Exception {
+	void lastModifiedSetAndGet() {
 		Content bean = new Content();
 		Timestamp ts = new Timestamp();
 		bean.setLastModified(ts);
@@ -88,7 +88,7 @@ public class ContentDomainTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void contentTextSetAndGet() throws Exception {
+	void contentTextSetAndGet() {
 		Content bean = new Content();
 		bean.setContent("This is the content text");
 		assertEquals("This is the content text", bean.getContent());

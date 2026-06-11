@@ -22,7 +22,7 @@ import util.AbstractH2Test;
 class TagDomainTest extends AbstractH2Test {
 
 	@Test
-	void dataBuilderPopulatesTagBean() throws Exception {
+	void dataBuilderPopulatesTagBean() {
 		Tag bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
@@ -31,49 +31,49 @@ class TagDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void bizModuleAndDocumentAreCorrect() throws Exception {
+	void bizModuleAndDocumentAreCorrect() {
 		Tag bean = Tag.newInstance();
 		assertEquals(Tag.MODULE_NAME, bean.getBizModule());
 		assertEquals(Tag.DOCUMENT_NAME, bean.getBizDocument());
 	}
 
 	@Test
-	void nameSetAndGet() throws Exception {
+	void nameSetAndGet() {
 		Tag bean = Tag.newInstance();
 		bean.setName("My Tag");
 		assertEquals("My Tag", bean.getName());
 	}
 
 	@Test
-	void visibleSetAndGet() throws Exception {
+	void visibleSetAndGet() {
 		Tag bean = Tag.newInstance();
 		bean.setVisible(Boolean.TRUE);
 		assertEquals(Boolean.TRUE, bean.getVisible());
 	}
 
 	@Test
-	void combinationsOperatorSetAndGet() throws Exception {
+	void combinationsOperatorSetAndGet() {
 		Tag bean = Tag.newInstance();
 		bean.setCombinationsOperator(CombinationsOperator.union);
 		assertEquals(CombinationsOperator.union, bean.getCombinationsOperator());
 	}
 
 	@Test
-	void combinationExplanationSetAndGet() throws Exception {
+	void combinationExplanationSetAndGet() {
 		Tag bean = Tag.newInstance();
 		bean.setCombinationExplanation("Some explanation");
 		assertEquals("Some explanation", bean.getCombinationExplanation());
 	}
 
 	@Test
-	void filterActionSetAndGet() throws Exception {
+	void filterActionSetAndGet() {
 		Tag bean = Tag.newInstance();
 		bean.setFilterAction(FilterAction.tagRecordsThatMatch);
 		assertEquals(FilterAction.tagRecordsThatMatch, bean.getFilterAction());
 	}
 
 	@Test
-	void uploadModuleAndDocumentNameSetAndGet() throws Exception {
+	void uploadModuleAndDocumentNameSetAndGet() {
 		Tag bean = Tag.newInstance();
 		bean.setUploadModuleName("admin");
 		bean.setUploadDocumentName("User");
@@ -84,7 +84,7 @@ class TagDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void booleanPropertyFlagsSetAndGet() throws Exception {
+	void booleanPropertyFlagsSetAndGet() {
 		Tag bean = Tag.newInstance();
 		bean.setFileHasHeaders(Boolean.TRUE);
 		bean.setNotification(Boolean.FALSE);
@@ -95,7 +95,7 @@ class TagDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void actionModuleAndDocumentNameSetAndGet() throws Exception {
+	void actionModuleAndDocumentNameSetAndGet() {
 		Tag bean = Tag.newInstance();
 		bean.setActionModuleName("admin");
 		bean.setActionDocumentName("Contact");

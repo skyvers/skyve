@@ -9,7 +9,7 @@ import org.skyve.metadata.controller.ImplicitActionName;
 import modules.whosin.domain.Staff;
 
 @SuppressWarnings("static-method")
-public class StaffBizletTest {
+class StaffBizletTest {
 
 	@Test
 	void preExecuteWithEditSetsReportsToParent() throws Exception {

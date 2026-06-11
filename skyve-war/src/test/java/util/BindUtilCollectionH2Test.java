@@ -30,7 +30,7 @@ class BindUtilCollectionH2Test extends AbstractH2Test {
         private AllAttributesPersistent child2;
 
         @BeforeEach
-        void createBeans() throws Exception {
+        void createBeans() {
                 Persistence p = CORE.getPersistence();
 
                 parent = AllAttributesPersistent.newInstance();

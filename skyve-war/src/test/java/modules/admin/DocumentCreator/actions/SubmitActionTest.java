@@ -8,7 +8,7 @@ import org.skyve.domain.messages.ValidationException;
 import modules.admin.domain.DocumentCreator;
 
 @SuppressWarnings("static-method")
-public class SubmitActionTest {
+class SubmitActionTest {
 
 	@Test
 	void executeWithNullOutputLocationThrowsValidationException() {

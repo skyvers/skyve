@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("static-method")
-public class MappedExtensionJoinedStrategyBizletTest {
+class MappedExtensionJoinedStrategyBizletTest {
 
 	private static final MappedExtensionJoinedStrategyBizlet bizlet = new MappedExtensionJoinedStrategyBizlet();
 

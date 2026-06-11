@@ -29,7 +29,7 @@ public class ViewBackgroundTaskTest {
 	}
 
 	@Test
-	public void executeBeanCallbackRecordsInvocation() throws Exception {
+	public void executeBeanCallbackRecordsInvocation() {
 		RecordingViewBackgroundTask task = new RecordingViewBackgroundTask();
 		Bean bean = mock(Bean.class);
 

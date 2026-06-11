@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
  * Tests covering all concrete AbstractDocumentChartModel implementations.
  */
 @SuppressWarnings("static-method")
-public class DocumentModelsTest {
+class DocumentModelsTest {
 
 	// DocumentCreateCpuUtilisationModel
 

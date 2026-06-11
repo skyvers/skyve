@@ -12,10 +12,10 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
-public class ChangePasswordDomainTest extends AbstractH2Test {
+class ChangePasswordDomainTest extends AbstractH2Test {
 
 	@Test
-	void dataBuilderCreatesBean() throws Exception {
+	void dataBuilderCreatesBean() {
 		ChangePassword bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(ChangePassword.MODULE_NAME, ChangePassword.DOCUMENT_NAME);
@@ -23,42 +23,42 @@ public class ChangePasswordDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void moduleAndDocumentNames() throws Exception {
+	void moduleAndDocumentNames() {
 		ChangePassword bean = ChangePassword.newInstance();
 		assertEquals("admin", bean.getBizModule());
 		assertEquals("ChangePassword", bean.getBizDocument());
 	}
 
 	@Test
-	void oldPasswordSetAndGet() throws Exception {
+	void oldPasswordSetAndGet() {
 		ChangePassword bean = ChangePassword.newInstance();
 		bean.setOldPassword("oldPass123");
 		assertEquals("oldPass123", bean.getOldPassword());
 	}
 
 	@Test
-	void newPasswordSetAndGet() throws Exception {
+	void newPasswordSetAndGet() {
 		ChangePassword bean = ChangePassword.newInstance();
 		bean.setNewPassword("newPass456");
 		assertEquals("newPass456", bean.getNewPassword());
 	}
 
 	@Test
-	void confirmPasswordSetAndGet() throws Exception {
+	void confirmPasswordSetAndGet() {
 		ChangePassword bean = ChangePassword.newInstance();
 		bean.setConfirmPassword("newPass456");
 		assertEquals("newPass456", bean.getConfirmPassword());
 	}
 
 	@Test
-	void responseSetAndGet() throws Exception {
+	void responseSetAndGet() {
 		ChangePassword bean = ChangePassword.newInstance();
 		bean.setResponse("Password changed successfully");
 		assertEquals("Password changed successfully", bean.getResponse());
 	}
 
 	@Test
-	void isPasswordChangedWhenResponseSet() throws Exception {
+	void isPasswordChangedWhenResponseSet() {
 		ChangePassword bean = ChangePassword.newInstance();
 		assertFalse(bean.isPasswordChanged());
 		assertTrue(bean.isNotPasswordChanged());
@@ -68,7 +68,7 @@ public class ChangePasswordDomainTest extends AbstractH2Test {
 	}
 
         @Test
-        void getBizKeyNotNull() throws Exception {
+        void getBizKeyNotNull() {
                 ChangePassword bean = ChangePassword.newInstance();
                 assertNotNull(bean.getBizKey());
         }

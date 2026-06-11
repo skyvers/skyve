@@ -112,14 +112,14 @@ class FacesActionsTest extends AbstractSkyveTest {
 	// ----- ActionUtil.getTargetBeanForView -----
 
 	@Test
-	void actionUtilGetTargetBeanForViewReturnsNullWhenFacesViewHasNoBean() throws Exception {
+	void actionUtilGetTargetBeanForViewReturnsNullWhenFacesViewHasNoBean() {
 		FacesView facesView = new FacesView();
 		Bean result = ActionUtil.getTargetBeanForView(facesView);
 		assertNull(result, "Should return null when FacesView has no bean");
 	}
 
 	@Test
-	void actionUtilGetTargetBeanForViewReturnsBeanWhenNoViewBinding() throws Exception {
+	void actionUtilGetTargetBeanForViewReturnsBeanWhenNoViewBinding() {
 		FacesView facesView = new FacesView();
 		AbstractWebContext ctx = mockWebContext();
 		facesView.setWebContext(ctx);
@@ -132,14 +132,14 @@ class FacesActionsTest extends AbstractSkyveTest {
 	}
 
 	@Test
-	void actionUtilGetTargetBeanForViewAndReferenceBindingReturnsNullWhenNoBean() throws Exception {
+	void actionUtilGetTargetBeanForViewAndReferenceBindingReturnsNullWhenNoBean() {
 		FacesView facesView = new FacesView();
 		Bean result = ActionUtil.getTargetBeanForViewAndReferenceBinding(facesView, null);
 		assertNull(result, "Should return null when FacesView has no bean");
 	}
 
 	@Test
-	void actionUtilGetTargetBeanForViewAndReferenceBindingReturnsBeanWhenSet() throws Exception {
+	void actionUtilGetTargetBeanForViewAndReferenceBindingReturnsBeanWhenSet() {
 		FacesView facesView = new FacesView();
 		AbstractWebContext ctx = mockWebContext();
 		facesView.setWebContext(ctx);

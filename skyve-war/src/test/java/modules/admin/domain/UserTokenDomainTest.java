@@ -10,10 +10,10 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
-public class UserTokenDomainTest extends AbstractH2Test {
+class UserTokenDomainTest extends AbstractH2Test {
 
 	@Test
-	void dataBuilderCreatesBean() throws Exception {
+	void dataBuilderCreatesBean() {
 		UserToken bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(UserToken.MODULE_NAME, UserToken.DOCUMENT_NAME);
@@ -21,41 +21,41 @@ public class UserTokenDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void moduleAndDocumentNames() throws Exception {
+	void moduleAndDocumentNames() {
 		UserToken bean = UserToken.newInstance();
 		assertEquals("admin", bean.getBizModule());
 		assertEquals("UserToken", bean.getBizDocument());
 	}
 
 	@Test
-	void userNameSetAndGet() throws Exception {
+	void userNameSetAndGet() {
 		UserToken bean = UserToken.newInstance();
 		bean.setUserName("tokenuser");
 		assertEquals("tokenuser", bean.getUserName());
 	}
 
 	@Test
-	void seriesSetAndGet() throws Exception {
+	void seriesSetAndGet() {
 		UserToken bean = UserToken.newInstance();
 		bean.setSeries("series-abc-123");
 		assertEquals("series-abc-123", bean.getSeries());
 	}
 
 	@Test
-	void tokenSetAndGet() throws Exception {
+	void tokenSetAndGet() {
 		UserToken bean = UserToken.newInstance();
 		bean.setToken("tok-xyz-789");
 		assertEquals("tok-xyz-789", bean.getToken());
 	}
 
         @Test
-        void getBizKeyNotNull() throws Exception {
+        void getBizKeyNotNull() {
                 UserToken bean = UserToken.newInstance();
                 assertNotNull(bean.getBizKey());
         }
 
         @Test
-        void lastUsedSetAndGet() throws Exception {
+        void lastUsedSetAndGet() {
                 UserToken bean = UserToken.newInstance();
                 org.skyve.domain.types.Timestamp now = new org.skyve.domain.types.Timestamp();
                 bean.setLastUsed(now);

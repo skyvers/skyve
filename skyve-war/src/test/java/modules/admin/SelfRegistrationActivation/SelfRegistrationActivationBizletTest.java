@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.skyve.metadata.controller.ImplicitActionName;
 
 @SuppressWarnings("static-method")
-public class SelfRegistrationActivationBizletTest {
+class SelfRegistrationActivationBizletTest {
 
 	private static final SelfRegistrationActivationBizlet bizlet = new SelfRegistrationActivationBizlet();
 

@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -46,10 +46,10 @@ import org.skyve.metadata.module.query.BizQLDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
-import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.module.query.SQLDefinition;
 import org.skyve.metadata.user.DocumentPermission;
 
+@SuppressWarnings("static-method")
 class DoctorUtilTest {
 
 	private interface PrintAction {
@@ -98,6 +98,7 @@ class DoctorUtilTest {
 		return text;
 	}
 
+	@SuppressWarnings({"boxing", "unchecked", "rawtypes"})
 	private static Document createDocument() {
 		Document document = mock(Document.class);
 		Text bizKey = textAttribute(Bean.BIZ_KEY, 32);
@@ -141,6 +142,7 @@ class DoctorUtilTest {
 		return document;
 	}
 
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	private static Module createModule(Document document, MetaDataQueryDefinition query, RoleImpl role) {
 		Module module = mock(Module.class);
 		Map<String, Object> documentRefs = new LinkedHashMap<>();
@@ -160,7 +162,7 @@ class DoctorUtilTest {
 		return module;
 	}
 
-	private static MetaDataQueryDefinition createQuery(Document document) {
+	private static MetaDataQueryDefinition createQuery() {
 		MetaDataQueryDefinition query = mock(MetaDataQueryDefinition.class);
 		when(query.getName()).thenReturn("findContact");
 		when(query.getLocalisedDescription()).thenReturn("Query description");
@@ -208,7 +210,7 @@ class DoctorUtilTest {
 	@Test
 	void renderCustomerRendersNestedDocumentation() throws Exception {
 		Document document = createDocument();
-		MetaDataQueryDefinition query = createQuery(document);
+		MetaDataQueryDefinition query = createQuery();
 		RoleImpl role = createRole();
 		Module module = createModule(document, query, role);
 		Customer customer = mock(Customer.class);

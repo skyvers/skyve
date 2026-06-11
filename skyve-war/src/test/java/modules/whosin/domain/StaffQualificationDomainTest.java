@@ -12,7 +12,7 @@ import java.time.LocalDate;
 import org.skyve.domain.types.DateOnly;
 
 @SuppressWarnings("static-method")
-public class StaffQualificationDomainTest {
+class StaffQualificationDomainTest {
 
 	private StaffQualification bean;
 

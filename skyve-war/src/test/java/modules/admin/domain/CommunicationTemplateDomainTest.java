@@ -9,11 +9,11 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.test.AbstractSkyveTest;
 
-public class CommunicationTemplateDomainTest extends AbstractSkyveTest {
+class CommunicationTemplateDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void dataBuilderCreatesCommunicationTemplate() throws Exception {
+	void dataBuilderCreatesCommunicationTemplate() {
 		CommunicationTemplate bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(CommunicationTemplate.MODULE_NAME, CommunicationTemplate.DOCUMENT_NAME);
@@ -22,7 +22,7 @@ public class CommunicationTemplateDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void moduleAndDocumentNames() throws Exception {
+	void moduleAndDocumentNames() {
 		CommunicationTemplate bean = new CommunicationTemplate();
 		assertEquals("admin", bean.getBizModule());
 		assertEquals("CommunicationTemplate", bean.getBizDocument());
@@ -30,7 +30,7 @@ public class CommunicationTemplateDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void nameSetAndGet() throws Exception {
+	void nameSetAndGet() {
 		CommunicationTemplate bean = new CommunicationTemplate();
 		bean.setName("Welcome Email Template");
 		assertEquals("Welcome Email Template", bean.getName());
@@ -38,7 +38,7 @@ public class CommunicationTemplateDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void descriptionSetAndGet() throws Exception {
+	void descriptionSetAndGet() {
 		CommunicationTemplate bean = new CommunicationTemplate();
 		bean.setDescription("Template for welcome emails");
 		assertEquals("Template for welcome emails", bean.getDescription());
@@ -46,7 +46,7 @@ public class CommunicationTemplateDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void templateSetAndGet() throws Exception {
+	void templateSetAndGet() {
 		CommunicationTemplate bean = new CommunicationTemplate();
 		bean.setTemplate("<html>Hello {{name}}</html>");
 		assertEquals("<html>Hello {{name}}</html>", bean.getTemplate());

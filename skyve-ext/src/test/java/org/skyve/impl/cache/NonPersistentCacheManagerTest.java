@@ -77,13 +77,13 @@ class NonPersistentCacheManagerTest {
 	}
 
 	@Test
-	void destroyIsNoOp() throws Exception {
+	void destroyIsNoOp() {
 		// destroy() is a no-op in NonPersistentCacheManager — just verify it does not throw
 		assertDoesNotThrow(cacheManager::destroy);
 	}
 
 	@Test
-	void destroyCacheIsNoOp() throws Exception {
+	void destroyCacheIsNoOp() {
 		// destroyCache() is a no-op — just verify it does not throw
 		assertDoesNotThrow(() -> cacheManager.destroyCache("any"));
 	}

@@ -9,7 +9,7 @@ import modules.kitchensink.domain.ListAttributes;
 import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
-public class ListAttributesBizletTest extends AbstractH2Test {
+class ListAttributesBizletTest extends AbstractH2Test {
 
 	private static final ListAttributesBizlet bizlet = new ListAttributesBizlet();
 

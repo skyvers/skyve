@@ -8,7 +8,7 @@ import org.skyve.domain.messages.ValidationException;
 import modules.admin.JobSchedule.JobScheduleExtension;
 
 @SuppressWarnings("static-method")
-public class RunJobNowTest {
+class RunJobNowTest {
 
 	@Test
 	void executeWithNullJobNameThrowsValidationException() {

@@ -10,10 +10,10 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
-public class SystemDashboardDomainTest extends AbstractH2Test {
+class SystemDashboardDomainTest extends AbstractH2Test {
 
 	@Test
-	void dataBuilderCreatesBean() throws Exception {
+	void dataBuilderCreatesBean() {
 		SystemDashboard bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(SystemDashboard.MODULE_NAME, SystemDashboard.DOCUMENT_NAME);
@@ -21,14 +21,14 @@ public class SystemDashboardDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void moduleAndDocumentNames() throws Exception {
+	void moduleAndDocumentNames() {
 		SystemDashboard bean = SystemDashboard.newInstance();
 		assertEquals("admin", bean.getBizModule());
 		assertEquals("SystemDashboard", bean.getBizDocument());
 	}
 
 	@Test
-	void statusListInitialized() throws Exception {
+	void statusListInitialized() {
 		SystemDashboard bean = SystemDashboard.newInstance();
 		assertNotNull(bean.getStatus());
 	}

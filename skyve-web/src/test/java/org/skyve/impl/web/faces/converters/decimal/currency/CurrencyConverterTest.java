@@ -12,7 +12,7 @@ import org.skyve.domain.types.Decimal10;
 
 import jakarta.faces.convert.ConverterException;
 @SuppressWarnings("static-method")
-public class CurrencyConverterTest {
+class CurrencyConverterTest {
 
 	// ---- Decimal2DollarsAndCents ----
 

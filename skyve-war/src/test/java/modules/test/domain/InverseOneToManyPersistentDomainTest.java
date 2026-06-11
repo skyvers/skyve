@@ -11,34 +11,34 @@ import org.junit.jupiter.api.Test;
 import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
-public class InverseOneToManyPersistentDomainTest extends AbstractH2Test {
+class InverseOneToManyPersistentDomainTest extends AbstractH2Test {
 
 	@Test
-	void bizModuleIsTest() throws Exception {
+	void bizModuleIsTest() {
 		InverseOneToManyPersistent bean = InverseOneToManyPersistent.newInstance();
 		assertEquals("test", bean.getBizModule());
 	}
 
 	@Test
-	void bizDocumentIsInverseOneToManyPersistent() throws Exception {
+	void bizDocumentIsInverseOneToManyPersistent() {
 		InverseOneToManyPersistent bean = InverseOneToManyPersistent.newInstance();
 		assertEquals("InverseOneToManyPersistent", bean.getBizDocument());
 	}
 
 	@Test
-	void getBizKeyNotNull() throws Exception {
+	void getBizKeyNotNull() {
 		InverseOneToManyPersistent bean = InverseOneToManyPersistent.newInstance();
 		assertNotNull(bean.getBizKey());
 	}
 
 	@Test
-	void aggAssociationNullByDefault() throws Exception {
+	void aggAssociationNullByDefault() {
 		InverseOneToManyPersistent bean = InverseOneToManyPersistent.newInstance();
 		assertNull(bean.getAggAssociation());
 	}
 
 	@Test
-	void aggAssociationSetAndGet() throws Exception {
+	void aggAssociationSetAndGet() {
 		InverseOneToManyPersistent bean = InverseOneToManyPersistent.newInstance();
 		InverseOneToManyPersistent assoc = InverseOneToManyPersistent.newInstance();
 		bean.setAggAssociation(assoc);
@@ -46,7 +46,7 @@ public class InverseOneToManyPersistentDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void nullAggAssociationClearsField() throws Exception {
+	void nullAggAssociationClearsField() {
 		InverseOneToManyPersistent bean = InverseOneToManyPersistent.newInstance();
 		InverseOneToManyPersistent assoc = InverseOneToManyPersistent.newInstance();
 		bean.setAggAssociation(assoc);
@@ -55,14 +55,14 @@ public class InverseOneToManyPersistentDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void invAggAssociationEmptyByDefault() throws Exception {
+	void invAggAssociationEmptyByDefault() {
 		InverseOneToManyPersistent bean = InverseOneToManyPersistent.newInstance();
 		assertNotNull(bean.getInvAggAssociation());
 		assertTrue(bean.getInvAggAssociation().isEmpty());
 	}
 
 	@Test
-	void addAndGetInvAggAssociationElement() throws Exception {
+	void addAndGetInvAggAssociationElement() {
 		InverseOneToManyPersistent bean = InverseOneToManyPersistent.newInstance();
 		InverseOneToManyPersistent child = InverseOneToManyPersistent.newInstance();
 		bean.addInvAggAssociationElement(child);
@@ -70,7 +70,7 @@ public class InverseOneToManyPersistentDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void addInvAggAssociationElementAtIndex() throws Exception {
+	void addInvAggAssociationElementAtIndex() {
 		InverseOneToManyPersistent bean = InverseOneToManyPersistent.newInstance();
 		InverseOneToManyPersistent child1 = InverseOneToManyPersistent.newInstance();
 		InverseOneToManyPersistent child2 = InverseOneToManyPersistent.newInstance();
@@ -80,7 +80,7 @@ public class InverseOneToManyPersistentDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void removeInvAggAssociationElement() throws Exception {
+	void removeInvAggAssociationElement() {
 		InverseOneToManyPersistent bean = InverseOneToManyPersistent.newInstance();
 		InverseOneToManyPersistent child = InverseOneToManyPersistent.newInstance();
 		bean.addInvAggAssociationElement(child);
@@ -89,14 +89,14 @@ public class InverseOneToManyPersistentDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void removeInvAggAssociationElementNotPresent() throws Exception {
+	void removeInvAggAssociationElementNotPresent() {
 		InverseOneToManyPersistent bean = InverseOneToManyPersistent.newInstance();
 		InverseOneToManyPersistent child = InverseOneToManyPersistent.newInstance();
 		assertFalse(bean.removeInvAggAssociationElement(child));
 	}
 
 	@Test
-	void removeInvAggAssociationElementByIndex() throws Exception {
+	void removeInvAggAssociationElementByIndex() {
 		InverseOneToManyPersistent bean = InverseOneToManyPersistent.newInstance();
 		InverseOneToManyPersistent child = InverseOneToManyPersistent.newInstance();
 		bean.addInvAggAssociationElement(child);
@@ -106,7 +106,7 @@ public class InverseOneToManyPersistentDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void getInvAggAssociationElementById() throws Exception {
+	void getInvAggAssociationElementById() {
 		InverseOneToManyPersistent bean = InverseOneToManyPersistent.newInstance();
 		InverseOneToManyPersistent child = InverseOneToManyPersistent.newInstance();
 		bean.addInvAggAssociationElement(child);

@@ -25,7 +25,7 @@ class FluentViewTest {
 	private FluentView fluent;
 
 	@BeforeEach
-	void setup() throws Exception {
+	void setup() {
 		fluent = new FluentView();
 		fluent.get().setAccesses(new ViewUserAccessesMetaData());
 	}

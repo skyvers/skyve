@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import modules.admin.domain.DocumentCreator;
 
 @SuppressWarnings("static-method")
-public class DocumentCreatorBizletTest {
+class DocumentCreatorBizletTest {
 
 	private static final DocumentCreatorBizlet bizlet = new DocumentCreatorBizlet();
 

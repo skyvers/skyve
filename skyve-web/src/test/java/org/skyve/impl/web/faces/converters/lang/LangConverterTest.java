@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
 @SuppressWarnings("static-method")
-public class LangConverterTest {
+class LangConverterTest {
 
 	// ---- Boolean ----
 

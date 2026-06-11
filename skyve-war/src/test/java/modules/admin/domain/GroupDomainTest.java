@@ -11,10 +11,10 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
-public class GroupDomainTest extends AbstractH2Test {
+class GroupDomainTest extends AbstractH2Test {
 
 	@Test
-	void dataBuilderCreatesBean() throws Exception {
+	void dataBuilderCreatesBean() {
 		Group bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(Group.MODULE_NAME, Group.DOCUMENT_NAME);
@@ -22,34 +22,34 @@ public class GroupDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void moduleAndDocumentNames() throws Exception {
+	void moduleAndDocumentNames() {
 		Group bean = Group.newInstance();
 		assertEquals("admin", bean.getBizModule());
 		assertEquals("Group", bean.getBizDocument());
 	}
 
 	@Test
-	void nameSetAndGet() throws Exception {
+	void nameSetAndGet() {
 		Group bean = Group.newInstance();
 		bean.setName("Administrators");
 		assertEquals("Administrators", bean.getName());
 	}
 
 	@Test
-	void descriptionSetAndGet() throws Exception {
+	void descriptionSetAndGet() {
 		Group bean = Group.newInstance();
 		bean.setDescription("Admin group description");
 		assertEquals("Admin group description", bean.getDescription());
 	}
 
 	@Test
-	void rolesListInitialized() throws Exception {
+	void rolesListInitialized() {
 		Group bean = Group.newInstance();
 		assertNotNull(bean.getRoles());
 	}
 
 	@Test
-	void addAndRemoveRolesElement() throws Exception {
+	void addAndRemoveRolesElement() {
 		Group bean = Group.newInstance();
 		GroupRole role = GroupRole.newInstance();
 		role.setRoleName("admin.BasicUser");
@@ -60,7 +60,7 @@ public class GroupDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void addRolesElementAtIndex() throws Exception {
+	void addRolesElementAtIndex() {
 		Group bean = Group.newInstance();
 		GroupRole role = GroupRole.newInstance();
 		role.setRoleName("admin.BasicUser");
@@ -71,13 +71,13 @@ public class GroupDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void candidateRolesListInitialized() throws Exception {
+	void candidateRolesListInitialized() {
 		Group bean = Group.newInstance();
 		assertNotNull(bean.getCandidateRoles());
 	}
 
 	@Test
-	void addAndRemoveCandidateRolesElement() throws Exception {
+	void addAndRemoveCandidateRolesElement() {
 		Group bean = Group.newInstance();
 		int initialSize = bean.getCandidateRoles().size();
 		GroupRole role = GroupRole.newInstance();
@@ -89,7 +89,7 @@ public class GroupDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void addCandidateRolesElementAtIndex() throws Exception {
+	void addCandidateRolesElementAtIndex() {
 		Group bean = Group.newInstance();
 		int initialSize = bean.getCandidateRoles().size();
 		GroupRole role = GroupRole.newInstance();

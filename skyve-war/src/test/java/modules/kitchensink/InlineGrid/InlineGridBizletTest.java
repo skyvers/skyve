@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import modules.kitchensink.domain.ListAttributes;
 @SuppressWarnings("static-method")
-public class InlineGridBizletTest {
+class InlineGridBizletTest {
 
 	private static final InlineGridBizlet bizlet = new InlineGridBizlet();
 

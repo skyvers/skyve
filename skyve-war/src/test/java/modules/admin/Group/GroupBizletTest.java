@@ -18,7 +18,7 @@ import modules.admin.User.UserService;
 import modules.admin.domain.Group;
 
 @SuppressWarnings("static-method")
-public class GroupBizletTest {
+class GroupBizletTest {
 
 	private static final GroupBizlet bizlet = new GroupBizlet();
 

@@ -10,10 +10,10 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
-public class UserProxyDomainTest extends AbstractH2Test {
+class UserProxyDomainTest extends AbstractH2Test {
 
 	@Test
-	void dataBuilderCreatesBean() throws Exception {
+	void dataBuilderCreatesBean() {
 		UserProxy bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME);
@@ -21,34 +21,34 @@ public class UserProxyDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void moduleAndDocumentNames() throws Exception {
+	void moduleAndDocumentNames() {
 		UserProxy bean = UserProxy.newInstance();
 		assertEquals("admin", bean.getBizModule());
 		assertEquals("UserProxy", bean.getBizDocument());
 	}
 
 	@Test
-	void userNameSetAndGet() throws Exception {
+	void userNameSetAndGet() {
 		UserProxy bean = UserProxy.newInstance();
 		bean.setUserName("proxyuser");
 		assertEquals("proxyuser", bean.getUserName());
 	}
 
 	@Test
-	void inactiveSetAndGet() throws Exception {
+	void inactiveSetAndGet() {
 		UserProxy bean = UserProxy.newInstance();
 		bean.setInactive(Boolean.FALSE);
 		assertEquals(Boolean.FALSE, bean.getInactive());
 	}
 
         @Test
-        void getBizKeyNotNull() throws Exception {
+        void getBizKeyNotNull() {
                 UserProxy bean = UserProxy.newInstance();
                 assertNotNull(bean.getBizKey());
         }
 
         @Test
-        void createdDateTimeSetAndGet() throws Exception {
+        void createdDateTimeSetAndGet() {
                 UserProxy bean = UserProxy.newInstance();
                 org.skyve.domain.types.DateTime now = new org.skyve.domain.types.DateTime();
                 bean.setCreatedDateTime(now);
@@ -67,7 +67,7 @@ public class UserProxyDomainTest extends AbstractH2Test {
         }
 
         @Test
-        void getBizKeyWithContactReturnsFormattedKey() throws Exception {
+        void getBizKeyWithContactReturnsFormattedKey() {
                 UserProxy bean = UserProxy.newInstance();
                 bean.setUserName("testuser");
                 modules.admin.Contact.ContactExtension contact = new modules.admin.Contact.ContactExtension();

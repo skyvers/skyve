@@ -10,10 +10,10 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
-public class CountryDomainTest extends AbstractH2Test {
+class CountryDomainTest extends AbstractH2Test {
 
 	@Test
-	void dataBuilderCreatesBean() throws Exception {
+	void dataBuilderCreatesBean() {
 		Country bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(Country.MODULE_NAME, Country.DOCUMENT_NAME);
@@ -21,14 +21,14 @@ public class CountryDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void moduleAndDocumentNames() throws Exception {
+	void moduleAndDocumentNames() {
 		Country bean = Country.newInstance();
 		assertEquals("admin", bean.getBizModule());
 		assertEquals("Country", bean.getBizDocument());
 	}
 
 	@Test
-	void nameSetAndGet() throws Exception {
+	void nameSetAndGet() {
 		Country bean = Country.newInstance();
 		bean.setName("Australia");
 		assertEquals("Australia", bean.getName());

@@ -16,10 +16,10 @@ import util.AbstractH2Test;
  * Tests for the {@link OrderedGrid} kitchensink domain bean.
  */
 @SuppressWarnings("static-method")
-public class OrderedGridDomainTest extends AbstractH2Test {
+class OrderedGridDomainTest extends AbstractH2Test {
 
 	@Test
-	void dataBuilderCreatesBean() throws Exception {
+	void dataBuilderCreatesBean() {
 		OrderedGrid bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(OrderedGrid.MODULE_NAME, OrderedGrid.DOCUMENT_NAME);
@@ -27,14 +27,14 @@ public class OrderedGridDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void moduleAndDocumentNames() throws Exception {
+	void moduleAndDocumentNames() {
 		OrderedGrid bean = OrderedGrid.newInstance();
 		assertEquals(OrderedGrid.MODULE_NAME, bean.getBizModule());
 		assertEquals(OrderedGrid.DOCUMENT_NAME, bean.getBizDocument());
 	}
 
 	@Test
-	void setAndGetProperties() throws Exception {
+	void setAndGetProperties() {
 		OrderedGrid bean = OrderedGrid.newInstance();
 		bean.setBooleanFlag(Boolean.TRUE);
 		bean.setColour("red");

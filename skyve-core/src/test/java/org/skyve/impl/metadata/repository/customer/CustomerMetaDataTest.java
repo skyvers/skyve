@@ -26,7 +26,7 @@ import org.skyve.metadata.repository.ProvidedRepository;
 class CustomerMetaDataTest {
 
 	@BeforeAll
-	static void setUpRepository() throws Exception {
+	static void setUpRepository() {
 		ProvidedRepository mockRepository = mock(ProvidedRepository.class);
 		Module mockModule = mock(Module.class);
 		when(mockRepository.getModule(any(), any())).thenReturn(mockModule);

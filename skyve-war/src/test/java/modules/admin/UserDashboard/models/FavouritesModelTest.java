@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("static-method")
-public class FavouritesModelTest {
+class FavouritesModelTest {
 
 	@Test
 	void getDescriptionReturnsExpectedValue() throws Exception {

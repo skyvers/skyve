@@ -57,7 +57,7 @@ class MapServletBoundsTest {
 	}
 
 	@Test
-	void mapBoundsRejectsInvalidWktInput() throws Exception {
+	void mapBoundsRejectsInvalidWktInput() {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		when(request.getParameter("_ne")).thenReturn("NOT_A_POINT");
 

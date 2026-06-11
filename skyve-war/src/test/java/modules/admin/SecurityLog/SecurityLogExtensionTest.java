@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.skyve.util.IPGeolocation;
 
 @SuppressWarnings("static-method")
-public class SecurityLogExtensionTest {
+class SecurityLogExtensionTest {
 
 	@Test
 	void isHasLocationWithNullSourceIPReturnsFalse() {

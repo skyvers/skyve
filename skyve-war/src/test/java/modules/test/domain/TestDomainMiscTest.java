@@ -15,7 +15,7 @@ class TestDomainMiscTest extends AbstractH2Test {
         // --- Hierarchical ---
 
         @Test
-        void hierarchicalBizModuleAndDocument() throws Exception {
+        void hierarchicalBizModuleAndDocument() {
                 Hierarchical bean = Hierarchical.newInstance();
                 assertEquals("test", bean.getBizModule());
                 assertEquals("Hierarchical", bean.getBizDocument());
@@ -50,7 +50,7 @@ class TestDomainMiscTest extends AbstractH2Test {
         // --- ArcOneToOne ---
 
         @Test
-        void arcOneToOneBizModuleAndDocument() throws Exception {
+        void arcOneToOneBizModuleAndDocument() {
                 ArcOneToOne bean = ArcOneToOne.newInstance();
                 assertEquals("test", bean.getBizModule());
                 assertEquals("ArcOneToOne", bean.getBizDocument());
@@ -68,7 +68,7 @@ class TestDomainMiscTest extends AbstractH2Test {
         // --- DeleteDuringPostDelete ---
 
         @Test
-        void deleteDuringPostDeleteBizModuleAndDocument() throws Exception {
+        void deleteDuringPostDeleteBizModuleAndDocument() {
                 DeleteDuringPostDelete bean = DeleteDuringPostDelete.newInstance();
                 assertEquals("test", bean.getBizModule());
                 assertEquals("DeleteDuringPostDelete", bean.getBizDocument());
@@ -86,7 +86,7 @@ class TestDomainMiscTest extends AbstractH2Test {
         // --- ArcOneToMany ---
 
         @Test
-        void arcOneToManyBizModuleAndDocument() throws Exception {
+        void arcOneToManyBizModuleAndDocument() {
                 ArcOneToMany bean = ArcOneToMany.newInstance();
                 assertEquals("test", bean.getBizModule());
                 assertEquals("ArcOneToMany", bean.getBizDocument());

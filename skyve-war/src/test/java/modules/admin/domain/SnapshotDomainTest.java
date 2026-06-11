@@ -10,10 +10,10 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
-public class SnapshotDomainTest extends AbstractH2Test {
+class SnapshotDomainTest extends AbstractH2Test {
 
 	@Test
-	void dataBuilderCreatesBean() throws Exception {
+	void dataBuilderCreatesBean() {
 		Snapshot bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(Snapshot.MODULE_NAME, Snapshot.DOCUMENT_NAME);
@@ -21,42 +21,42 @@ public class SnapshotDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void moduleAndDocumentNames() throws Exception {
+	void moduleAndDocumentNames() {
 		Snapshot bean = Snapshot.newInstance();
 		assertEquals("admin", bean.getBizModule());
 		assertEquals("Snapshot", bean.getBizDocument());
 	}
 
 	@Test
-	void moduleNameSetAndGet() throws Exception {
+	void moduleNameSetAndGet() {
 		Snapshot bean = Snapshot.newInstance();
 		bean.setModuleName("admin");
 		assertEquals("admin", bean.getModuleName());
 	}
 
 	@Test
-	void queryNameSetAndGet() throws Exception {
+	void queryNameSetAndGet() {
 		Snapshot bean = Snapshot.newInstance();
 		bean.setQueryName("qUsers");
 		assertEquals("qUsers", bean.getQueryName());
 	}
 
 	@Test
-	void nameSetAndGet() throws Exception {
+	void nameSetAndGet() {
 		Snapshot bean = Snapshot.newInstance();
 		bean.setName("My snapshot");
 		assertEquals("My snapshot", bean.getName());
 	}
 
 	@Test
-	void snapshotDataSetAndGet() throws Exception {
+	void snapshotDataSetAndGet() {
 		Snapshot bean = Snapshot.newInstance();
 		bean.setSnapshot("{\"filter\":{}}");
 		assertEquals("{\"filter\":{}}", bean.getSnapshot());
 	}
 
 	@Test
-	void ordinalSetAndGet() throws Exception {
+	void ordinalSetAndGet() {
 		Snapshot bean = Snapshot.newInstance();
 		bean.setOrdinal(Integer.valueOf(3));
 		assertEquals(Integer.valueOf(3), bean.getOrdinal());

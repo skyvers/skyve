@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.skyve.util.IPGeolocation;
 
 @SuppressWarnings("static-method")
-public class UserLoginRecordExtensionTest {
+class UserLoginRecordExtensionTest {
 
 	@Test
 	void getCountryNameWithNullCountryCodeReturnsNull() {

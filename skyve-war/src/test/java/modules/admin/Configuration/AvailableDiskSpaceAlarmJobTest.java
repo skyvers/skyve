@@ -12,7 +12,7 @@ import modules.admin.domain.Configuration;
 import modules.admin.domain.Generic;
 
 @SuppressWarnings("static-method")
-public class AvailableDiskSpaceAlarmJobTest {
+class AvailableDiskSpaceAlarmJobTest {
 
 	@Test
 	void cancelReturnsNull() {

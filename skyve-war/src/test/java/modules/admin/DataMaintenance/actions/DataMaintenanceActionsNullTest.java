@@ -8,7 +8,7 @@ import org.skyve.domain.messages.ValidationException;
 import modules.admin.DataMaintenance.DataMaintenanceExtension;
 
 @SuppressWarnings("static-method")
-public class DataMaintenanceActionsNullTest {
+class DataMaintenanceActionsNullTest {
 
 	@Test
 	void truncateWithNullConfirmPasswordThrowsValidationException() {

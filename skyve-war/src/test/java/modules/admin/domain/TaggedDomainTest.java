@@ -12,10 +12,10 @@ import modules.admin.Tag.TagExtension;
 import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
-public class TaggedDomainTest extends AbstractH2Test {
+class TaggedDomainTest extends AbstractH2Test {
 
 	@Test
-	void dataBuilderCreatesBean() throws Exception {
+	void dataBuilderCreatesBean() {
 		Tagged bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(Tagged.MODULE_NAME, Tagged.DOCUMENT_NAME);
@@ -23,35 +23,35 @@ public class TaggedDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void moduleAndDocumentNames() throws Exception {
+	void moduleAndDocumentNames() {
 		Tagged bean = Tagged.newInstance();
 		assertEquals("admin", bean.getBizModule());
 		assertEquals("Tagged", bean.getBizDocument());
 	}
 
 	@Test
-	void taggedModuleSetAndGet() throws Exception {
+	void taggedModuleSetAndGet() {
 		Tagged bean = Tagged.newInstance();
 		bean.setTaggedModule("admin");
 		assertEquals("admin", bean.getTaggedModule());
 	}
 
 	@Test
-	void taggedDocumentSetAndGet() throws Exception {
+	void taggedDocumentSetAndGet() {
 		Tagged bean = Tagged.newInstance();
 		bean.setTaggedDocument("User");
 		assertEquals("User", bean.getTaggedDocument());
 	}
 
 	@Test
-	void taggedBizIdSetAndGet() throws Exception {
+	void taggedBizIdSetAndGet() {
 		Tagged bean = Tagged.newInstance();
 		bean.setTaggedBizId("abc123");
 		assertEquals("abc123", bean.getTaggedBizId());
 	}
 
 	@Test
-	void tagSetAndGet() throws Exception {
+	void tagSetAndGet() {
 		Tagged bean = Tagged.newInstance();
 		TagExtension tag = new TagExtension();
 		tag.setName("MyTag");
@@ -60,14 +60,14 @@ public class TaggedDomainTest extends AbstractH2Test {
 	}
 
 	@Test
-	void tagSetToNullReturnsNull() throws Exception {
+	void tagSetToNullReturnsNull() {
 		Tagged bean = Tagged.newInstance();
 		bean.setTag(null);
 		assertNull(bean.getTag());
 	}
 
         @Test
-        void getBizKeyNotNull() throws Exception {
+        void getBizKeyNotNull() {
                 Tagged bean = Tagged.newInstance();
                 assertNotNull(bean.getBizKey());
         }

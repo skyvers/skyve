@@ -9,7 +9,7 @@ import org.skyve.domain.messages.ValidationException;
 import modules.admin.domain.CommunicationTemplate;
 
 @SuppressWarnings("static-method")
-public class CommunicationTemplateBizletTest {
+class CommunicationTemplateBizletTest {
 
 	private static final CommunicationTemplateBizlet bizlet = new CommunicationTemplateBizlet();
 
