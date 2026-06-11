@@ -28,6 +28,7 @@ public class ObserverMetaDataImpl implements ObserverMetaData {
 	 * The fully qualified classname of the observer implementation.
 	 */
 	private String className;
+	@SuppressWarnings("java:S3077") // Double-checked locking needs volatile for safe publication of the observer reference.
 	private volatile Observer observer;
 
 	/**

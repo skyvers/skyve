@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.io.Writer;
 import java.text.MessageFormat;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -142,11 +143,11 @@ public class Util {
 	
 	// language code -> (key -> string)
 	// Use of this map is WAY faster than using ResourceBundle which sux arse.
-	// This map is synchronized on during the put but reads are left free.
-	// The usage of this map is almost always read.
 	// The map is keyed on language code because there are less language codes than locales.
-	// NB Make the map volatile to ensure it is readable by multiple threads.
-	private static volatile Map<String, Map<String, String>> I18N_PROPERTIES = new TreeMap<>();
+	// NB Copy-on-write publication keeps reads lock-free and avoids concurrent TreeMap mutation.
+	private static final Object I18N_PROPERTIES_LOCK = new Object();
+	@SuppressWarnings("java:S3077") // Copy-on-write publishes immutable map snapshots through this volatile reference.
+	private static volatile Map<String, Map<String, String>> I18N_PROPERTIES = Collections.emptyMap();
 	
 	/**
 	 * Internationalises a string for a particular locale and performs message formatting on tokens like {0}, {1} etc.
@@ -160,7 +161,7 @@ public class Util {
 			String lang = l.getLanguage();
 			Map<String, String> properties = I18N_PROPERTIES.get(lang);
 			if (properties == null) {
-				synchronized (I18N_PROPERTIES) {
+				synchronized (I18N_PROPERTIES_LOCK) {
 					properties = I18N_PROPERTIES.get(lang);
 					if (properties == null) {
 						ResourceBundle bundle = ResourceBundle.getBundle("resources.i18n", l, Thread.currentThread().getContextClassLoader());
@@ -168,8 +169,14 @@ public class Util {
 						for (String bundleKey : bundle.keySet()) {
 							properties.put(bundleKey, bundle.getString(bundleKey));
 						}
+						// Make sure the properties are unmodifiable
+						properties = Collections.unmodifiableMap(properties);
 						ResourceBundle.clearCache(Thread.currentThread().getContextClassLoader());
-						I18N_PROPERTIES.put(lang, properties);
+
+						// Copy-on-write publication of the new unmodifiable properties map
+						Map<String, Map<String, String>> updatedProperties = new TreeMap<>(I18N_PROPERTIES);
+						updatedProperties.put(lang, properties);
+						I18N_PROPERTIES = Collections.unmodifiableMap(updatedProperties);
 					}
 				}
 			}
@@ -347,6 +354,7 @@ public class Util {
 		return ((UtilImpl.SUPPORT_EMAIL_ADDRESS == null) ? "" : UtilImpl.SUPPORT_EMAIL_ADDRESS);
 	}
 
+	@SuppressWarnings("java:S3077") // Double-checked locking publishes an immutable Boolean reference.
 	private static volatile Boolean secureUrl = null;
 	
 	public static boolean isSecureUrl() {

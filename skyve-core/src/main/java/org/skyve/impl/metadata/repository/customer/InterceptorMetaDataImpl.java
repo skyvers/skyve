@@ -28,6 +28,7 @@ public class InterceptorMetaDataImpl implements InterceptorMetaData {
 	 * The fully qualified classname of the interceptor implementation.
 	 */
 	private String className;
+	@SuppressWarnings("java:S3077") // Double-checked locking needs volatile for safe publication of the interceptor reference.
 	private volatile Interceptor interceptor;
 
 	/**
