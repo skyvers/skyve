@@ -47,6 +47,7 @@ Follow the tier ordering in [../coverage-plan.md](../coverage-plan.md):
 - If you changed Java code, metadata, generators, or packaging behaviour, run the narrowest meaningful validation first and widen from there.
 - `mvn -B package` from the repository root is the baseline CI-aligned build.
 - Surefire unit tests run by default; failsafe integration tests are skipped by default via the root Maven properties unless explicitly enabled.
+- JUnit 5 test methods must be instance methods, not `static`, even though Jupiter can execute static tests. Use `@SuppressWarnings("static-method")` on the method or class when Eclipse/JDT flags pure assertion tests.
 - Some higher-cost test suites live under SAIL/integration-oriented packages. Run them when the touched behaviour warrants it, but do not claim they ran if you only executed unit/module tests.
 - In H2-backed framework tests, prefer existing test bases such as `AbstractH2Test`, `AbstractDomainTest`, or `AbstractActionTest` when they fit the change.
 - When creating real Skyve document instances, prefer the generated `DocumentName.newInstance()` path rather than calling constructors directly. In database-backed tests, prefer `DataBuilder` for valid fixture graphs when the surrounding code already follows that pattern.

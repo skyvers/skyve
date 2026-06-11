@@ -5,16 +5,17 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import org.junit.jupiter.api.Test;
 
+@SuppressWarnings("static-method")
 class SkyveQueryExecuterTest {
 
 	@Test
-	static void cancelQueryIsNotSupported() throws Exception {
+	void cancelQueryIsNotSupported() throws Exception {
 		SkyveQueryExecuter executer = new SkyveQueryExecuter("admin.Contact");
 		assertFalse(executer.cancelQuery());
 	}
 
 	@Test
-	static void closeDoesNothing() {
+	void closeDoesNothing() {
 		SkyveQueryExecuter executer = new SkyveQueryExecuter("admin.Contact");
 		assertDoesNotThrow(executer::close);
 	}

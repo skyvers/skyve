@@ -18,6 +18,7 @@ import net.sf.jasperreports.engine.JRDataset;
 import net.sf.jasperreports.engine.JRField;
 import net.sf.jasperreports.engine.JRQuery;
 
+@SuppressWarnings("static-method")
 class SkyveFieldProvidersTest {
 	private static JRDataset dataset(String queryText) {
 		JRQuery query = mock(JRQuery.class);
@@ -29,13 +30,12 @@ class SkyveFieldProvidersTest {
 	}
 
 	@AfterEach
-	@SuppressWarnings("static-method")
 	void clearAppsJarDirectory() {
 		UtilImpl.APPS_JAR_DIRECTORY = null;
 	}
 
 	@Test
-	static void skyveQueryFieldsProviderReportsNoDesignerSupport() throws Exception {
+	void skyveQueryFieldsProviderReportsNoDesignerSupport() throws Exception {
 		SkyveQueryFieldsProvider provider = new SkyveQueryFieldsProvider();
 		assertNull(provider.designQuery(null, null, null));
 		assertNull(provider.getEditorComponent(null));
@@ -46,7 +46,7 @@ class SkyveFieldProvidersTest {
 	}
 
 	@Test
-	static void skyveDocumentFieldsProviderReportsNoDesignerSupport() throws Exception {
+	void skyveDocumentFieldsProviderReportsNoDesignerSupport() throws Exception {
 		SkyveDocumentFieldsProvider provider = new SkyveDocumentFieldsProvider();
 		assertNull(provider.designQuery(null, null, null));
 		assertNull(provider.getEditorComponent(null));
@@ -57,7 +57,7 @@ class SkyveFieldProvidersTest {
 	}
 
 	@Test
-	static void skyveDocumentFieldsProviderResolvesDocumentMetadata() throws Exception {
+	void skyveDocumentFieldsProviderResolvesDocumentMetadata() throws Exception {
 		UtilImpl.APPS_JAR_DIRECTORY = skyveWarMainJava().toString().replace('\\', '/') + '/';
 		JRField[] fields = new SkyveDocumentFieldsProvider().getFields(null, dataset("admin.DocumentNumber"), null);
 
