@@ -14,9 +14,10 @@ import org.skyve.impl.util.UtilImpl;
 
 import modules.admin.Contact.ContactExtension;
 import modules.admin.User.UserExtension;
+import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
-class SelfRegistrationExtensionTest {
+class SelfRegistrationExtensionTest extends AbstractH2Test {
 	@AfterEach
 	void clearCaptchaKeys() {
 		UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY = null;

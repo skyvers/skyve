@@ -6,9 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import org.junit.jupiter.api.Test;
 
 import modules.kitchensink.domain.ListAttributes;
+import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
-public class ListAttributesBizletTest {
+public class ListAttributesBizletTest extends AbstractH2Test {
 
 	private static final ListAttributesBizlet bizlet = new ListAttributesBizlet();
 

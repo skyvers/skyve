@@ -9,9 +9,10 @@ import org.junit.jupiter.api.Assertions;
 import org.skyve.domain.messages.ValidationException;
 
 import modules.admin.domain.Communication;
+import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
-class CommunicationBizletTest {
+class CommunicationBizletTest extends AbstractH2Test {
 
 	private static final CommunicationBizlet bizlet = new CommunicationBizlet();
 

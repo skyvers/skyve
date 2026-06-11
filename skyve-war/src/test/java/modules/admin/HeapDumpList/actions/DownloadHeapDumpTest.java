@@ -6,9 +6,10 @@ import org.junit.jupiter.api.Test;
 import org.skyve.domain.messages.ValidationException;
 
 import modules.admin.domain.HeapDumpList;
+import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
-public class DownloadHeapDumpTest {
+public class DownloadHeapDumpTest extends AbstractH2Test {
 
 	@Test
 	void prepareWithNonExistentFileThrowsValidationException() {
