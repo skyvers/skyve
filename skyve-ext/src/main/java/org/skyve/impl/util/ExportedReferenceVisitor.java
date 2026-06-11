@@ -41,6 +41,11 @@ public abstract class ExportedReferenceVisitor {
 
     private static final Logger QUERY_LOGGER = Category.QUERY.logger();
 
+    private static final String UPDATE_SQL = "update ";
+	private static final String SET_SQL = " set ";
+	private static final String WHERE_SQL = " where ";
+	private static final String PARAMETER_EQUALS_SQL = " = :";
+
 	public void visit(Bean bean)
 	throws Exception {
 		CustomerImpl c = (CustomerImpl) CORE.getUser().getCustomer();
@@ -237,15 +242,15 @@ public abstract class ExportedReferenceVisitor {
 				if (! CollectionType.child.equals(referenceType)) {
 					StringBuilder statement = new StringBuilder(64);
 					if ((newBizId != null) && (exportedReference.isRequired())) {
-						statement.append("update ");
+						statement.append(UPDATE_SQL);
 						@SuppressWarnings("null") // tested early in CascadeDeleteBeanVisitor
 						String persistentIdentifier = referenceDocument.getPersistent().getPersistentIdentifier();
 						statement.append(persistentIdentifier);
 						statement.append('_').append(exportedReference.getReferenceFieldName());
-						statement.append(" set ").append(PersistentBean.OWNER_COLUMN_NAME);
-						statement.append(" = :").append(PersistentBean.OWNER_COLUMN_NAME);
-						statement.append(" where ").append(PersistentBean.ELEMENT_COLUMN_NAME);
-						statement.append(" = :").append(Bean.DOCUMENT_ID);
+						statement.append(SET_SQL).append(PersistentBean.OWNER_COLUMN_NAME);
+						statement.append(PARAMETER_EQUALS_SQL).append(PersistentBean.OWNER_COLUMN_NAME);
+						statement.append(WHERE_SQL).append(PersistentBean.ELEMENT_COLUMN_NAME);
+						statement.append(PARAMETER_EQUALS_SQL).append(Bean.DOCUMENT_ID);
 						if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(statement.toString());
 						logger.debug(statement.toString());
 						SQL sql = CORE.getPersistence().newSQL(statement.toString());
@@ -259,7 +264,7 @@ public abstract class ExportedReferenceVisitor {
 						String persistentIdentifier = referenceDocument.getPersistent().getPersistentIdentifier();
 						statement.append(persistentIdentifier);
 						statement.append('_').append(exportedReference.getReferenceFieldName());
-						statement.append(" where ").append(PersistentBean.ELEMENT_COLUMN_NAME).append(" = :").append(Bean.DOCUMENT_ID);
+						statement.append(WHERE_SQL).append(PersistentBean.ELEMENT_COLUMN_NAME).append(PARAMETER_EQUALS_SQL).append(Bean.DOCUMENT_ID);
 						if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(statement.toString());
 						logger.debug(statement.toString());
 						CORE.getPersistence().newSQL(statement.toString()).putParameter(Bean.DOCUMENT_ID, bizId, false).execute();
@@ -271,9 +276,9 @@ public abstract class ExportedReferenceVisitor {
 				StringBuilder statement = new StringBuilder(64);
 				@SuppressWarnings("null") // tested early in CascadeDeleteBeanVisitor
 				String persistentIdentifier = referenceDocument.getPersistent().getPersistentIdentifier();
-				statement.append("update ").append(persistentIdentifier);
-				statement.append(" set ").append(referenceFieldName).append("_id = :newBizId");
-				statement.append(" where ").append(referenceFieldName).append("_id = :").append(Bean.DOCUMENT_ID);
+				statement.append(UPDATE_SQL).append(persistentIdentifier);
+				statement.append(SET_SQL).append(referenceFieldName).append("_id = :newBizId");
+				statement.append(WHERE_SQL).append(referenceFieldName).append("_id = :").append(Bean.DOCUMENT_ID);
 				if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(statement.toString());
 				logger.debug(statement.toString());
 				SQL sql = CORE.getPersistence().newSQL(statement.toString());
@@ -293,9 +298,9 @@ public abstract class ExportedReferenceVisitor {
 				StringBuilder statement = new StringBuilder(64);
 				@SuppressWarnings("null") // tested early in CascadeDeleteBeanVisitor if hierarchical
 				String persistentIdentifier = document.getPersistent().getPersistentIdentifier();
-				statement.append("update ").append(persistentIdentifier);
-				statement.append(" set ").append(HierarchicalBean.PARENT_ID).append(" = :newBizId");
-				statement.append(" where ").append(HierarchicalBean.PARENT_ID).append(" = :").append(Bean.DOCUMENT_ID);
+				statement.append(UPDATE_SQL).append(persistentIdentifier);
+				statement.append(SET_SQL).append(HierarchicalBean.PARENT_ID).append(" = :newBizId");
+				statement.append(WHERE_SQL).append(HierarchicalBean.PARENT_ID).append(PARAMETER_EQUALS_SQL).append(Bean.DOCUMENT_ID);
 				if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(statement.toString());
 				logger.debug(statement.toString());
 				SQL sql = CORE.getPersistence().newSQL(statement.toString());

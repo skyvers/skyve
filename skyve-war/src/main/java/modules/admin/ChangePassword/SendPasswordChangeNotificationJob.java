@@ -25,6 +25,7 @@ import modules.admin.domain.UserProxy;
  * @author Simeon Solomou
  */
 public class SendPasswordChangeNotificationJob extends Job {
+	private static final String BINDING_HTML_BREAK_SUFFIX = "}<br/>";
 
 	private static final String EMAIL_DESCRIPTION_GEOIP_ENABLED = "SYSTEM Password Change Notification (GeoIP enabled)";
 	private static final String EMAIL_SUBJECT_GEOIP_ENABLED = "Password change detected";
@@ -32,9 +33,9 @@ public class SendPasswordChangeNotificationJob extends Job {
 			+ BindUtil.createCompoundBinding(UserProxy.contactPropertyName, Contact.namePropertyName)
 			+ "},<br/><br/>"
 			+ "You recently changed your password. To help keep you safe, here are some details:<br/>"
-			+ "Date/Time: {" + User.passwordLastChangedPropertyName + "}<br/>"
-			+ "IP Address: {" + User.passwordLastChangedIPPropertyName + "}<br/>"
-			+ "Country: {" + User.passwordLastChangedCountryCodePropertyName + "} - {" + User.passwordLastChangedCountryNamePropertyName + "}<br/>"
+			+ "Date/Time: {" + User.passwordLastChangedPropertyName + BINDING_HTML_BREAK_SUFFIX
+			+ "IP Address: {" + User.passwordLastChangedIPPropertyName + BINDING_HTML_BREAK_SUFFIX
+			+ "Country: {" + User.passwordLastChangedCountryCodePropertyName + "} - {" + User.passwordLastChangedCountryNamePropertyName + BINDING_HTML_BREAK_SUFFIX
 			+ "<br/>"
 			+ "If this was you, then you can safely ignore this email.<br/>"
 			+ "If you are not sure if this was you, please contact us <a href=\"mailto: {"
@@ -47,8 +48,8 @@ public class SendPasswordChangeNotificationJob extends Job {
 			+ BindUtil.createCompoundBinding(UserProxy.contactPropertyName, Contact.namePropertyName)
 			+ "},<br/><br/>"
 			+ "You recently changed your password. To help keep you safe, here are some details:<br/>"
-			+ "Date/Time: {" + User.passwordLastChangedPropertyName + "}<br/>"
-			+ "IP Address: {" + User.passwordLastChangedIPPropertyName + "}<br/>"
+			+ "Date/Time: {" + User.passwordLastChangedPropertyName + BINDING_HTML_BREAK_SUFFIX
+			+ "IP Address: {" + User.passwordLastChangedIPPropertyName + BINDING_HTML_BREAK_SUFFIX
 			+ "<br/>"
 			+ "If this was you, then you can safely ignore this email.<br/>"
 			+ "If you are not sure if this was you, please contact us <a href=\"mailto: {"

@@ -32,6 +32,7 @@ import com.squareup.javapoet.TypeSpec;
  * <p>Threading: this mojo reads and writes project sources and should be treated as thread-confined.
  */
 @Mojo(name = "newAction")
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate scaffolded action source fragments.
 public class NewActionMojo extends AbstractSkyveMojo {
 
 	/**

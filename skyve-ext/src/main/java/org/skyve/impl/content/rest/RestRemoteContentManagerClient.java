@@ -45,6 +45,7 @@ import org.skyve.util.logging.SkyveLoggerFactory;
  */
 public class RestRemoteContentManagerClient extends AbstractContentManager {
 	private static final String REST_CONTENT_PATH = "/rest/content";
+	private static final String TRUNCATE_INDEXING_UNSUPPORTED = "Truncate indexing of a remote content repository is not supported";
 	
 	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(RestRemoteContentManagerClient.class);
 	
@@ -158,17 +159,17 @@ public class RestRemoteContentManagerClient extends AbstractContentManager {
 	
 	@Override
 	public void truncateIndexing(String customerName) throws Exception {
-		throw new UnsupportedOperationException("Truncate indexing of a remote content repository is not supported");
+		throw new UnsupportedOperationException(TRUNCATE_INDEXING_UNSUPPORTED);
 	}
 
 	@Override
 	public void truncateAttachmentIndexing(String customerName) throws Exception {
-		throw new UnsupportedOperationException("Truncate indexing of a remote content repository is not supported");
+		throw new UnsupportedOperationException(TRUNCATE_INDEXING_UNSUPPORTED);
 	}
 
 	@Override
 	public void truncateBeanIndexing(String customerName) throws Exception {
-		throw new UnsupportedOperationException("Truncate indexing of a remote content repository is not supported");
+		throw new UnsupportedOperationException(TRUNCATE_INDEXING_UNSUPPORTED);
 	}
 
 	@Override

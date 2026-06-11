@@ -30,6 +30,10 @@ import org.skyve.tag.TagManager;
  */
 public class DefaultTagManager implements TagManager {
 	private static final DefaultTagManager INSTANCE = new DefaultTagManager();
+
+	private static final String TAG_ATTRIBUTE_QUERY_PREFIX = "where bean.%s.%s = :%s ";
+	private static final String TAG_QUERY_AND_WITH_SPACE = "and bean.%s = :%s ";
+	private static final String TAG_QUERY_AND = "and bean.%s = :%s";
 	
 	/**
 	 * Returns the singleton instance.
@@ -123,11 +127,11 @@ public class DefaultTagManager implements TagManager {
 		User user = persistence.getUser();
 
 		BizQL deleteStatement = persistence.newBizQL(String.format("delete from {%s.%s} as bean " +
-																	"where bean.%s.%s = :%s " +
-																	"and bean.%s = :%s " +
-																	"and bean.%s = :%s " +
-																	"and bean.%s = :%s " +
-																	"and bean.%s = :%s",
+																	TAG_ATTRIBUTE_QUERY_PREFIX +
+																	TAG_QUERY_AND_WITH_SPACE +
+																	TAG_QUERY_AND_WITH_SPACE +
+																	TAG_QUERY_AND_WITH_SPACE +
+																	TAG_QUERY_AND,
 																		AppConstants.ADMIN_MODULE_NAME,
 																		AppConstants.TAGGED_DOCUMENT_NAME,
 																		AppConstants.TAG_ATTRIBUTE_NAME,
@@ -290,8 +294,8 @@ public class DefaultTagManager implements TagManager {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		User user = persistence.getUser();
 		BizQL deleteStatement = persistence.newBizQL(String.format("delete from {%s.%s} as bean " +
-																	"where bean.%s.%s = :%s " +
-																	"and bean.%s = :%s",
+																	TAG_ATTRIBUTE_QUERY_PREFIX +
+																	TAG_QUERY_AND,
 																		AppConstants.ADMIN_MODULE_NAME,
 																		AppConstants.TAGGED_DOCUMENT_NAME,
 																		AppConstants.TAG_ATTRIBUTE_NAME,
@@ -321,8 +325,8 @@ public class DefaultTagManager implements TagManager {
 																"bean.%s as %s, " + 
 																"bean.%s as %s " +
 															"from {%s.%s} as bean " + 
-															"where bean.%s.%s = :%s " +
-															"and bean.%s = :%s",
+															TAG_ATTRIBUTE_QUERY_PREFIX +
+															TAG_QUERY_AND,
 																AppConstants.TAGGED_MODULE_ATTRIBUTE_NAME,
 																AppConstants.TAGGED_MODULE_ATTRIBUTE_NAME,
 																AppConstants.TAGGED_DOCUMENT_ATTRIBUTE_NAME,

@@ -39,6 +39,7 @@ import jakarta.servlet.http.HttpServletRequest;
  */
 @Named("menu")
 @SessionScoped
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate menu URL rendering fragments.
 public class MenuView extends HarnessView {
 	private static final long serialVersionUID = -7523306130675202901L;
 

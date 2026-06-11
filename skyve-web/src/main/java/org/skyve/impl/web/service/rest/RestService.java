@@ -58,6 +58,12 @@ import jakarta.ws.rs.core.MediaType;
 public class RestService {
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(RestService.class);
 
+    private static final String READ_DATA_PERMISSION = "read this data";
+	private static final String BEAN_PATH_PARAM = "bean";
+	private static final String DOCUMENT_PATH_PARAM = "document";
+	private static final String ID_PATH_PARAM = "id";
+	private static final String MODULE_PATH_PARAM = "module";
+
 	@Context
 	private HttpServletRequest request;
 	@Context
@@ -74,9 +80,9 @@ public class RestService {
 	@GET
 	@Path("/json/{module}/{document}/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String retrieveJSON(@PathParam("module") String module, 
-								@PathParam("document") String document,
-								@PathParam("id") String id) {
+	public String retrieveJSON(@PathParam(MODULE_PATH_PARAM) String module,
+								@PathParam(DOCUMENT_PATH_PARAM) String document,
+								@PathParam(ID_PATH_PARAM) String id) {
 		String result = null;
 		Bean bean = null;
 		
@@ -90,7 +96,7 @@ public class RestService {
 			Document d = m.getDocument(c, document);
 			
 			if (! u.canReadDocument(d)) {
-				throw new SecurityException("read this data", u.getName());
+				throw new SecurityException(READ_DATA_PERMISSION, u.getName());
 			}
 	
 	    	bean = p.retrieve(d, id);
@@ -118,9 +124,9 @@ public class RestService {
 	@GET
 	@Path("/xml/{module}/{document}/{id}")
 	@Produces(MediaType.APPLICATION_XML)
-	public Bean retrieveXML(@PathParam("module") String module, 
-										@PathParam("document") String document,
-										@PathParam("id") String id) {
+	public Bean retrieveXML(@PathParam(MODULE_PATH_PARAM) String module,
+										@PathParam(DOCUMENT_PATH_PARAM) String document,
+										@PathParam(ID_PATH_PARAM) String id) {
 		Bean result = null;
 		
 		Persistence p = null;
@@ -133,7 +139,7 @@ public class RestService {
 			Document d = m.getDocument(c, document);
 			
 			if (! u.canReadDocument(d)) {
-				throw new SecurityException("read this data", u.getName());
+				throw new SecurityException(READ_DATA_PERMISSION, u.getName());
 			}
 	
 	    	result = p.retrieve(d, id);
@@ -161,8 +167,8 @@ public class RestService {
 	@GET
 	@Path("/json/{module}/{document}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String retrieveJSON(@PathParam("module") String module, 
-								@PathParam("document") String document,
+	public String retrieveJSON(@PathParam(MODULE_PATH_PARAM) String module,
+								@PathParam(DOCUMENT_PATH_PARAM) String document,
 								@QueryParam("start") int start,
 								@QueryParam("end") int end) {
 		String result = null;
@@ -178,7 +184,7 @@ public class RestService {
 			Document d = m.getDocument(c, document);
 			
 			if (! u.canReadDocument(d)) {
-				throw new SecurityException("read this data", u.getName());
+				throw new SecurityException(READ_DATA_PERMISSION, u.getName());
 			}
 			
 	    	DocumentQuery q = p.newDocumentQuery(d);
@@ -206,7 +212,7 @@ public class RestService {
 	@GET
 	@Path("/json/insert/{bean}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String insertJSONGet(@PathParam("bean") String json) {
+	public String insertJSONGet(@PathParam(BEAN_PATH_PARAM) String json) {
 		return insertJSON(json);
 	}
 
@@ -259,7 +265,7 @@ public class RestService {
 	@GET
 	@Path("/json/update/{bean}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String updateJSONGet(@PathParam("bean") String json) {
+	public String updateJSONGet(@PathParam(BEAN_PATH_PARAM) String json) {
 		return updateJSON(json);
 	}
 
@@ -314,7 +320,7 @@ public class RestService {
 	@GET
 	@Path("/json/delete/{bean}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String deleteJSONGet(@PathParam("bean") String json) {
+	public String deleteJSONGet(@PathParam(BEAN_PATH_PARAM) String json) {
 		return deleteJSON(json);
 	}
 	
@@ -363,8 +369,8 @@ public class RestService {
 	@GET
 	@Path("/xml/{module}/{document}")
 	@Produces(MediaType.APPLICATION_XML)
-	public List<Bean> retrieveXML(@PathParam("module") String module, 
-								@PathParam("document") String document,
+	public List<Bean> retrieveXML(@PathParam(MODULE_PATH_PARAM) String module,
+								@PathParam(DOCUMENT_PATH_PARAM) String document,
 								@QueryParam("start") int start,
 								@QueryParam("end") int end) throws Throwable {
 		response.setContentType(MediaType.APPLICATION_XML);
@@ -384,7 +390,7 @@ public class RestService {
 	@GET
 	@Path("/json/query/{module}/{documentOrQuery}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String query(@PathParam("module") String module,
+	public String query(@PathParam(MODULE_PATH_PARAM) String module,
 							@PathParam("documentOrQuery") String documentOrQuery,
 							@QueryParam("start") int start,
 							@QueryParam("end") int end) {
@@ -411,7 +417,7 @@ public class RestService {
 	
 	        Document d = qm.getDrivingDocument();
 			if (! u.canReadDocument(d)) {
-				throw new SecurityException("read this data", u.getName());
+				throw new SecurityException(READ_DATA_PERMISSION, u.getName());
 			}
 	        
 	        List<Bean> beans = qm.fetch().getRows();
@@ -507,9 +513,9 @@ public class RestService {
 	@Consumes(MediaType.TEXT_PLAIN)
 	@Produces(MediaType.TEXT_PLAIN)
 	public String insertContent(@PathParam("customer") String customer,
-								@PathParam("module") String module,
-								@PathParam("document") String document,
-								@PathParam("id") String id,
+								@PathParam(MODULE_PATH_PARAM) String module,
+								@PathParam(DOCUMENT_PATH_PARAM) String document,
+								@PathParam(ID_PATH_PARAM) String id,
 								@PathParam("attributeName") String attributeName,
 								@PathParam("contentType") String contentType,
 								String encodedContent) {

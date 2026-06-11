@@ -93,6 +93,7 @@ import jakarta.inject.Named;
  */
 @ViewScoped
 @Named("skyve")
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate Faces view rendering/logging fragments.
 public class FacesView extends HarnessView {
 	private static final long serialVersionUID = 3331890232012703780L;
 

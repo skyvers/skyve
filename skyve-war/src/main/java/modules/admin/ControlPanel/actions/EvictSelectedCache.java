@@ -21,6 +21,8 @@ import modules.admin.ControlPanel.ControlPanelExtension;
  * Evicts selected cache regions from the configured cache provider.
  */
 public class EvictSelectedCache implements ServerSideAction<ControlPanelExtension> {
+	private static final String CACHE_CLEARED_SUFFIX = " has been cleared";
+
 	/**
 	 * Performs the execute operation.
 	 * @param bean the bean value
@@ -39,22 +41,22 @@ public class EvictSelectedCache implements ServerSideAction<ControlPanelExtensio
 			if (UtilImpl.CONVERSATION_CACHE.getName().equals(cacheName)) {
 				Cache<? extends Serializable, ? extends Serializable> cache = caching.getEHCache(cacheName, UtilImpl.CONVERSATION_CACHE.getKeyClass(), UtilImpl.CONVERSATION_CACHE.getValueClass());
 				cache.clear();
-				webContext.growl(MessageSeverity.info, "Cache " + cacheName + " has been cleared");
+				growlCacheCleared(webContext, cacheName);
 			}
 			else if (UtilImpl.CSRF_TOKEN_CACHE.getName().equals(cacheName)) {
 				Cache<? extends Serializable, ? extends Serializable> cache = caching.getEHCache(cacheName, UtilImpl.CSRF_TOKEN_CACHE.getKeyClass(), UtilImpl.CSRF_TOKEN_CACHE.getValueClass());
 				cache.clear();
-				webContext.growl(MessageSeverity.info, "Cache " + cacheName + " has been cleared");
+				growlCacheCleared(webContext, cacheName);
 			}
 			else if (UtilImpl.GEO_IP_CACHE.getName().equals(cacheName)) {
 				Cache<? extends Serializable, ? extends Serializable> cache = caching.getEHCache(cacheName, UtilImpl.GEO_IP_CACHE.getKeyClass(), UtilImpl.GEO_IP_CACHE.getValueClass());
 				cache.clear();
-				webContext.growl(MessageSeverity.info, "Cache " + cacheName + " has been cleared");
+				growlCacheCleared(webContext, cacheName);
 			}
 			else if (UtilImpl.SESSION_CACHE.getName().equals(cacheName)) {
 				Cache<? extends Serializable, ? extends Serializable> cache = caching.getEHCache(cacheName, UtilImpl.SESSION_CACHE.getKeyClass(), UtilImpl.SESSION_CACHE.getValueClass());
 				cache.clear();
-				webContext.growl(MessageSeverity.info, "Cache " + cacheName + " has been cleared");
+				growlCacheCleared(webContext, cacheName);
 			}
 			else {
 				boolean found = false;
@@ -62,9 +64,10 @@ public class EvictSelectedCache implements ServerSideAction<ControlPanelExtensio
 					String hibernateCacheName = c.getName();
 					if (cacheName.equals(hibernateCacheName)) {
 						found = true;
+						@SuppressWarnings("resource")
 						javax.cache.Cache<? extends Serializable, ? extends Serializable> cache = caching.getJCache(cacheName, c.getKeyClass(), c.getValueClass());
 						cache.clear();
-						webContext.growl(MessageSeverity.info, "Cache " + cacheName + " has been cleared");
+						growlCacheCleared(webContext, cacheName);
 						break;
 					}
 				}
@@ -81,7 +84,7 @@ public class EvictSelectedCache implements ServerSideAction<ControlPanelExtensio
 								javax.cache.Cache<? extends Serializable, ? extends Serializable> cache = caching.getJCache(cacheName, c.getKeyClass(), c.getValueClass());
 								cache.clear();
 							}
-							webContext.growl(MessageSeverity.info, "Cache " + cacheName + " has been cleared");
+							growlCacheCleared(webContext, cacheName);
 							break;
 						}
 					}
@@ -89,5 +92,9 @@ public class EvictSelectedCache implements ServerSideAction<ControlPanelExtensio
 			}
 		}
 		return new ServerSideActionResult<>(bean);
+	}
+
+	private static void growlCacheCleared(WebContext webContext, String cacheName) {
+		webContext.growl(MessageSeverity.info, "Cache " + cacheName + CACHE_CLEARED_SUFFIX);
 	}
 }

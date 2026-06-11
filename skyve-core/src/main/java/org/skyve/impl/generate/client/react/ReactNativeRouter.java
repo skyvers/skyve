@@ -23,6 +23,7 @@ import org.skyve.metadata.module.menu.MenuRenderer;
 /**
  * Generates React Native navigation routes for generated views.
  */
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate fragments of generated React Native routing output.
 public class ReactNativeRouter {
 	private static String[] EDIT_VIEW_PARAMS = new String[] {"bizId"};
 

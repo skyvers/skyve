@@ -34,6 +34,8 @@ import org.springframework.stereotype.Component;
 public class SecurityListener {
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SecurityListener.class);
 
+    private static final String UNKNOWN = "unknown";
+
 	/**
 	 * Records failed authentication attempts that qualify for account lockout tracking.
 	 *
@@ -137,19 +139,19 @@ public class SecurityListener {
 						bizCustomer = UtilImpl.processStringValue(username.substring(0, slashIndex));
 					}
 					if (userName == null) {
-						userName = "unknown";
+						userName = UNKNOWN;
 					}
 					if (bizCustomer == null) {
-						bizCustomer = "unknown";
+						bizCustomer = UNKNOWN;
 					}
 				}
 				java.sql.Timestamp now = new java.sql.Timestamp(System.currentTimeMillis());
 				ps.setString(1, UUIDv7.create().toString());
 				ps.setInt(2, 0);
-				ps.setString(3, new OptimisticLock("unknown", now).toString());
+				ps.setString(3, new OptimisticLock(UNKNOWN, now).toString());
 				ps.setString(4, "Failed Login attempt: " + userName + " @ " + TimeUtil.formatISODate(now, false));
 				ps.setString(5, bizCustomer);
-				ps.setString(6, "unknown");
+				ps.setString(6, UNKNOWN);
 				ps.setString(7, userName);
 				ps.setTimestamp(8, new java.sql.Timestamp(System.currentTimeMillis()));
 				ps.setBoolean(9, true);

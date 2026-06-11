@@ -45,6 +45,8 @@ public class SmartClientTextSearchServlet extends HttpServlet {
 
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SmartClientTextSearchServlet.class);
 
+    private static final String DATA_FIELD = "data";
+
 	/**
 	 * Executes SmartClient text-search requests and returns matching indexed content in ISC JSON format.
 	 *
@@ -129,7 +131,7 @@ public class SmartClientTextSearchServlet extends HttpServlet {
 				            row.put("score", Integer.valueOf(result.getScore()));
 				            if (bean == null) { // deleted or otherwise non-existent
 				            	row.put(Bean.BIZ_KEY, null);
-				            	row.put("data", null);
+								row.put(DATA_FIELD, null);
 				            }
 				            else {
 				            	row.put(Bean.BIZ_KEY, bean.getBizKey());
@@ -140,10 +142,10 @@ public class SmartClientTextSearchServlet extends HttpServlet {
 				                    url.append("?m=");
 				                    url.append(moduleName).append("&d=").append(documentName);
 				                    url.append("&i=").append(bizId);
-						            row.put("data", url.toString());
+						            row.put(DATA_FIELD, url.toString());
 				            	}
 				            	else {
-				            		row.put("data", null);
+									row.put(DATA_FIELD, null);
 				            	}
 				            }
 				            if (result.isAttachment()) {

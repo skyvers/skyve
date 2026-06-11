@@ -18,6 +18,10 @@ import jakarta.annotation.Nullable;
  */
 public class LoggingMailService implements MailService {
 	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(LoggingMailService.class);
+
+	private static final String INDENTED_VALUE_LOG = "    {}";
+	private static final String TEST_BOGUS_SEND = "testBogusSend";
+	
 	private final MailService delegate;
 
 	public LoggingMailService(@Nonnull MailService delegate) {
@@ -33,7 +37,7 @@ public class LoggingMailService implements MailService {
 	public void sendMail(@Nonnull Mail mail) {
 		if (UtilImpl.SMTP_TEST_BOGUS_SEND) {
 			logBogusSendMail(mail);
-			MailLogUtil.logMail(mail, MailDispatchOutcome.skipped(resolveProviderName(), "testBogusSend"));
+			MailLogUtil.logMail(mail, MailDispatchOutcome.skipped(resolveProviderName(), TEST_BOGUS_SEND));
 			return;
 		}
 
@@ -52,7 +56,7 @@ public class LoggingMailService implements MailService {
 	public void sendBulkMail(@Nonnull List<Mail> mails) {
 		if (UtilImpl.SMTP_TEST_BOGUS_SEND) {
 			logBogusSendBulkMail(mails);
-			MailLogUtil.logBulkMail(mails, MailDispatchOutcome.skipped(resolveProviderName(), "testBogusSend"));
+			MailLogUtil.logBulkMail(mails, MailDispatchOutcome.skipped(resolveProviderName(), TEST_BOGUS_SEND));
 			return;
 		}
 
@@ -71,7 +75,7 @@ public class LoggingMailService implements MailService {
 	public @Nonnull MailDispatchOutcome dispatchMail(@Nonnull Mail mail) {
 		if (UtilImpl.SMTP_TEST_BOGUS_SEND) {
 			logBogusSendMail(mail);
-			MailDispatchOutcome outcome = MailDispatchOutcome.skipped(resolveProviderName(), "testBogusSend");
+			MailDispatchOutcome outcome = MailDispatchOutcome.skipped(resolveProviderName(), TEST_BOGUS_SEND);
 			MailLogUtil.logMail(mail, outcome);
 			return outcome;
 		}
@@ -94,7 +98,7 @@ public class LoggingMailService implements MailService {
 	public @Nonnull MailDispatchOutcome dispatchBulkMail(@Nonnull List<Mail> mails) {
 		if (UtilImpl.SMTP_TEST_BOGUS_SEND) {
 			logBogusSendBulkMail(mails);
-			MailDispatchOutcome outcome = MailDispatchOutcome.skipped(resolveProviderName(), "testBogusSend");
+			MailDispatchOutcome outcome = MailDispatchOutcome.skipped(resolveProviderName(), TEST_BOGUS_SEND);
 			MailLogUtil.logBulkMail(mails, outcome);
 			return outcome;
 		}
@@ -163,15 +167,15 @@ public class LoggingMailService implements MailService {
 		LOGGER.info("@@@@@@@@@@@@ EMAIL (BOGUS SEND ENABLED) @@@@@@@@@@@@");
 		LOGGER.info("TO:");
 		for (String to : mail.getRecipientEmailAddresses()) {
-			LOGGER.info("    {}", to);
+			LOGGER.info(INDENTED_VALUE_LOG, to);
 		}
 		LOGGER.info("CC:");
 		for (String cc : mail.getCcEmailAddresses()) {
-			LOGGER.info("    {}", cc);
+			LOGGER.info(INDENTED_VALUE_LOG, cc);
 		}
 		LOGGER.info("BCC:");
 		for (String bcc : mail.getBccEmailAddresses()) {
-			LOGGER.info("    {}", bcc);
+			LOGGER.info(INDENTED_VALUE_LOG, bcc);
 		}
 		LOGGER.info("SENDER: {}", mail.getSenderEmailAddress());
 		LOGGER.info("SUBJECT {}", mail.getSubject());

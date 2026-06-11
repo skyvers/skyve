@@ -131,7 +131,6 @@ public class ReindexBeansJob extends CancellableJob {
 	 * @return the current thread-bound persistence implementation
 	 */
 	@SuppressWarnings("static-method")
-	@Generated("test seam")
 	protected AbstractPersistence getPersistence() {
 		return AbstractPersistence.get();
 	}
@@ -143,7 +142,6 @@ public class ReindexBeansJob extends CancellableJob {
 	 * @return the persistent identifier for the dynamic entity table
 	 */
 	@SuppressWarnings("static-method")
-	@Generated("test seam")
 	protected String getDynamicEntityPersistenceIdentifier(Customer customer) {
 		return RDBMSDynamicPersistenceListModel.getDynamicEntityPersistent(customer).getPersistentIdentifier();
 	}
@@ -154,7 +152,6 @@ public class ReindexBeansJob extends CancellableJob {
 	 * @return a new content manager instance
 	 */
 	@SuppressWarnings({"static-method", "resource"})
-	@Generated("test seam")
 	protected ContentManager newContentManager() {
 		return EXT.newContentManager();
 	}

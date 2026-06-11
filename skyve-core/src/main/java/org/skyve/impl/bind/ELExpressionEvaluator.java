@@ -56,9 +56,10 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	public static final String RTEL_PREFIX = "rtel";
 
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ELExpressionEvaluator.class); 
+	private static final String BEAN_VARIABLE = "bean";
 
 	// Regex expressions to find the start of an EL expression
-	private static final String[] COMMENCING_REGEX_TOKENS = new String[] {"bean\\s*\\.",
+	private static final String[] COMMENCING_REGEX_TOKENS = new String[] {BEAN_VARIABLE + "\\s*\\.",
 																		"user\\s*\\.",
 																		"stash\\s*\\[",
 																		"stash\\s*\\.",
@@ -106,7 +107,7 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	// Completes used when we know we are not continuing an expression (with '.' or '[')
 	private static final String[] COMMENCING_COMPLETES = new String[] {"empty",
 																		"concat(",
-																		"bean",
+																		BEAN_VARIABLE,
 																		"user",
 																		"stash",
 																		"newDateOnly()",
@@ -468,7 +469,7 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	private static ELProcessor setupProcessor(@SuppressWarnings("unused") Customer customer, Object bean, Object user, Object stash) {
 		ELProcessor result = new ELProcessor();
 		if (bean != null) {
-			result.defineBean("bean", bean);
+		result.defineBean(BEAN_VARIABLE, bean);
 		}
 		result.defineBean("user", user);
 		result.defineBean("stash", stash);

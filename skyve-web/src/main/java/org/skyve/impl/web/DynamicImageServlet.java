@@ -51,6 +51,10 @@ public class DynamicImageServlet extends HttpServlet {
 	public static final String IMAGE_WIDTH_ZOOM_NAME = "_wz";
 	public static final String IMAGE_HEIGHT_ZOOM_NAME = "_hz";
 
+	private static final String CACHE_CONTROL = "Cache-Control";
+	private static final String CACHE_VALUE = "cache";
+	private static final String NO_CACHE_VALUE = "private,no-cache,no-store";
+
 	/**
 	 * Generates a dynamic image for the current conversation bean and streams the rendered thumbnail response.
 	 *
@@ -173,13 +177,13 @@ public class DynamicImageServlet extends HttpServlet {
 			if (exception == null) { // no problem encountered yet
 				// Set cache header based on image cache time
 				if (cacheTime == null) {
-					response.addHeader("Cache-Control", "private,no-cache,no-store");
+					response.addHeader(CACHE_CONTROL, NO_CACHE_VALUE);
 				}
 				else {
 					// Note this header is first in case there is an arithmetic error
 					response.addDateHeader("Expires", System.currentTimeMillis() + cacheTime.toMillis());
-					response.setHeader("Cache-Control", "cache");
-					response.setHeader("Pragma", "cache");
+					response.setHeader(CACHE_CONTROL, CACHE_VALUE);
+					response.setHeader("Pragma", CACHE_VALUE);
 				}
 			}
 		}
@@ -210,7 +214,7 @@ public class DynamicImageServlet extends HttpServlet {
 			
 			// We've had a problem - don't throw here - just log it as its not a show-stopper if the image doesn't render.
 			if (exception != null) {
-				response.addHeader("Cache-Control", "private,no-cache,no-store");
+				response.addHeader(CACHE_CONTROL, NO_CACHE_VALUE);
 				HTTP_LOGGER.warn("Problem generating the dynamic image", exception);
 	
 				BufferedImage blankImage = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);

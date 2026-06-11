@@ -24,6 +24,8 @@ import modules.admin.domain.ModuleDocument;
  * Applies Data Maintenance document rules and lifecycle behaviour.
  */
 public class DataMaintenanceBizlet extends SingletonCachedBizlet<DataMaintenance> {
+	private static final String MODULE_DOCUMENT_FORMAT = "%s.%s";
+
 	public static final String SYSTEM_DATA_REFRESH_NOTIFICATION = "SYSTEM Document Data Refresh Notification";
 	public static final String SYSTEM_DATA_REFRESH_DEFAULT_SUBJECT = "Perform Document Data Refresh - Complete";
 	public static final String SYSTEM_DATA_REFRESH_DEFAULT_BODY = "The document data refresh is complete."
@@ -47,7 +49,7 @@ public class DataMaintenanceBizlet extends SingletonCachedBizlet<DataMaintenance
 					ModuleDocument doc = ModuleDocument.newInstance();
 					doc.setModuleName(m.getName());
 					doc.setDocumentName(d.getName());
-					doc.setModDocName(String.format("%s.%s", m.getLocalisedTitle(), d.getLocalisedSingularAlias()));
+					doc.setModDocName(String.format(MODULE_DOCUMENT_FORMAT, m.getLocalisedTitle(), d.getLocalisedSingularAlias()));
 					result.getRefreshDocuments().add(doc);
 				}
 			}
@@ -73,8 +75,8 @@ public class DataMaintenanceBizlet extends SingletonCachedBizlet<DataMaintenance
 				for (String k : m.getDocumentRefs().keySet()) {
 					Document d = m.getDocument(c, k);
 					if (d.isPersistable()) {
-						result.add(new DomainValue(String.format("%s.%s", m.getName(), k),
-								String.format("%s.%s", m.getLocalisedTitle(), d.getLocalisedSingularAlias())));
+						result.add(new DomainValue(String.format(MODULE_DOCUMENT_FORMAT, m.getName(), k),
+								String.format(MODULE_DOCUMENT_FORMAT, m.getLocalisedTitle(), d.getLocalisedSingularAlias())));
 					}
 				}
 			}

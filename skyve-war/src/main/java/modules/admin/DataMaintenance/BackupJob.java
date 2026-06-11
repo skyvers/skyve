@@ -21,6 +21,10 @@ import modules.admin.domain.DataMaintenance;
  * Runs background backup generation and records progress for Data Maintenance.
  */
 public class BackupJob extends Job {
+	private static final String COPY_BACKUP_FORMAT = "Copy Backup %s to %s";
+	private static final String DAILY_PREFIX = "DAILY_";
+	private static final String PROBLEMS_SUFFIX = "_PROBLEMS";
+
 	/**
 	 * Performs the cancel operation.
 	 * @return the operation result
@@ -81,7 +85,7 @@ public class BackupJob extends Job {
 
 			// move the zip archive
 			File backupDir = backupZip.getParentFile();
-			File dailyZip = new File(backupDir, "DAILY_" + backupZip.getName());
+			File dailyZip = new File(backupDir, DAILY_PREFIX + backupZip.getName());
 			if (ExternalBackup.areExternalBackupsEnabled()) {
 				try {
 					ExternalBackup.getInstance().moveBackup(backupZip.getName(), dailyZip.getName());
@@ -117,7 +121,7 @@ public class BackupJob extends Job {
 						org.skyve.impl.backup.BackupJob.emailProblem(log, trace);
 					}
 				} else {
-					trace = String.format("Copy Backup %s to %s", backupZip.getAbsolutePath(), copy.getAbsolutePath());
+					trace = String.format(COPY_BACKUP_FORMAT, backupZip.getAbsolutePath(), copy.getAbsolutePath());
 					log.add(trace);
 					LOGGER.info(trace);
 					FileUtil.copy(dailyZip, copy);
@@ -143,7 +147,7 @@ public class BackupJob extends Job {
 						org.skyve.impl.backup.BackupJob.emailProblem(log, trace);
 					}
 				} else {
-					trace = String.format("Copy Backup %s to %s", backupZip.getAbsolutePath(), copy.getAbsolutePath());
+					trace = String.format(COPY_BACKUP_FORMAT, backupZip.getAbsolutePath(), copy.getAbsolutePath());
 					log.add(trace);
 					LOGGER.info(trace);
 					FileUtil.copy(dailyZip, copy);
@@ -169,7 +173,7 @@ public class BackupJob extends Job {
 						org.skyve.impl.backup.BackupJob.emailProblem(log, trace);
 					}
 				} else {
-					trace = String.format("Copy Backup %s to %s", backupZip.getAbsolutePath(), copy.getAbsolutePath());
+					trace = String.format(COPY_BACKUP_FORMAT, backupZip.getAbsolutePath(), copy.getAbsolutePath());
 					log.add(trace);
 					LOGGER.info(trace);
 					FileUtil.copy(dailyZip, copy);
@@ -177,16 +181,16 @@ public class BackupJob extends Job {
 			}
 
 			// cull daily
-			cull(backupDir, "DAILY_", daily);
-			cull(backupDir, "DAILY_", "_PROBLEMS", daily * 2);
+			cull(backupDir, DAILY_PREFIX, daily);
+			cull(backupDir, DAILY_PREFIX, PROBLEMS_SUFFIX, daily * 2);
 			// cull weekly
 			cull(backupDir, "WEEKLY_", weekly);
-			cull(backupDir, "WEEKLY_", "_PROBLEMS", weekly * 2);
+			cull(backupDir, "WEEKLY_", PROBLEMS_SUFFIX, weekly * 2);
 			// cull monthly
 			cull(backupDir, "MONTHLY_", monthly);
-			cull(backupDir, "MONTHLY_", "_PROBLEMS", monthly * 2);
+			cull(backupDir, "MONTHLY_", PROBLEMS_SUFFIX, monthly * 2);
 			// cull yearly
-			cull(backupDir, "YEARLY_", "_PROBLEMS", yearly * 2);
+			cull(backupDir, "YEARLY_", PROBLEMS_SUFFIX, yearly * 2);
 		}
 
 		setPercentComplete(100);

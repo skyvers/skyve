@@ -76,7 +76,12 @@ import jakarta.annotation.Nullable;
  * of the content node - ie module name and document name are not known to the table.
  */
 public class BackupJob extends CancellableJob {
-    private static final Logger SLOGGER = SkyveLoggerFactory.getLogger(BackupJob.class);
+	private static final Logger SLOGGER = SkyveLoggerFactory.getLogger(BackupJob.class);
+
+	private static final String CREATE_SQL = "create.sql";
+	private static final String FIELD_VALUE_SUFFIX = " value.";
+	private static final String MISSING_FIELD_PREFIX = " is missing a ";
+	private static final String WITH_DOCUMENT_ID = " with " + Bean.DOCUMENT_ID + " = ";
 
 	private Calendar gmt = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
 
@@ -160,7 +165,7 @@ public class BackupJob extends CancellableJob {
 		List<String> createDDL = new java.util.ArrayList<>();
 		p.generateDDL(dropDDL, createDDL, null);
 		BackupUtil.writeScript(dropDDL, new File(backupDir, "drop.sql"));
-		BackupUtil.writeScript(createDDL, new File(backupDir, "create.sql"));
+		BackupUtil.writeScript(createDDL, new File(backupDir, CREATE_SQL));
 		boolean problem = false; // indicates if the backup had a problem
 		try {
 			try {
@@ -216,31 +221,27 @@ public class BackupJob extends CancellableJob {
 																if ("".equals(value)) {
 																	// bizId is mandatory
 																	if (name.equalsIgnoreCase(Bean.DOCUMENT_ID)) {
-																		throw new IllegalStateException(table.agnosticIdentifier + " is missing a " + Bean.DOCUMENT_ID + " value.");
+																		throw new IllegalStateException(table.agnosticIdentifier + MISSING_FIELD_PREFIX + Bean.DOCUMENT_ID + FIELD_VALUE_SUFFIX);
 																	}
 																	// bizLock is mandatory
 																	if (name.equalsIgnoreCase(PersistentBean.LOCK_NAME)) {
-																		throw new IllegalStateException(table.agnosticIdentifier + " with " +
-																											Bean.DOCUMENT_ID + " = " + values.get(Bean.DOCUMENT_ID) +
-																											" is missing a " + PersistentBean.LOCK_NAME + " value.");
+																		throw new IllegalStateException(table.agnosticIdentifier + WITH_DOCUMENT_ID + values.get(Bean.DOCUMENT_ID) +
+																											MISSING_FIELD_PREFIX + PersistentBean.LOCK_NAME + FIELD_VALUE_SUFFIX);
 																	}
 																	// bizKey is mandatory
 																	if (name.equalsIgnoreCase(Bean.BIZ_KEY)) {
-																		throw new IllegalStateException(table.agnosticIdentifier + " with " +
-																											Bean.DOCUMENT_ID + " = " + values.get(Bean.DOCUMENT_ID) +
-																											" is missing a " + Bean.BIZ_KEY + " value.");
+																		throw new IllegalStateException(table.agnosticIdentifier + WITH_DOCUMENT_ID + values.get(Bean.DOCUMENT_ID) +
+																											MISSING_FIELD_PREFIX + Bean.BIZ_KEY + FIELD_VALUE_SUFFIX);
 																	}
 																	// bizCustomer is mandatory
 																	if (name.equalsIgnoreCase(Bean.CUSTOMER_NAME)) {
-																		throw new IllegalStateException(table.agnosticIdentifier + " with " +
-																											Bean.DOCUMENT_ID + " = " + values.get(Bean.DOCUMENT_ID) +
-																											" is missing a " + Bean.CUSTOMER_NAME + " value.");
+																		throw new IllegalStateException(table.agnosticIdentifier + WITH_DOCUMENT_ID + values.get(Bean.DOCUMENT_ID) +
+																											MISSING_FIELD_PREFIX + Bean.CUSTOMER_NAME + FIELD_VALUE_SUFFIX);
 																	}
 																	// bizUserId is mandatory
 																	if (name.equalsIgnoreCase(Bean.USER_ID)) {
-																		throw new IllegalStateException(table.agnosticIdentifier + " with " +
-																											Bean.DOCUMENT_ID + " = " + values.get(Bean.DOCUMENT_ID) +
-																											" is missing a " + Bean.USER_ID + " value.");
+																		throw new IllegalStateException(table.agnosticIdentifier + WITH_DOCUMENT_ID + values.get(Bean.DOCUMENT_ID) +
+																											MISSING_FIELD_PREFIX + Bean.USER_ID + FIELD_VALUE_SUFFIX);
 																	}
 																}
 																// Respect sensitivity
@@ -358,9 +359,8 @@ public class BackupJob extends CancellableJob {
 																// bizVersion is mandatory
 																if ("".equals(value) &&
 																		name.equalsIgnoreCase(PersistentBean.VERSION_NAME)) {
-																	throw new IllegalStateException(table.agnosticIdentifier + " with " +
-																			Bean.DOCUMENT_ID + " = " + values.get(Bean.DOCUMENT_ID) +
-																			" is missing a " + PersistentBean.VERSION_NAME + " value.");
+																	throw new IllegalStateException(table.agnosticIdentifier + WITH_DOCUMENT_ID + values.get(Bean.DOCUMENT_ID) +
+																			MISSING_FIELD_PREFIX + PersistentBean.VERSION_NAME + FIELD_VALUE_SUFFIX);
 																}
 	
 															}

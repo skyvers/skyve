@@ -44,6 +44,7 @@ import jakarta.faces.component.html.HtmlPanelGroup;
 /**
  * Collects generated PrimeFaces components and indexes them in the automation context.
  */
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate component selector fragments.
 class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	private PrimeFacesAutomationContext context;
 	private Step step;

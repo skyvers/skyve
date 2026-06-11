@@ -34,6 +34,7 @@ import org.hibernate.type.StandardBasicTypes;
  *
  * @author Karel Maesen
  */
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate MySQL spatial function template fragments.
 public class MySQL56SpatialDialect extends MySQL55Dialect implements SpatialDialect {
 	private static final long serialVersionUID = 1445850336151684170L;
 

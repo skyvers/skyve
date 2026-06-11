@@ -26,6 +26,9 @@ import org.skyve.util.Util;
  * such as filtering, sorting, detail-only rendering, and thumbnail handling.
  */
 public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefinition {
+	private static final String IMAGE_TYPE = "image";
+	private static final String TEXT_TYPE = "text";
+
 	private boolean canFilter = true;
 	private boolean canSave = true;
 	private boolean detail = false;
@@ -101,8 +104,8 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 					canSave = false; // can't edit as it is the code anyway
 					// reset to a text field as it was set to enum in SmartClientAttribute super constructor call
 					valueMap = null; 
-					type = "text";
-					filterEditorType = "text";
+					type = TEXT_TYPE;
+					filterEditorType = TEXT_TYPE;
 					hasTextFilterOperators = true;
 					sortByField = name; // sort by the code field, not _display_*
 					// Dynamic domain values can't be filtered
@@ -129,7 +132,7 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 					String targetDocumentName = association.getDocumentName();
 					Document targetDocument = module.getDocument(customer, targetDocumentName);
 					if (targetDocument.isPersistable()) { // this is a persistent target document - not a mapped document
-						type = "text";
+						type = TEXT_TYPE;
 						editorType = "comboBox";
 						lookup = new SmartClientLookupDefinition(false,
 																	user,
@@ -160,7 +163,7 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 			pixelHeight = contentColumn.getPixelHeight();
 			emptyThumbnailRelativeFile = contentColumn.getEmptyThumbnailRelativeFile();
 			if (DisplayType.thumbnail.equals(contentColumn.getDisplay())) {
-				type = "image";
+				type = IMAGE_TYPE;
 				if (pixelHeight == null) {
 					pixelHeight = Integer.valueOf(64);
 				}
@@ -360,9 +363,9 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
         	result.append(",align:'").append(align.toTextAlignmentString()).append('\'');
         }
         if (pixelWidth != null) {
-        	result.append(",width:").append("image".equals(type) ? pixelWidth.intValue() + 8 : pixelWidth.intValue());
+			result.append(",width:").append(IMAGE_TYPE.equals(type) ? pixelWidth.intValue() + 8 : pixelWidth.intValue());
         }
-        else if ("image".equals(type)) {
+        else if (IMAGE_TYPE.equals(type)) {
         	if (pixelHeight != null) {
             	result.append(",width:").append(pixelHeight.intValue() + 8);
         	}

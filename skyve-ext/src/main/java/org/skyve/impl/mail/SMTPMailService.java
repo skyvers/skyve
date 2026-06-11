@@ -40,6 +40,8 @@ import jakarta.mail.util.ByteArrayDataSource;
 public class SMTPMailService implements MailService {
 	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SMTPMailService.class);
 
+	private static final String INDENTED_VALUE_LOG = "    {}";
+
 	@Override
 	public void writeMail(@Nonnull Mail mail, @Nonnull OutputStream out) {
 		try {
@@ -96,15 +98,15 @@ public class SMTPMailService implements MailService {
 		LOGGER.info("@@@@@@@@@@@@ EMAIL @@@@@@@@@@@@");
 		LOGGER.info("TO:");
 		for (String to : recipientEmailAddresses) {
-			LOGGER.info("    {}", to);
+			LOGGER.info(INDENTED_VALUE_LOG, to);
 		}
 		LOGGER.info("CC:");
 		for (String cc : ccEmailAddresses) {
-			LOGGER.info("    {}", cc);
+			LOGGER.info(INDENTED_VALUE_LOG, cc);
 		}
 		LOGGER.info("BCC:");
 		for (String bcc : bccEmailAddresses) {
-			LOGGER.info("    {}", bcc);
+			LOGGER.info(INDENTED_VALUE_LOG, bcc);
 		}
 		LOGGER.info("SENDER: {}", senderEmailAddress);
 		LOGGER.info("SUBJECT {}", subject);

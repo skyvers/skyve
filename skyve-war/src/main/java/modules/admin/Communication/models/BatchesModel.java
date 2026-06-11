@@ -24,6 +24,8 @@ import modules.admin.domain.DownloadFolder;
  * Lists generated communication batches available for download and cleanup.
  */
 public class BatchesModel extends ListModel<Communication> {
+	private static final String NOT_IMPLEMENTED = "NOT IMPLEMENTED";
+
 	private Document drivingDocument = null;
 	private Set<String> projections = new TreeSet<>();
 	private List<MetaDataQueryColumn> columns = new ArrayList<>(1);
@@ -134,7 +136,7 @@ public class BatchesModel extends ListModel<Communication> {
 	 */
 	@Override
 	public AutoClosingIterable<Bean> iterate() throws Exception {
-		throw new IllegalStateException("NOT IMPLEMENTED");
+		throw new IllegalStateException(NOT_IMPLEMENTED);
 	}
 
 	/**
@@ -146,7 +148,7 @@ public class BatchesModel extends ListModel<Communication> {
 	 */
 	@Override
 	public Bean update(String bizId, SortedMap<String, Object> properties) throws Exception {
-		throw new IllegalStateException("NOT IMPLEMENTED");
+		throw new IllegalStateException(NOT_IMPLEMENTED);
 	}
 
 	/**
@@ -156,6 +158,6 @@ public class BatchesModel extends ListModel<Communication> {
 	 */
 	@Override
 	public void remove(String bizId) throws Exception {
-		throw new IllegalStateException("NOT IMPLEMENTED");
+		throw new IllegalStateException(NOT_IMPLEMENTED);
 	}
 }

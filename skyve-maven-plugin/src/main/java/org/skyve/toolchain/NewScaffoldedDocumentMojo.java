@@ -42,6 +42,7 @@ import com.squareup.javapoet.TypeSpec;
  * </p>
  */
 @Mojo(name = "newScaffoldedDocument")
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate scaffolded source/metadata fragments.
 public class NewScaffoldedDocumentMojo extends NewDocumentMojo {
 	private static final Logger LOGGER = LoggerFactory.getLogger(NewScaffoldedDocumentMojo.class);
 

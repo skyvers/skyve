@@ -51,6 +51,9 @@ import jakarta.annotation.Nullable;
 public class StandardLoader {
 	private static final String REFERENCED_ROW_DNE_MESSAGE_KEY = "bizport.referencedRowDoesNotExist";
 
+	private static final String REFERENCED_SHEET_PREFIX = "The referenced sheet for ";
+	private static final String MISSING_REFERENCED_SHEET_SUFFIX = " does not exist in this workbook. Check the template you started with and copy the missing sheet back in.";
+
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(StandardLoader.class);
 
 	private @Nonnull BizPortWorkbook workbook;
@@ -467,12 +470,12 @@ public class StandardLoader {
 				continue;
 			}
 			BizPortSheet foreignKeySheet = workbook.getSheet(foreignKeySheetKey);
-			if (foreignKeySheet == null) {
-				sheet.addWarningAtCurrentRow(problems, 
-												foreignKeyColumn, 
-												"The referenced sheet for " + associationBinding + " does not exist in this workbook. Check the template you started with and copy the missing sheet back in.");
-				continue;
-			}
+				if (foreignKeySheet == null) {
+					sheet.addWarningAtCurrentRow(problems,
+													foreignKeyColumn,
+													REFERENCED_SHEET_PREFIX + associationBinding + MISSING_REFERENCED_SHEET_SUFFIX);
+					continue;
+				}
 
 			Document associatedDocument = module.getDocument(customer, association.getDocumentName());
 			Bean foreignKeyBean = beansBySheetKey.get(createSheetKey(associatedDocument, foreignKeySheetId));
@@ -527,8 +530,8 @@ public class StandardLoader {
 		// The row can be empty - owner sheet ID and element sheet ID are both null, or both filled
 		if (ownerSheetId == null) {
 			if (elementSheetId != null) {
-				collectionSheet.addErrorAtCurrentRow(problems, 
-														ownerSheetIdColumn, 
+				collectionSheet.addErrorAtCurrentRow(problems,
+														ownerSheetIdColumn,
 														"The owner cell is empty. You must specify the owner of this relationship.");
 			}
 			return;
@@ -543,12 +546,12 @@ public class StandardLoader {
 		// Lookup the foreign key row for owner
 		SheetKey ownerSheetKey = ownerSheetIdColumn.getReferencedSheet();
 		BizPortSheet ownerSheet = workbook.getSheet(ownerSheetKey);
-		if (ownerSheet == null) {
-			collectionSheet.addErrorAtCurrentRow(problems, 
-													ownerSheetIdColumn, 
-													"The referenced sheet for " + PersistentBean.OWNER_COLUMN_NAME + " does not exist in this workbook. Check the template you started with and copy the missing sheet back in.");
-			return;
-		}
+			if (ownerSheet == null) {
+				collectionSheet.addErrorAtCurrentRow(problems,
+														ownerSheetIdColumn,
+														REFERENCED_SHEET_PREFIX + PersistentBean.OWNER_COLUMN_NAME + MISSING_REFERENCED_SHEET_SUFFIX);
+				return;
+			}
 		Bean owner = beansBySheetKey.get(createSheetKey(owningDocument, ownerSheetId));
 		if (owner == null) {
 			collectionSheet.addErrorAtCurrentRow(problems, 
@@ -560,12 +563,12 @@ public class StandardLoader {
 		// Lookup the foreign key row for element
 		SheetKey elementSheetKey = elementSheetIdColumn.getReferencedSheet();
 		BizPortSheet elementSheet = workbook.getSheet(elementSheetKey);
-		if (elementSheet == null) {
-			collectionSheet.addWarningAtCurrentRow(problems, 
-													elementSheetIdColumn, 
-													"The referenced sheet for " + PersistentBean.ELEMENT_COLUMN_NAME + " does not exist in this workbook. Check the template you started with and copy the missing sheet back in.");
-			return;
-		}
+			if (elementSheet == null) {
+				collectionSheet.addWarningAtCurrentRow(problems,
+														elementSheetIdColumn,
+														REFERENCED_SHEET_PREFIX + PersistentBean.ELEMENT_COLUMN_NAME + MISSING_REFERENCED_SHEET_SUFFIX);
+				return;
+			}
 		Bean element = beansBySheetKey.get(createSheetKey(elementDocument, elementSheetId));
 		if (element == null) {
 			collectionSheet.addErrorAtCurrentRow(problems, 

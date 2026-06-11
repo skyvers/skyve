@@ -25,8 +25,9 @@ import org.slf4j.Logger;
  * (observing foreign-key constraints) prior to a restore operation.
  */
 public class Truncate {
-
     private static final Logger COMMAND_LOGGER = Category.COMMAND.logger();
+
+    private static final String DELETE_FROM = "delete from ";
 
 	public static void truncate(String schemaName, boolean database, boolean content) 
 	throws Exception {
@@ -70,7 +71,7 @@ public class Truncate {
 			for (Table table : tables) {
 				if (table instanceof JoinTable) {
 					sql.setLength(0);
-					sql.append("delete from ").append(table.persistentIdentifier);
+					sql.append(DELETE_FROM).append(table.persistentIdentifier);
 					BackupUtil.secureSQL(sql, table, customerName);
 					if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("delete joining table {}", table.persistentIdentifier);
 					persistence.newSQL(sql.toString()).noTimeout().execute();
@@ -88,7 +89,7 @@ public class Truncate {
 					continue;
 				}
 				sql.setLength(0);
-				sql.append("delete from ").append(table.persistentIdentifier);
+				sql.append(DELETE_FROM).append(table.persistentIdentifier);
 				BackupUtil.secureSQL(sql, table, customerName);
 				if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("delete extension table {}", table.persistentIdentifier);
 				persistence.newSQL(sql.toString()).noTimeout().execute();
@@ -105,7 +106,7 @@ public class Truncate {
 					continue;
 				}
 				sql.setLength(0);
-				sql.append("delete from ").append(table.persistentIdentifier);
+				sql.append(DELETE_FROM).append(table.persistentIdentifier);
 				BackupUtil.secureSQL(sql, table, customerName);
 				if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("delete table {}", table.persistentIdentifier);
 				persistence.newSQL(sql.toString()).noTimeout().execute();

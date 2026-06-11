@@ -19,6 +19,7 @@ import jakarta.annotation.Nullable;
 /**
  * React Native-specific layout/container renderer.
  */
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate fragments of generated React Native layout output.
 public class ReactNativeLayoutRenderer extends LayoutRenderer {
 	private Map<String, String> imports;
 

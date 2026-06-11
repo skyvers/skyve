@@ -26,6 +26,7 @@ import org.skyve.util.Icons;
 /**
  * Renders Markdown nodes into Skyve document XML snippets for script-assisted document generation.
  */
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate Skyve script/XML rendering fragments.
 public class SkyveDocumentNodeRenderer implements NodeRenderer {
 
 	private final HtmlWriter html;

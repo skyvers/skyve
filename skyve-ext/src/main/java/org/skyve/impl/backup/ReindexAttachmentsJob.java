@@ -121,7 +121,6 @@ public class ReindexAttachmentsJob extends CancellableJob {
 	 * @return the active customer name
 	 */
 	@SuppressWarnings("static-method")
-	@Generated("test seam")
 	protected String getCustomerName() {
 		return CORE.getUser().getCustomerName();
 	}
@@ -134,7 +133,6 @@ public class ReindexAttachmentsJob extends CancellableJob {
 	 * @return a new content manager instance
 	 */
 	@SuppressWarnings({"static-method", "resource"})
-	@Generated("test seam")
 	protected ContentManager newContentManager() {
 		return EXT.newContentManager();
 	}
@@ -145,7 +143,6 @@ public class ReindexAttachmentsJob extends CancellableJob {
 	 * @return an open JDBC connection
 	 */
 	@SuppressWarnings({"static-method", "resource"})
-	@Generated("test seam")
 	protected Connection getDataStoreConnection() {
 		return EXT.getDataStoreConnection();
 	}
@@ -157,7 +154,6 @@ public class ReindexAttachmentsJob extends CancellableJob {
 	 * @throws Exception if metadata lookup fails
 	 */
 	@SuppressWarnings("static-method")
-	@Generated("test seam")
 	protected Collection<Table> getTables() throws Exception {
 		return BackupUtil.getTables();
 	}
@@ -170,7 +166,6 @@ public class ReindexAttachmentsJob extends CancellableJob {
 	 * @param customerName the customer scope to apply
 	 */
 	@SuppressWarnings("static-method")
-	@Generated("test seam")
 	protected void secureSQL(StringBuilder sql, Table table, String customerName) {
 		BackupUtil.secureSQL(sql, table, customerName);
 	}
@@ -182,7 +177,6 @@ public class ReindexAttachmentsJob extends CancellableJob {
 	 * @return {@code true} when the manager is an {@link AbstractContentManager}
 	 */
 	@SuppressWarnings("static-method")
-	@Generated("test seam")
 	protected boolean isAbstractContentManager(ContentManager cm) {
 		return cm instanceof AbstractContentManager;
 	}

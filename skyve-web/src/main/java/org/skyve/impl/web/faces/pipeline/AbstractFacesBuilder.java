@@ -18,6 +18,7 @@ import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.html.HtmlPanelGroup;
 import jakarta.faces.context.FacesContext;
 
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate JSF attribute/output fragments.
 public abstract class AbstractFacesBuilder {
 	protected static final Integer ONE_HUNDRED = Integer.valueOf(100);
 

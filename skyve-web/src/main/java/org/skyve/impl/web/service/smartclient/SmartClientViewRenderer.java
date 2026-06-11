@@ -131,6 +131,7 @@ import jakarta.annotation.Nullable;
 /**
  * Renders Skyve metadata into SC Skyve Javascript.
  */
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate SmartClient JSON/script output fragments.
 public class SmartClientViewRenderer extends ViewRenderer {
 	private static final Integer DEFAULT_MIN_HEIGHT_IN_PIXELS = Integer.valueOf(170);
 	private static final Integer DEFAULT_TAB_MIN_HEIGHT_IN_PIXELS = Integer.valueOf(200);

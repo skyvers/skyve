@@ -55,6 +55,7 @@ import jakarta.servlet.http.HttpSession;
  * - "N": Create a new tag with a specified name.
  * - "D": Delete a specified tag.
  */
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate SmartClient tag-operation script fragments.
 public class SmartClientTagServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 

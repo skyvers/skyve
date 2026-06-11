@@ -24,8 +24,9 @@ import org.skyve.util.logging.SkyveLoggerFactory;
  */
 @Extension(points = {TextExtractor.class})
 public class TikaTextExtractor implements TextExtractor {
-
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(TikaTextExtractor.class);
+
+    private static final String METADATA_SEPARATOR = ". ";
 
 	private static final Tika TIKA = new Tika();
 	
@@ -78,7 +79,7 @@ public class TikaTextExtractor implements TextExtractor {
 				String title = metadata.get(TikaCoreProperties.TITLE);
 				if (title != null) {
 					if (! result.isEmpty()) {
-						result.append(". ");
+						result.append(METADATA_SEPARATOR);
 					}
 					result.append(title);
 				}
@@ -86,7 +87,7 @@ public class TikaTextExtractor implements TextExtractor {
 				String author = metadata.get(Office.AUTHOR);
 				if (author != null) {
 					if (! result.isEmpty()) {
-						result.append(". ");
+						result.append(METADATA_SEPARATOR);
 					}
 					result.append(author);
 				}
@@ -94,7 +95,7 @@ public class TikaTextExtractor implements TextExtractor {
 				String subject = metadata.get(TikaCoreProperties.SUBJECT);
 				if (subject != null) {
 					if (! result.isEmpty()) {
-						result.append(". ");
+						result.append(METADATA_SEPARATOR);
 					}
 					result.append(subject);
 				}
@@ -107,7 +108,7 @@ public class TikaTextExtractor implements TextExtractor {
 					markup = UtilImpl.processStringValue(TIKA.parseToString(markupStream, new Metadata(), 100000));
 					if (markup != null) {
 						if (! result.isEmpty()) {
-							result.append(". ");
+							result.append(METADATA_SEPARATOR);
 						}
 						result.append(markup);
 					}

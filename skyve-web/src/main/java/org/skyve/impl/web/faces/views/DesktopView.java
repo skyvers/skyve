@@ -43,6 +43,7 @@ import jakarta.servlet.http.HttpServletRequest;
  */
 @RequestScoped
 @Named("desktop")
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate desktop-view markup fragments.
 public class DesktopView extends HarnessView {
 	private static final long serialVersionUID = 913239189728613263L;
 

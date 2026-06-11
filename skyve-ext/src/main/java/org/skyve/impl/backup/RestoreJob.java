@@ -53,6 +53,9 @@ import org.supercsv.prefs.CsvPreference;
  * binary content according to the {@link RestoreOptions} provided.
  */
 public class RestoreJob extends CancellableJob {
+	private static final String CREATE_SQL = "create.sql";
+	private static final String ID_COLUMN_SUFFIX = "_id";
+
 	private Calendar gmt = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
 
 	/**
@@ -147,7 +150,7 @@ public class RestoreJob extends CancellableJob {
 			boolean ddlSync = false;
 			if (PreProcess.createUsingBackup.equals(restorePreProcess)) {
 				createUsingBackup = true;
-				DDL.create(new File(extractDir, "create.sql"), true);
+				DDL.create(new File(extractDir, CREATE_SQL), true);
 				ddlSync = true;
 			}
 			else if (PreProcess.createUsingMetadata.equals(restorePreProcess)) {
@@ -157,7 +160,7 @@ public class RestoreJob extends CancellableJob {
 			else if (PreProcess.dropUsingBackupAndCreateUsingBackup.equals(restorePreProcess)) {
 				createUsingBackup = true;
 				DDL.drop(new File(extractDir, "drop.sql"), true);
-				DDL.create(new File(extractDir, "create.sql"), true);
+				DDL.create(new File(extractDir, CREATE_SQL), true);
 				ddlSync = true;
 			}
 			else if (PreProcess.dropUsingBackupAndCreateUsingMetadata.equals(restorePreProcess)) {
@@ -168,7 +171,7 @@ public class RestoreJob extends CancellableJob {
 			else if (PreProcess.dropUsingMetadataAndCreateUsingBackup.equals(restorePreProcess)) {
 				createUsingBackup = true;
 				DDL.drop(null, true);
-				DDL.create(new File(extractDir, "create.sql"), true);
+				DDL.create(new File(extractDir, CREATE_SQL), true);
 				ddlSync = true;
 			}
 			else if (PreProcess.dropUsingMetadataAndCreateUsingMetadata.equals(restorePreProcess)) {
@@ -359,7 +362,7 @@ public class RestoreJob extends CancellableJob {
 								sql.append(header).append(',');
 							}
 							else {
-								if (! header.endsWith("_id")) {
+								if (! header.endsWith(ID_COLUMN_SUFFIX)) {
 									sql.append(header).append(',');
 								}
 							}
@@ -371,7 +374,7 @@ public class RestoreJob extends CancellableJob {
 								sql.append("?,");
 							}
 							else {
-								if (! header.endsWith("_id")) {
+								if (! header.endsWith(ID_COLUMN_SUFFIX)) {
 									sql.append("?,");
 								}
 							}
@@ -390,7 +393,7 @@ public class RestoreJob extends CancellableJob {
 
 								int index = 1;
 								for (String header : headers) {
-									if ((! joinTables) && header.endsWith("_id")) {
+									if ((! joinTables) && header.endsWith(ID_COLUMN_SUFFIX)) {
 										continue;
 									}
 									String stringValue = values.get(header);
@@ -403,7 +406,7 @@ public class RestoreJob extends CancellableJob {
 									AttributeType attributeType = (field == null) ? null : field.getAttributeType();
 
 									// foreign keys
-									if (header.endsWith("_id")) {
+									if (header.endsWith(ID_COLUMN_SUFFIX)) {
 										statement.setString(index++, stringValue);
 									}
 									else if (AttributeType.colour.equals(attributeType) ||
@@ -587,7 +590,7 @@ public class RestoreJob extends CancellableJob {
 					sql.append("update ").append(table.persistentIdentifier);
 					boolean foundAForeignKey = false;
 					for (String header : headers) {
-						if (header.endsWith("_id")) {
+						if (header.endsWith(ID_COLUMN_SUFFIX)) {
 							if (! foundAForeignKey) {
 								sql.append(" set ");
 							}
@@ -613,7 +616,7 @@ public class RestoreJob extends CancellableJob {
 
 								int i = 1;
 								for (String header : headers) {
-									if (header.endsWith("_id")) {
+									if (header.endsWith(ID_COLUMN_SUFFIX)) {
 										final String stringValue = values.get(header);
 										if ((stringValue == null) || (stringValue.length() == 0)) {
 											statement.setObject(i, null);

@@ -34,6 +34,7 @@ import jakarta.annotation.Nullable;
 public abstract class AbstractDocumentQuery extends AbstractQuery implements DocumentQuery {
 
     private static final Logger QUERY_LOGGER = Category.QUERY.logger();
+	private static final String AS_ALIAS = " as ";
 
 	/**
 	 * Metadata for the document that anchors the query's from-clause.
@@ -166,7 +167,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 		drivingDocumentName = drivingDocument.getName();
 		filter = new DocumentFilterImpl(this, rdbms, filterClause);
 		fromClause.append(persistence.getDocumentEntityName(drivingModuleName, drivingDocumentName));
-		fromClause.append(" as ").append(THIS_ALIAS);
+		fromClause.append(AS_ALIAS).append(THIS_ALIAS);
 		if (groupClause != null) {
 			this.groupClause.append(groupClause);
 		}
@@ -244,7 +245,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 		if (projectionClause.length() > 0) {
 			projectionClause.append(", ");
 		}
-		projectionClause.append(THIS_ALIAS).append(" as ").append(THIS_ALIAS);
+		projectionClause.append(THIS_ALIAS).append(AS_ALIAS).append(THIS_ALIAS);
 		return this;
 	}
 
@@ -282,7 +283,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 			projectionClause.append(", ");
 		}
 		projectionClause.append(entityAlias).append('.').append(binding);
-		projectionClause.append(" as ").append(BindUtil.sanitiseBinding(projectedAlias));
+		projectionClause.append(AS_ALIAS).append(BindUtil.sanitiseBinding(projectedAlias));
 		return this;
 	}
 
@@ -297,7 +298,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 		if (projectionClause.length() > 0) {
 			projectionClause.append(", ");
 		}
-		projectionClause.append(expression).append(" as ").append(BindUtil.sanitiseBinding(projectedAlias));
+		projectionClause.append(expression).append(AS_ALIAS).append(BindUtil.sanitiseBinding(projectedAlias));
 		return this;
 	}
 
@@ -671,7 +672,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	@Override
 	public DocumentQuery addInnerJoinFromEntity(String entityAlias, String referenceBinding, String joinAlias) {
 		fromClause.append(" INNER JOIN ").append(entityAlias).append('.').append(referenceBinding);
-		fromClause.append(" as ").append(BindUtil.sanitiseBinding(joinAlias));
+		fromClause.append(AS_ALIAS).append(BindUtil.sanitiseBinding(joinAlias));
 		return this;
 	}
 
@@ -696,7 +697,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	@Override
 	public DocumentQuery addLeftOuterJoinFromEntity(String entityAlias, String referenceBinding, String joinAlias) {
 		fromClause.append(" LEFT OUTER JOIN ").append(entityAlias).append('.').append(referenceBinding);
-		fromClause.append(" as ").append(BindUtil.sanitiseBinding(joinAlias));
+		fromClause.append(AS_ALIAS).append(BindUtil.sanitiseBinding(joinAlias));
 		return this;
 	}
 
@@ -721,7 +722,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	@Override
 	public DocumentQuery addRightOuterJoinFromEntity(String entityAlias, String referenceBinding, String joinAlias) {
 		fromClause.append(" RIGHT OUTER JOIN ").append(entityAlias).append('.').append(referenceBinding);
-		fromClause.append(" as ").append(BindUtil.sanitiseBinding(joinAlias));
+		fromClause.append(AS_ALIAS).append(BindUtil.sanitiseBinding(joinAlias));
 		return this;
 	}
 
@@ -746,7 +747,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	@Override
 	public DocumentQuery addFetchedInnerJoinFromEntity(String entityAlias, String referenceBinding, String joinAlias) {
 		fromClause.append(" INNER JOIN FETCH ").append(entityAlias).append('.').append(referenceBinding);
-		fromClause.append(" as ").append(BindUtil.sanitiseBinding(joinAlias));
+		fromClause.append(AS_ALIAS).append(BindUtil.sanitiseBinding(joinAlias));
 		return this;
 	}
 
@@ -771,7 +772,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	@Override
 	public DocumentQuery addFetchedLeftOuterJoinFromEntity(String entityAlias, String referenceBinding, String joinAlias) {
 		fromClause.append(" LEFT OUTER JOIN FETCH ").append(entityAlias).append('.').append(referenceBinding);
-		fromClause.append(" as ").append(BindUtil.sanitiseBinding(joinAlias));
+		fromClause.append(AS_ALIAS).append(BindUtil.sanitiseBinding(joinAlias));
 		return this;
 	}
 
@@ -796,7 +797,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	@Override
 	public DocumentQuery addFetchedRightOuterJoinFromEntity(String entityAlias, String referenceBinding, String joinAlias) {
 		fromClause.append(" RIGHT OUTER JOIN FETCH ").append(entityAlias).append('.').append(referenceBinding);
-		fromClause.append(" as ").append(BindUtil.sanitiseBinding(joinAlias));
+		fromClause.append(AS_ALIAS).append(BindUtil.sanitiseBinding(joinAlias));
 		return this;
 	}
 

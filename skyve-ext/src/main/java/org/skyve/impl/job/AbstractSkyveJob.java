@@ -40,6 +40,7 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 	public static final String BEAN_JOB_PARAMETER_KEY = "bean";
 	public static final String USER_JOB_PARAMETER_KEY = "user";
 	public static final String SLEEP_JOB_PARAMETER_KEY = "sleep";
+	private static final String JOB_FAILED_PREFIX = "Job Failed :- ";
 
 	private String displayName;
 	private Timestamp startTime = new Timestamp();
@@ -228,16 +229,16 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 			persistence.rollback();
 
 			if (t instanceof MessageException messageException) {
-				getLog().add("Job Failed :- ");
+				getLog().add(JOB_FAILED_PREFIX);
 				for (Message em : messageException.getMessages()) {
 					getLog().add(em.getText());
 				}
 			}
 			else if (t.getMessage() != null) {
-				getLog().add("Job Failed :- " + t.getMessage());
+				getLog().add(JOB_FAILED_PREFIX + t.getMessage());
 			} else {
 				// for any other exceptions, just log that it happened
-				getLog().add("Job Failed :- " + t.toString());
+				getLog().add(JOB_FAILED_PREFIX + t.toString());
 			}
 
 			throw new JobExecutionException("Job failed", t);

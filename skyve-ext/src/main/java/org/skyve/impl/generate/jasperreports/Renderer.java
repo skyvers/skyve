@@ -33,6 +33,7 @@ import org.slf4j.Logger;
  * Drives the complete JasperReports rendering pipeline: load or compile the
  * {@code .jrxml}, fill with data, and export to the target format.
  */
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate JasperReports XML element and attribute names.
 public class Renderer {
 
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(Renderer.class);

@@ -69,6 +69,7 @@ import org.skyve.util.OWASP;
 /**
  * Implements internal web-module behavior for this Skyve runtime concern.
  */
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate SmartClient attribute definition fragments.
 abstract class SmartClientAttributeDefinition {
     protected SmartClientLookupDefinition lookup;
 	protected String name;

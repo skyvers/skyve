@@ -23,6 +23,8 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 abstract class MetaDataExpressionEvaluator extends ExpressionEvaluator {
+	private static final String BINDING_DESCRIPTION = "Binding ";
+
 	@SuppressWarnings("static-method")
 	protected @Nullable Attribute obtainAttribute(String expression, Bean bean) {
 		Customer c = CORE.getCustomer();
@@ -56,12 +58,12 @@ abstract class MetaDataExpressionEvaluator extends ExpressionEvaluator {
 			if ((returnType != null) && (! returnType.isAssignableFrom(type))) {
 				if (attribute == null) { // implicit type or condition
 					if (Boolean.class.equals(type)) { // condition)
-						throw new MetaDataException("Binding " + expression + " resolves to a condition that is incompatible with required type of " + returnType);
+						throw new MetaDataException(BINDING_DESCRIPTION + expression + " resolves to a condition that is incompatible with required type of " + returnType);
 					}
-					throw new MetaDataException("Binding " + expression + " resolves to implicit attribute of type " + type + 
+					throw new MetaDataException(BINDING_DESCRIPTION + expression + " resolves to implicit attribute of type " + type +
 													" that is incompatible with required type of " + returnType);
 				}
-				throw new MetaDataException("Binding " + expression + " resolves to an attribute of type " + type + 
+				throw new MetaDataException(BINDING_DESCRIPTION + expression + " resolves to an attribute of type " + type +
 												" that is incompatible with required type of " + returnType);
 			}
 		}
@@ -70,18 +72,18 @@ abstract class MetaDataExpressionEvaluator extends ExpressionEvaluator {
 		}
 		return error;
 	}
-	
+
 	@Override
 	public List<String> completeWithoutPrefixOrSuffix(String fragment,
 														Customer customer,
 														Module module,
 														Document document) {
 		List<String> result = new ArrayList<>();
-		
+
 		Document targetDocument = null;
 		String simpleBindingFragment = fragment;
 		String bindingPrefix = "";
-		
+
 		if (fragment == null) { // handle null fragment
 			targetDocument = document;
 		}
@@ -96,8 +98,8 @@ abstract class MetaDataExpressionEvaluator extends ExpressionEvaluator {
 			}
 			else { // compound
 				bindingPrefix = fragment.substring(0, lastDelimiterIndex);
-				simpleBindingFragment = (lastDelimiterIndex == (fragment.length() - 1)) ? 
-											null : 
+				simpleBindingFragment = (lastDelimiterIndex == (fragment.length() - 1)) ?
+											null :
 											fragment.substring(lastDelimiterIndex + 1);
 
 				if (! bindingPrefix.isEmpty()) { // fragment = "." or "[" or "]"
@@ -144,7 +146,7 @@ abstract class MetaDataExpressionEvaluator extends ExpressionEvaluator {
 									targetDocument = null; // complete the collection index notation and no more
 								}
 								// if its a close collection index expression followed by a '.' - eg "[0]."
-								else if ((lastDelimiterIndex == lastDotIndex) && 
+								else if ((lastDelimiterIndex == lastDotIndex) &&
 											(lastClosingSquareBracketIndex == (lastDelimiterIndex - 1))) {
 									bindingPrefix += '.';
 								}
@@ -170,14 +172,14 @@ abstract class MetaDataExpressionEvaluator extends ExpressionEvaluator {
 				}
 			}
 		}
-		
+
 		if (targetDocument != null) {
 			addAttributesAndConditions(bindingPrefix, simpleBindingFragment, customer, targetDocument, result);
 		}
-		
+
 		return result;
 	}
-	
+
 	static void addAttributesAndConditions(@Nonnull String bindingPrefix,
 											@Nullable String simpleBindingFragment,
 											@Nonnull Customer customer,
@@ -190,7 +192,7 @@ abstract class MetaDataExpressionEvaluator extends ExpressionEvaluator {
 				completions.add(bindingPrefix + name);
 			}
 		}
-		
+
 		// Check conditions
 		for (String name : document.getConditionNames()) {
 			if (! (Bean.CREATED_KEY.equals(name) || Bean.PERSISTED_KEY.equals(name))) {
@@ -229,7 +231,7 @@ abstract class MetaDataExpressionEvaluator extends ExpressionEvaluator {
 		if ((simpleBindingFragment == null) || Bean.USER_ID.startsWith(simpleBindingFragment)) {
 			completions.add(bindingPrefix + Bean.USER_ID);
 		}
-		
+
 		String parentDocumentName = document.getParentDocumentName();
 		if (parentDocumentName != null) {
 			if (parentDocumentName.equals(document.getName())) { // hierarchical
@@ -243,7 +245,7 @@ abstract class MetaDataExpressionEvaluator extends ExpressionEvaluator {
 				}
 			}
 		}
-		
+
 		if (document.isPersistable()) {
 			if ((simpleBindingFragment == null) || PersistentBean.VERSION_NAME.startsWith(simpleBindingFragment)) {
 				completions.add(bindingPrefix + PersistentBean.VERSION_NAME);

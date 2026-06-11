@@ -71,6 +71,7 @@ import org.slf4j.LoggerFactory;
  */
 @Mojo(name = "systemDocumentation") //, requiresDependencyResolution = ResolutionScope.TEST)
 @Execute(phase = LifecyclePhase.PROCESS_RESOURCES)
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate system-documentation metadata keys.
 public class SystemDocumentationMojo extends AbstractSkyveMojo {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SystemDocumentationMojo.class);
 

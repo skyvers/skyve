@@ -64,6 +64,7 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 							"properties"})
 public class ViewMetaData extends Container implements NamedMetaData, ConvertibleMetaData<ViewImpl>, DecoratedMetaData {
 	private static final long serialVersionUID = -1831750070396044584L;
+	private static final String VIEW_NAME_SEPARATOR = " view ";
 
 	private String name;
 	private String title;
@@ -410,23 +411,23 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 				if (action.getResourceName() == null) {
 					if (implicitName == null) { // custom action
 						throw new MetaDataException(metaDataName + " : [className] is required for a custom action for " + 
-														getName() + " view " + metaDataName);
+														getName() + VIEW_NAME_SEPARATOR + metaDataName);
 					}
 					else if (ImplicitActionName.BizExport.equals(implicitName) || 
 								ImplicitActionName.BizImport.equals(implicitName)) {
 						throw new MetaDataException(metaDataName + " : [className] is required for a BizPort action for " +
-														getName() + " view " + metaDataName);
+														getName() + VIEW_NAME_SEPARATOR + metaDataName);
 					}
 					else if (ImplicitActionName.Report.equals(implicitName)) {
 						throw new MetaDataException(metaDataName + " : [reportName] is required for a report action for " + 
-														getName() + " view " + metaDataName);
+														getName() + VIEW_NAME_SEPARATOR + metaDataName);
 					}
 				}
 				else {
 					value = actionMetaData.getDisplayName();
 					if (value == null) {
 						throw new MetaDataException(metaDataName + " : The view action [displayName] is required for the designer defined action " +
-														action.getResourceName() + " for " + getName() + " view " + metaDataName);
+														action.getResourceName() + " for " + getName() + VIEW_NAME_SEPARATOR + metaDataName);
 					}
 				}
 
@@ -442,17 +443,17 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 		value = getRefreshConditionName();
 		if (value != null) {
 			if (result.getRefreshTimeInSeconds() == null) {
-				throw new MetaDataException(metaDataName + " : The view [refreshIf] is defined but no [refreshTimeInSeconds] is defined in " + getName() + " view " + metaDataName);
+				throw new MetaDataException(metaDataName + " : The view [refreshIf] is defined but no [refreshTimeInSeconds] is defined in " + getName() + VIEW_NAME_SEPARATOR + metaDataName);
 			}
 			result.setRefreshConditionName(value);
 		}
 		value = getRefreshActionName();
 		if (value != null) {
 			if (result.getRefreshTimeInSeconds() == null) {
-				throw new MetaDataException(metaDataName + " : The view [refreshAction] is defined but no [refreshTimeInSeconds] is defined in " + getName() + " view " + metaDataName);
+				throw new MetaDataException(metaDataName + " : The view [refreshAction] is defined but no [refreshTimeInSeconds] is defined in " + getName() + VIEW_NAME_SEPARATOR + metaDataName);
 			}
 			if (result.getAction(value) == null) {
-				throw new MetaDataException(metaDataName + " : The view [refreshAction] is not a valid action in " + getName() + " view " + metaDataName);
+				throw new MetaDataException(metaDataName + " : The view [refreshAction] is not a valid action in " + getName() + VIEW_NAME_SEPARATOR + metaDataName);
 			}
 			result.setRefreshActionName(value);
 		}
@@ -460,10 +461,10 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 		if ((parameters != null) && (! parameters.isEmpty())) {
 			for (ViewParameter parameter : parameters) {
 				if (parameter.getFromBinding() == null) {
-					throw new MetaDataException(metaDataName + " : The " + getName() + " view newParameter [fromBinding] is required in " + getName() + " view " + metaDataName);
+					throw new MetaDataException(metaDataName + " : The " + getName() + " view newParameter [fromBinding] is required in " + getName() + VIEW_NAME_SEPARATOR + metaDataName);
 				}
 				if (parameter.getBoundTo() == null) {
-					throw new MetaDataException(metaDataName + " : The " + getName() + " view " + parameter.getFromBinding() + " newParameter [boundTo] is required in " + getName() + " view " + metaDataName);
+					throw new MetaDataException(metaDataName + " : The " + getName() + VIEW_NAME_SEPARATOR + parameter.getFromBinding() + " newParameter [boundTo] is required in " + getName() + VIEW_NAME_SEPARATOR + metaDataName);
 				}
 			}
 			result.getParameters().addAll(parameters);

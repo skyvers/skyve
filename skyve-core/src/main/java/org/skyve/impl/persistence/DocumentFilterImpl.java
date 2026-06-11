@@ -29,8 +29,12 @@ import jakarta.annotation.Nullable;
  * @see org.skyve.persistence.DocumentFilter
  */
 public class DocumentFilterImpl implements DocumentFilter {
+	private static final String AND_OPERATOR = " AND ";
+	private static final String GEOMETRY_TRUE_SUFFIX = ") = true";
 	private static final String LIKE_OPERATOR = " like ";
+	private static final String LOWER_FUNCTION = "lower(";
 	private static final String NOT_LIKE_OPERATOR = " not like ";
+	private static final String PARAMETER_PREFIX = "param";
 
 	private AbstractDocumentQuery owningQuery;
 	private StringBuilder filterClause = new StringBuilder(128); // resulting filter expression
@@ -146,7 +150,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 */
 	private DocumentFilter addIn(@Nonnull String entityAlias, @Nonnull String binding, boolean not, Object... operands) {
 		if (filterClause.length() > 0) {
-			filterClause.append(" AND ");
+			filterClause.append(AND_OPERATOR);
 		}
 
 		// lower function is required for postgresql database with 
@@ -167,7 +171,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 		}
 
 		if (lower) {
-			filterClause.append("lower(");
+			filterClause.append(LOWER_FUNCTION);
 		}
 		filterClause.append(entityAlias).append('.').append(binding);
 		if (lower) {
@@ -179,7 +183,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 		filterClause.append(" in (");
 		
 		for (Object operand : operands) {
-			String parameterName = "param" + owningQuery.parameterNumber++;
+			String parameterName = PARAMETER_PREFIX + owningQuery.parameterNumber++;
 			// Its probably wisest (although untested as yet) to use the DB lower function 
 			// on parameters to use its char set and collation.
 			owningQuery.putParameter(parameterName, operand);
@@ -352,7 +356,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 */
 	@Override
 	public DocumentFilter addAliasedEquals(String entityAlias, String binding, Geometry geometry) {
-		return appendRestriction(entityAlias, binding, null, geometry, false, false, "equals(", ") = true", false);
+		return appendRestriction(entityAlias, binding, null, geometry, false, false, "equals(", GEOMETRY_TRUE_SUFFIX, false);
 	}
 
 	/**
@@ -372,7 +376,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 */
 	@Override
 	public DocumentFilter addAliasedDisjoint(String entityAlias, String binding, Geometry geometry) {
-		return appendRestriction(entityAlias, binding, null, geometry, false, false, "disjoint(", ") = true", false);
+		return appendRestriction(entityAlias, binding, null, geometry, false, false, "disjoint(", GEOMETRY_TRUE_SUFFIX, false);
 	}
 	
 	/**
@@ -392,7 +396,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 */
 	@Override
 	public DocumentFilter addAliasedIntersects(String entityAlias, String binding, Geometry geometry) {
-		return appendRestriction(entityAlias, binding, null, geometry, false, false, "intersects(", ") = true", false);
+		return appendRestriction(entityAlias, binding, null, geometry, false, false, "intersects(", GEOMETRY_TRUE_SUFFIX, false);
 	}
 
 	/**
@@ -412,7 +416,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 */
 	@Override
 	public DocumentFilter addAliasedTouches(String entityAlias, String binding, Geometry geometry) {
-		return appendRestriction(entityAlias, binding, null, geometry, false, false, "touches(", ") = true", false);
+		return appendRestriction(entityAlias, binding, null, geometry, false, false, "touches(", GEOMETRY_TRUE_SUFFIX, false);
 	}
 
 	/**
@@ -432,7 +436,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 */
 	@Override
 	public DocumentFilter addAliasedCrosses(String entityAlias, String binding, Geometry geometry) {
-		return appendRestriction(entityAlias, binding, null, geometry, false, false, "crosses(", ") = true", false);
+		return appendRestriction(entityAlias, binding, null, geometry, false, false, "crosses(", GEOMETRY_TRUE_SUFFIX, false);
 	}
 
 	/**
@@ -452,7 +456,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 */
 	@Override
 	public DocumentFilter addAliasedWithin(String entityAlias, String binding, Geometry geometry) {
-		return appendRestriction(entityAlias, binding, null, geometry, false, false, "within(", ") = true", false);
+		return appendRestriction(entityAlias, binding, null, geometry, false, false, "within(", GEOMETRY_TRUE_SUFFIX, false);
 	}
 	
 	/**
@@ -472,7 +476,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 */
 	@Override
 	public DocumentFilter addAliasedContains(String entityAlias, String binding, Geometry geometry) {
-		return appendRestriction(entityAlias, binding, null, geometry, false, false, "contains(", ") = true", false);
+		return appendRestriction(entityAlias, binding, null, geometry, false, false, "contains(", GEOMETRY_TRUE_SUFFIX, false);
 	}
 	
 	/**
@@ -492,7 +496,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 */
 	@Override
 	public DocumentFilter addAliasedOverlaps(String entityAlias, String binding, Geometry geometry) {
-		return appendRestriction(entityAlias, binding, null, geometry, false, false, "overlaps(", ") = true", false);
+		return appendRestriction(entityAlias, binding, null, geometry, false, false, "overlaps(", GEOMETRY_TRUE_SUFFIX, false);
 	}
 	
 	/**
@@ -672,7 +676,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 */
 	@Override
 	public DocumentFilter addAliasedNullOrEquals(String entityAlias, String binding, Geometry geometry) {
-		return appendRestriction(entityAlias, binding, null, geometry, true, false, "equals(", ") = true", false);
+		return appendRestriction(entityAlias, binding, null, geometry, true, false, "equals(", GEOMETRY_TRUE_SUFFIX, false);
 	}
 
 	/**
@@ -692,7 +696,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 */
 	@Override
 	public DocumentFilter addAliasedNullOrDisjoint(String entityAlias, String binding, Geometry geometry) {
-		return appendRestriction(entityAlias, binding, null, geometry, true, false, "disjoint(", ") = true", false);
+		return appendRestriction(entityAlias, binding, null, geometry, true, false, "disjoint(", GEOMETRY_TRUE_SUFFIX, false);
 	}
 	
 	/**
@@ -712,7 +716,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 */
 	@Override
 	public DocumentFilter addAliasedNullOrIntersects(String entityAlias, String binding, Geometry geometry) {
-		return appendRestriction(entityAlias, binding, null, geometry, true, false, "intersects(", ") = true", false);
+		return appendRestriction(entityAlias, binding, null, geometry, true, false, "intersects(", GEOMETRY_TRUE_SUFFIX, false);
 	}
 
 	/**
@@ -732,7 +736,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 */
 	@Override
 	public DocumentFilter addAliasedNullOrTouches(String entityAlias, String binding, Geometry geometry) {
-		return appendRestriction(entityAlias, binding, null, geometry, true, false, "touches(", ") = true", false);
+		return appendRestriction(entityAlias, binding, null, geometry, true, false, "touches(", GEOMETRY_TRUE_SUFFIX, false);
 	}
 
 	/**
@@ -752,7 +756,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 */
 	@Override
 	public DocumentFilter addAliasedNullOrCrosses(String entityAlias, String binding, Geometry geometry) {
-		return appendRestriction(entityAlias, binding, null, geometry, true, false, "crosses(", ") = true", false);
+		return appendRestriction(entityAlias, binding, null, geometry, true, false, "crosses(", GEOMETRY_TRUE_SUFFIX, false);
 	}
 
 	/**
@@ -772,7 +776,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 */
 	@Override
 	public DocumentFilter addAliasedNullOrWithin(String entityAlias, String binding, Geometry geometry) {
-		return appendRestriction(entityAlias, binding, null, geometry, true, false, "within(", ") = true", false);
+		return appendRestriction(entityAlias, binding, null, geometry, true, false, "within(", GEOMETRY_TRUE_SUFFIX, false);
 	}
 	
 	/**
@@ -792,7 +796,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 */
 	@Override
 	public DocumentFilter addAliasedNullOrContains(String entityAlias, String binding, Geometry geometry) {
-		return appendRestriction(entityAlias, binding, null, geometry, true, false, "contains(", ") = true", false);
+		return appendRestriction(entityAlias, binding, null, geometry, true, false, "contains(", GEOMETRY_TRUE_SUFFIX, false);
 	}
 	
 	/**
@@ -812,7 +816,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 */
 	@Override
 	public DocumentFilter addAliasedNullOrOverlaps(String entityAlias, String binding, Geometry geometry) {
-		return appendRestriction(entityAlias, binding, null, geometry, true, false, "overlaps(", ") = true", false);
+		return appendRestriction(entityAlias, binding, null, geometry, true, false, "overlaps(", GEOMETRY_TRUE_SUFFIX, false);
 	}
 	
 	/**
@@ -833,7 +837,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	@Override
 	public DocumentFilter addAliasedNull(String entityAlias, String binding) {
 		if (filterClause.length() > 0) {
-			filterClause.append(" AND ");
+			filterClause.append(AND_OPERATOR);
 		}
 		filterClause.append(entityAlias).append('.').append(binding).append(" IS NULL");
 		return this;
@@ -857,7 +861,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	@Override
 	public DocumentFilter addAliasedNotNull(String entityAlias, String binding) {
 		if (filterClause.length() > 0) {
-			filterClause.append(" AND ");
+			filterClause.append(AND_OPERATOR);
 		}
 		filterClause.append(entityAlias).append('.').append(binding).append(" IS NOT NULL");
 		return this;
@@ -883,13 +887,13 @@ public class DocumentFilterImpl implements DocumentFilter {
 	public DocumentFilter addAliasedBetween(String entityAlias, String binding, Object minOperand, Object maxOperand) {
 		// Its probably wisest (although untested as yet) to use the DB lower function 
 		// on parameters to use its char set and collation.
-		String minParameterName = "param" + owningQuery.parameterNumber++;
-		String maxParameterName = "param" + owningQuery.parameterNumber++;
+		String minParameterName = PARAMETER_PREFIX + owningQuery.parameterNumber++;
+		String maxParameterName = PARAMETER_PREFIX + owningQuery.parameterNumber++;
 		owningQuery.putParameter(minParameterName, minOperand);
 		owningQuery.putParameter(maxParameterName, maxOperand);
 
 		if (filterClause.length() > 0) {
-			filterClause.append(" AND ");
+			filterClause.append(AND_OPERATOR);
 		}
 
 		// lower function is required for postgresql database with 
@@ -902,7 +906,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 		}
 		
 		if (lower) {
-			filterClause.append("lower(").append(entityAlias).append('.').append(binding).append(") BETWEEN ");
+			filterClause.append(LOWER_FUNCTION).append(entityAlias).append('.').append(binding).append(") BETWEEN ");
 			filterClause.append("lower(:").append(minParameterName).append(") and lower(:").append(maxParameterName).append(')');
 		}
 		else {
@@ -1099,11 +1103,11 @@ public class DocumentFilterImpl implements DocumentFilter {
 												@Nullable String functionPrefix,
 												@Nullable String functionSuffix,
 												boolean reversed) {
-		String parameterName = "param" + owningQuery.parameterNumber++;
+		String parameterName = PARAMETER_PREFIX + owningQuery.parameterNumber++;
 		owningQuery.putParameter(parameterName, operand);
 
 		if (filterClause.length() > 0) {
-			filterClause.append(" AND ");
+			filterClause.append(AND_OPERATOR);
 		}
 
 		if (addNullTest) {
@@ -1159,7 +1163,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 */
 	private void appendBinding(@Nonnull String entityAlias, @Nonnull String binding, boolean useStr, boolean lower) {
 		if (lower) {
-			filterClause.append("lower(");
+			filterClause.append(LOWER_FUNCTION);
 		}
 		if (useStr) {
 			filterClause.append("str(").append(entityAlias).append('.').append(binding).append(')');
@@ -1183,7 +1187,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 		// Its probably wisest (although untested as yet) to use the DB lower function 
 		// on parameters to use its char set and collation.
 		if (lower) {
-			filterClause.append("lower(");
+			filterClause.append(LOWER_FUNCTION);
 		}
 		filterClause.append(':').append(parameterName);
 		if (lower) {
@@ -1199,7 +1203,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	@Override
 	public DocumentFilter addAnd(DocumentFilter filter) {
 		if (filterClause.length() > 0) {
-			filterClause.append(" AND ");
+			filterClause.append(AND_OPERATOR);
 		}
 		filterClause.append('(').append(filter).append(')');
 		return this;
@@ -1232,7 +1236,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	@Override
 	public DocumentFilter addExpression(String expression) {
 		if (filterClause.length() > 0) {
-			filterClause.append(" AND ");
+			filterClause.append(AND_OPERATOR);
 		}
 		filterClause.append(expression);
 		return this;

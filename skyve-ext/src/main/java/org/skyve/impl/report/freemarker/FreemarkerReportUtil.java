@@ -10,7 +10,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -74,7 +73,6 @@ import jakarta.annotation.Nonnull;
  * Central utility for executing FreeMarker report templates and rendering PDF output.
  */
 public final class FreemarkerReportUtil {
-
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(FreemarkerReportUtil.class);
 
 	private static Configuration cfg;
@@ -119,7 +117,7 @@ public final class FreemarkerReportUtil {
 
 		// Set the preferred charset template files are stored in. UTF-8 is
 		// a good choice in most applications:
-		cfg.setDefaultEncoding("UTF-8");
+		cfg.setDefaultEncoding(StandardCharsets.UTF_8.name());
 
 		// Sets how errors will appear.
 		// During web page *development* TemplateExceptionHandler.HTML_DEBUG_HANDLER is better.
@@ -382,7 +380,7 @@ public final class FreemarkerReportUtil {
 		}
 		org.jsoup.nodes.Document doc;
 
-		doc = Jsoup.parse(in, "UTF-8", "");
+		doc = Jsoup.parse(in, StandardCharsets.UTF_8.name(), "");
 
 		// Should reuse W3CDom instance if converting multiple documents.
 		return new W3CDom().fromJsoup(doc);
@@ -526,7 +524,7 @@ public final class FreemarkerReportUtil {
 				template.process(reportParameters, sw);
 
 				// write the output string to an input stream
-				InputStream inputStream = new ByteArrayInputStream(sw.toString().getBytes(Charset.forName("UTF-8")));
+				InputStream inputStream = new ByteArrayInputStream(sw.toString().getBytes(StandardCharsets.UTF_8));
 
 				Path tempDir = Paths.get(Util.getContentDirectory(), "temp");
 				tempDir.toFile().mkdirs();

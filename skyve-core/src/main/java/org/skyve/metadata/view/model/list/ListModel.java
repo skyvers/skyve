@@ -70,6 +70,8 @@ import jakarta.annotation.Nullable;
  * @see InMemoryListModel
  */
 public abstract class ListModel<T extends Bean> implements ViewModel {
+	private static final String FILTERING_NOT_CATERED_FOR = " is not catered for in filtering";
+
 	private T bean;
 	public T getBean() {
 		return bean;
@@ -456,7 +458,7 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
     		filter.addEquals(binding, geometry);
     	}
     	else {
-    		throw new IllegalArgumentException(value + " is not catered for in filtering");
+			throw new IllegalArgumentException(value + FILTERING_NOT_CATERED_FOR);
     	}
     }
     
@@ -486,7 +488,7 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
     		filter.addNotEquals(binding, geometry);
     	}
     	else {
-    		throw new IllegalArgumentException(value + " is not catered for in filtering");
+			throw new IllegalArgumentException(value + FILTERING_NOT_CATERED_FOR);
     	}
     }
     
@@ -507,7 +509,7 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
     		filter.addGreaterThan(binding, decimal);
     	}
     	else {
-    		throw new IllegalArgumentException(value + " is not catered for in filtering");
+			throw new IllegalArgumentException(value + FILTERING_NOT_CATERED_FOR);
     	}
     }
     
@@ -528,7 +530,7 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
     		filter.addGreaterThanOrEqualTo(binding, decimal);
     	}
     	else {
-    		throw new IllegalArgumentException(value + " is not catered for in filtering");
+			throw new IllegalArgumentException(value + FILTERING_NOT_CATERED_FOR);
     	}
     }
     
@@ -549,7 +551,7 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
     		filter.addLessThan(binding, decimal);
     	}
     	else {
-    		throw new IllegalArgumentException(value + " is not catered for in filtering");
+			throw new IllegalArgumentException(value + FILTERING_NOT_CATERED_FOR);
     	}
     }
     
@@ -570,7 +572,7 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
     		filter.addLessThanOrEqualTo(binding, decimal);
     	}
     	else {
-    		throw new IllegalArgumentException(value + " is not catered for in filtering");
+			throw new IllegalArgumentException(value + FILTERING_NOT_CATERED_FOR);
     	}
     }
     
@@ -591,7 +593,7 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
     		filter.addBetween(binding, decimalStart, (Decimal) end);
     	}
     	else {
-    		throw new IllegalArgumentException(start + " or " + end + " is not catered for in filtering");
+			throw new IllegalArgumentException(start + " or " + end + FILTERING_NOT_CATERED_FOR);
     	}
     }
     

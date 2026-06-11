@@ -19,6 +19,7 @@ import jakarta.annotation.Nullable;
 /**
  * Flutter-specific layout/container renderer.
  */
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate fragments of generated Flutter layout output.
 public class FlutterLayoutRenderer extends LayoutRenderer {
 	public static final String VBOX_IMPORT = "widgets/skyve_vbox";
 	public static final String HBOX_IMPORT = "widgets/skyve_hbox";

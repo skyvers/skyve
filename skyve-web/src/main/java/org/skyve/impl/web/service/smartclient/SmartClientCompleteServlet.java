@@ -56,6 +56,9 @@ public class SmartClientCompleteServlet extends HttpServlet {
 	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SmartClientCompleteServlet.class);
 	private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
 
+	private static final String MALFORMED_URL = "Mal-formed URL";
+	private static final String VALUE_FIELD = "value";
+
 	/**
 	 * Handles SmartClient completion requests submitted with HTTP GET.
 	 *
@@ -119,7 +122,7 @@ public class SmartClientCompleteServlet extends HttpServlet {
 					String attributeName = UtilImpl.processStringValue(request.getParameter("_attr"));
 					attributeName = BindUtil.unsanitiseBinding(attributeName);
 					if (attributeName == null) {
-						throw new ServletException("Mal-formed URL");
+						throw new ServletException(MALFORMED_URL);
 					}
 					final String binding = attributeName;
 					
@@ -176,13 +179,13 @@ public class SmartClientCompleteServlet extends HttpServlet {
 			        	throw e;
 			        }
 					catch (Exception e) {
-						throw new ServletException("Mal-formed URL", e);
+						throw new ServletException(MALFORMED_URL, e);
 					}
 					if ((attribute == null) && (! BindUtil.isImplicit(attributeName))) {
-						throw new ServletException("Mal-formed URL");
+						throw new ServletException(MALFORMED_URL);
 					}
 
-					String value = UtilImpl.processStringValue(request.getParameter("value"));
+					String value = UtilImpl.processStringValue(request.getParameter(VALUE_FIELD));
 
 					String _startRow = request.getParameter("_startRow");
 					int startRow = (_startRow == null) ? 0 : Integer.parseInt(_startRow);
@@ -220,7 +223,7 @@ public class SmartClientCompleteServlet extends HttpServlet {
 								
 								if (totalRows > 0) {
 									q = persistence.newDocumentQuery(moduleName, documentName);
-									q.addBoundProjection(attributeName, "value");
+									q.addBoundProjection(attributeName, VALUE_FIELD);
 									q.setDistinct(true);
 									if (value != null) {
 										sb.setLength(0);

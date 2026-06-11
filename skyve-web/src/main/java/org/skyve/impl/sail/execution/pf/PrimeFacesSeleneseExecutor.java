@@ -84,6 +84,7 @@ import jakarta.faces.component.UIComponent;
 /**
  * Executes SAIL interaction steps against the web UI for test scenarios.
  */
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate Selenese command and selector fragments.
 public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutomationContext> {
 	private ComponentBuilder componentBuilder;
 	private LayoutBuilder layoutBuilder;

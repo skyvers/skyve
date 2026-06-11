@@ -9,14 +9,17 @@ import org.skyve.metadata.router.UxUi;
  * Declare new UxUis in the DefaultUxUiSelector.
  */
 public class UxUis {
+	private static final String EDITORIAL_THEME = "editorial";
+	private static final String SAGA_THEME = "saga";
+
 	/**
 	 * PrimeFaces profile for phone devices.
 	 */
-	public static final UxUi PHONE = UxUi.newPrimeFaces("phone", "editorial", "saga");
+	public static final UxUi PHONE = UxUi.newPrimeFaces("phone", EDITORIAL_THEME, SAGA_THEME);
 	/**
 	 * PrimeFaces profile for tablet devices.
 	 */
-	public static final UxUi TABLET = UxUi.newPrimeFaces("tablet", "editorial", "saga");
+	public static final UxUi TABLET = UxUi.newPrimeFaces("tablet", EDITORIAL_THEME, SAGA_THEME);
 	/**
 	 * SmartClient profile for desktop browsers.
 	 */
@@ -24,9 +27,9 @@ public class UxUis {
 	/**
 	 * PrimeFaces profile for unauthenticated/public pages.
 	 */
-	public static final UxUi EXTERNAL = UxUi.newPrimeFaces("external", "editorial", "saga");
+	public static final UxUi EXTERNAL = UxUi.newPrimeFaces("external", EDITORIAL_THEME, SAGA_THEME);
 	/**
 	 * PrimeFaces profile for startup/setup wizard pages.
 	 */
-	public static final UxUi STARTUP = UxUi.newPrimeFaces("startup", "editorial", "saga");
+	public static final UxUi STARTUP = UxUi.newPrimeFaces("startup", EDITORIAL_THEME, SAGA_THEME);
 }

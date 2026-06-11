@@ -48,6 +48,9 @@ public class HealthServlet extends HttpServlet {
 
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(HealthServlet.class);
 
+    private static final String STATUS_OK = "ok";
+	private static final String STATUS_ERROR = "error";
+
 	// The thread-safe cached response
 	private static AtomicReference<StringBuilder> cachedResponse = new AtomicReference<>();
 	// The thread-safe millis at caching instant - used to determine whether to use the cached response or not
@@ -111,7 +114,7 @@ public class HealthServlet extends HttpServlet {
 		try {
 			AbstractHibernatePersistence p = (AbstractHibernatePersistence) AbstractPersistence.get();
 			try {
-				result.append("ok");
+				result.append(STATUS_OK);
 				
 				// Primary Data Store
 				result.append("\",\"database\":\"");
@@ -127,7 +130,7 @@ public class HealthServlet extends HttpServlet {
 					StringBuilder sql = new StringBuilder(64);
 					sql.append("select 1 from ").append(persistent.getPersistentIdentifier()).append(" where 1 = 0");
 					p.newSQL(sql.toString()).scalarResults(Number.class);
-					result.append("ok");
+					result.append(STATUS_OK);
 				}
 				finally {
 					p.rollback();
@@ -139,7 +142,7 @@ public class HealthServlet extends HttpServlet {
 		}
 		catch (Throwable t) {
 			LOGGER.error(t.getMessage(), t);
-			result.append("error");
+			result.append(STATUS_ERROR);
 		}
 		
 		// Data Stores
@@ -152,11 +155,11 @@ public class HealthServlet extends HttpServlet {
 					}
 				}
 			}
-			result.append("ok");
+			result.append(STATUS_OK);
 		}
 		catch (Throwable t) {
 			LOGGER.error(t.getMessage(), t);
-			result.append("error");
+			result.append(STATUS_ERROR);
 		}
 		
 		// Repository
@@ -164,15 +167,15 @@ public class HealthServlet extends HttpServlet {
 		try {
 			// Obtain the repository
 			if (CORE.getRepository() == null) {
-				result.append("error");
+				result.append(STATUS_ERROR);
 			}
 			else {
-				result.append("ok");
+				result.append(STATUS_OK);
 			}
 		}
 		catch (Throwable t) {
 			LOGGER.error(t.getMessage(), t);
-			result.append("error");
+			result.append(STATUS_ERROR);
 		}
 
 		// Add-ins
@@ -180,11 +183,11 @@ public class HealthServlet extends HttpServlet {
 		try {
 			// Obtain the addin manager
 			EXT.getAddInManager();
-			result.append("ok");
+			result.append(STATUS_OK);
 		}
 		catch (Throwable t) {
 			LOGGER.error(t.getMessage(), t);
-			result.append("error");
+			result.append(STATUS_ERROR);
 		}
 
 		// Content
@@ -192,12 +195,12 @@ public class HealthServlet extends HttpServlet {
 		try {
 			// Open and close a new content manager
 			try (ContentManager cm = EXT.newContentManager()) {
-				result.append("ok");
+				result.append(STATUS_OK);
 			}
 		}
 		catch (Throwable t) {
 			LOGGER.error(t.getMessage(), t);
-			result.append("error");
+			result.append(STATUS_ERROR);
 		}
 
 		// Job Scheduler
@@ -206,11 +209,11 @@ public class HealthServlet extends HttpServlet {
 			try {
 				// Obtain the job scheduler manager
 				EXT.getJobScheduler();
-				result.append("ok");
+				result.append(STATUS_OK);
 			}
 			catch (Throwable t) {
 				LOGGER.error(t.getMessage(), t);
-				result.append("error");
+				result.append(STATUS_ERROR);
 			}
 		}
 		else {
@@ -222,11 +225,11 @@ public class HealthServlet extends HttpServlet {
 		try {
 			// Check for a bogus token that will get the CSRF token cache
 			StateUtil.checkToken("", null);
-			result.append("ok");
+			result.append(STATUS_OK);
 		}
 		catch (Throwable t) {
 			LOGGER.error(t.getMessage(), t);
-			result.append("error");
+			result.append(STATUS_ERROR);
 		}
 
 		// Resources

@@ -83,6 +83,7 @@ import jakarta.faces.component.UIComponent;
 /**
  * Executes SAIL interaction steps against the web UI for test scenarios.
  */
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate inline WebDriver script fragments.
 public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFacesAutomationContext> {
 
 	private ComponentBuilder componentBuilder;

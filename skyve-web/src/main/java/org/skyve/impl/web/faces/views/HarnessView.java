@@ -35,6 +35,7 @@ import jakarta.servlet.http.HttpSession;
  * Extension point that establishes state for the running Skyve app Faces Views.
  * Note that no methods should be final in here as a bean could be injected and a proxy needs to be made.
  */
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate harness view script fragments.
 public abstract class HarnessView extends LocalisableView {
 	private static final long serialVersionUID = 2805839690076647L;
 
@@ -262,6 +263,7 @@ public abstract class HarnessView extends LocalisableView {
 	 * Initialises harness state for the current request and user context.
 	 */
 	@Override
+	@SuppressWarnings({"null", "unused", "java:S6541", "java:S3776"}) // OK to check user for null defensively and complexity OK
 	public void initialise() {
 		super.initialise();
 
@@ -434,10 +436,10 @@ public abstract class HarnessView extends LocalisableView {
 			WebUtil.setSessionId(user, request);
 			session.setAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME, user);
 			WebUtil.addSessionAndAuditConcurrentSessionWarning(user, request, session);
-		}
 
-		AbstractPersistence persistence = AbstractPersistence.get();
-		persistence.setUser(user);
+			AbstractPersistence persistence = AbstractPersistence.get();
+			persistence.setUser(user);
+		}
 	}
 	
 	/**

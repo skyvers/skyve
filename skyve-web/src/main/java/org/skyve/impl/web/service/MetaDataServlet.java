@@ -219,6 +219,7 @@ import org.skyve.util.logging.SkyveLoggerFactory;
  * The servlet resolves the authenticated user, applies access checks, and serializes runtime metadata
  * to JSON for SmartClient bootstrap and view rendering.
  */
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate metadata JSON output fragments.
 public class MetaDataServlet extends HttpServlet {
 	private static final long serialVersionUID = -2160904569807647301L;
 	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(MetaDataServlet.class);

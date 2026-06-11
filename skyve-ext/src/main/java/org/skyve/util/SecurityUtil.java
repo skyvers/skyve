@@ -44,6 +44,8 @@ public class SecurityUtil {
 	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SecurityUtil.class);
 
 	private static final String ANONYMOUS_SECURITY_USER = "securityUser";
+	private static final String ARGON2_ALGORITHM = "argon2";
+	private static final String HTML_LINE_BREAK = "<br/>";
 	private static final PasswordEncoder BCRYPT_PASSWORD_ENCODER = new LegacyBCryptPasswordEncoder();
 
 	/**
@@ -246,31 +248,31 @@ public class SecurityUtil {
 				.append(nameEnv);
 		body.append("<br/><br/>");
 		if (timestamp != null) {
-			body.append("Timestamp: ").append(timestamp).append("<br/>");
+			body.append("Timestamp: ").append(timestamp).append(HTML_LINE_BREAK);
 		}
 		if (threadId != null) {
-			body.append("Thread ID: ").append(threadId).append("<br/>");
+			body.append("Thread ID: ").append(threadId).append(HTML_LINE_BREAK);
 		}
 		if (threadName != null) {
-			body.append("Thread Name: ").append(threadName).append("<br/>");
+			body.append("Thread Name: ").append(threadName).append(HTML_LINE_BREAK);
 		}
 		if (sourceIP != null) {
-			body.append("Source IP: ").append(sourceIP).append("<br/>");
+			body.append("Source IP: ").append(sourceIP).append(HTML_LINE_BREAK);
 		}
 		if (username != null) {
-			body.append("Username: ").append(username).append("<br/>");
+			body.append("Username: ").append(username).append(HTML_LINE_BREAK);
 		}
 		if (loggedInUserId != null) {
-			body.append("Logged in User ID: ").append(loggedInUserId).append("<br/>");
+			body.append("Logged in User ID: ").append(loggedInUserId).append(HTML_LINE_BREAK);
 		}
 		if (eventType != null) {
-			body.append("Event Type: ").append(eventType).append("<br/>");
+			body.append("Event Type: ").append(eventType).append(HTML_LINE_BREAK);
 		}
 		if (eventMessage != null) {
-			body.append("Event Message: ").append(eventMessage).append("<br/>");
+			body.append("Event Message: ").append(eventMessage).append(HTML_LINE_BREAK);
 		}
 		if (provenance != null) {
-			body.append("Provenance: ").append(provenance).append("<br/>");
+			body.append("Provenance: ").append(provenance).append(HTML_LINE_BREAK);
 		}
 
 		// Send
@@ -367,9 +369,9 @@ public class SecurityUtil {
 	 * @return	Skyve's delegating password encoder
 	 */
 	public static @Nonnull PasswordEncoder createDelegatingPasswordEncoder() {
-		String encodingId = "argon2";
+		String encodingId = ARGON2_ALGORITHM;
 		Map<String, PasswordEncoder> encoders = new HashMap<>();
-		encoders.put("argon2", Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8());
+		encoders.put(ARGON2_ALGORITHM, Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8());
 		encoders.put("bcrypt", BCRYPT_PASSWORD_ENCODER);
 		encoders.put("pbkdf2", Pbkdf2PasswordEncoder.defaultsForSpringSecurity_v5_8());
 		encoders.put("scrypt", SCryptPasswordEncoder.defaultsForSpringSecurity_v5_8());
@@ -391,7 +393,7 @@ public class SecurityUtil {
 		String result = null;
 
 		String passwordHashingAlgorithm = Util.getPasswordHashingAlgorithm();
-		if ("argon2".equals(passwordHashingAlgorithm)) {
+		if (ARGON2_ALGORITHM.equals(passwordHashingAlgorithm)) {
 			result = "{argon2}" + Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8().encode(clearText);
 		}
 		else if ("bcrypt".equals(passwordHashingAlgorithm)) {

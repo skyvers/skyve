@@ -52,6 +52,7 @@ import jakarta.annotation.Nullable;
 /**
  * React Native-specific widget/component renderer.
  */
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate fragments of generated React Native component output.
 public class ReactNativeComponentRenderer extends ComponentRenderer {
 	public static final String REACT_NATIVE_IMPORT = "react-native";
 

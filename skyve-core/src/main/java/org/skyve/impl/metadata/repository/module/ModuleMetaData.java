@@ -75,12 +75,12 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * @see org.skyve.impl.metadata.module.ModuleImpl
  */
 @XmlRootElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "module")
-@XmlType(namespace = XMLMetaData.MODULE_NAMESPACE, 
+@XmlType(namespace = XMLMetaData.MODULE_NAMESPACE,
 			name = "module",
 			propOrder = {"title",
 							"prototype",
 							"formLabelLayout",
-							"documentation", 
+							"documentation",
 							"homeRef",
 							"homeDocument",
 							"jobs",
@@ -91,6 +91,17 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 							"properties"})
 public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData<Module>, DecoratedMetaData {
 	private static final long serialVersionUID = -6257431975403255783L;
+	
+	private static final String FOR_MENU_ITEM = "for menu item ";
+	private static final String IN_QUERY = " in query ";
+	private static final String IN_ROLE = " in role ";
+	private static final String IS_REQUIRED = " is required";
+	private static final String IS_A_MODULE_DOCUMENT_NAME = " is a module document name.";
+	private static final String MENU_DOCUMENT_QUERY_EXCLUSIVITY = " : If [document] is present, then [query] should be absent ";
+	private static final String MENU_MODEL_DOCUMENT_REQUIRED = " : If [model] is present, then [document] is required ";
+	private static final String MENU_QUERY_EXCLUSIVITY = " : If [query] is present, then [model] and [document] should be absent ";
+	private static final String MENU_TARGET_REQUIRED = " : One of [document], [query] or [model] ";
+	private static final String MENU_TARGET_REQUIRED_SUFFIX = "is required for menu item ";
 
 	private String title;
 	private Boolean prototype;
@@ -340,7 +351,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	public Map<String, String> getProperties() {
 		return properties;
 	}
-	
+
 	/**
 	 * Converts this JAXB metadata descriptor into a validated runtime {@link Module}.
 	 *
@@ -376,13 +387,13 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 		result.setTitle(value);
 
 		result.setPrototype(Boolean.TRUE.equals(prototype));
-		
+
 		result.setFormLabelLayout(getFormLabelLayout());
-		
+
 		result.setDocumentation(documentation);
 
 		result.getProperties().putAll(properties);
-		
+
 		value = getHomeDocument();
 		if (value == null) {
 			throw new MetaDataException(metaDataName + " : The module [homeDocument] is required");
@@ -419,7 +430,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 				else {
 					documentRef.setOwningModuleName(getName());
 				}
-				
+
 				documentRef.getProperties().putAll(document.getProperties());
 
 				// TODO expand on document ref when add further modules documentRef.setRelatedTo();
@@ -427,12 +438,12 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 			}
 		}
 		if (! documentNames.contains(result.getHomeDocumentName())) {
-			throw new MetaDataException(metaDataName + " : The module [homeDocument] " + 
+			throw new MetaDataException(metaDataName + " : The module [homeDocument] " +
 											result.getHomeDocumentName() + " is not a module document");
 		}
 
 		// Populate Jobs
-		
+
 		List<JobMetaDataImpl> repositoryJobs = getJobs();
 		if (repositoryJobs != null) {
 			Set<String> jobNames = new TreeSet<>();
@@ -445,18 +456,18 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 					throw new MetaDataException(metaDataName + " : Duplicate job named " + value);
 				}
 				if (documentNames.contains(value)) {
-					throw new MetaDataException(metaDataName + " : The job named " + value + " is a module document name.");
+					throw new MetaDataException(metaDataName + " : The job named " + value + IS_A_MODULE_DOCUMENT_NAME);
 				}
 
 				value = job.getDisplayName();
 				if (value == null) {
-					throw new MetaDataException(metaDataName + " : The [displayName] for job " + job.getName() + " is required");
+					throw new MetaDataException(metaDataName + " : The [displayName] for job " + job.getName() + IS_REQUIRED);
 				}
 				job.setOwningModuleName(result.getName());
 				result.putJob(job);
 			}
 		}
-		
+
 		// Populate queries
 
 		List<QueryMetaData> repositoryQueries = getQueries();
@@ -475,8 +486,8 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 
 					value = documentQueryMetaData.getDocumentName();
 					if (value == null) {
-						throw new MetaDataException(metaDataName + " : The [documentName] for query " + 
-														defn.getName() + " is required");
+						throw new MetaDataException(metaDataName + " : The [documentName] for query " +
+														defn.getName() + IS_REQUIRED);
 					}
 					if (! documentNames.contains(value)) {
 						throw new MetaDataException(metaDataName + " : The [documentName] of " + value + " for query " +
@@ -508,57 +519,57 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 								contentColumn = new MetaDataQueryContentColumnImpl();
 								column = contentColumn;
 							}
-							
+
 							column.setName(repositoryColumn.getName());
 							String binding = repositoryColumn.getBinding();
 							if ((projectedColumn != null) && (projectedRepositoryColumn != null)) {
 								String expression = projectedRepositoryColumn.getExpression();
 								if ((binding == null) && (expression == null)) {
-									throw new MetaDataException(metaDataName + 
-																	" : The [binding] and [expression] for a query column is missing in query " + 
+									throw new MetaDataException(metaDataName +
+																	" : The [binding] and [expression] for a query column is missing in query " +
 																	defn.getName());
 								}
 								if ((binding != null) && (expression != null)) {
-									throw new MetaDataException(metaDataName + 
-																	" : Both the [binding] and [expression] for a query column are entered in query " + 
+									throw new MetaDataException(metaDataName +
+																	" : Both the [binding] and [expression] for a query column are entered in query " +
 																	defn.getName());
 								}
 								if ((expression != null) && (column.getName() == null)) {
-									throw new MetaDataException(metaDataName + 
-																	" : An [expression] query column requires the [name] to be entered in query " + 
+									throw new MetaDataException(metaDataName +
+																	" : An [expression] query column requires the [name] to be entered in query " +
 																	defn.getName());
 								}
 								projectedColumn.setExpression(expression);
 							}
 							else if (contentColumn != null) {
 								if (binding == null) {
-									throw new MetaDataException(metaDataName + 
-																	" : The [binding] for a content query column is missing in query " + 
+									throw new MetaDataException(metaDataName +
+																	" : The [binding] for a content query column is missing in query " +
 																	defn.getName());
 								}
 							}
 							column.setBinding(binding);
 							column.setDisplayName(repositoryColumn.getDisplayName());
 							column.getProperties().putAll(repositoryColumn.getProperties());
-							
+
 							FilterOperator filterOperator = repositoryColumn.getFilterOperator();
 							String filterExpression = repositoryColumn.getFilterExpression();
-							if ((filterOperator != null) && 
+							if ((filterOperator != null) &&
 									(! filterOperator.equals(FilterOperator.isNull)) &&
-									(! filterOperator.equals(FilterOperator.notNull)) && 
+									(! filterOperator.equals(FilterOperator.notNull)) &&
 									(filterExpression == null)) {
-								throw new MetaDataException(metaDataName + " : Operator " + filterOperator + 
-																" in column " + column.getBinding() + 
-																" in query " + defn.getName() + 
+								throw new MetaDataException(metaDataName + " : Operator " + filterOperator +
+																" in column " + column.getBinding() +
+																IN_QUERY + defn.getName() +
 																" requires an [expression].");
 							}
-							if (((filterOperator == null) || 
-									filterOperator.equals(FilterOperator.isNull) || 
+							if (((filterOperator == null) ||
+									filterOperator.equals(FilterOperator.isNull) ||
 									filterOperator.equals(FilterOperator.notNull)) &&
 									(filterExpression != null)) {
-								throw new MetaDataException(metaDataName + " : Operator " + filterOperator + 
-																" in column " + column.getBinding() + 
-																" in query " + defn.getName() +
+								throw new MetaDataException(metaDataName + " : Operator " + filterOperator +
+																" in column " + column.getBinding() +
+																IN_QUERY + defn.getName() +
 																" does not require an [expression].");
 							}
 							column.setFilterOperator(filterOperator);
@@ -599,8 +610,8 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 								FormatterName formatterName = projectedRepositoryColumn.getFormatterName();
 								String customFormatterName = projectedRepositoryColumn.getCustomFormatterName();
 								if ((formatterName != null) && (customFormatterName != null)) {
-									throw new MetaDataException(metaDataName + " : formatter and customFormatter cannot both be defined in column " + 
-																	column.getBinding() +  " in query " + defn.getName());
+									throw new MetaDataException(metaDataName + " : formatter and customFormatter cannot both be defined in column " +
+																	column.getBinding() +  IN_QUERY + defn.getName());
 								}
 								else if (formatterName != null) {
 									projectedColumn.setFormatterName(formatterName);
@@ -618,15 +629,15 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 								contentColumn.setDisplay(display);
 								contentColumn.setPixelHeight(contentRepositoryColumn.getPixelHeight());
 								String emptyThumbnailRelativeFile = contentRepositoryColumn.getEmptyThumbnailRelativeFile();
-								if ((emptyThumbnailRelativeFile != null) && 
+								if ((emptyThumbnailRelativeFile != null) &&
 										(! DisplayType.thumbnail.equals(display))) {
 									throw new MetaDataException(metaDataName + " : An [emptyThumbnailRelativeFile] should not be defined on content column " +
-																	column.getBinding() + " in query " + defn.getName() + 
+																	column.getBinding() + IN_QUERY + defn.getName() +
 																	" as it is not a thumbnail content column");
 								}
 								contentColumn.setEmptyThumbnailRelativeFile(emptyThumbnailRelativeFile);
 							}
-							
+
 							defn.getColumns().add(column);
 						}
 					}
@@ -634,7 +645,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 				}
 				else if (queryMetaData instanceof SQLMetaData sqlMetaData) {
 					SQLDefinitionImpl defn = new SQLDefinitionImpl();
-					populateQueryProperties(sqlMetaData, 
+					populateQueryProperties(sqlMetaData,
 												defn,
 												metaDataName,
 												queryNames,
@@ -688,25 +699,25 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 					query = reference;
 				}
 				else {
-					throw new MetaDataException(metaDataName + " : Unrecognised query type " + 
+					throw new MetaDataException(metaDataName + " : Unrecognised query type " +
 													queryMetaData.getClass().getName());
 				}
-				
+
 				result.putQuery(query);
 			}
-			
+
 			// Check default query names exist as queries
 			for (Entry<String, DocumentRef> ref : result.getDocumentRefs().entrySet()) {
 				String defaultQueryName = ref.getValue().getDefaultQueryName();
 				if ((defaultQueryName != null) && (! queryNames.contains(defaultQueryName))) {
-					throw new MetaDataException(metaDataName + " : The default query of " + defaultQueryName + 
+					throw new MetaDataException(metaDataName + " : The default query of " + defaultQueryName +
 													" does not exist for document " + ref.getKey());
 				}
 			}
 		}
 
 		// Populate Roles
-		
+
 		Set<String> roleNames = new TreeSet<>();
 		List<ModuleRoleMetaData> repositoryRoles = getRoles();
 		if (repositoryRoles != null) {
@@ -720,13 +731,13 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 					throw new MetaDataException(metaDataName + " : Duplicate role named " + roleName);
 				}
 				if (documentNames.contains(roleName)) {
-					throw new MetaDataException(metaDataName + " : The role named " + roleName + " is a module document name.");
+					throw new MetaDataException(metaDataName + " : The role named " + roleName + IS_A_MODULE_DOCUMENT_NAME);
 				}
 				role.setName(roleName);
 				role.setDescription(roleMetaData.getDescription());
 				role.setDocumentation(roleMetaData.getDocumentation());
 				role.getProperties().putAll(roleMetaData.getProperties());
-				
+
 				// Populate privileges
 				Set<String> docPrivNames = new TreeSet<>();
 				List<DocumentPrivilegeMetaData> repositoryDocPrivileges = roleMetaData.getPrivileges();
@@ -738,7 +749,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 							throw new MetaDataException(metaDataName + " : The [documentName] for a privilege is required for role " + roleName);
 						}
 						if (! docPrivNames.add(value)) {
-							throw new MetaDataException(metaDataName + " : Duplicate document privilege for document " + value + " in role " + roleName);
+							throw new MetaDataException(metaDataName + " : Duplicate document privilege for document " + value + IN_ROLE + roleName);
 						}
 						if (! documentNames.contains(value)) {
 							String message = String.format("%1$s : The privilege [documentName] value of %2$s in role %3$s is not a module document. " +
@@ -748,7 +759,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 						}
 						if (result.getDocumentRefs().get(value).getReferencedModuleName() != null) {
 							throw new MetaDataException(metaDataName + " : The privilege [documentName] value of " + value +
-															" in role " + roleName +
+															IN_ROLE + roleName +
 															" cannot be for a document referenced from another module.  Document Privileges are to be made on the owning module only.");
 						}
 
@@ -756,7 +767,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 						DocumentPermission docPermission = documentPrivilegeMetaData.getPermission();
 						if (docPermission == null) {
 							throw new MetaDataException(metaDataName + " : Document permission is required for document " +
-															documentPrivilege.getName() + " in role " + roleName);
+															documentPrivilege.getName() + IN_ROLE + roleName);
 						}
 						documentPrivilege.setPermission(docPermission);
 						documentPrivilege.getProperties().putAll(documentPrivilegeMetaData.getProperties());
@@ -771,7 +782,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 								value = actionPrivilegeMetaData.getActionName();
 								if (value == null) {
 									throw new MetaDataException(metaDataName + " : The [actionName] for a privilege is required for document " +
-																	documentPrivilege.getName() + " in role " + roleName);
+																	documentPrivilege.getName() + IN_ROLE + roleName);
 								}
 								actionPrivilege.setName(value);
 								actionPrivilege.setDocumentName(documentPrivilege.getName());
@@ -788,7 +799,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 								value = contentRestriction.getAttributeName();
 								if (value == null) {
 									throw new MetaDataException(metaDataName + " : The [attribute] for a content restriction is required for document " +
-																	documentPrivilege.getName() + " in role " + roleName);
+																	documentPrivilege.getName() + IN_ROLE + roleName);
 								}
 								contentRestriction.setDocumentName(documentPrivilege.getName());
 
@@ -803,7 +814,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 								value = contentPermission.getAttributeName();
 								if (value == null) {
 									throw new MetaDataException(metaDataName + " : The [attribute] for a content permission is required for document " +
-																	documentPrivilege.getName() + " in role " + roleName);
+																	documentPrivilege.getName() + IN_ROLE + roleName);
 								}
 								contentPermission.setDocumentName(documentPrivilege.getName());
 
@@ -812,7 +823,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 						}
 					}
 				}
-				
+
 				// Populate User Accesses
 				List<ModuleRoleUserAccessMetaData> repositoryAccesses = roleMetaData.getAccesses();
 				if (repositoryAccesses != null) {
@@ -832,17 +843,17 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 							for (ModuleRoleUserAccessUxUiMetadata uxuiMetaData : uxuisMetaData) {
 								String uxuiName = uxuiMetaData.getName();
 								if (uxuiName == null) {
-									throw new MetaDataException(metaDataName + " : [name] is required for UX/UI in user access " + accessMetaData.toUserAccess(moduleName).toString() + " in role " + roleName);
+									throw new MetaDataException(metaDataName + " : [name] is required for UX/UI in user access " + accessMetaData.toUserAccess(moduleName).toString() + IN_ROLE + roleName);
 								}
 								if (! uxuis.add(uxuiMetaData.getName())) {
-									throw new MetaDataException(metaDataName + " : Duplicate UX/UI of " + uxuiMetaData.getName() + " in user access " + accessMetaData.toUserAccess(moduleName).toString() + " in role " + roleName);
+									throw new MetaDataException(metaDataName + " : Duplicate UX/UI of " + uxuiMetaData.getName() + " in user access " + accessMetaData.toUserAccess(moduleName).toString() + IN_ROLE + roleName);
 								}
 							}
 						}
 
 						// Put into accesses
 						if (accesses.put(accessMetaData.toUserAccess(moduleName), uxuis) != null) {
-							throw new MetaDataException(metaDataName + " : Duplicate user access " + accessMetaData.toUserAccess(moduleName).toString() + " in role " + roleName);
+							throw new MetaDataException(metaDataName + " : Duplicate user access " + accessMetaData.toUserAccess(moduleName).toString() + IN_ROLE + roleName);
 						}
 					}
 				}
@@ -855,7 +866,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 
 		MenuImpl resultMenu = new MenuImpl();
 		resultMenu.getProperties().putAll(menu.getProperties());
-		
+
 		List<MenuItem> items = resultMenu.getItems();
 		populateModuleMenu(metaDataName, items, menu.getActions(), roleNames);
 		result.setMenu(resultMenu);
@@ -874,9 +885,9 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 * @param validRoleNames role names valid for grants within this module
 	 * @throws MetaDataException if required action attributes are missing or inconsistent
 	 */
-	private void populateModuleMenu(String metaDataName, 
-										List<MenuItem> items, 
-										List<ActionMetaData> actions, 
+	private void populateModuleMenu(String metaDataName,
+										List<MenuItem> items,
+										List<ActionMetaData> actions,
 										Set<String> validRoleNames) {
 		for (ActionMetaData action : actions) {
 			if (action instanceof GroupMetaData group) {
@@ -889,7 +900,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 				menuGroup.getProperties().putAll(action.getProperties());
 				populateUxuis(metaDataName, value, group.getUxuis(), menuGroup.getUxUis());
 				populateModuleMenu(metaDataName, menuGroup.getItems(), group.getActions(), validRoleNames);
-				
+
 				items.add(menuGroup);
 			}
 			else if (action instanceof CalendarItemMetaData item) {
@@ -901,64 +912,64 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 				String modelName = item.getModelName();
 				String startBinding = item.getStartBinding();
 				String endBinding = item.getEndBinding();
-				
+
 				if (documentName != null) {
 					if ((queryName != null) ||
-							(startBinding == null) || 
+							(startBinding == null) ||
 							(endBinding == null)) {
-						throw new MetaDataException(metaDataName + " : If [document] is present, then [query] should be absent " + 
+						throw new MetaDataException(metaDataName + MENU_DOCUMENT_QUERY_EXCLUSIVITY +
 														"and [startBinding] and [endBinding] are required for menu item " + item.getName());
 					}
 				}
 				else if (queryName != null) {
 					if ((modelName != null) ||
-							(startBinding == null) || 
+							(startBinding == null) ||
 							(endBinding == null)) {
-						throw new MetaDataException(metaDataName + " : If [query] is present, then [model] and [document] should be absent " + 
+						throw new MetaDataException(metaDataName + MENU_QUERY_EXCLUSIVITY +
 														"and [startBinding] and [endBinding] are required for menu item " + item.getName());
 					}
 				}
 				else if (modelName != null) {
 					if ((startBinding != null) || (endBinding != null)) {
-						throw new MetaDataException(metaDataName + " : If [model] is present, then [document] is required and [query], " + 
+						throw new MetaDataException(metaDataName + " : If [model] is present, then [document] is required and [query], " +
 														"[startBinding] and [endBinding] should be absent for menu item " + item.getName());
 					}
 				}
 				else {
-					throw new MetaDataException(metaDataName + " : One of [document], [query] or [model] " + 
-													"is required for menu item " + item.getName());
+					throw new MetaDataException(metaDataName + MENU_TARGET_REQUIRED +
+													MENU_TARGET_REQUIRED_SUFFIX + item.getName());
 				}
-				
+
 				result.setDocumentName(documentName);
 				result.setModelName(modelName);
 				result.setQueryName(queryName);
 				result.setStartBinding(startBinding);
 				result.setEndBinding(endBinding);
-				
+
 				items.add(result);
 			}
 			else if (action instanceof LinkItemMetaData item) {
 				org.skyve.impl.metadata.module.menu.LinkItem result = new org.skyve.impl.metadata.module.menu.LinkItem();
 				populateItem(metaDataName, validRoleNames, result, item);
-				
+
 				String href = item.getHref();
 				if (href == null) {
 					throw new MetaDataException(metaDataName + " : [href] is required for menu item " + item.getName());
 				}
 				result.setHref(href);
-				
+
 				items.add(result);
 			}
 			else if (action instanceof EditItemMetaData item) {
 				org.skyve.impl.metadata.module.menu.EditItem result = new org.skyve.impl.metadata.module.menu.EditItem();
 				populateItem(metaDataName, validRoleNames, result, item);
-				
+
 				String documentName = item.getDocumentName();
 				if (documentName == null) {
 					throw new MetaDataException(metaDataName + " : [document] is required for menu item " + item.getName());
 				}
 				result.setDocumentName(documentName);
-				
+
 				items.add(result);
 			}
 			else if (action instanceof ListItemMetaData item) {
@@ -971,33 +982,33 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 
 				if (documentName != null) {
 					if (queryName != null) {
-						throw new MetaDataException(metaDataName + 
-														" : If [document] is present, then [query] should be absent " + 
-														"for menu item " + item.getName());
+						throw new MetaDataException(metaDataName +
+														MENU_DOCUMENT_QUERY_EXCLUSIVITY +
+														FOR_MENU_ITEM + item.getName());
 					}
 				}
 				else if (queryName != null) {
 					if (modelName != null) {
-						throw new MetaDataException(metaDataName + " : If [query] is present, then [model] and [document] should be absent " + 
-														"for menu item " + item.getName());
+						throw new MetaDataException(metaDataName + MENU_QUERY_EXCLUSIVITY +
+														FOR_MENU_ITEM + item.getName());
 					}
 				}
 				else if (modelName != null) {
-					throw new MetaDataException(metaDataName + " : If [model] is present, then [document] is required " + 
-													"for menu item " + item.getName());
+					throw new MetaDataException(metaDataName + MENU_MODEL_DOCUMENT_REQUIRED +
+													FOR_MENU_ITEM + item.getName());
 				}
 				else {
-					throw new MetaDataException(metaDataName + " : One of [document], [query] or [model] " + 
-													"is required for menu item " + item.getName());
+					throw new MetaDataException(metaDataName + MENU_TARGET_REQUIRED +
+													MENU_TARGET_REQUIRED_SUFFIX + item.getName());
 				}
 
 				result.setDocumentName(documentName);
 				result.setQueryName(queryName);
 				result.setModelName(modelName);
 				result.setAutoPopulate(! Boolean.FALSE.equals(item.getAutoPopulate()));
-				
+
 				items.add(result);
-			} 
+			}
 			else if (action instanceof MapItemMetaData item) {
 				org.skyve.impl.metadata.module.menu.MapItem result = new org.skyve.impl.metadata.module.menu.MapItem();
 				populateItem(metaDataName, validRoleNames, result, item);
@@ -1007,40 +1018,40 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 				String modelName = item.getModelName();
 				String geometryBinding = item.getGeometryBinding();
 				Integer refreshTimeInSeconds = item.getRefreshTimeInSeconds();
-				
+
 				if (documentName != null) {
 					if ((queryName != null) ||
 							(geometryBinding == null)) {
-						throw new MetaDataException(metaDataName + " : If [document] is present, then [query] should be absent " + 
+						throw new MetaDataException(metaDataName + MENU_DOCUMENT_QUERY_EXCLUSIVITY +
 														"and [geometryBinding] is required for menu item " + item.getName());
 					}
 				}
 				else if (queryName != null) {
 					if ((modelName != null) ||
 							(geometryBinding == null)) {
-						throw new MetaDataException(metaDataName + " : If [query] is present, then [model] and [document] should be absent " + 
+						throw new MetaDataException(metaDataName + MENU_QUERY_EXCLUSIVITY +
 														"and [geometryBinding] is required for menu item " + item.getName());
 					}
 				}
 				else if (modelName != null) {
-					throw new MetaDataException(metaDataName + " : If [model] is present, then [document] is required " + 
-													"for menu item " + item.getName());
+					throw new MetaDataException(metaDataName + MENU_MODEL_DOCUMENT_REQUIRED +
+													FOR_MENU_ITEM + item.getName());
 				}
 				else {
-					throw new MetaDataException(metaDataName + " : One of [document], [query] or [model] " + 
-													"is required for menu item " + item.getName());
+					throw new MetaDataException(metaDataName + MENU_TARGET_REQUIRED +
+													MENU_TARGET_REQUIRED_SUFFIX + item.getName());
 				}
 				if ((refreshTimeInSeconds != null) && refreshTimeInSeconds.intValue() < 5) {
 					throw new MetaDataException(metaDataName + " : [refreshTimeInSeconds] must be at least 5");
 				}
-				
+
 				result.setDocumentName(documentName);
 				result.setModelName(modelName);
 				result.setQueryName(queryName);
 				result.setGeometryBinding(geometryBinding);
 				result.setShowRefreshControls(item.getShowRefreshControls());
 				result.setRefreshTimeInSeconds(refreshTimeInSeconds);
-				
+
 				items.add(result);
 			}
 			else if (action instanceof TreeItemMetaData item) {
@@ -1050,34 +1061,34 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 				String documentName = item.getDocumentName();
 				String queryName = item.getQueryName();
 				String modelName = item.getModelName();
-				
+
 				if (documentName != null) {
 					if (queryName != null) {
 						throw new MetaDataException(metaDataName + " : If [document] is present, " +
-														"then [query] should be absent for menu item " + 
+														"then [query] should be absent for menu item " +
 														item.getName());
 					}
 				}
 				else if (queryName != null) {
 					if (modelName != null) {
-						throw new MetaDataException(metaDataName + " : If [query] is present, then [model] and [document] should be absent " + 
-														"for menu item " + item.getName());
+						throw new MetaDataException(metaDataName + MENU_QUERY_EXCLUSIVITY +
+														FOR_MENU_ITEM + item.getName());
 					}
 				}
 				else if (modelName != null) {
-					throw new MetaDataException(metaDataName + " : If [model] is present, then [document] is required " + 
-													"for menu item " + item.getName());
+					throw new MetaDataException(metaDataName + MENU_MODEL_DOCUMENT_REQUIRED +
+													FOR_MENU_ITEM + item.getName());
 				}
 				else {
-					throw new MetaDataException(metaDataName + " : One of [document], [query] or [model] " + 
-													"is required for menu item " + item.getName());
+					throw new MetaDataException(metaDataName + MENU_TARGET_REQUIRED +
+													MENU_TARGET_REQUIRED_SUFFIX + item.getName());
 				}
-				
+
 				result.setDocumentName(documentName);
 				result.setModelName(modelName);
 				result.setQueryName(queryName);
 				result.setAutoPopulate(! Boolean.FALSE.equals(item.getAutoPopulate()));
-				
+
 				items.add(result);
 			}
 			else {
@@ -1085,7 +1096,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 			}
 		}
 	}
-	
+
 	/**
 	 * Populates common runtime menu-item state from source metadata.
 	 *
@@ -1108,7 +1119,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 		}
 		result.setName(value);
 		result.getProperties().putAll(metadata.getProperties());
-		
+
 		Set<String> grantNames = new TreeSet<>();
 		List<GrantedTo> grants = metadata.getRoles();
 		if (grants.isEmpty()) {
@@ -1121,7 +1132,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 												result.getName());
 			}
 			if (! grantNames.add(value)) {
-				throw new MetaDataException(metaDataName + " : Duplicate grant for role " + 
+				throw new MetaDataException(metaDataName + " : Duplicate grant for role " +
 												value + " in menu item " + result.getName());
 			}
 			if (! validRoleNames.contains(value)) {
@@ -1135,7 +1146,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 		}
 		populateUxuis(metaDataName, result.getName(), metadata.getUxuis(), result.getUxUis());
 	}
-	
+
 	/**
 	 * Copies shared query-definition fields from repository metadata into a runtime query.
 	 *
@@ -1146,8 +1157,8 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 * @param documentNames document names used to prevent query/document naming collisions
 	 * @throws MetaDataException if required fields are missing or naming rules are violated
 	 */
-	private static void populateQueryProperties(QueryDefinitionMetaData queryMetaData, 
-													QueryDefinitionImpl query, 
+	private static void populateQueryProperties(QueryDefinitionMetaData queryMetaData,
+													QueryDefinitionImpl query,
 													String metaDataName,
 													Set<String> queryNames,
 													Set<String> documentNames) {
@@ -1161,7 +1172,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 
 		value = queryMetaData.getDescription();
 		if (value == null) {
-			throw new MetaDataException(metaDataName + " : The [description] for query " + query.getName() + " is required");
+			throw new MetaDataException(metaDataName + " : The [description] for query " + query.getName() + IS_REQUIRED);
 		}
 		query.setDescription(value);
 		query.setDocumentation(queryMetaData.getDocumentation());
@@ -1173,7 +1184,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 
 		query.getProperties().putAll(queryMetaData.getProperties());
 	}
-	
+
 	/**
 	 * Validates that a query name is unique and does not clash with module document names.
 	 *
@@ -1191,7 +1202,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 			throw new MetaDataException(metaDataName + " : Duplicate query named " + name);
 		}
 		if (documentNames.contains(name)) {
-			throw new MetaDataException(metaDataName + " : The query named " + name + " is a module document name.");
+			throw new MetaDataException(metaDataName + " : The query named " + name + IS_A_MODULE_DOCUMENT_NAME);
 		}
 	}
 
@@ -1206,9 +1217,9 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 * @param uxuisToAddTo destination set receiving validated UX/UI names
 	 * @throws MetaDataException if a UX/UI name is missing or duplicated
 	 */
-	private static void populateUxuis(String metaDataName, 
-										String itemName, 
-										List<ApplicableTo> uxuis, 
+	private static void populateUxuis(String metaDataName,
+										String itemName,
+										List<ApplicableTo> uxuis,
 										Set<String> uxuisToAddTo) {
 		Set<String> applicableUxuis = new TreeSet<>();
 		for (ApplicableTo uxui : uxuis) {
@@ -1218,7 +1229,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 												itemName);
 			}
 			if (! applicableUxuis.add(value)) {
-				throw new MetaDataException(metaDataName + " : Duplicate uxui " + 
+				throw new MetaDataException(metaDataName + " : Duplicate uxui " +
 												value + " in menu item " + itemName);
 			}
 			uxuisToAddTo.add(value);

@@ -27,6 +27,8 @@ import jakarta.annotation.Nullable;
  * rather than accept().
  */
 abstract class BeanVisitorImpl {
+	private static final String BEAN_ACCESSOR_CLASH = " Possible bean accessor clash with is/get methods?";
+
 	private boolean visitNulls = false;
 	private boolean visitInverses;
 	private boolean vectorCyclicDetection;
@@ -183,7 +185,7 @@ abstract class BeanVisitorImpl {
 								}
 								catch (ClassCastException e) {
 									throw new DomainException("Is relation " + relationName + " property getter overridden in the document extension class?" +
-																	" Possible bean accessor clash with is/get methods?", e);
+																	BEAN_ACCESSOR_CLASH, e);
 								}
 							}
 							if ((child != null) || visitNulls) {
@@ -222,7 +224,7 @@ abstract class BeanVisitorImpl {
 								}
 								catch (ClassCastException e) {
 									throw new DomainException("Is relation " + relationName + " property getter overridden in the document extension class?" +
-																	" Possible bean accessor clash with is/get methods?", e);
+																	BEAN_ACCESSOR_CLASH, e);
 								}
 							}
 							if (children != null) {
@@ -298,7 +300,7 @@ abstract class BeanVisitorImpl {
 						}
 						catch (ClassCastException e) {
 							throw new DomainException("Is parent property getter overridden in the document extension class?" +
-															" Possible bean accessor clash with is/get methods?", e);
+															BEAN_ACCESSOR_CLASH, e);
 						}
 					}
 					if ((parent != null) || visitNulls) {

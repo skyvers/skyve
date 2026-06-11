@@ -121,6 +121,12 @@ public class SkyveContextListener implements ServletContextListener {
 	private static final String ENVIRONMENT_KEY = "environment";
 	private static final String HEALTH_KEY = "health";
 	private static final String BOOTSTRAP_KEY = "bootstrap";
+	private static final String API_KEY = "api";
+	private static final String DOES_NOT_EXIST = " does not exist.";
+	private static final String MAP_KEY = "map";
+	private static final String PUSH_KEY = "push";
+	private static final String SMTP_KEY = "smtp";
+	private static final String URL_KEY = "url";
 	private static final String WARNING_BANNER = "*******************************************************************************************************";
 
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SkyveContextListener.class);
@@ -166,7 +172,7 @@ public class SkyveContextListener implements ServletContextListener {
 				// if a default customer is specified, only notify that one
 				CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(UtilImpl.CUSTOMER);
 				if (internalCustomer == null) {
-					throw new IllegalStateException("UtilImpl.CUSTOMER " + UtilImpl.CUSTOMER + " does not exist.");
+					throw new IllegalStateException("UtilImpl.CUSTOMER " + UtilImpl.CUSTOMER + DOES_NOT_EXIST);
 				}
 				internalCustomer.notifyStartup();
 			}
@@ -175,7 +181,7 @@ public class SkyveContextListener implements ServletContextListener {
 				for (String customerName : repository.getAllCustomerNames()) {
 					CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(customerName);
 					if (internalCustomer == null) {
-						throw new IllegalStateException("Customer " + customerName + " does not exist.");
+						throw new IllegalStateException("Customer " + customerName + DOES_NOT_EXIST);
 					}
 					internalCustomer.notifyStartup();
 				}
@@ -424,24 +430,24 @@ public class SkyveContextListener implements ServletContextListener {
 	static void configureMailServiceAndSmtp(Map<String, Object> properties, Map<String, Object> factories) {
 		boolean smtpRequired = configureMailService(factories);
 
-		Map<String, Object> smtp = getObject(null, "smtp", properties, smtpRequired);
+		Map<String, Object> smtp = getObject(null, SMTP_KEY, properties, smtpRequired);
 		if (smtp == null) {
 			return;
 		}
 
-		UtilImpl.SMTP = getString("smtp", "server", smtp, smtpRequired);
-		Number smtpPort = getNumber("smtp", "port", smtp, smtpRequired);
+		UtilImpl.SMTP = getString(SMTP_KEY, "server", smtp, smtpRequired);
+		Number smtpPort = getNumber(SMTP_KEY, "port", smtp, smtpRequired);
 		UtilImpl.SMTP_PORT = (smtpPort == null) ? 0 : smtpPort.intValue();
-		UtilImpl.SMTP_UID = getString("smtp", "uid", smtp, false);
-		UtilImpl.SMTP_PWD = getString("smtp", "pwd", smtp, false);
+		UtilImpl.SMTP_UID = getString(SMTP_KEY, "uid", smtp, false);
+		UtilImpl.SMTP_PWD = getString(SMTP_KEY, "pwd", smtp, false);
 
-		UtilImpl.SMTP_PROPERTIES = toStringMap(getObject("smtp", "properties", smtp, false));
+		UtilImpl.SMTP_PROPERTIES = toStringMap(getObject(SMTP_KEY, "properties", smtp, false));
 
-		UtilImpl.SMTP_HEADERS = toStringMap(getObject("smtp", "headers", smtp, false));
+		UtilImpl.SMTP_HEADERS = toStringMap(getObject(SMTP_KEY, "headers", smtp, false));
 
-		UtilImpl.SMTP_SENDER = getString("smtp", "sender", smtp, smtpRequired);
-		UtilImpl.SMTP_TEST_RECIPIENT = getString("smtp", "testRecipient", smtp, false);
-		Boolean smtpTestBogusSend = (Boolean) get("smtp", "testBogusSend", smtp, smtpRequired);
+		UtilImpl.SMTP_SENDER = getString(SMTP_KEY, "sender", smtp, smtpRequired);
+		UtilImpl.SMTP_TEST_RECIPIENT = getString(SMTP_KEY, "testRecipient", smtp, false);
+		Boolean smtpTestBogusSend = (Boolean) get(SMTP_KEY, "testBogusSend", smtp, smtpRequired);
 		UtilImpl.SMTP_TEST_BOGUS_SEND = Boolean.TRUE.equals(smtpTestBogusSend);
 	}
 
@@ -555,35 +561,35 @@ public class SkyveContextListener implements ServletContextListener {
 	}
 
 	private static void configurePushSettings(Map<String, Object> properties) {
-		Map<String, Object> push = getObject(null, "push", properties, false);
+		Map<String, Object> push = getObject(null, PUSH_KEY, properties, false);
 		if (push == null) {
 			return;
 		}
 
-		UtilImpl.PUSH_KEEP_ALIVE_TIME_IN_SECONDS = getInt("push", "keepAliveTimeInSeconds", push);
+		UtilImpl.PUSH_KEEP_ALIVE_TIME_IN_SECONDS = getInt(PUSH_KEY, "keepAliveTimeInSeconds", push);
 		if (UtilImpl.PUSH_KEEP_ALIVE_TIME_IN_SECONDS < 1) {
 			throw new IllegalStateException("push.keepAliveTimeInSeconds must be greater than 0");
 		}
 
-		applyOptionalInt(push, "push", "queueSize", value -> {
+		applyOptionalInt(push, PUSH_KEY, "queueSize", value -> {
 			UtilImpl.PUSH_MESSAGE_QUEUE_SIZE = value;
 			if (UtilImpl.PUSH_MESSAGE_QUEUE_SIZE < 1) {
 				throw new IllegalStateException("push.queueSize must be greater than 0");
 			}
 		});
-		applyOptionalInt(push, "push", "maxReceiversPerUser", value -> {
+		applyOptionalInt(push, PUSH_KEY, "maxReceiversPerUser", value -> {
 			UtilImpl.PUSH_MAX_RECEIVERS_PER_USER = value;
 			if (UtilImpl.PUSH_MAX_RECEIVERS_PER_USER < 0) {
 				throw new IllegalStateException("push.maxReceiversPerUser must be greater than or equal to 0");
 			}
 		});
-		applyOptionalInt(push, "push", "maxReceiversTotal", value -> {
+		applyOptionalInt(push, PUSH_KEY, "maxReceiversTotal", value -> {
 			UtilImpl.PUSH_MAX_RECEIVERS_TOTAL = value;
 			if (UtilImpl.PUSH_MAX_RECEIVERS_TOTAL < 0) {
 				throw new IllegalStateException("push.maxReceiversTotal must be greater than or equal to 0");
 			}
 		});
-		applyOptionalInt(push, "push", "staleReceiverTimeoutInSeconds", value -> {
+		applyOptionalInt(push, PUSH_KEY, "staleReceiverTimeoutInSeconds", value -> {
 			UtilImpl.PUSH_STALE_RECEIVER_TIMEOUT_IN_SECONDS = value;
 			if (UtilImpl.PUSH_STALE_RECEIVER_TIMEOUT_IN_SECONDS < 0) {
 				throw new IllegalStateException("push.staleReceiverTimeoutInSeconds must be greater than or equal to 0");
@@ -621,10 +627,10 @@ public class SkyveContextListener implements ServletContextListener {
 	}
 
 	private static void configureUrlSettings(Map<String, Object> properties) {
-		Map<String, Object> url = getObject(null, "url", properties, true);
-		UtilImpl.SERVER_URL = getString("url", "server", url, true);
-		UtilImpl.SKYVE_CONTEXT = getString("url", "context", url, true);
-		UtilImpl.HOME_URI = getString("url", "home", url, true);
+		Map<String, Object> url = getObject(null, URL_KEY, properties, true);
+		UtilImpl.SERVER_URL = getString(URL_KEY, "server", url, true);
+		UtilImpl.SKYVE_CONTEXT = getString(URL_KEY, "context", url, true);
+		UtilImpl.HOME_URI = getString(URL_KEY, "home", url, true);
 	}
 
 	private static void configureStateSettings(Map<String, Object> properties) {
@@ -695,12 +701,12 @@ public class SkyveContextListener implements ServletContextListener {
 	}
 
 	private static void configureMapSettings(Map<String, Object> properties) {
-		Map<String, Object> map = getObject(null, "map", properties, true);
-		String value = getString("map", "type", map, true);
+		Map<String, Object> map = getObject(null, MAP_KEY, properties, true);
+		String value = getString(MAP_KEY, "type", map, true);
 		UtilImpl.MAP_TYPE = MapType.valueOf(value);
-		UtilImpl.MAP_LAYERS = getString("map", "layers", map, true);
-		UtilImpl.MAP_CENTRE = getString("map", "centre", map, false);
-		Number zoom = getNumber("map", "zoom", map, false);
+		UtilImpl.MAP_LAYERS = getString(MAP_KEY, "layers", map, true);
+		UtilImpl.MAP_CENTRE = getString(MAP_KEY, "centre", map, false);
+		Number zoom = getNumber(MAP_KEY, "zoom", map, false);
 		if (zoom != null) {
 			UtilImpl.MAP_ZOOM = zoom.intValue();
 		}
@@ -780,7 +786,7 @@ public class SkyveContextListener implements ServletContextListener {
 
 			File moduleDirectory = new File(UtilImpl.MODULE_DIRECTORY);
 			if (! moduleDirectory.exists()) {
-				throw new IllegalStateException(ENVIRONMENT_KEY + ".moduleDirectory " + UtilImpl.MODULE_DIRECTORY + " does not exist.");
+				throw new IllegalStateException(ENVIRONMENT_KEY + ".moduleDirectory " + UtilImpl.MODULE_DIRECTORY + DOES_NOT_EXIST);
 			}
 			if (! moduleDirectory.isDirectory()) {
 				throw new IllegalStateException(ENVIRONMENT_KEY + ".moduleDirectory " + UtilImpl.MODULE_DIRECTORY + " is not a directory.");
@@ -802,27 +808,27 @@ public class SkyveContextListener implements ServletContextListener {
 	}
 
 	private static void configureApiSettings(Map<String, Object> properties) {
-		Map<String, Object> api = getObject(null, "api", properties, true);
-		UtilImpl.CHECK_FOR_BREACHED_PASSWORD = Boolean.TRUE.equals(get("api", "checkForBreachedPassword", api, false));
-		UtilImpl.GOOGLE_MAPS_V3_API_KEY = getString("api", "googleMapsV3Key", api, false);
-		UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY = getString("api", "googleRecaptchaSiteKey", api, false);
-		UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY = getString("api", "googleRecaptchaSecretKey", api, false);
-		UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY = getString("api", "cloudflareTurnstileSiteKey", api, false);
-		UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY = getString("api", "cloudflareTurnstileSecretKey", api, false);
-		UtilImpl.GEO_IP_KEY = getString("api", "geoIPKey", api, false);
+		Map<String, Object> api = getObject(null, API_KEY, properties, true);
+		UtilImpl.CHECK_FOR_BREACHED_PASSWORD = Boolean.TRUE.equals(get(API_KEY, "checkForBreachedPassword", api, false));
+		UtilImpl.GOOGLE_MAPS_V3_API_KEY = getString(API_KEY, "googleMapsV3Key", api, false);
+		UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY = getString(API_KEY, "googleRecaptchaSiteKey", api, false);
+		UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY = getString(API_KEY, "googleRecaptchaSecretKey", api, false);
+		UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY = getString(API_KEY, "cloudflareTurnstileSiteKey", api, false);
+		UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY = getString(API_KEY, "cloudflareTurnstileSecretKey", api, false);
+		UtilImpl.GEO_IP_KEY = getString(API_KEY, "geoIPKey", api, false);
 
-		String geoIpCountryCodes = getString("api", "geoIPCountryCodes", api, false);
+		String geoIpCountryCodes = getString(API_KEY, "geoIPCountryCodes", api, false);
 		if (geoIpCountryCodes != null) {
 			String[] codes = geoIpCountryCodes.split("\\|");
 			UtilImpl.GEO_IP_COUNTRY_CODES = new CopyOnWriteArraySet<>(Arrays.asList(codes));
 		}
 
-		Boolean geoIpWhitelist = (Boolean) get("api", "geoIPWhitelist", api, false);
+		Boolean geoIpWhitelist = (Boolean) get(API_KEY, "geoIPWhitelist", api, false);
 		if (geoIpWhitelist != null) {
 			UtilImpl.GEO_IP_WHITELIST = geoIpWhitelist.booleanValue();
 		}
 
-		UtilImpl.CKEDITOR_CONFIG_FILE_URL = getString("api", "ckEditorConfigFileUrl", api, false);
+		UtilImpl.CKEDITOR_CONFIG_FILE_URL = getString(API_KEY, "ckEditorConfigFileUrl", api, false);
 		if (UtilImpl.CKEDITOR_CONFIG_FILE_URL == null) {
 			UtilImpl.CKEDITOR_CONFIG_FILE_URL = "";
 		}
@@ -900,7 +906,7 @@ public class SkyveContextListener implements ServletContextListener {
 			if (jndi == null) {
 				UtilImpl.DATA_STORES.put(dataStoreName,
 						new DataStore(getString(prefix, "driver", dataStore, true),
-								getString(prefix, "url", dataStore, true),
+								getString(prefix, URL_KEY, dataStore, true),
 								getString(prefix, "user", dataStore, false),
 								getString(prefix, "password", dataStore, false),
 								dialect,
@@ -1302,7 +1308,7 @@ public class SkyveContextListener implements ServletContextListener {
 												// if a default customer is specified, only notify that one
 												CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(UtilImpl.CUSTOMER);
 												if (internalCustomer == null) {
-													throw new IllegalStateException("UtilImpl.CUSTOMER " + UtilImpl.CUSTOMER + " does not exist.");
+													throw new IllegalStateException("UtilImpl.CUSTOMER " + UtilImpl.CUSTOMER + DOES_NOT_EXIST);
 												}
 												internalCustomer.notifyShutdown();
 											} 
@@ -1311,7 +1317,7 @@ public class SkyveContextListener implements ServletContextListener {
 												for (String customerName : repository.getAllCustomerNames()) {
 													CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(customerName);
 													if (internalCustomer == null) {
-														throw new IllegalStateException("Customer " + customerName + " does not exist.");
+														throw new IllegalStateException("Customer " + customerName + DOES_NOT_EXIST);
 													}
 													internalCustomer.notifyShutdown();
 												}
@@ -1400,7 +1406,7 @@ public class SkyveContextListener implements ServletContextListener {
 		File directory = new File(directoryPath);
 		
 		if (! directory.exists()) {
-			throw new IllegalStateException(propertyName + " " + directoryPath + " does not exist.");
+			throw new IllegalStateException(propertyName + " " + directoryPath + DOES_NOT_EXIST);
 		}
 		
 		if (! directory.isDirectory()) {

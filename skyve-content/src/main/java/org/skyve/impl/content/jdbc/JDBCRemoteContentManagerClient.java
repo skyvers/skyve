@@ -50,6 +50,9 @@ import org.skyve.impl.util.UtilImpl;
  * <p>Threading: not thread-safe; expected to be created and managed by the runtime container.
  */
 public class JDBCRemoteContentManagerClient extends AbstractContentManager {
+	private static final String CALL_ONE_PARAMETER_FUNCTION = "CALL %s(?)";
+	private static final String TRUNCATE_INDEXING_UNSUPPORTED = "Truncate indexing of a remote content repository is not supported";
+
 	/**
 	 * Initializes the client lifecycle.
 	 */
@@ -85,7 +88,7 @@ public class JDBCRemoteContentManagerClient extends AbstractContentManager {
 	@Override
 	public void put(BeanContent content) throws Exception {
 		try (Connection c = EXT.getDataStoreConnection(UtilImpl.DATA_STORES.get(JDBCRemoteContentManagerServer.CONTENT_DATA_STORE_NAME), false)) {
-			try (CallableStatement s = c.prepareCall(String.format("CALL %s(?)", JDBCRemoteContentManagerServer.PUT_BEAN_FUNCTION_NAME))) {
+			try (CallableStatement s = c.prepareCall(String.format(CALL_ONE_PARAMETER_FUNCTION, JDBCRemoteContentManagerServer.PUT_BEAN_FUNCTION_NAME))) {
 				s.setString(1, StateUtil.encode64(content));
 				s.execute();
 			}
@@ -122,7 +125,7 @@ public class JDBCRemoteContentManagerClient extends AbstractContentManager {
 	@Override
 	public void update(AttachmentContent content) throws Exception {
 		try (Connection c = EXT.getDataStoreConnection(UtilImpl.DATA_STORES.get(JDBCRemoteContentManagerServer.CONTENT_DATA_STORE_NAME), false)) {
-			try (CallableStatement s = c.prepareCall(String.format("CALL %s(?)", JDBCRemoteContentManagerServer.UPDATE_ATTACHMENT_FUNCTION_NAME))) {
+			try (CallableStatement s = c.prepareCall(String.format(CALL_ONE_PARAMETER_FUNCTION, JDBCRemoteContentManagerServer.UPDATE_ATTACHMENT_FUNCTION_NAME))) {
 				s.setString(1, StateUtil.encode64(content.cloneForRemoteUpdate()));
 				s.execute();
 			}
@@ -177,7 +180,7 @@ public class JDBCRemoteContentManagerClient extends AbstractContentManager {
 	@Override
 	public void removeBean(String bizId) throws Exception {
 		try (Connection c = EXT.getDataStoreConnection(UtilImpl.DATA_STORES.get(JDBCRemoteContentManagerServer.CONTENT_DATA_STORE_NAME), false)) {
-			try (CallableStatement s = c.prepareCall(String.format("CALL %s(?)", JDBCRemoteContentManagerServer.REMOVE_BEAN_FUNCTION_NAME))) {
+			try (CallableStatement s = c.prepareCall(String.format(CALL_ONE_PARAMETER_FUNCTION, JDBCRemoteContentManagerServer.REMOVE_BEAN_FUNCTION_NAME))) {
 				s.setString(1, bizId);
 				s.execute();
 			}
@@ -193,7 +196,7 @@ public class JDBCRemoteContentManagerClient extends AbstractContentManager {
 	@Override
 	public void removeAttachment(String contentId) throws Exception {
 		try (Connection c = EXT.getDataStoreConnection(UtilImpl.DATA_STORES.get(JDBCRemoteContentManagerServer.CONTENT_DATA_STORE_NAME), false)) {
-			try (CallableStatement s = c.prepareCall(String.format("CALL %s(?)", JDBCRemoteContentManagerServer.REMOVE_ATTACHMENT_FUNCTION_NAME))) {
+			try (CallableStatement s = c.prepareCall(String.format(CALL_ONE_PARAMETER_FUNCTION, JDBCRemoteContentManagerServer.REMOVE_ATTACHMENT_FUNCTION_NAME))) {
 				s.setString(1, contentId);
 				s.execute();
 			}
@@ -244,7 +247,7 @@ public class JDBCRemoteContentManagerClient extends AbstractContentManager {
 	 */
 	@Override
 	public void truncateIndexing(String customerName) throws Exception {
-		throw new UnsupportedOperationException("Truncate indexing of a remote content repository is not supported");
+		throw new UnsupportedOperationException(TRUNCATE_INDEXING_UNSUPPORTED);
 	}
 
 	/**
@@ -255,7 +258,7 @@ public class JDBCRemoteContentManagerClient extends AbstractContentManager {
 	 */
 	@Override
 	public void truncateAttachmentIndexing(String customerName) throws Exception {
-		throw new UnsupportedOperationException("Truncate indexing of a remote content repository is not supported");
+		throw new UnsupportedOperationException(TRUNCATE_INDEXING_UNSUPPORTED);
 	}
 
 	/**
@@ -266,7 +269,7 @@ public class JDBCRemoteContentManagerClient extends AbstractContentManager {
 	 */
 	@Override
 	public void truncateBeanIndexing(String customerName) throws Exception {
-		throw new UnsupportedOperationException("Truncate indexing of a remote content repository is not supported");
+		throw new UnsupportedOperationException(TRUNCATE_INDEXING_UNSUPPORTED);
 	}
 
 	/**

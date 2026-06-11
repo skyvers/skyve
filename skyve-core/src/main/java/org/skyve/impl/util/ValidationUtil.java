@@ -67,9 +67,10 @@ import org.skyve.util.logging.SkyveLoggerFactory;
  * constraint). Avoid calling this in tight loops.
  */
 public class ValidationUtil {
-
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ValidationUtil.class);
     private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
+
+    private static final String VALIDATION_FAILED_FOR_BEAN = "Validation Failed for bean {}";
 
 	private ValidationUtil() {
 		// no implementation
@@ -105,7 +106,7 @@ public class ValidationUtil {
 		}
 
 		if (! e.getMessages().isEmpty()) {
-			LOGGER.warn("Validation Failed for bean {}", bean);
+			LOGGER.warn(VALIDATION_FAILED_FOR_BEAN, bean);
 			throw e;
 		}
 	}
@@ -316,7 +317,7 @@ public class ValidationUtil {
 		}
 		catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
-			LOGGER.warn("Validation Failed for bean {}", bean);
+			LOGGER.warn(VALIDATION_FAILED_FOR_BEAN, bean);
 			throw new ValidationException(new Message(binding, Util.nullSafeI18n(BeanValidator.VALIDATION_ACCESS_KEY)));
 		}
 
@@ -367,7 +368,7 @@ public class ValidationUtil {
 		}
 
 		if (! e.getMessages().isEmpty()) {
-			LOGGER.warn("Validation Failed for bean {}", bean);
+			LOGGER.warn(VALIDATION_FAILED_FOR_BEAN, bean);
 			throw e;
 		}
 	}
@@ -452,12 +453,12 @@ public class ValidationUtil {
 			}
 		}
 		catch (UniqueConstraintViolationException ve) {
-			LOGGER.warn("Validation Failed for bean {}", bean);
+			LOGGER.warn(VALIDATION_FAILED_FOR_BEAN, bean);
 			throw ve;
 		}
 		catch (Exception ex) {
 			LOGGER.error(ex.getMessage(), ex);
-			LOGGER.warn("Validation Failed for bean {}", bean);
+			LOGGER.warn(VALIDATION_FAILED_FOR_BEAN, bean);
 			throw new ValidationException(new Message("An error occurred checking collection unique constraints. - See stack trace in log"));
 		}
 	}

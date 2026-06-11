@@ -72,6 +72,7 @@ import org.skyve.util.Binder.TargetMetaData;
  */
 public class ViewImpl extends Container implements View {
 	private static final long serialVersionUID = -2621201277538515637L;
+	private static final String IN_VIEW = " in view";
 
 	private String name;
 	private long lastModifiedMillis = Long.MAX_VALUE;
@@ -600,17 +601,17 @@ public class ViewImpl extends Container implements View {
 					for (ViewUserAccessUxUiMetadata uxuiMetaData : uxuisMetaData) {
 						String uxuiName = uxuiMetaData.getName();
 						if (uxuiName == null) {
-							throw new MetaDataException(metaDataName + " : [name] is required for UX/UI in user access " + accessMetaData.toUserAccess(moduleName, documentName).toString() + " in view");
+							throw new MetaDataException(metaDataName + " : [name] is required for UX/UI in user access " + accessMetaData.toUserAccess(moduleName, documentName).toString() + IN_VIEW);
 						}
 						if (! uxuis.add(uxuiMetaData.getName())) {
-							throw new MetaDataException(metaDataName + " : Duplicate UX/UI of " + uxuiMetaData.getName() + " in user access " + accessMetaData.toUserAccess(moduleName, documentName).toString() + " in view");
+							throw new MetaDataException(metaDataName + " : Duplicate UX/UI of " + uxuiMetaData.getName() + " in user access " + accessMetaData.toUserAccess(moduleName, documentName).toString() + IN_VIEW);
 						}
 					}
 				}
 
 				// Put into accesses
 				if (! accesses.add(accessMetaData.toUserAccess(moduleName, documentName))) {
-					throw new MetaDataException(metaDataName + " : Duplicate user access " + accessMetaData.toUserAccess(moduleName, documentName).toString() + " in view");
+					throw new MetaDataException(metaDataName + " : Duplicate user access " + accessMetaData.toUserAccess(moduleName, documentName).toString() + IN_VIEW);
 				}
 			}
 		}

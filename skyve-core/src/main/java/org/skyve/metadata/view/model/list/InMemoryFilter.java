@@ -13,6 +13,8 @@ import org.skyve.domain.types.Decimal;
 import org.skyve.util.Binder;
 
 public class InMemoryFilter implements Filter {
+	private static final String BETWEEN_OPERATOR = "between";
+
 	private List<Predicate> predicates = new ArrayList<>();
 	
 	private abstract static class MyPredicate<T extends Object> implements Predicate {
@@ -612,7 +614,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addBetween(String binding, String start, String end) {
-		predicates.add(new MyPredicate<>(binding, "between", null, start, end) {
+		predicates.add(new MyPredicate<>(binding, BETWEEN_OPERATOR, null, start, end) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, String value, String start, String end) throws Exception {
@@ -628,7 +630,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addBetween(String binding, Date start, Date end) {
-		predicates.add(new MyPredicate<>(binding, "between", null, start, end) {
+		predicates.add(new MyPredicate<>(binding, BETWEEN_OPERATOR, null, start, end) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Date value, Date start, Date end) throws Exception {
@@ -640,7 +642,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addBetween(String binding, Integer start, Integer end) {
-		predicates.add(new MyPredicate<>(binding, "between", null, start, end) {
+		predicates.add(new MyPredicate<>(binding, BETWEEN_OPERATOR, null, start, end) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Integer value, Integer start, Integer end) throws Exception {
@@ -652,7 +654,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addBetween(String binding, Long start, Long end) {
-		predicates.add(new MyPredicate<>(binding, "between", null, start, end) {
+		predicates.add(new MyPredicate<>(binding, BETWEEN_OPERATOR, null, start, end) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Long value, Long start, Long end) throws Exception {
@@ -664,7 +666,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addBetween(String binding, Decimal start, Decimal end) {
-		predicates.add(new MyPredicate<>(binding, "between", null, start, end) {
+		predicates.add(new MyPredicate<>(binding, BETWEEN_OPERATOR, null, start, end) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Decimal value, Decimal start, Decimal end) throws Exception {

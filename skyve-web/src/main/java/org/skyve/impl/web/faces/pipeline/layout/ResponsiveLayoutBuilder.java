@@ -31,6 +31,7 @@ import jakarta.faces.component.html.HtmlOutputLabel;
 import jakarta.faces.component.html.HtmlOutputText;
 import jakarta.faces.component.html.HtmlPanelGroup;
 
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate responsive-layout attribute fragments.
 public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 /*
 	@Override

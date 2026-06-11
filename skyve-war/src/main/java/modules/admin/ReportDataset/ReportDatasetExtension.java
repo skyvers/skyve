@@ -46,6 +46,7 @@ public class ReportDatasetExtension extends ReportDataset {
 
 	private static final String PARAMETER_PREFIX = ":";
 	private static final String DATE_PARAMETER_STRING_FORMAT = "d_%s_%d";
+	private static final String DATASET_TYPE_REQUIRED_FORMAT = "Dataset type must be %s";
 	private static final DateTimeFormatter DATE_PARAMETER_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
 
 	/**
@@ -150,7 +151,7 @@ public class ReportDatasetExtension extends ReportDataset {
 	public List<Bean> executeQuery() throws Exception {
 		if (DatasetType.bizQL != getDatasetType()) {
 			throw new IllegalArgumentException(
-					String.format("Dataset type must be %s", DatasetType.bizQL.toLocalisedDescription()));
+					String.format(DATASET_TYPE_REQUIRED_FORMAT, DatasetType.bizQL.toLocalisedDescription()));
 		}
 
 		SubstitutedQueryResult sQR = getSubstitutedQuery();
@@ -213,7 +214,7 @@ public class ReportDatasetExtension extends ReportDataset {
 	@Override
 	public List<DynaBean> executeSQLQuery() throws Exception {
 		if (DatasetType.SQL != getDatasetType()) {
-			throw new IllegalArgumentException(String.format("Dataset type must be %s", DatasetType.SQL.toLocalisedDescription()));
+			throw new IllegalArgumentException(String.format(DATASET_TYPE_REQUIRED_FORMAT, DatasetType.SQL.toLocalisedDescription()));
 		}
 
 		final SQL sql = CORE.getPersistence().newSQL(getQuery());
@@ -279,7 +280,7 @@ public class ReportDatasetExtension extends ReportDataset {
 	public List<Bean> executeTestQuery() {
 		if (DatasetType.bizQL != getDatasetType()) {
 			throw new IllegalArgumentException(
-					String.format("Dataset type must be %s", DatasetType.bizQL.toLocalisedDescription()));
+					String.format(DATASET_TYPE_REQUIRED_FORMAT, DatasetType.bizQL.toLocalisedDescription()));
 		}
 
 		SubstitutedQueryResult sQR = getSubstitutedQuery();
@@ -323,7 +324,7 @@ public class ReportDatasetExtension extends ReportDataset {
 	 */
 	public List<DynaBean> executeTestSQLQuery() throws Exception {
 		if (DatasetType.SQL != getDatasetType()) {
-			throw new IllegalArgumentException(String.format("Dataset type must be %s", DatasetType.SQL.toLocalisedDescription()));
+			throw new IllegalArgumentException(String.format(DATASET_TYPE_REQUIRED_FORMAT, DatasetType.SQL.toLocalisedDescription()));
 		}
 
 		final SQL sql = CORE.getPersistence().newSQL(getQuery());

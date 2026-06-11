@@ -37,10 +37,11 @@ import jakarta.servlet.http.HttpServletResponse;
  * and writes REST error responses on authentication or processing failure.
  */
 public class BasicAuthFilter extends AbstractRestFilter {
-
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(BasicAuthFilter.class);
     private static final Logger COMMAND_LOGGER = Category.COMMAND.logger();
-	private static final String AUTH_FAILURE_MESSAGE = "Unable to authenticate with the provided credentials";
+
+    private static final String AUTH_FAILURE_MESSAGE = "Unable to authenticate with the provided credentials";
+	private static final String INVALID_CREDENTIALS = "Invalid username/password";
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -146,7 +147,7 @@ public class BasicAuthFilter extends AbstractRestFilter {
 		SQL q = p.newSQL(sql.toString());
 		if (customerAndUser.length == 1) {
 			if (UtilImpl.CUSTOMER == null) { // multi-tenant
-				throw new SecurityException("Invalid username/password");
+				throw new SecurityException(INVALID_CREDENTIALS);
 			}
 			q.putParameter(AppConstants.USER_NAME_ATTRIBUTE_NAME, customerAndUser[0], false);
 		}
@@ -155,17 +156,17 @@ public class BasicAuthFilter extends AbstractRestFilter {
 				q.putParameter(Bean.CUSTOMER_NAME, customerAndUser[0], false);
 			}
 			else {
-				throw new SecurityException("Invalid username/password");
+				throw new SecurityException(INVALID_CREDENTIALS);
 			}
 			q.putParameter(AppConstants.USER_NAME_ATTRIBUTE_NAME, customerAndUser[1], false);
 		}
 
 		String hashedPassword = q.scalarResult(String.class);
 		if (hashedPassword == null) {
-			throw new SecurityException("Invalid username/password");
+			throw new SecurityException(INVALID_CREDENTIALS);
 		}
 		if (! EXT.checkPassword(password, hashedPassword)) {
-			throw new SecurityException("Invalid username/password");
+			throw new SecurityException(INVALID_CREDENTIALS);
 		}
 	}
 }

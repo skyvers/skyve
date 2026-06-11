@@ -113,7 +113,7 @@ public class HibernateAutoClosingIterable<T> implements AutoClosingIterable<T> {
 		 * @return the projected row value for the current cursor position
 		 */
 		@Override
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings({"unchecked", "java:S2272"}) // hasNext() has side-effects
 		public Z next() {
 			Z result = null;
 

@@ -11,6 +11,8 @@ import modules.admin.domain.ReportParameter;
  * Validates report parameter naming and required test values during report design.
  */
 public class ReportParameterBizlet extends Bizlet<ReportParameterExtension> {
+	private static final String TEST_VALUE_REQUIRED = "Test value is required.";
+
 	/**
 	 * Validates parameter naming conventions and required test-value inputs.
 	 * @param bean the bean value
@@ -36,19 +38,19 @@ public class ReportParameterBizlet extends Bizlet<ReportParameterExtension> {
 				switch (bean.getType()) {
 					case date:
 						e.getMessages()
-								.add(new Message(ReportParameter.dateTestValuePropertyName, "Test value is required."));
+								.add(new Message(ReportParameter.dateTestValuePropertyName, TEST_VALUE_REQUIRED));
 						break;
 					case integer:
 					case longInteger:
 						e.getMessages()
-								.add(new Message(ReportParameter.numericalTestValuePropertyName, "Test value is required."));
+								.add(new Message(ReportParameter.numericalTestValuePropertyName, TEST_VALUE_REQUIRED));
 						break;
 					case text:
 						e.getMessages()
-								.add(new Message(ReportParameter.textTestValuePropertyName, "Test value is required."));
+								.add(new Message(ReportParameter.textTestValuePropertyName, TEST_VALUE_REQUIRED));
 						break;
 					default:
-						e.getMessages().add(new Message("Test value is required."));
+						e.getMessages().add(new Message(TEST_VALUE_REQUIRED));
 				}
 			}
 		}

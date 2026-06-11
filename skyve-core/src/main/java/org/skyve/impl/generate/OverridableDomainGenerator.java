@@ -85,6 +85,7 @@ import jakarta.annotation.Nullable;
  * Constrain base classes.
  * Generate base classes.
  */
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate fragments of generated source and mapping output.
 public final class OverridableDomainGenerator extends DomainGenerator {
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(OverridableDomainGenerator.class);
 

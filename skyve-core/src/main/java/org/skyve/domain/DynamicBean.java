@@ -47,6 +47,7 @@ public class DynamicBean extends LazyDynaMap implements Bean {
 	private static final long serialVersionUID = 1L;
 
 	public static final String BEAN_PROPERTY_KEY = "bean";
+	private static final String BINDING_DOES_NOT_EXIST = "Binding does not exist - ";
 	
 	/**
 	 * Creates a new DynamicBean instance.
@@ -335,13 +336,13 @@ public class DynamicBean extends LazyDynaMap implements Bean {
 									break;
 								}
 								catch (Exception e) {
-									throw new IllegalArgumentException("Binding does not exist - " + binding, e);
+									throw new IllegalArgumentException(BINDING_DOES_NOT_EXIST + binding, e);
 								}
 							}
 							dotIndex = bindingPart.lastIndexOf('.');
 						}
 						if (dotIndex < 0) { // simple binding
-							throw new IllegalArgumentException("Binding does not exist - " + binding);
+							throw new IllegalArgumentException(BINDING_DOES_NOT_EXIST + binding);
 						}
 					}
 				}
@@ -351,7 +352,7 @@ public class DynamicBean extends LazyDynaMap implements Bean {
 					result = BindUtil.get(bean, binding);
 				}
 				catch (Exception e) {
-					throw new IllegalArgumentException("Binding does not exist - " + binding, e);
+					throw new IllegalArgumentException(BINDING_DOES_NOT_EXIST + binding, e);
 				}
 			}
 		}
@@ -375,13 +376,13 @@ public class DynamicBean extends LazyDynaMap implements Bean {
 		else {
 			Object bean = values.get(BEAN_PROPERTY_KEY);
 			if (bean == null) {
-				throw new IllegalArgumentException("Binding does not exist - " + binding);
+				throw new IllegalArgumentException(BINDING_DOES_NOT_EXIST + binding);
 			}
 			try {
 				result = BindUtil.get(bean, new StringBuilder(32).append(binding).append('[').append(index).append(']').toString());
 			}
 			catch (Exception e) {
-				throw new IllegalArgumentException("Binding does not exist - " + binding, e);
+				throw new IllegalArgumentException(BINDING_DOES_NOT_EXIST + binding, e);
 			}
 		}
 		
@@ -404,13 +405,13 @@ public class DynamicBean extends LazyDynaMap implements Bean {
 		else {
 			Object bean = values.get(BEAN_PROPERTY_KEY);
 			if (bean == null) {
-				throw new IllegalArgumentException("Binding does not exist - " + binding);
+				throw new IllegalArgumentException(BINDING_DOES_NOT_EXIST + binding);
 			}
 			try {
 				result = BindUtil.get(bean, new StringBuilder(32).append(binding).append('(').append(key).append(')').toString());
 			}
 			catch (Exception e) {
-				throw new IllegalArgumentException("Binding does not exist - " + binding, e);
+				throw new IllegalArgumentException(BINDING_DOES_NOT_EXIST + binding, e);
 			}
 		}
 
@@ -430,13 +431,13 @@ public class DynamicBean extends LazyDynaMap implements Bean {
 		else {
 			Object bean = values.get(BEAN_PROPERTY_KEY);
 			if (bean == null) {
-				throw new IllegalArgumentException("Binding does not exist - " + binding);
+				throw new IllegalArgumentException(BINDING_DOES_NOT_EXIST + binding);
 			}
 			try {
 				BindUtil.set(bean, binding, value);
 			}
 			catch (Exception e) {
-				throw new IllegalArgumentException("Binding does not exist - " + binding, e);
+				throw new IllegalArgumentException(BINDING_DOES_NOT_EXIST + binding, e);
 			}
 		}
 	}
@@ -455,7 +456,7 @@ public class DynamicBean extends LazyDynaMap implements Bean {
 		else {
 			Object bean = values.get(BEAN_PROPERTY_KEY);
 			if (bean == null) {
-				throw new IllegalArgumentException("Binding does not exist - " + binding);
+				throw new IllegalArgumentException(BINDING_DOES_NOT_EXIST + binding);
 			}
 			try {
 				BindUtil.set(bean, 
@@ -463,7 +464,7 @@ public class DynamicBean extends LazyDynaMap implements Bean {
 								value);
 			}
 			catch (Exception e) {
-				throw new IllegalArgumentException("Binding does not exist - " + binding, e);
+				throw new IllegalArgumentException(BINDING_DOES_NOT_EXIST + binding, e);
 			}
 		}
 	}
@@ -482,7 +483,7 @@ public class DynamicBean extends LazyDynaMap implements Bean {
 		else {
 			Object bean = values.get(BEAN_PROPERTY_KEY);
 			if (bean == null) {
-				throw new IllegalArgumentException("Binding does not exist - " + binding);
+				throw new IllegalArgumentException(BINDING_DOES_NOT_EXIST + binding);
 			}
 			try {
 				BindUtil.set(bean, 
@@ -490,7 +491,7 @@ public class DynamicBean extends LazyDynaMap implements Bean {
 								value);
 			}
 			catch (Exception e) {
-				throw new IllegalArgumentException("Binding does not exist - " + binding, e);
+				throw new IllegalArgumentException(BINDING_DOES_NOT_EXIST + binding, e);
 			}
 		}
 	}
@@ -513,7 +514,7 @@ public class DynamicBean extends LazyDynaMap implements Bean {
 	@Override
 	public Object getDynamic(String simpleBinding) {
 		if (! isDynaProperty(simpleBinding)) {
-			throw new IllegalArgumentException("Binding does not exist - " + simpleBinding);
+			throw new IllegalArgumentException(BINDING_DOES_NOT_EXIST + simpleBinding);
 		}
 		return get(simpleBinding);
 	}
@@ -526,7 +527,7 @@ public class DynamicBean extends LazyDynaMap implements Bean {
 	@Override
 	public void setDynamic(String simpleBinding, Object value) {
 		if (! isDynaProperty(simpleBinding)) {
-			throw new IllegalArgumentException("Binding does not exist - " + simpleBinding);
+			throw new IllegalArgumentException(BINDING_DOES_NOT_EXIST + simpleBinding);
 		}
 		set(simpleBinding, value);
 	}

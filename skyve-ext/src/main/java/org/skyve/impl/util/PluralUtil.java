@@ -21,8 +21,8 @@ import org.skyve.util.logging.SkyveLoggerFactory;
  * Article function converted Java implementation of https://github.com/EamonNerbonne/a-vs-an.
  * Licence: Apache 2.0
  */
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate pluralisation and article-rule tokens.
 public class PluralUtil {
-
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(PluralUtil.class);
 
 	final static String LOWERCASE_PATTERN = "\\b[a-z'\\-]+\\b";

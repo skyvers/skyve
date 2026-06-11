@@ -40,6 +40,7 @@ import modules.admin.domain.DataMaintenance;
  */
 public class ContentModel extends ListModel<DataMaintenance> {
 	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ContentModel.class);
+	private static final String NOT_IMPLEMENTED = "NOT IMPLEMENTED";
 
 	private Document drivingDocument = null;
 	private Set<String> projections = new TreeSet<>();
@@ -273,7 +274,7 @@ public class ContentModel extends ListModel<DataMaintenance> {
 	 */
 	@Override
 	public AutoClosingIterable<Bean> iterate() throws Exception {
-		throw new IllegalStateException("NOT IMPLEMENTED");
+		throw new IllegalStateException(NOT_IMPLEMENTED);
 	}
 
 	/**
@@ -286,7 +287,7 @@ public class ContentModel extends ListModel<DataMaintenance> {
 	@Override
 	public Bean update(String bizId, SortedMap<String, Object> properties)
 			throws Exception {
-		throw new IllegalStateException("NOT IMPLEMENTED");
+		throw new IllegalStateException(NOT_IMPLEMENTED);
 	}
 
 	/**
@@ -296,6 +297,6 @@ public class ContentModel extends ListModel<DataMaintenance> {
 	 */
 	@Override
 	public void remove(String bizId) throws Exception {
-		throw new IllegalStateException("NOT IMPLEMENTED");
+		throw new IllegalStateException(NOT_IMPLEMENTED);
 	}
 }

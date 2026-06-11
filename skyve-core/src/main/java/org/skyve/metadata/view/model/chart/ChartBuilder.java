@@ -35,6 +35,9 @@ import jakarta.annotation.Nonnull;
  * @author mike
  */
 public class ChartBuilder {
+	private static final String CATEGORY_ALIAS = "category";
+	private static final String VALUE_ALIAS = "value";
+
 	private Document document;
 	private DocumentQuery query;
 	private String categoryBinding;
@@ -262,8 +265,8 @@ public class ChartBuilder {
 		Customer c = CORE.getCustomer();
 		result.setLabels(data.stream().map(r -> (categoryBucket == null) ?
 													label(Binder.getDisplay(c, r, categoryBinding)) :
-													label(categoryBucket.label(Binder.get(r, "category")))).collect(Collectors.toList()));
-		result.setValues(data.stream().map(r -> (Number) Binder.get(r, "value")).collect(Collectors.toList()));
+													label(categoryBucket.label(Binder.get(r, CATEGORY_ALIAS)))).collect(Collectors.toList()));
+		result.setValues(data.stream().map(r -> (Number) Binder.get(r, VALUE_ALIAS)).collect(Collectors.toList()));
 
 		result.setBackgrounds(backgroundColours.list(200));
 		result.setBorders(borderColours.list());
@@ -281,7 +284,7 @@ public class ChartBuilder {
 	
 	private List<Bean> query() {
 		String categoryExpression = null;
-		String categoryAlias = "category";
+		String categoryAlias = CATEGORY_ALIAS;
 		String valueExpression = (valueFunction == null) ? 
 									"bean." + valueBinding : 
 									valueFunction + "(bean." + valueBinding + ")";
@@ -294,7 +297,7 @@ public class ChartBuilder {
 		}
 
 		query.addExpressionProjection(categoryExpression, categoryAlias);
-		query.addExpressionProjection(valueExpression, "value");
+		query.addExpressionProjection(valueExpression, VALUE_ALIAS);
 		query.addExpressionGrouping(categoryExpression);
 		
 		if (top > 0) {
@@ -337,8 +340,8 @@ public class ChartBuilder {
 					}
 					
 					Map<String, Object> properties = new TreeMap<>();
-					properties.put((categoryBucket == null) ? categoryBinding : "category", null);
-					properties.put("value", rest);
+					properties.put((categoryBucket == null) ? categoryBinding : CATEGORY_ALIAS, null);
+					properties.put(VALUE_ALIAS, rest);
 					best.add(new DynamicBean(document.getOwningModuleName(), document.getName(), properties));
 					result = best;
 				}
@@ -347,7 +350,7 @@ public class ChartBuilder {
 				}
 			}
 			// Always order here as the top sort was applied on the data store
-			OrderingImpl ordering = new OrderingImpl(OrderBy.category.equals(orderBy) ? ((categoryBucket == null) ? categoryBinding : "category") : "value",
+			OrderingImpl ordering = new OrderingImpl(OrderBy.category.equals(orderBy) ? ((categoryBucket == null) ? categoryBinding : CATEGORY_ALIAS) : VALUE_ALIAS,
 														SortDirection.descending.equals(orderBySort) ? SortDirection.descending : SortDirection.ascending);
 			Binder.order(result, ordering);
 		}
@@ -359,7 +362,7 @@ public class ChartBuilder {
 		
 		Class<?> numberType = null;
 		for (Bean bean : best) {
-			Number number = (Number) Binder.get(bean, "value");
+			Number number = (Number) Binder.get(bean, VALUE_ALIAS);
 			if (number != null) {
 				numberType = number.getClass();
 				break;
@@ -367,7 +370,7 @@ public class ChartBuilder {
 		}
 		
 		for (Bean bean : beans) {
-			Number number = (Number) Binder.get(bean, "value");
+			Number number = (Number) Binder.get(bean, VALUE_ALIAS);
 			if (number != null) {
 				result += number.doubleValue();
 			}
@@ -401,7 +404,7 @@ public class ChartBuilder {
 		
 		for (Bean bean : beans) {
 			@SuppressWarnings("unchecked")
-			Comparable<Number> number = (Comparable<Number>) Binder.get(bean, "value");
+			Comparable<Number> number = (Comparable<Number>) Binder.get(bean, VALUE_ALIAS);
 			if (number != null) {
 				if (result == null) {
 					result = (Number) number;

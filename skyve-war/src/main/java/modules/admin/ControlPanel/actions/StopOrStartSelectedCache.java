@@ -21,6 +21,10 @@ import modules.admin.ControlPanel.ControlPanelExtension;
  * Starts or stops selected caches in the cache provider.
  */
 public class StopOrStartSelectedCache implements ServerSideAction<ControlPanelExtension> {
+	private static final String CACHE_PREFIX = "Cache ";
+	private static final String HAS_BEEN_STARTED = " has been started";
+	private static final String HAS_BEEN_STOPPED = " has been stopped";
+
 	/**
 	 * Performs the execute operation.
 	 * @param bean the bean value
@@ -45,11 +49,11 @@ public class StopOrStartSelectedCache implements ServerSideAction<ControlPanelEx
 						if (caching.getEHCache(cacheName, c.getKeyClass(), c.getValueClass()) == null) {
 							caching.createEHCache((EHCacheConfig<? extends Serializable, ? extends Serializable>) c);
 							
-							webContext.growl(MessageSeverity.info, "Cache " + cacheName + " has been started");
+							webContext.growl(MessageSeverity.info, CACHE_PREFIX + cacheName + HAS_BEEN_STARTED);
 						}
 						else {
 							caching.removeEHCache(cacheName);
-							webContext.growl(MessageSeverity.info, "Cache " + cacheName + " has been stopped");
+							webContext.growl(MessageSeverity.info, CACHE_PREFIX + cacheName + HAS_BEEN_STOPPED);
 						}
 					}
 					else if (c instanceof JCacheConfig<?, ?>) {
@@ -58,11 +62,11 @@ public class StopOrStartSelectedCache implements ServerSideAction<ControlPanelEx
 						if (cache == null) {
 							@SuppressWarnings({ "resource", "unused" })
 							Cache<?, ?> created = caching.createJCache((JCacheConfig<? extends Serializable, ? extends Serializable>) c);
-							webContext.growl(MessageSeverity.info, "Cache " + cacheName + " has been started");
+							webContext.growl(MessageSeverity.info, CACHE_PREFIX + cacheName + HAS_BEEN_STARTED);
 						}
 						else {
 							caching.destroyJCache(cacheName);
-							webContext.growl(MessageSeverity.info, "Cache " + cacheName + " has been stopped");
+							webContext.growl(MessageSeverity.info, CACHE_PREFIX + cacheName + HAS_BEEN_STOPPED);
 						}
 					}
 					break;

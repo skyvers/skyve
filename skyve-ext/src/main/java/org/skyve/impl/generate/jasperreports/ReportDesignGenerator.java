@@ -20,6 +20,7 @@ import org.skyve.util.logging.SkyveLoggerFactory;
  * <p>Subclasses (document, list, query, view) implement report-type-specific
  * layout and field-ordering logic on top of the common scaffolding provided here.
  */
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate fragments of generated JasperReports design output.
 public abstract class ReportDesignGenerator {
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ReportDesignGenerator.class);
 

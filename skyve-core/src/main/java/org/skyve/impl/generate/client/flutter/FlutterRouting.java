@@ -32,6 +32,7 @@ import org.skyve.util.logging.SkyveLoggerFactory;
 /**
  * Generates Flutter route declarations for generated views.
  */
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate fragments of generated Flutter routing output.
 public class FlutterRouting {
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(FlutterRouting.class);
     

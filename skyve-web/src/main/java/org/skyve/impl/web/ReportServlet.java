@@ -70,6 +70,7 @@ import net.sf.jasperreports.jakarta.servlets.BaseHttpServlet;
 /**
  * Handles HTTP requests for this Skyve web endpoint.
  */
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate report response header/script fragments.
 public class ReportServlet extends HttpServlet {
     private static final Logger HTTP_LOGGER = Category.HTTP.logger();
 

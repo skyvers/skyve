@@ -85,11 +85,35 @@ import jakarta.annotation.Nullable;
  * unsupported in this repository variant.
  *
  * Do not instantiate directly, use CORE.getRepository().
- * 
+ *
  * <p>Threading: intended for startup and tooling workflows; not designed for
  * concurrent mutation.
  */
 public class LocalDesignRepository extends FileSystemRepository {
+	private static final String FOR_CUSTOMER = " for customer ";
+	private static final String IN_DOCUMENT = " in document ";
+	private static final String IN_INVERSE = " in Inverse ";
+	private static final String IN_MODULE = " in module ";
+	private static final String IN_MODULE_DOCUMENT = "] in module.document ";
+	private static final String IN_REFERENCE = " in Reference ";
+	private static final String IN_VIEW = " in view ";
+	private static final String IS_FOR_DOCUMENT = " is for document ";
+	private static final String IS_FOR_MODEL = " is for model ";
+	private static final String IMPORTED_QUERY_PREFIX = "Imported query ";
+	private static final String IS_NOT_VALID_BINDING = " is not a valid binding.";
+	private static final String IS_REFERENCING_UNKNOWN_QUERY = " is referencing unknown query ";
+	private static final String MAP_MENU_PREFIX = "Map Menu [";
+	private static final String MENU_PREFIX = "Menu [";
+	private static final String HAS_GEOMETRY_BINDING_OF = " has a geometryBinding of ";
+	private static final String DEFAULT_VALUE_PREFIX = "The default value ";
+	private static final String TARGET_DOCUMENT_NAME_OF = "The target [documentName] of ";
+	private static final String TARGET_REFERENCE_NAME_OF = "The target [referenceName] of ";
+	private static final String QUERY_PREFIX = "Query ";
+	private static final String USER_ACCESS_PREFIX = "User Access [";
+	private static final String USER_ACCESS_MODULE_SUFFIX = "] in module ";
+	private static final String WHICH_DOES_NOT_EXIST = " which does not exist.";
+	private static final String WITH_COLUMN_BINDING = " with column binding ";
+
 	/**
 	 * Creates a repository rooted at the default Skyve base path.
 	 */
@@ -123,7 +147,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	public boolean getUseScaffoldedViews() {
 		return true;
 	}
-	
+
 	/**
 	 * Unsupported in local design-time repository mode.
 	 *
@@ -135,7 +159,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	public UserImpl retrieveUser(String userPrincipal) {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	/**
 	 * Unsupported in local design-time repository mode.
 	 *
@@ -293,7 +317,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 		}
 
 		CustomerImpl customerImpl = (CustomerImpl) customer;
-		
+
 		// NB Module entry names (keys) are in defined order
 		for (Entry<String, FormLabelLayout> moduleEntry : customerImpl.getModuleEntries().entrySet()) {
 			String moduleName = moduleEntry.getKey();
@@ -303,23 +327,23 @@ public class LocalDesignRepository extends FileSystemRepository {
 			try {
 				module = getModule(customer, moduleName);
 				if (module == null) {
-					throw new MetaDataException("Repository returned null for " + moduleName + 
-													" for customer " + customer.getName());
+					throw new MetaDataException("Repository returned null for " + moduleName +
+													FOR_CUSTOMER + customer.getName());
 				}
 			}
 			catch (MetaDataException e) {
-				throw new MetaDataException("Module reference " + moduleName + 
+				throw new MetaDataException("Module reference " + moduleName +
 												" does not reference a module in customer " + customer.getName(), e);
 			}
 
 			// Catch where we can't convert from top defined to side rendered
 			// NB null = side (the default)
 			if ((formLabelLayout != FormLabelLayout.top) && (module.getFormLabelLayout() == FormLabelLayout.top)) {
-				throw new MetaDataException("Module reference " + moduleName + " for customer " + customer.getName() +
+				throw new MetaDataException("Module reference " + moduleName + FOR_CUSTOMER + customer.getName() +
 												" has a layout of side but the module is defined with a layout of top and cannot be converted");
 			}
 		}
-		
+
 		// Validate the role metadata module roles point to valid module roles
 		// NB We don't need to check the module name of the role as this is checked when the metadata
 		// is converted and we know all module names are correct from the validation performed above.
@@ -328,7 +352,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 				String moduleName = moduleRole.getModuleName();
 				Module module = getModule(customer, moduleName);
 				if (module.getRole(moduleRole.getName()) == null) {
-					throw new MetaDataException("Module role " + moduleRole.getName() + 
+					throw new MetaDataException("Module role " + moduleRole.getName() +
 													" for module " + moduleName +
 													" for customer role " + role.getName() +
 													" in customer " + customer.getName() +
@@ -336,16 +360,16 @@ public class LocalDesignRepository extends FileSystemRepository {
 				}
 			}
 		}
-		
+
 		// Validate text search roles point to valid module roles
 		validateFeatureRoles(customer, customerImpl.getTextSearchRoles());
-		
+
 		// Validate flag roles point to valid module roles
 		validateFeatureRoles(customer, customerImpl.getFlagRoles());
-		
+
 		// Validate switch mode roles point to valid module roles
 		validateFeatureRoles(customer, customerImpl.getSwitchModeRoles());
-		
+
 		// TODO check the converter type corresponds to the type required.
 	}
 
@@ -367,9 +391,9 @@ public class LocalDesignRepository extends FileSystemRepository {
 		if (homeDocumentName != null) {
 			Document homeDocument = module.getDocument(customer, homeDocumentName);
 			if ((homeDocument.getPersistent() == null) && (! ViewType.edit.equals(module.getHomeRef()))) { // is transient but not edit
-				throw new MetaDataException("Home document " + homeDocumentName + 
-												" for customer " + customer.getName() + 
-												" in module " + module.getName() +
+				throw new MetaDataException("Home document " + homeDocumentName +
+												FOR_CUSTOMER + customer.getName() +
+												IN_MODULE + module.getName() +
 												" is transient and therefore the module requires a homeRef of 'edit'.");
 			}
 		}
@@ -379,41 +403,41 @@ public class LocalDesignRepository extends FileSystemRepository {
 			if (query instanceof QueryReferenceImpl reference) { // check all query imports
 				Module m = getModule(customer, reference.getModuleRef());
 				if (m == null) {
-					throw new MetaDataException("Imported query " + query.getName() + 
-							" in module " + query.getOwningModule().getName() +
+					throw new MetaDataException(IMPORTED_QUERY_PREFIX + query.getName() +
+							IN_MODULE + query.getOwningModule().getName() +
 							" is referencing unknown module " + reference.getModuleRef());
 				}
-				
+
 				if (query instanceof MetaDataQueryReferenceImpl q) {
 					MetaDataQueryDefinition imported = m.getMetaDataQuery(q.getRef());
 					if (imported == null) {
-						throw new MetaDataException("Imported query " + query.getName() + 
-														" in module " + query.getOwningModule().getName() +
-														" is referencing unknown query " + q.getRef() +
-														" in module " + reference.getModuleRef());
+						throw new MetaDataException(IMPORTED_QUERY_PREFIX + query.getName() +
+														IN_MODULE + query.getOwningModule().getName() +
+														IS_REFERENCING_UNKNOWN_QUERY + q.getRef() +
+														IN_MODULE + reference.getModuleRef());
 					}
 					else if (getDocument(customer, query.getOwningModule(), imported.getDocumentName()) == null) {
-						throw new MetaDataException("Imported query " + query.getName() + 
-														" in module " + query.getOwningModule().getName() +
+						throw new MetaDataException(IMPORTED_QUERY_PREFIX + query.getName() +
+														IN_MODULE + query.getOwningModule().getName() +
 														" is referencing query " + q.getRef() +
-														" in module " + reference.getModuleRef() +
+														IN_MODULE + reference.getModuleRef() +
 														" with a driving document of " + imported.getDocumentName() +
 														" that does not exist");
 					}
 				}
-				else if ((query instanceof SQLReferenceImpl q) && 
+				else if ((query instanceof SQLReferenceImpl q) &&
 							(m.getMetaDataQuery(q.getRef()) == null)) {
-					throw new MetaDataException("Imported SQL query " + query.getName() + 
-													" in module " + query.getOwningModule().getName() +
-													" is referencing unknown query " + q.getRef() +
-													" in module " + reference.getModuleRef());
+					throw new MetaDataException("Imported SQL query " + query.getName() +
+													IN_MODULE + query.getOwningModule().getName() +
+													IS_REFERENCING_UNKNOWN_QUERY + q.getRef() +
+													IN_MODULE + reference.getModuleRef());
 				}
-				else if ((query instanceof BizQLReferenceImpl q) && 
+				else if ((query instanceof BizQLReferenceImpl q) &&
 							(m.getMetaDataQuery(q.getRef()) == null)) {
-					throw new MetaDataException("Imported BizQL query " + query.getName() + 
-													" in module " + query.getOwningModule().getName() +
-													" is referencing unknown query " + q.getRef() +
-													" in module " + reference.getModuleRef());
+					throw new MetaDataException("Imported BizQL query " + query.getName() +
+													IN_MODULE + query.getOwningModule().getName() +
+													IS_REFERENCING_UNKNOWN_QUERY + q.getRef() +
+													IN_MODULE + reference.getModuleRef());
 				}
 			}
 			else if (query instanceof MetaDataQueryDefinition documentQuery) {
@@ -425,16 +449,16 @@ public class LocalDesignRepository extends FileSystemRepository {
 						// Check that the column binding is valid/exists
 						TargetMetaData target = null;
 						try {
-							target = BindUtil.getMetaDataForBinding(customer, 
+							target = BindUtil.getMetaDataForBinding(customer,
 																		queryDocumentModule,
 																		queryDocument,
 																		binding);
 						}
 						catch (MetaDataException e) {
-							throw new MetaDataException("Query " + query.getName() + 
-															" in module " + query.getOwningModule().getName() +
-															" with column binding " + binding +
-															" is not a valid binding.", e);
+							throw new MetaDataException(QUERY_PREFIX + query.getName() +
+															IN_MODULE + query.getOwningModule().getName() +
+															WITH_COLUMN_BINDING + binding +
+															IS_NOT_VALID_BINDING, e);
 						}
 
 						final Document targetDocument = target.getDocument();
@@ -443,7 +467,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 						MetaDataQueryProjectedColumn projectedColumn = (column instanceof MetaDataQueryProjectedColumn pc) ? pc : null;
 
 						// Check that non-persistent column bindings are not sortable, filterable or editable
-						if ((projectedColumn != null) && 
+						if ((projectedColumn != null) &&
 								(projectedColumn.isSortable() || projectedColumn.isFilterable() || projectedColumn.isEditable())) {
 							boolean nonPersistent = false;
 							// target document is non-persistent and not a mapped document
@@ -451,7 +475,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 								nonPersistent = true;
 							}
 							// target attribute is a non-persistent non-implicit attribute
-							else if ((targetAttribute != null) && 
+							else if ((targetAttribute != null) &&
 										(! BindUtil.isImplicit(targetAttribute.getName())) &&
 										(! targetAttribute.isPersistent())) {
 								nonPersistent = true;
@@ -462,7 +486,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 								if (lastDotIndex > 0) { // compound
 									Module owningModule = queryDocumentModule;
 									Document owningDocument = queryDocument;
-									
+
 									// Tokenise the relation bindings up to the ultimate binding (which we know is OK from the above tests)
 									StringTokenizer tokenizer = new StringTokenizer(binding.substring(0, lastDotIndex), ".");
 									while (tokenizer.hasMoreTokens()) {
@@ -481,10 +505,10 @@ public class LocalDesignRepository extends FileSystemRepository {
 										if (relationAttribute == null) { // "parent" binding
 											owningDocument = relationTarget.getDocument().getParentDocument(customer);
 											if (owningDocument == null) {
-												throw new MetaDataException("Query " + query.getName() + 
-																				" in module " + query.getOwningModule().getName() +
-																				" with column binding " + binding +
-																				" is not a valid binding.");
+												throw new MetaDataException(QUERY_PREFIX + query.getName() +
+																				IN_MODULE + query.getOwningModule().getName() +
+																				WITH_COLUMN_BINDING + binding +
+																				IS_NOT_VALID_BINDING);
 											}
 										}
 										else { // relation binding
@@ -500,13 +524,13 @@ public class LocalDesignRepository extends FileSystemRepository {
 							}
 
 							if (nonPersistent) {
-								throw new MetaDataException("Query " + query.getName() + 
-																" in module " + query.getOwningModule().getName() +
-																" with column binding " + binding +
+								throw new MetaDataException(QUERY_PREFIX + query.getName() +
+																IN_MODULE + query.getOwningModule().getName() +
+																WITH_COLUMN_BINDING + binding +
 																" references a transient (or mapped) attribute and should not be sortable, filterable or editable.");
 							}
 						}
-						
+
 						// Check that the formatter or customerFormatter are compatible if defined
 						if ((projectedColumn != null) && (targetAttribute != null)) {
 							AttributeType targetAttributeType = targetAttribute.getAttributeType();
@@ -518,12 +542,12 @@ public class LocalDesignRepository extends FileSystemRepository {
 								Class<?> targetAttributeImplementingType = getImplementingTypeForGenerateDomainValidation(targetAttribute);
 								if ((targetAttributeImplementingType != null) &&
 										(! formatterName.getFormatter().getValueType().isAssignableFrom(targetAttributeImplementingType))) {
-									throw new MetaDataException("Query " + query.getName() + 
-																" in module " + query.getOwningModule().getName() +
-																" with column binding " + binding +
-																" has formatter " + formatterName.name() + 
-																" for type " + formatterName.getFormatter().getValueType() + 
-																" but the column binding is to attribute type " + targetAttributeType + 
+									throw new MetaDataException(QUERY_PREFIX + query.getName() +
+																IN_MODULE + query.getOwningModule().getName() +
+																WITH_COLUMN_BINDING + binding +
+																" has formatter " + formatterName.name() +
+																" for type " + formatterName.getFormatter().getValueType() +
+																" but the column binding is to attribute type " + targetAttributeType +
 																" of incompatible type " + targetAttributeImplementingType);
 								}
 							}
@@ -535,36 +559,36 @@ public class LocalDesignRepository extends FileSystemRepository {
 								// TODO This is a hack for the chicken and egg enum generation problem to be solved by making generate domain 2 phased.
 								// Class<?> targetAttributeImplementingType = targetAttribute.getImplementingType();
 								Class<?> targetAttributeImplementingType = getImplementingTypeForGenerateDomainValidation(targetAttribute);
-								if ((formatter != null) && 
+								if ((formatter != null) &&
 										(targetAttributeImplementingType != null) &&
 										(! formatter.getValueType().isAssignableFrom(targetAttributeImplementingType))) {
-									throw new MetaDataException("Query " + query.getName() + 
-																" in module " + query.getOwningModule().getName() +
-																" with column binding " + binding +
-																" has formatter " + customFormatterName + 
-																" for type " + formatter.getValueType() + 
-																" but the column binding is to attribute type " + targetAttributeType + 
+									throw new MetaDataException(QUERY_PREFIX + query.getName() +
+																IN_MODULE + query.getOwningModule().getName() +
+																WITH_COLUMN_BINDING + binding +
+																" has formatter " + customFormatterName +
+																" for type " + formatter.getValueType() +
+																" but the column binding is to attribute type " + targetAttributeType +
 																" of incompatible type " + targetAttributeImplementingType);
 								}
 							}
 						}
 
-						// Customer overridden documents that are used in metadata queries cause an error unless 
+						// Customer overridden documents that are used in metadata queries cause an error unless
 						// <association>.bizId is used as the binding.
-						if ((targetAttribute != null) && 
+						if ((targetAttribute != null) &&
 								AttributeType.association.equals(targetAttribute.getAttributeType()) &&
 								(column.getFilterOperator() != null)) {
-							throw new MetaDataException("Query " + query.getName() + 
-															" in module " + query.getOwningModule().getName() +
-															" with column binding " + binding +
-															" references an association which has a column filter defined.  Use [" + 
+							throw new MetaDataException(QUERY_PREFIX + query.getName() +
+															IN_MODULE + query.getOwningModule().getName() +
+															WITH_COLUMN_BINDING + binding +
+															" references an association which has a column filter defined.  Use [" +
 															binding + ".bizId] as the binding for the column.");
 						}
 					}
 				}
 			}
 		}
-		
+
 		// check menu items
 		checkMenu(module.getMenu().getItems(), customer, module);
 
@@ -577,17 +601,17 @@ public class LocalDesignRepository extends FileSystemRepository {
 					Document actionDocument = module.getDocument(customer, actionPrivilege.getDocumentName());
 					if (getClassAction(customer, actionDocument, actionPrivilegeName, false, false) == null) {
 						if (getMetaDataAction(customer, actionDocument, actionPrivilegeName) == null) {
-							throw new MetaDataException("Action privilege " + actionPrivilege.getName() + 
-															" for customer " + customer.getName() + 
-															" in module " + module.getName() +
-															" for document " + actionDocument.getName() + 
+							throw new MetaDataException("Action privilege " + actionPrivilege.getName() +
+															FOR_CUSTOMER + customer.getName() +
+															IN_MODULE + module.getName() +
+															" for document " + actionDocument.getName() +
 															" for role " + role.getName() +
 															" does not reference a valid action");
 						}
 					}
 				}
 			}
-			
+
 			// Check modelAggregate and previousComplete UserAccesses
 			for (UserAccess access : roleImpl.getAccesses().keySet()) {
 				if (access.isModelAggregate()) {
@@ -596,10 +620,10 @@ public class LocalDesignRepository extends FileSystemRepository {
 						getModel(customer, accessDocument, access.getComponent(), false);
 					}
 					catch (Exception e) {
-						throw new MetaDataException("User Access [" + access.toString() + 
-														"] in module " + module.getName() +
-														" is for model " + access.getComponent() +
-														" which does not exist.",
+						throw new MetaDataException(USER_ACCESS_PREFIX + access.toString() +
+														USER_ACCESS_MODULE_SUFFIX + module.getName() +
+														IS_FOR_MODEL + access.getComponent() +
+														WHICH_DOES_NOT_EXIST,
 														e);
 					}
 				}
@@ -609,10 +633,10 @@ public class LocalDesignRepository extends FileSystemRepository {
 						getDynamicImage(customer, accessDocument, access.getComponent(), false);
 					}
 					catch (Exception e) {
-						throw new MetaDataException("User Access [" + access.toString() + 
-														"] in module " + module.getName() +
+						throw new MetaDataException(USER_ACCESS_PREFIX + access.toString() +
+														USER_ACCESS_MODULE_SUFFIX + module.getName() +
 														" is for dynamic image " + access.getComponent() +
-														" which does not exist.",
+														WHICH_DOES_NOT_EXIST,
 														e);
 					}
 				}
@@ -623,10 +647,10 @@ public class LocalDesignRepository extends FileSystemRepository {
 						BindUtil.getMetaDataForBinding(customer, module, accessDocument, binding);
 					}
 					catch (MetaDataException e) {
-						throw new MetaDataException("User Access [" + access.toString() + 
-														"] in module " + module.getName() +
+						throw new MetaDataException(USER_ACCESS_PREFIX + access.toString() +
+														USER_ACCESS_MODULE_SUFFIX + module.getName() +
 														" with binding " + binding +
-														" is not a valid binding.", e);
+														IS_NOT_VALID_BINDING, e);
 					}
 				}
 				else if (access.isReport()) {
@@ -635,8 +659,8 @@ public class LocalDesignRepository extends FileSystemRepository {
 					String reportName = access.getComponent();
 					Document reportDocument = customer.getModule(reportModuleName).getDocument(customer, reportDocumentName);
 					if (getReportFileName(customer, reportDocument, reportName) == null) { // not found
-						throw new MetaDataException("User Access [" + access.toString() + 
-														"] in module " + module.getName() +
+						throw new MetaDataException(USER_ACCESS_PREFIX + access.toString() +
+														USER_ACCESS_MODULE_SUFFIX + module.getName() +
 														" for module/document/report " + reportModuleName + "/" +
 														reportDocumentName + "/" + reportName +
 														" does not exist.");
@@ -668,10 +692,10 @@ public class LocalDesignRepository extends FileSystemRepository {
 							document = module.getDocument(customer, documentName);
 						}
 						catch (Exception e) {
-							throw new MetaDataException("Menu [" + item.getName() + 
-															"] in module " + module.getName() +
-															" is for document " + documentName +
-															" which does not exist.", e);
+							throw new MetaDataException(MENU_PREFIX + item.getName() +
+															USER_ACCESS_MODULE_SUFFIX + module.getName() +
+															IS_FOR_DOCUMENT + documentName +
+															WHICH_DOES_NOT_EXIST, e);
 						}
 						// NB Only EditItems or ListModel ListItems can be to a transient document
 						if (document.getPersistent() == null) { // non-persistent document
@@ -681,9 +705,9 @@ public class LocalDesignRepository extends FileSystemRepository {
 							}
 							boolean editItem = (item instanceof EditItem);
 							if (! (listModelItem || editItem)) {
-								throw new MetaDataException("Menu [" + item.getName() + 
-																"] in module " + module.getName() +
-																" is for document " + documentName +
+								throw new MetaDataException(MENU_PREFIX + item.getName() +
+																USER_ACCESS_MODULE_SUFFIX + module.getName() +
+																IS_FOR_DOCUMENT + documentName +
 																" which is not persistent.");
 							}
 						}
@@ -695,19 +719,19 @@ public class LocalDesignRepository extends FileSystemRepository {
 						if (queryName != null) {
 							query = module.getMetaDataQuery(queryName);
 							if (query == null) {
-								throw new MetaDataException("Menu [" + item.getName() + 
-																"] in module " + module.getName() +
+								throw new MetaDataException(MENU_PREFIX + item.getName() +
+																USER_ACCESS_MODULE_SUFFIX + module.getName() +
 																" is for query " + queryName +
-																" which does not exist.");
+																WHICH_DOES_NOT_EXIST);
 							}
 							// Can't check query references here as we cannot call MetaDataQueryDefinitionImpl.getTarget() as we have no
-							// persistence or customer set, but the query reference itself checks that the driving document exists (is imported). 
+							// persistence or customer set, but the query reference itself checks that the driving document exists (is imported).
 							if (query instanceof MetaDataQueryDefinitionImpl) { // not a reference
 								documentName = query.getDocumentName();
 								document = module.getDocument(customer, documentName);
 							}
 						}
-						
+
 						String modelName = dataItem.getModelName();
 						if (modelName != null) {
 							try {
@@ -721,21 +745,21 @@ public class LocalDesignRepository extends FileSystemRepository {
 								}
 							}
 							catch (Exception e) {
-								throw new MetaDataException("Menu [" + item.getName() + 
-																"] in module " + module.getName() +
-																" is for model " + documentName + '.' + modelName +
+								throw new MetaDataException(MENU_PREFIX + item.getName() +
+																USER_ACCESS_MODULE_SUFFIX + module.getName() +
+																IS_FOR_MODEL + documentName + '.' + modelName +
 																" which does not exist or cannot be instantiated.",
 																e);
 							}
 						}
-						
+
 						if (item instanceof TreeItem) {
 							// Not a model, then its a query or document so check the document is hierarchical
 							if ((modelName == null) && (documentName != null) && (document != null)) {
 								if (! documentName.equals(document.getParentDocumentName())) {
-									throw new MetaDataException("Tree Menu [" + item.getName() + 
-																	"] in module " + module.getName() + 
-																	" is for document " + document.getName() + 
+									throw new MetaDataException("Tree Menu [" + item.getName() +
+																	USER_ACCESS_MODULE_SUFFIX + module.getName() +
+																	IS_FOR_DOCUMENT + document.getName() +
 																	" which is not hierarchical.");
 								}
 							}
@@ -747,22 +771,22 @@ public class LocalDesignRepository extends FileSystemRepository {
 								try {
 									TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
 									Attribute attribute = target.getAttribute();
-									if ((attribute == null) || 
+									if ((attribute == null) ||
 											(! AttributeType.geometry.equals(attribute.getAttributeType()))) {
-										throw new MetaDataException("Map Menu [" + item.getName() + 
-																		"] in module " + module.getName() + 
-																		" has a geometryBinding of " + binding + 
+										throw new MetaDataException(MAP_MENU_PREFIX + item.getName() +
+																		USER_ACCESS_MODULE_SUFFIX + module.getName() +
+																		HAS_GEOMETRY_BINDING_OF + binding +
 																		" which is not a geometry.");
 									}
 								}
 								catch (Exception e) {
-									throw new MetaDataException("Map Menu [" + item.getName() + 
-																	"] in module " + module.getName() + 
-																	" has a geometryBinding of " + binding + 
-																	" which does not exist.",
+									throw new MetaDataException(MAP_MENU_PREFIX + item.getName() +
+																	USER_ACCESS_MODULE_SUFFIX + module.getName() +
+																	HAS_GEOMETRY_BINDING_OF + binding +
+																	WHICH_DOES_NOT_EXIST,
 																	e);
 								}
-								
+
 								// If the query is defined and not polymorphic, check that the binding is in the query.
 								if ((queryName == null) && (documentName != null)) { // default document query
 									query = module.getDocumentDefaultQuery(customer, documentName);
@@ -770,11 +794,11 @@ public class LocalDesignRepository extends FileSystemRepository {
 								if (query != null) {
 									if (! Boolean.TRUE.equals(query.getPolymorphic())) {
 										if (query.getColumns().stream().noneMatch(c -> ((c instanceof MetaDataQueryProjectedColumn projected) && binding.equals(projected.getBinding())))) {
-											throw new MetaDataException("Map Menu [" + item.getName() + 
-																			"] in module " + module.getName() + 
-																			" has a geometryBinding of " + binding + 
-																			" which is not a column in the " + 
-																			((queryName == null) ? "default query" : "query " + queryName) + 
+											throw new MetaDataException(MAP_MENU_PREFIX + item.getName() +
+																			USER_ACCESS_MODULE_SUFFIX + module.getName() +
+																			HAS_GEOMETRY_BINDING_OF + binding +
+																			" which is not a column in the " +
+																			((queryName == null) ? "default query" : "query " + queryName) +
 																			". Either add the column (preferable) to the query or set the query to be polymorphic.");
 										}
 									}
@@ -815,11 +839,11 @@ public class LocalDesignRepository extends FileSystemRepository {
 																module,
 																document);
 				if (error != null) {
-					throw new MetaDataException("Condition " + conditionName + " in document " + documentIdentifier + " with expression " + expression + " has an error : " + error);
+					throw new MetaDataException("Condition " + conditionName + IN_DOCUMENT + documentIdentifier + " with expression " + expression + " has an error : " + error);
 				}
 			}
 		}
-		
+
 		// Check the bizKey expression, if defined
 		String bizKeyExpression = document.getBizKeyExpression();
 		if (bizKeyExpression != null) {
@@ -828,17 +852,17 @@ public class LocalDesignRepository extends FileSystemRepository {
 				throw new MetaDataException("The biz key [expression] defined contains malformed binding expressions in document " + documentIdentifier + ": " + error);
 			}
 		}
-		
+
 		// If document has a parentDocument defined, ensure that it exists in the document's module.
 		try {
 			document.getParentDocument(customer);
 		}
 		catch (@SuppressWarnings("unused") MetaDataException e) {
-			throw new MetaDataException("The document " + documentIdentifier + 
+			throw new MetaDataException("The document " + documentIdentifier +
 											" has a parent document of " +
 											document.getParentDocumentName() + " that does not exist in this module.");
 		}
-		
+
 		// NOTE - Persistent etc is checked when generating documents as it is dependent on the hierarchy and persistence strategy etc
 
 		// Check attributes
@@ -867,7 +891,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 						if (BindUtil.containsSkyveExpressions(defaultValue)) {
 							String error = BindUtil.validateMessageExpressions(defaultValue, customer, document);
 							if (error != null) {
-								throw new MetaDataException("The default value " + defaultValue + " is not a valid expression for attribute " + 
+								throw new MetaDataException(DEFAULT_VALUE_PREFIX + defaultValue + " is not a valid expression for attribute " +
 																module.getName() + '.' + document.getName() + '.' + attribute.getName() + ": " + error);
 							}
 						}
@@ -877,7 +901,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 						if (BindUtil.isSkyveExpression(defaultValue)) {
 							String error = ExpressionEvaluator.validate(defaultValue, type, customer, module, document);
 							if (error != null) {
-								throw new MetaDataException("The default value " + defaultValue + " is not a valid expression for attribute " + 
+								throw new MetaDataException(DEFAULT_VALUE_PREFIX + defaultValue + " is not a valid expression for attribute " +
 																module.getName() + '.' + document.getName() + '.' + attribute.getName() + ": " + error);
 							}
 						}
@@ -887,10 +911,10 @@ public class LocalDesignRepository extends FileSystemRepository {
 							if (type != null) {
 								try {
 									BindUtil.fromSerialised(type, defaultValue);
-								} 
+								}
 								catch (Exception e) {
-									throw new MetaDataException("The default value " + defaultValue + " for attribute " + 
-																	module.getName() + '.' + document.getName() + '.' + attribute.getName() + " is not coercible to type " + type + 
+									throw new MetaDataException(DEFAULT_VALUE_PREFIX + defaultValue + " for attribute " +
+																	module.getName() + '.' + document.getName() + '.' + attribute.getName() + " is not coercible to type " + type +
 																	".  Date based types should be expressed as a standard XML date format - YYYY-MM-DD or YYYY-MM-DDTHH24:MM:SS", e);
 								}
 							}
@@ -903,74 +927,74 @@ public class LocalDesignRepository extends FileSystemRepository {
 				String targetDocumentName = reference.getDocumentName();
 				DocumentRef targetDocumentRef = module.getDocumentRefs().get(targetDocumentName);
 				if (targetDocumentRef == null) {
-					throw new MetaDataException("The target [documentName] of " + 
-													targetDocumentName + " in Reference " +
-													reference.getName() + " in document " + 
+					throw new MetaDataException(TARGET_DOCUMENT_NAME_OF +
+													targetDocumentName + IN_REFERENCE +
+													reference.getName() + IN_DOCUMENT +
 													documentIdentifier + " is not a valid document reference in this module.");
 				}
 				Document targetDocument = module.getDocument(customer, targetDocumentName);
 				if (targetDocument == null) {
-					throw new MetaDataException("The target [documentName] of " + 
-													targetDocumentName + " in Reference " +
-													reference.getName() + " in document " + 
+					throw new MetaDataException(TARGET_DOCUMENT_NAME_OF +
+													targetDocumentName + IN_REFERENCE +
+													reference.getName() + IN_DOCUMENT +
 													documentIdentifier + " cannot be found.");
 				}
-				
+
 				// Check the query (if defined) points to a query of the required document type
 				String queryName = reference.getQueryName();
 				if (queryName != null) {
 					MetaDataQueryDefinition query = module.getMetaDataQuery(queryName);
 					if (query == null) {
-						throw new MetaDataException("The target [queryName] of " + 
-														queryName + " in Reference " +
-														reference.getName() + " in document " + 
+						throw new MetaDataException("The target [queryName] of " +
+														queryName + IN_REFERENCE +
+														reference.getName() + IN_DOCUMENT +
 														documentIdentifier + " is not a valid document query in this module.");
 					}
-					
+
 					String queryDocumentName = query.getDocumentName();
 					if (! targetDocumentName.equals(queryDocumentName)) {
-						throw new MetaDataException("The target [queryName] of " + 
-														queryName + " in Reference " +
-														reference.getName() + " in document " + 
-														documentIdentifier + " references a document query for document " + 
+						throw new MetaDataException("The target [queryName] of " +
+														queryName + IN_REFERENCE +
+														reference.getName() + IN_DOCUMENT +
+														documentIdentifier + " references a document query for document " +
 														queryDocumentName + ", not document " + targetDocumentName);
 					}
 				}
-				
+
 				// Check collection order by bindings are valid
 				if (reference instanceof Collection collection) {
 					Module targetModule = getModule(customer, targetDocument.getOwningModuleName());
 					for (Ordering ordering : collection.getOrdering()) {
 						String by = ordering.getBy();
-						TargetMetaData target = null; 
+						TargetMetaData target = null;
 						try {
 							target = BindUtil.validateBinding(customer, targetModule, targetDocument, by);
 						}
 						catch (MetaDataException e) {
 							throw new MetaDataException("The order by binding of " + by + " in collection " + collection.getName() +
-															" in document " +  documentIdentifier + " is invalid", e);
+															IN_DOCUMENT +  documentIdentifier + " is invalid", e);
 						}
 						if (! BindUtil.isAScalarType(target.getType())) {
 							throw new MetaDataException("The order by binding of " + by + " in collection " + collection.getName() +
-															" in document " +  documentIdentifier + " is not scalar.");
+															IN_DOCUMENT +  documentIdentifier + " is not scalar.");
 						}
 					}
 				}
-				
+
 				boolean dynamicDocument = document.isDynamic();
 				boolean dynamicTargetDocument = targetDocument.isDynamic();
-				
+
 				// Disallow a dynamic embedded association to a static document (can't save it in hibernate without a static owner)
 				if (dynamicDocument && (! dynamicTargetDocument) && (reference.getType() == AssociationType.embedded)) {
-					throw new MetaDataException("The dynamic embedded association " + reference.getName() + 
-													" in document " + documentIdentifier + " references document " +
+					throw new MetaDataException("The dynamic embedded association " + reference.getName() +
+													IN_DOCUMENT + documentIdentifier + " references document " +
 													targetDocumentName + " which is not a dynamic document. Dynamic embedded associations to static documents are not permitted.");
 				}
 
 				// Disallow a dynamic child collection to a static document (can't save it in hibernate without a static owner)
 				if (dynamicDocument && (! dynamicTargetDocument) && (reference.getType() == CollectionType.child)) {
-					throw new MetaDataException("The dynamic child collection " + reference.getName() + 
-													" in document " + documentIdentifier + " references document " +
+					throw new MetaDataException("The dynamic child collection " + reference.getName() +
+													IN_DOCUMENT + documentIdentifier + " references document " +
 													targetDocumentName + " which is not a dynamic document. Dynamic child collections to static documents are not permitted.");
 				}
 			}
@@ -980,9 +1004,9 @@ public class LocalDesignRepository extends FileSystemRepository {
 				String targetDocumentName = inverse.getDocumentName();
 				DocumentRef inverseDocumentRef = module.getDocumentRefs().get(targetDocumentName);
 				if (inverseDocumentRef == null) {
-					throw new MetaDataException("The target [documentName] of " + 
-													targetDocumentName + " in Inverse " +
-													inverse.getName() + " in document " + 
+					throw new MetaDataException(TARGET_DOCUMENT_NAME_OF +
+													targetDocumentName + IN_INVERSE +
+													inverse.getName() + IN_DOCUMENT +
 													documentIdentifier + " is not a valid document reference in this module.");
 				}
 				Module targetModule = module;
@@ -995,28 +1019,28 @@ public class LocalDesignRepository extends FileSystemRepository {
 				String targetReferenceName = inverse.getReferenceName();
 				Reference targetReference = targetDocument.getReferenceByName(targetReferenceName);
 				if (targetReference == null) {
-					throw new MetaDataException("The target [referenceName] of " + 
-													targetReferenceName + " in Inverse " +
-													inverse.getName() + " in document " + 
-													documentIdentifier + " is not a valid reference within the document " + 
+					throw new MetaDataException(TARGET_REFERENCE_NAME_OF +
+													targetReferenceName + IN_INVERSE +
+													inverse.getName() + IN_DOCUMENT +
+													documentIdentifier + " is not a valid reference within the document " +
 													targetModule.getName() + '.' + targetDocumentName);
 				}
 				boolean one = InverseCardinality.one.equals(inverse.getCardinality());
 				if (targetReference instanceof Collection collection) {
 					if (one) {
-						throw new MetaDataException("The target [referenceName] of " + 
-														targetReferenceName + " in Inverse " +
-														inverse.getName() + " in document " + 
-														documentIdentifier + " points to a valid collection within the document " + 
-														targetModule.getName() + '.' + targetDocumentName + 
+						throw new MetaDataException(TARGET_REFERENCE_NAME_OF +
+														targetReferenceName + IN_INVERSE +
+														inverse.getName() + IN_DOCUMENT +
+														documentIdentifier + " points to a valid collection within the document " +
+														targetModule.getName() + '.' + targetDocumentName +
 														" but the cardinality of the inverse is set to one.");
 					}
 					if (CollectionType.child.equals(collection.getType())) {
-						throw new MetaDataException("The target [referenceName] of " + 
-														targetReferenceName + " in Inverse " +
-														inverse.getName() + " in document " + 
-														documentIdentifier + " points to a valid collection within the document " + 
-														targetModule.getName() + '.' + targetDocumentName + 
+						throw new MetaDataException(TARGET_REFERENCE_NAME_OF +
+														targetReferenceName + IN_INVERSE +
+														inverse.getName() + IN_DOCUMENT +
+														documentIdentifier + " points to a valid collection within the document " +
+														targetModule.getName() + '.' + targetDocumentName +
 														" but the collection is a child collection.  The [parent] attribute should be used instead of an inverse reference.");
 					}
 				}
@@ -1025,7 +1049,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 											(one ? InverseRelationship.oneToOne : InverseRelationship.oneToMany));
 			}
 		}
-		
+
 		// Check the message binding expressions, if present
 		List<UniqueConstraint> constraints = document.getUniqueConstraints();
 		for (UniqueConstraint constraint : constraints) {
@@ -1033,7 +1057,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 			String error = BindUtil.validateMessageExpressions(message, customer, document);
 			if (error != null) {
 				throw new MetaDataException("The unique constraint [message] contains malformed binding expressions in constraint " +
-												constraint.getName() + " in document " + documentIdentifier + ": " + error);
+												constraint.getName() + IN_DOCUMENT + documentIdentifier + ": " + error);
 			}
 		}
 		// TODO check binding in uniqueConstraint.fieldReference.ref as above and ensure the binding is persistent
@@ -1056,7 +1080,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 		CustomerImpl customerImpl = (CustomerImpl) customer;
 		ViewImpl viewImpl = (ViewImpl) view;
 		new ViewValidator(viewImpl, this, customerImpl, (DocumentImpl) document, uxui).visit();
-		
+
 		// Check modelAggregate and previousComplete UserAccesses
 		Set<UserAccess> accesses = viewImpl.getAccesses(customerImpl, document, uxui);
 		if (accesses != null) { // can be null if access control is turned off
@@ -1066,11 +1090,11 @@ public class LocalDesignRepository extends FileSystemRepository {
 						getModel(customer, document, access.getComponent(), false);
 					}
 					catch (Exception e) {
-						throw new MetaDataException("User Access [" + access.toString() + 
-														"] in module.document " + document.getOwningModuleName() + '.' + document.getName() +
-														" in view " + view.getName() +
-														" is for model " + access.getComponent() +
-														" which does not exist.",
+						throw new MetaDataException(USER_ACCESS_PREFIX + access.toString() +
+														IN_MODULE_DOCUMENT + document.getOwningModuleName() + '.' + document.getName() +
+														IN_VIEW + view.getName() +
+														IS_FOR_MODEL + access.getComponent() +
+														WHICH_DOES_NOT_EXIST,
 														e);
 					}
 				}
@@ -1079,11 +1103,11 @@ public class LocalDesignRepository extends FileSystemRepository {
 						getDynamicImage(customer, document, access.getComponent(), false);
 					}
 					catch (Exception e) {
-						throw new MetaDataException("User Access [" + access.toString() + 
-														"] in module.document " + document.getOwningModuleName() + '.' + document.getName() +
-														" in view " + view.getName() +
+						throw new MetaDataException(USER_ACCESS_PREFIX + access.toString() +
+														IN_MODULE_DOCUMENT + document.getOwningModuleName() + '.' + document.getName() +
+														IN_VIEW + view.getName() +
 														" is for dynamic image " + access.getComponent() +
-														" which does not exist.",
+														WHICH_DOES_NOT_EXIST,
 														e);
 					}
 				}
@@ -1094,11 +1118,11 @@ public class LocalDesignRepository extends FileSystemRepository {
 						BindUtil.getMetaDataForBinding(customer, module, document, binding);
 					}
 					catch (MetaDataException e) {
-						throw new MetaDataException("User Access [" + access.toString() + 
-														"] in module.document " + module.getName() + '.' + document.getName() +
-														" in view " + view.getName() +
+						throw new MetaDataException(USER_ACCESS_PREFIX + access.toString() +
+														IN_MODULE_DOCUMENT + module.getName() + '.' + document.getName() +
+														IN_VIEW + view.getName() +
 														" with binding " + binding +
-														" is not a valid binding.", e);
+														IS_NOT_VALID_BINDING, e);
 					}
 				}
 				else if (access.isReport()) {
@@ -1108,9 +1132,9 @@ public class LocalDesignRepository extends FileSystemRepository {
 					Document reportDocument = customer.getModule(reportModuleName).getDocument(customer, reportDocumentName);
 					if (getReportFileName(customer, reportDocument, reportName) == null) { // not found
 						final Module module = getModule(customer, document.getOwningModuleName());
-						throw new MetaDataException("User Access [" + access.toString() + 
-														"] in module.document " + module.getName() + '.' + document.getName() +
-														" in view " + view.getName() +
+						throw new MetaDataException(USER_ACCESS_PREFIX + access.toString() +
+														IN_MODULE_DOCUMENT + module.getName() + '.' + document.getName() +
+														IN_VIEW + view.getName() +
 														" for module/document/report " + reportModuleName + "/" +
 														reportDocumentName + "/" + reportName +
 														" does not exist.");
@@ -1124,7 +1148,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	 * TODO This is a hack for the chicken and egg enum generation problem to be solved by making generate domain 2 phased.
 	 * Generated enum classes may not exist yet during generateDomain validation.
 	 * In this case, skip type compatibility checks and allow generation to continue.
-	 * 
+	 *
 	 * Returns an attribute implementing type for validation when available.
 	 *
 	 * <p>During generate-domain validation, enum classes can be temporarily
@@ -1162,7 +1186,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 			Module module = getModule(customer, moduleName);
 			String roleName = moduleAndRoleName[1];
 			if (module.getRole(roleName) == null) {
-				throw new MetaDataException("Module role " + roleName + 
+				throw new MetaDataException("Module role " + roleName +
 						" for module " + moduleName +
 						" does not reference a valid module role");
 			}

@@ -39,6 +39,7 @@ import jakarta.servlet.http.HttpServletRequest;
  */
 @RequestScoped
 @Named("_skyveContent")
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate upload view response fragments.
 public class ContentUploadView extends AbstractUploadView {
 	private static final long serialVersionUID = -6769960348990922565L;
 

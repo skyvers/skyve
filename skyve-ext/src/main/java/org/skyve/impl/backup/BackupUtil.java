@@ -69,6 +69,10 @@ final class BackupUtil {
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(BackupUtil.class);
     private static final Logger COMMAND_LOGGER = Category.COMMAND.logger();
 
+    private static final String TABLE_DEFINITION_CREATED = "Table definition created for {}";
+	private static final String PERSISTENT_METADATA_MISSING = " is persistable but has no persistent metadata.";
+	private static final String WHERE_SQL = " where ";
+
 	private BackupUtil() {
 		// nothing to see here
 	}
@@ -249,7 +253,7 @@ final class BackupUtil {
 			if (table == null) {
 				table = new Table(agnosticIdentifier, persistentIdentifier);
 				tables.put(agnosticIdentifier, table);
-				if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("Table definition created for {}", agnosticIdentifier);
+				if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info(TABLE_DEFINITION_CREATED, agnosticIdentifier);
 			}
 
 			table.addFieldsFromDocument(customer, document);
@@ -284,7 +288,7 @@ final class BackupUtil {
 											if (derivedDocument.isPersistable()) {
 												Persistent derivedPersistent = derivedDocument.getPersistent();
 												if (derivedPersistent == null) {
-													throw new MetaDataException(derivedDocument.getName() + " is persistable but has no persistent metadata.");
+													throw new MetaDataException(derivedDocument.getName() + PERSISTENT_METADATA_MISSING);
 												}
 												String ai = derivedPersistent.getAgnosticIdentifier();
 												ownerAgnosticIdentifier = ai;
@@ -294,7 +298,7 @@ final class BackupUtil {
 												if (! tables.containsKey(joinAgnosticIdentifier)) {
 													JoinTable joinTable = new JoinTable(joinAgnosticIdentifier, joinPersistentIdentifier, ownerAgnosticIdentifier, ownerPersistentIdentifier, Boolean.TRUE.equals(collection.getOrdered()));
 													tables.put(joinAgnosticIdentifier, joinTable);
-													if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("Table definition created for {}", joinAgnosticIdentifier);
+													if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info(TABLE_DEFINITION_CREATED, joinAgnosticIdentifier);
 												}
 											}
 										}
@@ -313,7 +317,7 @@ final class BackupUtil {
 											if (baseDocument.isPersistable()) {
 												Persistent basePersistent = baseDocument.getPersistent();
 												if (basePersistent == null) {
-													throw new MetaDataException(baseDocument.getName() + " is persistable but has no persistent metadata.");
+													throw new MetaDataException(baseDocument.getName() + PERSISTENT_METADATA_MISSING);
 												}
 												ExtensionStrategy baseStrategy = basePersistent.getStrategy();
 												// keep looking if joined
@@ -331,21 +335,21 @@ final class BackupUtil {
 
 										Persistent ultimatePersistent = ultimateDocument.getPersistent();
 										if (ultimatePersistent == null) {
-											throw new MetaDataException(ultimateDocument.getName() + " is persistable but has no persistent metadata.");
+											throw new MetaDataException(ultimateDocument.getName() + PERSISTENT_METADATA_MISSING);
 										}
 										String ai = ultimatePersistent.getAgnosticIdentifier();
 										ownerAgnosticIdentifier = ai;
 										ownerPersistentIdentifier = ultimatePersistent.getPersistentIdentifier();
 										Persistent referencedPersistent = referencedDocument.getPersistent();
 										if (referencedPersistent == null) {
-											throw new MetaDataException(referencedDocument.getName() + " is persistable but has no persistent metadata.");
+											throw new MetaDataException(referencedDocument.getName() + PERSISTENT_METADATA_MISSING);
 										}
 										String joinAgnosticIdentifier = referencedPersistent.getAgnosticIdentifier() + '_' + referenceFieldName;
 										String joinPersistentIdentifier = referencedPersistent.getPersistentIdentifier() + '_' + referenceFieldName;
 										if (! tables.containsKey(joinAgnosticIdentifier)) {
 											JoinTable joinTable = new JoinTable(joinAgnosticIdentifier, joinPersistentIdentifier, ownerAgnosticIdentifier, ownerPersistentIdentifier, Boolean.TRUE.equals(collection.getOrdered()));
 											tables.put(joinAgnosticIdentifier, joinTable);
-											if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("Table definition created for {}", joinAgnosticIdentifier);
+											if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info(TABLE_DEFINITION_CREATED, joinAgnosticIdentifier);
 										}
 									}
 									else {
@@ -354,7 +358,7 @@ final class BackupUtil {
 										if (! tables.containsKey(joinAgnosticIdentifier)) {
 											JoinTable joinTable = new JoinTable(joinAgnosticIdentifier, joinPersistentIdentifier, ownerAgnosticIdentifier, ownerPersistentIdentifier, Boolean.TRUE.equals(collection.getOrdered()));
 											tables.put(joinAgnosticIdentifier, joinTable);
-											if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("Table definition created for {}", joinAgnosticIdentifier);
+											if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info(TABLE_DEFINITION_CREATED, joinAgnosticIdentifier);
 										}
 									}
 								}
@@ -379,16 +383,16 @@ final class BackupUtil {
 	
 	static void secureSQL(StringBuilder sql, Table table, String customerName) {
 		if (table instanceof JoinTable joinTable) {
-			sql.append(" where ").append(PersistentBean.OWNER_COLUMN_NAME);
+			sql.append(WHERE_SQL).append(PersistentBean.OWNER_COLUMN_NAME);
 			sql.append(" in (select ").append(Bean.DOCUMENT_ID).append(" from ").append(joinTable.ownerPersistentIdentifier);
 			if (UtilImpl.CUSTOMER == null) { // multi-tenant
-				sql.append(" where ").append(Bean.CUSTOMER_NAME).append(" = '").append(customerName).append('\'');
+				sql.append(WHERE_SQL).append(Bean.CUSTOMER_NAME).append(" = '").append(customerName).append('\'');
 			}
 			sql.append(')');
 		}
 		else {
 			if ((UtilImpl.CUSTOMER == null) && hasBizCustomer(table)) {
-				sql.append(" where ").append(Bean.CUSTOMER_NAME).append(" = '").append(customerName).append('\'');
+				sql.append(WHERE_SQL).append(Bean.CUSTOMER_NAME).append(" = '").append(customerName).append('\'');
 			}
 		}
 	}

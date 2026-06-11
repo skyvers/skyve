@@ -27,6 +27,8 @@ import modules.admin.domain.UserLoginRecord;
  * Applies geolocation enrichment and security anomaly checks to login records.
  */
 public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
+	private static final String UNKNOWN = "Unknown";
+
 	private static final String IP_CHANGE_LOG_MESSAGE = "The user %s has logged in from a new IP address. "
 			+ "The IP address has changed from %s to %s. "
 			+ "If this change is unexpected, it may indicate unauthorized access to the account. "
@@ -145,8 +147,8 @@ public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
 												String.format(COUNTRY_CHANGE_LOG_MESSAGE,
 																userName,
 																(lastKnownCountryCode == null) ? "??" : lastKnownCountryCode,
-																(lastKnownCountry == null) ? "Unknown" : lastKnownCountry,
-																(lastKnownIP == null) ? "Unknown" : lastKnownIP,
+																(lastKnownCountry == null) ? UNKNOWN : lastKnownCountry,
+																(lastKnownIP == null) ? UNKNOWN : lastKnownIP,
 																countryCode,
 																country,
 																userIPAddress),
@@ -161,7 +163,7 @@ public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
 							SecurityUtil.log("Change of IP Address from Last Login",
 												String.format(IP_CHANGE_LOG_MESSAGE, 
 																userName, 
-																(lastKnownIP == null) ? "Unknown" : lastKnownIP, 
+																(lastKnownIP == null) ? UNKNOWN : lastKnownIP,
 																userIPAddress),
 												UtilImpl.IP_ADDRESS_CHANGE_NOTIFICATIONS);
 						}

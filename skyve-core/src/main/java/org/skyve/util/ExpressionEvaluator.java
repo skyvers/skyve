@@ -60,6 +60,9 @@ public abstract class ExpressionEvaluator {
 	public static final String TIMESTAMP_EXPRESSION = "TIMESTAMP";
 	public static final String URL_EXPRESSION = "URL";
 
+	private static final String MISSING_EVALUATOR_PREFIX = "Cannot find an expression evaluator for prefix ";
+	private static final String FORMATTER_PREFIX = "Formatter ";
+
 	// Map of expression evaluator implementations keyed by their prefix
 	private static final Map<String, ExpressionEvaluator> EVALUATORS = new TreeMap<>();
 	// Default evaluator to use when there is no prefix or when validating a binding
@@ -193,10 +196,10 @@ public abstract class ExpressionEvaluator {
 			}
 			formatter = Formatters.get(formatName);
 			if (formatter == null) {
-				return "Formatter " + formatName + " does not exist";
+				return FORMATTER_PREFIX + formatName + " does not exist";
 			}
 			if ((returnType != null) && (! returnType.isAssignableFrom(String.class))) {
-				return "Formatter " + formatName + " evaluates to a String, not " + returnType;
+				return FORMATTER_PREFIX + formatName + " evaluates to a String, not " + returnType;
 			}
 		}
 		
@@ -252,7 +255,7 @@ public abstract class ExpressionEvaluator {
 			// Select the evaluator
 			ExpressionEvaluator eval = EVALUATORS.get(prefix);
 			if (eval == null) {
-				result = "Cannot find an expression evaluator for prefix " + prefix;
+				result = MISSING_EVALUATOR_PREFIX + prefix;
 			}
 			else {
 				result = eval.validateWithoutPrefixOrSuffix(expressionWithoutPrefixOrSuffix,
@@ -266,7 +269,7 @@ public abstract class ExpressionEvaluator {
 		
 		if ((formatter != null) && (result == null) && (testType != null)) { // valid expression but we still need to validate the format
 			if (! formatter.getValueType().isAssignableFrom(testType)) {
-				result = "Formatter " + formatName + " for type " + formatter.getValueType() + 
+				result = FORMATTER_PREFIX + formatName + " for type " + formatter.getValueType() +
 							" is incompatible with expression " +
 							expressionWithoutSuffix + " of type " + testType;
 			}
@@ -328,7 +331,7 @@ public abstract class ExpressionEvaluator {
 
 		ExpressionEvaluator eval = EVALUATORS.get(prefix);
 		if (eval == null) {
-			throw new DomainException("Cannot find an expression evaluator for prefix " + prefix);
+			throw new DomainException(MISSING_EVALUATOR_PREFIX + prefix);
 		}
 		
 		StringBuilder result = new StringBuilder(expressionWithoutPrefixOfSuffix);
@@ -671,7 +674,7 @@ public abstract class ExpressionEvaluator {
 
 		ExpressionEvaluator eval = EVALUATORS.get(prefix);
 		if (eval == null) {
-			throw new DomainException("Cannot find an expression evaluator for prefix " + prefix);
+			throw new DomainException(MISSING_EVALUATOR_PREFIX + prefix);
 		}
 		
 		if (formatName != null) {

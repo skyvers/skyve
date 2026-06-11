@@ -40,6 +40,7 @@ import jakarta.annotation.Nullable;
  *
  * <p>Threading: not thread-safe; intended for single-threaded generation runs.
  */
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate fragments of generated source and SQL keyword output.
 public abstract class DomainGenerator {
 
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(DomainGenerator.class);

@@ -20,6 +20,7 @@ public class DevLoginFilter implements Filter {
 	private static final String CUSTOMER_NAME = "customer";
 	private static final String USER_NAME = "user";
 	private static final String PASSWORD = "password";
+	private static final String INIT_PARAMETER_REQUIRED = " init parameter is required";
 	
 	private String user;
 	private String userPassword;
@@ -34,16 +35,16 @@ public class DevLoginFilter implements Filter {
 	public void init(FilterConfig config) throws ServletException {
 		String customerName = Util.processStringValue(config.getInitParameter(CUSTOMER_NAME));
 		if (customerName == null) {
-			throw new ServletException(CUSTOMER_NAME + " init parameter is required");
+			throw new ServletException(CUSTOMER_NAME + INIT_PARAMETER_REQUIRED);
 		}
 		String userName = Util.processStringValue(config.getInitParameter(USER_NAME));
 		if (userName == null) {
-			throw new ServletException(USER_NAME + " init parameter is required");
+			throw new ServletException(USER_NAME + INIT_PARAMETER_REQUIRED);
 		}
 		user = customerName + '/' + userName;
 		userPassword = Util.processStringValue(config.getInitParameter(PASSWORD));
 		if (userPassword == null) {
-			throw new ServletException(PASSWORD + " init parameter is required");
+			throw new ServletException(PASSWORD + INIT_PARAMETER_REQUIRED);
 		}
 	}
 

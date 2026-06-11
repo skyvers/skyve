@@ -33,6 +33,9 @@ import org.springframework.security.web.authentication.rememberme.PersistentToke
 @Import(SkyveSpringSecurityConfig.class)
 @EnableWebSecurity
 public class SpringSecurityConfig {
+	private static final String LOGIN_ERROR_QUERY = "?error";
+	private static final String REMEMBER_ME_PARAMETER = "remember";
+
 	/**
 	 * Security adapter that provides concrete Spring Security collaborators.
 	 */
@@ -66,9 +69,9 @@ public class SpringSecurityConfig {
 	 * @return the configured security filter chain
 	 * @throws Exception if chain construction fails
 	 */
-    @Bean
-    @SuppressWarnings("java:S4502") // Suppress CSRF turned off as Skyve implements its own
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+	@Bean
+	@SuppressWarnings("java:S4502") // Suppress CSRF turned off as Skyve implements its own
+	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http.authorizeHttpRequests(c -> {
 			if (UtilImpl.DEV_LOGIN_FILTER_USED) {
 				// Open SC list view servlet
@@ -155,10 +158,10 @@ public class SpringSecurityConfig {
 		)
 		.sessionManagement(c -> c.sessionFixation().changeSessionId())
 		.rememberMe(c ->
-			c.key("remember")
+			c.key(REMEMBER_ME_PARAMETER)
 				.tokenValiditySeconds(UtilImpl.REMEMBER_ME_TOKEN_TIMEOUT_HOURS * 60 * 60)
-				.rememberMeParameter("remember")
-				.rememberMeCookieName("remember")
+				.rememberMeParameter(REMEMBER_ME_PARAMETER)
+				.rememberMeCookieName(REMEMBER_ME_PARAMETER)
 				.tokenRepository(tokenRepository())
 				.useSecureCookie(Util.isSecureUrl())
 		)
@@ -166,7 +169,7 @@ public class SpringSecurityConfig {
 			c.defaultSuccessUrl(Util.getHomeUrl())
 				.loginPage(Util.getLoginUrl())
 				.loginProcessingUrl(SkyveSpringSecurity.LOGIN_ATTEMPT_PATH)
-				.failureUrl(Util.getLoginUrl() + "?error")
+				.failureUrl(Util.getLoginUrl() + LOGIN_ERROR_QUERY)
 				.successHandler(new SkyveAuthenticationSuccessHandler(userDetailsManager()))
 		)
 		.logout(c -> 
@@ -188,7 +191,7 @@ public class SpringSecurityConfig {
 			http.oauth2Login(c ->
 				c.defaultSuccessUrl(Util.getHomeUrl())
 					.loginPage(Util.getLoginUrl())
-					.failureUrl(Util.getLoginUrl() + "?error")
+					.failureUrl(Util.getLoginUrl() + LOGIN_ERROR_QUERY)
 					.successHandler(new SkyveAuthenticationSuccessHandler(userDetailsManager()))
 			);
 		}

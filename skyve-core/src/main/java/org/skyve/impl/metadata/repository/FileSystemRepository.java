@@ -69,6 +69,11 @@ import jakarta.annotation.Nullable;
 public abstract class FileSystemRepository extends MutableCachedRepository {
 
     private static final Logger XML_LOGGER = Category.XML.logger();
+	private static final String CLASS_SUFFIX = ".class";
+	private static final String JAVA_SUFFIX = ".java";
+	private static final String NAME_ATTRIBUTE_MISMATCH = " but the name attribute is ";
+	private static final String TRACE_ARROW = " -> ";
+	private static final String XML_SUFFIX = ".xml";
 
 	protected String absolutePath;
 	// used to stop resources paths breaking out of the web root (eg ../../../../)
@@ -175,7 +180,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		if (customerName == null) {
 			String key = MODULES_NAMESPACE + moduleName;
 			sb.setLength(0);
-			sb.append(absolutePath).append(key).append('/').append(moduleName).append(".xml");
+			sb.append(absolutePath).append(key).append('/').append(moduleName).append(XML_SUFFIX);
 			File moduleFile = new File(sb.toString());
 			if (moduleFile.exists()) {
 				if (UtilImpl.XML_TRACE) XML_LOGGER.info("{} -> {}", moduleName, key);
@@ -187,7 +192,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 			sb.append(MODULES_NAMESPACE).append(moduleName);
 			String key = sb.toString();
 			sb.setLength(0);
-			sb.append(absolutePath).append(key).append('/').append(moduleName).append(".xml");
+			sb.append(absolutePath).append(key).append('/').append(moduleName).append(XML_SUFFIX);
 			File moduleFile = new File(sb.toString());
 			if (moduleFile.exists()) {
 				if (UtilImpl.XML_TRACE) XML_LOGGER.info("{} -> {}", moduleName, key);
@@ -219,17 +224,17 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 									if (files != null) {
 										for (File actionFile : files) {
 											String actionFileName = actionFile.getName();
-											if (actionFileName.endsWith(".class") || actionFileName.endsWith(".java") || actionFileName.endsWith(".xml")) {
+											if (actionFileName.endsWith(CLASS_SUFFIX) || actionFileName.endsWith(JAVA_SUFFIX) || actionFileName.endsWith(XML_SUFFIX)) {
 												String actionName = actionFileName.substring(0, actionFileName.lastIndexOf('.'));
 			
 												sb.setLength(0);
 												sb.append(key).append(moduleFileName).append('/');
 												sb.append(ACTIONS_NAMESPACE).append(actionName);
-												if (actionFileName.endsWith(".xml")) {
+												if (actionFileName.endsWith(XML_SUFFIX)) {
 													sb.append(META_DATA_SUFFIX);
 												}
 												String actionLocation = sb.toString();
-												if (UtilImpl.XML_TRACE) XML_LOGGER.info(new StringBuilder(128).append("Action ").append(actionName).append(" -> ").append(actionLocation).toString());
+												if (UtilImpl.XML_TRACE) XML_LOGGER.info(new StringBuilder(128).append("Action ").append(actionName).append(TRACE_ARROW).append(actionLocation).toString());
 												addKey(actionLocation);
 											}
 										}
@@ -241,13 +246,13 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 									if (files != null) {
 										for (File imageFile : files) {
 											String imageFileName = imageFile.getName();
-											if (imageFileName.endsWith(".class") || imageFileName.endsWith(".java")) {
+											if (imageFileName.endsWith(CLASS_SUFFIX) || imageFileName.endsWith(JAVA_SUFFIX)) {
 												String imageName = imageFileName.substring(0, imageFileName.lastIndexOf('.'));
 												sb.setLength(0);
 												sb.append(key).append(moduleFileName).append('/');
 												sb.append(IMAGES_NAMESPACE).append(imageName);
 												String imageLocation = sb.toString();
-												if (UtilImpl.XML_TRACE) XML_LOGGER.info(new StringBuilder(128).append("Dynamic Image ").append(imageName).append(" -> ").append(imageLocation).toString());
+												if (UtilImpl.XML_TRACE) XML_LOGGER.info(new StringBuilder(128).append("Dynamic Image ").append(imageName).append(TRACE_ARROW).append(imageLocation).toString());
 												addKey(imageLocation);
 											}
 										}
@@ -259,13 +264,13 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 									if (files != null) {
 										for (File modelFile : files) {
 											String modelFileName = modelFile.getName();
-											if (modelFileName.endsWith(".class") || modelFileName.endsWith(".java")) {
+											if (modelFileName.endsWith(CLASS_SUFFIX) || modelFileName.endsWith(JAVA_SUFFIX)) {
 												String modelName = modelFileName.substring(0, modelFileName.lastIndexOf('.'));
 												sb.setLength(0);
 												sb.append(key).append(moduleFileName).append('/');
 												sb.append(MODELS_NAMESPACE).append(modelName);
 												String modelLocation = sb.toString();
-												if (UtilImpl.XML_TRACE) XML_LOGGER.info(new StringBuilder(128).append("Model ").append(modelName).append(" -> ").append(modelLocation).toString());
+												if (UtilImpl.XML_TRACE) XML_LOGGER.info(new StringBuilder(128).append("Model ").append(modelName).append(TRACE_ARROW).append(modelLocation).toString());
 												addKey(modelLocation);
 											}
 										}
@@ -283,7 +288,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 												sb.append(key).append(moduleFileName).append('/');
 												sb.append(REPORTS_NAMESPACE).append(reportName).append(JASPER_SUFFIX);
 												String reportLocation = sb.toString();
-												if (UtilImpl.XML_TRACE) XML_LOGGER.info(new StringBuilder(128).append("Jasper Report ").append(reportName).append(" -> ").append(reportLocation).toString());
+												if (UtilImpl.XML_TRACE) XML_LOGGER.info(new StringBuilder(128).append("Jasper Report ").append(reportName).append(TRACE_ARROW).append(reportLocation).toString());
 												addKey(reportLocation);
 											}
 											else if (reportFileName.endsWith(".ftlh")) {
@@ -292,7 +297,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 												sb.append(key).append(moduleFileName).append('/');
 												sb.append(REPORTS_NAMESPACE).append(reportName).append(FREEMARKER_SUFFIX);
 												String reportLocation = sb.toString();
-												if (UtilImpl.XML_TRACE) XML_LOGGER.info(new StringBuilder(128).append("Freemarker Report ").append(reportName).append(" -> ").append(reportLocation).toString());
+												if (UtilImpl.XML_TRACE) XML_LOGGER.info(new StringBuilder(128).append("Freemarker Report ").append(reportName).append(TRACE_ARROW).append(reportLocation).toString());
 												addKey(reportLocation);
 											}
 										}
@@ -304,13 +309,13 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 									if (viewFiles != null) {
 										for (File viewFile : viewFiles) {
 											String viewFileName = viewFile.getName();
-											if (viewFileName.endsWith(".xml")) { // found a view file
+											if (viewFileName.endsWith(XML_SUFFIX)) { // found a view file
 												String viewType = viewFileName.substring(0, viewFileName.length() - 4);
 												sb.setLength(0);
 												sb.append(key).append(moduleFileName).append('/');
 												sb.append(VIEWS_NAMESPACE).append(viewType);
 												String viewLocation = sb.toString();
-												if (UtilImpl.XML_TRACE) XML_LOGGER.info(new StringBuilder(128).append("View ").append(viewType).append(" -> ").append(viewLocation).toString());
+												if (UtilImpl.XML_TRACE) XML_LOGGER.info(new StringBuilder(128).append("View ").append(viewType).append(TRACE_ARROW).append(viewLocation).toString());
 												addKey(viewLocation);
 											}
 											else if (viewFile.isDirectory()) {
@@ -318,13 +323,13 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 												if (uxuiViewFiles != null) {
 													for (File uxuiViewFile : uxuiViewFiles) {
 														String uxuiViewFileName = uxuiViewFile.getName();
-														if (uxuiViewFileName.endsWith(".xml")) { // found a view file
+														if (uxuiViewFileName.endsWith(XML_SUFFIX)) { // found a view file
 															String viewType = uxuiViewFileName.substring(0, uxuiViewFileName.length() - 4);
 															sb.setLength(0);
 															sb.append(key).append(moduleFileName).append('/');
 															sb.append(VIEWS_NAMESPACE).append(viewFileName).append('/').append(viewType);
 															String viewLocation = sb.toString();
-															if (UtilImpl.XML_TRACE) XML_LOGGER.info(new StringBuilder(128).append("View ").append(viewType).append(" -> ").append(viewLocation).toString());
+															if (UtilImpl.XML_TRACE) XML_LOGGER.info(new StringBuilder(128).append("View ").append(viewType).append(TRACE_ARROW).append(viewLocation).toString());
 															addKey(viewLocation);
 														}
 													}
@@ -339,7 +344,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 									sb.append(key).append(moduleFileName).append('/');
 									sb.append(moduleFileName).append(BIZLET_SUFFIX);
 									String bizletLocation = sb.toString();
-									if (UtilImpl.XML_TRACE) XML_LOGGER.info(new StringBuilder(128).append("Bizlet ").append(moduleFileName).append(" -> ").append(bizletLocation).toString());
+									if (UtilImpl.XML_TRACE) XML_LOGGER.info(new StringBuilder(128).append("Bizlet ").append(moduleFileName).append(TRACE_ARROW).append(bizletLocation).toString());
 									addKey(bizletLocation);
 								}
 								// found the bizlet metadata file
@@ -348,7 +353,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 									sb.append(key).append(moduleFileName).append('/');
 									sb.append(moduleFileName).append(BIZLET_SUFFIX).append(META_DATA_SUFFIX);
 									String bizletLocation = sb.toString();
-									if (UtilImpl.XML_TRACE) XML_LOGGER.info(new StringBuilder(128).append("BizletMetaData ").append(moduleFileName).append(" -> ").append(bizletLocation).toString());
+									if (UtilImpl.XML_TRACE) XML_LOGGER.info(new StringBuilder(128).append("BizletMetaData ").append(moduleFileName).append(TRACE_ARROW).append(bizletLocation).toString());
 									addKey(bizletLocation);
 								}
 								// found the extension class file
@@ -357,7 +362,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 									sb.append(key).append(moduleFileName).append('/');
 									sb.append(moduleFileName).append("Extension");
 									String extensionLocation = sb.toString();
-									if (UtilImpl.XML_TRACE) XML_LOGGER.info(new StringBuilder(128).append("Extension ").append(moduleFileName).append(" -> ").append(extensionLocation).toString());
+									if (UtilImpl.XML_TRACE) XML_LOGGER.info(new StringBuilder(128).append("Extension ").append(moduleFileName).append(TRACE_ARROW).append(extensionLocation).toString());
 									addKey(extensionLocation);
 								}
 								// found the factory class file
@@ -366,13 +371,13 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 									sb.append(key).append(moduleFileName).append('/');
 									sb.append(moduleFileName).append("Factory");
 									String factoryLocation = sb.toString();
-									if (UtilImpl.XML_TRACE) XML_LOGGER.info(new StringBuilder(128).append("Factory ").append(moduleFileName).append(" -> ").append(factoryLocation).toString());
+									if (UtilImpl.XML_TRACE) XML_LOGGER.info(new StringBuilder(128).append("Factory ").append(moduleFileName).append(TRACE_ARROW).append(factoryLocation).toString());
 									addKey(factoryLocation);
 								}
 								// found the document definition file
-								else if (documentFileName.equals(moduleFileName + ".xml")) {
+								else if (documentFileName.equals(moduleFileName + XML_SUFFIX)) {
 									String documentLocation = key + moduleFileName;
-									if (UtilImpl.XML_TRACE) XML_LOGGER.info(new StringBuilder(128).append("Document ").append(moduleFileName).append(" -> ").append(documentLocation).toString());
+									if (UtilImpl.XML_TRACE) XML_LOGGER.info(new StringBuilder(128).append("Document ").append(moduleFileName).append(TRACE_ARROW).append(documentLocation).toString());
 									addKey(documentLocation);
 								}
 							} // for (all document files)
@@ -440,7 +445,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		
 		if (includeGlobal) {
 			sb.append(absolutePath);
-			sb.append(ROUTER_NAMESPACE).append(ROUTER_NAME).append(".xml");
+			sb.append(ROUTER_NAMESPACE).append(ROUTER_NAME).append(XML_SUFFIX);
 			s = sb.toString();
 			f = new File(s);
 			if (f.exists()) {
@@ -458,7 +463,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 				}
 				for (Module module : customer.getModules()) {
 					sb.append(absolutePath);
-					sb.append(CUSTOMERS_NAMESPACE).append(customerName).append('/').append(module.getName()).append("/").append(ROUTER_NAME).append(".xml");
+					sb.append(CUSTOMERS_NAMESPACE).append(customerName).append('/').append(module.getName()).append("/").append(ROUTER_NAME).append(XML_SUFFIX);
 					s = sb.toString();
 					f = new File(s);
 					if (f.exists()) {
@@ -471,7 +476,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 			// Add vanilla modules
 			for (String moduleName : getAllVanillaModuleNames()) {
 				sb.append(absolutePath);
-				sb.append(MODULES_NAMESPACE).append(moduleName).append("/").append(ROUTER_NAME).append(".xml");
+				sb.append(MODULES_NAMESPACE).append(moduleName).append("/").append(ROUTER_NAME).append(XML_SUFFIX);
 				s = sb.toString();
 				f = new File(s);
 				if (f.exists()) {
@@ -564,7 +569,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 						File[] moduleChildren = moduleDirectory.listFiles();
 						if (moduleChildren != null) {
 							for (File moduleChild : moduleChildren) {
-								if (moduleChild.getName().equals(moduleDirectory.getName() + ".xml")) {
+								if (moduleChild.getName().equals(moduleDirectory.getName() + XML_SUFFIX)) {
 									result.add(moduleDirectory.getName());
 									break;
 								}
@@ -582,7 +587,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		StringBuilder result = new StringBuilder(256);
 		result.append(absolutePath);
 		result.append(CUSTOMERS_NAMESPACE);
-		result.append(customerName).append('/').append(customerName).append(".xml");
+		result.append(customerName).append('/').append(customerName).append(XML_SUFFIX);
 		return result.toString();
 	}
 	
@@ -602,7 +607,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 			result = XMLMetaData.unmarshalCustomerFile(path);
 			if (! customerName.equals(result.getName())) {
 				throw new MetaDataException("Customer is defined with file name of " + path + 
-												" but the name attribute is " + result.getName());
+												NAME_ATTRIBUTE_MISMATCH + result.getName());
 			}
 		}
 		catch (SkyveException e) {
@@ -638,7 +643,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 			result.append(CUSTOMERS_NAMESPACE).append(customerName).append('/');
 		}
 		result.append(MODULES_NAMESPACE);
-		result.append(moduleName).append('/').append(moduleName).append(".xml");
+		result.append(moduleName).append('/').append(moduleName).append(XML_SUFFIX);
 		return result.toString();
 	}
 	
@@ -659,7 +664,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 			result = XMLMetaData.unmarshalModuleFile(path);
 			if (! moduleName.equals(result.getName())) {
 				throw new MetaDataException("Module is defined with file name of " + path + 
-												" but the name attribute is " + result.getName());
+												NAME_ATTRIBUTE_MISMATCH + result.getName());
 			}
 		}
 		catch (SkyveException e) {
@@ -697,7 +702,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		}
 		result.append(MODULES_NAMESPACE);
 		result.append(moduleName).append('/');
-		result.append(documentName).append('/').append(documentName).append(".xml");
+		result.append(documentName).append('/').append(documentName).append(XML_SUFFIX);
 		return result.toString();
 	}
 	
@@ -719,7 +724,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 			result = XMLMetaData.unmarshalDocumentFile(path);
 			if (! documentName.equals(result.getName())) {
 				throw new MetaDataException("Document is defined with file name of " + path + 
-												" but the name attribute is " + result.getName());
+												NAME_ATTRIBUTE_MISMATCH + result.getName());
 			}
 		} // try (populate Metadata)
 		catch (MetaDataException e) {
@@ -766,7 +771,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		if (uxui != null) {
 			result.append(uxui).append('/');
 		}
-		result.append(viewName).append(".xml");
+		result.append(viewName).append(XML_SUFFIX);
 		return result.toString();
 	}
 	
@@ -790,7 +795,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 			result = XMLMetaData.unmarshalViewFile(path);
 			if (! viewName.equals(result.getName())) {
 				throw new MetaDataException("View is defined with file name of " + path + 
-												" but the name attribute is " + result.getName());
+												NAME_ATTRIBUTE_MISMATCH + result.getName());
 			}
 		} // try (populate Metadata)
 		catch (MetaDataException e) {
@@ -835,7 +840,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		result.append(MODULES_NAMESPACE);
 		result.append(moduleName).append('/');
 		result.append(documentName).append('/').append(ACTIONS_NAMESPACE);
-		result.append(actionName).append(".xml");
+		result.append(actionName).append(XML_SUFFIX);
 		return result.toString();
 	}
 	
@@ -858,7 +863,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 			result = XMLMetaData.unmarshalActionFile(path);
 			if (! actionName.equals(result.getName())) {
 				throw new MetaDataException("Action is defined with file name of " + path + 
-												" but the name attribute is " + result.getName());
+												NAME_ATTRIBUTE_MISMATCH + result.getName());
 			}
 		} // try (populate Metadata)
 		catch (MetaDataException e) {
@@ -932,7 +937,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		result.append(MODULES_NAMESPACE);
 		result.append(moduleName).append('/');
 		result.append(documentName).append('/');
-		result.append(documentName).append(BIZLET_SUFFIX).append(".xml");
+		result.append(documentName).append(BIZLET_SUFFIX).append(XML_SUFFIX);
 		return result.toString();
 	}
 	
@@ -1364,7 +1369,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 				// Not loading classes
 				// check for a java file and return a MetaData implementation
 				// NB WidgetReference is a pretty simple MetaData implementation
-				if (new File(this.absolutePath + className + ".java").exists()) {
+				if (new File(this.absolutePath + className + JAVA_SUFFIX).exists()) {
 					return WidgetReference.class;
 				}
 				

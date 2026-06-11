@@ -30,6 +30,7 @@ import org.slf4j.Logger;
  *
  * <p>Threading: not thread-safe. Instances are mutable during setup and assembly.
  */
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate Maven project scaffolding path fragments.
 public class MavenSkyveProject {
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(MavenSkyveProject.class);
 

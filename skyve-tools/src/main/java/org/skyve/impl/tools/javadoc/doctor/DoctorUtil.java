@@ -49,6 +49,7 @@ import org.skyve.metadata.user.Role;
  * <p>Threading: this class is stateless and method-local. It is safe for
  * concurrent use when callers provide independent stream and metadata contexts.
  */
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate documentation section labels.
 public class DoctorUtil {
 
 	/**

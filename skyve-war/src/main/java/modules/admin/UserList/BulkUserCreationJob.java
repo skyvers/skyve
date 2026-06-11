@@ -33,6 +33,7 @@ import modules.admin.domain.UserList;
  */
 public class BulkUserCreationJob extends Job {
 	private static final String SPACE_COMMA_OR_SEMICOLON = "[\\s,;]+";
+	private static final String NEW_USER_LOG_PREFIX = "New user '";
 
 	/**
 	 * Indicates cancellation is not implemented for this job.
@@ -75,12 +76,12 @@ public class BulkUserCreationJob extends Job {
 								UserListUtil.SYSTEM_USER_INVITATION_DEFAULT_BODY,
 								CommunicationUtil.ResponseMode.EXPLICIT, null, newUser);
 
-						log.add("New user '" + newUser.getUserName() + "' created and emailed ok");
+						log.add(NEW_USER_LOG_PREFIX + newUser.getUserName() + "' created and emailed ok");
 					} catch (@SuppressWarnings("unused") Exception e) {
-						log.add("New user '" + newUser.getUserName() + "' created ok but emailed FAILED");
+						log.add(NEW_USER_LOG_PREFIX + newUser.getUserName() + "' created ok but emailed FAILED");
 					}
 				} else {
-					log.add("New user '" + newUser.getUserName() + "'created ok");
+					log.add(NEW_USER_LOG_PREFIX + newUser.getUserName() + "'created ok");
 				}
 			}
 

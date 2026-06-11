@@ -16,6 +16,7 @@ import jakarta.xml.bind.annotation.XmlType;
  * @author mike
  */
 @XmlTransient
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate SQL temporal expression fragments.
 public class TemporalBucket implements Bucket {
 	private static final long serialVersionUID = -9134123560010408219L;
 

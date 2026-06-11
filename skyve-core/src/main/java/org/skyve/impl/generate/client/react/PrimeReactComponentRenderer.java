@@ -52,6 +52,7 @@ import jakarta.annotation.Nullable;
 /**
  * PrimeReact-specific widget/component renderer.
  */
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate fragments of generated PrimeReact component output.
 public class PrimeReactComponentRenderer extends ComponentRenderer {
 	private Map<String, String> imports;
 	private String startingIndent;

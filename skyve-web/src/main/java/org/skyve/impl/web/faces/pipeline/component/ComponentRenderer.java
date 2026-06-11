@@ -68,6 +68,7 @@ import jakarta.faces.component.html.HtmlPanelGrid;
 import jakarta.faces.component.html.HtmlPanelGroup;
 import jakarta.faces.convert.Converter;
 
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate JSF component attribute names.
 public class ComponentRenderer {
 	private static final char INDENT = '\t';
 	StringBuilder out = new StringBuilder(1024);

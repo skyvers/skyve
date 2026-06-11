@@ -34,9 +34,10 @@ import modules.admin.domain.ReportTemplate;
  * Orchestrates report template editing, scheduling options, and dynamic domain values.
  */
 public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
-	@Inject
-	@SuppressWarnings("java:S6813") // allow member injection
-	private transient UserService userService;
+	private static final String HOUR_PREFIX = "hour";
+	private static final String DAY_PREFIX = "day";
+	private static final String MONTH_PREFIX = "month";
+	private static final String WEEKDAY_PREFIX = "weekday";
 
 	public static final String FREEMARKER_HTML_TEMPLATE_EXTENSION = "ftlh";
 
@@ -48,6 +49,10 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 	private static final String LAST_WEEK_DAY_CODE = "LW";
 	private static final String ANY_CODE = "?";
 	private static final Integer ANY_CODE_SPEC = Integer.valueOf(98);
+
+	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
+	private transient UserService userService;
 
 	/**
 	 * Returns constant domain values for schedule selectors and module lists.
@@ -228,7 +233,7 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 			} else {
 				bean.setAllHours(SELECTED_CODE);
 				for (int i = 0, l = 24; i < l; i++) {
-					Binder.set(bean, "hour" + i, hours.contains(Integer.valueOf(i)) ? Boolean.TRUE : Boolean.FALSE);
+					Binder.set(bean, HOUR_PREFIX + i, hours.contains(Integer.valueOf(i)) ? Boolean.TRUE : Boolean.FALSE);
 				}
 			}
 
@@ -243,7 +248,7 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 			} else {
 				bean.setAllDays(SELECTED_CODE);
 				for (int i = 1, l = 32; i < l; i++) {
-					Binder.set(bean, "day" + i, days.contains(Integer.valueOf(i)) ? Boolean.TRUE : Boolean.FALSE);
+					Binder.set(bean, DAY_PREFIX + i, days.contains(Integer.valueOf(i)) ? Boolean.TRUE : Boolean.FALSE);
 				}
 			}
 
@@ -252,7 +257,7 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 			} else {
 				bean.setAllMonths(SELECTED_CODE);
 				for (int i = 1, l = 13; i < l; i++) {
-					Binder.set(bean, "month" + i, months.contains(Integer.valueOf(i)) ? Boolean.TRUE : Boolean.FALSE);
+					Binder.set(bean, MONTH_PREFIX + i, months.contains(Integer.valueOf(i)) ? Boolean.TRUE : Boolean.FALSE);
 				}
 			}
 
@@ -261,7 +266,7 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 			} else {
 				bean.setAllWeekdays(SELECTED_CODE);
 				for (int i = 1, l = 8; i < l; i++) {
-					Binder.set(bean, "weekday" + i, weekdays.contains(Integer.valueOf(i)) ? Boolean.TRUE : Boolean.FALSE);
+					Binder.set(bean, WEEKDAY_PREFIX + i, weekdays.contains(Integer.valueOf(i)) ? Boolean.TRUE : Boolean.FALSE);
 				}
 			}
 		}
@@ -312,7 +317,7 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 				expression.append(ALL_CODE);
 			} else {
 				for (int i = 0, l = 24; i < l; i++) {
-					if (Boolean.TRUE.equals(Binder.get(bean, "hour" + i))) {
+					if (Boolean.TRUE.equals(Binder.get(bean, HOUR_PREFIX + i))) {
 						expression.append(i).append(',');
 					}
 				}
@@ -335,7 +340,7 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 				expression.append(LAST_WEEK_DAY_CODE);
 			} else {
 				for (int i = 1, l = 32; i < l; i++) {
-					if (Boolean.TRUE.equals(Binder.get(bean, "day" + i))) {
+					if (Boolean.TRUE.equals(Binder.get(bean, DAY_PREFIX + i))) {
 						expression.append(i).append(',');
 					}
 				}
@@ -348,7 +353,7 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 				expression.append(ALL_CODE);
 			} else {
 				for (int i = 1, l = 13; i < l; i++) {
-					if (Boolean.TRUE.equals(Binder.get(bean, "month" + i))) {
+					if (Boolean.TRUE.equals(Binder.get(bean, MONTH_PREFIX + i))) {
 						expression.append(i).append(',');
 					}
 				}
@@ -361,7 +366,7 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 				expression.append(ANY_CODE);
 			} else {
 				for (int i = 1, l = 8; i < l; i++) {
-					if (Boolean.TRUE.equals(Binder.get(bean, "weekday" + i))) {
+					if (Boolean.TRUE.equals(Binder.get(bean, WEEKDAY_PREFIX + i))) {
 						expression.append(i).append(',');
 					}
 				}
@@ -427,7 +432,7 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 			if (SELECTED_CODE.equals(bean.getAllHours())) {
 				boolean found = false;
 				for (int i = 0, l = 24; i < l; i++) {
-					if (Boolean.TRUE.equals(Binder.get(bean, "hour" + i))) {
+					if (Boolean.TRUE.equals(Binder.get(bean, HOUR_PREFIX + i))) {
 						found = true;
 						break;
 					}
@@ -439,7 +444,7 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 			if (SELECTED_CODE.equals(bean.getAllDays())) {
 				boolean found = false;
 				for (int i = 1, l = 32; i < l; i++) {
-					if (Boolean.TRUE.equals(Binder.get(bean, "day" + i))) {
+					if (Boolean.TRUE.equals(Binder.get(bean, DAY_PREFIX + i))) {
 						found = true;
 						break;
 					}
@@ -451,7 +456,7 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 			if (SELECTED_CODE.equals(bean.getAllMonths())) {
 				boolean found = false;
 				for (int i = 1, l = 13; i < l; i++) {
-					if (Boolean.TRUE.equals(Binder.get(bean, "month" + i))) {
+					if (Boolean.TRUE.equals(Binder.get(bean, MONTH_PREFIX + i))) {
 						found = true;
 						break;
 					}
@@ -463,7 +468,7 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 			if (SELECTED_CODE.equals(bean.getAllWeekdays())) {
 				boolean found = false;
 				for (int i = 1, l = 8; i < l; i++) {
-					if (Boolean.TRUE.equals(Binder.get(bean, "weekday" + i))) {
+					if (Boolean.TRUE.equals(Binder.get(bean, WEEKDAY_PREFIX + i))) {
 						found = true;
 						break;
 					}

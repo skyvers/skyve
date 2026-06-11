@@ -47,6 +47,7 @@ import jakarta.xml.bind.annotation.XmlType;
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE, 
 			name = "actions",
 			propOrder = {"widgetId", "actions"})
+@SuppressWarnings("java:S1192") // Repeated literals are JAXB element and property names required by metadata annotations.
 public class Actions implements Identifiable {
 	private static final long serialVersionUID = 7637506523705376564L;
 

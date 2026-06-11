@@ -85,6 +85,7 @@ import net.sf.jasperreports.engine.xml.JRXmlWriter;
  * Renders JasperReports designs to various output formats (PDF, HTML, XLSX) by
  * compiling the design, filling it with a Skyve data source, and exporting.
  */
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate JasperReports expression and renderer fragments.
 public class JasperReportRenderer {
 
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(JasperReportRenderer.class);

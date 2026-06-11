@@ -40,6 +40,7 @@ import jakarta.faces.context.FacesContext;
  * This component isn't in the skyve.taglib.xml and has no @Component annotation and is not meant to be used on an XHTML page. 
  * The resources skyvevue/index.js and skyvevue/index.css are brought in view view.xhtml (if enabled)
  */
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate Vue list-grid script keys.
 public class VueListGridScript extends UIOutput {
 	private String containerId;
 

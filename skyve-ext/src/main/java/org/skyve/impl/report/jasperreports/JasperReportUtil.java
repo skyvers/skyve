@@ -71,6 +71,11 @@ import net.sf.jasperreports.web.util.WebHtmlResourceHandler;
 public final class JasperReportUtil {
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(JasperReportUtil.class);
 
+    private static final String READ_DATA_PERMISSION = "read this data";
+	private static final String FILL_REPORT = "FILL REPORT";
+	private static final String PUMP_REPORT = "PUMP REPORT";
+	private static final String PUMPED_REPORT = "PUMPED REPORT";
+
 	private JasperReportUtil() {
 		// disallow instantiation
 	}
@@ -171,7 +176,7 @@ public final class JasperReportUtil {
 			result = fillSqlReport(jasperReport, parameters, format, out);
 		}
 		else if ("document".equalsIgnoreCase(queryLanguage)) {
-			LOGGER.info("FILL REPORT");
+			LOGGER.info(FILL_REPORT);
 			Bean reportBean = bean;
 			// if we have no bean then see if there is a bizId parameter
 			if (reportBean == null) {
@@ -183,14 +188,14 @@ public final class JasperReportUtil {
 						throw new NoResultsException();
 					}
 					if (! user.canReadBean(id, reportBean.getBizModule(), reportBean.getBizDocument(), reportBean.getBizCustomer(), reportBean.getBizDataGroupId(), reportBean.getBizUserId())) {
-						throw new SecurityException("read this data", user.getName());
+						throw new SecurityException(READ_DATA_PERMISSION, user.getName());
 					}
 				}
 			}
 			result = JasperFillManager.fillReport(jasperReport, parameters, new SkyveDataSource(user, reportBean));
-			LOGGER.info("PUMP REPORT");
+			LOGGER.info(PUMP_REPORT);
 			runReport(result, format, out);
-			LOGGER.info("PUMPED REPORT");
+			LOGGER.info(PUMPED_REPORT);
 		}
 
 		return result;
@@ -209,15 +214,15 @@ public final class JasperReportUtil {
 											ReportFormat format,
 											OutputStream out)
 	throws Exception {
-		LOGGER.info("FILL REPORT");
+		LOGGER.info(FILL_REPORT);
 		JasperPrint result;
 		try (AutoClosingIterable<Bean> iterable = listModel.iterate()) {
 			final JRDataSource dataSource = new SkyveDataSource(user, iterable.iterator());
 			result = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
 		}
-		LOGGER.info("PUMP REPORT");
+		LOGGER.info(PUMP_REPORT);
 		runReport(result, format, out);
-		LOGGER.info("PUMPED REPORT");
+		LOGGER.info(PUMPED_REPORT);
 
 		return result;
 	}
@@ -227,13 +232,13 @@ public final class JasperReportUtil {
 										ReportFormat format,
 										OutputStream out)
 	throws Exception {
-		LOGGER.info("FILL REPORT");
+		LOGGER.info(FILL_REPORT);
 		JasperPrint result;
 		try (Connection connection = EXT.getDataStoreConnection()) {
 			result = JasperFillManager.fillReport(jasperReport, parameters, connection);
-			LOGGER.info("PUMP REPORT");
+			LOGGER.info(PUMP_REPORT);
 			runReport(result, format, out);
-			LOGGER.info("PUMPED REPORT");
+			LOGGER.info(PUMPED_REPORT);
 		}
 		return result;
 	}
@@ -259,16 +264,16 @@ public final class JasperReportUtil {
 
 			LOGGER.info("QUERY LNG = {}", queryLanguage);
 			if ("sql".equalsIgnoreCase(queryLanguage)) {
-				LOGGER.info("FILL REPORT");
+				LOGGER.info(FILL_REPORT);
 				try (Connection connection = EXT.getDataStoreConnection()) {
 					result.add(JasperFillManager.fillReport(jasperReport, reportParameter.getParameters(), connection));
-					LOGGER.info("PUMP REPORT");
+					LOGGER.info(PUMP_REPORT);
 					runReport(result, format, out);
-					LOGGER.info("PUMPED REPORT");
+					LOGGER.info(PUMPED_REPORT);
 				}
 			}
 			else if ("document".equalsIgnoreCase(queryLanguage)) {
-				LOGGER.info("FILL REPORT");
+				LOGGER.info(FILL_REPORT);
 				Bean reportBean = reportParameter.getBean();
 				// if we have no bean then see if there is a bizId parameter
 				if (reportBean == null) {
@@ -280,7 +285,7 @@ public final class JasperReportUtil {
 							throw new NoResultsException();
 						}
 						if (! user.canReadBean(id, reportBean.getBizModule(), reportBean.getBizDocument(), reportBean.getBizCustomer(), reportBean.getBizDataGroupId(), reportBean.getBizUserId()))
-							throw new SecurityException("read this data", user.getName());
+							throw new SecurityException(READ_DATA_PERMISSION, user.getName());
 						}
 				}
 				result.add(JasperFillManager.fillReport(jasperReport,
@@ -289,9 +294,9 @@ public final class JasperReportUtil {
 			}
 		}
 
-		LOGGER.info("PUMP REPORT");
+		LOGGER.info(PUMP_REPORT);
 		runReport(result, format, out);
-		LOGGER.info("PUMPED REPORT");
+		LOGGER.info(PUMPED_REPORT);
 
 		return result;
 	}
@@ -479,7 +484,7 @@ public final class JasperReportUtil {
 
         final Document drivingDocument = module.getDocument(customer, query.getDocumentName());
 		if (! user.canReadDocument(drivingDocument)) {
-			throw new SecurityException("read this data", user.getName());
+			throw new SecurityException(READ_DATA_PERMISSION, user.getName());
 		}
 
 		return EXT.newListModel(query);

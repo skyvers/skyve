@@ -10,6 +10,7 @@ import org.skyve.CORE;
  * Represents a six-field cron expression and provides conversion helpers to and from
  * natural-language phrases.
  */
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate cron grammar tokens.
 public class CronExpression {
 	public String second = null;
 	public String minute = null;

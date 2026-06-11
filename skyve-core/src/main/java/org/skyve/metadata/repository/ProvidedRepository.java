@@ -54,6 +54,8 @@ import jakarta.annotation.Nullable;
  * @see MutableRepository
  */
 public interface ProvidedRepository extends CachedRepository {
+	final String DOCUMENT_PREFIX = "Document ";
+
 	final String ROUTER_NAME = "router";
 	final String ROUTER_NAMESPACE = ROUTER_NAME + '/';
 	final String CUSTOMERS_NAME = "customers";
@@ -441,12 +443,12 @@ public interface ProvidedRepository extends CachedRepository {
 		Document inheritedDocument = null;
 		try {
 			inheritedDocument = Optional.ofNullable(module.getDocument(customer, inherits.getDocumentName()))
-									.orElseThrow(() -> new MetaDataException("Document " + document.getName() +
+									.orElseThrow(() -> new MetaDataException(DOCUMENT_PREFIX + document.getName() +
 																" extends document " + inherits.getDocumentName() +
 																" which does not exist in module " + module.getName()));
 		}
 		catch (IllegalStateException e) {
-			throw new MetaDataException("Document " + document.getName() +
+			throw new MetaDataException(DOCUMENT_PREFIX + document.getName() +
 									" extends document " + inherits.getDocumentName() +
 									" which does not exist in module " + module.getName(), e);
 		}
@@ -457,7 +459,7 @@ public interface ProvidedRepository extends CachedRepository {
 			if (baseInherits != null) {
 				Module baseModule = getModule(customer, inheritedDocument.getOwningModuleName());
 				if (baseModule == null) {
-					throw new MetaDataException("Document " + inheritedDocument.getName() +
+					throw new MetaDataException(DOCUMENT_PREFIX + inheritedDocument.getName() +
 									" is owned by module " + inheritedDocument.getOwningModuleName() +
 									" which does not exist.");
 				}

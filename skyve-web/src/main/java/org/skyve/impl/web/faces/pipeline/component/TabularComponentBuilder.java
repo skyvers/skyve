@@ -190,6 +190,7 @@ import jakarta.faces.component.html.HtmlPanelGroup;
 import jakarta.faces.component.html.HtmlSelectOneMenu;
 import jakarta.faces.convert.Converter;
 
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate JSF component script/style fragments.
 public abstract class TabularComponentBuilder extends ComponentBuilder {
 	public static final String EMPTY_DATA_TABLE_CAN_ADD_MESSAGE = "No Items to show. Click <span class=\"" + Icons.FONT_ADD + " skyveEmptyListAddIcon\"></span> to add a new Item.";
 	public static final String EMPTY_DATA_TABLE_MESSAGE = "No Items to show.";

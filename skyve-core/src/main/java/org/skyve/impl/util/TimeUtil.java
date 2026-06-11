@@ -32,6 +32,9 @@ import org.skyve.util.Time;
  * <p>Threading: stateless; all methods are safe for concurrent use.
  */
 public class TimeUtil {
+	private static final String ISO_TIMESTAMP_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZZ";
+	private static final String DATE_REQUIRED = "The date must not be null";
+
 	private TimeUtil() {
 		// no implementation
 	}
@@ -422,14 +425,14 @@ public class TimeUtil {
 		else if (l == 20) { // cater for no millis and a 'Z' = Zulu
 			param = date.substring(0, 19) + ".000+00:00";
 		}
-		return DateUtils.parseDate(param, new String[]{ "yyyy-MM-dd'T'HH:mm:ss.SSSZZ" });
+		return DateUtils.parseDate(param, new String[]{ ISO_TIMESTAMP_FORMAT });
 	}
 
 	public static String formatISODate(Date date, boolean inUTC) {
 		if (inUTC) {
-			return DateFormatUtils.format(date, "yyyy-MM-dd'T'HH:mm:ss.SSSZZ", TimeZone.getTimeZone("UTC"));
+			return DateFormatUtils.format(date, ISO_TIMESTAMP_FORMAT, TimeZone.getTimeZone("UTC"));
 		}
-		return DateFormatUtils.format(date, "yyyy-MM-dd'T'HH:mm:ss.SSSZZ");
+		return DateFormatUtils.format(date, ISO_TIMESTAMP_FORMAT);
 	}
 	
 	/**
@@ -438,7 +441,7 @@ public class TimeUtil {
 	public static DateOnly addDaysToNew(final Date date, final int numberOfDays) {
 
 		if (date == null) {
-			throw new IllegalArgumentException("The date must not be null");
+			throw new IllegalArgumentException(DATE_REQUIRED);
 		}
 
 		final Calendar calendar = Calendar.getInstance();
@@ -454,7 +457,7 @@ public class TimeUtil {
 	public static DateOnly addMonthsToNew(final Date date, final int numberOfMonths) {
 
 		if (date == null) {
-			throw new IllegalArgumentException("The date must not be null");
+			throw new IllegalArgumentException(DATE_REQUIRED);
 		}
 
 		final Calendar calendar = Calendar.getInstance();
@@ -470,7 +473,7 @@ public class TimeUtil {
 	public static DateOnly addYearsToNew(final Date date, final int numberOfYears) {
 
 		if (date == null) {
-			throw new IllegalArgumentException("The date must not be null");
+			throw new IllegalArgumentException(DATE_REQUIRED);
 		}
 
 		final Calendar calendar = Calendar.getInstance();

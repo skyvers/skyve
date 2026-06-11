@@ -104,14 +104,27 @@ import jakarta.annotation.Nullable;
  * <p>Threading: all methods are stateless and thread-safe.
  */
 public final class BindUtil {
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(BindUtil.class); 
+
 	private static final String DEFAULT_DISPLAY_DATE_FORMAT = "dd/MM/yyyy";
 	private static final String ELEMENT = "Element";
 	private static final String ELEMENT_BY_ID = "ElementById(";
+	
+	private static final String ATTEMPT_TO_SET = "Attempt to set ";
+	private static final String BINDING_PREFIX = "Binding ";
+	private static final String BINDUTIL_FROM_STRING_CANNOT_CONVERT = "BindUtil.fromString() - Can't convert ";
+	private static final String COLLECTION_BINDING_PREFIX = "Collection binding ";
+	private static final String INFIX_IN = " in ";
+	private static final String IS_INVALID = " is invalid";
+	private static final String METHOD_PREFIX = "Method ";
+	private static final String NOT_FOUND_ON = " not found on ";
+	private static final String NOT = "not";
+	private static final String TO_INFIX = " to ";
+	private static final String VALIDATION_LOCATION_SEPARATOR = " @ ";
+
 	private static final Object UNRESOLVED = new Object();
 	private static final DeproxyingPropertyUtilsBean PROPERTY_UTILS = new DeproxyingPropertyUtilsBean();
 	
-	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(BindUtil.class); 
-
 	private BindUtil() {
 		// prevent instantiation
 	}
@@ -317,10 +330,10 @@ public final class BindUtil {
 			if (parentDocument != null) {
 				return parentDocument;
 			}
-			throw new MetaDataException("Binding " + penultimateBinding + " does not resolve to a parent document.");
+			throw new MetaDataException(BINDING_PREFIX + penultimateBinding + " does not resolve to a parent document.");
 		}
 
-		throw new MetaDataException("Binding " + penultimateBinding + " does not resolve to a relation for " + ultimateBinding + '.');
+		throw new MetaDataException(BINDING_PREFIX + penultimateBinding + " does not resolve to a relation for " + ultimateBinding + '.');
 	}
 
 	private static @Nonnull TargetMetaData resolvePenultimateBinding(@Nonnull Customer customer,
@@ -334,12 +347,12 @@ public final class BindUtil {
 			throw e;
 		}
 		catch (Exception e) {
-			throw new MetaDataException("Binding " + penultimateBinding + " does not resolve to a document attribute.", e);
+			throw new MetaDataException(BINDING_PREFIX + penultimateBinding + " does not resolve to a document attribute.", e);
 		}
 	}
 
 	private static @Nonnull String normaliseConditionBindingName(@Nonnull String binding) {
-		if (! binding.startsWith("not")) {
+		if (! binding.startsWith(NOT)) {
 			return binding;
 		}
 
@@ -403,7 +416,7 @@ public final class BindUtil {
 	}
 
 	private static boolean evaluateNamedCondition(@Nonnull Bean bean, @Nonnull String condition) {
-		boolean negated = condition.startsWith("not");
+		boolean negated = condition.startsWith(NOT);
 		String conditionName = negated ? Introspector.decapitalize(condition.substring(3)) : condition;
 		Condition metadataCondition = getBeanCondition(bean, conditionName);
 		if ((metadataCondition != null) && isSkyveExpression(metadataCondition.getExpression())) {
@@ -437,12 +450,12 @@ public final class BindUtil {
 	        else if ("false".equals(condition)) {
 	            result = "true";
 	        }
-	        else if (condition.startsWith("not")) {
+	        else if (condition.startsWith(NOT)) {
 	            result = Introspector.decapitalize(condition.substring(3));
 	        }
 	        else {
 	            StringBuilder sb = new StringBuilder(condition.length() + 3);
-	            sb.append("not").append(Character.toUpperCase(condition.charAt(0)));
+	            sb.append(NOT).append(Character.toUpperCase(condition.charAt(0)));
 	            sb.append(condition.substring(1));
 	            result = sb.toString();
 	        }
@@ -776,7 +789,7 @@ public final class BindUtil {
 			Date date = customer.getDefaultDateConverter().fromDisplayValue(stringValue);
 			return new DateOnly(date.getTime());
 		}
-		throw new IllegalStateException("BindUtil.fromString() - Can't convert " + stringValue + " to DateOnly");
+		throw new IllegalStateException(BINDUTIL_FROM_STRING_CANNOT_CONVERT + stringValue + " to DateOnly");
 	}
 
 	private static @Nonnull Object fromStringTimeOnly(@Nullable Customer customer,
@@ -789,7 +802,7 @@ public final class BindUtil {
 			Date date = customer.getDefaultTimeConverter().fromDisplayValue(stringValue);
 			return new TimeOnly(date.getTime());
 		}
-		throw new IllegalStateException("BindUtil.fromString() - Can't convert " + stringValue + " to TimeOnly");
+		throw new IllegalStateException(BINDUTIL_FROM_STRING_CANNOT_CONVERT + stringValue + " to TimeOnly");
 	}
 
 	private static @Nonnull Object fromStringDateTime(@Nullable Customer customer,
@@ -802,7 +815,7 @@ public final class BindUtil {
 			Date date = customer.getDefaultDateTimeConverter().fromDisplayValue(stringValue);
 			return new DateTime(date.getTime());
 		}
-		throw new IllegalStateException("BindUtil.fromString() - Can't convert " + stringValue + " to DateTime");
+		throw new IllegalStateException(BINDUTIL_FROM_STRING_CANNOT_CONVERT + stringValue + " to DateTime");
 	}
 
 	private static @Nonnull Object fromStringTimestamp(@Nullable Customer customer,
@@ -815,7 +828,7 @@ public final class BindUtil {
 			Date date = customer.getDefaultTimestampConverter().fromDisplayValue(stringValue);
 			return new Timestamp(date.getTime());
 		}
-		throw new IllegalStateException("BindUtil.fromString() - Can't convert " + stringValue + " to Timestamp");
+		throw new IllegalStateException(BINDUTIL_FROM_STRING_CANNOT_CONVERT + stringValue + " to Timestamp");
 	}
 
 	public static @Nonnull String toDisplay(@Nonnull Customer customer, @Nullable Object value) {
@@ -1308,7 +1321,7 @@ public final class BindUtil {
 			Document d = m.getDocument(c, associationOwner.getBizDocument());
 			Attribute a = d.getPolymorphicAttribute(c, associationName);
 			if (a == null) {
-				throw new MetaDataException("Association binding " + associationBinding + " is invalid");
+				throw new MetaDataException("Association binding " + associationBinding + IS_INVALID);
 			}
 
 			// Dynamic association - make it happen here with no convenience method
@@ -1354,7 +1367,7 @@ public final class BindUtil {
 			Document d = m.getDocument(c, collectionOwner.getBizDocument());
 			Attribute a = d.getPolymorphicAttribute(c, collectionName);
 			if (a == null) {
-				throw new MetaDataException("Collection binding " + collectionBinding + " is invalid");
+				throw new MetaDataException(COLLECTION_BINDING_PREFIX + collectionBinding + IS_INVALID);
 			}
 
 			// Dynamic collection - make it happen here with no convenience method
@@ -1383,7 +1396,7 @@ public final class BindUtil {
 				}
 			}
 			
-			throw new IllegalStateException("Method " + methodName + " not found on " + collectionOwner);
+			throw new IllegalStateException(METHOD_PREFIX + methodName + NOT_FOUND_ON + collectionOwner);
 		}
 		catch (Exception e) {
 			if (e instanceof SkyveException skyveException) {
@@ -1414,7 +1427,7 @@ public final class BindUtil {
 			Document d = m.getDocument(c, collectionOwner.getBizDocument());
 			Attribute a = d.getPolymorphicAttribute(c, collectionName);
 			if (a == null) {
-				throw new MetaDataException("Collection binding " + collectionBinding + " is invalid");
+				throw new MetaDataException(COLLECTION_BINDING_PREFIX + collectionBinding + IS_INVALID);
 			}
 
 			// Dynamic collection - make it happen here with no convenience method
@@ -1443,7 +1456,7 @@ public final class BindUtil {
 				}
 			}
 			
-			throw new IllegalStateException("Method " + methodName + " not found on " + collectionOwner);
+			throw new IllegalStateException(METHOD_PREFIX + methodName + NOT_FOUND_ON + collectionOwner);
 		}
 		catch (Exception e) {
 			if (e instanceof SkyveException skyveException) {
@@ -1472,7 +1485,7 @@ public final class BindUtil {
 			Document d = m.getDocument(c, collectionOwner.getBizDocument());
 			Attribute a = d.getPolymorphicAttribute(c, collectionName);
 			if (a == null) {
-				throw new MetaDataException("Collection binding " + collectionBinding + " is invalid");
+				throw new MetaDataException(COLLECTION_BINDING_PREFIX + collectionBinding + IS_INVALID);
 			}
 
 			// Dynamic collection - make it happen here with no convenience method
@@ -1505,7 +1518,7 @@ public final class BindUtil {
 				}
 			}
 			
-			throw new IllegalStateException("Method " + methodName + " not found on " + collectionOwner);
+			throw new IllegalStateException(METHOD_PREFIX + methodName + NOT_FOUND_ON + collectionOwner);
 		}
 		catch (Exception e) {
 			if (e instanceof SkyveException skyveException) {
@@ -1535,7 +1548,7 @@ public final class BindUtil {
 			Document d = m.getDocument(c, collectionOwner.getBizDocument());
 			Attribute a = d.getPolymorphicAttribute(c, collectionName);
 			if (a == null) {
-				throw new MetaDataException("Collection binding " + collectionBinding + " is invalid");
+				throw new MetaDataException(COLLECTION_BINDING_PREFIX + collectionBinding + IS_INVALID);
 			}
 			
 			// Dynamic collection - make it happen here with no convenience method
@@ -1831,7 +1844,7 @@ public final class BindUtil {
 				Object penultimate = target.getLeft();
 				String simpleBinding = target.getRight();
 				if (penultimate == null) {
-					throw new MetaDataException("Binding " + binding + " does not resolve to a target bean.");
+					throw new MetaDataException(BINDING_PREFIX + binding + " does not resolve to a target bean.");
 				}
 
 				if (valueToSet != null) {
@@ -1940,7 +1953,7 @@ public final class BindUtil {
 			return;
 		}
 		if (! (valueToSet instanceof Bean beanToSet)) {
-			throw new IllegalStateException("Attempt to set " + binding + " in " + bean + " to " + valueToSet + " but valueToSet should be a Bean");
+			throw new IllegalStateException(ATTEMPT_TO_SET + binding + INFIX_IN + bean + TO_INFIX + valueToSet + " but valueToSet should be a Bean");
 		}
 		setDynamicElementByIdValue(bean, binding, targetBean, simpleBinding, attributeName, beanToSet);
 	}
@@ -1954,7 +1967,7 @@ public final class BindUtil {
 		@SuppressWarnings("unchecked")
 		List<Object> list = (List<Object>) targetBean.getDynamic(attributeName);
 		if (list == null) {
-			throw new IllegalStateException("Attempt to set " + binding + " in " + bean + " to " + valueToSet + " but the list is null");
+			throw new IllegalStateException(ATTEMPT_TO_SET + binding + INFIX_IN + bean + TO_INFIX + valueToSet + " but the list is null");
 		}
 
 		int braceIndex = simpleBinding.indexOf('[');
@@ -1971,7 +1984,7 @@ public final class BindUtil {
 		@SuppressWarnings("unchecked")
 		List<Bean> list = (List<Bean>) targetBean.getDynamic(attributeName);
 		if (list == null) {
-			throw new IllegalStateException("Attempt to set " + binding + " in " + bean + " to " + beanToSet + " but the list is null");
+			throw new IllegalStateException(ATTEMPT_TO_SET + binding + INFIX_IN + bean + TO_INFIX + beanToSet + " but the list is null");
 		}
 
 		String bizId = extractDynamicElementBizId(simpleBinding);
@@ -1982,7 +1995,7 @@ public final class BindUtil {
 			}
 		}
 
-		throw new IllegalStateException("Attempt to set " + binding + " in " + bean + " to " + beanToSet + " but the element was not in the list");
+		throw new IllegalStateException(ATTEMPT_TO_SET + binding + INFIX_IN + bean + TO_INFIX + beanToSet + " but the element was not in the list");
 	}
 
 	private static @Nonnull String extractDynamicElementBizId(@Nonnull String simpleBinding) {
@@ -2078,7 +2091,7 @@ public final class BindUtil {
 													 int lastDotIndex) {
 		Object penultimate = get(bean, binding.substring(0, lastDotIndex));
 		if (penultimate == null) {
-			throw new MetaDataException("Binding " + binding + " does not resolve to a target bean.");
+			throw new MetaDataException(BINDING_PREFIX + binding + " does not resolve to a target bean.");
 		}
 		return getPropertyType(penultimate, binding.substring(lastDotIndex + 1));
 	}
@@ -2623,7 +2636,7 @@ public final class BindUtil {
 
 		if (type == null) {
 			throw new MetaDataException(navigatingDocument.getOwningModuleName() + '.' + navigatingDocument.getName() +
-					" @ " + binding + " does not resolve to a concrete attribute type.");
+					VALIDATION_LOCATION_SEPARATOR + binding + " does not resolve to a concrete attribute type.");
 		}
 
 		return new TargetMetaData(navigatingDocument, attribute, type);
@@ -2660,7 +2673,7 @@ public final class BindUtil {
 		}
 		if (parentDocumentName == null) {
 			throw new MetaDataException(navigatingDocument.getOwningModuleName() + '.' +
-						navigatingDocument.getName() + " @ " + binding +
+						navigatingDocument.getName() + VALIDATION_LOCATION_SEPARATOR + binding +
 						" does not exist (token [parent] doesn't check out as " + navigatingDocument.getName() +
 						" is not a child document)");
 		}
@@ -2699,7 +2712,7 @@ public final class BindUtil {
 		if (ChildBean.PARENT_NAME.equals(attributeName)) {
 			if (parentDocumentName == null) {
 				throw new MetaDataException(navigatingDocument.getOwningModuleName() + '.' +
-							navigatingDocument.getName() + " @ " + binding +
+							navigatingDocument.getName() + VALIDATION_LOCATION_SEPARATOR + binding +
 							" does not exist (token [parent] doesn't check out as " + navigatingDocument.getName() +
 							" is not a child document)");
 			}
@@ -2710,7 +2723,7 @@ public final class BindUtil {
 		}
 
 		throw new MetaDataException(navigatingDocument.getOwningModuleName() + '.' +
-					navigatingDocument.getName() + " @ " + binding +
+					navigatingDocument.getName() + VALIDATION_LOCATION_SEPARATOR + binding +
 					" does not exist (token [" + attributeName + "] doesn't check out)");
 	}
 
@@ -2738,7 +2751,7 @@ public final class BindUtil {
 				return implicitType;
 			}
 			throw new MetaDataException(navigatingDocument.getOwningModuleName() + '.' +
-						navigatingDocument.getName() + " @ " + binding +
+						navigatingDocument.getName() + VALIDATION_LOCATION_SEPARATOR + binding +
 						" does not exist (last attribute not in document)");
 		}
 
@@ -2758,7 +2771,7 @@ public final class BindUtil {
 				return relationDocumentImpl.getBeanClass(resolvedCustomer);
 			}
 			catch (ClassNotFoundException e) {
-				throw new MetaDataException("Binding " + binding + " resolves to relation attribute " + relation.getName() +
+				throw new MetaDataException(BINDING_PREFIX + binding + " resolves to relation attribute " + relation.getName() +
 						" but the document class for document " + relationDocumentImpl.getOwningModuleName() +
 						'.' + relationDocumentImpl.getName() + " cannot be loaded.", e);
 			}

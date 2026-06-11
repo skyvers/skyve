@@ -139,6 +139,7 @@ import org.skyve.web.WebContext;
 
 // Note: We cannot cache the bindings required for each view as it may be different 
 // depending on the security principal
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate SmartClient view JSON/markup fragments.
 public class ViewJSONManipulator extends ViewVisitor {
 	// Generate href expressions for references for smart client
 	private class HrefProcessor extends ReferenceProcessor {

@@ -50,6 +50,9 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 								PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, SkyveSpringSecurity.LOGIN_ATTEMPT_PATH);
 	private static final Pattern SIX_DIGIT_TFA_CODE_PATTERN = Pattern.compile("\\d{6}");
 
+	private static final String LOGIN_PATH = "/login";
+	private static final String LOGIN_ERROR_PATH = "/login?error";
+
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(TwoFactorAuthPushFilter.class);
 
 	public static final String SKYVE_SECURITY_FORM_CUSTOMER_KEY = "customer";
@@ -163,7 +166,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 														TwoFactorAuthCustomerConfiguration config)
 	throws IOException, ServletException {
 		LOGGER.warn("No MFA push filter supports the configured type [{}]", config.getTfaType());
-		SimpleUrlAuthenticationFailureHandler handler = new SimpleUrlAuthenticationFailureHandler("/login?error");
+		SimpleUrlAuthenticationFailureHandler handler = new SimpleUrlAuthenticationFailureHandler(LOGIN_ERROR_PATH);
 		handler.onAuthenticationFailure(request, response, new AuthenticationServiceException("Unsupported MFA factor type"));
 	}
 
@@ -217,7 +220,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 			pushNotification(user, twoFactorCodeClearText);
 
 			// redirect to 2FA code entry page
-			TwoFactorAuthForwardHandler handler = new TwoFactorAuthForwardHandler("/login");
+			TwoFactorAuthForwardHandler handler = new TwoFactorAuthForwardHandler(LOGIN_PATH);
 
 			request.setAttribute(CUSTOMER_ATTRIBUTE, OWASP.sanitise(Sanitisation.text, customerName));
 			request.setAttribute(TWO_FACTOR_TOKEN_ATTRIBUTE,  OWASP.sanitise(Sanitisation.text, user.getTfaToken()));
@@ -259,7 +262,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		
 		if (tfaCodeExpired(user.getCustomer(), twoFactorToken)) {
 			LOGGER.info("Users TFA Code has timed out.");
-			SimpleUrlAuthenticationFailureHandler handler = new SimpleUrlAuthenticationFailureHandler("/login?" + TWO_FACTOR_EXPIRED_PARAMETER);
+			SimpleUrlAuthenticationFailureHandler handler = new SimpleUrlAuthenticationFailureHandler(LOGIN_PATH + '?' + TWO_FACTOR_EXPIRED_PARAMETER);
 			handler.onAuthenticationFailure(request, response, new AccountExpiredException("TFA timeout"));
 			return true;
 		}
@@ -278,7 +281,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 			TwoFactorAuthUser refreshedUser = getUserDB(username);
 			if (isNowLockedAfterBadCredentials(username, refreshedUser)) {
 				LOGGER.info("Rejecting additional TFA attempts because account {} is now locked.", username);
-				SimpleUrlAuthenticationFailureHandler handler = new SimpleUrlAuthenticationFailureHandler("/login?error");
+				SimpleUrlAuthenticationFailureHandler handler = new SimpleUrlAuthenticationFailureHandler(LOGIN_ERROR_PATH);
 				handler.onAuthenticationFailure(request, response, e);
 				return true;
 			}
@@ -286,7 +289,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		}
 		catch (AuthenticationException e) {
 			LOGGER.info("TFA authentication failed with {}", e.getClass().getSimpleName());
-			SimpleUrlAuthenticationFailureHandler handler = new SimpleUrlAuthenticationFailureHandler("/login?error");
+			SimpleUrlAuthenticationFailureHandler handler = new SimpleUrlAuthenticationFailureHandler(LOGIN_ERROR_PATH);
 			handler.onAuthenticationFailure(request, response, e);
 			return true;
 		}
@@ -319,7 +322,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 
 		if (tfaCodeExpired(user.getCustomer(), twoFactorToken)) {
 			LOGGER.info("Rejecting 2fa resend for user {} because the token has expired.", username);
-			SimpleUrlAuthenticationFailureHandler handler = new SimpleUrlAuthenticationFailureHandler("/login?" + TWO_FACTOR_EXPIRED_PARAMETER);
+			SimpleUrlAuthenticationFailureHandler handler = new SimpleUrlAuthenticationFailureHandler(LOGIN_PATH + '?' + TWO_FACTOR_EXPIRED_PARAMETER);
 			handler.onAuthenticationFailure(request, response, new AccountExpiredException("TFA timeout"));
 			return true;
 		}
@@ -347,7 +350,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 
 	private static void redirectToLogin(HttpServletRequest request, HttpServletResponse response)
 	throws IOException, ServletException {
-		SimpleUrlAuthenticationFailureHandler handler = new SimpleUrlAuthenticationFailureHandler("/login");
+		SimpleUrlAuthenticationFailureHandler handler = new SimpleUrlAuthenticationFailureHandler(LOGIN_PATH);
 		handler.onAuthenticationFailure(request, response, new AuthenticationServiceException("Invalid TFA resend request"));
 	}
 
@@ -364,7 +367,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 													boolean rememberMe,
 													boolean invalidCode)
 	throws IOException, ServletException {
-		TwoFactorAuthForwardHandler handler = new TwoFactorAuthForwardHandler("/login");
+		TwoFactorAuthForwardHandler handler = new TwoFactorAuthForwardHandler(LOGIN_PATH);
 		request.setAttribute(CUSTOMER_ATTRIBUTE, user.getCustomer());
 		request.setAttribute(TWO_FACTOR_TOKEN_ATTRIBUTE,  user.getTfaToken());
 		request.setAttribute(USER_ATTRIBUTE, user.getUser());

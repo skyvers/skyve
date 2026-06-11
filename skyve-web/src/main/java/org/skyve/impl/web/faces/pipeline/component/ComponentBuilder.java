@@ -73,6 +73,7 @@ import jakarta.faces.component.html.HtmlOutputLink;
 /**
  * Defines the component-stage contract that maps Skyve metadata widgets to JSF UI components.
  */
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate JSF component binding/script fragments.
 public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public static final String COLLECTION_BINDING_ATTRIBUTE_KEY = "collectionBinding";
 	public static final String COMPONENT_BUILDER_CLASS_KEY = "componentBuilderClass";

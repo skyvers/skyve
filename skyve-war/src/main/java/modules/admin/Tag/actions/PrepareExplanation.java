@@ -12,6 +12,8 @@ import modules.admin.Tag.TagExtension;
  * union, except, and intersect operations to display to users.
  */
 public class PrepareExplanation implements ServerSideAction<TagExtension> {
+	private static final String TAG_LABEL_PREFIX = " Tag '";
+
 	/**
 	 * Builds explanatory text for the selected combination operator.
 	 *
@@ -32,12 +34,12 @@ public class PrepareExplanation implements ServerSideAction<TagExtension> {
 				switch (bean.getCombinationsOperator()) {
 					case union:
 						ex.append("Add to ");
-						ex.append(" Tag '").append(bean.getName()).append("'");
+						ex.append(TAG_LABEL_PREFIX).append(bean.getName()).append("'");
 						ex.append(" all records in ");
 						if (bean.getOperandTag() == null) {
 							ex.append("the other Tag.");
 						} else {
-							ex.append(" Tag '").append(bean.getOperandTag().getName()).append("'.");
+							ex.append(TAG_LABEL_PREFIX).append(bean.getOperandTag().getName()).append("'.");
 						}
 						ex.append("<br/><br/>Note: results are distinct so may not be equal to the sum of both Tags.");
 						break;
@@ -53,7 +55,7 @@ public class PrepareExplanation implements ServerSideAction<TagExtension> {
 						break;
 					case intersect:
 						ex.append("Leave only the records in ");
-						ex.append(" Tag '").append(bean.getName()).append("' ");
+						ex.append(TAG_LABEL_PREFIX).append(bean.getName()).append("' ");
 						ex.append(" that are in both Tags.");
 						break;
 					default:

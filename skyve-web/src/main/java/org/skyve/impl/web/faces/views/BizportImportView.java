@@ -47,6 +47,7 @@ import jakarta.servlet.http.HttpServletRequest;
  */
 @RequestScoped
 @Named("_skyveBizImport")
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate upload view response fragments.
 public class BizportImportView extends AbstractUploadView {
 	private static final long serialVersionUID = -8452779436908784172L;
 

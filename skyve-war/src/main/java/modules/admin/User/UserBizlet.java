@@ -39,6 +39,8 @@ import modules.admin.domain.User.WizardState;
  * Implements admin user document lifecycle rules for defaults, validation, and security events.
  */
 public class UserBizlet extends Bizlet<UserExtension> {
+	private static final String PASSWORD_CHANGED_STASH_KEY = "passwordChanged";
+
 	@Inject
 	@SuppressWarnings("java:S6813") // allow member injection
 	private transient UserService userService;
@@ -238,7 +240,7 @@ public class UserBizlet extends Bizlet<UserExtension> {
 				}
 			}
 			// Set switch in stash (see postSave)
-			CORE.getStash().put("passwordChanged", Boolean.TRUE);
+			CORE.getStash().put(PASSWORD_CHANGED_STASH_KEY, Boolean.TRUE);
 		}
 	}
 
@@ -248,7 +250,7 @@ public class UserBizlet extends Bizlet<UserExtension> {
 	@Override
 	public void postSave(UserExtension bean) throws Exception {
 		// If password has changed...
-		if (Boolean.TRUE.equals(CORE.getStash().get("passwordChanged"))) {
+		if (Boolean.TRUE.equals(CORE.getStash().get(PASSWORD_CHANGED_STASH_KEY))) {
 			// Remove any remember-me tokens
 			Persistence persistence = CORE.getPersistence();
 			new SkyveRememberMeTokenRepository().removeUserTokens(persistence, bean.getBizCustomer() + '/' + bean.getUserName());
@@ -272,7 +274,7 @@ public class UserBizlet extends Bizlet<UserExtension> {
 					UtilImpl.PASSWORD_CHANGE_NOTIFICATIONS);
 
 			// Clear stash
-			CORE.getStash().remove("passwordChanged");
+			CORE.getStash().remove(PASSWORD_CHANGED_STASH_KEY);
 		}
 
 		bean.clearAssignedRoles();

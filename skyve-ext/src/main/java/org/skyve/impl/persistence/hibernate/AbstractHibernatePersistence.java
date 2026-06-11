@@ -194,6 +194,17 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
     private static final Logger QUERY_LOGGER = Category.QUERY.logger();
     private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
 
+    private static final String DOCUMENT_PREFIX = "Document ";
+	private static final String ID_COLUMN_SUFFIX = "_id";
+	private static final String INSERT_INTO_SQL = "insert into ";
+	private static final String IS_NOT_PERSISTABLE = " is not persistable";
+	private static final String AND_SQL = " and ";
+	private static final String CONFIG_FALSE = "false";
+	private static final String FROM_BEAN = " from bean ";
+	private static final String TYPE_COLUMN_SUFFIX = "_type";
+	private static final String VALUES_SQL = ") values (:";
+	private static final String WHERE_SQL = " where ";
+
     /**
      * Shared Hibernate session factory for all persistence instances.
      */
@@ -324,7 +335,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 			if (value != null) {
 				cfg.put(AvailableSettings.PASS, value);
 			}
-			cfg.put(AvailableSettings.AUTOCOMMIT, "false");
+			cfg.put(AvailableSettings.AUTOCOMMIT, CONFIG_FALSE);
 		}
 		else {
 			cfg.put(AvailableSettings.DATASOURCE, dataSource);
@@ -332,7 +343,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		cfg.put(AvailableSettings.DIALECT, UtilImpl.DATA_STORE.getDialectClassName());
 
 		// Query Caching screws up pessimistic locking
-		cfg.put(AvailableSettings.USE_QUERY_CACHE, "false");
+		cfg.put(AvailableSettings.USE_QUERY_CACHE, CONFIG_FALSE);
 
 		// turn on second level caching
 		cfg.put(AvailableSettings.USE_SECOND_LEVEL_CACHE, "true");
@@ -357,7 +368,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		}
 
 		// Whether to generate dynamic proxies as classes or not (adds to classes loaded and thus Permanent Generation)
-		cfg.put(AvailableSettings.USE_REFLECTION_OPTIMIZER, "false");
+		cfg.put(AvailableSettings.USE_REFLECTION_OPTIMIZER, CONFIG_FALSE);
 
 		// Update the database schema on first use
 		if (UtilImpl.DDL_SYNC) {
@@ -368,14 +379,14 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		cfg.put(AvailableSettings.HBM2DDL_JDBC_METADATA_EXTRACTOR_STRATEGY, "individually");
 
 		// Keep stats on usage
-		cfg.put(AvailableSettings.GENERATE_STATISTICS, "false");
+		cfg.put(AvailableSettings.GENERATE_STATISTICS, CONFIG_FALSE);
 
 		// Log SQL to stdout
 		cfg.put(AvailableSettings.SHOW_SQL, Boolean.toString(UtilImpl.SQL_TRACE));
 		cfg.put(AvailableSettings.FORMAT_SQL, Boolean.toString(UtilImpl.PRETTY_SQL_OUTPUT));
 
 		// Don't import simple class names as entity names
-		cfg.put("auto-import", "false");
+		cfg.put("auto-import", CONFIG_FALSE);
 
 		StandardServiceRegistryBuilder ssrb = new StandardServiceRegistryBuilder().configure(config);
 		ssrb.addService(IntegratorService.class, new IntegratorService() {
@@ -1042,7 +1053,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 								final String persistentIdentifier = persistent.getPersistentIdentifier();
 								for (String hash : uniqueHashes) {
 									StringBuilder query = new StringBuilder(64);
-									query.append("delete from ").append(persistentIdentifier).append(" where ");
+									query.append("delete from ").append(persistentIdentifier).append(WHERE_SQL);
 									query.append(UniquenessEntity.HASH_COLUMN_NAME).append(" = :").append(UniquenessEntity.HASH_COLUMN_NAME);
 									newSQL(query.toString()).putParameter(UniquenessEntity.HASH_COLUMN_NAME, hash, false).execute();
 								}
@@ -2202,8 +2213,8 @@ if (document.isDynamic()) return;
 								persistent.setName(UniquenessEntity.TABLE_NAME);
 								String persistentIdentifier = persistent.getPersistentIdentifier();
 								StringBuilder sql = new StringBuilder(64);
-								sql.append("insert into ").append(persistentIdentifier).append(" (").append(UniquenessEntity.HASH_COLUMN_NAME);
-								sql.append(") values (:").append(UniquenessEntity.HASH_COLUMN_NAME).append(')');
+								sql.append(INSERT_INTO_SQL).append(persistentIdentifier).append(" (").append(UniquenessEntity.HASH_COLUMN_NAME);
+								sql.append(VALUES_SQL).append(UniquenessEntity.HASH_COLUMN_NAME).append(')');
 								newSQL(sql.toString()).putParameter(UniquenessEntity.HASH_COLUMN_NAME, hash, false).execute();
 							}
 							catch (@SuppressWarnings("unused") DomainException e) {
@@ -2754,10 +2765,10 @@ if (document.isDynamic()) return;
 				queryString.append(persistent.getPersistentIdentifier());
 				if (ref.isCollection()) {
 					queryString.append('_').append(ref.getReferenceFieldName());
-					queryString.append(" where ").append(PersistentBean.ELEMENT_COLUMN_NAME).append(" = :reference_id");
+					queryString.append(WHERE_SQL).append(PersistentBean.ELEMENT_COLUMN_NAME).append(" = :reference_id");
 				}
 				else {
-					queryString.append(" where ").append(ref.getReferenceFieldName());
+					queryString.append(WHERE_SQL).append(ref.getReferenceFieldName());
 					queryString.append("_id = :reference_id");
 				}
 				
@@ -2766,10 +2777,10 @@ if (document.isDynamic()) return;
 					int i = 0;
 					for (@SuppressWarnings("unused") Bean thisBeanToBeCascaded : theseBeansToBeCascaded) {
 						if (ref.isCollection()) {
-							queryString.append(" and ").append(PersistentBean.OWNER_COLUMN_NAME).append(" != :deleted_id");
+							queryString.append(AND_SQL).append(PersistentBean.OWNER_COLUMN_NAME).append(" != :deleted_id");
 						}
 						else {
-							queryString.append(" and ").append(Bean.DOCUMENT_ID).append(" != :deleted_id");
+							queryString.append(AND_SQL).append(Bean.DOCUMENT_ID).append(" != :deleted_id");
 						}
 						queryString.append(i++);
 					}
@@ -3348,7 +3359,7 @@ if (document.isDynamic()) return;
 					String persistentIdentifier = persistent.getPersistentIdentifier();
 					StringBuilder sql = new StringBuilder(64);
 					sql.append("delete from ").append(persistentIdentifier);
-					sql.append(" where ").append(UniquenessEntity.HASH_COLUMN_NAME).append(" = :").append(UniquenessEntity.HASH_COLUMN_NAME);
+					sql.append(WHERE_SQL).append(UniquenessEntity.HASH_COLUMN_NAME).append(" = :").append(UniquenessEntity.HASH_COLUMN_NAME);
 					newSQL(sql.toString()).putParameter(UniquenessEntity.HASH_COLUMN_NAME, hash, false).execute();
 				}
 			}
@@ -3388,7 +3399,7 @@ public void doWorkOnConnection(Session session) {
 		Module module = customer.getModule(bean.getBizModule());
 		Document document = module.getDocument(customer, bean.getBizDocument());
 		if (! document.isPersistable()) {
-			throw new MetaDataException("Document " + module.getName() + '.' + document.getName() + " is not persistable");
+			throw new MetaDataException(DOCUMENT_PREFIX + module.getName() + '.' + document.getName() + IS_NOT_PERSISTABLE);
 		}
 		@SuppressWarnings("null") // tested above
 		String persistentIdentifier = document.getPersistent().getPersistentIdentifier();
@@ -3446,14 +3457,14 @@ public void doWorkOnConnection(Session session) {
 				else if (attribute instanceof Association association) {
 					// Exclude embedded associations
 					if (association.getType() != AssociationType.embedded) {
-						query.append(',').append(attributeName).append("_id=:").append(attributeName).append("_id");
+						query.append(',').append(attributeName).append("_id=:").append(attributeName).append(ID_COLUMN_SUFFIX);
 
 						// If this is an arc, add the type column to the insert
 						String referencedDocumentName = association.getDocumentName();
 						Document referencedDocument = module.getDocument(customer, referencedDocumentName);
 						Persistent referencedPersistent = referencedDocument.getPersistent();
 						if ((referencedPersistent != null) && referencedPersistent.isPolymorphicallyMapped()) {
-							query.append(',').append(attributeName).append("_type=:").append(attributeName).append("_type");
+							query.append(',').append(attributeName).append("_type=:").append(attributeName).append(TYPE_COLUMN_SUFFIX);
 						}
 					}
 				}
@@ -3462,7 +3473,7 @@ public void doWorkOnConnection(Session session) {
 				}
 			}
 
-			query.append(" where ").append(Bean.DOCUMENT_ID).append("=:").append(Bean.DOCUMENT_ID);
+			query.append(WHERE_SQL).append(Bean.DOCUMENT_ID).append("=:").append(Bean.DOCUMENT_ID);
 		}
 		else { // insert a new row
 			// Add the built ins
@@ -3513,16 +3524,16 @@ public void doWorkOnConnection(Session session) {
 				else if (attribute instanceof Association association) {
 					// Exclude embedded associations
 					if (association.getType() != AssociationType.embedded) {
-						columns.append(',').append(attributeName).append("_id");
-						values.append(",:").append(attributeName).append("_id");
+						columns.append(',').append(attributeName).append(ID_COLUMN_SUFFIX);
+						values.append(",:").append(attributeName).append(ID_COLUMN_SUFFIX);
 	
 						// If this is an arc, add the type column to the insert
 						String referencedDocumentName = association.getDocumentName();
 						Document referencedDocument = module.getDocument(customer, referencedDocumentName);
 						Persistent referencedPersistent = referencedDocument.getPersistent();
 						if ((referencedPersistent != null) && referencedPersistent.isPolymorphicallyMapped()) {
-							columns.append(',').append(attributeName).append("_type");
-							values.append(",:").append(attributeName).append("_type");
+							columns.append(',').append(attributeName).append(TYPE_COLUMN_SUFFIX);
+							values.append(",:").append(attributeName).append(TYPE_COLUMN_SUFFIX);
 						}
 					}
 				}
@@ -3581,7 +3592,7 @@ public void doWorkOnConnection(Session session) {
 				if (attribute instanceof Association association) {
 					// Exclude embedded associations
 					if (association.getType() != AssociationType.embedded) {
-						String columnName = new StringBuilder(64).append(attributeName).append("_id").toString();
+						String columnName = new StringBuilder(64).append(attributeName).append(ID_COLUMN_SUFFIX).toString();
 						String binding = new StringBuilder(64).append(attributeName).append('.').append(Bean.DOCUMENT_ID).toString();
 						sql.putParameter(columnName, (String) BindUtil.get(bean, binding), false);
 	
@@ -3590,7 +3601,7 @@ public void doWorkOnConnection(Session session) {
 						Document referencedDocument = module.getDocument(customer, referencedDocumentName);
 						Persistent referencedPersistent = referencedDocument.getPersistent();
 						if ((referencedPersistent != null) && referencedPersistent.isPolymorphicallyMapped()) {
-							columnName = new StringBuilder(64).append(attributeName).append("_type").toString();
+							columnName = new StringBuilder(64).append(attributeName).append(TYPE_COLUMN_SUFFIX).toString();
 							Bean referencedBean = (Bean) BindUtil.get(bean, attributeName);
 							String value = null;
 							if (referencedBean != null) {
@@ -3624,7 +3635,7 @@ public void doWorkOnConnection(Session session) {
 			}
 			catch (Exception e) {
 				throw new DomainException("Could not grab the value in attribute " + attributeName +
-											" from bean " + bean, e);
+											FROM_BEAN + bean, e);
 			}
 		}
 
@@ -3645,7 +3656,7 @@ public void doWorkOnConnection(Session session) {
 		Module module = customer.getModule(owningBean.getBizModule());
 		Document document = module.getDocument(customer, owningBean.getBizDocument());
 		if (! document.isPersistable()) {
-			throw new MetaDataException("Document " + module.getName() + '.' + document.getName() + " is not persistable");
+			throw new MetaDataException(DOCUMENT_PREFIX + module.getName() + '.' + document.getName() + IS_NOT_PERSISTABLE);
 		}
 		@SuppressWarnings("null") // tested above
 		String persistentIdentifier = document.getPersistent().getPersistentIdentifier();
@@ -3660,14 +3671,14 @@ public void doWorkOnConnection(Session session) {
 		}
 		catch (Exception e) {
 			throw new DomainException("Could not get collection " + collectionName + 
-										" from bean " + owningBean, e);
+										FROM_BEAN + owningBean, e);
 		}
 		
 		if (elementBeans != null) {
 			for (Bean elementBean : elementBeans) {
 				query.append("select * from ").append(persistentIdentifier).append('_').append(collectionName);
-				query.append(" where ").append(PersistentBean.OWNER_COLUMN_NAME).append("=:");
-				query.append(PersistentBean.OWNER_COLUMN_NAME).append(" and ").append(PersistentBean.ELEMENT_COLUMN_NAME);
+				query.append(WHERE_SQL).append(PersistentBean.OWNER_COLUMN_NAME).append("=:");
+				query.append(PersistentBean.OWNER_COLUMN_NAME).append(AND_SQL).append(PersistentBean.ELEMENT_COLUMN_NAME);
 				query.append("=:").append(PersistentBean.ELEMENT_COLUMN_NAME);
 	
 				SQL sql = newSQL(query.toString());
@@ -3677,9 +3688,9 @@ public void doWorkOnConnection(Session session) {
 				boolean notExists = sql.tupleResults().isEmpty();
 				query.setLength(0);
 				if (notExists) {
-					query.append("insert into ").append(persistentIdentifier).append('_').append(collectionName);
+					query.append(INSERT_INTO_SQL).append(persistentIdentifier).append('_').append(collectionName);
 					query.append(" (").append(PersistentBean.OWNER_COLUMN_NAME).append(',').append(PersistentBean.ELEMENT_COLUMN_NAME);
-					query.append(") values (:").append(PersistentBean.OWNER_COLUMN_NAME).append(",:");
+					query.append(VALUES_SQL).append(PersistentBean.OWNER_COLUMN_NAME).append(",:");
 					query.append(PersistentBean.ELEMENT_COLUMN_NAME).append(')');
 	
 					sql = newSQL(query.toString());
@@ -3702,14 +3713,14 @@ public void doWorkOnConnection(Session session) {
 		Module module = customer.getModule(owningBean.getBizModule());
 		Document document = module.getDocument(customer, owningBean.getBizDocument());
 		if (! document.isPersistable()) {
-			throw new MetaDataException("Document " + module.getName() + '.' + document.getName() + " is not persistable");
+			throw new MetaDataException(DOCUMENT_PREFIX + module.getName() + '.' + document.getName() + IS_NOT_PERSISTABLE);
 		}
 		@SuppressWarnings("null") // tested above
 		String persistentIdentifier = document.getPersistent().getPersistentIdentifier();
 		StringBuilder query = new StringBuilder(256);
-		query.append("insert into ").append(persistentIdentifier).append('_').append(collectionName);
+		query.append(INSERT_INTO_SQL).append(persistentIdentifier).append('_').append(collectionName);
 		query.append(" (").append(PersistentBean.OWNER_COLUMN_NAME).append(',').append(PersistentBean.ELEMENT_COLUMN_NAME);
-		query.append(") values (:").append(PersistentBean.OWNER_COLUMN_NAME).append(",:");
+		query.append(VALUES_SQL).append(PersistentBean.OWNER_COLUMN_NAME).append(",:");
 		query.append(PersistentBean.ELEMENT_COLUMN_NAME).append(')');
 
 		List<PersistentBean> elementBeans = null;
@@ -3720,7 +3731,7 @@ public void doWorkOnConnection(Session session) {
 		}
 		catch (Exception e) {
 			throw new DomainException("Could not get collection " + collectionName + 
-										" from bean " + owningBean, e);
+										FROM_BEAN + owningBean, e);
 		}
 		
 		if (elementBeans != null) {

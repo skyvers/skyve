@@ -47,6 +47,7 @@ import jakarta.servlet.http.HttpSession;
  */
 @RequestScoped
 @Named("_skyveMarkup")
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate image markup response fragments.
 public class ImageMarkupView extends LocalisableView {
 	private static final long serialVersionUID = 4573644429247936306L;
 

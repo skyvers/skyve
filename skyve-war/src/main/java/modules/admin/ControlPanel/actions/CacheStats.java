@@ -23,7 +23,15 @@ import modules.admin.ControlPanel.ControlPanelExtension;
 /**
  * Collects and exposes runtime cache statistics for inspection.
  */
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate cache statistics HTML fragments.
 public class CacheStats implements ServerSideAction<ControlPanelExtension> {
+	private static final String TABLE_CELL = "<td style=\"padding:20px\">";
+	private static final String EVICTIONS_LABEL = "Evictions: ";
+	private static final String HITS_LABEL = "Hits: ";
+	private static final String MISSES_LABEL = "Misses: ";
+	private static final String PUTS_LABEL = "Puts: ";
+	private static final String REMOVALS_LABEL = "Removals: ";
+
 	/**
 	 * Performs the execute operation.
 	 * @param bean the bean value
@@ -75,14 +83,14 @@ public class CacheStats implements ServerSideAction<ControlPanelExtension> {
 	public static void addEHCacheStats(String cacheName, CacheStatistics stats, StringBuilder sb) {
 		final Caching caching = EXT.getCaching();
 
-		sb.append("<tr><td style=\"padding:20px\">");
+		sb.append("<tr>").append(TABLE_CELL);
 		sb.append("<h1>").append(cacheName).append("</h1>");
 		addStats(stats, sb);
 		sb.append("</td>");
 		
 		TierStatistics ts = caching.getEHTierStatistics(stats, CacheTier.OnHeap);
 		if (ts != null) {
-			sb.append("<td style=\"padding:20px\">");
+			sb.append(TABLE_CELL);
 			sb.append("<h2>").append("Heap").append("</h2>");
 			addStats(ts, sb);
 			sb.append("</td>");
@@ -90,7 +98,7 @@ public class CacheStats implements ServerSideAction<ControlPanelExtension> {
 		
 		ts = caching.getEHTierStatistics(stats, CacheTier.OffHeap);
 		if (ts != null) {
-			sb.append("<td style=\"padding:20px\">");
+			sb.append(TABLE_CELL);
 			sb.append("<h2>").append("Off-Heap").append("</h2>");
 			addStats(ts, sb);
 			sb.append("</td>");
@@ -98,7 +106,7 @@ public class CacheStats implements ServerSideAction<ControlPanelExtension> {
 
 		ts = caching.getEHTierStatistics(stats, CacheTier.Disk);
 		if (ts != null) {
-			sb.append("<td style=\"padding:20px\">");
+			sb.append(TABLE_CELL);
 			sb.append("<h2>").append("Disk").append("</h2>");
 			addStats(ts, sb);
 			sb.append("</td>");
@@ -113,7 +121,7 @@ public class CacheStats implements ServerSideAction<ControlPanelExtension> {
 	 * @param sb the sb value
 	 */
 	public static void addJCacheStats(String cacheName, CacheStatisticsMXBean stats, StringBuilder sb) {
-		sb.append("<tr><td style=\"padding:20px\">");
+		sb.append("<tr>").append(TABLE_CELL);
 		sb.append("<h1>").append(cacheName).append("</h1>");
 		addStats(stats, sb);
 		sb.append("</td>");
@@ -131,15 +139,15 @@ public class CacheStats implements ServerSideAction<ControlPanelExtension> {
 			sb.append("No stats<br/>");
 		}
 		else {
-			sb.append("Evictions: ").append(stats.getCacheEvictions()).append("<br/>");
+			sb.append(EVICTIONS_LABEL).append(stats.getCacheEvictions()).append("<br/>");
 			sb.append("Expirations: ").append(stats.getCacheExpirations()).append("<br/>");
 			sb.append("Gets: ").append(stats.getCacheGets()).append("<br/>");
-			sb.append("Hits: ").append(stats.getCacheHits()).append("<br/>");
+			sb.append(HITS_LABEL).append(stats.getCacheHits()).append("<br/>");
 			sb.append("Hit (%): ").append(stats.getCacheHitPercentage()).append("<br/>");
-			sb.append("Misses: ").append(stats.getCacheMisses()).append("<br/>");
+			sb.append(MISSES_LABEL).append(stats.getCacheMisses()).append("<br/>");
 			sb.append("Miss (%): ").append(stats.getCacheMissPercentage()).append("<br/>");
-			sb.append("Puts: ").append(stats.getCachePuts()).append("<br/>");
-			sb.append("Removals: ").append(stats.getCacheRemovals()).append("<br/>");
+			sb.append(PUTS_LABEL).append(stats.getCachePuts()).append("<br/>");
+			sb.append(REMOVALS_LABEL).append(stats.getCacheRemovals()).append("<br/>");
 		}
 	}
 	
@@ -154,12 +162,12 @@ public class CacheStats implements ServerSideAction<ControlPanelExtension> {
 			sb.append("Allocated Byte Size: ").append(stats.getAllocatedByteSize()).append("<br/>");
 			sb.append("Occupied Byte Size: ").append(stats.getOccupiedByteSize()).append("<br/>");
 			sb.append("Entries: ").append(stats.getMappings()).append("<br/>");
-			sb.append("Evictions: ").append(stats.getEvictions()).append("<br/>");
+			sb.append(EVICTIONS_LABEL).append(stats.getEvictions()).append("<br/>");
 			sb.append("Expirations: ").append(stats.getExpirations()).append("<br/>");
-			sb.append("Hits: ").append(stats.getHits()).append("<br/>");
-			sb.append("Misses: ").append(stats.getMisses()).append("<br/>");
-			sb.append("Puts: ").append(stats.getPuts()).append("<br/>");
-			sb.append("Removals: ").append(stats.getRemovals()).append("<br/>");
+			sb.append(HITS_LABEL).append(stats.getHits()).append("<br/>");
+			sb.append(MISSES_LABEL).append(stats.getMisses()).append("<br/>");
+			sb.append(PUTS_LABEL).append(stats.getPuts()).append("<br/>");
+			sb.append(REMOVALS_LABEL).append(stats.getRemovals()).append("<br/>");
 		}
 	}
 
@@ -174,14 +182,14 @@ public class CacheStats implements ServerSideAction<ControlPanelExtension> {
 			sb.append("No Stats<br/>");
 		}
 		else {
-			sb.append("Evictions: ").append(stats.getCacheEvictions()).append("<br/>");
+			sb.append(EVICTIONS_LABEL).append(stats.getCacheEvictions()).append("<br/>");
 			sb.append("Gets: ").append(stats.getCacheGets()).append("<br/>");
 			sb.append("Hit (%): ").append(stats.getCacheHitPercentage()).append("<br/>");
-			sb.append("Hits: ").append(stats.getCacheHits()).append("<br/>");
-			sb.append("Misses: ").append(stats.getCacheMisses()).append("<br/>");
+			sb.append(HITS_LABEL).append(stats.getCacheHits()).append("<br/>");
+			sb.append(MISSES_LABEL).append(stats.getCacheMisses()).append("<br/>");
 			sb.append("Miss (%): ").append(stats.getCacheMissPercentage()).append("<br/>");
-			sb.append("Puts: ").append(stats.getCachePuts()).append("<br/>");
-			sb.append("Removals: ").append(stats.getCacheRemovals()).append("<br/>");
+			sb.append(PUTS_LABEL).append(stats.getCachePuts()).append("<br/>");
+			sb.append(REMOVALS_LABEL).append(stats.getCacheRemovals()).append("<br/>");
 			sb.append("Average Get Time: ").append(stats.getAverageGetTime()).append("<br/>");
 			sb.append("Average Put Time: ").append(stats.getAveragePutTime()).append("<br/>");
 			sb.append("Average Remove Time: ").append(stats.getAverageRemoveTime()).append("<br/>");

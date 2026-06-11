@@ -53,6 +53,7 @@ import jakarta.annotation.Nullable;
 /**
  * Flutter-specific widget/component renderer.
  */
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate fragments of generated Flutter component output.
 public class FlutterComponentRenderer extends ComponentRenderer {
     
     /**

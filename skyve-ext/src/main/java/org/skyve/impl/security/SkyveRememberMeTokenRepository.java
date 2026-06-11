@@ -27,6 +27,8 @@ import jakarta.annotation.Nonnull;
 public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements PersistentTokenRepository {
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SkyveRememberMeTokenRepository.class);
 
+    private static final String JDBC_TEMPLATE_REQUIRED = "getJdbcTemplate() is null";
+
 	/**
 	 * SQL used to fetch a remember-me token row by series identifier.
 	 */
@@ -69,7 +71,7 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 		}
 		JdbcTemplate t = getJdbcTemplate();
 		if (t == null) {
-			throw new IllegalStateException("getJdbcTemplate() is null");
+			throw new IllegalStateException(JDBC_TEMPLATE_REQUIRED);
 		}
 		t.update(createNewTokenSql,
 					UUIDv7.create().toString(),
@@ -95,7 +97,7 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 	public void updateToken(String series, String tokenValue, Date lastUsed) {
 		JdbcTemplate t = getJdbcTemplate();
 		if (t == null) {
-			throw new IllegalStateException("getJdbcTemplate() is null");
+			throw new IllegalStateException(JDBC_TEMPLATE_REQUIRED);
 		}
 		t.update(updateTokenSql, tokenValue, lastUsed, series);
 	}
@@ -110,7 +112,7 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 		try {
 			JdbcTemplate t = getJdbcTemplate();
 			if (t == null) {
-				throw new IllegalStateException("getJdbcTemplate() is null");
+				throw new IllegalStateException(JDBC_TEMPLATE_REQUIRED);
 			}
 			return t.queryForObject(
 						getTokenForSeriesSql,
@@ -156,7 +158,7 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 	public void removeUserTokens(String username) {
 		JdbcTemplate t = getJdbcTemplate();
 		if (t == null) {
-			throw new IllegalStateException("getJdbcTemplate() is null");
+			throw new IllegalStateException(JDBC_TEMPLATE_REQUIRED);
 		}
 		t.update(removeUserTokensSql, username);
 	}

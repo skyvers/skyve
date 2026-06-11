@@ -28,6 +28,7 @@ import org.skyve.util.logging.SkyveLoggerFactory;
  *
  * <p>Coordinates routing, component/layout rendering, and output writing.
  */
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate fragments of generated Flutter project output.
 public class FlutterGenerator {
     public static final String INDENT = "  ";
 

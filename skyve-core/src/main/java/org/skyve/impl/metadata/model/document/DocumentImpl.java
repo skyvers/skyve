@@ -92,6 +92,8 @@ import jakarta.annotation.Nonnull;
 public final class DocumentImpl extends ModelImpl implements Document {
     private static final long serialVersionUID = 9091172268741052691L;
     private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
+    
+	private static final String DOCUMENT_PREFIX = "Document ";
 
 	private long lastModifiedMillis = Long.MAX_VALUE;
 	private long lastCheckedMillis = System.currentTimeMillis();
@@ -512,7 +514,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	public <T extends Bean> DynamicImage<T> getDynamicImage(Customer customer, String name) {
 		DynamicImage<T> result = ProvidedRepositoryFactory.get().getDynamicImage(customer, this, name, true);
 		if (result == null) {
-			throw new MetaDataException("Document " + getName() + " has no dynamic image defined for " + name);
+			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no dynamic image defined for " + name);
 		}
 		return result;
 	}
@@ -827,7 +829,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	public <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(Customer customer, String modelName, boolean runtime) {
 		ComparisonModel<T, C> result = ProvidedRepositoryFactory.get().getComparisonModel(customer, this, modelName, runtime);
 		if (result == null) {
-			throw new MetaDataException("Document " + getName() + " has no comparison model defined for " + modelName);
+			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no comparison model defined for " + modelName);
 		}
 		return result;
 	}
@@ -844,7 +846,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	public <T extends Bean> MapModel<T> getMapModel(Customer customer, String modelName, boolean runtime) {
 		MapModel<T> result = ProvidedRepositoryFactory.get().getMapModel(customer, this, modelName, runtime);
 		if (result == null) {
-			throw new MetaDataException("Document " + getName() + " has no map model defined for " + modelName);
+			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no map model defined for " + modelName);
 		}
 		return result;
 	}
@@ -861,7 +863,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	public <T extends Bean> ChartModel<T> getChartModel(Customer customer, String modelName, boolean runtime) {
 		ChartModel<T> result = ProvidedRepositoryFactory.get().getChartModel(customer, this, modelName, runtime);
 		if (result == null) {
-			throw new MetaDataException("Document " + getName() + " has no chart model defined for " + modelName);
+			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no chart model defined for " + modelName);
 		}
 		return result;
 	}
@@ -878,7 +880,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	public <T extends Bean> ListModel<T> getListModel(Customer customer, String modelName, boolean runtime) {
 		ListModel<T> result = ProvidedRepositoryFactory.get().getListModel(customer, this, modelName, runtime);
 		if (result == null) {
-			throw new MetaDataException("Document " + getName() + " has no list model defined for " + modelName);
+			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no list model defined for " + modelName);
 		}
 		return result;
 	}
@@ -904,7 +906,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		
 		ServerSideAction<Bean> result = repository.getServerSideAction(customer, this, className, runtime);
 		if (result == null) {
-			throw new MetaDataException("Document " + getName() + " has no server-side action defined for " + className);
+			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no server-side action defined for " + className);
 		}
 		return result;
 	}
@@ -921,7 +923,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	public BizExportAction getBizExportAction(Customer customer, String className, boolean runtime) {
 		BizExportAction result = ProvidedRepositoryFactory.get().getBizExportAction(customer, this, className, runtime);
 		if (result == null) {
-			throw new MetaDataException("Document " + getName() + " has no BizPort export action defined for " + className);
+			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no BizPort export action defined for " + className);
 		}
 		return result;
 	}
@@ -938,7 +940,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	public BizImportAction getBizImportAction(Customer customer, String className, boolean runtime) {
 		BizImportAction result = ProvidedRepositoryFactory.get().getBizImportAction(customer, this, className, runtime);
 		if (result == null) {
-			throw new MetaDataException("Document " + getName() + " has no BizPort import action defined for " + className);
+			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no BizPort import action defined for " + className);
 		}
 		return result;
 	}
@@ -955,7 +957,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	public DownloadAction<Bean> getDownloadAction(Customer customer, String className, boolean runtime) {
 		DownloadAction<Bean> result = ProvidedRepositoryFactory.get().getDownloadAction(customer, this, className, runtime);
 		if (result == null) {
-			throw new MetaDataException("Document " + getName() + " has no download action defined for " + className);
+			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no download action defined for " + className);
 		}
 		return result;
 	}
@@ -972,7 +974,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	public UploadAction<Bean> getUploadAction(Customer customer, String className, boolean runtime) {
 		UploadAction<Bean> result = ProvidedRepositoryFactory.get().getUploadAction(customer, this, className, runtime);
 		if (result == null) {
-			throw new MetaDataException("Document " + getName() + " has no upload action defined for " + className);
+			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no upload action defined for " + className);
 		}
 		return result;
 	}
@@ -1162,7 +1164,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		}
 		
 		if (view == null) {
-			throw new MetaDataException("Document " + getName() + " has no view defined for " + name);
+			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no view defined for " + name);
 		}
 
 		return view;

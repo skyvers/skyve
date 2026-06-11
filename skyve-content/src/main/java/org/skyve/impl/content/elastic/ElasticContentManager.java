@@ -99,13 +99,14 @@ public class ElasticContentManager extends AbstractContentManager {
 //    private static final String KEYWORDS = "keywords";
 //
 //    private static final String BEAN = "bean";
-    static final String BEAN_CUSTOMER_NAME = "bean." + Bean.CUSTOMER_NAME;
-    static final String BEAN_MODULE_KEY = "bean." + Bean.MODULE_KEY;
-    static final String BEAN_DOCUMENT_KEY = "bean." + Bean.DOCUMENT_KEY;
-    static final String BEAN_DATA_GROUP_ID = "bean." + Bean.DATA_GROUP_ID;
-    static final String BEAN_USER_ID = "bean." + Bean.USER_ID;
-    static final String BEAN_DOCUMENT_ID = "bean." + Bean.DOCUMENT_ID;
-    static final String BEAN_ATTRIBUTE_NAME = "bean.attribute";
+	private static final String BEAN_PREFIX = "bean.";
+    static final String BEAN_CUSTOMER_NAME = BEAN_PREFIX + Bean.CUSTOMER_NAME;
+    static final String BEAN_MODULE_KEY = BEAN_PREFIX + Bean.MODULE_KEY;
+    static final String BEAN_DOCUMENT_KEY = BEAN_PREFIX + Bean.DOCUMENT_KEY;
+    static final String BEAN_DATA_GROUP_ID = BEAN_PREFIX + Bean.DATA_GROUP_ID;
+    static final String BEAN_USER_ID = BEAN_PREFIX + Bean.USER_ID;
+    static final String BEAN_DOCUMENT_ID = BEAN_PREFIX + Bean.DOCUMENT_ID;
+    static final String BEAN_ATTRIBUTE_NAME = BEAN_PREFIX + "attribute";
 	
 //	private static Node node = ElasticUtil.localNode();
 //	private static final Tika TIKA = new Tika();

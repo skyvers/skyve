@@ -62,6 +62,9 @@ public class JDBCRemoteContentManagerServer {
 	static final String REMOVE_ATTACHMENT_FUNCTION_NAME = "REMOVE_ATTACHMENT";
 	static final String GOOGLE_SEARCH_FUNCTION_NAME = "GOOGLE_SEARCH";
 
+	private static final String DROP_ALIAS_SQL = "DROP ALIAS IF EXISTS %s";
+	private static final String CREATE_ALIAS_SQL = "CREATE ALIAS %s FOR \"%s\"";
+
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(JDBCRemoteContentManagerServer.class);
 
 	private static Server server = null;
@@ -90,65 +93,65 @@ public class JDBCRemoteContentManagerServer {
 			// register the database functions
 			LOGGER.info("REGISTER DATABASE FUNCTIONS FOR REMOTE CONTENT CALLS");
 			try (Connection c = EXT.getDataStoreConnection(UtilImpl.DATA_STORES.get(CONTENT_DATA_STORE_NAME), false)) {
-				try (CallableStatement s = c.prepareCall(String.format("DROP ALIAS IF EXISTS %s",
+				try (CallableStatement s = c.prepareCall(String.format(DROP_ALIAS_SQL,
 																		PUT_BEAN_FUNCTION_NAME))) {
 					s.execute();
 				}
-				try (CallableStatement s = c.prepareCall(String.format("CREATE ALIAS %s FOR \"%s\"",
+				try (CallableStatement s = c.prepareCall(String.format(CREATE_ALIAS_SQL,
 																		PUT_BEAN_FUNCTION_NAME,
 																		"org.skyve.impl.content.jdbc.JDBCRemoteContentManagerServer.putBeanFunction"))) {
 					s.execute();
 				}
-				try (CallableStatement s = c.prepareCall(String.format("DROP ALIAS IF EXISTS %s",
+				try (CallableStatement s = c.prepareCall(String.format(DROP_ALIAS_SQL,
 																		PUT_ATTACHMENT_FUNCTION_NAME))) {
 					s.execute();
 				}
-				try (CallableStatement s = c.prepareCall(String.format("CREATE ALIAS %s FOR \"%s\"",
+				try (CallableStatement s = c.prepareCall(String.format(CREATE_ALIAS_SQL,
 																		PUT_ATTACHMENT_FUNCTION_NAME,
 																		"org.skyve.impl.content.jdbc.JDBCRemoteContentManagerServer.putAttachmentFunction"))) {
 					s.execute();
 				}
-				try (CallableStatement s = c.prepareCall(String.format("DROP ALIAS IF EXISTS %s",
+				try (CallableStatement s = c.prepareCall(String.format(DROP_ALIAS_SQL,
 																		UPDATE_ATTACHMENT_FUNCTION_NAME))) {
 					s.execute();
 				}
-				try (CallableStatement s = c.prepareCall(String.format("CREATE ALIAS %s FOR \"%s\"",
+				try (CallableStatement s = c.prepareCall(String.format(CREATE_ALIAS_SQL,
 																		UPDATE_ATTACHMENT_FUNCTION_NAME,
 																		"org.skyve.impl.content.jdbc.JDBCRemoteContentManagerServer.updateAttachmentFunction"))) {
 					s.execute();
 				}
-				try (CallableStatement s = c.prepareCall(String.format("DROP ALIAS IF EXISTS %s",
+				try (CallableStatement s = c.prepareCall(String.format(DROP_ALIAS_SQL,
 																		GET_ATTACHMENT_FUNCTION_NAME))) {
 					s.execute();
 				}
-				try (CallableStatement s = c.prepareCall(String.format("CREATE ALIAS %s FOR \"%s\"",
+				try (CallableStatement s = c.prepareCall(String.format(CREATE_ALIAS_SQL,
 																		GET_ATTACHMENT_FUNCTION_NAME,
 																		"org.skyve.impl.content.jdbc.JDBCRemoteContentManagerServer.getAttachmentFunction"))) {
 					s.execute();
 				}
-				try (CallableStatement s = c.prepareCall(String.format("DROP ALIAS IF EXISTS %s",
+				try (CallableStatement s = c.prepareCall(String.format(DROP_ALIAS_SQL,
 																		REMOVE_BEAN_FUNCTION_NAME))) {
 					s.execute();
 				}
-				try (CallableStatement s = c.prepareCall(String.format("CREATE ALIAS %s FOR \"%s\"",
+				try (CallableStatement s = c.prepareCall(String.format(CREATE_ALIAS_SQL,
 																		REMOVE_BEAN_FUNCTION_NAME,
 																		"org.skyve.impl.content.jdbc.JDBCRemoteContentManagerServer.removeBeanFunction"))) {
 					s.execute();
 				}
-				try (CallableStatement s = c.prepareCall(String.format("DROP ALIAS IF EXISTS %s",
+				try (CallableStatement s = c.prepareCall(String.format(DROP_ALIAS_SQL,
 																		REMOVE_ATTACHMENT_FUNCTION_NAME))) {
 					s.execute();	
 				}
-				try (CallableStatement s = c.prepareCall(String.format("CREATE ALIAS %s FOR \"%s\"",
+				try (CallableStatement s = c.prepareCall(String.format(CREATE_ALIAS_SQL,
 																		REMOVE_ATTACHMENT_FUNCTION_NAME,
 																		"org.skyve.impl.content.jdbc.JDBCRemoteContentManagerServer.removeAttachmentFunction"))) {
 					s.execute();
 				}
-				try (CallableStatement s = c.prepareCall(String.format("DROP ALIAS IF EXISTS %s",
+				try (CallableStatement s = c.prepareCall(String.format(DROP_ALIAS_SQL,
 																		GOOGLE_SEARCH_FUNCTION_NAME))) {
 					s.execute();	
 				}
-				try (CallableStatement s = c.prepareCall(String.format("CREATE ALIAS %s FOR \"%s\"",
+				try (CallableStatement s = c.prepareCall(String.format(CREATE_ALIAS_SQL,
 																		GOOGLE_SEARCH_FUNCTION_NAME,
 																		"org.skyve.impl.content.jdbc.JDBCRemoteContentManagerServer.googleSearchFunction"))) {
 					s.execute();

@@ -40,6 +40,8 @@ import modules.admin.domain.DownloadFolder;
  * Lists backup files and projected metadata for the Data Maintenance backups grid.
  */
 public class BackupsModel extends ListModel<DataMaintenance> {
+	private static final String NOT_IMPLEMENTED = "NOT IMPLEMENTED";
+
 	@Inject
 	@SuppressWarnings("java:S6813") // allow member injection
 	private transient DataMaintenanceService dataMaintenanceService;
@@ -159,7 +161,7 @@ public class BackupsModel extends ListModel<DataMaintenance> {
 	 */
 	@Override
 	public AutoClosingIterable<Bean> iterate() throws Exception {
-		throw new IllegalStateException("NOT IMPLEMENTED");
+		throw new IllegalStateException(NOT_IMPLEMENTED);
 	}
 
 	/**
@@ -172,7 +174,7 @@ public class BackupsModel extends ListModel<DataMaintenance> {
 	@Override
 	public Bean update(String bizId, SortedMap<String, Object> properties)
 			throws Exception {
-		throw new IllegalStateException("NOT IMPLEMENTED");
+		throw new IllegalStateException(NOT_IMPLEMENTED);
 	}
 
 	/**
@@ -182,7 +184,7 @@ public class BackupsModel extends ListModel<DataMaintenance> {
 	 */
 	@Override
 	public void remove(String bizId) throws Exception {
-		throw new IllegalStateException("NOT IMPLEMENTED");
+		throw new IllegalStateException(NOT_IMPLEMENTED);
 	}
 
 	/**

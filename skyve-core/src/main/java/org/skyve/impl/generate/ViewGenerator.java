@@ -75,6 +75,7 @@ import jakarta.annotation.Nullable;
  * <p>Traverses view definitions and emits strongly typed references for
  * generated code consumers.
  */
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate fragments of generated view-source output.
 public class ViewGenerator {
 
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ViewGenerator.class);

@@ -51,6 +51,7 @@ import org.skyve.util.logging.SkyveLoggerFactory;
 /**
  * Parses and interprets Skyve Markdown script into module and document metadata models.
  */
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate Skyve script token fragments.
 public class SkyveScriptInterpreter {
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SkyveScriptInterpreter.class);
 
