@@ -1,9 +1,8 @@
 package org.skyve.metadata.view.fluent;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -19,12 +18,12 @@ class FluentInputWidgetTest {
 
 	@Test
 	void fluentCheckBoxTriStateTrueSetsTrue() {
-		assertTrue(Boolean.TRUE.equals(new FluentCheckBox().triState(true).get().getTriState()));
+		assertEquals(Boolean.TRUE, new FluentCheckBox().triState(true).get().getTriState());
 	}
 
 	@Test
 	void fluentCheckBoxTriStateFalseSetsFalse() {
-		assertFalse(Boolean.TRUE.equals(new FluentCheckBox().triState(false).get().getTriState()));
+		assertNotEquals(Boolean.TRUE, new FluentCheckBox().triState(false).get().getTriState());
 	}
 
 	@Test
@@ -68,12 +67,12 @@ class FluentInputWidgetTest {
 
 	@Test
 	void fluentDataGridShowAddTrueSetsTrue() {
-		assertTrue(Boolean.TRUE.equals(new FluentDataGrid().showAdd(true).get().getShowAdd()));
+		assertEquals(Boolean.TRUE, new FluentDataGrid().showAdd(true).get().getShowAdd());
 	}
 
 	@Test
 	void fluentDataGridShowRemoveFalseSetsFalse() {
-		assertFalse(Boolean.TRUE.equals(new FluentDataGrid().showRemove(false).get().getShowRemove()));
+		assertNotEquals(Boolean.TRUE, new FluentDataGrid().showRemove(false).get().getShowRemove());
 	}
 
 	@Test
@@ -83,17 +82,17 @@ class FluentInputWidgetTest {
 
 	@Test
 	void fluentDataGridInlineTrueSetsTrue() {
-		assertTrue(Boolean.TRUE.equals(new FluentDataGrid().inline(true).get().getInline()));
+		assertEquals(Boolean.TRUE, new FluentDataGrid().inline(true).get().getInline());
 	}
 
 	@Test
 	void fluentDataGridEditableTrueSetsTrue() {
-		assertTrue(Boolean.TRUE.equals(new FluentDataGrid().editable(true).get().getEditable()));
+		assertEquals(Boolean.TRUE, new FluentDataGrid().editable(true).get().getEditable());
 	}
 
 	@Test
 	void fluentDataGridWordWrapTrueSetsTrue() {
-		assertTrue(Boolean.TRUE.equals(new FluentDataGrid().wordWrap(true).get().getWordWrap()));
+		assertEquals(Boolean.TRUE, new FluentDataGrid().wordWrap(true).get().getWordWrap());
 	}
 
 	// ---- FluentListGrid -----------------------------------------------------
@@ -120,12 +119,12 @@ class FluentInputWidgetTest {
 
 	@Test
 	void fluentListGridShowAddTrueSetsTrue() {
-		assertTrue(Boolean.TRUE.equals(new FluentListGrid().showAdd(true).get().getShowAdd()));
+		assertEquals(Boolean.TRUE, new FluentListGrid().showAdd(true).get().getShowAdd());
 	}
 
 	@Test
 	void fluentListGridShowExportTrueSetsTrue() {
-		assertTrue(Boolean.TRUE.equals(new FluentListGrid().showExport(true).get().getShowExport()));
+		assertEquals(Boolean.TRUE, new FluentListGrid().showExport(true).get().getShowExport());
 	}
 
 	@Test

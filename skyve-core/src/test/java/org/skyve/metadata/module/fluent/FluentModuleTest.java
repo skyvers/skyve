@@ -1,7 +1,7 @@
 package org.skyve.metadata.module.fluent;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -55,12 +55,12 @@ class FluentModuleTest {
 
 	@Test
 	void prototypeTrueSetsTrue() {
-		assertTrue(Boolean.TRUE.equals(new FluentModule().prototype(true).get().getPrototype()));
+		assertEquals(Boolean.TRUE, new FluentModule().prototype(true).get().getPrototype());
 	}
 
 	@Test
 	void prototypeFlaseSetsFalse() {
-		assertFalse(Boolean.TRUE.equals(new FluentModule().prototype(false).get().getPrototype()));
+		assertNotEquals(Boolean.TRUE, new FluentModule().prototype(false).get().getPrototype());
 	}
 
 	@Test
@@ -253,7 +253,7 @@ class FluentModuleTest {
 		assertEquals("testModule", fm.get().getName());
 		assertEquals("Test Module", fm.get().getTitle());
 		assertEquals("Module docs", fm.get().getDocumentation());
-		assertTrue(Boolean.TRUE.equals(fm.get().getPrototype()));
+		assertEquals(Boolean.TRUE, fm.get().getPrototype());
 		assertEquals(FormLabelLayout.side, fm.get().getFormLabelLayout());
 		assertEquals(ViewType.list, fm.get().getHomeRef());
 		assertEquals("Contact", fm.get().getHomeDocument());

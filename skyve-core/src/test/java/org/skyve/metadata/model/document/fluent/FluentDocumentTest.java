@@ -6,6 +6,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -109,22 +110,22 @@ class FluentDocumentTest {
 
 	@Test
 	void abstractDocumentTrueSetsTrue() {
-		assertTrue(Boolean.TRUE.equals(new FluentDocument().abstractDocument(true).get().getAbstract()));
+		assertEquals(Boolean.TRUE, new FluentDocument().abstractDocument(true).get().getAbstract());
 	}
 
 	@Test
 	void abstractDocumentFalseSetsFalse() {
-		assertFalse(Boolean.TRUE.equals(new FluentDocument().abstractDocument(false).get().getAbstract()));
+		assertNotEquals(Boolean.TRUE, new FluentDocument().abstractDocument(false).get().getAbstract());
 	}
 
 	@Test
 	void auditedTrueSetsTrue() {
-		assertTrue(Boolean.TRUE.equals(new FluentDocument().audited(true).get().getAudited()));
+		assertEquals(Boolean.TRUE, new FluentDocument().audited(true).get().getAudited());
 	}
 
 	@Test
 	void auditedFalseSetsFalse() {
-		assertFalse(Boolean.TRUE.equals(new FluentDocument().audited(false).get().getAudited()));
+		assertNotEquals(Boolean.TRUE, new FluentDocument().audited(false).get().getAudited());
 	}
 
 	// ---- bizKey setters ------------------------------------------------------

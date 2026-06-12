@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
@@ -282,7 +283,7 @@ class FluentFormTest {
 	void fromBorderFalseWhenNotSet() {
 		Form src = new Form();
 		src.setBorder(null);
-		assertFalse(Boolean.TRUE.equals(new FluentForm().from(src).get().getBorder()));
+		assertNotEquals(Boolean.TRUE, new FluentForm().from(src).get().getBorder());
 	}
 
         @Test

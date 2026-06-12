@@ -3,6 +3,7 @@ package org.skyve.impl.domain.types;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -91,7 +92,7 @@ public class OptimisticLockUserTypeTest {
 		OptimisticLock original = lock("admin");
 		Object copy = type.deepCopy(original);
 		assertEquals(original, copy);
-		assertFalse("deep copy must not be same reference", copy == original);
+		assertNotSame("deep copy must not be same reference", original, copy);
 	}
 
 	@Test

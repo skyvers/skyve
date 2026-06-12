@@ -1,5 +1,6 @@
 package org.skyve.impl.metadata.repository.document;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -21,6 +22,6 @@ class DynamicClassMapTypeTest {
 		DynamicClassMapType map = new DynamicClassMapType();
 		DynamicClassMapEntryType entry = new DynamicClassMapEntryType();
 		map.classes.add(entry);
-		assertTrue(map.classes.size() == 1);
+		assertEquals(1, map.classes.size());
 	}
 }

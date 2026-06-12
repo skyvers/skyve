@@ -2,6 +2,7 @@ package org.skyve.metadata.view.fluent;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -71,12 +72,12 @@ class FluentViewWidgetTest {
 
 	@Test
 	void fluentLabelFormattedTrueSetsTrue() {
-		assertTrue(Boolean.TRUE.equals(new FluentLabel().formatted(true).get().getFormatted()));
+		assertEquals(Boolean.TRUE, new FluentLabel().formatted(true).get().getFormatted());
 	}
 
 	@Test
 	void fluentLabelFormattedFalseSetsFalse() {
-		assertFalse(Boolean.TRUE.equals(new FluentLabel().formatted(false).get().getFormatted()));
+		assertNotEquals(Boolean.TRUE, new FluentLabel().formatted(false).get().getFormatted());
 	}
 
 	@Test
@@ -92,7 +93,7 @@ class FluentViewWidgetTest {
 
 	@Test
 	void fluentLabelEscapeTrueSetsTrue() {
-		assertTrue(Boolean.TRUE.equals(new FluentLabel().escape(true).get().getEscape()));
+		assertEquals(Boolean.TRUE, new FluentLabel().escape(true).get().getEscape());
 	}
 
 	// ---- FluentButton -------------------------------------------------------
@@ -141,12 +142,12 @@ class FluentViewWidgetTest {
 
 	@Test
 	void fluentTextFieldEditableTrueSetsTrue() {
-		assertTrue(Boolean.TRUE.equals(new FluentTextField().editable(true).get().getEditable()));
+		assertEquals(Boolean.TRUE, new FluentTextField().editable(true).get().getEditable());
 	}
 
 	@Test
 	void fluentTextFieldEditableFalseSetsFalse() {
-		assertFalse(Boolean.TRUE.equals(new FluentTextField().editable(false).get().getEditable()));
+		assertNotEquals(Boolean.TRUE, new FluentTextField().editable(false).get().getEditable());
 	}
 
 	@Test
@@ -284,7 +285,7 @@ class FluentViewWidgetTest {
 
 	@Test
 	void fluentFormBorderTrueSetsTrue() {
-		assertTrue(Boolean.TRUE.equals(new FluentForm().border(true).get().getBorder()));
+		assertEquals(Boolean.TRUE, new FluentForm().border(true).get().getBorder());
 	}
 
 	@Test

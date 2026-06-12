@@ -1,5 +1,6 @@
 package org.skyve.domain.types;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
@@ -35,7 +36,7 @@ class EnumerationDomainValueSortByCodeTest {
 		DomainValueSortByCode comparator = new DomainValueSortByCode();
 		DomainValue a = new DomainValue("x", "One");
 		DomainValue b = new DomainValue("x", "Two");
-		assertTrue(comparator.compare(a, b) == 0);
+		assertEquals(0, comparator.compare(a, b));
 	}
 
 	@Test
@@ -46,8 +47,8 @@ class EnumerationDomainValueSortByCodeTest {
 		list.add(new DomainValue("a", "A"));
 		list.add(new DomainValue("b", "B"));
 		list.sort(new DomainValueSortByCode());
-		assertTrue(list.get(0).getCode().equals("a"));
-		assertTrue(list.get(1).getCode().equals("b"));
-		assertTrue(list.get(2).getCode().equals("c"));
+		assertEquals(list.get(0).getCode(), "a");
+		assertEquals(list.get(1).getCode(), "b");
+		assertEquals(list.get(2).getCode(), "c");
 	}
 }

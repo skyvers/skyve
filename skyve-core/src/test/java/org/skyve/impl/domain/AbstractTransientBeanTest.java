@@ -1,5 +1,6 @@
 package org.skyve.impl.domain;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -41,7 +42,7 @@ class AbstractTransientBeanTest {
 	void setBizIdUpdatesId() {
 		ConcreteTransientBean bean = new ConcreteTransientBean();
 		bean.setBizId("custom-id");
-		assertTrue("custom-id".equals(bean.getBizId()));
+		assertEquals("custom-id", bean.getBizId());
 	}
 
 	@Test
@@ -54,7 +55,7 @@ class AbstractTransientBeanTest {
 	void setBizCustomerUpdatesCustomer() {
 		ConcreteTransientBean bean = new ConcreteTransientBean();
 		bean.setBizCustomer("acme");
-		assertTrue("acme".equals(bean.getBizCustomer()));
+		assertEquals("acme", bean.getBizCustomer());
 	}
 
 	@Test
@@ -67,7 +68,7 @@ class AbstractTransientBeanTest {
 	void setBizDataGroupIdUpdatesDataGroupId() {
 		ConcreteTransientBean bean = new ConcreteTransientBean();
 		bean.setBizDataGroupId("group1");
-		assertTrue("group1".equals(bean.getBizDataGroupId()));
+		assertEquals("group1", bean.getBizDataGroupId());
 	}
 
 	@Test
@@ -80,7 +81,7 @@ class AbstractTransientBeanTest {
 	void setBizUserIdUpdatesBizUserId() {
 		ConcreteTransientBean bean = new ConcreteTransientBean();
 		bean.setBizUserId("user1");
-		assertTrue("user1".equals(bean.getBizUserId()));
+		assertEquals("user1", bean.getBizUserId());
 	}
 
 	@Test

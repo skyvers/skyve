@@ -1,11 +1,9 @@
 package org.skyve.domain.types;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Date;
 
@@ -66,7 +64,7 @@ class OptimisticLockTest {
 		Date date = new Date(0);
 		OptimisticLock a = new OptimisticLock("user", date);
 		OptimisticLock b = new OptimisticLock("user", date);
-		assertTrue(a.equals(b));
+		assertEquals(a, b);
 	}
 
 	@Test
@@ -75,14 +73,14 @@ class OptimisticLockTest {
 		Date date = new Date(0);
 		OptimisticLock a = new OptimisticLock("alice", date);
 		OptimisticLock b = new OptimisticLock("bob", date);
-		assertFalse(a.equals(b));
+		assertNotEquals(a, b);
 	}
 
 	@Test
-	@SuppressWarnings({ "static-method", "unlikely-arg-type" })
+	@SuppressWarnings("static-method")
 	void equalsReturnsFalseForNonOptimisticLock() {
 		OptimisticLock lock = new OptimisticLock("user", new Date());
-		assertFalse(lock.equals("notALock"));
+		assertNotEquals(lock, "notALock");
 	}
 
 	@Test

@@ -3,7 +3,6 @@ package org.skyve.metadata.view.fluent;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn;
@@ -35,7 +34,7 @@ class FluentLookupDescriptionColumnTest {
 	@Test
 	void filterableSetsTrue() {
 		FluentLookupDescriptionColumn fluent = new FluentLookupDescriptionColumn().filterable(true);
-		assertTrue(Boolean.TRUE.equals(fluent.get().getFilterable()));
+		assertEquals(Boolean.TRUE, fluent.get().getFilterable());
 	}
 
 	@Test
@@ -45,7 +44,7 @@ class FluentLookupDescriptionColumnTest {
 		source.setFilterable(Boolean.TRUE);
 		FluentLookupDescriptionColumn fluent = new FluentLookupDescriptionColumn().from(source);
 		assertEquals("col1", fluent.get().getName());
-		assertTrue(Boolean.TRUE.equals(fluent.get().getFilterable()));
+		assertEquals(Boolean.TRUE, fluent.get().getFilterable());
 	}
 
 	@Test

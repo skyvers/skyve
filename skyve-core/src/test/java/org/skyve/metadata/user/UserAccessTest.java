@@ -313,7 +313,7 @@ class UserAccessTest {
 	@Test
 	void equalsReturnsFalseForNull() {
 		UserAccess a = UserAccess.singular("mod", "doc");
-		assertFalse(a.equals(null));
+		assertNotEquals(a, null);
 	}
 
 	@Test

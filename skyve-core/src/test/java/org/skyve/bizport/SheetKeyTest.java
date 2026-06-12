@@ -3,7 +3,6 @@ package org.skyve.bizport;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -51,7 +50,7 @@ class SheetKeyTest {
 	void equalSameModuleDocument() {
 		SheetKey k1 = new SheetKey("admin", "User");
 		SheetKey k2 = new SheetKey("admin", "User");
-		assertTrue(k1.equals(k2));
+		assertEquals(k1, k2);
 	}
 
 	@Test
@@ -59,7 +58,7 @@ class SheetKeyTest {
 	void notEqualDifferentDocument() {
 		SheetKey k1 = new SheetKey("admin", "User");
 		SheetKey k2 = new SheetKey("admin", "Group");
-		assertFalse(k1.equals(k2));
+		assertNotEquals(k1, k2);
 	}
 
 	@Test
@@ -67,7 +66,7 @@ class SheetKeyTest {
 	void notEqualDifferentModule() {
 		SheetKey k1 = new SheetKey("admin", "User");
 		SheetKey k2 = new SheetKey("crm", "User");
-		assertFalse(k1.equals(k2));
+		assertNotEquals(k1, k2);
 	}
 
 	@Test
@@ -75,7 +74,7 @@ class SheetKeyTest {
 	void equalWithSameCollectionBinding() {
 		SheetKey k1 = new SheetKey("admin", "User", "roles");
 		SheetKey k2 = new SheetKey("admin", "User", "roles");
-		assertTrue(k1.equals(k2));
+		assertEquals(k1, k2);
 	}
 
 	@Test
@@ -83,7 +82,7 @@ class SheetKeyTest {
 	void notEqualDifferentCollectionBinding() {
 		SheetKey k1 = new SheetKey("admin", "User", "roles");
 		SheetKey k2 = new SheetKey("admin", "User", "groups");
-		assertFalse(k1.equals(k2));
+		assertNotEquals(k1, k2);
 	}
 
 	@Test
@@ -91,15 +90,15 @@ class SheetKeyTest {
 	void notEqualOneHasCollectionOneDoesNot() {
 		SheetKey k1 = new SheetKey("admin", "User");
 		SheetKey k2 = new SheetKey("admin", "User", "roles");
-		assertFalse(k1.equals(k2));
-		assertFalse(k2.equals(k1));
+		assertNotEquals(k1, k2);
+		assertNotEquals(k2, k1);
 	}
 
 	@Test
-	@SuppressWarnings({"static-method", "unlikely-arg-type"})
+	@SuppressWarnings("static-method")
 	void notEqualToNonSheetKey() {
 		SheetKey k1 = new SheetKey("admin", "User");
-		assertFalse(k1.equals("not a SheetKey"));
+		assertNotEquals(k1, "not a SheetKey");
 	}
 
 	@Test

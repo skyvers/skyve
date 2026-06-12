@@ -3,6 +3,7 @@ package org.skyve.impl.domain.types;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -84,7 +85,7 @@ public class DecimalUserTypeTest {
 		Decimal2 original = new Decimal2("7.77");
 		Object copy = dec2.deepCopy(original);
 		assertEquals(original, copy);
-		assertFalse("deep copy must not be same reference", copy == original);
+		assertNotSame("deep copy must not be same reference", original, copy);
 	}
 
 	@Test

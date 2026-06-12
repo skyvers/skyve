@@ -97,7 +97,7 @@ class ActionImplTest {
 
 	@Test
 	void clientValidationDefaultIsTrue() {
-		assertTrue(Boolean.TRUE.equals(action.getClientValidation()));
+		assertEquals(Boolean.TRUE, action.getClientValidation());
 	}
 
 	@Test
@@ -108,7 +108,7 @@ class ActionImplTest {
 
 	@Test
 	void inActionPanelDefaultIsTrue() {
-		assertTrue(Boolean.TRUE.equals(action.getInActionPanel()));
+		assertEquals(Boolean.TRUE, action.getInActionPanel());
 	}
 
 	@Test

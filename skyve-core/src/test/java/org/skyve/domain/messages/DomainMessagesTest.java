@@ -6,6 +6,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -449,21 +450,20 @@ class DomainMessagesTest {
 	void uploadExceptionProblemEqualsReturnsTrueForSame() {
 		UploadException.Problem p1 = new UploadException.Problem("broken", "line 5");
 		UploadException.Problem p2 = new UploadException.Problem("broken", "line 5");
-		assertTrue(p1.equals(p2));
+		assertEquals(p1, p2);
 	}
 
 	@Test
 	void uploadExceptionProblemEqualsReturnsFalseForDifferent() {
 		UploadException.Problem p1 = new UploadException.Problem("broken", "line 5");
 		UploadException.Problem p2 = new UploadException.Problem("other", "line 5");
-		assertFalse(p1.equals(p2));
+		assertNotEquals(p1, p2);
 	}
 
 	@Test
-	@SuppressWarnings("unlikely-arg-type")
 	void uploadExceptionProblemEqualsReturnsFalseForNonProblem() {
 		UploadException.Problem p = new UploadException.Problem("broken", "line 5");
-		assertFalse(p.equals("notAProblem"));
+		assertNotEquals(p, "notAProblem");
 	}
 
 	@Test

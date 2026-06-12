@@ -3,6 +3,7 @@ package org.skyve.impl.domain.types;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -123,7 +124,7 @@ public class DateTimeUserTypeTest {
 		Object copy = timeType.deepCopy(t);
 		// TimeOnly strips date-component and millis, compare via its own getTime()
 		assertEquals(t.getTime(), ((java.util.Date) copy).getTime());
-		assertFalse("deep copy must not be same reference", copy == t);
+		assertNotSame("deep copy must not be same reference", t, copy);
 	}
 
 	@Test
@@ -258,7 +259,7 @@ public class DateTimeUserTypeTest {
 		assertTrue(copy instanceof DateOnly);
 		// DateOnly strips time component, compare via the domain object's own getTime()
 		assertEquals(d.getTime(), ((java.util.Date) copy).getTime());
-		assertFalse("deep copy must not be same reference", copy == d);
+		assertNotSame("deep copy must not be same reference", d, copy);
 	}
 
 	@Test
@@ -402,7 +403,7 @@ public class DateTimeUserTypeTest {
 		assertTrue(copy instanceof DateTime);
 		// DateTime strips millis, compare via domain object's own getTime()
 		assertEquals(d.getTime(), ((java.util.Date) copy).getTime());
-		assertFalse("deep copy must not be same reference", copy == d);
+		assertNotSame("deep copy must not be same reference", d, copy);
 	}
 
 	@Test
@@ -522,7 +523,7 @@ public class DateTimeUserTypeTest {
 		assertTrue(copy instanceof org.skyve.domain.types.Timestamp);
 		// Timestamp strips millis, compare via domain object's own getTime()
 		assertEquals(t.getTime(), ((java.util.Date) copy).getTime());
-		assertFalse("deep copy must not be same reference", copy == t);
+		assertNotSame("deep copy must not be same reference", t, copy);
 	}
 
 	@Test

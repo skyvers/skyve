@@ -1,7 +1,7 @@
 package modules.test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -177,7 +177,7 @@ class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
 		assertNotNull(bean);
 		// boolean attribute excluded — should be null/false default
-		assertFalse(Boolean.TRUE.equals(bean.getBooleanFlag()));
+		assertNotEquals(Boolean.TRUE, bean.getBooleanFlag());
 	}
 
 	@Test
