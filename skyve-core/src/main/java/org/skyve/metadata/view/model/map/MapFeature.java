@@ -16,6 +16,7 @@ public class MapFeature {
 	public MapFeature() {
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public MapFeature(Geometry geometry,
 						boolean zoomable,
 						boolean editable,

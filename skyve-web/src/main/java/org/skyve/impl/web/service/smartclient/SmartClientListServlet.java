@@ -465,6 +465,7 @@ public class SmartClientListServlet extends HttpServlet {
 		}
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private static void fetch(Module module,
 								Document queryDocument,
 								int startRow,
@@ -524,7 +525,7 @@ public class SmartClientListServlet extends HttpServlet {
 		Util.chunkCharsToWriter(message, pw);
 	}
 
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
 	private static void addFilterCriteriaToQuery(Module module,
 													Document document,
 													User user,
@@ -919,7 +920,7 @@ public class SmartClientListServlet extends HttpServlet {
 
 	private static final String HIERARCHICAL_PARENT_ID_SUFFIX = "." + HierarchicalBean.PARENT_ID;
 
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
 	private static void addAdvancedFilterCriteriaToQueryInternal(Module module,
 																	Document document,
 																	User user,
@@ -1724,6 +1725,7 @@ public class SmartClientListServlet extends HttpServlet {
 		Util.chunkCharsToWriter(returnTagUpdateMessage(user, customer, parameters, module, model, false), pw);
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private static void flag(HttpServletRequest request,
 								PrintWriter pw,
 								AbstractPersistence persistence,

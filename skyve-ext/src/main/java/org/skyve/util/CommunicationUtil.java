@@ -566,6 +566,7 @@ public class CommunicationUtil {
 	 * @param bean
 	 * @throws Exception
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public static void sendFailSafeSystemCommunication(WebContext webContext, String description, String sendTo, String ccTo, String defaultSubject, String defaultBody,
 			ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... beans) throws Exception {
 		Communication c = initialiseSystemCommunication(description, sendTo, ccTo, defaultSubject, defaultBody);
@@ -585,6 +586,7 @@ public class CommunicationUtil {
 	 * @param beans Binding context beans
 	 * @throws Exception If initialisation or send fails in explicit mode
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public static void sendFailSafeSystemCommunication(String description, String sendTo, String ccTo, String defaultSubject, String defaultBody, ResponseMode responseMode,
 			MailAttachment[] additionalAttachments, Bean... beans) throws Exception {
 		sendFailSafeSystemCommunication(null, description, sendTo, ccTo, defaultSubject, defaultBody, responseMode, additionalAttachments, beans);

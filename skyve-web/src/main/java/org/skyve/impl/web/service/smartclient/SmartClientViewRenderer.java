@@ -4124,6 +4124,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param invisibleConditionName optional invisible condition binding
 	 * @param canDelete delete permission used for remove actions
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private void addAction(String actionName,
 							ImplicitActionName implicitName,
 							String displayName,
@@ -4244,6 +4245,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param canDelete delete permission used for remove actions
 	 * @return JavaScript constructor expression for the button
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private String generateButton(String actionName,
 									ImplicitActionName implicitName,
 									String label,
@@ -4490,6 +4492,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	* @param visitedQueryNames visited data-source names used to break recursion
 	* @return the generated data-source id
      */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public static String appendDataSourceDefinition(User user,
 														Customer customer,
 														Module owningModule,
@@ -4543,6 +4546,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	* @param visitedQueryNames visited data-source names used to break recursion
 	* @return the generated data-source id
      */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public static String appendDataSourceDefinition(User user,
 														Customer customer,
 														MetaDataQueryDefinition query,
@@ -4597,7 +4601,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param visitedQueryNames visited data-source ids used to avoid recursion loops
 	 * @return generated data-source id
 	 */
-	@SuppressWarnings({"null", "java:S3776"}) // Complexity OK
+	@SuppressWarnings({"java:S107", "null", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
 	private static String appendDataSourceDefinition(User user,
 														Customer customer,
 														String owningModuleName,

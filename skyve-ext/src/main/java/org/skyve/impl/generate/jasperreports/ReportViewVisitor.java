@@ -270,6 +270,7 @@ public class ReportViewVisitor extends ViewVisitor {
 	 * @param horizontal
 	 * @param name
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	protected void addContainer(String widgetId, String borderTitle, Boolean border, Integer pixelWidth, Integer percentageWidth, Integer responsiveWidth, Boolean horizontal,
 			ContainerType type, String invisibleConditionName) {
 
@@ -686,7 +687,7 @@ public class ReportViewVisitor extends ViewVisitor {
 	 * @param percentageWidth
 	 * @param responsiveWidth
 	 */
-	@SuppressWarnings({"boxing", "java:S3776"}) // Complexity OK
+	@SuppressWarnings({"java:S107", "boxing", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
 	protected void addElementFromItem(String binding, ReportElement.ElementType elementType, Integer pixelWidth, Integer percentageWidth, Integer responsiveWidth, Integer pixelHeight, 
 			String valueFontName, String invisibleConditionName) {
 		

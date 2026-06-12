@@ -86,6 +86,7 @@ public class VueListGridScript extends UIOutput {
 	 * @param showSnap whether snap controls are visible
 	 * @param selectedRemoteCommand the optional remote command for selected row callbacks
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public VueListGridScript(String containerId,
 								String owningModuleName,
 								String owningDocumentName,

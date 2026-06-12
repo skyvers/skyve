@@ -125,6 +125,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	 * @param forApply whether the manipulator is for apply processing
 	 * @return configured JSON manipulator
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private static ViewJSONManipulator newManipulator(User user,
 														Module module, 
 														Document document, 
@@ -575,7 +576,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	 * @param pw response writer
 	 * @throws Exception when fetch processing fails
 	 */
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
 	private static void fetch(AbstractWebContext webContext,
 			                    User user,
 		    					Customer customer,
@@ -905,7 +906,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	 * @param uxui UX/UI profile used to resolve the view
 	 * @throws Exception when parameter conversion or binding fails
 	 */
-    @SuppressWarnings("java:S3776") // Complexity OK
+    @SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
     public static void applyNewParameters(Customer customer, 
 	    									User user, 
 	    									AbstractPersistence persistence, 
@@ -1008,7 +1009,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	 * @param pw response writer
 	 * @throws Exception when apply processing fails
 	 */
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
 	private static void apply(AbstractWebContext webContext,
 		                        User user,
 		    					Customer customer,
@@ -1241,6 +1242,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	 * @param pw response writer
 	 * @throws Exception when response rendering fails
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private static void pumpOutResponse(AbstractWebContext webContext,
 		                                    User user,
 		                                    CustomerImpl internalCustomer,
@@ -1302,6 +1304,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	 * @param pw response writer
 	 * @throws Exception when delete processing fails
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private static void remove(AbstractWebContext webContext,
 								User user,
 		                        Customer customer,

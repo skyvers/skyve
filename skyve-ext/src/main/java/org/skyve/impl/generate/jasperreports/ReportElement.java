@@ -527,6 +527,7 @@ public class ReportElement {
 	 * @param italic
 	 * @param printWhenExpression
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public ReportElement(ElementType type, String name, String valueExpression, String fontName, Integer fontSize, Integer top, Integer left,
 			Integer width, Integer height, Boolean border, ElementAlignment alignment, Boolean bold, Boolean italic, String invisibleConditionName) {
 

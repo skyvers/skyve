@@ -589,6 +589,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 							false);
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private HtmlOutputText outputText(String dataWidgetVar,
 										String value,
 										String binding,
@@ -1838,6 +1839,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	protected UIComponent createListGridActionColumn(String moduleName,
 													   String documentName,
 													   boolean canCreateDocument,
@@ -2493,6 +2495,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * @param toAddTo
 	 * @param binding
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private void editableContent(List<UIComponent> toAddTo,
 									String id,
 									String binding,
@@ -3262,6 +3265,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 	
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	protected Password password(String dataWidgetVar,
 									String binding,
 									String title,
@@ -3284,6 +3288,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	protected InputText textField(String dataWidgetVar,
 									String binding,
 									String title,
@@ -3322,6 +3327,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private InputMask maskField(String dataWidgetVar,
 									String binding,
 									String title,
@@ -3418,6 +3424,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private Spinner spinner(String dataWidgetVar,
 								String binding,
 								String title,
@@ -3457,7 +3464,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
 	private DatePicker datePicker(String dataWidgetVar,
 									String binding,
 									String title,
@@ -3708,6 +3715,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	protected InputTextarea textArea(String dataWidgetVar,
 										String binding,
 										String title,
@@ -3736,7 +3744,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
 	protected CommandButton actionButton(String title,
 											String iconStyleClass,
 											String tooltip,
@@ -3861,6 +3869,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * Create a button with a href URL that looks like...
 	 * http://localhost:8080/skyve/report/Bum.html?_f=html&_c=<webId>&_id=<id>&wee=poo&_n=Bum&_mod=<module>&_doc=<document>
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private Button reportButton(String title,
 									String iconStyleClass,
 									String tooltip,
@@ -3929,6 +3938,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * Create a command button that redirects to a URL that looks like...
 	 * http://localhost:8080/skyve/download?_n=<downloadAction>&_doc=<module>.<document>&_c=<webId>&_b=<form binding>&_ctim=<currentTimeInMillis>
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private CommandButton downloadButton(String title,
 											String iconStyleClass,
 											String tooltip,
@@ -3970,6 +3980,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 *					<iframe id="s01_overlayiframe" src="/skyve/contentUpload.xhtml" style="width:100%;height:280px;border:none"></iframe>
 	 *			    </p:overlayPanel>
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	protected UIComponent uploadButton(String title,
 										String iconStyleClass,
 										String tooltip,
@@ -4062,6 +4073,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	protected CommandLink downloadLink(String title,
 										String tooltip,
 										String actionName,
@@ -4093,6 +4105,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	protected CommandLink actionLink(String title,
 										String tooltip,
 										ImplicitActionName implicitActionName,
@@ -4162,6 +4175,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		command.setActionExpression(methodExpressionForAction(implicitActionName, actionName, collectionBinding, dataWidgetVar, inline, eventHandlerActionNames));
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private Button linkButton(String icon,
 								String styleClass,
 								String style,
@@ -4343,6 +4357,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return input(SelectBooleanCheckbox.COMPONENT_TYPE, dataWidgetVar, binding, title, requiredMessage, disabled, formDisabled);
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	protected ColorPicker colourPicker(String dataWidgetVar,
 										String binding,
 										String title,
@@ -4412,6 +4427,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	protected AutoComplete lookupDescription(String dataWidgetVar,
 												String binding,
 												String title,
@@ -4480,6 +4496,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	protected AutoComplete complete(String dataWidgetVar,
 										String binding,
 										String title,
@@ -4584,6 +4601,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private DataTable dataTable(String binding,
 									String dataWidgetVar,
 									String invisible,

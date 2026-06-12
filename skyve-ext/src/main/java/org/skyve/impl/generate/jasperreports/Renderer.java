@@ -965,6 +965,7 @@ public class Renderer {
 	 * @param printWhenExpression Optional invisible-condition expression name.
 	 * @return The same band instance after element insertion.
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public static ReportBand addElement(ReportBand band, ReportElement.ElementType type, String name, String valueExpression, String fontName, Integer fontSize, Integer top,
 			Integer left,
 			Integer width, Integer height, Boolean border, ReportElement.ElementAlignment alignment, Boolean bold, Boolean italic, String foreColour, String backColour,

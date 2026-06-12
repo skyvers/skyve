@@ -105,7 +105,7 @@ abstract class SmartClientAttributeDefinition {
 	 * @param isField whether the attribute renders as a form field
 	 * @param uxui the active UX/UI profile name
 	 */
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
 	protected SmartClientAttributeDefinition(User user,
 												Customer customer, 
 												Module module,

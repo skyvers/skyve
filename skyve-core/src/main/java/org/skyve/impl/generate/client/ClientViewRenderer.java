@@ -448,7 +448,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		formRowLayout = null;
 	}
 
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
 	private void addComponent(String widgetLabel,
 								int formColspan,
 								@Nullable String widgetRequiredMessage,
@@ -562,7 +562,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		renderButton(name, label, 0, iconUrl, iconStyleClass, toolTip, confirmationText, action, button);
 	}
 
-	@SuppressWarnings("unused")
+	@SuppressWarnings({"java:S107", "unused"}) // Long parameter list preserves the existing framework/API contract.
 	private void renderButton(String name,
 								String label,
 								int formColspan,

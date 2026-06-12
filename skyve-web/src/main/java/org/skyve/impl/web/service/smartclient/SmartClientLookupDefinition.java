@@ -48,7 +48,7 @@ public class SmartClientLookupDefinition {
 	 * @param runtime whether runtime domain/query values should be resolved
 	 * @param uxui active UX/UI profile name
 	 */
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
 	protected SmartClientLookupDefinition(boolean bindingToDataGrid,
 		    								User user,
 		    								Customer customer,

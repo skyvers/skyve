@@ -40,6 +40,7 @@ public class GetBeansAction extends FacesAction<List<BeanMapAdapter>> {
 	 * @param parameters query parameter definitions
 	 * @param escape whether output values should be escaped
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public GetBeansAction(FacesView facesView,
 							String bizModule,
 							String bizDocument,

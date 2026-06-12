@@ -77,6 +77,7 @@ final class BackupUtil {
 		// nothing to see here
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	static void initialise(String customerName,
 							String contentDirectory,
 							String contentFileStorage,

@@ -272,6 +272,7 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @param gridColumnExpression mutable aggregate expression builder for columns
 	 * @return the updated insertion point component
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public abstract RenderedComponent addDataGridBoundColumn(RenderedComponent component,
 																RenderedComponent current, 
 																AbstractDataWidget widget,
@@ -377,6 +378,7 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @param showGrid whether the grid shell should be rendered
 	 * @return the generated list-repeater component
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public abstract RenderedComponent listRepeater(RenderedComponent component,
 													String modelDocumentName,
 													String modelName,
@@ -605,6 +607,7 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @param format formatter to apply when present
 	 * @return the generated text-field component
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public abstract RenderedComponent text(RenderedComponent component, 
 											String dataWidgetVar, 
 											TextField text, 

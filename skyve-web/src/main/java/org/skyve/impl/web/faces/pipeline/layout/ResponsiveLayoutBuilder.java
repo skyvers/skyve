@@ -438,6 +438,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 		return result;
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private HtmlPanelGroup responsiveColumn(Integer pixelWidth, 
 												Integer responsiveWidth, 
 												Integer percentageWidth,

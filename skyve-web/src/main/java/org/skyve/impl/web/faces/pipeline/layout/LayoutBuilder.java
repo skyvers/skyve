@@ -186,6 +186,7 @@ public abstract class LayoutBuilder extends AbstractFacesBuilder {
 	 * @param widgetInvisible the invisible condition expression
 	 * @param widgetHelpText the help text
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public abstract void layoutFormItemLabel(UIComponent formOrRowLayout,
 												UIComponent formItemComponent,
 												Form currentForm,
@@ -213,6 +214,7 @@ public abstract class LayoutBuilder extends AbstractFacesBuilder {
 	 * @param showLabel whether the label is shown
 	 * @param topLabel whether the label is rendered above the widget
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public abstract void layoutFormItemWidget(UIComponent formOrRowLayout,
 												UIComponent formItemComponent,
 												Form currentForm,
@@ -253,6 +255,7 @@ public abstract class LayoutBuilder extends AbstractFacesBuilder {
 	 * @param invisibleConditionName optional invisible condition expression
 	 * @return the resulting current component for subsequent layout operations
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public abstract UIComponent addToContainer(UIComponent component,
 												Container viewContainer,
 												UIComponent container, 

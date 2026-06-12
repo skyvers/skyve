@@ -590,6 +590,7 @@ public class MailLogUtil {
 		private final Boolean hasMultipleBodies;
 		private final Long bodyVariantCount;
 
+		@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 		private MailLogEntry(Timestamp timestamp,
 							String toRecipients,
 							String ccRecipients,

@@ -30,6 +30,7 @@ public class EHCacheConfig<K extends Serializable, V extends Serializable> exten
 	 * @param valueClass value type
 	 * @param diskSizeInMB disk tier size in megabytes
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public EHCacheConfig(String name,
 							long heapSizeEntries,
 							long offHeapSizeInMB,
@@ -55,6 +56,7 @@ public class EHCacheConfig<K extends Serializable, V extends Serializable> exten
 	 * @param diskSizeInMB disk tier size in megabytes
 	 * @param persistent whether disk storage is persistent across restarts
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public EHCacheConfig(String name,
 							long heapSizeEntries,
 							long offHeapSizeInMB,
@@ -143,6 +145,7 @@ public class EHCacheConfig<K extends Serializable, V extends Serializable> exten
 	 * @param diskSizeInMB disk tier size in megabytes
 	 * @param persistent whether disk storage is persistent across restarts
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public EHCacheConfig(String name,
 							long heapSizeEntries,
 							CacheExpiryPolicy expiryPolicy,

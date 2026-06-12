@@ -191,6 +191,7 @@ public class View extends HtmlPanelGroup {
 		 * @param layoutBuilder the layout builder used to render the view
 		 * @return the generated faces view components, including an optional sidebar
 	 */
+    @SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
     public static List<UIComponent> generate(String moduleName,
 				    							String documentName,
 				    							String widgetId,

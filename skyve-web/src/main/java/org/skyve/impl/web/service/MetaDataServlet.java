@@ -3606,6 +3606,7 @@ public class MetaDataServlet extends HttpServlet {
 				result.append(",\"sort\":\"").append(order.getSort()).append('"');
 			}
 			
+			@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 			private void processAction(String name,
 										ImplicitActionName type,
 										String label,

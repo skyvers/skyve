@@ -115,6 +115,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * @param names mapping from component-local names to owning-view names
 	 * @param widgetId optional widget id used to extract a single targeted fragment
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public ComponentViewVisitor(CustomerImpl customer, 
 									ModuleImpl module, 
 									DocumentImpl document, 

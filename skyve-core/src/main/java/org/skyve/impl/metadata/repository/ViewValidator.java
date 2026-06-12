@@ -175,6 +175,7 @@ class ViewValidator extends ViewVisitor {
 		viewIdentifier = view.getName() + " view for UX/UI " + uxui + " for document " + module.getName() + '.' + document.getName();
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private Class<?> validateBinding(String bindingPrefix,
 										String binding,
 										boolean bindingRequired,
@@ -195,7 +196,7 @@ class ViewValidator extends ViewVisitor {
 								assertTypes);
 	}
 
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
 	private Class<?> validateBinding(Module contextModule,
 										Document contextDocument,
 										String bindingPrefix,

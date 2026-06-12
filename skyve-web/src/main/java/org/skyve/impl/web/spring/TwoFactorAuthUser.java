@@ -39,6 +39,7 @@ public class TwoFactorAuthUser extends User {
 	 * @param email The principal email address.
 	 * @param userPassword The original user password value for downstream flows.
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public TwoFactorAuthUser(String username,
 					String password,
 					boolean enabled,

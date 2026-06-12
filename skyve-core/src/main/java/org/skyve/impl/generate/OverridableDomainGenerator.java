@@ -996,7 +996,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 	}
 
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
 	private void generateAttributeMappings(StringBuilder contents,
 											Customer customer,
 											Module module,
@@ -2185,7 +2185,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		enums.append("\t}\n\n");
 	}
 
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
 	private void addReference(Reference reference,
 								boolean overriddenReference,
 								Customer customer,
@@ -2518,7 +2518,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 	}
 
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
 	private void addInverse(AbstractInverse inverse,
 								boolean overriddenInverse,
 								Customer customer,
@@ -3002,7 +3002,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		contents.append("\n}");
 	}
 
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
 	private void generateJava(Customer customer,
 								Module module,
 								Document document,

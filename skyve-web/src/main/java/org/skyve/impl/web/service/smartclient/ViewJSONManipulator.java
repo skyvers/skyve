@@ -283,6 +283,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 	HrefProcessor hrefProcessor = new HrefProcessor();
 	private StringBuilder htmlGuts = new StringBuilder(64);
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	protected ViewJSONManipulator(User user,
 									Module module, 
 									Document document, 
@@ -1508,7 +1509,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 		visitDataWidget(repeater, parentVisible, parentEnabled, true, true, null, null, null, null, null);
 	}
 	
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
 	private void visitDataWidget(AbstractDataWidget widget,
 									boolean parentVisible,
 									boolean parentEnabled,

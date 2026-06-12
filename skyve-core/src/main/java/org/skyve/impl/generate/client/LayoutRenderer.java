@@ -139,6 +139,7 @@ public abstract class LayoutRenderer extends AbstractRenderer {
 	 *
 	 * <p>Side effects: mutates {@code formOrRowLayout} by appending label-rendering content.
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public abstract void layoutFormItemLabel(RenderedComponent formOrRowLayout,
 												RenderedComponent formItemComponent,
 												Form currentForm,
@@ -154,6 +155,7 @@ public abstract class LayoutRenderer extends AbstractRenderer {
 	 *
 	 * <p>Side effects: mutates {@code formOrRowLayout} by appending widget-rendering content.
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public abstract void layoutFormItemWidget(RenderedComponent formOrRowLayout,
 												RenderedComponent formItemComponent,
 												Form currentForm,
@@ -180,6 +182,7 @@ public abstract class LayoutRenderer extends AbstractRenderer {
 	 * @param invisibleConditionName visibility condition expression for the child
 	 * @return the active render node to continue processing with
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public abstract RenderedComponent addToContainer(RenderedComponent component,
 														Container viewContainer,
 														RenderedComponent container, 

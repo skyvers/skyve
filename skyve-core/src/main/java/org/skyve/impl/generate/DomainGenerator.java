@@ -223,6 +223,7 @@ public abstract class DomainGenerator {
 	
 	protected Map<Path, CharSequence> generation = new TreeMap<>();
 	
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	protected DomainGenerator(boolean write,
 								boolean debug,
 								boolean multiTenant,
@@ -298,6 +299,7 @@ public abstract class DomainGenerator {
 
 	public abstract void generate() throws Exception;
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public static final DomainGenerator newDomainGenerator(boolean write,
 															boolean debug,
 															boolean multiTenant,
@@ -363,6 +365,7 @@ public abstract class DomainGenerator {
 	/**
 	 * Generate the domain model.
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public static void generate(boolean debug,
 									boolean multiTenant,
 									DialectOptions dialectOptions,

@@ -182,6 +182,7 @@ public abstract class AbstractFacesBuilder {
 	 * @param percentageHeight height in percent
 	 * @param defaultPercentageWidth default percentage width when no width is specified
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	protected final void setSizeAndTextAlignStyle(UIComponent component,
 													String existingStyle, 
 													Integer pixelWidth, 
@@ -208,7 +209,7 @@ public abstract class AbstractFacesBuilder {
 	 * @param specialTextAlignStyleAttributeName optional style attribute name for text alignment
 	 * @param rightPaddingIfNecessary optional right padding applied for right alignment
 	 */
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
 	protected void setSizeAndTextAlignStyle(UIComponent component,
 												String existingStyle, 
 												Integer pixelWidth, 
@@ -316,6 +317,7 @@ public abstract class AbstractFacesBuilder {
 	 * @param sanitise sanitisation mode
 	 * @return the created value expression
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	protected ValueExpression createValueExpressionFromFragment(String expressionPrefix, 
 																	boolean dataWidgetVar,
 																	String fragment, 
@@ -470,6 +472,7 @@ public abstract class AbstractFacesBuilder {
 	 * @param rowspan row span
 	 * @return the configured column
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	protected Column column(String invisible, 
 								boolean noWrap, 
 								boolean top, 

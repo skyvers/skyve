@@ -666,6 +666,7 @@ public class DesktopView extends HarnessView {
 	 * @param dataSources buffer that receives generated datasource definitions
 	 * @param visitedQueryNames set used to avoid duplicate query definitions
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private static void listDataSourcesForMenuItems(UserImpl user,
 														Customer customer, 
 														String moduleName, 

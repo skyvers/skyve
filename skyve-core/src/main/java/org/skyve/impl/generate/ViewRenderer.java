@@ -882,6 +882,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 		}
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public abstract void renderFormButton(String name,
 											String label,
 											String iconUrl,
@@ -890,6 +891,8 @@ public abstract class ViewRenderer extends ViewVisitor {
 											String confirmationText,
 											Action action,
 											Button button);
+
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public abstract void renderButton(String name,
 										String label,
 										String iconUrl,
@@ -1955,6 +1958,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 							canDelete);
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public abstract void renderRemoveAction(String name,
 												String label,
 												String iconUrl,

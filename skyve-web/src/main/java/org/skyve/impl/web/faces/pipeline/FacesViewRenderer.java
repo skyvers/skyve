@@ -204,6 +204,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	 * @param cb component builder used to create UI components
 	 * @param lb layout builder used to create container layouts
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public FacesViewRenderer(User user,
 								Module module,
 								Document document,
@@ -556,7 +557,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	 * @param lg optional large breakpoint width
 	 * @param xl optional extra-large breakpoint width
 	 */
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
 	private void addComponent(String widgetLabel,
 								int formColspan,
 								@Nullable String widgetRequiredMessage,
@@ -708,6 +709,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	 * @param button button metadata
 	 * @param formDisabledConditionName form-level disabled condition
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private void renderButton(String label,
 								int formColspan,
 								String iconStyleClass,
@@ -3186,6 +3188,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	 * @param xl optional extra-large breakpoint width
 	 * @param invisibleConditionName invisible-condition expression
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private void addToContainer(UIComponent component,
 									Integer pixelWidth,
 									Integer responsiveWidth,

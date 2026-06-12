@@ -252,6 +252,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param action action metadata
 	 * @return the resulting component
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public abstract UIComponent actionButton(UIComponent component,
 												String dataWidgetBinding, 
 												String dataWidgetVar, 
@@ -276,6 +277,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param action action metadata
 	 * @return the resulting component
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public abstract UIComponent reportButton(UIComponent component, 
 												String label,
 												String iconStyleClass,
@@ -300,6 +302,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param action action metadata
 	 * @return the resulting component
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public abstract UIComponent downloadButton(UIComponent component,
 												String dataWidgetBinding, 
 												String dataWidgetVar, 
@@ -324,6 +327,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param action action metadata
 	 * @return the resulting component
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public abstract UIComponent uploadButton(UIComponent component, 
 												String label,
 												String iconStyleClass,
@@ -436,6 +440,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param pixelWidth optional column width
 	 * @return the resulting component after adding the column
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public abstract UIComponent addDataGridBoundColumn(UIComponent component,
 														UIComponent current, 
 														AbstractDataWidget widget,
@@ -500,6 +505,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param canDelete whether delete is permitted
 	 * @return the resulting component after adding the column
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public abstract UIComponent addDataGridActionColumn(UIComponent component,
 															UIComponent current, 
 															DataGrid grid,
@@ -524,6 +530,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param aggregateQuery whether the model uses aggregate query semantics
 	 * @return the resulting list-grid component
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public abstract UIComponent listGrid(UIComponent component,
 											String moduleName,
 											String modelDocumentName,
@@ -568,6 +575,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param showGrid whether grid borders should be shown
 	 * @return the resulting list-repeater component
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public abstract UIComponent listRepeater(UIComponent component,
 												String modelDocumentName,
 												String modelName,
@@ -809,6 +817,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param query backing query definition
 	 * @return the resulting wrapper component
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public abstract EventSourceComponent lookupDescription(EventSourceComponent component, 
 															String dataWidgetVar,
 															LookupDescription lookup,
@@ -888,6 +897,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param facesConverter JSF converter instance
 	 * @return the resulting wrapper component
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public abstract EventSourceComponent spinner(EventSourceComponent component, 
 													String dataWidgetVar,
 													Spinner spinner,
@@ -933,6 +943,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param facesConverter JSF converter instance
 	 * @return the resulting wrapper component
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public abstract EventSourceComponent text(EventSourceComponent component, 
 												String dataWidgetVar, 
 												TextField text, 
@@ -958,6 +969,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param length optional max length
 	 * @return the resulting wrapper component
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public abstract EventSourceComponent textArea(EventSourceComponent component, 
 													String dataWidgetVar,
 													TextArea text,
@@ -1104,6 +1116,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param action action metadata
 	 * @return the resulting action-link component
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public abstract UIComponent actionLink(UIComponent component,
 											String dataWidgetBinding,
 											String dataWidgetVar,
@@ -1145,6 +1158,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param action action metadata
 	 * @return the resulting download component
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public abstract UIComponent download(UIComponent component, 
 											String dataWidgetBinding,
 											String dataWidgetVar,
@@ -1206,6 +1220,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param action action metadata
 	 * @return the resulting action component
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public abstract UIComponent action(UIComponent component, 
 										String dataWidgetBinding, 
 										String dataWidgetVar,

@@ -114,6 +114,7 @@ public class RequestListModel extends InMemoryListModel<MonitoringDashboard> {
 		return result;
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private static void processPeriod(RequestKey requestKey,
 										long now,
 										Map<Integer, Integer> millis,

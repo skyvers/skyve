@@ -1095,7 +1095,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @param reversed whether parameter appears on the left-hand side
 	 * @return this filter for fluent chaining
 	 */
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
 	private DocumentFilter appendRestriction(@Nonnull String entityAlias,
 												@Nonnull String binding,
 												@Nullable String operator,
