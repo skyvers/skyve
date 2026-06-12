@@ -16,6 +16,7 @@ import java.util.List;
  * @param bizKey                   the biz key of the bean being deleted
  * @param referencingDocumentAlias the human-readable name of the referencing document
  */
+@SuppressWarnings("java:S110") // This inheritance-depth warning is ridiculous for intentional framework hierarchies.
 public class ReferentialConstraintViolationException extends DomainException implements MessageException {
 	private static final long serialVersionUID = 4458169944531617791L;
 

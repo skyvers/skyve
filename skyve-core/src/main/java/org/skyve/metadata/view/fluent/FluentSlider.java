@@ -5,6 +5,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Slider;
 /**
  * Builds {@link Slider} widget metadata using a fluent API.
  */
+@SuppressWarnings("java:S110") // This inheritance-depth warning is ridiculous for intentional framework hierarchies.
 public class FluentSlider extends FluentChangeableInputWidget<FluentSlider>
 		implements FluentAbsoluteSize<FluentSlider>, FluentConstrainableHeight<FluentSlider> {
 	private Slider slider = null;

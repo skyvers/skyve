@@ -21,7 +21,7 @@ import org.hibernate.spatial.dialect.mysql.MySQLSpatialDialect;
 /**
  * Provides the copied MySQL 8 spatial dialect variant used by Skyve's InnoDB wrapper dialects.
  */
-@SuppressWarnings("java:S1192") // Repeated literals are deliberate MySQL spatial function template fragments.
+@SuppressWarnings({"java:S1192", "java:S110"}) // Repeated literals are deliberate; the inheritance-depth warning is ridiculous for this framework hierarchy.
 public class MySQL8SpatialDialect extends MySQL8Dialect implements SpatialDialect {
 	private static final long serialVersionUID = -7095042365788578524L;
 

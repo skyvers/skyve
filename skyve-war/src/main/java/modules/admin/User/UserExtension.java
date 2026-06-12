@@ -33,6 +33,7 @@ import modules.admin.domain.UserRole;
 /**
  * Extends admin {@link User} with metadata-user mapping and activation workflows.
  */
+@SuppressWarnings("java:S110") // This inheritance-depth warning is ridiculous for intentional framework hierarchies.
 public class UserExtension extends User {
 	private static final long serialVersionUID = 3422968996147520436L;
 
@@ -46,7 +47,7 @@ public class UserExtension extends User {
 			+ "<p>To complete your account setup, please click the activation link below.</p>"
 			+ "<p><a href=\"{%2$s}\">{%2$s}</a></p>"
 			+ "<p>If you have any questions about your new account, contact us at <a href=\"mailto:%3$s\">%3$s</a>.</p>",
-			Binder.createCompoundBinding(User.contactPropertyName, Contact.namePropertyName),
+			Binder.createCompoundBinding(UserProxy.contactPropertyName, Contact.namePropertyName),
 			activateUrlPropertyName,
 			Util.getSupportEmailAddress());
 
@@ -103,6 +104,7 @@ public class UserExtension extends User {
 	 *
 	 * @return the metadata user that is this user
 	 */
+	@Override
 	public org.skyve.metadata.user.User toMetaDataUser() {
 		UserImpl result = null;
 

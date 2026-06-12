@@ -5,6 +5,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 /**
  * Builds {@link CheckBox} widget metadata using a fluent API.
  */
+@SuppressWarnings("java:S110") // This inheritance-depth warning is ridiculous for intentional framework hierarchies.
 public class FluentCheckBox extends FluentChangeableInputWidget<FluentCheckBox> implements FluentAbsoluteSize<FluentCheckBox> {
 	private CheckBox check = null;
 

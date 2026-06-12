@@ -10,6 +10,7 @@ import java.util.List;
  * a large import, or a complex query) has exceeded a configured timeout threshold.
  * Application code may catch this and present a user-friendly message.
  */
+@SuppressWarnings("java:S110") // This inheritance-depth warning is ridiculous for intentional framework hierarchies.
 public class TimeoutException extends DomainException implements MessageException {
 	private static final long serialVersionUID = 1184348868443172562L;
 

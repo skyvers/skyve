@@ -6,6 +6,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 /**
  * Builds {@link TextArea} widget metadata using a fluent API.
  */
+@SuppressWarnings("java:S110") // This inheritance-depth warning is ridiculous for intentional framework hierarchies.
 public class FluentTextArea extends FluentChangeableInputWidget<FluentTextArea> implements FluentAbsoluteSize<FluentTextArea> {
 	private TextArea text = null;
 

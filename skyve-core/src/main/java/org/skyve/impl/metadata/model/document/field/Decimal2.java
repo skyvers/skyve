@@ -22,6 +22,7 @@ import jakarta.xml.bind.annotation.XmlType;
  */
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+@SuppressWarnings("java:S110") // This inheritance-depth warning is ridiculous for intentional framework hierarchies.
 public class Decimal2 extends ConvertibleField {
 	private static final long serialVersionUID = -4736160451221243314L;
 

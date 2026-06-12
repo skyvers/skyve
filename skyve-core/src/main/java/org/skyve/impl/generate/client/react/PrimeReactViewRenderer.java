@@ -11,6 +11,7 @@ import org.skyve.web.UserAgentType;
 /**
  * PrimeReact-oriented view renderer specialisation.
  */
+@SuppressWarnings("java:S110") // This inheritance-depth warning is ridiculous for intentional framework hierarchies.
 public class PrimeReactViewRenderer extends ReactViewRenderer {
 	static final String PRIME_REACT_VIEW_FILE = "../../PrimeReactView.js";
 	static final String STARTING_INDENT = "\t\t\t";

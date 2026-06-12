@@ -5,6 +5,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Spinner;
 /**
  * Builds {@link Spinner} widget metadata using a fluent API.
  */
+@SuppressWarnings("java:S110") // This inheritance-depth warning is ridiculous for intentional framework hierarchies.
 public class FluentSpinner extends FluentTextField {
 	private Spinner spinner = null;
 

@@ -20,6 +20,7 @@ import jakarta.xml.bind.annotation.XmlType;
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "spinner")
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"min", "max", "step"})
+@SuppressWarnings("java:S110") // This inheritance-depth warning is ridiculous for intentional framework hierarchies.
 public class Spinner extends TextField {
 	private static final long serialVersionUID = 5688526602834604710L;
 

@@ -22,6 +22,7 @@ import org.skyve.util.SecurityUtil;
  * @see AccessException
  * @see org.skyve.util.SecurityUtil
  */
+@SuppressWarnings("java:S110") // This inheritance-depth warning is ridiculous for intentional framework hierarchies.
 public class SecurityException extends DomainException {
 	private static final long serialVersionUID = 2941808458696267548L;
 

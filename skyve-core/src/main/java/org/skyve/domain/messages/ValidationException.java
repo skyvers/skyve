@@ -30,6 +30,7 @@ import java.util.List;
  * @see Message
  * @see org.skyve.metadata.model.document.Bizlet#validate
  */
+@SuppressWarnings("java:S110") // This inheritance-depth warning is ridiculous for intentional framework hierarchies.
 public class ValidationException extends DomainException implements MessageException {
 	private static final long serialVersionUID = -2033700648810378214L;
 

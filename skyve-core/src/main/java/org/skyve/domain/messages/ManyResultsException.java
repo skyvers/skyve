@@ -10,6 +10,7 @@ import java.util.List;
  * {@link org.skyve.persistence.Persistence#retrieve} when the underlying query matches
  * multiple rows. Signals a data or query definition problem rather than a user error.
  */
+@SuppressWarnings("java:S110") // This inheritance-depth warning is ridiculous for intentional framework hierarchies.
 public class ManyResultsException extends DomainException implements MessageException {
 	private static final long serialVersionUID = -9157432424169068442L;
 

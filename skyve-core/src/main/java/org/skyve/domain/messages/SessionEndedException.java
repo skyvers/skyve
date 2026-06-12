@@ -18,6 +18,7 @@ import jakarta.validation.constraints.NotNull;
  *
  * @see ConversationEndedException
  */
+@SuppressWarnings("java:S110") // This inheritance-depth warning is ridiculous for intentional framework hierarchies.
 public class SessionEndedException extends DomainException implements MessageException {
 	private static final long serialVersionUID = 2247724782906480914L;
 

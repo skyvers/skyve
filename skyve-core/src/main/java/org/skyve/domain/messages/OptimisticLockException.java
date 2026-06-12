@@ -24,6 +24,7 @@ import org.skyve.util.Util;
  * @see org.skyve.domain.types.OptimisticLock
  * @see org.skyve.domain.PersistentBean#getBizLock()
  */
+@SuppressWarnings("java:S110") // This inheritance-depth warning is ridiculous for intentional framework hierarchies.
 public class OptimisticLockException extends DomainException implements MessageException {
 	private static final long serialVersionUID = 9168437033648462795L;
 

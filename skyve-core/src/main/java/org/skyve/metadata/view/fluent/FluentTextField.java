@@ -7,6 +7,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 /**
  * Builds {@link TextField} widget metadata using a fluent API.
  */
+@SuppressWarnings("java:S110") // This inheritance-depth warning is ridiculous for intentional framework hierarchies.
 public class FluentTextField extends FluentChangeableInputWidget<FluentTextField> implements FluentAbsoluteWidth<FluentTextField> {
 	private TextField text = null;
 

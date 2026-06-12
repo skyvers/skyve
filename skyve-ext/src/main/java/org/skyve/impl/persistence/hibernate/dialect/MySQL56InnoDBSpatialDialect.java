@@ -11,6 +11,7 @@ import org.skyve.impl.persistence.hibernate.dialect.mysqlbugfix.MySQL56SpatialDi
 /**
  * Skyve Hibernate dialect for MySQL 5.6 InnoDB with spatial type support.
  */
+@SuppressWarnings("java:S110") // This inheritance-depth warning is ridiculous for intentional framework hierarchies.
 public class MySQL56InnoDBSpatialDialect extends MySQL56SpatialDialect implements SkyveDialect {
 	private static final long serialVersionUID = -6017668196369823514L;
 

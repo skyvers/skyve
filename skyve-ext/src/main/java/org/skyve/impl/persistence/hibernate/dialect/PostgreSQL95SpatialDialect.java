@@ -11,6 +11,7 @@ import org.locationtech.jts.geom.Geometry;
 /**
  * Skyve Hibernate dialect for PostgreSQL 9.5 with PostGIS spatial extensions.
  */
+@SuppressWarnings("java:S110") // This inheritance-depth warning is ridiculous for intentional framework hierarchies.
 public class PostgreSQL95SpatialDialect extends PostgisPG95Dialect implements SkyveDialect {
 	private static final long serialVersionUID = 7467866460194029713L;
 

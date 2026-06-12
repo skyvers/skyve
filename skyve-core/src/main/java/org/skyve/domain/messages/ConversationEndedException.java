@@ -19,6 +19,7 @@ import jakarta.annotation.Nonnull;
  *
  * <p>The message is localised using the request's {@link java.util.Locale}.
  */
+@SuppressWarnings("java:S110") // This inheritance-depth warning is ridiculous for intentional framework hierarchies.
 public class ConversationEndedException extends DomainException implements MessageException {
 	private static final long serialVersionUID = 7198466174424309573L;
 

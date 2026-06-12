@@ -24,6 +24,7 @@ import jakarta.xml.bind.annotation.XmlType;
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE,
 			propOrder = {"length", "format", "validator"})
+@SuppressWarnings("java:S110") // This inheritance-depth warning is ridiculous for intentional framework hierarchies.
 public class Text extends ConvertibleField implements LengthField {
 	private static final long serialVersionUID = 7128775778521517080L;
 

@@ -23,6 +23,7 @@ import jakarta.xml.bind.annotation.XmlType;
  */
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+@SuppressWarnings("java:S110") // This inheritance-depth warning is ridiculous for intentional framework hierarchies.
 public class Timestamp extends ConvertibleField {
 	private static final long serialVersionUID = -5008213051812011630L;
 

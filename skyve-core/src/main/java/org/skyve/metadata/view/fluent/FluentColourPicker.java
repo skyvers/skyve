@@ -5,6 +5,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 /**
  * Builds {@link ColourPicker} widget metadata using a fluent API.
  */
+@SuppressWarnings("java:S110") // This inheritance-depth warning is ridiculous for intentional framework hierarchies.
 public class FluentColourPicker extends FluentChangeableInputWidget<FluentColourPicker>
 		implements FluentAbsoluteWidth<FluentColourPicker> {
 	private ColourPicker colour = null;

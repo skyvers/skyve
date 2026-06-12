@@ -13,6 +13,7 @@ import java.util.List;
  *
  * @see ManyResultsException
  */
+@SuppressWarnings("java:S110") // This inheritance-depth warning is ridiculous for intentional framework hierarchies.
 public class NoResultsException extends DomainException implements MessageException {
 	private static final long serialVersionUID = -9157432424169068442L;
 

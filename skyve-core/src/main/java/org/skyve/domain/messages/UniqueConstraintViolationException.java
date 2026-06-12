@@ -16,6 +16,7 @@ import org.skyve.metadata.model.document.Document;
  *
  * @see org.skyve.metadata.model.document.UniqueConstraint
  */
+@SuppressWarnings("java:S110") // This inheritance-depth warning is ridiculous for intentional framework hierarchies.
 public class UniqueConstraintViolationException extends DomainException implements MessageException {
 	private static final long serialVersionUID = 2245888585799230814L;
 

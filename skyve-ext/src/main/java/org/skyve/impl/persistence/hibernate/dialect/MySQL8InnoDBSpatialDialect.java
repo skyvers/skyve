@@ -11,6 +11,7 @@ import org.skyve.impl.persistence.hibernate.dialect.mysqlbugfix.MySQL8SpatialDia
 /**
  * Skyve Hibernate dialect for MySQL 8 InnoDB with spatial type support.
  */
+@SuppressWarnings("java:S110") // This inheritance-depth warning is ridiculous for intentional framework hierarchies.
 public class MySQL8InnoDBSpatialDialect extends MySQL8SpatialDialect implements SkyveDialect {
 	private static final long serialVersionUID = 1802127305662334430L;
 

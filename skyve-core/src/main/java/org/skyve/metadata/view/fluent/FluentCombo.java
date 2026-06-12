@@ -5,6 +5,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 /**
  * Builds {@link Combo} widget metadata using a fluent API.
  */
+@SuppressWarnings("java:S110") // This inheritance-depth warning is ridiculous for intentional framework hierarchies.
 public class FluentCombo extends FluentChangeableInputWidget<FluentCombo> implements FluentAbsoluteWidth<FluentCombo> {
 	private Combo combo = null;
 

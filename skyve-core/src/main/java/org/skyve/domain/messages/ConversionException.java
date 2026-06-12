@@ -77,6 +77,7 @@ import jakarta.annotation.Nonnull;
  * @see org.skyve.domain.types.converters.Converter
  * @see MessageException
  */
+@SuppressWarnings("java:S110") // This inheritance-depth warning is ridiculous for intentional framework hierarchies.
 public class ConversionException extends DomainException implements MessageException {
 	private static final long serialVersionUID = 6752293620540676434L;
 

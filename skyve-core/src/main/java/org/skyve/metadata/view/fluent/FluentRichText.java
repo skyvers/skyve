@@ -6,6 +6,7 @@ import org.skyve.metadata.view.TextOutput.Sanitisation;
 /**
  * Builds {@link RichText} widget metadata using a fluent API.
  */
+@SuppressWarnings("java:S110") // This inheritance-depth warning is ridiculous for intentional framework hierarchies.
 public class FluentRichText extends FluentChangeableInputWidget<FluentRichText>
 		implements FluentAbsoluteSize<FluentRichText>, FluentConstrainableHeight<FluentRichText> {
 	private RichText text = null;

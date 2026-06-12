@@ -10,6 +10,7 @@ import org.locationtech.jts.geom.Geometry;
 /**
  * Skyve Hibernate dialect for SQL Server 2008 with spatial type support.
  */
+@SuppressWarnings("java:S110") // This inheritance-depth warning is ridiculous for intentional framework hierarchies.
 public class SQLServer2008SpatialDialect extends SqlServer2008SpatialDialect implements SkyveDialect {
 	private static final long serialVersionUID = 5463421110159264122L;
 
