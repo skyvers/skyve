@@ -25,6 +25,7 @@ public interface Communication extends PersistentBean {
 	 * consumers.
 	 */
 	@XmlEnum
+	@SuppressWarnings("java:S115") // Enum names are stable persisted domain codes.
 	public static enum FormatType implements Enumeration {
 		/**
 		 * Email-based outbound communication format.
@@ -128,6 +129,7 @@ public interface Communication extends PersistentBean {
 	 * Enumerates communication processing actions available to the UI/workflow.
 	 */
 	@XmlEnum
+	@SuppressWarnings("java:S115") // Enum names are stable persisted domain codes.
 	public static enum ActionType implements Enumeration {
 		/**
 		 * Saves the communication for later batch/bulk sending.

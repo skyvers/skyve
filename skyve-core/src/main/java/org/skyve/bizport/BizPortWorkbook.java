@@ -32,6 +32,7 @@ public interface BizPortWorkbook {
 	/**
 	 * Supported Excel output formats for {@link BizPortWorkbook#write}.
 	 */
+	@SuppressWarnings("java:S115") // Enum names are serialized workbook format codes.
 	public static enum BizPortFormat {
 		/** Legacy Excel 97-2003 binary format. */
 		xls,

@@ -33,6 +33,7 @@ public class Format<T> {
 	 * Controls the case transformation applied to display strings.
 	 */
 	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+	@SuppressWarnings("java:S115") // Enum names are metadata XML values.
 	public static enum TextCase {
 		upper, lower, capital;
 	}

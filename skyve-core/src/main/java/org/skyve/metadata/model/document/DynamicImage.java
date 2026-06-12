@@ -31,6 +31,7 @@ public interface DynamicImage<T extends Bean> extends MetaData {
 	/**
 	 * Defines the ImageFormat enumeration.
 	 */
+	@SuppressWarnings("java:S115") // Enum names are MIME/image format identifiers.
 	public static enum ImageFormat {
 		png(MimeType.png) , jpeg(MimeType.jpeg), gif(MimeType.gif);
 

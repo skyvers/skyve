@@ -23,6 +23,7 @@ public interface ReportDataset extends PersistentBean {
 	 * The type of this dataset; if it is a BizQL or SQL query, a fixed constant value or a dataset Class.
 	 **/
 	@XmlEnum
+	@SuppressWarnings("java:S115") // Enum names are stable persisted domain codes.
 	public static enum DatasetType implements Enumeration {
 		/**
 		 * Dataset rows are produced by executing a BizQL query.

@@ -55,6 +55,7 @@ public class Chart implements DecoratedMetaData, RelativeSize, Invisible {
 	private static final long serialVersionUID = 6664085314805510891L;
 
 	@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
+	@SuppressWarnings("java:S115") // Enum names are metadata XML values.
 	public static enum ChartType {
 		line, lineArea, bar, horizontalBar, radar, pie, doughnut, polarArea;
 	}

@@ -21,6 +21,7 @@ public interface ReportParameter extends PersistentBean {
 	 * The data type of this parameter
 	 **/
 	@XmlEnum
+	@SuppressWarnings("java:S115") // Enum names are stable persisted domain codes.
 	public static enum Type implements Enumeration {
 		/**
 		 * Free-form textual input parameter.

@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
  * etc.) used during programmatic {@code .jrxml} generation.
  */
 public class ReportBand {
+	@SuppressWarnings("java:S115") // Enum names are JasperReports band names.
 	public static enum BandType {
 		background,
 		title,
@@ -23,6 +24,7 @@ public class ReportBand {
 		noData
 	}
 
+	@SuppressWarnings("java:S115") // Enum names are JasperReports split type names.
 	public static enum SplitType {
 		immediate,
 		prevent,

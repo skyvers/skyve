@@ -9,6 +9,7 @@ import org.skyve.util.Util;
 /**
  * Enumerates built-in actions that can be executed against a tag selection.
  */
+@SuppressWarnings("java:S115") // Enum names are stable tag action identifiers.
 public enum TagDefaultAction {
 	tagUpsert("SkyveUpsert", "Upsert (Save Top Level Only) Documents"), tagResave("SkyveResave", "Save Documents"), tagDelete("SkyveDelete", "Delete Documents"), tagValidate("SkyveValidate", "Validate Documents");
 

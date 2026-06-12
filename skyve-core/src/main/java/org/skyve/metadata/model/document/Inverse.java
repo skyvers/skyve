@@ -14,6 +14,7 @@ public interface Inverse extends Relation {
 	/**
 	 * Defines the InverseCardinality enumeration.
 	 */
+	@SuppressWarnings("java:S115") // Enum names are metadata XML values.
 	public static enum InverseCardinality {
 		one, many;
 	}

@@ -38,8 +38,8 @@ public class Renderer {
 
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(Renderer.class);
 
-	public static final int defaultReportWith = 842;
-	public static final int defaultReportHeight = 595;
+	public static final int DEFAULT_REPORT_WIDTH = 842;
+	public static final int DEFAULT_REPORT_HEIGHT = 595;
 
 	/**
 	 * Renders an opening XML element with optional attributes.

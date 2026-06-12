@@ -25,6 +25,7 @@ public interface DataMaintenance extends PersistentBean {
 	 * Determines which attributes are redacted during an ad-hoc backup.
 	 **/
 	@XmlEnum
+	@SuppressWarnings("java:S115") // Enum names are stable persisted domain codes.
 	public static enum DataSensitivity implements Enumeration {
 		/**
 		 * No redaction threshold; values marked at any sensitivity remain visible.

@@ -27,6 +27,7 @@ public class Persistent extends NamedMetaData {
 	 * Strategy for mapping document inheritance to database structures.
 	 */
 	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+	@SuppressWarnings("java:S115") // Enum names are metadata XML values.
 	public static enum ExtensionStrategy {
 		single,
 		joined,

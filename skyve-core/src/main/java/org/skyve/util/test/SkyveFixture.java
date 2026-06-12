@@ -20,6 +20,7 @@ public @interface SkyveFixture {
 	/**
 	 * Declares broad fixture categories used to select factory methods.
 	 */
+	@SuppressWarnings("java:S115") // Enum names are fixture category identifiers.
 	public static enum FixtureType {
 		/**
 		 * CRUD-oriented fixture generation (create/read/update/delete flows).

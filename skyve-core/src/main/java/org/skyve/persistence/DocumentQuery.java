@@ -47,6 +47,7 @@ public interface DocumentQuery extends BeanQuery, ProjectedQuery, ScalarQuery, T
 
 	/** Aggregate functions supported in {@link DocumentQuery#addAggregateProjection}. */
 	@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
+	@SuppressWarnings("java:S115") // Enum names are query function names used in metadata.
 	public static enum AggregateFunction {
 		Min,
 		Max, 

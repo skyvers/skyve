@@ -41,6 +41,7 @@ public class Container {
 	/**
 	 * Enumerates supported container layout semantics from the source view model.
 	 */
+	@SuppressWarnings("java:S115") // Enum names are view/Jasper layout codes.
 	public static enum ContainerType {
 		tab, hbox, vbox, form, column, subreport
 	}

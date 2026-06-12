@@ -132,8 +132,8 @@ class RendererStringTest {
 
 	@Test
 	void defaultReportDimensions() {
-		assertEquals(842, Renderer.defaultReportWith);
-		assertEquals(595, Renderer.defaultReportHeight);
+		assertEquals(842, Renderer.DEFAULT_REPORT_WIDTH);
+		assertEquals(595, Renderer.DEFAULT_REPORT_HEIGHT);
 	}
 
 	// --- renderPrintWhenExpression ---

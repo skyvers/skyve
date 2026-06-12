@@ -46,6 +46,7 @@ public class TextValidator extends FieldValidator<String> {
 	private static final String PATTERN_PROTOCOL = "^(?:https?|ftps?)://.*";
 
 	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+	@SuppressWarnings("java:S115") // Enum names are metadata XML values.
 	public static enum ValidatorType {
 		creditCard,
 		internetDomain,

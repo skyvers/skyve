@@ -25,11 +25,13 @@ public class DesignSpecification {
 	private Map<String, String> joinAlias = null;
 	private Map<String, String> joins = null;
 	
+	@SuppressWarnings("java:S115") // Enum names are report generation option codes.
 	public static enum Mode {
 		sql,
 		bean
 	}
 
+	@SuppressWarnings("java:S115") // Enum names are report generation option codes.
 	public static enum DefinitionSource {
 		document,
 		view,
@@ -38,12 +40,14 @@ public class DesignSpecification {
 	}
 
 // TODO do I need to Capitalise the toString().
+	@SuppressWarnings("java:S115") // Enum names are report generation option codes.
 	public static enum ReportType {
 		report,
 		subreport;
 	}
 
 // TODO do I need to Capitalise the toString().
+	@SuppressWarnings("java:S115") // Enum names are report generation option codes.
 	public static enum Orientation {
 		portrait,
 		landscape

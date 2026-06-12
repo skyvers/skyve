@@ -31,6 +31,7 @@ public interface UniqueConstraint extends NamedMetaData, DecoratedMetaData {
 	 * that the constraint SQL respects Skyve's multi-tenant data partitioning.
 	 */
 	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+	@SuppressWarnings("java:S115") // Enum names are metadata XML values.
 	public static enum DocumentScope {
 		/** Uniqueness is enforced across all tenants. */
 		global(DocumentPermissionScope.global),

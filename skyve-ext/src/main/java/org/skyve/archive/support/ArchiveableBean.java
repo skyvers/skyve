@@ -25,7 +25,9 @@ import org.skyve.domain.types.Timestamp;
  */
 public interface ArchiveableBean extends Bean {
 
+    @SuppressWarnings("java:S115") // Property-name constants mirror generated domain binding names.
     public static final String archiveTimestampPropertyName = "archiveTimestamp";
+    @SuppressWarnings("java:S115") // Property-name constants mirror generated domain binding names.
     public static final String archiveFilenamePropertyName = "archiveFilename";
 
     public Timestamp getArchiveTimestamp();

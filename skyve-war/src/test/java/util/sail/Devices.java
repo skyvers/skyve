@@ -2,6 +2,7 @@ package util.sail;
 
 import org.openqa.selenium.Dimension;
 
+@SuppressWarnings("java:S115") // Enum names are SAIL device identifiers.
 public enum Devices {
 	iphone("Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1", new Dimension(375, 667)),
 	iphonePlus("Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1", new Dimension(414, 736)),

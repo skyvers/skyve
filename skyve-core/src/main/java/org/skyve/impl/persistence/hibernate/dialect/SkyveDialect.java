@@ -28,6 +28,7 @@ public interface SkyveDialect {
 	 * Identifies the supported relational database families that Skyve maps to
 	 * concrete Hibernate dialect implementations.
 	 */
+	@SuppressWarnings("java:S115") // Enum names are database identifiers used in configuration logic.
 	public static enum RDBMS {
 		h2, mysql, sqlserver, postgresql
 	}

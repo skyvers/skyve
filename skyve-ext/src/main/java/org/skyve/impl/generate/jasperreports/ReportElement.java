@@ -9,6 +9,7 @@ import org.skyve.impl.metadata.view.HorizontalAlignment;
  * a JasperReports band during programmatic {@code .jrxml} generation.
  */
 public class ReportElement {
+	@SuppressWarnings("java:S115") // Enum names are JasperReports/view element names.
 	public static enum ElementType {
 		staticText, 
 		textField, 
@@ -29,6 +30,7 @@ public class ReportElement {
 		border
 	}
 
+	@SuppressWarnings("java:S115") // Enum names are JasperReports alignment names.
 	public static enum ElementAlignment {
 		left, right, center;
 
@@ -50,6 +52,7 @@ public class ReportElement {
 		}
 	}
 
+	@SuppressWarnings("java:S115") // Enum names are JasperReports evaluation-time names.
 	public static enum EvaluationTime {
 		now, report, page, column, band, auto;
 		

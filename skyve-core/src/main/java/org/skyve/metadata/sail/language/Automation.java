@@ -41,6 +41,7 @@ public class Automation implements Executable {
 	 * Controls how test assertion failures are handled during execution.
 	 */
 	@XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
+	@SuppressWarnings("java:S115") // Enum names are SAIL XML values.
 	public static enum TestStrategy {
 		/** Stop the automation run immediately on the first assertion failure. */
 		Assert,

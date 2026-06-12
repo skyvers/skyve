@@ -32,11 +32,13 @@ public abstract class Field extends AbstractAttribute {
 	private static final long serialVersionUID = -638312757619721424L;
 
 	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+	@SuppressWarnings("java:S115") // Enum names are metadata XML values.
 	public static enum IndexType {
 		database, textual, both, none;
 	}
 
 	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+	@SuppressWarnings("java:S115") // Enum names are metadata XML values.
 	public static enum GeneratedType {
 		insert, always;
 	}

@@ -20,7 +20,7 @@ import jakarta.annotation.Nullable;
  */
 public class Monitoring {
 	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(Monitoring.class);
-	private static final float MiB = 1024 * 1024.0F;
+	private static final float MIB = 1024 * 1024.0F;
 
 	private Monitoring() {
 		// prevent instantiation
@@ -149,7 +149,7 @@ public class Monitoring {
 	 */
 	public static float totalMemoryInMiB() {
 		Runtime runtime = Runtime.getRuntime();
-		return runtime.totalMemory() / MiB;
+		return runtime.totalMemory() / MIB;
 	}
 
 	/**
@@ -157,7 +157,7 @@ public class Monitoring {
 	 */
 	public static float freeMemoryInMiB() {
 		Runtime runtime = Runtime.getRuntime();
-		return runtime.freeMemory() / MiB;
+		return runtime.freeMemory() / MIB;
 	}
 
 	/**
@@ -165,7 +165,7 @@ public class Monitoring {
 	 */
 	public static float maxMemoryInMiB() {
 		Runtime runtime = Runtime.getRuntime();
-		return runtime.maxMemory() / MiB;
+		return runtime.maxMemory() / MIB;
 	}
 
 	/**

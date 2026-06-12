@@ -34,6 +34,7 @@ public abstract class AbstractInverse extends AbstractAttribute implements Inver
 	private static final long serialVersionUID = 6617399816835649143L;
 
 	@XmlTransient
+	@SuppressWarnings("java:S115") // Enum names are metadata generation values.
 	public static enum InverseRelationship {
 		oneToOne,
 		oneToMany,

@@ -18,6 +18,7 @@ public class DocSection {
 	/**
 	 * Defines supported heading levels for section rendering.
 	 */
+	@SuppressWarnings("java:S115") // Enum names are documentation heading identifiers.
 	public static enum SectionType {
 		/** Top-level chapter heading. */
 		Chapter, Section, SubChapter, SubTitle

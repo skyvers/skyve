@@ -33,6 +33,7 @@ public interface TextOutput {
 	 * relative restrictiveness.
 	 */
 	@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
+	@SuppressWarnings("java:S115") // Enum names are metadata XML values.
 	public static enum Sanitisation {
 		// Note the values are ordered from least restrictive to most restrictive so we can compare the ordinals
 		

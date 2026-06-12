@@ -55,6 +55,7 @@ public class DoctorUtil {
 	/**
 	 * Enumerates output formats supported by the documentation tool.
 	 */
+	@SuppressWarnings("java:S115") // Enum names are documentation output option codes.
 	public static enum OutputFormat {
 		/** Writes diagnostic output to standard output. */
 		debug, template, htmlSet, htmlDoc
@@ -345,17 +346,19 @@ public class DoctorUtil {
 			DocTable table = new DocTable(createIndentifier(customer.getName(), module.getName(), document.getName(), "conditionList"));
 			table.setTitle("Conditions");
 			table.getHtmlContent().add(document.getPluralAlias() + " have the following conditions specified:");
-			table.setHeaderValues("Name", "Description", "Documentation", "Usage");
-			for (String conditionName : document.getConditionNames()) {
-				Condition condition = document.getCondition(conditionName);
-				UsageType usage = condition.getUsage();
-				table.setRowValues(conditionName, 
-									condition.getDescription(), 
-									condition.getDocumentation(), 
-									(usage == null) ? null : usage.toString());
+				table.setHeaderValues("Name", "Description", "Documentation", "Usage");
+				for (String conditionName : document.getConditionNames()) {
+					Condition condition = document.getCondition(conditionName);
+					if (condition != null) {
+						UsageType usage = condition.getUsage();
+						table.setRowValues(conditionName, 
+											condition.getDescription(), 
+											condition.getDocumentation(), 
+											(usage == null) ? null : usage.toString());
+					}
+				}
+				out.println(table.toHTML(true));
 			}
-			out.println(table.toHTML(true));
-		}
 
 		// List Constraints
 		if (!document.getUniqueConstraints().isEmpty()) {
