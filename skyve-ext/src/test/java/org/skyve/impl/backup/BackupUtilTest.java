@@ -227,16 +227,16 @@ public class BackupUtilTest {
 	@SuppressWarnings("static-method")
 	public void testRedactDate() {
 		// setup the test data
-		Date input1 =  Date.valueOf(LocalDate.of(2000, 1, 15));
-		Date input2 =  Date.valueOf(LocalDate.of(1989, 6, 11));
-		Date input3 =  Date.valueOf(LocalDate.of(2000, 6, 23));
-		Date input4 =  Date.valueOf(LocalDate.of(2010, 4, 15));
-		Date input5 =  Date.valueOf(LocalDate.of(2020, 3, 2));
-		Date input6 =  Date.valueOf(LocalDate.of(2000, 11, 28));
-		Date input7 =  Date.valueOf(LocalDate.of(1990, 10, 25));
-		Date input8 =  Date.valueOf(LocalDate.of(1991, 10, 19));
-		Date input9 =  Date.valueOf(LocalDate.of(1972, 9, 6));
-		Date input10 = Date.valueOf(LocalDate.of(1892, 11, 3));
+		Date input1 =  Date.valueOf(LocalDate.of(2000, Month.JANUARY, 15));
+		Date input2 =  Date.valueOf(LocalDate.of(1989, Month.JUNE, 11));
+		Date input3 =  Date.valueOf(LocalDate.of(2000, Month.JUNE, 23));
+		Date input4 =  Date.valueOf(LocalDate.of(2010, Month.APRIL, 15));
+		Date input5 =  Date.valueOf(LocalDate.of(2020, Month.MARCH, 2));
+		Date input6 =  Date.valueOf(LocalDate.of(2000, Month.NOVEMBER, 28));
+		Date input7 =  Date.valueOf(LocalDate.of(1990, Month.OCTOBER, 25));
+		Date input8 =  Date.valueOf(LocalDate.of(1991, Month.OCTOBER, 19));
+		Date input9 =  Date.valueOf(LocalDate.of(1972, Month.SEPTEMBER, 6));
+		Date input10 = Date.valueOf(LocalDate.of(1892, Month.NOVEMBER, 3));
 		
 		// call the method under test
 		Date result1 = (Date) redactData(AttributeType.date, input1);
@@ -251,32 +251,32 @@ public class BackupUtilTest {
 		Date result10 = (Date) redactData(AttributeType.date, input10);
 		
 		// verify the result
-		assertThat(result1, is(Date.valueOf(LocalDate.of(2000, 1, 1))));
-		assertThat(result2, is(Date.valueOf(LocalDate.of(1989, 6, 1))));
-		assertThat(result3, is(Date.valueOf(LocalDate.of(2000, 6, 1))));
-		assertThat(result4, is(Date.valueOf(LocalDate.of(2010, 4, 1))));
-		assertThat(result5, is(Date.valueOf(LocalDate.of(2020, 3, 1))));
-		assertThat(result6, is(Date.valueOf(LocalDate.of(2000, 11, 1))));
-		assertThat(result7, is(Date.valueOf(LocalDate.of(1990, 10, 1))));
-		assertThat(result8, is(Date.valueOf(LocalDate.of(1991, 10, 1))));
-		assertThat(result9, is(Date.valueOf(LocalDate.of(1972, 9, 1))));
-		assertThat(result10, is(Date.valueOf(LocalDate.of(1892, 11, 1))));
+		assertThat(result1, is(Date.valueOf(LocalDate.of(2000, Month.JANUARY, 1))));
+		assertThat(result2, is(Date.valueOf(LocalDate.of(1989, Month.JUNE, 1))));
+		assertThat(result3, is(Date.valueOf(LocalDate.of(2000, Month.JUNE, 1))));
+		assertThat(result4, is(Date.valueOf(LocalDate.of(2010, Month.APRIL, 1))));
+		assertThat(result5, is(Date.valueOf(LocalDate.of(2020, Month.MARCH, 1))));
+		assertThat(result6, is(Date.valueOf(LocalDate.of(2000, Month.NOVEMBER, 1))));
+		assertThat(result7, is(Date.valueOf(LocalDate.of(1990, Month.OCTOBER, 1))));
+		assertThat(result8, is(Date.valueOf(LocalDate.of(1991, Month.OCTOBER, 1))));
+		assertThat(result9, is(Date.valueOf(LocalDate.of(1972, Month.SEPTEMBER, 1))));
+		assertThat(result10, is(Date.valueOf(LocalDate.of(1892, Month.NOVEMBER, 1))));
 	}
 	
 	@Test
 	@SuppressWarnings("static-method")
 	public void testRedactTimestamp() {
 		// setup the test data
-		java.sql.Timestamp input1 = java.sql.Timestamp.valueOf(LocalDateTime.of(2000, 1, 15, 23, 58));
-		java.sql.Timestamp input2 = java.sql.Timestamp.valueOf(LocalDateTime.of(1989, 5, 11, 21, 45));
-		java.sql.Timestamp input3 = java.sql.Timestamp.valueOf(LocalDateTime.of(2000, 8, 8, 18, 45));
-		java.sql.Timestamp input4 = java.sql.Timestamp.valueOf(LocalDateTime.of(2010, 2, 1, 14, 19));
-		java.sql.Timestamp input5 = java.sql.Timestamp.valueOf(LocalDateTime.of(2020, 9, 18, 11, 59));
-		java.sql.Timestamp input6 = java.sql.Timestamp.valueOf(LocalDateTime.of(2000, 11, 23, 17, 22));
-		java.sql.Timestamp input7 = java.sql.Timestamp.valueOf(LocalDateTime.of(1990, 12, 11, 19, 11));
-		java.sql.Timestamp input8 = java.sql.Timestamp.valueOf(LocalDateTime.of(1991, 2, 12, 23, 36));
-		java.sql.Timestamp input9 = java.sql.Timestamp.valueOf(LocalDateTime.of(1972, 3, 15, 18, 8));
-		java.sql.Timestamp input10 = java.sql.Timestamp.valueOf(LocalDateTime.of(1892, 1, 14, 21, 5));
+		java.sql.Timestamp input1 = java.sql.Timestamp.valueOf(LocalDateTime.of(2000, Month.JANUARY, 15, 23, 58));
+		java.sql.Timestamp input2 = java.sql.Timestamp.valueOf(LocalDateTime.of(1989, Month.MAY, 11, 21, 45));
+		java.sql.Timestamp input3 = java.sql.Timestamp.valueOf(LocalDateTime.of(2000, Month.AUGUST, 8, 18, 45));
+		java.sql.Timestamp input4 = java.sql.Timestamp.valueOf(LocalDateTime.of(2010, Month.FEBRUARY, 1, 14, 19));
+		java.sql.Timestamp input5 = java.sql.Timestamp.valueOf(LocalDateTime.of(2020, Month.SEPTEMBER, 18, 11, 59));
+		java.sql.Timestamp input6 = java.sql.Timestamp.valueOf(LocalDateTime.of(2000, Month.NOVEMBER, 23, 17, 22));
+		java.sql.Timestamp input7 = java.sql.Timestamp.valueOf(LocalDateTime.of(1990, Month.DECEMBER, 11, 19, 11));
+		java.sql.Timestamp input8 = java.sql.Timestamp.valueOf(LocalDateTime.of(1991, Month.FEBRUARY, 12, 23, 36));
+		java.sql.Timestamp input9 = java.sql.Timestamp.valueOf(LocalDateTime.of(1972, Month.MARCH, 15, 18, 8));
+		java.sql.Timestamp input10 = java.sql.Timestamp.valueOf(LocalDateTime.of(1892, Month.JANUARY, 14, 21, 5));
 		
 		// call the method under test
 		java.sql.Timestamp result1 = (Timestamp) redactData(AttributeType.dateTime, input1);
@@ -291,16 +291,16 @@ public class BackupUtilTest {
 		java.sql.Timestamp result10 = (Timestamp) redactData(AttributeType.timestamp, input10);
 		
 		// verify the result
-		assertThat(result1, is(java.sql.Timestamp.valueOf(LocalDateTime.of(2000, 1, 1, 0, 0))));
-		assertThat(result2, is(java.sql.Timestamp.valueOf(LocalDateTime.of(1989, 5, 1, 0, 0))));
-		assertThat(result3, is(java.sql.Timestamp.valueOf(LocalDateTime.of(2000, 8, 1, 0, 0))));
-		assertThat(result4, is(java.sql.Timestamp.valueOf(LocalDateTime.of(2010, 2, 1, 0, 0))));
-		assertThat(result5, is(java.sql.Timestamp.valueOf(LocalDateTime.of(2020, 9, 1, 0, 0))));
-		assertThat(result6, is(java.sql.Timestamp.valueOf(LocalDateTime.of(2000, 11, 1, 0, 0))));
-		assertThat(result7, is(java.sql.Timestamp.valueOf(LocalDateTime.of(1990, 12, 1, 0, 0))));
-		assertThat(result8, is(java.sql.Timestamp.valueOf(LocalDateTime.of(1991, 2, 1, 0, 0))));
-		assertThat(result9, is(java.sql.Timestamp.valueOf(LocalDateTime.of(1972, 3, 1, 0, 0))));
-		assertThat(result10, is(java.sql.Timestamp.valueOf(LocalDateTime.of(1892, 1, 1, 0, 0))));
+		assertThat(result1, is(java.sql.Timestamp.valueOf(LocalDateTime.of(2000, Month.JANUARY, 1, 0, 0))));
+		assertThat(result2, is(java.sql.Timestamp.valueOf(LocalDateTime.of(1989, Month.MAY, 1, 0, 0))));
+		assertThat(result3, is(java.sql.Timestamp.valueOf(LocalDateTime.of(2000, Month.AUGUST, 1, 0, 0))));
+		assertThat(result4, is(java.sql.Timestamp.valueOf(LocalDateTime.of(2010, Month.FEBRUARY, 1, 0, 0))));
+		assertThat(result5, is(java.sql.Timestamp.valueOf(LocalDateTime.of(2020, Month.SEPTEMBER, 1, 0, 0))));
+		assertThat(result6, is(java.sql.Timestamp.valueOf(LocalDateTime.of(2000, Month.NOVEMBER, 1, 0, 0))));
+		assertThat(result7, is(java.sql.Timestamp.valueOf(LocalDateTime.of(1990, Month.DECEMBER, 1, 0, 0))));
+		assertThat(result8, is(java.sql.Timestamp.valueOf(LocalDateTime.of(1991, Month.FEBRUARY, 1, 0, 0))));
+		assertThat(result9, is(java.sql.Timestamp.valueOf(LocalDateTime.of(1972, Month.MARCH, 1, 0, 0))));
+		assertThat(result10, is(java.sql.Timestamp.valueOf(LocalDateTime.of(1892, Month.JANUARY, 1, 0, 0))));
 	}
 	
 	@Test

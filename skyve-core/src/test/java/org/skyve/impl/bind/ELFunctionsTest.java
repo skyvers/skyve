@@ -7,6 +7,7 @@ import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.Month;
 import java.util.Date;
 
 import org.junit.jupiter.api.Test;
@@ -48,13 +49,13 @@ class ELFunctionsTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void newDateOnlyFromLocalDate() {
-		assertNotNull(ELFunctions.newDateOnlyFromLocalDate(LocalDate.of(2024, 1, 15)));
+		assertNotNull(ELFunctions.newDateOnlyFromLocalDate(LocalDate.of(2024, Month.JANUARY, 15)));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
 	void newDateOnlyFromLocalDateTime() {
-		assertNotNull(ELFunctions.newDateOnlyFromLocalDateTime(LocalDateTime.of(2024, 1, 15, 10, 0)));
+		assertNotNull(ELFunctions.newDateOnlyFromLocalDateTime(LocalDateTime.of(2024, Month.JANUARY, 15, 10, 0)));
 	}
 
 	@Test
@@ -85,13 +86,13 @@ class ELFunctionsTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void newDateTimeFromLocalDate() {
-		assertNotNull(ELFunctions.newDateTimeFromLocalDate(LocalDate.of(2024, 6, 1)));
+		assertNotNull(ELFunctions.newDateTimeFromLocalDate(LocalDate.of(2024, Month.JUNE, 1)));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
 	void newDateTimeFromLocalDateTime() {
-		assertNotNull(ELFunctions.newDateTimeFromLocalDateTime(LocalDateTime.of(2024, 6, 1, 12, 0)));
+		assertNotNull(ELFunctions.newDateTimeFromLocalDateTime(LocalDateTime.of(2024, Month.JUNE, 1, 12, 0)));
 	}
 
 	@Test
@@ -134,7 +135,7 @@ class ELFunctionsTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void newTimeOnlyFromLocalDateTime() {
-		assertNotNull(ELFunctions.newTimeOnlyFromLocalDateTime(LocalDateTime.of(2024, 6, 1, 10, 30)));
+		assertNotNull(ELFunctions.newTimeOnlyFromLocalDateTime(LocalDateTime.of(2024, Month.JUNE, 1, 10, 30)));
 	}
 
 	@Test
@@ -164,13 +165,13 @@ class ELFunctionsTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void newTimestampFromLocalDate() {
-		assertNotNull(ELFunctions.newTimestampFromLocalDate(LocalDate.of(2024, 1, 1)));
+		assertNotNull(ELFunctions.newTimestampFromLocalDate(LocalDate.of(2024, Month.JANUARY, 1)));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
 	void newTimestampFromLocalDateTime() {
-		assertNotNull(ELFunctions.newTimestampFromLocalDateTime(LocalDateTime.of(2024, 1, 1, 0, 0)));
+		assertNotNull(ELFunctions.newTimestampFromLocalDateTime(LocalDateTime.of(2024, Month.JANUARY, 1, 0, 0)));
 	}
 
 	@Test

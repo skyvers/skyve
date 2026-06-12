@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -464,7 +465,7 @@ class TimeUtilTest {
 
 	@Test
 	void asDateOnlyConvertsLocalDate() {
-		LocalDate localDate = LocalDate.of(2023, 6, 15);
+		LocalDate localDate = LocalDate.of(2023, Month.JUNE, 15);
 		DateOnly result = TimeUtil.asDateOnly(localDate);
 		assertThat(result, notNullValue());
 		assertEquals(2023, TimeUtil.getYear(result));
@@ -478,7 +479,7 @@ class TimeUtilTest {
 		cal.set(2023, Calendar.JUNE, 15);
 		LocalDate result = TimeUtil.asLocalDate(cal.getTime());
 		assertEquals(2023, result.getYear());
-		assertEquals(6, result.getMonthValue());
+		assertEquals(Month.JUNE, result.getMonth());
 		assertEquals(15, result.getDayOfMonth());
 	}
 
