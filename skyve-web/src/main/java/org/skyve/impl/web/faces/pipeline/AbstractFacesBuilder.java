@@ -244,20 +244,20 @@ public abstract class AbstractFacesBuilder {
 			style.append("width:").append(defaultPercentageWidth).append('%');
 		}
 		if (pixelHeight != null) {
-			if (style.length() > 0) {
+			if (! style.isEmpty()) {
 				style.append(';');
 			}
 			style.append("height:").append(pixelHeight).append("px");
 		}
 		else if (percentageHeight != null) {
-			if (style.length() > 0) {
+			if (! style.isEmpty()) {
 				style.append(';');
 			}
 			style.append("height:").append(percentageHeight).append("%");
 		}
 		if (textAlign != null) {
 			if (specialTextAlignStyleAttributeName == null) {
-				if (style.length() > 0) {
+				if (! style.isEmpty()) {
 					style.append(';');
 				}
 				if ((rightPaddingIfNecessary != null) && (textAlign == HorizontalAlignment.right)) {
@@ -448,7 +448,7 @@ public abstract class AbstractFacesBuilder {
 		if (middle) {
 			style.append("vertical-align:middle;");
 		}
-		if (style.length() > 0) {
+		if (! style.isEmpty()) {
 			result.setStyle(style.toString());
 		}
 		setInvisible(result, invisibleConditionName, null);

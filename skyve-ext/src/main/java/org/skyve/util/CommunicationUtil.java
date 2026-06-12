@@ -839,7 +839,7 @@ public class CommunicationUtil {
 		String[] lines = html.split("\n");
 		for (String line : lines) {
 			sb.append(line);
-			if (line.length() > 0 && !line.endsWith(">")) {
+			if ((! line.isEmpty()) && (! line.endsWith(">"))) {
 				sb.append("<br>\n");
 			} else {
 				sb.append("\n");

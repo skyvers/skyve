@@ -369,7 +369,7 @@ public class DoctorUtil {
 			for (UniqueConstraint u : document.getUniqueConstraints()) {
 				StringBuilder s = new StringBuilder();
 				for (String r : u.getFieldNames()) {
-					if (s.toString().length() > 0) {
+					if (! s.toString().isEmpty()) {
 						s.append(", ");
 					}
 					Attribute a = getAttributeFromFieldName(document, r);
@@ -547,8 +547,8 @@ public class DoctorUtil {
 
 		for (int i = 0; i < s.length; i++) {
 			String x = s[i].replaceAll(" ", "").toLowerCase();
-			if (x.length() > 0) {
-				if (id.length() > 0) {
+			if (! x.isEmpty()) {
+				if (! id.isEmpty()) {
 					id.append("_");
 				}
 				id.append(x);

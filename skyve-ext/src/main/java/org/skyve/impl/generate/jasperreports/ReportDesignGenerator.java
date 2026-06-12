@@ -330,7 +330,7 @@ public abstract class ReportDesignGenerator {
             default:
                 fieldPrefix.append(a.getName());
                 f.setName(fieldPrefix.toString());
-                if (mutableSJoin.length() == 0) {
+                if (mutableSJoin.isEmpty()) {
                     f.setNameSql("a." + f.getName());
                 } else {
                     f.setJoinSql(mutableSJoin.toString());

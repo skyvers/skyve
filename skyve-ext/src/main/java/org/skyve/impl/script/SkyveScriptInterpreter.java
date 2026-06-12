@@ -188,7 +188,7 @@ public class SkyveScriptInterpreter {
 	 * @return The parsed root node.
 	 */
 	public Node parse() {
-		if (script != null && script.length() > 0) {
+		if (script != null && (! script.isEmpty())) {
 			this.document = parser.parse(script);
 			return this.document;
 		}
@@ -210,7 +210,7 @@ public class SkyveScriptInterpreter {
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
 	public String preProcess() {
-		if (script != null && script.length() > 0) {
+		if (script != null && (! script.isEmpty())) {
 			String[] lines = script.split("\n");
 			StringBuilder newScript = new StringBuilder();
 
@@ -276,7 +276,7 @@ public class SkyveScriptInterpreter {
 					line = line.replace("[", "`").replace("]", "`");
 				}
 
-				if (newScript.length() > 0) {
+				if (! newScript.isEmpty()) {
 					newScript.append("\n");
 				}
 				newScript.append(line);

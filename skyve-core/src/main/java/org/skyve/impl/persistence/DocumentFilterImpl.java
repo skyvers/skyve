@@ -150,7 +150,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
 	private DocumentFilter addIn(@Nonnull String entityAlias, @Nonnull String binding, boolean not, Object... operands) {
-		if (filterClause.length() > 0) {
+		if (! filterClause.isEmpty()) {
 			filterClause.append(AND_OPERATOR);
 		}
 
@@ -837,7 +837,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 */
 	@Override
 	public DocumentFilter addAliasedNull(String entityAlias, String binding) {
-		if (filterClause.length() > 0) {
+		if (! filterClause.isEmpty()) {
 			filterClause.append(AND_OPERATOR);
 		}
 		filterClause.append(entityAlias).append('.').append(binding).append(" IS NULL");
@@ -861,7 +861,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 */
 	@Override
 	public DocumentFilter addAliasedNotNull(String entityAlias, String binding) {
-		if (filterClause.length() > 0) {
+		if (! filterClause.isEmpty()) {
 			filterClause.append(AND_OPERATOR);
 		}
 		filterClause.append(entityAlias).append('.').append(binding).append(" IS NOT NULL");
@@ -893,7 +893,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 		owningQuery.putParameter(minParameterName, minOperand);
 		owningQuery.putParameter(maxParameterName, maxOperand);
 
-		if (filterClause.length() > 0) {
+		if (! filterClause.isEmpty()) {
 			filterClause.append(AND_OPERATOR);
 		}
 
@@ -1108,7 +1108,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 		String parameterName = PARAMETER_PREFIX + owningQuery.parameterNumber++;
 		owningQuery.putParameter(parameterName, operand);
 
-		if (filterClause.length() > 0) {
+		if (! filterClause.isEmpty()) {
 			filterClause.append(AND_OPERATOR);
 		}
 
@@ -1204,7 +1204,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 */
 	@Override
 	public DocumentFilter addAnd(DocumentFilter filter) {
-		if (filterClause.length() > 0) {
+		if (! filterClause.isEmpty()) {
 			filterClause.append(AND_OPERATOR);
 		}
 		filterClause.append('(').append(filter).append(')');
@@ -1219,7 +1219,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 */
 	@Override
 	public DocumentFilter addOr(DocumentFilter filter) {
-		if (filterClause.length() > 0) {
+		if (! filterClause.isEmpty()) {
 			filterClause.insert(0, '(');
 			filterClause.append(") OR ");
 		}
@@ -1237,7 +1237,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 */
 	@Override
 	public DocumentFilter addExpression(String expression) {
-		if (filterClause.length() > 0) {
+		if (! filterClause.isEmpty()) {
 			filterClause.append(AND_OPERATOR);
 		}
 		filterClause.append(expression);

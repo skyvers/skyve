@@ -647,7 +647,7 @@ public class DesktopView extends HarnessView {
 			Menu menu = user.getModuleMenu(moduleName);
 			listDataSourcesForMenuItems(user, customer, moduleName, module, menu.getItems(), uxui, dataSources, visitedQueryNames);
 		}
-		if (dataSources.length() > 0) { // we have appended some data sources
+		if (! dataSources.isEmpty()) { // we have appended some data sources
 			dataSources.setLength(dataSources.length() - 2); // remove the last data source comma
 			result.append(dataSources);
 		}

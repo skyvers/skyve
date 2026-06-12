@@ -127,7 +127,7 @@ public class DocTable {
 			for (int i = 0; i < this.headers.length; i++) {
 				// turn col true if already true or if the row value is not null
 				// or empty
-				cols[i] = cols[i] || (row[i] != null && row[i].length() > 0);
+				cols[i] = cols[i] || (row[i] != null && (! row[i].isEmpty()));
 			}
 		}
 		// count how many non-null columns

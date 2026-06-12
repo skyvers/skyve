@@ -522,7 +522,7 @@ final class BackupUtil {
 		int charsToShowAtStart = 2;
 		int charsToShowAtEnd = 2;
 
-		if (data.length() == 0) {
+		if (data.isEmpty()) {
 			return "";
 		} else if (data.length() <= 1) {
 			charsToShowAtStart = 0;

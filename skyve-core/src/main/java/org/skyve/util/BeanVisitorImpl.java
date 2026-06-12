@@ -202,7 +202,7 @@ abstract class BeanVisitorImpl {
 								}
 								
 								sb.setLength(0);
-								if (binding.length() != 0) {
+								if (! binding.isEmpty()) {
 									sb.append(binding).append('.');
 								}
 								sb.append(relationName);
@@ -242,7 +242,7 @@ abstract class BeanVisitorImpl {
 										}
 										
 										sb.setLength(0);
-										if (binding.length() != 0) {
+										if (! binding.isEmpty()) {
 											sb.append(binding).append('.');
 										}
 										sb.append(relationName).append('[').append(i).append(']');
@@ -258,7 +258,7 @@ abstract class BeanVisitorImpl {
 								}
 								if ((i == 0) && visitNulls) { // no elements in the collection
 									sb.setLength(0);
-									if (binding.length() != 0) {
+									if (! binding.isEmpty()) {
 										sb.append(binding).append('.');
 									}
 									sb.append(relationName);
@@ -273,7 +273,7 @@ abstract class BeanVisitorImpl {
 							}
 							else {
 								sb.setLength(0);
-								if (binding.length() != 0) {
+								if (! binding.isEmpty()) {
 									sb.append(binding).append('.');
 								}
 								sb.append(relationName);
@@ -317,7 +317,7 @@ abstract class BeanVisitorImpl {
 						}
 						
 						sb.setLength(0);
-						if (binding.length() != 0) {
+						if (! binding.isEmpty()) {
 							sb.append(binding).append('.');
 						}
 						sb.append(ChildBean.PARENT_NAME);

@@ -352,8 +352,8 @@ public class TestUtil {
 	 * @return True if the string contains a period followed by at least one character, false otherwise
 	 */
 	private static boolean hasExtension(final String filename) {
-		if (filename != null && filename.length() > 0 && filename.indexOf(".") > 0) {
-			if ((filename.substring(filename.indexOf(".") + 1)).length() > 0) {
+		if (filename != null && ! filename.isEmpty() && filename.indexOf(".") > 0) {
+			if (! (filename.substring(filename.indexOf(".") + 1)).isEmpty()) {
 				return true;
 			}
 		}
@@ -724,7 +724,7 @@ public class TestUtil {
 							// trim to last sentence boundary
 							out = out.substring(0, out.lastIndexOf(".") + 1).trim();
 						}
-						if (out.length() > 0) {
+						if (! out.isEmpty()) {
 							LOGGER.debug("Random {} for {} with length {}({}): {}",
 									attribute.getAttributeType(),
 									attribute.getName(),

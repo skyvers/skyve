@@ -126,7 +126,7 @@ public class POISheetLoader extends AbstractDataFileLoader {
 				field.setIndex(Integer.valueOf(0));
 			}
 			String val = getStringFieldValue(field.getIndex().intValue(), true);
-			if (val != null && val.trim().length() > 0) {
+			if (val != null && (! val.trim().isEmpty())) {
 				foundNonEmpty = true;
 				break;
 			} else if(debugMode){
@@ -162,7 +162,7 @@ public class POISheetLoader extends AbstractDataFileLoader {
 			if (cell != null) {
 				//handle empty string more robustly
 				String raw = getStringValueFromCell(col, true);
-				if(raw==null || raw.trim().length()==0){
+				if ((raw == null) || raw.trim().isEmpty()){
 					if (emptyAsZero) {
 						result = Double.valueOf(0);
 					} else {

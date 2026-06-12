@@ -3825,14 +3825,14 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		contents.append("\t */\n");
 		contents.append("\tprivate static final long serialVersionUID = 1L;\n\n");
 
-		if (statics.length() > 0) {
+		if (! statics.isEmpty()) {
 			contents.append(statics);
 		}
-		if (enums.length() > 0) {
+		if (! enums.isEmpty()) {
 			contents.append(enums);
 		}
 		contents.append(attributes);
-		if (methods.length() > 0) {
+		if (! methods.isEmpty()) {
 			contents.append(methods, 0, methods.length() - 1); // don't include last \n
 		}
 

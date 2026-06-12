@@ -72,11 +72,11 @@ public class Check implements ServerSideAction<UserExtension> {
 			// prepare the email for search
 			searchEmail = StringUtils.deleteWhitespace(searchEmail);
 
-			if (searchEmail.length() > 0) {
-				if (!searchEmail.startsWith("%")) {
+			if (! searchEmail.isEmpty()) {
+				if (! searchEmail.startsWith("%")) {
 					searchEmail = "%" + searchEmail;
 				}
-				if (!searchEmail.endsWith("%")) {
+				if (! searchEmail.endsWith("%")) {
 					searchEmail = searchEmail + "%";
 				}
 

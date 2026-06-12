@@ -399,7 +399,7 @@ public class RestoreJob extends CancellableJob {
 										continue;
 									}
 									String stringValue = values.get(header);
-									if ((stringValue == null) || (stringValue.length() == 0)) {
+									if ((stringValue == null) || stringValue.isEmpty()) {
 										statement.setObject(index++, null);
 										continue;
 									}
@@ -621,7 +621,7 @@ public class RestoreJob extends CancellableJob {
 								for (String header : headers) {
 									if (header.endsWith(ID_COLUMN_SUFFIX)) {
 										final String stringValue = values.get(header);
-										if ((stringValue == null) || (stringValue.length() == 0)) {
+										if ((stringValue == null) || stringValue.isEmpty()) {
 											statement.setObject(i, null);
 											i++;
 										}

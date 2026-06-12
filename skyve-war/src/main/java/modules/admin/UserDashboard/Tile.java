@@ -108,7 +108,7 @@ public class Tile implements Serializable {
 		 * @return This builder.
 		 */
 		public Builder link(@SuppressWarnings("hiding") final String link) {
-			if (link != null && link.length() > 0) {
+			if (link != null && (! link.isEmpty())) {
 				this.link = String.format("onclick=\"location.href='%s';\"", link);
 			}
 			return this;
@@ -274,7 +274,7 @@ public class Tile implements Serializable {
 		if (link == null) {
 			if (other.link != null)
 				return false;
-		} else if (!link.equals(other.link))
+		} else if (! link.equals(other.link))
 			return false;
 		return true;
 	}

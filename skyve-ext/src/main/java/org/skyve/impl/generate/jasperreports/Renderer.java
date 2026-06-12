@@ -730,7 +730,7 @@ public class Renderer {
 				StringBuilder sql = new StringBuilder();
 				for (ReportField f : design.getFields()) {
 					if (! Boolean.TRUE.equals(f.getCollection())) {
-						if (sql.length() > 0) {
+						if (! sql.isEmpty()) {
 							sql.append("\n ,");
 						}
 						sql.append((f.getNameSql() == null ? sqlName + "." + f.getName() : f.getNameSql()));

@@ -602,7 +602,7 @@ public class ModulesUtil {
 
 				// if the format string includes a sub-bean attribute, get the
 				// sub-bean
-				if (binding.toString().length() > 0) {
+				if (! binding.toString().isEmpty()) {
 					b = (Bean) Binder.get(bean, binding.toString());
 				}
 
@@ -624,7 +624,7 @@ public class ModulesUtil {
 					for (Attribute attribute : document.getAllAttributes(customer)) {
 						if (attribute.getLocalisedDisplayName().equals(a)) {
 							found = true;
-							if (binding.toString().length() > 0) {
+							if (! binding.toString().isEmpty()) {
 								binding.append('.').append(attribute.getName());
 							} else {
 								binding.append(attribute.getName());
@@ -677,8 +677,8 @@ public class ModulesUtil {
 		String delim = Util.coalesceNull(delimiter, " ");
 
 		for (String s : strings) {
-			if (Util.coalesceNull(s, "").length() > 0) {
-				if (sb.toString().length() > 0) {
+			if (! Util.coalesceNull(s, "").isEmpty()) {
+				if (! sb.toString().isEmpty()) {
 					sb.append(delim);
 				}
 				sb.append(s);

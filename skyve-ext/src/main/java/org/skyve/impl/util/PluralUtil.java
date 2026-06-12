@@ -265,7 +265,7 @@ public class PluralUtil {
 	 * @return true if all the words are lowercase, false otherwise
 	 */
 	public static boolean isLowerCase(final String phrase) {
-		if (phrase != null && phrase.length() > 0) {
+		if (phrase != null && (! phrase.isEmpty())) {
 			Pattern p = Pattern.compile(LOWERCASE_PATTERN);
 			String[] tokens = phrase.split("\\s");
 			for (String s : tokens) {
@@ -296,7 +296,7 @@ public class PluralUtil {
 	 * @return true if all the words are title case, false otherwise
 	 */
 	public static boolean isTitleCase(final String phrase) {
-		if (phrase != null && phrase.length() > 0) {
+		if (phrase != null && (! phrase.isEmpty())) {
 			Pattern p = Pattern.compile(TITLECASE_PATTERN);
 			String[] tokens = phrase.split("\\s");
 			for (String s : tokens) {
@@ -327,7 +327,7 @@ public class PluralUtil {
 	 * @return true if all the words are uppercase, false otherwise
 	 */
 	public static boolean isUpperCase(final String phrase) {
-		if (phrase != null && phrase.length() > 0) {
+		if (phrase != null && (! phrase.isEmpty())) {
 			Pattern p = Pattern.compile(UPPERCASE_PATTERN);
 			String[] tokens = phrase.split("\\s");
 			for (String s : tokens) {
@@ -350,7 +350,7 @@ public class PluralUtil {
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
 	public static String pluralise(final String singular) {
-		if (singular != null && singular.length() > 0) {
+		if (singular != null && (! singular.isEmpty())) {
 			String str = singular.toLowerCase();
 
 			// Split into words and get the last word
@@ -546,11 +546,11 @@ public class PluralUtil {
 	 * @return A title case identifier. First letter upper case words with spaces between.
 	 */
 	public static String toTitleCase(String phrase) {
-		if (phrase != null && phrase.length() > 0) {
+		if (phrase != null && (! phrase.isEmpty())) {
 			StringBuilder out = new StringBuilder();
 			String[] tokens = phrase.split("\\s");
 			for (String s : tokens) {
-				out.append(out.length() > 0 ? " " : "");
+				out.append((! out.isEmpty()) ? " " : "");
 				out.append(StringUtils.capitalize(s.toLowerCase()));
 			}
 			return out.toString();
@@ -599,7 +599,7 @@ public class PluralUtil {
 				result.append(replWord.toLowerCase());
 			}
 			// If original word is title case, make replacement title case
-			else if (origWord.length() > 0 && 
+			else if ((! origWord.isEmpty()) &&
 					Character.isUpperCase(origWord.charAt(0)) && 
 					origWord.substring(1).equals(origWord.substring(1).toLowerCase())) {
 				result.append(Character.toUpperCase(replWord.charAt(0)));

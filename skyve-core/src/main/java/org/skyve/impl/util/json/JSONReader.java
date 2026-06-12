@@ -248,7 +248,7 @@ public class JSONReader {
 					else if (PersistentBean.LOCK_NAME.equals(propertyName)) {
 						OptimisticLock lock = null;
 						String lockString = (String) value;
-						if ((lockString != null) && (lockString.length() > 0)) {
+						if ((lockString != null) && (! lockString.isEmpty())) {
 							lock = new OptimisticLock(lockString);
 						}
 						BindUtil.set(result, propertyName, lock);
@@ -263,7 +263,7 @@ public class JSONReader {
 					else {
 						// Convert the value if required
 						if (value instanceof String valueString) {
-							if (valueString.length() == 0) {
+							if (valueString.isEmpty()) {
 								value = null;
 							}
 							else {

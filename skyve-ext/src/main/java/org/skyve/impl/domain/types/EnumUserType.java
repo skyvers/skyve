@@ -93,7 +93,7 @@ public class EnumUserType implements UserType, Serializable, ParameterizedType {
 	public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner)
 	throws HibernateException, SQLException {
         String code = rs.getString(names[0]);
-		if ((rs.wasNull()) || (code == null) || (code.length() == 0)) {
+		if ((rs.wasNull()) || (code == null) || code.isEmpty()) {
 			return null;
 		}
         

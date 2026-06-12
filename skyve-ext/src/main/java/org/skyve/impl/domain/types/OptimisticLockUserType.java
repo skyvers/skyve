@@ -48,7 +48,7 @@ public class OptimisticLockUserType implements UserType, Serializable, LiteralTy
 	public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner)
 	throws HibernateException, SQLException {
 		String value = rs.getString(names[0]);
-		if ((rs.wasNull()) || (value == null) || (value.length() == 0)) {
+		if (rs.wasNull() || (value == null) || value.isEmpty()) {
 			return null;
 		}
 
