@@ -6,14 +6,14 @@ package org.skyve.impl.backup;
  */
 public interface RestoreOptions {
 	@SuppressWarnings("java:S115") // Enum names are restore option codes.
-	public static enum ContentOption {
+	public enum ContentOption {
 		clearOrphanedContentIds,
 		saveOrphanedContentIds,
 		error
 	}
 	
 	@SuppressWarnings("java:S115") // Enum names are restore option codes.
-	public static enum PreProcess {
+	public enum PreProcess {
 		noProcessing,
 		dropUsingMetadataAndCreateUsingBackup,
 		dropUsingBackupAndCreateUsingBackup,
@@ -25,7 +25,7 @@ public interface RestoreOptions {
 	}
 	
 	@SuppressWarnings("java:S115") // Enum names are restore option codes.
-	public static enum IndexingOption {
+	public enum IndexingOption {
 		data,
 		content,
 		both,

@@ -63,7 +63,7 @@ public class CommunicationUtil {
 	 * 
 	 * SILENT logs any exception stack EXPLICIT throws any exception
 	 */
-	public static enum ResponseMode {
+	public enum ResponseMode {
 		SILENT, EXPLICIT;
 	}
 
@@ -75,11 +75,11 @@ public class CommunicationUtil {
 	 * action can be performed (for example to test whether a communication
 	 * message is valid and can be bound with the beans provided)
 	 */
-	public static enum RunMode {
+	public enum RunMode {
 		ACTION, TEST;
 	}
 
-	public static enum ActionType {
+	public enum ActionType {
 		FILE, SMTP;
 	}
 

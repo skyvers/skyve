@@ -58,7 +58,7 @@ public abstract class ReportManager extends AbstractTransientBean {
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-	public static enum ImportActionType implements Enumeration {
+	public enum ImportActionType implements Enumeration {
 		validateOnlyReportConfigurationsAndTemplates("validate", "Validate only report configurations and templates"),
 		validateThenImportReportConfigurationsAndTemplates("import", "Validate then import report configurations and templates");
 

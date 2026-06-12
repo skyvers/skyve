@@ -42,7 +42,7 @@ public class ModulesUtil {
 
 	/** general types of time-based frequencies */
 	@SuppressWarnings("java:S115") // Enum names are legacy domain value labels.
-	public static enum OccurenceFrequency {
+	public enum OccurenceFrequency {
 		OneOff, EverySecond, EveryMinute, Hourly, Daily, Weekly, Fortnightly, Monthly, Quarterly, HalfYearly, Yearly, Irregularly, DuringHolidays, NotDuringHolidays, WeekDays, Weekends;
 	}
 
@@ -76,7 +76,7 @@ public class ModulesUtil {
 
 	/** normal days of the week */
 	@SuppressWarnings("java:S115") // Enum names are legacy domain value labels.
-	public static enum DayOfWeek {
+	public enum DayOfWeek {
 		Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday
 	}
 
@@ -164,7 +164,7 @@ public class ModulesUtil {
 
 	/** returns the number of days between day1 and day2 */
 	@SuppressWarnings("java:S115") // Enum names are legacy domain value labels.
-	public static enum OccurrencePeriod {
+	public enum OccurrencePeriod {
 		Seconds, Minutes, Hours, Days, Weeks, Months, Years
 	}
 
@@ -469,7 +469,7 @@ public class ModulesUtil {
 	}
 
 	/** abbreviated forms of calendar months */
-	public static enum CalendarMonth {
+	public enum CalendarMonth {
 		JAN, FEB, MAR, APR, MAY, JUN, JUL, AUG, SEP, OCT, NOV, DEC
 	}
 

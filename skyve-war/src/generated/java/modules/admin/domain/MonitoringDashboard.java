@@ -101,7 +101,7 @@ public class MonitoringDashboard extends AbstractPersistentBean {
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-	public static enum RequestType implements Enumeration {
+	public enum RequestType implements Enumeration {
 		all("all", "All Request Types"),
 		A("A", "Action"),
 		C("C", "Create"),
@@ -180,7 +180,7 @@ public class MonitoringDashboard extends AbstractPersistentBean {
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-	public static enum Metric implements Enumeration {
+	public enum Metric implements Enumeration {
 		elapsedRequestTime("t", "Elapsed Request Time"),
 		requestCPUUtilisation("u", "Request CPU Utilisation"),
 		systemCPUUsage("c", "System CPU Usage"),
@@ -252,7 +252,7 @@ public class MonitoringDashboard extends AbstractPersistentBean {
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-	public static enum Period implements Enumeration {
+	public enum Period implements Enumeration {
 		currentMinute("m", "Current Minute"),
 		currentHour("h", "Current Hour"),
 		currentDay("d", "Current Day"),

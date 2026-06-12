@@ -63,7 +63,7 @@ public abstract class Contact extends AbstractPersistentBean implements org.skyv
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-	public static enum ContactType implements Enumeration {
+	public enum ContactType implements Enumeration {
 		person("Person", "Person"),
 		organisation("Organisation", "Organisation");
 

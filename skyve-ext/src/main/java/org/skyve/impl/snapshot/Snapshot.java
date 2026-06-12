@@ -27,7 +27,7 @@ public class Snapshot {
 	private static final String FILTER_PROPERTY_NAME = "filter";
 	
 	@SuppressWarnings("java:S115") // Enum names are snapshot JSON values.
-	public static enum AdvancedSearchType {
+	public enum AdvancedSearchType {
 		radio, bracket, inline;
 	}
 	

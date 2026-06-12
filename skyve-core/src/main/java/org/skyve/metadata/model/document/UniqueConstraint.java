@@ -32,7 +32,7 @@ public interface UniqueConstraint extends NamedMetaData, DecoratedMetaData {
 	 */
 	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	@SuppressWarnings("java:S115") // Enum names are metadata XML values.
-	public static enum DocumentScope {
+	public enum DocumentScope {
 		/** Uniqueness is enforced across all tenants. */
 		global(DocumentPermissionScope.global),
 		

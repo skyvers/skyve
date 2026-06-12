@@ -14,7 +14,7 @@ public final class ReportDesignParameters {
 	 * Supported high-level layout styles for generated reports.
 	 */
 	@SuppressWarnings("java:S115") // Enum names are report design option codes.
-	public static enum ReportStyle {
+	public enum ReportStyle {
 		/** Row-oriented table layout. */
 		tabular, columnar
 	}
@@ -23,7 +23,7 @@ public final class ReportDesignParameters {
 	 * Horizontal alignment options for report column values.
 	 */
 	@SuppressWarnings("java:S115") // Enum names are report design option codes.
-	public static enum ColumnAlignment {
+	public enum ColumnAlignment {
 		/** Left-align text/content. */
 		left, center, right
 	}

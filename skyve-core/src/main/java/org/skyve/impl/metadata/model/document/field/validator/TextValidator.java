@@ -47,7 +47,7 @@ public class TextValidator extends FieldValidator<String> {
 
 	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	@SuppressWarnings("java:S115") // Enum names are metadata XML values.
-	public static enum ValidatorType {
+	public enum ValidatorType {
 		creditCard,
 		internetDomain,
 		ean13CheckDigit,

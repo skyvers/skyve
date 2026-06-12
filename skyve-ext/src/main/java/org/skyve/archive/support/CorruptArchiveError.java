@@ -114,7 +114,7 @@ public interface CorruptArchiveError extends PersistentBean {
     @XmlEnum
     @Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
     @SuppressWarnings("java:S115") // Generated enum names are stable persisted domain codes.
-    public static enum Resolution implements Enumeration {
+    public enum Resolution implements Enumeration {
         /**
          * Corrupt archive has been identified but not yet actioned.
          */

@@ -184,7 +184,7 @@ public abstract class Startup extends AbstractTransientBean {
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-	public static enum MapType implements Enumeration {
+	public enum MapType implements Enumeration {
 		gmap("gmap", "Google Maps"),
 		leaflet("leaflet", "Open Street Map");
 
@@ -256,7 +256,7 @@ public abstract class Startup extends AbstractTransientBean {
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-	public static enum BackupType implements Enumeration {
+	public enum BackupType implements Enumeration {
 		none("none", "None (Internal Backups)"),
 		azure("org.skyve.impl.backup.AzureBlobStorageBackup", "Azure Blob Storage");
 
@@ -328,7 +328,7 @@ public abstract class Startup extends AbstractTransientBean {
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-	public static enum CaptchaType implements Enumeration {
+	public enum CaptchaType implements Enumeration {
 		googleRecaptcha("Google Recaptcha", "Google Recaptcha"),
 		cloudflareTurnstile("Cloudflare Turnstile", "Cloudflare Turnstile");
 
@@ -400,7 +400,7 @@ public abstract class Startup extends AbstractTransientBean {
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-	public static enum GeoIPCountryListType implements Enumeration {
+	public enum GeoIPCountryListType implements Enumeration {
 		blacklist("blacklist", "Blacklist"),
 		whitelist("whitelist", "Whitelist");
 

@@ -10,7 +10,7 @@ import org.skyve.impl.metadata.view.HorizontalAlignment;
  */
 public class ReportElement {
 	@SuppressWarnings("java:S115") // Enum names are JasperReports/view element names.
-	public static enum ElementType {
+	public enum ElementType {
 		staticText, 
 		textField, 
 		checkBox, 
@@ -31,7 +31,7 @@ public class ReportElement {
 	}
 
 	@SuppressWarnings("java:S115") // Enum names are JasperReports alignment names.
-	public static enum ElementAlignment {
+	public enum ElementAlignment {
 		left, right, center;
 
 		@Override
@@ -53,7 +53,7 @@ public class ReportElement {
 	}
 
 	@SuppressWarnings("java:S115") // Enum names are JasperReports evaluation-time names.
-	public static enum EvaluationTime {
+	public enum EvaluationTime {
 		now, report, page, column, band, auto;
 		
 		@Override

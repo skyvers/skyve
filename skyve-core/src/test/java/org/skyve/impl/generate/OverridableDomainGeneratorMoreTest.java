@@ -604,7 +604,7 @@ class OverridableDomainGeneratorMoreTest {
 				.invoke(gen, enumeration, "Status", sb);
 
 		String result = sb.toString();
-		assertTrue(result.contains("public static enum Status"));
+		assertTrue(result.contains("public enum Status"));
 		assertTrue(result.contains("pending(\"pending\", \"Pending\")"));
 		assertTrue(result.contains("active(\"active\", \"Active\")"));
 		assertTrue(result.contains("private String code;"));

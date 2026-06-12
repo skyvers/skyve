@@ -155,7 +155,7 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-	public static enum PasswordComplexityModel implements Enumeration {
+	public enum PasswordComplexityModel implements Enumeration {
 		minimumMin6Chars("MINIMUM", "Minimum - min 6 chars"),
 		mediumMin6CharsUpperLowerAndNumeric("MEDIUM", "Medium - min 6 chars, upper, lower and numeric"),
 		goodMin8CharsUpperLowerNumericAndPunctuation("MAXIMUM", "Good - min 8 chars, upper, lower, numeric and punctuation"),
@@ -229,7 +229,7 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-	public static enum TwoFactorType implements Enumeration {
+	public enum TwoFactorType implements Enumeration {
 		off("OFF", "Off"),
 		email("EMAIL", "Email");
 

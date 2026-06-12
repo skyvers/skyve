@@ -102,7 +102,7 @@ public class Staff extends AbstractPersistentBean implements HierarchicalBean<St
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-	public static enum Status implements Enumeration {
+	public enum Status implements Enumeration {
 		inTheOffice("inOffice", "In the Office"),
 		outOfTheOffice("outOffice", "Out of the Office"),
 		onLeave("onLeave", "On Leave"),

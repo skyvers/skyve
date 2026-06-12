@@ -34,7 +34,7 @@ public class Format<T> {
 	 */
 	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	@SuppressWarnings("java:S115") // Enum names are metadata XML values.
-	public static enum TextCase {
+	public enum TextCase {
 		upper, lower, capital;
 	}
 	

@@ -22,7 +22,7 @@ public class TemporalBucket implements Bucket {
 
 	@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 	@SuppressWarnings("java:S115") // Enum names are chart metadata values.
-	public static enum TemporalBucketType {
+	public enum TemporalBucketType {
 		quarter, dayMonthYear, day, month, year, monthYear, hour, hourDay, hourDayMonth, minuteHour, secondMinuteHour
 	}
 	

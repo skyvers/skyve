@@ -63,7 +63,7 @@ public class UserMonthlyHits extends AbstractPersistentBean {
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-	public static enum Device implements Enumeration {
+	public enum Device implements Enumeration {
 		phone("P", "Phone"),
 		tablet("T", "Tablet"),
 		desktop("D", "Desktop"),

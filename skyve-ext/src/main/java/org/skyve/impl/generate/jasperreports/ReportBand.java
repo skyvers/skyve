@@ -11,7 +11,7 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class ReportBand {
 	@SuppressWarnings("java:S115") // Enum names are JasperReports band names.
-	public static enum BandType {
+	public enum BandType {
 		background,
 		title,
 		pageHeader,
@@ -25,7 +25,7 @@ public class ReportBand {
 	}
 
 	@SuppressWarnings("java:S115") // Enum names are JasperReports split type names.
-	public static enum SplitType {
+	public enum SplitType {
 		immediate,
 		prevent,
 		stretch;

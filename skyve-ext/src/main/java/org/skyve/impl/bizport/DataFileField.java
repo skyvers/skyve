@@ -14,7 +14,7 @@ import org.skyve.metadata.model.Attribute;
  *
  */
 public class DataFileField {
-	public static enum LoadAction {
+	public enum LoadAction {
 		SET_VALUE, LOOKUP_EQUALS, LOOKUP_LIKE, LOOKUP_CONTAINS, CONFIRM_VALUE
 	}
 	

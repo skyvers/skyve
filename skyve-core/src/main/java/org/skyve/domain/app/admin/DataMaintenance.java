@@ -26,7 +26,7 @@ public interface DataMaintenance extends PersistentBean {
 	 **/
 	@XmlEnum
 	@SuppressWarnings("java:S115") // Enum names are stable persisted domain codes.
-	public static enum DataSensitivity implements Enumeration {
+	public enum DataSensitivity implements Enumeration {
 		/**
 		 * No redaction threshold; values marked at any sensitivity remain visible.
 		 */

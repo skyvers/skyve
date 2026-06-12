@@ -13,7 +13,7 @@ public class Tile implements Serializable {
 	 * Enumerates tile operations used for CSS and icon selection.
 	 */
 	@SuppressWarnings("java:S115") // Enum names are dashboard operation CSS/state values.
-	public static enum Operation {
+	public enum Operation {
 		insert, update, delete, view
 	}
 

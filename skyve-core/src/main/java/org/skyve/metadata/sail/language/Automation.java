@@ -42,7 +42,7 @@ public class Automation implements Executable {
 	 */
 	@XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
 	@SuppressWarnings("java:S115") // Enum names are SAIL XML values.
-	public static enum TestStrategy {
+	public enum TestStrategy {
 		/** Stop the automation run immediately on the first assertion failure. */
 		Assert,
 		/** Continue running after failures and collect all assertion failures before reporting. */

@@ -24,7 +24,7 @@ public interface ReportDataset extends PersistentBean {
 	 **/
 	@XmlEnum
 	@SuppressWarnings("java:S115") // Enum names are stable persisted domain codes.
-	public static enum DatasetType implements Enumeration {
+	public enum DatasetType implements Enumeration {
 		/**
 		 * Dataset rows are produced by executing a BizQL query.
 		 */

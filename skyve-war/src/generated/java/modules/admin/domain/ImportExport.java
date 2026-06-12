@@ -96,7 +96,7 @@ public abstract class ImportExport extends AbstractPersistentBean {
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-	public static enum Mode implements Enumeration {
+	public enum Mode implements Enumeration {
 		importData("importData", "Import Data"),
 		exportData("exportData", "Export Data");
 
@@ -166,7 +166,7 @@ public abstract class ImportExport extends AbstractPersistentBean {
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-	public static enum RollbackErrors implements Enumeration {
+	public enum RollbackErrors implements Enumeration {
 		rollbackErrors("rollbackErrors", "admin.importExport.rollbackErrors.rollbackErrors.description"),
 		noRollbackErrors("noRollbackErrors", "admin.importExport.rollbackErrors.noRollbackErrors.description");
 

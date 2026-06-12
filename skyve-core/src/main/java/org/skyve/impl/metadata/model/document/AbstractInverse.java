@@ -35,7 +35,7 @@ public abstract class AbstractInverse extends AbstractAttribute implements Inver
 
 	@XmlTransient
 	@SuppressWarnings("java:S115") // Enum names are metadata generation values.
-	public static enum InverseRelationship {
+	public enum InverseRelationship {
 		oneToOne,
 		oneToMany,
 		manyToMany

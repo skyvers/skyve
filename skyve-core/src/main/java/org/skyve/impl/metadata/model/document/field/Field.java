@@ -33,13 +33,13 @@ public abstract class Field extends AbstractAttribute {
 
 	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	@SuppressWarnings("java:S115") // Enum names are metadata XML values.
-	public static enum IndexType {
+	public enum IndexType {
 		database, textual, both, none;
 	}
 
 	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	@SuppressWarnings("java:S115") // Enum names are metadata XML values.
-	public static enum GeneratedType {
+	public enum GeneratedType {
 		insert, always;
 	}
 

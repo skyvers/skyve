@@ -60,7 +60,7 @@ public class ImportExportColumn extends AbstractPersistentBean implements ChildB
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-	public static enum LoadAction implements Enumeration {
+	public enum LoadAction implements Enumeration {
 		setValue("set", "admin.importExportColumn.loadAction.set.description"),
 		lookupEquals("equals", "admin.importExportColumn.loadAction.equals.description"),
 		lookupLike("like", "admin.importExportColumn.loadAction.like.description"),

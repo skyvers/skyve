@@ -31,7 +31,7 @@ public class MetaDataQueryContentColumnMetaData extends MetaDataQueryColumnMetaD
 	 */
 	@XmlType(namespace = XMLMetaData.MODULE_NAMESPACE)
 	@SuppressWarnings("java:S115") // Enum names are metadata XML values.
-	public static enum DisplayType {
+	public enum DisplayType {
 		/** Render content as an inline thumbnail preview. */
 		thumbnail,
 		/** Render content as a link suitable for download/open in a new request. */

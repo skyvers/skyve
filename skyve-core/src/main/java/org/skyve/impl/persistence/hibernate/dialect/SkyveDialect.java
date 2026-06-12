@@ -29,7 +29,7 @@ public interface SkyveDialect {
 	 * concrete Hibernate dialect implementations.
 	 */
 	@SuppressWarnings("java:S115") // Enum names are database identifiers used in configuration logic.
-	public static enum RDBMS {
+	public enum RDBMS {
 		h2, mysql, sqlserver, postgresql
 	}
 	
