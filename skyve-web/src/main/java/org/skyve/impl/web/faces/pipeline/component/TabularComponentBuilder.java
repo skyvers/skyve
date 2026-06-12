@@ -1367,7 +1367,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		</p:dataTable>
 	*/
 	@Override
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	public UIComponent listGrid(UIComponent component,
 									String moduleName,
 									String modelDocumentName,

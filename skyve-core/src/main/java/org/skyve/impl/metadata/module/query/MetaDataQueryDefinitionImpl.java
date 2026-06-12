@@ -165,7 +165,7 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 	}
 
 	@Override
-	@SuppressWarnings({"incomplete-switch", "java:S3776"}) // Complexity OK
+	@SuppressWarnings({"incomplete-switch", "java:S3776", "java:S6541"}) // complexity OK
 	public DocumentQuery constructDocumentQuery(AggregateFunction summaryType,
 													String tagId) {
 		AbstractPersistence persistence = AbstractPersistence.get();

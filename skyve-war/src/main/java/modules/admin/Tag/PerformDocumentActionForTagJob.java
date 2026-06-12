@@ -65,7 +65,7 @@ public class PerformDocumentActionForTagJob extends Job {
 	 * @throws Exception If metadata lookup or action execution fails.
 	 */
 	@Override
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	public void execute() throws Exception {
 
 		List<String> log = getLog();

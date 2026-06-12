@@ -3305,6 +3305,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 
+			@SuppressWarnings("java:S6541") // complexity OK
 			private void processTarget() {
 				TargetMetaData target = getCurrentTarget();
 				if (target != null) {

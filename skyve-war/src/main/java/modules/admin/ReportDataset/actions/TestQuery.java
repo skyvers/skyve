@@ -49,7 +49,7 @@ public class TestQuery implements ServerSideAction<ReportDatasetExtension> {
 	 * @throws Exception if the operation fails
 	 */
 	@Override
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	public ServerSideActionResult<ReportDatasetExtension> execute(ReportDatasetExtension bean, WebContext webContext)
 			throws Exception {
 		// clear any previous results

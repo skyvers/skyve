@@ -308,7 +308,7 @@ public class RestoreJob extends CancellableJob {
 	 * Restores table data from CSV files, handling join tables, extension tables,
 	 * and content attachments according to restore options.
 	 */
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	private void restoreData(File backupDirectory,
 								Collection<Table> tables,
 								Connection connection,

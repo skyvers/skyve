@@ -996,7 +996,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 	}
 
-	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
+	@SuppressWarnings({"java:S107", "java:S3776", "java:S6541"}) // Long parameter list preserves the existing framework/API contract; complexity OK
 	private void generateAttributeMappings(StringBuilder contents,
 											Customer customer,
 											Module module,
@@ -2106,7 +2106,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		attributeJavadoc(enumeration, enums);
 		enums.append("\t@XmlEnum\n");
 		enums.append("\t@Generated(value = \"").append(getClass().getName()).append("\")\n");
-		enums.append("\tpublic static enum ").append(typeName).append(" implements Enumeration {\n");
+		enums.append("\tpublic enum ").append(typeName).append(" implements Enumeration {\n");
 		for (EnumeratedValue value : enumeration.getValues()) {
 			String code = value.getCode();
 			String description = value.getDescription();
@@ -2185,7 +2185,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		enums.append("\t}\n\n");
 	}
 
-	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
+	@SuppressWarnings({"java:S107", "java:S3776", "java:S6541"}) // Long parameter list preserves the existing framework/API contract; complexity OK
 	private void addReference(Reference reference,
 								boolean overriddenReference,
 								Customer customer,
@@ -3002,7 +3002,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		contents.append("\n}");
 	}
 
-	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
+	@SuppressWarnings({"java:S107", "java:S3776", "java:S6541"}) // Long parameter list preserves the existing framework/API contract; complexity OK
 	private void generateJava(Customer customer,
 								Module module,
 								Document document,

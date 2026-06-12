@@ -177,7 +177,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	 * @param response outbound HTTP response
 	 * @throws IOException when writing the response fails
 	 */
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	private static void processRequest(HttpServletRequest request, HttpServletResponse response) 
 	throws IOException {
 		response.setContentType(MimeType.json.toString());
@@ -576,7 +576,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	 * @param pw response writer
 	 * @throws Exception when fetch processing fails
 	 */
-	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
+	@SuppressWarnings({"java:S107", "java:S3776", "java:S6541"}) // Long parameter list preserves the existing framework/API contract; complexity OK
 	private static void fetch(AbstractWebContext webContext,
 			                    User user,
 		    					Customer customer,
@@ -1009,7 +1009,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	 * @param pw response writer
 	 * @throws Exception when apply processing fails
 	 */
-	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
+	@SuppressWarnings({"java:S107", "java:S3776", "java:S6541"}) // Long parameter list preserves the existing framework/API contract; complexity OK
 	private static void apply(AbstractWebContext webContext,
 		                        User user,
 		    					Customer customer,

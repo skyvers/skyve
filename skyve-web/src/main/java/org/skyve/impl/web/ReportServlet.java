@@ -420,7 +420,7 @@ public class ReportServlet extends HttpServlet {
 	 * rebuilds filter criteria, derives export columns, fills a Jasper report from the resulting iterable, and
 	 * streams the generated document back to the client.
 	 */
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	private static void doExport(HttpServletRequest request, HttpServletResponse response)
 	throws IOException {
 		try (ServletOutputStream out = response.getOutputStream()) {

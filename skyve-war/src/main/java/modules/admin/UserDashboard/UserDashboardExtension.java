@@ -321,7 +321,7 @@ public class UserDashboardExtension extends UserDashboard {
 	 * @param reason Reason text shown on the tile.
 	 * @return A tile descriptor, or {@code null} when access checks fail.
 	 */
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	private static Tile createTile(Operation operation, String moduleName, String documentName, Bean bean, String reason) {
 
 		if (!checkModuleDocumentCanBeRead(moduleName, documentName)) {

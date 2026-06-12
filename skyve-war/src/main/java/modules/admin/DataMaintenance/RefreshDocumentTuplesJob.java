@@ -40,7 +40,7 @@ public class RefreshDocumentTuplesJob extends Job {
 	 * @throws Exception if the operation fails
 	 */
 	@Override
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	public void execute() throws Exception {
 
 		List<String> log = getLog();

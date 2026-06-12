@@ -292,7 +292,7 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 	 * @throws Exception if the operation fails
 	 */
 	@Override
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	public void preSave(ReportTemplateExtension bean) throws Exception {
 		JobScheduler jobScheduler = EXT.getJobScheduler();
 

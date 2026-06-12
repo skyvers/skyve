@@ -56,7 +56,7 @@ public class DoctorUtil {
 	 * Enumerates output formats supported by the documentation tool.
 	 */
 	@SuppressWarnings("java:S115") // Enum names are documentation output option codes.
-	public static enum OutputFormat {
+	public enum OutputFormat {
 		/** Writes diagnostic output to standard output. */
 		debug, template, htmlSet, htmlDoc
 	}
@@ -247,7 +247,7 @@ public class DoctorUtil {
 	 * @param out destination stream receiving HTML fragments
 	 * @throws Exception if metadata access or rendering fails
 	 */
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	public static void renderDocument(Customer customer, Module module, Document document, PrintStream out) {
 
 		DocSection title = new DocSection(createIndentifier(customer.getName(), module.getName(), document.getName(), "documentTitle"));

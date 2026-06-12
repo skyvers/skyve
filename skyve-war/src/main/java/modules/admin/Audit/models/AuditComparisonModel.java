@@ -50,7 +50,7 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 	 * @throws Exception if audit payload parsing or metadata lookup fails
 	 */
 	@Override
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	public ComparisonComposite getComparisonComposite(Audit me) throws Exception {
 		Audit sourceVersion = me.getSourceVersion();
 		Audit comparisonVersion = me.getComparisonVersion();

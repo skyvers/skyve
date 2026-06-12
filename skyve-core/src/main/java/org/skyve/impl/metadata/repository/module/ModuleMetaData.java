@@ -370,7 +370,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 * @throws MetaDataException if required fields are missing or duplicate names are detected
 	 */
 	@Override
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	public Module convert(String metaDataName) {
 		ModuleImpl result = new ModuleImpl();
 		result.setLastModifiedMillis(getLastModifiedMillis());

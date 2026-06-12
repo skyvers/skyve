@@ -125,7 +125,7 @@ public abstract class AbstractDataFileLoader {
 	// NB An instance member LOGGER is OK here as this is not Serializable
     protected final Logger LOGGER = SkyveLoggerFactory.getLogger(getClass());
 
-	public static enum LoaderActivityType {
+	public enum LoaderActivityType {
 		CREATE_ALL, CREATE_FIND, FIND
 	}
 
@@ -592,7 +592,7 @@ public abstract class AbstractDataFileLoader {
 	 * 
 	 * @return
 	 */
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	public <T extends Bean> T beanResult() {
 
 		if (debugMode) {

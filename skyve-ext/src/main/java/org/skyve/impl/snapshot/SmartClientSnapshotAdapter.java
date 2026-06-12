@@ -40,7 +40,7 @@ class SmartClientSnapshotAdapter extends SnapshotAdapter {
 	private static final String MALFORMED_SORT_STATE = "Malformed sortState in snapshot - ";
 	
 	@Override
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	public Snapshot fromClientPayload(String payload) {
 		User u = CORE.getUser();
 		

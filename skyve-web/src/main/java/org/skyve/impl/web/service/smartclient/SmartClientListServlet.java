@@ -142,7 +142,7 @@ public class SmartClientListServlet extends HttpServlet {
 		processRequest(request, response);
 	}
 
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	private static void processRequest(HttpServletRequest request, HttpServletResponse response)
 	throws IOException {
 		response.setContentType(MimeType.json.toString());
@@ -920,7 +920,7 @@ public class SmartClientListServlet extends HttpServlet {
 
 	private static final String HIERARCHICAL_PARENT_ID_SUFFIX = "." + HierarchicalBean.PARENT_ID;
 
-	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
+	@SuppressWarnings({"java:S107", "java:S3776", "java:S6541"}) // Long parameter list preserves the existing framework/API contract; complexity OK
 	private static void addAdvancedFilterCriteriaToQueryInternal(Module module,
 																	Document document,
 																	User user,
@@ -1379,7 +1379,7 @@ public class SmartClientListServlet extends HttpServlet {
 		return filterOperator;
 	}
 
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	private static void addCriterionToFilter(String binding,
 												SmartClientFilterOperator filterOperator,
 												Object value,

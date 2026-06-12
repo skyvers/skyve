@@ -251,7 +251,7 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	 * @return matching completion candidates in the order they were discovered
 	 */
 	@Override
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	public List<String> completeWithoutPrefixOrSuffix(String fragment,
 														Customer customer,
 														Module module,

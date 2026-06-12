@@ -64,7 +64,7 @@ public class EditAction extends FacesAction<Void> {
 	 * @throws Exception when edit initialization fails
 	 */
 	@Override
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	public Void callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("EditAction");
 

@@ -49,7 +49,7 @@ class VueSnapshotAdapter extends SnapshotAdapter {
 	}
 	
 	@Override
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	public Snapshot fromClientPayload(String payload) {
 		User u = CORE.getUser();
 		

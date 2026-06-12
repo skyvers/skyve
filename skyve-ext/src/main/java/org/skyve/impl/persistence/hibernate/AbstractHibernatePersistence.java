@@ -2141,7 +2141,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 * @param document The document metadata.
 	 * @param bean The bean to validate.
 	 */
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	private void checkUniqueConstraints(@Nonnull Customer customer, @Nonnull Document document, @Nonnull Bean bean) {
 // TODO - Work the dynamic something in here - remove the short-circuit on dynamic
 if (document.isDynamic()) return;
@@ -3395,7 +3395,7 @@ public void doWorkOnConnection(Session session) {
 	 * {@inheritDoc}
 	 */
 	@Override
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	public void upsertBeanTuple(PersistentBean bean) {
 		CustomerImpl customer = (CustomerImpl) user.getCustomer();
 		Module module = customer.getModule(bean.getBizModule());

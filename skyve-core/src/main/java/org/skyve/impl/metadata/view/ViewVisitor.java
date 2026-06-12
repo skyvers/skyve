@@ -482,7 +482,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 		return true;
 	}
 
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	private void visitWidget(MetaData widget, 
 								boolean parentVisible,
 								boolean parentEnabled) {

@@ -51,7 +51,7 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 	 * @throws Exception if validation or persistence fails
 	 */
 	@Override
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	public ServerSideActionResult<SelfRegistrationExtension> execute(SelfRegistrationExtension bean, WebContext webContext)
 			throws Exception {
 		Persistence persistence = CORE.getPersistence();

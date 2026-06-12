@@ -187,7 +187,7 @@ public class JSONReader {
 		return token;
 	}
 
-	@SuppressWarnings({"unchecked", "java:S3776"}) // Complexity OK
+	@SuppressWarnings({"unchecked", "java:S3776", "java:S6541"}) // complexity OK
 	private @Nullable Object object() throws Exception {
 		Object key = read();
 		if (Bean.MODULE_KEY.equals(key)) {

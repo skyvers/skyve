@@ -265,7 +265,7 @@ class HibernateSQL extends AbstractSQL {
 		}
 	}
 	
-	@SuppressWarnings({"resource", "java:S3776"}) // Complexity OK
+	@SuppressWarnings({"resource", "java:S3776", "java:S6541"}) // complexity OK
 	private @Nonnull <T> NativeQuery<T> createQueryFromSQL() {
 		Session session = persistence.getSession();
 		NativeQuery<T> result = session.createNativeQuery(toQueryString());

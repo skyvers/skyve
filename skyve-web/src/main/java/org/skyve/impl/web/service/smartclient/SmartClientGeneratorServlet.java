@@ -110,7 +110,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 	}
 
 	// NB - Never throw ServletException as this will halt the SmartClient Relogin flow.
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	private static void processRequest(HttpServletRequest request,
 										HttpServletResponse response)
 	throws IOException {

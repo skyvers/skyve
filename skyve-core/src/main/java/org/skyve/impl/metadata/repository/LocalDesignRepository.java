@@ -387,7 +387,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	 * @throws MetaDataException when module metadata is inconsistent or invalid
 	 */
 	@Override
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	public void validateModuleForGenerateDomain(Customer customer, Module module) {
 		// if home document is transient then home ref had better be edit
 		String homeDocumentName = module.getHomeDocumentName();
@@ -681,7 +681,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	 * @param module the owning module
 	 * @throws MetaDataException when any menu item references invalid metadata
 	 */
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	private void checkMenu(@Nonnull List<MenuItem> items, @Nullable Customer customer, @Nonnull Module module) {
 		for (MenuItem item : items) {
 			if (item instanceof MenuGroup group) {
@@ -827,7 +827,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	 * @throws MetaDataException when document metadata is inconsistent or invalid
 	 */
 	@Override
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	public void validateDocumentForGenerateDomain(Customer customer, Document document) {
 		String documentIdentifier = document.getOwningModuleName() + '.' + document.getName();
 		Module module = getModule(customer, document.getOwningModuleName());

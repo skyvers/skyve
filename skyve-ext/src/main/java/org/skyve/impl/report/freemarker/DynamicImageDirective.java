@@ -67,7 +67,7 @@ public class DynamicImageDirective implements TemplateDirectiveModel {
 	private static final String PARAMETER_REQUIRED_SUFFIX = "' is required";
 
 	@Override
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
 	throws TemplateException, IOException {
 		if (params.isEmpty()) {

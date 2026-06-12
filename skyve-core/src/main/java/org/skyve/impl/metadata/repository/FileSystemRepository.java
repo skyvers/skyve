@@ -201,7 +201,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		}
 	}
 
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	private void populateDocumentLocations(@Nonnull String key) {
 		StringBuilder sb = new StringBuilder(256);
 

@@ -340,7 +340,7 @@ public class ReportViewVisitor extends ViewVisitor {
 	 * 
 	 * @param container
 	 */
-	@SuppressWarnings({"boxing", "java:S3776"}) // Complexity OK
+	@SuppressWarnings({"boxing", "java:S3776", "java:S6541"}) // complexity OK
 	protected void layout(Container container) {
 		
 		int sizedCols = 0;

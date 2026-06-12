@@ -258,7 +258,7 @@ public class JasperReportRenderer {
 		throw new IllegalArgumentException("Invalid module or document name.");
 	}
 
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	private String renderFromReportDesignParameters() throws JRException {
 		int reportColumnWidth = reportDesignParameters.getPageWidth() - 
 									reportDesignParameters.getLeftMargin() -

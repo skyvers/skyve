@@ -83,7 +83,7 @@ public class ComponentRenderer {
 		return out.toString();
 	}
 
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	private void renderComponent(UIComponentBase component) {
 		String tagName = null;
 		Map<String, Object> attributes = new LinkedHashMap<>();
