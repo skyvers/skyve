@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.Marker;
 import org.slf4j.event.Level;
 import org.slf4j.helpers.AbstractLogger;
+import org.slf4j.spi.LocationAwareLogger;
 
 /**
  * Verifies that {@link SkyveLoggerFactory} strips log-injection characters from
@@ -140,6 +141,24 @@ class SkyveLoggerFactoryTest {
 		assertSame(cause, recorder.lastThrowable);
 	}
 
+	@Test
+	@SuppressWarnings("static-method")
+	void usesLocationAwareLoggerWhenDelegateSupportsCallerBoundary() {
+		LocationAwareRecordingLogger locationAwareRecorder = new LocationAwareRecordingLogger();
+		Logger locationAwareLogger = SkyveLoggerFactory.wrap(locationAwareRecorder);
+		RuntimeException cause = new RuntimeException("boom");
+
+		locationAwareLogger.warn("Failure\nfor {}", "user\rname", cause);
+
+		assertEquals(LocationAwareLogger.WARN_INT, locationAwareRecorder.lastLevelInt);
+		assertEquals(AbstractLogger.class.getName(), locationAwareRecorder.lastFqcn);
+		assertEquals("Failure_for {}", locationAwareRecorder.lastMsg);
+		assertNotNull(locationAwareRecorder.lastArgs);
+		assertEquals(1, locationAwareRecorder.lastArgs.length);
+		assertEquals("user_name", locationAwareRecorder.lastArgs[0]);
+		assertSame(cause, locationAwareRecorder.lastThrowable);
+	}
+
 	// ---- all five levels sanitise ----
 
 	@Test
@@ -228,6 +247,51 @@ class SkyveLoggerFactoryTest {
 			this.lastMsg = msg;
 			this.lastArgs = arguments;
 			this.lastThrowable = throwable;
+		}
+
+		@Override public boolean isTraceEnabled() { return true; }
+		@Override public boolean isTraceEnabled(Marker marker) { return true; }
+		@Override public boolean isDebugEnabled() { return true; }
+		@Override public boolean isDebugEnabled(Marker marker) { return true; }
+		@Override public boolean isInfoEnabled() { return true; }
+		@Override public boolean isInfoEnabled(Marker marker) { return true; }
+		@Override public boolean isWarnEnabled() { return true; }
+		@Override public boolean isWarnEnabled(Marker marker) { return true; }
+		@Override public boolean isErrorEnabled() { return true; }
+		@Override public boolean isErrorEnabled(Marker marker) { return true; }
+	}
+
+	private static final class LocationAwareRecordingLogger extends AbstractLogger implements LocationAwareLogger {
+
+		private static final long serialVersionUID = 1L;
+
+		String lastFqcn;
+		int lastLevelInt;
+		String lastMsg;
+		Object[] lastArgs;
+		Throwable lastThrowable;
+
+		LocationAwareRecordingLogger() {
+			this.name = "locationAwareRecording";
+		}
+
+		@Override
+		protected String getFullyQualifiedCallerName() {
+			return null;
+		}
+
+		@Override
+		protected void handleNormalizedLoggingCall(Level level, Marker marker, String msg, Object[] arguments, Throwable throwable) {
+			throw new AssertionError("LocationAwareLogger.log should be used directly");
+		}
+
+		@Override
+		public void log(Marker marker, String fqcn, int level, String message, Object[] argArray, Throwable t) {
+			this.lastFqcn = fqcn;
+			this.lastLevelInt = level;
+			this.lastMsg = message;
+			this.lastArgs = argArray;
+			this.lastThrowable = t;
 		}
 
 		@Override public boolean isTraceEnabled() { return true; }

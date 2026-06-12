@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.slf4j.event.Level;
 import org.slf4j.helpers.AbstractLogger;
+import org.slf4j.spi.LocationAwareLogger;
 import org.skyve.util.OWASP;
 
 /**
@@ -26,14 +27,14 @@ import org.skyve.util.OWASP;
  * <p>{@link Category#logger()} also returns a {@code SkyveLogger}-wrapped instance, so
  * category loggers obtained through that convenience method are automatically sanitised.
  *
- * @implNote Because this class adds a delegation frame, caller-location information in
- *           log output (class name, method, line number) reflects the internal delegation
- *           call rather than the original call site. This is an inherent limitation of
- *           the wrapper pattern and an acceptable trade-off for backend-agnostic
- *           sanitisation.
+ * @implNote When the delegate implements {@link LocationAwareLogger}, this wrapper
+ *           passes a caller boundary so the backend can resolve the original call
+ *           site. Backends without {@code LocationAwareLogger} support may still
+ *           report this wrapper in caller-location output.
  */
 public final class SkyveLoggerFactory extends AbstractLogger {
 	private static final long serialVersionUID = 6403958415244412320L;
+	private static final String CALLER_BOUNDARY_FQCN = AbstractLogger.class.getName();
 
 	/**
 	 * Transient because {@link Logger} implementations are not reliably serializable.
@@ -93,13 +94,18 @@ public final class SkyveLoggerFactory extends AbstractLogger {
 
 	@Override
 	protected String getFullyQualifiedCallerName() {
-		return null;
+		return CALLER_BOUNDARY_FQCN;
 	}
 
 	@Override
 	protected void handleNormalizedLoggingCall(Level level, Marker marker, String msg, Object[] arguments, Throwable throwable) {
 		String cleanMsg = OWASP.sanitiseLog(msg);
 		Object[] cleanArgs = sanitiseArgs(arguments);
+		if (delegate instanceof LocationAwareLogger locationAware) {
+			locationAware.log(marker, CALLER_BOUNDARY_FQCN, toLocationAwareLevel(level), cleanMsg, cleanArgs, throwable);
+			return;
+		}
+
 		Object[] delegateArgs = throwable != null ? appendThrowable(cleanArgs, throwable) : cleanArgs;
 		switch (level) {
 			case TRACE: delegate.trace(marker, cleanMsg, delegateArgs); break;
@@ -109,6 +115,16 @@ public final class SkyveLoggerFactory extends AbstractLogger {
 			case ERROR: delegate.error(marker, cleanMsg, delegateArgs); break;
 			default:    delegate.info(marker, cleanMsg, delegateArgs);  break;
 		}
+	}
+
+	private static int toLocationAwareLevel(Level level) {
+		return switch (level) {
+			case TRACE -> LocationAwareLogger.TRACE_INT;
+			case DEBUG -> LocationAwareLogger.DEBUG_INT;
+			case INFO -> LocationAwareLogger.INFO_INT;
+			case WARN -> LocationAwareLogger.WARN_INT;
+			case ERROR -> LocationAwareLogger.ERROR_INT;
+		};
 	}
 
 	@Override
