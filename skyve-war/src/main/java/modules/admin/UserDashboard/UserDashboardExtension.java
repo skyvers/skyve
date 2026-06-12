@@ -93,6 +93,7 @@ public class UserDashboardExtension extends UserDashboard {
 	 * 
 	 * @return The HTML markup for the favourites
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void createFavourites() {
 		UserExtension currentUser = userService.currentAdminUser();
 
@@ -204,6 +205,7 @@ public class UserDashboardExtension extends UserDashboard {
 	 * @param top Maximum number of tiles to produce.
 	 * @param reason Reason text shown on the tile.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void createTilesCommon(List<Bean> audits, Operation operation, int top, String reason) {
 
 		try {
@@ -249,6 +251,7 @@ public class UserDashboardExtension extends UserDashboard {
 	 * @param top Maximum number of tiles to produce.
 	 * @param reason Reason text shown on the tile.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void createTilesRecent(List<Bean> audits, Operation operation, int top, String reason) {
 
 		int count = 0;
@@ -318,6 +321,7 @@ public class UserDashboardExtension extends UserDashboard {
 	 * @param reason Reason text shown on the tile.
 	 * @return A tile descriptor, or {@code null} when access checks fail.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static Tile createTile(Operation operation, String moduleName, String documentName, Bean bean, String reason) {
 
 		if (!checkModuleDocumentCanBeRead(moduleName, documentName)) {

@@ -162,6 +162,7 @@ public class Snapshot {
 	 * @return A populated snapshot, or {@code null} when the input contains no values.
 	 * @throws Exception If the JSON payload cannot be parsed into a valid snapshot structure.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static Snapshot fromJSON(String json) throws Exception {
 		@SuppressWarnings("unchecked")
 		Map<String, Object> values = (Map<String, Object>) JSON.unmarshall(json);

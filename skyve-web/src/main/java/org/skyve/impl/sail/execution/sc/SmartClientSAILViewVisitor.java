@@ -176,6 +176,7 @@ public class SmartClientSAILViewVisitor {
 	 *
 	 * @param widget the metadata widget to visit
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void visitWidget(MetaData widget) {
 		if (widget instanceof Container container) {
 			visitContainer(container);
@@ -858,6 +859,7 @@ public class SmartClientSAILViewVisitor {
 	 * @param implicitName the implicit action being expanded
 	 * @param action the action metadata definition
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void visit(String viewName, ImplicitActionName implicitName, ActionImpl action) {
 		if (ImplicitActionName.DEFAULTS.equals(implicitName)) {
 			if (ViewType.list.toString().equals(viewName)) {

@@ -117,6 +117,7 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 	 * @throws Exception if the operation fails
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public List<DomainValue> getDynamicDomainValues(String attributeName, ControlPanelExtension bean) throws Exception {
 
 		// list documents within modules that have not already been selected

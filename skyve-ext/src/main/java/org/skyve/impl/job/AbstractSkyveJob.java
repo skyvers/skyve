@@ -186,7 +186,7 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 	}
 
 	@Override
-	@SuppressWarnings({"java:S1143", "java:S1163"}) // OK to throw in the finally block here as it stops deployment
+	@SuppressWarnings({"java:S1143", "java:S1163", "java:S3776"}) // OK to throw in the finally block here as it stops deployment; Complexity OK
 	public final void execute(JobExecutionContext context)
 	throws JobExecutionException {
 		AbstractPersistence persistence = AbstractPersistence.get();

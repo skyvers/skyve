@@ -223,6 +223,7 @@ public class BackupsModel extends ListModel<DataMaintenance> {
 	 * @return
 	 * @throws IOException
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static Page fetchBackups(String dirPath, int startRow, int endRow) throws IOException {
 		Map<String, Long> backups = new TreeMap<>();
 		if (ExternalBackup.areExternalBackupsEnabled()) {

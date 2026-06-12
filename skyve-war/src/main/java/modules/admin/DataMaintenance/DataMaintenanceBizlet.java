@@ -65,6 +65,7 @@ public class DataMaintenanceBizlet extends SingletonCachedBizlet<DataMaintenance
 	 * @throws Exception if the operation fails
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public List<DomainValue> getConstantDomainValues(String attributeName) throws Exception {
 		List<DomainValue> result = null;
 

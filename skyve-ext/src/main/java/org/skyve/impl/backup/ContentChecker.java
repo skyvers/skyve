@@ -317,6 +317,7 @@ public class ContentChecker {
 	 * @param dynamicEntityPersistentIdentifier persistent identifier for DynamicEntity
 	 * @return a string describing the bogus reference, or null if not found
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static @Nullable String bogusDynamicContentReference(@Nonnull String contentId, @Nonnull String dynamicEntityPersistentIdentifier) {
 		ProvidedRepository r = ProvidedRepositoryFactory.get();
 		Persistence p = CORE.getPersistence();

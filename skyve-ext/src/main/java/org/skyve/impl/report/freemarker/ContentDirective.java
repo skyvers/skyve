@@ -68,6 +68,7 @@ public class ContentDirective implements TemplateDirectiveModel {
 	private static final String PARAMETER_REQUIRED_SUFFIX = "' is required";
 
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
 	throws TemplateException, IOException {
 		if (params.isEmpty()) {

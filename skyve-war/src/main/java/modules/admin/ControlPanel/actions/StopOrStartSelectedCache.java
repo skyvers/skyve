@@ -33,6 +33,7 @@ public class StopOrStartSelectedCache implements ServerSideAction<ControlPanelEx
 	 * @throws Exception if the operation fails
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public ServerSideActionResult<ControlPanelExtension> execute(ControlPanelExtension bean, WebContext webContext) throws Exception {
 		bean.setTabIndex(null);
 		

@@ -138,6 +138,7 @@ public abstract class FacesAction<T> {
 	 * @param message	
 	 * @param globalMessageSet	Used to add only unique/distinct messages across calls
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static void processFacesMessages(FacesContext context,
 												Severity severity,
 												Message message,
@@ -224,6 +225,7 @@ public abstract class FacesAction<T> {
 	 * @param globalMessages set used to deduplicate global validation messages
 	 * @return {@code true} when no required-field validation failures are found, otherwise {@code false}
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static boolean validateRequiredFields(final FacesContext fc, 
 													UIComponent component, 
 													final TreeSet<String> globalMessages) {
@@ -398,6 +400,7 @@ public abstract class FacesAction<T> {
 	 * @param component the current component in traversal
 	 * @param messageClientIds accumulator for discovered client ids
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static void findAllMessageComponentClientIds(UIComponent component, List<String> messageClientIds) {
 		if (component.isRendered()) {
 			if (component instanceof org.primefaces.component.message.Message) {

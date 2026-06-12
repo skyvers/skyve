@@ -41,6 +41,7 @@ public class TagBizlet extends Bizlet<TagExtension> {
 	 * @throws Exception If metadata resolution fails.
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public List<DomainValue> getDynamicDomainValues(String attributeName, TagExtension bean) throws Exception {
 		Persistence pers = CORE.getPersistence();
 		List<DomainValue> result = new ArrayList<>();
@@ -128,6 +129,7 @@ public class TagBizlet extends Bizlet<TagExtension> {
 	 * @throws Exception If setup or cleanup fails.
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public TagExtension preExecute(ImplicitActionName actionName, TagExtension bean, Bean parentBean, WebContext webContext)
 			throws Exception {
 		if (ImplicitActionName.Edit.equals(actionName)) {

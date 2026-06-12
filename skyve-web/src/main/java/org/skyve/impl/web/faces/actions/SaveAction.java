@@ -39,6 +39,7 @@ public class SaveAction extends FacesAction<Void> {
 	}
 
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public Void callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("SaveAction - ok={}", ok);
 

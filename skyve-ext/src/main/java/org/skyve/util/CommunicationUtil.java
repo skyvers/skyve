@@ -130,6 +130,7 @@ public class CommunicationUtil {
 	 * 
 	 * @throws Exception
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static String actionCommunicationRequest(WebContext webContext, ActionType actionType, Communication communication, RunMode runMode, ResponseMode responseMode,
 			MailAttachment[] additionalAttachments, @Nonnull Bean... specificBeans) throws Exception {
 
@@ -300,6 +301,7 @@ public class CommunicationUtil {
 	 * @param addressList
 	 * @return
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static List<String> resolveAndValidateEmailAddressList(String addressList, ResponseMode responseMode, Document communicationDoc,
 			Document subscriptionDoc) throws Exception {
 

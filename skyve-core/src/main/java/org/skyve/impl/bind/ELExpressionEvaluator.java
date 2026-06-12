@@ -199,6 +199,7 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	 *         otherwise {@code null}
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public String validateWithoutPrefixOrSuffix(String expression,
 													Class<?> returnType,
 													Customer customer,
@@ -250,6 +251,7 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	 * @return matching completion candidates in the order they were discovered
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public List<String> completeWithoutPrefixOrSuffix(String fragment,
 														Customer customer,
 														Module module,

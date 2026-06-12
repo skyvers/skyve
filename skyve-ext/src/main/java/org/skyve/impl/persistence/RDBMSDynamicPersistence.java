@@ -112,6 +112,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 	 * @param bean the root bean whose dynamic state should be flushed
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void persist(PersistentBean bean) {
 		Customer c = persistence.getUser().getCustomer();
 		populatePersistentIdentifiersIfNecessary(c);
@@ -196,6 +197,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 	 * @param d the document definition of {@code bean}
 	 * @param bean the bean to persist
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void persistOne(@Nonnull Customer c, @Nonnull Document d, @Nonnull PersistentBean bean) {
 		final Map<String, Object> dynamicFields = new TreeMap<>();
 		// Reference name -> emebdded association indictor
@@ -283,6 +285,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 	 * @param bean the owning bean of the relations
 	 * @param references map of relation names to embedded-association flags
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void insertReferences(@Nonnull Customer c, @Nonnull PersistentBean bean, @Nonnull Map<String, Boolean> references) {
 		String insert = "insert into " + dynamicRelationPersistentIdentifier + " (bizId, bizVersion, bizLock, bizKey, bizCustomer, bizFlagComment, bizDataGroupId, bizUserId, parent_id, relatedModuleName, relatedDocumentName, relatedId, attributeName, ordinal) " + 
 							"values (:bizId, 0, :bizLock, :bizKey, :bizCustomer, null, null, :bizUserId, :parent_id, :relatedModuleName, :relatedDocumentName, :relatedId, :attributeName, :ordinal)";
@@ -369,6 +372,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 	 * @param bean the root bean to delete from dynamic storage
 	 * @param beforeSave when {@code true}, performs pre-save cleanup semantics instead of full delete semantics
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void delete(@Nonnull Customer customer, @Nonnull Document document, @Nonnull PersistentBean bean, boolean beforeSave) {
 		final Map<String, Bean> bizIdsToDelete = new TreeMap<>();
 		
@@ -648,6 +652,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 	 * @param tuple the tuple row from dynamic storage
 	 * @throws Exception if type conversion or related-bean population fails
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void populate(@Nonnull User u,
 							@Nonnull Customer c,
 							@Nonnull Module m,
@@ -715,6 +720,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 	 * @param dynamicReferenceNames the set of dynamic reference attribute names to populate
 	 * @throws Exception if related bean retrieval fails
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void populateReferences(@Nonnull PersistentBean bean, @Nonnull Set<String> dynamicReferenceNames) throws Exception {
 		String select = "select relatedModuleName, relatedDocumentName, relatedId, attributeName from " + dynamicRelationPersistentIdentifier + " where parent_id = :bizId order by attributeName, ordinal";
 		// Note - this following SQL gets a list instead of iterating as this method is recursive (through the populate() call for relatedBean).

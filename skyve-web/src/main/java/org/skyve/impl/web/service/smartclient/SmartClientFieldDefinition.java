@@ -87,6 +87,7 @@ public class SmartClientFieldDefinition extends SmartClientDataGridFieldDefiniti
 	 * @return SmartClient JavaScript field definition payload
 	 */
 	@Override
+    @SuppressWarnings("java:S3776") // Complexity OK
     public String toJavascript() {
         StringBuilder result = new StringBuilder(128);
 

@@ -580,6 +580,7 @@ public class ModulesUtil {
 	 *         general Exception for metadata exception or string
 	 *         manipulation failure etc
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static String replaceBindingsInString(Bean bean, String replacementString) throws Exception {
 
 		StringBuilder result = new StringBuilder(replacementString);

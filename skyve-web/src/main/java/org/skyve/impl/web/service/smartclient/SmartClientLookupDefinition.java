@@ -48,6 +48,7 @@ public class SmartClientLookupDefinition {
 	 * @param runtime whether runtime domain/query values should be resolved
 	 * @param uxui active UX/UI profile name
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	protected SmartClientLookupDefinition(boolean bindingToDataGrid,
 		    								User user,
 		    								Customer customer,

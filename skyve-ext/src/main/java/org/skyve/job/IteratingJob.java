@@ -22,7 +22,7 @@ public abstract class IteratingJob<T> extends CancellableJob {
 	private int numRolledBackElements;
 
 	@Override
-	@SuppressWarnings("boxing")
+	@SuppressWarnings({"boxing", "java:S3776"}) // Complexity OK
 	public void execute() throws Exception {
 		getLog().add(String.format("Commencing job %s.", getDisplayName()));
 

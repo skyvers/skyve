@@ -121,7 +121,7 @@ public class BackupJob extends CancellableJob {
 	 *
 	 * @throws Exception if the backup fails
 	 */
-	@SuppressWarnings("java:S1143") // Allow nested try blocks for clarity in resource management and error handling
+	@SuppressWarnings({"java:S1143", "java:S3776"}) // Allow nested try blocks for clarity in resource management and error handling; Complexity OK
 	private void backup() throws Exception {
 		Bean bean = getBean();
 		List<String> log = getLog();

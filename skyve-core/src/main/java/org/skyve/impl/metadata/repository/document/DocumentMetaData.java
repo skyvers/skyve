@@ -573,6 +573,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @throws MetaDataException if the descriptor is incomplete or internally inconsistent
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public Document convert(String metaDataName) {
 		DocumentImpl result = new DocumentImpl();
 		result.setLastModifiedMillis(getLastModifiedMillis());

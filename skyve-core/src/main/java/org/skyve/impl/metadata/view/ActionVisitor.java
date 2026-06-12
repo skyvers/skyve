@@ -94,6 +94,7 @@ public abstract class ActionVisitor {
 		}
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void visit(String viewName, ImplicitActionName implicitName, ActionImpl action) {
 		if (ImplicitActionName.DEFAULTS.equals(implicitName)) {
 			if (ViewType.list.toString().equals(viewName)) {

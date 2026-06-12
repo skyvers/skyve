@@ -185,6 +185,7 @@ public final class ComparisonJSONManipulator {
 	 * @return ordered property maps; never {@code null}
 	 * @throws Exception if a property cannot be mapped to SmartClient metadata
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private List<Map<String, Object>> listOfMapOfProperties(List<ComparisonProperty> properties,
 																Document nodeDocument)
 	throws Exception {

@@ -196,6 +196,7 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 	 * @param event the current rendering-complete phase event
 	 * @throws Exception when post-render lifecycle processing fails
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static void afterResponseRendered(PhaseEvent event)
 	throws Exception {
 		try {

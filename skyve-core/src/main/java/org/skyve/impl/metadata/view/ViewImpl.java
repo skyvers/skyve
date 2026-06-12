@@ -496,6 +496,7 @@ public class ViewImpl extends Container implements View {
 	 * @return the effective access set for this view and its component fragments,
 	 *         or {@code null} if access control has not been enabled and accesses have not been generated
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public Set<UserAccess> getAccesses(CustomerImpl customer, Document document, String uxui) {
 		Set<UserAccess> result = accesses;
 		if (result != null) { // accesses were generated
@@ -576,6 +577,7 @@ public class ViewImpl extends Container implements View {
 	 * @param metaDataName source metadata name for diagnostics
 	 * @param accessesMetaData repository access definitions, or {@code null}
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void convertAccesses(Module module,
 									String documentName,
 									String metaDataName,
@@ -632,6 +634,7 @@ public class ViewImpl extends Container implements View {
 	 * @param document the owning document
 	 * @param generate whether missing accesses should be generated when access control is enabled
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void resolve(String uxui, Customer customer, Module module, Document document, boolean generate) {
 		final String moduleName = module.getName();
 		final String documentName = document.getName();

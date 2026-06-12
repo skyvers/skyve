@@ -68,6 +68,7 @@ public class CompleteAction extends FacesAction<List<String>> {
 	 * @throws Exception when completion processing fails unexpectedly
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public List<String> callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("CompleteAction - EXECUTE complete {} for binding {}", query, binding);
 		AbstractPersistence persistence = AbstractPersistence.get();

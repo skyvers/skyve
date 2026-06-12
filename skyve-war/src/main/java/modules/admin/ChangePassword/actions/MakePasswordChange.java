@@ -34,6 +34,7 @@ public class MakePasswordChange implements ServerSideAction<ChangePassword> {
 	 * @throws Exception if the operation fails
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public ServerSideActionResult<ChangePassword> execute(ChangePassword bean, WebContext webContext) throws Exception {
 		Persistence persistence = CORE.getPersistence();
 		User user = persistence.getUser();

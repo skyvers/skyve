@@ -444,6 +444,7 @@ public final class FreemarkerReportUtil {
 	 * @return A String with the merged output of the template with the report parameters
 	 * @throws Exception
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static String runReport(final String reportName, final Map<String, Object> reportParameters)
 	throws Exception {
 		// get the report template with the specified name

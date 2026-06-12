@@ -255,6 +255,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	 * @param menu the menu tree to prune
 	 * @param user the user whose role membership is evaluated
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static void removeInaccessibleItems(@Nonnull String moduleName, @Nonnull Menu menu, @Nonnull User user) {
 		// Check all the child items to see if we have access
 		Iterator<MenuItem> i = menu.getItems().iterator();
@@ -305,6 +306,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	 * @throws MetaDataException when any customer-level reference is invalid
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void validateCustomerForGenerateDomain(Customer customer) {
 		try {
 			Module homeModule = customer.getHomeModule();
@@ -385,6 +387,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	 * @throws MetaDataException when module metadata is inconsistent or invalid
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void validateModuleForGenerateDomain(Customer customer, Module module) {
 		// if home document is transient then home ref had better be edit
 		String homeDocumentName = module.getHomeDocumentName();
@@ -678,6 +681,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	 * @param module the owning module
 	 * @throws MetaDataException when any menu item references invalid metadata
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void checkMenu(@Nonnull List<MenuItem> items, @Nullable Customer customer, @Nonnull Module module) {
 		for (MenuItem item : items) {
 			if (item instanceof MenuGroup group) {
@@ -823,6 +827,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	 * @throws MetaDataException when document metadata is inconsistent or invalid
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void validateDocumentForGenerateDomain(Customer customer, Document document) {
 		String documentIdentifier = document.getOwningModuleName() + '.' + document.getName();
 		Module module = getModule(customer, document.getOwningModuleName());
@@ -1076,6 +1081,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	 * @throws MetaDataException when view metadata or access targets are invalid
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void validateViewForGenerateDomain(Customer customer, Document document, View view, String uxui) {
 		CustomerImpl customerImpl = (CustomerImpl) customer;
 		ViewImpl viewImpl = (ViewImpl) view;

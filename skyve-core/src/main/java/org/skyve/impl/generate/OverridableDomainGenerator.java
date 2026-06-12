@@ -996,6 +996,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void generateAttributeMappings(StringBuilder contents,
 											Customer customer,
 											Module module,
@@ -1811,6 +1812,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		filterDefinitions.append("\t</filter-def>\n");
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void generateOverriddenORM(StringBuilder contents,
 										Customer customer,
 										Module module,
@@ -1988,6 +1990,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		return result;
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void populatePropertyLengths(Customer customer,
 											Module module,
 											Document document,
@@ -2182,6 +2185,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		enums.append("\t}\n\n");
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void addReference(Reference reference,
 								boolean overriddenReference,
 								Customer customer,
@@ -2514,6 +2518,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void addInverse(AbstractInverse inverse,
 								boolean overriddenInverse,
 								Customer customer,
@@ -2777,7 +2782,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 	}
 
-	@SuppressWarnings("boxing")
+	@SuppressWarnings({"boxing", "java:S3776"}) // Complexity OK
 	private void generateActionTests(final String moduleName,
 										final String packagePath,
 										final String modulePath,
@@ -2997,6 +3002,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		contents.append("\n}");
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void generateJava(Customer customer,
 								Module module,
 								Document document,
@@ -3980,6 +3986,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 * 
 	 * @param document The document containing the attributes to be visited
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void validateDocumentAttributeNames(final Document document) {
 		if (document != null) {
 			for (Attribute attribute : document.getAttributes()) {
@@ -4100,6 +4107,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 * 
 	 * @throws IOException
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void replaceGenerated(List<String> moduleNames) throws IOException {
 		// src/main/java/generated/modules
 		final Path generatedDirectory = Paths.get(generatedSrcPath, ProvidedRepository.MODULES_NAMESPACE);

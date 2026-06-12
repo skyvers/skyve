@@ -123,6 +123,7 @@ public class ThumbnailFilter implements Filter {
 	 * @throws ServletException if a servlet error occurs during chain execution
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 	throws IOException, ServletException {
 		// Parse width and height; if absent or invalid pass straight through

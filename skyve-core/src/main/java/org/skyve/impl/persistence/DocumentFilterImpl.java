@@ -148,6 +148,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * binding and parameters are wrapped in {@code lower(...)} to preserve
 	 * case-insensitive matching semantics.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private DocumentFilter addIn(@Nonnull String entityAlias, @Nonnull String binding, boolean not, Object... operands) {
 		if (filterClause.length() > 0) {
 			filterClause.append(AND_OPERATOR);
@@ -1094,6 +1095,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @param reversed whether parameter appears on the left-hand side
 	 * @return this filter for fluent chaining
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private DocumentFilter appendRestriction(@Nonnull String entityAlias,
 												@Nonnull String binding,
 												@Nullable String operator,

@@ -370,6 +370,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 * @throws MetaDataException if required fields are missing or duplicate names are detected
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public Module convert(String metaDataName) {
 		ModuleImpl result = new ModuleImpl();
 		result.setLastModifiedMillis(getLastModifiedMillis());
@@ -885,6 +886,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 * @param validRoleNames role names valid for grants within this module
 	 * @throws MetaDataException if required action attributes are missing or inconsistent
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void populateModuleMenu(String metaDataName,
 										List<MenuItem> items,
 										List<ActionMetaData> actions,

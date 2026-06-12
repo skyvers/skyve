@@ -181,6 +181,7 @@ final class SelectItemsIterator implements Iterator<SelectItem> {
      * <code>Iterator</code> appropriate to the UISelectItem(s) value.
      * </p>
      */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void initializeItems(Object kid) {
 
         if (kid instanceof UISelectItem ui) {

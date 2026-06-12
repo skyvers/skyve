@@ -374,6 +374,7 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 	 * @param dataEnter the data-entry step to execute
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void executeDataEnter(DataEnter dataEnter) {
 		PrimeFacesAutomationContext context = peek();
 		String identifier = dataEnter.getIdentifier(context);
@@ -741,6 +742,7 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 	 * @param binding the data-grid binding identifier
 	 * @param row optional row index for row-scoped interactions
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void dataGridGesture(Step step, String binding, Integer row) {
 		PrimeFacesAutomationContext context = peek();
 		String buttonIdentifier = step.getIdentifier(context);
@@ -856,6 +858,7 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 	 * @param step the originating list-grid step
 	 * @param row optional row index for row-scoped interactions
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void listGridGesture(Step step, Integer row) {
 		PrimeFacesAutomationContext context = peek();
 		String buttonIdentifier = step.getIdentifier(context);
@@ -913,6 +916,7 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 	 * @param step the originating list-grid step
 	 * @return a populated push-edit context for the target document
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private PushEditContext listGridContext(String queryName, String documentName, String modelName, Step step) {
 		PushEditContext result = new PushEditContext();
 

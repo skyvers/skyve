@@ -99,6 +99,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 	}
 
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public UIComponent addToContainer(UIComponent component,
 										Container viewContainer, 
 										UIComponent container, 
@@ -514,6 +515,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 		return new ResponsiveGridStyle(small, medium, large, extraLarge).toString();
 	}
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static ResponsiveGridStyle[] responsiveFormStyleClasses(List<FormColumn> formColumns) {
 		ResponsiveGridStyle[] result = new ResponsiveGridStyle[formColumns.size()];
 		

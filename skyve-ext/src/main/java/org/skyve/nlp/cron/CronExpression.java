@@ -284,7 +284,7 @@ public class CronExpression {
 	 *
 	 * @return A natural-language description, or {@code null} when no fields are set.
 	 */
-	@SuppressWarnings("boxing")
+	@SuppressWarnings({"boxing", "java:S3776"}) // Complexity OK
 	public String toNaturalLanguage() {
 		if (!hasNothing()) {
 			// check if it's one of our static expressions

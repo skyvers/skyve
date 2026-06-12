@@ -145,6 +145,7 @@ public final class POISheet implements BizPortSheet {
 	 *
 	 * @param sheet	The excel worksheet.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	POISheet(Customer customer, POIWorkbook parent, Sheet sheet, UploadException problems) {
 		title = sheet.getSheetName();
 
@@ -719,7 +720,7 @@ public final class POISheet implements BizPortSheet {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "java:S3776"}) // Complexity OK
 	public <T> T getValue(String columnBinding,
 							AttributeType attributeType,
 							UploadException problems) {
@@ -829,6 +830,7 @@ public final class POISheet implements BizPortSheet {
 	}
 	
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void setValue(String columnBinding, Object value) {
 		if (sheet == null) {
 			throw new IllegalStateException(WORKBOOK_DATA_NOT_MATERIALIZED);

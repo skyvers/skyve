@@ -368,6 +368,7 @@ public abstract class ReportDesignGenerator {
      * @param binding A simple or dotted attribute binding.
      * @return A resolved report field, or {@code null} when the binding cannot be represented.
      */
+    @SuppressWarnings("java:S3776") // Complexity OK
     protected static ReportField fieldFromBinding(DesignSpecification design, Customer customer, Document document, String binding) {
 
         ReportField result = null;

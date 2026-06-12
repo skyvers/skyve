@@ -42,6 +42,7 @@ public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenti
 	 * Process the redirect after login
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void onAuthenticationSuccess(HttpServletRequest request,
 										HttpServletResponse response,
 										Authentication authentication)

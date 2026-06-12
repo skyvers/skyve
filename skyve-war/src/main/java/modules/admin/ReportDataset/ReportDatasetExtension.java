@@ -55,6 +55,7 @@ public class ReportDatasetExtension extends ReportDataset {
 	 * If any parameters haven't already been created, create a new optional parameter in the template
 	 * with the name.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void addMissingParameters() {
 		if (isTypeQuery()) {
 			// check we have a query and a parent
@@ -149,6 +150,7 @@ public class ReportDatasetExtension extends ReportDataset {
 	 * @throws Exception
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public List<Bean> executeQuery() throws Exception {
 		if (DatasetType.bizQL != getDatasetType()) {
 			throw new IllegalArgumentException(
@@ -213,6 +215,7 @@ public class ReportDatasetExtension extends ReportDataset {
 	 * @throws Exception if the operation fails
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public List<DynaBean> executeSQLQuery() throws Exception {
 		if (DatasetType.SQL != getDatasetType()) {
 			throw new IllegalArgumentException(
@@ -361,6 +364,7 @@ public class ReportDatasetExtension extends ReportDataset {
 	 *
 	 * @return A substituted query replacing any date sentinels with the date parameters to use, or the original query
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public SubstitutedQueryResult getSubstitutedQuery() {
 		if (getDatasetType() == DatasetType.bizQL) {
 			String query = getQuery();

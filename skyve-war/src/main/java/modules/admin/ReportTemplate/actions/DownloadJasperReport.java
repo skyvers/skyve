@@ -53,6 +53,7 @@ public class DownloadJasperReport extends DownloadAction<ReportTemplateExtension
 	 * @throws Exception if the operation fails
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public Download download(ReportTemplateExtension bean, WebContext webContext) throws Exception {
 		User user = CORE.getUser();
 		Module module = user.getCustomer().getModule(bean.getModuleName());

@@ -82,6 +82,7 @@ public final class StandardGenerator {
 	 *
 	 * @param workbook	The workbook to generate the structure into.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void generateStructure(@Nonnull final BizPortWorkbook workbook) {
 		new NullableBeanVisitor(false, false) {
 			// processBean can be null as we are visiting ALL
@@ -171,6 +172,7 @@ public final class StandardGenerator {
 	 * @param workbook	The workbook to fill.
 	 * @param beans	The data to use to fill with.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void generateData(@Nonnull final BizPortWorkbook workbook,
 								@Nonnull final Iterable<? extends Bean> beans) {
 		// Recursively walks the topBean's object graph populating the relevant
@@ -287,6 +289,7 @@ public final class StandardGenerator {
 		}
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void generateRowData(@Nonnull BizPortSheet sheet,
 									@Nonnull Set<String> columnBindings,
 									@Nonnull Document currentDocument,
@@ -400,6 +403,7 @@ public final class StandardGenerator {
 	 * @param embeddedAssociationDisplayName	If recursing an embedded association, its display name.
 	 * @throws Exception
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void generateAttributeColumns(@Nonnull BizPortSheet sheet,
 											@Nonnull Document currentDocument,
 											@Nullable String embeddedAssociationName,

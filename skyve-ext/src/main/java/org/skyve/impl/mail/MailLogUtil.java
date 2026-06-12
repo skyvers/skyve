@@ -285,6 +285,7 @@ public class MailLogUtil {
 		return result.toString();
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static String maskSensitiveCodes(String body) {
 		String lower = body.toLowerCase(Locale.ROOT);
 		StringBuilder result = new StringBuilder(body);
@@ -369,6 +370,7 @@ public class MailLogUtil {
 		return createEntry(mails, outcome, true);
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static MailLogEntry createEntry(List<Mail> mails, MailDispatchOutcome outcome, boolean bulk) {
 		// TreeSet values are persisted/displayed, so keep deterministic ordering.
 		TreeSet<String> toRecipients = new TreeSet<>();

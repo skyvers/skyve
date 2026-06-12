@@ -38,6 +38,7 @@ public class TestReport extends DownloadAction<ReportTemplate> {
 	 * @throws Exception if the operation fails
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void prepare(ReportTemplate bean, WebContext webContext) throws Exception {
 		// check there are no unsaved changes
 		if (bean.isChanged()) {

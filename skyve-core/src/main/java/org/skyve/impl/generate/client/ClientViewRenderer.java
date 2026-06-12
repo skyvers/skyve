@@ -448,6 +448,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		formRowLayout = null;
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void addComponent(String widgetLabel,
 								int formColspan,
 								@Nullable String widgetRequiredMessage,
@@ -2166,6 +2167,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * @param formColspan the form column span to apply when rendering inside a form
 	 * @param text        the text-field metadata being rendered
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void renderTextField(int formColspan, TextField text) {
 		TargetMetaData target = getCurrentTarget();
 		Attribute attribute = (target == null) ? null : target.getAttribute();
@@ -2570,6 +2572,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * @param action the action metadata instance
 	 * @param name   the implicit action type to render
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void processImplicitAction(ActionImpl action, ImplicitActionName name) {
 		if (! Boolean.FALSE.equals(action.getInActionPanel())) {
 			if (toolbarLayouts != null) {

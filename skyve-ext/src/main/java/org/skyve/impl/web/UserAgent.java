@@ -64,6 +64,7 @@ public class UserAgent {
 	 * @param request The active HTTP request.
 	 * @return The resolved user-agent type.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static @Nonnull UserAgentType getType(@Nonnull HttpServletRequest request) {
 		boolean touchEnabled = false;
 

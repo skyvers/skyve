@@ -74,6 +74,7 @@ public class CompressionFilter implements Filter {
      */
 
     @Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void init(FilterConfig filterConfig) {
 
         config = filterConfig;
@@ -133,6 +134,7 @@ public class CompressionFilter implements Filter {
      **/
 
     @Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void doFilter(ServletRequest request,
 							ServletResponse response,
 							FilterChain chain)

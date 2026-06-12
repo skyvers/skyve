@@ -397,6 +397,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 * @return the supplied component
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public UIComponent addDataGridActionColumn(UIComponent component,
 												UIComponent current,
 												DataGrid grid,

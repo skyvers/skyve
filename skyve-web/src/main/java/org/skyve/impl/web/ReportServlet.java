@@ -159,6 +159,7 @@ public class ReportServlet extends HttpServlet {
 	 * <p>Side effects: reads request parameters, may restore conversation state, may load persistent beans,
 	 * executes JasperReports rendering, and writes either report bytes or a generic HTML error response.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static void doReport(HttpServletRequest request, HttpServletResponse response) {
 		try {
 			String moduleName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.MODULE_NAME)));
@@ -419,6 +420,7 @@ public class ReportServlet extends HttpServlet {
 	 * rebuilds filter criteria, derives export columns, fills a Jasper report from the resulting iterable, and
 	 * streams the generated document back to the client.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static void doExport(HttpServletRequest request, HttpServletResponse response)
 	throws IOException {
 		try (ServletOutputStream out = response.getOutputStream()) {

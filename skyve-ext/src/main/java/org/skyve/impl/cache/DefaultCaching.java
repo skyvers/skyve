@@ -76,7 +76,7 @@ public class DefaultCaching implements Caching {
 	 * Performs startup.
 	 */
 	@Override
-	@SuppressWarnings({"resource", "java:S1143", "java:S1163"}) // OK to throw in the finally block here as it stops deployment
+	@SuppressWarnings({"resource", "java:S1143", "java:S1163", "java:S3776"}) // OK to throw in the finally block here as it stops deployment; Complexity OK
 	public void startup() {
 		if (isUnInitialised()) {
 			try {

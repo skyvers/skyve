@@ -129,6 +129,7 @@ public class JobScheduleBizlet extends Bizlet<JobScheduleExtension> {
 	 *         if cron parsing fails
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void postLoad(JobScheduleExtension bean) throws Exception {
 		JobCronExpression expression = new JobCronExpression(bean.getCronExpression());
 
@@ -199,6 +200,7 @@ public class JobScheduleBizlet extends Bizlet<JobScheduleExtension> {
 	 *         if expression generation fails
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void preSave(JobScheduleExtension bean) throws Exception {
 		StringBuilder expression = new StringBuilder(128);
 
@@ -324,6 +326,7 @@ public class JobScheduleBizlet extends Bizlet<JobScheduleExtension> {
 	 *         if validation processing fails
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void validate(JobScheduleExtension bean, ValidationException e)
 			throws Exception {
 		if ((!ALL_CODE.equals(bean.getAllDays())) && (!ALL_CODE.equals(bean.getAllWeekdays()))) {

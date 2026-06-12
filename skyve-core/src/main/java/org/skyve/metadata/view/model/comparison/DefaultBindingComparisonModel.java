@@ -33,6 +33,7 @@ public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> exte
 	}
 	
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public ComparisonComposite getComparisonComposite(C boundBean)
 	throws Exception {
 		final Map<String, ComparisonComposite> bindingToNodes = new LinkedHashMap<>();

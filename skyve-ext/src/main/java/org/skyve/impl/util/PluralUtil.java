@@ -348,6 +348,7 @@ public class PluralUtil {
 	 * @param singular The word to pluralise
 	 * @return The plural of the singular word
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static String pluralise(final String singular) {
 		if (singular != null && singular.length() > 0) {
 			String str = singular.toLowerCase();
@@ -566,6 +567,7 @@ public class PluralUtil {
 	 * @param replacement The replacement string with the case to be matched to the original
 	 * @return The replacement string, with the matching case of the original if possible
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	static String replaceWithMatchingCase(final String original, final String replacement) {
 		if (isUpperCase(original)) {
 			return replacement.toUpperCase();

@@ -68,6 +68,7 @@ public class MonitoringDashboardBizlet extends SingletonCachedBizlet<MonitoringD
 	 * @throws Exception if the operation fails
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public List<DomainValue> getDynamicDomainValues(String attributeName, MonitoringDashboard bean) throws Exception {
 		List<DomainValue> results = new ArrayList<>();
 
@@ -177,6 +178,7 @@ public class MonitoringDashboardBizlet extends SingletonCachedBizlet<MonitoringD
 	/**
 	 * Get filtered request values as strings for autocomplete functionality
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static List<String> getFilteredRequestStrings(String requestType, RequestValueType valueType, String searchValue,
 			MonitoringDashboard bean) {
 		List<String> results = new ArrayList<>();

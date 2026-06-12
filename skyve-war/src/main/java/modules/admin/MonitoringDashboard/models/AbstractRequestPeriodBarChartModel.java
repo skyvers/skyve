@@ -63,6 +63,7 @@ public abstract class AbstractRequestPeriodBarChartModel extends AbstractMonitor
 	 * @return the result
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public ChartData getChartData() {
 		MonitoringDashboard bean = getBean();
 

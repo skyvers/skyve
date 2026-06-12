@@ -60,7 +60,7 @@ public class ExecuteActionAction extends FacesAction<Void> {
 	 * @throws Exception when action execution fails
 	 */
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "java:S3776"}) // Complexity OK
 	public Void callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) {
 			if (collectionName != null) {

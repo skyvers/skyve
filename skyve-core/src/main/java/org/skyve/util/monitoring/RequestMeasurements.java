@@ -332,6 +332,7 @@ public class RequestMeasurements implements Serializable {
 		rollupInternal();
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private int rollupInternal() {
 		LocalDateTime currentDateTime = LocalDateTime.now(ZoneId.systemDefault());
 		timeLastUpdate = System.currentTimeMillis();

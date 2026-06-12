@@ -772,6 +772,7 @@ public class ThemeCharter {
 	 * @param focusString
 	 * @return
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public BufferedImage getFabulator(int width, int height, List<Object[]> objects, String focusString) {
 		BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 

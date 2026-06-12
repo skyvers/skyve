@@ -106,6 +106,7 @@ public class SecurityUtil {
 	 * @param email Whether to attempt sending an email notification
 	 * @throws IllegalArgumentException if eventType or eventMessage is null
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static void log(@Nonnull String eventType, @Nonnull String eventMessage, @Nullable String provenance, @Nullable User user, boolean email) {
 		// If no user is specified, attempt to retrieve from current persistence
 		User associatedUser = user;

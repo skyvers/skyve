@@ -52,6 +52,7 @@ public class RunImport implements ServerSideAction<ImportExport> {
 	 *         if the import pipeline fails
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public ServerSideActionResult<ImportExport> execute(ImportExport bean, WebContext webContext)
 			throws Exception {
 

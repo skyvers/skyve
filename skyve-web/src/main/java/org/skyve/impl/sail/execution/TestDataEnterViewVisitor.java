@@ -355,6 +355,7 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 	 * @param visible the effective visibility for the current widget
 	 * @param enabled the effective enabled-state for the current widget
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void addDataEnter(Bound bound, boolean parentVisible, boolean parentEnabled, boolean visible, boolean enabled) {
 		if (parentVisible && parentEnabled && visible && enabled && !inDataWidget) {
 			String binding = bound.getBinding();

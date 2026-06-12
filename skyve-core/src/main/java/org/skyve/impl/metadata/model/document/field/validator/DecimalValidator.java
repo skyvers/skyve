@@ -41,6 +41,7 @@ public class DecimalValidator extends RangeValidator<Decimal> {
 	}
 
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void validate(User user,
 							Decimal value,
 							String binding,

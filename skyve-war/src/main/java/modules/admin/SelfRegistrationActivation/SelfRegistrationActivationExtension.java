@@ -26,6 +26,7 @@ public class SelfRegistrationActivationExtension extends SelfRegistrationActivat
 	 * @param activationCode The activation code to validate and activate the user
 	 * @return The activated UserExtension instance
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public UserExtension activateUser(String activationCode) {
 		// temporarily escalate access to query and save users
 		return CORE.getPersistence().withDocumentPermissionScopes(DocumentPermissionScope.customer, p -> {

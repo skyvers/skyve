@@ -1039,7 +1039,8 @@ public class FacesView extends HarnessView {
 	 * @param query lookup query text
 	 * @return matching bean adapters
 	 */
- 	public List<BeanMapAdapter> lookup(String query) {
+		@SuppressWarnings("java:S3776") // Complexity OK
+		public List<BeanMapAdapter> lookup(String query) {
 		UIComponent currentComponent = UIComponent.getCurrentComponent(FacesContext.getCurrentInstance());
 		Map<String, Object> attributes = currentComponent.getAttributes();
 		String completeModule = (String) attributes.get("module");

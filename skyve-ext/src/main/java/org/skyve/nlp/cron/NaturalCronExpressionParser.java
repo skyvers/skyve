@@ -78,6 +78,7 @@ public class NaturalCronExpressionParser {
 	 * @return The parsed cron expression, or {@code null} when {@code string} is {@code null}.
 	 * @throws CronParserException If no valid cron expression can be derived.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public CronExpression parse(final String string) {
 
 		if (string != null) {

@@ -23,6 +23,7 @@ import jakarta.annotation.Generated;
  */
 public class ReindexAttachmentsJob extends CancellableJob {
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void execute() throws Exception {
 		String customerName = getCustomerName();
 		List<String> log = getLog();

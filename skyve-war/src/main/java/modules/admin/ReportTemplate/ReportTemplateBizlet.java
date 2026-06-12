@@ -217,6 +217,7 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 	 * @throws Exception if the operation fails
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void postLoad(ReportTemplateExtension bean) throws Exception {
 		super.postLoad(bean);
 
@@ -291,6 +292,7 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 	 * @throws Exception if the operation fails
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void preSave(ReportTemplateExtension bean) throws Exception {
 		JobScheduler jobScheduler = EXT.getJobScheduler();
 
@@ -406,6 +408,7 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 	 * @throws Exception if the operation fails
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void validate(ReportTemplateExtension bean, ValidationException e) throws Exception {
 		super.validate(bean, e);
 

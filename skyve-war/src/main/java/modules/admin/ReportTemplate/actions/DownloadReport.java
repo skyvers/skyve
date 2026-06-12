@@ -37,6 +37,7 @@ public class DownloadReport extends DownloadAction<ReportTemplateExtension> {
 	 * @throws Exception if the operation fails
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void prepare(ReportTemplateExtension bean, WebContext webContext) throws Exception {
 		// validate any required parameters
 		ValidationException e = new ValidationException();

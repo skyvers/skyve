@@ -269,6 +269,7 @@ public class Router implements ConvertibleMetaData<Router>, DecoratedMetaData, R
 	 * Thus the broadest routes should go in the global router and the module router should be mainly for public pages. 
 	 * @param routerToMerge	Router to merge into this router.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void merge(Router routerToMerge) {
 		// Set the last modified to the latest timestamp of any router to be merged
 		setLastModifiedMillis(Math.max(getLastModifiedMillis(), routerToMerge.getLastModifiedMillis()));

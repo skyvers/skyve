@@ -58,7 +58,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @throws IllegalStateException
 	 *             if a contained widget type is not supported by the fluent adapter set
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "java:S3776"}) // Complexity OK
 	protected T from(Container container) {
 		for (SerializableMetaData widget : container.getContained()) {
 			if (widget instanceof StaticImage image) {

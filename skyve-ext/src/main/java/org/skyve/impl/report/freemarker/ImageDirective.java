@@ -61,6 +61,7 @@ public class ImageDirective implements TemplateDirectiveModel {
 	private static final String STRING_PARAMETER_REQUIRED_FORMAT = "The '%s' parameter must be a String.";
 
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
 	throws TemplateException, IOException {
 		if (params.isEmpty()) {

@@ -92,6 +92,7 @@ public class SmartClientCompleteServlet extends HttpServlet {
 	}
 
 	// NB - Never throw ServletException as this will halt the SmartClient Relogin flow.
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static void processRequest(HttpServletRequest request, HttpServletResponse response)
 	throws IOException {
 		response.setContentType(MimeType.json.toString());

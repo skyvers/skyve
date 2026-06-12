@@ -51,6 +51,7 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 	 * @param runtime whether runtime domain values should be resolved
 	 * @param uxui active UX/UI profile name
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	protected SmartClientQueryColumnDefinition(User user,
 												Customer customer, 
 												Module module, 
@@ -305,6 +306,7 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 	 *
 	 * @return SmartClient JavaScript field definition payload
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public String toJavascript() {
 		StringBuilder result = new StringBuilder(64);
 

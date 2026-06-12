@@ -50,6 +50,7 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 	 * @throws Exception if audit payload parsing or metadata lookup fails
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public ComparisonComposite getComparisonComposite(Audit me) throws Exception {
 		Audit sourceVersion = me.getSourceVersion();
 		Audit comparisonVersion = me.getComparisonVersion();
@@ -198,6 +199,7 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 		return result;
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static void addProperties(Customer c,
 										ComparisonComposite node,
 										Map<String, Object> values,
@@ -255,6 +257,7 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 		}
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static void updateNode(ComparisonComposite node,
 									Customer c,
 									Map<String, Object> values)

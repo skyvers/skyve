@@ -154,6 +154,7 @@ System.out.println(visitModules(args[0]));
 		return result;
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static void menu(User u,
 								Customer c,
 								Module m,

@@ -482,6 +482,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 		return true;
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void visitWidget(MetaData widget, 
 								boolean parentVisible,
 								boolean parentEnabled) {
@@ -768,6 +769,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 		}
 	}
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void visitContainer(Container container, 
 									boolean parentVisible,
 									boolean parentEnabled) {
@@ -818,6 +820,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 		}
 	}
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void visitDataWidgetColumns(AbstractDataWidget widget,
 											String widgetBindingPrefix,
 											boolean widgetVisible,

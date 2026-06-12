@@ -195,6 +195,7 @@ class ViewValidator extends ViewVisitor {
 								assertTypes);
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private Class<?> validateBinding(Module contextModule,
 										Document contextDocument,
 										String bindingPrefix,
@@ -1053,6 +1054,7 @@ class ViewValidator extends ViewVisitor {
 		}
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void validateChartModel(ChartBuilderMetaData model, String chartIdentifier) {
 		Module contextModule = null;
 		try {
@@ -1330,6 +1332,7 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void visitLookupDescription(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 		String binding = lookup.getBinding();
 		String descriptionBinding = lookup.getDescriptionBinding();
@@ -1639,6 +1642,7 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void visitLink(Link link, boolean parentVisible, boolean parentEnabled) {
 		final String linkIdentifier = "Link " + link.getValue();
 		validateConditionName(link.getInvisibleConditionName(), linkIdentifier);
@@ -2152,6 +2156,7 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void visitReportAction(ActionImpl action) {
 		validateAction(action);
 

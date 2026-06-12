@@ -201,6 +201,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		}
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void populateDocumentLocations(@Nonnull String key) {
 		StringBuilder sb = new StringBuilder(256);
 
@@ -556,6 +557,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 * @return valid vanilla module names
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public List<String> getAllVanillaModuleNames() {
 		List<String> result = new ArrayList<>();
 

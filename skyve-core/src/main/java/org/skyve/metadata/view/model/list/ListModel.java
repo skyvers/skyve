@@ -126,6 +126,7 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
 		this.selectedTagId = selectedTagId;
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public final void addParameters(Document drivingDocument,
 										List<FilterParameter> filterParameters,
 										List<Parameter> parameters)
@@ -272,6 +273,7 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
 		}
 	}
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private Pair<String, Object> processParameter(@Nonnull Customer customer,
 													@Nonnull Module module,
 													@Nonnull Document document,

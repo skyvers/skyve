@@ -379,6 +379,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 	 * @throws MetaDataException if required metadata is missing or inconsistent
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public ViewImpl convert(String metaDataName) {
 		ViewImpl result = new ViewImpl();
 		result.setLastModifiedMillis(getLastModifiedMillis());

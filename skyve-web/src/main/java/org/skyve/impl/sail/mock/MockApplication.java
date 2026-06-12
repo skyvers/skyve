@@ -110,6 +110,7 @@ public class MockApplication extends Application {
 	 * @throws FacesException when the component type is not mapped by this mock registry
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public UIComponent createComponent(String componentType) throws FacesException {
 		if (AutoComplete.COMPONENT_TYPE.equals(componentType)) {
 			return new AutoComplete();

@@ -885,6 +885,7 @@ public class XMLMetaData {
 		}
 
 		@Override
+		@SuppressWarnings("java:S3776") // Complexity OK
 		public void visit(Element node) {
 			Namespace ns = node.getNamespace();
 

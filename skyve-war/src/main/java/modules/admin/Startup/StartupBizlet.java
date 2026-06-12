@@ -106,6 +106,7 @@ public class StartupBizlet extends Bizlet<StartupExtension> {
 	 * @throws Exception if validation processing fails
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void validate(StartupExtension bean, ValidationException e) throws Exception {
 		if (bean.getBackupDirectoryName() != null) {
 			if (bean.getBackupDirectoryName().length() < 3) {

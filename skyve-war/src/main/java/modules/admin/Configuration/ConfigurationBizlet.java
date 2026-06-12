@@ -172,6 +172,7 @@ public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExte
 	 * @throws Exception if the operation fails
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void preRerender(String source, ConfigurationExtension bean, WebContext webContext) throws Exception {
 
 		if (Binder.createCompoundBinding(Configuration.startupPropertyName, Startup.mapTypePropertyName).equals(source)) {

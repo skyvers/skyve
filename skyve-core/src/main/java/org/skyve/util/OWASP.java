@@ -128,6 +128,7 @@ public class OWASP {
 		return escapeHtml(result, false);
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static void sanitiseAndEscapeListModelRows(List<Bean> rows,
 														List<MetaDataQueryColumn> columns,
 														boolean escape) {

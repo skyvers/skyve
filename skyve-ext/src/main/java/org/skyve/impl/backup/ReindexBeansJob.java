@@ -32,6 +32,7 @@ import jakarta.annotation.Generated;
  */
 public class ReindexBeansJob extends CancellableJob {
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void execute() throws Exception {
 		AbstractPersistence persistence = getPersistence();
 		Customer customer = persistence.getUser().getCustomer();
@@ -163,6 +164,7 @@ public class ReindexBeansJob extends CancellableJob {
 	 * @param document the document metadata to inspect
 	 * @return {@code true} when the document has at least one indexable text field
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static boolean needsIndexing(Customer customer, Document document) {
 		if (document.isPersistable()) {
 			for (Attribute attribute : document.getAllAttributes(customer)) {

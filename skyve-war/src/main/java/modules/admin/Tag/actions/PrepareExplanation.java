@@ -23,6 +23,7 @@ public class PrepareExplanation implements ServerSideAction<TagExtension> {
 	 * @throws Exception If explanation generation fails.
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public ServerSideActionResult<TagExtension> execute(TagExtension bean, WebContext webContext) throws Exception {
 
 		StringBuilder ex = new StringBuilder(128);

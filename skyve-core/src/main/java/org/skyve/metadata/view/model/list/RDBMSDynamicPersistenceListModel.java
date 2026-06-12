@@ -284,6 +284,7 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 	}
 	
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public List<Bean> getRows() throws Exception {
 		// Populate the selectClause and fromClause and all the resulting table info
 		prepare();
@@ -356,6 +357,7 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 	// The position in each tuple array
 	private int fieldIndex = 4; // 4 implicit fields projected by default
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void prepare() {
 		// add alias zero - the driving table
 		TableInfo info = new TableInfo();
@@ -442,6 +444,7 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 	 * Look at each simple binding and join in the appropriate table(s)
 	 * @param simpleBindings
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void prepareReferences(String[] simpleBindings) {
 		Module simpleBindingModule = module;
 		Document simpleBindingDocument = document;

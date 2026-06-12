@@ -100,7 +100,7 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 	 * @param node The node to render.
 	 */
 	@Override
-	@SuppressWarnings("boxing")
+	@SuppressWarnings({"boxing", "java:S3776"}) // Complexity OK
 	public void render(Node node) {
 		if (node instanceof Heading heading) {
 			if (heading.getLevel() == 2) {
@@ -239,6 +239,7 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 		}
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void createAttribute(String attributeName, String[] parts, boolean required, Node line) {
 		// identify the type from the parts
 		String type = null;

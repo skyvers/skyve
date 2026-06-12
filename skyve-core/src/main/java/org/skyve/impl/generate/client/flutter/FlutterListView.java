@@ -60,6 +60,7 @@ class FlutterListView extends FlutterView {
 		fw.write(substitute("templates/list.dart", subs));
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void addQuerySubstitutes(Map<String, String> subs) {
 		String description = "";
 		String column1 = null;

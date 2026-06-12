@@ -45,6 +45,7 @@ public class ContentGarbageCollectionJob implements Job {
 	private Set<String> orphanedBeanBizIds = new TreeSet<>();
 	
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void execute(JobExecutionContext context)
 	throws JobExecutionException {
 		LOGGER.info("Start Content Garbage Collection");

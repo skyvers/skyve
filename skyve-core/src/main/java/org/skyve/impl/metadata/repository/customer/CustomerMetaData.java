@@ -423,6 +423,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @throws MetaDataException if required metadata is missing, duplicated, or invalid
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public CustomerImpl convert(String metaDataName) {
 		CustomerImpl result = new CustomerImpl();
 		result.setLastModifiedMillis(getLastModifiedMillis());
@@ -593,6 +594,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param moduleEntries known customer modules
 	 * @throws MetaDataException if role/module references are invalid or duplicated
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static void populateFeatureRoles(List<CustomerFeatureRoleMetaData> featureRoles, Set<String> featureModuleRoles,
 			String metaDataName, CustomerRolesMetaData roles, Map<String, FormLabelLayout> moduleEntries) {
 		for (CustomerFeatureRoleMetaData featureRole : featureRoles) {

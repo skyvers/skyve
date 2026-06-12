@@ -62,6 +62,7 @@ public class DDLDelegate {
 	 * @return the generated alter-column statements, in execution order
 	 * @throws SQLException if the datastore connection or schema inspection cannot be established
 	 */
+    @SuppressWarnings("java:S3776") // Complexity OK
     public static List<String> migrate(ServiceRegistry standardRegistry, Metadata metadata, SkyveDialect skyveDialect, boolean execute)
 	throws SQLException {
 		List<String> result = new ArrayList<>(20);
@@ -190,6 +191,7 @@ public class DDLDelegate {
 	 * @return iterable alter-column DDL statements for columns requiring changes
 	 */
 	// from org.hibernate.mapping.Table
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static Iterable<String> sqlAlterTableDDL(SkyveDialect skyveDialect, 
 														Table table, 
 														TableInformation tableInfo,

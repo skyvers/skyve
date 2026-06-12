@@ -1285,6 +1285,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param eventHandlerActionNames optional event handler names
 	 * @return the JSF method expression
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	protected MethodExpression methodExpressionForAction(ImplicitActionName implicitActionName, 
 															String actionName,
 															String collectionBinding, 

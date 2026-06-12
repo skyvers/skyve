@@ -95,6 +95,7 @@ public class JSONReader {
 		}
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private @Nullable Object read() throws Exception {
 		skipWhiteSpace();
 		char ch = c;
@@ -186,7 +187,7 @@ public class JSONReader {
 		return token;
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "java:S3776"}) // Complexity OK
 	private @Nullable Object object() throws Exception {
 		Object key = read();
 		if (Bean.MODULE_KEY.equals(key)) {
@@ -430,6 +431,7 @@ public class JSONReader {
 		return result;
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private @Nonnull Object string(char delimiter) {
 		sb.setLength(0);
 		int i = 0;

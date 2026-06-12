@@ -47,6 +47,7 @@ public class ProcessCommunicationForTagJob extends Job {
 	 * @throws Exception if the operation fails
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void execute() throws Exception {
 		List<String> log = getLog();
 

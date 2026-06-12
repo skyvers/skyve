@@ -102,6 +102,7 @@ public class DoctorUtil {
 	 * @param out destination stream receiving HTML fragments
 	 * @throws Exception if metadata access or rendering fails
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static void renderModule(Customer customer, Module module, PrintStream out) throws Exception {
 
 		// Create title page
@@ -245,6 +246,7 @@ public class DoctorUtil {
 	 * @param out destination stream receiving HTML fragments
 	 * @throws Exception if metadata access or rendering fails
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static void renderDocument(Customer customer, Module module, Document document, PrintStream out) throws Exception {
 
 		DocSection title = new DocSection(createIndentifier(customer.getName(), module.getName(), document.getName(), "documentTitle"));
@@ -410,6 +412,7 @@ public class DoctorUtil {
 	 * @param out destination stream receiving HTML fragments
 	 * @throws Exception if metadata access or rendering fails
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static void renderQuery(Customer customer, Module module, QueryDefinition q, PrintStream out) throws Exception {
 		// Documentation for Query
 		DocSection section = new DocSection(createIndentifier(customer.getName(), module.getName(), q.getName() + "Overview"));

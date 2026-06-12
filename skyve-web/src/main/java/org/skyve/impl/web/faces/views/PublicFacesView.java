@@ -49,7 +49,7 @@ public class PublicFacesView extends FacesView {
 	 * Ensures a public user is asserted for non-postback requests before delegating to standard view pre-render logic.
 	 */
 	@Override
-	@SuppressWarnings("javasecurity:S5146") // false positive: see below
+	@SuppressWarnings({"javasecurity:S5146", "java:S3776"}) // false positive: see below; Complexity OK
 	public void preRender() {
 		FacesContext fc = FacesContext.getCurrentInstance();
 		if (! fc.isPostback()) {

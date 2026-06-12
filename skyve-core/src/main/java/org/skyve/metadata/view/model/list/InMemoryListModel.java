@@ -192,6 +192,7 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 		}
 	}
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private Bean summarize() throws Exception {
 		Map<String, Object> summaryData = new TreeMap<>();
 

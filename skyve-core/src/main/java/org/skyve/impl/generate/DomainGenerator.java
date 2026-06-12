@@ -244,6 +244,7 @@ public abstract class DomainGenerator {
 		this.excludedModules = excludedModules;
 	}
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void validateCustomer(String customerName) throws Exception {
 		if (debug) System.out.println("Get customer " + customerName);
 		Customer customer = repository.getCustomer(customerName);
@@ -444,6 +445,7 @@ public abstract class DomainGenerator {
 	 * @param args
 	 * @throws Exception
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static void main(String[] args) throws Exception {
 		if (args.length == 0 || args.length < 4) {
 			System.err.println("You must have at least the src path, generated path, test path and generated test path as arguments"

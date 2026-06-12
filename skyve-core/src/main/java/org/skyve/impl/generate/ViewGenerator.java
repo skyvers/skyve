@@ -145,6 +145,7 @@ public class ViewGenerator {
 		SerializableMetaData widget;
 	}
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private ViewImpl generateEditView(Customer customer, Module module, Document document, boolean formLabelSideLayout) {
 		ViewImpl result = new ViewImpl();
 		result.setName(ViewType.edit.toString());
@@ -285,6 +286,7 @@ public class ViewGenerator {
 		return result;
 	}
 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void processAttributes(Customer customer, 
 									Module module, 
 									Document document,
@@ -469,6 +471,7 @@ public class ViewGenerator {
 		}
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static DataGrid generateDataGrid(CollectionType collectionType,
 												Customer customer,
 												Module module,
@@ -598,6 +601,7 @@ public class ViewGenerator {
 		LOGGER.info("Remember to rename this to 'edit.xml' to make this view active.");
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static void main(String[] args) throws Exception {
 		String srcPath = null;
 		String customerName = null;

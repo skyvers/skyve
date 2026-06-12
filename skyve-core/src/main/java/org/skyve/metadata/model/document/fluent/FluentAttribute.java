@@ -54,7 +54,7 @@ public abstract class FluentAttribute<T extends FluentAttribute<T>> {
 	 *
 	 * <p>Side effects: replaces this builder's current state with values from {@code attribute}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "java:S3776"}) // Complexity OK
 	protected T from(Attribute attribute) {
 		audited(attribute.isAudited());
 		deprecated(attribute.isDeprecated());

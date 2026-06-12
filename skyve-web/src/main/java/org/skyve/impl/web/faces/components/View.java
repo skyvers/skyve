@@ -53,6 +53,7 @@ public class View extends HtmlPanelGroup {
 	 */
 	// The method intentionally preserves the existing request-scoped generation flow.
     @Override
+    @SuppressWarnings("java:S3776") // Complexity OK
     public void encodeBegin(FacesContext context) throws IOException {
 		Map<String, Object> attributes = getAttributes();
    	

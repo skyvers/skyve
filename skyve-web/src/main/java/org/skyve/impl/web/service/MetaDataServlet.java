@@ -315,6 +315,7 @@ public class MetaDataServlet extends HttpServlet {
 		pw.append(",\"userContactAvatarInitials\":\"").append(value).append("\"}");
 	}
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static void processModules(final String uxui, 
 										final User user,
 										final String chosenModuleName,
@@ -784,6 +785,7 @@ public class MetaDataServlet extends HttpServlet {
         dataSourceJson.append("}");
 	}
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static StringBuilder view(User user,
 										String uxui,
 										String moduleName,

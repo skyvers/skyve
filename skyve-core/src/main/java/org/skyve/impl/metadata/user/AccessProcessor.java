@@ -106,6 +106,7 @@ class AccessProcessor {
 		}
 	}
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void processMenuItems(final List<MenuItem> items, final Module module, final String moduleName) {
 		for (MenuItem item : items) {
 			// NB Disregard LinkItem as it is outside of accesses

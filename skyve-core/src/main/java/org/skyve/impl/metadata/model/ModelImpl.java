@@ -203,6 +203,7 @@ public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
 		hasDynamic = null;
 	}
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void determineHasDynamic(Set<String> modoc) {
 		Customer c = CORE.getCustomer();
 		String omn = getOwningModuleName();

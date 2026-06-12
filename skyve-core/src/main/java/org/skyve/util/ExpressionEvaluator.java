@@ -176,6 +176,7 @@ public abstract class ExpressionEvaluator {
 	 * @param document	The document to validate for.
 	 * @return	null if valid or the error message if not.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static @Nullable String validate(@Nonnull String expression,
 												@Nullable Class<?> returnType,
 												@Nullable Customer customer,
@@ -399,6 +400,7 @@ public abstract class ExpressionEvaluator {
 	 * @param document	The document to complete for.
 	 * @return	A list of valid completions.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static @Nonnull List<String> completeExpression(@Nullable String fragment,
 															@Nonnull Customer customer,
 															@Nonnull Module module,
@@ -534,6 +536,7 @@ public abstract class ExpressionEvaluator {
 	 * @param format Whether this is called by format(), otherwise called by evaluate().
 	 * @return The evaluated expression.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static Object process(String expression, Bean bean, boolean format) {
 		String expressionWithoutSuffix = expression;
 		String formatName = null;

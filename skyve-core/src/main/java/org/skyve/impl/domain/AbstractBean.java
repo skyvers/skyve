@@ -69,6 +69,7 @@ public abstract class AbstractBean implements Bean {
 	 * @param propertyName
 	 * @param propertyValue
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	protected final void preset(String propertyName, Serializable propertyValue) {
 		try {
 			if (! originalValues.containsKey(propertyName)) {
@@ -110,6 +111,7 @@ public abstract class AbstractBean implements Bean {
 	}
 	
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public boolean isChanged() {
 		Customer customer = null;
 		Module module = null;

@@ -48,6 +48,7 @@ class HibernateQueryDelegate {
 		maxResults = max;
 	}
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	@Nonnull <T> Query<T> createHibernateQuery(@Nonnull AbstractQuery query) {
 		// This needs to be be before we set the driving document (below)
 		// as it sets the driving document in a BizQL
@@ -101,7 +102,7 @@ class HibernateQueryDelegate {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "java:S3776"}) // Complexity OK
 	@Nonnull <T> List<T> list(@Nonnull Query<T> query, boolean asIs, boolean assertSingle, boolean assertMultiple) {
 		try {
 			@SuppressWarnings("deprecation") // TODO should use jakarta.persistence.Tuple

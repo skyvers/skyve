@@ -23,6 +23,7 @@ public class StaffBizlet extends Bizlet<Staff> {
 	 * @throws Exception if lifecycle processing fails
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public Staff preExecute(ImplicitActionName actionName, Staff bean, Bean parentBean, WebContext webContext) throws Exception {
 
 		if(ImplicitActionName.Edit.equals(actionName)) {

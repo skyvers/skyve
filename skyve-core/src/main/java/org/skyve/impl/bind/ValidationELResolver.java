@@ -318,6 +318,7 @@ class ValidationELResolver extends ELResolver {
 	}
 
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public boolean isReadOnly(ELContext context, Object base, Object property) {
 		if (Object.class.equals(base)) { // we are not in type-safe mode
 			context.setPropertyResolved(true);

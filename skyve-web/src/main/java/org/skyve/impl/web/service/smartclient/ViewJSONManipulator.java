@@ -386,6 +386,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 		}
 	}
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	protected void addBindingsAndFormatValues(ViewBindings bindings,
 												Bean aBean,
 												Map<String, Object> toAddTo,
@@ -491,7 +492,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 		applyJSON(bindingTree, document, values, bean, persistence, webContext);
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "java:S3776"}) // Complexity OK
 	protected void applyJSON(ViewBindings bindings,
 								Document appliedToDoc,
 								Map<String, Object> values,
@@ -669,6 +670,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 		}
 	}
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	protected void applyJSONProperty(Document startingDocument,
 										String binding, 
 										Map<String, Object> values, 
@@ -780,6 +782,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 	 * 
 	 * @param binding	The binding for the domain values lookup.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void putVariantAndDynamicDomainValuesInValueMaps(String binding) {
 		String safeBinding = BindUtil.sanitiseBinding(binding);
 		if (! valueMaps.containsKey(safeBinding)) {
@@ -1183,6 +1186,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 	}
 
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void visitBlurb(Blurb blurb,
 							boolean parentVisible,
 							boolean parentEnabled) {
@@ -1222,6 +1226,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 	}
 
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void visitLabel(Label label,
 							boolean parentVisible,
 							boolean parentEnabled) {
@@ -1503,6 +1508,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 		visitDataWidget(repeater, parentVisible, parentEnabled, true, true, null, null, null, null, null);
 	}
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void visitDataWidget(AbstractDataWidget widget,
 									boolean parentVisible,
 									boolean parentEnabled,
@@ -1714,6 +1720,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 	}
 
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void visitCheckMembership(CheckMembership membership,
 										boolean parentVisible,
 										boolean parentEnabled) {
@@ -1777,6 +1784,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 	}
 
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void visitCombo(Combo combo,
 							boolean parentVisible,
 							boolean parentEnabled) {
@@ -1857,6 +1865,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 	}
 
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void visitListMembership(ListMembership membership,
 										boolean parentVisible,
 										boolean parentEnabled) {
@@ -1963,6 +1972,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 	}
 
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void visitLookupDescription(LookupDescription lookup,
 										boolean parentVisible,
 										boolean parentEnabled) {

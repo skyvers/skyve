@@ -160,6 +160,7 @@ public class Component extends AbstractBound implements NamedMetaData, Decorated
 		return v.getFragment(customer, m, d, uxui, this);
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void link(String uxui, CustomerImpl customer, ModuleImpl owningModule, DocumentImpl owningDocument, String viewName) {
 		String binding = getBinding();
 		ModuleImpl m = null;

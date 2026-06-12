@@ -106,6 +106,7 @@ public class HealthServlet extends HttpServlet {
 	 * Create a JSON response representing the status of the system components.
 	 * @return	The JSON.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static StringBuilder determineResponse() {
 		StringBuilder result = new StringBuilder(128);
 		

@@ -74,6 +74,7 @@ abstract class MetaDataExpressionEvaluator extends ExpressionEvaluator {
 	}
 
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public List<String> completeWithoutPrefixOrSuffix(String fragment,
 														Customer customer,
 														Module module,
@@ -180,6 +181,7 @@ abstract class MetaDataExpressionEvaluator extends ExpressionEvaluator {
 		return result;
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	static void addAttributesAndConditions(@Nonnull String bindingPrefix,
 											@Nullable String simpleBindingFragment,
 											@Nonnull Customer customer,

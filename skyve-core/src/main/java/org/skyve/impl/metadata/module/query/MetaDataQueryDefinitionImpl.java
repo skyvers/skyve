@@ -165,7 +165,7 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 	}
 
 	@Override
-	@SuppressWarnings("incomplete-switch")
+	@SuppressWarnings({"incomplete-switch", "java:S3776"}) // Complexity OK
 	public DocumentQuery constructDocumentQuery(AggregateFunction summaryType,
 													String tagId) {
 		AbstractPersistence persistence = AbstractPersistence.get();
@@ -717,6 +717,7 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 		return result;
 	}
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static @Nullable String replaceImplicitExpressions(@Nullable String clause, 
 																@Nonnull Map<String, Object> parametersToAddTo, 
 																@Nonnull User user, 

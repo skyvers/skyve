@@ -70,6 +70,7 @@ public class PlantUMLDirective implements TemplateDirectiveModel {
 	 * @throws IOException if the rendered image cannot be written to the template output
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
 	throws TemplateException, IOException {
 		if (params.isEmpty()) {

@@ -146,6 +146,7 @@ public class ImportExportColumnBizlet extends Bizlet<ImportExportColumn> {
 	 *         if validation fails
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public ImportExportColumn preExecute(ImplicitActionName actionName, ImportExportColumn bean, Bean parentBean,
 			WebContext webContext) throws Exception {
 

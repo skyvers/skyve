@@ -400,6 +400,7 @@ public class ActionImpl implements Action {
 	 * @return repository action metadata equivalent to this runtime action
 	 * @throws IllegalStateException if the implicit action name is unsupported
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public ActionMetaData toRepositoryAction() {
 		ActionMetaData result = null;
 		if (implicitName == null) { // custom action

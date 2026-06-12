@@ -89,6 +89,7 @@ public class SmartClientTagServlet extends HttpServlet {
 	 * @param response outbound HTTP response
 	 * @throws IOException when response writing fails
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static void processRequest(HttpServletRequest request, 
 										HttpServletResponse response)
 	throws IOException {

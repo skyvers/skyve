@@ -26,6 +26,7 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 	 * @return the result
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public ChartData getChartData() {
 		MonitoringDashboard bean = getBean();
 

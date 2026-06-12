@@ -37,6 +37,7 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 	 * @param isField whether the definition is generated for a field context
 	 * @param uxui active UX/UI profile name
 	 */
+    @SuppressWarnings("java:S3776") // Complexity OK
     protected SmartClientDataGridFieldDefinition(User user,
 			    									Customer customer, 
 			                                        Module module, 

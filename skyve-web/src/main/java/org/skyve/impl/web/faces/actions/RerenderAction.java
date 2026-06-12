@@ -50,6 +50,7 @@ public class RerenderAction extends FacesAction<Void> {
 	 * @throws Exception if target bean resolution, interception, or bizlet processing fails
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public Void callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("RerenderAction - EXECUTE RERENDER with source {} {} validation", source, (validate ? "with" : "without"));
 

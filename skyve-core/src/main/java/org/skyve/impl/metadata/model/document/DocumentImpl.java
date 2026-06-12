@@ -243,7 +243,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	 * @return the concrete bean class.
 	 * @throws ClassNotFoundException if a mapped class cannot be loaded.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "java:S3776"}) // Complexity OK
 	public <T extends Bean> Class<T> getBeanClass(@Nonnull Customer customer)
 	throws ClassNotFoundException {
 		if (isDynamic()) {
@@ -346,6 +346,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	 * @return the newly created base bean.
 	 * @throws Exception if class resolution or object construction fails.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public <T extends Bean> T newInstance(Customer customer) throws Exception {
 		T result = null;
 		
@@ -441,6 +442,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	 * @param bean the bean receiving the default value.
 	 * @return the resolved default value, or {@code null} when no default applies.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static Object dynamicDefaultValue(Attribute attribute, Bean bean) {
 		Object result = null;
 		

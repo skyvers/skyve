@@ -63,6 +63,7 @@ public class ImportReportSpecifications extends UploadAction<ReportManagerExtens
 	 * @throws Exception if upload or import processing fails
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public ReportManagerExtension upload(ReportManagerExtension bean, Upload upload, UploadException exception,
 			WebContext webContext) throws Exception {
 		// Mimetype not being detected, so use file extension instead

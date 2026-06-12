@@ -67,6 +67,7 @@ public class FluentFormItem {
 	 * @throws IllegalStateException
 	 *             if the widget type is not supported by this fluent adapter
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public FluentFormItem from(@SuppressWarnings("hiding") FormItem item) {
 		Integer i = item.getColspan();
 		if (i != null) {

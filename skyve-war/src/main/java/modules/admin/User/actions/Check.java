@@ -42,6 +42,7 @@ public class Check implements ServerSideAction<UserExtension> {
 	 * @throws Exception If search or retrieval fails.
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public ServerSideActionResult<UserExtension> execute(UserExtension adminUser, WebContext webContext) throws Exception {
 		// validate required fields
 		if (StringUtils.isAllBlank(adminUser.getSearchContactName(), adminUser.getSearchEmail())) {

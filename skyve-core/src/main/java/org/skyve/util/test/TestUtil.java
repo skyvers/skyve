@@ -251,7 +251,7 @@ public class TestUtil {
 		return null;
 	}
 
-	@SuppressWarnings("incomplete-switch") // content type missing from switch statement
+	@SuppressWarnings({"incomplete-switch", "java:S3776"}) // content type missing from switch statement; Complexity OK
 	private static @Nonnull <T extends Bean> T constructRandomInstance(@Nonnull User user,
 																		@Nonnull Module module,
 																		@Nonnull Document document,
@@ -515,6 +515,7 @@ public class TestUtil {
 	 * @param attribute The attribute to generate the random integer for
 	 * @return A random integer
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static Integer randomInteger(Attribute attribute) {
 		int min = 0, max = 10000;
 
@@ -604,6 +605,7 @@ public class TestUtil {
 	 * @return A string containing random data for the text attribute
 	 * @throws IOException
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static String randomText(String customerName, Module module, Document document, Attribute attribute)
 			throws IOException {
 		if (attribute != null) {
@@ -774,6 +776,7 @@ public class TestUtil {
 	 * @return A random value from the data file if it exists, null otherwise
 	 * @throws IOException
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static String randomValueFromFile(String customerName, final Module module, final Document document,
 			final String attributeName,
 			final String... fileName) throws IOException {

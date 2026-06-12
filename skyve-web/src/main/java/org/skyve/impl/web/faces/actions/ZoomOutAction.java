@@ -48,6 +48,7 @@ public class ZoomOutAction extends FacesAction<Void> {
 	 * @throws Exception if validation, bizlet hooks, binding updates, or redirect handling fails
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public Void callback() throws Exception {
 		Deque<String> zoomInBindings = facesView.getZoomInBindings();
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("ZoomOutAction by zoom in binding of {} with view binding of {}",
@@ -112,6 +113,7 @@ public class ZoomOutAction extends FacesAction<Void> {
 	 * @param internalCustomer the resolved internal customer used for metadata lookup
 	 * @throws Exception if target bean resolution or redirect handling fails
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	static void zoomOut(FacesView facesView, CustomerImpl internalCustomer) throws Exception {
 		String viewBinding = facesView.getViewBinding();
 		Deque<String> zoomInBindings = facesView.getZoomInBindings();

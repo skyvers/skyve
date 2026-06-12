@@ -142,6 +142,7 @@ public class SmartClientListServlet extends HttpServlet {
 		processRequest(request, response);
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static void processRequest(HttpServletRequest request, HttpServletResponse response)
 	throws IOException {
 		response.setContentType(MimeType.json.toString());
@@ -523,6 +524,7 @@ public class SmartClientListServlet extends HttpServlet {
 		Util.chunkCharsToWriter(message, pw);
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static void addFilterCriteriaToQuery(Module module,
 													Document document,
 													User user,
@@ -583,6 +585,7 @@ public class SmartClientListServlet extends HttpServlet {
 
 	// Add display values and sanitise
 	// Returns the projections required from JSON.marshall()
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static Set<String> processRows(List<Bean> beans,
 											ListModel<Bean> model,
 											User user,
@@ -742,6 +745,7 @@ public class SmartClientListServlet extends HttpServlet {
 	 * @param model list model receiving the filter criteria
 	 * @throws Exception if metadata resolution or value conversion fails
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static void addSimpleFilterCriteriaToQuery(Module module,
 														Document document,
 														Customer customer,
@@ -915,6 +919,7 @@ public class SmartClientListServlet extends HttpServlet {
 
 	private static final String HIERARCHICAL_PARENT_ID_SUFFIX = "." + HierarchicalBean.PARENT_ID;
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static void addAdvancedFilterCriteriaToQueryInternal(Module module,
 																	Document document,
 																	User user,
@@ -1373,6 +1378,7 @@ public class SmartClientListServlet extends HttpServlet {
 		return filterOperator;
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static void addCriterionToFilter(String binding,
 												SmartClientFilterOperator filterOperator,
 												Object value,

@@ -62,7 +62,7 @@ public class DownloadServlet extends HttpServlet {
 	 * @throws IOException when request or response I/O fails
 	 */
 	@Override
-	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
+	@SuppressWarnings({"java:S1989", "java:S3776"}) // there exists JavaEE error pages; Complexity OK
 	public void doGet(HttpServletRequest request, HttpServletResponse response)
 	throws ServletException, IOException {
 		try (OutputStream out = response.getOutputStream()) {

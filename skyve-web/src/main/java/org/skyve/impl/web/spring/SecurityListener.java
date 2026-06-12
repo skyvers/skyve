@@ -92,6 +92,7 @@ public class SecurityListener {
 	 * @param username The username to record.
 	 * @throws MetaDataException If the failure record cannot be persisted.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static void recordLoginFailure(String username) {
 		SkyveDialect dialect = AbstractHibernatePersistence.getDialect(UtilImpl.DATA_STORE.getDialectClassName());
 		RDBMS rdbms = dialect.getRDBMS();
@@ -207,6 +208,7 @@ public class SecurityListener {
 	 * @return The matching business ID, or null when no applicable row is found.
 	 * @throws SQLException If the lookup query fails.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static String getBizId(String fullUsername, Connection c, boolean forReset) throws SQLException {
 		String result = null;
 		

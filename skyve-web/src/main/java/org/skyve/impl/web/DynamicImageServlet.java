@@ -67,7 +67,7 @@ public class DynamicImageServlet extends HttpServlet {
 	 * and records dynamic-image monitoring metrics when the target image metadata is known.
 	 */
 	@Override
-	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
+	@SuppressWarnings({"java:S1989", "java:S3776"}) // there exists JavaEE error pages; Complexity OK
 	public void doGet(HttpServletRequest request, HttpServletResponse response)
 	throws ServletException, IOException {
 		// State required for rendering the image

@@ -17,6 +17,7 @@ import modules.admin.domain.Audit;
  * audit versions for comparison and by resolving archived audit records when a
  * user opens an archived audit instance.
  */
+@SuppressWarnings("java:S120")
 public class AuditBizlet extends Bizlet<Audit> {
 	@Inject
 	@SuppressWarnings("java:S6813") // allow member injection

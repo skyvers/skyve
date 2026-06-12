@@ -211,6 +211,7 @@ public class ReportTemplateExtension extends ReportTemplate {
 	 * 
 	 * @param e The ValidationException any errors will be added to
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void validateReportParameters(ValidationException e) {
 		// skip validation for jasper reports
 		if (getReportType() == ReportType.jasper) {

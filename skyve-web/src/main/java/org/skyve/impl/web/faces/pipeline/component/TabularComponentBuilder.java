@@ -852,6 +852,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public UIComponent addDataGridActionColumn(UIComponent component,
 												UIComponent current,
 												DataGrid grid,
@@ -1365,6 +1366,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		</p:dataTable>
 	*/
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public UIComponent listGrid(UIComponent component,
 									String moduleName,
 									String modelDocumentName,
@@ -1573,6 +1575,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
     	return result;
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	protected void addDataTableSelection(DataTable table,
 										String selectedIdBinding,
 										List<EventAction> selectedActions,
@@ -1614,6 +1617,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
         table.addClientBehavior("rowSelect", ajax);
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	protected void addListGridDataColumns(ListModel<? extends Bean> model,
 											List<UIComponent> componentChildrenToAddTo,
 											boolean showFilter,
@@ -1989,6 +1993,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * No CRUD.
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public UIComponent listRepeater(UIComponent component,
 										String modelDocumentName,
 										String modelName,
@@ -3452,6 +3457,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private DatePicker datePicker(String dataWidgetVar,
 									String binding,
 									String title,
@@ -3730,6 +3736,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	protected CommandButton actionButton(String title,
 											String iconStyleClass,
 											String tooltip,

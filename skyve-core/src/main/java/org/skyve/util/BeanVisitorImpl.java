@@ -100,6 +100,7 @@ abstract class BeanVisitorImpl {
 	 * @param customer	The current customer.
 	 * @param visited	The set of breadcrumbs that have been visited in the past (for cyclic detection)
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void visit(@Nonnull String binding,
 						@Nonnull Document document,
 						@Nullable Document owningDocument,

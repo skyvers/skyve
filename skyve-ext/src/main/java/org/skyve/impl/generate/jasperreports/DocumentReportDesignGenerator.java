@@ -47,6 +47,7 @@ public class DocumentReportDesignGenerator extends ReportDesignGenerator {
      * @param design The design being populated.
      */
     @Override
+    @SuppressWarnings("java:S3776") // Complexity OK
     protected void addBands(DesignSpecification design) {
         super.addBands(design);
 

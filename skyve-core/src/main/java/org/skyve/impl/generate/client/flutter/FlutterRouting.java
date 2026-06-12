@@ -115,6 +115,7 @@ public class FlutterRouting {
         }
     }
 
+    @SuppressWarnings("java:S3776") // Complexity OK
     private void menuImportsAndRoutes(BiPredicate<Module, Document> whiteListPredicate) {
         LOGGER.debug("Rendering menu items");
 

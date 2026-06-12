@@ -3875,6 +3875,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param defaultMinHeightInPixels fallback minimum height when no explicit minimum is set
 	 * @param builder JavaScript buffer receiving size-related properties
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void size(AbsoluteWidth sizable, 
 						Integer defaultMinHeightInPixels,
 						StringBuilder builder) {
@@ -4337,6 +4338,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param parameters named parameter definitions
 	 * @param builder JavaScript buffer receiving encoded request parameters
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static void appendFilterParameters(@Nullable List<FilterParameter> filterParameters,
 												@Nullable List<Parameter> parameters,
 												@Nonnull StringBuilder builder) {
@@ -4595,7 +4597,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param visitedQueryNames visited data-source ids used to avoid recursion loops
 	 * @return generated data-source id
 	 */
-	@SuppressWarnings("null")
+	@SuppressWarnings({"null", "java:S3776"}) // Complexity OK
 	private static String appendDataSourceDefinition(User user,
 														Customer customer,
 														String owningModuleName,

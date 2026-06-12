@@ -41,6 +41,7 @@ public class GenerateUniqueUserName implements ServerSideAction<User> {
 	 * @return A unique username suggestion.
 	 * @throws Exception If lookup validation fails.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static String generateUniqueUserNameFromContactName(User user) throws Exception {
 		if (user.getContact() == null) {
 			Message vm = new Message(User.contactPropertyName, "You first need to select a contact for this user");

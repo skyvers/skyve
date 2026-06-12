@@ -94,6 +94,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	 * @param customer the customer scope to evict, or {@code null} for a full eviction
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void evictCachedMetaData(Customer customer) {
 		// Clear the lot
 		if (customer == null) {
@@ -135,7 +136,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	 * @return the resolved router, or {@code null} when no router key exists in the cache
 	 */
 	@Override
-	@SuppressWarnings("java:S2789")
+	@SuppressWarnings({"java:S2789", "java:S3776"}) // Complexity OK
 	public Router getRouter() {
 		Optional<MetaData> result = cache.get(ROUTER_KEY);
 		if (result != null) { // key is present
@@ -196,7 +197,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	 * @return the resolved customer, or {@code null} when the key is not present
 	 */
 	@Override
-	@SuppressWarnings("java:S2789")
+	@SuppressWarnings({"java:S2789", "java:S3776"}) // Complexity OK
 	public Customer getCustomer(String customerName) {
 		String customerKey = CUSTOMERS_NAMESPACE + customerName;
 		Optional<MetaData> result = cache.get(customerKey);
@@ -276,7 +277,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		return result;
 	}
 	
-	@SuppressWarnings("java:S2789")
+	@SuppressWarnings({"java:S2789", "java:S3776"}) // Complexity OK
 	private @Nullable Module getModuleInternal(@Nullable Customer customer, @Nonnull String moduleName) {
 		final String customerName = (customer == null) ? null : customer.getName();
 		StringBuilder moduleKeySB = new StringBuilder(64);
@@ -391,7 +392,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		return result;
 	}
 
-	@SuppressWarnings("java:S2789")
+	@SuppressWarnings({"java:S2789", "java:S3776"}) // Complexity OK
 	private @Nullable Document getDocumentInternal(boolean customerOverride, @Nullable Customer customer, @Nonnull Module module, @Nonnull String documentName) {
 		DocumentRef ref = module.getDocumentRefs().get(documentName);
 		if (ref == null) {
@@ -564,7 +565,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	 * @return the resolved or scaffolded view, or {@code null} when unavailable
 	 */
 	@Override
-	@SuppressWarnings("java:S2789")
+	@SuppressWarnings({"java:S2789", "java:S3776"}) // Complexity OK
 	public View getView(String uxui,
 							Customer customer, 
 							Document document, 
@@ -616,7 +617,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		return result;
 	}
 
-	@SuppressWarnings("java:S2789")
+	@SuppressWarnings({"java:S2789", "java:S3776"}) // Complexity OK
 	private @Nullable View getViewInternal(@Nullable String searchCustomerName, // the name of the customer to try to load
 											@Nullable String searchUxUi, // the uxui to try to load  - from getView()
 											@Nullable Customer customer,
@@ -850,7 +851,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		return result;
 	}
 
-	@SuppressWarnings("java:S2789")
+	@SuppressWarnings({"java:S2789", "java:S3776"}) // Complexity OK
 	private @Nullable ActionMetaData getMetaDataActionInternal(@Nullable String customerName,
 																@Nonnull Document document,
 																@Nonnull String actionName) {
@@ -985,7 +986,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		return result;
 	}
 
-	@SuppressWarnings("java:S2789")
+	@SuppressWarnings({"java:S2789", "java:S3776"}) // Complexity OK
 	private @Nullable BizletMetaData getMetaDataBizletInternal(@Nullable String customerName, @Nonnull Document document) {
 		StringBuilder bizletKeySB = new StringBuilder(128);
 		if (customerName != null) {

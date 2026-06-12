@@ -281,6 +281,7 @@ public class ImageMarkupView extends LocalisableView {
 	 * @param apply whether to persist posted markup updates
 	 * @throws Exception when conversation restore, access checks, or persistence operations fail
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void process(boolean apply) throws Exception {
 		// If there is no access, don't process the upload and return to allow the view to render the no access message
 		if (! isCanAccess()) {

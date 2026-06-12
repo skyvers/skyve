@@ -119,7 +119,7 @@ public class ValidationUtil {
 	 * @param bean The bean to validate
 	 * @param e The exception to populate
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "java:S3776"}) // Complexity OK
 	public static void validateBeanPropertyAgainstAttribute(User user, Attribute attribute, Bean bean, ValidationException e) {
 		String binding = attribute.getName();
 		AttributeType type = attribute.getAttributeType();
@@ -410,6 +410,7 @@ public class ValidationUtil {
 		}.visit(masterDocument, masterBean, customer);
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static void checkCollectionUniqueConstraints(Customer customer, Document document, Bean bean) {
 		try {
 			for (Attribute attribute : document.getAllAttributes(customer)) {

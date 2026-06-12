@@ -113,6 +113,7 @@ public class RelationTreeModelFilter<T extends Bean> extends InMemoryFilter {
 	/**
 	 * Add the children to the rows to return for the parent node just expanded.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void addChildren(List<Bean> rows, Bean parent) {
 		Customer c = CORE.getCustomer();
 		Module m = c.getModule(parent.getBizModule());

@@ -221,6 +221,7 @@ public class ChartServlet extends HttpServlet {
 		return result;
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static String processListModel(HttpServletRequest request)
 	throws Exception {
 		User user = CORE.getUser();

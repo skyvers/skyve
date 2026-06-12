@@ -77,7 +77,7 @@ public final class SheetKey implements Comparable<SheetKey> {
 	 *         of module, document, and collection binding
 	 */
 	@Override
-	@SuppressWarnings("null") // collection binding null checks are correct below
+	@SuppressWarnings({"null", "java:S3776"}) // collection binding null checks are correct below; Complexity OK
 	public int compareTo(@Nullable SheetKey o) {
 		if (o == null) {
 			return 1;

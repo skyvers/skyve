@@ -224,6 +224,7 @@ public abstract class ExportedReferenceVisitor {
 		}
 
 		@Override
+		@SuppressWarnings("java:S3776") // Complexity OK
 		protected void acceptReference(Document document,
 										String bizId,
 										ExportedReference exportedReference, 

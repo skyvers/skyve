@@ -176,6 +176,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	 * @param response outbound HTTP response
 	 * @throws IOException when writing the response fails
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static void processRequest(HttpServletRequest request, HttpServletResponse response) 
 	throws IOException {
 		response.setContentType(MimeType.json.toString());
@@ -574,6 +575,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	 * @param pw response writer
 	 * @throws Exception when fetch processing fails
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static void fetch(AbstractWebContext webContext,
 			                    User user,
 		    					Customer customer,
@@ -903,6 +905,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	 * @param uxui UX/UI profile used to resolve the view
 	 * @throws Exception when parameter conversion or binding fails
 	 */
+    @SuppressWarnings("java:S3776") // Complexity OK
     public static void applyNewParameters(Customer customer, 
 	    									User user, 
 	    									AbstractPersistence persistence, 
@@ -1005,6 +1008,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	 * @param pw response writer
 	 * @throws Exception when apply processing fails
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static void apply(AbstractWebContext webContext,
 		                        User user,
 		    					Customer customer,

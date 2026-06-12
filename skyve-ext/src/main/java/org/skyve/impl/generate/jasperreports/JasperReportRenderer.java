@@ -258,6 +258,7 @@ public class JasperReportRenderer {
 		throw new IllegalArgumentException("Invalid module or document name.");
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private String renderFromReportDesignParameters() throws JRException {
 		int reportColumnWidth = reportDesignParameters.getPageWidth() - 
 									reportDesignParameters.getLeftMargin() -
@@ -809,6 +810,7 @@ public class JasperReportRenderer {
 	 *
 	 * @param designSpecification The source design specification.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	protected void addQuery(@SuppressWarnings("hiding") DesignSpecification designSpecification) {
 		final JRDesignQuery query = new JRDesignQuery();
 		if (DesignSpecification.Mode.bean.equals(designSpecification.getMode())) {

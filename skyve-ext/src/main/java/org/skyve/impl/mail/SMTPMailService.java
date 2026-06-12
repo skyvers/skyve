@@ -85,6 +85,7 @@ public class SMTPMailService implements MailService {
 		return MailDispatchOutcome.sent("smtp");
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static MimeMessage createMail(Mail mail, boolean forWriting) throws AddressException, MessagingException {
 		Set<String> recipientEmailAddresses = mail.getRecipientEmailAddresses();
 		Set<String> ccEmailAddresses = mail.getCcEmailAddresses();

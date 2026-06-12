@@ -57,6 +57,7 @@ public class QueryGenerator {
 		return result;
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static String generateQueryXML(Customer customer, Module module, boolean includeAssociationBizKeys) {
 		ModuleMetaData newModule = new ModuleMetaData();
 

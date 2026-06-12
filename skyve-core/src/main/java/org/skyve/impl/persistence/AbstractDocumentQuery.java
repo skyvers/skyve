@@ -810,6 +810,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return rendered query text including select/from/filter/group/order clauses
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public String toQueryString() {
 		StringBuilder result = new StringBuilder(256);
 

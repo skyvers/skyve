@@ -364,6 +364,7 @@ public class MenuRenderer {
 		}
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void renderMenuItems(Customer customer,
 									Module menuModule, 
 									List<MenuItem> items) {

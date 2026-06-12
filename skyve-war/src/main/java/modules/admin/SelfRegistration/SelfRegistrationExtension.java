@@ -129,6 +129,7 @@ public class SelfRegistrationExtension extends SelfRegistration {
 	 * @throws ValidationException if either field is blank or the values do not
 	 *         match
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void validateConfirmEmail() {
 		if (getUser() != null) {
 			Contact contact = getUser().getContact();

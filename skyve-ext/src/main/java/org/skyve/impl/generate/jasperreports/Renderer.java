@@ -175,6 +175,7 @@ public class Renderer {
 	/**
 	 * Renders the element.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static String renderElement(ReportElement elem) {
 
 		StringBuilder sb = new StringBuilder();
@@ -467,6 +468,7 @@ public class Renderer {
 	/**
 	 * Renders the box.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static String renderBox(ReportElement e) throws Exception {
 		StringBuilder sb = new StringBuilder();
 
@@ -645,6 +647,7 @@ public class Renderer {
 	/**
 	 * Renders the design.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static String renderDesign(DesignSpecification design) {
 		StringBuilder sb = new StringBuilder();
 

@@ -660,7 +660,7 @@ public class UserImpl implements User {
 	 * @return {@code true} when read access is granted; otherwise {@code false}.
 	 */
 	@Override
-	@SuppressWarnings("incomplete-switch")
+	@SuppressWarnings({"incomplete-switch", "java:S3776"}) // Complexity OK
 	public boolean canReadBean(String beanBizId,
 								String beanBizModule,
 								String beanBizDocument,

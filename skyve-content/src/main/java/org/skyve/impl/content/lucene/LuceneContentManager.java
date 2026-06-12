@@ -459,6 +459,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 	 * @throws Exception if query parsing or execution fails
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public SearchResults google(String search, int maxResults) throws Exception {
 		SearchResults results = new SearchResults();
 		

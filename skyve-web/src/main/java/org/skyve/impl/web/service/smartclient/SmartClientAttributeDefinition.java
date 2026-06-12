@@ -105,6 +105,7 @@ abstract class SmartClientAttributeDefinition {
 	 * @param isField whether the attribute renders as a form field
 	 * @param uxui the active UX/UI profile name
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	protected SmartClientAttributeDefinition(User user,
 												Customer customer, 
 												Module module,
@@ -698,6 +699,7 @@ abstract class SmartClientAttributeDefinition {
 	 *
 	 * @param text text attribute metadata whose format determines mask and text style
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void setMaskAndStyle(Text text) {
 		String result = null;
 		
@@ -763,6 +765,7 @@ abstract class SmartClientAttributeDefinition {
 	 * @param pixelHeight preferred pixel height for image thumbnails, or {@code null}
 	 * @param emptyThumbnailRelativeFile fallback thumbnail resource path, or {@code null}
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	void appendEditorProperties(StringBuilder result,
 									boolean forDataGrid,
 									Integer pixelHeight,

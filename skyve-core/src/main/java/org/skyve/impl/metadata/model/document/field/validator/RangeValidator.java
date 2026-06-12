@@ -70,6 +70,7 @@ public abstract class RangeValidator<T> extends FieldValidator<T> {
 	}
 
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public String constructMessage(User user, String localisedDisplayName, Converter<T> converter) {
 		String result = getLocalisedValidationMessage();
 		if (result == null) {

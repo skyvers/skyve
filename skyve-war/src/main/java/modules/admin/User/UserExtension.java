@@ -57,6 +57,7 @@ public class UserExtension extends User {
 	 * @return List of UserRole objects representing the assigned roles
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public List<UserRole> getAssignedRoles() {
 		List<UserRole> assignedRoles = super.getAssignedRoles();
 		if (!determinedRoles) {

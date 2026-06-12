@@ -60,6 +60,7 @@ public class ZoomInAction extends FacesAction<Void> {
 	 * @throws Exception if bean resolution, instantiation, pre-execute hooks, or redirect handling fails
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public Void callback() throws Exception {
 		StringBuilder sb = new StringBuilder(64);
 		sb.append("ZoomInAction - binding=").append(binding).append(" : bizId=").append(bizId);

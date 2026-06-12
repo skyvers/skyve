@@ -385,6 +385,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param dataEnter the data-entry step to execute
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void executeDataEnter(DataEnter dataEnter) {
 		PrimeFacesAutomationContext context = peek();
 		String identifier = dataEnter.getIdentifier(context);
@@ -788,6 +789,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param binding the data-grid binding identifier
 	 * @param row optional row index for row-scoped interactions
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void dataGridGesture(Step step, String binding, Integer row) {
 		PrimeFacesAutomationContext context = peek();
 		String buttonIdentifier = step.getIdentifier(context);
@@ -917,6 +919,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param step the originating list-grid step
 	 * @param row optional row index for row-scoped interactions
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void listGridGesture(Step step, Integer row) {
 		PrimeFacesAutomationContext context = peek();
 		String buttonIdentifier = step.getIdentifier(context);

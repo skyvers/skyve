@@ -275,6 +275,7 @@ public final class POIWorkbook implements BizPortWorkbook {
 	 * @param value
 	 * @throws Exception
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static void putPOICellValue(XSSFSheet sheet, int rowNum, int colNum, CellType cellType, Object value, boolean forceNumericNullToZero, boolean bold) throws Exception {
 		@SuppressWarnings("resource")
 		XSSFWorkbook workbook = sheet.getWorkbook();

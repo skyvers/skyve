@@ -98,6 +98,7 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 	}
 	
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public boolean populateUser(User user, Connection connection) {
 		UserImpl internalUser = (UserImpl) user;
 		try {

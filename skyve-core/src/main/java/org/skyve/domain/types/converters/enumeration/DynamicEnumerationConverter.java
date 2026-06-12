@@ -44,6 +44,7 @@ public class DynamicEnumerationConverter implements Converter<String> {
 	 * @throws ConversionException when conversion fails unexpectedly
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public String toDisplayValue(String value) throws ConversionException {
 		try {
 			// check code first

@@ -56,7 +56,7 @@ public class SmartClientTextSearchServlet extends HttpServlet {
 	 * @throws IOException when response writing fails
 	 */
 	@Override
-	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
+	@SuppressWarnings({"java:S1989", "java:S3776"}) // there exists JavaEE error pages; Complexity OK
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
 	throws ServletException, IOException {
 		Enumeration<String> parameterNames = request.getParameterNames();

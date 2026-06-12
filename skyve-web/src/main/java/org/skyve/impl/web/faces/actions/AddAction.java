@@ -50,6 +50,7 @@ public class AddAction extends FacesAction<Void> {
 	 * Creates and inserts a new collection element, then optionally zooms into the new element view.
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public Void callback() throws Exception {
 		String viewBinding = facesView.getViewBinding();
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("AddAction - dataWidgetBinding={} : facesView.viewBinding={} : facesView.inline={}", 

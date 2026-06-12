@@ -235,6 +235,7 @@ public class SkyveSpringSecurity {
 	/**
 	 * Creates a JDBC-backed user-details manager configured for Skyve credential and authority queries.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public UserDetailsManager jdbcUserDetailsManager() {
 		JdbcUserDetailsManager result = new JdbcUserDetailsManager() {
 			private String skyveUserQuery;

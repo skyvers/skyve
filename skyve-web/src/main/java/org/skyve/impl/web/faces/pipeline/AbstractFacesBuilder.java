@@ -208,6 +208,7 @@ public abstract class AbstractFacesBuilder {
 	 * @param specialTextAlignStyleAttributeName optional style attribute name for text alignment
 	 * @param rightPaddingIfNecessary optional right padding applied for right alignment
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	protected void setSizeAndTextAlignStyle(UIComponent component,
 												String existingStyle, 
 												Integer pixelWidth, 

@@ -592,6 +592,7 @@ public abstract class AbstractDataFileLoader {
 	 * 
 	 * @return
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public <T extends Bean> T beanResult() {
 
 		if (debugMode) {

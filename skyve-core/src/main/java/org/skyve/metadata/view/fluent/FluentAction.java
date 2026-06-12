@@ -80,7 +80,7 @@ public abstract class FluentAction<T extends FluentAction<T>> {
 	 * @throws IllegalStateException
 	 *             if the action type is not supported
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "java:S3776"}) // Complexity OK
 	public static <T extends FluentAction<T>> T from(ActionMetaData action) {
 		if (action instanceof DefaultsAction defaults) {
 			return (T) new FluentDefaultsAction().from(defaults);

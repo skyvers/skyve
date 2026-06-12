@@ -65,6 +65,7 @@ public class FluentDocument {
 	 * <p>Side effects: clears/overwrites state in this builder as values are applied.
 	 * Unknown attribute implementations cause an {@link IllegalStateException}.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public FluentDocument from(@SuppressWarnings("hiding") Document document) {
 		DocumentImpl impl = (DocumentImpl) document;
 		name(document.getName());

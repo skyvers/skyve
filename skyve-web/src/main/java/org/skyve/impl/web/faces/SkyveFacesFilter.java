@@ -84,7 +84,7 @@ public class SkyveFacesFilter implements Filter {
 	 * Applies Faces-page authentication/session routing and error handling before delegating the filter chain.
 	 */
 	@Override
-	@SuppressWarnings("javasecurity:S5146") // false positive: see below
+	@SuppressWarnings({"javasecurity:S5146", "java:S3776"}) // false positive: see below; Complexity OK
 	public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain)
 	throws IOException, ServletException {
 		HttpServletRequest request = (HttpServletRequest) req;

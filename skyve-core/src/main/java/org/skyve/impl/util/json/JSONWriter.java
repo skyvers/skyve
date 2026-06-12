@@ -83,6 +83,7 @@ public class JSONWriter {
 		return String.valueOf(b);
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void value(@Nullable Object object, @Nullable Set<String> propertyNames, boolean topLevel) {
 		if (object == null || cyclic(object)) {
 			add("null");
@@ -152,6 +153,7 @@ public class JSONWriter {
 		return calls.contains(object);
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void bean(@Nonnull Object object, @Nullable Set<String> propertyNames, boolean topLevel) {
 		boolean firstProperty = true;
 
@@ -206,6 +208,7 @@ public class JSONWriter {
 		add("}");
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void document(@Nonnull Bean bean, @Nullable Set<String> propertyNames, boolean topLevel) {
 		if (customer == null) {
 			throw new IllegalStateException("Marshalling a Skyve Bean requires a customer");

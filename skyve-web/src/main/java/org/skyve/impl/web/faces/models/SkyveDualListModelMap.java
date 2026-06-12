@@ -137,6 +137,7 @@ public class SkyveDualListModelMap extends TreeMap<String, DualListModel<DomainV
 	/**
 	 * Effect the changes required to keep the model lists and the domain model collection in sync.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void gather() {
 		if (view == null) {
 			return;

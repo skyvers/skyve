@@ -107,6 +107,7 @@ public class ChartAction extends FacesAction<ChartModel> {
 	 * @param data the chart data values and labels
 	 * @return the PrimeFaces chart model
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static ChartModel pfChartModel(ChartType type, org.skyve.metadata.view.model.chart.ChartData data) {
 		Title title = title(data);
 

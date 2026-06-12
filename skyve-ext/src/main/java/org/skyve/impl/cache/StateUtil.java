@@ -61,6 +61,7 @@ public class StateUtil {
 		getConversations().put(webContext.getKey(), SerializationHelper.serialize(webContext));
 	}
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static @Nullable AbstractWebContext getCachedConversation(@Nullable String webId,
 																		@Nullable HttpServletRequest request)
 	throws Exception {

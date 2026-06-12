@@ -197,6 +197,7 @@ public class POISheetLoader extends AbstractDataFileLoader {
 	 * @param col
 	 * @return The String Value of the cell
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private String getStringValueFromCell(int col, boolean blankAsNull) {
 		String result = null;
 

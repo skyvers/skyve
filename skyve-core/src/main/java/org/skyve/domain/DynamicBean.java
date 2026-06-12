@@ -268,6 +268,7 @@ public class DynamicBean extends LazyDynaMap implements Bean {
 	 * @return the result
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public Object get(String binding) {
 		Object result = null;
 		Bean bean = (Bean) values.get(BEAN_PROPERTY_KEY);

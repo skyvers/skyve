@@ -35,6 +35,7 @@ public class Truncate {
 		truncate(tables, CORE.getUser().getCustomerName(), database, content);
 	}
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static void truncate(Collection<Table> tables, 
 									String customerName, 
 									boolean database,
@@ -125,7 +126,7 @@ public class Truncate {
 	// table types for getting table database metadata from JDBC
 	private static final String[] TABLE_TYPES = new String[] {"TABLE"};
 	
-	@SuppressWarnings("resource")
+	@SuppressWarnings({"resource", "java:S3776"}) // Complexity OK
 	private static Collection<Table> getTables(String schema)
 	throws SQLException {
 		Collection<Table> result = new ArrayList<>();

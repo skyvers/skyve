@@ -90,6 +90,7 @@ public class StandardLoader {
 	 * @return	A list of top-level beans from the first document sheet found.
 	 * @throws Exception
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public @Nonnull <T extends Bean> List<T> populate(@Nonnull Persistence persistence)
 	throws Exception {
 		List<T> result = new ArrayList<>(128);
@@ -196,6 +197,7 @@ public class StandardLoader {
 	 * @return	The constructed bean or null.
 	 * @throws Exception
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private @Nullable <T extends Bean> T populateBeanFromRow(@Nonnull Persistence persistence, 
 																@Nonnull User user,
 																@Nonnull Document document,
@@ -298,6 +300,7 @@ public class StandardLoader {
 	 * @param sheet	The sheet to iterate over.
 	 * @throws Exception
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void linkAssociationsFromSheet(@Nullable Customer customer, 
 											@Nonnull Module module, 
 											@Nonnull Document document, 
@@ -645,6 +648,7 @@ public class StandardLoader {
 	}
 	
 	// Ensure that error message and all subordinate error messages fit on the message list
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void addError(@Nullable Customer customer, 
 							@Nonnull Module module, 
 							@Nonnull Document document, 

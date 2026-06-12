@@ -49,6 +49,7 @@ class VueSnapshotAdapter extends SnapshotAdapter {
 	}
 	
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public Snapshot fromClientPayload(String payload) {
 		User u = CORE.getUser();
 		
@@ -248,6 +249,7 @@ class VueSnapshotAdapter extends SnapshotAdapter {
 	}
 	
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public String toClientPayload(Snapshot snapshot) {
 		try {
 			Map<String, Object> result = new LinkedHashMap<>(6);
@@ -390,6 +392,7 @@ class VueSnapshotAdapter extends SnapshotAdapter {
 	 * @param topCriteria	
 	 * @return	Restructured 3-tier and criteria -> and/or criteria -> criterion(s) or null if impossible.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static @Nullable Map<String, SnapshotCriteria> restructure(SnapshotCriteria topCriteria) {
 		CompoundFilterOperator operator = topCriteria.getOperator();
 		// Check the operator - Not is not supported

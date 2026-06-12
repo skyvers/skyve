@@ -410,6 +410,7 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 	 * @throws TimeoutException if query timeout configuration fails
 	 * @throws DomainException if statement preparation fails for other reasons
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void prepareStatement(@Nonnull NamedParameterPreparedStatement ps, @Nonnull DataStore dataStore, @Nonnull SkyveDialect dialect) {
 		try {
 			// negative timeout values means no timeout

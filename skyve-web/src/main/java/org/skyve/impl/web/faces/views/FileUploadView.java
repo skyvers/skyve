@@ -116,6 +116,7 @@ public class FileUploadView extends AbstractUploadView {
 	 * @param event the PrimeFaces upload event containing the submitted file
 	 * @throws Exception if upload preconditions or processing fail unexpectedly
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void handleFileUpload(FileUploadEvent event) throws Exception {
 		// If there is no access, don't process the upload and return to allow the view to render the no access message
 		if (! isCanAccess()) {

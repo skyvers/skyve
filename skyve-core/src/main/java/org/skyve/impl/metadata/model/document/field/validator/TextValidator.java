@@ -96,6 +96,7 @@ public class TextValidator extends FieldValidator<String> {
 	}
 	
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void validate(User user,
 							String value,
 							String binding,

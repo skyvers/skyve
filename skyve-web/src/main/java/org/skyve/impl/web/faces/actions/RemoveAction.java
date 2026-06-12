@@ -63,6 +63,7 @@ public class RemoveAction extends FacesAction<Void> {
 	 * @throws Exception if target resolution, interceptors, bizlet hooks, or binding updates fail
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public Void callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("RemoveAction - collectionName={} : elementBizId={}", collectionName, elementBizId);
 

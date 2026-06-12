@@ -76,6 +76,7 @@ public class RestoreJob extends CancellableJob {
 	 * Orchestrates a full restore from the selected backup, including optional DDL work,
 	 * data restore, indexing, and cleanup.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void restore(RestoreOptions options) throws Exception {
 		CustomerImpl customer = (CustomerImpl) CORE.getCustomer();
 		String customerName = customer.getName();
@@ -307,6 +308,7 @@ public class RestoreJob extends CancellableJob {
 	 * Restores table data from CSV files, handling join tables, extension tables,
 	 * and content attachments according to restore options.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void restoreData(File backupDirectory,
 								Collection<Table> tables,
 								Connection connection,
@@ -558,6 +560,7 @@ public class RestoreJob extends CancellableJob {
 	/**
 	 * Restores foreign keys for non-join tables after base data is loaded.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void restoreForeignKeys(File backupDirectory,
 										Collection<Table> tables,
 										Connection connection)

@@ -91,6 +91,7 @@ public class ReportDatasetBizlet extends Bizlet<ReportDatasetExtension> {
 	 * view won't validate the parameters as they belong to the parent ReportTemplate not the dataset
 	 * being edited.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static void validateReportParameters(ReportDatasetExtension bean) {
 		if (bean.getParent() != null) {
 			List<ReportParameterExtension> parameters = bean.getParent().getParameters();

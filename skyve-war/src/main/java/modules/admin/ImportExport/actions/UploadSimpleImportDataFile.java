@@ -50,6 +50,7 @@ public class UploadSimpleImportDataFile extends UploadAction<ImportExportExtensi
 	 *         if upload persistence or column inference fails
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public ImportExportExtension upload(ImportExportExtension importExport,
 											Upload upload,
 											UploadException exception,
@@ -128,6 +129,7 @@ public class UploadSimpleImportDataFile extends UploadAction<ImportExportExtensi
 	 * @throws Exception
 	 *         if file loading or metadata matching fails
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static ImportExportExtension loadColumnsFromFile(ImportExportExtension bean, UploadException exception) throws Exception {
 
 		// clear previous columns

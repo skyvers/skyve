@@ -101,6 +101,7 @@ public class StartupExtension extends Startup {
 	 * Populate this bean's attributes from the current configuration properties values
 	 * read from the application json and override json.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void loadProperties() {
 		setApiGoogleMapsKey(UtilImpl.GOOGLE_MAPS_V3_API_KEY);
 		setApiGoogleRecaptchaSiteKey(UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY);
@@ -283,7 +284,7 @@ public class StartupExtension extends Startup {
 	 * @param properties The current override configuration property map
 	 * @return The map of api properties which have been modified
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "java:S3776"}) // Complexity OK
 	private Map<String, Object> putApi(final Map<String, Object> properties) {
 
 		// initialise or get the existing property map

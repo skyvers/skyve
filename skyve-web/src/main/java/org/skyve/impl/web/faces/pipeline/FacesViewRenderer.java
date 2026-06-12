@@ -556,6 +556,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	 * @param lg optional large breakpoint width
 	 * @param xl optional extra-large breakpoint width
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void addComponent(String widgetLabel,
 								int formColspan,
 								@Nullable String widgetRequiredMessage,
@@ -2842,6 +2843,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		renderTextField(getCurrentWidgetColspan(), text);
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void renderTextField(int formColspan, TextField text) {
 		TargetMetaData target = getCurrentTarget();
 		Attribute attribute = (target == null) ? null : target.getAttribute();
@@ -2924,6 +2926,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	 * @param type attribute type used for default converter selection
 	 * @return matching JSF converter, or {@code null}
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static jakarta.faces.convert.Converter<?> convertConverter(Converter<?> converter, AttributeType type) {
 		jakarta.faces.convert.Converter<?> result = null;
 		if (converter != null) {

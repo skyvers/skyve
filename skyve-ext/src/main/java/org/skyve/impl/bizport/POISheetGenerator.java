@@ -113,6 +113,7 @@ public class POISheetGenerator {
 		fields.add(new DataFileExportField(fieldTitle, binding));
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public Download getDownload() throws Exception {
 
 		Download result= null;

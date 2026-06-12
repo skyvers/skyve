@@ -241,6 +241,7 @@ final class BackupUtil {
 		}
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static void addOrUpdate(Map<String, Table> tables, Customer customer, Document document) {
 		Persistent persistent = document.getPersistent();
 		if ((! document.isDynamic()) && document.isPersistable()) { // static persistent document

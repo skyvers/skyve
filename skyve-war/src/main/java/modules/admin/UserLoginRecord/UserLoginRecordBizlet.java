@@ -76,6 +76,7 @@ public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
 	 * @throws Exception if any error occurs during processing
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void preSave(UserLoginRecordExtension bean) throws Exception {
 		if (bean.isNotPersisted()) {
 			// Check if IP address checks are enabled

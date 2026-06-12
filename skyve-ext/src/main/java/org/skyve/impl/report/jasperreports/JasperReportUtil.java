@@ -249,6 +249,7 @@ public final class JasperReportUtil {
 	 * @return The list of filled report prints.
 	 */
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static List<JasperPrint> runReport(User user,
 												List<ReportParameters> reportParameters,
 												ReportFormat format,

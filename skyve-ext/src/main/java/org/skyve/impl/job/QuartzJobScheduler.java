@@ -408,6 +408,7 @@ public class QuartzJobScheduler implements JobScheduler {
 		scheduleJob(job, null, user, tb.build(), null);
 	}
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static void scheduleJob(JobMetaData job,
 										Bean parameter,
 										User user,

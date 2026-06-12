@@ -35,6 +35,7 @@ public class ReactNativeEditView extends ReactComponent {
  	}
 
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	protected void create(FileWriter fw) throws IOException {
 		Map<String, String> imports = new TreeMap<>();
 		String editJsx = null;

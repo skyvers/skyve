@@ -52,6 +52,7 @@ public class PushMessage {
 	 * 
 	 * @param intervalInSeconds How often (in seconds) to scan for stale receivers.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static synchronized void startReaper(int intervalInSeconds) {
 		if (reaperFuture != null) {
 			LOGGER.warn("Push message reaper already running – ignoring duplicate start request");

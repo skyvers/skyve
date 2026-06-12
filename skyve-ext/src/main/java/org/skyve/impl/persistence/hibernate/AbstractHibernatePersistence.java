@@ -318,7 +318,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	/**
 	 * Configure the shared Hibernate SessionFactory and metadata.
 	 */
-	@SuppressWarnings("resource")
+	@SuppressWarnings({"resource", "java:S3776"}) // Complexity OK
 	private static void configure() {
 		LoadedConfig config = LoadedConfig.baseline();
 		Map<String, String> cfg = config.getConfigurationValues();
@@ -686,6 +686,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 * @param operationType The persistence operation being performed.
 	 * @param bean The bean involved, if any.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void treatPersistenceThrowable(@Nonnull Throwable t,
 											@Nonnull OperationType operationType,
 											@Nullable PersistentBean bean) {
@@ -879,6 +880,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 * @param document The document to apply filters to.
 	 * @param scope The permission scope.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void setFilters(@Nonnull Document document, @Nonnull DocumentPermissionScope scope) {
 		Set<String> accessibleModuleNames = ((UserImpl) user).getAccessibleModuleNames(); 
 		ProvidedRepository repository = ProvidedRepositoryFactory.get();
@@ -1030,6 +1032,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 * @param close Whether to close this persistence instance after commit.
 	 * @param removeUniqueHashes Whether to remove temporary unique hashes before commit.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public final void commit(boolean close, boolean removeUniqueHashes) {
 		boolean rollbackOnly = false;
 		try {
@@ -1473,6 +1476,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 * @param document The root document metadata.
 	 * @param beanToSave The root bean.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static void firePreSaveEvents(@Nonnull final Customer customer,
 											@Nonnull Document document,
 											@Nonnull final Bean beanToSave) {
@@ -1533,6 +1537,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 * @param document The root document metadata.
 	 * @param beanToSave The root bean.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void validatePreMerge(@Nonnull final Customer customer,
 									@Nonnull Document document,
 									@Nonnull final Bean beanToSave) {
@@ -1727,7 +1732,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 */
 	private Deque<Map<PersistentBean, PersistentBean>> saveContext = new ArrayDeque<>(32); // non-null elements
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "java:S3776"}) // Complexity OK
 	private @Nonnull <T extends PersistentBean> T save(@Nonnull Document document, @Nonnull T bean, boolean flush) {
 		T result = null;
 		
@@ -1821,7 +1826,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		return result;
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "java:S3776"}) // Complexity OK
 	private @Nonnull <T extends PersistentBean> List<T> save(@Nonnull List<T> beans, boolean flush) {
 		List<T> results = new ArrayList<>();
 		PersistentBean currentBean = null; // used in exception handling
@@ -1961,6 +1966,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 * @param beanToSave The merged bean.
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void postMerge(Document document, final PersistentBean beanToSave) {
 		final Customer customer = user.getCustomer();
 		
@@ -2135,6 +2141,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 * @param document The document metadata.
 	 * @param bean The bean to validate.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void checkUniqueConstraints(@Nonnull Customer customer, @Nonnull Document document, @Nonnull Bean bean) {
 // TODO - Work the dynamic something in here - remove the short-circuit on dynamic
 if (document.isDynamic()) return;
@@ -2415,6 +2422,7 @@ if (document.isDynamic()) return;
 	 * Delete a document bean from the data store.
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public final <T extends PersistentBean> void delete(Document document, T bean) {
 		if (isPersisted(bean)) {
 			try {
@@ -2487,6 +2495,7 @@ if (document.isDynamic()) return;
 	 * @param beans The beans to delete.
 	 * @throws Exception If validation or persistence fails during deletion.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void deleteStatic(@Nonnull Set<PersistentBean> beans) throws Exception {
 		Map<String, Set<Bean>> beansToDelete = null;
 		for (PersistentBean bean : beans) {
@@ -2558,6 +2567,7 @@ if (document.isDynamic()) return;
 	 * @param preRemove True when invoked from Hibernate pre-remove events.
 	 */
 	// Do not increase visibility of this method as we don't want it to be public.
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void checkReferentialIntegrityOnDelete(@Nonnull Document document, 
 													@Nonnull PersistentBean bean, 
 													@Nonnull Set<String> documentsVisited,
@@ -2744,6 +2754,7 @@ if (document.isDynamic()) return;
 	 * @param modoc Module/document identifier for the reference owner.
 	 * @param referenceDocument The document that holds the reference.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void checkPolymorphicallyMappedReference(@Nonnull PersistentBean bean, 
 														@Nonnull Map<String, Set<Bean>> beansToBeCascaded,
 														@Nonnull Document document,
@@ -2981,6 +2992,7 @@ if (document.isDynamic()) return;
 	 * @param document The document metadata.
 	 * @param loadedBean The bean being processed.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static void nullEmbeddedReferencesOnLoad(@Nonnull Customer customer,
 														@Nonnull Module module,
 														@Nonnull Document document,
@@ -3024,6 +3036,7 @@ if (document.isDynamic()) return;
 	 * @throws Exception If indexing or content storage fails.
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void reindex(PersistentBean beanToReindex)
 	throws Exception {
 		TextExtractor extractor = null; // lazily instantiated
@@ -3073,6 +3086,7 @@ if (document.isDynamic()) return;
 	 * @param state Current property state.
 	 * @throws Exception If indexing or content storage fails.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void index(@Nonnull PersistentBean beanToIndex,
 						@Nonnull String[] propertyNames,
 						@Nonnull Type[] propertyTypes,
@@ -3145,6 +3159,7 @@ if (document.isDynamic()) return;
 
 	// Need the callback because an element removed from a collection will be deleted and only this event will pick it up
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void preRemove(PersistentBean bean)
 	throws Exception {
 		final Map<String, Set<Bean>> beansToDelete = deleteContext.isEmpty() ? new TreeMap<>() : deleteContext.peek();
@@ -3225,6 +3240,7 @@ if (document.isDynamic()) return;
 	}
 
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void postRemove(PersistentBean bean)
 	throws Exception {
 		final Customer customer = user.getCustomer();
@@ -3282,6 +3298,7 @@ if (document.isDynamic()) return;
 		}
 	}
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void removeInsertedUniqueConstraintState(Customer customer, Document document, Bean bean) {
 // TODO - Work the dynamic something in here - remove the short-circuit on dynamic
 if (document.isDynamic()) return;
@@ -3378,6 +3395,7 @@ public void doWorkOnConnection(Session session) {
 	 * {@inheritDoc}
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void upsertBeanTuple(PersistentBean bean) {
 		CustomerImpl customer = (CustomerImpl) user.getCustomer();
 		Module module = customer.getModule(bean.getBizModule());

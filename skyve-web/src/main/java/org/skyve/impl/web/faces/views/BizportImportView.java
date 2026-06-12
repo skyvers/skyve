@@ -121,6 +121,7 @@ public class BizportImportView extends AbstractUploadView {
 	 * @throws Exception when unexpected import processing failures occur before they are converted
 	 *         to user-facing messages
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void handleFileUpload(FileUploadEvent event) throws Exception {
 		FacesContext fc = FacesContext.getCurrentInstance();
 

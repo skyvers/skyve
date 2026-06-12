@@ -91,6 +91,7 @@ public class UserService {
 	 * @param e The ValidationException to accumulate validation errors
 	 * @throws Exception if there are issues accessing the database or configuration
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void validateUserNameAndPassword(UserExtension user, ValidationException e) throws Exception {
 
 		// validate username is not null, not too short and unique
@@ -184,7 +185,7 @@ public class UserService {
 	 * @param user The Skyve user for whom to retrieve available roles
 	 * @return A list of DomainValue objects representing available roles with their names and descriptions
 	 */
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "java:S3776"}) // Complexity OK
 	public List<DomainValue> getCustomerRoleValues(org.skyve.metadata.user.User user) {
 		List<DomainValue> result = new ArrayList<>();
 

@@ -40,7 +40,7 @@ import jakarta.annotation.Nonnull;
 public abstract class AbstractDocumentNumberGenerator implements NumberGenerator {
 	private static final String NUMERIC_PATTERN = "^\\d+$";
 
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "java:S3776"}) // Complexity OK
 	protected String getNextNumber(Persistence pers,
 									String prefix,
 									String moduleName,

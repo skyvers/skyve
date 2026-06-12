@@ -76,6 +76,7 @@ public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
 	}
 
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public List<SelectItem> callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("GetSelectItemsAction - binding={} : includeEmptyItem={}", binding, Boolean.valueOf(includeEmptyItem));
 

@@ -148,6 +148,7 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 	 * @param sanitise the sanitisation strategy
 	 * @return the resolved value
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private Object get(final Object key, final boolean escape, final Sanitisation sanitise) {
 		return new FacesAction<>() {
 			@Override

@@ -211,6 +211,7 @@ public class RouteCriteria implements SerializableMetaData {
 	 * @throws IllegalStateException when canonicalisation is requested without
 	 *         pre-set module or document names
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void canonicalise(Customer customer, String binding) {
 		if (webAction != WebAction.m) { // exclude maps
 			String b = UtilImpl.processStringValue(binding);
@@ -251,6 +252,7 @@ public class RouteCriteria implements SerializableMetaData {
 	 * @param criteria the runtime request criteria to test
 	 * @return {@code true} if all constrained fields match, otherwise {@code false}
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public boolean matches(RouteCriteria criteria) {
 		if ((customerName != null) && (! customerName.equals(criteria.customerName))) {
 			return false;

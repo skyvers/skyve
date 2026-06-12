@@ -282,6 +282,7 @@ public class ChartBuilder {
 		return value;
 	}
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private List<Bean> query() {
 		String categoryExpression = null;
 		String categoryAlias = CATEGORY_ALIAS;
@@ -399,6 +400,7 @@ public class ChartBuilder {
 		return Double.valueOf(result);
 	}
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static Number minMax(List<Bean> beans, boolean min) {
 		Number result = null;
 		

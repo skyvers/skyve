@@ -126,6 +126,7 @@ public class DesktopView extends HarnessView {
 	/**
 	 * Prepares desktop scripts (menu, datasource, UI, and banner) for initial non-postback rendering.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void preRender() {
         final FacesContext fc = FacesContext.getCurrentInstance();
         if (! fc.isPostback()) {
@@ -250,6 +251,7 @@ public class DesktopView extends HarnessView {
 	/**
 	 * Creates locale-specific script include markup when a non-default locale bundle is required.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void createLocaleScriptIfRequired() {
 		Locale locale = CORE.getUser().getLocale();
 		String language = locale.getLanguage();
@@ -406,6 +408,7 @@ public class DesktopView extends HarnessView {
 	 * @param uxui UX/UI name used to resolve the menu structure
 	 * @param result buffer that receives the generated script
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void constructMenu(String chosenModuleName,
 								String uxui,
 								StringBuilder result) {

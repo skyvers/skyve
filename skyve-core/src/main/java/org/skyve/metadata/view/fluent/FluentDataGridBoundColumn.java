@@ -56,6 +56,7 @@ public class FluentDataGridBoundColumn extends FluentDataGridColumn<FluentDataGr
 	 * @throws IllegalStateException
 	 *             if an unsupported input widget type is encountered
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public FluentDataGridBoundColumn from(@SuppressWarnings("hiding") DataGridBoundColumn column) {
 		super.from(column);
 

@@ -117,6 +117,7 @@ public class DocTable {
 	 * @param displayAsListIfOneColumnOnly whether to use list fallback
 	 * @return HTML string representation
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public String toHTML(boolean displayAsListIfOneColumnOnly) {
 
 		// exclude empty columns - if only one column then display as an

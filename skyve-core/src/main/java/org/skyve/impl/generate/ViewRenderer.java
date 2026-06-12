@@ -534,6 +534,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 		}
 	}
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void preProcessWidget(boolean clearState, boolean showsLabelByDefault) {
 		if (clearState) {
 			currentWidgetLabel = null;
@@ -633,6 +634,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	 * @param action
 	 * @return	false if the user does not have privileges to execute the action, otherwise true.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private boolean preProcessAction(ImplicitActionName implicitName, Action action, ActionShow showOverride) {
 		boolean result = true;
 		

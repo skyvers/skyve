@@ -34,7 +34,7 @@ public class UpdatePreview implements ServerSideAction<DocumentCreator> {
 	 *         if parsing or metadata processing fails
 	 */
 	@Override
-	@SuppressWarnings("boxing")
+	@SuppressWarnings({"boxing", "java:S3776"}) // Complexity OK
 	public ServerSideActionResult<DocumentCreator> execute(DocumentCreator bean, WebContext webContext) throws Exception {
 		String script = bean.getScript();
 		if (script == null) {

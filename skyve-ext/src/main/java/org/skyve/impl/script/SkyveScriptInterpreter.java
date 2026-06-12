@@ -208,6 +208,7 @@ public class SkyveScriptInterpreter {
 	 * 
 	 * @return the cleansed markdown ready to be processed
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public String preProcess() {
 		if (script != null && script.length() > 0) {
 			String[] lines = script.split("\n");
@@ -329,7 +330,7 @@ public class SkyveScriptInterpreter {
 	 *
 	 * @param node The current node to process.
 	 */
-	@SuppressWarnings("boxing")
+	@SuppressWarnings({"boxing", "java:S3776"}) // Complexity OK
 	private void process(Node node) {
 		if (isHeading(node)) {
 			Heading heading = (Heading) node;
@@ -644,6 +645,7 @@ public class SkyveScriptInterpreter {
 		}
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void createAttribute(String attributeName, String[] parts, boolean required, Node line) {
 		// identify the type from the parts
 		String type = null;
