@@ -21,6 +21,7 @@ import jakarta.xml.bind.annotation.XmlType;
  * @see org.skyve.metadata.NamedMetaData
  */
 @XmlType(namespace = XMLMetaData.COMMON_NAMESPACE)
+@SuppressWarnings("java:S2176") // JAXB metadata vocabulary intentionally mirrors org.skyve.metadata.NamedMetaData.
 public abstract class NamedMetaData implements org.skyve.metadata.NamedMetaData {
 	private static final long serialVersionUID = 3158067742748907120L;
 

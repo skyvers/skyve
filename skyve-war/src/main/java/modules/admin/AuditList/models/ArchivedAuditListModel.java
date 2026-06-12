@@ -11,6 +11,7 @@ import org.skyve.domain.Bean;
  *
  * @param <U> The bean type.
  */
+@SuppressWarnings("java:S2176") // Metadata model aliases intentionally mirror the shared admin model names.
 public class ArchivedAuditListModel<U extends Bean> extends modules.admin.Audit.models.ArchivedAuditListModel<U> {
-    //
+    //  Nothing to see here
 }

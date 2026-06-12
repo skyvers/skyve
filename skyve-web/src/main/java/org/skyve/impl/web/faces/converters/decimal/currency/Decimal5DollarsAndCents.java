@@ -13,6 +13,7 @@ import jakarta.faces.convert.ConverterException;
 /**
  * Converts JSF values between formatted UI strings and Skyve domain representations for this format.
  */
+@SuppressWarnings("java:S2176") // Converter class names intentionally match metadata and Faces converter IDs.
 public class Decimal5DollarsAndCents extends org.skyve.domain.types.converters.decimal.currency.Decimal5DollarsAndCents
 										implements Converter<Decimal5> {
 	/**

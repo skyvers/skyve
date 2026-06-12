@@ -18,6 +18,7 @@ import jakarta.xml.bind.annotation.XmlType;
  * @see org.skyve.metadata.customer.UIResources
  */
 @XmlType(namespace = XMLMetaData.CUSTOMER_NAMESPACE)
+@SuppressWarnings("java:S2176") // JAXB customer.xml element type intentionally mirrors the public UIResources contract.
 public class UIResources implements org.skyve.metadata.customer.UIResources {
 	private static final long serialVersionUID = 7253552655682697331L;
 

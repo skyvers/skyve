@@ -12,6 +12,7 @@ import jakarta.faces.convert.ConverterException;
 /**
  * Converts JSF values between formatted UI strings and Skyve domain representations for this format.
  */
+@SuppressWarnings("java:S2176") // Converter class names intentionally match metadata and Faces converter IDs.
 public class LongIntegerSeparator extends org.skyve.domain.types.converters.integer.LongIntegerSeparator
 									implements Converter<Long> {
 	/**
