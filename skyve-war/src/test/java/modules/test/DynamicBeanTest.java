@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Geometry;
 import org.skyve.CORE;
@@ -49,18 +49,18 @@ class DynamicBeanTest extends AbstractSkyveTest {
 	void testAbstractBean() {
 		Contact contact = Contact.newInstance();
 		contact.putDynamic(ONE, TWO);
-		Assert.assertEquals("Dynamic Property set correctly", TWO, contact.getDynamic(ONE));
-		Assert.assertTrue("Is a dynamic property", contact.isDynamic(ONE));
+		Assertions.assertEquals(TWO, contact.getDynamic(ONE), "Dynamic Property set correctly");
+		Assertions.assertTrue(contact.isDynamic(ONE), "Is a dynamic property");
 		contact.setDynamic(ONE, THREE);
-		Assert.assertEquals("Dynamic Property set correctly", THREE, contact.getDynamic(ONE));
+		Assertions.assertEquals(THREE, contact.getDynamic(ONE), "Dynamic Property set correctly");
 		try {
 			contact.getDynamic(THREE);
-			Assert.fail("Not a property");
+			Assertions.fail("Not a property");
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
 			// do nothing
 		}
-		Assert.assertFalse("Not a property", contact.isDynamic(THREE));
+		Assertions.assertFalse(contact.isDynamic(THREE), "Not a property");
 	}
 
 	@Test
@@ -69,46 +69,46 @@ class DynamicBeanTest extends AbstractSkyveTest {
 		Map<String, Object> values = new TreeMap<>();
 		values.put(ONE, TWO);
 		DynamicBean contact = new DynamicBean(Contact.MODULE_NAME, Contact.DOCUMENT_NAME, values);
-		Assert.assertEquals("Dynamic Property set correctly", TWO, contact.getDynamic(ONE));
-		Assert.assertTrue("Is a dynamic property", contact.isDynamic(ONE));
+		Assertions.assertEquals(TWO, contact.getDynamic(ONE), "Dynamic Property set correctly");
+		Assertions.assertTrue(contact.isDynamic(ONE), "Is a dynamic property");
 		contact.setDynamic(ONE, THREE);
-		Assert.assertEquals("Dynamic Property set correctly", THREE, contact.getDynamic(ONE));
+		Assertions.assertEquals(THREE, contact.getDynamic(ONE), "Dynamic Property set correctly");
 	}
 	
 	@Test
 	void testGetAllAttributesPersistentClass() throws Exception {
-		Assert.assertEquals("ADAPD document should create AllDynamicAtrributesPersistent", AllDynamicAttributesPersistent.class, adapd.newInstance(u).getClass());
+		Assertions.assertEquals(AllDynamicAttributesPersistent.class, adapd.newInstance(u).getClass(), "ADAPD document should create AllDynamicAtrributesPersistent");
 	}
 
 	@Test
 	void testGetAllAttributesDynamicPersistentClass() throws Exception {
-		Assert.assertEquals("AADPD document should create AllAtrributesDynamicPersistent", DynamicPersistentBean.class, aadpd.newInstance(u).getClass());
+		Assertions.assertEquals(DynamicPersistentBean.class, aadpd.newInstance(u).getClass(), "AADPD document should create AllAtrributesDynamicPersistent");
 	}
 	
 	@Test
 	void testDefaultValues() throws Exception {
 		Bean bean = aadpd.newInstance(u);
-		Assert.assertEquals("Boolean default value", Boolean.TRUE, Binder.get(bean, AllAttributesPersistent.booleanFlagPropertyName));
-		Assert.assertEquals("Colour default value", "#000000", Binder.get(bean, AllAttributesPersistent.colourPropertyName));
-		Assert.assertEquals("Date default value", new DateOnly("2021-10-21"), Binder.get(bean, AllAttributesPersistent.datePropertyName));
-		Assert.assertEquals("DateTime default value", new DateTime("2021-10-21T07:48:29Z"), Binder.get(bean, AllAttributesPersistent.dateTimePropertyName));
-		Assert.assertEquals("Decimal10 default value", new Decimal10("100.1234567899"), Binder.get(bean, AllAttributesPersistent.decimal10PropertyName));
-		Assert.assertEquals("Decimal2 default value", new Decimal2("100.12"), Binder.get(bean, AllAttributesPersistent.decimal2PropertyName));
-		Assert.assertEquals("Decimal5 default value", new Decimal5("100.12345"), Binder.get(bean, AllAttributesPersistent.decimal5PropertyName));
-		Assert.assertEquals("Enum default value", "one", Binder.get(bean, AllAttributesPersistent.enum3PropertyName));
+		Assertions.assertEquals(Boolean.TRUE, Binder.get(bean, AllAttributesPersistent.booleanFlagPropertyName), "Boolean default value");
+		Assertions.assertEquals("#000000", Binder.get(bean, AllAttributesPersistent.colourPropertyName), "Colour default value");
+		Assertions.assertEquals(new DateOnly("2021-10-21"), Binder.get(bean, AllAttributesPersistent.datePropertyName), "Date default value");
+		Assertions.assertEquals(new DateTime("2021-10-21T07:48:29Z"), Binder.get(bean, AllAttributesPersistent.dateTimePropertyName), "DateTime default value");
+		Assertions.assertEquals(new Decimal10("100.1234567899"), Binder.get(bean, AllAttributesPersistent.decimal10PropertyName), "Decimal10 default value");
+		Assertions.assertEquals(new Decimal2("100.12"), Binder.get(bean, AllAttributesPersistent.decimal2PropertyName), "Decimal2 default value");
+		Assertions.assertEquals(new Decimal5("100.12345"), Binder.get(bean, AllAttributesPersistent.decimal5PropertyName), "Decimal5 default value");
+		Assertions.assertEquals("one", Binder.get(bean, AllAttributesPersistent.enum3PropertyName), "Enum default value");
 		Geometry g = (Geometry) Binder.fromSerialised(Geometry.class, "POINT(0 0)");
-		Assert.assertEquals("Geometry default value", g, Binder.get(bean, AllAttributesPersistent.geometryPropertyName));
-		Assert.assertEquals("Id default value", "1234567890", Binder.get(bean, AllAttributesPersistent.idPropertyName));
-		Assert.assertEquals("Integer default value", Integer.valueOf(123), Binder.get(bean, AllAttributesPersistent.normalIntegerPropertyName));
-		Assert.assertEquals("Long integer default value", Long.valueOf(123), Binder.get(bean, AllAttributesPersistent.longIntegerPropertyName));
-		Assert.assertEquals("Markup default value", "<h1>Markup</h1>", Binder.get(bean, AllAttributesPersistent.markupPropertyName));
-		Assert.assertEquals("Memo default value", "Memo", Binder.get(bean, AllAttributesPersistent.memoPropertyName));
-		Assert.assertEquals("Text default value", "Text", Binder.get(bean, AllAttributesPersistent.textPropertyName));
-		Assert.assertEquals("Time default value", new TimeOnly("07:51:26"), Binder.get(bean, AllAttributesPersistent.timePropertyName));
-		Assert.assertEquals("Timestamp default value", new Timestamp("2021-10-21T07:48:29Z"), Binder.get(bean, AllAttributesPersistent.timestampPropertyName));
+		Assertions.assertEquals(g, Binder.get(bean, AllAttributesPersistent.geometryPropertyName), "Geometry default value");
+		Assertions.assertEquals("1234567890", Binder.get(bean, AllAttributesPersistent.idPropertyName), "Id default value");
+		Assertions.assertEquals(Integer.valueOf(123), Binder.get(bean, AllAttributesPersistent.normalIntegerPropertyName), "Integer default value");
+		Assertions.assertEquals(Long.valueOf(123), Binder.get(bean, AllAttributesPersistent.longIntegerPropertyName), "Long integer default value");
+		Assertions.assertEquals("<h1>Markup</h1>", Binder.get(bean, AllAttributesPersistent.markupPropertyName), "Markup default value");
+		Assertions.assertEquals("Memo", Binder.get(bean, AllAttributesPersistent.memoPropertyName), "Memo default value");
+		Assertions.assertEquals("Text", Binder.get(bean, AllAttributesPersistent.textPropertyName), "Text default value");
+		Assertions.assertEquals(new TimeOnly("07:51:26"), Binder.get(bean, AllAttributesPersistent.timePropertyName), "Time default value");
+		Assertions.assertEquals(new Timestamp("2021-10-21T07:48:29Z"), Binder.get(bean, AllAttributesPersistent.timestampPropertyName), "Timestamp default value");
 		
 		bean = adapd.newInstance(u);
-		Assert.assertEquals("Colour default value", "#000000", Binder.get(bean, AllAttributesPersistent.colourPropertyName));
+		Assertions.assertEquals("#000000", Binder.get(bean, AllAttributesPersistent.colourPropertyName), "Colour default value");
 	}
 	
 	@Test
@@ -117,15 +117,15 @@ class DynamicBeanTest extends AbstractSkyveTest {
 		String bizId = bean.getBizId();
 		String json = JSON.marshall(c, bean);
 		bean = (Bean) JSON.unmarshall(u, json);
-		Assert.assertEquals("JSON marshall/unmarshall problem", bizId, bean.getBizId());
-		Assert.assertEquals("JSON unmarshall document should create AllAtrributesDynamicPersistent", DynamicPersistentBean.class, bean.getClass());
+		Assertions.assertEquals(bizId, bean.getBizId(), "JSON marshall/unmarshall problem");
+		Assertions.assertEquals(DynamicPersistentBean.class, bean.getClass(), "JSON unmarshall document should create AllAtrributesDynamicPersistent");
 
 		bean = Util.constructRandomInstance(u, m, adapd, 2);
 		bizId = bean.getBizId();
 		json = JSON.marshall(c, bean);
 		bean = (Bean) JSON.unmarshall(u, json);
-		Assert.assertEquals("JSON marshall/unmarshall problem", bizId, bean.getBizId());
-		Assert.assertEquals("JSON unmarshall document should create AllAtrributesPersistent", AllDynamicAttributesPersistent.class, bean.getClass());
+		Assertions.assertEquals(bizId, bean.getBizId(), "JSON marshall/unmarshall problem");
+		Assertions.assertEquals(AllDynamicAttributesPersistent.class, bean.getClass(), "JSON unmarshall document should create AllAtrributesPersistent");
 	}
 	
 	@Test
@@ -147,46 +147,46 @@ class DynamicBeanTest extends AbstractSkyveTest {
 	private static void testBinder(Bean bean, String associationPropertyName, String collectionPropertyName, PersistentBean testAssignment) {
 		// Simple scalar
 		Binder.set(bean, AllAttributesPersistent.booleanFlagPropertyName, Boolean.TRUE);
-		Assert.assertEquals(Boolean.TRUE, Binder.get(bean, AllAttributesPersistent.booleanFlagPropertyName));
+		Assertions.assertEquals(Boolean.TRUE, Binder.get(bean, AllAttributesPersistent.booleanFlagPropertyName));
 		Binder.set(bean, AllAttributesPersistent.normalIntegerPropertyName, INTEGER);
-		Assert.assertEquals(INTEGER, Binder.get(bean, AllAttributesPersistent.normalIntegerPropertyName));
+		Assertions.assertEquals(INTEGER, Binder.get(bean, AllAttributesPersistent.normalIntegerPropertyName));
 
 		// Simple association
 		Binder.set(bean, associationPropertyName, bean);
-		Assert.assertEquals(bean, Binder.get(bean, associationPropertyName));
+		Assertions.assertEquals(bean, Binder.get(bean, associationPropertyName));
 
 		// Simple collection
-		Assert.assertTrue(Binder.get(bean, collectionPropertyName) instanceof List<?>);
+		Assertions.assertTrue(Binder.get(bean, collectionPropertyName) instanceof List<?>);
 		
 		// Compound association to scalar
 		String binding = Binder.createCompoundBinding(associationPropertyName, AllAttributesPersistent.normalIntegerPropertyName);
 		Binder.set(bean, binding, INTEGER);
-		Assert.assertEquals(INTEGER, Binder.get(bean, binding));
+		Assertions.assertEquals(INTEGER, Binder.get(bean, binding));
 		
 		// Compound association to association
 		binding = Binder.createCompoundBinding(associationPropertyName, associationPropertyName);
 		Object oldValue = Binder.get(bean, binding);
 		Binder.set(bean, binding, bean);
-		Assert.assertEquals(bean, Binder.get(bean, binding));
+		Assertions.assertEquals(bean, Binder.get(bean, binding));
 		Binder.set(bean, binding, oldValue);
 
 		// Compound association to collection
 		binding = Binder.createCompoundBinding(associationPropertyName, collectionPropertyName);
-		Assert.assertTrue(Binder.get(bean, binding) instanceof List<?>);
+		Assertions.assertTrue(Binder.get(bean, binding) instanceof List<?>);
 
 		// Compound association to indexed
 		binding = Binder.createIndexedBinding(Binder.createCompoundBinding(associationPropertyName, collectionPropertyName), 0);
 		Binder.set(bean, binding, testAssignment);
-		Assert.assertEquals(testAssignment, Binder.get(bean, binding));
+		Assertions.assertEquals(testAssignment, Binder.get(bean, binding));
 
 		// Check set above via Compound association to Id
 		binding = Binder.createIdBinding(Binder.createCompoundBinding(associationPropertyName, collectionPropertyName), testAssignment.getBizId());
-		Assert.assertEquals(testAssignment, Binder.get(bean, binding));
+		Assertions.assertEquals(testAssignment, Binder.get(bean, binding));
 		
 		// Indexed collection to scalar
 		binding = Binder.createCompoundBinding(Binder.createIndexedBinding(collectionPropertyName, 0), AllAttributesPersistent.normalIntegerPropertyName);
 		Binder.set(bean, binding, INTEGER);
-		Assert.assertEquals(INTEGER, Binder.get(bean, binding));
+		Assertions.assertEquals(INTEGER, Binder.get(bean, binding));
 
 		// Id collection to scalar
 		@SuppressWarnings("unchecked")
@@ -196,7 +196,7 @@ class DynamicBeanTest extends AbstractSkyveTest {
 		String bizId = elements.get(1).getBizId();
 		binding = Binder.createCompoundBinding(Binder.createIdBinding(collectionPropertyName, bizId), AllAttributesPersistent.normalIntegerPropertyName);
 		Binder.set(bean, binding, INTEGER);
-		Assert.assertEquals(INTEGER, Binder.get(bean, binding));
+		Assertions.assertEquals(INTEGER, Binder.get(bean, binding));
 	}
 	
 	@Test
@@ -230,19 +230,19 @@ class DynamicBeanTest extends AbstractSkyveTest {
 	@Test
 	void testDynamicDefinitions() {
 		Bizlet<Bean> bizlet = aadpd.getBizlet(c);
-		Assert.assertNotNull(bizlet);
+		Assertions.assertNotNull(bizlet);
 		
 		Object dataFactory = CORE.getRepository().getDataFactory(c, aadpd);
-		Assert.assertNotNull(dataFactory);
+		Assertions.assertNotNull(dataFactory);
 		
 		ServerSideAction<Bean> action = aadpd.getServerSideAction(c, TestServerSideAction.class.getSimpleName(), true);
-		Assert.assertNotNull(action);
+		Assertions.assertNotNull(action);
 
 		DynamicImage<Bean> image = aadpd.getDynamicImage(c, TestDynamicImage.class.getSimpleName());
-		Assert.assertNotNull(image);
+		Assertions.assertNotNull(image);
 
 		ListModel<Bean> model = aadpd.getListModel(c, TestListModel.class.getSimpleName(), false);
-		Assert.assertNotNull(model);
+		Assertions.assertNotNull(model);
 	}
 	
 	@Test
@@ -251,21 +251,21 @@ class DynamicBeanTest extends AbstractSkyveTest {
 		DynamicPersistentBean dynamicBean = aadpd.newInstance(u);
 		AllDynamicAttributesPersistent staticBean = adapd.newInstance(u);
 		BindUtil.addElementToCollection(dynamicBean, AllDynamicAttributesPersistent.dynamicInverseAggregatedAssociationPropertyName, staticBean);
-		Assert.assertSame(dynamicBean, staticBean.getDynamic(AllDynamicAttributesPersistent.dynamicAggregatedAssociationPropertyName));
+		Assertions.assertSame(dynamicBean, staticBean.getDynamic(AllDynamicAttributesPersistent.dynamicAggregatedAssociationPropertyName));
 
 		// removing from inverse collection nulls other side (dynamic/static)
 		BindUtil.removeElementFromCollection(dynamicBean, AllDynamicAttributesPersistent.dynamicInverseAggregatedAssociationPropertyName, staticBean);
-		Assert.assertNull(staticBean.getDynamic(AllDynamicAttributesPersistent.dynamicAggregatedAssociationPropertyName));
+		Assertions.assertNull(staticBean.getDynamic(AllDynamicAttributesPersistent.dynamicAggregatedAssociationPropertyName));
 
 		// added to inverse collection assigns to other side (static/dynamic)
 		staticBean = adapd.newInstance(u);
 		dynamicBean = aadpd.newInstance(u);
 		BindUtil.addElementToCollection(staticBean, AllDynamicAttributesPersistent.dynamicInverseAggregatedAssociationPropertyName, dynamicBean);
-		Assert.assertSame(staticBean, dynamicBean.getDynamic(AllDynamicAttributesPersistent.dynamicAggregatedAssociationPropertyName));
+		Assertions.assertSame(staticBean, dynamicBean.getDynamic(AllDynamicAttributesPersistent.dynamicAggregatedAssociationPropertyName));
 
 		// removing from inverse collection nulls other side (static/dynamic)
 		BindUtil.removeElementFromCollection(staticBean, AllDynamicAttributesPersistent.dynamicInverseAggregatedAssociationPropertyName, dynamicBean);
-		Assert.assertNull(dynamicBean.getDynamic(AllDynamicAttributesPersistent.dynamicAggregatedAssociationPropertyName));
+		Assertions.assertNull(dynamicBean.getDynamic(AllDynamicAttributesPersistent.dynamicAggregatedAssociationPropertyName));
 
 		// setting dynamic association adds to inverse collection
 		dynamicBean = aadpd.newInstance(u);
@@ -273,16 +273,16 @@ class DynamicBeanTest extends AbstractSkyveTest {
 		BindUtil.setAssociation(dynamicBean, AllDynamicAttributesPersistent.dynamicAggregatedAssociationPropertyName, nutherDynamicBean);
 		@SuppressWarnings("unchecked")
 		List<Bean> list = (List<Bean>) nutherDynamicBean.getDynamic(AllDynamicAttributesPersistent.dynamicInverseAggregatedAssociationPropertyName);
-		Assert.assertTrue(list.contains(dynamicBean));
+		Assertions.assertTrue(list.contains(dynamicBean));
 		
 		// overwriting dynamic association removes from old inverse collection and adds to new inverse collection
 		DynamicPersistentBean nutherNutherDynamicBean = aadpd.newInstance(u);
 		BindUtil.setAssociation(dynamicBean, AllDynamicAttributesPersistent.dynamicAggregatedAssociationPropertyName, nutherNutherDynamicBean);
 		//old
-		Assert.assertFalse(list.contains(dynamicBean));
+		Assertions.assertFalse(list.contains(dynamicBean));
 		// new
 		@SuppressWarnings("unchecked")
 		List<Bean> newList = (List<Bean>) nutherNutherDynamicBean.getDynamic(AllDynamicAttributesPersistent.dynamicInverseAggregatedAssociationPropertyName);
-		Assert.assertTrue(newList.contains(dynamicBean));
+		Assertions.assertTrue(newList.contains(dynamicBean));
 	}
 }

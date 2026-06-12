@@ -4,9 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.UUID;
 
-import org.junit.Assert;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.skyve.domain.messages.UniqueConstraintViolationException;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.util.Util;
@@ -151,7 +150,7 @@ class UniqueConstraintHierarchyTest extends AbstractSkyveTest {
 	}
 	
 	private void withCommit(MappedBase test1, MappedBase test2, boolean text) {
-		UniqueConstraintViolationException ucve = Assert.assertThrows(UniqueConstraintViolationException.class, () -> {
+		UniqueConstraintViolationException ucve = Assertions.assertThrows(UniqueConstraintViolationException.class, () -> {
 			duplicate(test1, text);
 			p.save(test1);
 			p.commit(false);
@@ -164,7 +163,7 @@ class UniqueConstraintHierarchyTest extends AbstractSkyveTest {
 	}
 	
 	private void inAnotherTransaction(MappedBase test1, MappedBase test2, boolean text) {
-		UniqueConstraintViolationException ucve = Assert.assertThrows(UniqueConstraintViolationException.class, () -> {
+		UniqueConstraintViolationException ucve = Assertions.assertThrows(UniqueConstraintViolationException.class, () -> {
 			duplicate(test1, text);
 			p.save(test1);
 			AbstractPersistence p1 = AbstractPersistence.newInstance();
@@ -178,7 +177,7 @@ class UniqueConstraintHierarchyTest extends AbstractSkyveTest {
 	}
 	
 	private void inSameTransaction(MappedBase test1, MappedBase test2, boolean text) {
-		UniqueConstraintViolationException ucve = Assert.assertThrows(UniqueConstraintViolationException.class, () -> {
+		UniqueConstraintViolationException ucve = Assertions.assertThrows(UniqueConstraintViolationException.class, () -> {
 			duplicate(test1, text);
 			p.save(test1);
 			duplicate(test2, text);

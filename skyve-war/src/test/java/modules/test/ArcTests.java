@@ -4,7 +4,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.util.Util;
@@ -23,7 +23,7 @@ class ArcTests extends AbstractSkyveTest {
 	 */
 	@Test
 	void testOneToManyPersist() {
-		DomainException de = Assert.assertThrows(DomainException.class, () -> {
+		DomainException de = Assertions.assertThrows(DomainException.class, () -> {
 			ArcOneToMany test = Util.constructRandomInstance(u, m, ao2m, 0);
 			test = p.save(test);
 			test.getArcs().add(p.save((AnyDerived1) Util.constructRandomInstance(u, m, ad1, 0)));
@@ -53,8 +53,8 @@ class ArcTests extends AbstractSkyveTest {
 		p.evictAllCached();
 
 		test = p.retrieve(ao2o, test.getBizId());
-		Assert.assertNotNull(test);
-		Assert.assertNotNull(test.getArc());
+		Assertions.assertNotNull(test);
+		Assertions.assertNotNull(test.getArc());
 	}
 
 	/**
@@ -64,7 +64,7 @@ class ArcTests extends AbstractSkyveTest {
 	 */
 	@Test
 	void testOneToOnePersistArcTransient() {
-		DomainException de = Assert.assertThrows(DomainException.class, () -> {
+		DomainException de = Assertions.assertThrows(DomainException.class, () -> {
 			ArcOneToOne test = Util.constructRandomInstance(u, m, ao2o, 0);
 			test = p.save(test);
 			test.setArc((AnyDerived1) Util.constructRandomInstance(u, m, ad1, 0));
@@ -73,8 +73,8 @@ class ArcTests extends AbstractSkyveTest {
 			p.evictAllCached();
 
 			test = p.retrieve(ao2o, test.getBizId());
-			Assert.assertNotNull(test);
-			Assert.assertNotNull(test.getArc());
+			Assertions.assertNotNull(test);
+			Assertions.assertNotNull(test.getArc());
 		});
 
 		assertThat(de.getMessage(), is(notNullValue()));
@@ -94,8 +94,8 @@ class ArcTests extends AbstractSkyveTest {
 		p.evictAllCached();
 
 		test = p.retrieve(ao2o, test.getBizId());
-		Assert.assertNotNull(test);
-		Assert.assertNotNull(test.getArc());
+		Assertions.assertNotNull(test);
+		Assertions.assertNotNull(test.getArc());
 	}
 
 	/**
@@ -105,7 +105,7 @@ class ArcTests extends AbstractSkyveTest {
 	 */
 	@Test
 	void testOneToOnePersistFullyTransient() {
-		DomainException de = Assert.assertThrows(DomainException.class, () -> {
+		DomainException de = Assertions.assertThrows(DomainException.class, () -> {
 			ArcOneToOne test = Util.constructRandomInstance(u, m, ao2o, 0);
 			test.setArc((AnyDerived1) Util.constructRandomInstance(u, m, ad1, 0));
 			test = p.save(test);
@@ -124,8 +124,8 @@ class ArcTests extends AbstractSkyveTest {
 		p.evictAllCached();
 
 		test = p.retrieve(ao2o, test.getBizId());
-		Assert.assertNotNull(test);
-		Assert.assertNotNull(test.getArc());
+		Assertions.assertNotNull(test);
+		Assertions.assertNotNull(test.getArc());
 	}
 
 	@Test
@@ -142,8 +142,8 @@ class ArcTests extends AbstractSkyveTest {
 		p.evictAllCached();
 
 		test = p.retrieve(ao2o, test.getBizId());
-		Assert.assertNotNull(test);
-		Assert.assertNotNull(test.getArc());
+		Assertions.assertNotNull(test);
+		Assertions.assertNotNull(test.getArc());
 		assertThat(test.getArc().getBizId(), is(arc2.getBizId()));
 	}
 }

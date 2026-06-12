@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.apache.commons.collections.Predicate;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
@@ -54,7 +54,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		f.addStartsWith("name", "Je");
 
 		f.filter(beans);
-		Assert.assertEquals("Filter result is wrong", 1, beans.size());
+		Assertions.assertEquals(1, beans.size(), "Filter result is wrong");
 	}
 
 	@Test
@@ -68,8 +68,8 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		List<Predicate> predicates = (List<Predicate>) predicatesField.get(f);
 
 		String result = predicates.get(0).toString();
-		Assert.assertTrue("toString should contain binding", result.contains("name"));
-		Assert.assertTrue("toString should contain value", result.contains("Ted"));
+		Assertions.assertTrue(result.contains("name"), "toString should contain binding");
+		Assertions.assertTrue(result.contains("Ted"), "toString should contain value");
 	}
 
 	@Test
@@ -83,8 +83,8 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		List<Predicate> predicates = (List<Predicate>) predicatesField.get(f);
 
 		String result = predicates.get(0).toString();
-		Assert.assertTrue("toString should contain binding", result.contains("name"));
-		Assert.assertTrue("toString should contain 'and'", result.contains("and"));
+		Assertions.assertTrue(result.contains("name"), "toString should contain binding");
+		Assertions.assertTrue(result.contains("and"), "toString should contain 'and'");
 	}
 
 	@Test
@@ -98,8 +98,8 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		List<Predicate> predicates = (List<Predicate>) predicatesField.get(f);
 
 		String result = predicates.get(0).toString();
-		Assert.assertTrue("toString should contain binding", result.contains("name"));
-		Assert.assertTrue("toString should contain operator description", result.contains("is null"));
+		Assertions.assertTrue(result.contains("name"), "toString should contain binding");
+		Assertions.assertTrue(result.contains("is null"), "toString should contain operator description");
 	}
 
 	private static List<Bean> beansWithValue(String binding, Object value) {
@@ -117,7 +117,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addNull("name");
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -127,7 +127,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addNull("name");
 		f.filter(beans);
-		Assert.assertEquals(0, beans.size());
+		Assertions.assertEquals(0, beans.size());
 	}
 
 	@Test
@@ -137,7 +137,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addNotNull("name");
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -147,7 +147,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addNotNull("name");
 		f.filter(beans);
-		Assert.assertEquals(0, beans.size());
+		Assertions.assertEquals(0, beans.size());
 	}
 
 	@Test
@@ -157,7 +157,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addEquals("name", "Ted");
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -167,7 +167,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addEquals("name", "Ted");
 		f.filter(beans);
-		Assert.assertEquals(0, beans.size());
+		Assertions.assertEquals(0, beans.size());
 	}
 
 	@Test
@@ -177,7 +177,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addEquals("age", Integer.valueOf(42));
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -187,7 +187,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addEquals("count", Long.valueOf(100L));
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -197,7 +197,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addEquals("active", Boolean.TRUE);
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -207,7 +207,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addEquals("amount", new Decimal2("10.00"));
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -217,7 +217,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addNotEquals("name", "Ted");
 		f.filter(beans);
-		Assert.assertEquals(0, beans.size());
+		Assertions.assertEquals(0, beans.size());
 	}
 
 	@Test
@@ -227,7 +227,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addNotEquals("name", "Ted");
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -237,7 +237,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addContains("name", "eder");
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -247,7 +247,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addContains("name", "xyz");
 		f.filter(beans);
-		Assert.assertEquals(0, beans.size());
+		Assertions.assertEquals(0, beans.size());
 	}
 
 	@Test
@@ -257,7 +257,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addNotContains("name", "eder");
 		f.filter(beans);
-		Assert.assertEquals(0, beans.size());
+		Assertions.assertEquals(0, beans.size());
 	}
 
 	@Test
@@ -267,7 +267,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addEndsWith("name", "rick");
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -277,7 +277,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addNotStartsWith("name", "Fred");
 		f.filter(beans);
-		Assert.assertEquals(0, beans.size());
+		Assertions.assertEquals(0, beans.size());
 	}
 
 	@Test
@@ -287,7 +287,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addNotEndsWith("name", "rick");
 		f.filter(beans);
-		Assert.assertEquals(0, beans.size());
+		Assertions.assertEquals(0, beans.size());
 	}
 
 	@Test
@@ -297,7 +297,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addGreaterThan("name", "A");
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -307,7 +307,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addGreaterThan("age", Integer.valueOf(40));
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -317,7 +317,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addGreaterThan("count", Long.valueOf(100L));
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -327,7 +327,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addGreaterThan("amount", new Decimal2("10.00"));
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -337,7 +337,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addGreaterThanOrEqualTo("name", "B");
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -347,7 +347,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addGreaterThanOrEqualTo("age", Integer.valueOf(40));
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -357,7 +357,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addGreaterThanOrEqualTo("count", Long.valueOf(100L));
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -367,7 +367,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addGreaterThanOrEqualTo("amount", new Decimal2("10.00"));
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -377,7 +377,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addBetween("name", "A", "Z");
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -387,7 +387,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addBetween("age", Integer.valueOf(20), Integer.valueOf(30));
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -397,7 +397,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addBetween("count", Long.valueOf(100L), Long.valueOf(200L));
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -407,7 +407,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addBetween("amount", new Decimal2("10.00"), new Decimal2("20.00"));
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -417,7 +417,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addEqualsIgnoreCase("name", "TED");
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -427,7 +427,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addNotEqualsIgnoreCase("name", "TED");
 		f.filter(beans);
-		Assert.assertEquals(0, beans.size());
+		Assertions.assertEquals(0, beans.size());
 	}
 
 	@Test
@@ -440,7 +440,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		f2.addNotNull("name");
 		f1.addAnd(f2);
 		f1.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -453,7 +453,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		f2.addEquals("name", "Ted");
 		f1.addOr(f2);
 		f1.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -464,7 +464,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addEquals("created", d);
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -474,7 +474,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addNotEquals("age", Integer.valueOf(42));
 		f.filter(beans);
-		Assert.assertEquals(0, beans.size());
+		Assertions.assertEquals(0, beans.size());
 	}
 
 	@Test
@@ -484,7 +484,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addNotEquals("count", Long.valueOf(100L));
 		f.filter(beans);
-		Assert.assertEquals(0, beans.size());
+		Assertions.assertEquals(0, beans.size());
 	}
 
 	@Test
@@ -494,7 +494,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addNotEquals("active", Boolean.TRUE);
 		f.filter(beans);
-		Assert.assertEquals(0, beans.size());
+		Assertions.assertEquals(0, beans.size());
 	}
 
 	@Test
@@ -504,7 +504,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addNotEquals("amount", new Decimal2("10.00"));
 		f.filter(beans);
-		Assert.assertEquals(0, beans.size());
+		Assertions.assertEquals(0, beans.size());
 	}
 
 	// ---- addStartsWith positive ----
@@ -516,7 +516,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addStartsWith("name", "He");
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -526,7 +526,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addStartsWith("name", "Wo");
 		f.filter(beans);
-		Assert.assertEquals(0, beans.size());
+		Assertions.assertEquals(0, beans.size());
 	}
 
 	// ---- addLessThan ----
@@ -538,7 +538,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addLessThan("name", "Banana");
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -548,7 +548,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addLessThan("name", "Apple");
 		f.filter(beans);
-		Assert.assertEquals(0, beans.size());
+		Assertions.assertEquals(0, beans.size());
 	}
 
 	@Test
@@ -558,7 +558,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addLessThan("count", Integer.valueOf(10));
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -568,7 +568,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addLessThan("count", Long.valueOf(10L));
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -578,7 +578,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addLessThan("amount", new Decimal2("10.00"));
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -590,7 +590,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addLessThan("when", later);
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	// ---- addLessThanOrEqualTo ----
@@ -602,7 +602,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addLessThanOrEqualTo("name", "Apple");
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -612,7 +612,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addLessThanOrEqualTo("count", Integer.valueOf(10));
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -622,7 +622,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addLessThanOrEqualTo("count", Long.valueOf(10L));
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -632,7 +632,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addLessThanOrEqualTo("amount", new Decimal2("10.00"));
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -643,7 +643,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addLessThanOrEqualTo("when", d);
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	// ---- addGreaterThan(Date) and addGreaterThanOrEqualTo(Date) ----
@@ -657,7 +657,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addGreaterThan("when", earlier);
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -668,7 +668,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addGreaterThanOrEqualTo("when", d);
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	// ---- addBetween(Date) ----
@@ -683,7 +683,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addBetween("when", start, end);
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -696,7 +696,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addBetween("when", start, end);
 		f.filter(beans);
-		Assert.assertEquals(0, beans.size());
+		Assertions.assertEquals(0, beans.size());
 	}
 
 	// ---- addIn ----
@@ -708,7 +708,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addIn("name", "Alice", "Bob", "Charlie");
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -718,7 +718,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addIn("name", "Alice", "Bob", "Charlie");
 		f.filter(beans);
-		Assert.assertEquals(0, beans.size());
+		Assertions.assertEquals(0, beans.size());
 	}
 
 	@Test
@@ -728,7 +728,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addIn("name", "Alice", "Bob");
 		f.filter(beans);
-		Assert.assertEquals(0, beans.size());
+		Assertions.assertEquals(0, beans.size());
 	}
 
 	// ---- addEquals(Enum) / addNotEquals(Enum) ----
@@ -742,7 +742,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addEquals("status", TestEnum.A);
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -752,7 +752,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addNotEquals("status", TestEnum.A);
 		f.filter(beans);
-		Assert.assertEquals(0, beans.size());
+		Assertions.assertEquals(0, beans.size());
 	}
 
 	// ---- reset ----
@@ -764,7 +764,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addNotIn("name", "Bob", "Charlie");
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -774,7 +774,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addNotIn("name", "Alice", "Bob");
 		f.filter(beans);
-		Assert.assertEquals(0, beans.size());
+		Assertions.assertEquals(0, beans.size());
 	}
 
 	// ---- geometry spatial filters ----
@@ -792,7 +792,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addWithin("location", polygon);
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -808,7 +808,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addWithin("location", polygon);
 		f.filter(beans);
-		Assert.assertEquals(0, beans.size());
+		Assertions.assertEquals(0, beans.size());
 	}
 
 	@Test
@@ -824,7 +824,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addContains("area", point);
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -840,7 +840,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addDisjoint("location", polygon);
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -858,7 +858,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addIntersects("path", polygon);
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -874,7 +874,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addTouches("location", polygon);
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -892,7 +892,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addCrosses("path", polygon);
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -907,7 +907,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addWithin("location", polygon);
 		f.filter(beans);
-		Assert.assertEquals(0, beans.size());
+		Assertions.assertEquals(0, beans.size());
 	}
 
 	@Test
@@ -926,14 +926,14 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addOverlaps("area", poly2);
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
 	void isEmptyReturnsTrueForNewFilter() {
 		InMemoryFilter f = new InMemoryFilter();
-		Assert.assertTrue(f.isEmpty());
+		Assertions.assertTrue(f.isEmpty());
 	}
 
 	@Test
@@ -941,7 +941,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 	void isEmptyReturnsFalseAfterAddingPredicate() {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addEquals("name", "Ted");
-		Assert.assertFalse(f.isEmpty());
+		Assertions.assertFalse(f.isEmpty());
 	}
 
 	@Test
@@ -953,7 +953,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addNotEquals("date", d2);
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -964,7 +964,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addNotEquals("date", d);
 		f.filter(beans);
-		Assert.assertEquals(0, beans.size());
+		Assertions.assertEquals(0, beans.size());
 	}
 
 	@Test
@@ -976,7 +976,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addEquals("location", pt);
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -989,7 +989,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addNotEquals("location", pt2);
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -999,7 +999,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addBetween("name", "A", "Z");
 		f.filter(beans);
-		Assert.assertEquals(1, beans.size());
+		Assertions.assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -1009,7 +1009,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addBetween("name", "A", "M");
 		f.filter(beans);
-		Assert.assertEquals(0, beans.size());
+		Assertions.assertEquals(0, beans.size());
 	}
 
 	@Test
@@ -1019,6 +1019,6 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		InMemoryFilter f = new InMemoryFilter();
 		f.addBetween("name", "A", "Z");
 		f.filter(beans);
-		Assert.assertEquals(0, beans.size());
+		Assertions.assertEquals(0, beans.size());
 	}
 }

@@ -5,10 +5,9 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.skyve.CORE;
 import org.skyve.domain.messages.UniqueConstraintViolationException;
 import org.skyve.util.test.TestUtil;
@@ -46,7 +45,7 @@ class UniqueConstraintNonNullableTest extends AbstractSkyveTest {
 
 	@Test
 	void testSaveTwoIdenticalInstances() throws Exception {
-		UniqueConstraintViolationException ucve = Assert.assertThrows(UniqueConstraintViolationException.class, () -> {
+		UniqueConstraintViolationException ucve = Assertions.assertThrows(UniqueConstraintViolationException.class, () -> {
 			// setup the test data
 			UniqueConstraintNonNullable uniqueConstraintNonNullable2 = UniqueConstraintNonNullable.newInstance();
 			uniqueConstraintNonNullable2.setBooleanFlag(uniqueConstraintNonNullable.getBooleanFlag());

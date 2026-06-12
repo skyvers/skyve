@@ -1,9 +1,9 @@
 package org.skyve.domain.types.converters.timestamp;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.messages.ConversionException;
 import org.skyve.domain.types.Timestamp;
@@ -26,7 +26,7 @@ class YYYY_MM_DDTest {
 		Timestamp testDate = new Timestamp(Time.withDate(01, 03, 2020));
 
 		// call the method under test
-		Assert.assertEquals(testDate, converter.fromDisplayValue("2020/03/01"));
+		Assertions.assertEquals(testDate, converter.fromDisplayValue("2020/03/01"));
 	}
 
 	@Test
@@ -36,6 +36,6 @@ class YYYY_MM_DDTest {
 		Time.setTime(testDate, 02, 30, 55);
 
 		// call the method under test
-		Assert.assertEquals("2020/03/01", converter.toDisplayValue(testDate));
+		Assertions.assertEquals("2020/03/01", converter.toDisplayValue(testDate));
 	}
 }

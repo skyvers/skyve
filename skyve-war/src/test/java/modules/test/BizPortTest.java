@@ -7,7 +7,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.skyve.CORE;
 import org.skyve.EXT;
@@ -102,7 +102,7 @@ class BizPortTest extends AbstractSkyveTest {
 				EXT.standardBizImport(bais, problems);
 				
 				Bean importedBean = Objects.requireNonNull(CORE.getPersistence().retrieve(bean.getBizModule(), bean.getBizDocument(), bean.getBizId()));
-				Assert.assertTrue("Beans not the same", same(bean, importedBean));
+				Assertions.assertTrue(same(bean, importedBean), "Beans not the same");
 			}
 			catch (UploadException e ) {
 				handleUploadException(e);
@@ -118,7 +118,7 @@ class BizPortTest extends AbstractSkyveTest {
 		for (Problem p : e.getErrors()) {
 			sb.append(p.toString()).append('\n');
 		}
-		Assert.fail(sb.toString());
+		Assertions.fail(sb.toString());
 	}
 	
 	private boolean same(@Nonnull Bean one, @Nonnull Bean other) {

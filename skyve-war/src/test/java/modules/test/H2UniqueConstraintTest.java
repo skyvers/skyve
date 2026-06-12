@@ -1,8 +1,7 @@
 package modules.test;
 
-import org.junit.Assert;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.util.test.TestUtil;
 
@@ -29,7 +28,7 @@ class H2UniqueConstraintTest extends AbstractSkyveTest {
 	 */
 	@Test
 	void testNonNullUniqueness() throws Exception {
-		Assert.assertThrows(DomainException.class, () -> {
+		Assertions.assertThrows(DomainException.class, () -> {
 			AllAttributesPersistent aap1 = TestUtil.constructRandomInstance(u, m, aapd, 0);
 			aap1.setComposedAssociation(aap1);
 			aap1 = p.save(aap1);

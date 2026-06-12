@@ -1,6 +1,6 @@
 package modules.test;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
@@ -32,18 +32,18 @@ class GenerationTests extends AbstractSkyveTest {
 		MappedExtensionJoinedStrategy mejs = MappedExtensionJoinedStrategy.newInstance();
 		MappedSubclassedSingleStrategy msss = new MappedSubclassedSingleStrategy();
 		MappedSubclassedJoinedStrategy msjs = new MappedSubclassedJoinedStrategy();
-		Assert.assertTrue(new AllAttributesPersistent() instanceof PersistentBean);
-		Assert.assertTrue(new Hierarchical() instanceof HierarchicalBean<?>);
-		Assert.assertTrue(mb instanceof PersistentBean);
-		Assert.assertFalse(MappedBase.class.isAnnotationPresent(PolymorphicPersistentBean.class)); // mapped bean
-		Assert.assertTrue(mejs instanceof MappedBase);
-		Assert.assertTrue(MappedExtensionJoinedStrategy.class.isAnnotationPresent(PolymorphicPersistentBean.class)); // joined strategy
-		Assert.assertTrue(mess instanceof MappedBase);
-		Assert.assertTrue(MappedExtensionSingleStrategy.class.isAnnotationPresent(PolymorphicPersistentBean.class)); // single strategy
-		Assert.assertTrue(msjs instanceof MappedExtensionJoinedStrategyExtension);
-		Assert.assertFalse(MappedExtensionJoinedStrategyExtension.class.isAnnotationPresent(PolymorphicPersistentBean.class)); // no subclasses
-		Assert.assertTrue(msss instanceof MappedExtensionSingleStrategyExtension);
-		Assert.assertFalse(MappedExtensionSingleStrategyExtension.class.isAnnotationPresent(PolymorphicPersistentBean.class)); // no subclasses
+		Assertions.assertTrue(new AllAttributesPersistent() instanceof PersistentBean);
+		Assertions.assertTrue(new Hierarchical() instanceof HierarchicalBean<?>);
+		Assertions.assertTrue(mb instanceof PersistentBean);
+		Assertions.assertFalse(MappedBase.class.isAnnotationPresent(PolymorphicPersistentBean.class)); // mapped bean
+		Assertions.assertTrue(mejs instanceof MappedBase);
+		Assertions.assertTrue(MappedExtensionJoinedStrategy.class.isAnnotationPresent(PolymorphicPersistentBean.class)); // joined strategy
+		Assertions.assertTrue(mess instanceof MappedBase);
+		Assertions.assertTrue(MappedExtensionSingleStrategy.class.isAnnotationPresent(PolymorphicPersistentBean.class)); // single strategy
+		Assertions.assertTrue(msjs instanceof MappedExtensionJoinedStrategyExtension);
+		Assertions.assertFalse(MappedExtensionJoinedStrategyExtension.class.isAnnotationPresent(PolymorphicPersistentBean.class)); // no subclasses
+		Assertions.assertTrue(msss instanceof MappedExtensionSingleStrategyExtension);
+		Assertions.assertFalse(MappedExtensionSingleStrategyExtension.class.isAnnotationPresent(PolymorphicPersistentBean.class)); // no subclasses
 	}
 	
 	/**
@@ -53,17 +53,17 @@ class GenerationTests extends AbstractSkyveTest {
 	@SuppressWarnings("static-method")
 	void testNullOneToOne() {
 		InverseOneToOnePersistent one = InverseOneToOnePersistent.newInstance();
-		Assert.assertNull(one.getAggAssociation());
-		Assert.assertNull(one.getInvAggAssociation());
+		Assertions.assertNull(one.getAggAssociation());
+		Assertions.assertNull(one.getInvAggAssociation());
 		
 		InverseOneToOnePersistent two = InverseOneToOnePersistent.newInstance();
 		one.setAggAssociation(two);
-		Assert.assertEquals(two, one.getAggAssociation());
-		Assert.assertEquals(one, two.getInvAggAssociation());
+		Assertions.assertEquals(two, one.getAggAssociation());
+		Assertions.assertEquals(one, two.getInvAggAssociation());
 
 		one.setAggAssociation(null);
-		Assert.assertNull(one.getAggAssociation());
-		Assert.assertNull(two.getInvAggAssociation());
+		Assertions.assertNull(one.getAggAssociation());
+		Assertions.assertNull(two.getInvAggAssociation());
 	}
 	
 	/**
@@ -73,20 +73,20 @@ class GenerationTests extends AbstractSkyveTest {
 	@SuppressWarnings("static-method")
 	void testDoubleAssignOneToOne() {
 		InverseOneToOnePersistent one = InverseOneToOnePersistent.newInstance();
-		Assert.assertNull(one.getAggAssociation());
-		Assert.assertNull(one.getInvAggAssociation());
+		Assertions.assertNull(one.getAggAssociation());
+		Assertions.assertNull(one.getInvAggAssociation());
 		
 		InverseOneToOnePersistent two = InverseOneToOnePersistent.newInstance();
 		one.setAggAssociation(two);
-		Assert.assertEquals(two, one.getAggAssociation());
-		Assert.assertEquals(one, two.getInvAggAssociation());
+		Assertions.assertEquals(two, one.getAggAssociation());
+		Assertions.assertEquals(one, two.getInvAggAssociation());
 
 		InverseOneToOnePersistent three = InverseOneToOnePersistent.newInstance();
 		one.setAggAssociation(three);
-		Assert.assertEquals(three, one.getAggAssociation());
-		Assert.assertEquals(one, three.getInvAggAssociation());
-		Assert.assertNull(two.getAggAssociation());
-		Assert.assertNull(two.getInvAggAssociation());
+		Assertions.assertEquals(three, one.getAggAssociation());
+		Assertions.assertEquals(one, three.getInvAggAssociation());
+		Assertions.assertNull(two.getAggAssociation());
+		Assertions.assertNull(two.getInvAggAssociation());
 	}
 
 	/**
@@ -96,17 +96,17 @@ class GenerationTests extends AbstractSkyveTest {
 	@SuppressWarnings("static-method")
 	void testNullInverseOneToOne() {
 		InverseOneToOnePersistent one = InverseOneToOnePersistent.newInstance();
-		Assert.assertNull(one.getAggAssociation());
-		Assert.assertNull(one.getInvAggAssociation());
+		Assertions.assertNull(one.getAggAssociation());
+		Assertions.assertNull(one.getInvAggAssociation());
 		
 		InverseOneToOnePersistent two = InverseOneToOnePersistent.newInstance();
 		one.setInvAggAssociation(two);
-		Assert.assertEquals(two, one.getInvAggAssociation());
-		Assert.assertEquals(one, two.getAggAssociation());
+		Assertions.assertEquals(two, one.getInvAggAssociation());
+		Assertions.assertEquals(one, two.getAggAssociation());
 
 		one.setInvAggAssociation(null);
-		Assert.assertNull(one.getInvAggAssociation());
-		Assert.assertNull(two.getAggAssociation());
+		Assertions.assertNull(one.getInvAggAssociation());
+		Assertions.assertNull(two.getAggAssociation());
 	}
 
 	/**
@@ -116,20 +116,20 @@ class GenerationTests extends AbstractSkyveTest {
 	@SuppressWarnings("static-method")
 	void testDoubleAssignInverseOneToOne() {
 		InverseOneToOnePersistent one = InverseOneToOnePersistent.newInstance();
-		Assert.assertNull(one.getAggAssociation());
-		Assert.assertNull(one.getInvAggAssociation());
+		Assertions.assertNull(one.getAggAssociation());
+		Assertions.assertNull(one.getInvAggAssociation());
 		
 		InverseOneToOnePersistent two = InverseOneToOnePersistent.newInstance();
 		one.setInvAggAssociation(two);
-		Assert.assertEquals(two, one.getInvAggAssociation());
-		Assert.assertEquals(one, two.getAggAssociation());
+		Assertions.assertEquals(two, one.getInvAggAssociation());
+		Assertions.assertEquals(one, two.getAggAssociation());
 
 		InverseOneToOnePersistent three = InverseOneToOnePersistent.newInstance();
 		one.setInvAggAssociation(three);
-		Assert.assertEquals(three, one.getInvAggAssociation());
-		Assert.assertEquals(one, three.getAggAssociation());
-		Assert.assertNull(two.getAggAssociation());
-		Assert.assertNull(two.getInvAggAssociation());
+		Assertions.assertEquals(three, one.getInvAggAssociation());
+		Assertions.assertEquals(one, three.getAggAssociation());
+		Assertions.assertNull(two.getAggAssociation());
+		Assertions.assertNull(two.getInvAggAssociation());
 	}
 
 	/**
@@ -139,17 +139,17 @@ class GenerationTests extends AbstractSkyveTest {
 	@SuppressWarnings("static-method")
 	void testNullOneToMany() {
 		InverseOneToManyPersistent one = InverseOneToManyPersistent.newInstance();
-		Assert.assertNull(one.getAggAssociation());
-		Assert.assertTrue(one.getInvAggAssociation().isEmpty());
+		Assertions.assertNull(one.getAggAssociation());
+		Assertions.assertTrue(one.getInvAggAssociation().isEmpty());
 		
 		InverseOneToManyPersistent two = InverseOneToManyPersistent.newInstance();
 		one.setAggAssociation(two);
-		Assert.assertEquals(two, one.getAggAssociation());
-		Assert.assertTrue(two.getInvAggAssociation().contains(one));
+		Assertions.assertEquals(two, one.getAggAssociation());
+		Assertions.assertTrue(two.getInvAggAssociation().contains(one));
 
 		one.setAggAssociation(null);
-		Assert.assertNull(one.getAggAssociation());
-		Assert.assertTrue(two.getInvAggAssociation().isEmpty());
+		Assertions.assertNull(one.getAggAssociation());
+		Assertions.assertTrue(two.getInvAggAssociation().isEmpty());
 	}
 	
 	/**
@@ -160,30 +160,30 @@ class GenerationTests extends AbstractSkyveTest {
 	@SuppressWarnings("static-method")
 	void testDoubleDualAndNullAssignOneToMany() {
 		InverseOneToManyPersistent one = InverseOneToManyPersistent.newInstance();
-		Assert.assertNull(one.getAggAssociation());
-		Assert.assertTrue(one.getInvAggAssociation().isEmpty());
+		Assertions.assertNull(one.getAggAssociation());
+		Assertions.assertTrue(one.getInvAggAssociation().isEmpty());
 		
 		InverseOneToManyPersistent two = InverseOneToManyPersistent.newInstance();
 		one.setAggAssociation(two);
-		Assert.assertEquals(two, one.getAggAssociation());
-		Assert.assertTrue(two.getInvAggAssociation().contains(one));
+		Assertions.assertEquals(two, one.getAggAssociation());
+		Assertions.assertTrue(two.getInvAggAssociation().contains(one));
 
 		InverseOneToManyPersistent three = InverseOneToManyPersistent.newInstance();
 		one.setAggAssociation(three);
-		Assert.assertEquals(three, one.getAggAssociation());
-		Assert.assertTrue(three.getInvAggAssociation().contains(one));
-		Assert.assertNull(two.getAggAssociation());
-		Assert.assertTrue(two.getInvAggAssociation().isEmpty());
+		Assertions.assertEquals(three, one.getAggAssociation());
+		Assertions.assertTrue(three.getInvAggAssociation().contains(one));
+		Assertions.assertNull(two.getAggAssociation());
+		Assertions.assertTrue(two.getInvAggAssociation().isEmpty());
 		
 		one.setAggAssociation(three);
-		Assert.assertEquals(three, one.getAggAssociation());
-		Assert.assertEquals(three.getInvAggAssociation().indexOf(one), three.getInvAggAssociation().lastIndexOf(one));
-		Assert.assertNull(two.getAggAssociation());
-		Assert.assertTrue(two.getInvAggAssociation().isEmpty());
+		Assertions.assertEquals(three, one.getAggAssociation());
+		Assertions.assertEquals(three.getInvAggAssociation().indexOf(one), three.getInvAggAssociation().lastIndexOf(one));
+		Assertions.assertNull(two.getAggAssociation());
+		Assertions.assertTrue(two.getInvAggAssociation().isEmpty());
 
 		one.setAggAssociation(null);
-		Assert.assertNull(one.getAggAssociation());
-		Assert.assertTrue(one.getInvAggAssociation().isEmpty());
+		Assertions.assertNull(one.getAggAssociation());
+		Assertions.assertTrue(one.getInvAggAssociation().isEmpty());
 	}
 
 	/**
@@ -194,30 +194,30 @@ class GenerationTests extends AbstractSkyveTest {
 	@SuppressWarnings("static-method")
 	void testDoubleAndDualAddAndRemoveInverseOneToMany() {
 		InverseOneToManyPersistent one = InverseOneToManyPersistent.newInstance();
-		Assert.assertNull(one.getAggAssociation());
-		Assert.assertTrue(one.getInvAggAssociation().isEmpty());
+		Assertions.assertNull(one.getAggAssociation());
+		Assertions.assertTrue(one.getInvAggAssociation().isEmpty());
 		
 		InverseOneToManyPersistent two = InverseOneToManyPersistent.newInstance();
 		one.addInvAggAssociationElement(two);
-		Assert.assertTrue(one.getInvAggAssociation().contains(two));
-		Assert.assertEquals(one, two.getAggAssociation());
+		Assertions.assertTrue(one.getInvAggAssociation().contains(two));
+		Assertions.assertEquals(one, two.getAggAssociation());
 
 		InverseOneToManyPersistent three = InverseOneToManyPersistent.newInstance();
 		one.addInvAggAssociationElement(three);
-		Assert.assertTrue(one.getInvAggAssociation().contains(three));
-		Assert.assertEquals(one, three.getAggAssociation());
-		Assert.assertEquals(one, two.getAggAssociation());
-		Assert.assertTrue(one.getInvAggAssociation().contains(two));
+		Assertions.assertTrue(one.getInvAggAssociation().contains(three));
+		Assertions.assertEquals(one, three.getAggAssociation());
+		Assertions.assertEquals(one, two.getAggAssociation());
+		Assertions.assertTrue(one.getInvAggAssociation().contains(two));
 		
 		one.addInvAggAssociationElement(three);
-		Assert.assertEquals(one.getInvAggAssociation().indexOf(three), one.getInvAggAssociation().lastIndexOf(three));
-		Assert.assertEquals(one, three.getAggAssociation());
-		Assert.assertTrue(one.getInvAggAssociation().contains(two));
-		Assert.assertEquals(one, two.getAggAssociation());
+		Assertions.assertEquals(one.getInvAggAssociation().indexOf(three), one.getInvAggAssociation().lastIndexOf(three));
+		Assertions.assertEquals(one, three.getAggAssociation());
+		Assertions.assertTrue(one.getInvAggAssociation().contains(two));
+		Assertions.assertEquals(one, two.getAggAssociation());
 		
 		one.removeInvAggAssociationElement(two);
-		Assert.assertFalse(one.getInvAggAssociation().contains(two));
-		Assert.assertNull(two.getAggAssociation());
+		Assertions.assertFalse(one.getInvAggAssociation().contains(two));
+		Assertions.assertNull(two.getAggAssociation());
 	}
 	
 	/**
@@ -228,38 +228,38 @@ class GenerationTests extends AbstractSkyveTest {
 	@SuppressWarnings("static-method")
 	void testDoubleAndDualAddAndRemoveManyToMany() {
 		InverseManyToManyPersistent one = InverseManyToManyPersistent.newInstance();
-		Assert.assertTrue(one.getAggCollection().isEmpty());
-		Assert.assertTrue(one.getInvAggCollection().isEmpty());
+		Assertions.assertTrue(one.getAggCollection().isEmpty());
+		Assertions.assertTrue(one.getInvAggCollection().isEmpty());
 		
 		InverseManyToManyPersistent two = InverseManyToManyPersistent.newInstance();
 		one.addAggCollectionElement(two);
-		Assert.assertTrue(one.getAggCollection().contains(two));
-		Assert.assertTrue(two.getInvAggCollection().contains(one));
+		Assertions.assertTrue(one.getAggCollection().contains(two));
+		Assertions.assertTrue(two.getInvAggCollection().contains(one));
 
 		InverseManyToManyPersistent three = InverseManyToManyPersistent.newInstance();
 		one.addAggCollectionElement(three);
-		Assert.assertTrue(one.getAggCollection().contains(three));
-		Assert.assertTrue(three.getInvAggCollection().contains(one));
-		Assert.assertTrue(two.getInvAggCollection().contains(one));
-		Assert.assertTrue(one.getAggCollection().contains(two));
+		Assertions.assertTrue(one.getAggCollection().contains(three));
+		Assertions.assertTrue(three.getInvAggCollection().contains(one));
+		Assertions.assertTrue(two.getInvAggCollection().contains(one));
+		Assertions.assertTrue(one.getAggCollection().contains(two));
 		
 		one.addAggCollectionElement(three);
-		Assert.assertNotEquals(one.getAggCollection().indexOf(three), one.getAggCollection().lastIndexOf(three));
-		Assert.assertTrue(three.getInvAggCollection().contains(one));
-		Assert.assertTrue(one.getAggCollection().contains(two));
-		Assert.assertTrue(two.getInvAggCollection().contains(one));
+		Assertions.assertNotEquals(one.getAggCollection().indexOf(three), one.getAggCollection().lastIndexOf(three));
+		Assertions.assertTrue(three.getInvAggCollection().contains(one));
+		Assertions.assertTrue(one.getAggCollection().contains(two));
+		Assertions.assertTrue(two.getInvAggCollection().contains(one));
 		
 		one.removeAggCollectionElement(two);
-		Assert.assertFalse(one.getAggCollection().contains(two));
-		Assert.assertTrue(two.getInvAggCollection().isEmpty());
-		Assert.assertEquals(2, one.getAggCollection().size());
-		Assert.assertEquals(2, three.getInvAggCollection().size());
+		Assertions.assertFalse(one.getAggCollection().contains(two));
+		Assertions.assertTrue(two.getInvAggCollection().isEmpty());
+		Assertions.assertEquals(2, one.getAggCollection().size());
+		Assertions.assertEquals(2, three.getInvAggCollection().size());
 		
 		one.removeAggCollectionElement(three);
-		Assert.assertTrue(one.getAggCollection().contains(three));
-		Assert.assertTrue(three.getInvAggCollection().contains(one));
-		Assert.assertEquals(1, one.getAggCollection().size());
-		Assert.assertEquals(1, three.getInvAggCollection().size());
+		Assertions.assertTrue(one.getAggCollection().contains(three));
+		Assertions.assertTrue(three.getInvAggCollection().contains(one));
+		Assertions.assertEquals(1, one.getAggCollection().size());
+		Assertions.assertEquals(1, three.getInvAggCollection().size());
 	}
 
 	/**
@@ -270,37 +270,37 @@ class GenerationTests extends AbstractSkyveTest {
 	@SuppressWarnings("static-method")
 	void testDoubleAndDualAddAndRemoveInverseManyToMany() {
 		InverseManyToManyPersistent one = InverseManyToManyPersistent.newInstance();
-		Assert.assertTrue(one.getAggCollection().isEmpty());
-		Assert.assertTrue(one.getInvAggCollection().isEmpty());
+		Assertions.assertTrue(one.getAggCollection().isEmpty());
+		Assertions.assertTrue(one.getInvAggCollection().isEmpty());
 		
 		InverseManyToManyPersistent two = InverseManyToManyPersistent.newInstance();
 		one.addInvAggCollectionElement(two);
-		Assert.assertTrue(one.getInvAggCollection().contains(two));
-		Assert.assertTrue(two.getAggCollection().contains(one));
+		Assertions.assertTrue(one.getInvAggCollection().contains(two));
+		Assertions.assertTrue(two.getAggCollection().contains(one));
 
 		InverseManyToManyPersistent three = InverseManyToManyPersistent.newInstance();
 		one.addInvAggCollectionElement(three);
-		Assert.assertTrue(one.getInvAggCollection().contains(three));
-		Assert.assertTrue(three.getAggCollection().contains(one));
-		Assert.assertTrue(two.getAggCollection().contains(one));
-		Assert.assertTrue(one.getInvAggCollection().contains(two));
+		Assertions.assertTrue(one.getInvAggCollection().contains(three));
+		Assertions.assertTrue(three.getAggCollection().contains(one));
+		Assertions.assertTrue(two.getAggCollection().contains(one));
+		Assertions.assertTrue(one.getInvAggCollection().contains(two));
 		
 		one.addInvAggCollectionElement(three);
-		Assert.assertNotEquals(one.getInvAggCollection().indexOf(three), one.getInvAggCollection().lastIndexOf(three));
-		Assert.assertTrue(three.getAggCollection().contains(one));
-		Assert.assertTrue(one.getInvAggCollection().contains(two));
-		Assert.assertTrue(two.getAggCollection().contains(one));
+		Assertions.assertNotEquals(one.getInvAggCollection().indexOf(three), one.getInvAggCollection().lastIndexOf(three));
+		Assertions.assertTrue(three.getAggCollection().contains(one));
+		Assertions.assertTrue(one.getInvAggCollection().contains(two));
+		Assertions.assertTrue(two.getAggCollection().contains(one));
 		
 		one.removeInvAggCollectionElement(two);
-		Assert.assertFalse(one.getInvAggCollection().contains(two));
-		Assert.assertTrue(two.getAggCollection().isEmpty());
-		Assert.assertEquals(2, one.getInvAggCollection().size());
-		Assert.assertEquals(2, three.getAggCollection().size());
+		Assertions.assertFalse(one.getInvAggCollection().contains(two));
+		Assertions.assertTrue(two.getAggCollection().isEmpty());
+		Assertions.assertEquals(2, one.getInvAggCollection().size());
+		Assertions.assertEquals(2, three.getAggCollection().size());
 		
 		one.removeInvAggCollectionElement(three);
-		Assert.assertTrue(one.getInvAggCollection().contains(three));
-		Assert.assertTrue(three.getAggCollection().contains(one));
-		Assert.assertEquals(1, one.getInvAggCollection().size());
-		Assert.assertEquals(1, three.getAggCollection().size());
+		Assertions.assertTrue(one.getInvAggCollection().contains(three));
+		Assertions.assertTrue(three.getAggCollection().contains(one));
+		Assertions.assertEquals(1, one.getInvAggCollection().size());
+		Assertions.assertEquals(1, three.getAggCollection().size());
 	}
 }

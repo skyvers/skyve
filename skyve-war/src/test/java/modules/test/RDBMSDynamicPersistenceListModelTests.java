@@ -3,7 +3,7 @@ package modules.test;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicPersistentBean;
@@ -29,7 +29,7 @@ class RDBMSDynamicPersistenceListModelTests extends AbstractSkyveTest {
 		model.postConstruct(c, true);
 		
 		List<Bean> rows = model.getRows();
-		Assert.assertEquals("Rows not the right size", 14, rows.size());
+		Assertions.assertEquals(14, rows.size(), "Rows not the right size");
 	}
 
 	@Test
@@ -51,7 +51,7 @@ class RDBMSDynamicPersistenceListModelTests extends AbstractSkyveTest {
 		model.postConstruct(c, true);
 		
 		List<Bean> rows = model.getRows();
-		Assert.assertEquals("Rows not the right size", 14, rows.size());
+		Assertions.assertEquals(14, rows.size(), "Rows not the right size");
 	}
 
 	@Test
@@ -74,7 +74,7 @@ class RDBMSDynamicPersistenceListModelTests extends AbstractSkyveTest {
 		model.setBean(null);
 		
 		List<Bean> rows = model.getRows();
-		Assert.assertEquals("Rows not the right size", 14, rows.size());
+		Assertions.assertEquals(14, rows.size(), "Rows not the right size");
 	}
 
 	@Test
@@ -94,7 +94,7 @@ class RDBMSDynamicPersistenceListModelTests extends AbstractSkyveTest {
 		model.postConstruct(c, true);
 		
 		List<Bean> rows = model.getRows();
-		Assert.assertEquals("Rows not the right size", 14, rows.size());
+		Assertions.assertEquals(14, rows.size(), "Rows not the right size");
 	}
 
 	@Test
@@ -120,7 +120,7 @@ class RDBMSDynamicPersistenceListModelTests extends AbstractSkyveTest {
 		model.postConstruct(c, true);
 		
 		List<Bean> rows = model.getRows();
-		Assert.assertEquals("Rows not the right size", 14, rows.size());
+		Assertions.assertEquals(14, rows.size(), "Rows not the right size");
 	}
 
 	@Test
@@ -147,6 +147,6 @@ class RDBMSDynamicPersistenceListModelTests extends AbstractSkyveTest {
 		model.setBean(null);
 		
 		List<Bean> rows = model.getRows();
-		Assert.assertEquals("Rows not the right size", 14, rows.size());
+		Assertions.assertEquals(14, rows.size(), "Rows not the right size");
 	}
 }

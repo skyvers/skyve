@@ -1,6 +1,6 @@
 package org.skyve.impl.snapshot;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.snapshot.Snapshot.AdvancedSearchType;
 import org.skyve.metadata.SortDirection;
@@ -27,8 +27,8 @@ class SnapshotAdapterTest extends AbstractSkyveTest {
 		criteria.getFilters().add(criterion);
 		test.setFilter(criteria);
 		String json = test.toJSON();
-		Assert.assertEquals("JSON generation has side effects", json, test.toJSON());
-		Assert.assertEquals("JSON from and to lost something on reentry", json, Snapshot.fromJSON(test.toJSON()).toJSON());
+		Assertions.assertEquals(json, test.toJSON(), "JSON generation has side effects");
+		Assertions.assertEquals(json, Snapshot.fromJSON(test.toJSON()).toJSON(), "JSON from and to lost something on reentry");
 	}
 	
 	private String[] source = {
@@ -259,10 +259,10 @@ class SnapshotAdapterTest extends AbstractSkyveTest {
 	@Test
 	void testAdapter() {
 		for (int i = 0, l = source.length; i < l; i++) {
-			Assert.assertEquals("SC Test " + i, SnapshotAdapter.toSmartClient(source[i]), sc[i]);
+			Assertions.assertEquals(SnapshotAdapter.toSmartClient(source[i]), sc[i], "SC Test " + i);
 		}
 		for (int i = 0, l = source.length; i < l; i++) {
-			Assert.assertEquals("Vue Test " + i, SnapshotAdapter.toVue(source[i]), vue[i]);
+			Assertions.assertEquals(SnapshotAdapter.toVue(source[i]), vue[i], "Vue Test " + i);
 		}
 	}
 }

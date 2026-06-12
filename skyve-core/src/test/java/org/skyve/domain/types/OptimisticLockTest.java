@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Date;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.messages.DomainException;
 
@@ -20,19 +20,19 @@ class OptimisticLockTest {
 	void testUTCConversion() {
 		Date date = new Date();
 		OptimisticLock lock = new OptimisticLock("test", date);
-		Assert.assertEquals(date, lock.getTimestamp());
+		Assertions.assertEquals(date, lock.getTimestamp());
 
 		lock = new OptimisticLock(lock.toString());
-		Assert.assertEquals(date, lock.getTimestamp());
+		Assertions.assertEquals(date, lock.getTimestamp());
 
-		Assert.assertEquals(date.toString(), lock.getTimestamp().toString());
+		Assertions.assertEquals(date.toString(), lock.getTimestamp().toString());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
 	void testNonExistentLocalTimeConversion() {
 		OptimisticLock lock = new OptimisticLock("20191006022000121admin");
-		Assert.assertEquals("20191006022000121admin", lock.toString());
+		Assertions.assertEquals("20191006022000121admin", lock.toString());
 	}
 
 	@Test

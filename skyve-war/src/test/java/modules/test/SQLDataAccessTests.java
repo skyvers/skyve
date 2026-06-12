@@ -3,7 +3,7 @@ package modules.test;
 import java.util.List;
 
 import org.apache.commons.beanutils.DynaBean;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Coordinate;
@@ -51,8 +51,8 @@ class SQLDataAccessTests extends AbstractSkyveTestDispose {
 			sql = sda.newSQL(aapd, String.format("select * from %s where bizId = :param", persistentIdentifier));
 			sql.putParameter("param", aap);
 			List<AllAttributesPersistent> results = sql.beanResults();
-			Assert.assertEquals(1, results.size());
-			Assert.assertNotEquals(aap.getBizId(), results.get(0).getBizId());
+			Assertions.assertEquals(1, results.size());
+			Assertions.assertNotEquals(aap.getBizId(), results.get(0).getBizId());
 		}
 	}
 
@@ -78,14 +78,14 @@ class SQLDataAccessTests extends AbstractSkyveTestDispose {
 			sql = sda.newSQL(aapd, String.format("select * from %s where bizId = :param", persistentIdentifier));
 			sql.putParameter("param", aap, type);
 			List<AllAttributesPersistent> results = sql.beanResults();
-			Assert.assertEquals(1, results.size());
-			Assert.assertNotEquals(aap.getBizId(), results.get(0).getBizId());
+			Assertions.assertEquals(1, results.size());
+			Assertions.assertNotEquals(aap.getBizId(), results.get(0).getBizId());
 	
 			// test null
 			sql = sda.newSQL(aapd, String.format("select * from %s where bizid = :param", persistentIdentifier));
 			sql.putParameter("param", null, type);
 			results = sql.beanResults();
-			Assert.assertEquals(0, results.size());
+			Assertions.assertEquals(0, results.size());
 		}
 	}
 
@@ -101,8 +101,8 @@ class SQLDataAccessTests extends AbstractSkyveTestDispose {
 			sql = sda.newSQL(aapd, String.format("select * from %s where booleanFlag = :param", persistentIdentifier));
 			sql.putParameter("param", aap.getBooleanFlag());
 			List<AllAttributesPersistent> results = sql.beanResults();
-			Assert.assertEquals(1, results.size());
-			Assert.assertNotEquals(aap.getBizId(), results.get(0).getBizId());
+			Assertions.assertEquals(1, results.size());
+			Assertions.assertNotEquals(aap.getBizId(), results.get(0).getBizId());
 		}
 	}
 
@@ -123,8 +123,8 @@ class SQLDataAccessTests extends AbstractSkyveTestDispose {
 			sql = sda.newSQL(aapd, String.format("select * from %s where date = :param", persistentIdentifier));
 			sql.putParameter("param", aap.getDate());
 			List<AllAttributesPersistent> results = sql.beanResults();
-			Assert.assertEquals(1, results.size());
-			Assert.assertNotEquals(aap.getBizId(), results.get(0).getBizId());
+			Assertions.assertEquals(1, results.size());
+			Assertions.assertNotEquals(aap.getBizId(), results.get(0).getBizId());
 		}
 	}
 
@@ -145,8 +145,8 @@ class SQLDataAccessTests extends AbstractSkyveTestDispose {
 			sql = sda.newSQL(aapd, String.format("select * from %s where dateTime = :param", persistentIdentifier));
 			sql.putParameter("param", aap.getDateTime());
 			List<AllAttributesPersistent> results = sql.beanResults();
-			Assert.assertEquals(1, results.size());
-			Assert.assertNotEquals(aap.getBizId(), results.get(0).getBizId());
+			Assertions.assertEquals(1, results.size());
+			Assertions.assertNotEquals(aap.getBizId(), results.get(0).getBizId());
 		}
 	}
 
@@ -167,8 +167,8 @@ class SQLDataAccessTests extends AbstractSkyveTestDispose {
 			sql = sda.newSQL(aapd, String.format("select * from %s where decimal2 = :param", persistentIdentifier));
 			sql.putParameter("param", aap.getDecimal2());
 			List<AllAttributesPersistent> results = sql.beanResults();
-			Assert.assertEquals(1, results.size());
-			Assert.assertNotEquals(aap.getBizId(), results.get(0).getBizId());
+			Assertions.assertEquals(1, results.size());
+			Assertions.assertNotEquals(aap.getBizId(), results.get(0).getBizId());
 		}
 	}
 
@@ -189,8 +189,8 @@ class SQLDataAccessTests extends AbstractSkyveTestDispose {
 			sql = sda.newSQL(aapd, String.format("select * from %s where decimal5 = :param", persistentIdentifier));
 			sql.putParameter("param", aap.getDecimal5());
 			List<AllAttributesPersistent> results = sql.beanResults();
-			Assert.assertEquals(1, results.size());
-			Assert.assertNotEquals(aap.getBizId(), results.get(0).getBizId());
+			Assertions.assertEquals(1, results.size());
+			Assertions.assertNotEquals(aap.getBizId(), results.get(0).getBizId());
 		}
 	}
 
@@ -211,8 +211,8 @@ class SQLDataAccessTests extends AbstractSkyveTestDispose {
 			sql = sda.newSQL(aapd, String.format("select * from %s where decimal10 = :param", persistentIdentifier));
 			sql.putParameter("param", aap.getDecimal10());
 			List<AllAttributesPersistent> results = sql.beanResults();
-			Assert.assertEquals(1, results.size());
-			Assert.assertNotEquals(aap.getBizId(), results.get(0).getBizId());
+			Assertions.assertEquals(1, results.size());
+			Assertions.assertNotEquals(aap.getBizId(), results.get(0).getBizId());
 		}
 	}
 
@@ -234,8 +234,8 @@ class SQLDataAccessTests extends AbstractSkyveTestDispose {
 			sql = sda.newSQL(aapd, String.format("select * from %s where enum3 = :param", persistentIdentifier));
 			sql.putParameter("param", aap.getEnum3());
 			List<AllAttributesPersistent> results = sql.beanResults();
-			Assert.assertEquals(1, results.size());
-			Assert.assertNotEquals(aap.getBizId(), results.get(0).getBizId());
+			Assertions.assertEquals(1, results.size());
+			Assertions.assertNotEquals(aap.getBizId(), results.get(0).getBizId());
 		}
 	}
 
@@ -256,8 +256,8 @@ class SQLDataAccessTests extends AbstractSkyveTestDispose {
 			sql = sda.newSQL(aapd, String.format("select * from %s where geometry = :param", persistentIdentifier));
 			sql.putParameter("param", aap.getGeometry());
 			List<AllAttributesPersistent> results = sql.beanResults();
-			Assert.assertEquals(1, results.size());
-			Assert.assertNotEquals(aap.getBizId(), results.get(0).getBizId());
+			Assertions.assertEquals(1, results.size());
+			Assertions.assertNotEquals(aap.getBizId(), results.get(0).getBizId());
 		}
 	}
 
@@ -282,8 +282,8 @@ class SQLDataAccessTests extends AbstractSkyveTestDispose {
 														AllAttributesPersistent.normalIntegerPropertyName));
 			sql.putParameter("param", aap.getNormalInteger());
 			List<AllAttributesPersistent> results = sql.beanResults();
-			Assert.assertEquals(1, results.size());
-			Assert.assertNotEquals(aap.getBizId(), results.get(0).getBizId());
+			Assertions.assertEquals(1, results.size());
+			Assertions.assertNotEquals(aap.getBizId(), results.get(0).getBizId());
 		}
 	}
 
@@ -304,8 +304,8 @@ class SQLDataAccessTests extends AbstractSkyveTestDispose {
 			sql = sda.newSQL(aapd, String.format("select * from %s where longInteger = :param", persistentIdentifier));
 			sql.putParameter("param", aap.getLongInteger());
 			List<AllAttributesPersistent> results = sql.beanResults();
-			Assert.assertEquals(1, results.size());
-			Assert.assertNotEquals(aap.getBizId(), results.get(0).getBizId());
+			Assertions.assertEquals(1, results.size());
+			Assertions.assertNotEquals(aap.getBizId(), results.get(0).getBizId());
 		}
 	}
 
@@ -326,8 +326,8 @@ class SQLDataAccessTests extends AbstractSkyveTestDispose {
 			sql = sda.newSQL(aapd, String.format("select * from %s where time = :param", persistentIdentifier));
 			sql.putParameter("param", aap.getTime());
 			List<AllAttributesPersistent> results = sql.beanResults();
-			Assert.assertEquals(1, results.size());
-			Assert.assertNotEquals(aap.getBizId(), results.get(0).getBizId());
+			Assertions.assertEquals(1, results.size());
+			Assertions.assertNotEquals(aap.getBizId(), results.get(0).getBizId());
 		}
 	}
 
@@ -348,8 +348,8 @@ class SQLDataAccessTests extends AbstractSkyveTestDispose {
 			sql = sda.newSQL(aapd, String.format("select * from %s where timestamp = :param", persistentIdentifier));
 			sql.putParameter("param", aap.getTimestamp());
 			List<AllAttributesPersistent> results = sql.beanResults();
-			Assert.assertEquals(1, results.size());
-			Assert.assertNotEquals(aap.getBizId(), results.get(0).getBizId());
+			Assertions.assertEquals(1, results.size());
+			Assertions.assertNotEquals(aap.getBizId(), results.get(0).getBizId());
 		}
 	}
 
@@ -370,8 +370,8 @@ class SQLDataAccessTests extends AbstractSkyveTestDispose {
 			sql = sda.newSQL(aapd, String.format("select * from %s where text = :param", persistentIdentifier));
 			sql.putParameter("param", aap.getText(), false);
 			List<AllAttributesPersistent> results = sql.beanResults();
-			Assert.assertEquals(1, results.size());
-			Assert.assertNotEquals(aap.getBizId(), results.get(0).getBizId());
+			Assertions.assertEquals(1, results.size());
+			Assertions.assertNotEquals(aap.getBizId(), results.get(0).getBizId());
 		}
 	}
 
@@ -392,8 +392,8 @@ class SQLDataAccessTests extends AbstractSkyveTestDispose {
 			sql = sda.newSQL(aapd, String.format("select * from %s where memo = :param", persistentIdentifier));
 			sql.putParameter("param", aap.getMemo(), true);
 			List<AllAttributesPersistent> results = sql.beanResults();
-			Assert.assertEquals(1, results.size());
-			Assert.assertNotEquals(aap.getBizId(), results.get(0).getBizId());
+			Assertions.assertEquals(1, results.size());
+			Assertions.assertNotEquals(aap.getBizId(), results.get(0).getBizId());
 		}
 	}
 
@@ -416,14 +416,14 @@ class SQLDataAccessTests extends AbstractSkyveTestDispose {
 													binding));
 			sql.putParameter("param", value, type);
 			List<AllAttributesPersistent> results = sql.beanResults();
-			Assert.assertEquals(1, results.size());
-			Assert.assertNotEquals(aap.getBizId(), results.get(0).getBizId());
+			Assertions.assertEquals(1, results.size());
+			Assertions.assertNotEquals(aap.getBizId(), results.get(0).getBizId());
 	
 			// test null
 			sql = sda.newSQL(aapd, String.format("select * from %s where %s = :param", persistentIdentifier, binding));
 			sql.putParameter("param", null, type);
 			results = sql.beanResults();
-			Assert.assertEquals(0, results.size());
+			Assertions.assertEquals(0, results.size());
 		}
 	}
 
@@ -441,25 +441,25 @@ class SQLDataAccessTests extends AbstractSkyveTestDispose {
 			p.commit(false);
 	
 			DynaBean bean = sda.newSQL("select bizId from " + persistentIdentifier).dynaResult();
-			Assert.assertNotNull("bizId should not be null", Binder.get(bean, Bean.DOCUMENT_ID.toLowerCase()));
+			Assertions.assertNotNull(Binder.get(bean, Bean.DOCUMENT_ID.toLowerCase()), "bizId should not be null");
 
 			List<DynaBean> beans = sda.newSQL("select bizId from " + persistentIdentifier).dynaResults();
-			Assert.assertEquals("Requires some data", 3, beans.size());
+			Assertions.assertEquals(3, beans.size(), "Requires some data");
 			for (DynaBean thisBean : beans) {
-				Assert.assertNotNull("bizId should not be null", Binder.get(thisBean, Bean.DOCUMENT_ID.toLowerCase()));
+				Assertions.assertNotNull(Binder.get(thisBean, Bean.DOCUMENT_ID.toLowerCase()), "bizId should not be null");
 			}
 
 			try (AutoClosingIterable<DynaBean> i = sda.newSQL("select bizId from " + persistentIdentifier).dynaIterable()) {
 				boolean exists = false;
 				for (DynaBean thisBean : i) {
-					Assert.assertNotNull("bizId should not be null", Binder.get(thisBean, Bean.DOCUMENT_ID.toLowerCase()));
+					Assertions.assertNotNull(Binder.get(thisBean, Bean.DOCUMENT_ID.toLowerCase()), "bizId should not be null");
 					exists = true;
 				}
-				Assert.assertTrue("Requires some data", exists);
+				Assertions.assertTrue(exists, "Requires some data");
 			}
 
 			beans = sda.newSQL("select bizId from " + persistentIdentifier + " where bizId = :bizId").putParameter(Bean.DOCUMENT_ID, "test", false).dynaResults();
-			Assert.assertEquals("Should be no matches", 0, beans.size());
+			Assertions.assertEquals(0, beans.size(), "Should be no matches");
 		}
 	}
 }

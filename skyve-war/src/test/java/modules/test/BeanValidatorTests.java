@@ -2,7 +2,7 @@ package modules.test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.skyve.CORE;
 import org.skyve.domain.messages.ValidationException;
@@ -23,7 +23,7 @@ class BeanValidatorTests extends AbstractSkyveTest {
 
 	@Test
 	void testValidateBeanAgainstBaseDocument() {
-		ValidationException ve = Assert.assertThrows(ValidationException.class, () -> {
+		ValidationException ve = Assertions.assertThrows(ValidationException.class, () -> {
 			MappedExtensionSingleStrategy test = Util.constructRandomInstance(u, m, messd, 2);
 			test.setColour(null);
 			BeanValidator.validateBeanAgainstDocument(messd, test);
@@ -40,7 +40,7 @@ class BeanValidatorTests extends AbstractSkyveTest {
 
 	@Test
 	void testValidateBeanAgainstDocumentFail() {
-		ValidationException ve = Assert.assertThrows(ValidationException.class, () -> {
+		ValidationException ve = Assertions.assertThrows(ValidationException.class, () -> {
 			AllAttributesRequiredPersistent test = Util.constructRandomInstance(u, m, aarpd, 2);
 			test.setColour(null);
 			BeanValidator.validateBeanAgainstDocument(aarpd, test);
@@ -57,7 +57,7 @@ class BeanValidatorTests extends AbstractSkyveTest {
 
 	@Test
 	void testValidateBeanAgainstDocumentNamecFail() {
-		ValidationException ve = Assert.assertThrows(ValidationException.class, () -> {
+		ValidationException ve = Assertions.assertThrows(ValidationException.class, () -> {
 			AllAttributesRequiredPersistent test = Util.constructRandomInstance(u, m, aarpd, 2);
 			test.setColour(null);
 			BeanValidator.validateBeanAgainstDocument(test);
@@ -74,7 +74,7 @@ class BeanValidatorTests extends AbstractSkyveTest {
 				aarpd.getAttribute(AllAttributesRequiredPersistent.colourPropertyName),
 				test,
 				ve);
-		Assert.assertEquals("No validation error should occur", 0, ve.getMessages().size());
+		Assertions.assertEquals(0, ve.getMessages().size(), "No validation error should occur");
 	}
 
 	@Test
@@ -86,7 +86,7 @@ class BeanValidatorTests extends AbstractSkyveTest {
 				aarpd.getAttribute(AllAttributesRequiredPersistent.colourPropertyName),
 				test,
 				ve);
-		Assert.assertEquals("No validation error should occur", 1, ve.getMessages().size());
+		Assertions.assertEquals(1, ve.getMessages().size(), "No validation error should occur");
 	}
 
 	@Test
@@ -96,7 +96,7 @@ class BeanValidatorTests extends AbstractSkyveTest {
 		BeanValidator.validateBeanPropertyAgainstAttribute(aarpd.getAttribute(AllAttributesRequiredPersistent.colourPropertyName),
 				test,
 				ve);
-		Assert.assertEquals("No validation error should occur", 0, ve.getMessages().size());
+		Assertions.assertEquals(0, ve.getMessages().size(), "No validation error should occur");
 	}
 
 	@Test
@@ -107,7 +107,7 @@ class BeanValidatorTests extends AbstractSkyveTest {
 		BeanValidator.validateBeanPropertyAgainstAttribute(aarpd.getAttribute(AllAttributesRequiredPersistent.colourPropertyName),
 				test,
 				ve);
-		Assert.assertEquals("No validation error should occur", 1, ve.getMessages().size());
+		Assertions.assertEquals(1, ve.getMessages().size(), "No validation error should occur");
 	}
 
 	@Test
@@ -117,7 +117,7 @@ class BeanValidatorTests extends AbstractSkyveTest {
 		BeanValidator.validateBeanPropertyAgainstAttribute(AllAttributesRequiredPersistent.colourPropertyName,
 				test,
 				ve);
-		Assert.assertEquals("No validation error should occur", 0, ve.getMessages().size());
+		Assertions.assertEquals(0, ve.getMessages().size(), "No validation error should occur");
 	}
 
 	@Test
@@ -128,6 +128,6 @@ class BeanValidatorTests extends AbstractSkyveTest {
 		BeanValidator.validateBeanPropertyAgainstAttribute(AllAttributesRequiredPersistent.colourPropertyName,
 				test,
 				ve);
-		Assert.assertEquals("No validation error should occur", 1, ve.getMessages().size());
+		Assertions.assertEquals(1, ve.getMessages().size(), "No validation error should occur");
 	}
 }

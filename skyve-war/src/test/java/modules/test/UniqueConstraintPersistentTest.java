@@ -2,10 +2,9 @@ package modules.test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.skyve.domain.messages.UniqueConstraintViolationException;
 import org.skyve.util.test.TestUtil;
 
@@ -42,7 +41,7 @@ class UniqueConstraintPersistentTest extends AbstractSkyveTest {
 		uc2 = p.save(uc2);
 		duplicate();
 		
-		UniqueConstraintViolationException ucve = Assert.assertThrows(UniqueConstraintViolationException.class, () -> {
+		UniqueConstraintViolationException ucve = Assertions.assertThrows(UniqueConstraintViolationException.class, () -> {
 			UniqueConstraintPersistent ucp = UniqueConstraintPersistent.newInstance();
 			ucp.setNonPersistent1(uc1);
 			ucp.setNonPersistent2(uc2);
@@ -67,7 +66,7 @@ class UniqueConstraintPersistentTest extends AbstractSkyveTest {
 		uc2 = p.save(uc2);
 		duplicate();
 		
-		UniqueConstraintViolationException ucve = Assert.assertThrows(UniqueConstraintViolationException.class, () -> {
+		UniqueConstraintViolationException ucve = Assertions.assertThrows(UniqueConstraintViolationException.class, () -> {
 			UniqueConstraintPersistent ucp = UniqueConstraintPersistent.newInstance();
 			ucp.setPersistent1(uc1);
 			ucp.setPersistent2(uc2);
@@ -81,7 +80,7 @@ class UniqueConstraintPersistentTest extends AbstractSkyveTest {
 	void testPersistentReferenceToUnpersistedDuplicates() {
 		duplicate();
 		
-		UniqueConstraintViolationException ucve = Assert.assertThrows(UniqueConstraintViolationException.class, () -> {
+		UniqueConstraintViolationException ucve = Assertions.assertThrows(UniqueConstraintViolationException.class, () -> {
 			UniqueConstraintPersistent ucp = UniqueConstraintPersistent.newInstance();
 			ucp.setPersistent1(uc1);
 			ucp.setPersistent2(uc2);
@@ -97,7 +96,7 @@ class UniqueConstraintPersistentTest extends AbstractSkyveTest {
 		uc2 = p.save(uc2);
 		duplicate();
 		
-		UniqueConstraintViolationException ucve = Assert.assertThrows(UniqueConstraintViolationException.class, () -> {
+		UniqueConstraintViolationException ucve = Assertions.assertThrows(UniqueConstraintViolationException.class, () -> {
 			UniqueConstraintPersistent ucp = UniqueConstraintPersistent.newInstance();
 			ucp.setPersistent1(uc1);
 			ucp.setNonPersistent2(uc2);
@@ -181,7 +180,7 @@ class UniqueConstraintPersistentTest extends AbstractSkyveTest {
 		uc2 = p.save(uc2);
 		duplicate();
 		
-		UniqueConstraintViolationException ucve = Assert.assertThrows(UniqueConstraintViolationException.class, () -> {
+		UniqueConstraintViolationException ucve = Assertions.assertThrows(UniqueConstraintViolationException.class, () -> {
 			UniqueConstraintPersistent innerUcp = UniqueConstraintPersistent.newInstance();
 			innerUcp.setNonPersistent1(uc1);
 			innerUcp.setNonPersistent2(uc2);
@@ -210,7 +209,7 @@ class UniqueConstraintPersistentTest extends AbstractSkyveTest {
 		uc2 = p.save(uc2);
 		duplicate();
 		
-		UniqueConstraintViolationException ucve = Assert.assertThrows(UniqueConstraintViolationException.class, () -> {
+		UniqueConstraintViolationException ucve = Assertions.assertThrows(UniqueConstraintViolationException.class, () -> {
 			UniqueConstraintPersistent innerUcp = UniqueConstraintPersistent.newInstance();
 			innerUcp.setPersistent1(uc1);
 			innerUcp.setPersistent2(uc2);
@@ -239,7 +238,7 @@ class UniqueConstraintPersistentTest extends AbstractSkyveTest {
 		uc2 = p.save(uc2);
 		duplicate();
 		
-		UniqueConstraintViolationException ucve = Assert.assertThrows(UniqueConstraintViolationException.class, () -> {
+		UniqueConstraintViolationException ucve = Assertions.assertThrows(UniqueConstraintViolationException.class, () -> {
 			UniqueConstraintPersistent innerUcp = UniqueConstraintPersistent.newInstance();
 			innerUcp.setPersistent1(uc1);
 			innerUcp.setNonPersistent2(uc2);
@@ -339,7 +338,7 @@ class UniqueConstraintPersistentTest extends AbstractSkyveTest {
 		uc2 = p.save(uc2);
 		duplicate();
 		
-		UniqueConstraintViolationException ucve = Assert.assertThrows(UniqueConstraintViolationException.class, () -> {
+		UniqueConstraintViolationException ucve = Assertions.assertThrows(UniqueConstraintViolationException.class, () -> {
 			UniqueConstraintPersistent innerUcp = UniqueConstraintPersistent.newInstance();
 			innerUcp.setNonPersistent1(uc1);
 			innerUcp.setNonPersistent2(uc2);
@@ -368,7 +367,7 @@ class UniqueConstraintPersistentTest extends AbstractSkyveTest {
 		uc2 = p.save(uc2);
 		duplicate();
 		
-		UniqueConstraintViolationException ucve = Assert.assertThrows(UniqueConstraintViolationException.class, () -> {
+		UniqueConstraintViolationException ucve = Assertions.assertThrows(UniqueConstraintViolationException.class, () -> {
 			UniqueConstraintPersistent innerUcp = UniqueConstraintPersistent.newInstance();
 			innerUcp.setPersistent1(uc1);
 			innerUcp.setPersistent2(uc2);
@@ -384,7 +383,7 @@ class UniqueConstraintPersistentTest extends AbstractSkyveTest {
 	void testPersistentToPersistentReferenceToUnpersistedDuplicates() {
 		duplicate();
 		
-		UniqueConstraintViolationException ucve = Assert.assertThrows(UniqueConstraintViolationException.class, () -> {
+		UniqueConstraintViolationException ucve = Assertions.assertThrows(UniqueConstraintViolationException.class, () -> {
 			UniqueConstraintPersistent innerUcp = UniqueConstraintPersistent.newInstance();
 			innerUcp.setPersistent1(uc1);
 			innerUcp.setPersistent2(uc2);
@@ -402,7 +401,7 @@ class UniqueConstraintPersistentTest extends AbstractSkyveTest {
 		uc2 = p.save(uc2);
 		duplicate();
 		
-		UniqueConstraintViolationException ucve = Assert.assertThrows(UniqueConstraintViolationException.class, () -> {
+		UniqueConstraintViolationException ucve = Assertions.assertThrows(UniqueConstraintViolationException.class, () -> {
 			UniqueConstraintPersistent innerUcp = UniqueConstraintPersistent.newInstance();
 			innerUcp.setPersistent1(uc1);
 			innerUcp.setNonPersistent2(uc2);

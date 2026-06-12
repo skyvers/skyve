@@ -5,7 +5,7 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.UUID;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.bind.BindUtil;
@@ -40,21 +40,21 @@ class OWASPTest extends AbstractSkyveTest {
 	@Test
 	void testEscape() {
 		for (Entry<String, String> entry : escape.entrySet()) {
-			Assert.assertEquals("Escape not working", entry.getValue(), OWASP.escapeHtml(entry.getKey()));
+			Assertions.assertEquals(entry.getValue(), OWASP.escapeHtml(entry.getKey()), "Escape not working");
 		}
 	}
 
 	@Test
 	void testSanitise() {
 		for (Entry<String, String> entry : sanitise.entrySet()) {
-			Assert.assertEquals("Sanitise not working", entry.getValue(), OWASP.sanitise(Sanitisation.relaxed, entry.getKey()));
+			Assertions.assertEquals(entry.getValue(), OWASP.sanitise(Sanitisation.relaxed, entry.getKey()), "Sanitise not working");
 		}
 	}
 
 	@Test
 	void testBoth() {
 		for (Entry<String, String> entry : both.entrySet()) {
-			Assert.assertEquals("Sanitise and escape not as expected", entry.getValue(), OWASP.sanitiseAndEscapeHtml(Sanitisation.relaxed, entry.getKey()));
+			Assertions.assertEquals(entry.getValue(), OWASP.sanitiseAndEscapeHtml(Sanitisation.relaxed, entry.getKey()), "Sanitise and escape not as expected");
 		}
 	}
 
@@ -63,30 +63,30 @@ class OWASPTest extends AbstractSkyveTest {
 		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 2);
 		aap.setText("Test<script>alert(1)</script>Me");
 
-		Assert.assertEquals("Format Message with sanitise function should remove script tag", 
+		Assertions.assertEquals(
 								"<h1>TestMe</h1>",
-								BindUtil.formatMessage("<h1>{text}</h1>", displayName -> OWASP.sanitise(Sanitisation.relaxed, displayName), aap));
+								BindUtil.formatMessage("<h1>{text}</h1>", displayName -> OWASP.sanitise(Sanitisation.relaxed, displayName), aap), "Format Message with sanitise function should remove script tag");
 	}
 	
 	@Test
 	@SuppressWarnings("static-method")
 	void testSanitiseBindings() {
-		Assert.assertEquals("Sanitise should leave bindings alone",
+		Assertions.assertEquals(
 								"user.contacts(1234567890).poo[0]",
-								OWASP.sanitise(Sanitisation.text, "user.contacts(1234567890).poo[0]"));
+								OWASP.sanitise(Sanitisation.text, "user.contacts(1234567890).poo[0]"), "Sanitise should leave bindings alone");
 	}
 	
 	@Test
 	@SuppressWarnings("static-method")
 	void testSanitiseUUIDs() {
 		String uuid = UUID.randomUUID().toString();
-		Assert.assertEquals("Sanitise should leave UUIDs alone",
+		Assertions.assertEquals(
 								uuid,
-								OWASP.sanitise(Sanitisation.text, uuid));
+								OWASP.sanitise(Sanitisation.text, uuid), "Sanitise should leave UUIDs alone");
 		uuid = UUIDv7.create().toString();
-		Assert.assertEquals("Sanitise should leave UUIDs alone",
+		Assertions.assertEquals(
 								uuid,
-								OWASP.sanitise(Sanitisation.text, uuid));
+								OWASP.sanitise(Sanitisation.text, uuid), "Sanitise should leave UUIDs alone");
 	}
 
 }

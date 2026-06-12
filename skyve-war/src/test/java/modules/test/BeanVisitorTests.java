@@ -3,7 +3,7 @@ package modules.test;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
@@ -52,7 +52,7 @@ class BeanVisitorTests extends AbstractSkyveTest {
 
 		}.visit(aapd, test, c);
 
-		Assert.assertEquals(expectedBindings, actualBindings);
+		Assertions.assertEquals(expectedBindings, actualBindings);
 	}
 
 	@Test
@@ -107,7 +107,7 @@ class BeanVisitorTests extends AbstractSkyveTest {
 
 		}.visit(ieDoc, test, c);
 
-		Assert.assertEquals(expectedBindings, actualBindings);
+		Assertions.assertEquals(expectedBindings, actualBindings);
 	}
 
 	@Test
@@ -146,7 +146,7 @@ class BeanVisitorTests extends AbstractSkyveTest {
 
 		}.visit(aapd, test, c);
 
-		Assert.assertEquals(expectedBindings, actualBindings);
+		Assertions.assertEquals(expectedBindings, actualBindings);
 	}
 
 	@Test
@@ -157,7 +157,7 @@ class BeanVisitorTests extends AbstractSkyveTest {
 		test = p.save(test);
 		p.evictAllCached();
 		test = p.retrieve(aapd, test.getBizId());
-		Assert.assertNotNull(test);
+		Assertions.assertNotNull(test);
 		
 		Set<String> expectedBindings = new TreeSet<>();
 		expectedBindings.add("");
@@ -193,7 +193,7 @@ class BeanVisitorTests extends AbstractSkyveTest {
 
 		}.visit(aapd, test.getAggregatedAssociation(), c);
 
-		Assert.assertEquals(expectedBindings, actualBindings);
+		Assertions.assertEquals(expectedBindings, actualBindings);
 	}
 
 	@Test
@@ -203,7 +203,7 @@ class BeanVisitorTests extends AbstractSkyveTest {
 		test = p.save(test);
 		p.evictAllCached();
 		test = p.retrieve(io2opd, test.getBizId());
-		Assert.assertNotNull(test);
+		Assertions.assertNotNull(test);
 
 		Set<String> expectedBindings = new TreeSet<>();
 		expectedBindings.add("");
@@ -227,7 +227,7 @@ class BeanVisitorTests extends AbstractSkyveTest {
 
 		}.visit(io2opd, test.getAggAssociation(), c);
 
-		Assert.assertEquals(expectedBindings, actualBindings);
+		Assertions.assertEquals(expectedBindings, actualBindings);
 	}
 
 	@Test
@@ -265,7 +265,7 @@ class BeanVisitorTests extends AbstractSkyveTest {
 
 		}.visit(aapd, test, c);
 
-		Assert.assertEquals(expectedBindings, actualBindings);
+		Assertions.assertEquals(expectedBindings, actualBindings);
 	}
 
 	@Test
@@ -317,6 +317,6 @@ class BeanVisitorTests extends AbstractSkyveTest {
 
 		}.visit(aapd, test, c);
 
-		Assert.assertEquals(expectedBindings, actualBindings);
+		Assertions.assertEquals(expectedBindings, actualBindings);
 	}
 }
