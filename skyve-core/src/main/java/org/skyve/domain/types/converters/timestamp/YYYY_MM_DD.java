@@ -6,6 +6,7 @@ import org.skyve.domain.messages.ConversionException;
  * Converts {@link Timestamp} values using this class's configured
  * year-first date-only pattern.
  */
+@SuppressWarnings("java:S101") // Converter class names intentionally match metadata converter IDs.
 public class YYYY_MM_DD extends AbstractTimestampConverter {
 	private static final String PATTERN = "yyyy/MM/dd";
 

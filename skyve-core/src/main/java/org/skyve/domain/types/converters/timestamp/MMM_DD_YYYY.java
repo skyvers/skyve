@@ -6,6 +6,7 @@ import org.skyve.domain.messages.ConversionException;
  * Converts {@link Timestamp} values using this class's configured
  * month-name date-only pattern.
  */
+@SuppressWarnings("java:S101") // Converter class names intentionally match metadata converter IDs.
 public class MMM_DD_YYYY extends AbstractTimestampConverter {
 	private static final String PATTERN = "MMM-dd-yyyy";
 

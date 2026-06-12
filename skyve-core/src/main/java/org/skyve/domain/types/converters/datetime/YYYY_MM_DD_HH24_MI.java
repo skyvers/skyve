@@ -6,6 +6,7 @@ import org.skyve.domain.messages.ConversionException;
  * Converts {@link DateTime} values using this class's configured
  * year-first, 24-hour date-time pattern.
  */
+@SuppressWarnings("java:S101") // Converter class names intentionally match metadata converter IDs.
 public class YYYY_MM_DD_HH24_MI extends AbstractDateTimeConverter {
 	public static final String PATTERN = "yyyy/MM/dd HH:mm";
 

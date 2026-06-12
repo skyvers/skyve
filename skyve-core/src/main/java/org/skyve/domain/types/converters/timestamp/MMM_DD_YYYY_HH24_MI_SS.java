@@ -6,6 +6,7 @@ import org.skyve.domain.messages.ConversionException;
  * Converts {@link Timestamp} values using this class's configured
  * month-name, day-first, 24-hour timestamp pattern with seconds.
  */
+@SuppressWarnings("java:S101") // Converter class names intentionally match metadata converter IDs.
 public class MMM_DD_YYYY_HH24_MI_SS extends AbstractTimestampConverter {
 	public static final String PATTERN = "MMM-dd-yyyy HH:mm:ss";
 

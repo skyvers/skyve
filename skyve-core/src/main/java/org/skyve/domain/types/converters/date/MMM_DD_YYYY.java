@@ -6,6 +6,7 @@ import org.skyve.domain.messages.ConversionException;
  * Converts {@link org.skyve.domain.types.DateOnly} values using
  * {@code MMM/dd/yyyy} formatting.
  */
+@SuppressWarnings("java:S101") // Converter class names intentionally match metadata converter IDs.
 public class MMM_DD_YYYY extends AbstractDateConverter {
 	public static final String PATTERN = "MMM-dd-yyyy";
 

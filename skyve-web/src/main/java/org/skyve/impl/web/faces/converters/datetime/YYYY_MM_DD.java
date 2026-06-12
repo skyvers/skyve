@@ -13,6 +13,7 @@ import jakarta.faces.convert.ConverterException;
 /**
  * Converts JSF values between formatted UI strings and Skyve domain representations for this format.
  */
+@SuppressWarnings("java:S101") // Converter class names intentionally match metadata converter IDs.
 public class YYYY_MM_DD extends org.skyve.domain.types.converters.datetime.YYYY_MM_DD
 							implements Converter<DateTime> {
 	/**
