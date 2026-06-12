@@ -1,6 +1,6 @@
 package org.skyve.impl.metadata.view.widget.bound.tabular;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
 
@@ -9,6 +9,6 @@ class ListRepeaterTest {
 
 	@Test
 	void getPropertiesReturnsNonNullMap() {
-		assertTrue(new ListRepeater().getProperties() != null);
+		assertNotNull(new ListRepeater().getProperties());
 	}
 }

@@ -411,7 +411,8 @@ class FluentMenuTest {
                         @Override public Set<String> getRoleNames() { return Set.of(); }
                         @Override public Set<String> getUxUis() { return Set.of(); }
                         @Override public boolean isApplicable(String uxui) { return true; }
-                });
-                assertThrows(IllegalStateException.class, () -> new FluentMenu().from(source));
-        }
-}
+	                });
+	                FluentMenu menu = new FluentMenu();
+	                assertThrows(IllegalStateException.class, () -> menu.from(source));
+	        }
+	}

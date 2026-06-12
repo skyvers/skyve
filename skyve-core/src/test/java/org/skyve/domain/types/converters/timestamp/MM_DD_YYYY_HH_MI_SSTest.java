@@ -22,14 +22,7 @@ class MM_DD_YYYY_HH_MI_SSTest {
 
 	@Test
 	void testFromDisplayValueInvalidFormat() throws Exception {
-		ConversionException ce = assertThrows(ConversionException.class, () -> {
-			// setup the test data
-			Timestamp testDate = new Timestamp(Time.withDate(01, 03, 2020));
-			Time.setTime(testDate, 02, 30, 05);
-
-			// call the method under test
-			assertThat(formatter.fromDisplayValue("01-03-2020 02:30:05"), is(testDate));
-		});
+		ConversionException ce = assertThrows(ConversionException.class, () -> formatter.fromDisplayValue("01-03-2020 02:30:05"));
 
 		assertTrue(ce.getMessages().size() > 0);
 	}

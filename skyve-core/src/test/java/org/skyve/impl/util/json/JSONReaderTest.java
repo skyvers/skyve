@@ -285,27 +285,14 @@ class JSONReaderTest {
 	// ---- scientific notation numbers ------------------------------------
 
 	@Test
-	void readScientificNotationPositiveExponent() throws Exception {
-		Map<Object, Object> result = readDynamic("{\"v\":1.5e2}");
-		Object val = result.get("v");
-		assertTrue(val instanceof BigDecimal);
-		assertEquals(0, new BigDecimal("1.5e2").compareTo((BigDecimal) val));
-	}
-
-	@Test
-	void readScientificNotationUpperCaseE() throws Exception {
-		Map<Object, Object> result = readDynamic("{\"v\":2E3}");
-		Object val = result.get("v");
-		assertTrue(val instanceof BigDecimal);
-		assertEquals(0, new BigDecimal("2E3").compareTo((BigDecimal) val));
-	}
-
-	@Test
-	void readScientificNotationNegativeExponent() throws Exception {
-		Map<Object, Object> result = readDynamic("{\"v\":1e-2}");
-		Object val = result.get("v");
-		assertTrue(val instanceof BigDecimal);
-		assertTrue(((BigDecimal) val).compareTo(BigDecimal.ZERO) > 0);
+	void readScientificNotationNumbers() throws Exception {
+		String[] values = {"1.5e2", "2E3", "1e-2"};
+		for (String value : values) {
+			Map<Object, Object> result = readDynamic("{\"v\":" + value + "}");
+			Object val = result.get("v");
+			assertTrue(val instanceof BigDecimal);
+			assertTrue(((BigDecimal) val).compareTo(BigDecimal.ZERO) > 0);
+		}
 	}
 
 	// ---- deeply nested structures ---------------------------------------
@@ -391,7 +378,8 @@ class JSONReaderTest {
 		// The object-mode parser requires a comma after the class name;
 		// a class-only object (no trailing comma) is considered malformed JSON
 		String className = "org.skyve.impl.util.json.JSONReaderTest$TestBean";
-		assertThrows(IllegalStateException.class, () -> new JSONReader(null).read("{\"class\":\"" + className + "\"}"));
+		JSONReader reader = new JSONReader(null);
+		assertThrows(IllegalStateException.class, () -> reader.read("{\"class\":\"" + className + "\"}"));
 	}
 
 	// ---- scientific notation with explicit + sign ---------------------------
@@ -419,8 +407,7 @@ class JSONReaderTest {
 
 	@Test
 	void readUnquotedKeyStartingWithFNotFalse() throws Exception {
-		// Key starts with 'f' but is not "false" — exercises the f-not-false else branch
-		// string('\0') reads "fast" until the ':' delimiter
+		// Exercise a key that starts with f without being the false literal.
 		@SuppressWarnings("unchecked")
 		Map<Object, Object> map = (Map<Object, Object>) new JSONReader(null).read("{fast: 1}");
 		assertEquals(Long.valueOf(1L), map.get("fast"));
@@ -446,17 +433,20 @@ class JSONReaderTest {
 
 	@Test
 	void malformedUnterminatedStringThrows() {
-		assertThrows(IllegalStateException.class, () -> new JSONReader(null).read("{\"key\":\"unclosed"));
+		JSONReader reader = new JSONReader(null);
+		assertThrows(IllegalStateException.class, () -> reader.read("{\"key\":\"unclosed"));
 	}
 
 	@Test
 	void malformedUnterminatedArrayThrows() {
-		assertThrows(IllegalStateException.class, () -> new JSONReader(null).read("[1,2,3"));
+		JSONReader reader = new JSONReader(null);
+		assertThrows(IllegalStateException.class, () -> reader.read("[1,2,3"));
 	}
 
 	@Test
 	void malformedUnterminatedObjectThrows() {
-		assertThrows(IllegalStateException.class, () -> new JSONReader(null).read("{\"a\":1"));
+		JSONReader reader = new JSONReader(null);
+		assertThrows(IllegalStateException.class, () -> reader.read("{\"a\":1"));
 	}
 
 	// ---- unicode() — lowercase and uppercase hex branch coverage ------------

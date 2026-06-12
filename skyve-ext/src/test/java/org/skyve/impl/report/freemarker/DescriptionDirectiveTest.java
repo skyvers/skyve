@@ -62,9 +62,11 @@ class DescriptionDirectiveTest {
 	@Test
 	void executeAcceptsEscapeParameterTypesBeforeRequiringEnvironment() {
 		DescriptionDirective directive = new DescriptionDirective();
+		Map<String, TemplateModel> scalarEscape = Map.of("escape", scalar("false"));
+		Map<String, TemplateModel> booleanEscape = Map.of("escape", bool(false));
 
-		assertThrows(NullPointerException.class, () -> directive.execute(null, Map.of("escape", scalar("false")), new TemplateModel[0], null));
-		assertThrows(NullPointerException.class, () -> directive.execute(null, Map.of("escape", bool(false)), new TemplateModel[0], null));
+		assertThrows(NullPointerException.class, () -> directive.execute(null, scalarEscape, new TemplateModel[0], null));
+		assertThrows(NullPointerException.class, () -> directive.execute(null, booleanEscape, new TemplateModel[0], null));
 	}
 
 	@Test

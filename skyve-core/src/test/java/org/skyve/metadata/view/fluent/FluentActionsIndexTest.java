@@ -118,8 +118,7 @@ class FluentActionsIndexTest {
 
 	@Test
 	void findZoomOutActionReturnsNullWhenEmpty() {
-		// findZoomOutAction() searches for ImplicitActionName.Save internally;
-		// with no matching action, it returns null.
+		// The current lookup targets Save internally, so an empty action list has no match.
 		assertThat(new FluentActions().findZoomOutAction(), is(nullValue()));
 	}
 

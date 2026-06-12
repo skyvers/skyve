@@ -23,6 +23,7 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.Month;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -459,9 +460,9 @@ public class BackupUtilTest {
 	@Test
 	@SuppressWarnings("static-method")
 	public void redactDataDateTypeRoundsToFirstOfMonth() {
-		Date input = Date.valueOf(LocalDate.of(2023, 7, 15));
+		Date input = Date.valueOf(LocalDate.of(2023, Month.JULY, 15));
 		Date result = (Date) redactData(AttributeType.date, input);
-		assertThat(result, is(Date.valueOf(LocalDate.of(2023, 7, 1))));
+		assertThat(result, is(Date.valueOf(LocalDate.of(2023, Month.JULY, 1))));
 	}
 
 	@Test
@@ -475,17 +476,17 @@ public class BackupUtilTest {
 	@Test
 	@SuppressWarnings("static-method")
 	public void redactDataDateTimeTypeRoundsToFirstOfMonth() {
-		Timestamp input = Timestamp.valueOf(LocalDateTime.of(2023, 8, 20, 10, 30, 0));
+		Timestamp input = Timestamp.valueOf(LocalDateTime.of(2023, Month.AUGUST, 20, 10, 30, 0));
 		Timestamp result = (Timestamp) redactData(AttributeType.dateTime, input);
-		assertThat(result, is(Timestamp.valueOf(LocalDateTime.of(2023, 8, 1, 0, 0, 0))));
+		assertThat(result, is(Timestamp.valueOf(LocalDateTime.of(2023, Month.AUGUST, 1, 0, 0, 0))));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
 	public void redactDataTimestampTypeRoundsToFirstOfMonth() {
-		Timestamp input = Timestamp.valueOf(LocalDateTime.of(2021, 3, 14, 9, 15, 0));
+		Timestamp input = Timestamp.valueOf(LocalDateTime.of(2021, Month.MARCH, 14, 9, 15, 0));
 		Timestamp result = (Timestamp) redactData(AttributeType.timestamp, input);
-		assertThat(result, is(Timestamp.valueOf(LocalDateTime.of(2021, 3, 1, 0, 0, 0))));
+		assertThat(result, is(Timestamp.valueOf(LocalDateTime.of(2021, Month.MARCH, 1, 0, 0, 0))));
 	}
 
 	@Test

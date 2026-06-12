@@ -1,6 +1,11 @@
 package modules.test;
 
-import org.junit.Assert;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import org.junit.jupiter.api.Test;
 import org.skyve.CORE;
 import org.skyve.metadata.customer.Customer;
@@ -16,27 +21,27 @@ class CustomerOverrideTests extends AbstractSkyveTest {
 	@Test
 	void testCustomerOverridesExist() {
 		Customer customer = CORE.getRepository().getCustomer("test");
-		Assert.assertNotNull(customer);
+		assertNotNull(customer);
 		Module module = customer.getModule("test");
-		Assert.assertNotNull(module.getRole("TestRole"));
+		assertNotNull(module.getRole("TestRole"));
 		Document document = module.getDocument(customer, AllAttributesPersistent.DOCUMENT_NAME);
-		Assert.assertNotNull(document.getCondition("test"));
+		assertNotNull(document.getCondition("test"));
 		View view = document.getView(null, customer, "edit");
-		Assert.assertEquals("Test", view.getTitle());
-		Assert.assertNotNull(module.getDocument(customer, "Test"));
-		Assert.assertNotNull(document.getCondition("test"));
+		assertEquals("Test", view.getTitle());
+		assertNotNull(module.getDocument(customer, "Test"));
+		assertNotNull(document.getCondition("test"));
 	}
 
 	@Test
 	void testCustomerOverridesDoNotExist() {
-		Assert.assertNull(m.getRole("TestRole"));
+		assertNull(m.getRole("TestRole"));
 		Document document = m.getDocument(c, AllAttributesPersistent.DOCUMENT_NAME);
-		Assert.assertNull(document.getCondition("test"));
+		assertNull(document.getCondition("test"));
 		View view = document.getView(null, c, "edit");
-		Assert.assertNotEquals("Test", view.getTitle());
+		assertNotEquals("Test", view.getTitle());
 		try {
 			m.getDocument(c, "Test");
-			Assert.fail("Test should not exist");
+			fail("Test should not exist");
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
 			// do nothing here

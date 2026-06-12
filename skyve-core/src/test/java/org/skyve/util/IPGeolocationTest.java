@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -155,7 +156,6 @@ class IPGeolocationTest {
 			deserialized = ois.readObject();
 		}
 		assertTrue(deserialized instanceof IPGeolocation);
-		assertFalse(deserialized == IPGeolocation.EMPTY, "Non-null IPGeolocation should not resolve to EMPTY");
+		assertNotSame(IPGeolocation.EMPTY, deserialized, "Non-null IPGeolocation should not resolve to EMPTY");
 	}
 }
-

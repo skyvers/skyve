@@ -231,70 +231,26 @@ class MailLogUtilTest {
 		assertNotNull(entries.get(0).getTimestamp());
 	}
 
-	// ---- normaliseHtmlLineBreaks (unclosed tag) and isBlockClosingTag (empty name) ----
-
 	@Test
-	void testBodyWithUnclosedHtmlTagAndEmptyClosingTagIsHandled() {
-		// "</>" triggers isBlockClosingTag with nameStart==i (empty name after '/').
-		// "<unclosed" triggers normaliseHtmlLineBreaks break when no '>' is found.
-		Mail mail = new Mail().addTo("to@skyve.org").subject("Subject").body("</><unclosed");
-
-		MailLogUtil.logMail(mail, MailDispatchOutcome.sent("smtp"));
-
-		assertEquals(1, entries.size());
-	}
-
-	// ---- plainTextBody null after OWASP text sanitize ----
-
-	@Test
-	void testPlainTextBodyNullAfterOwaspSanitizeReturnsNullBodyVariant() {
-		// OWASP text policy strips ALL HTML tags; an empty-tag body produces an empty
-		// string, which processStringValue converts to null — covering the plainTextBody
-		// return-null branch after sanitization.
-		Mail mail = new Mail().addTo("to@skyve.org").subject("Subject").body("<b></b>");
-
-		MailLogUtil.logMail(mail, MailDispatchOutcome.sent("smtp"));
-
-		assertEquals(1, entries.size());
-		// body variant is "<null>" because plainTextBody returned null
-	}
-
-	// ---- plainTextBody null after collapse/trim ----
-
-	@Test
-	void testPlainTextBodyNullAfterCollapseAndTrimReturnsNullBodyVariant() {
-		// "<br>" tags are normalised to '\n'. Three consecutive newlines collapse to two,
-		// then processStringValue trims to empty → null, covering the third return-null
-		// branch in plainTextBody.
-		Mail mail = new Mail().addTo("to@skyve.org").subject("Subject").body("<br><br><br><br>");
-
-		MailLogUtil.logMail(mail, MailDispatchOutcome.sent("smtp"));
-
-		assertEquals(1, entries.size());
-	}
-
-	// ---- maskSensitiveCodes: direct colon path (no 'is' word) ----
-
-	@Test
-	void testMaskSensitiveCodesDirectColonPathMasksDigits() {
-		// "security code: 12345678" — no 'is' word before the colon. Exercises the
-		// else-if branch in maskSensitiveCodes (cursor points directly at ':').
-		Mail mail = new Mail().addTo("to@skyve.org").subject("Subject").body("security code: 12345678");
-		MailLogUtil.logMail(mail, MailDispatchOutcome.sent("smtp"));
-
-		assertEquals(1, entries.size());
-	}
-
-	// ---- maskSensitiveCodes: 'is =' path with equals sign ----
-
-	@Test
-	void testMaskSensitiveCodesIsEqualsPathMasksDigits() {
-		// "verification code is= 12345678" — 'is' followed by '='. Exercises the inner
-		// if branch inside startsWithWord("is") that checks for ':' or '='.
-		Mail mail = new Mail().addTo("to@skyve.org").subject("Subject").body("verification code is= 12345678");
-		MailLogUtil.logMail(mail, MailDispatchOutcome.sent("smtp"));
-
-		assertEquals(1, entries.size());
+	void testLogMailBodyEdgeCasesProduceEntries() {
+		String[] bodies = {
+				"</><unclosed",
+				"<b></b>",
+				"<br><br><br><br>",
+				"security code: 12345678",
+				"verification code is= 12345678",
+				"verification codeis 123456789",
+				null,
+				"<br class=\"x\">text",
+				"before</span>after",
+				"before</div extra>after"
+		};
+		for (String body : bodies) {
+			entries.clear();
+			Mail mail = new Mail().addTo("to@skyve.org").subject("Subject").body(body);
+			MailLogUtil.logMail(mail, MailDispatchOutcome.sent("smtp"));
+			assertEquals(1, entries.size());
+		}
 	}
 
 	@SuppressWarnings("static-method")
@@ -315,28 +271,6 @@ class MailLogUtilTest {
 				"<br/> <br/>");
 
 		assertEquals(null, result);
-	}
-
-	// ---- startsWithWord: word char immediately before 'is' position ----
-
-	@Test
-	void testMaskSensitiveCodesWordCharBeforeIsReturnsFalse() {
-		// "verification codeis 123456789" — no space between 'code' and 'is'.
-		// startsWithWord returns false because the char before 'is' is a word char.
-		Mail mail = new Mail().addTo("to@skyve.org").subject("Subject").body("verification codeis 123456789");
-		MailLogUtil.logMail(mail, MailDispatchOutcome.sent("smtp"));
-
-		assertEquals(1, entries.size());
-	}
-
-	// ---- plainTextBody: null when body is blank (L90) ----
-
-	@Test
-	void testLogMailWithNullBodyProducesEntry() {
-		// processStringValue(null) == null → plainTextBody returns null at L90
-		Mail mail = new Mail().addTo("to@skyve.org").subject("Subject").body((String) null);
-		MailLogUtil.logMail(mail, MailDispatchOutcome.sent("smtp"));
-		assertEquals(1, entries.size());
 	}
 
 	// ---- maskSensitiveCodes: digit-length < 4 (L323) ----
@@ -411,39 +345,6 @@ class MailLogUtilTest {
 		Method method = MailLogUtil.class.getDeclaredMethod(methodName, parameterTypes);
 		method.setAccessible(true);
 		return method.invoke(null, args);
-	}
-
-	// ---- isLineBreakTag: returns false when <br> has attributes (line 154) ----
-
-	@Test
-	void testBrTagWithAttributesIsNotNormalisedToNewline() {
-		// "<br class=\"x\">" — isLineBreakTag finds "br" but has extra content after it,
-		// so i != endExclusive → returns false at line 154.
-		Mail mail = new Mail().addTo("to@skyve.org").subject("Subject").body("<br class=\"x\">text");
-		MailLogUtil.logMail(mail, MailDispatchOutcome.sent("smtp"));
-		assertEquals(1, entries.size());
-	}
-
-	// ---- isBlockClosingTag: returns false for non-block element name (line 175) ----
-
-	@Test
-	void testNonBlockClosingTagIsNotNormalisedToNewline() {
-		// "</span>" — isBlockClosingTag finds a valid closing tag name but "span" is not a
-		// block element, so !isBlockClosingTagName("span") → returns false at line 175.
-		Mail mail = new Mail().addTo("to@skyve.org").subject("Subject").body("before</span>after");
-		MailLogUtil.logMail(mail, MailDispatchOutcome.sent("smtp"));
-		assertEquals(1, entries.size());
-	}
-
-	// ---- isBlockClosingTag: false branch of return i == endExclusive (line 179) ----
-
-	@Test
-	void testMalformedBlockClosingTagWithTrailingContentIsNotNormalisedToNewline() {
-		// "</div extra>" — "div" is a block element name, but after skipWhitespace there
-		// is still "extra" before endExclusive, so i != endExclusive → return false at line 179.
-		Mail mail = new Mail().addTo("to@skyve.org").subject("Subject").body("before</div extra>after");
-		MailLogUtil.logMail(mail, MailDispatchOutcome.sent("smtp"));
-		assertEquals(1, entries.size());
 	}
 
 	@SuppressWarnings("static-method")

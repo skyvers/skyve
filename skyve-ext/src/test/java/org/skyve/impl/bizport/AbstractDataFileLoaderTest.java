@@ -429,9 +429,11 @@ class AbstractDataFileLoaderTest {
 		TestLoader loader = new TestLoader(LoaderActivityType.FIND, new UploadException());
 		DataFileField field = field("company", AttributeType.association);
 		field.setLoadAction(LoadAction.LOOKUP_EQUALS);
+		Bean bean = mock(Bean.class);
+		StringBuilder problems = new StringBuilder();
 
 		DomainException thrown = assertThrows(DomainException.class,
-				() -> loader.lookupBean(mock(Bean.class), field, "Acme", new StringBuilder()));
+				() -> loader.lookupBean(bean, field, "Acme", problems));
 
 		assertThat(thrown.getMessage(), containsString("doesn't match any existing Orders"));
 		verify(filter).addEquals("company", "Acme");
@@ -508,9 +510,10 @@ class AbstractDataFileLoaderTest {
 		properties.put("company", null);
 		Bean order = new DynamicBean("sales", "Order", properties);
 		Binder.set(order, "company", existing);
+		StringBuilder problems = new StringBuilder();
 
 		DomainException thrown = assertThrows(DomainException.class,
-				() -> loader.lookupBean(order, field, "Acme", new StringBuilder()));
+				() -> loader.lookupBean(order, field, "Acme", problems));
 
 		verify(filter).addEquals("name", "Acme");
 		assertThat(thrown.getMessage(), containsString("doesn't match the existing value"));

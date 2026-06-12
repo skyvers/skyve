@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
+import java.time.Month;
 
 import org.skyve.domain.types.DateOnly;
 
@@ -81,14 +82,14 @@ class StaffQualificationDomainTest {
 
 	@Test
 	void dateAttainedSetAndGet() {
-		DateOnly date = new DateOnly(LocalDate.of(2023, 5, 10));
+		DateOnly date = new DateOnly(LocalDate.of(2023, Month.MAY, 10));
 		bean.setDateAttained(date);
 		assertEquals(date, bean.getDateAttained());
 	}
 
 	@Test
 	void dateExpirySetAndGet() {
-		DateOnly date = new DateOnly(LocalDate.of(2026, 5, 10));
+		DateOnly date = new DateOnly(LocalDate.of(2026, Month.MAY, 10));
 		bean.setDateExpiry(date);
 		assertEquals(date, bean.getDateExpiry());
 	}

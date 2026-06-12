@@ -1,8 +1,11 @@
 package modules.test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 import java.util.Objects;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.util.ExportedReferenceVisitor.Dereferencer;
 import org.skyve.util.Util;
@@ -23,14 +26,14 @@ class ExportedReferenceVisitorTests extends AbstractSkyveTest {
 
 		p.evictCached(child);
 
-		Assert.assertEquals(2, Objects.requireNonNull(p.newSQL("select count(1) from TEST_Hierarchical").scalarResult(Number.class)).intValue());
+		assertEquals(2, Objects.requireNonNull(p.newSQL("select count(1) from TEST_Hierarchical").scalarResult(Number.class)).intValue());
 
 		new Dereferencer().visit(hd, root);
 		child = Objects.requireNonNull(p.retrieve(hd, child.getBizId()));
-		Assert.assertNull(child.getParent());
+		assertNull(child.getParent());
 		p.delete(root);
 
-		Assert.assertEquals(1, Objects.requireNonNull(p.newSQL("select count(1) from TEST_Hierarchical").scalarResult(Number.class)).intValue());
+		assertEquals(1, Objects.requireNonNull(p.newSQL("select count(1) from TEST_Hierarchical").scalarResult(Number.class)).intValue());
 	}
 
 	@Test
@@ -49,11 +52,11 @@ class ExportedReferenceVisitorTests extends AbstractSkyveTest {
 		p.evictAllCached();
 
 		test = p.retrieve(messd, test.getBizId());
-		Assert.assertNotNull(test);
-		Assert.assertNull(test.getAggregatedAssociation());
-		Assert.assertNull(test.getComposedAssociation());
-		Assert.assertEquals(1, test.getAggregatedCollection().size());
-		Assert.assertEquals(1, test.getComposedCollection().size());
+		assertNotNull(test);
+		assertNull(test.getAggregatedAssociation());
+		assertNull(test.getComposedAssociation());
+		assertEquals(1, test.getAggregatedCollection().size());
+		assertEquals(1, test.getComposedCollection().size());
 	}
 
 	@Test
@@ -72,10 +75,10 @@ class ExportedReferenceVisitorTests extends AbstractSkyveTest {
 		p.evictAllCached();
 
 		test = p.retrieve(msssd, test.getBizId());
-		Assert.assertNotNull(test);
-		Assert.assertNull(test.getAggregatedAssociation());
-		Assert.assertNull(test.getComposedAssociation());
-		Assert.assertEquals(1, test.getAggregatedCollection().size());
-		Assert.assertEquals(1, test.getComposedCollection().size());
+		assertNotNull(test);
+		assertNull(test.getAggregatedAssociation());
+		assertNull(test.getComposedAssociation());
+		assertEquals(1, test.getAggregatedCollection().size());
+		assertEquals(1, test.getComposedCollection().size());
 	}
 }

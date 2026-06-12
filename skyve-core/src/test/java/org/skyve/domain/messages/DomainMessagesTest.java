@@ -615,12 +615,12 @@ class DomainMessagesTest {
 	@Test
 	void uploadExceptionAddErrorThrowsSelfAfterFiftyErrors() {
 		UploadException ex = new UploadException();
-		// addError throws when errors.size() > 50, so adding the 51st entry triggers the throw
-		assertThrows(UploadException.class, () -> {
-			for (int i = 0; i < 52; i++) {
-				ex.addError(new UploadException.Problem("err" + i, "row" + i));
-			}
-		});
+		// addError throws when errors.size() > 50, so adding the 51st distinct entry triggers the throw
+		for (int i = 0; i < 50; i++) {
+			ex.addError(new UploadException.Problem("err" + i, "row" + i));
+		}
+		UploadException.Problem overflowProblem = new UploadException.Problem("err50", "row50");
+		assertThrows(UploadException.class, () -> ex.addError(overflowProblem));
 	}
 
 	// ---- ValidationException.getMessage null-superMessage branch ----

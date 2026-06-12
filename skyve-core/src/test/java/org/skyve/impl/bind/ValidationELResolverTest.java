@@ -184,21 +184,12 @@ class ValidationELResolverTest {
 	}
 
 	@Test
-	void setValueSetsPropertyResolvedWhenValIsNullAndTypeNotPrimitive() {
-		ValidationELResolver resolver = newResolver();
-		ELContext context = mock(ELContext.class);
-		// SampleBean.name is String (non-primitive), val=null → context.setPropertyResolved
-		assertDoesNotThrow(() -> resolver.setValue(context, SampleBean.class, "name", null));
-	}
-
-	@Test
-	void setValueDoesNothingForPrimitivePropertyBecauseTypeResolvesToTerminatingMock() {
-		// SampleBean.count is int — getType() returns null (terminating mocks return Integer not int.class)
-		// so setValue is a no-op
-		ValidationELResolver resolver = newResolver();
-		ELContext context = mock(ELContext.class);
-		// no exception expected
-		assertDoesNotThrow(() -> resolver.setValue(context, SampleBean.class, "count", null));
+	void setValueHandlesNullValueWithoutThrowing() {
+		for (String property : List.of("name", "count")) {
+			ValidationELResolver resolver = newResolver();
+			ELContext context = mock(ELContext.class);
+			assertDoesNotThrow(() -> resolver.setValue(context, SampleBean.class, property, null));
+		}
 	}
 
 	@Test

@@ -1,11 +1,13 @@
 package modules.test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import java.io.File;
 import java.nio.file.Files;
 import java.util.List;
 
-import org.junit.AfterClass;
-import org.junit.Assert;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
 import org.skyve.domain.app.admin.DataMaintenance.DataSensitivity;
@@ -70,7 +72,7 @@ class BackupTest extends AbstractSkyveTestDispose {
 			job.execute();
 			backupZip = job.getBackupZip();
 		}
-		Assert.assertNotNull(backupZip);
+		assertNotNull(backupZip);
 	}
 	
 	@Test
@@ -139,10 +141,10 @@ class BackupTest extends AbstractSkyveTestDispose {
 		if ((one == null) && (other == null)) {
 			return;
 		}
-		Assert.assertNotNull("original bean should not be null", one);
-		Assert.assertNotNull("restored bean should not be null", other);
-		Assert.assertEquals("bizModules", one.getBizModule(), other.getBizModule());
-		Assert.assertEquals("bizDocuments", one.getBizDocument(), other.getBizDocument());
+		assertNotNull(one, "original bean should not be null");
+		assertNotNull(other, "restored bean should not be null");
+		assertEquals(one.getBizModule(), other.getBizModule(), "bizModules");
+		assertEquals(one.getBizDocument(), other.getBizDocument(), "bizDocuments");
 		
 		Module module = c.getModule(one.getBizModule());
 		Document d = module.getDocument(c, one.getBizDocument());
@@ -150,7 +152,7 @@ class BackupTest extends AbstractSkyveTestDispose {
 			if (a.isPersistent()) {
 				String n = a.getName();
 				if (a instanceof Field) {
-					Assert.assertEquals(n, Binder.get(one, n), Binder.get(other, n));
+					assertEquals(Binder.get(one, n), Binder.get(other, n), n);
 				}
 				else if (a instanceof Association) {
 					compare((Bean) Binder.get(one, n), (Bean) Binder.get(other, n));
@@ -160,9 +162,9 @@ class BackupTest extends AbstractSkyveTestDispose {
 					List<Bean> ones = (List<Bean>) Binder.get(one, n);
 					@SuppressWarnings("unchecked")
 					List<Bean> others = (List<Bean>) Binder.get(other, n);
-					Assert.assertNotNull(n, ones);
-					Assert.assertNotNull(n, others);
-					Assert.assertEquals(n + " sizes", ones.size(), others.size());
+					assertNotNull(ones, n);
+					assertNotNull(others, n);
+					assertEquals(ones.size(), others.size(), n + " sizes");
 					for (int i = 0, l = ones.size(); i < l; i++) {
 						compare(ones.get(i), others.get(i));
 					}
@@ -174,8 +176,8 @@ class BackupTest extends AbstractSkyveTestDispose {
 	/**
 	 * Delete the backup zip file
 	 */
-	@AfterClass
-	public static void afterClass() throws Exception {
+	@AfterAll
+	static void afterClass() throws Exception {
 		if (backupZip != null) {
 			Files.delete(backupZip.toPath());
 		}

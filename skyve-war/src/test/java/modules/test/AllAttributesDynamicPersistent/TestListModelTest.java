@@ -34,7 +34,8 @@ class TestListModelTest {
 	@Test
 	void updateThrowsUnsupportedOperation() {
 		TestListModel model = new TestListModel();
-		assertThrows(UnsupportedOperationException.class, () -> model.update("bizId", new TreeMap<>()));
+		TreeMap<String, Object> properties = new TreeMap<>();
+		assertThrows(UnsupportedOperationException.class, () -> model.update("bizId", properties));
 	}
 
 	@Test

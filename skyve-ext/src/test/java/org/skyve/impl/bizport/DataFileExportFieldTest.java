@@ -33,31 +33,19 @@ public class DataFileExportFieldTest {
 	}
 
 	@Test
-	public void setBindingExpressionWithCurlyBracesStripsThemOff() {
-		DataFileExportField field = new DataFileExportField("Title", "original");
-		field.setBindingExpression("{myExpression}");
-		assertEquals("myExpression", field.getBindingExpression());
-	}
-
-	@Test
-	public void setBindingExpressionWithOnlyOpenBraceDoesNotStrip() {
-		DataFileExportField field = new DataFileExportField("Title", "original");
-		field.setBindingExpression("{noBrace");
-		assertEquals("{noBrace", field.getBindingExpression());
-	}
-
-	@Test
-	public void setBindingExpressionWithOnlyCloseBraceDoesNotStrip() {
-		DataFileExportField field = new DataFileExportField("Title", "original");
-		field.setBindingExpression("noBrace}");
-		assertEquals("noBrace}", field.getBindingExpression());
-	}
-
-	@Test
-	public void setBindingExpressionPlainStringStoredAsIs() {
-		DataFileExportField field = new DataFileExportField("Title", "original");
-		field.setBindingExpression("plainBinding");
-		assertEquals("plainBinding", field.getBindingExpression());
+	public void setBindingExpressionStoresExpectedValue() {
+		String[][] cases = {
+				{"{myExpression}", "myExpression"},
+				{"{noBrace", "{noBrace"},
+				{"noBrace}", "noBrace}"},
+				{"plainBinding", "plainBinding"},
+				{"{}", ""}
+		};
+		for (String[] testCase : cases) {
+			DataFileExportField field = new DataFileExportField("Title", "original");
+			field.setBindingExpression(testCase[0]);
+			assertEquals(testCase[1], field.getBindingExpression());
+		}
 	}
 
 	@Test
@@ -67,10 +55,4 @@ public class DataFileExportFieldTest {
 		assertNull(field.getBindingExpression());
 	}
 
-	@Test
-	public void setBindingExpressionEmptyCurlyBracesStripsToEmpty() {
-		DataFileExportField field = new DataFileExportField("Title", "original");
-		field.setBindingExpression("{}");
-		assertEquals("", field.getBindingExpression());
-	}
 }

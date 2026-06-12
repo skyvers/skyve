@@ -247,7 +247,7 @@ class StandardGeneratorTest {
 		when(document.getBizlet(customer)).thenReturn(bizlet);
 		when(customer.getModule("admin")).thenReturn(module);
 		when(module.getDocument(customer, "User")).thenReturn(associationDocument);
-		when(customer.getConstantDomainValues(eq(bizlet), eq("admin"), eq("Communication"), eq(status)))
+		when(customer.getConstantDomainValues(bizlet, "admin", "Communication", status))
 				.thenReturn(List.of(new DomainValue("A", "Active"), new DomainValue("I", "Inactive")));
 		StandardGenerator generator = new StandardGenerator(customer, document);
 

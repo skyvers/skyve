@@ -1,5 +1,6 @@
 package modules.admin.SecurityLog.models;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -35,6 +36,6 @@ class GeoIPMapTest {
 		IPGeolocation geoIP = new IPGeolocation("Sydney", "Australia", "AU", point);
 		MapResult result = GeoIPMap.mapModel(geoIP);
 		assertNotNull(result);
-		assertTrue(result.getItems().size() == 1);
+		assertEquals(1, result.getItems().size());
 	}
 }

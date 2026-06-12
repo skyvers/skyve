@@ -60,7 +60,8 @@ class LocalisableViewTest {
 		assertThrows(UnsupportedOperationException.class, () -> map.containsValue("v"));
 		assertThrows(UnsupportedOperationException.class, () -> map.put("k", "v"));
 		assertThrows(UnsupportedOperationException.class, () -> map.remove("k"));
-		assertThrows(UnsupportedOperationException.class, () -> map.putAll(java.util.Map.of("k", "v")));
+		java.util.Map<String, String> values = java.util.Map.of("k", "v");
+		assertThrows(UnsupportedOperationException.class, () -> map.putAll(values));
 		assertThrows(UnsupportedOperationException.class, map::clear);
 		assertThrows(UnsupportedOperationException.class, map::keySet);
 		assertThrows(UnsupportedOperationException.class, map::values);

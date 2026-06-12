@@ -15,6 +15,7 @@ import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -256,13 +257,13 @@ class SimpleObjectContractTest {
 			return new TimeOnly();
 		}
 		if (type == LocalDate.class) {
-			return LocalDate.of(2026, 6, 5);
+			return LocalDate.of(2026, Month.JUNE, 5);
 		}
 		if (type == LocalTime.class) {
 			return LocalTime.NOON;
 		}
 		if (type == LocalDateTime.class) {
-			return LocalDateTime.of(2026, 6, 5, 12, 0);
+			return LocalDateTime.of(2026, Month.JUNE, 5, 12, 0);
 		}
 		if (type == URI.class) {
 			return URI.create("https://example.invalid");

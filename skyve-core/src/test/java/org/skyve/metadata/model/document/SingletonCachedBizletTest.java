@@ -315,10 +315,11 @@ class SingletonCachedBizletTest {
 					return function.apply(persistence);
 				});
 
-		TestBean seed = new TestBean("admin", "Contact", "S1", "Seed");
-		assertThrows(DomainException.class,
-				() -> new TestSingletonCachedBizlet().newInstance(seed, DocumentPermissionScope.global));
-	}
+			TestBean seed = new TestBean("admin", "Contact", "S1", "Seed");
+			TestSingletonCachedBizlet bizlet = new TestSingletonCachedBizlet();
+			assertThrows(DomainException.class,
+					() -> bizlet.newInstance(seed, DocumentPermissionScope.global));
+		}
 
 	@Test
 	void clearRemovesCustomerAndGlobalKeysWithoutError() {

@@ -43,7 +43,9 @@ class FormattersTest {
 
 	@Test
 	void formattersRegisterDuplicateThrowsIllegalState() {
-		assertThrows(IllegalStateException.class, () -> Formatters.register(FormatterName.DD_MM_YYYY.name(), FormatterName.DD_MM_YYYY.getFormatter()));
+		String name = FormatterName.DD_MM_YYYY.name();
+		Formatter<?> formatter = FormatterName.DD_MM_YYYY.getFormatter();
+		assertThrows(IllegalStateException.class, () -> Formatters.register(name, formatter));
 	}
 
 	// ---- TimeDurationFormatter ----

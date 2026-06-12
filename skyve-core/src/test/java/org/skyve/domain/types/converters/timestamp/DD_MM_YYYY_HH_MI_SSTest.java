@@ -25,14 +25,7 @@ class DD_MM_YYYY_HH_MI_SSTest {
 
 	@Test
 	void testFromDisplayValueInvalidFormat() throws Exception {
-		ConversionException ce = assertThrows(ConversionException.class, () -> {
-			// setup the test data
-			Timestamp testDate = new Timestamp(Time.withDate(01, 03, 2020));
-			Time.setTime(testDate, 02, 30, 05);
-
-			// call the method under test
-			assertThat(formatter.fromDisplayValue("01-03-2020 02:30:05"), is(testDate));
-		});
+		ConversionException ce = assertThrows(ConversionException.class, () -> formatter.fromDisplayValue("01-03-2020 02:30:05"));
 
 		assertTrue(ce.getMessages().size() > 0);
 	}
@@ -104,6 +97,7 @@ class DD_MM_YYYY_HH_MI_SSTest {
 	@Test
 	@SuppressWarnings({ "static-method", "null" })
 	void testToDisplayValueNullThrows() {
-		assertThrows(ConversionException.class, () -> new DD_MM_YYYY_HH_MI_SS().toDisplayValue(null));
+		DD_MM_YYYY_HH_MI_SS converter = new DD_MM_YYYY_HH_MI_SS();
+		assertThrows(ConversionException.class, () -> converter.toDisplayValue(null));
 	}
 }

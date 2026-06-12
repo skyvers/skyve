@@ -1,10 +1,13 @@
 package modules.test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.awt.Color;
 import java.nio.charset.Charset;
 import java.util.Objects;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.skyve.util.JSON;
@@ -38,11 +41,11 @@ class UtilTests extends AbstractSkyveTest {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
 
 		test.originalValues().clear();
-		Assert.assertFalse("Should not have changed", test.hasChanged());
+		assertFalse(test.hasChanged(), "Should not have changed");
 
 		test.setText("TEST");
 
-		Assert.assertTrue("Should have changed", test.hasChanged());
+		assertTrue(test.hasChanged(), "Should have changed");
 	}
 
 	@Test
@@ -56,11 +59,11 @@ class UtilTests extends AbstractSkyveTest {
 		test.getComposedAssociation().originalValues().clear();
 		test.getEmbeddedAssociation().originalValues().clear();
 
-		Assert.assertFalse("Should not have changed", test.hasChanged());
+		assertFalse(test.hasChanged(), "Should not have changed");
 
 		test.getAggregatedAssociation().setText("TEST");
 
-		Assert.assertTrue("Should have changed", test.hasChanged());
+		assertTrue(test.hasChanged(), "Should have changed");
 	}
 
 	@Test
@@ -71,11 +74,11 @@ class UtilTests extends AbstractSkyveTest {
 
 		test = p.save(test);
 
-		Assert.assertFalse("Should not have changed", test.hasChanged());
+		assertFalse(test.hasChanged(), "Should not have changed");
 
 		test.getAggregatedCollection().get(0).setText("TEST");
 
-		Assert.assertTrue("Should have changed", test.hasChanged());
+		assertTrue(test.hasChanged(), "Should have changed");
 	}
 
 	@Test
@@ -86,12 +89,12 @@ class UtilTests extends AbstractSkyveTest {
 		test.originalValues().clear();
 		element.originalValues().clear();
 
-		Assert.assertFalse("Should not have changed", test.hasChanged());
-		Assert.assertFalse("Should not have changed", element.hasChanged());
+		assertFalse(test.hasChanged(), "Should not have changed");
+		assertFalse(element.hasChanged(), "Should not have changed");
 
 		test.getAggregatedCollection().add(element);
 
-		Assert.assertTrue("Should have changed", test.hasChanged());
+		assertTrue(test.hasChanged(), "Should have changed");
 	}
 
 	@Test
@@ -102,11 +105,11 @@ class UtilTests extends AbstractSkyveTest {
 
 		test = p.save(test);
 
-		Assert.assertFalse("Should not have changed", test.hasChanged());
+		assertFalse(test.hasChanged(), "Should not have changed");
 
 		test.getAggregatedCollection().get(0).setText("TEST");
 
-		Assert.assertTrue("Should have changed", test.hasChanged());
+		assertTrue(test.hasChanged(), "Should have changed");
 	}
 
 	@Test
@@ -116,7 +119,7 @@ class UtilTests extends AbstractSkyveTest {
 		AllCodepointsIterator iterator = new AllCodepointsIterator();
 		while (iterator.hasNext()) {
 			String test = new String(Character.toChars(iterator.next()));
-			Assert.assertEquals(test.getBytes(utf8).length, Util.utf8Length(test));
+			assertEquals(test.getBytes(utf8).length, Util.utf8Length(test));
 		}
 	}
 
@@ -155,16 +158,16 @@ class UtilTests extends AbstractSkyveTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void testColour() {
-		Assert.assertEquals("#000000", Util.htmlColourCode(Color.BLACK));
-		Assert.assertEquals("#ffffff", Util.htmlColourCode(Color.WHITE));
-		Assert.assertEquals("#ff0000", Util.htmlColourCode(Color.RED));
-		Assert.assertEquals("#00ff00", Util.htmlColourCode(Color.GREEN));
-		Assert.assertEquals("#0000ff", Util.htmlColourCode(Color.BLUE));
+		assertEquals("#000000", Util.htmlColourCode(Color.BLACK));
+		assertEquals("#ffffff", Util.htmlColourCode(Color.WHITE));
+		assertEquals("#ff0000", Util.htmlColourCode(Color.RED));
+		assertEquals("#00ff00", Util.htmlColourCode(Color.GREEN));
+		assertEquals("#0000ff", Util.htmlColourCode(Color.BLUE));
 
-		Assert.assertEquals(Color.BLACK, Util.htmlColour("#000000"));
-		Assert.assertEquals(Color.WHITE, Util.htmlColour("#FFFFFF"));
-		Assert.assertEquals(Color.RED, Util.htmlColour("#ff0000"));
-		Assert.assertEquals(Color.GREEN, Util.htmlColour("#00ff00"));
-		Assert.assertEquals(Color.BLUE, Util.htmlColour("#0000ff"));
+		assertEquals(Color.BLACK, Util.htmlColour("#000000"));
+		assertEquals(Color.WHITE, Util.htmlColour("#FFFFFF"));
+		assertEquals(Color.RED, Util.htmlColour("#ff0000"));
+		assertEquals(Color.GREEN, Util.htmlColour("#00ff00"));
+		assertEquals(Color.BLUE, Util.htmlColour("#0000ff"));
 	}
 }

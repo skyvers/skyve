@@ -13,6 +13,7 @@ import static org.mockito.Mockito.doReturn;
 
 import java.lang.reflect.Field;
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.List;
 
 import org.apache.commons.beanutils.DynaBean;
@@ -335,7 +336,7 @@ class ReportDatasetExtensionTest extends AbstractH2Test {
 
 	@Test
 	void testExecuteQueryBindsInputAndDefaultValues() throws Exception {
-		DateOnly savedDate = new DateOnly(LocalDate.of(2026, 2, 1));
+		DateOnly savedDate = new DateOnly(LocalDate.of(2026, Month.FEBRUARY, 1));
 		AllAttributesPersistent saved = saveAllAttributes("report-bizql-input", 11, 17L, savedDate);
 		ReportDatasetExtension dataset = ReportDataset.newInstance();
 		ReportTemplateExtension parent = ReportTemplate.newInstance();
@@ -378,7 +379,7 @@ class ReportDatasetExtensionTest extends AbstractH2Test {
 
 	@Test
 	void testExecuteTestQueryBindsAllTestValueTypes() {
-		DateOnly savedDate = new DateOnly(LocalDate.of(2026, 3, 2));
+		DateOnly savedDate = new DateOnly(LocalDate.of(2026, Month.MARCH, 2));
 		AllAttributesPersistent saved = saveAllAttributes("report-bizql-test", 13, 19L, savedDate);
 		ReportDatasetExtension dataset = ReportDataset.newInstance();
 		ReportTemplateExtension parent = ReportTemplate.newInstance();

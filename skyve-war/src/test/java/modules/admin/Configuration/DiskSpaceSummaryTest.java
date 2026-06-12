@@ -1,6 +1,7 @@
 package modules.admin.Configuration;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
@@ -41,6 +42,6 @@ class DiskSpaceSummaryTest {
 		DiskSpaceSummary summary = new DiskSpaceSummary();
 		String html1 = summary.getHTMLSummary();
 		String html2 = summary.getHTMLSummary();
-		assertTrue(html1 == html2); // same instance, cached
+		assertSame(html1, html2);
 	}
 }

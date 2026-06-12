@@ -3,8 +3,8 @@ package org.skyve.impl.security;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import org.junit.Test;
 import org.skyve.impl.util.UtilImpl;
@@ -45,12 +45,9 @@ public class SkyveLegacyAuthenticationProviderTest {
 		try {
 			UtilImpl.PASSWORD_HASHING_ALGORITHM = "not-a-message-digest";
 			SkyveLegacyAuthenticationProvider provider = new SkyveLegacyAuthenticationProvider();
+			UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken("user", "password");
 
-			provider.authenticate(new UsernamePasswordAuthenticationToken("user", "password"));
-			fail("Expected unsupported message digest algorithm to fail before JDBC access");
-		}
-		catch (@SuppressWarnings("unused") InternalAuthenticationServiceException e) {
-			// expected
+			assertThrows(InternalAuthenticationServiceException.class, () -> provider.authenticate(token));
 		}
 		finally {
 			UtilImpl.PASSWORD_HASHING_ALGORITHM = originalAlgorithm;

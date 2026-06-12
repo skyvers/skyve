@@ -74,57 +74,21 @@ class PlantUMLDirectiveTest {
 	}
 
 	@Test
-	void executeRejectsUnsupportedParameter() {
+	void executeRejectsInvalidParameters() {
 		PlantUMLDirective directive = new PlantUMLDirective();
-		Map<String, TemplateModel> params = Map.of("unknown", new SimpleScalar("value"));
-
-		TemplateModelException exception = assertThrows(TemplateModelException.class,
-				() -> directive.execute(null, params, new TemplateModel[0], null));
-
-		assertTrue(exception.getMessage().contains("Unsupported parameter"));
-	}
-
-	@Test
-	void executeRejectsNonScalarMarkup() {
-		PlantUMLDirective directive = new PlantUMLDirective();
-		Map<String, TemplateModel> params = Map.of("markup", mock(TemplateModel.class));
-
-		TemplateModelException exception = assertThrows(TemplateModelException.class,
-				() -> directive.execute(null, params, new TemplateModel[0], null));
-
-		assertTrue(exception.getMessage().contains("'markup' parameter must be a String"));
-	}
-
-	@Test
-	void executeRejectsNonBeanBeanParameter() {
-		PlantUMLDirective directive = new PlantUMLDirective();
-		Map<String, TemplateModel> params = Map.of("bean", new SimpleScalar("not-a-bean"));
-
-		TemplateModelException exception = assertThrows(TemplateModelException.class,
-				() -> directive.execute(null, params, new TemplateModel[0], null));
-
-		assertTrue(exception.getMessage().contains("'bean' parameter must be a Skyve bean"));
-	}
-
-	@Test
-	void executeRejectsNonScalarBinding() {
-		PlantUMLDirective directive = new PlantUMLDirective();
-		Map<String, TemplateModel> params = Map.of("binding", mock(TemplateModel.class));
-
-		TemplateModelException exception = assertThrows(TemplateModelException.class,
-				() -> directive.execute(null, params, new TemplateModel[0], null));
-
-		assertTrue(exception.getMessage().contains("'binding' parameter must be a String"));
-	}
-
-	@Test
-	void executeRejectsPartialBeanAndBindingParameters() {
-		PlantUMLDirective directive = new PlantUMLDirective();
-		Map<String, TemplateModel> params = Map.of("binding", new SimpleScalar("markup"));
-
-		TemplateModelException exception = assertThrows(TemplateModelException.class,
-				() -> directive.execute(null, params, new TemplateModel[0], null));
-
-		assertTrue(exception.getMessage().contains("Expected bean and binding, or markup"));
+		Object[][] cases = {
+				{Map.of("unknown", new SimpleScalar("value")), "Unsupported parameter"},
+				{Map.of("markup", mock(TemplateModel.class)), "'markup' parameter must be a String"},
+				{Map.of("bean", new SimpleScalar("not-a-bean")), "'bean' parameter must be a Skyve bean"},
+				{Map.of("binding", mock(TemplateModel.class)), "'binding' parameter must be a String"},
+				{Map.of("binding", new SimpleScalar("markup")), "Expected bean and binding, or markup"}
+		};
+		for (Object[] testCase : cases) {
+			@SuppressWarnings("unchecked")
+			Map<String, TemplateModel> params = (Map<String, TemplateModel>) testCase[0];
+			TemplateModelException exception = assertThrows(TemplateModelException.class,
+					() -> directive.execute(null, params, new TemplateModel[0], null));
+			assertTrue(exception.getMessage().contains((String) testCase[1]));
+		}
 	}
 }

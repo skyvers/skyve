@@ -4,8 +4,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.lang.reflect.Field;
 
@@ -35,9 +35,9 @@ class DataBuilderH2Test extends AbstractH2Test {
 		User result1 = db.optional(true, true).factoryBuild(User.MODULE_NAME, User.DOCUMENT_NAME);
 
 		// validate the test data
-		assertNull("cardinality should be null initially", getFieldValue(db, "cardinalities"));
-		assertEquals("default cardinality should be 1", 1, result1.getGroups().size());
-		assertEquals("default cardinality should be 1", 1, result1.getRoles().size());
+		assertNull(getFieldValue(db, "cardinalities"), "cardinality should be null initially");
+		assertEquals(1, result1.getGroups().size(), "default cardinality should be 1");
+		assertEquals(1, result1.getRoles().size(), "default cardinality should be 1");
 
 		// call the method under test
 		db.cardinality(User.groupsPropertyName, expectedCardinality);
@@ -46,8 +46,8 @@ class DataBuilderH2Test extends AbstractH2Test {
 		// verify the result
 		java.util.Map<String, Integer> cardinalities = getFieldValue(db, "cardinalities");
 		assertEquals(Integer.valueOf(expectedCardinality), cardinalities.get(User.groupsPropertyName));
-		assertEquals("groups collection should now have specified cardinality", expectedCardinality, result2.getGroups().size());
-		assertEquals("roles collection should still have the default cardinality", 1, result2.getRoles().size());
+		assertEquals(expectedCardinality, result2.getGroups().size(), "groups collection should now have specified cardinality");
+		assertEquals(1, result2.getRoles().size(), "roles collection should still have the default cardinality");
 	}
 
 	@Test
@@ -91,7 +91,7 @@ class DataBuilderH2Test extends AbstractH2Test {
 		Contact result1 = db.build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
 
 		// validate the test data
-		assertNull("name should be null initially", getFieldValue(db, "names"));
+		assertNull(getFieldValue(db, "names"), "name should be null initially");
 		assertThat(result1.getEmail1(), is(notNullValue()));
 
 		// call the method under test
@@ -111,7 +111,7 @@ class DataBuilderH2Test extends AbstractH2Test {
 		Tag result1 = db.build(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
 
 		// validate the test data
-		assertNull("type should be null initially", getFieldValue(db, "types"));
+		assertNull(getFieldValue(db, "types"), "type should be null initially");
 		assertThat(result1.getVisible(), is(notNullValue()));
 
 		// call the method under test

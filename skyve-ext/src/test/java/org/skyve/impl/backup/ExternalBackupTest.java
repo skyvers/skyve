@@ -20,41 +20,18 @@ public class ExternalBackupTest {
 	}
 
 	@Test
-	public void getInstanceThrowsWhenNotConfigured() {
-		// BACKUP_EXTERNAL_BACKUP_CLASS is null by default
+	public void getInstanceThrowsWhenConfigurationCannotCreateBackup() {
 		String saved = UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS;
 		try {
-			UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS = null;
-			assertThrows(IllegalStateException.class, ExternalBackup::getInstance);
+			String[] invalidClassNames = {null, "com.example.NonExistentBackupClass", "java.net.InetSocketAddress"};
+			for (String className : invalidClassNames) {
+				UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS = className;
+				assertThrows(IllegalStateException.class, ExternalBackup::getInstance);
+			}
 		} finally {
 			UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS = saved;
 		}
 	}
-
-        @Test
-        public void getInstanceThrowsWhenClassNotFound() {
-                // covers the try block path (L24-27): class name is set but class doesn't exist
-                String saved = UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS;
-                try {
-                        UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS = "com.example.NonExistentBackupClass";
-                        assertThrows(IllegalStateException.class, ExternalBackup::getInstance);
-                } finally {
-                        UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS = saved;
-                }
-        }
-
-        @Test
-        public void getInstanceThrowsInstantiationException() {
-                // covers L24-25: class exists but has no no-arg constructor, so newInstance throws NoSuchMethodException
-                String saved = UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS;
-                try {
-                        // InetSocketAddress has no no-arg constructor → NoSuchMethodException → IllegalStateException
-                        UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS = "java.net.InetSocketAddress";
-                        assertThrows(IllegalStateException.class, ExternalBackup::getInstance);
-                } finally {
-                        UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS = saved;
-                }
-        }
 
         @Test
         public void areExternalBackupsEnabledReturnsTrueWhenConfigured() {

@@ -400,7 +400,8 @@ class DecimalTypesTest {
 	@Test
 	void decimal2CompareToIllegalTypeThrows() {
 		Decimal2 d = new Decimal2(1.0);
-		assertThrows(IllegalArgumentException.class, () -> d.compareTo(Integer.valueOf(1)));
+		Integer other = Integer.valueOf(1);
+		assertThrows(IllegalArgumentException.class, () -> d.compareTo(other));
 	}
 
 	@Test

@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig;
@@ -112,25 +111,25 @@ class UtilImplTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void testUnidecode() {
-		Assert.assertEquals("descricao", UtilImpl.unidecode("descrição"));
-		Assert.assertEquals("tache", UtilImpl.unidecode("tâche"));
-		Assert.assertEquals("opcoes", UtilImpl.unidecode("opções"));
-		Assert.assertEquals("endereco", UtilImpl.unidecode("endereço"));
-		Assert.assertEquals("LocalDeInstalacao", UtilImpl.unidecode("LocalDeInstalação"));
-		Assert.assertEquals("kayttaja", UtilImpl.unidecode("käyttäjä"));
-		Assert.assertEquals("flagObbligatorieta", UtilImpl.unidecode("flagObbligatorietà"));
-		Assert.assertEquals("namenserganzung", UtilImpl.unidecode("namensergänzung"));
-		Assert.assertEquals("prenom", UtilImpl.unidecode("prénom"));
-		Assert.assertEquals("data", UtilImpl.unidecode("дата"));
-		Assert.assertEquals("prioritat", UtilImpl.unidecode("priorität"));
-		Assert.assertEquals("Hebergement", UtilImpl.unidecode("Hébergement"));
-		Assert.assertEquals("filDactualite", UtilImpl.unidecode("filDactualité"));
-		Assert.assertEquals("capacite", UtilImpl.unidecode("capacité"));
-		Assert.assertEquals("endereco", UtilImpl.unidecode("endereço"));
-		Assert.assertEquals("escritorio", UtilImpl.unidecode("escritório"));
-		Assert.assertEquals("noRecu", UtilImpl.unidecode("noReçu"));
-		Assert.assertEquals("yeuCauTuyenDung", UtilImpl.unidecode("yêuCầuTuyểnDụng"));
-		Assert.assertEquals("heureDarrivee", UtilImpl.unidecode("heureDarrivée"));
+		assertEquals("descricao", UtilImpl.unidecode("descrição"));
+		assertEquals("tache", UtilImpl.unidecode("tâche"));
+		assertEquals("opcoes", UtilImpl.unidecode("opções"));
+		assertEquals("endereco", UtilImpl.unidecode("endereço"));
+		assertEquals("LocalDeInstalacao", UtilImpl.unidecode("LocalDeInstalação"));
+		assertEquals("kayttaja", UtilImpl.unidecode("käyttäjä"));
+		assertEquals("flagObbligatorieta", UtilImpl.unidecode("flagObbligatorietà"));
+		assertEquals("namenserganzung", UtilImpl.unidecode("namensergänzung"));
+		assertEquals("prenom", UtilImpl.unidecode("prénom"));
+		assertEquals("data", UtilImpl.unidecode("дата"));
+		assertEquals("prioritat", UtilImpl.unidecode("priorität"));
+		assertEquals("Hebergement", UtilImpl.unidecode("Hébergement"));
+		assertEquals("filDactualite", UtilImpl.unidecode("filDactualité"));
+		assertEquals("capacite", UtilImpl.unidecode("capacité"));
+		assertEquals("endereco", UtilImpl.unidecode("endereço"));
+		assertEquals("escritorio", UtilImpl.unidecode("escritório"));
+		assertEquals("noRecu", UtilImpl.unidecode("noReçu"));
+		assertEquals("yeuCauTuyenDung", UtilImpl.unidecode("yêuCầuTuyểnDụng"));
+		assertEquals("heureDarrivee", UtilImpl.unidecode("heureDarrivée"));
 	}
 
 	// ---- processStringValue ------------------------------------------------

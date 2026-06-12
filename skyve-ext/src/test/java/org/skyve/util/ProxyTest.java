@@ -1,11 +1,10 @@
 package org.skyve.util;
 
-import static org.junit.Assert.assertSame;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.lang.reflect.Method;
 
@@ -62,12 +61,9 @@ class ProxyTest {
 		Counter counter = new Counter();
 		ProxyDelegate<Counter> delegate = new ProxyDelegate<>();
 		Method method = Counter.class.getMethod("throwingMethod");
-		try {
-			delegate.invoke(counter, counter, method, new Object[0]);
-			fail("Expected exception");
-		} catch (IllegalArgumentException e) {
-			assertEquals("original-cause", e.getMessage());
-		}
+		IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+				() -> delegate.invoke(counter, counter, method, new Object[0]));
+		assertEquals("original-cause", e.getMessage());
 	}
 
 	@Test

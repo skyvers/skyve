@@ -374,6 +374,7 @@ class FluentDocumentAdditionalBuildersTest {
 		};
 		unknown.setName("unknown");
 		doc.putAttribute(unknown);
-		assertThrows(IllegalStateException.class, () -> new FluentDocument().from(doc));
+		FluentDocument fluentDocument = new FluentDocument();
+		assertThrows(IllegalStateException.class, () -> fluentDocument.from(doc));
 	}
 }

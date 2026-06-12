@@ -38,7 +38,7 @@ public class ReindexJobSeamMethodsTest {
 		StringBuilder sql = new StringBuilder("select * from ADM_TEST");
 		Table table = new Table("ADM_TEST", "ADM_TEST");
 		harness.callSecureSql(sql, table, "demo");
-		assertTrue(sql.length() > 0);
+		assertFalse(sql.isEmpty());
 	}
 
 	@Test

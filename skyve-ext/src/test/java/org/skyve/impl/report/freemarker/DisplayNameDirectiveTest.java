@@ -60,8 +60,9 @@ class DisplayNameDirectiveTest {
 	@Test
 	void executeAcceptsBindingBeforeRequiringEnvironment() {
 		DisplayNameDirective directive = new DisplayNameDirective();
+		Map<String, TemplateModel> params = Map.of("binding", scalar("name"));
 
-		assertThrows(NullPointerException.class, () -> directive.execute(null, Map.of("binding", scalar("name")), new TemplateModel[0], null));
+		assertThrows(NullPointerException.class, () -> directive.execute(null, params, new TemplateModel[0], null));
 	}
 
 	@Test

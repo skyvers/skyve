@@ -94,11 +94,6 @@ class BizPortTest extends AbstractSkyveTest {
 	
 	private void bizport(Bean bean) throws Exception {
 		BizPortWorkbook workbook = EXT.standardBizExport(bean);
-// Uncomment to put the xlsx to the file system
-//try (OutputStream os = new FileOutputStream("/Users/mike/Downloads/test.xlsx")) {
-//workbook.write(os);
-//os.flush();
-//}
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(10240)) {
 			workbook.write(baos);
 			byte[] bytes = baos.toByteArray();

@@ -300,6 +300,6 @@ class RouterTest implements TaggingUxUiSelector {
 	void getUxuiSelectorThrowsMetaDataExceptionForInvalidClassName() {
 		Router router = new Router();
 		router.setUxuiSelectorClassName("com.example.NonExistentClass");
-		assertThrows(MetaDataException.class, () -> router.getUxuiSelector());
+		assertThrows(MetaDataException.class, router::getUxuiSelector);
 	}
 }

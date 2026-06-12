@@ -6,32 +6,34 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
+import org.junit.runners.Parameterized.Parameters;
+
+import java.util.Arrays;
+import java.util.Collection;
 
 @SuppressWarnings("static-method")
+@RunWith(Parameterized.class)
 public class NoonTest {
-
-	@Test
-	public void testMatchesNoon() {
-		Noon provider = new Noon();
-		assertTrue(provider.matches("noon"));
+	@Parameters(name = "{0}")
+	public static Collection<Object[]> matchingExpressions() {
+		return Arrays.asList(new Object[][] {
+				{"noon"},
+				{"midday"},
+				{"NOON"},
+				{"Midday"}
+		});
 	}
 
-	@Test
-	public void testMatchesMidday() {
-		Noon provider = new Noon();
-		assertTrue(provider.matches("midday"));
-	}
+	@Parameter
+	public String matchingExpression;
 
 	@Test
-	public void testMatchesCaseInsensitiveNoon() {
+	public void testMatchesNoonExpression() {
 		Noon provider = new Noon();
-		assertTrue(provider.matches("NOON"));
-	}
-
-	@Test
-	public void testMatchesCaseInsensitiveMidday() {
-		Noon provider = new Noon();
-		assertTrue(provider.matches("Midday"));
+		assertTrue(provider.matches(matchingExpression));
 	}
 
 	@Test

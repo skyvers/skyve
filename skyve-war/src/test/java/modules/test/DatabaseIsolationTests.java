@@ -3,11 +3,11 @@ package modules.test;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Objects;
 import java.util.UUID;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.skyve.CORE;
 import org.skyve.EXT;
@@ -33,7 +33,7 @@ class DatabaseIsolationTests extends AbstractSkyveTestDispose {
 		test1.setBizId(test.getBizId());
 		p.upsertBeanTuple(test);
 		p.commit(false);
-		DomainException de = Assert.assertThrows(DomainException.class, () -> p.upsertBeanTuple(test1));
+		DomainException de = assertThrows(DomainException.class, () -> p.upsertBeanTuple(test1));
 
 		assertThat(de.getMessage(), is(notNullValue()));
 	}
@@ -47,7 +47,7 @@ class DatabaseIsolationTests extends AbstractSkyveTestDispose {
 		test1.setBizId(test.getBizId());
 		p.upsertBeanTuple(test);
 		p.commit(false);
-		DomainException de = Assert.assertThrows(DomainException.class, () -> p.upsertBeanTuple(test1));
+		DomainException de = assertThrows(DomainException.class, () -> p.upsertBeanTuple(test1));
 
 		assertThat(de.getMessage(), is(notNullValue()));
 	}

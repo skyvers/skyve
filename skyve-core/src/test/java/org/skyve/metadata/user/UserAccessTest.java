@@ -171,20 +171,20 @@ class UserAccessTest {
 	void equalsSameValues() {
 		UserAccess ua1 = UserAccess.singular("mod", "doc");
 		UserAccess ua2 = UserAccess.singular("mod", "doc");
-		assertTrue(ua1.equals(ua2));
+		assertEquals(ua1, ua2);
 	}
 
 	@Test
 	void notEqualsDifferentType() {
 		UserAccess ua1 = UserAccess.singular("mod", "doc");
 		UserAccess ua2 = UserAccess.documentAggregate("mod", "doc");
-		assertFalse(ua1.equals(ua2));
+		assertNotEquals(ua1, ua2);
 	}
 
 	@Test
 	void notEqualsNull() {
 		UserAccess ua = UserAccess.singular("mod", "doc");
-		assertFalse(ua.equals(null));
+		assertNotEquals(null, ua);
 	}
 
 	@Test
@@ -205,7 +205,7 @@ class UserAccessTest {
 	void compareToNotSameReturnsNonZero() {
 		UserAccess ua1 = UserAccess.singular("mod", "doc");
 		UserAccess ua2 = UserAccess.queryAggregate("mod", "qry");
-		assertFalse(ua1.compareTo(ua2) == 0);
+		assertNotEquals(0, ua1.compareTo(ua2));
 	}
 
 	// ---- ALL_UX_UIS ----

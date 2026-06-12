@@ -69,9 +69,11 @@ class UploadQualificationsTest {
 	@Test
 	void uploadUnsupportedFileTypeThrowsValidationException() {
 		UploadQualifications action = new UploadQualifications();
+		Upload upload = upload("qualifications.txt");
+		UploadException problems = new UploadException();
 
 		ValidationException exception = assertThrows(ValidationException.class,
-				() -> action.upload(null, upload("qualifications.txt"), new UploadException(), null));
+				() -> action.upload(null, upload, problems, null));
 
 		assertEquals("Only csv or xlsx file types are supported", exception.getMessages().iterator().next().getText());
 	}

@@ -1,15 +1,17 @@
 package org.skyve.impl.content;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Field;
 
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
-import org.junit.Assert;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.Test;
 import org.skyve.content.AttachmentContent;
 import org.skyve.impl.util.UUIDv7;
@@ -65,7 +67,7 @@ class TikaTextExtractorTest {
 																"image")
 												.attachment(resourceName, bytes);
 			String text = new TikaTextExtractor().extractTextFromContent(content);
-			Assert.assertTrue(text.contains(expected));
+			assertTrue(text.contains(expected));
 		}
 	}
 
@@ -74,19 +76,19 @@ class TikaTextExtractorTest {
 		String markup = "<html><body><p>Hello world</p></body></html>";
 		String result = new TikaTextExtractor().extractTextFromMarkup(markup);
 		assertNotNull(result);
-		Assert.assertTrue(result.contains("Hello world"));
+		assertTrue(result.contains("Hello world"));
 	}
 
 	@Test
 	void testExtractTextFromMarkupWithNull() {
 		String result = new TikaTextExtractor().extractTextFromMarkup(null);
-		Assert.assertNull(result);
+		assertNull(result);
 	}
 
 	@Test
 	void testExtractTextFromMarkupWithBlank() {
 		String result = new TikaTextExtractor().extractTextFromMarkup("   ");
-		Assert.assertNull(result);
+		assertNull(result);
 	}
 
 	@Test
@@ -100,9 +102,9 @@ class TikaTextExtractorTest {
 		String result = new TikaTextExtractor().extractTextFromContent(content);
 
 		assertNotNull(result);
-		Assert.assertTrue(result.contains("Hello body"));
-		Assert.assertTrue(result.contains("Example Title"));
-		Assert.assertTrue(result.contains("Markup trail"));
+		assertTrue(result.contains("Hello body"));
+		assertTrue(result.contains("Example Title"));
+		assertTrue(result.contains("Markup trail"));
 	}
 
 	@Test
@@ -125,9 +127,9 @@ class TikaTextExtractorTest {
 		String result = new TikaTextExtractor().extractTextFromContent(content);
 
 		assertNotNull(result);
-		Assert.assertTrue(result.contains("Body text"));
-		Assert.assertTrue(result.contains("Meta Title"));
-		Assert.assertTrue(result.contains("Meta Subject") || result.contains("Meta Author"));
+		assertTrue(result.contains("Body text"));
+		assertTrue(result.contains("Meta Title"));
+		assertTrue(result.contains("Meta Subject") || result.contains("Meta Author"));
 	}
 
 	@Test
@@ -173,7 +175,7 @@ class TikaTextExtractorTest {
 
 		new TikaTextExtractor().sniffContentType(content);
 
-		Assert.assertEquals("image/png", content.getContentType());
+		assertEquals("image/png", content.getContentType());
 	}
 
 	@Test
@@ -184,7 +186,7 @@ class TikaTextExtractorTest {
 		content.setContentType("application/octet-stream");
 		new TikaTextExtractor().sniffContentType(content);
 		// Content type should not change when already set
-		Assert.assertEquals("application/octet-stream", content.getContentType());
+		assertEquals("application/octet-stream", content.getContentType());
 	}
 
 	@Test
@@ -203,7 +205,7 @@ class TikaTextExtractorTest {
 			String result = new TikaTextExtractor().sniffLanguage("The quick brown fox jumps over the lazy dog");
 			// if a detector is available, result should be non-null
 			if (result != null) {
-				Assert.assertEquals("en", result);
+				assertEquals("en", result);
 			}
 		} catch (IllegalStateException expected) {
 			assertNotNull(expected.getMessage());
@@ -216,11 +218,11 @@ class TikaTextExtractorTest {
 		try {
 			// empty text should return null or a language code, never throw
 			String result = new TikaTextExtractor().sniffLanguage("");
-			Assert.assertTrue("sniffLanguage should return null or a valid language code",
-					result == null || !result.isEmpty());
+			assertTrue(result == null || !result.isEmpty(),
+					"sniffLanguage should return null or a valid language code");
 		} catch (IllegalStateException e) {
 			// No language detectors available in test classpath — acceptable
-			Assert.assertNotNull(e);
+			assertNotNull(e);
 		}
 	}
 

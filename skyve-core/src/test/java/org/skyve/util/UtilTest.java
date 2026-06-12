@@ -467,8 +467,7 @@ class UtilTest {
 
 	@Test
 	void getHomeUriReturnsUtilImplHomeUri() {
-		// getHomeUri() returns UtilImpl.HOME_URI which defaults to null;
-		// just call it to cover the line
+		// Cover the default home URI delegation without relying on local configuration.
 		assertDoesNotThrow(Util::getHomeUri);
 	}
 

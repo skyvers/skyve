@@ -334,32 +334,32 @@ class DelegatingProvidedRepositoryChainTest {
 		when(d1.retrieveAllScheduledReportsForAllCustomers()).thenReturn(Collections.emptyList());
 		when(d2.retrieveAllScheduledReportsForAllCustomers()).thenReturn(Collections.emptyList());
 
-		assertTrue(chain.findResourceFile("r", "c", "m") == null);
-		assertTrue(chain.getRouter() == null);
-		assertTrue(chain.getCustomer("c") == null);
-		assertTrue(chain.getDynamicImage(customer, document, "img", false) == null);
-		assertTrue(chain.getView("ux", customer, document, "v") == null);
-		assertTrue(chain.getMetaDataAction(customer, document, "a") == null);
-		assertTrue(chain.getComparisonModel(customer, document, "cmp", false) == null);
-		assertTrue(chain.getMapModel(customer, document, "map", false) == null);
-		assertTrue(chain.getChartModel(customer, document, "chart", false) == null);
-		assertTrue(chain.getListModel(customer, document, "list", false) == null);
-		assertTrue(chain.getServerSideAction(customer, document, "S", false) == null);
-		assertTrue(chain.getBizExportAction(customer, document, "E", false) == null);
-		assertTrue(chain.getBizImportAction(customer, document, "I", false) == null);
-		assertTrue(chain.getDownloadAction(customer, document, "D", false) == null);
-		assertTrue(chain.getUploadAction(customer, document, "U", false) == null);
-		assertTrue(chain.getDataFactory(customer, document) == null);
-		assertTrue(chain.retrieveUser("u") == null);
+			assertNull(chain.findResourceFile("r", "c", "m"));
+			assertNull(chain.getRouter());
+			assertNull(chain.getCustomer("c"));
+			assertNull(chain.getDynamicImage(customer, document, "img", false));
+			assertNull(chain.getView("ux", customer, document, "v"));
+			assertNull(chain.getMetaDataAction(customer, document, "a"));
+			assertNull(chain.getComparisonModel(customer, document, "cmp", false));
+			assertNull(chain.getMapModel(customer, document, "map", false));
+			assertNull(chain.getChartModel(customer, document, "chart", false));
+			assertNull(chain.getListModel(customer, document, "list", false));
+			assertNull(chain.getServerSideAction(customer, document, "S", false));
+			assertNull(chain.getBizExportAction(customer, document, "E", false));
+			assertNull(chain.getBizImportAction(customer, document, "I", false));
+			assertNull(chain.getDownloadAction(customer, document, "D", false));
+			assertNull(chain.getUploadAction(customer, document, "U", false));
+			assertNull(chain.getDataFactory(customer, document));
+			assertNull(chain.retrieveUser("u"));
 		assertTrue(chain.retrieveAllScheduledJobsForAllCustomers().isEmpty());
 		assertTrue(chain.retrieveAllScheduledReportsForAllCustomers().isEmpty());
-		assertTrue(chain.retrievePublicUserName("c") == null);
-		assertTrue(chain.getBizlet(customer, document, false) == null);
-		assertTrue(chain.getMetaDataBizlet(customer, document) == null);
-		assertTrue(chain.getGlobalRouter() == null);
-		assertTrue(chain.getReportFileName(customer, document, "rpt") == null);
-		assertTrue(chain.getJavaClass(customer, "key") == null);
-		assertTrue(chain.vtable("cust", "key") == null);
+			assertNull(chain.retrievePublicUserName("c"));
+			assertNull(chain.getBizlet(customer, document, false));
+			assertNull(chain.getMetaDataBizlet(customer, document));
+			assertNull(chain.getGlobalRouter());
+			assertNull(chain.getReportFileName(customer, document, "rpt"));
+			assertNull(chain.getJavaClass(customer, "key"));
+			assertNull(chain.vtable("cust", "key"));
 		assertThrows(MetaDataException.class, () -> chain.getDocument(customer, module, "doc"));
 	}
 
@@ -398,5 +398,4 @@ class DelegatingProvidedRepositoryChainTest {
 		assertEquals("Invoice does not exist for module sales", documentException.getMessage());
 	}
 }
-
 

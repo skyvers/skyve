@@ -435,10 +435,7 @@ class RendererStringTest {
 	// --- renderBand ---
 
 	private ReportBand newBand(ReportBand.BandType type) {
-		ReportBand band = new ReportBand();
-		band.setBandType(type);
-		band.setParent(parent);
-		return band;
+		return band(type, parent);
 	}
 
 	@Test

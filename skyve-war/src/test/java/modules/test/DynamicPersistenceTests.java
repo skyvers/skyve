@@ -3,10 +3,16 @@ package modules.test;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.List;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Geometry;
 import org.skyve.domain.Bean;
@@ -31,28 +37,28 @@ class DynamicPersistenceTests extends AbstractSkyveTestDispose {
 
 	@Test
 	void testHasDynamic() {
-		Assert.assertFalse(aapd.hasDynamic());
-		Assert.assertTrue(adapd.hasDynamic()); // has dynamic attributes
-		Assert.assertTrue(aadpd.hasDynamic()); // is dynamic
-		Assert.assertFalse(aarpd.hasDynamic());
-		Assert.assertFalse(ad1.hasDynamic());
-		Assert.assertFalse(ad2.hasDynamic());
-		Assert.assertFalse(ao2m.hasDynamic());
-		Assert.assertFalse(ao2o.hasDynamic());
-		Assert.assertTrue(dmed.hasDynamic()); // is dynamic
-		Assert.assertTrue(dmsd.hasDynamic()); // is dynamic
-		Assert.assertFalse(hd.hasDynamic());
-		Assert.assertFalse(im2mpd.hasDynamic());
-		Assert.assertFalse(io2mpd.hasDynamic());
-		Assert.assertFalse(io2opd.hasDynamic());
-		Assert.assertTrue(mbd.hasDynamic()); // points to messd (dynamic)
-		Assert.assertTrue(mejsd.hasDynamic()); // has dynamic attribute
-		Assert.assertTrue(messd.hasDynamic()); // has dynamic attribute
-		Assert.assertTrue(msjsd.hasDynamic()); // has dynamic attribute
-		Assert.assertTrue(msssd.hasDynamic()); // has dynamic attribute
-		Assert.assertFalse(rd.hasDynamic());
-		Assert.assertFalse(ucn.hasDynamic());
-		Assert.assertFalse(ucnn.hasDynamic());
+		assertFalse(aapd.hasDynamic());
+		assertTrue(adapd.hasDynamic()); // has dynamic attributes
+		assertTrue(aadpd.hasDynamic()); // is dynamic
+		assertFalse(aarpd.hasDynamic());
+		assertFalse(ad1.hasDynamic());
+		assertFalse(ad2.hasDynamic());
+		assertFalse(ao2m.hasDynamic());
+		assertFalse(ao2o.hasDynamic());
+		assertTrue(dmed.hasDynamic()); // is dynamic
+		assertTrue(dmsd.hasDynamic()); // is dynamic
+		assertFalse(hd.hasDynamic());
+		assertFalse(im2mpd.hasDynamic());
+		assertFalse(io2mpd.hasDynamic());
+		assertFalse(io2opd.hasDynamic());
+		assertTrue(mbd.hasDynamic()); // points to messd (dynamic)
+		assertTrue(mejsd.hasDynamic()); // has dynamic attribute
+		assertTrue(messd.hasDynamic()); // has dynamic attribute
+		assertTrue(msjsd.hasDynamic()); // has dynamic attribute
+		assertTrue(msssd.hasDynamic()); // has dynamic attribute
+		assertFalse(rd.hasDynamic());
+		assertFalse(ucn.hasDynamic());
+		assertFalse(ucnn.hasDynamic());
 	}
 
 	@Test
@@ -67,24 +73,24 @@ class DynamicPersistenceTests extends AbstractSkyveTestDispose {
 		test = p.save(test);
 		test = p.save(test);
 
-		Assert.assertEquals(Integer.valueOf(1), test.getBizVersion());
-		Assert.assertEquals(Integer.valueOf(1), test.getAggregatedAssociation().getBizVersion());
-		Assert.assertEquals(Integer.valueOf(0), test.getComposedAssociation().getBizVersion());
-		Assert.assertEquals(null, test.getEmbeddedAssociation().getBizVersion());
-		Assert.assertEquals(Integer.valueOf(0), ((DynamicPersistentBean) test.getDynamic(AllDynamicAttributesPersistent.dynamicAggregatedAssociationPropertyName)).getBizVersion());
-		Assert.assertEquals(Integer.valueOf(0), ((DynamicPersistentBean) test.getDynamic(AllDynamicAttributesPersistent.dynamicComposedAssociationPropertyName)).getBizVersion());
-		Assert.assertEquals(Integer.valueOf(0), ((DynamicPersistentBean) test.getDynamic(AllDynamicAttributesPersistent.dynamicEmbeddedAssociationPropertyName)).getBizVersion());
-		Assert.assertEquals(Integer.valueOf(0), test.getComposedCollection().get(0).getBizVersion());
-		Assert.assertEquals(Integer.valueOf(0), test.getComposedCollection().get(1).getBizVersion());
+		assertEquals(Integer.valueOf(1), test.getBizVersion());
+		assertEquals(Integer.valueOf(1), test.getAggregatedAssociation().getBizVersion());
+		assertEquals(Integer.valueOf(0), test.getComposedAssociation().getBizVersion());
+		assertEquals(null, test.getEmbeddedAssociation().getBizVersion());
+		assertEquals(Integer.valueOf(0), ((DynamicPersistentBean) test.getDynamic(AllDynamicAttributesPersistent.dynamicAggregatedAssociationPropertyName)).getBizVersion());
+		assertEquals(Integer.valueOf(0), ((DynamicPersistentBean) test.getDynamic(AllDynamicAttributesPersistent.dynamicComposedAssociationPropertyName)).getBizVersion());
+		assertEquals(Integer.valueOf(0), ((DynamicPersistentBean) test.getDynamic(AllDynamicAttributesPersistent.dynamicEmbeddedAssociationPropertyName)).getBizVersion());
+		assertEquals(Integer.valueOf(0), test.getComposedCollection().get(0).getBizVersion());
+		assertEquals(Integer.valueOf(0), test.getComposedCollection().get(1).getBizVersion());
 		List<DynamicPersistentBean> list = (List<DynamicPersistentBean>) test.getDynamic(AllDynamicAttributesPersistent.dynamicAggregatedCollectionPropertyName);
-		Assert.assertEquals(Integer.valueOf(0), list.get(0).getBizVersion());
-		Assert.assertEquals(Integer.valueOf(0), list.get(1).getBizVersion());
+		assertEquals(Integer.valueOf(0), list.get(0).getBizVersion());
+		assertEquals(Integer.valueOf(0), list.get(1).getBizVersion());
 		list = (List<DynamicPersistentBean>) test.getDynamic(AllDynamicAttributesPersistent.dynamicComposedCollectionPropertyName);
-		Assert.assertEquals(Integer.valueOf(0), list.get(0).getBizVersion());
-		Assert.assertEquals(Integer.valueOf(0), list.get(1).getBizVersion());
+		assertEquals(Integer.valueOf(0), list.get(0).getBizVersion());
+		assertEquals(Integer.valueOf(0), list.get(1).getBizVersion());
 		list = (List<DynamicPersistentBean>) test.getDynamic(AllDynamicAttributesPersistent.dynamicChildCollectionPropertyName);
-		Assert.assertEquals(Integer.valueOf(0), list.get(0).getBizVersion());
-		Assert.assertEquals(Integer.valueOf(0), list.get(1).getBizVersion());
+		assertEquals(Integer.valueOf(0), list.get(0).getBizVersion());
+		assertEquals(Integer.valueOf(0), list.get(1).getBizVersion());
 	}
 
 	@Test
@@ -95,20 +101,20 @@ class DynamicPersistenceTests extends AbstractSkyveTestDispose {
 		
 		p.evictAllCached();
 		test = p.retrieve(adapd, test.getBizId());
-		Assert.assertNotNull(test);
+		assertNotNull(test);
 
-		Assert.assertTrue(test.getDynamic(AllDynamicAttributesPersistent.booleanFlagPropertyName) instanceof Boolean);
-		Assert.assertTrue(test.getDynamic(AllDynamicAttributesPersistent.datePropertyName) instanceof DateOnly);
-		Assert.assertTrue(test.getDynamic(AllDynamicAttributesPersistent.dateTimePropertyName) instanceof DateTime);
-		Assert.assertTrue(test.getDynamic(AllDynamicAttributesPersistent.decimal10PropertyName) instanceof Decimal10);
-		Assert.assertTrue(test.getDynamic(AllDynamicAttributesPersistent.decimal2PropertyName) instanceof Decimal2);
-		Assert.assertTrue(test.getDynamic(AllDynamicAttributesPersistent.decimal5PropertyName) instanceof Decimal5);
-		Assert.assertTrue(test.getDynamic(AllDynamicAttributesPersistent.enum3PropertyName) instanceof String);
-		Assert.assertTrue(test.getDynamic(AllDynamicAttributesPersistent.geometryPropertyName) instanceof Geometry);
-		Assert.assertTrue(test.getDynamic(AllDynamicAttributesPersistent.longIntegerPropertyName) instanceof Long);
-		Assert.assertTrue(test.getDynamic(AllDynamicAttributesPersistent.normalIntegerPropertyName) instanceof Integer);
-		Assert.assertTrue(test.getDynamic(AllDynamicAttributesPersistent.timePropertyName) instanceof TimeOnly);
-		Assert.assertTrue(test.getDynamic(AllDynamicAttributesPersistent.timestampPropertyName) instanceof Timestamp);
+		assertTrue(test.getDynamic(AllDynamicAttributesPersistent.booleanFlagPropertyName) instanceof Boolean);
+		assertTrue(test.getDynamic(AllDynamicAttributesPersistent.datePropertyName) instanceof DateOnly);
+		assertTrue(test.getDynamic(AllDynamicAttributesPersistent.dateTimePropertyName) instanceof DateTime);
+		assertTrue(test.getDynamic(AllDynamicAttributesPersistent.decimal10PropertyName) instanceof Decimal10);
+		assertTrue(test.getDynamic(AllDynamicAttributesPersistent.decimal2PropertyName) instanceof Decimal2);
+		assertTrue(test.getDynamic(AllDynamicAttributesPersistent.decimal5PropertyName) instanceof Decimal5);
+		assertTrue(test.getDynamic(AllDynamicAttributesPersistent.enum3PropertyName) instanceof String);
+		assertTrue(test.getDynamic(AllDynamicAttributesPersistent.geometryPropertyName) instanceof Geometry);
+		assertTrue(test.getDynamic(AllDynamicAttributesPersistent.longIntegerPropertyName) instanceof Long);
+		assertTrue(test.getDynamic(AllDynamicAttributesPersistent.normalIntegerPropertyName) instanceof Integer);
+		assertTrue(test.getDynamic(AllDynamicAttributesPersistent.timePropertyName) instanceof TimeOnly);
+		assertTrue(test.getDynamic(AllDynamicAttributesPersistent.timestampPropertyName) instanceof Timestamp);
 	}
 	
 	@Test
@@ -149,33 +155,33 @@ class DynamicPersistenceTests extends AbstractSkyveTestDispose {
 		p.evictAllCached();
 		
 		AllDynamicAttributesPersistent clone = p.retrieve(adapd, test.getBizId());
-		Assert.assertNotNull(clone);
+		assertNotNull(clone);
 		
-		Assert.assertEquals("#000001", clone.getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
-		Assert.assertEquals("#000002", clone.getAggregatedAssociation().getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
-		Assert.assertEquals("#000003", clone.getComposedAssociation().getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
-		Assert.assertEquals("#000004", clone.getEmbeddedAssociation().getColour());
+		assertEquals("#000001", clone.getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+		assertEquals("#000002", clone.getAggregatedAssociation().getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+		assertEquals("#000003", clone.getComposedAssociation().getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+		assertEquals("#000004", clone.getEmbeddedAssociation().getColour());
 
-		Assert.assertEquals("#000005", ((Bean) clone.getDynamic(AllDynamicAttributesPersistent.dynamicAggregatedAssociationPropertyName)).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
-		Assert.assertEquals("#000006", ((Bean) clone.getDynamic(AllDynamicAttributesPersistent.dynamicComposedAssociationPropertyName)).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
-		Assert.assertEquals("#000007", ((Bean) clone.getDynamic(AllDynamicAttributesPersistent.dynamicEmbeddedAssociationPropertyName)).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+		assertEquals("#000005", ((Bean) clone.getDynamic(AllDynamicAttributesPersistent.dynamicAggregatedAssociationPropertyName)).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+		assertEquals("#000006", ((Bean) clone.getDynamic(AllDynamicAttributesPersistent.dynamicComposedAssociationPropertyName)).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+		assertEquals("#000007", ((Bean) clone.getDynamic(AllDynamicAttributesPersistent.dynamicEmbeddedAssociationPropertyName)).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
 		
-		Assert.assertEquals("#000008", clone.getComposedCollection().get(0).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
-		Assert.assertEquals("#000009", clone.getComposedCollection().get(1).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+		assertEquals("#000008", clone.getComposedCollection().get(0).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+		assertEquals("#000009", clone.getComposedCollection().get(1).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
 		
 		list = (List<PersistentBean>) clone.getDynamic(AllDynamicAttributesPersistent.dynamicAggregatedCollectionPropertyName);
-		Assert.assertEquals("#000010", list.get(0).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
-		Assert.assertEquals("#000011", list.get(1).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+		assertEquals("#000010", list.get(0).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+		assertEquals("#000011", list.get(1).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
 		
 		list = (List<PersistentBean>) clone.getDynamic(AllDynamicAttributesPersistent.dynamicComposedCollectionPropertyName);
-		Assert.assertEquals("#000012", list.get(0).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
-		Assert.assertEquals("#000013", list.get(1).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+		assertEquals("#000012", list.get(0).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+		assertEquals("#000013", list.get(1).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
 
 		List<ChildBean<Bean>> children = (List<ChildBean<Bean>>) clone.getDynamic(AllDynamicAttributesPersistent.dynamicChildCollectionPropertyName);
-		Assert.assertEquals("#000014", children.get(0).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
-		Assert.assertEquals("#000015", children.get(1).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
-		Assert.assertSame(clone, children.get(0).getParent());
-		Assert.assertSame(clone, children.get(1).getParent());
+		assertEquals("#000014", children.get(0).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+		assertEquals("#000015", children.get(1).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+		assertSame(clone, children.get(0).getParent());
+		assertSame(clone, children.get(1).getParent());
 	}
 
 	@Test
@@ -184,18 +190,18 @@ class DynamicPersistenceTests extends AbstractSkyveTestDispose {
 		test = p.save(test);
 
 		// Test
-		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_AllAttributesPersistent").scalarResult(Number.class).intValue());
-		Assert.assertEquals(59, p.newSQL("select count(1) from TEST_AllDynamicAttributesPersistent").scalarResult(Number.class).intValue());
-		Assert.assertEquals(160, p.newSQL("select count(1) from ADM_DynamicEntity").scalarResult(Number.class).intValue());
-		Assert.assertEquals(141, p.newSQL("select count(1) from ADM_DynamicRelation").scalarResult(Number.class).intValue());
+		assertEquals(2, p.newSQL("select count(1) from TEST_AllAttributesPersistent").scalarResult(Number.class).intValue());
+		assertEquals(59, p.newSQL("select count(1) from TEST_AllDynamicAttributesPersistent").scalarResult(Number.class).intValue());
+		assertEquals(160, p.newSQL("select count(1) from ADM_DynamicEntity").scalarResult(Number.class).intValue());
+		assertEquals(141, p.newSQL("select count(1) from ADM_DynamicRelation").scalarResult(Number.class).intValue());
 		
 		p.delete(test);
 		
 		// Test
-		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_AllAttributesPersistent").scalarResult(Number.class).intValue());
-		Assert.assertEquals(36, p.newSQL("select count(1) from TEST_AllDynamicAttributesPersistent").scalarResult(Number.class).intValue());
-		Assert.assertEquals(94, p.newSQL("select count(1) from ADM_DynamicEntity").scalarResult(Number.class).intValue());
-		Assert.assertEquals(54, p.newSQL("select count(1) from ADM_DynamicRelation").scalarResult(Number.class).intValue());
+		assertEquals(2, p.newSQL("select count(1) from TEST_AllAttributesPersistent").scalarResult(Number.class).intValue());
+		assertEquals(36, p.newSQL("select count(1) from TEST_AllDynamicAttributesPersistent").scalarResult(Number.class).intValue());
+		assertEquals(94, p.newSQL("select count(1) from ADM_DynamicEntity").scalarResult(Number.class).intValue());
+		assertEquals(54, p.newSQL("select count(1) from ADM_DynamicRelation").scalarResult(Number.class).intValue());
 	}
 	
 	@Test
@@ -209,7 +215,7 @@ class DynamicPersistenceTests extends AbstractSkyveTestDispose {
 		referrer = p.save(referrer);
 
 		final PersistentBean toDelete = referenced;
-		ReferentialConstraintViolationException rcve = Assert.assertThrows(ReferentialConstraintViolationException.class, () -> p.delete(toDelete));
+		ReferentialConstraintViolationException rcve = assertThrows(ReferentialConstraintViolationException.class, () -> p.delete(toDelete));
 
 		assertThat(rcve.getMessage(), is(notNullValue()));
 	}
@@ -221,25 +227,25 @@ class DynamicPersistenceTests extends AbstractSkyveTestDispose {
 		test = p.save(test);
 		test = p.save(test);
 
-		Assert.assertEquals(Integer.valueOf(0), test.getBizVersion());
-		Assert.assertEquals(Integer.valueOf(0), ((PersistentBean) test.getDynamic(AllDynamicAttributesPersistent.aggregatedAssociationPropertyName)).getBizVersion());
-		Assert.assertEquals(Integer.valueOf(0), ((PersistentBean) test.getDynamic(AllDynamicAttributesPersistent.composedAssociationPropertyName)).getBizVersion());
-		Assert.assertEquals(Integer.valueOf(0), ((DynamicPersistentBean) test.getDynamic(AllDynamicAttributesPersistent.dynamicAggregatedAssociationPropertyName)).getBizVersion());
-		Assert.assertEquals(Integer.valueOf(0), ((DynamicPersistentBean) test.getDynamic(AllDynamicAttributesPersistent.dynamicComposedAssociationPropertyName)).getBizVersion());
-		Assert.assertEquals(Integer.valueOf(0), ((DynamicPersistentBean) test.getDynamic(AllDynamicAttributesPersistent.dynamicEmbeddedAssociationPropertyName)).getBizVersion());
+		assertEquals(Integer.valueOf(0), test.getBizVersion());
+		assertEquals(Integer.valueOf(0), ((PersistentBean) test.getDynamic(AllDynamicAttributesPersistent.aggregatedAssociationPropertyName)).getBizVersion());
+		assertEquals(Integer.valueOf(0), ((PersistentBean) test.getDynamic(AllDynamicAttributesPersistent.composedAssociationPropertyName)).getBizVersion());
+		assertEquals(Integer.valueOf(0), ((DynamicPersistentBean) test.getDynamic(AllDynamicAttributesPersistent.dynamicAggregatedAssociationPropertyName)).getBizVersion());
+		assertEquals(Integer.valueOf(0), ((DynamicPersistentBean) test.getDynamic(AllDynamicAttributesPersistent.dynamicComposedAssociationPropertyName)).getBizVersion());
+		assertEquals(Integer.valueOf(0), ((DynamicPersistentBean) test.getDynamic(AllDynamicAttributesPersistent.dynamicEmbeddedAssociationPropertyName)).getBizVersion());
 
 		List<PersistentBean> list = (List<PersistentBean>) test.getDynamic(AllDynamicAttributesPersistent.composedCollectionPropertyName);
-		Assert.assertEquals(Integer.valueOf(0), list.get(0).getBizVersion());
-		Assert.assertEquals(Integer.valueOf(0), list.get(1).getBizVersion());
+		assertEquals(Integer.valueOf(0), list.get(0).getBizVersion());
+		assertEquals(Integer.valueOf(0), list.get(1).getBizVersion());
 		list = (List<PersistentBean>) test.getDynamic(AllDynamicAttributesPersistent.dynamicAggregatedCollectionPropertyName);
-		Assert.assertEquals(Integer.valueOf(0), list.get(0).getBizVersion());
-		Assert.assertEquals(Integer.valueOf(0), list.get(1).getBizVersion());
+		assertEquals(Integer.valueOf(0), list.get(0).getBizVersion());
+		assertEquals(Integer.valueOf(0), list.get(1).getBizVersion());
 		list = (List<PersistentBean>) test.getDynamic(AllDynamicAttributesPersistent.dynamicComposedCollectionPropertyName);
-		Assert.assertEquals(Integer.valueOf(0), list.get(0).getBizVersion());
-		Assert.assertEquals(Integer.valueOf(0), list.get(1).getBizVersion());
+		assertEquals(Integer.valueOf(0), list.get(0).getBizVersion());
+		assertEquals(Integer.valueOf(0), list.get(1).getBizVersion());
 		list = (List<PersistentBean>) test.getDynamic(AllDynamicAttributesPersistent.dynamicChildCollectionPropertyName);
-		Assert.assertEquals(Integer.valueOf(0), list.get(0).getBizVersion());
-		Assert.assertEquals(Integer.valueOf(0), list.get(1).getBizVersion());
+		assertEquals(Integer.valueOf(0), list.get(0).getBizVersion());
+		assertEquals(Integer.valueOf(0), list.get(1).getBizVersion());
 	}
 
 	@Test
@@ -278,45 +284,45 @@ class DynamicPersistenceTests extends AbstractSkyveTestDispose {
 		test = p.save(test);
 		PersistentBean clone = p.retrieve(aadpd, test.getBizId());
 		if (clone != test) {
-			Assert.fail("save did not cache");
+			fail("save did not cache");
 		}
 		p.evictAllCached();
 		
 		clone = p.retrieve(aadpd, test.getBizId());
-		Assert.assertNotNull(clone);
+		assertNotNull(clone);
 		if (clone == test) {
-			Assert.fail("cache was not evicted");
+			fail("cache was not evicted");
 		}
 		
-		Assert.assertEquals("#000001", clone.getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
-		Assert.assertEquals("#000002", ((Bean) clone.getDynamic(AllDynamicAttributesPersistent.aggregatedAssociationPropertyName)).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
-		Assert.assertEquals("#000003", ((Bean) clone.getDynamic(AllDynamicAttributesPersistent.composedAssociationPropertyName)).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+		assertEquals("#000001", clone.getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+		assertEquals("#000002", ((Bean) clone.getDynamic(AllDynamicAttributesPersistent.aggregatedAssociationPropertyName)).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+		assertEquals("#000003", ((Bean) clone.getDynamic(AllDynamicAttributesPersistent.composedAssociationPropertyName)).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
 
-		Assert.assertEquals("#000005", ((Bean) clone.getDynamic(AllDynamicAttributesPersistent.dynamicAggregatedAssociationPropertyName)).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
-		Assert.assertEquals("#000006", ((Bean) clone.getDynamic(AllDynamicAttributesPersistent.dynamicComposedAssociationPropertyName)).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
-		Assert.assertEquals("#000007", ((Bean) clone.getDynamic(AllDynamicAttributesPersistent.dynamicEmbeddedAssociationPropertyName)).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+		assertEquals("#000005", ((Bean) clone.getDynamic(AllDynamicAttributesPersistent.dynamicAggregatedAssociationPropertyName)).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+		assertEquals("#000006", ((Bean) clone.getDynamic(AllDynamicAttributesPersistent.dynamicComposedAssociationPropertyName)).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+		assertEquals("#000007", ((Bean) clone.getDynamic(AllDynamicAttributesPersistent.dynamicEmbeddedAssociationPropertyName)).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
 
 		list = (List<PersistentBean>) clone.getDynamic(AllDynamicAttributesPersistent.composedCollectionPropertyName);
-		Assert.assertEquals("#000010", list.get(0).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
-		Assert.assertEquals("#000011", list.get(1).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+		assertEquals("#000010", list.get(0).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+		assertEquals("#000011", list.get(1).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
 		
 		list = (List<PersistentBean>) clone.getDynamic(AllDynamicAttributesPersistent.dynamicAggregatedCollectionPropertyName);
-		Assert.assertEquals("#000010", list.get(0).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
-		Assert.assertEquals("#000011", list.get(1).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+		assertEquals("#000010", list.get(0).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+		assertEquals("#000011", list.get(1).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
 		
 		list = (List<PersistentBean>) clone.getDynamic(AllDynamicAttributesPersistent.dynamicComposedCollectionPropertyName);
-		Assert.assertEquals("#000012", list.get(0).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
-		Assert.assertEquals("#000013", list.get(1).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+		assertEquals("#000012", list.get(0).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+		assertEquals("#000013", list.get(1).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
 
 		List<ChildBean<Bean>> children = (List<ChildBean<Bean>>) clone.getDynamic(AllDynamicAttributesPersistent.dynamicChildCollectionPropertyName);
-		Assert.assertEquals("#000014", children.get(0).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
-		Assert.assertEquals("#000015", children.get(1).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
-		Assert.assertSame(clone, children.get(0).getParent());
-		Assert.assertSame(clone, children.get(1).getParent());
+		assertEquals("#000014", children.get(0).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+		assertEquals("#000015", children.get(1).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+		assertSame(clone, children.get(0).getParent());
+		assertSame(clone, children.get(1).getParent());
 
 		PersistentBean cached = p.retrieve(aadpd, test.getBizId());
 		if (clone != cached) {
-			Assert.fail("populate did not cache");
+			fail("populate did not cache");
 		}
 	}
 	
@@ -335,12 +341,12 @@ class DynamicPersistenceTests extends AbstractSkyveTestDispose {
 		test = p.save(test);
 		p.evictAllCached();
 		test = p.retrieve(aadpd, test.getBizId());
-		Assert.assertNotNull(test);
+		assertNotNull(test);
 		bean = (PersistentBean) test.getDynamic(AllDynamicAttributesPersistent.dynamicAggregatedAssociationPropertyName);
 		list = (List<PersistentBean>) test.getDynamic(AllDynamicAttributesPersistent.dynamicChildCollectionPropertyName);
 		
-		Assert.assertSame(test, bean.getDynamic(AllDynamicAttributesPersistent.aggregatedAssociationPropertyName));
-		Assert.assertSame(test, list.get(1));
+		assertSame(test, bean.getDynamic(AllDynamicAttributesPersistent.aggregatedAssociationPropertyName));
+		assertSame(test, list.get(1));
 	}
 	
 	@Test
@@ -349,18 +355,18 @@ class DynamicPersistenceTests extends AbstractSkyveTestDispose {
 		test = p.save(test);
 
 		// Test
-		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_AllAttributesPersistent").scalarResult(Number.class).intValue());
-		Assert.assertEquals(68, p.newSQL("select count(1) from TEST_AllDynamicAttributesPersistent").scalarResult(Number.class).intValue());
-		Assert.assertEquals(188, p.newSQL("select count(1) from ADM_DynamicEntity").scalarResult(Number.class).intValue());
-		Assert.assertEquals(165, p.newSQL("select count(1) from ADM_DynamicRelation").scalarResult(Number.class).intValue());
+		assertEquals(2, p.newSQL("select count(1) from TEST_AllAttributesPersistent").scalarResult(Number.class).intValue());
+		assertEquals(68, p.newSQL("select count(1) from TEST_AllDynamicAttributesPersistent").scalarResult(Number.class).intValue());
+		assertEquals(188, p.newSQL("select count(1) from ADM_DynamicEntity").scalarResult(Number.class).intValue());
+		assertEquals(165, p.newSQL("select count(1) from ADM_DynamicRelation").scalarResult(Number.class).intValue());
 		
 		p.delete(test);
 		
 		// Test
-		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_AllAttributesPersistent").scalarResult(Number.class).intValue());
-		Assert.assertEquals(46, p.newSQL("select count(1) from TEST_AllDynamicAttributesPersistent").scalarResult(Number.class).intValue());
-		Assert.assertEquals(122, p.newSQL("select count(1) from ADM_DynamicEntity").scalarResult(Number.class).intValue());
-		Assert.assertEquals(72, p.newSQL("select count(1) from ADM_DynamicRelation").scalarResult(Number.class).intValue());
+		assertEquals(2, p.newSQL("select count(1) from TEST_AllAttributesPersistent").scalarResult(Number.class).intValue());
+		assertEquals(46, p.newSQL("select count(1) from TEST_AllDynamicAttributesPersistent").scalarResult(Number.class).intValue());
+		assertEquals(122, p.newSQL("select count(1) from ADM_DynamicEntity").scalarResult(Number.class).intValue());
+		assertEquals(72, p.newSQL("select count(1) from ADM_DynamicRelation").scalarResult(Number.class).intValue());
 	}
 
 	@Test
@@ -374,7 +380,7 @@ class DynamicPersistenceTests extends AbstractSkyveTestDispose {
 		referrer = p.save(referrer);
 
 		final PersistentBean toDelete = referenced;
-		ReferentialConstraintViolationException rcve = Assert.assertThrows(ReferentialConstraintViolationException.class, () -> p.delete(toDelete));
+		ReferentialConstraintViolationException rcve = assertThrows(ReferentialConstraintViolationException.class, () -> p.delete(toDelete));
 		assertThat(rcve.getMessage(), is(notNullValue()));
 	}
 }

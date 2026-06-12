@@ -1,5 +1,6 @@
 package modules.admin.Country;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -14,7 +15,7 @@ class CountryExtensionTest {
 		country.setBizId("AU");
 		country.setName("Australia");
 		// getCode() returns getBizId()
-		assertTrue("AU".equals(country.getCode()));
+		assertEquals("AU", country.getCode());
 	}
 
 	@Test

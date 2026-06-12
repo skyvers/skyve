@@ -392,12 +392,4 @@ class EnumerationTest {
                 assertEquals(1, e.getValues().size());
                 assertEquals("code1", e.getValues().get(0).getCode());
         }
-
-        @Test
-        @SuppressWarnings("static-method")
-        void isDynamicTrueWhenSetDynamicViaXml() {
-                Enumeration e = new Enumeration();
-                e.setDynamic(true);
-                assertTrue(e.isDynamic());
-        }
-}
+	}

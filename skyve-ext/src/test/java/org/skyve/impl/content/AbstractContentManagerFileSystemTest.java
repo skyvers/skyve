@@ -72,8 +72,8 @@ public class AbstractContentManagerFileSystemTest {
 	public void mainPrintsBalancedFolderPathForContentId() {
 		PrintStream originalOut = System.out;
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		try {
-			System.setOut(new PrintStream(out, true, StandardCharsets.UTF_8));
+		try (PrintStream printStream = new PrintStream(out, true, StandardCharsets.UTF_8)) {
+			System.setOut(printStream);
 
 			AbstractContentManager.main(new String[] { CONTENT_ID });
 

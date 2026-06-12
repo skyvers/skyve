@@ -212,6 +212,12 @@ class SmartClientSnapshotAdapterTest {
 				criteria));
 
 		assertNotNull(result);
+		assertParsedDisplayState(result);
+		assertEquals(criteria, result.getSourceSmartClientCriteria());
+		assertParsedSimpleMapFilter(result.getFilter());
+	}
+
+	private static void assertParsedDisplayState(Snapshot result) {
 		assertEquals(AdvancedSearchType.inline, result.getAdvanced());
 		assertEquals(Integer.valueOf(120), result.getColumns().get("amount"));
 		assertTrue(result.getColumns().containsKey("status"));
@@ -223,9 +229,10 @@ class SmartClientSnapshotAdapterTest {
 		assertEquals(SortDirection.ascending, result.getSorts().get("created"));
 		assertEquals("category", result.getGroup());
 		assertEquals(AggregateFunction.Sum, result.getSummary());
-		assertEquals(criteria, result.getSourceSmartClientCriteria());
+	}
 
-		SnapshotCriteria filter = assertInstanceOf(SnapshotCriteria.class, result.getFilter());
+	private static void assertParsedSimpleMapFilter(SnapshotFilter resultFilter) {
+		SnapshotCriteria filter = assertInstanceOf(SnapshotCriteria.class, resultFilter);
 		assertEquals(3, filter.getFilters().size());
 		SnapshotCriteria status = assertInstanceOf(SnapshotCriteria.class, filter.getFilters().get(0));
 		assertEquals(CompoundFilterOperator.or, status.getOperator());

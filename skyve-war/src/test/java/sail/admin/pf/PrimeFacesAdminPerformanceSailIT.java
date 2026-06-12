@@ -12,93 +12,64 @@ public class PrimeFacesAdminPerformanceSailIT extends PrimeFacesAdminSailIT {
 
 	@Test
 	public void test1() throws Exception {
-		Thread.sleep(1000);
-		while (true) {
-			test();
-		}
+		runRepeatedlyAfterDelay(1000);
 	}
 	
 	@Test
 	public void test2() throws Exception {
-		Thread.sleep(2000);
-		while (true) {
-			test();
-		}
+		runRepeatedlyAfterDelay(2000);
 	}
 
 	@Test
 	public void test3() throws Exception {
-		Thread.sleep(3000);
-		while (true) {
-			test();
-		}
+		runRepeatedlyAfterDelay(3000);
 	}
 
 	@Test
 	public void test4() throws Exception {
-		Thread.sleep(4000);
-		while (true) {
-			test();
-		}
+		runRepeatedlyAfterDelay(4000);
 	}	
 	@Test
 	public void test5() throws Exception {
-		Thread.sleep(5000);
-		while (true) {
-			test();
-		}
+		runRepeatedlyAfterDelay(5000);
 	}
 	@Test
 	public void test6() throws Exception {
-		Thread.sleep(6000);
-		while (true) {
-			test();
-		}
+		runRepeatedlyAfterDelay(6000);
 	}
 
 	@Test
 	public void test7() throws Exception {
-		Thread.sleep(7000);
-		while (true) {
-			test();
-		}
+		runRepeatedlyAfterDelay(7000);
 	}
 
 	@Test
 	public void test8() throws Exception {
-		Thread.sleep(8000);
-		while (true) {
-			test();
-		}
+		runRepeatedlyAfterDelay(8000);
 	}
 
 	@Test
 	public void test9() throws Exception {
-		Thread.sleep(9000);
-		while (true) {
-			test();
-		}
+		runRepeatedlyAfterDelay(9000);
 	}
 
 	@Test
 	public void test10() throws Exception {
-		Thread.sleep(10000);
-		while (true) {
-			test();
-		}
+		runRepeatedlyAfterDelay(10000);
 	}
 
 	@Test
 	public void test11() throws Exception {
-		Thread.sleep(11000);
-		while (true) {
-			test();
-		}
+		runRepeatedlyAfterDelay(11000);
 	}
 	
 	@Test
 	public void test12() throws Exception {
-		Thread.sleep(12000);
+		runRepeatedlyAfterDelay(12000);
+	}
+
+	private void runRepeatedlyAfterDelay(long delay) throws Exception {
+		Thread.sleep(delay);
 		while (true) {
 			test();
 		}

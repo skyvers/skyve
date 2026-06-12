@@ -6,44 +6,36 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
+import org.junit.runners.Parameterized.Parameters;
+
+import java.util.Arrays;
+import java.util.Collection;
 
 @SuppressWarnings("static-method")
+@RunWith(Parameterized.class)
 public class EveryYearTest {
-
-	@Test
-	public void testMatchesYearly() {
-		EveryYear provider = new EveryYear();
-		assertTrue(provider.matches("yearly"));
+	@Parameters(name = "{0}")
+	public static Collection<Object[]> matchingExpressions() {
+		return Arrays.asList(new Object[][] {
+				{"yearly"},
+				{"annually"},
+				{"every year"},
+				{"each year"},
+				{"every 2 years"},
+				{"YEARLY"}
+		});
 	}
 
-	@Test
-	public void testMatchesAnnually() {
-		EveryYear provider = new EveryYear();
-		assertTrue(provider.matches("annually"));
-	}
+	@Parameter
+	public String matchingExpression;
 
 	@Test
-	public void testMatchesEveryYear() {
+	public void testMatchesYearExpression() {
 		EveryYear provider = new EveryYear();
-		assertTrue(provider.matches("every year"));
-	}
-
-	@Test
-	public void testMatchesEachYear() {
-		EveryYear provider = new EveryYear();
-		assertTrue(provider.matches("each year"));
-	}
-
-	@Test
-	public void testMatchesEvery2Years() {
-		EveryYear provider = new EveryYear();
-		assertTrue(provider.matches("every 2 years"));
-	}
-
-	@Test
-	public void testMatchesCaseInsensitive() {
-		EveryYear provider = new EveryYear();
-		assertTrue(provider.matches("YEARLY"));
+		assertTrue(provider.matches(matchingExpression));
 	}
 
 	@Test

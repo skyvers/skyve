@@ -75,6 +75,8 @@ class NullTolerantBeanComparatorTest {
 	@Test
 	void compareInvalidPropertyThrowsRuntimeException() {
 		NullTolerantBeanComparator cmp = new NullTolerantBeanComparator("nonExistentProperty");
-		assertThrows(RuntimeException.class, () -> cmp.compare(new NamedItem("a"), new NamedItem("b")));
+		NamedItem first = new NamedItem("a");
+		NamedItem second = new NamedItem("b");
+		assertThrows(RuntimeException.class, () -> cmp.compare(first, second));
 	}
 }

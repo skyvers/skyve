@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import java.util.Date;
 
@@ -25,33 +26,20 @@ import org.skyve.domain.Bean;
 class JSONWriterTest {
 
 	@Test
-	void staticWriteLong() {
-		assertThat(JSONWriter.write(42L), is("42"));
-	}
-
-	@Test
-	void staticWriteNegativeLong() {
-		assertThat(JSONWriter.write(-1L), is("-1"));
-	}
-
-	@Test
-	void staticWriteDouble() {
-		assertThat(JSONWriter.write(3.14d), is("3.14"));
-	}
-
-	@Test
-	void staticWriteChar() {
-		assertThat(JSONWriter.write('a'), is("\"a\""));
-	}
-
-	@Test
-	void staticWriteBooleanTrue() {
-		assertThat(JSONWriter.write(true), is("true"));
-	}
-
-	@Test
-	void staticWriteBooleanFalse() {
-		assertThat(JSONWriter.write(false), is("false"));
+	void staticWriteSerialisesSimpleValues() {
+		Object[][] cases = {
+				{(Supplier<String>) () -> JSONWriter.write(42L), "42"},
+				{(Supplier<String>) () -> JSONWriter.write(-1L), "-1"},
+				{(Supplier<String>) () -> JSONWriter.write(3.14d), "3.14"},
+				{(Supplier<String>) () -> JSONWriter.write('a'), "\"a\""},
+				{(Supplier<String>) () -> JSONWriter.write(true), "true"},
+				{(Supplier<String>) () -> JSONWriter.write(false), "false"}
+		};
+		for (Object[] testCase : cases) {
+			@SuppressWarnings("unchecked")
+			Supplier<String> write = (Supplier<String>) testCase[0];
+			assertThat(write.get(), is(testCase[1]));
+		}
 	}
 
 	@Test
@@ -62,45 +50,20 @@ class JSONWriterTest {
 	}
 
 	@Test
-	void writeStringProducesQuotedValue() {
+	void writeStringEscapesSpecialCharacters() {
 		JSONWriter writer = new JSONWriter(null);
-		String result = writer.write("hello", null);
-		assertThat(result, is("\"hello\""));
-	}
-
-	@Test
-	void writeStringWithSpecialChars() {
-		JSONWriter writer = new JSONWriter(null);
-		String result = writer.write("say \"hi\"", null);
-		assertThat(result, is("\"say \\\"hi\\\"\""));
-	}
-
-	@Test
-	void writeStringWithBackslash() {
-		JSONWriter writer = new JSONWriter(null);
-		String result = writer.write("a\\b", null);
-		assertThat(result, is("\"a\\\\b\""));
-	}
-
-	@Test
-	void writeStringWithNewline() {
-		JSONWriter writer = new JSONWriter(null);
-		String result = writer.write("line1\nline2", null);
-		assertThat(result, is("\"line1\\nline2\""));
-	}
-
-	@Test
-	void writeStringWithTab() {
-		JSONWriter writer = new JSONWriter(null);
-		String result = writer.write("a\tb", null);
-		assertThat(result, is("\"a\\tb\""));
-	}
-
-	@Test
-	void writeStringWithCarriageReturn() {
-		JSONWriter writer = new JSONWriter(null);
-		String result = writer.write("a\rb", null);
-		assertThat(result, is("\"a\\rb\""));
+		String[][] cases = {
+				{"hello", "\"hello\""},
+				{"say \"hi\"", "\"say \\\"hi\\\"\""},
+				{"a\\b", "\"a\\\\b\""},
+				{"line1\nline2", "\"line1\\nline2\""},
+				{"a\tb", "\"a\\tb\""},
+				{"a\rb", "\"a\\rb\""}
+		};
+		for (String[] testCase : cases) {
+			String result = writer.write(testCase[0], null);
+			assertThat(result, is(testCase[1]));
+		}
 	}
 
 	@Test

@@ -392,11 +392,8 @@ class ComponentViewVisitorTest {
 		ViewImpl view = new ViewImpl();
 		view.getContained().add(new Button());
 		ComponentViewVisitor v = visitorWithWidgetId(view, "nonExistentWidgetId");
-		// visit() will throw because identifiable is null after traversal
-		assertThrows(MetaDataException.class, () -> {
-			v.visit();
-			v.getContained();
-		});
+		v.visit();
+		assertThrows(MetaDataException.class, v::getContained);
 	}
 
 	@Test

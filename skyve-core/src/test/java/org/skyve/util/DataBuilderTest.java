@@ -731,16 +731,16 @@ class DataBuilderTest {
 			DataBuilder.setTrace(true);
 			assertThat(getField(DataBuilder.class, "trace"), is((Object) Boolean.TRUE));
 
-			Method method = DataBuilder.class.getDeclaredMethod("trace", StringBuilder.class, int.class);
-			method.setAccessible(true);
+				Method method = DataBuilder.class.getDeclaredMethod("trace", StringBuilder.class, int.class);
+				method.setAccessible(true);
 
-			PrintStream originalOut = System.out;
-			ByteArrayOutputStream out = new ByteArrayOutputStream();
-			System.setOut(new PrintStream(out));
-			try {
-				method.invoke(null, new StringBuilder("line"), Integer.valueOf(2));
-			}
-			finally {
+				PrintStream originalOut = System.out;
+				ByteArrayOutputStream out = new ByteArrayOutputStream();
+				try (PrintStream printStream = new PrintStream(out)) {
+					System.setOut(printStream);
+					method.invoke(null, new StringBuilder("line"), Integer.valueOf(2));
+				}
+				finally {
 				System.setOut(originalOut);
 			}
 

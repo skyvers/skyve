@@ -142,11 +142,12 @@ class DefaultReportingTest {
 				() -> reporting.createFreemarkerReportPDF("default-reporting-missing.ftl", Map.of(), "default-reporting-missing"));
 		assertThrows(TemplateNotFoundException.class,
 				() -> reporting.createFreemarkerBeanReportPDF(bean, "default-reporting-missing.ftl", Map.of(), "default-reporting-missing"));
-		assertThrows(NullPointerException.class,
-				() -> reporting.generateFreemarkerPDFFromHTML((String) null, output));
-		assertThrows(NullPointerException.class,
-					() -> reporting.generateFreemarkerPDFFromHTML((String) null, new ByteArrayOutputStream()));
-	}
+			assertThrows(NullPointerException.class,
+					() -> reporting.generateFreemarkerPDFFromHTML((String) null, output));
+			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+			assertThrows(NullPointerException.class,
+						() -> reporting.generateFreemarkerPDFFromHTML((String) null, outputStream));
+		}
 
 	@Test
 	void freemarkerPdfFacadeMethodsGeneratePdfOutput() throws Exception {

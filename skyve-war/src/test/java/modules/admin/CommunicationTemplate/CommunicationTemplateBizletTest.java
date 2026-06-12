@@ -16,7 +16,6 @@ class CommunicationTemplateBizletTest {
 	@Test
 	void validateWithDefaultTemplateAddsNoErrors() throws Exception {
 		CommunicationTemplate bean = new CommunicationTemplate();
-		// Default template contains {body}
 		ValidationException e = new ValidationException();
 		bizlet.validate(bean, e);
 		assertTrue(e.getMessages().isEmpty());

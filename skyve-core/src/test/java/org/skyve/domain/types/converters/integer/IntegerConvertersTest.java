@@ -57,17 +57,20 @@ class IntegerConvertersTest {
 
 	@Test
 	void integerConverterFromDisplayValueInvalidThrows() {
-		assertThrows(ConversionException.class, () -> new IntegerConverter().fromDisplayValue("notanumber"));
+		IntegerConverter converter = new IntegerConverter();
+		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("notanumber"));
 	}
 
 	@Test
 	void integerConverterFromDisplayValueLargePositiveThrows() {
-		assertThrows(ConversionException.class, () -> new IntegerConverter().fromDisplayValue("12345678901"));
+		IntegerConverter converter = new IntegerConverter();
+		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("12345678901"));
 	}
 
 	@Test
 	void integerConverterFromDisplayValueLargeNegativeThrows() {
-		assertThrows(ConversionException.class, () -> new IntegerConverter().fromDisplayValue("-12345678901"));
+		IntegerConverter converter = new IntegerConverter();
+		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("-12345678901"));
 	}
 
 	// ---- IntegerSeparator ----
@@ -110,17 +113,20 @@ class IntegerConvertersTest {
 
 	@Test
 	void integerSeparatorFromDisplayValueInvalidThrows() {
-		assertThrows(ConversionException.class, () -> new IntegerSeparator().fromDisplayValue("notanumber"));
+		IntegerSeparator converter = new IntegerSeparator();
+		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("notanumber"));
 	}
 
 	@Test
 	void integerSeparatorFromDisplayValueLargePositiveThrows() {
-		assertThrows(ConversionException.class, () -> new IntegerSeparator().fromDisplayValue("12345678901"));
+		IntegerSeparator converter = new IntegerSeparator();
+		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("12345678901"));
 	}
 
 	@Test
 	void integerSeparatorFromDisplayValueLargeNegativeThrows() {
-		assertThrows(ConversionException.class, () -> new IntegerSeparator().fromDisplayValue("-12345678901"));
+		IntegerSeparator converter = new IntegerSeparator();
+		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("-12345678901"));
 	}
 
 	// ---- LongIntegerConverter ----
@@ -162,17 +168,20 @@ class IntegerConvertersTest {
 
 	@Test
 	void longIntegerConverterFromDisplayValueInvalidThrows() {
-		assertThrows(ConversionException.class, () -> new LongIntegerConverter().fromDisplayValue("notanumber"));
+		LongIntegerConverter converter = new LongIntegerConverter();
+		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("notanumber"));
 	}
 
 	@Test
 	void longIntegerConverterFromDisplayValueLargePositiveThrows() {
-		assertThrows(ConversionException.class, () -> new LongIntegerConverter().fromDisplayValue("99999999999999999999"));
+		LongIntegerConverter converter = new LongIntegerConverter();
+		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("99999999999999999999"));
 	}
 
 	@Test
 	void longIntegerConverterFromDisplayValueLargeNegativeThrows() {
-		assertThrows(ConversionException.class, () -> new LongIntegerConverter().fromDisplayValue("-99999999999999999999"));
+		LongIntegerConverter converter = new LongIntegerConverter();
+		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("-99999999999999999999"));
 	}
 
 	// ---- LongIntegerSeparator ----
@@ -215,17 +224,20 @@ class IntegerConvertersTest {
 
 	@Test
 	void longIntegerSeparatorFromDisplayValueInvalidThrows() {
-		assertThrows(ConversionException.class, () -> new LongIntegerSeparator().fromDisplayValue("notanumber"));
+		LongIntegerSeparator converter = new LongIntegerSeparator();
+		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("notanumber"));
 	}
 
 	@Test
 	void longIntegerSeparatorFromDisplayValueLargePositiveThrows() {
-		assertThrows(ConversionException.class, () -> new LongIntegerSeparator().fromDisplayValue("99999999999999999999"));
+		LongIntegerSeparator converter = new LongIntegerSeparator();
+		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("99999999999999999999"));
 	}
 
 	@Test
 	void longIntegerSeparatorFromDisplayValueLargeNegativeThrows() {
-		assertThrows(ConversionException.class, () -> new LongIntegerSeparator().fromDisplayValue("-99999999999999999999"));
+		LongIntegerSeparator converter = new LongIntegerSeparator();
+		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("-99999999999999999999"));
 	}
 
 	// ---- SimplePercentage ----
@@ -267,7 +279,8 @@ class IntegerConvertersTest {
 
 	@Test
 	void simplePercentageFromDisplayValueInvalidThrows() {
-		assertThrows(ConversionException.class, () -> new SimplePercentage().fromDisplayValue("notanumber%"));
+		SimplePercentage converter = new SimplePercentage();
+		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("notanumber%"));
 	}
 
 	@Test
@@ -277,41 +290,43 @@ class IntegerConvertersTest {
 
 	@Test
 	void simplePercentageFromDisplayValueLargePositiveThrows() {
-		assertThrows(ConversionException.class, () -> new SimplePercentage().fromDisplayValue("12345678901%"));
+		SimplePercentage converter = new SimplePercentage();
+		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("12345678901%"));
 	}
 
 	@Test
 	void simplePercentageFromDisplayValueLargeNegativeThrows() {
-		assertThrows(ConversionException.class, () -> new SimplePercentage().fromDisplayValue("-12345678901%"));
+		SimplePercentage converter = new SimplePercentage();
+		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("-12345678901%"));
 	}
 
 
 
-	// ---- IntegerConverter generic catch ----
-
 	@Test
+	@SuppressWarnings("null")
 	void integerConverterToDisplayValueNullThrows() {
-		assertThrows(ConversionException.class, () -> new IntegerConverter().toDisplayValue(null));
+		IntegerConverter converter = new IntegerConverter();
+		assertThrows(ConversionException.class, () -> converter.toDisplayValue(null));
 	}
 
-	// ---- LongIntegerConverter generic catch ----
-
 	@Test
+	@SuppressWarnings("null")
 	void longIntegerConverterToDisplayValueNullThrows() {
-		assertThrows(ConversionException.class, () -> new LongIntegerConverter().toDisplayValue(null));
+		LongIntegerConverter converter = new LongIntegerConverter();
+		assertThrows(ConversionException.class, () -> converter.toDisplayValue(null));
 	}
 
-	// ---- IntegerSeparator generic catch (fromDisplayValue) ----
-
 	@Test
+	@SuppressWarnings("null")
 	void integerSeparatorFromDisplayValueNullThrows() {
-		assertThrows(ConversionException.class, () -> new IntegerSeparator().fromDisplayValue(null));
+		IntegerSeparator converter = new IntegerSeparator();
+		assertThrows(ConversionException.class, () -> converter.fromDisplayValue(null));
 	}
 
-	// ---- LongIntegerSeparator generic catch (fromDisplayValue) ----
-
 	@Test
+	@SuppressWarnings("null")
 	void longIntegerSeparatorFromDisplayValueNullThrows() {
-		assertThrows(ConversionException.class, () -> new LongIntegerSeparator().fromDisplayValue(null));
+		LongIntegerSeparator converter = new LongIntegerSeparator();
+		assertThrows(ConversionException.class, () -> converter.fromDisplayValue(null));
 	}
 }

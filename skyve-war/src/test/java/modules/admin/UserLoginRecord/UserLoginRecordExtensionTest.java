@@ -13,31 +13,31 @@ class UserLoginRecordExtensionTest {
 
 	@Test
 	void getCountryNameWithNullCountryCodeReturnsNull() {
-		UserLoginRecordExtension record = new UserLoginRecordExtension();
-		assertNull(record.getCountryName());
+		UserLoginRecordExtension loginRecord = new UserLoginRecordExtension();
+		assertNull(loginRecord.getCountryName());
 	}
 
 	@Test
 	void isHasLocationWithNullIpAddressReturnsFalse() {
-		UserLoginRecordExtension record = new UserLoginRecordExtension();
+		UserLoginRecordExtension loginRecord = new UserLoginRecordExtension();
 		// getIpAddress() is null → geoIP stays EMPTY → isHasLocation = false
-		assertFalse(record.isHasLocation());
+		assertFalse(loginRecord.isHasLocation());
 	}
 
 	@Test
 	void getGeoIPWithNullIpAddressReturnsEmpty() {
-		UserLoginRecordExtension record = new UserLoginRecordExtension();
-		IPGeolocation result = record.getGeoIP();
+		UserLoginRecordExtension loginRecord = new UserLoginRecordExtension();
+		IPGeolocation result = loginRecord.getGeoIP();
 		assertNotNull(result);
 		assertEquals(IPGeolocation.EMPTY, result);
 	}
 
 	@Test
 	void getBizKeyWithFailedTruePrependsPrefix() {
-		UserLoginRecordExtension record = new UserLoginRecordExtension();
-		record.setFailed(Boolean.TRUE);
-		String bizKey = record.getBizKey();
+		UserLoginRecordExtension loginRecord = new UserLoginRecordExtension();
+		loginRecord.setFailed(Boolean.TRUE);
+		String bizKey = loginRecord.getBizKey();
 		assertNotNull(bizKey);
-		assertEquals("Failed Login attempt: " + record.getBizKey().replace("Failed Login attempt: ", ""), bizKey);
+		assertEquals("Failed Login attempt: " + loginRecord.getBizKey().replace("Failed Login attempt: ", ""), bizKey);
 	}
 }

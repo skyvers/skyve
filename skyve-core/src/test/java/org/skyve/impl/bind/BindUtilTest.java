@@ -4788,9 +4788,10 @@ class BindUtilTest {
 	void setDynamicElementByIdBindingThroughPublicSetRejectsNonBeanValue() {
 		DynamicBean first = new DynamicBean("sales", "Item", new HashMap<>(Map.of(Bean.DOCUMENT_ID, "one")));
 		DynamicBean bean = new DynamicBean("sales", "Order", new HashMap<>(Map.of("items", new ArrayList<>(List.of(first)))));
+		String idBinding = BindUtil.createIdBinding("items", "one");
 
 		MetaDataException exception = assertThrows(MetaDataException.class,
-				() -> BindUtil.set(bean, BindUtil.createIdBinding("items", "one"), "not a bean"));
+				() -> BindUtil.set(bean, idBinding, "not a bean"));
 
 		assertNotNull(exception);
 	}
@@ -4800,9 +4801,10 @@ class BindUtilTest {
 	void setDynamicElementByIdBindingThroughPublicSetRejectsNullValue() {
 		DynamicBean first = new DynamicBean("sales", "Item", new HashMap<>(Map.of(Bean.DOCUMENT_ID, "one")));
 		DynamicBean bean = new DynamicBean("sales", "Order", new HashMap<>(Map.of("items", new ArrayList<>(List.of(first)))));
+		String idBinding = BindUtil.createIdBinding("items", "one");
 
 		MetaDataException exception = assertThrows(MetaDataException.class,
-				() -> BindUtil.set(bean, BindUtil.createIdBinding("items", "one"), null));
+				() -> BindUtil.set(bean, idBinding, null));
 
 		assertNotNull(exception);
 	}

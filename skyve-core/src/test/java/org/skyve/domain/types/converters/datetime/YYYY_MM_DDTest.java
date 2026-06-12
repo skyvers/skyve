@@ -15,10 +15,7 @@ class YYYY_MM_DDTest {
 
 	@Test
 	void testFromDisplayValueInvalidFormat() throws Exception {
-		ConversionException ce = assertThrows(ConversionException.class, () -> {
-			// call the method under test
-			converter.fromDisplayValue("01-03-2020");
-		});
+		ConversionException ce = assertThrows(ConversionException.class, () -> converter.fromDisplayValue("01-03-2020"));
 
 		assertTrue(ce.getMessages().size() > 0);
 	}

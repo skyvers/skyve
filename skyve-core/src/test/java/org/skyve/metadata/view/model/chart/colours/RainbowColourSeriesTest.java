@@ -48,27 +48,12 @@ class RainbowColourSeriesTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void setSizeSmallSizeTrimsSpectrum() {
-		RainbowColourSeries series = new RainbowColourSeries();
-		// size <= 10 uses trimmed spectrum
-		series.setSize(5);
-		assertNotNull(series.getCurrent());
-	}
-
-	@Test
-	@SuppressWarnings("static-method")
-	void setSizeLargeSizeKeepsSpectrum() {
-		RainbowColourSeries series = new RainbowColourSeries();
-		series.setSize(20);
-		assertNotNull(series.getCurrent());
-	}
-
-	@Test
-	@SuppressWarnings("static-method")
-	void setSizeTenKeepsTrimmedSpectrum() {
-		RainbowColourSeries series = new RainbowColourSeries();
-		series.setSize(10);
-		assertNotNull(series.getCurrent());
+	void setSizeKeepsCurrentColourAvailable() {
+		for (int size : new int[] {5, 10, 20}) {
+			RainbowColourSeries series = new RainbowColourSeries();
+			series.setSize(size);
+			assertNotNull(series.getCurrent());
+		}
 	}
 
 	@Test

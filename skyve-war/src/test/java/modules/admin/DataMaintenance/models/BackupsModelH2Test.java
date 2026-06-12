@@ -124,9 +124,10 @@ class BackupsModelH2Test extends AbstractH2Test {
 	@SuppressWarnings("static-method")
 	void unsupportedListModelOperationsThrow() {
 		BackupsModel model = new BackupsModel();
+		TreeMap<String, Object> properties = new TreeMap<>();
 
 		assertThrows(IllegalStateException.class, model::iterate);
-		assertThrows(IllegalStateException.class, () -> model.update("id", new TreeMap<>()));
+		assertThrows(IllegalStateException.class, () -> model.update("id", properties));
 		assertThrows(IllegalStateException.class, () -> model.remove("id"));
 	}
 }

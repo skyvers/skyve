@@ -3,6 +3,7 @@ package org.skyve.impl.web.faces.views;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -56,7 +57,7 @@ class UploadViewsStateTest {
 		assertEquals("beanBinding", view.getBinding());
 		assertEquals("contentId", view.getContentBinding());
 		assertFalse(view.isCanAccess());
-		assertTrue(view.getBaseHref() != null);
+		assertNotNull(view.getBaseHref());
 	}
 
 	@Test

@@ -25,41 +25,22 @@ class MonitoringDashboardBizletTest {
 
 	@Test
 	void preRerenderRsModuleNameClearsDocumentAndComponent() throws Exception {
-		MonitoringDashboardBizlet bizlet = new MonitoringDashboardBizlet();
-		MonitoringDashboard bean = new MonitoringDashboard();
-		bean.setRsDocumentName("User");
-		bean.setRsComponentName("grid");
+		Object[][] cases = {
+				{"User", "grid"},
+				{null, "grid"},
+				{null, null}
+		};
+		for (Object[] testCase : cases) {
+			MonitoringDashboardBizlet bizlet = new MonitoringDashboardBizlet();
+			MonitoringDashboard bean = new MonitoringDashboard();
+			bean.setRsDocumentName((String) testCase[0]);
+			bean.setRsComponentName((String) testCase[1]);
 
-		bizlet.preRerender(MonitoringDashboard.rsModuleNamePropertyName, bean, null);
+			bizlet.preRerender(MonitoringDashboard.rsModuleNamePropertyName, bean, null);
 
-		assertNull(bean.getRsDocumentName());
-		assertNull(bean.getRsComponentName());
-	}
-
-	@Test
-	void preRerenderRsModuleNameClearsComponentWhenNoDocument() throws Exception {
-		MonitoringDashboardBizlet bizlet = new MonitoringDashboardBizlet();
-		MonitoringDashboard bean = new MonitoringDashboard();
-		bean.setRsDocumentName(null);
-		bean.setRsComponentName("grid");
-
-		bizlet.preRerender(MonitoringDashboard.rsModuleNamePropertyName, bean, null);
-
-		assertNull(bean.getRsDocumentName());
-		assertNull(bean.getRsComponentName());
-	}
-
-	@Test
-	void preRerenderRsModuleNameNoOpWhenBothNull() throws Exception {
-		MonitoringDashboardBizlet bizlet = new MonitoringDashboardBizlet();
-		MonitoringDashboard bean = new MonitoringDashboard();
-		bean.setRsDocumentName(null);
-		bean.setRsComponentName(null);
-
-		bizlet.preRerender(MonitoringDashboard.rsModuleNamePropertyName, bean, null);
-
-		assertNull(bean.getRsDocumentName());
-		assertNull(bean.getRsComponentName());
+			assertNull(bean.getRsDocumentName());
+			assertNull(bean.getRsComponentName());
+		}
 	}
 
 	@Test
@@ -112,42 +93,23 @@ class MonitoringDashboardBizletTest {
 	}
 
 	@Test
-	void completeRsDocumentNameWithNullModuleReturnsEmpty() throws Exception {
-		MonitoringDashboardBizlet bizlet = new MonitoringDashboardBizlet();
-		MonitoringDashboard bean = new MonitoringDashboard();
-		bean.setRsRequestType(MonitoringDashboard.RequestType.E);
-		bean.setRsModuleName(null);
+	void completeWithMissingModuleReturnsEmpty() throws Exception {
+		Object[][] cases = {
+				{"rsDocumentName", "User", null},
+				{"rsDocumentName", "User", "  "},
+				{"rsComponentName", "form", null}
+		};
+		for (Object[] testCase : cases) {
+			MonitoringDashboardBizlet bizlet = new MonitoringDashboardBizlet();
+			MonitoringDashboard bean = new MonitoringDashboard();
+			bean.setRsRequestType(MonitoringDashboard.RequestType.E);
+			bean.setRsModuleName((String) testCase[2]);
 
-		List<String> result = bizlet.complete("rsDocumentName", "User", bean);
+			List<String> result = bizlet.complete((String) testCase[0], (String) testCase[1], bean);
 
-		assertNotNull(result);
-		assertTrue(result.isEmpty());
-	}
-
-	@Test
-	void completeRsDocumentNameWithEmptyModuleReturnsEmpty() throws Exception {
-		MonitoringDashboardBizlet bizlet = new MonitoringDashboardBizlet();
-		MonitoringDashboard bean = new MonitoringDashboard();
-		bean.setRsRequestType(MonitoringDashboard.RequestType.E);
-		bean.setRsModuleName("  ");
-
-		List<String> result = bizlet.complete("rsDocumentName", "User", bean);
-
-		assertNotNull(result);
-		assertTrue(result.isEmpty());
-	}
-
-	@Test
-	void completeRsComponentNameWithNullModuleReturnsEmpty() throws Exception {
-		MonitoringDashboardBizlet bizlet = new MonitoringDashboardBizlet();
-		MonitoringDashboard bean = new MonitoringDashboard();
-		bean.setRsRequestType(MonitoringDashboard.RequestType.E);
-		bean.setRsModuleName(null);
-
-		List<String> result = bizlet.complete("rsComponentName", "form", bean);
-
-		assertNotNull(result);
-		assertTrue(result.isEmpty());
+			assertNotNull(result);
+			assertTrue(result.isEmpty());
+		}
 	}
 
 	@Test

@@ -22,10 +22,7 @@ class DD_MM_YYYYTest {
 
 	@Test
 	void testFromDisplayValueInvalidFormat() throws Exception {
-		ConversionException ce = assertThrows(ConversionException.class, () -> {
-			// call the method under test
-			formatter.fromDisplayValue("03-01-2020");
-		});
+		ConversionException ce = assertThrows(ConversionException.class, () -> formatter.fromDisplayValue("03-01-2020"));
 
 		assertTrue(ce.getMessages().size() > 0);
 	}

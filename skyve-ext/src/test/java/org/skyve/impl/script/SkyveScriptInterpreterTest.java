@@ -1533,19 +1533,21 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testProcessStarBulletMarkerAddsError() {
-		// covers L397-398: '*' bullet marker is not supported (only '-' and '+')
-		i = new SkyveScriptInterpreter("# Admin\n## Customer\n* name text\n");
-		i.process();
-		assertFalse("star bullet marker should add error", i.getErrors().isEmpty());
-	}
+	public void testInvalidScriptsAddErrors() {
+		String[][] cases = {
+				{"# Admin\n## Customer\n* name text\n", "star bullet marker should add error"},
+				{"# `code`\n## Customer\n- name text\n", "code-span heading should add critical error"},
+				{"# Admin\n## Customer\n- state enum (QLD,NSW\n", "invalid enum bracket format should add error"},
+				{"# Admin\n## Customer\n- state enum\n", "enum with no brackets should add warning or error"},
+				{"# Admin\n## Customer\n- name text abc\n", "non-integer text length should add error"},
+				{"# Admin\n## Customer\n- *name*\n", "required attribute with no type should add warning or error"},
+				{"# Admin\n## Customer\n- name foobartype\n", "unrecognised attribute type should add a warning"}};
 
-	@Test
-	public void testProcessHeading1WithCodeChildAddsCritical() {
-		// covers L317: heading1 where first child is not a Text node (uses code span)
-		i = new SkyveScriptInterpreter("# `code`\n## Customer\n- name text\n");
-		i.process();
-		assertFalse("code-span heading should add critical error", i.getErrors().isEmpty());
+		for (String[] testCase : cases) {
+			i = new SkyveScriptInterpreter(testCase[0]);
+			i.process();
+			assertFalse(testCase[1], i.getErrors().isEmpty());
+		}
 	}
 
         @Test
@@ -1557,45 +1559,13 @@ public class SkyveScriptInterpreterTest {
                 assertThat(i.getModules().get(0).getName(), is("myapp"));
         }
 
-        @Test
-        public void testDocumentWithoutModuleAndNoDefaultAddsCritical() {
-                // covers L372 and initialiseDefaultModule() L922, L935 (addCritical path)
-                i = new SkyveScriptInterpreter("## Customer\n- name text 50\n");
-                i.process();
-                assertFalse("no default module should add critical error", i.getErrors().isEmpty());
-        }
-
-        @Test
-        public void testEnumAttributeWithInvalidBracketFormatAddsError() {
-                // covers L653: enum type with parts.length==2 but brackets don't end with ')'
-                i = new SkyveScriptInterpreter("# Admin\n## Customer\n- state enum (QLD,NSW\n");
-                i.process();
-                assertFalse("invalid enum bracket format should add error", i.getErrors().isEmpty());
-        }
-
-        @Test
-        public void testEnumAttributeWithNoBracketsAddsWarning() {
-                // covers L656-658: enum type with parts.length != 2 (no brackets supplied)
-                i = new SkyveScriptInterpreter("# Admin\n## Customer\n- state enum\n");
-                i.process();
-                assertFalse("enum with no brackets should add warning or error", i.getErrors().isEmpty());
-        }
-
-        @Test
-        public void testTextAttributeWithNonIntegerLengthAddsError() {
-                // covers L669-671: text attribute whose length is not a valid integer
-                i = new SkyveScriptInterpreter("# Admin\n## Customer\n- name text abc\n");
-                i.process();
-                assertFalse("non-integer text length should add error", i.getErrors().isEmpty());
-        }
-
-        @Test
-        public void testRequiredAttributeWithNoTypeAddsWarning() {
-                // covers parseAttribute L1109: required attribute (*name*) with no following Text node
-                i = new SkyveScriptInterpreter("# Admin\n## Customer\n- *name*\n");
-                i.process();
-                assertFalse("required attribute with no type should add warning or error", i.getErrors().isEmpty());
-        }
+	@Test
+	public void testDocumentWithoutModuleAndNoDefaultAddsCritical() {
+		// covers L372 and initialiseDefaultModule() L922, L935 (addCritical path)
+		i = new SkyveScriptInterpreter("## Customer\n- name text 50\n");
+		i.process();
+		assertFalse("no default module should add critical error", i.getErrors().isEmpty());
+	}
 
         @Test
         public void testTwoDocumentsInModuleCoversAppendRoleElseBranch() {
@@ -1608,14 +1578,4 @@ public class SkyveScriptInterpreterTest {
                 assertFalse("module should have roles", i.getModules().get(0).getRoles().isEmpty());
         }
 
-        @Test
-        public void testUnsupportedAttributeTypeAddsWarning() {
-                // covers createAttribute default case L685: unrecognised lowercase type that is
-                // not an Association (uppercase) and not a Collection (plus-marker list)
-                i = new SkyveScriptInterpreter("# Admin\n## Customer\n- name foobartype\n");
-                i.process();
-                assertFalse("unrecognised attribute type should add a warning", i.getErrors().isEmpty());
-        }
-
 }
-

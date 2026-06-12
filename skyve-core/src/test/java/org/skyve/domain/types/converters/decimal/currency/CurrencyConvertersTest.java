@@ -64,7 +64,8 @@ class CurrencyConvertersTest {
 
 	@Test
 	void decimal2DollarsAndCentsFromDisplayValueInvalidThrows() {
-		assertThrows(ConversionException.class, () -> new Decimal2DollarsAndCents().fromDisplayValue("notanumber"));
+		Decimal2DollarsAndCents converter = new Decimal2DollarsAndCents();
+		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("notanumber"));
 	}
 
 	// ---- Decimal5DollarsAndCents ----
@@ -114,7 +115,8 @@ class CurrencyConvertersTest {
 
 	@Test
 	void decimal5DollarsAndCentsFromDisplayValueInvalidThrows() {
-		assertThrows(ConversionException.class, () -> new Decimal5DollarsAndCents().fromDisplayValue("notanumber"));
+		Decimal5DollarsAndCents converter = new Decimal5DollarsAndCents();
+		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("notanumber"));
 	}
 
 	// ---- Decimal10DollarsAndCents ----
@@ -164,23 +166,30 @@ class CurrencyConvertersTest {
 
 	@Test
 	void decimal10DollarsAndCentsFromDisplayValueInvalidThrows() {
-		assertThrows(ConversionException.class, () -> new Decimal10DollarsAndCents().fromDisplayValue("notanumber"));
+		Decimal10DollarsAndCents converter = new Decimal10DollarsAndCents();
+		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("notanumber"));
 	}
 
 	// ---- toDisplayValue(null) exception paths ----
 
 	@Test
+	@SuppressWarnings("null")
 	void decimal2DollarsAndCentsToDisplayValueNullThrows() {
-		assertThrows(ConversionException.class, () -> new Decimal2DollarsAndCents().toDisplayValue(null));
+		Decimal2DollarsAndCents converter = new Decimal2DollarsAndCents();
+		assertThrows(ConversionException.class, () -> converter.toDisplayValue(null));
 	}
 
 	@Test
+	@SuppressWarnings("null")
 	void decimal5DollarsAndCentsToDisplayValueNullThrows() {
-		assertThrows(ConversionException.class, () -> new Decimal5DollarsAndCents().toDisplayValue(null));
+		Decimal5DollarsAndCents converter = new Decimal5DollarsAndCents();
+		assertThrows(ConversionException.class, () -> converter.toDisplayValue(null));
 	}
 
 	@Test
+	@SuppressWarnings("null")
 	void decimal10DollarsAndCentsToDisplayValueNullThrows() {
-		assertThrows(ConversionException.class, () -> new Decimal10DollarsAndCents().toDisplayValue(null));
+		Decimal10DollarsAndCents converter = new Decimal10DollarsAndCents();
+		assertThrows(ConversionException.class, () -> converter.toDisplayValue(null));
 	}
 }

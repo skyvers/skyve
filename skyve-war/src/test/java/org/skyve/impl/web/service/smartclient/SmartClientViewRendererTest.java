@@ -65,6 +65,7 @@ import org.skyve.impl.metadata.repository.view.actions.RemoveAction;
 import org.skyve.impl.metadata.repository.view.actions.SaveAction;
 import org.skyve.impl.metadata.repository.view.actions.UploadAction;
 import org.skyve.impl.metadata.repository.view.actions.ZoomOutAction;
+import org.skyve.metadata.MetaData;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.VerticalAlignment;
 import org.skyve.impl.metadata.view.container.Collapsible;
@@ -112,72 +113,30 @@ class SmartClientViewRendererTest extends AbstractSkyveTest {
 
 	@Test
 	void renderViewWithTextFieldGeneratesFormItem() {
-		ViewImpl view = new ViewImpl();
-		view.setName(ViewType.edit.toString());
-		view.setTitle("Test");
-
-		Form form = new Form();
-		form.getColumns().add(new FormColumn());
-		FormRow row = new FormRow();
-		form.getRows().add(row);
-		FormItem item = new FormItem();
 		TextField tf = new TextField();
 		tf.setBinding("text");
-		item.setWidget(tf);
-		row.getItems().add(item);
-		view.getContained().add(form);
 
-		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
-		renderer.visit();
-		String code = renderer.getCode().toString();
+		String code = renderSingleFormWidget(tf);
 		assertFalse(code.isEmpty());
 		assertTrue(code.contains("type:'text'"));
 	}
 
 	@Test
 	void renderViewWithCheckBox() {
-		ViewImpl view = new ViewImpl();
-		view.setName(ViewType.edit.toString());
-		view.setTitle("Test");
-
-		Form form = new Form();
-		form.getColumns().add(new FormColumn());
-		FormRow row = new FormRow();
-		form.getRows().add(row);
-		FormItem item = new FormItem();
 		CheckBox cb = new CheckBox();
 		cb.setBinding("booleanFlag");
-		item.setWidget(cb);
-		row.getItems().add(item);
-		view.getContained().add(form);
 
-		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
-		renderer.visit();
-		String code = renderer.getCode().toString();
+		String code = renderSingleFormWidget(cb);
 		assertFalse(code.isEmpty());
 		assertTrue(code.contains("checkbox"));
 	}
 
 	@Test
 	void renderViewWithCombo() {
-		ViewImpl view = new ViewImpl();
-		view.setName(ViewType.edit.toString());
-		view.setTitle("Test");
-
-		Form form = new Form();
-		form.getColumns().add(new FormColumn());
-		FormRow row = new FormRow();
-		form.getRows().add(row);
-		FormItem item = new FormItem();
 		Combo combo = new Combo();
 		combo.setBinding("enum3");
-		item.setWidget(combo);
-		row.getItems().add(item);
-		view.getContained().add(form);
 
-		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
-		renderer.visit();
-		String code = renderer.getCode().toString();
+		String code = renderSingleFormWidget(combo);
 		assertFalse(code.isEmpty());
 		assertTrue(code.contains("select"));
 	}
@@ -1206,6 +1165,25 @@ class SmartClientViewRendererTest extends AbstractSkyveTest {
 		return form;
 	}
 
+	private String renderSingleFormWidget(MetaData widget) {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		FormRow row = new FormRow();
+		form.getRows().add(row);
+		FormItem item = new FormItem();
+		item.setWidget(widget);
+		row.getItems().add(item);
+		view.getContained().add(form);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		return renderer.getCode().toString();
+	}
+
 	@Test
 	void renderViewWithServerSideActionEventHandler() {
 		ViewImpl view = new ViewImpl();
@@ -1725,72 +1703,30 @@ class SmartClientViewRendererTest extends AbstractSkyveTest {
 
 	@Test
 	void renderViewWithDecimal2TextField() {
-		ViewImpl view = new ViewImpl();
-		view.setName(ViewType.edit.toString());
-		view.setTitle("Test");
-
-		Form form = new Form();
-		form.getColumns().add(new FormColumn());
-		FormRow row = new FormRow();
-		form.getRows().add(row);
-		FormItem item = new FormItem();
 		TextField tf = new TextField();
 		tf.setBinding("decimal2");
-		item.setWidget(tf);
-		row.getItems().add(item);
-		view.getContained().add(form);
 
-		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
-		renderer.visit();
-		String code = renderer.getCode().toString();
+		String code = renderSingleFormWidget(tf);
 		assertFalse(code.isEmpty());
 		assertTrue(code.contains("type:'bizDecimal2'") || code.contains("type:'bizDollarsAndCents'"));
 	}
 
 	@Test
 	void renderViewWithDecimal5TextField() {
-		ViewImpl view = new ViewImpl();
-		view.setName(ViewType.edit.toString());
-		view.setTitle("Test");
-
-		Form form = new Form();
-		form.getColumns().add(new FormColumn());
-		FormRow row = new FormRow();
-		form.getRows().add(row);
-		FormItem item = new FormItem();
 		TextField tf = new TextField();
 		tf.setBinding("decimal5");
-		item.setWidget(tf);
-		row.getItems().add(item);
-		view.getContained().add(form);
 
-		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
-		renderer.visit();
-		String code = renderer.getCode().toString();
+		String code = renderSingleFormWidget(tf);
 		assertFalse(code.isEmpty());
 		assertTrue(code.contains("type:'bizDecimal5'") || code.contains("type:'bizDollarsAndCents'"));
 	}
 
 	@Test
 	void renderViewWithDecimal10TextField() {
-		ViewImpl view = new ViewImpl();
-		view.setName(ViewType.edit.toString());
-		view.setTitle("Test");
-
-		Form form = new Form();
-		form.getColumns().add(new FormColumn());
-		FormRow row = new FormRow();
-		form.getRows().add(row);
-		FormItem item = new FormItem();
 		TextField tf = new TextField();
 		tf.setBinding("decimal10");
-		item.setWidget(tf);
-		row.getItems().add(item);
-		view.getContained().add(form);
 
-		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
-		renderer.visit();
-		String code = renderer.getCode().toString();
+		String code = renderSingleFormWidget(tf);
 		assertFalse(code.isEmpty());
 		assertTrue(code.contains("type:'bizDecimal10'") || code.contains("type:'bizDollarsAndCents'"));
 	}
@@ -3965,6 +3901,3 @@ class SmartClientViewRendererTest extends AbstractSkyveTest {
 	}
 
 }
-
-
-

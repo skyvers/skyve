@@ -103,9 +103,10 @@ class ExpressionEvaluatorTest {
 	void registerDuplicatePrefixThrows() {
 		String prefix = "z" + UUID.randomUUID().toString().replace("-", "");
 		ExpressionEvaluator.register(prefix, new NoOpEvaluator());
+		NoOpEvaluator evaluator = new NoOpEvaluator();
 
 		IllegalStateException ex = assertThrows(IllegalStateException.class,
-				() -> ExpressionEvaluator.register(prefix, new NoOpEvaluator()));
+				() -> ExpressionEvaluator.register(prefix, evaluator));
 		assertThat(ex.getMessage(), containsString("already registered"));
 	}
 
@@ -731,27 +732,11 @@ class ExpressionEvaluatorTest {
 	}
 
 	@Test
-	void evaluateDateExpressionWithFormatSuffixReturnsString() {
-		Object result = ExpressionEvaluator.evaluate("{DATE|nonExistentFmt}");
-		assertThat(result, instanceOf(String.class));
-	}
-
-	@Test
-	void evaluateTimeExpressionWithFormatSuffixReturnsString() {
-		Object result = ExpressionEvaluator.evaluate("{TIME|nonExistentFmt}");
-		assertThat(result, instanceOf(String.class));
-	}
-
-	@Test
-	void evaluateDatetimeExpressionWithFormatSuffixReturnsString() {
-		Object result = ExpressionEvaluator.evaluate("{DATETIME|nonExistentFmt}");
-		assertThat(result, instanceOf(String.class));
-	}
-
-	@Test
-	void evaluateTimestampExpressionWithFormatSuffixReturnsString() {
-		Object result = ExpressionEvaluator.evaluate("{TIMESTAMP|nonExistentFmt}");
-		assertThat(result, instanceOf(String.class));
+	void evaluateTemporalExpressionsWithFormatSuffixReturnString() {
+		for (String expression : List.of("{DATE|nonExistentFmt}", "{TIME|nonExistentFmt}", "{DATETIME|nonExistentFmt}", "{TIMESTAMP|nonExistentFmt}")) {
+			Object result = ExpressionEvaluator.evaluate(expression);
+			assertThat(result, instanceOf(String.class));
+		}
 	}
 
 	@Test
@@ -813,7 +798,7 @@ class ExpressionEvaluatorTest {
 		// "name" is not a real binding — should return an error message or null
 		String result = ExpressionEvaluator.validate("{name}", null, customer, module, document);
 		// Just checking the code path is reached (result may be null or an error)
-		assertTrue(result == null || result.length() > 0);
+		assertTrue(result == null || !result.isEmpty());
 	}
 
 	@Test
@@ -824,7 +809,7 @@ class ExpressionEvaluatorTest {
 		when(document.getAllAttributes(customer)).thenReturn(Collections.emptyList());
 		String result = ExpressionEvaluator.validate("{bean:name}", null, customer, module, document);
 		// Just checking the code path is reached
-		assertTrue(result == null || result.length() > 0);
+		assertTrue(result == null || !result.isEmpty());
 	}
 
 	@Test

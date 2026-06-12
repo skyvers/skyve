@@ -26,33 +26,11 @@ public class Decimal5Test {
 	}
 
 	@Test
-	public void testGetAsObjectLargeValue() throws Exception {
-		// setup the test data
-		java.lang.String stringValue = "9999999999999999999";
-		org.skyve.domain.types.Decimal5 decimalValue = new org.skyve.domain.types.Decimal5(stringValue);
-
-		// call the method under test
-		assertThat(converter.getAsObject(null, null, stringValue), is(decimalValue));
-	}
-
-	@Test
-	public void testGetAsObjectLargePositiveValue() throws Exception {
-		// setup the test data
-		java.lang.String stringValue = "+9999999999999999999";
-		org.skyve.domain.types.Decimal5 decimalValue = new org.skyve.domain.types.Decimal5(stringValue);
-
-		// call the method under test
-		assertThat(converter.getAsObject(null, null, stringValue), is(decimalValue));
-	}
-
-	@Test
-	public void testGetAsObjectLargeNegativeValue() throws Exception {
-		// setup the test data
-		java.lang.String stringValue = "-9999999999999999999";
-		org.skyve.domain.types.Decimal5 decimalValue = new org.skyve.domain.types.Decimal5(stringValue);
-
-		// call the method under test
-		assertThat(converter.getAsObject(null, null, stringValue), is(decimalValue));
+	public void testGetAsObjectLargeValues() throws Exception {
+		for (String stringValue : new String[] {"9999999999999999999", "+9999999999999999999", "-9999999999999999999"}) {
+			org.skyve.domain.types.Decimal5 decimalValue = new org.skyve.domain.types.Decimal5(stringValue);
+			assertThat(converter.getAsObject(null, null, stringValue), is(decimalValue));
+		}
 	}
 
 	@Test

@@ -317,8 +317,9 @@ class RequestListModelTest extends AbstractH2Test {
 	@Test
 	void unsupportedListModelOperationsThrow() {
 		RequestListModel model = new RequestListModel();
+		TreeMap<String, Object> properties = new TreeMap<>();
 
-		assertThrows(IllegalStateException.class, () -> model.update("id", new TreeMap<>()));
+		assertThrows(IllegalStateException.class, () -> model.update("id", properties));
 		assertThrows(IllegalStateException.class, () -> model.remove("id"));
 	}
 }

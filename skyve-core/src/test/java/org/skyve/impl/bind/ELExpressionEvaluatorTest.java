@@ -65,26 +65,12 @@ import org.skyve.metadata.customer.Customer;
 	}
 
 	@Test
-	void completeReturnsEmptyForClosingSquareBraceFragment() {
+	void completeReturnsEmptyForClosedOrUnrecognisedFragments() {
 		ELExpressionEvaluator evaluator = new ELExpressionEvaluator(false);
-		// ']' as last char → newExpression skips adding completes
-		List<String> result = evaluator.completeWithoutPrefixOrSuffix("]", null, null, null);
-		assertTrue(result.isEmpty(), "Closing brace fragment should return no completions");
-	}
-
-	@Test
-	void completeReturnsEmptyForClosingParenFragment() {
-		ELExpressionEvaluator evaluator = new ELExpressionEvaluator(false);
-		List<String> result = evaluator.completeWithoutPrefixOrSuffix(")", null, null, null);
-		assertTrue(result.isEmpty(), "Closing paren fragment should return no completions");
-	}
-
-	@Test
-	void completeReturnsEmptyForUnrecognisedCompoundFragment() {
-		ELExpressionEvaluator evaluator = new ELExpressionEvaluator(false);
-		// "x.y" → has dot (delimiter) but no commencing token found → newExpression("x.y") → "y" matches nothing
-		List<String> result = evaluator.completeWithoutPrefixOrSuffix("x.y", null, null, null);
-		assertTrue(result.isEmpty(), "Unrecognised compound fragment should return no completions");
+		for (String fragment : List.of("]", ")", "x.y")) {
+			List<String> result = evaluator.completeWithoutPrefixOrSuffix(fragment, null, null, null);
+			assertTrue(result.isEmpty(), "Fragment should return no completions: " + fragment);
+		}
 	}
 
 	@Test

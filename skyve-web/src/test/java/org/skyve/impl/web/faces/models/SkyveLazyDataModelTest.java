@@ -229,9 +229,10 @@ class SkyveLazyDataModelTest {
 		Filter modelFilter = mock(Filter.class);
 		ListModel<Bean> listModel = listModelWithFilter(modelFilter);
 		Customer customer = customerForSalesModule();
+		Map<String, FilterMeta> filters = Map.of(Bean.DOCUMENT_ID, filterMeta);
 
 		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-				() -> invokeFilter(Map.of(Bean.DOCUMENT_ID, filterMeta), listModel, customer));
+				() -> invokeFilter(filters, listModel, customer));
 
 		assertEquals(unsupportedValue + " is not a valid value for param " + Bean.DOCUMENT_ID, exception.getMessage());
 	}

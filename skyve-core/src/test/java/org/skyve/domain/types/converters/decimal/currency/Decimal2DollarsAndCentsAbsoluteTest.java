@@ -92,12 +92,14 @@ class Decimal2DollarsAndCentsAbsoluteTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void fromDisplayValueInvalidThrowsConversionException() {
-		assertThrows(ConversionException.class, () -> new Decimal2DollarsAndCentsAbsolute().fromDisplayValue("not_a_number"));
+		Decimal2DollarsAndCentsAbsolute converter = new Decimal2DollarsAndCentsAbsolute();
+		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("not_a_number"));
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"})
 	void toDisplayValueNullThrows() {
-		assertThrows(ConversionException.class, () -> new Decimal2DollarsAndCentsAbsolute().toDisplayValue(null));
+		Decimal2DollarsAndCentsAbsolute converter = new Decimal2DollarsAndCentsAbsolute();
+		assertThrows(ConversionException.class, () -> converter.toDisplayValue(null));
 	}
 }

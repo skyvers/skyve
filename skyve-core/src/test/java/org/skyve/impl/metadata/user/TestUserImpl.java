@@ -1,14 +1,18 @@
 package org.skyve.impl.metadata.user;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -22,144 +26,143 @@ class TestUserImpl {
 	@SuppressWarnings("static-method")
 	void testSetLanguageTag() {
 		UserImpl user = new UserImpl();
-		Assert.assertNull(user.getLocale());
-		Assert.assertNull(user.getLanguageTag());
+		assertNull(user.getLocale());
+		assertNull(user.getLanguageTag());
 		user.setLanguageTag(Locale.FRENCH.getLanguage());
-		Assert.assertEquals(Locale.FRENCH.getLanguage(), user.getLanguageTag());
-		Assert.assertEquals(Locale.FRENCH, user.getLocale());
+		assertEquals(Locale.FRENCH.getLanguage(), user.getLanguageTag());
+		assertEquals(Locale.FRENCH, user.getLocale());
 	}
 	
 	@Test
 	@SuppressWarnings("static-method")
 	void testSetWebLocaleWithoutLanguageTag() {
 		UserImpl user = new UserImpl();
-		Assert.assertNull(user.getLocale());
-		Assert.assertNull(user.getLanguageTag());
+		assertNull(user.getLocale());
+		assertNull(user.getLanguageTag());
 		user.setWebLocale(Locale.CHINESE);
-		Assert.assertNull(user.getLanguageTag());
-		Assert.assertEquals(Locale.CHINESE, user.getLocale());
+		assertNull(user.getLanguageTag());
+		assertEquals(Locale.CHINESE, user.getLocale());
 	}
 	
 	@Test
 	@SuppressWarnings("static-method")
 	void testSetWebLocaleWithLanguageTag() {
 		UserImpl user = new UserImpl();
-		Assert.assertNull(user.getLocale());
-		Assert.assertNull(user.getLanguageTag());
+		assertNull(user.getLocale());
+		assertNull(user.getLanguageTag());
 		user.setLanguageTag(Locale.FRENCH.getLanguage());
-		Assert.assertEquals(Locale.FRENCH.getLanguage(), user.getLanguageTag());
+		assertEquals(Locale.FRENCH.getLanguage(), user.getLanguageTag());
 		user.setWebLocale(Locale.CHINESE);
-		Assert.assertEquals(Locale.FRENCH.getLanguage(), user.getLanguageTag());
-		Assert.assertEquals(Locale.FRENCH, user.getLocale());
+		assertEquals(Locale.FRENCH.getLanguage(), user.getLanguageTag());
+		assertEquals(Locale.FRENCH, user.getLocale());
 	}
 	
 	@Test
 	@SuppressWarnings("static-method")
 	void testLocaleSerialization() {
 		UserImpl user = new UserImpl();
-		Assert.assertNull(user.getLocale());
-		Assert.assertNull(user.getLanguageTag());
+		assertNull(user.getLocale());
+		assertNull(user.getLanguageTag());
 		user = UtilImpl.cloneBySerialization(user);
-		Assert.assertNull(user.getLocale());
-		Assert.assertNull(user.getLanguageTag());
+		assertNull(user.getLocale());
+		assertNull(user.getLanguageTag());
 		user.setWebLocale(Locale.CHINESE);
 		user = UtilImpl.cloneBySerialization(user);
-		Assert.assertNull(user.getLocale());
-		Assert.assertNull(user.getLanguageTag());
+		assertNull(user.getLocale());
+		assertNull(user.getLanguageTag());
 		user.setLanguageTag(Locale.FRENCH.getLanguage());
 		user = UtilImpl.cloneBySerialization(user);
-		Assert.assertEquals(Locale.FRENCH.getLanguage(), user.getLanguageTag());
-		Assert.assertEquals(Locale.FRENCH, user.getLocale());
+		assertEquals(Locale.FRENCH.getLanguage(), user.getLanguageTag());
+		assertEquals(Locale.FRENCH, user.getLocale());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
 	void testSetAndGetId() {
 		UserImpl user = new UserImpl();
-		Assert.assertNull(user.getId());
 		user.setId("test-id-123");
-		Assert.assertEquals("test-id-123", user.getId());
+		assertEquals("test-id-123", user.getId());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
 	void testSetAndGetName() {
 		UserImpl user = new UserImpl();
-		Assert.assertNull(user.getName());
+		assertNull(user.getName());
 		user.setName("testuser");
-		Assert.assertEquals("testuser", user.getName());
+		assertEquals("testuser", user.getName());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
 	void testSetAndGetPasswordHash() {
 		UserImpl user = new UserImpl();
-		Assert.assertNull(user.getPasswordHash());
+		assertNull(user.getPasswordHash());
 		user.setPasswordHash("hashedpw");
-		Assert.assertEquals("hashedpw", user.getPasswordHash());
+		assertEquals("hashedpw", user.getPasswordHash());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
 	void testSetAndGetPasswordChangeRequired() {
 		UserImpl user = new UserImpl();
-		Assert.assertFalse(user.isPasswordChangeRequired());
+		assertFalse(user.isPasswordChangeRequired());
 		user.setPasswordChangeRequired(true);
-		Assert.assertTrue(user.isPasswordChangeRequired());
+		assertTrue(user.isPasswordChangeRequired());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
 	void testSetAndGetContactId() {
 		UserImpl user = new UserImpl();
-		Assert.assertNull(user.getContactId());
+		assertNull(user.getContactId());
 		user.setContactId("contact-123");
-		Assert.assertEquals("contact-123", user.getContactId());
+		assertEquals("contact-123", user.getContactId());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
 	void testSetAndGetContactName() {
 		UserImpl user = new UserImpl();
-		Assert.assertNull(user.getContactName());
+		assertNull(user.getContactName());
 		user.setContactName("John Doe");
-		Assert.assertEquals("John Doe", user.getContactName());
+		assertEquals("John Doe", user.getContactName());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
 	void testSetAndGetContactImageId() {
 		UserImpl user = new UserImpl();
-		Assert.assertNull(user.getContactImageId());
+		assertNull(user.getContactImageId());
 		user.setContactImageId("image-abc");
-		Assert.assertEquals("image-abc", user.getContactImageId());
+		assertEquals("image-abc", user.getContactImageId());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
 	void testSetAndGetCustomerName() {
 		UserImpl user = new UserImpl();
-		Assert.assertNull(user.getCustomerName());
+		assertNull(user.getCustomerName());
 		user.setCustomerName("acme");
-		Assert.assertEquals("acme", user.getCustomerName());
+		assertEquals("acme", user.getCustomerName());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
 	void testSetAndGetDataGroupId() {
 		UserImpl user = new UserImpl();
-		Assert.assertNull(user.getDataGroupId());
+		assertNull(user.getDataGroupId());
 		user.setDataGroupId("group-1");
-		Assert.assertEquals("group-1", user.getDataGroupId());
+		assertEquals("group-1", user.getDataGroupId());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
 	void testSetAndGetHomeModuleName() {
 		UserImpl user = new UserImpl();
-		Assert.assertNull(user.getHomeModuleName());
+		assertNull(user.getHomeModuleName());
 		user.setHomeModuleName("admin");
-		Assert.assertEquals("admin", user.getHomeModuleName());
+		assertEquals("admin", user.getHomeModuleName());
 	}
 
 	@Test
@@ -167,8 +170,8 @@ class TestUserImpl {
 	void testGetAttributesReturnsEmptyMapByDefault() {
 		UserImpl user = new UserImpl();
 		Map<String, Object> attributes = user.getAttributes();
-		Assert.assertNotNull(attributes);
-		Assert.assertTrue(attributes.isEmpty());
+		assertNotNull(attributes);
+		assertTrue(attributes.isEmpty());
 	}
 
 	@Test
@@ -176,7 +179,7 @@ class TestUserImpl {
 	void testSetSessionIdAndGetSessionId() {
 		UserImpl user = new UserImpl();
 		user.setSessionId("session-xyz");
-		Assert.assertEquals("session-xyz", user.getSessionId());
+		assertEquals("session-xyz", user.getSessionId());
 	}
 
 	@Test
@@ -185,8 +188,8 @@ class TestUserImpl {
 		UserImpl user = new UserImpl();
 		user.setContactName("John Doe");
 		String initials = user.getContactAvatarInitials();
-		Assert.assertNotNull(initials);
-		Assert.assertEquals("JD", initials);
+		assertNotNull(initials);
+		assertEquals("JD", initials);
 	}
 
 	@Test
@@ -195,8 +198,8 @@ class TestUserImpl {
 		UserImpl user = new UserImpl();
 		user.setContactName("John");
 		String initials = user.getContactAvatarInitials();
-		Assert.assertNotNull(initials);
-		Assert.assertEquals("J", initials);
+		assertNotNull(initials);
+		assertEquals("J", initials);
 	}
 
 	@Test
@@ -204,15 +207,15 @@ class TestUserImpl {
 	void testGetContactAvatarInitialsWithNullName() {
 		UserImpl user = new UserImpl();
 		String initials = user.getContactAvatarInitials();
-		Assert.assertNotNull(initials);
-		Assert.assertEquals("??", initials);
+		assertNotNull(initials);
+		assertEquals("??", initials);
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
 	void testGetContactImageUrlNullWhenNoImageId() {
 		UserImpl user = new UserImpl();
-		Assert.assertNull(user.getContactImageUrl(64, 64));
+		assertNull(user.getContactImageUrl(64, 64));
 	}
 
 	@Test
@@ -221,10 +224,10 @@ class TestUserImpl {
 		UserImpl user = new UserImpl();
 		user.setContactImageId("img-123");
 		String url = user.getContactImageUrl(100, 200);
-		Assert.assertNotNull(url);
-		Assert.assertTrue(url.contains("img-123"));
-		Assert.assertTrue(url.contains("100"));
-		Assert.assertTrue(url.contains("200"));
+		assertNotNull(url);
+		assertTrue(url.contains("img-123"));
+		assertTrue(url.contains("100"));
+		assertTrue(url.contains("200"));
 	}
 
 	@Test
@@ -232,15 +235,15 @@ class TestUserImpl {
 	void testGetFullyQualifiedDocumentNamesEmptyByDefault() {
 		UserImpl user = new UserImpl();
 		Set<String> names = user.getFullyQualifiedDocumentNames();
-		Assert.assertNotNull(names);
-		Assert.assertTrue(names.isEmpty());
+		assertNotNull(names);
+		assertTrue(names.isEmpty());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
 	void testGetModuleMenuNullWhenNotSet() {
 		UserImpl user = new UserImpl();
-		Assert.assertNull(user.getModuleMenu("admin"));
+		assertNull(user.getModuleMenu("admin"));
 	}
 
 	@Test
@@ -252,7 +255,7 @@ class TestUserImpl {
 		Menu menu = Mockito.mock(Menu.class);
 		Mockito.when(menu.getItems()).thenReturn(new ArrayList<>());
 		user.putModuleMenu(module, menu);
-		Assert.assertEquals(menu, user.getModuleMenu("admin"));
+		assertEquals(menu, user.getModuleMenu("admin"));
 	}
 
 	@Test
@@ -264,7 +267,7 @@ class TestUserImpl {
 		Menu menu = Mockito.mock(Menu.class);
 		user.putModuleMenu(module, menu);
 		user.clearModuleMenus();
-		Assert.assertNull(user.getModuleMenu("admin"));
+		assertNull(user.getModuleMenu("admin"));
 	}
 
 	@Test
@@ -272,8 +275,8 @@ class TestUserImpl {
 	void testGetAccessibleModuleNamesEmptyWhenNoMenus() {
 		UserImpl user = new UserImpl();
 		Set<String> accessible = user.getAccessibleModuleNames();
-		Assert.assertNotNull(accessible);
-		Assert.assertTrue(accessible.isEmpty());
+		assertNotNull(accessible);
+		assertTrue(accessible.isEmpty());
 	}
 
 	@Test
@@ -289,14 +292,14 @@ class TestUserImpl {
 		Mockito.when(menu.getItems()).thenReturn(items);
 		user.putModuleMenu(module, menu);
 		Set<String> accessible = user.getAccessibleModuleNames();
-		Assert.assertTrue(accessible.contains("admin"));
+		assertTrue(accessible.contains("admin"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
 	void testIsInRoleReturnsFalseWhenNoRoles() {
 		UserImpl user = new UserImpl();
-		Assert.assertFalse(user.isInRole("admin", "SomeRole"));
+		assertFalse(user.isInRole("admin", "SomeRole"));
 	}
 
 	// --- addRole / putDocumentPermission ---
@@ -323,7 +326,7 @@ class TestUserImpl {
 
 		UserImpl user = new UserImpl();
 		user.addRole(role);
-		Assert.assertTrue(user.isInRole("admin", "BasicUser"));
+		assertTrue(user.isInRole("admin", "BasicUser"));
 	}
 
 	@Test
@@ -338,14 +341,14 @@ class TestUserImpl {
 		user.addRole(role);
 		user.addRole(role); // second add should be a no-op
 		// scope should still be global (not doubled)
-		Assert.assertEquals(DocumentPermissionScope.global, user.getScope("admin", "User"));
+		assertEquals(DocumentPermissionScope.global, user.getScope("admin", "User"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
 	void testGetScopeNoneWhenNoPermission() {
 		UserImpl user = new UserImpl();
-		Assert.assertEquals(DocumentPermissionScope.none, user.getScope("admin", "User"));
+		assertEquals(DocumentPermissionScope.none, user.getScope("admin", "User"));
 	}
 
 	@Test
@@ -357,7 +360,7 @@ class TestUserImpl {
 		RoleImpl role = buildRole(module, "Editor", "MyDoc", DocumentPermission.CRUDC);
 		UserImpl user = new UserImpl();
 		user.addRole(role);
-		Assert.assertEquals(DocumentPermissionScope.customer, user.getScope("myModule", "MyDoc"));
+		assertEquals(DocumentPermissionScope.customer, user.getScope("myModule", "MyDoc"));
 	}
 
 	@Test
@@ -374,7 +377,7 @@ class TestUserImpl {
 		Mockito.when(doc.getOwningModuleName()).thenReturn("admin");
 		Mockito.when(doc.getName()).thenReturn("Report");
 
-		Assert.assertTrue(user.canAccessDocument(doc));
+		assertTrue(user.canAccessDocument(doc));
 	}
 
 	@Test
@@ -386,7 +389,7 @@ class TestUserImpl {
 		Mockito.when(doc.getOwningModuleName()).thenReturn("admin");
 		Mockito.when(doc.getName()).thenReturn("Report");
 
-		Assert.assertFalse(user.canAccessDocument(doc));
+		assertFalse(user.canAccessDocument(doc));
 	}
 
 	@Test
@@ -403,7 +406,7 @@ class TestUserImpl {
 		Mockito.when(doc.getOwningModuleName()).thenReturn("admin");
 		Mockito.when(doc.getName()).thenReturn("Config");
 
-		Assert.assertTrue(user.canCreateDocument(doc));
+		assertTrue(user.canCreateDocument(doc));
 	}
 
 	@Test
@@ -420,7 +423,7 @@ class TestUserImpl {
 		Mockito.when(doc.getOwningModuleName()).thenReturn("admin");
 		Mockito.when(doc.getName()).thenReturn("Config");
 
-		Assert.assertFalse(user.canCreateDocument(doc));
+		assertFalse(user.canCreateDocument(doc));
 	}
 
 	@Test
@@ -437,7 +440,7 @@ class TestUserImpl {
 		Mockito.when(doc.getOwningModuleName()).thenReturn("mod");
 		Mockito.when(doc.getName()).thenReturn("Doc1");
 
-		Assert.assertTrue(user.canReadDocument(doc));
+		assertTrue(user.canReadDocument(doc));
 	}
 
 	@Test
@@ -454,7 +457,7 @@ class TestUserImpl {
 		Mockito.when(doc.getOwningModuleName()).thenReturn("mod");
 		Mockito.when(doc.getName()).thenReturn("Doc1");
 
-		Assert.assertTrue(user.canUpdateDocument(doc));
+		assertTrue(user.canUpdateDocument(doc));
 	}
 
 	@Test
@@ -471,7 +474,7 @@ class TestUserImpl {
 		Mockito.when(doc.getOwningModuleName()).thenReturn("mod");
 		Mockito.when(doc.getName()).thenReturn("Doc2");
 
-		Assert.assertTrue(user.canDeleteDocument(doc));
+		assertTrue(user.canDeleteDocument(doc));
 	}
 
 	@Test
@@ -496,8 +499,8 @@ class TestUserImpl {
 		Mockito.when(doc.getOwningModuleName()).thenReturn("tasks");
 		Mockito.when(doc.getName()).thenReturn("Task");
 
-		Assert.assertTrue(user.canExecuteAction(doc, "Execute"));
-		Assert.assertFalse(user.canExecuteAction(doc, "Other"));
+		assertTrue(user.canExecuteAction(doc, "Execute"));
+		assertFalse(user.canExecuteAction(doc, "Other"));
 	}
 
 	@Test
@@ -511,11 +514,11 @@ class TestUserImpl {
 		user.addRole(role);
 
 		// sanity check
-		Assert.assertTrue(user.isInRole("admin", "Admin"));
+		assertTrue(user.isInRole("admin", "Admin"));
 
 		user.clearAllPermissionsAndMenus();
-		Assert.assertFalse(user.isInRole("admin", "Admin"));
-		Assert.assertEquals(DocumentPermissionScope.none, user.getScope("admin", "User"));
+		assertFalse(user.isInRole("admin", "Admin"));
+		assertEquals(DocumentPermissionScope.none, user.getScope("admin", "User"));
 	}
 
 	@Test
@@ -529,7 +532,7 @@ class TestUserImpl {
 		user.setCustomerName("myCustomer");
 		user.addRole(role);
 
-		Assert.assertTrue(user.canReadBean("someId", "admin", "User", "anyCustomer", null, null));
+		assertTrue(user.canReadBean("someId", "admin", "User", "anyCustomer", null, null));
 	}
 
 	@Test
@@ -543,8 +546,8 @@ class TestUserImpl {
 		user.setCustomerName("myCustomer");
 		user.addRole(role);
 
-		Assert.assertTrue(user.canReadBean("someId", "admin", "User", "myCustomer", null, null));
-		Assert.assertFalse(user.canReadBean("someId", "admin", "User", "otherCustomer", null, null));
+		assertTrue(user.canReadBean("someId", "admin", "User", "myCustomer", null, null));
+		assertFalse(user.canReadBean("someId", "admin", "User", "otherCustomer", null, null));
 	}
 
 	@Test
@@ -560,11 +563,11 @@ class TestUserImpl {
 		user.addRole(role);
 
 		// Same customer and data group — allowed
-		Assert.assertTrue(user.canReadBean("someId", "admin", "User", "myCustomer", "group1", null));
+		assertTrue(user.canReadBean("someId", "admin", "User", "myCustomer", "group1", null));
 		// Different customer — denied
-		Assert.assertFalse(user.canReadBean("someId", "admin", "User", "otherCustomer", "group1", null));
+		assertFalse(user.canReadBean("someId", "admin", "User", "otherCustomer", "group1", null));
 		// Same customer, different data group — denied
-		Assert.assertFalse(user.canReadBean("someId", "admin", "User", "myCustomer", "group2", null));
+		assertFalse(user.canReadBean("someId", "admin", "User", "myCustomer", "group2", null));
 	}
 
 	@Test
@@ -579,8 +582,8 @@ class TestUserImpl {
 		// dataGroupId is null on user — means user sees all groups in their customer
 		user.addRole(role);
 
-		Assert.assertTrue(user.canReadBean("someId", "admin", "User", "myCustomer", "anyGroup", null));
-		Assert.assertFalse(user.canReadBean("someId", "admin", "User", "otherCustomer", "anyGroup", null));
+		assertTrue(user.canReadBean("someId", "admin", "User", "myCustomer", "anyGroup", null));
+		assertFalse(user.canReadBean("someId", "admin", "User", "otherCustomer", "anyGroup", null));
 	}
 
 	@Test
@@ -597,11 +600,11 @@ class TestUserImpl {
 		user.addRole(role);
 
 		// Same customer, group and user — allowed
-		Assert.assertTrue(user.canReadBean("someId", "admin", "User", "myCustomer", "group1", "userId1"));
+		assertTrue(user.canReadBean("someId", "admin", "User", "myCustomer", "group1", "userId1"));
 		// Different user — denied
-		Assert.assertFalse(user.canReadBean("someId", "admin", "User", "myCustomer", "group1", "userId2"));
+		assertFalse(user.canReadBean("someId", "admin", "User", "myCustomer", "group1", "userId2"));
 		// Different customer — denied
-		Assert.assertFalse(user.canReadBean("someId", "admin", "User", "otherCustomer", "group1", "userId1"));
+		assertFalse(user.canReadBean("someId", "admin", "User", "otherCustomer", "group1", "userId1"));
 	}
 
 	@Test
@@ -616,7 +619,7 @@ class TestUserImpl {
 		user.setCustomerName("myCustomer");
 		user.addRole(role);
 
-		Assert.assertFalse(user.canReadBean("someId", "admin", "User", "myCustomer", null, null));
+		assertFalse(user.canReadBean("someId", "admin", "User", "myCustomer", null, null));
 	}
 
 	@Test
@@ -627,9 +630,9 @@ class TestUserImpl {
 		user.setCustomerName("acme");
 		user.setId("abc123");
 		String s = user.toString();
-		Assert.assertTrue(s.contains("jdoe"));
-		Assert.assertTrue(s.contains("acme"));
-		Assert.assertTrue(s.contains("abc123"));
+		assertTrue(s.contains("jdoe"));
+		assertTrue(s.contains("acme"));
+		assertTrue(s.contains("abc123"));
 	}
 
 	@Test
@@ -646,7 +649,7 @@ class TestUserImpl {
 		Mockito.when(doc.getOwningModuleName()).thenReturn("myModule");
 		Mockito.when(doc.getName()).thenReturn("MyDoc");
 
-		Assert.assertTrue(user.canAccessDocument(doc));
+		assertTrue(user.canAccessDocument(doc));
 	}
 
 	@Test
@@ -658,7 +661,7 @@ class TestUserImpl {
 		Mockito.when(doc.getOwningModuleName()).thenReturn("myModule");
 		Mockito.when(doc.getName()).thenReturn("MyDoc");
 
-		Assert.assertFalse(user.canAccessDocument(doc));
+		assertFalse(user.canAccessDocument(doc));
 	}
 
 	@Test
@@ -674,7 +677,7 @@ class TestUserImpl {
 		restriction.setAttributeName("photo");
 		user.callAddContentRestriction("myModule", restriction);
 
-		Assert.assertFalse(user.canAccessContent("bizId", "myModule", "Contact", "myCustomer", null, "userId1", "photo"));
+		assertFalse(user.canAccessContent("bizId", "myModule", "Contact", "myCustomer", null, "userId1", "photo"));
 	}
 
 	@Test
@@ -696,7 +699,7 @@ class TestUserImpl {
 		permission.setAttributeName("photo");
 		user.callAddContentPermission("myModule", permission);
 
-		Assert.assertTrue(user.canAccessContent("bizId", "myModule", "Contact", "myCustomer", null, "userId1", "photo"));
+		assertTrue(user.canAccessContent("bizId", "myModule", "Contact", "myCustomer", null, "userId1", "photo"));
 	}
 
 	/** Helper subclass to expose protected methods for testing. */
@@ -727,21 +730,21 @@ class TestUserImpl {
 
 		org.skyve.impl.metadata.user.ClientUserData clientUser = user.createClientUser();
 
-		Assert.assertNotNull(clientUser);
-		Assert.assertEquals("user-1", clientUser.getId());
-		Assert.assertEquals("jdoe", clientUser.getName());
-		Assert.assertEquals("contact-1", clientUser.getContactId());
-		Assert.assertEquals("John Doe", clientUser.getContactName());
-		Assert.assertEquals("myCustomer", clientUser.getCustomerName());
-		Assert.assertEquals("dg-1", clientUser.getDataGroupId());
+		assertNotNull(clientUser);
+		assertEquals("user-1", clientUser.getId());
+		assertEquals("jdoe", clientUser.getName());
+		assertEquals("contact-1", clientUser.getContactId());
+		assertEquals("John Doe", clientUser.getContactName());
+		assertEquals("myCustomer", clientUser.getCustomerName());
+		assertEquals("dg-1", clientUser.getDataGroupId());
 
 		Map<String, Map<String, Boolean>> permissions = clientUser.getDocumentPermissions();
-		Assert.assertNotNull(permissions);
-		Assert.assertTrue(permissions.containsKey("myModule.MyDoc"));
+		assertNotNull(permissions);
+		assertTrue(permissions.containsKey("myModule.MyDoc"));
 		Map<String, Boolean> docPerms = permissions.get("myModule.MyDoc");
-		Assert.assertEquals(Boolean.TRUE, docPerms.get("create"));
-		Assert.assertEquals(Boolean.TRUE, docPerms.get("read"));
-		Assert.assertEquals(Boolean.TRUE, docPerms.get("update"));
-		Assert.assertEquals(Boolean.TRUE, docPerms.get("delete"));
+		assertEquals(Boolean.TRUE, docPerms.get("create"));
+		assertEquals(Boolean.TRUE, docPerms.get("read"));
+		assertEquals(Boolean.TRUE, docPerms.get("update"));
+		assertEquals(Boolean.TRUE, docPerms.get("delete"));
 	}
 }

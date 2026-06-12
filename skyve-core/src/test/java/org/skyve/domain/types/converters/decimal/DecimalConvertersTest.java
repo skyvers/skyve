@@ -59,7 +59,8 @@ class DecimalConvertersTest {
 
 	@Test
 	void decimal2ConverterFromDisplayValueInvalidThrows() {
-		assertThrows(ConversionException.class, () -> new Decimal2Converter().fromDisplayValue("notanumber"));
+		Decimal2Converter converter = new Decimal2Converter();
+		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("notanumber"));
 	}
 
 	// ---- Decimal5Converter ----
@@ -103,7 +104,8 @@ class DecimalConvertersTest {
 
 	@Test
 	void decimal5ConverterFromDisplayValueInvalidThrows() {
-		assertThrows(ConversionException.class, () -> new Decimal5Converter().fromDisplayValue("notanumber"));
+		Decimal5Converter converter = new Decimal5Converter();
+		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("notanumber"));
 	}
 
 	// ---- Decimal10Converter ----
@@ -147,7 +149,8 @@ class DecimalConvertersTest {
 
 	@Test
 	void decimal10ConverterFromDisplayValueInvalidThrows() {
-		assertThrows(ConversionException.class, () -> new Decimal10Converter().fromDisplayValue("notanumber"));
+		Decimal10Converter converter = new Decimal10Converter();
+		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("notanumber"));
 	}
 
 	// ---- Decimal10TwoDecimalPlaces ----
@@ -186,7 +189,8 @@ class DecimalConvertersTest {
 
 	@Test
 	void decimal10TwoDecimalPlacesFromDisplayValueInvalidThrows() {
-		assertThrows(ConversionException.class, () -> new Decimal10TwoDecimalPlaces().fromDisplayValue("notanumber"));
+		Decimal10TwoDecimalPlaces converter = new Decimal10TwoDecimalPlaces();
+		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("notanumber"));
 	}
 
 	// ---- Decimal2Integer ----
@@ -230,7 +234,8 @@ class DecimalConvertersTest {
 
 	@Test
 	void decimal2IntegerFromDisplayValueInvalidThrows() {
-		assertThrows(ConversionException.class, () -> new Decimal2Integer().fromDisplayValue("notanumber"));
+		Decimal2Integer converter = new Decimal2Integer();
+		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("notanumber"));
 	}
 
 	// ---- Decimal2IntegerPercentage ----
@@ -269,7 +274,8 @@ class DecimalConvertersTest {
 
 	@Test
 	void decimal2IntegerPercentageFromDisplayValueInvalidThrows() {
-		assertThrows(ConversionException.class, () -> new Decimal2IntegerPercentage().fromDisplayValue("notanumber%"));
+		Decimal2IntegerPercentage converter = new Decimal2IntegerPercentage();
+		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("notanumber%"));
 	}
 
 	// ---- Decimal2OneDecimalPlace ----
@@ -308,7 +314,8 @@ class DecimalConvertersTest {
 
 	@Test
 	void decimal2OneDecimalPlaceFromDisplayValueInvalidThrows() {
-		assertThrows(ConversionException.class, () -> new Decimal2OneDecimalPlace().fromDisplayValue("notanumber"));
+		Decimal2OneDecimalPlace converter = new Decimal2OneDecimalPlace();
+		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("notanumber"));
 	}
 
 	// ---- Decimal5Integer ----
@@ -347,7 +354,8 @@ class DecimalConvertersTest {
 
 	@Test
 	void decimal5IntegerFromDisplayValueInvalidThrows() {
-		assertThrows(ConversionException.class, () -> new Decimal5Integer().fromDisplayValue("notanumber"));
+		Decimal5Integer converter = new Decimal5Integer();
+		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("notanumber"));
 	}
 
 	// ---- Decimal5IntegerPercentage ----
@@ -386,7 +394,8 @@ class DecimalConvertersTest {
 
 	@Test
 	void decimal5IntegerPercentageFromDisplayValueInvalidThrows() {
-		assertThrows(ConversionException.class, () -> new Decimal5IntegerPercentage().fromDisplayValue("notanumber%"));
+		Decimal5IntegerPercentage converter = new Decimal5IntegerPercentage();
+		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("notanumber%"));
 	}
 
 	// ---- Decimal5OneDecimalPlace ----
@@ -425,7 +434,8 @@ class DecimalConvertersTest {
 
 	@Test
 	void decimal5OneDecimalPlaceFromDisplayValueInvalidThrows() {
-		assertThrows(ConversionException.class, () -> new Decimal5OneDecimalPlace().fromDisplayValue("notanumber"));
+		Decimal5OneDecimalPlace converter = new Decimal5OneDecimalPlace();
+		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("notanumber"));
 	}
 
 	// ---- Decimal5TwoDecimalPlaces ----
@@ -464,7 +474,8 @@ class DecimalConvertersTest {
 
 	@Test
 	void decimal5TwoDecimalPlacesFromDisplayValueInvalidThrows() {
-		assertThrows(ConversionException.class, () -> new Decimal5TwoDecimalPlaces().fromDisplayValue("notanumber"));
+		Decimal5TwoDecimalPlaces converter = new Decimal5TwoDecimalPlaces();
+		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("notanumber"));
 	}
 
 	// ---- Decimal5TwoDecimalPlacesPercentage ----
@@ -503,7 +514,8 @@ class DecimalConvertersTest {
 
 	@Test
 	void decimal5TwoDecimalPlacesPercentageFromDisplayValueInvalidThrows() {
-		assertThrows(ConversionException.class, () -> new Decimal5TwoDecimalPlacesPercentage().fromDisplayValue("notanumber%"));
+		Decimal5TwoDecimalPlacesPercentage converter = new Decimal5TwoDecimalPlacesPercentage();
+		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("notanumber%"));
 	}
 
 	// ---- Decimal5TimeDuration ----
@@ -547,12 +559,14 @@ class DecimalConvertersTest {
 
 	@Test
 	void decimal5TimeDurationFromDisplayValueNoColonThrows() {
-		assertThrows(ConversionException.class, () -> new Decimal5TimeDuration().fromDisplayValue("invalid"));
+		Decimal5TimeDuration converter = new Decimal5TimeDuration();
+		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("invalid"));
 	}
 
 	@Test
 	void decimal5TimeDurationFromDisplayValueInvalidNumberThrows() {
-		assertThrows(ConversionException.class, () -> new Decimal5TimeDuration().fromDisplayValue("abc:30"));
+		Decimal5TimeDuration converter = new Decimal5TimeDuration();
+		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("abc:30"));
 	}
 
 	@Test
@@ -564,28 +578,38 @@ class DecimalConvertersTest {
 	// ---- toDisplayValue(null) exception paths ----
 
 	@Test
+	@SuppressWarnings("null")
 	void decimal2ConverterToDisplayValueNullThrows() {
-		assertThrows(ConversionException.class, () -> new Decimal2Converter().toDisplayValue(null));
+		Decimal2Converter converter = new Decimal2Converter();
+		assertThrows(ConversionException.class, () -> converter.toDisplayValue(null));
 	}
 
 	@Test
+	@SuppressWarnings("null")
 	void decimal5ConverterToDisplayValueNullThrows() {
-		assertThrows(ConversionException.class, () -> new Decimal5Converter().toDisplayValue(null));
+		Decimal5Converter converter = new Decimal5Converter();
+		assertThrows(ConversionException.class, () -> converter.toDisplayValue(null));
 	}
 
 	@Test
+	@SuppressWarnings("null")
 	void decimal10ConverterToDisplayValueNullThrows() {
-		assertThrows(ConversionException.class, () -> new Decimal10Converter().toDisplayValue(null));
+		Decimal10Converter converter = new Decimal10Converter();
+		assertThrows(ConversionException.class, () -> converter.toDisplayValue(null));
 	}
 
 	@Test
+	@SuppressWarnings("null")
 	void decimal2IntegerToDisplayValueNullThrows() {
-		assertThrows(ConversionException.class, () -> new Decimal2Integer().toDisplayValue(null));
+		Decimal2Integer converter = new Decimal2Integer();
+		assertThrows(ConversionException.class, () -> converter.toDisplayValue(null));
 	}
 
 	@Test
+	@SuppressWarnings("null")
 	void decimal10TwoDecimalPlacesToDisplayValueNullThrows() {
-		assertThrows(ConversionException.class, () -> new Decimal10TwoDecimalPlaces().toDisplayValue(null));
+		Decimal10TwoDecimalPlaces converter = new Decimal10TwoDecimalPlaces();
+		assertThrows(ConversionException.class, () -> converter.toDisplayValue(null));
 	}
 
 	@Test
@@ -594,8 +618,10 @@ class DecimalConvertersTest {
 	}
 
 	@Test
+	@SuppressWarnings("null")
 	void decimal2OneDecimalPlaceToDisplayValueNullThrows() {
-		assertThrows(ConversionException.class, () -> new Decimal2OneDecimalPlace().toDisplayValue(null));
+		Decimal2OneDecimalPlace converter = new Decimal2OneDecimalPlace();
+		assertThrows(ConversionException.class, () -> converter.toDisplayValue(null));
 	}
 
 	@Test
@@ -604,8 +630,10 @@ class DecimalConvertersTest {
 	}
 
 	@Test
+	@SuppressWarnings("null")
 	void decimal5IntegerToDisplayValueNullThrows() {
-		assertThrows(ConversionException.class, () -> new Decimal5Integer().toDisplayValue(null));
+		Decimal5Integer converter = new Decimal5Integer();
+		assertThrows(ConversionException.class, () -> converter.toDisplayValue(null));
 	}
 
 	@Test
@@ -614,8 +642,10 @@ class DecimalConvertersTest {
 	}
 
 	@Test
+	@SuppressWarnings("null")
 	void decimal5OneDecimalPlaceToDisplayValueNullThrows() {
-		assertThrows(ConversionException.class, () -> new Decimal5OneDecimalPlace().toDisplayValue(null));
+		Decimal5OneDecimalPlace converter = new Decimal5OneDecimalPlace();
+		assertThrows(ConversionException.class, () -> converter.toDisplayValue(null));
 	}
 
 	@Test
@@ -624,8 +654,10 @@ class DecimalConvertersTest {
 	}
 
 	@Test
+	@SuppressWarnings("null")
 	void decimal5TwoDecimalPlacesToDisplayValueNullThrows() {
-		assertThrows(ConversionException.class, () -> new Decimal5TwoDecimalPlaces().toDisplayValue(null));
+		Decimal5TwoDecimalPlaces converter = new Decimal5TwoDecimalPlaces();
+		assertThrows(ConversionException.class, () -> converter.toDisplayValue(null));
 	}
 
 	@Test
@@ -634,8 +666,10 @@ class DecimalConvertersTest {
 	}
 
 	@Test
+	@SuppressWarnings("null")
 	void decimal2IntegerPercentageToDisplayValueNullThrows() {
-		assertThrows(ConversionException.class, () -> new Decimal2IntegerPercentage().toDisplayValue(null));
+		Decimal2IntegerPercentage converter = new Decimal2IntegerPercentage();
+		assertThrows(ConversionException.class, () -> converter.toDisplayValue(null));
 	}
 
 	@Test
@@ -644,8 +678,10 @@ class DecimalConvertersTest {
 	}
 
 	@Test
+	@SuppressWarnings("null")
 	void decimal5IntegerPercentageToDisplayValueNullThrows() {
-		assertThrows(ConversionException.class, () -> new Decimal5IntegerPercentage().toDisplayValue(null));
+		Decimal5IntegerPercentage converter = new Decimal5IntegerPercentage();
+		assertThrows(ConversionException.class, () -> converter.toDisplayValue(null));
 	}
 
 	@Test
@@ -654,8 +690,10 @@ class DecimalConvertersTest {
 	}
 
 	@Test
+	@SuppressWarnings("null")
 	void decimal5TwoDecimalPlacesPercentageToDisplayValueNullThrows() {
-		assertThrows(ConversionException.class, () -> new Decimal5TwoDecimalPlacesPercentage().toDisplayValue(null));
+		Decimal5TwoDecimalPlacesPercentage converter = new Decimal5TwoDecimalPlacesPercentage();
+		assertThrows(ConversionException.class, () -> converter.toDisplayValue(null));
 	}
 
 	@Test

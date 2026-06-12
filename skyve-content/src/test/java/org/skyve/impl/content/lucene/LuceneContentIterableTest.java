@@ -133,7 +133,8 @@ class LuceneContentIterableTest {
 	@Test
 	void testIteratorConstructorWrapsReaderOpenFailure() throws Exception {
 		try (Directory directory = new ByteBuffersDirectory()) {
-			DomainException exception = assertThrows(DomainException.class, () -> new LuceneContentIterable(directory).iterator());
+			LuceneContentIterable iterable = new LuceneContentIterable(directory);
+			DomainException exception = assertThrows(DomainException.class, iterable::iterator);
 			assertTrue(exception.getMessage().contains("Cannot open the content index for read"));
 		}
 	}

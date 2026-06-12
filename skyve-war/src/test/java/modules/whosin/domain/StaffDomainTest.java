@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
+import java.time.Month;
 
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
@@ -64,7 +65,7 @@ class StaffDomainTest {
 
 	@Test
 	void dateOfBirthSetAndGet() {
-		DateOnly dob = new DateOnly(LocalDate.of(2000, 1, 15));
+		DateOnly dob = new DateOnly(LocalDate.of(2000, Month.JANUARY, 15));
 		bean.setDateOfBirth(dob);
 		assertEquals(dob, bean.getDateOfBirth());
 	}

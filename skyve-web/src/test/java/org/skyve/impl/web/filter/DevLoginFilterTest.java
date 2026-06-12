@@ -1,5 +1,6 @@
 package org.skyve.impl.web.filter;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -7,8 +8,8 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.security.Principal;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.FilterConfig;
@@ -36,12 +37,7 @@ class DevLoginFilterTest {
 		DevLoginFilter filter = new DevLoginFilter();
 		FilterConfig config = mock(FilterConfig.class);
 		when(config.getInitParameter("customer")).thenReturn(null);
-		try {
-			filter.init(config);
-			Assertions.fail("Expected ServletException");
-		} catch (@SuppressWarnings("unused") ServletException e) {
-			// expected
-		}
+		assertThrows(ServletException.class, () -> filter.init(config));
 	}
 
 	@Test
@@ -51,12 +47,7 @@ class DevLoginFilterTest {
 		FilterConfig config = mock(FilterConfig.class);
 		when(config.getInitParameter("customer")).thenReturn("test");
 		when(config.getInitParameter("user")).thenReturn(null);
-		try {
-			filter.init(config);
-			Assertions.fail("Expected ServletException");
-		} catch (@SuppressWarnings("unused") ServletException e) {
-			// expected
-		}
+		assertThrows(ServletException.class, () -> filter.init(config));
 	}
 
 	@Test
@@ -67,12 +58,7 @@ class DevLoginFilterTest {
 		when(config.getInitParameter("customer")).thenReturn("test");
 		when(config.getInitParameter("user")).thenReturn("admin");
 		when(config.getInitParameter("password")).thenReturn(null);
-		try {
-			filter.init(config);
-			Assertions.fail("Expected ServletException");
-		} catch (@SuppressWarnings("unused") ServletException e) {
-			// expected
-		}
+		assertThrows(ServletException.class, () -> filter.init(config));
 	}
 
 	@Test

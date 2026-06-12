@@ -22,14 +22,7 @@ class HH24_MI_SSTest {
 
 	@Test
 	void testFromDisplayValueInvalidFormat() throws Exception {
-		ConversionException ce = assertThrows(ConversionException.class, () -> {
-			// setup the test data
-			TimeOnly testDate = new TimeOnly(Time.withDate(01, 03, 2020));
-			Time.setTime(testDate, 02, 30, 05);
-
-			// call the method under test
-			assertThat(formatter.fromDisplayValue("02:30"), is(testDate));
-		});
+		ConversionException ce = assertThrows(ConversionException.class, () -> formatter.fromDisplayValue("02:30"));
 
 		assertTrue(ce.getMessages().size() > 0);
 	}

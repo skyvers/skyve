@@ -81,9 +81,10 @@ class HeapDumpsModelH2Test extends AbstractH2Test {
 	@SuppressWarnings("static-method")
 	void unsupportedListModelOperationsThrow() {
 		HeapDumpsModel model = new HeapDumpsModel();
+		TreeMap<String, Object> properties = new TreeMap<>();
 
 		assertThrows(IllegalStateException.class, model::iterate);
-		assertThrows(IllegalStateException.class, () -> model.update("id", new TreeMap<>()));
+		assertThrows(IllegalStateException.class, () -> model.update("id", properties));
 		assertThrows(IllegalStateException.class, () -> model.remove("id"));
 	}
 

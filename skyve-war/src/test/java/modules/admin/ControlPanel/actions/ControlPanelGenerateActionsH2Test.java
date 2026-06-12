@@ -97,30 +97,15 @@ class ControlPanelGenerateActionsH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	void generateTestDataWithNullNumberToGenerateThrowsValidationException() {
-		bean.setTestModuleName("admin");
-		bean.setTestNumberToGenerate(null);
+	void generateTestDataWithInvalidNumberToGenerateThrowsValidationException() {
+		Integer[] invalidNumbers = {null, Integer.valueOf(0), Integer.valueOf(10001)};
+		for (Integer invalidNumber : invalidNumbers) {
+			bean.setTestModuleName("admin");
+			bean.setTestNumberToGenerate(invalidNumber);
 
-		GenerateTestData action = new GenerateTestData();
-		assertThrows(ValidationException.class, () -> action.execute(bean, webContext));
-	}
-
-	@Test
-	void generateTestDataWithZeroNumberToGenerateThrowsValidationException() {
-		bean.setTestModuleName("admin");
-		bean.setTestNumberToGenerate(Integer.valueOf(0));
-
-		GenerateTestData action = new GenerateTestData();
-		assertThrows(ValidationException.class, () -> action.execute(bean, webContext));
-	}
-
-	@Test
-	void generateTestDataWithTooLargeNumberToGenerateThrowsValidationException() {
-		bean.setTestModuleName("admin");
-		bean.setTestNumberToGenerate(Integer.valueOf(10001));
-
-		GenerateTestData action = new GenerateTestData();
-		assertThrows(ValidationException.class, () -> action.execute(bean, webContext));
+			GenerateTestData action = new GenerateTestData();
+			assertThrows(ValidationException.class, () -> action.execute(bean, webContext));
+		}
 	}
 
 	@Test
