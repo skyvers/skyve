@@ -22,7 +22,7 @@ class BeanForReportH2Test extends AbstractH2Test {
 	private Persistence p;
 
 	@BeforeEach
-	void setUpBean() throws Exception {
+	void setUpBean() {
 		p = CORE.getPersistence();
 		AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
 		bean.setText("hello from BeanForReport");

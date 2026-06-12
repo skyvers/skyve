@@ -307,7 +307,7 @@ public class FileUtil {
 	 * @throws IOException
 	 */
 	public static void addToZip(@Nonnull File directoryToZip, @Nonnull File file, @Nonnull ZipOutputStream zos)
-	throws FileNotFoundException, IOException {
+	throws IOException {
 		addPathToZip(directoryToZip.toPath(), file.toPath(), zos);
 	}
 

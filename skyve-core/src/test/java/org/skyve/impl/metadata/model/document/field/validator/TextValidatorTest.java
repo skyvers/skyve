@@ -24,7 +24,7 @@ class TextValidatorTest {
 	}
 
 	@Test
-	void testValidateCreditCardInvalid() throws Exception {
+	void testValidateCreditCardInvalid() {
 		// setup the test data
 		validator.setType(ValidatorType.creditCard);
 
@@ -46,7 +46,7 @@ class TextValidatorTest {
 	}
 
 	@Test
-	void testValidateCreditCardValid() throws Exception {
+	void testValidateCreditCardValid() {
 		// setup the test data
 		validator.setType(ValidatorType.creditCard);
 
@@ -70,7 +70,7 @@ class TextValidatorTest {
 	}
 
 	@Test
-	void testValidateEmailInvalid() throws Exception {
+	void testValidateEmailInvalid() {
 		// setup the test data
 		validator.setType(ValidatorType.email);
 
@@ -95,7 +95,7 @@ class TextValidatorTest {
 	}
 
 	@Test
-	void testValidateEmailValid() throws Exception {
+	void testValidateEmailValid() {
 		// setup the test data
 		validator.setType(ValidatorType.email);
 

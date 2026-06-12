@@ -14,14 +14,14 @@ class YYYY_MM_DDTest {
 	private YYYY_MM_DD converter = new YYYY_MM_DD();
 
 	@Test
-	void testFromDisplayValueInvalidFormat() throws Exception {
+	void testFromDisplayValueInvalidFormat() {
 		ConversionException ce = assertThrows(ConversionException.class, () -> converter.fromDisplayValue("03-01-2020"));
 
 		assertTrue(ce.getMessages().size() > 0);
 	}
 
 	@Test
-	void testFromDisplayValueValidFormat() throws Exception {
+	void testFromDisplayValueValidFormat() {
 		// setup the test data
 		DateOnly testDate = Time.withDate(01, 03, 2020);
 
@@ -30,7 +30,7 @@ class YYYY_MM_DDTest {
 	}
 
 	@Test
-	void testToDisplayValue() throws Exception {
+	void testToDisplayValue() {
 		// setup the test data
 		DateOnly testDate = Time.withDate(01, 03, 2020);
 

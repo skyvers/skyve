@@ -803,7 +803,7 @@ public class CommunicationUtil {
 	 * @return
 	 * @throws Exception
 	 */
-	public static String formatCommunicationMessage(Customer customer, String expression, Bean... beans) throws Exception {
+	public static String formatCommunicationMessage(Customer customer, String expression, Bean... beans) {
 		String result = expression;
 		
 		if (result != null) {

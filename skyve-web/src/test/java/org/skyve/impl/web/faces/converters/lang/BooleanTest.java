@@ -15,25 +15,25 @@ public class BooleanTest {
 	}
 
 	@Test
-	public void testGetAsObjectInvalidStringValueReturnsFalse() throws Exception {
+	public void testGetAsObjectInvalidStringValueReturnsFalse() {
 		// call the method under test
 		assertThat(converter.getAsObject(null, null, "not a boolean"), is(java.lang.Boolean.FALSE));
 	}
 
 	@Test
-	public void testGetAsObjectUppercaseFalseValue() throws Exception {
+	public void testGetAsObjectUppercaseFalseValue() {
 		// call the method under test
 		assertThat(converter.getAsObject(null, null, "FALSE"), is(java.lang.Boolean.FALSE));
 	}
 
 	@Test
-	public void testGetAsObjectUppercaseTrueValue() throws Exception {
+	public void testGetAsObjectUppercaseTrueValue() {
 		// call the method under test
 		assertThat(converter.getAsObject(null, null, "TRUE"), is(java.lang.Boolean.TRUE));
 	}
 
 	@Test
-	public void testGetAsObjectValidFalseValue() throws Exception {
+	public void testGetAsObjectValidFalseValue() {
 		// setup the test data
 		java.lang.Boolean testValue = java.lang.Boolean.FALSE;
 
@@ -42,7 +42,7 @@ public class BooleanTest {
 	}
 
 	@Test
-	public void testGetAsObjectValidTrueValue() throws Exception {
+	public void testGetAsObjectValidTrueValue() {
 		// setup the test data
 		java.lang.Boolean testValue = java.lang.Boolean.TRUE;
 
@@ -51,7 +51,7 @@ public class BooleanTest {
 	}
 
 	@Test
-	public void testGetAsStringFalseValue() throws Exception {
+	public void testGetAsStringFalseValue() {
 		// setup the test data
 		java.lang.Boolean testValue = java.lang.Boolean.FALSE;
 
@@ -60,7 +60,7 @@ public class BooleanTest {
 	}
 
 	@Test
-	public void testGetAsStringTrueValue() throws Exception {
+	public void testGetAsStringTrueValue() {
 		// setup the test data
 		java.lang.Boolean testValue = java.lang.Boolean.TRUE;
 

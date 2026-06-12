@@ -1,7 +1,6 @@
 package org.skyve.impl.persistence.hibernate;
 
 import java.sql.ResultSet;
-import java.sql.SQLTimeoutException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -82,7 +81,7 @@ class HibernateSQL extends AbstractSQL {
 			NativeQuery<T> query = createQueryFromSQL();
 			return query.addEntity(entityName).list();
 		}
-		catch (QueryTimeoutException | org.hibernate.QueryTimeoutException | SQLTimeoutException e) {
+		catch (QueryTimeoutException | org.hibernate.QueryTimeoutException e) {
 			throw new TimeoutException(e);
 		}
 		catch (SkyveException e) {
@@ -109,7 +108,7 @@ class HibernateSQL extends AbstractSQL {
 			String entityName = persistence.getDocumentEntityName(moduleName, documentName);
 			return new HibernateAutoClosingIterable<>(createQueryFromSQL().addEntity(entityName).scroll(), false, false);
 		}
-		catch (QueryTimeoutException | org.hibernate.QueryTimeoutException | SQLTimeoutException e) {
+		catch (QueryTimeoutException | org.hibernate.QueryTimeoutException e) {
 			throw new TimeoutException(e);
 		}
 		catch (SkyveException e) {
@@ -133,7 +132,7 @@ class HibernateSQL extends AbstractSQL {
 			}
 			return results;
 		}
-		catch (QueryTimeoutException | org.hibernate.QueryTimeoutException | SQLTimeoutException e) {
+		catch (QueryTimeoutException | org.hibernate.QueryTimeoutException e) {
 			throw new TimeoutException(e);
 		}
 		catch (SkyveException e) {
@@ -153,7 +152,7 @@ class HibernateSQL extends AbstractSQL {
 		try {
 			return new HibernateAutoClosingIterable<>(createQueryFromSQL().scroll(), true, false);
 		}
-		catch (QueryTimeoutException | org.hibernate.QueryTimeoutException | SQLTimeoutException e) {
+		catch (QueryTimeoutException | org.hibernate.QueryTimeoutException e) {
 			throw new TimeoutException(e);
 		}
 		catch (SkyveException e) {
@@ -177,7 +176,7 @@ class HibernateSQL extends AbstractSQL {
 			}
 			return (List<Object[]>) results;
 		}
-		catch (QueryTimeoutException | org.hibernate.QueryTimeoutException | SQLTimeoutException e) {
+		catch (QueryTimeoutException | org.hibernate.QueryTimeoutException e) {
 			throw new TimeoutException(e);
 		}
 		catch (SkyveException e) {
@@ -197,7 +196,7 @@ class HibernateSQL extends AbstractSQL {
 		try {
 			return new HibernateAutoClosingIterable<>(createQueryFromSQL().scroll(), false, true);
 		}
-		catch (QueryTimeoutException | org.hibernate.QueryTimeoutException | SQLTimeoutException e) {
+		catch (QueryTimeoutException | org.hibernate.QueryTimeoutException e) {
 			throw new TimeoutException(e);
 		}
 		catch (SkyveException e) {
@@ -255,7 +254,7 @@ class HibernateSQL extends AbstractSQL {
 			NativeQuery<?> query = createQueryFromSQL();
 			return query.executeUpdate();
 		}
-		catch (QueryTimeoutException | org.hibernate.QueryTimeoutException | SQLTimeoutException e) {
+		catch (QueryTimeoutException | org.hibernate.QueryTimeoutException e) {
 			throw new TimeoutException(e);
 		}
 		catch (SkyveException e) {
@@ -267,7 +266,7 @@ class HibernateSQL extends AbstractSQL {
 	}
 	
 	@SuppressWarnings({"resource", "java:S3776"}) // Complexity OK
-	private @Nonnull <T> NativeQuery<T> createQueryFromSQL() throws Exception {
+	private @Nonnull <T> NativeQuery<T> createQueryFromSQL() {
 		Session session = persistence.getSession();
 		NativeQuery<T> result = session.createNativeQuery(toQueryString());
 		// This ensures that the second level (shared) cache is not invalidated.

@@ -721,7 +721,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 	 * @throws Exception if related bean retrieval fails
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private void populateReferences(@Nonnull PersistentBean bean, @Nonnull Set<String> dynamicReferenceNames) throws Exception {
+	private void populateReferences(@Nonnull PersistentBean bean, @Nonnull Set<String> dynamicReferenceNames) {
 		String select = "select relatedModuleName, relatedDocumentName, relatedId, attributeName from " + dynamicRelationPersistentIdentifier + " where parent_id = :bizId order by attributeName, ordinal";
 		// Note - this following SQL gets a list instead of iterating as this method is recursive (through the populate() call for relatedBean).
 		// Hibernate can't manage multiple nested ScrollableResults for certain databases (MySQL) and closes the encapsulated ResultSet of the outer ScrollableResults prematurely.

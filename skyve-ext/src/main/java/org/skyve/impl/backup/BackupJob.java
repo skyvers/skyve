@@ -543,7 +543,7 @@ public class BackupJob extends CancellableJob {
 	 * @param problem the problem description, or null for a generic message
 	 * @throws Exception if sending the email fails
 	 */
-	public static void emailProblem(@Nonnull List<String> jobLog, @Nullable String problem) throws Exception {
+	public static void emailProblem(@Nonnull List<String> jobLog, @Nullable String problem) {
 		// nameEnv is the application name and environment identifier.
 		StringBuilder nameEnv = new StringBuilder();
 		nameEnv.append("[").append(UtilImpl.ARCHIVE_NAME);

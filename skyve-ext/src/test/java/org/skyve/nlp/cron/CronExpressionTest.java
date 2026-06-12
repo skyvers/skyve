@@ -128,7 +128,7 @@ public class CronExpressionTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void toNaturalLanguageNoExpressionReturnsNull() throws Exception {
+	public void toNaturalLanguageNoExpressionReturnsNull() {
 		// setup the test data
 		CronExpression c = new CronExpression();
 
@@ -144,7 +144,7 @@ public class CronExpressionTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void toNaturalLanguageFormatsExpressions() throws Exception {
+	public void toNaturalLanguageFormatsExpressions() {
 		String[][] cases = {
 				{"0 0 0 1 1 *", "yearly"},
 				{"0 0 0 * * 1", "every Monday"},

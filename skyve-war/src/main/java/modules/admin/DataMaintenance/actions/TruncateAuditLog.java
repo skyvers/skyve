@@ -54,7 +54,7 @@ public class TruncateAuditLog implements ServerSideAction<DataMaintenance> {
 	 * @return
 	 * @throws Exception
 	 */
-	public static DocumentQuery getAuditQuery(Persistence pers, DataMaintenance bean) throws Exception {
+	public static DocumentQuery getAuditQuery(Persistence pers, DataMaintenance bean) {
 
 		DocumentQuery qAudits = pers.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
 		if (bean.getAuditModuleName() != null) {

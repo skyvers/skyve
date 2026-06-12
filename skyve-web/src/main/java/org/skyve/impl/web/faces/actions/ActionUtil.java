@@ -99,8 +99,7 @@ public class ActionUtil {
 	 * @param collectionName the optional collection binding name
 	 * @param newValue the replacement bean value
 	 */
-    static <T extends Bean> void setTargetBeanForViewAndCollectionBinding(FacesView facesView, String collectionName, T newValue)
-	throws Exception {
+    static <T extends Bean> void setTargetBeanForViewAndCollectionBinding(FacesView facesView, String collectionName, T newValue) {
     	Bean bean = facesView.getBean();
     	if (bean != null) { // hopefully never
 	    	String viewBinding = facesView.getViewBinding();

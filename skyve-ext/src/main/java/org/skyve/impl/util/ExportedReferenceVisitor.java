@@ -58,8 +58,7 @@ public abstract class ExportedReferenceVisitor {
 		visit(c, document, bean);
 	}
 
-	private void visit(final CustomerImpl customer, Document document, Bean bean) 
-	throws Exception {
+	private void visit(final CustomerImpl customer, Document document, Bean bean) {
 		final Set<String> bizIdsVisited = new TreeSet<>();
 		
 		new CascadeDeleteBeanVisitor() {

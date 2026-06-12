@@ -276,7 +276,7 @@ public final class POIWorkbook implements BizPortWorkbook {
 	 * @throws Exception
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public static void putPOICellValue(XSSFSheet sheet, int rowNum, int colNum, CellType cellType, Object value, boolean forceNumericNullToZero, boolean bold) throws Exception {
+	public static void putPOICellValue(XSSFSheet sheet, int rowNum, int colNum, CellType cellType, Object value, boolean forceNumericNullToZero, boolean bold) {
 		@SuppressWarnings("resource")
 		XSSFWorkbook workbook = sheet.getWorkbook();
 
@@ -291,11 +291,11 @@ public final class POIWorkbook implements BizPortWorkbook {
 		style.setFont(font);
 
 		XSSFRow row = sheet.getRow(rowNum-1);
-		if(row==null){
+		if (row == null) {
 			row = sheet.createRow(rowNum-1);
 		}
 		XSSFCell cell = row.getCell(colNum-1);
-		if (cell == null){
+		if (cell == null) {
 			cell = row.createCell(colNum-1);
 		}
 
@@ -304,7 +304,7 @@ public final class POIWorkbook implements BizPortWorkbook {
 		if (value != null) {
 //			Util.LOGGER.info("VALUE for {}, {} IS NOT NULL", rowNum, colNum);
 			cell.setCellType(cellType);
-			if(bold){
+			if (bold) {
 				cell.setCellStyle(style);
 			}
 
@@ -338,7 +338,7 @@ public final class POIWorkbook implements BizPortWorkbook {
 		} else {
 			// empty value
 //			Util.LOGGER.info("VALUE for {}, {} IS NULL with cellType {}", rowNum, colNum, (Cell.CELL_TYPE_NUMERIC == cellType ));
-			if(CellType.NUMERIC == cellType && forceNumericNullToZero){
+			if(CellType.NUMERIC == cellType && forceNumericNullToZero) {
 				cell.setCellValue(0.0);
 			}
 			else {

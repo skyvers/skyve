@@ -39,7 +39,7 @@ public class Interpreter {
 	 * @throws Exception if repository/bootstrap/execution setup fails
 	 */
 	@SuppressWarnings("resource")
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) {
 		AbstractPersistence.IMPLEMENTATION_CLASS = HibernateContentPersistence.class;
 		AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = RDBMSDynamicPersistence.class;
 		AbstractContentManager.IMPLEMENTATION_CLASS = NoOpContentManager.class;

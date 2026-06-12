@@ -26,7 +26,7 @@ public class JobsService {
 	 *         if querying the scheduler fails
 	 */
 	@SuppressWarnings("static-method")
-	public final void refresh(Jobs jobs) throws Exception {
+	public final void refresh(Jobs jobs) {
 		List<JobExtension> runningJobs = jobs.getRunningJobs();
 		runningJobs.clear();
 

@@ -31,7 +31,7 @@ public abstract class RelationTreeModel<T extends Bean> extends InMemoryListMode
 	 * Construct a new tree model
 	 * @param stopDocuments	Document names to exclude from the tree.
 	 */
-	public RelationTreeModel(String... stopDocuments) throws Exception {
+	public RelationTreeModel(String... stopDocuments) {
 		this.stopDocuments = stopDocuments;
 		Customer c = CORE.getUser().getCustomer();
 		Module m = c.getModule(AppConstants.ADMIN_MODULE_NAME);
@@ -40,7 +40,7 @@ public abstract class RelationTreeModel<T extends Bean> extends InMemoryListMode
 	}
 	
 	@Override
-	public List<Bean> getRows() throws Exception {
+	public List<Bean> getRows() {
 		return new ArrayList<>(); // empty list ready for the filter to add rows to
 	}
 

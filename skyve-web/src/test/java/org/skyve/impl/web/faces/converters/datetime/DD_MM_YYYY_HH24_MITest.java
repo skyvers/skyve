@@ -20,7 +20,7 @@ public class DD_MM_YYYY_HH24_MITest {
 	}
 
 	@Test(expected = ConverterException.class)
-	public void testGetAsObjectInvalidFormat() throws Exception {
+	public void testGetAsObjectInvalidFormat() {
 		// call the method under test
 		formatter.getAsObject(null, null, "03-01-2020 02:30");
 
@@ -28,7 +28,7 @@ public class DD_MM_YYYY_HH24_MITest {
 	}
 
 	@Test
-	public void testGetAsObjectValidFormatAM() throws Exception {
+	public void testGetAsObjectValidFormatAM() {
 		// setup the test data
 		DateTime testDate = new DateTime(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 02, 30, 0);
@@ -38,7 +38,7 @@ public class DD_MM_YYYY_HH24_MITest {
 	}
 
 	@Test
-	public void testGetAsObjectValidFormatPM() throws Exception {
+	public void testGetAsObjectValidFormatPM() {
 		// setup the test data
 		DateTime testDate = new DateTime(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 14, 30, 0);
@@ -48,7 +48,7 @@ public class DD_MM_YYYY_HH24_MITest {
 	}
 
 	@Test
-	public void testGetAsStringAM() throws Exception {
+	public void testGetAsStringAM() {
 		// setup the test data
 		DateTime testDate = new DateTime(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 02, 30, 0);
@@ -58,7 +58,7 @@ public class DD_MM_YYYY_HH24_MITest {
 	}
 
 	@Test
-	public void testGetAsStringPM() throws Exception {
+	public void testGetAsStringPM() {
 		// setup the test data
 		DateTime testDate = new DateTime(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 14, 30, 0);

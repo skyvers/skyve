@@ -559,7 +559,7 @@ class DomainMessagesTest {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	void optimisticLockExceptionUpdateOperationCreatesInstance() throws Exception {
+	void optimisticLockExceptionUpdateOperationCreatesInstance() {
 		when(mockUser.getCustomer()).thenReturn(mockCustomer);
 		when(mockCustomer.getDefaultTimestampConverter()).thenReturn(mockConverter);
 		when(mockConverter.toDisplayValue(org.mockito.ArgumentMatchers.any())).thenReturn("2024-01-01 10:00:00");
@@ -572,7 +572,7 @@ class DomainMessagesTest {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	void optimisticLockExceptionDeleteOperationCreatesInstance() throws Exception {
+	void optimisticLockExceptionDeleteOperationCreatesInstance() {
 		when(mockUser.getCustomer()).thenReturn(mockCustomer);
 		when(mockCustomer.getDefaultTimestampConverter()).thenReturn(mockConverter);
 		when(mockConverter.toDisplayValue(org.mockito.ArgumentMatchers.any())).thenReturn("2024-01-01 10:00:00");
@@ -584,7 +584,7 @@ class DomainMessagesTest {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	void optimisticLockExceptionFallsBackToTimestampToStringOnConverterException() throws Exception {
+	void optimisticLockExceptionFallsBackToTimestampToStringOnConverterException() {
 		when(mockUser.getCustomer()).thenReturn(mockCustomer);
 		when(mockCustomer.getDefaultTimestampConverter()).thenReturn(mockConverter);
 		when(mockConverter.toDisplayValue(org.mockito.ArgumentMatchers.any(Timestamp.class))).thenThrow(new RuntimeException("converter failure"));

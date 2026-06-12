@@ -30,8 +30,7 @@ public final class ComparisonProperty {
 	
 	public ComparisonProperty(Attribute attribute,
 								Bean oldBean,
-								Bean newBean)
-	throws Exception {
+								Bean newBean) {
 		name = attribute.getName();
 		title = attribute.getLocalisedDisplayName();
 		widget = attribute.getDefaultInputWidget();

@@ -30,7 +30,7 @@ public class PasswordGenerator {
 	 * @return the operation result
 	 * @throws Exception if the operation fails
 	 */
-	public static String generate() throws Exception {
+	public static String generate() {
 
 		ConfigurationExtension config = Configuration.newInstance();
 

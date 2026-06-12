@@ -7,7 +7,7 @@ import org.junit.Test;
 public class PrimeFacesAdminFunctionSail extends TestAdminMenuExternalTabletAsAdmininstrator {
 
 	@Test
-	public void test() throws Exception {
+	public void test() {
 		
 		String clearTextPassword = "admin";
 		

@@ -407,8 +407,7 @@ public final class FreemarkerReportUtil {
 	 * @return The resolved template.
 	 * @throws Exception If template lookup fails.
 	 */
-	public static Template getTemplate(final String templateName)
-	throws Exception {
+	public static Template getTemplate(final String templateName) {
 		return CORE.getPersistence().withDocumentPermissionScopes(DocumentPermissionScope.customer, p -> {
 			try {
 				return cfg.getTemplate(templateName);

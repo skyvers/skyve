@@ -251,7 +251,7 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 		}
 	}
 	
-	private void minOrMax(Map<String, Object> summaryData, boolean max) throws Exception {
+	private void minOrMax(Map<String, Object> summaryData, boolean max) {
 		for (Bean row : rows) {
 			for (MetaDataQueryColumn column : getColumns()) {
 				String binding = column.getBinding();
@@ -279,7 +279,7 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 		}
 	}
 	
-	private void sum(Map<String, Object> summaryData) throws Exception {
+	private void sum(Map<String, Object> summaryData) {
 		for (Bean row : rows) {
 			for (MetaDataQueryColumn column : getColumns()) {
 				String binding = column.getBinding();

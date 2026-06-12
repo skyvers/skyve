@@ -688,8 +688,7 @@ public class Util {
 	 * @return A list of distinct String values matching the prefix, ordered alphabetically
 	 * @throws Exception
 	 */
-	public static List<String> getCompleteSuggestions(String moduleName, String documentName, String attributeName, String value)
-			throws Exception {
+	public static List<String> getCompleteSuggestions(String moduleName, String documentName, String attributeName, String value) {
 		DocumentQuery q = CORE.getPersistence().newDocumentQuery(moduleName, documentName);
 		if (value != null) {
 			q.getFilter().addLike(attributeName, value + "%");

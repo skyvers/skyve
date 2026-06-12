@@ -120,7 +120,7 @@ final class BackupUtil {
 		p.disposeAllPersistenceInstances();
 	}
 	
-	static Collection<Table> getTables() throws Exception {
+	static Collection<Table> getTables() {
 		// A case insensitive keyed map of tables
 		Map<String, Table> result = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		Customer customer = AbstractPersistence.get().getUser().getCustomer();

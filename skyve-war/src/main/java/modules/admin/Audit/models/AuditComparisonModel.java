@@ -203,8 +203,7 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 	private static void addProperties(Customer c,
 										ComparisonComposite node,
 										Map<String, Object> values,
-										boolean deleted)
-	throws Exception {
+										boolean deleted) {
 		Document nodeDocument = node.getDocument();
 		List<ComparisonProperty> properties = node.getProperties();
 		
@@ -260,8 +259,7 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 	@SuppressWarnings("java:S3776") // Complexity OK
 	private static void updateNode(ComparisonComposite node,
 									Customer c,
-									Map<String, Object> values)
-	throws Exception {
+									Map<String, Object> values) {
 		if (values != null) {
 			boolean nodeDirty = false;
 			

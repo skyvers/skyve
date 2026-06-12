@@ -249,7 +249,7 @@ class InterceptorTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void beforePostRenderReturnsTrueByDefault() throws Exception {
+	void beforePostRenderReturnsTrueByDefault() {
 		assertFalse(new NoOpInterceptor().beforePostRender(null, null));
 	}
 

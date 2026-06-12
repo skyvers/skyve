@@ -65,7 +65,7 @@ public class RuntimeCompiler {
 	private static class InMemoryJavaSourceFileObject extends SimpleJavaFileObject {
 		private String contents = null;
 
-		private InMemoryJavaSourceFileObject(String className, String contents) throws Exception {
+		private InMemoryJavaSourceFileObject(String className, String contents) {
 			super(URI.create("string:///" + className.replace('.', '/') + Kind.SOURCE.extension), Kind.SOURCE);
 			this.contents = contents;
 		}

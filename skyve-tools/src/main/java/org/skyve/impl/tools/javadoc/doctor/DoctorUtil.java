@@ -247,7 +247,7 @@ public class DoctorUtil {
 	 * @throws Exception if metadata access or rendering fails
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public static void renderDocument(Customer customer, Module module, Document document, PrintStream out) throws Exception {
+	public static void renderDocument(Customer customer, Module module, Document document, PrintStream out) {
 
 		DocSection title = new DocSection(createIndentifier(customer.getName(), module.getName(), document.getName(), "documentTitle"));
 		title.setSectionType(SectionType.SubChapter);
@@ -280,13 +280,13 @@ public class DoctorUtil {
 					int fieldLen = 0;
 					DocList valueList = new DocList(false);
 					if(AttributeType.enumeration.equals(attribute.getAttributeType())
-							|| DomainType.constant.equals(attribute.getDomainType())){
+							|| DomainType.constant.equals(attribute.getDomainType())) {
 						try {
-							for(DomainValue val: ((DocumentImpl) document).getDomainValues((CustomerImpl) customer, attribute.getDomainType(), attribute, null, false) ){
+							for (DomainValue val : ((DocumentImpl) document).getDomainValues((CustomerImpl) customer, attribute.getDomainType(), attribute, null, false)) {
 								StringBuilder sb = new StringBuilder();
 								sb.append(val.getLocalisedDescription()).append(" (").append(val.getCode()).append(")");
 								valueList.getItems().add(sb.toString());
-								if(val.getCode().length()>fieldLen){
+								if (val.getCode().length() > fieldLen) {
 									fieldLen = val.getCode().length();
 								}
 							}
@@ -413,7 +413,7 @@ public class DoctorUtil {
 	 * @throws Exception if metadata access or rendering fails
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public static void renderQuery(Customer customer, Module module, QueryDefinition q, PrintStream out) throws Exception {
+	public static void renderQuery(Customer customer, Module module, QueryDefinition q, PrintStream out) {
 		// Documentation for Query
 		DocSection section = new DocSection(createIndentifier(customer.getName(), module.getName(), q.getName() + "Overview"));
 		section.setSectionType(SectionType.SubChapter);
@@ -471,7 +471,7 @@ public class DoctorUtil {
 	 * @param out destination stream receiving HTML fragments
 	 * @throws Exception if metadata access or rendering fails
 	 */
-	public static void renderRole(Customer customer, Module module, Role r, PrintStream out) throws Exception {
+	public static void renderRole(Customer customer, Module module, Role r, PrintStream out) {
 		// Documentation for Role
 		DocSection section = new DocSection(createIndentifier(customer.getName(), module.getName(), r.getName() + "Overview"));
 		section.setSectionTitle(r.getName());

@@ -21,14 +21,14 @@ class MMM_DD_YYYYTest {
 	}
 
 	@Test
-	void testFromDisplayValueInvalidFormat() throws Exception {
+	void testFromDisplayValueInvalidFormat() {
 		ConversionException ce = assertThrows(ConversionException.class, () -> formatter.fromDisplayValue("03-01-2020"));
 
 		assertTrue(ce.getMessages().size() > 0);
 	}
 
 	@Test
-	void testFromDisplayValue() throws Exception {
+	void testFromDisplayValue() {
 		// setup the test data
 		Timestamp testDate = new Timestamp(Time.withDate(01, 03, 2020));
 
@@ -37,7 +37,7 @@ class MMM_DD_YYYYTest {
 	}
 
 	@Test
-	void testToDisplayValue() throws Exception {
+	void testToDisplayValue() {
 		// setup the test data
 		Timestamp testDate = new Timestamp(Time.withDate(01, 03, 2020));
 

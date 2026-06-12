@@ -20,7 +20,7 @@ public abstract class AbstractH2TestForJUnit4 extends InternalBaseH2Test {
 	}
 
 	@BeforeClass
-	public static void beforeClass() throws Exception {
+	public static void beforeClass() {
 		internalSetup();
 	}
 
@@ -31,7 +31,7 @@ public abstract class AbstractH2TestForJUnit4 extends InternalBaseH2Test {
 
 	@Before
 	@SuppressWarnings("static-method")
-	public void beforeBase() throws Exception {
+	public void beforeBase() {
 		internalBefore();
 	}
 

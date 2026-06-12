@@ -31,7 +31,7 @@ public abstract class AbstractH2Test extends InternalBaseH2Test {
 
 	@BeforeEach
 	@SuppressWarnings("static-method")
-	void beforeBase() throws Exception {
+	void beforeBase() {
 		internalBefore();
 	}
 

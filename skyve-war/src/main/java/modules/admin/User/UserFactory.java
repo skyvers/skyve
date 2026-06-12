@@ -28,7 +28,7 @@ public class UserFactory {
 	 * @throws Exception If fixture construction fails.
 	 */
 	@SkyveFixture(types = FixtureType.crud)
-	public static UserExtension crudInstance() throws Exception {
+	public static UserExtension crudInstance() {
 		UserExtension user = new DataBuilder().factoryBuild(User.MODULE_NAME, User.DOCUMENT_NAME);
 		user.setConfirmPassword(null);
 		user.setGeneratedPassword(null);

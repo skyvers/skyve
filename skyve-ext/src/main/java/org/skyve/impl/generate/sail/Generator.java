@@ -77,8 +77,7 @@ System.out.println(visitModules(args[0]));
 												String loginPassword,
 												String uxui,
 												UserAgentType userAgentType,
-												TestStrategy testStrategy)
-	throws Exception {
+												TestStrategy testStrategy) {
 		ProvidedRepositoryFactory.get().resetMenus(user);
 		UserImpl u = (UserImpl) user;
 		Customer c = user.getCustomer();
@@ -132,8 +131,7 @@ System.out.println(visitModules(args[0]));
 										String moduleName,
 										String uxui,
 										UserAgentType userAgentType,
-										TestStrategy testStrategy)
-	throws Exception {
+										TestStrategy testStrategy) {
 		ProvidedRepositoryFactory.get().resetMenus(user);
 		UserImpl u = (UserImpl) user;
 		Customer c = user.getCustomer();

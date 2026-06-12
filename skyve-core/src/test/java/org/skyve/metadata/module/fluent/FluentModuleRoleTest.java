@@ -29,7 +29,7 @@ class FluentModuleRoleTest {
 	private FluentModuleRole fluent;
 	
 	@BeforeEach
-	void setup() throws Exception {
+	void setup() {
 		fluent = new FluentModuleRole();
 	}
 

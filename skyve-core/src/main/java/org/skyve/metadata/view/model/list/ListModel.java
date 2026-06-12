@@ -599,8 +599,7 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
     	}
     }
     
-	private void addNullOrSomething(Filter filterToAddTo, Filter somethingFilter, String binding) 
-	throws Exception {
+	private void addNullOrSomething(Filter filterToAddTo, Filter somethingFilter, String binding) {
 		Filter orFilter = newFilter();
 		orFilter.addNull(binding);
 		orFilter.addOr(somethingFilter);

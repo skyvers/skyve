@@ -179,7 +179,7 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 	 * @param user the user whose password is being encoded
 	 * @throws Exception if hashing fails
 	 */
-	private static void encodePassword(User user) throws Exception {
+	private static void encodePassword(User user) {
 		user.setPassword(EXT.hashPassword(user.getPassword()));
 	}
 

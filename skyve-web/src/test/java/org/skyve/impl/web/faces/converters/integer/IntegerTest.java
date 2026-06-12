@@ -18,7 +18,7 @@ public class IntegerTest {
 	}
 
 	@Test(expected = ConverterException.class)
-	public void testGetAsObjectInvalidStringValue() throws Exception {
+	public void testGetAsObjectInvalidStringValue() {
 		// call the method under test
 		converter.getAsObject(null, null, "not an integer");
 
@@ -26,7 +26,7 @@ public class IntegerTest {
 	}
 
 	@Test
-	public void testGetAsObjectInvalidTooLargeValue() throws Exception {
+	public void testGetAsObjectInvalidTooLargeValue() {
 		// call the method under test
 		try {
 			converter.getAsObject(null, null, "99999999999");
@@ -39,7 +39,7 @@ public class IntegerTest {
 	}
 
 	@Test
-	public void testGetAsObjectInvalidTooLargePositiveValue() throws Exception {
+	public void testGetAsObjectInvalidTooLargePositiveValue() {
 		// call the method under test
 		try {
 			converter.getAsObject(null, null, "+99999999999");
@@ -52,7 +52,7 @@ public class IntegerTest {
 	}
 
 	@Test
-	public void testGetAsObjectInvalidTooSmallValue() throws Exception {
+	public void testGetAsObjectInvalidTooSmallValue() {
 		// call the method under test
 		try {
 			converter.getAsObject(null, null, "-99999999999");
@@ -65,7 +65,7 @@ public class IntegerTest {
 	}
 
 	@Test
-	public void testGetAsObjectValidValue() throws Exception {
+	public void testGetAsObjectValidValue() {
 		// setup the test data
 		java.lang.Integer testValue = java.lang.Integer.valueOf(1000);
 
@@ -74,7 +74,7 @@ public class IntegerTest {
 	}
 
 	@Test
-	public void testGetAsObjectValidLargeValue() throws Exception {
+	public void testGetAsObjectValidLargeValue() {
 		// setup the test data
 		java.lang.Integer testValue = java.lang.Integer.valueOf("999999999");
 
@@ -83,7 +83,7 @@ public class IntegerTest {
 	}
 
 	@Test
-	public void testGetAsObjectValidSmallValue() throws Exception {
+	public void testGetAsObjectValidSmallValue() {
 		// setup the test data
 		java.lang.Integer testValue = java.lang.Integer.valueOf("-999999999");
 
@@ -92,7 +92,7 @@ public class IntegerTest {
 	}
 
 	@Test
-	public void testGetAsString() throws Exception {
+	public void testGetAsString() {
 		// setup the test data
 		java.lang.Integer testValue = java.lang.Integer.valueOf(1000);
 

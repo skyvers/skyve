@@ -315,7 +315,7 @@ class NewServiceMojoTest {
      * - Method should not throw exception but log a warning
      */
     @Test
-    void testCreateServiceClassWithInvalidDirectory() throws Exception {
+    void testCreateServiceClassWithInvalidDirectory() {
         // Set an invalid srcDir that doesn't exist
         ReflectionTestUtils.setField(mojo, "srcDir", "/nonexistent/directory");
         
@@ -339,7 +339,7 @@ class NewServiceMojoTest {
      * - Service class creation works when called from another Mojo
      */
     @Test
-    void testNewServiceMojoCanBeUsedByOtherMojos() throws Exception {
+    void testNewServiceMojoCanBeUsedByOtherMojos() {
         // Create a new instance (simulating how NewScaffoldedDocumentMojo would use it)
         NewServiceMojo serviceMojo = new NewServiceMojo();
         

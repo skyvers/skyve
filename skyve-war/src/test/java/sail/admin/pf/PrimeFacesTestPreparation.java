@@ -11,7 +11,7 @@ import util.sail.PrimeFacesSelenium;
 public class PrimeFacesTestPreparation extends PrimeFacesSelenium {
 
 	@Before
-	public void setup() throws Exception {
+	public void setup() {
 		startBrowser(new BrowserConfiguration()
 							.browser(Browsers.chrome)
 							.baseUrl("http://localhost:8080/skyve/")
@@ -26,7 +26,7 @@ public class PrimeFacesTestPreparation extends PrimeFacesSelenium {
 	/**
 	 * Menu DevOps::Data Maintenance
 	 */
-	protected void testMenuDevOpsDataMaintenance() throws Exception {
+	protected void testMenuDevOpsDataMaintenance() {
 		trace("Edit new document [admin.DataMaintenance] instance");
 		get("?a=e&m=admin&d=DataMaintenance");
 		trace("click tab [Backup/Restore]");
@@ -40,7 +40,7 @@ public class PrimeFacesTestPreparation extends PrimeFacesSelenium {
 	/**
 	 * Menu Jobs
 	 */
-	protected void testMenuJobs() throws Exception {
+	protected void testMenuJobs() {
 		trace("Edit new document [admin.Jobs] instance");
 		get("?a=e&m=admin&d=Jobs");
 		trace("click tab [Actual]");

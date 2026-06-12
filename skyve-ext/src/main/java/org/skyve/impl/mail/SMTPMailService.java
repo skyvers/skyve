@@ -86,7 +86,7 @@ public class SMTPMailService implements MailService {
 	}
 
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private static MimeMessage createMail(Mail mail, boolean forWriting) throws AddressException, MessagingException {
+	private static MimeMessage createMail(Mail mail, boolean forWriting) throws MessagingException {
 		Set<String> recipientEmailAddresses = mail.getRecipientEmailAddresses();
 		Set<String> ccEmailAddresses = mail.getCcEmailAddresses();
 		Set<String> bccEmailAddresses = mail.getBccEmailAddresses();
@@ -199,7 +199,7 @@ public class SMTPMailService implements MailService {
 	}
 
 	private static void addAddresses(MimeMessage message, Set<String> addresses, Message.RecipientType type)
-	throws AddressException, MessagingException {
+	throws MessagingException {
 		if (addresses != null) {
 			for (String address : addresses) {
 				message.addRecipient(type, new InternetAddress(address));

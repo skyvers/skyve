@@ -21,14 +21,14 @@ class MM_DD_YYYY_HH_MITest {
 	}
 
 	@Test
-	void testFromDisplayValueInvalidFormat() throws Exception {
+	void testFromDisplayValueInvalidFormat() {
 		ConversionException ce = assertThrows(ConversionException.class, () -> formatter.fromDisplayValue("03-01-2020 02:30"));
 
 		assertTrue(ce.getMessages().size() > 0);
 	}
 
 	@Test
-	void testFromDisplayValueAM() throws Exception {
+	void testFromDisplayValueAM() {
 		// setup the test data
 		DateTime testDate = new DateTime(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 02, 30, 0);
@@ -41,14 +41,14 @@ class MM_DD_YYYY_HH_MITest {
 	 * Note: This formatter cannot parse PM times. See {@link MM_DD_YYYY_HH24_MI} instead.
 	 */
 	@Test
-	void testFromDisplayValuePM() throws Exception {
+	void testFromDisplayValuePM() {
 		ConversionException ce = assertThrows(ConversionException.class, () -> formatter.fromDisplayValue("03/01/2020 14:30"));
 
 		assertTrue(ce.getMessages().size() > 0);
 	}
 
 	@Test
-	void testToDisplayValueAM() throws Exception {
+	void testToDisplayValueAM() {
 		// setup the test data
 		DateTime testDate = new DateTime(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 02, 30, 0);
@@ -58,7 +58,7 @@ class MM_DD_YYYY_HH_MITest {
 	}
 
 	@Test
-	void testToDisplayValuePM() throws Exception {
+	void testToDisplayValuePM() {
 		// setup the test data
 		DateTime testDate = new DateTime(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 14, 30, 0);

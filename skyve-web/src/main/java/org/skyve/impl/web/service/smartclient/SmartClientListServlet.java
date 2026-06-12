@@ -1752,8 +1752,7 @@ public class SmartClientListServlet extends HttpServlet {
 														Document document,
 														ListModel<Bean> model, 
 														Bean bean,
-														boolean rowIstagged)
-	throws Exception {
+														boolean rowIstagged) {
 		StringBuilder message = new StringBuilder(256);
 		message.append("{\"response\":{\"status\":0,\"data\":");
 
@@ -1781,8 +1780,7 @@ public class SmartClientListServlet extends HttpServlet {
 															Map<String, Object> parameters,
 															Module module,
 															ListModel<Bean> model,
-															boolean tagging)
-	throws Exception {
+															boolean tagging) {
 		StringBuilder message = new StringBuilder(256);
 		message.append("{\"response\":{\"status\":0,\"data\":[");
 

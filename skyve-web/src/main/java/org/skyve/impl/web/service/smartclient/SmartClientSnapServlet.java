@@ -232,8 +232,7 @@ public class SmartClientSnapServlet extends HttpServlet {
 	 */
 	private static StringBuilder list(String moduleName,
 										String queryName,
-										boolean smartClientRequest)
-	throws Exception {
+										boolean smartClientRequest) {
 		Persistence p = CORE.getPersistence();
 		DocumentQuery q = p.newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.SNAPSHOT_DOCUMENT_NAME)
 							.addBoundProjection(Bean.DOCUMENT_ID)

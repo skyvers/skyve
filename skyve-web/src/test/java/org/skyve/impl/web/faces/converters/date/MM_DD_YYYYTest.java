@@ -20,7 +20,7 @@ public class MM_DD_YYYYTest {
 	}
 
 	@Test(expected = ConverterException.class)
-	public void testGetAsObjectInvalidFormat() throws Exception {
+	public void testGetAsObjectInvalidFormat() {
 		// call the method under test
 		formatter.getAsObject(null, null, "03-01-2020");
 
@@ -28,7 +28,7 @@ public class MM_DD_YYYYTest {
 	}
 
 	@Test
-	public void testGetAsObjectValidFormat() throws Exception {
+	public void testGetAsObjectValidFormat() {
 		// setup the test data
 		DateOnly testDate = Time.withDate(01, 03, 2020);
 
@@ -37,7 +37,7 @@ public class MM_DD_YYYYTest {
 	}
 
 	@Test
-	public void testGetAsString() throws Exception {
+	public void testGetAsString() {
 		// setup the test data
 		DateOnly testDate = Time.withDate(01, 03, 2020);
 

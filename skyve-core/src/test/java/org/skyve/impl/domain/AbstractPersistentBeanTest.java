@@ -58,7 +58,7 @@ class AbstractPersistentBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void setBizLockRoundtrip() throws Exception {
+	void setBizLockRoundtrip() {
 		TestPersistentBean bean = new TestPersistentBean();
 		assertNull(bean.getBizLock());
 		OptimisticLock lock = new OptimisticLock("admin", new java.util.Date());

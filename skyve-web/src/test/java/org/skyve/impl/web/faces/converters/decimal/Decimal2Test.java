@@ -18,7 +18,7 @@ public class Decimal2Test {
 	}
 
 	@Test(expected = ConverterException.class)
-	public void testGetAsObjectInvalidStringValue() throws Exception {
+	public void testGetAsObjectInvalidStringValue() {
 		// call the method under test
 		converter.getAsObject(null, null, "not a Decimal2");
 
@@ -26,7 +26,7 @@ public class Decimal2Test {
 	}
 
 	@Test
-	public void testGetAsObjectLargeValues() throws Exception {
+	public void testGetAsObjectLargeValues() {
 		for (String stringValue : new String[] {"9999999999999999999", "+9999999999999999999", "-9999999999999999999"}) {
 			org.skyve.domain.types.Decimal2 decimalValue = new org.skyve.domain.types.Decimal2(stringValue);
 			assertThat(converter.getAsObject(null, null, stringValue), is(decimalValue));
@@ -34,7 +34,7 @@ public class Decimal2Test {
 	}
 
 	@Test
-	public void testGetAsObjectValidValue() throws Exception {
+	public void testGetAsObjectValidValue() {
 		// setup the test data
 		org.skyve.domain.types.Decimal2 testValue = org.skyve.domain.types.Decimal2.ONE_THOUSAND;
 
@@ -43,7 +43,7 @@ public class Decimal2Test {
 	}
 
 	@Test
-	public void testGetAsString() throws Exception {
+	public void testGetAsString() {
 		// setup the test data
 		org.skyve.domain.types.Decimal2 testValue = org.skyve.domain.types.Decimal2.ONE_THOUSAND;
 
@@ -52,7 +52,7 @@ public class Decimal2Test {
 	}
 
 	@Test
-	public void testGetAsStringPrecisionValue() throws Exception {
+	public void testGetAsStringPrecisionValue() {
 		// setup the test data
 		java.lang.String stringValue = "99.99";
 		org.skyve.domain.types.Decimal2 decimalValue = new org.skyve.domain.types.Decimal2(stringValue);
@@ -62,7 +62,7 @@ public class Decimal2Test {
 	}
 
 	@Test
-	public void testGetAsStringLargePrecisionValue() throws Exception {
+	public void testGetAsStringLargePrecisionValue() {
 		// setup the test data
 		java.lang.String stringValue = "+99.99999999999999999";
 		org.skyve.domain.types.Decimal2 decimalValue = new org.skyve.domain.types.Decimal2(stringValue);
@@ -72,7 +72,7 @@ public class Decimal2Test {
 	}
 
 	@Test
-	public void testGetAsStringLargePositiveValue() throws Exception {
+	public void testGetAsStringLargePositiveValue() {
 		// setup the test data
 		java.lang.String stringValue = "9999999999999999999";
 		org.skyve.domain.types.Decimal2 decimalValue = new org.skyve.domain.types.Decimal2("+" + stringValue);
@@ -82,7 +82,7 @@ public class Decimal2Test {
 	}
 
 	@Test
-	public void testGetAsStringLargeNegativeValue() throws Exception {
+	public void testGetAsStringLargeNegativeValue() {
 		// setup the test data
 		java.lang.String stringValue = "-9999999999999999999";
 		org.skyve.domain.types.Decimal2 decimalValue = new org.skyve.domain.types.Decimal2(stringValue);

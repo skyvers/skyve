@@ -99,7 +99,7 @@ public class POISheetGenerator {
 	 * @param dff
 	 * @throws Exception
 	 */
-	public void addField(DataFileExportField field) throws Exception {
+	public void addField(DataFileExportField field) {
 		fields.add(field);
 	}
 
@@ -109,7 +109,7 @@ public class POISheetGenerator {
 	 * @param fieldTitle
 	 * @param binding
 	 */
-	public void addField(String fieldTitle, String binding) throws Exception {
+	public void addField(String fieldTitle, String binding) {
 		fields.add(new DataFileExportField(fieldTitle, binding));
 	}
 

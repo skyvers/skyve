@@ -27,6 +27,7 @@ import modules.admin.domain.Contact.ContactType;
 import modules.admin.domain.Group;
 import modules.admin.domain.User;
 import modules.admin.domain.UserList;
+import modules.admin.domain.UserProxy;
 
 /**
  * Creates users in bulk from an email list and optional invitation delivery settings.
@@ -173,11 +174,11 @@ public class BulkUserCreationJob extends Job {
 	 * @return Persisted user, or {@code null} when user exists or creation fails.
 	 * @throws Exception If unexpected persistence failures occur.
 	 */
-	public static User createUserFromContact(ContactExtension c, UserList bean, List<String> log) throws Exception {
+	public static User createUserFromContact(ContactExtension c, UserList bean, List<String> log) {
 
 		// check if user already exists
 		DocumentQuery q = CORE.getPersistence().newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME);
-		q.getFilter().addEquals(User.userNamePropertyName, c.getEmail1());
+		q.getFilter().addEquals(UserProxy.userNamePropertyName, c.getEmail1());
 		q.setMaxResults(1);
 
 		User found = q.beanResult();

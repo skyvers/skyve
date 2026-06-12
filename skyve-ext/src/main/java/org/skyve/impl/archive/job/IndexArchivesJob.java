@@ -376,7 +376,7 @@ public class IndexArchivesJob extends CancellableJob {
          * @throws IOException
          * @throws ParseException
          */
-        private List<IndexableFile> identifyUnindexed() throws IOException, ParseException {
+        private List<IndexableFile> identifyUnindexed() throws IOException {
             List<File> archives = listArchiveFiles(archiveDir);
             logger.debug("{} archive files found in {}", archives.size(), archiveDir);
 

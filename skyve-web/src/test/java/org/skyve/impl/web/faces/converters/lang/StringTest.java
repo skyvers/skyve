@@ -14,25 +14,25 @@ public class StringTest {
 	}
 
 	@Test
-	public void testGetAsObjectEmptyStringValueReturnsNull() throws Exception {
+	public void testGetAsObjectEmptyStringValueReturnsNull() {
 		// call the method under test
 		assertThat(converter.getAsObject(null, null, ""), is(nullValue()));
 	}
 
 	@Test
-	public void testGetAsObjectWhitespaceStringValueReturnsNull() throws Exception {
+	public void testGetAsObjectWhitespaceStringValueReturnsNull() {
 		// call the method under test
 		assertThat(converter.getAsObject(null, null, " "), is(nullValue()));
 	}
 
 	@Test
-	public void testGetAsObjectWordValueTrimsWhitespace() throws Exception {
+	public void testGetAsObjectWordValueTrimsWhitespace() {
 		// call the method under test
 		assertThat(converter.getAsObject(null, null, " word "), is("word"));
 	}
 
 	@Test
-	public void testGetAsObjectWordValue() throws Exception {
+	public void testGetAsObjectWordValue() {
 		// setup the test data
 		java.lang.String testValue = "word";
 
@@ -42,7 +42,7 @@ public class StringTest {
 
 
 	@Test
-	public void testGetAsStringTrueValue() throws Exception {
+	public void testGetAsStringTrueValue() {
 		// setup the test data
 		java.lang.String testValue = "test";
 
