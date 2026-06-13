@@ -2516,6 +2516,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 		MenuButton actionButton = (MenuButton) a.createComponent(MenuButton.COMPONENT_TYPE);
 		setId(actionButton, null);
+		String actionButtonId = actionButton.getId();
 		actionButton.setIcon("fa-solid fa-ellipsis-vertical");
 		actionButton.setTitle(image ? "Image Actions" : "Content Actions");
 		actionButton.setAriaLabel(image ? "Image Actions" : "Content Actions");
@@ -2531,7 +2532,6 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 														null,
 														disabledConditionName,
 														formDisabledConditionName);
-		String uploadItemId = uploadItem.getId();
 		actionItems.add(uploadItem);
 
 		String var = id + "_" + sanitisedBinding + "Overlay";
@@ -2564,7 +2564,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			OverlayPanel overlay = (OverlayPanel) a.createComponent(OverlayPanel.COMPONENT_TYPE);
 			setId(overlay, null);
 			overlay.setWidgetVar(var);
-			overlay.setFor(uploadItemId);
+			overlay.setFor(actionButtonId);
+			overlay.setShowEvent("skyveContentUpload");
+			overlay.setHideEvent("skyveContentUpload");
 			overlay.setDynamic(false);
 			overlay.setShowCloseIcon(true);
 			overlay.setModal(false); // modal on PF8 causes the transparent modal mask to sit over the top of the overlay panel

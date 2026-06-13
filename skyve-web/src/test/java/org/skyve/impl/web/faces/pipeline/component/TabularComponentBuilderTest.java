@@ -1575,6 +1575,7 @@ class TabularComponentBuilderTest {
 		when(imageContainer.getChildren()).thenReturn(imageChildren);
 		when(actionGroup.getChildren()).thenReturn(actionChildren);
 		when(actionButton.getChildren()).thenReturn(menuChildren);
+		when(actionButton.getId()).thenReturn("actionButtonId");
 		when(uploadItem.getId()).thenReturn("uploadItemId");
 		when(uploadDialog.getChildren()).thenReturn(uploadDialogChildren);
 		when(markupDialog.getChildren()).thenReturn(markupDialogChildren);
@@ -1679,6 +1680,7 @@ class TabularComponentBuilderTest {
 		when(outputLink.getChildren()).thenReturn(linkChildren);
 		when(actionGroup.getChildren()).thenReturn(actionChildren);
 		when(actionButton.getChildren()).thenReturn(menuChildren);
+		when(actionButton.getId()).thenReturn("actionButtonId");
 		when(uploadItem.getId()).thenReturn("uploadItemId");
 		when(overlay.getChildren()).thenReturn(overlayChildren);
 		when(mockApplication.createComponent(HtmlPanelGrid.COMPONENT_TYPE)).thenReturn(panelGrid);
@@ -1714,7 +1716,9 @@ class TabularComponentBuilderTest {
 		verify(uploadItem).setValue("Upload Content");
 		verify(uploadItem).setUrl("javascript:void(0)");
 		verify(uploadItem).setOnclick("PF('contentLinkGrid_doc_attachmentOverlay').show();return false");
-		verify(overlay).setFor("uploadItemId");
+		verify(overlay).setFor("actionButtonId");
+		verify(overlay).setShowEvent("skyveContentUpload");
+		verify(overlay).setHideEvent("skyveContentUpload");
 		verify(clearItem).setValue("Clear Content");
 		verify(clearItem).setUrl("javascript:void(0)");
 		verify(clearItem).setOnclick("SKYVE.PF.clearContentLink('doc_attachment','contentLinkGrid');return false");
