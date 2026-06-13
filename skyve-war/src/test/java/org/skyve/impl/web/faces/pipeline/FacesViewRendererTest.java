@@ -188,6 +188,20 @@ class FacesViewRendererTest extends AbstractSkyveTest {
 		return new FacesViewRenderer(u, m, aapd, view, UXUI, widgetId, cb, lb);
 	}
 
+	private FacesViewRenderer createRenderer(org.skyve.metadata.module.Module module,
+												org.skyve.metadata.model.document.Document document,
+												org.skyve.metadata.view.View view,
+												String uxui) {
+		ResponsiveComponentBuilder cb = new ResponsiveComponentBuilder();
+		TestLayoutBuilder lb = new TestLayoutBuilder();
+		FacesView managedBean = new FacesView();
+		cb.setUserAgentType(UserAgentType.desktop);
+		lb.setUserAgentType(UserAgentType.desktop);
+		cb.setSAILManagedBean(managedBean);
+		lb.setSAILManagedBean(managedBean);
+		return new FacesViewRenderer(u, module, document, view, uxui, null, cb, lb);
+	}
+
 	@Test
 	void renderEmptyEditView() {
 		ViewImpl view = new ViewImpl();
@@ -1913,6 +1927,26 @@ class FacesViewRendererTest extends AbstractSkyveTest {
 		FacesViewRenderer renderer = createRenderer(view);
 		renderer.visit();
 		assertNotNull(renderer.getFacesView());
+	}
+
+	@Test
+	void renderRealMetadataEditViews() {
+		assertRealMetadataViewRenders("admin", "JobSchedule", "external");
+		assertRealMetadataViewRenders("admin", "ReportTemplate", "external");
+		assertRealMetadataViewRenders("admin", "Startup", "external");
+		assertRealMetadataViewRenders("admin", "Communication", "external");
+		assertRealMetadataViewRenders("kitchensink", "KitchenSink", "external");
+	}
+
+	private void assertRealMetadataViewRenders(String moduleName, String documentName, String uxui) {
+		org.skyve.metadata.module.Module module = c.getModule(moduleName);
+		org.skyve.metadata.model.document.Document document = module.getDocument(c, documentName);
+		org.skyve.metadata.view.View view = document.getView(uxui, c, ViewType.edit.toString());
+
+		FacesViewRenderer renderer = createRenderer(module, document, view, uxui);
+		renderer.visit();
+
+		assertNotNull(renderer.getFacesView(), moduleName + "." + documentName);
 	}
 
 	// ---- helpers ----

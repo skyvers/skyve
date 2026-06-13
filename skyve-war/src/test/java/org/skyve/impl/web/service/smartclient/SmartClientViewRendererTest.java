@@ -3900,4 +3900,31 @@ class SmartClientViewRendererTest extends AbstractSkyveTest {
 		assertFalse(code.isEmpty());
 	}
 
+	@Test
+	void renderRealMetadataEditViews() {
+		assertRealMetadataViewRenders("admin", "JobSchedule", "desktop");
+		assertRealMetadataViewRenders("admin", "ReportTemplate", "desktop");
+		assertRealMetadataViewRenders("admin", "Startup", "desktop");
+		assertRealMetadataViewRenders("admin", "UserAccount", "desktop");
+		assertRealMetadataViewRenders("admin", "MonitoringDashboard", "desktop");
+		assertRealMetadataViewRenders("admin", "ControlPanel", "desktop");
+		assertRealMetadataViewRenders("admin", "Tag", "desktop");
+		assertRealMetadataViewRenders("admin", "Communication", "desktop");
+		assertRealMetadataViewRenders("admin", "ImportExport", "desktop");
+		assertRealMetadataViewRenders("admin", "DataMaintenance", "desktop");
+		assertRealMetadataViewRenders("admin", "User", "desktop");
+		assertRealMetadataViewRenders("admin", "UserList", "desktop");
+		assertRealMetadataViewRenders("kitchensink", "KitchenSink", "desktop");
+	}
+
+	private void assertRealMetadataViewRenders(String moduleName, String documentName, String uxui) {
+		org.skyve.metadata.module.Module module = c.getModule(moduleName);
+		org.skyve.metadata.model.document.Document document = module.getDocument(c, documentName);
+		org.skyve.metadata.view.View view = document.getView(uxui, c, ViewType.edit.toString());
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, module, document, view, uxui, false);
+		renderer.visit();
+
+		assertFalse(renderer.getCode().isEmpty(), moduleName + "." + documentName);
+	}
 }

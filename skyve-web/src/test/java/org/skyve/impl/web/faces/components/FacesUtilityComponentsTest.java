@@ -3,6 +3,7 @@ package org.skyve.impl.web.faces.components;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -255,5 +256,29 @@ class FacesUtilityComponentsTest {
 		when(externalContext.getRequest()).thenReturn(null);
 
 		assertThrows(IllegalStateException.class, () -> component.encodeBegin(facesContext));
+	}
+
+	@Test
+	void viewWrapsInvalidComponentBuilderClassAsIOException() {
+		View component = new View();
+		component.getAttributes().put(org.skyve.impl.web.faces.pipeline.component.ComponentBuilder.COMPONENT_BUILDER_CLASS_KEY,
+										"not.a.RealBuilder");
+		FacesContext facesContext = mock(FacesContext.class);
+
+		java.io.IOException thrown = assertThrows(java.io.IOException.class, () -> component.encodeBegin(facesContext));
+
+		assertTrue(thrown.getMessage().contains("Cannot instantiate the component builder"));
+	}
+
+	@Test
+	void viewWrapsInvalidLayoutBuilderClassAsIOException() {
+		View component = new View();
+		component.getAttributes().put(org.skyve.impl.web.faces.pipeline.component.ComponentBuilder.COMPONENT_BUILDER_CLASS_KEY,
+										org.skyve.impl.web.faces.pipeline.component.NoOpComponentBuilder.class.getName());
+		component.getAttributes().put(org.skyve.impl.web.faces.pipeline.layout.LayoutBuilder.LAYOUT_BUILDER_CLASS_KEY,
+										"not.a.RealLayout");
+		FacesContext facesContext = mock(FacesContext.class);
+
+		assertThrows(java.io.IOException.class, () -> component.encodeBegin(facesContext));
 	}
 }

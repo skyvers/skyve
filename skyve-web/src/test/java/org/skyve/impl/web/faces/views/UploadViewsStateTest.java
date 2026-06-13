@@ -164,6 +164,25 @@ class UploadViewsStateTest {
 	}
 
 	@Test
+	void contentUploadHandleFileUploadShowsMalformedUrlMessageWhenContextMissing() throws Exception {
+		FacesContext context = Mockito.mock(FacesContext.class);
+		FacesContextBridge.setCurrent(context);
+		ContentUploadView view = new ContentUploadView();
+		FileUploadEvent event = Mockito.mock(FileUploadEvent.class);
+		UploadedFile file = Mockito.mock(UploadedFile.class);
+
+		setField(AbstractUploadView.class, view, "canAccess", Boolean.TRUE);
+		setField(ContentUploadView.class, view, "contentBinding", "contentId");
+		when(event.getFile()).thenReturn(file);
+		doReturn(Long.valueOf(1024L)).when(file).getSize();
+		when(file.getFileName()).thenReturn("ok.txt");
+
+		assertDoesNotThrow(() -> view.handleFileUpload(event));
+
+		verify(context).addMessage(isNull(), any());
+	}
+
+	@Test
 	void bizportImportHandleFileUploadShowsMalformedUrlMessageWhenContextMissing() {
 		FacesContext context = Mockito.mock(FacesContext.class);
 		FacesContextBridge.setCurrent(context);

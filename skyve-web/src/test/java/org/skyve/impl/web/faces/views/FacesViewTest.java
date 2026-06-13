@@ -46,7 +46,9 @@ import org.skyve.domain.DynamicBean;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.router.UxUi;
+import org.skyve.metadata.user.User;
 import org.skyve.web.UserAgentType;
+import org.skyve.web.WebContext;
 
 import jakarta.faces.FacesException;
 import jakarta.faces.component.UIComponent;
@@ -294,6 +296,56 @@ class FacesViewTest {
 	void getApiScriptIsNullByDefault() {
 		FacesView view = new FacesView();
 		assertNull(view.getApiScript());
+	}
+
+	@Test
+	void getUserReturnsSessionUserFromFacesContext() {
+		FacesView view = new FacesView();
+		User user = mock(User.class);
+		Map<String, Object> sessionMap = new HashMap<>();
+		sessionMap.put(WebContext.USER_SESSION_ATTRIBUTE_NAME, user);
+		FacesContext facesContext = mockFacesContextWithSessionMap(sessionMap);
+		FacesContextBridge.setCurrent(facesContext);
+
+		assertSame(user, view.getUser());
+
+		FacesContextBridge.setCurrent(null);
+	}
+
+	@Test
+	void textSearchAndModeSwitchReflectSessionUserPermissions() {
+		FacesView view = new FacesView();
+		User user = mock(User.class);
+		when(user.canTextSearch()).thenReturn(true);
+		when(user.canSwitchMode()).thenReturn(true);
+		Map<String, Object> sessionMap = new HashMap<>();
+		sessionMap.put(WebContext.USER_SESSION_ATTRIBUTE_NAME, user);
+		FacesContext facesContext = mockFacesContextWithSessionMap(sessionMap);
+		FacesContextBridge.setCurrent(facesContext);
+
+		assertTrue(view.isCanTextSearch());
+		assertTrue(view.isCanSwitchMode());
+
+		FacesContextBridge.setCurrent(null);
+	}
+
+	@Test
+	void setUxUiStoresAndClearsModeWhenUserCanSwitch() {
+		FacesView view = new FacesView();
+		User user = mock(User.class);
+		when(user.canSwitchMode()).thenReturn(true);
+		Map<String, Object> sessionMap = new HashMap<>();
+		sessionMap.put(WebContext.USER_SESSION_ATTRIBUTE_NAME, user);
+		FacesContext facesContext = mockFacesContextWithSessionMap(sessionMap);
+		FacesContextBridge.setCurrent(facesContext);
+
+		view.setUxUi("tablet");
+		assertEquals("tablet", sessionMap.get(AbstractWebContext.UXUI));
+
+		view.setUxUi((String) null);
+		assertFalse(sessionMap.containsKey(AbstractWebContext.UXUI));
+
+		FacesContextBridge.setCurrent(null);
 	}
 
 	@Test
@@ -1964,6 +2016,14 @@ class FacesViewTest {
 
 		assertThrows(Throwable.class, () -> view.sign("sig", "signature", 100, 40, "#fff", "#000"));
 		FacesContextBridge.setCurrent(null);
+	}
+
+	private static FacesContext mockFacesContextWithSessionMap(Map<String, Object> sessionMap) {
+		FacesContext facesContext = mock(FacesContext.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
+		when(facesContext.getExternalContext()).thenReturn(externalContext);
+		when(externalContext.getSessionMap()).thenReturn(sessionMap);
+		return facesContext;
 	}
 
 	@SuppressWarnings("unchecked")
