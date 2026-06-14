@@ -2,6 +2,7 @@ package org.skyve.impl.web.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.PrintWriter;
@@ -9,10 +10,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.Principal;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.content.MimeType;
 import org.skyve.metadata.user.User;
 import org.skyve.web.WebContext;
 
@@ -21,7 +24,13 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpServletRequest;
 import modules.test.AbstractSkyveTest;
 
+@SuppressWarnings({"static-method", "resource"})
 class ChartServletH2Test extends AbstractSkyveTest {
+	@AfterEach
+	void restorePersistenceUser() {
+		AbstractPersistence.get().setUser(u);
+	}
+
 	@Test
 	void processListModelReturnsEmptyResponseForModelDatasource() throws Exception {
 		String config = invokeProcessListModel(chartRequest("test_AllAttributesPersistent__SomeModel", null, null));
@@ -46,7 +55,46 @@ class ChartServletH2Test extends AbstractSkyveTest {
 		servlet.doGet(authenticatedChartRequest(u, "test_AllAttributesPersistent__SomeModel"), response);
 
 		assertEquals("{}", body.toString());
-		AbstractPersistence.get().setUser(u);
+		verify(response).setContentType(MimeType.json.toString());
+		verify(response).setCharacterEncoding(java.nio.charset.StandardCharsets.UTF_8.name());
+		verify(response).addHeader("Cache-control", "private,no-cache,no-store");
+		verify(response).addDateHeader("Expires", 0);
+	}
+
+	@Test
+	void doPostDelegatesToAuthenticatedModelDatasourceResponse() throws Exception {
+		ChartServlet servlet = new ChartServlet();
+		java.io.StringWriter body = new java.io.StringWriter();
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		when(response.getWriter()).thenReturn(new PrintWriter(body, true));
+
+		servlet.doPost(authenticatedChartRequest(u, "test_AllAttributesPersistent__SomeModel"), response);
+
+		assertEquals("{}", body.toString());
+	}
+
+	@Test
+	void doGetReturnsEmptyJsonWhenDatasourceIsMissingAndConversationHasNoBean() throws Exception {
+		ChartServlet servlet = new ChartServlet();
+		java.io.StringWriter body = new java.io.StringWriter();
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		when(response.getWriter()).thenReturn(new PrintWriter(body, true));
+
+		servlet.doGet(authenticatedChartRequest(u, null), response);
+
+		assertEquals("{}", body.toString());
+	}
+
+	@Test
+	void doGetReturnsEmptyJsonWhenDatasourceCannotBeParsed() throws Exception {
+		ChartServlet servlet = new ChartServlet();
+		java.io.StringWriter body = new java.io.StringWriter();
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		when(response.getWriter()).thenReturn(new PrintWriter(body, true));
+
+		servlet.doGet(authenticatedChartRequest(u, "malformed"), response);
+
+		assertEquals("{}", body.toString());
 	}
 
 	private static HttpServletRequest chartRequest(String dataSourceName, String criteriaJson, String builderJson) {

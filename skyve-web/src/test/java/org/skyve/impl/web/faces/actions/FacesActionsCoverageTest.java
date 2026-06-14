@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
+import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.Collections;
 import java.util.Date;
@@ -617,6 +618,31 @@ class FacesActionsCoverageTest {
 	}
 
 	@Test
+	void zoomInActionReturnsWhenRequiredValidationFails() {
+		installFailingRequiredValidationContext();
+
+		FacesView facesView = mock(FacesView.class);
+
+		ZoomInAction action = new ZoomInAction(facesView, "items", "e1");
+		assertDoesNotThrow(action::callback);
+
+		verify(facesView, never()).getCurrentBean();
+	}
+
+	@Test
+	void zoomOutActionReturnsWhenRequiredValidationFails() {
+		installFailingRequiredValidationContext();
+
+		FacesView facesView = mock(FacesView.class);
+		when(facesView.getZoomInBindings()).thenReturn(new ArrayDeque<>());
+
+		ZoomOutAction action = new ZoomOutAction(facesView);
+		assertDoesNotThrow(action::callback);
+
+		verify(facesView, never()).getBean();
+	}
+
+	@Test
 	void addActionInlineBypassesValidationAndThrowsWhenBeanMissing() {
 		FacesView facesView = mock(FacesView.class);
 		when(facesView.getViewBinding()).thenReturn(null);
@@ -776,6 +802,29 @@ class FacesActionsCoverageTest {
 		AbstractPersistence persistence = mock(AbstractPersistence.class, CALLS_REAL_METHODS);
 		persistence.setUser(user);
 		persistence.setForThread();
+	}
+
+	private static void installFailingRequiredValidationContext() {
+		UIViewRoot root = mock(UIViewRoot.class);
+		org.mockito.Mockito.doReturn(Boolean.TRUE).when(root).isRendered();
+
+		HtmlInputText requiredInput = mock(HtmlInputText.class);
+		org.mockito.Mockito.doReturn(Boolean.TRUE).when(requiredInput).isRendered();
+		when(requiredInput.getRequiredMessage()).thenReturn("Required");
+		when(requiredInput.getValue()).thenReturn(null);
+		when(requiredInput.getStyle()).thenReturn("");
+		when(requiredInput.getFacetsAndChildren()).thenAnswer(i -> java.util.Arrays.asList().iterator());
+
+		when(root.getFacetsAndChildren()).thenAnswer(i -> java.util.Arrays.asList(requiredInput).iterator());
+
+		Set<String> renderIds = new LinkedHashSet<>();
+		PartialViewContext partial = mock(PartialViewContext.class);
+		when(partial.getRenderIds()).thenReturn(renderIds);
+
+		FacesContext context = mock(FacesContext.class);
+		when(context.getViewRoot()).thenReturn(root);
+		when(context.getPartialViewContext()).thenReturn(partial);
+		FacesContextBridge.setCurrent(context);
 	}
 
 	@SuppressWarnings("unchecked")

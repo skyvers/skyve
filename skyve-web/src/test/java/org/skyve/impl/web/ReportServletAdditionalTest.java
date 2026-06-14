@@ -6,8 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -59,24 +61,14 @@ class ReportServletAdditionalTest {
 
 	@Test
 	void doPostDelegatesToDoGet() throws Exception {
-		ReportServlet servlet = new ReportServlet();
+		ReportServlet servlet = spy(new ReportServlet());
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		HttpServletResponse response = mock(HttpServletResponse.class);
+		doNothing().when(servlet).doGet(request, response);
 
-		// doGet will throw because there's no principal/context set up
-		// but we just verify it's called (delegation)
-		when(request.getUserPrincipal()).thenReturn(null);
-		when(request.getRequestURI()).thenReturn("/skyve/report");
-		when(request.getServletPath()).thenReturn(ReportServlet.REPORT_PATH);
+		servlet.doPost(request, response);
 
-		try {
-			Method doGetMethod = ReportServlet.class.getDeclaredMethod("doGet", HttpServletRequest.class, HttpServletResponse.class);
-			// just verify doPost can be invoked without crashing before doGet
-			assertNotNull(servlet);
-		}
-		catch (NoSuchMethodException e) {
-			// expected for non-public - it's public though
-		}
+		verify(servlet).doGet(request, response);
 	}
 
 	// ===== getParameters =====

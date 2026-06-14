@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingDeque;
@@ -251,6 +252,31 @@ class SseClientHandlerTest extends JerseyTest {
 
 			assertEquals(1, org.skyve.util.PushMessage.RECEIVERS.size(), "global cap should prevent a new SSE receiver registration");
 			assertTrue(org.skyve.util.PushMessage.RECEIVERS.contains(existing));
+		} finally {
+			org.skyve.util.PushMessage.RECEIVERS.clear();
+			UtilImpl.PUSH_MAX_RECEIVERS_TOTAL = originalMaxTotal;
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testUnderGlobalReceiverLimitReturnsTrueWhenDisabled() throws Exception {
+		int originalMaxTotal = UtilImpl.PUSH_MAX_RECEIVERS_TOTAL;
+		try {
+			UtilImpl.PUSH_MAX_RECEIVERS_TOTAL = 0;
+			org.skyve.util.PushMessage.RECEIVERS.add(new org.skyve.util.PushMessage.PushMessageReceiver() {
+				@Override
+				public String forUserId() {
+					return "existing-user";
+				}
+
+				@Override
+				public void sendMessage(org.skyve.util.PushMessage message) {
+					// no-op
+				}
+			});
+
+			assertTrue(invokeUnderGlobalReceiverLimit());
 		} finally {
 			org.skyve.util.PushMessage.RECEIVERS.clear();
 			UtilImpl.PUSH_MAX_RECEIVERS_TOTAL = originalMaxTotal;
@@ -610,6 +636,12 @@ class SseClientHandlerTest extends JerseyTest {
 		Field field = SseClientHandler.class.getDeclaredField("userId");
 		field.setAccessible(true);
 		field.set(handler, userId);
+	}
+
+	private static boolean invokeUnderGlobalReceiverLimit() throws Exception {
+		Method method = SseClientHandler.class.getDeclaredMethod("underGlobalReceiverLimit");
+		method.setAccessible(true);
+		return ((Boolean) method.invoke(null)).booleanValue();
 	}
 
 	/**

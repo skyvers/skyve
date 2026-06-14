@@ -322,6 +322,29 @@ class SingletonCachedBizletTest {
 		}
 
 	@Test
+	void newInstanceWithScopeRejectsNullWrapperResult() {
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		when(customer.getName()).thenReturn("custA");
+		when(user.getCustomer()).thenReturn(customer);
+		when(user.getCustomerName()).thenReturn("custA");
+
+		AbstractPersistence persistence = mock(AbstractPersistence.class, withSettings().defaultAnswer(CALLS_REAL_METHODS));
+		persistence.setUser(user);
+		persistence.setForThread();
+
+		when(persistence.withDocumentPermissionScopes(eq(DocumentPermissionScope.global),
+				org.mockito.ArgumentMatchers.<Function<Persistence, PersistentBean>>any()))
+				.thenReturn(null);
+
+		TestBean seed = new TestBean("admin", "Contact", "S1", "Seed");
+		TestSingletonCachedBizlet bizlet = new TestSingletonCachedBizlet();
+
+		assertThrows(IllegalStateException.class,
+				() -> bizlet.newInstance(seed, DocumentPermissionScope.global));
+	}
+
+	@Test
 	void clearRemovesCustomerAndGlobalKeysWithoutError() {
 		User user = mock(User.class);
 		Customer customer = mock(Customer.class);

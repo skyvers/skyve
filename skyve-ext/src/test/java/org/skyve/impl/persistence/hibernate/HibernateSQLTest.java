@@ -30,6 +30,7 @@ import org.skyve.domain.types.OptimisticLock;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.document.Document;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.SQL;
 
@@ -64,6 +65,25 @@ class HibernateSQLTest {
 		try {
 			HibernateSQL sql = new HibernateSQL("admin", "Contact", "select 1", persistence);
 			assertNotNull(sql);
+		}
+		finally {
+			persistence.close();
+		}
+	}
+
+	@Test
+	void testDocumentConstructorCreatesInstance() {
+		AbstractHibernatePersistenceTest.TestHibernatePersistence persistence = new AbstractHibernatePersistenceTest.TestHibernatePersistence();
+		try {
+			Document document = mock(Document.class);
+			when(document.getOwningModuleName()).thenReturn("admin");
+			when(document.getName()).thenReturn("Contact");
+
+			HibernateSQL sql = new HibernateSQL(document, "select 1", persistence);
+
+			assertNotNull(sql);
+			assertEquals("admin", sql.getModuleName());
+			assertEquals("Contact", sql.getDocumentName());
 		}
 		finally {
 			persistence.close();
@@ -114,6 +134,31 @@ class HibernateSQLTest {
 		try {
 			HibernateSQL sql = new HibernateSQL("select 1", persistence);
 			org.junit.jupiter.api.Assertions.assertThrows(DomainException.class, sql::beanIterable);
+		}
+		finally {
+			persistence.close();
+		}
+	}
+
+	@Test
+	void testBeanResultsDelegatesToEntityNativeQuery() {
+		AbstractHibernatePersistenceTest.TestHibernatePersistence persistence = new AbstractHibernatePersistenceTest.TestHibernatePersistence();
+		try {
+			Session session = mock(Session.class);
+			setSession(persistence, session);
+			persistence.setUser(AbstractHibernatePersistenceTest.createTestUser());
+
+			NativeQuery q = mock(NativeQuery.class);
+			when(session.createNativeQuery(anyString())).thenReturn(q);
+			when(q.addSynchronizedQuerySpace(anyString())).thenReturn(q);
+			when(q.setFetchSize(anyInt())).thenReturn(q);
+			when(q.addEntity(anyString())).thenReturn(q);
+			when(q.list()).thenReturn(List.of());
+
+			HibernateSQL sql = new HibernateSQL("admin", "Contact", "select * from ADM_Contact", persistence);
+
+			assertNotNull(sql.beanResults());
+			verify(q).addEntity("adminContact");
 		}
 		finally {
 			persistence.close();

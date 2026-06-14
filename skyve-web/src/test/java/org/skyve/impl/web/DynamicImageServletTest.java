@@ -82,6 +82,31 @@ class DynamicImageServletTest {
 		}
 	}
 
+	@Test
+	void invalidZoomParameterReturnsBlankPngFallback() throws Exception {
+		DynamicImageServlet servlet = new DynamicImageServlet();
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		when(request.getParameter(AbstractWebContext.DOCUMENT_NAME)).thenReturn("admin.Contact");
+		when(request.getParameter(DynamicImageServlet.IMAGE_NAME)).thenReturn("avatar");
+		when(request.getParameter(DynamicImageServlet.IMAGE_WIDTH_NAME)).thenReturn("64");
+		when(request.getParameter(DynamicImageServlet.IMAGE_HEIGHT_NAME)).thenReturn("48");
+		when(request.getParameter(DynamicImageServlet.IMAGE_WIDTH_ZOOM_NAME)).thenReturn("wide");
+
+		try (CapturingServletOutputStream output = new CapturingServletOutputStream()) {
+			HttpServletResponse response = mock(HttpServletResponse.class);
+			doReturn(output).when(response).getOutputStream();
+
+			servlet.doGet(request, response);
+
+			verify(response).setContentType("image/png");
+			verify(response).addHeader("Cache-Control", "private,no-cache,no-store");
+			BufferedImage image = ImageIO.read(new ByteArrayInputStream(output.toByteArray()));
+			assertNotNull(image);
+			assertEquals(1, image.getWidth());
+			assertEquals(1, image.getHeight());
+		}
+	}
+
 	private static Stream<Arguments> invalidRequiredParameterRequests() {
 		return Stream.of(
 				Arguments.of(null, "image", "10", "10"),

@@ -7,7 +7,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Constructor;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -21,6 +23,7 @@ import org.skyve.domain.messages.UploadException.Problem;
 import org.skyve.impl.bizport.AbstractDataFileLoader.LoaderActivityType;
 import org.skyve.impl.bizport.DataFileField;
 import org.skyve.impl.bizport.DataFileField.LoadAction;
+import org.skyve.impl.bizport.POISheetLoader;
 import org.skyve.metadata.controller.Upload;
 import org.skyve.metadata.controller.WebFileInputStream;
 import org.skyve.tag.TagManager;
@@ -103,6 +106,29 @@ class UploadTagCriteriaTest {
 		assertEquals(Long.valueOf(1), tag.getUploadMatched());
 	}
 
+	@Test
+	@SuppressWarnings("boxing")
+	void poiSheetLoaderAdapterDelegatesToWrappedLoader() throws Exception {
+		POISheetLoader wrapped = mock(POISheetLoader.class);
+		DataFileField field = new DataFileField("email1", 0);
+		List<Bean> results = List.of(mock(Bean.class));
+		when(wrapped.beanResults()).thenReturn(results);
+		when(wrapped.getDataIndex()).thenReturn(Integer.valueOf(3));
+		UploadTagCriteria.SheetLoader adapter = privateAdapter(wrapped);
+
+		adapter.setActivityType(LoaderActivityType.FIND);
+		adapter.setDataIndex(1);
+		adapter.setDebugMode(true);
+		adapter.addField(field);
+
+		assertEquals(results, adapter.beanResults());
+		assertEquals(Integer.valueOf(3), Integer.valueOf(adapter.getDataIndex()));
+		verify(wrapped).setActivityType(LoaderActivityType.FIND);
+		verify(wrapped).setDataIndex(1);
+		verify(wrapped).setDebugMode(true);
+		verify(wrapped).addField(field);
+	}
+
 	@SuppressWarnings("resource")
 	private static Upload upload(String fileName) {
 		return new Upload(fileName,
@@ -118,6 +144,13 @@ class UploadTagCriteriaTest {
 		tag.setAttributeName("email1");
 		tag.setFilterAction(filterAction);
 		return tag;
+	}
+
+	private static UploadTagCriteria.SheetLoader privateAdapter(POISheetLoader wrapped) throws Exception {
+		Class<?> adapterClass = Class.forName(UploadTagCriteria.class.getName() + "$POISheetLoaderAdapter");
+		Constructor<?> constructor = adapterClass.getDeclaredConstructor(POISheetLoader.class);
+		constructor.setAccessible(true);
+		return UploadTagCriteria.SheetLoader.class.cast(constructor.newInstance(wrapped));
 	}
 
 	private static class TestTag extends TagExtension {

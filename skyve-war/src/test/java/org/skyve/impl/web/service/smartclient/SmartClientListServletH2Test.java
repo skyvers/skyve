@@ -111,8 +111,37 @@ class SmartClientListServletH2Test extends AbstractSkyveTest {
 	}
 
 	@Test
+	void fetchResetsStartRowWhenRequestedPageIsBeyondFilteredRows() throws Exception {
+		AllAttributesPersistent bean = saveUncommittedBean("list-page-reset");
+		SortedMap<String, Object> parameters = new TreeMap<>();
+		parameters.put("text", "list-page-reset");
+
+		String body = invokeFetch(99,
+									100,
+									SmartClientFilterOperator.substring,
+									null,
+									null,
+									null,
+									false,
+									parameters);
+
+		assertSuccessfulFetch(body);
+		assertTrue(body.contains("\"startRow\":0"), body);
+		assertTrue(body.contains("\"endRow\":1"), body);
+		assertTrue(body.contains("\"totalRows\":1"), body);
+		assertTrue(! body.contains(bean.getBizId()), body);
+	}
+
+	@Test
 	void doGetReturnsEmptyResponseWhenOperationTypeMissing() throws Exception {
 		CapturedResponse response = service(newRequest(u).param("_dataSource", DATASOURCE)).doGet();
+
+		assertTrue(response.body().contains("{}"));
+	}
+
+	@Test
+	void doPostDelegatesToEmptyResponseWhenOperationTypeMissing() throws Exception {
+		CapturedResponse response = service(newRequest(u).param("_dataSource", DATASOURCE)).doPost();
 
 		assertTrue(response.body().contains("{}"));
 	}
@@ -125,10 +154,12 @@ class SmartClientListServletH2Test extends AbstractSkyveTest {
 		assertTrue(response.body().contains("\"totalRows\":0"));
 	}
 
-	private AllAttributesPersistent saveBean(String textPrefix) throws Exception {
-		AllAttributesPersistent bean = saveUncommittedBean(textPrefix);
-		p.commit(false);
-		return bean;
+	@Test
+	void doPostDelegatesToSmartClientErrorForMissingDatasource() throws Exception {
+		CapturedResponse response = service(newRequest(u).param("_operationType", Operation.fetch.toString())).doPost();
+
+		assertTrue(response.body().contains("\"status\":-1"));
+		assertTrue(response.body().contains("\"totalRows\":0"));
 	}
 
 	private AllAttributesPersistent saveUncommittedBean(String textPrefix) throws Exception {
@@ -277,6 +308,7 @@ class SmartClientListServletH2Test extends AbstractSkyveTest {
 		private final StringWriter sink = new StringWriter();
 		private final HttpServletResponse response = mock(HttpServletResponse.class);
 
+		@SuppressWarnings("resource")
 		private CapturedResponse() throws IOException {
 			when(response.getWriter()).thenReturn(new PrintWriter(sink, true));
 		}

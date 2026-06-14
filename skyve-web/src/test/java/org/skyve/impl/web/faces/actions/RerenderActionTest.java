@@ -1,6 +1,7 @@
 package org.skyve.impl.web.faces.actions;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -9,8 +10,10 @@ import java.lang.reflect.Field;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.skyve.domain.Bean;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.web.faces.views.FacesView;
+import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.user.User;
 
 @SuppressWarnings("static-method")
@@ -29,6 +32,26 @@ class RerenderActionTest {
 
 		RerenderAction action = new RerenderAction(facesView, "source", false);
 		assertDoesNotThrow(action::callback);
+	}
+
+	@Test
+	void callbackResolvesTargetBeanBeforeInternalCustomerHooks() {
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		bindPersistenceForUser(user);
+		when(user.getCustomer()).thenReturn(customer);
+
+		Bean bean = mock(Bean.class);
+		when(bean.getBizModule()).thenReturn("admin");
+		when(bean.getBizDocument()).thenReturn("Contact");
+
+		FacesView facesView = mock(FacesView.class);
+		when(facesView.getBean()).thenReturn(bean);
+		when(facesView.getViewBinding()).thenReturn(null);
+
+		RerenderAction action = new RerenderAction(facesView, "source", false);
+
+		assertThrows(ClassCastException.class, action::callback);
 	}
 
 	private static void bindPersistenceForUser(User user) {

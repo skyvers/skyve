@@ -17,8 +17,10 @@ import org.junit.jupiter.api.Test;
 import org.skyve.impl.util.TwoFactorAuthConfigurationSingleton;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.persistence.DataStore;
+import org.springframework.security.core.AuthenticatedPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 
 import javax.sql.DataSource;
 
@@ -30,12 +32,30 @@ class SkyveSpringSecurityTest {
 	private final int originalLockoutThreshold = UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD;
 	private final int originalLockoutDurationMultiple = UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS;
 	private final DataStore originalDataStore = UtilImpl.DATA_STORE;
+	private final String originalGoogleClientId = UtilImpl.AUTHENTICATION_GOOGLE_CLIENT_ID;
+	private final String originalGoogleSecret = UtilImpl.AUTHENTICATION_GOOGLE_SECRET;
+	private final String originalFacebookClientId = UtilImpl.AUTHENTICATION_FACEBOOK_CLIENT_ID;
+	private final String originalFacebookSecret = UtilImpl.AUTHENTICATION_FACEBOOK_SECRET;
+	private final String originalGithubClientId = UtilImpl.AUTHENTICATION_GITHUB_CLIENT_ID;
+	private final String originalGithubSecret = UtilImpl.AUTHENTICATION_GITHUB_SECRET;
+	private final String originalAzureTenantId = UtilImpl.AUTHENTICATION_AZUREAD_TENANT_ID;
+	private final String originalAzureClientId = UtilImpl.AUTHENTICATION_AZUREAD_CLIENT_ID;
+	private final String originalAzureSecret = UtilImpl.AUTHENTICATION_AZUREAD_SECRET;
 
 	@AfterEach
 	void cleanup() {
 		UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD = originalLockoutThreshold;
 		UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS = originalLockoutDurationMultiple;
 		UtilImpl.DATA_STORE = originalDataStore;
+		UtilImpl.AUTHENTICATION_GOOGLE_CLIENT_ID = originalGoogleClientId;
+		UtilImpl.AUTHENTICATION_GOOGLE_SECRET = originalGoogleSecret;
+		UtilImpl.AUTHENTICATION_FACEBOOK_CLIENT_ID = originalFacebookClientId;
+		UtilImpl.AUTHENTICATION_FACEBOOK_SECRET = originalFacebookSecret;
+		UtilImpl.AUTHENTICATION_GITHUB_CLIENT_ID = originalGithubClientId;
+		UtilImpl.AUTHENTICATION_GITHUB_SECRET = originalGithubSecret;
+		UtilImpl.AUTHENTICATION_AZUREAD_TENANT_ID = originalAzureTenantId;
+		UtilImpl.AUTHENTICATION_AZUREAD_CLIENT_ID = originalAzureClientId;
+		UtilImpl.AUTHENTICATION_AZUREAD_SECRET = originalAzureSecret;
 		TwoFactorAuthConfigurationSingleton.getInstance().clearConfig("acme");
 		TwoFactorAuthConfigurationSingleton.getInstance().clearConfig("beta");
 	}
@@ -53,6 +73,19 @@ class SkyveSpringSecurityTest {
 		assertFalse(SkyveSpringSecurity.hasActiveLockout(3, oldFailure, now));
 		assertFalse(SkyveSpringSecurity.hasActiveLockout(3, (Timestamp) null, now));
 		assertEquals(40_000L, SkyveSpringSecurity.lockoutDurationMillis(4));
+	}
+
+	@Test
+	void lockoutHelpersReturnFalseWhenLockoutIsDisabled() {
+		long now = 200_000L;
+
+		UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD = 0;
+		UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS = 10;
+		assertFalse(SkyveSpringSecurity.hasActiveLockout(100, now - 1_000L, now));
+
+		UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD = 3;
+		UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS = 0;
+		assertFalse(SkyveSpringSecurity.hasActiveLockout(100, now - 1_000L, now));
 	}
 
 	@Test
@@ -79,6 +112,41 @@ class SkyveSpringSecurityTest {
 		UserDetails loaded = service.loadUserByUsername("cust/user");
 		assertNotNull(loaded);
 		assertEquals("cust/user", loaded.getUsername());
+	}
+
+	@Test
+	void userNameFromPrincipalSupportsAuthenticatedPrincipal() {
+		AuthenticatedPrincipal principal = () -> "oauth-user";
+
+		assertEquals("oauth-user", SkyveSpringSecurity.userNameFromPrincipal(principal));
+	}
+
+	@Test
+	void clientRegistrationRepositoryUsesConfiguredProvidersAndFallsBackToDummy() {
+		SkyveSpringSecurity security = new SkyveSpringSecurity();
+
+		UtilImpl.AUTHENTICATION_GOOGLE_CLIENT_ID = null;
+		UtilImpl.AUTHENTICATION_FACEBOOK_CLIENT_ID = null;
+		UtilImpl.AUTHENTICATION_GITHUB_CLIENT_ID = null;
+		UtilImpl.AUTHENTICATION_AZUREAD_TENANT_ID = null;
+		ClientRegistrationRepository dummy = security.clientRegistrationRepository();
+		assertNotNull(dummy.findByRegistrationId("dummy"));
+
+		UtilImpl.AUTHENTICATION_GOOGLE_CLIENT_ID = "google-id";
+		UtilImpl.AUTHENTICATION_GOOGLE_SECRET = "google-secret";
+		UtilImpl.AUTHENTICATION_FACEBOOK_CLIENT_ID = "facebook-id";
+		UtilImpl.AUTHENTICATION_FACEBOOK_SECRET = "facebook-secret";
+		UtilImpl.AUTHENTICATION_GITHUB_CLIENT_ID = "github-id";
+		UtilImpl.AUTHENTICATION_GITHUB_SECRET = "github-secret";
+		UtilImpl.AUTHENTICATION_AZUREAD_TENANT_ID = "tenant";
+		UtilImpl.AUTHENTICATION_AZUREAD_CLIENT_ID = "azure-id";
+		UtilImpl.AUTHENTICATION_AZUREAD_SECRET = "azure-secret";
+
+		ClientRegistrationRepository configured = security.clientRegistrationRepository();
+		assertNotNull(configured.findByRegistrationId("google"));
+		assertNotNull(configured.findByRegistrationId("facebook"));
+		assertNotNull(configured.findByRegistrationId("github"));
+		assertNotNull(configured.findByRegistrationId("microsoft"));
 	}
 
 	@Test

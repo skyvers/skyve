@@ -3,9 +3,13 @@ package modules.whosin.Staff.actions;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
@@ -15,6 +19,8 @@ import org.skyve.content.MimeType;
 import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.bizport.AbstractDataFileLoader.LoaderActivityType;
+import org.skyve.impl.bizport.CSVLoader;
+import org.skyve.impl.bizport.POISheetLoader;
 import org.skyve.metadata.controller.Upload;
 import org.skyve.metadata.controller.WebFileInputStream;
 
@@ -78,11 +84,58 @@ class UploadQualificationsTest {
 		assertEquals("Only csv or xlsx file types are supported", exception.getMessages().iterator().next().getText());
 	}
 
+	@Test
+	void poiSheetQualificationLoaderDelegatesToWrappedLoader() throws Exception {
+		POISheetLoader wrapped = mock(POISheetLoader.class);
+		UploadQualifications.QualificationLoader loader = privateLoader("POISheetQualificationLoader",
+				POISheetLoader.class,
+				wrapped);
+		StaffQualification qualification = new StaffQualification();
+		when(wrapped.beanResults()).thenReturn(List.of(qualification));
+
+		loader.addFields("name", "type");
+		loader.setDebugMode(true);
+		loader.setDataIndex(3);
+
+		assertEquals(List.of(qualification), loader.beanResults());
+		verify(wrapped).addFields("name", "type");
+		verify(wrapped).setDebugMode(true);
+		verify(wrapped).setDataIndex(3);
+	}
+
+	@Test
+	void csvQualificationLoaderDelegatesToWrappedLoader() throws Exception {
+		CSVLoader wrapped = mock(CSVLoader.class);
+		UploadQualifications.QualificationLoader loader = privateLoader("CSVQualificationLoader", CSVLoader.class,
+				wrapped);
+		StaffQualification qualification = new StaffQualification();
+		when(wrapped.beanResults()).thenReturn(List.of(qualification));
+
+		loader.addFields("name");
+		loader.setDebugMode(false);
+		loader.setDataIndex(2);
+
+		assertEquals(List.of(qualification), loader.beanResults());
+		verify(wrapped).addFields("name");
+		verify(wrapped).setDebugMode(false);
+		verify(wrapped).setDataIndex(2);
+	}
+
 	@SuppressWarnings("resource")
 	private static Upload upload(String fileName) {
 		return new Upload(fileName,
 				new WebFileInputStream(new ByteArrayInputStream("content".getBytes(StandardCharsets.UTF_8))),
 				MimeType.csv);
+	}
+
+	private static <T> UploadQualifications.QualificationLoader privateLoader(String className,
+			Class<T> wrappedType,
+			T wrapped)
+	throws Exception {
+		Class<?> loaderType = Class.forName(UploadQualifications.class.getName() + "$" + className);
+		Constructor<?> constructor = loaderType.getDeclaredConstructor(wrappedType);
+		constructor.setAccessible(true);
+		return UploadQualifications.QualificationLoader.class.cast(constructor.newInstance(wrapped));
 	}
 
 	private static class TestableUploadQualifications extends UploadQualifications {

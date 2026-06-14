@@ -256,4 +256,23 @@ class AbstractMonitoringChartModelTest extends AbstractSkyveTest {
 		String desc = TestChartModel.testGetRequestDescription(bean);
 		assertTrue(desc.contains("admin"), "Description should contain module name");
 	}
+
+	@Test
+	void getRequestDescriptionWithModuleDocumentAndComponent() {
+		MonitoringDashboard bean = MonitoringDashboard.newInstance();
+		bean.setRsModuleName("admin");
+		bean.setRsDocumentName("User");
+		bean.setRsComponentName("editButton");
+		String desc = TestChartModel.testGetRequestDescription(bean);
+		assertTrue(desc.contains("admin.User"), "Description should contain module.document");
+		assertTrue(desc.contains("(editButton)"), "Description should contain component in parentheses");
+	}
+
+	@Test
+	void getRequestDescriptionWithOnlyComponent() {
+		MonitoringDashboard bean = MonitoringDashboard.newInstance();
+		bean.setRsComponentName("saveButton");
+		String desc = TestChartModel.testGetRequestDescription(bean);
+		assertTrue(desc.contains("saveButton"), "Description should contain component when module is absent");
+	}
 }

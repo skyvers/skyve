@@ -9,7 +9,10 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.Map;
 import java.util.Set;
@@ -17,10 +20,25 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
+import org.skyve.domain.DynamicBean;
+import org.skyve.domain.DynamicChildBean;
+import org.skyve.domain.DynamicHierarchicalBean;
+import org.skyve.domain.DynamicPersistentBean;
+import org.skyve.domain.DynamicPersistentChildBean;
+import org.skyve.domain.DynamicPersistentHierarchicalBean;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
+import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Dynamic;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.Attribute.Sensitivity;
+import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Condition;
+import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.UniqueConstraint;
+import org.skyve.metadata.module.Module;
+import org.skyve.metadata.repository.ProvidedRepository;
+import org.skyve.metadata.view.View;
 
 class DocumentImplTest {
 
@@ -59,6 +77,59 @@ class DocumentImplTest {
 	void setLastCheckedMillisRoundTrips() {
 		doc.setLastCheckedMillis(99999L);
 		assertEquals(99999L, doc.getLastCheckedMillis());
+	}
+
+	// ----------------------------------------------------------------
+	// dynamic bean class selection
+	// ----------------------------------------------------------------
+
+	@Test
+	void getBeanClassReturnsDynamicBeanForDynamicRootDocument() throws Exception {
+		makeDynamicDocument("Demo");
+
+		assertEquals(DynamicBean.class, doc.getBeanClass(mock(Customer.class)));
+	}
+
+	@Test
+	void getBeanClassReturnsDynamicPersistentBeanForPersistentDynamicRootDocument() throws Exception {
+		makeDynamicDocument("Demo");
+		doc.setPersistent(new Persistent());
+
+		assertEquals(DynamicPersistentBean.class, doc.getBeanClass(mock(Customer.class)));
+	}
+
+	@Test
+	void getBeanClassReturnsDynamicHierarchicalBeanForSelfParentDocument() throws Exception {
+		makeDynamicDocument("Tree");
+		doc.setParentDocumentName("Tree");
+
+		assertEquals(DynamicHierarchicalBean.class, doc.getBeanClass(mock(Customer.class)));
+	}
+
+	@Test
+	void getBeanClassReturnsDynamicPersistentHierarchicalBeanForPersistentSelfParentDocument() throws Exception {
+		makeDynamicDocument("Tree");
+		doc.setParentDocumentName("Tree");
+		doc.setPersistent(new Persistent());
+
+		assertEquals(DynamicPersistentHierarchicalBean.class, doc.getBeanClass(mock(Customer.class)));
+	}
+
+	@Test
+	void getBeanClassReturnsDynamicChildBeanForDifferentParentDocument() throws Exception {
+		makeDynamicDocument("Line");
+		doc.setParentDocumentName("Header");
+
+		assertEquals(DynamicChildBean.class, doc.getBeanClass(mock(Customer.class)));
+	}
+
+	@Test
+	void getBeanClassReturnsDynamicPersistentChildBeanForPersistentDifferentParentDocument() throws Exception {
+		makeDynamicDocument("Line");
+		doc.setParentDocumentName("Header");
+		doc.setPersistent(new Persistent());
+
+		assertEquals(DynamicPersistentChildBean.class, doc.getBeanClass(mock(Customer.class)));
 	}
 
 	// ----------------------------------------------------------------
@@ -260,6 +331,67 @@ class DocumentImplTest {
 		assertThat(doc.getReferenceByName("unknown"), nullValue());
 	}
 
+	@Test
+	void getRelatedDocumentThrowsWhenRelationMissing() {
+		assertThrows(IllegalStateException.class, () -> doc.getRelatedDocument(mock(Customer.class), "missing"));
+	}
+
+	@Test
+	void getRelatedDocumentThrowsWhenRelationHasNoDocumentName() {
+		AssociationImpl association = new AssociationImpl();
+		association.setName("contact");
+		doc.putRelation(association);
+
+		assertThrows(IllegalStateException.class, () -> doc.getRelatedDocument(mock(Customer.class), "contact"));
+	}
+
+	@Test
+	void getRelatedDocumentReturnsDocumentFromOwningModule() {
+		doc.setOwningModuleName("admin");
+		AssociationImpl association = new AssociationImpl();
+		association.setName("contact");
+		association.setDocumentName("Contact");
+		doc.putRelation(association);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document relatedDocument = mock(Document.class);
+		when(customer.getModule("admin")).thenReturn(module);
+		when(module.getDocument(customer, "Contact")).thenReturn(relatedDocument);
+
+		assertThat(doc.getRelatedDocument(customer, "contact"), is(relatedDocument));
+	}
+
+	@Test
+	void repositoryBackedLookupsThrowWhenRepositoryReturnsNull() {
+		doc.setName("Demo");
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+
+		withRepository(repository, () -> {
+			assertThrows(MetaDataException.class, () -> doc.getDynamicImage(null, "missingImage"));
+			assertThrows(MetaDataException.class, () -> doc.getComparisonModel(null, "missingComparison", true));
+			assertThrows(MetaDataException.class, () -> doc.getMapModel(null, "missingMap", true));
+			assertThrows(MetaDataException.class, () -> doc.getChartModel(null, "missingChart", true));
+			assertThrows(MetaDataException.class, () -> doc.getListModel(null, "missingList", true));
+			assertThrows(MetaDataException.class, () -> doc.getServerSideAction(null, "missingAction", true));
+			assertThrows(MetaDataException.class, () -> doc.getBizExportAction(null, "missingExport", true));
+			assertThrows(MetaDataException.class, () -> doc.getBizImportAction(null, "missingImport", true));
+			assertThrows(MetaDataException.class, () -> doc.getDownloadAction(null, "missingDownload", true));
+			assertThrows(MetaDataException.class, () -> doc.getUploadAction(null, "missingUpload", true));
+			assertThrows(MetaDataException.class, () -> doc.getView("desktop", null, "edit"));
+		});
+	}
+
+	@Test
+	void getViewFallsBackToEditViewForCreateView() {
+		doc.setName("Demo");
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		View editView = mock(View.class);
+		when(repository.getView("desktop", null, doc, "create")).thenReturn(null);
+		when(repository.getView("desktop", null, doc, "edit")).thenReturn(editView);
+
+		withRepository(repository, () -> assertThat(doc.getView("desktop", null, "create"), is(editView)));
+	}
+
 	// ----------------------------------------------------------------
 	// conditions
 	// ----------------------------------------------------------------
@@ -350,5 +482,27 @@ class DocumentImplTest {
 		AssociationImpl assoc = new AssociationImpl();
 		assoc.setRequiredBool(Boolean.TRUE);
 		assertTrue(assoc.isRequired());
+	}
+
+	private void makeDynamicDocument(String name) {
+		doc.setOwningModuleName("test");
+		doc.setName(name);
+		doc.setDynamism(new Dynamic());
+	}
+
+	private static void withRepository(ProvidedRepository repository, Runnable assertions) {
+		ProvidedRepository previous = ProvidedRepositoryFactory.isConfigured() ? ProvidedRepositoryFactory.get() : null;
+		try {
+			ProvidedRepositoryFactory.set(repository);
+			assertions.run();
+		}
+		finally {
+			if (previous == null) {
+				ProvidedRepositoryFactory.clear();
+			}
+			else {
+				ProvidedRepositoryFactory.set(previous);
+			}
+		}
 	}
 }

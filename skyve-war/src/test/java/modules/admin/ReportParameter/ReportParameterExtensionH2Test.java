@@ -54,6 +54,22 @@ class ReportParameterExtensionH2Test extends AbstractH2Test {
 	}
 
 	@Test
+	void getFormattedInputValueWithValidDateInput() {
+		bean.setType(Type.date);
+		bean.setReportInputValue("01/02/2026");
+
+		assertNotNull(bean.getFormattedInputValue());
+	}
+
+	@Test
+	void getFormattedInputValueWithInvalidDateInputStillReturnsDisplayValue() {
+		bean.setType(Type.date);
+		bean.setReportInputValue("not-a-date");
+
+		assertNotNull(bean.getFormattedInputValue());
+	}
+
+	@Test
 	void validateDateTypeWithInvalidValue() {
 		bean.setType(Type.date);
 		bean.setReportInputValue("not-a-date");

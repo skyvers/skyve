@@ -61,6 +61,22 @@ class ExecuteSAILTest extends AbstractH2Test {
 	}
 
 	@Test
+	void executePropagatesValidationExceptionFromActionEntryPoint() {
+		controlPanel.setSailUser(null);
+		controlPanel.setSailBaseUrl("http://localhost:8080");
+		controlPanel.setSailExecutor(SailExecutor.primeFacesInlineWebDriver);
+		controlPanel.setSailComponentBuilder("org.skyve.impl.web.faces.pipeline.component.SkyveComponentBuilderChain");
+		controlPanel.setSailLayoutBuilder("org.skyve.impl.web.faces.pipeline.layout.ResponsiveLayoutBuilder");
+		controlPanel.setSail("<automation/>");
+
+		ValidationException e = assertThrows(ValidationException.class,
+				() -> new ExecuteSAIL().execute(controlPanel, null));
+
+		assertEquals(1, e.getMessages().size());
+		assertTrue(hasBinding(e.getMessages().get(0).getBindings(), ControlPanel.sailUserPropertyName));
+	}
+
+	@Test
 	void testExecuteSAILWithNullBaseUrlThrowsValidationException() {
 		// setup the test data - all fields except baseUrl
 		UserProxyExtension user = db.build(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME);

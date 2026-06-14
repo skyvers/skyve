@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -157,6 +158,39 @@ class SkyveLoggerFactoryTest {
 		assertEquals(1, locationAwareRecorder.lastArgs.length);
 		assertEquals("user_name", locationAwareRecorder.lastArgs[0]);
 		assertSame(cause, locationAwareRecorder.lastThrowable);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void mapsAllLevelsForLocationAwareLogger() {
+		LocationAwareRecordingLogger locationAwareRecorder = new LocationAwareRecordingLogger();
+		Logger locationAwareLogger = SkyveLoggerFactory.wrap(locationAwareRecorder);
+
+		locationAwareLogger.trace("trace");
+		assertEquals(LocationAwareLogger.TRACE_INT, locationAwareRecorder.lastLevelInt);
+
+		locationAwareLogger.debug("debug");
+		assertEquals(LocationAwareLogger.DEBUG_INT, locationAwareRecorder.lastLevelInt);
+
+		locationAwareLogger.info("info");
+		assertEquals(LocationAwareLogger.INFO_INT, locationAwareRecorder.lastLevelInt);
+
+		locationAwareLogger.error("error");
+		assertEquals(LocationAwareLogger.ERROR_INT, locationAwareRecorder.lastLevelInt);
+	}
+
+	@Test
+	void delegatesEnabledChecks() {
+		assertTrue(logger.isTraceEnabled());
+		assertTrue(logger.isTraceEnabled(null));
+		assertTrue(logger.isDebugEnabled());
+		assertTrue(logger.isDebugEnabled(null));
+		assertTrue(logger.isInfoEnabled());
+		assertTrue(logger.isInfoEnabled(null));
+		assertTrue(logger.isWarnEnabled());
+		assertTrue(logger.isWarnEnabled(null));
+		assertTrue(logger.isErrorEnabled());
+		assertTrue(logger.isErrorEnabled(null));
 	}
 
 	// ---- all five levels sanitise ----

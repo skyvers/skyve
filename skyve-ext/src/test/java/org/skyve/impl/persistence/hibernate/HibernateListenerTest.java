@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.messages.SkyveException;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.user.User;
@@ -125,6 +126,26 @@ class HibernateListenerTest {
 	}
 
 	@Test
+	void onPreDeleteWrapsCheckedPersistenceFailures() throws Exception {
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		bindPersistenceToThread(persistence);
+		try {
+			PersistentBean bean = mock(PersistentBean.class);
+			Exception failure = new Exception("pre-remove failed");
+			doThrow(failure).when(persistence).preRemove(bean);
+			PreDeleteEvent event = new PreDeleteEvent(bean, "id-1", new Object[0], mock(EntityPersister.class), null);
+
+			DomainException thrown = assertThrows(DomainException.class,
+					() -> new HibernateListener().onPreDelete(event));
+
+			assertSame(failure, thrown.getCause());
+		}
+		finally {
+			unbindPersistenceFromThread();
+		}
+	}
+
+	@Test
 	void onPostDeleteDelegatesToPersistence() throws Exception {
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		bindPersistenceToThread(persistence);
@@ -135,6 +156,24 @@ class HibernateListenerTest {
 			new HibernateListener().onPostDelete(event);
 
 			verify(persistence).postRemove(bean);
+		}
+		finally {
+			unbindPersistenceFromThread();
+		}
+	}
+
+	@Test
+	void onPostDeletePropagatesSkyveExceptions() throws Exception {
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		bindPersistenceToThread(persistence);
+		try {
+			PersistentBean bean = mock(PersistentBean.class);
+			SkyveException failure = new DomainException("post-remove failed");
+			doThrow(failure).when(persistence).postRemove(bean);
+			PostDeleteEvent event = new PostDeleteEvent(bean, "id-1", new Object[0], mock(EntityPersister.class), null);
+
+			assertSame(failure, assertThrows(SkyveException.class,
+					() -> new HibernateListener().onPostDelete(event)));
 		}
 		finally {
 			unbindPersistenceFromThread();

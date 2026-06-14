@@ -6,12 +6,17 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Locale;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
+import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
@@ -153,5 +158,34 @@ class SuperUserTest {
 		// When super.getScope() returns 'none', SuperUser upgrades it to 'customer'
 		DocumentPermissionScope scope = superUser.getScope("anyModule", "anyDocument");
 		assertThat(scope, is(DocumentPermissionScope.customer));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getAccessibleModuleNamesReturnsSortedCustomerModuleNames() {
+		CustomerImpl customer = Mockito.mock(CustomerImpl.class);
+		Map<String, FormLabelLayout> modules = new TreeMap<>();
+		modules.put("sales", FormLabelLayout.top);
+		modules.put("admin", FormLabelLayout.side);
+		Mockito.when(customer.getModuleEntries()).thenReturn(modules);
+
+		SuperUser superUser = new TestSuperUser(customer);
+
+		assertThat(superUser.getAccessibleModuleNames(), is(new java.util.TreeSet<>(modules.keySet())));
+	}
+
+	private static final class TestSuperUser extends SuperUser {
+		private static final long serialVersionUID = 1L;
+
+		private final Customer customer;
+
+		private TestSuperUser(Customer customer) {
+			this.customer = customer;
+		}
+
+		@Override
+		public Customer getCustomer() {
+			return customer;
+		}
 	}
 }

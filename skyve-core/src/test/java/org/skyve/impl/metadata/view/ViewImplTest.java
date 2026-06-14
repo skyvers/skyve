@@ -185,4 +185,10 @@ class ViewImplTest {
 		assertNotNull(v.getProperties());
 		assertTrue(v.getProperties().isEmpty());
 	}
+
+	@Test
+	void getAccessesReturnsNullWhenAccessesHaveNotBeenConverted() {
+		ViewImpl v = new ViewImpl();
+		assertNull(v.getAccesses(null, null, "desktop"));
+	}
 }

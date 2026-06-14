@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -26,6 +27,12 @@ class RequestKeyTest {
 	@SuppressWarnings("static-method")
 	void noneTypeIsSpace() {
 		assertEquals(' ', RequestKey.NONE.getType());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void fromStringWithEmptyStringReturnsNone() {
+		assertSame(RequestKey.NONE, RequestKey.fromString(""));
 	}
 
 	// ---- documentListModel factory ----

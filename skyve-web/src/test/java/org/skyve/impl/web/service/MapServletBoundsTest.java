@@ -45,6 +45,34 @@ class MapServletBoundsTest {
 	}
 
 	@Test
+	void mapBoundsUsesDefaultNorthEastWhenOnlySouthWestProvided() throws Exception {
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		when(request.getParameter("_sw")).thenReturn("POINT(100 -45)");
+
+		Geometry result = invokeMapBounds(request);
+
+		assertInstanceOf(Polygon.class, result);
+		assertEquals(100.0, result.getEnvelopeInternal().getMinX());
+		assertEquals(180.0, result.getEnvelopeInternal().getMaxX());
+		assertEquals(-45.0, result.getEnvelopeInternal().getMinY());
+		assertEquals(90.0, result.getEnvelopeInternal().getMaxY());
+	}
+
+	@Test
+	void mapBoundsUsesDefaultSouthWestWhenOnlyNorthEastProvided() throws Exception {
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		when(request.getParameter("_ne")).thenReturn("POINT(20 35)");
+
+		Geometry result = invokeMapBounds(request);
+
+		assertInstanceOf(Polygon.class, result);
+		assertEquals(-180.0, result.getEnvelopeInternal().getMinX());
+		assertEquals(20.0, result.getEnvelopeInternal().getMaxX());
+		assertEquals(-90.0, result.getEnvelopeInternal().getMinY());
+		assertEquals(35.0, result.getEnvelopeInternal().getMaxY());
+	}
+
+	@Test
 	void mapBoundsReturnsMultiPolygonWhenViewportCrossesAntiMeridian() throws Exception {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		when(request.getParameter("_ne")).thenReturn("POINT(-170 20)");

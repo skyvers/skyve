@@ -65,15 +65,36 @@ class MetaDataServletH2Test extends AbstractSkyveTest {
 
 	@Test
 	void doGetRendersAuthenticatedViewMetadata() throws Exception {
-		MetaDataServlet servlet = new MetaDataServlet();
 		java.io.StringWriter body = new java.io.StringWriter();
-		HttpServletResponse response = mock(HttpServletResponse.class);
-		when(response.getWriter()).thenReturn(new PrintWriter(body, true));
+		HttpServletResponse response = responseWritingTo(body);
 
-		servlet.doGet(authenticatedViewRequest(u, UXUI, "admin", "JobSchedule"), response);
+		invokeServletMethod("doGet", authenticatedViewRequest(u, UXUI, "admin", "JobSchedule"), response);
 
 		assertTrue(body.toString().contains("\"type\":\"view\""), body.toString());
 		assertTrue(body.toString().contains("\"name\":\"edit\""), body.toString());
+	}
+
+	@Test
+	void doPostDelegatesToAuthenticatedViewMetadata() throws Exception {
+		java.io.StringWriter body = new java.io.StringWriter();
+		HttpServletResponse response = responseWritingTo(body);
+
+		invokeServletMethod("doPost", authenticatedViewRequest(u, UXUI, "admin", "JobSchedule"), response);
+
+		assertTrue(body.toString().contains("\"type\":\"view\""), body.toString());
+		assertTrue(body.toString().contains("\"name\":\"edit\""), body.toString());
+	}
+
+	@Test
+	void doGetReturnsEmptyViewResponseWhenDocumentCannotBeResolved() throws Exception {
+		java.io.StringWriter body = new java.io.StringWriter();
+		HttpServletResponse response = responseWritingTo(body);
+
+		invokeServletMethod("doGet", authenticatedViewRequest(u, UXUI, "admin", "MissingDocument"), response);
+
+		assertTrue(body.toString().contains("\"type\":\"view\""), body.toString());
+		assertTrue(body.toString().contains("\"contained\":[]"), body.toString());
+		assertTrue(body.toString().contains("\"title\":\"MissingDocument\""), body.toString());
 	}
 
 	private void assertViewRenders(String moduleName, String documentName) throws Exception {
@@ -85,7 +106,7 @@ class MetaDataServletH2Test extends AbstractSkyveTest {
 
 	private static String invokeView(User user, String uxui, String moduleName, String documentName, boolean topLabels)
 	throws Exception {
-		Method view = MetaDataServlet.class.getDeclaredMethod("view",
+		Method view = metaDataServletClass().getDeclaredMethod("view",
 				User.class,
 				String.class,
 				String.class,
@@ -102,6 +123,34 @@ class MetaDataServletH2Test extends AbstractSkyveTest {
 			}
 			throw e;
 		}
+	}
+
+	private static void invokeServletMethod(String methodName, HttpServletRequest request, HttpServletResponse response) throws Exception {
+		Class<?> servletClass = metaDataServletClass();
+		Object servlet = servletClass.getDeclaredConstructor().newInstance();
+		Method method = servletClass.getDeclaredMethod(methodName, HttpServletRequest.class, HttpServletResponse.class);
+		method.setAccessible(true);
+		try {
+			method.invoke(servlet, request, response);
+		}
+		catch (InvocationTargetException e) {
+			Throwable cause = e.getCause();
+			if (cause instanceof Exception exception) {
+				throw exception;
+			}
+			throw e;
+		}
+	}
+
+	private static Class<?> metaDataServletClass() throws ClassNotFoundException {
+		return Class.forName("org.skyve.impl.web.service.MetaDataServlet");
+	}
+
+	@SuppressWarnings("resource")
+	private static HttpServletResponse responseWritingTo(java.io.StringWriter body) throws java.io.IOException {
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		when(response.getWriter()).thenReturn(new PrintWriter(body, true));
+		return response;
 	}
 
 	private static HttpServletRequest authenticatedViewRequest(User user, String uxui, String moduleName, String documentName) {

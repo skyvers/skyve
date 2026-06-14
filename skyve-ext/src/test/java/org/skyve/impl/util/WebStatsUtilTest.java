@@ -1,5 +1,6 @@
 package org.skyve.impl.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -12,12 +13,16 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.skyve.domain.Bean;
+import org.skyve.domain.app.AppConstants;
+import org.skyve.domain.types.DateTime;
+import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Persistent;
@@ -98,6 +103,31 @@ class WebStatsUtilTest {
 		verify(persistence).commit(true);
 	}
 
+	@Test
+	void recordLoginCreatesLoginRecordForUser() throws Exception {
+		AbstractPersistence persistence = bindPersistence();
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document loginRecordDocument = mock(Document.class);
+		TestLoginRecord loginRecord = loginRecordBean();
+		when(user.getName()).thenReturn("mike");
+		when(user.getCustomer()).thenReturn(customer);
+		when(persistence.getUser()).thenReturn(user);
+		when(customer.getModule(AppConstants.ADMIN_MODULE_NAME)).thenReturn(module);
+		when(module.getDocument(customer, AppConstants.USER_LOGIN_RECORD_DOCUMENT_NAME)).thenReturn(loginRecordDocument);
+		when(loginRecordDocument.newInstance(user)).thenReturn(loginRecord);
+
+		WebStatsUtil.recordLogin(user, "203.0.113.42");
+
+		assertEquals("mike", loginRecord.getDynamic(AppConstants.USER_NAME_ATTRIBUTE_NAME));
+		assertTrue(loginRecord.getDynamic(AppConstants.LOGIN_DATE_TIME_ATTRIBUTE_NAME) instanceof DateTime);
+		assertEquals(Boolean.FALSE, loginRecord.getDynamic(AppConstants.FAILED_ATTRIBUTE_NAME));
+		assertEquals("203.0.113.42", loginRecord.getDynamic(AppConstants.IP_ADDRESS_ATTRIBUTE_NAME));
+		verify(persistence).setUser(user);
+		verify(persistence).save(loginRecordDocument, loginRecord);
+	}
+
 	private static AbstractPersistence bindPersistence() throws Exception {
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		bindPersistenceToThread(persistence);
@@ -127,6 +157,36 @@ class WebStatsUtilTest {
 		when(sql.putParameter(anyString(), nullable(String.class), eq(false))).thenReturn(sql);
 		when(sql.scalarResults(String.class)).thenReturn(scalarResults);
 		return sql;
+	}
+
+	private static TestLoginRecord loginRecordBean() {
+		TestLoginRecord bean = new TestLoginRecord();
+		HashMap<String, Object> properties = new HashMap<>();
+		properties.put(AppConstants.USER_NAME_ATTRIBUTE_NAME, null);
+		properties.put(AppConstants.LOGIN_DATE_TIME_ATTRIBUTE_NAME, null);
+		properties.put(AppConstants.FAILED_ATTRIBUTE_NAME, null);
+		properties.put(AppConstants.IP_ADDRESS_ATTRIBUTE_NAME, null);
+		bean.putAllDynamic(properties);
+		return bean;
+	}
+
+	private static class TestLoginRecord extends AbstractPersistentBean {
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public String getBizModule() {
+			return AppConstants.ADMIN_MODULE_NAME;
+		}
+
+		@Override
+		public String getBizDocument() {
+			return AppConstants.USER_LOGIN_RECORD_DOCUMENT_NAME;
+		}
+
+		@Override
+		public String getBizKey() {
+			return "login";
+		}
 	}
 
 	@SuppressWarnings("unchecked")

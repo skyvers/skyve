@@ -63,6 +63,18 @@ class AbstractDocumentNumberGeneratorTest {
 		assertThat(result, is("10002"));
 	}
 
+	@Test
+	void incrementAlphaNumericPrefixWithZeroStartsAtPrefixedOne() {
+		String result = AbstractDocumentNumberGenerator.incrementAlpha("10", "0", 5);
+		assertThat(result, is("10001"));
+	}
+
+	@Test
+	void incrementAlphaNonNumericLastNumberAppendsOne() {
+		String result = AbstractDocumentNumberGenerator.incrementAlpha(null, "ABC", 4);
+		assertThat(result, is("ABC1"));
+	}
+
 	// ---- NumberGeneratorStaticSingleton tests ----
 
 	@Test

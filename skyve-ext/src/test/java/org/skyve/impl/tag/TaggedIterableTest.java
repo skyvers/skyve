@@ -60,6 +60,24 @@ class TaggedIterableTest {
 		verify(persistence).retrieve(document, "BIZ-2");
 	}
 
+	@Test
+	void iteratorReturnsFalseWhenAllRowsCannotBeResolved() throws Exception {
+		bindPersistence();
+
+		Iterator<Bean> iterator = taggedIterable(taggedRow(null, "Opportunity", "missing")).iterator();
+
+		assertFalse(iterator.hasNext());
+	}
+
+	@Test
+	void closeDelegatesToWrappedIterable() throws Exception {
+		AutoClosingIterable<Bean> wrapped = mock(AutoClosingIterable.class);
+
+		new TaggedIterable(wrapped).close();
+
+		verify(wrapped).close();
+	}
+
 	private static AutoClosingIterable<Bean> taggedIterable(Bean... rows) {
 		return new TaggedIterable(new AutoClosingIterable<>() {
 			@Override

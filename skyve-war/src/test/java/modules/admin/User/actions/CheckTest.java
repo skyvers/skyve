@@ -4,18 +4,23 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.CORE;
+import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.Util;
 import org.skyve.util.test.SkyveFixture.FixtureType;
+import org.skyve.web.WebContext;
 
+import modules.admin.domain.Contact.ContactType;
 import modules.admin.User.UserExtension;
 import modules.admin.domain.User;
 import util.AbstractH2Test;
@@ -126,5 +131,21 @@ class CheckTest extends AbstractH2Test {
 
 		// verify the result
 		assertEquals(2, result.getBean().getCandidateContacts().size());
+	}
+
+	@Test
+	void testExecuteEmailOnlyNoMatchesSeedsContactAndReportsInfo() throws Exception {
+		UserExtension searchUser = User.newInstance();
+		String email = "nomatch-" + searchToken + "@check.com";
+		searchUser.setSearchEmail(email);
+		WebContext webContext = mock(WebContext.class);
+
+		ServerSideActionResult<UserExtension> result = action.execute(searchUser, webContext);
+
+		assertEquals(0, result.getBean().getCandidateContacts().size());
+		assertEquals(null, result.getBean().getContact().getName());
+		assertEquals(email, result.getBean().getContact().getEmail1());
+		assertEquals(ContactType.person, result.getBean().getContact().getContactType());
+		verify(webContext).growl(MessageSeverity.info, "admin.user.actions.check.noResults");
 	}
 }

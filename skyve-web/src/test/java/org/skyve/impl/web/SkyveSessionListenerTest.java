@@ -2,6 +2,7 @@ package org.skyve.impl.web;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.skyve.cache.SessionCacheConfig;
 import org.skyve.impl.cache.DefaultCaching;
 import org.skyve.impl.cache.StateUtil;
+import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.repository.ProvidedRepository;
@@ -114,5 +116,25 @@ class SkyveSessionListenerTest {
 		listener.sessionDestroyed(event);
 
 		assertEquals(0, StateUtil.getSessionCount());
+	}
+
+	@Test
+	void sessionDestroyedWithSkyveUserNotifiesCustomerLogout() {
+		StateUtil.incrementSessionCount();
+		SkyveSessionListener listener = new SkyveSessionListener();
+		User user = mock(User.class);
+		CustomerImpl customer = mock(CustomerImpl.class);
+		HttpSession session = mock(HttpSession.class);
+		when(user.getId()).thenReturn(USER_ID);
+		when(user.getCustomerName()).thenReturn("demo");
+		when(user.getCustomer()).thenReturn(customer);
+		when(session.getAttribute(org.skyve.web.WebContext.USER_SESSION_ATTRIBUTE_NAME)).thenReturn(user);
+		when(session.getId()).thenReturn("session-1");
+		HttpSessionEvent event = new HttpSessionEvent(session);
+
+		listener.sessionDestroyed(event);
+
+		assertEquals(0, StateUtil.getSessionCount());
+		verify(customer).notifyLogout(user, session);
 	}
 }

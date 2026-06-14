@@ -72,4 +72,27 @@ class ReportParameterBizletTest {
 		bizlet.validate(bean, e);
 		assertFalse(e.getMessages().isEmpty());
 	}
+
+	@Test
+	void validateRequiredLongIntegerTypeWithNoTestValueAddsError() throws Exception {
+		ReportParameterExtension bean = new ReportParameterExtension();
+		bean.setName("longParam");
+		bean.setRequired(Boolean.TRUE);
+		bean.setType(Type.longInteger);
+		ValidationException e = new ValidationException();
+		bizlet.validate(bean, e);
+		assertFalse(e.getMessages().isEmpty());
+	}
+
+	@Test
+	void validateRequiredWithTestValueAddsNoRequiredError() throws Exception {
+		ReportParameterExtension bean = new ReportParameterExtension();
+		bean.setName("textParam");
+		bean.setRequired(Boolean.TRUE);
+		bean.setType(Type.text);
+		bean.setTestValueString("sample");
+		ValidationException e = new ValidationException();
+		bizlet.validate(bean, e);
+		assertTrue(e.getMessages().isEmpty());
+	}
 }

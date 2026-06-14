@@ -1,8 +1,13 @@
 package org.skyve.impl.web;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -11,6 +16,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.Principal;
+import java.util.Map;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -26,10 +32,12 @@ import jakarta.servlet.WriteListener;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import net.sf.jasperreports.jakarta.servlets.BaseHttpServlet;
 import net.sf.jasperreports.engine.JasperPrint;
 import modules.test.AbstractSkyveTest;
 import modules.test.domain.AllAttributesPersistent;
 
+@SuppressWarnings({"static-method", "boxing", "resource"})
 class ReportServletH2Test extends AbstractSkyveTest {
 	@AfterEach
 	void restorePersistenceUser() {
@@ -119,6 +127,19 @@ class ReportServletH2Test extends AbstractSkyveTest {
 	}
 
 	@Test
+	void doPostDelegatesToAuthenticatedExportRequest() throws Exception {
+		CapturedOutput output = new CapturedOutput();
+		HttpServletRequest request = authenticatedExportRequest();
+		HttpServletResponse response = exportResponse(output);
+
+		new ReportServlet().doPost(request, response);
+
+		String body = output.text();
+		assertTrue(body.contains("Missing Report Parameters"), body);
+		assertTrue(body.contains("There are no report parameters"), body);
+	}
+
+	@Test
 	void pumpOutReportFormatStreamsAllSupportedFormats() throws Exception {
 		byte[] bytes = "abc".getBytes(java.nio.charset.StandardCharsets.UTF_8);
 		for (ReportFormat format : ReportFormat.values()) {
@@ -131,6 +152,80 @@ class ReportServletH2Test extends AbstractSkyveTest {
 			assertArrayEquals(bytes, output.bytes(), format.name());
 			verify(response).setContentLength(bytes.length);
 		}
+	}
+
+	@Test
+	void pumpOutReportFormatStoresHtmlPrintInSessionAndSetsInlineDisposition() throws Exception {
+		byte[] bytes = "abc".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+		CapturedOutput output = new CapturedOutput();
+		HttpSession session = mock(HttpSession.class);
+		HttpServletResponse response = exportResponse(output);
+		JasperPrint jasperPrint = new JasperPrint();
+
+		invokePumpOutReportFormat(bytes, jasperPrint, ReportFormat.html, session, response);
+
+		verify(response).setHeader("Content-Disposition", "inline; filename=\"all-attributes.html\"");
+		verify(session).setAttribute(BaseHttpServlet.DEFAULT_JASPER_PRINT_SESSION_ATTRIBUTE, jasperPrint);
+		assertArrayEquals(bytes, output.bytes());
+	}
+
+	@Test
+	void redirectToErrorPageSendsEncodedErrorUrl() throws Exception {
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		when(response.encodeRedirectURL(anyString())).thenAnswer(invocation -> invocation.getArgument(0));
+
+		invokeRedirectToErrorPage(response, "REF-1");
+
+		verify(response).sendRedirect(anyString());
+	}
+
+	@Test
+	void redirectToErrorPageWritesFallbackErrorWhenRedirectFails() throws Exception {
+		CapturedOutput output = new CapturedOutput();
+		HttpServletResponse response = exportResponse(output);
+		when(response.encodeRedirectURL(anyString())).thenAnswer(invocation -> invocation.getArgument(0));
+		when(response.isCommitted()).thenReturn(false);
+		org.mockito.Mockito.doThrow(new IOException("redirect failed")).when(response).sendRedirect(anyString());
+
+		invokeRedirectToErrorPage(response, "REF-2");
+
+		assertTrue(output.text().contains("REF-2"), output.text());
+		verify(response).reset();
+		verify(response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+	}
+
+	@Test
+	void writeReportErrorDoesNothingWhenResponseAlreadyCommitted() throws Exception {
+		CapturedOutput output = new CapturedOutput();
+		HttpServletResponse response = exportResponse(output);
+		when(response.isCommitted()).thenReturn(true);
+
+		invokeWriteReportError(response, output.stream(), "REF-3");
+
+		assertEquals(0, output.bytes().length);
+		verify(response, never()).reset();
+	}
+
+	@Test
+	void getParametersReturnsOnlySanitisedReportParameters() throws Exception {
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		when(request.getParameterMap()).thenReturn(Map.of(
+				AbstractWebContext.MODULE_NAME, new String[] {"test"},
+				AbstractWebContext.DOCUMENT_NAME, new String[] {"AllAttributesPersistent"},
+				"custom", new String[] {"<b>value</b>"},
+				"blank", new String[] {""}));
+		when(request.getParameter(AbstractWebContext.MODULE_NAME)).thenReturn("test");
+		when(request.getParameter(AbstractWebContext.DOCUMENT_NAME)).thenReturn("AllAttributesPersistent");
+		when(request.getParameter("custom")).thenReturn("<b>value</b>");
+		when(request.getParameter("blank")).thenReturn("");
+
+		Map<String, Object> parameters = invokeGetParameters(request);
+
+		assertFalse(parameters.containsKey(AbstractWebContext.MODULE_NAME));
+		assertFalse(parameters.containsKey(AbstractWebContext.DOCUMENT_NAME));
+		assertEquals("value", parameters.get("custom"));
+		assertTrue(parameters.containsKey("blank"));
+		assertNull(parameters.get("blank"));
 	}
 
 	private AllAttributesPersistent saveReportBean(String prefix) throws Exception {
@@ -207,6 +302,55 @@ class ReportServletH2Test extends AbstractSkyveTest {
 		pumpOutReportFormat.setAccessible(true);
 		try {
 			pumpOutReportFormat.invoke(null, bytes, jasperPrint, format, "all-attributes", session, response);
+		}
+		catch (InvocationTargetException e) {
+			Throwable cause = e.getCause();
+			if (cause instanceof Exception exception) {
+				throw exception;
+			}
+			throw e;
+		}
+	}
+
+	private static void invokeRedirectToErrorPage(HttpServletResponse response, String reference) throws Exception {
+		Method redirectToErrorPage = ReportServlet.class.getDeclaredMethod("redirectToErrorPage", HttpServletResponse.class, String.class);
+		redirectToErrorPage.setAccessible(true);
+		try {
+			redirectToErrorPage.invoke(null, response, reference);
+		}
+		catch (InvocationTargetException e) {
+			Throwable cause = e.getCause();
+			if (cause instanceof Exception exception) {
+				throw exception;
+			}
+			throw e;
+		}
+	}
+
+	private static void invokeWriteReportError(HttpServletResponse response, java.io.OutputStream out, String reference) throws Exception {
+		Method writeReportError = ReportServlet.class.getDeclaredMethod("writeReportError",
+				HttpServletResponse.class,
+				java.io.OutputStream.class,
+				String.class);
+		writeReportError.setAccessible(true);
+		try {
+			writeReportError.invoke(null, response, out, reference);
+		}
+		catch (InvocationTargetException e) {
+			Throwable cause = e.getCause();
+			if (cause instanceof Exception exception) {
+				throw exception;
+			}
+			throw e;
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private static Map<String, Object> invokeGetParameters(HttpServletRequest request) throws Exception {
+		Method getParameters = ReportServlet.class.getDeclaredMethod("getParameters", HttpServletRequest.class);
+		getParameters.setAccessible(true);
+		try {
+			return (Map<String, Object>) getParameters.invoke(null, request);
 		}
 		catch (InvocationTargetException e) {
 			Throwable cause = e.getCause();

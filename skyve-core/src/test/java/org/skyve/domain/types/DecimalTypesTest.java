@@ -359,10 +359,11 @@ class DecimalTypesTest {
 	}
 
 	@Test
-	@SuppressWarnings("java:S5845") // Testing equals with different types
+	@SuppressWarnings({"java:S5845", "java:S5785", "unlikely-arg-type"}) // Testing equals with different types
 	void decimal2EqualsBigDecimalReturnsTrue() {
 		Decimal2 d = new Decimal2("2.50");
-		assertEquals(new BigDecimal("2.50"), d);
+		// Gotta test Decimal2.equals(Object) with a BigDecimal to cover the code path where it checks for BigDecimal equality
+		assertTrue(d.equals(new BigDecimal("2.50")));
 	}
 
 	@Test
