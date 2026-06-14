@@ -1444,7 +1444,6 @@ class TabularComponentBuilderTest {
 		HtmlInputHidden hidden = mock(HtmlInputHidden.class);
 		MenuButton actionButton = mock(MenuButton.class);
 		UIMenuItem uploadItem = mock(UIMenuItem.class);
-		UIMenuItem cameraItem = mock(UIMenuItem.class);
 		Dialog dialog = mock(Dialog.class);
 		HtmlOutputText iframe = mock(HtmlOutputText.class);
 		UIMenuItem clearItem = mock(UIMenuItem.class);
@@ -1455,7 +1454,6 @@ class TabularComponentBuilderTest {
 		List<UIComponent> dialogChildren = new ArrayList<>();
 		ValueExpression valueExpression = mock(ValueExpression.class);
 		ValueExpression uploadOnclickExpression = mock(ValueExpression.class);
-		ValueExpression cameraOnclickExpression = mock(ValueExpression.class);
 		FacesView managedBean = mock(FacesView.class);
 		when(managedBean.nextId()).thenReturn("contentImageGrid",
 												"contentImageInner",
@@ -1464,7 +1462,6 @@ class TabularComponentBuilderTest {
 												"hiddenId",
 												"actionButtonId",
 												"uploadItemId",
-												"cameraItemId",
 												"dialogId",
 												"iframeId",
 												"clearItemId");
@@ -1482,12 +1479,11 @@ class TabularComponentBuilderTest {
 		when(mockApplication.createComponent(GraphicImage.COMPONENT_TYPE)).thenReturn(image);
 		when(mockApplication.createComponent(HtmlInputHidden.COMPONENT_TYPE)).thenReturn(hidden);
 		when(mockApplication.createComponent(MenuButton.COMPONENT_TYPE)).thenReturn(actionButton);
-		when(mockApplication.createComponent(UIMenuItem.COMPONENT_TYPE)).thenReturn(uploadItem, cameraItem, clearItem);
+		when(mockApplication.createComponent(UIMenuItem.COMPONENT_TYPE)).thenReturn(uploadItem, clearItem);
 		when(mockApplication.createComponent(Dialog.COMPONENT_TYPE)).thenReturn(dialog);
 		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(iframe);
 		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(Object.class))).thenReturn(valueExpression);
-		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(String.class))).thenReturn(uploadOnclickExpression,
-																														cameraOnclickExpression);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(String.class))).thenReturn(uploadOnclickExpression);
 
 		ContentImage contentImage = new ContentImage();
 		contentImage.setBinding("doc.image");
@@ -1503,31 +1499,26 @@ class TabularComponentBuilderTest {
 		assertSame(hidden, actionChildren.get(0));
 		assertSame(actionButton, actionChildren.get(1));
 		assertSame(dialog, actionChildren.get(2));
-		assertEquals(3, menuChildren.size());
+		assertEquals(2, menuChildren.size());
 		assertSame(uploadItem, menuChildren.get(0));
-		assertSame(cameraItem, menuChildren.get(1));
-		assertSame(clearItem, menuChildren.get(2));
+		assertSame(clearItem, menuChildren.get(1));
 		assertSame(iframe, dialogChildren.get(0));
 		verify(panelGrid).setColumns(2);
 		verify(actionButton).setTitle("Image Actions");
 		verify(actionButton).setIcon("fa-solid fa-ellipsis-vertical");
 		verify(actionButton).setButtonStyleClass("skyveContentActionButton");
 		verify(uploadItem).setValue("Upload Image");
-		verify(cameraItem).setIcon("fa-solid fa-camera");
-		verify(cameraItem).setValue("Take Photo");
 		verify(clearItem).setValue("Clear Content");
 		verify(uploadItem).setUrl("javascript:void(0)");
-		verify(cameraItem).setUrl("javascript:void(0)");
 		verify(clearItem).setUrl("javascript:void(0)");
 		verify(uploadItem).setValueExpression(eq("onclick"), any(ValueExpression.class));
-		verify(cameraItem).setValueExpression(eq("onclick"), any(ValueExpression.class));
 		verify(clearItem).setOnclick("SKYVE.PF.clearContentImage('doc_image','contentImageGrid');return false");
 		ArgumentCaptor<String> onclickExpressions = ArgumentCaptor.forClass(String.class);
 		verify(mockExpressionFactory, atLeastOnce()).createValueExpression(any(ELContext.class),
 																			onclickExpressions.capture(),
 																			eq(String.class));
-		assertTrue(onclickExpressions.getAllValues().stream().anyMatch(value -> value.contains("getContentUploadUrl('doc_image',true,false)")));
-		assertTrue(onclickExpressions.getAllValues().stream().anyMatch(value -> value.contains("getContentUploadUrl('doc_image',true,true)")));
+		assertTrue(onclickExpressions.getAllValues().stream().anyMatch(value -> value.contains("getContentUploadUrl('doc_image',true)")));
+		assertTrue(onclickExpressions.getAllValues().stream().anyMatch(value -> value.endsWith("return false'))}")));
 	}
 
 	@SuppressWarnings("static-method")
@@ -1541,7 +1532,6 @@ class TabularComponentBuilderTest {
 		HtmlInputHidden hidden = mock(HtmlInputHidden.class);
 		MenuButton actionButton = mock(MenuButton.class);
 		UIMenuItem uploadItem = mock(UIMenuItem.class);
-		UIMenuItem cameraItem = mock(UIMenuItem.class);
 		UIMenuItem clearItem = mock(UIMenuItem.class);
 		UIMenuItem markupItem = mock(UIMenuItem.class);
 		Dialog uploadDialog = mock(Dialog.class);
@@ -1562,7 +1552,6 @@ class TabularComponentBuilderTest {
 												"hiddenId",
 												"actionButtonId",
 												"uploadItemId",
-												"cameraItemId",
 												"uploadDialogId",
 												"uploadIframeId",
 												"clearItemId",
@@ -1585,7 +1574,7 @@ class TabularComponentBuilderTest {
 		when(mockApplication.createComponent(GraphicImage.COMPONENT_TYPE)).thenReturn(image);
 		when(mockApplication.createComponent(HtmlInputHidden.COMPONENT_TYPE)).thenReturn(hidden);
 		when(mockApplication.createComponent(MenuButton.COMPONENT_TYPE)).thenReturn(actionButton);
-		when(mockApplication.createComponent(UIMenuItem.COMPONENT_TYPE)).thenReturn(uploadItem, cameraItem, clearItem, markupItem);
+		when(mockApplication.createComponent(UIMenuItem.COMPONENT_TYPE)).thenReturn(uploadItem, clearItem, markupItem);
 		when(mockApplication.createComponent(Dialog.COMPONENT_TYPE)).thenReturn(uploadDialog, markupDialog);
 		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(uploadIframe, markupIframe);
 
@@ -1596,11 +1585,10 @@ class TabularComponentBuilderTest {
 		UIComponent result = builder.contentImage(null, "row", contentImage, null, "Image", null);
 
 		assertSame(panelGrid, result);
-		assertEquals(4, menuChildren.size());
+		assertEquals(3, menuChildren.size());
 		assertSame(uploadItem, menuChildren.get(0));
-		assertSame(cameraItem, menuChildren.get(1));
-		assertSame(clearItem, menuChildren.get(2));
-		assertSame(markupItem, menuChildren.get(3));
+		assertSame(clearItem, menuChildren.get(1));
+		assertSame(markupItem, menuChildren.get(2));
 		assertSame(uploadDialog, actionChildren.get(2));
 		assertSame(markupDialog, actionChildren.get(3));
 		verify(markupItem).setValue("Mark Up Image");

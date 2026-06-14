@@ -61,7 +61,7 @@ class UploadViewsStateTest {
 	}
 
 	@Test
-	void imageUploadPostConstructParsesCameraMode() throws Exception {
+	void imageUploadPostConstructSetsSanitisedStateWithoutSession() throws Exception {
 		FacesContext context = Mockito.mock(FacesContext.class);
 		ExternalContext externalContext = Mockito.mock(ExternalContext.class);
 		when(context.getExternalContext()).thenReturn(externalContext);
@@ -72,11 +72,16 @@ class UploadViewsStateTest {
 		setField(AbstractUploadView.class, view, "context", "ctx");
 		setField(AbstractUploadView.class, view, "binding", "beanBinding");
 		setField(ContentUploadView.class, view, "contentBinding", "contentId");
-		setField(ImageUploadView.class, view, "camera", "true");
 
 		view.postConstruct();
 
-		assertTrue(view.isCamera());
+		assertEquals("ctx", view.getContext());
+		assertEquals("beanBinding", view.getBinding());
+		assertEquals("contentId", view.getContentBinding());
+		assertFalse(view.isCanAccess());
+		assertEquals(UtilImpl.UPLOADS_IMAGE_WHITELIST_REGEX, view.getWhitelistRegex());
+		assertEquals(UtilImpl.UPLOADS_IMAGE_MAXIMUM_SIZE_IN_MB * AbstractUploadView.MB_IN_BYTES,
+					 view.getMaximumSizeInBytes());
 	}
 
 	@Test

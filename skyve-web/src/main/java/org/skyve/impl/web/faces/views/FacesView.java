@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 
 import org.primefaces.PrimeFaces;
@@ -859,25 +860,10 @@ public class FacesView extends HarnessView {
 	 * @return upload endpoint URL
 	 */
 	public String getContentUploadUrl(String sanitisedBinding, boolean image) {
-		return getContentUploadUrl(sanitisedBinding, image, false);
-	}
-
-	/**
-	 * Builds upload endpoint URL for content/image widgets in the current view context.
-	 *
-	 * @param sanitisedBinding sanitised binding for the target content field
-	 * @param image whether the upload endpoint is for an image
-	 * @param camera whether the image upload endpoint should prefer native camera capture
-	 * @return upload endpoint URL
-	 */
-	public String getContentUploadUrl(String sanitisedBinding, boolean image, boolean camera) {
 		StringBuilder result = new StringBuilder(128);
 		result.append(Util.getSkyveContextUrl()).append(image ? "/image" : "/content").append("Upload.xhtml?");
 		result.append(AbstractWebContext.RESOURCE_FILE_NAME).append('=').append(sanitisedBinding);
 		result.append('&').append(AbstractWebContext.CONTEXT_NAME).append('=').append(webContext.getWebId());
-		if (image && camera) {
-			result.append('&').append(AbstractWebContext.CAMERA_NAME).append("=true");
-		}
 		if (viewBinding != null) {
 			result.append('&').append(AbstractWebContext.BINDING_NAME).append('=').append(viewBinding);
 		}
@@ -1248,7 +1234,7 @@ public class FacesView extends HarnessView {
 					throw new ValidationException("Signature was not found");
 				}
 				Bean bean = getCurrentBean().getBean();
-				String unsanitisedContentBinding = BindUtil.unsanitiseBinding(binding);
+				String unsanitisedContentBinding = Objects.requireNonNull(BindUtil.unsanitiseBinding(binding), "unsanitisedContentBinding");
 
 				// Check content access
 				User user = getUser();
@@ -1272,7 +1258,8 @@ public class FacesView extends HarnessView {
 				// NB This handles compound bindings and checks for content access on the content owning bean
 				AttachmentContent content = FacesContentUtil.handleFileUpload(signature, MimeType.png.toString(), bean, BindUtil.unsanitiseBinding(binding));		
 				// Set the content attribute
-				BindUtil.set(bean, unsanitisedContentBinding, content.getContentId());
+				String contentId = Objects.requireNonNull(content.getContentId(), "contentId");
+				BindUtil.set(bean, unsanitisedContentBinding, contentId);
 
 				return null;
 			}

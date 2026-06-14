@@ -2511,8 +2511,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		HtmlPanelGroup actionGroup = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
 		setId(actionGroup, null);
 		toAddTo.add(actionGroup);
-		toAddTo = actionGroup.getChildren();
-		toAddTo.add(hidden);
+		List<UIComponent> actionGroupChildren = actionGroup.getChildren();
+		actionGroupChildren.add(hidden);
 
 		MenuButton actionButton = (MenuButton) a.createComponent(MenuButton.COMPONENT_TYPE);
 		setId(actionButton, null);
@@ -2524,7 +2524,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		actionButton.setButtonStyle("width:30px;height:30px;text-align:center");
 		actionButton.setButtonStyleClass("skyveContentActionButton");
 		setDisabled(actionButton, disabledConditionName, formDisabledConditionName);
-		toAddTo.add(actionButton);
+		actionGroupChildren.add(actionButton);
 		List<UIComponent> actionItems = actionButton.getChildren();
 
 		UIMenuItem uploadItem = createContentMenuItem(image ? "Upload Image" : "Upload Content",
@@ -2536,14 +2536,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 		String var = id + "_" + sanitisedBinding + "Overlay";
 		if (image) {
-			setContentUploadDialogOnclick(uploadItem, id, sanitisedBinding, var, false);
-			UIMenuItem cameraItem = createContentMenuItem("Take Photo",
-															Icons.FONT_CAMERA,
-															null,
-															disabledConditionName,
-															formDisabledConditionName);
-			setContentUploadDialogOnclick(cameraItem, id, sanitisedBinding, var, true);
-			actionItems.add(cameraItem);
+			setContentUploadDialogOnclick(uploadItem, id, sanitisedBinding, var);
 		}
 
 		UIPanel panel = null;
@@ -2586,7 +2579,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			panel.setValueExpression("onShow", ef.createValueExpression(elc, value.toString(), String.class));
 			uploadItem.setOnclick("PF('" + var + "').show();return false");
 		}
-		toAddTo.add(panel);
+		actionGroupChildren.add(panel);
 
 		// <iframe id="s06" src="" style="width:100%;height:280px;border:none"></iframe>
 		HtmlOutputText iframe = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
@@ -2642,7 +2635,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			value.append("#{'SKYVE.PF.contentMarkupOnShow(\\'").append(id).append("\\',\\'").append(sanitisedBinding).append("\\',\\''.concat(");
 			value.append(managedBeanName).append(".getContentMarkupUrl('").append(sanitisedBinding).append("')).concat('\\')')}");
 			dialog.setValueExpression("onShow", ef.createValueExpression(elc, value.toString(), String.class));
-			toAddTo.add(dialog);
+			actionGroupChildren.add(dialog);
 
 			// <iframe id="s06" src="" style="width:100%;height:280px;border:none"></iframe>
 			iframe = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
@@ -2671,12 +2664,12 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	private void setContentUploadDialogOnclick(UIMenuItem item, String id, String sanitisedBinding, String var, boolean camera) {
+	private void setContentUploadDialogOnclick(UIMenuItem item, String id, String sanitisedBinding, String var) {
 		StringBuilder value = new StringBuilder(192);
 		value.append("#{'SKYVE.PF.contentOverlayOnShow(\\'").append(id).append("\\',\\''.concat(");
-		value.append(managedBeanName).append(".getContentUploadUrl('").append(sanitisedBinding).append("',true,");
-		value.append(camera).append(")).concat('\\');PF(\\'").append(var);
-		value.append("\\').show();PF(\\'").append(var).append("\\').toggleMaximize();return false')}");
+		value.append(managedBeanName).append(".getContentUploadUrl('").append(sanitisedBinding).append("',true)");
+		value.append(".concat('\\');PF(\\'").append(var);
+		value.append("\\').show();PF(\\'").append(var).append("\\').toggleMaximize();return false'))}");
 		item.setValueExpression("onclick", ef.createValueExpression(elc, value.toString(), String.class));
 	}
 
