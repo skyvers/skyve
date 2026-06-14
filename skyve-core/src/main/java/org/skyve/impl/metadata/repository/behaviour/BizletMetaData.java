@@ -200,12 +200,13 @@ public class BizletMetaData implements ConvertibleMetaData<BizletMetaData>, Relo
 	 *
 	 * @param attributeName attribute binding name
 	 * @param value current partial value
-	 * @param bean current bean instance
+	 * @param bean current bean instance, or {@code null} when no bean exists for a
+	 *             compound binding parent (where parent is null)
 	 * @return completion suggestions, or {@code null} when not supplied
 	 * @throws Exception if completion generation fails
 	 */
-	@SuppressWarnings("static-method")
-	public List<String> complete(String attributeName, String value, Bean bean) throws Exception {
+	@SuppressWarnings({"static-method", "java:S112"}) // Exception thrown is part of Skyve's convenient API
+	public List<String> complete(String attributeName, String value, @Nullable Bean bean) throws Exception {
 		// TODO not implemented yet
 		return null;
 	}

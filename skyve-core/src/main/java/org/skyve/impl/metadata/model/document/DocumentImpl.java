@@ -193,6 +193,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	 * @throws Exception if bean creation, interception, or bizlet execution fails.
 	 */
 	@Override
+	@SuppressWarnings({ "unused", "null" }) // Defensive check against App coders Bizlet.newIntance() returning null
 	public <T extends Bean> T newInstance(User user) throws Exception {
 		Customer customer = user.getCustomer();
 		T result = newInstance(customer);
@@ -243,7 +244,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	 * @return the concrete bean class.
 	 * @throws ClassNotFoundException if a mapped class cannot be loaded.
 	 */
-	@SuppressWarnings({"unchecked", "java:S3776"}) // Complexity OK
+	@SuppressWarnings({"unchecked", "java:S3776", "java:S1141"}) // Complexity OK; try-catch is clearer here than multiple ifs and throws is required for Class.forName()
 	public <T extends Bean> Class<T> getBeanClass(@Nonnull Customer customer)
 	throws ClassNotFoundException {
 		if (isDynamic()) {
@@ -346,7 +347,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	 * @return the newly created base bean.
 	 * @throws Exception if class resolution or object construction fails.
 	 */
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S3776", "java:S112"}) // Complexity OK; throws Exception in API for app coder convenience
 	public <T extends Bean> T newInstance(Customer customer) throws Exception {
 		T result = null;
 		
@@ -455,7 +456,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 						result = BindUtil.formatMessage(defaultValue, bean);
 					}
 					else {
-						// NB Take care of escaped {
+						// NB Take care of escaped '{'
 						result = defaultValue.replace("\\{", "{");
 					}
 				}

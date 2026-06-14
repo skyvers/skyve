@@ -211,17 +211,22 @@ public class Bizlet<T extends Bean> implements MetaData {
 	}
 
 	/**
-	 * This method is called when auto-complete values are required from a view widget.
-	 * They can be based on values from within the containing bean.
-	 * 
-	 * @param attributeName	The name of the attribute to get the domain for.
+	 * Returns auto-complete values for a view widget.
+	 *
+	 * <p>The supplied bean is the bean that owns {@code attributeName}. It can be
+	 * {@code null} when the completion request comes from a compound binding and
+	 * the parent binding currently resolves to {@code null}; for example,
+	 * completing {@code contact.email} before {@code contact} has been populated.
+	 *
+	 * @param attributeName The name of the attribute to get the domain for.
 	 * @param value The value typed into the view widget used to complete upon.
-	 * @param bean	This bean to use to derive the values.
+	 * @param bean This bean to use to derive the values, or {@code null} when no
+	 *             bean instance exists for a compound binding parent (where parent is null).
 	 * @return the meta-data bizlet's completions or null.
 	 */
 	public @Nullable List<String> complete(@Nonnull String attributeName,
 											@Nonnull String value,
-											@Nonnull T bean) throws Exception {
+											@Nullable T bean) throws Exception {
 		// Execute the metaDataBizlet if one exists
 		if (metaDataBizlet != null) {
 			return metaDataBizlet.complete(attributeName, value, bean);

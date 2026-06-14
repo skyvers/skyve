@@ -68,7 +68,7 @@ public class CompleteAction extends FacesAction<List<String>> {
 	 * @throws Exception when completion processing fails unexpectedly
 	 */
 	@Override
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // Complexity OK
 	public List<String> callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("CompleteAction - EXECUTE complete {} for binding {}", query, binding);
 		AbstractPersistence persistence = AbstractPersistence.get();
@@ -124,24 +124,23 @@ public class CompleteAction extends FacesAction<List<String>> {
 				throw new SecurityException("read this data", user.getName());
 			}
 
-			if (document.isPersistable()) { // persistent document
-				if ((attribute == null) || // implicit attribute or
-						attribute.isPersistent()) { // explicit and persistent attribute
-					final String moduleName = document.getOwningModuleName();
-					final String documentName = document.getName();
-					DocumentQuery q = persistence.newDocumentQuery(moduleName, documentName);
-					q.addBoundProjection(attributeName, attributeName);
-					q.setDistinct(true);
-					if (query != null) {
-						q.getFilter().addLike(attributeName, new StringBuilder(query.length() + 2).append("%").append(query).append("%").toString());
-					}
-					// NB return Object as the type could be anything
-					List<Object> results = q.setMaxResults(100).scalarResults(Object.class);
-					result = new ArrayList<>(results.size());
-					for (Object value : results) {
-						if (value != null) {
-							result.add(value.toString());
-						}
+			if (document.isPersistable() &&
+					((attribute == null) || // implicit attribute or
+						attribute.isPersistent())) { // explicit and persistent attribute
+				final String moduleName = document.getOwningModuleName();
+				final String documentName = document.getName();
+				DocumentQuery q = persistence.newDocumentQuery(moduleName, documentName);
+				q.addBoundProjection(attributeName, attributeName);
+				q.setDistinct(true);
+				if (query != null) {
+					q.getFilter().addLike(attributeName, new StringBuilder(query.length() + 2).append("%").append(query).append("%").toString());
+				}
+				// NB return Object as the type could be anything
+				List<Object> results = q.setMaxResults(100).scalarResults(Object.class);
+				result = new ArrayList<>(results.size());
+				for (Object value : results) {
+					if (value != null) {
+						result.add(value.toString());
 					}
 				}
 			}

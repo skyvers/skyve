@@ -359,15 +359,16 @@ class DecimalTypesTest {
 	}
 
 	@Test
+	@SuppressWarnings("java:S5845") // Testing equals with different types
 	void decimal2EqualsBigDecimalReturnsTrue() {
 		Decimal2 d = new Decimal2("2.50");
-		assertEquals(d, new BigDecimal("2.50"));
+		assertEquals(new BigDecimal("2.50"), d);
 	}
 
 	@Test
 	void decimal2EqualsNonDecimalReturnsFalse() {
 		Decimal2 d = new Decimal2(1.0);
-		assertNotEquals(d, "1.0");
+		assertNotEquals("1.0", d);
 	}
 
 	@Test
