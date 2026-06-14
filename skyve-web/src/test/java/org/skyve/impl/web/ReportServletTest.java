@@ -75,7 +75,7 @@ class ReportServletTest {
 			verify(response).setContentType("text/csv");
 			verify(response).setHeader("Content-Disposition", "attachment; filename=\"export-file.csv\"");
 			verify(response).setContentLength(bytes.length);
-			verify(response).setHeader("Accept-Ranges", "bytes");
+			verify(response, never()).setHeader("Accept-Ranges", "bytes");
 			verify(response).addDateHeader(eq("Expires"), anyLong());
 			assertEquals("a,b,c", out.asString());
 		}
@@ -132,7 +132,7 @@ class ReportServletTest {
 				verify(response).setHeader("Content-Disposition", "attachment; filename=\"sample." + entry.getKey().name() + "\"");
 				verify(response).setHeader("Cache-Control", "cache");
 				verify(response).setHeader("Pragma", "cache");
-				verify(response).setHeader("Accept-Ranges", "bytes");
+				verify(response, never()).setHeader("Accept-Ranges", "bytes");
 				verify(response).addDateHeader(eq("Expires"), anyLong());
 			}
 		}

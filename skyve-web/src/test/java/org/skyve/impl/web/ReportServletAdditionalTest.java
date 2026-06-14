@@ -312,7 +312,7 @@ class ReportServletAdditionalTest {
 
 		verify(response).setHeader("Cache-Control", "cache");
 		verify(response).setHeader("Pragma", "cache");
-		verify(response).setHeader("Accept-Ranges", "bytes");
+		verify(response, never()).setHeader("Accept-Ranges", "bytes");
 		verify(response).setContentLength(3);
 	}
 }

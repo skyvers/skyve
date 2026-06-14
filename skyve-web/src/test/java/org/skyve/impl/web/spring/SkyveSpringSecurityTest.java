@@ -122,6 +122,19 @@ class SkyveSpringSecurityTest {
 	}
 
 	@Test
+	void userNameFromPrincipalSupportsCommonPrincipalShapes() {
+		UserDetails userDetails = org.springframework.security.core.userdetails.User.withUsername("spring-user")
+				.password("password")
+				.authorities("NoAuth")
+				.build();
+
+		assertEquals("spring-user", SkyveSpringSecurity.userNameFromPrincipal(userDetails));
+		assertEquals("plain-user", SkyveSpringSecurity.userNameFromPrincipal("plain-user"));
+		assertNull(SkyveSpringSecurity.userNameFromPrincipal(new Object()));
+		assertNull(SkyveSpringSecurity.userNameFromPrincipal(null));
+	}
+
+	@Test
 	void clientRegistrationRepositoryUsesConfiguredProvidersAndFallsBackToDummy() {
 		SkyveSpringSecurity security = new SkyveSpringSecurity();
 

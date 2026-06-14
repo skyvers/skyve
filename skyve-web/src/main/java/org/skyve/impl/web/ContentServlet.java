@@ -1,6 +1,7 @@
 package org.skyve.impl.web;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
@@ -20,6 +21,8 @@ import org.skyve.util.Thumbnail;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -59,7 +62,7 @@ public class ContentServlet extends AbstractResourceServlet {
 	 * {@link #dispose()} to ensure the underlying store connection is always released.
 	 * </p>
 	 */
-	private static class ContentResource extends AbstractResource {
+	private static class ContentResource extends AbstractResource implements StreamableResource {
 		@SuppressWarnings("resource")
 		private ContentManager cm;
 		private AttachmentContent content;
@@ -86,7 +89,11 @@ public class ContentServlet extends AbstractResourceServlet {
 		 */
 		@Override
 		public long getLastModified() {
-			return (content != null) ? content.getLastModified().getTime() : super.getLastModified();
+			if (content == null) {
+				return super.getLastModified();
+			}
+			java.util.Date lastModified = content.getLastModified();
+			return (lastModified == null) ? super.getLastModified() : lastModified.getTime();
 		}
 
 		/**
@@ -101,7 +108,7 @@ public class ContentServlet extends AbstractResourceServlet {
 		 * @throws IOException if the attachment bytes cannot be read
 		 */
 		@Override
-		protected Thumbnail load() throws IOException {
+		protected @Nullable Thumbnail load() throws IOException {
 			Thumbnail result = null;
 			if (content != null) {
 				if ((imageWidth > 0) && (imageHeight > 0)) { // a thumbnail image
@@ -120,7 +127,7 @@ public class ContentServlet extends AbstractResourceServlet {
 		 * @return the content type string, or {@code null} if no content has been resolved
 		 */
 		@Override
-		protected String resolveContentType() {
+		protected @Nullable String resolveContentType() {
 			return (content != null) ? content.getContentType() : null;
 		}
 
@@ -130,8 +137,42 @@ public class ContentServlet extends AbstractResourceServlet {
 		 * @return the file name, or {@code null} if no content has been resolved
 		 */
 		@Override
-		protected String resolveFileName() {
+		protected @Nullable String resolveFileName() {
 			return (content != null) ? content.getFileName() : null;
+		}
+
+		/**
+		 * Returns the original attachment length without loading file-backed content into
+		 * memory.
+		 */
+		@Override
+		public long getContentLength() {
+			return (content == null) ? -1L : content.getContentLength();
+		}
+
+		/**
+		 * Opens a fresh stream for the original attachment bytes.
+		 */
+		@Override
+		@SuppressWarnings("resource") // Caller owns and closes the returned stream.
+		public @Nonnull InputStream openStream() throws IOException {
+			if (content == null) {
+				throw new IOException("No attachment content is available to stream");
+			}
+			return content.getContentStream();
+		}
+
+		/**
+		 * Byte ranges are safe only for untransformed original attachment bytes with a
+		 * known non-empty length.
+		 */
+		@Override
+		public boolean isRangeSupported() {
+			return (content != null) && (content.getMarkup() == null) && (content.getContentLength() > 0L);
+		}
+
+		private boolean canStreamOriginal() {
+			return (content != null) && (content.getMarkup() == null) && (content.getContentLength() >= 0L);
 		}
 	}
 
@@ -140,8 +181,7 @@ public class ContentServlet extends AbstractResourceServlet {
 	 * the attachment.
 	 * <p>
 	 * Sets {@code Content-Disposition} to {@code inline} with the OWASP-sanitised file
-	 * name, enables one-minute browser caching, and sets {@code Accept-Ranges: bytes}
-	 * to support pause-and-resume downloads.
+	 * name and enables one-minute browser caching.
 	 * </p>
 	 *
 	 * @param resource the resolved resource
@@ -149,7 +189,7 @@ public class ContentServlet extends AbstractResourceServlet {
 	 * @throws IOException if the file name cannot be resolved from the resource
 	 */
 	@Override
-	protected void addResponseHeaders(Resource resource, HttpServletResponse response)
+	protected void addResponseHeaders(@Nonnull Resource resource, @Nonnull HttpServletResponse response)
 	throws IOException {
 		StringBuilder disposition = new StringBuilder(64);
 		disposition.append("inline; filename=\"");
@@ -161,8 +201,16 @@ public class ContentServlet extends AbstractResourceServlet {
 		response.setHeader("Cache-Control", "cache");
 		response.setHeader("Pragma", "cache");
 		response.addDateHeader("Expires", System.currentTimeMillis() + 60000); // 1 minute
-		// The following allows partial requests which are useful for large media or downloading files with pause and resume functions.
-		response.setHeader("Accept-Ranges", "bytes");
+	}
+
+	/**
+	 * Streams only original unmarked content. Thumbnail requests and attachments with
+	 * editable markup remain on the existing buffered transformation path.
+	 */
+	@Override
+	protected boolean shouldStreamOriginal(@Nonnull RequestParams params, @Nonnull Resource resource)
+	throws IOException {
+		return super.shouldStreamOriginal(params, resource) && ((ContentResource) resource).canStreamOriginal();
 	}
 	
 	/**
@@ -191,13 +239,13 @@ public class ContentServlet extends AbstractResourceServlet {
 	 * @throws SecurityException if the user is not authorised to access the content
 	 */
 	@Override
-	protected void secureResource(Resource resource,
-									String moduleName,
-									String documentName,
-									String binding,
-									String resourceFileName,
-									User user,
-									String uxui)
+	protected void secureResource(@Nonnull Resource resource,
+									@Nullable String moduleName,
+									@Nullable String documentName,
+									@Nullable String binding,
+									@Nullable String resourceFileName,
+									@Nullable User user,
+									@Nullable String uxui)
 	throws SecurityException {
 		ContentResource contentResource = (ContentResource) resource;
 		if (contentResource.content == null) {
@@ -226,7 +274,8 @@ public class ContentServlet extends AbstractResourceServlet {
 		// Check that the user has access - use the full binding here
 		// NB If you can text search you should already be able to see anything you have access to
 		if (! user.canTextSearch()) {
-			EXT.checkAccess(user, UserAccess.content(moduleName, documentName, binding), uxui);
+			String uxuiName = (uxui == null) ? org.skyve.metadata.router.UxUi.DESKTOP_NAME : uxui;
+			EXT.checkAccess(user, UserAccess.content(moduleName, documentName, binding), uxuiName);
 		}
 
 		// Check that user has content access - Use the content module and document and the target attribute name
@@ -263,12 +312,13 @@ public class ContentServlet extends AbstractResourceServlet {
 	 *                   be retrieved
 	 */
 	@Override
-	protected Resource createResource(HttpServletRequest request, RequestParams params) throws Exception {
+	protected @Nonnull Resource createResource(@Nonnull HttpServletRequest request, @Nonnull RequestParams params) throws Exception {
 		ContentResource resource = new ContentResource();
 		resource.imageWidth = params.imageWidth();
 		resource.imageHeight = params.imageHeight();
 
-		if (params.resourceFileName() == null) {
+		String resourceFileName = params.resourceFileName();
+		if (resourceFileName == null) {
 			LOGGER.error("No resource file name or data file name in the URL");
 		}
 		else {
@@ -277,12 +327,12 @@ public class ContentServlet extends AbstractResourceServlet {
 			}
 			if ((params.user() != null) &&
 					(params.customer() != null) &&
-					(params.resourceFileName().length() == 36)) { // its a valid UUID in length at least
+					(resourceFileName.length() == 36)) { // its a valid UUID in length at least
 				resource.cm = EXT.newContentManager();
-				resource.content = resource.cm.getAttachment(params.resourceFileName());
+				resource.content = resource.cm.getAttachment(resourceFileName);
 				// if &_nm is in the URL then don't include markup - we are most probably editing SVG
 				// PS The content is never put so the mutation below is OK
-				if (request.getParameterMap().containsKey(AbstractWebContext.NO_MARKUP)) {
+				if ((resource.content != null) && request.getParameterMap().containsKey(AbstractWebContext.NO_MARKUP)) {
 					resource.content.setMarkup(null);
 				}
 			}

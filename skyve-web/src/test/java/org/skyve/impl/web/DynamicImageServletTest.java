@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -45,7 +46,7 @@ class DynamicImageServletTest {
 		servlet.doGet(request, response);
 
 		verify(response).setCharacterEncoding(StandardCharsets.UTF_8.name());
-		verify(response).setHeader("Accept-Ranges", "bytes");
+		verify(response, never()).setHeader("Accept-Ranges", "bytes");
 		verify(response).setContentType("image/png");
 		verify(response).addHeader("Cache-Control", "private,no-cache,no-store");
 

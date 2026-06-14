@@ -49,6 +49,7 @@ import org.primefaces.component.inputmask.InputMask;
 import org.primefaces.component.inputtext.InputText;
 import org.primefaces.component.inputtextarea.InputTextarea;
 import org.primefaces.component.menubutton.MenuButton;
+import org.primefaces.component.message.Message;
 import org.primefaces.component.menuitem.UIMenuItem;
 import org.primefaces.component.outputlabel.OutputLabel;
 import org.primefaces.component.panel.Panel;
@@ -3760,6 +3761,109 @@ class TabularComponentBuilderTest {
 		UIComponent result = builder.addedDataGridBoundColumn(null, current, null);
 
 		assertSame(parent, result);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testAddedDataGridBoundColumnNonShortcutPathPrependsMessageForNonInputContent() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("messageId");
+		builder.setManagedBeanForTest(managedBean);
+		Message createdMessage = new Message();
+		when(mockApplication.createComponent(Message.COMPONENT_TYPE)).thenReturn(createdMessage);
+
+		UIComponent current = mock(UIComponent.class);
+		UIComponent parent = mock(UIComponent.class);
+		List<UIComponent> currentChildren = new ArrayList<>();
+		HtmlOutputText contents = new HtmlOutputText();
+		contents.setId("display");
+		currentChildren.add(contents);
+		when(current.getChildren()).thenReturn(currentChildren);
+		when(current.getParent()).thenReturn(parent);
+
+		UIComponent result = builder.addedDataGridBoundColumn(null, current, HorizontalAlignment.right);
+
+		assertSame(parent, result);
+		assertEquals(2, currentChildren.size());
+		assertTrue(currentChildren.get(0) instanceof Message);
+		assertSame(contents, currentChildren.get(1));
+		Message message = (Message) currentChildren.get(0);
+		assertEquals("display", message.getFor());
+		assertEquals("float:left", message.getStyle());
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testAddedDataGridBoundColumnNonShortcutPathWrapsInputContentWithMessage() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("messageId", "panelId");
+		builder.setManagedBeanForTest(managedBean);
+		Message createdMessage = new Message();
+		when(mockApplication.createComponent(Message.COMPONENT_TYPE)).thenReturn(createdMessage);
+		HtmlPanelGroup wrapper = new HtmlPanelGroup();
+		when(mockApplication.createComponent(HtmlPanelGroup.COMPONENT_TYPE)).thenReturn(wrapper);
+		ValueExpression widthExpression = mock(ValueExpression.class);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), eq("width:100%"), eq(String.class))).thenReturn(widthExpression);
+
+		UIComponent current = mock(UIComponent.class);
+		UIComponent parent = mock(UIComponent.class);
+		List<UIComponent> currentChildren = new ArrayList<>();
+		HtmlInputText input = new HtmlInputText();
+		input.setId("editable");
+		currentChildren.add(input);
+		when(current.getChildren()).thenReturn(currentChildren);
+		when(current.getParent()).thenReturn(parent);
+
+		UIComponent result = builder.addedDataGridBoundColumn(null, current, HorizontalAlignment.left);
+
+		assertSame(parent, result);
+		assertEquals(1, currentChildren.size());
+		assertSame(wrapper, currentChildren.get(0));
+		assertEquals("display:flex", wrapper.getStyle());
+		assertEquals(2, wrapper.getChildCount());
+		assertTrue(wrapper.getChildren().get(0) instanceof Message);
+		assertSame(input, wrapper.getChildren().get(1));
+		assertSame(widthExpression, input.getValueExpression("style"));
+		Message message = (Message) wrapper.getChildren().get(0);
+		assertEquals("editable", message.getFor());
+		assertEquals("float:left", message.getStyle());
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testAddedDataGridBoundColumnNonShortcutPathJustifiesCheckboxContent() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("messageId", "panelId");
+		builder.setManagedBeanForTest(managedBean);
+		Message createdMessage = new Message();
+		when(mockApplication.createComponent(Message.COMPONENT_TYPE)).thenReturn(createdMessage);
+		HtmlPanelGroup wrapper = new HtmlPanelGroup();
+		when(mockApplication.createComponent(HtmlPanelGroup.COMPONENT_TYPE)).thenReturn(wrapper);
+
+		UIComponent current = mock(UIComponent.class);
+		UIComponent parent = mock(UIComponent.class);
+		List<UIComponent> currentChildren = new ArrayList<>();
+		TriStateCheckbox checkBox = new TriStateCheckbox();
+		checkBox.setId("choice");
+		currentChildren.add(checkBox);
+		when(current.getChildren()).thenReturn(currentChildren);
+		when(current.getParent()).thenReturn(parent);
+
+		UIComponent result = builder.addedDataGridBoundColumn(null, current, HorizontalAlignment.centre);
+
+		assertSame(parent, result);
+		assertEquals(1, currentChildren.size());
+		assertSame(wrapper, currentChildren.get(0));
+		assertEquals("display:flex;justify-content:center", wrapper.getStyle());
+		assertEquals(2, wrapper.getChildCount());
+		assertTrue(wrapper.getChildren().get(0) instanceof Message);
+		assertSame(checkBox, wrapper.getChildren().get(1));
+		Message message = (Message) wrapper.getChildren().get(0);
+		assertEquals("choice", message.getFor());
+		assertEquals("float:left", message.getStyle());
 	}
 
 	@SuppressWarnings("static-method")

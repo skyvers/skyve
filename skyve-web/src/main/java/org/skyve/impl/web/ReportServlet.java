@@ -55,6 +55,7 @@ import org.skyve.util.Util;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServlet;
@@ -69,6 +70,9 @@ import net.sf.jasperreports.jakarta.servlets.BaseHttpServlet;
 
 /**
  * Handles HTTP requests for this Skyve web endpoint.
+ *
+ * <p>Servlet API override parameters are intentionally left unannotated because
+ * {@link HttpServlet} does not declare nullness constraints for them.
  */
 @SuppressWarnings("java:S1192") // Repeated literals are deliberate report response header/script fragments.
 public class ReportServlet extends HttpServlet {
@@ -138,7 +142,7 @@ public class ReportServlet extends HttpServlet {
 	 * <p>Side effects: sends an HTTP redirect when possible, otherwise falls back to writing a minimal HTML
 	 * error response directly to the servlet output stream.
 	 */
-	private static void redirectToErrorPage(HttpServletResponse response, String reference) {
+	private static void redirectToErrorPage(@Nonnull HttpServletResponse response, @Nonnull String reference) {
 		try {
 			String errorURI = WebErrorUtil.appendErrorReference(Util.getSkyveContextUrl() + "/pages/error.jsp", reference);
 			response.sendRedirect(response.encodeRedirectURL(errorURI));
@@ -256,7 +260,7 @@ public class ReportServlet extends HttpServlet {
 	/**
 	 * Writes a generic HTML error response for a failed report request using the servlet output stream.
 	 */
-	private static void writeReportError(HttpServletResponse response, String reference) {
+	private static void writeReportError(@Nonnull HttpServletResponse response, @Nonnull String reference) {
 		try (ServletOutputStream out = response.getOutputStream()) {
 			writeReportError(response, out, reference);
 		}
@@ -271,7 +275,7 @@ public class ReportServlet extends HttpServlet {
 	 * <p>Side effects: resets the servlet response when it is still mutable, sets a 500 status, and emits a
 	 * minimal UTF-8 HTML payload containing the supplied support reference.
 	 */
-	private static void writeReportError(HttpServletResponse response, OutputStream out, String reference) {
+	private static void writeReportError(@Nonnull HttpServletResponse response, @Nonnull OutputStream out, @Nonnull String reference) {
 		try {
 			if (response.isCommitted()) {
 				HTTP_LOGGER.warn("Could not write report error response for reference {} because the response is already committed.", reference);
@@ -296,7 +300,7 @@ public class ReportServlet extends HttpServlet {
 	 * <p>Returned values are sanitised as text because this helper is used for report execution parameters
 	 * sourced directly from the HTTP request.
 	 */
-	private static Map<String, Object> getParameters(HttpServletRequest request) {
+	private static @Nonnull Map<String, Object> getParameters(@Nonnull HttpServletRequest request) {
 //		 TODO coercion somehow...
 		Map<String, Object> params = new TreeMap<>();
 
@@ -322,12 +326,12 @@ public class ReportServlet extends HttpServlet {
 	 * <p>Side effects: sets content headers, content disposition, cache headers, content length, and for HTML
 	 * reports stores the {@link JasperPrint} in the session for JasperReports viewer integration.
 	 */
-	private static void pumpOutReportFormat(byte[] bytes,
-												JasperPrint jasperPrint,
-												ReportFormat format,
-												String fileNameNoSuffix,
-												HttpSession session,
-												HttpServletResponse response)
+	private static void pumpOutReportFormat(@Nonnull byte[] bytes,
+												@Nonnull JasperPrint jasperPrint,
+												@Nonnull ReportFormat format,
+												@Nonnull String fileNameNoSuffix,
+												@Nonnull HttpSession session,
+												@Nonnull HttpServletResponse response)
 	throws IOException {
 		response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
@@ -403,9 +407,6 @@ public class ReportServlet extends HttpServlet {
 		response.setHeader("Cache-Control", "cache");
 		response.setHeader("Pragma", "cache");
 		response.addDateHeader("Expires", System.currentTimeMillis() + (60000)); // 1 minute
-		// The following allows partial requests which are useful for large media or
-		// downloading files with pause and resume functions.
-		response.setHeader("Accept-Ranges", "bytes");
 
 		try (ServletOutputStream outputStream = response.getOutputStream()) {
 			Util.chunkBytesToOutputStream(bytes, outputStream);
@@ -421,7 +422,7 @@ public class ReportServlet extends HttpServlet {
 	 * streams the generated document back to the client.
 	 */
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
-	private static void doExport(HttpServletRequest request, HttpServletResponse response)
+	private static void doExport(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response)
 	throws IOException {
 		try (ServletOutputStream out = response.getOutputStream()) {
 			AbstractPersistence persistence = AbstractPersistence.get();

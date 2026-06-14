@@ -39,6 +39,9 @@ import net.coobird.thumbnailator.Thumbnails.Builder;
 
 /**
  * Serves Skyve dynamic images.
+ *
+ * <p>Servlet API override parameters are intentionally left unannotated because
+ * {@link HttpServlet} does not declare nullness constraints for them.
  */
 public class DynamicImageServlet extends HttpServlet {
 	private static final long serialVersionUID = 5180477867432555312L;
@@ -170,8 +173,6 @@ public class DynamicImageServlet extends HttpServlet {
 		try {
 			// Set invariant headers
 			response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-			// The following allows partial requests which are useful for large media or downloading files with pause and resume functions.
-			response.setHeader("Accept-Ranges", "bytes");
 			response.setContentType(format.getMimeType().toString());
 
 			if (exception == null) { // no problem encountered yet

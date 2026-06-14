@@ -31,6 +31,9 @@ import org.skyve.util.logging.SkyveLoggerFactory;
 
 /**
  * Handles HTTP requests for this Skyve web endpoint.
+ *
+ * <p>Servlet API override parameters are intentionally left unannotated because
+ * {@link HttpServlet} does not declare nullness constraints for them.
  */
 public class BizportExportServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
@@ -120,8 +123,6 @@ public class BizportExportServlet extends HttpServlet {
 			    		response.setHeader("Cache-Control", "cache");
 			            response.setHeader("Pragma", "cache");
 			            response.addDateHeader("Expires", System.currentTimeMillis() + (60000)); // 1 minute
-						// The following allows partial requests which are useful for large media or downloading files with pause and resume functions.
-						response.setHeader("Accept-Ranges", "bytes");
 			
 			            out.write(bytes);
 			            out.flush();

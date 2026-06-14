@@ -1,6 +1,7 @@
 package org.skyve.impl.web;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
@@ -42,6 +43,16 @@ import jakarta.servlet.http.HttpSession;
  * <p>
  * Concrete subclasses must implement {@link #createResource} and may optionally
  * override {@link #secureResource} and {@link #addResponseHeaders}.
+ * </p>
+ * <p>
+ * Servlet API override parameters are intentionally left unannotated because
+ * {@link HttpServlet} does not declare nullness constraints for them.
+ * </p>
+ * <p>
+ * Streaming and byte-range support are intentionally limited to original,
+ * untransformed resources with a known length. Thumbnail requests remain on the
+ * buffered thumbnail path; generated dynamic images and report/export output are
+ * produced by other servlets and are not streamed through this contract.
  * </p>
  */
 public abstract class AbstractResourceServlet extends HttpServlet {
@@ -126,6 +137,47 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 	}
 
 	/**
+	 * Resource variant whose original bytes can be streamed without first materialising
+	 * the complete response body.
+	 *
+	 * <p>Implementations must open a fresh stream for each call to {@link #openStream()}.
+	 * Byte ranges are only safe when the stream starts at byte zero, the reported
+	 * {@link #getContentLength()} is the exact length of the original bytes, and no
+	 * compression, thumbnailing, markup, or other transformation is applied after
+	 * offsets have been calculated.
+	 */
+	protected interface StreamableResource extends Resource {
+		/**
+		 * Returns the number of original bytes available to stream, or a negative value
+		 * when the length is unknown.
+		 *
+		 * @return the streamable content length
+		 * @throws IOException if the length cannot be resolved
+		 */
+		long getContentLength() throws IOException;
+
+		/**
+		 * Opens a new stream positioned at the start of the original resource.
+		 * The caller owns and closes the returned stream.
+		 *
+		 * @return a newly opened input stream
+		 * @throws IOException if the stream cannot be opened
+		 */
+		@Nonnull InputStream openStream() throws IOException;
+
+		/**
+		 * Indicates whether byte-range responses may be served from this resource.
+		 * Return {@code false} for resources whose length is unknown or whose stream
+		 * cannot be reopened from byte zero for each request.
+		 *
+		 * @return {@code true} when ranges can be copied from a fresh stream
+		 */
+		default boolean isRangeSupported() {
+			return true;
+		}
+	}
+
+	/**
 	 * Base resource implementation that provides thumbnailing behaviour.
 	 * Subclasses supply the backing data (file or content) via {@link #load()},
 	 * {@link #resolveContentType()} and {@link #resolveFileName()}.
@@ -142,7 +194,7 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 		 * @throws IOException if the data cannot be read
 		 */
 		@Override
-		public byte[] getBytes() throws IOException {
+		public @Nullable byte[] getBytes() throws IOException {
 			if (image == null) {
 				image = load();
 			}
@@ -154,7 +206,7 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 		 * Subclasses should override and call super.dispose() after disposing of their own resources
 		 */
 		@Override
-		public void dispose() throws Exception{
+		public void dispose() throws Exception {
 			image = null;
 		}
 		
@@ -185,7 +237,7 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 		 * @throws IOException if the thumbnail must be loaded to determine the type
 		 */
 		@Override
-		public String getContentType() throws IOException {
+		public @Nullable String getContentType() throws IOException {
 			if ((imageWidth > 0) && (imageHeight > 0)) {
 				if (image == null) {
 					image = load();
@@ -210,7 +262,7 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 		 * @throws IOException if the thumbnail must be loaded to determine the type
 		 */
 		@Override
-		public String getFileName() throws IOException {
+		public @Nullable String getFileName() throws IOException {
 			if ((imageWidth > 0) && (imageHeight > 0)) {
 				if (image == null) {
 					image = load();
@@ -313,10 +365,27 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 	 */
 	@Override
 	public void doGet(HttpServletRequest request, HttpServletResponse response) {
+		doResourceRequest(request, response, false);
+	}
+
+	/**
+	 * Handles HEAD requests through the same resource lookup and security path as
+	 * {@link #doGet(HttpServletRequest, HttpServletResponse)}, but without writing a
+	 * response body.
+	 *
+	 * @param request  the current HTTP request
+	 * @param response the current HTTP response
+	 */
+	@Override
+	protected void doHead(HttpServletRequest request, HttpServletResponse response) {
+		doResourceRequest(request, response, true);
+	}
+
+	private void doResourceRequest(HttpServletRequest request, HttpServletResponse response, boolean headOnly) {
 		try {
+			RequestParams params = parseRequestParams(request);
 			Resource resource = RESOURCES.get();
 			if (resource == null) {
-				RequestParams params = parseRequestParams(request);
 				resource = createResource(request, params);
 				secureResource(resource,
 								params.moduleName(),
@@ -342,6 +411,11 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 
 			addResponseHeaders(resource, response);
 
+			if (shouldStreamOriginal(params, resource)) {
+				writeStreamableResource((StreamableResource) resource, request, response, headOnly);
+				return;
+			}
+
 			byte[] bytes = resource.getBytes();
 			if (bytes == null) {
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -350,6 +424,10 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 			}
 
 			response.setContentLength(bytes.length);
+			if (headOnly) {
+				return;
+			}
+			
 			try (OutputStream out = response.getOutputStream()) {
 				Util.chunkBytesToOutputStream(bytes, out);
 				out.flush();
@@ -365,6 +443,66 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 		}
 	}
 
+	/**
+	 * Determines whether the original resource may be streamed directly for the current
+	 * request. Thumbnail requests remain on the buffered transformation path.
+	 *
+	 * @param params   parsed request parameters
+	 * @param resource resolved resource
+	 * @return {@code true} when direct streaming is available
+	 * @throws IOException if stream metadata cannot be resolved
+	 */
+	@SuppressWarnings("static-method") // protected hook for concrete resource servlets
+	protected boolean shouldStreamOriginal(@Nonnull RequestParams params, @Nonnull Resource resource)
+	throws IOException {
+		if (! (resource instanceof StreamableResource streamable)) {
+			return false;
+		}
+		if ((params.imageWidth() > 0) || (params.imageHeight() > 0)) {
+			return false;
+		}
+		return streamable.getContentLength() >= 0;
+	}
+
+	private static void writeStreamableResource(@Nonnull StreamableResource resource,
+													@Nonnull HttpServletRequest request,
+													@Nonnull HttpServletResponse response,
+													boolean headOnly)
+	throws IOException {
+		long contentLength = resource.getContentLength();
+		boolean rangeSupported = resource.isRangeSupported();
+		if (rangeSupported) {
+			response.setHeader("Accept-Ranges", "bytes");
+		}
+
+		HttpRange range = rangeSupported ?
+							HttpRange.parse(request.getHeader("Range"),
+												contentLength,
+												request.getHeader("If-Range"),
+												resource.getLastModified(),
+												response.getHeader("ETag")) :
+							HttpRange.parse(null, contentLength);
+		if (range.isUnsatisfiable()) {
+			response.setStatus(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
+			response.setHeader("Content-Range", range.getContentRange());
+			return;
+		}
+
+		if (range.isPartial()) {
+			response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
+			response.setHeader("Content-Range", range.getContentRange());
+		}
+		response.setContentLengthLong(range.getBytesToSend());
+		if (headOnly) {
+			return;
+		}
+
+		try (InputStream in = resource.openStream();
+				OutputStream out = response.getOutputStream()) {
+			StreamResponse.copy(in, out, range.getStart(), range.getBytesToSend());
+			out.flush();
+		}
+	}
 
 	/**
 	 * Creates and populates a Resource for the given request.
@@ -388,7 +526,7 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 	 * @param response the HTTP response
 	 * @throws IOException if there is a problem accessing the resource properties
 	 */
-	protected void addResponseHeaders(Resource resource, HttpServletResponse response)
+	protected void addResponseHeaders(@Nonnull Resource resource, @Nonnull HttpServletResponse response)
 	throws IOException {
 		// no-op by default
 	}

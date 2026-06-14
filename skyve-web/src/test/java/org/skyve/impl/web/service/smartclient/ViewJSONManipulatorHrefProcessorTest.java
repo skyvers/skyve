@@ -1,6 +1,7 @@
 package org.skyve.impl.web.service.smartclient;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -118,6 +119,15 @@ class ViewJSONManipulatorHrefProcessorTest {
 		editViewReference.setBinding("row.bizId");
 		invokeHrefProcessor(manipulator, "processEditViewReference", EditViewReference.class, editViewReference);
 		assertTrue(htmlGuts(manipulator).contains("{row.bizId}"));
+
+		setHtmlGuts(manipulator, new StringBuilder());
+		EditViewReference editViewWithoutBinding = new EditViewReference();
+		editViewWithoutBinding.setModuleName("test");
+		editViewWithoutBinding.setDocumentName("AllAttributesPersistent");
+		invokeHrefProcessor(manipulator, "processEditViewReference", EditViewReference.class, editViewWithoutBinding);
+		assertTrue(htmlGuts(manipulator).contains("m=test"));
+		assertTrue(htmlGuts(manipulator).contains("d=AllAttributesPersistent"));
+		assertFalse(htmlGuts(manipulator).contains("{row.bizId}"));
 	}
 
 	private static ViewJSONManipulator newManipulator(String viewName, int editIdCounter, int createIdCounter) {

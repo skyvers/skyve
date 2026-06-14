@@ -1,8 +1,10 @@
 package org.skyve.impl.web;
 
 import java.io.File;
-import java.util.Objects;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Objects;
 
 import org.skyve.CORE;
 import org.skyve.content.MimeType;
@@ -11,6 +13,8 @@ import org.skyve.util.Thumbnail;
 import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
@@ -36,7 +40,7 @@ public class CustomerResourceServlet extends AbstractResourceServlet {
 	 * file system.  Supports both full-content delivery and on-the-fly thumbnail
 	 * generation via {@link Thumbnail}.
 	 */
-	protected static class FileResource extends AbstractResource {
+	protected static class FileResource extends AbstractResource implements StreamableResource {
 		private File file;
 
 		/**
@@ -60,6 +64,26 @@ public class CustomerResourceServlet extends AbstractResourceServlet {
 			return (file != null) ? file.lastModified() : super.getLastModified();
 		}
 
+		@Override
+		public long getContentLength() {
+			return isExistingFile() ? file.length() : -1L;
+		}
+
+		@Override
+		@SuppressWarnings("resource") // Caller owns and closes the returned stream.
+		public @Nonnull InputStream openStream() throws IOException {
+			return new FileInputStream(file);
+		}
+
+		@Override
+		public boolean isRangeSupported() {
+			return isExistingFile();
+		}
+
+		private boolean isExistingFile() {
+			return (file != null) && file.exists() && file.isFile();
+		}
+
 		/**
 		 * Loads the resource content from the backing file.
 		 * <p>
@@ -73,7 +97,7 @@ public class CustomerResourceServlet extends AbstractResourceServlet {
 		 * @throws IOException if the file cannot be read
 		 */
 		@Override
-		protected Thumbnail load() throws IOException {
+		protected @Nullable Thumbnail load() throws IOException {
 			Thumbnail result = null;
 			if (file != null) {
 				if ((imageWidth > 0) && (imageHeight > 0)) { // a thumbnail image
@@ -93,7 +117,7 @@ public class CustomerResourceServlet extends AbstractResourceServlet {
 		 *         type cannot be determined or no file has been resolved
 		 */
 		@Override
-		protected String resolveContentType() {
+		protected @Nullable String resolveContentType() {
 			if (file != null) {
 				MimeType mimeType = MimeType.fromFileName(file.getName());
 				if (mimeType != null) {
@@ -110,7 +134,7 @@ public class CustomerResourceServlet extends AbstractResourceServlet {
 		 * @return the file name, e.g. {@code "logo.png"}
 		 */
 		@Override
-		protected String resolveFileName() {
+		protected @Nullable String resolveFileName() {
 			return (file != null) ? file.getName() : null;
 		}
 	}
@@ -140,7 +164,7 @@ public class CustomerResourceServlet extends AbstractResourceServlet {
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // complexity is fine
-	protected Resource createResource(HttpServletRequest request, RequestParams params) throws Exception {
+	protected @Nonnull Resource createResource(@Nonnull HttpServletRequest request, @Nonnull RequestParams params) throws Exception {
 		FileResource resource = new FileResource();
 		resource.imageWidth = params.imageWidth();
 		resource.imageHeight = params.imageHeight();
@@ -173,4 +197,3 @@ public class CustomerResourceServlet extends AbstractResourceServlet {
 		return resource;
 	}
 }
-

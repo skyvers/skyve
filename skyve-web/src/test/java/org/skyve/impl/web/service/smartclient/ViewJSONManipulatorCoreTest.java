@@ -22,6 +22,7 @@ import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.view.ActionImpl;
+import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.Inject;
 import org.skyve.impl.metadata.view.InjectBinding;
 import org.skyve.impl.metadata.view.ViewImpl;
@@ -532,6 +533,12 @@ class ViewJSONManipulatorCoreTest {
 		dynamicImage.setInvisibleConditionName("avatarHidden");
 		manipulator.visitDynamicImage(dynamicImage, true, true);
 
+		DynamicImage initialSizeImage = new DynamicImage();
+		initialSizeImage.setName("avatarInitial");
+		initialSizeImage.setImageInitialPixelWidth(Integer.valueOf(28));
+		initialSizeImage.setImageInitialPixelHeight(Integer.valueOf(29));
+		manipulator.visitDynamicImage(initialSizeImage, true, true);
+
 		StaticImage staticImage = new StaticImage();
 		staticImage.setRelativeFile("icons/static.png");
 		staticImage.setPixelWidth(Integer.valueOf(16));
@@ -548,6 +555,7 @@ class ViewJSONManipulatorCoreTest {
 
 		Blurb blurb = new Blurb();
 		blurb.setMarkup("Hello");
+		blurb.setTextAlignment(HorizontalAlignment.right);
 		blurb.setInvisibleConditionName("blurbHidden");
 		manipulator.visitBlurb(blurb, true, true);
 
@@ -555,6 +563,15 @@ class ViewJSONManipulatorCoreTest {
 		bindingLabel.setBinding("status");
 		bindingLabel.setInvisibleConditionName("statusHidden");
 		manipulator.visitLabel(bindingLabel, true, true);
+
+		Label valueLabel = new Label();
+		valueLabel.setValue("Ready");
+		valueLabel.setInvisibleConditionName("true");
+		manipulator.visitLabel(valueLabel, true, true);
+
+		Label forLabel = new Label();
+		forLabel.setFor("fallbackField");
+		manipulator.visitLabel(forLabel, true, true);
 
 		ExternalReference reference = new ExternalReference();
 		reference.setHref("https://example.test/details");
@@ -566,11 +583,18 @@ class ViewJSONManipulatorCoreTest {
 
 		String html = objectField(manipulator, "htmlGuts").toString();
 		assertTrue(html.contains("dynamic.png?_n=avatar"), html);
+		assertTrue(html.contains("dynamic.png?_n=avatarInitial"), html);
+		assertTrue(html.contains("_w=28"), html);
+		assertTrue(html.contains("_h=29"), html);
 		assertTrue(html.contains("resources?_n=icons/static.png"), html);
 		assertTrue(html.contains("content?_n={photo}"), html);
 		assertTrue(html.contains("<div"), html);
+		assertTrue(html.contains("text-align:right"), html);
 		assertTrue(html.contains("<span"), html);
 		assertTrue(html.contains("{status}"), html);
+		assertTrue(html.contains(">Ready</span>"), html);
+		assertTrue(html.contains("display:none"), html);
+		assertTrue(html.contains(">fallbackField</span>"), html);
 		assertTrue(html.contains("<a href=\"https://example.test/details\""), html);
 		assertTrue(html.contains("&nbsp;"), html);
 	}

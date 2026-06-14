@@ -33,6 +33,8 @@ import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
 
 import jakarta.enterprise.context.RequestScoped;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.Consumes;
@@ -80,9 +82,9 @@ public class RestService {
 	@GET
 	@Path("/json/{module}/{document}/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String retrieveJSON(@PathParam(MODULE_PATH_PARAM) String module,
-								@PathParam(DOCUMENT_PATH_PARAM) String document,
-								@PathParam(ID_PATH_PARAM) String id) {
+	public @Nullable String retrieveJSON(@PathParam(MODULE_PATH_PARAM) @Nonnull String module,
+											@PathParam(DOCUMENT_PATH_PARAM) @Nonnull String document,
+											@PathParam(ID_PATH_PARAM) @Nonnull String id) {
 		String result = null;
 		Bean bean = null;
 		
@@ -124,9 +126,9 @@ public class RestService {
 	@GET
 	@Path("/xml/{module}/{document}/{id}")
 	@Produces(MediaType.APPLICATION_XML)
-	public Bean retrieveXML(@PathParam(MODULE_PATH_PARAM) String module,
-										@PathParam(DOCUMENT_PATH_PARAM) String document,
-										@PathParam(ID_PATH_PARAM) String id) {
+	public @Nullable Bean retrieveXML(@PathParam(MODULE_PATH_PARAM) @Nonnull String module,
+										@PathParam(DOCUMENT_PATH_PARAM) @Nonnull String document,
+										@PathParam(ID_PATH_PARAM) @Nonnull String id) {
 		Bean result = null;
 		
 		Persistence p = null;
@@ -167,10 +169,10 @@ public class RestService {
 	@GET
 	@Path("/json/{module}/{document}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String retrieveJSON(@PathParam(MODULE_PATH_PARAM) String module,
-								@PathParam(DOCUMENT_PATH_PARAM) String document,
-								@QueryParam("start") int start,
-								@QueryParam("end") int end) {
+	public @Nullable String retrieveJSON(@PathParam(MODULE_PATH_PARAM) @Nonnull String module,
+											@PathParam(DOCUMENT_PATH_PARAM) @Nonnull String document,
+											@QueryParam("start") int start,
+											@QueryParam("end") int end) {
 		String result = null;
 		
 		Persistence p = null;
@@ -212,7 +214,7 @@ public class RestService {
 	@GET
 	@Path("/json/insert/{bean}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String insertJSONGet(@PathParam(BEAN_PATH_PARAM) String json) {
+	public @Nullable String insertJSONGet(@PathParam(BEAN_PATH_PARAM) @Nonnull String json) {
 		return insertJSON(json);
 	}
 
@@ -226,7 +228,7 @@ public class RestService {
 	@Path("/json/insert")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public String insertJSONPost(String json) {
+	public @Nullable String insertJSONPost(@Nonnull String json) {
 		return insertJSON(json);
 	}
 	
@@ -236,7 +238,7 @@ public class RestService {
 	 * @param json JSON payload representing the bean to insert
 	 * @return marshalled inserted bean JSON, or {@code null} when an error occurs
 	 */
-	private String insertJSON(String json) {
+	private @Nullable String insertJSON(@Nonnull String json) {
 		String result = null;
 		
 		Persistence p = null;
@@ -265,7 +267,7 @@ public class RestService {
 	@GET
 	@Path("/json/update/{bean}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String updateJSONGet(@PathParam(BEAN_PATH_PARAM) String json) {
+	public @Nullable String updateJSONGet(@PathParam(BEAN_PATH_PARAM) @Nonnull String json) {
 		return updateJSON(json);
 	}
 
@@ -279,7 +281,7 @@ public class RestService {
 	@Path("/json/update")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public String updateJSONPost(String json) {
+	public @Nullable String updateJSONPost(@Nonnull String json) {
 		return updateJSON(json);
 	}
 	
@@ -289,7 +291,7 @@ public class RestService {
 	 * @param json JSON payload representing the bean to update
 	 * @return marshalled updated bean JSON, or {@code null} when an error occurs
 	 */
-	private String updateJSON(String json) {
+	private @Nullable String updateJSON(@Nonnull String json) {
 		String result = null;
 		
 		Persistence p = null;
@@ -320,7 +322,7 @@ public class RestService {
 	@GET
 	@Path("/json/delete/{bean}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String deleteJSONGet(@PathParam(BEAN_PATH_PARAM) String json) {
+	public @Nullable String deleteJSONGet(@PathParam(BEAN_PATH_PARAM) @Nonnull String json) {
 		return deleteJSON(json);
 	}
 	
@@ -334,7 +336,7 @@ public class RestService {
 	@Path("/json/delete")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public String deleteJSONDelete(String json) {
+	public @Nullable String deleteJSONDelete(@Nonnull String json) {
 		return deleteJSON(json);
 	}
 
@@ -344,7 +346,7 @@ public class RestService {
 	 * @param json JSON payload representing the bean to delete
 	 * @return empty JSON object string, or {@code null} when an error occurs
 	 */
-	private String deleteJSON(String json) {
+	private @Nullable String deleteJSON(@Nonnull String json) {
 		String result = null;
 		
 		Persistence p = null;
@@ -390,10 +392,10 @@ public class RestService {
 	@GET
 	@Path("/json/query/{module}/{documentOrQuery}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String query(@PathParam(MODULE_PATH_PARAM) String module,
-							@PathParam("documentOrQuery") String documentOrQuery,
-							@QueryParam("start") int start,
-							@QueryParam("end") int end) {
+	public @Nullable String query(@PathParam(MODULE_PATH_PARAM) @Nonnull String module,
+									@PathParam("documentOrQuery") @Nonnull String documentOrQuery,
+									@QueryParam("start") int start,
+									@QueryParam("end") int end) {
 		String result = null;
 		
 		Persistence p = null;
@@ -447,7 +449,7 @@ public class RestService {
 	@GET
 	@Path("/content/{contentId}")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
-	public byte[] queryContent(@PathParam("contentId") String contentId) {
+	public @Nullable byte[] queryContent(@PathParam("contentId") @Nonnull String contentId) {
 		byte[] result = null;
 		
 		try {
@@ -484,8 +486,6 @@ public class RestService {
 				}
 				response.setHeader("Content-Disposition", 
 									String.format("attachment; filename=\"%s\"", OWASP.sanitiseFileName(fileName)));
-				// The following allows partial requests which are useful for large media or downloading files with pause and resume functions.
-				response.setHeader("Accept-Ranges", "bytes");
 				LOGGER.info("{} served as binary", request.getRequestURI());
 			}				
 		}
@@ -512,13 +512,13 @@ public class RestService {
 	@Path("/content/insert/{customer}/{module}/{document}/{id}/{attributeName}/{contentType}")
 	@Consumes(MediaType.TEXT_PLAIN)
 	@Produces(MediaType.TEXT_PLAIN)
-	public String insertContent(@PathParam("customer") String customer,
-								@PathParam(MODULE_PATH_PARAM) String module,
-								@PathParam(DOCUMENT_PATH_PARAM) String document,
-								@PathParam(ID_PATH_PARAM) String id,
-								@PathParam("attributeName") String attributeName,
-								@PathParam("contentType") String contentType,
-								String encodedContent) {
+	public @Nullable String insertContent(@PathParam("customer") @Nonnull String customer,
+											@PathParam(MODULE_PATH_PARAM) @Nonnull String module,
+											@PathParam(DOCUMENT_PATH_PARAM) @Nonnull String document,
+											@PathParam(ID_PATH_PARAM) @Nonnull String id,
+											@PathParam("attributeName") @Nonnull String attributeName,
+											@PathParam("contentType") @Nonnull String contentType,
+											@Nonnull String encodedContent) {
 		try {
 			response.setContentType(MediaType.APPLICATION_JSON);
 			final User u = CORE.getUser();
@@ -576,7 +576,7 @@ public class RestService {
 	 * @param context a human-readable description of the failing REST operation for structured logging
 	 * @param t the unexpected failure that triggered the REST error response
 	 */
-	private void handleUnexpectedRestError(Persistence persistence, String context, Throwable t) {
+	private void handleUnexpectedRestError(@Nullable Persistence persistence, @Nonnull String context, @Nonnull Throwable t) {
 		String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, context, t);
 		AbstractRestFilter.error(persistence, response, WebErrorUtil.genericMessage(reference));
 	}

@@ -161,6 +161,14 @@ public class AttachmentContentTest {
 	}
 
 	@Test
+	public void testGetContentLengthFromBytes() {
+		AttachmentContent ac = newAC("doc");
+		ac.attachment("test.txt", "text/plain", "hello world".getBytes());
+
+		assertEquals(11L, ac.getContentLength());
+	}
+
+	@Test
 	public void testGetContentStreamFromFile() throws Exception {
 		File f = tmp.newFile("test.txt");
 		try (FileOutputStream out = new FileOutputStream(f)) {
@@ -171,6 +179,25 @@ public class AttachmentContentTest {
 		try (InputStream is = ac.getContentStream()) {
 			assertArrayEquals("file content".getBytes(), is.readAllBytes());
 		}
+	}
+
+	@Test
+	public void testGetContentLengthFromFile() throws Exception {
+		File f = tmp.newFile("length.txt");
+		try (FileOutputStream out = new FileOutputStream(f)) {
+			out.write("file content".getBytes());
+		}
+		AttachmentContent ac = newAC("doc");
+		ac.attachment("length.txt", "text/plain", f);
+
+		assertEquals(f.length(), ac.getContentLength());
+	}
+
+	@Test
+	public void testGetContentLengthWithoutAttachment() {
+		AttachmentContent ac = newAC("doc");
+
+		assertEquals(-1L, ac.getContentLength());
 	}
 
 	@Test

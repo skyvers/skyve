@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.Collections;
@@ -686,6 +687,41 @@ class FacesActionsCoverageTest {
 	}
 
 	@Test
+	void editActionSetupViewForZoomInUpdatesViewWhenBindingResolves() throws Exception {
+		HashMap<String, Object> childValues = new HashMap<>();
+		DynamicBean child = new DynamicBean("admin", "Child", childValues);
+		HashMap<String, Object> parentValues = new HashMap<>();
+		parentValues.put("child", child);
+		DynamicBean parent = new DynamicBean("admin", "Parent", parentValues);
+		HashMap<String, Object> rootValues = new HashMap<>();
+		rootValues.put("parent", parent);
+		DynamicBean root = new DynamicBean("admin", "Root", rootValues);
+		ArrayDeque<String> zoomInBindings = new ArrayDeque<>();
+		FacesView facesView = mock(FacesView.class);
+		when(facesView.getZoomInBindings()).thenReturn(zoomInBindings);
+
+		invokeSetupViewForZoomIn(new EditAction(facesView), root, "parent,child");
+
+		assertEquals(List.of("parent", "child"), List.copyOf(zoomInBindings));
+		verify(facesView).setViewBinding("parent.child");
+		verify(facesView).setBizModuleParameter("admin");
+		verify(facesView).setBizDocumentParameter("Child");
+	}
+
+	@Test
+	void editActionSetupViewForZoomInLeavesViewAloneWhenBindingCannotResolve() throws Exception {
+		DynamicBean root = new DynamicBean("admin", "Root", new HashMap<>());
+		FacesView facesView = mock(FacesView.class);
+
+		invokeSetupViewForZoomIn(new EditAction(facesView), root, "missing");
+
+		verify(facesView, never()).getZoomInBindings();
+		verify(facesView, never()).setViewBinding(org.mockito.ArgumentMatchers.anyString());
+		verify(facesView, never()).setBizModuleParameter(org.mockito.ArgumentMatchers.anyString());
+		verify(facesView, never()).setBizDocumentParameter(org.mockito.ArgumentMatchers.anyString());
+	}
+
+	@Test
 	void addActionResolvesUserAndDocumentThenThrowsWhenCurrentBeanMissing() {
 		User user = mock(User.class);
 		Customer customer = mock(Customer.class);
@@ -802,6 +838,12 @@ class FacesActionsCoverageTest {
 		AbstractPersistence persistence = mock(AbstractPersistence.class, CALLS_REAL_METHODS);
 		persistence.setUser(user);
 		persistence.setForThread();
+	}
+
+	private static void invokeSetupViewForZoomIn(EditAction action, Bean bean, String bindingParameter) throws Exception {
+		Method method = EditAction.class.getDeclaredMethod("setupViewForZoomIn", Bean.class, String.class);
+		method.setAccessible(true);
+		method.invoke(action, bean, bindingParameter);
 	}
 
 	private static void installFailingRequiredValidationContext() {
