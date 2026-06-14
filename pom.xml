@@ -91,9 +91,13 @@
 		<sonar.organization>skyvers</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 		<sonar.coverage.jacoco.xmlReportPaths>${maven.multiModuleProjectDirectory}/skyve-coverage/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+		<!-- Excluded because of the javadoc preference -->
+		<sonar.cpd.exclusions>**/*</sonar.cpd.exclusions>
 		<sonar.issue.ignore.multicriteria>e1,e2</sonar.issue.ignore.multicriteria>
+		<!-- Packages are camel case in Skyve documents -->
 		<sonar.issue.ignore.multicriteria.e1.ruleKey>java:S120</sonar.issue.ignore.multicriteria.e1.ruleKey>
 		<sonar.issue.ignore.multicriteria.e1.resourceKey>**/src/main/java/modules/**/*.java</sonar.issue.ignore.multicriteria.e1.resourceKey>
+		<!-- Allow commented out code - its useful -->
 		<sonar.issue.ignore.multicriteria.e2.ruleKey>java:S125</sonar.issue.ignore.multicriteria.e2.ruleKey>
 		<sonar.issue.ignore.multicriteria.e2.resourceKey>**/*.java</sonar.issue.ignore.multicriteria.e2.resourceKey>
 	</properties>
