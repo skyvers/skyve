@@ -16,8 +16,20 @@ import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
-@XmlType(namespace = XMLMetaData.MODULE_NAMESPACE, 
+/**
+ * Abstract JAXB base for metadata query column descriptors.
+ *
+ * <p>Carries common column properties: binding path, display name, sort order,
+ * visibility, filter operator and expression, pixel width, and text alignment.
+ * Concrete subclasses add type-specific properties ({@link MetaDataQueryProjectedColumnMetaData}
+ * for projected data columns; {@link MetaDataQueryContentColumnMetaData} for binary
+ * content columns).
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see MetaDataQueryProjectedColumnMetaData
+ * @see MetaDataQueryContentColumnMetaData
+ */@XmlType(namespace = XMLMetaData.MODULE_NAMESPACE, 
 			propOrder = {"binding", 
 							"displayName",
 							"sortOrder", 

@@ -1,0 +1,5 @@
+extension/dist/
+extension/node_modules/
+extension/*.vsix
+mcp-server/dist/
+mcp-server/node_modules/

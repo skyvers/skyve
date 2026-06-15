@@ -16,7 +16,16 @@ import modules.admin.domain.HeapDumpList;
  * Action to download a selected heap dump file from the content directory.
  */
 public class DownloadHeapDump extends DownloadAction<HeapDumpList> {
-
+	/**
+	 * Validates that the selected heap dump still exists before download.
+	 *
+	 * @param bean
+	 *        the heap-dump selector bean
+	 * @param webContext
+	 *        the current web context
+	 * @throws Exception
+	 *         if validation fails
+	 */
 	@Override
 	public void prepare(HeapDumpList bean, WebContext webContext) throws Exception {
 		String selectedName = bean.getSelectedName();
@@ -27,6 +36,17 @@ public class DownloadHeapDump extends DownloadAction<HeapDumpList> {
 		}
 	}
 
+	/**
+	 * Builds the file download for the selected heap dump.
+	 *
+	 * @param bean
+	 *        the heap-dump selector bean
+	 * @param webContext
+	 *        the current web context
+	 * @return the heap dump file download
+	 * @throws Exception
+	 *         if download metadata cannot be constructed
+	 */
 	@Override
 	public Download download(
 			HeapDumpList bean,

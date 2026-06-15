@@ -10,7 +10,15 @@ import modules.admin.domain.HeapDumpList;
  * Action to select a heap dump file from the the list of heap dump files in the content directory.
  */
 public class SelectedHeapDump implements ServerSideAction<HeapDumpList> {
-
+	/**
+	 * Marks the list as not requiring refresh after explicit selection.
+	 *
+	 * @param bean
+	 *        the heap-dump list bean
+	 * @param webContext
+	 *        the current web context
+	 * @return a result wrapping {@code bean}
+	 */
 	@Override
 	public ServerSideActionResult<HeapDumpList> execute(HeapDumpList bean, WebContext webContext) {
 		bean.setRefresh(Boolean.FALSE);

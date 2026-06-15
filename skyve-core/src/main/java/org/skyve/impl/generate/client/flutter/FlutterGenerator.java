@@ -21,12 +21,18 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.metadata.customer.Customer;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
+/**
+ * Orchestrates Flutter client code generation for modules and views.
+ *
+ * <p>Coordinates routing, component/layout rendering, and output writing.
+ */
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate fragments of generated Flutter project output.
 public class FlutterGenerator {
     public static final String INDENT = "  ";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FlutterGenerator.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(FlutterGenerator.class);
 
     private GeneratorConfig config;
     Set<FlutterView> views = new TreeSet<>();

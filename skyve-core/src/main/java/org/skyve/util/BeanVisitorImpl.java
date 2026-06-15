@@ -27,6 +27,8 @@ import jakarta.annotation.Nullable;
  * rather than accept().
  */
 abstract class BeanVisitorImpl {
+	private static final String BEAN_ACCESSOR_CLASH = " Possible bean accessor clash with is/get methods?";
+
 	private boolean visitNulls = false;
 	private boolean visitInverses;
 	private boolean vectorCyclicDetection;
@@ -98,6 +100,7 @@ abstract class BeanVisitorImpl {
 	 * @param customer	The current customer.
 	 * @param visited	The set of breadcrumbs that have been visited in the past (for cyclic detection)
 	 */
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	private void visit(@Nonnull String binding,
 						@Nonnull Document document,
 						@Nullable Document owningDocument,
@@ -183,7 +186,7 @@ abstract class BeanVisitorImpl {
 								}
 								catch (ClassCastException e) {
 									throw new DomainException("Is relation " + relationName + " property getter overridden in the document extension class?" +
-																	" Possible bean accessor clash with is/get methods?", e);
+																	BEAN_ACCESSOR_CLASH, e);
 								}
 							}
 							if ((child != null) || visitNulls) {
@@ -199,7 +202,7 @@ abstract class BeanVisitorImpl {
 								}
 								
 								sb.setLength(0);
-								if (binding.length() != 0) {
+								if (! binding.isEmpty()) {
 									sb.append(binding).append('.');
 								}
 								sb.append(relationName);
@@ -222,7 +225,7 @@ abstract class BeanVisitorImpl {
 								}
 								catch (ClassCastException e) {
 									throw new DomainException("Is relation " + relationName + " property getter overridden in the document extension class?" +
-																	" Possible bean accessor clash with is/get methods?", e);
+																	BEAN_ACCESSOR_CLASH, e);
 								}
 							}
 							if (children != null) {
@@ -239,7 +242,7 @@ abstract class BeanVisitorImpl {
 										}
 										
 										sb.setLength(0);
-										if (binding.length() != 0) {
+										if (! binding.isEmpty()) {
 											sb.append(binding).append('.');
 										}
 										sb.append(relationName).append('[').append(i).append(']');
@@ -255,7 +258,7 @@ abstract class BeanVisitorImpl {
 								}
 								if ((i == 0) && visitNulls) { // no elements in the collection
 									sb.setLength(0);
-									if (binding.length() != 0) {
+									if (! binding.isEmpty()) {
 										sb.append(binding).append('.');
 									}
 									sb.append(relationName);
@@ -270,7 +273,7 @@ abstract class BeanVisitorImpl {
 							}
 							else {
 								sb.setLength(0);
-								if (binding.length() != 0) {
+								if (! binding.isEmpty()) {
 									sb.append(binding).append('.');
 								}
 								sb.append(relationName);
@@ -298,7 +301,7 @@ abstract class BeanVisitorImpl {
 						}
 						catch (ClassCastException e) {
 							throw new DomainException("Is parent property getter overridden in the document extension class?" +
-															" Possible bean accessor clash with is/get methods?", e);
+															BEAN_ACCESSOR_CLASH, e);
 						}
 					}
 					if ((parent != null) || visitNulls) {
@@ -314,7 +317,7 @@ abstract class BeanVisitorImpl {
 						}
 						
 						sb.setLength(0);
-						if (binding.length() != 0) {
+						if (! binding.isEmpty()) {
 							sb.append(binding).append('.');
 						}
 						sb.append(ChildBean.PARENT_NAME);

@@ -3,7 +3,15 @@ package org.skyve.metadata.view;
 import org.skyve.metadata.SerializableMetaData;
 
 /**
- * 
+ * Mixin interface for view elements that can be conditionally disabled.
+ *
+ * <p>The disabled state is driven by a named {@link org.skyve.metadata.model.document.Condition}
+ * evaluated on the current document bean. The convenience method
+ * {@link #setEnabledConditionName} accepts an enable condition and negates it
+ * (by prepending {@code not}) to produce the stored disabled condition name.
+ *
+ * @see Invisible
+ * @see Editable
  */
 public interface Disableable extends SerializableMetaData {
 	/**

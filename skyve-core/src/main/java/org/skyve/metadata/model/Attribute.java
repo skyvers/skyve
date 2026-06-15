@@ -22,14 +22,35 @@ import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
- * 
+ * Describes a single typed field or relation on a Skyve document.
+ *
+ * <p>Attributes are the building blocks of the domain model. Every field, scalar value,
+ * association, and collection declared in a document XML produces one {@code Attribute}
+ * instance. The {@link AttributeType} enum enumerates every supported Skyve type and
+ * maps each to its Java implementation class.
+ *
+ * <p>Attributes carry metadata governing how the framework treats them:
+ * <ul>
+ *   <li>Persistence ({@link #isPersistent()}) — whether the value is persisted to the database.</li>
+ *   <li>Usage ({@link #getUsage()}) — whether the attribute applies to the domain, the view, or both.</li>
+ *   <li>Sensitivity ({@link #getSensitivity()}) — data classification for backup redaction.</li>
+ *   <li>Change tracking ({@link #isTrackChanges()}) — whether mutations mark the bean as dirty.</li>
+ *   <li>Auditing ({@link #isAudited()}) — whether value changes are written to the audit log.</li>
+ * </ul>
+ *
+ * @see Model#getAttributes()
+ * @see AttributeType
  */
 public interface Attribute extends NamedMetaData, DecoratedMetaData {
 	/**
-	 * The Skyve type of the attribute.
-	 * This also encapsulates the implementation type.
+	 * The Skyve type system for document attributes.
+	 *
+	 * <p>Each constant maps a Skyve type name to the Java class used to represent
+	 * values of that type in the domain model. The mapping is available at runtime
+	 * via {@link #getImplementingType()} / {@link Attribute#getImplementingType()}.
 	 */
 	@XmlType
+	@SuppressWarnings("java:S115") // Suppress "Constant names should comply with a naming convention" as these are not constants but enum values
 	public enum AttributeType {
 		text(String.class), 
 		date(DateOnly.class), 
@@ -65,12 +86,26 @@ public interface Attribute extends NamedMetaData, DecoratedMetaData {
 		}
 	}
 	
+	/**
+	 * Governs when the attribute is included in generated or resolved metadata.
+	 *
+	 * <ul>
+	 *   <li>{@code domain} — the attribute is only present in the domain model (not in views).</li>
+	 *   <li>{@code view} — the attribute is only present in views (not persisted to domain).</li>
+	 *   <li>{@code both} — the attribute is present in both domain and view contexts.</li>
+	 * </ul>
+	 */
 	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+	@SuppressWarnings("java:S115") // Suppress "Constant names should comply with a naming convention" as these are not constants but enum values
 	public enum UsageType {
 		domain, view, both
 	}
 	
+	/**
+	 * Defines the Sensitivity enumeration.
+	 */
 	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+	@SuppressWarnings("java:S115") // Suppress "Constant names should comply with a naming convention" as these are not constants but enum values
 	public enum Sensitivity {	
 		/**
 		 * Data is freely available and does not require any special security measures. 
@@ -122,8 +157,10 @@ public interface Attribute extends NamedMetaData, DecoratedMetaData {
 	}
 	
 	/**
-	 * 
-	 * @return
+	 * Returns the i18n resource key (or literal string) for the human-readable attribute label.
+	 *
+	 * @return the display name key; may be {@code null}
+	 * @see #getLocalisedDisplayName()
 	 */
 	String getDisplayName();
 	
@@ -132,8 +169,10 @@ public interface Attribute extends NamedMetaData, DecoratedMetaData {
 	}
 	
 	/**
-	 * 
-	 * @return
+	 * Returns the i18n resource key (or literal string) for a tooltip or help description.
+	 *
+	 * @return the description key; may be {@code null}
+	 * @see #getLocalisedDescription()
 	 */
 	String getDescription();
 	
@@ -142,8 +181,9 @@ public interface Attribute extends NamedMetaData, DecoratedMetaData {
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Returns the Skyve type of this attribute.
+	 *
+	 * @return the attribute type; never {@code null}
 	 */
 	AttributeType getAttributeType();
 	
@@ -156,8 +196,10 @@ public interface Attribute extends NamedMetaData, DecoratedMetaData {
 	}
 
 	/**
-	 * Fields are scalar (a single value), Relations are not.
-	 * @return	whether scalar.
+	 * Returns whether this attribute holds a single value (as opposed to a collection or inverse relation).
+	 *
+	 * @return {@code true} for scalar types (text, integer, date, association, etc.);
+	 *         {@code false} for collection and inverse-many types
 	 */
 	boolean isScalar();
 
@@ -174,14 +216,18 @@ public interface Attribute extends NamedMetaData, DecoratedMetaData {
 	Sensitivity getSensitivity();
 	
 	/**
-	 * 
-	 * @return
+	 * Returns whether this attribute is persisted to the database.
+	 *
+	 * <p>Transient attributes (e.g. view-only calculated fields) return {@code false}.
+	 *
+	 * @return {@code true} if the attribute is stored in the database
 	 */
 	boolean isPersistent();
 	
 	/**
-	 * 
-	 * @return
+	 * Returns whether this attribute must have a non-null, non-empty value before save.
+	 *
+	 * @return {@code true} if the attribute is mandatory
 	 */
 	boolean isRequired();
 	
@@ -192,14 +238,19 @@ public interface Attribute extends NamedMetaData, DecoratedMetaData {
 	}
 	
 	/**
-	 * 
-	 * @return
+	 * Returns the domain type that governs what values are valid for this attribute.
+	 *
+	 * @return the domain type, or {@code null} if there are no domain value constraints
 	 */
 	DomainType getDomainType();
 
 	/**
-	 * 
-	 * @return
+	 * Returns whether this attribute is marked as deprecated.
+	 *
+	 * <p>Deprecated attributes are hidden from generated UIs and may be removed in a
+	 * future version of the module.
+	 *
+	 * @return {@code true} if deprecated
 	 */
 	boolean isDeprecated();
 	
@@ -226,14 +277,16 @@ public interface Attribute extends NamedMetaData, DecoratedMetaData {
 	boolean isTransient();
 
 	/**
-	 * 
-	 * @return
+	 * Returns the default widget to use when this attribute is rendered in a generated view.
+	 *
+	 * @return the default input widget; may be {@code null} if not configured
 	 */
 	InputWidget getDefaultInputWidget();
 	
 	/**
-	 * 
-	 * @return
+	 * Returns extended documentation for this attribute (HTML or plain text).
+	 *
+	 * @return the documentation; may be {@code null}
 	 */
 	String getDocumentation();
 }

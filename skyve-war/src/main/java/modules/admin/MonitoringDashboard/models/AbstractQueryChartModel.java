@@ -17,7 +17,6 @@ import modules.admin.domain.MonitoringDashboard.Period;
  * Provides common functionality for timestamp-based charting and data filtering for query operations.
  */
 public abstract class AbstractQueryChartModel extends AbstractMonitoringChartModel {
-
 	/**
 	 * Get the chart title for this specific chart type and query.
 	 * 
@@ -49,6 +48,10 @@ public abstract class AbstractQueryChartModel extends AbstractMonitoringChartMod
 	 */
 	protected abstract Map<Integer, ? extends Number> extractDataForTimePeriod(RequestMeasurements measurements, Period period);
 
+	/**
+	 * Executes getChartData.
+	 * @return the result
+	 */
 	@Override
 	public ChartData getChartData() {
 		MonitoringDashboard bean = getBean();

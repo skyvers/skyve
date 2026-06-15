@@ -19,7 +19,7 @@ import org.skyve.persistence.Persistence;
 public abstract class AbstractH2TestDispose extends AbstractH2Test {
 	@Override
 	@AfterEach
-	public void afterBase() {
+	void afterBase() {
 		super.afterBase(); // rollback and evict
 
 		// The call to commit and disposeAllPersistenceInstances will close and dispose the current connection.

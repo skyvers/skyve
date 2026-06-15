@@ -43,7 +43,9 @@ public class Rainbow {
 			return colourGradients.get(0).colourAt(number);
 		}
 
-		double segment = (maxNum - minNum) / (colourGradients.size());
+		@SuppressWarnings("java:S2184") // maxNum and minNum are double, so this is floating-point division.
+		double segment = (maxNum - minNum) / colourGradients.size();
+		@SuppressWarnings("java:S2184") // segment is double, so this is floating-point division.
 		int index = (int) Math.min(Math.floor((Math.max(number, minNum) - minNum) / segment), colourGradients.size() - 1);
 		return colourGradients.get(index).colourAt(number);
 	}	
@@ -66,6 +68,7 @@ public class Rainbow {
 				throw new RainbowException("Rainbow must have two or more colours.");
 			}
 
+			@SuppressWarnings("java:S2184") // maxNum and minNum are double, so this is floating-point division.
 			double increment = (maxNum - minNum) / (spectrum.length - 1);
 			ColourGradient firstGradient = new ColourGradient();
 			firstGradient.setGradient(spectrum[0], spectrum[1]);
@@ -159,7 +162,7 @@ class ColourGradient {
 			num = maxNum;
 		} 
 		double numRange = maxNum - minNum; 
-		double cPerUnit = (channelEnd - channelStart)/numRange;
+		double cPerUnit = ((double) channelEnd - channelStart) / numRange;
 		return (int) Math.round(cPerUnit * (num - minNum) + channelStart);
 	}
 	

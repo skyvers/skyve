@@ -4,8 +4,9 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.skyve</groupId>
 	<artifactId>skyve-parent</artifactId>
-	<version>9.5.0-SNAPSHOT</version>
+	<version>10.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
+	<description>Skyve</description>
 
 	<modules>
 		<module>skyve-core</module>
@@ -15,6 +16,7 @@
 		<module>skyve-content</module>
 		<module>skyve-tools</module>
 		<module>skyve-maven-plugin</module>
+		<module>skyve-coverage</module>
 	</modules>
 
 	<properties>
@@ -39,20 +41,21 @@
 		<hibernate-entitymanager.version>5.6.15.Final</hibernate-entitymanager.version>
 		<hibernate-spatial.version>5.6.15.Final</hibernate-spatial.version>
 		<ireport.version>4.7.0</ireport.version>
-		<jasperreports.version>6.20.5</jasperreports.version>
+		<jasperreports.version>7.0.6</jasperreports.version>
 		<java.version>17</java.version>
 		<javassist.version>3.20.0-GA</javassist.version>
 		<jakartaee-api.version>10.0.0</jakartaee-api.version>
 		<jts.version>1.19.0</jts.version>
 		<lucene.version>9.7.0</lucene.version>
-		<omnifaces.version>4.3</omnifaces.version>
+		<mojarra.version>4.0.11</mojarra.version>
+		<omnifaces.version>4.7.5</omnifaces.version>
 		<owasp.encoder.version>1.2.3</owasp.encoder.version>
 		<owasp.html.sanitizer.version>20220608.1</owasp.html.sanitizer.version>
 		<owasp.json.sanitizer.version>[1.0,)</owasp.json.sanitizer.version>
 		<!-- vulnerability in hibernate spatial transitive dependency -->
-		<postgresql.version>42.5.6</postgresql.version>
-		<pf4j.version>3.10.0</pf4j.version>
-		<bouncycastle.version>1.78.1</bouncycastle.version>
+		<postgresql.version>42.7.11</postgresql.version>
+		<pf4j.version>3.14.1</pf4j.version>
+		<bouncycastle.version>1.84</bouncycastle.version>
 		<poi.version>5.4.0</poi.version>
 		<primefaces.version>13.0.10</primefaces.version>
 		<primefaces-extensions.version>13.0.14</primefaces-extensions.version>
@@ -71,9 +74,10 @@
 		<junit-jupiter.version>5.10.2</junit-jupiter.version>
 		<mockito.version>4.2.0</mockito.version>
 		<jersey.test.version>3.1.10</jersey.test.version>
+		<jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
 		<weld.version>5.1.2.Final</weld.version>
-		<spring-security.version>6.5.5</spring-security.version>
-		<spring.version>6.2.11</spring.version>
+		<spring-security.version>6.5.10</spring-security.version>
+		<spring.version>6.2.17</spring.version>
 		<!-- freemarker report versions -->
 		<flying-saucer.version>9.6.1</flying-saucer.version>
 		<freemarker.version>2.3.32</freemarker.version>
@@ -86,6 +90,16 @@
 
 		<sonar.organization>skyvers</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
+		<sonar.coverage.jacoco.xmlReportPaths>${maven.multiModuleProjectDirectory}/skyve-coverage/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+		<!-- Excluded because of the javadoc preference -->
+		<sonar.cpd.exclusions>**/*</sonar.cpd.exclusions>
+		<sonar.issue.ignore.multicriteria>e1,e2</sonar.issue.ignore.multicriteria>
+		<!-- Packages are camel case in Skyve documents -->
+		<sonar.issue.ignore.multicriteria.e1.ruleKey>java:S120</sonar.issue.ignore.multicriteria.e1.ruleKey>
+		<sonar.issue.ignore.multicriteria.e1.resourceKey>**/src/main/java/modules/**/*.java</sonar.issue.ignore.multicriteria.e1.resourceKey>
+		<!-- Allow commented out code - its useful -->
+		<sonar.issue.ignore.multicriteria.e2.ruleKey>java:S125</sonar.issue.ignore.multicriteria.e2.ruleKey>
+		<sonar.issue.ignore.multicriteria.e2.resourceKey>**/*.java</sonar.issue.ignore.multicriteria.e2.resourceKey>
 	</properties>
 
 	<distributionManagement>
@@ -106,10 +120,10 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.13.0</version>
 					<configuration>
 						<forceJavacCompilerUse>true</forceJavacCompilerUse>
-						<source>${java.version}</source>
-						<target>${java.version}</target>
+						<release>${java.version}</release>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -412,6 +426,31 @@
 				</exclusions>
 			</dependency>
 			<dependency>
+				<groupId>net.sf.jasperreports</groupId>
+				<artifactId>jasperreports-pdf</artifactId>
+				<version>${jasperreports.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.sf.jasperreports</groupId>
+				<artifactId>jasperreports-excel-poi</artifactId>
+				<version>${jasperreports.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.sf.jasperreports</groupId>
+				<artifactId>jasperreports-jdt</artifactId>
+				<version>${jasperreports.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.sf.jasperreports</groupId>
+				<artifactId>jasperreports-charts</artifactId>
+				<version>${jasperreports.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.sf.jasperreports</groupId>
+				<artifactId>jasperreports-servlets</artifactId>
+				<version>${jasperreports.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-api</artifactId>
 				<version>${slf4j-api.version}</version>
@@ -602,6 +641,19 @@
 				<version>${mockito.version}</version>
 				<scope>test</scope>
 			</dependency>
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-junit-jupiter</artifactId>
+				<version>${mockito.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<!-- Jakarta Mail implementation used by tests that build real MimeMessage instances -->
+			<dependency>
+				<groupId>org.eclipse.angus</groupId>
+				<artifactId>jakarta.mail</artifactId>
+				<version>2.0.5</version>
+				<scope>test</scope>
+			</dependency>
 <!-- Removed until byte-buddy can be uplifted (through hibernate)
 			<dependency>
 				<groupId>org.mockito</groupId>
@@ -610,12 +662,6 @@
 				<scope>test</scope>
 			</dependency>
 -->
-			<dependency>
-				<groupId>org.mockito</groupId>
-				<artifactId>mockito-junit-jupiter</artifactId>
-				<version>${mockito.version}</version>
-				<scope>test</scope>
-			</dependency>
 			<dependency>
 				<groupId>org.hamcrest</groupId>
 				<artifactId>hamcrest</artifactId>
@@ -679,4 +725,42 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
+
+	<!-- To produce aggregate jacoco test coverage -->
+	<profiles>
+		<profile>
+			<id>coverage</id>
+			<build>
+				<plugins>
+						<plugin>
+						<groupId>org.jacoco</groupId>
+						<artifactId>jacoco-maven-plugin</artifactId>
+						<version>0.8.13</version>
+						<executions>
+							<!-- Override the pluginManagement jacoco-initialize execution
+							     to run after compilation (process-test-classes), preventing
+							     the JaCoCo agent from being attached to the Maven JVM before
+							     javac runs. Without this, JaCoCo corrupts JDK module class
+							     files (e.g. java.awt.BasicStroke) causing "bad class file"
+							     errors during compilation. -->
+							<execution>
+								<id>jacoco-initialize</id>
+								<phase>process-test-classes</phase>
+								<goals>
+									<goal>prepare-agent</goal>
+								</goals>
+							</execution>
+							<execution>
+								<id>jacoco-report</id>
+								<phase>prepare-package</phase>
+								<goals>
+									<goal>report</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>

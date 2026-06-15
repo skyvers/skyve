@@ -1,27 +1,33 @@
 package modules.test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.awt.Color;
 import java.nio.charset.Charset;
+import java.util.Objects;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
 import modules.test.domain.AllAttributesPersistent;
 
-public class UtilTests extends AbstractSkyveTest {
+@SuppressWarnings({ "java:S4144", "java:S1130", "java:S1854" })
+class UtilTests extends AbstractSkyveTest {
 
 	@Test
-	public void testPopulateFully() throws Exception {
-		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 5);
-
+	void testPopulateFully() throws Exception {
+		AllAttributesPersistent test = Objects.requireNonNull(
+				Assertions.assertDoesNotThrow(() -> Util.constructRandomInstance(u, m, aapd, 5)));
 		// Save and evict
-		test = p.save(test);
+		test = Objects.requireNonNull(p.save(test));
 		p.evictAllCached();
 
 		// Got the shell of the object back
-		test = p.retrieve(aapd, test.getBizId());
+		test = Objects.requireNonNull(p.retrieve(aapd, test.getBizId()));
 
 		Util.populateFully(test);
 
@@ -31,19 +37,19 @@ public class UtilTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testAttributeHasChanged() throws Exception {
+	void testAttributeHasChanged() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
 
 		test.originalValues().clear();
-		Assert.assertFalse("Should not have changed", test.hasChanged());
+		assertFalse(test.hasChanged(), "Should not have changed");
 
 		test.setText("TEST");
 
-		Assert.assertTrue("Should have changed", test.hasChanged());
+		assertTrue(test.hasChanged(), "Should have changed");
 	}
 
 	@Test
-	public void testNestedAttributeHasChanged() throws Exception {
+	void testNestedAttributeHasChanged() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 2);
 		test.getAggregatedCollection().clear();
 		test.getComposedCollection().clear();
@@ -53,67 +59,67 @@ public class UtilTests extends AbstractSkyveTest {
 		test.getComposedAssociation().originalValues().clear();
 		test.getEmbeddedAssociation().originalValues().clear();
 
-		Assert.assertFalse("Should not have changed", test.hasChanged());
+		assertFalse(test.hasChanged(), "Should not have changed");
 
 		test.getAggregatedAssociation().setText("TEST");
 
-		Assert.assertTrue("Should have changed", test.hasChanged());
+		assertTrue(test.hasChanged(), "Should have changed");
 	}
 
 	@Test
-	public void testCollectedAttributeHasChanged() throws Exception {
+	void testCollectedAttributeHasChanged() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
 		AllAttributesPersistent element = Util.constructRandomInstance(u, m, aapd, 1);
 		test.getAggregatedCollection().add(element);
 
 		test = p.save(test);
 
-		Assert.assertFalse("Should not have changed", test.hasChanged());
+		assertFalse(test.hasChanged(), "Should not have changed");
 
 		test.getAggregatedCollection().get(0).setText("TEST");
 
-		Assert.assertTrue("Should have changed", test.hasChanged());
+		assertTrue(test.hasChanged(), "Should have changed");
 	}
 
 	@Test
-	public void testTransientCollectionHasChanged() throws Exception {
+	void testTransientCollectionHasChanged() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
 		AllAttributesPersistent element = Util.constructRandomInstance(u, m, aapd, 1);
 
 		test.originalValues().clear();
 		element.originalValues().clear();
 
-		Assert.assertFalse("Should not have changed", test.hasChanged());
-		Assert.assertFalse("Should not have changed", element.hasChanged());
+		assertFalse(test.hasChanged(), "Should not have changed");
+		assertFalse(element.hasChanged(), "Should not have changed");
 
 		test.getAggregatedCollection().add(element);
 
-		Assert.assertTrue("Should have changed", test.hasChanged());
+		assertTrue(test.hasChanged(), "Should have changed");
 	}
 
 	@Test
-	public void testPersistentCollectedHasChanged() throws Exception {
+	void testPersistentCollectedHasChanged() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
 		AllAttributesPersistent element = Util.constructRandomInstance(u, m, aapd, 1);
 		test.getAggregatedCollection().add(element);
 
 		test = p.save(test);
 
-		Assert.assertFalse("Should not have changed", test.hasChanged());
+		assertFalse(test.hasChanged(), "Should not have changed");
 
 		test.getAggregatedCollection().get(0).setText("TEST");
 
-		Assert.assertTrue("Should have changed", test.hasChanged());
+		assertTrue(test.hasChanged(), "Should have changed");
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testUTF8Length() {
+	void testUTF8Length() {
 		Charset utf8 = Charset.forName("UTF-8");
 		AllCodepointsIterator iterator = new AllCodepointsIterator();
 		while (iterator.hasNext()) {
 			String test = new String(Character.toChars(iterator.next()));
-			Assert.assertEquals(test.getBytes(utf8).length, Util.UTF8Length(test));
+			assertEquals(test.getBytes(utf8).length, Util.utf8Length(test));
 		}
 	}
 
@@ -151,17 +157,17 @@ public class UtilTests extends AbstractSkyveTest {
 	
 	@Test
 	@SuppressWarnings("static-method")
-	public void testColour() {
-		Assert.assertEquals("#000000", Util.htmlColourCode(Color.BLACK));
-		Assert.assertEquals("#ffffff", Util.htmlColourCode(Color.WHITE));
-		Assert.assertEquals("#ff0000", Util.htmlColourCode(Color.RED));
-		Assert.assertEquals("#00ff00", Util.htmlColourCode(Color.GREEN));
-		Assert.assertEquals("#0000ff", Util.htmlColourCode(Color.BLUE));
+	void testColour() {
+		assertEquals("#000000", Util.htmlColourCode(Color.BLACK));
+		assertEquals("#ffffff", Util.htmlColourCode(Color.WHITE));
+		assertEquals("#ff0000", Util.htmlColourCode(Color.RED));
+		assertEquals("#00ff00", Util.htmlColourCode(Color.GREEN));
+		assertEquals("#0000ff", Util.htmlColourCode(Color.BLUE));
 
-		Assert.assertEquals(Color.BLACK, Util.htmlColour("#000000"));
-		Assert.assertEquals(Color.WHITE, Util.htmlColour("#FFFFFF"));
-		Assert.assertEquals(Color.RED, Util.htmlColour("#ff0000"));
-		Assert.assertEquals(Color.GREEN, Util.htmlColour("#00ff00"));
-		Assert.assertEquals(Color.BLUE, Util.htmlColour("#0000ff"));
+		assertEquals(Color.BLACK, Util.htmlColour("#000000"));
+		assertEquals(Color.WHITE, Util.htmlColour("#FFFFFF"));
+		assertEquals(Color.RED, Util.htmlColour("#ff0000"));
+		assertEquals(Color.GREEN, Util.htmlColour("#00ff00"));
+		assertEquals(Color.BLUE, Util.htmlColour("#0000ff"));
 	}
 }

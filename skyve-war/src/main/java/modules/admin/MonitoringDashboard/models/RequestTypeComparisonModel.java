@@ -17,9 +17,16 @@ import modules.admin.domain.MonitoringDashboard.Metric;
 import modules.admin.domain.MonitoringDashboard.Period;
 import modules.admin.domain.MonitoringDashboard.RequestType;
 
+/**
+ * Chart model comparing request performance across request types for selected periods and metrics.
+ */
 public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> {
-
+	/**
+	 * Builds comparison chart data for request metrics grouped by request type and period.
+	 * @return the result
+	 */
 	@Override
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	public ChartData getChartData() {
 		MonitoringDashboard bean = getBean();
 
@@ -43,6 +50,10 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 			backgrounds.add(Color.LIGHT_GRAY);
 			borders.add(Color.GRAY);
 			cd.setTitle("No Data");
+			cd.setLabels(documentLabels);
+			cd.setValues(values);
+			cd.setBackgrounds(backgrounds);
+			cd.setBorders(borders);
 			return cd;
 		}
 
@@ -102,6 +113,10 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 			borders.add(Color.GRAY);
 			cd.setTitle(getChartTitle(requestType, metric, period, topCount) +
 					" [No Data]");
+			cd.setLabels(documentLabels);
+			cd.setValues(values);
+			cd.setBackgrounds(backgrounds);
+			cd.setBorders(borders);
 			return cd;
 		}
 

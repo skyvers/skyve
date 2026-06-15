@@ -10,6 +10,13 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB descriptor for numeric-range bucketing.
+ *
+ * <p>Groups numeric values into explicitly configured range intervals.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ */
 @XmlRootElement(name = "numericRangeBucket", namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 public class NumericRangeBucketMetaData extends NumericRangeBucket {

@@ -389,7 +389,7 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-	public static enum ReportType implements Enumeration {
+	public enum ReportType implements Enumeration {
 		jasper("Jasper", "Jasper"),
 		freemarker("Freemarker", "Freemarker");
 
@@ -461,7 +461,7 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-	public static enum OutputFormat implements Enumeration {
+	public enum OutputFormat implements Enumeration {
 		CSV("CSV", "CSV"),
 		PDF("PDF", "PDF");
 
@@ -533,7 +533,7 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-	public static enum Mode implements Enumeration {
+	public enum Mode implements Enumeration {
 		SQL("sql", "SQL"),
 		bean("bean", "Bean");
 
@@ -609,7 +609,7 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-	public static enum WizardState implements Enumeration {
+	public enum WizardState implements Enumeration {
 		enterDetails("enterDetails", "enterDetails"),
 		enterMarkup("enterMarkup", "enterMarkup");
 
@@ -682,7 +682,7 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-	public static enum GenerateExisting implements Enumeration {
+	public enum GenerateExisting implements Enumeration {
 		generate("Generate", "Generate"),
 		existing("Existing", "Existing");
 

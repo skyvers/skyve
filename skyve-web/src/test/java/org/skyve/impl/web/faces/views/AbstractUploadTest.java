@@ -64,21 +64,19 @@ public class AbstractUploadTest {
 	@Mock
 	private FacesContext fc;
 
-	private AutoCloseable mocks;
-	
 	@Before
-	public void before() throws Exception {
-		mocks = MockitoAnnotations.openMocks(this);
+	@SuppressWarnings("deprecation")
+	public void before() {
+		MockitoAnnotations.initMocks(this);
 	}
 	
 	@After
 	public void after() throws Exception {
-		if (mocks != null) {
-			mocks.close();
-		}
+		// no-op
 	}
 	
 	@Test
+	@SuppressWarnings("java:S5961")
 	public void testUploadDefaultFiles() {
 		ContentUploadView content = new ContentUploadView();
 		TestUploadedFile file = new TestUploadedFile();
@@ -130,6 +128,7 @@ public class AbstractUploadTest {
 	}
 	
 	@Test
+	@SuppressWarnings("java:S5961")
 	public void testBizPortDefaultFiles() {
 		BizportImportView bizport = new BizportImportView();
 		TestUploadedFile file = new TestUploadedFile();

@@ -13,7 +13,17 @@ import org.skyve.web.WebContext;
 
 import modules.admin.domain.DataMaintenance;
 
+/**
+ * Triggers background reindexing based on Data Maintenance scope settings.
+ */
 public class Reindex implements ServerSideAction<DataMaintenance> {
+	/**
+	 * Performs the execute operation.
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public ServerSideActionResult<DataMaintenance> execute(DataMaintenance bean, WebContext webContext)
 	throws Exception {

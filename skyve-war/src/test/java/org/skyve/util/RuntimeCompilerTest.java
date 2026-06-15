@@ -2,6 +2,7 @@ package org.skyve.util;
 
 import java.io.File;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
 import java.util.Arrays;
 
 import javax.tools.JavaFileObject;
@@ -32,7 +33,7 @@ public class RuntimeCompilerTest {
 		finally {
 			File classFile = new File(UtilImpl.TEMP_DIRECTORY, "Calculator.class");
 			if (classFile.exists()) {
-				classFile.delete();
+				Files.delete(classFile.toPath());
 			}
 		}
 	}

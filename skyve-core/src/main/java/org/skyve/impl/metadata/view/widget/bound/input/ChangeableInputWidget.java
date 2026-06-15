@@ -18,6 +18,14 @@ import jakarta.xml.bind.annotation.XmlElementRefs;
 import jakarta.xml.bind.annotation.XmlElementWrapper;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * Abstract JAXB base for input widgets that support value-change events.
+ *
+ * <p>Extends {@link FocusableInputWidget} with an onChange event handler list.
+ * Most concrete input controls extend this class.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ */
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"changedActions"})
 public abstract class ChangeableInputWidget extends FocusableInputWidget implements Changeable {

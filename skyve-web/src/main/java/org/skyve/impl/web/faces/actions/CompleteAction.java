@@ -31,8 +31,10 @@ import org.skyve.util.monitoring.Monitoring;
 import org.skyve.util.monitoring.RequestKey;
 import org.slf4j.Logger;
 
+/**
+ * Executes a Faces callback action within the current Skyve web context.
+ */
 public class CompleteAction extends FacesAction<List<String>> {
-
     private static final Logger FACES_LOGGER = Category.FACES.logger();
     private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
 
@@ -41,6 +43,14 @@ public class CompleteAction extends FacesAction<List<String>> {
 	private String binding;
 	private CompleteType complete;
 	
+	/**
+	 * Creates a completion action for the specified query fragment and binding.
+	 *
+	 * @param facesView the active Faces view state
+	 * @param query the user-entered completion query text
+	 * @param binding the target binding to complete against
+	 * @param complete the completion strategy to execute
+	 */
 	public CompleteAction(FacesView facesView,
 							String query,
 							String binding,
@@ -51,7 +61,14 @@ public class CompleteAction extends FacesAction<List<String>> {
 		this.complete = complete;
 	}
 
+	/**
+	 * Executes completion for the configured binding using either previous values or bizlet completion logic.
+	 *
+	 * @return completion candidates suitable for UI suggestion rendering
+	 * @throws Exception when completion processing fails unexpectedly
+	 */
 	@Override
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // Complexity OK
 	public List<String> callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("CompleteAction - EXECUTE complete {} for binding {}", query, binding);
 		AbstractPersistence persistence = AbstractPersistence.get();
@@ -107,24 +124,23 @@ public class CompleteAction extends FacesAction<List<String>> {
 				throw new SecurityException("read this data", user.getName());
 			}
 
-			if (document.isPersistable()) { // persistent document
-				if ((attribute == null) || // implicit attribute or
-						attribute.isPersistent()) { // explicit and persistent attribute
-					final String moduleName = document.getOwningModuleName();
-					final String documentName = document.getName();
-					DocumentQuery q = persistence.newDocumentQuery(moduleName, documentName);
-					q.addBoundProjection(attributeName, attributeName);
-					q.setDistinct(true);
-					if (query != null) {
-						q.getFilter().addLike(attributeName, new StringBuilder(query.length() + 2).append("%").append(query).append("%").toString());
-					}
-					// NB return Object as the type could be anything
-					List<Object> results = q.setMaxResults(100).scalarResults(Object.class);
-					result = new ArrayList<>(results.size());
-					for (Object value : results) {
-						if (value != null) {
-							result.add(value.toString());
-						}
+			if (document.isPersistable() &&
+					((attribute == null) || // implicit attribute or
+						attribute.isPersistent())) { // explicit and persistent attribute
+				final String moduleName = document.getOwningModuleName();
+				final String documentName = document.getName();
+				DocumentQuery q = persistence.newDocumentQuery(moduleName, documentName);
+				q.addBoundProjection(attributeName, attributeName);
+				q.setDistinct(true);
+				if (query != null) {
+					q.getFilter().addLike(attributeName, new StringBuilder(query.length() + 2).append("%").append(query).append("%").toString());
+				}
+				// NB return Object as the type could be anything
+				List<Object> results = q.setMaxResults(100).scalarResults(Object.class);
+				result = new ArrayList<>(results.size());
+				for (Object value : results) {
+					if (value != null) {
+						result.add(value.toString());
 					}
 				}
 			}

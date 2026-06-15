@@ -1,0 +1,3 @@
+class ##CLASS## {
+  final String value = "##VALUE##";
+}

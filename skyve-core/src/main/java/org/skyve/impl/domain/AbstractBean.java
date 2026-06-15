@@ -25,15 +25,36 @@ import org.skyve.metadata.module.Module;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
+/**
+ * Base implementation of {@link org.skyve.domain.Bean} providing change-tracking,
+ * dynamic attribute support, and binding utilities.
+ *
+ * <p>Change tracking works by saving the original value of a property in
+ * {@code originalValues} before each setter call so that
+ * {@link #isChanged()} and {@link #originalValues} can report unsaved mutations.
+ * {@link ChangeTrackingArrayList} delegates to the same mechanism for collection
+ * mutations.
+ *
+ * <p>Dynamic attributes (those not declared in document metadata) are stored in a
+ * lazily-created {@link org.apache.commons.beanutils.LazyDynaMap} and accessed via
+ * the {@link #getDynamic()} binding.
+ *
+ * <p>Threading: thread-confined. Instances must not be shared across threads
+ * while a persistence session is open.
+ *
+ * @see org.skyve.domain.Bean
+ * @see AbstractPersistentBean
+ * @see ChangeTrackingArrayList
+ */
 public abstract class AbstractBean implements Bean {
 	private static final long serialVersionUID = -5241897716950549433L;
 
     private static final Logger DIRTY_LOGGER = Category.DIRTY.logger();
 
     // LOGGER to use in sub-classes - this is instance scoped for polymorphism and re-instated after deserialzation in readResolve() 
-    protected transient Logger LOGGER = LoggerFactory.getLogger(getClass());
+    protected transient Logger LOGGER = SkyveLoggerFactory.getLogger(getClass());
 
 	// Holds the old (replaced) values when a setter is called.
 	private Map<String, Serializable> originalValues = new TreeMap<>();
@@ -48,6 +69,7 @@ public abstract class AbstractBean implements Bean {
 	 * @param propertyName
 	 * @param propertyValue
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	protected final void preset(String propertyName, Serializable propertyValue) {
 		try {
 			if (! originalValues.containsKey(propertyName)) {
@@ -89,6 +111,7 @@ public abstract class AbstractBean implements Bean {
 	}
 	
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public boolean isChanged() {
 		Customer customer = null;
 		Module module = null;
@@ -357,7 +380,7 @@ public abstract class AbstractBean implements Bean {
 	 * @see BeanProvider#injectFields(Object)
 	 */
 	protected Object readResolve() {
-	    LOGGER = LoggerFactory.getLogger(getClass());
+	    LOGGER = SkyveLoggerFactory.getLogger(getClass());
 	    UtilImpl.inject(this);
 	    return this;
 	}

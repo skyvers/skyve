@@ -23,6 +23,10 @@ import org.commonmark.renderer.html.HtmlNodeRendererContext;
 import org.commonmark.renderer.html.HtmlWriter;
 import org.skyve.util.Icons;
 
+/**
+ * Renders Markdown nodes into Skyve document XML snippets for script-assisted document generation.
+ */
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate Skyve script/XML rendering fragments.
 public class SkyveDocumentNodeRenderer implements NodeRenderer {
 
 	private final HtmlWriter html;
@@ -45,6 +49,11 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 	private static final String ICON = "<iconStyleClass>" + Icons.FONT_DOCUMENT + "</iconStyleClass>";
 	private static final String BIZKEY = "<bizKey expression=\"%s\"/>";
 
+	/**
+	 * Creates a node renderer using default output formatting.
+	 *
+	 * @param context HTML renderer context.
+	 */
 	public SkyveDocumentNodeRenderer(HtmlNodeRendererContext context) {
 		this.html = context.getWriter();
 
@@ -57,11 +66,22 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 		alertText.put("style", "color: red");
 	}
 
+	/**
+	 * Creates a node renderer with optional visible indentation spacing.
+	 *
+	 * @param context HTML renderer context.
+	 * @param htmlSpacing Whether indentation spacing should be emitted.
+	 */
 	public SkyveDocumentNodeRenderer(HtmlNodeRendererContext context, boolean htmlSpacing) {
 		this(context);
 		this.htmlSpacing = htmlSpacing;
 	}
 
+	/**
+	 * Returns the Markdown node types handled by this renderer.
+	 *
+	 * @return Node classes that should be routed to this renderer.
+	 */
 	@Override
 	public Set<Class<? extends Node>> getNodeTypes() {
 		// return the node types we want to use this renderer for
@@ -74,8 +94,13 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 		return types;
 	}
 
+	/**
+	 * Renders supported Markdown nodes into Skyve document XML fragments.
+	 *
+	 * @param node The node to render.
+	 */
 	@Override
-	@SuppressWarnings("boxing")
+	@SuppressWarnings({"boxing", "java:S3776"}) // Complexity OK
 	public void render(Node node) {
 		if (node instanceof Heading heading) {
 			if (heading.getLevel() == 2) {
@@ -214,6 +239,7 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 		}
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void createAttribute(String attributeName, String[] parts, boolean required, Node line) {
 		// identify the type from the parts
 		String type = null;

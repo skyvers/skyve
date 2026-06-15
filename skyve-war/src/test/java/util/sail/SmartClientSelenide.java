@@ -6,6 +6,7 @@ import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selectors.byId;
 import static com.codeborne.selenide.Selenide.$;
 
+
 import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
@@ -256,7 +257,7 @@ public class SmartClientSelenide extends Selenide<
 				// Wait for the pick list drop down
 				element = locate(String.format("%s/item[Class=ComboBoxItem||name=_combo]/pickList", locator));
 				if (!element.is(visible)) {
-					element.scrollIntoView(true);
+					element.scrollTo();
 				}
 
 				element.should(exist, Duration.ofSeconds(30)).shouldBe(visible);
@@ -503,6 +504,7 @@ public class SmartClientSelenide extends Selenide<
 	 *
 	 * @param locator the locator string for logging purposes
 	 */
+	@SuppressWarnings("java:S2925")
 	private static void sleepForRetry(String locator) {
 		try {
 			Thread.sleep(SLEEP_FOR_RETRY_MILLIS);
@@ -665,7 +667,7 @@ public class SmartClientSelenide extends Selenide<
 	 * @param millis the number of milliseconds to sleep
 	 * @param errorMessage the error message to include if the sleep is interrupted
 	 */
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "java:S2925"})
 	public void sleep(long millis, String errorMessage) {
 		try {
 			Thread.sleep(millis);
@@ -704,7 +706,7 @@ public class SmartClientSelenide extends Selenide<
 			try {
 				// Scroll the element into view on the page and see if the element can be made visible
 				if (!element.is(visible, Duration.ofMillis(250))) {
-					element.scrollIntoView(true);
+						element.scrollTo();
 				}
 				
 				clickIt(element, doubleClick);
@@ -777,7 +779,7 @@ public class SmartClientSelenide extends Selenide<
 		element.should(exist);
 		
 		if (!element.is(visible)) {
-			element.scrollIntoView(true);
+			element.scrollTo();
 		}
 
 		element.shouldBe(visible)

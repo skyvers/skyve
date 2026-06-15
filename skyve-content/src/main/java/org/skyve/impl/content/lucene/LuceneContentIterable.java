@@ -16,15 +16,31 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.util.TimeUtil;
 
+/**
+ * Iterates over all records in the Lucene content index.
+ *
+ * <p>Iteration streams results in pages to avoid loading the full index result set into
+ * memory at once.
+ */
+
+@SuppressWarnings("resource")
 public class LuceneContentIterable implements ContentIterable {
 	private Directory directory = null;
 	
+	/**
+	 * Creates an iterable for the supplied Lucene directory.
+	 *
+	 * @param directory the Lucene directory containing content records
+	 */
 	public LuceneContentIterable(Directory directory) {
 		this.directory = directory;
 	}
 	
+	/**
+	 * Provides paged iteration over Lucene documents.
+	 */
 	class LuceneContentIterator implements ContentIterator {
-		private final int PAGE_SIZE = 1000;
+		private static final int PAGE_SIZE = 1000;
 		
 		private IndexReader reader = null;
 		private long totalHits = 0L;
@@ -32,6 +48,9 @@ public class LuceneContentIterable implements ContentIterable {
 		private ScoreDoc[] scoreDocs = null;
 		private int index = 0;
 		
+		/**
+		 * Opens an index reader and prepares search state.
+		 */
 		private LuceneContentIterator() {
 			try {
 				reader = DirectoryReader.open(directory);
@@ -43,41 +62,53 @@ public class LuceneContentIterable implements ContentIterable {
 			totalHits = reader.numDocs();
 		}
 		
+		/**
+		 * Returns the next indexed content result from the current page.
+		 *
+		 * @return the next result, or {@code null} when no more results remain
+		 */
 		@Override
+		@SuppressWarnings("java:S2272") // NoSuchElement exception not required as this should be in a for loop
 		public SearchResult next() {
-			if ((scoreDocs != null) && (scoreDocs.length > index)) {
-				int doc = scoreDocs[index++].doc;
-				try {
-					Document document = reader.storedFields().document(doc);
-					SearchResult result = new SearchResult();
-					result.setAttributeName(document.get(AbstractContentManager.ATTRIBUTE_NAME));
-					result.setBizDataGroupId(document.get(Bean.DATA_GROUP_ID));
-					result.setContentId(document.get(AbstractContentManager.CONTENT_ID));
-					String bizId = document.get(Bean.DOCUMENT_ID);
-					if (result.isAttachment()) { // attachment content
-						result.setBizId(bizId);
-					}
-					else { // bean content
-						result.setBizId(bizId.substring(0, bizId.length() - 1)); // remove the '~'
-					}
-					result.setModuleName(document.get(Bean.MODULE_KEY));
-					result.setDocumentName(document.get(Bean.DOCUMENT_KEY));
-					result.setCustomerName(document.get(Bean.CUSTOMER_NAME));
-					result.setBizUserId(document.get(Bean.USER_ID));
-					result.setExcerpt(document.get(AbstractContentManager.CONTENT));
-					String lastModified = document.get(AbstractContentManager.LAST_MODIFIED);
-					if (lastModified != null) {
-						result.setLastModified(TimeUtil.parseISODate(lastModified));
-					}
-					return result;
-				}
-				catch (Exception e) {
-					throw new DomainException("Cannot get the document " + doc + " from the content index", e);
-				}
+			if ((scoreDocs == null) || (scoreDocs.length <= index)) {
+				return null;
 			}
-			return null;
+
+			int doc = scoreDocs[index++].doc;
+			try {
+				Document document = reader.storedFields().document(doc);
+				SearchResult result = new SearchResult();
+				result.setAttributeName(document.get(AbstractContentManager.ATTRIBUTE_NAME));
+				result.setBizDataGroupId(document.get(Bean.DATA_GROUP_ID));
+				result.setContentId(document.get(AbstractContentManager.CONTENT_ID));
+				String bizId = document.get(Bean.DOCUMENT_ID);
+				if (result.isAttachment()) { // attachment content
+					result.setBizId(bizId);
+				}
+				else { // bean content
+					result.setBizId(bizId.substring(0, bizId.length() - 1)); // remove the '~'
+				}
+				result.setModuleName(document.get(Bean.MODULE_KEY));
+				result.setDocumentName(document.get(Bean.DOCUMENT_KEY));
+				result.setCustomerName(document.get(Bean.CUSTOMER_NAME));
+				result.setBizUserId(document.get(Bean.USER_ID));
+				result.setExcerpt(document.get(AbstractContentManager.CONTENT));
+				String lastModified = document.get(AbstractContentManager.LAST_MODIFIED);
+				if (lastModified != null) {
+					result.setLastModified(TimeUtil.parseISODate(lastModified));
+				}
+				return result;
+			}
+			catch (Exception e) {
+				throw new DomainException("Cannot get the document " + doc + " from the content index", e);
+			}
 		}
 		
+		/**
+		 * Loads the first page lazily and then subsequent pages as needed.
+		 *
+		 * @return {@code true} when more results are available
+		 */
 		@Override
 		public boolean hasNext() {
 			if (scoreDocs == null) { // never issued a query
@@ -89,7 +120,7 @@ public class LuceneContentIterable implements ContentIterable {
 				}
 				index = 0;
 			}
-			else if (scoreDocs.length == index) { // exhausted this page
+			else if ((scoreDocs.length > 0) && (scoreDocs.length == index)) { // exhausted this page
 				final ScoreDoc after = scoreDocs[index - 1]; // get the last one searched in the last page
 				try {
 					scoreDocs = searcher.searchAfter(after, new MatchAllDocsQuery(), PAGE_SIZE).scoreDocs;
@@ -101,23 +132,44 @@ public class LuceneContentIterable implements ContentIterable {
 			}
 
 			boolean more = scoreDocs.length > index;
-			if ((! more) && (reader != null)) {
-				try {
-					reader.close();
-				}
-				catch (IOException e) {
-					throw new DomainException("Cannot close the reader from the content index", e);
-				}
+			if (! more) {
+				closeReader();
 			}
 			return more;
 		}
+
+		private void closeReader() {
+			if (reader == null) {
+				return;
+			}
+
+			try {
+				reader.close();
+			}
+			catch (IOException e) {
+				throw new DomainException("Cannot close the reader from the content index", e);
+			}
+			finally {
+				reader = null;
+			}
+		}
 		
+		/**
+		 * Returns the total number of indexed documents at iterator creation time.
+		 *
+		 * @return total indexed document count
+		 */
 		@Override
 		public long getTotalHits() {
 			return totalHits;
 		}
 	}
 	
+	/**
+	 * Returns an iterator over indexed content.
+	 *
+	 * @return a new Lucene content iterator
+	 */
 	@Override
 	public ContentIterator iterator() {
 		return new LuceneContentIterator();

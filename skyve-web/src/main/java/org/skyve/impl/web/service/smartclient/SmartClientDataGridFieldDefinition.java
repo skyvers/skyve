@@ -16,10 +16,28 @@ import org.skyve.util.BeanValidator;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 
+/**
+ * SmartClient data-grid field definition.
+ */
 public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefinition {
     protected boolean editable;
     protected String defaultValueJavascriptExpression;
 
+	/**
+	 * Builds a SmartClient data-grid field definition from widget and document metadata.
+	 *
+	 * @param user active user used for localisation and metadata rules
+	 * @param customer active customer metadata
+	 * @param module module containing the target document
+	 * @param document target document metadata
+	 * @param widget source widget metadata
+	 * @param dataGridBindingOverride optional binding override, or {@code null}
+	 * @param hasFormatter whether a display formatter is applied
+	 * @param runtime whether runtime domain values should be resolved
+	 * @param isField whether the definition is generated for a field context
+	 * @param uxui active UX/UI profile name
+	 */
+    @SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
     protected SmartClientDataGridFieldDefinition(User user,
 			    									Customer customer, 
 			                                        Module module, 
@@ -89,61 +107,76 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 		}
     }
 
+	/**
+	 * Indicates whether the field can be edited in the SmartClient grid.
+	 *
+	 * @return {@code true} when the field can be edited
+	 */
 	public boolean getEditable() {
 		return editable;
 	}
 
+	/**
+	 * Sets whether the field can be edited in the SmartClient grid.
+	 *
+	 * @param editable whether the field can be edited
+	 */
 	public void setEditable(boolean editable) {
 		this.editable = editable;
 	}
 
+	/**
+	 * Produces the SmartClient JavaScript field definition payload for this data-grid field.
+	 *
+	 * @return SmartClient JavaScript field definition payload
+	 */
 	public String toJavascript() {
-        StringBuilder result = new StringBuilder(128);
+		StringBuilder result = new StringBuilder(128);
 
-        result.append("name:'");
-        result.append(name);
-        result.append("',title:'");
-        result.append(OWASP.escapeJsString(title));
-        result.append("',type:'");
-        result.append(type).append('\'');
-        if (defaultValueJavascriptExpression != null) {
+		result.append("name:'");
+		result.append(name);
+		result.append("',title:'");
+		result.append(OWASP.escapeJsString(title));
+		result.append("',type:'");
+		result.append(type).append('\'');
+		if (defaultValueJavascriptExpression != null) {
 			result.append(",defaultValue:").append(defaultValueJavascriptExpression);
-        }
-        if (editorType != null) {
-            result.append(",editorType:'").append(editorType).append('\'');
-        }
-        appendEditorProperties(result, true, null, null);
-        if (required) {
-        	result.append(",bizRequired:true,requiredMessage:'");
-        	if (requiredMessage == null) {
-        		result.append(OWASP.escapeJsString(Util.nullSafeI18n(BeanValidator.VALIDATION_REQUIRED_KEY, title)));
-        	}
-        	else {
-        		result.append(OWASP.escapeJsString(requiredMessage));
-        	}
-        	result.append('\'');
-        }
-        if (valueMap != null) {
-            result.append(",valueMap:").append(getValueMapAsString());
-        }
-        if (align != null) {
-        	result.append(",align:'").append(align.toTextAlignmentString()).append('\'');
-        }
-        if (length != null) {
-            result.append(",length:").append(length);
-        }
-        if (! editable) {
-        	result.append(",canEdit:false");
-        }
-        if (pixelWidth != null) {
-        	result.append(",width:").append(pixelWidth);
-        }
-        if (escape) {
-        	result.append(",escapeHTML:true");
-        }
+		}
+		if (editorType != null) {
+			result.append(",editorType:'").append(editorType).append('\'');
+		}
+		appendEditorProperties(result, true, null, null);
+		if (required) {
+			result.append(",bizRequired:true,requiredMessage:'");
+			if (requiredMessage == null) {
+				result.append(OWASP.escapeJsString(Util.nullSafeI18n(BeanValidator.VALIDATION_REQUIRED_KEY, title)));
+			}
+			else {
+				result.append(OWASP.escapeJsString(requiredMessage));
+			}
+			result.append('\'');
+		}
+		if (valueMap != null) {
+			result.append(",valueMap:").append(getValueMapAsString());
+		}
+		if (align != null) {
+			result.append(",align:'").append(align.toTextAlignmentString()).append('\'');
+		}
+		if (length != null) {
+			result.append(",length:").append(length);
+		}
+		if (! editable) {
+			result.append(",canEdit:false");
+		}
+		if (pixelWidth != null) {
+			result.append(",width:").append(pixelWidth);
+		}
+		if (escape) {
+			result.append(",escapeHTML:true");
+		}
 //TODO fix this
 //result.append(",changed:'alert(item.grid.getSelectedRecord().bizId)'");
-        
-        return result.toString();
-    }
+
+		return result.toString();
+	}
 }

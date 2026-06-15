@@ -1,7 +1,6 @@
 package org.skyve.impl.web.faces.sse;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
@@ -25,6 +24,7 @@ import jakarta.ws.rs.core.Response;
  * context must be configured <em>without</em> the user-injection servlet
  * filter used by {@link SseClientHandlerTest}.
  */
+@SuppressWarnings("java:S4144")
 class SseClientHandlerNoUserTest extends JerseyTest {
 
 	/**
@@ -32,6 +32,7 @@ class SseClientHandlerNoUserTest extends JerseyTest {
 	 * each test to ensure a clean baseline.
 	 */
 	@BeforeEach
+	@SuppressWarnings("static-method")
 	void clearReceivers() {
 		PushMessage.stopReaper();
 		PushMessage.RECEIVERS.clear();
@@ -42,6 +43,7 @@ class SseClientHandlerNoUserTest extends JerseyTest {
 	 * test in case an assertion failure left the collection dirty.
 	 */
 	@AfterEach
+	@SuppressWarnings("static-method")
 	void cleanupReceivers() {
 		PushMessage.stopReaper();
 		PushMessage.RECEIVERS.clear();
@@ -82,12 +84,13 @@ class SseClientHandlerNoUserTest extends JerseyTest {
 	 */
 	@Test
 	void testUnauthenticatedRequestDoesNotRegisterReceiver() {
-		assertThat(PushMessage.RECEIVERS.size(), is(0));
+		assertEquals(0, PushMessage.RECEIVERS.size());
 
-		Response response = target("stream").request().get();
-		response.close();
+		try (Response response = target("stream").request().get()) {
+			assertEquals(200, response.getStatus());
+		}
 
-		assertThat("Unauthenticated request must not register a push receiver",
-				PushMessage.RECEIVERS.size(), is(0));
+		assertEquals(0, PushMessage.RECEIVERS.size(),
+				"Unauthenticated request must not register a push receiver");
 	}
 }

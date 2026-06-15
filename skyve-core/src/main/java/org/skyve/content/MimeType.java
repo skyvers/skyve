@@ -9,6 +9,7 @@ import jakarta.annotation.Nullable;
 /**
  * Encapsulates the main possible mime types, their content type and file suffixes
  */
+@SuppressWarnings("java:S115") // Suppress "Constant names should comply with a naming convention" as these are not constants but enum values
 public enum MimeType {
 	access("application/x-msaccess", "mdb"),
 	aiff("audio/x-aiff", "aiff", "aif", "aifc"), 

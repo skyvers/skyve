@@ -25,6 +25,21 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 @XmlRootElement(namespace = XMLMetaData.ROUTER_NAMESPACE)
 @XmlType(namespace = XMLMetaData.ROUTER_NAMESPACE, propOrder = {"uxuis", "unsecuredUrlPrefixes", "properties"})
+/**
+ * JAXB root element for the router descriptor ({@code router.xml}).
+ *
+ * <p>A {@code Router} contains an ordered list of {@link Route} instances and an
+ * optional set of UI ({@link UxUiMetadata}) configurations.  The router is loaded
+ * once during application startup and used by the web layer to map incoming
+ * requests to outcome URLs or UI configurations.
+ *
+ * <p>Threading: not thread-safe.  The instance is written during JAXB unmarshalling
+ * and is read-only once placed in the repository cache.
+ *
+ * @see Route
+ * @see UxUiMetadata
+ * @see org.skyve.metadata.router.UxUi
+ */
 public class Router implements ConvertibleMetaData<Router>, DecoratedMetaData, ReloadableMetaData {
 	private static final long serialVersionUID = 670690452538129424L;
 
@@ -35,22 +50,41 @@ public class Router implements ConvertibleMetaData<Router>, DecoratedMetaData, R
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
 	private Map<String, String> properties = new TreeMap<>();
 
-	
+	/**
+	 * Returns the source metadata last-modified timestamp used for reload checks.
+	 *
+	 * @return source metadata last-modified timestamp in milliseconds
+	 */
 	@Override
 	public long getLastModifiedMillis() {
 		return lastModifiedMillis;
 	}
 
+	/**
+	 * Sets the source metadata last-modified timestamp used for reload checks.
+	 *
+	 * @param lastModifiedMillis source metadata last-modified timestamp in milliseconds
+	 */
 	@XmlTransient
 	public void setLastModifiedMillis(long lastModifiedMillis) {
 		this.lastModifiedMillis = lastModifiedMillis;
 	}
 
+	/**
+	 * Returns the timestamp of the last repository check for this router metadata.
+	 *
+	 * @return last checked timestamp in milliseconds
+	 */
 	@Override
 	public long getLastCheckedMillis() {
 		return lastCheckedMillis;
 	}
 
+	/**
+	 * Updates the timestamp of the last repository check for this router metadata.
+	 *
+	 * @param lastCheckedMillis last checked timestamp in milliseconds
+	 */
 	@Override
 	@XmlTransient
 	public void setLastCheckedMillis(long lastCheckedMillis) {
@@ -69,40 +103,97 @@ public class Router implements ConvertibleMetaData<Router>, DecoratedMetaData, R
 	@XmlElement(namespace = XMLMetaData.ROUTER_NAMESPACE, name = "unsecured")
 	private Set<String> unsecuredUrlPrefixes = new TreeSet<>();
 
+	/**
+	 * Returns configured URL prefixes that bypass security checks.
+	 *
+	 * @return mutable set of unsecured URL prefixes
+	 */
 	public Set<String> getUnsecuredUrlPrefixes() {
 		return unsecuredUrlPrefixes;
 	}
 
+	/**
+	 * Returns the fully-qualified class name of the UX/UI selector implementation.
+	 *
+	 * @return selector implementation class name, or {@code null}
+	 */
 	public String getUxuiSelectorClassName() {
 		return uxuiSelectorClassName;
 	}
+
+	/**
+	 * Sets the fully-qualified class name of the UX/UI selector implementation.
+	 *
+	 * @param uxuiSelectorClassName selector implementation class name
+	 */
 	@XmlAttribute(name = "uxuiSelectorClassName")
 	public void setUxuiSelectorClassName(String uxuiSelectorClassName) {
 		this.uxuiSelectorClassName = uxuiSelectorClassName;
 	}
 
+	/**
+	 * Returns decorator properties defined for this router descriptor.
+	 *
+	 * @return mutable router property map
+	 */
 	@Override
 	public Map<String, String> getProperties() {
 		return properties;
 	}
 	
-	public TaggingUxUiSelector getUxuiSelector() throws Exception {
+	/**
+	 * Returns the lazily-instantiated UX/UI selector implementation.
+	 *
+	 * <p>Side effects: loads and instantiates {@code uxuiSelectorClassName} via the
+	 * thread context class loader on first call.
+	 *
+	 * @return the selector instance, never {@code null}
+	 * @throws MetaDataException if the selector class cannot be loaded or instantiated
+	 */
+	public TaggingUxUiSelector getUxuiSelector() {
 		if (uxuiSelector == null) {
-			Class<?> type = Thread.currentThread().getContextClassLoader().loadClass(uxuiSelectorClassName);
-			uxuiSelector = (TaggingUxUiSelector) type.getDeclaredConstructor().newInstance();
+			try {
+				Class<?> type = Thread.currentThread().getContextClassLoader().loadClass(uxuiSelectorClassName);
+				uxuiSelector = (TaggingUxUiSelector) type.getDeclaredConstructor().newInstance();
+			}
+			catch (Exception e) {
+				throw new MetaDataException("Cannot load UX/UI selector class " + uxuiSelectorClassName, e);
+			}
 		}
 		return uxuiSelector;
 	}
 
+	/**
+	 * Returns configured UX/UI metadata entries in declaration order.
+	 *
+	 * @return mutable list of UX/UI metadata entries
+	 */
 	public List<UxUiMetadata> getUxUis() {
 		return uxuis;
 	}
 
+	/**
+	 * Selects the first matching route outcome URL for the supplied UX/UI and criteria.
+	 *
+	 * @param uxui the UX/UI name to evaluate
+	 * @param criteria request criteria to match
+	 * @return the matched outcome URL, or {@code null} when no route matches
+	 */
 	public String selectOutcomeUrl(String uxui, RouteCriteria criteria) {
 		Route route = selectRoute(uxui, criteria);
 		return (route == null) ? null : route.getOutcomeUrl();
 	}
 	
+	/**
+	 * Selects the first route that matches the supplied UX/UI and request criteria.
+	 *
+	 * <p>Routes are evaluated in declaration order. A route with no criteria is
+	 * treated as a match-all fallback for that UX/UI.
+	 *
+	 * @param uxui the UX/UI name to evaluate
+	 * @param criteria request criteria to match
+	 * @return the first matching route, or {@code null} if none match
+	 */
 	public Route selectRoute(String uxui, RouteCriteria criteria) {
 		UxUiMetadata selectedUxUi = uxuiMap.get(uxui);
 		if (selectedUxUi != null) {
@@ -122,6 +213,13 @@ public class Router implements ConvertibleMetaData<Router>, DecoratedMetaData, R
 		return null;
 	}
 	
+	/**
+	 * Determines whether a URL prefix is exempt from security checks.
+	 *
+	 * @param urlPrefixToTest the request URL prefix to test
+	 * @return {@code true} when the prefix starts with any configured unsecured
+	 *         prefix, otherwise {@code false}
+	 */
 	public boolean isUnsecured(String urlPrefixToTest) {
 		if (urlPrefixToTest != null) {
 			for (String unsecuredURLPrefix : unsecuredUrlPrefixes) {
@@ -133,6 +231,15 @@ public class Router implements ConvertibleMetaData<Router>, DecoratedMetaData, R
         return false;
 	}
 	
+	/**
+	 * Normalises this router after JAXB unmarshalling.
+	 *
+	 * <p>Side effects: rebuilds the internal UX/UI lookup map and trims unsecured
+	 * URL prefixes, discarding blank entries.
+	 *
+	 * @param metaDataName metadata path used in error reporting
+	 * @return this router instance
+	 */
 	@Override
 	public Router convert(String metaDataName) {
 		// populate the UX/UI map
@@ -162,6 +269,7 @@ public class Router implements ConvertibleMetaData<Router>, DecoratedMetaData, R
 	 * Thus the broadest routes should go in the global router and the module router should be mainly for public pages. 
 	 * @param routerToMerge	Router to merge into this router.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void merge(Router routerToMerge) {
 		// Set the last modified to the latest timestamp of any router to be merged
 		setLastModifiedMillis(Math.max(getLastModifiedMillis(), routerToMerge.getLastModifiedMillis()));

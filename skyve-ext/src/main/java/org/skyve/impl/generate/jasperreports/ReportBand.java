@@ -5,8 +5,13 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+/**
+ * Describes a JasperReports report band (title, column header, detail, summary,
+ * etc.) used during programmatic {@code .jrxml} generation.
+ */
 public class ReportBand {
-	public static enum BandType {
+	@SuppressWarnings("java:S115") // Enum names are JasperReports band names.
+	public enum BandType {
 		background,
 		title,
 		pageHeader,
@@ -19,7 +24,8 @@ public class ReportBand {
 		noData
 	}
 
-	public static enum SplitType {
+	@SuppressWarnings("java:S115") // Enum names are JasperReports split type names.
+	public enum SplitType {
 		immediate,
 		prevent,
 		stretch;

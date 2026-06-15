@@ -11,12 +11,19 @@ import org.springframework.security.crypto.password.PasswordEncoder;
  * TODO Legacy hashing with no SALT - REMOVE when RevSA password time period expires 
  * @author mike
  */
+@SuppressWarnings("java:S2068") // false positive - this is not a hard coded password, it's a legacy hashing algorithm that we need to support for a period of time
 public class SkyveLegacyPasswordEncoder implements PasswordEncoder {
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public String encode(CharSequence rawPassword) {
 		return encode(rawPassword, Util.getPasswordHashingAlgorithm());
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean matches(CharSequence rawPassword, String encodedPassword) {
 		int encodedPasswordLength = encodedPassword.length();
@@ -27,6 +34,9 @@ public class SkyveLegacyPasswordEncoder implements PasswordEncoder {
 		return matches(rawPassword, encodedPassword, passwordHashingAlgorithm);
 	}
 	
+	/**
+	 * Performs encode.
+	 */
 	public static String encode(CharSequence rawPassword, String passwordHashingAlgorithm) {
 		try {
 			MessageDigest md = MessageDigest.getInstance(passwordHashingAlgorithm);
@@ -38,6 +48,9 @@ public class SkyveLegacyPasswordEncoder implements PasswordEncoder {
 		}
 	}
 	
+	/**
+	 * Performs matches.
+	 */
 	public static boolean matches(CharSequence rawPassword, String encodedPassword, String passwordHashingAlgorithm) {
 		return encodedPassword.equals(encode(rawPassword, passwordHashingAlgorithm));
 	}

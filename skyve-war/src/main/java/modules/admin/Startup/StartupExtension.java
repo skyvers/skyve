@@ -32,14 +32,20 @@ import modules.admin.Country.CountryExtension;
 import modules.admin.Country.CountryService;
 import modules.admin.domain.Startup;
 
+/**
+ * Extends {@link Startup} with logic to load, compare, and persist runtime
+ * configuration overrides for the admin setup experience.
+ */
 public class StartupExtension extends Startup {
-
-	@Inject
-	private transient Customer customer;
-	@Inject
-	private transient CountryService countryService;
-
 	private static final long serialVersionUID = -8931459527432227257L;
+
+	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
+	private transient Customer customer;
+
+	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
+	private transient CountryService countryService;
 
 	static final String ACCOUNT_STANZA_KEY = "account";
 	static final String ACCOUNT_ALLOW_SELF_REGISTRATION_KEY = "allowUserSelfRegistration";
@@ -79,8 +85,12 @@ public class StartupExtension extends Startup {
 	static final String SMTP_SERVER_KEY = "server";
 
 	static final String SECURITY_STANZA_KEY = "security";
+	static final String SECURITY_IP_ADDRESS_CHECKS_KEY = "ipAddressChecks";
+	static final String SECURITY_IP_ADDRESS_HISTORY_CHECK_COUNT_KEY = "ipAddressHistoryCheckCount";
+	static final String SECURITY_CONCURRENT_SESSION_WARNINGS_KEY = "concurrentSessionWarnings";
 	static final String SECURITY_NOTIFICATIONS_EMAIL_KEY = "securityNotificationsEmail";
 	static final String SECURITY_GEO_IP_NOTIFICATIONS_KEY = "geoIPBlockNotifications";
+	static final String SECURITY_CONCURRENT_SESSION_NOTIFICATIONS_KEY = "concurrentSessionNotifications";
 	static final String SECURITY_PASSWORD_CHANGE_NOTIFICATIONS_KEY = "passwordChangeNotifications";
 	static final String SECURITY_DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS_KEY = "differentCountryLoginNotifications";
 	static final String SECURITY_IP_ADDRESS_CHANGE_NOTIFICATIONS_KEY = "ipAddressChangeNotifications";
@@ -91,6 +101,7 @@ public class StartupExtension extends Startup {
 	 * Populate this bean's attributes from the current configuration properties values
 	 * read from the application json and override json.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void loadProperties() {
 		setApiGoogleMapsKey(UtilImpl.GOOGLE_MAPS_V3_API_KEY);
 		setApiGoogleRecaptchaSiteKey(UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY);
@@ -158,6 +169,11 @@ public class StartupExtension extends Startup {
 		// load country list type
 		setGeoIPCountryListType(UtilImpl.GEO_IP_WHITELIST ? GeoIPCountryListType.whitelist : GeoIPCountryListType.blacklist);
 
+		// IP tracking configurations
+		setIpAddressChecks(Boolean.valueOf(UtilImpl.IP_ADDRESS_CHECKS));
+		setIpAddressHistoryCheckCount(Integer.valueOf(UtilImpl.IP_ADDRESS_HISTORY_CHECK_COUNT));
+		setConcurrentSessionWarnings(Boolean.valueOf(UtilImpl.CONCURRENT_SESSION_WARNINGS));
+
 		// convert country codes from csv to list
 		List<CountryExtension> countries = getGeoIPCountries();
 		countries.clear();
@@ -169,6 +185,7 @@ public class StartupExtension extends Startup {
 		// Security notification configurations
 		setSecurityNotificationsEmail(UtilImpl.SECURITY_NOTIFICATIONS_EMAIL_ADDRESS);
 		setGeoIPBlockNotifications(Boolean.valueOf(UtilImpl.GEO_IP_BLOCK_NOTIFICATIONS));
+		setConcurrentSessionNotifications(Boolean.valueOf(UtilImpl.CONCURRENT_SESSION_NOTIFICATIONS));
 		setPasswordChangeNotifications(Boolean.valueOf(UtilImpl.PASSWORD_CHANGE_NOTIFICATIONS));
 		setDifferentCountryLoginNotifications(Boolean.valueOf(UtilImpl.DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS));
 		setIpAddressChangeNotifications(Boolean.valueOf(UtilImpl.IP_ADDRESS_CHANGE_NOTIFICATIONS));
@@ -179,7 +196,7 @@ public class StartupExtension extends Startup {
 	/**
 	 * Write any modified configuration properties to the application's override json file.
 	 * 
-	 * @throws IOException
+	 * @throws IOException if writing the override file fails
 	 */
 	public void saveConfiguration() throws IOException {
 		if (Boolean.TRUE.equals(getDontShowAgain())) {
@@ -209,7 +226,7 @@ public class StartupExtension extends Startup {
 	 * property to false so that the startup configuration page is not shown again
 	 * for this Skyve application.
 	 * 
-	 * @throws IOException
+	 * @throws IOException if writing the override file fails
 	 */
 	@SuppressWarnings({ "unchecked" })
 	public void setDontShow() throws IOException {
@@ -267,7 +284,7 @@ public class StartupExtension extends Startup {
 	 * @param properties The current override configuration property map
 	 * @return The map of api properties which have been modified
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "java:S3776"}) // Complexity OK
 	private Map<String, Object> putApi(final Map<String, Object> properties) {
 
 		// initialise or get the existing property map
@@ -584,6 +601,14 @@ public class StartupExtension extends Startup {
 		return map;
 	}
 
+	/**
+	 * Removes empty stanza maps and marshals the remaining override settings to
+	 * JSON.
+	 *
+	 * @param properties override properties grouped by stanza
+	 * @return marshaled JSON when at least one property remains, otherwise
+	 *         {@code null}
+	 */
 	@SuppressWarnings({ "unchecked" })
 	String marshall(final Map<String, Object> properties) {
 		if (!properties.isEmpty()) {
@@ -626,6 +651,24 @@ public class StartupExtension extends Startup {
 		}
 
 		// add any values to the override configuration if they have changed
+		boolean ipAddressChecks = BooleanUtils.isNotFalse(getIpAddressChecks()); // default to true
+		if (UtilImpl.IP_ADDRESS_CHECKS != ipAddressChecks) {
+			map.put(SECURITY_IP_ADDRESS_CHECKS_KEY, ipAddressChecks);
+			UtilImpl.IP_ADDRESS_CHECKS = ipAddressChecks;
+		}
+
+		int ipAddressHistoryCheckCount = getIpAddressHistoryCheckCount() == null ? 1 : getIpAddressHistoryCheckCount();
+		if (UtilImpl.IP_ADDRESS_HISTORY_CHECK_COUNT != ipAddressHistoryCheckCount) {
+			map.put(SECURITY_IP_ADDRESS_HISTORY_CHECK_COUNT_KEY, ipAddressHistoryCheckCount);
+			UtilImpl.IP_ADDRESS_HISTORY_CHECK_COUNT = ipAddressHistoryCheckCount;
+		}
+
+		boolean concurrentSessionWarnings = BooleanUtils.isNotFalse(getConcurrentSessionWarnings()); // default to true
+		if (UtilImpl.CONCURRENT_SESSION_WARNINGS != concurrentSessionWarnings) {
+			map.put(SECURITY_CONCURRENT_SESSION_WARNINGS_KEY, concurrentSessionWarnings);
+			UtilImpl.CONCURRENT_SESSION_WARNINGS = concurrentSessionWarnings;
+		}
+
 		String securityNotificationsEmail = getSecurityNotificationsEmail();
 		if (!Objects.equals(UtilImpl.SECURITY_NOTIFICATIONS_EMAIL_ADDRESS, securityNotificationsEmail)) {
 			map.put(SECURITY_NOTIFICATIONS_EMAIL_KEY, securityNotificationsEmail);
@@ -636,6 +679,12 @@ public class StartupExtension extends Startup {
 		if (UtilImpl.GEO_IP_BLOCK_NOTIFICATIONS != geoIPBlockNotifications) {
 			map.put(SECURITY_GEO_IP_NOTIFICATIONS_KEY, geoIPBlockNotifications);
 			UtilImpl.GEO_IP_BLOCK_NOTIFICATIONS = geoIPBlockNotifications;
+		}
+
+		boolean concurrentSessionNotifications = BooleanUtils.isNotFalse(getConcurrentSessionNotifications()); // default to true
+		if (UtilImpl.CONCURRENT_SESSION_NOTIFICATIONS != concurrentSessionNotifications) {
+			map.put(SECURITY_CONCURRENT_SESSION_NOTIFICATIONS_KEY, concurrentSessionNotifications);
+			UtilImpl.CONCURRENT_SESSION_NOTIFICATIONS = concurrentSessionNotifications;
 		}
 
 		boolean passwordChangeNotifications = BooleanUtils.isNotFalse(getPasswordChangeNotifications()); // default to true
@@ -673,11 +722,10 @@ public class StartupExtension extends Startup {
 	}
 
 	/**
-	 * Marshals the specified map of properties to JSON and creates or overwrites the
-	 * override JSON folder for this Skyve application.
+	 * Writes override configuration JSON to the archive override file.
 	 * 
-	 * @param properties The map of override properties to write
-	 * @throws IOException
+	 * @param json the JSON payload to persist
+	 * @throws IOException if file output fails
 	 */
 	@SuppressWarnings("static-method")
 	void writeConfiguration(final String json) throws IOException {
@@ -691,10 +739,11 @@ public class StartupExtension extends Startup {
 	}
 
 	/**
-	 * This method is used to clear any api values in the json override file found in the content folder
+	 * Clears API stanza values from the in-memory override map and persists the
+	 * updated configuration.
 	 * 
-	 * @param properties
-	 * @throws IOException
+	 * @param properties the override properties map to mutate
+	 * @throws IOException if the updated override file cannot be written
 	 */
 	public void clearApi(Map<String, Object> properties) throws IOException {
 		// initialise or get the existing property map

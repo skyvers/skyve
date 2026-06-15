@@ -8,11 +8,26 @@ import org.skyve.impl.metadata.view.event.SetInvisibleEventAction;
 import org.skyve.impl.metadata.view.event.ToggleDisabledEventAction;
 import org.skyve.impl.metadata.view.event.ToggleVisibilityEventAction;
 
+/**
+ * Provides fluent conversion for supported {@link EventAction} implementations.
+ */
 public abstract class FluentEventAction {
+	/**
+	 * Creates a fluent event action base.
+	 */
 	protected FluentEventAction() {
 		// nothing to see
 	}
 
+	/**
+	 * Converts an event action instance into the corresponding fluent wrapper type.
+	 *
+	 * @param action
+	 *            the event action to convert
+	 * @return the matching fluent event action wrapper
+	 * @throws IllegalArgumentException
+	 *             if the action type is unsupported
+	 */
 	protected static FluentEventAction from(EventAction action) {
 		if (action instanceof RerenderEventAction rerender) {
 			return new FluentRerenderEventAction().from(rerender);
@@ -37,5 +52,8 @@ public abstract class FluentEventAction {
 		}
 	}
 
+	/**
+	 * Returns the wrapped event action instance.
+	 */
 	abstract EventAction get();
 }

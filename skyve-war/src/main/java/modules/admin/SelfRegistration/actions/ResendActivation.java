@@ -14,11 +14,18 @@ import modules.admin.domain.User;
  * attempts to register an account which already exists but has not been activated.
  */
 public class ResendActivation implements ServerSideAction<SelfRegistrationExtension> {
-
+	/**
+	 * Reissues activation details and sends a fresh registration email.
+	 *
+	 * @param bean the registration bean containing the user to reactivate
+	 * @param webContext the current web context
+	 * @return the action result wrapping the supplied bean
+	 * @throws Exception if user retrieval, activation update, or email delivery
+	 *         fails
+	 */
 	@Override
 	public ServerSideActionResult<SelfRegistrationExtension> execute(SelfRegistrationExtension bean, WebContext webContext)
 			throws Exception {
-
 		if (bean != null) {
 			if (bean.getUser().getContact() == null || bean.getUser().getContact().getName() == null) {
 				// this came from a public page, retrieve the user
@@ -38,5 +45,4 @@ public class ResendActivation implements ServerSideAction<SelfRegistrationExtens
 
 		return new ServerSideActionResult<>(bean);
 	}
-
 }

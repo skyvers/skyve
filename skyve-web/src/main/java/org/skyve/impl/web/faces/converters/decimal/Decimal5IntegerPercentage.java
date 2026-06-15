@@ -10,8 +10,21 @@ import jakarta.faces.context.FacesContext;
 import jakarta.faces.convert.Converter;
 import jakarta.faces.convert.ConverterException;
 
+/**
+ * Converts JSF values between formatted UI strings and Skyve domain representations for this format.
+ */
+@SuppressWarnings("java:S2176") // Converter class names intentionally match metadata and Faces converter IDs.
 public class Decimal5IntegerPercentage extends org.skyve.domain.types.converters.decimal.Decimal5IntegerPercentage
 										implements Converter<Decimal5> {
+	/**
+	 * Parses a UI string value into the corresponding Skyve domain value for this converter format.
+	 *
+	 * @param fc the active JSF context used to resolve locale and conversion error handling
+	 * @param component the component requesting conversion
+	 * @param value the submitted UI value
+	 * @return the converted domain value, or {@code null} when the submitted value is blank
+	 * @throws ConverterException when the submitted value cannot be parsed using this format
+	 */
 	@Override
 	public Decimal5 getAsObject(FacesContext fc, UIComponent component, String value) {
     	String processedValue = UtilImpl.processStringValue(value);
@@ -27,6 +40,14 @@ public class Decimal5IntegerPercentage extends org.skyve.domain.types.converters
 		return null;
 	}
 
+	/**
+	 * Formats a Skyve domain value to the display string expected by this converter format.
+	 *
+	 * @param fc the active JSF context used to resolve locale-specific formatting
+	 * @param component the component requesting conversion
+	 * @param value the domain value to format
+	 * @return a formatted display value, or an empty string when the value is {@code null} or formatting fails
+	 */
 	@Override
 	public String getAsString(FacesContext fc, UIComponent component, Decimal5 value) {
 		if (value == null) {

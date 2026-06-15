@@ -8,8 +8,10 @@ import org.skyve.impl.util.UtilImpl;
 import modules.admin.domain.ControlPanel;
 import modules.admin.domain.ModuleDocument;
 
+/**
+ * Adds admin-only helper state used by Control Panel actions.
+ */
 public class ControlPanelExtension extends ControlPanel {
-
 	private static final long serialVersionUID = -6204655500999983605L;
 
 	private String unescapedResults;
@@ -27,6 +29,10 @@ public class ControlPanelExtension extends ControlPanel {
 		return docName;
 	}
 	
+	/**
+	 * Performs the trapException operation.
+	 * @param e the e value
+	 */
 	public void trapException(Exception e) {
 		StringWriter sw = new StringWriter(512);
 		PrintWriter pw = new PrintWriter(sw);
@@ -43,6 +49,13 @@ public class ControlPanelExtension extends ControlPanel {
 		setResults(results, true);
 	}
 	
+	/**
+	 * Stores query/action output and optionally escapes characters that interfere with
+	 * XML/markup rendering.
+	 *
+	 * @param results The textual output to store.
+	 * @param escape Whether to escape markup-sensitive characters before storing.
+	 */
 	public void setResults(String results, boolean escape) {
 		unescapedResults = results;
 		if ((escape) && (results != null)) {
@@ -53,65 +66,130 @@ public class ControlPanelExtension extends ControlPanel {
 		}
 	}
 
+	/**
+	 * Returns the last result payload before any escaping or formatting is applied.
+	 *
+	 * @return The unescaped result payload.
+	 */
 	public String getUnescapedResults() {
 		return unescapedResults;
 	}
 
+	/**
+	 * Returns whether Bizlet tracing is currently enabled.
+	 *
+	 * @return {@code true} when Bizlet tracing is enabled.
+	 */
 	@Override
 	public Boolean getBizletTrace() {
 		return Boolean.valueOf(UtilImpl.BIZLET_TRACE);
 	}
 
+	/**
+	 * Enables or disables Bizlet tracing.
+	 *
+	 * @param bizletTrace The new Bizlet trace flag.
+	 */
 	@Override
 	public void setBizletTrace(Boolean bizletTrace) {
 		UtilImpl.BIZLET_TRACE = Boolean.TRUE.equals(bizletTrace);
 	}
 
+	/**
+	 * Returns whether command tracing is currently enabled.
+	 *
+	 * @return {@code true} when command tracing is enabled.
+	 */
 	@Override
 	public Boolean getCommandTrace() {
 		return Boolean.valueOf(UtilImpl.COMMAND_TRACE);
 	}
 
+	/**
+	 * Enables or disables command tracing.
+	 *
+	 * @param commandTrace The new command trace flag.
+	 */
 	@Override
 	public void setCommandTrace(Boolean commandTrace) {
 		UtilImpl.COMMAND_TRACE = Boolean.TRUE.equals(commandTrace);
 	}
 
+	/**
+	 * Returns whether content tracing is currently enabled.
+	 *
+	 * @return {@code true} when content tracing is enabled.
+	 */
 	@Override
 	public Boolean getContentTrace() {
 		return Boolean.valueOf(UtilImpl.CONTENT_TRACE);
 	}
 
+	/**
+	 * Enables or disables content tracing.
+	 *
+	 * @param contentTrace The new content trace flag.
+	 */
 	@Override
 	public void setContentTrace(Boolean contentTrace) {
 		UtilImpl.CONTENT_TRACE = Boolean.TRUE.equals(contentTrace);
 	}
 
+	/**
+	 * Returns whether dirty-state tracing is currently enabled.
+	 *
+	 * @return {@code true} when dirty-state tracing is enabled.
+	 */
 	@Override
 	public Boolean getDirtyTrace() {
 		return Boolean.valueOf(UtilImpl.DIRTY_TRACE);
 	}
 
+	/**
+	 * Enables or disables dirty-state tracing.
+	 *
+	 * @param dirtyTrace The new dirty-state trace flag.
+	 */
 	@Override
 	public void setDirtyTrace(Boolean dirtyTrace) {
 		UtilImpl.DIRTY_TRACE = Boolean.TRUE.equals(dirtyTrace);
 	}
 
+	/**
+	 * Returns whether Faces lifecycle tracing is currently enabled.
+	 *
+	 * @return {@code true} when Faces lifecycle tracing is enabled.
+	 */
 	@Override
 	public Boolean getFacesTrace() {
 		return Boolean.valueOf(UtilImpl.FACES_TRACE);
 	}
 
+	/**
+	 * Enables or disables Faces lifecycle tracing.
+	 *
+	 * @param facesTrace The new Faces trace flag.
+	 */
 	@Override
 	public void setFacesTrace(Boolean facesTrace) {
 		UtilImpl.FACES_TRACE = Boolean.TRUE.equals(facesTrace);
 	}
 
+	/**
+	 * Returns whether HTTP tracing is currently enabled.
+	 *
+	 * @return {@code true} when HTTP tracing is enabled.
+	 */
 	@Override
 	public Boolean getHttpTrace() {
 		return Boolean.valueOf(UtilImpl.HTTP_TRACE);
 	}
 
+	/**
+	 * Enables or disables HTTP tracing.
+	 *
+	 * @param httpTrace The new HTTP trace flag.
+	 */
 	@Override
 	public void setHttpTrace(Boolean httpTrace) {
 		UtilImpl.HTTP_TRACE = Boolean.TRUE.equals(httpTrace);
@@ -140,11 +218,21 @@ public class ControlPanelExtension extends ControlPanel {
 		UtilImpl.QUERY_TRACE = Boolean.TRUE.equals(queryTrace);
 	}
 
+	/**
+	 * Returns whether security tracing is currently enabled.
+	 *
+	 * @return {@code true} when security tracing is enabled.
+	 */
 	@Override
 	public Boolean getSecurityTrace() {
 		return Boolean.valueOf(UtilImpl.SECURITY_TRACE);
 	}
 
+	/**
+	 * Enables or disables security tracing.
+	 *
+	 * @param securityTrace The new security trace flag.
+	 */
 	@Override
 	public void setSecurityTrace(Boolean securityTrace) {
 		UtilImpl.SECURITY_TRACE = Boolean.TRUE.equals(securityTrace);
@@ -172,5 +260,4 @@ public class ControlPanelExtension extends ControlPanel {
 	public void setXmlTrace(Boolean xmlTrace) {
 		UtilImpl.XML_TRACE = Boolean.TRUE.equals(xmlTrace);
 	}
-
 }

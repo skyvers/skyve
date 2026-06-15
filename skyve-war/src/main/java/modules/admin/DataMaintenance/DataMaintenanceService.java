@@ -6,7 +6,7 @@ import org.skyve.util.Util;
 import jakarta.enterprise.inject.Default;
 
 /**
- * This class acts as a service layer to encapsulate domain logic.
+ * Provides service operations for admin data maintenance.
  *
  * Add this line to classes that wish to use it: @Inject private transient DataMaintenanceService dataMaintenanceService;
  */

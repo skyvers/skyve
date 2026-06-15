@@ -7,6 +7,22 @@ import org.skyve.domain.Bean;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
+/**
+ * Result-fetching contract for queries that return typed {@link Bean} instances.
+ *
+ * <p>The four methods follow the standard Skyve result-fetching convention:
+ * <ul>
+ *   <li>{@link #beanResults()} — returns all matching beans as a list.
+ *   <li>{@link #beanResult()} — returns the first bean or {@code null}.
+ *   <li>{@link #retrieveBean()} — returns exactly one bean or throws.
+ *   <li>{@link #beanIterable()} — streams beans lazily from a cursor;
+ *       must be closed after use.
+ * </ul>
+ *
+ * <p>The generic type {@code T} is inferred from the calling context.
+ * For type-safe retrieval the calling code should declare the expected type;
+ * an unchecked cast is performed internally.
+ */
 public interface BeanQuery {
 	/**
 	 * Returns a list of all the beans which match this query.

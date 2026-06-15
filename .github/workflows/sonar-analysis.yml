@@ -20,11 +20,11 @@ jobs:
       pull-requests: write
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       with:
         fetch-depth: 0  # Disable shallow clone for better analysis
     - name: Set up JDK 17
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4
       with:
         java-version: '17'
         distribution: 'temurin'
@@ -32,9 +32,12 @@ jobs:
     - name: Build with Maven
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      run: mvn -B package org.jacoco:jacoco-maven-plugin:0.8.10:prepare-agent test org.jacoco:jacoco-maven-plugin:0.8.10:report org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+      run: >-
+        mvn -B -Pcoverage -pl skyve-coverage -am
+        -DskipIntegrationTests=true -DskipUnitTests=false
+        verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
     - name: Test Report
-      uses: dorny/test-reporter@v2
+      uses: dorny/test-reporter@df6247429542221bc30d46a036ee47af1102c451 # v2
       if: success() || failure()
       with:
         name: Test Report

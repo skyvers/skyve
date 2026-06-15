@@ -1,5 +1,9 @@
 package org.skyve.util;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,15 +16,15 @@ import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
+import org.skyve.impl.security.LegacyBCryptPasswordEncoder;
 import org.skyve.impl.security.SkyveLegacyPasswordEncoder;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.HttpServletRequestResponse;
 import org.skyve.impl.web.WebContainer;
 import org.skyve.metadata.user.User;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
@@ -34,11 +38,15 @@ import jakarta.servlet.http.HttpServletRequest;
  * Utility class for handling security-related operations.
  * Provides functionality for security logging, password hashing, and IP address handling.
  */
+@SuppressWarnings("java:S2068") // Suppress "Hardcoded password" false positives
 public class SecurityUtil {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(SecurityUtil.class);
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SecurityUtil.class);
 
 	private static final String ANONYMOUS_SECURITY_USER = "securityUser";
+	private static final String ARGON2_ALGORITHM = "argon2";
+	private static final String HTML_LINE_BREAK = "<br/>";
+	private static final PasswordEncoder BCRYPT_PASSWORD_ENCODER = new LegacyBCryptPasswordEncoder();
 
 	/**
 	 * Creates a security log entry and optionally sends an email notification for the specified exception.
@@ -98,6 +106,7 @@ public class SecurityUtil {
 	 * @param email Whether to attempt sending an email notification
 	 * @throws IllegalArgumentException if eventType or eventMessage is null
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static void log(@Nonnull String eventType, @Nonnull String eventMessage, @Nullable String provenance, @Nullable User user, boolean email) {
 		// If no user is specified, attempt to retrieve from current persistence
 		User associatedUser = user;
@@ -205,19 +214,19 @@ public class SecurityUtil {
 		if (sendTo == null) {
 			sendTo = UtilImpl.SUPPORT_EMAIL_ADDRESS;
 			if (sendTo == null) {
-				LOGGER.warn("Cannot send security log notification as no email address is specified.");
+				LOGGER.warn("Cannot send security log notification as no email address is specified");
 				return;
 			}
 		}
 
 		// Check email configuration
 		if ("localhost".equals(UtilImpl.SMTP)) {
-			LOGGER.warn("Cannot send security log notification as email is not configured.");
+			LOGGER.warn("Cannot send security log notification as email is not configured");
 			return;
 		}
 
 		// Extract event information
-		Timestamp timestamp = sl.getTimestamp();
+		String timestamp = formatTimestampWithServerAndUTCZone(sl.getTimestamp());
 		Long threadId = sl.getThreadId();
 		String threadName = sl.getThreadName();
 		String sourceIP = sl.getSourceIP();
@@ -240,41 +249,69 @@ public class SecurityUtil {
 				.append(nameEnv);
 		body.append("<br/><br/>");
 		if (timestamp != null) {
-			body.append("Timestamp: ").append(timestamp).append("<br/>");
+			body.append("Timestamp: ").append(timestamp).append(HTML_LINE_BREAK);
 		}
 		if (threadId != null) {
-			body.append("Thread ID: ").append(threadId).append("<br/>");
+			body.append("Thread ID: ").append(threadId).append(HTML_LINE_BREAK);
 		}
 		if (threadName != null) {
-			body.append("Thread Name: ").append(threadName).append("<br/>");
+			body.append("Thread Name: ").append(threadName).append(HTML_LINE_BREAK);
 		}
 		if (sourceIP != null) {
-			body.append("Source IP: ").append(sourceIP).append("<br/>");
+			body.append("Source IP: ").append(sourceIP).append(HTML_LINE_BREAK);
 		}
 		if (username != null) {
-			body.append("Username: ").append(username).append("<br/>");
+			body.append("Username: ").append(username).append(HTML_LINE_BREAK);
 		}
 		if (loggedInUserId != null) {
-			body.append("Logged in User ID: ").append(loggedInUserId).append("<br/>");
+			body.append("Logged in User ID: ").append(loggedInUserId).append(HTML_LINE_BREAK);
 		}
 		if (eventType != null) {
-			body.append("Event Type: ").append(eventType).append("<br/>");
+			body.append("Event Type: ").append(eventType).append(HTML_LINE_BREAK);
 		}
 		if (eventMessage != null) {
-			body.append("Event Message: ").append(eventMessage).append("<br/>");
+			body.append("Event Message: ").append(eventMessage).append(HTML_LINE_BREAK);
 		}
 		if (provenance != null) {
-			body.append("Provenance: ").append(provenance).append("<br/>");
+			body.append("Provenance: ").append(provenance).append(HTML_LINE_BREAK);
 		}
 
 		// Send
 		StringBuilder subjectBuilder = new StringBuilder(nameEnv);
 		subjectBuilder.append(" Security Log Entry - ")
 				.append(eventType != null ? eventType : "Unknown");
-		EXT.sendMail(new Mail().from(UtilImpl.SMTP_SENDER)
+		EXT.getMailService()
+				.sendMail(new Mail().from(UtilImpl.SMTP_SENDER)
 				.addTo(sendTo)
 				.subject(subjectBuilder.toString())
 				.body(body.toString()));
+	}
+
+	/**
+	 * Formats a {@link Timestamp} including both the server-local time and UTC time to ensure
+	 * clarity in security notification, as recipients may be in different timezones.
+	 *
+	 * @param timestamp the {@link Timestamp} to format, may be null
+	 * @return a string in the format "yyyy-MM-dd HH:mm:ss (UTC: yyyy-MM-dd HH:mm:ss)"
+	 */
+	private static @Nullable String formatTimestampWithServerAndUTCZone(@Nullable Timestamp timestamp) {
+		if (timestamp == null) {
+			return null;
+		}
+
+		Instant instant = timestamp.toInstant();
+
+		// Server timezone
+		ZoneId serverZone = ZoneId.systemDefault();
+		ZonedDateTime serverTime = instant.atZone(serverZone);
+
+		// UTC timezone
+		ZoneId utcZone = ZoneId.of("UTC");
+		ZonedDateTime utcTime = instant.atZone(utcZone);
+
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+		return String.format("%s (UTC: %s)", serverTime.format(formatter), utcTime.format(formatter));
 	}
 
 	/**
@@ -333,10 +370,10 @@ public class SecurityUtil {
 	 * @return	Skyve's delegating password encoder
 	 */
 	public static @Nonnull PasswordEncoder createDelegatingPasswordEncoder() {
-		String encodingId = "argon2";
+		String encodingId = ARGON2_ALGORITHM;
 		Map<String, PasswordEncoder> encoders = new HashMap<>();
-		encoders.put("argon2", Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8());
-		encoders.put("bcrypt", new BCryptPasswordEncoder());
+		encoders.put(ARGON2_ALGORITHM, Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8());
+		encoders.put("bcrypt", BCRYPT_PASSWORD_ENCODER);
 		encoders.put("pbkdf2", Pbkdf2PasswordEncoder.defaultsForSpringSecurity_v5_8());
 		encoders.put("scrypt", SCryptPasswordEncoder.defaultsForSpringSecurity_v5_8());
 		DelegatingPasswordEncoder result = new DelegatingPasswordEncoder(encodingId, encoders);
@@ -357,11 +394,11 @@ public class SecurityUtil {
 		String result = null;
 
 		String passwordHashingAlgorithm = Util.getPasswordHashingAlgorithm();
-		if ("argon2".equals(passwordHashingAlgorithm)) {
+		if (ARGON2_ALGORITHM.equals(passwordHashingAlgorithm)) {
 			result = "{argon2}" + Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8().encode(clearText);
 		}
 		else if ("bcrypt".equals(passwordHashingAlgorithm)) {
-			result = "{bcrypt}" + new BCryptPasswordEncoder().encode(clearText);
+			result = "{bcrypt}" + BCRYPT_PASSWORD_ENCODER.encode(clearText);
 		}
 		else if ("pbkdf2".equals(passwordHashingAlgorithm)) {
 			result = "{pbkdf2}" + Pbkdf2PasswordEncoder.defaultsForSpringSecurity_v5_8().encode(clearText);

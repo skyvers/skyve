@@ -16,10 +16,23 @@ import jakarta.inject.Inject;
 import modules.admin.domain.ImportExport;
 import modules.admin.domain.ImportExport.Mode;
 
+/**
+ * Provides Bizlet behaviour for import/export document configuration.
+ */
 public class ImportExportBizlet extends Bizlet<ImportExportExtension> {
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient ImportExportService importExportService;
 
+	/**
+	 * Supplies module choices for import/export configuration.
+	 *
+	 * @param attributeName
+	 *        the requested attribute name
+	 * @return sorted module values for {@link ImportExport#moduleNamePropertyName}, otherwise superclass values
+	 * @throws Exception
+	 *         if value resolution fails
+	 */
 	@Override
 	public List<DomainValue> getConstantDomainValues(String attributeName) throws Exception {
 
@@ -37,6 +50,17 @@ public class ImportExportBizlet extends Bizlet<ImportExportExtension> {
 		return super.getConstantDomainValues(attributeName);
 	}
 
+	/**
+	 * Supplies document choices based on the selected module.
+	 *
+	 * @param attributeName
+	 *        the requested attribute name
+	 * @param bean
+	 *        the current import/export bean
+	 * @return persistable document values for {@link ImportExport#documentNamePropertyName}, otherwise superclass values
+	 * @throws Exception
+	 *         if value resolution fails
+	 */
 	@Override
 	public List<DomainValue> getDynamicDomainValues(String attributeName, ImportExportExtension bean) throws Exception {
 
@@ -60,6 +84,18 @@ public class ImportExportBizlet extends Bizlet<ImportExportExtension> {
 		return super.getDynamicDomainValues(attributeName, bean);
 	}
 
+	/**
+	 * Rebuilds column definitions when controlling fields change.
+	 *
+	 * @param source
+	 *        the source property that triggered rerender
+	 * @param bean
+	 *        the import/export bean
+	 * @param webContext
+	 *        the current web context
+	 * @throws Exception
+	 *         if column regeneration fails
+	 */
 	@Override
 	public void preRerender(String source, ImportExportExtension bean, WebContext webContext) throws Exception {
 
@@ -72,6 +108,14 @@ public class ImportExportBizlet extends Bizlet<ImportExportExtension> {
 		super.preRerender(source, bean, webContext);
 	}
 
+	/**
+	 * Cleans up uploaded import files before deleting the configuration record.
+	 *
+	 * @param bean
+	 *        the bean being deleted
+	 * @throws Exception
+	 *         if cleanup or delete preparation fails
+	 */
 	@Override
 	public void preDelete(ImportExportExtension bean) throws Exception {
 
@@ -80,6 +124,14 @@ public class ImportExportBizlet extends Bizlet<ImportExportExtension> {
 		super.preDelete(bean);
 	}
 
+	/**
+	 * Removes stale upload files when mode switches to export.
+	 *
+	 * @param bean
+	 *        the bean being saved
+	 * @throws Exception
+	 *         if save preparation fails
+	 */
 	@Override
 	public void preSave(ImportExportExtension bean) throws Exception {
 
@@ -91,6 +143,19 @@ public class ImportExportBizlet extends Bizlet<ImportExportExtension> {
 		super.preSave(bean);
 	}
 
+	/**
+	 * Returns completion options for load-type text entry.
+	 *
+	 * @param attributeName
+	 *        the attribute being completed
+	 * @param value
+	 *        the user-entered value prefix
+	 * @param bean
+	 *        the current bean
+	 * @return available load-type options for {@link ImportExport#loadTypePropertyName}, otherwise superclass values
+	 * @throws Exception
+	 *         if completion fails
+	 */
 	@Override
 	public List<String> complete(String attributeName, String value, ImportExportExtension bean) throws Exception {
 		List<String> results = new ArrayList<>();
@@ -101,5 +166,4 @@ public class ImportExportBizlet extends Bizlet<ImportExportExtension> {
 		}
 		return super.complete(attributeName, value, bean);
 	}
-
 }

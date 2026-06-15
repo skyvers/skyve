@@ -17,6 +17,9 @@ import jakarta.faces.component.UIOutput;
 import jakarta.faces.component.html.HtmlForm;
 import jakarta.faces.context.FacesContext;
 
+/**
+ * Implements internal web-module behavior for this Skyve runtime concern.
+ */
 @FacesComponent(CSRFForm.COMPONENT_TYPE)
 public class CSRFForm extends HtmlForm {
 	@SuppressWarnings("hiding")

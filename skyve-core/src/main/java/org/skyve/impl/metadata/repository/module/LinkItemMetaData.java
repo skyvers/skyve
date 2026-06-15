@@ -7,6 +7,16 @@ import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB-annotated descriptor for a {@code <link>} menu item in a module menu.
+ *
+ * <p>Provides a navigation link to an arbitrary URL, a named action, or another
+ * Skyve route.  Extends {@link ItemMetaData}.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see ItemMetaData
+ */
 @XmlType(name = "link", namespace = XMLMetaData.MODULE_NAMESPACE)
 @XmlRootElement(name = "link", namespace = XMLMetaData.MODULE_NAMESPACE)
 public class LinkItemMetaData extends ItemMetaData {

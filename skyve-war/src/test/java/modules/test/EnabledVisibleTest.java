@@ -35,13 +35,13 @@ public class EnabledVisibleTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testBlurb() throws Exception {
+	public void testBlurb() {
 		testVisible(new Blurb());
 	}
 	
 	@Test
 	@SuppressWarnings("static-method")
-	public void testDialogButton() throws Exception {
+	public void testDialogButton() {
 		DialogButton button = new DialogButton();
 		testVisible(button);
 		testEnabled(button);
@@ -49,13 +49,13 @@ public class EnabledVisibleTest {
 	
 	@Test
 	@SuppressWarnings("static-method")
-	public void testDynamicImage() throws Exception {
+	public void testDynamicImage() {
 		testVisible(new DynamicImage());
 	}
 	
 	@Test
 	@SuppressWarnings("static-method")
-	public void testForm() throws Exception {
+	public void testForm() {
 		Form form = new Form();
 		testVisible(form);
 		testEnabled(form);
@@ -63,13 +63,13 @@ public class EnabledVisibleTest {
 	
 	@Test
 	@SuppressWarnings("static-method")
-	public void testHBox() throws Exception {
+	public void testHBox() {
 		testVisible(new HBox());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testInputWidget() throws Exception {
+	public void testInputWidget() {
 		TextField text = new TextField();
 		testVisible(text);
 		testEnabled(text);
@@ -77,7 +77,7 @@ public class EnabledVisibleTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testLookupDescription() throws Exception {
+	public void testLookupDescription() {
 		LookupDescription lookup = new LookupDescription();
 		testVisible(lookup);
 		testEnabled(lookup);
@@ -89,19 +89,19 @@ public class EnabledVisibleTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testLabel() throws Exception {
+	public void testLabel() {
 		testVisible(new Label());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testLink() throws Exception {
+	public void testLink() {
 		testVisible(new Link());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testListGrid() throws Exception {
+	public void testListGrid() {
 		ListGrid list = new ListGrid();
 		testVisible(list);
 		testEnabled(list);
@@ -110,37 +110,37 @@ public class EnabledVisibleTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testMapDisplay() throws Exception {
+	public void testMapDisplay() {
 		testVisible(new MapDisplay());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testProgressBar() throws Exception {
+	public void testProgressBar() {
 		testVisible(new ProgressBar());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSetInvisibleEventAction() throws Exception {
+	public void testSetInvisibleEventAction() {
 		testVisible(new SetInvisibleEventAction());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSetDisabledEventAction() throws Exception {
+	public void testSetDisabledEventAction() {
 		testEnabled(new SetDisabledEventAction());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testStaticImage() throws Exception {
+	public void testStaticImage() {
 		testVisible(new StaticImage());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testTab() throws Exception {
+	public void testTab() {
 		Tab tab = new Tab();
 		testVisible(tab);
 		testEnabled(tab);
@@ -148,7 +148,7 @@ public class EnabledVisibleTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testTabPane() throws Exception {
+	public void testTabPane() {
 		TabPane pane = new TabPane();
 		testVisible(pane);
 		testEnabled(pane);
@@ -156,7 +156,7 @@ public class EnabledVisibleTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testDataGrid() throws Exception {
+	public void testDataGrid() {
 		DataGrid grid = new DataGrid();
 		testVisible(grid);
 		testEnabled(grid);
@@ -165,30 +165,27 @@ public class EnabledVisibleTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testVBox() throws Exception {
+	public void testVBox() {
 		testVisible(new VBox());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testActionImpl() throws Exception {
+	public void testActionImpl() {
 		ActionImpl action = new ActionImpl();
 		testVisible(action);
 		testEnabled(action);
 	}
 	
-	private static void testVisible(Invisible metaData)
-	throws Exception {
+	private static void testVisible(Invisible metaData) {
 		testCondition(metaData, "invisibleConditionName", "visibleConditionName");
 	}
 
-	private static void testEnabled(Disableable metaData)
-	throws Exception {
+	private static void testEnabled(Disableable metaData) {
 		testCondition(metaData, "disabledConditionName", "enabledConditionName");
 	}
 	
-	private static void testDisableableCRUDGrid(DisableableCRUDGrid metaData)
-	throws Exception {
+	private static void testDisableableCRUDGrid(DisableableCRUDGrid metaData) {
 		testCondition(metaData, "disableAddConditionName", "enableAddConditionName");
 		testCondition(metaData, "disableZoomConditionName", "enableZoomConditionName");
 		testCondition(metaData, "disableEditConditionName", "enableEditConditionName");
@@ -197,8 +194,7 @@ public class EnabledVisibleTest {
 	
 	private static void testCondition(Object metaData,
 										String conditionName, 
-										String negatedConditionName)
-	throws Exception {
+										String negatedConditionName) {
 		Binder.set(metaData, conditionName, CONDITION);
 		Assert.assertEquals(CONDITION, Binder.get(metaData, conditionName));
 

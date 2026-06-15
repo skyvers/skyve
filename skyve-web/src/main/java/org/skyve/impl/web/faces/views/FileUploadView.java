@@ -20,6 +20,7 @@ import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.metadata.controller.Upload;
 import org.skyve.metadata.controller.UploadAction;
@@ -41,26 +42,41 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
 
+/**
+ * Models a view interaction and binds it to the active Skyve web context.
+ */
 @RequestScoped
 @Named("_skyveUpload")
 public class FileUploadView extends AbstractUploadView {
 	private static final long serialVersionUID = -8705052124876109265L;
 
+	private static final String FAILURE_MESSAGE_SUMMARY = "Failure";
+
 	@Inject
 	@ManagedProperty(value = "#{param." + AbstractWebContext.ACTION_NAME + "}")
+	@SuppressWarnings("java:S6813") // allow member injection
 	private String action;
 
+	/**
+	 * Creates the request-scoped file upload view with framework upload limits.
+	 */
 	public FileUploadView() {
 		super(UtilImpl.UPLOADS_FILE_WHITELIST_REGEX, UtilImpl.UPLOADS_FILE_MAXIMUM_SIZE_IN_MB);
 	}
 
 	@Override
 	@PostConstruct
+	/**
+	 * Initialises request parameters for upload processing after dependency injection.
+	 */
 	public void postConstruct() {
 		super.postConstruct();
 		action = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(action));
 	}
 
+	/**
+	 * Restores cached upload conversation state before the page is rendered.
+	 */
 	public void preRender() {
 		new FacesAction<Void>() {
 			@Override
@@ -71,23 +87,36 @@ public class FileUploadView extends AbstractUploadView {
 		}.execute();
 	}
 
+	/**
+	 * Returns the upload action name requested in the page URL.
+	 *
+	 * @return the sanitised upload action name
+	 */
 	public String getAction() {
 		return action;
 	}
 
 	private List<Problem> problems = new ArrayList<>();
 
+	/**
+	 * Returns upload problems accumulated during processing.
+	 *
+	 * @return the collected upload problems
+	 */
 	public List<Problem> getProblems() {
 		return problems;
 	}
 
 	/**
-	 * Process the file upload
-	 * This method does not use FacesAction because it should show errors/growls under all circumstances
-	 * since the upload pages are embedded in iframes.
-	 * 
-	 * @param event
+	 * Processes an uploaded file for the configured upload action and reports user-facing outcomes.
+	 *
+	 * <p>This method deliberately executes outside {@link FacesAction} so failures can always be
+	 * reported in iframe-hosted upload pages.
+	 *
+	 * @param event the PrimeFaces upload event containing the submitted file
+	 * @throws Exception if upload preconditions or processing fail unexpectedly
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void handleFileUpload(FileUploadEvent event) throws Exception {
 		// If there is no access, don't process the upload and return to allow the view to render the no access message
 		if (! isCanAccess()) {
@@ -104,7 +133,7 @@ public class FileUploadView extends AbstractUploadView {
 		String context = getContext();
 		if ((context == null) || (action == null)) {
 			LOGGER.warn("FileUpload - Malformed URL on Upload Action - context, binding, or action is null");
-			FacesMessage msg = new FacesMessage("Failure", "Malformed URL");
+			FacesMessage msg = new FacesMessage(FAILURE_MESSAGE_SUMMARY, "Malformed URL");
 			fc.addMessage(null, msg);
 			return;
 		}
@@ -115,7 +144,7 @@ public class FileUploadView extends AbstractUploadView {
 		AbstractWebContext webContext = StateUtil.getCachedConversation(context, request);
 		if (webContext == null) {
 			LOGGER.warn("FileUpload - Malformed URL on Upload Action - context does not exist");
-			FacesMessage msg = new FacesMessage("Failure", "Malformed URL");
+			FacesMessage msg = new FacesMessage(FAILURE_MESSAGE_SUMMARY, "Malformed URL");
 			FacesContext.getCurrentInstance().addMessage(null, msg);
 			return;
 		}
@@ -179,7 +208,7 @@ public class FileUploadView extends AbstractUploadView {
 				}
 			}
 			catch (UploadException e) {
-				e.printStackTrace();
+				LOGGER.warn("File upload completed with user-facing upload problems.", e);
 				persistence.rollback();
 				exception = e;
 			}
@@ -237,8 +266,8 @@ public class FileUploadView extends AbstractUploadView {
 		}
 		catch (Exception e) {
 			persistence.rollback();
-			e.printStackTrace();
-			FacesMessage msg = new FacesMessage("Failure", e.getMessage());
+			String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "File upload failed for action " + action, e);
+			FacesMessage msg = new FacesMessage(FAILURE_MESSAGE_SUMMARY, WebErrorUtil.genericMessage(reference));
 			fc.addMessage(null, msg);
 		}
 		// NB No need to disconnect Persistence as it is done in the SkyveFacesPhaseListener after the response is rendered.

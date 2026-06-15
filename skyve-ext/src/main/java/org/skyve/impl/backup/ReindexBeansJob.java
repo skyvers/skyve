@@ -24,17 +24,24 @@ import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.SQL;
 
+import jakarta.annotation.Generated;
+
+/**
+ * Reindexes all bean-level content (indexed text attributes) in the content
+ * search engine after a restore or configuration change.
+ */
 public class ReindexBeansJob extends CancellableJob {
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void execute() throws Exception {
-		AbstractPersistence persistence = AbstractPersistence.get();
+		AbstractPersistence persistence = getPersistence();
 		Customer customer = persistence.getUser().getCustomer();
-		String dynamicEntityPersistenceIdentifier = RDBMSDynamicPersistenceListModel.getDynamicEntityPersistent(customer).getPersistentIdentifier();
+		String dynamicEntityPersistenceIdentifier = getDynamicEntityPersistenceIdentifier(customer);
 		List<String> log = getLog();
 		String trace;
 		
 		// truncate the bean content ready to reindex
-		try (ContentManager cm = EXT.newContentManager()) {
+		try (ContentManager cm = newContentManager()) {
 			trace = "Truncate Beans";
 			log.add(trace);
 			LOGGER.info(trace);
@@ -43,8 +50,8 @@ public class ReindexBeansJob extends CancellableJob {
 		
 		// reindex
 		List<Module> modules = customer.getModules();
-		float i = 0f;
-		float l = modules.size();
+		int i = 0;
+		int l = modules.size();
 		for (Module module : modules) {
 			i++;
 			String moduleName = module.getName();
@@ -59,7 +66,7 @@ public class ReindexBeansJob extends CancellableJob {
 					if (needsIndexing(customer, document)) {
 						try {
 							persistence.begin();
-							try (ContentManager cm = EXT.newContentManager()) {
+							try (ContentManager cm = newContentManager()) {
 								// Don't check if a document has indexable fields as we
 								// may need to have nodes deleted
 								// (i.e. a document field used to be indexed but now is not)
@@ -111,14 +118,53 @@ public class ReindexBeansJob extends CancellableJob {
 					}
 				}
 			}
-			setPercentComplete((int) (i / l * 100f));
+			setPercentComplete((int) ((((float) i) / ((float) l)) * 100f));
 		}
 		trace = "Reindex beans complete";
 		log.add(trace);
 		LOGGER.info(trace);
 		setPercentComplete(100);
 	}
+
+	/**
+	 * Returns the active persistence context used for reindexing beans.
+	 *
+	 * @return the current thread-bound persistence implementation
+	 */
+	@SuppressWarnings("static-method")
+	protected AbstractPersistence getPersistence() {
+		return AbstractPersistence.get();
+	}
+
+	/**
+	 * Resolves the persistence identifier of the dynamic entity table.
+	 *
+	 * @param customer the customer whose dynamic entity table is required
+	 * @return the persistent identifier for the dynamic entity table
+	 */
+	@SuppressWarnings("static-method")
+	protected String getDynamicEntityPersistenceIdentifier(Customer customer) {
+		return RDBMSDynamicPersistenceListModel.getDynamicEntityPersistent(customer).getPersistentIdentifier();
+	}
+
+	/**
+	 * Creates a content manager used when truncating and rebuilding bean indexing.
+	 *
+	 * @return a new content manager instance
+	 */
+	@SuppressWarnings({"static-method", "resource"})
+	protected ContentManager newContentManager() {
+		return EXT.newContentManager();
+	}
 	
+	/**
+	 * Determines whether the document contains attributes requiring text indexing.
+	 *
+	 * @param customer the customer context used to resolve document attributes
+	 * @param document the document metadata to inspect
+	 * @return {@code true} when the document has at least one indexable text field
+	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static boolean needsIndexing(Customer customer, Document document) {
 		if (document.isPersistable()) {
 			for (Attribute attribute : document.getAllAttributes(customer)) {

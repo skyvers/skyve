@@ -42,6 +42,7 @@ import com.squareup.javapoet.TypeSpec;
  * </p>
  */
 @Mojo(name = "newScaffoldedDocument")
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate scaffolded source/metadata fragments.
 public class NewScaffoldedDocumentMojo extends NewDocumentMojo {
 	private static final Logger LOGGER = LoggerFactory.getLogger(NewScaffoldedDocumentMojo.class);
 
@@ -86,7 +87,7 @@ public class NewScaffoldedDocumentMojo extends NewDocumentMojo {
 	 */
 	@Override
 	public void execute() throws MojoExecutionException {
-		super.execute();
+		createDocument();
 
 		createExtensionClass();
 		createBizletClass();
@@ -94,6 +95,10 @@ public class NewScaffoldedDocumentMojo extends NewDocumentMojo {
 		createServiceClass();
 		generateDomain();
 		generateEditView();
+	}
+
+	void createDocument() throws MojoExecutionException {
+		super.execute();
 	}
 
 	/**
@@ -217,19 +222,20 @@ public class NewScaffoldedDocumentMojo extends NewDocumentMojo {
 
 		try {
 			configureClasspath(srcDir);
-			ProvidedRepositoryFactory.set(new LocalDesignRepository(srcDir, false));
-			DomainGenerator.newDomainGenerator(true,
-												generateDomainConfig.isDebug(),
-												generateDomainConfig.isMultiTenant(),
-												DialectOptions.valueOf(generateDomainConfig.getDialect()),
-												srcDir,
-												generatedDir,
-												testDir,
-												generatedTestDir,
-												generateDomainConfig.getExcludedModules().split(",")).generate();
+				registerCustomisations(generateDomainConfig.getCustomisationsClass());
+				setRepository();
+				generateDomain(true,
+								generateDomainConfig.isDebug(),
+								generateDomainConfig.isMultiTenant(),
+								DialectOptions.valueOf(generateDomainConfig.getDialect()),
+								srcDir,
+								generatedDir,
+								testDir,
+								generatedTestDir,
+								generateDomainConfig.getExcludedModules().split(","));
 		}
 		catch (Exception e) {
-			LOGGER.error("Failed to generated domain.", e);
+			LOGGER.error("Failed to generated domain.");
 			throw new MojoExecutionException("Failed to generate domain.", e);
 		}
 	}
@@ -240,7 +246,7 @@ public class NewScaffoldedDocumentMojo extends NewDocumentMojo {
 	 * 
 	 * @throws MojoExecutionException if there is an error during generation
 	 */
-	private void generateEditView() throws MojoExecutionException {
+	void generateEditView() throws MojoExecutionException {
 		try {
 			final String configCustomerName = (generateEditViewConfig != null) ? generateEditViewConfig.getCustomer() : customer;
 			final String customerName = getDefaultOrPromptCustomer(configCustomerName);
@@ -249,22 +255,64 @@ public class NewScaffoldedDocumentMojo extends NewDocumentMojo {
 
 			final String overriddenViewName = (generateEditViewConfig != null) ? generateEditViewConfig.getOverridenViewName() : null;
 
-			configureClasspath(srcDir);
-			ViewGenerator.main(new String[] {srcDir,
+				configureClasspath(srcDir);
+				generateEditView(new String[] {srcDir,
 												customerName,
 												moduleName,
 												documentName,
 												Boolean.toString(isCustomerOverriden),
 												overriddenViewName});
 
-			final Path viewsDirectory = getModulesDirectory().resolve(moduleName).resolve(documentName).resolve("views");
-			final Path source = viewsDirectory.resolve("generatedEdit.xml");
-			final Path destination = viewsDirectory.resolve("edit.xml");
-			Files.move(source, destination);
+				final Path viewsDirectory = getModulesDirectory().resolve(moduleName).resolve(documentName).resolve("views");
+				final Path source = viewsDirectory.resolve("generatedEdit.xml");
+				final Path destination = viewsDirectory.resolve("edit.xml");
+				move(source, destination);
 		}
 		catch (Exception e) {
-			LOGGER.error("Failed to generate edit view.", e);
+			LOGGER.error("Failed to generate edit view.");
 			throw new MojoExecutionException("Failed to generate edit view.", e);
 		}
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	void registerCustomisations(String customisationsClassName) throws Exception {
+		DomainGenerator.registerCustomisations(customisationsClassName);
+	}
+
+	// test seam
+	void setRepository() {
+		ProvidedRepositoryFactory.set(new LocalDesignRepository(srcDir, false));
+	}
+
+	@SuppressWarnings({"static-method", "java:S107"}) // test seam
+	void generateDomain(boolean generateDomainClasses,
+							boolean debug,
+							boolean multiTenant,
+							DialectOptions dialect,
+							String sourceDirectory,
+							String generatedDirectory,
+							String testDirectory,
+							String generatedTestDirectory,
+							String[] excludedModules)
+	throws Exception {
+		DomainGenerator.newDomainGenerator(generateDomainClasses,
+											debug,
+											multiTenant,
+											dialect,
+											sourceDirectory,
+											generatedDirectory,
+											testDirectory,
+											generatedTestDirectory,
+											excludedModules).generate();
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	void generateEditView(String[] arguments) throws Exception {
+		ViewGenerator.main(arguments);
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	void move(Path source, Path destination) throws IOException {
+		Files.move(source, destination);
 	}
 }

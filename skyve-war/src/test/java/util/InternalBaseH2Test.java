@@ -137,6 +137,11 @@ abstract class InternalBaseH2Test {
 		UtilImpl.CONFIGURATION = new TreeMap<>();
 
 		ProvidedRepositoryFactory.set(new DefaultRepository());
+		// Warm up the repository so the customer and its modules are loaded before
+		// setUser is called, otherwise SuperUser.getAccessibleModuleNames()
+		// silently returns null when the customer metadata hasn't been loaded yet,
+		// which causes a NPE in AbstractHibernatePersistence.resetDocumentPermissionScopes().
+		ProvidedRepositoryFactory.get().getCustomer(CUSTOMER);
 
 		final SuperUser user = new SuperUser();
 		user.setCustomerName(CUSTOMER);
@@ -158,10 +163,21 @@ abstract class InternalBaseH2Test {
 	 * Common tear down after each test
 	 */
 	protected static void internalAfter() {
+		internalAfter(true);
+	}
+
+	/**
+	 * Common tear down after each test.
+	 * @param close Whether to close and remove the current persistence after rollback.
+	 */
+	protected static void internalAfter(boolean close) {
 		final AbstractPersistence persistence = AbstractPersistence.get();
 		persistence.rollback();
 		persistence.evictAllCached();
 		persistence.evictAllSharedCache();
+		if (close) {
+			persistence.commit(true);
+		}
 		SingletonCachedBizlet.dispose();
 	}
 

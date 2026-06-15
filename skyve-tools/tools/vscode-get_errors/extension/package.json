@@ -1,0 +1,55 @@
+{
+  "name": "vscode-get-errors",
+  "displayName": "VS Code get_errors",
+  "description": "Exposes VS Code Problems diagnostics to a local Codex MCP server.",
+  "version": "0.1.0",
+  "publisher": "local",
+  "license": "UNLICENSED",
+  "private": true,
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished",
+    "onCommand:vscode-get-errors.restart"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "vscode-get-errors.restart",
+        "title": "get_errors: Restart Server"
+      }
+    ],
+    "configuration": {
+      "title": "VS Code Diagnostics Bridge",
+      "properties": {
+        "vscodeDiagnosticsBridge.port": {
+          "type": "number",
+          "default": 37645,
+          "minimum": 1024,
+          "maximum": 65535,
+          "description": "Localhost port used by the diagnostics bridge endpoint."
+        },
+        "vscodeDiagnosticsBridge.token": {
+          "type": "string",
+          "default": "",
+          "description": "Optional bearer token required by the diagnostics bridge endpoint."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "package": "npm run compile && vsce package --allow-missing-repository --no-dependencies"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.0",
+    "@types/vscode": "^1.90.0",
+    "@vscode/vsce": "^3.6.3",
+    "typescript": "^5.9.3"
+  }
+}

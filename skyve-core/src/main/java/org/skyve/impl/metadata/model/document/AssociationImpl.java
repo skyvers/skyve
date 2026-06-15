@@ -14,6 +14,21 @@ import jakarta.xml.bind.annotation.XmlType;
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE, 
 			name = "association", 
 			propOrder = {"requiredBool", "requiredMessage", "type", "embeddedColumnsPrefix", "databaseIndex"})
+/**
+ * JAXB-annotated implementation of {@link Association}, representing a many-to-one
+ * or aggregation reference from one document to another.
+ *
+ * <p>Carries the {@link AssociationType} (aggregation or composition) and
+ * the query name to use when presenting pick lists for this association.
+ * An association attribute is stored as a foreign key column in the owning
+ * document's table.
+ *
+ * <p>Threading: not thread-safe.  Instances are populated during metadata loading
+ * and are read-only once placed in the repository cache.
+ *
+ * @see ReferenceImpl
+ * @see Association
+ */
 public class AssociationImpl extends ReferenceImpl implements Association {
 	private static final long serialVersionUID = -2839713495173145591L;
 

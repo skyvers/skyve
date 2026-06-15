@@ -2,7 +2,7 @@ package org.skyve.domain.types.converters.time;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -11,31 +11,24 @@ import org.skyve.domain.messages.ConversionException;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.util.Time;
 
-public class HH24_MI_SSTest {
+class HH24_MI_SSTest {
 
 	private HH24_MI_SS formatter;
 
 	@BeforeEach
-	public void before() {
+	void before() {
 		formatter = new HH24_MI_SS();
 	}
 
 	@Test
-	public void testFromDisplayValueInvalidFormat() throws Exception {
-		ConversionException ce = assertThrows(ConversionException.class, () -> {
-			// setup the test data
-			TimeOnly testDate = new TimeOnly(Time.withDate(01, 03, 2020));
-			Time.setTime(testDate, 02, 30, 05);
-
-			// call the method under test
-			assertThat(formatter.fromDisplayValue("02:30"), is(testDate));
-		});
+	void testFromDisplayValueInvalidFormat() {
+		ConversionException ce = assertThrows(ConversionException.class, () -> formatter.fromDisplayValue("02:30"));
 
 		assertTrue(ce.getMessages().size() > 0);
 	}
 
 	@Test
-	public void testFromDisplayValueAM() throws Exception {
+	void testFromDisplayValueAM() {
 		// setup the test data
 		TimeOnly testDate = new TimeOnly(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 02, 30, 55);
@@ -45,7 +38,7 @@ public class HH24_MI_SSTest {
 	}
 
 	@Test
-	public void testFromDisplayValuePM() throws Exception {
+	void testFromDisplayValuePM() {
 		// setup the test data
 		TimeOnly testDate = new TimeOnly(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 14, 30, 55);
@@ -55,7 +48,7 @@ public class HH24_MI_SSTest {
 	}
 
 	@Test
-	public void testToDisplayValueAM() throws Exception {
+	void testToDisplayValueAM() {
 		// setup the test data
 		TimeOnly testDate = new TimeOnly(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 02, 30, 55);
@@ -65,12 +58,22 @@ public class HH24_MI_SSTest {
 	}
 
 	@Test
-	public void testToDisplayValuePM() throws Exception {
+	void testToDisplayValuePM() {
 		// setup the test data
 		TimeOnly testDate = new TimeOnly(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 14, 30, 55);
 
 		// call the method under test
 		assertThat(formatter.toDisplayValue(testDate), is("14:30:55"));
+	}
+
+	@Test
+	void testGetFormatPattern() {
+		assertThat(formatter.getFormatPattern(), is(HH24_MI_SS.PATTERN));
+	}
+
+	@Test
+	void testGetFormat() {
+		assertThat(formatter.getFormat(), org.hamcrest.Matchers.notNullValue());
 	}
 }

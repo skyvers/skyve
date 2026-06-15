@@ -17,13 +17,24 @@ import org.skyve.web.UserAgentType;
 import jakarta.annotation.Nullable;
 import jakarta.faces.component.UIComponent;
 
+/**
+ * Builds Faces components for a specific rendering concern in the pipeline.
+ */
 public class LayoutBuilderChain extends LayoutBuilder {
 	private LayoutBuilder[] builders;
 	
+	/**
+	 * Creates a layout builder chain that delegates to the supplied builders in order.
+	 */
 	public LayoutBuilderChain(LayoutBuilder... builders) {
 		this.builders = builders;
 	}
 	
+	/**
+	 * Sets managed bean name on this chain and all delegated builders.
+	 *
+	 * @param managedBeanName the managed bean name
+	 */
 	@Override
 	public void setManagedBeanName(String managedBeanName) {
 		// Set the state of the chain too so that utility methods in AbstractFacesBuilder can work
@@ -34,6 +45,11 @@ public class LayoutBuilderChain extends LayoutBuilder {
 		}
 	}
 	
+	/**
+	 * Sets the SAIL managed bean on this chain and all delegated builders.
+	 *
+	 * @param managedBean the managed bean instance
+	 */
 	@Override
 	public void setSAILManagedBean(FacesView managedBean) {
 		// Set the state of the chain too so that utility methods in AbstractFacesBuilder can work
@@ -44,6 +60,11 @@ public class LayoutBuilderChain extends LayoutBuilder {
 		}
 	}
 
+	/**
+	 * Sets JSF process expression on this chain and all delegated builders.
+	 *
+	 * @param process process expression
+	 */
 	@Override
 	public void setProcess(String process) {
 		// Set the state of the chain too so that utility methods in AbstractFacesBuilder can work
@@ -54,6 +75,11 @@ public class LayoutBuilderChain extends LayoutBuilder {
 		}
 	}
 
+	/**
+	 * Sets JSF update expression on this chain and all delegated builders.
+	 *
+	 * @param update update expression
+	 */
 	@Override
 	public void setUpdate(String update) {
 		// Set the state of the chain too so that utility methods in AbstractFacesBuilder can work
@@ -64,6 +90,11 @@ public class LayoutBuilderChain extends LayoutBuilder {
 		}
 	}
 
+	/**
+	 * Sets user-agent type on this chain and all delegated builders.
+	 *
+	 * @param userAgentType user-agent type
+	 */
 	@Override
 	public void setUserAgentType(UserAgentType userAgentType) {
 		// Set the state of the chain too so that utility methods in AbstractFacesBuilder can work
@@ -74,6 +105,12 @@ public class LayoutBuilderChain extends LayoutBuilder {
 		}
 	}
 
+	/**
+	 * Builds the view layout by delegating through the chain in order.
+	 *
+	 * @param component input component
+	 * @return resulting component
+	 */
 	@Override
 	public UIComponent viewLayout(UIComponent component) {
 		UIComponent result = component;
@@ -83,6 +120,12 @@ public class LayoutBuilderChain extends LayoutBuilder {
 		return result;
 	}
 
+	/**
+	 * Builds toolbar layouts by delegating through the chain in order.
+	 *
+	 * @param components input toolbar components
+	 * @return resulting toolbar components
+	 */
 	@Override
 	public List<UIComponent> toolbarLayouts(List<UIComponent> components) {
 		List<UIComponent> result = components;
@@ -92,6 +135,12 @@ public class LayoutBuilderChain extends LayoutBuilder {
 		return result;
 	}
 
+	/**
+	 * Builds tab layout by delegating through the chain in order.
+	 *
+	 * @param component input component
+	 * @return resulting component
+	 */
 	@Override
 	public UIComponent tabLayout(UIComponent component) {
 		UIComponent result = component;
@@ -101,6 +150,13 @@ public class LayoutBuilderChain extends LayoutBuilder {
 		return result;
 	}
 
+	/**
+	 * Builds vertical-box layout by delegating through the chain in order.
+	 *
+	 * @param component input component
+	 * @param vbox vbox metadata
+	 * @return resulting component
+	 */
 	@Override
 	public UIComponent vboxLayout(UIComponent component, VBox vbox) {
 		UIComponent result = component;
@@ -110,6 +166,13 @@ public class LayoutBuilderChain extends LayoutBuilder {
 		return result;
 	}
 
+	/**
+	 * Builds horizontal-box layout by delegating through the chain in order.
+	 *
+	 * @param component input component
+	 * @param hbox hbox metadata
+	 * @return resulting component
+	 */
 	@Override
 	public UIComponent hboxLayout(UIComponent component, HBox hbox) {
 		UIComponent result = component;
@@ -119,6 +182,14 @@ public class LayoutBuilderChain extends LayoutBuilder {
 		return result;
 	}
 	
+	/**
+	 * Builds sidebar layout by delegating through the chain in order.
+	 *
+	 * @param component input component
+	 * @param sidebar sidebar metadata
+	 * @param createView whether create-view mode is active
+	 * @return resulting component
+	 */
 	@Override
 	public UIComponent sidebarLayout(UIComponent component, Sidebar sidebar, boolean createView) {
 		UIComponent result = component;
@@ -128,6 +199,13 @@ public class LayoutBuilderChain extends LayoutBuilder {
 		return result;
 	}
 
+	/**
+	 * Builds form layout by delegating through the chain in order.
+	 *
+	 * @param component input component
+	 * @param form form metadata
+	 * @return resulting component
+	 */
 	@Override
 	public UIComponent formLayout(UIComponent component, Form form) {
 		UIComponent result = component;
@@ -137,6 +215,13 @@ public class LayoutBuilderChain extends LayoutBuilder {
 		return result;
 	}
 
+	/**
+	 * Builds form-row layout by delegating through the chain in order.
+	 *
+	 * @param component input component
+	 * @param row form-row metadata
+	 * @return resulting component
+	 */
 	@Override
 	public UIComponent formRowLayout(UIComponent component, FormRow row) {
 		UIComponent result = component;
@@ -146,6 +231,12 @@ public class LayoutBuilderChain extends LayoutBuilder {
 		return result;
 	}
 
+	/**
+	 * Adds toolbar layouts by delegating to each builder.
+	 *
+	 * @param toolbars toolbar components
+	 * @param toolbarLayouts toolbar layout components
+	 */
 	@Override
 	public void addToolbarLayouts(List<UIComponent> toolbars, List<UIComponent> toolbarLayouts) {
 		for (LayoutBuilder builder : builders) {
@@ -153,6 +244,12 @@ public class LayoutBuilderChain extends LayoutBuilder {
 		}
 	}
 
+	/**
+	 * Adds toolbars or layouts to the view by delegating to each builder.
+	 *
+	 * @param view view component
+	 * @param toolbarsOrLayouts toolbar or layout components
+	 */
 	@Override
 	public void addToolbarsOrLayouts(UIComponent view, List<UIComponent> toolbarsOrLayouts) {
 		for (LayoutBuilder builder : builders) {
@@ -160,6 +257,14 @@ public class LayoutBuilderChain extends LayoutBuilder {
 		}
 	}
 
+	/**
+	 * Adds tab layout by delegating through the chain in order.
+	 *
+	 * @param component input component
+	 * @param tab tab component
+	 * @param tabLayout tab layout component
+	 * @return resulting component
+	 */
 	@Override
 	public UIComponent addTabLayout(UIComponent component, UIComponent tab, UIComponent tabLayout) {
 		UIComponent result = component;
@@ -169,6 +274,12 @@ public class LayoutBuilderChain extends LayoutBuilder {
 		return result;
 	}
 
+	/**
+	 * Adds a tab by delegating to each builder.
+	 *
+	 * @param tabPane tab-pane component
+	 * @param tab tab component
+	 */
 	@Override
 	public void addTab(UIComponent tabPane, UIComponent tab) {
 		for (LayoutBuilder builder : builders) {
@@ -176,6 +287,13 @@ public class LayoutBuilderChain extends LayoutBuilder {
 		}
 	}
 
+	/**
+	 * Finalizes tab addition by delegating through the chain in order.
+	 *
+	 * @param component input component
+	 * @param tab tab component
+	 * @return resulting component
+	 */
 	@Override
 	public UIComponent addedTab(UIComponent component, UIComponent tab) {
 		UIComponent result = component;
@@ -185,6 +303,12 @@ public class LayoutBuilderChain extends LayoutBuilder {
 		return result;
 	}
 
+	/**
+	 * Adds a border layout by delegating to each builder.
+	 *
+	 * @param border border component
+	 * @param borderLayout border layout component
+	 */
 	@Override
 	public void addBorderLayout(UIComponent border, UIComponent borderLayout) {
 		for (LayoutBuilder builder : builders) {
@@ -192,6 +316,13 @@ public class LayoutBuilderChain extends LayoutBuilder {
 		}
 	}
 
+	/**
+	 * Finalizes border layout by delegating through the chain in order.
+	 *
+	 * @param component input component
+	 * @param borderLayout border layout component
+	 * @return resulting component
+	 */
 	@Override
 	public UIComponent addedBorderLayout(UIComponent component, UIComponent borderLayout) {
 		UIComponent result = component;
@@ -201,6 +332,14 @@ public class LayoutBuilderChain extends LayoutBuilder {
 		return result;
 	}
 
+	/**
+	 * Adds form-row layout by delegating through the chain in order.
+	 *
+	 * @param component input component
+	 * @param formLayout form layout component
+	 * @param rowLayout row layout component
+	 * @return resulting component
+	 */
 	@Override
 	public UIComponent addFormRowLayout(UIComponent component, UIComponent formLayout, UIComponent rowLayout) {
 		UIComponent result = component;
@@ -210,6 +349,13 @@ public class LayoutBuilderChain extends LayoutBuilder {
 		return result;
 	}
 
+	/**
+	 * Finalizes form-row layout by delegating through the chain in order.
+	 *
+	 * @param component input component
+	 * @param rowLayout row layout component
+	 * @return resulting component
+	 */
 	@Override
 	public UIComponent addedFormRowLayout(UIComponent component, UIComponent rowLayout) {
 		UIComponent result = component;
@@ -219,6 +365,19 @@ public class LayoutBuilderChain extends LayoutBuilder {
 		return result;
 	}
 
+	/**
+	 * Lays out a form-item label by delegating to each builder.
+	 *
+	 * @param formOrRowLayout form or row layout component
+	 * @param formItemComponent form-item component
+	 * @param currentForm current form metadata
+	 * @param currentFormItem current form-item metadata
+	 * @param currentFormColumn current form-column metadata
+	 * @param widgetLabel widget label
+	 * @param widgetRequiredMessage optional required-message text
+	 * @param widgetInvisible widget invisible condition
+	 * @param widgetHelpText widget help text
+	 */
 	@Override
 	public void layoutFormItemLabel(UIComponent formOrRowLayout,
 										UIComponent formItemComponent,
@@ -242,6 +401,23 @@ public class LayoutBuilderChain extends LayoutBuilder {
 		}
 	}
 
+	/**
+	 * Lays out a form-item widget by delegating to each builder.
+	 *
+	 * @param formOrRowLayout form or row layout component
+	 * @param formItemComponent form-item component
+	 * @param currentForm current form metadata
+	 * @param currentFormItem current form-item metadata
+	 * @param currentFormColumn current form-column metadata
+	 * @param widgetLabel widget label
+	 * @param widgetColspan widget colspan
+	 * @param widgetRequiredMessage optional required-message text
+	 * @param widgetInvisible widget invisible condition
+	 * @param widgetHelpText widget help text
+	 * @param widgetPixelWidth widget pixel width
+	 * @param showLabel whether label is shown
+	 * @param topLabel whether top-label mode is enabled
+	 */
 	@Override
 	public void layoutFormItemWidget(UIComponent formOrRowLayout,
 										UIComponent formItemComponent,
@@ -273,6 +449,13 @@ public class LayoutBuilderChain extends LayoutBuilder {
 		}
 	}
 
+	/**
+	 * Builds content-signature layout by delegating through the chain in order.
+	 *
+	 * @param component input component
+	 * @param signature content-signature metadata
+	 * @return resulting component
+	 */
 	@Override
 	public UIComponent contentSignatureLayout(UIComponent component, ContentSignature signature) {
 		UIComponent result = component;
@@ -282,6 +465,23 @@ public class LayoutBuilderChain extends LayoutBuilder {
 		return result;
 	}
 	
+	/**
+	 * Adds a component to a container by delegating through the chain in order.
+	 *
+	 * @param component input component
+	 * @param viewContainer current view container metadata
+	 * @param container target container component
+	 * @param componentToAdd component to add
+	 * @param pixelWidth optional pixel width
+	 * @param responsiveWidth optional responsive width
+	 * @param percentageWidth optional percentage width
+	 * @param sm optional small breakpoint width
+	 * @param md optional medium breakpoint width
+	 * @param lg optional large breakpoint width
+	 * @param xl optional extra-large breakpoint width
+	 * @param invisibleConditionName invisible condition name
+	 * @return resulting component
+	 */
 	@Override
 	public UIComponent addToContainer(UIComponent component,
 										Container viewContainer,
@@ -313,6 +513,14 @@ public class LayoutBuilderChain extends LayoutBuilder {
 		return result;
 	}
 
+	/**
+	 * Finalizes container addition by delegating through the chain in order.
+	 *
+	 * @param component input component
+	 * @param viewContainer current view container metadata
+	 * @param container container component
+	 * @return resulting component
+	 */
 	@Override
 	public UIComponent addedToContainer(UIComponent component, Container viewContainer, UIComponent container) {
 		UIComponent result = component;

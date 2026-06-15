@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
@@ -15,8 +16,10 @@ import java.sql.PreparedStatement;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Map;
+import java.util.TimeZone;
 
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.WKTReader;
@@ -40,11 +43,21 @@ import org.skyve.job.CancellableJob;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.util.FileUtil;
 import org.skyve.util.PushMessage;
+import org.skyve.util.SecurityUtil;
 import org.skyve.util.Util;
 import org.supercsv.io.CsvMapReader;
 import org.supercsv.prefs.CsvPreference;
 
+/**
+ * Restores a Skyve application from a backup ZIP, re-creating table data and
+ * binary content according to the {@link RestoreOptions} provided.
+ */
 public class RestoreJob extends CancellableJob {
+	private static final String CREATE_SQL = "create.sql";
+	private static final String ID_COLUMN_SUFFIX = "_id";
+
+	private Calendar gmt = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+
 	/**
 	 * Executes a restore job when invoked with {@link RestoreOptions}.
 	 * Logs a user-facing message if the job is triggered with the wrong bean type.
@@ -63,6 +76,7 @@ public class RestoreJob extends CancellableJob {
 	 * Orchestrates a full restore from the selected backup, including optional DDL work,
 	 * data restore, indexing, and cleanup.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void restore(RestoreOptions options) throws Exception {
 		CustomerImpl customer = (CustomerImpl) CORE.getCustomer();
 		String customerName = customer.getName();
@@ -112,7 +126,9 @@ public class RestoreJob extends CancellableJob {
 				log.add(trace);
 				LOGGER.info(trace);
 			}
-			FileUtil.extractZipArchive(backup, extractDir);
+			FileUtil.extractZipArchive(backup, extractDir,
+					UtilImpl.BACKUP_RESTORE_MAX_EXTRACT_ENTRIES,
+					UtilImpl.BACKUP_RESTORE_MAX_EXTRACT_SIZE_MB);
 			trace = String.format("Extracted %s to %s", backup.getAbsolutePath(), extractDir.getAbsolutePath());
 			log.add(trace);
 			LOGGER.info(trace);
@@ -135,7 +151,7 @@ public class RestoreJob extends CancellableJob {
 			boolean ddlSync = false;
 			if (PreProcess.createUsingBackup.equals(restorePreProcess)) {
 				createUsingBackup = true;
-				DDL.create(new File(extractDir, "create.sql"), true);
+				DDL.create(new File(extractDir, CREATE_SQL), true);
 				ddlSync = true;
 			}
 			else if (PreProcess.createUsingMetadata.equals(restorePreProcess)) {
@@ -145,7 +161,7 @@ public class RestoreJob extends CancellableJob {
 			else if (PreProcess.dropUsingBackupAndCreateUsingBackup.equals(restorePreProcess)) {
 				createUsingBackup = true;
 				DDL.drop(new File(extractDir, "drop.sql"), true);
-				DDL.create(new File(extractDir, "create.sql"), true);
+				DDL.create(new File(extractDir, CREATE_SQL), true);
 				ddlSync = true;
 			}
 			else if (PreProcess.dropUsingBackupAndCreateUsingMetadata.equals(restorePreProcess)) {
@@ -156,7 +172,7 @@ public class RestoreJob extends CancellableJob {
 			else if (PreProcess.dropUsingMetadataAndCreateUsingBackup.equals(restorePreProcess)) {
 				createUsingBackup = true;
 				DDL.drop(null, true);
-				DDL.create(new File(extractDir, "create.sql"), true);
+				DDL.create(new File(extractDir, CREATE_SQL), true);
 				ddlSync = true;
 			}
 			else if (PreProcess.dropUsingMetadataAndCreateUsingMetadata.equals(restorePreProcess)) {
@@ -193,6 +209,36 @@ public class RestoreJob extends CancellableJob {
 			setPercentComplete(100);
 
 			EXT.push(new PushMessage().growl(MessageSeverity.info, "System Restore complete."));
+		}
+		catch (IOException zipLimitEx) {
+			String msg = zipLimitEx.getMessage();
+			if (msg != null && msg.startsWith("Zip archive exceeds")) {
+				restoreSuccessful = false;
+				String alert = new StringBuilder(256)
+						.append("Restore ABORTED for customer '").append(customerName)
+						.append("', backup '").append(selectedBackupName)
+						.append("': ").append(msg)
+						.append(" (configured limits: maxEntries=").append(UtilImpl.BACKUP_RESTORE_MAX_EXTRACT_ENTRIES)
+						.append(", maxSizeMB=").append(UtilImpl.BACKUP_RESTORE_MAX_EXTRACT_SIZE_MB)
+						.append(')')
+						.toString();
+				log.add(alert);
+				LOGGER.error(alert);
+				// Remove any partially extracted files
+				String extractDirName = selectedBackupName.substring(0, selectedBackupName.length() - 4);
+				File partialExtract = new File(backup.getParentFile(), extractDirName);
+				if (partialExtract.exists()) {
+					try {
+						FileUtil.delete(partialExtract);
+					}
+					catch (IOException delEx) {
+						LOGGER.warn("Could not delete partial extract at {}", partialExtract.getAbsolutePath(), delEx);
+					}
+				}
+				// Create a SecurityLog entry and email to securityNotificationsEmail / supportEmailAddress
+				SecurityUtil.log("Restore Archive Limit Exceeded", alert, true);
+			}
+			throw zipLimitEx;
 		}
 		catch (Throwable t) {
 			restoreSuccessful = false;
@@ -262,6 +308,7 @@ public class RestoreJob extends CancellableJob {
 	 * Restores table data from CSV files, handling join tables, extension tables,
 	 * and content attachments according to restore options.
 	 */
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	private void restoreData(File backupDirectory,
 								Collection<Table> tables,
 								Connection connection,
@@ -317,7 +364,7 @@ public class RestoreJob extends CancellableJob {
 								sql.append(header).append(',');
 							}
 							else {
-								if (! header.endsWith("_id")) {
+								if (! header.endsWith(ID_COLUMN_SUFFIX)) {
 									sql.append(header).append(',');
 								}
 							}
@@ -329,7 +376,7 @@ public class RestoreJob extends CancellableJob {
 								sql.append("?,");
 							}
 							else {
-								if (! header.endsWith("_id")) {
+								if (! header.endsWith(ID_COLUMN_SUFFIX)) {
 									sql.append("?,");
 								}
 							}
@@ -348,11 +395,11 @@ public class RestoreJob extends CancellableJob {
 
 								int index = 1;
 								for (String header : headers) {
-									if ((! joinTables) && header.endsWith("_id")) {
+									if ((! joinTables) && header.endsWith(ID_COLUMN_SUFFIX)) {
 										continue;
 									}
 									String stringValue = values.get(header);
-									if ((stringValue == null) || (stringValue.length() == 0)) {
+									if ((stringValue == null) || stringValue.isEmpty()) {
 										statement.setObject(index++, null);
 										continue;
 									}
@@ -361,7 +408,7 @@ public class RestoreJob extends CancellableJob {
 									AttributeType attributeType = (field == null) ? null : field.getAttributeType();
 
 									// foreign keys
-									if (header.endsWith("_id")) {
+									if (header.endsWith(ID_COLUMN_SUFFIX)) {
 										statement.setString(index++, stringValue);
 									}
 									else if (AttributeType.colour.equals(attributeType) ||
@@ -389,14 +436,14 @@ public class RestoreJob extends CancellableJob {
 										statement.setBoolean(index++, Boolean.parseBoolean(stringValue));
 									}
 									else if (AttributeType.date.equals(attributeType)) {
-										statement.setDate(index++, new Date(Long.parseLong(stringValue)), BackupUtil.GMT);
+										statement.setDate(index++, new Date(Long.parseLong(stringValue)), gmt);
 									}
 									else if (AttributeType.time.equals(attributeType)) {
-										statement.setTime(index++, new Time(Long.parseLong(stringValue)), BackupUtil.GMT);
+										statement.setTime(index++, new Time(Long.parseLong(stringValue)), gmt);
 									}
 									else if (AttributeType.dateTime.equals(attributeType) ||
 												AttributeType.timestamp.equals(attributeType)) {
-										statement.setTimestamp(index++, new Timestamp(Long.parseLong(stringValue)), BackupUtil.GMT);
+										statement.setTimestamp(index++, new Timestamp(Long.parseLong(stringValue)), gmt);
 									}
 									else if (AttributeType.decimal2.equals(attributeType) ||
 												AttributeType.decimal5.equals(attributeType) ||
@@ -513,6 +560,7 @@ public class RestoreJob extends CancellableJob {
 	/**
 	 * Restores foreign keys for non-join tables after base data is loaded.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void restoreForeignKeys(File backupDirectory,
 										Collection<Table> tables,
 										Connection connection)
@@ -545,7 +593,7 @@ public class RestoreJob extends CancellableJob {
 					sql.append("update ").append(table.persistentIdentifier);
 					boolean foundAForeignKey = false;
 					for (String header : headers) {
-						if (header.endsWith("_id")) {
+						if (header.endsWith(ID_COLUMN_SUFFIX)) {
 							if (! foundAForeignKey) {
 								sql.append(" set ");
 							}
@@ -571,9 +619,9 @@ public class RestoreJob extends CancellableJob {
 
 								int i = 1;
 								for (String header : headers) {
-									if (header.endsWith("_id")) {
+									if (header.endsWith(ID_COLUMN_SUFFIX)) {
 										final String stringValue = values.get(header);
-										if ((stringValue == null) || (stringValue.length() == 0)) {
+										if ((stringValue == null) || stringValue.isEmpty()) {
 											statement.setObject(i, null);
 											i++;
 										}

@@ -27,32 +27,45 @@ import freemarker.template.Template;
 import modules.admin.ReportDataset.ReportDatasetExtension;
 import modules.admin.domain.Contact;
 import modules.admin.domain.ReportTemplate;
-import modules.admin.domain.User;
 import modules.admin.domain.UserProxy;
 
+/**
+ * Scheduled job that renders report templates and emails generated outputs to configured recipients.
+ */
 public class ReportJob extends Job {
 	public static final String SYSTEM_SCHEDULED_REPORT_EMAIL = "SYSTEM Scheduled Report";
 	public static final String SYSTEM_SCHEDULED_REPORT_EMAIL_DEFAULT_SUBJECT = String.format("Scheduled Report {%s}",
 			ReportTemplate.namePropertyName);
 	public static final String SYSTEM_SCHEDULED_REPORT_EMAIL_DEFAULT_BODY = String.format("Hi {%s}, <br /><br />" +
 					"Please find attached your copy of a scheduled report.",
-			Binder.createCompoundBinding(User.contactPropertyName, Contact.namePropertyName));
+			Binder.createCompoundBinding(UserProxy.contactPropertyName, Contact.namePropertyName));
 
+	/**
+	 * Executes the scheduled report job.
+	 *
+	 * @throws Exception if report generation or dispatch fails
+	 */
 	@Override
 	public void execute() throws Exception {
 		executeReport();
 	}
 
+	/**
+	 * Generates the configured report output and dispatches it to all configured recipients.
+	 *
+	 * @throws Exception if template processing, output rendering, or delivery fails
+	 */
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	public void executeReport() throws Exception {
-		UtilImpl.inject(this);
+		injectDependencies();
 
-		final ReportTemplate report = CORE.getPersistence().retrieve(ReportTemplate.MODULE_NAME, ReportTemplate.DOCUMENT_NAME, getBean().getBizId());
+		final ReportTemplate report = retrieveReport(getBean().getBizId());
 		if (report == null) {
 			throw new DomainException("Report template " + getBean().getBizId() + " does not exist");
 		}
 
 		// TODO: Diverge from Jasper
-		Template template = EXT.getReporting().getFreemarkerTemplate(report.getTemplateName());
+		Template template = getFreemarkerTemplate(report.getTemplateName());
 
 		Map<String, Object> root = new HashMap<>();
 
@@ -104,22 +117,18 @@ public class ReportJob extends Job {
 			} else if (ReportTemplate.OutputFormat.PDF == report.getOutputFormat()) {
 				try (final ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 					try (final InputStream in = new ByteArrayInputStream(reportBytes)) {
-						EXT.getReporting().generateFreemarkerPDFFromHTML(in, out);
+						generateFreemarkerPDFFromHTML(in, out);
 						reportAttachment = new MailAttachment(String.format("%s.pdf", report.getName()), out.toByteArray(), MimeType.pdf);
 					}
 				}
 			} else {
-				throw new RuntimeException("Unsupported format.");
+				throw new DomainException("Unsupported format.");
 			}
 
 			final List<Exception> exceptions = new ArrayList<>();
 			for (UserProxy userToEmail : report.getUsersToEmail()) {
 				try {
-					CommunicationUtil.sendFailSafeSystemCommunication(SYSTEM_SCHEDULED_REPORT_EMAIL,
-							SYSTEM_SCHEDULED_REPORT_EMAIL_DEFAULT_SUBJECT,
-							SYSTEM_SCHEDULED_REPORT_EMAIL_DEFAULT_BODY,
-							CommunicationUtil.ResponseMode.EXPLICIT, new MailAttachment[] { reportAttachment }, userToEmail,
-							report);
+					sendReport(reportAttachment, userToEmail, report);
 					getLog().add(String.format("Successfully emailed report to %s.", userToEmail.getContact().getEmail1()));
 				} catch (Exception e) {
 					getLog().add(String.format("Failed to email report to %s.", userToEmail.getContact().getEmail1()));
@@ -128,8 +137,35 @@ public class ReportJob extends Job {
 			}
 
 			if (!exceptions.isEmpty()) {
-				throw new RuntimeException("Failed to send report to some users.");
+				throw new DomainException("Failed to send report to some users.");
 			}
 		}
+	}
+
+	protected void injectDependencies() {
+		UtilImpl.inject(this);
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	protected ReportTemplate retrieveReport(String bizId) {
+		return CORE.getPersistence().retrieve(ReportTemplate.MODULE_NAME, ReportTemplate.DOCUMENT_NAME, bizId);
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	protected Template getFreemarkerTemplate(String templateName) throws Exception {
+		return EXT.getReporting().getFreemarkerTemplate(templateName);
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	protected void generateFreemarkerPDFFromHTML(InputStream in, ByteArrayOutputStream out) throws Exception {
+		EXT.getReporting().generateFreemarkerPDFFromHTML(in, out);
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	protected void sendReport(MailAttachment reportAttachment, UserProxy userToEmail, ReportTemplate report) throws Exception {
+		CommunicationUtil.sendFailSafeSystemCommunication(SYSTEM_SCHEDULED_REPORT_EMAIL,
+				SYSTEM_SCHEDULED_REPORT_EMAIL_DEFAULT_SUBJECT,
+				SYSTEM_SCHEDULED_REPORT_EMAIL_DEFAULT_BODY,
+				CommunicationUtil.ResponseMode.EXPLICIT, new MailAttachment[] { reportAttachment }, userToEmail, report);
 	}
 }

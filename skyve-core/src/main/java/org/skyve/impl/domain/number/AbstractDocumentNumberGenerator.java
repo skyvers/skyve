@@ -21,8 +21,26 @@ import org.skyve.util.Binder;
 
 import jakarta.annotation.Nonnull;
 
+/**
+ * Base implementation of {@link NumberGenerator} that reads and increments sequence
+ * counters stored in the {@code DocumentNumber} admin document.
+ *
+ * <p>The counter for a {@code (moduleName, documentName, fieldName)} triple is
+ * persisted in the database. On first access the implementation bootstraps from
+ * the maximum value already present in the field's column so that generated numbers
+ * never collide with existing data.
+ *
+ * <p>Subclasses must implement {@link NumberGenerator#next} using the
+ * {@link #getNextNumber} helper, supplying the appropriate
+ * {@link org.skyve.persistence.Persistence} instance.
+ *
+ * @see DocumentNumberGenerator
+ * @see NumberGeneratorStaticSingleton
+ */
 public abstract class AbstractDocumentNumberGenerator implements NumberGenerator {
-	@SuppressWarnings("static-method")
+	private static final String NUMERIC_PATTERN = "^\\d+$";
+
+	@SuppressWarnings({"static-method", "java:S3776"}) // Complexity OK
 	protected String getNextNumber(Persistence pers,
 									String prefix,
 									String moduleName,
@@ -140,13 +158,13 @@ public abstract class AbstractDocumentNumberGenerator implements NumberGenerator
 				value = Integer.valueOf(Integer.parseInt(numberPart) + 1);
 
 				// cater for purely numeric prefix
-			} else if (prefix.matches("^\\d+$") && lastNumber.matches("^\\d+$") && !"0".equals(lastNumber)) {
+			} else if (prefix.matches(NUMERIC_PATTERN) && lastNumber.matches(NUMERIC_PATTERN) && !"0".equals(lastNumber)) {
 				int len = prefix.length();
 				value = Integer.valueOf(Integer.parseInt(lastNumber.substring(len)) + 1);
 				nonNumeric = prefix;
 
 				// cater for numeric only
-			} else if (lastNumber.matches("^\\d+$")) {
+			} else if (lastNumber.matches(NUMERIC_PATTERN)) {
 				nonNumeric = prefix;
 				value = Integer.valueOf(Integer.parseInt(lastNumber) + 1);
 			}

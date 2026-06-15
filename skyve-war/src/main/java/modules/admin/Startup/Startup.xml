@@ -226,6 +226,11 @@
 			<defaultValue>1</defaultValue>
 			<validator min="1" />
 		</integer>
+		<boolean name="concurrentSessionWarnings">
+			<displayName>Concurrent Session Warnings</displayName>
+			<description>When enabled, a security event will be logged when a user starts a new session while another session is already active.</description>
+			<defaultValue>true</defaultValue>
+		</boolean>
 		<enum name="captchaType">
 			<displayName>CAPTCHA Type</displayName>
 			<description>
@@ -264,6 +269,11 @@
 		<boolean name="geoIPBlockNotifications">
 			<displayName>Geo IP Block Notifications</displayName>
 			<description>When enabled, notifications will be sent when a Geo IP block occurs.</description>
+		</boolean>
+		<boolean name="concurrentSessionNotifications">
+			<displayName>Concurrent Session Notifications</displayName>
+			<description>When enabled, notifications will be sent when a concurrent session warning is logged.</description>
+			<defaultValue>true</defaultValue>
 		</boolean>
 		<boolean name="passwordChangeNotifications">
 			<displayName>Password Change Notifications</displayName>

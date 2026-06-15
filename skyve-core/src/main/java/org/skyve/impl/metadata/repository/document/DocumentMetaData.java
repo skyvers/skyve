@@ -7,7 +7,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.apache.commons.lang3.StringUtils;
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.bind.BindUtil;
@@ -84,29 +83,91 @@ import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "document")
-@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE, 
+@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE,
 			name = "document",
 			propOrder = {"documentation",
 							"extends",
 							"abstract",
 							"persistent",
 							"dynamic",
-							"singularAlias", 
+							"singularAlias",
 							"pluralAlias",
 							"audited",
 							"iconStyleClass",
 							"icon16x16RelativeFilePath",
 							"icon32x32RelativeFilePath",
 							"description",
-							"parentDocument", 
+							"parentDocument",
 							"bizKey",
 							"implements",
-							"attributes", 
-							"conditions", 
+							"attributes",
+							"conditions",
 							"uniqueConstraints",
 							"properties"})
+/**
+ * JAXB root element for a document XML descriptor ({@code document.xml}), converted
+ * to a runtime {@link Document} during repository bootstrap.
+ *
+ * <p>Holds the full structural definition of a Skyve document: class name,
+ * persistence mapping, fields, associations, collections, conditions, unique
+ * constraints, and actions.  Extends {@link NamedMetaData} to bind the document
+ * to its symbolic name.
+ *
+ * <p>Threading: not thread-safe.  Instances are populated during JAXB unmarshalling
+ * and are read-only once converted and placed in the repository cache.
+ *
+ * @see Document
+ * @see org.skyve.impl.metadata.model.document.DocumentImpl
+ */
 public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaData<Document>, DecoratedMetaData {
 	private static final long serialVersionUID = 222166383815547958L;
+	
+	private static final String ATTRIBUTE_NAMED = " : The attribute named ";
+	private static final String ENUMERATION_PREFIX = " : Enumeration ";
+	private static final String FOR_VALIDATOR_ON_FIELD = " for validator on field ";
+	private static final String IS_NOT_COERCIBLE_TO_TYPE = " is not coercible to type ";
+	private static final String MAX_VALUE_OF = " : The max value of ";
+	private static final String MIN_VALUE_OF = " : The min value of ";
+	private static final String PRECISION_FOR_VALIDATOR_ON_FIELD = " : Precision for validator on field ";
+	private static final String VALIDATOR_MUST_DEFINE_MIN_OR_MAX = " : The validator on field ";
+	private static final String MUST_DEFINE_EITHER_MIN_OR_MAX = " must define either a min or max.";
+
+	private static boolean isAsciiJavaIdentifierPath(String value) {
+		boolean expectingIdentifierStart = true;
+		boolean foundIdentifierPart = false;
+		for (int i = 0, l = value.length(); i < l; i++) {
+			char character = value.charAt(i);
+			if (Character.isWhitespace(character)) {
+				continue;
+			}
+			if (expectingIdentifierStart) {
+				if (! isAsciiJavaIdentifierStart(character)) {
+					return false;
+				}
+				expectingIdentifierStart = false;
+				foundIdentifierPart = true;
+			}
+			else if (character == '.') {
+				expectingIdentifierStart = true;
+			}
+			else if (! isAsciiJavaIdentifierPart(character)) {
+				return false;
+			}
+		}
+		return foundIdentifierPart && (! expectingIdentifierStart);
+	}
+
+	private static boolean isAsciiJavaIdentifierStart(char character) {
+		return (character == '_') ||
+				(character == '$') ||
+				((character >= 'a') && (character <= 'z')) ||
+				((character >= 'A') && (character <= 'Z'));
+	}
+
+	private static boolean isAsciiJavaIdentifierPart(char character) {
+		return isAsciiJavaIdentifierStart(character) ||
+				((character >= '0') && (character <= '9'));
+	}
 
 	private Extends inherits;
 	private java.lang.Boolean abstractClass;
@@ -127,129 +188,264 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	private List<UniqueConstraint> uniqueConstraints = new ArrayList<>();
 	private String documentation;
 	private long lastModifiedMillis = Long.MAX_VALUE;
-	
+
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
 	private Map<String, String> properties = new TreeMap<>();
 
+	/**
+	 * Returns the document inheritance mode.
+	 *
+	 * @return inheritance strategy, or {@code null}
+	 */
 	public Extends getExtends() {
 		return inherits;
 	}
 
+	/**
+	 * Sets the document inheritance mode.
+	 *
+	 * @param inherits inheritance strategy
+	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setExtends(Extends inherits) {
 		this.inherits = inherits;
 	}
 
+	/**
+	 * Returns whether this document is abstract.
+	 *
+	 * @return {@code true} when abstract, otherwise {@code false} or {@code null}
+	 */
 	public java.lang.Boolean getAbstract() {
 		return abstractClass;
 	}
 
+	/**
+	 * Sets whether this document is abstract.
+	 *
+	 * @param abstractClass abstract flag
+	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setAbstract(java.lang.Boolean abstractClass) {
 		this.abstractClass = abstractClass;
 	}
 
+	/**
+	 * Returns persistence mapping metadata for this document.
+	 *
+	 * @return persistence metadata, or {@code null} for transient documents
+	 */
 	public Persistent getPersistent() {
 		return persistent;
 	}
 
+	/**
+	 * Sets persistence mapping metadata for this document.
+	 *
+	 * @param persistent persistence metadata
+	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, required = false)
 	public void setPersistent(Persistent persistent) {
 		this.persistent = persistent;
 	}
 
+	/**
+	 * Returns dynamic-behaviour metadata for this document.
+	 *
+	 * @return dynamic metadata, or {@code null}
+	 */
 	public Dynamic getDynamic() {
 		return dynamic;
 	}
 
+	/**
+	 * Sets dynamic-behaviour metadata for this document.
+	 *
+	 * @param dynamic dynamic metadata
+	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setDynamic(Dynamic dynamic) {
 		this.dynamic = dynamic;
 	}
 
+	/**
+	 * Returns the singular display alias.
+	 *
+	 * @return singular alias
+	 */
 	public String getSingularAlias() {
 		return singularAlias;
 	}
 
+	/**
+	 * Sets the singular display alias.
+	 *
+	 * @param singularAlias singular alias value
+	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, required = true)
 	public void setSingularAlias(String singularAlias) {
 		this.singularAlias = UtilImpl.processStringValue(singularAlias);
 	}
 
+	/**
+	 * Returns the plural display alias.
+	 *
+	 * @return plural alias
+	 */
 	public String getPluralAlias() {
 		return pluralAlias;
 	}
 
+	/**
+	 * Sets the plural display alias.
+	 *
+	 * @param pluralAlias plural alias value
+	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, required = true)
 	public void setPluralAlias(String pluralAlias) {
 		this.pluralAlias = UtilImpl.processStringValue(pluralAlias);
 	}
 
+	/**
+	 * Returns the relative path for the 16x16 document icon.
+	 *
+	 * @return 16x16 icon path, or {@code null}
+	 */
 	public String getIcon16x16RelativeFilePath() {
 		return icon16x16RelativeFilePath;
 	}
 
+	/**
+	 * Sets the relative path for the 16x16 document icon.
+	 *
+	 * @param icon16x16RelativeFilePath 16x16 icon path
+	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setIcon16x16RelativeFilePath(String icon16x16RelativeFilePath) {
 		this.icon16x16RelativeFilePath = UtilImpl.processStringValue(icon16x16RelativeFilePath);
 	}
 
+	/**
+	 * Returns the icon CSS class.
+	 *
+	 * @return icon style class, or {@code null}
+	 */
 	public String getIconStyleClass() {
 		return iconStyleClass;
 	}
 
+	/**
+	 * Sets the icon CSS class.
+	 *
+	 * @param iconStyleClass icon style class
+	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setIconStyleClass(String iconStyleClass) {
 		this.iconStyleClass = UtilImpl.processStringValue(iconStyleClass);
 	}
 
+	/**
+	 * Returns the relative path for the 32x32 document icon.
+	 *
+	 * @return 32x32 icon path, or {@code null}
+	 */
 	public String getIcon32x32RelativeFilePath() {
 		return icon32x32RelativeFilePath;
 	}
 
+	/**
+	 * Sets the relative path for the 32x32 document icon.
+	 *
+	 * @param icon32x32RelativeFilePath 32x32 icon path
+	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setIcon32x32RelativeFilePath(String icon32x32RelativeFilePath) {
 		this.icon32x32RelativeFilePath = UtilImpl.processStringValue(icon32x32RelativeFilePath);
 	}
 
+	/**
+	 * Returns whether auditing is enabled.
+	 *
+	 * @return audit flag, or {@code null} to use defaults
+	 */
 	public java.lang.Boolean getAudited() {
 		return audited;
 	}
 
+	/**
+	 * Sets whether auditing is enabled.
+	 *
+	 * @param audited audit flag
+	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setAudited(java.lang.Boolean audited) {
 		this.audited = audited;
 	}
 
+	/**
+	 * Returns the human-readable document description.
+	 *
+	 * @return document description, or {@code null}
+	 */
 	public String getDescription() {
 		return description;
 	}
 
+	/**
+	 * Sets the human-readable document description.
+	 *
+	 * @param description document description
+	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
 	public void setDescription(String description) {
 		this.description = UtilImpl.processStringValue(description);
 	}
 
+	/**
+	 * Returns parent-document linkage metadata.
+	 *
+	 * @return parent document metadata, or {@code null}
+	 */
 	public ParentDocument getParentDocument() {
 		return parentDocument;
 	}
 
+	/**
+	 * Sets parent-document linkage metadata.
+	 *
+	 * @param parentDocument parent document metadata
+	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setParentDocument(ParentDocument parentDocument) {
 		this.parentDocument = parentDocument;
 	}
 
+	/**
+	 * Returns business-key metadata for this document.
+	 *
+	 * @return business-key metadata, or {@code null}
+	 */
 	public BizKey getBizKey() {
 		return bizKey;
 	}
 
+	/**
+	 * Sets business-key metadata for this document.
+	 *
+	 * @param bizKey business-key metadata
+	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setBizKey(BizKey bizKey) {
 		this.bizKey = bizKey;
 	}
 
+	/**
+	 * Returns implemented interfaces declared for this document.
+	 *
+	 * @return mutable list of interface declarations
+	 */
 	@XmlElementWrapper(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "implements")
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE,
 			name = "interface",
@@ -258,7 +454,13 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 		return interfaces;
 	}
 
-	// Keep this in sync with ViewModelMetaData
+	/**
+	 * Returns declared document attributes in definition order.
+	 *
+	 * Keep this in sync with ViewModelMetaData
+	 *
+	 * @return mutable list of document attributes
+	 */
 	@XmlElementWrapper(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "attributes", required = true)
 	@XmlElementRefs({@XmlElementRef(type = Text.class),
 						@XmlElementRef(type = Date.class),
@@ -287,44 +489,91 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 		return attributes;
 	}
 
+	/**
+	 * Returns declared document conditions.
+	 *
+	 * @return mutable list of condition metadata
+	 */
 	@XmlElementWrapper(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "conditions")
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "condition", required = true)
 	public List<ConditionMetaData> getConditions() {
 		return conditions;
 	}
 
+	/**
+	 * Returns declared unique constraints.
+	 *
+	 * @return mutable list of unique constraint metadata
+	 */
 	@XmlElementWrapper(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "uniqueConstraints")
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "constraint", required = false)
 	public List<UniqueConstraint> getUniqueConstraints() {
 		return uniqueConstraints;
 	}
 
+	/**
+	 * Returns long-form document documentation.
+	 *
+	 * @return documentation text, or {@code null}
+	 */
 	public String getDocumentation() {
 		return documentation;
 	}
 
+	/**
+	 * Sets long-form document documentation.
+	 *
+	 * @param documentation documentation text
+	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
 	public void setDocumentation(String documentation) {
 		this.documentation = UtilImpl.processStringValue(documentation);
 	}
-	
+
+	/**
+	 * Returns decorator properties defined on this document descriptor.
+	 *
+	 * @return mutable document property map
+	 */
 	@Override
 	public Map<String, String> getProperties() {
 		return properties;
 	}
 
+	/**
+	 * Returns the source metadata last-modified timestamp used for reload checks.
+	 *
+	 * @return source metadata last-modified timestamp in milliseconds
+	 */
 	@Override
 	public long getLastModifiedMillis() {
 		return lastModifiedMillis;
 	}
 
+	/**
+	 * Sets the source metadata last-modified timestamp used for reload checks.
+	 *
+	 * @param lastModifiedMillis source metadata last-modified timestamp in milliseconds
+	 */
 	@XmlTransient
 	public void setLastModifiedMillis(long lastModifiedMillis) {
 		this.lastModifiedMillis = lastModifiedMillis;
 	}
 
+	/**
+	 * Converts this JAXB document descriptor into runtime document metadata.
+	 *
+	 * <p>Validates required aliases, biz-key rules, dynamic mappings, attribute
+	 * names, converter compatibility, uniqueness constraints, and derived defaults
+	 * before returning a populated {@link DocumentImpl}.
+	 *
+	 * @param metaDataName metadata path used in validation error messages
+	 * @return the populated runtime document metadata
+	 * @throws MetaDataException if the descriptor is incomplete or internally inconsistent
+	 */
 	@Override
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	public Document convert(String metaDataName) {
 		DocumentImpl result = new DocumentImpl();
 		result.setLastModifiedMillis(getLastModifiedMillis());
@@ -373,9 +622,9 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 
 		// audited defaults to true when not present
 		result.setAudited(! java.lang.Boolean.FALSE.equals(getAudited()));
-		
+
 		result.setDescription(getDescription());
-		
+
 		ParentDocument parent = getParentDocument();
 		if (parent != null) {
 			result.setParentDocumentName(parent.getParentDocumentName());
@@ -475,46 +724,46 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 					throw new MetaDataException(metaDataName + " : The attribute [name] is required");
 				}
 				if (BindUtil.isImplicit(value)) {
-					throw new MetaDataException(metaDataName + " : The attribute named " + value + " is already an implicit attribute.");
+					throw new MetaDataException(metaDataName + ATTRIBUTE_NAMED + value + " is already an implicit attribute.");
 				}
 				if (! value.equals(BindUtil.toJavaInstanceIdentifier(value))) {
-					throw new MetaDataException(metaDataName + " : The attribute named " + value + " is not a valid attribute name. This should be camel case with no punctuation");
+					throw new MetaDataException(metaDataName + ATTRIBUTE_NAMED + value + " is not a valid attribute name. This should be camel case with no punctuation");
 				}
 				// do not allow unicode document names, see https://hibernate.atlassian.net/browse/HHH-13383
-				if (! StringUtils.deleteWhitespace(value).matches("^([a-zA-Z_$][a-zA-Z\\d_$]*\\.)*[a-zA-Z_$][a-zA-Z\\d_$]*$")) {
-					throw new MetaDataException(metaDataName + " : The attribute named " + value + " must only contain non-unicode letters and digits.");
+				if (! isAsciiJavaIdentifierPath(value)) {
+					throw new MetaDataException(metaDataName + ATTRIBUTE_NAMED + value + " must only contain non-unicode letters and digits.");
 				}
 				// not required but has a required message
 				if ((! attribute.isRequired()) && attribute.getRequiredMessage() != null) {
-					throw new MetaDataException(metaDataName + " : The attribute named " + value + " is not required but has a requiredMessage.");
+					throw new MetaDataException(metaDataName + ATTRIBUTE_NAMED + value + " is not required but has a requiredMessage.");
 				}
 				if (! attributeNames.add(value)) {
 					throw new MetaDataException(metaDataName + " : Duplicate attribute named " + value);
 				}
-				
+
 				value = attribute.getDisplayName();
 				if (value == null) {
 					throw new MetaDataException(metaDataName + " : The attribute [displayName] is required for attribute " + attribute.getName());
 				}
-				
+
 				if (DomainGenerator.JAVA_RESERVED_WORDS.contains(attribute.getName().toLowerCase())) {
 					throw new MetaDataException(String.format("%s : %s is a reserved word and cannot be used as an attribute name.",
 							metaDataName, attribute.getName()));
 				}
-				
-				// Default auditing to off for view attributes 
+
+				// Default auditing to off for view attributes
 				// that don't have an audited value set in their definition.
-				if ((attribute instanceof AbstractAttribute aa) && 
-						(aa.getAuditedBool() == null) && 
+				if ((attribute instanceof AbstractAttribute aa) &&
+						(aa.getAuditedBool() == null) &&
 						UsageType.view.equals(attribute.getUsage())) {
 					((AbstractAttribute) attribute).setAudited(false);
 				}
-				
+
 				AttributeType type = attribute.getAttributeType();
 				if (attribute instanceof Field field) {
 					Converter<?> converter = null;
-					
-					if ((AttributeType.memo.equals(type) || AttributeType.markup.equals(type)) && 
+
+					if ((AttributeType.memo.equals(type) || AttributeType.markup.equals(type)) &&
 							(field.getIndex() == null)) {
 						field.setIndex(IndexType.textual);
 					}
@@ -527,7 +776,11 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 					if (resultDynamic != null) {
 						field.setDynamic(true);
 					}
-					
+
+					if ((field.getGenerated() != null) && (! field.isPersistent())) {
+						throw new MetaDataException(metaDataName + " : The [generated] element cannot be defined on non-persistent field " + field.getName());
+					}
+
 					if (attribute instanceof ConvertibleField convertibleField) {
 						ConverterName converterName = convertibleField.getConverterName();
 						if (converterName != null) {
@@ -550,7 +803,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 					DecimalValidator decimalValidator = null;
 					IntegerValidator integerValidator = null;
 					LongValidator longValidator = null;
-					
+
 					if (field instanceof Text text) {
 						TextValidator validator = text.getValidator();
 						if (validator != null) {
@@ -578,7 +831,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 						if (decimalValidator != null) {
 							java.lang.Integer precision = decimalValidator.getPrecision();
 							if ((precision != null) && (precision.intValue() > 2)) {
-								throw new MetaDataException(metaDataName + " : Precision for validator on field " + field.getName() + " cannot be > 2");
+								throw new MetaDataException(metaDataName + PRECISION_FOR_VALIDATOR_ON_FIELD + field.getName() + " cannot be > 2");
 							}
 						}
 					}
@@ -587,7 +840,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 						if (decimalValidator != null) {
 							java.lang.Integer precision = decimalValidator.getPrecision();
 							if ((precision != null) && (precision.intValue() > 5)) {
-								throw new MetaDataException(metaDataName + " : Precision for validator on field " + field.getName() + " cannot be > 5");
+								throw new MetaDataException(metaDataName + PRECISION_FOR_VALIDATOR_ON_FIELD + field.getName() + " cannot be > 5");
 							}
 						}
 					}
@@ -596,7 +849,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 						if (decimalValidator != null) {
 							java.lang.Integer precision = decimalValidator.getPrecision();
 							if ((precision != null) && (precision.intValue() > 10)) {
-								throw new MetaDataException(metaDataName + " : Precision for validator on field " + field.getName() + " cannot be > 10");
+								throw new MetaDataException(metaDataName + PRECISION_FOR_VALIDATOR_ON_FIELD + field.getName() + " cannot be > 10");
 							}
 						}
 					}
@@ -606,30 +859,30 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 					else if (field instanceof LongInteger integer) {
 						longValidator = integer.getValidator();
 					}
-					
+
 					if (dateValidator != null) {
 						String xmlMin = dateValidator.getXmlMin();
 						String xmlMax = dateValidator.getXmlMax();
 						if ((xmlMin == null) && (xmlMax == null)) {
-							throw new MetaDataException(metaDataName + " : The validator on field " + attribute.getName() + " must define either a min or max.");
+							throw new MetaDataException(metaDataName + VALIDATOR_MUST_DEFINE_MIN_OR_MAX + attribute.getName() + MUST_DEFINE_EITHER_MIN_OR_MAX);
 						}
 						if (xmlMin != null) {
 							try {
 								dateValidator.setMin((java.util.Date) BindUtil.fromSerialised(converter, implementingType, xmlMin));
-							} 
+							}
 							catch (@SuppressWarnings("unused") Exception e) {
-								throw new MetaDataException(metaDataName + " : The min value of " + xmlMin + " for validator on field " + field.getName() + 
-																" is not coercible to type " + type + 
+								throw new MetaDataException(metaDataName + MIN_VALUE_OF + xmlMin + FOR_VALIDATOR_ON_FIELD + field.getName() +
+																IS_NOT_COERCIBLE_TO_TYPE + type +
 																".  Values should be specified in the format of the field converter (if defined) or generic formats otherwise - date based types should be expressed as a standard XML date format - YYYY-MM-DD or YYYY-MM-DDTHH24:MM:SS");
 							}
 						}
 						if (xmlMax != null) {
 							try {
 								dateValidator.setMax((java.util.Date) BindUtil.fromSerialised(converter, implementingType, xmlMax));
-							} 
+							}
 							catch (@SuppressWarnings("unused") Exception e) {
-								throw new MetaDataException(metaDataName + " : The max value of " + xmlMax + " for validator on field " + field.getName() + 
-																" is not coercible to type " + type + 
+								throw new MetaDataException(metaDataName + MAX_VALUE_OF + xmlMax + FOR_VALIDATOR_ON_FIELD + field.getName() +
+																IS_NOT_COERCIBLE_TO_TYPE + type +
 																".  Values should be specified in the format of the field converter (if defined) or generic formats otherwise - date based types should be expressed as a standard XML date format - YYYY-MM-DD or YYYY-MM-DDTHH24:MM:SS");
 							}
 						}
@@ -638,15 +891,15 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 						String xmlMin = decimalValidator.getXmlMin();
 						String xmlMax = decimalValidator.getXmlMax();
 						if ((xmlMin == null) && (xmlMax == null)) {
-							throw new MetaDataException(metaDataName + " : The validator on field " + attribute.getName() + " must define either a min or max.");
+							throw new MetaDataException(metaDataName + VALIDATOR_MUST_DEFINE_MIN_OR_MAX + attribute.getName() + MUST_DEFINE_EITHER_MIN_OR_MAX);
 						}
 						if (xmlMin != null) {
 							try {
 								decimalValidator.setMin((Decimal) BindUtil.fromSerialised(converter, implementingType, xmlMin));
-							} 
+							}
 							catch (@SuppressWarnings("unused") Exception e) {
-								throw new MetaDataException(metaDataName + " : The min value of " + xmlMin + " for validator on field " + field.getName() + 
-																" is not coercible to type " + type + ".  Values should be specified in the format of the field converter (if defined) or generic formats otherwise - decimal based types should be expressed as floating point expressions ie 1.1");
+								throw new MetaDataException(metaDataName + MIN_VALUE_OF + xmlMin + FOR_VALIDATOR_ON_FIELD + field.getName() +
+																IS_NOT_COERCIBLE_TO_TYPE + type + ".  Values should be specified in the format of the field converter (if defined) or generic formats otherwise - decimal based types should be expressed as floating point expressions ie 1.1");
 							}
 						}
 						if (xmlMax != null) {
@@ -654,8 +907,8 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 								decimalValidator.setMax((Decimal) BindUtil.fromSerialised(converter, implementingType, xmlMax));
 							}
 							catch (@SuppressWarnings("unused") Exception e) {
-								throw new MetaDataException(metaDataName + " : The max value of " + xmlMax + " for validator on field " + field.getName() + 
-										" is not coercible to type " + type + ".  Values should be specified in the format of the field converter (if defined) or generic formats otherwise - decimal based types should be expressed as floating point expressions ie 1.1");
+								throw new MetaDataException(metaDataName + MAX_VALUE_OF + xmlMax + FOR_VALIDATOR_ON_FIELD + field.getName() +
+										IS_NOT_COERCIBLE_TO_TYPE + type + ".  Values should be specified in the format of the field converter (if defined) or generic formats otherwise - decimal based types should be expressed as floating point expressions ie 1.1");
 							}
 						}
 					}
@@ -663,15 +916,15 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 						String xmlMin = integerValidator.getXmlMin();
 						String xmlMax = integerValidator.getXmlMax();
 						if ((xmlMin == null) && (xmlMax == null)) {
-							throw new MetaDataException(metaDataName + " : The validator on field " + attribute.getName() + " must define either a min or max.");
+							throw new MetaDataException(metaDataName + VALIDATOR_MUST_DEFINE_MIN_OR_MAX + attribute.getName() + MUST_DEFINE_EITHER_MIN_OR_MAX);
 						}
 						if (xmlMin != null) {
 							try {
 								integerValidator.setMin((java.lang.Integer) BindUtil.fromSerialised(converter, implementingType, xmlMin));
-							} 
+							}
 							catch (@SuppressWarnings("unused") Exception e) {
-								throw new MetaDataException(metaDataName + " : The min value of " + xmlMin + " for validator on field " + field.getName() + 
-																" is not coercible to type " + type + ".  Values should be specified in the format of the field converter (if defined) or generic formats otherwise - integer based types should be expressed as integer expressions ie 1");
+								throw new MetaDataException(metaDataName + MIN_VALUE_OF + xmlMin + FOR_VALIDATOR_ON_FIELD + field.getName() +
+																IS_NOT_COERCIBLE_TO_TYPE + type + ".  Values should be specified in the format of the field converter (if defined) or generic formats otherwise - integer based types should be expressed as integer expressions ie 1");
 							}
 						}
 						if (xmlMax != null) {
@@ -679,8 +932,8 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 								integerValidator.setMax((java.lang.Integer) BindUtil.fromSerialised(converter, implementingType, xmlMax));
 							}
 							catch (@SuppressWarnings("unused") Exception e) {
-								throw new MetaDataException(metaDataName + " : The max value of " + xmlMax + " for validator on field " + field.getName() + 
-										" is not coercible to type " + type + ".  Values should be specified in the format of the field converter (if defined) or generic formats otherwise - integer based types should be expressed as integer expressions ie 1");
+								throw new MetaDataException(metaDataName + MAX_VALUE_OF + xmlMax + FOR_VALIDATOR_ON_FIELD + field.getName() +
+										IS_NOT_COERCIBLE_TO_TYPE + type + ".  Values should be specified in the format of the field converter (if defined) or generic formats otherwise - integer based types should be expressed as integer expressions ie 1");
 							}
 						}
 					}
@@ -688,15 +941,15 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 						String xmlMin = longValidator.getXmlMin();
 						String xmlMax = longValidator.getXmlMax();
 						if ((xmlMin == null) && (xmlMax == null)) {
-							throw new MetaDataException(metaDataName + " : The validator on field " + attribute.getName() + " must define either a min or max.");
+							throw new MetaDataException(metaDataName + VALIDATOR_MUST_DEFINE_MIN_OR_MAX + attribute.getName() + MUST_DEFINE_EITHER_MIN_OR_MAX);
 						}
 						if (xmlMin != null) {
 							try {
 								longValidator.setMin((java.lang.Long) BindUtil.fromSerialised(converter, implementingType, xmlMin));
-							} 
+							}
 							catch (@SuppressWarnings("unused") Exception e) {
-								throw new MetaDataException(metaDataName + " : The min value of " + xmlMin + " for validator on field " + field.getName() + 
-																" is not coercible to type " + type + ".  Values should be specified in the format of the field converter (if defined) or generic formats otherwise - long based types should be expressed as long expressions ie 1");
+								throw new MetaDataException(metaDataName + MIN_VALUE_OF + xmlMin + FOR_VALIDATOR_ON_FIELD + field.getName() +
+																IS_NOT_COERCIBLE_TO_TYPE + type + ".  Values should be specified in the format of the field converter (if defined) or generic formats otherwise - long based types should be expressed as long expressions ie 1");
 							}
 						}
 						if (xmlMax != null) {
@@ -704,8 +957,8 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 								longValidator.setMax((java.lang.Long) BindUtil.fromSerialised(converter, implementingType, xmlMax));
 							}
 							catch (@SuppressWarnings("unused") Exception e) {
-								throw new MetaDataException(metaDataName + " : The max value of " + xmlMax + " for validator on field " + field.getName() + 
-										" is not coercible to type " + type + ".  Values should be specified in the format of the field converter (if defined) or generic formats otherwise - long based types should be expressed as long expressions ie 1");
+								throw new MetaDataException(metaDataName + MAX_VALUE_OF + xmlMax + FOR_VALIDATOR_ON_FIELD + field.getName() +
+										IS_NOT_COERCIBLE_TO_TYPE + type + ".  Values should be specified in the format of the field converter (if defined) or generic formats otherwise - long based types should be expressed as long expressions ie 1");
 							}
 						}
 					}
@@ -722,27 +975,27 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 						String documentRef = enumeration.getDocumentRef();
 						String attributeRef = enumeration.getAttributeRef();
 						List<EnumeratedValue> values = enumeration.getXmlValues();
-						
+
 						// Reference
 						if ((moduleRef != null) || (documentRef != null) || (attributeRef != null)) { // reference
 							if (attributeRef == null) {
-								throw new MetaDataException(metaDataName + " : Enumeration " + attribute.getName() + 
+								throw new MetaDataException(metaDataName + ENUMERATION_PREFIX + attribute.getName() +
 																" is defined as a reference to another enum but [attributeRef] is not defined.");
 							}
 							if ((moduleRef != null) && (documentRef == null)) {
-								throw new MetaDataException(metaDataName + " : Enumeration " + attribute.getName() + 
+								throw new MetaDataException(metaDataName + ENUMERATION_PREFIX + attribute.getName() +
 																" has a [moduleRef] but no documentRef.");
 							}
 							if (! values.isEmpty()) {
-								throw new MetaDataException(metaDataName + " : Enumeration " + attribute.getName() + 
+								throw new MetaDataException(metaDataName + ENUMERATION_PREFIX + attribute.getName() +
 																" is defined as a reference to another enum but has [values] defined.");
 							}
 							if (enumeration.getXmlTypeName() != null) {
-								throw new MetaDataException(metaDataName + " : Enumeration " + attribute.getName() + 
+								throw new MetaDataException(metaDataName + ENUMERATION_PREFIX + attribute.getName() +
 																" is defined as a reference to another enum but has [typeName] defined.");
 							}
 							if (enumeration.getXmlImplementingEnumClassName() != null) {
-								throw new MetaDataException(metaDataName + " : Enumeration " + attribute.getName() + 
+								throw new MetaDataException(metaDataName + ENUMERATION_PREFIX + attribute.getName() +
 																" is defined as a reference to another enum but has [implementingEnumClassName] defined.");
 							}
 						}
@@ -750,19 +1003,19 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 							String implementingEnumClassName = enumeration.getXmlImplementingEnumClassName();
 							if (implementingEnumClassName != null) { // implementing
 								if (! values.isEmpty()) {
-									throw new MetaDataException(metaDataName + " : Enumeration " + attribute.getName() + 
+									throw new MetaDataException(metaDataName + ENUMERATION_PREFIX + attribute.getName() +
 																	" is defined with an [implementingEnumClassName] but has [values] defined.");
 								}
 							}
 							else { // definition
 								if (values.isEmpty()) {
-									throw new MetaDataException(metaDataName + " : Enumeration " + attribute.getName() + 
+									throw new MetaDataException(metaDataName + ENUMERATION_PREFIX + attribute.getName() +
 																	" has no [values] defined.");
 								}
 							}
 						}
 						enumeration.setOwningDocument(result);
-						
+
 						// check to see if there is an overridden domain type set,
 						// otherwise set it to constant
 						if (enumeration.getDomainType() == null) {
@@ -801,10 +1054,10 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 						// Ordered and Ordering are mutually exclusive
 						List<Ordering> orderings = collection.getOrdering();
 						if (java.lang.Boolean.TRUE.equals(collection.getOrdered()) && (! orderings.isEmpty())) {
-							throw new MetaDataException(metaDataName + " : The collection [ordered] and [orderings] are mutually exclusive for collection " + 
+							throw new MetaDataException(metaDataName + " : The collection [ordered] and [orderings] are mutually exclusive for collection " +
 															relation.getName());
 						}
-						
+
 						java.lang.Boolean ownerDatabaseIndex = collection.getOwnerDatabaseIndex();
 						java.lang.Boolean elementDatabaseIndex = collection.getElementDatabaseIndex();
 
@@ -831,7 +1084,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 																relation.getName());
 							}
 						}
-						
+
 						if (CollectionType.child.equals(collection.getType())) {
 							if (ownerDatabaseIndex != null) {
 								throw new MetaDataException(metaDataName + " : The collection [ownerDatabaseIndex] is NOT applicable to child collection " +
@@ -890,7 +1143,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 				condition.setDescription(conditionMetaData.getDescription());
 				condition.setUsage(conditionMetaData.getUsage());
 				condition.getProperties().putAll(conditionMetaData.getProperties());
-				
+
 				if (result.getConditions().put(conditionName, condition) != null) {
 					throw new MetaDataException(metaDataName + " : A duplicate condition of " + conditionName + " is defined.");
 				}
@@ -951,7 +1204,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 
 		result.setDocumentation(getDocumentation());
 		result.getProperties().putAll(getProperties());
-		
+
 		return result;
 	}
 }

@@ -9,7 +9,8 @@ import org.openqa.selenium.Dimension;
  * @author mike
  */
 public class BrowserConfiguration {
-	public static enum Browsers {
+	@SuppressWarnings("java:S115") // Enum names are browser option identifiers.
+	public enum Browsers {
 		chrome,
 		firefox,
 		safari,

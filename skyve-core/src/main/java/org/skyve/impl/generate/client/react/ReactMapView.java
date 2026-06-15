@@ -8,6 +8,9 @@ import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.view.model.list.ListModel;
 
 
+/**
+ * Renders React map view component code from Skyve metadata.
+ */
 public class ReactMapView extends ReactComponent {
 	@SuppressWarnings("unused")
 	private ListModel<Bean> model;

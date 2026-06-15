@@ -7,12 +7,24 @@ import org.skyve.domain.types.converters.Validator;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.util.BeanValidator;
 
+/**
+ * Converts integer values representing simple percentage display values.
+ */
 public class SimplePercentage implements Converter<Integer> {
+	/**
+	 * Returns the value type handled by this converter.
+	 * @return the result value
+	 */
 	@Override
 	public Class<Integer> getValueType() {
 		return Integer.class;
 	}
 	
+	/**
+	 * Converts a display representation to its domain value.
+	 * @param displayValue the display value
+	 * @return the result value
+	 */
 	@Override
 	public Integer fromDisplayValue(String displayValue) throws ConversionException {
 		String noPercentage = displayValue.replace("%", "");
@@ -33,6 +45,11 @@ public class SimplePercentage implements Converter<Integer> {
 		}
 	}
 
+	/**
+	 * Converts a domain value to its display representation.
+	 * @param value the value
+	 * @return the result value
+	 */
 	@Override
 	public String toDisplayValue(Integer value) throws ConversionException {
 		try {
@@ -43,21 +60,37 @@ public class SimplePercentage implements Converter<Integer> {
 		}
 	}
 
+	/**
+	 * Returns the attribute type supported by this converter.
+	 * @return the result value
+	 */
 	@Override
 	public AttributeType getAttributeType() {
 		return AttributeType.integer;
 	}
 
+	/**
+	 * Returns the optional format descriptor for this converter.
+	 * @return the result value
+	 */
 	@Override
 	public Format<Integer> getFormat() {
 		return null;
 	}
 
+	/**
+	 * Returns the optional validator descriptor for this converter.
+	 * @return the result value
+	 */
 	@Override
 	public Validator<Integer> getValidator() {
 		return null;
 	}
 	
+	/**
+	 * Returns the optional format pattern for this converter.
+	 * @return the result value
+	 */
 	@Override
 	public String getFormatPattern() {
 		return null;

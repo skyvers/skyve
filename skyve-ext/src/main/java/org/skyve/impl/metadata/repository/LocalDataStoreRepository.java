@@ -33,7 +33,7 @@ import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.SQL;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 /**
  * Adds security integration to LocalDesignRepository.
@@ -41,9 +41,21 @@ import org.slf4j.LoggerFactory;
  * @author Mike
  */
 public class LocalDataStoreRepository extends LocalDesignRepository {
-
     private static final Logger QUERY_LOGGER = Category.QUERY.logger();
-    private static final Logger LOGGER = LoggerFactory.getLogger(LocalDataStoreRepository.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(LocalDataStoreRepository.class);
+
+    private static final String INNER_JOIN = "inner join ";
+
+	public LocalDataStoreRepository() {
+		super();
+	}
+
+	/**
+	 * Creates a repository rooted at a specific metadata path for tests.
+	 */
+	LocalDataStoreRepository(String absolutePath) {
+		super(absolutePath);
+	}
 
 	@Override
 	public UserImpl retrieveUser(String userPrincipal) {
@@ -86,6 +98,7 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 	}
 	
 	@Override
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	public boolean populateUser(User user, Connection connection) {
 		UserImpl internalUser = (UserImpl) user;
 		try {
@@ -119,9 +132,9 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 						"u.homeModule, " +
 						"r.roleName ");
 			sql.append("from ").append(ADM_SecurityUser).append(" u ");
-			sql.append("inner join ").append(ADM_SecurityUserRole).append(" r ");
+			sql.append(INNER_JOIN).append(ADM_SecurityUserRole).append(" r ");
 			sql.append("on r.parent_id = u.bizId ");
-			sql.append("inner join ").append(ADM_Contact).append(" c ");
+			sql.append(INNER_JOIN).append(ADM_Contact).append(" c ");
 			sql.append("on u.contact_id = c.bizId ");
 			sql.append("left outer join ").append(ADM_Configuration).append(" p ");
 			sql.append("on u.bizId = p.publicUser_id ");
@@ -143,13 +156,13 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 						"u.homeModule, " +
 						"r.roleName ");
 			sql.append("from ").append(ADM_SecurityUser).append(" u ");
-			sql.append("inner join ").append(ADM_SecurityUser_groups).append(" gs ");
+			sql.append(INNER_JOIN).append(ADM_SecurityUser_groups).append(" gs ");
 			sql.append("on gs.owner_id = u.bizId ");
-			sql.append("inner join ").append(ADM_SecurityGroup).append(" g ");
+			sql.append(INNER_JOIN).append(ADM_SecurityGroup).append(" g ");
 			sql.append("on g.bizId = gs.element_id ");
-			sql.append("inner join ").append(ADM_SecurityGroupRole).append(" r ");
+			sql.append(INNER_JOIN).append(ADM_SecurityGroupRole).append(" r ");
 			sql.append("on r.parent_id = g.bizId ");
-			sql.append("inner join ").append(ADM_Contact).append(" c ");
+			sql.append(INNER_JOIN).append(ADM_Contact).append(" c ");
 			sql.append("on u.contact_id = c.bizId ");
 			sql.append("left outer join ").append(ADM_Configuration).append(" p ");
 			sql.append("on u.bizId = p.publicUser_id ");
@@ -385,11 +398,10 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 			if (UtilImpl.CUSTOMER == null) { // multi-tenant
 				s.putParameter(Bean.CUSTOMER_NAME, customerName, false);
 			}
-			result = s.retrieveScalar(String.class);
+			result = s.scalarResult(String.class);
 		}
 		catch (Exception e) {
 			LOGGER.warn("Could not retrieve public user for customer {}", customerName, e);
-			e.printStackTrace();
 		}
 		
 		return result;

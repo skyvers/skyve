@@ -10,6 +10,18 @@ import org.skyve.web.WebContext;
 
 import jakarta.annotation.Nullable;
 
+/**
+ * Abstract thread-local web context that tracks conversation state, cached domain
+ * beans, and request-parameter constants during a Skyve web request lifecycle.
+ *
+ * <p>The context is keyed by the {@code _c} request parameter and holds the
+ * conversation-scoped bean cache so that the same bean instance is used across
+ * multiple actions in the same conversation.
+ *
+ * <p>Threading: thread-confined. One instance per web request thread.
+ *
+ * @see org.skyve.web.WebContext
+ */
 public abstract class AbstractWebContext implements WebContext {
 	private static final long serialVersionUID = 876761059493617411L;
 	

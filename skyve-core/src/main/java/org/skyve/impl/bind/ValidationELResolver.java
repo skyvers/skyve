@@ -50,6 +50,11 @@ class ValidationELResolver extends ELResolver {
 	private static final Class<?> UNMODIFIABLE_LIST_CLASS = Collections.unmodifiableList(new ArrayList<>()).getClass();
 	private static final Class<?> UNMODIFIABLE_MAP_CLASS = Collections.unmodifiableMap(new HashMap<>()).getClass();
 	
+	private static final String CANNOT_GET_BEAN_CLASS_FOR_DOCUMENT = "Cannot get bean class for document ";
+	private static final String METHOD_PREFIX = "Method ";
+	private static final String ON_INFIX = " on ";
+	private static final String DOES_NOT_EXIST = " does not exist";
+	
 	private Customer customer;
 	
 	private static final Map<Class<?>, Object> TERMINATING_MOCKS = new HashMap<>();
@@ -207,7 +212,7 @@ class ValidationELResolver extends ELResolver {
 				object = document.getBeanClass(customer);
 			}
 			catch (ClassNotFoundException e) {
-				throw new IllegalStateException("Cannot get bean class for document " + document.getOwningModuleName() + "." + document.getName(), e);
+				throw new IllegalStateException(CANNOT_GET_BEAN_CLASS_FOR_DOCUMENT + document.getOwningModuleName() + "." + document.getName(), e);
 			}
 		}
 		
@@ -232,7 +237,7 @@ class ValidationELResolver extends ELResolver {
 						return mock(descriptor.getPropertyType());
 					}
 				}
-				throw new PropertyNotFoundException("Property " + propertyName + " on " + type + " does not exist");
+				throw new PropertyNotFoundException("Property " + propertyName + ON_INFIX + type + DOES_NOT_EXIST);
 			}
 		}
 		
@@ -254,7 +259,7 @@ class ValidationELResolver extends ELResolver {
 				result = document.getBeanClass(customer);
 			}
 			catch (ClassNotFoundException e) {
-				throw new IllegalStateException("Cannot get bean class for document " + document.getOwningModuleName() + "." + document.getName(), e);
+				throw new IllegalStateException(CANNOT_GET_BEAN_CLASS_FOR_DOCUMENT + document.getOwningModuleName() + "." + document.getName(), e);
 			}
 		}
 		
@@ -277,7 +282,7 @@ class ValidationELResolver extends ELResolver {
 				type = document.getBeanClass(customer);
 			}
 			catch (ClassNotFoundException e) {
-				throw new MethodNotFoundException("Method " + method + " on " + base + " cannot be invoked", e);
+				throw new MethodNotFoundException(METHOD_PREFIX + method + ON_INFIX + base + " cannot be invoked", e);
 			}
 		}
 		else if (base instanceof Class<?> clazz) {
@@ -294,7 +299,7 @@ class ValidationELResolver extends ELResolver {
 					context.setPropertyResolved(base, method);
 					return mock(m.getReturnType());
 	            }
-				throw new MethodNotFoundException("Method " + method + " on " + base + " is not public");
+				throw new MethodNotFoundException(METHOD_PREFIX + method + ON_INFIX + base + " is not public");
 			}
 			
 			int paramCount = (params == null) ? 0 : params.length;
@@ -305,14 +310,15 @@ class ValidationELResolver extends ELResolver {
 					return mock(m.getReturnType());
 				}
 			}
-			throw new MethodNotFoundException("Method " + method + " on " + base + " does not exist");
+			throw new MethodNotFoundException(METHOD_PREFIX + method + ON_INFIX + base + DOES_NOT_EXIST);
 		}
 		catch (NoSuchMethodException e) {
-			throw new MethodNotFoundException("Method " + method + " on " + base + " does not exist", e);
+			throw new MethodNotFoundException(METHOD_PREFIX + method + ON_INFIX + base + DOES_NOT_EXIST, e);
 		}
 	}
 
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public boolean isReadOnly(ELContext context, Object base, Object property) {
 		if (Object.class.equals(base)) { // we are not in type-safe mode
 			context.setPropertyResolved(true);

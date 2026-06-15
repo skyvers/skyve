@@ -62,7 +62,12 @@ public class DynamicImageDirective implements TemplateDirectiveModel {
 	private static final String PARAM_HEIGHT = "height";
 	private static final String PARAM_WIDTH = "width";
 
+	private static final String STRING_PARAMETER_REQUIRED_FORMAT = "The '%s' parameter must be a String.";
+	private static final String PARAMETER_REQUIRED_PREFIX = "Parameter '";
+	private static final String PARAMETER_REQUIRED_SUFFIX = "' is required";
+
 	@Override
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
 	throws TemplateException, IOException {
 		if (params.isEmpty()) {
@@ -98,19 +103,19 @@ public class DynamicImageDirective implements TemplateDirectiveModel {
 
 			if (paramName.equals(PARAM_NAME_IMAGE)) {
 				if (! (paramValue instanceof TemplateScalarModel)) {
-					throw new TemplateModelException(String.format("The '%s' parameter must be a String.", PARAM_NAME_IMAGE));
+					throw new TemplateModelException(String.format(STRING_PARAMETER_REQUIRED_FORMAT, PARAM_NAME_IMAGE));
 				}
 				imageParam = ((TemplateScalarModel) paramValue).getAsString();
 			}
 			else if (paramName.equals(PARAM_NAME_DOCUMENT)) {
 				if (! (paramValue instanceof TemplateScalarModel)) {
-					throw new TemplateModelException(String.format("The '%s' parameter must be a String.", PARAM_NAME_DOCUMENT));
+					throw new TemplateModelException(String.format(STRING_PARAMETER_REQUIRED_FORMAT, PARAM_NAME_DOCUMENT));
 				}
 				documentParam = ((TemplateScalarModel) paramValue).getAsString();
 			}
 			else if (paramName.equals(PARAM_NAME_MODULE)) {
 				if (! (paramValue instanceof TemplateScalarModel)) {
-					throw new TemplateModelException(String.format("The '%s' parameter must be a String.", PARAM_NAME_MODULE));
+					throw new TemplateModelException(String.format(STRING_PARAMETER_REQUIRED_FORMAT, PARAM_NAME_MODULE));
 				}
 				moduleParam = ((TemplateScalarModel) paramValue).getAsString();
 			}
@@ -165,16 +170,16 @@ public class DynamicImageDirective implements TemplateDirectiveModel {
 		}
 
 		if (imageParam == null) {
-			throw new TemplateModelException("Parameter '" + PARAM_NAME_IMAGE + "' is required");
+			throw new TemplateModelException(PARAMETER_REQUIRED_PREFIX + PARAM_NAME_IMAGE + PARAMETER_REQUIRED_SUFFIX);
 		}
 		if (documentParam == null) {
-			throw new TemplateModelException("Parameter '" + PARAM_NAME_DOCUMENT + "' is required");
+			throw new TemplateModelException(PARAMETER_REQUIRED_PREFIX + PARAM_NAME_DOCUMENT + PARAMETER_REQUIRED_SUFFIX);
 		}
 		if (moduleParam == null) {
-			throw new TemplateModelException("Parameter '" + PARAM_NAME_MODULE + "' is required");
+			throw new TemplateModelException(PARAMETER_REQUIRED_PREFIX + PARAM_NAME_MODULE + PARAMETER_REQUIRED_SUFFIX);
 		}
 		if (beanParam == null) {
-			throw new TemplateModelException("Parameter '" + PARAM_NAME_BEAN + "' is required");
+			throw new TemplateModelException(PARAMETER_REQUIRED_PREFIX + PARAM_NAME_BEAN + PARAMETER_REQUIRED_SUFFIX);
 		}
 
 		// get the Skyve Document for the image

@@ -15,12 +15,12 @@ import org.primefaces.component.datatable.DataTable;
 import org.skyve.domain.messages.ConversationEndedException;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageException;
-import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.util.Util;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.el.ValueExpression;
 import jakarta.faces.application.FacesMessage;
@@ -45,12 +45,19 @@ import jakarta.servlet.http.HttpServletRequest;
  * It will just provide a blank page.
  * 
  * @author mike
- * @param <T>
+ * @param <T> the callback result type produced by this action
  */
 public abstract class FacesAction<T> {
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(FacesAction.class);
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FacesAction.class);
-
+	/**
+	 * Executes this action with Skyve-aware exception handling and message propagation.
+	 *
+	 * @return the result produced by {@link #callback()}, or {@code null} when callback returns {@code null}
+	 * @throws SecurityException when the callback raises a security error
+	 * @throws SessionEndedException when the user session has ended
+	 * @throws ConversationEndedException when the conversation has ended
+	 */
 	public final T execute() {
 		T result = null;
 		
@@ -73,7 +80,7 @@ public abstract class FacesAction<T> {
 					ec.redirect(Util.getSkyveContextUrl() + errorPageLocation);
 				}
 				catch (IOException ioe) {
-					ioe.printStackTrace();
+					WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "Faces security redirect failed", ioe);
 				}
 			}
 			persistence.setRollbackOnly();
@@ -81,9 +88,9 @@ public abstract class FacesAction<T> {
 		}
 		catch (Throwable t) {
 			persistence.setRollbackOnly();
-			t.printStackTrace();
 			
 			if (t instanceof MessageException me) {
+				LOGGER.warn("Faces action failed with message exception.", t);
 				TreeSet<String> globalMessageSet = new TreeSet<>();
 				for (Message em : me.getMessages()) {
 					processFacesMessages(fc, FacesMessage.SEVERITY_ERROR, em, globalMessageSet);
@@ -97,10 +104,12 @@ public abstract class FacesAction<T> {
 				renderIds.addAll(messageClientIds);
 			}
 			else {
-				FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, t.getMessage(), t.getMessage());
-		        fc.addMessage(null, msg);
-		        // render nothing here since we are only adding a global message
-		        fc.getPartialViewContext().getRenderIds().clear();
+				String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "Faces action failed", t);
+				String message = WebErrorUtil.genericMessage(reference);
+				FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, message, message);
+				fc.addMessage(null, msg);
+				// render nothing here since we are only adding a global message
+				fc.getPartialViewContext().getRenderIds().clear();
 			}
 		}
 		
@@ -129,6 +138,7 @@ public abstract class FacesAction<T> {
 	 * @param message	
 	 * @param globalMessageSet	Used to add only unique/distinct messages across calls
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static void processFacesMessages(FacesContext context,
 												Severity severity,
 												Message message,
@@ -179,8 +189,17 @@ public abstract class FacesAction<T> {
 		}
 	}
 	
+	/**
+	 * Performs the underlying action implementation.
+	 *
+	 * @return the callback result value
+	 * @throws Exception when callback execution fails
+	 */
 	public abstract T callback() throws Exception;
 	
+	/**
+	 * Validates required inputs in the current view and publishes field/global messages for failures.
+	 */
     public static boolean validateRequiredFields() {
     	TreeSet<String> globalMessages = new TreeSet<>(); // used for removing duplicate global messages
     	FacesContext fc = FacesContext.getCurrentInstance();
@@ -198,6 +217,15 @@ public abstract class FacesAction<T> {
     	return valid;
     }
     
+	/**
+	 * Recursively validates rendered required-input components beneath the supplied component subtree.
+	 *
+	 * @param fc the active Faces context
+	 * @param component the root component to validate
+	 * @param globalMessages set used to deduplicate global validation messages
+	 * @return {@code true} when no required-field validation failures are found, otherwise {@code false}
+	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static boolean validateRequiredFields(final FacesContext fc, 
 													UIComponent component, 
 													final TreeSet<String> globalMessages) {
@@ -241,6 +269,14 @@ public abstract class FacesAction<T> {
 		return result;
 	}
 
+	/**
+	 * Validates a single required input and publishes both field-level and distinct global error messages.
+	 *
+	 * @param fc the active Faces context
+	 * @param input the input component to validate
+	 * @param globalMessages set used to deduplicate global validation messages
+	 * @return {@code true} when validation passes for the input, otherwise {@code false}
+	 */
 	private static boolean checkRequiredInput(FacesContext fc,
 												UIInput input,
 												TreeSet<String> globalMessages) {
@@ -273,6 +309,13 @@ public abstract class FacesAction<T> {
 		return true;
 	}
 
+	/**
+	 * Performs a depth-first search for a component id within the supplied component subtree.
+	 *
+	 * @param base the root component to search
+	 * @param id the component id to find
+	 * @return the matching component, or {@code null} when no match exists
+	 */
 	public static UIComponent findComponentById(UIComponent base, String id) {
 		if (id.equals(base.getId())) {
 			return base;
@@ -296,6 +339,13 @@ public abstract class FacesAction<T> {
 		return result;
 	}
 
+	/**
+	 * Finds all components whose value expression resolves to the supplied binding or its simple trailing segment.
+	 *
+	 * @param base the root component to search
+	 * @param binding the binding expression to match
+	 * @return matching components in traversal order
+	 */
 	private static List<UIComponent> findComponentsByBinding(UIComponent base, String binding) {
 		List<UIComponent> result = new ArrayList<>();
 		findComponentsByBinding(base, binding, result);
@@ -314,6 +364,13 @@ public abstract class FacesAction<T> {
 		return result;
 	}
 
+	/**
+	 * Accumulates components whose value expressions end with the supplied binding token.
+	 *
+	 * @param base the current component in traversal
+	 * @param binding the binding expression to match
+	 * @param result accumulator for matching components
+	 */
 	private static void findComponentsByBinding(UIComponent base, String binding, List<UIComponent> result) {
 		ValueExpression ve = base.getValueExpression("value");
 		if (ve != null) {
@@ -337,6 +394,13 @@ public abstract class FacesAction<T> {
 		}
 	}
 	
+	/**
+	 * Collects client ids for rendered PrimeFaces message components, expanding per-row ids for data-grid messages.
+	 *
+	 * @param component the current component in traversal
+	 * @param messageClientIds accumulator for discovered client ids
+	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static void findAllMessageComponentClientIds(UIComponent component, List<String> messageClientIds) {
 		if (component.isRendered()) {
 			if (component instanceof org.primefaces.component.message.Message) {

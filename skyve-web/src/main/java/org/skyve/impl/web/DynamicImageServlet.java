@@ -37,6 +37,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import net.coobird.thumbnailator.Thumbnails;
 import net.coobird.thumbnailator.Thumbnails.Builder;
 
+/**
+ * Serves Skyve dynamic images.
+ *
+ * <p>Servlet API override parameters are intentionally left unannotated because
+ * {@link HttpServlet} does not declare nullness constraints for them.
+ */
 public class DynamicImageServlet extends HttpServlet {
 	private static final long serialVersionUID = 5180477867432555312L;
 	
@@ -48,8 +54,23 @@ public class DynamicImageServlet extends HttpServlet {
 	public static final String IMAGE_WIDTH_ZOOM_NAME = "_wz";
 	public static final String IMAGE_HEIGHT_ZOOM_NAME = "_hz";
 
+	private static final String CACHE_CONTROL = "Cache-Control";
+	private static final String CACHE_VALUE = "cache";
+	private static final String NO_CACHE_VALUE = "private,no-cache,no-store";
+
+	/**
+	 * Generates a dynamic image for the current conversation bean and streams the rendered thumbnail response.
+	 *
+	 * <p>This method sanitises request parameters, restores the cached conversation and authenticated user,
+	 * validates dynamic-image access, delegates image generation to document metadata, configures cache
+	 * headers, and falls back to a one-pixel blank image if generation fails.
+	 *
+	 * <p>Side effects: binds the conversation persistence context to the current thread, mutates response
+	 * headers, writes image bytes to the response stream, logs failures without surfacing them to the client,
+	 * and records dynamic-image monitoring metrics when the target image metadata is known.
+	 */
 	@Override
-	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
+	@SuppressWarnings({"java:S1989", "java:S3776"}) // there exists JavaEE error pages; Complexity OK
 	public void doGet(HttpServletRequest request, HttpServletResponse response)
 	throws ServletException, IOException {
 		// State required for rendering the image
@@ -152,20 +173,18 @@ public class DynamicImageServlet extends HttpServlet {
 		try {
 			// Set invariant headers
 			response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-			// The following allows partial requests which are useful for large media or downloading files with pause and resume functions.
-			response.setHeader("Accept-Ranges", "bytes");
 			response.setContentType(format.getMimeType().toString());
 
 			if (exception == null) { // no problem encountered yet
 				// Set cache header based on image cache time
 				if (cacheTime == null) {
-					response.addHeader("Cache-Control", "private,no-cache,no-store");
+					response.addHeader(CACHE_CONTROL, NO_CACHE_VALUE);
 				}
 				else {
 					// Note this header is first in case there is an arithmetic error
 					response.addDateHeader("Expires", System.currentTimeMillis() + cacheTime.toMillis());
-					response.setHeader("Cache-Control", "cache");
-					response.setHeader("Pragma", "cache");
+					response.setHeader(CACHE_CONTROL, CACHE_VALUE);
+					response.setHeader("Pragma", CACHE_VALUE);
 				}
 			}
 		}
@@ -196,7 +215,7 @@ public class DynamicImageServlet extends HttpServlet {
 			
 			// We've had a problem - don't throw here - just log it as its not a show-stopper if the image doesn't render.
 			if (exception != null) {
-				response.addHeader("Cache-Control", "private,no-cache,no-store");
+				response.addHeader(CACHE_CONTROL, NO_CACHE_VALUE);
 				HTTP_LOGGER.warn("Problem generating the dynamic image", exception);
 	
 				BufferedImage blankImage = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
@@ -204,7 +223,6 @@ public class DynamicImageServlet extends HttpServlet {
 				g.setColor(Color.WHITE);
 				g.fillRect(0, 0, 1, 1);
 				Thumbnails.of(blankImage).scale(1.0).outputFormat(format.toString()).toOutputStream(out);
-				exception.printStackTrace();
 			}
 		}
 		

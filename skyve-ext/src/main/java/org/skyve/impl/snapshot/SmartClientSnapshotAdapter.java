@@ -16,6 +16,7 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.JSON;
 import org.skyve.util.OWASP;
 
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate escaped SmartClient snapshot state fragments.
 class SmartClientSnapshotAdapter extends SnapshotAdapter {
 	private static final String SC_ADVANCED_CRITERIA_STYLE = "advancedCriteriaStyle";
 	private static final String SC_FIELD_STATE = "fieldState";
@@ -35,8 +36,11 @@ class SmartClientSnapshotAdapter extends SnapshotAdapter {
 	private static final String SC_VALUE = "value";
 	private static final String SC_START = "start";
 	private static final String SC_END = "end";
+	private static final String MALFORMED_FIELD_STATE = "Malformed fieldState in snapshot - ";
+	private static final String MALFORMED_SORT_STATE = "Malformed sortState in snapshot - ";
 	
 	@Override
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	public Snapshot fromClientPayload(String payload) {
 		User u = CORE.getUser();
 		
@@ -77,16 +81,16 @@ class SmartClientSnapshotAdapter extends SnapshotAdapter {
 							}
 						}
 						else {
-							throw new IllegalStateException("Malformed fieldState in snapshot - " + element);
+							throw new IllegalStateException(MALFORMED_FIELD_STATE + element);
 						}
 					}
 				}
 				else {
-					throw new IllegalStateException("Malformed fieldState in snapshot - " + value);
+					throw new IllegalStateException(MALFORMED_FIELD_STATE + value);
 				}
 			}
 			else {
-				throw new IllegalStateException("Malformed fieldState in snapshot - " + value);
+				throw new IllegalStateException(MALFORMED_FIELD_STATE + value);
 			}
 			
 			// SortState can be null if empty, or an object
@@ -125,20 +129,20 @@ class SmartClientSnapshotAdapter extends SnapshotAdapter {
 								}
 							}
 							else {
-								throw new IllegalStateException("Malformed sortState in snapshot - " + value);
+								throw new IllegalStateException(MALFORMED_SORT_STATE + value);
 							}
 						}
 						else {
-							throw new IllegalStateException("Malformed sortState in snapshot - " + sortState);
+							throw new IllegalStateException(MALFORMED_SORT_STATE + sortState);
 						}
 					}
 					else {
-						throw new IllegalStateException("Malformed sortState in snapshot - " + sortState);
+						throw new IllegalStateException(MALFORMED_SORT_STATE + sortState);
 					}
 				}
 			}
 			else if (value != null) {
-				throw new IllegalStateException("Malformed sortState in snapshot - " + value);
+				throw new IllegalStateException(MALFORMED_SORT_STATE + value);
 			}
 
 			
@@ -206,6 +210,7 @@ class SmartClientSnapshotAdapter extends SnapshotAdapter {
 		return result;
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static SnapshotFilter criteria(Map<String, Object> map) {
 		// Advanced Criteria
 		if (SC_ADVANCED_CRITERIA.equals(map.get(SC_CONSTRUCTOR))) {

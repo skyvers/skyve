@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.skyve.impl.util.ArticleNode.Data;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 /**
  * Pluarlise function converted and enhanced Java implementation of
@@ -21,9 +21,9 @@ import org.slf4j.LoggerFactory;
  * Article function converted Java implementation of https://github.com/EamonNerbonne/a-vs-an.
  * Licence: Apache 2.0
  */
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate pluralisation and article-rule tokens.
 public class PluralUtil {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(PluralUtil.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(PluralUtil.class);
 
 	final static String LOWERCASE_PATTERN = "\\b[a-z'\\-]+\\b";
 	final static String TITLECASE_PATTERN = "\\b[A-Z][a-z'\\-]+\\b";
@@ -265,7 +265,7 @@ public class PluralUtil {
 	 * @return true if all the words are lowercase, false otherwise
 	 */
 	public static boolean isLowerCase(final String phrase) {
-		if (phrase != null && phrase.length() > 0) {
+		if (phrase != null && (! phrase.isEmpty())) {
 			Pattern p = Pattern.compile(LOWERCASE_PATTERN);
 			String[] tokens = phrase.split("\\s");
 			for (String s : tokens) {
@@ -296,7 +296,7 @@ public class PluralUtil {
 	 * @return true if all the words are title case, false otherwise
 	 */
 	public static boolean isTitleCase(final String phrase) {
-		if (phrase != null && phrase.length() > 0) {
+		if (phrase != null && (! phrase.isEmpty())) {
 			Pattern p = Pattern.compile(TITLECASE_PATTERN);
 			String[] tokens = phrase.split("\\s");
 			for (String s : tokens) {
@@ -327,7 +327,7 @@ public class PluralUtil {
 	 * @return true if all the words are uppercase, false otherwise
 	 */
 	public static boolean isUpperCase(final String phrase) {
-		if (phrase != null && phrase.length() > 0) {
+		if (phrase != null && (! phrase.isEmpty())) {
 			Pattern p = Pattern.compile(UPPERCASE_PATTERN);
 			String[] tokens = phrase.split("\\s");
 			for (String s : tokens) {
@@ -348,8 +348,9 @@ public class PluralUtil {
 	 * @param singular The word to pluralise
 	 * @return The plural of the singular word
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static String pluralise(final String singular) {
-		if (singular != null && singular.length() > 0) {
+		if (singular != null && (! singular.isEmpty())) {
 			String str = singular.toLowerCase();
 
 			// Split into words and get the last word
@@ -545,11 +546,11 @@ public class PluralUtil {
 	 * @return A title case identifier. First letter upper case words with spaces between.
 	 */
 	public static String toTitleCase(String phrase) {
-		if (phrase != null && phrase.length() > 0) {
+		if (phrase != null && (! phrase.isEmpty())) {
 			StringBuilder out = new StringBuilder();
 			String[] tokens = phrase.split("\\s");
 			for (String s : tokens) {
-				out.append(out.length() > 0 ? " " : "");
+				out.append((! out.isEmpty()) ? " " : "");
 				out.append(StringUtils.capitalize(s.toLowerCase()));
 			}
 			return out.toString();
@@ -566,6 +567,7 @@ public class PluralUtil {
 	 * @param replacement The replacement string with the case to be matched to the original
 	 * @return The replacement string, with the matching case of the original if possible
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	static String replaceWithMatchingCase(final String original, final String replacement) {
 		if (isUpperCase(original)) {
 			return replacement.toUpperCase();
@@ -597,7 +599,7 @@ public class PluralUtil {
 				result.append(replWord.toLowerCase());
 			}
 			// If original word is title case, make replacement title case
-			else if (origWord.length() > 0 && 
+			else if ((! origWord.isEmpty()) &&
 					Character.isUpperCase(origWord.charAt(0)) && 
 					origWord.substring(1).equals(origWord.substring(1).toLowerCase())) {
 				result.append(Character.toUpperCase(replWord.charAt(0)));

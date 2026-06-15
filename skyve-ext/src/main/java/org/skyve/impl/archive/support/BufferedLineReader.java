@@ -9,6 +9,16 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
+/**
+ * An efficient NIO-based line reader over an archive file that tracks the byte
+ * offset of each line for positional random-access retrieval.
+ *
+ * <p>Must be closed after use; implements {@link AutoCloseable} for
+ * try-with-resources support.
+ *
+ * <p>Side effects: opens an NIO {@link java.nio.channels.FileChannel} on the given
+ * path; the channel is closed by {@link #close()}.
+ */
 public class BufferedLineReader implements AutoCloseable {
 
     private static final int BUFFER_CAPACITY = 0x4000;

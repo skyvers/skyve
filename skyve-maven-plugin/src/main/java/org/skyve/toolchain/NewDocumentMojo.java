@@ -27,6 +27,11 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Nullable;
 
+/**
+ * Creates a new Skyve document directory, metadata file, and module registration entry.
+ *
+ * <p>Threading: this mojo mutates project sources and metadata files and should be treated as thread-confined.
+ */
 @Mojo(name = "newDocument")
 public class NewDocumentMojo extends AbstractSkyveMojo {
 	private static final Logger LOGGER = LoggerFactory.getLogger(NewDocumentMojo.class);
@@ -38,6 +43,11 @@ public class NewDocumentMojo extends AbstractSkyveMojo {
 	protected String documentName;
 	protected File newDocumentDirectory;
 
+	/**
+	 * Prompts for a module and document name, creates the document metadata, and registers it in the module file.
+	 *
+	 * @throws MojoExecutionException if the document cannot be created
+	 */
 	@Override
 	public void execute() throws MojoExecutionException {
 		try {
@@ -113,6 +123,13 @@ public class NewDocumentMojo extends AbstractSkyveMojo {
 		}
 	}
 
+	/**
+	 * Locates the Skyve {@code modules} directory beneath the project's compile source roots.
+	 *
+	 * @param project the Maven project to inspect
+	 * @return the modules directory
+	 * @throws FileNotFoundException if the directory cannot be found
+	 */
 	private static Path getModulesDirectory(MavenProject project) throws FileNotFoundException {
 		for (final String sourceRoot : project.getCompileSourceRoots()) {
 			final Path modules = Paths.get(sourceRoot, "modules");
@@ -124,6 +141,12 @@ public class NewDocumentMojo extends AbstractSkyveMojo {
 		throw new FileNotFoundException("Failed to find modules directory.");
 	}
 
+	/**
+	 * Returns the configured module name or prompts the user for one.
+	 *
+	 * @return the module name
+	 * @throws PrompterException if prompting fails
+	 */
 	private String getModuleName() throws PrompterException {
 		if ((newDocumentConfig != null) && StringUtils.isNotBlank(newDocumentConfig.getDefaultModule())) {
 			return newDocumentConfig.getDefaultModule();
@@ -132,7 +155,13 @@ public class NewDocumentMojo extends AbstractSkyveMojo {
 	}
 
 	/**
-	 * Uses the module and document name to guess the persistent name
+	 * Derives a persistent entity name from the module and document names when possible.
+	 *
+	 * <p>Returns {@code null} when either input is blank or the module name is too short to derive a prefix.
+	 *
+	 * @param moduleName the module name to derive the prefix from
+	 * @param documentName the document name to append
+	 * @return the derived persistent name, or {@code null}
 	 */
 	private static @Nullable String generatePersistentName(String moduleName, final String documentName) {
 		if ((moduleName != null) && (documentName != null)) {
@@ -148,9 +177,18 @@ public class NewDocumentMojo extends AbstractSkyveMojo {
 		return null;
 	}
 
+	/**
+	 * Signals that the target document directory already exists.
+	 */
 	protected static class DocumentDirectoryAlreadyExistsException extends MojoExecutionException {
 		private static final long serialVersionUID = 6391327338382551137L;
 
+		/**
+		 * Creates the exception with a message naming the existing directory and document.
+		 *
+		 * @param directoryPath the existing directory path
+		 * @param newDocumentName the requested document name
+		 */
 		DocumentDirectoryAlreadyExistsException(String directoryPath, String newDocumentName) {
 			super(String.format("Directory %s for new document %s already exists.", directoryPath, newDocumentName));
 		}

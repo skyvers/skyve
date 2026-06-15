@@ -134,7 +134,7 @@ public abstract class Tag extends AbstractPersistentBean implements org.skyve.do
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-	public static enum CombinationsOperator implements Enumeration {
+	public enum CombinationsOperator implements Enumeration {
 		union("Union", "Union"),
 		except("Except", "Except"),
 		intersect("Intersect", "Intersect");
@@ -205,7 +205,7 @@ public abstract class Tag extends AbstractPersistentBean implements org.skyve.do
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-	public static enum FilterOperator implements Enumeration {
+	public enum FilterOperator implements Enumeration {
 		equals("equals", "Equals"),
 		like("like", "Like"),
 		contains("contains", "Contains");
@@ -276,7 +276,7 @@ public abstract class Tag extends AbstractPersistentBean implements org.skyve.do
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-	public static enum FilterAction implements Enumeration {
+	public enum FilterAction implements Enumeration {
 		tagRecordsThatMatch("tag", "Tag records that match"),
 		unTagRecordsThatMatch("unTag", "UnTag records that match");
 

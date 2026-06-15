@@ -12,6 +12,13 @@ public class StringFormatter implements Formatter<String> {
 	private boolean escapeJS;
 	private Sanitisation sanitise;
 	
+	/**
+	 * Creates a new StringFormatter instance.
+	 * @param escapeHTML the escapeHTML
+	 * @param escapeJSON the escapeJSON
+	 * @param escapeJS the escapeJS
+	 * @param sanitise the sanitise
+	 */
 	public StringFormatter(boolean escapeHTML, boolean escapeJSON, boolean escapeJS, Sanitisation sanitise) {
 		super();
 		this.escapeHTML = escapeHTML;
@@ -20,11 +27,20 @@ public class StringFormatter implements Formatter<String> {
 		this.sanitise = sanitise;
 	}
 	
+	/**
+	 * Returns the valueType.
+	 * @return the result
+	 */
 	@Override
 	public Class<String> getValueType() {
 		return String.class;
 	}
 	
+	/**
+	 * Executes toDisplayValue.
+	 * @param value the value
+	 * @return the result
+	 */
 	@Override
 	public String toDisplayValue(String value) {
 		String result = value;

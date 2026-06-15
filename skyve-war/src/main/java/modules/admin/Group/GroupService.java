@@ -11,20 +11,20 @@ import jakarta.inject.Inject;
 import modules.admin.domain.Group;
 
 /**
- * This class acts as a service layer to encapsulate domain logic.
- *
- * Add this line to classes that wish to use it: @Inject private transient GroupService groupService;
+ * Provides query-based service operations for admin group records.
  */
 @Default
 public class GroupService {
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient Persistence persistence;
 
 	/**
-	 * Retrieves a GroupExtension by its BizId.
+	 * Retrieves one group by document id.
 	 *
-	 * @param bizId The BizId of the Group.
-	 * @return The GroupExtension with the given ID, or null if not found.
+	 * @param bizId
+	 *        the group document identifier
+	 * @return the matching group, or {@code null} when no record exists
 	 */
 	public GroupExtension get(String bizId) {
 		final DocumentQuery query = persistence.newDocumentQuery(Group.MODULE_NAME,
@@ -35,9 +35,9 @@ public class GroupService {
 	}
 
 	/**
-	 * Retrieves all GroupExtension records.
+	 * Retrieves all groups visible to the current persistence user.
 	 *
-	 * @return A list of all PartySessionExtension records in the system.
+	 * @return all group records for the customer context
 	 */
 	public List<GroupExtension> getAll() {
 		final DocumentQuery query = persistence.newDocumentQuery(Group.MODULE_NAME,
@@ -46,10 +46,11 @@ public class GroupService {
 	}
 
 	/**
-	 * Finds a group by its name.
+	 * Finds the first group matching the supplied name.
 	 *
-	 * @param groupName The name of the group to find
-	 * @return The GroupExtension with the given name, or null if not found
+	 * @param groupName
+	 *        the group name to search for
+	 * @return the first matching group, or {@code null} when no match exists
 	 */
 	public GroupExtension findByName(String groupName) {
 		final DocumentQuery query = persistence.newDocumentQuery(Group.MODULE_NAME, Group.DOCUMENT_NAME);

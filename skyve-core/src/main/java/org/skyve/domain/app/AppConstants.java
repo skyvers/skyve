@@ -1,5 +1,11 @@
 package org.skyve.domain.app;
 
+/**
+ * Defines shared constant values for the built-in Skyve admin application.
+ *
+ * <p>Includes module names, document names, attribute names, action names,
+ * and job names used by generated code and framework services.
+ */
 public final class AppConstants {
 	// Modules
 	public static final String ADMIN_MODULE_NAME = "admin";
@@ -19,6 +25,7 @@ public final class AppConstants {
 	public static final String GROUP_ROLE_DOCUMENT_NAME = "GroupRole";
 	public static final String JOB_DOCUMENT_NAME = "Job";
 	public static final String JOB_SCHEDULE_DOCUMENT_NAME = "JobSchedule";
+	public static final String MAIL_LOG_DOCUMENT_NAME = "MailLog";
 	public static final String REPORT_DATASET_DOCUMENT_NAME = "ReportDataset";
 	public static final String REPORT_PARAMETER_DOCUMENT_NAME = "ReportParameter";
 	public static final String REPORT_TEMPLATE_DOCUMENT_NAME = "ReportTemplate";

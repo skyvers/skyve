@@ -18,8 +18,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,13 +25,17 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.image.ImageTranscoder;
@@ -43,11 +45,11 @@ import org.skyve.metadata.model.document.DynamicImage.ImageFormat;
 import org.skyve.metadata.repository.Repository;
 import org.skyve.util.FileUtil;
 import org.skyve.util.Util;
-import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -59,6 +61,8 @@ import net.coobird.thumbnailator.util.exif.Orientation;
  * Image Utility methods.
  */
 public class ImageUtil {
+	private ImageUtil() {}
+
 	private static final int FIRST_IMAGE_INDEX = 0;
 	
 	private static final Color TRANSPARENT = new Color(0, 0, 0, 0);
@@ -167,7 +171,7 @@ public class ImageUtil {
 												@Nullable String rgbHexForegroundColour)
 	throws IOException {
 		List<List<Point>> lines = new ArrayList<>();
-		Matcher lineMatcher = Pattern.compile("(\\[(?:,?\\[-?[\\d\\.]+,-?[\\d\\.]+\\])+\\])").matcher(json);
+		Matcher lineMatcher = Pattern.compile("(\\[(?:,?\\[-?[\\d\\.]+,-?[\\d\\.]+\\])++\\])").matcher(json);
 		while (lineMatcher.find()) {
 			Matcher pointMatcher = Pattern.compile("\\[(-?[\\d\\.]+),(-?[\\d\\.]+)\\]").matcher(lineMatcher.group(1));
 			List<Point> line = new ArrayList<>();
@@ -220,7 +224,7 @@ public class ImageUtil {
 					String value = attr.getNodeValue();
 					if ("style".equals(name)) {
 						// Replace transparent in CSS property values, e.g. "fill: transparent; stroke: transparent"
-						attr.setNodeValue(value.replaceAll("(?<=[:\\s,])\\s*transparent\\b", "none"));
+						attr.setNodeValue(value.replaceAll("([:,])(\\s*)transparent\\b", "$1$2none"));
 					}
 					else if ("transparent".equals(value)) {
 						// Presentation attribute, e.g. fill="transparent"
@@ -235,6 +239,7 @@ public class ImageUtil {
 	/**
 	 * Batik Transcoder used in burnSvg().
 	 */
+	@SuppressWarnings("java:S110") // Batik's ImageTranscoder hierarchy exceeds 5 parents; not in our control
 	private static class BufferedImageTranscoder extends ImageTranscoder {
 		private BufferedImage image = null;
 
@@ -248,7 +253,7 @@ public class ImageUtil {
 		}
 
 		@Override
-		public void writeImage(@SuppressWarnings({"hiding", "null"}) @Nonnull BufferedImage image, @Nullable TranscoderOutput output) {
+		public void writeImage(@SuppressWarnings("hiding") @Nonnull BufferedImage image, @Nullable TranscoderOutput output) {
 			this.image = image;
 		}
 	}
@@ -260,7 +265,7 @@ public class ImageUtil {
 	 * @param svg	The SVG markup to burn in.
 	 */
 	public static void burnSvg(@Nonnull BufferedImage image, @Nonnull String svg)
-	throws Exception {
+	throws ParserConfigurationException, SAXException, IOException, TransformerException, TranscoderException {
 		BufferedImageTranscoder imageTranscoder = new BufferedImageTranscoder(image);
 
 		// Strip <style> elements before parsing - Batik requires xml-apis-ext to load
@@ -271,11 +276,15 @@ public class ImageUtil {
 		// Batik uses an old SVG/CSS spec that does not recognise "transparent" as a paint value.
 		// Parse the SVG as DOM and replace transparent attribute values and inline style uses
 		// with "none", which is the correct SVG 1.1 equivalent, before handing to Batik.
+		@SuppressWarnings("java:S2755") // fixed with feature secure processing below
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
 		factory.setNamespaceAware(true);
 		org.w3c.dom.Document doc = factory.newDocumentBuilder().parse(new InputSource(new StringReader(svgForBatik)));
 		normaliseTransparentForBatik(doc.getChildNodes());
+		@SuppressWarnings("java:S2755") // fixed with feature secure processing below
 		Transformer transformer = TransformerFactory.newInstance().newTransformer();
+		factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
 		transformer.setOutputProperty(OutputKeys.INDENT, "no");
 		StringWriter sw = new StringWriter(svgForBatik.length());
 		transformer.transform(new DOMSource(doc), new StreamResult(sw));

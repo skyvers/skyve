@@ -9,6 +9,18 @@ import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 
+/**
+ * Abstract visitor that traverses the action list of a {@link ViewImpl}.
+ *
+ * <p>Subclasses override {@link #visit(String, ActionImpl)} to process each
+ * action.  {@link ViewVisitor} extends this class to combine action and widget
+ * traversal.
+ *
+ * <p>Threading: not thread-safe; one instance per traversal.
+ *
+ * @see ViewVisitor
+ * @see NoOpViewVisitor
+ */
 public abstract class ActionVisitor {
 	public final void visitActions(ViewImpl view) {
 		String name = view.getName();
@@ -82,6 +94,7 @@ public abstract class ActionVisitor {
 		}
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void visit(String viewName, ImplicitActionName implicitName, ActionImpl action) {
 		if (ImplicitActionName.DEFAULTS.equals(implicitName)) {
 			if (ViewType.list.toString().equals(viewName)) {

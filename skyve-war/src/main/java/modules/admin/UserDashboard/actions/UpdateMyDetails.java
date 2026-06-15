@@ -10,7 +10,18 @@ import modules.admin.User.UserExtension;
 import modules.admin.domain.Contact.ContactType;
 import modules.admin.domain.UserDashboard;
 
+/**
+ * Saves edits to the current user's contact details from the dashboard.
+ */
 public class UpdateMyDetails implements ServerSideAction<UserDashboard> {
+	/**
+	 * Forces person contact type, persists the current user, and keeps the form open.
+	 *
+	 * @param bean The dashboard bean containing the current user reference.
+	 * @param webContext The current web context.
+	 * @return The same dashboard bean.
+	 * @throws Exception If persistence fails.
+	 */
 	@Override
 	public ServerSideActionResult<UserDashboard> execute(UserDashboard bean, WebContext webContext) throws Exception {
 

@@ -6,6 +6,12 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.persistence.DynamicPersistence;
 import org.skyve.persistence.Persistence;
 
+/**
+ * No-operation {@link org.skyve.persistence.DynamicPersistence} implementation
+ * that silently accepts all dynamic entity operations without persisting them.
+ *
+ * <p>Used in environments or tests where dynamic persistence is not required.
+ */
 public class NoOpDynamicPersistence implements DynamicPersistence {
 	private static final long serialVersionUID = 2810341864186864562L;
 

@@ -153,7 +153,7 @@ SKYVE.BizMap = function() {
 			
 			var contents = overlay.infoMarkup;
 	    	contents += '<br/><br/><input type="button" value="Zoom" onclick="window.location=\'' + SKYVE.Util.CONTEXT_URL;
-			contents += '?m=' + overlay.mod + '&d=' + overlay.doc + '&i=' + overlay.bizId + "'\"/>";
+			contents += '?a=e&m=' + overlay.mod + '&d=' + overlay.doc + '&i=' + overlay.bizId + "'\"/>";
 	    	if (overlay.getPosition) {
 				display.infoWindow.open(display.webmap, overlay);
 	    		display.infoWindow.setContent(contents);

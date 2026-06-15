@@ -12,6 +12,7 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.metadata.customer.Customer;
@@ -33,19 +34,30 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
 
+/**
+ * Models a view interaction and binds it to the active Skyve web context.
+ */
 @RequestScoped
 @Named("_skyveContent")
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate upload view response fragments.
 public class ContentUploadView extends AbstractUploadView {
 	private static final long serialVersionUID = -6769960348990922565L;
 
 	@Inject
 	@ManagedProperty(value = "#{param." + AbstractWebContext.RESOURCE_FILE_NAME + "}")
+	@SuppressWarnings("java:S6813") // allow member injection
 	private String contentBinding;
 
+	/**
+	 * Creates the request-scoped content upload view with framework content upload limits.
+	 */
 	public ContentUploadView() {
 		super(UtilImpl.UPLOADS_CONTENT_WHITELIST_REGEX, UtilImpl.UPLOADS_CONTENT_MAXIMUM_SIZE_IN_MB);
 	}
 
+	/**
+	 * Creates a content upload view with explicit whitelist and size constraints.
+	 */
 	protected ContentUploadView(String whitelistRegex, int maximumSizeMB) {
 		super(whitelistRegex, maximumSizeMB);
 	}
@@ -57,6 +69,9 @@ public class ContentUploadView extends AbstractUploadView {
 		contentBinding = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(contentBinding));
 	}
 	
+	/**
+	 * Restores cached upload conversation state before the page is rendered.
+	 */
 	public void preRender() {
 		new FacesAction<Void>() {
 			@Override
@@ -67,6 +82,9 @@ public class ContentUploadView extends AbstractUploadView {
 		}.execute();
 	}
 
+	/**
+	 * Returns the binding that stores the uploaded content identifier.
+	 */
 	public String getContentBinding() {
 		return contentBinding;
 	}
@@ -179,8 +197,8 @@ public class ContentUploadView extends AbstractUploadView {
 		}
 		catch (Exception e) {
 			persistence.rollback();
-			e.printStackTrace();
-			FacesMessage msg = new FacesMessage("Failure", e.getMessage());
+			String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "Content upload failed for binding " + contentBinding, e);
+			FacesMessage msg = new FacesMessage("Failure", WebErrorUtil.genericMessage(reference));
 			fc.addMessage(null, msg);
 		}
 		// NB No need to disconnect Persistence as it is done in the SkyveFacesPhaseListener after the response is rendered.

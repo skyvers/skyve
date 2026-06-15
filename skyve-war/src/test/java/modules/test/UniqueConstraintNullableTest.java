@@ -6,9 +6,9 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.skyve.CORE;
 import org.skyve.domain.messages.UniqueConstraintViolationException;
@@ -16,21 +16,22 @@ import org.skyve.util.test.TestUtil;
 
 import modules.test.domain.UniqueConstraintNullable;
 
-public class UniqueConstraintNullableTest extends AbstractSkyveTest {
+@SuppressWarnings({ "java:S5778", "java:S1130", "java:S1854" })
+class UniqueConstraintNullableTest extends AbstractSkyveTest {
 	private UniqueConstraintNullable uniqueConstraintNullable;
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		uniqueConstraintNullable = TestUtil.constructRandomInstance(u, m, ucn, 0);
 	}
 
 	@Test
-	public void testSaveSingleInstance() throws Exception {
-		CORE.getPersistence().save(uniqueConstraintNullable);
+	void testSaveSingleInstance() throws Exception {
+		Assertions.assertDoesNotThrow(() -> CORE.getPersistence().save(uniqueConstraintNullable));
 	}
 
 	@Test
-	public void testSaveTwoDifferentInstances() throws Exception {
+	void testSaveTwoDifferentInstances() throws Exception {
 		// setup the test data
 		UniqueConstraintNullable uniqueConstraintNullable2 = TestUtil.constructRandomInstance(u, m, ucn, 0);
 
@@ -44,8 +45,8 @@ public class UniqueConstraintNullableTest extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testSaveTwoIdenticalInstancesAllFields() throws Exception {
-		UniqueConstraintViolationException ucve = Assert.assertThrows(UniqueConstraintViolationException.class, () -> {
+	void testSaveTwoIdenticalInstancesAllFields() throws Exception {
+		UniqueConstraintViolationException ucve = Assertions.assertThrows(UniqueConstraintViolationException.class, () -> {
 			// setup the test data
 			UniqueConstraintNullable uniqueConstraintNullable2 = UniqueConstraintNullable.newInstance();
 			uniqueConstraintNullable2.setBooleanFlag(uniqueConstraintNullable.getBooleanFlag());
@@ -71,9 +72,9 @@ public class UniqueConstraintNullableTest extends AbstractSkyveTest {
 	 * it hasn't been implemented yet, so by default null values or partially nulled composite keys are ignored. 
 	 */
 	@Test
-	@Disabled
-	public void testSaveTwoIdenticalInstancesWithNull() throws Exception {
-		UniqueConstraintViolationException ucve = Assert.assertThrows(UniqueConstraintViolationException.class, () -> {
+	@Disabled("Null-inclusive unique-constraint validation is not implemented yet")
+	void testSaveTwoIdenticalInstancesWithNull() throws Exception {
+		UniqueConstraintViolationException ucve = Assertions.assertThrows(UniqueConstraintViolationException.class, () -> {
 			// setup the test data
 			uniqueConstraintNullable.setEnum3(null);
 

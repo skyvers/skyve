@@ -128,7 +128,7 @@ public class CronExpressionTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void toNaturalLanguageNoExpressionReturnsNull() throws Exception {
+	public void toNaturalLanguageNoExpressionReturnsNull() {
 		// setup the test data
 		CronExpression c = new CronExpression();
 
@@ -144,178 +144,26 @@ public class CronExpressionTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void toNaturalLanguageStaticExpression() throws Exception {
-		// setup the test data
-		CronExpression c = CronExpression.fromExpression("0 0 0 1 1 *");
+	public void toNaturalLanguageFormatsExpressions() {
+		String[][] cases = {
+				{"0 0 0 1 1 *", "yearly"},
+				{"0 0 0 * * 1", "every Monday"},
+				{"* * * * * *", "every second"},
+				{"0 * * * * *", "every minute"},
+				{"0 */5 * * * *", "every 5 minutes"},
+				{"0 5 * * * *", "every 5 past the hour"},
+				{"0 * 10 * * *", "every minute past 10am"},
+				{"0 * 23 * * *", "every minute past 11pm"},
+				{"0 */5 10 * * *", "every 5 minutes past 10am"},
+				{"0 5 10 * * *", "every day at 10:05am"},
+				{"0 15 10 * * *", "every day at 10:15am"}};
 
-		// validate the test data
-		assertThat(Boolean.valueOf(c.hasNothing()), is(Boolean.FALSE));
+		for (String[] testCase : cases) {
+			CronExpression c = CronExpression.fromExpression(testCase[0]);
 
-		// call the method under test
-		String result = c.toNaturalLanguage();
-
-		// verify the result
-		assertThat(result, is("yearly"));
-	}
-
-	@Test
-	@SuppressWarnings("static-method")
-	public void toNaturalLanguageDayOfWeek() throws Exception {
-		// setup the test data
-		CronExpression c = CronExpression.fromExpression("0 0 0 * * 1");
-
-		// validate the test data
-		assertThat(Boolean.valueOf(c.hasNothing()), is(Boolean.FALSE));
-
-		// call the method under test
-		String result = c.toNaturalLanguage();
-
-		// verify the result
-		assertThat(result, is("every Monday"));
-	}
-
-	@Test
-	@SuppressWarnings("static-method")
-	public void toNaturalLanguageEverySecond() throws Exception {
-		// setup the test data
-		CronExpression c = CronExpression.fromExpression("* * * * * *");
-
-		// validate the test data
-		assertThat(Boolean.valueOf(c.hasNothing()), is(Boolean.FALSE));
-
-		// call the method under test
-		String result = c.toNaturalLanguage();
-
-		// verify the result
-		assertThat(result, is("every second"));
-	}
-
-	@Test
-	@SuppressWarnings("static-method")
-	public void toNaturalLanguageEveryMinute() throws Exception {
-		// setup the test data
-		CronExpression c = CronExpression.fromExpression("0 * * * * *");
-
-		// validate the test data
-		assertThat(Boolean.valueOf(c.hasNothing()), is(Boolean.FALSE));
-
-		// call the method under test
-		String result = c.toNaturalLanguage();
-
-		// verify the result
-		assertThat(result, is("every minute"));
-	}
-
-	@Test
-	@SuppressWarnings("static-method")
-	public void toNaturalLanguageEveryFiveMinutes() throws Exception {
-		// setup the test data
-		CronExpression c = CronExpression.fromExpression("0 */5 * * * *");
-
-		// validate the test data
-		assertThat(Boolean.valueOf(c.hasNothing()), is(Boolean.FALSE));
-
-		// call the method under test
-		String result = c.toNaturalLanguage();
-
-		// verify the result
-		assertThat(result, is("every 5 minutes"));
-	}
-
-	@Test
-	@SuppressWarnings("static-method")
-	public void toNaturalLanguageMinuteFive() throws Exception {
-		// setup the test data
-		CronExpression c = CronExpression.fromExpression("0 5 * * * *");
-
-		// validate the test data
-		assertThat(Boolean.valueOf(c.hasNothing()), is(Boolean.FALSE));
-
-		// call the method under test
-		String result = c.toNaturalLanguage();
-
-		// verify the result
-		assertThat(result, is("every 5 past the hour"));
-	}
-
-	@Test
-	@SuppressWarnings("static-method")
-	public void toNaturalLanguageHourAmEveryMinute() throws Exception {
-		// setup the test data
-		CronExpression c = CronExpression.fromExpression("0 * 10 * * *");
-
-		// validate the test data
-		assertThat(Boolean.valueOf(c.hasNothing()), is(Boolean.FALSE));
-
-		// call the method under test
-		String result = c.toNaturalLanguage();
-
-		// verify the result
-		assertThat(result, is("every minute past 10am"));
-	}
-
-	@Test
-	@SuppressWarnings("static-method")
-	public void toNaturalLanguageHourPmEveryMinute() throws Exception {
-		// setup the test data
-		CronExpression c = CronExpression.fromExpression("0 * 23 * * *");
-
-		// validate the test data
-		assertThat(Boolean.valueOf(c.hasNothing()), is(Boolean.FALSE));
-
-		// call the method under test
-		String result = c.toNaturalLanguage();
-
-		// verify the result
-		assertThat(result, is("every minute past 11pm"));
-	}
-
-	@Test
-	@SuppressWarnings("static-method")
-	public void toNaturalLanguageHourEveryFiveMinutes() throws Exception {
-		// setup the test data
-		CronExpression c = CronExpression.fromExpression("0 */5 10 * * *");
-
-		// validate the test data
-		assertThat(Boolean.valueOf(c.hasNothing()), is(Boolean.FALSE));
-
-		// call the method under test
-		String result = c.toNaturalLanguage();
-
-		// verify the result
-		assertThat(result, is("every 5 minutes past 10am"));
-	}
-
-	@Test
-	@SuppressWarnings("static-method")
-	public void toNaturalLanguageHourMinuteUnderTen() throws Exception {
-		// setup the test data
-		CronExpression c = CronExpression.fromExpression("0 5 10 * * *");
-
-		// validate the test data
-		assertThat(Boolean.valueOf(c.hasNothing()), is(Boolean.FALSE));
-
-		// call the method under test
-		String result = c.toNaturalLanguage();
-
-		// verify the result
-		assertThat(result, is("every day at 10:05am"));
-	}
-
-	@Test
-	@SuppressWarnings("static-method")
-	public void toNaturalLanguageHourMinute() throws Exception {
-		// setup the test data
-		CronExpression c = CronExpression.fromExpression("0 15 10 * * *");
-
-		// validate the test data
-		assertThat(Boolean.valueOf(c.hasNothing()), is(Boolean.FALSE));
-
-		// call the method under test
-		String result = c.toNaturalLanguage();
-
-		// verify the result
-		assertThat(result, is("every day at 10:15am"));
+			assertThat(Boolean.valueOf(c.hasNothing()), is(Boolean.FALSE));
+			assertThat(c.toNaturalLanguage(), is(testCase[1]));
+		}
 	}
 
 	@Test
@@ -342,6 +190,61 @@ public class CronExpressionTest {
 
 		// verify the result
 		assertThat(result, is("1 2 0 3 * 5"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testToNaturalLanguageDayNumberSuffixes() {
+		String[][] cases = {
+				{"0 0 0 2 * *", "every 2nd"},
+				{"0 0 0 3 * *", "every 3rd"},
+				{"0 0 0 12 * *", "every 12th"}};
+
+		for (String[] testCase : cases) {
+			CronExpression c = CronExpression.fromExpression(testCase[0]);
+			assertThat(c.toNaturalLanguage(), is(testCase[1]));
+		}
+	}
+
+        @Test
+        @SuppressWarnings("static-method")
+        public void testIntegerConstructorWithNullsStoresNulls() {
+                // covers null branch in Integer constructor at L35 and L38
+                CronExpression c = new CronExpression((Integer) null, (Integer) null, (Integer) null, (Integer) null, (Integer) null, (Integer) null);
+                assertThat(c.getSecond(), is(nullValue()));
+                assertThat(c.getMinute(), is(nullValue()));
+                assertThat(c.getHour(), is(nullValue()));
+                assertThat(c.getDayNumber(), is(nullValue()));
+                assertThat(c.getMonth(), is(nullValue()));
+                assertThat(c.getDayOfWeek(), is(nullValue()));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        public void testToNaturalLanguagePmHourWithStepMinute() {
+                // covers L229-230: timeStepSetPattern matches for minute, hour >= 12 (PM)
+                CronExpression c = CronExpression.fromExpression("0 */5 14 * * *");
+                String result = c.toNaturalLanguage();
+                assertThat(result, is(org.hamcrest.CoreMatchers.notNullValue()));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        public void testToNaturalLanguagePmHourWithZeroMinute() {
+                // covers L244-245: minute = "0", hour >= 12 (PM)
+                CronExpression c = CronExpression.fromExpression("0 0 15 * * *");
+                String result = c.toNaturalLanguage();
+                assertThat(result, is(org.hamcrest.CoreMatchers.notNullValue()));
+        }
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testConstructorWithNonNullMonthCoversL38TrueBranch() {
+		// Call the Integer constructor with a non-null month to cover
+		// the String.valueOf(month) branch of the ternary on that line.
+		CronExpression c = new CronExpression(null, null, null, null, Integer.valueOf(6), null);
+		assertThat(c.getMonth(), is("6"));
+		assertThat(c.getSecond(), is(nullValue()));
 	}
 
 }

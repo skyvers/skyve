@@ -94,7 +94,7 @@ public class Audit extends AbstractPersistentBean implements org.skyve.archive.s
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-	public static enum Operation implements Enumeration {
+	public enum Operation implements Enumeration {
 		insert("I", "Insert"),
 		update("U", "Update"),
 		delete("D", "Delete");

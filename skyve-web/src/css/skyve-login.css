@@ -1,0 +1,29 @@
+.tfa-code-inputs {
+	display: flex;
+	gap: 0.5rem;
+	justify-content: center;
+}
+
+.tfa-code-input {
+	width: 2.7rem !important;
+	height: 3.2rem !important;
+	line-height: 3.2rem !important;
+	padding: 0 !important;
+	text-align: center;
+	font-size: 1.3rem !important;
+	font-family: monospace;
+	font-variant-numeric: tabular-nums;
+	color: #1b1c1d !important;
+	-webkit-text-fill-color: #1b1c1d !important;
+	caret-color: #2185d0;
+	background: #ffffff !important;
+	opacity: 1 !important;
+	text-shadow: none !important;
+	-webkit-text-security: none !important;
+}
+
+@media (max-width: 480px) {
+	.tfa-code-input {
+		width: 2.3rem !important;
+	}
+}

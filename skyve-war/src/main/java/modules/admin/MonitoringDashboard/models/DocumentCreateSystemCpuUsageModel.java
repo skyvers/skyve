@@ -12,26 +12,50 @@ import modules.admin.domain.MonitoringDashboard.Period;
  * Shows system laod usage changes for create operations on selected documents.
  */
 public class DocumentCreateSystemCpuUsageModel extends AbstractDocumentChartModel {
+	/**
+	 * Executes getChartTitle.
+	 * @param selectedDocument the selectedDocument value
+	 * @return the result
+	 */
 	@Override
 	protected String getChartTitle(String selectedDocument) {
 		return "Create Request System CPU Usage - " + selectedDocument;
 	}
 
+	/**
+	 * Executes getChartLabel.
+	 * @return the result
+	 */
 	@Override
 	protected String getChartLabel() {
 		return "System CPU Usage (%)";
 	}
 
+	/**
+	 * Executes getChartColor.
+	 * @return the result
+	 */
 	@Override
 	protected Color getChartColor() {
 		return Color.ORANGE;
 	}
 
+	/**
+	 * Executes getRequestKey.
+	 * @param selectedDocument the selectedDocument value
+	 * @return the result
+	 */
 	@Override
 	protected String getRequestKey(String selectedDocument) {
 		return "C" + selectedDocument;
 	}
 
+	/**
+	 * Executes extractDataForTimePeriod.
+	 * @param measurements the measurements value
+	 * @param period the period value
+	 * @return the result
+	 */
 	@Override
 	protected Map<Integer, Float> extractDataForTimePeriod(RequestMeasurements measurements, Period period) {
 		return RequestListModel.extractSystemCpuUsageForTimePeriod(measurements, period);

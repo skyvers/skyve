@@ -93,7 +93,7 @@ public class SqlFormatDirective implements TemplateDirectiveModel {
 		}
 	}
 	
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "java:S3776", "null", "unused"}) // complexity OK - allow customer to be validated
 	private String toDisplay(final Object value) {
 		String result = "";
 		try {

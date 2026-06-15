@@ -31,10 +31,20 @@ import modules.admin.domain.ControlPanel.SailTestStrategy;
 import modules.admin.domain.ModuleDocument;
 import modules.admin.domain.Tag;
 
+/**
+ * Applies validation and lifecycle rules for Control Panel operations.
+ */
 public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient UserService userService;
 
+	/**
+	 * Performs the newInstance operation.
+	 * @param bean the bean value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public ControlPanelExtension newInstance(ControlPanelExtension bean) throws Exception {
 		// Set the user name to the logged in user
@@ -56,6 +66,12 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 		return bean;
 	}
 
+	/**
+	 * Performs the getConstantDomainValues operation.
+	 * @param attributeName the attributeName value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public List<DomainValue> getConstantDomainValues(String attributeName) throws Exception {
 		if (ControlPanel.selectedCachePropertyName.equals(attributeName)) {
@@ -93,7 +109,15 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 		return null;
 	}
 
+	/**
+	 * Performs the getDynamicDomainValues operation.
+	 * @param attributeName the attributeName value
+	 * @param bean the bean value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public List<DomainValue> getDynamicDomainValues(String attributeName, ControlPanelExtension bean) throws Exception {
 
 		// list documents within modules that have not already been selected
@@ -130,6 +154,12 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 		return super.getDynamicDomainValues(attributeName, bean);
 	}
 
+	/**
+	 * Performs the getVariantDomainValues operation.
+	 * @param attributeName the attributeName value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
 		if (ControlPanel.customerNameToSwapToPropertyName.equals(attributeName)) {
@@ -159,6 +189,14 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 		return null;
 	}
 
+	/**
+	 * Performs the complete operation.
+	 * @param attributeName the attributeName value
+	 * @param value the value value
+	 * @param bean the bean value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public List<String> complete(String attributeName, String value, ControlPanelExtension bean) throws Exception {
 
@@ -169,6 +207,13 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 		return super.complete(attributeName, value, bean);
 	}
 
+	/**
+	 * Performs the preRerender operation.
+	 * @param source the source value
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public void preRerender(String source, ControlPanelExtension bean, WebContext webContext) throws Exception {
 		if ("push".equals(source)) {

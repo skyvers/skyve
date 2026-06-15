@@ -7,7 +7,16 @@ import org.skyve.web.WebContext;
 
 import modules.admin.domain.DataMaintenance;
 
+/**
+ * Exports Data Maintenance results to a BizPort workbook.
+ */
 public class DataMaintenanceExportAction extends BizExportAction {
+	/**
+	 * Performs the bizExport operation.
+	 * @param webContext the webContext value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public BizPortWorkbook bizExport(WebContext webContext) throws Exception {
 		DataMaintenance d = (DataMaintenance) webContext.getCurrentBean();

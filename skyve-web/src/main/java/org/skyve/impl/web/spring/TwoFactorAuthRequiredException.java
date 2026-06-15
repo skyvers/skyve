@@ -2,22 +2,35 @@ package org.skyve.impl.web.spring;
 
 import org.springframework.security.core.AuthenticationException;
 
+/**
+ * Signals that primary authentication succeeded but the user must complete a two-factor challenge.
+ */
 public class TwoFactorAuthRequiredException extends AuthenticationException {
-
 	private static final long serialVersionUID = -4848026331324090665L;
 
-	// false : indicates that we need to redirect the user to a page with 2FA code entry 
-	// true : indicates user sent 2FA code and failed authentication 
-	private boolean authenticationFailure;
+	// false: initial 2FA challenge has been issued and the user should enter their code.
+	// true: user submitted an invalid/expired 2FA code and an error should be shown.
+	private final boolean invalidTwoFactorCode;
 	
 	
-	public TwoFactorAuthRequiredException(String msg, boolean authenticationFailure) {
+	/**
+	 * Creates an authentication exception indicating that two-factor verification is required.
+	 *
+	 * @param msg The exception message.
+	 * @param invalidTwoFactorCode Whether the submitted two-factor code is invalid or expired.
+	 */
+	public TwoFactorAuthRequiredException(String msg, boolean invalidTwoFactorCode) {
 		super(msg);
-		this.authenticationFailure = authenticationFailure;
+		this.invalidTwoFactorCode = invalidTwoFactorCode;
 	}
 
-	public boolean isAuthenticationFailure() {
-		return this.authenticationFailure;
+	/**
+	 * Indicates whether the current two-factor challenge failed because the submitted code was invalid.
+	 *
+	 * @return True when the submitted two-factor code is invalid or expired.
+	 */
+	public boolean isInvalidTwoFactorCode() {
+		return invalidTwoFactorCode;
 	}
 	
 }

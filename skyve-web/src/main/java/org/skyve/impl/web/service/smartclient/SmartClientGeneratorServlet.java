@@ -13,6 +13,7 @@ import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.UserAgent;
+import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -26,7 +27,7 @@ import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
@@ -35,15 +36,21 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
- * Generates views based on bizhub's XML view spec.
+ * Generates SmartClient JavaScript for edit and create views.
  */
 public class SmartClientGeneratorServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SmartClientGeneratorServlet.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SmartClientGeneratorServlet.class);
 
 	private static Class<? extends SmartClientViewRenderer> RENDERER_CLASS = null;
 	
+	/**
+	 * Initialises the optional SmartClient renderer override from servlet configuration.
+	 *
+	 * @param config servlet configuration
+	 * @throws ServletException if the configured renderer class cannot be loaded
+	 */
 	@Override
 	@SuppressWarnings("unchecked")
 	public void init(ServletConfig config) throws ServletException {
@@ -60,6 +67,18 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 		}
 	}
 	
+	/**
+	 * Creates the renderer used to generate a SmartClient view script.
+	 *
+	 * @param user active user
+	 * @param module module containing the document
+	 * @param document document metadata to render
+	 * @param view view metadata to render
+	 * @param uxui active UX/UI profile name
+	 * @param noCreateView whether create-view container scaffolding should be skipped
+	 * @return the configured renderer
+	 * @throws DomainException if the configured renderer cannot be instantiated
+	 */
 	public static SmartClientViewRenderer newRenderer(User user, Module module, Document document, View view, String uxui, boolean noCreateView) {
 		if (RENDERER_CLASS == null) {
 			return new SmartClientViewRenderer(user, module, document, view, uxui, noCreateView);
@@ -73,6 +92,14 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 		}
 	}
 
+	/**
+	 * Handles the SmartClient view-generation request.
+	 *
+	 * @param request inbound HTTP request
+	 * @param response outbound HTTP response
+	 * @throws ServletException if request validation fails
+	 * @throws IOException if the response cannot be written
+	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
 	protected void doGet(HttpServletRequest request,
@@ -83,6 +110,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 	}
 
 	// NB - Never throw ServletException as this will halt the SmartClient Relogin flow.
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	private static void processRequest(HttpServletRequest request,
 										HttpServletResponse response)
 	throws IOException {
@@ -229,7 +257,6 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 				pw.append("return view;};");
 			}
 			catch (Throwable t) {
-				t.printStackTrace();
 				persistence.rollback();
 	
 				pw.append("isc.warn('");
@@ -240,12 +267,25 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 					pw.append("');");
 				}
 				else {
-					pw.append("isc.warn('Could not generate views.  Please contact your system administrator.');");
+					String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "SmartClient view generation failed for " + moduleName + "." + documentName, t);
+					appendUnexpectedWarning(reference, pw);
+					pw.append("');");
 				}
 			}
 			finally {
 				persistence.commit(true);
 			}
 		}
+	}
+
+	/**
+	 * Append a generic unexpected error message to the output, with a reference to the logs for more details.
+	 * 
+	 * @param reference The reference to the logs.
+	 * @param pw The PrintWriter to append to.
+	 */
+	static void appendUnexpectedWarning(String reference, PrintWriter pw) {
+		pw.append("Could not generate views. ");
+		pw.append(WebErrorUtil.escapeJsString(WebErrorUtil.genericMessage(reference)));
 	}
 }

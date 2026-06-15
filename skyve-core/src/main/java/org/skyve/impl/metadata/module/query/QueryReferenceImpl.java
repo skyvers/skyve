@@ -10,6 +10,20 @@ import com.google.common.base.MoreObjects;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
+/**
+ * Abstract base for query reference implementations — lightweight query
+ * descriptors that name an existing query without re-specifying its column list.
+ *
+ * <p>A query reference is used in list or lookup widgets to point at a named
+ * query defined elsewhere in the module.  Concrete subclasses specialise for
+ * {@link MetaDataQueryReferenceImpl}, {@link SQLReferenceImpl}, and
+ * {@link BizQLReferenceImpl}.
+ *
+ * <p>Threading: not thread-safe.  Instances are populated during metadata loading
+ * and are read-only once placed in the repository cache.
+ *
+ * @see QueryDefinition
+ */
 public abstract class QueryReferenceImpl implements QueryDefinition {
 	private static final long serialVersionUID = -8409852834346167656L;
 

@@ -13,11 +13,24 @@ import modules.admin.domain.ReportTemplate.ReportType;
  * report type and template type.
  */
 public class DownloadTemplate extends DownloadAction<ReportTemplate> {
+	/**
+	 * Executes prepare.
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public void prepare(ReportTemplate bean, WebContext webContext) throws Exception {
 		// nothing to do here
 	}
 
+	/**
+	 * Executes download.
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @return the result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public Download download(ReportTemplate bean, WebContext webContext) throws Exception {
 		// return XML for Jasper reports

@@ -12,17 +12,29 @@ import org.hibernate.mapping.Column;
 import org.hibernate.mapping.UniqueKey;
 
 /**
+ * Emits filtered SQL Server unique indexes so nullable columns behave with null-tolerant uniqueness.
+ * 
  * Use SQLServer "CREATE UNIQUE NONCLUSTERED INDEX UniqueKey ON Table(Column) WHERE Column IS NOT NULL"
  * instead of defining unique Constraints as the toy database considers NULL
  * to be a value and raises a constraint violation.
- * 
- * @author mike
  */
 public class SQLServer2008NullTolerantUniqueDelegate extends DefaultUniqueDelegate {
+	/**
+	 * Creates the delegate for the supplied SQL Server dialect.
+	 *
+	 * @param dialect the owning Hibernate dialect
+	 */
 	public SQLServer2008NullTolerantUniqueDelegate(Dialect dialect) {
 		super(dialect);
 	}
 	
+	/**
+	 * Builds a filtered nonclustered unique index for nullable SQL Server columns.
+	 *
+	 * @param uniqueKey the unique key definition to render
+	 * @param metadata the mapping metadata used to format the qualified table name
+	 * @return SQL that creates a filtered unique index excluding {@code NULL} values
+	 */
 	@Override
 	@Deprecated // Because Hibernate has deprecated
 	public String getAlterTableToAddUniqueKeyCommand(UniqueKey uniqueKey, Metadata metadata) {
@@ -61,7 +73,12 @@ public class SQLServer2008NullTolerantUniqueDelegate extends DefaultUniqueDelega
 	}
 	
 	/**
-	 * Overridden to delegate to Skyve's deprecated method, not Hibernate's.
+	 * Delegates to the deprecated Skyve override so Hibernate uses the filtered-index form.
+	 *
+	 * @param uniqueKey the unique key definition to render
+	 * @param metadata the mapping metadata
+	 * @param context the SQL rendering context supplied by Hibernate
+	 * @return SQL that creates the filtered unique index
 	 */
 	@Override
 	public String getAlterTableToAddUniqueKeyCommand(UniqueKey uniqueKey,
@@ -70,6 +87,13 @@ public class SQLServer2008NullTolerantUniqueDelegate extends DefaultUniqueDelega
 		return getAlterTableToAddUniqueKeyCommand(uniqueKey, metadata);
 	}
 	
+	/**
+	 * Builds SQL to drop the filtered unique index that represents the unique key.
+	 *
+	 * @param uniqueKey the unique key definition to remove
+	 * @param metadata the mapping metadata used to format the qualified table name
+	 * @return SQL that drops the filtered unique index
+	 */
 	@Override
 	@Deprecated // Because Hibernate has deprecated
 	public String getAlterTableToDropUniqueKeyCommand(UniqueKey uniqueKey, Metadata metadata) {
@@ -85,7 +109,12 @@ public class SQLServer2008NullTolerantUniqueDelegate extends DefaultUniqueDelega
 	}
 
 	/**
-	 * Overridden to delegate to Skyve's deprecated method, not Hibernate's.
+	 * Delegates to the deprecated Skyve override so Hibernate drops the filtered-index form.
+	 *
+	 * @param uniqueKey the unique key definition to remove
+	 * @param metadata the mapping metadata
+	 * @param context the SQL rendering context supplied by Hibernate
+	 * @return SQL that drops the filtered unique index
 	 */
 	@Override
 	public String getAlterTableToDropUniqueKeyCommand(UniqueKey uniqueKey,

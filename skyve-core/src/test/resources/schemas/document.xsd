@@ -249,6 +249,7 @@
           <xs:element name="requiredMessage" type="xs:string" form="qualified" minOccurs="0"/>
           <xs:element name="defaultValue" type="xs:string" form="qualified" minOccurs="0"/>
           <xs:element name="index" type="tns:indexType" form="qualified" minOccurs="0"/>
+          <xs:element name="generated" type="tns:generatedType" form="qualified" minOccurs="0"/>
         </xs:sequence>
         <xs:attribute name="persistent" type="xs:boolean"/>
         <xs:attribute name="required" type="xs:boolean"/>
@@ -727,6 +728,13 @@
       <xs:enumeration value="textual"/>
       <xs:enumeration value="both"/>
       <xs:enumeration value="none"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="generatedType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="insert"/>
+      <xs:enumeration value="always"/>
     </xs:restriction>
   </xs:simpleType>
 

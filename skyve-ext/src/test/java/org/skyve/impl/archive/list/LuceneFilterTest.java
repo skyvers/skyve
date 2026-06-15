@@ -1,7 +1,6 @@
 package org.skyve.impl.archive.list;
 
 import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
@@ -9,6 +8,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -56,7 +57,7 @@ import com.google.common.util.concurrent.AtomicDouble;
  * a positive score to documents otherwise we will get zero results; typically
  * I've used addNotNull().
  */
-@SuppressWarnings({"boxing", "static-method"})
+@SuppressWarnings({"boxing", "static-method", "null", "java:S8692"}) // system clock OK
 public class LuceneFilterTest {
 
     private static final String DECIMAL_FIELD = "our_decimal";
@@ -68,9 +69,9 @@ public class LuceneFilterTest {
     private static final String BOOLEAN_FIELD = "our_bool";
     private static final String ENUM_FIELD = "our_enum";
 
-    private final int MAX_RESULTS = 25;
+    private static final int MAX_RESULTS = 25;
 
-    private static final boolean debugPrint = false;
+    private static final boolean DEBUG_PRINT = false;
 
     private enum TestEnum {
         X, Y, Z
@@ -87,12 +88,12 @@ public class LuceneFilterTest {
 
         List<Document> results = newIndexAndQuery(docs, filter);
 
-        assertThat(results.size(), is(1));
+        assertEquals(1, results.size());
         Document firstResult = results.get(0);
         assertThat(firstResult.get(TEXT_FIELD), is(testTextVal));
 
         assertThat(filter.toString(), notNullValue());
-        assertThat(filter.isEmpty(), is(false));
+        assertFalse(filter.isEmpty());
     }
 
     @Test
@@ -121,7 +122,7 @@ public class LuceneFilterTest {
         List<Document> results = newIndexAndQuery(docs, filterA);
 
         // Expecting 3 results
-        assertThat(results.size(), is(3));
+        assertEquals(3, results.size());
 
         // Dobule value for the correct results are all sub 10
         for (Document document : results) {
@@ -155,7 +156,7 @@ public class LuceneFilterTest {
         List<Document> results = newIndexAndQuery(docs, filterA);
 
         // Expecting 3 results
-        assertThat(results.size(), is(1));
+        assertEquals(1, results.size());
 
         // Dobule value for the correct results are all sub 10
         for (Document document : results) {
@@ -184,7 +185,7 @@ public class LuceneFilterTest {
 
         List<Document> results = newIndexAndQuery(docs, filter);
 
-        assertThat(results.size(), is(1));
+        assertEquals(1, results.size());
         assertThat(results.get(0)
                           .getField(DOUBLE_FIELD)
                           .numericValue()
@@ -205,7 +206,7 @@ public class LuceneFilterTest {
 
         List<Document> results = newIndexAndQuery(docs, filter);
 
-        assertThat(results.size(), is(3));
+        assertEquals(3, results.size());
 
         for (Document document : results) {
 
@@ -228,7 +229,7 @@ public class LuceneFilterTest {
 
             List<Document> results = newIndexAndQuery(docs, filter);
 
-            assertThat(results.size(), is(0));
+            assertEquals(0, results.size());
         }
 
         // Then get 1 hit
@@ -240,7 +241,7 @@ public class LuceneFilterTest {
 
             List<Document> results = newIndexAndQuery(docs, filter);
 
-            assertThat(results.size(), is(1));
+            assertEquals(1, results.size());
             assertThat(results.get(0)
                               .getField(DOUBLE_FIELD)
                               .numericValue()
@@ -264,7 +265,7 @@ public class LuceneFilterTest {
 
         List<Document> results = newIndexAndQuery(docs, filter);
 
-        assertThat(results.size(), is(2));
+        assertEquals(2, results.size());
         for (Document document : results) {
             assertThat(getDouble(document), is(lessThan(10.0)));
         }
@@ -284,7 +285,7 @@ public class LuceneFilterTest {
 
         List<Document> results = newIndexAndQuery(docs, filter);
 
-        assertThat(results.size(), is(1));
+        assertEquals(1, results.size());
         assertThat(getDouble(results.get(0)), is(lessThan(10.0)));
     }
 
@@ -303,7 +304,7 @@ public class LuceneFilterTest {
 
         List<Document> results = newIndexAndQuery(docs, filter);
 
-        assertThat(results.size(), is(1));
+        assertEquals(1, results.size());
         assertThat(getDouble(results.get(0)), is(lessThan(10.0)));
     }
 
@@ -318,7 +319,7 @@ public class LuceneFilterTest {
 
         List<Document> results = newIndexAndQuery(docs, filter);
 
-        assertThat(results.size(), is(1));
+        assertEquals(1, results.size());
         assertThat(getInt(results.get(0)), is(targetValue));
     }
 
@@ -334,7 +335,7 @@ public class LuceneFilterTest {
 
         List<Document> results = newIndexAndQuery(docs, filter);
 
-        assertThat(results.size(), is(2));
+        assertEquals(2, results.size());
         for (Document document : results) {
 
             assertThat(getInt(document), not(targetValue));
@@ -352,7 +353,7 @@ public class LuceneFilterTest {
 
         List<Document> results = newIndexAndQuery(docs, filter);
 
-        assertThat(results.size(), is(1));
+        assertEquals(1, results.size());
         assertThat(getLong(results.get(0)), is(targetValue));
     }
 
@@ -368,7 +369,7 @@ public class LuceneFilterTest {
 
         List<Document> results = newIndexAndQuery(docs, filter);
 
-        assertThat(results.size(), is(2));
+        assertEquals(2, results.size());
         for (Document document : results) {
             assertThat(getLong(document), not(targetValue));
         }
@@ -390,7 +391,7 @@ public class LuceneFilterTest {
 
         List<Document> results = newIndexAndQuery(docs, filter);
 
-        assertThat(results.size(), is(1));
+        assertEquals(1, results.size());
         for (Document document : results) {
             assertThat(document.getField(DECIMAL_FIELD)
                                .numericValue()
@@ -416,7 +417,7 @@ public class LuceneFilterTest {
 
         List<Document> results = newIndexAndQuery(docs, filter);
 
-        assertThat(results.size(), is(3));
+        assertEquals(3, results.size());
 
         for (Document document : results) {
             assertThat(document.getField(DECIMAL_FIELD)
@@ -436,7 +437,7 @@ public class LuceneFilterTest {
 
         List<Document> results = newIndexAndQuery(docs, filter);
 
-        assertThat(results.size(), is(2));
+        assertEquals(2, results.size());
         for (Document document : results) {
             assertThat(document.get(BOOLEAN_FIELD), is("true"));
         }
@@ -454,7 +455,7 @@ public class LuceneFilterTest {
 
         List<Document> results = newIndexAndQuery(docs, filter);
 
-        assertThat(results.size(), is(1));
+        assertEquals(1, results.size());
         for (Document document : results) {
             assertThat(document.get(BOOLEAN_FIELD), is("false"));
         }
@@ -474,7 +475,7 @@ public class LuceneFilterTest {
 
         List<Document> results = newIndexAndQuery(docs, filter);
 
-        assertThat(results.size(), is(2));
+        assertEquals(2, results.size());
         for (Document document : results) {
             assertThat(document.get(ENUM_FIELD), is("Y"));
         }
@@ -494,7 +495,7 @@ public class LuceneFilterTest {
 
         List<Document> results = newIndexAndQuery(docs, filter);
 
-        assertThat(results.size(), is(3));
+        assertEquals(3, results.size());
     }
 
     @Test
@@ -515,7 +516,7 @@ public class LuceneFilterTest {
 
         List<Document> results = newIndexAndQuery(docs, filter);
 
-        assertThat(results.size(), is(5));
+        assertEquals(5, results.size());
         for (Document document : results) {
             assertThat(document.get(ENUM_FIELD), not("Y"));
         }
@@ -535,7 +536,7 @@ public class LuceneFilterTest {
 
         List<Document> results = newIndexAndQuery(docs, filter);
 
-        assertThat(results.size(), is(2));
+        assertEquals(2, results.size());
         for (Document document : results) {
             assertThat(getDouble(document), lessThan(10.0));
         }
@@ -556,7 +557,7 @@ public class LuceneFilterTest {
 
         List<Document> results = newIndexAndQuery(docs, filter);
 
-        assertThat(results.size(), is(3));
+        assertEquals(3, results.size());
         for (Document document : results) {
             assertThat(getDouble(document), lessThan(10.0));
         }
@@ -578,7 +579,7 @@ public class LuceneFilterTest {
 
             List<Document> results = newIndexAndQuery(docs, filter);
 
-            assertThat(results.size(), is(3));
+            assertEquals(3, results.size());
             for (Document document : results) {
                 assertThat(getDouble(document), lessThan(10.0));
             }
@@ -592,7 +593,7 @@ public class LuceneFilterTest {
 
             List<Document> results = newIndexAndQuery(docs, filter);
 
-            assertThat(results.size(), is(2));
+            assertEquals(2, results.size());
             for (Document document : results) {
                 assertThat(getDouble(document), greaterThan(10.0));
             }
@@ -615,7 +616,7 @@ public class LuceneFilterTest {
 
             List<Document> results = newIndexAndQuery(docs, filter);
 
-            assertThat(results.size(), is(3));
+            assertEquals(3, results.size());
             for (Document document : results) {
                 assertThat(getDouble(document), lessThan(10.0));
             }
@@ -629,7 +630,7 @@ public class LuceneFilterTest {
 
             List<Document> results = newIndexAndQuery(docs, filter);
 
-            assertThat(results.size(), is(2));
+            assertEquals(2, results.size());
             for (Document document : results) {
                 assertThat(getDouble(document), greaterThan(10.0));
             }
@@ -774,8 +775,8 @@ public class LuceneFilterTest {
 
         final Instant start = Instant.parse("2014-01-01T08:00:00Z");
         List<Document> docs = datesSeries(start, Duration.ofDays(1)).limit(10)
-                                                                    .map(d -> createDoc(d))
-                                                                    .collect(toList());
+                                                                    .map(this::createDoc)
+                                                                    .toList();
 
         // This date appears in the 10 dates we just generated
         // so we can distunguish the results of the 'OrEqualTo' criteria
@@ -787,7 +788,7 @@ public class LuceneFilterTest {
             filter.addGreaterThan(DATE_FIELD, queryDate);
 
             List<Document> results = newIndexAndQuery(docs, filter);
-            assertThat(results.size(), is(2));
+            assertEquals(2, results.size());
         }
 
         // Greater than or equal to
@@ -796,7 +797,7 @@ public class LuceneFilterTest {
             filter.addGreaterThanOrEqualTo(DATE_FIELD, queryDate);
 
             List<Document> results = newIndexAndQuery(docs, filter);
-            assertThat(results.size(), is(3));
+            assertEquals(3, results.size());
         }
 
         // Less than
@@ -805,7 +806,7 @@ public class LuceneFilterTest {
             filter.addLessThan(DATE_FIELD, queryDate);
 
             List<Document> results = newIndexAndQuery(docs, filter);
-            assertThat(results.size(), is(7));
+            assertEquals(7, results.size());
         }
 
         // Less than or equal to
@@ -814,7 +815,7 @@ public class LuceneFilterTest {
             filter.addLessThanOrEqualTo(DATE_FIELD, queryDate);
 
             List<Document> results = newIndexAndQuery(docs, filter);
-            assertThat(results.size(), is(8));
+            assertEquals(8, results.size());
         }
 
         // Between
@@ -823,7 +824,7 @@ public class LuceneFilterTest {
             filter.addBetween(DATE_FIELD, queryDate, queryDate);
 
             List<Document> results = newIndexAndQuery(docs, filter);
-            assertThat(results.size(), is(1));
+            assertEquals(1, results.size());
         }
     }
 
@@ -849,7 +850,7 @@ public class LuceneFilterTest {
         AtomicInteger i = new AtomicInteger(1);
         List<Document> docs = Stream.generate(() -> createDoc(i.getAndIncrement()))
                                     .limit(10)
-                                    .collect(toList());
+                                    .toList();
 
         int targetVal = 8;
 
@@ -859,7 +860,7 @@ public class LuceneFilterTest {
             filter.addGreaterThan(INT_FIELD, targetVal);
 
             List<Document> results = newIndexAndQuery(docs, filter);
-            assertThat(results.size(), is(2));
+            assertEquals(2, results.size());
         }
 
         // GTE
@@ -868,7 +869,7 @@ public class LuceneFilterTest {
             filter.addGreaterThanOrEqualTo(INT_FIELD, targetVal);
 
             List<Document> results = newIndexAndQuery(docs, filter);
-            assertThat(results.size(), is(3));
+            assertEquals(3, results.size());
         }
 
         // LT
@@ -877,7 +878,7 @@ public class LuceneFilterTest {
             filter.addLessThan(INT_FIELD, targetVal);
 
             List<Document> results = newIndexAndQuery(docs, filter);
-            assertThat(results.size(), is(7));
+            assertEquals(7, results.size());
         }
 
         // LTE
@@ -886,7 +887,7 @@ public class LuceneFilterTest {
             filter.addLessThanOrEqualTo(INT_FIELD, targetVal);
 
             List<Document> results = newIndexAndQuery(docs, filter);
-            assertThat(results.size(), is(8));
+            assertEquals(8, results.size());
         }
 
         // Between
@@ -895,7 +896,7 @@ public class LuceneFilterTest {
             filter.addBetween(INT_FIELD, 4, 7);
 
             List<Document> results = newIndexAndQuery(docs, filter);
-            assertThat(results.size(), is(4));
+            assertEquals(4, results.size());
         }
     }
 
@@ -905,7 +906,7 @@ public class LuceneFilterTest {
         AtomicLong i = new AtomicLong(1);
         List<Document> docs = Stream.generate(() -> createDoc(i.getAndIncrement()))
                                     .limit(10)
-                                    .collect(toList());
+                                    .toList();
 
         long targetVal = 8;
 
@@ -915,7 +916,7 @@ public class LuceneFilterTest {
             filter.addGreaterThan(LONG_FIELD, targetVal);
 
             List<Document> results = newIndexAndQuery(docs, filter);
-            assertThat(results.size(), is(2));
+            assertEquals(2, results.size());
         }
 
         // GTE
@@ -924,7 +925,7 @@ public class LuceneFilterTest {
             filter.addGreaterThanOrEqualTo(LONG_FIELD, targetVal);
 
             List<Document> results = newIndexAndQuery(docs, filter);
-            assertThat(results.size(), is(3));
+            assertEquals(3, results.size());
         }
 
         // LT
@@ -933,7 +934,7 @@ public class LuceneFilterTest {
             filter.addLessThan(LONG_FIELD, targetVal);
 
             List<Document> results = newIndexAndQuery(docs, filter);
-            assertThat(results.size(), is(7));
+            assertEquals(7, results.size());
         }
 
         // LTE
@@ -942,7 +943,7 @@ public class LuceneFilterTest {
             filter.addLessThanOrEqualTo(LONG_FIELD, targetVal);
 
             List<Document> results = newIndexAndQuery(docs, filter);
-            assertThat(results.size(), is(8));
+            assertEquals(8, results.size());
         }
 
         // Between
@@ -951,7 +952,7 @@ public class LuceneFilterTest {
             filter.addBetween(LONG_FIELD, 4l, 7l);
 
             List<Document> results = newIndexAndQuery(docs, filter);
-            assertThat(results.size(), is(4));
+            assertEquals(4, results.size());
         }
     }
 
@@ -965,7 +966,7 @@ public class LuceneFilterTest {
             return doc;
         })
                                     .limit(10)
-                                    .collect(toList());
+                                    .toList();
 
         Decimal targetVal = new Decimal2("8.0");
 
@@ -975,7 +976,7 @@ public class LuceneFilterTest {
             filter.addGreaterThan(DOUBLE_FIELD, targetVal);
 
             List<Document> results = newIndexAndQuery(docs, filter);
-            assertThat(results.size(), is(2));
+            assertEquals(2, results.size());
         }
 
         // GTE
@@ -984,7 +985,7 @@ public class LuceneFilterTest {
             filter.addGreaterThanOrEqualTo(DOUBLE_FIELD, targetVal);
 
             List<Document> results = newIndexAndQuery(docs, filter);
-            assertThat(results.size(), is(3));
+            assertEquals(3, results.size());
         }
 
         // LT
@@ -993,7 +994,7 @@ public class LuceneFilterTest {
             filter.addLessThan(DOUBLE_FIELD, targetVal);
 
             List<Document> results = newIndexAndQuery(docs, filter);
-            assertThat(results.size(), is(7));
+            assertEquals(7, results.size());
         }
 
         // LTE
@@ -1002,7 +1003,7 @@ public class LuceneFilterTest {
             filter.addLessThanOrEqualTo(DOUBLE_FIELD, targetVal);
 
             List<Document> results = newIndexAndQuery(docs, filter);
-            assertThat(results.size(), is(8));
+            assertEquals(8, results.size());
         }
 
         // Between
@@ -1011,7 +1012,7 @@ public class LuceneFilterTest {
             filter.addBetween(DOUBLE_FIELD, new Decimal2(4.0), new Decimal2(7.0));
 
             List<Document> results = newIndexAndQuery(docs, filter);
-            assertThat(results.size(), is(4));
+            assertEquals(4, results.size());
         }
     }
 
@@ -1149,7 +1150,7 @@ public class LuceneFilterTest {
 
                 try (IndexWriter writer = new IndexWriter(dir, iwc)) {
 
-                    if (debugPrint) {
+                    if (DEBUG_PRINT) {
                         System.out.println("Inserting: ");
                         docsToInsert.forEach(d -> System.out.println("\t" + d));
                     }
@@ -1178,9 +1179,9 @@ public class LuceneFilterTest {
                                                              throw new RuntimeException(e);
                                                          }
                                                      })
-                                                     .collect(toList());
+                                                     .toList();
 
-                if (debugPrint) {
+                if (DEBUG_PRINT) {
                     System.out.println("=================");
                     System.out.println("Query: \n\t" + query);
                     System.out.println("ScoreDocs:");
@@ -1199,6 +1200,7 @@ public class LuceneFilterTest {
 
     }
 
+    @SuppressWarnings("resource")
     private static Analyzer customAnalyzer() {
 
         try {
@@ -1210,5 +1212,55 @@ public class LuceneFilterTest {
             throw new RuntimeException(e);
         }
 
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testAddTaggedThrowsUnsupportedOperationException() {
+        new LuceneFilter().addTagged("tag", true);
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testAddWithinGeometryThrowsUnsupportedOperationException() {
+        new LuceneFilter().addWithin("binding", null);
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testAddContainsGeometryThrowsUnsupportedOperationException() {
+        new LuceneFilter().addContains("binding", (org.locationtech.jts.geom.Geometry) null);
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testAddCrossesGeometryThrowsUnsupportedOperationException() {
+        new LuceneFilter().addCrosses("binding", null);
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testAddDisjointGeometryThrowsUnsupportedOperationException() {
+        new LuceneFilter().addDisjoint("binding", null);
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testAddIntersectsGeometryThrowsUnsupportedOperationException() {
+        new LuceneFilter().addIntersects("binding", null);
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testAddOverlapsGeometryThrowsUnsupportedOperationException() {
+        new LuceneFilter().addOverlaps("binding", null);
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testAddTouchesGeometryThrowsUnsupportedOperationException() {
+        new LuceneFilter().addTouches("binding", null);
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testAddNotEqualsGeometryThrowsUnsupportedOperationException() {
+        new LuceneFilter().addNotEquals("binding", (org.locationtech.jts.geom.Geometry) null);
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testAddEqualsGeometryThrowsUnsupportedOperationException() {
+        new LuceneFilter().addEquals("binding", (org.locationtech.jts.geom.Geometry) null);
     }
 }

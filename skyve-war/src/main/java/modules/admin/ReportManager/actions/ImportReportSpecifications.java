@@ -35,23 +35,37 @@ import modules.admin.ReportTemplate.ReportTemplateExtension;
 import modules.admin.domain.ReportManager.ImportActionType;
 import modules.admin.domain.ReportTemplate;
 
+import org.slf4j.Logger;
+import org.skyve.util.logging.SkyveLoggerFactory;
+
 /**
  * Imports report specifications from JSON or ZIP files, validating and loading report templates
  * with support for batch imports and replacing existing reports.
  */
 public class ImportReportSpecifications extends UploadAction<ReportManagerExtension> {
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ImportReportSpecifications.class);
+	private static final int IMPORT_ZIP_MAX_ENTRIES = 2000;
+	private static final int IMPORT_ZIP_MAX_UNCOMPRESSED_MB = 100;
+
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient ReportManagerService reportManagerService;
 
 	/**
 	 * Upload a zip containing a number of report configurations
 	 * unzip to a temporary folder
 	 * and then unmarshall the json
+	 * @param bean the report manager bean
+	 * @param upload the uploaded file metadata and stream
+	 * @param exception the upload exception holder
+	 * @param webContext the current web context
+	 * @return the updated report manager bean
+	 * @throws Exception if upload or import processing fails
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public ReportManagerExtension upload(ReportManagerExtension bean, Upload upload, UploadException exception,
 			WebContext webContext) throws Exception {
-
 		// Mimetype not being detected, so use file extension instead
 		String ext = upload.getFileName().substring(upload.getFileName().lastIndexOf(".") + 1);
 
@@ -76,7 +90,7 @@ public class ImportReportSpecifications extends UploadAction<ReportManagerExtens
 					loadReport(bean, pb);
 
 				} catch (Exception e) {
-					e.printStackTrace();
+					LOGGER.error(e.getMessage(), e);
 					if (e instanceof ValidationException) {
 						throw e;
 					}
@@ -91,7 +105,10 @@ public class ImportReportSpecifications extends UploadAction<ReportManagerExtens
 				Files.copy(in, Paths.get(importFile.getAbsolutePath()));
 
 				// extract the report configurations from the zip
-				FileUtil.extractZipArchive(importFile, outdir);
+				FileUtil.extractZipArchive(importFile,
+						outdir,
+						IMPORT_ZIP_MAX_ENTRIES,
+						IMPORT_ZIP_MAX_UNCOMPRESSED_MB);
 
 				// handle case that zip supplied was a directory of files
 				if (outdir.isDirectory()) {
@@ -112,7 +129,7 @@ public class ImportReportSpecifications extends UploadAction<ReportManagerExtens
 						try {
 							pb = (PersistentBean) JSON.unmarshall(CORE.getUser(), json);
 						} catch (Exception e) {
-							e.printStackTrace();
+							LOGGER.error(e.getMessage(), e);
 							throw new ValidationException(new Message("The report " + report.getName() + " was not a valid."));
 						}
 						validateReport(pb, false, templatesToReplace);
@@ -208,7 +225,7 @@ public class ImportReportSpecifications extends UploadAction<ReportManagerExtens
 			try {
 				CORE.getPersistence().save(newTemplate);
 			} catch (Exception e) {
-				e.printStackTrace();
+				LOGGER.error(e.getMessage(), e);
 				reportManagerService.cleanUpTemporaryFiles();
 				throw new ValidationException(new Message("The report template " + newTemplate.getName() + " could not be saved."));
 			}

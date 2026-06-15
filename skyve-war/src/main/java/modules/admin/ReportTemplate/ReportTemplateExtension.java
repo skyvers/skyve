@@ -26,6 +26,9 @@ import modules.admin.domain.ReportDataset;
 import modules.admin.domain.ReportTemplate;
 import modules.admin.domain.UserProxy;
 
+/**
+ * Extends report template state with scheduling utilities and generated-template scaffolding.
+ */
 public class ReportTemplateExtension extends ReportTemplate {
 	private static final long serialVersionUID = -7147172221052954971L;
 
@@ -49,6 +52,7 @@ public class ReportTemplateExtension extends ReportTemplate {
 
 	/**
 	 * Returns a text description of the cron schedule for this report.
+	 * @return the result
 	 */
 	@Override
 	public String getScheduleDescription() {
@@ -123,6 +127,9 @@ public class ReportTemplateExtension extends ReportTemplate {
 		setTemplate(template);
 	}
 
+	/**
+	 * Executes generateInitialDataset.
+	 */
 	public void generateInitialDataset() {
 		// make sure we have a document
 		if (getGenerateDocumentName() == null) {
@@ -204,6 +211,7 @@ public class ReportTemplateExtension extends ReportTemplate {
 	 * 
 	 * @param e The ValidationException any errors will be added to
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void validateReportParameters(ValidationException e) {
 		// skip validation for jasper reports
 		if (getReportType() == ReportType.jasper) {

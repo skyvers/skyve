@@ -30,8 +30,8 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -51,7 +51,10 @@ import jakarta.annotation.Nullable;
 public class StandardLoader {
 	private static final String REFERENCED_ROW_DNE_MESSAGE_KEY = "bizport.referencedRowDoesNotExist";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StandardLoader.class);
+	private static final String REFERENCED_SHEET_PREFIX = "The referenced sheet for ";
+	private static final String MISSING_REFERENCED_SHEET_SUFFIX = " does not exist in this workbook. Check the template you started with and copy the missing sheet back in.";
+
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(StandardLoader.class);
 
 	private @Nonnull BizPortWorkbook workbook;
 	
@@ -87,6 +90,7 @@ public class StandardLoader {
 	 * @return	A list of top-level beans from the first document sheet found.
 	 * @throws Exception
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public @Nonnull <T extends Bean> List<T> populate(@Nonnull Persistence persistence)
 	throws Exception {
 		List<T> result = new ArrayList<>(128);
@@ -168,7 +172,7 @@ public class StandardLoader {
 		while (sheet.nextRow()) {
 			T bean = populateBeanFromRow(persistence, user, document, sheet);
 			Object sheetRowId = sheet.getValue(Bean.DOCUMENT_ID, AttributeType.text, problems);
-			if (sheetRowId != null) {
+			if ((bean != null) && (sheetRowId != null)) { // a real non-empty row with an ID
 				beansBySheetKey.put(createSheetKey(document, sheetRowId), bean);
 				String bizId = bean.getBizId();
 				bizIdToSheetRowId.put(bizId, sheetRowId);
@@ -190,10 +194,11 @@ public class StandardLoader {
 	 * @param document	The document of the bean to create.
 	 * @param sheet	The Excel sheet we are populating from.
 	 * @param listToAddBeanTo	The list to add the constructed bean to.
-	 * @return	The constructed bean.
+	 * @return	The constructed bean or null.
 	 * @throws Exception
 	 */
-	private @Nonnull <T extends Bean> T populateBeanFromRow(@Nonnull Persistence persistence, 
+	@SuppressWarnings("java:S3776") // Complexity OK
+	private @Nullable <T extends Bean> T populateBeanFromRow(@Nonnull Persistence persistence, 
 																@Nonnull User user,
 																@Nonnull Document document,
 																@Nonnull BizPortSheet sheet) 
@@ -293,14 +298,13 @@ public class StandardLoader {
 	 * @param customer	The pertinent customer.
 	 * @param document	The parent document to interrogate.
 	 * @param sheet	The sheet to iterate over.
-	 * @throws Exception
 	 */
-	private void linkAssociationsFromSheet(@Nullable Customer customer, 
+	@SuppressWarnings("java:S3776") // Complexity OK
+	private void linkAssociationsFromSheet(@Nonnull Customer customer,
 											@Nonnull Module module, 
 											@Nonnull Document document, 
 											@Nonnull SheetKey key,
-											@Nonnull BizPortSheet sheet)
-	throws Exception {
+											@Nonnull BizPortSheet sheet) {
 		List<Association> associations = new ArrayList<>();
 		
 		// determine the association bindings
@@ -347,13 +351,11 @@ public class StandardLoader {
 	 * @param sheet	To get values from the current row.
 	 * @param customer	The pertinent customer.
 	 * @param childDocument	The document of the child end of the relationship.
-	 * @throws Exception
 	 */
 	private void linkParentFromRow(@Nonnull BizPortSheet sheet,
-										@Nullable Customer customer,
-										@Nonnull Document childDocument,
-										@Nonnull String collectionBinding)
-	throws Exception {
+									@Nullable Customer customer,
+									@Nonnull Document childDocument,
+									@Nullable String collectionBinding) {
 		Object parentSheetId = sheet.getValue(ChildBean.PARENT_NAME, AttributeType.text, problems);
 		Object childSheetId = sheet.getValue(Bean.DOCUMENT_ID, AttributeType.text, problems);
 		if ((parentSheetId == null) && (childSheetId == null)) { // don't process an empty row
@@ -399,7 +401,9 @@ public class StandardLoader {
 											"The child ID " + childSheetId + " does not match any row in the current sheet.");
 				return;
 			}
-			BindUtil.ensureElementIsInCollection(parentBean, collectionBinding, childBean);
+			if (collectionBinding != null) {
+				BindUtil.ensureElementIsInCollection(parentBean, collectionBinding, childBean);
+			}
 		}
 	}
 
@@ -412,8 +416,7 @@ public class StandardLoader {
 	 * @throws Exception
 	 */
 	private void linkHierarchyFromRow(@Nonnull BizPortSheet sheet,
-										@Nonnull Document childDocument)
-	throws Exception {
+										@Nonnull Document childDocument) {
 		Object parentSheetRowId = sheet.getValue(HierarchicalBean.PARENT_ID, AttributeType.text, problems);
 		Object sheetRowId = sheet.getValue(Bean.DOCUMENT_ID, AttributeType.text, problems);
 		if (parentSheetRowId != null) {
@@ -447,8 +450,7 @@ public class StandardLoader {
 											@Nullable Customer customer,
 											@Nonnull Module module,
 											@Nonnull Bean masterBean,
-											@Nonnull List<Association> associations) 
-	throws Exception {
+											@Nonnull List<Association> associations) {
 		// for each association
 		for (Association association : associations) {
 			String associationBinding = association.getName();
@@ -467,12 +469,12 @@ public class StandardLoader {
 				continue;
 			}
 			BizPortSheet foreignKeySheet = workbook.getSheet(foreignKeySheetKey);
-			if (foreignKeySheet == null) {
-				sheet.addWarningAtCurrentRow(problems, 
-												foreignKeyColumn, 
-												"The referenced sheet for " + associationBinding + " does not exist in this workbook. Check the template you started with and copy the missing sheet back in.");
-				continue;
-			}
+				if (foreignKeySheet == null) {
+					sheet.addWarningAtCurrentRow(problems,
+													foreignKeyColumn,
+													REFERENCED_SHEET_PREFIX + associationBinding + MISSING_REFERENCED_SHEET_SUFFIX);
+					continue;
+				}
 
 			Document associatedDocument = module.getDocument(customer, association.getDocumentName());
 			Bean foreignKeyBean = beansBySheetKey.get(createSheetKey(associatedDocument, foreignKeySheetId));
@@ -492,13 +494,11 @@ public class StandardLoader {
 	 * 
 	 * @param collectionBinding	The collection binding to process.
 	 * @param collectionSheet	The collection sheet to iterate over.
-	 * @throws Exception
 	 */
 	private void populateCollectionFromSheet(@Nonnull String collectionBinding,
 												@Nonnull Document owningDocument,
 												@Nonnull Document elementDocument,
-												@Nonnull BizPortSheet collectionSheet)
-	throws Exception {
+												@Nonnull BizPortSheet collectionSheet) {
 		while (collectionSheet.nextRow()) {
 			populateCollectionFromRow(collectionBinding,
 										owningDocument,
@@ -517,8 +517,7 @@ public class StandardLoader {
 	private void populateCollectionFromRow(@Nonnull String collectionBinding,
 											@Nonnull Document owningDocument,
 											@Nonnull Document elementDocument,
-											@Nonnull BizPortSheet collectionSheet) 
-	throws Exception {
+											@Nonnull BizPortSheet collectionSheet) {
 		Object ownerSheetId = collectionSheet.getValue(PersistentBean.OWNER_COLUMN_NAME, AttributeType.text, problems);
 		BizPortColumn ownerSheetIdColumn = collectionSheet.getColumn(PersistentBean.OWNER_COLUMN_NAME);
 		Object elementSheetId = collectionSheet.getValue(PersistentBean.ELEMENT_COLUMN_NAME, AttributeType.text, problems);
@@ -527,8 +526,8 @@ public class StandardLoader {
 		// The row can be empty - owner sheet ID and element sheet ID are both null, or both filled
 		if (ownerSheetId == null) {
 			if (elementSheetId != null) {
-				collectionSheet.addErrorAtCurrentRow(problems, 
-														ownerSheetIdColumn, 
+				collectionSheet.addErrorAtCurrentRow(problems,
+														ownerSheetIdColumn,
 														"The owner cell is empty. You must specify the owner of this relationship.");
 			}
 			return;
@@ -543,12 +542,12 @@ public class StandardLoader {
 		// Lookup the foreign key row for owner
 		SheetKey ownerSheetKey = ownerSheetIdColumn.getReferencedSheet();
 		BizPortSheet ownerSheet = workbook.getSheet(ownerSheetKey);
-		if (ownerSheet == null) {
-			collectionSheet.addErrorAtCurrentRow(problems, 
-													ownerSheetIdColumn, 
-													"The referenced sheet for " + PersistentBean.OWNER_COLUMN_NAME + " does not exist in this workbook. Check the template you started with and copy the missing sheet back in.");
-			return;
-		}
+			if (ownerSheet == null) {
+				collectionSheet.addErrorAtCurrentRow(problems,
+														ownerSheetIdColumn,
+														REFERENCED_SHEET_PREFIX + PersistentBean.OWNER_COLUMN_NAME + MISSING_REFERENCED_SHEET_SUFFIX);
+				return;
+			}
 		Bean owner = beansBySheetKey.get(createSheetKey(owningDocument, ownerSheetId));
 		if (owner == null) {
 			collectionSheet.addErrorAtCurrentRow(problems, 
@@ -560,12 +559,12 @@ public class StandardLoader {
 		// Lookup the foreign key row for element
 		SheetKey elementSheetKey = elementSheetIdColumn.getReferencedSheet();
 		BizPortSheet elementSheet = workbook.getSheet(elementSheetKey);
-		if (elementSheet == null) {
-			collectionSheet.addWarningAtCurrentRow(problems, 
-													elementSheetIdColumn, 
-													"The referenced sheet for " + PersistentBean.ELEMENT_COLUMN_NAME + " does not exist in this workbook. Check the template you started with and copy the missing sheet back in.");
-			return;
-		}
+			if (elementSheet == null) {
+				collectionSheet.addWarningAtCurrentRow(problems,
+														elementSheetIdColumn,
+														REFERENCED_SHEET_PREFIX + PersistentBean.ELEMENT_COLUMN_NAME + MISSING_REFERENCED_SHEET_SUFFIX);
+				return;
+			}
 		Bean element = beansBySheetKey.get(createSheetKey(elementDocument, elementSheetId));
 		if (element == null) {
 			collectionSheet.addErrorAtCurrentRow(problems, 
@@ -619,6 +618,9 @@ public class StandardLoader {
 		beansBySheetKey.put(key, bean);
 	}
 	
+	/**
+	 * Adds a error.
+	 */
 	public void addError(@Nonnull Customer customer, @Nonnull Bean bean, @Nonnull Exception e) {
 		final SheetKey key = bizIdToSheetKey.get(bean.getBizId());
 		BizPortSheet sheet = workbook.getSheet(key);
@@ -639,6 +641,7 @@ public class StandardLoader {
 	}
 	
 	// Ensure that error message and all subordinate error messages fit on the message list
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void addError(@Nullable Customer customer, 
 							@Nonnull Module module, 
 							@Nonnull Document document, 

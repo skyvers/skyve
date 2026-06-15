@@ -26,13 +26,16 @@ import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.logging.Category;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.faces.model.SelectItem;
 
+/**
+ * Executes a Faces callback action within the current Skyve web context.
+ */
 public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GetSelectItemsAction.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(GetSelectItemsAction.class);
     private static final Logger FACES_LOGGER = Category.FACES.logger();
 
 	private Bean bean;
@@ -73,6 +76,7 @@ public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
 	}
 
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public List<SelectItem> callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("GetSelectItemsAction - binding={} : includeEmptyItem={}", binding, Boolean.valueOf(includeEmptyItem));
 

@@ -5,6 +5,9 @@ import java.util.List;
 import org.apache.commons.beanutils.DynaBean;
 import org.skyve.domain.app.admin.ReportParameter;
 
+/**
+ * Supplies dynamic bean rows for a configured FreeMarker report dataset.
+ */
 public interface BeanReportDataset {
 	/**
 	 * Returns a list of beans to be added into the report context when specified as

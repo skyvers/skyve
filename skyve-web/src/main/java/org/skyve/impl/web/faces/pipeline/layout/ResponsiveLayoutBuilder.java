@@ -31,6 +31,7 @@ import jakarta.faces.component.html.HtmlOutputLabel;
 import jakarta.faces.component.html.HtmlOutputText;
 import jakarta.faces.component.html.HtmlPanelGroup;
 
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate responsive-layout attribute fragments.
 public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 /*
 	@Override
@@ -98,6 +99,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 	}
 
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public UIComponent addToContainer(UIComponent component,
 										Container viewContainer, 
 										UIComponent container, 
@@ -160,7 +162,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 				}
 			}
 			if (unsizedCols > 0) {
-				mutablePercentageWidth = Integer.valueOf(LayoutUtil.responsiveWidthToPercentageWidth(mediumColsRemaining / unsizedCols));
+				mutablePercentageWidth = Integer.valueOf(LayoutUtil.responsiveWidthToPercentageWidth(((double) mediumColsRemaining) / unsizedCols));
 			}
 		}
 		HtmlPanelGroup div = responsiveColumn(pixelWidth, responsiveWidth, mutablePercentageWidth, sm, md, lg, xl, widgetInvisible, nopad);
@@ -436,6 +438,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 		return result;
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private HtmlPanelGroup responsiveColumn(Integer pixelWidth, 
 												Integer responsiveWidth, 
 												Integer percentageWidth,
@@ -513,6 +516,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 		return new ResponsiveGridStyle(small, medium, large, extraLarge).toString();
 	}
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static ResponsiveGridStyle[] responsiveFormStyleClasses(List<FormColumn> formColumns) {
 		ResponsiveGridStyle[] result = new ResponsiveGridStyle[formColumns.size()];
 		

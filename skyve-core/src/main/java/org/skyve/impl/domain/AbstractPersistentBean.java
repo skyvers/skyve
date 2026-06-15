@@ -13,8 +13,17 @@ import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
- * 
- * @author Mike NOTE - DO NOT MAKE ANY METHOD IN THIS CLASS FINAL...
+ * Base implementation of {@link PersistentBean} that carries Hibernate ORM
+ * annotations and the bidirectional JAXB/XML mapping for persistent beans.
+ *
+ * <p>Provides the standard persistent-bean fields: {@code bizId},
+ * {@code bizVersion}, {@code bizLock}, and {@code bizKey}.
+ *
+ * <p>Invariant: no method in this class may be declared {@code final} because
+ * Hibernate requires the ability to create subclass proxies via bytecode enhancement.
+ *
+ * @see PersistentBean
+ * @see AbstractBean
  */
 @XmlType
 @MappedSuperclass

@@ -33,6 +33,12 @@ public class DecimalFormatter implements Formatter<Number> {
 	private Boolean calculatedPercentage;
 	private boolean floatingPoint;
 	
+	/**
+	 * Creates a new DecimalFormatter instance.
+	 * @param decimalFormatPattern the decimalFormatPattern
+	 * @param absolute the absolute
+	 * @param calculatedPercentage the calculatedPercentage
+	 */
 	public DecimalFormatter(String decimalFormatPattern, boolean absolute, Boolean calculatedPercentage) {
 		this.decimalFormatPattern = decimalFormatPattern;
 		this.absolute = absolute;
@@ -40,11 +46,20 @@ public class DecimalFormatter implements Formatter<Number> {
 		this.floatingPoint = (calculatedPercentage != null) || (decimalFormatPattern.indexOf('.') > -1);
 	}
 
+	/**
+	 * Returns the valueType.
+	 * @return the result
+	 */
 	@Override
 	public Class<Number> getValueType() {
 		return Number.class;
 	}
 	
+	/**
+	 * Executes toDisplayValue.
+	 * @param value the value
+	 * @return the result
+	 */
 	@Override
 	public String toDisplayValue(Number value) {
 		java.text.DecimalFormat df = CORE.getDecimalFormat(decimalFormatPattern);

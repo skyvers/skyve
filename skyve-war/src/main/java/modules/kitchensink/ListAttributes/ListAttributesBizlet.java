@@ -7,6 +7,9 @@ import org.skyve.metadata.model.document.Bizlet;
 
 import modules.kitchensink.domain.ListAttributes;
 
+/**
+ * Supplies static demonstration domain values for list-attribute examples.
+ */
 public class ListAttributesBizlet extends Bizlet<ListAttributes> {
 	private static List<DomainValue> dvs = new ArrayList<>(3);
 	
@@ -16,6 +19,13 @@ public class ListAttributesBizlet extends Bizlet<ListAttributes> {
 		dvs.add(new DomainValue("three", "Three (3)!"));
 	}
 	
+	/**
+	 * Returns the shared constant domain values for the configured sample attribute.
+	 *
+	 * @param attributeName the document attribute requesting values
+	 * @return the configured domain values when the constant-domain attribute is requested, otherwise {@code null}
+	 * @throws Exception if domain value resolution fails
+	 */
 	@Override
 	public List<DomainValue> getConstantDomainValues(String attributeName) throws Exception {
 		if (ListAttributes.constantDomainPropertyName.equals(attributeName)) {
@@ -24,6 +34,13 @@ public class ListAttributesBizlet extends Bizlet<ListAttributes> {
 		return null;
 	}
 	
+	/**
+	 * Returns the shared variant domain values for the configured sample attribute.
+	 *
+	 * @param attributeName the document attribute requesting values
+	 * @return the configured domain values when the variant-domain attribute is requested, otherwise {@code null}
+	 * @throws Exception if domain value resolution fails
+	 */
 	@Override
 	public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
 		if (ListAttributes.variantDomainPropertyName.equals(attributeName)) {
@@ -32,6 +49,14 @@ public class ListAttributesBizlet extends Bizlet<ListAttributes> {
 		return null;
 	}
 	
+	/**
+	 * Returns the shared dynamic domain values for the configured sample attribute.
+	 *
+	 * @param attributeName the document attribute requesting values
+	 * @param bean the current list-attributes bean
+	 * @return the configured domain values when the dynamic-domain attribute is requested, otherwise {@code null}
+	 * @throws Exception if domain value resolution fails
+	 */
 	@Override
 	public List<DomainValue> getDynamicDomainValues(String attributeName, ListAttributes bean) throws Exception {
 		if (ListAttributes.dynamicDomainPropertyName.equals(attributeName)) {

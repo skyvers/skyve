@@ -9,9 +9,16 @@ import org.skyve.persistence.Persistence;
 import jakarta.annotation.Nonnull;
 
 /**
- * A Bizlet extension that will return a persisted instance for the current user if one exists.
+ * Resolves a singleton document instance by returning the first persisted
+ * record visible in the current permission scope.
  *
- * @param <T>
+ * <p>If no persisted instance is visible, resolution falls back to
+ * {@link Bizlet#newInstance(PersistentBean)}.
+ *
+ * <p>Threading: not thread-safe; instances rely on thread-bound
+ * {@link CORE}/{@link Persistence} context.
+ *
+ * @param <T> the singleton document bean type
  */
 public abstract class SingletonBizlet<T extends PersistentBean> extends Bizlet<T> {
 	/**
@@ -40,6 +47,7 @@ public abstract class SingletonBizlet<T extends PersistentBean> extends Bizlet<T
 	 * @return	The singleton bean
 	 * @throws Exception
 	 */
+	@SuppressWarnings({"java:S112", "java:S1130"}) // Intentionally permitted exceptions
 	public @Nonnull T newInstance(@Nonnull T bean, @Nonnull DocumentPermissionScope scope) throws Exception {
 		@SuppressWarnings("null")
 		@Nonnull T result = CORE.getPersistence().withDocumentPermissionScopes(scope, p -> {

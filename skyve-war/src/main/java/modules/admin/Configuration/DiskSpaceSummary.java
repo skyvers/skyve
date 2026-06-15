@@ -10,14 +10,14 @@ import java.text.NumberFormat;
 
 import org.skyve.util.Util;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 /**
  * Determine the total file system sizings.
  */
 public final class DiskSpaceSummary {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(DiskSpaceSummary.class);
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(DiskSpaceSummary.class);
 
 	private long totalAvailable;
 	private long totalSpace;

@@ -20,40 +20,59 @@ public class DevLoginFilter implements Filter {
 	private static final String CUSTOMER_NAME = "customer";
 	private static final String USER_NAME = "user";
 	private static final String PASSWORD = "password";
+	private static final String INIT_PARAMETER_REQUIRED = " init parameter is required";
 	
 	private String user;
-	private String password;
+	private String userPassword;
 	
+	/**
+	 * Reads required development login credentials from filter init parameters.
+	 *
+	 * @param config filter configuration containing customer, user, and password parameters
+	 * @throws ServletException when any required parameter is missing
+	 */
 	@Override
 	public void init(FilterConfig config) throws ServletException {
 		String customerName = Util.processStringValue(config.getInitParameter(CUSTOMER_NAME));
 		if (customerName == null) {
-			throw new ServletException(CUSTOMER_NAME + " init parameter is required");
+			throw new ServletException(CUSTOMER_NAME + INIT_PARAMETER_REQUIRED);
 		}
 		String userName = Util.processStringValue(config.getInitParameter(USER_NAME));
 		if (userName == null) {
-			throw new ServletException(USER_NAME + " init parameter is required");
+			throw new ServletException(USER_NAME + INIT_PARAMETER_REQUIRED);
 		}
 		user = customerName + '/' + userName;
-		password = Util.processStringValue(config.getInitParameter(PASSWORD));
-		if (password == null) {
-			throw new ServletException(PASSWORD + " init parameter is required");
+		userPassword = Util.processStringValue(config.getInitParameter(PASSWORD));
+		if (userPassword == null) {
+			throw new ServletException(PASSWORD + INIT_PARAMETER_REQUIRED);
 		}
 	}
 
+	/**
+	 * Clears cached development credentials when the filter is destroyed.
+	 */
 	@Override
 	public void destroy() {
 		user = null;
-		password = null;
+		userPassword = null;
 	}
 	
+	/**
+	 * Performs transparent login for unauthenticated requests using configured development credentials.
+	 *
+	 * @param request inbound servlet request
+	 * @param response outbound servlet response
+	 * @param chain downstream filter chain
+	 * @throws IOException when request processing fails due to I/O issues
+	 * @throws ServletException when authentication or downstream processing fails
+	 */
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 	throws IOException, ServletException {
 		HttpServletRequest hsr = (HttpServletRequest) request;
 		Principal userPrincipal = hsr.getUserPrincipal();
 		if (userPrincipal == null) {
-			hsr.login(user, password);
+			hsr.login(user, userPassword);
 		}
 		chain.doFilter(request, response);
 	}

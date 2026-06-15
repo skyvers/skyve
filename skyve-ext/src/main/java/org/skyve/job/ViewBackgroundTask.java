@@ -12,7 +12,7 @@ import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.user.User;
 import org.skyve.web.BackgroundTask;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 /**
  * This is the default implementation of BackgroundTask integration and serves as the extension point.
@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class ViewBackgroundTask<T extends Bean> implements BackgroundTask<T>, org.quartz.Job {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ViewBackgroundTask.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ViewBackgroundTask.class);
 
 	private AbstractWebContext webContext;
 	private T bean;

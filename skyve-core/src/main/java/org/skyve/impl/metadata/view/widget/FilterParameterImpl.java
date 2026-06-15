@@ -8,6 +8,17 @@ import org.skyve.metadata.view.widget.FilterParameter;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB-annotated runtime implementation of the {@link FilterParameter}
+ * metadata interface.
+ *
+ * <p>Carries a single filter criterion — binding path, comparison operator,
+ * and either a literal value or a value resolved from a second binding —
+ * passed to a {@link org.skyve.metadata.view.widget.FilterParameter}-aware
+ * widget such as a {@link org.skyve.impl.metadata.view.widget.bound.input.LookupDescription}.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ */
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE, propOrder = {"filterBinding", "operator", "value", "valueBinding"})
 public final class FilterParameterImpl implements FilterParameter {
 	private static final long serialVersionUID = -4191066734972894505L;

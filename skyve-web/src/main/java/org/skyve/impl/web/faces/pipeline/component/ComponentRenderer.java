@@ -68,6 +68,7 @@ import jakarta.faces.component.html.HtmlPanelGrid;
 import jakarta.faces.component.html.HtmlPanelGroup;
 import jakarta.faces.convert.Converter;
 
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate JSF component attribute names.
 public class ComponentRenderer {
 	private static final char INDENT = '\t';
 	StringBuilder out = new StringBuilder(1024);
@@ -82,6 +83,7 @@ public class ComponentRenderer {
 		return out.toString();
 	}
 
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	private void renderComponent(UIComponentBase component) {
 		String tagName = null;
 		Map<String, Object> attributes = new LinkedHashMap<>();
@@ -421,6 +423,11 @@ public class ComponentRenderer {
 		else if (component instanceof SelectOneMenu pick) {
 			tagName = "p:selectOneMenu";
 			
+			if (pick.isFilter()) {
+				putValue(attributes, "filter", Boolean.TRUE);
+				putValue(attributes, "filterMatchMode", pick.getFilterMatchMode());
+				putValue(attributes, "filterPlaceholder", pick.getFilterPlaceholder());
+			}
 			putValue(attributes, "style", pick.getStyle());
 			putValue(attributes, "styleClass", pick.getStyleClass());
 		}

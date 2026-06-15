@@ -13,6 +13,17 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * Carries optional dynamic class-name overrides for a document's Bizlet, actions,
+ * images, and models.
+ *
+ * <p>When a document declares {@code <dynamic>} in its XML, Skyve loads the named
+ * classes at runtime rather than relying on statically generated domain classes. This
+ * supports hot-reloadable implementations in development and plugin scenarios.
+ *
+ * <p>The maps ({@link #getActions()}, {@link #getImages()}, {@link #getModels()}) are
+ * keyed by the action/image/model name and valued by fully-qualified class names.
+ */
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 public class Dynamic implements SerializableMetaData {
@@ -33,32 +44,60 @@ public class Dynamic implements SerializableMetaData {
 	@XmlJavaTypeAdapter(DynamicClassMapAdapter.class)
 	private Map<String, String> models = new TreeMap<>();
 
+	/**
+	 * Returns the bizletClassName.
+	 * @return the result
+	 */
 	public String getBizletClassName() {
 		return bizletClassName;
 	}
 
+	/**
+	 * Sets the bizletClassName.
+	 * @param className the className
+	 */
 	@XmlAttribute(required = false)
 	public void setBizletClassName(String className) {
 		this.bizletClassName = className;
 	}
 
+	/**
+	 * Returns the dataFactoryClassName.
+	 * @return the result
+	 */
 	public String getDataFactoryClassName() {
 		return dataFactoryClassName;
 	}
 	
+	/**
+	 * Sets the dataFactoryClassName.
+	 * @param dataFactoryClassName the dataFactoryClassName
+	 */
 	@XmlAttribute(required = false)
 	public void setDataFactoryClassName(String dataFactoryClassName) {
 		this.dataFactoryClassName = dataFactoryClassName;
 	}
 	
+	/**
+	 * Returns the actions.
+	 * @return the result
+	 */
 	public Map<String, String> getActions() {
 		return actions;
 	}
 
+	/**
+	 * Returns the images.
+	 * @return the result
+	 */
 	public Map<String, String> getImages() {
 		return images;
 	}
 	
+	/**
+	 * Returns the models.
+	 * @return the result
+	 */
 	public Map<String, String> getModels() {
 		return models;
 	}

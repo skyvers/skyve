@@ -15,6 +15,8 @@
 	boolean rmChecked = false;
 	String user = null;
 	boolean error2FA = false;
+	boolean resendSuccess = Boolean.TRUE.equals(request.getAttribute(TwoFactorAuthPushFilter.RESEND_SUCCESS_ATTRIBUTE));
+	boolean resendCooldown = Boolean.TRUE.equals(request.getAttribute(TwoFactorAuthPushFilter.RESEND_COOLDOWN_ATTRIBUTE));
 	
 
 	String basePath = Util.getSkyveContextUrl() + "/";
@@ -22,6 +24,7 @@
 	
 	// Check if this was a login error
 	boolean loginError = (request.getParameter("error") != null);
+	boolean tfaExpired = (request.getParameter(TwoFactorAuthPushFilter.TWO_FACTOR_EXPIRED_PARAMETER) != null);
 
 	if (show2FA) {	
 		customer = (String) request.getAttribute(TwoFactorAuthPushFilter.CUSTOMER_ATTRIBUTE);
@@ -76,9 +79,12 @@
 	String loginBanner = show2FA ? 
 					Util.i18n("page.login.2FACode.banner", locale) :
 					Util.i18n("page.login.banner", locale);
+	String initialFocusScript = show2FA ?
+					"document.getElementById('tfaCode1').focus()" :
+					"document.forms['loginForm'].elements['" + ((customer == null) ? customerFieldName : userFieldName) + "'].focus()";
 %>
 <!DOCTYPE html>
-<html dir="<%=Util.isRTL(locale) ? "rtl" : "ltr"%>">
+<html dir="<%=Util.isRTL(locale) ? "rtl" : "ltr"%>" lang="<%=locale.getLanguage()%>" xml:lang="<%=locale.getLanguage()%>">
 	<head>
 		<!-- Standard Meta -->
 	    <meta charset="utf-8" />
@@ -104,19 +110,46 @@
 	    <%@include file="fragments/styles.html" %>
 	    <%@include file="fragments/backgroundImage.html" %>
 		
-		<script type="text/javascript" src="semantic24/jquery.slim.min.js"></script>
-		<script type="text/javascript" src="semantic24/components/form.min.js"></script>
-		<script type="text/javascript" src="semantic24/components/transition.min.js"></script>
-		<script type="text/javascript" src="skyve/prime/skyve-min.js?v=<%=UtilImpl.WEB_RESOURCE_FILE_VERSION%>"></script>
+			<script type="text/javascript" src="semantic24/jquery.slim.min.js"></script>
+			<script type="text/javascript" src="semantic24/components/form.min.js"></script>
+			<script type="text/javascript" src="semantic24/components/transition.min.js"></script>
+			<script type="text/javascript" src="skyve/prime/skyve-min.js?v=<%=UtilImpl.WEB_RESOURCE_FILE_VERSION%>"></script>
+			<link rel="stylesheet" href="skyve/css/skyve-login-min.css?v=<%=UtilImpl.WEB_RESOURCE_FILE_VERSION%>">
+			<script type="text/javascript" src="skyve/skyve-login-min.js?v=<%=UtilImpl.WEB_RESOURCE_FILE_VERSION%>"></script>
 
-		<script type="text/javascript">
-			function testMandatoryFields(form) {
-				if($('.ui.form').form('is valid')) {
-					var hidden = document.createElement('input');
-					hidden.setAttribute('type', 'hidden');
-					hidden.setAttribute('name', 'username');
+			<script type="text/javascript">
+				function setUsernameField(form) {
+					var hidden = form.querySelector("input[name='username']");
+					if (! hidden) {
+						hidden = document.createElement('input');
+						hidden.setAttribute('type', 'hidden');
+						hidden.setAttribute('name', 'username');
+						form.appendChild(hidden);
+					}
 					hidden.setAttribute('value', form.customer.value + "/" + form.user.value);
-					form.appendChild(hidden);
+				}
+
+				function submitResend(form) {
+					var resendField = form.elements['tfaResend'];
+					if (resendField) {
+						resendField.value = 'true';
+					}
+					setUsernameField(form);
+					form.action = 'loginAttempt';
+					form.submit();
+					return false;
+				}
+
+				function testMandatoryFields(form) {
+					<% if (show2FA) { %>
+						var resendField = form.elements['tfaResend'];
+						if (resendField) {
+							resendField.value = '';
+						}
+						SKYVE.Login.syncTwoFactorCode();
+					<% } %>
+						if($('.ui.form').form('is valid')) {
+					setUsernameField(form);
 					form.action = 'loginAttempt';
 					return true;
 				}
@@ -127,7 +160,7 @@
 			$(document)
 			.ready(function() {
 			    $('.ui.form')
-			    .form({
+				    .form({
 			        fields: {
 			        	customer: {
 			        		identifier: 'customer',
@@ -148,21 +181,29 @@
 			                ]
 			            },
 			            password: {
-			                identifier  : 'password',
+			                identifier: 'password',
 			                rules: [
+			                    <% if (show2FA) { %>
 			                    {
-			                        type   : 'empty',
-			                        prompt : '<%=passwordEmptyError%>'
-			                    }
+			                        type: 'exactLength[6]',
+			                        prompt: '<%=Util.i18n("page.login.password.error.2FACode.required", locale)%>'
+			                    }<% } else { %>
+			                    {
+			                        type: 'empty',
+			                        prompt: '<%=passwordEmptyError%>'
+			                    }<% } %>
 			                ]
-			            }
-			        }
-			    });
-			    SKYVE.Util.setTouchCookie();
-			});
-		</script>
-	</head>
-	<body onload="document.forms['loginForm'].elements['<%=(customer == null) ? customerFieldName : userFieldName%>'].focus()">
+				            }
+				        }
+				    });
+					<% if (show2FA) { %>
+						SKYVE.Login.initialiseTwoFactorCodeInputs();
+					<% } %>
+					    SKYVE.Util.setTouchCookie();
+					});
+				</script>
+		</head>
+			<body onload="<%=initialFocusScript%>">
 		<SCRIPT>//'"]]>>isc_loginRequired
 		var isc = top.isc ? top.isc : window.opener ? window.opener.isc : null;
 		if (isc && isc.RPCManager) isc.RPCManager.delayCall("handleLoginRequired", [window]);
@@ -184,6 +225,14 @@
 				        			<%=Util.i18n("page.loginError.attempts", locale, String.valueOf(UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD), String.valueOf(UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS))%>
 				        		</div>
 				        	<% } %>
+			        	</p>
+            		</div>
+				<% } %>
+				<% if (tfaExpired) { %>
+					<div class="ui error message">
+	            		<div class="header"><%=Util.i18n("page.loginError.banner", locale)%></div>
+			        	<p>
+			        		<%=Util.i18n("page.loginError.2FACode.expired", locale)%>
 			        	</p>
             		</div>
 				<% } %>
@@ -235,16 +284,22 @@
 							<% } %>
 		                    </div>
 		                <% } %>
-		                </div>
-		                <div class="field">
-		                	<% if (show2FA) { %>
-								<div class="ui left icon input">
-			                        <i class="lock icon"></i>
-			                        <input type="text" id="password" name="password" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" inputmode="numeric" placeholder="<%=Util.i18n("page.login.2FACode.label", locale)%>"/>
-			                    </div>
-			                    <input type="password" id="tfaToken" name="tfaToken" hidden="true" value="<%=tfaToken%>"/>
-							<% } else { %>
-			                    <div class="ui left icon input">
+			                </div>
+			                <div class="field">
+			                <% if (show2FA) { %>
+							<div class="tfa-code-inputs" aria-label="<%=Util.i18n("page.login.2FACode.label", locale)%>">
+								<input type="text" class="tfa-code-input js-tfa-code" id="tfaCode1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" maxlength="1" aria-label="Digit 1">
+								<input type="text" class="tfa-code-input js-tfa-code" id="tfaCode2" inputmode="numeric" pattern="[0-9]*" autocomplete="off" maxlength="1" aria-label="Digit 2">
+								<input type="text" class="tfa-code-input js-tfa-code" id="tfaCode3" inputmode="numeric" pattern="[0-9]*" autocomplete="off" maxlength="1" aria-label="Digit 3">
+								<input type="text" class="tfa-code-input js-tfa-code" id="tfaCode4" inputmode="numeric" pattern="[0-9]*" autocomplete="off" maxlength="1" aria-label="Digit 4">
+								<input type="text" class="tfa-code-input js-tfa-code" id="tfaCode5" inputmode="numeric" pattern="[0-9]*" autocomplete="off" maxlength="1" aria-label="Digit 5">
+								<input type="text" class="tfa-code-input js-tfa-code" id="tfaCode6" inputmode="numeric" pattern="[0-9]*" autocomplete="off" maxlength="1" aria-label="Digit 6">
+							</div>
+							<input type="hidden" id="password" name="password"/>
+				                    <input type="password" id="tfaToken" name="tfaToken" hidden="true" value="<%=tfaToken%>"/>
+				                    <input type="hidden" id="tfaResend" name="tfaResend" value=""/>
+						<% } else { %>
+				                    <div class="ui left icon input">
 			                        <i class="lock icon"></i>
 			                        <input type="password" id="password" name="password" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" placeholder="<%=Util.i18n("page.login.password.label", locale)%>">
 			                    </div>
@@ -258,15 +313,23 @@
 								</div>
 							</div>
 								<div class="field" style="text-align: right;">
-									<a href="<%=basePath%>pages/requestPasswordReset.jsp"><%=Util.i18n("page.login.reset.label", locale)%></a>
+									<% if (! show2FA) { %>
+										<a href="<%=basePath%>pages/requestPasswordReset.jsp"><%=Util.i18n("page.login.reset.label", locale)%></a>
+									<% } %>
 		    					</div>
     					</div>
 						<input type="submit" value="<%=Util.i18n("page.login.submit.label", locale)%>" class="ui fluid large blue submit button" />
-						
 						<% if (show2FA) { %>
 							<div style="margin-top: 5px;">
-			                	<a href="<%=Util.getBaseUrl()%>" class="ui fluid basic large button"><%=Util.i18n("page.login.2FACode.return.label", locale)%></a>
-			                </div>
+								<input type="button"
+										value="<%=Util.i18n("page.login.2FACode.resend.label", locale)%>"
+										title="<%=Util.i18n("page.login.2FACode.resend.tooltip", locale)%>"
+										onclick="return submitResend(this.form)"
+										class="ui fluid basic large button" />
+							</div>
+							<div style="margin-top: 5px;">
+				                <a href="<%=Util.getBaseUrl()%>" title="<%=Util.i18n("page.login.2FACode.return.tooltip", locale)%>" class="ui fluid basic large button"><%=Util.i18n("page.login.2FACode.return.label", locale)%></a>
+				            </div>
 		                <% } %>
 		            </div>
 
@@ -324,6 +387,18 @@
 		            	<%-- javascript form validation is inserted here --%> 
 		            </div>
 		        </form>
+		        <% if (show2FA) { %>
+					<% if (resendSuccess) { %>
+						<div class="ui success message">
+							<p><%=Util.i18n("page.login.2FACode.resend.success", locale)%></p>
+						</div>
+					<% } %>
+					<% if (resendCooldown) { %>
+						<div class="ui warning message">
+							<p><%=Util.i18n("page.login.2FACode.resend.cooldown", locale)%></p>
+						</div>
+					<% } %>
+				<% } %>
 		        <% if (customer != null) { %>
 					<% if (allowRegistration) { %>
 						<div class="ui message">

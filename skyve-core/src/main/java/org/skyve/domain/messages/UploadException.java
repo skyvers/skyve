@@ -7,10 +7,21 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This class is used to store errors and warnings that occur during the upload process.
+ * Collects errors and warnings encountered during a Skyve data-import or file-upload operation.
+ *
+ * <p>Unlike most Skyve exceptions, {@code UploadException} is designed to be populated
+ * incrementally: the import processor adds {@link Problem} instances as it encounters
+ * issues, and the exception is thrown (or returned) only when processing is complete.
+ * This allows the UI to present a comprehensive problem report rather than halting on
+ * the first error.
+ *
+ * <p>At most 50 errors and 50 warnings are retained. Calling {@link #addError} after
+ * 50 errors have accumulated throws {@code this} immediately to halt further processing.
+ *
+ * <p>Each {@link Problem} records a "what" (description of the issue) and a "where"
+ * (cell reference, line number, or other location identifier).
  */
 public class UploadException extends SkyveException {
-
 	private static final long serialVersionUID = 4401759405779814684L;
 
 	// Errors keyed by where; 1 per cell reference is allowed
@@ -19,6 +30,9 @@ public class UploadException extends SkyveException {
 	// Warnings - any amount of these are allowed
 	private List<Problem> warnings = new ArrayList<>();
 
+	/**
+	 * Creates a new UploadException instance.
+	 */
 	public UploadException() {
 		super();
 	}
@@ -40,6 +54,10 @@ public class UploadException extends SkyveException {
 		return (! errors.isEmpty());
 	}
 
+	/**
+	 * Executes addErrors.
+	 * @param problems the problems
+	 */
 	public void addErrors(List<Problem> problems) {
 		for (Problem problem : problems) {
 			addError(problem);
@@ -140,6 +158,11 @@ public class UploadException extends SkyveException {
 			return error;
 		}
 		
+		/**
+		 * Compares this instance with the given value.
+		 * @param o the o
+		 * @return the result
+		 */
 		@Override
 		public int compareTo(Problem o) {
 			if (o == null) {
@@ -149,6 +172,11 @@ public class UploadException extends SkyveException {
 			return toString().compareTo(o.toString());
 		}
 
+		/**
+		 * Returns whether this instance is equal to the given object.
+		 * @param o the o
+		 * @return the result
+		 */
 		@Override
 		public boolean equals(Object o) {
 			if (o instanceof Problem p) {
@@ -158,11 +186,19 @@ public class UploadException extends SkyveException {
 			return false;
 		}
 		
+		/**
+		 * Returns whether hCode.
+		 * @return the result
+		 */
 		@Override
 		public int hashCode() {
 			return toString().hashCode();
 		}
 
+		/**
+		 * Returns a string representation of this instance.
+		 * @return the result
+		 */
 		@Override
 		public String toString() {
 			if (string == null) {

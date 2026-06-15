@@ -29,6 +29,7 @@ import org.primefaces.component.inputmask.InputMask;
 import org.primefaces.component.inputtext.InputText;
 import org.primefaces.component.inputtextarea.InputTextarea;
 import org.primefaces.component.linechart.LineChart;
+import org.primefaces.component.menubutton.MenuButton;
 import org.primefaces.component.menuitem.UIMenuItem;
 import org.primefaces.component.message.Message;
 import org.primefaces.component.outputlabel.OutputLabel;
@@ -189,6 +190,7 @@ import jakarta.faces.component.html.HtmlPanelGroup;
 import jakarta.faces.component.html.HtmlSelectOneMenu;
 import jakarta.faces.convert.Converter;
 
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate JSF component script/style fragments.
 public abstract class TabularComponentBuilder extends ComponentBuilder {
 	public static final String EMPTY_DATA_TABLE_CAN_ADD_MESSAGE = "No Items to show. Click <span class=\"" + Icons.FONT_ADD + " skyveEmptyListAddIcon\"></span> to add a new Item.";
 	public static final String EMPTY_DATA_TABLE_MESSAGE = "No Items to show.";
@@ -587,6 +589,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 							false);
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private HtmlOutputText outputText(String dataWidgetVar,
 										String value,
 										String binding,
@@ -850,6 +853,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public UIComponent addDataGridActionColumn(UIComponent component,
 												UIComponent current,
 												DataGrid grid,
@@ -1363,6 +1367,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		</p:dataTable>
 	*/
 	@Override
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	public UIComponent listGrid(UIComponent component,
 									String moduleName,
 									String modelDocumentName,
@@ -1571,6 +1576,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
     	return result;
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	protected void addDataTableSelection(DataTable table,
 										String selectedIdBinding,
 										List<EventAction> selectedActions,
@@ -1612,6 +1618,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
         table.addClientBehavior("rowSelect", ajax);
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	protected void addListGridDataColumns(ListModel<? extends Bean> model,
 											List<UIComponent> componentChildrenToAddTo,
 											boolean showFilter,
@@ -1823,7 +1830,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		else {
 			AttributeType type = columnAttribute.getAttributeType();
 			if (AttributeType.bool.equals(type)) {
-				TriStateCheckbox cb = (TriStateCheckbox) checkbox(null, null, null, null, null, null, true);
+				TriStateCheckbox cb = (TriStateCheckbox) checkBoxInput(null, null, null, null, null, null, true);
 				cb.setOnchange(String.format("PF('%s').filter()", tableVar));
 				result = cb;
 			}
@@ -1832,6 +1839,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	protected UIComponent createListGridActionColumn(String moduleName,
 													   String documentName,
 													   boolean canCreateDocument,
@@ -1987,6 +1995,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * No CRUD.
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public UIComponent listRepeater(UIComponent component,
 										String modelDocumentName,
 										String modelName,
@@ -2147,7 +2156,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			return component;
 		}
 
-		UIInput result = checkbox(dataWidgetVar,
+		UIInput result = checkBoxInput(dataWidgetVar,
 									checkBox.getBinding(),
 									title,
 									requiredMessage,
@@ -2219,7 +2228,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		HtmlPanelGrid result = (HtmlPanelGrid) a.createComponent(HtmlPanelGrid.COMPONENT_TYPE);
 		setId(result, null);
 		boolean showMarkup = (! Boolean.FALSE.equals(image.getShowMarkup()));
-		result.setColumns(showMarkup ? 6 : 5);
+		boolean editable = (! Boolean.FALSE.equals(image.getEditable()));
+		result.setColumns(editable ? 2 : 1);
 		String id = result.getId();
 		List<UIComponent> toAddTo = result.getChildren();
 
@@ -2236,7 +2246,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		// Set the id of the inner image element
 		contentImage.getChildren().get(0).setId(String.format("%s_%s_image", id, sanitisedBinding));
 		toAddTo.add(contentImage);
-		if (! Boolean.FALSE.equals(image.getEditable())) {
+		if (editable) {
 			editableContent(toAddTo,
 								id,
 								binding,
@@ -2270,7 +2280,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 		HtmlPanelGrid result = (HtmlPanelGrid) a.createComponent(HtmlPanelGrid.COMPONENT_TYPE);
 		setId(result, null);
-		result.setColumns(5);
+		boolean editable = (! Boolean.FALSE.equals(link.getEditable()));
+		result.setColumns(editable ? 2 : 1);
 		String id = result.getId();
 		List<UIComponent> toAddTo = result.getChildren();
 
@@ -2279,7 +2290,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		HtmlOutputLink contentLink = contentLink(link.getPixelWidth(), textAlignment, binding);
 		contentLink.setId(String.format("%s_%s_link", id, sanitisedBinding));
 		toAddTo.add(contentLink);
-		if (! Boolean.FALSE.equals(link.getEditable())) {
+		if (editable) {
 			editableContent(toAddTo,
 								id,
 								binding,
@@ -2484,6 +2495,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * @param toAddTo
 	 * @param binding
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private void editableContent(List<UIComponent> toAddTo,
 									String id,
 									String binding,
@@ -2495,23 +2507,36 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 									boolean showMarkup) {
 		HtmlInputHidden hidden = (HtmlInputHidden) input(HtmlInputHidden.COMPONENT_TYPE, null, binding, null, requiredMessage, null, null);
 		setId(hidden, String.format("%s_%s_hidden", id, sanitisedBinding));
-		toAddTo.add(hidden);
 
-		CommandButton uploadButton = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
-		setId(uploadButton, null);
-		String uploadButtonId = uploadButton.getId();
-		uploadButton.setIcon(Icons.FONT_UPLOAD);
-		uploadButton.setTitle(image ? "Upload Image" : "Upload Content");
-		uploadButton.setValue(null);
-		uploadButton.setType("button"); // no process or update required
-		setDisabled(uploadButton, disabledConditionName, formDisabledConditionName);
-		// for admin theme
-		setSizeAndTextAlignStyle(uploadButton, null, Integer.valueOf(30), null, null, Integer.valueOf(30), null, null);
-		toAddTo.add(uploadButton);
+		HtmlPanelGroup actionGroup = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
+		setId(actionGroup, null);
+		toAddTo.add(actionGroup);
+		List<UIComponent> actionGroupChildren = actionGroup.getChildren();
+		actionGroupChildren.add(hidden);
 
-		String var = sanitisedBinding + "Overlay";
+		MenuButton actionButton = (MenuButton) a.createComponent(MenuButton.COMPONENT_TYPE);
+		setId(actionButton, null);
+		String actionButtonId = actionButton.getId();
+		actionButton.setIcon("fa-solid fa-ellipsis-vertical");
+		actionButton.setTitle(image ? "Image Actions" : "Content Actions");
+		actionButton.setAriaLabel(image ? "Image Actions" : "Content Actions");
+		actionButton.setValue(null);
+		actionButton.setButtonStyle("width:30px;height:30px;text-align:center");
+		actionButton.setButtonStyleClass("skyveContentActionButton");
+		setDisabled(actionButton, disabledConditionName, formDisabledConditionName);
+		actionGroupChildren.add(actionButton);
+		List<UIComponent> actionItems = actionButton.getChildren();
+
+		UIMenuItem uploadItem = createContentMenuItem(image ? "Upload Image" : "Upload Content",
+														Icons.FONT_UPLOAD,
+														null,
+														disabledConditionName,
+														formDisabledConditionName);
+		actionItems.add(uploadItem);
+
+		String var = id + "_" + sanitisedBinding + "Overlay";
 		if (image) {
-			uploadButton.setOnclick("PF('" + var + "').show();PF('" + var + "').toggleMaximize()");
+			setContentUploadDialogOnclick(uploadItem, id, sanitisedBinding, var);
 		}
 
 		UIPanel panel = null;
@@ -2531,8 +2556,10 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		else {
 			OverlayPanel overlay = (OverlayPanel) a.createComponent(OverlayPanel.COMPONENT_TYPE);
 			setId(overlay, null);
-			overlay.setWidgetVar(sanitisedBinding + "Overlay");
-			overlay.setFor(uploadButtonId);
+			overlay.setWidgetVar(var);
+			overlay.setFor(actionButtonId);
+			overlay.setShowEvent("skyveContentUpload");
+			overlay.setHideEvent("skyveContentUpload");
 			overlay.setDynamic(false);
 			overlay.setShowCloseIcon(true);
 			overlay.setModal(false); // modal on PF8 causes the transparent modal mask to sit over the top of the overlay panel
@@ -2543,55 +2570,54 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			panel = overlay;
 		}
 
-		// $(PrimeFaces.escapeClientId('<id>')).attr('src', '<url>')
 		StringBuilder value = new StringBuilder(64);
-		value.append("#{'SKYVE.PF.contentOverlayOnShow(\\'").append(id).append("\\',\\''.concat(");
-		value.append(managedBeanName).append(".getContentUploadUrl('").append(sanitisedBinding).append("',");
-		value.append(image).append(")).concat('\\')')}");
-		panel.setValueExpression("onShow", ef.createValueExpression(elc, value.toString(), String.class));
-		toAddTo.add(panel);
+		if (! image) {
+			// $(PrimeFaces.escapeClientId('<id>')).attr('src', '<url>')
+			value.append("#{'SKYVE.PF.contentOverlayOnShow(\\'").append(id).append("\\',\\''.concat(");
+			value.append(managedBeanName).append(".getContentUploadUrl('").append(sanitisedBinding).append("',");
+			value.append(image).append(")).concat('\\')')}");
+			panel.setValueExpression("onShow", ef.createValueExpression(elc, value.toString(), String.class));
+			uploadItem.setOnclick("PF('" + var + "').show();return false");
+		}
+		actionGroupChildren.add(panel);
 
 		// <iframe id="s06" src="" style="width:100%;height:280px;border:none"></iframe>
 		HtmlOutputText iframe = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
 		iframe.setEscape(false);
-		iframe.setValue(String.format("<iframe id=\"%s_overlayiframe\" src=\"\" style=\"width:100%%;height:%s;border:none\"></iframe>", id, image ? "100%" : "300px"));
+		String iframeAttributes = image ? " scrolling=\"no\" style=\"width:100%;height:100%;border:none;overflow:hidden\""
+											: " style=\"width:100%;height:300px;border:none\"";
+		iframe.setValue(String.format("<iframe id=\"%s_overlayiframe\" src=\"\"%s></iframe>", id, iframeAttributes));
 		setId(iframe, null);
 		panel.getChildren().add(iframe);
 
-		CommandButton clearButton = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
-		setId(clearButton, null);
-		clearButton.setIcon(Icons.FONT_CLEAR);
-		clearButton.setTitle("Clear Content");
-		clearButton.setValue(null);
-		clearButton.setType("button"); // no process or update required
+		UIMenuItem clearItem = createContentMenuItem("Clear Content",
+														Icons.FONT_CLEAR,
+														null,
+														disabledConditionName,
+														formDisabledConditionName);
 		if (image) {
-			clearButton.setOnclick(String.format("SKYVE.PF.clearContentImage('%s')", sanitisedBinding));
+			clearItem.setOnclick(String.format("SKYVE.PF.clearContentImage('%s','%s');return false", sanitisedBinding, id));
 		}
 		else {
-			clearButton.setOnclick(String.format("SKYVE.PF.clearContentLink('%s')", sanitisedBinding));
+			clearItem.setOnclick(String.format("SKYVE.PF.clearContentLink('%s','%s');return false", sanitisedBinding, id));
 		}
-		setDisabled(clearButton, disabledConditionName, formDisabledConditionName);
-		// for admin theme
-		setSizeAndTextAlignStyle(clearButton, null, Integer.valueOf(30), null, null, Integer.valueOf(30), null, null);
-		toAddTo.add(clearButton);
+		actionItems.add(clearItem);
 		
 		// Markup button (if required)
 		if (showMarkup) {
-			CommandButton markupButton = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
-			setId(markupButton, null);
-			markupButton.setIcon(Icons.FONT_EDIT);
-			markupButton.setTitle("Mark Up Image");
-			markupButton.setValue(null);
-			markupButton.setType("button"); // no process or update required
-			setDisabled(markupButton, disabledConditionName, formDisabledConditionName);
-			// for admin theme
-			setSizeAndTextAlignStyle(markupButton, null, Integer.valueOf(30), null, null, Integer.valueOf(30), null, null);
-			toAddTo.add(markupButton);
+			UIMenuItem markupItem = createContentMenuItem("Mark Up Image",
+															Icons.FONT_EDIT,
+															null,
+															disabledConditionName,
+															formDisabledConditionName);
+			actionItems.add(markupItem);
 	
-			var = sanitisedBinding + "Markup";
+			var = id + "_" + sanitisedBinding + "Markup";
 			value.setLength(0);
-			value.append("if($('[id$=\"_").append(sanitisedBinding).append("_hidden\"]').val().length==0){return false}else{PF('" + var + "').show();PF('" + var + "').toggleMaximize()}"); 
-			markupButton.setOnclick(value.toString());
+			value.append("event.preventDefault();var contentId=$('[id$=\"").append(id).append('_').append(sanitisedBinding);
+			value.append("_hidden\"]').val();if(!contentId){return false}PF('").append(var);
+			value.append("').show();PF('").append(var).append("').toggleMaximize();return false");
+			markupItem.setOnclick(value.toString());
 	
 			Dialog dialog = (Dialog) a.createComponent(Dialog.COMPONENT_TYPE);
 			setId(dialog, null);
@@ -2609,7 +2635,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			value.append("#{'SKYVE.PF.contentMarkupOnShow(\\'").append(id).append("\\',\\'").append(sanitisedBinding).append("\\',\\''.concat(");
 			value.append(managedBeanName).append(".getContentMarkupUrl('").append(sanitisedBinding).append("')).concat('\\')')}");
 			dialog.setValueExpression("onShow", ef.createValueExpression(elc, value.toString(), String.class));
-			toAddTo.add(dialog);
+			actionGroupChildren.add(dialog);
 
 			// <iframe id="s06" src="" style="width:100%;height:280px;border:none"></iframe>
 			iframe = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
@@ -2618,6 +2644,33 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			setId(iframe, null);
 			dialog.getChildren().add(iframe);
 		}
+	}
+
+	private UIMenuItem createContentMenuItem(String value,
+												String icon,
+												@Nullable String onclick,
+												String disabledConditionName,
+												String formDisabledConditionName) {
+		UIMenuItem result = (UIMenuItem) a.createComponent(UIMenuItem.COMPONENT_TYPE);
+		setId(result, null);
+		result.setValue(value);
+		result.setIcon(icon);
+		result.setUrl("javascript:void(0)");
+		result.setAjax(false);
+		if (onclick != null) {
+			result.setOnclick(onclick);
+		}
+		setDisabled(result, disabledConditionName, formDisabledConditionName);
+		return result;
+	}
+
+	private void setContentUploadDialogOnclick(UIMenuItem item, String id, String sanitisedBinding, String var) {
+		StringBuilder value = new StringBuilder(192);
+		value.append("#{'SKYVE.PF.contentOverlayOnShow(\\'").append(id).append("\\',\\''.concat(");
+		value.append(managedBeanName).append(".getContentUploadUrl('").append(sanitisedBinding).append("',true)");
+		value.append(".concat('\\');PF(\\'").append(var);
+		value.append("\\').show();PF(\\'").append(var).append("\\').toggleMaximize();return false'))}");
+		item.setValueExpression("onclick", ef.createValueExpression(elc, value.toString(), String.class));
 	}
 
 	@Override
@@ -2832,7 +2885,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			double range = max.doubleValue() - min.doubleValue();
 			double step = range / numberOfDiscreteValues.doubleValue();
 			if (precision != null) {
-				step = new BigDecimal(step).setScale(precision.intValue(), RoundingMode.HALF_UP).doubleValue();
+				step = BigDecimal.valueOf(step).setScale(precision.intValue(), RoundingMode.HALF_UP).doubleValue();
 			}
 			sliderComponent.setStep(step);
 		}
@@ -3207,6 +3260,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 	
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	protected Password password(String dataWidgetVar,
 									String binding,
 									String title,
@@ -3229,6 +3283,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	protected InputText textField(String dataWidgetVar,
 									String binding,
 									String title,
@@ -3267,6 +3322,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private InputMask maskField(String dataWidgetVar,
 									String binding,
 									String title,
@@ -3363,6 +3419,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private Spinner spinner(String dataWidgetVar,
 								String binding,
 								String title,
@@ -3402,6 +3459,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
+	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
 	private DatePicker datePicker(String dataWidgetVar,
 									String binding,
 									String title,
@@ -3652,6 +3710,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	protected InputTextarea textArea(String dataWidgetVar,
 										String binding,
 										String title,
@@ -3680,6 +3739,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
+	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
 	protected CommandButton actionButton(String title,
 											String iconStyleClass,
 											String tooltip,
@@ -3804,6 +3864,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * Create a button with a href URL that looks like...
 	 * http://localhost:8080/skyve/report/Bum.html?_f=html&_c=<webId>&_id=<id>&wee=poo&_n=Bum&_mod=<module>&_doc=<document>
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private Button reportButton(String title,
 									String iconStyleClass,
 									String tooltip,
@@ -3872,6 +3933,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * Create a command button that redirects to a URL that looks like...
 	 * http://localhost:8080/skyve/download?_n=<downloadAction>&_doc=<module>.<document>&_c=<webId>&_b=<form binding>&_ctim=<currentTimeInMillis>
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private CommandButton downloadButton(String title,
 											String iconStyleClass,
 											String tooltip,
@@ -3913,6 +3975,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 *					<iframe id="s01_overlayiframe" src="/skyve/contentUpload.xhtml" style="width:100%;height:280px;border:none"></iframe>
 	 *			    </p:overlayPanel>
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	protected UIComponent uploadButton(String title,
 										String iconStyleClass,
 										String tooltip,
@@ -4005,6 +4068,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	protected CommandLink downloadLink(String title,
 										String tooltip,
 										String actionName,
@@ -4036,6 +4100,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	protected CommandLink actionLink(String title,
 										String tooltip,
 										ImplicitActionName implicitActionName,
@@ -4105,6 +4170,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		command.setActionExpression(methodExpressionForAction(implicitActionName, actionName, collectionBinding, dataWidgetVar, inline, eventHandlerActionNames));
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private Button linkButton(String icon,
 								String styleClass,
 								String style,
@@ -4264,7 +4330,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 	// TODO do the grids
 
-	protected UIInput checkbox(String dataWidgetVar,
+	protected UIInput checkBoxInput(String dataWidgetVar,
 								String binding,
 								String title,
 								@Nullable String requiredMessage,
@@ -4286,6 +4352,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return input(SelectBooleanCheckbox.COMPONENT_TYPE, dataWidgetVar, binding, title, requiredMessage, disabled, formDisabled);
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	protected ColorPicker colourPicker(String dataWidgetVar,
 										String binding,
 										String title,
@@ -4324,6 +4391,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		// The control sets its width by default based on the font metrics of the drop-down values.
 		// Note: We can't set text alignment of a selectOneMenu easily through inline styling
 		setSizeAndTextAlignStyle(result, null, pixelWidth, null, null, null, null, null);
+		result.setFilter(true);
+		result.setFilterMatchMode("contains");
+		result.setFilterPlaceholder("Search");
 		result.setConverter(new SelectItemsBeanConverter());
 		return result;
 	}
@@ -4352,6 +4422,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	protected AutoComplete lookupDescription(String dataWidgetVar,
 												String binding,
 												String title,
@@ -4420,6 +4491,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	protected AutoComplete complete(String dataWidgetVar,
 										String binding,
 										String title,
@@ -4524,6 +4596,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private DataTable dataTable(String binding,
 									String dataWidgetVar,
 									String invisible,

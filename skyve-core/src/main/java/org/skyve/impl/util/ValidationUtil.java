@@ -47,12 +47,30 @@ import org.skyve.util.BeanVisitor;
 import org.skyve.util.Util;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
+/**
+ * Validates domain object attributes, required fields, uniqueness constraints,
+ * and field-level format rules, collecting violations into a
+ * {@link org.skyve.domain.messages.ValidationException}.
+ *
+ * <p>The main entry points are:
+ * <ul>
+ *   <li>{@link #validateBeanAgainstDocument} — validates a single bean against its
+ *       document metadata (required, format, range, uniqueness).
+ *   <li>{@link #validateBeanAgainstBizlet} — delegates to the document's
+ *       {@link org.skyve.metadata.model.document.Bizlet#validate} callback.
+ * </ul>
+ *
+ * <p>Complexity: validation traverses the document's attribute list (O(a)) and may
+ * issue uniqueness queries against the persistence layer (O(u) queries, one per unique
+ * constraint). Avoid calling this in tight loops.
+ */
 public class ValidationUtil {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ValidationUtil.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ValidationUtil.class);
     private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
+
+    private static final String VALIDATION_FAILED_FOR_BEAN = "Validation Failed for bean {}";
 
 	private ValidationUtil() {
 		// no implementation
@@ -88,7 +106,7 @@ public class ValidationUtil {
 		}
 
 		if (! e.getMessages().isEmpty()) {
-			LOGGER.warn("Validation Failed for bean {}", bean);
+			LOGGER.warn(VALIDATION_FAILED_FOR_BEAN, bean);
 			throw e;
 		}
 	}
@@ -101,7 +119,7 @@ public class ValidationUtil {
 	 * @param bean The bean to validate
 	 * @param e The exception to populate
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "java:S3776"}) // Complexity OK
 	public static void validateBeanPropertyAgainstAttribute(User user, Attribute attribute, Bean bean, ValidationException e) {
 		String binding = attribute.getName();
 		AttributeType type = attribute.getAttributeType();
@@ -279,7 +297,7 @@ public class ValidationUtil {
 				// ok, we've passed validation from the 2 calls above...
 				// now, only set the newValue back on the bean if it was a reformatted string,
 				// otherwise its another type that is just displayed a certain way
-				if ((value instanceof String) && (newValue instanceof String)) {
+				if ((value instanceof String v) && (newValue instanceof String nv) && (! v.equals(nv))) {
 					BindUtil.set(bean, binding, newValue);
 				}
 			}
@@ -298,8 +316,8 @@ public class ValidationUtil {
 			result = BindUtil.get(bean, binding);
 		}
 		catch (Exception e) {
-			e.printStackTrace();
-			LOGGER.warn("Validation Failed for bean {}", bean);
+			LOGGER.error(e.getMessage(), e);
+			LOGGER.warn(VALIDATION_FAILED_FOR_BEAN, bean);
 			throw new ValidationException(new Message(binding, Util.nullSafeI18n(BeanValidator.VALIDATION_ACCESS_KEY)));
 		}
 
@@ -343,14 +361,14 @@ public class ValidationUtil {
 			}
 		}
 		catch (Exception ex) {
-			ex.printStackTrace();
+			LOGGER.error(ex.getMessage(), ex);
 			e.getMessages().add(new Message("An error occurred processing " + 
 												bizlet.getClass().getName() +
 												".validate() - See stack trace in log"));
 		}
 
 		if (! e.getMessages().isEmpty()) {
-			LOGGER.warn("Validation Failed for bean {}", bean);
+			LOGGER.warn(VALIDATION_FAILED_FOR_BEAN, bean);
 			throw e;
 		}
 	}
@@ -392,6 +410,7 @@ public class ValidationUtil {
 		}.visit(masterDocument, masterBean, customer);
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static void checkCollectionUniqueConstraints(Customer customer, Document document, Bean bean) {
 		try {
 			for (Attribute attribute : document.getAllAttributes(customer)) {
@@ -417,7 +436,7 @@ public class ValidationUtil {
 										message = BindUtil.formatMessage(constraint.getMessage(), element);
 									}
 									catch (Exception ex) {
-										ex.printStackTrace();
+										LOGGER.error(ex.getMessage(), ex);
 										message = "Unique Constraint Violation occurred on collection " + referenceName +
 													" but could not display the unique constraint message for constraint " +
 													constraint.getName();
@@ -435,12 +454,12 @@ public class ValidationUtil {
 			}
 		}
 		catch (UniqueConstraintViolationException ve) {
-			LOGGER.warn("Validation Failed for bean {}", bean);
+			LOGGER.warn(VALIDATION_FAILED_FOR_BEAN, bean);
 			throw ve;
 		}
 		catch (Exception ex) {
-			ex.printStackTrace();
-			LOGGER.warn("Validation Failed for bean {}", bean);
+			LOGGER.error(ex.getMessage(), ex);
+			LOGGER.warn(VALIDATION_FAILED_FOR_BEAN, bean);
 			throw new ValidationException(new Message("An error occurred checking collection unique constraints. - See stack trace in log"));
 		}
 	}

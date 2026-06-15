@@ -10,13 +10,30 @@ import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
- * A list of related document instances.
+ * A to-many relational attribute linking a document to a list of related document instances.
+ *
+ * <p>Collections come in three flavours declared by {@link CollectionType}:
+ * <ul>
+ *   <li>{@link CollectionType#child child} — a composition where the child document holds
+ *       a direct foreign key back to the parent; child rows are cascade-deleted.</li>
+ *   <li>{@link CollectionType#composition composition} — a composition with a joining table;
+ *       joining rows and child beans are cascade-deleted.</li>
+ *   <li>{@link CollectionType#aggregation aggregation} — a joining table without
+ *       cascade-delete of the referenced beans.</li>
+ * </ul>
+ *
+ * <p>An ordered collection ({@link #getOrdered()} returning {@code true}) maintains an
+ * explicit {@code bizOrdinal} column that records the user-defined element order.
+ *
+ * @see Association
+ * @see Inverse
  */
 public interface Collection extends Reference {
 	/**
 	 * The type (database structure and behaviour) of a collection.
 	 */
 	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+	@SuppressWarnings("java:S115") // Suppress "Constant names should comply with a naming convention" as these are not constants but enum values
 	public enum CollectionType implements ReferenceType {
 		/**
 		 * Composition relationship to a child document - child points back to parent.

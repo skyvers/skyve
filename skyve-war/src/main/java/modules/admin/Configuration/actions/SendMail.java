@@ -10,8 +10,17 @@ import org.skyve.web.WebContext;
 import modules.admin.Configuration.ConfigurationExtension;
 import modules.admin.domain.Contact;
 
+/**
+ * Sends a test email using the current system mail configuration.
+ */
 public class SendMail implements ServerSideAction<ConfigurationExtension> {
-
+	/**
+	 * Performs the execute operation.
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public ServerSideActionResult<ConfigurationExtension> execute(ConfigurationExtension bean, WebContext webContext)
 	throws Exception {
@@ -22,7 +31,8 @@ public class SendMail implements ServerSideAction<ConfigurationExtension> {
 				emailTo = emailToContact.getEmail1();
 			}
 			if (emailTo != null) {
-				EXT.sendMail(new Mail()
+				EXT.getMailService()
+						.sendMail(new Mail()
 									.addTo(emailTo)
 									.from(bean.getEmailFrom())
 									.subject(bean.getEmailSubject())

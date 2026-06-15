@@ -13,11 +13,20 @@ import org.skyve.domain.types.Decimal5;
 public class TimeDurationFormatter implements Formatter<Decimal> {
 	private static final MathContext MATH_CONTEXT = new MathContext(4, RoundingMode.HALF_UP);
 
+	/**
+	 * Returns the valueType.
+	 * @return the result
+	 */
 	@Override
 	public Class<Decimal> getValueType() {
 		return Decimal.class;
 	}
 	
+	/**
+	 * Executes toDisplayValue.
+	 * @param value the value
+	 * @return the result
+	 */
 	@Override
 	public String toDisplayValue(Decimal value) {
 		BigDecimal decimalValue = value.bigDecimalValue();

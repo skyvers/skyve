@@ -13,26 +13,42 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletResponse;
 
+/**
+ * Filters inbound or outbound requests before downstream web processing.
+ */
 public class ResponseHeaderFilter implements Filter {
 	public static final String SECURITY_HEADERS_FILTER_NAME = "SecurityHeadersFilter";
-	private static FilterConfig SECURITY_HEADERS_FILTER_CONFIG = null;
+	private static FilterConfig securityHeadersFilterConfig = null;
 	
 	private FilterConfig fc;
 
+	/**
+	 * Captures filter configuration and tracks the dedicated security-headers filter instance.
+	 *
+	 * @param config filter configuration containing response header settings
+	 * @throws ServletException when filter initialization fails
+	 */
 	@Override
 	public void init(FilterConfig config) throws ServletException {
 		if (SECURITY_HEADERS_FILTER_NAME.equals(config.getFilterName())) {
-			SECURITY_HEADERS_FILTER_CONFIG = config;
+			setSecurityHeadersFilterConfig(config);
 		}
 		fc = config;
 	}
 
+	/**
+	 * Clears cached filter configuration references on shutdown.
+	 */
 	@Override
 	public void destroy() {
 		if (SECURITY_HEADERS_FILTER_NAME.equals(fc.getFilterName())) {
-			SECURITY_HEADERS_FILTER_CONFIG = null;
+			setSecurityHeadersFilterConfig(null);
 		}
 		fc = null;
+	}
+
+	private static void setSecurityHeadersFilterConfig(FilterConfig config) {
+		securityHeadersFilterConfig = config;
 	}
 
 	@Override
@@ -75,6 +91,8 @@ public class ResponseHeaderFilter implements Filter {
 	 * @param httpResponse	The response to apply the headers to.
 	 */
 	public static void applySecurityHeaders(HttpServletResponse httpResponse) {
-		applyHeaders(SECURITY_HEADERS_FILTER_CONFIG, httpResponse);
+		if (securityHeadersFilterConfig != null) {
+			applyHeaders(securityHeadersFilterConfig, httpResponse);
+		}
 	}
 }

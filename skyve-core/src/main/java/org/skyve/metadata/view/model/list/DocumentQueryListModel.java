@@ -218,8 +218,7 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 								SortedMap<String, Object> properties, 
 								Document drivingDocument,
 								MetaDataQueryDefinition query,
-								String selectedTagId)
-	throws Exception {
+								String selectedTagId) {
 		Persistence p = CORE.getPersistence();
 		PersistentBean bean = p.retrieveAndLock(drivingDocument, bizId);
 		BindUtil.populateProperties(p.getUser(), bean, properties, true);

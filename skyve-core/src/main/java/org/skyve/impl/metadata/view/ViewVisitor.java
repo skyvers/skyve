@@ -83,11 +83,24 @@ import org.skyve.metadata.view.Invisible;
 import org.skyve.metadata.view.widget.bound.Bound;
 import org.skyve.util.Binder.TargetMetaData;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
+/**
+ * Abstract visitor that traverses the full widget and action tree of a
+ * {@link ViewImpl}, visiting every widget type and every action.
+ *
+ * <p>Subclasses override the relevant {@code visit*} methods for the widget
+ * types they care about.  Use {@link NoOpViewVisitor} to inherit empty
+ * implementations and override only the needed methods.
+ *
+ * <p>Threading: not thread-safe; one instance per traversal.
+ *
+ * @see ActionVisitor
+ * @see NoOpViewVisitor
+ */
 public abstract class ViewVisitor extends ActionVisitor {
 	// NB An instance member LOGGER is OK here as this is not Serializable
-    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    protected final Logger LOGGER = SkyveLoggerFactory.getLogger(getClass());
 
 	protected CustomerImpl customer;
 	protected ModuleImpl module;
@@ -469,6 +482,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 		return true;
 	}
 
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	private void visitWidget(MetaData widget, 
 								boolean parentVisible,
 								boolean parentEnabled) {
@@ -755,6 +769,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 		}
 	}
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void visitContainer(Container container, 
 									boolean parentVisible,
 									boolean parentEnabled) {
@@ -805,6 +820,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 		}
 	}
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void visitDataWidgetColumns(AbstractDataWidget widget,
 											String widgetBindingPrefix,
 											boolean widgetVisible,

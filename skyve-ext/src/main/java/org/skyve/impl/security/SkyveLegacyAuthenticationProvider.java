@@ -12,7 +12,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.skyve.EXT;
 import org.skyve.util.Util;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
@@ -20,12 +20,25 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 
+/**
+ * Authenticates users against legacy hashed-password storage using direct SQL lookup.
+ */
 public class SkyveLegacyAuthenticationProvider implements AuthenticationProvider {
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SkyveLegacyAuthenticationProvider.class);
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SkyveLegacyAuthenticationProvider.class);
-
+	/**
+	 * SQL statement used to retrieve a user's stored hashed password by username.
+	 */
 	private String hashedPasswordSql;
 	
+	/**
+	 * Authenticates supplied credentials by hashing the presented password and comparing against
+	 * the configured user-password query result.
+	 *
+	 * @param authentication The authentication request.
+	 * @return An authenticated token when credentials are valid.
+	 * @throws AuthenticationException If the credentials are invalid or authentication cannot be completed.
+	 */
 	@Override
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 		String name = authentication.getName();
@@ -84,6 +97,12 @@ public class SkyveLegacyAuthenticationProvider implements AuthenticationProvider
 		return result;
 	}
 
+	/**
+	 * Indicates whether this provider can process the supplied authentication token type.
+	 *
+	 * @param authentication The authentication token class.
+	 * @return {@code true}, as this provider accepts all authentication types.
+	 */
 	@Override
 	public boolean supports(Class<?> authentication) {
 		// NB - will implement all authentication mechanisms over time but for now
@@ -91,10 +110,20 @@ public class SkyveLegacyAuthenticationProvider implements AuthenticationProvider
 		return true;
 	}
 	
+	/**
+	 * Returns the configured SQL query used to look up stored password hashes.
+	 *
+	 * @return The configured password-hash lookup SQL.
+	 */
 	public String getHashedPasswordSql() {
 		return hashedPasswordSql;
 	}
 	
+	/**
+	 * Sets the SQL query used to retrieve a stored password hash for a username.
+	 *
+	 * @param hashedPasswordSql The password-hash lookup SQL.
+	 */
 	public void setHashedPasswordSql(String hashedPasswordSql) {
 		this.hashedPasswordSql = hashedPasswordSql;
 	}

@@ -12,9 +12,12 @@ import java.util.Date;
 
 import org.apache.commons.io.FilenameUtils;
 import org.skyve.util.FileUtil;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+
+import org.slf4j.Logger;
 
 /**
  * Represents an attachment stored in a content document attribute.
@@ -23,6 +26,7 @@ import jakarta.annotation.Nullable;
  */
 public class AttachmentContent extends Content {
 	private static final long serialVersionUID = 5929667528318345993L;
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(AttachmentContent.class);
 
 	private String attributeName;
 	private String contentId;
@@ -59,9 +63,9 @@ public class AttachmentContent extends Content {
 	 * @param bytes Content bytes to attach.
 	 * @return this content instance
 	 */
-	public AttachmentContent attachment(@SuppressWarnings("hiding") @Nullable String fileName,
-											@Nonnull MimeType mimeType,
-											@SuppressWarnings("hiding") @Nonnull byte[] bytes) {
+	public @Nonnull AttachmentContent attachment(@SuppressWarnings("hiding") @Nullable String fileName,
+													@Nonnull MimeType mimeType,
+													@SuppressWarnings("hiding") @Nonnull byte[] bytes) {
 		return internalAttachment(fileName, mimeType.toString(), bytes, null);
 	}
 	
@@ -73,9 +77,9 @@ public class AttachmentContent extends Content {
 	 * @param file File to attach.
 	 * @return this content instance
 	 */
-	public AttachmentContent attachment(@SuppressWarnings("hiding") @Nullable String fileName,
-											@Nonnull MimeType mimeType,
-											@SuppressWarnings("hiding") @Nonnull File file) {
+	public @Nonnull AttachmentContent attachment(@SuppressWarnings("hiding") @Nullable String fileName,
+													@Nonnull MimeType mimeType,
+													@SuppressWarnings("hiding") @Nonnull File file) {
 		return internalAttachment(fileName, mimeType.toString(), null, file);
 	}
 	
@@ -87,7 +91,7 @@ public class AttachmentContent extends Content {
 	 * @param bytes Content bytes to attach.
 	 * @return this content instance
 	 */
-	public AttachmentContent attachment(@SuppressWarnings("hiding") @Nullable String fileName,
+	public @Nonnull AttachmentContent attachment(@SuppressWarnings("hiding") @Nullable String fileName,
 											@SuppressWarnings("hiding") @Nonnull String contentType,
 											@SuppressWarnings("hiding") @Nonnull byte[] bytes) {
 		return internalAttachment(fileName, contentType, bytes, null);
@@ -101,9 +105,9 @@ public class AttachmentContent extends Content {
 	 * @param file File to attach.
 	 * @return this content instance
 	 */
-	public AttachmentContent attachment(@SuppressWarnings("hiding") @Nullable String fileName,
-											@SuppressWarnings("hiding") @Nonnull String contentType,
-											@SuppressWarnings("hiding") @Nonnull File file) {
+	public @Nonnull AttachmentContent attachment(@SuppressWarnings("hiding") @Nullable String fileName,
+													@SuppressWarnings("hiding") @Nonnull String contentType,
+													@SuppressWarnings("hiding") @Nonnull File file) {
 		return internalAttachment(fileName, contentType, null, file);
 	}
 	
@@ -114,8 +118,8 @@ public class AttachmentContent extends Content {
 	 * @param bytes Content bytes to attach.
 	 * @return this content instance
 	 */
-	public AttachmentContent attachment(@Nonnull String fileNameWithStandardSuffix,
-											@SuppressWarnings("hiding") @Nonnull byte[] bytes) {
+	public @Nonnull AttachmentContent attachment(@Nonnull String fileNameWithStandardSuffix,
+													@SuppressWarnings("hiding") @Nonnull byte[] bytes) {
 		return internalAttachment(fileNameWithStandardSuffix, null, bytes, null);
 	}
 	
@@ -126,8 +130,8 @@ public class AttachmentContent extends Content {
 	 * @param file File to attach.
 	 * @return this content instance
 	 */
-	public AttachmentContent attachment(@Nonnull String fileNameWithStandardSuffix,
-											@SuppressWarnings("hiding") @Nonnull File file) {
+	public @Nonnull AttachmentContent attachment(@Nonnull String fileNameWithStandardSuffix,
+													@SuppressWarnings("hiding") @Nonnull File file) {
 		return internalAttachment(fileNameWithStandardSuffix, null, null, file);
 	}
 
@@ -140,10 +144,10 @@ public class AttachmentContent extends Content {
 	 * @param newFile File to attach.
 	 * @return this content instance
 	 */
-	private AttachmentContent internalAttachment(@Nullable String newFileName,
-											@Nullable String newContentType,
-											@Nullable byte[] newBytes,
-											@Nullable File newFile) {
+	private @Nonnull AttachmentContent internalAttachment(@Nullable String newFileName,
+															@Nullable String newContentType,
+															@Nullable byte[] newBytes,
+															@Nullable File newFile) {
 		fileName = newFileName;
 		contentType = newContentType;
 
@@ -189,7 +193,7 @@ public class AttachmentContent extends Content {
 	 * @param markup Markup to apply.
 	 * @return this content instance
 	 */
-	public AttachmentContent markup(@SuppressWarnings("hiding") @Nullable String markup) {
+	public @Nonnull AttachmentContent markup(@SuppressWarnings("hiding") @Nullable String markup) {
 		this.markup = markup;
 		return this;
 	}
@@ -202,7 +206,7 @@ public class AttachmentContent extends Content {
 	 * @param externalAbsoluteFilePath External absolute file path.
 	 * @return this content instance
 	 */
-	public AttachmentContent externalAbsoluteFilePath(@SuppressWarnings("hiding") @Nullable String externalAbsoluteFilePath) {
+	public @Nonnull AttachmentContent externalAbsoluteFilePath(@SuppressWarnings("hiding") @Nonnull String externalAbsoluteFilePath) {
 		this.externalAbsoluteFilePath = externalAbsoluteFilePath;
 		File newFile = new File(externalAbsoluteFilePath);
 		if (newFile.exists() && newFile.isFile()) {
@@ -219,7 +223,7 @@ public class AttachmentContent extends Content {
 	 *
 	 * @return attribute name
 	 */
-	public final String getAttributeName() {
+	public final @Nonnull String getAttributeName() {
 		return attributeName;
 	}
 	
@@ -228,7 +232,7 @@ public class AttachmentContent extends Content {
 	 *
 	 * @param attributeName Attribute name
 	 */
-	public final void setAttributeName(String attributeName) {
+	public final void setAttributeName(@Nonnull String attributeName) {
 		this.attributeName = attributeName;
 	}
 	
@@ -237,7 +241,7 @@ public class AttachmentContent extends Content {
 	 *
 	 * @return a unique identifier or null if this has not yet been put in the content repository.
 	 */
-	public final String getContentId() {
+	public final @Nullable String getContentId() {
 		return contentId;
 	}
 	
@@ -246,7 +250,7 @@ public class AttachmentContent extends Content {
 	 *
 	 * @param contentId Content identifier
 	 */
-	public final void setContentId(String contentId) {
+	public final void setContentId(@Nullable String contentId) {
 		this.contentId = contentId;
 	}
 
@@ -255,7 +259,7 @@ public class AttachmentContent extends Content {
 	 *
 	 * @return external absolute file path
 	 */
-	public final String getExternalAbsoluteFilePath() {
+	public final @Nullable String getExternalAbsoluteFilePath() {
 		return externalAbsoluteFilePath;
 	}
 
@@ -264,7 +268,7 @@ public class AttachmentContent extends Content {
 	 *
 	 * @param externalAbsoluteFilePath External absolute file path
 	 */
-	public final void setExternalAbsoluteFilePath(String externalAbsoluteFilePath) {
+	public final void setExternalAbsoluteFilePath(@Nullable String externalAbsoluteFilePath) {
 		this.externalAbsoluteFilePath = externalAbsoluteFilePath;
 	}
 
@@ -273,7 +277,7 @@ public class AttachmentContent extends Content {
 	 *
 	 * @return file name
 	 */
-	public final String getFileName() {
+	public final @Nullable String getFileName() {
 		return fileName;
 	}
 
@@ -282,7 +286,7 @@ public class AttachmentContent extends Content {
 	 *
 	 * @param fileName File name
 	 */
-	public final void setFileName(String fileName) {
+	public final void setFileName(@Nullable String fileName) {
 		this.fileName = fileName;
 	}
 	
@@ -300,7 +304,7 @@ public class AttachmentContent extends Content {
 	 *
 	 * @return content type
 	 */
-	public final String getContentType() {
+	public final @Nullable String getContentType() {
 		return contentType;
 	}
 	
@@ -309,7 +313,7 @@ public class AttachmentContent extends Content {
 	 *
 	 * @param contentType Content type
 	 */
-	public final void setContentType(String contentType) {
+	public final void setContentType(@Nullable String contentType) {
 		this.contentType = contentType;
 	}
 	
@@ -318,7 +322,7 @@ public class AttachmentContent extends Content {
 	 *
 	 * @return last modified date
 	 */
-	public final Date getLastModified() {
+	public final @Nullable Date getLastModified() {
 		return lastModified;
 	}
 	
@@ -327,7 +331,7 @@ public class AttachmentContent extends Content {
 	 *
 	 * @param lastModified Last modified date
 	 */
-	public final void setLastModified(Date lastModified) {
+	public final void setLastModified(@Nullable Date lastModified) {
 		this.lastModified = lastModified;
 	}
 	
@@ -336,7 +340,7 @@ public class AttachmentContent extends Content {
 	 *
 	 * @return markup
 	 */
-	public String getMarkup() {
+	public @Nullable String getMarkup() {
 		return markup;
 	}
 	
@@ -345,7 +349,7 @@ public class AttachmentContent extends Content {
 	 *
 	 * @param markup Markup to apply
 	 */
-	public void setMarkup(String markup) {
+	public void setMarkup(@Nullable String markup) {
 		this.markup = markup;
 	}
 
@@ -356,7 +360,7 @@ public class AttachmentContent extends Content {
 	 *
 	 * @param bizCustomer Customer identifier
 	 */
-	public final void setBizCustomer(String bizCustomer) {
+	public final void setBizCustomer(@Nonnull String bizCustomer) {
 		this.bizCustomer = bizCustomer;
 	}
 
@@ -365,7 +369,7 @@ public class AttachmentContent extends Content {
 	 *
 	 * @param bizModule Module identifier
 	 */
-	public final void setBizModule(String bizModule) {
+	public final void setBizModule(@Nonnull String bizModule) {
 		this.bizModule = bizModule;
 	}
 	
@@ -374,7 +378,7 @@ public class AttachmentContent extends Content {
 	 *
 	 * @param bizDocument Document identifier
 	 */
-	public final void setBizDocument(String bizDocument) {
+	public final void setBizDocument(@Nonnull String bizDocument) {
 		this.bizDocument = bizDocument;
 	}
 	
@@ -383,7 +387,7 @@ public class AttachmentContent extends Content {
 	 *
 	 * @param bizDataGroupId Data group identifier
 	 */
-	public final void setBizDataGroupId(String bizDataGroupId) {
+	public final void setBizDataGroupId(@Nullable String bizDataGroupId) {
 		this.bizDataGroupId = bizDataGroupId;
 	}
 	
@@ -392,7 +396,7 @@ public class AttachmentContent extends Content {
 	 *
 	 * @param bizUserId User identifier
 	 */
-	public final void setBizUserId(String bizUserId) {
+	public final void setBizUserId(@Nonnull String bizUserId) {
 		this.bizUserId = bizUserId;
 	}
 
@@ -404,7 +408,8 @@ public class AttachmentContent extends Content {
 	 *
 	 * @return content stream
 	 */
-	public final InputStream getContentStream() {
+	@SuppressWarnings("resource") // Caller owns and must close the returned stream.
+	public final @Nonnull InputStream getContentStream() {
 		if (file == null) {
 			return new ByteArrayInputStream(bytes);
 		}
@@ -416,6 +421,23 @@ public class AttachmentContent extends Content {
 			return new ByteArrayInputStream(new byte[0]);
 		}
 	}
+
+	/**
+	 * Returns the number of bytes available from the current content source without
+	 * materialising file-backed content into memory.
+	 *
+	 * <p>Side effects: none. For file-backed content this delegates to
+	 * {@link java.io.File#length()} and does not open the file or populate the cached
+	 * byte array used by {@link #getContentBytes()}.
+	 *
+	 * @return the byte length, or {@code -1} when no content source is attached
+	 */
+	public final long getContentLength() {
+		if (file != null) {
+			return file.length();
+		}
+		return (bytes == null) ? -1L : bytes.length;
+	}
 	
 	/**
 	 * Read the content bytes, loading from the content stream if needed.
@@ -423,7 +445,7 @@ public class AttachmentContent extends Content {
 	 * @return content bytes
 	 * @throws IOException if the stream cannot be read
 	 */
-	public final byte[] getContentBytes() throws IOException {
+	public final @Nonnull byte[] getContentBytes() throws IOException {
 		if (bytes == null) {
 			try (InputStream is = getContentStream()) {
 				bytes = FileUtil.bytes(is);
@@ -439,7 +461,7 @@ public class AttachmentContent extends Content {
 	 *
 	 * @return A clone of the content with zero bytes and no file for remote transmission.
 	 */
-	public AttachmentContent cloneForRemoteUpdate() {
+	public @Nonnull AttachmentContent cloneForRemoteUpdate() {
 		AttachmentContent result = new AttachmentContent(bizCustomer,
 															bizModule,
 															bizDocument,
@@ -461,7 +483,7 @@ public class AttachmentContent extends Content {
 	 *
 	 * @return A clone of the content linked to its existing file or bytes but with no contentId.
 	 */
-	public AttachmentContent cloneNewForPut() {
+	public @Nonnull AttachmentContent cloneNewForPut() {
 		AttachmentContent result = new AttachmentContent(bizCustomer,
 															bizModule,
 															bizDocument,
@@ -486,13 +508,13 @@ public class AttachmentContent extends Content {
 	 * @return this
 	 * @throws ObjectStreamException if serialization fails
 	 */
-	private Object writeReplace() throws ObjectStreamException {
+	private @Nonnull Object writeReplace() throws ObjectStreamException {
 		try {
 			getContentBytes();
 			file = null;
 		}
 		catch (IOException e) {
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 			throw new InvalidObjectException(e.getLocalizedMessage());
 		}
 		return this;

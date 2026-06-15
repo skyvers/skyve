@@ -1,6 +1,7 @@
 package org.skyve.toolchain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -314,7 +315,7 @@ class NewServiceMojoTest {
      * - Method should not throw exception but log a warning
      */
     @Test
-    void testCreateServiceClassWithInvalidDirectory() throws Exception {
+    void testCreateServiceClassWithInvalidDirectory() {
         // Set an invalid srcDir that doesn't exist
         ReflectionTestUtils.setField(mojo, "srcDir", "/nonexistent/directory");
         
@@ -323,6 +324,7 @@ class NewServiceMojoTest {
         
         // The method should complete without throwing an exception
         // The actual file creation would fail, but the method handles the IOException gracefully
+        assertNotNull(mojo);
     }
     
     /**
@@ -337,7 +339,7 @@ class NewServiceMojoTest {
      * - Service class creation works when called from another Mojo
      */
     @Test
-    void testNewServiceMojoCanBeUsedByOtherMojos() throws Exception {
+    void testNewServiceMojoCanBeUsedByOtherMojos() {
         // Create a new instance (simulating how NewScaffoldedDocumentMojo would use it)
         NewServiceMojo serviceMojo = new NewServiceMojo();
         

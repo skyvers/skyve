@@ -29,9 +29,18 @@ package org.skyve.impl.content.elastic;
 //import org.skyve.impl.util.UtilImpl;
 //import org.skyve.util.Util;
 
+/**
+ * Holds utility operations for the legacy Elasticsearch integration.
+ *
+ * <p>Most helper routines are intentionally retained as commented reference code while
+ * Elasticsearch integration remains disabled.
+ */
 public class ElasticUtil {
 //	private static final String CLUSTER_NAME = "SKYVE_CONTENT";
 
+	/**
+	 * Prevents utility-class instantiation.
+	 */
 	private ElasticUtil() {
 		// disallow instantiation
 	}

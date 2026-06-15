@@ -33,6 +33,13 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.web.UserAgentType;
 
+/**
+ * Entry point for SAIL test-script generation from Skyve module/view metadata.
+ *
+ * <p>Walks a module's documents and their views, instantiating
+ * {@link GenerateViewVisitor} for each view, and writes the resulting SAIL
+ * scripts to the configured output directory.
+ */
 public class Generator {
 /*
 	public static final void main(String[] args) throws Exception {
@@ -51,8 +58,7 @@ System.out.println(visitModules(args[0]));
 	public static List<Automation> visitMenus(User user,
 												String uxui,
 												UserAgentType userAgentType,
-												TestStrategy testStrategy)
-	throws Exception {
+												TestStrategy testStrategy) {
 		return visitMenus(user, null, null, uxui, userAgentType, testStrategy);
 	}
 
@@ -60,8 +66,7 @@ System.out.println(visitModules(args[0]));
 												String loginPassword,
 												String uxui,
 												UserAgentType userAgentType,
-												TestStrategy testStrategy)
-	throws Exception {
+												TestStrategy testStrategy) {
 		return visitMenus(user, null, loginPassword, uxui, userAgentType, testStrategy);
 	}
 
@@ -70,8 +75,7 @@ System.out.println(visitModules(args[0]));
 												String loginPassword,
 												String uxui,
 												UserAgentType userAgentType,
-												TestStrategy testStrategy)
-	throws Exception {
+												TestStrategy testStrategy) {
 		ProvidedRepositoryFactory.get().resetMenus(user);
 		UserImpl u = (UserImpl) user;
 		Customer c = user.getCustomer();
@@ -104,8 +108,7 @@ System.out.println(visitModules(args[0]));
 										String moduleName,
 										String uxui,
 										UserAgentType userAgentType,
-										TestStrategy testStrategy)
-	throws Exception {
+										TestStrategy testStrategy) {
 		return visitMenu(user, null, null, moduleName, uxui, userAgentType, testStrategy);
 	}	
 
@@ -114,8 +117,7 @@ System.out.println(visitModules(args[0]));
 										String moduleName,
 										String uxui,
 										UserAgentType userAgentType,
-										TestStrategy testStrategy)
-	throws Exception {
+										TestStrategy testStrategy) {
 		return visitMenu(user, null, loginPassword, moduleName, uxui, userAgentType, testStrategy);
 	}
 	
@@ -125,8 +127,7 @@ System.out.println(visitModules(args[0]));
 										String moduleName,
 										String uxui,
 										UserAgentType userAgentType,
-										TestStrategy testStrategy)
-	throws Exception {
+										TestStrategy testStrategy) {
 		ProvidedRepositoryFactory.get().resetMenus(user);
 		UserImpl u = (UserImpl) user;
 		Customer c = user.getCustomer();
@@ -147,6 +148,7 @@ System.out.println(visitModules(args[0]));
 		return result;
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static void menu(User u,
 								Customer c,
 								Module m,
@@ -294,8 +296,7 @@ System.out.println(visitModules(args[0]));
 											String moduleName,
 											String uxui,
 											UserAgentType userAgentType,
-											TestStrategy testStrategy)
-	throws Exception {
+											TestStrategy testStrategy) {
 		Customer c = user.getCustomer();
 		Module m = c.getModule(moduleName);
 		

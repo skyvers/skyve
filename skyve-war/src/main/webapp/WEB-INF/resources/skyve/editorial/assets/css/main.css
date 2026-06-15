@@ -1832,7 +1832,7 @@ mark {
 		.icon:before {
 			-moz-osx-font-smoothing: grayscale;
 			-webkit-font-smoothing: antialiased;
-			font-family: FontAwesome;
+			font-family: FontAwesome, sans-serif;
 			font-style: normal;
 			font-weight: normal;
 			text-transform: none !important;
@@ -2080,7 +2080,7 @@ mark {
 			ul.contact li:before {
 				-moz-osx-font-smoothing: grayscale;
 				-webkit-font-smoothing: antialiased;
-				font-family: FontAwesome;
+				font-family: FontAwesome, sans-serif;
 				font-style: normal;
 				font-weight: normal;
 				text-transform: none !important;
@@ -2730,7 +2730,7 @@ mark {
 			#sidebar .toggle:before {
 				-moz-osx-font-smoothing: grayscale;
 				-webkit-font-smoothing: antialiased;
-				font-family: FontAwesome;
+				font-family: FontAwesome, sans-serif;
 				font-style: normal;
 				font-weight: normal;
 				text-transform: none !important;

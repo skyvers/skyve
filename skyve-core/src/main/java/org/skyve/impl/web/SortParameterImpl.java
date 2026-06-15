@@ -5,6 +5,12 @@ import java.io.Serializable;
 import org.skyve.metadata.SortDirection;
 import org.skyve.web.SortParameter;
 
+/**
+ * Immutable value type representing a single sort parameter (binding + direction)
+ * extracted from a web request or provided programmatically.
+ *
+ * @see org.skyve.web.SortParameter
+ */
 public class SortParameterImpl implements Serializable, SortParameter {
 	private static final long serialVersionUID = 4250974309552241616L;
 

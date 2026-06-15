@@ -11,9 +11,18 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
- * A SAIL step that navigates to an list view for a specified document.
- * 
- * @author mike
+ * Navigates to the list view for the specified module, document, query, or model.
+ *
+ * <p>At minimum {@code moduleName} and {@code documentName} must be provided.
+ * {@code queryName} and {@code modelName} are optional overrides that select a
+ * specific named query or list-model when the document has more than one.
+ *
+ * <p>This class is also the base for {@link NavigateCalendar}, {@link NavigateMap},
+ * {@link NavigateTree}, {@link org.skyve.metadata.sail.language.step.context.PushListContext},
+ * and {@link org.skyve.metadata.sail.language.step.interaction.grids.ListGridNew}.
+ *
+ * @see NavigateEdit
+ * @see org.skyve.metadata.sail.execution.Executor#executeNavigateList
  */
 @XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
@@ -24,52 +33,102 @@ public class NavigateList implements Step {
 	private String queryName;
 	private String modelName;
 	
+	/**
+	 * Returns the moduleName.
+	 * @return the result
+	 */
 	public String getModuleName() {
 		return moduleName;
 	}
 
+	/**
+	 * Sets the moduleName.
+	 * @param moduleName the moduleName
+	 */
 	@XmlAttribute(name = "module", required = true)
 	public void setModuleName(String moduleName) {
 		this.moduleName = UtilImpl.processStringValue(moduleName);
 	}
 
+	/**
+	 * Returns the documentName.
+	 * @return the result
+	 */
 	public String getDocumentName() {
 		return documentName;
 	}
 
+	/**
+	 * Sets the documentName.
+	 * @param documentName the documentName
+	 */
 	@XmlAttribute(name = "document")
 	public void setDocumentName(String documentName) {
 		this.documentName = UtilImpl.processStringValue(documentName);
 	}
 
+	/**
+	 * Returns the queryName.
+	 * @return the result
+	 */
 	public String getQueryName() {
 		return queryName;
 	}
 
+	/**
+	 * Sets the queryName.
+	 * @param queryName the queryName
+	 */
 	@XmlAttribute(name = "query")
 	public void setQueryName(String queryName) {
 		this.queryName = UtilImpl.processStringValue(queryName);
 	}
 
+	/**
+	 * Returns the modelName.
+	 * @return the result
+	 */
 	public String getModelName() {
 		return modelName;
 	}
 
+	/**
+	 * Sets the modelName.
+	 * @param modelName the modelName
+	 */
 	@XmlAttribute(name = "model")
 	public void setModelName(String modelName) {
 		this.modelName = UtilImpl.processStringValue(modelName);
 	}
 
+	/**
+	 * Executes execute.
+	 * @param executor the executor
+	 */
 	@Override
 	public void execute(Executor executor) {
 		executor.executeNavigateList(this);
 	}
 	
+	/**
+	 * Returns the identifier.
+	 * @param context the context
+	 * @return the result
+	 */
 	@Override
 	public String getIdentifier(AutomationContext context) {
 		return listGridIdentifier(context, moduleName, queryName, documentName, modelName);
 	}
 	
+	/**
+	 * Executes listGridIdentifier.
+	 * @param context the context
+	 * @param moduleName the moduleName
+	 * @param queryName the queryName
+	 * @param documentName the documentName
+	 * @param modelName the modelName
+	 * @return the result
+	 */
 	public static String listGridIdentifier(AutomationContext context,
 												String moduleName,
 												String queryName,

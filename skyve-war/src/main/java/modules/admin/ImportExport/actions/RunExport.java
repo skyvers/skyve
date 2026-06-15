@@ -11,16 +11,39 @@ import modules.admin.ImportExport.ImportExportUtil;
 import modules.admin.domain.ImportExport;
 import modules.admin.domain.ImportExportColumn;
 
+/**
+ * Generates spreadsheet exports for import/export configurations.
+ */
 public class RunExport extends DownloadAction<ImportExport> {
+	/**
+	 * Performs no additional pre-download validation.
+	 *
+	 * @param bean
+	 *        the import/export bean
+	 * @param webContext
+	 *        the current web context
+	 * @throws Exception
+	 *         if preparation fails
+	 */
 	@Override
 	public void prepare(ImportExport bean, WebContext webContext) throws Exception {
 		// Nothing to see here
 	}
 
+	/**
+	 * Produces a download from the bean's configured export columns.
+	 *
+	 * @param bean
+	 *        the import/export bean
+	 * @param webContext
+	 *        the current web context
+	 * @return the generated spreadsheet download
+	 * @throws Exception
+	 *         if export generation fails
+	 */
 	@Override
 	public Download download(ImportExport bean, WebContext webContext)
 			throws Exception {
-
 		return generateDownload(bean, bean.getImportExportColumns(), bean.getFileContainsHeaders(), Boolean.FALSE);
 	}
 
@@ -62,5 +85,4 @@ public class RunExport extends DownloadAction<ImportExport> {
 
 		return generator.getDownload();
 	}
-
 }

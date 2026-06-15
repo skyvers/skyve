@@ -30,6 +30,7 @@ import jakarta.servlet.http.HttpSession;
 
 @Disabled("Until byte buddy can be upl.ofted to allow mockito-inline lib to work")
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("resource")
 class LoginServletTest {
 
     @Mock

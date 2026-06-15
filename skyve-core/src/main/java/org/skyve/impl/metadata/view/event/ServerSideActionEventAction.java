@@ -13,6 +13,16 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 
+/**
+ * JAXB-annotated event action that invokes a named server-side action when
+ * a widget event fires.
+ *
+ * <p>A {@code <server>} action in an event handler list causes the specified
+ * Skyve action class to be executed on the server in response to the event
+ * (e.g. onChange, onSelected).
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ */
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "server")
 public class ServerSideActionEventAction implements EventAction {

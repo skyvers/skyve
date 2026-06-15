@@ -14,14 +14,25 @@ import org.skyve.metadata.controller.UploadAction;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import modules.admin.domain.DataMaintenance;
 
+/**
+ * Stores an uploaded backup file in the configured backup location.
+ */
 public class UploadBackup extends UploadAction<DataMaintenance> {
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(UploadBackup.class);
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(UploadBackup.class);
-
+	/**
+	 * Performs the upload operation.
+	 * @param bean the bean value
+	 * @param upload the upload value
+	 * @param exception the exception value
+	 * @param webContext the webContext value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public DataMaintenance upload(final DataMaintenance bean, final Upload upload,
 			final UploadException exception, final WebContext webContext) throws Exception {

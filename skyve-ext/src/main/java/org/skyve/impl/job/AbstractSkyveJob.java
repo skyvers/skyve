@@ -24,14 +24,23 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+/**
+ * Base implementation for all Skyve background jobs.
+ *
+ * <p>Implements Quartz {@link org.quartz.InterruptableJob} and the Skyve
+ * {@link org.skyve.metadata.MetaData} contract; subclasses override
+ * {@link #execute()} to provide job logic and may call {@link #checkCancelled()}
+ * to honour cancellation requests.
+ */
 public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 	public static final String DISPLAY_NAME_JOB_PARAMETER_KEY = "displayName";
 	public static final String BEAN_JOB_PARAMETER_KEY = "bean";
 	public static final String USER_JOB_PARAMETER_KEY = "user";
 	public static final String SLEEP_JOB_PARAMETER_KEY = "sleep";
+	private static final String JOB_FAILED_PREFIX = "Job Failed :- ";
 
 	private String displayName;
 	private Timestamp startTime = new Timestamp();
@@ -46,48 +55,81 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
      * classes' name.
      */
 	// NB An instance member LOGGER is OK here as this is not Serializable
-    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    protected final Logger LOGGER = SkyveLoggerFactory.getLogger(getClass());
 
+	/**
+	 * Returns the displayName.
+	 */
 	public String getDisplayName() {
 		return displayName;
 	}
 
+	/**
+	 * Sets the displayName.
+	 */
 	public void setDisplayName(String displayName) {
 		this.displayName = displayName;
 	}
 
+	/**
+	 * Returns the percentComplete.
+	 */
 	public final int getPercentComplete() {
 		return percentComplete;
 	}
 
+	/**
+	 * Sets the percentComplete.
+	 */
 	public final void setPercentComplete(int percentComplete) {
 		this.percentComplete = percentComplete;
 	}
 
+	/**
+	 * Sets the percentComplete.
+	 */
 	public final void setPercentComplete(int totalProcessed, int totalSize) {
 		setPercentComplete((int) (((float) totalProcessed) / ((float) totalSize) * 100F));
 	}
 
+	/**
+	 * Returns the startTime.
+	 */
 	public final Timestamp getStartTime() {
 		return startTime;
 	}
 
+	/**
+	 * Returns the endTime.
+	 */
 	public final Timestamp getEndTime() {
 		return endTime;
 	}
 
+	/**
+	 * Returns the status.
+	 */
 	public final JobStatus getStatus() {
 		return status;
 	}
 
+	/**
+	 * Returns the log.
+	 */
 	public final List<String> getLog() {
 		return log;
 	}
 
+	/**
+	 * Sets the log.
+	 */
 	protected final void setLog(List<String> log) {
 		this.log = log;
 	}
 
+	/**
+	 * Creates the logDescriptionString.
+	 */
 	public final String createLogDescriptionString() {
 		StringBuilder sb = new StringBuilder(256);
 		synchronized (log) {
@@ -99,10 +141,16 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 		return sb.toString();
 	}
 
+	/**
+	 * Returns the bean.
+	 */
 	public final Bean getBean() {
 		return bean;
 	}
 
+	/**
+	 * Sets the bean.
+	 */
 	public final void setBean(Bean bean) {
 		this.bean = bean;
 	}
@@ -138,6 +186,7 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 	}
 
 	@Override
+	@SuppressWarnings({"java:S1143", "java:S1163", "java:S3776"}) // OK to throw in the finally block here as it stops deployment; Complexity OK
 	public final void execute(JobExecutionContext context)
 	throws JobExecutionException {
 		AbstractPersistence persistence = AbstractPersistence.get();
@@ -180,16 +229,16 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 			persistence.rollback();
 
 			if (t instanceof MessageException messageException) {
-				getLog().add("Job Failed :- ");
+				getLog().add(JOB_FAILED_PREFIX);
 				for (Message em : messageException.getMessages()) {
 					getLog().add(em.getText());
 				}
 			}
 			else if (t.getMessage() != null) {
-				getLog().add("Job Failed :- " + t.getMessage());
+				getLog().add(JOB_FAILED_PREFIX + t.getMessage());
 			} else {
 				// for any other exceptions, just log that it happened
-				getLog().add("Job Failed :- " + t.toString());
+				getLog().add(JOB_FAILED_PREFIX + t.toString());
 			}
 
 			throw new JobExecutionException("Job failed", t);
@@ -241,7 +290,8 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 					Thread.sleep(sleepInSeconds.intValue() * 1000L);
 				}
 				catch (@SuppressWarnings("unused") InterruptedException e) {
-					// Do nothing - can't do anything here - its all too late
+					// Restore the interrupted status, but don't do anything - its all too late.
+				    Thread.currentThread().interrupt();
 				}
 			}
 		}

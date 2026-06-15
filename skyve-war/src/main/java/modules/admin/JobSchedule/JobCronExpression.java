@@ -44,11 +44,26 @@ public class JobCronExpression {
 
 	private CronExpression expression = null;
 
+	/**
+	 * Parses a Quartz cron expression for reflective field inspection.
+	 *
+	 * @param cronExpression
+	 *        the cron expression to parse
+	 * @throws ParseException
+	 *         if the expression is invalid
+	 */
 	public JobCronExpression(String cronExpression)
 			throws ParseException {
 		expression = new CronExpression(cronExpression);
 	}
 
+	/**
+	 * Retrieves a private field from Quartz {@link CronExpression} state.
+	 *
+	 * @param name
+	 *        the private field name
+	 * @return the reflective field value
+	 */
 	private Object get(String name) {
 		try {
 			Field f = expression.getClass().getDeclaredField(name);
@@ -61,39 +76,79 @@ public class JobCronExpression {
 		}
 	}
 
+	/**
+	 * Returns configured minute values.
+	 *
+	 * @return the minute set from the parsed expression
+	 */
 	@SuppressWarnings("unchecked")
 	public Set<Integer> getMinutes() {
 		return (Set<Integer>) get(FIELD_MINUTES);
 	}
 
+	/**
+	 * Returns configured hour values.
+	 *
+	 * @return the hour set from the parsed expression
+	 */
 	@SuppressWarnings("unchecked")
 	public Set<Integer> getHours() {
 		return (Set<Integer>) get(FIELD_HOURS);
 	}
 
+	/**
+	 * Returns configured day-of-month values.
+	 *
+	 * @return the day-of-month set from the parsed expression
+	 */
 	@SuppressWarnings("unchecked")
 	public Set<Integer> getDaysOfMonth() {
 		return (Set<Integer>) get(FIELD_DAYS_OF_MONTH);
 	}
 
+	/**
+	 * Returns configured month values.
+	 *
+	 * @return the month set from the parsed expression
+	 */
 	@SuppressWarnings("unchecked")
 	public Set<Integer> getMonths() {
 		return (Set<Integer>) get(FIELD_MONTHS);
 	}
 
+	/**
+	 * Returns configured day-of-week values.
+	 *
+	 * @return the day-of-week set from the parsed expression
+	 */
 	@SuppressWarnings("unchecked")
 	public Set<Integer> getDaysOfWeek() {
 		return (Set<Integer>) get(FIELD_DAYS_OF_WEEK);
 	}
 
+	/**
+	 * Indicates whether the expression uses the last day-of-week token.
+	 *
+	 * @return {@code true} when last day-of-week is enabled
+	 */
 	public boolean getLastDayOfWeek() {
 		return Boolean.TRUE.equals(get(FIELD_LAST_DAY_OF_WEEK));
 	}
 
+	/**
+	 * Indicates whether the expression uses the last day-of-month token.
+	 *
+	 * @return {@code true} when last day-of-month is enabled
+	 */
 	public boolean getLastDayOfMonth() {
 		return Boolean.TRUE.equals(get(FIELD_LAST_DAY_OF_MONTH));
 	}
 
+	/**
+	 * Indicates whether the expression uses nearest-weekday semantics.
+	 *
+	 * @return {@code true} when nearest-weekday is enabled
+	 */
 	public boolean getNearestWeekday() {
 		return Boolean.TRUE.equals(get(FIELD_NEAREST_WEEKDAY));
 	}

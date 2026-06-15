@@ -25,7 +25,6 @@ import org.skyve.impl.metadata.model.document.field.ConvertibleField;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.SortParameterImpl;
 import org.skyve.impl.web.faces.views.FacesView;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -45,18 +44,21 @@ import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 import org.skyve.util.logging.Category;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.skyve.util.monitoring.Monitoring;
 import org.skyve.util.monitoring.RequestKey;
 import org.skyve.web.SortParameter;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Nonnull;
 
+/**
+ * Implements internal web-module behavior for this Skyve runtime concern.
+ */
 public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 	private static final long serialVersionUID = -2161288261538038204L;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SkyveLazyDataModel.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SkyveLazyDataModel.class);
     private static final Logger COMMAND_LOGGER = Category.COMMAND.logger();
 
 	private FacesView view;
@@ -68,6 +70,19 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 	private List<Parameter> parameters;
 	private boolean escape;
 	
+	/**
+	 * Creates a lazy data model for query/model-backed list rendering with optional filter parameters.
+	 *
+	 * @param view the owning faces view
+	 * @param moduleName the target module name
+	 * @param documentName the target document name
+	 * @param queryName the optional query name
+	 * @param modelName the optional model name
+	 * @param filterParameters optional filter parameter metadata
+	 * @param parameters optional query parameter metadata
+	 * @param escape whether list row values should be HTML-escaped
+	 */
+	@SuppressWarnings("java:S107") // too many params OK
 	public SkyveLazyDataModel(@Nonnull FacesView view,
 								String moduleName, 
 								String documentName, 
@@ -88,6 +103,9 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 	
 	/**
 	 * Can't implement this as the rows and the count come back together in the load method.
+	 *
+	 * @param filterBy filter metadata supplied by PrimeFaces
+	 * @return always {@code 0}; row count is set inside {@link #load(int, int, Map, Map)}
 	 */
 	@Override
 	public int count(Map<String, FilterMeta> filterBy) {
@@ -95,9 +113,16 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 	}
 	
 	/**
-	 * Return a page of filtered and sorted data (and set the rowCount)
+	 * Returns a page of filtered and sorted data and updates the total row count.
+	 *
+	 * @param first the zero-based first row index
+	 * @param pageSize the requested page size
+	 * @param multiSortMeta optional sort metadata
+	 * @param filters optional filter metadata
+	 * @return the adapted page rows for JSF rendering
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // complexity OK
 	public List<BeanMapAdapter> load(int first,
 										int pageSize,
 										Map<String, SortMeta> multiSortMeta,
@@ -116,9 +141,6 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 			EXT.checkAccess(u, UserAccess.modelAggregate(moduleName, documentName, modelName), uxui);
 			d = m.getDocument(c, documentName);
 			model = d.getListModel(c, modelName, true);
-			if (model == null) {
-				throw new MetaDataException(modelName + " is not a valid ListModel");
-			}
 			key = RequestKey.model(d, modelName);
 		}
 		// query type of request
@@ -161,7 +183,9 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 			throw new SecurityException(d.getName() + " in module " + d.getOwningModuleName(), u.getName());
 		}
 
-        if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("LOAD {} : {}", String.valueOf(first), String.valueOf(pageSize));
+		if (UtilImpl.COMMAND_TRACE) {
+			COMMAND_LOGGER.info("LOAD {} : {}", Integer.valueOf(first), Integer.valueOf(pageSize));
+		}
 		model.setStartRow(first);
 		model.setEndRow(first + pageSize);
 
@@ -198,6 +222,9 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 
 	/**
 	 * Called when encoding the rows of a data table or data list.
+	 *
+	 * @param bean the row bean adapter
+	 * @return a stable row key composed of biz id, document, and module
 	 */
 	@Override
 	public String getRowKey(BeanMapAdapter bean) {
@@ -207,6 +234,9 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 	
 	/**
 	 * Called when a table or list row is selected.
+	 *
+	 * @param rowKey the row key produced by {@link #getRowKey(BeanMapAdapter)}
+	 * @return a bean adapter created from the row key components
 	 */
 	@Override
 	public BeanMapAdapter getRowData(String rowKey) {
@@ -220,6 +250,12 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 		return new BeanMapAdapter(bean, view.getWebContext());
 	}
 	
+	/**
+	 * Applies PrimeFaces sort metadata to the list model.
+	 *
+	 * @param multiSortMeta sort metadata entries
+	 * @param model the target list model
+	 */
 	private static void sort(Map<String, SortMeta> multiSortMeta, ListModel<Bean> model) {
 		int l = multiSortMeta.size();
 		SortParameter[] sortParameters = new SortParameter[l];
@@ -235,13 +271,23 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 		model.setSortParameters(sortParameters);
 	}
 	
+	/**
+	 * Applies PrimeFaces filter metadata to the list model.
+	 *
+	 * @param filters filter metadata entries
+	 * @param model the target list model
+	 * @param customer the current customer metadata
+	 * @throws Exception if metadata resolution or conversion fails
+	 */
+	@SuppressWarnings({"java:S3776", "java:S6541", "java:S112"}) // complex method OK
 	private static void filter(Map<String, FilterMeta> filters, ListModel<Bean> model, Customer customer)
 	throws Exception {
 		Document drivingDocument = model.getDrivingDocument();
 		Module drivingModule = customer.getModule(drivingDocument.getOwningModuleName());
 		Filter modelFilter = model.getFilter();
-		for (String key : filters.keySet()) {
-			FilterMeta fm = filters.get(key);
+		for (Map.Entry<String, FilterMeta> filterEntry : filters.entrySet()) {
+			String key = filterEntry.getKey();
+			FilterMeta fm = filterEntry.getValue();
 			Object value = fm.getFilterValue();
 			if (value instanceof String string) {
 				value = Util.processStringValue(string);

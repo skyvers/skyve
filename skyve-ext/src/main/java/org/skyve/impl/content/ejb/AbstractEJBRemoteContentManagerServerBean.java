@@ -6,7 +6,7 @@ import org.skyve.content.BeanContent;
 import org.skyve.content.ContentManager;
 import org.skyve.content.SearchResults;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 /**
  * Extend this to make a stateless session bean in the skyve server instance.
@@ -71,7 +71,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractEJBRemoteContentManagerServerBean implements EJBRemoteContentManagerServer {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractEJBRemoteContentManagerServerBean.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(AbstractEJBRemoteContentManagerServerBean.class);
 
 	@Override
 	public void put(BeanContent content) throws Exception {

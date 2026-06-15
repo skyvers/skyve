@@ -1,13 +1,19 @@
 package org.skyve.impl.backup;
 
+/**
+ * Configuration contract for the restore operation, specifying how existing
+ * database schema and content should be handled before data is restored.
+ */
 public interface RestoreOptions {
-	public static enum ContentOption {
+	@SuppressWarnings("java:S115") // Enum names are restore option codes.
+	public enum ContentOption {
 		clearOrphanedContentIds,
 		saveOrphanedContentIds,
 		error
 	}
 	
-	public static enum PreProcess {
+	@SuppressWarnings("java:S115") // Enum names are restore option codes.
+	public enum PreProcess {
 		noProcessing,
 		dropUsingMetadataAndCreateUsingBackup,
 		dropUsingBackupAndCreateUsingBackup,
@@ -18,7 +24,8 @@ public interface RestoreOptions {
 		deleteData;
 	}
 	
-	public static enum IndexingOption {
+	@SuppressWarnings("java:S115") // Enum names are restore option codes.
+	public enum IndexingOption {
 		data,
 		content,
 		both,

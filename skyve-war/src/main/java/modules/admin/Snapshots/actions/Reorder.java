@@ -12,10 +12,20 @@ import org.skyve.web.WebContext;
 import modules.admin.domain.Snapshot;
 import modules.admin.domain.Snapshots;
 
+/**
+ * Persists user-defined ordering for snapshots in a selected module/query
+ * context.
+ */
 public class Reorder implements ServerSideAction<Snapshots> {
 	private static String update = "update ADM_Snapshot set ordinal = :ordinal where bizId = :bizId";
+
 	/**
 	 * Reorder the snapshots based on the snapshotsToReorder collection sequence.
+	 *
+	 * @param bean the snapshots aggregate containing the reordered collection
+	 * @param webContext the current web context
+	 * @return the action result wrapping the updated bean
+	 * @throws Exception if SQL updates fail
 	 */
 	@Override
 	public ServerSideActionResult<Snapshots> execute(Snapshots bean, WebContext webContext) throws Exception {

@@ -30,31 +30,33 @@ import org.skyve.metadata.module.Module;
 import org.skyve.util.BeanVisitor;
 import org.skyve.util.NullableBeanVisitor;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 /**
  * Utility class to generate a spreadsheet shape from a document definition.
- * 
+ *
  * @author mike
  *
  */
 public final class StandardGenerator {
+	private static final String IDS_SUFFIX = " IDs.";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StandardGenerator.class);
+
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(StandardGenerator.class);
 
 	/**
 	 * The relevant customer for the generation.
 	 */
 	private @Nonnull Customer customer;
-	
+
 	/**
 	 * The driving document for the generation.
 	 */
 	private @Nonnull Document document;
-	
+
 	/**
 	 * Bindings (relative to driving document) to exclude from the generation.
 	 * Each binding will stop the recursive generation processing when it is satisfied.
@@ -62,7 +64,7 @@ public final class StandardGenerator {
 	private @Nonnull String[] exclusions;
 
 	/**
-	 * 
+	 *
 	 * @param customer	The relevant customer for the generation.
 	 * @param document	The driving document for the generation.
 	 * @param exclusions	Bindings (relative to driving document) to exclude from the generation.
@@ -77,9 +79,10 @@ public final class StandardGenerator {
 	/**
 	 * Generate a structure which will accomodate the driving document for the customer
 	 * into the given workbook.
-	 * 
+	 *
 	 * @param workbook	The workbook to generate the structure into.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void generateStructure(@Nonnull final BizPortWorkbook workbook) {
 		new NullableBeanVisitor(false, false) {
 			// processBean can be null as we are visiting ALL
@@ -101,26 +104,26 @@ public final class StandardGenerator {
 				// if its a collection, put in a joining sheet
 				if (owningRelation instanceof Collection owningCollection) {
 					if (! CollectionType.child.equals(owningCollection.getType())) {
-						BizPortSheet collectionSheet = workbook.getSheet(new SheetKey(document.getOwningModuleName(), 
+						BizPortSheet collectionSheet = workbook.getSheet(new SheetKey(document.getOwningModuleName(),
 																						document.getName(),
 																						binding));
 						if (collectionSheet == null) {
 							// lower levels
-							generateAndAddCollectionSheet(binding, 
-															owningDocument, 
-															owningCollection, 
-															processDocument, 
+							generateAndAddCollectionSheet(binding,
+															owningDocument,
+															owningCollection,
+															processDocument,
 															workbook);
 						}
 					}
 				}
 
 				// ensure that there is a document sheet created, if there isn't one already
-				boolean recurse = (workbook.getSheet(new SheetKey(processDocument.getOwningModuleName(), 
+				boolean recurse = (workbook.getSheet(new SheetKey(processDocument.getOwningModuleName(),
 																	processDocument.getName())) == null);
 				if (recurse) {
 					// lower levels
-					boolean embeddedAssociation = (owningRelation instanceof Association a) && 
+					boolean embeddedAssociation = (owningRelation instanceof Association a) &&
 													AssociationType.embedded.equals(a.getType());
 					if (! embeddedAssociation) {
 						generateAndAddDocumentSheet(processDocument, owningRelation, workbook);
@@ -153,7 +156,7 @@ public final class StandardGenerator {
 			generateData(workbook, Collections.singleton(bean));
 		}
 	}
-	
+
 	// Grab all nodes of the hierarchy and add to the "nodes" set
 	private void collect(@Nonnull Bean bean, @Nonnull Set<Bean> nodes) {
 		nodes.add(bean);
@@ -163,15 +166,16 @@ public final class StandardGenerator {
 			}
 		}
 	}
-	
+
 	/**
 	 * Fill the workbook with data given a list of beans of the driving document type.
 	 * @param workbook	The workbook to fill.
 	 * @param beans	The data to use to fill with.
 	 */
-	public void generateData(@Nonnull final BizPortWorkbook workbook, 
+	@SuppressWarnings("java:S3776") // Complexity OK
+	public void generateData(@Nonnull final BizPortWorkbook workbook,
 								@Nonnull final Iterable<? extends Bean> beans) {
-		// Recursively walks the topBean's object graph populating the relevant 
+		// Recursively walks the topBean's object graph populating the relevant
 		// sheets in the workbook.
 		BeanVisitor excelBeanVisitor = new BeanVisitor(false, false) {
 			// the top-most bean to process
@@ -202,8 +206,8 @@ public final class StandardGenerator {
 					else {
 						// search for the collection sheets through the binding with the array indexing removed - eg [0], [1]
 						String collectionBinding = binding.replaceAll("\\[\\d*\\]", "");
-						BizPortSheet collectionSheet = workbook.getSheet(new SheetKey(document.getOwningModuleName(), 
-																						document.getName(), 
+						BizPortSheet collectionSheet = workbook.getSheet(new SheetKey(document.getOwningModuleName(),
+																						document.getName(),
 																						collectionBinding));
 						// collectionSheet can be null if the binding was struck out
 						// during the spreadsheet generation (may be in the exclusions),
@@ -243,32 +247,32 @@ public final class StandardGenerator {
 					sheet.addRow(bizId);
 
 					Set<String> columnBindings = sheet.getColumnBindings();
-					
+
 					// add the ID first
 					sheet.setValue(Bean.DOCUMENT_ID, bizId);
-					if (columnBindings.contains(Bean.BIZ_KEY) && 
+					if (columnBindings.contains(Bean.BIZ_KEY) &&
 							(bean instanceof PersistentBean persistentBean)) {
 						sheet.setValue(Bean.BIZ_KEY, persistentBean.getBizKey());
 					}
 
 					generateRowData(sheet, columnBindings, currentDocument, bean, null);
-					
+
 					// Parent ID column
 					final String parentDocumentName = currentDocument.getParentDocumentName();
 					if (parentDocumentName != null) {
 						if (parentDocumentName.equals(currentDocumentName)) {
 							if (columnBindings.contains(HierarchicalBean.PARENT_ID)) {
-								sheet.setValue(HierarchicalBean.PARENT_ID, 
+								sheet.setValue(HierarchicalBean.PARENT_ID,
 												BindUtil.get(bean, HierarchicalBean.PARENT_ID));
 							}
 
 						}
 						else {
 							if (columnBindings.contains(ChildBean.PARENT_NAME)) {
-								sheet.setValue(ChildBean.PARENT_NAME, 
+								sheet.setValue(ChildBean.PARENT_NAME,
 												BindUtil.get(bean, new StringBuilder(32).append(ChildBean.PARENT_NAME).append('.').append(Bean.DOCUMENT_ID).toString()));
 							}
-							
+
 							if (orderedChildCollection && columnBindings.contains(Bean.ORDINAL_NAME)) {
 								sheet.setValue(Bean.ORDINAL_NAME, BindUtil.get(bean, Bean.ORDINAL_NAME));
 							}
@@ -285,6 +289,7 @@ public final class StandardGenerator {
 		}
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void generateRowData(@Nonnull BizPortSheet sheet,
 									@Nonnull Set<String> columnBindings,
 									@Nonnull Document currentDocument,
@@ -298,13 +303,13 @@ public final class StandardGenerator {
 				columnBinding = new StringBuilder(64).append(embeddedAssociationName).append('.').append(columnBinding).toString();
 			}
 			String valueBinding = columnBinding;
-			
+
 			// Process if not a collection and not the bizKey
 			if ((! AttributeType.collection.equals(type)) && (! Bean.BIZ_KEY.equals(name))) {
 				if (attribute instanceof Association association) {
 					final Module owningModule = customer.getModule(currentDocument.getOwningModuleName());
 					final Document associationDocument = owningModule.getDocument(customer, association.getDocumentName());
-					
+
 					if (AssociationType.embedded.equals(association.getType())) { // embedded
 						generateRowData(sheet, columnBindings, associationDocument, bean, name);
 					}
@@ -323,7 +328,7 @@ public final class StandardGenerator {
 			}
 		}
 	}
-	
+
 	/**
 	 * Make a sheet for a document encountered.
 	 * The sheet is added to the workbook under the owning module name and document name.
@@ -333,7 +338,7 @@ public final class StandardGenerator {
 	 */
 	private void generateAndAddDocumentSheet(@Nonnull Document currentDocument,
 												@Nullable Relation owningRelation,
-												@Nonnull BizPortWorkbook workbook) 
+												@Nonnull BizPortWorkbook workbook)
 	throws Exception {
 		BizPortSheet sheet = new POISheet(currentDocument.getLocalisedSingularAlias());
 
@@ -345,15 +350,15 @@ public final class StandardGenerator {
 
 		// BizKey column
 		column = new BizPortColumn("Business Key",
-										"The business description of the record.  This value is NOT uploaded but allows a referential description within the spreadsheet.", 
+										"The business description of the record.  This value is NOT uploaded but allows a referential description within the spreadsheet.",
 										AttributeType.text);
 		sheet.addColumn(Bean.BIZ_KEY, column);
-		
+
 		final String currentDocumentName = currentDocument.getName();
 		final String currentDocumentOwningModuleName = currentDocument.getOwningModuleName();
 
 		generateAttributeColumns(sheet, currentDocument, null, null);
-		
+
 		// add the parent if this is a child document
 		SheetKey key = null;
 		final String parentDocumentName = currentDocument.getParentDocumentName();
@@ -368,11 +373,11 @@ public final class StandardGenerator {
 				if ((parentDocument != null) && (owningRelation instanceof Collection collection)) { // definitely a child document
 					String localisedSingularAlias = parentDocument.getLocalisedSingularAlias();
 					column = new BizPortColumn(localisedSingularAlias + " ID (Parent)",
-													"The 'Parent' link of the relationship.  Populate this with " + localisedSingularAlias + " IDs.", 
+													"The 'Parent' link of the relationship.  Populate this with " + localisedSingularAlias + IDS_SUFFIX,
 													AttributeType.text);
 					column.setReferencedSheet(new SheetKey(parentDocument.getOwningModuleName(), parentDocument.getName()));
 					sheet.addColumn(ChildBean.PARENT_NAME, column);
-		
+
 					if (Boolean.TRUE.equals(collection.getOrdered())) {
 						column = new BizPortColumn("Ordinal", "The order of these records", AttributeType.integer);
 						sheet.addColumn(Bean.ORDINAL_NAME, column);
@@ -385,19 +390,20 @@ public final class StandardGenerator {
 		if (key == null) { // not a child document
 			key = new SheetKey(currentDocumentOwningModuleName, currentDocumentName);
 		}
-		
+
 		workbook.addSheet(key, sheet);
 	}
 
 	/**
 	 * This method is used to add all scalar attributes to the given sheet, recursing when an embedded association is encountered.
-	 * 
+	 *
 	 * @param sheet	The sheet to add columns to.
 	 * @param currentDocument	The document to get the attributes for.
-	 * @param embeddedAssociationName	If recursing an embedded association, its name. 
+	 * @param embeddedAssociationName	If recursing an embedded association, its name.
 	 * @param embeddedAssociationDisplayName	If recursing an embedded association, its display name.
 	 * @throws Exception
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void generateAttributeColumns(@Nonnull BizPortSheet sheet,
 											@Nonnull Document currentDocument,
 											@Nullable String embeddedAssociationName,
@@ -419,7 +425,7 @@ public final class StandardGenerator {
 					final Module owningModule = customer.getModule(currentDocumentOwningModuleName);
 					final Document associationDocument = owningModule.getDocument(customer, association.getDocumentName());
 					final String displayName = attribute.getLocalisedDisplayName();
-					
+
 					if (AssociationType.embedded.equals(association.getType())) { // embedded - just add compound bindings to the current sheet
 						generateAttributeColumns(sheet, associationDocument, name, displayName);
 					}
@@ -430,7 +436,7 @@ public final class StandardGenerator {
 						}
 						title.append(displayName).append(" ID");
 						column = new BizPortColumn(title.toString(), attribute.getLocalisedDescription(), type);
-						column.setReferencedSheet(new SheetKey(associationDocument.getOwningModuleName(), 
+						column.setReferencedSheet(new SheetKey(associationDocument.getOwningModuleName(),
 																associationDocument.getName()));
 					}
 				}
@@ -456,12 +462,12 @@ public final class StandardGenerator {
 								// empty bizlet
 							};
 						}
-						column.setRangeValues(getConstantRangeValues(bizlet, 
+						column.setRangeValues(getConstantRangeValues(bizlet,
 																		currentDocumentOwningModuleName,
 																		currentDocumentName,
 																		attribute));
 					}
-	
+
 					if (embeddedAssociationName != null) {
 						StringBuilder binding = new StringBuilder(64);
 						binding.append(embeddedAssociationName).append('.');
@@ -475,7 +481,7 @@ public final class StandardGenerator {
 			}
 		}
 	}
-	
+
 	/**
 	 * Make a sheet for a collection within the document encountered.
 	 * The sheet is added to the workbook under the owning module name and document name and collection binding.
@@ -495,7 +501,7 @@ public final class StandardGenerator {
 		// Owner ID column
 		String localisedSingularAlias = owningDocument.getLocalisedSingularAlias();
 		BizPortColumn column = new BizPortColumn(localisedSingularAlias + " ID (From)",
-													"The 'From' link of the relationship.  Populate this with " + localisedSingularAlias + " IDs.",
+													"The 'From' link of the relationship.  Populate this with " + localisedSingularAlias + IDS_SUFFIX,
 													AttributeType.text);
 		column.setReferencedSheet(new SheetKey(owningDocument.getOwningModuleName(), owningDocument.getName()));
 		sheet.addColumn(PersistentBean.OWNER_COLUMN_NAME, column);
@@ -503,7 +509,7 @@ public final class StandardGenerator {
 		// Element ID column
 		localisedSingularAlias = collectionDocument.getLocalisedSingularAlias();
 		column = new BizPortColumn(localisedSingularAlias + " ID (To)",
-									"The 'To' link of the relationship.  Populate this with " + localisedSingularAlias + " IDs.",
+									"The 'To' link of the relationship.  Populate this with " + localisedSingularAlias + IDS_SUFFIX,
 									AttributeType.text);
 		column.setReferencedSheet(new SheetKey(collectionDocument.getOwningModuleName(), collectionDocument.getName()));
 		sheet.addColumn(PersistentBean.ELEMENT_COLUMN_NAME, column);
@@ -528,7 +534,7 @@ public final class StandardGenerator {
 	private @Nonnull String[] getConstantRangeValues(@Nonnull Bizlet<?> domainBizlet,
 														@Nonnull String domainModuleName,
 														@Nonnull String domainDocumentName,
-														@Nonnull Attribute domainAttribute) 
+														@Nonnull Attribute domainAttribute)
 	throws Exception {
 		List<DomainValue> values = customer.getConstantDomainValues(domainBizlet,
 																		domainModuleName,

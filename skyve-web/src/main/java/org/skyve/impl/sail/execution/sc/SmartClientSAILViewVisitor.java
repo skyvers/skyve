@@ -83,6 +83,17 @@ public class SmartClientSAILViewVisitor {
 
 	private boolean visitingForm = false;
 
+	/**
+	 * Creates a SmartClient view visitor that records interaction locators into the supplied context.
+	 *
+	 * @param user the current user
+	 * @param module the module metadata being visited
+	 * @param document the document metadata being visited
+	 * @param view the view metadata being traversed
+	 * @param uxui the active UX/UI name
+	 * @param automationContext the automation context receiving generated locators
+	 * @param windowPrefix the SmartClient window locator prefix
+	 */
 	public SmartClientSAILViewVisitor(
 			User user,
 			Module module,
@@ -100,10 +111,18 @@ public class SmartClientSAILViewVisitor {
 		this.windowPrefix = windowPrefix;
 	}
 
+	/**
+	 * Traverses the configured view and records supported automation locators in the current context.
+	 */
 	public final void visit() {
 		visitContainer(view);
 	}
 
+	/**
+	 * Visits a supported container type and dispatches traversal to contained metadata.
+	 *
+	 * @param container the container metadata to traverse
+	 */
 	private void visitContainer(Container container) {
 		if (container == view) {
 			for (MetaData widget : container.getContained()) {
@@ -134,18 +153,30 @@ public class SmartClientSAILViewVisitor {
 		}
 	}
 
+	/**
+	 * Enters form traversal mode and resets the form-item index for locator generation.
+	 */
 	private final void visitForm() {
 		formIndex = 0;
 
 		visitingForm = true;
 	}
 
+	/**
+	 * Leaves form traversal mode and advances the container index.
+	 */
 	private final void visitedForm() {
 		containerIndex++;
 
 		visitingForm = false;
 	}
 
+	/**
+	 * Dispatches a metadata widget to the SmartClient locator visitor that matches its concrete widget type.
+	 *
+	 * @param widget the metadata widget to visit
+	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void visitWidget(MetaData widget) {
 		if (widget instanceof Container container) {
 			visitContainer(container);
@@ -261,6 +292,11 @@ public class SmartClientSAILViewVisitor {
 		}
 	}
 
+	/**
+	 * Resolves a default widget to its concrete input widget and visits the resolved widget.
+	 *
+	 * @param widget the default widget metadata
+	 */
 	private void visitDefaultWidget(DefaultWidget widget) {
 		String binding = widget.getBinding();
 
@@ -280,6 +316,11 @@ public class SmartClientSAILViewVisitor {
 		}
 	}
 
+	/**
+	 * Registers a locator for a form button action.
+	 *
+	 * @param button the button metadata
+	 */
 	private final void visitButton(Button button) {
 		String actionName = button.getActionName();
 
@@ -292,6 +333,11 @@ public class SmartClientSAILViewVisitor {
 						Integer.valueOf(formIndex))));
 	}
 
+	/**
+	 * Registers a locator for a zoom-in widget.
+	 *
+	 * @param zoomIn the zoom-in metadata
+	 */
 	private final void visitZoomIn(ZoomIn zoomIn) {
 		String binding = zoomIn.getBinding();
 		String identifier = String.format("%s.zoomIn", binding.replaceAll("\\.", "_"));
@@ -309,11 +355,21 @@ public class SmartClientSAILViewVisitor {
 		}
 	}
 
-	@SuppressWarnings("unused")
+	/**
+	 * Placeholder for map widget locator generation.
+	 *
+	 * @param map the map metadata
+	 */
+	@SuppressWarnings("java:S1172")
 	private final void visitMap(MapDisplay map) {
 		// TODO
 	}
 
+	/**
+	 * Registers a locator for a geometry widget.
+	 *
+	 * @param geometry the geometry metadata
+	 */
 	private final void visitGeometry(Geometry geometry) {
 		String binding = geometry.getBinding();
 
@@ -326,16 +382,31 @@ public class SmartClientSAILViewVisitor {
 						Integer.valueOf(formIndex)), InputType.TEXT));
 	}
 
-	@SuppressWarnings("unused")
+	/**
+	 * Placeholder for tree-grid locator generation.
+	 *
+	 * @param grid the tree-grid metadata
+	 */
+	@SuppressWarnings("java:S1172")
 	private final void visitTreeGrid(TreeGrid grid) {
 		// TODO
 	}
 
-	@SuppressWarnings("unused")
+	/**
+	 * Placeholder for link locator generation.
+	 *
+	 * @param link the link metadata
+	 */
+	@SuppressWarnings("java:S1172")
 	private final void visitLink(Link link) {
 		// TODO
 	}
 
+	/**
+	 * Registers list-grid action and selection locators.
+	 *
+	 * @param grid the list-grid metadata
+	 */
 	private final void visitListGrid(ListGrid grid) {
 		String key = NavigateList.listGridIdentifier(
 				automationContext,
@@ -349,14 +420,25 @@ public class SmartClientSAILViewVisitor {
 		visitListGridSelect(key);
 	}
 
+	/**
+	 * Marks completion of list-grid traversal by advancing the container index.
+	 */
 	private final void visitedListGrid() {
 		containerIndex++;
 	}
 
+	/**
+	 * Marks completion of list-repeater traversal by advancing the container index.
+	 */
 	private final void visitedListRepeater() {
 		containerIndex++;
 	}
 
+	/**
+	 * Registers the list-grid new-action locator.
+	 *
+	 * @param key the list-grid automation key
+	 */
 	private final void visitListGridNew(String key) {
 		automationContext.put(String.format("%s.new", key),
 				new Locator(String.format(
@@ -366,6 +448,11 @@ public class SmartClientSAILViewVisitor {
 						Integer.valueOf(containerIndex))));
 	}
 
+	/**
+	 * Registers the list-grid zoom-action locator.
+	 *
+	 * @param key the list-grid automation key
+	 */
 	private final void visitListGridZoom(String key) {
 		automationContext.put(String.format("%s.zoom", key),
 				new Locator(String.format(
@@ -375,6 +462,11 @@ public class SmartClientSAILViewVisitor {
 						Integer.valueOf(containerIndex))));
 	}
 
+	/**
+	 * Registers the list-grid row-selection locator.
+	 *
+	 * @param key the list-grid automation key
+	 */
 	private final void visitListGridSelect(String key) {
 		automationContext.put(String.format("%s.select", key),
 				new Locator(String.format(
@@ -384,6 +476,11 @@ public class SmartClientSAILViewVisitor {
 						Integer.valueOf(containerIndex))));
 	}
 
+	/**
+	 * Registers the standard SmartClient data-grid toolbar and row-selection locators for the given binding.
+	 *
+	 * @param grid the data-grid metadata to visit
+	 */
 	private final void visitDataGrid(DataGrid grid) {
 		String binding = grid.getBinding();
 
@@ -394,10 +491,18 @@ public class SmartClientSAILViewVisitor {
 		visitDataGridSelect(binding);
 	}
 
+	/**
+	 * Marks completion of data-grid traversal by advancing the container index.
+	 */
 	private final void visitedDataGrid() {
 		containerIndex++;
 	}
 
+	/**
+	 * Registers the data-grid new-action locator.
+	 *
+	 * @param binding the data-grid binding
+	 */
 	private final void visitDataGridNew(String binding) {
 		automationContext.put(String.format("%s.new", binding),
 				new Locator(String.format(
@@ -407,6 +512,11 @@ public class SmartClientSAILViewVisitor {
 						Integer.valueOf(containerIndex))));
 	}
 
+	/**
+	 * Registers the data-grid zoom-action locator.
+	 *
+	 * @param binding the data-grid binding
+	 */
 	private final void visitDataGridZoom(String binding) {
 		automationContext.put(String.format("%s.zoom", binding),
 				new Locator(String.format(
@@ -416,6 +526,11 @@ public class SmartClientSAILViewVisitor {
 						Integer.valueOf(containerIndex))));
 	}
 
+	/**
+	 * Registers the data-grid edit-action locator.
+	 *
+	 * @param binding the data-grid binding
+	 */
 	private final void visitDataGridEdit(String binding) {
 		automationContext.put(String.format("%s.edit", binding),
 				new Locator(String.format(
@@ -425,6 +540,11 @@ public class SmartClientSAILViewVisitor {
 						Integer.valueOf(containerIndex))));
 	}
 
+	/**
+	 * Registers the data-grid remove-action locator.
+	 *
+	 * @param binding the data-grid binding
+	 */
 	private final void visitDataGridRemove(String binding) {
 		automationContext.put(String.format("%s.remove", binding),
 				new Locator(String.format(
@@ -434,6 +554,11 @@ public class SmartClientSAILViewVisitor {
 						Integer.valueOf(containerIndex))));
 	}
 
+	/**
+	 * Registers the data-grid row-selection locator.
+	 *
+	 * @param binding the data-grid binding
+	 */
 	private final void visitDataGridSelect(String binding) {
 		automationContext.put(String.format("%s.select", binding),
 				new Locator(String.format(
@@ -443,6 +568,11 @@ public class SmartClientSAILViewVisitor {
 						Integer.valueOf(containerIndex))));
 	}
 
+	/**
+	 * Registers a locator for a checkbox widget.
+	 *
+	 * @param checkBox the checkbox metadata
+	 */
 	private final void visitCheckBox(CheckBox checkBox) {
 		String binding = checkBox.getBinding();
 
@@ -454,6 +584,11 @@ public class SmartClientSAILViewVisitor {
 						Integer.valueOf(formIndex)), InputType.CHECKBOX));
 	}
 
+	/**
+	 * Registers a locator for a colour-picker widget.
+	 *
+	 * @param colour the colour-picker metadata
+	 */
 	private final void visitColourPicker(ColourPicker colour) {
 		String binding = colour.getBinding();
 
@@ -465,6 +600,11 @@ public class SmartClientSAILViewVisitor {
 						Integer.valueOf(formIndex)), InputType.TEXT));
 	}
 
+	/**
+	 * Registers a locator for a combo widget.
+	 *
+	 * @param combo the combo metadata
+	 */
 	private final void visitCombo(Combo combo) {
 		String binding = combo.getBinding();
 
@@ -476,26 +616,51 @@ public class SmartClientSAILViewVisitor {
 						Integer.valueOf(formIndex)), InputType.COMBO));
 	}
 
-	@SuppressWarnings("unused")
+	/**
+	 * Placeholder for content-image locator generation.
+	 *
+	 * @param contentImage the content-image metadata
+	 */
+	@SuppressWarnings("java:S1172")
 	private final void visitContentImage(ContentImage contentImage) {
 		// TODO
 	}
 
-	@SuppressWarnings("unused")
+	/**
+	 * Placeholder for content-link locator generation.
+	 *
+	 * @param contentLink the content-link metadata
+	 */
+	@SuppressWarnings("java:S1172")
 	private final void visitContentLink(ContentLink contentLink) {
 		// TODO
 	}
 
-	@SuppressWarnings("unused")
+	/**
+	 * Placeholder for content-signature locator generation.
+	 *
+	 * @param contentSignature the content-signature metadata
+	 */
+	@SuppressWarnings("java:S1172")
 	private final void visitContentSignature(ContentSignature contentSignature) {
 		// TODO
 	}
 
-	@SuppressWarnings("unused")
+	/**
+	 * Placeholder for HTML widget locator generation.
+	 *
+	 * @param html the HTML metadata
+	 */
+	@SuppressWarnings("java:S1172")
 	private final void visitHTML(HTML html) {
 		// TODO
 	}
 
+	/**
+	 * Registers a locator for a lookup-description widget.
+	 *
+	 * @param lookup the lookup-description metadata
+	 */
 	private final void visitLookupDescription(LookupDescription lookup) {
 		String binding = lookup.getBinding();
 
@@ -508,6 +673,11 @@ public class SmartClientSAILViewVisitor {
 						Integer.valueOf(formIndex)), InputType.LOOKUP_DESCRIPTION));
 	}
 
+	/**
+	 * Registers a locator for a password widget.
+	 *
+	 * @param password the password metadata
+	 */
 	private final void visitPassword(Password password) {
 		String binding = password.getBinding();
 
@@ -519,6 +689,11 @@ public class SmartClientSAILViewVisitor {
 						Integer.valueOf(formIndex)), InputType.TEXT));
 	}
 
+	/**
+	 * Registers a locator for a radio widget.
+	 *
+	 * @param radio the radio metadata
+	 */
 	private final void visitRadio(Radio radio) {
 		String binding = radio.getBinding();
 
@@ -531,6 +706,11 @@ public class SmartClientSAILViewVisitor {
 						Integer.valueOf(formIndex)), InputType.RADIO));
 	}
 
+	/**
+	 * Registers a locator for a rich-text widget.
+	 *
+	 * @param text the rich-text metadata
+	 */
 	private final void visitRichText(RichText text) {
 		String binding = text.getBinding();
 
@@ -543,11 +723,21 @@ public class SmartClientSAILViewVisitor {
 						Integer.valueOf(formIndex)), InputType.TEXT));
 	}
 
-	@SuppressWarnings("unused")
+	/**
+	 * Placeholder for slider widget locator generation.
+	 *
+	 * @param slider the slider metadata
+	 */
+	@SuppressWarnings("java:S1172")
 	private final void visitSlider(Slider slider) {
 		// TODO
 	}
 
+	/**
+	 * Registers a locator for a spinner widget.
+	 *
+	 * @param spinner the spinner metadata
+	 */
 	private final void visitSpinner(Spinner spinner) {
 		String binding = spinner.getBinding();
 
@@ -560,6 +750,11 @@ public class SmartClientSAILViewVisitor {
 						Integer.valueOf(formIndex)), InputType.TEXT));
 	}
 
+	/**
+	 * Registers a locator for a text-area widget.
+	 *
+	 * @param text the text-area metadata
+	 */
 	private final void visitTextArea(TextArea text) {
 		String binding = text.getBinding();
 
@@ -572,6 +767,11 @@ public class SmartClientSAILViewVisitor {
 						Integer.valueOf(formIndex)), InputType.TEXT));
 	}
 
+	/**
+	 * Registers a text-field locator, selecting the correct sub-input for date/time-oriented attribute types.
+	 *
+	 * @param text the text-field metadata to visit
+	 */
 	private final void visitTextField(TextField text) {
 		String binding = text.getBinding();
 
@@ -615,12 +815,20 @@ public class SmartClientSAILViewVisitor {
 		}
 	}
 
+	/**
+	 * Visits a reusable component fragment by traversing its contained metadata.
+	 *
+	 * @param component the component metadata defining the fragment
+	 */
 	private void visitComponent(Component component) {
 		for (MetaData widget : component.getFragment(customer, currentUxUi).getContained()) {
 			visitWidget(widget);
 		}
 	}
 
+	/**
+	 * Visits all view actions and registers corresponding locators.
+	 */
 	private final void visitActions() {
 		String name = view.getName();
 
@@ -629,6 +837,12 @@ public class SmartClientSAILViewVisitor {
 		}
 	}
 
+	/**
+	 * Dispatches an action to implicit-action expansion or custom-action handling.
+	 *
+	 * @param viewName the current view name
+	 * @param action the action metadata definition
+	 */
 	private void visit(String viewName, ActionImpl action) {
 		ImplicitActionName implicitName = action.getImplicitName();
 		if (implicitName != null) {
@@ -638,6 +852,14 @@ public class SmartClientSAILViewVisitor {
 		}
 	}
 
+	/**
+	 * Expands implicit actions into the SmartClient locator set appropriate for the current view type.
+	 *
+	 * @param viewName the current view name
+	 * @param implicitName the implicit action being expanded
+	 * @param action the action metadata definition
+	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void visit(String viewName, ImplicitActionName implicitName, ActionImpl action) {
 		if (ImplicitActionName.DEFAULTS.equals(implicitName)) {
 			if (ViewType.list.toString().equals(viewName)) {
@@ -676,52 +898,86 @@ public class SmartClientSAILViewVisitor {
 		}
 	}
 
+	/**
+	 * Registers the implicit remove-action locator.
+	 */
 	private final void visitRemoveAction() {
 		automationContext.put(ImplicitActionName.Remove.toString(),
 				new Locator(String.format("%s//IButton[actionName=\"Remove\"]", windowPrefix)));
 	}
 
+	/**
+	 * Registers the implicit zoom-out action locator.
+	 */
 	private final void visitZoomOutAction() {
 		automationContext.put(ImplicitActionName.ZoomOut.toString(),
 				new Locator(String.format("%s//IButton[actionName=\"ZoomOut\"]", windowPrefix)));
 	}
 
+	/**
+	 * Registers the implicit OK action locator.
+	 */
 	private final void visitOKAction() {
 		automationContext.put(ImplicitActionName.OK.toString(),
 				new Locator(String.format("%s//IButton[actionName=\"OK\"]", windowPrefix)));
 	}
 
+	/**
+	 * Registers the implicit save action locator.
+	 */
 	private final void visitSaveAction() {
 		automationContext.put(ImplicitActionName.Save.toString(),
 				new Locator(String.format("%s//IButton[actionName=\"Save\"]", windowPrefix)));
 	}
 
+	/**
+	 * Registers the implicit cancel action locator.
+	 */
 	private final void visitCancelAction() {
 		automationContext.put(ImplicitActionName.Cancel.toString(),
 				new Locator(String.format("%s//IButton[actionName=\"Cancel\"]", windowPrefix)));
 	}
 
+	/**
+	 * Registers the implicit delete action locator.
+	 */
 	private final void visitDeleteAction() {
 		automationContext.put(ImplicitActionName.Delete.toString(),
 				new Locator(String.format("%s//IButton[actionName=\"Delete\"]", windowPrefix)));
 	}
 
+	/**
+	 * Registers the implicit add action locator.
+	 */
 	private final void visitAddAction() {
 		automationContext.put(ImplicitActionName.Add.toString(),
 				new Locator(String.format("%s//IButton[actionName=\"Add\"]", windowPrefix)));
 	}
 
+	/**
+	 * Registers the implicit edit action locator.
+	 */
 	private final void visitEditAction() {
 		automationContext.put(ImplicitActionName.Edit.toString(),
 				new Locator(String.format("%s//IButton[actionName=\"Edit\"]", windowPrefix)));
 	}
 
+	/**
+	 * Registers a custom action locator by action name.
+	 *
+	 * @param action the custom action metadata definition
+	 */
 	private final void visitCustomAction(ActionImpl action) {
 		String actionName = action.getName();
 
 		automationContext.put(actionName, new Locator(String.format("%s//IButton[actionName=\"%s\"]", windowPrefix, actionName)));
 	}
 
+	/**
+	 * Registers a tab-selection locator by localized tab title.
+	 *
+	 * @param tab the tab metadata definition
+	 */
 	private final void visitTab(Tab tab) {
 		String path = tab.getTitle();
 

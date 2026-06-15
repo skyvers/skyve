@@ -7,6 +7,17 @@ import org.skyve.metadata.customer.LoginResources;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB-annotated descriptor for the {@code <loginResources>} element in a
+ * {@code customer.xml} file.
+ *
+ * <p>Specifies the paths to customer-branded login-page resources (logo,
+ * background, custom CSS) that override the default framework login page.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see org.skyve.metadata.customer.LoginResources
+ */
 @XmlType(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "LoginResources")
 public class LoginResourcesMetaData implements LoginResources {
 	private static final long serialVersionUID = -6851698152410454808L;

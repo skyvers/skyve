@@ -1,7 +1,7 @@
 package modules.admin.ImportExport;
 
 /**
- * Utility class containing constants for import/export
+ * Defines shared literal values used by admin import/export workflows.
  */
 public class ImportExportUtil {
 	public static final String CREATE_EVERYTHING_EVEN_IF_THERE_MIGHT_BE_DUPLICATES = "Create everything even if there might be duplicates";

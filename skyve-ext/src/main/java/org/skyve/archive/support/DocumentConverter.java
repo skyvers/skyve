@@ -8,6 +8,24 @@ import org.apache.lucene.document.DateTools.Resolution;
 import org.apache.lucene.document.Document;
 import org.skyve.domain.Bean;
 
+/**
+ * SPI for converting domain beans to Apache Lucene {@link org.apache.lucene.document.Document}
+ * instances for content-store indexing.
+ *
+ * <p>Implementations are registered with the content search subsystem and called during
+ * archive indexing to transform an {@link org.skyve.domain.Bean} into a Lucene document
+ * with searchable fields.
+ *
+ * <p>Each implementation handles a specific module/document type (as reported by
+ * {@link #handles}) and must produce a consistent set of Lucene fields so that
+ * search queries can be constructed against known field names.
+ *
+ * <p>Utility methods {@link #dateToString}/{@link #stringToDate} and
+ * {@link #toSortBinding} are provided to standardise field naming and date encoding
+ * across implementations.
+ *
+ * @see ArchiveableBean
+ */
 public interface DocumentConverter {
 
     /**

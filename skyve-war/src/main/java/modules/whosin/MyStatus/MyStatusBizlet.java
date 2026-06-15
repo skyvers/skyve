@@ -10,7 +10,17 @@ import org.skyve.util.Binder;
 import modules.whosin.domain.MyStatus;
 import modules.whosin.domain.Staff;
 
+/**
+ * Initialises {@link MyStatus} records for the currently logged-in staff member.
+ */
 public class MyStatusBizlet extends Bizlet<MyStatus> {
+	/**
+	 * Resolves the staff record associated with the active user and assigns it to the status bean.
+	 *
+	 * @param bean the transient status bean
+	 * @return the initialised status bean
+	 * @throws Exception if staff lookup fails
+	 */
 	@Override
 	public MyStatus newInstance(MyStatus bean) throws Exception {
 		

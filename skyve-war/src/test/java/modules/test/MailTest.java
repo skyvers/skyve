@@ -11,9 +11,11 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.skyve.EXT;
+import org.skyve.impl.mail.MailServiceStaticSingleton;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Mail;
 
+@SuppressWarnings("deprecation")
 public class MailTest {
 	public static final String EMAIL1 = "email1@skyve.org";
 	public static final String EMAIL2 = "email2@skyve.org";
@@ -32,6 +34,7 @@ public class MailTest {
 
 	@BeforeClass
 	public static void beforeClass() {
+		MailServiceStaticSingleton.setDefault();
 		UtilImpl.SMTP = "localhost";
 		UtilImpl.SMTP_PORT = 25;
 		bogusSend = UtilImpl.SMTP_TEST_BOGUS_SEND;

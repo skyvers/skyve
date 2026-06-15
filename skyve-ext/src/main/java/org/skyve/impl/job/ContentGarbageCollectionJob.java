@@ -27,7 +27,7 @@ import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 /**
  * This job removes orphaned uploads and any textually indexed data left from delete/truncate SQL statements issued.
@@ -36,14 +36,16 @@ import org.slf4j.LoggerFactory;
  */
 public class ContentGarbageCollectionJob implements Job {
 	private static final long CONTENT_GC_ELIGIBLE_AGE_MILLIS = UtilImpl.CONTENT_GC_ELIGIBLE_AGE_MINUTES * 60000L;
+	private static final String EXECUTE_PROBLEM_MESSAGE = "ContentGarbageCollectionJob.execute() problem...";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ContentGarbageCollectionJob.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ContentGarbageCollectionJob.class);
     private static final Logger CONTENT_LOGGER = Category.CONTENT.logger();
 
 	private Set<String> orphanedAttachmentContentIds = new TreeSet<>();
 	private Set<String> orphanedBeanBizIds = new TreeSet<>();
 	
 	@Override
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	public void execute(JobExecutionContext context)
 	throws JobExecutionException {
 		LOGGER.info("Start Content Garbage Collection");
@@ -176,7 +178,7 @@ public class ContentGarbageCollectionJob implements Job {
 						}
 						catch (Exception e) {
 							LOGGER.warn("ContentGarbageCollectionJob retrieve problem...{}", e.getLocalizedMessage());
-							if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.warn("ContentGarbageCollectionJob.execute() problem...", e);
+							if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.warn(EXECUTE_PROBLEM_MESSAGE, e);
 						}
 					}
 					
@@ -186,7 +188,7 @@ public class ContentGarbageCollectionJob implements Job {
 						}
 						catch (Exception e) {
 							LOGGER.warn("ContentGarbageCollectionJob remove problem...{}", e.getLocalizedMessage());
-							if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.warn("ContentGarbageCollectionJob.execute() problem...", e);
+							if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.warn(EXECUTE_PROBLEM_MESSAGE, e);
 						}
 					}
 					orphanedAttachmentContentIds.clear();
@@ -197,7 +199,7 @@ public class ContentGarbageCollectionJob implements Job {
 						}
 						catch (Exception e) {
 							LOGGER.warn("ContentGarbageCollectionJob remove problem...{}", e.getLocalizedMessage());
-							if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.warn("ContentGarbageCollectionJob.execute() problem...", e);
+							if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.warn(EXECUTE_PROBLEM_MESSAGE, e);
 						}
 					}
 					orphanedBeanBizIds.clear();

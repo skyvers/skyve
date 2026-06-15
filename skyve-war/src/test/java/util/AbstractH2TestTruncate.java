@@ -22,9 +22,9 @@ public abstract class AbstractH2TestTruncate extends AbstractH2Test {
 
 	@Override
 	@AfterEach
-	public void afterBase() {
-		super.afterBase(); // rollback and evict
-		
+	void afterBase() {
+		internalAfter(false); // rollback and evict, leaving the user available for truncate
+
 		Persistence p = CORE.getPersistence();
 		try {
 			p.begin();
@@ -34,7 +34,7 @@ public abstract class AbstractH2TestTruncate extends AbstractH2Test {
 			throw new DomainException(e);
 		}
 		finally {
-			p.commit(false);
+			p.commit(true);
 		}
 	}
 }

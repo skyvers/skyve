@@ -43,6 +43,7 @@ public class OWASP {
 		// nothing to see here
 	}
 	
+	@SuppressWarnings("javasecurity:S5131") // false positive: result is not left assigned unless Sanitise is null
 	public static String sanitise(Sanitisation sanitise, String html) {
 		String result = html;
 
@@ -127,6 +128,7 @@ public class OWASP {
 		return escapeHtml(result, false);
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static void sanitiseAndEscapeListModelRows(List<Bean> rows,
 														List<MetaDataQueryColumn> columns,
 														boolean escape) {
@@ -167,5 +169,19 @@ public class OWASP {
 	 */
 	public static String sanitiseFileName(String input) {
 		return SafeFileName.sanitise(input);
+	}
+
+	/**
+	 * Strips ASCII control characters from {@code value} to prevent log injection attacks.
+	 *
+	 * <p>Replaces each character in the ranges U+0000–U+001F and U+007F (DEL) with an
+	 * underscore ({@code _}). This covers CR, LF, tab, NUL, and all other ASCII control
+	 * codes that could be used to forge log entries.
+	 *
+	 * @param value the string to sanitise; may be {@code null}
+	 * @return the sanitised string, or {@code null} if {@code value} was {@code null}
+	 */
+	public static String sanitiseLog(String value) {
+		return value == null ? null : value.replaceAll("[\u0000-\u001f\u007f]", "_");
 	}
 }

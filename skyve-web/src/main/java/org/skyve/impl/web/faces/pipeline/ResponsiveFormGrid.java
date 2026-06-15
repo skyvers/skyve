@@ -26,6 +26,14 @@ public class ResponsiveFormGrid implements Serializable {
 		private int largeCols;
 		private int extraLargeCols;
 		
+		/**
+		 * Creates a responsive style definition for small through extra-large breakpoints.
+		 *
+		 * @param smallCols the small breakpoint column span
+		 * @param mediumCols the medium breakpoint column span
+		 * @param largeCols the large breakpoint column span
+		 * @param extraLargeCols the extra-large breakpoint column span
+		 */
 		public ResponsiveGridStyle(int smallCols, int mediumCols, int largeCols, int extraLargeCols) {
 			this.smallCols = smallCols;
 			this.mediumCols = mediumCols;
@@ -85,6 +93,11 @@ public class ResponsiveFormGrid implements Serializable {
 	// The column styles derived from the edit view markup.
 	private ResponsiveGridStyle[] columnStyles;
 	
+	/**
+	 * Creates a grid tracker for the supplied responsive column styles.
+	 *
+	 * @param columnStyles the per-column responsive style definitions
+	 */
 	public ResponsiveFormGrid(ResponsiveGridStyle[] columnStyles) {
 		this.columnStyles = columnStyles;
 	}

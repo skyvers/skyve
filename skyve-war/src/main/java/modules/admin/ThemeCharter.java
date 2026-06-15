@@ -32,7 +32,14 @@ import org.jfree.data.jdbc.JDBCCategoryDataset;
 import org.jfree.data.jdbc.JDBCPieDataset;
 import org.skyve.EXT;
 
+import org.slf4j.Logger;
+import org.skyve.util.logging.SkyveLoggerFactory;
+
+/**
+ * Configures chart theming, palette colours, and rendering defaults used by admin reporting views.
+ */
 public class ThemeCharter {
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ThemeCharter.class);
 
 	private static final String EMPTY_STRING = "";
 	private static final DecimalFormat THEME_NUMERIC_FORMAT = new DecimalFormat("#,##0");
@@ -75,98 +82,186 @@ public class ThemeCharter {
 			"#E3E3AD"
 	};
 	
+	/**
+	 * Performs the getThemeBaseColour operation.
+	 * @return the operation result
+	 */
 	public Color getThemeBaseColour() {
 		return themeBaseColour;
 	}
 
+	/**
+	 * Performs the setThemeBaseColour operation.
+	 * @param themeBaseColour the themeBaseColour value
+	 */
 	public void setThemeBaseColour(Color themeBaseColour) {
 		this.themeBaseColour = themeBaseColour;
 	}
 	
+	/**
+	 * Performs the getColourPalette operation.
+	 * @return the operation result
+	 */
 	public String[] getColourPalette() {
 		return colourPalette;
 	}
 
+	/**
+	 * Performs the setColourPalette operation.
+	 * @param colourPalette the colourPalette value
+	 */
 	public void setColourPalette(String[] colourPalette) {
 		this.colourPalette = colourPalette;
 	}
 
+	/**
+	 * Performs the getColouriserTheme operation.
+	 * @return the operation result
+	 */
 	public SectionColouriser.Colouriser getColouriserTheme() {
 		return colouriserTheme;
 	}
 
+	/**
+	 * Performs the setColouriserTheme operation.
+	 * @param colouriserTheme the colouriserTheme value
+	 */
 	public void setColouriserTheme(SectionColouriser.Colouriser colouriserTheme) {
 		this.colouriserTheme = colouriserTheme;
 	}
 
+	/**
+	 * Performs the getThemeLegendFontSize operation.
+	 * @return the operation result
+	 */
 	public int getThemeLegendFontSize() {
 		return themeLegendFontSize;
 	}
 
+	/**
+	 * Performs the setThemeLegendFontSize operation.
+	 * @param themeLegendFontSize the themeLegendFontSize value
+	 */
 	public void setThemeLegendFontSize(int themeLegendFontSize) {
 		this.themeLegendFontSize = themeLegendFontSize;
 	}
 
+	/**
+	 * Performs the getThemeTitleFontSize operation.
+	 * @return the operation result
+	 */
 	public int getThemeTitleFontSize() {
 		return themeTitleFontSize;
 	}
 
+	/**
+	 * Performs the setThemeTitleFontSize operation.
+	 * @param themeTitleFontSize the themeTitleFontSize value
+	 */
 	public void setThemeTitleFontSize(int themeTitleFontSize) {
 		this.themeTitleFontSize = themeTitleFontSize;
 	}
 
+	/**
+	 * Performs the getThemeRangeFontSize operation.
+	 * @return the operation result
+	 */
 	public int getThemeRangeFontSize() {
 		return themeRangeFontSize;
 	}
 
+	/**
+	 * Performs the setThemeRangeFontSize operation.
+	 * @param themeRangeFontSize the themeRangeFontSize value
+	 */
 	public void setThemeRangeFontSize(int themeRangeFontSize) {
 		this.themeRangeFontSize = themeRangeFontSize;
 	}
 
+	/**
+	 * Performs the getThemeDomainFontSize operation.
+	 * @return the operation result
+	 */
 	public int getThemeDomainFontSize() {
 		return themeDomainFontSize;
 	}
 
+	/**
+	 * Performs the setThemeDomainFontSize operation.
+	 * @param themeDomainFontSize the themeDomainFontSize value
+	 */
 	public void setThemeDomainFontSize(int themeDomainFontSize) {
 		this.themeDomainFontSize = themeDomainFontSize;
 	}
 
+	/**
+	 * Performs the getThemeLegendFont operation.
+	 * @return the operation result
+	 */
 	public Font getThemeLegendFont() {
 		return new Font(themeFontName, Font.PLAIN, themeLegendFontSize);
 	}
 
+	/**
+	 * Performs the getThemeTitleFont operation.
+	 * @return the operation result
+	 */
 	public Font getThemeTitleFont() {
 		return new Font(themeFontName, Font.BOLD, themeTitleFontSize);
 	}
 
+	/**
+	 * Performs the getThemeRangeFont operation.
+	 * @return the operation result
+	 */
 	public Font getThemeRangeFont() {
 		return new Font(themeFontName, Font.PLAIN, themeRangeFontSize);
 	}
 
+	/**
+	 * Performs the getThemeDomainFont operation.
+	 * @return the operation result
+	 */
 	public Font getThemeDomainFont() {
 		return new Font(themeFontName, Font.PLAIN, themeDomainFontSize);
 	}
 
+	/**
+	 * Performs the getThemeFontName operation.
+	 * @return the operation result
+	 */
 	public String getThemeFontName() {
 		return themeFontName;
 	}
 
+	/**
+	 * Performs the setThemeFontName operation.
+	 * @param themeFontName the themeFontName value
+	 */
 	public void setThemeFontName(String themeFontName) {
 		this.themeFontName = themeFontName;
 	}
 
+	/**
+	 * Performs the getSql operation.
+	 * @return the operation result
+	 */
 	public String getSql() {
 		return sql;
 	}
 
+	/**
+	 * Performs the setSql operation.
+	 * @param sql the sql value
+	 */
 	public void setSql(String sql) {
 		this.sql = sql;
 	}
 
-	public enum ChartAspect {
-		FLAT, THREE_D
-	}
-
+	/**
+	 * Creates a new ThemeCharter instance.
+	 * @param themeColour the themeColour value
+	 */
 	public ThemeCharter(Color themeColour) {
 		this.themeBaseColour = themeColour;
 		themeFontName = THEME_FONT_NAME;
@@ -176,6 +271,9 @@ public class ThemeCharter {
 		themeDomainFontSize = THEME_NORMAL_FONT_SIZE;
 	}
 
+	/**
+	 * Creates a new ThemeCharter instance.
+	 */
 	public ThemeCharter() {
 		this.themeBaseColour = new Color(70, 130, 180);
 		themeFontName = THEME_FONT_NAME;
@@ -185,7 +283,13 @@ public class ThemeCharter {
 		themeDomainFontSize = THEME_NORMAL_FONT_SIZE;
 	}
 
+	/**
+	 * Derives sequential colours for chart series from either a gradient or a palette.
+	 */
 	public static class SectionColouriser {
+		/**
+		 * Defines the colour derivation strategy for subsequent series colours.
+		 */
 		public enum Colouriser {
 			SINGLE_COLOUR, MULTI_COLOUR
 		}
@@ -199,46 +303,104 @@ public class ThemeCharter {
 		private Color current;
 		private String[] palette;
 		
+		/**
+		 * Returns the active colour derivation strategy.
+		 *
+		 * @return The configured colour derivation strategy.
+		 */
 		public Colouriser getColouriser() {
 			return colouriser;
 		}
 
+		/**
+		 * Sets the colour derivation strategy.
+		 *
+		 * @param colouriser The strategy to apply for future colour generation.
+		 */
 		public void setColour(Colouriser colouriser) {
 			this.colouriser = colouriser;
 		}
 
+		/**
+		 * Returns the currently selected series colour.
+		 *
+		 * @return The current series colour.
+		 */
 		public Color getCurrent() {
 			return current;
 		}
 
+		/**
+		 * Sets the currently selected series colour.
+		 *
+		 * @param current The colour to use as the current series colour.
+		 */
 		public void setCurrent(Color current) {
 			this.current = current;
 		}
 
+		/**
+		 * Returns the red-channel decrement applied for single-colour gradients.
+		 *
+		 * @return The red-channel decrement value.
+		 */
 		public int getRedDiff() {
 			return redDiff;
 		}
 
+		/**
+		 * Sets the red-channel decrement applied for single-colour gradients.
+		 *
+		 * @param redDiff The red-channel decrement value.
+		 */
 		public void setRedDiff(int redDiff) {
 			this.redDiff = redDiff;
 		}
 
+		/**
+		 * Returns the green-channel decrement applied for single-colour gradients.
+		 *
+		 * @return The green-channel decrement value.
+		 */
 		public int getGreenDiff() {
 			return greenDiff;
 		}
 
+		/**
+		 * Sets the green-channel decrement applied for single-colour gradients.
+		 *
+		 * @param greenDiff The green-channel decrement value.
+		 */
 		public void setGreenDiff(int greenDiff) {
 			this.greenDiff = greenDiff;
 		}
 
+		/**
+		 * Returns the blue-channel decrement applied for single-colour gradients.
+		 *
+		 * @return The blue-channel decrement value.
+		 */
 		public int getBlueDiff() {
 			return blueDiff;
 		}
 
+		/**
+		 * Sets the blue-channel decrement applied for single-colour gradients.
+		 *
+		 * @param blueDiff The blue-channel decrement value.
+		 */
 		public void setBlueDiff(int blueDiff) {
 			this.blueDiff = blueDiff;
 		}
 		
+		/**
+		 * Creates a colour sequencer for chart sections.
+		 *
+		 * @param baseColour The base colour used for gradient derivation.
+		 * @param columnCount The number of series/columns to colour.
+		 * @param colouriser The colour derivation strategy.
+		 * @param palette The palette to use when {@code colouriser} is multi-colour.
+		 */
 		public SectionColouriser(Color baseColour, int columnCount, SectionColouriser.Colouriser colouriser, String[] palette) {
 			this.current = baseColour;
 			this.colouriser = colouriser;
@@ -250,6 +412,9 @@ public class ThemeCharter {
 			}
 		}
 
+		/**
+		 * Advances to the next colour in the configured sequence.
+		 */
 		public void nextColour() {
 			if(colouriser==Colouriser.MULTI_COLOUR) {
 				this.current = Color.decode(palette[currentColourIndex++]);
@@ -260,22 +425,28 @@ public class ThemeCharter {
 		}
 	}
 
+	/**
+	 * Performs the getBarChartImage operation.
+	 * @param domainTitle the domainTitle value
+	 * @param rangeTitle the rangeTitle value
+	 * @param labelColumn the labelColumn value
+	 * @param orientation the orientation value
+	 * @param width the width value
+	 * @param height the height value
+	 * @param showLegend the showLegend value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	public BufferedImage getBarChartImage(String domainTitle, String rangeTitle, Integer labelColumn,
-			PlotOrientation orientation, int width, int height, ChartAspect aspect, boolean showLegend)
+			PlotOrientation orientation, int width, int height, boolean showLegend)
 			throws Exception {
 		Connection connection = null;
 		try {
 			connection = EXT.getDataStoreConnection();
 			JDBCCategoryDataset data = new JDBCCategoryDataset(connection, this.sql);
 
-			JFreeChart chart;
-			if (ChartAspect.THREE_D.equals(aspect)) {
-				chart = ChartFactory.createBarChart3D(EMPTY_STRING, domainTitle, rangeTitle, data, orientation, true,
+			JFreeChart chart = ChartFactory.createBarChart(EMPTY_STRING, domainTitle, rangeTitle, data, orientation, true,
 						false, false);
-			} else {
-				chart = ChartFactory.createBarChart(EMPTY_STRING, domainTitle, rangeTitle, data, orientation, true,
-						false, false);
-			}
 			chart.setBackgroundImageAlpha(0.8F);
 			chart.getPlot().setBackgroundAlpha(0.2F);
 			chart.getPlot().setBackgroundPaint(null);
@@ -284,13 +455,8 @@ public class ThemeCharter {
 			CategoryPlot plot = (CategoryPlot) chart.getPlot();
 			plot.setRangeGridlinesVisible(false);
 
-			BarRenderer renderer;
-			if (ChartAspect.THREE_D.equals(aspect)) {
-				renderer = (BarRenderer) chart.getCategoryPlot().getRenderer();
-			} else {
-				renderer = (BarRenderer) plot.getRenderer();
-				renderer.setBarPainter(new StandardBarPainter());
-			}
+			BarRenderer renderer = (BarRenderer) plot.getRenderer();
+			renderer.setBarPainter(new StandardBarPainter());
 
 			plot.setNoDataMessage(NO_DATA_AVAILABLE);
 			plot.setOutlineVisible(false);
@@ -325,13 +491,13 @@ public class ThemeCharter {
 
 			return chart.createBufferedImage(width, height);
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 		} finally {
 			if (connection != null) {
 				try {
 					connection.close();
 				} catch (SQLException e) {
-					e.printStackTrace();
+					LOGGER.error(e.getMessage(), e);
 				}
 				connection = null;
 			}
@@ -340,6 +506,18 @@ public class ThemeCharter {
 		return null;
 	}
 
+	/**
+	 * Performs the getLineChartImage operation.
+	 * @param domainTitle the domainTitle value
+	 * @param rangeTitle the rangeTitle value
+	 * @param labelColumn the labelColumn value
+	 * @param orientation the orientation value
+	 * @param width the width value
+	 * @param height the height value
+	 * @param showLegend the showLegend value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	public BufferedImage getLineChartImage(String domainTitle, String rangeTitle, Integer labelColumn,
 			PlotOrientation orientation, int width, int height, boolean showLegend) throws Exception {
 		Connection connection = null;
@@ -391,13 +569,13 @@ public class ThemeCharter {
 
 			return chart.createBufferedImage(width, height);
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 		} finally {
 			if (connection != null) {
 				try {
 					connection.close();
 				} catch (SQLException e) {
-					e.printStackTrace();
+					LOGGER.error(e.getMessage(), e);
 				}
 				connection = null;
 			}
@@ -406,6 +584,18 @@ public class ThemeCharter {
 		return null;
 	}
 
+	/**
+	 * Performs the getAreaChartImage operation.
+	 * @param domainTitle the domainTitle value
+	 * @param rangeTitle the rangeTitle value
+	 * @param labelColumn the labelColumn value
+	 * @param orientation the orientation value
+	 * @param width the width value
+	 * @param height the height value
+	 * @param showLegend the showLegend value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	public BufferedImage getAreaChartImage(String domainTitle, String rangeTitle, Integer labelColumn,
 			PlotOrientation orientation, int width, int height, boolean showLegend) throws Exception {
 		Connection connection = null;
@@ -457,13 +647,13 @@ public class ThemeCharter {
 
 			return chart.createBufferedImage(width, height);
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 		} finally {
 			if (connection != null) {
 				try {
 					connection.close();
 				} catch (SQLException e) {
-					e.printStackTrace();
+					LOGGER.error(e.getMessage(), e);
 				}
 				connection = null;
 			}
@@ -472,15 +662,21 @@ public class ThemeCharter {
 		return null;
 	}
 
-	public BufferedImage getPieChartImage(String title, Integer labelColumn, int width, int height, ChartAspect aspect,
+	/**
+	 * Performs the getPieChartImage operation.
+	 * @param title the title value
+	 * @param labelColumn the labelColumn value
+	 * @param width the width value
+	 * @param height the height value
+	 * @param showLegend the showLegend value
+	 * @param data the data value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
+	public BufferedImage getPieChartImage(String title, Integer labelColumn, int width, int height,
 			boolean showLegend, PieDataset data) throws Exception {
 
-		JFreeChart chart;
-		if (ChartAspect.THREE_D.equals(aspect)) {
-			chart = ChartFactory.createPieChart3D(title, data, true, false, false);
-		} else {
-			chart = ChartFactory.createPieChart(title, data, true, false, false);
-		}
+		JFreeChart chart = ChartFactory.createPieChart(title, data, true, false, false);
 		chart.setBackgroundImageAlpha(0.0F);
 		chart.getPlot().setBackgroundAlpha(0.0F);
 		chart.setBackgroundPaint(null);
@@ -508,8 +704,8 @@ public class ThemeCharter {
 		textTitle.setFont(getThemeTitleFont());
 
 		plot.setSectionOutlinesVisible(true);
-		plot.setBaseSectionOutlinePaint(new Color(0xFFFFFF));
-		plot.setBaseSectionOutlineStroke(new BasicStroke(2F));
+		plot.setDefaultSectionOutlinePaint(new Color(0xFFFFFF));
+		plot.setDefaultSectionOutlineStroke(new BasicStroke(2F));
 
 		if (!showLegend) {
 			chart.removeLegend();
@@ -520,21 +716,31 @@ public class ThemeCharter {
 		return chart.createBufferedImage(width, height);
 	}
 
-	public BufferedImage getPieChartImage(String title, Integer labelColumn, int width, int height, ChartAspect aspect,
-			boolean showLegend) throws Exception {
+	/**
+	 * Performs the getPieChartImage operation.
+	 * @param title the title value
+	 * @param labelColumn the labelColumn value
+	 * @param width the width value
+	 * @param height the height value
+	 * @param showLegend the showLegend value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
+	public BufferedImage getPieChartImage(String title, Integer labelColumn, int width, int height, boolean showLegend)
+			throws Exception {
 		Connection connection = null;
 		try {
 			connection = EXT.getDataStoreConnection();
 			JDBCPieDataset data = new JDBCPieDataset(connection, this.sql);
-			return getPieChartImage(title, labelColumn, width, height, aspect, showLegend, data);
+			return getPieChartImage(title, labelColumn, width, height, showLegend, data);
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 		} finally {
 			if (connection != null) {
 				try {
 					connection.close();
 				} catch (SQLException e) {
-					e.printStackTrace();
+					LOGGER.error(e.getMessage(), e);
 				}
 				connection = null;
 			}
@@ -543,6 +749,12 @@ public class ThemeCharter {
 		return null;
 	}
 	
+	/**
+	 * Builds a chart-label formatter token reference for the supplied column index.
+	 *
+	 * @param columnIndex The column index to reference.
+	 * @return A formatter token such as {@code {0}}.
+	 */
 	private static String labelReference(Integer columnIndex) {
 		return "{" + columnIndex.toString() + "}";
 	}
@@ -560,6 +772,7 @@ public class ThemeCharter {
 	 * @param focusString
 	 * @return
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public BufferedImage getFabulator(int width, int height, List<Object[]> objects, String focusString) {
 		BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 
@@ -649,5 +862,4 @@ public class ThemeCharter {
 
 		return img;
 	}
-
 }

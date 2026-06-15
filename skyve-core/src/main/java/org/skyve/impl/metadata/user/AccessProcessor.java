@@ -30,6 +30,16 @@ import org.skyve.metadata.view.View.ViewType;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
+/**
+ * Evaluates whether the current user has a specific access permission for a
+ * document, action, or content item.
+ *
+ * <p>The processor resolves permission from the user's accumulated role set,
+ * checking CRUD flags, content restrictions/permissions, and query and view
+ * accesses. Results are derived from pre-built privilege maps held by the user.
+ *
+ * <p>Package-private: used only by {@link UserImpl}.
+ */
 class AccessProcessor {
 	private User user;
 	private CustomerImpl customer;
@@ -96,6 +106,7 @@ class AccessProcessor {
 		}
 	}
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void processMenuItems(final List<MenuItem> items, final Module module, final String moduleName) {
 		for (MenuItem item : items) {
 			// NB Disregard LinkItem as it is outside of accesses

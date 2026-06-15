@@ -13,18 +13,37 @@ import jakarta.faces.convert.Converter;
 import jakarta.faces.model.SelectItem;
 import jakarta.faces.model.SelectItemGroup;
 
+/**
+ * Converts JSF values between formatted UI strings and Skyve domain representations for this format.
+ */
 public class SelectItemsBeanConverter implements Converter<Object> {
+	/**
+	 * Parses a UI string value into the corresponding domain value for this converter.
+	 *
+	 * @param context the active JSF context
+	 * @param component the component requesting conversion
+	 * @param value the submitted UI value
+	 * @return the resolved domain value or identifier object
+	 */
 	@Override
 	public Object getAsObject(FacesContext context, UIComponent component, String value) {
 		Object result = null;
 
-		if ((value != null) && (value.length() > 0)) {
+		if ((value != null) && (! value.isEmpty())) {
 			result = findValueByStringConversion(context, component, value, this);
 		}
 
 		return result;
 	}
 
+	/**
+	 * Formats a domain value as a UI string representation for this converter.
+	 *
+	 * @param context the active JSF context
+	 * @param component the component requesting conversion
+	 * @param value the domain value to convert
+	 * @return the display or identifier string for the supplied value
+	 */
 	@Override
 	public String getAsString(FacesContext context, UIComponent component, Object value) {
 		String result = "";
@@ -45,10 +64,29 @@ public class SelectItemsBeanConverter implements Converter<Object> {
 		return result;
 	}
 
+	/**
+	 * Searches all select items on the component for a value matching the supplied string.
+	 *
+	 * @param context the active JSF context
+	 * @param component the component providing select items
+	 * @param value the submitted UI value
+	 * @param converter the converter used for string comparisons
+	 * @return the matching item value, or {@code null} when no item matches
+	 */
 	private static Object findValueByStringConversion(FacesContext context, UIComponent component, String value, Converter<Object> converter) {
 		return findValueByStringConversion(context, component, new SelectItemsIterator(context, component), value, converter);
 	}
 
+	/**
+	 * Searches an iterator of select items for a value matching the supplied string.
+	 *
+	 * @param context the active JSF context
+	 * @param component the component providing select items
+	 * @param items the select items iterator to inspect
+	 * @param value the submitted UI value
+	 * @param converter the converter used for string comparisons
+	 * @return the matching item value, or {@code null} when no item matches
+	 */
 	private static Object findValueByStringConversion(FacesContext context,
 														UIComponent component,
 														Iterator<SelectItem> items,
@@ -58,7 +96,7 @@ public class SelectItemsBeanConverter implements Converter<Object> {
 			SelectItem item = items.next();
 			Object itemValue = item.getValue();
 			if (item instanceof SelectItemGroup selectItemGroup) {
-				SelectItem subitems[] = selectItemGroup.getSelectItems();
+				SelectItem[] subitems = selectItemGroup.getSelectItems();
 				if ((subitems != null) && (subitems.length > 0)) {
 					Object object = findValueByStringConversion(context,
 																	component,
@@ -78,19 +116,30 @@ public class SelectItemsBeanConverter implements Converter<Object> {
 		return null;
 	}
 
+	/**
+	 * Returns {@code true} when the supplied array is null or has zero length.
+	 *
+	 * @param array the array to test
+	 * @return {@code true} when null or empty, otherwise {@code false}
+	 */
 	public static boolean isEmpty(Object[] array) {
 		return array == null || array.length == 0;
 	}
 
 	/**
-	 * This class is based on Mojarra version
+	 * Iterates a fixed array of {@link SelectItem} values.
 	 */
 	static class ArrayIterator implements Iterator<SelectItem> {
-		public ArrayIterator(SelectItem items[]) {
+		/**
+		 * Creates an iterator over the supplied select-item array.
+		 *
+		 * @param items the backing array of select items
+		 */
+		public ArrayIterator(SelectItem[] items) {
 			this.items = items;
 		}
 
-		private SelectItem items[];
+		private SelectItem[] items;
 		private int index = 0;
 
 		@Override

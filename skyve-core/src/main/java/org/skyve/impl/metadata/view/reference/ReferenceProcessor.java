@@ -1,6 +1,7 @@
 package org.skyve.impl.metadata.view.reference;
 
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
@@ -12,6 +13,15 @@ import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.web.UserAgentType;
 
+/**
+ * Abstract dispatcher that processes concrete {@link Reference} subtypes.
+ *
+ * <p>Routes each reference instance to a specialised {@code process*} hook
+ * method that subclasses implement.  This centralises reference-type
+ * dispatch used by view conversion logic.
+ *
+ * <p>Threading: not thread-safe; one processor instance per conversion run.
+ */
 public abstract class ReferenceProcessor {
 	public final void process(Reference reference) {
 		if (reference instanceof ActionReference actionReference) {
@@ -78,14 +88,16 @@ public abstract class ReferenceProcessor {
 		final ViewType[] viewTypesToSearch = new ViewType[] { ViewType.edit, ViewType.create };
 		Action result = null;
 		for (ViewType viewType : viewTypesToSearch) {
-			final View listDocumentView = listDocument.getView(userAgentType.name(), customer, viewType.name());
-			if (listDocumentView == null) {
-				continue;
+			try {
+				final View listDocumentView = listDocument.getView(userAgentType.name(), customer, viewType.name());
+				result = listDocumentView.getAction(reference.getActionName());
+				if (result != null) {
+					// Found the action, we can stop looking.
+					break;
+				}
 			}
-			result = listDocumentView.getAction(reference.getActionName());
-			if (result != null) {
-				// Found the action, we can stop looking.
-				break;
+			catch (@SuppressWarnings("unused") MetaDataException e) {
+				// No view of this type, skip to the next.
 			}
 		}
 

@@ -45,6 +45,7 @@ import org.skyve.impl.dataaccess.sql.StreamableConnection;
 import org.skyve.impl.generate.charts.JFreeChartGenerator;
 import org.skyve.impl.geoip.GeoIPServiceStaticSingleton;
 import org.skyve.impl.job.JobSchedulerStaticSingleton;
+import org.skyve.impl.mail.MailServiceStaticSingleton;
 import org.skyve.impl.metadata.view.widget.Chart.ChartType;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.RDBMSDynamicPersistence;
@@ -52,7 +53,6 @@ import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.report.DefaultReporting;
 import org.skyve.impl.sms.SMSServiceStaticSingleton;
 import org.skyve.impl.tag.DefaultTagManager;
-import org.skyve.impl.util.MailUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.HttpServletRequestResponse;
 import org.skyve.impl.web.WebContainer;
@@ -75,13 +75,15 @@ import org.skyve.persistence.Persistence;
 import org.skyve.report.Reporting;
 import org.skyve.tag.TagManager;
 import org.skyve.util.GeoIPService;
+import org.skyve.util.OWASP;
 import org.skyve.util.Mail;
+import org.skyve.util.MailService;
 import org.skyve.util.PushMessage;
 import org.skyve.util.PushMessage.PushMessageReceiver;
 import org.skyve.util.SMSService;
 import org.skyve.util.SecurityUtil;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import jakarta.annotation.Nonnull;
@@ -89,12 +91,46 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
- * The central factory for creating all objects required in skyve ext.
- * See {@link org.skyve.CORE} for creating objects implemented in the skyve core API.
+ * Static facade providing access to all Skyve extended runtime services.
+ *
+ * <p>{@code EXT} is the {@code skyve-ext} counterpart to {@link org.skyve.CORE}.
+ * It provides factory methods and service accessors for capabilities that depend
+ * on the full runtime stack: content management, job scheduling, tagging, caching,
+ * reporting, mail, SMS, push messaging, GeoIP, BizPort, SQL data access, and security.
+ *
+ * <p>All methods are static and may be called from any framework layer. Underlying
+ * service implementations are resolved via singleton holders; they are available from
+ * application startup onward.
+ *
+ * <p>Example usages:
+ * <pre>
+ *   // Content management — always in try-with-resources
+ *   try (ContentManager cm = EXT.newContentManager()) {
+ *       cm.put(attachment);
+ *   }
+ *
+ *   // Tag management
+ *   TagManager tm = EXT.getTagManager();
+ *   tm.tag(tagId, bean);
+ *
+ *   // SQL access to a named data store
+ *   try (SQLDataAccess sql = EXT.newSQLDataAccess()) {
+ *       SQL q = sql.newSQL("select count(*) from ...");
+ *   }
+ * </pre>
+ *
+ * <p>Threading: all static methods are safe to call concurrently. Individual
+ * returned objects (e.g. {@link ContentManager}, {@link SQLDataAccess}) are
+ * thread-confined and must not be shared.
+ *
+ * @see org.skyve.CORE
  */
 public class EXT {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EXT.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(EXT.class);
+	private static final String WITH_BINDING = " with binding ";
+	private static final String WITH_UX_UI = " with UX/UI ";
+	private static final String NAMED = " named ";
 
 	/**
 	 * Disallow instantiation
@@ -145,10 +181,20 @@ public class EXT {
 
 	/**
 	 * Get a geo-ip service
-	 * @ return A geo-ip service
+	 * 
+	 * @return A geo-ip service
 	 */
 	public static @Nonnull GeoIPService getGeoIPService() {
 		return GeoIPServiceStaticSingleton.get();
+	}
+
+	/**
+	 * Get a mail service for sending email.
+	 * 
+	 * @return The system configured mail service wrapped with global pre-processing.
+	 */
+	public static @Nonnull MailService getMailService() {
+		return MailServiceStaticSingleton.getEffective();
 	}
 
 	/**
@@ -315,7 +361,7 @@ public class EXT {
 		for (String key : loader.getBeanKeys()) {
 			Bean bean = loader.getBean(key);
 			if (bean == null) {
-				loader.addError(c, bean, new IllegalStateException("Bean with key " + key + " not found"));
+				problems.addError(new UploadException.Problem("Bean with key " + key + " not found", key));
 			}
 			else {
 				Module module = c.getModule(bean.getBizModule());
@@ -340,7 +386,7 @@ public class EXT {
 		try {
 			for (Bean bean : beans) {
 				persistentBean = (PersistentBean) bean;
-				persistentBean = p.save(persistentBean);
+				p.save(persistentBean);
 			}
 		}
 		catch (DomainException e) {
@@ -363,20 +409,27 @@ public class EXT {
 	 * outlook displays a from addresses something like
 	 * "mailer@skyve.com (on behalf of sender@foo.com)".
 	 * 
-	 * @param mail	The email to write.
-	 * @param out	The stream to write to.
+	 * @deprecated Use {@link #getMailService()} to get the mail service and call writeMail on it.
+	 * @param mail The email to write.
+	 * @param out The stream to write to.
 	 */
+	@SuppressWarnings("java:S1133") // deprecated
+	@Deprecated(since = "10.0.0", forRemoval = false)
 	public static void writeMail(@Nonnull Mail mail, @Nonnull OutputStream out) {
-		MailUtil.writeMail(mail, out);
+		getMailService().writeMail(mail, out);
 	}
 
 	/**
 	 * Send an email.
 	 * 
-	 * @param mail	The email to send.
+	 * @deprecated Use {@link #getMailService()} to get the mail service and call sendMail on it,
+	 *             to ensure any global pre-processing is applied.
+	 * @param mail The email to send.
 	 */
+	@SuppressWarnings("java:S1133") // deprecated
+	@Deprecated(since = "10.0.0", forRemoval = false)
 	public static void sendMail(@Nonnull Mail mail) {
-		MailUtil.sendMail(mail);
+		getMailService().sendMail(mail);
 	}
 
 	/**
@@ -518,6 +571,7 @@ public class EXT {
 	 * 
 	 * @return A connection.
 	 */
+	@SuppressWarnings("resource")
 	public static @Nonnull Connection getDataStoreConnection() {
 		return getDataStoreConnection(UtilImpl.DATA_STORE, true);
 	}
@@ -547,6 +601,7 @@ public class EXT {
 	 * 
 	 * @return A SQLDataAccess.
 	 */
+	@SuppressWarnings("resource")
 	public static @Nonnull SQLDataAccess newSQLDataAccess() {
 		return new SQLDataAccessImpl(UtilImpl.DATA_STORE);
 	}
@@ -557,6 +612,7 @@ public class EXT {
 	 * 
 	 * @return A SQLDataAccess.
 	 */
+	@SuppressWarnings("resource")
 	public static @Nonnull SQLDataAccess newSQLDataAccess(@Nonnull DataStore dataStore) {
 		return new SQLDataAccessImpl(dataStore);
 	}
@@ -590,8 +646,8 @@ public class EXT {
 		catch (SkyveException e) {
 			throw e;
 		}
-		catch (Throwable t) {
-			throw new DomainException("Cannot create new list model", t);
+		catch (Exception e) {
+			throw new DomainException("Cannot create new list model", e);
 		}
 	}
 	
@@ -608,9 +664,9 @@ public class EXT {
 	/**
 	 * Check a hash against a clear text password.
 	 * 
-	 * @param	clearText
-	 * @param	The encoded password.
-	 * @return	true if it matches, or false if it doesn't
+	 * @param clearText The candidate clear-text password
+	 * @param hashedPassword The encoded password hash
+	 * @return {@code true} when the candidate password matches the hash
 	 */
 	public static boolean checkPassword(@Nonnull String clearText, @Nonnull String hashedPassword) {
 		PasswordEncoder dpe = SecurityUtil.createDelegatingPasswordEncoder();
@@ -727,66 +783,67 @@ public class EXT {
 	 * @param uxui The UX/UI name to test for
 	 */
 	public static void checkAccess(@Nonnull User user, @Nonnull UserAccess access, @Nonnull String uxui) {
-		if (!user.canAccess(access, uxui)) {
+		if (! user.canAccess(access, uxui)) {
 			final String userName = user.getName();
 			final String moduleName = access.getModuleName();
 			final String documentName = access.getDocumentName();
 			final String component = access.getComponent();
 			final StringBuilder warning = new StringBuilder(256);
 			final String resource;
-			warning.append("User ").append(userName).append(" cannot access ");
+	    		warning.append("User ").append(OWASP.sanitiseLog(userName)).append(" cannot access ");
 			if (access.isContent()) {
-				warning.append("content for document ").append(moduleName).append('.').append(documentName);
-				warning.append(" with binding ").append(component);
-				warning.append(" with UX/UI ").append(uxui);
+    			warning.append("content for document ").append(OWASP.sanitiseLog(moduleName)).append('.').append(OWASP.sanitiseLog(documentName));
+    			warning.append(WITH_BINDING).append(OWASP.sanitiseLog(component));
+    			warning.append(WITH_UX_UI).append(OWASP.sanitiseLog(uxui));
 				resource = "this content";
 			}
 			else if (access.isDocumentAggregate()) {
-				warning.append("default query for document ").append(moduleName).append('.').append(component);
-				warning.append(" with UX/UI ").append(uxui);
+    			warning.append("default query for document ").append(OWASP.sanitiseLog(moduleName)).append('.').append(OWASP.sanitiseLog(component));
+    			warning.append(WITH_UX_UI).append(OWASP.sanitiseLog(uxui));
 				resource = "this query";
 			}
 			else if (access.isDynamicImage()) {
-				warning.append("dynamic image for document ").append(moduleName).append('.').append(documentName);
-				warning.append(" with binding ").append(component);
-				warning.append(" and UX/UI ").append(uxui);
+    			warning.append("dynamic image for document ").append(OWASP.sanitiseLog(moduleName)).append('.').append(OWASP.sanitiseLog(documentName));
+    			warning.append(WITH_BINDING).append(OWASP.sanitiseLog(component));
+    			warning.append(WITH_UX_UI).append(OWASP.sanitiseLog(uxui));
 				resource = "this dynamic image";
 			}
 			else if (access.isModelAggregate()) {
-				warning.append("model for document ").append(moduleName).append('.').append(documentName);
-				warning.append(" named ").append(component);
-				warning.append(" with UX/UI ").append(uxui);
+    			warning.append("model for document ").append(OWASP.sanitiseLog(moduleName)).append('.').append(OWASP.sanitiseLog(documentName));
+    			warning.append(NAMED).append(OWASP.sanitiseLog(component));
+    			warning.append(WITH_UX_UI).append(OWASP.sanitiseLog(uxui));
 				resource = "this model";
 			}
 			else if (access.isPreviousComplete()) {
-				warning.append("previous complete for document ").append(moduleName).append('.').append(documentName);
-				warning.append(" with binding ").append(component);
-				warning.append(" and UX/UI ").append(uxui);
+    			warning.append("previous complete for document ").append(OWASP.sanitiseLog(moduleName)).append('.').append(OWASP.sanitiseLog(documentName));
+    			warning.append(WITH_BINDING).append(OWASP.sanitiseLog(component));
+    			warning.append(WITH_UX_UI).append(OWASP.sanitiseLog(uxui));
 				resource = "this previous data";
 			}
 			else if (access.isQueryAggregate()) {
-				warning.append("query for module ").append(moduleName);
-				warning.append(" named ").append(component);
-				warning.append(" with UX/UI ").append(uxui);
+    			warning.append("query for module ").append(OWASP.sanitiseLog(moduleName));
+    			warning.append(NAMED).append(OWASP.sanitiseLog(component));
+    			warning.append(WITH_UX_UI).append(OWASP.sanitiseLog(uxui));
 				resource = "this query";
 			}
 			else if (access.isReport()) {
-				warning.append("report for document ").append(moduleName).append('.').append(documentName);
-				warning.append(" named ").append(component);
-				warning.append(" with UX/UI ").append(uxui);
+    			warning.append("report for document ").append(OWASP.sanitiseLog(moduleName)).append('.').append(OWASP.sanitiseLog(documentName));
+    			warning.append(NAMED).append(OWASP.sanitiseLog(component));
+    			warning.append(WITH_UX_UI).append(OWASP.sanitiseLog(uxui));
 				resource = "this report";
 			}
 			else if (access.isSingular()) {
-				warning.append("view for document ").append(moduleName).append('.').append(documentName);
-				warning.append(" named ").append(component);
-				warning.append(" with UX/UI ").append(uxui);
+    			warning.append("view for document ").append(OWASP.sanitiseLog(moduleName)).append('.').append(OWASP.sanitiseLog(documentName));
+    			warning.append(NAMED).append(OWASP.sanitiseLog(component));
+    			warning.append(WITH_UX_UI).append(OWASP.sanitiseLog(uxui));
 				resource = "this view";
 			}
 			else {
 				throw new IllegalStateException(access.toString() + " not catered for");
 			}
 
-			LOGGER.warn(warning.toString());
+			final String log = warning.toString();
+			LOGGER.warn(log);
 			LOGGER.info("If this user already has a document or action privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
 			throw new AccessException(resource, userName);
 		}

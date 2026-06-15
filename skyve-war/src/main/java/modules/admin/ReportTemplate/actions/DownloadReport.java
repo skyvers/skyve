@@ -30,7 +30,14 @@ import modules.admin.domain.ReportTemplate;
  * supporting CSV and PDF output formats with parameter validation.
  */
 public class DownloadReport extends DownloadAction<ReportTemplateExtension> {
+	/**
+	 * Executes prepare.
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @throws Exception if the operation fails
+	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void prepare(ReportTemplateExtension bean, WebContext webContext) throws Exception {
 		// validate any required parameters
 		ValidationException e = new ValidationException();
@@ -88,6 +95,13 @@ public class DownloadReport extends DownloadAction<ReportTemplateExtension> {
 		}
 	}
 
+	/**
+	 * Executes download.
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @return the result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public Download download(ReportTemplateExtension bean, WebContext webContext) throws Exception {
 		// return the correct report type

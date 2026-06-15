@@ -9,8 +9,10 @@ import org.skyve.metadata.module.Module;
 
 import modules.admin.domain.Job;
 
+/**
+ * Extends {@link Job} with rerun eligibility logic for admin UI actions.
+ */
 public class JobExtension extends Job {
-
 	private static final long serialVersionUID = 3821211430282929423L;
 
 	/**
@@ -19,7 +21,7 @@ public class JobExtension extends Job {
 	 * Checks whether this job has a status (complete/failed), and
 	 * has a unique display name so we know we can identify the job to rerun.
 	 * 
-	 * @return true when this job can be rerun, false otherwise
+	 * @return {@code true} when this job can be rerun, otherwise {@code false}
 	 */
 	public boolean rerunnable() {
 		if (getStatus() != null) {

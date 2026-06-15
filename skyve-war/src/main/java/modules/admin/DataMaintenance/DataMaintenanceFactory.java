@@ -7,11 +7,18 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.admin.domain.DataMaintenance;
 
+/**
+ * Creates Data Maintenance documents with default maintenance state.
+ */
 @SkyveFactory(testAction = false)
 public class DataMaintenanceFactory {
-
+	/**
+	 * Performs the crudInstance operation.
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@SkyveFixture(types = FixtureType.crud)
-	public static DataMaintenanceExtension crudInstance() throws Exception {
+	public static DataMaintenanceExtension crudInstance() {
 		DataMaintenanceExtension bean = new DataBuilder()
 				.optional(true, false)
 				.factoryBuild(DataMaintenance.MODULE_NAME, DataMaintenance.DOCUMENT_NAME);

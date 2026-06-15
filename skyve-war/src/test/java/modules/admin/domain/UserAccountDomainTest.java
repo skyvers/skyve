@@ -1,0 +1,64 @@
+package modules.admin.domain;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
+import org.junit.jupiter.api.Test;
+import org.skyve.util.DataBuilder;
+import org.skyve.util.test.SkyveFixture.FixtureType;
+
+import util.AbstractH2Test;
+
+@SuppressWarnings("static-method")
+class UserAccountDomainTest extends AbstractH2Test {
+
+	@Test
+	void dataBuilderCreatesBean() {
+		UserAccount bean = new DataBuilder()
+				.fixture(FixtureType.crud)
+				.build(UserAccount.MODULE_NAME, UserAccount.DOCUMENT_NAME);
+		assertNotNull(bean);
+	}
+
+	@Test
+	void moduleAndDocumentNames() {
+		UserAccount bean = UserAccount.newInstance();
+		assertEquals("admin", bean.getBizModule());
+		assertEquals("UserAccount", bean.getBizDocument());
+	}
+
+	@Test
+	void sessionsListInitialized() {
+		UserAccount bean = UserAccount.newInstance();
+		assertNotNull(bean.getSessions());
+	}
+
+	@Test
+	void secondFactorPreferredMethodSetAndGet() {
+		UserAccount bean = UserAccount.newInstance();
+		bean.setSecondFactorPreferredMethod(UserAccount.SecondFactorPreferredMethod.email);
+		assertEquals(UserAccount.SecondFactorPreferredMethod.email, bean.getSecondFactorPreferredMethod());
+	}
+
+	@Test
+	void secondFactorEnumFromCode() {
+		UserAccount.SecondFactorPreferredMethod method = UserAccount.SecondFactorPreferredMethod.fromCode("A");
+		assertEquals(UserAccount.SecondFactorPreferredMethod.authenticator, method);
+	}
+
+	@Test
+	void secondFactorEnumValues() {
+		assertNotNull(UserAccount.SecondFactorPreferredMethod.values());
+		assertEquals(3, UserAccount.SecondFactorPreferredMethod.values().length);
+	}
+
+	@Test
+	void secondFactorPreferredMethodFromLocalisedDescriptionAndToDomainValues() {
+		assertNull(UserAccount.SecondFactorPreferredMethod.fromCode("nonexistent"));
+		assertNotNull(UserAccount.SecondFactorPreferredMethod.fromLocalisedDescription(
+				UserAccount.SecondFactorPreferredMethod.email.toLocalisedDescription()));
+		assertNull(UserAccount.SecondFactorPreferredMethod.fromLocalisedDescription("nonexistent"));
+		assertNotNull(UserAccount.SecondFactorPreferredMethod.toDomainValues());
+	}
+}

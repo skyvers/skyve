@@ -8,6 +8,9 @@ import org.skyve.impl.sail.mock.MockFacesContext;
 
 import jakarta.faces.context.FacesContext;
 
+/**
+ * Renders Skyve metadata into JSF or PrimeFaces output for this concern.
+ */
 public class SkyveBarChartRenderer extends BarChartRenderer {
 	public String encodeConfig(ChartModel model) throws IOException {
 		FacesContext fc = new MockFacesContext();

@@ -14,11 +14,14 @@ import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Binder;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
+/**
+ * Executes a Faces callback action within the current Skyve web context.
+ */
 public class SetTitleAction extends FacesAction<Void> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SetTitleAction.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SetTitleAction.class);
     private static final Logger FACES_LOGGER = Category.FACES.logger();
 
 	private FacesView facesView;

@@ -1140,6 +1140,86 @@ SKYVE.Leaflet = (function () {
 		}
 	}
 
+	function isClusterableGeometry(geometry) {
+		return (
+			geometry &&
+			(geometry.type === "Point" || geometry.type === "MultiPoint") &&
+			geometry.properties &&
+			!geometry.properties.editable &&
+			L.markerClusterGroup
+		);
+	}
+
+	function markerClusterGroup(display) {
+		const maxZoom = display.webmap.getMaxZoom();
+		if (!isFinite(maxZoom)) {
+			return null;
+		}
+		if (
+			!display._markerClusterGroup ||
+			display._markerClusterGroup._map !== display.webmap
+		) {
+			display._markerClusterGroup = L.markerClusterGroup({
+				showCoverageOnHover: true,
+				zoomToBoundsOnClick: true,
+				spiderfyOnMaxZoom: true,
+				removeOutsideVisibleBounds: true,
+				maxClusterRadius: 40,
+				spiderLegPolylineOptions: {
+					weight: 1.5,
+					color: "#333",
+					opacity: 0.5,
+				},
+			});
+			display.webmap.addLayer(display._markerClusterGroup);
+		}
+		return display._markerClusterGroup;
+	}
+
+	function addOverlay(display, overlay, clustered) {
+		if (clustered) {
+			const group = markerClusterGroup(display);
+			if (group) {
+				overlay._skyveClustered = true;
+				group.addLayer(overlay);
+				return;
+			}
+		}
+		display.webmap.addLayer(overlay);
+	}
+
+	function removeOverlay(display, overlay) {
+		if (overlay._skyveClustered && display._markerClusterGroup) {
+			display._markerClusterGroup.removeLayer(overlay);
+		} else {
+			display.webmap.removeLayer(overlay);
+		}
+	}
+
+	function overlayGeometry(overlay) {
+		if (overlay.zoomData) {
+			return overlay.zoomData.geometry;
+		}
+		if (overlay.getLayers) {
+			const layers = overlay.getLayers();
+			if (layers.length && layers[0].zoomData) {
+				return layers[0].zoomData.geometry;
+			}
+		}
+		return null;
+	}
+
+	function overlayBounds(overlay) {
+		if (overlay.getBounds) {
+			return overlay.getBounds();
+		}
+		if (overlay.getLatLng) {
+			const latlng = overlay.getLatLng();
+			return L.latLngBounds(latlng, latlng);
+		}
+		return null;
+	}
+
 	// Public methods
 	return {
 		/**
@@ -1171,7 +1251,7 @@ SKYVE.Leaflet = (function () {
 						if (!found) {
 							const deletedObject = display._objects[bizId];
 							for (let i = 0, l = deletedObject.overlays.length; i < l; i++) {
-								display.webmap.removeLayer(deletedObject.overlays[i]);
+								removeOverlay(display, deletedObject.overlays[i]);
 								deletedObject.overlays[i] = null;
 							}
 							delete deletedObject.overlays;
@@ -1185,7 +1265,7 @@ SKYVE.Leaflet = (function () {
 					if (Object.prototype.hasOwnProperty.call(display._objects, bizId)) {
 						const deletedObject = display._objects[bizId];
 						for (let i = 0, l = deletedObject.overlays.length; i < l; i++) {
-							display.webmap.removeLayer(deletedObject.overlays[i]);
+							removeOverlay(display, deletedObject.overlays[i]);
 							deletedObject.overlays[i] = null;
 						}
 						delete deletedObject.overlays;
@@ -1204,10 +1284,7 @@ SKYVE.Leaflet = (function () {
 					let same = object.overlays.length === item.features.length;
 					if (same) {
 						for (let j = 0, m = object.overlays.length; j < m; j++) {
-							if (
-								object.overlays[j].getLayers()[0].zoomData.geometry !==
-								item.features[j].geometry
-							) {
+							if (overlayGeometry(object.overlays[j]) !== item.features[j].geometry) {
 								same = false;
 								break;
 							}
@@ -1215,7 +1292,7 @@ SKYVE.Leaflet = (function () {
 					}
 					if (!same) {
 						for (let j = 0, m = object.overlays.length; j < m; j++) {
-							display.webmap.removeLayer(object.overlays[j]);
+							removeOverlay(display, object.overlays[j]);
 							object.overlays[j] = null;
 						}
 						delete object.overlays;
@@ -1242,7 +1319,7 @@ SKYVE.Leaflet = (function () {
 						}
 						if (itemFeature.iconRelativeFilePath) {
 							const icon = {
-								iconUrl: `resources?_n=${itemFeature.iconRelativeFilePath}&_doc=${data._doc}`,
+								iconUrl: `${SKYVE.Util.CONTEXT_URL}resources?_n=${itemFeature.iconRelativeFilePath}&_doc=${data._doc}`,
 							};
 							if (itemFeature.iconAnchorX && itemFeature.iconAnchorY) {
 								icon.iconAnchor = [
@@ -1252,6 +1329,7 @@ SKYVE.Leaflet = (function () {
 							}
 							geometry.properties.icon = icon;
 						}
+						const clustered = isClusterableGeometry(geometry);
 
 						const overlay = L.geoJson(geometry, {
 							pointToLayer(point, latlng) {
@@ -1287,7 +1365,7 @@ SKYVE.Leaflet = (function () {
 							},
 						});
 						object.overlays.push(overlay);
-						display.webmap.addLayer(overlay);
+						addOverlay(display, overlay, clustered);
 					}
 					display._objects[item.bizId] = object;
 				}
@@ -1303,7 +1381,10 @@ SKYVE.Leaflet = (function () {
 						const overlays = object.overlays;
 						for (let i = 0, l = overlays.length; i < l; i++) {
 							const overlay = overlays[i];
-							bounds.extend(overlay.getBounds());
+							const overlayBound = overlayBounds(overlay);
+							if (overlayBound) {
+								bounds.extend(overlayBound);
+							}
 						}
 					}
 				}

@@ -16,6 +16,10 @@ import org.skyve.impl.metadata.view.container.form.FormRow;
 
 import jakarta.annotation.Nullable;
  
+/**
+ * PrimeReact-specific layout/container renderer.
+ */
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate fragments of generated PrimeReact layout output.
 public class PrimeReactLayoutRenderer extends LayoutRenderer {
 	private Map<String, String> imports;
 

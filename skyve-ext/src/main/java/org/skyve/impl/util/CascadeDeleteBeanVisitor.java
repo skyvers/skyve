@@ -10,11 +10,25 @@ import org.skyve.metadata.model.document.Reference.ReferenceType;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.util.BeanVisitor;
 
+/**
+ * Bean visitor base class for cascade-delete pre-processing.
+ *
+ * <p>The visitor traverses persistable, non-parent, non-aggregation relationships
+ * and invokes {@link #preDeleteProcessing(Document, Bean)} before continuing down
+ * eligible branches.
+ */
 public abstract class CascadeDeleteBeanVisitor extends BeanVisitor {
+	/**
+	 * Creates a cascade-delete visitor with inverse traversal disabled and
+	 * collection traversal enabled.
+	 */
 	public CascadeDeleteBeanVisitor() {
 		super(false, true);
 	}
 	
+	/**
+	 * Filters traversal to references that should participate in cascade-delete checks.
+	 */
 	@Override
 	protected final boolean accept(String binding,
 									Document visitedDocument,
@@ -51,5 +65,12 @@ public abstract class CascadeDeleteBeanVisitor extends BeanVisitor {
 		return false;
 	}
 	
+	/**
+	 * Executes delete pre-processing for one cascaded bean/document pair.
+	 *
+	 * @param documentToCascade Document metadata for the visited bean
+	 * @param beanToCascade Visited bean participating in cascade delete
+	 * @throws Exception If pre-delete processing fails
+	 */
 	public abstract void preDeleteProcessing(Document documentToCascade, Bean beanToCascade) throws Exception;
 }

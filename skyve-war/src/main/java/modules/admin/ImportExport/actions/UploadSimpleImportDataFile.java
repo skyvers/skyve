@@ -25,8 +25,32 @@ import org.skyve.web.WebContext;
 import modules.admin.ImportExport.ImportExportExtension;
 import modules.admin.domain.ImportExportColumn;
 
+import org.slf4j.Logger;
+import org.skyve.util.logging.SkyveLoggerFactory;
+
+/**
+ * Handles spreadsheet uploads and derives import column definitions from the file.
+ */
 public class UploadSimpleImportDataFile extends UploadAction<ImportExportExtension> {
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(UploadSimpleImportDataFile.class);
+
+	/**
+	 * Stores the uploaded file, infers column definitions, and persists bean state.
+	 *
+	 * @param importExport
+	 *        the import/export bean receiving the uploaded file
+	 * @param upload
+	 *        uploaded file metadata and stream
+	 * @param exception
+	 *        upload exception collector used by the spreadsheet loader
+	 * @param webContext
+	 *        the current web context used for growl feedback
+	 * @return the saved import/export bean
+	 * @throws Exception
+	 *         if upload persistence or column inference fails
+	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public ImportExportExtension upload(ImportExportExtension importExport,
 											Upload upload,
 											UploadException exception,
@@ -83,7 +107,7 @@ public class UploadSimpleImportDataFile extends UploadAction<ImportExportExtensi
 				webContext.growl(MessageSeverity.info, bean.getResults());
 			} catch (Exception e) {
 				// clean up any uploaded file
-				e.printStackTrace();
+				LOGGER.error(e.getMessage(), e);
 				bean.cleanupImportFile();
 			}
 		}
@@ -94,6 +118,18 @@ public class UploadSimpleImportDataFile extends UploadAction<ImportExportExtensi
 		return bean;
 	}
 
+	/**
+	 * Rebuilds import column rows by reading the uploaded spreadsheet header row.
+	 *
+	 * @param bean
+	 *        the import/export bean with uploaded file path
+	 * @param exception
+	 *        upload exception collector for POI parsing
+	 * @return the same bean with regenerated import/export columns
+	 * @throws Exception
+	 *         if file loading or metadata matching fails
+	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static ImportExportExtension loadColumnsFromFile(ImportExportExtension bean, UploadException exception) throws Exception {
 
 		// clear previous columns

@@ -2,6 +2,16 @@ package org.skyve.impl.metadata.view;
 
 import org.skyve.impl.util.UtilImpl;
 
+/**
+ * Utility class providing responsive-layout calculations for view rendering.
+ *
+ * <p>Converts between Skyve responsive-width column values and CSS pixel
+ * breakpoints (small/medium/large screen).  Constants and methods are all
+ * static; the class is not instantiable.
+ *
+ * <p>Threading: thread-safe.  All methods are pure computations over
+ * primitive values with no mutable shared state.
+ */
 public class LayoutUtil {
 	private LayoutUtil() {}
 	

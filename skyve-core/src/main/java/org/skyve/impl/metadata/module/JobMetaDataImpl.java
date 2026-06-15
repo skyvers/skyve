@@ -15,6 +15,21 @@ import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * JAXB-annotated implementation of {@link JobMetaData}, representing a background
+ * job declared in a module descriptor.
+ *
+ * <p>A job declaration maps a symbolic name to a fully-qualified class that the Quartz
+ * scheduler can instantiate and execute.  The {@code displayName} and {@code description}
+ * fields carry the human-readable label and documentation; the {@code className} field
+ * identifies the concrete {@link org.skyve.job.Job} subclass to run.
+ *
+ * <p>Threading: not thread-safe.  Instances are populated during metadata loading
+ * and are read-only once placed in the repository cache.
+ *
+ * @see JobMetaData
+ * @see org.skyve.job.Job
+ */
 @XmlType(name = "job", 
 			namespace = XMLMetaData.MODULE_NAMESPACE,
 			propOrder = {"displayName", "className", "description", "properties"})

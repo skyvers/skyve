@@ -7,9 +7,17 @@ import org.skyve.util.Util;
 import jakarta.annotation.Nonnull;
 import modules.admin.domain.UserLoginRecord;
 
+/**
+ * Extends login records with lazy geolocation support and presentation helpers.
+ */
 public class UserLoginRecordExtension extends UserLoginRecord {
 	private static final long serialVersionUID = 200018857407163578L;
 
+	/**
+	 * Prefixes failed login attempts in the business key for readability.
+	 *
+	 * @return Decorated business key for failed logins, otherwise the base key.
+	 */
 	@Override
 	public String getBizKey() {
 		if (Boolean.TRUE.equals(getFailed())) {
@@ -37,7 +45,9 @@ public class UserLoginRecordExtension extends UserLoginRecord {
 	}
 
 	/**
-	 * Overridden to check if we have IP geo-location data
+	 * Indicates whether geolocation data is available for this record.
+	 *
+	 * @return {@code true} when geolocation is not empty.
 	 */
 	@Override
 	public boolean isHasLocation() {

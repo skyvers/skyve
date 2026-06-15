@@ -2,6 +2,7 @@ package org.skyve.util.monitoring;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.temporal.ChronoField;
 import java.util.Arrays;
 import java.util.Map;
@@ -78,6 +79,9 @@ public class RequestMeasurements implements Serializable {
 	private int lastDay = Integer.MIN_VALUE;
 	private int lastWeek = Integer.MIN_VALUE;
 
+	/**
+	 * Creates empty request measurements for all rolling time windows.
+	 */
 	public RequestMeasurements() {
 		clear(secondsMillis, secondsCpuUtilisation, secondsSystemCpuUsage, secondsHeapRamUsage);
 		clear(minutesMillis, minutesCpuUtilisation, minutesSystemCpuUsage, minutesHeapRamUsage);
@@ -86,22 +90,47 @@ public class RequestMeasurements implements Serializable {
 		clear(weeksMillis, weeksCpuUtilisation, weeksSystemCpuUsage, weeksHeapRamUsage);
 	}
 	
+	/**
+	 * Returns elapsed request times recorded for the current minute.
+	 *
+	 * @return second-indexed millisecond values; never {@code null}
+	 */
 	public Map<Integer, Integer> getSecondsMillis() {
 		return getMap(secondsMillis);
 	}
 
+	/**
+	 * Returns elapsed request time roll-ups recorded for the current hour.
+	 *
+	 * @return minute-indexed millisecond values; never {@code null}
+	 */
 	public Map<Integer, Integer> getMinutesMillis() {
 		return getMap(minutesMillis);
 	}
 
+	/**
+	 * Returns elapsed request time roll-ups recorded for the current day.
+	 *
+	 * @return hour-indexed millisecond values; never {@code null}
+	 */
 	public Map<Integer, Integer> getHoursMillis() {
 		return getMap(hoursMillis);
 	}
 
+	/**
+	 * Returns elapsed request time roll-ups recorded for the current week.
+	 *
+	 * @return day-indexed millisecond values; never {@code null}
+	 */
 	public Map<Integer, Integer> getDaysMillis() {
 		return getMap(daysMillis);
 	}
 
+	/**
+	 * Returns elapsed request time roll-ups recorded for the current year window.
+	 *
+	 * @return week-indexed millisecond values; never {@code null}
+	 */
 	public Map<Integer, Integer> getWeeksMillis() {
 		return getMap(weeksMillis);
 	}
@@ -118,62 +147,137 @@ public class RequestMeasurements implements Serializable {
 		return result;
 	}
 
+	/**
+	 * Returns request thread CPU utilisation recorded for the current minute.
+	 *
+	 * @return second-indexed fractional percentages; never {@code null}
+	 */
 	public Map<Integer, Float> getSecondsCpuUtilisation() {
 		return getMap(secondsCpuUtilisation);
 	}
 
+	/**
+	 * Returns request thread CPU utilisation roll-ups recorded for the current hour.
+	 *
+	 * @return minute-indexed fractional percentages; never {@code null}
+	 */
 	public Map<Integer, Float> getMinutesCpuUtilisation() {
 		return getMap(minutesCpuUtilisation);
 	}
 
+	/**
+	 * Returns request thread CPU utilisation roll-ups recorded for the current day.
+	 *
+	 * @return hour-indexed fractional percentages; never {@code null}
+	 */
 	public Map<Integer, Float> getHoursCpuUtilisation() {
 		return getMap(hoursCpuUtilisation);
 	}
 
+	/**
+	 * Returns request thread CPU utilisation roll-ups recorded for the current week.
+	 *
+	 * @return day-indexed fractional percentages; never {@code null}
+	 */
 	public Map<Integer, Float> getDaysCpuUtilisation() {
 		return getMap(daysCpuUtilisation);
 	}
 
+	/**
+	 * Returns request thread CPU utilisation roll-ups recorded for the current year window.
+	 *
+	 * @return week-indexed fractional percentages; never {@code null}
+	 */
 	public Map<Integer, Float> getWeeksCpuUtilisation() {
 		return getMap(weeksCpuUtilisation);
 	}
 
+	/**
+	 * Returns heap RAM usage recorded for the current minute.
+	 *
+	 * @return second-indexed fractional percentages; never {@code null}
+	 */
 	public Map<Integer, Float> getSecondsHeapRamUsage() {
 		return getMap(secondsHeapRamUsage);
 	}
 
+	/**
+	 * Returns heap RAM usage roll-ups recorded for the current hour.
+	 *
+	 * @return minute-indexed fractional percentages; never {@code null}
+	 */
 	public Map<Integer, Float> getMinutesHeapRamUsage() {
 		return getMap(minutesHeapRamUsage);
 	}
 
+	/**
+	 * Returns heap RAM usage roll-ups recorded for the current day.
+	 *
+	 * @return hour-indexed fractional percentages; never {@code null}
+	 */
 	public Map<Integer, Float> getHoursHeapRamUsage() {
 		return getMap(hoursHeapRamUsage);
 	}
 
+	/**
+	 * Returns heap RAM usage roll-ups recorded for the current week.
+	 *
+	 * @return day-indexed fractional percentages; never {@code null}
+	 */
 	public Map<Integer, Float> getDaysHeapRamUsage() {
 		return getMap(daysHeapRamUsage);
 	}
 
+	/**
+	 * Returns heap RAM usage roll-ups recorded for the current year window.
+	 *
+	 * @return week-indexed fractional percentages; never {@code null}
+	 */
 	public Map<Integer, Float> getWeeksHeapRamUsage() {
 		return getMap(weeksHeapRamUsage);
 	}
 
+	/**
+	 * Returns system CPU usage recorded for the current minute.
+	 *
+	 * @return second-indexed fractional percentages; never {@code null}
+	 */
 	public Map<Integer, Float> getSecondsSystemCpuUsage() {
 		return getMap(secondsSystemCpuUsage);
 	}
 
+	/**
+	 * Returns system CPU usage roll-ups recorded for the current hour.
+	 *
+	 * @return minute-indexed fractional percentages; never {@code null}
+	 */
 	public Map<Integer, Float> getMinutesSystemCpuUsage() {
 		return getMap(minutesSystemCpuUsage);
 	}
 
+	/**
+	 * Returns system CPU usage roll-ups recorded for the current day.
+	 *
+	 * @return hour-indexed fractional percentages; never {@code null}
+	 */
 	public Map<Integer, Float> getHoursSystemCpuUsage() {
 		return getMap(hoursSystemCpuUsage);
 	}
 
+	/**
+	 * Returns system CPU usage roll-ups recorded for the current week.
+	 *
+	 * @return day-indexed fractional percentages; never {@code null}
+	 */
 	public Map<Integer, Float> getDaysSystemCpuUsage() {
 		return getMap(daysSystemCpuUsage);
 	}
 
+	/**
+	 * Returns system CPU usage roll-ups recorded for the current year window.
+	 *
+	 * @return week-indexed fractional percentages; never {@code null}
+	 */
 	public Map<Integer, Float> getWeeksSystemCpuUsage() {
 		return getMap(weeksSystemCpuUsage);
 	}
@@ -219,12 +323,18 @@ public class RequestMeasurements implements Serializable {
 	}
 	
 	
+	/**
+	 * Rolls any elapsed time windows forward without adding a new request measurement.
+	 *
+	 * <p>Side effects: mutates the internal rolling buckets and updates the last-update timestamp.
+	 */
 	public synchronized void rollup() {
 		rollupInternal();
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private int rollupInternal() {
-		LocalDateTime currentDateTime = LocalDateTime.now();
+		LocalDateTime currentDateTime = LocalDateTime.now(ZoneId.systemDefault());
 		timeLastUpdate = System.currentTimeMillis();
 		int second = currentDateTime.getSecond();
 		int minute = currentDateTime.getMinute();
@@ -389,6 +499,11 @@ public class RequestMeasurements implements Serializable {
 		sb.append("\n");
 	}
 
+	/**
+	 * Returns the epoch millisecond timestamp of the last measurement update or roll-up.
+	 *
+	 * @return epoch milliseconds according to the system clock
+	 */
 	public long getTimeLastUpdate() {
 		return timeLastUpdate;
 	}

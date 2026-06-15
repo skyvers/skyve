@@ -8,7 +8,7 @@ import modules.admin.ReportParameter.ReportParameterExtension;
 import modules.admin.domain.ReportParameter;
 
 /**
- * This class acts as a service layer to encapsulate domain logic.
+ * Provides helper operations for constructing report dataset parameters from query bindings.
  *
  * Add this line to classes that wish to use it: @Inject private transient ReportDatasetService reportDatasetService;
  */

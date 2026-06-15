@@ -12,12 +12,25 @@ import jakarta.inject.Inject;
 import modules.admin.Country.CountryService;
 import modules.admin.domain.Startup;
 
+/**
+ * Implements Startup document initialization, rerender handling, and validation
+ * for editable runtime configuration settings.
+ */
 public class StartupBizlet extends Bizlet<StartupExtension> {
-	@Inject
-	private transient CountryService countryService;
 	public static final String MAP_LAYER_GMAP = "google.maps.MapTypeId.ROADMAP";
 	public static final String MAP_LAYER_OPEN_STREET_MAP = "[L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19, attribution: '&copy; <a href=\\\\\\\"https://www.openstreetmap.org/copyright\\\\\\\">OpenStreetMap</a> contributors'})]";
 
+	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
+	private transient CountryService countryService;
+
+	/**
+	 * Provides selectable country values for GeoIP configuration.
+	 *
+	 * @param attributeName the attribute requesting variant values
+	 * @return country domain values for GeoIP fields, otherwise superclass values
+	 * @throws Exception if domain retrieval fails
+	 */
 	@Override
 	public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
 		if (Startup.geoIPCountriesPropertyName.equals(attributeName)) {
@@ -27,6 +40,13 @@ public class StartupBizlet extends Bizlet<StartupExtension> {
 		return super.getVariantDomainValues(attributeName);
 	}
 
+	/**
+	 * Initializes the startup bean from the current effective configuration.
+	 *
+	 * @param bean the startup bean being instantiated
+	 * @return the initialized startup bean
+	 * @throws Exception if configuration loading fails
+	 */
 	@Override
 	public StartupExtension newInstance(StartupExtension bean) throws Exception {
 		// set all the current property values from the current configuration
@@ -35,6 +55,14 @@ public class StartupBizlet extends Bizlet<StartupExtension> {
 		return bean;
 	}
 
+	/**
+	 * Applies dependent-field updates when map or backup settings change.
+	 *
+	 * @param source the triggering binding
+	 * @param bean the startup bean being rerendered
+	 * @param webContext the current web context
+	 * @throws Exception if rerender preparation fails
+	 */
 	@Override
 	public void preRerender(String source, StartupExtension bean, WebContext webContext) throws Exception {
 
@@ -70,7 +98,15 @@ public class StartupBizlet extends Bizlet<StartupExtension> {
 		super.preRerender(source, bean, webContext);
 	}
 
+	/**
+	 * Validates startup configuration values before save.
+	 *
+	 * @param bean the startup bean being validated
+	 * @param e the validation collector
+	 * @throws Exception if validation processing fails
+	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void validate(StartupExtension bean, ValidationException e) throws Exception {
 		if (bean.getBackupDirectoryName() != null) {
 			if (bean.getBackupDirectoryName().length() < 3) {

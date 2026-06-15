@@ -18,6 +18,7 @@ public class ReferenceTarget implements SerializableMetaData {
 	private static final long serialVersionUID = 245896096781243153L;
 
 	@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
+	@SuppressWarnings("java:S115") // Suppress "Constant names should comply with a naming convention" as these are not constants but enum values
 	public enum ReferenceTargetType {
 		self,
 		blankFrame,

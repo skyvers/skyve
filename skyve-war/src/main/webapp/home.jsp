@@ -21,11 +21,11 @@
 <%@ page import="org.skyve.web.UserAgentType"%>
 <%@ page import="org.skyve.impl.web.WebUtil"%>
 <%@ page import="org.skyve.impl.util.UtilImpl"%>
-<%@ page import="org.slf4j.LoggerFactory"%>
+<%@ page import="org.skyve.util.logging.SkyveLoggerFactory"%>
 <%@ page import="org.slf4j.Logger"%>
 <%@ page import="org.skyve.util.logging.Category"%>
 
-<%! static final Logger logger = LoggerFactory.getLogger("org.skyve.jsp.home"); %>
+<%! static final Logger logger = SkyveLoggerFactory.getLogger("org.skyve.jsp.home"); %>
 <%! static final Logger COMMAND_LOGGER = Category.COMMAND.logger(); %>
 
 <%

@@ -6,8 +6,19 @@ import org.skyve.web.WebContext;
 
 import modules.admin.Startup.StartupExtension;
 
+/**
+ * Dismisses the startup prompt and optionally persists the
+ * "don't show again" preference.
+ */
 public class Dismiss implements ServerSideAction<StartupExtension> {
-
+	/**
+	 * Handles startup dismissal requests.
+	 *
+	 * @param bean the startup bean carrying dismissal choice
+	 * @param webContext the current web context
+	 * @return the action result wrapping the startup bean
+	 * @throws Exception if configuration update fails
+	 */
 	@Override
 	public ServerSideActionResult<StartupExtension> execute(StartupExtension bean, WebContext webContext) throws Exception {
 
@@ -19,5 +30,4 @@ public class Dismiss implements ServerSideAction<StartupExtension> {
 
 		return new ServerSideActionResult<>(bean);
 	}
-
 }

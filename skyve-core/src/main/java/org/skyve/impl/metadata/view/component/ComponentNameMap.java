@@ -7,6 +7,16 @@ import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB-annotated mapping entry that renames a widget component during view
+ * composition.
+ *
+ * <p>Declares that a component referenced as {@code fromComponent} in the
+ * parent view should be resolved as {@code mappedTo} in the composed view,
+ * enabling component reuse with different bindings or identifiers.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ */
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE, propOrder = {"fromComponent", "mappedTo"})
 public class ComponentNameMap implements SerializableMetaData {

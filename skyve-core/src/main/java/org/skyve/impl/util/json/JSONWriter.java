@@ -37,8 +37,22 @@ import org.skyve.metadata.module.Module;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
+import org.slf4j.Logger;
+import org.skyve.util.logging.SkyveLoggerFactory;
+
 // TODO Clean up exception handling in JSON stuff
+/**
+ * Serialises Java objects — domain beans, maps, collections, and primitives — to
+ * a JSON string, respecting Skyve attribute converters and bean reference semantics.
+ *
+ * <p>Supports circular-reference detection via a visited-bean set. Geometry values
+ * are written as Well-Known Text (WKT). Dates and Skyve temporal types are written
+ * as ISO-8601 strings.
+ *
+ * <p>Threading: not thread-safe. Create a new instance per serialisation.
+ */
 public class JSONWriter {
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(JSONWriter.class);
 	private StringBuilder buf = new StringBuilder();
 	private Deque<Object> calls = new ArrayDeque<>(16); // non-null elements
 	private Customer customer;
@@ -69,6 +83,7 @@ public class JSONWriter {
 		return String.valueOf(b);
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void value(@Nullable Object object, @Nullable Set<String> propertyNames, boolean topLevel) {
 		if (object == null || cyclic(object)) {
 			add("null");
@@ -138,6 +153,7 @@ public class JSONWriter {
 		return calls.contains(object);
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void bean(@Nonnull Object object, @Nullable Set<String> propertyNames, boolean topLevel) {
 		boolean firstProperty = true;
 
@@ -180,18 +196,19 @@ public class JSONWriter {
 			}
 		}
 		catch (IllegalAccessException iae) {
-			iae.printStackTrace();
+			LOGGER.error(iae.getMessage(), iae);
 		}
 		catch (InvocationTargetException ite) {
-			ite.getCause().printStackTrace();
-			ite.printStackTrace();
+			LOGGER.error(ite.getCause().getMessage(), ite.getCause());
+			LOGGER.error(ite.getMessage(), ite);
 		}
 		catch (IntrospectionException ie) {
-			ie.printStackTrace();
+			LOGGER.error(ie.getMessage(), ie);
 		}
 		add("}");
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void document(@Nonnull Bean bean, @Nullable Set<String> propertyNames, boolean topLevel) {
 		if (customer == null) {
 			throw new IllegalStateException("Marshalling a Skyve Bean requires a customer");
@@ -276,7 +293,7 @@ public class JSONWriter {
 			}
 		}
 		catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 		}
 		add("}");
 	}

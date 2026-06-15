@@ -18,6 +18,17 @@ import jakarta.xml.bind.annotation.XmlElementRefs;
 import jakarta.xml.bind.annotation.XmlElementWrapper;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * Abstract JAXB base for input widgets that support focus and blur events.
+ *
+ * <p>Extends {@link InputWidget} with focus/blur event handler lists.  Concrete
+ * subclasses that also support value-change events extend
+ * {@link ChangeableInputWidget} instead.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see ChangeableInputWidget
+ */
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"focusActions", "blurActions"})
 public abstract class FocusableInputWidget extends InputWidget implements Focusable {

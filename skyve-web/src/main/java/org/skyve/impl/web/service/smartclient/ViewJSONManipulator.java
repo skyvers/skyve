@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.UnaryOperator;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
@@ -138,6 +139,7 @@ import org.skyve.web.WebContext;
 
 // Note: We cannot cache the bindings required for each view as it may be different 
 // depending on the security principal
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate SmartClient view JSON/markup fragments.
 public class ViewJSONManipulator extends ViewVisitor {
 	// Generate href expressions for references for smart client
 	private class HrefProcessor extends ReferenceProcessor {
@@ -281,6 +283,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 	HrefProcessor hrefProcessor = new HrefProcessor();
 	private StringBuilder htmlGuts = new StringBuilder(64);
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	protected ViewJSONManipulator(User user,
 									Module module, 
 									Document document, 
@@ -384,6 +387,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 		}
 	}
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	protected void addBindingsAndFormatValues(ViewBindings bindings,
 												Bean aBean,
 												Map<String, Object> toAddTo,
@@ -446,10 +450,14 @@ public class ViewJSONManipulator extends ViewVisitor {
 				// now format the message
 				Sanitisation sanitisation = viewFormat.getSanitise();
 				if (viewFormat.isEscape()) {
-					format = BindUtil.formatMessage(format, displayValue -> OWASP.sanitiseAndEscapeHtml(sanitisation, displayValue), aBean);
+					format = BindUtil.formatMessage(format,
+											(UnaryOperator<String>) displayValue -> OWASP.sanitiseAndEscapeHtml(sanitisation, displayValue),
+											aBean);
 				}
 				else {
-					format = BindUtil.formatMessage(format, displayValue -> OWASP.sanitise(sanitisation, displayValue), aBean);
+					format = BindUtil.formatMessage(format,
+											(UnaryOperator<String>) displayValue -> OWASP.sanitise(sanitisation, displayValue),
+											aBean);
 				}
 				// remove the display style if its true
 				format = format.replace("display:true;", "");
@@ -485,7 +493,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 		applyJSON(bindingTree, document, values, bean, persistence, webContext);
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "java:S3776"}) // Complexity OK
 	protected void applyJSON(ViewBindings bindings,
 								Document appliedToDoc,
 								Map<String, Object> values,
@@ -499,6 +507,10 @@ public class ViewJSONManipulator extends ViewVisitor {
 
 		for (String childBindingPrefix : bindings.getChildren()) {
 			ViewBindings childBindings = bindings.putOrGetChild(childBindingPrefix, null);
+			String unsanitisedChildBindingPrefix = BindUtil.unsanitiseBinding(childBindingPrefix);
+			if (unsanitisedChildBindingPrefix == null) {
+				continue;
+			}
 			// Get the reference target metadata
 			TargetMetaData target = BindUtil.getMetaDataForBinding(customer, 
 																	module, 
@@ -521,7 +533,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 				// the rows should exist this will be a List of bizId Strings.
 				// If the rows are aggregated/composed (grid widget),
 				// then each row property is updated to add or modify the rows.
-				List<Object> requestList = (List<Object>) BindUtil.get(values, BindUtil.unsanitiseBinding(childBindingPrefix));
+				List<Object> requestList = (List<Object>) BindUtil.get(values, unsanitisedChildBindingPrefix);
 				// If the requestList is null then it was not sent from the client - it is irrelevant.
 				// A data grid binding can be struck out of the request when a zoom out occurs.
 				// This ensures that old values are not updated when the view is refreshed - see EditView.js where action == 'ZoomOut'
@@ -566,6 +578,9 @@ public class ViewJSONManipulator extends ViewVisitor {
 	
 						if (thisBean == null) { // DNE in beanList
 							if (thisMap == null) { // reference
+								if (thisBizId == null) {
+									throw new MetaDataException("Missing bizId for child binding " + childBindingPrefix);
+								}
 								thisBean = WebUtil.findReferencedBean(relatedDocument, thisBizId, persistence, bean, webContext);
 							}
 							else {
@@ -612,7 +627,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 			else { // relation is an association (or one to one / one to many inverse)
 				// Get the existing bean referenced
 				Bean referencedBean = (Bean) BindUtil.get(appliedTo, childBindingPrefix);
-				Object requestObject = BindUtil.get(values, BindUtil.unsanitiseBinding(childBindingPrefix));
+				Object requestObject = BindUtil.get(values, unsanitisedChildBindingPrefix);
 				if (requestObject == null) {
 					if (referencedBean != null) {
 						BindUtil.setAssociation(appliedTo, childBindingPrefix, null);
@@ -656,6 +671,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 		}
 	}
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	protected void applyJSONProperty(Document startingDocument,
 										String binding, 
 										Map<String, Object> values, 
@@ -767,6 +783,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 	 * 
 	 * @param binding	The binding for the domain values lookup.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void putVariantAndDynamicDomainValuesInValueMaps(String binding) {
 		String safeBinding = BindUtil.sanitiseBinding(binding);
 		if (! valueMaps.containsKey(safeBinding)) {
@@ -1056,7 +1073,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 									boolean parentEnabled) {
 		if (visitingDataWidget) {
 			if (processingDataWidget) {
-				if (htmlGuts.length() > 0) {
+				if (! htmlGuts.isEmpty()) {
 					htmlGuts.append("&nbsp;");
 				}
 				// TODO - should make the URL dependent on the image format
@@ -1104,7 +1121,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 									boolean parentEnabled) {
 		if (visitingDataWidget) {
 			if (processingDataWidget) {
-				if (htmlGuts.length() > 0) {
+				if (! htmlGuts.isEmpty()) {
 					htmlGuts.append("&nbsp;");
 				}
 				htmlGuts.append("<img src=\"resources?_n=").append(image.getRelativeFile());
@@ -1124,7 +1141,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 									boolean parentEnabled) {
 		if (visitingDataWidget) {
 			if (processingDataWidget) {
-				if (htmlGuts.length() > 0) {
+				if (! htmlGuts.isEmpty()) {
 					htmlGuts.append("&nbsp;");
 				}
 				String binding = image.getBinding();
@@ -1170,12 +1187,13 @@ public class ViewJSONManipulator extends ViewVisitor {
 	}
 
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void visitBlurb(Blurb blurb,
 							boolean parentVisible,
 							boolean parentEnabled) {
 		if (visitingDataWidget) {
 			if (processingDataWidget) {
-				if (htmlGuts.length() > 0) {
+				if (! htmlGuts.isEmpty()) {
 					htmlGuts.append("&nbsp;");
 				}
 				htmlGuts.append("<div");
@@ -1209,12 +1227,13 @@ public class ViewJSONManipulator extends ViewVisitor {
 	}
 
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void visitLabel(Label label,
 							boolean parentVisible,
 							boolean parentEnabled) {
 		if (visitingDataWidget) {
 			if (processingDataWidget) {
-				if (htmlGuts.length() > 0) {
+				if (! htmlGuts.isEmpty()) {
 					htmlGuts.append("&nbsp;");
 				}
 				htmlGuts.append("<span");
@@ -1275,7 +1294,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 							boolean parentVisible,
 							boolean parentEnabled) {
 		if (processingDataWidget) {
-			if (htmlGuts.length() > 0) {
+			if (! htmlGuts.isEmpty()) {
 				htmlGuts.append("&nbsp;");
 			}
 		}
@@ -1490,6 +1509,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 		visitDataWidget(repeater, parentVisible, parentEnabled, true, true, null, null, null, null, null);
 	}
 	
+	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
 	private void visitDataWidget(AbstractDataWidget widget,
 									boolean parentVisible,
 									boolean parentEnabled,
@@ -1701,6 +1721,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 	}
 
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void visitCheckMembership(CheckMembership membership,
 										boolean parentVisible,
 										boolean parentEnabled) {
@@ -1764,6 +1785,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 	}
 
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void visitCombo(Combo combo,
 							boolean parentVisible,
 							boolean parentEnabled) {
@@ -1844,6 +1866,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 	}
 
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void visitListMembership(ListMembership membership,
 										boolean parentVisible,
 										boolean parentEnabled) {
@@ -1899,6 +1922,9 @@ public class ViewJSONManipulator extends ViewVisitor {
 				RequestKey key = RequestKey.model(document, modelName);
 				ProvidedRepository repository = ProvidedRepositoryFactory.get();
 				ComparisonModel<Bean, Bean> model = repository.getComparisonModel(customer, document, modelName, true);
+				if (model == null) {
+					throw new MetaDataException("Could not resolve comparison model [" + modelName + "]");
+				}
 				model.setBean(bean);
 				ComparisonComposite root = model.getComparisonComposite((Bean) BindUtil.get(bean, referenceName));
 				if (! forApply) {
@@ -1947,6 +1973,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 	}
 
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void visitLookupDescription(LookupDescription lookup,
 										boolean parentVisible,
 										boolean parentEnabled) {
@@ -2011,7 +2038,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 			return;
 		}
 
-		if (parentVisible & visible(password)) {
+		if (parentVisible && visible(password)) {
 			if ((! forApply) || 
 					(forApply && parentEnabled && enabled(password))) {
 				addBinding(password.getBinding(), true, false, Sanitisation.none);

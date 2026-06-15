@@ -13,21 +13,22 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.NullableBeanVisitor;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 import modules.admin.domain.DataGroup;
 
 /**
- * This class acts as a service layer to encapsulate domain logic.
+ * Provides service operations for admin data group management.
  *
  * Add this line to classes that wish to use it: @Inject private transient DataGroupService dataGroupService;
  */
 @Default
 public class DataGroupService {
-	private static final Logger LOGGER = LoggerFactory.getLogger(DataGroupService.class);
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(DataGroupService.class);
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient Persistence pers;
 
 	/**

@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping default-access="field">
+	<class name="org.skyve.impl.persistence.hibernate.BootstrapContact" table="ADM_Contact" entity-name="adminContact">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizKey" length="128" not-null="true" />
+	</class>
+</hibernate-mapping>

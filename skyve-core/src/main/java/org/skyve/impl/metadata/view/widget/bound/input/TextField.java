@@ -15,6 +15,17 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * JAXB-annotated single-line text-field input widget bound to a scalar
+ * String or numeric attribute.
+ *
+ * <p>Supports auto-complete, keyboard type hints, optional inline editing,
+ * absolute width, focus/blur/change events, and disabled/invisible conditions.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see Spinner
+ */
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"editable", "keyboardType", "complete", "pixelWidth", "properties"})
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)

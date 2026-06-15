@@ -8,6 +8,18 @@ import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 //@XmlSchemaType(name = "time")
 //@XmlJavaTypeAdapter(TimeOnlyMapper.class)
+/**
+ * JAXB {@link XmlAdapter} that converts between the XML {@code xs:time} type
+ * ({@link java.util.Date}) and Skyve's {@link org.skyve.domain.types.TimeOnly} domain type.
+ *
+ * <p>On unmarshalling, wraps the JAXB-supplied {@code Date} in a new
+ * {@link org.skyve.domain.types.TimeOnly} preserving the epoch millisecond value.
+ * A {@code null} input produces a {@code null} output in both directions.
+ *
+ * <p>Threading: stateless; instances are safe for concurrent use.
+ *
+ * @see org.skyve.domain.types.TimeOnly
+ */
 public class TimeOnlyMapper extends XmlAdapter<Date, TimeOnly> {
 	@Override
 	public TimeOnly unmarshal(Date time) throws Exception {

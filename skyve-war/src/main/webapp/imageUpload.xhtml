@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" 
+<html xmlns="http://www.w3.org/1999/xhtml"
 		xmlns:ui="http://java.sun.com/jsf/facelets" 
 		xmlns:h="http://java.sun.com/jsf/html" 
 		xmlns:f="http://java.sun.com/jsf/core"
 		xmlns:p="http://primefaces.org/ui"
+		lang="#{_skyveImage.languageTag}" xml:lang="#{_skyveImage.languageTag}"
 		dir="#{_skyveImage.dir}">
     <f:view contentType="text/html" encoding="#{_skyveImage.encoding}">
 		<f:metadata>
@@ -13,6 +14,12 @@
 			<title>#{_skyveImage.i18n['page.contentUpload.title']}</title>
 			<base href="#{_skyveImage.baseHref}" />
 			<style>
+				html,
+				body {
+					height: 100%;
+					margin: 0;
+					overflow: hidden;
+				}
 				.ui-widget {
 				    font-size: 12px !important;
 				}
@@ -29,47 +36,277 @@
 					.ui-fileupload-buttonbar .ui-button {
 						padding: 20px !important;
 					}
+					.ui-fileupload-buttonbar .ui-button,
+					.cropperControls .ui-button {
+						height: 48px;
+						min-height: 48px !important;
+						min-width: 48px !important;
+						padding: 0 !important;
+						position: relative;
+						width: 48px;
+					}
+					.ui-fileupload-buttonbar .ui-button .ui-button-icon-left,
+					.ui-fileupload-buttonbar .ui-button .ui-icon,
+					.ui-fileupload-buttonbar .ui-button .fa,
+					.cropperControls .ui-button .ui-button-icon-left {
+						height: 1em;
+						left: 50% !important;
+						line-height: 1em;
+						margin-left: -0.5em !important;
+						margin-top: -0.5em !important;
+						position: absolute !important;
+						text-align: center;
+						top: 50% !important;
+						width: 1em;
+					}
+					.ui-fileupload-buttonbar .ui-button .ui-button-text,
+					.cropperControls .ui-button .ui-button-text {
+						display: none !important;
+						padding: 0 !important;
+					}
 				}
-				<!-- Place the cropper at 50% of width and matching height -->
-				.square {
-					position: relative;
-					width: 50%;
-					padding-top: 10px;
-				}
-				.square:after {
-					content: "";
-					display: block;
-					padding-bottom: 75%;
-				}
-				.content {
-					position: absolute;
-					width: 100%;
+				#form {
+					display: flex;
+					flex-direction: column;
 					height: 100%;
+					margin: 0;
+					min-height: 0;
+					overflow: hidden;
+				}
+				#cropperBar {
+					display: none;
+					flex: 0 0 auto;
+				}
+				#cropperContainer {
+					box-sizing: border-box;
+					display: none;
+					flex: 1 1 auto;
+					gap: 10px;
+					justify-content: center;
+					min-height: 0;
+					padding: 10px;
+				}
+				.cropperFrame {
+					align-items: center;
+					display: flex;
+					flex: 1 1 auto;
+					justify-content: center;
+					min-height: 0;
+					min-width: 0;
+					overflow: hidden;
+				}
+				#cropperImage {
+					display: block;
+					height: auto;
+					max-width: 100%;
+					max-height: 100%;
+					width: auto;
+				}
+				.cropperControls {
+					display: flex;
+					flex: 0 0 auto;
+					flex-direction: column;
+					gap: 10px;
+					justify-content: center;
+				}
+				.cropperControls .ui-button {
+					margin-bottom: 0 !important;
+				}
+				@media(max-width: 640px) {
+					#cropperContainer {
+						flex-direction: column;
+					}
+					.cropperControls {
+						flex-direction: row;
+						justify-content: center;
+					}
 				}
 			</style>
 			<link type="text/css" rel="stylesheet" href="fontawesome-6.5.1/css/all.min.css" />
 			<link type="text/css" rel="stylesheet" href="skyve/css/prime-min.css?v=#{_skyveImage.webResourceFileVersion}" />
-			<link rel="stylesheet" href="croppie/croppie.css?v=#{_skyveImage.webResourceFileVersion}" />
-			<script src="croppie/exif-min.js?v=#{_skyveImage.webResourceFileVersion}"></script>
-			<script src="croppie/croppie-min.js?v=#{_skyveImage.webResourceFileVersion}"></script>
+			<link rel="stylesheet" href="cropperjs/cropper.min.css?v=#{_skyveImage.webResourceFileVersion}" />
+			<script src="cropperjs/cropper.min.js?v=#{_skyveImage.webResourceFileVersion}"></script>
 			<script type="text/javascript">
 				var cropper = null;
 				var file = null;
 				var fileName = null;
 				var fileFormat = 'png';
-				<!-- Load the image into croppie, show the cropper bar, and container and hide the file upload -->
+				var cameraMode = false;
+				var autoEditAfterFileSelection = false;
+				var suppressChooseClick = false;
+				var maximumUploadSizeInBytes = #{_skyveImage.maximumSizeInBytes};
+				var maximumImageDimension = 4096;
+				var minimumImageDimension = 320;
+				var currentImageUrl = null;
+				var resizeTimer = null;
+				function sizeCropperImage(image) {
+					var frame = document.getElementById('cropperFrame');
+					var frameWidth = frame.clientWidth;
+					var frameHeight = frame.clientHeight;
+					if (! (frameWidth > 0)) {
+						return;
+					}
+					if (! (frameHeight > 0)) {
+						return;
+					}
+					if ((frameWidth / frameHeight) > (image.naturalWidth / image.naturalHeight)) {
+						image.style.width = 'auto';
+						image.style.height = frameHeight + 'px';
+					}
+					else {
+						image.style.width = frameWidth + 'px';
+						image.style.height = 'auto';
+					}
+				}
+				function initialiseCropper(imageUrl) {
+					currentImageUrl = imageUrl;
+					var image = document.getElementById('cropperImage');
+					if (cropper != null) {
+						cropper.destroy();
+						cropper = null;
+					}
+					image.onload = function() {
+						window.requestAnimationFrame(function() {
+							sizeCropperImage(image);
+							cropper = new Cropper(image, {
+								viewMode: 1,
+								dragMode: 'move',
+								autoCropArea: 1,
+								background: false,
+								checkOrientation: true,
+								responsive: true,
+								ready: function() {
+									cropper.setCropBoxData(cropper.getCanvasData());
+								}
+							});
+						});
+					};
+					image.src = '';
+					image.src = imageUrl;
+				}
+				function canvasToBlob(canvas, mimeType, quality) {
+					var outputCanvas = canvasForMimeType(canvas, mimeType);
+					return new Promise(function(resolve, reject) {
+						outputCanvas.toBlob(function(blob) {
+							if (blob == null) {
+								reject(new Error('Could not encode cropped image'));
+							}
+							else {
+								resolve(blob);
+							}
+						}, mimeType, quality);
+					});
+				}
+				function canvasForMimeType(canvas, mimeType) {
+					if (mimeType != 'image/jpeg') {
+						return canvas;
+					}
+					var targetCanvas = document.createElement('canvas');
+					targetCanvas.width = canvas.width;
+					targetCanvas.height = canvas.height;
+					var context = targetCanvas.getContext('2d');
+					context.fillStyle = '#fff';
+					context.fillRect(0, 0, targetCanvas.width, targetCanvas.height);
+					context.drawImage(canvas, 0, 0);
+					return targetCanvas;
+				}
+				function createScaledCanvas(sourceCanvas, width, height) {
+					var targetCanvas = document.createElement('canvas');
+					targetCanvas.width = width;
+					targetCanvas.height = height;
+					var context = targetCanvas.getContext('2d');
+					context.imageSmoothingEnabled = true;
+					context.imageSmoothingQuality = 'high';
+					context.drawImage(sourceCanvas, 0, 0, width, height);
+					return targetCanvas;
+				}
+				function scaleCanvas(sourceCanvas, scale) {
+					var width = Math.max(1, Math.round(sourceCanvas.width * scale));
+					var height = Math.max(1, Math.round(sourceCanvas.height * scale));
+					return createScaledCanvas(sourceCanvas, width, height);
+				}
+				function scaleCanvasToMaximumDimension(sourceCanvas, maximumDimension) {
+					var dimension = Math.max(sourceCanvas.width, sourceCanvas.height);
+					if (! (dimension > maximumDimension)) {
+						return sourceCanvas;
+					}
+					return scaleCanvas(sourceCanvas, maximumDimension / dimension);
+				}
+				function fileExtension(format) {
+					return format == 'jpeg' ? 'jpg' : format;
+				}
+				function croppedFileName(format) {
+					var baseName = file.name.replace(/\.[^/.]+$/, '');
+					return baseName + '.cropped.' + fileExtension(format);
+				}
+				function formatBytes(bytes) {
+					if (bytes >= 1048576) {
+						return (bytes / 1048576).toFixed(1) + 'MB';
+					}
+					return Math.ceil(bytes / 1024) + 'KB';
+				}
+				async function encodeCanvasForUpload(croppedCanvas) {
+					var outputFormat = cameraMode ? 'jpeg' : fileFormat;
+					var mimeType = 'image/' + outputFormat;
+					var canvas = scaleCanvasToMaximumDimension(croppedCanvas, maximumImageDimension);
+					var quality = outputFormat == 'jpeg' ? 0.92 : 1;
+					var blob = await canvasToBlob(canvas, mimeType, quality);
+
+					if (blob.size > maximumUploadSizeInBytes) {
+						outputFormat = 'jpeg';
+						mimeType = 'image/jpeg';
+						quality = 0.92;
+						blob = await canvasToBlob(canvas, mimeType, quality);
+					}
+
+					while ((blob.size > maximumUploadSizeInBytes) &amp;&amp; (quality > 0.55)) {
+						quality = Math.max(0.55, quality - 0.07);
+						blob = await canvasToBlob(canvas, mimeType, quality);
+					}
+
+					while ((blob.size > maximumUploadSizeInBytes) &amp;&amp;
+							(Math.max(canvas.width, canvas.height) > minimumImageDimension)) {
+						canvas = scaleCanvas(canvas, 0.85);
+						quality = 0.82;
+						blob = await canvasToBlob(canvas, mimeType, quality);
+					}
+
+					fileName = croppedFileName(outputFormat);
+					return blob;
+				}
+				async function cropAndUpload() {
+					if (cropper == null) {
+						return;
+					}
+					try {
+						var croppedCanvas = cropper.getCroppedCanvas({
+							imageSmoothingEnabled: true,
+							imageSmoothingQuality: 'high'
+						});
+						var blob = await encodeCanvasForUpload(croppedCanvas);
+						if (blob.size > maximumUploadSizeInBytes) {
+							alert('The cropped image is still too large to upload. Maximum size is ' +
+									formatBytes(maximumUploadSizeInBytes) + '. Encoded size is ' + formatBytes(blob.size) + '.');
+							return;
+						}
+						uploadCropped(blob);
+					}
+					catch (e) {
+						alert(e.message || 'Could not process cropped image');
+					}
+				}
+				<!-- Load the image into Cropper.js, show the cropper bar, and container and hide the file upload -->
 				function editImage() {
+					fileFormat = 'png';
 					if (file.type == 'image/jpeg') {
 						fileFormat = 'jpeg';
 					}
-					fileName = file.name + '.cropped.' + fileFormat;
-					$('#cropperBar').css({visibility: 'visible'});
-					$('#cropperContainer').css({visibility: 'visible'});
+					fileName = croppedFileName(fileFormat);
+					$('#cropperBar').css({display: 'block'});
+					$('#cropperContainer').css({display: 'flex'});
 					var reader = new FileReader();
 					reader.onload = function (evt) {
-						cropper.croppie('bind', {
-							url: evt.target.result
-						});
+						initialiseCropper(evt.target.result);
 					}
 					reader.readAsDataURL(file);
 					$('#upload').css({display: 'none'});
@@ -93,42 +330,78 @@
 						PrimeFaces.ajax.Response.handle(data, status, xhr);
 					});
 				}
-				
-				$(document).ready(function() {
-					<!-- Add edit button to file upload panel -->
-					$('#edit').appendTo($('.ui-fileupload .ui-fileupload-buttonbar'));
+				function chooseImage() {
+					if (suppressChooseClick) {
+						suppressChooseClick = false;
+						return;
+					}
+					cameraMode = false;
+					autoEditAfterFileSelection = false;
+					$('#upload_input').removeAttr('capture');
+				}
+					function captureImage() {
+						cameraMode = true;
+						autoEditAfterFileSelection = true;
+						suppressChooseClick = true;
+					$('#upload_input').attr('capture', 'environment');
+					$('#upload_input').trigger('click');
+					setTimeout(function() {
+						suppressChooseClick = false;
+						}, 0);
+					}
+					function clearSelectedImage() {
+						file = null;
+						cameraMode = false;
+						autoEditAfterFileSelection = false;
+						$('#upload_input').removeAttr('capture');
+						$('#camera').show();
+						PF('editButton').disable();
+					}
 					
-					<!-- When a file is chosen, assign the file, enable the edit button, add click handlers on cancel buttons to disable edit button -->
-					$('#upload_input').on('change', function () {
-						if (this.files) {
-							if (this.files[0]) {
-								file = this.files[0];
-								PF('editButton').enable();
-
-								setTimeout(function() {
-									$('.ui-fileupload-cancel').on('click', function() {
-										PF('editButton').disable();
-									});
-								}, 500); <!-- Wait half a second for the file item to show -->
-							}
+					$(document).ready(function() {
+					<!-- Add camera and edit buttons to file upload panel -->
+					$('#camera').appendTo($('.ui-fileupload .ui-fileupload-buttonbar')).show();
+					$('#edit').appendTo($('.ui-fileupload .ui-fileupload-buttonbar')).show();
+					$('#upload .ui-fileupload-choose').on('click', chooseImage);
+					
+						<!-- When a file is chosen, assign the file, enable the edit button, add click handlers on cancel buttons to disable edit button -->
+						$('#upload_input').on('change', function () {
+							if (this.files) {
+								if (this.files[0]) {
+									file = this.files[0];
+									PF('editButton').enable();
+									if (autoEditAfterFileSelection) {
+										autoEditAfterFileSelection = false;
+										editImage();
+									}
+									else {
+										$('#camera').hide();
+									}
+	
+									setTimeout(function() {
+										$('.ui-fileupload-cancel').on('click', function() {
+											clearSelectedImage();
+										});
+									}, 500); <!-- Wait half a second for the file item to show -->
+								}
 						}
 					});
 
-					var cropperDiv = $('#cropper');
-					cropper = cropperDiv.croppie({
-						viewport: {
-							width: cropperDiv.width() - 50,
-							height: cropperDiv.height() - 50,
-							type: 'square'
-						},
-						enableExif: true,
-						enableResize: true,
-						enableOrientation: true
+					$(window).on('resize', function() {
+						if (currentImageUrl != null) {
+							if ($('#cropperContainer').css('display') === 'none') {
+								return;
+							}
+							clearTimeout(resizeTimer);
+							resizeTimer = setTimeout(function() {
+								initialiseCropper(currentImageUrl);
+							}, 200);
+						}
 					});
 				});
 			</script>
 		</h:head>
-		<h:body style="height:2000px">
+		<h:body>
 			<p:staticMessage severity="error"
 								summary="You cannot access this function"
 								detail="Click &lt;a href=&quot;javascript:void(0)&quot; onclick=&quot;window.top.location=''&quot;&gt;here&lt;/a&gt;"
@@ -151,24 +424,24 @@
 								invalidSizeMessage="#{_skyveImage.i18n['page.contentUpload.sizeLimit']}"
 								allowTypes="#{'/'.concat(_skyveImage.whitelistRegex).concat('/i')}"
 								invalidFileMessage="#{_skyveImage.i18n['page.contentUpload.invalidFile']}"
+								label="Choose"
 								uploadIcon="fa-solid fa-upload"
 								cancelIcon="fa-solid fa-ban" />
-				<!-- This button is moved into the upload button bar on document load -->
-				<p:button id="edit" widgetVar="editButton" type="button" disabled="true" icon="fa-solid fa-pencil" value="Edit" title="Crop &amp; rotate the uploaded image" onclick="editImage();return false" />
-				<!-- The cropperBar and cropperContainer are shown when the edit button is pressed. They are hidden so that we can still get their dimensions -->
-				<div id="cropperBar" style="visibility:hidden" class="ui-fileupload-buttonbar ui-widget-header ui-corner-top">
-					<p:button id="crop" type="button" icon="fa-solid fa-upload" value="Upload" title="Upload Cropped Image" onclick="cropper.croppie('result', {type: 'blob', size: 'original', format: fileFormat}).then(function(blob) {uploadCropped(blob)});return false" />
+				<!-- These buttons are moved into the upload button bar on document load -->
+				<p:button id="camera" type="button" icon="fa-solid fa-camera" value="Camera" title="Take a photo" style="display:none" onclick="captureImage();return false" />
+				<p:button id="edit" widgetVar="editButton" type="button" disabled="true" icon="fa-solid fa-pencil" value="Edit" title="Crop &amp; rotate the uploaded image" style="display:none" onclick="editImage();return false" />
+				<!-- The cropperBar and cropperContainer are shown when the edit button is pressed. -->
+				<div id="cropperBar" class="ui-fileupload-buttonbar ui-widget-header ui-corner-top">
+					<p:button id="crop" type="button" icon="fa-solid fa-upload" value="Upload" title="Upload Cropped Image" onclick="cropAndUpload();return false" />
 					<p:button id="cancel" type="button" icon="fa-solid fa-ban" value="Cancel" title="Cancel editing" onclick="location.reload(); return false" />
 				</div>
-				<div id="cropperContainer" style="visibility:hidden;display:flex">
-					<div style="width:25%" />
-					<div class="square">
-						<div id="cropper" class="content" />
+				<div id="cropperContainer">
+					<div id="cropperFrame" class="cropperFrame">
+						<img id="cropperImage" alt="" />
 					</div>
-					<div style="width:10px" />
-					<div style="display:flex;flex-direction:column;justify-content:center">
-						<p:button style="margin-bottom:10px" type="button" icon="fa-solid fa-rotate-left" title="Rotate Left" onclick="cropper.croppie('rotate',90);return false" />
-						<p:button style="margin-bottom:10px" type="button" icon="fa-solid fa-rotate-right" title="Rotate Right" onclick="cropper.croppie('rotate',-90);return false" />
+					<div class="cropperControls">
+						<p:button type="button" icon="fa-solid fa-rotate-left" title="Rotate Left" onclick="cropper.rotate(-90);return false" />
+						<p:button type="button" icon="fa-solid fa-rotate-right" title="Rotate Right" onclick="cropper.rotate(90);return false" />
 					</div>
 				</div>
 			</h:form>

@@ -15,7 +15,6 @@ import com.sun.management.HotSpotDiagnosticMXBean;
  * customer-specific content directory.
  */
 public class HeapDumpUtil {
-
 	/**
 	 * Generates a live heap dump file and returns its file path.
 	 * <p>
@@ -35,10 +34,10 @@ public class HeapDumpUtil {
 	}
 	
 	/**
-     * Constructs the full file path for the heap dump file based on the current timestamp.
-     * 
-     * @return the heap dump file path as a string
-     */
+	 * Constructs the full path for a new timestamped heap dump file.
+	 *
+	 * @return the heap dump file path
+	 */
 	public static String buildFilePath() {
 		String dirPath = getDirectory();
 
@@ -50,13 +49,11 @@ public class HeapDumpUtil {
 	}
 	
 	/**
-     * Returns the directory path where heap dumps are stored, creating it if necessary.
-     * 
-     * The directory is under the content directory, named with a prefix and the customer name.
-     * 
-     * @return the heap dump directory path as a string
-     * @throws RuntimeException if the directory cannot be created
-     */
+	 * Returns the customer-scoped heap dump directory, creating it when absent.
+	 *
+	 * @return the heap dump directory path
+	 * @throws RuntimeException if the directory cannot be created
+	 */
 	public static String getDirectory() {
 		String dirPath = String.format("%sheap_%s",
 				Util.getContentDirectory(),

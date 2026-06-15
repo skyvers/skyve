@@ -3,6 +3,7 @@ package org.skyve;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -24,6 +25,10 @@ public class EXTParameterisedTest {
 	// See: https://github.com/spring-projects/spring-security/issues/16802
 	private static String longPassword = "G^`Nyp&n1@rqsOll+?Q6m9w^Q<+N5+(ShbB$\\\"9Ns)/pc)fvv}`hj9*wL\\\\YH<6x?G^`Nyp&";
 
+	// veryLongPassword exceeds 72 UTF-8 bytes and includes a multi-byte character ('é' = 2 bytes).
+	// Intended to exercise LegacyBCryptPasswordEncoder's truncation behaviour (73 UTF-8 bytes total).
+	private static String veryLongPassword = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\u00e9b";
+
 	@Parameter(value = 0)
 	public String algorithm;
 	@Parameter(value = 1)
@@ -36,6 +41,7 @@ public class EXTParameterisedTest {
 				{ "argon2", longPassword },
 				{ "bcrypt", shortPassword },
 				{ "bcrypt", longPassword },
+				{ "bcrypt", veryLongPassword },
 				{ "pbkdf2", shortPassword },
 				{ "pbkdf2", longPassword },
 				{ "scrypt", shortPassword },
@@ -47,7 +53,6 @@ public class EXTParameterisedTest {
 	 * Tests that each hashedPassword input cleartext in the parameters list.
 	 */
 	@Test
-	@SuppressWarnings("boxing")
 	public void testHashPassword() {
 		// setup the test data
 		UtilImpl.PASSWORD_HASHING_ALGORITHM = algorithm;
@@ -59,8 +64,8 @@ public class EXTParameterisedTest {
 		String result = EXT.hashPassword(clearText);
 
 		// verify the result
-		// System.out.println(String.format("%s (%d): %s (%d)", algorithm, clearText.length(), result, result.length()));
-		assertThat("Encoded length should be less than 255 chars", result.length() <= 255, is(true));
+		assertTrue("Encoded length should be less than 255 chars", result.length() <= 255);
 		assertThat(result, is(not(clearText)));
+		assertTrue(EXT.checkPassword(clearText, result));
 	}
 }

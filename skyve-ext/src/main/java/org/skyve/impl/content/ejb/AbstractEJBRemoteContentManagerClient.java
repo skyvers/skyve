@@ -6,7 +6,7 @@ import org.skyve.content.ContentIterable;
 import org.skyve.content.SearchResults;
 import org.skyve.impl.content.AbstractContentManager;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 /**
  * This class is used to talk to another skyve server's EJB content server.
@@ -39,8 +39,9 @@ import org.slf4j.LoggerFactory;
  * </pre>
  */
 public abstract class AbstractEJBRemoteContentManagerClient extends AbstractContentManager {
+	private static final String TRUNCATE_INDEXING_UNSUPPORTED = "Truncate indexing of a remote content repository is not supported";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractEJBRemoteContentManagerClient.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(AbstractEJBRemoteContentManagerClient.class);
 
 	@Override
 	public void startup() {
@@ -115,17 +116,17 @@ public abstract class AbstractEJBRemoteContentManagerClient extends AbstractCont
 
 	@Override
 	public void truncateIndexing(String customerName) throws Exception {
-		throw new UnsupportedOperationException("Truncate indexing of a remote content repository is not supported");
+		throw new UnsupportedOperationException(TRUNCATE_INDEXING_UNSUPPORTED);
 	}
 
 	@Override
 	public void truncateAttachmentIndexing(String customerName) throws Exception {
-		throw new UnsupportedOperationException("Truncate indexing of a remote content repository is not supported");
+		throw new UnsupportedOperationException(TRUNCATE_INDEXING_UNSUPPORTED);
 	}
 
 	@Override
 	public void truncateBeanIndexing(String customerName) throws Exception {
-		throw new UnsupportedOperationException("Truncate indexing of a remote content repository is not supported");
+		throw new UnsupportedOperationException(TRUNCATE_INDEXING_UNSUPPORTED);
 	}
 
 	@Override

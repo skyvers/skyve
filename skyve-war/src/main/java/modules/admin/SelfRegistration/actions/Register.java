@@ -19,7 +19,7 @@ import org.skyve.util.SecurityUtil;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,13 +34,24 @@ import modules.admin.domain.User;
  * registration email to confirm their user account.
  */
 public class Register implements ServerSideAction<SelfRegistrationExtension> {
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(Register.class);
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(Register.class);
 
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient GeoIPService geoIPService;
 
+	/**
+	 * Executes the full registration pipeline including captcha validation,
+	 * optional GeoIP blocking, password checks, persistence, and activation email
+	 * dispatch.
+	 *
+	 * @param bean the registration bean submitted by the public form
+	 * @param webContext the current web context used for growl feedback
+	 * @return the action result wrapping the supplied bean
+	 * @throws Exception if validation or persistence fails
+	 */
 	@Override
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	public ServerSideActionResult<SelfRegistrationExtension> execute(SelfRegistrationExtension bean, WebContext webContext)
 			throws Exception {
 		Persistence persistence = CORE.getPersistence();
@@ -162,10 +173,22 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 		return new ServerSideActionResult<>(bean);
 	}
 
-	private static void encodePassword(User user) throws Exception {
+	/**
+	 * Hashes and replaces the user's plain-text password.
+	 *
+	 * @param user the user whose password is being encoded
+	 * @throws Exception if hashing fails
+	 */
+	private static void encodePassword(User user) {
 		user.setPassword(EXT.hashPassword(user.getPassword()));
 	}
 
+	/**
+	 * Sends the initial registration email in its own transaction boundary.
+	 *
+	 * @param bean the registration bean containing the user to email
+	 * @throws Exception if the surrounding persistence interaction fails
+	 */
 	private static void sendRegistrationEmail(SelfRegistrationExtension bean) throws Exception {
 		try {
 			// Send the registration email

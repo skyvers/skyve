@@ -14,6 +14,17 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB-annotated data-grid column descriptor that binds to a document
+ * attribute for display and optional inline editing.
+ *
+ * <p>Extends {@link DataGridColumn} with binding path, text-output type,
+ * and formatting options.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see DataGrid
+ */
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "boundColumn")
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"binding", "editable", "inputWidget", "escape", "sanitise", "formatterName", "customFormatterName"})

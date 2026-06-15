@@ -10,6 +10,14 @@ import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB-annotated descriptor for a {@code <dynamicImageAccess>} access constraint
+ * on a view; restricts the view to users with dynamic-image rendering access.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see ViewUserAccessMetaData
+ */
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "dynamicImageAccess")
 public class ViewDynamicImageUserAccessMetaData extends ViewUserAccessMetaData {

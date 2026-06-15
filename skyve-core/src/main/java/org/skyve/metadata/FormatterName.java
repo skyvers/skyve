@@ -14,6 +14,7 @@ import jakarta.xml.bind.annotation.XmlType;
  * Represents the Skyve built-in formatters that are supported in XML schema.
  */
 @XmlType(namespace = XMLMetaData.COMMON_NAMESPACE)
+@SuppressWarnings("java:S115") // Suppress "Constant names should comply with a naming convention" as these are not constants but enum values
 public enum FormatterName {
 	DD_MM_YYYY(new SimpleDateFormatter(org.skyve.domain.types.converters.date.DD_MM_YYYY.PATTERN)),
 	DD_MMM_YYYY(new SimpleDateFormatter(org.skyve.domain.types.converters.date.DD_MMM_YYYY.PATTERN)),
@@ -134,6 +135,10 @@ public enum FormatterName {
 		this.formatter = formatter;
 	}
 	
+	/**
+	 * Returns the formatter.
+	 * @return the result
+	 */
 	@SuppressWarnings("unchecked")
 	public <T> Formatter<T> getFormatter() {
 		return (Formatter<T>) formatter;

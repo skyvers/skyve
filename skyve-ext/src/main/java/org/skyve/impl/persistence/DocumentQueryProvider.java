@@ -18,20 +18,38 @@ import jakarta.inject.Inject;
  * Base class that can be used by service layer classes to reduce boilerplate database retrieval code.
  */
 public abstract class DocumentQueryProvider<T extends PersistentBean> {
-
 	protected Document document;
 
+	/**
+	 * Resolves the target document from the current user's customer context.
+	 *
+	 * <p>Threading: this constructor reads {@link CORE#getUser()} and therefore must
+	 * run with a fully initialised request or background-user context.
+	 *
+	 * @param moduleName the owning module name; must resolve for the current customer
+	 * @param documentName the document name within {@code moduleName}
+	 */
 	protected DocumentQueryProvider(String moduleName, String documentName) {
 		final Customer c = CORE.getUser().getCustomer();
 		final Module m = c.getModule(moduleName);
 		document = m.getDocument(c, documentName);
 	}
 
+	/**
+	 * Creates a provider for a pre-resolved document.
+	 *
+	 * @param document the document this provider queries; must not be {@code null}
+	 */
 	@Inject
 	protected DocumentQueryProvider(Document document) {
 		this.document = document;
 	}
 
+	/**
+	 * Returns the persistence instance used to create and execute document queries.
+	 *
+	 * @return the active persistence context
+	 */
 	protected abstract Persistence getPersistence();
 
 	/**
@@ -89,6 +107,11 @@ public abstract class DocumentQueryProvider<T extends PersistentBean> {
 		}
 	}
 
+	/**
+	 * Creates a new query for the configured document.
+	 *
+	 * @return a mutable {@link DocumentQuery} scoped to this provider's document
+	 */
 	public DocumentQuery getDocumentQuery() {
 		return getPersistence().newDocumentQuery(document);
 	}

@@ -11,6 +11,12 @@ import modules.admin.domain.MonitoringDashboard;
  * An action used to save the document during event handlers
  */
 public class Save implements ServerSideAction<MonitoringDashboard> {
+	/**
+	 * Saves the dashboard and clears dependent request-stat filters when the request type changes.
+	 * @param bean the dashboard being saved
+	 * @param webContext the current web context
+	 * @return the action result containing the saved dashboard
+	 */
 	@Override
 	public ServerSideActionResult<MonitoringDashboard> execute(MonitoringDashboard bean,
 			WebContext webContext) {

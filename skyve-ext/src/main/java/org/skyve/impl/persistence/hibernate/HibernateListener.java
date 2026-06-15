@@ -36,7 +36,14 @@ import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.util.logging.SkyveLoggerFactory;
+import org.slf4j.Logger;
 
+/**
+ * Hibernate event listener that bridges Hibernate entity lifecycle events to the
+ * Skyve domain-object lifecycle, enforcing field-level encryption, content
+ * persistence synchronisation, optimistic lock management, and bean observer callbacks.
+ */
 public class HibernateListener implements PostLoadEventListener,
 											PreDeleteEventListener,
 											PostDeleteEventListener,
@@ -45,6 +52,7 @@ public class HibernateListener implements PostLoadEventListener,
 											PostUpdateEventListener,
 											InitializeCollectionEventListener {
 	private static final long serialVersionUID = -2075261951031625148L;
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(HibernateListener.class);
 // TODO Need to replicate these functions for dynamic beans
 	
 	/**
@@ -156,7 +164,7 @@ public class HibernateListener implements PostLoadEventListener,
 		}
 		catch (Exception e) {
 			// Can't stop now, after all its only the indexing that is screwed
-			e.printStackTrace();
+			LOGGER.error("Index failed for bean {} - indexing is affected", eventBean.getBizId(), e);
 		}
 	}
 
@@ -179,7 +187,7 @@ public class HibernateListener implements PostLoadEventListener,
 		}
 		catch (Exception e) {
 			// Can't stop now, after all its only the indexing that is screwed
-			e.printStackTrace();
+			LOGGER.error("Index failed for bean {} on update - indexing is affected", eventBean.getBizId(), e);
 		}
 	}
 

@@ -9,19 +9,31 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
- * Represents the OK implicit action.
- * 
- * @author mike
+ * Clicks the OK button ({@link org.skyve.metadata.controller.ImplicitActionName#OK}) on
+ * a dialog or confirmation prompt, confirming the pending operation and continuing
+ * automation execution.
+ *
+ * @see Cancel
+ * @see org.skyve.metadata.sail.execution.Executor#executeOk
  */
 @XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
 public class Ok extends AbstractAction {
 
+	/**
+	 * Executes execute.
+	 * @param executor the executor
+	 */
 	@Override
 	public void execute(Executor executor) {
 		executor.executeOk(this);
 	}
 	
+	/**
+	 * Returns the identifier.
+	 * @param context the context
+	 * @return the result
+	 */
 	@Override
 	public String getIdentifier(AutomationContext context) {
 		return ImplicitActionName.OK.toString();

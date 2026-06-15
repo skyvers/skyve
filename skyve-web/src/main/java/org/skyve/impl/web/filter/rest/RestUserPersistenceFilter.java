@@ -5,10 +5,11 @@ import java.io.IOException;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.MetaDataException;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.FilterConfig;
@@ -52,13 +53,25 @@ import jakarta.servlet.http.HttpServletResponse;
  *	&lt;url-pattern&gt;{restUrlPattern}&lt;/url-pattern&gt;
  * &lt;/filter-mapping&gt;
  * </pre>
+ *
+ * <p>Side effects: starts a persistence transaction, sets the thread-local persistence user,
+ * and writes REST error responses on authentication/metadata/unexpected failures.
+ *
+ * <p>Threading: this filter stores configuration in {@code persistenceUser} during
+ * initialization and then treats it as read-only for request processing.
  */
 public class RestUserPersistenceFilter extends AbstractRestFilter {
-    private static final Logger LOGGER = LoggerFactory.getLogger(RestUserPersistenceFilter.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(RestUserPersistenceFilter.class);
     private static final String AUTHENTICATE_ERROR_MESSAGE = "Unable to authenticate with the provided credentials";
     
 	private String persistenceUser;
 
+	/**
+	 * Reads the configured persistence user and initializes shared REST filter settings.
+	 *
+	 * @param config filter configuration containing the PersistenceUser parameter
+	 * @throws ServletException when initialization fails
+	 */
 	@Override
 	public void init(FilterConfig config) throws ServletException {
 		persistenceUser = config.getInitParameter("PersistenceUser");
@@ -66,6 +79,19 @@ public class RestUserPersistenceFilter extends AbstractRestFilter {
 		super.init(config);
 	}
 
+	/**
+	 * Processes a REST request under the configured persistence user.
+	 *
+	 * <p>When the configured user cannot be resolved, this method returns HTTP 403.
+	 * For non-security failures, it logs an unexpected error reference and returns
+	 * a generic REST error payload.
+	 *
+	 * @param request the incoming servlet request
+	 * @param response the outgoing servlet response
+	 * @param chain the downstream filter chain
+	 * @throws IOException if writing the response fails
+	 * @throws ServletException if downstream filter processing fails
+	 */
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 	throws IOException, ServletException {
@@ -88,7 +114,7 @@ public class RestUserPersistenceFilter extends AbstractRestFilter {
 				chain.doFilter(httpRequest, httpResponse);
 			}
 			else {
-				error(persistence, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, AUTHENTICATE_ERROR_MESSAGE);
+				error(persistence, httpRequest, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, AUTHENTICATE_ERROR_MESSAGE);
 			}
 		}
 		catch (Throwable t) {
@@ -97,14 +123,14 @@ public class RestUserPersistenceFilter extends AbstractRestFilter {
 			}
 			
 			if (t instanceof SecurityException) {
-				error(persistence, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, AUTHENTICATE_ERROR_MESSAGE);
+				error(persistence, httpRequest, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, AUTHENTICATE_ERROR_MESSAGE);
 			}
 			else if (t instanceof MetaDataException) {
-				error(persistence, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, AUTHENTICATE_ERROR_MESSAGE);
+				error(persistence, httpRequest, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, AUTHENTICATE_ERROR_MESSAGE);
 			}
 			else {
-				LOGGER.error(t.getLocalizedMessage(), t);
-				error(persistence, httpResponse, t.getLocalizedMessage());
+				String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "REST user persistence filter failed", t);
+				error(persistence, httpRequest, httpResponse, WebErrorUtil.genericMessage(reference));
 			}
 		}
 		finally {

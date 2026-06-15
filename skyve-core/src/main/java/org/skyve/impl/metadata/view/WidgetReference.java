@@ -23,6 +23,14 @@ import jakarta.xml.bind.annotation.XmlElementRef;
 import jakarta.xml.bind.annotation.XmlElementRefs;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB-annotated reference that wraps an input widget instance by identity.
+ *
+ * <p>Used in view descriptors where a widget placeholder can be resolved to a
+ * concrete {@link InputWidget} at conversion time.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ */
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 public class WidgetReference implements SerializableMetaData {
 	private static final long serialVersionUID = -4623822506842372448L;

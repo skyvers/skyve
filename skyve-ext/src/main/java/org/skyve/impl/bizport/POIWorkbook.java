@@ -44,6 +44,7 @@ import org.skyve.metadata.customer.Customer;
  */
 public final class POIWorkbook implements BizPortWorkbook {
 	// The adapted Excel workbook
+	@SuppressWarnings("resource") // Workbook lifecycle is owned by this adapter and closed by callers when appropriate.
 	Workbook workbook;
 
 	// whether we are creating or reading an xls or an xlsx
@@ -103,18 +104,28 @@ public final class POIWorkbook implements BizPortWorkbook {
 			String documentName = documentCell == null ? null : documentCell.getStringCellValue();
 			Cell collectionCell = row.getCell(POISheet.COLLECTION_COLUMN, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
 			String binding = collectionCell == null ? null : collectionCell.getStringCellValue();
+			if ((moduleName == null) || (documentName == null)) {
+				e.addError(new UploadException.Problem("Invalid sheet header metadata", sheet.getSheetName()));
+				continue;
+			}
 
-			SheetKey key = new SheetKey(moduleName, documentName, binding);
+			SheetKey key = (binding == null) ? new SheetKey(moduleName, documentName) : new SheetKey(moduleName, documentName, binding);
 
 			sheets.put(key, sheetData);
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public POISheet getSheet(SheetKey key) {
 		return sheets.get(key);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void addSheet(SheetKey key, BizPortSheet sheet) {
 		if (workbook != null) {
@@ -126,6 +137,9 @@ public final class POIWorkbook implements BizPortWorkbook {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public POISheet removeSheet(SheetKey key) {
 		if (workbook != null) {
@@ -135,11 +149,17 @@ public final class POIWorkbook implements BizPortWorkbook {
 		return sheets.remove(key);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Set<SheetKey> getSheetKeys() {
 		return sheets.keySet();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void materialise() {
 		Workbook newWorkbook = ooxmlFormat ? new XSSFWorkbook() : new HSSFWorkbook();
@@ -199,6 +219,9 @@ public final class POIWorkbook implements BizPortWorkbook {
 		timestampStyle.setDataFormat(format.getFormat("m/d/yy h:mm"));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void write(OutputStream out) throws IOException {
 		if (workbook == null) {
@@ -222,6 +245,9 @@ public final class POIWorkbook implements BizPortWorkbook {
 		workbook.write(out);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public BizPortFormat getFormat() {
 		return ooxmlFormat ? BizPortFormat.xlsx : BizPortFormat.xls;
@@ -250,7 +276,8 @@ public final class POIWorkbook implements BizPortWorkbook {
 	 * @param value
 	 * @throws Exception
 	 */
-	public static void putPOICellValue(XSSFSheet sheet, int rowNum, int colNum, CellType cellType, Object value, boolean forceNumericNullToZero, boolean bold) throws Exception {
+	@SuppressWarnings("java:S3776") // Complexity OK
+	public static void putPOICellValue(XSSFSheet sheet, int rowNum, int colNum, CellType cellType, Object value, boolean forceNumericNullToZero, boolean bold) {
 		@SuppressWarnings("resource")
 		XSSFWorkbook workbook = sheet.getWorkbook();
 
@@ -265,11 +292,11 @@ public final class POIWorkbook implements BizPortWorkbook {
 		style.setFont(font);
 
 		XSSFRow row = sheet.getRow(rowNum-1);
-		if(row==null){
+		if (row == null) {
 			row = sheet.createRow(rowNum-1);
 		}
 		XSSFCell cell = row.getCell(colNum-1);
-		if (cell == null){
+		if (cell == null) {
 			cell = row.createCell(colNum-1);
 		}
 
@@ -278,7 +305,7 @@ public final class POIWorkbook implements BizPortWorkbook {
 		if (value != null) {
 //			Util.LOGGER.info("VALUE for {}, {} IS NOT NULL", rowNum, colNum);
 			cell.setCellType(cellType);
-			if(bold){
+			if (bold) {
 				cell.setCellStyle(style);
 			}
 
@@ -312,7 +339,7 @@ public final class POIWorkbook implements BizPortWorkbook {
 		} else {
 			// empty value
 //			Util.LOGGER.info("VALUE for {}, {} IS NULL with cellType {}", rowNum, colNum, (Cell.CELL_TYPE_NUMERIC == cellType ));
-			if(CellType.NUMERIC == cellType && forceNumericNullToZero){
+			if(CellType.NUMERIC == cellType && forceNumericNullToZero) {
 				cell.setCellValue(0.0);
 			}
 			else {
@@ -320,11 +347,17 @@ public final class POIWorkbook implements BizPortWorkbook {
 			}
 		}
 	}
-	public static void putPOICellValue(XSSFSheet sheet, int rowNum, int colNum, CellType cellType, Object value) throws Exception {
+	/**
+	 * Adds or replaces the pOICellValue value.
+	 */
+	public static void putPOICellValue(XSSFSheet sheet, int rowNum, int colNum, CellType cellType, Object value) {
 		putPOICellValue(sheet, rowNum, colNum, cellType, value, false, false);
 	}
 
-	public static void putPOICellValue(XSSFSheet sheet, int rowNum, int colNum, CellType cellType, String value, boolean bold) throws Exception {
+	/**
+	 * Adds or replaces the pOICellValue value.
+	 */
+	public static void putPOICellValue(XSSFSheet sheet, int rowNum, int colNum, CellType cellType, String value, boolean bold) {
 		putPOICellValue(sheet, rowNum, colNum, cellType, value, false, bold);
 	}
 

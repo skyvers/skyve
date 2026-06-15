@@ -1,25 +1,31 @@
 package org.skyve.metadata.model.document;
 
 /**
- * Represents the inverse relationship for an association or collection.
- * An inverse can have a cardinality or one or many (on the inverse side).
- * Inverse can be three types
- * 1) oneToOne - InverseOne -> association
- * 2) oneToMany - InverseOne -> collection
- * 3) manyToMany - InverseMany -> collection
+ * Defines the inverse side of a document relationship.
+ *
+ * <p>An inverse links the current relation to a named relation in the target
+ * document ({@link #getReferenceName()}) and declares inverse cardinality
+ * ({@link #getCardinality()}).
+ *
+ * <p>{@link #getCascade()} controls whether mutations on this side should be
+ * propagated to the inverse side by framework persistence logic.
  */
 public interface Inverse extends Relation {
-	public static enum InverseCardinality {
+	/**
+	 * Defines the InverseCardinality enumeration.
+	 */
+	@SuppressWarnings("java:S115") // Enum names are metadata XML values.
+	public enum InverseCardinality {
 		one, many;
 	}
 
 	/**
 	 * The reference name in the target document that this inverse relates to.
-	 * 
-	 * @return	The reference name for this inverse relationship.
+	 *
+	 * @return the reference name.
 	 */
 	public String getReferenceName();
-	
+
 	/**
 	 * The cardinality of this (inverse) side of the relationship.
 	 * 

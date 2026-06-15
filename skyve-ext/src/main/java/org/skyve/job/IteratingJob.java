@@ -12,6 +12,7 @@ import jakarta.inject.Inject;
 public abstract class IteratingJob<T> extends CancellableJob {
 
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient Persistence persistence;
 
 	private int numProcessedElements;
@@ -21,7 +22,7 @@ public abstract class IteratingJob<T> extends CancellableJob {
 	private int numRolledBackElements;
 
 	@Override
-	@SuppressWarnings("boxing")
+	@SuppressWarnings({"boxing", "java:S3776"}) // Complexity OK
 	public void execute() throws Exception {
 		getLog().add(String.format("Commencing job %s.", getDisplayName()));
 

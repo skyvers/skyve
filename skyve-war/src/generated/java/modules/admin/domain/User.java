@@ -176,7 +176,7 @@ public abstract class User extends UserProxyExtension implements org.skyve.domai
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-	public static enum WizardState implements Enumeration {
+	public enum WizardState implements Enumeration {
 		confirmContact("confirmContact", "confirmContact"),
 		createContact("createContact", "createContact"),
 		confirmUserNameAndPassword("confirmUserNameAndPassword", "confirmUserNameAndPassword"),
@@ -248,7 +248,7 @@ public abstract class User extends UserProxyExtension implements org.skyve.domai
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-	public static enum GroupSelection implements Enumeration {
+	public enum GroupSelection implements Enumeration {
 		existingGroups("existingGroups", "Existing groups"),
 		newGroup("newGroup", "New group");
 

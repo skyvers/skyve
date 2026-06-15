@@ -12,13 +12,24 @@ import org.skyve.domain.Bean;
 
 import modules.admin.domain.Audit;
 
+/**
+ * Converts archived audit beans into Lucene documents for full-text search and sorting.
+ *
+ * <p>The converter indexes the audit's core metadata plus the audited document identifiers
+ * so the archive list can filter and sort without rehydrating the original bean.
+ */
 public class AuditDocumentConverter implements DocumentConverter {
-
+	
     private static SortedDocValuesField sortField(String binding, String value) {
-
         return new SortedDocValuesField(DocumentConverter.toSortBinding(binding), new BytesRef(value));
     }
 
+    /**
+     * Converts an audited bean into a Lucene document suitable for archive indexing.
+     *
+     * @param bean the bean to index; must be an {@link Audit}
+     * @return the Lucene document containing searchable and sortable audit fields
+     */
     @Override
     public Document convert(Bean bean) {
 
@@ -70,10 +81,15 @@ public class AuditDocumentConverter implements DocumentConverter {
         return doc;
     }
 
+    /**
+     * Returns whether this converter handles the supplied module/document pair.
+     *
+     * @param module the module name being indexed; never {@code null}
+     * @param document the document name being indexed; never {@code null}
+     * @return {@code true} only for the admin audit document
+     */
     @Override
     public boolean handles(String module, String document) {
-
         return Audit.MODULE_NAME.equals(module) && Audit.DOCUMENT_NAME.equals(document);
     }
-
 }

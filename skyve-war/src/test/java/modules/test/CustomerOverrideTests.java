@@ -1,6 +1,11 @@
 package modules.test;
 
-import org.junit.Assert;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import org.junit.jupiter.api.Test;
 import org.skyve.CORE;
 import org.skyve.metadata.customer.Customer;
@@ -10,34 +15,33 @@ import org.skyve.metadata.view.View;
 
 import modules.test.domain.AllAttributesPersistent;
 
-public class CustomerOverrideTests extends AbstractSkyveTest {
+@SuppressWarnings("static-method")
+class CustomerOverrideTests extends AbstractSkyveTest {
 
 	@Test
-	@SuppressWarnings("static-method")
-	public void testCustomerOverridesExist() throws Exception {
+	void testCustomerOverridesExist() {
 		Customer customer = CORE.getRepository().getCustomer("test");
-		Assert.assertNotNull(customer);
+		assertNotNull(customer);
 		Module module = customer.getModule("test");
-		Assert.assertNotNull(module.getRole("TestRole"));
+		assertNotNull(module.getRole("TestRole"));
 		Document document = module.getDocument(customer, AllAttributesPersistent.DOCUMENT_NAME);
-		Assert.assertNotNull(document.getCondition("test"));
+		assertNotNull(document.getCondition("test"));
 		View view = document.getView(null, customer, "edit");
-		Assert.assertEquals("Test", view.getTitle());
-		document = module.getDocument(customer, "Test");
-		Assert.assertNotNull(document);
-		Assert.assertNotNull(document.getCondition("test"));
+		assertEquals("Test", view.getTitle());
+		assertNotNull(module.getDocument(customer, "Test"));
+		assertNotNull(document.getCondition("test"));
 	}
 
 	@Test
-	public void testCustomerOverridesDoNotExist() throws Exception {
-		Assert.assertNull(m.getRole("TestRole"));
+	void testCustomerOverridesDoNotExist() {
+		assertNull(m.getRole("TestRole"));
 		Document document = m.getDocument(c, AllAttributesPersistent.DOCUMENT_NAME);
-		Assert.assertNull(document.getCondition("test"));
+		assertNull(document.getCondition("test"));
 		View view = document.getView(null, c, "edit");
-		Assert.assertNotEquals("Test", view.getTitle());
+		assertNotEquals("Test", view.getTitle());
 		try {
-			document = m.getDocument(c, "Test");
-			Assert.fail("Test should not exist");
+			m.getDocument(c, "Test");
+			fail("Test should not exist");
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
 			// do nothing here

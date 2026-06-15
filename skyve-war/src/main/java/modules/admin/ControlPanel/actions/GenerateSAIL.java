@@ -22,8 +22,19 @@ import modules.admin.domain.ControlPanel.SailTestStrategy;
 import modules.admin.domain.ControlPanel.SailUserAgentType;
 import modules.admin.domain.UserProxy;
 
+/**
+ * Provides shared SAIL generation workflow used by Control Panel actions.
+ */
 public abstract class GenerateSAIL implements ServerSideAction<ControlPanelExtension> {
+	/**
+	 * Performs the execute operation.
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public ServerSideActionResult<ControlPanelExtension> execute(ControlPanelExtension bean, WebContext webContext)
 	throws Exception {
 		bean.setResults(null);
@@ -115,6 +126,18 @@ public abstract class GenerateSAIL implements ServerSideAction<ControlPanelExten
 		return new ServerSideActionResult<>(bean);
 	}
 	
+	/**
+	 * Performs the single operation.
+	 * @param user the user value
+	 * @param loginCustomer the loginCustomer value
+	 * @param loginPassword the loginPassword value
+	 * @param moduleName the moduleName value
+	 * @param uxui the uxui value
+	 * @param userAgentType the userAgentType value
+	 * @param testStrategy the testStrategy value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	protected abstract Automation single(User user,
 											String loginCustomer,
 											String loginPassword,
@@ -123,6 +146,18 @@ public abstract class GenerateSAIL implements ServerSideAction<ControlPanelExten
 											UserAgentType userAgentType,
 											TestStrategy testStrategy)
 	throws Exception;
+	
+	/**
+	 * Performs the multiple operation.
+	 * @param user the user value
+	 * @param loginCustomer the loginCustomer value
+	 * @param loginPassword the loginPassword value
+	 * @param uxui the uxui value
+	 * @param userAgentType the userAgentType value
+	 * @param testStrategy the testStrategy value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	protected abstract List<Automation> multiple(User user,
 													String loginCustomer,
 													String loginPassword,

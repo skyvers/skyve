@@ -5,6 +5,9 @@ import org.skyve.metadata.model.document.Bizlet;
 import jakarta.inject.Inject;
 import modules.admin.domain.Jobs;
 
+/**
+ * Initialises the Jobs admin document with currently running scheduler jobs.
+ */
 public class JobsBizlet extends Bizlet<Jobs> {
 	public static final String SYSTEM_JOB_NOTIFICATION = "SYSTEM Job Notification";
 	public static final String SYSTEM_JOB_NOTIFICATION_DEFAULT_SUBJECT = "Job - Complete";
@@ -12,8 +15,18 @@ public class JobsBizlet extends Bizlet<Jobs> {
 	public static final String SYSTEM_JOB_NOTICATION_DEFAULT_BODY = "The Job is complete." + SYSTEM_JOB_NOTIFICATION_LINK_TO_JOBS;
 
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient JobsService jobsService;
 
+	/**
+	 * Populates the running-jobs collection for new Jobs views.
+	 *
+	 * @param jobs
+	 *        the jobs bean to initialise
+	 * @return the same bean after refresh
+	 * @throws Exception
+	 *         if scheduler state cannot be queried
+	 */
 	@Override
 	public Jobs newInstance(Jobs jobs) throws Exception {
 		jobsService.refresh(jobs);

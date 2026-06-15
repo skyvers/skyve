@@ -14,7 +14,18 @@ import org.skyve.web.WebContext;
 
 import modules.admin.domain.User;
 
+/**
+ * Generates a unique username candidate derived from contact name data.
+ */
 public class GenerateUniqueUserName implements ServerSideAction<User> {
+	/**
+	 * Sets a generated unique username on the user bean.
+	 *
+	 * @param user The user bean being edited.
+	 * @param webContext The current web context.
+	 * @return The same user bean.
+	 * @throws Exception If username generation fails.
+	 */
 	@Override
 	public ServerSideActionResult<User> execute(User user, WebContext webContext) throws Exception {
 
@@ -23,6 +34,14 @@ public class GenerateUniqueUserName implements ServerSideAction<User> {
 		return new ServerSideActionResult<>(user);
 	}
 
+	/**
+	 * Builds a username stem from contact name and resolves collisions by incrementing a trailing number.
+	 *
+	 * @param user The user requiring a generated username.
+	 * @return A unique username suggestion.
+	 * @throws Exception If lookup validation fails.
+	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static String generateUniqueUserNameFromContactName(User user) throws Exception {
 		if (user.getContact() == null) {
 			Message vm = new Message(User.contactPropertyName, "You first need to select a contact for this user");
@@ -71,6 +90,5 @@ public class GenerateUniqueUserName implements ServerSideAction<User> {
 			}
 		}
 		return newUName;
-
 	}
 }

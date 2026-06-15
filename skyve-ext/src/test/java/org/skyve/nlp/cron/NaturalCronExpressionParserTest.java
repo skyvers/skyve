@@ -81,7 +81,7 @@ public class NaturalCronExpressionParserTest {
 	private NaturalCronExpressionParser parser;
 
 	@Before
-	public void setup() throws Exception {
+	public void setup() {
 		parser = new NaturalCronExpressionParser();
 	}
 

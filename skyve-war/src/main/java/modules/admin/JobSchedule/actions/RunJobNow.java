@@ -14,14 +14,27 @@ import org.skyve.persistence.Persistence;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import modules.admin.domain.JobSchedule;
 
+/**
+ * Runs a configured scheduled job immediately as a one-shot execution.
+ */
 public class RunJobNow implements ServerSideAction<JobSchedule> {
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(RunJobNow.class);
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RunJobNow.class);
-
+	/**
+	 * Validates the selected job name and triggers immediate execution.
+	 *
+	 * @param bean
+	 *        the selected schedule bean
+	 * @param webContext
+	 *        the current web context
+	 * @return a result wrapping {@code bean}
+	 * @throws Exception
+	 *         if validation or scheduling fails
+	 */
 	@Override
 	public ServerSideActionResult<JobSchedule> execute(JobSchedule bean, WebContext webContext) throws Exception {
 

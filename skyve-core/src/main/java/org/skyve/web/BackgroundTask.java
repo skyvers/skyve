@@ -3,25 +3,45 @@ package org.skyve.web;
 import org.skyve.domain.Bean;
 
 /**
- * This is a short-lived view-oriented background task that can be kicked off from WebContext.
- * @author mike
+ * Defines a short-lived asynchronous unit of work initiated from a web
+ * conversation context.
  *
- * @param <T>	The type of bean the task is operating on - usually the conversation bean.
+ * <p>Implementations execute against a conversation bean of type {@code T}
+ * and may request conversation persistence via {@link #cacheConversation()}.
+ * Implementations should assume execution outside the request thread and
+ * therefore avoid request-scoped state that is not explicitly captured.
+ *
+ * <p>Threading: implementations are expected to be thread-confined per task
+ * instance; shared mutable state requires external synchronization.
+ *
+ * @param <T> the bean type operated on by the task, typically the
+ *            conversation bean
  */
 public interface BackgroundTask<T extends Bean> {
 	/**
-	 * Get the bean for the task.
+	 * Returns the bean snapshot/context for this task execution.
+	 *
+	 * @return the task bean, never {@code null}
 	 */
 	T getBean();
 
 	/**
-	 * Place the conversation backing this task into the conversation cache.
+	 * Persists or places the backing conversation into the conversation cache.
+	 *
+	 * <p>Side effects: may write conversation state to cache/storage.
+	 *
+	 * @throws Exception if caching fails
 	 */
 	void cacheConversation() throws Exception;
 
 	/**
-	 * Override this to do whatever is required in this task.
-	 * @param bean	The same bean returned by getBean() for convenience.
+	 * Executes task-specific background work.
+	 *
+	 * <p>Precondition: {@code bean} is the same logical context returned by
+	 * {@link #getBean()}.
+	 *
+	 * @param bean the task bean/context
+	 * @throws Exception if execution fails
 	 */
 	void execute(T bean) throws Exception;
 }

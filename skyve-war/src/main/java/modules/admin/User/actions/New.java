@@ -12,10 +12,22 @@ import modules.admin.domain.Contact;
 import modules.admin.domain.Contact.ContactType;
 import modules.admin.domain.User.WizardState;
 
+/**
+ * Starts the new-contact branch of the user wizard.
+ */
 public class New implements ServerSideAction<UserExtension> {
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient UserService userService;
 
+	/**
+	 * Clears prior candidate matches, seeds a new contact, and advances wizard flow.
+	 *
+	 * @param adminUser The user wizard bean.
+	 * @param webContext The current web context.
+	 * @return The same user bean.
+	 * @throws Exception If username generation or workflow progression fails.
+	 */
 	@Override
 	public ServerSideActionResult<UserExtension> execute(UserExtension adminUser, WebContext webContext)
 			throws Exception {

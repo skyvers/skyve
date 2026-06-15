@@ -3,7 +3,7 @@ package modules.test;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicPersistentBean;
@@ -16,9 +16,9 @@ import org.skyve.util.Util;
 
 import modules.test.domain.AllAttributesPersistent;
 
-public class RDBMSDynamicPersistenceListModelTests extends AbstractSkyveTest {
+class RDBMSDynamicPersistenceListModelTests extends AbstractSkyveTest {
 	@Test
-	public void testConstructorQuery() throws Exception {
+	void testConstructorQuery() throws Exception {
 		DynamicPersistentBean row = Util.constructRandomInstance(u, m, aadpd, 2);
 		row = p.save(row);
 		row = Util.constructRandomInstance(u, m, aadpd, 2);
@@ -29,11 +29,11 @@ public class RDBMSDynamicPersistenceListModelTests extends AbstractSkyveTest {
 		model.postConstruct(c, true);
 		
 		List<Bean> rows = model.getRows();
-		Assert.assertEquals("Rows not the right size", 14, rows.size());
+		Assertions.assertEquals(14, rows.size(), "Rows not the right size");
 	}
 
 	@Test
-	public void testPostConstructQuery() throws Exception {
+	void testPostConstructQuery() throws Exception {
 		DynamicPersistentBean row = Util.constructRandomInstance(u, m, aadpd, 2);
 		row = p.save(row);
 		row = Util.constructRandomInstance(u, m, aadpd, 2);
@@ -51,11 +51,11 @@ public class RDBMSDynamicPersistenceListModelTests extends AbstractSkyveTest {
 		model.postConstruct(c, true);
 		
 		List<Bean> rows = model.getRows();
-		Assert.assertEquals("Rows not the right size", 14, rows.size());
+		Assertions.assertEquals(14, rows.size(), "Rows not the right size");
 	}
 
 	@Test
-	public void testSetBeanQuery() throws Exception {
+	void testSetBeanQuery() throws Exception {
 		DynamicPersistentBean row = Util.constructRandomInstance(u, m, aadpd, 2);
 		row = p.save(row);
 		row = Util.constructRandomInstance(u, m, aadpd, 2);
@@ -74,11 +74,11 @@ public class RDBMSDynamicPersistenceListModelTests extends AbstractSkyveTest {
 		model.setBean(null);
 		
 		List<Bean> rows = model.getRows();
-		Assert.assertEquals("Rows not the right size", 14, rows.size());
+		Assertions.assertEquals(14, rows.size(), "Rows not the right size");
 	}
 
 	@Test
-	public void testConstructorModel() throws Exception {
+	void testConstructorModel() throws Exception {
 		DynamicPersistentBean row = Util.constructRandomInstance(u, m, aadpd, 2);
 		row = p.save(row);
 		row = Util.constructRandomInstance(u, m, aadpd, 2);
@@ -94,11 +94,11 @@ public class RDBMSDynamicPersistenceListModelTests extends AbstractSkyveTest {
 		model.postConstruct(c, true);
 		
 		List<Bean> rows = model.getRows();
-		Assert.assertEquals("Rows not the right size", 14, rows.size());
+		Assertions.assertEquals(14, rows.size(), "Rows not the right size");
 	}
 
 	@Test
-	public void testPostConstructModel() throws Exception {
+	void testPostConstructModel() throws Exception {
 		DynamicPersistentBean row = Util.constructRandomInstance(u, m, aadpd, 2);
 		row = p.save(row);
 		row = Util.constructRandomInstance(u, m, aadpd, 2);
@@ -120,11 +120,11 @@ public class RDBMSDynamicPersistenceListModelTests extends AbstractSkyveTest {
 		model.postConstruct(c, true);
 		
 		List<Bean> rows = model.getRows();
-		Assert.assertEquals("Rows not the right size", 14, rows.size());
+		Assertions.assertEquals(14, rows.size(), "Rows not the right size");
 	}
 
 	@Test
-	public void testSetBeanModel() throws Exception {
+	void testSetBeanModel() throws Exception {
 		DynamicPersistentBean row = Util.constructRandomInstance(u, m, aadpd, 2);
 		row = p.save(row);
 		row = Util.constructRandomInstance(u, m, aadpd, 2);
@@ -147,6 +147,6 @@ public class RDBMSDynamicPersistenceListModelTests extends AbstractSkyveTest {
 		model.setBean(null);
 		
 		List<Bean> rows = model.getRows();
-		Assert.assertEquals("Rows not the right size", 14, rows.size());
+		Assertions.assertEquals(14, rows.size(), "Rows not the right size");
 	}
 }

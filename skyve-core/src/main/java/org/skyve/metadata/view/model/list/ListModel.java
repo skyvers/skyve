@@ -43,7 +43,35 @@ import org.skyve.web.SortParameter;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
+/**
+ * Abstract base for custom list view models that supply data to Skyve list widgets.
+ *
+ * <p>Subclass {@code ListModel} to provide a custom dataset to a {@code listGrid},
+ * {@code listRepeater}, or similar Skyve view widget via the {@code modelName} attribute.
+ * The framework calls {@link #fetch()} to retrieve a {@link Page} of results.
+ *
+ * <p>Subclasses must implement at minimum:
+ * <ul>
+ *   <li>{@link #getColumns()} — declare the typed column schema for the list.</li>
+ *   <li>{@link #fetch()} — return a {@link Page} of rows for the requested range
+ *       and sort order. Read {@link #getStartRow()}, {@link #getEndRow()}, and
+ *       {@link #getSorts()} to honour pagination and sort.</li>
+ * </ul>
+ *
+ * <p>For in-memory data sets, extend {@link InMemoryListModel} rather than this class.
+ * For document-query-backed lists, extend {@link DocumentQueryListModel}.
+ *
+ * <p>Threading: one {@code ListModel} instance is created per view render cycle and
+ * is not shared across threads.
+ *
+ * @param <T> the driving document bean type
+ * @see Page
+ * @see Filter
+ * @see InMemoryListModel
+ */
 public abstract class ListModel<T extends Bean> implements ViewModel {
+	private static final String FILTERING_NOT_CATERED_FOR = " is not catered for in filtering";
+
 	private T bean;
 	public T getBean() {
 		return bean;
@@ -98,6 +126,7 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
 		this.selectedTagId = selectedTagId;
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public final void addParameters(Document drivingDocument,
 										List<FilterParameter> filterParameters,
 										List<Parameter> parameters)
@@ -244,6 +273,7 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
 		}
 	}
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private Pair<String, Object> processParameter(@Nonnull Customer customer,
 													@Nonnull Module module,
 													@Nonnull Document document,
@@ -430,7 +460,7 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
     		filter.addEquals(binding, geometry);
     	}
     	else {
-    		throw new IllegalArgumentException(value + " is not catered for in filtering");
+			throw new IllegalArgumentException(value + FILTERING_NOT_CATERED_FOR);
     	}
     }
     
@@ -460,7 +490,7 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
     		filter.addNotEquals(binding, geometry);
     	}
     	else {
-    		throw new IllegalArgumentException(value + " is not catered for in filtering");
+			throw new IllegalArgumentException(value + FILTERING_NOT_CATERED_FOR);
     	}
     }
     
@@ -481,7 +511,7 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
     		filter.addGreaterThan(binding, decimal);
     	}
     	else {
-    		throw new IllegalArgumentException(value + " is not catered for in filtering");
+			throw new IllegalArgumentException(value + FILTERING_NOT_CATERED_FOR);
     	}
     }
     
@@ -502,7 +532,7 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
     		filter.addGreaterThanOrEqualTo(binding, decimal);
     	}
     	else {
-    		throw new IllegalArgumentException(value + " is not catered for in filtering");
+			throw new IllegalArgumentException(value + FILTERING_NOT_CATERED_FOR);
     	}
     }
     
@@ -523,7 +553,7 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
     		filter.addLessThan(binding, decimal);
     	}
     	else {
-    		throw new IllegalArgumentException(value + " is not catered for in filtering");
+			throw new IllegalArgumentException(value + FILTERING_NOT_CATERED_FOR);
     	}
     }
     
@@ -544,7 +574,7 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
     		filter.addLessThanOrEqualTo(binding, decimal);
     	}
     	else {
-    		throw new IllegalArgumentException(value + " is not catered for in filtering");
+			throw new IllegalArgumentException(value + FILTERING_NOT_CATERED_FOR);
     	}
     }
     
@@ -565,12 +595,11 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
     		filter.addBetween(binding, decimalStart, (Decimal) end);
     	}
     	else {
-    		throw new IllegalArgumentException(start + " or " + end + " is not catered for in filtering");
+			throw new IllegalArgumentException(start + " or " + end + FILTERING_NOT_CATERED_FOR);
     	}
     }
     
-	private void addNullOrSomething(Filter filterToAddTo, Filter somethingFilter, String binding) 
-	throws Exception {
+	private void addNullOrSomething(Filter filterToAddTo, Filter somethingFilter, String binding) {
 		Filter orFilter = newFilter();
 		orFilter.addNull(binding);
 		orFilter.addOr(somethingFilter);

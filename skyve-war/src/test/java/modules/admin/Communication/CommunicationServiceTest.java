@@ -14,18 +14,18 @@ import org.skyve.util.test.SkyveFixture;
 import modules.admin.domain.Communication;
 import util.AbstractH2Test;
 
-public class CommunicationServiceTest extends AbstractH2Test {
+class CommunicationServiceTest extends AbstractH2Test {
 
 	private CommunicationService communicationService;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		// Initialise CommunicationService
 		communicationService = new CommunicationService();
 	}
 
 	@Test
-	public void testAnonymouslyCommunicationExists() {
+	void testAnonymouslyCommunicationExists() {
 		// create the test data
 		Persistence pers = CORE.getPersistence();
 		Communication c = new DataBuilder().fixture(SkyveFixture.FixtureType.crud)

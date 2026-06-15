@@ -12,6 +12,13 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.user.UserAccess;
 
+/**
+ * Runtime implementation of {@link org.skyve.metadata.user.Role} that carries
+ * the role's document and action privilege set, content restrictions and
+ * permissions, and named {@link org.skyve.metadata.user.UserAccess} grants.
+ *
+ * @see org.skyve.metadata.user.Role
+ */
 public class RoleImpl implements Role {
 	private static final long serialVersionUID = -2841351233211789543L;
 

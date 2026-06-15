@@ -10,6 +10,7 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PiePlot;
+import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.PolarPlot;
 import org.jfree.chart.plot.SpiderWebPlot;
@@ -26,12 +27,19 @@ import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.PieDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
-import org.jfree.util.TableOrder;
+import org.jfree.chart.util.TableOrder;
 import org.skyve.CORE;
 import org.skyve.impl.metadata.view.widget.Chart.ChartType;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.view.model.chart.ChartData;
 
+/**
+ * Generates JFreeChart chart images from Skyve chart model data.
+ *
+ * <p>Converts a {@link org.skyve.metadata.view.model.chart.ChartData} payload
+ * into a JFreeChart instance and renders it as a PNG byte array suitable for
+ * embedding in reports or view responses.
+ */
 public class JFreeChartGenerator {
 	private static final String NO_DATA_AVAILABLE = "No data available";
 
@@ -53,6 +61,9 @@ public class JFreeChartGenerator {
 		this.pixelHeight = pixelHeight;
 	}
 
+	/**
+	 * Performs chart.
+	 */
 	public JFreeChart chart(ChartType type) {
 		JFreeChart result = null;
 		
@@ -87,14 +98,23 @@ public class JFreeChartGenerator {
 		return result;
 	}
 	
+	/**
+	 * Performs image.
+	 */
 	public BufferedImage image(JFreeChart chart) {
 		return chart.createBufferedImage(pixelWidth, pixelHeight);
 	}
 
+	/**
+	 * Performs image.
+	 */
 	public BufferedImage image(ChartType type) {
 		return image(chart(type));
 	}
 
+	/**
+	 * Performs bar.
+	 */
 	public JFreeChart bar() {
 		CategoryDataset dataSet = dataSet();
 		JFreeChart result = ChartFactory.createBarChart(data.getTitle(),
@@ -113,6 +133,9 @@ public class JFreeChartGenerator {
 		return result;
 	}
 	
+	/**
+	 * Performs horizontalBar.
+	 */
 	public JFreeChart horizontalBar() {
 		CategoryDataset dataSet = dataSet();
 		JFreeChart result = ChartFactory.createBarChart(data.getTitle(),
@@ -131,6 +154,9 @@ public class JFreeChartGenerator {
 		return result;
 	}
 	
+	/**
+	 * Performs lineArea.
+	 */
 	public JFreeChart lineArea() {
 		CategoryDataset dataSet = dataSet();
 		JFreeChart result = ChartFactory.createAreaChart(data.getTitle(),
@@ -147,6 +173,9 @@ public class JFreeChartGenerator {
 		return result;
 	}
 	
+	/**
+	 * Performs line.
+	 */
 	public JFreeChart line() {
 		CategoryDataset dataSet = dataSet();
 		JFreeChart result = ChartFactory.createLineChart(data.getTitle(),
@@ -159,15 +188,18 @@ public class JFreeChartGenerator {
 															false);
 		configureCategoryChart(result);
 		LineAndShapeRenderer renderer = (LineAndShapeRenderer) result.getCategoryPlot().getRenderer();
-		renderer.setBaseShapesVisible(true);
-		renderer.setBaseShapesFilled(true);
+		renderer.setDefaultShapesVisible(true);
+		renderer.setDefaultShapesFilled(true);
 
 		postProcess(result);
 		return result;
 	}
 	
+	/**
+	 * Performs pie.
+	 */
 	public JFreeChart pie() {
-		PieDataset dataSet = pieDataSet();
+		PieDataset<?> dataSet = pieDataSet();
 		JFreeChart result = ChartFactory.createPieChart(data.getTitle(), dataSet, true, false, false);
 		configurePieChart(result);
 
@@ -175,8 +207,11 @@ public class JFreeChartGenerator {
 		return result;
 	}
 	
+	/**
+	 * Performs doughnut.
+	 */
 	public JFreeChart doughnut() {
-		PieDataset dataSet = pieDataSet();
+		PieDataset<?> dataSet = pieDataSet();
 		JFreeChart result = ChartFactory.createRingChart(data.getTitle(), dataSet, true, false, false);
 		configurePieChart(result);
 
@@ -184,6 +219,9 @@ public class JFreeChartGenerator {
 		return result;
 	}
 
+	/**
+	 * Performs polarArea.
+	 */
 	public JFreeChart polarArea() {
 		XYSeriesCollection dataSet = new XYSeriesCollection();
 		dataSet.setNotify(false);
@@ -195,8 +233,8 @@ public class JFreeChartGenerator {
 			XYSeries series = new XYSeries(labels.get(i));
 			series.setNotify(false);
 			series.add(0, 0);
-			series.add(i * 360 / l, values.get(i));
-			series.add((i + 1) * 360 / l, values.get(i));
+			series.add(i * 360.0 / l, values.get(i));
+			series.add((i + 1) * 360.0 / l, values.get(i));
 			dataSet.addSeries(series);
 		}
 
@@ -225,8 +263,6 @@ public class JFreeChartGenerator {
 			renderer.setSeriesOutlinePaint(i, borders.get(i));
 		}
 
-		renderer.setItemLabelAnchorOffset(0);
-		
 		LegendTitle legend = result.getLegend();
 		legend.setItemFont(THEME_LEGEND_FONT);
 
@@ -237,6 +273,9 @@ public class JFreeChartGenerator {
 		return result;
 	}
 	
+	/**
+	 * Performs radar.
+	 */
 	public JFreeChart radar() {
 		CategoryDataset dataSet = dataSet();
 	    SpiderWebPlot plot = new SpiderWebPlot(dataSet);
@@ -271,7 +310,7 @@ public class JFreeChartGenerator {
 		return result;
 	}
 	
-	private PieDataset pieDataSet() {
+	private PieDataset<?> pieDataSet() {
 		return new CategoryToPieDataset(dataSet(), TableOrder.BY_ROW, 0);
 	}
 	
@@ -294,8 +333,6 @@ public class JFreeChartGenerator {
 		renderer.setSeriesOutlineStroke(0, new BasicStroke(1));
 		renderer.setSeriesFillPaint(0, data.getBackground());
 
-		renderer.setItemLabelAnchorOffset(0);
-		
 		LegendTitle legend = chart.getLegend();
 		if (legend != null) {
 			legend.setItemFont(THEME_LEGEND_FONT);
@@ -314,10 +351,14 @@ public class JFreeChartGenerator {
 		chart.setBackgroundPaint(null);
 	    chart.setBorderVisible(false);
 
-		PiePlot plot = (PiePlot) chart.getPlot();
-		plot.setBackgroundPaint(null);
-		plot.setNoDataMessage(NO_DATA_AVAILABLE);
-		plot.setOutlineVisible(false);
+		Plot plot = chart.getPlot();
+		if (! (plot instanceof PiePlot<?> piePlot)) {
+			throw new IllegalArgumentException("Chart plot is not a pie plot.");
+		}
+
+		piePlot.setBackgroundPaint(null);
+		piePlot.setNoDataMessage(NO_DATA_AVAILABLE);
+		piePlot.setOutlineVisible(false);
 
 		List<String> labels = data.getLabels();
 		List<Color> backgrounds = data.getBackgrounds();
@@ -325,8 +366,8 @@ public class JFreeChartGenerator {
 		
 		for (int i = 0, l = backgrounds.size(); i < l; i++) {
 			String label = labels.get(i);
-			plot.setSectionPaint(label, backgrounds.get(i));
-			plot.setSectionOutlinePaint(label, borders.get(i));
+			piePlot.setSectionPaint(label, backgrounds.get(i));
+			piePlot.setSectionOutlinePaint(label, borders.get(i));
 		}
 		
 		LegendTitle legend = chart.getLegend();

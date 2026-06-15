@@ -14,6 +14,15 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * JAXB-annotated colour-picker input widget bound to a String attribute.
+ *
+ * <p>Renders a colour-swatch button that opens a colour-selection popup.
+ * Supports absolute width, focus/blur/change events, and
+ * disabled/invisible conditions.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ */
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 public final class ColourPicker extends ChangeableInputWidget implements AbsoluteWidth, FormItemWidget {

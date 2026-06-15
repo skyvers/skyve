@@ -1,11 +1,13 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" 
+<html xmlns="http://www.w3.org/1999/xhtml"
 		xmlns:ui="http://java.sun.com/jsf/facelets" 
 		xmlns:h="http://java.sun.com/jsf/html" 
-		xmlns:f="http://java.sun.com/jsf/core">
+		xmlns:f="http://java.sun.com/jsf/core"
+		lang="#{device.languageTag}" xml:lang="#{device.languageTag}">
     <f:view contentType="text/html" encoding="UTF-8">
 		<!-- Dont use h:head coz it'll bring in themes that can screw up the device layout -->
 		<head>
+			<title>${project.description}</title>
 			<meta name="viewport" content="width=device-width, initial-scale=1" />
 			<link type="text/css" rel="stylesheet" href="#{device.contextUrl}/fontawesome-6.5.1/css/all.min.css" />
 
@@ -218,7 +220,7 @@
 		<body>
 			<div id="device">
 			  <div class="content">
-			    <iframe id="iframe" style="width:100%;border:none;height:100%"></iframe>
+			    <iframe id="iframe" title="Device preview" style="width:100%;border:none;height:100%"></iframe>
 			  </div>
 			</div>
 			<div style="position:fixed;bottom:80px;right:70px;">

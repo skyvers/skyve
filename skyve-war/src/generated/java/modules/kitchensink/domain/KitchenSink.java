@@ -155,7 +155,7 @@ public class KitchenSink extends AbstractTransientBean {
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-	public static enum Combo implements Enumeration {
+	public enum Combo implements Enumeration {
 		one("one", "one"),
 		two("two", "two"),
 		three("three", "three");
@@ -226,7 +226,7 @@ public class KitchenSink extends AbstractTransientBean {
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-	public static enum Radio implements Enumeration {
+	public enum Radio implements Enumeration {
 		one("one", "one"),
 		two("two", "two"),
 		three("three", "three");

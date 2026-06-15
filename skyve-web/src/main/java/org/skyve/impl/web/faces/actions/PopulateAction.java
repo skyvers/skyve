@@ -17,14 +17,30 @@ import org.slf4j.Logger;
  * Just set the state of the list bean up - but do not load any data
  */
 public class PopulateAction extends FacesAction<Void> {
-
     private static final Logger FACES_LOGGER = Category.FACES.logger();
 
 	private FacesView facesView;
+
+	/**
+	 * Creates an action that initialises list-view state without loading data rows.
+	 *
+	 * @param facesView the current Faces view context
+	 */
 	public PopulateAction(FacesView facesView) {
 		this.facesView = facesView;
 	}
 	
+	/**
+	 * Initialises the list view metadata state for the current request.
+	 *
+	 * <p>If both document and query parameters are present, this resolves the list model
+	 * from the document and applies its localised description to the view title. Otherwise,
+	 * it resolves the metadata query definition and derives the document name and title
+	 * from that definition.
+	 *
+	 * @return always {@code null} because this action mutates view state only
+	 * @throws Exception if metadata resolution fails while loading module, document, or query details
+	 */
 	@Override
 	public Void callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("PopulateAction");

@@ -13,6 +13,16 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * JAXB-annotated placeholder widget that requests the default input widget
+ * for the bound attribute type.
+ *
+ * <p>When a view declares {@code <default binding="..."/>}, the renderer
+ * substitutes the most appropriate concrete input widget for the bound
+ * attribute's data type at render time.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ */
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "default")
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE, propOrder = {"properties"})
 public class DefaultWidget extends AbstractBound implements DecoratedMetaData {

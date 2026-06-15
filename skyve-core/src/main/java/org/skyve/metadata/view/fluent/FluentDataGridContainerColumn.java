@@ -9,17 +9,38 @@ import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn;
 import org.skyve.metadata.MetaData;
 
+/**
+ * Builds container-style {@link DataGridContainerColumn} metadata.
+ */
 public class FluentDataGridContainerColumn extends FluentDataGridColumn<FluentDataGridContainerColumn> {
 	private DataGridContainerColumn column = null;
 	
+	/**
+	 * Creates a builder backed by a new {@link DataGridContainerColumn}.
+	 */
 	public FluentDataGridContainerColumn() {
 		column = new DataGridContainerColumn();
 	}
 
+	/**
+	 * Creates a builder backed by the supplied {@link DataGridContainerColumn}.
+	 *
+	 * @param column
+	 *            the metadata instance to mutate
+	 */
 	public FluentDataGridContainerColumn(DataGridContainerColumn column) {
 		this.column = column;
 	}
 
+	/**
+	 * Copies all supported widget references from runtime metadata.
+	 *
+	 * @param column
+	 *            the source metadata to copy
+	 * @return this builder
+	 * @throws IllegalStateException
+	 *             if an unsupported widget type is encountered
+	 */
 	public FluentDataGridContainerColumn from(@SuppressWarnings("hiding") DataGridContainerColumn column) {
 		super.from(column);
 
@@ -50,36 +71,78 @@ public class FluentDataGridContainerColumn extends FluentDataGridColumn<FluentDa
 		return this;
 	}
 
+	/**
+	 * Adds a link widget to the container column.
+	 *
+	 * @param link
+	 *            the link builder whose widget is appended
+	 * @return this builder
+	 */
 	public FluentDataGridContainerColumn addWidget(FluentLink link) {
 		column.getWidgets().add(link.get());
 		return this;
 	}
 
+	/**
+	 * Adds a {@link org.skyve.impl.metadata.view.widget.bound.input.ContentImage} widget to this container column.
+	 *
+	 * @param image the content image builder whose widget is appended
+	 * @return this builder
+	 */
 	public FluentDataGridContainerColumn addWidget(FluentContentImage image) {
 		column.getWidgets().add(image.get());
 		return this;
 	}
 
+	/**
+	 * Adds a {@link org.skyve.impl.metadata.view.widget.StaticImage} widget to this container column.
+	 *
+	 * @param image the static image builder whose widget is appended
+	 * @return this builder
+	 */
 	public FluentDataGridContainerColumn addWidget(FluentStaticImage image) {
 		column.getWidgets().add(image.get());
 		return this;
 	}
 
+	/**
+	 * Adds a {@link org.skyve.impl.metadata.view.widget.DynamicImage} widget to this container column.
+	 *
+	 * @param image the dynamic image builder whose widget is appended
+	 * @return this builder
+	 */
 	public FluentDataGridContainerColumn addWidget(FluentDynamicImage image) {
 		column.getWidgets().add(image.get());
 		return this;
 	}
 
+	/**
+	 * Adds a {@link org.skyve.impl.metadata.view.widget.Blurb} widget to this container column.
+	 *
+	 * @param blurb the blurb builder whose widget is appended
+	 * @return this builder
+	 */
 	public FluentDataGridContainerColumn addWidget(FluentBlurb blurb) {
 		column.getWidgets().add(blurb.get());
 		return this;
 	}
 
+	/**
+	 * Adds a {@link org.skyve.impl.metadata.view.widget.bound.Label} widget to this container column.
+	 *
+	 * @param label the label builder whose widget is appended
+	 * @return this builder
+	 */
 	public FluentDataGridContainerColumn addWidget(FluentLabel label) {
 		column.getWidgets().add(label.get());
 		return this;
 	}
 
+	/**
+	 * Returns the underlying mutable metadata.
+	 *
+	 * @return the wrapped container column metadata
+	 */
 	@Override
 	public DataGridContainerColumn get() {
 		return column;

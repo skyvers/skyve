@@ -18,8 +18,20 @@ import jakarta.faces.component.UIViewRoot;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.convert.Converter;
 
+/**
+ * Converts JSF values between formatted UI strings and Skyve domain representations for this format.
+ */
 public class AssociationAutoCompleteConverter implements Converter<Object> {
+	/**
+	 * Resolves an association identifier string back to a referenced bean.
+	 *
+	 * @param context the active JSF context
+	 * @param component the component requesting conversion
+	 * @param value the submitted association token
+	 * @return the resolved referenced bean, or {@code null} when the submitted value is empty
+	 */
     @Override
+    @SuppressWarnings("java:S3776") // Complexity OK
     public Object getAsObject(FacesContext context, UIComponent component, String value) {
     	Bean result = null;
     	
@@ -35,8 +47,6 @@ public class AssociationAutoCompleteConverter implements Converter<Object> {
 		            String bizId = documentName.substring(pos + 1);
 		            documentName = documentName.substring(0, pos);
 
-		            Bean bean = null;
-		            WebContext webContext = null;
 					UIViewRoot root = context.getViewRoot();
 					if (root != null) {
 						String managedBeanName = (String) root.getAttributes().get(FacesUtil.MANAGED_BEAN_NAME_KEY);
@@ -44,18 +54,20 @@ public class AssociationAutoCompleteConverter implements Converter<Object> {
 							FacesView view = (FacesView) FacesUtil.getNamed(managedBeanName);
 							if (view != null) {
 								BeanMapAdapter adapter = view.getCurrentBean();
+								Bean bean = null;
 								if (adapter != null) {
 									bean = adapter.getBean();
 								}
-								webContext = view.getWebContext();
+								
+								WebContext webContext = view.getWebContext();
+					            Customer c = CORE.getCustomer();
+					            Module m  = c.getModule(moduleName);
+					            Document d = m.getDocument(c, documentName);
+					        	return WebUtil.findReferencedBean(d, bizId, CORE.getPersistence(), bean, webContext);
 							}
 						}
 					}
-					
-		            Customer c = CORE.getCustomer();
-		            Module m  = c.getModule(moduleName);
-		            Document d = m.getDocument(c, documentName);
-		            return WebUtil.findReferencedBean(d, bizId, CORE.getPersistence(), bean, webContext);
+					return null;
 				}
 			}.execute();
         }
@@ -63,6 +75,14 @@ public class AssociationAutoCompleteConverter implements Converter<Object> {
         return result;
     }
 
+	/**
+	 * Formats a referenced bean as the module.document.bizId token used by this converter.
+	 *
+	 * @param context the active JSF context
+	 * @param component the component requesting conversion
+	 * @param value the referenced bean or bean adapter to format
+	 * @return the encoded association token, or an empty string when no bean is supplied
+	 */
     @Override
     public String getAsString(FacesContext context, UIComponent component, Object value) {
     	String result = "";

@@ -29,7 +29,7 @@ import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.report.ReportFormat;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import net.sf.jasperreports.engine.JRAbstractExporter;
@@ -40,10 +40,10 @@ import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.export.HtmlExporter;
 import net.sf.jasperreports.engine.export.JRCsvExporter;
 import net.sf.jasperreports.engine.export.JRExporterContext;
-import net.sf.jasperreports.engine.export.JRPdfExporter;
+import net.sf.jasperreports.pdf.JRPdfExporter;
 import net.sf.jasperreports.engine.export.JRRtfExporter;
 import net.sf.jasperreports.engine.export.JRTextExporter;
-import net.sf.jasperreports.engine.export.JRXlsExporter;
+import net.sf.jasperreports.poi.export.JRXlsExporter;
 import net.sf.jasperreports.engine.export.JRXmlExporter;
 import net.sf.jasperreports.engine.export.oasis.JROdsExporter;
 import net.sf.jasperreports.engine.export.oasis.JROdtExporter;
@@ -65,13 +65,26 @@ import net.sf.jasperreports.export.SimpleXlsxReportConfiguration;
 import net.sf.jasperreports.export.SimpleXmlExporterOutput;
 import net.sf.jasperreports.web.util.WebHtmlResourceHandler;
 
+/**
+ * Utility methods for filling and exporting Jasper reports from Skyve data sources.
+ */
 public final class JasperReportUtil {
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(JasperReportUtil.class);
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JasperReportUtil.class);
+    private static final String READ_DATA_PERMISSION = "read this data";
+	private static final String FILL_REPORT = "FILL REPORT";
+	private static final String PUMP_REPORT = "PUMP REPORT";
+	private static final String PUMPED_REPORT = "PUMPED REPORT";
 
 	private JasperReportUtil() {
 		// disallow instantiation
 	}
+
+	/**
+	 * Runs a Jasper report using a bean-backed document data source.
+	 *
+	 * @return The filled report print.
+	 */
 
 	public static JasperPrint runBeanReport(User user,
 												Document document,
@@ -84,6 +97,12 @@ public final class JasperReportUtil {
 		return runReport(user, document, reportName, parameters, bean, format, out);
 	}
 
+	/**
+	 * Runs a Jasper report using its SQL query data source.
+	 *
+	 * @return The filled report print.
+	 */
+
 	public static JasperPrint runSQLReport(User user,
 											Document document,
 											String reportName,
@@ -94,6 +113,12 @@ public final class JasperReportUtil {
 		// Cast to null to remove method call ambiguity, this does not throw an NPE.
 		return runReport(user, document, reportName, parameters, (Bean) null, format, out);
 	}
+
+	/**
+	 * Loads and runs a Jasper report file for document/bean execution.
+	 *
+	 * @return The filled report print.
+	 */
 
 	public static JasperPrint runReport(User user,
 											Document document,
@@ -109,6 +134,12 @@ public final class JasperReportUtil {
 		return runReport(jasperReport, user, document, parameters, bean, format, out);
 	}
 
+	/**
+	 * Loads and runs a Jasper report file for list-model execution.
+	 *
+	 * @return The filled report print.
+	 */
+
 	public static JasperPrint runReport(User user,
 											Document document,
 											String reportName,
@@ -122,6 +153,12 @@ public final class JasperReportUtil {
 		final JasperReport jasperReport = (JasperReport) JRLoader.loadObject(new File(reportFileName));
 		return runReport(jasperReport, user, parameters, listModel, format, out);
 	}
+
+	/**
+	 * Fills and exports a compiled Jasper report using either SQL or document query language.
+	 *
+	 * @return The filled report print.
+	 */
 
 	public static JasperPrint runReport(JasperReport jasperReport,
 											User user,
@@ -139,7 +176,7 @@ public final class JasperReportUtil {
 			result = fillSqlReport(jasperReport, parameters, format, out);
 		}
 		else if ("document".equalsIgnoreCase(queryLanguage)) {
-			LOGGER.info("FILL REPORT");
+			LOGGER.info(FILL_REPORT);
 			Bean reportBean = bean;
 			// if we have no bean then see if there is a bizId parameter
 			if (reportBean == null) {
@@ -151,18 +188,24 @@ public final class JasperReportUtil {
 						throw new NoResultsException();
 					}
 					if (! user.canReadBean(id, reportBean.getBizModule(), reportBean.getBizDocument(), reportBean.getBizCustomer(), reportBean.getBizDataGroupId(), reportBean.getBizUserId())) {
-						throw new SecurityException("read this data", user.getName());
+						throw new SecurityException(READ_DATA_PERMISSION, user.getName());
 					}
 				}
 			}
 			result = JasperFillManager.fillReport(jasperReport, parameters, new SkyveDataSource(user, reportBean));
-			LOGGER.info("PUMP REPORT");
+			LOGGER.info(PUMP_REPORT);
 			runReport(result, format, out);
-			LOGGER.info("PUMPED REPORT");
+			LOGGER.info(PUMPED_REPORT);
 		}
 
 		return result;
 	}
+
+	/**
+	 * Fills and exports a compiled Jasper report from a list-model data source.
+	 *
+	 * @return The filled report print.
+	 */
 
 	public static JasperPrint runReport(JasperReport jasperReport,
 											User user,
@@ -171,15 +214,15 @@ public final class JasperReportUtil {
 											ReportFormat format,
 											OutputStream out)
 	throws Exception {
-		LOGGER.info("FILL REPORT");
+		LOGGER.info(FILL_REPORT);
 		JasperPrint result;
 		try (AutoClosingIterable<Bean> iterable = listModel.iterate()) {
 			final JRDataSource dataSource = new SkyveDataSource(user, iterable.iterator());
 			result = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
 		}
-		LOGGER.info("PUMP REPORT");
+		LOGGER.info(PUMP_REPORT);
 		runReport(result, format, out);
-		LOGGER.info("PUMPED REPORT");
+		LOGGER.info(PUMPED_REPORT);
 
 		return result;
 	}
@@ -189,17 +232,24 @@ public final class JasperReportUtil {
 										ReportFormat format,
 										OutputStream out)
 	throws Exception {
-		LOGGER.info("FILL REPORT");
+		LOGGER.info(FILL_REPORT);
 		JasperPrint result;
 		try (Connection connection = EXT.getDataStoreConnection()) {
 			result = JasperFillManager.fillReport(jasperReport, parameters, connection);
-			LOGGER.info("PUMP REPORT");
+			LOGGER.info(PUMP_REPORT);
 			runReport(result, format, out);
-			LOGGER.info("PUMPED REPORT");
+			LOGGER.info(PUMPED_REPORT);
 		}
 		return result;
 	}
 
+	/**
+	 * Runs and exports multiple reports described by report parameter descriptors.
+	 *
+	 * @return The list of filled report prints.
+	 */
+
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static List<JasperPrint> runReport(User user,
 												List<ReportParameters> reportParameters,
 												ReportFormat format,
@@ -215,16 +265,16 @@ public final class JasperReportUtil {
 
 			LOGGER.info("QUERY LNG = {}", queryLanguage);
 			if ("sql".equalsIgnoreCase(queryLanguage)) {
-				LOGGER.info("FILL REPORT");
+				LOGGER.info(FILL_REPORT);
 				try (Connection connection = EXT.getDataStoreConnection()) {
 					result.add(JasperFillManager.fillReport(jasperReport, reportParameter.getParameters(), connection));
-					LOGGER.info("PUMP REPORT");
+					LOGGER.info(PUMP_REPORT);
 					runReport(result, format, out);
-					LOGGER.info("PUMPED REPORT");
+					LOGGER.info(PUMPED_REPORT);
 				}
 			}
 			else if ("document".equalsIgnoreCase(queryLanguage)) {
-				LOGGER.info("FILL REPORT");
+				LOGGER.info(FILL_REPORT);
 				Bean reportBean = reportParameter.getBean();
 				// if we have no bean then see if there is a bizId parameter
 				if (reportBean == null) {
@@ -236,7 +286,7 @@ public final class JasperReportUtil {
 							throw new NoResultsException();
 						}
 						if (! user.canReadBean(id, reportBean.getBizModule(), reportBean.getBizDocument(), reportBean.getBizCustomer(), reportBean.getBizDataGroupId(), reportBean.getBizUserId()))
-							throw new SecurityException("read this data", user.getName());
+							throw new SecurityException(READ_DATA_PERMISSION, user.getName());
 						}
 				}
 				result.add(JasperFillManager.fillReport(jasperReport,
@@ -245,9 +295,9 @@ public final class JasperReportUtil {
 			}
 		}
 
-		LOGGER.info("PUMP REPORT");
+		LOGGER.info(PUMP_REPORT);
 		runReport(result, format, out);
-		LOGGER.info("PUMPED REPORT");
+		LOGGER.info(PUMPED_REPORT);
 
 		return result;
 	}
@@ -289,6 +339,10 @@ public final class JasperReportUtil {
 		return result;
 	}
 
+	/**
+	 * Exports a single filled report using the specified format.
+	 */
+
 	public static void runReport(JasperPrint jasperPrint,
 									ReportFormat format,
 									OutputStream out)
@@ -297,6 +351,10 @@ public final class JasperReportUtil {
 		exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
 		exporter.exportReport();
 	}
+
+	/**
+	 * Exports multiple filled reports using the specified format.
+	 */
 
 	public static void runReport(List<JasperPrint> jasperPrintList, ReportFormat format, OutputStream out)
 	throws Exception {
@@ -404,6 +462,14 @@ public final class JasperReportUtil {
 		return result;
 	}
 
+	/**
+	 * Resolves a list model for a document default query or named metadata query with security checks.
+	 *
+	 * @param module The module containing the query or document.
+	 * @param documentOrQueryName The query name or document name.
+	 * @param uxui The UX/UI context identifier used for access checks.
+	 * @return A list model for report iteration.
+	 */
 	public static ListModel<Bean> getQueryListModel(Module module, String documentOrQueryName, String uxui) {
 		final String moduleName = module.getName();
 		final User user = CORE.getUser();
@@ -419,7 +485,7 @@ public final class JasperReportUtil {
 
         final Document drivingDocument = module.getDocument(customer, query.getDocumentName());
 		if (! user.canReadDocument(drivingDocument)) {
-			throw new SecurityException("read this data", user.getName());
+			throw new SecurityException(READ_DATA_PERMISSION, user.getName());
 		}
 
 		return EXT.newListModel(query);

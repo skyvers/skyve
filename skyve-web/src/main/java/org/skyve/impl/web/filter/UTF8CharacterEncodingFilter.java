@@ -14,6 +14,12 @@ import jakarta.servlet.ServletResponse;
  * Sets the char encoding to UTF-8 on the request if not set, and preemptively sets UTF-8 on the response.
  */
 public class UTF8CharacterEncodingFilter implements Filter {
+	/**
+	 * No-op lifecycle hook for filter initialization.
+	 *
+	 * @param filterConfig filter configuration
+	 * @throws ServletException when initialization fails
+	 */
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
 		// nothing to see here
@@ -29,13 +35,16 @@ public class UTF8CharacterEncodingFilter implements Filter {
 		response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 		chain.doFilter(request, response);
 		
-		// TODO Note that we can't set the contentType or character encoding here after calling the filter chain as the response is committed.
+		// Note that we can't set the contentType or character encoding here after calling the filter chain as the response is committed.
 		// So to add selective char encodings we would have to look at the servlet path and exclude certain mappings.
 		// Regex is too hard.
 		// A CSV of path prefixes to exclude is doable if really needed.
 		// See how this pans out with flutter.
 	}
 
+	/**
+	 * No-op lifecycle hook for filter destruction.
+	 */
 	@Override
 	public void destroy() {
 		// nothing to see here

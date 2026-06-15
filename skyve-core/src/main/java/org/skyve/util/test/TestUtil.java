@@ -28,7 +28,6 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.model.document.AssociationImpl;
 import org.skyve.impl.metadata.model.document.field.Decimal10;
 import org.skyve.impl.metadata.model.document.field.Decimal5;
-import org.skyve.impl.metadata.model.document.field.LongInteger;
 import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.metadata.model.document.field.TextFormat;
 import org.skyve.impl.metadata.model.document.field.validator.DecimalValidator;
@@ -48,17 +47,24 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Binder;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.mifmif.common.regex.Generex;
 
 import jakarta.annotation.Nonnull;
 
+/**
+ * Generates and mutates deterministic/random test data for Skyve domain documents.
+ *
+ * <p>This utility supports fixture-driven value sourcing, metadata-aware attribute
+ * updates, and random document instance construction for generated tests.
+ */
 public class TestUtil {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TestUtil.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(TestUtil.class);
 
+	@SuppressWarnings("java:S2245") // It's ok that this is not cryptographically strong as it's only used for generating test data
     private static final Random RANDOM = new Random();
 	private static final String NUMBERS = "0123456789";
 	private static final String LETTERS = "abcdefghijklmnopqrstuvwxyz";
@@ -245,7 +251,7 @@ public class TestUtil {
 		return null;
 	}
 
-	@SuppressWarnings("incomplete-switch") // content type missing from switch statement
+	@SuppressWarnings({"incomplete-switch", "java:S3776"}) // content type missing from switch statement; Complexity OK
 	private static @Nonnull <T extends Bean> T constructRandomInstance(@Nonnull User user,
 																		@Nonnull Module module,
 																		@Nonnull Document document,
@@ -346,8 +352,8 @@ public class TestUtil {
 	 * @return True if the string contains a period followed by at least one character, false otherwise
 	 */
 	private static boolean hasExtension(final String filename) {
-		if (filename != null && filename.length() > 0 && filename.indexOf(".") > 0) {
-			if ((filename.substring(filename.indexOf(".") + 1)).length() > 0) {
+		if (filename != null && ! filename.isEmpty() && filename.indexOf(".") > 0) {
+			if (! (filename.substring(filename.indexOf(".") + 1)).isEmpty()) {
 				return true;
 			}
 		}
@@ -389,9 +395,19 @@ public class TestUtil {
 						.add(new Decimal2(1)).intValue())).add(min);
 	}
 
+	/**
+	 * Returns a pseudo-random email string constrained to the requested total length.
+	 *
+	 * <p>The result is generated as {@code local@domain.cc}, where local and domain
+	 * parts are uppercase alphabetic characters and {@code cc} is a two-character
+	 * alphabetic suffix.
+	 *
+	 * @param length The requested total email length
+	 * @return A pseudo-random email string
+	 */
 	public static String randomEmail(int length) {
-		int addressLength = (int) Math.floor((length - 2) / 2);
-		int domainLength = (int) Math.floor((length - 2) / 2) - 2;
+		int addressLength = (int) Math.floor((length - 2) / 2.0);
+		int domainLength = (int) Math.floor((length - 2) / 2.0) - 2;
 
 		char[] address = new char[addressLength];
 		for (int i = 0; i < addressLength; i++) {
@@ -499,6 +515,7 @@ public class TestUtil {
 	 * @param attribute The attribute to generate the random integer for
 	 * @return A random integer
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static Integer randomInteger(Attribute attribute) {
 		int min = 0, max = 10000;
 
@@ -588,6 +605,7 @@ public class TestUtil {
 	 * @return A string containing random data for the text attribute
 	 * @throws IOException
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static String randomText(String customerName, Module module, Document document, Attribute attribute)
 			throws IOException {
 		if (attribute != null) {
@@ -706,7 +724,7 @@ public class TestUtil {
 							// trim to last sentence boundary
 							out = out.substring(0, out.lastIndexOf(".") + 1).trim();
 						}
-						if (out.length() > 0) {
+						if (! out.isEmpty()) {
 							LOGGER.debug("Random {} for {} with length {}({}): {}",
 									attribute.getAttributeType(),
 									attribute.getName(),
@@ -758,6 +776,7 @@ public class TestUtil {
 	 * @return A random value from the data file if it exists, null otherwise
 	 * @throws IOException
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static String randomValueFromFile(String customerName, final Module module, final Document document,
 			final String attributeName,
 			final String... fileName) throws IOException {
@@ -849,7 +868,8 @@ public class TestUtil {
 	}
 
 	// Used by findRandomDocumentQueryResult().
-	private static Random random = new Random();
+	@SuppressWarnings("java:S2245") // It's ok that this is not cryptographically strong as it's only used for generating test data
+	private static Random documentQueryRandom = new Random();
 	
 	/**
 	 * <p>
@@ -878,7 +898,7 @@ public class TestUtil {
 			return null;
 		}
 
-		int randomIndex = random.nextInt((int) count - 1);
+		int randomIndex = (count == 1) ? 0 : documentQueryRandom.nextInt((int) count - 1);
 
 		// get the random record
 		aq.clearProjections();

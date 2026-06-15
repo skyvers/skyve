@@ -1,6 +1,7 @@
 package sail.kitchenSink.sc;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 
 import util.AbstractSmartClientInterpretedSail;
 import util.sail.BrowserConfiguration;
@@ -21,6 +22,6 @@ class SmartClientKitchenSinkSailIT extends AbstractSmartClientInterpretedSail {
 
 	@Test
 	void test() {
-		sailFile("/Users/simeonsolomou/git/skyve/skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail.xml");
+		Assertions.assertDoesNotThrow(() -> sailFile("/Users/simeonsolomou/git/skyve/skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail.xml"));
 	}
 }

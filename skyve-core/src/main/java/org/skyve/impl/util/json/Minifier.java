@@ -43,6 +43,7 @@ public class Minifier {
 	 * @return a minified version of the passed string, with whitespace and comments
 	 *         removed, null if param is null.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static final String minify(String json) {
 		if (json == null || json.isEmpty())
 			return json;

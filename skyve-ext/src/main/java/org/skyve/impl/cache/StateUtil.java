@@ -39,6 +39,10 @@ import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
+/**
+ * Manages serialised conversation (page-scope) state in the HTTP session,
+ * providing store and retrieve operations for Faces view state and navigation data.
+ */
 public class StateUtil {
 
     private static final Logger FACES_LOGGER = Category.FACES.logger();
@@ -57,6 +61,7 @@ public class StateUtil {
 		getConversations().put(webContext.getKey(), SerializationHelper.serialize(webContext));
 	}
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static @Nullable AbstractWebContext getCachedConversation(@Nullable String webId,
 																		@Nullable HttpServletRequest request)
 	throws Exception {
@@ -100,14 +105,23 @@ public class StateUtil {
 	
 	private static final AtomicInteger SESSION_COUNT = new AtomicInteger(0);
 
+	/**
+	 * Returns the sessionCount.
+	 */
 	public static int getSessionCount() {
 		return SESSION_COUNT.get();
 	}
 	
+	/**
+	 * Performs incrementSessionCount.
+	 */
 	public static void incrementSessionCount() {
 		SESSION_COUNT.incrementAndGet();
 	}
 	
+	/**
+	 * Performs decrementSessionCount.
+	 */
 	public static void decrementSessionCount() {
 		int count = SESSION_COUNT.decrementAndGet();
 		if (count < 0) {
@@ -120,6 +134,9 @@ public class StateUtil {
 		return EXT.getCaching().getEHCache(UtilImpl.SESSION_CACHE.getName(), String.class, TreeSet.class);
 	}
 	
+	/**
+	 * Adds a session.
+	 */
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	public static void addSession(@Nonnull String userId, @Nonnull HttpSession session) {
 		Cache<String, TreeSet> sessions = getSessions();
@@ -132,6 +149,9 @@ public class StateUtil {
 		sessions.put(userId, sessionIds);
 	}
 	
+	/**
+	 * Removes the session.
+	 */
 	@SuppressWarnings("rawtypes")
 	public static void removeSession(@Nonnull String userId, @Nonnull HttpSession session) {
 		Cache<String, TreeSet> sessions = getSessions();
@@ -148,6 +168,9 @@ public class StateUtil {
 		}
 	}
 	
+	/**
+	 * Performs checkSession.
+	 */
 	@SuppressWarnings("rawtypes")
 	public static boolean checkSession(@Nonnull String userId, @Nonnull HttpSession session) {
 		Cache<String, TreeSet> sessions = getSessions();
@@ -157,7 +180,43 @@ public class StateUtil {
 		}
 		return false;
 	}
+
+	/**
+	 * Determines whether the user has at least one different registered session ID.
+	 *
+	 * @param userId The user identifier.
+	 * @param session The current session.
+	 * @return {@code true} if at least one other session ID is already registered for the user.
+	 */
+	@SuppressWarnings("rawtypes")
+	public static boolean hasOtherSession(@Nonnull String userId, @Nonnull HttpSession session) {
+		Cache<String, TreeSet> sessions = getSessions();
+		TreeSet sessionIds = sessions.get(userId);
+		if (sessionIds == null || sessionIds.isEmpty()) {
+			return false;
+		}
+		if (sessionIds.size() > 1) {
+			return true;
+		}
+		return ! sessionIds.contains(session.getId());
+	}
+
+	/**
+	 * Returns the number of currently registered session IDs for a user.
+	 *
+	 * @param userId The user identifier.
+	 * @return The count of session IDs currently tracked for this user.
+	 */
+	@SuppressWarnings("rawtypes")
+	public static int getSessionCount(@Nonnull String userId) {
+		Cache<String, TreeSet> sessions = getSessions();
+		TreeSet sessionIds = sessions.get(userId);
+		return (sessionIds == null) ? 0 : sessionIds.size();
+	}
 	
+	/**
+	 * Removes the sessions.
+	 */
 	public static void removeSessions(@Nonnull String userId) {
 		getSessions().remove(userId);
 	}
@@ -181,10 +240,16 @@ public class StateUtil {
 		return EXT.getCaching().getEHCache(UtilImpl.CSRF_TOKEN_CACHE.getName(), String.class, TreeSet.class);
 	}
 
+	/**
+	 * Performs clearTokens.
+	 */
 	public static void clearTokens(@Nonnull HttpSession session) {
 		clearTokens(session.getId());
 	}
 	
+	/**
+	 * Performs clearTokens.
+	 */
 	@SuppressWarnings("rawtypes")
 	public static void clearTokens(@Nonnull String sessionId) {
 		Cache<String, TreeSet> tokens = getTokens();
@@ -196,10 +261,16 @@ public class StateUtil {
 		}
 	}
 	
+	/**
+	 * Performs checkToken.
+	 */
 	public static boolean checkToken(@Nonnull HttpSession session, @Nullable Integer token) {
 		return checkToken(session.getId(), token);
 	}
 	
+	/**
+	 * Performs checkToken.
+	 */
 	@SuppressWarnings("rawtypes")
 	public static boolean checkToken(@Nonnull String sessionId, @Nullable Integer token) {
 		if (token == null) {
@@ -251,6 +322,9 @@ public class StateUtil {
 		return Integer.valueOf(RANDOM.nextInt());
 	}
 	
+	/**
+	 * Logs the stateStats.
+	 */
 	public static void logStateStats() {
 		logCacheStats(UtilImpl.CONVERSATION_CACHE.getName(), "Conversation");
 		logCacheStats(UtilImpl.CSRF_TOKEN_CACHE.getName(), "CSRF Token");
@@ -287,6 +361,9 @@ public class StateUtil {
 		}
 	}
 	
+	/**
+	 * Performs evictExpiredConversations.
+	 */
 	public static void evictExpiredConversations() {
 		Cache<String, byte[]> conversations = getConversations();
 		Iterator<Entry<String, byte[]>> i = conversations.iterator();
@@ -300,6 +377,9 @@ public class StateUtil {
 		}
 	}
 	
+	/**
+	 * Performs evictExpiredSessionTokens.
+	 */
 	@SuppressWarnings("rawtypes")
 	public static void evictExpiredSessionTokens() {
 		Cache<String, TreeSet> tokens = getTokens();

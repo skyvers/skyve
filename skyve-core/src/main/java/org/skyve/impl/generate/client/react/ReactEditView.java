@@ -13,6 +13,9 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 
+/**
+ * Renders React edit view component code from Skyve metadata.
+ */
 public class ReactEditView extends ReactComponent {
 	private Module module;
 	private Document document;
@@ -32,6 +35,7 @@ public class ReactEditView extends ReactComponent {
  	}
 
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	protected void create(FileWriter fw) throws IOException {
 		Map<String, String> imports = new TreeMap<>();
 		String editJsx = null;

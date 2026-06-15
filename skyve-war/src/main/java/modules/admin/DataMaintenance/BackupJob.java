@@ -6,7 +6,6 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.skyve.CORE;
 import org.skyve.domain.types.DateOnly;
@@ -18,16 +17,32 @@ import org.skyve.util.FileUtil;
 
 import modules.admin.domain.DataMaintenance;
 
+/**
+ * Runs background backup generation and records progress for Data Maintenance.
+ */
 public class BackupJob extends Job {
+	private static final String COPY_BACKUP_FORMAT = "Copy Backup %s to %s";
+	private static final String DAILY_PREFIX = "DAILY_";
+	private static final String PROBLEMS_SUFFIX = "_PROBLEMS";
+
+	/**
+	 * Performs the cancel operation.
+	 * @return the operation result
+	 */
 	@Override
 	public String cancel() {
 		return null;
 	}
 
+	/**
+	 * Performs the execute operation.
+	 * @throws Exception if the operation fails
+	 */
 	@Override
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	public void execute() throws Exception {
 		DateOnly now = new DateOnly();
-		DataMaintenance dm = DataMaintenance.newInstance();
+		DataMaintenance dm = createDataMaintenance();
 		File backupZip = null;
 		List<String> log = getLog();
 		String trace;
@@ -54,7 +69,7 @@ public class BackupJob extends Job {
 			trace = "Take backup...";
 			log.add(trace);
 			LOGGER.warn(trace);
-			org.skyve.impl.backup.BackupJob backupJob = new org.skyve.impl.backup.BackupJob();
+			org.skyve.impl.backup.BackupJob backupJob = createBackupJob();
 			execute(backupJob);
 			backupZip = backupJob.getBackupZip();
 		} else {
@@ -70,7 +85,7 @@ public class BackupJob extends Job {
 
 			// move the zip archive
 			File backupDir = backupZip.getParentFile();
-			File dailyZip = new File(backupDir, "DAILY_" + backupZip.getName());
+			File dailyZip = new File(backupDir, DAILY_PREFIX + backupZip.getName());
 			if (ExternalBackup.areExternalBackupsEnabled()) {
 				try {
 					ExternalBackup.getInstance().moveBackup(backupZip.getName(), dailyZip.getName());
@@ -78,8 +93,7 @@ public class BackupJob extends Job {
 					trace = String.format("Failed to move external backup for %s from %s to %s",
 							UtilImpl.ARCHIVE_NAME, backupZip.getName(), dailyZip.getName());
 					log.add(trace);
-					LOGGER.warn(trace);
-					e.printStackTrace();
+					LOGGER.warn(trace, e);
 					org.skyve.impl.backup.BackupJob.emailProblem(log, trace);
 				}
 			} else {
@@ -103,12 +117,11 @@ public class BackupJob extends Job {
 						trace = String.format("Failed to copy external backup for %s from %s to %s",
 								UtilImpl.ARCHIVE_NAME, dailyZip.getName(), copy.getName());
 						log.add(trace);
-						LOGGER.warn(trace);
-						e.printStackTrace();
+						LOGGER.warn(trace, e);
 						org.skyve.impl.backup.BackupJob.emailProblem(log, trace);
 					}
 				} else {
-					trace = String.format("Copy Backup %s to %s", backupZip.getAbsolutePath(), copy.getAbsolutePath());
+					trace = String.format(COPY_BACKUP_FORMAT, backupZip.getAbsolutePath(), copy.getAbsolutePath());
 					log.add(trace);
 					LOGGER.info(trace);
 					FileUtil.copy(dailyZip, copy);
@@ -130,12 +143,11 @@ public class BackupJob extends Job {
 						trace = String.format("Failed to copy external backup for %s from %s to %s",
 								UtilImpl.ARCHIVE_NAME, dailyZip.getName(), copy.getName());
 						log.add(trace);
-						LOGGER.warn(trace);
-						e.printStackTrace();
+						LOGGER.warn(trace, e);
 						org.skyve.impl.backup.BackupJob.emailProblem(log, trace);
 					}
 				} else {
-					trace = String.format("Copy Backup %s to %s", backupZip.getAbsolutePath(), copy.getAbsolutePath());
+					trace = String.format(COPY_BACKUP_FORMAT, backupZip.getAbsolutePath(), copy.getAbsolutePath());
 					log.add(trace);
 					LOGGER.info(trace);
 					FileUtil.copy(dailyZip, copy);
@@ -161,7 +173,7 @@ public class BackupJob extends Job {
 						org.skyve.impl.backup.BackupJob.emailProblem(log, trace);
 					}
 				} else {
-					trace = String.format("Copy Backup %s to %s", backupZip.getAbsolutePath(), copy.getAbsolutePath());
+					trace = String.format(COPY_BACKUP_FORMAT, backupZip.getAbsolutePath(), copy.getAbsolutePath());
 					log.add(trace);
 					LOGGER.info(trace);
 					FileUtil.copy(dailyZip, copy);
@@ -169,22 +181,32 @@ public class BackupJob extends Job {
 			}
 
 			// cull daily
-			cull(backupDir, "DAILY_", daily);
-			cull(backupDir, "DAILY_", "_PROBLEMS", daily * 2);
+			cull(backupDir, DAILY_PREFIX, daily);
+			cull(backupDir, DAILY_PREFIX, PROBLEMS_SUFFIX, daily * 2);
 			// cull weekly
 			cull(backupDir, "WEEKLY_", weekly);
-			cull(backupDir, "WEEKLY_", "_PROBLEMS", weekly * 2);
+			cull(backupDir, "WEEKLY_", PROBLEMS_SUFFIX, weekly * 2);
 			// cull monthly
 			cull(backupDir, "MONTHLY_", monthly);
-			cull(backupDir, "MONTHLY_", "_PROBLEMS", monthly * 2);
+			cull(backupDir, "MONTHLY_", PROBLEMS_SUFFIX, monthly * 2);
 			// cull yearly
-			cull(backupDir, "YEARLY_", "_PROBLEMS", yearly * 2);
+			cull(backupDir, "YEARLY_", PROBLEMS_SUFFIX, yearly * 2);
 		}
 
 		setPercentComplete(100);
 		trace = String.format("Finished Backup of customer %s at %s", CORE.getUser().getCustomerName(), new Date());
 		log.add(trace);
 		LOGGER.info(trace);
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	protected DataMaintenance createDataMaintenance() {
+		return DataMaintenance.newInstance();
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	protected org.skyve.impl.backup.BackupJob createBackupJob() {
+		return new org.skyve.impl.backup.BackupJob();
 	}
 
 	private void cull(File backupDir, String prefix, int retain)
@@ -212,7 +234,7 @@ public class BackupJob extends Job {
 				final ExternalBackup externalBackup = ExternalBackup.getInstance();
 				final List<String> backups = externalBackup.listBackups();
 				final List<String> matchingBackups = backups.stream().filter(backup -> backup.matches(regex))
-						.collect(Collectors.toList());
+						.toList();
 				for (int i = retain, l = matchingBackups.size(); i < l; i++) {
 					String trace = String.format("Cull backup %s - retention is set to %d",
 							matchingBackups.get(i),

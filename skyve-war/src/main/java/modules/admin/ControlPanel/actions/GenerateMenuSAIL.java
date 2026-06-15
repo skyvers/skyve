@@ -8,7 +8,22 @@ import org.skyve.metadata.sail.language.Automation.TestStrategy;
 import org.skyve.metadata.user.User;
 import org.skyve.web.UserAgentType;
 
+/**
+ * Generates SAIL automation for menu navigation scenarios.
+ */
 public class GenerateMenuSAIL extends GenerateSAIL {
+	/**
+	 * Performs the single operation.
+	 * @param user the user value
+	 * @param loginCustomer the loginCustomer value
+	 * @param loginPassword the loginPassword value
+	 * @param moduleName the moduleName value
+	 * @param uxui the uxui value
+	 * @param userAgentType the userAgentType value
+	 * @param testStrategy the testStrategy value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public Automation single(User user,
 								String loginCustomer,
@@ -21,6 +36,17 @@ public class GenerateMenuSAIL extends GenerateSAIL {
 		return Generator.visitMenu(user, loginCustomer, loginPassword, moduleName, uxui, userAgentType, testStrategy);
 	}
 
+	/**
+	 * Performs the multiple operation.
+	 * @param user the user value
+	 * @param loginCustomer the loginCustomer value
+	 * @param loginPassword the loginPassword value
+	 * @param uxui the uxui value
+	 * @param userAgentType the userAgentType value
+	 * @param testStrategy the testStrategy value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public List<Automation> multiple(User user,
 										String loginCustomer,

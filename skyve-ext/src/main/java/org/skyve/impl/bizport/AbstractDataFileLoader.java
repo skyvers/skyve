@@ -31,8 +31,11 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * <pre>
@@ -120,9 +123,9 @@ import org.slf4j.LoggerFactory;
  **/
 public abstract class AbstractDataFileLoader {
 	// NB An instance member LOGGER is OK here as this is not Serializable
-    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    protected final Logger LOGGER = SkyveLoggerFactory.getLogger(getClass());
 
-	public static enum LoaderActivityType {
+	public enum LoaderActivityType {
 		CREATE_ALL, CREATE_FIND, FIND
 	}
 
@@ -143,14 +146,14 @@ public abstract class AbstractDataFileLoader {
 	protected int dataIndex;
 	protected int fieldIndex;
 
-	protected List<Bean> results;
+	protected final List<Bean> results;
 
-	protected List<DataFileField> fields; // maintain order
+	protected final List<DataFileField> fields; // maintain order
 
-	public AbstractDataFileLoader(LoaderActivityType activityType,
-									UploadException exception,
-									String moduleName,
-									String documentName) {
+	protected AbstractDataFileLoader(@Nonnull LoaderActivityType activityType,
+										@Nonnull UploadException exception,
+										@Nonnull String moduleName,
+										@Nonnull String documentName) {
 		this.activityType = activityType;
 		this.exception = exception;
 
@@ -213,15 +216,15 @@ public abstract class AbstractDataFileLoader {
 		this.treatAllEmptyNumericAsZero = emptyAsZero;
 	}
 
-	public void setException(UploadException exception) {
+	public void setException(@Nonnull UploadException exception) {
 		this.exception = exception;
 	}
 
-	public void setActivityType(LoaderActivityType activityType) {
+	public void setActivityType(@Nonnull LoaderActivityType activityType) {
 		this.activityType = activityType;
 	}
 
-	public UploadException getException() {
+	public @Nonnull UploadException getException() {
 		return exception;
 	}
 
@@ -230,9 +233,9 @@ public abstract class AbstractDataFileLoader {
 	 * 
 	 * @param binding
 	 */
-	public void addField(String binding) {
+	public void addField(@Nonnull String binding) {
 		String fixedBinding = binding;
-		if (binding != null && binding.startsWith("{") && binding.endsWith("}")) {
+		if (binding.startsWith("{") && binding.endsWith("}")) {
 			fixedBinding = binding.substring(1, binding.length() - 1);
 		}
 		DataFileField field = new DataFileField(fixedBinding, fields.size());
@@ -244,7 +247,7 @@ public abstract class AbstractDataFileLoader {
 	 * 
 	 * @param dff
 	 */
-	public void addField(DataFileField field) {
+	public void addField(@Nonnull DataFileField field) {
 		if (field.getIndex() == null) {
 			field.setIndex(fields.size());
 		}
@@ -260,15 +263,16 @@ public abstract class AbstractDataFileLoader {
 	 * @param required
 	 * @param converter
 	 */
-	public void addField(String binding, LoadAction loadAction, boolean required, Converter<?> converter) {
+	public void addField(@Nonnull String binding, LoadAction loadAction, boolean required, Converter<?> converter) {
 		DataFileField field = new DataFileField(binding, loadAction, required, fields.size(), converter);
 		fields.add(finaliseField(field));
 	}
 
-	private DataFileField finaliseField(DataFileField field) {
+	@SuppressWarnings({"java:S2629", "java:S3776"}) // logging log.toString() fine, complexity OK
+	private DataFileField finaliseField(@Nonnull DataFileField field) {
 		if (field.getBinding() != null) {
 			// default inferred load action
-			if (field.getBinding().indexOf('.') > 0 && LoaderActivityType.CREATE_FIND.equals(activityType)) {
+			if (field.getBinding().indexOf('.') >= 0 && LoaderActivityType.CREATE_FIND.equals(activityType)) {
 				field.setLoadAction(LoadAction.LOOKUP_EQUALS);
 			}
 
@@ -321,14 +325,13 @@ public abstract class AbstractDataFileLoader {
 	 * 
 	 * @param bindings
 	 */
-	public void addFields(String... bindings) {
-
+	public void addFields(@Nonnull String... bindings) {
 		for (String binding : bindings) {
 			addField(binding);
 		}
 	}
 
-	public List<DataFileField> getFields() {
+	public @Nonnull List<DataFileField> getFields() {
 		return fields;
 	}
 
@@ -354,7 +357,7 @@ public abstract class AbstractDataFileLoader {
 	 * @param moduleName
 	 * @param documentName
 	 */
-	public void setDocumentContext(String moduleName, String documentName) {
+	public void setDocumentContext(@Nonnull String moduleName, @Nonnull String documentName) {
 		this.moduleName = moduleName;
 		module = customer.getModule(moduleName);
 		this.documentName = documentName;
@@ -412,7 +415,7 @@ public abstract class AbstractDataFileLoader {
 	 * @param fieldIndex
 	 * @return
 	 */
-	private String getWhere(Integer index) {
+	private String getWhere(@Nullable Integer index) {
 		StringBuilder where = new StringBuilder(128);
 		where.append("Row ").append((dataIndex + 1));
 		if (index != null) {
@@ -437,7 +440,7 @@ public abstract class AbstractDataFileLoader {
 	 * 
 	 * @return
 	 */
-	public String getWhere() {
+	public @Nonnull String getWhere() {
 		return getWhere(null);
 	}
 
@@ -446,7 +449,7 @@ public abstract class AbstractDataFileLoader {
 	 * 
 	 * @return
 	 */
-	public String debugData() {
+	public @Nonnull String debugData() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Row ").append(dataIndex);
 		if (!isNoData()) {
@@ -468,10 +471,9 @@ public abstract class AbstractDataFileLoader {
 	 * @param loadValue
 	 * @return
 	 */
-	public void lookupBean(Bean contextBean, DataFileField field, Object loadValue, StringBuilder what) {
-
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
+	public void lookupBean(@Nonnull Bean contextBean, @Nonnull DataFileField field, @Nullable Object loadValue, @Nonnull StringBuilder what) {
 		if (loadValue != null) {
-
 			// default action - look for equals value if attribute document is different to starting
 			// document if a compound binding is supplied, we need to
 			// find if there is any top-level association which matches
@@ -482,7 +484,7 @@ public abstract class AbstractDataFileLoader {
 			// the rest - e.g company.contact.name
 			String restBinding = binding;
 			String searchBinding = binding;
-			if (binding.indexOf('.') > 0) {
+			if (binding.indexOf('.') >= 0) {
 				restBinding = binding.substring(binding.indexOf('.') + 1);
 
 				// the bit to search - e.g. we are searching company
@@ -504,8 +506,7 @@ public abstract class AbstractDataFileLoader {
 				LOGGER.info("{} searching {} in document {} for value {}", field.getLoadAction().name(), restBinding, drivingDoc.getName(), loadValue);
 			}
 			switch (field.getLoadAction()) {
-			case LOOKUP_EQUALS:
-			case CONFIRM_VALUE:
+			case LOOKUP_EQUALS, CONFIRM_VALUE:
 				lookup.getFilter().addEquals(restBinding, loadValue);
 				break;
 			case LOOKUP_LIKE:
@@ -591,6 +592,7 @@ public abstract class AbstractDataFileLoader {
 	 * 
 	 * @return
 	 */
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	public <T extends Bean> T beanResult() {
 
 		if (debugMode) {
@@ -664,7 +666,7 @@ public abstract class AbstractDataFileLoader {
 							if (debugMode) {
 								LOGGER.info("Loading String value {} using Skyve converter {}", displayValue, field.getConverter().toString());
 							}
-							if (displayValue != null && displayValue.trim().length() > 0) {
+							if (displayValue != null && (! displayValue.trim().isEmpty())) {
 								try {
 									loadValue = field.getConverter().fromDisplayValue(displayValue.trim());
 								} catch (@SuppressWarnings("unused") Exception e) {
@@ -727,7 +729,7 @@ public abstract class AbstractDataFileLoader {
 							case text:
 								operand = getStringFieldValue(fieldIndex, true);
 								if (operand != null) {
-									loadValue = (((String) operand).trim().length()>0? (String) operand: null);
+									loadValue = ((String) operand).trim().isEmpty() ? null : (String) operand;
 									if (debugMode) {
 										LOGGER.info("String field value {}", loadValue);
 									}

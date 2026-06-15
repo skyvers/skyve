@@ -2,6 +2,7 @@ package org.skyve.impl.metadata.repository;
 
 import java.io.File;
 import java.sql.Connection;
+import java.util.Collections;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -37,7 +38,7 @@ public abstract class AbstractDynamicRepository extends MutableCachedRepository 
 	/**
 	 * Use a plain TreeMap as the cache.
 	 */
-	public AbstractDynamicRepository() {
+	protected AbstractDynamicRepository() {
 		super(new TreeMap<>());
 	}
 
@@ -133,7 +134,7 @@ public abstract class AbstractDynamicRepository extends MutableCachedRepository 
 
 	@Override
 	public List<Router> getModuleRouters() {
-		return null;
+		return Collections.emptyList();
 	}
 
 	@Override
@@ -173,12 +174,12 @@ public abstract class AbstractDynamicRepository extends MutableCachedRepository 
 
 	@Override
 	public List<UserJobSchedule> retrieveAllScheduledJobsForAllCustomers() {
-		return null;
+		return Collections.emptyList();
 	}
 
 	@Override
 	public List<UserJobSchedule> retrieveAllScheduledReportsForAllCustomers() {
-		return null;
+		return Collections.emptyList();
 	}
 
 	@Override

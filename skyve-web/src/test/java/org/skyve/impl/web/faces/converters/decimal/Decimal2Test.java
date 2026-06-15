@@ -2,13 +2,13 @@ package org.skyve.impl.web.faces.converters.decimal;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import jakarta.faces.convert.ConverterException;
-
 public class Decimal2Test {
 	private Decimal2Converter converter;
 
@@ -18,7 +18,7 @@ public class Decimal2Test {
 	}
 
 	@Test(expected = ConverterException.class)
-	public void testGetAsObjectInvalidStringValue() throws Exception {
+	public void testGetAsObjectInvalidStringValue() {
 		// call the method under test
 		converter.getAsObject(null, null, "not a Decimal2");
 
@@ -26,37 +26,15 @@ public class Decimal2Test {
 	}
 
 	@Test
-	public void testGetAsObjectLargeValue() throws Exception {
-		// setup the test data
-		java.lang.String stringValue = "9999999999999999999";
-		org.skyve.domain.types.Decimal2 decimalValue = new org.skyve.domain.types.Decimal2(stringValue);
-
-		// call the method under test
-		assertThat(converter.getAsObject(null, null, stringValue), is(decimalValue));
+	public void testGetAsObjectLargeValues() {
+		for (String stringValue : new String[] {"9999999999999999999", "+9999999999999999999", "-9999999999999999999"}) {
+			org.skyve.domain.types.Decimal2 decimalValue = new org.skyve.domain.types.Decimal2(stringValue);
+			assertThat(converter.getAsObject(null, null, stringValue), is(decimalValue));
+		}
 	}
 
 	@Test
-	public void testGetAsObjectLargePositiveValue() throws Exception {
-		// setup the test data
-		java.lang.String stringValue = "+9999999999999999999";
-		org.skyve.domain.types.Decimal2 decimalValue = new org.skyve.domain.types.Decimal2(stringValue);
-
-		// call the method under test
-		assertThat(converter.getAsObject(null, null, stringValue), is(decimalValue));
-	}
-
-	@Test
-	public void testGetAsObjectLargeNegativeValue() throws Exception {
-		// setup the test data
-		java.lang.String stringValue = "-9999999999999999999";
-		org.skyve.domain.types.Decimal2 decimalValue = new org.skyve.domain.types.Decimal2(stringValue);
-
-		// call the method under test
-		assertThat(converter.getAsObject(null, null, stringValue), is(decimalValue));
-	}
-
-	@Test
-	public void testGetAsObjectValidValue() throws Exception {
+	public void testGetAsObjectValidValue() {
 		// setup the test data
 		org.skyve.domain.types.Decimal2 testValue = org.skyve.domain.types.Decimal2.ONE_THOUSAND;
 
@@ -65,7 +43,7 @@ public class Decimal2Test {
 	}
 
 	@Test
-	public void testGetAsString() throws Exception {
+	public void testGetAsString() {
 		// setup the test data
 		org.skyve.domain.types.Decimal2 testValue = org.skyve.domain.types.Decimal2.ONE_THOUSAND;
 
@@ -74,7 +52,7 @@ public class Decimal2Test {
 	}
 
 	@Test
-	public void testGetAsStringPrecisionValue() throws Exception {
+	public void testGetAsStringPrecisionValue() {
 		// setup the test data
 		java.lang.String stringValue = "99.99";
 		org.skyve.domain.types.Decimal2 decimalValue = new org.skyve.domain.types.Decimal2(stringValue);
@@ -84,7 +62,7 @@ public class Decimal2Test {
 	}
 
 	@Test
-	public void testGetAsStringLargePrecisionValue() throws Exception {
+	public void testGetAsStringLargePrecisionValue() {
 		// setup the test data
 		java.lang.String stringValue = "+99.99999999999999999";
 		org.skyve.domain.types.Decimal2 decimalValue = new org.skyve.domain.types.Decimal2(stringValue);
@@ -94,7 +72,7 @@ public class Decimal2Test {
 	}
 
 	@Test
-	public void testGetAsStringLargePositiveValue() throws Exception {
+	public void testGetAsStringLargePositiveValue() {
 		// setup the test data
 		java.lang.String stringValue = "9999999999999999999";
 		org.skyve.domain.types.Decimal2 decimalValue = new org.skyve.domain.types.Decimal2("+" + stringValue);
@@ -104,12 +82,22 @@ public class Decimal2Test {
 	}
 
 	@Test
-	public void testGetAsStringLargeNegativeValue() throws Exception {
+	public void testGetAsStringLargeNegativeValue() {
 		// setup the test data
 		java.lang.String stringValue = "-9999999999999999999";
 		org.skyve.domain.types.Decimal2 decimalValue = new org.skyve.domain.types.Decimal2(stringValue);
 
 		// call the method under test
 		assertThat(converter.getAsString(null, null, decimalValue), is(stringValue + ".00"));
+	}
+
+	@Test
+	public void testGetAsObjectNullValue() {
+		assertNull(converter.getAsObject(null, null, null));
+	}
+
+	@Test
+	public void testGetAsStringNullValue() {
+		assertThat(converter.getAsString(null, null, null), is(""));
 	}
 }

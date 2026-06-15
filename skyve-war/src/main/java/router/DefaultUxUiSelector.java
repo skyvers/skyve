@@ -8,19 +8,25 @@ import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.router.UxUiSelector;
 import org.skyve.metadata.user.User;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.skyve.web.UserAgentType;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import modules.admin.domain.Startup;
 
+/**
+ * Selects the effective UX/UI profile for incoming web requests.
+ */
 public class DefaultUxUiSelector implements UxUiSelector {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultUxUiSelector.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(DefaultUxUiSelector.class);
 
+	/**
+	 * Session key that records whether the startup wizard has been dismissed.
+	 */
 	public static final String DISMISS_STARTUP = "DISMISS_STARTUP";
 
 	private static final Map<String, UxUi> uxuis = new TreeMap<>();
@@ -32,6 +38,13 @@ public class DefaultUxUiSelector implements UxUiSelector {
 		uxuis.put(UxUis.STARTUP.getName(), UxUis.STARTUP);
 	}
 
+	/**
+	 * Selects the UX/UI profile for the current request.
+	 *
+	 * @param userAgentType the detected user-agent category
+	 * @param request the current servlet request
+	 * @return the selected UX/UI profile
+	 */
 	@Override
 	public UxUi select(UserAgentType userAgentType, HttpServletRequest request) {
 		// public pages are destined for external UX/UI always
@@ -45,7 +58,8 @@ public class DefaultUxUiSelector implements UxUiSelector {
 		User user = (session == null) ? null : (User) session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
 		if (user != null && user.isInRole(Startup.MODULE_NAME, "SecurityAdministrator") && UtilImpl.SHOW_SETUP) {
 			// check the user has not already dismissed the startup page this session
-			Object dismissed = session != null ? session.getAttribute(DISMISS_STARTUP) : null;
+			@SuppressWarnings("null") // session cannot be null here as user is not null
+			Object dismissed = session.getAttribute(DISMISS_STARTUP);
 			if (! Boolean.TRUE.equals(dismissed)) {
 				LOGGER.info("ROUTING TO STARTUP");
 				return UxUis.STARTUP;
@@ -73,6 +87,13 @@ public class DefaultUxUiSelector implements UxUiSelector {
 		}
 	}
 	
+	/**
+	 * Selects the emulated UX/UI profile for preview and testing scenarios.
+	 *
+	 * @param userAgentType the requested user-agent category
+	 * @param request the current servlet request
+	 * @return the emulated UX/UI profile
+	 */
 	@Override
 	public UxUi emulate(UserAgentType userAgentType, HttpServletRequest request) {
 		switch (userAgentType) {

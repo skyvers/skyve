@@ -10,6 +10,14 @@ import org.skyve.domain.Bean;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.util.UtilImpl;
 
+/**
+ * Implements the Elasticsearch-backed content manager integration.
+ *
+ * <p>This implementation currently operates as a compatibility stub while the legacy
+ * Elasticsearch-specific indexing logic remains commented out.
+ *
+ * <p>Threading: not thread-safe; lifecycle and usage are expected to be container-managed.
+ */
 @SuppressWarnings("all")
 public class ElasticContentManager extends AbstractContentManager {
 	//import java.io.File;
@@ -91,34 +99,47 @@ public class ElasticContentManager extends AbstractContentManager {
 //    private static final String KEYWORDS = "keywords";
 //
 //    private static final String BEAN = "bean";
-    static final String BEAN_CUSTOMER_NAME = "bean." + Bean.CUSTOMER_NAME;
-    static final String BEAN_MODULE_KEY = "bean." + Bean.MODULE_KEY;
-    static final String BEAN_DOCUMENT_KEY = "bean." + Bean.DOCUMENT_KEY;
-    static final String BEAN_DATA_GROUP_ID = "bean." + Bean.DATA_GROUP_ID;
-    static final String BEAN_USER_ID = "bean." + Bean.USER_ID;
-    static final String BEAN_DOCUMENT_ID = "bean." + Bean.DOCUMENT_ID;
-    static final String BEAN_ATTRIBUTE_NAME = "bean.attribute";
+	private static final String BEAN_PREFIX = "bean.";
+    static final String BEAN_CUSTOMER_NAME = BEAN_PREFIX + Bean.CUSTOMER_NAME;
+    static final String BEAN_MODULE_KEY = BEAN_PREFIX + Bean.MODULE_KEY;
+    static final String BEAN_DOCUMENT_KEY = BEAN_PREFIX + Bean.DOCUMENT_KEY;
+    static final String BEAN_DATA_GROUP_ID = BEAN_PREFIX + Bean.DATA_GROUP_ID;
+    static final String BEAN_USER_ID = BEAN_PREFIX + Bean.USER_ID;
+    static final String BEAN_DOCUMENT_ID = BEAN_PREFIX + Bean.DOCUMENT_ID;
+    static final String BEAN_ATTRIBUTE_NAME = BEAN_PREFIX + "attribute";
 	
 //	private static Node node = ElasticUtil.localNode();
 //	private static final Tika TIKA = new Tika();
 
 //	private Client client = null;
 	
+	/**
+	 * Creates the manager instance.
+	 */
 	public ElasticContentManager() {
 //		client = ElasticUtil.localClient(node);
 	}
 	
+	/**
+	 * Starts the content manager lifecycle.
+	 */
 	@Override
 	public void startup() {
 //		ElasticUtil.prepareIndex(client, ElasticContentManager.ATTACHMENT_INDEX_NAME, ElasticContentManager.ATTACHMENT_INDEX_TYPE);
 //		ElasticUtil.prepareIndex(client, ElasticContentManager.BEAN_INDEX_NAME, ElasticContentManager.BEAN_INDEX_TYPE);
 	}
 
+	/**
+	 * Stops the content manager lifecycle.
+	 */
 	@Override
 	public void shutdown() {
 //		ElasticUtil.close(node);
 	}
 
+	/**
+	 * Flushes index state and releases manager resources.
+	 */
 	@Override
 	public void close() {
 /*
@@ -131,6 +152,12 @@ public class ElasticContentManager extends AbstractContentManager {
 */
 	}
 	
+	/**
+	 * Indexes bean-scoped text content.
+	 *
+	 * @param content the bean content payload
+	 * @throws Exception if indexing fails
+	 */
 	@Override
 	public void put(BeanContent content)
 	throws Exception {
@@ -172,23 +199,51 @@ public class ElasticContentManager extends AbstractContentManager {
 */
 	}
 	
+	/**
+	 * Stores or indexes attachment content.
+	 *
+	 * @param attachment the attachment payload
+	 * @param index whether textual indexing is enabled
+	 * @throws Exception if storage or indexing fails
+	 */
 	@Override
 	public void put(AttachmentContent attachment, boolean index)
 	throws Exception {
 		put(attachment, index, true);
 	}
 	
+	/**
+	 * Updates an existing attachment record.
+	 *
+	 * @param content the attachment update payload
+	 * @throws Exception if update processing fails
+	 */
 	@Override
 	public void update(AttachmentContent content) throws Exception {
 		// needs implementation
 	}
 	
+	/**
+	 * Reindexes attachment metadata and optional text.
+	 *
+	 * @param attachment the attachment to reindex
+	 * @param index whether textual indexing is enabled
+	 * @throws Exception if indexing fails
+	 */
 	@Override
 	public void reindex(AttachmentContent attachment, boolean index) 
 	throws Exception {
 		put(attachment, index, false);
 	}
 
+	/**
+	 * Writes attachment content to the index and optional storage location.
+	 *
+	 * @param attachment the attachment to persist
+	 * @param index whether textual indexing is enabled
+	 * @param store whether binary content should be stored
+	 * @throws Exception if writing fails
+	 */
 	@SuppressWarnings("unused")
 	private void put(AttachmentContent attachment, boolean index, boolean store)
 	throws Exception {
@@ -333,6 +388,13 @@ public class ElasticContentManager extends AbstractContentManager {
 */
 	}
 
+	/**
+	 * Retrieves attachment content by identifier.
+	 *
+	 * @param contentId the content identifier
+	 * @return the attachment, or {@code null} when not found
+	 * @throws Exception if retrieval fails
+	 */
 	@Override
 	public AttachmentContent getAttachment(String contentId) throws Exception {
 		if (UtilImpl.CONTENT_FILE_STORAGE) {
@@ -343,6 +405,13 @@ public class ElasticContentManager extends AbstractContentManager {
 		return getFromElastic(contentId);
 	}
 
+	/**
+	 * Reads attachment content directly from Elasticsearch storage.
+	 *
+	 * @param contentId the content identifier
+	 * @return the attachment, or {@code null} when not found
+	 * @throws Exception if retrieval fails
+	 */
 	@SuppressWarnings("static-method")
 	private AttachmentContent getFromElastic(@SuppressWarnings("unused") String contentId) throws Exception {
 /*
@@ -421,6 +490,11 @@ public class ElasticContentManager extends AbstractContentManager {
 return null;
 	}
 
+	/**
+	 * Removes indexed bean content by business identifier.
+	 *
+	 * @param bizId the business document identifier
+	 */
 	@Override
 	public void removeBean(String bizId) {
 /*
@@ -431,6 +505,12 @@ return null;
 */
 	}
 
+	/**
+	 * Removes indexed attachment content by content identifier.
+	 *
+	 * @param contentId the content identifier
+	 * @throws IOException if removal fails
+	 */
 	@Override
 	public void removeAttachment(String contentId) throws IOException {
 /*
@@ -468,11 +548,22 @@ return null;
 */
 	}
 
+	/**
+	 * Drops all indexing structures.
+	 *
+	 * @throws Exception if index dropping fails
+	 */
 	@Override
 	public void dropIndexing() throws Exception {
 		// TODO
 	}
 	
+	/**
+	 * Truncates all indexed content for a customer.
+	 *
+	 * @param customerName the customer tenant name
+	 * @throws Exception if truncation fails
+	 */
 	@Override
 	public void truncateIndexing(String customerName) throws Exception {
 /*
@@ -489,6 +580,12 @@ return null;
 */
 	}
 
+	/**
+	 * Truncates indexed attachments for a customer.
+	 *
+	 * @param customerName the customer tenant name
+	 * @throws Exception if truncation fails
+	 */
 	@Override
 	public void truncateAttachmentIndexing(String customerName) throws Exception {
 /*
@@ -505,6 +602,12 @@ return null;
 */
 	}
 	
+	/**
+	 * Truncates indexed bean content for a customer.
+	 *
+	 * @param customerName the customer tenant name
+	 * @throws Exception if truncation fails
+	 */
 	@Override
 	public void truncateBeanIndexing(String customerName) throws Exception {
 /*
@@ -521,6 +624,14 @@ return null;
 */
 	}
 
+	/**
+	 * Executes full-text search across indexed content.
+	 *
+	 * @param search the search expression
+	 * @param maxResults maximum number of results to return
+	 * @return search results; currently an empty result set in stub mode
+	 * @throws Exception if querying fails
+	 */
 	@Override
 	public SearchResults google(String search, int maxResults)
 	throws Exception {
@@ -643,6 +754,12 @@ return new SearchResults();
 		return null;
 	}
 */	
+	/**
+	 * Returns an iterable over all indexed records.
+	 *
+	 * @return iterable over legacy Elasticsearch-backed content
+	 * @throws Exception if iteration cannot be initialized
+	 */
 	@Override
 	public ContentIterable all() throws Exception {
 //		return new ElasticContentIterable(client);

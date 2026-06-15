@@ -16,9 +16,24 @@ import org.skyve.util.BeanValidator;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 
+/**
+ * SmartClient form field definition.
+ * This is used for both edit and grid fields, with some differences in editorType and valueMap handling as described in the constructor.
+ */
 public class SmartClientFieldDefinition extends SmartClientDataGridFieldDefinition {
 	private String helpText;
 
+	/**
+	 * Builds a SmartClient form-field definition from widget and document metadata.
+	 *
+	 * @param user active user
+	 * @param customer active customer metadata
+	 * @param module module containing the target document
+	 * @param document target document metadata
+	 * @param widget source widget metadata
+	 * @param runtime whether runtime domain values should be resolved
+	 * @param uxui active UX/UI profile name
+	 */
 	protected SmartClientFieldDefinition(User user,
 											Customer customer, 
 											Module module, 
@@ -48,15 +63,31 @@ public class SmartClientFieldDefinition extends SmartClientDataGridFieldDefiniti
 		}
 	}
 
+	/**
+	 * Returns the help text displayed as an inline help icon prompt.
+	 *
+	 * @return help text, or {@code null}
+	 */
 	public String getHelpText() {
 		return helpText;
 	}
 
+	/**
+	 * Sets the help text displayed as an inline help icon prompt.
+	 *
+	 * @param helpText help text
+	 */
 	public void setHelpText(String helpText) {
 		this.helpText = helpText;
 	}
 
+	/**
+	 * Produces the SmartClient JavaScript field definition payload for this form field.
+	 *
+	 * @return SmartClient JavaScript field definition payload
+	 */
 	@Override
+    @SuppressWarnings("java:S3776") // Complexity OK
     public String toJavascript() {
         StringBuilder result = new StringBuilder(128);
 

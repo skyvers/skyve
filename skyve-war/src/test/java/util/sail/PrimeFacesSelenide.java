@@ -10,6 +10,7 @@ import static com.codeborne.selenide.Selectors.byName;
 import static com.codeborne.selenide.Selectors.byXpath;
 import static com.codeborne.selenide.Selenide.$;
 
+
 import java.time.Duration;
 import java.util.List;
 import java.util.function.Function;
@@ -146,21 +147,18 @@ public class PrimeFacesSelenide extends Selenide<
 		if (element != null && element.isDisplayed() && element.isEnabled()) {
 			// data grid button is present
 			element = oldById(buttonId);
-			if (element != null && element.isDisplayed() && element.isEnabled()) {
-				// Look for prime faces disabled style on data grid button
-				if (!element.getDomAttribute("class").contains("ui-state-disabled")) {
-					// All good, continue with the button click
-					String viewState = getViewState();
-					click($(element));
+			if (element != null && element.isDisplayed() && element.isEnabled() && !element.getDomAttribute("class").contains("ui-state-disabled")) {
+				// All good, continue with the button click
+				String viewState = getViewState();
+				click($(element));
 
-					if (ajax) {
-						waitForAjaxResponse();
-					} else {
-						waitForFullPageResponse(viewState);
-					}
-
-					return true;
+				if (ajax) {
+					waitForAjaxResponse();
+				} else {
+					waitForFullPageResponse(viewState);
 				}
+
+				return true;
 			}
 		}
 
@@ -198,21 +196,18 @@ public class PrimeFacesSelenide extends Selenide<
 		if (element != null && element.isDisplayed() && element.isEnabled()) {
 			// list grid button is present
 			element = oldById(buttonId);
-			if (element != null && element.isDisplayed() && element.isEnabled()) {
-				// Look for prime faces disabled style on list grid button
-				if (!element.getDomAttribute("class").contains("ui-state-disabled")) {
-					// All good, continue with the button click
-					String viewState = getViewState();
-					click($(element));
+			if (element != null && element.isDisplayed() && element.isEnabled() && !element.getDomAttribute("class").contains("ui-state-disabled")) {
+				// All good, continue with the button click
+				String viewState = getViewState();
+				click($(element));
 
-					if (ajax) {
-						waitForAjaxResponse();
-					} else {
-						waitForFullPageResponse(viewState);
-					}
-
-					return true;
+				if (ajax) {
+					waitForAjaxResponse();
+				} else {
+					waitForFullPageResponse(viewState);
 				}
+
+				return true;
 			}
 		}
 
@@ -433,9 +428,7 @@ public class PrimeFacesSelenide extends Selenide<
 		if (messages != null && messages.isDisplayed()) {
 			String innerHTML = messages.getDomProperty("innerHTML");
 			if (innerHTML.contains("ui-messages-error") || innerHTML.contains("ui-messages-fatal")) {
-				if (messageToCheck == null) {
-					return true;
-				} else if (innerHTML.contains(messageToCheck)) {
+				if (messageToCheck == null || innerHTML.contains(messageToCheck)) {
 					return true;
 				}
 
@@ -522,7 +515,7 @@ public class PrimeFacesSelenide extends Selenide<
 		try {
 			// Scroll the element into view on the page and see if the element can be made visible
 			if (! element.is(visible, Duration.ofMillis(250))) {
-				element.scrollIntoView(true);
+				element.scrollTo();
 			}
 
 			wrappedElement.click();
@@ -583,11 +576,11 @@ public class PrimeFacesSelenide extends Selenide<
 		return by(n -> driver.findElement(By.name(n)), name);
 	}
 
-	private static long MAX_WAIT = 1000L;
-	private static long WAIT = 50L;
+	private static long maxWait = 1000L;
+	private static long waitInterval = 50L;
 
 	private static @Nullable WebElement by(@Nonnull Function<String, WebElement> function, @Nonnull String search) {
-		for (long l = 0; l <= MAX_WAIT; l += WAIT) {
+		for (long l = 0; l <= maxWait; l += waitInterval) {
 			try {
 				try {
 					WebElement result = function.apply(search);
@@ -596,11 +589,11 @@ public class PrimeFacesSelenide extends Selenide<
 
 					return result;
 				} catch (NoSuchElementException | StaleElementReferenceException e) {
-					if (l > MAX_WAIT) {
+					if (l > maxWait) {
 						throw e;
 					}
 
-					Thread.sleep(WAIT);
+					Thread.sleep(waitInterval); // NOSONAR java:S2925
 				}
 			} catch (@SuppressWarnings("unused") InterruptedException e) {
 				// do nothing here

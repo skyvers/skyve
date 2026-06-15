@@ -29,11 +29,19 @@ import modules.admin.domain.Generic;
 import modules.admin.domain.MonitoringDashboard;
 import modules.admin.domain.MonitoringDashboard.Period;
 
+/**
+ * In-memory list model that materialises monitoring request measurements for dashboard grids.
+ */
 public class RequestListModel extends InMemoryListModel<MonitoringDashboard> {
 	private List<MetaDataQueryColumn> columns = new ArrayList<>();
 	
 	private static final Integer COLUMN_WIDTH = Integer.valueOf(125);
 
+	/**
+	 * Builds rows representing request telemetry rollups for each configured period.
+	 * @return the result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public List<Bean> getRows() throws Exception {
 		List<Bean> result = new ArrayList<>();
@@ -106,6 +114,7 @@ public class RequestListModel extends InMemoryListModel<MonitoringDashboard> {
 		return result;
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private static void processPeriod(RequestKey requestKey,
 										long now,
 										Map<Integer, Integer> millis,
@@ -149,6 +158,11 @@ public class RequestListModel extends InMemoryListModel<MonitoringDashboard> {
 		});
 	}
 	
+	/**
+	 * Initialises driving document metadata and projected list columns.
+	 * @param customer the customer value
+	 * @param runtime the runtime value
+	 */
 	@Override
 	public void postConstruct(Customer customer, boolean runtime) {
 		// Set driving document
@@ -177,21 +191,42 @@ public class RequestListModel extends InMemoryListModel<MonitoringDashboard> {
 		columns.add(column);
 	}
 
+	/**
+	 * Returns the model description used by list model metadata consumers.
+	 * @return the result
+	 */
 	@Override
 	public String getDescription() {
 		return "Requests";
 	}
 
+	/**
+	 * Returns configured list columns for request telemetry rows.
+	 * @return the result
+	 */
 	@Override
 	public List<MetaDataQueryColumn> getColumns() {
 		return columns;
 	}
 
+	/**
+	 * Updates are not supported for this computed read-only model.
+	 * @param bizId the bizId value
+	 * @param SortedMap<String the SortedMap<String value
+	 * @param properties the properties value
+	 * @return the result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public Bean update(String bizId, SortedMap<String, Object> properties) throws Exception {
 		throw new IllegalStateException("Not implemented");
 	}
 
+	/**
+	 * Removes are not supported for this computed read-only model.
+	 * @param bizId the bizId value
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public void remove(String bizId) throws Exception {
 		throw new IllegalStateException("Not implemented");

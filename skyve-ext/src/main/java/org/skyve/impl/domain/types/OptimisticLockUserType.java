@@ -14,6 +14,11 @@ import org.hibernate.usertype.UserType;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.OptimisticLock;
 
+/**
+ * Hibernate {@link org.hibernate.usertype.UserType} that maps a Skyve
+ * {@link org.skyve.domain.types.OptimisticLock} composite value to its
+ * serialised string representation in the database.
+ */
 public class OptimisticLockUserType implements UserType, Serializable, LiteralType<OptimisticLock> {
 	private static final long serialVersionUID = 3237725890005410642L;
 
@@ -43,7 +48,7 @@ public class OptimisticLockUserType implements UserType, Serializable, LiteralTy
 	public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner)
 	throws HibernateException, SQLException {
 		String value = rs.getString(names[0]);
-		if ((rs.wasNull()) || (value == null) || (value.length() == 0)) {
+		if (rs.wasNull() || (value == null) || value.isEmpty()) {
 			return null;
 		}
 

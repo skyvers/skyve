@@ -18,9 +18,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.TreeMap;
 
 import org.hibernate.engine.spi.SessionImplementor;
@@ -54,8 +56,8 @@ import org.skyve.util.FileUtil;
 import org.skyve.util.Mail;
 import org.skyve.util.PushMessage;
 import org.skyve.util.Util;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.supercsv.io.CsvMapWriter;
 import org.supercsv.prefs.CsvPreference;
 
@@ -74,8 +76,14 @@ import jakarta.annotation.Nullable;
  * of the content node - ie module name and document name are not known to the table.
  */
 public class BackupJob extends CancellableJob {
-    
-    private static final Logger SLOGGER = LoggerFactory.getLogger(BackupJob.class);
+	private static final Logger SLOGGER = SkyveLoggerFactory.getLogger(BackupJob.class);
+
+	private static final String CREATE_SQL = "create.sql";
+	private static final String FIELD_VALUE_SUFFIX = " value.";
+	private static final String MISSING_FIELD_PREFIX = " is missing a ";
+	private static final String WITH_DOCUMENT_ID = " with " + Bean.DOCUMENT_ID + " = ";
+
+	private Calendar gmt = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
 
 	private File backupZip;
 
@@ -113,6 +121,7 @@ public class BackupJob extends CancellableJob {
 	 *
 	 * @throws Exception if the backup fails
 	 */
+	@SuppressWarnings({"java:S1143", "java:S3776", "java:S6541"}) // Allow nested try blocks for clarity in resource management and error handling; complexity OK
 	private void backup() throws Exception {
 		Bean bean = getBean();
 		List<String> log = getLog();
@@ -152,9 +161,11 @@ public class BackupJob extends CancellableJob {
 		
 		BackupUtil.writeTables(tables, new File(backupDir, "tables.txt"));
 
-		p.generateDDL(new File(backupDir, "drop.sql").getAbsolutePath(),
-				new File(backupDir, "create.sql").getAbsolutePath(),
-				null);
+		List<String> dropDDL = new java.util.ArrayList<>();
+		List<String> createDDL = new java.util.ArrayList<>();
+		p.generateDDL(dropDDL, createDDL, null);
+		BackupUtil.writeScript(dropDDL, new File(backupDir, "drop.sql"));
+		BackupUtil.writeScript(createDDL, new File(backupDir, CREATE_SQL));
 		boolean problem = false; // indicates if the backup had a problem
 		try {
 			try {
@@ -210,31 +221,27 @@ public class BackupJob extends CancellableJob {
 																if ("".equals(value)) {
 																	// bizId is mandatory
 																	if (name.equalsIgnoreCase(Bean.DOCUMENT_ID)) {
-																		throw new IllegalStateException(table.agnosticIdentifier + " is missing a " + Bean.DOCUMENT_ID + " value.");
+																		throw new IllegalStateException(table.agnosticIdentifier + MISSING_FIELD_PREFIX + Bean.DOCUMENT_ID + FIELD_VALUE_SUFFIX);
 																	}
 																	// bizLock is mandatory
 																	if (name.equalsIgnoreCase(PersistentBean.LOCK_NAME)) {
-																		throw new IllegalStateException(table.agnosticIdentifier + " with " +
-																											Bean.DOCUMENT_ID + " = " + values.get(Bean.DOCUMENT_ID) +
-																											" is missing a " + PersistentBean.LOCK_NAME + " value.");
+																		throw new IllegalStateException(table.agnosticIdentifier + WITH_DOCUMENT_ID + values.get(Bean.DOCUMENT_ID) +
+																											MISSING_FIELD_PREFIX + PersistentBean.LOCK_NAME + FIELD_VALUE_SUFFIX);
 																	}
 																	// bizKey is mandatory
 																	if (name.equalsIgnoreCase(Bean.BIZ_KEY)) {
-																		throw new IllegalStateException(table.agnosticIdentifier + " with " +
-																											Bean.DOCUMENT_ID + " = " + values.get(Bean.DOCUMENT_ID) +
-																											" is missing a " + Bean.BIZ_KEY + " value.");
+																		throw new IllegalStateException(table.agnosticIdentifier + WITH_DOCUMENT_ID + values.get(Bean.DOCUMENT_ID) +
+																											MISSING_FIELD_PREFIX + Bean.BIZ_KEY + FIELD_VALUE_SUFFIX);
 																	}
 																	// bizCustomer is mandatory
 																	if (name.equalsIgnoreCase(Bean.CUSTOMER_NAME)) {
-																		throw new IllegalStateException(table.agnosticIdentifier + " with " +
-																											Bean.DOCUMENT_ID + " = " + values.get(Bean.DOCUMENT_ID) +
-																											" is missing a " + Bean.CUSTOMER_NAME + " value.");
+																		throw new IllegalStateException(table.agnosticIdentifier + WITH_DOCUMENT_ID + values.get(Bean.DOCUMENT_ID) +
+																											MISSING_FIELD_PREFIX + Bean.CUSTOMER_NAME + FIELD_VALUE_SUFFIX);
 																	}
 																	// bizUserId is mandatory
 																	if (name.equalsIgnoreCase(Bean.USER_ID)) {
-																		throw new IllegalStateException(table.agnosticIdentifier + " with " +
-																											Bean.DOCUMENT_ID + " = " + values.get(Bean.DOCUMENT_ID) +
-																											" is missing a " + Bean.USER_ID + " value.");
+																		throw new IllegalStateException(table.agnosticIdentifier + WITH_DOCUMENT_ID + values.get(Bean.DOCUMENT_ID) +
+																											MISSING_FIELD_PREFIX + Bean.USER_ID + FIELD_VALUE_SUFFIX);
 																	}
 																}
 																// Respect sensitivity
@@ -278,7 +285,7 @@ public class BackupJob extends CancellableJob {
 																}
 															}
 															else if (AttributeType.date.equals(attributeType)) {
-																Date date = resultSet.getDate(name, BackupUtil.GMT);
+																Date date = resultSet.getDate(name, gmt);
 																if (resultSet.wasNull()) {
 																	value = "";
 																}
@@ -292,7 +299,7 @@ public class BackupJob extends CancellableJob {
 																}
 															}
 															else if (AttributeType.time.equals(attributeType)) {
-																Time time = resultSet.getTime(name, BackupUtil.GMT);
+																Time time = resultSet.getTime(name, gmt);
 																if (resultSet.wasNull()) {
 																	value = "";
 																}
@@ -307,7 +314,7 @@ public class BackupJob extends CancellableJob {
 															}
 															else if (AttributeType.dateTime.equals(attributeType) ||
 																	AttributeType.timestamp.equals(attributeType)) {
-																Timestamp timestamp = resultSet.getTimestamp(name, BackupUtil.GMT);
+																Timestamp timestamp = resultSet.getTimestamp(name, gmt);
 																if (resultSet.wasNull()) {
 																	value = "";
 																}
@@ -352,9 +359,8 @@ public class BackupJob extends CancellableJob {
 																// bizVersion is mandatory
 																if ("".equals(value) &&
 																		name.equalsIgnoreCase(PersistentBean.VERSION_NAME)) {
-																	throw new IllegalStateException(table.agnosticIdentifier + " with " +
-																			Bean.DOCUMENT_ID + " = " + values.get(Bean.DOCUMENT_ID) +
-																			" is missing a " + PersistentBean.VERSION_NAME + " value.");
+																	throw new IllegalStateException(table.agnosticIdentifier + WITH_DOCUMENT_ID + values.get(Bean.DOCUMENT_ID) +
+																			MISSING_FIELD_PREFIX + PersistentBean.VERSION_NAME + FIELD_VALUE_SUFFIX);
 																}
 	
 															}
@@ -537,7 +543,7 @@ public class BackupJob extends CancellableJob {
 	 * @param problem the problem description, or null for a generic message
 	 * @throws Exception if sending the email fails
 	 */
-	public static void emailProblem(@Nonnull List<String> jobLog, @Nullable String problem) throws Exception {
+	public static void emailProblem(@Nonnull List<String> jobLog, @Nullable String problem) {
 		// nameEnv is the application name and environment identifier.
 		StringBuilder nameEnv = new StringBuilder();
 		nameEnv.append("[").append(UtilImpl.ARCHIVE_NAME);
@@ -557,7 +563,8 @@ public class BackupJob extends CancellableJob {
 		subjectBuilder.append(nameEnv).append(" Backup Problem");
 
 		if (UtilImpl.SUPPORT_EMAIL_ADDRESS != null) {
-			EXT.sendMail(new Mail().from(UtilImpl.SMTP_SENDER)
+			EXT.getMailService()
+					.sendMail(new Mail().from(UtilImpl.SMTP_SENDER)
 									.addTo(UtilImpl.SUPPORT_EMAIL_ADDRESS)
 									.subject(subjectBuilder.toString())
 									.body(body));

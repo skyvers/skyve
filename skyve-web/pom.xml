@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.skyve</groupId>
 		<artifactId>skyve-parent</artifactId>
-		<version>9.5.0-SNAPSHOT</version>
+		<version>10.0.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>skyve-web</artifactId>
 
@@ -24,12 +24,18 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.poi</groupId>
+			<version>${poi.version}</version>
 			<artifactId>poi-ooxml</artifactId>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.jasperreports</groupId>
 			<artifactId>jasperreports</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports-servlets</artifactId>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -94,6 +100,11 @@
 			<artifactId>slf4j-api</artifactId>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-text</artifactId>
+			<scope>compile</scope>
+		</dependency>
 
 		<!-- test dependencies -->
 		<dependency>
@@ -114,6 +125,24 @@
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-junit-jupiter</artifactId>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.junit.jupiter</groupId>
+					<artifactId>junit-jupiter</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-params</artifactId>
+			<version>${junit-jupiter.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish</groupId>
+			<artifactId>jakarta.faces</artifactId>
+			<version>${mojarra.version}</version>
 			<scope>test</scope>
 		</dependency>
 

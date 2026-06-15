@@ -11,10 +11,14 @@ import modules.admin.domain.ModuleDocument;
  * Bizlet used when resolving module documents from the Control Panel.
  */
 public class ModuleDocumentBizlet extends Bizlet<ModuleDocument> {
-
         /**
          * Resolve the requested document, adding it to the current Control Panel
          * session when applicable.
+         * @param bizId the bizId value
+         * @param conversationBean the conversationBean value
+         * @param webContext the webContext value
+         * @return the result
+         * @throws Exception if the operation fails
          */
         @Override
         public ModuleDocument resolve(String bizId, Bean conversationBean, WebContext webContext) throws Exception {

@@ -36,6 +36,7 @@ public class ImportExportService {
 	 * @param bean The ImportExport instance containing the configuration to update
 	 * @throws Exception If there's an error loading columns from file or accessing document metadata
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void updateColumns(String source, ImportExportExtension bean) throws Exception {
 		switch (source) {
 			case ImportExport.documentNamePropertyName:

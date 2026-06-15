@@ -28,7 +28,11 @@ public interface DynamicImage<T extends Bean> extends MetaData {
 	public @Nonnull BufferedImage getImage(@Nonnull T bean, int width, int height, @Nonnull User user)
 	throws Exception;
 
-	public static enum ImageFormat {
+	/**
+	 * Defines the ImageFormat enumeration.
+	 */
+	@SuppressWarnings("java:S115") // Enum names are MIME/image format identifiers.
+	public enum ImageFormat {
 		png(MimeType.png) , jpeg(MimeType.jpeg), gif(MimeType.gif);
 
 		private MimeType mimeType;
@@ -37,6 +41,10 @@ public interface DynamicImage<T extends Bean> extends MetaData {
 			this.mimeType = mimeType;
 		}
 		
+		/**
+		 * Returns the mimeType.
+		 * @return the result
+		 */
 		public MimeType getMimeType() {
 			return mimeType;
 		}

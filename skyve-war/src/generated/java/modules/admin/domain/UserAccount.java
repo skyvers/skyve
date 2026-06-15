@@ -53,7 +53,7 @@ public class UserAccount extends AbstractTransientBean {
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-	public static enum SecondFactorPreferredMethod implements Enumeration {
+	public enum SecondFactorPreferredMethod implements Enumeration {
 		authenticator("A", "Authenticator"),
 		email("E", "Email"),
 		SMSTextMessage("T", "SMS/Text message");

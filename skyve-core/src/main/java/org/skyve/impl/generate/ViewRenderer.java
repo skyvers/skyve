@@ -93,6 +93,13 @@ import org.skyve.util.Util;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
+/**
+ * Abstract base renderer that converts a {@link org.skyve.metadata.view.View}
+ * into a client-specific representation.
+ *
+ * <p>Extends {@link org.skyve.impl.metadata.view.ViewVisitor} to walk the
+ * view tree and emit renderer-specific output.
+ */
 public abstract class ViewRenderer extends ViewVisitor {
 	// The user to render for
 	protected User user;
@@ -101,6 +108,14 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	// Stack of containers sent in to render methods
 	private Deque<Container> currentContainers = new ArrayDeque<>(24); // non-null elements
+
+	/**
+	 * Returns the active container stack used during view traversal.
+	 *
+	 * <p>Top of stack is the current rendering container.
+	 *
+	 * @return mutable traversal stack used by renderer hooks
+	 */
 	public Deque<Container> getCurrentContainers() {
 		return currentContainers;
 	}
@@ -108,11 +123,27 @@ public abstract class ViewRenderer extends ViewVisitor {
 	// Attributes pushed and popped during internal processing
 	private Deque<String> renderAttributes = new LinkedList<>(); // nullable elements
 	
+	/**
+	 * Creates a renderer bound to the supplied view metadata context.
+	 *
+	 * @param user the current user context used for visibility and localisation
+	 * @param module the module owning the rendered view
+	 * @param document the document owning the rendered view
+	 * @param view the view metadata to traverse
+	 * @param uxui the target UX/UI profile key
+	 */
 	protected ViewRenderer(User user, Module module, Document document, View view, String uxui) {
 		super((CustomerImpl) user.getCustomer(), (ModuleImpl) module, (DocumentImpl) document, (ViewImpl) view, uxui);
 		this.user = user;
 	}
 
+	/**
+	 * Forces form rendering to use top-aligned labels for the current traversal.
+	 *
+	 * <p>Side effects: mutates renderer state and affects later form-render decisions.
+	 *
+	 * @return this renderer for fluent configuration
+	 */
 	public ViewRenderer forceTopFormLabelAlignment() {
 		this.forceTopFormLabelAlignment = true;
 		return this;
@@ -121,6 +152,9 @@ public abstract class ViewRenderer extends ViewVisitor {
 	private String viewIcon16x16Url;
 	private String viewIcon32x32Url;
 	
+	/**
+	 * Begins rendering of the root view and pushes it onto the container stack.
+	 */
 	@Override
 	public final void visitView() {
 		viewIcon16x16Url = iconToUrl(document.getIcon16x16RelativeFileName());
@@ -131,8 +165,17 @@ public abstract class ViewRenderer extends ViewVisitor {
 	}
 
 	// NB View titles are evaluated dynamically for a view
+	/**
+	 * Renders the opening portion of the root view.
+	 *
+	 * @param icon16x16Url resolved 16x16 icon URL for the view/document
+	 * @param icon32x32Url resolved 32x32 icon URL for the view/document
+	 */
 	public abstract void renderView(String icon16x16Url, String icon32x32Url);
 	
+	/**
+	 * Finalises rendering of the root view and pops it from the container stack.
+	 */
 	@Override
 	public final void visitedView() {
 		renderedView(viewIcon16x16Url, viewIcon32x32Url);
@@ -140,29 +183,56 @@ public abstract class ViewRenderer extends ViewVisitor {
 	}
 
 	// NB View titles are evaluated dynamically for a view
+	/**
+	 * Renders the closing portion of the root view.
+	 *
+	 * @param icon16x16Url resolved 16x16 icon URL for the view/document
+	 * @param icon32x32Url resolved 32x32 icon URL for the view/document
+	 */
 	public abstract void renderedView(String icon16x16Url, String icon32x32Url);
 	
 	private TabPane currentTabPane;
+
+	/**
+	 * Returns the tab pane currently being rendered.
+	 *
+	 * @return current tab pane, or {@code null} when traversal is outside a tab pane
+	 */
 	public TabPane getCurrentTabPane() {
 		return currentTabPane;
 	}
 	
+	/**
+	 * Begins rendering of a tab pane.
+	 */
 	@Override
 	public final void visitTabPane(TabPane tabPane, boolean parentVisible, boolean parentEnabled) {
 		renderTabPane(tabPane);
 		currentTabPane = tabPane;
 	}
 	
+	/**
+	 * Renders the opening portion of a tab pane.
+	 */
 	public abstract void renderTabPane(TabPane tabPane);
 	
+	/**
+	 * Finalises rendering of a tab pane.
+	 */
 	@Override
 	public final void visitedTabPane(TabPane tabPane, boolean parentVisible, boolean parentEnabled) {
 		renderedTabPane(tabPane);
 		currentTabPane = null;
 	}
 
+	/**
+	 * Renders the closing portion of a tab pane.
+	 */
 	public abstract void renderedTabPane(TabPane tabPane);
 	
+	/**
+	 * Begins rendering of a tab and pushes it onto the container stack.
+	 */
 	@Override
 	public final void visitTab(Tab tab, boolean parentVisible, boolean parentEnabled) {
 		String title = tab.getLocalisedTitle();
@@ -173,14 +243,23 @@ public abstract class ViewRenderer extends ViewVisitor {
 		currentContainers.push(tab);
 	}
 
+	/**
+	 * Renders the opening portion of a tab.
+	 */
 	public abstract void renderTab(String title, String icon16x16Url, Tab tab);
 	
+	/**
+	 * Finalises rendering of a tab and pops it from the container stack.
+	 */
 	@Override
 	public final void visitedTab(Tab tab, boolean parentVisible, boolean parentEnabled) {
 		renderedTab(renderAttributes.pop(), renderAttributes.pop(), tab);
 		currentContainers.pop();
 	}
 	
+	/**
+	 * Renders the closing portion of a tab.
+	 */
 	public abstract void renderedTab(String title, String icon16x16Url, Tab tab);
 
 	@Override
@@ -191,6 +270,9 @@ public abstract class ViewRenderer extends ViewVisitor {
 		currentContainers.push(vbox);
 	}
 
+	/**
+	 * Renders the opening portion of a vertical box container.
+	 */
 	public abstract void renderVBox(String borderTitle, VBox vbox);
 	
 	@Override
@@ -199,6 +281,9 @@ public abstract class ViewRenderer extends ViewVisitor {
 		currentContainers.pop();
 	}
 
+	/**
+	 * Renders the closing portion of a vertical box container.
+	 */
 	public abstract void renderedVBox(String borderTitle, VBox vbox);
 
 	@Override
@@ -207,6 +292,9 @@ public abstract class ViewRenderer extends ViewVisitor {
 		currentContainers.push(sidebar);
 	}
 
+	/**
+	 * Renders the opening portion of a sidebar container.
+	 */
 	public abstract void renderSidebar(Sidebar sidebar);
 	
 	@Override
@@ -215,8 +303,10 @@ public abstract class ViewRenderer extends ViewVisitor {
 		currentContainers.pop();
 	}
 
+	/**
+	 * Renders the closing portion of a sidebar container.
+	 */
 	public abstract void renderedSidebar(Sidebar sidebar);
-
 	
 	@Override
 	public final void visitHBox(HBox hbox, boolean parentVisible, boolean parentEnabled) {
@@ -226,6 +316,9 @@ public abstract class ViewRenderer extends ViewVisitor {
 		currentContainers.push(hbox);
 	}
 
+	/**
+	 * Renders the opening portion of a horizontal box container.
+	 */
 	public abstract void renderHBox(String borderTitle, HBox hbox);
 	
 	@Override
@@ -234,22 +327,44 @@ public abstract class ViewRenderer extends ViewVisitor {
 		currentContainers.pop();
 	}
 
+	/**
+	 * Renders the closing portion of a horizontal box container.
+	 */
 	public abstract void renderedHBox(String title, HBox hbox);
 	
 	private Form currentForm;
+	
+	/**
+	 * Returns the form currently being rendered.
+	 *
+	 * @return current form, or {@code null} when traversal is outside a form
+	 */
 	public Form getCurrentForm() {
 		return currentForm;
 	}
+	
 	private String currentFormBorderTitle;
 	
 	// Is this form defined with top labels or side labels (by module default or form setting)
 	private boolean currentFormAuthoredTopLabels = false;
+	
+	/**
+	 * Indicates whether the authored form label layout resolves to top labels.
+	 *
+	 * @return {@code true} when authored/default form metadata resolves to top labels
+	 */
 	public boolean isCurrentFormAuthoredTopLabels() {
 		return currentFormAuthoredTopLabels;
 	}
 
 	// Should this form be rendered with top labels or side labels
 	private boolean currentFormRenderTopLabels = false;
+	
+	/**
+	 * Indicates whether the current form should be rendered with top labels.
+	 *
+	 * @return {@code true} when current rendering should use top-aligned labels
+	 */
 	public boolean isCurrentFormRenderTopLabels() {
 		return forceTopFormLabelAlignment || currentFormRenderTopLabels;
 	}
@@ -316,6 +431,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	public abstract void renderFormRow(FormRow row);
 
 	private int currentFormColumnIndex = 0;
+
 	public void incrementFormColumn() {
 		if (currentForm != null) {
 			List<FormColumn> formColumns = currentForm.getColumns();
@@ -366,7 +482,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 		currentFormItem = item;
 	}
 
-	public abstract void renderFormItem(@Nonnull String label,
+	public abstract void renderFormItem(@Nullable String label,
 											@Nullable String requiredMessage,
 											@Nullable String help,
 											boolean showsLabel,
@@ -418,6 +534,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 		}
 	}
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void preProcessWidget(boolean clearState, boolean showsLabelByDefault) {
 		if (clearState) {
 			currentWidgetLabel = null;
@@ -517,6 +634,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	 * @param action
 	 * @return	false if the user does not have privileges to execute the action, otherwise true.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private boolean preProcessAction(ImplicitActionName implicitName, Action action, ActionShow showOverride) {
 		boolean result = true;
 		
@@ -764,6 +882,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 		}
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public abstract void renderFormButton(String name,
 											String label,
 											String iconUrl,
@@ -772,6 +891,8 @@ public abstract class ViewRenderer extends ViewVisitor {
 											String confirmationText,
 											Action action,
 											Button button);
+
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public abstract void renderButton(String name,
 										String label,
 										String iconUrl,
@@ -1837,6 +1958,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 							canDelete);
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public abstract void renderRemoveAction(String name,
 												String label,
 												String iconUrl,

@@ -20,6 +20,16 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB root descriptor for a chart model definition used by the
+ * {@link org.skyve.impl.metadata.view.widget.Chart} widget.
+ *
+ * <p>Declares the data model name, chart type, bucket strategy, optional
+ * ordering/top selection, and other model parameters used to generate chart
+ * series at runtime.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ */
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"title",
@@ -58,6 +68,7 @@ public class ChartBuilderMetaData implements ModelMetaData {
 	public String getModelName() {
 		if (modelName == null) {
 			try {
+		    	@SuppressWarnings("java:S4790") // Just to make a unique name within the character limit - not for security purposes
 				final MessageDigest md = MessageDigest.getInstance("MD5");
 				String hash = JSON.marshall(this);
 				md.update(hash.getBytes(StandardCharsets.UTF_8));

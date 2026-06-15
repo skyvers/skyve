@@ -30,10 +30,24 @@ import jakarta.xml.bind.annotation.XmlElementRefs;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB-annotated holder for the action list declared in a view descriptor.
+ *
+ * <p>An {@code Actions} element groups the ordered list of action buttons
+ * (OK, Save, Cancel, New, Delete, custom actions, etc.) for a specific
+ * widget area of the view, identified by an optional {@code widgetId}.
+ *
+ * <p>Threading: not thread-safe.  Instances are populated during JAXB unmarshalling
+ * and are read-only once placed in the repository cache.
+ *
+ * @see ViewMetaData
+ * @see org.skyve.impl.metadata.repository.view.actions.ActionMetaData
+ */
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "actions")
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE, 
 			name = "actions",
 			propOrder = {"widgetId", "actions"})
+@SuppressWarnings("java:S1192") // Repeated literals are JAXB element and property names required by metadata annotations.
 public class Actions implements Identifiable {
 	private static final long serialVersionUID = 7637506523705376564L;
 

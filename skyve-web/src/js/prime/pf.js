@@ -12,6 +12,23 @@ SKYVE.PF = function() {
 		}
 		return result;
 	};
+	
+	var contentOverlayIdsByBinding = {};
+	var contentMarkupIdsByBinding = {};
+	
+	var getUrlParameter = function(url, name) {
+		var match = new RegExp('[?&]' + name + '=([^&]*)').exec(url);
+		return match ? decodeURIComponent(match[1].replace(/\+/g, ' ')) : null;
+	};
+	
+	var getContentSelector = function(id, binding, suffix) {
+		return id ? '[id$="' + id + '_' + binding + suffix + '"]' : '[id$="_' + binding + suffix + '"]';
+	};
+	
+	var getContentWidget = function(id, binding, suffix) {
+		var widget = id ? top.PF(id + '_' + binding + suffix) : null;
+		return widget || top.PF(binding + suffix);
+	};
 
 	// public
 	return {
@@ -24,6 +41,10 @@ SKYVE.PF = function() {
 		},
 		
 		contentOverlayOnShow: function(id, url) {
+			var binding = getUrlParameter(url, '_n');
+			if (binding) {
+				contentOverlayIdsByBinding[binding] = id;
+			}
 			SKYVE.PF.getById(id + '_overlayiframe').attr('src', url);
 		},
 		
@@ -33,25 +54,31 @@ SKYVE.PF = function() {
 		
 		afterContentUpload: function(binding, contentId, modoc, fileName) {
 			// Cannot use window.parent here to support nested frames as the script is called from eval server side which is executed at the top window context.
-			top.$('[id$="_' + binding + '_hidden"]').val(contentId);
+			var id = contentOverlayIdsByBinding[binding];
+			top.$(getContentSelector(id, binding, '_hidden')).val(contentId);
 			var url = 'content?_n=' + contentId + '&_doc=' + modoc + '&_b=' + binding.replace(/\_/g, '.');
-			top.$('[id$="_' + binding + '_link"]').attr('href', url).text(fileName).attr('onclick', 'return true');
-			top.$('[id$="_' + binding + '_image"]').attr('src', url);
-			top.PF(binding + 'Overlay').hide();
+			top.$(getContentSelector(id, binding, '_link')).attr('href', url).text(fileName).attr('onclick', 'return true');
+			top.$(getContentSelector(id, binding, '_image')).attr('src', url);
+			var widget = getContentWidget(id, binding, 'Overlay');
+			if (widget) {
+				widget.hide();
+			}
+			delete contentOverlayIdsByBinding[binding];
 		},
 
-		clearContentImage: function(binding) {
-			$('[id$="_' + binding + '_hidden"]').val('');
-			$('[id$="_' + binding + '_image"]').attr('src','images/blank.gif');
+		clearContentImage: function(binding, id) {
+			$(getContentSelector(id, binding, '_hidden')).val('');
+			$(getContentSelector(id, binding, '_image')).attr('src','images/blank.gif');
 		},
 		
-		clearContentLink: function(binding) {
-			$('[id$="_' + binding + '_hidden"]').val('');
-			$('[id$="_' + binding + '_link"]').attr('href','javascript:void(0)').text('<Empty>').attr('onclick', 'return false');
+		clearContentLink: function(binding, id) {
+			$(getContentSelector(id, binding, '_hidden')).val('');
+			$(getContentSelector(id, binding, '_link')).attr('href','javascript:void(0)').text('<Empty>').attr('onclick', 'return false');
 		},
 
 		contentMarkupOnShow: function(id, binding, url) {
-			var finalUrl = url += '&_id=' + $('[id$="_' + binding + '_hidden"]').val();
+			contentMarkupIdsByBinding[binding] = id;
+			var finalUrl = url += '&_id=' + $(getContentSelector(id, binding, '_hidden')).val();
 			SKYVE.PF.getById(id + '_markupiframe').attr('src', finalUrl);
 		},
 
@@ -61,11 +88,16 @@ SKYVE.PF = function() {
 
 		afterMarkupApply: function(binding, contentId, modoc, fileName) {
 			// Cannot use window.parent here to support nested frames as the script is called from eval server side which is executed at the top window context.
-			top.$('[id$="_' + binding + '_hidden"]').val(contentId);
+			var id = contentMarkupIdsByBinding[binding];
+			top.$(getContentSelector(id, binding, '_hidden')).val(contentId);
 			var url = 'content?_n=' + contentId + '&_doc=' + modoc + '&_b=' + binding.replace(/\_/g, '.');
-			top.$('[id$="_' + binding + '_link"]').attr('href', url).text(fileName).attr('onclick', 'return true');
-			top.$('[id$="_' + binding + '_image"]').attr('src', url);
-			top.PF(binding + 'Markup').hide();
+			top.$(getContentSelector(id, binding, '_link')).attr('href', url).text(fileName).attr('onclick', 'return true');
+			top.$(getContentSelector(id, binding, '_image')).attr('src', url);
+			var widget = getContentWidget(id, binding, 'Markup');
+			if (widget) {
+				widget.hide();
+			}
+			delete contentMarkupIdsByBinding[binding];
 		},
 
 		tabChange: function(moduleName, documentName, id, index) {
@@ -367,14 +399,20 @@ SKYVE.PF = function() {
 					SKYVE.Util.loadJS('leaflet/leaflet.js?v=' + SKYVE.Util.v, function() {
 						SKYVE.Util.loadJS('leaflet/Path.Drag.js?v=' + SKYVE.Util.v, function() {
 							SKYVE.Util.loadJS('leaflet/Leaflet.Editable.js?v=' + SKYVE.Util.v, function() {
-								SKYVE.Util.loadCSS('leaflet/leaflet.fullscreen.css?v=' + SKYVE.Util.v, function() {
-									SKYVE.Util.loadJS('leaflet/Leaflet.fullscreen.min.js?v=' + SKYVE.Util.v, function() {
-										SKYVE.Util.loadJS('skyve/prime/skyve-leaflet-min.js?v=' + SKYVE.Util.v, function() {
-											loadingMap = false;
-											if (options.queryName || options.modelName) {
-												return SKYVE.BizMap.create(options);
-											}
-											return SKYVE.BizMapPicker.create(options);
+								SKYVE.Util.loadCSS('leaflet/MarkerCluster.css?v=' + SKYVE.Util.v, function() {
+									SKYVE.Util.loadCSS('leaflet/MarkerCluster.Default.css?v=' + SKYVE.Util.v, function() {
+										SKYVE.Util.loadJS('leaflet/leaflet.markercluster.js?v=' + SKYVE.Util.v, function() {
+											SKYVE.Util.loadCSS('leaflet/leaflet.fullscreen.css?v=' + SKYVE.Util.v, function() {
+												SKYVE.Util.loadJS('leaflet/Leaflet.fullscreen.min.js?v=' + SKYVE.Util.v, function() {
+													SKYVE.Util.loadJS('skyve/prime/skyve-leaflet-min.js?v=' + SKYVE.Util.v, function() {
+														loadingMap = false;
+														if (options.queryName || options.modelName) {
+															return SKYVE.BizMap.create(options);
+														}
+														return SKYVE.BizMapPicker.create(options);
+													});
+												});
+											});
 										});
 									});
 								});
