@@ -162,7 +162,7 @@ class SmartClientListServletH2Test extends AbstractSkyveTest {
 		assertTrue(response.body().contains("\"totalRows\":0"));
 	}
 
-	private AllAttributesPersistent saveUncommittedBean(String textPrefix) throws Exception {
+	private AllAttributesPersistent saveUncommittedBean(String textPrefix) {
 		AllAttributesPersistent bean = new DataBuilder().fixture(FixtureType.crud)
 														.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
 		bean.setText(textPrefix + '-' + System.nanoTime());

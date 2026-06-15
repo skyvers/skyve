@@ -31,9 +31,8 @@ public class GeneratePassword implements ServerSideAction<User> {
 	 * Updates temporary and confirmation password fields and marks password as expired.
 	 *
 	 * @param user The user bean receiving generated credentials.
-	 * @throws Exception If generation fails.
 	 */
-	private static void generatePassword(User user) throws Exception {
+	private static void generatePassword(User user) {
 		user.setGeneratedPassword(PasswordGenerator.generate());
 
 		user.setNewPassword(user.getGeneratedPassword());

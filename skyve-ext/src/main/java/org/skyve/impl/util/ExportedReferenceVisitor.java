@@ -46,14 +46,12 @@ public abstract class ExportedReferenceVisitor {
 	private static final String WHERE_SQL = " where ";
 	private static final String PARAMETER_EQUALS_SQL = " = :";
 
-	public void visit(Bean bean)
-	throws Exception {
+	public void visit(Bean bean) {
 		CustomerImpl c = (CustomerImpl) CORE.getUser().getCustomer();
 		visit(c, c.getModule(bean.getBizModule()).getDocument(c, bean.getBizDocument()), bean);
 	}
 	
-	public void visit(Document document, Bean bean)
-	throws Exception {
+	public void visit(Document document, Bean bean) {
 		CustomerImpl c = (CustomerImpl) CORE.getUser().getCustomer();
 		visit(c, document, bean);
 	}

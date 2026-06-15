@@ -99,7 +99,7 @@ class ActionUtilTest {
 	}
 
 	@Test
-	void setTargetBeanForViewAndCollectionBindingSetsBeanWhenNoViewBinding() throws Exception {
+	void setTargetBeanForViewAndCollectionBindingSetsBeanWhenNoViewBinding() {
 		FacesView facesView = mock(FacesView.class);
 		DynamicBean oldBean = new DynamicBean("admin", "Root", new HashMap<>());
 		DynamicBean newBean = new DynamicBean("admin", "Root", new HashMap<>());
@@ -113,7 +113,7 @@ class ActionUtilTest {
 	}
 
 	@Test
-	void setTargetBeanForViewAndCollectionBindingSetsNestedViewBinding() throws Exception {
+	void setTargetBeanForViewAndCollectionBindingSetsNestedViewBinding() {
 		Map<String, Object> rootValues = new HashMap<>();
 		DynamicBean root = new DynamicBean("admin", "Root", rootValues);
 		DynamicBean oldChild = new DynamicBean("admin", "Child", new HashMap<>());

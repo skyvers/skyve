@@ -5,11 +5,8 @@ import org.junit.Test;
 
 @Ignore
 public class PrimeFacesConsolidatedTest extends PrimeFacesTestPreparation {
-
-	
 	@Test
-	public void test() throws Exception {
-		
+	public void test() {
 		String clearTextPassword = "Password01";
 		
 		login("demo", "admin", clearTextPassword);
@@ -17,5 +14,4 @@ public class PrimeFacesConsolidatedTest extends PrimeFacesTestPreparation {
 		testMenuDevOpsDataMaintenance();
 		testMenuJobs();
 	}
-
 }

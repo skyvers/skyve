@@ -438,7 +438,7 @@ class UtilTest {
 	}
 
 	@Test
-	void getCompleteSuggestionsBuildsExpectedQuery() throws Exception {
+	void getCompleteSuggestionsBuildsExpectedQuery() {
 		AbstractPersistence persistence = mock(AbstractPersistence.class, withSettings().defaultAnswer(CALLS_REAL_METHODS));
 		persistence.setUser(mock(User.class));
 		persistence.setForThread();

@@ -14,21 +14,21 @@ public class PasswordGeneratorTest extends AbstractH2TestForJUnit4 {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGenerateReturnsNonNull() throws Exception {
+	public void testGenerateReturnsNonNull() {
 		String password = PasswordGenerator.generate();
 		assertThat(password, is(notNullValue()));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGenerateReturnsMinimumLength() throws Exception {
+	public void testGenerateReturnsMinimumLength() {
 		String password = PasswordGenerator.generate();
 		assertTrue("Generated password must be at least 6 characters", password.length() >= 6);
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGenerateContainsDigit() throws Exception {
+	public void testGenerateContainsDigit() {
 		// Run several times to account for randomness
 		boolean found = false;
 		for (int i = 0; i < 20; i++) {
@@ -48,7 +48,7 @@ public class PasswordGeneratorTest extends AbstractH2TestForJUnit4 {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGenerateContainsUppercase() throws Exception {
+	public void testGenerateContainsUppercase() {
 		boolean found = false;
 		for (int i = 0; i < 20; i++) {
 			String password = PasswordGenerator.generate();
@@ -67,7 +67,7 @@ public class PasswordGeneratorTest extends AbstractH2TestForJUnit4 {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGenerateContainsLowercase() throws Exception {
+	public void testGenerateContainsLowercase() {
 		boolean found = false;
 		for (int i = 0; i < 20; i++) {
 			String password = PasswordGenerator.generate();
@@ -86,7 +86,7 @@ public class PasswordGeneratorTest extends AbstractH2TestForJUnit4 {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGenerateContainsPunctuation() throws Exception {
+	public void testGenerateContainsPunctuation() {
 		boolean found = false;
 		for (int i = 0; i < 20; i++) {
 			String password = PasswordGenerator.generate();
@@ -105,7 +105,7 @@ public class PasswordGeneratorTest extends AbstractH2TestForJUnit4 {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGenerateProducesDifferentPasswords() throws Exception {
+	public void testGenerateProducesDifferentPasswords() {
 		String first = PasswordGenerator.generate();
 		String second = PasswordGenerator.generate();
 		// Two consecutive calls should not deterministically produce the same result

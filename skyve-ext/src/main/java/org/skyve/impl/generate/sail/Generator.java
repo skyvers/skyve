@@ -58,8 +58,7 @@ System.out.println(visitModules(args[0]));
 	public static List<Automation> visitMenus(User user,
 												String uxui,
 												UserAgentType userAgentType,
-												TestStrategy testStrategy)
-	throws Exception {
+												TestStrategy testStrategy) {
 		return visitMenus(user, null, null, uxui, userAgentType, testStrategy);
 	}
 
@@ -67,8 +66,7 @@ System.out.println(visitModules(args[0]));
 												String loginPassword,
 												String uxui,
 												UserAgentType userAgentType,
-												TestStrategy testStrategy)
-	throws Exception {
+												TestStrategy testStrategy) {
 		return visitMenus(user, null, loginPassword, uxui, userAgentType, testStrategy);
 	}
 
@@ -110,8 +108,7 @@ System.out.println(visitModules(args[0]));
 										String moduleName,
 										String uxui,
 										UserAgentType userAgentType,
-										TestStrategy testStrategy)
-	throws Exception {
+										TestStrategy testStrategy) {
 		return visitMenu(user, null, null, moduleName, uxui, userAgentType, testStrategy);
 	}	
 
@@ -120,8 +117,7 @@ System.out.println(visitModules(args[0]));
 										String moduleName,
 										String uxui,
 										UserAgentType userAgentType,
-										TestStrategy testStrategy)
-	throws Exception {
+										TestStrategy testStrategy) {
 		return visitMenu(user, null, loginPassword, moduleName, uxui, userAgentType, testStrategy);
 	}
 	
@@ -300,8 +296,7 @@ System.out.println(visitModules(args[0]));
 											String moduleName,
 											String uxui,
 											UserAgentType userAgentType,
-											TestStrategy testStrategy)
-	throws Exception {
+											TestStrategy testStrategy) {
 		Customer c = user.getCustomer();
 		Module m = c.getModule(moduleName);
 		

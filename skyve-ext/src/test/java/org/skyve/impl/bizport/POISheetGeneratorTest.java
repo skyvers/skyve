@@ -99,21 +99,21 @@ class POISheetGeneratorTest {
 	}
 
 	@Test
-	void addFieldObjectAppendsToList() throws Exception {
+	void addFieldObjectAppendsToList() {
 		POISheetGenerator gen = new POISheetGenerator("m", "d");
 		gen.addField(new DataFileExportField("Title", "binding"));
 		assertEquals(1, gen.getFields().size());
 	}
 
 	@Test
-	void addFieldStringAndBindingAppendsToList() throws Exception {
+	void addFieldStringAndBindingAppendsToList() {
 		POISheetGenerator gen = new POISheetGenerator("m", "d");
 		gen.addField("Title", "binding");
 		assertEquals(1, gen.getFields().size());
 	}
 
 	@Test
-	void addMultipleFieldsAccumulatesInOrder() throws Exception {
+	void addMultipleFieldsAccumulatesInOrder() {
 		POISheetGenerator gen = new POISheetGenerator("m", "d");
 		gen.addField("Col1", "attr1");
 		gen.addField("Col2", "attr2");

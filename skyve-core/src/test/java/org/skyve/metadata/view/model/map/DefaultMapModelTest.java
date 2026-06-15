@@ -72,8 +72,7 @@ class DefaultMapModelTest {
 			return null;
 		}
 
-		void invokeAddItem(TestBean beanContainingGeometry, List<MapItem> itemsToAddTo, Envelope mapExtents)
-		throws Exception {
+		void invokeAddItem(TestBean beanContainingGeometry, List<MapItem> itemsToAddTo, Envelope mapExtents) {
 			addItem(beanContainingGeometry, itemsToAddTo, mapExtents);
 		}
 	}

@@ -113,8 +113,7 @@ public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> exte
 											Relation owningRelation,
 											Document currentDocument,
 											Bean bean,
-											boolean newNode)
-	throws Exception {
+											boolean newNode) {
 		ComparisonComposite result = new ComparisonComposite();
 		result.setBizId(bean.getBizId());
 		result.setBusinessKeyDescription((bean instanceof PersistentBean persistentBean) ? 

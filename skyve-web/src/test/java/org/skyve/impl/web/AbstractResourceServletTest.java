@@ -223,7 +223,7 @@ class AbstractResourceServletTest {
 	}
 
 	@Test
-	void doGetReturns416ForUnsatisfiableRangeWithoutOpeningStream() throws Exception {
+	void doGetReturns416ForUnsatisfiableRangeWithoutOpeningStream() {
 		TestServlet servlet = new TestServlet();
 		TestStreamableResource resource = TestStreamableResource.with("abcdef".getBytes(StandardCharsets.UTF_8), "application/octet-stream", "data.bin");
 		servlet.resource = resource;

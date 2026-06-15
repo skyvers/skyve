@@ -298,15 +298,13 @@ public class StandardLoader {
 	 * @param customer	The pertinent customer.
 	 * @param document	The parent document to interrogate.
 	 * @param sheet	The sheet to iterate over.
-	 * @throws Exception
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private void linkAssociationsFromSheet(@Nullable Customer customer, 
+	private void linkAssociationsFromSheet(@Nonnull Customer customer,
 											@Nonnull Module module, 
 											@Nonnull Document document, 
 											@Nonnull SheetKey key,
-											@Nonnull BizPortSheet sheet)
-	throws Exception {
+											@Nonnull BizPortSheet sheet) {
 		List<Association> associations = new ArrayList<>();
 		
 		// determine the association bindings
@@ -353,12 +351,11 @@ public class StandardLoader {
 	 * @param sheet	To get values from the current row.
 	 * @param customer	The pertinent customer.
 	 * @param childDocument	The document of the child end of the relationship.
-	 * @throws Exception
 	 */
 	private void linkParentFromRow(@Nonnull BizPortSheet sheet,
-										@Nullable Customer customer,
-										@Nonnull Document childDocument,
-										@Nonnull String collectionBinding) {
+									@Nullable Customer customer,
+									@Nonnull Document childDocument,
+									@Nullable String collectionBinding) {
 		Object parentSheetId = sheet.getValue(ChildBean.PARENT_NAME, AttributeType.text, problems);
 		Object childSheetId = sheet.getValue(Bean.DOCUMENT_ID, AttributeType.text, problems);
 		if ((parentSheetId == null) && (childSheetId == null)) { // don't process an empty row
@@ -404,7 +401,9 @@ public class StandardLoader {
 											"The child ID " + childSheetId + " does not match any row in the current sheet.");
 				return;
 			}
-			BindUtil.ensureElementIsInCollection(parentBean, collectionBinding, childBean);
+			if (collectionBinding != null) {
+				BindUtil.ensureElementIsInCollection(parentBean, collectionBinding, childBean);
+			}
 		}
 	}
 
@@ -495,13 +494,11 @@ public class StandardLoader {
 	 * 
 	 * @param collectionBinding	The collection binding to process.
 	 * @param collectionSheet	The collection sheet to iterate over.
-	 * @throws Exception
 	 */
 	private void populateCollectionFromSheet(@Nonnull String collectionBinding,
 												@Nonnull Document owningDocument,
 												@Nonnull Document elementDocument,
-												@Nonnull BizPortSheet collectionSheet)
-	throws Exception {
+												@Nonnull BizPortSheet collectionSheet) {
 		while (collectionSheet.nextRow()) {
 			populateCollectionFromRow(collectionBinding,
 										owningDocument,

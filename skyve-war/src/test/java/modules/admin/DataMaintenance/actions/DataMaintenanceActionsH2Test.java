@@ -261,7 +261,7 @@ class DataMaintenanceActionsH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	void truncateAuditLogGetAuditQueryAddsAllProvidedFilters() throws Exception {
+	void truncateAuditLogGetAuditQueryAddsAllProvidedFilters() {
 		Persistence persistence = mock(Persistence.class);
 		DocumentQuery query = mock(DocumentQuery.class);
 		DocumentFilter filter = mock(DocumentFilter.class);

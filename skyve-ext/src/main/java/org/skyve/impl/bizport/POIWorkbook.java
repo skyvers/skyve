@@ -44,6 +44,7 @@ import org.skyve.metadata.customer.Customer;
  */
 public final class POIWorkbook implements BizPortWorkbook {
 	// The adapted Excel workbook
+	@SuppressWarnings("resource") // Workbook lifecycle is owned by this adapter and closed by callers when appropriate.
 	Workbook workbook;
 
 	// whether we are creating or reading an xls or an xlsx
@@ -349,14 +350,14 @@ public final class POIWorkbook implements BizPortWorkbook {
 	/**
 	 * Adds or replaces the pOICellValue value.
 	 */
-	public static void putPOICellValue(XSSFSheet sheet, int rowNum, int colNum, CellType cellType, Object value) throws Exception {
+	public static void putPOICellValue(XSSFSheet sheet, int rowNum, int colNum, CellType cellType, Object value) {
 		putPOICellValue(sheet, rowNum, colNum, cellType, value, false, false);
 	}
 
 	/**
 	 * Adds or replaces the pOICellValue value.
 	 */
-	public static void putPOICellValue(XSSFSheet sheet, int rowNum, int colNum, CellType cellType, String value, boolean bold) throws Exception {
+	public static void putPOICellValue(XSSFSheet sheet, int rowNum, int colNum, CellType cellType, String value, boolean bold) {
 		putPOICellValue(sheet, rowNum, colNum, cellType, value, false, bold);
 	}
 

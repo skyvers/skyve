@@ -174,8 +174,7 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 													Reference owningReference,
 													Document referenceDocument,
 													Map<String, Object> values,
-													boolean deleted)
-	throws Exception {
+													boolean deleted) {
 		ComparisonComposite result = new ComparisonComposite();
 		result.setBizId((String) values.remove(Bean.DOCUMENT_ID));
 		String description = (String) values.remove(Bean.BIZ_KEY);

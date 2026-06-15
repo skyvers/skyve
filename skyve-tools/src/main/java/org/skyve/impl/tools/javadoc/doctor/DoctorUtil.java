@@ -101,10 +101,9 @@ public class DoctorUtil {
 	 * @param customer owning customer for metadata resolution
 	 * @param module module to document
 	 * @param out destination stream receiving HTML fragments
-	 * @throws Exception if metadata access or rendering fails
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public static void renderModule(Customer customer, Module module, PrintStream out) throws Exception {
+	public static void renderModule(Customer customer, Module module, PrintStream out) {
 
 		// Create title page
 		String localisedTitle = module.getLocalisedTitle();

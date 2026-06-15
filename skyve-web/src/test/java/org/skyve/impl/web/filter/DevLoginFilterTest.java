@@ -33,7 +33,7 @@ class DevLoginFilterTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void initThrowsWhenCustomerMissing() throws Exception {
+	void initThrowsWhenCustomerMissing() {
 		DevLoginFilter filter = new DevLoginFilter();
 		FilterConfig config = mock(FilterConfig.class);
 		when(config.getInitParameter("customer")).thenReturn(null);
@@ -42,7 +42,7 @@ class DevLoginFilterTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void initThrowsWhenUserMissing() throws Exception {
+	void initThrowsWhenUserMissing() {
 		DevLoginFilter filter = new DevLoginFilter();
 		FilterConfig config = mock(FilterConfig.class);
 		when(config.getInitParameter("customer")).thenReturn("test");
@@ -52,7 +52,7 @@ class DevLoginFilterTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void initThrowsWhenPasswordMissing() throws Exception {
+	void initThrowsWhenPasswordMissing() {
 		DevLoginFilter filter = new DevLoginFilter();
 		FilterConfig config = mock(FilterConfig.class);
 		when(config.getInitParameter("customer")).thenReturn("test");

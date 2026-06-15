@@ -193,7 +193,7 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 	}
 	
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private Bean summarize() throws Exception {
+	private Bean summarize() {
 		Map<String, Object> summaryData = new TreeMap<>();
 
 		AggregateFunction summary = getSummary();
@@ -335,6 +335,7 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 	}
 
 	@Override
+	@SuppressWarnings("resource") // Ownership of the returned iterable passes to the caller.
 	public AutoClosingIterable<Bean> iterate() throws Exception {
 		rows = getRows();
 		if (rows == null) {

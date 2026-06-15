@@ -423,9 +423,8 @@ public class CommunicationUtil {
 	 * 
 	 * @param description Communication description to search for
 	 * @return Matching system communication, or {@code null} when not found
-	 * @throws Exception If retrieval fails
 	 */
-	public static Communication getSystemCommunicationByDescription(String description) throws Exception {
+	public static Communication getSystemCommunicationByDescription(String description) {
 		return CORE.getPersistence().withDocumentPermissionScopes(DocumentPermissionScope.customer, p -> {
 			DocumentQuery query = p.newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.COMMUNICATION_DOCUMENT_NAME);
 			query.getFilter().addEquals(AppConstants.DESCRIPTION_ATTRIBUTE_NAME, description);

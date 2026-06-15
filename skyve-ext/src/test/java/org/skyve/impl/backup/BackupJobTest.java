@@ -71,7 +71,7 @@ class BackupJobTest {
 	}
 
 	@Test
-	void testEmailProblemUsesExtMailService() throws Exception {
+	void testEmailProblemUsesExtMailService() {
 		List<String> jobLog = new ArrayList<>();
 
 		BackupJob.emailProblem(jobLog, "simulated failure");
@@ -91,7 +91,7 @@ class BackupJobTest {
 	}
 
 		@Test
-		void testEmailProblemWithNullProblemSendsGenericMessage() throws Exception {
+		void testEmailProblemWithNullProblemSendsGenericMessage() {
                 List<String> jobLog = new ArrayList<>();
 
                 BackupJob.emailProblem(jobLog, null);
@@ -102,7 +102,7 @@ class BackupJobTest {
         }
 
 		@Test
-		void testEmailProblemWithNoSupportEmailLogsToJobLog() throws Exception {
+		void testEmailProblemWithNoSupportEmailLogsToJobLog() {
                 UtilImpl.SUPPORT_EMAIL_ADDRESS = null;
                 List<String> jobLog = new ArrayList<>();
 
@@ -114,7 +114,7 @@ class BackupJobTest {
         }
 
 		@Test
-		void testEmailProblemWithNullEnvironmentIdentifierOmitsEnvSuffix() throws Exception {
+		void testEmailProblemWithNullEnvironmentIdentifierOmitsEnvSuffix() {
                 UtilImpl.ENVIRONMENT_IDENTIFIER = null;
                 List<String> jobLog = new ArrayList<>();
 

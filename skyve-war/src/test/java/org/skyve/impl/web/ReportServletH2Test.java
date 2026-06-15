@@ -228,7 +228,7 @@ class ReportServletH2Test extends AbstractSkyveTest {
 		assertNull(parameters.get("blank"));
 	}
 
-	private AllAttributesPersistent saveReportBean(String prefix) throws Exception {
+	private AllAttributesPersistent saveReportBean(String prefix) {
 		AllAttributesPersistent bean = new DataBuilder().fixture(FixtureType.crud)
 														.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
 		bean.setText(prefix + "-" + System.nanoTime());

@@ -83,7 +83,7 @@ class BulkUserCreationJobTest extends AbstractH2Test {
 	}
 
 	@Test
-	void createUserFromContactReturnsNullAndLogsWhenUserAlreadyExists() throws Exception {
+	void createUserFromContactReturnsNullAndLogsWhenUserAlreadyExists() {
 		String email = "bulk-existing-" + UUID.randomUUID() + "@example.com";
 		DataBuilder db = new DataBuilder().fixture(FixtureType.crud);
 		User existing = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
@@ -105,7 +105,7 @@ class BulkUserCreationJobTest extends AbstractH2Test {
 	}
 
 	@Test
-	void createUserFromContactReturnsNullAndLogsWhenContactCannotBeSaved() throws Exception {
+	void createUserFromContactReturnsNullAndLogsWhenContactCannotBeSaved() {
 		String email = "bulk-invalid-" + UUID.randomUUID() + "@example.com";
 		ContactExtension contact = Contact.newInstance();
 		contact.setEmail1(email);
@@ -120,7 +120,7 @@ class BulkUserCreationJobTest extends AbstractH2Test {
 	}
 
 	@Test
-	void createUserFromContactCreatesUserWithDefaultModuleWhenValid() throws Exception {
+	void createUserFromContactCreatesUserWithDefaultModuleWhenValid() {
 		String email = "bulk-create-" + UUID.randomUUID() + "@example.com";
 		ContactExtension contact = Contact.newInstance();
 		contact.setName(email);

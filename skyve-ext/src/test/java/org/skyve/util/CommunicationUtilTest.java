@@ -151,13 +151,13 @@ class CommunicationUtilTest {
 
 	@SuppressWarnings("static-method")
 	@Test
-	void testFormatCommunicationMessageReturnsNullForNullExpression() throws Exception {
+	void testFormatCommunicationMessageReturnsNullForNullExpression() {
 		assertThat(CommunicationUtil.formatCommunicationMessage(null, null), is((String) null));
 	}
 
 	@SuppressWarnings("static-method")
 	@Test
-	void testFormatCommunicationMessageReplacesResetPasswordPlaceholder() throws Exception {
+	void testFormatCommunicationMessageReplacesResetPasswordPlaceholder() {
 		String expression = "Use this link: " + CommunicationUtil.SPECIAL_LOGOUT_URL;
 
 		String result = CommunicationUtil.formatCommunicationMessage(null, expression);
@@ -168,7 +168,7 @@ class CommunicationUtilTest {
 
 	@SuppressWarnings("static-method")
 	@Test
-	void testFormatCommunicationMessageReplacesBeanUrlAndContextForFirstBean() throws Exception {
+	void testFormatCommunicationMessageReplacesBeanUrlAndContextForFirstBean() {
 		Bean bean = mock(Bean.class);
 		when(bean.getBizModule()).thenReturn("admin");
 		when(bean.getBizDocument()).thenReturn("Communication");
@@ -185,7 +185,7 @@ class CommunicationUtilTest {
 
 	@SuppressWarnings("static-method")
 	@Test
-	void testFormatCommunicationMessageLeavesBeanPlaceholdersWhenFirstBeanIsNull() throws Exception {
+	void testFormatCommunicationMessageLeavesBeanPlaceholdersWhenFirstBeanIsNull() {
 		String expression = "No bindings here";
 
 		String result = CommunicationUtil.formatCommunicationMessage(null, expression, new Bean[] { null });
@@ -195,7 +195,7 @@ class CommunicationUtilTest {
 
 	@SuppressWarnings("static-method")
 	@Test
-	void testFormatCommunicationMessageWithEmptyBeansOnlyReplacesResetPasswordPlaceholder() throws Exception {
+	void testFormatCommunicationMessageWithEmptyBeansOnlyReplacesResetPasswordPlaceholder() {
 		String expression = CommunicationUtil.SPECIAL_BEAN_URL + " " + CommunicationUtil.SPECIAL_CONTEXT + " " + CommunicationUtil.SPECIAL_LOGOUT_URL;
 
 		String result = CommunicationUtil.formatCommunicationMessage(null, expression, new Bean[0]);

@@ -116,7 +116,7 @@ class ComparisonPropertyTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void attributeConstructorWithNullBeansUsesAttributeValues() throws Exception {
+	void attributeConstructorWithNullBeansUsesAttributeValues() {
 		Attribute attr = Mockito.mock(Attribute.class);
 		Mockito.when(attr.getName()).thenReturn("myField");
 		Mockito.when(attr.getLocalisedDisplayName()).thenReturn("My Field");
@@ -132,7 +132,7 @@ class ComparisonPropertyTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void attributeConstructorWithNonNullBeansCallsBindUtil() throws Exception {
+	void attributeConstructorWithNonNullBeansCallsBindUtil() {
 		// Bean.getBizModule() is a getter that BindUtil can access via BeanUtils reflection.
 		// Using "bizModule" means PROPERTY_UTILS.getProperty(mockBean, "bizModule") will call
 		// mockBean.getBizModule() which returns null (Mockito default). This covers the
