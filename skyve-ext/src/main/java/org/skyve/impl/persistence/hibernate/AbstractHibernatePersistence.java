@@ -47,6 +47,7 @@ import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.event.service.spi.EventListenerRegistry;
 import org.hibernate.event.spi.EventType;
 import org.hibernate.hql.internal.ast.QuerySyntaxException;
+import org.hibernate.hql.spi.id.inline.InlineIdsOrClauseBulkIdStrategy;
 import org.hibernate.integrator.spi.Integrator;
 import org.hibernate.integrator.spi.IntegratorService;
 import org.hibernate.internal.SessionImpl;
@@ -170,20 +171,13 @@ import jakarta.persistence.RollbackException;
  * {@link #removeBeanContent(PersistentBean)}, {@link #putBeanContent(BeanContent)},
  * and {@link #closeContent()}.
  * </p>
+ * <p>
+ * Threading: thread-confined — do not share instances across threads.
+ * </p>
  *
  * @see AbstractPersistence
  * @see Persistence
  * @see DynamicPersistence
- */
-/**
- * Core Hibernate-backed persistence context for Skyve, extending
- * {@link org.skyve.impl.persistence.AbstractPersistence}.
- *
- * <p>Manages the Hibernate {@link org.hibernate.Session} lifecycle, JPQL/SQL
- * query execution, flush, commit, rollback, and content persistence.
- *
- * <p>Threading: thread-confined — do not share instances across threads.
- *
  * @see HibernateContentPersistence
  * @see HibernateNoContentPersistence
  */
@@ -388,6 +382,9 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		// Don't import simple class names as entity names
 		cfg.put("auto-import", CONFIG_FALSE);
 
+		// Disable the unsafe inline bulk-id strategy that is vulnerable to CVE-2026-0603, even if configured by the user, and fail fast with a clear error message.
+		validateBulkIdStrategyConfiguration(cfg);
+
 		StandardServiceRegistryBuilder ssrb = new StandardServiceRegistryBuilder().configure(config);
 		ssrb.addService(IntegratorService.class, new IntegratorService() {
 			private static final long serialVersionUID = -1078480021120121931L;
@@ -493,6 +490,30 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 			catch (Exception e) {
 				LOGGER.error("Could not apply skyve extra schema updates", e);
 			}
+		}
+	}
+
+	/**
+	 * Validate the configured Hibernate bulk-id strategy to prevent unsafe inline strategies that are vulnerable to CVE-2026-0603.
+	 * @param cfg
+	 */
+	private static void validateBulkIdStrategyConfiguration(Map<String, String> cfg) {
+		String configuredStrategy = cfg.get(AvailableSettings.HQL_BULK_ID_STRATEGY);
+		if (configuredStrategy == null) {
+			return;
+		}
+
+		configuredStrategy = configuredStrategy.trim();
+		if (configuredStrategy.isEmpty()) {
+			return;
+		}
+
+		if (InlineIdsOrClauseBulkIdStrategy.class.getName().equals(configuredStrategy)) {
+			LOGGER.error("Attempted configuration of unsafe Hibernate bulk-id strategy '{}' was blocked due to CVE-2026-0603", configuredStrategy);
+			throw new IllegalStateException(String.format(
+					"Unsafe Hibernate bulk-id strategy '%s' is disabled due to CVE-2026-0603. "
+							+ "Use a non-inline strategy (or the dialect default).",
+					configuredStrategy));
 		}
 	}
 
