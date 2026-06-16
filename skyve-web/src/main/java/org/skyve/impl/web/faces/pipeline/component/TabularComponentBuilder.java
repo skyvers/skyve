@@ -2266,7 +2266,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		String id = result.getId();
 		List<UIComponent> toAddTo = result.getChildren();
 
-		String binding = content.getBinding();
+		@Nonnull String binding = content.getBinding();
 		String sanitisedBinding = BindUtil.sanitiseBinding(binding);
 		ContentDisplay display = content.getResolvedDisplay();
 		boolean auto = ContentDisplay.auto.equals(display);
@@ -2634,7 +2634,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list and cognitive compleity OK
 	private void editableContent(List<UIComponent> toAddTo,
 									String id,
-									String binding,
+									@Nonnull String binding,
 									String sanitisedBinding,
 									@Nullable String requiredMessage,
 									String disabledConditionName,
