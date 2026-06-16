@@ -5,8 +5,7 @@ import org.skyve.impl.metadata.view.WidgetReference;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
@@ -24,8 +23,7 @@ import org.skyve.metadata.model.Attribute.UsageType;
 import org.skyve.metadata.view.fluent.FluentCheckBox;
 import org.skyve.metadata.view.fluent.FluentColourPicker;
 import org.skyve.metadata.view.fluent.FluentCombo;
-import org.skyve.metadata.view.fluent.FluentContentImage;
-import org.skyve.metadata.view.fluent.FluentContentLink;
+import org.skyve.metadata.view.fluent.FluentContentUpload;
 import org.skyve.metadata.view.fluent.FluentGeometry;
 import org.skyve.metadata.view.fluent.FluentHTML;
 import org.skyve.metadata.view.fluent.FluentInputWidget;
@@ -37,6 +35,8 @@ import org.skyve.metadata.view.fluent.FluentSlider;
 import org.skyve.metadata.view.fluent.FluentSpinner;
 import org.skyve.metadata.view.fluent.FluentTextArea;
 import org.skyve.metadata.view.fluent.FluentTextField;
+
+import jakarta.annotation.Nonnull;
 
 /**
  * Provides a fluent builder for FluentAttribute metadata.
@@ -70,11 +70,8 @@ public abstract class FluentAttribute<T extends FluentAttribute<T>> {
 		if ((attribute instanceof AbstractAttribute abstractAttribute) && 
 				(abstractAttribute.getDefaultWidgetReference() != null)) {
 			InputWidget input = abstractAttribute.getDefaultInputWidget();
-			if (input instanceof ContentImage image) {
-				defaultWidget(new FluentContentImage().from(image));
-			}
-			else if (input instanceof ContentLink link) {
-				defaultWidget(new FluentContentLink().from(link));
+			if (input instanceof ContentUpload content) {
+				defaultWidget(new FluentContentUpload().from(content));
 			}
 			else if (input instanceof CheckBox check) {
 				defaultWidget(new FluentCheckBox().from(check));
@@ -214,17 +211,13 @@ public abstract class FluentAttribute<T extends FluentAttribute<T>> {
 	}
 
 	/**
-	 * Updates metadata on this fluent builder.
+	 * Sets a managed-content default widget for the attribute.
+	 *
+	 * @param content the content upload builder to store as the default widget
+	 * @return this builder
 	 */
-	public T defaultWidget(FluentContentImage image) {
-		return defaultWidgetReference(image);
-	}
-
-	/**
-	 * Updates metadata on this fluent builder.
-	 */
-	public T defaultWidget(FluentContentLink link) {
-		return defaultWidgetReference(link);
+	public @Nonnull T defaultWidget(@Nonnull FluentContentUpload content) {
+		return defaultWidgetReference(content);
 	}
 
 	/**

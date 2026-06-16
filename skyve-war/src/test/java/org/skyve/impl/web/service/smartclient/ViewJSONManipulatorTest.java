@@ -57,8 +57,6 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
 import org.skyve.impl.metadata.view.widget.StaticImage;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckMembership;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.ActionImpl;
@@ -934,55 +932,7 @@ class ViewJSONManipulatorTest extends AbstractSkyveTest {
 		assertNotNull(json);
 	}
 
-	@Test
-	void testViewWithContentImage() throws Exception {
-		ViewImpl view = new ViewImpl();
-		view.setTitle("TEST");
 
-		Form form = new Form();
-		form.getColumns().add(new FormColumn());
-		FormRow row = new FormRow();
-		form.getRows().add(row);
-		FormItem item = new FormItem();
-		ContentImage ci = new ContentImage();
-		ci.setBinding("text");
-		item.setWidget(ci);
-		row.getItems().add(item);
-		view.getContained().add(form);
-
-		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 0);
-		ViewJSONManipulator vjm = new ViewJSONManipulator(u, m, aapd, view, TEST_UXUI, bean, 0, 0, false);
-		vjm.visit();
-		AbstractWebContext ctx = mockWebContext();
-		ctx.setCurrentBean(bean);
-		String json = vjm.toJSON(ctx, null);
-		assertNotNull(json);
-	}
-
-	@Test
-	void testViewWithContentLink() throws Exception {
-		ViewImpl view = new ViewImpl();
-		view.setTitle("TEST");
-
-		Form form = new Form();
-		form.getColumns().add(new FormColumn());
-		FormRow row = new FormRow();
-		form.getRows().add(row);
-		FormItem item = new FormItem();
-		ContentLink cl = new ContentLink();
-		cl.setBinding("text");
-		item.setWidget(cl);
-		row.getItems().add(item);
-		view.getContained().add(form);
-
-		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 0);
-		ViewJSONManipulator vjm = new ViewJSONManipulator(u, m, aapd, view, TEST_UXUI, bean, 0, 0, false);
-		vjm.visit();
-		AbstractWebContext ctx = mockWebContext();
-		ctx.setCurrentBean(bean);
-		String json = vjm.toJSON(ctx, null);
-		assertNotNull(json);
-	}
 
 	@Test
 	void testViewWithContentSignature() throws Exception {
@@ -1982,32 +1932,6 @@ class ViewJSONManipulatorTest extends AbstractSkyveTest {
 		assertNotNull(json);
 	}
 
-	@Test
-	void testViewWithDataGridContainerColumnWithContentImage() throws Exception {
-		ViewImpl view = new ViewImpl();
-		view.setTitle("TEST");
-
-		DataGrid grid = new DataGrid();
-		grid.setBinding("aggregatedCollection");
-		DataGridContainerColumn col = new DataGridContainerColumn();
-		ContentImage img = new ContentImage();
-		img.setBinding("text");
-		col.getWidgets().add(img);
-		grid.getColumns().add(col);
-		view.getContained().add(grid);
-
-		Form form = new Form();
-		form.getColumns().add(new FormColumn());
-		view.getContained().add(form);
-
-		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 1);
-		ViewJSONManipulator vjm = new ViewJSONManipulator(u, m, aapd, view, TEST_UXUI, bean, 0, 0, false);
-		vjm.visit();
-		AbstractWebContext ctx = mockWebContext();
-		ctx.setCurrentBean(bean);
-		String json = vjm.toJSON(ctx, null);
-		assertNotNull(json);
-	}
 
 	@Test
 	void testViewWithDataGridContainerColumnWithBlurb() throws Exception {
@@ -2320,55 +2244,7 @@ class ViewJSONManipulatorTest extends AbstractSkyveTest {
 		assertNotNull(json);
 	}
 
-	@Test
-	void testViewWithContentImageForApply() throws Exception {
-		ViewImpl view = new ViewImpl();
-		view.setTitle("TEST");
 
-		Form form = new Form();
-		form.getColumns().add(new FormColumn());
-		FormRow row = new FormRow();
-		form.getRows().add(row);
-		FormItem item = new FormItem();
-		ContentImage ci = new ContentImage();
-		ci.setBinding("text");
-		item.setWidget(ci);
-		row.getItems().add(item);
-		view.getContained().add(form);
-
-		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 1);
-		ViewJSONManipulator vjm = new ViewJSONManipulator(u, m, aapd, view, TEST_UXUI, bean, 0, 0, true);
-		vjm.visit();
-		AbstractWebContext ctx = mockWebContext();
-		ctx.setCurrentBean(bean);
-		String json = vjm.toJSON(ctx, null);
-		assertNotNull(json);
-	}
-
-	@Test
-	void testViewWithContentLinkForApply() throws Exception {
-		ViewImpl view = new ViewImpl();
-		view.setTitle("TEST");
-
-		Form form = new Form();
-		form.getColumns().add(new FormColumn());
-		FormRow row = new FormRow();
-		form.getRows().add(row);
-		FormItem item = new FormItem();
-		ContentLink cl = new ContentLink();
-		cl.setBinding("text");
-		item.setWidget(cl);
-		row.getItems().add(item);
-		view.getContained().add(form);
-
-		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 1);
-		ViewJSONManipulator vjm = new ViewJSONManipulator(u, m, aapd, view, TEST_UXUI, bean, 0, 0, true);
-		vjm.visit();
-		AbstractWebContext ctx = mockWebContext();
-		ctx.setCurrentBean(bean);
-		String json = vjm.toJSON(ctx, null);
-		assertNotNull(json);
-	}
 
 	@Test
 	void testViewWithContentSignatureForApply() throws Exception {

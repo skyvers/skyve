@@ -31,10 +31,10 @@ public class FluentId extends FluentField<FluentId> {
 		return this;
 	}
 	
-	@Override
 	/**
 	 * Returns the mutable metadata instance represented by this builder.
 	 */
+	@Override
 	public Id get() {
 		return id;
 	}

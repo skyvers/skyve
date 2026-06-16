@@ -33,8 +33,6 @@ import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
@@ -459,22 +457,6 @@ class ComponentBuilderChainTest {
 		EventSourceComponent result = new EventSourceComponent(mock(UIComponent.class), mock(UIComponentBase.class));
 		when(mockBuilder.combo(mockEventSource, "var", combo, "disabled", "title", null)).thenReturn(result);
 		assertSame(result, chain.combo(mockEventSource, "var", combo, "disabled", "title", null));
-	}
-
-	@Test
-	void contentImageDelegatesToBuilder() {
-		ContentImage image = mock(ContentImage.class);
-		UIComponent result = mock(UIComponent.class);
-		when(mockBuilder.contentImage(mockComponent, "var", image, "disabled", "title", null)).thenReturn(result);
-		assertSame(result, chain.contentImage(mockComponent, "var", image, "disabled", "title", null));
-	}
-
-	@Test
-	void contentLinkDelegatesToBuilder() {
-		ContentLink link = mock(ContentLink.class);
-		UIComponent result = mock(UIComponent.class);
-		when(mockBuilder.contentLink(mockComponent, "var", link, "disabled", "title", null, HorizontalAlignment.left)).thenReturn(result);
-		assertSame(result, chain.contentLink(mockComponent, "var", link, "disabled", "title", null, HorizontalAlignment.left));
 	}
 
 	@Test

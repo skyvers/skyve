@@ -57,7 +57,7 @@
 			<column />
 			<row>
 				<item>
-					<contentImage binding="contact.image" pixelWidth="200"
+					<content binding="contact.image" display="image" capture="all" pixelWidth="200"
 						pixelHeight="200" />
 				</item>
 			</row>

@@ -115,9 +115,10 @@ import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.CompleteType;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentCapture;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentDisplay;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryInputType;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
@@ -170,6 +171,7 @@ import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Icons;
 import org.skyve.web.WebAction;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.el.MethodExpression;
 import jakarta.el.ValueExpression;
@@ -198,6 +200,12 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	public static final Integer SINGLE_ACTION_COLUMN_WIDTH_INTEGER = Integer.valueOf(60);
 	public static final String DOUBLE_ACTION_COLUMN_WIDTH = "95";
 
+	private static final Integer FORM_VIDEO_DEFAULT_PIXEL_WIDTH = Integer.valueOf(320);
+	private static final Integer FORM_VIDEO_DEFAULT_PIXEL_HEIGHT = Integer.valueOf(180);
+	private static final Integer GRID_VIDEO_DEFAULT_PIXEL_WIDTH = Integer.valueOf(160);
+	private static final Integer GRID_VIDEO_DEFAULT_PIXEL_HEIGHT = Integer.valueOf(90);
+	private static final String UPLOAD_CAPTURE_PROPERTY_NAME = "capture";
+
 	@Override
 	public UIComponent view(UIComponent component, boolean createView) {
 		if (component != null) {
@@ -206,7 +214,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 		HtmlPanelGroup result = panelGroup(true, false, false, null, null);
 
-		// Don't render the view if there is no bean selected as 
+		// Don't render the view if there is no bean selected as
 		// it'll cause a cascade of stack traces as the EL is evaluated
 		StringBuilder rendered = new StringBuilder(64);
 		rendered.append('(').append(managedBeanName).append(".currentBean ne null) and (");
@@ -258,7 +266,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		String selectedTabIndexBinding = tabPane.getSelectedTabIndexBinding();
 		if (selectedTabIndexBinding != null) {
 			result.setValueExpression("activeIndex", createValueExpressionFromFragment(selectedTabIndexBinding, true, null, Number.class, false, Sanitisation.none));
-			
+
 			// Set display on based on whether there is a tab index defined
 			expr.append("#{empty ").append(managedBeanName).append(".currentBean['").append(selectedTabIndexBinding).append("'] ? 'display:none' : ''}");
 			result.setValueExpression("style", ef.createValueExpression(elc, expr.toString(), String.class));
@@ -266,7 +274,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		else {
 			result.setStyle("display:none");
 		}
-		
+
 		result.setWidgetVar(id); // for subsequent tab script to work
 
 		expr.setLength(0);
@@ -307,7 +315,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		expr.append(moduleName).append('_').append(documentName).append('_').append(tabPaneComponentId);
 		expr.append(":0);});}</script>");
 		result.setValue(expr.toString());
-		
+
 		String selectedTabIndexBinding = tabPane.getSelectedTabIndexBinding();
 		if (selectedTabIndexBinding != null) {
 			// Set script conditional rendering based on whether there is a tab index defined
@@ -315,30 +323,30 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			expr.append("#{empty ").append(managedBeanName).append(".currentBean['").append(selectedTabIndexBinding).append("']}");
 			result.setValueExpression("rendered", ef.createValueExpression(elc, expr.toString(), Boolean.class));
 		}
-		
+
 		return result;
 	}
-	
+
 	@Override
 	public UIComponent sidebarScript(UIComponent component,
 										Sidebar sidebar,
 										boolean createView,
 										String sidebarComponentId) {
 		String width = "360px";
-		
+
 		Integer pixel = sidebar.getPixelWidth();
 		Integer responsive = sidebar.getResponsiveWidth();
 		Integer percentage = sidebar.getPercentageWidth();
 		if (pixel != null) {
 			width = pixel.toString() + "px";
-		} 
+		}
 		else if (responsive != null) {
 			width = LayoutUtil.responsiveWidthToPercentageWidth(responsive.doubleValue()) + "%";
 		}
 		else if (percentage != null) {
 			width = percentage.toString() + "%";
 		}
-		
+
 		StringBuilder expr = new StringBuilder(128);
 		expr.append("<script type=\"text/javascript\">SKYVE.PF.sidebar('");
 		expr.append(sidebarComponentId).append("','").append(width).append("',");
@@ -355,10 +363,10 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 		UIOutput result = new UIOutput();
 		result.setValue(expr.toString());
-		
+
 		return result;
 	}
-	
+
 	@Override
 	public UIComponent border(UIComponent component,
 								String borderTitle,
@@ -542,6 +550,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 								action.getDisabledConditionName(),
 								formDisabledConditionName,
 								action.getInvisibleConditionName(),
+								resolveActionUploadCapture(action),
 								false);
 	}
 
@@ -606,7 +615,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		// To implement horizontal alignment we use a table to wrap
 		String preAlign = (alignment == null) ? "" : "<table style=\"width:100%\"><tr><td align=\"" + alignment.toTextAlignmentString() + "\">";
 		String postAlign = (alignment == null) ? "" : "</td></tr></table>";
-		
+
 		if (value != null) {
 			result.setValue(preAlign + value + postAlign);
 		}
@@ -964,7 +973,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		if (disabled != null) {
 			result.setValueExpression("disabled", disabled);
 		}
-		
+
 		return result;
 	}
 
@@ -1412,7 +1421,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
         result.setVar("row");
         result.setLazy(true);
     	result.setRows(50);
-    	
+
 
 		UIOutput emptyMessage = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
         emptyMessage.setValue((canCreateDocument && createRendered) ? EMPTY_DATA_TABLE_CAN_ADD_MESSAGE : EMPTY_DATA_TABLE_MESSAGE);
@@ -1572,7 +1581,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 																			grid.getProperties());
 			children.add(actionColumn);
         }
-        
+
     	return result;
 	}
 
@@ -1712,7 +1721,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			HorizontalAlignment alignment = queryColumn.getAlignment();
 			if (alignment == null) {
 				alignment = customisations.determineDefaultColumnTextAlignment(uxui, attributeType);
-			} 
+			}
 
 			String value = null;
 			if (projectedQueryColumn != null) { // projected column
@@ -1792,7 +1801,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 				style.append("width:").append(pixelWidth).append("px;");
 			}
 			style.append("text-align:").append(alignment.toTextAlignmentString()).append(" !important;");
-			
+
 			if (! style.isEmpty()) {
 				column.setStyle(style.toString());
 			}
@@ -1855,7 +1864,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		column.setResponsivePriority(1);
 		column.setWidth(SINGLE_ACTION_COLUMN_WIDTH);
 		column.setStyle("text-align:center !important");
-		
+
 		// column header is a vertical flex with a little bit of space between the 2 buttons if needed
 		final HtmlPanelGroup columnHeader = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
 		columnHeader.setLayout("block");
@@ -1867,7 +1876,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			final UIComponent filterToggle = createDataTableFilterToggle(parentId);
 			columnHeaderChildren.add(filterToggle);
 		}
-			
+
 		if (canCreateDocument && createRendered) {
 			CommandButton button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 			setId(button, null);
@@ -1901,12 +1910,12 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		else {
 			column.setHeaderText("");
 		}
-		
+
 		if (zoomRendered) {
 			final UIComponent button = createListGridZoomButton(zoomDisabledConditionName, properties);
 			column.getChildren().add(button);
 		}
-		
+
 		return column;
 	}
 
@@ -1939,7 +1948,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		}
 
 		StringBuilder script = new StringBuilder();
-		
+
 		// create context menu
 		ContextMenu result = (ContextMenu) a.createComponent(ContextMenu.COMPONENT_TYPE);
 		result.setFor(listGridId); // Set the target DataTable
@@ -1965,7 +1974,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			item.setValueExpression("disabled", disableZoom);
 		}
 		items.add(item);
-		
+
 		// Add zoom In New Tab menu item
 		item = (UIMenuItem) a.createComponent(UIMenuItem.COMPONENT_TYPE);
 		item.setValue("Popout Detail");
@@ -1984,7 +1993,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 		return result;
 	}
-	
+
 	/*
 	 * List Repeater is just like a list grid - a data table but...
 	 * The grid column headers can be turned off (uses prime.css)
@@ -2028,8 +2037,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
         setId(result, null);
     	result.setWidgetVar(result.getId());
-    	
-    	
+
+
         // Write out getLazyDataModel call as the value
         StringBuilder value = new StringBuilder(64);
 		value.append("#{").append(managedBeanName).append(".getLazyDataModel('").append(moduleName).append("','");
@@ -2214,95 +2223,222 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return new EventSourceComponent(result, result);
 	}
 
+	/**
+	 * Creates the PrimeFaces component tree for a unified content widget.
+	 *
+	 * <p>Side effects: creates JSF components, value expressions, and upload/markup
+	 * menu actions. Auto display mode renders one link, image, and video candidate
+	 * and lets server-classified media-kind expressions choose which candidate is
+	 * visible.
+	 *
+	 * @param component existing component to preserve, or {@code null}
+	 * @param dataWidgetVar data widget variable, or {@code null}
+	 * @param content content widget metadata; must not be {@code null}
+	 * @param formDisabledConditionName form disabled condition, or {@code null}
+	 * @param title field title, or {@code null}
+	 * @param requiredMessage optional required-field message, or {@code null}
+	 * @param textAlignment text alignment, or {@code null}
+	 * @param formContext whether the widget is rendered in a form rather than a grid
+	 * @param imageUpload whether uploads should use the image upload route during
+	 *        the Phase 3 legacy upload-page seam
+	 * @return the existing component when supplied, otherwise a new panel grid; never
+	 *         {@code null}
+	 */
 	@Override
-	public UIComponent contentImage(UIComponent component,
-										String dataWidgetVar,
-										ContentImage image,
-										String formDisabledConditionName,
-										String title,
-										@Nullable String requiredMessage) {
+	@SuppressWarnings("java:S3776") // Complexity OK
+	public @Nonnull UIComponent content(@Nullable UIComponent component,
+											@Nullable String dataWidgetVar,
+											@Nonnull ContentUpload content,
+											@Nullable String formDisabledConditionName,
+											@Nullable String title,
+											@Nullable String requiredMessage,
+											@Nullable HorizontalAlignment textAlignment,
+											boolean formContext,
+											boolean imageUpload) {
 		if (component != null) {
 			return component;
 		}
 
 		HtmlPanelGrid result = (HtmlPanelGrid) a.createComponent(HtmlPanelGrid.COMPONENT_TYPE);
 		setId(result, null);
-		boolean showMarkup = (! Boolean.FALSE.equals(image.getShowMarkup()));
-		boolean editable = (! Boolean.FALSE.equals(image.getEditable()));
+		boolean editable = (! Boolean.FALSE.equals(content.getEditable()));
 		result.setColumns(editable ? 2 : 1);
 		String id = result.getId();
 		List<UIComponent> toAddTo = result.getChildren();
 
-		String binding = image.getBinding();
+		String binding = content.getBinding();
 		String sanitisedBinding = BindUtil.sanitiseBinding(binding);
-		Integer pixelWidth = image.getPixelWidth();
-		Integer pixelHeight = image.getPixelHeight();
-		HtmlPanelGroup contentImage = contentGraphicImage((pixelWidth == null) ? ONE_HUNDRED : pixelWidth,
-															null,
-															null,
-															(pixelHeight == null) ? ONE_HUNDRED : pixelHeight,
-															null,
-															binding);
-		// Set the id of the inner image element
-		contentImage.getChildren().get(0).setId(String.format("%s_%s_image", id, sanitisedBinding));
-		toAddTo.add(contentImage);
+		ContentDisplay display = content.getResolvedDisplay();
+		boolean auto = ContentDisplay.auto.equals(display);
+		boolean showMarkup = isContentMarkupAllowed(content, display);
+		List<UIComponent> mediaChildren = toAddTo;
+		if (auto) {
+			HtmlPanelGroup mediaGroup = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
+			setId(mediaGroup, null);
+			toAddTo.add(mediaGroup);
+			mediaChildren = mediaGroup.getChildren();
+		}
+
+		if (ContentDisplay.link.equals(display) || auto) {
+			HtmlOutputLink link = contentLink(content.getPixelWidth(), textAlignment, binding);
+			link.setId(String.format("%s_%s_link", id, sanitisedBinding));
+			if (auto) {
+				setAutoContentVisibleStyleClass(link, binding, "link");
+			}
+			mediaChildren.add(link);
+		}
+		if (ContentDisplay.image.equals(display) || auto) {
+			HtmlPanelGroup image = contentGraphicImage(resolveImageWidth(content),
+														null,
+														null,
+														resolveImageHeight(content),
+														null,
+														binding);
+			image.getChildren().get(0).setId(String.format("%s_%s_image", id, sanitisedBinding));
+			if (auto) {
+				setAutoContentVisibleStyleClass(image, binding, "image");
+			}
+			mediaChildren.add(image);
+		}
+		if (ContentDisplay.video.equals(display) || auto) {
+			String videoId = String.format("%s_%s_video", id, sanitisedBinding);
+			HtmlOutputText video = contentVideo(resolveVideoWidth(content, formContext),
+												resolveVideoHeight(content, formContext),
+												binding,
+												videoId);
+			if (auto) {
+				setAutoContentVisibleStyleClass(video, binding, "video");
+			}
+			mediaChildren.add(video);
+		}
 		if (editable) {
 			editableContent(toAddTo,
 								id,
 								binding,
 								sanitisedBinding,
 								requiredMessage,
-								image.getDisabledConditionName(),
+								content.getDisabledConditionName(),
 								formDisabledConditionName,
-								true,
-								showMarkup);
+								imageUpload,
+								showMarkup,
+								auto,
+								display,
+								content.getResolvedCapture());
 		}
 
 		return result;
 	}
 
 	/**
-	 * Content link in faces looks like...
-	 * 				<h:outputLink href="SHITE">shiter</p:link>
-	 * 				... then the buttons etc ...
+	 * Returns the configured image width or the legacy image default.
+	 *
+	 * @param content content widget metadata; must not be {@code null}
+	 * @return image width in pixels; never {@code null}
 	 */
-	@Override
-	public UIComponent contentLink(UIComponent component,
-									String dataWidgetVar,
-									ContentLink link,
-									String formDisabledConditionName,
-									String title,
-									@Nullable String requiredMessage,
-									HorizontalAlignment textAlignment) {
-		if (component != null) {
-			return component;
+	private static @Nonnull Integer resolveImageWidth(@Nonnull ContentUpload content) {
+		Integer result = content.getPixelWidth();
+		return (result == null) ? ONE_HUNDRED : result;
+	}
+
+	/**
+	 * Returns the configured image height or the legacy image default.
+	 *
+	 * @param content content widget metadata; must not be {@code null}
+	 * @return image height in pixels; never {@code null}
+	 */
+	private static @Nonnull Integer resolveImageHeight(@Nonnull ContentUpload content) {
+		Integer result = content.getPixelHeight();
+		return (result == null) ? ONE_HUNDRED : result;
+	}
+
+	/**
+	 * Returns the configured video width or the default for the current render
+	 * context.
+	 *
+	 * @param content content widget metadata; must not be {@code null}
+	 * @param formContext whether the widget is rendered in a form rather than a grid
+	 * @return video width in pixels; never {@code null}
+	 */
+	private static @Nonnull Integer resolveVideoWidth(@Nonnull ContentUpload content, boolean formContext) {
+		Integer result = content.getPixelWidth();
+		if (result == null) {
+			result = formContext ? FORM_VIDEO_DEFAULT_PIXEL_WIDTH : GRID_VIDEO_DEFAULT_PIXEL_WIDTH;
 		}
-
-		HtmlPanelGrid result = (HtmlPanelGrid) a.createComponent(HtmlPanelGrid.COMPONENT_TYPE);
-		setId(result, null);
-		boolean editable = (! Boolean.FALSE.equals(link.getEditable()));
-		result.setColumns(editable ? 2 : 1);
-		String id = result.getId();
-		List<UIComponent> toAddTo = result.getChildren();
-
-		String binding = link.getBinding();
-		String sanitisedBinding = BindUtil.sanitiseBinding(binding);
-		HtmlOutputLink contentLink = contentLink(link.getPixelWidth(), textAlignment, binding);
-		contentLink.setId(String.format("%s_%s_link", id, sanitisedBinding));
-		toAddTo.add(contentLink);
-		if (editable) {
-			editableContent(toAddTo,
-								id,
-								binding,
-								sanitisedBinding,
-								requiredMessage,
-								link.getDisabledConditionName(),
-								formDisabledConditionName,
-								false,
-								false);
-		}
-
 		return result;
+	}
+
+	/**
+	 * Returns the configured video height or the default for the current render
+	 * context.
+	 *
+	 * @param content content widget metadata; must not be {@code null}
+	 * @param formContext whether the widget is rendered in a form rather than a grid
+	 * @return video height in pixels; never {@code null}
+	 */
+	private static @Nonnull Integer resolveVideoHeight(@Nonnull ContentUpload content, boolean formContext) {
+		Integer result = content.getPixelHeight();
+		if (result == null) {
+			result = formContext ? FORM_VIDEO_DEFAULT_PIXEL_HEIGHT : GRID_VIDEO_DEFAULT_PIXEL_HEIGHT;
+		}
+		return result;
+	}
+
+	/**
+	 * Adds the media-kind visibility expression used by auto display mode.
+	 *
+	 * @param component component to guard; must not be {@code null}
+	 * @param binding content binding; must not be {@code null}
+	 * @param mediaKind expected media kind name; must not be {@code null}
+	 */
+	private void setAutoContentVisibleStyleClass(@Nonnull UIComponent component, @Nonnull String binding, @Nonnull String mediaKind) {
+		String mediaKindExpression = String.format("%s.getContentMediaKind('%s')", managedBeanName, binding);
+		String expression;
+		if ("link".equals(mediaKind)) {
+			expression = String.format("#{(empty %s or %s eq 'link') ? '' : 'skyveContentHidden'}", mediaKindExpression, mediaKindExpression);
+		}
+		else {
+			expression = String.format("#{%s eq '%s' ? '' : 'skyveContentHidden'}", mediaKindExpression, mediaKind);
+		}
+		component.setValueExpression("styleClass", ef.createValueExpression(elc, expression, String.class));
+	}
+
+	/**
+	 * Creates a native-video output fragment bound to the protected content URL.
+	 *
+	 * @param pixelWidth video width in pixels; must not be {@code null}
+	 * @param pixelHeight video height in pixels; must not be {@code null}
+	 * @param binding content binding; must not be {@code null}
+	 * @param videoId stable DOM id for callback refresh; must not be {@code null}
+	 * @return output text containing the video markup expression; never {@code null}
+	 */
+	private @Nonnull HtmlOutputText contentVideo(@Nonnull Integer pixelWidth,
+													@Nonnull Integer pixelHeight,
+													@Nonnull String binding,
+													@Nonnull String videoId) {
+		HtmlOutputText result = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
+		result.setEscape(false);
+		StringBuilder expression = new StringBuilder(192);
+		expression.append("<div id=\"").append(videoId).append("\" style=\"width:");
+		expression.append(pixelWidth).append("px;height:").append(pixelHeight);
+		expression.append("px;border:1px solid gray\">");
+		expression.append("#{empty ").append(managedBeanName).append(".currentBean['").append(binding);
+		expression.append("'] ? '' : '<video controls preload=\"metadata\" style=\"width:100%;height:100%;object-fit:contain\" src=\"'.concat(");
+		expression.append(managedBeanName).append(".getContentUrl('").append(binding);
+		expression.append("', true)).concat('\"></video>')}</div>");
+		result.setValueExpression("value", ef.createValueExpression(elc, expression.toString(), String.class));
+		result.setId(videoId + "_output");
+		return result;
+	}
+
+	/**
+	 * Returns the auto media-kind companion field name for a content binding.
+	 *
+	 * @param binding content binding; must not be {@code null}
+	 * @return companion field name using Skyve binding sanitisation; never
+	 *         {@code null}
+	 */
+	private static @Nonnull String companionFieldName(@Nonnull String binding) {
+		return BindUtil.sanitiseBinding(binding) + "_media";
 	}
 
 	/**
@@ -2376,7 +2512,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		}
 
 		toAddTo.add(signatureComponent);
-		
+
 		// Image
 		HtmlPanelGroup contentImage = contentGraphicImage(pixelWidth, null, null, pixelHeight, null, binding);
 
@@ -2386,7 +2522,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		contentImage.setValueExpression("rendered", ef.createValueExpression(elc, sb.toString(), Boolean.class));
 
 		toAddTo.add(contentImage);
-		
+
 		// The buttons
 		HtmlPanelGrid grid = (HtmlPanelGrid) a.createComponent(HtmlPanelGrid.COMPONENT_TYPE);
 		setId(grid, null);
@@ -2431,7 +2567,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		sb.setLength(0);
 		sb.append("if(SKYVE.PF.getById('").append(clientId).append("_signature').signature('isEmpty')){SKYVE.PF.onPushMessage([{type:'g',severity:'error',message:'Create your signature first'}]);return false}");
 		button.setOnstart(sb.toString());
-		
+
 		toAddTo.add(button);
 
 		// client-side clear button if we have no content sitting in the server state
@@ -2474,7 +2610,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		button.setValueExpression("rendered", ef.createValueExpression(elc, sb.toString(), Boolean.class));
 
 		toAddTo.add(button);
-		
+
 		// This is only returned to short circuit any component builder chains
 		return signatureComponent;
 	}
@@ -2495,7 +2631,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * @param toAddTo
 	 * @param binding
 	 */
-	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
+	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list and cognitive compleity OK
 	private void editableContent(List<UIComponent> toAddTo,
 									String id,
 									String binding,
@@ -2504,7 +2640,10 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 									String disabledConditionName,
 									String formDisabledConditionName,
 									boolean image,
-									boolean showMarkup) {
+									boolean showMarkup,
+									boolean auto,
+									ContentDisplay display,
+									ContentCapture capture) {
 		HtmlInputHidden hidden = (HtmlInputHidden) input(HtmlInputHidden.COMPONENT_TYPE, null, binding, null, requiredMessage, null, null);
 		setId(hidden, String.format("%s_%s_hidden", id, sanitisedBinding));
 
@@ -2513,6 +2652,20 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		toAddTo.add(actionGroup);
 		List<UIComponent> actionGroupChildren = actionGroup.getChildren();
 		actionGroupChildren.add(hidden);
+		if (auto) {
+			String mediaKind = managedBean.getContentMediaKind(binding);
+			if ((mediaKind != null) && mediaKind.trim().isEmpty()) {
+				mediaKind = null;
+			}
+			HtmlOutputText companion = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
+			companion.setEscape(false);
+			companion.setValue(String.format("<input type=\"hidden\" id=\"%s_%s_hidden\" value=\"%s\">",
+												id,
+												companionFieldName(binding),
+												mediaKind == null ? "" : mediaKind));
+			setId(companion, null);
+			actionGroupChildren.add(companion);
+		}
 
 		MenuButton actionButton = (MenuButton) a.createComponent(MenuButton.COMPONENT_TYPE);
 		setId(actionButton, null);
@@ -2534,29 +2687,36 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 														formDisabledConditionName);
 		actionItems.add(uploadItem);
 
-		String var = id + "_" + sanitisedBinding + "Overlay";
-		if (image) {
-			setContentUploadDialogOnclick(uploadItem, id, sanitisedBinding, var);
+		String overlayVar = id + "_" + sanitisedBinding + "Overlay";
+		boolean fullUploadDialog = image || isCameraAffordanceAllowed(display, capture);
+		if (fullUploadDialog) {
+			setContentUploadDialogOnclick(uploadItem,
+											id,
+											sanitisedBinding,
+											overlayVar,
+											display,
+											capture,
+											auto ? companionFieldName(binding) : null);
 		}
 
 		UIPanel panel = null;
-		if (image) {
+		if (fullUploadDialog) {
 			Dialog dialog = (Dialog) a.createComponent(Dialog.COMPONENT_TYPE);
 			setId(dialog, null);
-			dialog.setWidgetVar(var);
+			dialog.setWidgetVar(overlayVar);
 			dialog.setModal(true);
 			dialog.setResponsive(true);
 			dialog.setFitViewport(true);
-			dialog.setHeader("Image Upload");
+			dialog.setHeader(image ? "Image Upload" : "Content Upload");
 			dialog.setAppendTo("@(body)"); // append to <body/> so dialog can always pop (didn't work in tabs)
 			// clear the iframe src on hide so there is no flash next open
-			dialog.setOnHide("SKYVE.PF.contentOverlayOnHide('" + id + "');PF('" + var + "').toggleMaximize()");
+			dialog.setOnHide("SKYVE.PF.contentOverlayOnHide('" + id + "');PF('" + overlayVar + "').toggleMaximize()");
 			panel = dialog;
 		}
 		else {
 			OverlayPanel overlay = (OverlayPanel) a.createComponent(OverlayPanel.COMPONENT_TYPE);
 			setId(overlay, null);
-			overlay.setWidgetVar(var);
+			overlay.setWidgetVar(overlayVar);
 			overlay.setFor(actionButtonId);
 			overlay.setShowEvent("skyveContentUpload");
 			overlay.setHideEvent("skyveContentUpload");
@@ -2571,21 +2731,21 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		}
 
 		StringBuilder value = new StringBuilder(64);
-		if (! image) {
+		if (! fullUploadDialog) {
 			// $(PrimeFaces.escapeClientId('<id>')).attr('src', '<url>')
 			value.append("#{'SKYVE.PF.contentOverlayOnShow(\\'").append(id).append("\\',\\''.concat(");
-			value.append(managedBeanName).append(".getContentUploadUrl('").append(sanitisedBinding).append("',");
-			value.append(image).append(")).concat('\\')')}");
+			appendContentUploadUrlExpression(value, sanitisedBinding, display, capture, auto ? companionFieldName(binding) : null);
+			value.append(").concat('\\')')}");
 			panel.setValueExpression("onShow", ef.createValueExpression(elc, value.toString(), String.class));
-			uploadItem.setOnclick("PF('" + var + "').show();return false");
+			uploadItem.setOnclick("PF('" + overlayVar + "').show();return false");
 		}
 		actionGroupChildren.add(panel);
 
 		// <iframe id="s06" src="" style="width:100%;height:280px;border:none"></iframe>
 		HtmlOutputText iframe = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
 		iframe.setEscape(false);
-		String iframeAttributes = image ? " scrolling=\"no\" style=\"width:100%;height:100%;border:none;overflow:hidden\""
-											: " style=\"width:100%;height:300px;border:none\"";
+		String iframeAttributes = fullUploadDialog ? " scrolling=\"no\" style=\"width:100%;height:100%;border:none;overflow:hidden\""
+													: " style=\"width:100%;height:300px;border:none\"";
 		iframe.setValue(String.format("<iframe id=\"%s_overlayiframe\" src=\"\"%s></iframe>", id, iframeAttributes));
 		setId(iframe, null);
 		panel.getChildren().add(iframe);
@@ -2595,45 +2755,66 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 														null,
 														disabledConditionName,
 														formDisabledConditionName);
-		if (image) {
+		if (auto) {
+			clearItem.setOnclick(String.format("SKYVE.PF.clearContent('%s','%s','%s');return false",
+												sanitisedBinding,
+												id,
+												companionFieldName(binding)));
+		}
+		else if (image) {
 			clearItem.setOnclick(String.format("SKYVE.PF.clearContentImage('%s','%s');return false", sanitisedBinding, id));
 		}
 		else {
 			clearItem.setOnclick(String.format("SKYVE.PF.clearContentLink('%s','%s');return false", sanitisedBinding, id));
 		}
-		actionItems.add(clearItem);
-		
-		// Markup button (if required)
-		if (showMarkup) {
-			UIMenuItem markupItem = createContentMenuItem("Mark Up Image",
-															Icons.FONT_EDIT,
-															null,
-															disabledConditionName,
-															formDisabledConditionName);
-			actionItems.add(markupItem);
-	
-			var = id + "_" + sanitisedBinding + "Markup";
+			actionItems.add(clearItem);
+
+			// Markup button (if required)
+			if (showMarkup) {
+				UIMenuItem markupItem = createContentMenuItem("Mark Up Image",
+																Icons.FONT_EDIT,
+																null,
+																disabledConditionName,
+																formDisabledConditionName);
+				StringBuilder markupStyleClass = new StringBuilder(64);
+				markupStyleClass.append("skyveContentMarkupAction skyveContentMarkupAction-").append(id).append('_').append(sanitisedBinding);
+				if (! isContentMarkupInitiallyVisible(display, binding)) {
+					markupStyleClass.append(" skyveContentHidden");
+				}
+				markupItem.setContainerStyleClass(markupStyleClass.toString());
+				actionItems.add(markupItem);
+
+			overlayVar = id + "_" + sanitisedBinding + "Markup";
 			value.setLength(0);
-			value.append("event.preventDefault();var contentId=$('[id$=\"").append(id).append('_').append(sanitisedBinding);
-			value.append("_hidden\"]').val();if(!contentId){return false}PF('").append(var);
-			value.append("').show();PF('").append(var).append("').toggleMaximize();return false");
+			value.append("var contentId=$('[id$=\"").append(id).append('_').append(sanitisedBinding);
+			value.append("_hidden\"]').val();if(!contentId){return false}");
+			if (auto) {
+				value.append("var mediaKind=$('[id$=\"").append(id).append('_').append(companionFieldName(binding));
+				value.append("_hidden\"]').val();if(mediaKind!=='image'){return false}");
+			}
+			value.append("PF('").append(overlayVar);
+			value.append("').show();PF('").append(overlayVar).append("').toggleMaximize();return false");
 			markupItem.setOnclick(value.toString());
-	
+
 			Dialog dialog = (Dialog) a.createComponent(Dialog.COMPONENT_TYPE);
 			setId(dialog, null);
-			dialog.setWidgetVar(var);
+			dialog.setWidgetVar(overlayVar);
 			dialog.setModal(true);
 			dialog.setResponsive(true);
 			dialog.setFitViewport(true);
 			dialog.setHeader("Mark Up Image");
 			dialog.setAppendTo("@(body)"); // append to <body/> so dialog can always pop (didn't work in tabs)
 			// clear the iframe src on hide so there is no flash next open
-			dialog.setOnHide("SKYVE.PF.contentMarkupOnHide('" + id + "');PF('" + var + "').toggleMaximize()");
-			
+			dialog.setOnHide("SKYVE.PF.contentMarkupOnHide('" + id + "');PF('" + overlayVar + "').toggleMaximize()");
+
 			// $(PrimeFaces.escapeClientId('<id>')).attr('src', '<url>')
 			value.setLength(0);
 			value.append("#{'SKYVE.PF.contentMarkupOnShow(\\'").append(id).append("\\',\\'").append(sanitisedBinding).append("\\',\\''.concat(");
-			value.append(managedBeanName).append(".getContentMarkupUrl('").append(sanitisedBinding).append("')).concat('\\')')}");
+			value.append(managedBeanName).append(".getContentMarkupUrl('").append(sanitisedBinding).append("')).concat('\\')");
+			if (auto) {
+				value.append(",\\'").append(companionFieldName(binding)).append("\\'");
+			}
+			value.append("')}");
 			dialog.setValueExpression("onShow", ef.createValueExpression(elc, value.toString(), String.class));
 			actionGroupChildren.add(dialog);
 
@@ -2664,13 +2845,102 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	private void setContentUploadDialogOnclick(UIMenuItem item, String id, String sanitisedBinding, String var) {
+	/**
+	 * Indicates whether the upload route can expose the camera capture button.
+	 *
+	 * @param display content display mode; must not be {@code null}
+	 * @param capture content capture mode; must not be {@code null}
+	 * @return {@code true} when the upload dialog should include camera capture
+	 */
+	private static boolean isCameraAffordanceAllowed(@Nonnull ContentDisplay display, @Nonnull ContentCapture capture) {
+		return (ContentCapture.camera.equals(capture) || ContentCapture.all.equals(capture)) &&
+				! ContentDisplay.video.equals(display);
+	}
+
+	/**
+	 * Indicates whether the mark-up action should be available for this content.
+	 *
+	 * @param content content widget metadata; must not be {@code null}
+	 * @param display content display mode; must not be {@code null}
+	 * @return {@code true} when metadata permits mark-up and the widget can hold image content
+	 */
+	private static boolean isContentMarkupAllowed(@Nonnull ContentUpload content, @Nonnull ContentDisplay display) {
+		if (Boolean.FALSE.equals(content.getShowMarkup())) {
+			return false;
+		}
+		return ! ContentDisplay.video.equals(display);
+	}
+
+	/**
+	 * Indicates whether the mark-up action should be visible when the page first renders.
+	 *
+	 * @param display content display mode; must not be {@code null}
+	 * @param binding content binding; must not be {@code null}
+	 * @return {@code true} when the current content is image-like in this display mode
+	 */
+	private boolean isContentMarkupInitiallyVisible(@Nonnull ContentDisplay display, @Nonnull String binding) {
+		if (ContentDisplay.image.equals(display)) {
+			return true;
+		}
+		return "image".equals(managedBean.getContentMediaKind(binding));
+	}
+
+	/**
+	 * Configures the image upload menu item to open the unified bound upload page in
+	 * a maximised dialog.
+	 *
+	 * <p>Side effects: sets a JSF value expression on {@code item}.
+	 *
+	 * @param item upload menu item to configure; must not be {@code null}
+	 * @param id generated content component id; must not be {@code null}
+	 * @param sanitisedBinding sanitised content binding; must not be {@code null}
+	 * @param var PrimeFaces widget variable for the dialog; must not be {@code null}
+	 * @param display content display mode; must not be {@code null}
+	 * @param capture content capture mode; must not be {@code null}
+	 * @param companionBinding optional auto-mode media-kind companion field
+	 */
+	private void setContentUploadDialogOnclick(@Nonnull UIMenuItem item,
+												@Nonnull String id,
+												@Nonnull String sanitisedBinding,
+												@Nonnull String var,
+												@Nonnull ContentDisplay display,
+												@Nonnull ContentCapture capture,
+												@Nullable String companionBinding) {
 		StringBuilder value = new StringBuilder(192);
 		value.append("#{'SKYVE.PF.contentOverlayOnShow(\\'").append(id).append("\\',\\''.concat(");
-		value.append(managedBeanName).append(".getContentUploadUrl('").append(sanitisedBinding).append("',true)");
+		appendContentUploadUrlExpression(value, sanitisedBinding, display, capture, companionBinding);
 		value.append(".concat('\\');PF(\\'").append(var);
 		value.append("\\').show();PF(\\'").append(var).append("\\').toggleMaximize();return false'))}");
 		item.setValueExpression("onclick", ef.createValueExpression(elc, value.toString(), String.class));
+	}
+
+	/**
+	 * Appends a JSF EL call to {@code FacesView.getContentUploadUrl(...)} for a
+	 * bound content upload route.
+	 *
+	 * <p>Side effects: mutates {@code value}. The appended expression includes
+	 * display, capture, and optional auto companion route state for {@code upload.xhtml}.
+	 *
+	 * @param value expression buffer to append to; must not be {@code null}
+	 * @param sanitisedBinding sanitised content binding; must not be {@code null}
+	 * @param display content display mode; must not be {@code null}
+	 * @param capture content capture mode; must not be {@code null}
+	 * @param companionBinding optional auto-mode media-kind companion field
+	 */
+	private void appendContentUploadUrlExpression(@Nonnull StringBuilder value,
+													@Nonnull String sanitisedBinding,
+													@Nonnull ContentDisplay display,
+													@Nonnull ContentCapture capture,
+													@Nullable String companionBinding) {
+		value.append(managedBeanName).append(".getContentUploadUrl('").append(sanitisedBinding).append("',");
+		value.append('\'').append(display.name()).append("','").append(capture.name()).append("',");
+		if (companionBinding == null) {
+			value.append("null");
+		}
+		else {
+			value.append("'").append(companionBinding).append('\'');
+		}
+		value.append(')');
 	}
 
 	@Override
@@ -2835,7 +3105,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		}
 
 		boolean vertical = Boolean.TRUE.equals(slider.getVertical());
-		
+
 		// Table to hold it all
 		HtmlPanelGrid result = (HtmlPanelGrid) a.createComponent(HtmlPanelGrid.COMPONENT_TYPE);
 		setId(result, null);
@@ -2845,11 +3115,11 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			result.setStyle("width:100%");
 		}
 		List<UIComponent> toAddTo = result.getChildren();
-		
+
 		// Hidden component bound to data
 		HtmlInputHidden hidden = (HtmlInputHidden) input(HtmlInputHidden.COMPONENT_TYPE, null, slider.getBinding(), null, requiredMessage, null, null);
 		toAddTo.add(hidden);
-		
+
 		// Display value
 		HtmlOutputText display = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
 		setId(display, null);
@@ -2915,7 +3185,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			toAddTo.add(spacer);
 		}
 		toAddTo.add(display);
-		
+
 		return new EventSourceComponent(result, sliderComponent);
 	}
 
@@ -3149,7 +3419,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent upload(UIComponent component, 
+	public UIComponent upload(UIComponent component,
 								String label,
 								String iconStyleClass,
 								String toolTip,
@@ -3170,6 +3440,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 								action.getDisabledConditionName(),
 								null,
 								action.getInvisibleConditionName(),
+								resolveActionUploadCapture(action),
 								false);
 	}
 
@@ -3204,7 +3475,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 								properties.get(UPDATE_KEY),
 								canDelete);
 	}
-	
+
 	@Override
 	public UIComponent action(UIComponent component,
 								String dataWidgetBinding,
@@ -3245,7 +3516,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		setInvisible(result, invisible, null);
 		setSizeAndTextAlignStyle(result, null, pixelWidth, null, null, null, null, null);
 		setId(result, widgetId);
-		
+
 		if (collapsible != null) {
 			result.setToggleable(true);
 			result.setCollapsed(Collapsible.closed.equals(collapsible));
@@ -3256,10 +3527,10 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			ajax.addAjaxBehaviorListener(new AjaxBehaviorListenerImpl(me, me));
 			result.addClientBehavior("toggle", ajax);
 		}
-		
+
 		return result;
 	}
-	
+
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	protected Password password(String dataWidgetVar,
 									String binding,
@@ -3271,14 +3542,14 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 									Integer pixelWidth) {
 		Password result = (Password) input(Password.COMPONENT_TYPE, dataWidgetVar, binding, title, requiredMessage, disabled, formDisabled);
 		result.setId(result.getId() + "password"); // ensures that the password field value is not logged in the request parameters on the server
-		
+
 		// Security settings
 		result.setAutocomplete("off");
 		Map<String, Object> passThroughAttributes = result.getPassThroughAttributes();
 		passThroughAttributes.put("spellcheck", "false");
 		passThroughAttributes.put("autocapitalize", "none");
 		passThroughAttributes.put("autocorrect", "none");
-		
+
 		setSizeAndTextAlignStyle(result, null, pixelWidth, null, null, null, null, null, textAlignment, null, null);
 		return result;
 	}
@@ -3481,7 +3752,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		// prime docs (not faces) talks about using "-20:+20" for 20 years each side of current date for result.setYearRange()
 		// but this doesn't work.
 		// Using absolute range like "1900:2050" works but this isn't very useful.
-		
+
 		String converterName = converter.getClass().getSimpleName();
 		if (DD_MM_YYYY.class.getSimpleName().equals(converterName)) {
 			result.setPattern(DD_MM_YYYY.PATTERN);
@@ -3970,10 +4241,25 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 	/**
 	 * Add the buttons and overlay
-	 *			    <p:commandButton id="s03" icon="fa-solid fa-upload" title="Upload Content" type="button" onclick="$(PrimeFaces.escapeClientId('s06')).attr('src', '/skyve/contentUpload.xhtml')" />
+	 *			    <p:commandButton id="s03" icon="fa-solid fa-upload" title="Upload Content" type="button" onclick="$(PrimeFaces.escapeClientId('s06')).attr('src', '/skyve/upload.xhtml')" />
 	 *			    <p:overlayPanel id="s04" for="s03" hideEffect="fade" dynamic="true" showCloseIcon="true" modal="true" style="width:50%;height:310px">
-	 *					<iframe id="s01_overlayiframe" src="/skyve/contentUpload.xhtml" style="width:100%;height:280px;border:none"></iframe>
+	 *					<iframe id="s01_overlayiframe" src="/skyve/upload.xhtml" style="width:100%;height:280px;border:none"></iframe>
 	 *			    </p:overlayPanel>
+	 *
+	 * @param title button title
+	 * @param iconStyleClass optional icon style class
+	 * @param tooltip optional tooltip text
+	 * @param actionName action name used by the upload route; must not be {@code null}
+	 * @param pixelWidth optional button width in pixels
+	 * @param pixelHeight optional button height in pixels
+	 * @param clientValidation currently unused upload action validation flag
+	 * @param confirmationText optional confirmation text
+	 * @param disabled optional disabled condition
+	 * @param formDisabled optional form disabled condition
+	 * @param invisible optional invisible condition
+	 * @param capture upload capture affordance; must not be {@code null}
+	 * @param useDialog whether to use a dialog instead of an overlay panel
+	 * @return upload button component; never {@code null}
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	protected UIComponent uploadButton(String title,
@@ -3982,11 +4268,12 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 										String actionName,
 										Integer pixelWidth,
 										Integer pixelHeight,
-										@SuppressWarnings("unused") Boolean clientValidation, // TODO not implemented
+										Boolean clientValidation, // TODO not implemented
 										String confirmationText,
 										String disabled,
 										String formDisabled,
 										String invisible,
+										ContentCapture capture,
 										boolean useDialog) {
 		// A span as the top item so it can flow correctly in the action panel
 		HtmlPanelGroup result = panelGroup(false, false, false, invisible, null);
@@ -4050,10 +4337,11 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			panel = overlay;
 		}
 
-		// show the overlay, reset the fileUpload.xhtml iframe
+		// show the overlay, reset the upload.xhtml iframe
 		StringBuilder value = new StringBuilder(64);
 		value.append("#{'SKYVE.PF.contentOverlayOnShow(\\'").append(panelId).append("\\',\\''.concat(");
-		value.append(managedBeanName).append(".getFileUploadUrl('").append(actionName).append("')).concat('\\')')}");
+		value.append(managedBeanName).append(".getFileUploadUrl('").append(actionName).append("','");
+		value.append(capture.name()).append("')).concat('\\')')}");
 		panel.setValueExpression("onShow", ef.createValueExpression(elc, value.toString(), String.class));
 
 		children.add(panel);
@@ -4066,6 +4354,66 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		panel.getChildren().add(iframe);
 
 		return result;
+	}
+
+	/**
+	 * Builds an action-upload button using the default generic file chooser.
+	 *
+	 * @param title button title
+	 * @param iconStyleClass optional icon style class
+	 * @param tooltip optional tooltip text
+	 * @param actionName action name used by the upload route; must not be {@code null}
+	 * @param pixelWidth optional button width in pixels
+	 * @param pixelHeight optional button height in pixels
+	 * @param clientValidation currently unused upload action validation flag
+	 * @param confirmationText optional confirmation text
+	 * @param disabled optional disabled condition
+	 * @param formDisabled optional form disabled condition
+	 * @param invisible optional invisible condition
+	 * @param useDialog whether to use a dialog instead of an overlay panel
+	 * @return upload button component; never {@code null}
+	 */
+	@SuppressWarnings("java:S107") // Backward-compatible helper for existing builder specialisations and tests.
+	protected UIComponent uploadButton(String title,
+										String iconStyleClass,
+										String tooltip,
+										String actionName,
+										Integer pixelWidth,
+										Integer pixelHeight,
+										Boolean clientValidation,
+										String confirmationText,
+										String disabled,
+										String formDisabled,
+										String invisible,
+										boolean useDialog) {
+		return uploadButton(title,
+								iconStyleClass,
+								tooltip,
+								actionName,
+								pixelWidth,
+								pixelHeight,
+								clientValidation,
+								confirmationText,
+								disabled,
+								formDisabled,
+								invisible,
+								ContentCapture.none,
+								useDialog);
+	}
+
+	/**
+	 * Resolves an action upload capture property stored during metadata conversion.
+	 *
+	 * @param action runtime action metadata; must not be {@code null}
+	 * @return configured capture affordance, or {@link ContentCapture#none} when unset
+	 * @throws IllegalArgumentException if the stored property is not a {@link ContentCapture} name
+	 */
+	protected static @Nonnull ContentCapture resolveActionUploadCapture(@Nonnull Action action) {
+		String capture = action.getProperties().get(UPLOAD_CAPTURE_PROPERTY_NAME);
+		if ((capture == null) || capture.trim().isEmpty()) {
+			return ContentCapture.none;
+		}
+		return ContentCapture.valueOf(capture.trim());
 	}
 
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
@@ -4487,7 +4835,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 									textAlignment,
 									"inputStyle",
 									"0.5rem");
-		
+
 		return result;
 	}
 
@@ -4636,7 +4984,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			MethodExpression me = ef.createMethodExpression(elc, expression.toString(), null, new Class[0]);
 			ajax.addAjaxBehaviorListener(new AjaxBehaviorListenerImpl(me, me));
 			ajax.setProcess(process);
-			
+
 			ValueExpression disabled = createOredValueExpressionFromConditions(clickToZoomDisabledConditionNames);
 			if (disabled != null) {
 				ajax.setValueExpression("disabled", disabled);
@@ -4707,12 +5055,12 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		}
 		if (noWrap) {
 			style.append("white-space:nowrap;");
-		} 
-		
+		}
+
 		if (alignment != null) {
 			style.append("text-align:").append(alignment.toTextAlignmentString()).append(" !important;");
-		} 
-		
+		}
+
 		if (! style.isEmpty()) {
 			result.setStyle(style.toString());
 		}

@@ -16,7 +16,6 @@ import org.skyve.impl.metadata.view.widget.DynamicImage;
 import org.skyve.impl.metadata.view.widget.Link;
 import org.skyve.impl.metadata.view.widget.StaticImage;
 import org.skyve.impl.metadata.view.widget.bound.Label;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn;
 
 /**
@@ -64,13 +63,6 @@ class FluentDataGridContainerColumnTest {
 	}
 
 	@Test
-	void addContentImageWidgetAddsWidget() {
-		FluentDataGridContainerColumn col = new FluentDataGridContainerColumn().addWidget(new FluentContentImage());
-		assertEquals(1, col.get().getWidgets().size());
-		assertThat(col.get().getWidgets().get(0), instanceOf(ContentImage.class));
-	}
-
-	@Test
 	void addStaticImageWidgetAddsWidget() {
 		FluentDataGridContainerColumn col = new FluentDataGridContainerColumn().addWidget(new FluentStaticImage());
 		assertEquals(1, col.get().getWidgets().size());
@@ -114,14 +106,6 @@ class FluentDataGridContainerColumnTest {
 		source.getWidgets().add(new Link());
 		FluentDataGridContainerColumn result = new FluentDataGridContainerColumn().from(source);
 		assertThat(result.get().getWidgets().get(0), instanceOf(Link.class));
-	}
-
-	@Test
-	void fromContentImageRoundTrips() {
-		DataGridContainerColumn source = new DataGridContainerColumn();
-		source.getWidgets().add(new ContentImage());
-		FluentDataGridContainerColumn result = new FluentDataGridContainerColumn().from(source);
-		assertThat(result.get().getWidgets().get(0), instanceOf(ContentImage.class));
 	}
 
 	@Test

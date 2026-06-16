@@ -40,8 +40,6 @@ import org.skyve.impl.metadata.view.widget.bound.input.CheckMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
@@ -233,14 +231,6 @@ class ViewVisitorTest {
 		FormItem htmlItem = new FormItem();
 		htmlItem.setWidget(new HTML());
 		row.getItems().add(htmlItem);
-		// ContentImage
-		FormItem ciItem = new FormItem();
-		ciItem.setWidget(new ContentImage());
-		row.getItems().add(ciItem);
-		// ContentLink
-		FormItem clItem = new FormItem();
-		clItem.setWidget(new ContentLink());
-		row.getItems().add(clItem);
 		// ContentSignature
 		FormItem csItem = new FormItem();
 		csItem.setWidget(new ContentSignature());

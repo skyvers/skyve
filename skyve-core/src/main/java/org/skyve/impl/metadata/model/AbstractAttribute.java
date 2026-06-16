@@ -11,8 +11,8 @@ import org.skyve.impl.metadata.view.WidgetReference;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentDisplay;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
@@ -169,11 +169,13 @@ public abstract class AbstractAttribute extends NamedMetaData implements Attribu
 				defaultInputWidget.setBinding(getName());
 			}
 			else if (AttributeType.content.equals(attributeType)) {
-				defaultInputWidget = new ContentLink();
+				defaultInputWidget = new ContentUpload();
 				defaultInputWidget.setBinding(getName());
 			}
 			else if (AttributeType.image.equals(attributeType)) {
-				defaultInputWidget = new ContentImage();
+				ContentUpload content = new ContentUpload();
+				content.setDisplay(ContentDisplay.image);
+				defaultInputWidget = content;
 				defaultInputWidget.setBinding(getName());
 			}
 			else if (AttributeType.geometry.equals(attributeType)) {

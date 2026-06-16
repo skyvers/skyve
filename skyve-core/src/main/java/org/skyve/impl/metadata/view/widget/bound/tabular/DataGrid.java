@@ -578,12 +578,12 @@ public class DataGrid extends AbstractDataWidget implements DecoratedMetaData,
 		return selectedActions;
 	}
 
-	@Override
 	/**
 	 * Returns the mutable decorator property map for this grid.
 	 *
 	 * @return mutable decorator property map keyed by property name
 	 */
+	@Override
 	public Map<String, String> getProperties() {
 		return properties;
 	}

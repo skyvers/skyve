@@ -31,10 +31,10 @@ public class FluentBoolean extends FluentConvertibleField<FluentBoolean> {
 		return this;
 	}
 	
-	@Override
 	/**
 	 * Returns the mutable metadata instance represented by this builder.
 	 */
+	@Override
 	public Boolean get() {
 		return bool;
 	}

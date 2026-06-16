@@ -10,6 +10,8 @@ import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.faces.annotation.ManagedProperty;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
@@ -56,10 +58,10 @@ public abstract class AbstractUploadView extends LocalisableView {
 	/**
 	 * Creates a base upload view with explicit filename whitelist and size constraints.
 	 *
-	 * @param whitelistRegex case-insensitive regex used to validate file names
+	 * @param whitelistRegex case-insensitive regex used to validate file names, or {@code null} for no regex restriction
 	 * @param maximumSizeMB maximum allowed upload size in megabytes
 	 */
-	protected AbstractUploadView(String whitelistRegex, int maximumSizeMB) {
+	protected AbstractUploadView(@Nullable String whitelistRegex, int maximumSizeMB) {
 		this.whitelistRegex = whitelistRegex;
 		maximumSizeInBytes = maximumSizeMB * MB_IN_BYTES;
 	}
@@ -122,6 +124,18 @@ public abstract class AbstractUploadView extends LocalisableView {
 	}
 
 	/**
+	 * Updates the active filename whitelist and upload limit after route state has
+	 * selected a concrete upload category.
+	 *
+	 * @param whitelistRegex case-insensitive regex used to validate file names, or {@code null} for no regex restriction
+	 * @param maximumSizeMB maximum allowed upload size in megabytes
+	 */
+	protected final void setUploadLimits(@Nullable String whitelistRegex, int maximumSizeMB) {
+		this.whitelistRegex = whitelistRegex;
+		maximumSizeInBytes = maximumSizeMB * MB_IN_BYTES;
+	}
+
+	/**
 	 * Returns the configured maximum upload size in bytes.
 	 *
 	 * @return maximum upload size in bytes
@@ -137,7 +151,7 @@ public abstract class AbstractUploadView extends LocalisableView {
 	 * @param fc the active faces context used to enqueue validation messages
 	 * @return {@code true} when the file passes configured size and whitelist checks
 	 */
-	protected boolean validFile(UploadedFile file, FacesContext fc) {
+	protected boolean validFile(@Nonnull UploadedFile file, @Nonnull FacesContext fc) {
 		long size = file.getSize();
 		if (size > maximumSizeInBytes) {
 			if (LOGGER.isWarnEnabled()) {
@@ -165,4 +179,3 @@ public abstract class AbstractUploadView extends LocalisableView {
 		return true;
 	}
 }
-

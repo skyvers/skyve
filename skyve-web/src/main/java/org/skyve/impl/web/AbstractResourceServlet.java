@@ -437,10 +437,18 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 			response.setStatus(HttpServletResponse.SC_FORBIDDEN);
 			LOGGER.error("Problem getting the resource - {}", e.toString(), e);
 		}
+		catch (IOException e) {
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			logResourceIOException(LOGGER, e);
+		}
 		catch (Exception e) {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			LOGGER.error("Problem getting the resource - {}", e.toString(), e);
 		}
+	}
+
+	static void logResourceIOException(@Nonnull Logger logger, @Nonnull IOException e) {
+		logger.warn("Problem getting the resource - {}", e.toString());
 	}
 
 	/**

@@ -76,9 +76,9 @@ import org.skyve.impl.metadata.view.widget.bound.input.CheckMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentDisplay;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
@@ -173,6 +173,7 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.web.WebAction;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.UIComponentBase;
@@ -2164,115 +2165,67 @@ public class FacesViewRenderer extends ViewRenderer {
 	}
 
 	/**
-	 * Renders a content image within a bound column.
+	 * Renders content within a bound column.
 	 *
-	 * @param image content-image metadata
+	 * @param content content metadata; must not be {@code null}
 	 */
 	@Override
-	public void renderBoundColumnContentImage(ContentImage image) {
-		renderContentImage(0, image);
+	public void renderBoundColumnContent(@Nonnull ContentUpload content) {
+		renderContent(0, content, false);
 	}
 
 	/**
-	 * Renders a content image within a container column.
+	 * Renders content within a container column.
 	 *
-	 * @param image content-image metadata
+	 * @param content content metadata; must not be {@code null}
 	 */
 	@Override
-	public void renderContainerColumnContentImage(ContentImage image) {
-		renderContentImage(0, image);
+	public void renderContainerColumnContent(@Nonnull ContentUpload content) {
+		renderContent(0, content, false);
 	}
 
 	/**
-	 * Renders a content image within a form.
+	 * Renders content within a form.
 	 *
-	 * @param image content-image metadata
+	 * @param content content metadata; must not be {@code null}
 	 */
 	@Override
-	public void renderFormContentImage(ContentImage image) {
-		renderContentImage(getCurrentWidgetColspan(), image);
+	public void renderFormContent(@Nonnull ContentUpload content) {
+		renderContent(getCurrentWidgetColspan(), content, true);
 	}
 
 	/**
-	 * Renders a content image in the active context.
+	 * Renders content in the active context.
 	 *
 	 * @param formColspan form colspan
-	 * @param image content-image metadata
+	 * @param content content metadata; must not be {@code null}
+	 * @param formContext whether this is rendering into a form
 	 */
-	private void renderContentImage(int formColspan, ContentImage image) {
-		String title = getCurrentWidgetLabel();
-		String requiredMessage = getCurrentWidgetRequiredMessage();
-		Form currentForm = getCurrentForm();
-		UIComponent c = cb.contentImage(null,
-											dataWidgetVar,
-											image,
-											(currentForm == null) ? null : currentForm.getDisabledConditionName(),
-											title,
-											requiredMessage);
-		addComponent(title,
-						formColspan,
-						requiredMessage,
-						image.getInvisibleConditionName(),
-						getCurrentWidgetHelp(),
-						c,
-						image.getPixelWidth(),
-						null,
-						null,
-						null,
-						null,
-						null,
-						null);
-	}
-
-	/**
-	 * Renders a content link within a bound column.
-	 *
-	 * @param value display value
-	 * @param link content-link metadata
-	 */
-	@Override
-	public void renderBoundColumnContentLink(String value, ContentLink link) {
-		renderContentLink(0, link);
-	}
-
-	/**
-	 * Renders a content link within a form.
-	 *
-	 * @param value display value
-	 * @param link content-link metadata
-	 */
-	@Override
-	public void renderFormContentLink(String value, ContentLink link) {
-		renderContentLink(getCurrentWidgetColspan(), link);
-	}
-
-	/**
-	 * Renders a content link in the active context.
-	 *
-	 * @param formColspan form colspan
-	 * @param link content-link metadata
-	 */
-	private void renderContentLink(int formColspan, ContentLink link) {
+	private void renderContent(int formColspan, @Nonnull ContentUpload content, boolean formContext) {
 		String title = getCurrentWidgetLabel();
 		String requiredMessage = getCurrentWidgetRequiredMessage();
 		Form currentForm = getCurrentForm();
 		TargetMetaData target = getCurrentTarget();
 		Attribute attribute = (target == null) ? null : target.getAttribute();
 		AttributeType attributeType = (attribute == null) ? AttributeType.content : attribute.getAttributeType();
-		UIComponent c = cb.contentLink(null,
-										dataWidgetVar,
-										link,
-										(currentForm == null) ? null : currentForm.getDisabledConditionName(),
-										title,
-										requiredMessage,
-										CORE.getCustomisations().determineDefaultWidgetTextAlignment(currentUxUi, attributeType));
+		boolean imageUpload = AttributeType.image.equals(attributeType) ||
+								ContentDisplay.image.equals(content.getResolvedDisplay());
+		UIComponent c = cb.content(null,
+									dataWidgetVar,
+									content,
+									(currentForm == null) ? null : currentForm.getDisabledConditionName(),
+									title,
+									requiredMessage,
+									CORE.getCustomisations().determineDefaultWidgetTextAlignment(currentUxUi, attributeType),
+									formContext,
+									imageUpload);
 		addComponent(title,
 						formColspan,
 						requiredMessage,
-						link.getInvisibleConditionName(),
+						content.getInvisibleConditionName(),
 						getCurrentWidgetHelp(),
 						c,
-						link.getPixelWidth(),
+						content.getPixelWidth(),
 						null,
 						null,
 						null,

@@ -31,10 +31,10 @@ public class FluentInverseOne extends FluentInverse<FluentInverseOne> {
 		return this;
 	}
 	
-	@Override
 	/**
 	 * Returns the mutable metadata instance represented by this builder.
 	 */
+	@Override
 	public InverseOne get() {
 		return inverse;
 	}

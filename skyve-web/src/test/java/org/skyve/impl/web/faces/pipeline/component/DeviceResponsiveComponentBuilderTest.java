@@ -18,6 +18,7 @@ import org.primefaces.behavior.confirm.ConfirmBehavior;
 import org.primefaces.component.commandbutton.CommandButton;
 import org.skyve.impl.metadata.view.widget.Button;
 import org.skyve.impl.metadata.view.widget.Spacer;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentCapture;
 import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.view.Action;
@@ -139,6 +140,7 @@ class DeviceResponsiveComponentBuilderTest {
 												String disabled,
 												String formDisabled,
 												String invisible,
+												ContentCapture capture,
 												boolean useDialog) {
 				capturedUseDialog[0] = useDialog;
 				return mock(UIComponent.class);
@@ -171,6 +173,7 @@ class DeviceResponsiveComponentBuilderTest {
 												String disabled,
 												String formDisabled,
 												String invisible,
+												ContentCapture capture,
 												boolean useDialog) {
 				capturedUseDialog[0] = useDialog;
 				return mock(UIComponent.class);
@@ -205,6 +208,7 @@ class DeviceResponsiveComponentBuilderTest {
 												String disabled,
 												String formDisabled,
 												String invisible,
+												ContentCapture capture,
 												boolean useDialog) {
 				capturedUseDialog[0] = useDialog;
 				return mock(UIComponent.class);
@@ -238,6 +242,7 @@ class DeviceResponsiveComponentBuilderTest {
 												String disabled,
 												String formDisabled,
 												String invisible,
+												ContentCapture capture,
 												boolean useDialog) {
 				capturedUseDialog[0] = useDialog;
 				return mock(UIComponent.class);

@@ -13,8 +13,7 @@ import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 import org.skyve.impl.metadata.view.widget.bound.input.Password;
@@ -37,6 +36,7 @@ import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.bound.Bound;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.html.HtmlPanelGroup;
@@ -510,47 +510,30 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	}
 	
 	/**
-	 * Registers a content-image component against its binding for later automation lookup.
+	 * Registers a content component against its binding for later automation lookup.
 	 *
-	 * @param component the rendered content-image component
-	 * @param dataWidgetVar optional data-widget variable
-	 * @param image content-image metadata
-	 * @param formDisabledConditionName form-level disabled condition
-	 * @param title field title
+	 * @param component the rendered content component, or {@code null}
+	 * @param dataWidgetVar optional data-widget variable, or {@code null}
+	 * @param content content metadata; must not be {@code null}
+	 * @param formDisabledConditionName form-level disabled condition, or {@code null}
+	 * @param title field title, or {@code null}
 	 * @param requiredMessage optional required-field message
-	 * @return the supplied component
+	 * @param textAlignment text alignment metadata, or {@code null}
+	 * @param formContext whether the component was rendered in a form context
+	 * @param imageUpload whether the content component uses the image upload route
+	 * @return the supplied component, or {@code null}
 	 */
 	@Override
-	public UIComponent contentImage(UIComponent component,
-										String dataWidgetVar,
-										ContentImage image,
-										String formDisabledConditionName,
-										String title,
-										@Nullable String requiredMessage) {
-		return putByBinding(image, component);
-	}
-	
-	/**
-	 * Registers a content-link component against its binding for later automation lookup.
-	 *
-	 * @param component the rendered content-link component
-	 * @param dataWidgetVar optional data-widget variable
-	 * @param link content-link metadata
-	 * @param formDisabledConditionName form-level disabled condition
-	 * @param title field title
-	 * @param requiredMessage optional required-field message
-	 * @param textAlignment text alignment metadata
-	 * @return the supplied component
-	 */
-	@Override
-	public UIComponent contentLink(UIComponent component,
-									String dataWidgetVar,
-									ContentLink link,
-									String formDisabledConditionName,
-									String title,
-									@Nullable String requiredMessage,
-									HorizontalAlignment textAlignment) {
-		return putByBinding(link, component);
+	public @Nullable UIComponent content(@Nullable UIComponent component,
+											@Nullable String dataWidgetVar,
+											@Nonnull ContentUpload content,
+											@Nullable String formDisabledConditionName,
+											@Nullable String title,
+											@Nullable String requiredMessage,
+											@Nullable HorizontalAlignment textAlignment,
+											boolean formContext,
+											boolean imageUpload) {
+		return putByBinding(content, component);
 	}
 	
 	/**

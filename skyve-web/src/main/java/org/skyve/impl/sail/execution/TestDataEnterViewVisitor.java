@@ -16,8 +16,6 @@ import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 import org.skyve.impl.metadata.view.widget.bound.input.Password;
@@ -166,30 +164,6 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 		addDataEnter(combo, parentVisible, parentEnabled, visible(combo), enabled(combo));
 	}
 	
-	/**
-	 * No-op for content-image widgets in current test data generation strategy.
-	 *
-	 * @param image the content-image widget metadata
-	 * @param parentVisible whether parent containers are visible
-	 * @param parentEnabled whether parent containers are enabled
-	 */
-	@Override
-	public void visitContentImage(ContentImage image, boolean parentVisible, boolean parentEnabled) {
-		// TODO Auto-generated method stub
-	}
-	
-	/**
-	 * No-op for content-link widgets in current test data generation strategy.
-	 *
-	 * @param link the content-link widget metadata
-	 * @param parentVisible whether parent containers are visible
-	 * @param parentEnabled whether parent containers are enabled
-	 */
-	@Override
-	public void visitContentLink(ContentLink link, boolean parentVisible, boolean parentEnabled) {
-		// TODO Auto-generated method stub
-	}
-
 	/**
 	 * Marks entry into a data-grid scope so scalar generation is deferred.
 	 *

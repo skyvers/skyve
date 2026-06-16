@@ -4,9 +4,12 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.function.UnaryOperator;
 
+import org.skyve.EXT;
+import org.skyve.content.AttachmentContent;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.bind.BindUtil;
@@ -73,9 +76,9 @@ import org.skyve.impl.metadata.view.widget.bound.input.CheckMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentDisplay;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
@@ -103,6 +106,8 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.DynamicImageServlet;
 import org.skyve.impl.web.WebUtil;
+import org.skyve.impl.web.content.ContentMediaClassifier;
+import org.skyve.impl.web.content.ContentMediaClassifier.ContentMediaKind;
 import org.skyve.metadata.FormatterName;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ImplicitActionName;
@@ -137,8 +142,18 @@ import org.skyve.util.monitoring.Monitoring;
 import org.skyve.util.monitoring.RequestKey;
 import org.skyve.web.WebContext;
 
+import jakarta.annotation.Nonnull;
+
 // Note: We cannot cache the bindings required for each view as it may be different 
 // depending on the security principal
+/**
+ * Collects SmartClient view bindings and shapes JSON payloads for edit/create
+ * view rendering and apply operations.
+ *
+ * <p>Instances are request scoped. They keep per-request state such as generated
+ * format fields, child binding trees, and managed-content media-kind lookup
+ * cache, so they are not thread-safe and must not be shared between requests.
+ */
 @SuppressWarnings("java:S1192") // Repeated literals are deliberate SmartClient view JSON/markup fragments.
 public class ViewJSONManipulator extends ViewVisitor {
 	// Generate href expressions for references for smart client
@@ -283,6 +298,15 @@ public class ViewJSONManipulator extends ViewVisitor {
 	HrefProcessor hrefProcessor = new HrefProcessor();
 	private StringBuilder htmlGuts = new StringBuilder(64);
 
+	/**
+	 * Request-local media-kind cache keyed by managed content id.
+	 *
+	 * <p>This avoids repeated content-manager metadata lookups when the same content
+	 * id appears in multiple auto content bindings during one SmartClient payload
+	 * render.
+	 */
+	private Map<String, ContentMediaKind> contentMediaKindCache = new TreeMap<>();
+
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	protected ViewJSONManipulator(User user,
 									Module module, 
@@ -387,15 +411,15 @@ public class ViewJSONManipulator extends ViewVisitor {
 		}
 	}
 	
-	@SuppressWarnings("java:S3776") // Complexity OK
-	protected void addBindingsAndFormatValues(ViewBindings bindings,
-												Bean aBean,
-												Map<String, Object> toAddTo,
-												String webId)
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // Complexity OK
+	protected void addBindingsAndFormatValues(@Nonnull ViewBindings bindings,
+												@Nonnull Bean aBean,
+												@Nonnull Map<String, Object> toAddTo,
+												@Nonnull String webId)
 	throws Exception {
 		// Add bindings
 		for (String binding : bindings.getBindings()) {
-			ViewBinding viewBinding = bindings.getBinding(binding);
+			ViewBinding viewBinding = Objects.requireNonNull(bindings.getBinding(binding));
 			Object value = BindUtil.get(aBean, binding);
 			if ((value == null) && viewBinding.isInstantiate()) {
 				Module m = customer.getModule(aBean.getBizModule());
@@ -434,6 +458,9 @@ public class ViewJSONManipulator extends ViewVisitor {
 			}
 			toAddTo.put(BindUtil.sanitiseBinding(binding), value);
 		}
+
+		// Add media kinds
+		addAutoContentMediaKinds(bindings, aBean, toAddTo);
 		
 		// Add formats
 		String bindingKey = bindings.getBindingPrefix();
@@ -473,6 +500,90 @@ public class ViewJSONManipulator extends ViewVisitor {
 			constructJSONObjectFromBinding(bindings.putOrGetChild(childBinding, null), toAddTo, webId);
 		}
 	}
+
+	/**
+	 * For any auto content bindings in the given bindings, adds companion media kind entries to the given map.
+	 *
+	 * <p>For each auto content binding, if the binding value is a non-blank string, it is treated as a content id
+	 * and looked up in the content manager to determine the media kind. A companion entry is then added to the
+	 * map with a key of "_" + the sanitised binding and a value of the media kind name.
+	 *
+	 * @param bindings the view bindings to check for auto content bindings
+	 * @param aBean the bean to evaluate the binding values against
+	 * @param toAddTo the map to add media kind entries to
+	 */
+	private void addAutoContentMediaKinds(@Nonnull ViewBindings bindings,
+											@Nonnull Bean aBean,
+											@Nonnull Map<String, Object> toAddTo) {
+		for (String binding : bindings.getAutoContentBindings()) {
+			Object value = BindUtil.get(aBean, binding);
+			if (value instanceof String contentId) {
+				String trimmed = contentId.trim();
+				if (! trimmed.isEmpty()) {
+					ContentMediaKind mediaKind = resolveContentMediaKind(trimmed);
+					toAddTo.put(companionFieldName(binding), mediaKind.name());
+				}
+			}
+		}
+	}
+
+	/**
+	 * For a given auto content binding, returns the name of the companion media kind entry.
+	 *
+	 * <p>The companion media kind entry is used to store the media kind for an auto content binding in the JSON
+	 * payload. The key is generated by prefixing the sanitised binding with an underscore.
+	 *
+	 * @param binding the auto content binding to generate the companion field name for
+	 * @return the name of the companion media kind entry for the given binding
+	 * 
+	 */
+	static @Nonnull String companionFieldName(@Nonnull String binding) {
+		return '_' + BindUtil.sanitiseBinding(binding);
+	}
+
+	/**
+	 * Resolves the media kind for a given content id, using a request-local cache to avoid repeated lookups.
+	 *
+	 * <p>If the media kind for the given content id is not already in the cache, it is loaded using
+	 * {@link #loadContentMediaKind(String)} and then stored in the cache before being returned.
+	 *
+	 * @param contentId the content id to resolve the media kind for
+	 * @return the resolved media kind for the given content id
+	 */
+	protected @Nonnull ContentMediaKind resolveContentMediaKind(@Nonnull String contentId) {
+		ContentMediaKind result = contentMediaKindCache.get(contentId);
+		if (result == null) {
+			result = loadContentMediaKind(contentId);
+			contentMediaKindCache.put(contentId, result);
+		}
+		return result;
+	}
+
+	/**
+	 * Loads the media kind for a given content id from the content manager.
+	 *
+	 * <p>This method is called by {@link #resolveContentMediaKind(String)} when the media kind for a content id is
+	 * not already in the cache. It attempts to load the content using the content manager and classify its media
+	 * kind based on its content type and file name. If the content cannot be loaded for any reason, it defaults
+	 * to {@link ContentMediaKind#link}.
+	 *
+	 * @param contentId the content id to load the media kind for
+	 * @return the loaded media kind for the given content id, or {@link ContentMediaKind#link} if it cannot be loaded
+	 */
+	@SuppressWarnings("static-method")
+	protected @Nonnull ContentMediaKind loadContentMediaKind(@Nonnull String contentId) {
+		// Instance seam lets tests prove request caching without a live content store.
+		try (org.skyve.content.ContentManager cm = EXT.newContentManager()) {
+			AttachmentContent content = cm.getAttachment(contentId);
+			return (content == null) ?
+						ContentMediaKind.link :
+						ContentMediaClassifier.classify(content.getContentType(), content.getFileName());
+		}
+		catch (@SuppressWarnings("unused") Exception e) {
+			return ContentMediaKind.link;
+		}
+	}
+	
 /*	
 	private static void displayViewBindings(ViewBindings bindings) {
 		for (String binding : bindings.getBindings()) {
@@ -1135,44 +1246,12 @@ public class ViewJSONManipulator extends ViewVisitor {
 		}
 	}
 
-	@Override
-	public void visitContentImage(ContentImage image,
-									boolean parentVisible, 
-									boolean parentEnabled) {
-		if (visitingDataWidget) {
-			if (processingDataWidget) {
-				if (! htmlGuts.isEmpty()) {
-					htmlGuts.append("&nbsp;");
-				}
-				String binding = image.getBinding();
-				htmlGuts.append("<img src=\"content?_n={").append(binding);
-				htmlGuts.append("}&_doc={bizModule}.{bizDocument}&_b=");
-				htmlGuts.append(binding).append('"');
-				appendHtmlGutsStyle(image.getPixelWidth(), image.getPixelHeight(), null, image.getInvisibleConditionName());
-				htmlGuts.append("/>");
-			}
-		}
-		else {
-			if (parentVisible && visible(image)) {
-				if ((! forApply) || 
-						(forApply && parentEnabled && (! Boolean.FALSE.equals(image.getEditable())))) {
-					addBinding(image.getBinding(), true, false, Sanitisation.text);
-				}
-			}
-			addCondition(image.getInvisibleConditionName());
-			addCondition(image.getDisabledConditionName());
-			addBinding(Bean.MODULE_KEY, false, false, Sanitisation.text);
-			addBinding(Bean.DOCUMENT_KEY, false, false, Sanitisation.text);
-			addBinding(Bean.DATA_GROUP_ID, false, false, Sanitisation.text);
-			addBinding(Bean.USER_ID, false, false, Sanitisation.text);
-		}
-	}
 
 	@Override
 	public void visitContentSignature(ContentSignature signature,
 										boolean parentVisible, 
 										boolean parentEnabled) {
-		// TODO not implemented for SC yet - use ContentImage
+		// TODO not implemented for SC yet - use the content-image SmartClient item
 		if (parentVisible && visible(signature)) {
 			if ((! forApply) || (forApply && parentEnabled)) {
 				addBinding(signature.getBinding(), true, false, Sanitisation.text);
@@ -1360,28 +1439,40 @@ public class ViewJSONManipulator extends ViewVisitor {
 			htmlGuts.append('"');
 		}
 	}
-	
-	@Override
-	public void visitContentLink(ContentLink link, 
-									boolean parentVisible,
-									boolean parentEnabled) {
-		if (visitingDataWidget) {
-			return;
-		}
 
-		if (parentVisible && visible(link)) {
-			if ((! forApply) || 
-					(forApply && parentEnabled && (! Boolean.FALSE.equals(link.getEditable())))) {
-				addBinding(link.getBinding(), true, false, Sanitisation.text);
+	/**
+	 * Registers SmartClient bindings and conditions referenced by a managed-content
+	 * upload widget.
+	 *
+	 * <p>For {@code display="auto"}, this also registers the content binding for
+	 * media-kind companion enrichment when the current render/apply state allows
+	 * the widget binding to participate in the payload.
+	 *
+	 * @param content the content upload being visited; must not be {@code null}
+	 * @param parentVisible whether ancestor metadata is visible
+	 * @param parentEnabled whether ancestor metadata is enabled
+	 */
+	@Override
+	public void visitContent(@Nonnull ContentUpload content,
+								boolean parentVisible,
+								boolean parentEnabled) {
+		if (parentVisible && visible(content) && 
+				((! forApply) || 
+					(forApply && parentEnabled && (! Boolean.FALSE.equals(content.getEditable()))))) {
+				addBinding(content.getBinding(), true, false, Sanitisation.text);
+				if (ContentDisplay.auto.equals(content.getResolvedDisplay())) {
+					currentBindings.putAutoContentBinding(content.getBinding());
+				}
 			}
-		}
-		addCondition(link.getInvisibleConditionName());
-		addCondition(link.getDisabledConditionName());
+		
+		addCondition(content.getInvisibleConditionName());
+		addCondition(content.getDisabledConditionName());
 		addBinding(Bean.MODULE_KEY, false, false, Sanitisation.text);
 		addBinding(Bean.DOCUMENT_KEY, false, false, Sanitisation.text);
 		addBinding(Bean.DATA_GROUP_ID, false, false, Sanitisation.text);
 		addBinding(Bean.USER_ID, false, false, Sanitisation.text);
 	}
+
 
 	@Override
 	public void visitParameter(Parameter parameter,

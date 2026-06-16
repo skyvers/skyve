@@ -22,7 +22,9 @@ import org.skyve.impl.metadata.repository.view.actions.PositionableAction;
 import org.skyve.impl.metadata.repository.view.actions.RemoveAction;
 import org.skyve.impl.metadata.repository.view.actions.ReportAction;
 import org.skyve.impl.metadata.repository.view.actions.SaveAction;
+import org.skyve.impl.metadata.repository.view.actions.UploadAction;
 import org.skyve.impl.metadata.repository.view.actions.ZoomOutAction;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentCapture;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.controller.ServerSideAction;
@@ -460,6 +462,14 @@ public class ActionImpl implements Action {
 			case Save:
 				result = new SaveAction();
 				break;
+			case Upload:
+				UploadAction upload = new UploadAction();
+				String capture = getProperties().get(UploadAction.CAPTURE_PROPERTY_NAME);
+				if (capture != null) {
+					upload.setCapture(ContentCapture.valueOf(capture));
+				}
+				result = upload;
+				break;
 			case ZoomOut:
 				result = new ZoomOutAction();
 				break;
@@ -467,7 +477,7 @@ public class ActionImpl implements Action {
 				throw new IllegalStateException(implicitName + " not catered for.");
 			}
 		}
-		
+
 		result.setConfirmationText(getConfirmationText());
 		result.setDisabledConditionName(getDisabledConditionName());
 		result.setDisplayName(getDisplayName());
@@ -483,11 +493,11 @@ public class ActionImpl implements Action {
 		if (result instanceof ClassAction classAction) {
 			classAction.setClassName(getResourceName());
 		}
-		
+
 		if (result instanceof ParameterizableAction parameterizableAction) {
 			parameterizableAction.getParameters().addAll(getParameters());
 		}
-		
+
 		return result;
 	}
 

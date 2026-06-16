@@ -31,10 +31,10 @@ public class FluentGeometry extends FluentField<FluentGeometry> {
 		return this;
 	}
 	
-	@Override
 	/**
 	 * Returns the mutable metadata instance represented by this builder.
 	 */
+	@Override
 	public Geometry get() {
 		return geometry;
 	}

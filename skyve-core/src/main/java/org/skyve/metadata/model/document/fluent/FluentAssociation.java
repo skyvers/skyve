@@ -81,10 +81,10 @@ public class FluentAssociation extends FluentReference<FluentAssociation> {
 		return this;
 	}
 
-	@Override
 	/**
 	 * Returns the mutable metadata instance represented by this builder.
 	 */
+	@Override
 	public AssociationImpl get() {
 		return association;
 	}

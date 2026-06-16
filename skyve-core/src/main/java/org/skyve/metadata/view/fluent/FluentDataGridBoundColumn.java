@@ -4,8 +4,7 @@ import org.skyve.impl.metadata.view.WidgetReference;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
@@ -20,6 +19,8 @@ import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
 import org.skyve.metadata.FormatterName;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
+
+import jakarta.annotation.Nonnull;
 
 /**
  * Builds bound-column {@link DataGridBoundColumn} metadata.
@@ -75,11 +76,8 @@ public class FluentDataGridBoundColumn extends FluentDataGridColumn<FluentDataGr
 		WidgetReference widget = column.getInputWidget();
 		if (widget != null) {
 			InputWidget input = widget.getWidget();
-			if (input instanceof ContentImage image) {
-				inputWidget(new FluentContentImage().from(image));
-			}
-			else if (input instanceof ContentLink link) {
-				inputWidget(new FluentContentLink().from(link));
+			if (input instanceof ContentUpload content) {
+				inputWidget(new FluentContentUpload().from(content));
 			}
 			else if (input instanceof CheckBox box) {
 				inputWidget(new FluentCheckBox().from(box));
@@ -201,25 +199,13 @@ public class FluentDataGridBoundColumn extends FluentDataGridColumn<FluentDataGr
 	}
 
 	/**
-	 * Sets a {@link org.skyve.impl.metadata.view.widget.bound.input.ContentImage} inline editor for this column.
+	 * Sets a {@link org.skyve.impl.metadata.view.widget.bound.input.ContentUpload} inline editor for this column.
 	 *
-	 * @param image
-	 *            the content image widget builder
+	 * @param content the content upload builder
 	 * @return this builder
 	 */
-	public FluentDataGridBoundColumn inputWidget(FluentContentImage image) {
-		return inputWidgetReference(image);
-	}
-
-	/**
-	 * Sets a {@link org.skyve.impl.metadata.view.widget.bound.input.ContentLink} inline editor for this column.
-	 *
-	 * @param link
-	 *            the content link widget builder
-	 * @return this builder
-	 */
-	public FluentDataGridBoundColumn inputWidget(FluentContentLink link) {
-		return inputWidgetReference(link);
+	public @Nonnull FluentDataGridBoundColumn inputWidget(@Nonnull FluentContentUpload content) {
+		return inputWidgetReference(content);
 	}
 
 	/**

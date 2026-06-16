@@ -31,10 +31,10 @@ public class FluentImage extends FluentConstrainableField<FluentImage> {
 		return this;
 	}
 	
-	@Override
 	/**
 	 * Returns the mutable metadata instance represented by this builder.
 	 */
+	@Override
 	public Image get() {
 		return image;
 	}

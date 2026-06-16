@@ -235,6 +235,10 @@ th.hiddenFilter input.ui-column-filter, th.hiddenFilter div.ui-column-customfilt
 	color: rgb(5, 116, 218);
 }
 
+.skyveContentHidden {
+	display: none !important;
+}
+
 button.skyveContentActionButton.ui-button-icon-only,
 button.skyveContentActionButton.ui-button-text-icon-left {
 	padding: 0 !important;

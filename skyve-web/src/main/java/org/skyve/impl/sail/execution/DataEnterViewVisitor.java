@@ -14,8 +14,6 @@ import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
@@ -171,30 +169,6 @@ public class DataEnterViewVisitor extends NoOpViewVisitor {
 	@Override
 	public void visitCombo(Combo combo, boolean parentVisible, boolean parentEnabled) {
 		match(combo);
-	}
-	
-	/**
-	 * Evaluates a content-image binding for a target match.
-	 *
-	 * @param image the content-image metadata being visited
-	 * @param parentVisible whether ancestor containers are visible
-	 * @param parentEnabled whether ancestor containers are enabled
-	 */
-	@Override
-	public void visitContentImage(ContentImage image, boolean parentVisible, boolean parentEnabled) {
-		match(image);
-	}
-	
-	/**
-	 * Evaluates a content-link binding for a target match.
-	 *
-	 * @param link the content-link metadata being visited
-	 * @param parentVisible whether ancestor containers are visible
-	 * @param parentEnabled whether ancestor containers are enabled
-	 */
-	@Override
-	public void visitContentLink(ContentLink link, boolean parentVisible, boolean parentEnabled) {
-		match(link);
 	}
 	
 	/**

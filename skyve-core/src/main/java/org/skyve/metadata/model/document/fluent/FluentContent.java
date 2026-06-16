@@ -31,10 +31,10 @@ public class FluentContent extends FluentConstrainableField<FluentContent> {
 		return this;
 	}
 	
-	@Override
 	/**
 	 * Returns the mutable metadata instance represented by this builder.
 	 */
+	@Override
 	public Content get() {
 		return content;
 	}

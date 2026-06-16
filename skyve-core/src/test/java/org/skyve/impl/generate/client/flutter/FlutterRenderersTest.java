@@ -86,8 +86,6 @@ class FlutterRenderersTest {
 		renderer.checkBox(null, null, null, "Check", null);
 		renderer.colourPicker(null, null, null, "Colour", null);
 		renderer.combo(null, null, null, "Combo", null);
-		renderer.contentImage(null, null, null, "Image", null);
-		renderer.contentLink(null, null, null, "Link", null);
 		renderer.contentSignature(null, null, null, "Sign", null);
 		renderer.html(null, null, null, "Html", null);
 		renderer.lookupDescription(null, null, null, "Lookup", null, null, null);

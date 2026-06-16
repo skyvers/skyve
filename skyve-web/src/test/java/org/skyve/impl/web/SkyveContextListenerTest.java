@@ -14,6 +14,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
@@ -584,13 +585,14 @@ public class SkyveContextListenerTest {
 		int originalFileSizeMb = UtilImpl.UPLOADS_FILE_MAXIMUM_SIZE_IN_MB;
 		int originalContentSizeMb = UtilImpl.UPLOADS_CONTENT_MAXIMUM_SIZE_IN_MB;
 		int originalImageSizeMb = UtilImpl.UPLOADS_IMAGE_MAXIMUM_SIZE_IN_MB;
+		int originalVideoSizeMb = UtilImpl.UPLOADS_VIDEO_MAXIMUM_SIZE_IN_MB;
 		int originalBizportSizeMb = UtilImpl.UPLOADS_BIZPORT_MAXIMUM_SIZE_IN_MB;
 		String savedPropertiesFilePath = System.getProperty("PROPERTIES_FILE_PATH");
 		Class<? extends AbstractPersistence> originalPersistenceImplementation = AbstractPersistence.IMPLEMENTATION_CLASS;
 		Class<? extends DynamicPersistence> originalDynamicPersistenceImplementation = AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS;
 		Path tempDir = Files.createTempDirectory("skyve-context-listener-uploads");
 		try {
-			String extraStanza = "\"uploads\":{\"file\":{\"maximumSizeMB\":75},\"content\":{\"maximumSizeMB\":150},\"image\":{\"maximumSizeMB\":20},\"bizport\":{\"maximumSizeMB\":20}}";
+			String extraStanza = "\"uploads\":{\"file\":{\"maximumSizeMB\":75},\"content\":{\"maximumSizeMB\":150},\"image\":{\"maximumSizeMB\":20},\"video\":{\"maximumSizeMB\":100},\"bizport\":{\"maximumSizeMB\":20}}";
 			Path configFile = writeConfigurationWithExtra(tempDir, extraStanza);
 			System.setProperty("PROPERTIES_FILE_PATH", configFile.toString());
 			ProvidedRepository originalRepository = ProvidedRepositoryFactory.get();
@@ -602,6 +604,7 @@ public class SkyveContextListenerTest {
 				ProvidedRepositoryFactory.set(originalRepository);
 			}
 			assertEquals(75, UtilImpl.UPLOADS_FILE_MAXIMUM_SIZE_IN_MB);
+			assertEquals(100, UtilImpl.UPLOADS_VIDEO_MAXIMUM_SIZE_IN_MB);
 		}
 		finally {
 			restoreProperty("PROPERTIES_FILE_PATH", savedPropertiesFilePath);
@@ -610,6 +613,7 @@ public class SkyveContextListenerTest {
 			UtilImpl.UPLOADS_FILE_MAXIMUM_SIZE_IN_MB = originalFileSizeMb;
 			UtilImpl.UPLOADS_CONTENT_MAXIMUM_SIZE_IN_MB = originalContentSizeMb;
 			UtilImpl.UPLOADS_IMAGE_MAXIMUM_SIZE_IN_MB = originalImageSizeMb;
+			UtilImpl.UPLOADS_VIDEO_MAXIMUM_SIZE_IN_MB = originalVideoSizeMb;
 			UtilImpl.UPLOADS_BIZPORT_MAXIMUM_SIZE_IN_MB = originalBizportSizeMb;
 			deleteTree(tempDir);
 		}
@@ -1448,10 +1452,12 @@ public class SkyveContextListenerTest {
 		String originalFileRegex = UtilImpl.UPLOADS_FILE_WHITELIST_REGEX;
 		String originalContentRegex = UtilImpl.UPLOADS_CONTENT_WHITELIST_REGEX;
 		String originalImageRegex = UtilImpl.UPLOADS_IMAGE_WHITELIST_REGEX;
+		String originalVideoRegex = UtilImpl.UPLOADS_VIDEO_WHITELIST_REGEX;
 		String originalBizportRegex = UtilImpl.UPLOADS_BIZPORT_WHITELIST_REGEX;
 		int originalFileSizeMb = UtilImpl.UPLOADS_FILE_MAXIMUM_SIZE_IN_MB;
 		int originalContentSizeMb = UtilImpl.UPLOADS_CONTENT_MAXIMUM_SIZE_IN_MB;
 		int originalImageSizeMb = UtilImpl.UPLOADS_IMAGE_MAXIMUM_SIZE_IN_MB;
+		int originalVideoSizeMb = UtilImpl.UPLOADS_VIDEO_MAXIMUM_SIZE_IN_MB;
 		int originalBizportSizeMb = UtilImpl.UPLOADS_BIZPORT_MAXIMUM_SIZE_IN_MB;
 		try {
 			Map<String, Object> category = Map.of("whitelistRegex", ".*\\.txt", "maximumSizeMB", Integer.valueOf(9));
@@ -1459,6 +1465,7 @@ public class SkyveContextListenerTest {
 					"file", category,
 					"content", category,
 					"image", category,
+					"video", category,
 					"bizport", category));
 
 			invokePrivateStatic("configureUploadsSettings", new Class<?>[] {Map.class}, properties);
@@ -1466,22 +1473,37 @@ public class SkyveContextListenerTest {
 			assertEquals(".*\\.txt", UtilImpl.UPLOADS_FILE_WHITELIST_REGEX);
 			assertEquals(".*\\.txt", UtilImpl.UPLOADS_CONTENT_WHITELIST_REGEX);
 			assertEquals(".*\\.txt", UtilImpl.UPLOADS_IMAGE_WHITELIST_REGEX);
+			assertEquals(".*\\.txt", UtilImpl.UPLOADS_VIDEO_WHITELIST_REGEX);
 			assertEquals(".*\\.txt", UtilImpl.UPLOADS_BIZPORT_WHITELIST_REGEX);
 			assertEquals(9, UtilImpl.UPLOADS_FILE_MAXIMUM_SIZE_IN_MB);
 			assertEquals(9, UtilImpl.UPLOADS_CONTENT_MAXIMUM_SIZE_IN_MB);
 			assertEquals(9, UtilImpl.UPLOADS_IMAGE_MAXIMUM_SIZE_IN_MB);
+			assertEquals(9, UtilImpl.UPLOADS_VIDEO_MAXIMUM_SIZE_IN_MB);
 			assertEquals(9, UtilImpl.UPLOADS_BIZPORT_MAXIMUM_SIZE_IN_MB);
 		}
 		finally {
 			UtilImpl.UPLOADS_FILE_WHITELIST_REGEX = originalFileRegex;
 			UtilImpl.UPLOADS_CONTENT_WHITELIST_REGEX = originalContentRegex;
 			UtilImpl.UPLOADS_IMAGE_WHITELIST_REGEX = originalImageRegex;
+			UtilImpl.UPLOADS_VIDEO_WHITELIST_REGEX = originalVideoRegex;
 			UtilImpl.UPLOADS_BIZPORT_WHITELIST_REGEX = originalBizportRegex;
 			UtilImpl.UPLOADS_FILE_MAXIMUM_SIZE_IN_MB = originalFileSizeMb;
 			UtilImpl.UPLOADS_CONTENT_MAXIMUM_SIZE_IN_MB = originalContentSizeMb;
 			UtilImpl.UPLOADS_IMAGE_MAXIMUM_SIZE_IN_MB = originalImageSizeMb;
+			UtilImpl.UPLOADS_VIDEO_MAXIMUM_SIZE_IN_MB = originalVideoSizeMb;
 			UtilImpl.UPLOADS_BIZPORT_MAXIMUM_SIZE_IN_MB = originalBizportSizeMb;
 		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testUploadDefaultsIncludeVideoButNoMediaOrAudioCategory() {
+		assertEquals("^.+\\.(MP4|WEBM|MOV|M4V|OGV|AVI)$", UtilImpl.UPLOADS_VIDEO_WHITELIST_REGEX);
+		assertEquals(100, UtilImpl.UPLOADS_VIDEO_MAXIMUM_SIZE_IN_MB);
+		assertNoUtilImplUploadField("UPLOADS_MEDIA_WHITELIST_REGEX");
+		assertNoUtilImplUploadField("UPLOADS_MEDIA_MAXIMUM_SIZE_IN_MB");
+		assertNoUtilImplUploadField("UPLOADS_AUDIO_WHITELIST_REGEX");
+		assertNoUtilImplUploadField("UPLOADS_AUDIO_MAXIMUM_SIZE_IN_MB");
 	}
 
 	@Test
@@ -1804,6 +1826,14 @@ public class SkyveContextListenerTest {
 		Method method = SkyveContextListener.class.getDeclaredMethod(methodName, parameterTypes);
 		method.setAccessible(true);
 		return method.invoke(null, args);
+	}
+
+	private static void assertNoUtilImplUploadField(String fieldName) {
+		for (Field field : UtilImpl.class.getDeclaredFields()) {
+			if (fieldName.equals(field.getName())) {
+				throw new AssertionError(fieldName + " should not be defined.");
+			}
+		}
 	}
 
 	private static Path writeConfigurationWithReplacedApi(Path tempDir, String oldApiStanza, String newApiStanza) throws Exception {

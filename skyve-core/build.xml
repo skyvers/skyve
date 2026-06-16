@@ -2,9 +2,20 @@
 <!DOCTYPE project>
 <project name="XSD Gen" default="buildXmlSchemas" basedir=".">
     <path id="classpath">
-		<pathelement path="../skyve-war/deployments/skyve.war/WEB-INF/classes/" />
+		<pathelement location="target/classes" />
+		<pathelement location="../skyve-ext/target/classes" />
+		<pathelement location="../skyve-web/target/classes" />
+		<pathelement location="../skyve-tools/target/classes" />
+		<pathelement location="../skyve-war/target/classes" />
+		<fileset dir="target" includes="*.jar" excludes="*-sources.jar,*-javadoc.jar" erroronmissingdir="false" />
+		<fileset dir="../skyve-ext/target" includes="*.jar" excludes="*-sources.jar,*-javadoc.jar" erroronmissingdir="false" />
+		<fileset dir="../skyve-web/target" includes="*.jar" excludes="*-sources.jar,*-javadoc.jar" erroronmissingdir="false" />
+		<fileset dir="../skyve-tools/target" includes="*.jar" excludes="*-sources.jar,*-javadoc.jar" erroronmissingdir="false" />
+		<fileset dir="../skyve-war/target" includes="*.jar" excludes="*-sources.jar,*-javadoc.jar" erroronmissingdir="false" />
+		<pathelement location="../skyve-war/deployments/skyve.war/WEB-INF/classes" />
 		<fileset dir="../skyve-war/deployments/skyve.war/WEB-INF/lib/">
 			<include name="**/*.jar"/>
+			<exclude name="**/skyve-*.jar"/>
 		</fileset>
 	</path>
 	<target name="buildXmlSchemas">

@@ -27,6 +27,7 @@ import org.skyve.impl.metadata.view.container.form.Form;
 import org.skyve.impl.metadata.view.container.form.FormColumn;
 import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.container.form.FormRow;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
 import org.skyve.impl.metadata.view.event.EventSource;
 import org.skyve.impl.metadata.view.event.RerenderEventAction;
 import org.skyve.impl.metadata.view.event.ServerSideActionEventAction;
@@ -43,9 +44,9 @@ import org.skyve.impl.metadata.view.widget.Spacer;
 import org.skyve.impl.metadata.view.widget.StaticImage;
 import org.skyve.impl.metadata.view.widget.bound.Label;
 import org.skyve.impl.metadata.view.widget.bound.input.CompleteType;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentCapture;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentDisplay;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryInputType;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
@@ -486,42 +487,117 @@ class SmartClientViewRendererCoverageTest {
 	}
 
 	@Test
-	void renderFormContentWidgetsWriteEditableAndMarkupFlags() {
-		addTextAttribute("photo");
+	void renderFormContentUploadWritesDisplayCaptureAndCompanionMetadata() {
 		addTextAttribute("attachment");
-		addTextAttribute("signature");
 		SmartClientViewRenderer renderer = rendererWithOpenForm();
 
-		FormItem imageItem = beginFormItem(renderer, "Photo");
-		ContentImage image = new ContentImage();
-		image.setBinding("photo");
-		image.setEditable(Boolean.FALSE);
-		image.setShowMarkup(Boolean.FALSE);
-		image.setPixelWidth(Integer.valueOf(80));
-		renderer.visitContentImage(image, true, true);
-		renderer.visitedFormItem(imageItem, true, true);
-
-		FormItem linkItem = beginFormItem(renderer, "Attachment");
-		ContentLink link = new ContentLink();
-		link.setBinding("attachment");
-		link.setEditable(Boolean.FALSE);
-		renderer.renderFormContentLink("Open Attachment", link);
-		renderer.visitedFormItem(linkItem, true, true);
-
-		FormItem signatureItem = beginFormItem(renderer, "Signature");
-		ContentSignature signature = new ContentSignature();
-		signature.setBinding("signature");
-		renderer.visitContentSignature(signature, true, true);
-		renderer.visitedFormItem(signatureItem, true, true);
+		FormItem item = beginFormItem(renderer, "Attachment");
+		ContentUpload content = new ContentUpload();
+		content.setBinding("attachment");
+		content.setCapture(ContentCapture.all);
+		content.setShowMarkup(Boolean.TRUE);
+		renderer.visitContent(content, true, true);
+		renderer.visitedFormItem(item, true, true);
 
 		String code = renderer.getCode().toString();
-		assertTrue(code.contains("type:'bizContentImage'"), code);
-		assertTrue(code.contains("showMarkup:false"), code);
-		assertTrue(code.contains("editable:false"), code);
-		assertTrue(code.contains("width:80"), code);
-		assertTrue(code.contains("type:'bizContentLink'"), code);
-		assertTrue(code.contains("value:'Open Attachment'"), code);
-		assertTrue(code.contains("editable:true"), code);
+		assertTrue(code.contains("v0.setItems([{showTitle:true"), code);
+		assertTrue(code.contains(",name:'attachment'"), code);
+		assertTrue(code.contains("type:'bizContent'"), code);
+		assertTrue(code.contains("display:'auto'"), code);
+		assertTrue(code.contains("capture:'all'"), code);
+		assertTrue(code.contains("companion:'_attachment'"), code);
+		assertTrue(code.contains("showMarkup:true"), code);
+		assertTrue(code.contains("width:100"), code);
+		assertTrue(code.contains("height:100"), code);
+	}
+
+	@Test
+	void renderFormContentUploadAutoWritesExplicitImageDimensions() {
+		addTextAttribute("attachment");
+		SmartClientViewRenderer renderer = rendererWithOpenForm();
+
+		FormItem item = beginFormItem(renderer, "Attachment");
+		ContentUpload content = new ContentUpload();
+		content.setBinding("attachment");
+		content.setPixelWidth(Integer.valueOf(120));
+		content.setPixelHeight(Integer.valueOf(80));
+		renderer.visitContent(content, true, true);
+		renderer.visitedFormItem(item, true, true);
+
+		String code = renderer.getCode().toString();
+		assertTrue(code.contains("type:'bizContent'"), code);
+		assertTrue(code.contains("display:'auto'"), code);
+		assertTrue(code.contains("width:120"), code);
+		assertTrue(code.contains("height:80"), code);
+	}
+
+	@Test
+	void renderFormContentUploadVideoWritesStableDefaultDimensions() {
+		addTextAttribute("movie");
+		SmartClientViewRenderer renderer = rendererWithOpenForm();
+
+		FormItem item = beginFormItem(renderer, "Movie");
+		ContentUpload content = new ContentUpload();
+		content.setBinding("movie");
+		content.setDisplay(ContentDisplay.video);
+		renderer.visitContent(content, true, true);
+		renderer.visitedFormItem(item, true, true);
+
+		String code = renderer.getCode().toString();
+		assertTrue(code.contains("type:'bizContent'"), code);
+		assertTrue(code.contains("display:'video'"), code);
+		assertTrue(code.contains("width:320"), code);
+		assertTrue(code.contains("height:180"), code);
+	}
+
+	@Test
+	void contentUploadDataGridFieldWritesFormatterProperties() {
+		addTextAttribute("attachment");
+		ContentUpload content = new ContentUpload();
+		content.setBinding("attachment");
+		content.setCapture(ContentCapture.video);
+		content.setShowMarkup(Boolean.TRUE);
+
+		SmartClientDataGridFieldDefinition definition =
+				new SmartClientDataGridFieldDefinition(user, customer, module, document, content, null, false, true, false, "desktop");
+		String javascript = definition.toJavascript();
+
+		assertTrue(javascript.contains("editorType:'bizContent'"), javascript);
+		assertTrue(javascript.contains("display:'auto'"), javascript);
+		assertTrue(javascript.contains("capture:'video'"), javascript);
+		assertTrue(javascript.contains("companion:'_attachment'"), javascript);
+		assertTrue(javascript.contains("k=(rec&&rec['_attachment'])||'link'"), javascript);
+		assertTrue(javascript.contains("&_w=100&_h=100"), javascript);
+		assertTrue(javascript.contains("style=\"width:100px;height:100px;object-fit:contain\""), javascript);
+		assertTrue(javascript.contains("<video controls preload=\"metadata\""), javascript);
+		assertTrue(javascript.contains("style=\"width:160px;height:90px;object-fit:contain\""), javascript);
+	}
+
+	@Test
+	void renderBoundColumnContentUploadWritesDataGridFormatter() {
+		addTextAttribute("attachment");
+		SmartClientViewRenderer renderer = new SmartClientViewRenderer(user, module, document, view, "desktop", false);
+		ContentUpload content = new ContentUpload();
+		content.setBinding("attachment");
+		DataGridBoundColumn column = new DataGridBoundColumn();
+
+		renderer.renderBoundColumnContent(content);
+		renderer.renderedDataGridBoundColumn("Attachment", column);
+
+		String code = renderer.getCode().toString();
+		assertTrue(code.contains("editorType:'bizContent'"), code);
+		assertTrue(code.contains("formatCellValue:function"), code);
+	}
+
+	@Test
+	void renderContainerColumnContentUploadIsNoOp() {
+		SmartClientViewRenderer renderer = new SmartClientViewRenderer(user, module, document, view, "desktop", false);
+		ContentUpload content = new ContentUpload();
+		content.setBinding("attachment");
+
+		renderer.renderContainerColumnContent(content);
+
+		assertTrue(renderer.getCode().isEmpty());
 	}
 
 	@Test

@@ -23,9 +23,8 @@ import org.skyve.impl.metadata.view.widget.bound.Label;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
@@ -48,6 +47,7 @@ import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 /**
@@ -67,7 +67,6 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 	public static final String COLOURPICKER_IMPORT = "widgets/skyve_colourpicker";
 	public static final String COMBO_IMPORT = "widgets/skyve_combo";
 	public static final String CONTENTIMAGE_IMPORT = "widgets/skyve_contentimage";
-	private static final String CONTENTLINK_IMPORT = "widgets/skyve_contentlink";
 	public static final String DATA_GRID_IMPORT = "widgets/skyve_datagrid";
 	public static final String LABEL_IMPORT = "widgets/skyve_label";
 	public static final String SPACER_IMPORT = "widgets/skyve_spacer";
@@ -436,31 +435,25 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 		return result;
 	}
 
+	/**
+	 * Creates the temporary Flutter placeholder for content metadata.
+	 *
+	 * @param component the parent render node
+	 * @param dataWidgetVar row variable for repeating contexts
+	 * @param content source managed-content upload metadata
+	 * @param title resolved input title
+	 * @param requiredMessage optional required-message expression
+	 * @return the placeholder rendered component
+	 */
 	@Override
-	public RenderedComponent contentImage(RenderedComponent component,
-											String dataWidgetVar,
-											ContentImage image,
-											String title,
-											@Nullable String requiredMessage) {
-		imports.add(CONTENTIMAGE_IMPORT);
+	public @Nonnull RenderedComponent content(@Nullable RenderedComponent component,
+												@Nullable String dataWidgetVar,
+												@Nonnull ContentUpload content,
+												@Nullable String title,
+												@Nullable String requiredMessage) {
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		// output.append("Text('ContentImage ${_bean[\"").append(BindUtil.sanitiseBinding(image.getBinding())).append("\"]}'),");
-		output.append("SkyveContentImage(label: '").append(title).append("'),");
-		return result;
-	}
-
-	@Override
-	public RenderedComponent contentLink(RenderedComponent component,
-											String dataWidgetVar,
-											ContentLink link,
-											String title,
-											@Nullable String requiredMessage) {
-		imports.add(CONTENTLINK_IMPORT);
-		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
-		StringBuilder output = result.getOutput();
-		// output.append("Text('ContentLink ${_bean[\"").append(BindUtil.sanitiseBinding(link.getBinding())).append("\"]}'),");
-		output.append("SkyveContentLink(label: '").append(title).append("'),");
+		output.append("Text('Content'),");
 		return result;
 	}
 

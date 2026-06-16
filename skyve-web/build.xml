@@ -41,6 +41,9 @@
 		<java jar="${yui.compressor.jar}" fork="true">
 			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/skyve/css/skyve-login-min.css src/css/skyve-login.css"/>
 		</java>
+		<java jar="${yui.compressor.jar}" fork="true">
+			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/skyve/css/upload-min.css src/css/upload.css"/>
+		</java>
 
 	    <!-- Minify PrimeFaces JavaScript -->
 	    <java jar="${closure.compiler.jar}" fork="true">

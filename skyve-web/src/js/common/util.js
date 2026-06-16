@@ -48,6 +48,15 @@ SKYVE.Util = (function () {
 		allowedReportFormats: null,
 
 		/**
+		 * Restores a Skyve sanitised binding to its server-side binding form.
+		 * @param {string} binding - sanitised binding.
+		 * @returns {string} - unsanitised binding.
+		 */
+		unsanitiseBinding: function (binding) {
+			return binding.replace(/\_(\d*)\_/g, "[$1]").replace(/\_/g, ".");
+		},
+
+		/**
 		 * Loads a JavaScript file.
 		 * @param {string} scriptPath - the path to the JavaScript file.
 		 * @param {Function} callback - callback function to execute after loading.

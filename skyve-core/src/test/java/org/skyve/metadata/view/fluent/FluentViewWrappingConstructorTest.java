@@ -6,8 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.repository.view.Actions;
+import org.skyve.impl.metadata.repository.view.actions.UploadAction;
 import org.skyve.impl.metadata.repository.view.ViewMetaData;
 import org.skyve.impl.metadata.view.InjectBinding;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentCapture;
 import org.skyve.impl.metadata.view.event.RerenderEventAction;
 import org.skyve.impl.metadata.view.event.ServerSideActionEventAction;
 import org.skyve.impl.metadata.view.event.SetDisabledEventAction;
@@ -20,7 +22,6 @@ import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.DefaultWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
@@ -111,25 +112,31 @@ class FluentViewWrappingConstructorTest {
 		assertSame(existing, fluent.get());
 	}
 
-	// ---- FluentContentLink --------------------------------------------
+
+	// ---- FluentContentUpload ------------------------------------------
 
 	@Test
-	void contentLinkWrappingConstructorPreservesInstance() {
-		ContentLink existing = new ContentLink();
-		FluentContentLink fluent = new FluentContentLink(existing);
+	void contentUploadWrappingConstructorPreservesInstance() {
+		org.skyve.impl.metadata.view.widget.bound.input.ContentUpload existing =
+				new org.skyve.impl.metadata.view.widget.bound.input.ContentUpload();
+		FluentContentUpload fluent = new FluentContentUpload(existing);
 		assertSame(existing, fluent.get());
 	}
 
+	// ---- FluentUploadAction -------------------------------------------
+
 	@Test
-	void contentLinkValueSetsValue() {
-		FluentContentLink fluent = new FluentContentLink().value("myContent");
-		assertEquals("myContent", fluent.get().getValue());
+	void uploadActionCaptureSetsValue() {
+		FluentUploadAction fluent = new FluentUploadAction().capture(ContentCapture.video);
+		assertEquals(ContentCapture.video, fluent.get().getCapture());
 	}
 
 	@Test
-	void contentLinkEditableSetsValue() {
-		FluentContentLink fluent = new FluentContentLink().editable(true);
-		assertEquals(Boolean.TRUE, fluent.get().getEditable());
+	void uploadActionFromCopiesCapture() {
+		UploadAction existing = new UploadAction();
+		existing.setCapture(ContentCapture.camera);
+		FluentUploadAction fluent = new FluentUploadAction().from(existing);
+		assertEquals(ContentCapture.camera, fluent.get().getCapture());
 	}
 
 	// ---- FluentRerenderEventAction ------------------------------------

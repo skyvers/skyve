@@ -54,8 +54,6 @@ import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.impl.metadata.view.WidgetReference;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
@@ -366,29 +364,7 @@ class FacesViewRendererTest extends AbstractSkyveTest {
 		assertNotNull(renderer.getFacesView());
 	}
 
-	@Test
-	void renderViewWithFormAndContentImage() {
-		ViewImpl view = createEditView();
-		ContentImage ci = new ContentImage();
-		ci.setBinding("text");
-		view.getContained().add(createFormWithWidget(ci));
 
-		FacesViewRenderer renderer = createRenderer(view);
-		renderer.visit();
-		assertNotNull(renderer.getFacesView());
-	}
-
-	@Test
-	void renderViewWithFormAndContentLink() {
-		ViewImpl view = createEditView();
-		ContentLink cl = new ContentLink();
-		cl.setBinding("text");
-		view.getContained().add(createFormWithWidget(cl));
-
-		FacesViewRenderer renderer = createRenderer(view);
-		renderer.visit();
-		assertNotNull(renderer.getFacesView());
-	}
 
 	@Test
 	void renderViewWithFormAndGeometry() {
@@ -1626,27 +1602,6 @@ class FacesViewRendererTest extends AbstractSkyveTest {
 		assertNotNull(renderer.getFacesView());
 	}
 
-	@Test
-	void renderViewWithDataGridBoundColumnWithContentImage() {
-		ViewImpl view = createEditView();
-		DataGrid grid = new DataGrid();
-		grid.setBinding("aggregatedCollection");
-		DataGridBoundColumn col = new DataGridBoundColumn();
-		col.setBinding("text");
-		col.setEditable(Boolean.TRUE);
-		WidgetReference wr = new WidgetReference();
-		ContentImage ci = new ContentImage();
-		ci.setBinding("text");
-		wr.setWidget(ci);
-		col.setInputWidget(wr);
-		grid.getColumns().add(col);
-		view.getContained().add(grid);
-		view.getContained().add(createFormWithTextField());
-
-		FacesViewRenderer renderer = createRenderer(view);
-		renderer.visit();
-		assertNotNull(renderer.getFacesView());
-	}
 
 	@Test
 	void renderViewWithFormAndContentSignature() {
@@ -1763,22 +1718,6 @@ class FacesViewRendererTest extends AbstractSkyveTest {
 		assertNotNull(renderer.getFacesView());
 	}
 
-	@Test
-	void renderViewWithDataRepeaterContainerColumnContentLink() {
-		ViewImpl view = createEditView();
-		DataRepeater dr = new DataRepeater();
-		dr.setBinding("aggregatedCollection");
-		DataGridContainerColumn col = new DataGridContainerColumn();
-		ContentLink cl = new ContentLink();
-		cl.setBinding("text");
-		col.getWidgets().add(cl);
-		dr.getColumns().add(col);
-		view.getContained().add(dr);
-
-		FacesViewRenderer renderer = createRenderer(view);
-		renderer.visit();
-		assertNotNull(renderer.getFacesView());
-	}
 
 	@Test
 	void renderViewWithDataRepeaterContainerColumnContentSignature() {

@@ -109,6 +109,7 @@ public class DeviceResponsiveComponentBuilder extends ResponsiveComponentBuilder
 								action.getDisabledConditionName(),
 								null,
 								action.getInvisibleConditionName(),
+								resolveActionUploadCapture(action),
 								UserAgentType.phone.equals(userAgentType));
 	}
 
@@ -139,6 +140,7 @@ public class DeviceResponsiveComponentBuilder extends ResponsiveComponentBuilder
 								action.getDisabledConditionName(),
 								formDisabledConditionName,
 								action.getInvisibleConditionName(),
+								resolveActionUploadCapture(action),
 								UserAgentType.phone.equals(userAgentType));
 	}
 }

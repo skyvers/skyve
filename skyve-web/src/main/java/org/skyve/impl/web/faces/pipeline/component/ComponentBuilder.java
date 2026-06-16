@@ -31,9 +31,8 @@ import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
@@ -62,6 +61,7 @@ import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.el.MethodExpression;
 import jakarta.faces.component.UICommand;
@@ -730,42 +730,33 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 												@Nullable String requiredMessage);
 
 	/**
-	 * Creates a content-image component.
+	 * Creates a unified content component.
 	 *
-	 * @param component the current component
-	 * @param dataWidgetVar the data-widget variable
-	 * @param image the content-image metadata
-	 * @param formDisabledConditionName form disabled condition
-	 * @param title field title
+	 * @param component the current component, or {@code null} when this builder must
+	 *        create it
+	 * @param dataWidgetVar the data-widget variable, or {@code null} outside a data
+	 *        widget
+	 * @param content the content metadata; must not be {@code null}
+	 * @param formDisabledConditionName form disabled condition, or {@code null}
+	 * @param title field title, or {@code null}
 	 * @param requiredMessage optional required-message text
-	 * @return the resulting content-image component
+	 * @param textAlignment text alignment, or {@code null} to use renderer defaults
+	 * @param formContext whether the component is rendered in a form rather than a
+	 *        grid/list column
+	 * @param imageUpload whether uploads should use the image upload route during
+	 *        the Phase 3 legacy upload-page seam
+	 * @return the resulting content component, or {@code null} when a no-op builder
+	 *         receives no existing component
 	 */
-	public abstract UIComponent contentImage(UIComponent component, 
-												String dataWidgetVar, 
-												ContentImage image, 
-												String formDisabledConditionName,
-												String title, 
-												@Nullable String requiredMessage);
-
-	/**
-	 * Creates a content-link component.
-	 *
-	 * @param component the current component
-	 * @param dataWidgetVar the data-widget variable
-	 * @param link the content-link metadata
-	 * @param formDisabledConditionName form disabled condition
-	 * @param title field title
-	 * @param requiredMessage optional required-message text
-	 * @param textAlignment text alignment
-	 * @return the resulting content-link component
-	 */
-	public abstract UIComponent contentLink(UIComponent component, 
-												String dataWidgetVar, 
-												ContentLink link, 
-												String formDisabledConditionName,
-												String title, 
-												@Nullable String requiredMessage,
-												HorizontalAlignment textAlignment);
+	public abstract @Nullable UIComponent content(@Nullable UIComponent component,
+											@Nullable String dataWidgetVar,
+											@Nonnull ContentUpload content,
+											@Nullable String formDisabledConditionName,
+											@Nullable String title,
+											@Nullable String requiredMessage,
+											@Nullable HorizontalAlignment textAlignment,
+											boolean formContext,
+											boolean imageUpload);
 	
 	/**
 	 * Adds a content-signature component into a layout wrapper.

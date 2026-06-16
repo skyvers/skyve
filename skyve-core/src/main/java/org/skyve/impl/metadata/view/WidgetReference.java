@@ -3,8 +3,7 @@ package org.skyve.impl.metadata.view;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
@@ -41,8 +40,7 @@ public class WidgetReference implements SerializableMetaData {
 		return widget;
 	}
 
-	@XmlElementRefs({@XmlElementRef(type = ContentImage.class),
-						@XmlElementRef(type = ContentLink.class), 
+	@XmlElementRefs({@XmlElementRef(type = ContentUpload.class),
 						@XmlElementRef(type = CheckBox.class),
 						@XmlElementRef(type = ColourPicker.class), 
 						@XmlElementRef(type = Combo.class), 

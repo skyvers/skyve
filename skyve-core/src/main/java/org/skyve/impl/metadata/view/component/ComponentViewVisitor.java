@@ -58,9 +58,8 @@ import org.skyve.impl.metadata.view.widget.bound.input.CheckMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.DefaultWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
@@ -88,6 +87,8 @@ import org.skyve.metadata.view.Invisible;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Bound;
 import org.skyve.metadata.view.widget.bound.Parameter;
+
+import jakarta.annotation.Nonnull;
 
 /**
  * Rewrites component metadata so it can be embedded safely in an owning view context.
@@ -805,33 +806,17 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Prefixes the binding and translates the disable and invisible condition names.
+	 * Rewrites content upload bindings and conditions for the component context.
 	 *
-	 * @param image the content image widget being visited
-	 * @param parentVisible whether the parent container is visible
-	 * @param parentEnabled whether the parent container is enabled
+	 * @param content the content upload to rewrite; must not be {@code null}
+	 * @param parentVisible whether ancestor metadata is visible
+	 * @param parentEnabled whether ancestor metadata is enabled
 	 */
 	@Override
-	public void visitContentImage(ContentImage image, boolean parentVisible, boolean parentEnabled) {
-		bound(image);
-		disable(image);
-		invisible(image);
-	}
-
-	/**
-	 * Prefixes the binding, translates the disable and invisible condition names,
-	 * and prefixes binding expressions within the link value.
-	 *
-	 * @param link the content link widget being visited
-	 * @param parentVisible whether the parent container is visible
-	 * @param parentEnabled whether the parent container is enabled
-	 */
-	@Override
-	public void visitContentLink(ContentLink link, boolean parentVisible, boolean parentEnabled) {
-		bound(link);
-		disable(link);
-		invisible(link);
-		link.setValue(prefixExpression(link.getLocalisedValue()));
+	public void visitContent(@Nonnull ContentUpload content, boolean parentVisible, boolean parentEnabled) {
+		bound(content);
+		disable(content);
+		invisible(content);
 	}
 
 	/**

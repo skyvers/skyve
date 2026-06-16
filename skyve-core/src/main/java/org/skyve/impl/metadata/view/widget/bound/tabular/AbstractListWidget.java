@@ -198,12 +198,12 @@ public abstract class AbstractListWidget implements RelativeSize, Filterable, In
 		return parameters;
 	}
 
-	@Override
 	/**
 	 * Returns the absolute pixel width, or {@code null} when not specified.
 	 *
 	 * @return the absolute pixel width
 	 */
+	@Override
 	public Integer getPixelWidth() {
 		return pixelWidth;
 	}

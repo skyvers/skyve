@@ -37,7 +37,7 @@
 				</row>
 				<row>
 					<item>
-						<contentImage binding="currentUser.contact.image" />
+						<content binding="currentUser.contact.image" display="image" capture="all" />
 					</item>
 				</row>
 				<row>

@@ -71,9 +71,10 @@ import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
 import org.skyve.impl.metadata.view.widget.bound.input.CompleteType;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentCapture;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentDisplay;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryInputType;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
@@ -135,6 +136,13 @@ import jakarta.annotation.Nullable;
 public class SmartClientViewRenderer extends ViewRenderer {
 	private static final Integer DEFAULT_MIN_HEIGHT_IN_PIXELS = Integer.valueOf(170);
 	private static final Integer DEFAULT_TAB_MIN_HEIGHT_IN_PIXELS = Integer.valueOf(200);
+	private static final int CONTENT_IMAGE_DEFAULT_PIXEL_WIDTH = 100;
+	private static final int CONTENT_IMAGE_DEFAULT_PIXEL_HEIGHT = 100;
+	private static final int FORM_CONTENT_VIDEO_DEFAULT_PIXEL_WIDTH = 320;
+	private static final int FORM_CONTENT_VIDEO_DEFAULT_PIXEL_HEIGHT = 180;
+	private static final int GRID_CONTENT_VIDEO_DEFAULT_PIXEL_WIDTH = 160;
+	private static final int GRID_CONTENT_VIDEO_DEFAULT_PIXEL_HEIGHT = 90;
+	private static final String UPLOAD_CAPTURE_PROPERTY_NAME = "capture";
 
 	private boolean noCreateView;
 	private int variableCounter = 0;
@@ -145,7 +153,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 	private StringBuilder code = new StringBuilder(2048);
 	private Deque<String> containerVariables = new ArrayDeque<>(16); // non-null elements
-	
+
 	/**
 	 * Creates a renderer for generating SmartClient JavaScript for the supplied view.
 	 *
@@ -236,10 +244,10 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append("hide:function(){this.getParentCanvas().getMember(0).setShowResizeBar(this._hiding||false);this._hiding=false;this.Super('hide',arguments);},");
 		code.append("show:function(){this.getParentCanvas().getMember(0).setShowResizeBar(this._hiding||true);this.Super('show',arguments);},");
 		code.append("height:'100%',padding:5,shadowSoftness:10,shadowOffset:0,showShadow:true});");
-		
+
 		code.append("var viewPane=isc.BizContainer.create({width:'*',height:'100%',padding:5,shadowSoftness:10,shadowOffset:0,showShadow:true,showResizeBar:true,resizeBarTarget:'next'});");
 		containerVariables.push("viewPane");
-		
+
 		code.append("var ").append(variableName).append("=isc.BizHBox.create({width:'100%',height:'100%',padding:10,");
 		invisible(invisibleConditionName, code);
 		// Override hideMember to indicate that we are using the Snapbar collapse function
@@ -249,11 +257,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append("});\n");
 		code.append(variableName).append(".addContained(viewPane);\n");
 		code.append(variableName).append(".addContained(sidebarPane);\n");
-				
+
 		containerVariables.push("viewPane");
 
 	}
-	
+
 	/**
 	 * Finalizes SmartClient view rendering by attaching the generated view container to the root view.
 	 *
@@ -404,7 +412,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			size(vbox, null, code);
 			bordered(borderTitle, vbox, vbox.getPixelPadding(), code);
 		}
-		
+
 		box(vbox);
 		VerticalAlignment v = vbox.getVerticalAlignment();
 		if (v != null) {
@@ -446,7 +454,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append(containerVariables.peek()).append(".addContained(").append((collapsibleVar == null) ? variable : collapsibleVar).append(");\n");
 		containerVariables.push(variable);
 	}
-	
+
 	/**
 	 * Completes rendering of the current vertical box container.
 	 *
@@ -468,7 +476,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void renderHBox(String borderTitle, HBox hbox) {
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append("=isc.BizHBox.create({");
-		
+
 		// if collapsible, then make the inner hbox 100% width and height and do not put the border/title
 		Collapsible collapsible = hbox.getCollapsible();
 		if (collapsible != null) {
@@ -518,14 +526,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		box(hbox);
 		invisible(hbox.getInvisibleConditionName(), code);
 		removeTrailingComma(code);
-		
+
 		code.append("});\n");
 
 		String collapsibleVar = collapsible(borderTitle, hbox, variable);
 		code.append(containerVariables.peek()).append(".addContained(").append((collapsibleVar == null) ? variable : collapsibleVar).append(");\n");
 		containerVariables.push(variable);
 	}
-	
+
 	/**
 	 * Completes rendering of the current horizontal box container.
 	 *
@@ -555,7 +563,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append("membersMargin:10,");
 		}
 	}
-	
+
 	/**
 	 * Wraps an item in a collapsible container when the box declares collapsible behaviour.
 	 *
@@ -578,7 +586,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 		return result;
 	}
-	
+
 	private boolean viewHasAtLeastOneForm = false;
 	private String formVariable = null;
 	private VBox borderBox = null;
@@ -598,9 +606,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		// for its content.
 		Boolean border = form.getBorder();
 		Collapsible collapsible = form.getCollapsible();
-		
+
 		validateCollapsible(collapsible, borderTitle);
-		
+
 		if ((collapsible != null) || Boolean.TRUE.equals(border)) {
 			borderBox = new VBox();
 			borderBox.setBorder(Boolean.TRUE);
@@ -621,10 +629,10 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			}
 			borderBox.setPercentageHeight(percentageHeight);
 			borderBox.setPixelHeight(pixelHeight);
-			
+
 			vbox(borderTitle, borderBox);
 		}
-		
+
 		formVariable = "v" + variableCounter++;
 		code.append("var ").append(formVariable);
 		code.append("=isc.DynamicForm.create({longTextEditorType:'text',longTextEditorThreshold:102400,");
@@ -1112,7 +1120,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void renderSpacer(Spacer spacer) {
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append("=isc.LayoutSpacer.create(");
-        if ((spacer.getPixelWidth() != null) || 
+        if ((spacer.getPixelWidth() != null) ||
         		(spacer.getPixelHeight() != null) ||
         		(spacer.getInvisibleConditionName() != null)) {
 			code.append('{');
@@ -1404,7 +1412,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void renderLabel(String value, boolean boundValue, Label label) {
 		// Throw if the value has binding expressions in them
 		if (boundValue) {
-			throw new MetaDataException("Label or blurb with a value of [" + label.getValue() + 
+			throw new MetaDataException("Label or blurb with a value of [" + label.getValue() +
 											"] contains a binding expression and must be declared within a form element or a data grid container column to be able to bind correctly");
 		}
 
@@ -1627,14 +1635,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		else {
 			if (modelName != null) { // its a model
 				StringBuilder ds = new StringBuilder(256);
-				dataSourceId = SmartClientViewRenderer.appendDataSourceDefinition(user, 
-																					customer, 
-																					module, 
+				dataSourceId = SmartClientViewRenderer.appendDataSourceDefinition(user,
+																					customer,
+																					module,
 																					document,
 																					modelName,
 																					currentUxUi,
 																					false,
-																					ds, 
+																					ds,
 																					new TreeSet<>());
 				code.insert(0, ds);
 			}
@@ -1932,10 +1940,10 @@ public class SmartClientViewRenderer extends ViewRenderer {
 				StringBuilder ds = new StringBuilder(64);
 				String optionDataSource = lookup.getOptionDataSource();
 				SmartClientViewRenderer.appendDataSourceDefinition(user,
-																	customer, 
+																	customer,
 																	lookup.getQuery(),
 																	optionDataSource,
-																	(LookupDescription) dataWidgetColumnInputWidget, 
+																	(LookupDescription) dataWidgetColumnInputWidget,
 																	currentUxUi,
 																	false,
 																	ds,
@@ -2172,66 +2180,39 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	/**
-	 * Starts rendering a bound-column content image.
+	 * Starts rendering a bound-column unified content widget.
 	 *
-	 * @param image The content-image metadata.
+	 * @param content The content-upload metadata.
 	 */
 	@Override
-	public void renderBoundColumnContentImage(ContentImage image) {
-		dataWidgetColumnInputWidget = image;
+	public void renderBoundColumnContent(@Nonnull ContentUpload content) {
+		dataWidgetColumnInputWidget = content;
 	}
 
 	/**
-	 * Renders a container-column content image.
+	 * Renders a container-column unified content widget.
 	 *
-	 * @param image The content-image metadata.
+	 * @param content The content-upload metadata.
 	 */
 	@Override
-	public void renderContainerColumnContentImage(ContentImage image) {
-		// markup is generated in the JSON data for a data grid container column content image
+	public void renderContainerColumnContent(@Nonnull ContentUpload content) {
+		// markup is generated in the JSON data for a data grid container column content widget
 	}
 
 	/**
-	 * Renders a content image form item.
+	 * Renders a unified content form item.
 	 *
-	 * @param image The content-image metadata.
+	 * @param content The content-upload metadata.
 	 */
 	@Override
-	public void renderFormContentImage(ContentImage image) {
-		preProcessFormItem(image, "bizContentImage");
-		size(image, null, code);
-		disabled(image.getDisabledConditionName(), code);
-		invisible(image.getInvisibleConditionName(), code);
-		editable(image.getEditable(), code);
-		code.append("showMarkup:").append((! Boolean.FALSE.equals(image.getShowMarkup())) ? "true," : "false,");
-	}
-
-	/**
-	 * Starts rendering a bound-column content link.
-	 *
-	 * @param value The link value.
-	 * @param link The content-link metadata.
-	 */
-	@Override
-	public void renderBoundColumnContentLink(String value, ContentLink link) {
-		dataWidgetColumnInputWidget = link;
-	}
-
-	/**
-	 * Renders a content link form item.
-	 *
-	 * @param value The link value.
-	 * @param link The content-link metadata.
-	 */
-	@Override
-	public void renderFormContentLink(String value, ContentLink link) {
-		preProcessFormItem(link, "bizContentLink");
-		if (value != null) {
-			code.append("value:'").append(OWASP.escapeJsString(value)).append("',");
-		}
-		disabled(link.getDisabledConditionName(), code);
-		invisible(link.getInvisibleConditionName(), code);
-		editable(link.getEditable(), code);
+	public void renderFormContent(@Nonnull ContentUpload content) {
+		ContentDisplay display = content.getResolvedDisplay();
+		preProcessFormItem(content, "bizContent");
+		size(content, null, code);
+		disabled(content.getDisabledConditionName(), code);
+		invisible(content.getInvisibleConditionName(), code);
+		editable(content.getEditable(), code);
+		appendContentProperties(content, display, true, code);
 	}
 
 	/**
@@ -2241,12 +2222,125 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 */
 	@Override
 	public void renderFormContentSignature(ContentSignature signature) {
-		// TODO not implemented for SC yet - use a ContentImage for now
+		// TODO not implemented for SC yet - use the content-image SmartClient item for now
 		preProcessFormItem(signature, "bizContentImage");
 		size(signature, null, code);
 		disabled(signature.getDisabledConditionName(), code);
 		invisible(signature.getInvisibleConditionName(), code);
 		editable(Boolean.TRUE, code);
+	}
+
+	/**
+	 * Appends SmartClient form-item properties for a unified content widget.
+	 *
+	 * @param content The content-upload metadata.
+	 * @param display The resolved presentation mode.
+	 * @param formContext Whether the widget is being rendered in a form rather than a grid.
+	 * @param builder The JavaScript output buffer receiving the properties.
+	 */
+	private static void appendContentProperties(@Nonnull ContentUpload content,
+													@Nonnull ContentDisplay display,
+													boolean formContext,
+													@Nonnull StringBuilder builder) {
+		builder.append("display:'").append(display).append("',");
+		builder.append("capture:'").append(content.getResolvedCapture()).append("',");
+		if (ContentDisplay.auto.equals(display)) {
+			builder.append("companion:'").append(contentCompanionName(content.getBinding())).append("',");
+		}
+		builder.append("showMarkup:").append(isContentMarkupAllowed(content, display)).append(',');
+		appendResolvedContentSize(content, display, formContext, builder);
+	}
+
+	/**
+	 * Indicates whether image markup controls are allowed for this content widget.
+	 *
+	 * @param content The content-upload metadata.
+	 * @param display The resolved presentation mode.
+	 * @return {@code true} when metadata permits markup and the widget can hold image content.
+	 */
+	private static boolean isContentMarkupAllowed(@Nonnull ContentUpload content, @Nonnull ContentDisplay display) {
+		if (Boolean.FALSE.equals(content.getShowMarkup())) {
+			return false;
+		}
+		return ! ContentDisplay.video.equals(display);
+	}
+
+	/**
+	 * Appends explicit SmartClient width and height properties where the display mode needs them.
+	 *
+	 * @param content The content-upload metadata.
+	 * @param display The resolved presentation mode.
+	 * @param formContext Whether the widget is being rendered in a form rather than a grid.
+	 * @param builder The JavaScript output buffer receiving the size properties.
+	 */
+	private static void appendResolvedContentSize(@Nonnull ContentUpload content,
+													@Nonnull ContentDisplay display,
+													boolean formContext,
+													@Nonnull StringBuilder builder) {
+		if (ContentDisplay.video.equals(display)) {
+			builder.append("width:").append(resolveContentVideoWidth(content, formContext)).append(',');
+			builder.append("height:").append(resolveContentVideoHeight(content, formContext)).append(',');
+		}
+		else if (ContentDisplay.image.equals(display) || ContentDisplay.auto.equals(display)) {
+			builder.append("width:").append(resolveContentImageWidth(content)).append(',');
+			builder.append("height:").append(resolveContentImageHeight(content)).append(',');
+		}
+	}
+
+	/**
+	 * Resolves the image preview width to match the PrimeFaces content-image fallback.
+	 *
+	 * @param content The content-upload metadata.
+	 * @return The metadata width, or the PrimeFaces default.
+	 */
+	private static int resolveContentImageWidth(@Nonnull ContentUpload content) {
+		Integer result = content.getPixelWidth();
+		return (result == null) ? CONTENT_IMAGE_DEFAULT_PIXEL_WIDTH : result.intValue();
+	}
+
+	/**
+	 * Resolves the image preview height to match the PrimeFaces content-image fallback.
+	 *
+	 * @param content The content-upload metadata.
+	 * @return The metadata height, or the PrimeFaces default.
+	 */
+	private static int resolveContentImageHeight(@Nonnull ContentUpload content) {
+		Integer result = content.getPixelHeight();
+		return (result == null) ? CONTENT_IMAGE_DEFAULT_PIXEL_HEIGHT : result.intValue();
+	}
+
+	/**
+	 * Resolves the video preview width for form and compact grid-style contexts.
+	 *
+	 * @param content The content-upload metadata.
+	 * @param formContext Whether the widget is being rendered in a form rather than a grid.
+	 * @return The metadata width, or the SmartClient default for the context.
+	 */
+	private static int resolveContentVideoWidth(@Nonnull ContentUpload content, boolean formContext) {
+		Integer result = content.getPixelWidth();
+		return (result == null) ? (formContext ? FORM_CONTENT_VIDEO_DEFAULT_PIXEL_WIDTH : GRID_CONTENT_VIDEO_DEFAULT_PIXEL_WIDTH) : result.intValue();
+	}
+
+	/**
+	 * Resolves the video preview height for form and compact grid-style contexts.
+	 *
+	 * @param content The content-upload metadata.
+	 * @param formContext Whether the widget is being rendered in a form rather than a grid.
+	 * @return The metadata height, or the SmartClient default for the context.
+	 */
+	private static int resolveContentVideoHeight(@Nonnull ContentUpload content, boolean formContext) {
+		Integer result = content.getPixelHeight();
+		return (result == null) ? (formContext ? FORM_CONTENT_VIDEO_DEFAULT_PIXEL_HEIGHT : GRID_CONTENT_VIDEO_DEFAULT_PIXEL_HEIGHT) : result.intValue();
+	}
+
+	/**
+	 * Returns the server-generated media-kind companion field name for an auto content binding.
+	 *
+	 * @param binding The unsanitised content binding from view metadata.
+	 * @return The sanitised companion field name.
+	 */
+	private static @Nonnull String contentCompanionName(@Nonnull String binding) {
+		return '_' + BindUtil.sanitiseBinding(binding);
 	}
 
 	/**
@@ -2800,7 +2894,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void renderedFormTextField(TextField text) {
 		// do nothing
 	}
-	
+
 	/**
 	 * Renders an inject script within a form item.
 	 *
@@ -2850,8 +2944,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 									String toolTip,
 									String confirmationText,
 									ActionImpl action) {
-		addAction(name, 
-					null, 
+		addAction(name,
+					null,
 					label,
 					action.getInActionPanel(),
 					action.getClientValidation(),
@@ -3306,7 +3400,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					action.getParameters(),
 					action.getDisabledConditionName(),
 					action.getInvisibleConditionName(),
-					null);
+					null,
+					resolveActionUploadCapture(action).name());
 	}
 
 	/**
@@ -3410,7 +3505,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					action.getInvisibleConditionName(),
 					null);
 	}
-	
+
 	/**
 	 * Emits deferred server-side callback wrappers for async add/edit/remove handlers.
 	 *
@@ -3428,7 +3523,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append("},bizRemovedForServer:function(form,item,value){var view=form._view;");
 		}
 	}
-	
+
 	/**
 	 * Emits JavaScript that dispatches a server-side action callback for the current event context.
 	 *
@@ -3449,7 +3544,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append(name).append("',");
 		code.append(! Boolean.FALSE.equals(action.getClientValidation())).append(");");
 	}
-	
+
 	/**
 	 * Starts an on-change handler body for the current widget context.
 	 *
@@ -3466,7 +3561,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append("changed:function(form,item,value){var view=form._view;");
 		}
 	}
-	
+
 	/**
 	 * Closes the on-change handler body.
 	 *
@@ -3478,7 +3573,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void visitedOnChangedEventHandler(Changeable changeable, boolean parentVisible, boolean parentEnabled) {
 		code.append("},");
 	}
-	
+
 	/**
 	 * Starts an on-focus handler that short-circuits while requests are pending.
 	 *
@@ -3491,7 +3586,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		// Note the test to short circuit focus event processing whilst requests are pending to stop loops with multiple fields.
 		code.append("editorEnter:function(form,item,value){if((!isc.RPCManager.requestsArePending())&&item.validate()){var view=form._view;");
 	}
-	
+
 	/**
 	 * Closes the on-focus handler body.
 	 *
@@ -3507,7 +3602,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	// indicates that we are blurring or selecting and we need to call special methods
 	// to potentially serialize calls to button actions after editorExit.
 	private boolean visitingAsync = false;
-	
+
 	/**
 	 * Starts blur/edit-exit handlers and enables async sequencing for blurry actions.
 	 *
@@ -3518,7 +3613,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	@Override
 	public void visitOnBlurEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
 		visitingAsync = true;
-		
+
 		// This fires before the BizButton action() method if a button was clicked
 		// Note the test to short circuit blur event processing whilst requests are pending to stop loops with multiple fields.
 		code.append("blur:function(form,item){if(isc.RPCManager.requestsArePending()){form._view._blurry=null;}else{form._view._blurry=item;}},");
@@ -3526,7 +3621,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		// Note the test to short circuit blur event processing whilst requests are pending to stop loops with multiple fields.
 		code.append("editorExit:function(form,item,value){if(isc.RPCManager.requestsArePending()){form._view._blurry=null;}else{var view=form._view;");
 	}
-	
+
 	/**
 	 * Closes blur/edit-exit handler bodies and resets async sequencing state.
 	 *
@@ -3542,7 +3637,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 	// Used to sort out server-side events into the bizEditedForServer() method.
 	private boolean inOnAddedEventHandler = false;
-	
+
 	/**
 	 * Starts a biz-added event handler body.
 	 *
@@ -3565,7 +3660,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append("bizAdded:function(form,item,value){var view=form._view;");
 		}
 	}
-	
+
 	/**
 	 * Closes the biz-added event handler body.
 	 *
@@ -3581,7 +3676,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 	// Used to sort out server-side events into the bizEditedForServer() method.
 	private boolean inOnEditedEventHandler = false;
-	
+
 	/**
 	 * Starts a biz-edited event handler body.
 	 *
@@ -3604,7 +3699,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append("bizEdited:function(form,item,value){var view=form._view;");
 		}
 	}
-	
+
 	/**
 	 * Closes the biz-edited event handler body.
 	 *
@@ -3620,7 +3715,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 	// Used to sort out server-side events into the bizEditedForServer() method.
 	private boolean inOnRemovedEventHandler = false;
-	
+
 	/**
 	 * Starts a biz-removed event handler body.
 	 *
@@ -3643,7 +3738,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append("bizRemoved:function(form,item,value){var view=form._view;");
 		}
 	}
-	
+
 	/**
 	 * Closes the biz-removed event handler body.
 	 *
@@ -3656,7 +3751,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append("},");
 		inOnRemovedEventHandler = false;
 	}
-	
+
 	/**
 	 * Starts a biz-selected event handler body and enables async sequencing for list/data widgets.
 	 *
@@ -3676,7 +3771,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 		code.append("bizSelected:function(){var view=this._view;");
 	}
-	
+
 	/**
 	 * Closes the biz-selected event handler body and disables async sequencing.
 	 *
@@ -3689,7 +3784,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append("},");
 		visitingAsync = false;
 	}
-	
+
 	/**
 	 * Starts a lookup picked-event handler body.
 	 *
@@ -3701,7 +3796,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void visitOnPickedEventHandler(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 		code.append("bizPicked:function(form,item,value){var view=form._view;");
 	}
-	
+
 	/**
 	 * Closes the lookup picked-event handler body.
 	 *
@@ -3713,7 +3808,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void visitedOnPickedEventHandler(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 		code.append("},");
 	}
-	
+
 	/**
 	 * Starts a lookup cleared-event handler body.
 	 *
@@ -3725,7 +3820,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void visitOnClearedEventHandler(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 		code.append("bizCleared:function(form,item,value){var view=form._view;");
 	}
-	
+
 	/**
 	 * Closes the lookup cleared-event handler body.
 	 *
@@ -3818,7 +3913,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append("view.toggleVisibility('").append(BindUtil.sanitiseBinding(toggleVisibility.getBinding()));
 		code.append("');");
 	}
-	
+
 	/**
 	 * Visits an action parameter node.
 	 *
@@ -3832,7 +3927,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void visitParameter(Parameter parameter, boolean parentVisible, boolean parentEnabled) {
 		// do nothing - parameters are handled separately
 	}
-	
+
 	/**
 	 * Visits a filter parameter node.
 	 *
@@ -3864,10 +3959,10 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		else if (ViewType.create.toString().equals(view.getName())) {
 			result.append(SmartClientWebContext.CREATE_ID_COUNTER).append("++");
 		}
-		
+
 		return result.toString();
 	}
-	
+
 	/**
 	 * Appends width, height, and min/max constraints for a renderable component.
 	 *
@@ -3876,15 +3971,15 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param builder JavaScript buffer receiving size-related properties
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private void size(AbsoluteWidth sizable, 
+	private void size(AbsoluteWidth sizable,
 						Integer defaultMinHeightInPixels,
 						StringBuilder builder) {
-		ShrinkWrap shrinkWrap = (sizable instanceof ShrinkWrapper shrinkWrapper) ? 
+		ShrinkWrap shrinkWrap = (sizable instanceof ShrinkWrapper shrinkWrapper) ?
 									shrinkWrapper.getShrinkWrap() :
 									null;
 		boolean widthShrinkWrapped = false;
 		boolean heightShrinkWrapped = false;
-									
+
 		if (ShrinkWrap.width.equals(shrinkWrap) || ShrinkWrap.both.equals(shrinkWrap)) {
 			builder.append("width:1,");
 			widthShrinkWrapped = true;
@@ -3914,20 +4009,20 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					}
 				}
 			}
-			if ((! specifiedWidth) && 
-					(getCurrentFormItem() != null) && 
+			if ((! specifiedWidth) &&
+					(getCurrentFormItem() != null) &&
 					(! (sizable instanceof ContentSpecifiedWidth))) {
 				builder.append("width:'*',");
 			}
 		}
-		
+
 		if (sizable instanceof AbsoluteSize absoluteSize) {
 			if (ShrinkWrap.height.equals(shrinkWrap) || ShrinkWrap.both.equals(shrinkWrap)) {
 				builder.append("height:1,");
 				heightShrinkWrapped = true;
 			}
 			else {
-				// NB Don't use height:'*' if there is no specified height because blurbs won't 
+				// NB Don't use height:'*' if there is no specified height because blurbs won't
 				// layout correctly based on their content.
 				// Also, it doesn't help contentImages either to put in a '*'.
 				Integer height = absoluteSize.getPixelHeight();
@@ -3944,7 +4039,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 				}
 			}
 		}
-		
+
 		// process size constraints
 		if (sizable instanceof MinimumHeight minimumHeight) {
 			if (! heightShrinkWrapped) {
@@ -3978,7 +4073,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			}
 		}
 	}
-	
+
 	/**
 	 * Appends disable-condition flags for add/zoom/edit/remove grid actions.
 	 *
@@ -4060,7 +4155,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			builder.append("layoutMargin:10,");
 		}
 	}
-	
+
 	/**
 	 * Appends a disabled-condition binding when configured.
 	 *
@@ -4138,7 +4233,57 @@ public class SmartClientViewRenderer extends ViewRenderer {
 							String disabledConditionName,
 							String invisibleConditionName,
 							Boolean canDelete) { // null unless its a remove button
-		if (! Boolean.FALSE.equals(inActionPanel) && 
+		addAction(actionName,
+					implicitName,
+					displayName,
+					inActionPanel,
+					clientValidation,
+					iconUrl,
+					iconStyleClass,
+					tooltip,
+					confirmationText,
+					parameters,
+					disabledConditionName,
+					invisibleConditionName,
+					canDelete,
+					null);
+	}
+
+	/**
+	 * Adds an action button to the generated action panel when it is panel-visible,
+	 * optionally including upload capture metadata for SmartClient upload buttons.
+	 *
+	 * @param actionName action name sent to the client runtime
+	 * @param implicitName implicit action kind, or null
+	 * @param displayName button display label
+	 * @param inActionPanel whether this action should be rendered in the panel
+	 * @param clientValidation whether client-side validation should run
+	 * @param iconUrl optional icon URL
+	 * @param iconStyleClass optional icon style class
+	 * @param tooltip optional tooltip text
+	 * @param confirmationText optional confirmation message
+	 * @param parameters action parameters
+	 * @param disabledConditionName optional disabled condition binding
+	 * @param invisibleConditionName optional invisible condition binding
+	 * @param canDelete delete permission used for remove actions
+	 * @param uploadCapture optional upload capture enum name; {@code null} for non-upload actions
+	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
+	private void addAction(String actionName,
+							ImplicitActionName implicitName,
+							String displayName,
+							Boolean inActionPanel,
+							Boolean clientValidation,
+							String iconUrl,
+							String iconStyleClass,
+							String tooltip,
+							String confirmationText,
+							List<Parameter> parameters,
+							String disabledConditionName,
+							String invisibleConditionName,
+							Boolean canDelete,
+							String uploadCapture) { // null unless its an upload button
+		if (! Boolean.FALSE.equals(inActionPanel) &&
 				(! ImplicitActionName.Add.equals(implicitName)) &&
 				(! ImplicitActionName.Edit.equals(implicitName))) {
 			String buttonCode = generateButton(actionName,
@@ -4154,6 +4299,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 												invisibleConditionName,
 												null,
 												canDelete);
+			if (uploadCapture != null) {
+				buttonCode = buttonCode.replace("_view:view})", "capture:'" + uploadCapture + "',_view:view})");
+			}
 			// use double quote string delimiter to allow &quot; HTML character entity
 			code.append("view.add");
 			if (! noCreateView) {
@@ -4162,6 +4310,21 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append("Action(");
 			code.append(buttonCode).append(");");
 		}
+	}
+
+	/**
+	 * Resolves an action upload capture property stored during metadata conversion.
+	 *
+	 * @param action runtime action metadata; must not be {@code null}
+	 * @return configured capture affordance, or {@link ContentCapture#none} when unset
+	 * @throws IllegalArgumentException if the stored property is not a {@link ContentCapture} name
+	 */
+	private static @Nonnull ContentCapture resolveActionUploadCapture(@Nonnull Action action) {
+		String capture = action.getProperties().get(UPLOAD_CAPTURE_PROPERTY_NAME);
+		if ((capture == null) || capture.trim().isEmpty()) {
+			return ContentCapture.none;
+		}
+		return ContentCapture.valueOf(capture.trim());
 	}
 
 	/**
@@ -4299,10 +4462,10 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			result.append("_canDelete:").append(canDelete).append(',');
 		}
 		result.append("_view:view})");
-		
+
 		return result.toString();
 	}
-	
+
 	/**
 	 * Appends action parameters as JavaScript object properties.
 	 *
@@ -4384,12 +4547,12 @@ public class SmartClientViewRenderer extends ViewRenderer {
 						}
 					}
 				}
-			}			
+			}
 			builder.setLength(builder.length() - 1); // remove comma
 			builder.append("],");
 		}
 	}
-	
+
 	/**
 	 * Builds and appends a SmartClient field definition for the current form item.
 	 *
@@ -4414,13 +4577,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (help != null) {
 			def.setHelpText(help);
 		}
-		
+
 		code.append(def.toJavascript());
 		code.append(',');
 
 		return def;
 	}
-	
+
 	/**
 	 * Creates a query-column definition for SmartClient list rendering.
 	 *
@@ -4451,12 +4614,12 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param runtime Whether the generated definition is for runtime execution.
 	 * @return The SmartClient field definition for the widget.
 	 */
-	public SmartClientFieldDefinition getField(@SuppressWarnings("hiding") Document document, 
+	public SmartClientFieldDefinition getField(@SuppressWarnings("hiding") Document document,
 												InputWidget widget,
 												boolean runtime) {
 		return new SmartClientFieldDefinition(user, customer, module, document, widget, runtime, currentUxUi);
 	}
-	
+
 	/**
 	 * Creates a data-grid field definition for SmartClient list rendering.
 	 *
@@ -4510,7 +4673,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 		Module drivingDocumentModule = customer.getModule(drivingDocument.getOwningModuleName());
 
-		return appendDataSourceDefinition(user, 
+		return appendDataSourceDefinition(user,
 											customer,
 											owningModule.getName(),
 											owningDocument,
@@ -4521,14 +4684,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 											modelName,
 											model.getLocalisedDescription(),
 											model.getColumns(),
-											null, 
-											null, 
+											null,
+											null,
 											uxui,
-											config, 
-											toAppendTo, 
+											config,
+											toAppendTo,
 											visitedQueryNames);
 	}
-	
+
 	/**
 	* Appends a SmartClient data source definition for a module query.
 	*
@@ -4560,25 +4723,25 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		Module documentModule = query.getDocumentModule(customer);
 		Module owningModule = query.getOwningModule();
 		Document drivingDocument = documentModule.getDocument(customer, documentName);
-		return appendDataSourceDefinition(user, 
-											customer, 
-											owningModule.getName(), 
+		return appendDataSourceDefinition(user,
+											customer,
+											owningModule.getName(),
 											drivingDocument,
-											documentModule, 
-											drivingDocument, 
-											query.getName(), 
+											documentModule,
+											drivingDocument,
+											query.getName(),
 											query.isAggregate(),
-											null, 
+											null,
 											query.getLocalisedDescription(),
 											query.getColumns(),
-											dataSourceIDOverride, 
-											forLookup, 
+											dataSourceIDOverride,
+											forLookup,
 											uxui,
-											config, 
-											toAppendTo, 
+											config,
+											toAppendTo,
 											visitedQueryNames);
 	}
-	
+
 	/**
 	 * Appends a full SmartClient data source definition and any nested lookup data sources.
 	 *
@@ -4622,7 +4785,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 														@Nonnull Set<String> visitedQueryNames) {
 		// dataSourceId -> defn
 		Map<String, String> childDataSources = new TreeMap<>();
-		
+
 		String drivingDocumentName = drivingDocument.getName();
 		String dataSourceId = null;
 		if (dataSourceIDOverride != null) {
@@ -4697,12 +4860,12 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			toAppendTo.append(OWASP.escapeJsString(Util.nullSafeI18n("ui.flag"), false, true));
 			toAppendTo.append("'},"); //,length:1024} long length makes filter builder use a text area
 		}
-		
+
 		if (drivingDocumentName.equals(drivingDocument.getParentDocumentName())) { // hierarchical
 			toAppendTo.append("{name:'bizParentId',title:'Parent ID',type:'text',hidden:true,foreignKey:'");
 			toAppendTo.append(dataSourceId).append(".bizId'},");
 		}
-		
+
 		List<String> hiddenBindingsList = new ArrayList<>();
 		if (forLookup != null) {
 			hiddenBindingsList.add(forLookup.getDescriptionBinding());
@@ -4719,11 +4882,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 				}
 			}
 		}
-		
+
 		int cellHeight = 0; // fixed cell height of list grid (defined in data source)
-		
+
 		for (MetaDataQueryColumn column : columns) {
-			if ((column instanceof MetaDataQueryProjectedColumn projectedColumn) && 
+			if ((column instanceof MetaDataQueryProjectedColumn projectedColumn) &&
 					(! projectedColumn.isProjected())) {
 				continue;
 			}
@@ -4765,12 +4928,12 @@ public class SmartClientViewRenderer extends ViewRenderer {
 																		visitedQueryNames);
 				childDataSources.put(childDataSourceId, childDataSourceDefinition.toString());
 			}
-			
+
 			if (hiddenBindingsList != null) {
 				hiddenBindingsList.remove(column.getBinding());
 			}
 		}
-		
+
 		if (! config) {
 			// for filtering
 			toAppendTo.append("{name: 'operator', type: 'text', hidden: true},");
@@ -4780,7 +4943,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			toAppendTo.append("{name: 'bizId', primaryKey: true, hidden: true},");
 			toAppendTo.append("{name:'bizLock', hidden: true},");
 		}
-		
+
 		for (String hiddenBinding : hiddenBindingsList) {
 			toAppendTo.append("{name:'").append(BindUtil.sanitiseBinding(hiddenBinding));
 			toAppendTo.append("',type:'text',hidden:true},");
@@ -4790,27 +4953,27 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			toAppendTo.setLength(toAppendTo.length() - 1); // remove the last field comma
 		}
 		toAppendTo.append("]");
-		
+
 		// Add cellHeight if applicable
 		if (cellHeight > 0) {
 			toAppendTo.append(",cellHeight:").append(cellHeight);
 		}
-		
+
 		if (config) {
 			toAppendTo.append("},\n");
 		}
 		else {
 			toAppendTo.append("});}\n");
 		}
-		
+
 		// Add any child datasources found
 		for (String childDataSourceDefinition : childDataSources.values()) {
 			toAppendTo.append(childDataSourceDefinition).append('\n');
 		}
-		
+
 		return dataSourceId;
 	}
-	
+
 	/**
 	 * Validates that collapsible containers declare a border title.
 	 *
@@ -4836,11 +4999,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		invisible(sidebar.getInvisibleConditionName(), code);
 		removeTrailingComma(code);
 		code.append("});\n");
-		
+
 		code.append("sidebarPane.addContained(").append(variable).append(");\n");
 		containerVariables.push(variable);
 	}
-	
+
 	/**
 	 * Closes the current SmartClient sidebar container.
 	 *

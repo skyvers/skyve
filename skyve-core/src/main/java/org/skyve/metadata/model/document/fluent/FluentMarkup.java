@@ -31,10 +31,10 @@ public class FluentMarkup extends FluentConstrainableField<FluentMarkup> {
 		return this;
 	}
 	
-	@Override
 	/**
 	 * Returns the mutable metadata instance represented by this builder.
 	 */
+	@Override
 	public Markup get() {
 		return markup;
 	}

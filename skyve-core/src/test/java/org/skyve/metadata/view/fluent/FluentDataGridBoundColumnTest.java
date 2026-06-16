@@ -12,8 +12,6 @@ import org.skyve.impl.metadata.view.WidgetReference;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
@@ -112,20 +110,6 @@ class FluentDataGridBoundColumnTest {
 	}
 
 	// ---- inputWidget overloads ----
-
-	@Test
-	void inputWidgetContentImageSetsWidget() {
-		FluentDataGridBoundColumn col = new FluentDataGridBoundColumn().inputWidget(new FluentContentImage());
-		WidgetReference ref = col.get().getInputWidget();
-		assertThat(ref, is(notNullValue()));
-		assertThat(ref.getWidget(), instanceOf(ContentImage.class));
-	}
-
-	@Test
-	void inputWidgetContentLinkSetsWidget() {
-		FluentDataGridBoundColumn col = new FluentDataGridBoundColumn().inputWidget(new FluentContentLink());
-		assertThat(col.get().getInputWidget().getWidget(), instanceOf(ContentLink.class));
-	}
 
 	@Test
 	void inputWidgetCheckBoxSetsWidget() {
@@ -271,18 +255,6 @@ class FluentDataGridBoundColumnTest {
 		ref.setWidget(widget);
 		col.setInputWidget(ref);
 		return col;
-	}
-
-	@Test
-	void fromContentImageInputWidgetRoundTrips() {
-		assertThat(new FluentDataGridBoundColumn().from(withInputWidget(new ContentImage()))
-				.get().getInputWidget().getWidget(), instanceOf(ContentImage.class));
-	}
-
-	@Test
-	void fromContentLinkInputWidgetRoundTrips() {
-		assertThat(new FluentDataGridBoundColumn().from(withInputWidget(new ContentLink()))
-				.get().getInputWidget().getWidget(), instanceOf(ContentLink.class));
 	}
 
 	@Test

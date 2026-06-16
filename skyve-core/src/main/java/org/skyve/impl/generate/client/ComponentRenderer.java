@@ -19,9 +19,8 @@ import org.skyve.impl.metadata.view.widget.bound.Label;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
@@ -44,6 +43,7 @@ import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 /**
@@ -447,36 +447,20 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 												@Nullable String requiredMessage);
 
 	/**
-	 * Creates a content-image input component.
+	 * Creates a managed-content input component.
 	 *
 	 * @param component the parent render node
 	 * @param dataWidgetVar row variable for repeating contexts
-	 * @param image source content-image metadata
+	 * @param content source managed-content upload metadata
 	 * @param title resolved input title
 	 * @param requiredMessage optional required-message expression
-	 * @return the generated content-image component
+	 * @return the generated managed-content component
 	 */
-	public abstract RenderedComponent contentImage(RenderedComponent component, 
-													String dataWidgetVar, 
-													ContentImage image, 
-													String title, 
-													@Nullable String requiredMessage);
-
-	/**
-	 * Creates a content-link input component.
-	 *
-	 * @param component the parent render node
-	 * @param dataWidgetVar row variable for repeating contexts
-	 * @param link source content-link metadata
-	 * @param title resolved input title
-	 * @param requiredMessage optional required-message expression
-	 * @return the generated content-link component
-	 */
-	public abstract RenderedComponent contentLink(RenderedComponent component, 
-													String dataWidgetVar, 
-													ContentLink link, 
-													String title, 
-													@Nullable String requiredMessage);
+	public abstract @Nonnull RenderedComponent content(@Nullable RenderedComponent component,
+														@Nullable String dataWidgetVar,
+														@Nonnull ContentUpload content,
+														@Nullable String title,
+														@Nullable String requiredMessage);
 
 	/**
 	 * Creates a content-signature input component.

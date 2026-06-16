@@ -93,8 +93,6 @@ class ReactNativeRendererTest {
 		renderer.checkBox(null, null, null, null, null);
 		renderer.colourPicker(null, null, null, null, null);
 		renderer.combo(null, null, null, null, null);
-		renderer.contentImage(null, null, null, null, null);
-		renderer.contentLink(null, null, null, null, null);
 		renderer.contentSignature(null, null, null, null, null);
 		renderer.html(null, null, null, null, null);
 		renderer.lookupDescription(null, null, null, null, null, null, null);

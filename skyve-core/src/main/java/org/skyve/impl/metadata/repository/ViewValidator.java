@@ -76,10 +76,11 @@ import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentCapture;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentDisplay;
 import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
@@ -129,6 +130,8 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.report.ReportFormat;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
+
+import jakarta.annotation.Nonnull;
 
 // TODO check suggestion attributes on text fields etc
 /**
@@ -747,12 +750,22 @@ class ViewValidator extends ViewVisitor {
 		// do nothing
 	}
 
+	/**
+	 * Validates the metadata contract for a managed-content upload.
+	 *
+	 * <p>Side effects: records validation failures by throwing
+	 * {@link MetaDataException}; otherwise leaves the metadata unchanged.
+	 *
+	 * @param content the content upload being visited; must not be {@code null}
+	 * @param parentVisible whether ancestor metadata is visible
+	 * @param parentEnabled whether ancestor metadata is enabled
+	 */
 	@Override
-	public void visitContentImage(ContentImage image, boolean parentVisible, boolean parentEnabled) {
-		String binding = image.getBinding();
-		String imageIdentifier = "ContentImage " + binding;
+	public void visitContent(@Nonnull ContentUpload content, boolean parentVisible, boolean parentEnabled) {
+		String binding = content.getBinding();
+		String contentIdentifier = "Content " + binding;
 		if (dataWidgetBinding != null) {
-			imageIdentifier += IN + dataWidgetIdentifier;
+			contentIdentifier += IN + dataWidgetIdentifier;
 		}
 		validateBinding(dataWidgetBinding,
 							binding,
@@ -760,34 +773,46 @@ class ViewValidator extends ViewVisitor {
 							false,
 							false,
 							true,
-							imageIdentifier,
+							contentIdentifier,
 							AttributeType.content,
 							AttributeType.image);
-		validateConditionName(image.getDisabledConditionName(), imageIdentifier);
-		validateConditionName(image.getInvisibleConditionName(), imageIdentifier);
-		validateSize(image, imageIdentifier);
+		validateContentDisplayCapture(content, contentIdentifier);
+		validateConditionName(content.getDisabledConditionName(), contentIdentifier);
+		validateConditionName(content.getInvisibleConditionName(), contentIdentifier);
+		validateSize(content, contentIdentifier);
 	}
 
-	@Override
-	public void visitContentLink(ContentLink link, boolean parentVisible, boolean parentEnabled) {
-		String binding = link.getBinding();
-		String linkIdentifier = "ContentLink " + link.getBinding();
-		if (dataWidgetBinding != null) {
-			linkIdentifier += IN + dataWidgetIdentifier;
+	/**
+	 * Validates display, capture, and markup combinations for a content upload.
+	 *
+	 * @param content the content upload being validated; must not be {@code null}
+	 * @param widgetIdentifier human-readable identifier used in validation messages
+	 * @throws MetaDataException if the content metadata combination is invalid
+	 */
+	private void validateContentDisplayCapture(@Nonnull ContentUpload content, @Nonnull String widgetIdentifier) {
+		ContentDisplay display = content.getResolvedDisplay();
+		ContentCapture capture = content.getResolvedCapture();
+
+		if ((display == ContentDisplay.image) && (capture == ContentCapture.video)) {
+			throw new MetaDataException(widgetIdentifier + IN + viewIdentifier + " cannot use capture video with display image.");
 		}
-		validateBinding(dataWidgetBinding,
-							binding,
-							false,
-							false,
-							false,
-							true,
-							linkIdentifier,
-							AttributeType.content,
-							AttributeType.image);
-		validateConditionName(link.getDisabledConditionName(), linkIdentifier);
-		validateConditionName(link.getInvisibleConditionName(), linkIdentifier);
-		validateParameterBindings(link.getParameters(), linkIdentifier);
-		validateSize(link, linkIdentifier);
+		if ((display == ContentDisplay.video) && (capture == ContentCapture.camera)) {
+			throw new MetaDataException(widgetIdentifier + IN + viewIdentifier + " cannot use capture camera with display video.");
+		}
+		if (Boolean.TRUE.equals(content.getShowMarkup()) &&
+				((display == ContentDisplay.link) || (display == ContentDisplay.video))) {
+			throw new MetaDataException(widgetIdentifier + IN + viewIdentifier + " cannot use showMarkup with display " + display + '.');
+		}
+		if (display == ContentDisplay.video) {
+			validateBinding(dataWidgetBinding,
+								content.getBinding(),
+								true,
+								false,
+								false,
+								true,
+								widgetIdentifier,
+								AttributeType.content);
+		}
 	}
 
 	@Override

@@ -29,8 +29,6 @@ import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
@@ -293,15 +291,7 @@ class NoOpComponentBuilderTest {
 		assertSame(eventSourceComponent, builder.combo(eventSourceComponent, "var", new Combo(), "disabled", "title", null));
 	}
 
-	@Test
-	void contentImageReturnsInputComponent() {
-		assertSame(component, builder.contentImage(component, "var", new ContentImage(), "disabled", "title", null));
-	}
 
-	@Test
-	void contentLinkReturnsInputComponent() {
-		assertSame(component, builder.contentLink(component, "var", new ContentLink(), "disabled", "title", null, HorizontalAlignment.left));
-	}
 
 	@Test
 	void addContentSignatureReturnsInputComponent() {

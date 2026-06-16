@@ -26,7 +26,7 @@ import org.skyve.impl.metadata.view.container.form.FormColumn;
 import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
 import org.skyve.impl.metadata.view.container.form.FormRow;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.DefaultWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
@@ -431,9 +431,9 @@ public class ViewGenerator {
 					row.getItems().add(item);
 					form.getRows().add(row);
 				}
-				else if (module.isPrototype() && (attribute instanceof Content)) {
+				else if (attribute instanceof Content) {
 					FormItem item = new FormItem();
-					ContentImage widget = new ContentImage();
+					ContentUpload widget = new ContentUpload();
 					widget.setBinding(binding);
 					item.setWidget(widget);
 					FormRow row = new FormRow();

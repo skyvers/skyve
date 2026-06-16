@@ -67,9 +67,8 @@ import org.skyve.impl.metadata.view.widget.bound.input.CheckMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
@@ -111,6 +110,7 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.web.WebAction;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 /**
@@ -1598,45 +1598,54 @@ public class ClientViewRenderer extends ViewRenderer {
 	}
 
 	/**
-	 * Executes this renderer lifecycle override for the current view context.
+	 * Renders a content upload in a bound-column context.
+	 *
+	 * @param content the content upload to render; must not be {@code null}
 	 */
 	@Override
-	public void renderBoundColumnContentImage(ContentImage image) {
-		renderContentImage(0, image);
+	public void renderBoundColumnContent(@Nonnull ContentUpload content) {
+		renderContent(0, content);
 	}
 
 	/**
-	 * Executes this renderer lifecycle override for the current view context.
+	 * Renders a content upload in a container-column context.
+	 *
+	 * @param content the content upload to render; must not be {@code null}
 	 */
 	@Override
-	public void renderContainerColumnContentImage(ContentImage image) {
-		renderContentImage(0, image);
+	public void renderContainerColumnContent(@Nonnull ContentUpload content) {
+		renderContent(0, content);
 	}
 
 	/**
-	 * Executes this renderer lifecycle override for the current view context.
+	 * Renders a content upload in a form context.
+	 *
+	 * @param content the content upload to render; must not be {@code null}
 	 */
 	@Override
-	public void renderFormContentImage(ContentImage image) {
-		renderContentImage(getCurrentWidgetColspan(), image);
+	public void renderFormContent(@Nonnull ContentUpload content) {
+		renderContent(getCurrentWidgetColspan(), content);
 	}
 
 	/**
-	 * Renders a content-image input with explicit form colspan handling.
+	 * Creates and registers the generated client component for a content upload.
+	 *
+	 * @param formColspan form colspan to apply when rendering inside a form
+	 * @param content the content upload metadata; must not be {@code null}
 	 */
-	private void renderContentImage(int formColspan, ContentImage image) {
+	private void renderContent(int formColspan, @Nonnull ContentUpload content) {
 		String title = getCurrentWidgetLabel();
 		String requiredMessage = getCurrentWidgetRequiredMessage();
-		RenderedComponent c = cr.contentImage(null, dataWidgetVar, image, title, requiredMessage);
-        addComponent(title, 
-        				formColspan,
-        				null, 
-        				image.getInvisibleConditionName(), 
-        				getCurrentWidgetHelp(),
-        				c, 
-        				image.getPixelWidth(), 
-        				null, 
-        				null);
+		RenderedComponent c = cr.content(null, dataWidgetVar, content, title, requiredMessage);
+		addComponent(title,
+						formColspan,
+						null,
+						content.getInvisibleConditionName(),
+						getCurrentWidgetHelp(),
+						c,
+						content.getPixelWidth(),
+						null,
+						null);
 	}
 
 	/**
@@ -1656,40 +1665,6 @@ public class ClientViewRenderer extends ViewRenderer {
         				signature.getPixelWidth(), 
         				null, 
         				null);
-	}
-
-	/**
-	 * Executes this renderer lifecycle override for the current view context.
-	 */
-	@Override
-	public void renderBoundColumnContentLink(String value, ContentLink link) {
-		renderContentLink(value, 0, link);
-	}
-
-	/**
-	 * Executes this renderer lifecycle override for the current view context.
-	 */
-	@Override
-	public void renderFormContentLink(String value, ContentLink link) {
-		renderContentLink(value, getCurrentWidgetColspan(), link);
-	}
-
-	/**
-	 * Renders a content-link input with explicit form colspan handling.
-	 */
-	private void renderContentLink(@SuppressWarnings("unused") String value, int formColspan, ContentLink link) {
-		String title = getCurrentWidgetLabel();
-		String requiredMessage = getCurrentWidgetRequiredMessage();
-		RenderedComponent c = cr.contentLink(null, dataWidgetBinding, link, title, requiredMessage);
-		addComponent(title, 
-						formColspan,
-						requiredMessage, 
-						link.getInvisibleConditionName(), 
-						getCurrentWidgetHelp(),
-						c, 
-						link.getPixelWidth(), 
-						null, 
-						null);
 	}
 
 	/**

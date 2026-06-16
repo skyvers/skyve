@@ -29,9 +29,8 @@ import org.skyve.impl.metadata.view.widget.DynamicImage;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.input.CompleteType;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
@@ -54,6 +53,8 @@ import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Binder.TargetMetaData;
+
+import jakarta.annotation.Nonnull;
 
 /**
  * Runtime implementation of the {@link View} metadata interface.
@@ -656,29 +657,27 @@ public class ViewImpl extends Container implements View {
 			}
 			
 			@Override
-			public void visitContentImage(ContentImage image, boolean parentVisible, boolean parentEnabled) {
+			public void visitContent(@Nonnull ContentUpload content, boolean parentVisible, boolean parentEnabled) {
 				if (determineAccesses) {
-					String binding = image.getBinding();
-					if (dataGridBinding != null) {
-						StringBuilder sb = new StringBuilder(dataGridBinding.length() + 1 + binding.length());
-						sb.append(dataGridBinding).append('.').append(binding);
-						binding = sb.toString();
-					}
-					accesses.add(UserAccess.content(moduleName, documentName, binding));
+					addContentAccess(moduleName, documentName, content.getBinding());
 				}
 			}
-			
-			@Override
-			public void visitContentLink(ContentLink link, boolean parentVisible, boolean parentEnabled) {
-				if (determineAccesses) {
-					String binding = link.getBinding();
-					if (dataGridBinding != null) {
-						StringBuilder sb = new StringBuilder(dataGridBinding.length() + 1 + binding.length());
-						sb.append(dataGridBinding).append('.').append(binding);
-						binding = sb.toString();
-					}
-					accesses.add(UserAccess.content(moduleName, documentName, binding));
+
+			/**
+			 * Adds a content user-access entry for a visited content upload.
+			 *
+			 * @param contentModuleName owning module for the content binding
+			 * @param contentDocumentName owning document for the content binding
+			 * @param binding content binding relative to the current view or data-grid row
+			 */
+			private void addContentAccess(String contentModuleName, String contentDocumentName, String binding) {
+				String contentBinding = binding;
+				if (dataGridBinding != null) {
+					StringBuilder sb = new StringBuilder(dataGridBinding.length() + 1 + binding.length());
+					sb.append(dataGridBinding).append('.').append(binding);
+					contentBinding = sb.toString();
 				}
+				accesses.add(UserAccess.content(contentModuleName, contentDocumentName, contentBinding));
 			}
 			
 			@Override
@@ -885,12 +884,21 @@ public class ViewImpl extends Container implements View {
 				}
 			}
 
+			/**
+			 * Adds singular access for the document targeted by a relation binding.
+			 *
+			 * @param binding relation binding from the current document context
+			 * @throws MetaDataException if the binding cannot be resolved to a related document
+			 */
 			private void accessThroughBinding(String binding) {
 				TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
 
 				Document relatedDocument = null;
 				if (ChildBean.PARENT_NAME.equals(binding) || binding.endsWith(ChildBean.CHILD_PARENT_NAME_SUFFIX)) {
 					relatedDocument = target.getDocument().getParentDocument(customer);
+					if (relatedDocument == null) {
+						throw new MetaDataException(binding + " does not point anywhere from context document " + document.getName());
+					}
 				}
 				else {
 					Relation targetRelation = (Relation) target.getAttribute();

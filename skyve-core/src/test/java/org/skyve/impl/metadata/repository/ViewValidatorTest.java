@@ -85,9 +85,10 @@ import org.skyve.impl.metadata.view.widget.bound.input.CheckMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentCapture;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentDisplay;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
@@ -2020,14 +2021,6 @@ class ViewValidatorTest {
 	}
 
 	@Test
-	void visitContentLink_withNoBinding_noException() {
-		ContentLink link = new ContentLink();
-
-		ViewValidator v = newValidator();
-		assertDoesNotThrow(() -> v.visitContentLink(link, true, true));
-	}
-
-	@Test
 	void visitListGrid_withoutQueryOrModel_throws() {
 		ListGrid grid = new ListGrid();
 
@@ -2076,24 +2069,13 @@ class ViewValidatorTest {
 		CheckBox checkBox = new CheckBox();
 		ColourPicker colourPicker = new ColourPicker();
 		Combo combo = new Combo();
-		ContentImage contentImage = new ContentImage();
-		ContentSignature contentSignature = new ContentSignature();
-		HTML html = new HTML();
-		Password password = new Password();
+		ContentUpload content = new ContentUpload();
 		Radio radio = new Radio();
 		RichText richText = new RichText();
 		Slider slider = new Slider();
 		Spinner spinner = new Spinner();
 		TextArea textArea = new TextArea();
 		TextField textField = new TextField();
-
-		assertThrows(MetaDataException.class, () -> v.visitCheckBox(checkBox, true, true));
-		assertThrows(MetaDataException.class, () -> v.visitColourPicker(colourPicker, true, true));
-		assertThrows(MetaDataException.class, () -> v.visitCombo(combo, true, true));
-		assertThrows(MetaDataException.class, () -> v.visitContentImage(contentImage, true, true));
-		assertThrows(MetaDataException.class, () -> v.visitContentSignature(contentSignature, true, true));
-		assertThrows(MetaDataException.class, () -> v.visitHTML(html, true, true));
-		assertThrows(MetaDataException.class, () -> v.visitPassword(password, true, true));
 		assertThrows(MetaDataException.class, () -> v.visitRadio(radio, true, true));
 		assertThrows(MetaDataException.class, () -> v.visitRichText(richText, true, true));
 		assertThrows(MetaDataException.class, () -> v.visitSlider(slider, true, true));
@@ -2387,14 +2369,132 @@ class ViewValidatorTest {
 	@Test
 	void contentImage_inDataGrid_noException() {
 		org.skyve.impl.metadata.model.document.field.Content contentAttr = new org.skyve.impl.metadata.model.document.field.Content();
-		contentAttr.setName("photo");
+		contentAttr.setName("media");
 		contentAttr.setAttributeType(org.skyve.metadata.model.Attribute.AttributeType.content);
 		addChildDoc("ItemDoc", contentAttr);
-		ContentImage ci = new ContentImage();
-		ci.setBinding("photo");
-		addDataGrid("items", ci);
+		ContentUpload content = new ContentUpload();
+		content.setBinding("media");
+		addDataGrid("items", content);
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(v::visit);
+	}
+
+	@Test
+	void content_defaultDisplayAndCaptureOnContent_noException() {
+		org.skyve.impl.metadata.model.document.field.Content contentAttr = new org.skyve.impl.metadata.model.document.field.Content();
+		contentAttr.setName("media");
+		contentAttr.setAttributeType(org.skyve.metadata.model.Attribute.AttributeType.content);
+		document.putAttribute(contentAttr);
+		ContentUpload content = new ContentUpload();
+		content.setBinding("media");
+
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(() -> v.visitContent(content, true, true));
+	}
+
+	@Test
+	void content_imageDisplayOnImage_noException() {
+		org.skyve.impl.metadata.model.document.field.Image imageAttr = new org.skyve.impl.metadata.model.document.field.Image();
+		imageAttr.setName("photo");
+		imageAttr.setAttributeType(org.skyve.metadata.model.Attribute.AttributeType.image);
+		document.putAttribute(imageAttr);
+		ContentUpload content = new ContentUpload();
+		content.setBinding("photo");
+		content.setDisplay(ContentDisplay.image);
+		content.setCapture(ContentCapture.camera);
+		content.setShowMarkup(Boolean.TRUE);
+
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(() -> v.visitContent(content, true, true));
+	}
+
+	@Test
+	void content_videoDisplayOnContent_noException() {
+		org.skyve.impl.metadata.model.document.field.Content contentAttr = new org.skyve.impl.metadata.model.document.field.Content();
+		contentAttr.setName("media");
+		contentAttr.setAttributeType(org.skyve.metadata.model.Attribute.AttributeType.content);
+		document.putAttribute(contentAttr);
+		ContentUpload content = new ContentUpload();
+		content.setBinding("media");
+		content.setDisplay(ContentDisplay.video);
+		content.setCapture(ContentCapture.video);
+
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(() -> v.visitContent(content, true, true));
+	}
+
+	@Test
+	void content_videoDisplayOnImage_throws() {
+		org.skyve.impl.metadata.model.document.field.Image imageAttr = new org.skyve.impl.metadata.model.document.field.Image();
+		imageAttr.setName("photo");
+		imageAttr.setAttributeType(org.skyve.metadata.model.Attribute.AttributeType.image);
+		document.putAttribute(imageAttr);
+		ContentUpload content = new ContentUpload();
+		content.setBinding("photo");
+		content.setDisplay(ContentDisplay.video);
+
+		ViewValidator v = newValidator();
+		assertThrows(MetaDataException.class, () -> v.visitContent(content, true, true));
+	}
+
+	@Test
+	void content_imageDisplayWithVideoCapture_throws() {
+		org.skyve.impl.metadata.model.document.field.Content contentAttr = new org.skyve.impl.metadata.model.document.field.Content();
+		contentAttr.setName("media");
+		contentAttr.setAttributeType(org.skyve.metadata.model.Attribute.AttributeType.content);
+		document.putAttribute(contentAttr);
+		ContentUpload content = new ContentUpload();
+		content.setBinding("media");
+		content.setDisplay(ContentDisplay.image);
+		content.setCapture(ContentCapture.video);
+
+		ViewValidator v = newValidator();
+		assertThrows(MetaDataException.class, () -> v.visitContent(content, true, true));
+	}
+
+	@Test
+	void content_videoDisplayWithCameraCapture_throws() {
+		org.skyve.impl.metadata.model.document.field.Content contentAttr = new org.skyve.impl.metadata.model.document.field.Content();
+		contentAttr.setName("media");
+		contentAttr.setAttributeType(org.skyve.metadata.model.Attribute.AttributeType.content);
+		document.putAttribute(contentAttr);
+		ContentUpload content = new ContentUpload();
+		content.setBinding("media");
+		content.setDisplay(ContentDisplay.video);
+		content.setCapture(ContentCapture.camera);
+
+		ViewValidator v = newValidator();
+		assertThrows(MetaDataException.class, () -> v.visitContent(content, true, true));
+	}
+
+	@Test
+	void content_linkDisplayWithShowMarkup_throws() {
+		org.skyve.impl.metadata.model.document.field.Content contentAttr = new org.skyve.impl.metadata.model.document.field.Content();
+		contentAttr.setName("media");
+		contentAttr.setAttributeType(org.skyve.metadata.model.Attribute.AttributeType.content);
+		document.putAttribute(contentAttr);
+		ContentUpload content = new ContentUpload();
+		content.setBinding("media");
+		content.setDisplay(ContentDisplay.link);
+		content.setShowMarkup(Boolean.TRUE);
+
+		ViewValidator v = newValidator();
+		assertThrows(MetaDataException.class, () -> v.visitContent(content, true, true));
+	}
+
+	@Test
+	void content_videoDisplayWithShowMarkup_throws() {
+		org.skyve.impl.metadata.model.document.field.Content contentAttr = new org.skyve.impl.metadata.model.document.field.Content();
+		contentAttr.setName("media");
+		contentAttr.setAttributeType(org.skyve.metadata.model.Attribute.AttributeType.content);
+		document.putAttribute(contentAttr);
+		ContentUpload content = new ContentUpload();
+		content.setBinding("media");
+		content.setDisplay(ContentDisplay.video);
+		content.setShowMarkup(Boolean.TRUE);
+
+		ViewValidator v = newValidator();
+		assertThrows(MetaDataException.class, () -> v.visitContent(content, true, true));
 	}
 
 	// ---- contentSignature in data grid ----

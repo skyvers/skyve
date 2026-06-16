@@ -27,7 +27,6 @@ import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
@@ -144,7 +143,6 @@ class ReportViewVisitorLayoutTest {
 		visitor.visitCheckBox(new CheckBox(), true, true);
 		visitor.visitColourPicker(new ColourPicker(), true, true);
 		visitor.visitCombo(new Combo(), true, true);
-		visitor.visitContentImage(new ContentImage(), true, true);
 		visitor.visitContentSignature(new ContentSignature(), true, true);
 		visitor.visitGeometry(new Geometry(), true, true);
 		visitor.visitGeometryMap(new GeometryMap(), true, true);
@@ -411,7 +409,6 @@ class ReportViewVisitorLayoutTest {
 		visitor.visitZoomIn(null, true, true);
 		visitor.visitCheckMembership(null, true, true);
 		visitor.visitComparison(null, true, true);
-		visitor.visitContentLink(null, true, true);
 		visitor.visitDataGridBoundColumn(null, true, true);
 		visitor.visitDataGridContainerColumn(null, true, true);
 		visitor.visitDialogButton(null, true, true);

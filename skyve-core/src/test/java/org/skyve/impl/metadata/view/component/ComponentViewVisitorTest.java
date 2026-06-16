@@ -46,8 +46,6 @@ import org.skyve.impl.metadata.view.widget.bound.input.CheckMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.impl.metadata.view.widget.bound.input.DefaultWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
@@ -167,8 +165,6 @@ class ComponentViewVisitorTest {
 				formItem(new RichText()),
 				formItem(new TextArea()),
 				formItem(new HTML()),
-				formItem(new ContentImage()),
-				formItem(new ContentLink()),
 				formItem(new ContentSignature()),
 				formItem(new Slider()),
 				formItem(new Spinner()),

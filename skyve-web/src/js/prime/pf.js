@@ -15,16 +15,119 @@ SKYVE.PF = function() {
 	
 	var contentOverlayIdsByBinding = {};
 	var contentMarkupIdsByBinding = {};
+	var contentMarkupCompanionIdsByBinding = {};
 	
 	var getUrlParameter = function(url, name) {
 		var match = new RegExp('[?&]' + name + '=([^&]*)').exec(url);
 		return match ? decodeURIComponent(match[1].replace(/\+/g, ' ')) : null;
 	};
-	
-	var getContentSelector = function(id, binding, suffix) {
-		return id ? '[id$="' + id + '_' + binding + suffix + '"]' : '[id$="_' + binding + suffix + '"]';
+
+	var unsanitiseBinding = function(binding) {
+		return binding.replace(/\_(\d*)\_/g, '[$1]').replace(/\_/g, '.');
+	};
+
+	var getClientIdSelector = function(localId) {
+		return '[id="' + localId + '"],[id$=":' + localId + '"]';
 	};
 	
+	var getContentSelector = function(id, binding, suffix) {
+		return getClientIdSelector(id ? id + '_' + binding + suffix : '_' + binding + suffix);
+	};
+	
+	var getContentBindingCandidates = function(binding) {
+		var result = [binding];
+		var index = binding.lastIndexOf('_');
+		if (index > -1 && index < (binding.length - 1)) {
+			var suffix = binding.substring(index + 1);
+			if (binding.charAt(0) === '_') {
+				result.push('_' + suffix);
+			}
+			result.push(suffix);
+		}
+		return result;
+	};
+
+	var getContentElements = function(root, id, binding, suffix) {
+		var bindings = getContentBindingCandidates(binding);
+		var result = root.$();
+		for (var i = 0, l = bindings.length; i < l; i++) {
+			result = root.$(getContentSelector(id, bindings[i], suffix));
+			if (result.length > 0) {
+				return result;
+			}
+		}
+		if (id) {
+			for (var j = 0, m = bindings.length; j < m; j++) {
+				result = root.$(getContentSelector(null, bindings[j], suffix));
+				if (result.length > 0) {
+					return result;
+				}
+			}
+		}
+		return result;
+	};
+	
+	var setContentValue = function(root, id, binding, suffix, value) {
+		getContentElements(root, id, binding, suffix).val(value).attr('value', value).trigger('change');
+	};
+
+	var setExactContentValue = function(root, id, binding, suffix, value) {
+		var element = root.$(getContentSelector(id, binding, suffix));
+		if (element.length > 0) {
+			element.val(value).attr('value', value).trigger('change');
+		}
+	};
+	
+	var clearContentAnchor = function(root, id, binding) {
+		getContentElements(root, id, binding, '_link').attr('href','javascript:void(0)').text('<Empty>').attr('onclick', 'return false').off('click.skyveContentClear').on('click.skyveContentClear', function() { return false; });
+	};
+
+	var showContentVideo = function(root, id, binding, url) {
+		getContentElements(root, id, binding, '_video').each(function() {
+			var container = root.$(this);
+			var video = container.children('video');
+			if (video.length > 0) {
+				video.attr('src', url);
+			}
+			else {
+				container.append('<video controls preload="metadata" style="width:100%;height:100%;object-fit:contain" src="' + url + '"></video>');
+			}
+		});
+	};
+
+	var showContentVideoPlaceholder = function(root, id, binding) {
+		getContentElements(root, id, binding, '_video').each(function() {
+			root.$(this).children('video').remove();
+		});
+	};
+
+	var setAutoContentVisibility = function(root, id, binding, mediaKind) {
+		var link = getContentElements(root, id, binding, '_link');
+		link.toggleClass('skyveContentHidden', !! mediaKind && mediaKind !== 'link');
+
+		var image = getContentElements(root, id, binding, '_image');
+		var showImage = mediaKind === 'image';
+		image.toggleClass('skyveContentHidden', ! showImage);
+		image.parent().toggleClass('skyveContentHidden', ! showImage);
+
+		var video = getContentElements(root, id, binding, '_video');
+		var showVideo = mediaKind === 'video';
+		video.toggleClass('skyveContentHidden', ! showVideo);
+		video.parent().toggleClass('skyveContentHidden', ! showVideo);
+	};
+
+	var getContentMarkupItems = function(root, id, binding) {
+		var result = id ? root.$('.skyveContentMarkupAction-' + id + '_' + binding) : root.$();
+		if (result.length > 0) {
+			return result;
+		}
+		return root.$('.skyveContentMarkupAction-' + binding);
+	};
+
+	var setContentMarkupVisibility = function(root, id, binding, mediaKind) {
+		getContentMarkupItems(root, id, binding).toggleClass('skyveContentHidden', mediaKind !== 'image');
+	};
+		
 	var getContentWidget = function(id, binding, suffix) {
 		var widget = id ? top.PF(id + '_' + binding + suffix) : null;
 		return widget || top.PF(binding + suffix);
@@ -52,13 +155,21 @@ SKYVE.PF = function() {
 			SKYVE.PF.getById(id + '_overlayiframe').attr('src','')
 		},
 		
-		afterContentUpload: function(binding, contentId, modoc, fileName) {
+		afterContentUpload: function(binding, contentId, modoc, fileName, mediaKind, companionBinding) {
 			// Cannot use window.parent here to support nested frames as the script is called from eval server side which is executed at the top window context.
 			var id = contentOverlayIdsByBinding[binding];
-			top.$(getContentSelector(id, binding, '_hidden')).val(contentId);
-			var url = 'content?_n=' + contentId + '&_doc=' + modoc + '&_b=' + binding.replace(/\_/g, '.');
-			top.$(getContentSelector(id, binding, '_link')).attr('href', url).text(fileName).attr('onclick', 'return true');
-			top.$(getContentSelector(id, binding, '_image')).attr('src', url);
+			setContentValue(top, id, binding, '_hidden', contentId);
+			if (mediaKind && companionBinding) {
+				setExactContentValue(top, id, companionBinding, '_hidden', mediaKind);
+			}
+			var url = 'content?_n=' + contentId + '&_doc=' + modoc + '&_b=' + unsanitiseBinding(binding);
+			getContentElements(top, id, binding, '_link').off('click.skyveContentClear').attr('href', url).text(fileName).attr('onclick', 'return true');
+			getContentElements(top, id, binding, '_image').attr('src', url);
+			showContentVideo(top, id, binding, url);
+			if (companionBinding) {
+				setAutoContentVisibility(top, id, binding, mediaKind);
+			}
+			setContentMarkupVisibility(top, id, binding, mediaKind);
 			var widget = getContentWidget(id, binding, 'Overlay');
 			if (widget) {
 				widget.hide();
@@ -66,19 +177,44 @@ SKYVE.PF = function() {
 			delete contentOverlayIdsByBinding[binding];
 		},
 
-		clearContentImage: function(binding, id) {
-			$(getContentSelector(id, binding, '_hidden')).val('');
-			$(getContentSelector(id, binding, '_image')).attr('src','images/blank.gif');
+		clearContentImage: function(binding, id, companionBinding) {
+			setContentValue(top, id, binding, '_hidden', '');
+			if (companionBinding) {
+				setExactContentValue(top, id, companionBinding, '_hidden', '');
+			}
+			clearContentAnchor(top, id, binding);
+			getContentElements(top, id, binding, '_image').attr('src','images/blank.gif');
+			showContentVideoPlaceholder(top, id, binding);
+			if (companionBinding) {
+				setAutoContentVisibility(top, id, binding, '');
+			}
+			setContentMarkupVisibility(top, id, binding, '');
 		},
 		
-		clearContentLink: function(binding, id) {
-			$(getContentSelector(id, binding, '_hidden')).val('');
-			$(getContentSelector(id, binding, '_link')).attr('href','javascript:void(0)').text('<Empty>').attr('onclick', 'return false');
+		clearContentLink: function(binding, id, companionBinding) {
+			setContentValue(top, id, binding, '_hidden', '');
+			if (companionBinding) {
+				setExactContentValue(top, id, companionBinding, '_hidden', '');
+			}
+			clearContentAnchor(top, id, binding);
+			showContentVideoPlaceholder(top, id, binding);
+			if (companionBinding) {
+				setAutoContentVisibility(top, id, binding, '');
+			}
+			setContentMarkupVisibility(top, id, binding, '');
 		},
 
-		contentMarkupOnShow: function(id, binding, url) {
+		clearContent: function(binding, id, companionBinding) {
+			SKYVE.PF.clearContentLink(binding, id, companionBinding);
+			getContentElements(top, id, binding, '_image').attr('src','images/blank.gif');
+		},
+
+		contentMarkupOnShow: function(id, binding, url, companionBinding) {
 			contentMarkupIdsByBinding[binding] = id;
-			var finalUrl = url += '&_id=' + $(getContentSelector(id, binding, '_hidden')).val();
+			if (companionBinding) {
+				contentMarkupCompanionIdsByBinding[binding] = companionBinding;
+			}
+			var finalUrl = url += '&_id=' + getContentElements(window, id, binding, '_hidden').val();
 			SKYVE.PF.getById(id + '_markupiframe').attr('src', finalUrl);
 		},
 
@@ -89,15 +225,24 @@ SKYVE.PF = function() {
 		afterMarkupApply: function(binding, contentId, modoc, fileName) {
 			// Cannot use window.parent here to support nested frames as the script is called from eval server side which is executed at the top window context.
 			var id = contentMarkupIdsByBinding[binding];
-			top.$(getContentSelector(id, binding, '_hidden')).val(contentId);
-			var url = 'content?_n=' + contentId + '&_doc=' + modoc + '&_b=' + binding.replace(/\_/g, '.');
-			top.$(getContentSelector(id, binding, '_link')).attr('href', url).text(fileName).attr('onclick', 'return true');
-			top.$(getContentSelector(id, binding, '_image')).attr('src', url);
+			setContentValue(top, id, binding, '_hidden', contentId);
+			var companionBinding = contentMarkupCompanionIdsByBinding[binding];
+			if (companionBinding) {
+				setExactContentValue(top, id, companionBinding, '_hidden', 'image');
+			}
+			var url = 'content?_n=' + contentId + '&_doc=' + modoc + '&_b=' + unsanitiseBinding(binding);
+			getContentElements(top, id, binding, '_link').off('click.skyveContentClear').attr('href', url).text(fileName).attr('onclick', 'return true');
+			getContentElements(top, id, binding, '_image').attr('src', url);
+			if (companionBinding) {
+				setAutoContentVisibility(top, id, binding, 'image');
+			}
+			setContentMarkupVisibility(top, id, binding, 'image');
 			var widget = getContentWidget(id, binding, 'Markup');
 			if (widget) {
 				widget.hide();
 			}
 			delete contentMarkupIdsByBinding[binding];
+			delete contentMarkupCompanionIdsByBinding[binding];
 		},
 
 		tabChange: function(moduleName, documentName, id, index) {

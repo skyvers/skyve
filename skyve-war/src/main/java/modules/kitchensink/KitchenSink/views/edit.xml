@@ -140,12 +140,12 @@
 				</row>
 				<row>
 					<item>
-						<default binding="contentLink" />
+						<content binding="contentLink" display="link" />
 					</item>
 				</row>
 				<row>
 					<item>
-						<contentImage binding="contentImage" pixelWidth="50" pixelHeight="50" />
+						<content binding="contentImage" display="image" pixelWidth="50" pixelHeight="50" />
 					</item>
 				</row>
 				<row>

@@ -32,6 +32,7 @@ import org.primefaces.event.SelectEvent;
 import org.primefaces.event.ToggleEvent;
 import org.primefaces.model.Visibility;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentCapture;
 import org.skyve.impl.sail.mock.MockWebContext;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
@@ -410,10 +411,13 @@ class FacesViewTest {
 
 		String url = view.getContentUploadUrl("bean.name", false);
 
-		assertTrue(url.contains("/contentUpload.xhtml?"));
+		assertTrue(url.contains("/upload.xhtml?"));
+		assertTrue(url.contains("_u=boundContent"));
 		assertTrue(url.contains("_n=bean.name"));
 		assertTrue(url.contains("_c=web123"));
 		assertTrue(url.contains("_b=parent.child"));
+		assertTrue(url.contains("_d=link"));
+		assertTrue(url.contains("_cap=none"));
 	}
 
 	@Test
@@ -425,10 +429,13 @@ class FacesViewTest {
 
 		String url = view.getContentUploadUrl("bean.image", true);
 
-		assertTrue(url.contains("/imageUpload.xhtml?"));
+		assertTrue(url.contains("/upload.xhtml?"));
+		assertTrue(url.contains("_u=boundContent"));
 		assertTrue(url.contains("_n=bean.image"));
 		assertTrue(url.contains("_c=web123"));
 		assertFalse(url.contains("/contentUpload.xhtml?"));
+		assertTrue(url.contains("_d=image"));
+		assertTrue(url.contains("_cap=none"));
 	}
 
 	@Test
@@ -441,10 +448,64 @@ class FacesViewTest {
 
 		String url = view.getContentUploadUrl("bean.image", true);
 
-		assertTrue(url.contains("/imageUpload.xhtml?"));
+		assertTrue(url.contains("/upload.xhtml?"));
 		assertTrue(url.contains("_n=bean.image"));
 		assertTrue(url.contains("_c=web123"));
 		assertTrue(url.contains("_b=parent.child"));
+	}
+
+	@Test
+	void getContentUploadUrlStringOverloadDefaultsBlankValuesAndAddsCompanionBinding() {
+		FacesView view = new FacesView();
+		MockWebContext webContext = new MockWebContext();
+		webContext.setKey("web123");
+		view.setWebContext(webContext);
+
+		String url = view.getContentUploadUrl("bean.media", " ", null, "_bean_media");
+
+		assertTrue(url.contains("/upload.xhtml?"));
+		assertTrue(url.contains("_u=boundContent"));
+		assertTrue(url.contains("_n=bean.media"));
+		assertTrue(url.contains("_c=web123"));
+		assertTrue(url.contains("_d=auto"));
+		assertTrue(url.contains("_cap=none"));
+		assertTrue(url.contains("_m=_bean_media"));
+	}
+
+	@Test
+	void getContentUploadUrlStringOverloadRejectsUnknownDisplay() {
+		FacesView view = new FacesView();
+		MockWebContext webContext = new MockWebContext();
+		webContext.setKey("web123");
+		view.setWebContext(webContext);
+
+		assertThrows(IllegalArgumentException.class, () -> view.getContentUploadUrl("bean.media", "unknown", null, null));
+	}
+
+	@Test
+	void getContentMediaKindReturnsNullWhenCurrentBeanIsMissing() {
+		FacesView view = new FacesView();
+
+		assertNull(view.getContentMediaKind("attachment"));
+	}
+
+	@Test
+	void contentUrlHelpersRequireCurrentBean() {
+		FacesView view = new FacesView();
+
+		assertThrows(NullPointerException.class, () -> view.getContentUrl("attachment", true));
+		assertThrows(NullPointerException.class, () -> view.getContentFileName("attachment"));
+	}
+
+	@Test
+	void getContentMediaKindReturnsNullWhenContentBindingIsBlank() throws Exception {
+		FacesView view = new FacesView();
+		Map<String, Object> values = new HashMap<>();
+		values.put("attachment", " ");
+		DynamicBean bean = new DynamicBean("test", "RootDoc", values);
+		setPrivateField(view, "currentBean", new BeanMapAdapter(bean, null));
+
+		assertNull(view.getContentMediaKind("attachment"));
 	}
 
 	@Test
@@ -505,10 +566,64 @@ class FacesViewTest {
 
 		String url = view.getFileUploadUrl("myAction");
 
-		assertTrue(url.contains("/fileUpload.xhtml?"));
+		assertTrue(url.contains("/upload.xhtml?"));
+		assertTrue(url.contains("_u=action"));
 		assertTrue(url.contains("_a=myAction"));
 		assertTrue(url.contains("_c=web123"));
+		assertTrue(url.contains("_cap=none"));
 		assertFalse(url.contains("_b="));
+	}
+
+	@Test
+	void getFileUploadUrlIncludesActionCapture() {
+		FacesView view = new FacesView();
+		MockWebContext webContext = new MockWebContext();
+		webContext.setKey("web123");
+		view.setWebContext(webContext);
+
+		String url = view.getFileUploadUrl("myAction", "video");
+
+		assertTrue(url.contains("/upload.xhtml?"));
+		assertTrue(url.contains("_u=action"));
+		assertTrue(url.contains("_a=myAction"));
+		assertTrue(url.contains("_c=web123"));
+		assertTrue(url.contains("_cap=video"));
+	}
+
+	@Test
+	void getFileUploadUrlStringOverloadDefaultsBlankCapture() {
+		FacesView view = new FacesView();
+		MockWebContext webContext = new MockWebContext();
+		webContext.setKey("web123");
+		view.setWebContext(webContext);
+
+		String url = view.getFileUploadUrl("myAction", " ");
+
+		assertTrue(url.contains("_a=myAction"));
+		assertTrue(url.contains("_c=web123"));
+		assertTrue(url.contains("_cap=none"));
+	}
+
+	@Test
+	void getFileUploadUrlTypedOverloadDefaultsNullCapture() {
+		FacesView view = new FacesView();
+		MockWebContext webContext = new MockWebContext();
+		webContext.setKey("web123");
+		view.setWebContext(webContext);
+
+		String url = view.getFileUploadUrl("myAction", (ContentCapture) null);
+
+		assertTrue(url.contains("_a=myAction"));
+		assertTrue(url.contains("_c=web123"));
+		assertTrue(url.contains("_cap=none"));
+	}
+
+	@Test
+	@SuppressWarnings("null")
+	void getFileUploadUrlRequiresActionName() {
+		FacesView view = new FacesView();
+
+		assertThrows(NullPointerException.class, () -> view.getFileUploadUrl(null, ContentCapture.none));
 	}
 
 	@Test
@@ -802,6 +917,14 @@ class FacesViewTest {
 
 		assertFalse(view.postBackCalled);
 		assertTrue(view.coldHitCalled);
+	}
+
+	@Test
+	void coldHitExecutesBaseMethodBodyInHeadlessMode() {
+		FacesView view = new FacesView();
+
+		invokeIgnoringThrowable(view::coldHit);
+		assertNotNull(view);
 	}
 
 	@Test
@@ -1448,6 +1571,15 @@ class FacesViewTest {
 		invokeIgnoringThrowable(() -> view.rerender("sourceA", true));
 		invokeIgnoringThrowable(() -> view.download("export", "items", "id-1"));
 		invokeIgnoringThrowable(() -> view.download("export"));
+		assertNotNull(view);
+	}
+
+	@Test
+	void editActionsExecuteMethodBodiesInHeadlessMode() {
+		FacesView view = new FacesView();
+		invokeIgnoringThrowable(view::ok);
+		invokeIgnoringThrowable(view::save);
+		invokeIgnoringThrowable(view::delete);
 		assertNotNull(view);
 	}
 

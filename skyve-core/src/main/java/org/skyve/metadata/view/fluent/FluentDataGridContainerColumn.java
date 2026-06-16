@@ -5,9 +5,11 @@ import org.skyve.impl.metadata.view.widget.DynamicImage;
 import org.skyve.impl.metadata.view.widget.Link;
 import org.skyve.impl.metadata.view.widget.StaticImage;
 import org.skyve.impl.metadata.view.widget.bound.Label;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn;
 import org.skyve.metadata.MetaData;
+
+import jakarta.annotation.Nonnull;
 
 /**
  * Builds container-style {@link DataGridContainerColumn} metadata.
@@ -48,8 +50,8 @@ public class FluentDataGridContainerColumn extends FluentDataGridColumn<FluentDa
 			if (widget instanceof Link link) {
 				addWidget(new FluentLink().from(link));
 			}
-			else if (widget instanceof ContentImage image) {
-				addWidget(new FluentContentImage().from(image));
+			else if (widget instanceof ContentUpload content) {
+				addWidget(new FluentContentUpload().from(content));
 			}
 			else if (widget instanceof StaticImage image) {
 				addWidget(new FluentStaticImage().from(image));
@@ -84,13 +86,13 @@ public class FluentDataGridContainerColumn extends FluentDataGridColumn<FluentDa
 	}
 
 	/**
-	 * Adds a {@link org.skyve.impl.metadata.view.widget.bound.input.ContentImage} widget to this container column.
+	 * Adds a {@link org.skyve.impl.metadata.view.widget.bound.input.ContentUpload} widget to this container column.
 	 *
-	 * @param image the content image builder whose widget is appended
+	 * @param content the managed-content builder whose widget is appended
 	 * @return this builder
 	 */
-	public FluentDataGridContainerColumn addWidget(FluentContentImage image) {
-		column.getWidgets().add(image.get());
+	public @Nonnull FluentDataGridContainerColumn addWidget(@Nonnull FluentContentUpload content) {
+		column.getWidgets().add(content.get());
 		return this;
 	}
 

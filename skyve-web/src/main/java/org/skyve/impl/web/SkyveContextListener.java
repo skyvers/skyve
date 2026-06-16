@@ -553,6 +553,10 @@ public class SkyveContextListener implements ServletContextListener {
 				value -> UtilImpl.UPLOADS_IMAGE_WHITELIST_REGEX = value,
 				value -> UtilImpl.UPLOADS_IMAGE_MAXIMUM_SIZE_IN_MB = value);
 		configureUploadCategory(uploads,
+				"video",
+				value -> UtilImpl.UPLOADS_VIDEO_WHITELIST_REGEX = value,
+				value -> UtilImpl.UPLOADS_VIDEO_MAXIMUM_SIZE_IN_MB = value);
+		configureUploadCategory(uploads,
 				"bizport",
 				value -> UtilImpl.UPLOADS_BIZPORT_WHITELIST_REGEX = value,
 				value -> UtilImpl.UPLOADS_BIZPORT_MAXIMUM_SIZE_IN_MB = value);

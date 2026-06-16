@@ -199,6 +199,12 @@ public class UtilImpl {
 	// Max image upload size - default is 10MB the same as wildfly default
 	public static int UPLOADS_IMAGE_MAXIMUM_SIZE_IN_MB = UPLOADS_FILE_MAXIMUM_SIZE_IN_MB;
 
+	// Allowed video upload file names - default is common browser/mobile video containers
+	public static String UPLOADS_VIDEO_WHITELIST_REGEX = "^.+\\.(MP4|WEBM|MOV|M4V|OGV|AVI)$";
+
+	// Max video upload size - default is 100MB for about one minute of typical mobile video
+	public static int UPLOADS_VIDEO_MAXIMUM_SIZE_IN_MB = 100;
+
 	// Allowed bizport upload file names - default is a XLS and XLSX files
 	public static String UPLOADS_BIZPORT_WHITELIST_REGEX = "^.+\\.(XLS|XLSX)$";
 	
@@ -812,6 +818,8 @@ public class UtilImpl {
     	UPLOADS_CONTENT_MAXIMUM_SIZE_IN_MB = UPLOADS_FILE_MAXIMUM_SIZE_IN_MB;
     	UPLOADS_IMAGE_WHITELIST_REGEX = UPLOADS_FILE_WHITELIST_REGEX;
     	UPLOADS_IMAGE_MAXIMUM_SIZE_IN_MB = UPLOADS_FILE_MAXIMUM_SIZE_IN_MB;
+    	UPLOADS_VIDEO_WHITELIST_REGEX = "^.+\\.(MP4|WEBM|MOV|M4V|OGV|AVI)$";
+    	UPLOADS_VIDEO_MAXIMUM_SIZE_IN_MB = 100;
     	UPLOADS_BIZPORT_WHITELIST_REGEX = "^.+\\.(XLS|XLSX)$";
     	UPLOADS_BIZPORT_MAXIMUM_SIZE_IN_MB = UPLOADS_FILE_MAXIMUM_SIZE_IN_MB;
     	

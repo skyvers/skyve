@@ -8,7 +8,7 @@ import org.skyve.impl.metadata.view.widget.DynamicImage;
 import org.skyve.impl.metadata.view.widget.Link;
 import org.skyve.impl.metadata.view.widget.StaticImage;
 import org.skyve.impl.metadata.view.widget.bound.Label;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaData;
 
@@ -36,7 +36,7 @@ public class DataGridContainerColumn extends DataGridColumn {
 	private List<MetaData> widgets = new ArrayList<>();
 
 	@XmlElementRefs({@XmlElementRef(type = Link.class),
-						@XmlElementRef(type = ContentImage.class),
+						@XmlElementRef(type = ContentUpload.class),
 						@XmlElementRef(type = StaticImage.class),
 						@XmlElementRef(type = DynamicImage.class),
 						@XmlElementRef(type = Blurb.class),

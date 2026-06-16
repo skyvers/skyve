@@ -83,10 +83,11 @@ import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentCapture;
 import org.skyve.impl.metadata.view.widget.bound.input.CompleteType;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentDisplay;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.KeyboardType;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
@@ -226,6 +227,7 @@ class TabularComponentBuilderTest {
 		String uploadDisabled;
 		String uploadFormDisabled;
 		String uploadInvisible;
+		ContentCapture uploadCapture;
 		boolean uploadUseDialog;
 
 		String linkTitle;
@@ -312,6 +314,7 @@ class TabularComponentBuilderTest {
 											String disabled,
 											String formDisabled,
 											String invisible,
+											ContentCapture capture,
 											boolean useDialog) {
 			this.uploadTitle = title;
 			this.uploadIconStyleClass = iconStyleClass;
@@ -324,6 +327,7 @@ class TabularComponentBuilderTest {
 			this.uploadDisabled = disabled;
 			this.uploadFormDisabled = formDisabled;
 			this.uploadInvisible = invisible;
+			this.uploadCapture = capture;
 			this.uploadUseDialog = useDialog;
 			return delegatedUploadButtonResult;
 		}
@@ -1401,63 +1405,374 @@ class TabularComponentBuilderTest {
 
 	@SuppressWarnings("static-method")
 	@Test
-	void testContentImageNonShortcutPathWithoutEditableMarkupAddsImageContainer() {
+	void testContentUploadLinkModeRendersLinkLikeOutput() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
 		HtmlPanelGrid panelGrid = mock(HtmlPanelGrid.class);
-		HtmlPanelGroup imageContainer = mock(HtmlPanelGroup.class);
-		GraphicImage image = mock(GraphicImage.class);
+		HtmlOutputLink outputLink = mock(HtmlOutputLink.class);
+		UIOutput outputText = mock(UIOutput.class);
 		List<UIComponent> panelChildren = new ArrayList<>();
-		List<UIComponent> imageChildren = new ArrayList<>();
+		List<UIComponent> linkChildren = new ArrayList<>();
 		FacesView managedBean = mock(FacesView.class);
-		when(managedBean.nextId()).thenReturn("contentImageGrid", "contentImageInner", "contentImageTag");
+		when(managedBean.nextId()).thenReturn("contentGrid", "contentLinkInner");
 		builder.setManagedBeanForTest(managedBean);
 
-		when(panelGrid.getId()).thenReturn("contentImageGrid");
+		when(panelGrid.getId()).thenReturn("contentGrid");
 		when(panelGrid.getChildren()).thenReturn(panelChildren);
-		when(imageContainer.getChildren()).thenReturn(imageChildren);
+		when(outputLink.getChildren()).thenReturn(linkChildren);
 		when(mockApplication.createComponent(HtmlPanelGrid.COMPONENT_TYPE)).thenReturn(panelGrid);
-		when(mockApplication.createComponent(HtmlPanelGroup.COMPONENT_TYPE)).thenReturn(imageContainer);
-		when(mockApplication.createComponent(GraphicImage.COMPONENT_TYPE)).thenReturn(image);
+		when(mockApplication.createComponent(HtmlOutputLink.COMPONENT_TYPE)).thenReturn(outputLink);
+		when(mockApplication.createComponent(UIOutput.COMPONENT_TYPE)).thenReturn(outputText);
 
-		ContentImage contentImage = new ContentImage();
-		contentImage.setBinding("doc.image");
-		contentImage.setEditable(Boolean.FALSE);
-		contentImage.setShowMarkup(Boolean.FALSE);
-		UIComponent result = builder.contentImage(null, "row", contentImage, null, "Image", null);
+		ContentUpload content = new ContentUpload();
+		content.setBinding("doc.attachment");
+		content.setDisplay(ContentDisplay.link);
+		content.setEditable(Boolean.FALSE);
+		UIComponent result = builder.content(null, "row", content, null, "Attachment", null, HorizontalAlignment.left, true, false);
 
 		assertSame(panelGrid, result);
-		assertSame(imageContainer, panelChildren.get(0));
+		assertSame(outputLink, panelChildren.get(0));
+		assertSame(outputText, linkChildren.get(0));
 		verify(panelGrid).setColumns(1);
-		verify(image).setId("contentImageGrid_doc_image_image");
+		verify(outputLink).setId("contentGrid_doc_attachment_link");
 	}
 
-	@SuppressWarnings({"static-method", "java:S5961"})
+	@SuppressWarnings("static-method")
 	@Test
-	void testEditableContentImageAddsActionMenuItems() {
+	void testContentUploadVideoModeRendersVideoWithFormDefaults() {
 		clearInvocations(mockExpressionFactory);
 
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
 		HtmlPanelGrid panelGrid = mock(HtmlPanelGrid.class);
+		HtmlOutputText video = mock(HtmlOutputText.class);
+		List<UIComponent> panelChildren = new ArrayList<>();
+		ValueExpression valueExpression = mock(ValueExpression.class);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("contentGrid");
+		builder.setManagedBeanForTest(managedBean);
+
+		when(panelGrid.getId()).thenReturn("contentGrid");
+		when(panelGrid.getChildren()).thenReturn(panelChildren);
+		when(mockApplication.createComponent(HtmlPanelGrid.COMPONENT_TYPE)).thenReturn(panelGrid);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(video);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(String.class))).thenReturn(valueExpression);
+
+		ContentUpload content = new ContentUpload();
+		content.setBinding("doc.video");
+		content.setDisplay(ContentDisplay.video);
+		content.setEditable(Boolean.FALSE);
+		UIComponent result = builder.content(null, "row", content, null, "Video", null, HorizontalAlignment.left, true, false);
+
+		assertSame(panelGrid, result);
+		assertSame(video, panelChildren.get(0));
+		verify(panelGrid).setColumns(1);
+		verify(video).setEscape(false);
+		verify(video).setId("contentGrid_doc_video_video_output");
+		ArgumentCaptor<String> expressions = ArgumentCaptor.forClass(String.class);
+		verify(mockExpressionFactory).createValueExpression(any(ELContext.class), expressions.capture(), eq(String.class));
+		assertTrue(expressions.getValue().contains("<div id=\"contentGrid_doc_video_video\" style=\"width:320px;height:180px;border:1px solid gray\">"));
+		assertTrue(expressions.getValue().contains("<video controls preload=\"metadata\" style=\"width:100%;height:100%;object-fit:contain\""));
+		assertTrue(expressions.getValue().contains(" ? '' : '<video"));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testContentUploadVideoModeUsesGridDefaultsOutsideForm() {
+		clearInvocations(mockExpressionFactory);
+
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		HtmlPanelGrid panelGrid = mock(HtmlPanelGrid.class);
+		HtmlOutputText video = mock(HtmlOutputText.class);
+		List<UIComponent> panelChildren = new ArrayList<>();
+		ValueExpression valueExpression = mock(ValueExpression.class);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("contentGrid");
+		builder.setManagedBeanForTest(managedBean);
+
+		when(panelGrid.getId()).thenReturn("contentGrid");
+		when(panelGrid.getChildren()).thenReturn(panelChildren);
+		when(mockApplication.createComponent(HtmlPanelGrid.COMPONENT_TYPE)).thenReturn(panelGrid);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(video);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(String.class))).thenReturn(valueExpression);
+
+		ContentUpload content = new ContentUpload();
+		content.setBinding("doc.video");
+		content.setDisplay(ContentDisplay.video);
+		content.setEditable(Boolean.FALSE);
+		builder.content(null, "row", content, null, "Video", null, HorizontalAlignment.left, false, false);
+
+		ArgumentCaptor<String> expressions = ArgumentCaptor.forClass(String.class);
+		verify(mockExpressionFactory).createValueExpression(any(ELContext.class), expressions.capture(), eq(String.class));
+		assertTrue(expressions.getValue().contains("width:160px;height:90px"));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testContentUploadAutoModeUsesMediaKindHooks() {
+		clearInvocations(mockExpressionFactory);
+
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		HtmlPanelGrid panelGrid = mock(HtmlPanelGrid.class);
+		HtmlPanelGroup mediaGroup = mock(HtmlPanelGroup.class);
+		HtmlOutputLink outputLink = mock(HtmlOutputLink.class);
+		UIOutput outputText = mock(UIOutput.class);
 		HtmlPanelGroup imageContainer = mock(HtmlPanelGroup.class);
 		GraphicImage image = mock(GraphicImage.class);
+		HtmlOutputText video = mock(HtmlOutputText.class);
+		List<UIComponent> panelChildren = new ArrayList<>();
+		List<UIComponent> mediaChildren = new ArrayList<>();
+		List<UIComponent> linkChildren = new ArrayList<>();
+		List<UIComponent> imageChildren = new ArrayList<>();
+		ValueExpression stringExpression = mock(ValueExpression.class);
+		ValueExpression booleanExpression = mock(ValueExpression.class);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("contentGrid", "contentMedia", "contentLinkInner", "contentImageInner");
+		builder.setManagedBeanForTest(managedBean);
+
+		when(panelGrid.getId()).thenReturn("contentGrid");
+		when(panelGrid.getChildren()).thenReturn(panelChildren);
+		when(mediaGroup.getChildren()).thenReturn(mediaChildren);
+		when(outputLink.getChildren()).thenReturn(linkChildren);
+		when(imageContainer.getChildren()).thenReturn(imageChildren);
+		when(mockApplication.createComponent(HtmlPanelGrid.COMPONENT_TYPE)).thenReturn(panelGrid);
+		when(mockApplication.createComponent(HtmlOutputLink.COMPONENT_TYPE)).thenReturn(outputLink);
+		when(mockApplication.createComponent(UIOutput.COMPONENT_TYPE)).thenReturn(outputText);
+		when(mockApplication.createComponent(HtmlPanelGroup.COMPONENT_TYPE)).thenReturn(mediaGroup, imageContainer);
+		when(mockApplication.createComponent(GraphicImage.COMPONENT_TYPE)).thenReturn(image);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(video);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(String.class))).thenReturn(stringExpression);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(Boolean.class))).thenReturn(booleanExpression);
+
+		ContentUpload content = new ContentUpload();
+		content.setBinding("doc.attachment");
+		content.setDisplay(ContentDisplay.auto);
+		content.setEditable(Boolean.FALSE);
+		UIComponent result = builder.content(null, "row", content, null, "Attachment", null, HorizontalAlignment.left, true, false);
+
+		assertSame(panelGrid, result);
+		assertEquals(1, panelChildren.size());
+		assertSame(mediaGroup, panelChildren.get(0));
+		assertEquals(3, mediaChildren.size());
+		assertSame(outputLink, mediaChildren.get(0));
+		assertSame(imageContainer, mediaChildren.get(1));
+		assertSame(video, mediaChildren.get(2));
+		ArgumentCaptor<String> styleClassExpressions = ArgumentCaptor.forClass(String.class);
+		verify(mockExpressionFactory, atLeastOnce()).createValueExpression(any(ELContext.class), styleClassExpressions.capture(), eq(String.class));
+		assertTrue(styleClassExpressions.getAllValues().contains("#{(empty skyve.getContentMediaKind('doc.attachment') or skyve.getContentMediaKind('doc.attachment') eq 'link') ? '' : 'skyveContentHidden'}"));
+		assertTrue(styleClassExpressions.getAllValues().contains("#{skyve.getContentMediaKind('doc.attachment') eq 'image' ? '' : 'skyveContentHidden'}"));
+		assertTrue(styleClassExpressions.getAllValues().contains("#{skyve.getContentMediaKind('doc.attachment') eq 'video' ? '' : 'skyveContentHidden'}"));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testEditableAutoContentUploadAddsNonSubmittedCompanionHiddenField() {
+		clearInvocations(mockExpressionFactory);
+
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		HtmlPanelGrid panelGrid = mock(HtmlPanelGrid.class);
+		HtmlPanelGroup mediaGroup = mock(HtmlPanelGroup.class);
+		HtmlOutputLink outputLink = mock(HtmlOutputLink.class);
+		UIOutput outputText = mock(UIOutput.class);
+		HtmlPanelGroup imageContainer = mock(HtmlPanelGroup.class);
+		GraphicImage image = mock(GraphicImage.class);
+		HtmlOutputText video = mock(HtmlOutputText.class);
 		HtmlPanelGroup actionGroup = mock(HtmlPanelGroup.class);
 		HtmlInputHidden hidden = mock(HtmlInputHidden.class);
+		HtmlOutputText companion = mock(HtmlOutputText.class);
 		MenuButton actionButton = mock(MenuButton.class);
 		UIMenuItem uploadItem = mock(UIMenuItem.class);
+		UIMenuItem clearItem = mock(UIMenuItem.class);
+		OverlayPanel overlay = mock(OverlayPanel.class);
+		HtmlOutputText iframe = mock(HtmlOutputText.class);
+		List<UIComponent> panelChildren = new ArrayList<>();
+		List<UIComponent> mediaChildren = new ArrayList<>();
+		List<UIComponent> linkChildren = new ArrayList<>();
+		List<UIComponent> imageChildren = new ArrayList<>();
+		List<UIComponent> actionChildren = new ArrayList<>();
+		List<UIComponent> menuChildren = new ArrayList<>();
+		List<UIComponent> overlayChildren = new ArrayList<>();
+		ValueExpression stringExpression = mock(ValueExpression.class);
+		ValueExpression booleanExpression = mock(ValueExpression.class);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.getContentMediaKind("doc.attachment")).thenReturn("image");
+		when(managedBean.nextId()).thenReturn("contentGrid",
+												"contentMedia",
+												"contentLinkInner",
+												"contentImageInner",
+												"actionGroupId",
+												"hiddenId",
+												"companionHiddenId",
+												"actionButtonId",
+												"uploadItemId",
+												"overlayId",
+												"iframeId",
+												"clearItemId");
+		builder.setManagedBeanForTest(managedBean);
+
+		when(panelGrid.getId()).thenReturn("contentGrid");
+		when(panelGrid.getChildren()).thenReturn(panelChildren);
+		when(mediaGroup.getChildren()).thenReturn(mediaChildren);
+		when(outputLink.getChildren()).thenReturn(linkChildren);
+		when(imageContainer.getChildren()).thenReturn(imageChildren);
+		when(actionGroup.getChildren()).thenReturn(actionChildren);
+		when(actionButton.getChildren()).thenReturn(menuChildren);
+		when(actionButton.getId()).thenReturn("actionButtonId");
+		when(overlay.getChildren()).thenReturn(overlayChildren);
+		when(mockApplication.createComponent(HtmlPanelGrid.COMPONENT_TYPE)).thenReturn(panelGrid);
+		when(mockApplication.createComponent(HtmlOutputLink.COMPONENT_TYPE)).thenReturn(outputLink);
+		when(mockApplication.createComponent(UIOutput.COMPONENT_TYPE)).thenReturn(outputText);
+		when(mockApplication.createComponent(HtmlPanelGroup.COMPONENT_TYPE)).thenReturn(mediaGroup, imageContainer, actionGroup);
+		when(mockApplication.createComponent(GraphicImage.COMPONENT_TYPE)).thenReturn(image);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(video, companion, iframe);
+		when(mockApplication.createComponent(HtmlInputHidden.COMPONENT_TYPE)).thenReturn(hidden);
+		when(mockApplication.createComponent(MenuButton.COMPONENT_TYPE)).thenReturn(actionButton);
+		when(mockApplication.createComponent(UIMenuItem.COMPONENT_TYPE)).thenReturn(uploadItem, clearItem);
+		when(mockApplication.createComponent(OverlayPanel.COMPONENT_TYPE)).thenReturn(overlay);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(String.class))).thenReturn(stringExpression);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(Object.class))).thenReturn(stringExpression);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(Boolean.class))).thenReturn(booleanExpression);
+
+		ContentUpload content = new ContentUpload();
+		content.setBinding("doc.attachment");
+		content.setDisplay(ContentDisplay.auto);
+		content.setEditable(Boolean.TRUE);
+		content.setShowMarkup(Boolean.FALSE);
+		UIComponent result = builder.content(null, "row", content, null, "Attachment", null, HorizontalAlignment.left, true, false);
+
+		assertSame(panelGrid, result);
+		assertEquals(2, panelChildren.size());
+		assertSame(mediaGroup, panelChildren.get(0));
+		assertEquals(3, mediaChildren.size());
+		assertSame(outputLink, mediaChildren.get(0));
+		assertSame(imageContainer, mediaChildren.get(1));
+		assertSame(video, mediaChildren.get(2));
+		assertSame(actionGroup, panelChildren.get(1));
+		assertSame(hidden, actionChildren.get(0));
+		assertSame(companion, actionChildren.get(1));
+		assertSame(actionButton, actionChildren.get(2));
+		assertSame(overlay, actionChildren.get(3));
+		verify(companion).setEscape(false);
+		verify(companion).setValue("<input type=\"hidden\" id=\"contentGrid_doc_attachment_media_hidden\" value=\"image\">");
+		verify(companion, never()).setValueExpression(eq("value"), any(ValueExpression.class));
+		verify(clearItem).setOnclick("SKYVE.PF.clearContent('doc_attachment','contentGrid','doc_attachment_media');return false");
+		ArgumentCaptor<String> expressions = ArgumentCaptor.forClass(String.class);
+		verify(mockExpressionFactory, atLeastOnce()).createValueExpression(any(ELContext.class), expressions.capture(), eq(String.class));
+		assertFalse(expressions.getAllValues().contains("#{skyve.getContentMediaKind('doc.attachment')}"));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testEditableAutoContentUploadCanUseImageUploadRoute() {
+		clearInvocations(mockExpressionFactory);
+
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		HtmlPanelGrid panelGrid = mock(HtmlPanelGrid.class);
+		HtmlPanelGroup mediaGroup = mock(HtmlPanelGroup.class);
+		HtmlOutputLink outputLink = mock(HtmlOutputLink.class);
+		UIOutput outputText = mock(UIOutput.class);
+		HtmlPanelGroup imageContainer = mock(HtmlPanelGroup.class);
+		GraphicImage image = mock(GraphicImage.class);
+		HtmlOutputText video = mock(HtmlOutputText.class);
+		HtmlPanelGroup actionGroup = mock(HtmlPanelGroup.class);
+		HtmlInputHidden hidden = mock(HtmlInputHidden.class);
+		HtmlOutputText companion = mock(HtmlOutputText.class);
+		MenuButton actionButton = mock(MenuButton.class);
+		UIMenuItem uploadItem = mock(UIMenuItem.class);
+		UIMenuItem clearItem = mock(UIMenuItem.class);
 		Dialog dialog = mock(Dialog.class);
 		HtmlOutputText iframe = mock(HtmlOutputText.class);
-		UIMenuItem clearItem = mock(UIMenuItem.class);
 		List<UIComponent> panelChildren = new ArrayList<>();
+		List<UIComponent> mediaChildren = new ArrayList<>();
+		List<UIComponent> linkChildren = new ArrayList<>();
 		List<UIComponent> imageChildren = new ArrayList<>();
 		List<UIComponent> actionChildren = new ArrayList<>();
 		List<UIComponent> menuChildren = new ArrayList<>();
 		List<UIComponent> dialogChildren = new ArrayList<>();
-		ValueExpression valueExpression = mock(ValueExpression.class);
-		ValueExpression uploadOnclickExpression = mock(ValueExpression.class);
+		ValueExpression stringExpression = mock(ValueExpression.class);
+		ValueExpression booleanExpression = mock(ValueExpression.class);
 		FacesView managedBean = mock(FacesView.class);
-		when(managedBean.nextId()).thenReturn("contentImageGrid",
+		when(managedBean.nextId()).thenReturn("contentGrid",
+												"contentMedia",
+												"contentLinkInner",
 												"contentImageInner",
-												"contentImageTag",
+												"actionGroupId",
+												"hiddenId",
+												"companionHiddenId",
+												"actionButtonId",
+												"uploadItemId",
+												"dialogId",
+												"iframeId",
+												"clearItemId");
+		builder.setManagedBeanForTest(managedBean);
+
+		when(panelGrid.getId()).thenReturn("contentGrid");
+		when(panelGrid.getChildren()).thenReturn(panelChildren);
+		when(mediaGroup.getChildren()).thenReturn(mediaChildren);
+		when(outputLink.getChildren()).thenReturn(linkChildren);
+		when(imageContainer.getChildren()).thenReturn(imageChildren);
+		when(actionGroup.getChildren()).thenReturn(actionChildren);
+		when(actionButton.getChildren()).thenReturn(menuChildren);
+		when(dialog.getChildren()).thenReturn(dialogChildren);
+		when(mockApplication.createComponent(HtmlPanelGrid.COMPONENT_TYPE)).thenReturn(panelGrid);
+		when(mockApplication.createComponent(HtmlOutputLink.COMPONENT_TYPE)).thenReturn(outputLink);
+		when(mockApplication.createComponent(UIOutput.COMPONENT_TYPE)).thenReturn(outputText);
+		when(mockApplication.createComponent(HtmlPanelGroup.COMPONENT_TYPE)).thenReturn(mediaGroup, imageContainer, actionGroup);
+		when(mockApplication.createComponent(GraphicImage.COMPONENT_TYPE)).thenReturn(image);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(video, companion, iframe);
+		when(mockApplication.createComponent(HtmlInputHidden.COMPONENT_TYPE)).thenReturn(hidden);
+		when(mockApplication.createComponent(MenuButton.COMPONENT_TYPE)).thenReturn(actionButton);
+		when(mockApplication.createComponent(UIMenuItem.COMPONENT_TYPE)).thenReturn(uploadItem, clearItem);
+		when(mockApplication.createComponent(Dialog.COMPONENT_TYPE)).thenReturn(dialog);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(String.class))).thenReturn(stringExpression);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(Object.class))).thenReturn(stringExpression);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(Boolean.class))).thenReturn(booleanExpression);
+
+		ContentUpload content = new ContentUpload();
+		content.setBinding("doc.image");
+		content.setDisplay(ContentDisplay.auto);
+		content.setEditable(Boolean.TRUE);
+		content.setShowMarkup(Boolean.FALSE);
+		UIComponent result = builder.content(null, "row", content, null, "Image", null, HorizontalAlignment.left, true, true);
+
+		assertSame(panelGrid, result);
+		assertEquals(2, panelChildren.size());
+		assertSame(mediaGroup, panelChildren.get(0));
+		assertSame(actionGroup, panelChildren.get(1));
+		assertEquals(3, mediaChildren.size());
+		assertSame(dialog, actionChildren.get(3));
+		assertSame(iframe, dialogChildren.get(0));
+		verify(actionButton).setTitle("Image Actions");
+		verify(uploadItem).setValue("Upload Image");
+		verify(uploadItem).setValueExpression(eq("onclick"), any(ValueExpression.class));
+		ArgumentCaptor<String> expressions = ArgumentCaptor.forClass(String.class);
+		verify(mockExpressionFactory, atLeastOnce()).createValueExpression(any(ELContext.class), expressions.capture(), eq(String.class));
+		assertTrue(expressions.getAllValues().stream().anyMatch(value -> value.contains("getContentUploadUrl('doc_image','auto','none','doc_image_media')")));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testContentUploadWithCameraCaptureUsesFullDialog() {
+		clearInvocations(mockExpressionFactory);
+
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		HtmlPanelGrid panelGrid = mock(HtmlPanelGrid.class);
+		HtmlOutputLink outputLink = mock(HtmlOutputLink.class);
+		UIOutput outputText = mock(UIOutput.class);
+		HtmlPanelGroup actionGroup = mock(HtmlPanelGroup.class);
+		HtmlInputHidden hidden = mock(HtmlInputHidden.class);
+		MenuButton actionButton = mock(MenuButton.class);
+		UIMenuItem uploadItem = mock(UIMenuItem.class);
+		UIMenuItem clearItem = mock(UIMenuItem.class);
+		Dialog dialog = mock(Dialog.class);
+		HtmlOutputText iframe = mock(HtmlOutputText.class);
+		List<UIComponent> panelChildren = new ArrayList<>();
+		List<UIComponent> linkChildren = new ArrayList<>();
+		List<UIComponent> actionChildren = new ArrayList<>();
+		List<UIComponent> menuChildren = new ArrayList<>();
+		List<UIComponent> dialogChildren = new ArrayList<>();
+		ValueExpression stringExpression = mock(ValueExpression.class);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("contentGrid",
+												"contentLinkInner",
 												"actionGroupId",
 												"hiddenId",
 												"actionButtonId",
@@ -1467,175 +1782,141 @@ class TabularComponentBuilderTest {
 												"clearItemId");
 		builder.setManagedBeanForTest(managedBean);
 
-		when(panelGrid.getId()).thenReturn("contentImageGrid");
+		when(panelGrid.getId()).thenReturn("contentGrid");
 		when(panelGrid.getChildren()).thenReturn(panelChildren);
-		when(imageContainer.getChildren()).thenReturn(imageChildren);
+		when(outputLink.getChildren()).thenReturn(linkChildren);
 		when(actionGroup.getChildren()).thenReturn(actionChildren);
 		when(actionButton.getChildren()).thenReturn(menuChildren);
 		when(dialog.getChildren()).thenReturn(dialogChildren);
-		when(uploadItem.getId()).thenReturn("uploadItemId");
 		when(mockApplication.createComponent(HtmlPanelGrid.COMPONENT_TYPE)).thenReturn(panelGrid);
-		when(mockApplication.createComponent(HtmlPanelGroup.COMPONENT_TYPE)).thenReturn(imageContainer, actionGroup);
-		when(mockApplication.createComponent(GraphicImage.COMPONENT_TYPE)).thenReturn(image);
+		when(mockApplication.createComponent(HtmlOutputLink.COMPONENT_TYPE)).thenReturn(outputLink);
+		when(mockApplication.createComponent(UIOutput.COMPONENT_TYPE)).thenReturn(outputText);
+		when(mockApplication.createComponent(HtmlPanelGroup.COMPONENT_TYPE)).thenReturn(actionGroup);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(iframe);
 		when(mockApplication.createComponent(HtmlInputHidden.COMPONENT_TYPE)).thenReturn(hidden);
 		when(mockApplication.createComponent(MenuButton.COMPONENT_TYPE)).thenReturn(actionButton);
 		when(mockApplication.createComponent(UIMenuItem.COMPONENT_TYPE)).thenReturn(uploadItem, clearItem);
 		when(mockApplication.createComponent(Dialog.COMPONENT_TYPE)).thenReturn(dialog);
-		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(iframe);
-		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(Object.class))).thenReturn(valueExpression);
-		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(String.class))).thenReturn(uploadOnclickExpression);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(String.class))).thenReturn(stringExpression);
 
-		ContentImage contentImage = new ContentImage();
-		contentImage.setBinding("doc.image");
-		contentImage.setEditable(Boolean.TRUE);
-		contentImage.setShowMarkup(Boolean.FALSE);
-		UIComponent result = builder.contentImage(null, "row", contentImage, null, "Image", null);
+		ContentUpload content = new ContentUpload();
+		content.setBinding("doc.attachment");
+		content.setDisplay(ContentDisplay.link);
+		content.setCapture(ContentCapture.all);
+		content.setEditable(Boolean.TRUE);
+		content.setShowMarkup(Boolean.FALSE);
+		UIComponent result = builder.content(null, "row", content, null, "Attachment", null, HorizontalAlignment.left, true, false);
 
 		assertSame(panelGrid, result);
 		assertEquals(2, panelChildren.size());
-		assertSame(imageContainer, panelChildren.get(0));
+		assertSame(outputLink, panelChildren.get(0));
 		assertSame(actionGroup, panelChildren.get(1));
-		assertEquals(3, actionChildren.size());
-		assertSame(hidden, actionChildren.get(0));
-		assertSame(actionButton, actionChildren.get(1));
 		assertSame(dialog, actionChildren.get(2));
-		assertEquals(2, menuChildren.size());
-		assertSame(uploadItem, menuChildren.get(0));
-		assertSame(clearItem, menuChildren.get(1));
 		assertSame(iframe, dialogChildren.get(0));
-		verify(panelGrid).setColumns(2);
-		verify(actionButton).setTitle("Image Actions");
-		verify(actionButton).setIcon("fa-solid fa-ellipsis-vertical");
-		verify(actionButton).setButtonStyleClass("skyveContentActionButton");
-		verify(uploadItem).setValue("Upload Image");
-		verify(clearItem).setValue("Clear Content");
-		verify(uploadItem).setUrl("javascript:void(0)");
-		verify(clearItem).setUrl("javascript:void(0)");
+		verify(dialog).setHeader("Content Upload");
+		verify(dialog).setFitViewport(true);
+		verify(dialog).setOnHide("SKYVE.PF.contentOverlayOnHide('contentGrid');PF('contentGrid_doc_attachmentOverlay').toggleMaximize()");
 		verify(uploadItem).setValueExpression(eq("onclick"), any(ValueExpression.class));
-		verify(clearItem).setOnclick("SKYVE.PF.clearContentImage('doc_image','contentImageGrid');return false");
-		ArgumentCaptor<String> onclickExpressions = ArgumentCaptor.forClass(String.class);
-		verify(mockExpressionFactory, atLeastOnce()).createValueExpression(any(ELContext.class),
-																			onclickExpressions.capture(),
-																			eq(String.class));
-		assertTrue(onclickExpressions.getAllValues().stream().anyMatch(value -> value.contains("getContentUploadUrl('doc_image',true)")));
-		assertTrue(onclickExpressions.getAllValues().stream().anyMatch(value -> value.endsWith("return false'))}")));
+		verify(uploadItem, never()).setOnclick(anyString());
+		verify(iframe).setValue("<iframe id=\"contentGrid_overlayiframe\" src=\"\" scrolling=\"no\" style=\"width:100%;height:100%;border:none;overflow:hidden\"></iframe>");
+		ArgumentCaptor<String> expressions = ArgumentCaptor.forClass(String.class);
+		verify(mockExpressionFactory, atLeastOnce()).createValueExpression(any(ELContext.class), expressions.capture(), eq(String.class));
+		assertTrue(expressions.getAllValues().stream().anyMatch(value -> value.contains("getContentUploadUrl('doc_attachment','link','all',null)")));
+		assertTrue(expressions.getAllValues().stream().anyMatch(value -> value.contains("toggleMaximize()")));
 	}
 
 	@SuppressWarnings("static-method")
 	@Test
-	void testEditableContentImageWithShowMarkupAddsMarkupMenuItem() {
+	void testLinkContentUploadShowsMarkupActionForStoredImageContent() {
+		clearInvocations(mockExpressionFactory);
+
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
 		HtmlPanelGrid panelGrid = mock(HtmlPanelGrid.class);
-		HtmlPanelGroup imageContainer = mock(HtmlPanelGroup.class);
-		GraphicImage image = mock(GraphicImage.class);
+		HtmlOutputLink outputLink = mock(HtmlOutputLink.class);
+		UIOutput outputText = mock(UIOutput.class);
 		HtmlPanelGroup actionGroup = mock(HtmlPanelGroup.class);
 		HtmlInputHidden hidden = mock(HtmlInputHidden.class);
 		MenuButton actionButton = mock(MenuButton.class);
 		UIMenuItem uploadItem = mock(UIMenuItem.class);
 		UIMenuItem clearItem = mock(UIMenuItem.class);
 		UIMenuItem markupItem = mock(UIMenuItem.class);
-		Dialog uploadDialog = mock(Dialog.class);
+		OverlayPanel overlay = mock(OverlayPanel.class);
 		Dialog markupDialog = mock(Dialog.class);
-		HtmlOutputText uploadIframe = mock(HtmlOutputText.class);
+		HtmlOutputText overlayIframe = mock(HtmlOutputText.class);
 		HtmlOutputText markupIframe = mock(HtmlOutputText.class);
 		List<UIComponent> panelChildren = new ArrayList<>();
-		List<UIComponent> imageChildren = new ArrayList<>();
+		List<UIComponent> linkChildren = new ArrayList<>();
 		List<UIComponent> actionChildren = new ArrayList<>();
 		List<UIComponent> menuChildren = new ArrayList<>();
-		List<UIComponent> uploadDialogChildren = new ArrayList<>();
+		List<UIComponent> overlayChildren = new ArrayList<>();
 		List<UIComponent> markupDialogChildren = new ArrayList<>();
+		ValueExpression stringExpression = mock(ValueExpression.class);
 		FacesView managedBean = mock(FacesView.class);
-		when(managedBean.nextId()).thenReturn("contentImageGrid",
-												"contentImageInner",
-												"contentImageTag",
+		when(managedBean.getContentMediaKind("doc.attachment")).thenReturn("image");
+		when(managedBean.nextId()).thenReturn("contentGrid",
+												"contentLinkInner",
 												"actionGroupId",
 												"hiddenId",
 												"actionButtonId",
 												"uploadItemId",
-												"uploadDialogId",
-												"uploadIframeId",
+												"overlayId",
+												"overlayIframeId",
 												"clearItemId",
 												"markupItemId",
 												"markupDialogId",
 												"markupIframeId");
 		builder.setManagedBeanForTest(managedBean);
 
-		when(panelGrid.getId()).thenReturn("contentImageGrid");
+		when(panelGrid.getId()).thenReturn("contentGrid");
 		when(panelGrid.getChildren()).thenReturn(panelChildren);
-		when(imageContainer.getChildren()).thenReturn(imageChildren);
+		when(outputLink.getChildren()).thenReturn(linkChildren);
 		when(actionGroup.getChildren()).thenReturn(actionChildren);
 		when(actionButton.getChildren()).thenReturn(menuChildren);
 		when(actionButton.getId()).thenReturn("actionButtonId");
-		when(uploadItem.getId()).thenReturn("uploadItemId");
-		when(uploadDialog.getChildren()).thenReturn(uploadDialogChildren);
+		when(overlay.getChildren()).thenReturn(overlayChildren);
 		when(markupDialog.getChildren()).thenReturn(markupDialogChildren);
 		when(mockApplication.createComponent(HtmlPanelGrid.COMPONENT_TYPE)).thenReturn(panelGrid);
-		when(mockApplication.createComponent(HtmlPanelGroup.COMPONENT_TYPE)).thenReturn(imageContainer, actionGroup);
-		when(mockApplication.createComponent(GraphicImage.COMPONENT_TYPE)).thenReturn(image);
+		when(mockApplication.createComponent(HtmlOutputLink.COMPONENT_TYPE)).thenReturn(outputLink);
+		when(mockApplication.createComponent(UIOutput.COMPONENT_TYPE)).thenReturn(outputText);
+		when(mockApplication.createComponent(HtmlPanelGroup.COMPONENT_TYPE)).thenReturn(actionGroup);
 		when(mockApplication.createComponent(HtmlInputHidden.COMPONENT_TYPE)).thenReturn(hidden);
 		when(mockApplication.createComponent(MenuButton.COMPONENT_TYPE)).thenReturn(actionButton);
 		when(mockApplication.createComponent(UIMenuItem.COMPONENT_TYPE)).thenReturn(uploadItem, clearItem, markupItem);
-		when(mockApplication.createComponent(Dialog.COMPONENT_TYPE)).thenReturn(uploadDialog, markupDialog);
-		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(uploadIframe, markupIframe);
+		when(mockApplication.createComponent(OverlayPanel.COMPONENT_TYPE)).thenReturn(overlay);
+		when(mockApplication.createComponent(Dialog.COMPONENT_TYPE)).thenReturn(markupDialog);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(overlayIframe, markupIframe);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(String.class))).thenReturn(stringExpression);
 
-		ContentImage contentImage = new ContentImage();
-		contentImage.setBinding("doc.image");
-		contentImage.setEditable(Boolean.TRUE);
-		contentImage.setShowMarkup(Boolean.TRUE);
-		UIComponent result = builder.contentImage(null, "row", contentImage, null, "Image", null);
+		ContentUpload content = new ContentUpload();
+		content.setBinding("doc.attachment");
+		content.setDisplay(ContentDisplay.link);
+		content.setEditable(Boolean.TRUE);
+		UIComponent result = builder.content(null, "row", content, null, "Attachment", null, HorizontalAlignment.left, true, false);
 
 		assertSame(panelGrid, result);
+		assertEquals(2, panelChildren.size());
+		assertSame(outputLink, panelChildren.get(0));
+		assertSame(actionGroup, panelChildren.get(1));
 		assertEquals(3, menuChildren.size());
 		assertSame(uploadItem, menuChildren.get(0));
 		assertSame(clearItem, menuChildren.get(1));
 		assertSame(markupItem, menuChildren.get(2));
-		assertSame(uploadDialog, actionChildren.get(2));
 		assertSame(markupDialog, actionChildren.get(3));
+		assertSame(markupIframe, markupDialogChildren.get(0));
 		verify(markupItem).setValue("Mark Up Image");
-		verify(markupItem).setIcon("fa-solid fa-pencil");
-		verify(markupItem).setUrl("javascript:void(0)");
-		ArgumentCaptor<String> markupOnclickCaptor = ArgumentCaptor.forClass(String.class);
-		verify(markupItem).setOnclick(markupOnclickCaptor.capture());
-		assertTrue(markupOnclickCaptor.getValue().contains("event.preventDefault()"));
-		assertTrue(markupOnclickCaptor.getValue().contains("PF('contentImageGrid_doc_imageMarkup').show()"));
-		assertTrue(markupOnclickCaptor.getValue().contains("PF('contentImageGrid_doc_imageMarkup').toggleMaximize();return false"));
+		verify(markupItem).setContainerStyleClass("skyveContentMarkupAction skyveContentMarkupAction-contentGrid_doc_attachment");
+		verify(markupItem).setOnclick("var contentId=$('[id$=\"contentGrid_doc_attachment_hidden\"]').val();if(!contentId){return false}PF('contentGrid_doc_attachmentMarkup').show();PF('contentGrid_doc_attachmentMarkup').toggleMaximize();return false");
+		verify(markupDialog).setHeader("Mark Up Image");
+		ArgumentCaptor<String> expressions = ArgumentCaptor.forClass(String.class);
+		verify(mockExpressionFactory, atLeastOnce()).createValueExpression(any(ELContext.class), expressions.capture(), eq(String.class));
+		assertTrue(expressions.getAllValues().stream().anyMatch(value -> value.contains("contentMarkupOnShow(\\'contentGrid\\',\\'doc_attachment\\'")));
 	}
 
 	@SuppressWarnings("static-method")
 	@Test
-	void testContentLinkNonShortcutPathWithoutEditableAddsContentLink() {
-		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
-		HtmlPanelGrid panelGrid = mock(HtmlPanelGrid.class);
-		HtmlOutputLink outputLink = mock(HtmlOutputLink.class);
-		UIOutput outputText = mock(UIOutput.class);
-		List<UIComponent> panelChildren = new ArrayList<>();
-		List<UIComponent> linkChildren = new ArrayList<>();
-		FacesView managedBean = mock(FacesView.class);
-		when(managedBean.nextId()).thenReturn("contentLinkGrid", "contentLinkInner");
-		builder.setManagedBeanForTest(managedBean);
+	void testLinkContentUploadRendersHiddenMarkupActionForFutureImageContent() {
+		clearInvocations(mockExpressionFactory);
 
-		when(panelGrid.getId()).thenReturn("contentLinkGrid");
-		when(panelGrid.getChildren()).thenReturn(panelChildren);
-		when(outputLink.getChildren()).thenReturn(linkChildren);
-		when(mockApplication.createComponent(HtmlPanelGrid.COMPONENT_TYPE)).thenReturn(panelGrid);
-		when(mockApplication.createComponent(HtmlOutputLink.COMPONENT_TYPE)).thenReturn(outputLink);
-		when(mockApplication.createComponent(UIOutput.COMPONENT_TYPE)).thenReturn(outputText);
-
-		ContentLink contentLink = new ContentLink();
-		contentLink.setBinding("doc.attachment");
-		contentLink.setEditable(Boolean.FALSE);
-		UIComponent result = builder.contentLink(null, "row", contentLink, null, "Attachment", null, HorizontalAlignment.left);
-
-		assertSame(panelGrid, result);
-		assertSame(outputLink, panelChildren.get(0));
-		assertSame(outputText, linkChildren.get(0));
-		verify(panelGrid).setColumns(1);
-		verify(outputLink).setId("contentLinkGrid_doc_attachment_link");
-	}
-
-	@SuppressWarnings("static-method")
-	@Test
-	void testEditableContentLinkAddsUploadAndClearMenuItemsOnly() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
 		HtmlPanelGrid panelGrid = mock(HtmlPanelGrid.class);
 		HtmlOutputLink outputLink = mock(HtmlOutputLink.class);
@@ -1645,72 +1926,64 @@ class TabularComponentBuilderTest {
 		MenuButton actionButton = mock(MenuButton.class);
 		UIMenuItem uploadItem = mock(UIMenuItem.class);
 		UIMenuItem clearItem = mock(UIMenuItem.class);
+		UIMenuItem markupItem = mock(UIMenuItem.class);
 		OverlayPanel overlay = mock(OverlayPanel.class);
-		HtmlOutputText iframe = mock(HtmlOutputText.class);
+		Dialog markupDialog = mock(Dialog.class);
+		HtmlOutputText overlayIframe = mock(HtmlOutputText.class);
+		HtmlOutputText markupIframe = mock(HtmlOutputText.class);
 		List<UIComponent> panelChildren = new ArrayList<>();
 		List<UIComponent> linkChildren = new ArrayList<>();
 		List<UIComponent> actionChildren = new ArrayList<>();
 		List<UIComponent> menuChildren = new ArrayList<>();
 		List<UIComponent> overlayChildren = new ArrayList<>();
+		List<UIComponent> markupDialogChildren = new ArrayList<>();
+		ValueExpression stringExpression = mock(ValueExpression.class);
 		FacesView managedBean = mock(FacesView.class);
-		when(managedBean.nextId()).thenReturn("contentLinkGrid",
+		when(managedBean.getContentMediaKind("doc.attachment")).thenReturn("link");
+		when(managedBean.nextId()).thenReturn("contentGrid",
 												"contentLinkInner",
 												"actionGroupId",
 												"hiddenId",
 												"actionButtonId",
 												"uploadItemId",
 												"overlayId",
-												"iframeId",
-												"clearItemId");
+												"overlayIframeId",
+												"clearItemId",
+												"markupItemId",
+												"markupDialogId",
+												"markupIframeId");
 		builder.setManagedBeanForTest(managedBean);
 
-		when(panelGrid.getId()).thenReturn("contentLinkGrid");
+		when(panelGrid.getId()).thenReturn("contentGrid");
 		when(panelGrid.getChildren()).thenReturn(panelChildren);
 		when(outputLink.getChildren()).thenReturn(linkChildren);
 		when(actionGroup.getChildren()).thenReturn(actionChildren);
 		when(actionButton.getChildren()).thenReturn(menuChildren);
 		when(actionButton.getId()).thenReturn("actionButtonId");
-		when(uploadItem.getId()).thenReturn("uploadItemId");
 		when(overlay.getChildren()).thenReturn(overlayChildren);
+		when(markupDialog.getChildren()).thenReturn(markupDialogChildren);
 		when(mockApplication.createComponent(HtmlPanelGrid.COMPONENT_TYPE)).thenReturn(panelGrid);
 		when(mockApplication.createComponent(HtmlOutputLink.COMPONENT_TYPE)).thenReturn(outputLink);
 		when(mockApplication.createComponent(UIOutput.COMPONENT_TYPE)).thenReturn(outputText);
 		when(mockApplication.createComponent(HtmlPanelGroup.COMPONENT_TYPE)).thenReturn(actionGroup);
 		when(mockApplication.createComponent(HtmlInputHidden.COMPONENT_TYPE)).thenReturn(hidden);
 		when(mockApplication.createComponent(MenuButton.COMPONENT_TYPE)).thenReturn(actionButton);
-		when(mockApplication.createComponent(UIMenuItem.COMPONENT_TYPE)).thenReturn(uploadItem, clearItem);
+		when(mockApplication.createComponent(UIMenuItem.COMPONENT_TYPE)).thenReturn(uploadItem, clearItem, markupItem);
 		when(mockApplication.createComponent(OverlayPanel.COMPONENT_TYPE)).thenReturn(overlay);
-		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(iframe);
+		when(mockApplication.createComponent(Dialog.COMPONENT_TYPE)).thenReturn(markupDialog);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(overlayIframe, markupIframe);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(String.class))).thenReturn(stringExpression);
 
-		ContentLink contentLink = new ContentLink();
-		contentLink.setBinding("doc.attachment");
-		contentLink.setEditable(Boolean.TRUE);
-		UIComponent result = builder.contentLink(null, "row", contentLink, null, "Attachment", null, HorizontalAlignment.left);
+		ContentUpload content = new ContentUpload();
+		content.setBinding("doc.attachment");
+		content.setDisplay(ContentDisplay.link);
+		content.setEditable(Boolean.TRUE);
+		UIComponent result = builder.content(null, "row", content, null, "Attachment", null, HorizontalAlignment.left, true, false);
 
 		assertSame(panelGrid, result);
-		assertEquals(2, panelChildren.size());
-		assertSame(outputLink, panelChildren.get(0));
-		assertSame(actionGroup, panelChildren.get(1));
-		assertEquals(3, actionChildren.size());
-		assertSame(hidden, actionChildren.get(0));
-		assertSame(actionButton, actionChildren.get(1));
-		assertSame(overlay, actionChildren.get(2));
-		assertEquals(2, menuChildren.size());
-		assertSame(uploadItem, menuChildren.get(0));
-		assertSame(clearItem, menuChildren.get(1));
-		assertSame(iframe, overlayChildren.get(0));
-		verify(panelGrid).setColumns(2);
-		verify(actionButton).setTitle("Content Actions");
-		verify(actionButton).setButtonStyleClass("skyveContentActionButton");
-		verify(uploadItem).setValue("Upload Content");
-		verify(uploadItem).setUrl("javascript:void(0)");
-		verify(uploadItem).setOnclick("PF('contentLinkGrid_doc_attachmentOverlay').show();return false");
-		verify(overlay).setFor("actionButtonId");
-		verify(overlay).setShowEvent("skyveContentUpload");
-		verify(overlay).setHideEvent("skyveContentUpload");
-		verify(clearItem).setValue("Clear Content");
-		verify(clearItem).setUrl("javascript:void(0)");
-		verify(clearItem).setOnclick("SKYVE.PF.clearContentLink('doc_attachment','contentLinkGrid');return false");
+		assertSame(markupItem, menuChildren.get(2));
+		assertSame(markupDialog, actionChildren.get(3));
+		verify(markupItem).setContainerStyleClass("skyveContentMarkupAction skyveContentMarkupAction-contentGrid_doc_attachment skyveContentHidden");
 	}
 
 	@SuppressWarnings("static-method")

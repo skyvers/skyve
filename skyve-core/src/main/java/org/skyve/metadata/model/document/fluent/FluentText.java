@@ -65,10 +65,10 @@ public class FluentText extends FluentConvertibleField<FluentText> {
 		return this;
 	}
 
-	@Override
 	/**
 	 * Returns the mutable metadata instance represented by this builder.
 	 */
+	@Override
 	public Text get() {
 		return text;
 	}

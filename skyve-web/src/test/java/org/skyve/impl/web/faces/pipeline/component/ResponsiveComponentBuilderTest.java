@@ -266,37 +266,9 @@ class ResponsiveComponentBuilderTest {
                 assertNotNull(attrs.get("styleClass"));
         }
 
-        @Test
-        @SuppressWarnings("static-method")
-        void contentLinkShortcutAddsFloatLabel() {
-                ResponsiveComponentBuilder builder = new ResponsiveComponentBuilder();
-                UIComponent existing = mock(UIComponent.class);
-                java.util.Map<String, Object> attrs = new java.util.HashMap<>();
-                when(existing.getAttributes()).thenReturn(attrs);
-                org.skyve.impl.metadata.view.widget.bound.input.ContentLink link =
-                        new org.skyve.impl.metadata.view.widget.bound.input.ContentLink();
-                UIComponent result = builder.contentLink(existing, "row", link, null, "Link", null, null);
-                assertSame(existing, result);
-                assertNotNull(attrs.get("styleClass"));
-        }
-
-        @Test
-        @SuppressWarnings("static-method")
-        void contentImageShortcutAddsFloatLabel() {
-                ResponsiveComponentBuilder builder = new ResponsiveComponentBuilder();
-                UIComponent existing = mock(UIComponent.class);
-                java.util.Map<String, Object> attrs = new java.util.HashMap<>();
-                when(existing.getAttributes()).thenReturn(attrs);
-                org.skyve.impl.metadata.view.widget.bound.input.ContentImage image =
-                        new org.skyve.impl.metadata.view.widget.bound.input.ContentImage();
-                UIComponent result = builder.contentImage(existing, "row", image, null, "Image", null);
-                assertSame(existing, result);
-                assertNotNull(attrs.get("styleClass"));
-        }
-
-        @Test
-        @SuppressWarnings("static-method")
-        void geometryShortcutAddsFloatLabel() {
+		@Test
+		@SuppressWarnings("static-method")
+		void geometryShortcutAddsFloatLabel() {
                 ResponsiveComponentBuilder builder = new ResponsiveComponentBuilder();
                 EventSourceComponent existing = mock(EventSourceComponent.class);
                 UIComponent existingComp = mock(UIComponent.class);

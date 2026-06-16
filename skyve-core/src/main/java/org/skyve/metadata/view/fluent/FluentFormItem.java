@@ -15,9 +15,8 @@ import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.DefaultWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
@@ -31,6 +30,8 @@ import org.skyve.impl.metadata.view.widget.bound.input.Spinner;
 import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.metadata.MetaData;
+
+import jakarta.annotation.Nonnull;
 
 /**
  * Fluent builder for {@link FormItem} metadata.
@@ -97,11 +98,8 @@ public class FluentFormItem {
 		if (widget instanceof DefaultWidget defaultWidget) {
 			defaultWidget(new FluentDefaultWidget().from(defaultWidget));
 		}
-		else if (widget instanceof ContentImage content) {
-			contentImage(new FluentContentImage().from(content));
-		}
-		else if (widget instanceof ContentLink content) {
-			contentLink(new FluentContentLink().from(content));
+		else if (widget instanceof ContentUpload content) {
+			content(new FluentContentUpload().from(content));
 		}
 		else if (widget instanceof ContentSignature content) {
 			contentSignature(new FluentContentSignature().from(content));
@@ -306,29 +304,16 @@ public class FluentFormItem {
 	}
 	
 	/**
-	 * Assigns a content-image widget.
+	 * Assigns a managed-content upload.
 	 *
-	 * @param image
-	 *            content-image widget builder
+	 * @param content managed-content upload builder
 	 * @return this builder
 	 */
-	public FluentFormItem contentImage(FluentContentImage image) {
-		item.setWidget(image.get());
+	public @Nonnull FluentFormItem content(@Nonnull FluentContentUpload content) {
+		item.setWidget(content.get());
 		return this;
 	}
-	
-	/**
-	 * Assigns a content-link widget.
-	 *
-	 * @param link
-	 *            content-link widget builder
-	 * @return this builder
-	 */
-	public FluentFormItem contentLink(FluentContentLink link) {
-		item.setWidget(link.get());
-		return this;
-	}
-	
+
 	/**
 	 * Assigns a content-signature widget.
 	 *

@@ -40,10 +40,10 @@ public class FluentTime extends FluentConvertibleField<FluentTime> {
 		return this;
 	}
 
-	@Override
 	/**
 	 * Returns the mutable metadata instance represented by this builder.
 	 */
+	@Override
 	public Time get() {
 		return time;
 	}

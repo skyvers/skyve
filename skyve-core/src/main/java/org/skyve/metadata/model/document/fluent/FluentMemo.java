@@ -31,10 +31,10 @@ public class FluentMemo extends FluentConstrainableField<FluentMemo> {
 		return this;
 	}
 	
-	@Override
 	/**
 	 * Returns the mutable metadata instance represented by this builder.
 	 */
+	@Override
 	public Memo get() {
 		return memo;
 	}

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -33,6 +34,7 @@ import org.skyve.domain.messages.SecurityException;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.util.Thumbnail;
+import org.slf4j.Logger;
 
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.WriteListener;
@@ -133,6 +135,17 @@ class AbstractResourceServletTest {
 		servlet.doGet(request, response);
 
 		verify(response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+	}
+
+	@Test
+	void logResourceIOExceptionWarnsWithoutThrowableStackTrace() {
+		Logger logger = mock(Logger.class);
+		IOException failure = new IOException("Broken pipe");
+
+		AbstractResourceServlet.logResourceIOException(logger, failure);
+
+		verify(logger).warn("Problem getting the resource - {}", "java.io.IOException: Broken pipe");
+		verify(logger, never()).warn(anyString(), eq(failure));
 	}
 
 	@Test

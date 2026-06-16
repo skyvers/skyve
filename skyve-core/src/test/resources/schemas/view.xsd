@@ -39,11 +39,9 @@
 
   <xs:element name="containerColumn" type="tns:dataGridContainerColumn"/>
 
+  <xs:element name="content" type="tns:contentUpload"/>
+
   <xs:element name="contentAccess" type="tns:viewContentUserAccessMetaData"/>
-
-  <xs:element name="contentImage" type="tns:contentImage"/>
-
-  <xs:element name="contentLink" type="tns:contentLink"/>
 
   <xs:element name="contentReference" type="tns:contentReference"/>
 
@@ -213,8 +211,7 @@
 
   <xs:complexType name="widgetReference">
     <xs:choice>
-      <xs:element ref="tns:contentImage"/>
-      <xs:element ref="tns:contentLink"/>
+      <xs:element ref="tns:content"/>
       <xs:element ref="tns:checkBox"/>
       <xs:element ref="tns:colourPicker"/>
       <xs:element ref="tns:combo"/>
@@ -231,7 +228,7 @@
     </xs:choice>
   </xs:complexType>
 
-  <xs:complexType name="contentImage">
+  <xs:complexType name="contentUpload">
     <xs:complexContent>
       <xs:extension base="tns:inputWidget">
         <xs:sequence>
@@ -251,6 +248,8 @@
         <xs:attribute name="minPixelHeight" type="xs:int"/>
         <xs:attribute name="maxPixelHeight" type="xs:int"/>
         <xs:attribute name="editable" type="xs:boolean"/>
+        <xs:attribute name="capture" type="tns:contentCapture"/>
+        <xs:attribute name="display" type="tns:contentDisplay"/>
         <xs:attribute name="showMarkup" type="xs:boolean"/>
       </xs:extension>
     </xs:complexContent>
@@ -271,33 +270,6 @@
   <xs:complexType name="abstractBound" abstract="true">
     <xs:sequence/>
     <xs:attribute name="binding" type="xs:string"/>
-  </xs:complexType>
-
-  <xs:complexType name="contentLink">
-    <xs:complexContent>
-      <xs:extension base="tns:inputWidget">
-        <xs:sequence>
-          <xs:element name="parameters" form="qualified" minOccurs="0">
-            <xs:complexType>
-              <xs:sequence>
-                <xs:element name="parameter" type="tns:parameterImpl" minOccurs="0" maxOccurs="unbounded"/>
-              </xs:sequence>
-            </xs:complexType>
-          </xs:element>
-          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
-        </xs:sequence>
-        <xs:attribute name="value" type="xs:string"/>
-        <xs:attribute name="pixelWidth" type="xs:int"/>
-        <xs:attribute name="editable" type="xs:boolean"/>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-
-  <xs:complexType name="parameterImpl">
-    <xs:sequence/>
-    <xs:attribute name="name" type="xs:string" use="required"/>
-    <xs:attribute name="value" type="xs:string"/>
-    <xs:attribute name="valueBinding" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="checkBox">
@@ -570,6 +542,13 @@
     <xs:sequence/>
     <xs:attribute name="filterBinding" type="xs:string" use="required"/>
     <xs:attribute name="operator" type="ns1:filterOperator" use="required"/>
+    <xs:attribute name="value" type="xs:string"/>
+    <xs:attribute name="valueBinding" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="parameterImpl">
+    <xs:sequence/>
+    <xs:attribute name="name" type="xs:string" use="required"/>
     <xs:attribute name="value" type="xs:string"/>
     <xs:attribute name="valueBinding" type="xs:string"/>
   </xs:complexType>
@@ -898,8 +877,7 @@
       <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
       <xs:choice>
         <xs:element ref="tns:default"/>
-        <xs:element ref="tns:contentImage"/>
-        <xs:element ref="tns:contentLink"/>
+        <xs:element ref="tns:content"/>
         <xs:element ref="tns:contentSignature"/>
         <xs:element ref="tns:button"/>
         <xs:element ref="tns:zoomIn"/>
@@ -1629,7 +1607,7 @@
         <xs:sequence>
           <xs:choice minOccurs="0" maxOccurs="unbounded">
             <xs:element ref="tns:link"/>
-            <xs:element ref="tns:contentImage"/>
+            <xs:element ref="tns:content"/>
             <xs:element ref="tns:staticImage"/>
             <xs:element ref="tns:dynamicImage"/>
             <xs:element ref="tns:blurb"/>
@@ -1996,6 +1974,7 @@
     <xs:complexContent>
       <xs:extension base="tns:classAction">
         <xs:sequence/>
+        <xs:attribute name="capture" type="tns:contentCapture"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -2150,6 +2129,24 @@
       <xs:enumeration value="left"/>
       <xs:enumeration value="centre"/>
       <xs:enumeration value="right"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="contentCapture">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="none"/>
+      <xs:enumeration value="camera"/>
+      <xs:enumeration value="video"/>
+      <xs:enumeration value="all"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="contentDisplay">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="auto"/>
+      <xs:enumeration value="link"/>
+      <xs:enumeration value="image"/>
+      <xs:enumeration value="video"/>
     </xs:restriction>
   </xs:simpleType>
 

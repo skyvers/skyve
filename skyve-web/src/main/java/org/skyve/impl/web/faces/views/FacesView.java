@@ -34,10 +34,14 @@ import org.skyve.impl.metadata.view.widget.Chart.ChartType;
 import org.skyve.impl.metadata.view.widget.FilterParameterImpl;
 import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.impl.metadata.view.widget.bound.input.CompleteType;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentCapture;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentDisplay;
 import org.skyve.impl.util.ImageUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.DynamicImageServlet;
+import org.skyve.impl.web.content.ContentMediaClassifier;
+import org.skyve.impl.web.content.ContentMediaClassifier.ContentMediaKind;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.actions.ActionUtil;
@@ -79,6 +83,8 @@ import org.skyve.util.logging.Category;
 import org.skyve.web.UserAgentType;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
 import jakarta.faces.FacesException;
 import jakarta.faces.application.FacesMessage;
@@ -125,6 +131,7 @@ public class FacesView extends HarnessView {
 	private Map<String, SkyveLazyDataModel> lazyDataModels = new TreeMap<>();
  	private SkyveDualListModelMap dualListModels = new SkyveDualListModelMap(this);
 	private Map<String, List<BeanMapAdapter>> beans = new TreeMap<>();
+	private Map<String, String> contentMediaKindCache = new TreeMap<>();
 
 	// model name for aggregate views (list, tree, map & calendar) - ie m=admin&d=DataMaintenance&q=ContentModel
 	// parameter q becomes the model name; this is not a parameter
@@ -146,11 +153,11 @@ public class FacesView extends HarnessView {
 	public void setModelName(String modelName) {
 		this.modelName = modelName;
 	}
-	
+
 	// This parameter is used on GET requests to render a zoomed in view corresponding to the binding.
 	// and by map.xhtml to hold the geometryBinding for a map view.
 	private String bindingParameter;
-	
+
 	/**
 	 * Returns the optional binding parameter used for zoom-in view targeting.
 	 *
@@ -167,13 +174,13 @@ public class FacesView extends HarnessView {
 	public void setBindingParameter(String bindingParameter) {
 		this.bindingParameter = OWASP.sanitise(Sanitisation.text, Util.processStringValue(bindingParameter));
 	}
-	
+
 	/**
 	 * Used to track requests being executed out of order possibly from a Cross Site Request Forgery
 	 */
 	private String csrfToken;
 	private boolean csrfTokenChecked = true;
-	
+
 	/**
 	 * Establishes a token if not already present and returns the same token until the token is set (from a hidden input in an AJAX request)
 	 *
@@ -196,16 +203,16 @@ public class FacesView extends HarnessView {
 	 * @param csrfToken value from the web request
 	 */
 	public void setCsrfToken(String csrfToken) {
-		// We can't do CSRF processing as  
+		// We can't do CSRF processing as
 		if (FacesUtil.isIgnoreAutoUpdate()) {
 			return;
 		}
-		
+
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("setCsrfToken() = {}", csrfToken);
 		String currentCsrfToken = OWASP.sanitise(Sanitisation.text, Util.processStringValue(csrfToken));
 		csrfTokenChecked = true; // indicate we have checked the token
 		if (this.csrfToken != null) { // there needs to be a token to check first
-			
+
 			if (! this.csrfToken.equals(currentCsrfToken)) {
 				LOGGER.error("CSRF attack detected");
 				try {
@@ -218,7 +225,7 @@ public class FacesView extends HarnessView {
 			this.csrfToken = null;
 		}
 	}
-	
+
 	/**
 	 * Initializes request-scoped UX/UI and user-agent attributes after bean construction.
 	 */
@@ -228,7 +235,7 @@ public class FacesView extends HarnessView {
 		this.uxui = (UxUi) attributes.get(AbstractWebContext.UXUI);
 		this.userAgentType = (UserAgentType) attributes.get(AbstractWebContext.USER_AGENT_TYPE_KEY);
 	}
-	
+
 	/**
 	 * Dispatches pre-render processing to either postback or cold-hit handlers.
 	 */
@@ -241,14 +248,14 @@ public class FacesView extends HarnessView {
 			coldHit();
 		}
 	}
-	
+
 	/**
 	 * Handles first-render initialization path.
 	 */
 	protected void coldHit() {
 		new PreRenderColdHitAction(this).execute();
 	}
-	
+
 	/**
 	 * Handles postback lifecycle processing including CSRF token checks.
 	 */
@@ -407,7 +414,7 @@ public class FacesView extends HarnessView {
 
 	/**
 	 * Returns the current conversation bean for this view, or {@code null} when no web context is active.
-	 * 
+	 *
 	 * This is the edited bean.
 	 *
 	 * @return current conversation bean, or {@code null}
@@ -427,6 +434,7 @@ public class FacesView extends HarnessView {
 			webContext.setCurrentBean(bean);
 		}
 		currentBean = new BeanMapAdapter(ActionUtil.getTargetBeanForView(this), webContext);
+		contentMediaKindCache.clear();
 	}
 
 	/**
@@ -473,7 +481,7 @@ public class FacesView extends HarnessView {
 	public void ok() {
 		LOGGER.info("FacesView - ok");
 		new SaveAction(this, true).execute();
-		
+
 		FacesContext c = FacesContext.getCurrentInstance();
 		if (c.getMessageList().isEmpty()) {
 			PrimeFaces.current().executeScript("SKYVE.PF.popHistory(true)");
@@ -490,7 +498,7 @@ public class FacesView extends HarnessView {
 
 		new SaveAction(this, false).execute();
 		new SetTitleAction(this).execute();
-		
+
 		FacesContext c = FacesContext.getCurrentInstance();
 		if (c.getMessageList().isEmpty()) {
 			c.addMessage(null, new FacesMessage("Saved", "Any changes have been saved"));
@@ -504,7 +512,7 @@ public class FacesView extends HarnessView {
 			}
 		}
 	}
-	
+
 	/**
 	 * Executes delete behavior and closes the current edit view on success.
 	 */
@@ -529,7 +537,7 @@ public class FacesView extends HarnessView {
 		new ZoomInAction(this, dataWidgetBinding, bizId).execute();
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("FacesView - view binding now {}", viewBinding);
 	}
-	
+
 	// for navigate-on-select in data grids
 	/**
 	 * Navigates into the bean selected from a data-grid selection event.
@@ -544,7 +552,7 @@ public class FacesView extends HarnessView {
 		}
 		navigate(dataWidgetBinding.substring(0, dataWidgetBinding.length() - 3), bizId);
 	}
-	
+
 	// Called by ZoomIn widget
 	/**
 	 * Navigates into a reference binding from a zoom-in widget action.
@@ -554,7 +562,7 @@ public class FacesView extends HarnessView {
 		new ZoomInAction(this, referenceBinding).execute();
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("FacesView - view binding now {}", viewBinding);
 	}
-	
+
 	/**
 	 * Adds a new child row for the supplied data-widget binding.
 	 */
@@ -565,7 +573,7 @@ public class FacesView extends HarnessView {
 		new AddAction(this, dataWidgetBinding, inline).execute();
 		if (inline && UtilImpl.FACES_TRACE) LOGGER.info("FacesView - view binding now {}", viewBinding);
 	}
-	
+
 	/**
 	 * Navigates one level out of the current zoom-in binding stack.
 	 */
@@ -600,7 +608,7 @@ public class FacesView extends HarnessView {
 		new ExecuteActionAction(this, actionName, collectionBinding, elementBizId).execute();
 		new SetTitleAction(this).execute();
 	}
-	
+
 	/**
 	 * Executes a named server-side action without row-selection context.
 	 */
@@ -620,10 +628,10 @@ public class FacesView extends HarnessView {
 		new RerenderAction(this, source, validate).execute();
 		new SetTitleAction(this).execute();
 	}
-	
+
 	/**
 	 * Set the selected row bizId and fire an action or rerender.
-	 * 
+	 *
 	 * if actionName is null - do nothing - just set the selected row.
 	 * else if actionName is "true" - rerender with validation.
 	 * else if actionName is "false" - rerender with no validation.
@@ -676,9 +684,9 @@ public class FacesView extends HarnessView {
 	/**
 	 * Fired from JS with, eg:
 	 * `selectGridRow([{name:'bizId', value:'abcd-0000'})`
-	 * 
+	 *
 	 * Set the selected row bizId and fire an action or rerender.
-	 * 
+	 *
 	 * if actionName is null - do nothing - just set the selected row.
 	 * else if actionName is "true" - rerender with validation.
 	 * else if actionName is "false" - rerender with no validation.
@@ -717,14 +725,14 @@ public class FacesView extends HarnessView {
 	public BeanMapAdapter getSelectedRow() {
 		return selectedRow;
 	}
-	
+
 	/**
 	 * Sets the row adapter selected in UI table components.
 	 */
 	public void setSelectedRow(BeanMapAdapter selectedRow) {
 		this.selectedRow = selectedRow;
 	}
-	
+
 	/**
 	 * Ajax call from DataTable (data grid implementation) when rows are drag reordered in the UI.
 	 * @param event
@@ -757,8 +765,8 @@ public class FacesView extends HarnessView {
 	 * Returns (and lazily creates) a cached lazy data model for the supplied query/model key.
 	 */
 	@SuppressWarnings("java:S3776") // complexity OK
-	public SkyveLazyDataModel getLazyDataModel(String moduleName, 
-												String documentName, 
+	public SkyveLazyDataModel getLazyDataModel(String moduleName,
+												String documentName,
 												String queryName,
 												@SuppressWarnings("hiding") String modelName,
 												List<List<String>> filterCriteria) {
@@ -799,7 +807,7 @@ public class FacesView extends HarnessView {
 					}
 				}
 			}
-			
+
 			result = new SkyveLazyDataModel(this,
 												moduleName,
 												documentName,
@@ -810,7 +818,7 @@ public class FacesView extends HarnessView {
 												true);
 			lazyDataModels.put(key, result);
 		}
- 		
+
 		return result;
 	}
 
@@ -835,13 +843,13 @@ public class FacesView extends HarnessView {
 			log.append(" with selected row ").append(elementBizId);
 		}
 		LOGGER.info(log.toString());
-		new ExecuteDownloadAction(this, 
-									actionName, 
+		new ExecuteDownloadAction(this,
+									actionName,
 									collectionBinding,
 									elementBizId).execute();
 		new SetTitleAction(this).execute();
 	}
-	
+
 	/**
 	 * Executes a download action without row context.
 	 *
@@ -851,21 +859,69 @@ public class FacesView extends HarnessView {
 		action(actionName, null, null);
 	}
 
-	// /skyve/{content/image}Upload.xhtml?_n=<binding>&_c=<webId> and optionally &_b=<view binding>
+	// /skyve/upload.xhtml?_u=boundContent&_n=<binding>&_c=<webId> and optionally &_b=<view binding>
 	/**
 	 * Builds upload endpoint URL for content/image widgets in the current view context.
 	 *
 	 * @param sanitisedBinding sanitised binding for the target content field
 	 * @param image whether the upload endpoint is for an image
-	 * @return upload endpoint URL
+	 * @return upload endpoint URL; never {@code null}
 	 */
-	public String getContentUploadUrl(String sanitisedBinding, boolean image) {
+	public @Nonnull String getContentUploadUrl(@Nonnull String sanitisedBinding, boolean image) {
+		return getContentUploadUrl(sanitisedBinding, image ? ContentDisplay.image : ContentDisplay.link, ContentCapture.none, null);
+	}
+
+	/**
+	 * Builds unified upload endpoint URL for JSF expression callers using string
+	 * metadata values.
+	 *
+	 * <p>Precondition: non-null {@code display} and {@code capture} values must be
+	 * valid enum names accepted by {@link ContentDisplay#valueOf(String)} and
+	 * {@link ContentCapture#valueOf(String)}.
+	 *
+	 * @param sanitisedBinding sanitised binding for the target content field; must not be {@code null}
+	 * @param display content display mode name, or {@code null} to use {@code auto}
+	 * @param capture content capture mode name, or {@code null} to use {@code none}
+	 * @param companionBinding optional auto-mode media-kind companion field
+	 * @return upload endpoint URL; never {@code null}
+	 */
+	public @Nonnull String getContentUploadUrl(@Nonnull String sanitisedBinding,
+												@Nullable String display,
+												@Nullable String capture,
+												@Nullable String companionBinding) {
+		String displayValue = Util.processStringValue(display);
+		String captureValue = Util.processStringValue(capture);
+		ContentDisplay resolvedDisplay = (displayValue == null) ? ContentDisplay.auto : ContentDisplay.valueOf(displayValue);
+		ContentCapture resolvedCapture = (captureValue == null) ? ContentCapture.none : ContentCapture.valueOf(captureValue);
+		return getContentUploadUrl(sanitisedBinding, resolvedDisplay, resolvedCapture, companionBinding);
+	}
+
+	/**
+	 * Builds unified upload endpoint URL for bound content/image widgets in the current view context.
+	 *
+	 * @param sanitisedBinding sanitised binding for the target content field; must not be {@code null}
+	 * @param display content display mode, or {@code null} to use {@code auto}
+	 * @param capture content capture mode, or {@code null} to use {@code none}
+	 * @param companionBinding optional auto-mode media-kind companion field
+	 * @return upload endpoint URL; never {@code null}
+	 */
+	public @Nonnull String getContentUploadUrl(@Nonnull String sanitisedBinding,
+												@Nullable ContentDisplay display,
+												@Nullable ContentCapture capture,
+												@Nullable String companionBinding) {
 		StringBuilder result = new StringBuilder(128);
-		result.append(Util.getSkyveContextUrl()).append(image ? "/image" : "/content").append("Upload.xhtml?");
+		result.append(Util.getSkyveContextUrl()).append("/upload.xhtml?");
+		result.append("_u=").append(UnifiedUploadState.UploadKind.boundContent.name());
+		result.append('&');
 		result.append(AbstractWebContext.RESOURCE_FILE_NAME).append('=').append(sanitisedBinding);
 		result.append('&').append(AbstractWebContext.CONTEXT_NAME).append('=').append(webContext.getWebId());
 		if (viewBinding != null) {
 			result.append('&').append(AbstractWebContext.BINDING_NAME).append('=').append(viewBinding);
+		}
+		result.append("&_d=").append(display == null ? ContentDisplay.auto : display);
+		result.append("&_cap=").append(capture == null ? ContentCapture.none : capture);
+		if (companionBinding != null) {
+			result.append("&_m=").append(companionBinding);
 		}
 		return result.toString();
 	}
@@ -890,24 +946,54 @@ public class FacesView extends HarnessView {
 		return result.toString();
 	}
 
-	// /skyve/fileUpload.xhtml?_a=<actionName>&_c=<webId>
+	// /skyve/upload.xhtml?_u=action&_a=<actionName>&_c=<webId>
 	/**
-	 * Builds file-upload endpoint URL for action-based uploads in the current view context.
+	 * Builds unified upload endpoint URL for action-based uploads in the current view context.
 	 *
 	 * @param actionName action name to invoke on upload
-	 * @return file upload endpoint URL
+	 * @return upload endpoint URL; never {@code null}
 	 */
-	public String getFileUploadUrl(String actionName) {
+	public @Nonnull String getFileUploadUrl(@Nonnull String actionName) {
+		return getFileUploadUrl(actionName, ContentCapture.none);
+	}
+
+	/**
+	 * Builds unified upload endpoint URL for JSF expression callers using a capture
+	 * enum name.
+	 *
+	 * @param actionName action name to invoke on upload; must not be {@code null}
+	 * @param capture action capture mode name, or {@code null} to use {@code none}
+	 * @return upload endpoint URL; never {@code null}
+	 * @throws IllegalArgumentException if {@code capture} is non-blank and not a {@link ContentCapture} name
+	 */
+	public @Nonnull String getFileUploadUrl(@Nonnull String actionName, @Nullable String capture) {
+		String captureValue = Util.processStringValue(capture);
+		ContentCapture resolvedCapture = (captureValue == null) ? ContentCapture.none : ContentCapture.valueOf(captureValue);
+		return getFileUploadUrl(actionName, resolvedCapture);
+	}
+
+	/**
+	 * Builds unified upload endpoint URL for action-based uploads in the current view context.
+	 *
+	 * @param actionName action name to invoke on upload; must not be {@code null}
+	 * @param capture action capture mode, or {@code null} to use {@code none}
+	 * @return upload endpoint URL; never {@code null}
+	 */
+	public @Nonnull String getFileUploadUrl(@Nonnull String actionName, @Nullable ContentCapture capture) {
+		Objects.requireNonNull(actionName, "Action name");
 		StringBuilder result = new StringBuilder(128);
-		result.append(Util.getSkyveContextUrl()).append("/fileUpload.xhtml?");
+		result.append(Util.getSkyveContextUrl()).append("/upload.xhtml?");
+		result.append("_u=").append(UnifiedUploadState.UploadKind.action.name());
+		result.append('&');
 		result.append(AbstractWebContext.ACTION_NAME).append('=').append(actionName);
 		result.append('&').append(AbstractWebContext.CONTEXT_NAME).append('=').append(webContext.getWebId());
 		if (viewBinding != null) {
 			result.append('&').append(AbstractWebContext.BINDING_NAME).append('=').append(viewBinding);
 		}
+		result.append("&_cap=").append(capture == null ? ContentCapture.none : capture);
 		return result.toString();
 	}
-	
+
 	/**
 	 * Resolves a content retrieval URL for the supplied binding.
 	 *
@@ -918,7 +1004,7 @@ public class FacesView extends HarnessView {
 	public String getContentUrl(final String binding, final boolean image) {
  		return new GetContentURLAction(getCurrentBean().getBean(), binding, image).execute();
  	}
- 	
+
 	/**
 	 * Resolves the content file name for the supplied binding.
 	 *
@@ -928,7 +1014,69 @@ public class FacesView extends HarnessView {
  	public String getContentFileName(final String binding) {
  		return new GetContentFileNameAction(getCurrentBean().getBean(), binding).execute();
  	}
- 	
+
+	/**
+	 * Resolves the server-classified media kind for an auto content binding.
+	 *
+	 * <p>Side effects: when a nonblank content id is present and not already cached
+	 * for this hydrated view instance, opens a content manager to read stored content
+	 * metadata. Missing or unreadable metadata falls back to {@code link}; blank
+	 * content ids and views without a current bean return {@code null} so the
+	 * companion field can be omitted.
+	 *
+	 * <p>Complexity: O(1) after the first lookup for the same binding/content-id
+	 * pair in the current hydrated view.
+	 *
+	 * @param binding content binding to resolve; must not be {@code null}
+	 * @return media kind name, or {@code null} when the binding has no content id
+	 *         or the view has not been hydrated with a current bean
+	 */
+ 	public @Nullable String getContentMediaKind(final @Nonnull String binding) {
+		BeanMapAdapter current = getCurrentBean();
+		if (current == null) {
+			return null;
+		}
+		Bean bean = current.getBean();
+		if (bean == null) {
+			return null;
+		}
+
+		Object value = BindUtil.get(bean, binding);
+		if (value instanceof String contentId) {
+			contentId = UtilImpl.processStringValue(contentId);
+			if (contentId == null) {
+				return null;
+			}
+			String cacheKey = binding + '=' + contentId;
+			String result = contentMediaKindCache.get(cacheKey);
+			if (result == null) {
+				result = loadContentMediaKind(contentId);
+				contentMediaKindCache.put(cacheKey, result);
+			}
+			return result;
+		}
+		return null;
+ 	}
+
+	/**
+	 * Loads and classifies stored content metadata.
+	 *
+	 * @param contentId content id to inspect; must not be {@code null}
+	 * @return media kind name, defaulting to {@code link}; never {@code null}
+	 */
+	private static @Nonnull String loadContentMediaKind(@Nonnull String contentId) {
+		try (org.skyve.content.ContentManager cm = EXT.newContentManager()) {
+			AttachmentContent content = cm.getAttachment(contentId);
+			ContentMediaKind mediaKind = (content == null) ?
+											ContentMediaKind.link :
+											ContentMediaClassifier.classify(content.getContentType(), content.getFileName());
+			return mediaKind.name();
+		}
+		catch (@SuppressWarnings("unused") Exception e) {
+			return ContentMediaKind.link.name();
+		}
+	}
+
 	/**
 	 * Builds dynamic-image servlet URL for an image name and optional dimension overrides.
 	 *
@@ -941,12 +1089,12 @@ public class FacesView extends HarnessView {
 	 * @param initialPixelHeight initial height fallback, or {@code null}
 	 * @return dynamic image URL
 	 */
- 	public String getDynamicImageUrl(String name, 
+ 	public String getDynamicImageUrl(String name,
  										String moduleName,
  										String documentName,
- 										Integer pixelWidth, 
- 										Integer pixelHeight, 
- 										Integer initialPixelWidth, 
+ 										Integer pixelWidth,
+ 										Integer pixelHeight,
+ 										Integer initialPixelWidth,
  										Integer initialPixelHeight) {
 		StringBuilder result = new StringBuilder(128);
 		result.append("/dynamic.png?").append(AbstractWebContext.DOCUMENT_NAME).append('=');
@@ -977,7 +1125,7 @@ public class FacesView extends HarnessView {
 			result.append('&').append(AbstractWebContext.BINDING_NAME).append('=').append(viewBinding);
 		}
 		result.append("&_ts=").append(System.currentTimeMillis());
-		
+
 		return result.toString();
  	}
 
@@ -1018,7 +1166,7 @@ public class FacesView extends HarnessView {
 
 		return new CompleteAction(this, query, binding, complete).execute();
 	}
-	
+
 	/**
 	 * Executes lookup-description row searches with configured filter and parameter bindings.
 	 *
@@ -1062,7 +1210,7 @@ public class FacesView extends HarnessView {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("FacesView - COMPLETE = {}.{} : {}", completeModule, completeQuery, query);
 
  		List<BeanMapAdapter> result = null;
- 		
+
  		// these are ultimately web parameters that may not be present in the request
  		if ((completeQuery == null) || completeQuery.isEmpty()) {
  			result = new ArrayList<>();
@@ -1092,10 +1240,10 @@ public class FacesView extends HarnessView {
 				beans.put(key.toString(), result);
 			}
  		}
- 		
+
 		return result;
 	}
- 	
+
  	/**
  	 * Creates the map display script.
 	 *
@@ -1156,10 +1304,10 @@ public class FacesView extends HarnessView {
 		if (includeScriptTag) {
 			result.append("</script>");
 		}
-		
+
 		return result.toString();
 	}
-	
+
 	/**
 	 * Creates a PF ChartModel for a Skyve ChartModel.
 	 *
@@ -1190,7 +1338,7 @@ public class FacesView extends HarnessView {
 			ec.getSessionMap().put(panelUniqueName, event.getVisibility());
 		}
 	}
-	
+
 	/**
 	 * Restore the collapsible state from the session.
 	 * NB Called from SkyvePanelRenderer.
@@ -1208,7 +1356,7 @@ public class FacesView extends HarnessView {
 			}
 		}
 	}
-	
+
 	/**
 	 * Capture a signature from its json payloads
 	 *
@@ -1254,9 +1402,9 @@ public class FacesView extends HarnessView {
 
 				// Get the signature image bytes from the JSON
 				byte[] signature = ImageUtil.signature(json, width, height, rgbHexBackgroundColour, rgbHexForegroundColour);
-				// Add to content 
+				// Add to content
 				// NB This handles compound bindings and checks for content access on the content owning bean
-				AttachmentContent content = FacesContentUtil.handleFileUpload(signature, MimeType.png.toString(), bean, BindUtil.unsanitiseBinding(binding));		
+				AttachmentContent content = FacesContentUtil.handleFileUpload(signature, MimeType.png.toString(), bean, BindUtil.unsanitiseBinding(binding));
 				// Set the content attribute
 				String contentId = Objects.requireNonNull(content.getContentId(), "contentId");
 				BindUtil.set(bean, unsanitisedContentBinding, contentId);
@@ -1265,7 +1413,7 @@ public class FacesView extends HarnessView {
 			}
 		}.execute();
 	}
-	
+
 	/**
 	 * Clear a signature content
 	 *
@@ -1275,7 +1423,7 @@ public class FacesView extends HarnessView {
 		LOGGER.info("FacesView - clear signnature for binding {}", binding);
 		BindUtil.set(getCurrentBean().getBean(), binding, null);
 	}
-	
+
 	// Used to hydrate the state after dehydration in SkyveFacesPhaseListener.afterRestoreView()
  	// NB This is only set when the bean is dehydrated
 	private String dehydratedWebId;
@@ -1317,11 +1465,12 @@ public class FacesView extends HarnessView {
 		lazyDataModels.clear();
 		dualListModels.clear();
 		beans.clear();
+		contentMediaKindCache.clear();
 		currentBean = null;
 		postRenderBizlet = null;
 		postRenderBean = null;
 	}
-	
+
 	// This is used to ensure the same bizlet instance is used to call postRender() when required.
 	// If this is null, postRender isn't called in SkyveFacesPhaseListener.
 	// This enables state in the bizlet to be kept between preExecute(), preRerender() and postRender().
@@ -1339,7 +1488,7 @@ public class FacesView extends HarnessView {
 	// If not null, indicates that we wanna call postRender() on the postRenderBizlet in SkyveFacesPhaseListener.
 	// The bizlet may still be null but we wanna make the interceptor calls anyway.
 	private transient Bean postRenderBean = null;
-	
+
 	/**
 	 * Returns bean to use for post-render callbacks.
 	 *
@@ -1361,7 +1510,7 @@ public class FacesView extends HarnessView {
 	}
 
 	/**
-	 * This method produces a style class that implements 
+	 * This method produces a style class that implements
 	 * the form column/row contract in the skyve view metadata.
 	 * This method is called within the div styleClass attribute
 	 * in form layouts.
@@ -1378,10 +1527,10 @@ public class FacesView extends HarnessView {
 		if (alignment != null) {
 			result = String.format("%s %s", result, alignment);
 		}
-		
+
 		return result;
 	}
-	
+
 	/**
 	 * This method produces a style class for each edit view form row.
 	 * The side-effect is that the style is reset for the new row to layout.

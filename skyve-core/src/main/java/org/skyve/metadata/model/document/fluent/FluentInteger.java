@@ -40,10 +40,10 @@ public class FluentInteger extends FluentConvertibleField<FluentInteger> {
 		return this;
 	}
 
-	@Override
 	/**
 	 * Returns the mutable metadata instance represented by this builder.
 	 */
+	@Override
 	public Integer get() {
 		return integer;
 	}

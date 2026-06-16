@@ -32,7 +32,6 @@ import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
@@ -348,20 +347,6 @@ class ViewValidatorTest extends AbstractSkyveTest {
 		assertDoesNotThrow(() -> newValidator(view).visit());
 	}
 
-	@Test
-	void validateViewWithContentLink() {
-		ViewImpl view = editView();
-		Form form = new Form();
-		form.getColumns().add(new FormColumn());
-		FormRow row = new FormRow();
-		form.getRows().add(row);
-		FormItem item = new FormItem();
-		ContentLink cl = new ContentLink();
-		item.setWidget(cl);
-		row.getItems().add(item);
-		view.getContained().add(form);
-		assertDoesNotThrow(() -> newValidator(view).visit());
-	}
 
 	@Test
 	void validateViewWithBlurb() {
@@ -810,21 +795,6 @@ class ViewValidatorTest extends AbstractSkyveTest {
 		assertDoesNotThrow(() -> newValidator(view).visit());
 	}
 
-	@Test
-	void validateViewWithContentImageHavingMissingBindingThrowsException() {
-		ViewImpl view = editView();
-		Form form = new Form();
-		form.getColumns().add(new FormColumn());
-		FormRow row = new FormRow();
-		form.getRows().add(row);
-		FormItem item = new FormItem();
-		org.skyve.impl.metadata.view.widget.bound.input.ContentImage ci = new org.skyve.impl.metadata.view.widget.bound.input.ContentImage();
-		// binding is required for ContentImage
-		item.setWidget(ci);
-		row.getItems().add(item);
-		view.getContained().add(form);
-		assertThrows(MetaDataException.class, () -> newValidator(view).visit());
-	}
 
 	@Test
 	void validateViewWithContentSignatureHavingMissingBindingThrowsException() {

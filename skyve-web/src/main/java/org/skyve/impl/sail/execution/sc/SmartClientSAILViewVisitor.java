@@ -22,8 +22,6 @@ import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.impl.metadata.view.widget.bound.input.DefaultWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
@@ -250,12 +248,6 @@ public class SmartClientSAILViewVisitor {
 		}
 		else if (widget instanceof Combo combo) {
 			visitCombo(combo);
-		}
-		else if (widget instanceof ContentImage image) {
-			visitContentImage(image);
-		}
-		else if (widget instanceof ContentLink link) {
-			visitContentLink(link);
 		}
 		else if (widget instanceof ContentSignature signature) {
 			visitContentSignature(signature);
@@ -614,26 +606,6 @@ public class SmartClientSAILViewVisitor {
 						document.getName(),
 						Integer.valueOf(containerIndex),
 						Integer.valueOf(formIndex)), InputType.COMBO));
-	}
-
-	/**
-	 * Placeholder for content-image locator generation.
-	 *
-	 * @param contentImage the content-image metadata
-	 */
-	@SuppressWarnings("java:S1172")
-	private final void visitContentImage(ContentImage contentImage) {
-		// TODO
-	}
-
-	/**
-	 * Placeholder for content-link locator generation.
-	 *
-	 * @param contentLink the content-link metadata
-	 */
-	@SuppressWarnings("java:S1172")
-	private final void visitContentLink(ContentLink contentLink) {
-		// TODO
 	}
 
 	/**

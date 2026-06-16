@@ -15,8 +15,8 @@ import org.skyve.impl.metadata.view.WidgetReference;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentDisplay;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 import org.skyve.impl.metadata.view.widget.bound.input.RichText;
@@ -397,21 +397,23 @@ class AbstractAttributeTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void defaultInputWidgetForContentIsContentLink() {
+	void defaultInputWidgetForContentIsContentUploadAuto() {
 		Text attr = new Text();
 		attr.setName("myContent");
 		attr.setAttributeType(AttributeType.content);
-		assertTrue(attr.getDefaultInputWidget() instanceof ContentLink);
+		assertTrue(attr.getDefaultInputWidget() instanceof ContentUpload);
+		assertEquals(ContentDisplay.auto, ((ContentUpload) attr.getDefaultInputWidget()).getResolvedDisplay());
 		assertEquals("myContent", attr.getDefaultInputWidget().getBinding());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	void defaultInputWidgetForImageIsContentImage() {
+	void defaultInputWidgetForImageIsContentUploadImage() {
 		Text attr = new Text();
 		attr.setName("myImage");
 		attr.setAttributeType(AttributeType.image);
-		assertTrue(attr.getDefaultInputWidget() instanceof ContentImage);
+		assertTrue(attr.getDefaultInputWidget() instanceof ContentUpload);
+		assertEquals(ContentDisplay.image, ((ContentUpload) attr.getDefaultInputWidget()).getResolvedDisplay());
 		assertEquals("myImage", attr.getDefaultInputWidget().getBinding());
 	}
 

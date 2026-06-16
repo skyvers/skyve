@@ -72,8 +72,9 @@ import org.skyve.impl.metadata.view.container.Collapsible;
 import org.skyve.impl.metadata.view.container.Sidebar;
 import org.skyve.impl.metadata.view.container.VBox;
 import org.skyve.impl.metadata.view.WidgetReference;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentCapture;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentDisplay;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryInputType;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
@@ -688,28 +689,36 @@ class SmartClientViewRendererTest extends AbstractSkyveTest {
 		assertTrue(code.contains("BizVBox"));
 	}
 
+
 	@Test
-	void renderViewWithContentImage() {
-		ViewImpl view = new ViewImpl();
-		view.setName(ViewType.edit.toString());
-		view.setTitle("Test");
+	void renderViewWithContentUploadAutoEmitsBizContentMetadata() {
+		ContentUpload content = new ContentUpload();
+		content.setBinding("text");
+		content.setCapture(ContentCapture.all);
+		content.setShowMarkup(Boolean.TRUE);
 
-		Form form = new Form();
-		form.getColumns().add(new FormColumn());
-		FormRow row = new FormRow();
-		form.getRows().add(row);
-		FormItem item = new FormItem();
-		org.skyve.impl.metadata.view.widget.bound.input.ContentImage ci =
-				new org.skyve.impl.metadata.view.widget.bound.input.ContentImage();
-		ci.setBinding("text");
-		item.setWidget(ci);
-		row.getItems().add(item);
-		view.getContained().add(form);
+		String code = renderSingleFormWidget(content);
 
-		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
-		renderer.visit();
-		String code = renderer.getCode().toString();
-		assertFalse(code.isEmpty());
+		assertTrue(code.contains("type:'bizContent'"), "ContentUpload type: " + code);
+		assertTrue(code.contains("display:'auto'"), "ContentUpload display: " + code);
+		assertTrue(code.contains("capture:'all'"), "ContentUpload capture: " + code);
+		assertTrue(code.contains("companion:'_text'"), "ContentUpload companion: " + code);
+		assertTrue(code.contains("showMarkup:true"), "ContentUpload markup: " + code);
+	}
+
+	@Test
+	void renderViewWithContentUploadVideoEmitsStableDimensions() {
+		ContentUpload content = new ContentUpload();
+		content.setBinding("text");
+		content.setDisplay(ContentDisplay.video);
+
+		String code = renderSingleFormWidget(content);
+
+		assertTrue(code.contains("type:'bizContent'"), "ContentUpload type: " + code);
+		assertTrue(code.contains("display:'video'"), "ContentUpload display: " + code);
+		assertTrue(code.contains("showMarkup:false"), "ContentUpload markup: " + code);
+		assertTrue(code.contains("width:320"), "ContentUpload video width: " + code);
+		assertTrue(code.contains("height:180"), "ContentUpload video height: " + code);
 	}
 
 	@Test
@@ -999,28 +1008,6 @@ class SmartClientViewRendererTest extends AbstractSkyveTest {
 		assertNotNull(code);
 	}
 
-	@Test
-	void renderViewWithContentLink() {
-		ViewImpl view = new ViewImpl();
-		view.setName(ViewType.edit.toString());
-		view.setTitle("Test");
-
-		Form form = new Form();
-		form.getColumns().add(new FormColumn());
-		FormRow row = new FormRow();
-		form.getRows().add(row);
-		FormItem item = new FormItem();
-		ContentLink cl = new ContentLink();
-		cl.setBinding("text");
-		item.setWidget(cl);
-		row.getItems().add(item);
-		view.getContained().add(form);
-
-		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
-		renderer.visit();
-		String code = renderer.getCode().toString();
-		assertNotNull(code);
-	}
 
 	@Test
 	void renderViewWithSidebar() {
@@ -1080,12 +1067,14 @@ class SmartClientViewRendererTest extends AbstractSkyveTest {
 		view.putAction(download.toMetaDataAction());
 		UploadAction upload = new UploadAction();
 		upload.setClassName("modules.test.Action");
+		upload.setCapture(ContentCapture.video);
 		view.putAction(upload.toMetaDataAction());
 
 		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
 		renderer.visit();
 		String code = renderer.getCode().toString();
 		assertNotNull(code);
+		assertTrue(code.contains("capture:'video'"), code);
 	}
 
 	@Test
@@ -3634,8 +3623,10 @@ class SmartClientViewRendererTest extends AbstractSkyveTest {
 		assertFalse(code.isEmpty());
 	}
 
+
+
 	@Test
-	void renderViewWithDataGridBoundColumnContentImage() {
+	void renderViewWithDataGridBoundColumnContentUploadAutoUsesCompanionFormatter() {
 		ViewImpl view = new ViewImpl();
 		view.setName(ViewType.edit.toString());
 		view.setTitle("Test");
@@ -3646,9 +3637,9 @@ class SmartClientViewRendererTest extends AbstractSkyveTest {
 		col.setBinding("text");
 		col.setEditable(Boolean.TRUE);
 		WidgetReference wr = new WidgetReference();
-		ContentImage ci = new ContentImage();
-		ci.setBinding("text");
-		wr.setWidget(ci);
+		ContentUpload content = new ContentUpload();
+		content.setBinding("text");
+		wr.setWidget(content);
 		col.setInputWidget(wr);
 		grid.getColumns().add(col);
 		view.getContained().add(grid);
@@ -3657,33 +3648,12 @@ class SmartClientViewRendererTest extends AbstractSkyveTest {
 		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
 		renderer.visit();
 		String code = renderer.getCode().toString();
-		assertFalse(code.isEmpty());
-	}
-
-	@Test
-	void renderViewWithDataGridBoundColumnContentLink() {
-		ViewImpl view = new ViewImpl();
-		view.setName(ViewType.edit.toString());
-		view.setTitle("Test");
-
-		DataGrid grid = new DataGrid();
-		grid.setBinding("aggregatedCollection");
-		DataGridBoundColumn col = new DataGridBoundColumn();
-		col.setBinding("text");
-		col.setEditable(Boolean.TRUE);
-		WidgetReference wr = new WidgetReference();
-		ContentLink cl = new ContentLink();
-		cl.setBinding("text");
-		wr.setWidget(cl);
-		col.setInputWidget(wr);
-		grid.getColumns().add(col);
-		view.getContained().add(grid);
-		view.getContained().add(createSimpleForm("text"));
-
-		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
-		renderer.visit();
-		String code = renderer.getCode().toString();
-		assertFalse(code.isEmpty());
+		assertTrue(code.contains("editorType:'bizContent'"), "ContentUpload editor: " + code);
+		assertTrue(code.contains("display:'auto'"), "ContentUpload display: " + code);
+		assertTrue(code.contains("companion:'_text'"), "ContentUpload companion: " + code);
+		assertTrue(code.contains("k=(rec&&rec['_text'])||'link'"), "ContentUpload auto formatter: " + code);
+		assertTrue(code.contains("<video controls preload=\"metadata\""), "ContentUpload video formatter: " + code);
+		assertTrue(code.contains("object-fit:contain"), "ContentUpload compact media formatter: " + code);
 	}
 
 	@Test
@@ -3804,51 +3774,7 @@ class SmartClientViewRendererTest extends AbstractSkyveTest {
 		assertFalse(code.isEmpty());
 	}
 
-	@Test
-	void renderViewWithDataGridContainerColumnContentImage() {
-		ViewImpl view = new ViewImpl();
-		view.setName(ViewType.edit.toString());
-		view.setTitle("Test");
 
-		DataGrid grid = new DataGrid();
-		grid.setBinding("aggregatedCollection");
-		DataGridContainerColumn containerCol = new DataGridContainerColumn();
-		containerCol.setTitle("ContentImage");
-		ContentImage ci = new ContentImage();
-		ci.setBinding("text");
-		containerCol.getWidgets().add(ci);
-		grid.getColumns().add(containerCol);
-		view.getContained().add(grid);
-		view.getContained().add(createSimpleForm("text"));
-
-		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
-		renderer.visit();
-		String code = renderer.getCode().toString();
-		assertFalse(code.isEmpty());
-	}
-
-	@Test
-	void renderViewWithDataGridContainerColumnContentLink() {
-		ViewImpl view = new ViewImpl();
-		view.setName(ViewType.edit.toString());
-		view.setTitle("Test");
-
-		DataGrid grid = new DataGrid();
-		grid.setBinding("aggregatedCollection");
-		DataGridContainerColumn containerCol = new DataGridContainerColumn();
-		containerCol.setTitle("ContentLink");
-		ContentLink cl = new ContentLink();
-		cl.setBinding("text");
-		containerCol.getWidgets().add(cl);
-		grid.getColumns().add(containerCol);
-		view.getContained().add(grid);
-		view.getContained().add(createSimpleForm("text"));
-
-		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
-		renderer.visit();
-		String code = renderer.getCode().toString();
-		assertFalse(code.isEmpty());
-	}
 
 	@Test
 	void renderViewWithDataGridContainerColumnContentSignature() {

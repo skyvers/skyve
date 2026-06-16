@@ -1,6 +1,9 @@
 package org.skyve.impl.web.service.smartclient;
 
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.model.document.field.Field;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentDisplay;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
@@ -20,8 +23,18 @@ import org.skyve.util.Util;
  * SmartClient data-grid field definition.
  */
 public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefinition {
-    protected boolean editable;
-    protected String defaultValueJavascriptExpression;
+	private static final int CONTENT_IMAGE_DEFAULT_PIXEL_WIDTH = 100;
+	private static final int CONTENT_IMAGE_DEFAULT_PIXEL_HEIGHT = 100;
+	private static final int GRID_CONTENT_VIDEO_DEFAULT_PIXEL_WIDTH = 160;
+	private static final int GRID_CONTENT_VIDEO_DEFAULT_PIXEL_HEIGHT = 90;
+
+	protected boolean editable;
+
+	// for list grids, we need to convert the defaultValue into a JavaScript expression that can be evaluated on the client side, so we store it separately here.
+	protected String defaultValueJavascriptExpression;
+    
+	// when the field is a content upload, we need to generate a JavaScript formatter to render the content in the grid, so we store that separately here.
+	private String contentUploadFormatterJavascript;
 
 	/**
 	 * Builds a SmartClient data-grid field definition from widget and document metadata.
@@ -105,6 +118,12 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 				editorType = null;
 			}
 		}
+		
+		if (widget instanceof ContentUpload content) {
+			type = "text";
+			editorType = "bizContent";
+			contentUploadFormatterJavascript = createContentUploadFormatter(content);
+		}
     }
 
 	/**
@@ -146,6 +165,9 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 			result.append(",editorType:'").append(editorType).append('\'');
 		}
 		appendEditorProperties(result, true, null, null);
+		if (contentUploadFormatterJavascript != null) {
+			result.append(contentUploadFormatterJavascript);
+		}
 		if (required) {
 			result.append(",bizRequired:true,requiredMessage:'");
 			if (requiredMessage == null) {
@@ -178,5 +200,64 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 //result.append(",changed:'alert(item.grid.getSelectedRecord().bizId)'");
 
 		return result.toString();
+	}
+	
+	private String createContentUploadFormatter(ContentUpload content) {
+		StringBuilder result = new StringBuilder(512);
+		ContentDisplay display = content.getResolvedDisplay();
+		int imageWidth = resolveImageWidth(content);
+		int imageHeight = resolveImageHeight(content);
+		int videoWidth = resolveVideoWidth(content);
+		int videoHeight = resolveVideoHeight(content);
+		String binding = BindUtil.unsanitiseBinding(name);
+		String companion = '_' + name;
+		result.append(",display:'").append(display).append('\'');
+		result.append(",capture:'").append(content.getResolvedCapture()).append('\'');
+		if (ContentDisplay.auto.equals(display)) {
+			result.append(",companion:'").append(companion).append('\'');
+		}
+		result.append(",showMarkup:").append(isContentMarkupAllowed(content, display));
+		result.append(",formatCellValue:function(v,rec,row,col){");
+		result.append("if(!v){return ''}");
+		result.append("var k='").append(display).append("';");
+		if (ContentDisplay.auto.equals(display)) {
+			result.append("k=(rec&&rec['").append(companion).append("'])||'link';");
+		}
+		result.append("var u='content?_n='+v+'&_doc='+rec.bizModule+'.'+rec.bizDocument+'&_b=").append(binding).append("';");
+		result.append("if(k==='image'){return '<a href=\"'+u+'\" target=\"_blank\"><img src=\"'+u+'");
+		result.append("&_w=").append(imageWidth).append("&_h=").append(imageHeight);
+		result.append("\" style=\"width:").append(imageWidth).append("px;height:").append(imageHeight);
+		result.append("px;object-fit:contain\"/></a>'}");
+		result.append("if(k==='video'){return '<video controls preload=\"metadata\" src=\"'+u+'\" style=\"width:");
+		result.append(videoWidth).append("px;height:").append(videoHeight).append("px;object-fit:contain\"></video>'}");
+		result.append("return '<a href=\"'+u+'\" target=\"_blank\">Content</a>'}");
+		return result.toString();
+	}
+
+	private static boolean isContentMarkupAllowed(ContentUpload content, ContentDisplay display) {
+		if (Boolean.FALSE.equals(content.getShowMarkup())) {
+			return false;
+		}
+		return ! ContentDisplay.video.equals(display);
+	}
+
+	private static int resolveImageWidth(ContentUpload content) {
+		Integer pixelWidth = content.getPixelWidth();
+		return (pixelWidth == null) ? CONTENT_IMAGE_DEFAULT_PIXEL_WIDTH : pixelWidth.intValue();
+	}
+
+	private static int resolveImageHeight(ContentUpload content) {
+		Integer pixelHeight = content.getPixelHeight();
+		return (pixelHeight == null) ? CONTENT_IMAGE_DEFAULT_PIXEL_HEIGHT : pixelHeight.intValue();
+	}
+	
+	private static int resolveVideoWidth(ContentUpload content) {
+		Integer pixelWidth = content.getPixelWidth();
+		return (pixelWidth == null) ? GRID_CONTENT_VIDEO_DEFAULT_PIXEL_WIDTH : pixelWidth.intValue();
+	}
+	
+	private static int resolveVideoHeight(ContentUpload content) {
+		Integer pixelHeight = content.getPixelHeight();
+		return (pixelHeight == null) ? GRID_CONTENT_VIDEO_DEFAULT_PIXEL_HEIGHT : pixelHeight.intValue();
 	}
 }

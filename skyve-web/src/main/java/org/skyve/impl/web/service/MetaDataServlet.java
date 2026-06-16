@@ -125,9 +125,8 @@ import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
 import org.skyve.impl.metadata.view.widget.bound.input.CompleteType;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryInputType;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
@@ -204,6 +203,7 @@ import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -1650,34 +1650,44 @@ public class MetaDataServlet extends HttpServlet {
 				processDecorated(signature);
 				result.append('}');
 			}
-			
+
 			/** {@inheritDoc} */
 			@Override
-			public void renderFormContentLink(String value, ContentLink link) {
-				result.append("{\"type\":\"contentLink\"");
-				if (value != null) {
-					result.append(",\"value\":\"").append(value).append('"');
-				}
-				processInputWidget(link);
-				processEditable(link);
-				processSize(link);
-				processParameterizable(link);
-				processDecorated(link);
-				result.append('}');
+			public void renderFormContent(@Nonnull ContentUpload content) {
+				renderContent(content);
 			}
-			
+
 			/** {@inheritDoc} */
 			@Override
-			public void renderFormContentImage(ContentImage image) {
-				result.append("{\"type\":\"contentImage\"");
-				processInputWidget(image);
-				processEditable(image);
-				Boolean showMarkup = image.getShowMarkup();
+			public void renderBoundColumnContent(@Nonnull ContentUpload content) {
+				if (input != null) {
+					renderContent(content);
+				}
+			}
+
+			/** {@inheritDoc} */
+			@Override
+			public void renderContainerColumnContent(@Nonnull ContentUpload content) {
+				renderContent(content);
+			}
+
+			/**
+			 * Serializes a managed-content widget for metadata clients.
+			 *
+			 * @param content the content widget metadata; must not be {@code null}
+			 */
+			private void renderContent(@Nonnull ContentUpload content) {
+				result.append("{\"type\":\"content\"");
+				processInputWidget(content);
+				result.append(",\"display\":\"").append(content.getResolvedDisplay()).append('"');
+				result.append(",\"capture\":\"").append(content.getResolvedCapture()).append('"');
+				Boolean showMarkup = content.getShowMarkup();
 				if (showMarkup != null) {
 					result.append(",\"showMarkup\":").append(showMarkup);
 				}
-				processSize(image);
-				processDecorated(image);
+				processEditable(content);
+				processSize(content);
+				processDecorated(content);
 				result.append('}');
 			}
 			
@@ -1882,13 +1892,6 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderContainerColumnContentImage(ContentImage image) {
-				renderFormContentImage(image);
-				result.append(',');
-			}
-			
-			/** {@inheritDoc} */
-			@Override
 			public void renderContainerColumnBlurb(String markup, Blurb blurb) {
 				renderBlurb(markup, blurb);
 			}
@@ -2078,22 +2081,6 @@ public class MetaDataServlet extends HttpServlet {
 			public void renderedBoundColumnGeometry(Geometry geometry) {
 				if (input != null) {
 					renderedFormGeometry(geometry);
-				}
-			}
-			
-			/** {@inheritDoc} */
-			@Override
-			public void renderBoundColumnContentLink(String value, ContentLink link) {
-				if (input != null) {
-					renderFormContentLink(value, link);
-				}
-			}
-			
-			/** {@inheritDoc} */
-			@Override
-			public void renderBoundColumnContentImage(ContentImage image) {
-				if (input != null) {
-					renderFormContentImage(image);
 				}
 			}
 			

@@ -97,8 +97,6 @@ class PrimeReactRendererTest {
 
 		renderer.checkBox(null, null, null, "title", null);
 		renderer.combo(null, null, null, "title", null);
-		renderer.contentImage(null, null, null, "title", null);
-		renderer.contentLink(null, null, null, "title", null);
 		renderer.contentSignature(null, null, null, "title", null);
 		renderer.html(null, null, null, "title", null);
 		renderer.lookupDescription(null, null, null, "title", null, "binding", null);

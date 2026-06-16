@@ -43,9 +43,8 @@ import org.skyve.impl.metadata.view.widget.bound.input.CheckMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
@@ -634,16 +633,22 @@ public abstract class ViewRenderer extends ViewVisitor {
 	 * @param action
 	 * @return	false if the user does not have privileges to execute the action, otherwise true.
 	 */
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // Complexity OK
 	private boolean preProcessAction(ImplicitActionName implicitName, Action action, ActionShow showOverride) {
 		boolean result = true;
 		
 		String resourceName = action.getResourceName();
 		String displayName = action.getLocalisedDisplayName();
 		// Note that the " " result is for SC
-		actionLabel = (displayName == null) ? 
-						((implicitName == null) ? " " : implicitName.getLocalisedDisplayName()) :
-							displayName;
+		if (displayName != null) {
+			actionLabel = displayName;
+		}
+		else if (implicitName == null) {
+			actionLabel = " ";
+		}
+		else {
+			actionLabel = implicitName.getLocalisedDisplayName();
+		}
 		String relativeIconFileName = action.getRelativeIconFileName();
 		actionIconStyleClass = action.getIconStyleClass();
 		actionConfirmationText = action.getConfirmationText(); // NB localised later with the param
@@ -1505,38 +1510,59 @@ public abstract class ViewRenderer extends ViewVisitor {
 	public abstract void renderedBoundColumnCombo(Combo combo);
 	public abstract void renderedFormCombo(Combo combo);
 	
+	/**
+	 * Dispatches a content upload to the active rendering context.
+	 *
+	 * @param content the content upload to render; must not be {@code null}
+	 * @param parentVisible whether ancestor metadata is visible
+	 * @param parentEnabled whether ancestor metadata is enabled
+	 */
 	@Override
-	public final void visitContentImage(ContentImage image, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget(image.getBinding(), image.showsLabelByDefault());
+	public final void visitContent(@Nonnull ContentUpload content, boolean parentVisible, boolean parentEnabled) {
+		preProcessWidget(content.getBinding(), content.showsLabelByDefault());
 		if (currentBoundColumn != null) {
-			renderBoundColumnContentImage(image);
+			renderBoundColumnContent(content);
 		}
 		else if (currentContainerColumn != null) {
-			renderContainerColumnContentImage(image);
+			renderContainerColumnContent(content);
 		}
 		else {
-			renderFormContentImage(image);
+			renderFormContent(content);
 		}
 	}
-
-	public abstract void renderBoundColumnContentImage(ContentImage image);
-	public abstract void renderContainerColumnContentImage(ContentImage image);
-	public abstract void renderFormContentImage(ContentImage image);
 	
-	@Override
-	public final void visitContentLink(ContentLink link, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget(link.getBinding(), link.showsLabelByDefault());
-		String value = link.getLocalisedValue();
-		if (currentBoundColumn != null) {
-			renderBoundColumnContentLink(value, link);
-		}
-		else {
-			renderFormContentLink(value, link);
-		}
+	/**
+	 * Renders content for a bound data-grid column.
+	 *
+	 * @param content the content upload to render; must not be {@code null}
+	 * @throws MetaDataException until a concrete renderer implements content rendering
+	 */
+	@SuppressWarnings("static-method")
+	public void renderBoundColumnContent(@Nonnull ContentUpload content) {
+		throw new MetaDataException("Content upload rendering is not implemented for this renderer: " + content.getBinding());
 	}
 
-	public abstract void renderBoundColumnContentLink(String value, ContentLink link);
-	public abstract void renderFormContentLink(String value, ContentLink link);
+	/**
+	 * Renders content for a container data-grid column.
+	 *
+	 * @param content the content upload to render; must not be {@code null}
+	 * @throws MetaDataException until a concrete renderer implements content rendering
+	 */
+	@SuppressWarnings("static-method")
+	public void renderContainerColumnContent(@Nonnull ContentUpload content) {
+		throw new MetaDataException("Content upload rendering is not implemented for this renderer: " + content.getBinding());
+	}
+
+	/**
+	 * Renders content for a form item.
+	 *
+	 * @param content the content upload to render; must not be {@code null}
+	 * @throws MetaDataException until a concrete renderer implements content rendering
+	 */
+	@SuppressWarnings("static-method")
+	public void renderFormContent(@Nonnull ContentUpload content) {
+		throw new MetaDataException("Content upload rendering is not implemented for this renderer: " + content.getBinding());
+	}
 
 	@Override
 	public final void visitContentSignature(ContentSignature signature, boolean parentVisible, boolean parentEnabled) {

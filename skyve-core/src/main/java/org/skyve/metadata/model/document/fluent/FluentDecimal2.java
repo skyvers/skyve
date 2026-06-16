@@ -40,10 +40,10 @@ public class FluentDecimal2 extends FluentConvertibleField<FluentDecimal2> {
 		return this;
 	}
 
-	@Override
 	/**
 	 * Returns the mutable metadata instance represented by this builder.
 	 */
+	@Override
 	public Decimal2 get() {
 		return decimal;
 	}

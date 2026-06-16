@@ -23,8 +23,6 @@ import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.impl.metadata.view.widget.bound.input.DefaultWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
@@ -126,18 +124,6 @@ class FluentFormItemTest {
 	void defaultWidgetSetsWidget() {
 		FluentFormItem fi = new FluentFormItem().defaultWidget(new FluentDefaultWidget());
 		assertThat(fi.get().getWidget(), instanceOf(DefaultWidget.class));
-	}
-
-	@Test
-	void contentImageSetsWidget() {
-		FluentFormItem fi = new FluentFormItem().contentImage(new FluentContentImage());
-		assertThat(fi.get().getWidget(), instanceOf(ContentImage.class));
-	}
-
-	@Test
-	void contentLinkSetsWidget() {
-		FluentFormItem fi = new FluentFormItem().contentLink(new FluentContentLink());
-		assertThat(fi.get().getWidget(), instanceOf(ContentLink.class));
 	}
 
 	@Test
@@ -298,20 +284,6 @@ class FluentFormItemTest {
 		source.setWidget(new DefaultWidget());
 		FluentFormItem fi = new FluentFormItem().from(source);
 		assertThat(fi.get().getWidget(), instanceOf(DefaultWidget.class));
-	}
-
-	@Test
-	void fromContentImageRoundTrips() {
-		FormItem source = new FormItem();
-		source.setWidget(new ContentImage());
-		assertThat(new FluentFormItem().from(source).get().getWidget(), instanceOf(ContentImage.class));
-	}
-
-	@Test
-	void fromContentLinkRoundTrips() {
-		FormItem source = new FormItem();
-		source.setWidget(new ContentLink());
-		assertThat(new FluentFormItem().from(source).get().getWidget(), instanceOf(ContentLink.class));
 	}
 
 	@Test

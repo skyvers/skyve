@@ -31,10 +31,10 @@ public class FluentColour extends FluentConvertibleField<FluentColour> {
 		return this;
 	}
 	
-	@Override
 	/**
 	 * Returns the mutable metadata instance represented by this builder.
 	 */
+	@Override
 	public Colour get() {
 		return colour;
 	}

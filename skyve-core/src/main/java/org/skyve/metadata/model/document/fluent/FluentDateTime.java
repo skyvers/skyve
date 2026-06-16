@@ -40,10 +40,10 @@ public class FluentDateTime extends FluentConvertibleField<FluentDateTime> {
 		return this;
 	}
 
-	@Override
 	/**
 	 * Returns the mutable metadata instance represented by this builder.
 	 */
+	@Override
 	public DateTime get() {
 		return dateTime;
 	}

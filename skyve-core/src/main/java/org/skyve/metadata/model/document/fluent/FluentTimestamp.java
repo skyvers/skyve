@@ -40,10 +40,10 @@ public class FluentTimestamp extends FluentConvertibleField<FluentTimestamp> {
 		return this;
 	}
 
-	@Override
 	/**
 	 * Returns the mutable metadata instance represented by this builder.
 	 */
+	@Override
 	public Timestamp get() {
 		return timestamp;
 	}

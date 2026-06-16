@@ -19,8 +19,6 @@ import org.skyve.metadata.model.Attribute.UsageType;
 import org.skyve.metadata.view.fluent.FluentCheckBox;
 import org.skyve.metadata.view.fluent.FluentColourPicker;
 import org.skyve.metadata.view.fluent.FluentCombo;
-import org.skyve.metadata.view.fluent.FluentContentImage;
-import org.skyve.metadata.view.fluent.FluentContentLink;
 import org.skyve.metadata.view.fluent.FluentGeometry;
 import org.skyve.metadata.view.fluent.FluentHTML;
 import org.skyve.metadata.view.fluent.FluentLookupDescription;
@@ -133,18 +131,6 @@ class FluentAttributeTest {
 	void sensitivitySecretSetsValue() {
 		FluentText f = new FluentText().sensitivity(Sensitivity.secret);
 		assertEquals(Sensitivity.secret, f.get().getSensitivity());
-	}
-
-	@Test
-	void defaultWidgetContentImageSetsWidget() {
-		FluentText f = new FluentText().name("x").defaultWidget(new FluentContentImage());
-		assertThat(f.get(), is(notNullValue()));
-	}
-
-	@Test
-	void defaultWidgetContentLinkSetsWidget() {
-		FluentText f = new FluentText().name("x").defaultWidget(new FluentContentLink());
-		assertThat(f.get(), is(notNullValue()));
 	}
 
 	@Test
@@ -331,22 +317,6 @@ class FluentAttributeTest {
 	@Test
 	void fromCopiesDefaultWidgetTextField() {
 		FluentText source = new FluentText().name("x").defaultWidget(new FluentTextField());
-		FluentText copy = new FluentText();
-		copy.from(source.get());
-		assertNotNull(copy.get());
-	}
-
-	@Test
-	void fromCopiesDefaultWidgetContentImage() {
-		FluentText source = new FluentText().name("x").defaultWidget(new FluentContentImage());
-		FluentText copy = new FluentText();
-		copy.from(source.get());
-		assertNotNull(copy.get());
-	}
-
-	@Test
-	void fromCopiesDefaultWidgetContentLink() {
-		FluentText source = new FluentText().name("x").defaultWidget(new FluentContentLink());
 		FluentText copy = new FluentText();
 		copy.from(source.get());
 		assertNotNull(copy.get());

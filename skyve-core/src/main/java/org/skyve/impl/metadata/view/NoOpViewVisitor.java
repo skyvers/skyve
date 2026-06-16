@@ -42,9 +42,8 @@ import org.skyve.impl.metadata.view.widget.bound.input.CheckMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
@@ -66,6 +65,8 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
+
+import jakarta.annotation.Nonnull;
 
 /**
  * No-operation adapter over {@link ViewVisitor} that overrides all abstract
@@ -426,15 +427,15 @@ public class NoOpViewVisitor extends ViewVisitor {
 		// no-op
 	}
 
-	/** No-op. */
+	/**
+	 * Ignores a managed-content upload.
+	 *
+	 * @param content the content upload being visited
+	 * @param parentVisible whether ancestor metadata is visible
+	 * @param parentEnabled whether ancestor metadata is enabled
+	 */
 	@Override
-	public void visitContentImage(ContentImage image, boolean parentVisible, boolean parentEnabled) {
-		// no-op
-	}
-
-	/** No-op. */
-	@Override
-	public void visitContentLink(ContentLink link, boolean parentVisible, boolean parentEnabled) {
+	public void visitContent(@Nonnull ContentUpload content, boolean parentVisible, boolean parentEnabled) {
 		// no-op
 	}
 

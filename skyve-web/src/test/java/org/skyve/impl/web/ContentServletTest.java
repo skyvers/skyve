@@ -205,6 +205,22 @@ class ContentServletTest {
 	}
 
 	@Test
+	void doGetStreamsSvgContentThroughContentServletWithoutInliningMarkup() throws Exception {
+		byte[] bytes = "<svg xmlns=\"http://www.w3.org/2000/svg\"><script>alert(1)</script></svg>".getBytes(StandardCharsets.UTF_8);
+		AttachmentContent content = newAttachmentContent("diagram.svg", "image/svg+xml", bytes);
+		TestContentServlet servlet = new TestContentServlet(newContentResource(content));
+		CapturingServletOutputStream out = new CapturingServletOutputStream();
+		HttpServletResponse response = responseWithOutput(out);
+
+		servlet.doGet(request(Map.of(), null), response);
+
+		verify(response).setContentType("image/svg+xml");
+		verify(response).setHeader("Content-Disposition", "inline; filename=\"diagram.svg\"");
+		assertArrayEquals(bytes, out.toByteArray());
+		assertEquals(1, servlet.secureCalls);
+	}
+
+	@Test
 	void doGetStreamsContentRange() throws Exception {
 		File file = File.createTempFile("content-range", ".bin");
 		Files.writeString(file.toPath(), "0123456789", StandardCharsets.UTF_8);

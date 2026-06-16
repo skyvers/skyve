@@ -22,7 +22,7 @@
  *   <li>{@code Spinner} — numeric spinner with optional step.
  *   <li>{@code Slider} — numeric range slider.
  *   <li>{@code ColourPicker} — colour selection widget.
- *   <li>{@code ContentImage} / {@code ContentLink} / {@code ContentSignature} —
+ *   <li>{@code ContentUpload} / {@code ContentSignature} —
  *       content-item upload widgets.
  *   <li>{@code Geometry} / {@code GeometryMap} / {@code GeometryInputType} —
  *       spatial geometry input widgets.

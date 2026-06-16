@@ -48,6 +48,20 @@ class MetaDataServletH2Test extends AbstractSkyveTest {
 	}
 
 	@Test
+	void viewRendersContentUploadMetadata() throws Exception {
+		String body = invokeView(u, UXUI, "kitchensink", "KitchenSink", false);
+
+		assertTrue(body.contains("\"type\":\"content\""), body);
+		assertTrue(body.contains("\"binding\":\"contentLink\""), body);
+		assertTrue(body.contains("\"display\":\"link\""), body);
+		assertTrue(body.contains("\"capture\":\"none\""), body);
+		assertTrue(body.contains("\"binding\":\"contentImage\""), body);
+		assertTrue(body.contains("\"display\":\"image\""), body);
+		assertTrue(body.contains("\"pixelWidth\":50"), body);
+		assertTrue(body.contains("\"pixelHeight\":50"), body);
+	}
+
+	@Test
 	void viewRendersWithForcedTopFormLabels() throws Exception {
 		String body = invokeView(u, UXUI, "admin", "JobSchedule", true);
 

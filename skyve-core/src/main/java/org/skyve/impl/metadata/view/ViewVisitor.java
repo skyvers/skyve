@@ -49,9 +49,8 @@ import org.skyve.impl.metadata.view.widget.bound.input.CheckMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.DefaultWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
@@ -84,6 +83,8 @@ import org.skyve.metadata.view.widget.bound.Bound;
 import org.skyve.util.Binder.TargetMetaData;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
+
+import jakarta.annotation.Nonnull;
 
 /**
  * Abstract visitor that traverses the full widget and action tree of a
@@ -315,12 +316,16 @@ public abstract class ViewVisitor extends ActionVisitor {
 	public abstract void visitedCombo(Combo combo,
 										boolean parentVisible,
 										boolean parentEnabled);
-	public abstract void visitContentImage(ContentImage image,
-											boolean parentVisible,
-											boolean parentEnabled);
-	public abstract void visitContentLink(ContentLink link,
-											boolean parentVisible,
-											boolean parentEnabled);
+	/**
+	 * Visits a managed-content upload.
+	 *
+	 * @param content the content upload being visited; must not be {@code null}
+	 * @param parentVisible whether ancestor metadata is visible
+	 * @param parentEnabled whether ancestor metadata is enabled
+	 */
+	public abstract void visitContent(@Nonnull ContentUpload content,
+										boolean parentVisible,
+										boolean parentEnabled);
 	public abstract void visitContentSignature(ContentSignature signature,
 												boolean parentVisible,
 												boolean parentEnabled);
@@ -658,12 +663,8 @@ public abstract class ViewVisitor extends ActionVisitor {
 			visitChangeable(combo, parentVisible, parentEnabled);
 			visitedCombo(combo, parentVisible, parentEnabled);
 		}
-		else if (widget instanceof ContentImage image) {
-			visitContentImage(image, parentVisible, parentEnabled);
-		}
-		else if (widget instanceof ContentLink link) {
-			visitContentLink(link, parentVisible, parentEnabled);
-			visitParameterizable(link, parentVisible, parentEnabled);
+		else if (widget instanceof ContentUpload content) {
+			visitContent(content, parentVisible, parentEnabled);
 		}
 		else if (widget instanceof ContentSignature signature) {
 			visitContentSignature(signature, parentVisible, parentEnabled);

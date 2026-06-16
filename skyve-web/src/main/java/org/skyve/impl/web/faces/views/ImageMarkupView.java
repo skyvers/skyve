@@ -394,8 +394,15 @@ public class ImageMarkupView extends LocalisableView {
 						String sanitisedContentBinding = BindUtil.sanitiseBinding(contentBindingParameter);
 						// if window.parent.isc is defined then we are using smart client, set the value in the values manager
 						js.append("if(window.parent.isc){");
+						js.append("if(window.parent.isc.BizUtil&&window.parent.isc.BizUtil.afterMarkupApply){");
+						js.append("window.parent.isc.BizUtil.afterMarkupApply('").append(sanitisedContentBinding);
+						js.append("','").append(newContentId).append("','");
+						js.append(bean.getBizModule()).append('.').append(bean.getBizDocument()).append("','");
+						js.append(OWASP.escapeJsString(content.getFileName(), false, false)).append("');");
+						js.append("}else{");
 						js.append("window.parent.isc.WindowStack.getOpener()._vm.setValue('").append(sanitisedContentBinding);
 						js.append("','").append(newContentId).append("');window.parent.isc.WindowStack.popoff(false)");
+						js.append('}');
 						// otherwise we are using prime faces, set the hidden input element that ends with "_<binding>"
 						// NB Cannot use window.parent here to support nested frames as the script is executed at the top window context.
 						js.append("}else if(top.SKYVE){if(top.SKYVE.PF){top.SKYVE.PF.afterMarkupApply('").append(sanitisedContentBinding);

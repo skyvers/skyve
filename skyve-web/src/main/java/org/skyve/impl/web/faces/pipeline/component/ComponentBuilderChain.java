@@ -23,9 +23,8 @@ import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
@@ -54,6 +53,7 @@ import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.web.UserAgentType;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.faces.component.UIComponent;
 
@@ -156,7 +156,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 */
 	@Override
 	public UIComponent view(UIComponent component, boolean createView) {
-		UIComponent result = component;
+		@Nullable UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.view(result, createView);
 		}
@@ -1064,53 +1064,33 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	}
 
 	/**
-	 * Delegates content-image component construction.
+	 * Delegates unified content component construction.
 	 *
-	 * @param component the source component
-	 * @param dataWidgetVar the data widget variable
-	 * @param image the content-image metadata
-	 * @param formDisabledConditionName the form disabled condition name
-	 * @param title the field title
+	 * @param component the source component, or {@code null} before any builder has
+	 *        produced one
+	 * @param dataWidgetVar the data widget variable, or {@code null}
+	 * @param content the content metadata; must not be {@code null}
+	 * @param formDisabledConditionName the form disabled condition name, or
+	 *        {@code null}
+	 * @param title the field title, or {@code null}
 	 * @param requiredMessage the optional required message
-	 * @return the transformed component
+	 * @param textAlignment the text alignment, or {@code null}
+	 * @param formContext whether the content is rendered in a form context
+	 * @return the transformed component, or {@code null} if every builder is a no-op
 	 */
 	@Override
-	public UIComponent contentImage(UIComponent component,
-										String dataWidgetVar,
-										ContentImage image,
-										String formDisabledConditionName,
-										String title,
-										@Nullable String requiredMessage) {
+	public @Nullable UIComponent content(@Nullable UIComponent component,
+											@Nullable String dataWidgetVar,
+											@Nonnull ContentUpload content,
+											@Nullable String formDisabledConditionName,
+											@Nullable String title,
+											@Nullable String requiredMessage,
+											@Nullable HorizontalAlignment textAlignment,
+											boolean formContext,
+											boolean imageUpload) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.contentImage(result, dataWidgetVar, image, formDisabledConditionName, title, requiredMessage);
-		}
-		return result;
-	}
-
-	/**
-	 * Delegates content-link component construction.
-	 *
-	 * @param component the source component
-	 * @param dataWidgetVar the data widget variable
-	 * @param link the content-link metadata
-	 * @param formDisabledConditionName the form disabled condition name
-	 * @param title the field title
-	 * @param requiredMessage the optional required message
-	 * @param textAlignment the text alignment
-	 * @return the transformed component
-	 */
-	@Override
-	public UIComponent contentLink(UIComponent component,
-									String dataWidgetVar,
-									ContentLink link,
-									String formDisabledConditionName,
-									String title,
-									@Nullable String requiredMessage,
-									HorizontalAlignment textAlignment) {
-		UIComponent result = component;
-		for (ComponentBuilder builder : builders) {
-			result = builder.contentLink(result, dataWidgetVar, link, formDisabledConditionName, title, requiredMessage, textAlignment);
+			result = builder.content(result, dataWidgetVar, content, formDisabledConditionName, title, requiredMessage, textAlignment, formContext, imageUpload);
 		}
 		return result;
 	}

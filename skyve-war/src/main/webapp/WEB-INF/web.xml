@@ -148,9 +148,7 @@
         		<![CDATA[
 					/jakarta.faces.resource/
 					/device.xhtml
-					/contentUpload.xhtml
-					/fileUpload.xhtml
-					/imageUpload.xhtml
+					/upload.xhtml
         		]]>
         	</param-value>
         </init-param>

@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
@@ -46,9 +47,8 @@ import org.skyve.impl.metadata.view.widget.bound.ProgressBar;
 import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
@@ -63,6 +63,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
 import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.impl.web.content.ContentMediaClassifier.ContentMediaKind;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.view.Disableable;
 import org.skyve.metadata.view.Invisible;
@@ -260,38 +261,75 @@ class ViewJSONManipulatorCoreTest {
 	void visitContentWidgetsAddsFileBindingsAndFrameworkIdentityBindings() throws Exception {
 		ViewJSONManipulator manipulator = newManipulator(ViewType.edit.toString(), visibleBean(), 0, 0);
 
-		ContentImage image = new ContentImage();
-		image.setBinding("photo");
-		image.setDisabledConditionName("photoDisabled");
-		image.setInvisibleConditionName("photoHidden");
-		manipulator.visitContentImage(image, true, true);
-
 		ContentSignature signature = new ContentSignature();
 		signature.setBinding("signature");
 		signature.setDisabledConditionName("signatureDisabled");
 		signature.setInvisibleConditionName("signatureHidden");
 		manipulator.visitContentSignature(signature, true, true);
 
-		ContentLink link = new ContentLink();
-		link.setBinding("attachment");
-		link.setDisabledConditionName("attachmentDisabled");
-		link.setInvisibleConditionName("attachmentHidden");
-		manipulator.visitContentLink(link, true, true);
+		ContentUpload content = new ContentUpload();
+		content.setBinding("media");
+		content.setDisabledConditionName("mediaDisabled");
+		content.setInvisibleConditionName("mediaHidden");
+		manipulator.visitContent(content, true, true);
 
 		ViewBindings bindingTree = bindingTree(manipulator);
-		assertMutableBinding(bindingTree, "photo", Sanitisation.text);
 		assertMutableBinding(bindingTree, "signature", Sanitisation.text);
-		assertMutableBinding(bindingTree, "attachment", Sanitisation.text);
+		assertMutableBinding(bindingTree, "media", Sanitisation.text);
+		assertTrue(bindingTree.getAutoContentBindings().contains("media"));
 		assertTrue(bindingTree.getBindings().contains(Bean.MODULE_KEY));
 		assertTrue(bindingTree.getBindings().contains(Bean.DOCUMENT_KEY));
 		assertTrue(bindingTree.getBindings().contains(Bean.DATA_GROUP_ID));
 		assertTrue(bindingTree.getBindings().contains(Bean.USER_ID));
-		assertTrue(bindingTree.getBindings().contains("photoDisabled"));
-		assertTrue(bindingTree.getBindings().contains("photoHidden"));
 		assertTrue(bindingTree.getBindings().contains("signatureDisabled"));
 		assertTrue(bindingTree.getBindings().contains("signatureHidden"));
-		assertTrue(bindingTree.getBindings().contains("attachmentDisabled"));
-		assertTrue(bindingTree.getBindings().contains("attachmentHidden"));
+		assertTrue(bindingTree.getBindings().contains("mediaDisabled"));
+		assertTrue(bindingTree.getBindings().contains("mediaHidden"));
+	}
+
+	@Test
+	void addBindingsAndFormatValuesAddsAutoContentCompanionAndCachesDuplicateIds() throws Exception {
+		TestOwnerBean owner = new TestOwnerBean();
+		owner.setMedia("content-1");
+		owner.setSecondMedia("content-1");
+
+		CountingMediaKindManipulator manipulator = new CountingMediaKindManipulator(ViewType.edit.toString(), owner, 0, 0);
+		ViewBindings rootBindings = bindingTree(manipulator);
+		rootBindings.putBinding("media", true, false, Sanitisation.text, false);
+		rootBindings.putAutoContentBinding("media");
+		rootBindings.putBinding("secondMedia", true, false, Sanitisation.text, false);
+		rootBindings.putAutoContentBinding("secondMedia");
+
+		Map<String, Object> values = new LinkedHashMap<>();
+		manipulator.addBindingsAndFormatValues(rootBindings, owner, values, "ctx");
+
+		assertEquals("content-1", values.get("media"));
+		assertEquals("image", values.get("_media"));
+		assertEquals("image", values.get("_secondMedia"));
+		assertEquals(1, manipulator.lookupCount.get());
+	}
+
+	@Test
+	void addBindingsAndFormatValuesOmitsAutoContentCompanionForBlankIds() throws Exception {
+		TestOwnerBean owner = new TestOwnerBean();
+		owner.setMedia(" ");
+
+		CountingMediaKindManipulator manipulator = new CountingMediaKindManipulator(ViewType.edit.toString(), owner, 0, 0);
+		ViewBindings rootBindings = bindingTree(manipulator);
+		rootBindings.putBinding("media", true, false, Sanitisation.text, false);
+		rootBindings.putAutoContentBinding("media");
+
+		Map<String, Object> values = new LinkedHashMap<>();
+		manipulator.addBindingsAndFormatValues(rootBindings, owner, values, "ctx");
+
+		assertFalse(values.containsKey("_media"));
+		assertEquals(0, manipulator.lookupCount.get());
+	}
+
+	@Test
+	void companionFieldNameUsesSkyveBindingSanitisationWithLeadingUnderscore() {
+		assertEquals("_media", ViewJSONManipulator.companionFieldName("media"));
+		assertEquals("_attachment_media", ViewJSONManipulator.companionFieldName("attachment.media"));
 	}
 
 	@Test
@@ -305,15 +343,14 @@ class ViewJSONManipulatorCoreTest {
 		readOnlyText.setInvisibleConditionName("nameHidden");
 		manipulator.visitTextField(readOnlyText, true, true);
 
-		ContentLink readOnlyLink = new ContentLink();
-		readOnlyLink.setBinding("attachment");
-		readOnlyLink.setEditable(Boolean.FALSE);
-		readOnlyLink.setDisabledConditionName("attachmentDisabled");
-		readOnlyLink.setInvisibleConditionName("attachmentHidden");
-		manipulator.visitContentLink(readOnlyLink, true, true);
+		ContentUpload attachment = new ContentUpload();
+		attachment.setBinding("attachment");
+		attachment.setEditable(Boolean.FALSE);
+		attachment.setDisabledConditionName("attachmentDisabled");
+		attachment.setInvisibleConditionName("attachmentHidden");
+		manipulator.visitContent(attachment, true, true);
 
 		ViewBindings bindingTree = bindingTree(manipulator);
-		assertFalse(bindingTree.getBindings().contains("name"));
 		assertFalse(bindingTree.getBindings().contains("attachment"));
 		assertTrue(bindingTree.getBindings().contains("nameDisabled"));
 		assertTrue(bindingTree.getBindings().contains("nameHidden"));
@@ -546,13 +583,6 @@ class ViewJSONManipulatorCoreTest {
 		staticImage.setInvisibleConditionName("staticHidden");
 		manipulator.visitStaticImage(staticImage, true, true);
 
-		ContentImage contentImage = new ContentImage();
-		contentImage.setBinding("photo");
-		contentImage.setPixelWidth(Integer.valueOf(24));
-		contentImage.setPixelHeight(Integer.valueOf(25));
-		contentImage.setInvisibleConditionName("photoHidden");
-		manipulator.visitContentImage(contentImage, true, true);
-
 		Blurb blurb = new Blurb();
 		blurb.setMarkup("Hello");
 		blurb.setTextAlignment(HorizontalAlignment.right);
@@ -587,7 +617,6 @@ class ViewJSONManipulatorCoreTest {
 		assertTrue(html.contains("_w=28"), html);
 		assertTrue(html.contains("_h=29"), html);
 		assertTrue(html.contains("resources?_n=icons/static.png"), html);
-		assertTrue(html.contains("content?_n={photo}"), html);
 		assertTrue(html.contains("<div"), html);
 		assertTrue(html.contains("text-align:right"), html);
 		assertTrue(html.contains("<span"), html);
@@ -933,6 +962,8 @@ class ViewJSONManipulatorCoreTest {
 		private String text;
 		private TestRelatedBean association;
 		private final List<TestRelatedBean> children = new ArrayList<>();
+		private String media;
+		private String secondMedia;
 
 		@Override
 		public String getBizKey() {
@@ -967,6 +998,22 @@ class ViewJSONManipulatorCoreTest {
 
 		public List<TestRelatedBean> getChildren() {
 			return children;
+		}
+
+		public String getMedia() {
+			return media;
+		}
+
+		public void setMedia(String media) {
+			this.media = media;
+		}
+
+		public String getSecondMedia() {
+			return secondMedia;
+		}
+
+		public void setSecondMedia(String secondMedia) {
+			this.secondMedia = secondMedia;
 		}
 	}
 
@@ -1017,6 +1064,54 @@ class ViewJSONManipulatorCoreTest {
 				editIdCounter,
 				createIdCounter,
 				forApply);
+	}
+
+	private static final class CountingMediaKindManipulator extends ViewJSONManipulator {
+		private final AtomicInteger lookupCount = new AtomicInteger();
+
+		private CountingMediaKindManipulator(String viewName, Bean bean, int editIdCounter, int createIdCounter) {
+			super(mockUser(),
+					testModule(),
+					testDocument(),
+					testView(viewName),
+					"external",
+					bean,
+					editIdCounter,
+					createIdCounter,
+					false);
+		}
+
+		@Override
+		protected ContentMediaKind loadContentMediaKind(String contentId) {
+			lookupCount.incrementAndGet();
+			return ContentMediaKind.image;
+		}
+	}
+
+	private static User mockUser() {
+		User user = mock(User.class);
+		when(user.getCustomer()).thenReturn(new CustomerImpl());
+		return user;
+	}
+
+	private static ModuleImpl testModule() {
+		ModuleImpl module = new ModuleImpl();
+		module.setName("testModule");
+		return module;
+	}
+
+	private static DocumentImpl testDocument() {
+		DocumentImpl document = new DocumentImpl();
+		document.setName("TestDoc");
+		document.setPersistent(new Persistent());
+		return document;
+	}
+
+	private static ViewImpl testView(String viewName) {
+		ViewImpl view = new ViewImpl();
+		view.setName(viewName);
+		view.setTitle("Test Title");
+		return view;
 	}
 
 	private static Bean visibleBean() {

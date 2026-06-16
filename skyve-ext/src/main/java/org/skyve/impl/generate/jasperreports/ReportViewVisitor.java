@@ -54,9 +54,8 @@ import org.skyve.impl.metadata.view.widget.bound.input.CheckMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
@@ -83,6 +82,8 @@ import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
+
+import jakarta.annotation.Nonnull;
 
 /**
  * View visitor that extracts field and parameter descriptors from a Skyve view
@@ -950,20 +951,15 @@ public class ReportViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Visits a content-image widget and emits an image report element.
+	 * Ignores managed-content uploads in report generation.
+	 *
+	 * @param content the content upload being visited
+	 * @param parentVisible whether ancestor metadata is visible
+	 * @param parentEnabled whether ancestor metadata is enabled
 	 */
 	@Override
-	public void visitContentImage(ContentImage arg0, boolean arg1, boolean arg2) {
-		addElementFromItem(arg0.getBinding(), ReportElement.ElementType.contentImage, arg0.getPixelWidth(), arg0.getPercentageWidth(), arg0.getResponsiveWidth(), arg0.getPixelHeight(), null, arg0.getInvisibleConditionName());
-	}
-
-	/**
-	 * Visits a content-link widget.
-	 */
-	@Override
-	public void visitContentLink(ContentLink arg0, boolean arg1, boolean arg2) {
+	public void visitContent(@Nonnull ContentUpload content, boolean parentVisible, boolean parentEnabled) {
 		// Not supported
-
 	}
 
 	/**
