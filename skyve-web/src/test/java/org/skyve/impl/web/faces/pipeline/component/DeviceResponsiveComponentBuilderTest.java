@@ -1,14 +1,21 @@
 package org.skyve.impl.web.faces.pipeline.component;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -16,9 +23,19 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
 import org.primefaces.behavior.confirm.ConfirmBehavior;
 import org.primefaces.component.commandbutton.CommandButton;
+import org.primefaces.component.dialog.Dialog;
+import org.primefaces.component.inputtext.InputText;
+import org.primefaces.component.menubutton.MenuButton;
+import org.primefaces.component.menuitem.UIMenuItem;
+import org.primefaces.component.overlaypanel.OverlayPanel;
 import org.skyve.impl.metadata.view.widget.Button;
 import org.skyve.impl.metadata.view.widget.Spacer;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentCapture;
+import org.skyve.impl.metadata.view.HorizontalAlignment;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentDisplay;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
+import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
+import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder.EventSourceComponent;
 import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.view.Action;
@@ -30,6 +47,12 @@ import jakarta.el.MethodExpression;
 import jakarta.el.ValueExpression;
 import jakarta.faces.application.Application;
 import jakarta.faces.component.UIComponent;
+import jakarta.faces.component.UIOutput;
+import jakarta.faces.component.html.HtmlInputHidden;
+import jakarta.faces.component.html.HtmlOutputLink;
+import jakarta.faces.component.html.HtmlOutputText;
+import jakarta.faces.component.html.HtmlPanelGrid;
+import jakarta.faces.component.html.HtmlPanelGroup;
 import jakarta.faces.context.FacesContext;
 
 class DeviceResponsiveComponentBuilderTest {
@@ -257,6 +280,154 @@ class DeviceResponsiveComponentBuilderTest {
 		when(action.getInvisibleConditionName()).thenReturn(null);
 		builder.uploadButton(null, "Upload", "icon", "tip", null, button, null, action);
 		assertFalse(capturedUseDialog[0], "Expected useDialog=false for desktop");
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void geometryUsesFullScreenDialogForPhone() {
+		DeviceResponsiveComponentBuilder builder = new DeviceResponsiveComponentBuilder();
+		builder.setUserAgentType(UserAgentType.phone);
+
+		HtmlPanelGrid panelGrid = mock(HtmlPanelGrid.class);
+		List<UIComponent> gridChildren = new ArrayList<>();
+		when(panelGrid.getId()).thenReturn("geoGrid");
+		when(panelGrid.getChildren()).thenReturn(gridChildren);
+
+		InputText inputText = mock(InputText.class);
+
+		CommandButton mapButton = mock(CommandButton.class);
+		when(mapButton.getId()).thenReturn("geoMapButton");
+
+		Dialog dialog = mock(Dialog.class);
+		when(dialog.getId()).thenReturn("geoDialog");
+		List<UIComponent> dialogChildren = new ArrayList<>();
+		when(dialog.getChildren()).thenReturn(dialogChildren);
+
+		HtmlPanelGroup outerGroup = mock(HtmlPanelGroup.class);
+		List<UIComponent> outerChildren = new ArrayList<>();
+		when(outerGroup.getChildren()).thenReturn(outerChildren);
+		HtmlPanelGroup innerGroup = mock(HtmlPanelGroup.class);
+
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("geoGrid",
+												"geoGridPanel",
+												"geoMapButton",
+												"geoDialog",
+												"geoMapOuter",
+												"geoMapInner");
+		builder.setSAILManagedBean(managedBean);
+
+		ValueExpression valueExpression = mock(ValueExpression.class);
+		when(mockApplication.createComponent(HtmlPanelGrid.COMPONENT_TYPE)).thenReturn(panelGrid);
+		when(mockApplication.createComponent(InputText.COMPONENT_TYPE)).thenReturn(inputText);
+		when(mockApplication.createComponent(CommandButton.COMPONENT_TYPE)).thenReturn(mapButton);
+		when(mockApplication.createComponent(Dialog.COMPONENT_TYPE)).thenReturn(dialog);
+		when(mockApplication.createComponent(HtmlPanelGroup.COMPONENT_TYPE)).thenReturn(outerGroup, innerGroup);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(Object.class))).thenReturn(valueExpression);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(String.class))).thenReturn(valueExpression);
+
+		Geometry geometry = new Geometry();
+		geometry.setBinding("geometry");
+
+		EventSourceComponent result = builder.geometry(null, "row", geometry, null, "Geometry", null, HorizontalAlignment.left);
+
+		assertNotNull(result);
+		assertSame(panelGrid, result.getComponent());
+		assertSame(inputText, result.getEventSource());
+		assertEquals(3, gridChildren.size());
+		assertSame(inputText, gridChildren.get(0));
+		assertSame(mapButton, gridChildren.get(1));
+		assertSame(dialog, gridChildren.get(2));
+		assertSame(outerGroup, dialogChildren.get(0));
+		verify(dialog).setModal(true);
+		verify(dialog).setResponsive(true);
+		verify(dialog).setFitViewport(true);
+		verify(mapButton).setOnclick("PF('geoDialogDialog').show();PF('geoDialogDialog').toggleMaximize();return false");
+		verify(mockApplication, never()).createComponent(OverlayPanel.COMPONENT_TYPE);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void contentUploadUsesFullScreenDialogForPhone() {
+		DeviceResponsiveComponentBuilder builder = new DeviceResponsiveComponentBuilder();
+		builder.setUserAgentType(UserAgentType.phone);
+
+		HtmlPanelGrid panelGrid = mock(HtmlPanelGrid.class);
+		List<UIComponent> panelChildren = new ArrayList<>();
+		when(panelGrid.getId()).thenReturn("contentGrid");
+		when(panelGrid.getChildren()).thenReturn(panelChildren);
+
+		HtmlOutputLink outputLink = mock(HtmlOutputLink.class);
+		List<UIComponent> linkChildren = new ArrayList<>();
+		when(outputLink.getChildren()).thenReturn(linkChildren);
+		UIOutput outputText = mock(UIOutput.class);
+
+		HtmlPanelGroup actionGroup = mock(HtmlPanelGroup.class);
+		List<UIComponent> actionChildren = new ArrayList<>();
+		when(actionGroup.getChildren()).thenReturn(actionChildren);
+
+		HtmlInputHidden hidden = mock(HtmlInputHidden.class);
+		MenuButton actionButton = mock(MenuButton.class);
+		List<UIComponent> menuChildren = new ArrayList<>();
+		when(actionButton.getId()).thenReturn("actionButton");
+		when(actionButton.getChildren()).thenReturn(menuChildren);
+
+		UIMenuItem uploadItem = mock(UIMenuItem.class);
+		UIMenuItem clearItem = mock(UIMenuItem.class);
+
+		Dialog dialog = mock(Dialog.class);
+		List<UIComponent> dialogChildren = new ArrayList<>();
+		when(dialog.getChildren()).thenReturn(dialogChildren);
+
+		HtmlOutputText iframe = mock(HtmlOutputText.class);
+		ValueExpression valueExpression = mock(ValueExpression.class);
+
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("contentGrid",
+												"contentLinkInner",
+												"actionGroup",
+												"hiddenId",
+												"actionButton",
+												"uploadItem",
+												"contentDialog",
+												"iframe",
+												"clearItem");
+		builder.setSAILManagedBean(managedBean);
+
+		when(mockApplication.createComponent(HtmlPanelGrid.COMPONENT_TYPE)).thenReturn(panelGrid);
+		when(mockApplication.createComponent(HtmlOutputLink.COMPONENT_TYPE)).thenReturn(outputLink);
+		when(mockApplication.createComponent(UIOutput.COMPONENT_TYPE)).thenReturn(outputText);
+		when(mockApplication.createComponent(HtmlPanelGroup.COMPONENT_TYPE)).thenReturn(actionGroup);
+		when(mockApplication.createComponent(HtmlInputHidden.COMPONENT_TYPE)).thenReturn(hidden);
+		when(mockApplication.createComponent(MenuButton.COMPONENT_TYPE)).thenReturn(actionButton);
+		when(mockApplication.createComponent(UIMenuItem.COMPONENT_TYPE)).thenReturn(uploadItem, clearItem);
+		when(mockApplication.createComponent(Dialog.COMPONENT_TYPE)).thenReturn(dialog);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(iframe);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(Object.class))).thenReturn(valueExpression);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(String.class))).thenReturn(valueExpression);
+
+		ContentUpload content = new ContentUpload();
+		content.setBinding("doc.attachment");
+		content.setDisplay(ContentDisplay.link);
+		content.setCapture(ContentCapture.none);
+		content.setEditable(Boolean.TRUE);
+		content.setShowMarkup(Boolean.FALSE);
+
+		UIComponent result = builder.content(null, "row", content, null, "Attachment", null, HorizontalAlignment.left, true, false);
+
+		assertSame(panelGrid, result);
+		assertEquals(2, panelChildren.size());
+		assertSame(outputLink, panelChildren.get(0));
+		assertSame(actionGroup, panelChildren.get(1));
+		assertSame(hidden, actionChildren.get(0));
+		assertSame(actionButton, actionChildren.get(1));
+		assertSame(dialog, actionChildren.get(2));
+		assertSame(iframe, dialogChildren.get(0));
+		verify(dialog).setModal(true);
+		verify(dialog).setResponsive(true);
+		verify(dialog).setFitViewport(true);
+		verify(uploadItem).setValueExpression(eq("onclick"), any(ValueExpression.class));
+		verify(mockApplication, never()).createComponent(OverlayPanel.COMPONENT_TYPE);
 	}
 
 	// ---- actionButton phone branch ----

@@ -2,10 +2,13 @@ package org.skyve.impl.web.faces.pipeline.component;
 
 import org.primefaces.component.commandbutton.CommandButton;
 import org.skyve.impl.metadata.view.widget.Button;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentCapture;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentDisplay;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.view.Action;
 import org.skyve.web.UserAgentType;
 
+import jakarta.annotation.Nonnull;
 import jakarta.faces.component.UIComponent;
 
 public class DeviceResponsiveComponentBuilder extends ResponsiveComponentBuilder {
@@ -142,5 +145,15 @@ public class DeviceResponsiveComponentBuilder extends ResponsiveComponentBuilder
 								action.getInvisibleConditionName(),
 								resolveActionUploadCapture(action),
 								UserAgentType.phone.equals(userAgentType));
+	}
+
+	@Override
+	protected boolean useGeometryDialog() {
+		return UserAgentType.phone.equals(userAgentType);
+	}
+
+	@Override
+	protected boolean useContentUploadDialog(boolean image, @Nonnull ContentDisplay display, @Nonnull ContentCapture capture) {
+		return UserAgentType.phone.equals(userAgentType) || super.useContentUploadDialog(image, display, capture);
 	}
 }

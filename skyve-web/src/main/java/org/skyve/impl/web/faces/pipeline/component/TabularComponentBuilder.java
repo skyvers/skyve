@@ -1085,7 +1085,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		setId(result, null);
 
 		Integer pixelHeight = widget.getPixelHeight();
-		if (pixelHeight == null) {
+		Integer percentageHeight = widget.getPercentageHeight();
+		if ((pixelHeight == null) && (percentageHeight == null)) {
 			pixelHeight = Integer.valueOf(300);
 		}
 		setSizeAndTextAlignStyle(result,
@@ -1094,7 +1095,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 									widget.getResponsiveWidth(),
 									widget.getPercentageWidth(),
 									pixelHeight,
-									widget.getPercentageHeight(),
+									percentageHeight,
 									null);
 
 		HtmlPanelGroup mapDiv = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
@@ -1190,31 +1191,65 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		setSizeAndTextAlignStyle(mapButton, null, Integer.valueOf(30), null, null, Integer.valueOf(30), null, null);
 		toAddTo.add(mapButton);
 
-		OverlayPanel overlay = (OverlayPanel) a.createComponent(OverlayPanel.COMPONENT_TYPE);
-		setId(overlay, null);
-		overlay.setFor(mapButtonId);
-		overlay.setDynamic(false);
-		overlay.setShowCloseIcon(true);
-		overlay.setModal(false); // modal on PF8 causes the transparent modal mask to sit over the top of the overlay panel
-		overlay.setStyle("width:50%;height:310px");
+		UIPanel panel = null;
+		if (useGeometryDialog()) {
+			Dialog dialog = (Dialog) a.createComponent(Dialog.COMPONENT_TYPE);
+			setId(dialog, null);
+			String dialogVar = dialog.getId() + "Dialog";
+			dialog.setWidgetVar(dialogVar);
+			dialog.setModal(true);
+			dialog.setResponsive(true);
+			dialog.setFitViewport(true);
+			dialog.setHeader("Map");
+			dialog.setAppendTo("@(body)"); // append to <body/> so dialog can always pop (didn't work in tabs)
+			dialog.setOnHide("PF('" + dialogVar + "').toggleMaximize()");
+			mapButton.setOnclick("PF('" + dialogVar + "').show();PF('" + dialogVar + "').toggleMaximize();return false");
+			panel = dialog;
+		}
+		else {
+			OverlayPanel overlay = (OverlayPanel) a.createComponent(OverlayPanel.COMPONENT_TYPE);
+			setId(overlay, null);
+			overlay.setFor(mapButtonId);
+			overlay.setDynamic(false);
+			overlay.setShowCloseIcon(true);
+			overlay.setModal(false); // modal on PF8 causes the transparent modal mask to sit over the top of the overlay panel
+			overlay.setStyle("width:50%;height:310px");
+			panel = overlay;
+		}
 
 		MapDisplay display = new MapDisplay();
-		display.setPixelHeight(Integer.valueOf(280));
+		if (panel instanceof Dialog) {
+			display.setPercentageHeight(Integer.valueOf(100));
+		}
+		else {
+			display.setPixelHeight(Integer.valueOf(280));
+		}
 		HtmlPanelGroup mapDivs = mapDiv(display);
 		UIComponent mapDiv = mapDivs.getChildren().get(0);
 		mapDiv.setId(id);
-		overlay.getChildren().add(mapDivs);
+		panel.getChildren().add(mapDivs);
 
-		toAddTo.add(overlay);
+		toAddTo.add(panel);
 
 		// Add the event once mapDiv.getClientId() can be determined as it is added to the component tree
-		overlay.setValueExpression("onShow", generateMapScriptExpression(mapDiv.getClientId(),
+		panel.setValueExpression("onShow", generateMapScriptExpression(mapDiv.getClientId(),
 																			binding,
 																			type,
 																			disabledConditionName,
 																			formDisabledConditionName,
 																			false));
 
+	}
+
+	/**
+	 * Indicates whether editable geometry should use a dialog instead of an
+	 * overlay panel.
+	 *
+	 * @return {@code true} to render the geometry map picker as a dialog
+	 */
+	@SuppressWarnings("static-method") // Extension hook overridden by responsive builders.
+	protected boolean useGeometryDialog() {
+		return false;
 	}
 
 	@Override
@@ -2688,7 +2723,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		actionItems.add(uploadItem);
 
 		String overlayVar = id + "_" + sanitisedBinding + "Overlay";
-		boolean fullUploadDialog = image || isCameraAffordanceAllowed(display, capture);
+		boolean fullUploadDialog = useContentUploadDialog(image, display, capture);
 		if (fullUploadDialog) {
 			setContentUploadDialogOnclick(uploadItem,
 											id,
@@ -2855,6 +2890,20 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	private static boolean isCameraAffordanceAllowed(@Nonnull ContentDisplay display, @Nonnull ContentCapture capture) {
 		return (ContentCapture.camera.equals(capture) || ContentCapture.all.equals(capture)) &&
 				! ContentDisplay.video.equals(display);
+	}
+
+	/**
+	 * Indicates whether editable content upload should use a full dialog rather
+	 * than an overlay panel.
+	 *
+	 * @param image whether the upload route targets images
+	 * @param display content display mode; must not be {@code null}
+	 * @param capture content capture affordance; must not be {@code null}
+	 * @return {@code true} to render the content upload action as a dialog
+	 */
+	@SuppressWarnings("static-method") // Extension hook overridden by responsive builders.
+	protected boolean useContentUploadDialog(boolean image, @Nonnull ContentDisplay display, @Nonnull ContentCapture capture) {
+		return image || isCameraAffordanceAllowed(display, capture);
 	}
 
 	/**
