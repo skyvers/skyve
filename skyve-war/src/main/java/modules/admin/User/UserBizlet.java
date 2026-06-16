@@ -214,6 +214,7 @@ public class UserBizlet extends Bizlet<UserExtension> {
 
 		// contact must be same datagroup as user
 		if (bean.getContact() != null) {
+			bean.getContact().setBizUserId(bean.getBizId());
 			if (bean.getDataGroup() == null) {
 				bean.getContact().setBizDataGroupId(null);
 			} else {
