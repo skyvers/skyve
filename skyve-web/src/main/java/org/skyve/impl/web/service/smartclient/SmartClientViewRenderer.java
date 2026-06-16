@@ -851,6 +851,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 											action.getInvisibleConditionName(),
 											button,
 											null);
+		if (ImplicitActionName.Upload.equals(action.getImplicitName())) {
+			buttonCode = withUploadCapture(buttonCode, resolveActionUploadCapture(action).name());
+		}
 		code.append("type:'canvas',showTitle:false,width:1,canvas:isc.HLayout.create({height:22,members:[");
 		code.append(buttonCode).append("]}),");
 		disabled(action.getDisabledConditionName(), code);
@@ -891,6 +894,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 											action.getInvisibleConditionName(),
 											button,
 											null);
+		if (ImplicitActionName.Upload.equals(action.getImplicitName())) {
+			buttonCode = withUploadCapture(buttonCode, resolveActionUploadCapture(action).name());
+		}
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append('=').append(buttonCode).append(";\n");
 		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
@@ -4300,7 +4306,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 												null,
 												canDelete);
 			if (uploadCapture != null) {
-				buttonCode = buttonCode.replace("_view:view})", "capture:'" + uploadCapture + "',_view:view})");
+				buttonCode = withUploadCapture(buttonCode, uploadCapture);
 			}
 			// use double quote string delimiter to allow &quot; HTML character entity
 			code.append("view.add");
@@ -4310,6 +4316,16 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append("Action(");
 			code.append(buttonCode).append(");");
 		}
+	}
+
+	/**
+	 * Inserts upload capture metadata into the generated button code for SmartClient upload buttons.
+	 * @param buttonCode
+	 * @param uploadCapture
+	 * @return
+	 */
+	private static String withUploadCapture(String buttonCode, String uploadCapture) {
+		return buttonCode.replace("_view:view})", "capture:'" + uploadCapture + "',_view:view})");
 	}
 
 	/**

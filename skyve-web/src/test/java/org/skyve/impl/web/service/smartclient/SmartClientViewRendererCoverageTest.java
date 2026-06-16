@@ -37,6 +37,7 @@ import org.skyve.impl.metadata.view.event.ToggleDisabledEventAction;
 import org.skyve.impl.metadata.view.event.ToggleVisibilityEventAction;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.container.Sidebar;
+import org.skyve.impl.metadata.view.widget.Button;
 import org.skyve.impl.metadata.view.widget.Chart;
 import org.skyve.impl.metadata.view.widget.Chart.ChartType;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
@@ -59,6 +60,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
+import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.controller.Customisations;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.user.User;
@@ -736,6 +738,25 @@ class SmartClientViewRendererCoverageTest {
 		assertTrue(code.contains("type:'Remove',actionName:'removeAction'"), code);
 		assertTrue(code.contains("icon:'../icons/remove.png'"), code);
 		assertTrue(code.contains("_canDelete:false"), code);
+	}
+
+	@Test
+	void renderButtonUploadActionReferenceWritesCapture() {
+		when(view.getName()).thenReturn("edit");
+		when(view.getSidebar()).thenReturn(null);
+		SmartClientViewRenderer renderer = new SmartClientViewRenderer(user, module, document, view, "desktop", false);
+		renderer.renderView(null, null);
+
+		ActionImpl upload = action("UploadBackup");
+		upload.setImplicitName(ImplicitActionName.Upload);
+		upload.getProperties().put("capture", ContentCapture.all.name());
+		Button button = new Button();
+
+		renderer.renderButton("UploadBackup", "Upload", null, null, null, null, upload, button);
+
+		String code = renderer.getCode().toString();
+		assertTrue(code.contains("type:'Upload',actionName:'UploadBackup'"), code);
+		assertTrue(code.contains("capture:'all'"), code);
 	}
 
 	@Test
