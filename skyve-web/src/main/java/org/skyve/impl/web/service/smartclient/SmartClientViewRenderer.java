@@ -2250,11 +2250,25 @@ public class SmartClientViewRenderer extends ViewRenderer {
 													@Nonnull StringBuilder builder) {
 		builder.append("display:'").append(display).append("',");
 		builder.append("capture:'").append(content.getResolvedCapture()).append("',");
+		builder.append("emptyText:'").append(contentEmptyText(display)).append("',");
 		if (ContentDisplay.auto.equals(display)) {
 			builder.append("companion:'").append(contentCompanionName(content.getBinding())).append("',");
 		}
 		builder.append("showMarkup:").append(isContentMarkupAllowed(content, display)).append(',');
 		appendResolvedContentSize(content, display, formContext, builder);
+	}
+
+	private static @Nonnull String contentEmptyText(@Nonnull ContentDisplay display) {
+		if (ContentDisplay.image.equals(display)) {
+			return "No image";
+		}
+		if (ContentDisplay.video.equals(display)) {
+			return "No video";
+		}
+		if (ContentDisplay.link.equals(display)) {
+			return "No file";
+		}
+		return "No content";
 	}
 
 	/**

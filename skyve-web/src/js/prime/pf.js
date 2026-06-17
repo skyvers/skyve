@@ -101,6 +101,12 @@ SKYVE.PF = function() {
 		});
 	};
 
+	var setContentImagePlaceholder = function(root, id, binding, empty) {
+		var image = getContentElements(root, id, binding, '_image');
+		image.toggleClass('skyveContentHidden', empty);
+		image.parent().toggleClass('skyveContentEmpty', empty);
+	};
+
 	var setAutoContentVisibility = function(root, id, binding, mediaKind) {
 		var link = getContentElements(root, id, binding, '_link');
 		link.toggleClass('skyveContentHidden', !! mediaKind && mediaKind !== 'link');
@@ -109,6 +115,7 @@ SKYVE.PF = function() {
 		var showImage = mediaKind === 'image';
 		image.toggleClass('skyveContentHidden', ! showImage);
 		image.parent().toggleClass('skyveContentHidden', ! showImage);
+		image.parent().toggleClass('skyveContentEmpty', ! showImage);
 
 		var video = getContentElements(root, id, binding, '_video');
 		var showVideo = mediaKind === 'video';
@@ -165,6 +172,7 @@ SKYVE.PF = function() {
 			var url = 'content?_n=' + contentId + '&_doc=' + modoc + '&_b=' + unsanitiseBinding(binding);
 			getContentElements(top, id, binding, '_link').off('click.skyveContentClear').attr('href', url).text(fileName).attr('onclick', 'return true');
 			getContentElements(top, id, binding, '_image').attr('src', url);
+			setContentImagePlaceholder(top, id, binding, false);
 			showContentVideo(top, id, binding, url);
 			if (companionBinding) {
 				setAutoContentVisibility(top, id, binding, mediaKind);
@@ -184,6 +192,7 @@ SKYVE.PF = function() {
 			}
 			clearContentAnchor(top, id, binding);
 			getContentElements(top, id, binding, '_image').attr('src','images/blank.gif');
+			setContentImagePlaceholder(top, id, binding, true);
 			showContentVideoPlaceholder(top, id, binding);
 			if (companionBinding) {
 				setAutoContentVisibility(top, id, binding, '');
@@ -207,6 +216,7 @@ SKYVE.PF = function() {
 		clearContent: function(binding, id, companionBinding) {
 			SKYVE.PF.clearContentLink(binding, id, companionBinding);
 			getContentElements(top, id, binding, '_image').attr('src','images/blank.gif');
+			setContentImagePlaceholder(top, id, binding, true);
 		},
 
 		contentMarkupOnShow: function(id, binding, url, companionBinding) {
@@ -233,6 +243,7 @@ SKYVE.PF = function() {
 			var url = 'content?_n=' + contentId + '&_doc=' + modoc + '&_b=' + unsanitiseBinding(binding);
 			getContentElements(top, id, binding, '_link').off('click.skyveContentClear').attr('href', url).text(fileName).attr('onclick', 'return true');
 			getContentElements(top, id, binding, '_image').attr('src', url);
+			setContentImagePlaceholder(top, id, binding, false);
 			if (companionBinding) {
 				setAutoContentVisibility(top, id, binding, 'image');
 			}

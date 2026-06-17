@@ -507,6 +507,7 @@ class SmartClientViewRendererCoverageTest {
 		assertTrue(code.contains("type:'bizContent'"), code);
 		assertTrue(code.contains("display:'auto'"), code);
 		assertTrue(code.contains("capture:'all'"), code);
+		assertTrue(code.contains("emptyText:'No content'"), code);
 		assertTrue(code.contains("companion:'_attachment'"), code);
 		assertTrue(code.contains("showMarkup:true"), code);
 		assertTrue(code.contains("width:100"), code);
@@ -548,6 +549,7 @@ class SmartClientViewRendererCoverageTest {
 		String code = renderer.getCode().toString();
 		assertTrue(code.contains("type:'bizContent'"), code);
 		assertTrue(code.contains("display:'video'"), code);
+		assertTrue(code.contains("emptyText:'No video'"), code);
 		assertTrue(code.contains("width:320"), code);
 		assertTrue(code.contains("height:180"), code);
 	}
@@ -567,6 +569,7 @@ class SmartClientViewRendererCoverageTest {
 		assertTrue(javascript.contains("editorType:'bizContent'"), javascript);
 		assertTrue(javascript.contains("display:'auto'"), javascript);
 		assertTrue(javascript.contains("capture:'video'"), javascript);
+		assertTrue(javascript.contains("emptyText:'No content'"), javascript);
 		assertTrue(javascript.contains("companion:'_attachment'"), javascript);
 		assertTrue(javascript.contains("k=(rec&&rec['_attachment'])||'link'"), javascript);
 		assertTrue(javascript.contains("&_w=100&_h=100"), javascript);

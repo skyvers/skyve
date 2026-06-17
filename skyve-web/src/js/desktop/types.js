@@ -3292,13 +3292,15 @@ isc.BizContentItem.addMethods({
 		this.capture = config.capture || "none";
 		this.companion = config.companion;
 		this.showMarkup = config.showMarkup || false;
+		this.emptyText = config.emptyText || "No content";
 		this._previewWidth = config.width || (this.display === "video" ? 320 : "100%");
 		this._previewHeight = config.height || (this.display === "video" ? 180 : 25);
 		this._preview = isc.HTMLFlow.create({
-			contents: "Empty",
+			contents: "",
 			width: this._previewWidth,
 			height: this._previewHeight,
 		});
+		this._preview.setContents(this._emptyPreviewContents());
 
 		if (config.editable) {
 			const imageIntent = this.display === "image";
@@ -3359,6 +3361,27 @@ isc.BizContentItem.addMethods({
 		);
 	},
 
+	_emptyPreviewContents: function () {
+		const height = this._preview ? this._preview.getHeight() : this._previewHeight;
+		return (
+			'<div style="align-items:center;background:#f8fafc;border:1px dashed #cbd5e1;box-sizing:border-box;color:#6b7280;display:flex;flex-direction:column;height:' +
+			height +
+			'px;justify-content:center;text-align:center;width:100%;">' +
+			'<span style="border:2px solid #cbd5e1;border-radius:4px;box-sizing:border-box;display:block;height:1.8rem;margin-bottom:0.35rem;position:relative;width:2.4rem;">' +
+			'<span style="background:#cbd5e1;border-radius:50%;display:block;height:0.35rem;position:absolute;right:0.35rem;top:0.35rem;width:0.35rem;"></span>' +
+			'<span style="border-bottom:0.55rem solid #cbd5e1;border-left:0.55rem solid transparent;border-right:0.55rem solid transparent;bottom:0.25rem;display:block;height:0;left:0.35rem;position:absolute;width:0;"></span>' +
+			"</span>" +
+			'<span style="font-size:0.85rem;line-height:1.2;">' +
+			String(this.emptyText)
+				.replace(/&/g, "&amp;")
+				.replace(/</g, "&lt;")
+				.replace(/>/g, "&gt;")
+				.replace(/"/g, "&quot;")
+				.replace(/'/g, "&#39;") +
+			"</span></div>"
+		);
+	},
+
 	/**
 	 * Updates the visible preview when the content id changes.
 	 *
@@ -3378,7 +3401,7 @@ isc.BizContentItem.addMethods({
 						"&_h=" +
 						this._preview.getHeight();
 					this._preview.setContents(
-						`<a href="${url}" target="_blank"><img src="${imageUrl}" style="width:${this._preview.getWidth()}px;height:${this._preview.getHeight()}px;object-fit:contain"/></a>`,
+						`<a href="${url}" target="_blank"><img src="${imageUrl}" style="border:1px solid #bfbfbf;box-sizing:border-box;width:${this._preview.getWidth()}px;height:${this._preview.getHeight()}px;object-fit:contain"/></a>`,
 					);
 				} else if (kind === "video") {
 					this._preview.setContents(
@@ -3390,7 +3413,7 @@ isc.BizContentItem.addMethods({
 					);
 				}
 			} else {
-				this._preview.setContents(this._linkPreviewContents("&lt;Empty&gt;"));
+				this._preview.setContents(this._emptyPreviewContents());
 			}
 		}
 

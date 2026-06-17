@@ -702,6 +702,7 @@ class SmartClientViewRendererTest extends AbstractSkyveTest {
 		assertTrue(code.contains("type:'bizContent'"), "ContentUpload type: " + code);
 		assertTrue(code.contains("display:'auto'"), "ContentUpload display: " + code);
 		assertTrue(code.contains("capture:'all'"), "ContentUpload capture: " + code);
+		assertTrue(code.contains("emptyText:'No content'"), "ContentUpload empty text: " + code);
 		assertTrue(code.contains("companion:'_text'"), "ContentUpload companion: " + code);
 		assertTrue(code.contains("showMarkup:true"), "ContentUpload markup: " + code);
 	}
@@ -716,6 +717,7 @@ class SmartClientViewRendererTest extends AbstractSkyveTest {
 
 		assertTrue(code.contains("type:'bizContent'"), "ContentUpload type: " + code);
 		assertTrue(code.contains("display:'video'"), "ContentUpload display: " + code);
+		assertTrue(code.contains("emptyText:'No video'"), "ContentUpload empty text: " + code);
 		assertTrue(code.contains("showMarkup:false"), "ContentUpload markup: " + code);
 		assertTrue(code.contains("width:320"), "ContentUpload video width: " + code);
 		assertTrue(code.contains("height:180"), "ContentUpload video height: " + code);
@@ -3650,6 +3652,7 @@ class SmartClientViewRendererTest extends AbstractSkyveTest {
 		String code = renderer.getCode().toString();
 		assertTrue(code.contains("editorType:'bizContent'"), "ContentUpload editor: " + code);
 		assertTrue(code.contains("display:'auto'"), "ContentUpload display: " + code);
+		assertTrue(code.contains("emptyText:'No content'"), "ContentUpload empty text: " + code);
 		assertTrue(code.contains("companion:'_text'"), "ContentUpload companion: " + code);
 		assertTrue(code.contains("k=(rec&&rec['_text'])||'link'"), "ContentUpload auto formatter: " + code);
 		assertTrue(code.contains("<video controls preload=\"metadata\""), "ContentUpload video formatter: " + code);

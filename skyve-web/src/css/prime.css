@@ -239,6 +239,34 @@ th.hiddenFilter input.ui-column-filter, th.hiddenFilter div.ui-column-customfilt
 	display: none !important;
 }
 
+.skyveContentPreview.skyveContentEmpty {
+	align-items: center;
+	background: #fafbfc;
+	border-color: #d6dee8 !important;
+	border-style: dashed !important;
+	color: #8a96a6;
+	display: flex;
+	justify-content: center;
+}
+
+.skyveContentPreview.skyveContentEmpty:before {
+	content: "\f03e";
+	font-family: "Font Awesome 6 Free";
+	font-size: 1.7rem;
+	font-weight: 900;
+	line-height: 1;
+	margin-top: -1.2rem;
+	opacity: 0.55;
+	position: absolute;
+}
+
+.skyveContentPreview.skyveContentEmpty:after {
+	content: "No image";
+	font-size: 0.85rem;
+	margin-top: 2.1rem;
+	opacity: 0.75;
+}
+
 button.skyveContentActionButton.ui-button-icon-only,
 button.skyveContentActionButton.ui-button-text-icon-left {
 	padding: 0 !important;

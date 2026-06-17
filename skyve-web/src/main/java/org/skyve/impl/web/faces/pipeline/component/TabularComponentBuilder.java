@@ -4691,13 +4691,17 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 												String binding) {
 		HtmlPanelGroup result = panelGroup(true, true, true, null, null);
 		setId(result, null);
-		setSizeAndTextAlignStyle(result, "border:1px solid gray;", pixelWidth, responsiveWidth, percentageWidth, pixelHeight, percentageHeight, null);
+		setSizeAndTextAlignStyle(result, "border:1px solid #d6dee8;position:relative;overflow:hidden;", pixelWidth, responsiveWidth, percentageWidth, pixelHeight, percentageHeight, null);
+		String expression = String.format("#{(empty %s.currentBean['%s']) ? 'skyveContentPreview skyveContentEmpty' : 'skyveContentPreview'}", managedBeanName, binding);
+		result.setValueExpression("styleClass", ef.createValueExpression(elc, expression, String.class));
 
 		GraphicImage image = (GraphicImage) a.createComponent(GraphicImage.COMPONENT_TYPE);
 		setId(image, null);
-		String expression = String.format("#{%s.getContentUrl('%s', true)}", managedBeanName, binding);
+		expression = String.format("#{%s.getContentUrl('%s', true)}", managedBeanName, binding);
 		image.setValueExpression("value", ef.createValueExpression(elc, expression, String.class));
 		image.setStyle("width:100%;height:100%;object-fit:contain;cursor:pointer");
+		expression = String.format("#{(empty %s.currentBean['%s']) ? 'skyveContentHidden' : ''}", managedBeanName, binding);
+		image.setValueExpression("styleClass", ef.createValueExpression(elc, expression, String.class));
 		image.setOnclick("window.open(this.src, '_blank')");
 		result.getChildren().add(image);
 

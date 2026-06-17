@@ -213,6 +213,7 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 		String companion = '_' + name;
 		result.append(",display:'").append(display).append('\'');
 		result.append(",capture:'").append(content.getResolvedCapture()).append('\'');
+		result.append(",emptyText:'").append(contentEmptyText(display)).append('\'');
 		if (ContentDisplay.auto.equals(display)) {
 			result.append(",companion:'").append(companion).append('\'');
 		}
@@ -232,6 +233,19 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 		result.append(videoWidth).append("px;height:").append(videoHeight).append("px;object-fit:contain\"></video>'}");
 		result.append("return '<a href=\"'+u+'\" target=\"_blank\">Content</a>'}");
 		return result.toString();
+	}
+
+	private static String contentEmptyText(ContentDisplay display) {
+		if (ContentDisplay.image.equals(display)) {
+			return "No image";
+		}
+		if (ContentDisplay.video.equals(display)) {
+			return "No video";
+		}
+		if (ContentDisplay.link.equals(display)) {
+			return "No file";
+		}
+		return "No content";
 	}
 
 	private static boolean isContentMarkupAllowed(ContentUpload content, ContentDisplay display) {

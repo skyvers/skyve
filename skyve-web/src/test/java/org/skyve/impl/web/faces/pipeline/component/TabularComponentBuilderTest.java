@@ -1558,6 +1558,8 @@ class TabularComponentBuilderTest {
 		ArgumentCaptor<String> styleClassExpressions = ArgumentCaptor.forClass(String.class);
 		verify(mockExpressionFactory, atLeastOnce()).createValueExpression(any(ELContext.class), styleClassExpressions.capture(), eq(String.class));
 		assertTrue(styleClassExpressions.getAllValues().contains("#{(empty skyve.getContentMediaKind('doc.attachment') or skyve.getContentMediaKind('doc.attachment') eq 'link') ? '' : 'skyveContentHidden'}"));
+		assertTrue(styleClassExpressions.getAllValues().contains("#{(empty skyve.currentBean['doc.attachment']) ? 'skyveContentPreview skyveContentEmpty' : 'skyveContentPreview'}"));
+		assertTrue(styleClassExpressions.getAllValues().contains("#{(empty skyve.currentBean['doc.attachment']) ? 'skyveContentHidden' : ''}"));
 		assertTrue(styleClassExpressions.getAllValues().contains("#{skyve.getContentMediaKind('doc.attachment') eq 'image' ? '' : 'skyveContentHidden'}"));
 		assertTrue(styleClassExpressions.getAllValues().contains("#{skyve.getContentMediaKind('doc.attachment') eq 'video' ? '' : 'skyveContentHidden'}"));
 	}

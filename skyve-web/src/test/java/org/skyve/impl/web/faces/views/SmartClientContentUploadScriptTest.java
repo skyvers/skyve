@@ -23,7 +23,11 @@ class SmartClientContentUploadScriptTest {
 		assertTrue(script.contains("'<div style=\"line-height:' +"), script);
 		assertTrue(script.contains("height +"), script);
 		assertTrue(script.contains("this._linkPreviewContents(this.canvas.linkHTML(url, \"Content\", \"_blank\"))"), script);
-		assertTrue(script.contains("this._preview.setContents(this._linkPreviewContents(\"&lt;Empty&gt;\"));"), script);
+		assertTrue(script.contains("this.emptyText = config.emptyText || \"No content\";"), script);
+		assertTrue(script.contains("this._preview.setContents(this._emptyPreviewContents());"), script);
+		assertTrue(script.contains("_emptyPreviewContents: function ()"), script);
+		assertTrue(script.contains("String(this.emptyText)\n\t\t\t\t.replace(/&/g, \"&amp;\")\n\t\t\t\t.replace(/</g, \"&lt;\")\n\t\t\t\t.replace(/>/g, \"&gt;\")"), script);
+		assertTrue(script.contains("border:1px solid #bfbfbf;box-sizing:border-box;width:${this._preview.getWidth()}px;height:${this._preview.getHeight()}px;object-fit:contain"), script);
 	}
 
 	@Test
