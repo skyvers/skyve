@@ -282,9 +282,7 @@ th.hiddenFilter input.ui-column-filter, th.hiddenFilter div.ui-column-customfilt
 }
 
 div.skyveContentPreview.skyveContentResponsiveImage,
-div.skyveContentPreview.skyveContentResponsiveSignature,
-.skyveContentResponsiveVideo,
-.skyveContentResponsiveSignature {
+.skyveContentResponsiveVideo {
 	max-width: 100%;
 	width: 100% !important;
 }
@@ -296,11 +294,6 @@ div.skyveContentPreview.skyveContentResponsiveImage {
 
 .skyveContentResponsiveVideo {
 	aspect-ratio: 16 / 9;
-	height: auto !important;
-}
-
-.skyveContentResponsiveSignature {
-	aspect-ratio: 2 / 1;
 	height: auto !important;
 }
 

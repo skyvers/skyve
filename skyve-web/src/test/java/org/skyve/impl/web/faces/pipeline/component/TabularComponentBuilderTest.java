@@ -849,7 +849,7 @@ class TabularComponentBuilderTest {
 		when(mockApplication.createComponent(UIOutput.COMPONENT_TYPE)).thenReturn(emptyMessage);
 		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(SkyveLazyDataModel.class))).thenReturn(modelExpression);
 
-		ListModel<org.skyve.domain.Bean> model = mock(ListModel.class);
+		ListModel<org.skyve.domain.Bean> model = mockListModel();
 		Document drivingDocument = mock(Document.class);
 		when(model.getDrivingDocument()).thenReturn(drivingDocument);
 		when(drivingDocument.getOwningModuleName()).thenReturn("sales");
@@ -2846,7 +2846,7 @@ class TabularComponentBuilderTest {
 			return modelExpression;
 		});
 
-		ListModel<org.skyve.domain.Bean> model = mock(ListModel.class);
+		ListModel<org.skyve.domain.Bean> model = mockListModel();
 		Document drivingDocument = mock(Document.class);
 		when(model.getDrivingDocument()).thenReturn(drivingDocument);
 		when(drivingDocument.getOwningModuleName()).thenReturn("sales");
@@ -3186,11 +3186,14 @@ class TabularComponentBuilderTest {
 		assertSame(buttonGrid, layoutChildren.get(2));
 		assertSame(image, imageChildren.get(0));
 		assertEquals(3, buttonChildren.size());
-		verify(signatureComponent).setStyle("width:400px;height:200px");
-		verify(signatureComponent).setStyleClass("skyveContentResponsiveSignature");
+		verify(buttonGrid).setColumns(2);
+		verify(buttonGrid).setStyle("margin-left:auto");
+		verify(signatureComponent).setStyle("width:350px;height:175px");
+		verify(signatureComponent, never()).setStyleClass("skyveContentResponsiveSignature");
+		verify(mockExpressionFactory).createValueExpression("border:1px solid #d6dee8;position:relative;overflow:hidden;width:350px;height:175px", String.class);
 		ArgumentCaptor<String> expressions = ArgumentCaptor.forClass(String.class);
 		verify(mockExpressionFactory, atLeastOnce()).createValueExpression(any(ELContext.class), expressions.capture(), eq(String.class));
-		assertTrue(expressions.getAllValues().contains("#{(empty skyve.currentBean['customerSignature']) ? 'skyveContentPreview skyveContentResponsiveSignature skyveContentEmpty' : 'skyveContentPreview skyveContentResponsiveSignature'}"));
+		assertTrue(expressions.getAllValues().contains("#{(empty skyve.currentBean['customerSignature']) ? 'skyveContentPreview skyveContentEmpty' : 'skyveContentPreview'}"));
 		verify(signButton).setValue("Sign");
 		verify(signButton).setProcess("@this");
 		verify(signButton).setUpdate("sigLayout");
@@ -3357,7 +3360,7 @@ class TabularComponentBuilderTest {
 		when(column.getChildren()).thenReturn(columnChildren);
 		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(Object.class))).thenReturn(valueExpression);
 
-		ListModel<org.skyve.domain.Bean> model = mock(ListModel.class);
+		ListModel<org.skyve.domain.Bean> model = mockListModel();
 		Document drivingDocument = mock(Document.class);
 		when(model.getDrivingDocument()).thenReturn(drivingDocument);
 		when(drivingDocument.getOwningModuleName()).thenReturn("sales");
@@ -3425,7 +3428,7 @@ class TabularComponentBuilderTest {
 		when(column.getChildren()).thenReturn(columnChildren);
 		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(Object.class))).thenReturn(valueExpression);
 
-		ListModel<org.skyve.domain.Bean> model = mock(ListModel.class);
+		ListModel<org.skyve.domain.Bean> model = mockListModel();
 		Document drivingDocument = mock(Document.class);
 		when(model.getDrivingDocument()).thenReturn(drivingDocument);
 		when(drivingDocument.getOwningModuleName()).thenReturn("sales");
@@ -3489,7 +3492,7 @@ class TabularComponentBuilderTest {
 		when(column.getChildren()).thenReturn(columnChildren);
 		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(Object.class))).thenReturn(valueExpression);
 
-		ListModel<org.skyve.domain.Bean> model = mock(ListModel.class);
+		ListModel<org.skyve.domain.Bean> model = mockListModel();
 		Document drivingDocument = mock(Document.class);
 		when(model.getDrivingDocument()).thenReturn(drivingDocument);
 		when(drivingDocument.getOwningModuleName()).thenReturn("sales");
@@ -3553,7 +3556,7 @@ class TabularComponentBuilderTest {
 		when(column.getChildren()).thenReturn(columnChildren);
 		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(Object.class))).thenReturn(valueExpression);
 
-		ListModel<org.skyve.domain.Bean> model = mock(ListModel.class);
+		ListModel<org.skyve.domain.Bean> model = mockListModel();
 		Document drivingDocument = mock(Document.class);
 		when(model.getDrivingDocument()).thenReturn(drivingDocument);
 		when(drivingDocument.getOwningModuleName()).thenReturn("sales");
@@ -3623,7 +3626,7 @@ class TabularComponentBuilderTest {
 		when(column.getChildren()).thenReturn(columnChildren);
 		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(Object.class))).thenReturn(valueExpression);
 
-		ListModel<org.skyve.domain.Bean> model = mock(ListModel.class);
+		ListModel<org.skyve.domain.Bean> model = mockListModel();
 		Document drivingDocument = mock(Document.class);
 		when(model.getDrivingDocument()).thenReturn(drivingDocument);
 		when(drivingDocument.getOwningModuleName()).thenReturn("sales");
@@ -5984,5 +5987,10 @@ class TabularComponentBuilderTest {
 		ListMembership membership = new ListMembership();
 		EventSourceComponent result = builder.listMembership(existing, "Candidates", "Members", membership);
 		assertSame(existing, result);
+	}
+
+	@SuppressWarnings("unchecked")
+	private static ListModel<org.skyve.domain.Bean> mockListModel() {
+		return mock(ListModel.class);
 	}
 }

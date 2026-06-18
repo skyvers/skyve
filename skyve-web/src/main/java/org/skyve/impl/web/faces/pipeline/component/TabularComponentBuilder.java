@@ -202,6 +202,10 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	public static final String DOUBLE_ACTION_COLUMN_WIDTH = "95";
 
 	private static final String UPLOAD_CAPTURE_PROPERTY_NAME = "capture";
+	
+	// 2:1 aspect ratio that will fit 95% of phone CSS widths
+	private static final Integer DEFAULT_SIGNATURE_PIXEL_WIDTH = Integer.valueOf(350);
+	private static final Integer DEFAULT_SIGNATURE_PIXEL_HEIGHT = Integer.valueOf(175);
 
 	@Override
 	public UIComponent view(UIComponent component, boolean createView) {
@@ -2488,10 +2492,10 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	/**
-	 *				<h:panelGrid id="one" columns="2">
-	 *					<p:signature id="one_signature" style="width:400px;height:200px" rendered="#{empty skyve.currentBean['image']}" />
-	 *					<p:graphicImage id="one_image" style="width:400px;height:200px;border:1px gray" rendered="#{not empty skyve.currentBean['image']}" />
-	 *					<h:panelGrid columns="1">
+	 *				<h:panelGrid id="one" columns="1">
+	 *					<p:signature id="one_signature" style="width:350px;height:175px" rendered="#{empty skyve.currentBean['image']}" />
+	 *					<p:graphicImage id="one_image" style="width:350px;height:175px;border:1px gray" rendered="#{not empty skyve.currentBean['image']}" />
+	 *					<h:panelGrid columns="2" style="margin-left:auto">
 	 *						<p:commandButton id="one_sign" value="Sign" icon="fa-solid fa-upload" title="Submit Signature" style="width:75px" action="#{skyve.sign('one', 'image')}" process="@this" update="one" rendered="#{empty skyve.currentBean['image']}" />
 	 *						<p:commandButton id="one_client" value="Clear" icon="fa-solid fa-trash" title="Clear Signature" style="width:75px"  type="button" onclick="SKYVE.PF.getById('one_signature').signature('clear')" rendered="#{empty skyve.currentBean['image']}" />
 	 *						<p:commandButton id="one_server" value="Clear" icon="fa-solid fa-trash" title="Clear Signature" style="width:75px" action="#{skyve.clear('image')}" process="@this" update="one" rendered="#{not empty skyve.currentBean['image']}" />
@@ -2511,14 +2515,13 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		}
 
 		String binding = signature.getBinding();
-		boolean phoneResponsiveMedia = signature.getPixelWidth() == null && signature.getPixelHeight() == null;
 		Integer pixelWidth = signature.getPixelWidth();
 		if (pixelWidth == null) {
-			pixelWidth = Integer.valueOf(400);
+			pixelWidth = DEFAULT_SIGNATURE_PIXEL_WIDTH;
 		}
 		Integer pixelHeight = signature.getPixelHeight();
 		if (pixelHeight == null) {
-			pixelHeight = Integer.valueOf(200);
+			pixelHeight = DEFAULT_SIGNATURE_PIXEL_HEIGHT;
 		}
 
 		String id = layout.getId();
@@ -2538,9 +2541,6 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		sb.append("width:").append(pixelWidth);
 		sb.append("px;height:").append(pixelHeight).append("px");
 		signatureComponent.setStyle(sb.toString());
-		if (phoneResponsiveMedia) {
-			signatureComponent.setStyleClass("skyveContentResponsiveSignature");
-		}
 
 		// Set signature rendered
 		sb.setLength(0);
@@ -2564,7 +2564,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		toAddTo.add(signatureComponent);
 
 		// Image
-		HtmlPanelGroup contentImage = contentGraphicImage(pixelWidth, null, null, pixelHeight, null, binding, phoneResponsiveMedia ? "skyveContentResponsiveSignature" : null, null);
+		HtmlPanelGroup contentImage = contentGraphicImage(pixelWidth, null, null, pixelHeight, null, binding, null, null);
 
 		// Set image rendered
 		sb.setLength(0);
@@ -2576,7 +2576,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		// The buttons
 		HtmlPanelGrid grid = (HtmlPanelGrid) a.createComponent(HtmlPanelGrid.COMPONENT_TYPE);
 		setId(grid, null);
-		grid.setColumns(1);
+		grid.setColumns(2);
+		grid.setStyle("margin-left:auto");
 		toAddTo.add(grid);
 		toAddTo = grid.getChildren();
 

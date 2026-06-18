@@ -435,11 +435,11 @@ class TabularLayoutBuilderTest {
 	}
 
 	@Test
-	void contentSignatureLayoutCreatesHtmlPanelGridWithTwoColumns() {
+	void contentSignatureLayoutCreatesHtmlPanelGridWithOneColumn() {
 		ContentSignature signature = new ContentSignature();
 		UIComponent result = builder.contentSignatureLayout(null, signature);
 		assertSame(mockHtmlPanelGrid, result);
-		verify(mockHtmlPanelGrid).setColumns(2);
+		verify(mockHtmlPanelGrid).setColumns(1);
 	}
 
 	@Test

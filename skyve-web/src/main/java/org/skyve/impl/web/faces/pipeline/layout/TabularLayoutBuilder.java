@@ -456,7 +456,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 		// Signature Grid
 		HtmlPanelGrid result = (HtmlPanelGrid) a.createComponent(HtmlPanelGrid.COMPONENT_TYPE);
 		setId(result, null);
-		result.setColumns(2);
+		result.setColumns(1);
 		setInvisible(result, signature.getInvisibleConditionName(), null);
 		return result;
 	}
