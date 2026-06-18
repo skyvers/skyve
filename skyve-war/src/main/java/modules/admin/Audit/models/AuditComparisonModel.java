@@ -240,11 +240,19 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 					converter = enumeration.getConverter();
 				}
 
-				if (value instanceof String string) {
-					value = BindUtil.fromSerialised(converter, type, string);
+				try {
+					if (value instanceof String string) {
+						value = BindUtil.fromSerialised(converter, type, string);
+					}
+					else {
+						value = BindUtil.convert(type, value);
+					}
 				}
-				else {
-					value = BindUtil.convert(type, value);
+				catch (@SuppressWarnings("unused") Exception e) {
+					// The audited value can no longer be coerced to the attribute's type
+					// (e.g. a removed/renamed enum constant). Fall back to the raw audited string.
+					property.setTitle(name);
+					property.setWidget(new TextField());
 				}
 			}
 
@@ -287,11 +295,18 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 						converter = enumeration.getConverter();
 					}
 
-					if (value instanceof String string) {
-						value = BindUtil.fromSerialised(converter, type, string);
+					try {
+						if (value instanceof String string) {
+							value = BindUtil.fromSerialised(converter, type, string);
+						}
+						else {
+							value = BindUtil.convert(type, value);
+						}
 					}
-					else {
-						value = BindUtil.convert(type, value);
+					catch (@SuppressWarnings("unused") Exception e) {
+						// The audited value can no longer be coerced to the attribute's type
+						// (e.g. a removed/renamed enum constant). Fall back to the raw audited string.
+						property.setWidget(new TextField());
 					}
 				}
 
