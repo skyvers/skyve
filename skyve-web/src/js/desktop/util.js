@@ -493,6 +493,23 @@ isc.BizUtil.addClassMethods({
 		return url;
 	},
 
+	openContentUpload: function (contentFormItem, image) {
+		isc.BizUtil._registerContentFormItem(contentFormItem);
+		const url = isc.BizUtil.createContentUploadUrl(contentFormItem, image);
+		isc.WindowStack.popup(
+			null,
+			image ? "Upload Image" : "Upload Content",
+			true,
+			[
+				isc.HTMLPane.create({
+					contentsType: "page",
+					contents: "Loading Page...",
+					contentsURL: url,
+				}),
+			],
+		);
+	},
+
 	_registerContentFormItem: function (contentFormItem) {
 		isc.BizUtil._contentFormItemsByBinding[contentFormItem.name] =
 			contentFormItem;
@@ -626,20 +643,7 @@ isc.BizUtil.addClassMethods({
 			false,
 			"Upload content",
 			function () {
-				isc.BizUtil._registerContentFormItem(contentFormItem);
-				const url = isc.BizUtil.createContentUploadUrl(contentFormItem, image);
-				isc.WindowStack.popup(
-					null,
-					image ? "Upload Image" : "Upload Content",
-					true,
-					[
-						isc.HTMLPane.create({
-							contentsType: "page",
-							contents: "Loading Page...",
-							contentsURL: url,
-						}),
-					],
-				);
+				isc.BizUtil.openContentUpload(contentFormItem, image);
 			},
 			"Other Options",
 			null,

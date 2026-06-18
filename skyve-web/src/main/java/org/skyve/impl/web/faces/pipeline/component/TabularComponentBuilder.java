@@ -5,6 +5,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import org.primefaces.behavior.ajax.AjaxBehavior;
@@ -2307,7 +2308,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		List<UIComponent> toAddTo = result.getChildren();
 
 		@Nonnull String binding = content.getBinding();
-		String sanitisedBinding = BindUtil.sanitiseBinding(binding);
+		@Nonnull String sanitisedBinding = Objects.requireNonNull(BindUtil.sanitiseBinding(binding), "sanitised binding");
 		ContentDisplay display = content.getResolvedDisplay();
 		boolean auto = ContentDisplay.auto.equals(display);
 		boolean showMarkup = isContentMarkupAllowed(content, display);
@@ -2327,6 +2328,17 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			}
 			mediaChildren.add(link);
 		}
+		String placeholderUploadOnclick = null;
+		if (editable && (ContentDisplay.image.equals(display) || auto)) {
+			boolean fullUploadDialog = useContentUploadDialog(imageUpload, display, content.getResolvedCapture());
+			placeholderUploadOnclick = createContentUploadOnclick(id,
+																	sanitisedBinding,
+																	id + "_" + sanitisedBinding + "Overlay",
+																	display,
+																	content.getResolvedCapture(),
+																	auto ? companionFieldName(binding) : null,
+																	fullUploadDialog);
+		}
 		if (ContentDisplay.image.equals(display) || auto) {
 			HtmlPanelGroup image = contentGraphicImage(resolveImageWidth(content),
 														null,
@@ -2334,7 +2346,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 														resolveImageHeight(content),
 														null,
 														binding,
-														phoneResponsiveMedia ? "skyveContentResponsiveImage" : null);
+														phoneResponsiveMedia ? "skyveContentResponsiveImage" : null,
+														placeholderUploadOnclick);
 			image.getChildren().get(0).setId(String.format("%s_%s_image", id, sanitisedBinding));
 			if (auto) {
 				setAutoContentVisibleStyleClass(image, binding, "image");
@@ -2565,7 +2578,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		toAddTo.add(signatureComponent);
 
 		// Image
-		HtmlPanelGroup contentImage = contentGraphicImage(pixelWidth, null, null, pixelHeight, null, binding, phoneResponsiveMedia ? "skyveContentResponsiveSignature" : null);
+		HtmlPanelGroup contentImage = contentGraphicImage(pixelWidth, null, null, pixelHeight, null, binding, phoneResponsiveMedia ? "skyveContentResponsiveSignature" : null, null);
 
 		// Set image rendered
 		sb.setLength(0);
@@ -2971,12 +2984,36 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 												@Nonnull ContentDisplay display,
 												@Nonnull ContentCapture capture,
 												@Nullable String companionBinding) {
+		item.setValueExpression("onclick",
+								ef.createValueExpression(elc,
+															createContentUploadOnclick(id,
+																						sanitisedBinding,
+																						var,
+																						display,
+																						capture,
+																						companionBinding,
+																						true),
+															String.class));
+	}
+
+	private @Nonnull String createContentUploadOnclick(@Nonnull String id,
+														@Nonnull String sanitisedBinding,
+														@Nonnull String var,
+														@Nonnull ContentDisplay display,
+														@Nonnull ContentCapture capture,
+														@Nullable String companionBinding,
+														boolean fullUploadDialog) {
 		StringBuilder value = new StringBuilder(192);
-		value.append("#{'SKYVE.PF.contentOverlayOnShow(\\'").append(id).append("\\',\\''.concat(");
-		appendContentUploadUrlExpression(value, sanitisedBinding, display, capture, companionBinding);
-		value.append(".concat('\\');PF(\\'").append(var);
-		value.append("\\').show();PF(\\'").append(var).append("\\').toggleMaximize();return false'))}");
-		item.setValueExpression("onclick", ef.createValueExpression(elc, value.toString(), String.class));
+		if (fullUploadDialog) {
+			value.append("#{'SKYVE.PF.contentOverlayOnShow(\\'").append(id).append("\\',\\''.concat(");
+			appendContentUploadUrlExpression(value, sanitisedBinding, display, capture, companionBinding);
+			value.append(".concat('\\');PF(\\'").append(var);
+			value.append("\\').show();PF(\\'").append(var).append("\\').toggleMaximize();return false'))}");
+		}
+		else {
+			value.append("PF('").append(var).append("').show();return false");
+		}
+		return value.toString();
 	}
 
 	/**
@@ -4705,7 +4742,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 												Integer pixelHeight,
 												Integer percentageHeight,
 												String binding,
-												String phoneResponsiveClass) {
+												String phoneResponsiveClass,
+												@Nullable String placeholderUploadOnclick) {
 		HtmlPanelGroup result = panelGroup(true, true, true, null, null);
 		setId(result, null);
 		setSizeAndTextAlignStyle(result, "border:1px solid #d6dee8;position:relative;overflow:hidden;", pixelWidth, responsiveWidth, percentageWidth, pixelHeight, percentageHeight, null);
@@ -4713,6 +4751,14 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		String emptyClass = (phoneResponsiveClass == null) ? "skyveContentPreview skyveContentEmpty" : "skyveContentPreview " + phoneResponsiveClass + " skyveContentEmpty";
 		String expression = String.format("#{(empty %s.currentBean['%s']) ? '%s' : '%s'}", managedBeanName, binding, emptyClass, previewClass);
 		result.setValueExpression("styleClass", ef.createValueExpression(elc, expression, String.class));
+		if (placeholderUploadOnclick != null) {
+			if (placeholderUploadOnclick.startsWith("#{")) {
+				result.setValueExpression("onclick", ef.createValueExpression(elc, placeholderUploadOnclick, String.class));
+			}
+			else {
+				result.setOnclick(placeholderUploadOnclick);
+			}
+		}
 
 		GraphicImage image = (GraphicImage) a.createComponent(GraphicImage.COMPONENT_TYPE);
 		setId(image, null);
@@ -4721,7 +4767,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		image.setStyle("width:100%;height:100%;object-fit:contain;cursor:pointer");
 		expression = String.format("#{(empty %s.currentBean['%s']) ? 'skyveContentHidden' : ''}", managedBeanName, binding);
 		image.setValueExpression("styleClass", ef.createValueExpression(elc, expression, String.class));
-		image.setOnclick("window.open(this.src, '_blank')");
+		image.setOnclick("window.open(this.src, '_blank');if(event){event.stopPropagation()}");
 		result.getChildren().add(image);
 
 		return result;

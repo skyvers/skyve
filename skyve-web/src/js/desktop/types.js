@@ -3182,6 +3182,12 @@ isc.BizContentImageItem.addMethods({
 			src: "[SKIN]blank.gif",
 			cursor: "pointer",
 			click(event) {
+				if (!this.creator.getValue()) {
+					if (config.editable) {
+						isc.BizUtil.openContentUpload(this.creator, true);
+					}
+					return;
+				}
 				let src = this.src;
 				// Remove the width and height parameters to get the full image, not a Thumbnail
 				src = src.replace(/&_w=\d*/, "").replace(/&_h=\d*/, "");
