@@ -555,6 +555,29 @@ class SmartClientViewRendererCoverageTest {
 	}
 
 	@Test
+	void renderFormContentUploadLinkWritesLinkDisplayMetadata() {
+		addTextAttribute("attachment");
+		SmartClientViewRenderer renderer = rendererWithOpenForm();
+
+		FormItem item = beginFormItem(renderer, "Attachment");
+		ContentUpload content = new ContentUpload();
+		content.setBinding("attachment");
+		content.setDisplay(ContentDisplay.link);
+		content.setPixelWidth(Integer.valueOf(303));
+		content.setPixelHeight(Integer.valueOf(303));
+		renderer.visitContent(content, true, true);
+		renderer.visitedFormItem(item, true, true);
+
+		String code = renderer.getCode().toString();
+		assertTrue(code.contains("type:'bizContent'"), code);
+		assertTrue(code.contains("display:'link'"), code);
+		assertTrue(code.contains("emptyText:'No file'"), code);
+		assertFalse(code.contains("companion:'_attachment'"), code);
+		assertTrue(code.contains("width:303"), code);
+		assertTrue(code.contains("height:303"), code);
+	}
+
+	@Test
 	void contentUploadDataGridFieldWritesFormatterProperties() {
 		addTextAttribute("attachment");
 		ContentUpload content = new ContentUpload();

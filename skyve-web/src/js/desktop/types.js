@@ -3316,7 +3316,7 @@ isc.BizContentItem.addMethods({
 		this._previewWidth = config.width && config.width !== "*" ? config.width : "100%";
 		this._previewHeight = config.height || null;
 		this._previewCanvasWidth = config.width || (config.editable ? "*" : "100%");
-		this._currentMediaKind = this.display === "video" ? "video" : "image";
+		this._currentMediaKind = this._defaultMediaKind();
 		this._previewUploadItemID = this.getID();
 		isc.BizContentItem._previewUploadItems[this._previewUploadItemID] = this;
 		const contentItem = this;
@@ -3355,6 +3355,13 @@ isc.BizContentItem.addMethods({
 		this.Super("init", arguments);
 	},
 
+	_defaultMediaKind: function () {
+		if (this.display === "link" || this.display === "video") {
+			return this.display;
+		}
+		return "image";
+	},
+
 	_resolveMediaKind: function () {
 		if (this.display !== "auto") {
 			return this.display;
@@ -3385,7 +3392,7 @@ isc.BizContentItem.addMethods({
 
 	_linkPreviewContents: function (contents) {
 		return (
-			'<div style="align-items:center;display:flex;min-height:1.6rem;vertical-align:middle;">' +
+			'<div style="align-items:center;box-sizing:border-box;display:flex;height:25px;line-height:25px;vertical-align:middle;">' +
 			contents +
 			"</div>"
 		);
@@ -3441,6 +3448,16 @@ isc.BizContentItem.addMethods({
 	},
 
 	_emptyPreviewContents: function () {
+		if (this.display === "link") {
+			return this._linkPreviewContents(
+				String(this.emptyText)
+					.replace(/&/g, "&amp;")
+					.replace(/</g, "&lt;")
+					.replace(/>/g, "&gt;")
+					.replace(/"/g, "&quot;")
+					.replace(/'/g, "&#39;"),
+			);
+		}
 		const clickableStyle = this._editable ? "cursor:pointer;" : "";
 		const clickHandler = this._editable ? ' onclick="isc.BizContentItem._openUploadFromPreview(\'' + this._previewUploadItemID + '\')"' : "";
 		return (
@@ -3498,7 +3515,7 @@ isc.BizContentItem.addMethods({
 					);
 				}
 			} else {
-				this._currentMediaKind = this.display === "video" ? "video" : "image";
+				this._currentMediaKind = this._defaultMediaKind();
 				this._preview.setContents(this._emptyPreviewContents());
 			}
 			this._syncPreviewHeight();
