@@ -28,6 +28,7 @@ import org.skyve.web.WebContext;
 
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
+import modules.admin.Contact.ContactExtension;
 import modules.admin.domain.ChangePassword;
 import modules.admin.domain.DataGroup;
 import modules.admin.domain.Group;
@@ -88,7 +89,6 @@ public class UserBizlet extends Bizlet<UserExtension> {
 	 */
 	@Override
 	public void preRerender(String source, UserExtension bean, WebContext webContext) throws Exception {
-
 		if (User.groupSelectionPropertyName.equals(source)) {
 			if (GroupSelection.newGroup.equals(bean.getGroupSelection())) {
 				bean.setNewGroup(Group.newInstance());
@@ -207,23 +207,23 @@ public class UserBizlet extends Bizlet<UserExtension> {
 	 */
 	@Override
 	public void preSave(UserExtension bean) throws Exception {
-
 		if (bean.getGeneratedPassword() != null) {
 			bean.setPasswordExpired(Boolean.TRUE);
 		}
 
-		// contact must be same datagroup as user
-		if (bean.getContact() != null) {
-			bean.getContact().setBizUserId(bean.getBizId());
-			if (bean.getDataGroup() == null) {
+		// user and contact must be visible within the user's own User-scope
+		String bizId = bean.getBizId();
+		bean.setBizUserId(bizId);
+		ContactExtension contact = bean.getContact();
+		if (contact != null) {
+			contact.setBizUserId(bizId);
+			DataGroup dataGroup = bean.getDataGroup();
+			if (dataGroup == null) {
 				bean.getContact().setBizDataGroupId(null);
 			} else {
-				bean.getContact().setBizDataGroupId(bean.getDataGroup().getBizId());
+				bean.getContact().setBizDataGroupId(dataGroup.getBizId());
 			}
 		}
-
-		// user must be saved to be visible within the users own User-scope
-		bean.setBizUserId(bean.getBizId());
 
 		// If password has changed...
 		if (bean.isPersisted() && (bean.originalValues().containsKey(User.passwordPropertyName)

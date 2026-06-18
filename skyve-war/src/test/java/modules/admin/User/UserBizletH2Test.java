@@ -19,6 +19,8 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
+import modules.admin.Contact.ContactExtension;
+import modules.admin.domain.DataGroup;
 import modules.admin.domain.Group;
 import modules.admin.domain.User;
 import modules.admin.domain.User.GroupSelection;
@@ -132,6 +134,48 @@ class UserBizletH2Test extends AbstractH2Test {
 		assertEquals(initialSize + 1, result.getGroups().size());
 	}
 
+	// ---- preSave ----
+
+	@Test
+	void preSaveSetsUserAndContactBizUserIdToUserBizId() throws Exception {
+		bean.setBizId("user-owned-id");
+		ContactExtension contact = bean.getContact();
+		assertNotNull(contact);
+		bean.setBizUserId("previous-owner");
+		contact.setBizUserId("previous-contact-owner");
+
+		bizlet.preSave(bean);
+
+		assertEquals("user-owned-id", bean.getBizUserId());
+		assertEquals("user-owned-id", contact.getBizUserId());
+	}
+
+	@Test
+	void preSaveSetsContactBizDataGroupIdFromUsersDataGroup() throws Exception {
+		ContactExtension contact = bean.getContact();
+		assertNotNull(contact);
+		DataGroup dataGroup = DataGroup.newInstance();
+		dataGroup.setBizId("data-group-id");
+		bean.setDataGroup(dataGroup);
+		contact.setBizDataGroupId("previous-data-group");
+
+		bizlet.preSave(bean);
+
+		assertEquals("data-group-id", contact.getBizDataGroupId());
+	}
+
+	@Test
+	void preSaveClearsContactBizDataGroupIdWhenUserHasNoDataGroup() throws Exception {
+		ContactExtension contact = bean.getContact();
+		assertNotNull(contact);
+		bean.setDataGroup(null);
+		contact.setBizDataGroupId("previous-data-group");
+
+		bizlet.preSave(bean);
+
+		assertThat(contact.getBizDataGroupId(), is(nullValue()));
+	}
+
 	// ---- getVariantDomainValues ----
 
 	@Test
@@ -150,7 +194,7 @@ class UserBizletH2Test extends AbstractH2Test {
 	@Test
 	void getVariantDomainValuesForHomeModuleReturnsList() throws Exception {
 		List<DomainValue> result = bizlet.getVariantDomainValues(User.homeModulePropertyName);
-		assertThat(result, is(notNullValue()));
+		assertNotNull(result);
 		assertFalse(result.isEmpty(), "Expected at least one accessible module");
 	}
 
