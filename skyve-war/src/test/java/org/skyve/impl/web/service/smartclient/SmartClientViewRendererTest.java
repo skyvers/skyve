@@ -708,7 +708,7 @@ class SmartClientViewRendererTest extends AbstractSkyveTest {
 	}
 
 	@Test
-	void renderViewWithContentUploadVideoEmitsStableDimensions() {
+	void renderViewWithContentUploadVideoUsesFluidDimensionsWhenUnsized() {
 		ContentUpload content = new ContentUpload();
 		content.setBinding("text");
 		content.setDisplay(ContentDisplay.video);
@@ -719,8 +719,8 @@ class SmartClientViewRendererTest extends AbstractSkyveTest {
 		assertTrue(code.contains("display:'video'"), "ContentUpload display: " + code);
 		assertTrue(code.contains("emptyText:'No video'"), "ContentUpload empty text: " + code);
 		assertTrue(code.contains("showMarkup:false"), "ContentUpload markup: " + code);
-		assertTrue(code.contains("width:320"), "ContentUpload video width: " + code);
-		assertTrue(code.contains("height:180"), "ContentUpload video height: " + code);
+		assertFalse(code.contains("width:320"), "ContentUpload video width: " + code);
+		assertFalse(code.contains("height:180"), "ContentUpload video height: " + code);
 	}
 
 	@Test

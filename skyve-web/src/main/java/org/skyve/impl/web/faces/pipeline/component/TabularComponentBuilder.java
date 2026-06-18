@@ -201,11 +201,6 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	public static final Integer SINGLE_ACTION_COLUMN_WIDTH_INTEGER = Integer.valueOf(60);
 	public static final String DOUBLE_ACTION_COLUMN_WIDTH = "95";
 
-	private static final Integer FORM_VIDEO_DEFAULT_PIXEL_WIDTH = Integer.valueOf(320);
-	private static final Integer FORM_VIDEO_DEFAULT_PIXEL_HEIGHT = Integer.valueOf(180);
-	private static final Integer GRID_VIDEO_DEFAULT_PIXEL_WIDTH = Integer.valueOf(160);
-	private static final Integer GRID_VIDEO_DEFAULT_PIXEL_HEIGHT = Integer.valueOf(90);
-	private static final Integer CONTENT_IMAGE_DEFAULT_PIXEL_SIZE = Integer.valueOf(200);
 	private static final String UPLOAD_CAPTURE_PROPERTY_NAME = "capture";
 
 	@Override
@@ -2356,8 +2351,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		}
 		if (ContentDisplay.video.equals(display) || auto) {
 			String videoId = String.format("%s_%s_video", id, sanitisedBinding);
-			HtmlOutputText video = contentVideo(resolveVideoWidth(content, formContext),
-												resolveVideoHeight(content, formContext),
+			HtmlOutputText video = contentVideo(resolveVideoWidth(content),
+												resolveVideoHeight(content),
 												binding,
 												videoId,
 												phoneResponsiveMedia);
@@ -2385,57 +2380,43 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	/**
-	 * Returns the configured image width or the legacy image default.
+	 * Returns the configured image width.
 	 *
 	 * @param content content widget metadata; must not be {@code null}
-	 * @return image width in pixels; never {@code null}
+	 * @return image width in pixels, or {@code null} for fluid sizing
 	 */
-	private static @Nonnull Integer resolveImageWidth(@Nonnull ContentUpload content) {
-		Integer result = content.getPixelWidth();
-		return (result == null) ? CONTENT_IMAGE_DEFAULT_PIXEL_SIZE : result;
+	private static @Nullable Integer resolveImageWidth(@Nonnull ContentUpload content) {
+		return content.getPixelWidth();
 	}
 
 	/**
-	 * Returns the configured image height or the legacy image default.
+	 * Returns the configured image height.
 	 *
 	 * @param content content widget metadata; must not be {@code null}
-	 * @return image height in pixels; never {@code null}
+	 * @return image height in pixels, or {@code null} for fluid sizing
 	 */
-	private static @Nonnull Integer resolveImageHeight(@Nonnull ContentUpload content) {
-		Integer result = content.getPixelHeight();
-		return (result == null) ? CONTENT_IMAGE_DEFAULT_PIXEL_SIZE : result;
+	private static @Nullable Integer resolveImageHeight(@Nonnull ContentUpload content) {
+		return content.getPixelHeight();
 	}
 
 	/**
-	 * Returns the configured video width or the default for the current render
-	 * context.
+	 * Returns the configured video width.
 	 *
 	 * @param content content widget metadata; must not be {@code null}
-	 * @param formContext whether the widget is rendered in a form rather than a grid
-	 * @return video width in pixels; never {@code null}
+	 * @return video width in pixels, or {@code null} for fluid sizing
 	 */
-	private static @Nonnull Integer resolveVideoWidth(@Nonnull ContentUpload content, boolean formContext) {
-		Integer result = content.getPixelWidth();
-		if (result == null) {
-			result = formContext ? FORM_VIDEO_DEFAULT_PIXEL_WIDTH : GRID_VIDEO_DEFAULT_PIXEL_WIDTH;
-		}
-		return result;
+	private static @Nullable Integer resolveVideoWidth(@Nonnull ContentUpload content) {
+		return content.getPixelWidth();
 	}
 
 	/**
-	 * Returns the configured video height or the default for the current render
-	 * context.
+	 * Returns the configured video height.
 	 *
 	 * @param content content widget metadata; must not be {@code null}
-	 * @param formContext whether the widget is rendered in a form rather than a grid
-	 * @return video height in pixels; never {@code null}
+	 * @return video height in pixels, or {@code null} for fluid sizing
 	 */
-	private static @Nonnull Integer resolveVideoHeight(@Nonnull ContentUpload content, boolean formContext) {
-		Integer result = content.getPixelHeight();
-		if (result == null) {
-			result = formContext ? FORM_VIDEO_DEFAULT_PIXEL_HEIGHT : GRID_VIDEO_DEFAULT_PIXEL_HEIGHT;
-		}
-		return result;
+	private static @Nullable Integer resolveVideoHeight(@Nonnull ContentUpload content) {
+		return content.getPixelHeight();
 	}
 
 	/**
@@ -2460,14 +2441,14 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	/**
 	 * Creates a native-video output fragment bound to the protected content URL.
 	 *
-	 * @param pixelWidth video width in pixels; must not be {@code null}
-	 * @param pixelHeight video height in pixels; must not be {@code null}
+	 * @param pixelWidth video width in pixels, or {@code null} for fluid sizing
+	 * @param pixelHeight video height in pixels, or {@code null} for fluid sizing
 	 * @param binding content binding; must not be {@code null}
 	 * @param videoId stable DOM id for callback refresh; must not be {@code null}
 	 * @return output text containing the video markup expression; never {@code null}
 	 */
-	private @Nonnull HtmlOutputText contentVideo(@Nonnull Integer pixelWidth,
-													@Nonnull Integer pixelHeight,
+	private @Nonnull HtmlOutputText contentVideo(@Nullable Integer pixelWidth,
+													@Nullable Integer pixelHeight,
 													@Nonnull String binding,
 													@Nonnull String videoId,
 													boolean phoneResponsiveMedia) {
@@ -2478,9 +2459,14 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		if (phoneResponsiveMedia) {
 			expression.append(" class=\"skyveContentResponsiveVideo\"");
 		}
-		expression.append(" style=\"width:");
-		expression.append(pixelWidth).append("px;height:").append(pixelHeight);
-		expression.append("px;border:1px solid #d6dee8\">");
+		expression.append(" style=\"");
+		if (pixelWidth != null) {
+			expression.append("width:").append(pixelWidth).append("px;");
+		}
+		if (pixelHeight != null) {
+			expression.append("height:").append(pixelHeight).append("px;");
+		}
+		expression.append("border:1px solid #d6dee8\">");
 		expression.append("#{empty ").append(managedBeanName).append(".currentBean['").append(binding);
 		expression.append("'] ? '' : '<video controls preload=\"metadata\" style=\"width:100%;height:100%;object-fit:contain\" src=\"'.concat(");
 		expression.append(managedBeanName).append(".getContentUrl('").append(binding);

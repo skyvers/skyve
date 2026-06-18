@@ -23,11 +23,6 @@ import org.skyve.util.Util;
  * SmartClient data-grid field definition.
  */
 public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefinition {
-	private static final int CONTENT_IMAGE_DEFAULT_PIXEL_WIDTH = 200;
-	private static final int CONTENT_IMAGE_DEFAULT_PIXEL_HEIGHT = 200;
-	private static final int GRID_CONTENT_VIDEO_DEFAULT_PIXEL_WIDTH = 160;
-	private static final int GRID_CONTENT_VIDEO_DEFAULT_PIXEL_HEIGHT = 90;
-
 	protected boolean editable;
 
 	// for list grids, we need to convert the defaultValue into a JavaScript expression that can be evaluated on the client side, so we store it separately here.
@@ -205,10 +200,10 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 	private String createContentUploadFormatter(ContentUpload content) {
 		StringBuilder result = new StringBuilder(512);
 		ContentDisplay display = content.getResolvedDisplay();
-		int imageWidth = resolveImageWidth(content);
-		int imageHeight = resolveImageHeight(content);
-		int videoWidth = resolveVideoWidth(content);
-		int videoHeight = resolveVideoHeight(content);
+		Integer imageWidth = content.getPixelWidth();
+		Integer imageHeight = content.getPixelHeight();
+		Integer videoWidth = content.getPixelWidth();
+		Integer videoHeight = content.getPixelHeight();
 		String binding = BindUtil.unsanitiseBinding(name);
 		String companion = '_' + name;
 		result.append(",display:'").append(display).append('\'');
@@ -226,13 +221,35 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 		}
 		result.append("var u='content?_n='+v+'&_doc='+rec.bizModule+'.'+rec.bizDocument+'&_b=").append(binding).append("';");
 		result.append("if(k==='image'){return '<a href=\"'+u+'\" target=\"_blank\"><img src=\"'+u+'");
-		result.append("&_w=").append(imageWidth).append("&_h=").append(imageHeight);
-		result.append("\" style=\"width:").append(imageWidth).append("px;height:").append(imageHeight);
-		result.append("px;object-fit:contain\"/></a>'}");
-		result.append("if(k==='video'){return '<video controls preload=\"metadata\" src=\"'+u+'\" style=\"width:");
-		result.append(videoWidth).append("px;height:").append(videoHeight).append("px;object-fit:contain\"></video>'}");
+		if (imageWidth != null) {
+			result.append("&_w=").append(imageWidth);
+		}
+		if (imageHeight != null) {
+			result.append("&_h=").append(imageHeight);
+		}
+		result.append("\" style=\"");
+		appendMediaStyle(result, imageWidth, imageHeight, "1 / 1");
+		result.append("object-fit:contain\"/></a>'}");
+		result.append("if(k==='video'){return '<video controls preload=\"metadata\" src=\"'+u+'\" style=\"");
+		appendMediaStyle(result, videoWidth, videoHeight, "16 / 9");
+		result.append("object-fit:contain\"></video>'}");
 		result.append("return '<a href=\"'+u+'\" target=\"_blank\">Content</a>'}");
 		return result.toString();
+	}
+
+	private static void appendMediaStyle(StringBuilder result, Integer width, Integer height, String aspectRatio) {
+		if (width == null) {
+			result.append("width:100%;");
+		}
+		else {
+			result.append("width:").append(width).append("px;");
+		}
+		if (height == null) {
+			result.append("height:auto;aspect-ratio:").append(aspectRatio).append(';');
+		}
+		else {
+			result.append("height:").append(height).append("px;");
+		}
 	}
 
 	private static String contentEmptyText(ContentDisplay display) {
@@ -255,23 +272,4 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 		return ! ContentDisplay.video.equals(display);
 	}
 
-	private static int resolveImageWidth(ContentUpload content) {
-		Integer pixelWidth = content.getPixelWidth();
-		return (pixelWidth == null) ? CONTENT_IMAGE_DEFAULT_PIXEL_WIDTH : pixelWidth.intValue();
-	}
-
-	private static int resolveImageHeight(ContentUpload content) {
-		Integer pixelHeight = content.getPixelHeight();
-		return (pixelHeight == null) ? CONTENT_IMAGE_DEFAULT_PIXEL_HEIGHT : pixelHeight.intValue();
-	}
-	
-	private static int resolveVideoWidth(ContentUpload content) {
-		Integer pixelWidth = content.getPixelWidth();
-		return (pixelWidth == null) ? GRID_CONTENT_VIDEO_DEFAULT_PIXEL_WIDTH : pixelWidth.intValue();
-	}
-	
-	private static int resolveVideoHeight(ContentUpload content) {
-		Integer pixelHeight = content.getPixelHeight();
-		return (pixelHeight == null) ? GRID_CONTENT_VIDEO_DEFAULT_PIXEL_HEIGHT : pixelHeight.intValue();
-	}
 }

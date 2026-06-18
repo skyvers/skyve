@@ -136,12 +136,6 @@ import jakarta.annotation.Nullable;
 public class SmartClientViewRenderer extends ViewRenderer {
 	private static final Integer DEFAULT_MIN_HEIGHT_IN_PIXELS = Integer.valueOf(170);
 	private static final Integer DEFAULT_TAB_MIN_HEIGHT_IN_PIXELS = Integer.valueOf(200);
-	private static final int CONTENT_IMAGE_DEFAULT_PIXEL_WIDTH = 200;
-	private static final int CONTENT_IMAGE_DEFAULT_PIXEL_HEIGHT = 200;
-	private static final int FORM_CONTENT_VIDEO_DEFAULT_PIXEL_WIDTH = 320;
-	private static final int FORM_CONTENT_VIDEO_DEFAULT_PIXEL_HEIGHT = 180;
-	private static final int GRID_CONTENT_VIDEO_DEFAULT_PIXEL_WIDTH = 160;
-	private static final int GRID_CONTENT_VIDEO_DEFAULT_PIXEL_HEIGHT = 90;
 	private static final String UPLOAD_CAPTURE_PROPERTY_NAME = "capture";
 
 	private boolean noCreateView;
@@ -2218,7 +2212,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		disabled(content.getDisabledConditionName(), code);
 		invisible(content.getInvisibleConditionName(), code);
 		editable(content.getEditable(), code);
-		appendContentProperties(content, display, true, code);
+		appendContentProperties(content, display, code);
 	}
 
 	/**
@@ -2241,12 +2235,10 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 *
 	 * @param content The content-upload metadata.
 	 * @param display The resolved presentation mode.
-	 * @param formContext Whether the widget is being rendered in a form rather than a grid.
 	 * @param builder The JavaScript output buffer receiving the properties.
 	 */
 	private static void appendContentProperties(@Nonnull ContentUpload content,
 													@Nonnull ContentDisplay display,
-													boolean formContext,
 													@Nonnull StringBuilder builder) {
 		builder.append("display:'").append(display).append("',");
 		builder.append("capture:'").append(content.getResolvedCapture()).append("',");
@@ -2255,7 +2247,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			builder.append("companion:'").append(contentCompanionName(content.getBinding())).append("',");
 		}
 		builder.append("showMarkup:").append(isContentMarkupAllowed(content, display)).append(',');
-		appendResolvedContentSize(content, display, formContext, builder);
+		appendResolvedContentSize(content, display, builder);
 	}
 
 	private static @Nonnull String contentEmptyText(@Nonnull ContentDisplay display) {
@@ -2290,67 +2282,34 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 *
 	 * @param content The content-upload metadata.
 	 * @param display The resolved presentation mode.
-	 * @param formContext Whether the widget is being rendered in a form rather than a grid.
 	 * @param builder The JavaScript output buffer receiving the size properties.
 	 */
 	private static void appendResolvedContentSize(@Nonnull ContentUpload content,
 													@Nonnull ContentDisplay display,
-													boolean formContext,
 													@Nonnull StringBuilder builder) {
 		if (ContentDisplay.video.equals(display)) {
-			builder.append("width:").append(resolveContentVideoWidth(content, formContext)).append(',');
-			builder.append("height:").append(resolveContentVideoHeight(content, formContext)).append(',');
+			appendExplicitContentSize(content, builder);
 		}
 		else if (ContentDisplay.image.equals(display) || ContentDisplay.auto.equals(display)) {
-			builder.append("width:").append(resolveContentImageWidth(content)).append(',');
-			builder.append("height:").append(resolveContentImageHeight(content)).append(',');
+			appendExplicitContentSize(content, builder);
 		}
 	}
 
 	/**
-	 * Resolves the image preview width to match the PrimeFaces content-image fallback.
+	 * Appends explicit SmartClient width and height properties.
 	 *
 	 * @param content The content-upload metadata.
-	 * @return The metadata width, or the PrimeFaces default.
+	 * @param builder The JavaScript output buffer receiving the size properties.
 	 */
-	private static int resolveContentImageWidth(@Nonnull ContentUpload content) {
-		Integer result = content.getPixelWidth();
-		return (result == null) ? CONTENT_IMAGE_DEFAULT_PIXEL_WIDTH : result.intValue();
-	}
-
-	/**
-	 * Resolves the image preview height to match the PrimeFaces content-image fallback.
-	 *
-	 * @param content The content-upload metadata.
-	 * @return The metadata height, or the PrimeFaces default.
-	 */
-	private static int resolveContentImageHeight(@Nonnull ContentUpload content) {
-		Integer result = content.getPixelHeight();
-		return (result == null) ? CONTENT_IMAGE_DEFAULT_PIXEL_HEIGHT : result.intValue();
-	}
-
-	/**
-	 * Resolves the video preview width for form and compact grid-style contexts.
-	 *
-	 * @param content The content-upload metadata.
-	 * @param formContext Whether the widget is being rendered in a form rather than a grid.
-	 * @return The metadata width, or the SmartClient default for the context.
-	 */
-	private static int resolveContentVideoWidth(@Nonnull ContentUpload content, boolean formContext) {
-		Integer result = content.getPixelWidth();
-		return (result == null) ? (formContext ? FORM_CONTENT_VIDEO_DEFAULT_PIXEL_WIDTH : GRID_CONTENT_VIDEO_DEFAULT_PIXEL_WIDTH) : result.intValue();
-	}
-
-	/**
-	 * Resolves the video preview height for form and compact grid-style contexts.
-	 *
-	 * @param content The content-upload metadata.
-	 * @param formContext Whether the widget is being rendered in a form rather than a grid.
-	 * @return The metadata height, or the SmartClient default for the context.
-	 */
-	private static int resolveContentVideoHeight(@Nonnull ContentUpload content, boolean formContext) {
-		Integer result = content.getPixelHeight();
-		return (result == null) ? (formContext ? FORM_CONTENT_VIDEO_DEFAULT_PIXEL_HEIGHT : GRID_CONTENT_VIDEO_DEFAULT_PIXEL_HEIGHT) : result.intValue();
+	private static void appendExplicitContentSize(@Nonnull ContentUpload content, @Nonnull StringBuilder builder) {
+		Integer width = content.getPixelWidth();
+		if (width != null) {
+			builder.append("width:").append(width).append(',');
+		}
+		Integer height = content.getPixelHeight();
+		if (height != null) {
+			builder.append("height:").append(height).append(',');
+		}
 	}
 
 	/**

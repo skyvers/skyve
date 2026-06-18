@@ -3282,6 +3282,17 @@ isc.BizContentItem.addProperties({
 	shouldSaveValue: true, // This is an editable data item
 });
 
+isc.BizContentItem.addClassMethods({
+	_previewUploadItems: {},
+
+	_openUploadFromPreview: function (itemID) {
+		const item = this._previewUploadItems[itemID];
+		if (item) {
+			item._openUploadFromPreview();
+		}
+	},
+});
+
 isc.BizContentItem.addMethods({
 	/**
 	 * Initializes the `BizContentItem` by creating preview and optional upload controls.
@@ -3299,23 +3310,39 @@ isc.BizContentItem.addMethods({
 		this.companion = config.companion;
 		this.showMarkup = config.showMarkup || false;
 		this.emptyText = config.emptyText || "No content";
-		this._previewWidth = config.width || (this.display === "video" ? 320 : "100%");
-		this._previewHeight = config.height || (this.display === "video" ? 180 : 25);
+		this._editable = !!config.editable;
+		this._imageIntent = this.display === "image";
+		this._previewFixedHeight = config.height != null;
+		this._previewWidth = config.width && config.width !== "*" ? config.width : "100%";
+		this._previewHeight = config.height || null;
+		this._previewCanvasWidth = config.width || (config.editable ? "*" : "100%");
+		this._currentMediaKind = this.display === "video" ? "video" : "image";
+		this._previewUploadItemID = this.getID();
+		isc.BizContentItem._previewUploadItems[this._previewUploadItemID] = this;
+		const contentItem = this;
 		this._preview = isc.HTMLFlow.create({
 			contents: "",
-			width: this._previewWidth,
-			height: this._previewHeight,
+			width: this._previewCanvasWidth,
+			height: this._previewHeight || 1,
+			overflow: "visible",
+			drawn: function () {
+				this.Super("drawn", arguments);
+				contentItem._syncPreviewHeight();
+			},
+			resized: function () {
+				this.Super("resized", arguments);
+				contentItem._syncPreviewHeight();
+			},
 		});
 		this._preview.setContents(this._emptyPreviewContents());
 
 		if (config.editable) {
-			const imageIntent = this.display === "image";
 			this.canvas = isc.HLayout.create({
 				defaultLayoutAlign: "center",
 				members: [
 					this._preview,
 					isc.LayoutSpacer.create({ width: 5 }),
-					isc.BizUtil.createUploadButton(this, imageIntent, this.showMarkup),
+					isc.BizUtil.createUploadButton(this, this._imageIntent, this.showMarkup),
 				],
 			});
 		} else {
@@ -3357,22 +3384,72 @@ isc.BizContentItem.addMethods({
 	},
 
 	_linkPreviewContents: function (contents) {
-		const height = this._preview ? this._preview.getHeight() : this._previewHeight;
 		return (
-			'<div style="line-height:' +
-			height +
-			'px;vertical-align:middle;">' +
+			'<div style="align-items:center;display:flex;min-height:1.6rem;vertical-align:middle;">' +
 			contents +
 			"</div>"
 		);
 	},
 
+	_openUploadFromPreview: function () {
+		if (this._editable && !this.isDisabled()) {
+			isc.BizUtil.openContentUpload(this, this._imageIntent);
+		}
+	},
+
+	destroy: function () {
+		delete isc.BizContentItem._previewUploadItems[this._previewUploadItemID];
+		return this.Super("destroy", arguments);
+	},
+
+	_syncPreviewHeight: function () {
+		if (this._previewFixedHeight || !this._preview) {
+			return;
+		}
+
+		const kind = this._currentMediaKind || this._resolveMediaKind();
+		if (kind === "link") {
+			this._preview.setHeight(25);
+			return;
+		}
+
+		const width = this._preview.getVisibleWidth ? this._preview.getVisibleWidth() : this._preview.getWidth();
+		if (!width || width < 1) {
+			return;
+		}
+
+		const ratio = kind === "video" ? 9 / 16 : 1;
+		const height = Math.max(25, Math.round(width * ratio));
+		if (this._preview.getHeight() !== height) {
+			this._preview.setHeight(height);
+		}
+	},
+
+	_previewMediaStyle: function (aspectRatio) {
+		let style = "box-sizing:border-box;";
+		if (this._previewWidth) {
+			style += typeof this._previewWidth === "number" ? "width:" + this._previewWidth + "px;" : "width:" + this._previewWidth + ";";
+		} else {
+			style += "width:100%;";
+		}
+		if (this._previewHeight) {
+			style += typeof this._previewHeight === "number" ? "height:" + this._previewHeight + "px;" : "height:" + this._previewHeight + ";";
+		} else {
+			style += "height:auto;aspect-ratio:" + aspectRatio + ";";
+		}
+		return style;
+	},
+
 	_emptyPreviewContents: function () {
-		const height = this._preview ? this._preview.getHeight() : this._previewHeight;
+		const clickableStyle = this._editable ? "cursor:pointer;" : "";
+		const clickHandler = this._editable ? ' onclick="isc.BizContentItem._openUploadFromPreview(\'' + this._previewUploadItemID + '\')"' : "";
 		return (
-			'<div style="align-items:center;background:#f8fafc;border:1px dashed #cbd5e1;box-sizing:border-box;color:#6b7280;display:flex;flex-direction:column;height:' +
-			height +
-			'px;justify-content:center;text-align:center;width:100%;">' +
+			'<div style="align-items:center;background:#f8fafc;border:1px dashed #cbd5e1;color:#6b7280;display:flex;flex-direction:column;justify-content:center;text-align:center;' +
+			clickableStyle +
+			this._previewMediaStyle(this.display === "video" ? "16 / 9" : "1 / 1") +
+			'min-height:4rem;"' +
+			clickHandler +
+			">" +
 			'<span style="border:2px solid #cbd5e1;border-radius:4px;box-sizing:border-box;display:block;height:1.8rem;margin-bottom:0.35rem;position:relative;width:2.4rem;">' +
 			'<span style="background:#cbd5e1;border-radius:50%;display:block;height:0.35rem;position:absolute;right:0.35rem;top:0.35rem;width:0.35rem;"></span>' +
 			'<span style="border-bottom:0.55rem solid #cbd5e1;border-left:0.55rem solid transparent;border-right:0.55rem solid transparent;bottom:0.25rem;display:block;height:0;left:0.35rem;position:absolute;width:0;"></span>' +
@@ -3399,19 +3476,21 @@ isc.BizContentItem.addMethods({
 			if (newValue) {
 				const url = this._contentUrl(newValue);
 				const kind = this._resolveMediaKind();
+				this._currentMediaKind = kind;
 				if (kind === "image") {
-					const imageUrl =
-						url +
-						"&_w=" +
-						this._preview.getWidth() +
-						"&_h=" +
-						this._preview.getHeight();
+					let imageUrl = url;
+					if (typeof this._previewWidth === "number") {
+						imageUrl += "&_w=" + this._previewWidth;
+					}
+					if (typeof this._previewHeight === "number") {
+						imageUrl += "&_h=" + this._previewHeight;
+					}
 					this._preview.setContents(
-						`<a href="${url}" target="_blank"><img src="${imageUrl}" style="border:1px solid #bfbfbf;box-sizing:border-box;width:${this._preview.getWidth()}px;height:${this._preview.getHeight()}px;object-fit:contain"/></a>`,
+						`<a href="${url}" target="_blank"><img src="${imageUrl}" style="border:1px solid #bfbfbf;${this._previewMediaStyle("1 / 1")}object-fit:contain"/></a>`,
 					);
 				} else if (kind === "video") {
 					this._preview.setContents(
-						`<video controls preload="metadata" src="${url}" style="width:${this._preview.getWidth()}px;height:${this._preview.getHeight()}px;object-fit:contain"></video>`,
+						`<video controls preload="metadata" src="${url}" style="${this._previewMediaStyle("16 / 9")}object-fit:contain"></video>`,
 					);
 				} else {
 					this._preview.setContents(
@@ -3419,8 +3498,10 @@ isc.BizContentItem.addMethods({
 					);
 				}
 			} else {
+				this._currentMediaKind = this.display === "video" ? "video" : "image";
 				this._preview.setContents(this._emptyPreviewContents());
 			}
+			this._syncPreviewHeight();
 		}
 
 		return this.Super("setValue", [newValue]);

@@ -433,6 +433,8 @@ isc.BizUtil.addClassMethods({
 	 * @param {string} splitTooltip - the tooltip for the split button.
 	 * @param {Object} splitTarget - the target for the split button.
 	 * @param {Array} splitItems - the menu items for the split button.
+	 * @param {number|string} [width] - optional width for the surrounding layout.
+	 * @param {string} [align='right'] - member alignment for the surrounding layout.
 	 * @returns {Object} - the created split button.
 	 */
 	createSplitButton: function (
@@ -444,11 +446,14 @@ isc.BizUtil.addClassMethods({
 		splitTooltip,
 		splitTarget,
 		splitItems,
+		width,
+		align,
 	) {
 		return isc.HLayout.create({
-			align: "right",
+			align: align || "right",
 			height: 1,
 			membersMargin: 1,
+			width: width,
 			members: [
 				isc.IButton.create({
 					autoFit: true,
@@ -648,6 +653,8 @@ isc.BizUtil.addClassMethods({
 			"Other Options",
 			null,
 			menu,
+			85,
+			"left",
 		);
 	},
 

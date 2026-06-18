@@ -1470,14 +1470,14 @@ class TabularComponentBuilderTest {
 		verify(video).setId("contentGrid_doc_video_video_output");
 		ArgumentCaptor<String> expressions = ArgumentCaptor.forClass(String.class);
 		verify(mockExpressionFactory).createValueExpression(any(ELContext.class), expressions.capture(), eq(String.class));
-		assertTrue(expressions.getValue().contains("<div id=\"contentGrid_doc_video_video\" class=\"skyveContentResponsiveVideo\" style=\"width:320px;height:180px;border:1px solid #d6dee8\">"));
+		assertTrue(expressions.getValue().contains("<div id=\"contentGrid_doc_video_video\" class=\"skyveContentResponsiveVideo\" style=\"border:1px solid #d6dee8\">"));
 		assertTrue(expressions.getValue().contains("<video controls preload=\"metadata\" style=\"width:100%;height:100%;object-fit:contain\""));
 		assertTrue(expressions.getValue().contains(" ? '' : '<video"));
 	}
 
 	@SuppressWarnings("static-method")
 	@Test
-	void testContentUploadVideoModeUsesGridDefaultsOutsideForm() {
+	void testContentUploadVideoModeUsesFluidDimensionsOutsideFormWhenUnsized() {
 		clearInvocations(mockExpressionFactory);
 
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -1503,7 +1503,7 @@ class TabularComponentBuilderTest {
 
 		ArgumentCaptor<String> expressions = ArgumentCaptor.forClass(String.class);
 		verify(mockExpressionFactory).createValueExpression(any(ELContext.class), expressions.capture(), eq(String.class));
-		assertTrue(expressions.getValue().contains("width:160px;height:90px"));
+		assertTrue(expressions.getValue().contains("class=\"skyveContentResponsiveVideo\" style=\"border:1px solid #d6dee8\""));
 	}
 
 	@SuppressWarnings("static-method")
@@ -1559,7 +1559,7 @@ class TabularComponentBuilderTest {
 		ArgumentCaptor<String> styleClassExpressions = ArgumentCaptor.forClass(String.class);
 		verify(mockExpressionFactory, atLeastOnce()).createValueExpression(any(ELContext.class), styleClassExpressions.capture(), eq(String.class));
 		assertTrue(styleClassExpressions.getAllValues().contains("#{(empty skyve.getContentMediaKind('doc.attachment') or skyve.getContentMediaKind('doc.attachment') eq 'link') ? '' : 'skyveContentHidden'}"));
-		verify(mockExpressionFactory).createValueExpression("border:1px solid #d6dee8;position:relative;overflow:hidden;width:200px;height:200px", String.class);
+		verify(mockExpressionFactory).createValueExpression("border:1px solid #d6dee8;position:relative;overflow:hidden;", String.class);
 		assertTrue(styleClassExpressions.getAllValues().contains("#{(empty skyve.currentBean['doc.attachment']) ? 'skyveContentPreview skyveContentResponsiveImage skyveContentEmpty' : 'skyveContentPreview skyveContentResponsiveImage'}"));
 		assertTrue(styleClassExpressions.getAllValues().contains("#{(empty skyve.currentBean['doc.attachment']) ? 'skyveContentHidden' : ''}"));
 		assertTrue(styleClassExpressions.getAllValues().contains("#{skyve.getContentMediaKind('doc.attachment') eq 'image' ? '' : 'skyveContentHidden'}"));
