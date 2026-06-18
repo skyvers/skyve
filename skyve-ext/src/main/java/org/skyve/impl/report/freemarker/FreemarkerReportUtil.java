@@ -60,6 +60,7 @@ import freemarker.cache.OrMatcher;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.cache.TemplateLoader;
 import freemarker.core.HTMLOutputFormat;
+import freemarker.core.TemplateClassResolver;
 import freemarker.core.TemplateConfiguration;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -85,6 +86,12 @@ public final class FreemarkerReportUtil {
 		// version (here 2.3.29) do you want to apply the fixes that are not 100%
 		// backward-compatible. See the Configuration JavaDoc for details.
 		cfg = new Configuration(Configuration.VERSION_2_3_29);
+
+		// Security: restrict the ?new built-in so attacker-controlled report templates
+		// (admin.ReportTemplate documents, editable by the BasicUser role) cannot
+		// instantiate arbitrary classes such as freemarker.template.utility.Execute
+		// and achieve remote code execution.
+		cfg.setNewBuiltinClassResolver(TemplateClassResolver.ALLOWS_NOTHING_RESOLVER);
 
 		// Specify the source where the template files come from
 		ClassLoader cl = Thread.currentThread().getContextClassLoader();
