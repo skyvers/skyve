@@ -22,8 +22,8 @@ import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.menu.MenuGroup;
 import org.skyve.metadata.module.menu.MenuItem;
 import org.skyve.metadata.module.menu.MenuRenderer;
-import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
+import org.slf4j.Logger;
 
 /*
  * TODO convert this away from string concatenation so
@@ -205,7 +205,7 @@ public class FlutterRouting {
 										modelName,
 										itemDocument.getListModel(customer, modelName, false));
 				}
-				else if (item.getQueryName() != null) { // query driven
+				else if (itemQueryName != null) { // query driven
 					component.setQuery(menuModule,
 										itemDocument,
 										menuModule.getNullSafeMetaDataQuery(itemQueryName));

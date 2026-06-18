@@ -3,6 +3,7 @@ package org.skyve.metadata.module.menu;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.skyve.impl.metadata.module.menu.CalendarItem;
@@ -19,6 +20,9 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Util;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Base class for rendering a Skyve module menu tree for a specific UX/UI variant.
@@ -55,9 +59,9 @@ import org.skyve.util.Util;
  */
 public class MenuRenderer {
 	/** The UX/UI variant name to filter by, or {@code null} for no filtering. */
-	protected String uxui;
+	protected @Nullable String uxui;
 	/** The name of the module whose menu should be rendered in the open/selected state. */
-	protected String selectedModuleName;
+	protected @Nullable String selectedModuleName;
 
 	/**
 	 * Constructs a renderer for the given UX/UI variant and selected module.
@@ -66,7 +70,7 @@ public class MenuRenderer {
 	 * @param selectedModuleName  the name of the module to render as selected/open;
 	 *                            {@code null} causes the first module with non-empty items to be opened
 	 */
-	protected MenuRenderer(String uxui, String selectedModuleName) {
+	protected MenuRenderer(@Nullable String uxui, @Nullable String selectedModuleName) {
 		this.uxui = uxui;
 		this.selectedModuleName = selectedModuleName;
 	}
@@ -81,9 +85,9 @@ public class MenuRenderer {
 	 * @param menuModule  the module that owns this menu; never {@code null}
 	 * @param open        {@code true} if this module's menu should be initially expanded
 	 */
-	public void renderModuleMenu(@SuppressWarnings("unused") Menu menu,
-									@SuppressWarnings("unused") Module menuModule,
-									@SuppressWarnings("unused") boolean open) {
+	public void renderModuleMenu(@Nonnull Menu menu,
+									@Nonnull Module menuModule,
+									boolean open) {
 		// nothing to do
 	}
 	
@@ -96,8 +100,8 @@ public class MenuRenderer {
 	 * @param menu        the menu whose root is being rendered; never {@code null}
 	 * @param menuModule  the module that owns this menu; never {@code null}
 	 */
-	public void renderMenuRoot(@SuppressWarnings("unused") Menu menu,
-								@SuppressWarnings("unused") Module menuModule) {
+	public void renderMenuRoot(@Nonnull Menu menu,
+								@Nonnull Module menuModule) {
 		// nothing to do
 	}
 	
@@ -110,8 +114,8 @@ public class MenuRenderer {
 	 * @param group       the group being opened; never {@code null}
 	 * @param menuModule  the module that owns this menu; never {@code null}
 	 */
-	public void renderMenuGroup(@SuppressWarnings("unused") MenuGroup group,
-									@SuppressWarnings("unused") Module menuModule) {
+	public void renderMenuGroup(@Nonnull MenuGroup group,
+									@Nonnull Module menuModule) {
 		// nothing to do
 	}
 	
@@ -131,13 +135,13 @@ public class MenuRenderer {
 	 * @param icon16          the document's 16-pixel icon path, or {@code null}
 	 * @param iconStyleClass  the document's icon CSS class, or {@code null}
 	 */
-	public void renderTreeItem(@SuppressWarnings("unused") TreeItem item,
-								@SuppressWarnings("unused") Module menuModule,
-								@SuppressWarnings("unused") Module itemModule,
-								@SuppressWarnings("unused") Document itemDocument,
-								@SuppressWarnings("unused") String itemQueryName,
-								@SuppressWarnings("unused") String icon16,
-								@SuppressWarnings("unused") String iconStyleClass) {
+	public void renderTreeItem(@Nonnull TreeItem item,
+								@Nonnull Module menuModule,
+								@Nonnull Module itemModule,
+								@Nonnull Document itemDocument,
+								@Nullable String itemQueryName,
+								@Nullable String icon16,
+								@Nullable String iconStyleClass) {
 		// nothing to do
 	}
 	
@@ -156,13 +160,13 @@ public class MenuRenderer {
 	 * @param icon16          the document's 16-pixel icon path, or {@code null}
 	 * @param iconStyleClass  the document's icon CSS class, or {@code null}
 	 */
-	public void renderListItem(@SuppressWarnings("unused") ListItem item,
-								@SuppressWarnings("unused") Module menuModule,
-								@SuppressWarnings("unused") Module itemModule,
-								@SuppressWarnings("unused") Document itemDocument,
-								@SuppressWarnings("unused") String itemQueryName,
-								@SuppressWarnings("unused") String icon16,
-								@SuppressWarnings("unused") String iconStyleClass) {
+	public void renderListItem(@Nonnull ListItem item,
+								@Nonnull Module menuModule,
+								@Nonnull Module itemModule,
+								@Nonnull Document itemDocument,
+								@Nullable String itemQueryName,
+								@Nullable String icon16,
+								@Nullable String iconStyleClass) {
 		// nothing to do
 	}
 	
@@ -181,13 +185,13 @@ public class MenuRenderer {
 	 * @param icon16          the document's 16-pixel icon path, or {@code null}
 	 * @param iconStyleClass  the document's icon CSS class, or {@code null}
 	 */
-	public void renderCalendarItem(@SuppressWarnings("unused") CalendarItem item,
-									@SuppressWarnings("unused") Module menuModule,
-									@SuppressWarnings("unused") Module itemModule,
-									@SuppressWarnings("unused") Document itemDocument,
-									@SuppressWarnings("unused") String itemQueryName,
-									@SuppressWarnings("unused") String icon16,
-									@SuppressWarnings("unused") String iconStyleClass) {
+	public void renderCalendarItem(@Nonnull CalendarItem item,
+									@Nonnull Module menuModule,
+									@Nonnull Module itemModule,
+									@Nonnull Document itemDocument,
+									@Nullable String itemQueryName,
+									@Nullable String icon16,
+									@Nullable String iconStyleClass) {
 		// nothing to do
 	}
 	
@@ -206,13 +210,13 @@ public class MenuRenderer {
 	 * @param icon16          the document's 16-pixel icon path, or {@code null}
 	 * @param iconStyleClass  the document's icon CSS class, or {@code null}
 	 */
-	public void renderMapItem(@SuppressWarnings("unused") MapItem item,
-								@SuppressWarnings("unused") Module menuModule,
-								@SuppressWarnings("unused") Module itemModule,
-								@SuppressWarnings("unused") Document itemDocument,
-								@SuppressWarnings("unused") String itemQueryName,
-								@SuppressWarnings("unused") String icon16,
-								@SuppressWarnings("unused") String iconStyleClass) {
+	public void renderMapItem(@Nonnull MapItem item,
+								@Nonnull Module menuModule,
+								@Nonnull Module itemModule,
+								@Nonnull Document itemDocument,
+								@Nullable String itemQueryName,
+								@Nullable String icon16,
+								@Nullable String iconStyleClass) {
 		// nothing to do
 	}
 	
@@ -230,12 +234,12 @@ public class MenuRenderer {
 	 * @param icon16          the document's 16-pixel icon path, or {@code null}
 	 * @param iconStyleClass  the document's icon CSS class, or {@code null}
 	 */
-	public void renderEditItem(@SuppressWarnings("unused") EditItem item,
-								@SuppressWarnings("unused") Module menuModule,
-								@SuppressWarnings("unused") Module itemModule,
-								@SuppressWarnings("unused") Document itemDocument,
-								@SuppressWarnings("unused") String icon16,
-								@SuppressWarnings("unused") String iconStyleClass) {
+	public void renderEditItem(@Nonnull EditItem item,
+								@Nonnull Module menuModule,
+								@Nonnull Module itemModule,
+								@Nonnull Document itemDocument,
+								@Nullable String icon16,
+								@Nullable String iconStyleClass) {
 		// nothing to do
 	}
 	
@@ -251,10 +255,10 @@ public class MenuRenderer {
 	 * @param relative      {@code true} if the link is context-relative, {@code false} if absolute
 	 * @param absoluteHref  the fully resolved href to use in navigation; never {@code null}
 	 */
-	public void renderLinkItem(@SuppressWarnings("unused") LinkItem item,
-								@SuppressWarnings("unused") Module menuModule,
-								@SuppressWarnings("unused") boolean relative,
-								@SuppressWarnings("unused") String absoluteHref) {
+	public void renderLinkItem(@Nonnull LinkItem item,
+								@Nonnull Module menuModule,
+								boolean relative,
+								@Nonnull String absoluteHref) {
 		// nothing to do
 	}
 
@@ -267,8 +271,8 @@ public class MenuRenderer {
 	 * @param group       the group that was just rendered; never {@code null}
 	 * @param menuModule  the module that owns this menu; never {@code null}
 	 */
-	public void renderedMenuGroup(@SuppressWarnings("unused") MenuGroup group,
-									@SuppressWarnings("unused") Module menuModule) {
+	public void renderedMenuGroup(@Nonnull MenuGroup group,
+									@Nonnull Module menuModule) {
 		// nothing to do
 	}
 	
@@ -281,8 +285,8 @@ public class MenuRenderer {
 	 * @param menu        the menu whose root was just rendered; never {@code null}
 	 * @param menuModule  the module that owns this menu; never {@code null}
 	 */
-	public void renderedMenuRoot(@SuppressWarnings("unused") Menu menu,
-									@SuppressWarnings("unused") Module menuModule) {
+	public void renderedMenuRoot(@Nonnull Menu menu,
+									@Nonnull Module menuModule) {
 		// nothing to do
 	}
 	
@@ -296,9 +300,9 @@ public class MenuRenderer {
 	 * @param menuModule  the module that owns this menu; never {@code null}
 	 * @param open        {@code true} if this module's menu was rendered in the open/expanded state
 	 */
-	public void renderedModuleMenu(@SuppressWarnings("unused") Menu menu,
-									@SuppressWarnings("unused") Module menuModule,
-									@SuppressWarnings("unused") boolean open) {
+	public void renderedModuleMenu(@Nonnull Menu menu,
+									@Nonnull Module menuModule,
+									boolean open) {
 		// nothing to do
 	}
 
@@ -311,7 +315,7 @@ public class MenuRenderer {
 	 *
 	 * @param customer  the tenant to render menus for; never {@code null}
 	 */
-	public void render(Customer customer) {
+	public void render(@Nonnull Customer customer) {
 		render(customer, null);
 	}
 	
@@ -324,17 +328,18 @@ public class MenuRenderer {
 	 *
 	 * @param user  the authenticated user; never {@code null}
 	 */
-	public void render(User user) {
+	public void render(@Nonnull User user) {
 		render(user.getCustomer(), user);
 	}
 	
-	private void render(Customer customer, User user) {
+	private void render(@Nonnull Customer customer, @Nullable User user) {
 		// determine if the first menu should be open - ie no default
-		Menu chosenMenu = (selectedModuleName == null) ? 
-							null : 
-							((user == null) ? 
-								customer.getModule(selectedModuleName).getMenu() :
-								((UserImpl) user).getModuleMenu(selectedModuleName));
+		Menu chosenMenu = null;
+		if (selectedModuleName != null) {
+			chosenMenu = (user == null) ?
+							customer.getModule(selectedModuleName).getMenu() :
+							((UserImpl) user).getModuleMenu(selectedModuleName);
+		}
 		final boolean setFirstModuleOpen = (chosenMenu == null) || chosenMenu.getItems().isEmpty();
 		final AtomicBoolean first = new AtomicBoolean(true);
 
@@ -364,10 +369,10 @@ public class MenuRenderer {
 		}
 	}
 
-	@SuppressWarnings("java:S3776") // Complexity OK
-	private void renderMenuItems(Customer customer,
-									Module menuModule, 
-									List<MenuItem> items) {
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // Complexity OK
+	private void renderMenuItems(@Nonnull Customer customer,
+									@Nonnull Module menuModule, 
+									@Nonnull List<MenuItem> items) {
 		for (MenuItem item : items) {
 			if ((uxui == null) || item.isApplicable(uxui)) {
 				if (item instanceof MenuGroup group) {
@@ -385,7 +390,8 @@ public class MenuRenderer {
 						String itemQueryName = treeItem.getQueryName();
 						String modelName = treeItem.getModelName();
 						if (modelName != null) {
-							itemModule = customer.getModule(menuModule.getDocument(customer, itemDocumentName).getOwningModuleName());
+							@Nonnull String modelDocumentName = Objects.requireNonNull(itemDocumentName, "itemDocumentName");
+							itemModule = customer.getModule(menuModule.getDocument(customer, modelDocumentName).getOwningModuleName());
 						}
 						else {
 		                    MetaDataQueryDefinition query = deriveDocumentQuery(customer,
@@ -407,14 +413,15 @@ public class MenuRenderer {
 						String itemQueryName = listItem.getQueryName();
 						String modelName = listItem.getModelName();
 						if (modelName != null) {
-							itemModule = customer.getModule(menuModule.getDocument(customer, itemDocumentName).getOwningModuleName());
+							@Nonnull String modelDocumentName = Objects.requireNonNull(itemDocumentName, "itemDocumentName");
+							itemModule = customer.getModule(menuModule.getDocument(customer, modelDocumentName).getOwningModuleName());
 						}
 						else {
 							MetaDataQueryDefinition query = deriveDocumentQuery(customer,
-													                                menuModule,
-													                                item,
-													                                itemQueryName,
-													                                itemDocumentName);
+																					menuModule,
+																					item,
+																					itemQueryName,
+																					itemDocumentName);
 							itemDocumentName = query.getDocumentName();
 							itemQueryName = query.getName();
 							itemModule = query.getDocumentModule(customer);
@@ -444,7 +451,8 @@ public class MenuRenderer {
 						String itemQueryName = mapItem.getQueryName();
 						String modelName = mapItem.getModelName();
 						if (modelName != null) {
-							itemModule = customer.getModule(menuModule.getDocument(customer, itemDocumentName).getOwningModuleName());
+							@Nonnull String modelDocumentName = Objects.requireNonNull(itemDocumentName, "itemDocumentName");
+							itemModule = customer.getModule(menuModule.getDocument(customer, modelDocumentName).getOwningModuleName());
 						}
 						else {
 							MetaDataQueryDefinition query = deriveDocumentQuery(customer,
@@ -463,7 +471,8 @@ public class MenuRenderer {
 	                }
 					else if (item instanceof EditItem editItem) {
 						itemDocumentName = editItem.getDocumentName();
-						Document itemDocument = menuModule.getDocument(customer, itemDocumentName);
+						@Nonnull String editDocumentName = Objects.requireNonNull(itemDocumentName, "itemDocumentName");
+						Document itemDocument = menuModule.getDocument(customer, editDocumentName);
 						itemModule = customer.getModule(itemDocument.getOwningModuleName());
 						icon16 = itemDocument.getIcon16x16RelativeFileName();
 						iconStyleClass = itemDocument.getIconStyleClass();
@@ -509,15 +518,15 @@ public class MenuRenderer {
 	 * @param module        the module to look up queries in; never {@code null}
 	 * @param item          the menu item requesting the query (used in error messages); never {@code null}
 	 * @param queryName     the explicit query name, or {@code null} to use the document default
-	 * @param documentName  the document name to fall back to if no explicit query is given; never {@code null}
+	 * @param documentName  the document name to fall back to if no explicit query is given; required when {@code queryName} is {@code null}
 	 * @return the resolved query definition; never {@code null}
 	 * @throws MetaDataException if the named query does not exist or the document has no default query
 	 */
-	public static MetaDataQueryDefinition deriveDocumentQuery(Customer customer,
-																Module module,
-																MenuItem item,
-																String queryName,
-																String documentName) {
+	public static @Nonnull MetaDataQueryDefinition deriveDocumentQuery(@Nonnull Customer customer,
+																		@Nonnull Module module,
+																		@Nonnull MenuItem item,
+																		@Nullable String queryName,
+																		@Nullable String documentName) {
         MetaDataQueryDefinition query = null;
 		if (queryName != null) {
             query = module.getMetaDataQuery(queryName);
@@ -528,7 +537,7 @@ public class MenuRenderer {
         }
         else {
         	try {
-        		query = module.getDocumentDefaultQuery(customer, documentName);
+        		query = module.getDocumentDefaultQuery(customer, Objects.requireNonNull(documentName, "documentName"));
         	}
         	catch (MetaDataException e) {
         		throw new MetaDataException("The target document " + documentName + " for menu action " +

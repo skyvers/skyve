@@ -48,7 +48,7 @@ public interface UxUiSelector extends TaggingUxUiSelector {
 	 * @param request       the current HTTP servlet request; never {@code null}
 	 * @return the selected UX/UI descriptor; never {@code null}
 	 */
-	default public @Nonnull UxUi emulate(@Nonnull UserAgentType userAgentType, @Nonnull HttpServletRequest request) {
+	default @Nonnull UxUi emulate(@Nonnull UserAgentType userAgentType, @Nonnull HttpServletRequest request) {
 		return select(userAgentType, request);
 	}
 }

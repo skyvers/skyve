@@ -144,7 +144,7 @@ public class ReactRouter {
 										modelName,
 										itemDocument.getListModel(c, modelName, false));
 				}
-				else if (item.getQueryName() != null) { // query driven
+				else if (itemQueryName != null) { // query driven
 					component.setQuery(menuModule,
 										itemDocument,
 										menuModule.getNullSafeMetaDataQuery(itemQueryName));
