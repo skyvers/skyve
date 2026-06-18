@@ -204,6 +204,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	private static final Integer FORM_VIDEO_DEFAULT_PIXEL_HEIGHT = Integer.valueOf(180);
 	private static final Integer GRID_VIDEO_DEFAULT_PIXEL_WIDTH = Integer.valueOf(160);
 	private static final Integer GRID_VIDEO_DEFAULT_PIXEL_HEIGHT = Integer.valueOf(90);
+	private static final Integer CONTENT_IMAGE_DEFAULT_PIXEL_SIZE = Integer.valueOf(200);
 	private static final String UPLOAD_CAPTURE_PROPERTY_NAME = "capture";
 
 	@Override
@@ -2297,7 +2298,11 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		HtmlPanelGrid result = (HtmlPanelGrid) a.createComponent(HtmlPanelGrid.COMPONENT_TYPE);
 		setId(result, null);
 		boolean editable = (! Boolean.FALSE.equals(content.getEditable()));
+		boolean phoneResponsiveMedia = content.getPixelWidth() == null && content.getPixelHeight() == null;
 		result.setColumns(editable ? 2 : 1);
+		if (phoneResponsiveMedia) {
+			result.setStyleClass("skyveContentPhoneResponsive");
+		}
 		String id = result.getId();
 		List<UIComponent> toAddTo = result.getChildren();
 
@@ -2328,7 +2333,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 														null,
 														resolveImageHeight(content),
 														null,
-														binding);
+														binding,
+														phoneResponsiveMedia ? "skyveContentResponsiveImage" : null);
 			image.getChildren().get(0).setId(String.format("%s_%s_image", id, sanitisedBinding));
 			if (auto) {
 				setAutoContentVisibleStyleClass(image, binding, "image");
@@ -2340,7 +2346,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			HtmlOutputText video = contentVideo(resolveVideoWidth(content, formContext),
 												resolveVideoHeight(content, formContext),
 												binding,
-												videoId);
+												videoId,
+												phoneResponsiveMedia);
 			if (auto) {
 				setAutoContentVisibleStyleClass(video, binding, "video");
 			}
@@ -2372,7 +2379,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 */
 	private static @Nonnull Integer resolveImageWidth(@Nonnull ContentUpload content) {
 		Integer result = content.getPixelWidth();
-		return (result == null) ? ONE_HUNDRED : result;
+		return (result == null) ? CONTENT_IMAGE_DEFAULT_PIXEL_SIZE : result;
 	}
 
 	/**
@@ -2383,7 +2390,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 */
 	private static @Nonnull Integer resolveImageHeight(@Nonnull ContentUpload content) {
 		Integer result = content.getPixelHeight();
-		return (result == null) ? ONE_HUNDRED : result;
+		return (result == null) ? CONTENT_IMAGE_DEFAULT_PIXEL_SIZE : result;
 	}
 
 	/**
@@ -2449,13 +2456,18 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	private @Nonnull HtmlOutputText contentVideo(@Nonnull Integer pixelWidth,
 													@Nonnull Integer pixelHeight,
 													@Nonnull String binding,
-													@Nonnull String videoId) {
+													@Nonnull String videoId,
+													boolean phoneResponsiveMedia) {
 		HtmlOutputText result = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
 		result.setEscape(false);
 		StringBuilder expression = new StringBuilder(192);
-		expression.append("<div id=\"").append(videoId).append("\" style=\"width:");
+		expression.append("<div id=\"").append(videoId).append('"');
+		if (phoneResponsiveMedia) {
+			expression.append(" class=\"skyveContentResponsiveVideo\"");
+		}
+		expression.append(" style=\"width:");
 		expression.append(pixelWidth).append("px;height:").append(pixelHeight);
-		expression.append("px;border:1px solid gray\">");
+		expression.append("px;border:1px solid #d6dee8\">");
 		expression.append("#{empty ").append(managedBeanName).append(".currentBean['").append(binding);
 		expression.append("'] ? '' : '<video controls preload=\"metadata\" style=\"width:100%;height:100%;object-fit:contain\" src=\"'.concat(");
 		expression.append(managedBeanName).append(".getContentUrl('").append(binding);
@@ -2500,6 +2512,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		}
 
 		String binding = signature.getBinding();
+		boolean phoneResponsiveMedia = signature.getPixelWidth() == null && signature.getPixelHeight() == null;
 		Integer pixelWidth = signature.getPixelWidth();
 		if (pixelWidth == null) {
 			pixelWidth = Integer.valueOf(400);
@@ -2526,6 +2539,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		sb.append("width:").append(pixelWidth);
 		sb.append("px;height:").append(pixelHeight).append("px");
 		signatureComponent.setStyle(sb.toString());
+		if (phoneResponsiveMedia) {
+			signatureComponent.setStyleClass("skyveContentResponsiveSignature");
+		}
 
 		// Set signature rendered
 		sb.setLength(0);
@@ -2549,7 +2565,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		toAddTo.add(signatureComponent);
 
 		// Image
-		HtmlPanelGroup contentImage = contentGraphicImage(pixelWidth, null, null, pixelHeight, null, binding);
+		HtmlPanelGroup contentImage = contentGraphicImage(pixelWidth, null, null, pixelHeight, null, binding, phoneResponsiveMedia ? "skyveContentResponsiveSignature" : null);
 
 		// Set image rendered
 		sb.setLength(0);
@@ -4688,11 +4704,14 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 												Integer percentageWidth,
 												Integer pixelHeight,
 												Integer percentageHeight,
-												String binding) {
+												String binding,
+												String phoneResponsiveClass) {
 		HtmlPanelGroup result = panelGroup(true, true, true, null, null);
 		setId(result, null);
 		setSizeAndTextAlignStyle(result, "border:1px solid #d6dee8;position:relative;overflow:hidden;", pixelWidth, responsiveWidth, percentageWidth, pixelHeight, percentageHeight, null);
-		String expression = String.format("#{(empty %s.currentBean['%s']) ? 'skyveContentPreview skyveContentEmpty' : 'skyveContentPreview'}", managedBeanName, binding);
+		String previewClass = (phoneResponsiveClass == null) ? "skyveContentPreview" : "skyveContentPreview " + phoneResponsiveClass;
+		String emptyClass = (phoneResponsiveClass == null) ? "skyveContentPreview skyveContentEmpty" : "skyveContentPreview " + phoneResponsiveClass + " skyveContentEmpty";
+		String expression = String.format("#{(empty %s.currentBean['%s']) ? '%s' : '%s'}", managedBeanName, binding, emptyClass, previewClass);
 		result.setValueExpression("styleClass", ef.createValueExpression(elc, expression, String.class));
 
 		GraphicImage image = (GraphicImage) a.createComponent(GraphicImage.COMPONENT_TYPE);

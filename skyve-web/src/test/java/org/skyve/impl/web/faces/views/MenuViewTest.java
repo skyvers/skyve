@@ -12,6 +12,7 @@ import org.skyve.impl.metadata.module.menu.ListItem;
 import org.skyve.impl.metadata.module.menu.MapItem;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.menu.MenuItem;
+import org.skyve.web.UserAgentType;
 
 @SuppressWarnings("static-method")
 class MenuViewTest {
@@ -70,6 +71,36 @@ class MenuViewTest {
 
 		assertTrue(calendarHref.contains("/?a=c&m=sales&q=events"));
 		assertTrue(mapHref.contains("/?a=m&m=sales&d=Location&q=siteMap&b=location"));
+	}
+
+	@Test
+	void createMenuHrefRoutesInternalListNavigationThroughDeviceJspWhenEmulated() {
+		ListItem item = new ListItem();
+
+		String href = MenuView.createMenuHref(module("sales"), null, item, "allContacts", null, UserAgentType.phone);
+
+		assertHasStartHistoryWrapper(href);
+		assertTrue(href.contains("/device.jsp?ua=phone&a=l&m=sales&q=allContacts"));
+	}
+
+	@Test
+	void createMenuHrefRoutesInternalEditNavigationThroughDeviceJspWhenEmulated() {
+		EditItem item = new EditItem();
+		item.setDocumentName("Contact");
+
+		String href = MenuView.createMenuHref(module("menu"), module("crm"), item, null, null, UserAgentType.tablet);
+
+		assertHasStartHistoryWrapper(href);
+		assertTrue(href.contains("/device.jsp?ua=tablet&a=e&m=crm&d=Contact"));
+	}
+
+	@Test
+	void createMenuHrefDoesNotRewriteAbsoluteHrefWhenEmulated() {
+		MenuItem item = mock(MenuItem.class);
+
+		String href = MenuView.createMenuHref(module("menu"), module("item"), item, "ignored", "/external/path", UserAgentType.phone);
+
+		assertEquals("javascript:SKYVE.PF.startHistory('/external/path')", href);
 	}
 
 	private static Module module(String name) {

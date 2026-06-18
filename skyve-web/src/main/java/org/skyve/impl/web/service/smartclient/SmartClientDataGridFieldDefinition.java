@@ -23,8 +23,8 @@ import org.skyve.util.Util;
  * SmartClient data-grid field definition.
  */
 public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefinition {
-	private static final int CONTENT_IMAGE_DEFAULT_PIXEL_WIDTH = 100;
-	private static final int CONTENT_IMAGE_DEFAULT_PIXEL_HEIGHT = 100;
+	private static final int CONTENT_IMAGE_DEFAULT_PIXEL_WIDTH = 200;
+	private static final int CONTENT_IMAGE_DEFAULT_PIXEL_HEIGHT = 200;
 	private static final int GRID_CONTENT_VIDEO_DEFAULT_PIXEL_WIDTH = 160;
 	private static final int GRID_CONTENT_VIDEO_DEFAULT_PIXEL_HEIGHT = 90;
 

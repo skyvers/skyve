@@ -136,8 +136,8 @@ import jakarta.annotation.Nullable;
 public class SmartClientViewRenderer extends ViewRenderer {
 	private static final Integer DEFAULT_MIN_HEIGHT_IN_PIXELS = Integer.valueOf(170);
 	private static final Integer DEFAULT_TAB_MIN_HEIGHT_IN_PIXELS = Integer.valueOf(200);
-	private static final int CONTENT_IMAGE_DEFAULT_PIXEL_WIDTH = 100;
-	private static final int CONTENT_IMAGE_DEFAULT_PIXEL_HEIGHT = 100;
+	private static final int CONTENT_IMAGE_DEFAULT_PIXEL_WIDTH = 200;
+	private static final int CONTENT_IMAGE_DEFAULT_PIXEL_HEIGHT = 200;
 	private static final int FORM_CONTENT_VIDEO_DEFAULT_PIXEL_WIDTH = 320;
 	private static final int FORM_CONTENT_VIDEO_DEFAULT_PIXEL_HEIGHT = 180;
 	private static final int GRID_CONTENT_VIDEO_DEFAULT_PIXEL_WIDTH = 160;

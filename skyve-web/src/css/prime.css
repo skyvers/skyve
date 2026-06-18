@@ -267,6 +267,47 @@ th.hiddenFilter input.ui-column-filter, th.hiddenFilter div.ui-column-customfilt
 	opacity: 0.75;
 }
 
+/* PrimeFaces ui-g collapse breakpoint */
+@media screen and (max-width: 40em) {
+	.skyveContentPhoneResponsive {
+		width: 100%;
+	}
+
+	.skyveContentPhoneResponsive > tbody > tr > td:first-child {
+		width: 100%;
+	}
+
+	.skyveContentPhoneResponsive > tbody > tr > td:last-child {
+		vertical-align: middle;
+		white-space: nowrap;
+		width: 1%;
+	}
+
+	div.skyveContentPreview.skyveContentResponsiveImage,
+	div.skyveContentPreview.skyveContentResponsiveSignature,
+	.skyveContentResponsiveVideo,
+	.skyveContentResponsiveSignature {
+		max-width: 100%;
+		width: 100% !important;
+	}
+
+	div.skyveContentPreview.skyveContentResponsiveImage {
+		aspect-ratio: 1 / 1;
+		height: auto !important;
+		min-height: 8rem;
+	}
+
+	.skyveContentResponsiveVideo {
+		aspect-ratio: 16 / 9;
+		height: auto !important;
+	}
+
+	.skyveContentResponsiveSignature {
+		aspect-ratio: 2 / 1;
+		height: auto !important;
+	}
+}
+
 button.skyveContentActionButton.ui-button-icon-only,
 button.skyveContentActionButton.ui-button-text-icon-left {
 	padding: 0 !important;

@@ -510,8 +510,8 @@ class SmartClientViewRendererCoverageTest {
 		assertTrue(code.contains("emptyText:'No content'"), code);
 		assertTrue(code.contains("companion:'_attachment'"), code);
 		assertTrue(code.contains("showMarkup:true"), code);
-		assertTrue(code.contains("width:100"), code);
-		assertTrue(code.contains("height:100"), code);
+		assertTrue(code.contains("width:200"), code);
+		assertTrue(code.contains("height:200"), code);
 	}
 
 	@Test
@@ -572,8 +572,8 @@ class SmartClientViewRendererCoverageTest {
 		assertTrue(javascript.contains("emptyText:'No content'"), javascript);
 		assertTrue(javascript.contains("companion:'_attachment'"), javascript);
 		assertTrue(javascript.contains("k=(rec&&rec['_attachment'])||'link'"), javascript);
-		assertTrue(javascript.contains("&_w=100&_h=100"), javascript);
-		assertTrue(javascript.contains("style=\"width:100px;height:100px;object-fit:contain\""), javascript);
+		assertTrue(javascript.contains("&_w=200&_h=200"), javascript);
+		assertTrue(javascript.contains("style=\"width:200px;height:200px;object-fit:contain\""), javascript);
 		assertTrue(javascript.contains("<video controls preload=\"metadata\""), javascript);
 		assertTrue(javascript.contains("style=\"width:160px;height:90px;object-fit:contain\""), javascript);
 	}

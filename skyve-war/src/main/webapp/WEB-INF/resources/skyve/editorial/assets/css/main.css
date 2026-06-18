@@ -2931,6 +2931,10 @@ mark {
 			#header {
 				padding-top: 2.2em;
 			}
+
+			#header .title {
+				text-align: center;
+			}
 		}
 		@media screen and (max-width: 736px) {
 			#header {

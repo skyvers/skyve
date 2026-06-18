@@ -1465,11 +1465,12 @@ class TabularComponentBuilderTest {
 		assertSame(panelGrid, result);
 		assertSame(video, panelChildren.get(0));
 		verify(panelGrid).setColumns(1);
+		verify(panelGrid).setStyleClass("skyveContentPhoneResponsive");
 		verify(video).setEscape(false);
 		verify(video).setId("contentGrid_doc_video_video_output");
 		ArgumentCaptor<String> expressions = ArgumentCaptor.forClass(String.class);
 		verify(mockExpressionFactory).createValueExpression(any(ELContext.class), expressions.capture(), eq(String.class));
-		assertTrue(expressions.getValue().contains("<div id=\"contentGrid_doc_video_video\" style=\"width:320px;height:180px;border:1px solid gray\">"));
+		assertTrue(expressions.getValue().contains("<div id=\"contentGrid_doc_video_video\" class=\"skyveContentResponsiveVideo\" style=\"width:320px;height:180px;border:1px solid #d6dee8\">"));
 		assertTrue(expressions.getValue().contains("<video controls preload=\"metadata\" style=\"width:100%;height:100%;object-fit:contain\""));
 		assertTrue(expressions.getValue().contains(" ? '' : '<video"));
 	}
@@ -1558,7 +1559,8 @@ class TabularComponentBuilderTest {
 		ArgumentCaptor<String> styleClassExpressions = ArgumentCaptor.forClass(String.class);
 		verify(mockExpressionFactory, atLeastOnce()).createValueExpression(any(ELContext.class), styleClassExpressions.capture(), eq(String.class));
 		assertTrue(styleClassExpressions.getAllValues().contains("#{(empty skyve.getContentMediaKind('doc.attachment') or skyve.getContentMediaKind('doc.attachment') eq 'link') ? '' : 'skyveContentHidden'}"));
-		assertTrue(styleClassExpressions.getAllValues().contains("#{(empty skyve.currentBean['doc.attachment']) ? 'skyveContentPreview skyveContentEmpty' : 'skyveContentPreview'}"));
+		verify(mockExpressionFactory).createValueExpression("border:1px solid #d6dee8;position:relative;overflow:hidden;width:200px;height:200px", String.class);
+		assertTrue(styleClassExpressions.getAllValues().contains("#{(empty skyve.currentBean['doc.attachment']) ? 'skyveContentPreview skyveContentResponsiveImage skyveContentEmpty' : 'skyveContentPreview skyveContentResponsiveImage'}"));
 		assertTrue(styleClassExpressions.getAllValues().contains("#{(empty skyve.currentBean['doc.attachment']) ? 'skyveContentHidden' : ''}"));
 		assertTrue(styleClassExpressions.getAllValues().contains("#{skyve.getContentMediaKind('doc.attachment') eq 'image' ? '' : 'skyveContentHidden'}"));
 		assertTrue(styleClassExpressions.getAllValues().contains("#{skyve.getContentMediaKind('doc.attachment') eq 'video' ? '' : 'skyveContentHidden'}"));
@@ -3185,6 +3187,10 @@ class TabularComponentBuilderTest {
 		assertSame(image, imageChildren.get(0));
 		assertEquals(3, buttonChildren.size());
 		verify(signatureComponent).setStyle("width:400px;height:200px");
+		verify(signatureComponent).setStyleClass("skyveContentResponsiveSignature");
+		ArgumentCaptor<String> expressions = ArgumentCaptor.forClass(String.class);
+		verify(mockExpressionFactory, atLeastOnce()).createValueExpression(any(ELContext.class), expressions.capture(), eq(String.class));
+		assertTrue(expressions.getAllValues().contains("#{(empty skyve.currentBean['customerSignature']) ? 'skyveContentPreview skyveContentResponsiveSignature skyveContentEmpty' : 'skyveContentPreview skyveContentResponsiveSignature'}"));
 		verify(signButton).setValue("Sign");
 		verify(signButton).setProcess("@this");
 		verify(signButton).setUpdate("sigLayout");
