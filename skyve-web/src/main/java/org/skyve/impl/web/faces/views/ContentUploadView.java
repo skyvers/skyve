@@ -711,23 +711,24 @@ public class ContentUploadView extends AbstractUploadView {
 												@Nonnull String sanitisedContentBinding) {
 		StringBuilder js = new StringBuilder(256);
 		String mediaKind = ContentMediaClassifier.classify(content.getContentType(), content.getFileName()).name();
-		// if window.parent.isc is defined then we are using smart client, set the value in the values manager
-		js.append("if(window.parent.isc){");
-		js.append("if(window.parent.isc.BizUtil&&window.parent.isc.BizUtil.afterContentUpload){");
+		js.append("var skyveUploadWindow=SKYVE.Util.findSkyveWindow();");
+		js.append("if(skyveUploadWindow){");
+		// if the owning frame has isc defined then we are using smart client, set the value in the values manager
+		js.append("if(skyveUploadWindow.isc){");
+		js.append("if(skyveUploadWindow.isc.BizUtil&&skyveUploadWindow.isc.BizUtil.afterContentUpload){");
 		appendSmartClientUploadCallback(js, bean, content, contentId, sanitisedContentBinding, mediaKind);
 		js.append("}else{");
 		if (companionBinding != null) {
-			js.append("window.parent.isc.WindowStack.getOpener()._vm.setValue('");
+			js.append("skyveUploadWindow.isc.WindowStack.getOpener()._vm.setValue('");
 			js.append(OWASP.escapeJsString(companionBinding, false, false));
 			js.append("','").append(mediaKind).append("');");
 		}
-		js.append("window.parent.isc.WindowStack.getOpener()._vm.setValue('").append(sanitisedContentBinding);
+		js.append("skyveUploadWindow.isc.WindowStack.getOpener()._vm.setValue('").append(sanitisedContentBinding);
 		js.append("','").append(contentId).append("');");
-		js.append("window.parent.isc.WindowStack.popoff(false)");
+		js.append("skyveUploadWindow.isc.WindowStack.popoff(false)");
 		js.append('}');
 		// otherwise we are using prime faces, set the hidden input element that ends with "_<binding>"
-		// NB Cannot use window.parent here to support nested frames as the script is executed at the top window context.
-		js.append("}else if(top.SKYVE){if(top.SKYVE.PF){top.SKYVE.PF.afterContentUpload('").append(sanitisedContentBinding);
+		js.append("}else if(skyveUploadWindow.SKYVE){if(skyveUploadWindow.SKYVE.PF){skyveUploadWindow.SKYVE.PF.afterContentUpload('").append(sanitisedContentBinding);
 		js.append("','").append(contentId).append("','");
 		js.append(bean.getBizModule()).append('.').append(bean.getBizDocument()).append("','");
 		js.append(OWASP.escapeJsString(content.getFileName(), false, false)).append("','");
@@ -735,7 +736,7 @@ public class ContentUploadView extends AbstractUploadView {
 		if (companionBinding != null) {
 			js.append(",'").append(OWASP.escapeJsString(companionBinding, false, false)).append('\'');
 		}
-		js.append(")}}");
+		js.append(")}}}");
 		return js.toString();
 	}
 
@@ -745,7 +746,7 @@ public class ContentUploadView extends AbstractUploadView {
 													@Nonnull String contentId,
 													@Nonnull String sanitisedContentBinding,
 													@Nonnull String mediaKind) {
-		js.append("window.parent.isc.BizUtil.afterContentUpload('").append(sanitisedContentBinding);
+		js.append("skyveUploadWindow.isc.BizUtil.afterContentUpload('").append(sanitisedContentBinding);
 		js.append("','").append(contentId).append("','");
 		js.append(bean.getBizModule()).append('.').append(bean.getBizDocument()).append("','");
 		js.append(OWASP.escapeJsString(content.getFileName(), false, false)).append("','");

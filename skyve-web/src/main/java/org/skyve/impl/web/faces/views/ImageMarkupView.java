@@ -33,6 +33,7 @@ import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.faces.application.FacesMessage;
@@ -281,7 +282,7 @@ public class ImageMarkupView extends LocalisableView {
 	 * @param apply whether to persist posted markup updates
 	 * @throws Exception when conversation restore, access checks, or persistence operations fail
 	 */
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // Complexity OK
 	private void process(boolean apply) throws Exception {
 		// If there is no access, don't process the upload and return to allow the view to render the no access message
 		if (! isCanAccess()) {
@@ -359,7 +360,7 @@ public class ImageMarkupView extends LocalisableView {
 						// Add a new content with the markup in it.
 						// This ensures that if cancel is pressed the old content will remain linked.
 						AttachmentContent newContent = content.cloneNewForPut();
-							newContent.setMarkup(svg);
+						newContent.setMarkup(svg);
 						// Determine whether we should index the new content by looking at the attribute
 						boolean index = false;
 						try {
@@ -388,28 +389,12 @@ public class ImageMarkupView extends LocalisableView {
 		
 						// only put conversation in cache if we have been successful in executing
 						StateUtil.cacheConversation(webContext);
-			
+				
 						// update the content UUID value on the client and popoff the window on the stack
-						StringBuilder js = new StringBuilder(128);
 						String sanitisedContentBinding = BindUtil.sanitiseBinding(contentBindingParameter);
-						// if window.parent.isc is defined then we are using smart client, set the value in the values manager
-						js.append("if(window.parent.isc){");
-						js.append("if(window.parent.isc.BizUtil&&window.parent.isc.BizUtil.afterMarkupApply){");
-						js.append("window.parent.isc.BizUtil.afterMarkupApply('").append(sanitisedContentBinding);
-						js.append("','").append(newContentId).append("','");
-						js.append(bean.getBizModule()).append('.').append(bean.getBizDocument()).append("','");
-						js.append(OWASP.escapeJsString(content.getFileName(), false, false)).append("');");
-						js.append("}else{");
-						js.append("window.parent.isc.WindowStack.getOpener()._vm.setValue('").append(sanitisedContentBinding);
-						js.append("','").append(newContentId).append("');window.parent.isc.WindowStack.popoff(false)");
-						js.append('}');
-						// otherwise we are using prime faces, set the hidden input element that ends with "_<binding>"
-						// NB Cannot use window.parent here to support nested frames as the script is executed at the top window context.
-						js.append("}else if(top.SKYVE){if(top.SKYVE.PF){top.SKYVE.PF.afterMarkupApply('").append(sanitisedContentBinding);
-						js.append("','").append(newContentId).append("','");
-						js.append(bean.getBizModule()).append('.').append(bean.getBizDocument()).append("','");
-						js.append(OWASP.escapeJsString(content.getFileName(), false, false)).append("')}}");
-						PrimeFaces.current().executeScript(js.toString());
+						if (sanitisedContentBinding != null) { // should never happen
+							PrimeFaces.current().executeScript(ImageMarkupView.createMarkupSuccessScript(sanitisedContentBinding, newContentId, bean, content));
+						}
 					}
 				}
 			}
@@ -421,5 +406,32 @@ public class ImageMarkupView extends LocalisableView {
 			fc.addMessage(null, msg);
 		}
 		// NB No need to disconnect Persistence as it is done in the SkyveFacesPhaseListener after the response is rendered.
+	}
+
+	@Nonnull static String createMarkupSuccessScript(@Nonnull String sanitisedContentBinding,
+														@Nonnull String contentId,
+														@Nonnull Bean bean,
+														@Nonnull AttachmentContent content) {
+		StringBuilder js = new StringBuilder(256);
+		js.append("var skyveMarkupWindow=SKYVE.Util.findSkyveWindow();");
+		js.append("if(skyveMarkupWindow){");
+		// if the owning frame has isc defined then we are using smart client, set the value in the values manager
+		js.append("if(skyveMarkupWindow.isc){");
+		js.append("if(skyveMarkupWindow.isc.BizUtil&&skyveMarkupWindow.isc.BizUtil.afterMarkupApply){");
+		js.append("skyveMarkupWindow.isc.BizUtil.afterMarkupApply('").append(sanitisedContentBinding);
+		js.append("','").append(contentId).append("','");
+		js.append(bean.getBizModule()).append('.').append(bean.getBizDocument()).append("','");
+		js.append(OWASP.escapeJsString(content.getFileName(), false, false)).append("');");
+		js.append("}else{");
+		js.append("skyveMarkupWindow.isc.WindowStack.getOpener()._vm.setValue('").append(sanitisedContentBinding);
+		js.append("','").append(contentId).append("');skyveMarkupWindow.isc.WindowStack.popoff(false)");
+		js.append('}');
+		// otherwise we are using prime faces, set the hidden input element that ends with "_<binding>"
+		js.append("}else if(skyveMarkupWindow.SKYVE){if(skyveMarkupWindow.SKYVE.PF){skyveMarkupWindow.SKYVE.PF.afterMarkupApply('").append(sanitisedContentBinding);
+		js.append("','").append(contentId).append("','");
+		js.append(bean.getBizModule()).append('.').append(bean.getBizDocument()).append("','");
+		js.append(OWASP.escapeJsString(content.getFileName(), false, false)).append("')}}");
+		js.append('}');
+		return js.toString();
 	}
 }

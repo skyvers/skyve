@@ -36,6 +36,17 @@
 					}
 				}
 			</style>
+			<script type="text/javascript" src="skyve/prime/skyve-min.js?v=#{_skyveBizImport.webResourceFileVersion}"></script>
+			<script type="text/javascript">
+				//<![CDATA[
+				function skyveAfterBizImport() {
+					var owner = SKYVE.Util.findSmartClientWindow();
+					if (owner) {
+						owner.isc.WindowStack.getOpener().saveInstance(true, '_PUSH');
+					}
+				}
+				//]]>
+			</script>
 		</h:head>
 		<h:body>
 			<h:form enctype="multipart/form-data" prependId="false">
@@ -48,7 +59,7 @@
 								allowTypes="#{'/'.concat(_skyveBizImport.whitelistRegex).concat('/i')}"
 								invalidFileMessage="#{_skyveBizImport.i18n['page.bizImport.invalidFile']}"
 								update="messages problems" 
-								oncomplete="window.parent.isc.WindowStack.getOpener().saveInstance(true,'_PUSH');" />
+								oncomplete="skyveAfterBizImport()" />
 			    <p:growl id="messages" showDetail="true" escape="false" life="20000" />
 			    <p/>
 			    <p:dataTable id="problems" value="#{_skyveBizImport.problems}" var="problem">

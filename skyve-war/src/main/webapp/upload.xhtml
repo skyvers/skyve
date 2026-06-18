@@ -28,6 +28,17 @@
 			<h:outputScript rendered="#{_skyveContent.imageUpload or _skyveContent.cameraUploadAllowed}">
 				window.skyveMaximumUploadSizeInBytes = #{_skyveContent.cameraMaximumSizeInBytes};
 			</h:outputScript>
+			<script type="text/javascript" src="skyve/prime/skyve-min.js?v=#{_skyveContent.webResourceFileVersion}"></script>
+			<script type="text/javascript">
+				//<![CDATA[
+				function skyveAfterActionUpload(uploadKind) {
+					var owner = SKYVE.Util.findSmartClientWindow();
+					if (owner && uploadKind === 'action') {
+						owner.isc.WindowStack.getOpener().saveInstance(true, '_PUSH');
+					}
+				}
+				//]]>
+			</script>
 		</h:head>
 		<h:body>
 			<p:staticMessage severity="error"
@@ -61,7 +72,7 @@
 								uploadIcon="fa-solid fa-upload"
 								cancelIcon="fa-solid fa-ban"
 								update="messages problems"
-								oncomplete="if(window.parent.isc &amp;&amp; '#{_skyveContent.uploadState.uploadKind}' === 'action'){window.parent.isc.WindowStack.getOpener().saveInstance(true,'_PUSH');}" />
+								oncomplete="skyveAfterActionUpload('#{_skyveContent.uploadState.uploadKind}')" />
 			    <p:growl id="messages" showDetail="true" escape="false">
 					<p:autoUpdate />
 			    </p:growl>

@@ -154,11 +154,17 @@ class UploadViewsStateTest {
 
 		int companionIndex = script.indexOf("setValue('_attachment_media','video')");
 		int contentIndex = script.indexOf("setValue('attachment','content-123')");
+		assertTrue(script.contains("var skyveUploadWindow=SKYVE.Util.findSkyveWindow();"), script);
+		assertTrue(script.contains("if(skyveUploadWindow){"), script);
+		assertTrue(script.contains("skyveUploadWindow.isc.BizUtil.afterContentUpload('attachment','content-123','admin.Contact','clip.mp4','video','_attachment_media')"), script);
 		assertTrue(script.contains("isc.BizUtil.afterContentUpload('attachment','content-123','admin.Contact','clip.mp4','video','_attachment_media')"), script);
 		assertTrue(companionIndex >= 0, script);
 		assertTrue(contentIndex > companionIndex, script);
 		assertTrue(script.contains("WindowStack.popoff(false)"), script);
-		assertTrue(script.contains("afterContentUpload('attachment','content-123','admin.Contact','clip.mp4','video','_attachment_media')"), script);
+		assertTrue(script.contains("skyveUploadWindow.SKYVE.PF.afterContentUpload('attachment','content-123','admin.Contact','clip.mp4','video','_attachment_media')"), script);
+		assertFalse(script.contains("skyveUploadWindow=skyveUploadWindow.parent"), script);
+		assertFalse(script.contains("window.parent.isc"), script);
+		assertFalse(script.contains("top.SKYVE"), script);
 	}
 
 	@Test
@@ -175,7 +181,9 @@ class UploadViewsStateTest {
 		assertFalse(script.contains("_attachment_media"), script);
 		assertTrue(script.contains("setValue('attachment','content-456')"), script);
 		assertTrue(script.contains("isc.BizUtil.afterContentUpload('attachment','content-456','admin.Contact','quote\\'s.png','image')"), script);
-		assertTrue(script.contains("afterContentUpload('attachment','content-456','admin.Contact','quote\\'s.png','image')"), script);
+		assertTrue(script.contains("skyveUploadWindow.SKYVE.PF.afterContentUpload('attachment','content-456','admin.Contact','quote\\'s.png','image')"), script);
+		assertFalse(script.contains("window.parent.isc"), script);
+		assertFalse(script.contains("top.SKYVE"), script);
 	}
 
 	@Test

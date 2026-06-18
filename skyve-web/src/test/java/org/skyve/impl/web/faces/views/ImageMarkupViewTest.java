@@ -15,6 +15,8 @@ import java.lang.reflect.Field;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.skyve.content.AttachmentContent;
+import org.skyve.domain.Bean;
 import org.skyve.web.WebContext;
 
 import jakarta.faces.context.ExternalContext;
@@ -139,6 +141,25 @@ class ImageMarkupViewTest {
 		assertDoesNotThrow(view::apply);
 
 		verify(context).addMessage(isNull(), any());
+	}
+
+	@Test
+	void markupSuccessScriptResolvesOwningFrameWithoutParentOrTopAssumptions() {
+		Bean bean = mock(Bean.class);
+		when(bean.getBizModule()).thenReturn("admin");
+		when(bean.getBizDocument()).thenReturn("Contact");
+		AttachmentContent content = new AttachmentContent("demo", "admin", "Contact", null, "user", "biz", "attachment")
+				.attachment("quote's.png", "image/png", new byte[] {1});
+
+		String script = ImageMarkupView.createMarkupSuccessScript("attachment", "content-789", bean, content);
+
+		assertTrue(script.contains("var skyveMarkupWindow=SKYVE.Util.findSkyveWindow();"), script);
+		assertTrue(script.contains("if(skyveMarkupWindow){"), script);
+		assertTrue(script.contains("skyveMarkupWindow.isc.BizUtil.afterMarkupApply('attachment','content-789','admin.Contact','quote\\'s.png')"), script);
+		assertTrue(script.contains("skyveMarkupWindow.SKYVE.PF.afterMarkupApply('attachment','content-789','admin.Contact','quote\\'s.png')"), script);
+		assertFalse(script.contains("skyveMarkupWindow=skyveMarkupWindow.parent"), script);
+		assertFalse(script.contains("window.parent.isc"), script);
+		assertFalse(script.contains("top.SKYVE"), script);
 	}
 
 	private static FacesContext mockFacesContextWithSession(HttpSession session) {

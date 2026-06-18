@@ -136,8 +136,8 @@ SKYVE.PF = function() {
 	};
 		
 	var getContentWidget = function(id, binding, suffix) {
-		var widget = id ? top.PF(id + '_' + binding + suffix) : null;
-		return widget || top.PF(binding + suffix);
+		var widget = id ? window.PF(id + '_' + binding + suffix) : null;
+		return widget || window.PF(binding + suffix);
 	};
 
 	// public
@@ -163,21 +163,20 @@ SKYVE.PF = function() {
 		},
 		
 		afterContentUpload: function(binding, contentId, modoc, fileName, mediaKind, companionBinding) {
-			// Cannot use window.parent here to support nested frames as the script is called from eval server side which is executed at the top window context.
 			var id = contentOverlayIdsByBinding[binding];
-			setContentValue(top, id, binding, '_hidden', contentId);
+			setContentValue(window, id, binding, '_hidden', contentId);
 			if (mediaKind && companionBinding) {
-				setExactContentValue(top, id, companionBinding, '_hidden', mediaKind);
+				setExactContentValue(window, id, companionBinding, '_hidden', mediaKind);
 			}
 			var url = 'content?_n=' + contentId + '&_doc=' + modoc + '&_b=' + unsanitiseBinding(binding);
-			getContentElements(top, id, binding, '_link').off('click.skyveContentClear').attr('href', url).text(fileName).attr('onclick', 'return true');
-			getContentElements(top, id, binding, '_image').attr('src', url);
-			setContentImagePlaceholder(top, id, binding, false);
-			showContentVideo(top, id, binding, url);
+			getContentElements(window, id, binding, '_link').off('click.skyveContentClear').attr('href', url).text('Content').attr('onclick', 'return true');
+			getContentElements(window, id, binding, '_image').attr('src', url);
+			setContentImagePlaceholder(window, id, binding, false);
+			showContentVideo(window, id, binding, url);
 			if (companionBinding) {
-				setAutoContentVisibility(top, id, binding, mediaKind);
+				setAutoContentVisibility(window, id, binding, mediaKind);
 			}
-			setContentMarkupVisibility(top, id, binding, mediaKind);
+			setContentMarkupVisibility(window, id, binding, mediaKind);
 			var widget = getContentWidget(id, binding, 'Overlay');
 			if (widget) {
 				widget.hide();
@@ -186,37 +185,37 @@ SKYVE.PF = function() {
 		},
 
 		clearContentImage: function(binding, id, companionBinding) {
-			setContentValue(top, id, binding, '_hidden', '');
+			setContentValue(window, id, binding, '_hidden', '');
 			if (companionBinding) {
-				setExactContentValue(top, id, companionBinding, '_hidden', '');
+				setExactContentValue(window, id, companionBinding, '_hidden', '');
 			}
-			clearContentAnchor(top, id, binding);
-			getContentElements(top, id, binding, '_image').attr('src','images/blank.gif');
-			setContentImagePlaceholder(top, id, binding, true);
-			showContentVideoPlaceholder(top, id, binding);
+			clearContentAnchor(window, id, binding);
+			getContentElements(window, id, binding, '_image').attr('src','images/blank.gif');
+			setContentImagePlaceholder(window, id, binding, true);
+			showContentVideoPlaceholder(window, id, binding);
 			if (companionBinding) {
-				setAutoContentVisibility(top, id, binding, '');
+				setAutoContentVisibility(window, id, binding, '');
 			}
-			setContentMarkupVisibility(top, id, binding, '');
+			setContentMarkupVisibility(window, id, binding, '');
 		},
 		
 		clearContentLink: function(binding, id, companionBinding) {
-			setContentValue(top, id, binding, '_hidden', '');
+			setContentValue(window, id, binding, '_hidden', '');
 			if (companionBinding) {
-				setExactContentValue(top, id, companionBinding, '_hidden', '');
+				setExactContentValue(window, id, companionBinding, '_hidden', '');
 			}
-			clearContentAnchor(top, id, binding);
-			showContentVideoPlaceholder(top, id, binding);
+			clearContentAnchor(window, id, binding);
+			showContentVideoPlaceholder(window, id, binding);
 			if (companionBinding) {
-				setAutoContentVisibility(top, id, binding, '');
+				setAutoContentVisibility(window, id, binding, '');
 			}
-			setContentMarkupVisibility(top, id, binding, '');
+			setContentMarkupVisibility(window, id, binding, '');
 		},
 
 		clearContent: function(binding, id, companionBinding) {
 			SKYVE.PF.clearContentLink(binding, id, companionBinding);
-			getContentElements(top, id, binding, '_image').attr('src','images/blank.gif');
-			setContentImagePlaceholder(top, id, binding, true);
+			getContentElements(window, id, binding, '_image').attr('src','images/blank.gif');
+			setContentImagePlaceholder(window, id, binding, true);
 		},
 
 		contentMarkupOnShow: function(id, binding, url, companionBinding) {
@@ -233,21 +232,20 @@ SKYVE.PF = function() {
 		},
 
 		afterMarkupApply: function(binding, contentId, modoc, fileName) {
-			// Cannot use window.parent here to support nested frames as the script is called from eval server side which is executed at the top window context.
 			var id = contentMarkupIdsByBinding[binding];
-			setContentValue(top, id, binding, '_hidden', contentId);
+			setContentValue(window, id, binding, '_hidden', contentId);
 			var companionBinding = contentMarkupCompanionIdsByBinding[binding];
 			if (companionBinding) {
-				setExactContentValue(top, id, companionBinding, '_hidden', 'image');
+				setExactContentValue(window, id, companionBinding, '_hidden', 'image');
 			}
 			var url = 'content?_n=' + contentId + '&_doc=' + modoc + '&_b=' + unsanitiseBinding(binding);
-			getContentElements(top, id, binding, '_link').off('click.skyveContentClear').attr('href', url).text(fileName).attr('onclick', 'return true');
-			getContentElements(top, id, binding, '_image').attr('src', url);
-			setContentImagePlaceholder(top, id, binding, false);
+			getContentElements(window, id, binding, '_link').off('click.skyveContentClear').attr('href', url).text('Content').attr('onclick', 'return true');
+			getContentElements(window, id, binding, '_image').attr('src', url);
+			setContentImagePlaceholder(window, id, binding, false);
 			if (companionBinding) {
-				setAutoContentVisibility(top, id, binding, 'image');
+				setAutoContentVisibility(window, id, binding, 'image');
 			}
-			setContentMarkupVisibility(top, id, binding, 'image');
+			setContentMarkupVisibility(window, id, binding, 'image');
 			var widget = getContentWidget(id, binding, 'Markup');
 			if (widget) {
 				widget.hide();

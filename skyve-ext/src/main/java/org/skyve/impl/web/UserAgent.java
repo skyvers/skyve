@@ -9,9 +9,9 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.router.UxUiSelector;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.skyve.web.UserAgentType;
 import org.slf4j.Logger;
-import org.skyve.util.logging.SkyveLoggerFactory;
 
 import com.blueconic.browscap.BrowsCapField;
 import com.blueconic.browscap.Capabilities;
@@ -64,7 +64,7 @@ public class UserAgent {
 	 * @param request The active HTTP request.
 	 * @return The resolved user-agent type.
 	 */
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S3776", "java:S3824"}) // Complexity OK; computeIfAbsent() not required
 	public static @Nonnull UserAgentType getType(@Nonnull HttpServletRequest request) {
 		boolean touchEnabled = false;
 
@@ -135,6 +135,9 @@ public class UserAgent {
 		UxUi result = (UxUi) request.getAttribute(AbstractWebContext.UXUI);
 		if (result == null) {
 			Router router = CORE.getRepository().getRouter();
+			if (router == null) {
+				throw new DomainException("No router configured; cannot resolve UX/UI");
+			}
 			UxUiSelector uxuiSelector = (UxUiSelector) router.getUxuiSelector();
 			UserAgentType type = UserAgent.getType(request);
 			result = UserAgent.isEmulated(request) ? uxuiSelector.emulate(type, request) : uxuiSelector.select(type, request);

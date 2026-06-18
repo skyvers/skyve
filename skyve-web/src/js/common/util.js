@@ -57,6 +57,62 @@ SKYVE.Util = (function () {
 		},
 
 		/**
+		 * Finds the nearest parent window matching a predicate.
+		 * @param {Function} predicate - accepts a window and returns true for the owner frame.
+		 * @returns {?Window} matching window, or null if none is reachable.
+		 */
+		findOwnerWindow: function (predicate) {
+			let result = window.parent;
+			while (result && result !== window) {
+				try {
+					if (predicate(result)) {
+						return result;
+					}
+					if (!result.parent || result.parent === result) {
+						return null;
+					}
+					result = result.parent;
+				} catch (ignore) {
+					return null;
+				}
+			}
+			return null;
+		},
+
+		/**
+		 * Finds the nearest parent window hosting SmartClient.
+		 * @returns {?Window} SmartClient owner window, or null if none is reachable.
+		 */
+		findSmartClientWindow: function () {
+			return SKYVE.Util.findOwnerWindow(function (owner) {
+				return !!(owner.isc && owner.isc.WindowStack);
+			});
+		},
+
+		/**
+		 * Finds the nearest parent window hosting PrimeFaces Skyve helpers.
+		 * @returns {?Window} PrimeFaces owner window, or null if none is reachable.
+		 */
+		findPrimeFacesWindow: function () {
+			return SKYVE.Util.findOwnerWindow(function (owner) {
+				return !!(owner.SKYVE && owner.SKYVE.PF);
+			});
+		},
+
+		/**
+		 * Finds the nearest parent window hosting either supported Skyve UI runtime.
+		 * @returns {?Window} Skyve UI owner window, or null if none is reachable.
+		 */
+		findSkyveWindow: function () {
+			return SKYVE.Util.findOwnerWindow(function (owner) {
+				return !!(
+					(owner.isc && owner.isc.WindowStack) ||
+					(owner.SKYVE && owner.SKYVE.PF)
+				);
+			});
+		},
+
+		/**
 		 * Loads a JavaScript file.
 		 * @param {string} scriptPath - the path to the JavaScript file.
 		 * @param {Function} callback - callback function to execute after loading.

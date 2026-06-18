@@ -25,7 +25,9 @@ class PrimeFacesContentUploadScriptTest {
 		assertTrue(script.contains("var unsanitiseBinding = function(binding)"), script);
 		assertTrue(script.contains("return binding.replace(/\\_(\\d*)\\_/g, '[$1]').replace(/\\_/g, '.');"), script);
 		assertTrue(script.contains("afterContentUpload: function(binding, contentId, modoc, fileName, mediaKind, companionBinding)"), script);
-		assertTrue(script.contains("if (mediaKind && companionBinding) {\n\t\t\t\tsetExactContentValue(top, id, companionBinding, '_hidden', mediaKind);\n\t\t\t}"), script);
+		assertTrue(script.contains(".text('Content').attr('onclick', 'return true');"), script);
+		assertFalse(script.contains(".text(fileName).attr('onclick', 'return true');"), script);
+		assertTrue(script.contains("if (mediaKind && companionBinding) {\n\t\t\t\tsetExactContentValue(window, id, companionBinding, '_hidden', mediaKind);\n\t\t\t}"), script);
 		assertTrue(script.contains("var showContentVideo = function(root, id, binding, url)"), script);
 		assertTrue(script.contains("var video = container.children('video');"), script);
 		assertTrue(script.contains("container.append('<video controls preload=\"metadata\" style=\"width:100%;height:100%;object-fit:contain\" src=\"' + url + '\"></video>');"), script);
@@ -41,21 +43,23 @@ class PrimeFacesContentUploadScriptTest {
 		assertTrue(script.contains("video.parent().toggleClass('skyveContentHidden', ! showVideo);"), script);
 		assertTrue(script.contains("var getContentMarkupItems = function(root, id, binding)"), script);
 		assertTrue(script.contains("toggleClass('skyveContentHidden', mediaKind !== 'image');"), script);
-		assertTrue(script.contains("setContentImagePlaceholder(top, id, binding, false);"), script);
-		assertTrue(script.contains("showContentVideo(top, id, binding, url);"), script);
-		assertTrue(script.contains("setAutoContentVisibility(top, id, binding, mediaKind);"), script);
-		assertTrue(script.contains("setContentMarkupVisibility(top, id, binding, mediaKind);"), script);
-		assertTrue(script.contains("setContentImagePlaceholder(top, id, binding, true);"), script);
-		assertTrue(script.contains("showContentVideoPlaceholder(top, id, binding);"), script);
-		assertTrue(script.contains("setAutoContentVisibility(top, id, binding, '');"), script);
-		assertTrue(script.contains("setContentMarkupVisibility(top, id, binding, '');"), script);
+		assertTrue(script.contains("setContentImagePlaceholder(window, id, binding, false);"), script);
+		assertTrue(script.contains("showContentVideo(window, id, binding, url);"), script);
+		assertTrue(script.contains("setAutoContentVisibility(window, id, binding, mediaKind);"), script);
+		assertTrue(script.contains("setContentMarkupVisibility(window, id, binding, mediaKind);"), script);
+		assertTrue(script.contains("setContentImagePlaceholder(window, id, binding, true);"), script);
+		assertTrue(script.contains("showContentVideoPlaceholder(window, id, binding);"), script);
+		assertTrue(script.contains("setAutoContentVisibility(window, id, binding, '');"), script);
+		assertTrue(script.contains("setContentMarkupVisibility(window, id, binding, '');"), script);
 		assertFalse(script.contains("replaceWith('<video"));
 		assertFalse(script.contains("replaceWith('<div"));
-		assertTrue(script.contains("setExactContentValue(top, id, companionBinding, '_hidden', 'image');"), script);
-		assertTrue(script.contains("setAutoContentVisibility(top, id, binding, 'image');"), script);
-		assertTrue(script.contains("setContentMarkupVisibility(top, id, binding, 'image');"), script);
+		assertTrue(script.contains("setExactContentValue(window, id, companionBinding, '_hidden', 'image');"), script);
+		assertTrue(script.contains("setAutoContentVisibility(window, id, binding, 'image');"), script);
+		assertTrue(script.contains("setContentMarkupVisibility(window, id, binding, 'image');"), script);
 		assertTrue(script.contains("'&_b=' + unsanitiseBinding(binding)"), script);
 		assertFalse(script.contains("setContentValue(top, id, '_' + binding, '_hidden', mediaKind || '');"), script);
 		assertFalse(script.contains("setContentValue(top, id, '_' + binding, '_hidden', 'image');"), script);
+		assertFalse(script.contains("setContentValue(top,"), script);
+		assertFalse(script.contains("getContentElements(top,"), script);
 	}
 }

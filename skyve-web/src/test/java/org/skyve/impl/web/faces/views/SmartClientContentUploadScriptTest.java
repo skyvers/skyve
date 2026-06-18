@@ -44,4 +44,20 @@ class SmartClientContentUploadScriptTest {
 		assertTrue(types.contains("SKYVE.Util.unsanitiseBinding(this.name)"), types);
 		assertTrue(types.contains("SKYVE.Util.unsanitiseBinding(this.name) +"), types);
 	}
+
+	@Test
+	void popupOwnerResolversSearchParentFrames() throws IOException {
+		String commonUtil = Files.readString(COMMON_UTIL_SCRIPT);
+
+		assertTrue(commonUtil.contains("findOwnerWindow: function (predicate)"), commonUtil);
+		assertTrue(commonUtil.contains("let result = window.parent;"), commonUtil);
+		assertTrue(commonUtil.contains("while (result && result !== window)"), commonUtil);
+		assertTrue(commonUtil.contains("catch (ignore)"), commonUtil);
+		assertTrue(commonUtil.contains("findSmartClientWindow: function ()"), commonUtil);
+		assertTrue(commonUtil.contains("return !!(owner.isc && owner.isc.WindowStack);"), commonUtil);
+		assertTrue(commonUtil.contains("findPrimeFacesWindow: function ()"), commonUtil);
+		assertTrue(commonUtil.contains("return !!(owner.SKYVE && owner.SKYVE.PF);"), commonUtil);
+		assertTrue(commonUtil.contains("findSkyveWindow: function ()"), commonUtil);
+		assertTrue(commonUtil.contains("(owner.isc && owner.isc.WindowStack) ||"), commonUtil);
+	}
 }

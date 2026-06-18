@@ -4733,9 +4733,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		String expression = String.format("#{%s.getContentUrl('%s', false)}", managedBeanName, binding);
 		result.setValueExpression("value", ef.createValueExpression(elc, expression, String.class));
 
-		expression = String.format("#{%s.getContentFileName('%s')}", managedBeanName, binding);
 		UIOutput outputText = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
-		outputText.setValueExpression("value", ef.createValueExpression(elc, expression, String.class));
+		outputText.setValue("Content");
 		result.getChildren().add(outputText);
 
 		expression = String.format("#{(empty %s.currentBean['%s']) ? 'return false' : null}", managedBeanName, binding);
