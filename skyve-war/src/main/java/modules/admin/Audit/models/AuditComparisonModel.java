@@ -250,9 +250,12 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 				}
 				catch (@SuppressWarnings("unused") Exception e) {
 					// The audited value can no longer be coerced to the attribute's type
-					// (e.g. a removed/renamed enum constant). Fall back to the raw audited string.
-					property.setTitle(name);
+					// (e.g. a removed/renamed enum constant). Keep the attribute's localised
+					// title but degrade to a text widget showing the raw audited string.
 					property.setWidget(new TextField());
+					if (value != null) {
+						value = value.toString();
+					}
 				}
 			}
 
@@ -305,8 +308,12 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 					}
 					catch (@SuppressWarnings("unused") Exception e) {
 						// The audited value can no longer be coerced to the attribute's type
-						// (e.g. a removed/renamed enum constant). Fall back to the raw audited string.
+						// (e.g. a removed/renamed enum constant). Degrade to a text widget
+						// showing the raw audited string.
 						property.setWidget(new TextField());
+						if (value != null) {
+							value = value.toString();
+						}
 					}
 				}
 

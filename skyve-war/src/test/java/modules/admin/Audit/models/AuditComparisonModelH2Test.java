@@ -187,7 +187,9 @@ class AuditComparisonModelH2Test extends AbstractH2Test {
 
 		ComparisonProperty property = root.getProperties().get(0);
 		assertThat(property.getName(), is("wizardState"));
-		assertThat(property.getTitle(), is("wizardState"));
+		// The attribute still exists, so its localised title is retained; only the
+		// widget/value degrades because the value can no longer be coerced.
+		assertThat(property.getTitle(), is("Wizard State"));
 		assertThat(property.getWidget(), instanceOf(TextField.class));
 		assertThat(property.getNewValue(), is("obsoleteState"));
 	}
