@@ -10,8 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.Marker;
-import org.slf4j.event.Level;
-import org.slf4j.helpers.AbstractLogger;
+import org.slf4j.MarkerFactory;
 import org.slf4j.spi.LocationAwareLogger;
 
 /**
@@ -23,6 +22,11 @@ import org.slf4j.spi.LocationAwareLogger;
  * real logging backend.
  */
 class SkyveLoggerFactoryTest {
+	private static final int TRACE = LocationAwareLogger.TRACE_INT;
+	private static final int DEBUG = LocationAwareLogger.DEBUG_INT;
+	private static final int INFO = LocationAwareLogger.INFO_INT;
+	private static final int WARN = LocationAwareLogger.WARN_INT;
+	private static final int ERROR = LocationAwareLogger.ERROR_INT;
 
 	private RecordingLogger recorder;
 	private Logger logger;
@@ -152,7 +156,7 @@ class SkyveLoggerFactoryTest {
 		locationAwareLogger.warn("Failure\nfor {}", "user\rname", cause);
 
 		assertEquals(LocationAwareLogger.WARN_INT, locationAwareRecorder.lastLevelInt);
-		assertEquals(AbstractLogger.class.getName(), locationAwareRecorder.lastFqcn);
+		assertEquals("org.skyve.util.logging.SkyveLoggerFactory$SanitisingLogger", locationAwareRecorder.lastFqcn);
 		assertEquals("Failure_for {}", locationAwareRecorder.lastMsg);
 		assertNotNull(locationAwareRecorder.lastArgs);
 		assertEquals(1, locationAwareRecorder.lastArgs.length);
@@ -193,41 +197,50 @@ class SkyveLoggerFactoryTest {
 		assertTrue(logger.isErrorEnabled(null));
 	}
 
+	@Test
+	void passesMarkerThrough() {
+		Marker marker = MarkerFactory.getMarker("audit");
+		logger.info(marker, "Marker\nmessage");
+
+		assertSame(marker, recorder.lastMarker);
+		assertEquals("Marker_message", recorder.lastMsg);
+	}
+
 	// ---- all five levels sanitise ----
 
 	@Test
 	void sanitisesTraceLevel() {
 		logger.trace("Trace\ninjection");
 		assertEquals("Trace_injection", recorder.lastMsg);
-		assertEquals(Level.TRACE, recorder.lastLevel);
+		assertEquals(TRACE, recorder.lastLevel);
 	}
 
 	@Test
 	void sanitisesDebugLevel() {
 		logger.debug("Debug\ninjection");
 		assertEquals("Debug_injection", recorder.lastMsg);
-		assertEquals(Level.DEBUG, recorder.lastLevel);
+		assertEquals(DEBUG, recorder.lastLevel);
 	}
 
 	@Test
 	void sanitisesInfoLevel() {
 		logger.info("Info\ninjection");
 		assertEquals("Info_injection", recorder.lastMsg);
-		assertEquals(Level.INFO, recorder.lastLevel);
+		assertEquals(INFO, recorder.lastLevel);
 	}
 
 	@Test
 	void sanitisesWarnLevel() {
 		logger.warn("Warn\ninjection");
 		assertEquals("Warn_injection", recorder.lastMsg);
-		assertEquals(Level.WARN, recorder.lastLevel);
+		assertEquals(WARN, recorder.lastLevel);
 	}
 
 	@Test
 	void sanitisesErrorLevel() {
 		logger.error("Error\ninjection");
 		assertEquals("Error_injection", recorder.lastMsg);
-		assertEquals(Level.ERROR, recorder.lastLevel);
+		assertEquals(ERROR, recorder.lastLevel);
 	}
 
 	// ---- factory methods return non-null sanitizing loggers ----
@@ -253,31 +266,25 @@ class SkyveLoggerFactoryTest {
 	// ---- recording delegate ----
 
 	/**
-	 * A minimal {@link AbstractLogger} subclass that records the last normalised
+	 * A minimal {@link Logger} implementation that records the last normalised
 	 * logging call made to it. All levels are enabled so that {@code SkyveLoggerFactory}
 	 * always forwards calls down to this recorder.
 	 */
-	private static final class RecordingLogger extends AbstractLogger {
-
-		private static final long serialVersionUID = 1L;
-
+	private static class RecordingLogger implements Logger {
 		String lastMsg;
 		Object[] lastArgs;
 		Throwable lastThrowable;
-		Level lastLevel;
-
-		RecordingLogger() {
-			this.name = "recording";
-		}
+		Marker lastMarker;
+		int lastLevel;
 
 		@Override
-		protected String getFullyQualifiedCallerName() {
-			return null;
+		public String getName() {
+			return "recording";
 		}
 
-		@Override
-		protected void handleNormalizedLoggingCall(Level level, Marker marker, String msg, Object[] arguments, Throwable throwable) {
+		protected void record(int level, Marker marker, String msg, Object[] arguments, Throwable throwable) {
 			this.lastLevel = level;
+			this.lastMarker = marker;
 			this.lastMsg = msg;
 			this.lastArgs = arguments;
 			this.lastThrowable = throwable;
@@ -285,39 +292,73 @@ class SkyveLoggerFactoryTest {
 
 		@Override public boolean isTraceEnabled() { return true; }
 		@Override public boolean isTraceEnabled(Marker marker) { return true; }
+		@Override public void trace(String msg) { record(TRACE, null, msg, null, null); }
+		@Override public void trace(String format, Object arg) { record(TRACE, null, format, new Object[] {arg}, null); }
+		@Override public void trace(String format, Object arg1, Object arg2) { record(TRACE, null, format, new Object[] {arg1, arg2}, null); }
+		@Override public void trace(String format, Object... arguments) { record(TRACE, null, format, arguments, null); }
+		@Override public void trace(String msg, Throwable t) { record(TRACE, null, msg, null, t); }
+		@Override public void trace(Marker marker, String msg) { record(TRACE, marker, msg, null, null); }
+		@Override public void trace(Marker marker, String format, Object arg) { record(TRACE, marker, format, new Object[] {arg}, null); }
+		@Override public void trace(Marker marker, String format, Object arg1, Object arg2) { record(TRACE, marker, format, new Object[] {arg1, arg2}, null); }
+		@Override public void trace(Marker marker, String format, Object... argArray) { record(TRACE, marker, format, argArray, null); }
+		@Override public void trace(Marker marker, String msg, Throwable t) { record(TRACE, marker, msg, null, t); }
+
 		@Override public boolean isDebugEnabled() { return true; }
 		@Override public boolean isDebugEnabled(Marker marker) { return true; }
+		@Override public void debug(String msg) { record(DEBUG, null, msg, null, null); }
+		@Override public void debug(String format, Object arg) { record(DEBUG, null, format, new Object[] {arg}, null); }
+		@Override public void debug(String format, Object arg1, Object arg2) { record(DEBUG, null, format, new Object[] {arg1, arg2}, null); }
+		@Override public void debug(String format, Object... arguments) { record(DEBUG, null, format, arguments, null); }
+		@Override public void debug(String msg, Throwable t) { record(DEBUG, null, msg, null, t); }
+		@Override public void debug(Marker marker, String msg) { record(DEBUG, marker, msg, null, null); }
+		@Override public void debug(Marker marker, String format, Object arg) { record(DEBUG, marker, format, new Object[] {arg}, null); }
+		@Override public void debug(Marker marker, String format, Object arg1, Object arg2) { record(DEBUG, marker, format, new Object[] {arg1, arg2}, null); }
+		@Override public void debug(Marker marker, String format, Object... arguments) { record(DEBUG, marker, format, arguments, null); }
+		@Override public void debug(Marker marker, String msg, Throwable t) { record(DEBUG, marker, msg, null, t); }
+
 		@Override public boolean isInfoEnabled() { return true; }
 		@Override public boolean isInfoEnabled(Marker marker) { return true; }
+		@Override public void info(String msg) { record(INFO, null, msg, null, null); }
+		@Override public void info(String format, Object arg) { record(INFO, null, format, new Object[] {arg}, null); }
+		@Override public void info(String format, Object arg1, Object arg2) { record(INFO, null, format, new Object[] {arg1, arg2}, null); }
+		@Override public void info(String format, Object... arguments) { record(INFO, null, format, arguments, null); }
+		@Override public void info(String msg, Throwable t) { record(INFO, null, msg, null, t); }
+		@Override public void info(Marker marker, String msg) { record(INFO, marker, msg, null, null); }
+		@Override public void info(Marker marker, String format, Object arg) { record(INFO, marker, format, new Object[] {arg}, null); }
+		@Override public void info(Marker marker, String format, Object arg1, Object arg2) { record(INFO, marker, format, new Object[] {arg1, arg2}, null); }
+		@Override public void info(Marker marker, String format, Object... arguments) { record(INFO, marker, format, arguments, null); }
+		@Override public void info(Marker marker, String msg, Throwable t) { record(INFO, marker, msg, null, t); }
+
 		@Override public boolean isWarnEnabled() { return true; }
 		@Override public boolean isWarnEnabled(Marker marker) { return true; }
+		@Override public void warn(String msg) { record(WARN, null, msg, null, null); }
+		@Override public void warn(String format, Object arg) { record(WARN, null, format, new Object[] {arg}, null); }
+		@Override public void warn(String format, Object... arguments) { record(WARN, null, format, arguments, null); }
+		@Override public void warn(String format, Object arg1, Object arg2) { record(WARN, null, format, new Object[] {arg1, arg2}, null); }
+		@Override public void warn(String msg, Throwable t) { record(WARN, null, msg, null, t); }
+		@Override public void warn(Marker marker, String msg) { record(WARN, marker, msg, null, null); }
+		@Override public void warn(Marker marker, String format, Object arg) { record(WARN, marker, format, new Object[] {arg}, null); }
+		@Override public void warn(Marker marker, String format, Object arg1, Object arg2) { record(WARN, marker, format, new Object[] {arg1, arg2}, null); }
+		@Override public void warn(Marker marker, String format, Object... arguments) { record(WARN, marker, format, arguments, null); }
+		@Override public void warn(Marker marker, String msg, Throwable t) { record(WARN, marker, msg, null, t); }
+
 		@Override public boolean isErrorEnabled() { return true; }
 		@Override public boolean isErrorEnabled(Marker marker) { return true; }
+		@Override public void error(String msg) { record(ERROR, null, msg, null, null); }
+		@Override public void error(String format, Object arg) { record(ERROR, null, format, new Object[] {arg}, null); }
+		@Override public void error(String format, Object arg1, Object arg2) { record(ERROR, null, format, new Object[] {arg1, arg2}, null); }
+		@Override public void error(String format, Object... arguments) { record(ERROR, null, format, arguments, null); }
+		@Override public void error(String msg, Throwable t) { record(ERROR, null, msg, null, t); }
+		@Override public void error(Marker marker, String msg) { record(ERROR, marker, msg, null, null); }
+		@Override public void error(Marker marker, String format, Object arg) { record(ERROR, marker, format, new Object[] {arg}, null); }
+		@Override public void error(Marker marker, String format, Object arg1, Object arg2) { record(ERROR, marker, format, new Object[] {arg1, arg2}, null); }
+		@Override public void error(Marker marker, String format, Object... arguments) { record(ERROR, marker, format, arguments, null); }
+		@Override public void error(Marker marker, String msg, Throwable t) { record(ERROR, marker, msg, null, t); }
 	}
 
-	private static final class LocationAwareRecordingLogger extends AbstractLogger implements LocationAwareLogger {
-
-		private static final long serialVersionUID = 1L;
-
+	private static final class LocationAwareRecordingLogger extends RecordingLogger implements LocationAwareLogger {
 		String lastFqcn;
 		int lastLevelInt;
-		String lastMsg;
-		Object[] lastArgs;
-		Throwable lastThrowable;
-
-		LocationAwareRecordingLogger() {
-			this.name = "locationAwareRecording";
-		}
-
-		@Override
-		protected String getFullyQualifiedCallerName() {
-			return null;
-		}
-
-		@Override
-		protected void handleNormalizedLoggingCall(Level level, Marker marker, String msg, Object[] arguments, Throwable throwable) {
-			throw new AssertionError("LocationAwareLogger.log should be used directly");
-		}
 
 		@Override
 		public void log(Marker marker, String fqcn, int level, String message, Object[] argArray, Throwable t) {
@@ -327,16 +368,5 @@ class SkyveLoggerFactoryTest {
 			this.lastArgs = argArray;
 			this.lastThrowable = t;
 		}
-
-		@Override public boolean isTraceEnabled() { return true; }
-		@Override public boolean isTraceEnabled(Marker marker) { return true; }
-		@Override public boolean isDebugEnabled() { return true; }
-		@Override public boolean isDebugEnabled(Marker marker) { return true; }
-		@Override public boolean isInfoEnabled() { return true; }
-		@Override public boolean isInfoEnabled(Marker marker) { return true; }
-		@Override public boolean isWarnEnabled() { return true; }
-		@Override public boolean isWarnEnabled(Marker marker) { return true; }
-		@Override public boolean isErrorEnabled() { return true; }
-		@Override public boolean isErrorEnabled(Marker marker) { return true; }
 	}
 }
