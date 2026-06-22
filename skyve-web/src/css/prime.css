@@ -32,6 +32,45 @@ body,html {
 	min-height: 0px !important;
 }
 
+.skyveMorphOpening {
+	animation: skyveMorphOpen 320ms cubic-bezier(.22, 1, .36, 1);
+	transform-origin: var(--skyve-morph-origin, top left);
+	will-change: transform, opacity, border-radius;
+	overflow: hidden;
+}
+.skyveMorphGhost {
+	box-shadow: 0 12px 32px rgba(0, 0, 0, .18);
+	pointer-events: none;
+	position: fixed;
+}
+
+@keyframes skyveMorphOpen {
+	from {
+		border-radius: var(--skyve-morph-start-radius, 16px);
+		opacity: .2;
+		transform: translate(var(--skyve-morph-x, 0), var(--skyve-morph-y, 0)) scale(var(--skyve-morph-scale-x, .25), var(--skyve-morph-scale-y, .25));
+	}
+	42% {
+		border-radius: max(var(--skyve-morph-start-radius, 16px), 38px);
+		opacity: .92;
+	}
+	78% {
+		border-radius: max(var(--skyve-morph-end-radius, 8px), 22px);
+		opacity: 1;
+	}
+	to {
+		border-radius: var(--skyve-morph-end-radius, inherit);
+		opacity: 1;
+		transform: translate(0, 0) scale(1, 1);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.skyveMorphOpening {
+		animation: none;
+	}
+}
+
 /* skyve alignment styles */
 .left {
 	text-align: left;

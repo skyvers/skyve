@@ -2727,6 +2727,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		actionButton.setValue(null);
 		actionButton.setButtonStyle("width:30px;height:30px;text-align:center");
 		actionButton.setButtonStyleClass("skyveContentActionButton");
+		actionButton.setMenuStyleClass("skyveContentActionMenu");
 		setDisabled(actionButton, disabledConditionName, formDisabledConditionName);
 		actionGroupChildren.add(actionButton);
 		List<UIComponent> actionItems = actionButton.getChildren();
@@ -2761,7 +2762,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			dialog.setHeader(image ? "Image Upload" : "Content Upload");
 			dialog.setAppendTo("@(body)"); // append to <body/> so dialog can always pop (didn't work in tabs)
 			// clear the iframe src on hide so there is no flash next open
-			dialog.setOnHide("SKYVE.PF.contentOverlayOnHide('" + id + "');PF('" + overlayVar + "').toggleMaximize()");
+			dialog.setOnHide("SKYVE.PF.contentOverlayOnHide('" + id + "',true);PF('" + overlayVar + "').toggleMaximize()");
 			panel = dialog;
 		}
 		else {
@@ -2795,8 +2796,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		// <iframe id="s06" src="" style="width:100%;height:280px;border:none"></iframe>
 		HtmlOutputText iframe = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
 		iframe.setEscape(false);
-		String iframeAttributes = fullUploadDialog ? " scrolling=\"no\" style=\"width:100%;height:100%;border:none;overflow:hidden\""
-													: " style=\"width:100%;height:300px;border:none\"";
+		String iframeAttributes = fullUploadDialog ? " loading=\"eager\" scrolling=\"no\" style=\"width:100%;height:100%;border:none;overflow:hidden\""
+													: " loading=\"eager\" style=\"width:100%;height:300px;border:none\"";
 		iframe.setValue(String.format("<iframe id=\"%s_overlayiframe\" src=\"\"%s></iframe>", id, iframeAttributes));
 		setId(iframe, null);
 		panel.getChildren().add(iframe);
@@ -2844,7 +2845,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 				value.append("_hidden\"]').val();if(mediaKind!=='image'){return false}");
 			}
 			value.append("PF('").append(overlayVar);
-			value.append("').show();PF('").append(overlayVar).append("').toggleMaximize();return false");
+			value.append("').show();PF('").append(overlayVar).append("').toggleMaximize();");
+			value.append("return false");
 			markupItem.setOnclick(value.toString());
 
 			Dialog dialog = (Dialog) a.createComponent(Dialog.COMPONENT_TYPE);
@@ -2995,7 +2997,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			value.append("#{'SKYVE.PF.contentOverlayOnShow(\\'").append(id).append("\\',\\''.concat(");
 			appendContentUploadUrlExpression(value, sanitisedBinding, display, capture, companionBinding);
 			value.append(".concat('\\');PF(\\'").append(var);
-			value.append("\\').show();PF(\\'").append(var).append("\\').toggleMaximize();return false'))}");
+			value.append("\\').show();PF(\\'").append(var).append("\\').toggleMaximize();");
+			value.append("return false'))}");
 		}
 		else {
 			value.append("PF('").append(var).append("').show();return false");

@@ -16,6 +16,158 @@ SKYVE.PF = function() {
 	var contentOverlayIdsByBinding = {};
 	var contentMarkupIdsByBinding = {};
 	var contentMarkupCompanionIdsByBinding = {};
+
+	var getElement = function(element) {
+		if (! element) {
+			return null;
+		}
+		if (element.jquery) {
+			return element[0] || null;
+		}
+		if (element.target) {
+			return element.currentTarget || element.target;
+		}
+		if (typeof element === 'string') {
+			var result = $(PrimeFaces.escapeClientId(element));
+			if (result.length === 0) {
+				result = $(element);
+			}
+			return result[0] || null;
+		}
+		return element;
+	};
+
+	var getWidgetElement = function(widgetVar) {
+		var widget = window.PF ? window.PF(widgetVar) : null;
+		return widget && widget.jq ? widget.jq[0] : null;
+	};
+
+	var prepareMorph = function(source, target, options) {
+		var sourceElement = getElement(source);
+		var targetElement = getElement(target);
+		if (! sourceElement || ! targetElement) {
+			return null;
+		}
+		if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+			return null;
+		}
+
+		var sourceRect = sourceElement.getBoundingClientRect();
+		var targetRect = targetElement.getBoundingClientRect();
+		if ((sourceRect.width <= 0) || (sourceRect.height <= 0) || (targetRect.width <= 0) || (targetRect.height <= 0)) {
+			return null;
+		}
+
+		var settings = options || {};
+		var originalTargetElement = targetElement;
+		if (settings.ghost || targetElement.classList.contains('ui-dialog')) {
+			var ghost = document.createElement('div');
+			var targetStyle = window.getComputedStyle(targetElement);
+			var targetZIndex = parseInt(targetStyle.zIndex, 10);
+			var backgroundColor = targetStyle.backgroundColor;
+			ghost.className = 'skyveMorphGhost';
+			ghost.style.left = targetRect.left + 'px';
+			ghost.style.top = targetRect.top + 'px';
+			ghost.style.width = targetRect.width + 'px';
+			ghost.style.height = targetRect.height + 'px';
+			ghost.style.backgroundColor = (! backgroundColor || backgroundColor === 'rgba(0, 0, 0, 0)' || backgroundColor === 'transparent') ? '#fff' : backgroundColor;
+			ghost.style.borderRadius = targetStyle.borderRadius;
+			ghost.style.zIndex = isNaN(targetZIndex) ? '1000' : targetZIndex + 1;
+			document.body.appendChild(ghost);
+			targetElement = ghost;
+			settings.endRadius = settings.endRadius || targetStyle.borderRadius;
+		}
+
+		var leftDistance = Math.min(Math.abs(sourceRect.left - targetRect.left), Math.abs(sourceRect.right - targetRect.left));
+		var rightDistance = Math.min(Math.abs(sourceRect.left - targetRect.right), Math.abs(sourceRect.right - targetRect.right));
+		var topDistance = Math.min(Math.abs(sourceRect.top - targetRect.top), Math.abs(sourceRect.bottom - targetRect.top));
+		var bottomDistance = Math.min(Math.abs(sourceRect.top - targetRect.bottom), Math.abs(sourceRect.bottom - targetRect.bottom));
+		var originX = leftDistance <= rightDistance ? 'left' : 'right';
+		var originY = topDistance <= bottomDistance ? 'top' : 'bottom';
+		var scaleX = Math.max(sourceRect.width / targetRect.width, 0.02);
+		var scaleY = Math.max(sourceRect.height / targetRect.height, 0.02);
+		var originOffsetX = originX === 'left' ? 0 : targetRect.width;
+		var originOffsetY = originY === 'top' ? 0 : targetRect.height;
+		var translateX = sourceRect.left - targetRect.left - (originOffsetX * (1 - scaleX));
+		var translateY = sourceRect.top - targetRect.top - (originOffsetY * (1 - scaleY));
+
+		targetElement.style.setProperty('--skyve-morph-origin', originX + ' ' + originY);
+		targetElement.style.setProperty('--skyve-morph-x', translateX + 'px');
+		targetElement.style.setProperty('--skyve-morph-y', translateY + 'px');
+		targetElement.style.setProperty('--skyve-morph-scale-x', scaleX);
+		targetElement.style.setProperty('--skyve-morph-scale-y', scaleY);
+		targetElement.style.setProperty('--skyve-morph-start-radius', settings.startRadius || Math.round(Math.min(sourceRect.width, sourceRect.height) / 2) + 'px');
+		if (settings.endRadius) {
+			targetElement.style.setProperty('--skyve-morph-end-radius', settings.endRadius);
+		}
+		else {
+			targetElement.style.removeProperty('--skyve-morph-end-radius');
+		}
+		return {
+			element: targetElement,
+			originalElement: originalTargetElement,
+			settings: settings
+		};
+	};
+
+	var morphFrom = function(source, target, options) {
+		var prepared = prepareMorph(source, target, options);
+		if (! prepared) {
+			return;
+		}
+		var targetElement = prepared.element;
+		var originalTargetElement = prepared.originalElement;
+		var settings = prepared.settings;
+
+		if (settings.hideTargetDuring && originalTargetElement !== targetElement) {
+			originalTargetElement.style.visibility = 'hidden';
+		}
+		targetElement.classList.remove('skyveMorphOpening');
+		void targetElement.offsetWidth;
+		targetElement.classList.add('skyveMorphOpening');
+		window.setTimeout(function() {
+			targetElement.classList.remove('skyveMorphOpening');
+			if (settings.hideTargetDuring && originalTargetElement !== targetElement) {
+				originalTargetElement.style.visibility = '';
+			}
+			if (targetElement.classList.contains('skyveMorphGhost')) {
+				targetElement.parentNode.removeChild(targetElement);
+			}
+		}, settings.duration || 360);
+	};
+
+	var morphWidgetFrom = function(source, widgetVar, options) {
+		window.setTimeout(function() {
+			morphFrom(source, getWidgetElement(widgetVar), options);
+		}, 0);
+	};
+
+	var getContentActionMenu = function(source) {
+		var menuId = source.id ? source.id.replace(/_button$/, '_menu') : null;
+		var menu = menuId ? document.getElementById(menuId) : null;
+		if (! menu && source.parentNode) {
+			menu = $(source.parentNode).children('.skyveContentActionMenu')[0] || null;
+		}
+		return menu;
+	};
+
+	$(document).on('mousedown touchstart', '.skyveContentActionButton', function() {
+		var menu = getContentActionMenu(this);
+		$(this).data('skyveMenuWasVisible', !! (menu && $(menu).is(':visible')));
+	});
+
+	$(document).on('click', '.skyveContentActionButton', function() {
+		if ($(this).data('skyveMenuWasVisible')) {
+			return;
+		}
+		var source = this;
+		window.setTimeout(function() {
+			var menu = getContentActionMenu(source);
+			if (menu && $(menu).is(':visible')) {
+				morphFrom(source, menu, {duration: 360, endRadius: '4px', ghost: true, hideTargetDuring: true});
+			}
+		}, 0);
+	});
 	
 	var getUrlParameter = function(url, name) {
 		var match = new RegExp('[?&]' + name + '=([^&]*)').exec(url);
@@ -145,6 +297,14 @@ SKYVE.PF = function() {
 		getById: function(id) {
 			return $(PrimeFaces.escapeClientId(id));
 		},
+
+		morphFrom: function(source, target, options) {
+			morphFrom(source, target, options);
+		},
+
+		morphWidgetFrom: function(source, widgetVar, options) {
+			morphWidgetFrom(source, widgetVar, options);
+		},
 		
 		getByIdEndsWith: function(id) {
 			return $('[id$="' + id + '"]');
@@ -155,11 +315,16 @@ SKYVE.PF = function() {
 			if (binding) {
 				contentOverlayIdsByBinding[binding] = id;
 			}
-			SKYVE.PF.getById(id + '_overlayiframe').attr('src', url);
+			var iframe = SKYVE.PF.getById(id + '_overlayiframe');
+			if (iframe.attr('src') !== url) {
+				iframe.attr('src', url);
+			}
 		},
 		
-		contentOverlayOnHide: function(id) {
-			SKYVE.PF.getById(id + '_overlayiframe').attr('src','')
+		contentOverlayOnHide: function(id, preserve) {
+			if (! preserve) {
+				SKYVE.PF.getById(id + '_overlayiframe').attr('src','')
+			}
 		},
 		
 		afterContentUpload: function(binding, contentId, modoc, fileName, mediaKind, companionBinding) {
@@ -181,6 +346,7 @@ SKYVE.PF = function() {
 			if (widget) {
 				widget.hide();
 			}
+			SKYVE.PF.getById(id + '_overlayiframe').attr('src','');
 			delete contentOverlayIdsByBinding[binding];
 		},
 
