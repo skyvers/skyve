@@ -19,6 +19,63 @@
 	display: none !important;
 }
 
+#upload .ui-fileupload-buttonbar,
+#cropperUpload .ui-fileupload-buttonbar {
+	align-items: center;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	justify-content: center;
+	padding: 8px;
+}
+
+#upload .ui-fileupload-buttonbar .ui-button,
+#cropperUpload .ui-fileupload-buttonbar .ui-button {
+	border-radius: 4px;
+	box-sizing: border-box;
+	height: auto !important;
+	line-height: 1.2;
+	min-height: 46px;
+	min-width: 68px !important;
+	overflow: visible;
+	padding: 6px 8px !important;
+	text-align: center;
+	white-space: nowrap;
+	width: auto !important;
+}
+
+#upload .ui-fileupload-buttonbar .ui-button .ui-button-icon-left,
+#cropperUpload .ui-fileupload-buttonbar .ui-button .ui-button-icon-left {
+	display: block;
+	font-size: 16px;
+	left: auto !important;
+	margin: 0 auto 4px !important;
+	position: static !important;
+	top: auto !important;
+	transform: none !important;
+}
+
+#upload .ui-fileupload-buttonbar .ui-button .ui-button-text,
+#cropperUpload .ui-fileupload-buttonbar .ui-button .ui-button-text {
+	clip: auto !important;
+	display: block !important;
+	height: auto !important;
+	line-height: 1.2;
+	margin: 0 !important;
+	max-width: none;
+	overflow: visible !important;
+	padding: 0 !important;
+	text-indent: 0 !important;
+	width: auto !important;
+}
+
+#upload .ui-fileupload-buttonbar .ui-fileupload-upload.ui-state-disabled,
+#upload .ui-fileupload-buttonbar .ui-fileupload-upload:disabled,
+#upload .ui-fileupload-buttonbar .ui-fileupload-cancel.ui-state-disabled,
+#upload .ui-fileupload-buttonbar .ui-fileupload-cancel:disabled {
+	display: none;
+}
+
 #form {
 	display: flex;
 	flex-direction: column;
@@ -28,7 +85,7 @@
 	overflow: hidden;
 }
 
-#cropperBar {
+#cropperUpload {
 	display: none;
 	flex: 0 0 auto;
 }

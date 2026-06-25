@@ -119,21 +119,23 @@
 							style="display:none"
 							onclick="editImage();return false"
 							rendered="#{_skyveContent.imageUpload}" />
-				<div id="cropperBar" class="ui-fileupload-buttonbar ui-widget-header ui-corner-top">
-					<p:button id="crop"
-								type="button"
-								icon="fa-solid fa-upload"
-								value="Upload"
-								title="Upload Cropped Image"
-								onclick="cropAndUpload();return false"
-								rendered="#{_skyveContent.imageUpload or _skyveContent.cameraUploadAllowed}" />
-					<p:button id="cancel"
-								type="button"
-								icon="fa-solid fa-ban"
-								value="Cancel"
-								title="Cancel editing"
-								onclick="location.reload();return false"
-								rendered="#{_skyveContent.imageUpload or _skyveContent.cameraUploadAllowed}" />
+				<div id="cropperUpload" class="ui-fileupload ui-widget">
+					<div id="cropperBar" class="ui-fileupload-buttonbar ui-widget-header ui-corner-top">
+						<p:button id="crop"
+									type="button"
+									icon="fa-solid fa-upload"
+									value="Upload"
+									title="Upload Cropped Image"
+									onclick="cropAndUpload();return false"
+									rendered="#{_skyveContent.imageUpload or _skyveContent.cameraUploadAllowed}" />
+						<p:button id="cancel"
+									type="button"
+									icon="fa-solid fa-ban"
+									value="Cancel"
+									title="Cancel editing"
+									onclick="location.reload();return false"
+									rendered="#{_skyveContent.imageUpload or _skyveContent.cameraUploadAllowed}" />
+					</div>
 				</div>
 				<div id="cropperContainer">
 					<div id="cropperFrame" class="cropperFrame">

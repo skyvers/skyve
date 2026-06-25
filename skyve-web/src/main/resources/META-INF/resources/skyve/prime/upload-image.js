@@ -214,7 +214,7 @@
 			fileFormat = "jpeg";
 		}
 		fileName = croppedFileName(fileFormat);
-		$("#cropperBar").css({display: "block"});
+		$("#cropperUpload").css({display: "block"});
 		$("#cropperContainer").css({display: "flex"});
 		var reader = new FileReader();
 		reader.onload = function(evt) {
@@ -270,8 +270,8 @@
 		if (! document.getElementById("cropperContainer")) {
 			return;
 		}
-		$("#camera").appendTo($(".ui-fileupload .ui-fileupload-buttonbar")).show();
-		$("#edit").appendTo($(".ui-fileupload .ui-fileupload-buttonbar")).show();
+		$("#camera").appendTo($("#upload .ui-fileupload-buttonbar")).show();
+		$("#edit").appendTo($("#upload .ui-fileupload-buttonbar")).show();
 		$("#upload .ui-fileupload-choose").on("click", chooseImage);
 
 		$("#upload_input").on("change", function() {

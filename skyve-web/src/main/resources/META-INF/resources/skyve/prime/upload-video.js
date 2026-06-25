@@ -23,7 +23,7 @@
 	};
 
 	$(document).ready(function() {
-		$("#video").appendTo($(".ui-fileupload .ui-fileupload-buttonbar")).show();
+		$("#video").appendTo($("#upload .ui-fileupload-buttonbar")).show();
 		$("#upload .ui-fileupload-choose").on("click", chooseVideo);
 	});
 }());
