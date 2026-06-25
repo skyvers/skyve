@@ -1241,6 +1241,7 @@ class TabularComponentBuilderTest {
 		verify(header).setEscape(true);
 		verify(panel).setId("panel1");
 		verify(panel).setToggleable(true);
+		verify(panel).setToggleableHeader(true);
 		verify(panel).setCollapsed(true);
 		verify(ajax).setProcess("@this");
 		verify(ajax).setUpdate("@none");
@@ -5158,6 +5159,7 @@ class TabularComponentBuilderTest {
 		assertSame(panel, result);
 		assertSame(header, facets.get("header"));
 		verify(panel).setToggleable(true);
+		verify(panel).setToggleableHeader(true);
 		verify(panel).setCollapsed(false);
 	}
 

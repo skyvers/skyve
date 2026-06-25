@@ -60,7 +60,6 @@ import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.converters.Format;
 import org.skyve.domain.types.converters.Format.TextCase;
-import org.skyve.impl.generate.ViewRenderer;
 import org.skyve.domain.types.converters.date.DD_MMM_YYYY;
 import org.skyve.domain.types.converters.date.DD_MM_YYYY;
 import org.skyve.domain.types.converters.date.MMM_DD_YYYY;
@@ -91,6 +90,7 @@ import org.skyve.domain.types.converters.timestamp.MM_DD_YYYY_HH_MI_SS;
 import org.skyve.domain.types.converters.timestamp.YYYY_MM_DD_HH24_MI_SS;
 import org.skyve.domain.types.converters.timestamp.YYYY_MM_DD_HH_MI_SS;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.generate.ViewRenderer;
 import org.skyve.impl.metadata.model.document.InverseOne;
 import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
@@ -2414,10 +2414,10 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		}
 
 		if (ContentDisplay.link.equals(display) || auto) {
-			HtmlOutputLink link = contentLink(content.getPixelWidth(), textAlignment, binding);
+			HtmlOutputLink link = contentLink(content.getPixelWidth(), textAlignment, dataWidgetVar, binding);
 			link.setId(String.format("%s_%s_link", id, sanitisedBinding));
 			if (auto) {
-				setAutoContentVisibleStyleClass(link, binding, "link");
+				setAutoContentVisibleStyleClass(link, dataWidgetVar, binding, "link");
 			}
 			mediaChildren.add(link);
 		}
@@ -2430,6 +2430,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 																	display,
 																	content.getResolvedCapture(),
 																	auto ? companionFieldName(binding) : null,
+																	dataWidgetVar,
 																	fullUploadDialog);
 		}
 		if (ContentDisplay.image.equals(display) || auto) {
@@ -2439,11 +2440,12 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 														resolveImageHeight(content),
 														null,
 														binding,
+														dataWidgetVar,
 														phoneResponsiveMedia ? "skyveContentResponsiveImage" : null,
 														placeholderUploadOnclick);
 			image.getChildren().get(0).setId(String.format("%s_%s_image", id, sanitisedBinding));
 			if (auto) {
-				setAutoContentVisibleStyleClass(image, binding, "image");
+				setAutoContentVisibleStyleClass(image, dataWidgetVar, binding, "image");
 			}
 			mediaChildren.add(image);
 		}
@@ -2452,16 +2454,18 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			HtmlOutputText video = contentVideo(resolveVideoWidth(content),
 												resolveVideoHeight(content),
 												binding,
+												dataWidgetVar,
 												videoId,
 												phoneResponsiveMedia);
 			if (auto) {
-				setAutoContentVisibleStyleClass(video, binding, "video");
+				setAutoContentVisibleStyleClass(video, dataWidgetVar, binding, "video");
 			}
 			mediaChildren.add(video);
 		}
 		if (editable) {
 			editableContent(toAddTo,
 								id,
+								dataWidgetVar,
 								binding,
 								sanitisedBinding,
 								requiredMessage,
@@ -2524,8 +2528,11 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * @param binding content binding; must not be {@code null}
 	 * @param mediaKind expected media kind name; must not be {@code null}
 	 */
-	private void setAutoContentVisibleStyleClass(@Nonnull UIComponent component, @Nonnull String binding, @Nonnull String mediaKind) {
-		String mediaKindExpression = String.format("%s.getContentMediaKind('%s')", managedBeanName, binding);
+	private void setAutoContentVisibleStyleClass(@Nonnull UIComponent component,
+													@Nullable String dataWidgetVar,
+													@Nonnull String binding,
+													@Nonnull String mediaKind) {
+		String mediaKindExpression = contentMediaKindExpression(dataWidgetVar, binding);
 		String expression;
 		if ("link".equals(mediaKind)) {
 			expression = String.format("#{(empty %s or %s eq 'link') ? '' : 'skyveContentHidden'}", mediaKindExpression, mediaKindExpression);
@@ -2534,6 +2541,27 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			expression = String.format("#{%s eq '%s' ? '' : 'skyveContentHidden'}", mediaKindExpression, mediaKind);
 		}
 		component.setValueExpression("styleClass", ef.createValueExpression(elc, expression, String.class));
+	}
+
+	private @Nonnull String contentMediaKindExpression(@Nullable String dataWidgetVar, @Nonnull String binding) {
+		if (dataWidgetVar == null) {
+			return String.format("%s.getContentMediaKind('%s')", managedBeanName, binding);
+		}
+		return String.format("%s.getContentMediaKind(%s,'%s')", managedBeanName, dataWidgetVar, binding);
+	}
+
+	private @Nonnull String contentUrlExpression(@Nullable String dataWidgetVar, @Nonnull String binding, boolean image) {
+		if (dataWidgetVar == null) {
+			return String.format("%s.getContentUrl('%s', %s)", managedBeanName, binding, Boolean.toString(image));
+		}
+		return String.format("%s.getContentUrl(%s,'%s', %s)", managedBeanName, dataWidgetVar, binding, Boolean.toString(image));
+	}
+
+	private @Nonnull String contentValueExpression(@Nullable String dataWidgetVar, @Nonnull String binding) {
+		if (dataWidgetVar == null) {
+			return String.format("%s.currentBean['%s']", managedBeanName, binding);
+		}
+		return String.format("%s['%s']", dataWidgetVar, binding);
 	}
 
 	/**
@@ -2548,6 +2576,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	private @Nonnull HtmlOutputText contentVideo(@Nullable Integer pixelWidth,
 													@Nullable Integer pixelHeight,
 													@Nonnull String binding,
+													@Nullable String dataWidgetVar,
 													@Nonnull String videoId,
 													boolean phoneResponsiveMedia) {
 		HtmlOutputText result = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
@@ -2565,10 +2594,10 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			expression.append("height:").append(pixelHeight).append("px;");
 		}
 		expression.append("border:1px solid #d6dee8\">");
-		expression.append("#{empty ").append(managedBeanName).append(".currentBean['").append(binding);
-		expression.append("'] ? '' : '<video controls preload=\"metadata\" style=\"width:100%;height:100%;object-fit:contain\" src=\"'.concat(");
-		expression.append(managedBeanName).append(".getContentUrl('").append(binding);
-		expression.append("', true)).concat('\"></video>')}</div>");
+		expression.append("#{empty ").append(contentValueExpression(dataWidgetVar, binding));
+		expression.append(" ? '' : '<video controls preload=\"metadata\" style=\"width:100%;height:100%;object-fit:contain\" src=\"'.concat(");
+		expression.append(contentUrlExpression(dataWidgetVar, binding, true));
+		expression.append(").concat('\"></video>')}</div>");
 		result.setValueExpression("value", ef.createValueExpression(elc, expression.toString(), String.class));
 		result.setId(videoId + "_output");
 		return result;
@@ -2658,7 +2687,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		toAddTo.add(signatureComponent);
 
 		// Image
-		HtmlPanelGroup contentImage = contentGraphicImage(pixelWidth, null, null, pixelHeight, null, binding, null, null);
+		HtmlPanelGroup contentImage = contentGraphicImage(pixelWidth, null, null, pixelHeight, null, binding, null, null, null);
 
 		// Set image rendered
 		sb.setLength(0);
@@ -2779,6 +2808,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list and cognitive compleity OK
 	private void editableContent(List<UIComponent> toAddTo,
 									String id,
+									@Nullable String dataWidgetVar,
 									@Nonnull String binding,
 									String sanitisedBinding,
 									@Nullable String requiredMessage,
@@ -2789,7 +2819,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 									boolean auto,
 									ContentDisplay display,
 									ContentCapture capture) {
-		HtmlInputHidden hidden = (HtmlInputHidden) input(HtmlInputHidden.COMPONENT_TYPE, null, binding, null, requiredMessage, null, null);
+		HtmlInputHidden hidden = (HtmlInputHidden) input(HtmlInputHidden.COMPONENT_TYPE, dataWidgetVar, binding, null, requiredMessage, null, null);
 		setId(hidden, String.format("%s_%s_hidden", id, sanitisedBinding));
 
 		HtmlPanelGroup actionGroup = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
@@ -2798,7 +2828,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		List<UIComponent> actionGroupChildren = actionGroup.getChildren();
 		actionGroupChildren.add(hidden);
 		if (auto) {
-			String mediaKind = managedBean.getContentMediaKind(binding);
+			String mediaKind = (dataWidgetVar == null) ? managedBean.getContentMediaKind(binding) : null;
 			if ((mediaKind != null) && mediaKind.trim().isEmpty()) {
 				mediaKind = null;
 			}
@@ -2842,7 +2872,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 											overlayVar,
 											display,
 											capture,
-											auto ? companionFieldName(binding) : null);
+											auto ? companionFieldName(binding) : null,
+											dataWidgetVar);
 		}
 
 		UIPanel panel = null;
@@ -2880,7 +2911,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		if (! fullUploadDialog) {
 			// $(PrimeFaces.escapeClientId('<id>')).attr('src', '<url>')
 			value.append("#{'SKYVE.PF.contentOverlayOnShow(\\'").append(id).append("\\',\\''.concat(");
-			appendContentUploadUrlExpression(value, sanitisedBinding, display, capture, auto ? companionFieldName(binding) : null);
+			appendContentUploadUrlExpression(value, sanitisedBinding, display, capture, auto ? companionFieldName(binding) : null, dataWidgetVar);
 			value.append(").concat('\\')')}");
 			panel.setValueExpression("onShow", ef.createValueExpression(elc, value.toString(), String.class));
 			uploadItem.setOnclick("PF('" + overlayVar + "').show();return false");
@@ -2924,7 +2955,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 																formDisabledConditionName);
 				StringBuilder markupStyleClass = new StringBuilder(64);
 				markupStyleClass.append("skyveContentMarkupAction skyveContentMarkupAction-").append(id).append('_').append(sanitisedBinding);
-				if (! isContentMarkupInitiallyVisible(display, binding)) {
+				if (! isContentMarkupInitiallyVisible(display, dataWidgetVar, binding)) {
 					markupStyleClass.append(" skyveContentHidden");
 				}
 				markupItem.setContainerStyleClass(markupStyleClass.toString());
@@ -3039,9 +3070,14 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * @param binding content binding; must not be {@code null}
 	 * @return {@code true} when the current content is image-like in this display mode
 	 */
-	private boolean isContentMarkupInitiallyVisible(@Nonnull ContentDisplay display, @Nonnull String binding) {
+	private boolean isContentMarkupInitiallyVisible(@Nonnull ContentDisplay display,
+														@Nullable String dataWidgetVar,
+														@Nonnull String binding) {
 		if (ContentDisplay.image.equals(display)) {
 			return true;
+		}
+		if (dataWidgetVar != null) {
+			return false;
 		}
 		return "image".equals(managedBean.getContentMediaKind(binding));
 	}
@@ -3055,47 +3091,52 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * @param item upload menu item to configure; must not be {@code null}
 	 * @param id generated content component id; must not be {@code null}
 	 * @param sanitisedBinding sanitised content binding; must not be {@code null}
-	 * @param var PrimeFaces widget variable for the dialog; must not be {@code null}
+	 * @param widgetVar PrimeFaces widget variable for the dialog; must not be {@code null}
 	 * @param display content display mode; must not be {@code null}
 	 * @param capture content capture mode; must not be {@code null}
 	 * @param companionBinding optional auto-mode media-kind companion field
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list OK
 	private void setContentUploadDialogOnclick(@Nonnull UIMenuItem item,
 												@Nonnull String id,
 												@Nonnull String sanitisedBinding,
-												@Nonnull String var,
+												@Nonnull String widgetVar,
 												@Nonnull ContentDisplay display,
 												@Nonnull ContentCapture capture,
-												@Nullable String companionBinding) {
+												@Nullable String companionBinding,
+												@Nullable String dataWidgetVar) {
 		item.setValueExpression("onclick",
 								ef.createValueExpression(elc,
 															createContentUploadOnclick(id,
 																						sanitisedBinding,
-																						var,
+																						widgetVar,
 																						display,
 																						capture,
 																						companionBinding,
+																						dataWidgetVar,
 																						true),
 															String.class));
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list OK
 	private @Nonnull String createContentUploadOnclick(@Nonnull String id,
 														@Nonnull String sanitisedBinding,
-														@Nonnull String var,
+														@Nonnull String widgetVar,
 														@Nonnull ContentDisplay display,
 														@Nonnull ContentCapture capture,
 														@Nullable String companionBinding,
+														@Nullable String dataWidgetVar,
 														boolean fullUploadDialog) {
 		StringBuilder value = new StringBuilder(192);
 		if (fullUploadDialog) {
 			value.append("#{'SKYVE.PF.contentOverlayOnShow(\\'").append(id).append("\\',\\''.concat(");
-			appendContentUploadUrlExpression(value, sanitisedBinding, display, capture, companionBinding);
-			value.append(".concat('\\');PF(\\'").append(var);
-			value.append("\\').show();PF(\\'").append(var).append("\\').toggleMaximize();");
+			appendContentUploadUrlExpression(value, sanitisedBinding, display, capture, companionBinding, dataWidgetVar);
+			value.append(".concat('\\');PF(\\'").append(widgetVar);
+			value.append("\\').show();PF(\\'").append(widgetVar).append("\\').toggleMaximize();");
 			value.append("return false'))}");
 		}
 		else {
-			value.append("PF('").append(var).append("').show();return false");
+			value.append("PF('").append(widgetVar).append("').show();return false");
 		}
 		return value.toString();
 	}
@@ -3117,7 +3158,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 													@Nonnull String sanitisedBinding,
 													@Nonnull ContentDisplay display,
 													@Nonnull ContentCapture capture,
-													@Nullable String companionBinding) {
+													@Nullable String companionBinding,
+													@Nullable String dataWidgetVar) {
 		value.append(managedBeanName).append(".getContentUploadUrl('").append(sanitisedBinding).append("',");
 		value.append('\'').append(display.name()).append("','").append(capture.name()).append("',");
 		if (companionBinding == null) {
@@ -3126,7 +3168,18 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		else {
 			value.append("'").append(companionBinding).append('\'');
 		}
+		if (dataWidgetVar != null) {
+			value.append(",'").append(dataWidgetVarToDataWidgetBinding(dataWidgetVar)).append("',");
+			value.append(dataWidgetVar).append("['").append(Bean.DOCUMENT_ID).append("']");
+		}
 		value.append(')');
+	}
+
+	private static @Nonnull String dataWidgetVarToDataWidgetBinding(@Nonnull String dataWidgetVar) {
+		if (dataWidgetVar.endsWith("Row")) {
+			return dataWidgetVar.substring(0, dataWidgetVar.length() - 3);
+		}
+		return dataWidgetVar;
 	}
 
 	@Override
@@ -3721,6 +3774,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 		if (collapsible != null) {
 			result.setToggleable(true);
+			result.setToggleableHeader(true);
 			result.setCollapsed(Collapsible.closed.equals(collapsible));
 			AjaxBehavior ajax = (AjaxBehavior) a.createBehavior(AjaxBehavior.BEHAVIOR_ID);
 			ajax.setProcess("@this");
@@ -4589,8 +4643,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			Dialog dialog = (Dialog) a.createComponent(Dialog.COMPONENT_TYPE);
 			setId(dialog, null);
 			panelId = dialog.getId();
-			String var = panelId + "Dialog";
-			dialog.setWidgetVar(var);
+			String widgetVar = panelId + "Dialog";
+			dialog.setWidgetVar(widgetVar);
 			dialog.setModal(true);
 			dialog.setResponsive(true);
 			dialog.setFitViewport(true);
@@ -4600,7 +4654,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			dialog.setOnHide(String.format("SKYVE.PF.contentOverlayOnHide('%s');%s()", panelId, refreshId));
 			panel = dialog;
 
-			uploadButton.setOnclick("PF('" + var + "').show();PF('" + var + "').toggleMaximize()");
+			uploadButton.setOnclick("PF('" + widgetVar + "').show();PF('" + widgetVar + "').toggleMaximize()");
 		} else {
 			// Overlay panel attached to the upload button that houses the iframe
 			OverlayPanel overlay = (OverlayPanel) a.createComponent(OverlayPanel.COMPONENT_TYPE);
@@ -5004,6 +5058,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 												Integer pixelHeight,
 												Integer percentageHeight,
 												String binding,
+												@Nullable String dataWidgetVar,
 												String phoneResponsiveClass,
 												@Nullable String placeholderUploadOnclick) {
 		HtmlPanelGroup result = panelGroup(true, true, true, null, null);
@@ -5011,7 +5066,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		setSizeAndTextAlignStyle(result, "border:1px solid #d6dee8;position:relative;overflow:hidden;", pixelWidth, responsiveWidth, percentageWidth, pixelHeight, percentageHeight, null);
 		String previewClass = (phoneResponsiveClass == null) ? "skyveContentPreview" : "skyveContentPreview " + phoneResponsiveClass;
 		String emptyClass = (phoneResponsiveClass == null) ? "skyveContentPreview skyveContentEmpty" : "skyveContentPreview " + phoneResponsiveClass + " skyveContentEmpty";
-		String expression = String.format("#{(empty %s.currentBean['%s']) ? '%s' : '%s'}", managedBeanName, binding, emptyClass, previewClass);
+		String expression = String.format("#{(empty %s) ? '%s' : '%s'}", contentValueExpression(dataWidgetVar, binding), emptyClass, previewClass);
 		result.setValueExpression("styleClass", ef.createValueExpression(elc, expression, String.class));
 		if (placeholderUploadOnclick != null) {
 			if (placeholderUploadOnclick.startsWith("#{")) {
@@ -5024,10 +5079,10 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 		GraphicImage image = (GraphicImage) a.createComponent(GraphicImage.COMPONENT_TYPE);
 		setId(image, null);
-		expression = String.format("#{%s.getContentUrl('%s', true)}", managedBeanName, binding);
+		expression = String.format("#{%s}", contentUrlExpression(dataWidgetVar, binding, true));
 		image.setValueExpression("value", ef.createValueExpression(elc, expression, String.class));
 		image.setStyle("width:100%;height:100%;object-fit:contain;cursor:pointer");
-		expression = String.format("#{(empty %s.currentBean['%s']) ? 'skyveContentHidden' : ''}", managedBeanName, binding);
+		expression = String.format("#{(empty %s) ? 'skyveContentHidden' : ''}", contentValueExpression(dataWidgetVar, binding));
 		image.setValueExpression("styleClass", ef.createValueExpression(elc, expression, String.class));
 		image.setOnclick("window.open(this.src, '_blank');if(event){event.stopPropagation()}");
 		result.getChildren().add(image);
@@ -5035,17 +5090,17 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	private HtmlOutputLink contentLink(Integer pixelWidth, HorizontalAlignment textAlignment, String binding) {
+	private HtmlOutputLink contentLink(Integer pixelWidth, HorizontalAlignment textAlignment, @Nullable String dataWidgetVar, String binding) {
 		HtmlOutputLink result = (HtmlOutputLink) a.createComponent(HtmlOutputLink.COMPONENT_TYPE);
 
-		String expression = String.format("#{%s.getContentUrl('%s', false)}", managedBeanName, binding);
+		String expression = String.format("#{%s}", contentUrlExpression(dataWidgetVar, binding, false));
 		result.setValueExpression("value", ef.createValueExpression(elc, expression, String.class));
 
 		UIOutput outputText = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
 		outputText.setValue("Content");
 		result.getChildren().add(outputText);
 
-		expression = String.format("#{(empty %s.currentBean['%s']) ? 'return false' : null}", managedBeanName, binding);
+		expression = String.format("#{(empty %s) ? 'return false' : null}", contentValueExpression(dataWidgetVar, binding));
 		result.setValueExpression("onclick", ef.createValueExpression(elc, expression, String.class));
 
 		result.setTarget("_blank");

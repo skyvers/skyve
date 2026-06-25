@@ -3,23 +3,12 @@ package org.skyve.impl.web.faces.pipeline.component;
 /**
  * Carries metadata-owned text with its resolved HTML escape decision through the
  * PrimeFaces component-building layer.
+ *
+ * @param value metadata text after localisation and expression resolution; may be {@code null}
+ * @param escape {@code true} to escape at the output boundary; {@code false}
+ *        to allow trusted markup
  */
-public final class EscapableText {
-	private final String value;
-	private final boolean escape;
-
-	/**
-	 * Creates a text value paired with its metadata escape flag.
-	 *
-	 * @param value metadata text after localisation and expression resolution; may be {@code null}
-	 * @param escape {@code true} to escape at the output boundary; {@code false}
-	 *        to allow trusted markup
-	 */
-	public EscapableText(String value, boolean escape) {
-		this.value = value;
-		this.escape = escape;
-	}
-
+public record EscapableText(String value, boolean escape) {
 	/**
 	 * Creates a text value paired with its metadata escape flag.
 	 *

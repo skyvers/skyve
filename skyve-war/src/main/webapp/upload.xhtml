@@ -57,6 +57,8 @@
 				<h:inputHidden id="_cap" value="#{_skyveContent.capture}" />
 				<h:inputHidden id="_af" value="#{_skyveContent.uploadAffordance}" />
 				<h:inputHidden id="_m" value="#{_skyveContent.uploadState.companion}" />
+				<h:inputHidden id="_g" value="#{_skyveContent.dataWidgetBinding}" />
+				<h:inputHidden id="_id" value="#{_skyveContent.elementBizId}" />
 				<p:fileUpload id="upload"
 								listener="#{_skyveContent.handleFileUpload}"
 								styleClass="#{_skyveContent.genericUploadAllowed ? '' : 'capture-only-upload'}"

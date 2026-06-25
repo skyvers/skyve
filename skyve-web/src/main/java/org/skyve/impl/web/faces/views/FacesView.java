@@ -897,6 +897,30 @@ public class FacesView extends HarnessView {
 	}
 
 	/**
+	 * Builds unified upload endpoint URL for content widgets rendered inside a data widget row.
+	 *
+	 * @param sanitisedBinding sanitised binding for the target content field; must not be {@code null}
+	 * @param display content display mode name, or {@code null} to use {@code auto}
+	 * @param capture content capture mode name, or {@code null} to use {@code none}
+	 * @param companionBinding optional auto-mode media-kind companion field
+	 * @param dataWidgetBinding sanitised data-widget binding containing the target row
+	 * @param elementBizId row biz id
+	 * @return upload endpoint URL; never {@code null}
+	 */
+	public @Nonnull String getContentUploadUrl(@Nonnull String sanitisedBinding,
+												@Nullable String display,
+												@Nullable String capture,
+												@Nullable String companionBinding,
+												@Nonnull String dataWidgetBinding,
+												@Nonnull String elementBizId) {
+		String displayValue = Util.processStringValue(display);
+		String captureValue = Util.processStringValue(capture);
+		ContentDisplay resolvedDisplay = (displayValue == null) ? ContentDisplay.auto : ContentDisplay.valueOf(displayValue);
+		ContentCapture resolvedCapture = (captureValue == null) ? ContentCapture.none : ContentCapture.valueOf(captureValue);
+		return getContentUploadUrl(sanitisedBinding, resolvedDisplay, resolvedCapture, companionBinding, dataWidgetBinding, elementBizId);
+	}
+
+	/**
 	 * Builds unified upload endpoint URL for bound content/image widgets in the current view context.
 	 *
 	 * @param sanitisedBinding sanitised binding for the target content field; must not be {@code null}
@@ -909,6 +933,15 @@ public class FacesView extends HarnessView {
 												@Nullable ContentDisplay display,
 												@Nullable ContentCapture capture,
 												@Nullable String companionBinding) {
+		return getContentUploadUrl(sanitisedBinding, display, capture, companionBinding, null, null);
+	}
+
+	private @Nonnull String getContentUploadUrl(@Nonnull String sanitisedBinding,
+												@Nullable ContentDisplay display,
+												@Nullable ContentCapture capture,
+												@Nullable String companionBinding,
+												@Nullable String dataWidgetBinding,
+												@Nullable String elementBizId) {
 		StringBuilder result = new StringBuilder(128);
 		result.append(Util.getSkyveContextUrl()).append("/upload.xhtml?");
 		result.append("_u=").append(UnifiedUploadState.UploadKind.boundContent.name());
@@ -922,6 +955,10 @@ public class FacesView extends HarnessView {
 		result.append("&_cap=").append(capture == null ? ContentCapture.none : capture);
 		if (companionBinding != null) {
 			result.append("&_m=").append(companionBinding);
+		}
+		if ((dataWidgetBinding != null) && (elementBizId != null)) {
+			result.append('&').append(AbstractWebContext.GRID_BINDING_NAME).append('=').append(dataWidgetBinding);
+			result.append('&').append(AbstractWebContext.ID_NAME).append('=').append(elementBizId);
 		}
 		return result.toString();
 	}
@@ -1006,6 +1043,19 @@ public class FacesView extends HarnessView {
  	}
 
 	/**
+	 * Resolves a content retrieval URL for a supplied row/current bean object.
+	 *
+	 * @param bean bean or bean map adapter to resolve against
+	 * @param binding content binding to resolve
+	 * @param image whether the content is an image
+	 * @return resolved content URL
+	 */
+	@SuppressWarnings("static-method") // JSF EL invokes this on the skyve managed bean.
+	public String getContentUrl(final Object bean, final String binding, final boolean image) {
+		return new GetContentURLAction(resolveContentBean(bean), binding, image).execute();
+	}
+
+	/**
 	 * Resolves the content file name for the supplied binding.
 	 *
 	 * @param binding content binding to resolve
@@ -1014,6 +1064,18 @@ public class FacesView extends HarnessView {
  	public String getContentFileName(final String binding) {
  		return new GetContentFileNameAction(getCurrentBean().getBean(), binding).execute();
  	}
+
+	/**
+	 * Resolves the content file name for a supplied row/current bean object.
+	 *
+	 * @param bean bean or bean map adapter to resolve against
+	 * @param binding content binding to resolve
+	 * @return resolved file name
+	 */
+	@SuppressWarnings("static-method") // JSF EL invokes this on the skyve managed bean.
+	public String getContentFileName(final Object bean, final String binding) {
+		return new GetContentFileNameAction(resolveContentBean(bean), binding).execute();
+	}
 
 	/**
 	 * Resolves the server-classified media kind for an auto content binding.
@@ -1040,7 +1102,22 @@ public class FacesView extends HarnessView {
 		if (bean == null) {
 			return null;
 		}
+		return getContentMediaKind(bean, binding);
+ 	}
 
+	/**
+	 * Resolves the server-classified media kind for a supplied row/current bean
+	 * object.
+	 *
+	 * @param bean bean or bean map adapter to resolve against
+	 * @param binding content binding to resolve; must not be {@code null}
+	 * @return media kind name, or {@code null} when the binding has no content id
+	 */
+	public @Nullable String getContentMediaKind(final Object bean, final @Nonnull String binding) {
+		return getContentMediaKind(resolveContentBean(bean), binding);
+	}
+
+	private @Nullable String getContentMediaKind(final @Nonnull Bean bean, final @Nonnull String binding) {
 		Object value = BindUtil.get(bean, binding);
 		if (value instanceof String contentId) {
 			contentId = UtilImpl.processStringValue(contentId);
@@ -1057,6 +1134,13 @@ public class FacesView extends HarnessView {
 		}
 		return null;
  	}
+
+	private static @Nonnull Bean resolveContentBean(final Object bean) {
+		if (bean instanceof BeanMapAdapter adapter) {
+			return adapter.getBean();
+		}
+		return (Bean) Objects.requireNonNull(bean, "bean");
+	}
 
 	/**
 	 * Loads and classifies stored content metadata.

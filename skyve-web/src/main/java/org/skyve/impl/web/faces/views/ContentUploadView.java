@@ -45,6 +45,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.persistence.Persistence;
+import org.skyve.util.Binder;
 import org.skyve.util.OWASP;
 
 import jakarta.annotation.Nonnull;
@@ -105,6 +106,16 @@ public class ContentUploadView extends AbstractUploadView {
 	@SuppressWarnings("java:S6813") // allow member injection
 	private @Nullable String uploadAffordance;
 
+	@Inject
+	@ManagedProperty(value = "#{param." + AbstractWebContext.GRID_BINDING_NAME + "}")
+	@SuppressWarnings("java:S6813") // allow member injection
+	private @Nullable String dataWidgetBinding;
+
+	@Inject
+	@ManagedProperty(value = "#{param." + AbstractWebContext.ID_NAME + "}")
+	@SuppressWarnings("java:S6813") // allow member injection
+	private @Nullable String elementBizId;
+
 	// Request state is nullable until JSF has injected parameters and @PostConstruct has parsed them.
 	private @Nullable UnifiedUploadState uploadState;
 	private @Nullable UploadAffordance activeUploadAffordance;
@@ -137,6 +148,8 @@ public class ContentUploadView extends AbstractUploadView {
 		display = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(display));
 		capture = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(capture));
 		uploadAffordance = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(uploadAffordance));
+		dataWidgetBinding = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(dataWidgetBinding));
+		elementBizId = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(elementBizId));
 		UnifiedUploadState state = UnifiedUploadState.fromRoute(
 				(uploadKind == null) ? UploadKind.boundContent.name() : uploadKind,
 				getContext(),
@@ -218,6 +231,24 @@ public class ContentUploadView extends AbstractUploadView {
 	 */
 	public @Nullable String getUploadAffordance() {
 		return uploadAffordance;
+	}
+
+	/**
+	 * Returns the sanitised data-widget binding for row-targeted content uploads.
+	 *
+	 * @return data-widget binding, or {@code null} for parent/current-bean uploads
+	 */
+	public @Nullable String getDataWidgetBinding() {
+		return dataWidgetBinding;
+	}
+
+	/**
+	 * Returns the row biz id for row-targeted content uploads.
+	 *
+	 * @return row biz id, or {@code null} for parent/current-bean uploads
+	 */
+	public @Nullable String getElementBizId() {
+		return elementBizId;
 	}
 
 	/**
@@ -464,6 +495,13 @@ public class ContentUploadView extends AbstractUploadView {
 			String binding = getBinding();
 			if (binding != null) {
 				bean = (Bean) BindUtil.get(bean, binding);
+			}
+			if (dataWidgetBinding != null) {
+				String unsanitisedDataWidgetBinding = BindUtil.unsanitiseBinding(dataWidgetBinding);
+				if ((unsanitisedDataWidgetBinding == null) || (elementBizId == null)) {
+					throw new IllegalStateException("dataWidgetBinding or elementBizId is null");
+				}
+				bean = Binder.getElementInCollection(Objects.requireNonNull(bean, "bean"), unsanitisedDataWidgetBinding, Objects.requireNonNull(elementBizId, "elementBizId"));
 			}
 			if (bean == null) { // should never happen
 				throw new IllegalStateException("bean is null");

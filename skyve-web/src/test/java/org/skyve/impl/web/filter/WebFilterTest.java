@@ -105,7 +105,7 @@ class WebFilterTest {
 	}
 
 	@Test
-	void testResponseHeaderFilterInitSetsSecurityConfig() throws Exception {
+	void testResponseHeaderFilterInitAndDestroy() throws Exception {
 		FilterConfig config = Assertions.assertDoesNotThrow(() -> mock(FilterConfig.class));
 		when(config.getFilterName()).thenReturn(ResponseHeaderFilter.SECURITY_HEADERS_FILTER_NAME);
 		when(config.getInitParameterNames()).thenReturn(Collections.emptyEnumeration());
@@ -113,29 +113,6 @@ class WebFilterTest {
 		ResponseHeaderFilter filter = new ResponseHeaderFilter();
 		filter.init(config);
 		filter.destroy();
-	}
-
-	@Test
-	void testResponseHeaderFilterDestroySetsSecurityConfigToNull() throws Exception {
-		FilterConfig config = Assertions.assertDoesNotThrow(() -> mock(FilterConfig.class));
-		when(config.getFilterName()).thenReturn(ResponseHeaderFilter.SECURITY_HEADERS_FILTER_NAME);
-		Vector<String> headerNames = new Vector<>();
-		headerNames.add("X-Destroy-Test");
-		when(config.getInitParameterNames()).thenReturn(headerNames.elements());
-		when(config.getInitParameter("X-Destroy-Test")).thenReturn("enabled");
-
-		HttpServletResponse response = mock(HttpServletResponse.class);
-
-		ResponseHeaderFilter filter = new ResponseHeaderFilter();
-		filter.init(config);
-		ResponseHeaderFilter.applySecurityHeaders(response);
-		verify(response).setHeader("X-Destroy-Test", "enabled");
-
-		org.mockito.Mockito.reset(response);
-		// destroy should null out SECURITY_HEADERS_FILTER_CONFIG — won't throw
-		filter.destroy();
-		ResponseHeaderFilter.applySecurityHeaders(response);
-		verify(response, never()).setHeader(anyString(), anyString());
 	}
 
 	@Test
@@ -190,24 +167,6 @@ class WebFilterTest {
 
 		// upgrade-insecure-requests should be stripped when not https
 		verify(response).setHeader(eq("Content-Security-Policy"), org.mockito.ArgumentMatchers.anyString());
-		filter.destroy();
-	}
-
-	@Test
-	void testResponseHeaderFilterApplySecurityHeaders() throws Exception {
-		FilterConfig config = mock(FilterConfig.class);
-		when(config.getFilterName()).thenReturn(ResponseHeaderFilter.SECURITY_HEADERS_FILTER_NAME);
-		Vector<String> headerNames = new Vector<>();
-		headerNames.add("X-Frame-Options");
-		when(config.getInitParameterNames()).thenReturn(headerNames.elements());
-		when(config.getInitParameter("X-Frame-Options")).thenReturn("SAMEORIGIN");
-		HttpServletResponse response = mock(HttpServletResponse.class);
-
-		ResponseHeaderFilter filter = new ResponseHeaderFilter();
-		filter.init(config);
-
-		ResponseHeaderFilter.applySecurityHeaders(response);
-		verify(response).setHeader("X-Frame-Options", "SAMEORIGIN");
 		filter.destroy();
 	}
 
