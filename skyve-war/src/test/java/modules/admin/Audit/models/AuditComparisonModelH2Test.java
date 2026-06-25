@@ -175,6 +175,41 @@ class AuditComparisonModelH2Test extends AbstractH2Test {
 		assertThat(child.getProperties().get(0).getName(), is(Contact.namePropertyName));
 	}
 
+	@Test
+	@SuppressWarnings("static-method")
+	void uncoercibleEnumValueInSourceDegradesToTextField() throws Exception {
+		AuditComparisonModel model = new AuditComparisonModel();
+		Audit audit = metadataAudit(Operation.insert,
+				"{\"\":" + objectWithoutBizKey("user-id", "\"wizardState\":\"obsoleteState\"") + "}",
+				null);
+
+		ComparisonComposite root = model.getComparisonComposite(audit);
+
+		ComparisonProperty property = root.getProperties().get(0);
+		assertThat(property.getName(), is("wizardState"));
+		// The attribute still exists, so its localised title is retained; only the
+		// widget/value degrades because the value can no longer be coerced.
+		assertThat(property.getTitle(), is("Wizard State"));
+		assertThat(property.getWidget(), instanceOf(TextField.class));
+		assertThat(property.getNewValue(), is("obsoleteState"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void uncoercibleEnumValueInComparisonDegradesToTextField() throws Exception {
+		AuditComparisonModel model = new AuditComparisonModel();
+		Audit audit = metadataAudit(Operation.update,
+				"{\"\":" + objectWithoutBizKey("user-id", "\"wizardState\":\"createContact\"") + "}",
+				"{\"\":" + objectWithoutBizKey("user-id", "\"wizardState\":\"obsoleteState\"") + "}");
+
+		ComparisonComposite root = model.getComparisonComposite(audit);
+
+		ComparisonProperty property = root.getProperties().get(0);
+		assertThat(property.getName(), is("wizardState"));
+		assertThat(property.getWidget(), instanceOf(TextField.class));
+		assertThat(property.getOldValue(), is("obsoleteState"));
+	}
+
 	private static Audit audit(Operation operation, String sourceDetail, String comparisonDetail) {
 		Audit selected = Audit.newInstance();
 		Audit source = version(operation, sourceDetail);
