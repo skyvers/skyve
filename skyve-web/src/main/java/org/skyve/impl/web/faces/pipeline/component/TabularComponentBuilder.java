@@ -2887,7 +2887,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			dialog.setHeader(image ? "Image Upload" : "Content Upload");
 			dialog.setAppendTo("@(body)"); // append to <body/> so dialog can always pop (didn't work in tabs)
 			// clear the iframe src on hide so there is no flash next open
-			dialog.setOnHide("SKYVE.PF.contentOverlayOnHide('" + id + "',true);PF('" + overlayVar + "').toggleMaximize()");
+			dialog.setOnHide("SKYVE.PF.contentOverlayOnHide('" + id + "',true,true);PF('" + overlayVar + "').toggleMaximize()");
 			panel = dialog;
 		}
 		else {
@@ -3131,7 +3131,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		if (fullUploadDialog) {
 			value.append("#{'SKYVE.PF.contentOverlayOnShow(\\'").append(id).append("\\',\\''.concat(");
 			appendContentUploadUrlExpression(value, sanitisedBinding, display, capture, companionBinding, dataWidgetVar);
-			value.append(".concat('\\');PF(\\'").append(widgetVar);
+			value.append(".concat('\\',true);PF(\\'").append(widgetVar);
 			value.append("\\').show();PF(\\'").append(widgetVar).append("\\').toggleMaximize();");
 			value.append("return false'))}");
 		}
@@ -4651,7 +4651,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			dialog.setHeader("Upload");
 			dialog.setAppendTo("@(body)"); // append to <body/> so dialog can always pop (didn't work in tabs)
 			// clear the iframe src on hide so there is no flash next open, and call the refresh remote command
-			dialog.setOnHide(String.format("SKYVE.PF.contentOverlayOnHide('%s');%s()", panelId, refreshId));
+			dialog.setOnHide(String.format("SKYVE.PF.contentOverlayOnHide('%s',false,true);%s()", panelId, refreshId));
 			panel = dialog;
 
 			uploadButton.setOnclick("PF('" + widgetVar + "').show();PF('" + widgetVar + "').toggleMaximize()");
@@ -4675,7 +4675,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		StringBuilder value = new StringBuilder(64);
 		value.append("#{'SKYVE.PF.contentOverlayOnShow(\\'").append(panelId).append("\\',\\''.concat(");
 		value.append(managedBeanName).append(".getFileUploadUrl('").append(actionName).append("','");
-		value.append(capture.name()).append("')).concat('\\')')}");
+		value.append(capture.name()).append("'))");
+		value.append(useDialog ? ".concat('\\',true)')}" : ".concat('\\')')}");
 		panel.setValueExpression("onShow", ef.createValueExpression(elc, value.toString(), String.class));
 
 		children.add(panel);

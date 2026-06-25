@@ -16,6 +16,18 @@ SKYVE.PF = function() {
 	var contentOverlayIdsByBinding = {};
 	var contentMarkupIdsByBinding = {};
 	var contentMarkupCompanionIdsByBinding = {};
+	var pageScrollLock = {
+		count: 0,
+		scrollX: 0,
+		scrollY: 0,
+		htmlOverflow: '',
+		bodyOverflow: '',
+		bodyPosition: '',
+		bodyTop: '',
+		bodyLeft: '',
+		bodyWidth: '',
+		bodyPaddingRight: ''
+	};
 
 	var getElement = function(element) {
 		if (! element) {
@@ -140,6 +152,56 @@ SKYVE.PF = function() {
 		window.setTimeout(function() {
 			morphFrom(source, getWidgetElement(widgetVar), options);
 		}, 0);
+	};
+
+	var lockPageScroll = function() {
+		var body = document.body;
+		var documentElement = document.documentElement;
+		if (! body || ! documentElement) {
+			return;
+		}
+		if (pageScrollLock.count === 0) {
+			pageScrollLock.scrollX = window.pageXOffset || documentElement.scrollLeft || body.scrollLeft || 0;
+			pageScrollLock.scrollY = window.pageYOffset || documentElement.scrollTop || body.scrollTop || 0;
+			pageScrollLock.htmlOverflow = documentElement.style.overflow;
+			pageScrollLock.bodyOverflow = body.style.overflow;
+			pageScrollLock.bodyPosition = body.style.position;
+			pageScrollLock.bodyTop = body.style.top;
+			pageScrollLock.bodyLeft = body.style.left;
+			pageScrollLock.bodyWidth = body.style.width;
+			pageScrollLock.bodyPaddingRight = body.style.paddingRight;
+
+			var scrollbarWidth = window.innerWidth - documentElement.clientWidth;
+			documentElement.style.overflow = 'hidden';
+			body.style.overflow = 'hidden';
+			body.style.position = 'fixed';
+			body.style.top = (-pageScrollLock.scrollY) + 'px';
+			body.style.left = (-pageScrollLock.scrollX) + 'px';
+			body.style.width = '100%';
+			if (scrollbarWidth > 0) {
+				body.style.paddingRight = ((parseFloat(window.getComputedStyle(body).paddingRight) || 0) + scrollbarWidth) + 'px';
+			}
+		}
+		pageScrollLock.count++;
+	};
+
+	var unlockPageScroll = function() {
+		var body = document.body;
+		var documentElement = document.documentElement;
+		if (! body || ! documentElement || pageScrollLock.count === 0) {
+			return;
+		}
+		pageScrollLock.count = Math.max(0, pageScrollLock.count - 1);
+		if (pageScrollLock.count === 0) {
+			documentElement.style.overflow = pageScrollLock.htmlOverflow;
+			body.style.overflow = pageScrollLock.bodyOverflow;
+			body.style.position = pageScrollLock.bodyPosition;
+			body.style.top = pageScrollLock.bodyTop;
+			body.style.left = pageScrollLock.bodyLeft;
+			body.style.width = pageScrollLock.bodyWidth;
+			body.style.paddingRight = pageScrollLock.bodyPaddingRight;
+			window.scrollTo(pageScrollLock.scrollX, pageScrollLock.scrollY);
+		}
 	};
 
 	var getContentActionMenu = function(source) {
@@ -305,12 +367,23 @@ SKYVE.PF = function() {
 		morphWidgetFrom: function(source, widgetVar, options) {
 			morphWidgetFrom(source, widgetVar, options);
 		},
+
+		lockPageScroll: function() {
+			lockPageScroll();
+		},
+
+		unlockPageScroll: function() {
+			unlockPageScroll();
+		},
 		
 		getByIdEndsWith: function(id) {
 			return $('[id$="' + id + '"]');
 		},
 		
-		contentOverlayOnShow: function(id, url) {
+		contentOverlayOnShow: function(id, url, lockScroll) {
+			if (lockScroll) {
+				lockPageScroll();
+			}
 			var binding = getUrlParameter(url, '_n');
 			if (binding) {
 				contentOverlayIdsByBinding[binding] = id;
@@ -321,9 +394,12 @@ SKYVE.PF = function() {
 			}
 		},
 		
-		contentOverlayOnHide: function(id, preserve) {
+		contentOverlayOnHide: function(id, preserve, unlockScroll) {
 			if (! preserve) {
 				SKYVE.PF.getById(id + '_overlayiframe').attr('src','')
+			}
+			if (unlockScroll) {
+				unlockPageScroll();
 			}
 		},
 		
