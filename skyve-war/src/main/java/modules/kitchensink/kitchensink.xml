@@ -14,6 +14,8 @@
 		<document ref="OrderedGrid" />
 		<document ref="DataRepeater" />
 		<document ref="EscapingFixture" />
+		<document ref="UploadFixture" />
+		<document ref="UploadFixtureGridRow" />
 		<document ref="LookupDescription" />
 	</documents>
 	<roles>
@@ -33,6 +35,34 @@
 				<document name="EscapingFixture" permission="CRUDD">
 					<action name="TrustedDisplayName" />
 				</document>
+				<document name="UploadFixture" permission="CRUDD">
+					<action name="UploadGeneric" />
+					<action name="UploadCamera" />
+					<action name="UploadVideo" />
+					<action name="UploadAll" />
+					<contentPermission attribute="contentAutoNone" />
+					<contentPermission attribute="contentAutoCamera" />
+					<contentPermission attribute="contentAutoVideo" />
+					<contentPermission attribute="contentAutoAll" />
+					<contentPermission attribute="contentLinkNone" />
+					<contentPermission attribute="contentLinkCamera" />
+					<contentPermission attribute="contentLinkVideo" />
+					<contentPermission attribute="contentLinkAll" />
+					<contentPermission attribute="contentImageNone" />
+					<contentPermission attribute="contentImageCamera" />
+					<contentPermission attribute="contentImageAll" />
+					<contentPermission attribute="contentVideoNone" />
+					<contentPermission attribute="contentVideoVideo" />
+					<contentPermission attribute="contentVideoAll" />
+					<contentPermission attribute="contentDisabledAuto" />
+					<contentPermission attribute="contentDisabledImage" />
+					<contentPermission attribute="contentReadOnlyLink" />
+					<contentPermission attribute="contentReadOnlyVideo" />
+				</document>
+				<document name="UploadFixtureGridRow" permission="CRUDD">
+					<contentPermission attribute="boundColumnContent" />
+					<contentPermission attribute="containerColumnContent" />
+				</document>
 				<document name="LookupDescription" permission="CRUDD" />
 			</privileges>
 		</role>
@@ -48,6 +78,9 @@
 			<role name="dev" />
 		</list>
 		<edit name="Escaping Fixture" document="EscapingFixture">
+			<role name="dev" />
+		</edit>
+		<edit name="Upload Fixture" document="UploadFixture">
 			<role name="dev" />
 		</edit>
 		<link href="#" name="Map">

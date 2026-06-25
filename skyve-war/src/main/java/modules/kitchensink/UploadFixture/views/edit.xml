@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view name="edit"
+		title="Upload Fixture"
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+		xmlns="http://www.skyve.org/xml/view"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<tabPane>
+		<tab title="Bound Content">
+			<form border="true" borderTitle="Auto display" responsiveWidth="12" percentageWidth="70">
+				<column percentageWidth="35" responsiveWidth="5" />
+				<column responsiveWidth="7" />
+				<row>
+					<item label="Auto / none">
+						<content binding="contentAutoNone" display="auto" capture="none" />
+					</item>
+				</row>
+				<row>
+					<item label="Auto / camera">
+						<content binding="contentAutoCamera" display="auto" capture="camera" />
+					</item>
+				</row>
+				<row>
+					<item label="Auto / video">
+						<content binding="contentAutoVideo" display="auto" capture="video" />
+					</item>
+				</row>
+				<row>
+					<item label="Auto / all">
+						<content binding="contentAutoAll" display="auto" capture="all" />
+					</item>
+				</row>
+			</form>
+			<form border="true" borderTitle="Link display" responsiveWidth="12" percentageWidth="70">
+				<column percentageWidth="35" responsiveWidth="5" />
+				<column responsiveWidth="7" />
+				<row>
+					<item label="Link / none">
+						<content binding="contentLinkNone" display="link" capture="none" />
+					</item>
+				</row>
+				<row>
+					<item label="Link / camera">
+						<content binding="contentLinkCamera" display="link" capture="camera" />
+					</item>
+				</row>
+				<row>
+					<item label="Link / video">
+						<content binding="contentLinkVideo" display="link" capture="video" />
+					</item>
+				</row>
+				<row>
+					<item label="Link / all">
+						<content binding="contentLinkAll" display="link" capture="all" />
+					</item>
+				</row>
+			</form>
+			<form border="true" borderTitle="Image display" responsiveWidth="12" percentageWidth="70">
+				<column percentageWidth="35" responsiveWidth="5" />
+				<column responsiveWidth="7" />
+				<row>
+					<item label="Image / none">
+						<content binding="contentImageNone" display="image" capture="none" pixelWidth="240" pixelHeight="160" />
+					</item>
+				</row>
+				<row>
+					<item label="Image / camera">
+						<content binding="contentImageCamera" display="image" capture="camera" pixelWidth="240" pixelHeight="160" />
+					</item>
+				</row>
+				<row>
+					<item label="Image / all">
+						<content binding="contentImageAll" display="image" capture="all" pixelWidth="240" pixelHeight="160" />
+					</item>
+				</row>
+			</form>
+			<form border="true" borderTitle="Video display" responsiveWidth="12" percentageWidth="70">
+				<column percentageWidth="35" responsiveWidth="5" />
+				<column responsiveWidth="7" />
+				<row>
+					<item label="Video / none">
+						<content binding="contentVideoNone" display="video" capture="none" pixelWidth="320" pixelHeight="180" />
+					</item>
+				</row>
+				<row>
+					<item label="Video / video">
+						<content binding="contentVideoVideo" display="video" capture="video" pixelWidth="320" pixelHeight="180" />
+					</item>
+				</row>
+				<row>
+					<item label="Video / all">
+						<content binding="contentVideoAll" display="video" capture="all" pixelWidth="320" pixelHeight="180" />
+					</item>
+				</row>
+			</form>
+			<form border="true" borderTitle="Disabled content" responsiveWidth="12" percentageWidth="70">
+				<column percentageWidth="35" responsiveWidth="5" />
+				<column responsiveWidth="7" />
+				<row>
+					<item label="Disabled auto / all">
+						<content binding="contentDisabledAuto" display="auto" capture="all" disabled="true" />
+					</item>
+				</row>
+				<row>
+					<item label="Disabled image / all">
+						<content binding="contentDisabledImage" display="image" capture="all" pixelWidth="240" pixelHeight="160" disabled="true" />
+					</item>
+				</row>
+			</form>
+			<form border="true" borderTitle="Non-editable content" responsiveWidth="12" percentageWidth="70">
+				<column percentageWidth="35" responsiveWidth="5" />
+				<column responsiveWidth="7" />
+				<row>
+					<item label="Read-only link / none">
+						<content binding="contentReadOnlyLink" display="link" capture="none" editable="false" />
+					</item>
+				</row>
+				<row>
+					<item label="Read-only video / video">
+						<content binding="contentReadOnlyVideo" display="video" capture="video" pixelWidth="320" pixelHeight="180" editable="false" />
+					</item>
+				</row>
+			</form>
+		</tab>
+		<tab title="Grid Content">
+			<dataGrid binding="gridRows" title="Content widgets in inline grid contexts" inline="true" showZoom="false">
+				<boundColumn binding="name" title="Name" />
+				<boundColumn binding="boundColumnContent" title="Bound-column input" editable="true">
+<!--
+					<input>
+						<content display="auto" capture="all" />
+					</input>
+-->
+				</boundColumn>
+				<boundColumn binding="containerColumnContent" title="Second bound-column input" editable="true">
+<!--
+					<input>
+						<content display="image" capture="all" pixelWidth="160" pixelHeight="120" />
+					</input>
+-->
+				</boundColumn>
+			</dataGrid>
+		</tab>
+		<tab title="Upload Actions">
+			<form border="true" borderTitle="Button-backed upload actions" responsiveWidth="12" percentageWidth="70">
+				<column percentageWidth="35" responsiveWidth="5" />
+				<column responsiveWidth="7" />
+				<row>
+					<item label="Action panel">
+						<label value="Use the upload actions to inspect action upload.xhtml routes." />
+					</item>
+				</row>
+			</form>
+		</tab>
+	</tabPane>
+	<actions>
+		<defaults />
+		<upload className="UploadGeneric" displayName="Upload generic" capture="none" clientValidation="false" />
+		<upload className="UploadCamera" displayName="Upload camera" capture="camera" clientValidation="false" />
+		<upload className="UploadVideo" displayName="Upload video" capture="video" clientValidation="false" />
+		<upload className="UploadAll" displayName="Upload all" capture="all" clientValidation="false" />
+	</actions>
+</view>
