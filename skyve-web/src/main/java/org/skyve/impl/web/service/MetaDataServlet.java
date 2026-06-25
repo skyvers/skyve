@@ -803,7 +803,7 @@ public class MetaDataServlet extends HttpServlet {
 			@Override
 			public void renderView(String icon16x16Url, String icon32x32Url) {
 				result.append("{\"type\":\"view\",\"name\":\"");
-				result.append(view.getName()).append("\",\"title\":\"").append(OWASP.escapeJsonString(view.getLocalisedTitle())).append('"');
+				result.append(view.getName()).append("\",\"title\":\"").append(jsonViewTitle(view)).append('"');
 				result.append(",\"escapeTitle\":").append(ViewRenderer.shouldEscape(view.getEscapeTitle()));
 				String value = view.getIconStyleClass();
 				if (value != null) {
@@ -3692,6 +3692,15 @@ public class MetaDataServlet extends HttpServlet {
 		vr.visit();	
 		
 		return result;
+	}
+
+	/**
+	 * Returns the JSON-escaped view title.
+	 *
+	 * <p>Package-visible for testing.
+	 */
+	static String jsonViewTitle(View view) {
+		return OWASP.escapeJsonString(view.getLocalisedTitle());
 	}
 	
 	private static void processParameterizable(Parameterizable parameterizable, StringBuilder json) {
