@@ -4,6 +4,7 @@
 <%@page import="java.security.Principal"%>
 <%@page import="java.util.Locale"%>
 <%@page import="org.skyve.domain.messages.SkyveException"%>
+<%@page import="org.skyve.impl.util.UtilImpl"%>
 <%@page import="org.skyve.metadata.user.User"%>
 <%@page import="org.skyve.metadata.view.TextOutput.Sanitisation"%>
 <%@page import="org.skyve.util.Util"%>
@@ -11,11 +12,7 @@
 <%@page import="org.skyve.impl.web.UserAgent"%>
 <%@page import="org.skyve.impl.web.WebErrorUtil"%>
 <%@page import="org.skyve.impl.web.WebUtil"%>
-<%@page import="org.skyve.impl.web.filter.ResponseHeaderFilter"%>
 <%
-	// The web container error processing does not pass the error page the web app's filters 
-	ResponseHeaderFilter.applySecurityHeaders(response);
-	
 	String basePath = Util.getSkyveContextUrl() + "/";
 	boolean mobile = UserAgent.getType(request).isMobile();
 	Principal p = request.getUserPrincipal();
@@ -63,6 +60,7 @@
 
 		<%@include file="fragments/favicon.html" %>
 		<link rel="stylesheet" href="semantic24/semantic.min.css">
+		<script type="text/javascript" src="skyve/prime/skyve-min.js?v=<%=UtilImpl.WEB_RESOURCE_FILE_VERSION%>"></script>
 		
 		<%@include file="fragments/styles.html" %>
 		<%@include file="fragments/backgroundImage.html" %>
@@ -88,9 +86,9 @@
 									Reference: <%=errorReference%>
 								</div>
 							<% } %>
-		            	</div>
+						</div>
 						<div class="field">
-							<a href="<%=Util.getBaseUrl()%>" class="ui fluid large blue submit button"><%=Util.i18n("page.loginError.retry", locale)%></a>
+							<a href="<%=Util.getBaseUrl()%>" onclick="return window.SKYVE ? SKYVE.Util.retryFromErrorPage(this.href) : true;" class="ui fluid large blue submit button"><%=Util.i18n("page.loginError.retry", locale)%></a>
 						</div>
 						<div class="field">
 							<a href="<%=mailto%>" class="ui fluid large blue basic button">

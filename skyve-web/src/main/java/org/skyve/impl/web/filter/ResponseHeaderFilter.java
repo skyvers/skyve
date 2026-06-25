@@ -18,21 +18,17 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 public class ResponseHeaderFilter implements Filter {
 	public static final String SECURITY_HEADERS_FILTER_NAME = "SecurityHeadersFilter";
-	private static FilterConfig securityHeadersFilterConfig = null;
 	
 	private FilterConfig fc;
 
 	/**
-	 * Captures filter configuration and tracks the dedicated security-headers filter instance.
+	 * Captures filter configuration used to apply response headers for this filter mapping.
 	 *
 	 * @param config filter configuration containing response header settings
 	 * @throws ServletException when filter initialization fails
 	 */
 	@Override
 	public void init(FilterConfig config) throws ServletException {
-		if (SECURITY_HEADERS_FILTER_NAME.equals(config.getFilterName())) {
-			setSecurityHeadersFilterConfig(config);
-		}
 		fc = config;
 	}
 
@@ -41,14 +37,7 @@ public class ResponseHeaderFilter implements Filter {
 	 */
 	@Override
 	public void destroy() {
-		if (SECURITY_HEADERS_FILTER_NAME.equals(fc.getFilterName())) {
-			setSecurityHeadersFilterConfig(null);
-		}
 		fc = null;
-	}
-
-	private static void setSecurityHeadersFilterConfig(FilterConfig config) {
-		securityHeadersFilterConfig = config;
 	}
 
 	@Override
@@ -83,16 +72,6 @@ public class ResponseHeaderFilter implements Filter {
 			else {
 				httpResponse.setHeader(headerName, fc.getInitParameter(headerName));
 			}
-		}
-	}
-	
-	/**
-	 * Used in error.jsp to apply security headers as web container error processing does not pass through the web app's filters.
-	 * @param httpResponse	The response to apply the headers to.
-	 */
-	public static void applySecurityHeaders(HttpServletResponse httpResponse) {
-		if (securityHeadersFilterConfig != null) {
-			applyHeaders(securityHeadersFilterConfig, httpResponse);
 		}
 	}
 }

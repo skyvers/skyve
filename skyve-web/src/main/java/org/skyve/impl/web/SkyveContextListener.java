@@ -326,6 +326,7 @@ public class SkyveContextListener implements ServletContextListener {
 			else if (RESPONSE_HEADER_FILTER_CLASS_NAME.equals(className)
 					&& ResponseHeaderFilter.SECURITY_HEADERS_FILTER_NAME.equals(reg.getName())) {
 				securityHeadersFilterExists = true;
+				// NB it would b good to test that the filter has REQUEST and ERROR dispatcher types, but the Servlet API doesn't provide a way to get that information from the FilterRegistration object.
 			}
 		}
 		if (! securityHeadersFilterExists) {

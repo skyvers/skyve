@@ -36,6 +36,63 @@ SKYVE.Util = (function () {
 		}
 	};
 
+	const normaliseUrl = function (url) {
+		const anchor = document.createElement("a");
+		anchor.href = url;
+		return anchor.href;
+	};
+
+	const isSameOriginUrl = function (url) {
+		try {
+			return new URL(url, window.location.href).origin === window.location.origin;
+		} catch (ignore) {
+			return false;
+		}
+	};
+
+	const isAccessibleWindow = function (target) {
+		try {
+			return !!(
+				target &&
+				target.location &&
+				target.document &&
+				target.location.origin === window.location.origin
+			);
+		} catch (ignore) {
+			return false;
+		}
+	};
+
+	const focusWindow = function (target) {
+		try {
+			if (target.focus) {
+				target.focus();
+			}
+		} catch (ignore) {
+			// Ignore focus failures; navigation has already done the useful work.
+		}
+	};
+
+	const reloadWindow = function (target) {
+		try {
+			target.location.reload();
+			focusWindow(target);
+			return true;
+		} catch (ignore) {
+			return false;
+		}
+	};
+
+	const navigateWindow = function (target, url) {
+		try {
+			target.location.href = url;
+			focusWindow(target);
+			return true;
+		} catch (ignore) {
+			return false;
+		}
+	};
+
 	// Public methods
 	return {
 		customer: null,
@@ -54,6 +111,39 @@ SKYVE.Util = (function () {
 		 */
 		unsanitiseBinding: function (binding) {
 			return binding.replace(/\_(\d*)\_/g, "[$1]").replace(/\_/g, ".");
+		},
+
+		/**
+		 * Recovers from an error page by reloading the owning Skyve browsing context when possible.
+		 * @param {string} url - fallback retry URL from the error page link.
+		 * @returns {boolean} false when navigation was handled, true to allow the link default.
+		 */
+		retryFromErrorPage: function (url) {
+			const retryUrl = normaliseUrl(url);
+			if (!isSameOriginUrl(retryUrl)) {
+				return true;
+			}
+
+			if (window.top && window.top !== window) {
+				if (isAccessibleWindow(window.top) && reloadWindow(window.top)) {
+					return false;
+				}
+				if (navigateWindow(window.top, retryUrl)) {
+					return false;
+				}
+				return true;
+			}
+
+			if (
+				window.opener &&
+				!window.opener.closed &&
+				isAccessibleWindow(window.opener) &&
+				reloadWindow(window.opener)
+			) {
+				return false;
+			}
+
+			return !navigateWindow(window, retryUrl);
 		},
 
 		/**

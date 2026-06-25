@@ -1,6 +1,7 @@
 <%@page session="false" isErrorPage="true" language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@page import="java.util.Locale"%>
 <%@page import="org.skyve.CORE"%>
+<%@page import="org.skyve.impl.util.UtilImpl"%>
 <%@page import="org.skyve.metadata.customer.Customer"%>
 <%@page import="org.skyve.util.Util"%>
 <%@page import="org.skyve.impl.web.UserAgent"%>
@@ -51,6 +52,7 @@
 		
 		<%@include file="fragments/favicon.html" %>
 		<link rel="stylesheet" href="semantic24/semantic.min.css">
+		<script type="text/javascript" src="skyve/prime/skyve-min.js?v=<%=UtilImpl.WEB_RESOURCE_FILE_VERSION%>"></script>
 		
 		<%@include file="fragments/styles.html" %>
 		<%@include file="fragments/backgroundImage.html" %>
@@ -73,9 +75,9 @@
 		            	</div>
 		            	
 						<% if ((referer == null) || referer.contains("/login") || referer.contains("/pages/")) { // no referer or came from the login or other jsp page %>
-							<a href="<%=Util.getBaseUrl()%>" class="ui fluid large blue submit button"><%=Util.i18n("page.loginError.retry", locale)%></a>
+							<a href="<%=Util.getBaseUrl()%>" onclick="return window.SKYVE ? SKYVE.Util.retryFromErrorPage(this.href) : true;" class="ui fluid large blue submit button"><%=Util.i18n("page.loginError.retry", locale)%></a>
 						<% } else { %>
-							<a href="<%=referer%>" class="ui fluid large blue submit button"><%=Util.i18n("page.loginError.retry", locale)%></a>
+							<a href="<%=referer%>" onclick="return window.SKYVE ? SKYVE.Util.retryFromErrorPage(this.href) : true;" class="ui fluid large blue submit button"><%=Util.i18n("page.loginError.retry", locale)%></a>
 						<% } %>
 		            </div>
 		        </div>
