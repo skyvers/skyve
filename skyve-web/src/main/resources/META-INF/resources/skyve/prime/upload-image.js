@@ -15,19 +15,29 @@
 
 	function sizeCropperImage(image) {
 		var frame = document.getElementById("cropperFrame");
-		var frameWidth = frame.clientWidth;
-		var frameHeight = frame.clientHeight;
+		var imageContainer = document.getElementById("cropperImageContainer");
+		var style = window.getComputedStyle(frame);
+		var horizontalPadding = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+		var verticalPadding = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
+		var frameWidth = frame.clientWidth - horizontalPadding;
+		var frameHeight = frame.clientHeight - verticalPadding;
 		if (! (frameWidth > 0) || ! (frameHeight > 0)) {
 			return;
 		}
+		var imageWidth;
+		var imageHeight;
 		if ((frameWidth / frameHeight) > (image.naturalWidth / image.naturalHeight)) {
-			image.style.width = "auto";
-			image.style.height = frameHeight + "px";
+			imageWidth = Math.round(frameHeight * (image.naturalWidth / image.naturalHeight));
+			imageHeight = frameHeight;
 		}
 		else {
-			image.style.width = frameWidth + "px";
-			image.style.height = "auto";
+			imageWidth = frameWidth;
+			imageHeight = Math.round(frameWidth * (image.naturalHeight / image.naturalWidth));
 		}
+		imageContainer.style.width = imageWidth + "px";
+		imageContainer.style.height = imageHeight + "px";
+		image.style.width = imageWidth + "px";
+		image.style.height = imageHeight + "px";
 	}
 
 	function initialiseCropper(imageUrl) {

@@ -45,12 +45,22 @@
 
 .cropperFrame {
 	align-items: center;
+	box-sizing: border-box;
 	display: flex;
 	flex: 1 1 auto;
 	justify-content: center;
 	min-height: 0;
 	min-width: 0;
-	overflow: hidden;
+	overflow: visible;
+	padding: 18px;
+}
+
+#cropperImageContainer {
+	align-items: center;
+	display: flex;
+	justify-content: center;
+	max-height: 100%;
+	max-width: 100%;
 }
 
 #cropperImage {
