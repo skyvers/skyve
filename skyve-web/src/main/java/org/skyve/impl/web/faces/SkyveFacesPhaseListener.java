@@ -228,8 +228,17 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 
 						// Cache the conversation
 						Severity maximumSeverity = event.getFacesContext().getMaximumSeverity();
-						if ((maximumSeverity == null) || 
+						if ((maximumSeverity == null) ||
 								(maximumSeverity.getOrdinal() < FacesMessage.SEVERITY_ERROR.getOrdinal())) {
+							// Commit (which ends the transaction and releases the JDBC connection) BEFORE
+							// serialising the conversation, so the Hibernate session is disconnected and
+							// serialises cleanly. A list grid that runs a query during the JSF RENDER phase
+							// otherwise leaves the session connected, causing "Cannot serialize SessionImpl
+							// while connected" and a corrupted conversation. Pass false so the EntityManager
+							// stays open for the cached conversation to be restored; the finally block below
+							// performs the final commit(true) which closes it. This is a reorder of the commit
+							// that already happens every request, not an additional commit.
+							AbstractPersistence.get().commit(false);
 							StateUtil.cacheConversation(webContext);
 						}
 						// Dehydrate the view
