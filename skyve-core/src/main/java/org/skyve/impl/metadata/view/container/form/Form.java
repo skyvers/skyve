@@ -186,6 +186,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 *
 	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
+	@Override
 	public Boolean getEscapeBorderTitle() {
 		return escapeBorderTitle;
 	}
@@ -206,6 +207,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 *
 	 * @param escapeBorderTitle {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
+	@Override
 	@XmlAttribute(required = false)
 	public void setEscapeBorderTitle(Boolean escapeBorderTitle) {
 		this.escapeBorderTitle = escapeBorderTitle;

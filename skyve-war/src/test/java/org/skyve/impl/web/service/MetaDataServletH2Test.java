@@ -61,6 +61,30 @@ class MetaDataServletH2Test extends AbstractSkyveTest {
 	}
 
 	@Test
+	void viewRendersBoilerplateEscapeMetadataWithExpandedDefaults() throws Exception {
+		String body = invokeView(u, UXUI, "kitchensink", "EscapingFixture", false);
+
+		assertTrue(body.contains("\"title\":\"Escaping fixture: <i>view title</i>\",\"escapeTitle\":false"), body);
+		assertTrue(body.contains("\"title\":\"Escaped <i>tab title</i>\",\"escapeTitle\":true"), body);
+		assertTrue(body.contains("\"borderTitle\":\"Trusted <i>hbox border</i>\",\"escapeBorderTitle\":false"), body);
+		assertTrue(body.contains("\"borderTitle\":\"Escaped <i>vbox border</i>\",\"escapeBorderTitle\":true"), body);
+		assertTrue(body.contains("\"label\":\"Trusted <i>label</i>\",\"escapeLabel\":false"), body);
+		assertTrue(body.contains("\"label\":\"Escaped <i>label</i>\",\"escapeLabel\":true"), body);
+		assertTrue(body.contains("\"help\":\"Trusted <i>help</i>\",\"escapeHelp\":false"), body);
+		assertTrue(body.contains("\"help\":\"Escaped <i>help</i>\",\"escapeHelp\":true"), body);
+		assertTrue(body.contains("\"requiredMessage\":\"Trusted <i>required message</i>\",\"escapeRequiredMessage\":false"), body);
+		assertTrue(body.contains("\"requiredMessage\":\"Escaped <i>required message</i>\",\"escapeRequiredMessage\":true"), body);
+		assertTrue(body.contains("\"label\":\"Trusted <i>zoom display</i>\",\"escapeDisplayName\":false"), body);
+		assertTrue(body.contains("\"toolTip\":\"Trusted <i>zoom tooltip</i>\",\"escapeToolTip\":false"), body);
+		assertTrue(body.contains("\"value\":\"Trusted <i>link</i>\",\"escapeValue\":false"), body);
+		assertTrue(body.contains("\"value\":\"Escaped <i>link</i>\",\"escapeValue\":true"), body);
+		assertTrue(body.contains("\"candidatesHeading\":\"Trusted <i>candidates heading</i>\",\"escapeCandidatesHeading\":false"), body);
+		assertTrue(body.contains("\"membersHeading\":\"Trusted <i>members heading</i>\",\"escapeMembersHeading\":false"), body);
+		assertTrue(body.contains("\"confirm\":\"Trusted <i>cancel confirm</i>\",\"escapeConfirm\":false"), body);
+		assertTrue(body.contains("\"confirm\":\"Escaped <i>save confirm</i>\",\"escapeConfirm\":true"), body);
+	}
+
+	@Test
 	void viewRendersWithForcedTopFormLabels() throws Exception {
 		String body = invokeView(u, UXUI, "admin", "JobSchedule", true);
 
