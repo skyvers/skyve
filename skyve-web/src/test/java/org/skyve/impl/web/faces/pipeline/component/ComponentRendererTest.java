@@ -2,6 +2,8 @@ package org.skyve.impl.web.faces.pipeline.component;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -13,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.owasp.encoder.Encode;
 import org.primefaces.behavior.ajax.AjaxBehavior;
 import org.primefaces.behavior.confirm.ConfirmBehavior;
 import org.primefaces.component.autocomplete.AutoComplete;
@@ -56,9 +59,11 @@ import org.primefaces.component.tristatecheckbox.TriStateCheckbox;
 
 import jakarta.el.MethodExpression;
 import jakarta.el.ValueExpression;
+import jakarta.faces.application.Application;
 import jakarta.faces.component.UIOutput;
 import jakarta.faces.component.UIParameter;
 import jakarta.faces.component.UISelectItems;
+import jakarta.faces.component.behavior.ClientBehavior;
 import jakarta.faces.component.html.HtmlOutputLink;
 import jakarta.faces.component.html.HtmlOutputText;
 import jakarta.faces.component.html.HtmlPanelGroup;
@@ -67,6 +72,74 @@ import jakarta.faces.convert.Converter;
 
 @SuppressWarnings({"static-method", "boxing"})
 class ComponentRendererTest {
+	private static final String RAW_MARKUP_TEXT = "<b>Skyve \"Prime\"</b>";
+
+	@Test
+	void escapableTextDefaultsToEscapingUnlessExplicitlyFalse() {
+		assertTrue(EscapableText.of(RAW_MARKUP_TEXT, true).shouldEscape());
+		assertTrue(EscapableText.of(RAW_MARKUP_TEXT, true).shouldEscape());
+		assertFalse(EscapableText.of(RAW_MARKUP_TEXT, false).shouldEscape());
+	}
+
+	@Test
+	void escapableComponentSupportCreatesOutputTextWithRawValueAndEscapeDecision() {
+		Application application = mock(Application.class);
+		HtmlOutputText outputText = new HtmlOutputText();
+		when(application.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(outputText);
+
+		HtmlOutputText result = EscapableComponentSupport.outputText(application, EscapableText.of(RAW_MARKUP_TEXT, false));
+
+		assertSame(outputText, result);
+		assertEquals(RAW_MARKUP_TEXT, result.getValue());
+		assertFalse(result.isEscape());
+	}
+
+	@Test
+	void escapableComponentSupportAddsFacetOnlyWhenTextIsPresent() {
+		Application application = mock(Application.class);
+		Panel panel = new Panel();
+		HtmlOutputText outputText = new HtmlOutputText();
+		when(application.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(outputText);
+
+		HtmlOutputText result = EscapableComponentSupport.putOutputTextFacet(application, panel, "header", EscapableText.of(RAW_MARKUP_TEXT, true));
+
+		assertSame(outputText, result);
+		assertSame(outputText, panel.getFacet("header"));
+		assertEquals(RAW_MARKUP_TEXT, outputText.getValue());
+		assertTrue(outputText.isEscape());
+
+		assertNull(EscapableComponentSupport.putOutputTextFacet(application, panel, "footer", EscapableText.of(null, false)));
+		assertNull(panel.getFacet("footer"));
+	}
+
+	@Test
+	void escapableComponentSupportCreatesOutputLabelWithRawValueAndEscapeDecision() {
+		Application application = mock(Application.class);
+		OutputLabel label = new OutputLabel();
+		when(application.createComponent(OutputLabel.COMPONENT_TYPE)).thenReturn(label);
+
+		OutputLabel result = EscapableComponentSupport.outputLabel(application, EscapableText.of(RAW_MARKUP_TEXT, false), "input1");
+
+		assertSame(label, result);
+		assertEquals(RAW_MARKUP_TEXT, result.getValue());
+		assertFalse(result.isEscape());
+		assertEquals("input1", result.getFor());
+	}
+
+	@Test
+	void escapableComponentSupportAddsConfirmBehaviourWithRawMessageAndEscapeDecision() {
+		Application application = mock(Application.class);
+		ConfirmBehavior confirm = new ConfirmBehavior();
+		CommandButton button = new CommandButton();
+		when(application.createBehavior(ConfirmBehavior.BEHAVIOR_ID)).thenReturn(confirm);
+
+		EscapableComponentSupport.addConfirmBehavior(application, button, EscapableText.of(RAW_MARKUP_TEXT, false));
+
+		Map<String, List<ClientBehavior>> behaviours = button.getClientBehaviors();
+		assertSame(confirm, behaviours.get("click").get(0));
+		assertEquals(RAW_MARKUP_TEXT, confirm.getMessage());
+		assertFalse(confirm.isEscape());
+	}
 
 	@Test
 	void rendersUiOutputValueWithoutTagWhenComponentTypeIsGenericUiOutput() {
@@ -147,11 +220,27 @@ class ComponentRendererTest {
 	}
 
 	@Test
+	void rendersOutputTextValueEscapeFlagAndSyntaxEscapedAttributeValue() {
+		HtmlOutputText text = mock(HtmlOutputText.class);
+		stubCommonComponentState(text);
+		when(text.getId()).thenReturn("textEscaping");
+		when(text.getValue()).thenReturn(RAW_MARKUP_TEXT);
+		when(text.isEscape()).thenReturn(false);
+
+		String rendered = new ComponentRenderer(text).toString();
+
+		assertTrue(rendered.contains("<h:outputText id=\"textEscaping\""));
+		assertTrue(rendered.contains(" escape=\"false\""));
+		assertTrue(rendered.contains(" value=\"" + Encode.forHtmlAttribute(RAW_MARKUP_TEXT) + "\""));
+	}
+
+	@Test
 	void rendersAjaxAndConfirmBehavioursWithProcessAndUpdate() {
 		CommandButton button = mock(CommandButton.class);
 		stubCommonComponentState(button);
 		when(button.getId()).thenReturn("btn1");
 		when(button.getValue()).thenReturn("Save");
+		when(button.isEscape()).thenReturn(true);
 
 		AjaxBehavior ajax = new AjaxBehavior();
 		ajax.setProcess("@this");
@@ -168,8 +257,28 @@ class ComponentRendererTest {
 		assertTrue(rendered.contains(" process=\"@this\""));
 		assertTrue(rendered.contains(" update=\"@form\""));
 		assertTrue(rendered.contains("<p:confirm message=\"Are you sure?\" />"));
+		assertFalse(rendered.contains(" escape=\"false\""));
 		assertTrue(rendered.contains("</p:commandButton>"));
 		assertFalse(rendered.contains("<cant obtain AjaxBehaviourListener(s) from primefaces></p:ajax>"));
+	}
+
+	@Test
+	void rendersConfirmBehaviourEscapeDecisionAndSyntaxEscapedMessage() {
+		CommandButton button = mock(CommandButton.class);
+		stubCommonComponentState(button);
+		when(button.getId()).thenReturn("btnConfirm");
+		when(button.getValue()).thenReturn("Delete");
+
+		ConfirmBehavior confirm = new ConfirmBehavior();
+		confirm.setMessage(RAW_MARKUP_TEXT);
+		confirm.setEscape(false);
+		Map<String, List<ClientBehavior>> behaviours = new HashMap<>();
+		behaviours.put("click", List.of(confirm));
+		when(button.getClientBehaviors()).thenReturn(behaviours);
+
+		String rendered = new ComponentRenderer(button).toString();
+
+		assertTrue(rendered.contains("<p:confirm message=\"" + Encode.forHtmlAttribute(RAW_MARKUP_TEXT) + "\" escape=\"false\" />"));
 	}
 
 	@Test
@@ -745,8 +854,14 @@ class ComponentRendererTest {
 		OutputLabel label = mock(OutputLabel.class);
 		stubCommonComponentState(label);
 		when(label.getId()).thenReturn("ol1");
+		when(label.getFor()).thenReturn("input1");
+		when(label.getValue()).thenReturn(RAW_MARKUP_TEXT);
+		when(label.isEscape()).thenReturn(false);
 		String rendered = new ComponentRenderer(label).toString();
 		assertTrue(rendered.contains("<p:outputLabel id=\"ol1\""), rendered);
+		assertTrue(rendered.contains(" for=\"input1\""), rendered);
+		assertTrue(rendered.contains(" escape=\"false\""), rendered);
+		assertTrue(rendered.contains(" value=\"" + Encode.forHtmlAttribute(RAW_MARKUP_TEXT) + "\""), rendered);
 	}
 
 	@Test

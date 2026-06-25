@@ -803,7 +803,8 @@ public class MetaDataServlet extends HttpServlet {
 			@Override
 			public void renderView(String icon16x16Url, String icon32x32Url) {
 				result.append("{\"type\":\"view\",\"name\":\"");
-				result.append(view.getName()).append("\",\"title\":\"").append(view.getLocalisedTitle()).append('"');
+				result.append(view.getName()).append("\",\"title\":\"").append(OWASP.escapeJsonString(view.getLocalisedTitle())).append('"');
+				result.append(",\"escapeTitle\":").append(ViewRenderer.shouldEscape(view.getEscapeTitle()));
 				String value = view.getIconStyleClass();
 				if (value != null) {
 					result.append(",\"iconStyleClass\":\"").append(value).append('"');
@@ -953,6 +954,7 @@ public class MetaDataServlet extends HttpServlet {
 			public void renderTab(String title, String icon16x16Url, Tab tab) {
 				result.append("{\"type\":\"tab\",\"title\":\"");
 				result.append(OWASP.escapeJsonString(title)).append('"');
+				result.append(",\"escapeTitle\":").append(ViewRenderer.shouldEscape(tab.getEscapeTitle()));
 				if (icon16x16Url != null) {
 					result.append(",\"icon16x16Url\":\"").append(OWASP.escapeJsonString(icon16x16Url)).append('"');
 				}
@@ -1080,6 +1082,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 				if (label != null) {
 					result.append(",\"label\":\"").append(OWASP.escapeJsonString(label)).append('"');
+					result.append(",\"escapeLabel\":").append(getCurrentWidgetEscapeLabel());
 				}
 				result.append(",\"showLabel\":").append(showsLabel);
 				align = item.getLabelHorizontalAlignment();
@@ -1092,9 +1095,11 @@ public class MetaDataServlet extends HttpServlet {
 				}
 				if (help != null) {
 					result.append(",\"help\":\"").append(OWASP.escapeJsonString(help)).append('"');
+					result.append(",\"escapeHelp\":").append(getCurrentWidgetEscapeHelp());
 				}
 				if (requiredMessage != null) {
 					result.append(",\"requiredMessage\":\"").append(requiredMessage).append('"');
+					result.append(",\"escapeRequiredMessage\":").append(getCurrentWidgetEscapeRequiredMessage());
 				}
 				processDecorated(item);
 				result.append(",\"widget\":");
@@ -1176,6 +1181,7 @@ public class MetaDataServlet extends HttpServlet {
 				result.append("{\"type\":\"zoomIn\"");
 				if (label != null) {
 					result.append(",\"label\":\"").append(OWASP.escapeJsonString(label)).append('"');
+					result.append(",\"escapeDisplayName\":").append(ViewRenderer.shouldEscape(zoomIn.getEscapeDisplayName()));
 				}
 				processBound(zoomIn);
 				if (iconStyleClass != null) {
@@ -1190,6 +1196,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 				if (toolTip != null) {
 					result.append(",\"toolTip\":\"").append(OWASP.escapeJsonString(toolTip)).append('"');
+					result.append(",\"escapeToolTip\":").append(ViewRenderer.shouldEscape(zoomIn.getEscapeToolTip()));
 				}
 				processSize(zoomIn);
 				processDisableable(zoomIn);
@@ -1416,6 +1423,7 @@ public class MetaDataServlet extends HttpServlet {
 				result.append("{\"type\":\"link\"");
 				if (value != null) {
 					result.append(",\"value\":\"").append(OWASP.escapeJsonString(value)).append('"');
+					result.append(",\"escapeValue\":").append(ViewRenderer.shouldEscape(link.getEscapeValue()));
 				}
 				org.skyve.impl.metadata.view.reference.Reference linkReference = link.getReference();
 				if (linkReference != null) {
@@ -1614,6 +1622,7 @@ public class MetaDataServlet extends HttpServlet {
 				result.append("{\"type\":\"dialogButton\"");
 				if (label != null) {
 					result.append(",\"label\":\"").append(OWASP.escapeJsonString(label)).append('"');
+					result.append(",\"escapeDisplayName\":").append(ViewRenderer.shouldEscape(button.getEscapeDisplayName()));
 				}
 				String string = button.getDialogName();
 				if (string != null) {
@@ -1764,6 +1773,7 @@ public class MetaDataServlet extends HttpServlet {
 				result.append(",\"actionName\":\"").append(name).append('"');
 				if (label != null) {
 					result.append(",\"label\":\"").append(OWASP.escapeJsonString(label)).append('"');
+					result.append(",\"escapeDisplayName\":").append(getActionEscapeDisplayName());
 				}
 				if (iconStyleClass != null) {
 					result.append(",\"fontIcon\":\"").append(OWASP.escapeJsonString(iconStyleClass)).append('"');
@@ -1773,9 +1783,11 @@ public class MetaDataServlet extends HttpServlet {
 				}
 				if (toolTip != null) {
 					result.append(",\"toolTip\":\"").append(OWASP.escapeJsonString(toolTip)).append('"');
+					result.append(",\"escapeToolTip\":").append(getActionEscapeToolTip());
 				}
 				if (confirmationText != null) {
 					result.append(",\"confirmationText\":\"").append(OWASP.escapeJsonString(confirmationText)).append('"');
+					result.append(",\"escapeConfirm\":").append(getActionEscapeConfirm());
 				}
 				ActionShow show = button.getShow();
 				if (show != null) {
@@ -1810,6 +1822,7 @@ public class MetaDataServlet extends HttpServlet {
 				result.append("{\"type\":\"dataGrid\"");
 				if (title != null) {
 					result.append(",\"title\":\"").append(OWASP.escapeJsonString(title)).append('"');
+					result.append(",\"escapeTitle\":").append(ViewRenderer.shouldEscape(grid.getEscapeTitle()));
 				}
 				processBound(grid);
 				processIdentifiable(grid);
@@ -1856,6 +1869,7 @@ public class MetaDataServlet extends HttpServlet {
 				result.append("{\"type\":\"containerColumn\"");
 				if (title != null) {
 					result.append(",\"title\":\"").append(OWASP.escapeJsonString(title)).append('"');
+					result.append(",\"escapeTitle\":").append(ViewRenderer.shouldEscape(column.getEscapeTitle()));
 				}
 				HorizontalAlignment alignment = column.getAlignment();
 				if (alignment != null) {
@@ -1911,6 +1925,7 @@ public class MetaDataServlet extends HttpServlet {
 				result.append("{\"type\":\"boundColumn\"");
 				if (title != null) {
 					result.append(",\"title\":\"").append(OWASP.escapeJsonString(title)).append('"');
+					result.append(",\"escapeTitle\":").append(ViewRenderer.shouldEscape(column.getEscapeTitle()));
 				}
 				HorizontalAlignment alignment = column.getAlignment();
 				if (alignment != null) {
@@ -2152,6 +2167,7 @@ public class MetaDataServlet extends HttpServlet {
 				result.append("{\"type\":\"dataRepeater\"");
 				if (title != null) {
 					result.append(",\"title\":\"").append(OWASP.escapeJsonString(title)).append('"');
+					result.append(",\"escapeTitle\":").append(ViewRenderer.shouldEscape(repeater.getEscapeTitle()));
 				}
 				processBound(repeater);
 				processIdentifiable(repeater);
@@ -2211,6 +2227,7 @@ public class MetaDataServlet extends HttpServlet {
 			private void renderListGridGuts(String title, boolean aggregateQuery, ListGrid grid) {
 				if (title != null) {
 					result.append(",\"title\":\"").append(OWASP.escapeJsonString(title)).append('"');
+					result.append(",\"escapeTitle\":").append(ViewRenderer.shouldEscape(grid.getEscapeTitle()));
 				}
 				result.append(",\"aggregateQuery\":").append(aggregateQuery);
 				result.append(",\"continueConversation\":").append(grid.getContinueConversation());
@@ -2324,6 +2341,7 @@ public class MetaDataServlet extends HttpServlet {
 				result.append("{\"type\":\"listRepeater\"");
 				if (title != null) {
 					result.append(",\"title\":\"").append(OWASP.escapeJsonString(title)).append('"');
+					result.append(",\"escapeTitle\":").append(ViewRenderer.shouldEscape(repeater.getEscapeTitle()));
 				}
 				processAbstractListWidget(repeater);
 				Boolean bool = repeater.getShowColumnHeaders();
@@ -2394,7 +2412,9 @@ public class MetaDataServlet extends HttpServlet {
 				result.append("{\"type\":\"listMembership\"");
 				processInputWidget(membership);
 				result.append(",\"candidatesHeading\":\"").append(OWASP.escapeJsonString(candidatesHeading)).append('"');
+				result.append(",\"escapeCandidatesHeading\":").append(ViewRenderer.shouldEscape(membership.getEscapeCandidatesHeading()));
 				result.append(",\"membersHeading\":\"").append(OWASP.escapeJsonString(membersHeading)).append('"');
+				result.append(",\"escapeMembersHeading\":").append(ViewRenderer.shouldEscape(membership.getEscapeMembersHeading()));
 				processSize(membership);
 				processDecorated(membership);
 				result.append("},");
@@ -3243,6 +3263,7 @@ public class MetaDataServlet extends HttpServlet {
 					result.append(",\"border\":true");
 					if (borderTitle != null) {
 						result.append(",\"borderTitle\":\"").append(OWASP.escapeJsonString(borderTitle)).append('"');
+						result.append(",\"escapeBorderTitle\":").append(ViewRenderer.shouldEscape(bordered.getEscapeBorderTitle()));
 					}
 				}
 			}
@@ -3617,6 +3638,7 @@ public class MetaDataServlet extends HttpServlet {
 				actionsJSON.append(",\"actionName\":\"").append(name).append('"');
 				if (label != null) {
 					actionsJSON.append(",\"label\":\"").append(OWASP.escapeJsonString(label)).append('"');
+					actionsJSON.append(",\"escapeDisplayName\":").append(getActionEscapeDisplayName());
 				}
 				if (iconStyleClass != null) {
 					actionsJSON.append(",\"fontIcon\":\"").append(iconStyleClass).append('"');
@@ -3632,9 +3654,11 @@ public class MetaDataServlet extends HttpServlet {
 				actionsJSON.append(",\"show\":\"").append(show).append('"');
 				if (confirmationText != null) {
 					actionsJSON.append(",\"confirm\":\"").append(OWASP.escapeJsonString(confirmationText)).append('"');
+					actionsJSON.append(",\"escapeConfirm\":").append(getActionEscapeConfirm());
 				}
 				if (toolTip != null) {
 					actionsJSON.append(",\"toolTip\":\"").append(OWASP.escapeJsonString(toolTip)).append('"');
+					actionsJSON.append(",\"escapeToolTip\":").append(getActionEscapeToolTip());
 				}
 				MetaDataServlet.processDisableable(action, actionsJSON);
 				MetaDataServlet.processInvisible(action, actionsJSON);

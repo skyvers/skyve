@@ -547,7 +547,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	    		result = true;
 	    		// no '.' or '[' or ']' allowed in JSON identifiers
 	    		sb.append('"').append(BindUtil.sanitiseBinding(binding)).append("\":\"");
-	    		sb.append(OWASP.escapeJsString(m.getText())).append("\",");
+			sb.append(OWASP.escapeJsString(OWASP.escapeHtml(m.getText()))).append("\",");
 	    	}
     	}
     	

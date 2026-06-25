@@ -19,7 +19,7 @@ class SmartClientContentUploadScriptTest {
 		String script = Files.readString(TYPES_SCRIPT);
 
 		assertTrue(script.contains("_linkPreviewContents: function (contents)"), script);
-		assertTrue(script.contains("'<div style=\"align-items:center;display:flex;min-height:1.6rem;vertical-align:middle;\">' +"), script);
+		assertTrue(script.contains("'<div style=\"align-items:center;box-sizing:border-box;display:flex;height:25px;line-height:25px;vertical-align:middle;\">' +"), script);
 		assertTrue(script.contains("this._linkPreviewContents(this.canvas.linkHTML(url, \"Content\", \"_blank\"))"), script);
 		assertTrue(script.contains("this.emptyText = config.emptyText || \"No content\";"), script);
 		assertTrue(script.contains("this._previewWidth = config.width && config.width !== \"*\" ? config.width : \"100%\";"), script);

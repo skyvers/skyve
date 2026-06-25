@@ -16,7 +16,6 @@ import org.skyve.metadata.module.query.MetaDataQueryContentColumn;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.user.User;
 import org.skyve.util.BeanValidator;
-import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 
 /**
@@ -313,7 +312,7 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 		result.append("name:'");
 		result.append(name);
 		result.append("',title:'");
-		result.append(OWASP.escapeJsString(title));
+		result.append(SmartClientViewRenderer.escapeSmartClientText(title, true));
 		result.append("',type:'");
 		result.append(type);
 		if (editorType != null) {
@@ -336,14 +335,14 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
         }
 
 		if (required) {
-        	result.append(",bizRequired:true,requiredMessage:'");
-        	if (requiredMessage == null) {
-        		result.append(OWASP.escapeJsString(Util.nullSafeI18n(BeanValidator.VALIDATION_REQUIRED_KEY, title)));
-        	}
-        	else {
-        		result.append(OWASP.escapeJsString(requiredMessage));
-        	}
-        	result.append('\'');
+			result.append(",bizRequired:true,requiredMessage:'");
+			if (requiredMessage == null) {
+				result.append(SmartClientViewRenderer.escapeSmartClientText(Util.nullSafeI18n(BeanValidator.VALIDATION_REQUIRED_KEY, title), true));
+			}
+			else {
+				result.append(SmartClientViewRenderer.escapeSmartClientText(requiredMessage, true));
+			}
+			result.append('\'');
 		}
 		if (! canFilter) {
 			result.append(",canFilter:false");

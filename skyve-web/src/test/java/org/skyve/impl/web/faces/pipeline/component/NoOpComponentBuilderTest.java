@@ -273,7 +273,11 @@ class NoOpComponentBuilderTest {
 
 	@Test
 	void listMembershipReturnsInputEventSource() {
-		assertSame(eventSourceComponent, builder.listMembership(eventSourceComponent, "candidates", "members", new ListMembership()));
+		assertSame(eventSourceComponent,
+					builder.listMembership(eventSourceComponent,
+											EscapableText.of("candidates", true),
+											EscapableText.of("members", true),
+											new ListMembership()));
 	}
 
 	@Test

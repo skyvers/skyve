@@ -23,6 +23,7 @@ import org.skyve.metadata.view.TextOutput.Sanitisation;
 
 import jakarta.annotation.Nullable;
 import jakarta.faces.component.UIComponent;
+import jakarta.faces.component.html.HtmlOutputText;
 import jakarta.faces.component.html.HtmlPanelGrid;
 import jakarta.faces.component.html.HtmlPanelGroup;
 
@@ -360,7 +361,11 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	 * @param currentFormItem current form-item metadata
 	 * @param currentFormColumn current form-column metadata
 	 * @param widgetLabel widget label fallback
-	 * @param widgetRequiredMessage optional required-message text
+	 * @param widgetEscapeLabel resolved escape decision for widget label
+	 * @param widgetRequiredMessage optional required-message text normalised for
+	 *        unescaped PrimeFaces message rendering
+	 * @param widgetEscapeRequiredMessage resolved escape decision retained for layout
+	 *        API compatibility
 	 * @param widgetInvisible widget invisible condition
 	 * @param widgetHelpText widget help text
 	 */
@@ -371,7 +376,9 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 										FormItem currentFormItem,
 										FormColumn currentFormColumn,
 										String widgetLabel,
+										boolean widgetEscapeLabel,
 										@Nullable String widgetRequiredMessage,
+										boolean widgetEscapeRequiredMessage,
 										String widgetInvisible,
 										String widgetHelpText) {
 		// The label
@@ -390,9 +397,9 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 		formOrRowLayout.getChildren().add(column);
 		HtmlPanelGroup pg = panelGroup(true, true, false, widgetInvisible, null);
 		column.getChildren().add(pg);
-		OutputLabel l = label(label, formItemComponent.getId(), widgetRequiredMessage);
+		OutputLabel l = label(label, widgetEscapeLabel, formItemComponent.getId(), widgetRequiredMessage);
 		pg.getChildren().add(l);
-		Message m = message(formItemComponent.getId());
+		Message m = message(formItemComponent.getId(), widgetEscapeRequiredMessage);
 		pg.getChildren().add(m);
 	}
 
@@ -405,10 +412,15 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	 * @param currentFormItem current form-item metadata
 	 * @param currentFormColumn current form-column metadata
 	 * @param widgetLabel widget label
+	 * @param widgetEscapeLabel resolved escape decision for widget label
 	 * @param widgetColspan widget column span
-	 * @param widgetRequiredMessage optional required-message text
+	 * @param widgetRequiredMessage optional required-message text normalised for
+	 *        unescaped PrimeFaces message rendering
+	 * @param widgetEscapeRequiredMessage resolved escape decision retained for layout
+	 *        API compatibility
 	 * @param widgetInvisible widget invisible condition
 	 * @param widgetHelpText widget help text
+	 * @param widgetEscapeHelp resolved escape decision for widget help text
 	 * @param widgetPixelWidth widget pixel width
 	 * @param showLabel whether label is shown
 	 * @param topLabel whether top-label mode is active
@@ -420,10 +432,13 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 										FormItem currentFormItem,
 										FormColumn currentFormColumn,
 										String widgetLabel,
+										boolean widgetEscapeLabel,
 										int widgetColspan,
 										@Nullable String widgetRequiredMessage,
+										boolean widgetEscapeRequiredMessage,
 										String widgetInvisible,
 										String widgetHelpText,
+										boolean widgetEscapeHelp,
 										Integer widgetPixelWidth,
 										boolean showLabel,
 										boolean topLabel) {
@@ -548,19 +563,34 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	}
 
 	/**
-	 * Creates a standard output label for a form item, appending required markup when needed.
+	 * Creates a standard output label for a form item.
+	 *
+	 * <p>Side effects: asks the JSF application to create an output label and child
+	 * output text components. The metadata label remains raw on its own child and
+	 * uses the paired escape decision; the required marker and trailing colon are
+	 * renderer-owned text on separate unescaped children.
 	 *
 	 * @param value label text
+	 * @param escapeLabel resolved escape decision for {@code value}
 	 * @param forId target component id
 	 * @param requiredMessage optional required-message text
 	 * @return configured output label
 	 */
-	protected OutputLabel label(String value, String forId, @Nullable String requiredMessage) {
+	protected OutputLabel label(String value, boolean escapeLabel, String forId, @Nullable String requiredMessage) {
 		OutputLabel result = (OutputLabel) a.createComponent(OutputLabel.COMPONENT_TYPE);
-		result.setValue((requiredMessage != null) ? value + "&nbsp;*:" : value + ":");
 		result.setEscape(false);
 		setId(result, null);
 		result.setFor(forId);
+
+		HtmlOutputText labelText = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
+		labelText.setValue(value);
+		labelText.setEscape(escapeLabel);
+		result.getChildren().add(labelText);
+
+		HtmlOutputText suffix = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
+		suffix.setValue((requiredMessage != null) ? "&nbsp;*:" : ":");
+		suffix.setEscape(false);
+		result.getChildren().add(suffix);
 		return result;
 	}
 

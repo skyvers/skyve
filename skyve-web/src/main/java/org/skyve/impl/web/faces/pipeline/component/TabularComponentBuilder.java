@@ -10,7 +10,6 @@ import java.util.function.Consumer;
 
 import org.primefaces.behavior.ajax.AjaxBehavior;
 import org.primefaces.behavior.ajax.AjaxBehaviorListenerImpl;
-import org.primefaces.behavior.confirm.ConfirmBehavior;
 import org.primefaces.component.accordionpanel.AccordionPanel;
 import org.primefaces.component.autocomplete.AutoComplete;
 import org.primefaces.component.barchart.BarChart;
@@ -61,6 +60,7 @@ import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.converters.Format;
 import org.skyve.domain.types.converters.Format.TextCase;
+import org.skyve.impl.generate.ViewRenderer;
 import org.skyve.domain.types.converters.date.DD_MMM_YYYY;
 import org.skyve.domain.types.converters.date.DD_MM_YYYY;
 import org.skyve.domain.types.converters.date.MMM_DD_YYYY;
@@ -106,6 +106,7 @@ import org.skyve.impl.metadata.view.event.ServerSideActionEventAction;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Chart;
 import org.skyve.impl.metadata.view.widget.Chart.ChartType;
+import org.skyve.impl.metadata.view.widget.DialogButton;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
 import org.skyve.impl.metadata.view.widget.Link;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
@@ -285,6 +286,20 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
+	/**
+	 * Creates a PrimeFaces tab whose metadata title is rendered through a
+	 * {@code title} facet.
+	 *
+	 * <p>Side effects: creates and IDs a tab component, optionally attaches a
+	 * title-facet output component, and applies disabled/rendered expressions.
+	 * {@code null} and {@code Boolean.TRUE} title escape flags escape at the facet
+	 * boundary; only {@code Boolean.FALSE} allows trusted title markup.
+	 *
+	 * @param component existing component to reuse; when non-{@code null}, returned unchanged
+	 * @param title raw resolved title or title expression fragment; may be {@code null}
+	 * @param tab tab metadata carrying escape, disabled, and invisible settings
+	 * @return existing component or configured tab; never {@code null} when a new tab is created
+	 */
 	@Override
 	public UIComponent tab(UIComponent component, String title, org.skyve.impl.metadata.view.container.Tab tab) {
 		if (component != null) {
@@ -292,7 +307,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		}
 
 		Tab result = (Tab) a.createComponent(Tab.COMPONENT_TYPE);
-		setValueOrValueExpression(title, result::setTitle, "title", result);
+		putOutputTextFacetValueOrValueExpression(result, "title", title, ViewRenderer.shouldEscape(tab.getEscapeTitle()));
 		setDisabled(result, tab.getDisabledConditionName(), null);
 		setInvisible(result, tab.getInvisibleConditionName(), null);
 		setId(result, null);
@@ -407,8 +422,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		CommandButton result = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 
 		result.setValue(label);
+		result.setEscape(! Boolean.FALSE.equals(zoomIn.getEscapeDisplayName()));
 		result.setIcon(iconStyleClass);
-		result.setTitle(toolTip);
+		result.setTitle(sanitiseFacesText(toolTip));
 
 		setSizeAndTextAlignStyle(result, null, zoomIn.getPixelWidth(), null, null, zoomIn.getPixelHeight(), null, null);
 		setInvisible(result, zoomIn.getInvisibleConditionName(), null);
@@ -449,9 +465,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		}
 
 		Map<String, String> properties = button.getProperties();
-		return actionButton(label,
+		return actionButton(actionDisplayName(label, action),
 								iconStyleClass,
-				                toolTip,
+				                actionToolTip(toolTip),
 				                action.getImplicitName(),
 				                action.getName(),
 				                false,
@@ -459,7 +475,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 				                dataWidgetVar,
 				                button.getPixelWidth(),
 				                button.getPixelHeight(),
-				                confirmationText,
+				                actionConfirmation(confirmationText, action),
 				                action.getDisabledConditionName(),
 				                formDisabledConditionName,
 				                action.getInvisibleConditionName(),
@@ -481,14 +497,14 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			return component;
 		}
 
-		return reportButton(label,
+		return reportButton(actionDisplayName(label, action),
 								iconStyleClass,
-								toolTip,
+								actionToolTip(toolTip),
 								action.getParameters(),
 								button.getPixelWidth(),
 								button.getPixelHeight(),
 								action.getClientValidation(),
-								confirmationText,
+								actionConfirmation(confirmationText, action),
 								action.getDisabledConditionName(),
 								formDisabledConditionName,
 								action.getInvisibleConditionName());
@@ -511,15 +527,15 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 		Map<String, String> properties = action.getProperties();
 
-		return downloadButton(label,
+		return downloadButton(actionDisplayName(label, action),
 								iconStyleClass,
-								toolTip,
+								actionToolTip(toolTip),
 								dataWidgetBinding,
 								dataWidgetVar,
 								action.getName(),
 								button.getPixelWidth(),
 								button.getPixelHeight(),
-								confirmationText,
+								actionConfirmation(confirmationText, action),
 								action.getDisabledConditionName(),
 								formDisabledConditionName,
 								action.getInvisibleConditionName(),
@@ -540,14 +556,14 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			return component;
 		}
 
-		return uploadButton(label,
+		return uploadButton(actionDisplayName(label, action),
 								iconStyleClass,
-								toolTip,
+								actionToolTip(toolTip),
 								action.getName(),
 								button.getPixelWidth(),
 								button.getPixelHeight(),
 								action.getClientValidation(),
-								confirmationText,
+								actionConfirmation(confirmationText, action),
 								action.getDisabledConditionName(),
 								formDisabledConditionName,
 								action.getInvisibleConditionName(),
@@ -575,6 +591,71 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 							! Boolean.FALSE.equals(blurb.getEscape()),
 							blurb.getSanitise(),
 							true);
+	}
+
+	/**
+	 * Creates a PrimeFaces command button for dialog-button metadata.
+	 *
+	 * <p>Side effects: creates and IDs a command button, assigns raw display text
+	 * and the metadata escape flag at the PrimeFaces output boundary, applies
+	 * disabled/invisible conditions, and marks the button as client-side only until
+	 * dialog invocation behaviour is implemented.
+	 *
+	 * @param component existing component to reuse; when non-{@code null}, returned unchanged
+	 * @param label raw button label and nullable escape flag
+	 * @param button dialog-button metadata
+	 * @param formDisabledConditionName optional form-level disabled condition
+	 * @return existing component or configured command button; never {@code null} when newly created
+	 */
+	@Override
+	public UIComponent dialogButton(UIComponent component,
+										EscapableText label,
+										DialogButton button,
+										String formDisabledConditionName) {
+		if (component != null) {
+			return component;
+		}
+
+		CommandButton result = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
+		setCommandButtonText(result, label);
+		result.setType("button");
+		setDisabled(result, button.getDisabledConditionName(), formDisabledConditionName);
+		setInvisible(result, button.getInvisibleConditionName(), null);
+		setId(result, null);
+		return result;
+	}
+
+	/**
+	 * Returns raw action display text with its metadata escape decision.
+	 *
+	 * @param value resolved action display text; may be {@code null}
+	 * @param action action metadata supplying the nullable escape flag; must not be {@code null}
+	 * @return raw display text paired with its escape decision; never {@code null}
+	 */
+	private static EscapableText actionDisplayName(String value, Action action) {
+		return EscapableText.of(value, ViewRenderer.shouldEscape(action.getEscapeDisplayName()));
+	}
+
+	/**
+	 * Returns plain action tooltip text for assignment to JSF/PrimeFaces browser
+	 * title attributes.
+	 *
+	 * @param value resolved action tooltip text; may be {@code null}
+	 * @return markup-stripped tooltip text, or {@code null}
+	 */
+	private static String actionToolTip(String value) {
+		return sanitiseFacesText(value);
+	}
+
+	/**
+	 * Returns raw action confirmation text with its metadata escape decision.
+	 *
+	 * @param value resolved confirmation text; may be {@code null}
+	 * @param action action metadata supplying the nullable escape flag; must not be {@code null}
+	 * @return raw confirmation text paired with its escape decision; never {@code null}
+	 */
+	private static EscapableText actionConfirmation(String value, Action action) {
+		return EscapableText.of(value, ViewRenderer.shouldEscape(action.getEscapeConfirm()));
 	}
 
 	@Override
@@ -731,6 +812,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		Column result = column(dataWidgetVar,
 								null,
 								columnTitle,
+								ViewRenderer.shouldEscape(column.getEscapeTitle()),
 								alignment,
 	                            false,
 	                            pixelWidth);
@@ -842,6 +924,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		Column col = column(widget.getBinding(),
 								null,
 								title,
+								ViewRenderer.shouldEscape(column.getEscapeTitle()),
 								alignment,
 				                false,
 				                column.getPixelWidth());
@@ -881,9 +964,10 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		if (! Boolean.FALSE.equals(grid.getEditable())) {
 			String dataWidgetBinding = grid.getBinding();
 
-			Column col = column(null,
-									null,
-									"",
+				Column col = column(null,
+										null,
+										"",
+										true,
 									HorizontalAlignment.centre,
 					                true,
 					                SINGLE_ACTION_COLUMN_WIDTH_INTEGER);
@@ -951,7 +1035,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		CommandButton result = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		setId(result, null);
 		result.setValue(null);
-		result.setTitle("Add a new " + singularDocumentAlias);
+		result.setTitle(sanitiseFacesText("Add a new " + singularDocumentAlias));
 		result.setIcon(Icons.FONT_ADD);
 		action(result, ImplicitActionName.Add, null, dataWidgetBinding, dataWidgetVar, inline, null);
 		result.setProcess(process);
@@ -982,7 +1066,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		CommandButton result = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		setId(result, null);
 		result.setValue(null);
-		result.setTitle("Remove this " + singularDocumentAlias);
+		result.setTitle(sanitiseFacesText("Remove this " + singularDocumentAlias));
 		result.setIcon(Icons.FONT_REMOVE);
 		result.setProcess(process);
 		// We cannot just update the data table ever when removing a row as
@@ -1010,7 +1094,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		CommandButton result = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		setId(result, null);
 		result.setValue(null);
-		result.setTitle("Edit this " + singularDocumentAlias);
+		result.setTitle(sanitiseFacesText("Edit this " + singularDocumentAlias));
 		result.setIcon(Icons.FONT_ZOOM_IN);
 		result.setProcess(process);
 		result.setUpdate(update);
@@ -1713,7 +1797,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			// Create the column
 			Column column = (Column) a.createComponent(Column.COMPONENT_TYPE);
 			setId(column, null);
-			column.setHeaderText(displayName);
+			putOutputTextFacetValueOrValueExpression(column, "header", displayName, true);
 			column.setResponsivePriority(columnPriority);
 			column.setStyleClass("hiddenFilter");
 			if (columnPriority < 6) {
@@ -2151,10 +2235,24 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result.toString();
 	}
 
+	/**
+	 * Creates a PrimeFaces pick-list with source and target caption facets.
+	 *
+	 * <p>Side effects: creates and IDs the pick-list and caption components, binds
+	 * pick-list value/item expressions, and mutates the pick-list facet map.
+	 * Caption metadata remains raw until each caption output component applies its
+	 * escape flag; omitted captions use renderer-owned fallback text.
+	 *
+	 * @param component existing wrapper component to reuse; when non-{@code null}, returned unchanged
+	 * @param candidatesHeading raw candidates-list heading and nullable escape flag; may be {@code null}
+	 * @param membersHeading raw members-list heading and nullable escape flag; may be {@code null}
+	 * @param membership list-membership metadata
+	 * @return existing wrapper or configured pick-list wrapper; never {@code null} when newly created
+	 */
 	@Override
 	public EventSourceComponent listMembership(EventSourceComponent component,
-												String candidatesHeading,
-												String membersHeading,
+												EscapableText candidatesHeading,
+												EscapableText membersHeading,
 												ListMembership membership) {
 		if (component != null) {
 			return component;
@@ -2179,13 +2277,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
         result.setValueExpression("itemLabel", ef.createValueExpression(elc, "#{item.localisedDescription}", String.class));
 
         Map<String, UIComponent> facets = result.getFacets();
-		UIOutput text = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
-		text.setValue((candidatesHeading == null) ? "Candidates" : candidatesHeading);
-		setId(text, null);
+		UIOutput text = outputText(defaultedCaption(candidatesHeading, "Candidates"));
 		facets.put("sourceCaption", text);
-		text = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
-		text.setValue((membersHeading == null) ? "Members" : membersHeading);
-		setId(text, null);
+		text = outputText(defaultedCaption(membersHeading, "Members"));
 		facets.put("targetCaption", text);
 		return new EventSourceComponent(result, result);
 	}
@@ -3423,13 +3517,13 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 		ImplicitActionName name = action.getImplicitName();
 		if (ImplicitActionName.Download.equals(name)) {
-			return downloadLink(value,
-									toolTip,
+			return downloadLink(EscapableText.of(value, ViewRenderer.shouldEscape(link.getEscapeValue())),
+									actionToolTip(toolTip),
 									action.getName(),
 									dataWidgetBinding,
 									dataWidgetVar,
 									link.getPixelWidth(),
-									confirmationText,
+									actionConfirmation(confirmationText, action),
 									action.getDisabledConditionName(),
 									null,
 									action.getInvisibleConditionName(),
@@ -3437,8 +3531,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 									properties.get(UPDATE_KEY));
 		}
 
-		return actionLink(value,
-							toolTip,
+		return actionLink(EscapableText.of(value, ViewRenderer.shouldEscape(link.getEscapeValue())),
+							actionToolTip(toolTip),
 							null,
 							action.getName(),
 							false,
@@ -3447,7 +3541,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 							link.getPixelWidth(),
 							null,
 							action.getClientValidation(),
-							confirmationText,
+							actionConfirmation(confirmationText, action),
 							action.getDisabledConditionName(),
 							null,
 							action.getInvisibleConditionName(),
@@ -3466,14 +3560,14 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			return component;
 		}
 
-		return reportButton(label,
+		return reportButton(actionDisplayName(label, action),
 								iconStyleClass,
-								toolTip,
+								actionToolTip(toolTip),
 								action.getParameters(),
 								null,
 								null,
 								action.getClientValidation(),
-								confirmationText,
+								actionConfirmation(confirmationText, action),
 								action.getDisabledConditionName(),
 								null,
 								action.getInvisibleConditionName());
@@ -3494,15 +3588,15 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 		Map<String, String> properties = action.getProperties();
 
-		return downloadButton(label,
+		return downloadButton(actionDisplayName(label, action),
 								iconStyleClass,
-								toolTip,
+								actionToolTip(toolTip),
 								dataWidgetBinding,
 								dataWidgetVar,
 								action.getName(),
 								null,
 								null,
-								confirmationText,
+								actionConfirmation(confirmationText, action),
 								action.getDisabledConditionName(),
 								null,
 								action.getInvisibleConditionName(),
@@ -3521,14 +3615,14 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			return component;
 		}
 
-		return uploadButton(label,
+		return uploadButton(actionDisplayName(label, action),
 								iconStyleClass,
-								toolTip,
+								actionToolTip(toolTip),
 								action.getName(),
 								null,
 								null,
 								action.getClientValidation(),
-								confirmationText,
+								actionConfirmation(confirmationText, action),
 								action.getDisabledConditionName(),
 								null,
 								action.getInvisibleConditionName(),
@@ -3549,9 +3643,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		}
 
 		Map<String, String> properties = action.getProperties();
-		return actionButton(label,
+		return actionButton(actionDisplayName(label, action),
 								iconStyleClass,
-								toolTip,
+								actionToolTip(toolTip),
 								ImplicitActionName.Remove,
 								action.getName(),
 								false,
@@ -3559,7 +3653,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 								null,
 								null,
 								null,
-								confirmationText,
+								actionConfirmation(confirmationText, action),
 								action.getDisabledConditionName(),
 								null,
 								action.getInvisibleConditionName(),
@@ -3583,9 +3677,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		}
 
 		Map<String, String> properties = action.getProperties();
-		return actionButton(label,
+		return actionButton(actionDisplayName(label, action),
 								iconStyleClass,
-								toolTip,
+								actionToolTip(toolTip),
 								name,
 								action.getName(),
 								false,
@@ -3593,7 +3687,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 								dataWidgetVar,
 								null,
 								null,
-								confirmationText,
+								actionConfirmation(confirmationText, action),
 								action.getDisabledConditionName(),
 								null,
 								action.getInvisibleConditionName(),
@@ -3602,9 +3696,25 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 								false);
 	}
 
+	/**
+	 * Creates a PrimeFaces panel for bordered metadata containers.
+	 *
+	 * <p>Side effects: creates and IDs a panel, optionally attaches a header-facet
+	 * output component, applies visibility/style settings, and attaches a toggle
+	 * behaviour for collapsible panels. {@code null} and {@code Boolean.TRUE} escape
+	 * flags escape the header at the facet boundary; only {@code Boolean.FALSE}
+	 * allows trusted header markup.
+	 *
+	 * @param title raw resolved border title; may be {@code null}
+	 * @param invisible optional invisible condition
+	 * @param pixelWidth optional fixed width in pixels
+	 * @param collapsible optional collapsible state
+	 * @param widgetId optional component id
+	 * @return configured panel; never {@code null}
+	 */
 	protected Panel panel(String title, String invisible, Integer pixelWidth, Collapsible collapsible, String widgetId) {
 		Panel result = (Panel) a.createComponent(Panel.COMPONENT_TYPE);
-		setValueOrValueExpression(title, result::setHeader, "header", result);
+		putOutputTextFacetValueOrValueExpression(result, "header", title, getCurrentInputTitleEscape());
 		setInvisible(result, invisible, null);
 		setSizeAndTextAlignStyle(result, null, pixelWidth, null, null, null, null, null);
 		setId(result, widgetId);
@@ -4102,8 +4212,38 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
+	/**
+	 * Creates a PrimeFaces command button for action metadata.
+	 *
+	 * <p>Side effects: creates and configures a command button, assigns action,
+	 * rendered/disabled/process/update expressions, and attaches a confirmation
+	 * behaviour when confirmation text is present. {@code title} and
+	 * {@code confirmationText} remain raw until the PrimeFaces renderer or
+	 * behaviour applies the paired escape flag; {@code null} and
+	 * {@code Boolean.TRUE} escape, and only {@code Boolean.FALSE} allows trusted
+	 * markup. {@code tooltip} is assigned raw to the component title property.
+	 *
+	 * @param title raw button text and nullable escape flag; may be {@code null}
+	 * @param iconStyleClass optional icon style class
+	 * @param tooltip optional raw tooltip/title property value
+	 * @param implicitActionName optional implicit action name
+	 * @param actionName action name used in the action expression; may be {@code null}
+	 * @param inline whether the action is rendered inside an inline collection
+	 * @param dataWidgetBinding optional data-widget binding
+	 * @param dataWidgetVar optional data-widget variable
+	 * @param pixelWidth optional button width in pixels
+	 * @param pixelHeight optional button height in pixels
+	 * @param confirmationText raw confirmation text and nullable escape flag; may be {@code null}
+	 * @param disabled optional disabled condition
+	 * @param formDisabled optional form-level disabled condition
+	 * @param invisible optional invisible condition
+	 * @param processOverride optional PrimeFaces process expression
+	 * @param updateOverride optional PrimeFaces update expression
+	 * @param canDelete whether remove/delete actions are permitted for the current row
+	 * @return configured command button; never {@code null}
+	 */
 	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
-	protected CommandButton actionButton(String title,
+	protected CommandButton actionButton(EscapableText title,
 											String iconStyleClass,
 											String tooltip,
 											ImplicitActionName implicitActionName,
@@ -4113,7 +4253,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 											String dataWidgetVar,
 											Integer pixelWidth,
 											Integer pixelHeight,
-											String confirmationText,
+											EscapableText confirmationText,
 											String disabled,
 											String formDisabled,
 											String invisible,
@@ -4122,9 +4262,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 											boolean canDelete) {
 		CommandButton result = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 
-		result.setValue(title);
+		setCommandButtonText(result, title);
 		result.setIcon(iconStyleClass);
-		result.setTitle(tooltip);
+		result.setTitle(sanitiseFacesText(tooltip));
 
 		action(result, implicitActionName, actionName, dataWidgetBinding, dataWidgetVar, inline, null);
 		setSizeAndTextAlignStyle(result, null, pixelWidth, null, null, pixelHeight, null, null);
@@ -4137,8 +4277,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			switch (implicitActionName) {
 				case Delete:
 					// Add the standard confirmation text if none exists
-					if (confirmationText == null) {
-						setConfirmation(result, "Do you want to delete this data?");
+					if ((confirmationText == null) || (confirmationText.getValue() == null)) {
+						setConfirmation(result, EscapableText.of("Do you want to delete this data?", true));
 					}
 					break;
 				case Cancel:
@@ -4147,8 +4287,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 					break;
 				case Remove:
 					// Add the standard confirmation text if none exists
-					if (confirmationText == null) {
-						setConfirmation(result, "Do you want to remove this data?");
+					if ((confirmationText == null) || (confirmationText.getValue() == null)) {
+						setConfirmation(result, EscapableText.of("Do you want to remove this data?", true));
 					}
 					break;
 				default:
@@ -4224,19 +4364,39 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	/**
-	 * Create a button with a href URL that looks like...
-	 * http://localhost:8080/skyve/report/Bum.html?_f=html&_c=<webId>&_id=<id>&wee=poo&_n=Bum&_mod=<module>&_doc=<document>
+	 * Creates a report link button with a generated report URL.
+	 *
+	 * <p>Side effects: creates and configures a PrimeFaces link button, including
+	 * its generated href expression. {@code title} remains raw until PrimeFaces
+	 * applies its button escape flag; {@code null} and {@code Boolean.TRUE} escape,
+	 * and only {@code Boolean.FALSE} allows trusted markup. {@code tooltip} is
+	 * assigned raw to the component title property. Confirmation text is accepted
+	 * for API symmetry but cannot be attached because this PrimeFaces link button
+	 * is not confirmable.
+	 *
+	 * @param title raw button text and nullable escape flag; may be {@code null}
+	 * @param iconStyleClass optional icon style class
+	 * @param tooltip optional raw tooltip/title property value
+	 * @param parameters report parameters used to build the href; must not be {@code null}
+	 * @param pixelWidth optional button width in pixels
+	 * @param pixelHeight optional button height in pixels
+	 * @param clientValidation currently unused validation flag
+	 * @param confirmationText raw confirmation text and nullable escape flag; ignored
+	 * @param disabled optional disabled condition
+	 * @param formDisabled optional form-level disabled condition
+	 * @param invisible optional invisible condition
+	 * @return configured report link button; never {@code null}
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	private Button reportButton(String title,
+	private Button reportButton(EscapableText title,
 									String iconStyleClass,
 									String tooltip,
 									List<Parameter> parameters,
 									Integer pixelWidth,
 									Integer pixelHeight,
-									@SuppressWarnings("unused") Boolean clientValidation, // TODO not implemented
+									Boolean clientValidation, // TODO not implemented
 									// TODO LinkButton is not a Confirmable. ConfirmBehavior can only be attached to components that implement org.primefaces.component.api.Confirmable interface
-									@SuppressWarnings("unused") String confirmationText,
+									EscapableText confirmationText,
 									String disabled,
 									String formDisabled,
 									String invisible) {
@@ -4293,11 +4453,34 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	/**
-	 * Create a command button that redirects to a URL that looks like...
-	 * http://localhost:8080/skyve/download?_n=<downloadAction>&_doc=<module>.<document>&_c=<webId>&_b=<form binding>&_ctim=<currentTimeInMillis>
+	 * Creates a command button that performs a download action.
+	 *
+	 * <p>Side effects: creates and configures a command button, assigns the
+	 * download action expression, process/update values, disabled/rendered
+	 * expressions, and an optional confirmation behaviour. {@code title} and
+	 * {@code confirmationText} remain raw until their PrimeFaces output boundary;
+	 * {@code null} and {@code Boolean.TRUE} escape, and only {@code Boolean.FALSE}
+	 * allows trusted markup. {@code tooltip} is assigned raw to the component title
+	 * property.
+	 *
+	 * @param title raw button text and nullable escape flag; may be {@code null}
+	 * @param iconStyleClass optional icon style class
+	 * @param tooltip optional raw tooltip/title property value
+	 * @param dataWidgetBinding optional data-widget binding
+	 * @param dataWidgetVar optional data-widget variable
+	 * @param downloadActionName download action name; must not be {@code null}
+	 * @param pixelWidth optional button width in pixels
+	 * @param pixelHeight optional button height in pixels
+	 * @param confirmationText raw confirmation text and nullable escape flag; may be {@code null}
+	 * @param disabled optional disabled condition
+	 * @param formDisabled optional form-level disabled condition
+	 * @param invisible optional invisible condition
+	 * @param processOverride optional PrimeFaces process expression
+	 * @param updateOverride optional PrimeFaces update expression
+	 * @return configured command button; never {@code null}
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	private CommandButton downloadButton(String title,
+	private CommandButton downloadButton(EscapableText title,
 											String iconStyleClass,
 											String tooltip,
 											String dataWidgetBinding,
@@ -4305,7 +4488,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 											String downloadActionName,
 											Integer pixelWidth,
 											Integer pixelHeight,
-											String confirmationText,
+											EscapableText confirmationText,
 											String disabled,
 											String formDisabled,
 											String invisible,
@@ -4313,9 +4496,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 											String updateOverride) {
 		CommandButton result = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 
-		result.setValue(title);
+		setCommandButtonText(result, title);
 		result.setIcon(iconStyleClass);
-		result.setTitle(tooltip);
+		result.setTitle(sanitiseFacesText(tooltip));
 
 		setSizeAndTextAlignStyle(result, null, pixelWidth, null, null, pixelHeight, null, null);
 		setInvisible(result, invisible, null);
@@ -4338,14 +4521,19 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 *					<iframe id="s01_overlayiframe" src="/skyve/upload.xhtml" style="width:100%;height:280px;border:none"></iframe>
 	 *			    </p:overlayPanel>
 	 *
-	 * @param title button title
+	 * <p>{@code title} and {@code confirmationText} remain raw until their
+	 * PrimeFaces output boundary; {@code null} and {@code Boolean.TRUE} escape, and
+	 * only {@code Boolean.FALSE} allows trusted markup. {@code tooltip} is assigned
+	 * raw to the component title property.
+	 *
+	 * @param title raw button text and nullable escape flag; may be {@code null}
 	 * @param iconStyleClass optional icon style class
 	 * @param tooltip optional tooltip text
 	 * @param actionName action name used by the upload route; must not be {@code null}
 	 * @param pixelWidth optional button width in pixels
 	 * @param pixelHeight optional button height in pixels
 	 * @param clientValidation currently unused upload action validation flag
-	 * @param confirmationText optional confirmation text
+	 * @param confirmationText raw confirmation text and nullable escape flag; may be {@code null}
 	 * @param disabled optional disabled condition
 	 * @param formDisabled optional form disabled condition
 	 * @param invisible optional invisible condition
@@ -4354,14 +4542,14 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * @return upload button component; never {@code null}
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	protected UIComponent uploadButton(String title,
+	protected UIComponent uploadButton(EscapableText title,
 										String iconStyleClass,
 										String tooltip,
 										String actionName,
 										Integer pixelWidth,
 										Integer pixelHeight,
 										Boolean clientValidation, // TODO not implemented
-										String confirmationText,
+										EscapableText confirmationText,
 										String disabled,
 										String formDisabled,
 										String invisible,
@@ -4385,9 +4573,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		CommandButton uploadButton = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		setId(uploadButton, null);
 		String uploadButtonId = uploadButton.getId();
-		uploadButton.setValue(title);
+		setCommandButtonText(uploadButton, title);
 		uploadButton.setIcon((iconStyleClass == null) ? Icons.FONT_UPLOAD : iconStyleClass);
-		uploadButton.setTitle(tooltip);
+		uploadButton.setTitle(sanitiseFacesText(tooltip));
 		uploadButton.setType("button"); // no process or update required
 		setSizeAndTextAlignStyle(uploadButton, null, pixelWidth, null, null, pixelHeight, null, null);
 		setDisabled(uploadButton, disabled, formDisabled);
@@ -4451,14 +4639,19 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	/**
 	 * Builds an action-upload button using the default generic file chooser.
 	 *
-	 * @param title button title
+	 * <p>{@code title} and {@code confirmationText} remain raw until their
+	 * PrimeFaces output boundary; {@code null} and {@code Boolean.TRUE} escape, and
+	 * only {@code Boolean.FALSE} allows trusted markup. {@code tooltip} is assigned
+	 * raw to the component title property.
+	 *
+	 * @param title raw button text and nullable escape flag; may be {@code null}
 	 * @param iconStyleClass optional icon style class
 	 * @param tooltip optional tooltip text
 	 * @param actionName action name used by the upload route; must not be {@code null}
 	 * @param pixelWidth optional button width in pixels
 	 * @param pixelHeight optional button height in pixels
 	 * @param clientValidation currently unused upload action validation flag
-	 * @param confirmationText optional confirmation text
+	 * @param confirmationText raw confirmation text and nullable escape flag; may be {@code null}
 	 * @param disabled optional disabled condition
 	 * @param formDisabled optional form disabled condition
 	 * @param invisible optional invisible condition
@@ -4466,14 +4659,14 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * @return upload button component; never {@code null}
 	 */
 	@SuppressWarnings("java:S107") // Backward-compatible helper for existing builder specialisations and tests.
-	protected UIComponent uploadButton(String title,
+	protected UIComponent uploadButton(EscapableText title,
 										String iconStyleClass,
 										String tooltip,
 										String actionName,
 										Integer pixelWidth,
 										Integer pixelHeight,
 										Boolean clientValidation,
-										String confirmationText,
+										EscapableText confirmationText,
 										String disabled,
 										String formDisabled,
 										String invisible,
@@ -4508,14 +4701,39 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return ContentCapture.valueOf(capture.trim());
 	}
 
+	/**
+	 * Creates a command link that performs a download action.
+	 *
+	 * <p>Side effects: creates and configures a command link, adds child output
+	 * text for the visible label, assigns the download action expression,
+	 * disabled/rendered/process/update values, and an optional confirmation
+	 * behaviour. {@code title} and {@code confirmationText} remain raw until their
+	 * output boundaries; {@code null} and {@code Boolean.TRUE} escape, and only
+	 * {@code Boolean.FALSE} allows trusted markup. {@code tooltip} is assigned raw
+	 * to the component title property.
+	 *
+	 * @param title raw link text and nullable escape flag; may be {@code null}
+	 * @param tooltip optional raw tooltip/title property value
+	 * @param actionName download action name; must not be {@code null}
+	 * @param dataWidgetBinding optional data-widget binding
+	 * @param dataWidgetVar optional data-widget variable
+	 * @param pixelWidth optional link width in pixels
+	 * @param confirmationText raw confirmation text and nullable escape flag; may be {@code null}
+	 * @param disabled optional disabled condition
+	 * @param formDisabled optional form-level disabled condition
+	 * @param invisible optional invisible condition
+	 * @param processOverride optional PrimeFaces process expression
+	 * @param updateOverride optional PrimeFaces update expression
+	 * @return configured command link; never {@code null}
+	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	protected CommandLink downloadLink(String title,
+	protected CommandLink downloadLink(EscapableText title,
 										String tooltip,
 										String actionName,
 										String dataWidgetBinding,
 										String dataWidgetVar,
 										Integer pixelWidth,
-										String confirmationText,
+										EscapableText confirmationText,
 										String disabled,
 										String formDisabled,
 										String invisible,
@@ -4523,8 +4741,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 										String updateOverride) {
 		CommandLink result = (CommandLink) a.createComponent(CommandLink.COMPONENT_TYPE);
 
-		result.setValue(title);
-		result.setTitle(tooltip);
+		addCommandLinkText(result, title);
+		result.setTitle(sanitiseFacesText(tooltip));
 
 		setSizeAndTextAlignStyle(result, null, pixelWidth, null, null, null, null, null);
 		setDisabled(result, disabled, formDisabled);
@@ -4540,8 +4758,37 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
+	/**
+	 * Creates a command link for an implicit or explicit action.
+	 *
+	 * <p>Side effects: creates and configures a command link, adds child output
+	 * text for the visible label, assigns the action expression, disabled/rendered
+	 * and optional process/update values, and an optional confirmation behaviour.
+	 * {@code title} and {@code confirmationText} remain raw until their output
+	 * boundaries; {@code null} and {@code Boolean.TRUE} escape, and only
+	 * {@code Boolean.FALSE} allows trusted markup. {@code tooltip} is assigned raw
+	 * to the component title property.
+	 *
+	 * @param title raw link text and nullable escape flag; may be {@code null}
+	 * @param tooltip optional raw tooltip/title property value
+	 * @param implicitActionName optional implicit action name
+	 * @param actionName action name used in the action expression; may be {@code null}
+	 * @param inline whether the action is rendered inside an inline collection
+	 * @param dataWidgetBinding optional data-widget binding
+	 * @param dataWidgetVar optional data-widget variable
+	 * @param pixelWidth optional link width in pixels
+	 * @param pixelHeight optional link height in pixels
+	 * @param clientValidation currently unused validation flag
+	 * @param confirmationText raw confirmation text and nullable escape flag; may be {@code null}
+	 * @param disabled optional disabled condition
+	 * @param formDisabled optional form-level disabled condition
+	 * @param invisible optional invisible condition
+	 * @param processOverride optional PrimeFaces process expression
+	 * @param updateOverride optional PrimeFaces update expression
+	 * @return configured command link; never {@code null}
+	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	protected CommandLink actionLink(String title,
+	protected CommandLink actionLink(EscapableText title,
 										String tooltip,
 										ImplicitActionName implicitActionName,
 										String actionName,
@@ -4550,8 +4797,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 										String dataWidgetVar,
 										Integer pixelWidth,
 										Integer pixelHeight,
-										@SuppressWarnings("unused") Boolean clientValidation,
-										String confirmationText,
+										Boolean clientValidation,
+										EscapableText confirmationText,
 										String disabled,
 										String formDisabled,
 										String invisible,
@@ -4559,8 +4806,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 										String updateOverride) {
 		CommandLink result = (CommandLink) a.createComponent(CommandLink.COMPONENT_TYPE);
 
-		result.setValue(title);
-		result.setTitle(tooltip);
+		addCommandLinkText(result, title);
+		result.setTitle(sanitiseFacesText(tooltip));
 
 		action(result, implicitActionName, actionName, dataWidgetBinding, dataWidgetVar, inline, null);
 
@@ -4610,11 +4857,35 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		command.setActionExpression(methodExpressionForAction(implicitActionName, actionName, collectionBinding, dataWidgetVar, inline, eventHandlerActionNames));
 	}
 
+	/**
+	 * Creates a PrimeFaces link button with raw visible text and a generated href.
+	 *
+	 * <p>Side effects: creates and configures a link button, assigns a value
+	 * expression for {@code href}, and applies disabled/rendered/style settings.
+	 * {@code value} remains raw until PrimeFaces applies the button escape flag;
+	 * {@code null} and {@code Boolean.TRUE} escape, and only {@code Boolean.FALSE}
+	 * allows trusted markup. {@code title} is assigned raw to the component title
+	 * property.
+	 *
+	 * @param icon optional icon style class
+	 * @param styleClass optional style class
+	 * @param style optional inline style
+	 * @param value raw button text and nullable escape flag; may be {@code null}
+	 * @param title optional raw tooltip/title property value
+	 * @param href link destination expression; must not be {@code null}
+	 * @param pixelWidth optional button width in pixels
+	 * @param pixelHeight optional button height in pixels
+	 * @param disabled optional disabled condition
+	 * @param formDisabled optional form-level disabled condition
+	 * @param invisible optional invisible condition
+	 * @param target optional link target
+	 * @return configured link button; never {@code null}
+	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private Button linkButton(String icon,
 								String styleClass,
 								String style,
-								String value,
+								EscapableText value,
 								String title,
 								String href,
 								Integer pixelWidth,
@@ -4624,8 +4895,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 								String invisible,
 								String target) {
 		Button result = button(icon, styleClass, style);
-		result.setValue(value);
-		result.setTitle(title);
+		result.setValue((value == null) ? null : value.getValue());
+		result.setEscape((value == null) || value.shouldEscape());
+		result.setTitle(sanitiseFacesText(title));
 		result.setValueExpression("href", ef.createValueExpression(elc, href, String.class));
 		result.setTarget(target);
 
@@ -5140,16 +5412,41 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
+	/**
+	 * Creates a PrimeFaces table column with metadata title output in a header facet.
+	 *
+	 * <p>Side effects: creates and IDs a column, optionally attaches a header-facet
+	 * output component, applies sort/style settings, and increments no external
+	 * counters. Empty renderer-owned headers remain shortcut header text. For
+	 * metadata titles, {@code null} and {@code Boolean.TRUE} escape at the facet
+	 * boundary; only {@code Boolean.FALSE} allows trusted markup.
+	 *
+	 * @param dataWidgetVar row variable used by sort expressions
+	 * @param sortBinding optional sort binding
+	 * @param title raw resolved column title; may be {@code null}
+	 * @param escapeTitle {@code true} to escape at the component boundary;
+	 *        {@code false} to allow trusted title markup
+	 * @param alignment optional text alignment
+	 * @param noWrap whether cell text should avoid wrapping
+	 * @param pixelWidth optional fixed width in pixels
+	 * @return configured column; never {@code null}
+	 */
 	private Column column(String dataWidgetVar,
 							String sortBinding,
 							String title,
+							boolean escapeTitle,
 							HorizontalAlignment alignment,
 							boolean noWrap,
 							Integer pixelWidth) {
 		Column result = (Column) a.createComponent(Column.COMPONENT_TYPE);
 		setId(result, null);
 
-		result.setHeaderText(title);
+		if ("".equals(title)) {
+			result.setHeaderText("");
+		}
+		else {
+			putOutputTextFacetValueOrValueExpression(result, "header", title, escapeTitle);
+		}
 		if (sortBinding != null) {
 			result.setValueExpression("sortBy",
 										// NB no need to sanitise and escape here as the SkyveLazyDataModel does this to the underlying data
@@ -5226,8 +5523,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			}
 		}
 		if (title != null) {
+			String escapedTitle = sanitiseFacesText(title);
 			result.setValueExpression("title",
-										ef.createValueExpression(elc, required ? title + " *" : title, String.class));
+										ef.createValueExpression(elc, required ? escapedTitle + " *" : escapedTitle, String.class));
 		}
 
 		// Cannot utilise the faces required attributes as some requests need to ignore required-ness.
@@ -5242,22 +5540,129 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	private void setConfirmation(UIComponentBase component, String confirmationText) {
-		if (confirmationText != null) {
-			ConfirmBehavior confirm = (ConfirmBehavior) a.createBehavior(ConfirmBehavior.BEHAVIOR_ID);
-			confirm.setMessage(confirmationText);
-			confirm.setEscape(false);
-			component.addClientBehavior("click", confirm);
+	/**
+	 * Assigns raw metadata text and its escape decision to a PrimeFaces command
+	 * button.
+	 *
+	 * <p>Side effects: mutates {@code button} by assigning the value and escape flag.
+	 * the resolved escape decision controls the PrimeFaces renderer boundary.
+	 *
+	 * @param button command button receiving visible text; must not be {@code null}
+	 * @param text raw metadata text and resolved escape decision; may be {@code null}
+	 */
+	private static void setCommandButtonText(CommandButton button, EscapableText text) {
+		button.setValue((text == null) ? null : text.getValue());
+		button.setEscape((text == null) || text.shouldEscape());
+	}
+
+	/**
+	 * Adds raw metadata text to a command link through a child output component.
+	 *
+	 * <p>Side effects: mutates {@code link.getChildren()} when {@code text} has a
+	 * value. The resolved escape decision controls the child output-text boundary.
+	 *
+	 * @param link command link receiving visible child text; must not be {@code null}
+	 * @param text raw metadata text and resolved escape decision; may be {@code null}
+	 */
+	private void addCommandLinkText(CommandLink link, EscapableText text) {
+		if ((text != null) && (text.getValue() != null)) {
+			link.getChildren().add(outputText(text));
 		}
 	}
 
+	/**
+	 * Adds a PrimeFaces confirmation behaviour carrying raw text and the metadata
+	 * escape decision.
+	 *
+	 * <p>Side effects: mutates {@code component} by adding a {@code click}
+	 * confirmation behaviour when a message is present. The resolved escape
+	 * decision controls the PrimeFaces confirm boundary.
+	 *
+	 * @param component component receiving the behaviour; must not be {@code null}
+	 * @param confirmationText raw confirmation text and resolved escape decision; may be {@code null}
+	 */
+	private void setConfirmation(UIComponentBase component, EscapableText confirmationText) {
+		addConfirmBehavior(component, confirmationText);
+	}
+
 	protected void setValueOrValueExpression(String value, Consumer<String> valueSetter, String valueExpressionName, UIComponent component) {
+		setValueOrValueExpression(value, false, valueSetter, valueExpressionName, component);
+	}
+
+	/**
+	 * Adds an output-text facet for static metadata text or an expression-backed
+	 * metadata fragment.
+	 *
+	 * <p>Side effects: creates and IDs an {@code h:outputText} component and mutates
+	 * {@code component.getFacets()} when {@code value} is present. Expression-backed
+	 * values are resolved raw. The resolved escape decision controls the output-text
+	 * boundary.
+	 *
+	 * @param component component receiving the facet; must not be {@code null}
+	 * @param facetName facet key to add or replace; must not be {@code null}
+	 * @param value static text or binding fragment; may be {@code null}
+	 * @param escape {@code true} to escape at the component boundary; {@code false}
+	 *        to allow trusted markup
+	 * @return the added output-text facet, or {@code null} when no text value is present
+	 */
+	protected HtmlOutputText putOutputTextFacetValueOrValueExpression(UIComponent component, String facetName, String value, boolean escape) {
+		if (value == null) {
+			return null;
+		}
+
+		boolean expressionBacked = value.indexOf('{') > -1;
+		HtmlOutputText result = outputText(EscapableText.of(expressionBacked ? null : value, escape));
+		if (expressionBacked) {
+			String sanitisedBinding = (value.indexOf('\'') >= 0) ? value.replace("'", "\\'") : value;
+			result.setValueExpression("value", createValueExpressionFromFragment(sanitisedBinding,
+																					true,
+																					null,
+																					String.class,
+																					false,
+																					Sanitisation.none));
+		}
+		component.getFacets().put(facetName, result);
+		return result;
+	}
+
+	/**
+	 * Returns a caption with renderer-owned fallback text when metadata omits a
+	 * list-membership caption.
+	 *
+	 * @param caption raw metadata caption and resolved escape decision; may be {@code null}
+	 * @param fallback renderer-owned caption text used when the metadata value is {@code null}
+	 * @return caption text and escape decision; never {@code null}
+	 */
+	private static EscapableText defaultedCaption(EscapableText caption, String fallback) {
+		if ((caption == null) || (caption.getValue() == null)) {
+			return EscapableText.of(fallback, true);
+		}
+		return caption;
+	}
+
+	/**
+	 * Assigns static text or a binding expression to a component property after
+	 * applying metadata-controlled escaping.
+	 *
+	 * @param value resolved text or binding fragment
+	 * @param escape {@code true} to escape at the component boundary; {@code false}
+	 *        to allow trusted markup
+	 * @param valueSetter setter for static values
+	 * @param valueExpressionName component property name for expression values
+	 * @param component component receiving expression values
+	 */
+	protected void setValueOrValueExpression(String value, boolean escape, Consumer<String> valueSetter, String valueExpressionName, UIComponent component) {
 		if (value != null && value.indexOf('{') > -1) {
 			final String sanitisedBinding = ((value.indexOf('\'') >= 0) ? value.replace("'", "\\'") : value);
-			final ValueExpression ve = createValueExpressionFromFragment(sanitisedBinding, true, null, String.class, false, Sanitisation.text);
+			final ValueExpression ve = createValueExpressionFromFragment(sanitisedBinding,
+																			true,
+																			null,
+																			String.class,
+																			escape,
+																			Sanitisation.text);
 			component.setValueExpression(valueExpressionName, ve);
 		} else if (value != null) {
-			valueSetter.accept(value);
+			valueSetter.accept(escapeFacesText(value, escape));
 		}
 	}
 

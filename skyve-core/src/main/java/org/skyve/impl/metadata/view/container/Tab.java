@@ -31,7 +31,8 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  */
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE, 
-			propOrder = {"title", 
+			propOrder = {"title",
+							"escapeTitle",
 							"icon16x16RelativeFileName", 
 							"iconStyleClass", 
 							"disabledConditionName", 
@@ -43,6 +44,7 @@ public final class Tab extends Container implements Disableable, Invisible, Deco
 	private static final long serialVersionUID = -3216551162394859248L;
 
 	private String title;
+	private Boolean escapeTitle;
 	private String icon16x16RelativeFileName;
 	private String iconStyleClass;
 	private String disabledConditionName;
@@ -69,6 +71,15 @@ public final class Tab extends Container implements Disableable, Invisible, Deco
 	public String getLocalisedTitle() {
 		return Util.i18n(title);
 	}
+
+	/**
+	 * Returns whether the tab title text should be escaped before rendering.
+	 *
+	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	public Boolean getEscapeTitle() {
+		return escapeTitle;
+	}
 	
 	/**
 	 * Sets the tab title.
@@ -80,6 +91,16 @@ public final class Tab extends Container implements Disableable, Invisible, Deco
 	@XmlAttribute(required = true)
 	public void setTitle(String title) {
 		this.title = UtilImpl.processStringValue(title);
+	}
+
+	/**
+	 * Sets whether the tab title text should be escaped before rendering.
+	 *
+	 * @param escapeTitle {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	@XmlAttribute(required = false)
+	public void setEscapeTitle(Boolean escapeTitle) {
+		this.escapeTitle = escapeTitle;
 	}
 
 	/**

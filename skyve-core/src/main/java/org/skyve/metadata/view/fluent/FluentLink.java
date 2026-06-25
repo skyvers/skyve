@@ -39,6 +39,7 @@ public class FluentLink extends FluentWidget implements FluentAbsoluteWidth<Flue
 		reference(link.getReference());
 		target(link.getTarget());
 		value(link.getValue());
+		escapeValue(link.getEscapeValue());
 		invisibleConditionName(link.getInvisibleConditionName());
 
 		absoluteWidth(link, this);
@@ -79,6 +80,27 @@ public class FluentLink extends FluentWidget implements FluentAbsoluteWidth<Flue
 	 */
 	public FluentLink value(String value) {
 		link.setValue(value);
+		return this;
+	}
+
+	/**
+	 * Sets whether the link value should be escaped before rendering.
+	 *
+	 * @param escapeValue {@code false} to allow trusted markup; {@code true} to escape at the renderer boundary
+	 * @return this builder
+	 */
+	public FluentLink escapeValue(boolean escapeValue) {
+		return escapeValue(escapeValue ? Boolean.TRUE : Boolean.FALSE);
+	}
+
+	/**
+	 * Sets whether the link value should be escaped before rendering.
+	 *
+	 * @param escapeValue {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 * @return this builder
+	 */
+	public FluentLink escapeValue(Boolean escapeValue) {
+		link.setEscapeValue(escapeValue);
 		return this;
 	}
 

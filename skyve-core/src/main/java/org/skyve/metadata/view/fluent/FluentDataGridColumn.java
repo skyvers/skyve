@@ -28,6 +28,7 @@ public abstract class FluentDataGridColumn<T extends FluentDataGridColumn<T>> {
 	@SuppressWarnings("unchecked")
 	protected T from(DataGridColumn column) {
 		title(column.getTitle());
+		escapeTitle(column.getEscapeTitle());
 		alignment(column.getAlignment());
 		Integer i = column.getPixelWidth();
 		if (i != null) {
@@ -46,6 +47,28 @@ public abstract class FluentDataGridColumn<T extends FluentDataGridColumn<T>> {
 	 */
 	public T title(String title) {
 		get().setTitle(title);
+		return (T) this;
+	}
+
+	/**
+	 * Sets whether the column title should be escaped before rendering.
+	 *
+	 * @param escapeTitle {@code false} to allow trusted markup; {@code true} to escape at the renderer boundary
+	 * @return this builder
+	 */
+	public T escapeTitle(boolean escapeTitle) {
+		return escapeTitle(escapeTitle ? Boolean.TRUE : Boolean.FALSE);
+	}
+
+	/**
+	 * Sets whether the column title should be escaped before rendering.
+	 *
+	 * @param escapeTitle {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 * @return this builder
+	 */
+	@SuppressWarnings("unchecked")
+	public T escapeTitle(Boolean escapeTitle) {
+		get().setEscapeTitle(escapeTitle);
 		return (T) this;
 	}
 

@@ -51,6 +51,19 @@ class VueListGridScriptColumnMetaDataTest {
 	}
 
 	@Test
+	void toMapPreservesRawHeaderForVueTextRendering() throws Exception {
+		MetaDataQueryColumn mdColumn = mock(MetaDataQueryColumn.class);
+		SmartClientQueryColumnDefinition scColumn = mock(SmartClientQueryColumnDefinition.class);
+		when(scColumn.getName()).thenReturn("unsafe");
+		when(scColumn.getTitle()).thenReturn("<img src=x onerror=alert(1)> & \"quoted\" 'single'");
+
+		TargetMetaData tmd = new TargetMetaData(mock(Document.class), null, String.class);
+		Map<String, Object> map = invokeToMap(mdColumn, scColumn, tmd, mock(Customer.class));
+
+		assertEquals("<img src=x onerror=alert(1)> & \"quoted\" 'single'", map.get("header"));
+	}
+
+	@Test
 	void toMapUsesAttributeFlatteningSortabilityAndEnumValues() throws Exception {
 		MetaDataQueryProjectedColumn mdColumn = mock(MetaDataQueryProjectedColumn.class);
 		when(mdColumn.isHidden()).thenReturn(false);

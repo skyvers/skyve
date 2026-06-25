@@ -13,6 +13,7 @@ import org.skyve.impl.metadata.view.container.TabPane;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
 import org.skyve.impl.metadata.view.widget.Chart;
+import org.skyve.impl.metadata.view.widget.DialogButton;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
 import org.skyve.impl.metadata.view.widget.Link;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
@@ -218,6 +219,19 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	}
 
 	/**
+	 * Sets the input-title escape state on this chain and delegates.
+	 *
+	 * @param currentInputTitleEscape resolved escape decision
+	 */
+	@Override
+	public void setCurrentInputTitleEscape(boolean currentInputTitleEscape) {
+		super.setCurrentInputTitleEscape(currentInputTitleEscape);
+		for (ComponentBuilder builder : builders) {
+			builder.setCurrentInputTitleEscape(currentInputTitleEscape);
+		}
+	}
+
+	/**
 	 * Delegates tab-pane script component construction.
 	 *
 	 * @param component the source component
@@ -296,6 +310,27 @@ public class ComponentBuilderChain extends ComponentBuilder {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.label(result, value);
+		}
+		return result;
+	}
+
+	/**
+	 * Delegates dialog-button component construction.
+	 *
+	 * @param component the source component
+	 * @param label raw button label and nullable escape flag
+	 * @param button dialog-button metadata
+	 * @param formDisabledConditionName optional form-level disabled condition
+	 * @return the transformed component
+	 */
+	@Override
+	public UIComponent dialogButton(UIComponent component,
+										EscapableText label,
+										DialogButton button,
+										String formDisabledConditionName) {
+		UIComponent result = component;
+		for (ComponentBuilder builder : builders) {
+			result = builder.dialogButton(result, label, button, formDisabledConditionName);
 		}
 		return result;
 	}
@@ -958,15 +993,19 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * Delegates list-membership input construction.
 	 *
 	 * @param component the source event source component
-	 * @param candidatesHeading the candidates heading text
-	 * @param membersHeading the members heading text
+	 * @param candidatesHeading raw candidates-list heading and nullable escape flag;
+	 *        {@code null} and {@code Boolean.TRUE} escape, while {@code Boolean.FALSE}
+	 *        allows trusted markup
+	 * @param membersHeading raw members-list heading and nullable escape flag;
+	 *        {@code null} and {@code Boolean.TRUE} escape, while {@code Boolean.FALSE}
+	 *        allows trusted markup
 	 * @param membership the list-membership metadata
 	 * @return the transformed event source component
 	 */
 	@Override
 	public EventSourceComponent listMembership(EventSourceComponent component,
-												String candidatesHeading,
-												String membersHeading,
+												EscapableText candidatesHeading,
+												EscapableText membersHeading,
 												ListMembership membership) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {

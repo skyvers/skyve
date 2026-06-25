@@ -13,6 +13,7 @@ import org.skyve.content.AttachmentContent;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.generate.ViewRenderer;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.InverseOne;
@@ -344,7 +345,11 @@ public class ViewJSONManipulator extends ViewVisitor {
 		result.put(AbstractWebContext.CONTEXT_NAME, webId);
 		
 		// put the view title in
-		result.put("_title", BindUtil.formatMessage(view.getLocalisedTitle(), bean));
+		String title = BindUtil.formatMessage(view.getLocalisedTitle(), bean);
+		if (ViewRenderer.shouldEscape(view.getEscapeTitle())) {
+			title = OWASP.escapeHtml(title);
+		}
+		result.put("_title", title);
 
 		// put the view changed/dirty flag in
 		Bean currentBean = webContextToReference.getNullableCurrentBean();
@@ -1398,7 +1403,9 @@ public class ViewJSONManipulator extends ViewVisitor {
 			
 		String value = link.getLocalisedValue();
 		if (value != null) {
-			htmlGuts.append(">").append(value).append("</a>");
+			htmlGuts.append('>');
+			htmlGuts.append(Boolean.FALSE.equals(link.getEscapeValue()) ? value : OWASP.escapeHtml(value));
+			htmlGuts.append("</a>");
 		}
 		else {
 			htmlGuts.append("/>");

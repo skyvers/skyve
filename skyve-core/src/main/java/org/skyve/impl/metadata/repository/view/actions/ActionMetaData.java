@@ -34,10 +34,13 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 			name = "abstractAction",
 			propOrder = {"name", 
 							"displayName",
+							"escapeDisplayName",
 							"toolTip", 
+							"escapeToolTip",
 							"relativeIconFileName", 
 							"iconStyleClass", 
 							"confirmationText",
+							"escapeConfirm",
 							"disabledConditionName",
 							"enabledConditionName",
 							"invisibleConditionName",
@@ -50,10 +53,13 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 
 	private String name;
 	private String displayName;
+	private Boolean escapeDisplayName;
 	private String toolTip;
+	private Boolean escapeToolTip;
 	private String relativeIconFileName;
 	private String iconStyleClass;
 	private String confirmationText;
+	private Boolean escapeConfirm;
 	private String disabledConditionName;
 	private String invisibleConditionName;
 
@@ -95,6 +101,15 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	}
 
 	/**
+	 * Returns whether the display name text should be escaped before rendering.
+	 *
+	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	public Boolean getEscapeDisplayName() {
+		return escapeDisplayName;
+	}
+
+	/**
 	 * Sets the display label shown for this action.
 	 *
 	 * @param displayName display label
@@ -102,6 +117,16 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	@XmlAttribute(required = false)
 	public void setDisplayName(String displayName) {
 		this.displayName = UtilImpl.processStringValue(displayName);
+	}
+
+	/**
+	 * Sets whether the display name text should be escaped before rendering.
+	 *
+	 * @param escapeDisplayName {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	@XmlAttribute(required = false)
+	public void setEscapeDisplayName(Boolean escapeDisplayName) {
+		this.escapeDisplayName = escapeDisplayName;
 	}
 
 	/**
@@ -152,6 +177,15 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	}
 
 	/**
+	 * Returns whether the tooltip text should be escaped before rendering.
+	 *
+	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	public Boolean getEscapeToolTip() {
+		return escapeToolTip;
+	}
+
+	/**
 	 * Sets the tooltip text for this action.
 	 *
 	 * @param toolTip tooltip text
@@ -159,6 +193,16 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	@XmlAttribute(required = false)
 	public void setToolTip(String toolTip) {
 		this.toolTip = UtilImpl.processStringValue(toolTip);
+	}
+
+	/**
+	 * Sets whether the tooltip text should be escaped before rendering.
+	 *
+	 * @param escapeToolTip {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	@XmlAttribute(required = false)
+	public void setEscapeToolTip(Boolean escapeToolTip) {
+		this.escapeToolTip = escapeToolTip;
 	}
 
 	/**
@@ -171,6 +215,15 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	}
 
 	/**
+	 * Returns whether the confirmation text should be escaped before rendering.
+	 *
+	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	public Boolean getEscapeConfirm() {
+		return escapeConfirm;
+	}
+
+	/**
 	 * Sets confirmation text shown before action execution.
 	 *
 	 * @param confirmationText confirmation text
@@ -178,6 +231,16 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	@XmlAttribute(name = "confirm", required = false)
 	public void setConfirmationText(String confirmationText) {
 		this.confirmationText = UtilImpl.processStringValue(confirmationText);
+	}
+
+	/**
+	 * Sets whether the confirmation text should be escaped before rendering.
+	 *
+	 * @param escapeConfirm {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	@XmlAttribute(name = "escapeConfirm", required = false)
+	public void setEscapeConfirm(Boolean escapeConfirm) {
+		this.escapeConfirm = escapeConfirm;
 	}
 
 	/**
@@ -284,8 +347,10 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 		ActionImpl result = new ActionImpl();
 
 		result.setConfirmationText(confirmationText);
+		result.setEscapeConfirm(escapeConfirm);
 		result.setDisabledConditionName(disabledConditionName);
 		result.setDisplayName(displayName);
+		result.setEscapeDisplayName(escapeDisplayName);
 		result.setName(name);
 		if (implicitName != null) {
 			result.setImplicitName(implicitName);
@@ -297,6 +362,7 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 		result.setRelativeIconFileName(getRelativeIconFileName());
 		result.setIconStyleClass(getIconStyleClass());
 		result.setToolTip(getToolTip());
+		result.setEscapeToolTip(getEscapeToolTip());
 		result.setProperties(properties);
 
 		return result;

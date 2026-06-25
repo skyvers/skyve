@@ -152,14 +152,14 @@ class DeviceResponsiveComponentBuilderTest {
 		final boolean[] capturedUseDialog = {false};
 		DeviceResponsiveComponentBuilder builder = new DeviceResponsiveComponentBuilder() {
 			@Override
-			protected UIComponent uploadButton(String title,
+			protected UIComponent uploadButton(EscapableText title,
 												String iconStyleClass,
 												String tooltip,
 												String actionName,
 												Integer pixelWidth,
 												Integer pixelHeight,
 												Boolean clientValidation,
-												String confirmationText,
+												EscapableText confirmationText,
 												String disabled,
 												String formDisabled,
 												String invisible,
@@ -185,14 +185,14 @@ class DeviceResponsiveComponentBuilderTest {
 		final boolean[] capturedUseDialog = {true};
 		DeviceResponsiveComponentBuilder builder = new DeviceResponsiveComponentBuilder() {
 			@Override
-			protected UIComponent uploadButton(String title,
+			protected UIComponent uploadButton(EscapableText title,
 												String iconStyleClass,
 												String tooltip,
 												String actionName,
 												Integer pixelWidth,
 												Integer pixelHeight,
 												Boolean clientValidation,
-												String confirmationText,
+												EscapableText confirmationText,
 												String disabled,
 												String formDisabled,
 												String invisible,
@@ -220,14 +220,14 @@ class DeviceResponsiveComponentBuilderTest {
 		final boolean[] capturedUseDialog = {false};
 		DeviceResponsiveComponentBuilder builder = new DeviceResponsiveComponentBuilder() {
 			@Override
-			protected UIComponent uploadButton(String title,
+			protected UIComponent uploadButton(EscapableText title,
 												String iconStyleClass,
 												String tooltip,
 												String actionName,
 												Integer pixelWidth,
 												Integer pixelHeight,
 												Boolean clientValidation,
-												String confirmationText,
+												EscapableText confirmationText,
 												String disabled,
 												String formDisabled,
 												String invisible,
@@ -254,14 +254,14 @@ class DeviceResponsiveComponentBuilderTest {
 		final boolean[] capturedUseDialog = {true};
 		DeviceResponsiveComponentBuilder builder = new DeviceResponsiveComponentBuilder() {
 			@Override
-			protected UIComponent uploadButton(String title,
+			protected UIComponent uploadButton(EscapableText title,
 												String iconStyleClass,
 												String tooltip,
 												String actionName,
 												Integer pixelWidth,
 												Integer pixelHeight,
 												Boolean clientValidation,
-												String confirmationText,
+												EscapableText confirmationText,
 												String disabled,
 												String formDisabled,
 												String invisible,

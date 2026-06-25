@@ -1,5 +1,6 @@
 package org.skyve.impl.web.faces.pipeline;
 
+import org.owasp.encoder.Encode;
 import org.primefaces.component.column.Column;
 import org.primefaces.component.message.Message;
 import org.skyve.impl.bind.BindUtil;
@@ -8,6 +9,7 @@ import org.skyve.impl.metadata.view.LayoutUtil;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
+import org.skyve.util.OWASP;
 import org.skyve.web.UserAgentType;
 
 import jakarta.el.ELContext;
@@ -37,6 +39,49 @@ public abstract class AbstractFacesBuilder {
 	protected String process = "@form";
 	protected String update = "@(form)";
 	protected UserAgentType userAgentType;
+
+	/**
+	 * Escapes metadata-owned text before assigning it to a PrimeFaces text boundary.
+	 *
+	 * @param value metadata text after localisation and expression resolution
+	 * @param escape {@code true} to HTML-escape before component assignment;
+	 *        {@code false} to allow trusted markup
+	 * @return escaped text, or {@code null} when {@code value} is {@code null}
+	 */
+	protected static String escapeFacesText(String value, boolean escape) {
+		if (value == null) {
+			return null;
+		}
+		return escape ? OWASP.escapeHtml(value) : value;
+	}
+
+	/**
+	 * Escapes metadata-owned text before concatenating it into a hand-built HTML attribute.
+	 *
+	 * <p>The metadata HTML escaping decision is applied first, then HTML attribute
+	 * syntax escaping is always applied so quotes and delimiters cannot break out of
+	 * the surrounding attribute.
+	 *
+	 * @param value metadata text after localisation and expression resolution
+	 * @param escape {@code true} to HTML-escape first; {@code false} to allow
+	 *        trusted markup in the attribute value
+	 * @return escaped attribute content, or {@code null} when {@code value} is {@code null}
+	 */
+	protected static String escapeFacesAttribute(String value, boolean escape) {
+		String htmlDecision = escapeFacesText(value, escape);
+		return (htmlDecision == null) ? null : Encode.forHtmlAttribute(htmlDecision);
+	}
+
+	/**
+	 * Strips markup from metadata-owned text before assigning it to a plain text
+	 * PrimeFaces boundary such as browser {@code title} attributes.
+	 *
+	 * @param value metadata text after localisation and expression resolution
+	 * @return sanitised plain text, or {@code null} when {@code value} is {@code null}
+	 */
+	protected static String sanitiseFacesText(String value) {
+		return OWASP.sanitise(Sanitisation.text, value);
+	}
 	
 	/**
 	 * Sets the managed bean name used for generated EL expressions.
@@ -502,10 +547,30 @@ public abstract class AbstractFacesBuilder {
 	/**
 	 * Creates a PrimeFaces message component for a target input component.
 	 *
+	 * <p>The message text must already be normalised for the PF message channel.
+	 * Skyve renders PF messages as HTML-capable output to match global
+	 * {@code p:messages} and {@code p:growl} usage.
+	 *
 	 * @param forId the target component ID
 	 * @return the configured message component
 	 */
 	protected Message message(String forId) {
+		return message(forId, true);
+	}
+
+	/**
+	 * Creates a PrimeFaces message component.
+	 *
+	 * <p>Side effects: asks the JSF application to create a detached PrimeFaces
+	 * message component. The required-message text assigned to the target input is
+	 * already normalised for unescaped PF message output.
+	 *
+	 * @param forId the target component ID
+	 * @param escapeRequiredMessage retained for layout API compatibility; callers
+	 *        must normalise message text before component creation
+	 * @return the configured message component
+	 */
+	protected Message message(String forId, boolean escapeRequiredMessage) {
 		Message message = (Message) a.createComponent(Message.COMPONENT_TYPE);
 		setId(message, null);
 		message.setFor(forId);

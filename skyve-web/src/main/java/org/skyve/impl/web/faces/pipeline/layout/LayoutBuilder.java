@@ -182,7 +182,11 @@ public abstract class LayoutBuilder extends AbstractFacesBuilder {
 	 * @param currentFormItem the current form item metadata
 	 * @param currentFormColumn the current form column metadata
 	 * @param widgetLabel the widget label text
-	 * @param widgetRequiredMessage the optional required message
+	 * @param widgetEscapeLabel resolved escape decision for {@code widgetLabel}
+	 * @param widgetRequiredMessage the optional required message normalised for
+	 *        unescaped PrimeFaces message rendering
+	 * @param widgetEscapeRequiredMessage resolved escape decision retained for layout
+	 *        API compatibility
 	 * @param widgetInvisible the invisible condition expression
 	 * @param widgetHelpText the help text
 	 */
@@ -193,7 +197,9 @@ public abstract class LayoutBuilder extends AbstractFacesBuilder {
 												FormItem currentFormItem,
 												FormColumn currentFormColumn,
 												String widgetLabel,
+												boolean widgetEscapeLabel,
 												@Nullable String widgetRequiredMessage,
+												boolean widgetEscapeRequiredMessage,
 												String widgetInvisible,
 												String widgetHelpText);
 
@@ -206,10 +212,15 @@ public abstract class LayoutBuilder extends AbstractFacesBuilder {
 	 * @param currentFormItem the current form item metadata
 	 * @param currentFormColumn the current form column metadata
 	 * @param widgetLabel the widget label text
+	 * @param widgetEscapeLabel resolved escape decision for {@code widgetLabel}
 	 * @param widgetColspan the widget column span
-	 * @param widgetRequiredMessage the optional required message
+	 * @param widgetRequiredMessage the optional required message normalised for
+	 *        unescaped PrimeFaces message rendering
+	 * @param widgetEscapeRequiredMessage resolved escape decision retained for layout
+	 *        API compatibility
 	 * @param widgetInvisible the invisible condition expression
 	 * @param widgetHelpText the help text
+	 * @param widgetEscapeHelp resolved escape decision for {@code widgetHelpText}
 	 * @param widgetPixelWidth the optional pixel width
 	 * @param showLabel whether the label is shown
 	 * @param topLabel whether the label is rendered above the widget
@@ -221,10 +232,13 @@ public abstract class LayoutBuilder extends AbstractFacesBuilder {
 												FormItem currentFormItem,
 												FormColumn currentFormColumn,
 												String widgetLabel,
+												boolean widgetEscapeLabel,
 												int widgetColspan,
 												@Nullable String widgetRequiredMessage,
+												boolean widgetEscapeRequiredMessage,
 												String widgetInvisible,
 												String widgetHelpText,
+												boolean widgetEscapeHelp,
 												Integer widgetPixelWidth,
 												boolean showLabel,
 												boolean topLabel);

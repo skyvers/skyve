@@ -35,9 +35,11 @@ public class FluentZoomIn extends FluentBoundWidget<FluentZoomIn>
 	 */
 	public FluentZoomIn from(@SuppressWarnings("hiding") ZoomIn zoom) {
 		displayName(zoom.getDisplayName());
+		escapeDisplayName(zoom.getEscapeDisplayName());
 		relativeIconFileName(zoom.getRelativeIconFileName());
 		iconStyleClass(zoom.getIconStyleClass());
 		toolTip(zoom.getToolTip());
+		escapeToolTip(zoom.getEscapeToolTip());
 		disabledConditionName(zoom.getDisabledConditionName());
 		invisibleConditionName(zoom.getInvisibleConditionName());
 		show(zoom.getShow());
@@ -56,6 +58,27 @@ public class FluentZoomIn extends FluentBoundWidget<FluentZoomIn>
 	 */
 	public FluentZoomIn displayName(String displayName) {
 		zoom.setDisplayName(displayName);
+		return this;
+	}
+
+	/**
+	 * Sets whether the display name should be escaped before rendering.
+	 *
+	 * @param escapeDisplayName {@code false} to allow trusted markup; {@code true} to escape at the renderer boundary
+	 * @return this builder
+	 */
+	public FluentZoomIn escapeDisplayName(boolean escapeDisplayName) {
+		return escapeDisplayName(escapeDisplayName ? Boolean.TRUE : Boolean.FALSE);
+	}
+
+	/**
+	 * Sets whether the display name should be escaped before rendering.
+	 *
+	 * @param escapeDisplayName {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 * @return this builder
+	 */
+	public FluentZoomIn escapeDisplayName(Boolean escapeDisplayName) {
+		zoom.setEscapeDisplayName(escapeDisplayName);
 		return this;
 	}
 
@@ -89,6 +112,27 @@ public class FluentZoomIn extends FluentBoundWidget<FluentZoomIn>
 	 */
 	public FluentZoomIn toolTip(String toolTip) {
 		zoom.setToolTip(toolTip);
+		return this;
+	}
+
+	/**
+	 * Sets whether the tooltip should be escaped before rendering.
+	 *
+	 * @param escapeToolTip {@code false} to allow trusted markup; {@code true} to escape at the renderer boundary
+	 * @return this builder
+	 */
+	public FluentZoomIn escapeToolTip(boolean escapeToolTip) {
+		return escapeToolTip(escapeToolTip ? Boolean.TRUE : Boolean.FALSE);
+	}
+
+	/**
+	 * Sets whether the tooltip should be escaped before rendering.
+	 *
+	 * @param escapeToolTip {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 * @return this builder
+	 */
+	public FluentZoomIn escapeToolTip(Boolean escapeToolTip) {
+		zoom.setEscapeToolTip(escapeToolTip);
 		return this;
 	}
 

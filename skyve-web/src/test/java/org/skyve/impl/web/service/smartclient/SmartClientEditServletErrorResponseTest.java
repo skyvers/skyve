@@ -194,7 +194,7 @@ class SmartClientEditServletErrorResponseTest {
 		Method method = SmartClientEditServlet.class.getDeclaredMethod("pumpOutValidationErrors", List.class, StringBuilder.class);
 		method.setAccessible(true);
 		String raw = "\"quoted\" <script>";
-		String escaped = OWASP.escapeJsString(raw);
+		String escaped = OWASP.escapeJsString(OWASP.escapeHtml(raw));
 
 		boolean hasBindings = ((Boolean) method.invoke(null,
 				List.of(new Message(new String[] {"customer.name"}, raw)),
@@ -203,6 +203,7 @@ class SmartClientEditServletErrorResponseTest {
 		assertTrue(hasBindings);
 		assertTrue(builder.toString().contains(escaped));
 		assertTrue(builder.toString().contains("customer_name"));
+		assertFalse(builder.toString().contains(raw));
 	}
 
 	@Test

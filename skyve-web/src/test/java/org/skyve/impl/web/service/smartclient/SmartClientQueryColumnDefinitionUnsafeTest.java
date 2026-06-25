@@ -54,6 +54,21 @@ class SmartClientQueryColumnDefinitionUnsafeTest {
 	}
 
 	@Test
+	void toJavascriptEscapesTitleByDefault() throws Exception {
+		SmartClientQueryColumnDefinition def = allocate(SmartClientQueryColumnDefinition.class);
+		def.name = "unsafe";
+		def.title = unsafeText();
+		def.type = "text";
+		def.required = true;
+
+		String js = def.toJavascript();
+
+		assertTrue(js.contains("title:'" + SmartClientViewRenderer.escapeSmartClientText(unsafeText(), true) + "'"), js);
+		assertTrue(js.contains("requiredMessage:'" + SmartClientViewRenderer.escapeSmartClientText(unsafeText(), true)), js);
+	}
+
+
+	@Test
 	void toJavascriptIncludesContainsOperatorsMaskAndValidators() throws Exception {
 		SmartClientQueryColumnDefinition def = allocate(SmartClientQueryColumnDefinition.class);
 		def.name = "name";
@@ -112,5 +127,9 @@ class SmartClientQueryColumnDefinitionUnsafeTest {
 		Object unsafe = f.get(null);
 		Method allocateInstance = unsafeType.getMethod("allocateInstance", Class.class);
 		return type.cast(allocateInstance.invoke(unsafe, type));
+	}
+
+	private static String unsafeText() {
+		return "<img src=x onerror=alert(1)> & \"quoted\" 'single'";
 	}
 }

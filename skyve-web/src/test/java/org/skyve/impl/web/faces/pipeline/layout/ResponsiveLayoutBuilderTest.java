@@ -1,6 +1,7 @@
 package org.skyve.impl.web.faces.pipeline.layout;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -28,6 +29,7 @@ import org.skyve.impl.metadata.view.container.form.FormColumn;
 import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.container.form.FormRow;
 import org.skyve.impl.web.faces.views.FacesView;
+import org.skyve.util.Icons;
 
 import jakarta.el.ELContext;
 import jakarta.el.ExpressionFactory;
@@ -35,6 +37,7 @@ import jakarta.el.ValueExpression;
 import jakarta.faces.application.Application;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.UIViewRoot;
+import jakarta.faces.component.html.HtmlOutputText;
 import jakarta.faces.component.html.HtmlPanelGroup;
 import jakarta.faces.context.FacesContext;
 
@@ -43,6 +46,7 @@ import jakarta.faces.context.FacesContext;
  * Uses Mockito mocks to avoid the Mojarra runtime dependency.
  */
 class ResponsiveLayoutBuilderTest {
+	private static final String UNSAFE_TEXT = "<img src=x onerror=alert(1)> & \"quoted\" 'single'";
 
 	private abstract static class FacesContextBridge extends FacesContext {
 		static void setCurrent(FacesContext facesContext) {
@@ -100,9 +104,11 @@ class ResponsiveLayoutBuilderTest {
 		mockMessage = mock(Message.class);
 
 		when(mockHtmlPanelGroup.getChildren()).thenReturn(new ArrayList<>());
+		when(mockOutputLabel.getChildren()).thenReturn(new ArrayList<>());
 		when(mockApplication.createComponent(HtmlPanelGroup.COMPONENT_TYPE)).thenReturn(mockHtmlPanelGroup);
 		when(mockApplication.createComponent(OutputLabel.COMPONENT_TYPE)).thenReturn(mockOutputLabel);
 		when(mockApplication.createComponent(Message.COMPONENT_TYPE)).thenReturn(mockMessage);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenAnswer(invocation -> new HtmlOutputText());
 
 		builder = new ResponsiveLayoutBuilder();
 		managedBean = mock(FacesView.class);
@@ -309,12 +315,29 @@ class ResponsiveLayoutBuilderTest {
 		Form form = new Form();
 		FormItem formItem = new FormItem();
 		FormColumn formColumn = new FormColumn();
-		builder.layoutFormItemLabel(rowLayout, widget, form, formItem, formColumn, "Label", null, null, null);
+		builder.layoutFormItemLabel(rowLayout, widget, form, formItem, formColumn, "Label", true, null, true, null, null);
 		// A div should be added to rowLayout
 		assertEquals(1, rowChildren.size());
 		assertSame(mockHtmlPanelGroup, rowChildren.get(0));
 		// The label should be added to the div
 		assertTrue(divChildren.contains(mockOutputLabel));
+	}
+
+	@Test
+	void layoutFormItemLabelStoresRawLabelWithEscapedDefaultAndSeparateRequiredMarker() {
+		UIComponent rowLayout = mock(UIComponent.class);
+		when(rowLayout.getChildren()).thenReturn(new ArrayList<>());
+		UIComponent widget = mock(UIComponent.class);
+		when(widget.getId()).thenReturn("widget1");
+		builder.layoutFormItemLabel(rowLayout, widget, new Form(), new FormItem(), new FormColumn(), UNSAFE_TEXT, true, "Required", false, null, null);
+		verify(mockOutputLabel).setEscape(false);
+		assertEquals(2, mockOutputLabel.getChildren().size());
+		HtmlOutputText labelText = (HtmlOutputText) mockOutputLabel.getChildren().get(0);
+		HtmlOutputText suffix = (HtmlOutputText) mockOutputLabel.getChildren().get(1);
+		assertEquals(UNSAFE_TEXT, labelText.getValue());
+		assertTrue(labelText.isEscape());
+		assertEquals("&nbsp;*:", suffix.getValue());
+		assertFalse(suffix.isEscape());
 	}
 
 	@Test
@@ -328,7 +351,7 @@ class ResponsiveLayoutBuilderTest {
 		Form form = new Form();
 		FormItem formItem = new FormItem();
 		FormColumn formColumn = new FormColumn();
-		builder.layoutFormItemWidget(rowLayout, widget, form, formItem, formColumn, "Label", 1, null, null, null, null, true, false);
+		builder.layoutFormItemWidget(rowLayout, widget, form, formItem, formColumn, "Label", true, 1, null, true, null, null, true, null, true, false);
 		// A flex div should be added to rowLayout
 		assertEquals(1, rowChildren.size());
 		assertSame(mockHtmlPanelGroup, rowChildren.get(0));
@@ -361,7 +384,7 @@ class ResponsiveLayoutBuilderTest {
 		Form form = new Form();
 		FormItem formItem = new FormItem();
 		FormColumn formColumn = new FormColumn();
-		builder.layoutFormItemWidget(rowLayout, widget, form, formItem, formColumn, "Label", 1, null, null, null, null, true, true);
+		builder.layoutFormItemWidget(rowLayout, widget, form, formItem, formColumn, "Label", true, 1, null, true, null, null, true, null, true, true);
 		// The flex div should be added to rowLayout
 		assertEquals(1, rowChildren.size());
 		assertSame(flexDiv, rowChildren.get(0));
@@ -371,6 +394,82 @@ class ResponsiveLayoutBuilderTest {
 		assertTrue(flexChildren.contains(fieldDiv));
 		// widget should be in floatSpan
 		assertTrue(floatChildren.contains(widget));
+	}
+
+	@Test
+	void layoutFormItemWidgetStoresRawTopLabelWithEscapeFlagBeforeRequiredMarker() {
+		HtmlPanelGroup flexDiv = mock(HtmlPanelGroup.class);
+		when(flexDiv.getChildren()).thenReturn(new ArrayList<>());
+		HtmlPanelGroup fieldDiv = mock(HtmlPanelGroup.class);
+		when(fieldDiv.getChildren()).thenReturn(new ArrayList<>());
+		HtmlPanelGroup floatSpan = mock(HtmlPanelGroup.class);
+		when(floatSpan.getChildren()).thenReturn(new ArrayList<>());
+		when(mockApplication.createComponent(HtmlPanelGroup.COMPONENT_TYPE))
+			.thenReturn(flexDiv)
+			.thenReturn(fieldDiv)
+			.thenReturn(floatSpan);
+
+		UIComponent rowLayout = mock(UIComponent.class);
+		when(rowLayout.getChildren()).thenReturn(new ArrayList<>());
+		UIComponent widget = mock(UIComponent.class);
+		when(widget.getId()).thenReturn("widget1");
+		when(mockOutputLabel.getChildren()).thenReturn(new ArrayList<>());
+		builder.layoutFormItemWidget(rowLayout, widget, new Form(), new FormItem(), new FormColumn(), UNSAFE_TEXT, true, 1, "Required", false, null, null, true, null, true, true);
+		verify(mockOutputLabel).setEscape(false);
+		assertEquals(2, mockOutputLabel.getChildren().size());
+		HtmlOutputText labelText = (HtmlOutputText) mockOutputLabel.getChildren().get(0);
+		HtmlOutputText suffix = (HtmlOutputText) mockOutputLabel.getChildren().get(1);
+		assertEquals(UNSAFE_TEXT, labelText.getValue());
+		assertTrue(labelText.isEscape());
+		assertEquals("&nbsp;*:", suffix.getValue());
+		assertFalse(suffix.isEscape());
+		verify(mockMessage).setEscape(false);
+	}
+
+	@Test
+	void layoutFormItemWidgetEscapesHelpTooltipForAttributeContext() {
+		UIComponent rowLayout = mock(UIComponent.class);
+		when(rowLayout.getChildren()).thenReturn(new ArrayList<>());
+		List<UIComponent> flexChildren = new ArrayList<>();
+		when(mockHtmlPanelGroup.getChildren()).thenReturn(flexChildren);
+		UIComponent widget = mock(UIComponent.class);
+
+		builder.layoutFormItemWidget(rowLayout, widget, new Form(), new FormItem(), new FormColumn(), "Label", true, 1, null, true, null, UNSAFE_TEXT, true, null, true, false);
+
+		HtmlOutputText help = null;
+		for (UIComponent child : flexChildren) {
+			if (child instanceof HtmlOutputText outputText) {
+				help = outputText;
+			}
+		}
+		assertNotNull(help);
+		String value = (String) help.getValue();
+		assertEquals(String.format("<i class=\"%s help\" data-tooltip=\"&amp;lt;img src=x onerror=alert(1)&amp;gt; &amp;amp; &amp;#34;quoted&amp;#34; &amp;#39;single&amp;#39;\"></i>", Icons.FONT_HELP), value);
+		assertFalse(value.contains("data-tooltip=\"<"));
+		assertFalse(value.contains("'single'"));
+	}
+
+	@Test
+	void layoutFormItemWidgetLeavesTrustedHelpMarkupButEscapesAttributeDelimiters() {
+		UIComponent rowLayout = mock(UIComponent.class);
+		when(rowLayout.getChildren()).thenReturn(new ArrayList<>());
+		List<UIComponent> flexChildren = new ArrayList<>();
+		when(mockHtmlPanelGroup.getChildren()).thenReturn(flexChildren);
+		UIComponent widget = mock(UIComponent.class);
+
+		builder.layoutFormItemWidget(rowLayout, widget, new Form(), new FormItem(), new FormColumn(), "Label", true, 1, null, true, null, UNSAFE_TEXT, false, null, true, false);
+
+		HtmlOutputText help = null;
+		for (UIComponent child : flexChildren) {
+			if (child instanceof HtmlOutputText outputText) {
+				help = outputText;
+			}
+		}
+		assertNotNull(help);
+		String value = (String) help.getValue();
+		assertEquals(String.format("<i class=\"%s help\" data-tooltip=\"&lt;img src=x onerror=alert(1)> &amp; &#34;quoted&#34; &#39;single&#39;\"></i>", Icons.FONT_HELP), value);
+		assertFalse(value.contains("\"quoted\""));
+		assertFalse(value.contains("'single'"));
 	}
 
 	@Test
@@ -470,10 +569,9 @@ class ResponsiveLayoutBuilderTest {
 		FormItem formItem = new FormItem();
 		FormColumn formColumn = new FormColumn();
 		// colspan = 2 triggers the else (colspan > 1) branch
-		builder.layoutFormItemWidget(rowLayout, widget, form, formItem, formColumn, "Label", 2, null, null, null, null, true, false);
+		builder.layoutFormItemWidget(rowLayout, widget, form, formItem, formColumn, "Label", true, 2, null, true, null, null, true, null, true, false);
 		// A flex div should be added to rowLayout
 		assertEquals(1, rowChildren.size());
 		assertSame(mockHtmlPanelGroup, rowChildren.get(0));
 	}
 }
-

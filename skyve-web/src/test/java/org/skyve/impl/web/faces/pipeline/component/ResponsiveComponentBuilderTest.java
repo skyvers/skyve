@@ -2,12 +2,13 @@ package org.skyve.impl.web.faces.pipeline.component;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -22,6 +23,7 @@ import jakarta.el.ELContext;
 import jakarta.el.ExpressionFactory;
 import jakarta.faces.application.Application;
 import jakarta.faces.component.UIComponent;
+import jakarta.faces.component.html.HtmlOutputText;
 import jakarta.faces.component.html.HtmlPanelGroup;
 import jakarta.faces.context.FacesContext;
 
@@ -115,7 +117,11 @@ class ResponsiveComponentBuilderTest {
 		builder.setUserAgentType(UserAgentType.desktop);
 		builder.setSAILManagedBean(mockManagedBean);
 		Panel panel = mock(Panel.class);
-		when(mockApplication.createComponent(anyString())).thenReturn(panel);
+		HtmlOutputText header = mock(HtmlOutputText.class);
+		Map<String, UIComponent> facets = new HashMap<>();
+		when(mockApplication.createComponent(Panel.COMPONENT_TYPE)).thenReturn(panel);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(header);
+		when(panel.getFacets()).thenReturn(facets);
 		when(panel.getId()).thenReturn("border1");
 		Panel result = (Panel) builder.border(null, "Title", null, null, null);
 		assertSame(panel, result);

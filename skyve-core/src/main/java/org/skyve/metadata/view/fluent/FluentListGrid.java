@@ -35,6 +35,7 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 */
 	public FluentListGrid from(@SuppressWarnings("hiding") ListGrid grid) {
 		title(grid.getTitle());
+		escapeTitle(grid.getEscapeTitle());
 		queryName(grid.getQueryName());
 		modelName(grid.getModelName());
 		postRefreshConditionName(grid.getPostRefreshConditionName());
@@ -127,7 +128,28 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 		grid.setTitle(title);
 		return this;
 	}
-	
+
+	/**
+	 * Sets whether the list title should be escaped before rendering.
+	 *
+	 * @param escapeTitle {@code false} to allow trusted markup; {@code true} to escape at the renderer boundary
+	 * @return this builder
+	 */
+	public FluentListGrid escapeTitle(boolean escapeTitle) {
+		return escapeTitle(escapeTitle ? Boolean.TRUE : Boolean.FALSE);
+	}
+
+	/**
+	 * Sets whether the list title should be escaped before rendering.
+	 *
+	 * @param escapeTitle {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 * @return this builder
+	 */
+	public FluentListGrid escapeTitle(Boolean escapeTitle) {
+		grid.setEscapeTitle(escapeTitle);
+		return this;
+	}
+
 	/**
 	 * Sets the query name used to populate this list grid.
 	 *

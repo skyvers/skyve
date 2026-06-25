@@ -43,7 +43,9 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"changedActions",
 							"membersHeading",
+							"escapeMembersHeading",
 							"candidatesHeading",
+							"escapeCandidatesHeading",
 							"pixelWidth",
 							"minPixelHeight",
 							"properties"})
@@ -53,7 +55,9 @@ public class ListMembership extends InputWidget implements MembershipWidget, Abs
 	private Integer pixelWidth;
 	private Integer minPixelHeight;
 	private String candidatesHeading = "Candidates";
+	private Boolean escapeCandidatesHeading;
 	private String membersHeading = "Members";
+	private Boolean escapeMembersHeading;
 	private List<EventAction> changedActions = new ArrayList<>();
 	
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
@@ -124,6 +128,15 @@ public class ListMembership extends InputWidget implements MembershipWidget, Abs
 	public String getLocalisedCandidatesHeading() {
 		return Util.i18n(candidatesHeading);
 	}
+
+	/**
+	 * Returns whether the candidates heading text should be escaped before rendering.
+	 *
+	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	public Boolean getEscapeCandidatesHeading() {
+		return escapeCandidatesHeading;
+	}
 	
 	/**
 	 * Sets the candidate-list heading after trimming and empty-string normalisation.
@@ -131,6 +144,16 @@ public class ListMembership extends InputWidget implements MembershipWidget, Abs
 	@XmlAttribute(required = false)
 	public void setCandidatesHeading(String candidatesHeading) {
 		this.candidatesHeading = UtilImpl.processStringValue(candidatesHeading);
+	}
+
+	/**
+	 * Sets whether the candidates heading text should be escaped before rendering.
+	 *
+	 * @param escapeCandidatesHeading {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	@XmlAttribute(required = false)
+	public void setEscapeCandidatesHeading(Boolean escapeCandidatesHeading) {
+		this.escapeCandidatesHeading = escapeCandidatesHeading;
 	}
 
 	/**
@@ -148,6 +171,15 @@ public class ListMembership extends InputWidget implements MembershipWidget, Abs
 	public String getLocalisedMembersHeading() {
 		return Util.i18n(membersHeading);
 	}
+
+	/**
+	 * Returns whether the members heading text should be escaped before rendering.
+	 *
+	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	public Boolean getEscapeMembersHeading() {
+		return escapeMembersHeading;
+	}
 	
 	/**
 	 * Sets the members-list heading after trimming and empty-string normalisation.
@@ -155,6 +187,16 @@ public class ListMembership extends InputWidget implements MembershipWidget, Abs
 	@XmlAttribute(required = false)
 	public void setMembersHeading(String membersHeading) {
 		this.membersHeading = UtilImpl.processStringValue(membersHeading);
+	}
+
+	/**
+	 * Sets whether the members heading text should be escaped before rendering.
+	 *
+	 * @param escapeMembersHeading {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	@XmlAttribute(required = false)
+	public void setEscapeMembersHeading(Boolean escapeMembersHeading) {
+		this.escapeMembersHeading = escapeMembersHeading;
 	}
 
 	/**

@@ -69,6 +69,7 @@ public class FormItem implements DecoratedMetaData {
 	private HorizontalAlignment horizontalAlignment;
 	// label override (based on binding on widget)
 	private String label;
+	private Boolean escapeLabel;
 	// is the label rendered?
 	private Boolean showLabel;
 	private HorizontalAlignment labelHorizontalAlignment;
@@ -76,10 +77,12 @@ public class FormItem implements DecoratedMetaData {
 	private Boolean showHelp;
 	// override help to be different from an attribute's description
 	private String help;
+	private Boolean escapeHelp;
 	// is the field required or not - regardless of whether its required in data
 	private Boolean required;
 	// override the required message to be different from the attribute
 	private String requiredMessage;
+	private Boolean escapeRequiredMessage;
 	
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
@@ -226,6 +229,15 @@ public class FormItem implements DecoratedMetaData {
 	public String getLocalisedLabel() {
 		return Util.i18n(label);
 	}
+
+	/**
+	 * Returns whether the label text should be escaped before rendering.
+	 *
+	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	public Boolean getEscapeLabel() {
+		return escapeLabel;
+	}
 	
 	/**
 	 * Sets the label override text for this item.
@@ -237,6 +249,16 @@ public class FormItem implements DecoratedMetaData {
 	@XmlAttribute(required = false)
 	public void setLabel(String label) {
 		this.label = UtilImpl.processStringValue(label);
+	}
+
+	/**
+	 * Sets whether the label text should be escaped before rendering.
+	 *
+	 * @param escapeLabel {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	@XmlAttribute(required = false)
+	public void setEscapeLabel(Boolean escapeLabel) {
+		this.escapeLabel = escapeLabel;
 	}
 
 	/**
@@ -294,6 +316,15 @@ public class FormItem implements DecoratedMetaData {
 	public String getLocalisedHelp() {
 		return Util.i18n(help);
 	}
+
+	/**
+	 * Returns whether the help text should be escaped before rendering.
+	 *
+	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	public Boolean getEscapeHelp() {
+		return escapeHelp;
+	}
 	
 	/**
 	 * Sets the help-text override for this item.
@@ -305,6 +336,16 @@ public class FormItem implements DecoratedMetaData {
 	@XmlAttribute(required = false)
 	public void setHelp(String help) {
 		this.help = UtilImpl.processStringValue(help);
+	}
+
+	/**
+	 * Sets whether the help text should be escaped before rendering.
+	 *
+	 * @param escapeHelp {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	@XmlAttribute(required = false)
+	public void setEscapeHelp(Boolean escapeHelp) {
+		this.escapeHelp = escapeHelp;
 	}
 
 	/**
@@ -345,6 +386,15 @@ public class FormItem implements DecoratedMetaData {
 	}
 
 	/**
+	 * Returns whether the required-message text should be escaped before rendering.
+	 *
+	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	public Boolean getEscapeRequiredMessage() {
+		return escapeRequiredMessage;
+	}
+
+	/**
 	 * Sets the required-message override text.
 	 *
 	 * <p>Side effects: trims and normalises the supplied value before storage.
@@ -354,6 +404,16 @@ public class FormItem implements DecoratedMetaData {
 	@XmlAttribute(required = false)
 	public void setRequiredMessage(String requiredMessage) {
 		this.requiredMessage = UtilImpl.processStringValue(requiredMessage);
+	}
+
+	/**
+	 * Sets whether the required-message text should be escaped before rendering.
+	 *
+	 * @param escapeRequiredMessage {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	@XmlAttribute(required = false)
+	public void setEscapeRequiredMessage(Boolean escapeRequiredMessage) {
+		this.escapeRequiredMessage = escapeRequiredMessage;
 	}
 
 	/**

@@ -2,6 +2,7 @@ package org.skyve.impl.web.faces.pipeline.layout;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -39,12 +40,14 @@ import jakarta.el.ExpressionFactory;
 import jakarta.el.ValueExpression;
 import jakarta.faces.application.Application;
 import jakarta.faces.component.UIComponent;
+import jakarta.faces.component.html.HtmlOutputText;
 import jakarta.faces.component.html.HtmlPanelGrid;
 import jakarta.faces.component.html.HtmlPanelGroup;
 import jakarta.faces.context.FacesContext;
 
 @SuppressWarnings("boxing")
 class TabularLayoutBuilderTest {
+	private static final String UNSAFE_TEXT = "<img src=x onerror=alert(1)> & \"quoted\" 'single'";
 
 	private abstract static class FacesContextBridge extends FacesContext {
 		static void setCurrent(FacesContext facesContext) {
@@ -112,6 +115,7 @@ class TabularLayoutBuilderTest {
 		when(mockRow.getChildren()).thenReturn(new ArrayList<>());
 		when(mockColumn.getChildren()).thenReturn(new ArrayList<>());
 		when(mockHtmlPanelGrid.getChildren()).thenReturn(new ArrayList<>());
+		when(mockOutputLabel.getChildren()).thenReturn(new ArrayList<>());
 
 		when(mockApplication.createComponent(PanelGrid.COMPONENT_TYPE)).thenReturn(mockPanelGrid);
 		when(mockApplication.createComponent(HtmlPanelGrid.COMPONENT_TYPE)).thenReturn(mockHtmlPanelGrid);
@@ -122,6 +126,7 @@ class TabularLayoutBuilderTest {
 		when(mockApplication.createComponent(OutputLabel.COMPONENT_TYPE)).thenReturn(mockOutputLabel);
 		when(mockApplication.createComponent(Message.COMPONENT_TYPE)).thenReturn(mockMessage);
 		when(mockApplication.createComponent(Panel.COMPONENT_TYPE)).thenReturn(mockPanel);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenAnswer(invocation -> new HtmlOutputText());
 
 		builder = new TabularLayoutBuilder();
 		managedBean = mock(FacesView.class);
@@ -414,10 +419,46 @@ class TabularLayoutBuilderTest {
 		Form form = new Form();
 		FormItem formItem = new FormItem();
 		FormColumn formColumn = new FormColumn();
-		builder.layoutFormItemLabel(rowLayout, widget, form, formItem, formColumn, "My Label", null, null, null);
+		builder.layoutFormItemLabel(rowLayout, widget, form, formItem, formColumn, "My Label", true, null, true, null, null);
 		// Should add a Column to the row
 		assertEquals(1, rowChildren.size());
 		assertSame(mockColumn, rowChildren.get(0));
+	}
+
+	@Test
+	void layoutFormItemLabelStoresRawLabelWithEscapedDefaultAndSeparateRequiredMarker() {
+		UIComponent rowLayout = mock(UIComponent.class);
+		when(rowLayout.getChildren()).thenReturn(new ArrayList<>());
+		UIComponent widget = mock(UIComponent.class);
+		when(widget.getId()).thenReturn("widget1");
+		builder.layoutFormItemLabel(rowLayout, widget, new Form(), new FormItem(), new FormColumn(), UNSAFE_TEXT, true, "Required", true, null, null);
+		verify(mockOutputLabel).setEscape(false);
+		assertEquals(2, mockOutputLabel.getChildren().size());
+		HtmlOutputText labelText = (HtmlOutputText) mockOutputLabel.getChildren().get(0);
+		HtmlOutputText suffix = (HtmlOutputText) mockOutputLabel.getChildren().get(1);
+		assertEquals(UNSAFE_TEXT, labelText.getValue());
+		assertTrue(labelText.isEscape());
+		assertEquals("&nbsp;*:", suffix.getValue());
+		assertFalse(suffix.isEscape());
+		verify(mockMessage).setEscape(false);
+	}
+
+	@Test
+	void layoutFormItemLabelAllowsTrustedLabelMarkupWithoutControllingRequiredMarker() {
+		UIComponent rowLayout = mock(UIComponent.class);
+		when(rowLayout.getChildren()).thenReturn(new ArrayList<>());
+		UIComponent widget = mock(UIComponent.class);
+		when(widget.getId()).thenReturn("widget1");
+		builder.layoutFormItemLabel(rowLayout, widget, new Form(), new FormItem(), new FormColumn(), "<b>Trusted</b>", false, "Required", false, null, null);
+		verify(mockOutputLabel).setEscape(false);
+		assertEquals(2, mockOutputLabel.getChildren().size());
+		HtmlOutputText labelText = (HtmlOutputText) mockOutputLabel.getChildren().get(0);
+		HtmlOutputText suffix = (HtmlOutputText) mockOutputLabel.getChildren().get(1);
+		assertEquals("<b>Trusted</b>", labelText.getValue());
+		assertFalse(labelText.isEscape());
+		assertEquals("&nbsp;*:", suffix.getValue());
+		assertFalse(suffix.isEscape());
+		verify(mockMessage).setEscape(false);
 	}
 
 	@Test
@@ -429,7 +470,7 @@ class TabularLayoutBuilderTest {
 		Form form = new Form();
 		FormItem formItem = new FormItem();
 		FormColumn formColumn = new FormColumn();
-		builder.layoutFormItemWidget(rowLayout, widget, form, formItem, formColumn, "My Label", 1, null, null, null, null, true, false);
+		builder.layoutFormItemWidget(rowLayout, widget, form, formItem, formColumn, "My Label", true, 1, null, true, null, null, true, null, true, false);
 		assertEquals(1, rowChildren.size());
 		assertSame(mockColumn, rowChildren.get(0));
 	}

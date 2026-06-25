@@ -35,6 +35,7 @@ public class FluentDialogButton extends FluentWidget {
 	public FluentDialogButton from(@SuppressWarnings("hiding") DialogButton button) {
 
 		displayName(button.getDisplayName());
+		escapeDisplayName(button.getEscapeDisplayName());
 		dialogName(button.getDialogName());
 		command(button.getCommand());
 		Integer i = button.getDialogHeight();
@@ -66,6 +67,27 @@ public class FluentDialogButton extends FluentWidget {
 	 */
 	public FluentDialogButton displayName(String displayName) {
 		button.setDisplayName(displayName);
+		return this;
+	}
+
+	/**
+	 * Sets whether the display name should be escaped before rendering.
+	 *
+	 * @param escapeDisplayName {@code false} to allow trusted markup; {@code true} to escape at the renderer boundary
+	 * @return this builder
+	 */
+	public FluentDialogButton escapeDisplayName(boolean escapeDisplayName) {
+		return escapeDisplayName(escapeDisplayName ? Boolean.TRUE : Boolean.FALSE);
+	}
+
+	/**
+	 * Sets whether the display name should be escaped before rendering.
+	 *
+	 * @param escapeDisplayName {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 * @return this builder
+	 */
+	public FluentDialogButton escapeDisplayName(Boolean escapeDisplayName) {
+		button.setEscapeDisplayName(escapeDisplayName);
 		return this;
 	}
 

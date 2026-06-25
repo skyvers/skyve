@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view name="edit"
+		title="Escaping fixture: &lt;i&gt;view title&lt;/i&gt;"
+		escapeTitle="false"
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+		xmlns="http://www.skyve.org/xml/view"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<tabPane>
+		<tab title="Escaped &lt;i&gt;tab title&lt;/i&gt;">
+			<vbox border="true" borderTitle="Escaped &lt;i&gt;vbox border&lt;/i&gt;">
+				<hbox border="true" borderTitle="Trusted &lt;i&gt;hbox border&lt;/i&gt;" escapeBorderTitle="false">
+					<form border="true" borderTitle="Trusted &lt;span class=&quot;ui-state-highlight&quot;&gt;form border&lt;/span&gt;" escapeBorderTitle="false">
+						<column percentageWidth="35" responsiveWidth="5" />
+						<column responsiveWidth="7" />
+						<row>
+							<item label="Escaped &lt;i&gt;label&lt;/i&gt;" help="Escaped &lt;i&gt;help&lt;/i&gt;" showHelp="true" required="true" requiredMessage="Escaped &lt;i&gt;required message&lt;/i&gt;">
+								<textField binding="text1" />
+							</item>
+						</row>
+						<row>
+							<item label="Trusted &lt;i&gt;label&lt;/i&gt;" escapeLabel="false" help="Trusted &lt;i&gt;help&lt;/i&gt;" escapeHelp="false" showHelp="true" required="true" requiredMessage="Trusted &lt;i&gt;required message&lt;/i&gt;" escapeRequiredMessage="false">
+								<textField binding="text2" />
+							</item>
+						</row>
+						<row>
+							<item label="Trusted &lt;span class=&quot;ui-state-highlight&quot;&gt;zoom label&lt;/span&gt;" escapeLabel="false">
+								<zoomIn binding="zoomTarget" displayName="Trusted &lt;i&gt;zoom display&lt;/i&gt;" escapeDisplayName="false" toolTip="Trusted &lt;i&gt;zoom tooltip&lt;/i&gt;" escapeToolTip="false" />
+							</item>
+						</row>
+						<row>
+							<item label="Trusted &lt;i&gt;dialog label&lt;/i&gt;" escapeLabel="false">
+								<dialogButton displayName="Trusted &lt;i&gt;dialog button&lt;/i&gt;" escapeDisplayName="false" dialogName="edit" />
+							</item>
+						</row>
+						<row>
+							<item label="Escaped &lt;i&gt;link value&lt;/i&gt;">
+								<link value="Escaped &lt;i&gt;link&lt;/i&gt;">
+									<resourceReference relativeFile="shared/images/UnknownContact.jpg" />
+								</link>
+							</item>
+						</row>
+						<row>
+							<item label="Trusted &lt;i&gt;link value&lt;/i&gt;" escapeLabel="false">
+								<link value="Trusted &lt;i&gt;link&lt;/i&gt;" escapeValue="false">
+									<resourceReference relativeFile="shared/images/UnknownContact.jpg" />
+								</link>
+							</item>
+						</row>
+						<row>
+							<item label="Document &lt;i&gt;default metadata&lt;/i&gt;" help="Escaped &lt;i&gt;metadata help&lt;/i&gt;" showHelp="true">
+								<default binding="metadataLabelText" />
+							</item>
+						</row>
+						<row>
+							<item label="Trusted &lt;i&gt;default widget&lt;/i&gt;" escapeLabel="false" help="Trusted &lt;i&gt;default widget help&lt;/i&gt;" escapeHelp="false" showHelp="true">
+								<default binding="metadataWidgetText" />
+							</item>
+						</row>
+						<row>
+							<item label="Literal &lt;i&gt;label widget&lt;/i&gt;">
+								<label value="Literal &lt;i&gt;label value&lt;/i&gt;" />
+							</item>
+						</row>
+						<row>
+							<item label="Trusted literal &lt;i&gt;label widget&lt;/i&gt;" escapeLabel="false">
+								<label value="Trusted literal &lt;i&gt;label value&lt;/i&gt;" escape="false" />
+							</item>
+						</row>
+						<row>
+							<item label="Literal &lt;i&gt;blurb widget&lt;/i&gt;">
+								<blurb>Literal &lt;i&gt;blurb value&lt;/i&gt;</blurb>
+							</item>
+						</row>
+						<row>
+							<item label="Trusted literal &lt;i&gt;blurb widget&lt;/i&gt;" escapeLabel="false">
+								<blurb escape="false">Trusted literal &lt;i&gt;blurb value&lt;/i&gt;</blurb>
+							</item>
+						</row>
+						<row>
+							<item label="Escaped expression &lt;i&gt;label widget&lt;/i&gt;">
+								<label value="Escaped expression {metadataLabelText}" />
+							</item>
+						</row>
+						<row>
+							<item label="Trusted expression &lt;i&gt;label widget&lt;/i&gt;" escapeLabel="false">
+								<label value="Trusted expression {metadataWidgetText}" escape="false" />
+							</item>
+						</row>
+						<row>
+							<item label="Escaped expression &lt;i&gt;blurb widget&lt;/i&gt;">
+								<blurb>Escaped expression {metadataLabelText}</blurb>
+							</item>
+						</row>
+						<row>
+							<item label="Trusted expression &lt;i&gt;blurb widget&lt;/i&gt;" escapeLabel="false">
+								<blurb escape="false">Trusted expression {metadataWidgetText}</blurb>
+							</item>
+						</row>
+					</form>
+				</hbox>
+			</vbox>
+		</tab>
+		<tab title="Trusted &lt;i&gt;tab title&lt;/i&gt;" escapeTitle="false">
+			<dataGrid binding="gridRows" title="Trusted &lt;i&gt;data grid title&lt;/i&gt;" escapeTitle="false" showAdd="false" showEdit="false" showZoom="false" showRemove="false">
+				<boundColumn binding="text" title="Escaped &lt;i&gt;column title&lt;/i&gt;" />
+				<boundColumn binding="memo" title="Trusted &lt;i&gt;column title&lt;/i&gt;" escapeTitle="false" />
+				<containerColumn title="Literal &lt;i&gt;container column&lt;/i&gt;" pixelWidth="220">
+					<label value="Literal &lt;i&gt;grid label&lt;/i&gt;" />
+					<blurb>Literal &lt;i&gt;grid blurb&lt;/i&gt;</blurb>
+				</containerColumn>
+				<containerColumn title="Trusted literal &lt;i&gt;container column&lt;/i&gt;" escapeTitle="false" pixelWidth="220">
+					<label value="Trusted literal &lt;i&gt;grid label&lt;/i&gt;" escape="false" />
+					<blurb escape="false">Trusted literal &lt;i&gt;grid blurb&lt;/i&gt;</blurb>
+				</containerColumn>
+				<containerColumn title="Escaped expression &lt;i&gt;container column&lt;/i&gt;" pixelWidth="240">
+					<label value="Escaped expression {text}" />
+					<blurb>Escaped expression {memo}</blurb>
+				</containerColumn>
+				<containerColumn title="Trusted expression &lt;i&gt;container column&lt;/i&gt;" escapeTitle="false" pixelWidth="240">
+					<label value="Trusted expression {text}" escape="false" />
+					<blurb escape="false">Trusted expression {memo}</blurb>
+				</containerColumn>
+			</dataGrid>
+			<dataRepeater binding="gridRows" title="Trusted &lt;i&gt;data repeater title&lt;/i&gt;" escapeTitle="false" showColumnHeaders="true">
+				<boundColumn binding="text" title="Trusted &lt;i&gt;repeater column&lt;/i&gt;" escapeTitle="false" />
+			</dataRepeater>
+			<listGrid query="qEscapingFixture" title="Trusted &lt;i&gt;list grid title&lt;/i&gt;" escapeTitle="false" continueConversation="false" disabled="true" />
+			<listRepeater query="qEscapingFixture" title="Trusted &lt;i&gt;list repeater title&lt;/i&gt;" escapeTitle="false" />
+			<listMembership binding="members" candidatesHeading="Trusted &lt;i&gt;candidates heading&lt;/i&gt;" escapeCandidatesHeading="false" membersHeading="Trusted &lt;i&gt;members heading&lt;/i&gt;" escapeMembersHeading="false" />
+		</tab>
+		<tab title="Actions">
+			<form border="true" borderTitle="Trusted &lt;i&gt;action labels below&lt;/i&gt;" escapeBorderTitle="false">
+				<column percentageWidth="35" responsiveWidth="5" />
+				<column responsiveWidth="7" />
+				<row>
+					<item label="Action panel">
+						<label value="Use the action bar to inspect escaped and trusted built-in action metadata." />
+					</item>
+				</row>
+			</form>
+		</tab>
+	</tabPane>
+	<actions>
+		<defaults />
+		<action className="TrustedDisplayName" displayName="Trusted &lt;i&gt;action display&lt;/i&gt;" escapeDisplayName="false" clientValidation="false" />
+		<save displayName="Escaped &lt;i&gt;save display&lt;/i&gt;" toolTip="Escaped &lt;i&gt;save tooltip&lt;/i&gt;" confirm="Escaped &lt;i&gt;save confirm&lt;/i&gt;" clientValidation="false" />
+		<cancel displayName="Trusted &lt;i&gt;cancel display&lt;/i&gt;" escapeDisplayName="false" toolTip="Trusted &lt;i&gt;cancel tooltip&lt;/i&gt;" escapeToolTip="false" confirm="Trusted &lt;i&gt;cancel confirm&lt;/i&gt;" escapeConfirm="false" />
+	</actions>
+</view>

@@ -430,9 +430,11 @@ class ComponentBuilderChainTest {
 	@Test
 	void listMembershipDelegatesToBuilder() {
 		ListMembership membership = mock(ListMembership.class);
+		EscapableText candidates = EscapableText.of("candidates", true);
+		EscapableText members = EscapableText.of("members", false);
 		EventSourceComponent result = new EventSourceComponent(mock(UIComponent.class), mock(UIComponentBase.class));
-		when(mockBuilder.listMembership(mockEventSource, "candidates", "members", membership)).thenReturn(result);
-		assertSame(result, chain.listMembership(mockEventSource, "candidates", "members", membership));
+		when(mockBuilder.listMembership(mockEventSource, candidates, members, membership)).thenReturn(result);
+		assertSame(result, chain.listMembership(mockEventSource, candidates, members, membership));
 	}
 
 	@Test

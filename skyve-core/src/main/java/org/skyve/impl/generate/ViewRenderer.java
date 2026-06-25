@@ -137,6 +137,17 @@ public abstract class ViewRenderer extends ViewVisitor {
 	}
 
 	/**
+	 * Resolves nullable metadata escape flags to the renderer escape decision.
+	 *
+	 * @param escape {@code Boolean.FALSE} to allow trusted markup; {@code null} or
+	 *        {@code Boolean.TRUE} to escape at the renderer boundary
+	 * @return {@code false} only when {@code escape} is {@code Boolean.FALSE}
+	 */
+	public static boolean shouldEscape(@Nullable Boolean escape) {
+		return ! Boolean.FALSE.equals(escape);
+	}
+
+	/**
 	 * Forces form rendering to use top-aligned labels for the current traversal.
 	 *
 	 * <p>Side effects: mutates renderer state and affects later form-render decisions.
@@ -454,6 +465,18 @@ public abstract class ViewRenderer extends ViewVisitor {
 	public String getCurrentWidgetLabel() {
 		return currentWidgetLabel;
 	}
+
+	private boolean currentWidgetEscapeLabel = true;
+	
+	/**
+	 * Returns whether the resolved current form-item label should be escaped.
+	 *
+	 * @return {@code true} to escape at the renderer boundary; {@code false} to allow trusted label markup
+	 */
+	public boolean getCurrentWidgetEscapeLabel() {
+		return currentWidgetEscapeLabel;
+	}
+	
 	private boolean currentWidgetShowLabel;
 	public boolean isCurrentWidgetShowLabel() {
 		return currentWidgetShowLabel;
@@ -463,10 +486,34 @@ public abstract class ViewRenderer extends ViewVisitor {
 	public String getCurrentWidgetRequiredMessage() {
 		return currentWidgetRequiredMessage;
 	}
+	
+	private boolean currentWidgetEscapeRequiredMessage = true;
+	
+	/**
+	 * Returns whether the resolved current form-item required message should be escaped.
+	 *
+	 * @return {@code true} to escape at the renderer boundary; {@code false} to allow trusted message markup
+	 */
+	public boolean getCurrentWidgetEscapeRequiredMessage() {
+		return currentWidgetEscapeRequiredMessage;
+	}
+	
 	private String currentWidgetHelp;
 	public String getCurrentWidgetHelp() {
 		return currentWidgetHelp;
 	}
+	
+	private boolean currentWidgetEscapeHelp = true;
+	
+	/**
+	 * Returns whether the resolved current form-item help text should be escaped.
+	 *
+	 * @return {@code true} to escape at the renderer boundary; {@code false} to allow trusted help markup
+	 */
+	public boolean getCurrentWidgetEscapeHelp() {
+		return currentWidgetEscapeHelp;
+	}
+	
 	private int currentWidgetColspan = 1;
 	public int getCurrentWidgetColspan() {
 		return currentWidgetColspan;
@@ -490,10 +537,13 @@ public abstract class ViewRenderer extends ViewVisitor {
 	
 	private void preProcessWidget(String binding, boolean showsLabelByDefault) {
 		currentWidgetLabel = null;
+		currentWidgetEscapeLabel = true;
 		currentWidgetShowLabel = false;
 		currentWidgetRequired = false;
 		currentWidgetRequiredMessage = null;
+		currentWidgetEscapeRequiredMessage = true;
 		currentWidgetHelp = null;
+		currentWidgetEscapeHelp = true;
 		currentWidgetColspan = 1;
 		currentTarget = null;
 		
@@ -537,19 +587,24 @@ public abstract class ViewRenderer extends ViewVisitor {
 	private void preProcessWidget(boolean clearState, boolean showsLabelByDefault) {
 		if (clearState) {
 			currentWidgetLabel = null;
+			currentWidgetEscapeLabel = true;
 			currentWidgetHelp = null;
+			currentWidgetEscapeHelp = true;
 			currentWidgetRequired = false;
 			currentWidgetRequiredMessage = null;
+			currentWidgetEscapeRequiredMessage = true;
 			currentWidgetColspan = 1;
 		}
 		if (currentFormItem != null) {
 			String label = currentFormItem.getLocalisedLabel();
 			if (label != null) {
 				currentWidgetLabel = label;
+				currentWidgetEscapeLabel = shouldEscape(currentFormItem.getEscapeLabel());
 			}
 			String help = currentFormItem.getLocalisedHelp();
 			if (help != null) {
 				currentWidgetHelp = help;
+				currentWidgetEscapeHelp = shouldEscape(currentFormItem.getEscapeHelp());
 			}
 			Boolean required = currentFormItem.getRequired();
 			if (required != null) {
@@ -560,6 +615,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 				String requiredMessage = currentFormItem.getLocalisedRequiredMessage();
 				if (requiredMessage != null) {
 					currentWidgetRequiredMessage = requiredMessage;
+					currentWidgetEscapeRequiredMessage = shouldEscape(currentFormItem.getEscapeRequiredMessage());
 				}
 			}
 			// Ensure required message is set to the default if widget input is required and there is no message
@@ -600,9 +656,12 @@ public abstract class ViewRenderer extends ViewVisitor {
 		currentFormItem = null;
 		currentWidgetRequired = false;
 		currentWidgetRequiredMessage = null;
+		currentWidgetEscapeRequiredMessage = true;
 		currentWidgetLabel = null;
+		currentWidgetEscapeLabel = true;
 		currentWidgetShowLabel = false;
 		currentWidgetHelp = null;
+		currentWidgetEscapeHelp = true;
 		currentWidgetColspan = 1;
 		currentTarget = null;
 	}
@@ -628,6 +687,36 @@ public abstract class ViewRenderer extends ViewVisitor {
 	private String actionIconStyleClass;
 	private String actionToolTip;
 	private String actionConfirmationText;
+	private boolean actionEscapeDisplayName = true;
+	private boolean actionEscapeToolTip = true;
+	private boolean actionEscapeConfirm = true;
+
+	/**
+	 * Returns whether the resolved current action label should be escaped.
+	 *
+	 * @return {@code true} to escape at the renderer boundary; {@code false} to allow trusted label markup
+	 */
+	public boolean getActionEscapeDisplayName() {
+		return actionEscapeDisplayName;
+	}
+
+	/**
+	 * Returns whether the resolved current action tooltip should be escaped.
+	 *
+	 * @return {@code true} to escape at the renderer boundary; {@code false} to allow trusted tooltip markup
+	 */
+	public boolean getActionEscapeToolTip() {
+		return actionEscapeToolTip;
+	}
+
+	/**
+	 * Returns whether the resolved current action confirmation text should be escaped.
+	 *
+	 * @return {@code true} to escape at the renderer boundary; {@code false} to allow trusted confirmation markup
+	 */
+	public boolean getActionEscapeConfirm() {
+		return actionEscapeConfirm;
+	}
 	
 	/**
 	 * @param action
@@ -639,9 +728,13 @@ public abstract class ViewRenderer extends ViewVisitor {
 		
 		String resourceName = action.getResourceName();
 		String displayName = action.getLocalisedDisplayName();
+		actionEscapeDisplayName = true;
+		actionEscapeToolTip = true;
+		actionEscapeConfirm = true;
 		// Note that the " " result is for SC
 		if (displayName != null) {
 			actionLabel = displayName;
+			actionEscapeDisplayName = shouldEscape(action.getEscapeDisplayName());
 		}
 		else if (implicitName == null) {
 			actionLabel = " ";
@@ -652,6 +745,9 @@ public abstract class ViewRenderer extends ViewVisitor {
 		String relativeIconFileName = action.getRelativeIconFileName();
 		actionIconStyleClass = action.getIconStyleClass();
 		actionConfirmationText = action.getConfirmationText(); // NB localised later with the param
+		if (actionConfirmationText != null) {
+			actionEscapeConfirm = shouldEscape(action.getEscapeConfirm());
+		}
 		String actionConfirmationParam = null;
 		
 		if (implicitName == null) {
@@ -846,6 +942,9 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 		actionIconUrl = iconToUrl(relativeIconFileName);
 		actionToolTip = action.getLocalisedToolTip();
+		if (actionToolTip != null) {
+			actionEscapeToolTip = shouldEscape(action.getEscapeToolTip());
+		}
 		if (actionConfirmationParam != null) {
 			actionConfirmationText = Util.i18n(actionConfirmationText, actionConfirmationParam);
 		}

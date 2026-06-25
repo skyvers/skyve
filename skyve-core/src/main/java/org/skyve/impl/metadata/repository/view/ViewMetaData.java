@@ -52,6 +52,7 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 							"actions", 
 							"name", 
 							"title",
+							"escapeTitle",
 							"iconStyleClass",
 							"icon32x32RelativeFileName",
 							"helpRelativeFileName",
@@ -68,6 +69,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 
 	private String name;
 	private String title;
+	private Boolean escapeTitle;
 	private String iconStyleClass;
 	private String icon32x32RelativeFileName;
 	private String helpRelativeFileName;
@@ -116,6 +118,15 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 	}
 
 	/**
+	 * Returns whether the view title text should be escaped before rendering.
+	 *
+	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	public Boolean getEscapeTitle() {
+		return escapeTitle;
+	}
+
+	/**
 	 * Sets the display title for this view.
 	 *
 	 * @param title view title
@@ -123,6 +134,16 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 	@XmlAttribute(required = true)
 	public void setTitle(String title) {
 		this.title = UtilImpl.processStringValue(title);
+	}
+
+	/**
+	 * Sets whether the view title text should be escaped before rendering.
+	 *
+	 * @param escapeTitle {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	@XmlAttribute(required = false)
+	public void setEscapeTitle(Boolean escapeTitle) {
+		this.escapeTitle = escapeTitle;
 	}
 
 	/**
@@ -389,6 +410,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 			throw new MetaDataException(metaDataName + " : The view [title] is required for view " + metaDataName);
 		}
 		result.setTitle(value);
+		result.setEscapeTitle(getEscapeTitle());
 
 		result.setIconStyleClass(getIconStyleClass());
 		result.setIcon32x32RelativeFileName(getIcon32x32RelativeFileName());

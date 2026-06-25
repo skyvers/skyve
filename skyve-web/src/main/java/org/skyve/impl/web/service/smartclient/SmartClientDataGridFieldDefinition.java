@@ -24,6 +24,7 @@ import org.skyve.util.Util;
  */
 public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefinition {
 	protected boolean editable;
+	private boolean escapeTitle = true;
 
 	// for list grids, we need to convert the defaultValue into a JavaScript expression that can be evaluated on the client side, so we store it separately here.
 	protected String defaultValueJavascriptExpression;
@@ -88,7 +89,11 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 				else if (! (AttributeType.bool.equals(attributeType) || 
 								AttributeType.integer.equals(attributeType) ||
 								AttributeType.longInteger.equals(attributeType))) {
-					defaultValueJavascriptExpression = new StringBuilder(128).append('\'').append(defaultValueJavascriptExpression).append('\'').toString();
+					defaultValueJavascriptExpression = new StringBuilder(128)
+																.append('\'')
+																.append(OWASP.escapeJsString(defaultValueJavascriptExpression, false, false))
+																.append('\'')
+																.toString();
 				}
         	}
         }
@@ -140,6 +145,15 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 	}
 
 	/**
+	 * Sets whether the field title should be escaped before rendering.
+	 *
+	 * @param escapeTitle {@code true} to escape at the renderer boundary; {@code false} to allow trusted title markup
+	 */
+	public void setEscapeTitle(boolean escapeTitle) {
+		this.escapeTitle = escapeTitle;
+	}
+
+	/**
 	 * Produces the SmartClient JavaScript field definition payload for this data-grid field.
 	 *
 	 * @return SmartClient JavaScript field definition payload
@@ -150,7 +164,7 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 		result.append("name:'");
 		result.append(name);
 		result.append("',title:'");
-		result.append(OWASP.escapeJsString(title));
+		result.append(SmartClientViewRenderer.escapeSmartClientText(title, escapeTitle));
 		result.append("',type:'");
 		result.append(type).append('\'');
 		if (defaultValueJavascriptExpression != null) {
@@ -166,10 +180,10 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 		if (required) {
 			result.append(",bizRequired:true,requiredMessage:'");
 			if (requiredMessage == null) {
-				result.append(OWASP.escapeJsString(Util.nullSafeI18n(BeanValidator.VALIDATION_REQUIRED_KEY, title)));
+				result.append(SmartClientViewRenderer.escapeSmartClientText(Util.nullSafeI18n(BeanValidator.VALIDATION_REQUIRED_KEY, title), true));
 			}
 			else {
-				result.append(OWASP.escapeJsString(requiredMessage));
+				result.append(SmartClientViewRenderer.escapeSmartClientText(requiredMessage, true));
 			}
 			result.append('\'');
 		}

@@ -39,6 +39,7 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 			propOrder = {"reference", 
 							"target",
 							"value",
+							"escapeValue",
 							"pixelWidth",
 							"invisibleConditionName",
 							"visibleConditionName",
@@ -49,6 +50,7 @@ public class Link implements Invisible, AbsoluteWidth, FormItemWidget {
 	private Reference reference;
 	private ReferenceTarget target;
 	private String value; // the title/label/value (not the href) of the link rendered on the UI
+	private Boolean escapeValue;
 	private Integer pixelWidth;
 	
 	private String invisibleConditionName;
@@ -130,6 +132,15 @@ public class Link implements Invisible, AbsoluteWidth, FormItemWidget {
 	public String getLocalisedValue() {
 		return Util.i18n(value);
 	}
+
+	/**
+	 * Returns whether the link value text should be escaped before rendering.
+	 *
+	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	public Boolean getEscapeValue() {
+		return escapeValue;
+	}
 	
 	/**
 	 * Sets the rendered link label value.
@@ -141,6 +152,16 @@ public class Link implements Invisible, AbsoluteWidth, FormItemWidget {
 		this.value = UtilImpl.processStringValue(value);
 	}
 	
+	/**
+	 * Sets whether the link value text should be escaped before rendering.
+	 *
+	 * @param escapeValue {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	@XmlAttribute(required = false)
+	public void setEscapeValue(Boolean escapeValue) {
+		this.escapeValue = escapeValue;
+	}
+
 	/**
 	 * Returns the absolute width of the link widget in pixels.
 	 *

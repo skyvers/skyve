@@ -83,6 +83,7 @@ public class ViewImpl extends Container implements View {
 	private String helpRelativeFileName;
 	private String helpURL;
 	private String title;
+	private Boolean escapeTitle;
 	private String actionsWidgetId;
 	private Sidebar sidebar;
 	private LinkedHashMap<String, Action> actions = new LinkedHashMap<>();
@@ -314,12 +315,30 @@ public class ViewImpl extends Container implements View {
 	}
 
 	/**
+	 * Returns whether the view title text should be escaped before rendering.
+	 *
+	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	public Boolean getEscapeTitle() {
+		return escapeTitle;
+	}
+
+	/**
 	 * Sets the display title of this view.
 	 *
 	 * @param title the display title
 	 */
 	public void setTitle(String title) {
 		this.title = title;
+	}
+
+	/**
+	 * Sets whether the view title text should be escaped before rendering.
+	 *
+	 * @param escapeTitle {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	public void setEscapeTitle(Boolean escapeTitle) {
+		this.escapeTitle = escapeTitle;
 	}
 
 	/**

@@ -54,10 +54,13 @@ public class ActionImpl implements Action {
 	private String resourceName;
 	private Boolean clientValidation = Boolean.TRUE;
 	private String displayName;
+	private Boolean escapeDisplayName;
 	private String toolTip;
+	private Boolean escapeToolTip;
 	private String relativeIconFileName;
 	private String iconStyleClass;
 	private String confirmationText;
+	private Boolean escapeConfirm;
 	private Boolean inActionPanel = Boolean.TRUE;
 	private ActionShow show = ActionShow.both;
 	private String disabledConditionName;
@@ -173,12 +176,31 @@ public class ActionImpl implements Action {
 	}
 
 	/**
+	 * Returns whether the display name text should be escaped before rendering.
+	 *
+	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	@Override
+	public Boolean getEscapeDisplayName() {
+		return escapeDisplayName;
+	}
+
+	/**
 	 * Sets the display label shown for this action.
 	 *
 	 * @param displayName the user-facing action label
 	 */
 	public void setDisplayName(String displayName) {
 		this.displayName = displayName;
+	}
+
+	/**
+	 * Sets whether the display name text should be escaped before rendering.
+	 *
+	 * @param escapeDisplayName {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	public void setEscapeDisplayName(Boolean escapeDisplayName) {
+		this.escapeDisplayName = escapeDisplayName;
 	}
 
 	/**
@@ -230,12 +252,31 @@ public class ActionImpl implements Action {
 	}
 
 	/**
+	 * Returns whether the confirmation text should be escaped before rendering.
+	 *
+	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	@Override
+	public Boolean getEscapeConfirm() {
+		return escapeConfirm;
+	}
+
+	/**
 	 * Sets the confirmation message presented before action execution.
 	 *
 	 * @param confirmationText the confirmation text
 	 */
 	public void setConfirmationText(String confirmationText) {
 		this.confirmationText = confirmationText;
+	}
+
+	/**
+	 * Sets whether the confirmation text should be escaped before rendering.
+	 *
+	 * @param escapeConfirm {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	public void setEscapeConfirm(Boolean escapeConfirm) {
+		this.escapeConfirm = escapeConfirm;
 	}
 
 	/**
@@ -249,12 +290,31 @@ public class ActionImpl implements Action {
 	}
 
 	/**
+	 * Returns whether the tooltip text should be escaped before rendering.
+	 *
+	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	@Override
+	public Boolean getEscapeToolTip() {
+		return escapeToolTip;
+	}
+
+	/**
 	 * Sets the tooltip text used for action presentation.
 	 *
 	 * @param toolTip the tooltip text
 	 */
 	public void setToolTip(String toolTip) {
 		this.toolTip = toolTip;
+	}
+
+	/**
+	 * Sets whether the tooltip text should be escaped before rendering.
+	 *
+	 * @param escapeToolTip {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	public void setEscapeToolTip(Boolean escapeToolTip) {
+		this.escapeToolTip = escapeToolTip;
 	}
 
 	/**
@@ -479,12 +539,15 @@ public class ActionImpl implements Action {
 		}
 
 		result.setConfirmationText(getConfirmationText());
+		result.setEscapeConfirm(getEscapeConfirm());
 		result.setDisabledConditionName(getDisabledConditionName());
 		result.setDisplayName(getDisplayName());
+		result.setEscapeDisplayName(getEscapeDisplayName());
 		result.setInvisibleConditionName(getInvisibleConditionName());
 		result.setRelativeIconFileName(getRelativeIconFileName());
 		result.setIconStyleClass(getIconStyleClass());
 		result.setToolTip(getToolTip());
+		result.setEscapeToolTip(getEscapeToolTip());
 
 		if (Boolean.FALSE.equals(inActionPanel) && (result instanceof PositionableAction positionableAction)) {
 			positionableAction.setInActionPanel(Boolean.FALSE);

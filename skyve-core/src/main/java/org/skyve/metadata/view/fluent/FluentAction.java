@@ -45,10 +45,13 @@ public abstract class FluentAction<T extends FluentAction<T>> {
 	protected T fromBase(ActionMetaData action) {
 		name(action.getName());
 		displayName(action.getDisplayName());
+		escapeDisplayName(action.getEscapeDisplayName());
 		toolTip(action.getToolTip());
+		escapeToolTip(action.getEscapeToolTip());
 		relativeIconFileName(action.getRelativeIconFileName());
 		iconStyleClass(action.getIconStyleClass());
 		confirmationText(action.getConfirmationText());
+		escapeConfirm(action.getEscapeConfirm());
 		disabledConditionName(action.getDisabledConditionName());
 		invisibleConditionName(action.getInvisibleConditionName());
 		action.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
@@ -160,6 +163,28 @@ public abstract class FluentAction<T extends FluentAction<T>> {
 	}
 
 	/**
+	 * Sets whether the display name should be escaped before rendering.
+	 *
+	 * @param escapeDisplayName {@code false} to allow trusted markup; {@code true} to escape at the renderer boundary
+	 * @return this builder
+	 */
+	public T escapeDisplayName(boolean escapeDisplayName) {
+		return escapeDisplayName(escapeDisplayName ? Boolean.TRUE : Boolean.FALSE);
+	}
+
+	/**
+	 * Sets whether the display name should be escaped before rendering.
+	 *
+	 * @param escapeDisplayName {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 * @return this builder
+	 */
+	@SuppressWarnings("unchecked")
+	public T escapeDisplayName(Boolean escapeDisplayName) {
+		get().setEscapeDisplayName(escapeDisplayName);
+		return (T) this;
+	}
+
+	/**
 	 * Sets the tooltip text for the action.
 	 *
 	 * @param toolTip
@@ -169,6 +194,28 @@ public abstract class FluentAction<T extends FluentAction<T>> {
 	@SuppressWarnings("unchecked")
 	public T toolTip(String toolTip) {
 		get().setToolTip(toolTip);
+		return (T) this;
+	}
+
+	/**
+	 * Sets whether the tooltip should be escaped before rendering.
+	 *
+	 * @param escapeToolTip {@code false} to allow trusted markup; {@code true} to escape at the renderer boundary
+	 * @return this builder
+	 */
+	public T escapeToolTip(boolean escapeToolTip) {
+		return escapeToolTip(escapeToolTip ? Boolean.TRUE : Boolean.FALSE);
+	}
+
+	/**
+	 * Sets whether the tooltip should be escaped before rendering.
+	 *
+	 * @param escapeToolTip {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 * @return this builder
+	 */
+	@SuppressWarnings("unchecked")
+	public T escapeToolTip(Boolean escapeToolTip) {
+		get().setEscapeToolTip(escapeToolTip);
 		return (T) this;
 	}
 
@@ -208,6 +255,28 @@ public abstract class FluentAction<T extends FluentAction<T>> {
 	@SuppressWarnings("unchecked")
 	public T confirmationText(String confirmationText) {
 		get().setConfirmationText(confirmationText);
+		return (T) this;
+	}
+
+	/**
+	 * Sets whether the confirmation text should be escaped before rendering.
+	 *
+	 * @param escapeConfirm {@code false} to allow trusted markup; {@code true} to escape at the renderer boundary
+	 * @return this builder
+	 */
+	public T escapeConfirm(boolean escapeConfirm) {
+		return escapeConfirm(escapeConfirm ? Boolean.TRUE : Boolean.FALSE);
+	}
+
+	/**
+	 * Sets whether the confirmation text should be escaped before rendering.
+	 *
+	 * @param escapeConfirm {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 * @return this builder
+	 */
+	@SuppressWarnings("unchecked")
+	public T escapeConfirm(Boolean escapeConfirm) {
+		get().setEscapeConfirm(escapeConfirm);
 		return (T) this;
 	}
 

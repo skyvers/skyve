@@ -42,6 +42,7 @@ public class FluentHBox extends FluentContainer<FluentHBox> implements FluentBox
 		widgetId(box.getWidgetId());
 		border(Boolean.TRUE.equals(box.getBorder()));
 		borderTitle(box.getBorderTitle());
+		escapeBorderTitle(box.getEscapeBorderTitle());
 		
 		box(box, this);
 		
@@ -91,6 +92,27 @@ public class FluentHBox extends FluentContainer<FluentHBox> implements FluentBox
 		return this;
 	}
 	
+	/**
+	 * Sets whether the border title should be escaped before rendering.
+	 *
+	 * @param escapeBorderTitle {@code false} to allow trusted markup; {@code true} to escape at the renderer boundary
+	 * @return this builder
+	 */
+	public FluentHBox escapeBorderTitle(boolean escapeBorderTitle) {
+		return escapeBorderTitle(escapeBorderTitle ? Boolean.TRUE : Boolean.FALSE);
+	}
+
+	/**
+	 * Sets whether the border title should be escaped before rendering.
+	 *
+	 * @param escapeBorderTitle {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 * @return this builder
+	 */
+	public FluentHBox escapeBorderTitle(Boolean escapeBorderTitle) {
+		box.setEscapeBorderTitle(escapeBorderTitle);
+		return this;
+	}
+
 	/**
 	 * Sets whether this hbox is collapsible. If true, a collapse/expand icon will be shown in the border
 	 * (if border is true) and the user can click on it to collapse/expand the box. If false, the box will

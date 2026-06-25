@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.owasp.encoder.Encode;
 import org.primefaces.behavior.ajax.AjaxBehavior;
 import org.primefaces.behavior.confirm.ConfirmBehavior;
 import org.primefaces.component.accordionpanel.AccordionPanel;
@@ -68,21 +69,50 @@ import jakarta.faces.component.html.HtmlPanelGrid;
 import jakarta.faces.component.html.HtmlPanelGroup;
 import jakarta.faces.convert.Converter;
 
+/**
+ * Renders a JSF component tree into a compact Facelets-like representation for
+ * generated-output and component-shape assertions.
+ *
+ * <p>Threading: instances are not thread-safe; each renderer owns a mutable
+ * {@link StringBuilder} for one render pass.
+ */
 @SuppressWarnings("java:S1192") // Repeated literals are deliberate JSF component attribute names.
 public class ComponentRenderer {
 	private static final char INDENT = '\t';
 	StringBuilder out = new StringBuilder(1024);
 	String indentation = "";
 	
+	/**
+	 * Renders {@code root} and its descendants immediately.
+	 *
+	 * <p>Side effects: walks the supplied component tree and appends generated output
+	 * to this instance's internal buffer. Component state is read but not mutated.
+	 *
+	 * @param root root component to render; must be a {@link UIComponentBase}
+	 */
 	public ComponentRenderer(UIComponent root) {
 		renderComponent((UIComponentBase) root);
 	}
 	
+	/**
+	 * Returns the rendered component representation.
+	 *
+	 * @return generated component markup; never {@code null}
+	 */
 	@Override
 	public String toString() {
 		return out.toString();
 	}
 
+	/**
+	 * Renders one component, its attributes, facets, behaviours, tag attributes, and children.
+	 *
+	 * <p>Side effects: appends generated component output to {@link #out} and mutates
+	 * {@link #indentation} while descending into nested output. Component state is read
+	 * but not mutated.
+	 *
+	 * @param component component to render; must not be {@code null}
+	 */
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	private void renderComponent(UIComponentBase component) {
 		String tagName = null;
@@ -283,6 +313,7 @@ public class ComponentRenderer {
 			}
 			
 			putValue(attributes, "for", label.getFor());
+			putValue(attributes, "escape", Boolean.valueOf(label.isEscape()));
 			putValue(attributes, "style", label.getStyle());
 			putValue(attributes, "styleClass", label.getStyleClass());
 		}
@@ -336,6 +367,7 @@ public class ComponentRenderer {
 			putValue(attributes, "showDetail", Boolean.valueOf(message.isShowDetail()));
 			putValue(attributes, "showSummary", Boolean.valueOf(message.isShowSummary()));
 			putValue(attributes, "display", message.getDisplay());
+			putValue(attributes, "escape", Boolean.valueOf(message.isEscape()));
 			putValue(attributes, "style", message.getStyle());
 			putValue(attributes, "styleClass", message.getStyleClass());
 		}
@@ -393,6 +425,8 @@ public class ComponentRenderer {
 			putValue(attributes, "showSourceFilter", Boolean.valueOf(pickList.isShowSourceFilter()));
 			putValue(attributes, "showTargetFilter", Boolean.valueOf(pickList.isShowTargetFilter()));
 			putValue(attributes, "responsive", Boolean.valueOf(pickList.isResponsive()));
+			putValue(attributes, "escape", Boolean.valueOf(pickList.isEscape()));
+			putValue(attributes, "escapeValue", Boolean.valueOf(pickList.isEscapeValue()));
 			putValueExpression(attributes, "itemValue", component);
 			putValueExpression(attributes, "itemLabel", component);
 			putValue(attributes, "style", pickList.getStyle());
@@ -500,7 +534,7 @@ public class ComponentRenderer {
 		
 		if (tagName != null) {
 			out.append(indentation).append('<').append(tagName);
-			out.append(" id=\"").append(component.getId()).append('"');
+			appendAttribute("id", component.getId());
 		}
 		
 		if (component instanceof UICommand command) {
@@ -558,7 +592,7 @@ public class ComponentRenderer {
 
 		// Add specific attributes detected above
 		for (String attributeName : attributes.keySet()) {
-			out.append(' ').append(attributeName).append("=\"").append(attributes.get(attributeName)).append('"');
+			appendAttribute(attributeName, attributes.get(attributeName));
 		}
 
 		// Add general attributes
@@ -567,7 +601,7 @@ public class ComponentRenderer {
 			if ((! attributeName.startsWith("com.sun")) && 
 					(! excludedAttributeNames.contains(attributeName)) &&
 					(! tagAttributeNames.contains(attributeName))) {
-				out.append(' ').append(attributeName).append("=\"").append(attributes.get(attributeName)).append('"');
+				appendAttribute(attributeName, attributes.get(attributeName));
 			}
 		}
 
@@ -576,7 +610,7 @@ public class ComponentRenderer {
 		for (String attributeName : attributes.keySet()) {
 			if ((! excludedAttributeNames.contains(attributeName)) &&
 					(! tagAttributeNames.contains(attributeName))) {
-				out.append(" pt:").append(attributeName).append("=\"").append(attributes.get(attributeName)).append('"');
+				appendAttribute("pt:" + attributeName, attributes.get(attributeName));
 			}
 		}
 
@@ -634,6 +668,13 @@ public class ComponentRenderer {
 		}
 	}
 	
+	/**
+	 * Adds an unevaluated value-expression string to the rendered attributes.
+	 *
+	 * @param attributes target attribute map; must not be {@code null}
+	 * @param name attribute name; must not be {@code null}
+	 * @param component component that may hold the value expression; must not be {@code null}
+	 */
 	private static void putValueExpression(Map<String, Object> attributes, String name, UIComponentBase component) {
 		ValueExpression ve = component.getValueExpression(name);
 		if (ve != null) {
@@ -645,45 +686,132 @@ public class ComponentRenderer {
 		}
 	}
 	
+	/**
+	 * Adds an unevaluated method-expression string to the rendered attributes.
+	 *
+	 * @param attributes target attribute map; must not be {@code null}
+	 * @param name attribute name; must not be {@code null}
+	 * @param me method expression to render; may be {@code null}
+	 */
 	private static void putMethodExpression(Map<String, Object> attributes, String name, MethodExpression me) {
 		if (me != null) {
 			attributes.put(name, me.getExpressionString());
 		}
 	}
 
+	/**
+	 * Adds a concrete attribute value when it is meaningful to render.
+	 *
+	 * @param attributes target attribute map; must not be {@code null}
+	 * @param name attribute name; must not be {@code null}
+	 * @param value attribute value; {@code null} and empty strings are omitted
+	 */
 	private static void putValue(Map<String, Object> attributes, String name, Object value) {
 		if ((value != null) && (! "".equals(value))) {
 			attributes.put(name, value);
 		}
 	}
 	
+	/**
+	 * Appends one syntax-safe XML attribute.
+	 *
+	 * <p>Side effects: appends to {@link #out}. Attribute values are escaped for the
+	 * generated Facelets/XML attribute context and are independent of any PrimeFaces
+	 * runtime escape decision represented by a separate component attribute.
+	 *
+	 * @param name attribute name; must not be {@code null}
+	 * @param value attribute value; may be {@code null}
+	 */
+	private void appendAttribute(String name, Object value) {
+		out.append(' ').append(name).append("=\"").append(toAttributeValue(value)).append('"');
+	}
+
+	/**
+	 * Converts an attribute value into generated Facelets/XML attribute content.
+	 *
+	 * @param value attribute value; may be {@code null}
+	 * @return escaped attribute content; never {@code null}
+	 */
+	private static String toAttributeValue(Object value) {
+		return (value == null) ? "" : Encode.forHtmlAttribute(String.valueOf(value));
+	}
+
+	/**
+	 * Renders a named facet and its component tree.
+	 *
+	 * <p>Side effects: appends generated facet output to {@link #out} and mutates
+	 * {@link #indentation} while rendering the facet body. Component state is read but
+	 * not mutated.
+	 *
+	 * @param facetName facet key; must not be {@code null}
+	 * @param facet facet component to render; must not be {@code null}
+	 */
 	private void renderFacet(String facetName, UIComponentBase facet) {
-		out.append(indentation).append("<f:facet name=\"").append(facetName).append("\">\n");
+		out.append(indentation).append("<f:facet");
+		appendAttribute("name", facetName);
+		out.append(">\n");
 		indentation += INDENT;
 		renderComponent(facet);
 		indentation = indentation.substring(1);
 		out.append(indentation).append("</f:facet>\n");
 	}
 	
+	/**
+	 * Renders a Facelets attribute tag for component metadata stored as general attributes.
+	 *
+	 * <p>Side effects: appends generated attribute output to {@link #out}.
+	 *
+	 * @param name attribute name; must not be {@code null}
+	 * @param value attribute value; may be {@code null}
+	 */
 	private void renderAttribute(String name, Object value) {
-		out.append(indentation).append("<f:attribute name=\"").append(name).append("\" value=\"").append(value).append("\" />\n");
+		out.append(indentation).append("<f:attribute");
+		appendAttribute("name", name);
+		appendAttribute("value", value);
+		out.append(" />\n");
 	}
 	
+	/**
+	 * Renders a PrimeFaces AJAX behaviour for the owning client-behaviour event.
+	 *
+	 * <p>Side effects: appends generated behaviour output to {@link #out}. Listener
+	 * details are intentionally represented by a placeholder because PrimeFaces does
+	 * not expose the listener list through this public behaviour API.
+	 *
+	 * @param eventName client event name; must not be {@code null}
+	 * @param behaviour behaviour to render; must not be {@code null}
+	 */
 	private void renderAjaxBehaviour(String eventName, AjaxBehavior behaviour) {
-		out.append(indentation).append("<p:ajax event=\"").append(eventName).append("\" listener=\"<cant obtain AjaxBehaviourListener(s) from primefaces>\"");
+		out.append(indentation).append("<p:ajax");
+		appendAttribute("event", eventName);
+		appendAttribute("listener", "<cant obtain AjaxBehaviourListener(s) from primefaces>");
 
 		String value = behaviour.getProcess();
 		if (value != null) {
-			out.append(" process=\"").append(value).append('"');
+			appendAttribute("process", value);
 		}
 		value = behaviour.getUpdate();
 		if (value != null) {
-			out.append(" update=\"").append(value).append('"');
+			appendAttribute("update", value);
 		}
 		out.append(" />\n");
 	}
 
+	/**
+	 * Renders a PrimeFaces confirmation behaviour with its output-boundary escape decision.
+	 *
+	 * <p>Side effects: appends generated behaviour output to {@link #out}. The message
+	 * attribute is escaped for generated markup syntax; the optional {@code escape}
+	 * attribute records the PrimeFaces runtime decision.
+	 *
+	 * @param behaviour confirmation behaviour to render; must not be {@code null}
+	 */
 	private void renderConfirmBehaviour(ConfirmBehavior behaviour) {
-		out.append(indentation).append("<p:confirm message=\"").append(behaviour.getMessage()).append("\" />\n");
+		out.append(indentation).append("<p:confirm");
+		appendAttribute("message", behaviour.getMessage());
+		if (! behaviour.isEscape()) {
+			appendAttribute("escape", Boolean.FALSE);
+		}
+		out.append(" />\n");
 	}
 }

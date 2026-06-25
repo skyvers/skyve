@@ -18,6 +18,9 @@
     "build": "vite build",
     "preview": "vite preview"
   },
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
   "dependencies": {
     "luxon": "^3.4.4",
     "primeflex": "^3.3.1",

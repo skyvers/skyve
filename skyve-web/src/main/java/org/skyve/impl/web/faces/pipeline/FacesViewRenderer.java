@@ -21,6 +21,7 @@ import org.skyve.impl.metadata.model.document.field.LengthField;
 import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.metadata.model.document.field.TextFormat;
 import org.skyve.impl.metadata.view.ActionImpl;
+import org.skyve.impl.metadata.view.Bordered;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.Inject;
 import org.skyve.impl.metadata.view.RelativeSize;
@@ -92,6 +93,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Spinner;
 import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.metadata.view.widget.bound.tabular.AbstractDataWidget;
+import org.skyve.impl.metadata.view.widget.bound.tabular.AbstractListWidget;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn;
@@ -148,6 +150,7 @@ import org.skyve.impl.web.faces.converters.timestamp.MM_DD_YYYY_HH24_MI_SS;
 import org.skyve.impl.web.faces.converters.timestamp.MM_DD_YYYY_HH_MI_SS;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder.EventSourceComponent;
+import org.skyve.impl.web.faces.pipeline.component.EscapableText;
 import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilder;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.Customisations;
@@ -505,7 +508,7 @@ public class FacesViewRenderer extends ViewRenderer {
 								boolean showLabel,
 								int colspan,
 								FormItem item) {
-		// nothing to do here
+		cb.setCurrentInputTitleEscape(getCurrentWidgetEscapeLabel());
 	}
 
 	/**
@@ -525,7 +528,7 @@ public class FacesViewRenderer extends ViewRenderer {
 									boolean showLabel,
 									int colspan,
 									FormItem item) {
-		// nothing to do here
+		cb.setCurrentInputTitleEscape(true);
 	}
 
 	/**
@@ -546,7 +549,8 @@ public class FacesViewRenderer extends ViewRenderer {
 	 *
 	 * @param widgetLabel resolved widget label
 	 * @param formColspan form column span
-	 * @param widgetRequiredMessage optional required-message text
+	 * @param widgetRequiredMessage optional PrimeFaces message text normalised
+	 *        for unescaped message rendering
 	 * @param widgetInvisible invisible-condition expression
 	 * @param helpText optional help text
 	 * @param component component to add
@@ -616,7 +620,9 @@ public class FacesViewRenderer extends ViewRenderer {
 											formItem,
 											formColumn,
 											widgetLabel,
+											getCurrentWidgetEscapeLabel(),
 											widgetRequiredMessage,
+											getCurrentWidgetEscapeRequiredMessage(),
 											widgetInvisible,
 											helpText);
 					incrementFormColumn();
@@ -628,10 +634,13 @@ public class FacesViewRenderer extends ViewRenderer {
 											formItem,
 											formColumn,
 											widgetLabel,
+											getCurrentWidgetEscapeLabel(),
 											formColspan,
 											widgetRequiredMessage,
+											getCurrentWidgetEscapeRequiredMessage(),
 											widgetInvisible,
 											helpText,
+											getCurrentWidgetEscapeHelp(),
 											pixelWidth,
 											isCurrentWidgetShowLabel(),
 											isCurrentFormRenderTopLabels());
@@ -640,6 +649,19 @@ public class FacesViewRenderer extends ViewRenderer {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Returns the current required message prepared for PrimeFaces message channels.
+	 *
+	 * <p>Field, global, and growl message components all read the same JSF
+	 * {@code FacesMessage}. The metadata escape decision is therefore applied before
+	 * the text enters the input required-message property.
+	 *
+	 * @return required-message text safe for PF message surfaces, or {@code null}
+	 */
+	private String getPrimeFacesRequiredMessage() {
+		return AbstractFacesBuilder.escapeFacesText(getCurrentWidgetRequiredMessage(), getCurrentWidgetEscapeRequiredMessage());
 	}
 
 	/**
@@ -916,7 +938,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	 */
 	private void renderGeometry(int formColspan, Geometry geometry) {
 		String title = getCurrentWidgetLabel();
-		String requiredMessage = getCurrentWidgetRequiredMessage();
+		String requiredMessage = getPrimeFacesRequiredMessage();
 		Form currentForm = getCurrentForm();
 		EventSourceComponent c = cb.geometry(null,
 												dataWidgetVar,
@@ -969,7 +991,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	@Override
 	public void renderFormGeometryMap(GeometryMap geometry) {
 		String title = getCurrentWidgetLabel();
-		String requiredMessage = getCurrentWidgetRequiredMessage();
+		String requiredMessage = getPrimeFacesRequiredMessage();
 		Form currentForm = getCurrentForm();
 		EventSourceComponent c = cb.geometryMap(null,
 													geometry,
@@ -1027,7 +1049,11 @@ public class FacesViewRenderer extends ViewRenderer {
 	 * @param button dialog-button metadata
 	 */
 	private void renderDialogButton(String label, int formColspan, DialogButton button) {
-		UIComponent bn = cb.label(null, "dialogButton " + label); // TODO dialog button
+		Form currentForm = getCurrentForm();
+		UIComponent bn = cb.dialogButton(null,
+											EscapableText.of(label, shouldEscape(button.getEscapeDisplayName())),
+											button,
+											(currentForm == null) ? null : currentForm.getDisabledConditionName());
 		addComponent(null,
 						formColspan,
 						null,
@@ -1214,6 +1240,12 @@ public class FacesViewRenderer extends ViewRenderer {
 	/**
 	 * Renders a link in the active context.
 	 *
+	 * <p>Side effects: creates and adds the resolved link component to the current
+	 * component tree. Edit-view link labels are passed raw to the component builder
+	 * with {@code link/@escapeValue}; {@code null} and {@code Boolean.TRUE} escape at
+	 * the child output-text boundary, and only {@code Boolean.FALSE} allows trusted
+	 * markup.
+	 *
 	 * @param value display value
 	 * @param formColspan form colspan
 	 * @param link link metadata
@@ -1254,7 +1286,11 @@ public class FacesViewRenderer extends ViewRenderer {
 				href.append("./?a=").append(WebAction.e.toString()).append("&m=").append(reference.getModuleName());
 				href.append("&d=").append(reference.getDocumentName()).append("&i={").append(reference.getBinding()).append('}');
 
-				c.set(cb.outputLink(dataWidgetVar, value, href.toString(), link.getInvisibleConditionName(), target));
+				c.set(cb.outputLink(dataWidgetVar,
+										EscapableText.of(value, shouldEscape(link.getEscapeValue())),
+										href.toString(),
+										link.getInvisibleConditionName(),
+										target));
 			}
 
 			@Override
@@ -1830,6 +1866,7 @@ public class FacesViewRenderer extends ViewRenderer {
 			pixelWidth = customisations.determineDefaultColumnWidth(currentUxUi, attributeType);
 		}
 
+		cb.setCurrentInputTitleEscape(shouldEscape(column.getEscapeTitle()));
 		current = cb.addDataGridBoundColumn(null,
 												current,
 												getCurrentDataWidget(),
@@ -1862,6 +1899,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	@Override
 	public void renderedDataGridBoundColumn(String title, DataGridBoundColumn column) {
 		current = cb.addedDataGridBoundColumn(null, current, gridColumnAlignment);
+		cb.setCurrentInputTitleEscape(true);
 	}
 
 	/**
@@ -1896,6 +1934,7 @@ public class FacesViewRenderer extends ViewRenderer {
 			alignment = CORE.getCustomisations().determineDefaultColumnTextAlignment(currentUxUi, attributeType);
 		}
 
+		cb.setCurrentInputTitleEscape(shouldEscape(column.getEscapeTitle()));
 		current = cb.addDataGridContainerColumn(null, current, getCurrentDataWidget(), title, column, alignment);
 	}
 
@@ -1919,6 +1958,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	@Override
 	public void renderedDataGridContainerColumn(String title, DataGridContainerColumn column) {
 		current = cb.addedDataGridContainerColumn(null, current);
+		cb.setCurrentInputTitleEscape(true);
 	}
 
 	/**
@@ -1949,7 +1989,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	 */
 	private void renderCheckBox(int formColspan, CheckBox checkBox) {
 		String title = getCurrentWidgetLabel();
-		String requiredMessage = getCurrentWidgetRequiredMessage();
+		String requiredMessage = getPrimeFacesRequiredMessage();
 		Form currentForm = getCurrentForm();
 		EventSourceComponent c = cb.checkBox(null,
 												dataWidgetVar,
@@ -2044,7 +2084,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	 */
 	private void renderColourPicker(int formColspan, ColourPicker colour) {
 		String title = getCurrentWidgetLabel();
-		String requiredMessage = getCurrentWidgetRequiredMessage();
+		String requiredMessage = getPrimeFacesRequiredMessage();
 		Form currentForm = getCurrentForm();
 		TargetMetaData target = getCurrentTarget();
 		Attribute attribute = (target == null) ? null : target.getAttribute();
@@ -2120,7 +2160,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	 */
 	private void renderCombo(int formColspan, Combo combo) {
 		String title = getCurrentWidgetLabel();
-		String requiredMessage = getCurrentWidgetRequiredMessage();
+		String requiredMessage = getPrimeFacesRequiredMessage();
 		Form currentForm = getCurrentForm();
 		EventSourceComponent c = cb.combo(null,
 											dataWidgetVar,
@@ -2203,7 +2243,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	 */
 	private void renderContent(int formColspan, @Nonnull ContentUpload content, boolean formContext) {
 		String title = getCurrentWidgetLabel();
-		String requiredMessage = getCurrentWidgetRequiredMessage();
+		String requiredMessage = getPrimeFacesRequiredMessage();
 		Form currentForm = getCurrentForm();
 		TargetMetaData target = getCurrentTarget();
 		Attribute attribute = (target == null) ? null : target.getAttribute();
@@ -2242,7 +2282,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	@Override
 	public void renderFormContentSignature(ContentSignature signature) {
 		String title = getCurrentWidgetLabel();
-		String requiredMessage = getCurrentWidgetRequiredMessage();
+		String requiredMessage = getPrimeFacesRequiredMessage();
 		Form currentForm = getCurrentForm();
 		UIComponent c = lb.contentSignatureLayout(null, signature);
 		addComponent(title,
@@ -2294,7 +2334,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	 */
 	private void renderHTML(int formColspan, HTML html) {
 		String title = getCurrentWidgetLabel();
-		String requiredMessage = getCurrentWidgetRequiredMessage();
+		String requiredMessage = getPrimeFacesRequiredMessage();
 		Form currentForm = getCurrentForm();
 		UIComponent c = cb.html(null,
 									dataWidgetVar,
@@ -2320,13 +2360,20 @@ public class FacesViewRenderer extends ViewRenderer {
 	/**
 	 * Renders list-membership control.
 	 *
-	 * @param candidatesHeading candidates heading
-	 * @param membersHeading members heading
+	 * <p>Side effects: creates a pick-list component, passes raw caption metadata
+	 * and nullable escape flags to the component builder, and adds the pick-list to
+	 * the current container.
+	 *
+	 * @param candidatesHeading raw candidates heading
+	 * @param membersHeading raw members heading
 	 * @param membership list-membership metadata
 	 */
 	@Override
 	public void renderListMembership(String candidatesHeading, String membersHeading, ListMembership membership) {
-		EventSourceComponent c = cb.listMembership(null, candidatesHeading, membersHeading, membership);
+		EventSourceComponent c = cb.listMembership(null,
+													EscapableText.of(candidatesHeading, shouldEscape(membership.getEscapeCandidatesHeading())),
+													EscapableText.of(membersHeading, shouldEscape(membership.getEscapeMembersHeading())),
+													membership);
 		eventSource = c.getEventSource();
 		Integer pixelWidth = membership.getPixelWidth();
 		addToContainer(c.getComponent(),
@@ -2423,7 +2470,7 @@ public class FacesViewRenderer extends ViewRenderer {
 											String descriptionBinding,
 											LookupDescription lookup) {
 		String title = getCurrentWidgetLabel();
-		String requiredMessage = getCurrentWidgetRequiredMessage();
+		String requiredMessage = getPrimeFacesRequiredMessage();
 		Form currentForm = getCurrentForm();
 		TargetMetaData target = getCurrentTarget();
 		Attribute attribute = (target == null) ? null : target.getAttribute();
@@ -2489,7 +2536,7 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	private void renderPassword(int formColspan, Password password) {
 		String title = getCurrentWidgetLabel();
-		String requiredMessage = getCurrentWidgetRequiredMessage();
+		String requiredMessage = getPrimeFacesRequiredMessage();
 		Form currentForm = getCurrentForm();
 		TargetMetaData target = getCurrentTarget();
 		Attribute attribute = (target == null) ? null : target.getAttribute();
@@ -2541,7 +2588,7 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	private void renderRadio(int formColspan, Radio radio) {
 		String title = getCurrentWidgetLabel();
-		String requiredMessage = getCurrentWidgetRequiredMessage();
+		String requiredMessage = getPrimeFacesRequiredMessage();
 		Form currentForm = getCurrentForm();
 		EventSourceComponent c = cb.radio(null,
 											dataWidgetVar,
@@ -2587,7 +2634,7 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	private void renderRichText(int formColspan, RichText text) {
 		String title = getCurrentWidgetLabel();
-		String requiredMessage = getCurrentWidgetRequiredMessage();
+		String requiredMessage = getPrimeFacesRequiredMessage();
 		Form currentForm = getCurrentForm();
 		EventSourceComponent c = cb.richText(null,
 												dataWidgetVar,
@@ -2641,7 +2688,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		}
 
 		String title = getCurrentWidgetLabel();
-		String requiredMessage = getCurrentWidgetRequiredMessage();
+		String requiredMessage = getPrimeFacesRequiredMessage();
 		Form currentForm = getCurrentForm();
 		EventSourceComponent c = cb.slider(null,
 												dataWidgetVar,
@@ -2696,7 +2743,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		}
 
 		String title = getCurrentWidgetLabel();
-		String requiredMessage = getCurrentWidgetRequiredMessage();
+		String requiredMessage = getPrimeFacesRequiredMessage();
 		Form currentForm = getCurrentForm();
 		EventSourceComponent c = cb.spinner(null,
 												dataWidgetVar,
@@ -2752,7 +2799,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		}
 
 		String title = getCurrentWidgetLabel();
-		String requiredMessage = getCurrentWidgetRequiredMessage();
+		String requiredMessage = getPrimeFacesRequiredMessage();
 		Form currentForm = getCurrentForm();
 		EventSourceComponent c = cb.textArea(null,
 												dataWidgetVar,
@@ -2835,7 +2882,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		}
 
 		String title = getCurrentWidgetLabel();
-		String requiredMessage = getCurrentWidgetRequiredMessage();
+		String requiredMessage = getPrimeFacesRequiredMessage();
 		Form currentForm = getCurrentForm();
 		EventSourceComponent c = cb.text(null,
 											dataWidgetVar,
@@ -3206,7 +3253,14 @@ public class FacesViewRenderer extends ViewRenderer {
 		validateCollapsible(collapsible, borderTitle);
 		// Cater for a border if this thing has a border
 		if (bordered) {
-			UIComponent borderComponent = cb.border(null, borderTitle, invisibleConditionName, size.getPixelWidth(), collapsible);
+			cb.setCurrentInputTitleEscape(resolveBorderTitleEscape(size));
+			UIComponent borderComponent;
+			try {
+				borderComponent = cb.border(null, borderTitle, invisibleConditionName, size.getPixelWidth(), collapsible);
+			}
+			finally {
+				cb.setCurrentInputTitleEscape(true);
+			}
 			addToContainer(borderComponent,
 							size.getPixelWidth(),
 							size.getResponsiveWidth(),
@@ -3852,6 +3906,26 @@ public class FacesViewRenderer extends ViewRenderer {
 		if (collapsible != null && borderTitle == null) {
 			throw new MetaDataException("Border title must be defined if the collapsible attribute is present");
 		}
+	}
+
+	/**
+	 * Returns the resolved escape decision paired with a rendered border title.
+	 *
+	 * @param size metadata object that owns the border title
+	 * @return {@code true} to escape at the component boundary; {@code false} to
+	 *         allow trusted markup
+	 */
+	private static boolean resolveBorderTitleEscape(RelativeSize size) {
+		if (size instanceof Bordered bordered) {
+			return shouldEscape(bordered.getEscapeBorderTitle());
+		}
+		if (size instanceof AbstractDataWidget widget) {
+			return shouldEscape(widget.getEscapeTitle());
+		}
+		if (size instanceof AbstractListWidget widget) {
+			return shouldEscape(widget.getEscapeTitle());
+		}
+		return true;
 	}
 
 	/**

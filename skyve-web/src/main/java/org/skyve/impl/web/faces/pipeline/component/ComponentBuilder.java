@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.primefaces.behavior.ajax.AjaxBehavior;
 import org.primefaces.behavior.ajax.AjaxBehaviorListenerImpl;
+import org.primefaces.component.outputlabel.OutputLabel;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Format;
@@ -21,6 +22,7 @@ import org.skyve.impl.metadata.view.reference.ReferenceTarget.ReferenceTargetTyp
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
 import org.skyve.impl.metadata.view.widget.Chart;
+import org.skyve.impl.metadata.view.widget.DialogButton;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
 import org.skyve.impl.metadata.view.widget.Link;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
@@ -67,8 +69,8 @@ import jakarta.el.MethodExpression;
 import jakarta.faces.component.UICommand;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.UIComponentBase;
-import jakarta.faces.component.UIOutput;
 import jakarta.faces.component.html.HtmlOutputLink;
+import jakarta.faces.component.html.HtmlOutputText;
 
 /**
  * Defines the component-stage contract that maps Skyve metadata widgets to JSF UI components.
@@ -77,6 +79,8 @@ import jakarta.faces.component.html.HtmlOutputLink;
 public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public static final String COLLECTION_BINDING_ATTRIBUTE_KEY = "collectionBinding";
 	public static final String COMPONENT_BUILDER_CLASS_KEY = "componentBuilderClass";
+
+	private boolean currentInputTitleEscape = true;
 
 	public static class EventSourceComponent {
 		private UIComponent component;
@@ -154,6 +158,95 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @return the resulting tab component
 	 */
 	public abstract UIComponent tab(UIComponent component, String title, Tab tab);
+
+	/**
+	 * Sets the resolved escape decision for subsequently rendered input title attributes.
+	 *
+	 * @param currentInputTitleEscape {@code true} to escape at the component
+	 *        boundary; {@code false} to allow trusted markup
+	 */
+	public void setCurrentInputTitleEscape(boolean currentInputTitleEscape) {
+		this.currentInputTitleEscape = currentInputTitleEscape;
+	}
+
+	/**
+	 * Returns the resolved escape decision for input title attributes.
+	 *
+	 * @return {@code true} to escape at the component boundary; {@code false} to
+	 *         allow trusted markup
+	 */
+	protected boolean getCurrentInputTitleEscape() {
+		return currentInputTitleEscape;
+	}
+
+	/**
+	 * Creates an output-text component for metadata text that escapes by default.
+	 *
+	 * <p>Side effects: creates a JSF component through the current
+	 * {@link jakarta.faces.application.Application} and assigns it a generated Skyve
+	 * component ID.
+	 *
+	 * @param text raw metadata text and nullable escape flag; must not be {@code null}
+	 * @return configured output-text component; never {@code null}
+	 */
+	protected HtmlOutputText outputText(EscapableText text) {
+		HtmlOutputText result = EscapableComponentSupport.outputText(a, text);
+		setId(result, null);
+		return result;
+	}
+
+	/**
+	 * Creates an output-label component for metadata text that escapes by default.
+	 *
+	 * <p>Side effects: creates a PrimeFaces component through the current
+	 * {@link jakarta.faces.application.Application} and assigns it a generated Skyve
+	 * component ID.
+	 *
+	 * @param text raw metadata label and nullable escape flag; must not be {@code null}
+	 * @param forId optional target component ID for the label
+	 * @return configured output-label component; never {@code null}
+	 */
+	protected OutputLabel outputLabel(EscapableText text, String forId) {
+		OutputLabel result = EscapableComponentSupport.outputLabel(a, text, forId);
+		setId(result, null);
+		return result;
+	}
+
+	/**
+	 * Adds an output-text facet for metadata text when a value is present.
+	 *
+	 * <p>Side effects: creates a JSF component through the current
+	 * {@link jakarta.faces.application.Application}, assigns it a generated Skyve
+	 * component ID, and mutates {@code component.getFacets()} by adding or replacing
+	 * {@code facetName}. No facet is added when {@code text} or its value is {@code null}.
+	 *
+	 * @param component component receiving the facet; must not be {@code null}
+	 * @param facetName facet key to add or replace; must not be {@code null}
+	 * @param text raw metadata text and nullable escape flag; may be {@code null}
+	 * @return the added output-text facet, or {@code null} when no text value is present
+	 */
+	protected HtmlOutputText putOutputTextFacet(UIComponent component, String facetName, EscapableText text) {
+		HtmlOutputText result = EscapableComponentSupport.putOutputTextFacet(a, component, facetName, text);
+		if (result != null) {
+			setId(result, null);
+		}
+		return result;
+	}
+
+	/**
+	 * Adds a click confirmation behaviour for metadata text when a value is present.
+	 *
+	 * <p>Side effects: creates a PrimeFaces behaviour through the current
+	 * {@link jakarta.faces.application.Application} and mutates {@code component} by
+	 * attaching the behaviour to the {@code click} event. No behaviour is added when
+	 * {@code confirmation} or its value is {@code null}.
+	 *
+	 * @param component component receiving the confirmation behaviour; must not be {@code null}
+	 * @param confirmation raw confirmation text and nullable escape flag; may be {@code null}
+	 */
+	protected void addConfirmBehavior(UIComponentBase component, EscapableText confirmation) {
+		EscapableComponentSupport.addConfirmBehavior(a, component, confirmation);
+	}
 	
 	/**
 	 * Creates tab-pane script support markup.
@@ -209,6 +302,20 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @return the resulting label component
 	 */
 	public abstract UIComponent label(UIComponent component, String value);
+
+	/**
+	 * Creates a dialog-button component.
+	 *
+	 * @param component the current component
+	 * @param label raw button label and nullable escape flag
+	 * @param button dialog-button metadata
+	 * @param formDisabledConditionName optional form-level disabled condition
+	 * @return the resulting dialog-button component
+	 */
+	public abstract UIComponent dialogButton(UIComponent component,
+												EscapableText label,
+												DialogButton button,
+												String formDisabledConditionName);
 	
 	/**
 	 * Creates a spacer component.
@@ -661,14 +768,18 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * Creates a list-membership component wrapper.
 	 *
 	 * @param component the existing wrapper component
-	 * @param candidatesHeading heading for candidates list
-	 * @param membersHeading heading for members list
+	 * @param candidatesHeading raw candidates-list heading and nullable escape flag;
+	 *        {@code null} and {@code Boolean.TRUE} escape, while {@code Boolean.FALSE}
+	 *        allows trusted markup
+	 * @param membersHeading raw members-list heading and nullable escape flag;
+	 *        {@code null} and {@code Boolean.TRUE} escape, while {@code Boolean.FALSE}
+	 *        allows trusted markup
 	 * @param membership the membership metadata
 	 * @return the resulting wrapper component
 	 */
 	public abstract EventSourceComponent listMembership(EventSourceComponent component,
-															String candidatesHeading,
-															String membersHeading,
+															EscapableText candidatesHeading,
+															EscapableText membersHeading,
 															ListMembership membership);
 	
 	/**
@@ -973,15 +1084,21 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	/**
 	 * Creates an output link component for reference fields.
 	 *
+	 * <p>Side effects: creates a JSF output-link component, assigns href/rendered
+	 * expressions, and adds child output text when {@code value} is present. The
+	 * child text remains raw until its output-text escape flag is applied.
+	 *
 	 * @param dataWidgetVar optional data widget variable
-	 * @param value optional label value
+	 * @param value optional raw link label and nullable escape flag; {@code null} and
+	 *        {@code Boolean.TRUE} escape at the child output-text boundary, and only
+	 *        {@code Boolean.FALSE} allows trusted markup
 	 * @param href link destination expression
 	 * @param invisible invisible condition expression
 	 * @param target optional reference target metadata
 	 * @return the configured output link component
 	 */
 	public HtmlOutputLink outputLink(String dataWidgetVar, 
-										String value, 
+										EscapableText value,
 										String href, 
 										String invisible,
 										ReferenceTarget target) {
@@ -992,9 +1109,8 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 		else {
 			result.setValueExpression("value", createValueExpressionFromFragment(href, true, null, String.class, false, Sanitisation.relaxed));
 		}
-		if (value != null) {
-			UIOutput outputText = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
-			outputText.setValue(value);
+		if ((value != null) && (value.getValue() != null)) {
+			HtmlOutputText outputText = outputText(value);
 			result.getChildren().add(outputText);
 		}
 		setInvisible(result, invisible, null);
@@ -1012,7 +1128,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 
 		return result;
 	}
-	
+
 	protected static class ActionFacesAttributes {
 		protected String actionName;
 		protected String process;

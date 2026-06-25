@@ -36,6 +36,7 @@ public class FluentTab extends FluentContainer<FluentTab> {
 	 */
 	public FluentTab from(@SuppressWarnings("hiding") Tab tab) {
 		title(tab.getTitle());
+		escapeTitle(tab.getEscapeTitle());
 		icon16x16RelativeFileName(tab.getIcon16x16RelativeFileName());
 		iconStyleClass(tab.getIconStyleClass());
 		disabledConditionName(tab.getDisabledConditionName());
@@ -55,6 +56,27 @@ public class FluentTab extends FluentContainer<FluentTab> {
 	 */
 	public FluentTab title(String title) {
 		tab.setTitle(title);
+		return this;
+	}
+
+	/**
+	 * Sets whether the tab title should be escaped before rendering.
+	 *
+	 * @param escapeTitle {@code false} to allow trusted markup; {@code true} to escape at the renderer boundary
+	 * @return this builder
+	 */
+	public FluentTab escapeTitle(boolean escapeTitle) {
+		return escapeTitle(escapeTitle ? Boolean.TRUE : Boolean.FALSE);
+	}
+
+	/**
+	 * Sets whether the tab title should be escaped before rendering.
+	 *
+	 * @param escapeTitle {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 * @return this builder
+	 */
+	public FluentTab escapeTitle(Boolean escapeTitle) {
+		tab.setEscapeTitle(escapeTitle);
 		return this;
 	}
 

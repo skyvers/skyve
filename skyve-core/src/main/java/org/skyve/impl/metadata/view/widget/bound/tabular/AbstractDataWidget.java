@@ -29,6 +29,7 @@ import jakarta.xml.bind.annotation.XmlType;
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"widgetId",
 							"title", 
+							"escapeTitle",
 							"pixelWidth",
 							"responsiveWidth",
 							"sm",
@@ -49,6 +50,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 
 	private String widgetId;
 	private String title;
+	private Boolean escapeTitle;
 	
 	private Integer pixelWidth;
 	private Integer responsiveWidth;
@@ -115,6 +117,15 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	}
 
 	/**
+	 * Returns whether the title text should be escaped before rendering.
+	 *
+	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	public Boolean getEscapeTitle() {
+		return escapeTitle;
+	}
+
+	/**
 	 * Sets the title after trimming and empty-string normalisation.
 	 *
 	 * @param title the title text to set
@@ -122,6 +133,16 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	@XmlAttribute(required = false)
 	public void setTitle(String title) {
 		this.title = UtilImpl.processStringValue(title);
+	}
+
+	/**
+	 * Sets whether the title text should be escaped before rendering.
+	 *
+	 * @param escapeTitle {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	@XmlAttribute(required = false)
+	public void setEscapeTitle(Boolean escapeTitle) {
+		this.escapeTitle = escapeTitle;
 	}
 
 	/**

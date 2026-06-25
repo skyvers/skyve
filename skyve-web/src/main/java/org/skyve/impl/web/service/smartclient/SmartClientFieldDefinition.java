@@ -13,7 +13,6 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.BeanValidator;
-import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 
 /**
@@ -22,6 +21,9 @@ import org.skyve.util.Util;
  */
 public class SmartClientFieldDefinition extends SmartClientDataGridFieldDefinition {
 	private String helpText;
+	private boolean escapeTitle = true;
+	private boolean escapeRequiredMessage = true;
+	private boolean escapeHelp = true;
 
 	/**
 	 * Builds a SmartClient form-field definition from widget and document metadata.
@@ -82,6 +84,34 @@ public class SmartClientFieldDefinition extends SmartClientDataGridFieldDefiniti
 	}
 
 	/**
+	 * Sets whether the field title should be escaped before rendering.
+	 *
+	 * @param escapeTitle {@code true} to escape at the renderer boundary; {@code false} to allow trusted title markup
+	 */
+	@Override
+	public void setEscapeTitle(boolean escapeTitle) {
+		this.escapeTitle = escapeTitle;
+	}
+
+	/**
+	 * Sets whether the required-message text should be escaped before rendering.
+	 *
+	 * @param escapeRequiredMessage {@code true} to escape at the renderer boundary; {@code false} to allow trusted message markup
+	 */
+	public void setEscapeRequiredMessage(boolean escapeRequiredMessage) {
+		this.escapeRequiredMessage = escapeRequiredMessage;
+	}
+
+	/**
+	 * Sets whether the help text should be escaped before rendering.
+	 *
+	 * @param escapeHelp {@code true} to escape at the renderer boundary; {@code false} to allow trusted help markup
+	 */
+	public void setEscapeHelp(boolean escapeHelp) {
+		this.escapeHelp = escapeHelp;
+	}
+
+	/**
 	 * Produces the SmartClient JavaScript field definition payload for this form field.
 	 *
 	 * @return SmartClient JavaScript field definition payload
@@ -94,7 +124,7 @@ public class SmartClientFieldDefinition extends SmartClientDataGridFieldDefiniti
         result.append("name:'");
         result.append(name);
         result.append("',title:'");
-        String ultimateTitle = OWASP.escapeJsString(title);
+        String ultimateTitle = SmartClientViewRenderer.escapeSmartClientText(title, escapeTitle);
         if (required) {
         	ultimateTitle += " *";
         }
@@ -115,12 +145,17 @@ public class SmartClientFieldDefinition extends SmartClientDataGridFieldDefiniti
         }
         if (required) {
         	result.append(",bizRequired:true,requiredMessage:'");
+        	String ultimateRequiredMessage;
+        	boolean ultimateEscapeRequiredMessage;
         	if (requiredMessage == null) {
-        		result.append(OWASP.escapeJsString(Util.nullSafeI18n(BeanValidator.VALIDATION_REQUIRED_KEY, title)));
+        		ultimateRequiredMessage = Util.nullSafeI18n(BeanValidator.VALIDATION_REQUIRED_KEY, title);
+        		ultimateEscapeRequiredMessage = true;
         	}
         	else {
-        		result.append(OWASP.escapeJsString(requiredMessage));
+        		ultimateRequiredMessage = requiredMessage;
+        		ultimateEscapeRequiredMessage = escapeRequiredMessage;
         	}
+    		result.append(SmartClientViewRenderer.escapeSmartClientText(ultimateRequiredMessage, ultimateEscapeRequiredMessage));
         	result.append('\'');
         }
         else {
@@ -149,8 +184,8 @@ public class SmartClientFieldDefinition extends SmartClientDataGridFieldDefiniti
 
 	    if (helpText != null) {
 			result.append(",icons:[{src:'icons/help.png',tabIndex:-1,showOver:true,neverDisable:true,prompt:'");
-			result.append(OWASP.escapeJsString(helpText, false, true));
-			result.append("',click:function(){isc.say(this.prompt, null, {title:'").append(OWASP.escapeJsString(title)).append("'})}}]");
+			result.append(SmartClientViewRenderer.escapeSmartClientText(helpText, escapeHelp));
+			result.append("',click:function(){isc.say(this.prompt, null, {title:'").append(SmartClientViewRenderer.escapeSmartClientText(title, escapeTitle)).append("'})}}]");
 		}
 
 	    if (lookup != null) {

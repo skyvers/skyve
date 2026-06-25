@@ -23,12 +23,15 @@
 	</target>
 	<target name="build-vue">
 		<echo>Running npm/vite build [${os.name}]</echo>
-		<condition property="npm.executable" value="npm.cmd" else="npm">
-		  <os family="windows" />
-		</condition>
-		<exec executable="${npm.executable}">
+		<exec executable="cmd" osfamily="windows" failonerror="true">
+			<arg value="/c" />
+			<arg value="npm.cmd" />
 			<arg value="run" />
 			<arg value="build" />
+		</exec>
+		<exec executable="/bin/sh" osfamily="unix" failonerror="true">
+			<arg value="-lc" />
+			<arg value="npm run build" />
 		</exec>
 	</target>
 </project>

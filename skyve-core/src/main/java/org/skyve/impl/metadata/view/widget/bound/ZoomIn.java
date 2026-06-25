@@ -28,6 +28,7 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"displayName", 
+							"escapeDisplayName",
 							"invisibleConditionName", 
 							"visibleConditionName",
 							"disabledConditionName", 
@@ -42,9 +43,11 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	private static final long serialVersionUID = 100210631435597022L;
 
 	private String displayName;
+	private Boolean escapeDisplayName;
 	private String relativeIconFileName;
 	private String iconStyleClass;
 	private String toolTip;
+	private Boolean escapeToolTip;
 	private Integer pixelWidth;
 	private Integer pixelHeight;
 	private Integer minPixelHeight;
@@ -86,6 +89,15 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	public String getLocalisedDisplayName() {
 		return Util.nullSafeI18n((displayName == null) ? "Zoom In" : displayName);
 	}
+
+	/**
+	 * Returns whether the display name text should be escaped before rendering.
+	 *
+	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	public Boolean getEscapeDisplayName() {
+		return escapeDisplayName;
+	}
 	
 	/**
 	 * Sets the button label.
@@ -95,6 +107,16 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	@XmlAttribute
 	public void setDisplayName(String displayName) {
 		this.displayName = UtilImpl.processStringValue(displayName);
+	}
+
+	/**
+	 * Sets whether the display name text should be escaped before rendering.
+	 *
+	 * @param escapeDisplayName {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	@XmlAttribute(required = false)
+	public void setEscapeDisplayName(Boolean escapeDisplayName) {
+		this.escapeDisplayName = escapeDisplayName;
 	}
 
 	/**
@@ -152,6 +174,15 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	public String getLocalisedToolTip() {
 		return Util.i18n(toolTip);
 	}
+
+	/**
+	 * Returns whether the tooltip text should be escaped before rendering.
+	 *
+	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	public Boolean getEscapeToolTip() {
+		return escapeToolTip;
+	}
 	
 	/**
 	 * Sets the tooltip text.
@@ -161,6 +192,16 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	@XmlAttribute(required = false)
 	public void setToolTip(String toolTip) {
 		this.toolTip = UtilImpl.processStringValue(toolTip);
+	}
+
+	/**
+	 * Sets whether the tooltip text should be escaped before rendering.
+	 *
+	 * @param escapeToolTip {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	@XmlAttribute(required = false)
+	public void setEscapeToolTip(Boolean escapeToolTip) {
+		this.escapeToolTip = escapeToolTip;
 	}
 
 	/**

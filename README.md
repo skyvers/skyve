@@ -86,7 +86,7 @@ The user guide is available at [https://skyvers.github.io/skyve-user-guide/](htt
 
 The development guide is available at [github.com/skyvers/skyve-dev-guide](https://github.com/skyvers/skyve-dev-guide). This contains detailed documentation covering the architecture and guiding principles of the framework, as well as explaining all the features and how to get started.
 
-Release-ready framework notes for the Skyve 10 managed content widget are available in [docs/content-widget.md](/docs/content-widget.md).
+Skyve 10 framework change notes are available in [docs/skyve-10-changes.md](/docs/skyve-10-changes.md).
 
 ### Skyve Cookbook
 

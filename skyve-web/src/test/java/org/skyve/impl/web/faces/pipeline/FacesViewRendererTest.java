@@ -1,11 +1,16 @@
 package org.skyve.impl.web.faces.pipeline;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -21,26 +26,38 @@ import java.util.stream.Stream;
 import org.primefaces.component.picklist.PickList;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.skyve.domain.types.converters.Converter;
+import org.skyve.impl.generate.ViewRenderer;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
+import org.skyve.impl.metadata.view.RelativeSize;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.container.Collapsible;
 import org.skyve.impl.metadata.view.container.VBox;
+import org.skyve.impl.metadata.view.reference.EditViewReference;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Chart;
+import org.skyve.impl.metadata.view.widget.DialogButton;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
+import org.skyve.impl.metadata.view.widget.Link;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.Spacer;
 import org.skyve.impl.metadata.view.widget.StaticImage;
+import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
+import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
+import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
+import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
 import org.skyve.impl.sail.mock.MockFacesContext;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
+import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder.EventSourceComponent;
+import org.skyve.impl.web.faces.pipeline.component.EscapableText;
 import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilder;
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.metadata.MetaDataException;
@@ -134,6 +151,171 @@ class FacesViewRendererTest {
 
 		verify(cb).view(null, true);
 		assertSame(root, renderer.getFacesView());
+	}
+
+	@Test
+	void renderLinkEscapesEditViewOutputLinkValueByDefaultAndWhenExplicitTrue() {
+		ComponentBuilder cb = mock(ComponentBuilder.class);
+		LayoutBuilder lb = mock(LayoutBuilder.class);
+		FacesViewRenderer defaultRenderer = newRenderer(createView(null), null, cb, lb);
+		Link defaultLink = editViewLink(null);
+
+		defaultRenderer.renderLink("<img src=x onerror=alert(1)>", defaultLink);
+
+		ArgumentCaptor<EscapableText> defaultValue = ArgumentCaptor.forClass(EscapableText.class);
+		verify(cb).outputLink(isNull(),
+								defaultValue.capture(),
+								eq("./?a=e&m=admin&d=Contact&i={contactId}"),
+								isNull(),
+								isNull());
+		assertEquals("<img src=x onerror=alert(1)>", defaultValue.getValue().getValue());
+		assertTrue(defaultValue.getValue().getEscape());
+
+		ComponentBuilder explicitBuilder = mock(ComponentBuilder.class);
+		FacesViewRenderer explicitRenderer = newRenderer(createView(null), null, explicitBuilder, lb);
+		Link explicitLink = editViewLink(Boolean.TRUE);
+
+		explicitRenderer.renderLink("<img src=x onerror=alert(1)>", explicitLink);
+
+		ArgumentCaptor<EscapableText> explicitValue = ArgumentCaptor.forClass(EscapableText.class);
+		verify(explicitBuilder).outputLink(isNull(),
+											explicitValue.capture(),
+											eq("./?a=e&m=admin&d=Contact&i={contactId}"),
+											isNull(),
+											isNull());
+		assertEquals("<img src=x onerror=alert(1)>", explicitValue.getValue().getValue());
+		assertTrue(explicitValue.getValue().getEscape());
+	}
+
+	@Test
+	void renderLinkAllowsTrustedEditViewOutputLinkValueWhenEscapingFalse() {
+		ComponentBuilder cb = mock(ComponentBuilder.class);
+		LayoutBuilder lb = mock(LayoutBuilder.class);
+		FacesViewRenderer renderer = newRenderer(createView(null), null, cb, lb);
+		Link link = editViewLink(Boolean.FALSE);
+
+		renderer.renderLink("<b>Open</b>", link);
+
+		ArgumentCaptor<EscapableText> trustedValue = ArgumentCaptor.forClass(EscapableText.class);
+		verify(cb).outputLink(isNull(),
+								trustedValue.capture(),
+								eq("./?a=e&m=admin&d=Contact&i={contactId}"),
+								isNull(),
+								isNull());
+		assertEquals("<b>Open</b>", trustedValue.getValue().getValue());
+		assertFalse(trustedValue.getValue().getEscape());
+	}
+
+	@Test
+	void renderListMembershipPassesRawHeadingsAndDefaultEscapingToComponentBuilder() {
+		ComponentBuilder cb = mock(ComponentBuilder.class);
+		LayoutBuilder lb = mock(LayoutBuilder.class);
+		FacesViewRenderer renderer = newRenderer(createView(null), null, cb, lb);
+		ListMembership membership = new ListMembership();
+		membership.setEscapeCandidatesHeading(Boolean.TRUE);
+		membership.setEscapeMembersHeading(null);
+		TestComponent component = new TestComponent("pickList");
+		when(cb.listMembership(any(), any(), any(), same(membership))).thenReturn(new EventSourceComponent(component, component));
+
+		assertThrows(IllegalStateException.class,
+						() -> renderer.renderListMembership("<img src=x onerror=alert(1)>", "<img src=x onerror=alert(1)>", membership));
+
+		ArgumentCaptor<EscapableText> candidates = ArgumentCaptor.forClass(EscapableText.class);
+		ArgumentCaptor<EscapableText> members = ArgumentCaptor.forClass(EscapableText.class);
+		verify(cb).listMembership(isNull(),
+									candidates.capture(),
+									members.capture(),
+									same(membership));
+		assertEquals("<img src=x onerror=alert(1)>", candidates.getValue().getValue());
+		assertTrue(candidates.getValue().shouldEscape());
+		assertTrue(candidates.getValue().getEscape());
+		assertEquals("<img src=x onerror=alert(1)>", members.getValue().getValue());
+		assertTrue(members.getValue().shouldEscape());
+		assertTrue(members.getValue().getEscape());
+	}
+
+	@Test
+	void renderListMembershipPassesTrustedHeadingFlagsToComponentBuilder() {
+		ComponentBuilder cb = mock(ComponentBuilder.class);
+		LayoutBuilder lb = mock(LayoutBuilder.class);
+		FacesViewRenderer renderer = newRenderer(createView(null), null, cb, lb);
+		ListMembership membership = new ListMembership();
+		membership.setEscapeCandidatesHeading(Boolean.FALSE);
+		membership.setEscapeMembersHeading(Boolean.FALSE);
+		TestComponent component = new TestComponent("pickList");
+		when(cb.listMembership(any(), any(), any(), same(membership))).thenReturn(new EventSourceComponent(component, component));
+
+		assertThrows(IllegalStateException.class,
+						() -> renderer.renderListMembership("<b>Candidates</b>", "<i>Members</i>", membership));
+
+		ArgumentCaptor<EscapableText> candidates = ArgumentCaptor.forClass(EscapableText.class);
+		ArgumentCaptor<EscapableText> members = ArgumentCaptor.forClass(EscapableText.class);
+		verify(cb).listMembership(isNull(), candidates.capture(), members.capture(), same(membership));
+		assertEquals("<b>Candidates</b>", candidates.getValue().getValue());
+		assertFalse(candidates.getValue().shouldEscape());
+		assertFalse(candidates.getValue().getEscape());
+		assertEquals("<i>Members</i>", members.getValue().getValue());
+		assertFalse(members.getValue().shouldEscape());
+		assertFalse(members.getValue().getEscape());
+	}
+
+	@Test
+	void renderDialogButtonPassesRawDisplayNameAndEscapeFlagToComponentBuilder() {
+		ComponentBuilder cb = mock(ComponentBuilder.class);
+		LayoutBuilder lb = mock(LayoutBuilder.class);
+		FacesViewRenderer renderer = newRenderer(createView(null), null, cb, lb);
+		DialogButton button = new DialogButton();
+		button.setDisplayName("Trusted <i>dialog button</i>");
+		button.setEscapeDisplayName(Boolean.FALSE);
+		TestComponent component = new TestComponent("dialogButton");
+		when(cb.dialogButton(any(), any(), same(button), isNull())).thenReturn(component);
+
+		assertThrows(IllegalStateException.class,
+						() -> renderer.renderDialogButton("Trusted <i>dialog button</i>", button));
+
+		ArgumentCaptor<EscapableText> label = ArgumentCaptor.forClass(EscapableText.class);
+		verify(cb).dialogButton(isNull(), label.capture(), same(button), isNull());
+		assertEquals("Trusted <i>dialog button</i>", label.getValue().getValue());
+		assertFalse(label.getValue().shouldEscape());
+		assertFalse(label.getValue().getEscape());
+	}
+
+	@Test
+	void renderInputEscapesRequiredMessageBeforePrimeFacesMessageChannel() throws Exception {
+		ComponentBuilder cb = mock(ComponentBuilder.class);
+		LayoutBuilder lb = mock(LayoutBuilder.class);
+		FacesViewRenderer renderer = newRenderer(createView(null), null, cb, lb);
+		CheckBox checkBox = new CheckBox();
+		TestComponent component = new TestComponent("checkbox");
+		when(cb.checkBox(any(), isNull(), same(checkBox), isNull(), eq("Name"), any())).thenReturn(new EventSourceComponent(component, component));
+		setViewRendererField(renderer, "currentWidgetLabel", "Name");
+		setViewRendererField(renderer, "currentWidgetRequiredMessage", "<b>Name required</b>");
+		setViewRendererField(renderer, "currentWidgetEscapeRequiredMessage", Boolean.TRUE);
+
+		assertThrows(IllegalStateException.class, () -> renderer.renderFormCheckBox(checkBox));
+
+		ArgumentCaptor<String> message = ArgumentCaptor.forClass(String.class);
+		verify(cb).checkBox(isNull(), isNull(), same(checkBox), isNull(), eq("Name"), message.capture());
+		assertEquals("&lt;b&gt;Name required&lt;/b&gt;", message.getValue());
+	}
+
+	@Test
+	void renderInputLeavesTrustedRequiredMessageMarkupForPrimeFacesMessageChannel() throws Exception {
+		ComponentBuilder cb = mock(ComponentBuilder.class);
+		LayoutBuilder lb = mock(LayoutBuilder.class);
+		FacesViewRenderer renderer = newRenderer(createView(null), null, cb, lb);
+		CheckBox checkBox = new CheckBox();
+		TestComponent component = new TestComponent("checkbox");
+		when(cb.checkBox(any(), isNull(), same(checkBox), isNull(), eq("Name"), any())).thenReturn(new EventSourceComponent(component, component));
+		setViewRendererField(renderer, "currentWidgetLabel", "Name");
+		setViewRendererField(renderer, "currentWidgetRequiredMessage", "<b>Name required</b>");
+		setViewRendererField(renderer, "currentWidgetEscapeRequiredMessage", Boolean.FALSE);
+
+		assertThrows(IllegalStateException.class, () -> renderer.renderFormCheckBox(checkBox));
+
+		ArgumentCaptor<String> message = ArgumentCaptor.forClass(String.class);
+		verify(cb).checkBox(isNull(), isNull(), same(checkBox), isNull(), eq("Name"), message.capture());
+		assertEquals("<b>Name required</b>", message.getValue());
 	}
 
 	@Test
@@ -498,6 +680,22 @@ class FacesViewRendererTest {
 		assertEquals("Border title must be defined if the collapsible attribute is present", exception.getMessage());
 	}
 
+	/**
+	 * Verifies that list widget border titles use the list-widget title escape flag.
+	 *
+	 * @throws Exception if the private resolver cannot be invoked
+	 */
+	@Test
+	void listWidgetBorderTitlesUseListWidgetEscapeTitleFlag() throws Exception {
+		ListGrid listGrid = new ListGrid();
+		listGrid.setEscapeTitle(Boolean.FALSE);
+		ListRepeater listRepeater = new ListRepeater();
+		listRepeater.setEscapeTitle(Boolean.FALSE);
+
+		assertEquals(Boolean.FALSE, resolveBorderTitleEscape(listGrid));
+		assertEquals(Boolean.FALSE, resolveBorderTitleEscape(listRepeater));
+	}
+
 	@ParameterizedTest
 	@MethodSource("skyveConverterMappings")
 	void convertConverterMapsSkyveConvertersToFacesConverters(Converter<?> skyveConverter,
@@ -539,6 +737,18 @@ class FacesViewRendererTest {
 		return view;
 	}
 
+	private static Link editViewLink(Boolean escapeValue) {
+		EditViewReference reference = new EditViewReference();
+		reference.setModuleName("admin");
+		reference.setDocumentName("Contact");
+		reference.setBinding("contactId");
+
+		Link link = new Link();
+		link.setReference(reference);
+		link.setEscapeValue(escapeValue);
+		return link;
+	}
+
 	private static FacesViewRenderer newRenderer(ViewImpl view,
 						String widgetId,
 						ComponentBuilder cb,
@@ -575,6 +785,25 @@ class FacesViewRendererTest {
 		Field field = FacesViewRenderer.class.getDeclaredField("eventSource");
 		field.setAccessible(true);
 		field.set(renderer, eventSource);
+	}
+
+	private static void setViewRendererField(FacesViewRenderer renderer, String fieldName, Object value) throws Exception {
+		Field field = ViewRenderer.class.getDeclaredField(fieldName);
+		field.setAccessible(true);
+		field.set(renderer, value);
+	}
+
+	/**
+	 * Invokes the private border-title escape resolver.
+	 *
+	 * @param size metadata object that owns a rendered border title
+	 * @return the resolved nullable escape flag
+	 * @throws Exception if the resolver cannot be invoked
+	 */
+	private static Boolean resolveBorderTitleEscape(RelativeSize size) throws Exception {
+		Method method = FacesViewRenderer.class.getDeclaredMethod("resolveBorderTitleEscape", RelativeSize.class);
+		method.setAccessible(true);
+		return (Boolean) method.invoke(null, size);
 	}
 
 	private static Stream<Arguments> defaultConverterMappings() {

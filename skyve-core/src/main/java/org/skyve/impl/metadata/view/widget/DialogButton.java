@@ -37,6 +37,7 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"displayName", 
+							"escapeDisplayName",
 							"dialogName", 
 							"command", 
 							"dialogWidth", 
@@ -52,6 +53,7 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 	private static final long serialVersionUID = 4201233664827983726L;
 
 	private String displayName;
+	private Boolean escapeDisplayName;
 	private String dialogName;
 	private String command;
 	private Integer dialogWidth = Integer.valueOf(800);
@@ -107,6 +109,15 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 	public String getLocalisedDisplayName() {
 		return Util.i18n(displayName);
 	}
+
+	/**
+	 * Returns whether the display name text should be escaped before rendering.
+	 *
+	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	public Boolean getEscapeDisplayName() {
+		return escapeDisplayName;
+	}
 	
 	/**
 	 * Sets the button label.
@@ -116,6 +127,16 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 	@XmlAttribute(required = true)
 	public void setDisplayName(String displayName) {
 		this.displayName = UtilImpl.processStringValue(displayName);
+	}
+
+	/**
+	 * Sets whether the display name text should be escaped before rendering.
+	 *
+	 * @param escapeDisplayName {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	@XmlAttribute(required = false)
+	public void setEscapeDisplayName(Boolean escapeDisplayName) {
+		this.escapeDisplayName = escapeDisplayName;
 	}
 
 	/**

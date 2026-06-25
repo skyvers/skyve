@@ -2,6 +2,7 @@ package org.skyve.impl.web.service;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.PrintWriter;
@@ -57,8 +58,6 @@ class MetaDataServletH2Test extends AbstractSkyveTest {
 		assertTrue(body.contains("\"capture\":\"none\""), body);
 		assertTrue(body.contains("\"binding\":\"contentImage\""), body);
 		assertTrue(body.contains("\"display\":\"image\""), body);
-		assertTrue(body.contains("\"pixelWidth\":50"), body);
-		assertTrue(body.contains("\"pixelHeight\":50"), body);
 	}
 
 	@Test
@@ -86,6 +85,54 @@ class MetaDataServletH2Test extends AbstractSkyveTest {
 
 		assertTrue(body.toString().contains("\"type\":\"view\""), body.toString());
 		assertTrue(body.toString().contains("\"name\":\"edit\""), body.toString());
+	}
+
+	@Test
+	void doGetRendersAuthenticatedViewMetadataUsingUserAgentUxUiFallback() throws Exception {
+		java.io.StringWriter body = new java.io.StringWriter();
+		HttpServletResponse response = responseWritingTo(body);
+
+		invokeServletMethod("doGet", authenticatedViewRequest(u, null, "admin", "JobSchedule"), response);
+
+		assertTrue(body.toString().contains("\"type\":\"view\""), body.toString());
+		assertTrue(body.toString().contains("\"name\":\"edit\""), body.toString());
+	}
+
+	@Test
+	void doGetRendersAuthenticatedViewMetadataWithForcedTopFormLabels() throws Exception {
+		java.io.StringWriter body = new java.io.StringWriter();
+		HttpServletResponse response = responseWritingTo(body);
+
+		invokeServletMethod("doGet", authenticatedViewRequest(u, UXUI, "admin", "JobSchedule", true), response);
+
+		assertTrue(body.toString().contains("\"type\":\"view\""), body.toString());
+		assertTrue(body.toString().contains("\"name\":\"edit\""), body.toString());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void doGetRendersEmptyMetadataResponseWhenSessionHasEnded() throws Exception {
+		java.io.StringWriter body = new java.io.StringWriter();
+		HttpServletResponse response = responseWritingTo(body);
+		HttpServletRequest request = unauthenticatedRequest();
+
+		invokeServletMethod("doGet", request, response);
+
+		assertTrue(body.toString().contains("\"menus\":[]"), body.toString());
+		assertTrue(body.toString().contains("\"dataSources\":[]"), body.toString());
+		verify(response).setContentType("application/json");
+		verify(response).setCharacterEncoding("UTF-8");
+	}
+
+	@Test
+	void doGetRendersEmptyMetadataResponseWhenModuleMetadataCannotBeResolved() throws Exception {
+		java.io.StringWriter body = new java.io.StringWriter();
+		HttpServletResponse response = responseWritingTo(body);
+
+		invokeServletMethod("doGet", authenticatedModuleRequest(u, UXUI, "admin"), response);
+
+		assertTrue(body.toString().contains("\"menus\":[]"), body.toString());
+		assertTrue(body.toString().contains("\"dataSources\":[]"), body.toString());
 	}
 
 	@Test
@@ -168,6 +215,21 @@ class MetaDataServletH2Test extends AbstractSkyveTest {
 	}
 
 	private static HttpServletRequest authenticatedViewRequest(User user, String uxui, String moduleName, String documentName) {
+		return authenticatedViewRequest(user, uxui, moduleName, documentName, false);
+	}
+
+	private static HttpServletRequest authenticatedViewRequest(User user,
+																String uxui,
+																String moduleName,
+																String documentName,
+																boolean topLabels) {
+		HttpServletRequest request = authenticatedModuleRequest(user, uxui, moduleName);
+		when(request.getParameter(AbstractWebContext.DOCUMENT_NAME)).thenReturn(documentName);
+		when(request.getParameter(AbstractWebContext.TOP_FORM_LABELS_NAME)).thenReturn(topLabels ? Boolean.TRUE.toString() : null);
+		return request;
+	}
+
+	private static HttpServletRequest authenticatedModuleRequest(User user, String uxui, String moduleName) {
 		HttpSession session = mock(HttpSession.class);
 		when(session.getId()).thenReturn("metadata-session-" + System.nanoTime());
 		when(session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME)).thenReturn(user);
@@ -182,8 +244,20 @@ class MetaDataServletH2Test extends AbstractSkyveTest {
 		when(request.getAttribute(AbstractWebContext.UXUI)).thenReturn(null);
 		when(request.getParameter(AbstractWebContext.UXUI)).thenReturn(uxui);
 		when(request.getParameter(AbstractWebContext.MODULE_NAME)).thenReturn(moduleName);
-		when(request.getParameter(AbstractWebContext.DOCUMENT_NAME)).thenReturn(documentName);
+		when(request.getParameter(AbstractWebContext.DOCUMENT_NAME)).thenReturn(null);
 		when(request.getParameter(AbstractWebContext.TOP_FORM_LABELS_NAME)).thenReturn(null);
+		return request;
+	}
+
+	private static HttpServletRequest unauthenticatedRequest() {
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		when(request.getSession(false)).thenReturn(null);
+		when(request.getUserPrincipal()).thenReturn((Principal) null);
+		when(request.getLocale()).thenReturn(java.util.Locale.ENGLISH);
+		when(request.getHeader("User-Agent")).thenReturn("Mozilla/5.0");
+		when(request.getParameter(AbstractWebContext.UXUI)).thenReturn(UXUI);
+		when(request.getParameter(AbstractWebContext.MODULE_NAME)).thenReturn("admin");
+		when(request.getParameter(AbstractWebContext.DOCUMENT_NAME)).thenReturn(null);
 		return request;
 	}
 

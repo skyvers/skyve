@@ -852,6 +852,36 @@ class ViewJSONManipulatorCoreTest {
 	}
 
 	@Test
+	void toJSONEscapesViewTitleByDefault() throws Exception {
+		PersistentBean constructorBean = mock(PersistentBean.class);
+		when(constructorBean.getBizId()).thenReturn("biz-1");
+		ViewJSONManipulator manipulator = newManipulator(ViewType.edit.toString(), constructorBean, 0, 0);
+		((ViewImpl) objectField(manipulator, "view")).setTitle("Escaped <b>view title</b>");
+
+		String json = manipulator.toJSON(new TestWebContext("ctx-1"), null);
+		@SuppressWarnings("unchecked")
+		Map<String, Object> result = (Map<String, Object>) JSON.unmarshall(json);
+
+		assertEquals("Escaped &lt;b&gt;view title&lt;/b&gt;", result.get("_title"));
+	}
+
+	@Test
+	void toJSONLeavesTrustedViewTitleRaw() throws Exception {
+		PersistentBean constructorBean = mock(PersistentBean.class);
+		when(constructorBean.getBizId()).thenReturn("biz-1");
+		ViewJSONManipulator manipulator = newManipulator(ViewType.edit.toString(), constructorBean, 0, 0);
+		ViewImpl view = (ViewImpl) objectField(manipulator, "view");
+		view.setTitle("Trusted <b>view title</b>");
+		view.setEscapeTitle(Boolean.FALSE);
+
+		String json = manipulator.toJSON(new TestWebContext("ctx-1"), null);
+		@SuppressWarnings("unchecked")
+		Map<String, Object> result = (Map<String, Object>) JSON.unmarshall(json);
+
+		assertEquals("Trusted <b>view title</b>", result.get("_title"));
+	}
+
+	@Test
 	void toJSONIncludesChildBindingsValueMapsAndComparisons() throws Exception {
 		TestOwnerBean owner = new TestOwnerBean();
 		owner.setBizId("owner-1");

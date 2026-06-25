@@ -40,6 +40,7 @@ public class VBox extends Container implements Box, Identifiable, Bordered {
 	
 	private Boolean border;
 	private String borderTitle;
+	private Boolean escapeBorderTitle;
 	
 	private Integer pixelWidth;
 	private Integer responsiveWidth;
@@ -127,6 +128,15 @@ public class VBox extends Container implements Box, Identifiable, Bordered {
 	}
 
 	/**
+	 * Returns whether the border title text should be escaped before rendering.
+	 *
+	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	public Boolean getEscapeBorderTitle() {
+		return escapeBorderTitle;
+	}
+
+	/**
 	 * Sets the optional border title.
 	 *
 	 * @param borderTitle  border title; may be {@code null}
@@ -135,6 +145,16 @@ public class VBox extends Container implements Box, Identifiable, Bordered {
 	@XmlAttribute(required = false)
 	public void setBorderTitle(String borderTitle) {
 		this.borderTitle = borderTitle;
+	}
+
+	/**
+	 * Sets whether the border title text should be escaped before rendering.
+	 *
+	 * @param escapeBorderTitle {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	@XmlAttribute(required = false)
+	public void setEscapeBorderTitle(Boolean escapeBorderTitle) {
+		this.escapeBorderTitle = escapeBorderTitle;
 	}
 
 	/**

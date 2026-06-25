@@ -374,7 +374,11 @@ public class LayoutBuilderChain extends LayoutBuilder {
 	 * @param currentFormItem current form-item metadata
 	 * @param currentFormColumn current form-column metadata
 	 * @param widgetLabel widget label
-	 * @param widgetRequiredMessage optional required-message text
+	 * @param widgetEscapeLabel resolved escape decision for widget label
+	 * @param widgetRequiredMessage optional required-message text normalised for
+	 *        unescaped PrimeFaces message rendering
+	 * @param widgetEscapeRequiredMessage resolved escape decision retained for layout
+	 *        API compatibility
 	 * @param widgetInvisible widget invisible condition
 	 * @param widgetHelpText widget help text
 	 */
@@ -385,7 +389,9 @@ public class LayoutBuilderChain extends LayoutBuilder {
 										FormItem currentFormItem,
 										FormColumn currentFormColumn,
 										String widgetLabel,
+										boolean widgetEscapeLabel,
 										@Nullable String widgetRequiredMessage,
+										boolean widgetEscapeRequiredMessage,
 										String widgetInvisible,
 										String widgetHelpText) {
 		for (LayoutBuilder builder : builders) {
@@ -395,7 +401,9 @@ public class LayoutBuilderChain extends LayoutBuilder {
 											currentFormItem,
 											currentFormColumn,
 											widgetLabel,
+											widgetEscapeLabel,
 											widgetRequiredMessage,
+											widgetEscapeRequiredMessage,
 											widgetInvisible,
 											widgetHelpText);
 		}
@@ -410,10 +418,15 @@ public class LayoutBuilderChain extends LayoutBuilder {
 	 * @param currentFormItem current form-item metadata
 	 * @param currentFormColumn current form-column metadata
 	 * @param widgetLabel widget label
+	 * @param widgetEscapeLabel resolved escape decision for widget label
 	 * @param widgetColspan widget colspan
-	 * @param widgetRequiredMessage optional required-message text
+	 * @param widgetRequiredMessage optional required-message text normalised for
+	 *        unescaped PrimeFaces message rendering
+	 * @param widgetEscapeRequiredMessage resolved escape decision retained for layout
+	 *        API compatibility
 	 * @param widgetInvisible widget invisible condition
 	 * @param widgetHelpText widget help text
+	 * @param widgetEscapeHelp resolved escape decision for widget help text
 	 * @param widgetPixelWidth widget pixel width
 	 * @param showLabel whether label is shown
 	 * @param topLabel whether top-label mode is enabled
@@ -425,10 +438,13 @@ public class LayoutBuilderChain extends LayoutBuilder {
 										FormItem currentFormItem,
 										FormColumn currentFormColumn,
 										String widgetLabel,
+										boolean widgetEscapeLabel,
 										int widgetColspan,
 										@Nullable String widgetRequiredMessage,
+										boolean widgetEscapeRequiredMessage,
 										String widgetInvisible,
 										String widgetHelpText,
+										boolean widgetEscapeHelp,
 										Integer widgetPixelWidth,
 										boolean showLabel,
 										boolean topLabel) {
@@ -439,10 +455,13 @@ public class LayoutBuilderChain extends LayoutBuilder {
 											currentFormItem,
 											currentFormColumn,
 											widgetLabel,
+											widgetEscapeLabel,
 											widgetColspan,
 											widgetRequiredMessage,
+											widgetEscapeRequiredMessage,
 											widgetInvisible,
 											widgetHelpText,
+											widgetEscapeHelp,
 											widgetPixelWidth,
 											showLabel,
 											topLabel);

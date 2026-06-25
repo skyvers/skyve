@@ -3,20 +3,24 @@ package org.skyve.impl.web.service.smartclient;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.generate.ViewRenderer;
 import org.skyve.impl.metadata.controller.CustomisationsStaticSingleton;
 import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.model.document.CollectionImpl;
 import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.LoadingType;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
+import org.skyve.impl.metadata.view.Inject;
 import org.skyve.impl.metadata.view.VerticalAlignment;
 import org.skyve.impl.metadata.view.container.Collapsible;
 import org.skyve.impl.metadata.view.container.HBox;
@@ -40,6 +44,7 @@ import org.skyve.impl.metadata.view.container.Sidebar;
 import org.skyve.impl.metadata.view.widget.Button;
 import org.skyve.impl.metadata.view.widget.Chart;
 import org.skyve.impl.metadata.view.widget.Chart.ChartType;
+import org.skyve.impl.metadata.view.widget.Link;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.Spacer;
 import org.skyve.impl.metadata.view.widget.StaticImage;
@@ -52,6 +57,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryInputType;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
+import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.Password;
 import org.skyve.impl.metadata.view.widget.bound.input.Radio;
 import org.skyve.impl.metadata.view.widget.bound.input.Slider;
@@ -64,8 +70,11 @@ import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.controller.Customisations;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.user.User;
+import org.skyve.util.OWASP;
 
 class SmartClientViewRendererCoverageTest {
+	private static final String UNSAFE_TITLE = "<img src=x onerror=alert(1)> & \"quoted\" 'single'";
+
 	private CustomerImpl customer;
 	private User user;
 	private ModuleImpl module;
@@ -198,6 +207,36 @@ class SmartClientViewRendererCoverageTest {
 	}
 
 	@Test
+	void renderVBoxEscapesBorderTitleByDefaultAndWhenExplicitlyTrue() {
+		SmartClientViewRenderer defaultRenderer = rendererWithViewContainer();
+		VBox defaultVBox = new VBox();
+		defaultVBox.setBorder(Boolean.TRUE);
+		defaultRenderer.renderVBox(UNSAFE_TITLE, defaultVBox);
+		assertTrue(defaultRenderer.getCode().toString().contains(escapedGroupTitle(UNSAFE_TITLE, null)));
+
+		SmartClientViewRenderer explicitRenderer = rendererWithViewContainer();
+		VBox explicitVBox = new VBox();
+		explicitVBox.setBorder(Boolean.TRUE);
+		explicitVBox.setEscapeBorderTitle(Boolean.TRUE);
+		explicitRenderer.renderVBox(UNSAFE_TITLE, explicitVBox);
+		assertTrue(explicitRenderer.getCode().toString().contains(escapedGroupTitle(UNSAFE_TITLE, Boolean.TRUE)));
+	}
+
+	@Test
+	void renderVBoxLeavesTrustedBorderTitleMarkupWhenEscapeFalse() {
+		SmartClientViewRenderer renderer = rendererWithViewContainer();
+		VBox vbox = new VBox();
+		vbox.setBorder(Boolean.TRUE);
+		vbox.setEscapeBorderTitle(Boolean.FALSE);
+
+		renderer.renderVBox(UNSAFE_TITLE, vbox);
+
+		String code = renderer.getCode().toString();
+		assertTrue(code.contains(escapedGroupTitle(UNSAFE_TITLE, Boolean.FALSE)), code);
+		assertFalse(code.contains(OWASP.escapeHtml(UNSAFE_TITLE)), code);
+	}
+
+	@Test
 	void renderHBoxWithCollapsibleDefaultsWritesWrapper() {
 		when(view.getName()).thenReturn("edit");
 		when(view.getSidebar()).thenReturn(null);
@@ -217,6 +256,25 @@ class SmartClientViewRendererCoverageTest {
 		assertTrue(code.contains("minimized:true,"));
 		assertTrue(code.contains("align:'right',"));
 		assertTrue(code.contains("defaultLayoutAlign:'bottom'"));
+	}
+
+	@Test
+	void renderHBoxEscapesCollapsibleTitleByDefaultAndAllowsTrustedMarkupWhenFalse() {
+		SmartClientViewRenderer defaultRenderer = rendererWithViewContainer();
+		HBox defaultHBox = new HBox();
+		defaultHBox.setCollapsible(Collapsible.closed);
+		defaultRenderer.renderHBox(UNSAFE_TITLE, defaultHBox);
+		assertTrue(defaultRenderer.getCode().toString().contains(escapedCollapsibleTitle(UNSAFE_TITLE, null)));
+
+		SmartClientViewRenderer trustedRenderer = rendererWithViewContainer();
+		HBox trustedHBox = new HBox();
+		trustedHBox.setCollapsible(Collapsible.closed);
+		trustedHBox.setEscapeBorderTitle(Boolean.FALSE);
+		trustedRenderer.renderHBox(UNSAFE_TITLE, trustedHBox);
+		String code = trustedRenderer.getCode().toString();
+		assertTrue(code.contains("title:'<img src=x onerror=alert(1)>"), code);
+		assertTrue(code.contains("&quot;quoted&quot;"), code);
+		assertFalse(code.contains("&lt;img"), code);
 	}
 
 	@Test
@@ -246,6 +304,50 @@ class SmartClientViewRendererCoverageTest {
 		assertTrue(code.contains("<i class=\"bizhubFontIcon fa-solid fa-star\"></i><span> &nbsp;</span>Overview"), code);
 		assertTrue(code.contains("disabledConditionName:'bean.tabDisabled'"), code);
 		assertTrue(code.contains("invisibleConditionName:'bean.tabHidden'"), code);
+	}
+
+	@Test
+	void renderedTabEscapesTitleByDefaultAndWhenExplicitlyTrue() {
+		SmartClientViewRenderer defaultRenderer = rendererWithOpenTabPane();
+		Tab defaultTab = new Tab();
+		defaultRenderer.renderTab(UNSAFE_TITLE, null, defaultTab);
+		defaultRenderer.renderedTab(UNSAFE_TITLE, null, defaultTab);
+		assertTrue(defaultRenderer.getCode().toString().contains(escapedTabTitle(UNSAFE_TITLE, null)));
+
+		SmartClientViewRenderer explicitRenderer = rendererWithOpenTabPane();
+		Tab explicitTab = new Tab();
+		explicitTab.setEscapeTitle(Boolean.TRUE);
+		explicitRenderer.renderTab(UNSAFE_TITLE, null, explicitTab);
+		explicitRenderer.renderedTab(UNSAFE_TITLE, null, explicitTab);
+		assertTrue(explicitRenderer.getCode().toString().contains(escapedTabTitle(UNSAFE_TITLE, Boolean.TRUE)));
+	}
+
+	@Test
+	void renderedTabLeavesTrustedTitleMarkupWhenEscapeFalse() {
+		SmartClientViewRenderer renderer = rendererWithOpenTabPane();
+		Tab tab = new Tab();
+		tab.setEscapeTitle(Boolean.FALSE);
+
+		renderer.renderTab(UNSAFE_TITLE, null, tab);
+		renderer.renderedTab(UNSAFE_TITLE, null, tab);
+
+		String code = renderer.getCode().toString();
+		assertTrue(code.contains(escapedTabTitle(UNSAFE_TITLE, Boolean.FALSE)), code);
+		assertFalse(code.contains(OWASP.escapeHtml(UNSAFE_TITLE)), code);
+	}
+
+	@Test
+	void renderedTabWithIconStyleEscapesOnlyMetadataTitle() {
+		SmartClientViewRenderer renderer = rendererWithOpenTabPane();
+		Tab tab = new Tab();
+		tab.setIconStyleClass("fa-solid fa-star");
+
+		renderer.renderTab(UNSAFE_TITLE, null, tab);
+		renderer.renderedTab(UNSAFE_TITLE, null, tab);
+
+		String code = renderer.getCode().toString();
+		assertTrue(code.contains("<i class=\"bizhubFontIcon fa-solid fa-star\"></i><span> &nbsp;</span>" +
+									SmartClientViewRenderer.escapeSmartClientText(UNSAFE_TITLE, true)), code);
 	}
 
 	@Test
@@ -286,7 +388,7 @@ class SmartClientViewRendererCoverageTest {
 		renderer.renderedTabPane(tabPane);
 
 		String code = renderer.getCode().toString();
-		assertTrue(code.contains("title:'Plain \\' title'"), code);
+		assertTrue(code.contains(escapedTabTitle("Plain ' title", null)), code);
 		assertFalse(code.contains("bizhubFontIcon"));
 		assertFalse(code.contains("icon:'../"));
 	}
@@ -376,6 +478,20 @@ class SmartClientViewRendererCoverageTest {
 		assertTrue(code.contains("numCols:4,colWidths:[120,'25%','50%','*']"), code);
 		assertTrue(code.contains("view._vm.addMember("), code);
 		assertTrue(code.contains("showTitle:true,colSpan:2,rowSpan:2,align:'center',titleAlign:'left',"), code);
+	}
+
+	@Test
+	void renderFormEscapesBorderTitleUsingFormFlag() {
+		SmartClientViewRenderer renderer = rendererWithViewContainer();
+		Form form = new Form();
+		form.setBorder(Boolean.TRUE);
+		form.setEscapeBorderTitle(Boolean.FALSE);
+
+		renderer.renderForm(UNSAFE_TITLE, form);
+
+		String code = renderer.getCode().toString();
+		assertTrue(code.contains(escapedGroupTitle(UNSAFE_TITLE, Boolean.FALSE)), code);
+		assertFalse(code.contains(OWASP.escapeHtml(UNSAFE_TITLE)), code);
 	}
 
 	@Test
@@ -666,6 +782,121 @@ class SmartClientViewRendererCoverageTest {
 	}
 
 	@Test
+	void renderFormInputEscapesLabelRequiredMessageAndHelpByDefault() {
+		addTextAttribute("name");
+		SmartClientViewRenderer renderer = rendererWithOpenForm();
+
+		FormItem item = beginFormItem(renderer, UNSAFE_TITLE);
+		item.setRequired(Boolean.TRUE);
+		item.setRequiredMessage(UNSAFE_TITLE);
+		item.setHelp(UNSAFE_TITLE);
+		TextField textField = new TextField();
+		textField.setBinding("name");
+		renderer.visitTextField(textField, true, true);
+		renderer.visitedFormItem(item, true, true);
+
+		String code = renderer.getCode().toString();
+		assertTrue(code.contains("title:'" + SmartClientViewRenderer.escapeSmartClientText(UNSAFE_TITLE, true) + " *'"), code);
+		assertTrue(code.contains("requiredMessage:'" + SmartClientViewRenderer.escapeSmartClientText(UNSAFE_TITLE, true) + "'"), code);
+		assertTrue(code.contains("prompt:'" + SmartClientViewRenderer.escapeSmartClientText(UNSAFE_TITLE, true) + "'"), code);
+	}
+
+	@Test
+	void renderFormInputHonoursFalseLabelRequiredMessageAndHelpFlags() {
+		addTextAttribute("name");
+		SmartClientViewRenderer renderer = rendererWithOpenForm();
+
+		FormItem item = beginFormItem(renderer, UNSAFE_TITLE);
+		item.setEscapeLabel(Boolean.FALSE);
+		item.setRequired(Boolean.TRUE);
+		item.setRequiredMessage(UNSAFE_TITLE);
+		item.setEscapeRequiredMessage(Boolean.FALSE);
+		item.setHelp(UNSAFE_TITLE);
+		item.setEscapeHelp(Boolean.FALSE);
+		TextField textField = new TextField();
+		textField.setBinding("name");
+		renderer.visitTextField(textField, true, true);
+		renderer.visitedFormItem(item, true, true);
+
+		String code = renderer.getCode().toString();
+		assertTrue(code.contains("title:'" + SmartClientViewRenderer.escapeSmartClientText(UNSAFE_TITLE, false) + " *'"), code);
+		assertTrue(code.contains("requiredMessage:'" + SmartClientViewRenderer.escapeSmartClientText(UNSAFE_TITLE, false) + "'"), code);
+		assertTrue(code.contains("prompt:'" + SmartClientViewRenderer.escapeSmartClientText(UNSAFE_TITLE, false) + "'"), code);
+		assertFalse(code.contains(OWASP.escapeHtml(UNSAFE_TITLE)), code);
+	}
+
+	@Test
+	void renderFormItemLabelBypassesHonourEscapeLabelFlag() {
+		SmartClientViewRenderer renderer = rendererWithOpenForm();
+
+		FormItem staticImageItem = beginFormItem(renderer, UNSAFE_TITLE);
+		staticImageItem.setEscapeLabel(Boolean.FALSE);
+		staticImageItem.setShowLabel(Boolean.TRUE);
+		StaticImage image = new StaticImage();
+		image.setRelativeFile("icons/test.png");
+		renderer.visitStaticImage(image, true, true);
+		renderer.visitedFormItem(staticImageItem, true, true);
+
+		FormItem linkItem = beginFormItem(renderer, UNSAFE_TITLE);
+		linkItem.setEscapeLabel(Boolean.FALSE);
+		Link link = new Link();
+		link.setValue("Open");
+		renderer.visitLink(link, true, true);
+		renderer.visitedFormItem(linkItem, true, true);
+
+		FormItem injectItem = beginFormItem(renderer, UNSAFE_TITLE);
+		injectItem.setEscapeLabel(Boolean.FALSE);
+		injectItem.setRequired(Boolean.TRUE);
+		Inject inject = new Inject();
+		inject.setScript("name:'custom'");
+		renderer.visitInject(inject, true, true);
+		renderer.visitedFormItem(injectItem, true, true);
+
+		String escapedRawTitle = SmartClientViewRenderer.escapeSmartClientText(UNSAFE_TITLE, false);
+		String code = renderer.getCode().toString();
+		assertTrue(code.contains("showTitle:true,title:\"" + escapedRawTitle + "\""), code);
+		assertTrue(code.contains("title:'" + escapedRawTitle + "',type:'blurb'"), code);
+		assertTrue(code.contains("title:'" + escapedRawTitle + "',required:true,name:'custom'"), code);
+		assertFalse(code.contains(OWASP.escapeHtml(UNSAFE_TITLE)), code);
+	}
+
+	@Test
+	void renderListMembershipEscapesHeadingsByDefaultAndWhenExplicitTrue() {
+		addCollectionAttribute("roles");
+		SmartClientViewRenderer defaultRenderer = rendererWithViewContainer();
+		ListMembership defaultMembership = listMembership(Boolean.TRUE);
+		defaultMembership.setEscapeCandidatesHeading(null);
+		defaultMembership.setEscapeMembersHeading(null);
+
+		defaultRenderer.visitListMembership(defaultMembership, true, true);
+		String defaultCode = defaultRenderer.getCode().toString();
+		assertTrue(defaultCode.contains("candidatesHeading:'" + SmartClientViewRenderer.escapeSmartClientText(UNSAFE_TITLE, true) + "'"), defaultCode);
+		assertTrue(defaultCode.contains("membersHeading:'" + SmartClientViewRenderer.escapeSmartClientText(UNSAFE_TITLE, true) + "'"), defaultCode);
+
+		SmartClientViewRenderer explicitRenderer = rendererWithViewContainer();
+		ListMembership explicitMembership = listMembership(Boolean.TRUE);
+
+		explicitRenderer.visitListMembership(explicitMembership, true, true);
+		String explicitCode = explicitRenderer.getCode().toString();
+		assertTrue(explicitCode.contains("candidatesHeading:'" + SmartClientViewRenderer.escapeSmartClientText(UNSAFE_TITLE, true) + "'"), explicitCode);
+		assertTrue(explicitCode.contains("membersHeading:'" + SmartClientViewRenderer.escapeSmartClientText(UNSAFE_TITLE, true) + "'"), explicitCode);
+	}
+
+	@Test
+	void renderListMembershipAllowsTrustedHeadingsWhenEscapingFalse() {
+		addCollectionAttribute("roles");
+		SmartClientViewRenderer renderer = rendererWithViewContainer();
+		ListMembership membership = listMembership(Boolean.FALSE);
+
+		renderer.visitListMembership(membership, true, true);
+
+		String code = renderer.getCode().toString();
+		assertTrue(code.contains("candidatesHeading:'" + SmartClientViewRenderer.escapeSmartClientText(UNSAFE_TITLE, false) + "'"), code);
+		assertTrue(code.contains("membersHeading:'" + SmartClientViewRenderer.escapeSmartClientText(UNSAFE_TITLE, false) + "'"), code);
+		assertFalse(code.contains(OWASP.escapeHtml(UNSAFE_TITLE)), code);
+	}
+
+	@Test
 	void renderFormSliderSpinnerAndTextInputsWriteNumericAndCompletionOptions() {
 		addTextAttribute("score");
 		addTextAttribute("quantity");
@@ -767,6 +998,40 @@ class SmartClientViewRendererCoverageTest {
 	}
 
 	@Test
+	void renderActionEscapesDisplayNameTooltipAndConfirmUnlessExplicitlyTrusted() {
+		when(view.getName()).thenReturn("edit");
+		when(view.getSidebar()).thenReturn(null);
+		doReturn(Boolean.TRUE).when(user).canExecuteAction(document, "unsafeAction");
+		SmartClientViewRenderer renderer = new SmartClientViewRenderer(user, module, document, view, "desktop", false);
+		renderer.renderView(null, null);
+
+		ActionImpl action = action("unsafeAction");
+		action.setDisplayName(UNSAFE_TITLE);
+		action.setToolTip(UNSAFE_TITLE);
+		action.setConfirmationText(UNSAFE_TITLE);
+		renderer.visitCustomAction(action);
+
+		String escaped = SmartClientViewRenderer.escapeSmartClientText(UNSAFE_TITLE, true);
+		String code = renderer.getCode().toString();
+		assertTrue(code.contains("displayName:'<span> &nbsp;</span>" + escaped + "'"), code);
+		assertTrue(code.contains("tooltip:'" + escaped + "'"), code);
+		assertTrue(code.contains("confirm:'" + escaped + "'"), code);
+
+		SmartClientViewRenderer trustedRenderer = new SmartClientViewRenderer(user, module, document, view, "desktop", false);
+		trustedRenderer.renderView(null, null);
+		action.setEscapeDisplayName(Boolean.FALSE);
+		action.setEscapeToolTip(Boolean.FALSE);
+		action.setEscapeConfirm(Boolean.FALSE);
+		trustedRenderer.visitCustomAction(action);
+
+		String trusted = SmartClientViewRenderer.escapeSmartClientText(UNSAFE_TITLE, false);
+		String trustedCode = trustedRenderer.getCode().toString();
+		assertTrue(trustedCode.contains("displayName:'<span> &nbsp;</span>" + trusted + "'"), trustedCode);
+		assertTrue(trustedCode.contains("tooltip:'" + trusted + "'"), trustedCode);
+		assertTrue(trustedCode.contains("confirm:'" + trusted + "'"), trustedCode);
+	}
+
+	@Test
 	void renderButtonUploadActionReferenceWritesCapture() {
 		when(view.getName()).thenReturn("edit");
 		when(view.getSidebar()).thenReturn(null);
@@ -853,6 +1118,33 @@ class SmartClientViewRendererCoverageTest {
 		return renderer;
 	}
 
+	private SmartClientViewRenderer rendererWithViewContainer() {
+		when(view.getName()).thenReturn("edit");
+		when(view.getSidebar()).thenReturn(null);
+
+		SmartClientViewRenderer renderer = new SmartClientViewRenderer(user, module, document, view, "desktop", false);
+		renderer.renderView(null, null);
+		return renderer;
+	}
+
+	private SmartClientViewRenderer rendererWithOpenTabPane() {
+		SmartClientViewRenderer renderer = rendererWithViewContainer();
+		renderer.renderTabPane(new TabPane());
+		return renderer;
+	}
+
+	private static String escapedTabTitle(String title, Boolean escape) {
+		return "title:'" + SmartClientViewRenderer.escapeSmartClientText(title, ViewRenderer.shouldEscape(escape)) + "'";
+	}
+
+	private static String escapedGroupTitle(String title, Boolean escape) {
+		return "groupTitle:'&nbsp;&nbsp;" + SmartClientViewRenderer.escapeSmartClientText(title, ViewRenderer.shouldEscape(escape)) + "&nbsp;&nbsp;'";
+	}
+
+	private static String escapedCollapsibleTitle(String title, Boolean escape) {
+		return "BizCollapsible.create({title:'" + SmartClientViewRenderer.escapeSmartClientText(title, ViewRenderer.shouldEscape(escape)) + "'";
+	}
+
 	private static FormItem beginFormItem(SmartClientViewRenderer renderer, String label) {
 		FormItem item = new FormItem();
 		item.setLabel(label);
@@ -866,6 +1158,24 @@ class SmartClientViewRendererCoverageTest {
 		text.setDisplayName(name);
 		text.setLength(100);
 		document.putAttribute(text);
+	}
+
+	private void addCollectionAttribute(String name) {
+		CollectionImpl collection = new CollectionImpl();
+		collection.setName(name);
+		collection.setDisplayName(name);
+		collection.setDocumentName("Role");
+		document.putAttribute(collection);
+	}
+
+	private static ListMembership listMembership(Boolean escape) {
+		ListMembership membership = new ListMembership();
+		membership.setBinding("roles");
+		membership.setCandidatesHeading(UNSAFE_TITLE);
+		membership.setMembersHeading(UNSAFE_TITLE);
+		membership.setEscapeCandidatesHeading(escape);
+		membership.setEscapeMembersHeading(escape);
+		return membership;
 	}
 
 	private static ActionImpl action(String resourceName) {

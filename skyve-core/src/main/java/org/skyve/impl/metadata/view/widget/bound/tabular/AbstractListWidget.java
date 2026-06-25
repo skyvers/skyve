@@ -34,6 +34,7 @@ import jakarta.xml.bind.annotation.XmlType;
  */
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"title", 
+							"escapeTitle",
 							"queryName",
 							"modelName",
 							"postRefreshConditionName",
@@ -58,6 +59,7 @@ public abstract class AbstractListWidget implements RelativeSize, Filterable, In
 	private static final long serialVersionUID = 9068940194810436542L;
 
 	private String title;
+	private Boolean escapeTitle;
 	
 	private String queryName;
 	private String modelName;
@@ -102,6 +104,15 @@ public abstract class AbstractListWidget implements RelativeSize, Filterable, In
 	}
 
 	/**
+	 * Returns whether the title text should be escaped before rendering.
+	 *
+	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	public Boolean getEscapeTitle() {
+		return escapeTitle;
+	}
+
+	/**
 	 * Sets the list title after trimming and empty-string normalisation.
 	 *
 	 * @param title the title expression
@@ -109,6 +120,16 @@ public abstract class AbstractListWidget implements RelativeSize, Filterable, In
 	@XmlAttribute(required = false)
 	public void setTitle(String title) {
 		this.title = UtilImpl.processStringValue(title);
+	}
+
+	/**
+	 * Sets whether the title text should be escaped before rendering.
+	 *
+	 * @param escapeTitle {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	@XmlAttribute(required = false)
+	public void setEscapeTitle(Boolean escapeTitle) {
+		this.escapeTitle = escapeTitle;
 	}
 
 	/**

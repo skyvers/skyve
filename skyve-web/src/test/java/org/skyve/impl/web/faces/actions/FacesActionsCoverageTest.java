@@ -31,6 +31,7 @@ import org.skyve.domain.types.OptimisticLock;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.web.faces.models.BeanMapAdapter;
 import org.skyve.impl.web.faces.views.FacesView;
@@ -235,7 +236,9 @@ class FacesActionsCoverageTest {
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
-		View view = mock(View.class);
+		ViewImpl view = new ViewImpl();
+		view.setName("edit");
+		view.setTitle("<img src=x onerror=alert(1)> {bizKey}");
 		bindPersistenceForUser(user);
 
 		when(user.getCustomer()).thenReturn(customer);
@@ -251,12 +254,45 @@ class FacesActionsCoverageTest {
 		when(customer.getModule("admin")).thenReturn(module);
 		when(module.getDocument(customer, "Contact")).thenReturn(document);
 		when(document.getView(org.mockito.ArgumentMatchers.eq("desktop"), org.mockito.ArgumentMatchers.eq(customer), org.mockito.ArgumentMatchers.anyString())).thenReturn(view);
-		when(view.getLocalisedTitle()).thenReturn("Fixed title");
+		when(bean.getBizKey()).thenReturn("Fixed title");
 
 		SetTitleAction action = new SetTitleAction(facesView);
 		assertDoesNotThrow(action::callback);
 
-		verify(facesView).setTitle("Fixed title");
+		verify(facesView).setTitle("<img src=x onerror=alert(1)> Fixed title");
+	}
+
+	@Test
+	void setTitleActionAllowsTrustedViewTitleWhenEscapingFalse() throws Exception {
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		ViewImpl view = new ViewImpl();
+		view.setName("edit");
+		view.setTitle("<b>{bizKey}</b>");
+		view.setEscapeTitle(Boolean.FALSE);
+		bindPersistenceForUser(user);
+
+		when(user.getCustomer()).thenReturn(customer);
+
+		FacesView facesView = mock(FacesView.class);
+		Bean bean = mock(Bean.class);
+		when(facesView.getBean()).thenReturn(bean);
+		when(facesView.getViewBinding()).thenReturn(null);
+		when(facesView.getUxUi()).thenReturn(org.skyve.metadata.router.UxUi.newPrimeFaces("desktop", "template", "saga"));
+
+		when(bean.getBizModule()).thenReturn("admin");
+		when(bean.getBizDocument()).thenReturn("Contact");
+		when(bean.getBizKey()).thenReturn("Trusted title");
+		when(customer.getModule("admin")).thenReturn(module);
+		when(module.getDocument(customer, "Contact")).thenReturn(document);
+		when(document.getView(org.mockito.ArgumentMatchers.eq("desktop"), org.mockito.ArgumentMatchers.eq(customer), org.mockito.ArgumentMatchers.anyString())).thenReturn(view);
+
+		SetTitleAction action = new SetTitleAction(facesView);
+		assertDoesNotThrow(action::callback);
+
+		verify(facesView).setTitle("<b>Trusted title</b>");
 	}
 
 	@Test

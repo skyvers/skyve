@@ -180,6 +180,25 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	/**
+	 * Escapes metadata-owned text for a SmartClient JavaScript string boundary.
+	 *
+	 * <p>Applies the metadata HTML escaping decision first, then JavaScript string
+	 * escaping required by SmartClient source generation.
+	 *
+	 * @param value metadata text after localisation and expression resolution
+	 * @param escape {@code true} to HTML-escape before JavaScript escaping;
+	 *        {@code false} to allow trusted markup
+	 * @return escaped JavaScript string content, or {@code null} when {@code value} is {@code null}
+	 */
+	static String escapeSmartClientText(String value, boolean escape) {
+		if (value == null) {
+			return null;
+		}
+		String result = escape ? OWASP.escapeHtml(value) : value;
+		return OWASP.escapeJsString(result);
+	}
+
+	/**
 	 * Starts SmartClient view rendering by creating the top-level container for the active view type.
 	 *
 	 * @param icon16x16Url The icon 16 x 16 url.
@@ -363,7 +382,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append("',title:'");
 		}
 
-		code.append(OWASP.escapeJsString(title));
+		code.append(escapeSmartClientText(title, shouldEscape(tab.getEscapeTitle())));
 		code.append("',pane:").append(paneVariable).append(',');
 		tabNumbers.push(Integer.valueOf(tabNumber.intValue() + 1));
 		disabled(tab.getDisabledConditionName(), code);
@@ -392,6 +411,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	private void vbox(String borderTitle, VBox vbox) {
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append("=isc.BizVBox.create({");
+		String escapedBorderTitle = escapeSmartClientText(borderTitle, shouldEscape(vbox.getEscapeBorderTitle()));
 
 		// if collapsible, then make the inner vbox 100% width and height and do not put the border/title
 		Collapsible collapsible = vbox.getCollapsible();
@@ -404,7 +424,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 		else {
 			size(vbox, null, code);
-			bordered(borderTitle, vbox, vbox.getPixelPadding(), code);
+			bordered(escapedBorderTitle, vbox, vbox.getPixelPadding(), code);
 		}
 
 		box(vbox);
@@ -444,7 +464,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		removeTrailingComma(code);
 		code.append("});\n");
 
-		String collapsibleVar = collapsible(borderTitle, vbox, variable);
+		String collapsibleVar = collapsible(escapedBorderTitle, vbox, variable);
 		code.append(containerVariables.peek()).append(".addContained(").append((collapsibleVar == null) ? variable : collapsibleVar).append(");\n");
 		containerVariables.push(variable);
 	}
@@ -470,6 +490,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void renderHBox(String borderTitle, HBox hbox) {
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append("=isc.BizHBox.create({");
+		String escapedBorderTitle = escapeSmartClientText(borderTitle, shouldEscape(hbox.getEscapeBorderTitle()));
 
 		// if collapsible, then make the inner hbox 100% width and height and do not put the border/title
 		Collapsible collapsible = hbox.getCollapsible();
@@ -482,7 +503,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 		else {
 			size(hbox, null, code);
-			bordered(borderTitle, hbox, hbox.getPixelPadding(), code);
+			bordered(escapedBorderTitle, hbox, hbox.getPixelPadding(), code);
 		}
 
 		HorizontalAlignment h = hbox.getHorizontalAlignment();
@@ -523,7 +544,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 		code.append("});\n");
 
-		String collapsibleVar = collapsible(borderTitle, hbox, variable);
+		String collapsibleVar = collapsible(escapedBorderTitle, hbox, variable);
 		code.append(containerVariables.peek()).append(".addContained(").append((collapsibleVar == null) ? variable : collapsibleVar).append(");\n");
 		containerVariables.push(variable);
 	}
@@ -561,7 +582,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	/**
 	 * Wraps an item in a collapsible container when the box declares collapsible behaviour.
 	 *
-	 * @param borderTitle The localized border title.
+	 * @param borderTitle localized border title already escaped for a SmartClient JavaScript string
 	 * @param box The box metadata.
 	 * @param itemVariable The JavaScript variable for the inner item.
 	 * @return The collapsible wrapper variable name, or null when no wrapper is created.
@@ -607,6 +628,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			borderBox = new VBox();
 			borderBox.setBorder(Boolean.TRUE);
 			borderBox.setBorderTitle(form.getLocalisedBorderTitle());
+			borderBox.setEscapeBorderTitle(form.getEscapeBorderTitle());
 			borderBox.setCollapsible(collapsible);
 			borderBox.setInvisibleConditionName(form.getInvisibleConditionName());
 			borderBox.setPixelWidth(form.getPixelWidth());
@@ -835,11 +857,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		String buttonCode = generateButton(name,
 											action.getImplicitName(),
 											label,
+											getActionEscapeDisplayName(),
 											action.getClientValidation(),
 											iconUrl,
 											iconStyleClass,
 											toolTip,
+											getActionEscapeToolTip(),
 											confirmationText,
+											getActionEscapeConfirm(),
 											action.getParameters(),
 											action.getDisabledConditionName(),
 											action.getInvisibleConditionName(),
@@ -878,11 +903,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		String buttonCode = generateButton(name,
 											action.getImplicitName(),
 											label,
+											getActionEscapeDisplayName(),
 											action.getClientValidation(),
 											iconUrl,
 											iconStyleClass,
 											toolTip,
+											getActionEscapeToolTip(),
 											confirmationText,
+											getActionEscapeConfirm(),
 											action.getParameters(),
 											action.getDisabledConditionName(),
 											action.getInvisibleConditionName(),
@@ -1079,7 +1107,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	@Override
 	public void renderFormDialogButton(String label, DialogButton button) {
 		code.append("type:'blurb',defaultValue:'dialog button ");
-		code.append(OWASP.escapeJsString(label)).append("',");
+		code.append(escapeSmartClientText(label, shouldEscape(button.getEscapeDisplayName()))).append("',");
 		disabled(button.getDisabledConditionName(), code);
 		invisible(button.getInvisibleConditionName(), code);
 	}
@@ -1094,7 +1122,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void renderDialogButton(String label, DialogButton button) {
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append("=isc.BizLabel.create({value: '");
-		code.append(OWASP.escapeJsString(label));
+		code.append(escapeSmartClientText(label, shouldEscape(button.getEscapeDisplayName())));
 		code.append("'});\n");
 		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 	}
@@ -1145,7 +1173,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (isCurrentWidgetShowLabel()) {
 			String title = getCurrentWidgetLabel();
 			if (title != null) {
-				code.append("showTitle:true,title:\"").append(OWASP.escapeJsString(title)).append("\",");
+				code.append("showTitle:true,title:\"").append(escapeSmartClientText(title, getCurrentWidgetEscapeLabel())).append("\",");
 			}
 		}
 		else {
@@ -1260,7 +1288,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (label == null) {
 			label = "Link";
 		}
-		code.append("title:'").append(label).append("',");
+		code.append("title:'").append(escapeSmartClientText(label, getCurrentWidgetEscapeLabel())).append("',");
 		code.append("type:'blurb',name:'_");
 		code.append(formatCounter++).append("',"); // _1, _2 and so on
 		size(link, null, code);
@@ -1661,7 +1689,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append("name:'").append(listWidgetVariable).append("',");
 		String title = widget.getLocalisedTitle();
 		if (title != null) {
-			border(OWASP.escapeJsString(title), null, code);
+			border(escapeSmartClientText(title, shouldEscape(widget.getEscapeTitle())), null, code);
 		}
 		String postRefreshConditionName = widget.getPostRefreshConditionName();
 		if (postRefreshConditionName != null) {
@@ -1850,7 +1878,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append(",canDelete:").append(user.canDeleteDocument(dataWidgetDocument)).append(',');
 		String title = widget.getLocalisedTitle();
 		if (title != null) {
-			border(OWASP.escapeJsString(title), null, code);
+			border(escapeSmartClientText(title, shouldEscape(widget.getEscapeTitle())), null, code);
 		}
 		if ((relation instanceof Collection collection) && Boolean.TRUE.equals(collection.getOrdered())) {
 			code.append("_ordinal:'").append(Bean.ORDINAL_NAME).append("',");
@@ -1920,6 +1948,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			}
 
 			def.setTitle(title);
+			def.setEscapeTitle(shouldEscape(column.getEscapeTitle()));
 			def.setEditable(! Boolean.FALSE.equals(column.getEditable()));
 			def.setEscape(! Boolean.FALSE.equals(column.getEscape()));
 
@@ -1976,7 +2005,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append("{name:'_").append(formatCounter++);
 		code.append("',type:'text',formatCellValue:'value;',canEdit:false,title:'");
 
-		code.append((title == null) ? " " : OWASP.escapeJsString(title)).append('\'');
+		code.append((title == null) ? " " : escapeSmartClientText(title, shouldEscape(column.getEscapeTitle()))).append('\'');
 		HorizontalAlignment alignment = column.getAlignment();
 		if (alignment != null) {
 			code.append(",align:'").append(alignment.toTextAlignmentString()).append('\'');
@@ -2366,11 +2395,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append('\'');
 		if (candidatesHeading != null) {
 			code.append(",candidatesHeading:'");
-			code.append(OWASP.escapeJsString(candidatesHeading)).append('\'');
+			code.append(escapeSmartClientText(candidatesHeading, shouldEscape(membership.getEscapeCandidatesHeading()))).append('\'');
 		}
 		if (membersHeading != null) {
 			code.append(",membersHeading:'");
-			code.append(OWASP.escapeJsString(membersHeading)).append('\'');
+			code.append(escapeSmartClientText(membersHeading, shouldEscape(membership.getEscapeMembersHeading()))).append('\'');
 		}
 		if ((relation instanceof Collection collection) && Boolean.TRUE.equals(collection.getOrdered())) {
 			code.append(",_ordinal:'").append(Bean.ORDINAL_NAME).append('\'');
@@ -2885,7 +2914,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (currentFormItem != null) {
 			// NB instead of preprocessFormItem(), handle title and required
 			if (currentFormItem.getLabel() != null) {
-				code.append("title:'").append(UtilImpl.processStringValue(getCurrentWidgetLabel())).append("',");
+				code.append("title:'").append(escapeSmartClientText(UtilImpl.processStringValue(getCurrentWidgetLabel()), getCurrentWidgetEscapeLabel())).append("',");
 			}
 			if (Boolean.TRUE.equals(currentFormItem.getRequired())) {
 				code.append("required:true,");
@@ -4106,7 +4135,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	/**
 	 * Applies bordered-group styling only when the component enables border rendering.
 	 *
-	 * @param title optional border title
+	 * @param title optional border title already escaped for a SmartClient JavaScript string
 	 * @param bordered border-capable metadata
 	 * @param definedPixelPadding explicit padding value, or null
 	 * @param builder JavaScript buffer receiving border properties
@@ -4120,14 +4149,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	/**
 	 * Appends the base SmartClient group-border presentation properties.
 	 *
-	 * @param title optional border title
+	 * @param title optional border title already escaped for a SmartClient JavaScript string
 	 * @param definedPixelPadding explicit padding value, or null
 	 * @param builder JavaScript buffer receiving border properties
 	 */
 	private static void border(String title, Integer definedPixelPadding, StringBuilder builder) {
 		builder.append("styleName:'bizhubRoundedBorder',groupBorderCSS:'1px solid #bfbfbf',isGroup:true,margin:1,groupLabelBackgroundColor:'transparent',");
 		if (title != null) {
-			builder.append("groupTitle:'&nbsp;&nbsp;").append(OWASP.escapeJsString(title));
+			builder.append("groupTitle:'&nbsp;&nbsp;").append(title);
 			builder.append("&nbsp;&nbsp;',groupLabelStyleName:'bizhubBorderLabel',");
 		}
 		if (definedPixelPadding == null) {
@@ -4268,11 +4297,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			String buttonCode = generateButton(actionName,
 												implicitName,
 												displayName,
+												getActionEscapeDisplayName(),
 												clientValidation,
 												iconUrl,
 												iconStyleClass,
 												tooltip,
+												getActionEscapeToolTip(),
 												confirmationText,
+												getActionEscapeConfirm(),
 												parameters,
 												disabledConditionName,
 												invisibleConditionName,
@@ -4352,7 +4384,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 			if (label != null) {
 				result.append("<span> &nbsp;</span>")
-						.append(OWASP.escapeJsString(label));
+						.append(escapeSmartClientText(label, shouldEscape(zoomIn.getEscapeDisplayName())));
 			}
 		}
 
@@ -4370,7 +4402,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 		if (toolTip != null) {
 			result.append("tooltip:'")
-					.append(OWASP.escapeJsString(toolTip))
+					.append(escapeSmartClientText(toolTip, shouldEscape(zoomIn.getEscapeToolTip())))
 					.append("',");
 		}
 
@@ -4385,11 +4417,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param actionName action name sent to the client runtime
 	 * @param implicitName implicit action kind, or null
 	 * @param label optional button label
+	 * @param escapeDisplayName whether the button label should be escaped
 	 * @param clientValidation whether client-side validation should run
 	 * @param iconUrl optional icon URL
 	 * @param iconStyleClass optional icon style class
 	 * @param toolTip optional tooltip text
+	 * @param escapeToolTip whether the tooltip should be escaped
 	 * @param confirmationText optional confirmation message
+	 * @param escapeConfirm whether the confirmation message should be escaped
 	 * @param parameters action parameters
 	 * @param disabledConditionName optional disabled condition binding
 	 * @param invisibleConditionName optional invisible condition binding
@@ -4401,11 +4436,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	private String generateButton(String actionName,
 									ImplicitActionName implicitName,
 									String label,
+									boolean escapeDisplayName,
 									Boolean clientValidation,
 									String iconUrl,
 									String iconStyleClass,
 									String toolTip,
+									boolean escapeToolTip,
 									String confirmationText,
+									boolean escapeConfirm,
 									List<Parameter> parameters,
 									String disabledConditionName,
 									String invisibleConditionName,
@@ -4428,7 +4466,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 				result.append("<i class=\"bizhubFontIcon ").append(iconStyleClass).append("\"></i>");
 			}
 			if (label != null) {
-				result.append("<span> &nbsp;</span>").append(OWASP.escapeJsString(label));
+				result.append("<span> &nbsp;</span>").append(escapeSmartClientText(label, escapeDisplayName));
 			}
 		}
 		result.append("',tabIndex:999,");
@@ -4441,10 +4479,10 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		disabled(disabledConditionName, result);
 		invisible(invisibleConditionName, result);
 		if (toolTip != null) {
-			result.append("tooltip:'").append(OWASP.escapeJsString(toolTip)).append("',");
+			result.append("tooltip:'").append(escapeSmartClientText(toolTip, escapeToolTip)).append("',");
 		}
 		if (confirmationText != null) {
-			result.append("confirm:'").append(OWASP.escapeJsString(confirmationText)).append("',");
+			result.append("confirm:'").append(escapeSmartClientText(confirmationText, escapeConfirm)).append("',");
 		}
 		appendParameters(parameters, result);
 		if (canDelete != null) {
@@ -4560,11 +4598,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		String title = getCurrentWidgetLabel();
 		if (title != null) {
 			def.setTitle(title);
+			def.setEscapeTitle(getCurrentWidgetEscapeLabel());
 		}
 		def.setRequiredMessage(getCurrentWidgetRequiredMessage());
+		def.setEscapeRequiredMessage(getCurrentWidgetEscapeRequiredMessage());
 		String help = getCurrentWidgetHelp();
 		if (help != null) {
 			def.setHelpText(help);
+			def.setEscapeHelp(getCurrentWidgetEscapeHelp());
 		}
 
 		code.append(def.toJavascript());

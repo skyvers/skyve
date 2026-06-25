@@ -87,6 +87,17 @@ public interface Action extends NamedMetaData, Disableable, Invisible, Parameter
 	public String getDisplayName();
 
 	/**
+	 * Returns whether the action display name should be escaped before rendering.
+	 *
+	 * <p>{@code null} preserves the default renderer behaviour, which is to escape.
+	 *
+	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	public default Boolean getEscapeDisplayName() {
+		return null;
+	}
+
+	/**
 	 * Returns the localised button label for the current user locale.
 	 *
 	 * @return a non-{@code null} localised display name
@@ -120,6 +131,17 @@ public interface Action extends NamedMetaData, Disableable, Invisible, Parameter
 	 * @return the confirmation text, or {@code null} for no confirmation dialog
 	 */
 	public String getConfirmationText();
+
+	/**
+	 * Returns whether the confirmation dialog text should be escaped before rendering.
+	 *
+	 * <p>{@code null} preserves the default renderer behaviour, which is to escape.
+	 *
+	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	public default Boolean getEscapeConfirm() {
+		return null;
+	}
 	
 	/**
 	 * Returns the localised confirmation dialog text for the current user locale.
@@ -138,6 +160,17 @@ public interface Action extends NamedMetaData, Disableable, Invisible, Parameter
 	 * @return the tooltip text, or {@code null} if none
 	 */
 	public String getToolTip();
+
+	/**
+	 * Returns whether the tooltip text should be escaped before rendering.
+	 *
+	 * <p>{@code null} preserves the default renderer behaviour, which is to escape.
+	 *
+	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	public default Boolean getEscapeToolTip() {
+		return null;
+	}
 	
 	/**
 	 * Returns the localised tooltip text for the current user locale.

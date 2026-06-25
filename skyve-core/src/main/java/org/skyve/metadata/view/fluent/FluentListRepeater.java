@@ -43,6 +43,7 @@ public class FluentListRepeater extends FluentWidget implements FluentRelativeSi
 		}
 
 		title(list.getTitle());
+		escapeTitle(list.getEscapeTitle());
 		queryName(list.getQueryName());
 		modelName(list.getModelName());
 		postRefreshConditionName(list.getPostRefreshConditionName());
@@ -90,6 +91,27 @@ public class FluentListRepeater extends FluentWidget implements FluentRelativeSi
 	 */
 	public FluentListRepeater title(String title) {
 		list.setTitle(title);
+		return this;
+	}
+
+	/**
+	 * Sets whether the list title should be escaped before rendering.
+	 *
+	 * @param escapeTitle {@code false} to allow trusted markup; {@code true} to escape at the renderer boundary
+	 * @return this builder
+	 */
+	public FluentListRepeater escapeTitle(boolean escapeTitle) {
+		return escapeTitle(escapeTitle ? Boolean.TRUE : Boolean.FALSE);
+	}
+
+	/**
+	 * Sets whether the list title should be escaped before rendering.
+	 *
+	 * @param escapeTitle {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 * @return this builder
+	 */
+	public FluentListRepeater escapeTitle(Boolean escapeTitle) {
+		list.setEscapeTitle(escapeTitle);
 		return this;
 	}
 

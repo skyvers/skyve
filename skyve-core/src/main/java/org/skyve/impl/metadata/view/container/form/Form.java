@@ -55,6 +55,7 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 							"maxPixelHeight", 
 							"border",
 							"borderTitle",
+							"escapeBorderTitle",
 							"collapsible",
 							"labelDefaultHorizontalAlignment",
 							"labelLayout",
@@ -72,6 +73,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	
 	private Boolean border;
 	private String borderTitle;
+	private Boolean escapeBorderTitle;
 	
 	private Integer pixelWidth;
 	private Integer percentageWidth;
@@ -180,6 +182,15 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	}
 
 	/**
+	 * Returns whether the border title text should be escaped before rendering.
+	 *
+	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	public Boolean getEscapeBorderTitle() {
+		return escapeBorderTitle;
+	}
+
+	/**
 	 * Sets the border title text.
 	 *
 	 * @param borderTitle  border title text; may be {@code null}
@@ -188,6 +199,16 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	@XmlAttribute(required = false)
 	public void setBorderTitle(String borderTitle) {
 		this.borderTitle = borderTitle;
+	}
+
+	/**
+	 * Sets whether the border title text should be escaped before rendering.
+	 *
+	 * @param escapeBorderTitle {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	@XmlAttribute(required = false)
+	public void setEscapeBorderTitle(Boolean escapeBorderTitle) {
+		this.escapeBorderTitle = escapeBorderTitle;
 	}
 
 	/**

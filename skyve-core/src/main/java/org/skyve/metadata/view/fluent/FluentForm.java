@@ -49,6 +49,7 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 		widgetId(form.getWidgetId());
 		border(Boolean.TRUE.equals(form.getBorder()));
 		borderTitle(form.getBorderTitle());
+		escapeBorderTitle(form.getEscapeBorderTitle());
 
 		relativeSize(form, this);
 
@@ -99,6 +100,27 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 	 */
 	public FluentForm borderTitle(String borderTitle) {
 		form.setBorderTitle(borderTitle);
+		return this;
+	}
+
+	/**
+	 * Sets whether the form border title should be escaped before rendering.
+	 *
+	 * @param escapeBorderTitle {@code false} to allow trusted markup; {@code true} to escape at the renderer boundary
+	 * @return this builder
+	 */
+	public FluentForm escapeBorderTitle(boolean escapeBorderTitle) {
+		return escapeBorderTitle(escapeBorderTitle ? Boolean.TRUE : Boolean.FALSE);
+	}
+
+	/**
+	 * Sets whether the form border title should be escaped before rendering.
+	 *
+	 * @param escapeBorderTitle {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 * @return this builder
+	 */
+	public FluentForm escapeBorderTitle(Boolean escapeBorderTitle) {
+		form.setEscapeBorderTitle(escapeBorderTitle);
 		return this;
 	}
 

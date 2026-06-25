@@ -31,6 +31,7 @@ public abstract class DataGridColumn implements TabularColumn, AbsoluteWidth, De
 	private static final long serialVersionUID = -5532364729219436008L;
 
 	private String title;
+	private Boolean escapeTitle;
 	private HorizontalAlignment alignment;
 	private Integer pixelWidth;
 
@@ -43,10 +44,29 @@ public abstract class DataGridColumn implements TabularColumn, AbsoluteWidth, De
 		return title;
 	}
 
+	/**
+	 * Returns whether the column title text should be escaped before rendering.
+	 *
+	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	public Boolean getEscapeTitle() {
+		return escapeTitle;
+	}
+
 	@Override
 	@XmlAttribute
 	public void setTitle(String title) {
 		this.title = UtilImpl.processStringValue(title);
+	}
+
+	/**
+	 * Sets whether the column title text should be escaped before rendering.
+	 *
+	 * @param escapeTitle {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 */
+	@XmlAttribute
+	public void setEscapeTitle(Boolean escapeTitle) {
+		this.escapeTitle = escapeTitle;
 	}
 
 	@Override

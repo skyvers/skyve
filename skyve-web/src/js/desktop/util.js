@@ -10,6 +10,25 @@ isc.RPCManager.saveDataPrompt = "Contacting Server...";
 isc.RPCManager.removeDataPrompt = "Contacting Server...";
 
 /**
+ * Preserves server-supplied HTML escaping decisions in field error tooltips.
+ * SmartClient's default implementation calls `asHTML()`, which always escapes
+ * the error text before placing it into the hover markup.
+ * @param {string|string[]} errors - field validation error text.
+ * @returns {string} - HTML for the error hover.
+ */
+isc.FormItem.getErrorPromptString = function (errors) {
+	if (!isc.isAn.Array(errors)) {
+		errors = [errors];
+	}
+
+	let result = "";
+	for (let i = 0; i < errors.length; i++) {
+		result += (i > 0 ? "<br>" : "") + (errors[i] == null ? "" : String(errors[i]));
+	}
+	return result;
+};
+
+/**
  * Handles RPC errors.
  * @param {Object} response - the RPC response object.
  * @param {Object} request - the RPC request object.

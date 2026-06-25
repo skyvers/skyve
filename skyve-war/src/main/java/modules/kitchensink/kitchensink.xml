@@ -13,6 +13,7 @@
 		<document ref="ListAttributes" />
 		<document ref="OrderedGrid" />
 		<document ref="DataRepeater" />
+		<document ref="EscapingFixture" />
 		<document ref="LookupDescription" />
 	</documents>
 	<roles>
@@ -29,6 +30,9 @@
 				<document name="ListAttributes" permission="CRUDD" />
 				<document name="OrderedGrid" permission="CRUDD" />
 				<document name="DataRepeater" permission="CRUDD" />
+				<document name="EscapingFixture" permission="CRUDD">
+					<action name="TrustedDisplayName" />
+				</document>
 				<document name="LookupDescription" permission="CRUDD" />
 			</privileges>
 		</role>
@@ -43,6 +47,9 @@
 		<list name="List" document="ListAttributes">
 			<role name="dev" />
 		</list>
+		<edit name="Escaping Fixture" document="EscapingFixture">
+			<role name="dev" />
+		</edit>
 		<link href="#" name="Map">
 			<role name="dev" />
 		</link>
@@ -53,4 +60,12 @@
 			<role name="dev" />
 		</list>
 	</menu>
+	<queries>
+		<query name="qEscapingFixture" documentName="ListAttributes">
+			<description>Small query used by the Kitchen Sink escaping fixture view.</description>
+			<columns>
+				<column binding="text" displayName="Text" />
+			</columns>
+		</query>
+	</queries>
 </module>

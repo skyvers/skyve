@@ -13,6 +13,7 @@ import org.skyve.impl.metadata.view.container.TabPane;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
 import org.skyve.impl.metadata.view.widget.Chart;
+import org.skyve.impl.metadata.view.widget.DialogButton;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
 import org.skyve.impl.metadata.view.widget.Link;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
@@ -112,6 +113,23 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 
 	@Override
 	public UIComponent spacer(UIComponent component, Spacer spacer) {
+		return component;
+	}
+
+	/**
+	 * Leaves dialog-button construction unchanged.
+	 *
+	 * @param component the current component
+	 * @param label raw button label and nullable escape flag
+	 * @param button dialog-button metadata
+	 * @param formDisabledConditionName optional form-level disabled condition
+	 * @return the original component
+	 */
+	@Override
+	public UIComponent dialogButton(UIComponent component,
+										EscapableText label,
+										DialogButton button,
+										String formDisabledConditionName) {
 		return component;
 	}
 
@@ -326,10 +344,23 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 		return component;
 	}
 
+	/**
+	 * Leaves list-membership caption construction unchanged for no-op builders.
+	 *
+	 * @param component the existing wrapper component
+	 * @param candidatesHeading raw candidates-list heading and nullable escape flag;
+	 *        {@code null} and {@code Boolean.TRUE} escape, while {@code Boolean.FALSE}
+	 *        allows trusted markup
+	 * @param membersHeading raw members-list heading and nullable escape flag;
+	 *        {@code null} and {@code Boolean.TRUE} escape, while {@code Boolean.FALSE}
+	 *        allows trusted markup
+	 * @param membership the list-membership metadata
+	 * @return {@code component} unchanged
+	 */
 	@Override
 	public EventSourceComponent listMembership(EventSourceComponent component,
-												String candidatesHeading,
-												String membersHeading,
+												EscapableText candidatesHeading,
+												EscapableText membersHeading,
 												ListMembership membership) {
 		return component;
 	}

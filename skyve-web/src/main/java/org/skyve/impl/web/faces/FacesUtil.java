@@ -30,13 +30,13 @@ public class FacesUtil {
 	 * Session key used to store a temporary managed bean during redirect navigation.
 	 */
 	// used to place a bean temporarily in the session when a redirect is done during navigate
-	public static String MANAGED_BEAN_NAME_KEY = "skyveFacesBean";
+	public static final String MANAGED_BEAN_NAME_KEY = "skyveFacesBean";
 
 	/**
 	 * View key used to cache responsive form style metadata.
 	 */
 	// used to get the responsive form grid out of the view root when required
-	public static String FORM_STYLES_KEY = "skyveFormStyles";
+	public static final String FORM_STYLES_KEY = "skyveFormStyles";
 
 	private static final String SET_STYLE_CLASS_METHOD_NAME = "setStyleClass";
 
@@ -164,6 +164,7 @@ public class FacesUtil {
 	 * <p>Side effects: mutates the thread-local {@link FacesContext} holder used by JSF so that SAIL view
 	 * traversal can execute component-building code paths without an active servlet-driven Faces lifecycle.
 	 */
+	@SuppressWarnings("java:S3011") // reflection is required to access the private FacesContext.instance field for SAIL mocking
 	public static void setSailFacesContextIfNeeded() {
 		try {
 			if (FacesContext.getCurrentInstance() == null) {
@@ -185,6 +186,7 @@ public class FacesUtil {
 	 * <p>Side effects: clears the JSF thread-local {@link FacesContext} only when the active context is the
 	 * mock SAIL implementation.
 	 */
+	@SuppressWarnings("java:S3011") // reflection is required to access the private FacesContext.instance field for SAIL mocking
 	public static void resetSailFacesContextIfNeeded() {
 		try {
 			FacesContext fc = FacesContext.getCurrentInstance();

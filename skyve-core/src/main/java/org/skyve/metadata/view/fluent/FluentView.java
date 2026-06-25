@@ -54,6 +54,7 @@ public class FluentView extends FluentContainer<FluentView> {
 	public FluentView from(@SuppressWarnings("hiding") View view) {
 		name(view.getName());
 		title(view.getTitle());
+		escapeTitle(((ViewImpl) view).getEscapeTitle());
 		iconStyleClass(view.getIconStyleClass());
 		icon32x32RelativeFileName(view.getIcon32x32RelativeFileName());
 		documentation(view.getDocumentation());
@@ -103,6 +104,27 @@ public class FluentView extends FluentContainer<FluentView> {
 	 */
 	public FluentView title(String title) {
 		view.setTitle(title);
+		return this;
+	}
+
+	/**
+	 * Sets whether the view title should be escaped before rendering.
+	 *
+	 * @param escapeTitle {@code false} to allow trusted markup; {@code true} to escape at the renderer boundary
+	 * @return this builder
+	 */
+	public FluentView escapeTitle(boolean escapeTitle) {
+		return escapeTitle(escapeTitle ? Boolean.TRUE : Boolean.FALSE);
+	}
+
+	/**
+	 * Sets whether the view title should be escaped before rendering.
+	 *
+	 * @param escapeTitle {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 * @return this builder
+	 */
+	public FluentView escapeTitle(Boolean escapeTitle) {
+		view.setEscapeTitle(escapeTitle);
 		return this;
 	}
 

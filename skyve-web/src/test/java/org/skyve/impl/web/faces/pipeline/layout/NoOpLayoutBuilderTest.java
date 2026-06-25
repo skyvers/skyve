@@ -168,14 +168,14 @@ class NoOpLayoutBuilderTest {
 
 	@Test
 	void layoutFormItemLabelDoesNothing() {
-		builder.layoutFormItemLabel(component, other, new Form(), new FormItem(), new FormColumn(), "label", null, "invisible", null);
+		builder.layoutFormItemLabel(component, other, new Form(), new FormItem(), new FormColumn(), "label", true, null, true, "invisible", null);
 		// No-op - verify component reference not null
 		assertNotNull(component);
 	}
 
 	@Test
 	void layoutFormItemWidgetDoesNothing() {
-		builder.layoutFormItemWidget(component, other, new Form(), new FormItem(), new FormColumn(), "label", 1, null, "invisible", null, null, true, false);
+		builder.layoutFormItemWidget(component, other, new Form(), new FormItem(), new FormColumn(), "label", true, 1, null, true, "invisible", null, true, null, true, false);
 		// No-op - verify component reference not null
 		assertNotNull(component);
 	}

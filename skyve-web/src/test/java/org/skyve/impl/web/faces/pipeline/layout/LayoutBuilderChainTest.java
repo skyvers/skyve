@@ -255,8 +255,8 @@ class LayoutBuilderChainTest {
 		Form form = new Form();
 		FormItem formItem = mock(FormItem.class);
 		FormColumn formColumn = mock(FormColumn.class);
-		chain.layoutFormItemLabel(mockComponent, formItemComponent, form, formItem, formColumn, "label", null, "invisible", "help");
-		verify(mockBuilder).layoutFormItemLabel(mockComponent, formItemComponent, form, formItem, formColumn, "label", null, "invisible", "help");
+		chain.layoutFormItemLabel(mockComponent, formItemComponent, form, formItem, formColumn, "label", true, null, false, "invisible", "help");
+		verify(mockBuilder).layoutFormItemLabel(mockComponent, formItemComponent, form, formItem, formColumn, "label", true, null, false, "invisible", "help");
 	}
 
 	@Test
@@ -265,8 +265,8 @@ class LayoutBuilderChainTest {
 		Form form = new Form();
 		FormItem formItem = mock(FormItem.class);
 		FormColumn formColumn = mock(FormColumn.class);
-		chain.layoutFormItemWidget(mockComponent, formItemComponent, form, formItem, formColumn, "label", 1, null, "invisible", "help", 100, true, false);
-		verify(mockBuilder).layoutFormItemWidget(mockComponent, formItemComponent, form, formItem, formColumn, "label", 1, null, "invisible", "help", 100, true, false);
+		chain.layoutFormItemWidget(mockComponent, formItemComponent, form, formItem, formColumn, "label", true, 1, null, false, "invisible", "help", false, 100, true, false);
+		verify(mockBuilder).layoutFormItemWidget(mockComponent, formItemComponent, form, formItem, formColumn, "label", true, 1, null, false, "invisible", "help", false, 100, true, false);
 	}
 
 	@Test

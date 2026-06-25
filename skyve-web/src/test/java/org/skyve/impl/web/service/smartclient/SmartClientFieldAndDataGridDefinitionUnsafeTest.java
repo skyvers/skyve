@@ -11,7 +11,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.metadata.controller.CustomisationsStaticSingleton;
+import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.metadata.model.document.field.Memo;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
+import org.skyve.impl.metadata.view.widget.bound.input.TextField;
+import org.skyve.metadata.controller.Customisations;
 
 @SuppressWarnings({"static-method", "boxing"})
 class SmartClientFieldAndDataGridDefinitionUnsafeTest {
@@ -54,6 +60,45 @@ class SmartClientFieldAndDataGridDefinitionUnsafeTest {
 		assertTrue(js.contains("optionDataSource:'mod_query_doc_rel'"));
 		assertTrue(js.contains("pickListFields:[{name:'code'},{name:'label'}]"));
 		assertTrue(js.contains("filterFields:['label']"));
+	}
+
+	@Test
+	void fieldToJavascriptEscapesTitleRequiredMessageAndHelpByDefault() throws Exception {
+		SmartClientFieldDefinition def = unsafeFieldDefinition();
+
+		String js = def.toJavascript();
+
+		assertTrue(js.contains("title:'" + SmartClientViewRenderer.escapeSmartClientText(unsafeText(), true) + " *'"), js);
+		assertTrue(js.contains("requiredMessage:'" + SmartClientViewRenderer.escapeSmartClientText(unsafeText(), true)), js);
+		assertTrue(js.contains("prompt:'" + SmartClientViewRenderer.escapeSmartClientText(unsafeText(), true) + "'"), js);
+	}
+
+	@Test
+	void fieldToJavascriptEscapesTitleRequiredMessageAndHelpWhenExplicitlyTrue() throws Exception {
+		SmartClientFieldDefinition def = unsafeFieldDefinition();
+		def.setEscapeTitle(Boolean.TRUE);
+		def.setEscapeRequiredMessage(Boolean.TRUE);
+		def.setEscapeHelp(Boolean.TRUE);
+
+		String js = def.toJavascript();
+
+		assertTrue(js.contains("title:'" + SmartClientViewRenderer.escapeSmartClientText(unsafeText(), true) + " *'"), js);
+		assertTrue(js.contains("requiredMessage:'" + SmartClientViewRenderer.escapeSmartClientText(unsafeText(), true) + "'"), js);
+		assertTrue(js.contains("prompt:'" + SmartClientViewRenderer.escapeSmartClientText(unsafeText(), true) + "'"), js);
+	}
+
+	@Test
+	void fieldToJavascriptLeavesTrustedTitleRequiredMessageAndHelpRawWhenFalse() throws Exception {
+		SmartClientFieldDefinition def = unsafeFieldDefinition();
+		def.setEscapeTitle(Boolean.FALSE);
+		def.setEscapeRequiredMessage(Boolean.FALSE);
+		def.setEscapeHelp(Boolean.FALSE);
+
+		String js = def.toJavascript();
+
+		assertTrue(js.contains("title:'" + SmartClientViewRenderer.escapeSmartClientText(unsafeText(), false) + " *'"), js);
+		assertTrue(js.contains("requiredMessage:'" + SmartClientViewRenderer.escapeSmartClientText(unsafeText(), false) + "'"), js);
+		assertTrue(js.contains("prompt:'" + SmartClientViewRenderer.escapeSmartClientText(unsafeText(), false) + "'"), js);
 	}
 
 	@Test
@@ -102,6 +147,77 @@ class SmartClientFieldAndDataGridDefinitionUnsafeTest {
 		assertTrue(js.contains("canEdit:false"));
 		assertTrue(js.contains("width:120"));
 		assertTrue(js.contains("escapeHTML:true"));
+	}
+
+	@Test
+	void dataGridToJavascriptEscapesStringDefaultValueAsJavascriptLiteral() {
+		DocumentImpl document = new DocumentImpl();
+		document.setName("Fixture");
+		document.setOwningModuleName("test");
+		Memo memo = new Memo();
+		memo.setName("memo");
+		memo.setDisplayName("Memo");
+		memo.setDefaultValue("Test {el:newGeometry('POINT(0 0)')}");
+		document.putAttribute(memo);
+		TextField widget = new TextField();
+		widget.setBinding("memo");
+		Customisations customisations = mock(Customisations.class);
+		when(customisations.determineDefaultColumnTextAlignment("desktop", memo.getAttributeType()))
+				.thenReturn(HorizontalAlignment.left);
+		Customisations previousCustomisations = CustomisationsStaticSingleton.get();
+		CustomisationsStaticSingleton.set(customisations);
+
+		try {
+			SmartClientDataGridFieldDefinition def = new SmartClientDataGridFieldDefinition(null,
+					new CustomerImpl(),
+					null,
+					document,
+					widget,
+					null,
+					false,
+					false,
+					false,
+					"desktop");
+
+			String js = def.toJavascript();
+
+			assertTrue(js.contains("defaultValue:'Test {el:newGeometry(\\'POINT(0 0)\\')}'"), js);
+			assertFalse(js.contains("defaultValue:'Test {el:newGeometry('POINT(0 0)')}'"), js);
+		}
+		finally {
+			CustomisationsStaticSingleton.set(previousCustomisations);
+		}
+	}
+
+	@Test
+	void dataGridToJavascriptEscapesTitleByDefault() throws Exception {
+		SmartClientDataGridFieldDefinition def = unsafeDataGridDefinition();
+
+		String js = def.toJavascript();
+
+		assertTrue(js.contains("title:'" + SmartClientViewRenderer.escapeSmartClientText(unsafeText(), true) + "'"), js);
+		assertTrue(js.contains("requiredMessage:'" + SmartClientViewRenderer.escapeSmartClientText(unsafeText(), true)), js);
+	}
+
+	@Test
+	void dataGridToJavascriptEscapesTitleWhenExplicitlyTrue() throws Exception {
+		SmartClientDataGridFieldDefinition def = unsafeDataGridDefinition();
+		def.setEscapeTitle(Boolean.TRUE);
+
+		String js = def.toJavascript();
+
+		assertTrue(js.contains("title:'" + SmartClientViewRenderer.escapeSmartClientText(unsafeText(), true) + "'"), js);
+	}
+
+	@Test
+	void dataGridToJavascriptLeavesTrustedTitleRawWhenFalse() throws Exception {
+		SmartClientDataGridFieldDefinition def = unsafeDataGridDefinition();
+		def.setEscapeTitle(Boolean.FALSE);
+
+		String js = def.toJavascript();
+
+		assertTrue(js.contains("title:'" + SmartClientViewRenderer.escapeSmartClientText(unsafeText(), false) + "'"), js);
+		assertTrue(js.contains("requiredMessage:'" + SmartClientViewRenderer.escapeSmartClientText(unsafeText(), true)), js);
 	}
 
 	@Test
@@ -196,5 +312,33 @@ class SmartClientFieldAndDataGridDefinitionUnsafeTest {
 		Object unsafe = f.get(null);
 		Method allocateInstance = unsafeType.getMethod("allocateInstance", Class.class);
 		return type.cast(allocateInstance.invoke(unsafe, type));
+	}
+
+	private static SmartClientFieldDefinition unsafeFieldDefinition() throws Exception {
+		SmartClientFieldDefinition def = allocate(SmartClientFieldDefinition.class);
+		def.name = "unsafe";
+		def.title = unsafeText();
+			def.type = "text";
+			def.required = true;
+			def.requiredMessage = unsafeText();
+			def.setEscapeTitle(true);
+			def.setEscapeRequiredMessage(true);
+			def.setEscapeHelp(true);
+			def.setHelpText(unsafeText());
+			return def;
+		}
+
+	private static SmartClientDataGridFieldDefinition unsafeDataGridDefinition() throws Exception {
+		SmartClientDataGridFieldDefinition def = allocate(SmartClientDataGridFieldDefinition.class);
+		def.name = "unsafe";
+			def.title = unsafeText();
+			def.type = "text";
+			def.required = true;
+			def.setEscapeTitle(true);
+			return def;
+		}
+
+	private static String unsafeText() {
+		return "<img src=x onerror=alert(1)> & \"quoted\" 'single'";
 	}
 }

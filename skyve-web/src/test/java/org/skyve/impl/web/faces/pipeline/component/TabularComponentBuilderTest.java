@@ -75,6 +75,7 @@ import org.skyve.impl.metadata.view.container.Sidebar;
 import org.skyve.impl.metadata.view.container.TabPane;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
+import org.skyve.impl.metadata.view.widget.DialogButton;
 import org.skyve.impl.metadata.view.widget.Link;
 import org.skyve.impl.metadata.view.widget.bound.Label;
 import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
@@ -199,6 +200,7 @@ class TabularComponentBuilderTest {
 		CommandLink delegatedDownloadLinkResult = mock(CommandLink.class);
 
 		String actionTitle;
+		Boolean actionTitleEscape;
 		String actionIconStyleClass;
 		String actionTooltip;
 		ImplicitActionName actionImplicitName;
@@ -209,6 +211,7 @@ class TabularComponentBuilderTest {
 		Integer actionPixelWidth;
 		Integer actionPixelHeight;
 		String actionConfirmationText;
+		Boolean actionConfirmationEscape;
 		String actionDisabled;
 		String actionFormDisabled;
 		String actionInvisible;
@@ -217,6 +220,7 @@ class TabularComponentBuilderTest {
 		boolean actionCanDelete;
 
 		String uploadTitle;
+		Boolean uploadTitleEscape;
 		String uploadIconStyleClass;
 		String uploadTooltip;
 		String uploadActionName;
@@ -224,6 +228,7 @@ class TabularComponentBuilderTest {
 		Integer uploadPixelHeight;
 		Boolean uploadClientValidation;
 		String uploadConfirmationText;
+		Boolean uploadConfirmationEscape;
 		String uploadDisabled;
 		String uploadFormDisabled;
 		String uploadInvisible;
@@ -231,6 +236,7 @@ class TabularComponentBuilderTest {
 		boolean uploadUseDialog;
 
 		String linkTitle;
+		Boolean linkTitleEscape;
 		String linkTooltip;
 		ImplicitActionName linkImplicitName;
 		String linkActionName;
@@ -241,6 +247,7 @@ class TabularComponentBuilderTest {
 		Integer linkPixelHeight;
 		Boolean linkClientValidation;
 		String linkConfirmationText;
+		Boolean linkConfirmationEscape;
 		String linkDisabled;
 		String linkFormDisabled;
 		String linkInvisible;
@@ -248,12 +255,14 @@ class TabularComponentBuilderTest {
 		String linkUpdateOverride;
 
 		String downloadLinkTitle;
+		Boolean downloadLinkTitleEscape;
 		String downloadLinkTooltip;
 		String downloadLinkActionName;
 		String downloadLinkDataWidgetBinding;
 		String downloadLinkDataWidgetVar;
 		Integer downloadLinkPixelWidth;
 		String downloadLinkConfirmationText;
+		Boolean downloadLinkConfirmationEscape;
 		String downloadLinkDisabled;
 		String downloadLinkFormDisabled;
 		String downloadLinkInvisible;
@@ -265,7 +274,7 @@ class TabularComponentBuilderTest {
 		}
 
 		@Override
-		protected CommandButton actionButton(String title,
+		protected CommandButton actionButton(EscapableText title,
 												String iconStyleClass,
 												String tooltip,
 												ImplicitActionName implicitActionName,
@@ -275,14 +284,15 @@ class TabularComponentBuilderTest {
 												String dataWidgetVar,
 												Integer pixelWidth,
 												Integer pixelHeight,
-												String confirmationText,
+												EscapableText confirmationText,
 												String disabled,
 												String formDisabled,
 												String invisible,
 												String processOverride,
 												String updateOverride,
 												boolean canDelete) {
-			this.actionTitle = title;
+			this.actionTitle = (title == null) ? null : title.getValue();
+			this.actionTitleEscape = (title == null) ? null : Boolean.valueOf(title.getEscape());
 			this.actionIconStyleClass = iconStyleClass;
 			this.actionTooltip = tooltip;
 			this.actionImplicitName = implicitActionName;
@@ -292,7 +302,8 @@ class TabularComponentBuilderTest {
 			this.actionDataWidgetVar = dataWidgetVar;
 			this.actionPixelWidth = pixelWidth;
 			this.actionPixelHeight = pixelHeight;
-			this.actionConfirmationText = confirmationText;
+			this.actionConfirmationText = (confirmationText == null) ? null : confirmationText.getValue();
+			this.actionConfirmationEscape = (confirmationText == null) ? null : Boolean.valueOf(confirmationText.getEscape());
 			this.actionDisabled = disabled;
 			this.actionFormDisabled = formDisabled;
 			this.actionInvisible = invisible;
@@ -303,27 +314,29 @@ class TabularComponentBuilderTest {
 		}
 
 		@Override
-		protected UIComponent uploadButton(String title,
+		protected UIComponent uploadButton(EscapableText title,
 											String iconStyleClass,
 											String tooltip,
 											String actionNameValue,
 											Integer pixelWidth,
 											Integer pixelHeight,
 											Boolean clientValidation,
-											String confirmationText,
+											EscapableText confirmationText,
 											String disabled,
 											String formDisabled,
 											String invisible,
 											ContentCapture capture,
 											boolean useDialog) {
-			this.uploadTitle = title;
+			this.uploadTitle = (title == null) ? null : title.getValue();
+			this.uploadTitleEscape = (title == null) ? null : Boolean.valueOf(title.getEscape());
 			this.uploadIconStyleClass = iconStyleClass;
 			this.uploadTooltip = tooltip;
 			this.uploadActionName = actionNameValue;
 			this.uploadPixelWidth = pixelWidth;
 			this.uploadPixelHeight = pixelHeight;
 			this.uploadClientValidation = clientValidation;
-			this.uploadConfirmationText = confirmationText;
+			this.uploadConfirmationText = (confirmationText == null) ? null : confirmationText.getValue();
+			this.uploadConfirmationEscape = (confirmationText == null) ? null : Boolean.valueOf(confirmationText.getEscape());
 			this.uploadDisabled = disabled;
 			this.uploadFormDisabled = formDisabled;
 			this.uploadInvisible = invisible;
@@ -333,7 +346,7 @@ class TabularComponentBuilderTest {
 		}
 
 		@Override
-		protected CommandLink actionLink(String title,
+		protected CommandLink actionLink(EscapableText title,
 											String tooltip,
 											ImplicitActionName implicitActionName,
 											String actionNameValue,
@@ -343,13 +356,14 @@ class TabularComponentBuilderTest {
 											Integer pixelWidth,
 											Integer pixelHeight,
 											Boolean clientValidation,
-											String confirmationText,
+											EscapableText confirmationText,
 											String disabled,
 											String formDisabled,
 											String invisible,
 											String processOverride,
 											String updateOverride) {
-			this.linkTitle = title;
+			this.linkTitle = (title == null) ? null : title.getValue();
+			this.linkTitleEscape = (title == null) ? null : Boolean.valueOf(title.getEscape());
 			this.linkTooltip = tooltip;
 			this.linkImplicitName = implicitActionName;
 			this.linkActionName = actionNameValue;
@@ -359,7 +373,8 @@ class TabularComponentBuilderTest {
 			this.linkPixelWidth = pixelWidth;
 			this.linkPixelHeight = pixelHeight;
 			this.linkClientValidation = clientValidation;
-			this.linkConfirmationText = confirmationText;
+			this.linkConfirmationText = (confirmationText == null) ? null : confirmationText.getValue();
+			this.linkConfirmationEscape = (confirmationText == null) ? null : Boolean.valueOf(confirmationText.getEscape());
 			this.linkDisabled = disabled;
 			this.linkFormDisabled = formDisabled;
 			this.linkInvisible = invisible;
@@ -369,25 +384,27 @@ class TabularComponentBuilderTest {
 		}
 
 		@Override
-		protected CommandLink downloadLink(String title,
+		protected CommandLink downloadLink(EscapableText title,
 											String tooltip,
 											String actionNameValue,
 											String dataWidgetBinding,
 											String dataWidgetVar,
 											Integer pixelWidth,
-											String confirmationText,
+											EscapableText confirmationText,
 											String disabled,
 											String formDisabled,
 											String invisible,
 											String processOverride,
 											String updateOverride) {
-			this.downloadLinkTitle = title;
+			this.downloadLinkTitle = (title == null) ? null : title.getValue();
+			this.downloadLinkTitleEscape = (title == null) ? null : Boolean.valueOf(title.getEscape());
 			this.downloadLinkTooltip = tooltip;
 			this.downloadLinkActionName = actionNameValue;
 			this.downloadLinkDataWidgetBinding = dataWidgetBinding;
 			this.downloadLinkDataWidgetVar = dataWidgetVar;
 			this.downloadLinkPixelWidth = pixelWidth;
-			this.downloadLinkConfirmationText = confirmationText;
+			this.downloadLinkConfirmationText = (confirmationText == null) ? null : confirmationText.getValue();
+			this.downloadLinkConfirmationEscape = (confirmationText == null) ? null : Boolean.valueOf(confirmationText.getEscape());
 			this.downloadLinkDisabled = disabled;
 			this.downloadLinkFormDisabled = formDisabled;
 			this.downloadLinkInvisible = invisible;
@@ -1089,17 +1106,22 @@ class TabularComponentBuilderTest {
 	@Test
 	void testTabCreatesTabComponentWhenNull() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
-		Tab tabComponent = new Tab();
+		Tab tabComponent = mock(Tab.class);
+		HtmlOutputText title = mock(HtmlOutputText.class);
+		Map<String, UIComponent> facets = new HashMap<>();
 		when(mockApplication.createComponent(Tab.COMPONENT_TYPE)).thenReturn(tabComponent);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(title);
+		when(tabComponent.getFacets()).thenReturn(facets);
 		FacesView managedBean = mock(FacesView.class);
-		when(managedBean.nextId()).thenReturn("generatedTabId");
+		when(managedBean.nextId()).thenReturn("generatedTitleId", "generatedTabId");
 		builder.setManagedBeanForTest(managedBean);
 
 		org.skyve.impl.metadata.view.container.Tab metadataTab = new org.skyve.impl.metadata.view.container.Tab();
 		Tab result = (Tab) builder.tab(null, "My Tab", metadataTab);
 
 		assertSame(tabComponent, result);
-		assertEquals("generatedTabId", result.getId());
+		assertSame(title, facets.get("title"));
+		verify(tabComponent).setId("generatedTabId");
 	}
 
 	@SuppressWarnings("static-method")
@@ -1198,22 +1220,120 @@ class TabularComponentBuilderTest {
 	void testPanelWithCollapsibleClosedAddsToggleBehavior() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
 		Panel panel = mock(Panel.class);
+		HtmlOutputText header = mock(HtmlOutputText.class);
+		Map<String, UIComponent> facets = new HashMap<>();
 		AjaxBehavior ajax = mock(AjaxBehavior.class);
 		MethodExpression methodExpression = mock(MethodExpression.class);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("headerId");
+		builder.setManagedBeanForTest(managedBean);
 
 		when(mockApplication.createComponent(Panel.COMPONENT_TYPE)).thenReturn(panel);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(header);
+		when(panel.getFacets()).thenReturn(facets);
 		when(mockApplication.createBehavior(AjaxBehavior.BEHAVIOR_ID)).thenReturn(ajax);
 		when(mockExpressionFactory.createMethodExpression(any(ELContext.class), anyString(), isNull(), any(Class[].class))).thenReturn(methodExpression);
 
 		builder.invokePanelForTest("Section", null, null, Collapsible.closed, "panel1");
 
-		verify(panel).setHeader("Section");
+		assertSame(header, facets.get("header"));
+		verify(header).setValue("Section");
+		verify(header).setEscape(true);
 		verify(panel).setId("panel1");
 		verify(panel).setToggleable(true);
 		verify(panel).setCollapsed(true);
 		verify(ajax).setProcess("@this");
 		verify(ajax).setUpdate("@none");
 		verify(panel).addClientBehavior("toggle", ajax);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testPanelEscapesHeaderByDefault() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("panelId");
+		builder.setManagedBeanForTest(managedBean);
+		Panel panel = mock(Panel.class);
+		HtmlOutputText header = mock(HtmlOutputText.class);
+		Map<String, UIComponent> facets = new HashMap<>();
+		when(mockApplication.createComponent(Panel.COMPONENT_TYPE)).thenReturn(panel);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(header);
+		when(panel.getFacets()).thenReturn(facets);
+
+		builder.invokePanelForTest("<img src=x onerror=alert(1)>", null, null, null, null);
+
+		assertSame(header, facets.get("header"));
+		verify(header).setValue("<img src=x onerror=alert(1)>");
+		verify(header).setEscape(true);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testPanelAllowsTrustedHeaderWhenEscapeFalse() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("panelId");
+		builder.setManagedBeanForTest(managedBean);
+		Panel panel = mock(Panel.class);
+		HtmlOutputText header = mock(HtmlOutputText.class);
+		Map<String, UIComponent> facets = new HashMap<>();
+		when(mockApplication.createComponent(Panel.COMPONENT_TYPE)).thenReturn(panel);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(header);
+		when(panel.getFacets()).thenReturn(facets);
+		builder.setCurrentInputTitleEscape(false);
+
+		builder.invokePanelForTest("<b>Trusted</b>", null, null, null, null);
+
+		assertSame(header, facets.get("header"));
+		verify(header).setValue("<b>Trusted</b>");
+		verify(header).setEscape(false);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testTabEscapesTitleByDefault() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("tabId");
+		builder.setManagedBeanForTest(managedBean);
+		Tab tabComponent = mock(Tab.class);
+		HtmlOutputText title = mock(HtmlOutputText.class);
+		Map<String, UIComponent> facets = new HashMap<>();
+		when(mockApplication.createComponent(Tab.COMPONENT_TYPE)).thenReturn(tabComponent);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(title);
+		when(tabComponent.getFacets()).thenReturn(facets);
+
+		builder.tab(null, "<img src=x onerror=alert(1)>", new org.skyve.impl.metadata.view.container.Tab());
+
+		assertSame(title, facets.get("title"));
+		verify(title).setValue("<img src=x onerror=alert(1)>");
+		verify(title).setEscape(true);
+		verify(tabComponent, never()).setTitle(anyString());
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testTabAllowsTrustedTitleWhenEscapeFalse() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("tabId");
+		builder.setManagedBeanForTest(managedBean);
+		Tab tabComponent = mock(Tab.class);
+		HtmlOutputText title = mock(HtmlOutputText.class);
+		Map<String, UIComponent> facets = new HashMap<>();
+		org.skyve.impl.metadata.view.container.Tab tab = new org.skyve.impl.metadata.view.container.Tab();
+		tab.setEscapeTitle(Boolean.FALSE);
+		when(mockApplication.createComponent(Tab.COMPONENT_TYPE)).thenReturn(tabComponent);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(title);
+		when(tabComponent.getFacets()).thenReturn(facets);
+
+		builder.tab(null, "<b>Trusted</b>", tab);
+
+		assertSame(title, facets.get("title"));
+		verify(title).setValue("<b>Trusted</b>");
+		verify(title).setEscape(false);
+		verify(tabComponent, never()).setTitle(anyString());
 	}
 
 	@SuppressWarnings("static-method")
@@ -1265,12 +1385,12 @@ class TabularComponentBuilderTest {
 		ConfirmBehavior confirm = mock(ConfirmBehavior.class);
 		when(mockApplication.createBehavior(ConfirmBehavior.BEHAVIOR_ID)).thenReturn(confirm);
 
-		Method method = TabularComponentBuilder.class.getDeclaredMethod("setConfirmation", UIComponentBase.class, String.class);
+		Method method = TabularComponentBuilder.class.getDeclaredMethod("setConfirmation", UIComponentBase.class, EscapableText.class);
 		method.setAccessible(true);
-		method.invoke(builder, component, "Proceed?");
+		method.invoke(builder, component, EscapableText.of("Proceed?", true));
 
 		verify(confirm).setMessage("Proceed?");
-		verify(confirm).setEscape(false);
+		verify(confirm).setEscape(true);
 		verify(component).addClientBehavior("click", confirm);
 	}
 
@@ -1294,11 +1414,90 @@ class TabularComponentBuilderTest {
 
 		assertSame(commandButton, result);
 		verify(commandButton).setValue("Zoom");
+		verify(commandButton).setEscape(true);
 		verify(commandButton).setIcon("pi pi-search");
 		verify(commandButton).setTitle("Open");
 		verify(commandButton).setProcess("@form");
 		verify(commandButton).setUpdate("@(form)");
 		verify(commandButton).setActionExpression(actionExpression);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testZoomInEscapesLabelAndTooltipByDefault() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		CommandButton commandButton = mock(CommandButton.class);
+		MethodExpression actionExpression = mock(MethodExpression.class);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("zoomInId");
+		builder.setManagedBeanForTest(managedBean);
+
+		when(mockApplication.createComponent(CommandButton.COMPONENT_TYPE)).thenReturn(commandButton);
+		when(mockExpressionFactory.createMethodExpression(any(ELContext.class), anyString(), isNull(), any(Class[].class))).thenReturn(actionExpression);
+
+		ZoomIn zoomIn = new ZoomIn();
+		zoomIn.setBinding("contact");
+
+		builder.zoomIn(null,
+						"<img src=x onerror=alert(1)>",
+						"pi pi-search",
+						"Open \"contact\"",
+						zoomIn,
+						null);
+
+		verify(commandButton).setValue("<img src=x onerror=alert(1)>");
+		verify(commandButton).setEscape(true);
+		verify(commandButton).setTitle("Open \"contact\"");
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testZoomInAllowsTrustedLabelButStripsTooltipWhenEscapeFalse() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		CommandButton commandButton = mock(CommandButton.class);
+		MethodExpression actionExpression = mock(MethodExpression.class);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("zoomInId");
+		builder.setManagedBeanForTest(managedBean);
+
+		when(mockApplication.createComponent(CommandButton.COMPONENT_TYPE)).thenReturn(commandButton);
+		when(mockExpressionFactory.createMethodExpression(any(ELContext.class), anyString(), isNull(), any(Class[].class))).thenReturn(actionExpression);
+
+		ZoomIn zoomIn = new ZoomIn();
+		zoomIn.setBinding("contact");
+		zoomIn.setEscapeDisplayName(Boolean.FALSE);
+		zoomIn.setEscapeToolTip(Boolean.FALSE);
+
+		builder.zoomIn(null, "<b>Zoom</b>", "pi pi-search", "<i>Open</i>", zoomIn, null);
+
+		verify(commandButton).setValue("<b>Zoom</b>");
+		verify(commandButton).setEscape(false);
+		verify(commandButton).setTitle("Open");
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testDialogButtonAllowsTrustedDisplayNameWhenEscapeFalse() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		CommandButton commandButton = mock(CommandButton.class);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("dialogButtonId");
+		builder.setManagedBeanForTest(managedBean);
+
+		when(mockApplication.createComponent(CommandButton.COMPONENT_TYPE)).thenReturn(commandButton);
+
+		DialogButton dialogButton = new DialogButton();
+		dialogButton.setEscapeDisplayName(Boolean.FALSE);
+
+		UIComponent result = builder.dialogButton(null,
+													EscapableText.of("Trusted <i>dialog button</i>", false),
+													dialogButton,
+													null);
+
+		assertSame(commandButton, result);
+		verify(commandButton).setValue("Trusted <i>dialog button</i>");
+		verify(commandButton).setEscape(false);
+		verify(commandButton).setType("button");
 	}
 
 	@SuppressWarnings("static-method")
@@ -1558,12 +1757,12 @@ class TabularComponentBuilderTest {
 		assertSame(video, mediaChildren.get(2));
 		ArgumentCaptor<String> styleClassExpressions = ArgumentCaptor.forClass(String.class);
 		verify(mockExpressionFactory, atLeastOnce()).createValueExpression(any(ELContext.class), styleClassExpressions.capture(), eq(String.class));
-		assertTrue(styleClassExpressions.getAllValues().contains("#{(empty skyve.getContentMediaKind('doc.attachment') or skyve.getContentMediaKind('doc.attachment') eq 'link') ? '' : 'skyveContentHidden'}"));
+		assertTrue(styleClassExpressions.getAllValues().contains("#{(empty skyve.getContentMediaKind(row,'doc.attachment') or skyve.getContentMediaKind(row,'doc.attachment') eq 'link') ? '' : 'skyveContentHidden'}"));
 		verify(mockExpressionFactory).createValueExpression("border:1px solid #d6dee8;position:relative;overflow:hidden;", String.class);
-		assertTrue(styleClassExpressions.getAllValues().contains("#{(empty skyve.currentBean['doc.attachment']) ? 'skyveContentPreview skyveContentResponsiveImage skyveContentEmpty' : 'skyveContentPreview skyveContentResponsiveImage'}"));
-		assertTrue(styleClassExpressions.getAllValues().contains("#{(empty skyve.currentBean['doc.attachment']) ? 'skyveContentHidden' : ''}"));
-		assertTrue(styleClassExpressions.getAllValues().contains("#{skyve.getContentMediaKind('doc.attachment') eq 'image' ? '' : 'skyveContentHidden'}"));
-		assertTrue(styleClassExpressions.getAllValues().contains("#{skyve.getContentMediaKind('doc.attachment') eq 'video' ? '' : 'skyveContentHidden'}"));
+		assertTrue(styleClassExpressions.getAllValues().contains("#{(empty row['doc.attachment']) ? 'skyveContentPreview skyveContentResponsiveImage skyveContentEmpty' : 'skyveContentPreview skyveContentResponsiveImage'}"));
+		assertTrue(styleClassExpressions.getAllValues().contains("#{(empty row['doc.attachment']) ? 'skyveContentHidden' : ''}"));
+		assertTrue(styleClassExpressions.getAllValues().contains("#{skyve.getContentMediaKind(row,'doc.attachment') eq 'image' ? '' : 'skyveContentHidden'}"));
+		assertTrue(styleClassExpressions.getAllValues().contains("#{skyve.getContentMediaKind(row,'doc.attachment') eq 'video' ? '' : 'skyveContentHidden'}"));
 	}
 
 	@SuppressWarnings("static-method")
@@ -1655,8 +1854,9 @@ class TabularComponentBuilderTest {
 		assertSame(actionButton, actionChildren.get(2));
 		assertSame(overlay, actionChildren.get(3));
 		verify(companion).setEscape(false);
-		verify(companion).setValue("<input type=\"hidden\" id=\"contentGrid_doc_attachment_media_hidden\" value=\"image\">");
+		verify(companion).setValue("<input type=\"hidden\" id=\"contentGrid_doc_attachment_media_hidden\" value=\"\">");
 		verify(companion, never()).setValueExpression(eq("value"), any(ValueExpression.class));
+		verify(managedBean, never()).getContentMediaKind("doc.attachment");
 		verify(clearItem).setOnclick("SKYVE.PF.clearContent('doc_attachment','contentGrid','doc_attachment_media');return false");
 		ArgumentCaptor<String> expressions = ArgumentCaptor.forClass(String.class);
 		verify(mockExpressionFactory, atLeastOnce()).createValueExpression(any(ELContext.class), expressions.capture(), eq(String.class));
@@ -1749,7 +1949,7 @@ class TabularComponentBuilderTest {
 		verify(uploadItem).setValueExpression(eq("onclick"), any(ValueExpression.class));
 		ArgumentCaptor<String> expressions = ArgumentCaptor.forClass(String.class);
 		verify(mockExpressionFactory, atLeastOnce()).createValueExpression(any(ELContext.class), expressions.capture(), eq(String.class));
-		assertTrue(expressions.getAllValues().stream().anyMatch(value -> value.contains("getContentUploadUrl('doc_image','auto','none','doc_image_media')")));
+		assertTrue(expressions.getAllValues().stream().anyMatch(value -> value.contains("getContentUploadUrl('doc_image','auto','none','doc_image_media','row',row['bizId'])")));
 	}
 
 	@SuppressWarnings("static-method")
@@ -1819,13 +2019,13 @@ class TabularComponentBuilderTest {
 		assertSame(iframe, dialogChildren.get(0));
 		verify(dialog).setHeader("Content Upload");
 		verify(dialog).setFitViewport(true);
-		verify(dialog).setOnHide("SKYVE.PF.contentOverlayOnHide('contentGrid');PF('contentGrid_doc_attachmentOverlay').toggleMaximize()");
+		verify(dialog).setOnHide("SKYVE.PF.contentOverlayOnHide('contentGrid',true);PF('contentGrid_doc_attachmentOverlay').toggleMaximize()");
 		verify(uploadItem).setValueExpression(eq("onclick"), any(ValueExpression.class));
 		verify(uploadItem, never()).setOnclick(anyString());
-		verify(iframe).setValue("<iframe id=\"contentGrid_overlayiframe\" src=\"\" scrolling=\"no\" style=\"width:100%;height:100%;border:none;overflow:hidden\"></iframe>");
+		verify(iframe).setValue("<iframe id=\"contentGrid_overlayiframe\" src=\"\" loading=\"eager\" scrolling=\"no\" style=\"width:100%;height:100%;border:none;overflow:hidden\"></iframe>");
 		ArgumentCaptor<String> expressions = ArgumentCaptor.forClass(String.class);
 		verify(mockExpressionFactory, atLeastOnce()).createValueExpression(any(ELContext.class), expressions.capture(), eq(String.class));
-		assertTrue(expressions.getAllValues().stream().anyMatch(value -> value.contains("getContentUploadUrl('doc_attachment','link','all',null)")));
+		assertTrue(expressions.getAllValues().stream().anyMatch(value -> value.contains("getContentUploadUrl('doc_attachment','link','all',null,'row',row['bizId'])")));
 		assertTrue(expressions.getAllValues().stream().anyMatch(value -> value.contains("toggleMaximize()")));
 	}
 
@@ -1908,7 +2108,8 @@ class TabularComponentBuilderTest {
 		assertSame(markupDialog, actionChildren.get(3));
 		assertSame(markupIframe, markupDialogChildren.get(0));
 		verify(markupItem).setValue("Mark Up Image");
-		verify(markupItem).setContainerStyleClass("skyveContentMarkupAction skyveContentMarkupAction-contentGrid_doc_attachment");
+		verify(markupItem).setContainerStyleClass("skyveContentMarkupAction skyveContentMarkupAction-contentGrid_doc_attachment skyveContentHidden");
+		verify(managedBean, never()).getContentMediaKind("doc.attachment");
 		verify(markupItem).setOnclick("var contentId=$('[id$=\"contentGrid_doc_attachment_hidden\"]').val();if(!contentId){return false}PF('contentGrid_doc_attachmentMarkup').show();PF('contentGrid_doc_attachmentMarkup').toggleMaximize();return false");
 		verify(markupDialog).setHeader("Mark Up Image");
 		ArgumentCaptor<String> expressions = ArgumentCaptor.forClass(String.class);
@@ -2423,6 +2624,73 @@ class TabularComponentBuilderTest {
 
 	@SuppressWarnings("static-method")
 	@Test
+	void testInputTitleStripsMarkupAndAppendsRequiredMarker() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("textId");
+		builder.setManagedBeanForTest(managedBean);
+		InputText input = mock(InputText.class);
+		when(input.getPassThroughAttributes()).thenReturn(new HashMap<>());
+		when(mockApplication.createComponent(InputText.COMPONENT_TYPE)).thenReturn(input);
+		ValueExpression expression = mock(ValueExpression.class);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(Object.class))).thenReturn(expression);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(String.class))).thenReturn(expression);
+		TextField textField = new TextField();
+		textField.setBinding("name");
+
+		builder.text(null,
+						null,
+						textField,
+						null,
+						"<b>Name</b>",
+						"Required",
+						null,
+						null,
+						null,
+						null,
+						null);
+
+		verify(mockExpressionFactory).createValueExpression(any(ELContext.class),
+															eq("Name *"),
+															eq(String.class));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testInputTitleStripsMarkupWhenEscapeFalse() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("textId");
+		builder.setManagedBeanForTest(managedBean);
+		builder.setCurrentInputTitleEscape(false);
+		InputText input = mock(InputText.class);
+		when(input.getPassThroughAttributes()).thenReturn(new HashMap<>());
+		when(mockApplication.createComponent(InputText.COMPONENT_TYPE)).thenReturn(input);
+		ValueExpression expression = mock(ValueExpression.class);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(Object.class))).thenReturn(expression);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(String.class))).thenReturn(expression);
+		TextField textField = new TextField();
+		textField.setBinding("name");
+
+		builder.text(null,
+						null,
+						textField,
+						null,
+						"<b>Trusted</b>",
+						null,
+						null,
+						null,
+						null,
+						null,
+						null);
+
+		verify(mockExpressionFactory).createValueExpression(any(ELContext.class),
+															eq("Trusted"),
+															eq(String.class));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
 	void testTextDelegatesToCompleteWhenCompleteConfigured() {
 		CapturingInputDelegationBuilder builder = new CapturingInputDelegationBuilder();
 		TextField textField = new TextField();
@@ -2526,6 +2794,7 @@ class TabularComponentBuilderTest {
 		when(action.getImplicitName()).thenReturn(ImplicitActionName.Save);
 		when(action.getName()).thenReturn("saveAction");
 		when(action.getClientValidation()).thenReturn(Boolean.TRUE);
+		when(action.getEscapeConfirm()).thenReturn(null);
 		when(action.getDisabledConditionName()).thenReturn("linkDisabled");
 		when(action.getInvisibleConditionName()).thenReturn("linkInvisible");
 
@@ -2541,6 +2810,7 @@ class TabularComponentBuilderTest {
 
 		assertSame(builder.delegatedActionLinkResult, result);
 		assertEquals("Save", builder.linkTitle);
+		assertEquals(Boolean.TRUE, builder.linkTitleEscape);
 		assertEquals("Save row", builder.linkTooltip);
 		assertEquals(null, builder.linkImplicitName);
 		assertEquals("saveAction", builder.linkActionName);
@@ -2550,6 +2820,7 @@ class TabularComponentBuilderTest {
 		assertEquals(Integer.valueOf(130), builder.linkPixelWidth);
 		assertEquals(Boolean.TRUE, builder.linkClientValidation);
 		assertEquals("Confirm save?", builder.linkConfirmationText);
+		assertEquals(Boolean.TRUE, builder.linkConfirmationEscape);
 		assertEquals("linkDisabled", builder.linkDisabled);
 		assertEquals("linkInvisible", builder.linkInvisible);
 		assertEquals("@this", builder.linkProcessOverride);
@@ -2568,6 +2839,7 @@ class TabularComponentBuilderTest {
 		Action action = mock(Action.class);
 		when(action.getImplicitName()).thenReturn(ImplicitActionName.Download);
 		when(action.getName()).thenReturn("downloadCsv");
+		when(action.getEscapeConfirm()).thenReturn(null);
 		when(action.getDisabledConditionName()).thenReturn("downloadDisabled");
 		when(action.getInvisibleConditionName()).thenReturn("downloadInvisible");
 
@@ -2583,11 +2855,14 @@ class TabularComponentBuilderTest {
 
 		assertSame(builder.delegatedDownloadLinkResult, result);
 		assertEquals("Download", builder.downloadLinkTitle);
+		assertEquals(Boolean.TRUE, builder.downloadLinkTitleEscape);
 		assertEquals("Download row", builder.downloadLinkTooltip);
 		assertEquals("downloadCsv", builder.downloadLinkActionName);
 		assertEquals("orders", builder.downloadLinkDataWidgetBinding);
 		assertEquals("row", builder.downloadLinkDataWidgetVar);
 		assertEquals(Integer.valueOf(95), builder.downloadLinkPixelWidth);
+		assertNull(builder.downloadLinkConfirmationText);
+		assertEquals(Boolean.TRUE, builder.downloadLinkConfirmationEscape);
 		assertEquals("downloadDisabled", builder.downloadLinkDisabled);
 		assertEquals("downloadInvisible", builder.downloadLinkInvisible);
 		assertEquals("@form", builder.downloadLinkProcessOverride);
@@ -2596,15 +2871,80 @@ class TabularComponentBuilderTest {
 
 	@SuppressWarnings("static-method")
 	@Test
+	void testActionLinkEscapesValueTooltipAndConfirmByDefault() {
+		CapturingDelegationBuilder builder = new CapturingDelegationBuilder();
+		Link link = new Link();
+
+		Action action = mock(Action.class);
+		when(action.getImplicitName()).thenReturn(ImplicitActionName.Save);
+		when(action.getName()).thenReturn("saveAction");
+		when(action.getEscapeToolTip()).thenReturn(null);
+		when(action.getEscapeConfirm()).thenReturn(null);
+		when(action.getProperties()).thenReturn(new HashMap<>());
+
+		builder.actionLink(null,
+							"orders",
+							"row",
+							"<img src=x onerror=alert(1)>",
+							null,
+							"Save \"row\"",
+							"Confirm <save>?",
+							link,
+							action);
+
+		assertEquals("<img src=x onerror=alert(1)>", builder.linkTitle);
+		assertEquals(Boolean.TRUE, builder.linkTitleEscape);
+		assertEquals("Save \"row\"", builder.linkTooltip);
+		assertEquals("Confirm <save>?", builder.linkConfirmationText);
+		assertEquals(Boolean.TRUE, builder.linkConfirmationEscape);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testActionLinkAllowsTrustedValueAndConfirmButStripsTooltipWhenEscapeFalse() {
+		CapturingDelegationBuilder builder = new CapturingDelegationBuilder();
+		Link link = new Link();
+		link.setEscapeValue(Boolean.FALSE);
+
+		Action action = mock(Action.class);
+		when(action.getImplicitName()).thenReturn(ImplicitActionName.Save);
+		when(action.getName()).thenReturn("saveAction");
+		when(action.getEscapeToolTip()).thenReturn(Boolean.FALSE);
+		when(action.getEscapeConfirm()).thenReturn(Boolean.FALSE);
+		when(action.getProperties()).thenReturn(new HashMap<>());
+
+		builder.actionLink(null,
+							"orders",
+							"row",
+							"<b>Save</b>",
+							null,
+							"<i>Save row</i>",
+							"<strong>Confirm</strong>",
+							link,
+							action);
+
+		assertEquals("<b>Save</b>", builder.linkTitle);
+		assertEquals(Boolean.FALSE, builder.linkTitleEscape);
+		assertEquals("Save row", builder.linkTooltip);
+		assertEquals("<strong>Confirm</strong>", builder.linkConfirmationText);
+		assertEquals(Boolean.FALSE, builder.linkConfirmationEscape);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
 	void testActionLinkImplicitDownloadUsesBaseDownloadLink() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
 		CommandLink commandLink = mock(CommandLink.class);
+		List<UIComponent> commandLinkChildren = new ArrayList<>();
+		HtmlOutputText outputText = new HtmlOutputText();
 		MethodExpression actionExpression = mock(MethodExpression.class);
 		FacesView managedBean = mock(FacesView.class);
-		when(managedBean.nextId()).thenReturn("downloadLinkId");
+		when(managedBean.nextId()).thenReturn("downloadTextId", "downloadLinkId");
 		builder.setManagedBeanForTest(managedBean);
 
 		when(mockApplication.createComponent(CommandLink.COMPONENT_TYPE)).thenReturn(commandLink);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(outputText);
+		when(commandLink.getChildren()).thenReturn(commandLinkChildren);
 		when(mockExpressionFactory.createMethodExpression(any(ELContext.class), anyString(), isNull(), any(Class[].class))).thenReturn(actionExpression);
 
 		Link link = new Link();
@@ -2629,7 +2969,9 @@ class TabularComponentBuilderTest {
 												action);
 
 		assertSame(commandLink, result);
-		verify(commandLink).setValue("Download");
+		assertTrue(commandLinkChildren.contains(outputText));
+		assertEquals("Download", outputText.getValue());
+		assertTrue(outputText.isEscape());
 		verify(commandLink).setProcess("@form");
 		verify(commandLink).setUpdate("@(form)");
 		verify(commandLink).setActionExpression(actionExpression);
@@ -2681,6 +3023,8 @@ class TabularComponentBuilderTest {
 		Action action = mock(Action.class);
 		when(action.getName()).thenReturn("uploadContent");
 		when(action.getClientValidation()).thenReturn(Boolean.TRUE);
+		when(action.getEscapeDisplayName()).thenReturn(null);
+		when(action.getEscapeConfirm()).thenReturn(null);
 		when(action.getDisabledConditionName()).thenReturn("uploadDisabled");
 		when(action.getInvisibleConditionName()).thenReturn("uploadInvisible");
 
@@ -2688,6 +3032,7 @@ class TabularComponentBuilderTest {
 
 		assertSame(builder.delegatedUploadButtonResult, result);
 		assertEquals("Upload", builder.uploadTitle);
+		assertEquals(Boolean.TRUE, builder.uploadTitleEscape);
 		assertEquals("pi pi-upload", builder.uploadIconStyleClass);
 		assertEquals("Upload file", builder.uploadTooltip);
 		assertEquals("uploadContent", builder.uploadActionName);
@@ -2695,6 +3040,7 @@ class TabularComponentBuilderTest {
 		assertEquals(null, builder.uploadPixelHeight);
 		assertEquals(Boolean.TRUE, builder.uploadClientValidation);
 		assertEquals("Proceed?", builder.uploadConfirmationText);
+		assertEquals(Boolean.TRUE, builder.uploadConfirmationEscape);
 		assertEquals("uploadDisabled", builder.uploadDisabled);
 		assertEquals(null, builder.uploadFormDisabled);
 		assertEquals("uploadInvisible", builder.uploadInvisible);
@@ -2709,6 +3055,8 @@ class TabularComponentBuilderTest {
 
 		Action action = mock(Action.class);
 		when(action.getName()).thenReturn("removeLine");
+		when(action.getEscapeDisplayName()).thenReturn(null);
+		when(action.getEscapeConfirm()).thenReturn(null);
 		when(action.getDisabledConditionName()).thenReturn("removeDisabled");
 		when(action.getInvisibleConditionName()).thenReturn("removeInvisible");
 		Map<String, String> properties = new HashMap<>();
@@ -2720,6 +3068,7 @@ class TabularComponentBuilderTest {
 
 		assertSame(builder.delegatedActionButtonResult, result);
 		assertEquals("Remove", builder.actionTitle);
+		assertEquals(Boolean.TRUE, builder.actionTitleEscape);
 		assertEquals("pi pi-times", builder.actionIconStyleClass);
 		assertEquals("Remove row", builder.actionTooltip);
 		assertEquals(ImplicitActionName.Remove, builder.actionImplicitName);
@@ -2730,6 +3079,7 @@ class TabularComponentBuilderTest {
 		assertEquals(null, builder.actionPixelWidth);
 		assertEquals(null, builder.actionPixelHeight);
 		assertEquals("Confirm remove?", builder.actionConfirmationText);
+		assertEquals(Boolean.TRUE, builder.actionConfirmationEscape);
 		assertEquals("removeDisabled", builder.actionDisabled);
 		assertEquals(null, builder.actionFormDisabled);
 		assertEquals("removeInvisible", builder.actionInvisible);
@@ -2785,6 +3135,92 @@ class TabularComponentBuilderTest {
 
 	@SuppressWarnings("static-method")
 	@Test
+	void testActionButtonEscapesValueTitleAndConfirmByDefault() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		CommandButton commandButton = mock(CommandButton.class);
+		ConfirmBehavior confirm = mock(ConfirmBehavior.class);
+		MethodExpression actionExpression = mock(MethodExpression.class);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("actionButtonId");
+		builder.setManagedBeanForTest(managedBean);
+
+		when(mockApplication.createComponent(CommandButton.COMPONENT_TYPE)).thenReturn(commandButton);
+		when(mockApplication.createBehavior(ConfirmBehavior.BEHAVIOR_ID)).thenReturn(confirm);
+		when(mockExpressionFactory.createMethodExpression(any(ELContext.class), anyString(), isNull(), any(Class[].class))).thenReturn(actionExpression);
+
+		Button button = new Button();
+		Action action = mock(Action.class);
+		when(action.getImplicitName()).thenReturn(ImplicitActionName.Save);
+		when(action.getName()).thenReturn("saveAction");
+		when(action.getEscapeDisplayName()).thenReturn(null);
+		when(action.getEscapeToolTip()).thenReturn(null);
+		when(action.getEscapeConfirm()).thenReturn(null);
+		when(action.getProperties()).thenReturn(new HashMap<>());
+
+		UIComponent result = builder.actionButton(null,
+													null,
+													null,
+													"<img src=x onerror=alert(1)>",
+													"pi pi-save",
+													"Save \"row\"",
+													"Confirm <save>?",
+													button,
+													null,
+													action);
+
+		assertSame(commandButton, result);
+		verify(commandButton).setValue("<img src=x onerror=alert(1)>");
+		verify(commandButton).setEscape(true);
+		verify(commandButton).setTitle("Save \"row\"");
+		verify(confirm).setMessage("Confirm <save>?");
+		verify(confirm).setEscape(true);
+		verify(commandButton).addClientBehavior("click", confirm);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testActionButtonAllowsTrustedValueAndConfirmButStripsTitleWhenEscapeFalse() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		CommandButton commandButton = mock(CommandButton.class);
+		ConfirmBehavior confirm = mock(ConfirmBehavior.class);
+		MethodExpression actionExpression = mock(MethodExpression.class);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("actionButtonId");
+		builder.setManagedBeanForTest(managedBean);
+
+		when(mockApplication.createComponent(CommandButton.COMPONENT_TYPE)).thenReturn(commandButton);
+		when(mockApplication.createBehavior(ConfirmBehavior.BEHAVIOR_ID)).thenReturn(confirm);
+		when(mockExpressionFactory.createMethodExpression(any(ELContext.class), anyString(), isNull(), any(Class[].class))).thenReturn(actionExpression);
+
+		Button button = new Button();
+		Action action = mock(Action.class);
+		when(action.getImplicitName()).thenReturn(ImplicitActionName.Save);
+		when(action.getName()).thenReturn("saveAction");
+		when(action.getEscapeDisplayName()).thenReturn(Boolean.FALSE);
+		when(action.getEscapeToolTip()).thenReturn(Boolean.FALSE);
+		when(action.getEscapeConfirm()).thenReturn(Boolean.FALSE);
+		when(action.getProperties()).thenReturn(new HashMap<>());
+
+		builder.actionButton(null,
+								null,
+								null,
+								"<b>Save</b>",
+								"pi pi-save",
+								"<i>Save row</i>",
+								"<strong>Confirm</strong>",
+								button,
+								null,
+								action);
+
+		verify(commandButton).setValue("<b>Save</b>");
+		verify(commandButton).setEscape(false);
+		verify(commandButton).setTitle("Save row");
+		verify(confirm).setMessage("<strong>Confirm</strong>");
+		verify(confirm).setEscape(false);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
 	void testReportNonShortcutPathBuildsReportHref() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
 		org.primefaces.component.button.Button reportButton = mock(org.primefaces.component.button.Button.class);
@@ -2813,6 +3249,7 @@ class TabularComponentBuilderTest {
 		Action action = mock(Action.class);
 		when(action.getParameters()).thenReturn(parameters);
 		when(action.getClientValidation()).thenReturn(Boolean.FALSE);
+		when(action.getEscapeDisplayName()).thenReturn(null);
 		when(action.getDisabledConditionName()).thenReturn(null);
 		when(action.getInvisibleConditionName()).thenReturn(null);
 
@@ -2822,6 +3259,7 @@ class TabularComponentBuilderTest {
 		assertNotNull(capturedHref.get());
 		assertTrue(capturedHref.get().contains("report/Orders.pdf?"));
 		verify(reportButton).setValue("Run Report");
+		verify(reportButton).setEscape(true);
 		verify(reportButton).setTitle("Open report");
 	}
 
@@ -3060,15 +3498,15 @@ class TabularComponentBuilderTest {
 	void testListMembershipNonShortcutPathSetsDefaultFacetHeadings() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
 		PickList pickList = mock(PickList.class);
-		UIOutput sourceCaption = mock(UIOutput.class);
-		UIOutput targetCaption = mock(UIOutput.class);
+		HtmlOutputText sourceCaption = mock(HtmlOutputText.class);
+		HtmlOutputText targetCaption = mock(HtmlOutputText.class);
 		Map<String, UIComponent> facets = new HashMap<>();
 		FacesView managedBean = mock(FacesView.class);
 		when(managedBean.nextId()).thenReturn("pickListId", "sourceCaptionId", "targetCaptionId");
 		builder.setManagedBeanForTest(managedBean);
 
 		when(mockApplication.createComponent(PickList.COMPONENT_TYPE)).thenReturn(pickList);
-		when(mockApplication.createComponent(UIOutput.COMPONENT_TYPE)).thenReturn(sourceCaption, targetCaption);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(sourceCaption, targetCaption);
 		when(pickList.getFacets()).thenReturn(facets);
 
 		org.skyve.impl.metadata.view.widget.bound.input.ListMembership membership = new org.skyve.impl.metadata.view.widget.bound.input.ListMembership();
@@ -3081,7 +3519,57 @@ class TabularComponentBuilderTest {
 		assertSame(sourceCaption, facets.get("sourceCaption"));
 		assertSame(targetCaption, facets.get("targetCaption"));
 		verify(sourceCaption).setValue("Candidates");
+		verify(sourceCaption).setEscape(true);
 		verify(targetCaption).setValue("Members");
+		verify(targetCaption).setEscape(true);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testListMembershipEscapesFacetHeadingsByDefaultAndWhenExplicitTrue() {
+		ListMembership membership = new ListMembership();
+		membership.setBinding("roles");
+
+		FacetHeadingContext defaultContext = facetHeadingContext();
+		EventSourceComponent defaultResult = defaultContext.builder.listMembership(null,
+																					EscapableText.of("<img src=x onerror=alert(1)>", true),
+																					EscapableText.of("<img src=x onerror=alert(1)>", true),
+																					membership);
+		assertSame(defaultContext.pickList, defaultResult.getComponent());
+		verify(defaultContext.sourceCaption).setValue("<img src=x onerror=alert(1)>");
+		verify(defaultContext.sourceCaption).setEscape(true);
+		verify(defaultContext.targetCaption).setValue("<img src=x onerror=alert(1)>");
+		verify(defaultContext.targetCaption).setEscape(true);
+
+		FacetHeadingContext explicitContext = facetHeadingContext();
+		EventSourceComponent explicitResult = explicitContext.builder.listMembership(null,
+																					EscapableText.of("<img src=x onerror=alert(1)>", true),
+																					EscapableText.of("<img src=x onerror=alert(1)>", true),
+																					membership);
+		assertSame(explicitContext.pickList, explicitResult.getComponent());
+		verify(explicitContext.sourceCaption).setValue("<img src=x onerror=alert(1)>");
+		verify(explicitContext.sourceCaption).setEscape(true);
+		verify(explicitContext.targetCaption).setValue("<img src=x onerror=alert(1)>");
+		verify(explicitContext.targetCaption).setEscape(true);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testListMembershipAllowsTrustedFacetHeadingsWhenEscapingFalse() {
+		ListMembership membership = new ListMembership();
+		membership.setBinding("roles");
+
+		FacetHeadingContext context = facetHeadingContext();
+		EventSourceComponent result = context.builder.listMembership(null,
+																		EscapableText.of("<b>Candidates</b>", false),
+																		EscapableText.of("<i>Members</i>", false),
+																		membership);
+
+		assertSame(context.pickList, result.getComponent());
+		verify(context.sourceCaption).setValue("<b>Candidates</b>");
+		verify(context.sourceCaption).setEscape(false);
+		verify(context.targetCaption).setValue("<i>Members</i>");
+		verify(context.targetCaption).setEscape(false);
 	}
 
 	@SuppressWarnings("static-method")
@@ -3347,7 +3835,9 @@ class TabularComponentBuilderTest {
 	void testAddListGridDataColumnsAddsProjectedColumnWithoutMetadataBindingLookup() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
 		Column column = mock(Column.class);
+		HtmlOutputText header = mock(HtmlOutputText.class);
 		HtmlOutputText outputText = mock(HtmlOutputText.class);
+		Map<String, UIComponent> facets = new HashMap<>();
 		List<UIComponent> listChildren = new ArrayList<>();
 		List<UIComponent> columnChildren = new ArrayList<>();
 		ValueExpression valueExpression = mock(ValueExpression.class);
@@ -3356,7 +3846,8 @@ class TabularComponentBuilderTest {
 		builder.setManagedBeanForTest(managedBean);
 
 		when(mockApplication.createComponent(Column.COMPONENT_TYPE)).thenReturn(column);
-		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(outputText);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(header, outputText);
+		when(column.getFacets()).thenReturn(facets);
 		when(column.getChildren()).thenReturn(columnChildren);
 		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(Object.class))).thenReturn(valueExpression);
 
@@ -3401,7 +3892,9 @@ class TabularComponentBuilderTest {
 		assertSame(column, listChildren.get(0));
 		assertEquals(1, columnChildren.size());
 		assertSame(outputText, columnChildren.get(0));
-		verify(column).setHeaderText("Status");
+		assertSame(header, facets.get("header"));
+		verify(header).setValue("Status");
+		verify(header).setEscape(true);
 		verify(column).setField("status");
 		verify(column).setSortable(false);
 		verify(column).setFilterable(false);
@@ -3415,7 +3908,9 @@ class TabularComponentBuilderTest {
 	void testAddListGridDataColumnsUsesFormatterNameWhenPresent() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
 		Column column = mock(Column.class);
+		HtmlOutputText header = mock(HtmlOutputText.class);
 		HtmlOutputText outputText = mock(HtmlOutputText.class);
+		Map<String, UIComponent> facets = new HashMap<>();
 		List<UIComponent> listChildren = new ArrayList<>();
 		List<UIComponent> columnChildren = new ArrayList<>();
 		ValueExpression valueExpression = mock(ValueExpression.class);
@@ -3424,7 +3919,8 @@ class TabularComponentBuilderTest {
 		builder.setManagedBeanForTest(managedBean);
 
 		when(mockApplication.createComponent(Column.COMPONENT_TYPE)).thenReturn(column);
-		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(outputText);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(header, outputText);
+		when(column.getFacets()).thenReturn(facets);
 		when(column.getChildren()).thenReturn(columnChildren);
 		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(Object.class))).thenReturn(valueExpression);
 
@@ -3543,7 +4039,9 @@ class TabularComponentBuilderTest {
 	void testAddListGridDataColumnsAddsThumbnailContentColumnWithPaddingAndCalculatedWidth() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
 		Column column = mock(Column.class);
+		HtmlOutputText header = mock(HtmlOutputText.class);
 		HtmlOutputText outputText = mock(HtmlOutputText.class);
+		Map<String, UIComponent> facets = new HashMap<>();
 		List<UIComponent> listChildren = new ArrayList<>();
 		List<UIComponent> columnChildren = new ArrayList<>();
 		ValueExpression valueExpression = mock(ValueExpression.class);
@@ -3552,7 +4050,8 @@ class TabularComponentBuilderTest {
 		builder.setManagedBeanForTest(managedBean);
 
 		when(mockApplication.createComponent(Column.COMPONENT_TYPE)).thenReturn(column);
-		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(outputText);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(header, outputText);
+		when(column.getFacets()).thenReturn(facets);
 		when(column.getChildren()).thenReturn(columnChildren);
 		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(Object.class))).thenReturn(valueExpression);
 
@@ -3599,7 +4098,9 @@ class TabularComponentBuilderTest {
 		assertSame(column, listChildren.get(0));
 		assertEquals(1, columnChildren.size());
 		assertSame(outputText, columnChildren.get(0));
-		verify(column).setHeaderText("Preview");
+		assertSame(header, facets.get("header"));
+		verify(header).setValue("Preview");
+		verify(header).setEscape(true);
 		verify(column).setField("content");
 		verify(column).setSortable(false);
 		verify(column).setFilterable(false);
@@ -3613,7 +4114,9 @@ class TabularComponentBuilderTest {
 	void testAddListGridDataColumnsAddsLinkContentColumnWithExplicitWidthAndAlignment() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
 		Column column = mock(Column.class);
+		HtmlOutputText header = mock(HtmlOutputText.class);
 		HtmlOutputText outputText = mock(HtmlOutputText.class);
+		Map<String, UIComponent> facets = new HashMap<>();
 		List<UIComponent> listChildren = new ArrayList<>();
 		List<UIComponent> columnChildren = new ArrayList<>();
 		ValueExpression valueExpression = mock(ValueExpression.class);
@@ -3622,7 +4125,8 @@ class TabularComponentBuilderTest {
 		builder.setManagedBeanForTest(managedBean);
 
 		when(mockApplication.createComponent(Column.COMPONENT_TYPE)).thenReturn(column);
-		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(outputText);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(header, outputText);
+		when(column.getFacets()).thenReturn(facets);
 		when(column.getChildren()).thenReturn(columnChildren);
 		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(Object.class))).thenReturn(valueExpression);
 
@@ -3667,7 +4171,9 @@ class TabularComponentBuilderTest {
 		assertSame(column, listChildren.get(0));
 		assertEquals(1, columnChildren.size());
 		assertSame(outputText, columnChildren.get(0));
-		verify(column).setHeaderText("Attachment");
+		assertSame(header, facets.get("header"));
+		verify(header).setValue("Attachment");
+		verify(header).setEscape(true);
 		verify(column).setField("contentLink");
 		verify(column).setSortable(false);
 		verify(column).setFilterable(false);
@@ -3798,6 +4304,8 @@ class TabularComponentBuilderTest {
 		Action action = mock(Action.class);
 		when(action.getName()).thenReturn("uploadAttachment");
 		when(action.getClientValidation()).thenReturn(Boolean.TRUE);
+		when(action.getEscapeDisplayName()).thenReturn(null);
+		when(action.getEscapeConfirm()).thenReturn(null);
 		when(action.getDisabledConditionName()).thenReturn(null);
 		when(action.getInvisibleConditionName()).thenReturn(null);
 
@@ -3813,6 +4321,8 @@ class TabularComponentBuilderTest {
 		assertSame(refresh, wrapperChildren.get(0));
 		assertSame(uploadButton, wrapperChildren.get(1));
 		assertSame(overlayPanel, wrapperChildren.get(2));
+		verify(uploadButton).setValue("Upload");
+		verify(uploadButton).setEscape(true);
 		verify(uploadButton).setType("button");
 		assertEquals(1, overlayChildren.size());
 		assertSame(iframe, overlayChildren.get(0));
@@ -3836,6 +4346,8 @@ class TabularComponentBuilderTest {
 
 		Action action = mock(Action.class);
 		when(action.getName()).thenReturn("downloadCsv");
+		when(action.getEscapeDisplayName()).thenReturn(null);
+		when(action.getEscapeConfirm()).thenReturn(null);
 		when(action.getDisabledConditionName()).thenReturn(null);
 		when(action.getInvisibleConditionName()).thenReturn(null);
 		Map<String, String> properties = new HashMap<>();
@@ -3858,6 +4370,7 @@ class TabularComponentBuilderTest {
 
 		assertSame(commandButton, result);
 		verify(commandButton).setValue("Download");
+		verify(commandButton).setEscape(true);
 		verify(commandButton).setIcon("pi pi-download");
 		verify(commandButton).setTitle("Download row");
 		verify(commandButton).setProcess("@form");
@@ -3990,10 +4503,14 @@ class TabularComponentBuilderTest {
 	void testAddDataGridBoundColumnNonShortcutPathAddsColumnWhenInlineEditable() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
 		Column createdColumn = mock(Column.class);
+		HtmlOutputText header = mock(HtmlOutputText.class);
+		Map<String, UIComponent> facets = new HashMap<>();
 		FacesView managedBean = mock(FacesView.class);
 		when(managedBean.nextId()).thenReturn("gridBoundColumnId");
 		builder.setManagedBeanForTest(managedBean);
 		when(mockApplication.createComponent(Column.COMPONENT_TYPE)).thenReturn(createdColumn);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(header);
+		when(createdColumn.getFacets()).thenReturn(facets);
 
 		UIComponent current = mock(UIComponent.class);
 		List<UIComponent> currentChildren = new ArrayList<>();
@@ -4018,7 +4535,84 @@ class TabularComponentBuilderTest {
 		assertSame(createdColumn, result);
 		assertSame(createdColumn, currentChildren.get(0));
 		assertEquals("unchanged", gridColumnExpression.toString());
-		verify(createdColumn).setHeaderText("Name");
+		assertSame(header, facets.get("header"));
+		verify(header).setValue("Name");
+		verify(header).setEscape(true);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testAddDataGridBoundColumnEscapesHeaderByDefault() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("columnId");
+		builder.setManagedBeanForTest(managedBean);
+		Column createdColumn = mock(Column.class);
+		HtmlOutputText header = mock(HtmlOutputText.class);
+		Map<String, UIComponent> facets = new HashMap<>();
+		when(mockApplication.createComponent(Column.COMPONENT_TYPE)).thenReturn(createdColumn);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(header);
+		when(createdColumn.getFacets()).thenReturn(facets);
+		UIComponent current = mock(UIComponent.class);
+		List<UIComponent> currentChildren = new ArrayList<>();
+		when(current.getChildren()).thenReturn(currentChildren);
+		DataGrid widget = new DataGrid();
+		widget.setInline(Boolean.TRUE);
+		DataGridBoundColumn column = new DataGridBoundColumn();
+		column.setEditable(Boolean.TRUE);
+
+		builder.addDataGridBoundColumn(null,
+										current,
+										widget,
+										column,
+										"row",
+										"<img src=x onerror=alert(1)>",
+										"name",
+										new StringBuilder("unchanged"),
+										null,
+										null);
+
+		assertSame(header, facets.get("header"));
+		verify(header).setValue("<img src=x onerror=alert(1)>");
+		verify(header).setEscape(true);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testAddDataGridBoundColumnAllowsTrustedHeaderWhenEscapeFalse() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("columnId");
+		builder.setManagedBeanForTest(managedBean);
+		Column createdColumn = mock(Column.class);
+		HtmlOutputText header = mock(HtmlOutputText.class);
+		Map<String, UIComponent> facets = new HashMap<>();
+		when(mockApplication.createComponent(Column.COMPONENT_TYPE)).thenReturn(createdColumn);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(header);
+		when(createdColumn.getFacets()).thenReturn(facets);
+		UIComponent current = mock(UIComponent.class);
+		List<UIComponent> currentChildren = new ArrayList<>();
+		when(current.getChildren()).thenReturn(currentChildren);
+		DataGrid widget = new DataGrid();
+		widget.setInline(Boolean.TRUE);
+		DataGridBoundColumn column = new DataGridBoundColumn();
+		column.setEditable(Boolean.TRUE);
+		column.setEscapeTitle(Boolean.FALSE);
+
+		builder.addDataGridBoundColumn(null,
+										current,
+										widget,
+										column,
+										"row",
+										"<b>Trusted</b>",
+										"name",
+										new StringBuilder("unchanged"),
+										null,
+										null);
+
+		assertSame(header, facets.get("header"));
+		verify(header).setValue("<b>Trusted</b>");
+		verify(header).setEscape(false);
 	}
 
 	@SuppressWarnings("static-method")
@@ -4143,10 +4737,14 @@ class TabularComponentBuilderTest {
 	void testAddDataGridContainerColumnNonShortcutPathAddsColumn() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
 		Column createdColumn = mock(Column.class);
+		HtmlOutputText header = mock(HtmlOutputText.class);
+		Map<String, UIComponent> facets = new HashMap<>();
 		FacesView managedBean = mock(FacesView.class);
 		when(managedBean.nextId()).thenReturn("gridContainerColumnId");
 		builder.setManagedBeanForTest(managedBean);
 		when(mockApplication.createComponent(Column.COMPONENT_TYPE)).thenReturn(createdColumn);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(header);
+		when(createdColumn.getFacets()).thenReturn(facets);
 
 		UIComponent current = mock(UIComponent.class);
 		List<UIComponent> currentChildren = new ArrayList<>();
@@ -4164,7 +4762,9 @@ class TabularComponentBuilderTest {
 
 		assertSame(createdColumn, result);
 		assertSame(createdColumn, currentChildren.get(0));
-		verify(createdColumn).setHeaderText("Details");
+		assertSame(header, facets.get("header"));
+		verify(header).setValue("Details");
+		verify(header).setEscape(true);
 	}
 
 	@SuppressWarnings("static-method")
@@ -4520,15 +5120,21 @@ class TabularComponentBuilderTest {
 	void testBorderDelegatesToPanelWhenComponentNull() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
 		Panel panel = mock(Panel.class);
+		HtmlOutputText header = mock(HtmlOutputText.class);
+		Map<String, UIComponent> facets = new HashMap<>();
 		FacesView managedBean = mock(FacesView.class);
 		when(managedBean.nextId()).thenReturn("borderId");
 		builder.setManagedBeanForTest(managedBean);
 		when(mockApplication.createComponent(Panel.COMPONENT_TYPE)).thenReturn(panel);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(header);
+		when(panel.getFacets()).thenReturn(facets);
 
 		UIComponent result = builder.border(null, "Section Title", null, null, null);
 
 		assertSame(panel, result);
-		verify(panel).setHeader("Section Title");
+		assertSame(header, facets.get("header"));
+		verify(header).setValue("Section Title");
+		verify(header).setEscape(true);
 	}
 
 	@SuppressWarnings("static-method")
@@ -4536,16 +5142,21 @@ class TabularComponentBuilderTest {
 	void testBorderWithCollapsibleAddsToggleBehavior() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
 		Panel panel = mock(Panel.class);
+		HtmlOutputText header = mock(HtmlOutputText.class);
+		Map<String, UIComponent> facets = new HashMap<>();
 		FacesView managedBean = mock(FacesView.class);
 		when(managedBean.nextId()).thenReturn("borderCollapsibleId");
 		builder.setManagedBeanForTest(managedBean);
 		when(mockApplication.createComponent(Panel.COMPONENT_TYPE)).thenReturn(panel);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(header);
+		when(panel.getFacets()).thenReturn(facets);
 		AjaxBehavior ajax = mock(AjaxBehavior.class);
 		when(mockApplication.createBehavior(AjaxBehavior.BEHAVIOR_ID)).thenReturn(ajax);
 
 		UIComponent result = builder.border(null, "Collapsible Section", null, null, Collapsible.open);
 
 		assertSame(panel, result);
+		assertSame(header, facets.get("header"));
 		verify(panel).setToggleable(true);
 		verify(panel).setCollapsed(false);
 	}
@@ -5594,18 +6205,22 @@ class TabularComponentBuilderTest {
 	@Test
 	void testOutputLinkWithValueAddsChildText() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("outputTextId");
+		builder.setManagedBeanForTest(managedBean);
 		HtmlOutputLink link = mock(HtmlOutputLink.class);
 		List<UIComponent> linkChildren = new ArrayList<>();
 		when(link.getChildren()).thenReturn(linkChildren);
 		when(mockApplication.createComponent(HtmlOutputLink.COMPONENT_TYPE)).thenReturn(link);
 
 		HtmlOutputText outputText = new HtmlOutputText();
-		when(mockApplication.createComponent(UIOutput.COMPONENT_TYPE)).thenReturn(outputText);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(outputText);
 
-		HtmlOutputLink result = builder.outputLink(null, "Link Text", "/href", null, null);
+		HtmlOutputLink result = builder.outputLink(null, EscapableText.of("Link Text", false), "/href", null, null);
 		assertSame(link, result);
 		assertTrue(linkChildren.contains(outputText));
 		assertEquals("Link Text", outputText.getValue());
+		assertFalse(outputText.isEscape());
 	}
 
 	@SuppressWarnings("static-method")
@@ -5985,12 +6600,47 @@ class TabularComponentBuilderTest {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
 		EventSourceComponent existing = mock(EventSourceComponent.class);
 		ListMembership membership = new ListMembership();
-		EventSourceComponent result = builder.listMembership(existing, "Candidates", "Members", membership);
+		EventSourceComponent result = builder.listMembership(existing,
+																EscapableText.of("Candidates", true),
+																EscapableText.of("Members", true),
+																membership);
 		assertSame(existing, result);
 	}
 
-	@SuppressWarnings("unchecked")
 	private static ListModel<org.skyve.domain.Bean> mockListModel() {
 		return mock(ListModel.class);
+	}
+
+	private static FacetHeadingContext facetHeadingContext() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		PickList pickList = mock(PickList.class);
+		HtmlOutputText sourceCaption = mock(HtmlOutputText.class);
+		HtmlOutputText targetCaption = mock(HtmlOutputText.class);
+		Map<String, UIComponent> facets = new HashMap<>();
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("pickListId", "sourceCaptionId", "targetCaptionId");
+		builder.setManagedBeanForTest(managedBean);
+
+		when(mockApplication.createComponent(PickList.COMPONENT_TYPE)).thenReturn(pickList);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(sourceCaption, targetCaption);
+		when(pickList.getFacets()).thenReturn(facets);
+		return new FacetHeadingContext(builder, pickList, sourceCaption, targetCaption);
+	}
+
+	private static final class FacetHeadingContext {
+		private final NoOpTabularComponentBuilder builder;
+		private final PickList pickList;
+		private final HtmlOutputText sourceCaption;
+		private final HtmlOutputText targetCaption;
+
+		private FacetHeadingContext(NoOpTabularComponentBuilder builder,
+										PickList pickList,
+										HtmlOutputText sourceCaption,
+										HtmlOutputText targetCaption) {
+			this.builder = builder;
+			this.pickList = pickList;
+			this.sourceCaption = sourceCaption;
+			this.targetCaption = targetCaption;
+		}
 	}
 }

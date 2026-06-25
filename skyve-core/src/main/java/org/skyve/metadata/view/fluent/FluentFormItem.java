@@ -36,6 +36,7 @@ import jakarta.annotation.Nonnull;
 /**
  * Fluent builder for {@link FormItem} metadata.
  */
+@SuppressWarnings("java:S6539") // Complexity OK - this is a fluent builder with many options
 public class FluentFormItem {
 	private FormItem item = null;
 	
@@ -80,19 +81,24 @@ public class FluentFormItem {
 		}
 		horizontalAlignment(item.getHorizontalAlignment());
 		label(item.getLabel());
+		escapeLabel(item.getEscapeLabel());
 		Boolean b = item.getShowLabel();
 		if (b != null) {
 			showLabel(b.booleanValue());
 		}
 		labelHorizontalAlignment(item.getLabelHorizontalAlignment());
+		b = item.getShowHelp();
 		if (b != null) {
 			showHelp(b.booleanValue());
 		}
 		help(item.getHelp());
+		escapeHelp(item.getEscapeHelp());
 		b = item.getRequired();
 		if (b != null) {
 			required(b.booleanValue());
 		}
+		requiredMessage(item.getRequiredMessage());
+		escapeRequiredMessage(item.getEscapeRequiredMessage());
 
 		MetaData widget = item.getWidget();
 		if (widget instanceof DefaultWidget defaultWidget) {
@@ -232,6 +238,27 @@ public class FluentFormItem {
 	}
 
 	/**
+	 * Sets whether the label should be escaped before rendering.
+	 *
+	 * @param escapeLabel {@code false} to allow trusted markup; {@code true} to escape at the renderer boundary
+	 * @return this builder
+	 */
+	public FluentFormItem escapeLabel(boolean escapeLabel) {
+		return escapeLabel(escapeLabel ? Boolean.TRUE : Boolean.FALSE);
+	}
+
+	/**
+	 * Sets whether the label should be escaped before rendering.
+	 *
+	 * @param escapeLabel {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 * @return this builder
+	 */
+	public FluentFormItem escapeLabel(Boolean escapeLabel) {
+		item.setEscapeLabel(escapeLabel);
+		return this;
+	}
+
+	/**
 	 * Controls whether the item label is rendered.
 	 *
 	 * @param showLabel
@@ -280,6 +307,27 @@ public class FluentFormItem {
 	}
 	
 	/**
+	 * Sets whether the help text should be escaped before rendering.
+	 *
+	 * @param escapeHelp {@code false} to allow trusted markup; {@code true} to escape at the renderer boundary
+	 * @return this builder
+	 */
+	public FluentFormItem escapeHelp(boolean escapeHelp) {
+		return escapeHelp(escapeHelp ? Boolean.TRUE : Boolean.FALSE);
+	}
+
+	/**
+	 * Sets whether the help text should be escaped before rendering.
+	 *
+	 * @param escapeHelp {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 * @return this builder
+	 */
+	public FluentFormItem escapeHelp(Boolean escapeHelp) {
+		item.setEscapeHelp(escapeHelp);
+		return this;
+	}
+
+	/**
 	 * Controls whether this item is required.
 	 *
 	 * @param required
@@ -288,6 +336,38 @@ public class FluentFormItem {
 	 */
 	public FluentFormItem required(boolean required) {
 		item.setRequired(required ? Boolean.TRUE : Boolean.FALSE);
+		return this;
+	}
+
+	/**
+	 * Sets the required-message override text.
+	 *
+	 * @param requiredMessage required-message override
+	 * @return this builder
+	 */
+	public FluentFormItem requiredMessage(String requiredMessage) {
+		item.setRequiredMessage(requiredMessage);
+		return this;
+	}
+
+	/**
+	 * Sets whether the required-message text should be escaped before rendering.
+	 *
+	 * @param escapeRequiredMessage {@code false} to allow trusted markup; {@code true} to escape at the renderer boundary
+	 * @return this builder
+	 */
+	public FluentFormItem escapeRequiredMessage(boolean escapeRequiredMessage) {
+		return escapeRequiredMessage(escapeRequiredMessage ? Boolean.TRUE : Boolean.FALSE);
+	}
+
+	/**
+	 * Sets whether the required-message text should be escaped before rendering.
+	 *
+	 * @param escapeRequiredMessage {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
+	 * @return this builder
+	 */
+	public FluentFormItem escapeRequiredMessage(Boolean escapeRequiredMessage) {
+		item.setEscapeRequiredMessage(escapeRequiredMessage);
 		return this;
 	}
 
