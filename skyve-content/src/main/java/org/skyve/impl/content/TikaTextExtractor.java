@@ -158,9 +158,20 @@ public class TikaTextExtractor implements TextExtractor {
 	 */
 	@Override
 	public String sniffLanguage(String text) {
-		LanguageResult result = LanguageDetector.getDefaultLanguageDetector().detect(text);
-		if (result != null) {
-			return result.getLanguage();
+		if (text == null || text.isBlank()) {
+			return null;
+		}
+		try {
+			LanguageResult result = LanguageDetector.getDefaultLanguageDetector().detect(text);
+			if (result != null) {
+				String lang = result.getLanguage();
+				if (lang != null && !lang.equalsIgnoreCase("unknown")) {
+					return lang;
+				}
+			}
+		}
+		catch (Throwable t) { // include Errors like NoClassDefFound
+			LOGGER.error("TextExtractorImpl.sniffLanguage(): Language could not be detected by TIKA", t);
 		}
 		return null;
 	}
