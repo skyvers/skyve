@@ -203,10 +203,118 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	public static final String DOUBLE_ACTION_COLUMN_WIDTH = "95";
 
 	private static final String UPLOAD_CAPTURE_PROPERTY_NAME = "capture";
+	private static final String FULL_SCREEN_DIALOG_WIDTH = "96vw";
+	private static final String FULL_SCREEN_DIALOG_HEIGHT = "96vh";
+	private static final String FULL_SCREEN_DIALOG_STYLE = "max-width:100vw;max-height:100vh;";
+	private static final String FULL_SCREEN_IFRAME_ATTRIBUTES = " loading=\"eager\" scrolling=\"no\" style=\"display:block;width:100%;height:100%;border:none;overflow:hidden\"";
+	private static final String LOCK_PAGE_SCROLL_SCRIPT = "SKYVE.PF.lockPageScroll()";
+	private static final String UNLOCK_PAGE_SCROLL_SCRIPT = "SKYVE.PF.unlockPageScroll()";
 	
 	// 2:1 aspect ratio that will fit 95% of phone CSS widths
 	private static final Integer DEFAULT_SIGNATURE_PIXEL_WIDTH = Integer.valueOf(350);
 	private static final Integer DEFAULT_SIGNATURE_PIXEL_HEIGHT = Integer.valueOf(175);
+
+	/**
+	 * Creates a PrimeFaces dialog configured for Skyve full-screen iframe tools.
+	 *
+	 * <p>Side effects: creates a JSF component, assigns it a generated id, and
+	 * applies the shared full-screen viewport sizing and dialog behaviour.
+	 *
+	 * @param header dialog header text; must not be {@code null}
+	 * @return configured full-screen dialog; never {@code null}
+	 */
+	private Dialog createFullScreenDialog(@Nonnull String header) {
+		Dialog result = (Dialog) a.createComponent(Dialog.COMPONENT_TYPE);
+		setId(result, null);
+		result.setModal(true);
+		result.setResponsive(true);
+		result.setFitViewport(true);
+		result.setResizable(false);
+		result.setCloseOnEscape(true);
+		result.setWidth(FULL_SCREEN_DIALOG_WIDTH);
+		result.setHeight(FULL_SCREEN_DIALOG_HEIGHT);
+		result.setStyle(FULL_SCREEN_DIALOG_STYLE);
+		result.setHeader(header);
+		result.setAppendTo("@(body)"); // append to <body/> so dialog can always pop (didn't work in tabs)
+		return result;
+	}
+
+	/**
+	 * Creates an iframe markup component with the supplied DOM id and attributes.
+	 *
+	 * <p>Side effects: creates a JSF component, assigns it a generated id, and
+	 * stores raw iframe markup in the component value.
+	 *
+	 * @param iframeId iframe DOM id; must not be {@code null}
+	 * @param iframeAttributes raw iframe attributes including any leading space; must not be {@code null}
+	 * @return output text component containing the iframe markup; never {@code null}
+	 */
+	private HtmlOutputText createIframe(@Nonnull String iframeId, @Nonnull String iframeAttributes) {
+		HtmlOutputText result = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
+		result.setEscape(false);
+		result.setValue(String.format("<iframe id=\"%s\" src=\"\"%s></iframe>", iframeId, iframeAttributes));
+		setId(result, null);
+		return result;
+	}
+
+	/**
+	 * Builds the JavaScript statement that opens a PrimeFaces widget.
+	 *
+	 * @param widgetVar PrimeFaces widget variable; must not be {@code null}
+	 * @return script fragment without a trailing semicolon; never {@code null}
+	 */
+	private static @Nonnull String createPfShowScript(@Nonnull String widgetVar) {
+		return "PF('" + widgetVar + "').show()";
+	}
+
+	/**
+	 * Builds the JavaScript used by button/menu onclick handlers that only open a
+	 * PrimeFaces widget.
+	 *
+	 * @param widgetVar PrimeFaces widget variable; must not be {@code null}
+	 * @return script fragment that opens the widget and returns {@code false}; never {@code null}
+	 */
+	private static @Nonnull String createPfShowReturnFalseScript(@Nonnull String widgetVar) {
+		return createPfShowScript(widgetVar) + ";return false";
+	}
+
+	/**
+	 * Builds the default content overlay hide script.
+	 *
+	 * @param id generated content or panel id; must not be {@code null}
+	 * @return script fragment without a trailing semicolon; never {@code null}
+	 */
+	private static @Nonnull String createContentOverlayOnHideScript(@Nonnull String id) {
+		return "SKYVE.PF.contentOverlayOnHide('" + id + "')";
+	}
+
+	/**
+	 * Builds the content overlay hide script with explicit iframe-preservation and
+	 * scroll-unlock flags.
+	 *
+	 * @param id generated content or panel id; must not be {@code null}
+	 * @param preserveIframeSrc whether the existing iframe source should be retained
+	 * @param unlockScroll whether the shared full-screen scroll lock should be released
+	 * @return script fragment without a trailing semicolon; never {@code null}
+	 */
+	private static @Nonnull String createContentOverlayOnHideScript(@Nonnull String id,
+																		boolean preserveIframeSrc,
+																		boolean unlockScroll) {
+		return String.format("SKYVE.PF.contentOverlayOnHide('%s',%s,%s)",
+								id,
+								Boolean.toString(preserveIframeSrc),
+								Boolean.toString(unlockScroll));
+	}
+
+	/**
+	 * Builds the mark-up dialog hide script and guarantees page scroll is unlocked.
+	 *
+	 * @param id generated content id; must not be {@code null}
+	 * @return script fragment without a trailing semicolon; never {@code null}
+	 */
+	private static @Nonnull String createContentMarkupOnHideAndUnlockScript(@Nonnull String id) {
+		return "try{SKYVE.PF.contentMarkupOnHide('" + id + "')}finally{" + UNLOCK_PAGE_SCROLL_SCRIPT + "}";
+	}
 
 	@Override
 	public UIComponent view(UIComponent component, boolean createView) {
@@ -1278,17 +1386,11 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 		UIPanel panel = null;
 		if (useGeometryDialog()) {
-			Dialog dialog = (Dialog) a.createComponent(Dialog.COMPONENT_TYPE);
-			setId(dialog, null);
+			Dialog dialog = createFullScreenDialog("Map");
 			String dialogVar = dialog.getId() + "Dialog";
 			dialog.setWidgetVar(dialogVar);
-			dialog.setModal(true);
-			dialog.setResponsive(true);
-			dialog.setFitViewport(true);
-			dialog.setHeader("Map");
-			dialog.setAppendTo("@(body)"); // append to <body/> so dialog can always pop (didn't work in tabs)
-			dialog.setOnHide("PF('" + dialogVar + "').toggleMaximize()");
-			mapButton.setOnclick("PF('" + dialogVar + "').show();PF('" + dialogVar + "').toggleMaximize();return false");
+			dialog.setOnHide(UNLOCK_PAGE_SCROLL_SCRIPT);
+			mapButton.setOnclick(createPfShowReturnFalseScript(dialogVar));
 			panel = dialog;
 		}
 		else {
@@ -1322,7 +1424,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 																			type,
 																			disabledConditionName,
 																			formDisabledConditionName,
-																			false));
+																			false,
+																			panel instanceof Dialog));
 
 	}
 
@@ -1376,8 +1479,28 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 															String disabledConditionName,
 															String formDisabledConditionName,
 															boolean includeScriptTag) {
+		return generateMapScriptExpression(mapDivClientId,
+											geometryBinding,
+											type,
+											disabledConditionName,
+											formDisabledConditionName,
+											includeScriptTag,
+											false);
+	}
+
+	private ValueExpression generateMapScriptExpression(String mapDivClientId,
+															String geometryBinding,
+															GeometryInputType type,
+															String disabledConditionName,
+															String formDisabledConditionName,
+															boolean includeScriptTag,
+															boolean lockScroll) {
 		StringBuilder value = new StringBuilder(128);
-		value.append("#{").append(managedBeanName).append(".getMapScript('").append(mapDivClientId);
+		value.append("#{");
+		if (lockScroll) {
+			value.append('\'').append(LOCK_PAGE_SCROLL_SCRIPT).append(";'.concat(");
+		}
+		value.append(managedBeanName).append(".getMapScript('").append(mapDivClientId);
 		value.append("', null, null, '").append(geometryBinding).append("', null, 'eager', null, null,");
 		if (type == null) {
 			value.append("null, ");
@@ -1402,6 +1525,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			}
 		}
 		value.append(", ").append(includeScriptTag).append(")}");
+		if (lockScroll) {
+			value.insert(value.length() - 1, ')');
+		}
 		return ef.createValueExpression(elc, value.toString(), String.class);
 	}
 
@@ -2878,16 +3004,10 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 		UIPanel panel = null;
 		if (fullUploadDialog) {
-			Dialog dialog = (Dialog) a.createComponent(Dialog.COMPONENT_TYPE);
-			setId(dialog, null);
+			Dialog dialog = createFullScreenDialog(image ? "Image Upload" : "Content Upload");
 			dialog.setWidgetVar(overlayVar);
-			dialog.setModal(true);
-			dialog.setResponsive(true);
-			dialog.setFitViewport(true);
-			dialog.setHeader(image ? "Image Upload" : "Content Upload");
-			dialog.setAppendTo("@(body)"); // append to <body/> so dialog can always pop (didn't work in tabs)
 			// clear the iframe src on hide so there is no flash next open
-			dialog.setOnHide("SKYVE.PF.contentOverlayOnHide('" + id + "',true,true);PF('" + overlayVar + "').toggleMaximize()");
+			dialog.setOnHide(createContentOverlayOnHideScript(id, true, true));
 			panel = dialog;
 		}
 		else {
@@ -2903,7 +3023,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			overlay.setStyle("width:50%;height:330px");
 			overlay.setAppendTo("@(body)"); // append to <body/> so overlay can always pop
 			// clear the iframe src on hide so there is no flash next open
-			overlay.setOnHide(String.format("SKYVE.PF.contentOverlayOnHide('%s')", id));
+			overlay.setOnHide(createContentOverlayOnHideScript(id));
 			panel = overlay;
 		}
 
@@ -2914,17 +3034,14 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			appendContentUploadUrlExpression(value, sanitisedBinding, display, capture, auto ? companionFieldName(binding) : null, dataWidgetVar);
 			value.append(").concat('\\')')}");
 			panel.setValueExpression("onShow", ef.createValueExpression(elc, value.toString(), String.class));
-			uploadItem.setOnclick("PF('" + overlayVar + "').show();return false");
+			uploadItem.setOnclick(createPfShowReturnFalseScript(overlayVar));
 		}
 		actionGroupChildren.add(panel);
 
 		// <iframe id="s06" src="" style="width:100%;height:280px;border:none"></iframe>
-		HtmlOutputText iframe = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
-		iframe.setEscape(false);
-		String iframeAttributes = fullUploadDialog ? " loading=\"eager\" scrolling=\"no\" style=\"width:100%;height:100%;border:none;overflow:hidden\""
+		String iframeAttributes = fullUploadDialog ? FULL_SCREEN_IFRAME_ATTRIBUTES
 													: " loading=\"eager\" style=\"width:100%;height:300px;border:none\"";
-		iframe.setValue(String.format("<iframe id=\"%s_overlayiframe\" src=\"\"%s></iframe>", id, iframeAttributes));
-		setId(iframe, null);
+		HtmlOutputText iframe = createIframe(id + "_overlayiframe", iframeAttributes);
 		panel.getChildren().add(iframe);
 
 		UIMenuItem clearItem = createContentMenuItem("Clear Content",
@@ -2969,25 +3086,19 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 				value.append("var mediaKind=$('[id$=\"").append(id).append('_').append(companionFieldName(binding));
 				value.append("_hidden\"]').val();if(mediaKind!=='image'){return false}");
 			}
-			value.append("PF('").append(overlayVar);
-			value.append("').show();PF('").append(overlayVar).append("').toggleMaximize();");
+			value.append(createPfShowScript(overlayVar)).append(';');
 			value.append("return false");
 			markupItem.setOnclick(value.toString());
 
-			Dialog dialog = (Dialog) a.createComponent(Dialog.COMPONENT_TYPE);
-			setId(dialog, null);
+			Dialog dialog = createFullScreenDialog("Mark Up Image");
 			dialog.setWidgetVar(overlayVar);
-			dialog.setModal(true);
-			dialog.setResponsive(true);
-			dialog.setFitViewport(true);
-			dialog.setHeader("Mark Up Image");
-			dialog.setAppendTo("@(body)"); // append to <body/> so dialog can always pop (didn't work in tabs)
 			// clear the iframe src on hide so there is no flash next open
-			dialog.setOnHide("SKYVE.PF.contentMarkupOnHide('" + id + "');PF('" + overlayVar + "').toggleMaximize()");
+			dialog.setOnHide(createContentMarkupOnHideAndUnlockScript(id));
 
 			// $(PrimeFaces.escapeClientId('<id>')).attr('src', '<url>')
 			value.setLength(0);
-			value.append("#{'SKYVE.PF.contentMarkupOnShow(\\'").append(id).append("\\',\\'").append(sanitisedBinding).append("\\',\\''.concat(");
+			value.append("#{'");
+			value.append(LOCK_PAGE_SCROLL_SCRIPT).append(";SKYVE.PF.contentMarkupOnShow(\\'").append(id).append("\\',\\'").append(sanitisedBinding).append("\\',\\''.concat(");
 			value.append(managedBeanName).append(".getContentMarkupUrl('").append(sanitisedBinding).append("')).concat('\\')");
 			if (auto) {
 				value.append(",\\'").append(companionFieldName(binding)).append("\\'");
@@ -2997,10 +3108,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			actionGroupChildren.add(dialog);
 
 			// <iframe id="s06" src="" style="width:100%;height:280px;border:none"></iframe>
-			iframe = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
-			iframe.setEscape(false);
-			iframe.setValue("<iframe id=\"" + id + "_markupiframe\" src=\"\" style=\"width:100%;height:calc(100% - 10px);border:none\"></iframe>");
-			setId(iframe, null);
+			iframe = createIframe(id + "_markupiframe", FULL_SCREEN_IFRAME_ATTRIBUTES);
 			dialog.getChildren().add(iframe);
 		}
 	}
@@ -3084,7 +3192,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 	/**
 	 * Configures the image upload menu item to open the unified bound upload page in
-	 * a maximised dialog.
+	 * a full-screen dialog.
 	 *
 	 * <p>Side effects: sets a JSF value expression on {@code item}.
 	 *
@@ -3132,7 +3240,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			value.append("#{'SKYVE.PF.contentOverlayOnShow(\\'").append(id).append("\\',\\''.concat(");
 			appendContentUploadUrlExpression(value, sanitisedBinding, display, capture, companionBinding, dataWidgetVar);
 			value.append(".concat('\\',true);PF(\\'").append(widgetVar);
-			value.append("\\').show();PF(\\'").append(widgetVar).append("\\').toggleMaximize();");
+			value.append("\\').show();");
 			value.append("return false'))}");
 		}
 		else {
@@ -4640,21 +4748,15 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		String panelId = null;
 		if (useDialog) {
 			// Dialog attached to the upload button that houses the iframe
-			Dialog dialog = (Dialog) a.createComponent(Dialog.COMPONENT_TYPE);
-			setId(dialog, null);
+			Dialog dialog = createFullScreenDialog("Upload");
 			panelId = dialog.getId();
 			String widgetVar = panelId + "Dialog";
 			dialog.setWidgetVar(widgetVar);
-			dialog.setModal(true);
-			dialog.setResponsive(true);
-			dialog.setFitViewport(true);
-			dialog.setHeader("Upload");
-			dialog.setAppendTo("@(body)"); // append to <body/> so dialog can always pop (didn't work in tabs)
 			// clear the iframe src on hide so there is no flash next open, and call the refresh remote command
-			dialog.setOnHide(String.format("SKYVE.PF.contentOverlayOnHide('%s',false,true);%s()", panelId, refreshId));
+			dialog.setOnHide(createContentOverlayOnHideScript(panelId, false, true) + ';' + refreshId + "()");
 			panel = dialog;
 
-			uploadButton.setOnclick("PF('" + widgetVar + "').show();PF('" + widgetVar + "').toggleMaximize()");
+			uploadButton.setOnclick(createPfShowScript(widgetVar));
 		} else {
 			// Overlay panel attached to the upload button that houses the iframe
 			OverlayPanel overlay = (OverlayPanel) a.createComponent(OverlayPanel.COMPONENT_TYPE);
@@ -4667,7 +4769,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			overlay.setModal(false); // modal on PF8 causes the opaque mask to sit over the top of the overlay panel
 			overlay.setStyle("width:50%;height:310px");
 			// clear the iframe src on hide so there is no flash next open, and call the refresh remote command
-			overlay.setOnHide(String.format("SKYVE.PF.contentOverlayOnHide('%s');%s()", panelId, refreshId));
+			overlay.setOnHide(createContentOverlayOnHideScript(panelId) + ';' + refreshId + "()");
 			panel = overlay;
 		}
 
@@ -4682,10 +4784,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		children.add(panel);
 
 		// <iframe id="s01_overlayiframe" src="" style="width:100%;height:280px;border:none"></iframe>
-		HtmlOutputText iframe = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
-		iframe.setEscape(false);
-		iframe.setValue(String.format("<iframe id=\"%s_overlayiframe\" src=\"\" style=\"width:100%%;height:285px;border:none\"></iframe>", panelId));
-		setId(iframe, null);
+		String iframeAttributes = useDialog ? FULL_SCREEN_IFRAME_ATTRIBUTES
+											: " style=\"width:100%;height:285px;border:none\"";
+		HtmlOutputText iframe = createIframe(panelId + "_overlayiframe", iframeAttributes);
 		panel.getChildren().add(iframe);
 
 		return result;

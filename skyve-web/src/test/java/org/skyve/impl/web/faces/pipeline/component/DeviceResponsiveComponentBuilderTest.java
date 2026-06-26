@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -21,6 +22,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
+import org.mockito.ArgumentCaptor;
 import org.primefaces.behavior.confirm.ConfirmBehavior;
 import org.primefaces.component.commandbutton.CommandButton;
 import org.primefaces.component.dialog.Dialog;
@@ -342,7 +344,17 @@ class DeviceResponsiveComponentBuilderTest {
 		verify(dialog).setModal(true);
 		verify(dialog).setResponsive(true);
 		verify(dialog).setFitViewport(true);
-		verify(mapButton).setOnclick("PF('geoDialogDialog').show();PF('geoDialogDialog').toggleMaximize();return false");
+		verify(dialog).setResizable(false);
+		verify(dialog).setCloseOnEscape(true);
+		verify(dialog).setWidth("96vw");
+		verify(dialog).setHeight("96vh");
+		verify(dialog).setStyle("max-width:100vw;max-height:100vh;");
+		verify(dialog).setOnHide("SKYVE.PF.unlockPageScroll()");
+		verify(mapButton).setOnclick("PF('geoDialogDialog').show();return false");
+		ArgumentCaptor<String> expressions = ArgumentCaptor.forClass(String.class);
+		verify(mockExpressionFactory, atLeastOnce()).createValueExpression(any(ELContext.class), expressions.capture(), eq(String.class));
+		assertTrue(expressions.getAllValues().stream().anyMatch(value -> value.contains("'SKYVE.PF.lockPageScroll();'.concat(") &&
+																			value.contains(".getMapScript(")));
 		verify(mockApplication, never()).createComponent(OverlayPanel.COMPONENT_TYPE);
 	}
 
@@ -426,7 +438,17 @@ class DeviceResponsiveComponentBuilderTest {
 		verify(dialog).setModal(true);
 		verify(dialog).setResponsive(true);
 		verify(dialog).setFitViewport(true);
+		verify(dialog).setResizable(false);
+		verify(dialog).setCloseOnEscape(true);
+		verify(dialog).setWidth("96vw");
+		verify(dialog).setHeight("96vh");
+		verify(dialog).setStyle("max-width:100vw;max-height:100vh;");
+		verify(dialog).setOnHide("SKYVE.PF.contentOverlayOnHide('contentGrid',true,true)");
 		verify(uploadItem).setValueExpression(eq("onclick"), any(ValueExpression.class));
+		ArgumentCaptor<String> expressions = ArgumentCaptor.forClass(String.class);
+		verify(mockExpressionFactory, atLeastOnce()).createValueExpression(any(ELContext.class), expressions.capture(), eq(String.class));
+		assertTrue(expressions.getAllValues().stream().anyMatch(value -> value.contains("contentOverlayOnShow(\\'contentGrid\\'") &&
+																			value.contains(".concat('\\',true);PF(\\'contentGrid_doc_attachmentOverlay\\').show();")));
 		verify(mockApplication, never()).createComponent(OverlayPanel.COMPONENT_TYPE);
 	}
 
