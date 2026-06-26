@@ -81,12 +81,20 @@ public interface DynamicPersistence extends Serializable, Closeable {
 	public void rollback();
 	
 	/**
-	 * Executes commit.
+	 * Commits pending dynamic-persistence work for the current unit of work.
+	 *
+	 * <p>Idempotency: implementations must tolerate repeated calls after the owning
+	 * {@link Persistence} has already completed its transaction. A repeated call without
+	 * intervening dynamic work must not duplicate writes or fail solely because there is
+	 * no active work to commit.
 	 */
 	public void commit();
 	
 	/**
-	 * Executes close.
+	 * Releases dynamic-persistence resources for this instance.
+	 *
+	 * <p>Idempotency: implementations must tolerate repeated calls. A repeated call must
+	 * not fail solely because resources have already been released.
 	 */
 	@Override
 	public void close();

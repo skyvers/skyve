@@ -131,6 +131,26 @@ class LuceneContentManagerLifecycleTest {
 	}
 
 	@Test
+	void testCloseIsIdempotentAfterContentFlush() throws Exception {
+		tempContentDirectory = Files.createTempDirectory("skyve-content-lucene-close-");
+		UtilImpl.CONTENT_DIRECTORY = tempContentDirectory.toString();
+
+		try (LuceneContentManager manager = new LuceneContentManager()) {
+			manager.startup();
+
+			BeanContent beanContent = new BeanContent(samplePersistentBean("bean-close-1"));
+			beanContent.getProperties().put("name", "alpha");
+			manager.put(beanContent);
+
+			manager.close();
+			manager.close();
+
+			assertEquals(1L, countHits(manager));
+			manager.shutdown();
+		}
+	}
+
+	@Test
 	void testAttachmentLifecycleWithInlineStorage() throws Exception {
 		tempContentDirectory = Files.createTempDirectory("skyve-content-lucene-inline-");
 		UtilImpl.CONTENT_DIRECTORY = tempContentDirectory.toString();

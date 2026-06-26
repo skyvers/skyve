@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -1830,6 +1831,26 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
+	void testCommitFalseThenCommitTrueIsIdempotentForCleanup() throws Exception {
+		TestHibernatePersistence persistence = new TestHibernatePersistence();
+		DynamicPersistence dynamicPersistence = mock(DynamicPersistence.class);
+		persistence.injectDynamicPersistence(dynamicPersistence);
+		try {
+			persistence.setUser(createTestUser());
+			persistence.begin();
+
+			persistence.commit(false);
+			persistence.commit(true);
+
+			verify(dynamicPersistence, times(2)).commit();
+			assertEquals(2, persistence.getCloseContentCount());
+		}
+		finally {
+			persistence.close();
+		}
+	}
+
+	@Test
 	void testGetSessionReturnsOpenSession() throws Exception {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -2163,6 +2184,8 @@ class AbstractHibernatePersistenceTest {
 	static final class TestHibernatePersistence extends AbstractHibernatePersistence {
 		private static final long serialVersionUID = 3676907942783294478L;
 
+		private int closeContentCount;
+
 		@Override
 		protected void removeBeanContent(PersistentBean bean) {
 			// no-op for unit tests
@@ -2175,12 +2198,16 @@ class AbstractHibernatePersistenceTest {
 
 		@Override
 		protected void closeContent() {
-			// no-op for unit tests
+			closeContentCount++;
 		}
 
 		/** Expose the protected {@code dynamicPersistence} field for test injection. */
 		void injectDynamicPersistence(DynamicPersistence dp) {
 			this.dynamicPersistence = dp;
+		}
+
+		int getCloseContentCount() {
+			return closeContentCount;
 		}
 	}
 }

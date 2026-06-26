@@ -132,4 +132,19 @@ public interface ContentManager extends AutoCloseable, ExtensionPoint, SystemObs
 	 * @throws Exception If iteration cannot be opened
 	 */
 	ContentIterable all() throws Exception;
+
+	/**
+	 * Flushes pending content changes and releases per-instance resources.
+	 *
+	 * <p>Idempotency: implementations must tolerate repeated calls on the same instance.
+	 * A repeated call must not duplicate content or indexing side effects, and must not
+	 * fail solely because resources have already been flushed or released. This supports
+	 * persistence lifecycles that may flush content before serialising a conversation and
+	 * later close the same persistence instance.
+	 *
+	 * @throws Exception if flushing or resource release fails for a reason other than
+	 * already-completed cleanup
+	 */
+	@Override
+	void close() throws Exception;
 }
