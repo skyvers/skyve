@@ -14,8 +14,8 @@ class SkyveContentSignature extends StatelessWidget with Sizable {
   Widget build(BuildContext context) {
     // TODO: implement widget
     return SizedBox(
-        width: pixelWidth?.toDouble() ?? 400.0,
-        height: pixelHeight?.toDouble() ?? 200.0,
+        width: pixelWidth?.toDouble() ?? 350.0,
+        height: pixelHeight?.toDouble() ?? 175.0,
         child: Stack(alignment: Alignment.center, children: [
           const Placeholder(fallbackHeight: 50, color: Colors.orange),
           Text('ContentLink: $label')

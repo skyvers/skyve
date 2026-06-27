@@ -11,6 +11,9 @@ Page listgrid
 Do react native
 
  */
+/**
+ * Orchestrates React and React Native client generation for Skyve views.
+ */
 public class ReactGenerator {
 	String uxui;
 	String projectFolderPath;

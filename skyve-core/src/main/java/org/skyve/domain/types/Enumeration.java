@@ -8,7 +8,28 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import jakarta.annotation.Nonnull;
 
 /**
- * The Skyve Enumeration interface.
+ * Contract implemented by every Skyve-generated enum type.
+ *
+ * <p>Skyve enumerations differ from plain Java enums in two important ways:
+ * <ol>
+ *   <li><b>Code vs. description</b> — {@link #toCode()} returns the stable identifier
+ *       that is persisted in the data store and compared in queries. The code must not
+ *       change across releases once data has been saved.
+ *       {@link #toLocalisedDescription()} returns the label displayed in the UI, which
+ *       may be localised and may change between releases.
+ *   <li><b>Domain values</b> — {@link #toDomainValue()} converts a single member to a
+ *       {@link org.skyve.metadata.model.document.Bizlet.DomainValue} for use in pickers
+ *       and drop-down lists.
+ * </ol>
+ *
+ * <p>The method-name constants ({@link #TO_CODE_METHOD_NAME}, {@link #FROM_CODE_METHOD_NAME},
+ * etc.) are used by the framework for reflective access when deserialising enum values
+ * from the database, REST payloads, and Bizlet domain-value lists.
+ *
+ * <p>The inner {@link DomainValueSortByCode} and {@link DomainValueSortByDescription}
+ * comparators are utilities for sorting lists of domain values in picker overlays.
+ *
+ * @see org.skyve.metadata.model.document.Bizlet.DomainValue
  */
 public interface Enumeration extends SerializableMetaData {
 	/**
@@ -52,9 +73,16 @@ public interface Enumeration extends SerializableMetaData {
 	public DomainValue toDomainValue();
 	
 	/**
-	 * Comparator to allow sorting of domain values by code
+	 * Comparator that orders {@link org.skyve.metadata.model.document.Bizlet.DomainValue}
+	 * instances alphabetically by their code.
 	 */
 	public static class DomainValueSortByCode implements Comparator<DomainValue> {
+		/**
+		 * Executes compare.
+		 * @param d1 the d1
+		 * @param d2 the d2
+		 * @return the result
+		 */
 		@Override
 		public int compare(@Nonnull DomainValue d1, @Nonnull DomainValue d2) {
 			return d1.getCode().compareTo(d2.getCode());
@@ -62,9 +90,16 @@ public interface Enumeration extends SerializableMetaData {
 	}
 
 	/**
-	 * Comparator to allow sorting of domain values by description
+	 * Comparator that orders {@link org.skyve.metadata.model.document.Bizlet.DomainValue}
+	 * instances alphabetically by their localised description.
 	 */
 	public static class DomainValueSortByDescription implements Comparator<DomainValue> {
+		/**
+		 * Executes compare.
+		 * @param d1 the d1
+		 * @param d2 the d2
+		 * @return the result
+		 */
 		@Override
 		public int compare(@Nonnull DomainValue d1, @Nonnull DomainValue d2) {
 			return d1.getLocalisedDescription().compareTo(d2.getLocalisedDescription());

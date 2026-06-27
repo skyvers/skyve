@@ -36,6 +36,63 @@ SKYVE.Util = (function () {
 		}
 	};
 
+	const normaliseUrl = function (url) {
+		const anchor = document.createElement("a");
+		anchor.href = url;
+		return anchor.href;
+	};
+
+	const isSameOriginUrl = function (url) {
+		try {
+			return new URL(url, window.location.href).origin === window.location.origin;
+		} catch (ignore) {
+			return false;
+		}
+	};
+
+	const isAccessibleWindow = function (target) {
+		try {
+			return !!(
+				target &&
+				target.location &&
+				target.document &&
+				target.location.origin === window.location.origin
+			);
+		} catch (ignore) {
+			return false;
+		}
+	};
+
+	const focusWindow = function (target) {
+		try {
+			if (target.focus) {
+				target.focus();
+			}
+		} catch (ignore) {
+			// Ignore focus failures; navigation has already done the useful work.
+		}
+	};
+
+	const reloadWindow = function (target) {
+		try {
+			target.location.reload();
+			focusWindow(target);
+			return true;
+		} catch (ignore) {
+			return false;
+		}
+	};
+
+	const navigateWindow = function (target, url) {
+		try {
+			target.location.href = url;
+			focusWindow(target);
+			return true;
+		} catch (ignore) {
+			return false;
+		}
+	};
+
 	// Public methods
 	return {
 		customer: null,
@@ -46,6 +103,104 @@ SKYVE.Util = (function () {
 		mapZoom: 1,
 		CONTEXT_URL: context,
 		allowedReportFormats: null,
+
+		/**
+		 * Restores a Skyve sanitised binding to its server-side binding form.
+		 * @param {string} binding - sanitised binding.
+		 * @returns {string} - unsanitised binding.
+		 */
+		unsanitiseBinding: function (binding) {
+			return binding.replace(/\_(\d*)\_/g, "[$1]").replace(/\_/g, ".");
+		},
+
+		/**
+		 * Recovers from an error page by reloading the owning Skyve browsing context when possible.
+		 * @param {string} url - fallback retry URL from the error page link.
+		 * @returns {boolean} false when navigation was handled, true to allow the link default.
+		 */
+		retryFromErrorPage: function (url) {
+			const retryUrl = normaliseUrl(url);
+			if (!isSameOriginUrl(retryUrl)) {
+				return true;
+			}
+
+			if (window.top && window.top !== window) {
+				if (isAccessibleWindow(window.top) && reloadWindow(window.top)) {
+					return false;
+				}
+				if (navigateWindow(window.top, retryUrl)) {
+					return false;
+				}
+				return true;
+			}
+
+			if (
+				window.opener &&
+				!window.opener.closed &&
+				isAccessibleWindow(window.opener) &&
+				reloadWindow(window.opener)
+			) {
+				return false;
+			}
+
+			return !navigateWindow(window, retryUrl);
+		},
+
+		/**
+		 * Finds the nearest parent window matching a predicate.
+		 * @param {Function} predicate - accepts a window and returns true for the owner frame.
+		 * @returns {?Window} matching window, or null if none is reachable.
+		 */
+		findOwnerWindow: function (predicate) {
+			let result = window.parent;
+			while (result && result !== window) {
+				try {
+					if (predicate(result)) {
+						return result;
+					}
+					if (!result.parent || result.parent === result) {
+						return null;
+					}
+					result = result.parent;
+				} catch (ignore) {
+					return null;
+				}
+			}
+			return null;
+		},
+
+		/**
+		 * Finds the nearest parent window hosting SmartClient.
+		 * @returns {?Window} SmartClient owner window, or null if none is reachable.
+		 */
+		findSmartClientWindow: function () {
+			return SKYVE.Util.findOwnerWindow(function (owner) {
+				return !!(owner.isc && owner.isc.WindowStack);
+			});
+		},
+
+		/**
+		 * Finds the nearest parent window hosting PrimeFaces Skyve helpers.
+		 * @returns {?Window} PrimeFaces owner window, or null if none is reachable.
+		 */
+		findPrimeFacesWindow: function () {
+			return SKYVE.Util.findOwnerWindow(function (owner) {
+				return !!(owner.SKYVE && owner.SKYVE.PF);
+			});
+		},
+
+		/**
+		 * Finds the nearest parent window hosting either supported Skyve UI runtime.
+		 * @returns {?Window} Skyve UI owner window, or null if none is reachable.
+		 */
+		findSkyveWindow: function () {
+			return SKYVE.Util.findOwnerWindow(function (owner) {
+				return !!(
+					(owner.isc && owner.isc.WindowStack) ||
+					(owner.SKYVE && owner.SKYVE.PF)
+				);
+			});
+		},
 
 		/**
 		 * Loads a JavaScript file.
@@ -1140,6 +1295,86 @@ SKYVE.Leaflet = (function () {
 		}
 	}
 
+	function isClusterableGeometry(geometry) {
+		return (
+			geometry &&
+			(geometry.type === "Point" || geometry.type === "MultiPoint") &&
+			geometry.properties &&
+			!geometry.properties.editable &&
+			L.markerClusterGroup
+		);
+	}
+
+	function markerClusterGroup(display) {
+		const maxZoom = display.webmap.getMaxZoom();
+		if (!isFinite(maxZoom)) {
+			return null;
+		}
+		if (
+			!display._markerClusterGroup ||
+			display._markerClusterGroup._map !== display.webmap
+		) {
+			display._markerClusterGroup = L.markerClusterGroup({
+				showCoverageOnHover: true,
+				zoomToBoundsOnClick: true,
+				spiderfyOnMaxZoom: true,
+				removeOutsideVisibleBounds: true,
+				maxClusterRadius: 40,
+				spiderLegPolylineOptions: {
+					weight: 1.5,
+					color: "#333",
+					opacity: 0.5,
+				},
+			});
+			display.webmap.addLayer(display._markerClusterGroup);
+		}
+		return display._markerClusterGroup;
+	}
+
+	function addOverlay(display, overlay, clustered) {
+		if (clustered) {
+			const group = markerClusterGroup(display);
+			if (group) {
+				overlay._skyveClustered = true;
+				group.addLayer(overlay);
+				return;
+			}
+		}
+		display.webmap.addLayer(overlay);
+	}
+
+	function removeOverlay(display, overlay) {
+		if (overlay._skyveClustered && display._markerClusterGroup) {
+			display._markerClusterGroup.removeLayer(overlay);
+		} else {
+			display.webmap.removeLayer(overlay);
+		}
+	}
+
+	function overlayGeometry(overlay) {
+		if (overlay.zoomData) {
+			return overlay.zoomData.geometry;
+		}
+		if (overlay.getLayers) {
+			const layers = overlay.getLayers();
+			if (layers.length && layers[0].zoomData) {
+				return layers[0].zoomData.geometry;
+			}
+		}
+		return null;
+	}
+
+	function overlayBounds(overlay) {
+		if (overlay.getBounds) {
+			return overlay.getBounds();
+		}
+		if (overlay.getLatLng) {
+			const latlng = overlay.getLatLng();
+			return L.latLngBounds(latlng, latlng);
+		}
+		return null;
+	}
+
 	// Public methods
 	return {
 		/**
@@ -1171,7 +1406,7 @@ SKYVE.Leaflet = (function () {
 						if (!found) {
 							const deletedObject = display._objects[bizId];
 							for (let i = 0, l = deletedObject.overlays.length; i < l; i++) {
-								display.webmap.removeLayer(deletedObject.overlays[i]);
+								removeOverlay(display, deletedObject.overlays[i]);
 								deletedObject.overlays[i] = null;
 							}
 							delete deletedObject.overlays;
@@ -1185,7 +1420,7 @@ SKYVE.Leaflet = (function () {
 					if (Object.prototype.hasOwnProperty.call(display._objects, bizId)) {
 						const deletedObject = display._objects[bizId];
 						for (let i = 0, l = deletedObject.overlays.length; i < l; i++) {
-							display.webmap.removeLayer(deletedObject.overlays[i]);
+							removeOverlay(display, deletedObject.overlays[i]);
 							deletedObject.overlays[i] = null;
 						}
 						delete deletedObject.overlays;
@@ -1204,10 +1439,7 @@ SKYVE.Leaflet = (function () {
 					let same = object.overlays.length === item.features.length;
 					if (same) {
 						for (let j = 0, m = object.overlays.length; j < m; j++) {
-							if (
-								object.overlays[j].getLayers()[0].zoomData.geometry !==
-								item.features[j].geometry
-							) {
+							if (overlayGeometry(object.overlays[j]) !== item.features[j].geometry) {
 								same = false;
 								break;
 							}
@@ -1215,7 +1447,7 @@ SKYVE.Leaflet = (function () {
 					}
 					if (!same) {
 						for (let j = 0, m = object.overlays.length; j < m; j++) {
-							display.webmap.removeLayer(object.overlays[j]);
+							removeOverlay(display, object.overlays[j]);
 							object.overlays[j] = null;
 						}
 						delete object.overlays;
@@ -1242,7 +1474,7 @@ SKYVE.Leaflet = (function () {
 						}
 						if (itemFeature.iconRelativeFilePath) {
 							const icon = {
-								iconUrl: `resources?_n=${itemFeature.iconRelativeFilePath}&_doc=${data._doc}`,
+								iconUrl: `${SKYVE.Util.CONTEXT_URL}resources?_n=${itemFeature.iconRelativeFilePath}&_doc=${data._doc}`,
 							};
 							if (itemFeature.iconAnchorX && itemFeature.iconAnchorY) {
 								icon.iconAnchor = [
@@ -1252,6 +1484,7 @@ SKYVE.Leaflet = (function () {
 							}
 							geometry.properties.icon = icon;
 						}
+						const clustered = isClusterableGeometry(geometry);
 
 						const overlay = L.geoJson(geometry, {
 							pointToLayer(point, latlng) {
@@ -1287,7 +1520,7 @@ SKYVE.Leaflet = (function () {
 							},
 						});
 						object.overlays.push(overlay);
-						display.webmap.addLayer(overlay);
+						addOverlay(display, overlay, clustered);
 					}
 					display._objects[item.bizId] = object;
 				}
@@ -1303,7 +1536,10 @@ SKYVE.Leaflet = (function () {
 						const overlays = object.overlays;
 						for (let i = 0, l = overlays.length; i < l; i++) {
 							const overlay = overlays[i];
-							bounds.extend(overlay.getBounds());
+							const overlayBound = overlayBounds(overlay);
+							if (overlayBound) {
+								bounds.extend(overlayBound);
+							}
 						}
 					}
 				}

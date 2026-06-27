@@ -16,6 +16,14 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * JAXB-annotated multi-line text-area input widget bound to a String attribute.
+ *
+ * <p>Renders a resizable text area with configurable word-wrap, editability,
+ * keyboard type, and pixel dimensions.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ */
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"wordWrap", "editable", "keyboardType", "pixelWidth", "pixelHeight", "minPixelHeight", "properties"})

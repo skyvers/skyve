@@ -33,6 +33,7 @@ public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> exte
 	}
 	
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public ComparisonComposite getComparisonComposite(C boundBean)
 	throws Exception {
 		final Map<String, ComparisonComposite> bindingToNodes = new LinkedHashMap<>();
@@ -112,8 +113,7 @@ public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> exte
 											Relation owningRelation,
 											Document currentDocument,
 											Bean bean,
-											boolean newNode)
-	throws Exception {
+											boolean newNode) {
 		ComparisonComposite result = new ComparisonComposite();
 		result.setBizId(bean.getBizId());
 		result.setBusinessKeyDescription((bean instanceof PersistentBean persistentBean) ? 
@@ -136,8 +136,7 @@ public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> exte
 
 	// fill in the oldValues JSON property for this entry
 	// determine if there are differences between the old and new and indicate these
-	private static void updateNode(Bean bean, ComparisonComposite node)
-	throws Exception {
+	private static void updateNode(Bean bean, ComparisonComposite node) {
 		boolean nodeDirty = false;
 
 		for (ComparisonProperty property : node.getProperties()) {
@@ -156,8 +155,7 @@ public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> exte
 								Document beanDocument,
 								Bean bean,
 								boolean newEntry,
-								String binding)
-	throws Exception {
+								String binding) {
 		// Get any inherited attributes here too.
 		for (Attribute attribute : beanDocument.getAllAttributes(customer)) {
 			String fqAttributeBinding = null;

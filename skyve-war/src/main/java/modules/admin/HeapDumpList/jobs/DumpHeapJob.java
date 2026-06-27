@@ -16,7 +16,12 @@ import modules.admin.HeapDumpList.util.HeapDumpUtil;
  * declared in <code>jboss-deployment-structure.xml</code>.
  */
 public class DumpHeapJob extends Job {
-
+	/**
+	 * Creates a heap dump and records the generated path in the job log.
+	 *
+	 * @throws Exception
+	 *         if heap-dump generation fails
+	 */
 	@Override
 	public void execute() throws Exception {
 		String dumpDir = HeapDumpUtil.dumpHeap();

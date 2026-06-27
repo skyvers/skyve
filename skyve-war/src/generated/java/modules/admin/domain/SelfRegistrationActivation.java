@@ -72,7 +72,7 @@ public abstract class SelfRegistrationActivation extends AbstractTransientBean {
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-	public static enum Result implements Enumeration {
+	public enum Result implements Enumeration {
 		SUCCESS("SUCCESS", "SUCCESS"),
 		ALREADYACTIVATED("ALREADY_ACTIVATED", "ALREADY_ACTIVATED"),
 		EXPIRED("EXPIRED", "EXPIRED"),

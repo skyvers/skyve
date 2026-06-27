@@ -77,7 +77,7 @@ public class CronExpressionParameterisedTest {
 	}
 
 	@Before
-	public void setup() throws Exception {
+	public void setup() {
 		parser = new NaturalCronExpressionParser();
 	}
 

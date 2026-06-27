@@ -64,7 +64,7 @@ public abstract class AbstractSkyveTestDispose extends AbstractH2TestDispose {
 	protected Persistence p;
 
 	@BeforeEach
-	public void before() {
+	void before() {
 		p = CORE.getPersistence();
 		u = p.getUser();
 		c = u.getCustomer();

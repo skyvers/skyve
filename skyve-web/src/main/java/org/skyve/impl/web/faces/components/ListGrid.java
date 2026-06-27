@@ -37,6 +37,9 @@ import jakarta.faces.component.html.HtmlPanelGroup;
 import jakarta.faces.context.FacesContext;
 import jakarta.servlet.http.HttpServletRequest;
 
+/**
+ * Implements internal web-module behavior for this Skyve runtime concern.
+ */
 @FacesComponent(ListGrid.COMPONENT_TYPE)
 public class ListGrid extends HtmlPanelGroup {
 
@@ -45,6 +48,12 @@ public class ListGrid extends HtmlPanelGroup {
 	@SuppressWarnings("hiding")
 	public static final String COMPONENT_TYPE = "org.skyve.impl.web.faces.components.ListGrid";
 
+	/**
+	 * Populates the component tree for the current request and appends list-grid children on first render.
+	 *
+	 * @param context the current Faces context
+	 * @throws IOException if component rendering fails
+	 */
 	@Override
 	public void encodeBegin(FacesContext context) throws IOException {
 		Map<String, Object> attributes = getAttributes();
@@ -97,11 +106,30 @@ public class ListGrid extends HtmlPanelGroup {
 			}.execute();
 		}
 
-		if ((UtilImpl.FACES_TRACE) && (! context.isPostback())) FACES_LOGGER.info(new ComponentRenderer(this).toString());
+		if ((UtilImpl.FACES_TRACE) && (! context.isPostback())) {
+			FACES_LOGGER.info("{}", new ComponentRenderer(this));
+		}
 
 		super.encodeBegin(context);
 	}
 
+	/**
+	 * Generates Faces components for a Skyve list grid and optional context menu actions.
+	 *
+	 * @param moduleName the module name containing the grid data
+	 * @param documentName the document name containing the grid data
+	 * @param queryName the optional query name
+	 * @param modelName the optional model name
+	 * @param uxui the UX/UI profile name
+	 * @param createRendered whether the add action is rendered
+	 * @param createDisabled whether the add action is disabled
+	 * @param zoomRendered whether the zoom action is rendered
+	 * @param zoomDisabled whether the zoom action is disabled
+	 * @param filterRendered whether the filter action is rendered
+	 * @param componentBuilder the builder used to generate the list grid components
+	 * @return the generated component list, typically containing the grid and optional context menu
+	 */
+	@SuppressWarnings("java:S107") // allow long parameter list for clarity and extensibility
 	public static List<UIComponent> generate(@Nonnull String moduleName,
 												@Nonnull String documentName,
 												@Nullable String queryName,
@@ -131,11 +159,14 @@ public class ListGrid extends HtmlPanelGroup {
 			listGrid.setQueryName(queryName);
 			name = queryName;
 		}
-		else {
+		else if (modelName != null) {
 			Document document = module.getDocument(customer, documentName);
 			model = document.getListModel(customer, modelName, true);
 			listGrid.setModelName(modelName);
 			name = modelName;
+		}
+		else {
+			throw new DomainException("A query or model name must be provided for a list grid");
 		}
 
 		listGrid.setTitle(model.getDescription()); // no localisation here as listGrid.getLocalisedTitle() would be called
@@ -162,6 +193,13 @@ public class ListGrid extends HtmlPanelGroup {
 		return result;
 	}
 	
+	/**
+	 * Instantiates a component builder implementation by known alias or fully qualified class name.
+	 *
+	 * @param componentBuilderClassString the optional alias or class name
+	 * @return the instantiated component builder
+	 * @throws DomainException if the builder cannot be created
+	 */
 	public static ComponentBuilder newComponentBuilder(@Nullable String componentBuilderClassString) {
 		try {
 			ComponentBuilder result = null;
@@ -186,12 +224,24 @@ public class ListGrid extends HtmlPanelGroup {
 		}
 	}
 	
+	/**
+	 * Converts literal or evaluated boolean-like attribute values into a nullable Boolean.
+	 *
+	 * @param renderedAttributeValue the raw attribute value
+	 * @return {@code true} when the attribute is null, literal true, or evaluated true
+	 */
 	public static Boolean getBooleanObjectAttribute(Object renderedAttributeValue) {
 		return Boolean.valueOf((renderedAttributeValue == null) || 
 														String.valueOf(true).equals(renderedAttributeValue) || // literal "true"
 														Boolean.TRUE.equals(renderedAttributeValue)); // evaluated EL expression
 	}
 
+	/**
+	 * Converts literal or evaluated boolean-like attribute values into a primitive boolean.
+	 *
+	 * @param disabledAttributeValue the raw attribute value
+	 * @return {@code true} when the attribute is literal true or evaluated true
+	 */
 	public static boolean getBooleanAttribute(Object disabledAttributeValue) {
 		return String.valueOf(true).equals(disabledAttributeValue) || // literal "true"
 				Boolean.TRUE.equals(disabledAttributeValue); // evaluated EL Expression

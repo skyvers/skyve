@@ -18,14 +18,22 @@ import jakarta.faces.component.html.HtmlPanelGroup;
 import jakarta.faces.context.FacesContext;
 import jakarta.servlet.http.HttpServletRequest;
 
+/**
+ * Implements internal web-module behavior for this Skyve runtime concern.
+ */
 @FacesComponent(Map.COMPONENT_TYPE)
 public class Map extends HtmlPanelGroup {
-
     private static final Logger FACES_LOGGER = Category.FACES.logger();
 
 	@SuppressWarnings("hiding")
 	public static final String COMPONENT_TYPE = "org.skyve.impl.web.faces.components.Map";
 
+	/**
+	 * Populates the map component tree on first render and delegates to the configured builder.
+	 *
+	 * @param context the current Faces context
+	 * @throws IOException if the component builder cannot be created or invoked
+	 */
 	@Override
 	public void encodeBegin(FacesContext context) throws IOException {
 		if (getChildCount() == 0) {
@@ -69,11 +77,23 @@ public class Map extends HtmlPanelGroup {
 			}.execute();
 		}
 
-		if ((UtilImpl.FACES_TRACE) && (! context.isPostback())) FACES_LOGGER.info(new ComponentRenderer(this).toString());
+		if ((UtilImpl.FACES_TRACE) && (! context.isPostback())) {
+			FACES_LOGGER.info("{}", new ComponentRenderer(this));
+		}
 
 		super.encodeBegin(context);
 	}		
 
+	/**
+	 * Generates the map component for either model-backed or query-backed map rendering.
+	 *
+	 * @param moduleName the module name
+	 * @param queryName the optional query name
+	 * @param geometryBinding the optional geometry binding
+	 * @param modelName the optional model name
+	 * @param componentBuilder the builder used to generate the component
+	 * @return the generated map component
+	 */
 	public static UIComponent generate(String moduleName,
 										String queryName,
 										String geometryBinding,

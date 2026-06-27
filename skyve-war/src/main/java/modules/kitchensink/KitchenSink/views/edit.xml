@@ -140,17 +140,17 @@
 				</row>
 				<row>
 					<item>
-						<default binding="contentLink" />
+						<content binding="contentLink" display="link" />
 					</item>
 				</row>
 				<row>
 					<item>
-						<contentImage binding="contentImage" pixelWidth="50" pixelHeight="50" />
+						<content binding="contentImage" display="image" capture="all" />
 					</item>
 				</row>
 				<row>
 					<item>
-						<contentSignature binding="contentSignature" pixelWidth="400" pixelHeight="200" />
+						<contentSignature binding="contentSignature" />
 					</item>
 				</row>
 			</form>

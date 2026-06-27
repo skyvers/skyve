@@ -7,8 +7,18 @@ import org.skyve.content.Disposition;
 import org.skyve.content.MimeType;
 
 /**
- * Represents a file stream to a client.
- * This is the result of executing the download method.
+ * Represents a file to be streamed to the browser as a download.
+ *
+ * <p>This is the result returned from
+ * {@link DownloadAction#download(org.skyve.domain.Bean, org.skyve.web.WebContext)}
+ * and carries the file name, MIME type, content disposition, and the content source
+ * (byte array, {@link File}, or {@link WebFileInputStream}).
+ *
+ * <p>When a {@link WebFileInputStream} is used as the content source, Skyve will
+ * not close the stream until its bytes have been written to the HTTP response.
+ *
+ * @see DownloadAction
+ * @see WebFileInputStream
  */
 public class Download {
 	private String fileName;
@@ -125,48 +135,54 @@ public class Download {
 	}
 	
 	/**
-	 * 
-	 * @return
+	 * Returns the suggested file name for the browser download prompt.
+	 *
+	 * @return file name; never {@code null}
 	 */
 	public String getFileName() {
 		return fileName;
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Returns the raw bytes of the file content, if the download was constructed from a byte array or String.
+	 *
+	 * @return the content bytes, or {@code null} if the content source is a {@link File} or stream
 	 */
 	public byte[] getBytes() {
 		return bytes;
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Returns the file on disk to stream, if the download was constructed from a {@link File}.
+	 *
+	 * @return the file, or {@code null} if the content source is bytes or a stream
 	 */
 	public File getFile() {
 		return file;
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Returns the lifecycle-managed input stream, if the download was constructed from a stream.
+	 *
+	 * @return the stream, or {@code null} if the content source is bytes or a file
 	 */
 	public WebFileInputStream getInputStream() {
 		return stream;
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Returns the MIME type to declare in the HTTP {@code Content-Type} header.
+	 *
+	 * @return the MIME type; never {@code null}
 	 */
 	public MimeType getMimeType() {
 		return mimeType;
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Returns the HTTP content disposition ({@code attachment} or {@code inline}).
+	 *
+	 * @return the disposition; defaults to {@link org.skyve.content.Disposition#attachment}
 	 */
 	public Disposition getDisposition() {
 		return disposition;

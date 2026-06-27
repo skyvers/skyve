@@ -18,7 +18,8 @@
 				/pages/css/
 				/ckeditor/
 				/codemirror/
-				/croppie/
+				/cropperjs/
+				/excalidraw/
 				/fontawesome-4.7.0/
 				/fontawesome-6.5.1/
 				/images/
@@ -27,7 +28,10 @@
 				/primevue-3.12.6/
 				/semantic24/
 				/skyve/
+				/skyvevue/
+				/sse/
 				/wicket/
+				/zxcvbn/
 			]]>
 		</param-value>
 	</context-param>
@@ -144,9 +148,7 @@
         		<![CDATA[
 					/jakarta.faces.resource/
 					/device.xhtml
-					/contentUpload.xhtml
-					/fileUpload.xhtml
-					/imageUpload.xhtml
+					/upload.xhtml
         		]]>
         	</param-value>
         </init-param>
@@ -296,6 +298,8 @@
 	<filter-mapping>
 		<filter-name>SecurityHeadersFilter</filter-name>
 		<url-pattern>/*</url-pattern>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>ERROR</dispatcher>
 	</filter-mapping>
 
     <filter>
@@ -445,7 +449,7 @@
 	
 	<servlet>
 		<servlet-name>ImageServlet</servlet-name>
-		<servlet-class>org.skyve.impl.web.jasperreports.ImageServlet</servlet-class>
+		<servlet-class>net.sf.jasperreports.jakarta.servlets.ImageServlet</servlet-class>
 		<async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>
@@ -467,8 +471,13 @@
 		<servlet-name>CustomerResourceServlet</servlet-name>
 		<url-pattern>/images/resources</url-pattern>
 	</servlet-mapping>
+	<servlet>
+		<servlet-name>ContentServlet</servlet-name>
+		<servlet-class>org.skyve.impl.web.ContentServlet</servlet-class>
+		<async-supported>true</async-supported>
+	</servlet>
 	<servlet-mapping>
-		<servlet-name>CustomerResourceServlet</servlet-name>
+		<servlet-name>ContentServlet</servlet-name>
 		<url-pattern>/content</url-pattern>
 	</servlet-mapping>
 

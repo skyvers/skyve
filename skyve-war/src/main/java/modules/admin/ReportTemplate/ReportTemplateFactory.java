@@ -7,11 +7,15 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.admin.domain.ReportTemplate;
 
+/**
+ * Fixture factory for {@code admin.ReportTemplate} test instances.
+ */
 @SkyveFactory(excludedUpdateAttributes = { ReportTemplate.runAsPropertyName })
 public class ReportTemplateFactory {
 	/**
 	 * Set scheduled to false so that the update action does not require the runAs UserProxy,
 	 * as validated by the bizlet.
+	 * @return the result
 	 */
 	@SkyveFixture(types = FixtureType.crud)
 	public static ReportTemplate crudInstance() {

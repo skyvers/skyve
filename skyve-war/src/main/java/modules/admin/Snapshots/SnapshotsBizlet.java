@@ -18,10 +18,15 @@ import modules.admin.domain.Snapshots;
  */
 public class SnapshotsBizlet extends Bizlet<Snapshots> {
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient SnapshotService snapshotService;
 
 	/**
 	 * Returns available modules for snapshot configuration.
+	 *
+	 * @param attributeName the attribute requesting values
+	 * @return module domain values when requested, otherwise superclass values
+	 * @throws Exception if domain lookup fails
 	 */
 	@Override
 	public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
@@ -33,6 +38,11 @@ public class SnapshotsBizlet extends Bizlet<Snapshots> {
 
 	/**
 	 * Returns queries for the selected module.
+	 *
+	 * @param attributeName the attribute requesting values
+	 * @param bean the current snapshots bean
+	 * @return query values for the selected module
+	 * @throws Exception if dynamic lookup fails
 	 */
 	@Override
 	public List<DomainValue> getDynamicDomainValues(String attributeName, Snapshots bean) throws Exception {
@@ -44,6 +54,11 @@ public class SnapshotsBizlet extends Bizlet<Snapshots> {
 
 	/**
 	 * Updates dependent fields when the module or query changes.
+	 *
+	 * @param source the triggering binding
+	 * @param bean the current snapshots bean
+	 * @param webContext the current web context
+	 * @throws Exception if rerender preparation fails
 	 */
 	@Override
 	public void preRerender(String source, Snapshots bean, WebContext webContext) throws Exception {

@@ -17,7 +17,17 @@ import org.skyve.web.WebContext;
 import modules.admin.domain.Audit;
 import modules.admin.domain.DataMaintenance;
 
+/**
+ * Schedules truncation of audit log data according to retention options.
+ */
 public class TruncateAuditLog implements ServerSideAction<DataMaintenance> {
+	/**
+	 * Performs the execute operation.
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public ServerSideActionResult<DataMaintenance> execute(DataMaintenance bean, WebContext webContext)
 			throws Exception {
@@ -44,7 +54,7 @@ public class TruncateAuditLog implements ServerSideAction<DataMaintenance> {
 	 * @return
 	 * @throws Exception
 	 */
-	public static DocumentQuery getAuditQuery(Persistence pers, DataMaintenance bean) throws Exception {
+	public static DocumentQuery getAuditQuery(Persistence pers, DataMaintenance bean) {
 
 		DocumentQuery qAudits = pers.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
 		if (bean.getAuditModuleName() != null) {
@@ -75,9 +85,8 @@ public class TruncateAuditLog implements ServerSideAction<DataMaintenance> {
 	 * @param pers
 	 * @param bean
 	 * @return
-	 * @throws Exception
 	 */
-	public static DataMaintenance setResultCount(Persistence pers, DataMaintenance bean) throws Exception {
+	public static DataMaintenance setResultCount(Persistence pers, DataMaintenance bean) {
 		DataMaintenance result = bean;
 
 		DocumentQuery qAudits = getAuditQuery(pers, bean);

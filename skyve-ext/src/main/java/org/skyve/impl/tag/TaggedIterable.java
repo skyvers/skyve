@@ -3,6 +3,7 @@ package org.skyve.impl.tag;
 import java.util.Iterator;
 
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.LoggingIteratorAdapter;
@@ -10,8 +11,14 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.persistence.AutoClosingIterable;
+import org.skyve.util.logging.SkyveLoggerFactory;
+import org.slf4j.Logger;
 
+
+@SuppressWarnings("resource")
 class TaggedIterable implements AutoClosingIterable<Bean> {
+	private static final Logger logger = SkyveLoggerFactory.getLogger(TaggedIterable.class);
+
 	private AutoClosingIterable<Bean> tagIterable;
 	
 	TaggedIterable(AutoClosingIterable<Bean> tagIterable) {
@@ -43,18 +50,21 @@ class TaggedIterable implements AutoClosingIterable<Bean> {
 					taggedBizId = (String) BindUtil.get(tagged, "taggedBizId");
 					AbstractPersistence persistence = AbstractPersistence.get(); // thread local remember
 					Customer customer = persistence.getUser().getCustomer();
+					if ((taggedModule == null) || (taggedDocument == null) || (taggedBizId == null)) {
+						throw new DomainException("Tagged item has missing module/document/bizId");
+					}
 					Module module = customer.getModule(taggedModule);
 					Document document = module.getDocument(customer, taggedDocument);
 					nextBean = persistence.retrieve(document, taggedBizId);
 					if (nextBean == null) {
-						throw new Exception("Tagged item does not exist");
+						throw new DomainException("Tagged item does not exist");
 					}
 				}
 				catch (Exception e) {
 					StringBuilder sb = new StringBuilder(256);
 					sb.append(taggedModule).append('.').append(taggedDocument);
 					sb.append('.').append(taggedBizId).append(" - ").append(e.getLocalizedMessage());
-					System.err.println(sb.toString());
+					logger.warn(sb.toString(), e);
 					// try the next one
 					result = hasNext();
 				}
@@ -64,6 +74,7 @@ class TaggedIterable implements AutoClosingIterable<Bean> {
 		}
 
 		@Override
+		@SuppressWarnings("java:S2272") // hasNext() has side-effects
 		public Bean next() {
 			Bean result = nextBean;
 			nextBean = null;

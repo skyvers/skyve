@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -51,6 +52,8 @@ public abstract class AbstractContentManager implements ContentManager {
 	protected static final String CLUSTER_NAME = "SKYVE_CONTENT";
     protected static final String MARKUP = "markup";
 
+    private static final String COULD_NOT_RENAME = "Could not rename ";
+
     @SuppressWarnings({"java:S3008", "java:S1444"}) // this is set at Skyve startup and should not be changed at runtime, so it is effectively final
     public static Class<? extends AbstractContentManager> IMPLEMENTATION_CLASS;
 	
@@ -60,6 +63,7 @@ public abstract class AbstractContentManager implements ContentManager {
 	 * @return a new {@link AbstractContentManager} instance.
 	 * @throws IllegalArgumentException if the configured implementation cannot be instantiated.
 	 */
+	@SuppressWarnings("resource") // handled by caller
 	public static AbstractContentManager get() {
 		try {
 			return IMPLEMENTATION_CLASS.getDeclaredConstructor().newInstance();
@@ -76,6 +80,7 @@ public abstract class AbstractContentManager implements ContentManager {
 	 * @param index True to index; false to remove from the index.
 	 * @throws Exception if the reindex operation fails.
 	 */
+	@SuppressWarnings("java:S112") // allow throws Exception for implementations
 	public abstract void reindex(AttachmentContent attachment, boolean index) throws Exception;
 	
 	/**
@@ -190,7 +195,7 @@ public abstract class AbstractContentManager implements ContentManager {
 		if (file.exists()) {
 			old = new File(file.getPath() + "_old");
 			if (Files.move(file.toPath(), old.toPath(), StandardCopyOption.REPLACE_EXISTING) == null) {
-				throw new IOException("Could not rename " + balancedFolderPath + " to " + balancedFolderPath + "_old before file content store operation");
+				throw new IOException(COULD_NOT_RENAME + balancedFolderPath + " to " + balancedFolderPath + "_old before file content store operation");
 			}
 		}
 		
@@ -205,7 +210,7 @@ public abstract class AbstractContentManager implements ContentManager {
 			if ((old != null) && 
 					old.exists() && 
 					(Files.move(old.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING) == null)) {
-				throw new IOException("Could not rename " + balancedFolderPath + "_old to " + balancedFolderPath + "after file content store operation error.", e);
+				throw new IOException(COULD_NOT_RENAME + balancedFolderPath + "_old to " + balancedFolderPath + "after file content store operation error.", e);
 			}
 			
 			throw e;
@@ -257,7 +262,7 @@ public abstract class AbstractContentManager implements ContentManager {
 		if (file.exists()) {
 			old = new File(file.getPath() + "_old");
 			if (Files.move(file.toPath(), old.toPath(), StandardCopyOption.REPLACE_EXISTING) == null) {
-				throw new IOException("Could not rename " + absoluteBalancedFolderPath + " to " + absoluteBalancedFolderPath + "_old before file content store meta operation");
+				throw new IOException(COULD_NOT_RENAME + absoluteBalancedFolderPath + " to " + absoluteBalancedFolderPath + "_old before file content store meta operation");
 			}
 		}
 		try {
@@ -270,7 +275,7 @@ public abstract class AbstractContentManager implements ContentManager {
 			if ((old != null) && 
 					old.exists() && 
 					Files.move(old.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING) == null) {
-				throw new IOException("Could not rename " + absoluteBalancedFolderPath + "_old to " + absoluteBalancedFolderPath + "after file content store meta operation error.", e);
+				throw new IOException(COULD_NOT_RENAME + absoluteBalancedFolderPath + "_old to " + absoluteBalancedFolderPath + "after file content store meta operation error.", e);
 			}
 			
 			if (e instanceof IOException ioe) {
@@ -374,6 +379,9 @@ public abstract class AbstractContentManager implements ContentManager {
 				int lastDot = fileName.lastIndexOf('.');
 				if (lastDot > -1) {
 					suffix = UtilImpl.processStringValue(fileName.substring(lastDot + 1));
+					if (suffix != null) {
+						suffix = suffix.toLowerCase(Locale.ROOT);
+					}
 				}
 			}
 	

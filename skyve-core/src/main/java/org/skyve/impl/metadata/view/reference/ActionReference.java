@@ -8,6 +8,15 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
+/**
+ * JAXB-annotated reference to a named action in a module/document/view
+ * context.
+ *
+ * <p>Used by view metadata elements that need to point to an action by name
+ * and resolve it later during view conversion.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ */
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 public class ActionReference implements Reference {
 	private static final long serialVersionUID = -3467116310017720893L;

@@ -12,16 +12,36 @@ import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
+/**
+ * Abstract base for all JasperReports design generators.
+ *
+ * <p>Subclasses (document, list, query, view) implement report-type-specific
+ * layout and field-ordering logic on top of the common scaffolding provided here.
+ */
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate fragments of generated JasperReports design output.
 public abstract class ReportDesignGenerator {
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ReportDesignGenerator.class);
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ReportDesignGenerator.class);
-
+    /**
+     * Creates a fresh design instance and populates it with derived report metadata.
+     *
+     * @return A populated design ready for rendering.
+     */
     public DesignSpecification generateDesign() {
         return populateDesign(new DesignSpecification());
     }
 
+    /**
+     * Populates a design with parameters, fields, variables, subreports and bands.
+     *
+     * <p>Side effects: clears any existing generated collections on {@code design}
+     * before rebuilding them.
+     *
+     * @param design The mutable design to populate.
+     * @return The same design instance after population.
+     */
     public DesignSpecification populateDesign(DesignSpecification design) {
         assert(design.getModuleName() != null);
         assert(design.getDocumentName() != null);
@@ -51,6 +71,11 @@ public abstract class ReportDesignGenerator {
         design.getSubReports().clear();
     }
 
+    /**
+     * Adds framework parameters used by generated report expressions.
+     *
+     * @param design The design receiving parameters.
+     */
     protected static void addParameters(DesignSpecification design) {
         ReportParameter p1 = new ReportParameter();
         p1.setName("SUBREPORT_DIR");
@@ -72,6 +97,11 @@ public abstract class ReportDesignGenerator {
         design.getParameters().add(p3);
     }
 
+    /**
+     * Adds baseline framework fields common to report designs.
+     *
+     * @param design The design receiving fields.
+     */
     @SuppressWarnings("static-method") // overridable
 	protected void addFields(DesignSpecification design) {
         final Customer customer = CORE.getCustomer();
@@ -124,6 +154,11 @@ public abstract class ReportDesignGenerator {
         }
     }
 
+    /**
+     * Adds aggregate variables for numeric fields in subreport mode.
+     *
+     * @param design The design receiving variables.
+     */
     protected static void addVariables(DesignSpecification design) {
         if (DesignSpecification.ReportType.subreport.equals(design.getReportType())) {
             for (ReportField a : design.getFields()) {
@@ -141,6 +176,11 @@ public abstract class ReportDesignGenerator {
         }
     }
 
+    /**
+     * Builds default subreport designs for collection fields when none were supplied.
+     *
+     * @param design The parent design receiving subreport specifications.
+     */
     protected void addSubreports(DesignSpecification design) {
         //only generate default reports if subreports is empty (allows for manual creation of subreports instead of default)
         if (design.getSubReports().isEmpty()) {
@@ -156,6 +196,11 @@ public abstract class ReportDesignGenerator {
         }
     }
 
+    /**
+     * Adds report-level bands that are shared by all generator implementations.
+     *
+     * @param design The design receiving generated bands.
+     */
 	protected void addBands(DesignSpecification design) {
         ReportBand background = new ReportBand();
         background.setBandType(ReportBand.BandType.background);
@@ -226,7 +271,13 @@ public abstract class ReportDesignGenerator {
         design.getBands().add(noData);
     }
 
-    @SuppressWarnings("static-method") // overridable
+    /**
+     * Creates the default title band scaffold.
+     *
+     * @param design The design being generated.
+     * @return A title band bound to the supplied design.
+     */
+	   @SuppressWarnings("static-method") // overridable
 	protected ReportBand createTitleBand(DesignSpecification design) {
         final ReportBand title = new ReportBand();
         title.setName("Title");
@@ -236,6 +287,17 @@ public abstract class ReportDesignGenerator {
         return title;
     }
 
+    /**
+     * Converts a Skyve attribute into a report field descriptor.
+     *
+     * @param bean The target report design.
+     * @param customer The current customer metadata context.
+     * @param document The owning document.
+     * @param a The source attribute.
+     * @param sJoin Join SQL accumulated for nested bindings.
+     * @param fieldPrefix Field-name prefix accumulated for nested bindings.
+     * @return The generated report field descriptor.
+     */
     protected static ReportField fieldFromAttribute(DesignSpecification bean, Customer customer, Document document, Attribute a, StringBuilder sJoin, StringBuilder fieldPrefix) {
     	StringBuilder mutableSJoin = sJoin;
     	ReportField f = new ReportField();
@@ -268,7 +330,7 @@ public abstract class ReportDesignGenerator {
             default:
                 fieldPrefix.append(a.getName());
                 f.setName(fieldPrefix.toString());
-                if (mutableSJoin.length() == 0) {
+                if (mutableSJoin.isEmpty()) {
                     f.setNameSql("a." + f.getName());
                 } else {
                     f.setJoinSql(mutableSJoin.toString());
@@ -298,15 +360,15 @@ public abstract class ReportDesignGenerator {
     }
 
     /**
-     * Constructs a field with joins for a given binding
+     * Resolves a binding expression to a report field, creating joins as required.
      *
-     * @param design
-     * @param customer
-     * @param document
-     * @param binding
-     * @return
-     * @throws Exception
+     * @param design The target design receiving join state.
+     * @param customer The current customer metadata context.
+     * @param document The driving document.
+     * @param binding A simple or dotted attribute binding.
+     * @return A resolved report field, or {@code null} when the binding cannot be represented.
      */
+    @SuppressWarnings("java:S3776") // Complexity OK
     protected static ReportField fieldFromBinding(DesignSpecification design, Customer customer, Document document, String binding) {
 
         ReportField result = null;
@@ -387,10 +449,11 @@ public abstract class ReportDesignGenerator {
     }
 
     /**
-     * Construct a subreport for the field which represents the collection
+     * Creates and populates a subreport design for a collection field.
      *
-     * @param fld
-     * @return
+     * @param design The parent design.
+     * @param fld The collection field descriptor.
+     * @param colWidth The available column width for the subreport.
      */
 	@SuppressWarnings("boxing")
 	public void constructSubreportFromField(DesignSpecification design, ReportField fld, Integer colWidth) {
@@ -429,5 +492,4 @@ public abstract class ReportDesignGenerator {
 
         design.getSubReports().add(subreport);
     }
-
 }

@@ -38,46 +38,95 @@ import jakarta.faces.context.FacesContext;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
 
+/**
+ * Models a view interaction and binds it to the active Skyve web context.
+ */
 @RequestScoped
 @Named("desktop")
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate desktop-view markup fragments.
 public class DesktopView extends HarnessView {
 	private static final long serialVersionUID = 913239189728613263L;
 
 	private String localeScript;
+	
+	/**
+	 * Returns locale bootstrap script markup for SmartClient internationalization.
+	 *
+	 * @return locale bootstrap script markup, or {@code null}
+	 */
 	public String getLocaleScript() {
 		return localeScript;
 	}
 	
 	private String menuScript;
+
+	/**
+	 * Returns generated desktop menu bootstrap script.
+	 *
+	 * @return generated desktop menu bootstrap script, or {@code null}
+	 */
 	public String getMenuScript() {
 		return menuScript;
 	}
 	
 	private String dataSourceScript;
+
+	/**
+	 * Returns generated SmartClient datasource bootstrap script.
+	 *
+	 * @return generated SmartClient datasource bootstrap script, or {@code null}
+	 */
 	public String getDataSourceScript() {
 		return dataSourceScript;
 	}
 	
 	private String uiScript;
+
+	/**
+	 * Returns generated initial UI action script.
+	 *
+	 * @return generated initial UI action script, or {@code null}
+	 */
 	public String getUiScript() {
 		return uiScript;
 	}
 	
 	private String bannerScript;
+
+	/**
+	 * Returns generated environment banner script.
+	 *
+	 * @return generated environment banner script, or {@code null}
+	 */
 	public String getBannerScript() {
 		return bannerScript;
 	}
 
+	/**
+	 * Returns SmartClient base directory configured for this runtime.
+	 *
+	 * @return SmartClient base directory
+	 */
 	@SuppressWarnings("static-method")
 	public String getSmartClientDir() {
 		return UtilImpl.SMART_CLIENT_DIR;
 	}
 
 	private String skin;
+
+	/**
+	 * Returns the SmartClient skin selected for the active UX/UI profile.
+	 *
+	 * @return SmartClient skin name, or {@code null}
+	 */
 	public String getSkin() {
 		return skin;
 	}
 	
+	/**
+	 * Prepares desktop scripts (menu, datasource, UI, and banner) for initial non-postback rendering.
+	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void preRender() {
         final FacesContext fc = FacesContext.getCurrentInstance();
         if (! fc.isPostback()) {
@@ -170,6 +219,11 @@ public class DesktopView extends HarnessView {
         }
 	}
 
+	/**
+	 * Builds the desktop header HTML template injected into SmartClient runtime state.
+	 *
+	 * @return header template HTML
+	 */
 	public String getHeaderTemplate() {
 		StringBuilder result = new StringBuilder(256);
 		result.append("<table style=\"width:100%\">");
@@ -194,6 +248,10 @@ public class DesktopView extends HarnessView {
 		return result.toString();
 	}
 
+	/**
+	 * Creates locale-specific script include markup when a non-default locale bundle is required.
+	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void createLocaleScriptIfRequired() {
 		Locale locale = CORE.getUser().getLocale();
 		String language = locale.getLanguage();
@@ -382,6 +440,14 @@ public class DesktopView extends HarnessView {
         }
 	}
 	
+	/**
+	 * Builds menu bootstrap script for all visible module menu entries.
+	 *
+	 * @param chosenModuleName module name currently being rendered
+	 * @param uxui UX/UI name used to resolve the menu structure
+	 * @param result buffer that receives the generated script
+	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void constructMenu(String chosenModuleName,
 								String uxui,
 								StringBuilder result) {
@@ -390,6 +456,9 @@ public class DesktopView extends HarnessView {
 
 		// render each module menu
 		new MenuRenderer(uxui, chosenModuleName) {
+			/**
+			 * Starts rendering a module menu descriptor.
+			 */
 			@Override
 			public void renderModuleMenu(Menu menu, Module menuModule, boolean open) {
 				result.append("{name:'");
@@ -400,6 +469,9 @@ public class DesktopView extends HarnessView {
 				result.append("',");
 			}
 			
+			/**
+			 * Starts rendering the root menu node for a module.
+			 */
 			@Override
 			public void renderMenuRoot(Menu menu, Module menuModule) {
 				result.append("root:{name:'");
@@ -407,6 +479,9 @@ public class DesktopView extends HarnessView {
 				result.append("',sub:[");
 			}
 			
+			/**
+			 * Starts rendering a menu-group node.
+			 */
 			@Override
 			public void renderMenuGroup(MenuGroup group, Module menuModule) {
 				result.append("{desc:'");
@@ -551,18 +626,27 @@ public class DesktopView extends HarnessView {
 				result.append("'},");
 			}
 			
+			/**
+			 * Finalizes a rendered menu-group node.
+			 */
 			@Override
 			public void renderedMenuGroup(MenuGroup group, Module menuModule) {
 				result.setLength(result.length() - 1);
 				result.append("]},");
 			}
 			
+			/**
+			 * Finalizes the rendered root menu node.
+			 */
 			@Override
 			public void renderedMenuRoot(Menu menu, Module menuModule) {
 				result.setLength(result.length() -1); // remove the last comma
 				result.append("]}");
 			}
 
+			/**
+			 * Finalizes a rendered module menu descriptor.
+			 */
 			@Override
 			public void renderedModuleMenu(Menu menu, Module menuModule, boolean open) {
 				result.append(",open:").append(open).append("},");
@@ -575,6 +659,14 @@ public class DesktopView extends HarnessView {
 		result.append(']');
 	}
 
+	/**
+	 * Appends SmartClient datasource definitions for accessible module menu items.
+	 *
+	 * @param customer customer whose modules are being rendered
+	 * @param user current user whose permissions determine accessible menus
+	 * @param uxui UX/UI name used to resolve the menu structure
+	 * @param result buffer that receives the generated script
+	 */
 	private static void listDataSources(Customer customer, UserImpl user, String uxui, StringBuilder result) {
 		StringBuilder dataSources = new StringBuilder(1024);
 
@@ -594,13 +686,26 @@ public class DesktopView extends HarnessView {
 			Menu menu = user.getModuleMenu(moduleName);
 			listDataSourcesForMenuItems(user, customer, moduleName, module, menu.getItems(), uxui, dataSources, visitedQueryNames);
 		}
-		if (dataSources.length() > 0) { // we have appended some data sources
+		if (! dataSources.isEmpty()) { // we have appended some data sources
 			dataSources.setLength(dataSources.length() - 2); // remove the last data source comma
 			result.append(dataSources);
 		}
 		result.append("]);");
 	}
 
+	/**
+	 * Recursively appends datasource definitions for nested menu items.
+	 *
+	 * @param user current user whose permissions determine accessible items
+	 * @param customer customer whose modules are being rendered
+	 * @param moduleName module name containing the menu items
+	 * @param module module containing the menu items
+	 * @param items menu items to traverse
+	 * @param uxui UX/UI name used to resolve the menu structure
+	 * @param dataSources buffer that receives generated datasource definitions
+	 * @param visitedQueryNames set used to avoid duplicate query definitions
+	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private static void listDataSourcesForMenuItems(UserImpl user,
 														Customer customer, 
 														String moduleName, 

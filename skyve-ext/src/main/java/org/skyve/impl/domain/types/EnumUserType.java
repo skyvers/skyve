@@ -14,6 +14,10 @@ import org.hibernate.usertype.ParameterizedType;
 import org.hibernate.usertype.UserType;
 import org.skyve.domain.types.Enumeration;
 
+/**
+ * Hibernate {@link org.hibernate.usertype.UserType} that persists Skyve enum
+ * attributes as their {@code code()} string value in a SQL {@code VARCHAR} column.
+ */
 public class EnumUserType implements UserType, Serializable, ParameterizedType {
 	private static final long serialVersionUID = 8418711259919061318L;
 
@@ -89,7 +93,7 @@ public class EnumUserType implements UserType, Serializable, ParameterizedType {
 	public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner)
 	throws HibernateException, SQLException {
         String code = rs.getString(names[0]);
-		if ((rs.wasNull()) || (code == null) || (code.length() == 0)) {
+		if ((rs.wasNull()) || (code == null) || code.isEmpty()) {
 			return null;
 		}
         

@@ -2,7 +2,7 @@ package org.skyve.domain.types.converters.datetime;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -11,31 +11,24 @@ import org.skyve.domain.messages.ConversionException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.util.Time;
 
-public class DD_MMM_YYYY_HH_MITest {
+class DD_MMM_YYYY_HH_MITest {
 
 	private DD_MMM_YYYY_HH_MI formatter;
 
 	@BeforeEach
-	public void before() {
+	void before() {
 		formatter = new DD_MMM_YYYY_HH_MI();
 	}
 
 	@Test
-	public void testFromDisplayValueInvalidFormat() throws Exception {
-		ConversionException ce = assertThrows(ConversionException.class, () -> {
-			// setup the test data
-			DateTime testDate = new DateTime(Time.withDate(01, 03, 2020));
-			Time.setTime(testDate, 02, 30, 0);
-
-			// call the method under test
-			assertThat(formatter.fromDisplayValue("01-03-2020 02:30"), is(testDate));
-		});
+	void testFromDisplayValueInvalidFormat() {
+		ConversionException ce = assertThrows(ConversionException.class, () -> formatter.fromDisplayValue("01-03-2020 02:30"));
 
 		assertTrue(ce.getMessages().size() > 0);
 	}
 
 	@Test
-	public void testFromDisplayValueAM() throws Exception {
+	void testFromDisplayValueAM() {
 		// setup the test data
 		DateTime testDate = new DateTime(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 02, 30, 0);
@@ -45,7 +38,7 @@ public class DD_MMM_YYYY_HH_MITest {
 	}
 
 	@Test
-	public void testFromDisplayValuePM() throws Exception {
+	void testFromDisplayValuePM() {
 		// setup the test data
 		DateTime testDate = new DateTime(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 14, 30, 0);
@@ -55,7 +48,7 @@ public class DD_MMM_YYYY_HH_MITest {
 	}
 
 	@Test
-	public void testToDisplayValueAM() throws Exception {
+	void testToDisplayValueAM() {
 		// setup the test data
 		DateTime testDate = new DateTime(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 02, 30, 0);
@@ -65,7 +58,7 @@ public class DD_MMM_YYYY_HH_MITest {
 	}
 
 	@Test
-	public void testToDisplayValuePM() throws Exception {
+	void testToDisplayValuePM() {
 		// setup the test data
 		DateTime testDate = new DateTime(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 14, 30, 0);

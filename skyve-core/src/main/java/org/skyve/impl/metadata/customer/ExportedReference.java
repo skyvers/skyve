@@ -7,6 +7,20 @@ import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Reference.ReferenceType;
 import org.skyve.util.Util;
 
+/**
+ * Records a cross-module referential dependency from one document to another.
+ *
+ * <p>An {@code ExportedReference} is created for every {@link org.skyve.metadata.model.document.Association}
+ * or {@link org.skyve.metadata.model.document.Collection} defined in a module that
+ * points at a document owned by a different module.  The repository uses these records
+ * at delete time to check whether outstanding references would be violated before
+ * allowing a bean to be removed.
+ *
+ * <p>Threading: not thread-safe.  Instances are populated once during metadata
+ * loading and are read-only thereafter.
+ *
+ * @see CustomerImpl
+ */
 public class ExportedReference implements Serializable {
 	private static final long serialVersionUID = 3672667027101941186L;
 

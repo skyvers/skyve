@@ -37,6 +37,7 @@ public class FluentModuleRole {
 		this.role = role;
 	}
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public FluentModuleRole from(@SuppressWarnings("hiding") Role role) {
 		name(role.getName());
 		description(role.getDescription());

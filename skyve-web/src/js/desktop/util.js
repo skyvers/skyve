@@ -10,6 +10,25 @@ isc.RPCManager.saveDataPrompt = "Contacting Server...";
 isc.RPCManager.removeDataPrompt = "Contacting Server...";
 
 /**
+ * Preserves server-supplied HTML escaping decisions in field error tooltips.
+ * SmartClient's default implementation calls `asHTML()`, which always escapes
+ * the error text before placing it into the hover markup.
+ * @param {string|string[]} errors - field validation error text.
+ * @returns {string} - HTML for the error hover.
+ */
+isc.FormItem.getErrorPromptString = function (errors) {
+	if (!isc.isAn.Array(errors)) {
+		errors = [errors];
+	}
+
+	let result = "";
+	for (let i = 0; i < errors.length; i++) {
+		result += (i > 0 ? "<br>" : "") + (errors[i] == null ? "" : String(errors[i]));
+	}
+	return result;
+};
+
+/**
  * Handles RPC errors.
  * @param {Object} response - the RPC response object.
  * @param {Object} request - the RPC request object.
@@ -217,6 +236,7 @@ isc.defineClass("BizUtil");
 isc.BizUtil.addClassProperties({
 	_modules: {}, // Map of modules loaded -> views -> used & unused views
 	_unusedPickLists: [], // List of picklists to use (for pick views)
+	_contentFormItemsByBinding: {}, // Content form items awaiting upload or markup callbacks
 
 	// Data source for the "previous values" mechanism on text fields
 	COMPLETE_DATA_SOURCE: isc.RestDataSource.create({
@@ -432,6 +452,8 @@ isc.BizUtil.addClassMethods({
 	 * @param {string} splitTooltip - the tooltip for the split button.
 	 * @param {Object} splitTarget - the target for the split button.
 	 * @param {Array} splitItems - the menu items for the split button.
+	 * @param {number|string} [width] - optional width for the surrounding layout.
+	 * @param {string} [align='right'] - member alignment for the surrounding layout.
 	 * @returns {Object} - the created split button.
 	 */
 	createSplitButton: function (
@@ -443,11 +465,14 @@ isc.BizUtil.addClassMethods({
 		splitTooltip,
 		splitTarget,
 		splitItems,
+		width,
+		align,
 	) {
 		return isc.HLayout.create({
-			align: "right",
+			align: align || "right",
 			height: 1,
 			membersMargin: 1,
+			width: width,
 			members: [
 				isc.IButton.create({
 					autoFit: true,
@@ -476,6 +501,105 @@ isc.BizUtil.addClassMethods({
 		});
 	},
 
+	createContentUploadUrl: function (contentFormItem, image) {
+		const instance = contentFormItem.form._view.gather(false);
+		const display = contentFormItem.display || (image ? "image" : "link");
+		const capture = contentFormItem.capture || "none";
+		let url = `upload.xhtml?_u=boundContent&_n=${SKYVE.Util.unsanitiseBinding(
+			contentFormItem.name,
+		)}&_c=${instance._c}&_d=${display}&_cap=${capture}`;
+		if (contentFormItem.form._view._b) {
+			url += `&_b=${SKYVE.Util.unsanitiseBinding(contentFormItem.form._view._b)}`;
+		}
+		if (contentFormItem.companion) {
+			url += `&_m=${contentFormItem.companion}`;
+		}
+		return url;
+	},
+
+	openContentUpload: function (contentFormItem, image) {
+		isc.BizUtil._registerContentFormItem(contentFormItem);
+		const url = isc.BizUtil.createContentUploadUrl(contentFormItem, image);
+		isc.WindowStack.popup(
+			null,
+			image ? "Upload Image" : "Upload Content",
+			true,
+			[
+				isc.HTMLPane.create({
+					contentsType: "page",
+					contents: "Loading Page...",
+					contentsURL: url,
+				}),
+			],
+		);
+	},
+
+	_registerContentFormItem: function (contentFormItem) {
+		isc.BizUtil._contentFormItemsByBinding[contentFormItem.name] =
+			contentFormItem;
+	},
+
+	_getContentFormItem: function (binding) {
+		let result = isc.BizUtil._contentFormItemsByBinding[binding];
+		if (!result) {
+			const opener = isc.WindowStack.getOpener();
+			if (opener && opener._vm) {
+				result = opener._vm.getItem(binding);
+			}
+		}
+		return result;
+	},
+
+	_setContentFormItemValue: function (contentFormItem, contentId, mediaKind) {
+		const view = contentFormItem.form._view;
+		if (mediaKind && contentFormItem.companion) {
+			view._vm.setValue(contentFormItem.companion, mediaKind);
+		}
+		view._vm.setValue(contentFormItem.name, contentId);
+	},
+
+	afterContentUpload: function (
+		binding,
+		contentId,
+		modoc,
+		fileName,
+		mediaKind,
+		companionBinding,
+	) {
+		const contentFormItem = isc.BizUtil._getContentFormItem(binding);
+		if (contentFormItem) {
+			isc.BizUtil._setContentFormItemValue(
+				contentFormItem,
+				contentId,
+				mediaKind,
+			);
+		} else {
+			const opener = isc.WindowStack.getOpener();
+			if (opener && opener._vm) {
+				if (mediaKind && companionBinding) {
+					opener._vm.setValue(companionBinding, mediaKind);
+				}
+				opener._vm.setValue(binding, contentId);
+			}
+		}
+		isc.WindowStack.popoff(false);
+		delete isc.BizUtil._contentFormItemsByBinding[binding];
+	},
+
+	afterMarkupApply: function (binding, contentId, modoc, fileName) {
+		const contentFormItem = isc.BizUtil._getContentFormItem(binding);
+		if (contentFormItem) {
+			isc.BizUtil._setContentFormItemValue(contentFormItem, contentId, "image");
+		} else {
+			const opener = isc.WindowStack.getOpener();
+			if (opener && opener._vm) {
+				opener._vm.setValue(binding, contentId);
+			}
+		}
+		isc.WindowStack.popoff(false);
+		delete isc.BizUtil._contentFormItemsByBinding[binding];
+	},
+
 	/**
 	 * Creates an upload button.
 	 * @param {Object} contentFormItem - the form item for the upload.
@@ -488,23 +612,35 @@ isc.BizUtil.addClassMethods({
 			{
 				title: isc.i18nMessages.bizUtilSplitButton_UploadButtonClearTitle,
 				icon: "icons/delete.png",
-				click: () => contentFormItem.setValue(null),
+				click: () => {
+					contentFormItem.setValue(null);
+					if (contentFormItem.companion) {
+						contentFormItem.form._view._vm.setValue(contentFormItem.companion, null);
+					}
+				},
 				enableIf: () => contentFormItem.getValue() !== null,
 			},
 		];
 
 		if (showMarkup) {
 			menu.push({
-				title: "Mark Up",
+				title: "Mark Up Image",
 				icon: "icons/edit.png",
 				click: function () {
+					if (
+						!contentFormItem.getValue() ||
+						(contentFormItem.isMarkupAvailable &&
+							!contentFormItem.isMarkupAvailable())
+					) {
+						return;
+					}
+					isc.BizUtil._registerContentFormItem(contentFormItem);
 					const instance = contentFormItem.form._view.gather(false);
-					let url = `imageMarkup.xhtml?_n=${contentFormItem.name.replaceAll(
-						"_",
-						".",
+					let url = `imageMarkup.xhtml?_n=${SKYVE.Util.unsanitiseBinding(
+						contentFormItem.name,
 					)}&_c=${instance._c}&_id=${contentFormItem.getValue()}`;
 					if (contentFormItem.form._view._b) {
-						url += `&_b=${contentFormItem.form._view._b.replaceAll("_", ".")}`;
+						url += `&_b=${SKYVE.Util.unsanitiseBinding(contentFormItem.form._view._b)}`;
 					}
 					isc.WindowStack.popup(null, "Mark Up Image", true, [
 						isc.HTMLPane.create({
@@ -514,7 +650,14 @@ isc.BizUtil.addClassMethods({
 						}),
 					]);
 				},
-				enableIf: () => contentFormItem.getValue() !== null,
+				enableIf: () =>
+					contentFormItem.getValue() !== null &&
+					(!contentFormItem.isMarkupAvailable ||
+						contentFormItem.isMarkupAvailable()),
+				showIf: () =>
+					contentFormItem.getValue() !== null &&
+					(!contentFormItem.isMarkupAvailable ||
+						contentFormItem.isMarkupAvailable()),
 			});
 		}
 
@@ -524,7 +667,8 @@ isc.BizUtil.addClassMethods({
 			false,
             isc.i18nMessages.bizUtilSplitButton_UploadButtonTooltip,
 			function () {
-				const instance = contentFormItem.form._view.gather(false);
+/* Add this in appropriately
+        const instance = contentFormItem.form._view.gather(false);
 				let url = `${
 					image ? "image" : "content"
 				}Upload.xhtml?_n=${contentFormItem.name.replaceAll("_", ".")}&_c=${
@@ -546,10 +690,14 @@ isc.BizUtil.addClassMethods({
 						}),
 					],
 				);
+*/
+        isc.BizUtil.openContentUpload(contentFormItem, image);
 			},
             isc.i18nMessages.bizUtilSplitButton_UploadTooltip,
 			null,
 			menu,
+			85,
+			"left",
 		);
 	},
 

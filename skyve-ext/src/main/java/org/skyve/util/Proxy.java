@@ -31,6 +31,8 @@ import net.bytebuddy.matcher.ElementMatchers;
  * @author mike
  */
 public class Proxy {
+	private static final String PROXY_CREATION_FAILED = "Could not create a proxy for ";
+
 	/**
 	 * Proxied class to Proxy sub-class (with non-transient proxied field added).
 	 */
@@ -134,7 +136,7 @@ public class Proxy {
 													}
 												}
 												catch (IOException e) {
-													throw new DomainException("Could not create a proxy for " + proxied, e);
+													throw new DomainException(PROXY_CREATION_FAILED + proxied, e);
 												}
 											});
 		}
@@ -154,7 +156,7 @@ public class Proxy {
 													}
 												}
 												catch (IOException e) {
-													throw new DomainException("Could not create a proxy for " + proxied, e);
+													throw new DomainException(PROXY_CREATION_FAILED + proxied, e);
 												}
 											});
 		}
@@ -167,7 +169,7 @@ public class Proxy {
 			return proxy;
 		}
 		catch (Exception e) {
-			throw new DomainException("Could not create a proxy for " + proxied, e);
+			throw new DomainException(PROXY_CREATION_FAILED + proxied, e);
 		}
 	}
 	

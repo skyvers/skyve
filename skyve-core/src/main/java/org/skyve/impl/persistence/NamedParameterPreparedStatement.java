@@ -72,6 +72,7 @@ public class NamedParameterPreparedStatement implements AutoCloseable {
 	 *            query to parse
 	 * @return the parsed query
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private String parse(String query) {
 		Map<String, List<Integer>> tempMap = new HashMap<>();
 

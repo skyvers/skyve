@@ -13,6 +13,9 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.TreeMap;
 
+/**
+ * Renders React Native edit view component code from Skyve metadata.
+ */
 public class ReactNativeEditView extends ReactComponent {
 	private Module module;
 	private Document document;
@@ -32,6 +35,7 @@ public class ReactNativeEditView extends ReactComponent {
  	}
 
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	protected void create(FileWriter fw) throws IOException {
 		Map<String, String> imports = new TreeMap<>();
 		String editJsx = null;

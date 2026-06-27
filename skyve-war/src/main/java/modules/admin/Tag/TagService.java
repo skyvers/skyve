@@ -25,11 +25,11 @@ import jakarta.enterprise.inject.Default;
 @Default
 public class TagService {
 	/**
-	 * Add to the subject tag records from the object tag.
-	 * 
-	 * @param subject the target tag to receive additional tagged items
-	 * @param object the source tag whose items will be copied to the subject tag
-	 * @throws Exception if an error occurs during the union operation
+	 * Adds all objects from one tag into another tag.
+	 *
+	 * @param subject The tag receiving additional memberships.
+	 * @param object The tag supplying memberships.
+	 * @throws Exception If iteration or tagging fails.
 	 */
 	@SuppressWarnings("static-method")
 	public void union(TagExtension subject, TagExtension object) throws Exception {
@@ -50,12 +50,11 @@ public class TagService {
 	}
 
 	/**
-	 * Deletes from the subject Tag any items which are not also in the object
-	 * Tag.
-	 * 
-	 * @param subject the target tag to be modified, keeping only items that exist in both tags
-	 * @param object the reference tag used to determine which items to keep in the subject tag
-	 * @throws Exception if an error occurs during the intersect operation
+	 * Keeps only memberships that appear in both subject and object tags.
+	 *
+	 * @param subject The tag being reduced.
+	 * @param object The reference tag supplying required memberships.
+	 * @throws Exception If SQL execution fails.
 	 */
 	@SuppressWarnings("static-method")
 	public void intersect(TagExtension subject, TagExtension object) throws Exception {
@@ -87,11 +86,11 @@ public class TagService {
 	}
 
 	/**
-	 * Deletes from the subject Tag items which are in the object Tag.
-	 * 
-	 * @param subject the target tag from which items will be removed
-	 * @param object the reference tag whose items will be removed from the subject tag
-	 * @throws Exception if an error occurs during the except operation
+	 * Removes memberships from subject when the same beans are present in object.
+	 *
+	 * @param subject The tag being reduced.
+	 * @param object The tag whose memberships should be subtracted.
+	 * @throws Exception If iteration or untagging fails.
 	 */
 	@SuppressWarnings("static-method")
 	public void except(TagExtension subject, TagExtension object) throws Exception {
@@ -110,17 +109,16 @@ public class TagService {
 	}
 
 	/**
-	 * Retrieve the items tagged which match the specified module and document
-	 * 
-	 * @param tag the tag from which to retrieve tagged items
-	 * @param moduleName the name of the module to filter by
-	 * @param documentName the name of the document type to filter by
-	 * @return a list of beans that are tagged and match the specified module and document
-	 * @throws Exception if an error occurs during retrieval of tagged items
+	 * Returns tagged beans constrained to a specific module and document.
+	 *
+	 * @param tag The tag whose beans are queried.
+	 * @param moduleName The required module name.
+	 * @param documentName The required document name.
+	 * @return Matching tagged beans, or an empty list when filters are incomplete.
+	 * @throws Exception If tag iteration fails.
 	 */
 	@SuppressWarnings("static-method")
 	public List<Bean> getTaggedItemsForDocument(TagExtension tag, String moduleName, String documentName) throws Exception {
-
 		List<Bean> beans = new ArrayList<>();
 		if (moduleName != null && documentName != null) {
 			Persistence pers = CORE.getPersistence();

@@ -11,6 +11,16 @@ import org.skyve.metadata.user.User;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB-annotated range validator for {@link Date}-typed document fields.
+ *
+ * <p>Enforces that the field value falls within the declared {@code min} and/or
+ * {@code max} date boundaries.  Extends {@link RangeValidator}.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see RangeValidator
+ */
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 public class DateValidator extends RangeValidator<Date> {

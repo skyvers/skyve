@@ -22,13 +22,25 @@ import modules.admin.domain.DataMaintenance.EvictOption;
 import modules.admin.domain.DataMaintenance.RefreshOption;
 import modules.admin.domain.ModuleDocument;
 
+/**
+ * Executes background regeneration of document tuple metadata.
+ */
 public class RefreshDocumentTuplesJob extends Job {
+	/**
+	 * Performs the cancel operation.
+	 * @return the operation result
+	 */
 	@Override
 	public String cancel() {
 		return null;
 	}
 
+	/**
+	 * Performs the execute operation.
+	 * @throws Exception if the operation fails
+	 */
 	@Override
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	public void execute() throws Exception {
 
 		List<String> log = getLog();

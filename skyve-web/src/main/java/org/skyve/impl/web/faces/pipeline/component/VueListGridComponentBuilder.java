@@ -25,6 +25,7 @@ import jakarta.faces.component.html.HtmlPanelGroup;
 
 public class VueListGridComponentBuilder extends NoOpComponentBuilder {
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public UIComponent listGrid(UIComponent component,
 									String moduleName,
 									String documentName,

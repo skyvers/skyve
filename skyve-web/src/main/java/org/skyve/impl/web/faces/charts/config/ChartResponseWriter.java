@@ -197,7 +197,7 @@ public class ChartResponseWriter extends ResponseWriter {
 	/**
 	 * Provides access to the underlying {@link StringWriter} used to accumulate output.
 	 *
-	 * @return the internal StringWriter buffer
+	 * @return the internal StringWriter buffer containing the generated JSON payload
 	 */
 	public StringWriter getStringWriter() {
 		return writer;

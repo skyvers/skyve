@@ -11,8 +11,8 @@ import org.skyve.impl.metadata.view.WidgetReference;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentDisplay;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
@@ -30,6 +30,21 @@ import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * JAXB-annotated base class for all document attribute types.
+ *
+ * <p>Carries the properties common to every attribute: display name, description,
+ * documentation, widget reference, deprecation flag, change-tracking and audit
+ * settings, transience flag, and an open-ended property map.  Concrete subclasses
+ * add the type-specific details (e.g., field length, collection type, referenced
+ * document).
+ *
+ * <p>Threading: not thread-safe.  Attribute instances are written during metadata
+ * loading and are read-only once placed in the repository cache.
+ *
+ * @see Attribute
+ * @see org.skyve.impl.metadata.repository.NamedMetaData
+ */
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE,
 			propOrder = {"documentation",
 							"displayName", 
@@ -154,11 +169,13 @@ public abstract class AbstractAttribute extends NamedMetaData implements Attribu
 				defaultInputWidget.setBinding(getName());
 			}
 			else if (AttributeType.content.equals(attributeType)) {
-				defaultInputWidget = new ContentLink();
+				defaultInputWidget = new ContentUpload();
 				defaultInputWidget.setBinding(getName());
 			}
 			else if (AttributeType.image.equals(attributeType)) {
-				defaultInputWidget = new ContentImage();
+				ContentUpload content = new ContentUpload();
+				content.setDisplay(ContentDisplay.image);
+				defaultInputWidget = content;
 				defaultInputWidget.setBinding(getName());
 			}
 			else if (AttributeType.geometry.equals(attributeType)) {

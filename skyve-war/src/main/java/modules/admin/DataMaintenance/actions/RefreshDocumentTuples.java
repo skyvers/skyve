@@ -16,7 +16,17 @@ import org.skyve.web.WebContext;
 
 import modules.admin.domain.DataMaintenance;
 
+/**
+ * Schedules regeneration of document tuple metadata used by queries.
+ */
 public class RefreshDocumentTuples implements ServerSideAction<DataMaintenance> {
+	/**
+	 * Performs the execute operation.
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public ServerSideActionResult<DataMaintenance> execute(DataMaintenance bean, WebContext webContext)
 			throws Exception {
@@ -38,5 +48,4 @@ public class RefreshDocumentTuples implements ServerSideAction<DataMaintenance> 
 
 		return new ServerSideActionResult<>(bean);
 	}
-	
 }

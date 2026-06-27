@@ -8,6 +8,9 @@ import jakarta.xml.bind.annotation.XmlType;
 
 /**
  * Represents a key/value map entry in JAXB.
+ *
+ * <p>{@code name} is the logical dynamic key declared in metadata and
+ * {@code className} is the fully-qualified Java type used at runtime.
  */
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 public final class DynamicClassMapEntryType implements SerializableMetaData {

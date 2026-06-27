@@ -56,8 +56,19 @@ public interface Persistence extends Serializable {
 	void setRollbackOnly();
 	
 	/**
-	 * Commit the transaction and optionally close the associated persistence resources.
-	 * @param close If {@code true}, the persistence resources are closed after the commit.
+	 * Commits the current transaction and optionally closes the associated persistence resources.
+	 *
+	 * <p>Side effects: commits or rolls back the active unit of work, flushes and clears
+	 * persistence-scoped cleanup state, and delegates cleanup to any dynamic persistence
+	 * or content-store collaborators.
+	 *
+	 * <p>Idempotency: implementations must tolerate {@code commit(false)} followed by
+	 * {@code commit(true)} on the same instance without a new {@link #begin()} between
+	 * the calls. The second call must perform disposal requested by {@code close=true},
+	 * but must not reapply already-committed data changes or fail solely because no
+	 * transaction is active.
+	 *
+	 * @param close if {@code true}, close persistence resources after commit processing
 	 */
 	void commit(boolean close);
 	

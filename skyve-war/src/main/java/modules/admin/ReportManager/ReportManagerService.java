@@ -10,18 +10,18 @@ import org.skyve.domain.messages.ValidationException;
 import org.skyve.util.FileUtil;
 import org.skyve.util.Util;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.enterprise.inject.Default;
 
 /**
- * This class acts as a service layer to encapsulate domain logic.
+ * Manages filesystem paths and temporary artefacts used by report import/export workflows.
  *
  * Add this line to classes that wish to use it: @Inject private transient ReportManagerService reportManagerService;
  */
 @Default
 public class ReportManagerService {
-	private static final Logger LOGGER = LoggerFactory.getLogger(ReportManagerService.class);
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ReportManagerService.class);
 
 	/**
 	 * Construct the name of the report management folder
@@ -51,7 +51,7 @@ public class ReportManagerService {
 		try {
 			temp.mkdirs();
 		} catch (SecurityException e) {
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 			throw new ValidationException(new Message("Export file preparation failed"));
 		}
 		return temp;

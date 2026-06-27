@@ -40,7 +40,7 @@
 				<column />
 				<row>
 					<item>
-						<contentImage binding="myStaff.contact.image" pixelWidth="200" pixelHeight="200" />
+						<content binding="myStaff.contact.image" display="image" capture="all" pixelWidth="200" pixelHeight="200" />
 					</item>
 				</row>
 

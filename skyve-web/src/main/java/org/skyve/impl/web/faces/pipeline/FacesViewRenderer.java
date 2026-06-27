@@ -21,6 +21,7 @@ import org.skyve.impl.metadata.model.document.field.LengthField;
 import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.metadata.model.document.field.TextFormat;
 import org.skyve.impl.metadata.view.ActionImpl;
+import org.skyve.impl.metadata.view.Bordered;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.Inject;
 import org.skyve.impl.metadata.view.RelativeSize;
@@ -76,9 +77,9 @@ import org.skyve.impl.metadata.view.widget.bound.input.CheckMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentDisplay;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
@@ -92,6 +93,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Spinner;
 import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.metadata.view.widget.bound.tabular.AbstractDataWidget;
+import org.skyve.impl.metadata.view.widget.bound.tabular.AbstractListWidget;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn;
@@ -148,6 +150,7 @@ import org.skyve.impl.web.faces.converters.timestamp.MM_DD_YYYY_HH24_MI_SS;
 import org.skyve.impl.web.faces.converters.timestamp.MM_DD_YYYY_HH_MI_SS;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder.EventSourceComponent;
+import org.skyve.impl.web.faces.pipeline.component.EscapableText;
 import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilder;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.Customisations;
@@ -173,6 +176,7 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.web.WebAction;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.UIComponentBase;
@@ -192,6 +196,19 @@ public class FacesViewRenderer extends ViewRenderer {
 	// A reference to the current widget that is the source of events
 	private UIComponentBase eventSource = null;
 
+	/**
+	 * Constructs a faces view renderer for the supplied metadata context.
+	 *
+	 * @param user the current user
+	 * @param module the active module
+	 * @param document the active document
+	 * @param view the view metadata to render
+	 * @param uxui the UX/UI variant name
+	 * @param widgetId optional widget identifier for fragment rendering
+	 * @param cb component builder used to create UI components
+	 * @param lb layout builder used to create container layouts
+	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public FacesViewRenderer(User user,
 								Module module,
 								Document document,
@@ -208,14 +225,30 @@ public class FacesViewRenderer extends ViewRenderer {
 		this.lb = lb;
 	}
 
+	/**
+	 * Returns the rendered faces view root component.
+	 *
+	 * @return the rendered view component
+	 */
 	public UIComponent getFacesView() {
 		return facesView;
 	}
 	
+	/**
+	 * Returns the rendered sidebar component.
+	 *
+	 * @return the sidebar component, or {@code null} when no sidebar is rendered
+	 */
 	public UIComponent getSidebar() {
 		return facesSidebar;
 	}
 
+	/**
+	 * Starts JSF view rendering by creating the root view container and toolbar/layout scaffolding.
+	 *
+	 * @param icon16x16Url ignored icon URL argument from the renderer contract
+	 * @param icon32x32Url ignored icon URL argument from the renderer contract
+	 */
 	@Override
 	public void renderView(String icon16x16Url, String icon32x32Url) {
 		// Ensure visibility is set for both create and edit views
@@ -235,6 +268,12 @@ public class FacesViewRenderer extends ViewRenderer {
 		}
 	}
 
+	/**
+	 * Finalizes JSF view rendering by attaching generated toolbars and deferred scripts.
+	 *
+	 * @param icon16x16Url ignored icon URL argument from the renderer contract
+	 * @param icon32x32Url ignored icon URL argument from the renderer contract
+	 */
 	@Override
 	public void renderedView(String icon16x16Url, String icon32x32Url) {
 		// Add the toolbar(s) if this is a full view render or
@@ -271,9 +310,21 @@ public class FacesViewRenderer extends ViewRenderer {
 	// - ie rendered="<condition>"
 	private List<UIComponent> scripts = new ArrayList<>();
 
+	/**
+	 * Begins rendering a tab pane container.
+	 *
+	 * @param tabPane the tab pane metadata
+	 */
 	@Override
 	public void renderTabPane(TabPane tabPane) {
 		UIComponent component = cb.tabPane(null, tabPane, module.getName(), document.getName());
+		boolean renderingThisFragment = (widgetId != null) && widgetId.equals(tabPane.getWidgetId());
+
+		// Mark the fragment before container insertion so fragment-only layout builders keep an active container.
+		if (renderingThisFragment) {
+			fragment = component;
+		}
+
 		addToContainer(component,
 						tabPane.getPixelWidth(),
 						tabPane.getResponsiveWidth(),
@@ -284,9 +335,8 @@ public class FacesViewRenderer extends ViewRenderer {
 						tabPane.getXl(),
 						tabPane.getInvisibleConditionName());
 
-		// start rendering if appropriate
-		if ((widgetId != null) && (widgetId.equals(tabPane.getWidgetId()))) {
-			fragment = component;
+		if (renderingThisFragment && (current == null)) {
+			current = component;
 		}
 
 		// These are added in the order they are encountered to ensure rendering works for nested tab panes correctly
@@ -296,21 +346,33 @@ public class FacesViewRenderer extends ViewRenderer {
 		}
 	}
 
+	/**
+	 * Completes rendering of a tab pane container.
+	 *
+	 * @param tabPane the tab pane metadata
+	 */
 	@Override
 	public void renderedTabPane(TabPane tabPane) {
-		addedToContainer();
+		if (current != null) {
+			addedToContainer();
+		}
 
 		// stop rendering if appropriate
 		if ((widgetId != null) && (widgetId.equals(tabPane.getWidgetId()))) {
-			current.getChildren().remove(fragment);
-			fragment.setParent(null);
-			facesView.getChildren().add(fragment);
+			moveFragmentToFacesView();
 			fragment = null;
 			// Add the scripts required for this fragment here (and not in renderedView()
 			facesView.getChildren().addAll(scripts);
 		}
 	}
 
+	/**
+	 * Begins rendering an individual tab.
+	 *
+	 * @param title resolved tab title
+	 * @param icon16x16Url optional small icon URL
+	 * @param tab the tab metadata
+	 */
 	@Override
 	public void renderTab(String title, String icon16x16Url, Tab tab) {
 		UIComponent component = cb.tab(null, title, tab);
@@ -322,33 +384,70 @@ public class FacesViewRenderer extends ViewRenderer {
 		}
 	}
 
+	/**
+	 * Completes rendering of an individual tab.
+	 *
+	 * @param title resolved tab title
+	 * @param icon16x16Url optional small icon URL
+	 * @param tab the tab metadata
+	 */
 	@Override
 	public void renderedTab(String title, String icon16x16Url, Tab tab) {
 		current = lb.addedTab(null, current);
 	}
 
+	/**
+	 * Begins rendering of a vertical box container.
+	 *
+	 * @param borderTitle resolved border title
+	 * @param vbox the container metadata
+	 */
 	@Override
 	public void renderVBox(String borderTitle, VBox vbox) {
 		UIComponent layout = lb.vboxLayout(null, vbox);
 		addToContainerWithPotentialBorder(layout, vbox.getBorder(), borderTitle, vbox, vbox.getInvisibleConditionName(), vbox.getCollapsible(), vbox.getWidgetId());
 	}
 
+	/**
+	 * Completes rendering of a vertical box container.
+	 *
+	 * @param borderTitle resolved border title
+	 * @param vbox the container metadata
+	 */
 	@Override
 	public void renderedVBox(String borderTitle, VBox vbox) {
 		addedToContainerWithPotentialBorder(vbox.getBorder(), vbox.getCollapsible(), vbox.getWidgetId());
 	}
 
+	/**
+	 * Begins rendering of a horizontal box container.
+	 *
+	 * @param borderTitle resolved border title
+	 * @param hbox the container metadata
+	 */
 	@Override
 	public void renderHBox(String borderTitle, HBox hbox) {
 		UIComponent layout = lb.hboxLayout(null, hbox);
 		addToContainerWithPotentialBorder(layout, hbox.getBorder(), borderTitle, hbox, hbox.getInvisibleConditionName(), hbox.getCollapsible(), hbox.getWidgetId());
 	}
 
+	/**
+	 * Completes rendering of a horizontal box container.
+	 *
+	 * @param borderTitle resolved border title
+	 * @param hbox the container metadata
+	 */
 	@Override
 	public void renderedHBox(String borderTitle, HBox hbox) {
 		addedToContainerWithPotentialBorder(hbox.getBorder(), hbox.getCollapsible(), hbox.getWidgetId());
 	}
 
+	/**
+	 * Begins rendering of a form container.
+	 *
+	 * @param borderTitle resolved border title
+	 * @param form the form metadata
+	 */
 	@Override
 	public void renderForm(String borderTitle, Form form) {
 		UIComponent layout = lb.formLayout(null, form);
@@ -356,11 +455,22 @@ public class FacesViewRenderer extends ViewRenderer {
 // TODO form.getDisabledConditionName() form.getLabelDefaultHorizontalAlignment()
 	}
 
+	/**
+	 * Completes rendering of a form container.
+	 *
+	 * @param borderTitle resolved border title
+	 * @param form the form metadata
+	 */
 	@Override
 	public void renderedForm(String borderTitle, Form form) {
 		addedToContainerWithPotentialBorder(form.getBorder(), form.getCollapsible(), form.getWidgetId());
 	}
 
+	/**
+	 * Renders a form column definition.
+	 *
+	 * @param column the form-column metadata
+	 */
 	@Override
 	public void renderFormColumn(FormColumn column) {
 		// Nothing to do here - for columns are a spec for html tables in this renderer.
@@ -368,6 +478,11 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	private UIComponent formRowLayout = null;
 
+	/**
+	 * Begins rendering of a form row.
+	 *
+	 * @param row the form-row metadata
+	 */
 	@Override
 	public void renderFormRow(FormRow row) {
 		formRowLayout = lb.formRowLayout(null, row);
@@ -376,6 +491,16 @@ public class FacesViewRenderer extends ViewRenderer {
 		}
 	}
 
+	/**
+	 * Begins rendering of a form item.
+	 *
+	 * @param label resolved label
+	 * @param requiredMessage optional required-message text
+	 * @param help optional help text
+	 * @param showLabel whether label rendering is enabled
+	 * @param colspan widget colspan
+	 * @param item the form-item metadata
+	 */
 	@Override
 	public void renderFormItem(String label,
 								String requiredMessage,
@@ -383,9 +508,19 @@ public class FacesViewRenderer extends ViewRenderer {
 								boolean showLabel,
 								int colspan,
 								FormItem item) {
-		// nothing to do here
+		cb.setCurrentInputTitleEscape(getCurrentWidgetEscapeLabel());
 	}
 
+	/**
+	 * Completes rendering of a form item.
+	 *
+	 * @param label resolved label
+	 * @param requiredMessage optional required-message text
+	 * @param help optional help text
+	 * @param showLabel whether label rendering is enabled
+	 * @param colspan widget colspan
+	 * @param item the form-item metadata
+	 */
 	@Override
 	public void renderedFormItem(String label,
 									String requiredMessage, 
@@ -393,9 +528,14 @@ public class FacesViewRenderer extends ViewRenderer {
 									boolean showLabel,
 									int colspan,
 									FormItem item) {
-		// nothing to do here
+		cb.setCurrentInputTitleEscape(true);
 	}
 
+	/**
+	 * Completes rendering of a form row.
+	 *
+	 * @param row the form-row metadata
+	 */
 	@Override
 	public void renderedFormRow(FormRow row) {
 		if (formRowLayout != null) {
@@ -404,6 +544,25 @@ public class FacesViewRenderer extends ViewRenderer {
 		formRowLayout = null;
 	}
 
+	/**
+	 * Adds a widget component into the current rendering context.
+	 *
+	 * @param widgetLabel resolved widget label
+	 * @param formColspan form column span
+	 * @param widgetRequiredMessage optional PrimeFaces message text normalised
+	 *        for unescaped message rendering
+	 * @param widgetInvisible invisible-condition expression
+	 * @param helpText optional help text
+	 * @param component component to add
+	 * @param pixelWidth optional fixed width
+	 * @param responsiveWidth optional responsive width
+	 * @param percentageWidth optional percentage width
+	 * @param sm optional small breakpoint width
+	 * @param md optional medium breakpoint width
+	 * @param lg optional large breakpoint width
+	 * @param xl optional extra-large breakpoint width
+	 */
+	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
 	private void addComponent(String widgetLabel,
 								int formColspan,
 								@Nullable String widgetRequiredMessage,
@@ -461,7 +620,9 @@ public class FacesViewRenderer extends ViewRenderer {
 											formItem,
 											formColumn,
 											widgetLabel,
+											getCurrentWidgetEscapeLabel(),
 											widgetRequiredMessage,
+											getCurrentWidgetEscapeRequiredMessage(),
 											widgetInvisible,
 											helpText);
 					incrementFormColumn();
@@ -473,10 +634,13 @@ public class FacesViewRenderer extends ViewRenderer {
 											formItem,
 											formColumn,
 											widgetLabel,
+											getCurrentWidgetEscapeLabel(),
 											formColspan,
 											widgetRequiredMessage,
+											getCurrentWidgetEscapeRequiredMessage(),
 											widgetInvisible,
 											helpText,
+											getCurrentWidgetEscapeHelp(),
 											pixelWidth,
 											isCurrentWidgetShowLabel(),
 											isCurrentFormRenderTopLabels());
@@ -487,6 +651,31 @@ public class FacesViewRenderer extends ViewRenderer {
 		}
 	}
 
+	/**
+	 * Returns the current required message prepared for PrimeFaces message channels.
+	 *
+	 * <p>Field, global, and growl message components all read the same JSF
+	 * {@code FacesMessage}. The metadata escape decision is therefore applied before
+	 * the text enters the input required-message property.
+	 *
+	 * @return required-message text safe for PF message surfaces, or {@code null}
+	 */
+	private String getPrimeFacesRequiredMessage() {
+		return AbstractFacesBuilder.escapeFacesText(getCurrentWidgetRequiredMessage(), getCurrentWidgetEscapeRequiredMessage());
+	}
+
+	/**
+	 * Renders a button declared within a form.
+	 *
+	 * @param name action name
+	 * @param label button label
+	 * @param iconUrl icon URL
+	 * @param iconStyleClass icon style class
+	 * @param toolTip tooltip text
+	 * @param confirmationText confirmation text
+	 * @param action action metadata
+	 * @param button button metadata
+	 */
 	@Override
 	public void renderFormButton(String name,
 									String label,
@@ -507,6 +696,18 @@ public class FacesViewRenderer extends ViewRenderer {
 						(currentForm == null) ? null : currentForm.getDisabledConditionName());
 	}
 
+	/**
+	 * Renders a button outside a form context.
+	 *
+	 * @param name action name
+	 * @param label button label
+	 * @param iconUrl icon URL
+	 * @param iconStyleClass icon style class
+	 * @param toolTip tooltip text
+	 * @param confirmationText confirmation text
+	 * @param action action metadata
+	 * @param button button metadata
+	 */
 	@Override
 	public void renderButton(String name,
 								String label,
@@ -519,6 +720,19 @@ public class FacesViewRenderer extends ViewRenderer {
 		renderButton(label, 0, iconStyleClass, toolTip, confirmationText, action, button, null);
 	}
 
+	/**
+	 * Renders a button in the current context.
+	 *
+	 * @param label button label
+	 * @param formColspan form colspan
+	 * @param iconStyleClass icon style class
+	 * @param toolTip tooltip text
+	 * @param confirmationText confirmation text
+	 * @param action action metadata
+	 * @param button button metadata
+	 * @param formDisabledConditionName form-level disabled condition
+	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private void renderButton(String label,
 								int formColspan,
 								String iconStyleClass,
@@ -588,6 +802,15 @@ public class FacesViewRenderer extends ViewRenderer {
 						null);
 	}
 
+	/**
+	 * Renders a zoom-in widget declared within a form.
+	 *
+	 * @param label resolved label
+	 * @param iconUrl icon URL
+	 * @param iconStyleClass icon style class
+	 * @param toolTip tooltip text
+	 * @param zoomIn zoom-in metadata
+	 */
 	@Override
 	public void renderFormZoomIn(String label, String iconUrl, String iconStyleClass, String toolTip, ZoomIn zoomIn) {
 		Form currentForm = getCurrentForm();
@@ -595,11 +818,30 @@ public class FacesViewRenderer extends ViewRenderer {
 		renderZoomIn(label, getCurrentWidgetColspan(), iconStyleClass, toolTip, zoomIn, formDisabledConditionName);
 	}
 
+	/**
+	 * Renders a zoom-in widget outside a form.
+	 *
+	 * @param label resolved label
+	 * @param iconUrl icon URL
+	 * @param iconStyleClass icon style class
+	 * @param toolTip tooltip text
+	 * @param zoomIn zoom-in metadata
+	 */
 	@Override
 	public void renderZoomIn(String label, String iconUrl, String iconStyleClass, String toolTip, ZoomIn zoomIn) {
 		renderZoomIn(label, 0, iconStyleClass, toolTip, zoomIn, null);
 	}
 
+	/**
+	 * Renders a zoom-in widget in the active context.
+	 *
+	 * @param label resolved label
+	 * @param formColspan form colspan
+	 * @param iconStyleClass icon style class
+	 * @param toolTip tooltip text
+	 * @param zoomIn zoom-in metadata
+	 * @param formDisabledConditionName form-level disabled condition
+	 */
 	protected void renderZoomIn(String label,
 									int formColspan,
 									String iconStyleClass,
@@ -622,6 +864,11 @@ public class FacesViewRenderer extends ViewRenderer {
 						null);
 	}
 
+	/**
+	 * Renders a model-backed map widget.
+	 *
+	 * @param map map metadata
+	 */
 	@Override
 	public void renderMap(MapDisplay map) {
 		UIComponent m = cb.map(null, map, map.getModelName());
@@ -640,6 +887,11 @@ public class FacesViewRenderer extends ViewRenderer {
 						map.getXl());
 	}
 
+	/**
+	 * Renders a chart widget.
+	 *
+	 * @param chart chart metadata
+	 */
 	@Override
 	public void renderChart(Chart chart) {
 		UIComponent c = cb.chart(null, chart);
@@ -658,19 +910,35 @@ public class FacesViewRenderer extends ViewRenderer {
 						chart.getXl());
 	}
 
+	/**
+	 * Renders geometry within a bound column.
+	 *
+	 * @param geometry geometry metadata
+	 */
 	@Override
 	public void renderBoundColumnGeometry(Geometry geometry) {
 		renderGeometry(0, geometry);
 	}
 
+	/**
+	 * Renders geometry within a form.
+	 *
+	 * @param geometry geometry metadata
+	 */
 	@Override
 	public void renderFormGeometry(Geometry geometry) {
 		renderGeometry(getCurrentWidgetColspan(), geometry);
 	}
 
+	/**
+	 * Renders geometry in the active context.
+	 *
+	 * @param formColspan form colspan
+	 * @param geometry geometry metadata
+	 */
 	private void renderGeometry(int formColspan, Geometry geometry) {
 		String title = getCurrentWidgetLabel();
-		String requiredMessage = getCurrentWidgetRequiredMessage();
+		String requiredMessage = getPrimeFacesRequiredMessage();
 		Form currentForm = getCurrentForm();
 		EventSourceComponent c = cb.geometry(null,
 												dataWidgetVar,
@@ -695,20 +963,35 @@ public class FacesViewRenderer extends ViewRenderer {
 						null);
 	}
 
+	/**
+	 * Completes geometry rendering for bound columns.
+	 *
+	 * @param geometry geometry metadata
+	 */
 	@Override
 	public void renderedBoundColumnGeometry(Geometry geometry) {
 		renderedFormGeometry(geometry);
 	}
 
+	/**
+	 * Completes geometry rendering for forms.
+	 *
+	 * @param geometry geometry metadata
+	 */
 	@Override
 	public void renderedFormGeometry(Geometry geometry) {
 		eventSource = null;
 	}
 
+	/**
+	 * Renders a geometry map within a form.
+	 *
+	 * @param geometry geometry-map metadata
+	 */
 	@Override
 	public void renderFormGeometryMap(GeometryMap geometry) {
 		String title = getCurrentWidgetLabel();
-		String requiredMessage = getCurrentWidgetRequiredMessage();
+		String requiredMessage = getPrimeFacesRequiredMessage();
 		Form currentForm = getCurrentForm();
 		EventSourceComponent c = cb.geometryMap(null,
 													geometry,
@@ -736,18 +1019,41 @@ public class FacesViewRenderer extends ViewRenderer {
 		eventSource = null;
 	}
 
+	/**
+	 * Renders a dialog button within a form.
+	 *
+	 * @param label button label
+	 * @param button dialog-button metadata
+	 */
 	@Override
 	public void renderFormDialogButton(String label, DialogButton button) {
 		renderDialogButton(label, getCurrentWidgetColspan(), button);
 	}
 
+	/**
+	 * Renders a dialog button outside a form.
+	 *
+	 * @param label button label
+	 * @param button dialog-button metadata
+	 */
 	@Override
 	public void renderDialogButton(String label, DialogButton button) {
 		renderDialogButton(label, 0, button);
 	}
 
+	/**
+	 * Renders a dialog button in the active context.
+	 *
+	 * @param label button label
+	 * @param formColspan form colspan
+	 * @param button dialog-button metadata
+	 */
 	private void renderDialogButton(String label, int formColspan, DialogButton button) {
-		UIComponent bn = cb.label(null, "dialogButton " + label); // TODO dialog button
+		Form currentForm = getCurrentForm();
+		UIComponent bn = cb.dialogButton(null,
+											EscapableText.of(label, shouldEscape(button.getEscapeDisplayName())),
+											button,
+											(currentForm == null) ? null : currentForm.getDisabledConditionName());
 		addComponent(null,
 						formColspan,
 						null,
@@ -763,16 +1069,32 @@ public class FacesViewRenderer extends ViewRenderer {
 						null);
 	}
 
+	/**
+	 * Renders a spacer within a form.
+	 *
+	 * @param spacer spacer metadata
+	 */
 	@Override
 	public void renderFormSpacer(Spacer spacer) {
 		renderSpacer(getCurrentWidgetColspan(), spacer);
 	}
 
+	/**
+	 * Renders a spacer outside a form.
+	 *
+	 * @param spacer spacer metadata
+	 */
 	@Override
 	public void renderSpacer(Spacer spacer) {
 		renderSpacer(0, spacer);
 	}
 
+	/**
+	 * Renders a spacer in the active context.
+	 *
+	 * @param formColspan form colspan
+	 * @param spacer spacer metadata
+	 */
 	private void renderSpacer(int formColspan, Spacer spacer) {
 		UIComponent component = cb.spacer(null, spacer);
 		if (component != null) {
@@ -792,16 +1114,35 @@ public class FacesViewRenderer extends ViewRenderer {
 		}
 	}
 
+	/**
+	 * Renders a static image within a form.
+	 *
+	 * @param fileUrl image URL
+	 * @param image static-image metadata
+	 */
 	@Override
 	public void renderFormStaticImage(String fileUrl, StaticImage image) {
 		renderStaticImage(fileUrl, getCurrentWidgetColspan(), image);
 	}
 
+	/**
+	 * Renders a static image outside a form.
+	 *
+	 * @param fileUrl image URL
+	 * @param image static-image metadata
+	 */
 	@Override
 	public void renderStaticImage(String fileUrl, StaticImage image) {
 		renderStaticImage(fileUrl, 0, image);
 	}
 
+	/**
+	 * Renders a static image in the active context.
+	 *
+	 * @param fileUrl image URL
+	 * @param formColspan form colspan
+	 * @param image static-image metadata
+	 */
 	private void renderStaticImage(String fileUrl, int formColspan, StaticImage image) {
 		UIComponent i = cb.staticImage(null, fileUrl, image);
 		addComponent(null,
@@ -819,16 +1160,32 @@ public class FacesViewRenderer extends ViewRenderer {
 						image.getXl());
 	}
 
+	/**
+	 * Renders a static image within a container column.
+	 *
+	 * @param fileUrl image URL
+	 * @param image static-image metadata
+	 */
 	@Override
 	public void renderContainerColumnStaticImage(String fileUrl, StaticImage image) {
 		renderStaticImage(fileUrl, image);
 	}
 
+	/**
+	 * Renders a dynamic image within a container column.
+	 *
+	 * @param image dynamic-image metadata
+	 */
 	@Override
 	public void renderContainerColumnDynamicImage(DynamicImage image) {
 		renderDynamicImage(image);
 	}
 
+	/**
+	 * Renders a dynamic image.
+	 *
+	 * @param image dynamic-image metadata
+	 */
 	@Override
 	public void renderDynamicImage(DynamicImage image) {
 		UIComponent i = cb.dynamicImage(null, image, module.getName(), document.getName());
@@ -847,21 +1204,52 @@ public class FacesViewRenderer extends ViewRenderer {
 						image.getXl());
 	}
 
+	/**
+	 * Renders a link within a form.
+	 *
+	 * @param value display value
+	 * @param link link metadata
+	 */
 	@Override
 	public void renderFormLink(String value, Link link) {
 		renderLink(value, getCurrentWidgetColspan(), link);
 	}
 
+	/**
+	 * Renders a link within a container column.
+	 *
+	 * @param value display value
+	 * @param link link metadata
+	 */
 	@Override
 	public void renderContainerColumnLink(String value, Link link) {
 		renderLink(value, 0, link);
 	}
 
+	/**
+	 * Renders a link outside form/container contexts.
+	 *
+	 * @param value display value
+	 * @param link link metadata
+	 */
 	@Override
 	public void renderLink(String value, Link link) {
 		renderLink(value, 0, link);
 	}
 
+	/**
+	 * Renders a link in the active context.
+	 *
+	 * <p>Side effects: creates and adds the resolved link component to the current
+	 * component tree. Edit-view link labels are passed raw to the component builder
+	 * with {@code link/@escapeValue}; {@code null} and {@code Boolean.TRUE} escape at
+	 * the child output-text boundary, and only {@code Boolean.FALSE} allows trusted
+	 * markup.
+	 *
+	 * @param value display value
+	 * @param formColspan form colspan
+	 * @param link link metadata
+	 */
 	private void renderLink(String value, int formColspan, Link link) {
 		org.skyve.impl.metadata.view.reference.Reference outerReference = link.getReference();
 		final ReferenceTarget target = link.getTarget();
@@ -898,7 +1286,11 @@ public class FacesViewRenderer extends ViewRenderer {
 				href.append("./?a=").append(WebAction.e.toString()).append("&m=").append(reference.getModuleName());
 				href.append("&d=").append(reference.getDocumentName()).append("&i={").append(reference.getBinding()).append('}');
 
-				c.set(cb.outputLink(dataWidgetVar, value, href.toString(), link.getInvisibleConditionName(), target));
+				c.set(cb.outputLink(dataWidgetVar,
+										EscapableText.of(value, shouldEscape(link.getEscapeValue())),
+										href.toString(),
+										link.getInvisibleConditionName(),
+										target));
 			}
 
 			@Override
@@ -952,21 +1344,46 @@ public class FacesViewRenderer extends ViewRenderer {
 		}
 	}
 
+	/**
+	 * Renders a blurb within a form.
+	 *
+	 * @param markup blurb markup
+	 * @param blurb blurb metadata
+	 */
 	@Override
 	public void renderFormBlurb(String markup, Blurb blurb) {
 		renderBlurb(markup, getCurrentWidgetColspan(), blurb);
 	}
 
+	/**
+	 * Renders a blurb within a container column.
+	 *
+	 * @param markup blurb markup
+	 * @param blurb blurb metadata
+	 */
 	@Override
 	public void renderContainerColumnBlurb(String markup, Blurb blurb) {
 		renderBlurb(markup, 0, blurb);
 	}
 
+	/**
+	 * Renders a blurb outside form/container contexts.
+	 *
+	 * @param markup blurb markup
+	 * @param blurb blurb metadata
+	 */
 	@Override
 	public void renderBlurb(String markup, Blurb blurb) {
 		renderBlurb(markup, 0, blurb);
 	}
 
+	/**
+	 * Renders a blurb in the active context.
+	 *
+	 * @param markup blurb markup
+	 * @param formColspan form colspan
+	 * @param blurb blurb metadata
+	 */
 	private void renderBlurb(String markup, int formColspan, Blurb blurb) {
 		String value = null;
 		String binding = null;
@@ -992,21 +1409,49 @@ public class FacesViewRenderer extends ViewRenderer {
 						null);
 	}
 
+	/**
+	 * Renders a label within a form.
+	 *
+	 * @param value label value or binding
+	 * @param boundValue whether the value argument is a binding
+	 * @param label label metadata
+	 */
 	@Override
 	public void renderFormLabel(String value, boolean boundValue, Label label) {
 		renderLabel(value, getCurrentWidgetColspan(), boundValue, label);
 	}
 
+	/**
+	 * Renders a label within a container column.
+	 *
+	 * @param value label value
+	 * @param label label metadata
+	 */
 	@Override
 	public void renderContainerColumnLabel(String value, Label label) {
 		renderLabel(value, 0, false, label);
 	}
 
+	/**
+	 * Renders a label outside form/container contexts.
+	 *
+	 * @param value label value or binding
+	 * @param boundValue whether the value argument is a binding
+	 * @param label label metadata
+	 */
 	@Override
 	public void renderLabel(String value, boolean boundValue, Label label) {
 		renderLabel(value, 0, boundValue, label);
 	}
 
+	/**
+	 * Renders a label in the active context.
+	 *
+	 * @param value label value or binding
+	 * @param formColspan form colspan
+	 * @param boundValue whether the value argument is a binding
+	 * @param label label metadata
+	 */
 	private void renderLabel(String value, int formColspan, boolean boundValue, Label label) {
 		String ultimateValue = value;
 		String binding = label.getBinding();
@@ -1031,6 +1476,11 @@ public class FacesViewRenderer extends ViewRenderer {
 						null);
 	}
 
+	/**
+	 * Renders a progress bar within a form.
+	 *
+	 * @param progressBar progress-bar metadata
+	 */
 	@Override
 	public void renderFormProgressBar(ProgressBar progressBar) {
 		UIComponent p = cb.label(null, "progressBar"); // TODO progress bar
@@ -1049,6 +1499,13 @@ public class FacesViewRenderer extends ViewRenderer {
 						null);
 	}
 
+	/**
+	 * Renders a list grid.
+	 *
+	 * @param title resolved border title
+	 * @param aggregateQuery whether the list model is aggregate
+	 * @param grid list-grid metadata
+	 */
 	@Override
 	public void renderListGrid(String title, boolean aggregateQuery, ListGrid grid) {
 		// Use the component builder specified by the listGrid property if it exists
@@ -1087,21 +1544,44 @@ public class FacesViewRenderer extends ViewRenderer {
 		}
 	}
 
+	/**
+	 * Processes a projected column during list-grid rendering.
+	 *
+	 * @param column projected-column metadata
+	 */
 	@Override
 	public void renderListGridProjectedColumn(MetaDataQueryProjectedColumn column) {
 		// nothing to see here
 	}
 
+	/**
+	 * Processes a content column during list-grid rendering.
+	 *
+	 * @param column content-column metadata
+	 */
 	@Override
 	public void renderListGridContentColumn(MetaDataQueryContentColumn column) {
 		// nothing to see here
 	}
 
+	/**
+	 * Completes list-grid rendering.
+	 *
+	 * @param title resolved border title
+	 * @param aggregateQuery whether the list model is aggregate
+	 * @param grid list-grid metadata
+	 */
 	@Override
 	public void renderedListGrid(String title, boolean aggregateQuery, ListGrid grid) {
 		addedToContainerWithPotentialBorder((title == null) ? Boolean.FALSE : Boolean.TRUE, null, null);
 	}
 
+	/**
+	 * Renders a list repeater.
+	 *
+	 * @param title resolved border title
+	 * @param repeater list-repeater metadata
+	 */
 	@Override
 	public void renderListRepeater(String title, ListRepeater repeater) {
 		UIComponent component = cb.listRepeater(null,
@@ -1122,21 +1602,43 @@ public class FacesViewRenderer extends ViewRenderer {
 											null);
 	}
 
+	/**
+	 * Processes a projected column during list-repeater rendering.
+	 *
+	 * @param column projected-column metadata
+	 */
 	@Override
 	public void renderListRepeaterProjectedColumn(MetaDataQueryProjectedColumn column) {
 		// nothing to see here
 	}
 
+	/**
+	 * Processes a content column during list-repeater rendering.
+	 *
+	 * @param column content-column metadata
+	 */
 	@Override
 	public void renderListRepeaterContentColumn(MetaDataQueryContentColumn column) {
 		// nothing to see here
 	}
 
+	/**
+	 * Completes list-repeater rendering.
+	 *
+	 * @param title resolved border title
+	 * @param repeater list-repeater metadata
+	 */
 	@Override
 	public void renderedListRepeater(String title, ListRepeater repeater) {
 		addedToContainerWithPotentialBorder((title == null) ? Boolean.FALSE : Boolean.TRUE, null, null);
 	}
 
+	/**
+	 * Renders a tree grid.
+	 *
+	 * @param title resolved border title
+	 * @param grid tree-grid metadata
+	 */
 	@Override
 	public void renderTreeGrid(String title, TreeGrid grid) {
 		UIComponent l = cb.label(null, "treeGrid");
@@ -1151,16 +1653,32 @@ public class FacesViewRenderer extends ViewRenderer {
 						grid.getInvisibleConditionName()); // TODO tree grid
 	}
 
+	/**
+	 * Processes a projected column during tree-grid rendering.
+	 *
+	 * @param column projected-column metadata
+	 */
 	@Override
 	public void renderTreeGridProjectedColumn(MetaDataQueryProjectedColumn column) {
 		// nothing to see here
 	}
 
+	/**
+	 * Processes a content column during tree-grid rendering.
+	 *
+	 * @param column content-column metadata
+	 */
 	@Override
 	public void renderTreeGridContentColumn(MetaDataQueryContentColumn column) {
 		// nothing to see here
 	}
 
+	/**
+	 * Completes tree-grid rendering.
+	 *
+	 * @param title resolved border title
+	 * @param grid tree-grid metadata
+	 */
 	@Override
 	public void renderedTreeGrid(String title, TreeGrid grid) {
 		addedToContainer();
@@ -1169,6 +1687,12 @@ public class FacesViewRenderer extends ViewRenderer {
 	private String dataWidgetBinding;
 	private String dataWidgetVar;
 
+	/**
+	 * Begins rendering of a data grid.
+	 *
+	 * @param title resolved border title
+	 * @param grid data-grid metadata
+	 */
 	@Override
 	public void renderDataGrid(String title, DataGrid grid) {
 		// Determine if the grid collection is ordered
@@ -1201,11 +1725,23 @@ public class FacesViewRenderer extends ViewRenderer {
 		}
 	}
 
+	/**
+	 * Completes rendering of a data grid.
+	 *
+	 * @param title resolved border title
+	 * @param grid data-grid metadata
+	 */
 	@Override
 	public void renderedDataGrid(String title, DataGrid grid) {
 		renderedDataWidget(title, grid);
 	}
 
+	/**
+	 * Begins rendering of a data repeater.
+	 *
+	 * @param title resolved border title
+	 * @param repeater data-repeater metadata
+	 */
 	@Override
 	public void renderDataRepeater(String title, DataRepeater repeater) {
 		// Create the data repeater faces component
@@ -1227,11 +1763,23 @@ public class FacesViewRenderer extends ViewRenderer {
 		}
 	}
 
+	/**
+	 * Completes rendering of a data repeater.
+	 *
+	 * @param title resolved border title
+	 * @param repeater data-repeater metadata
+	 */
 	@Override
 	public void renderedDataRepeater(String title, DataRepeater repeater) {
 		renderedDataWidget(title, repeater);
 	}
 
+	/**
+	 * Completes rendering of a generic data widget.
+	 *
+	 * @param title resolved border title
+	 * @param widget data-widget metadata
+	 */
 	private void renderedDataWidget(String title, AbstractDataWidget widget) {
 		// Determine the document alias
 		String alias = null;
@@ -1270,11 +1818,23 @@ public class FacesViewRenderer extends ViewRenderer {
 	private StringBuilder gridColumnExpression;
 	private HorizontalAlignment gridColumnAlignment;
 
+	/**
+	 * Begins rendering of a data-repeater bound column.
+	 *
+	 * @param title column title
+	 * @param column column metadata
+	 */
 	@Override
 	public void renderDataRepeaterBoundColumn(String title, DataGridBoundColumn column) {
 		renderDataGridBoundColumn(title, column);
 	}
 
+	/**
+	 * Begins rendering of a data-grid bound column.
+	 *
+	 * @param title column title
+	 * @param column column metadata
+	 */
 	@Override
 	public void renderDataGridBoundColumn(String title, DataGridBoundColumn column) {
 		String binding = column.getBinding();
@@ -1306,6 +1866,7 @@ public class FacesViewRenderer extends ViewRenderer {
 			pixelWidth = customisations.determineDefaultColumnWidth(currentUxUi, attributeType);
 		}
 
+		cb.setCurrentInputTitleEscape(shouldEscape(column.getEscapeTitle()));
 		current = cb.addDataGridBoundColumn(null,
 												current,
 												getCurrentDataWidget(),
@@ -1318,21 +1879,46 @@ public class FacesViewRenderer extends ViewRenderer {
 												pixelWidth);
 	}
 
+	/**
+	 * Completes rendering of a data-repeater bound column.
+	 *
+	 * @param title column title
+	 * @param column column metadata
+	 */
 	@Override
 	public void renderedDataRepeaterBoundColumn(String title, DataGridBoundColumn column) {
 		renderedDataGridBoundColumn(title, column);
 	}
 
+	/**
+	 * Completes rendering of a data-grid bound column.
+	 *
+	 * @param title column title
+	 * @param column column metadata
+	 */
 	@Override
 	public void renderedDataGridBoundColumn(String title, DataGridBoundColumn column) {
 		current = cb.addedDataGridBoundColumn(null, current, gridColumnAlignment);
+		cb.setCurrentInputTitleEscape(true);
 	}
 
+	/**
+	 * Begins rendering of a data-repeater container column.
+	 *
+	 * @param title column title
+	 * @param column column metadata
+	 */
 	@Override
 	public void renderDataRepeaterContainerColumn(String title, DataGridContainerColumn column) {
 		renderDataGridContainerColumn(title, column);
 	}
 
+	/**
+	 * Begins rendering of a data-grid container column.
+	 *
+	 * @param title column title
+	 * @param column column metadata
+	 */
 	@Override
 	public void renderDataGridContainerColumn(String title, DataGridContainerColumn column) {
 		TargetMetaData target = getCurrentTarget();
@@ -1348,32 +1934,62 @@ public class FacesViewRenderer extends ViewRenderer {
 			alignment = CORE.getCustomisations().determineDefaultColumnTextAlignment(currentUxUi, attributeType);
 		}
 
+		cb.setCurrentInputTitleEscape(shouldEscape(column.getEscapeTitle()));
 		current = cb.addDataGridContainerColumn(null, current, getCurrentDataWidget(), title, column, alignment);
 	}
 
+	/**
+	 * Completes rendering of a data-repeater container column.
+	 *
+	 * @param title column title
+	 * @param column column metadata
+	 */
 	@Override
 	public void renderedDataRepeaterContainerColumn(String title, DataGridContainerColumn column) {
 		renderedDataGridContainerColumn(title, column);
 	}
 
+	/**
+	 * Completes rendering of a data-grid container column.
+	 *
+	 * @param title column title
+	 * @param column column metadata
+	 */
 	@Override
 	public void renderedDataGridContainerColumn(String title, DataGridContainerColumn column) {
 		current = cb.addedDataGridContainerColumn(null, current);
+		cb.setCurrentInputTitleEscape(true);
 	}
 
+	/**
+	 * Renders a checkbox within a bound column.
+	 *
+	 * @param checkBox checkbox metadata
+	 */
 	@Override
 	public void renderBoundColumnCheckBox(CheckBox checkBox) {
 		renderCheckBox(0, checkBox);
 	}
 
+	/**
+	 * Renders a checkbox within a form.
+	 *
+	 * @param checkBox checkbox metadata
+	 */
 	@Override
 	public void renderFormCheckBox(CheckBox checkBox) {
 		renderCheckBox(getCurrentWidgetColspan(), checkBox);
 	}
 
+	/**
+	 * Renders a checkbox in the active context.
+	 *
+	 * @param formColspan form colspan
+	 * @param checkBox checkbox metadata
+	 */
 	private void renderCheckBox(int formColspan, CheckBox checkBox) {
 		String title = getCurrentWidgetLabel();
-		String requiredMessage = getCurrentWidgetRequiredMessage();
+		String requiredMessage = getPrimeFacesRequiredMessage();
 		Form currentForm = getCurrentForm();
 		EventSourceComponent c = cb.checkBox(null,
 												dataWidgetVar,
@@ -1397,16 +2013,31 @@ public class FacesViewRenderer extends ViewRenderer {
 						null);
 	}
 
+	/**
+	 * Completes checkbox rendering for bound columns.
+	 *
+	 * @param checkBox checkbox metadata
+	 */
 	@Override
 	public void renderedBoundColumnCheckBox(CheckBox checkBox) {
 		renderedFormCheckBox(checkBox);
 	}
 
+	/**
+	 * Completes checkbox rendering for forms.
+	 *
+	 * @param checkBox checkbox metadata
+	 */
 	@Override
 	public void renderedFormCheckBox(CheckBox checkBox) {
 		eventSource = null;
 	}
 
+	/**
+	 * Renders check-membership control.
+	 *
+	 * @param membership check-membership metadata
+	 */
 	@Override
 	public void renderCheckMembership(CheckMembership membership) {
 		UIComponentBase c = (UIComponentBase) cb.label(null, "checkMembership"); // TODO check membership
@@ -1414,25 +2045,46 @@ public class FacesViewRenderer extends ViewRenderer {
 		addToContainer(c, null, null, null, null, null, null, null, membership.getInvisibleConditionName());
 	}
 
+	/**
+	 * Completes check-membership rendering.
+	 *
+	 * @param membership check-membership metadata
+	 */
 	@Override
 	public void renderedCheckMembership(CheckMembership membership) {
 		addedToContainer();
 		eventSource = null;
 	}
 
+	/**
+	 * Renders a colour picker within a bound column.
+	 *
+	 * @param colour colour-picker metadata
+	 */
 	@Override
 	public void renderBoundColumnColourPicker(ColourPicker colour) {
 		renderColourPicker(0, colour);
 	}
 
+	/**
+	 * Renders a colour picker within a form.
+	 *
+	 * @param colour colour-picker metadata
+	 */
 	@Override
 	public void renderFormColourPicker(ColourPicker colour) {
 		renderColourPicker(getCurrentWidgetColspan(), colour);
 	}
 
+	/**
+	 * Renders a colour picker in the active context.
+	 *
+	 * @param formColspan form colspan
+	 * @param colour colour-picker metadata
+	 */
 	private void renderColourPicker(int formColspan, ColourPicker colour) {
 		String title = getCurrentWidgetLabel();
-		String requiredMessage = getCurrentWidgetRequiredMessage();
+		String requiredMessage = getPrimeFacesRequiredMessage();
 		Form currentForm = getCurrentForm();
 		TargetMetaData target = getCurrentTarget();
 		Attribute attribute = (target == null) ? null : target.getAttribute();
@@ -1460,29 +2112,55 @@ public class FacesViewRenderer extends ViewRenderer {
 						null);
 	}
 
+	/**
+	 * Completes colour-picker rendering for bound columns.
+	 *
+	 * @param colour colour-picker metadata
+	 */
 	@Override
 	public void renderedBoundColumnColourPicker(ColourPicker colour) {
 		renderedFormColourPicker(colour);
 	}
 
+	/**
+	 * Completes colour-picker rendering for forms.
+	 *
+	 * @param colour colour-picker metadata
+	 */
 	@Override
 	public void renderedFormColourPicker(ColourPicker colour) {
 		eventSource = null;
 	}
 
+	/**
+	 * Renders a combo within a bound column.
+	 *
+	 * @param combo combo metadata
+	 */
 	@Override
 	public void renderBoundColumnCombo(Combo combo) {
 		renderCombo(0, combo);
 	}
 
+	/**
+	 * Renders a combo within a form.
+	 *
+	 * @param combo combo metadata
+	 */
 	@Override
 	public void renderFormCombo(Combo combo) {
 		renderCombo(getCurrentWidgetColspan(), combo);
 	}
 
+	/**
+	 * Renders a combo in the active context.
+	 *
+	 * @param formColspan form colspan
+	 * @param combo combo metadata
+	 */
 	private void renderCombo(int formColspan, Combo combo) {
 		String title = getCurrentWidgetLabel();
-		String requiredMessage = getCurrentWidgetRequiredMessage();
+		String requiredMessage = getPrimeFacesRequiredMessage();
 		Form currentForm = getCurrentForm();
 		EventSourceComponent c = cb.combo(null,
 											dataWidgetVar,
@@ -1506,87 +2184,88 @@ public class FacesViewRenderer extends ViewRenderer {
 						null);
 	}
 
+	/**
+	 * Completes combo rendering for bound columns.
+	 *
+	 * @param combo combo metadata
+	 */
 	@Override
 	public void renderedBoundColumnCombo(Combo combo) {
 		renderedFormCombo(combo);
 	}
 
+	/**
+	 * Completes combo rendering for forms.
+	 *
+	 * @param combo combo metadata
+	 */
 	@Override
 	public void renderedFormCombo(Combo combo) {
 		eventSource = null;
 	}
 
+	/**
+	 * Renders content within a bound column.
+	 *
+	 * @param content content metadata; must not be {@code null}
+	 */
 	@Override
-	public void renderBoundColumnContentImage(ContentImage image) {
-		renderContentImage(0, image);
+	public void renderBoundColumnContent(@Nonnull ContentUpload content) {
+		renderContent(0, content, false);
 	}
 
+	/**
+	 * Renders content within a container column.
+	 *
+	 * @param content content metadata; must not be {@code null}
+	 */
 	@Override
-	public void renderContainerColumnContentImage(ContentImage image) {
-		renderContentImage(0, image);
+	public void renderContainerColumnContent(@Nonnull ContentUpload content) {
+		renderContent(0, content, false);
 	}
 
+	/**
+	 * Renders content within a form.
+	 *
+	 * @param content content metadata; must not be {@code null}
+	 */
 	@Override
-	public void renderFormContentImage(ContentImage image) {
-		renderContentImage(getCurrentWidgetColspan(), image);
+	public void renderFormContent(@Nonnull ContentUpload content) {
+		renderContent(getCurrentWidgetColspan(), content, true);
 	}
 
-	private void renderContentImage(int formColspan, ContentImage image) {
+	/**
+	 * Renders content in the active context.
+	 *
+	 * @param formColspan form colspan
+	 * @param content content metadata; must not be {@code null}
+	 * @param formContext whether this is rendering into a form
+	 */
+	private void renderContent(int formColspan, @Nonnull ContentUpload content, boolean formContext) {
 		String title = getCurrentWidgetLabel();
-		String requiredMessage = getCurrentWidgetRequiredMessage();
-		Form currentForm = getCurrentForm();
-		UIComponent c = cb.contentImage(null,
-											dataWidgetVar,
-											image,
-											(currentForm == null) ? null : currentForm.getDisabledConditionName(),
-											title,
-											requiredMessage);
-		addComponent(title,
-						formColspan,
-						requiredMessage,
-						image.getInvisibleConditionName(),
-						getCurrentWidgetHelp(),
-						c,
-						image.getPixelWidth(),
-						null,
-						null,
-						null,
-						null,
-						null,
-						null);
-	}
-
-	@Override
-	public void renderBoundColumnContentLink(String value, ContentLink link) {
-		renderContentLink(0, link);
-	}
-
-	@Override
-	public void renderFormContentLink(String value, ContentLink link) {
-		renderContentLink(getCurrentWidgetColspan(), link);
-	}
-
-	private void renderContentLink(int formColspan, ContentLink link) {
-		String title = getCurrentWidgetLabel();
-		String requiredMessage = getCurrentWidgetRequiredMessage();
+		String requiredMessage = getPrimeFacesRequiredMessage();
 		Form currentForm = getCurrentForm();
 		TargetMetaData target = getCurrentTarget();
 		Attribute attribute = (target == null) ? null : target.getAttribute();
 		AttributeType attributeType = (attribute == null) ? AttributeType.content : attribute.getAttributeType();
-		UIComponent c = cb.contentLink(null,
-										dataWidgetVar,
-										link,
-										(currentForm == null) ? null : currentForm.getDisabledConditionName(),
-										title,
-										requiredMessage,
-										CORE.getCustomisations().determineDefaultWidgetTextAlignment(currentUxUi, attributeType));
+		boolean imageUpload = AttributeType.image.equals(attributeType) ||
+								ContentDisplay.image.equals(content.getResolvedDisplay());
+		UIComponent c = cb.content(null,
+									dataWidgetVar,
+									content,
+									(currentForm == null) ? null : currentForm.getDisabledConditionName(),
+									title,
+									requiredMessage,
+									CORE.getCustomisations().determineDefaultWidgetTextAlignment(currentUxUi, attributeType),
+									formContext,
+									imageUpload);
 		addComponent(title,
 						formColspan,
 						requiredMessage,
-						link.getInvisibleConditionName(),
+						content.getInvisibleConditionName(),
 						getCurrentWidgetHelp(),
 						c,
-						link.getPixelWidth(),
+						content.getPixelWidth(),
 						null,
 						null,
 						null,
@@ -1595,10 +2274,15 @@ public class FacesViewRenderer extends ViewRenderer {
 						null);
 	}
 
+	/**
+	 * Renders a content-signature input within a form.
+	 *
+	 * @param signature content-signature metadata
+	 */
 	@Override
 	public void renderFormContentSignature(ContentSignature signature) {
 		String title = getCurrentWidgetLabel();
-		String requiredMessage = getCurrentWidgetRequiredMessage();
+		String requiredMessage = getPrimeFacesRequiredMessage();
 		Form currentForm = getCurrentForm();
 		UIComponent c = lb.contentSignatureLayout(null, signature);
 		addComponent(title,
@@ -1622,19 +2306,35 @@ public class FacesViewRenderer extends ViewRenderer {
 								requiredMessage);
 	}
 
+	/**
+	 * Renders HTML input within a bound column.
+	 *
+	 * @param html HTML metadata
+	 */
 	@Override
 	public void renderBoundColumnHTML(HTML html) {
 		renderHTML(0, html);
 	}
 
+	/**
+	 * Renders HTML input within a form.
+	 *
+	 * @param html HTML metadata
+	 */
 	@Override
 	public void renderFormHTML(HTML html) {
 		renderHTML(getCurrentWidgetColspan(), html);
 	}
 
+	/**
+	 * Renders HTML input in the active context.
+	 *
+	 * @param formColspan form colspan
+	 * @param html HTML metadata
+	 */
 	private void renderHTML(int formColspan, HTML html) {
 		String title = getCurrentWidgetLabel();
-		String requiredMessage = getCurrentWidgetRequiredMessage();
+		String requiredMessage = getPrimeFacesRequiredMessage();
 		Form currentForm = getCurrentForm();
 		UIComponent c = cb.html(null,
 									dataWidgetVar,
@@ -1657,9 +2357,23 @@ public class FacesViewRenderer extends ViewRenderer {
 						null);
 	}
 
+	/**
+	 * Renders list-membership control.
+	 *
+	 * <p>Side effects: creates a pick-list component, passes raw caption metadata
+	 * and nullable escape flags to the component builder, and adds the pick-list to
+	 * the current container.
+	 *
+	 * @param candidatesHeading raw candidates heading
+	 * @param membersHeading raw members heading
+	 * @param membership list-membership metadata
+	 */
 	@Override
 	public void renderListMembership(String candidatesHeading, String membersHeading, ListMembership membership) {
-		EventSourceComponent c = cb.listMembership(null, candidatesHeading, membersHeading, membership);
+		EventSourceComponent c = cb.listMembership(null,
+													EscapableText.of(candidatesHeading, shouldEscape(membership.getEscapeCandidatesHeading())),
+													EscapableText.of(membersHeading, shouldEscape(membership.getEscapeMembersHeading())),
+													membership);
 		eventSource = c.getEventSource();
 		Integer pixelWidth = membership.getPixelWidth();
 		addToContainer(c.getComponent(),
@@ -1673,12 +2387,24 @@ public class FacesViewRenderer extends ViewRenderer {
 						membership.getInvisibleConditionName());
 	}
 
+	/**
+	 * Completes list-membership rendering.
+	 *
+	 * @param candidatesHeading candidates heading
+	 * @param membersHeading members heading
+	 * @param membership list-membership metadata
+	 */
 	@Override
 	public void renderedListMembership(String candidatesHeading, String membersHeading, ListMembership membership) {
 		addedToContainer();
 		eventSource = null;
 	}
 
+	/**
+	 * Renders comparison widget.
+	 *
+	 * @param comparison comparison metadata
+	 */
 	@Override
 	public void renderComparison(Comparison comparison) {
 		UIComponent c = cb.label(null, "comparison"); // TODO comparison
@@ -1694,6 +2420,15 @@ public class FacesViewRenderer extends ViewRenderer {
 		addedToContainer();
 	}
 
+	/**
+	 * Renders lookup-description input within a bound column.
+	 *
+	 * @param query lookup query definition
+	 * @param canCreate whether create is permitted
+	 * @param canUpdate whether update is permitted
+	 * @param descriptionBinding description binding
+	 * @param lookup lookup metadata
+	 */
 	@Override
 	public void renderBoundColumnLookupDescription(MetaDataQueryDefinition query,
 													boolean canCreate,
@@ -1703,6 +2438,15 @@ public class FacesViewRenderer extends ViewRenderer {
 		renderLookupDescription(query, 0, descriptionBinding, lookup);
 	}
 
+	/**
+	 * Renders lookup-description input within a form.
+	 *
+	 * @param query lookup query definition
+	 * @param canCreate whether create is permitted
+	 * @param canUpdate whether update is permitted
+	 * @param descriptionBinding description binding
+	 * @param lookup lookup metadata
+	 */
 	@Override
 	public void renderFormLookupDescription(MetaDataQueryDefinition query,
 												boolean canCreate,
@@ -1713,12 +2457,20 @@ public class FacesViewRenderer extends ViewRenderer {
 	}
 
 	// No zoom in or create in PF lookup descriptions
+	/**
+	 * Renders lookup-description input in the active context.
+	 *
+	 * @param query lookup query definition
+	 * @param formColspan form colspan
+	 * @param descriptionBinding description binding
+	 * @param lookup lookup metadata
+	 */
 	public void renderLookupDescription(MetaDataQueryDefinition query,
 											int formColspan,
 											String descriptionBinding,
 											LookupDescription lookup) {
 		String title = getCurrentWidgetLabel();
-		String requiredMessage = getCurrentWidgetRequiredMessage();
+		String requiredMessage = getPrimeFacesRequiredMessage();
 		Form currentForm = getCurrentForm();
 		TargetMetaData target = getCurrentTarget();
 		Attribute attribute = (target == null) ? null : target.getAttribute();
@@ -1748,6 +2500,9 @@ public class FacesViewRenderer extends ViewRenderer {
 						null);
 	}
 
+	/**
+	 * Completes lookup-description rendering for bound columns.
+	 */
 	@Override
 	public void renderedBoundColumnLookupDescription(MetaDataQueryDefinition query,
 														boolean canCreate,
@@ -1757,6 +2512,9 @@ public class FacesViewRenderer extends ViewRenderer {
 		renderedFormLookupDescription(query, canCreate, canUpdate, descriptionBinding, lookup);
 	}
 
+	/**
+	 * Completes lookup-description rendering for forms.
+	 */
 	@Override
 	public void renderedFormLookupDescription(MetaDataQueryDefinition query,
 												boolean canCreate,
@@ -1778,7 +2536,7 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	private void renderPassword(int formColspan, Password password) {
 		String title = getCurrentWidgetLabel();
-		String requiredMessage = getCurrentWidgetRequiredMessage();
+		String requiredMessage = getPrimeFacesRequiredMessage();
 		Form currentForm = getCurrentForm();
 		TargetMetaData target = getCurrentTarget();
 		Attribute attribute = (target == null) ? null : target.getAttribute();
@@ -1830,7 +2588,7 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	private void renderRadio(int formColspan, Radio radio) {
 		String title = getCurrentWidgetLabel();
-		String requiredMessage = getCurrentWidgetRequiredMessage();
+		String requiredMessage = getPrimeFacesRequiredMessage();
 		Form currentForm = getCurrentForm();
 		EventSourceComponent c = cb.radio(null,
 											dataWidgetVar,
@@ -1876,7 +2634,7 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	private void renderRichText(int formColspan, RichText text) {
 		String title = getCurrentWidgetLabel();
-		String requiredMessage = getCurrentWidgetRequiredMessage();
+		String requiredMessage = getPrimeFacesRequiredMessage();
 		Form currentForm = getCurrentForm();
 		EventSourceComponent c = cb.richText(null,
 												dataWidgetVar,
@@ -1930,7 +2688,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		}
 
 		String title = getCurrentWidgetLabel();
-		String requiredMessage = getCurrentWidgetRequiredMessage();
+		String requiredMessage = getPrimeFacesRequiredMessage();
 		Form currentForm = getCurrentForm();
 		EventSourceComponent c = cb.slider(null,
 												dataWidgetVar,
@@ -1985,7 +2743,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		}
 
 		String title = getCurrentWidgetLabel();
-		String requiredMessage = getCurrentWidgetRequiredMessage();
+		String requiredMessage = getPrimeFacesRequiredMessage();
 		Form currentForm = getCurrentForm();
 		EventSourceComponent c = cb.spinner(null,
 												dataWidgetVar,
@@ -2041,7 +2799,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		}
 
 		String title = getCurrentWidgetLabel();
-		String requiredMessage = getCurrentWidgetRequiredMessage();
+		String requiredMessage = getPrimeFacesRequiredMessage();
 		Form currentForm = getCurrentForm();
 		EventSourceComponent c = cb.textArea(null,
 												dataWidgetVar,
@@ -2087,6 +2845,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		renderTextField(getCurrentWidgetColspan(), text);
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void renderTextField(int formColspan, TextField text) {
 		TargetMetaData target = getCurrentTarget();
 		Attribute attribute = (target == null) ? null : target.getAttribute();
@@ -2123,7 +2882,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		}
 
 		String title = getCurrentWidgetLabel();
-		String requiredMessage = getCurrentWidgetRequiredMessage();
+		String requiredMessage = getPrimeFacesRequiredMessage();
 		Form currentForm = getCurrentForm();
 		EventSourceComponent c = cb.text(null,
 											dataWidgetVar,
@@ -2162,6 +2921,14 @@ public class FacesViewRenderer extends ViewRenderer {
 		eventSource = null;
 	}
 
+	/**
+	 * Converts a Skyve converter to an equivalent JSF converter.
+	 *
+	 * @param converter Skyve converter instance
+	 * @param type attribute type used for default converter selection
+	 * @return matching JSF converter, or {@code null}
+	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static jakarta.faces.convert.Converter<?> convertConverter(Converter<?> converter, AttributeType type) {
 		jakarta.faces.convert.Converter<?> result = null;
 		if (converter != null) {
@@ -2388,16 +3155,40 @@ public class FacesViewRenderer extends ViewRenderer {
 		return result;
 	}
 
+	/**
+	 * Renders inject metadata within a form.
+	 *
+	 * @param inject inject metadata
+	 */
 	@Override
 	public void renderFormInject(Inject inject) {
 		// do nothing - this is for web 2 ux uis only
 	}
 
+	/**
+	 * Renders an inject widget outside form context.
+	 *
+	 * @param inject inject metadata
+	 */
 	@Override
 	public void renderInject(Inject inject) {
 		// do nothing - this is for web 2 ux uis only
 	}
 
+	/**
+	 * Adds a component to the current container.
+	 *
+	 * @param component component to add
+	 * @param pixelWidth optional fixed width
+	 * @param responsiveWidth optional responsive width
+	 * @param percentageWidth optional percentage width
+	 * @param sm optional small breakpoint width
+	 * @param md optional medium breakpoint width
+	 * @param lg optional large breakpoint width
+	 * @param xl optional extra-large breakpoint width
+	 * @param invisibleConditionName invisible-condition expression
+	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private void addToContainer(UIComponent component,
 									Integer pixelWidth,
 									Integer responsiveWidth,
@@ -2427,6 +3218,9 @@ public class FacesViewRenderer extends ViewRenderer {
 										invisibleConditionName);
 	}
 
+	/**
+	 * Completes container insertion for the current component.
+	 */
 	private void addedToContainer() {
 		Deque<Container> currentContainers = getCurrentContainers();
 		if (currentContainers.isEmpty()) {
@@ -2436,6 +3230,17 @@ public class FacesViewRenderer extends ViewRenderer {
 		current = lb.addedToContainer(null, currentContainer, current);
 	}
 	
+	/**
+	 * Adds a component to the current container, wrapping it in a border when required.
+	 *
+	 * @param component component to add
+	 * @param border whether border rendering is requested
+	 * @param borderTitle border title
+	 * @param size relative-size metadata
+	 * @param invisibleConditionName invisible-condition expression
+	 * @param collapsible optional collapsible metadata
+	 * @param thisWidgetId optional widget id for fragment rendering
+	 */
 	private void addToContainerWithPotentialBorder(UIComponent component,
 													Boolean border,
 													String borderTitle,
@@ -2448,7 +3253,14 @@ public class FacesViewRenderer extends ViewRenderer {
 		validateCollapsible(collapsible, borderTitle);
 		// Cater for a border if this thing has a border
 		if (bordered) {
-			UIComponent borderComponent = cb.border(null, borderTitle, invisibleConditionName, size.getPixelWidth(), collapsible);
+			cb.setCurrentInputTitleEscape(resolveBorderTitleEscape(size));
+			UIComponent borderComponent;
+			try {
+				borderComponent = cb.border(null, borderTitle, invisibleConditionName, size.getPixelWidth(), collapsible);
+			}
+			finally {
+				cb.setCurrentInputTitleEscape(true);
+			}
 			addToContainer(borderComponent,
 							size.getPixelWidth(),
 							size.getResponsiveWidth(),
@@ -2486,6 +3298,13 @@ public class FacesViewRenderer extends ViewRenderer {
 		current = component;
 	}
 
+	/**
+	 * Completes container insertion for a potentially bordered component.
+	 *
+	 * @param border whether border rendering was requested
+	 * @param collapsible optional collapsible metadata
+	 * @param thisWidgetId optional widget id for fragment rendering
+	 */
 	private void addedToContainerWithPotentialBorder(Boolean border, Collapsible collapsible, String thisWidgetId) {
 		// Cater for border, if one was added
 		if ((collapsible != null) || Boolean.TRUE.equals(border)) {
@@ -2495,18 +3314,50 @@ public class FacesViewRenderer extends ViewRenderer {
 
 		// stop rendering if appropriate
 		if ((widgetId != null) && (widgetId.equals(thisWidgetId))) {
-			current.getChildren().remove(fragment);
-			fragment.setParent(null);
-			facesView.getChildren().add(fragment);
+			moveFragmentToFacesView();
 			fragment = null;
 		}
 	}
+
+	private void moveFragmentToFacesView() {
+		if (fragment == null) {
+			return;
+		}
+
+		UIComponent parent = fragment.getParent();
+		if (parent != null) {
+			parent.getChildren().remove(fragment);
+		}
+		else if (current != null) {
+			current.getChildren().remove(fragment);
+		}
+
+		fragment.setParent(null);
+		facesView.getChildren().add(fragment);
+	}
 	
+	/**
+	 * Visits a server-side event action declaration.
+	 *
+	 * @param action owning action
+	 * @param server server-side event action metadata
+	 */
 	@Override
 	public void visitServerSideActionEventAction(Action action, ServerSideActionEventAction server) {
 		// event actions are handled when visiting the action handlers
 	}
 
+	/**
+	 * Renders a custom action entry in the action panel.
+	 *
+	 * @param name action name
+	 * @param label action label
+	 * @param iconUrl icon URL
+	 * @param iconStyleClass icon style class
+	 * @param toolTip tooltip text
+	 * @param confirmationText confirmation text
+	 * @param action action metadata
+	 */
 	@Override
 	public void renderCustomAction(String name,
 									String label,
@@ -2532,6 +3383,9 @@ public class FacesViewRenderer extends ViewRenderer {
 		}
 	}
 
+	/**
+	 * Renders an add action entry.
+	 */
 	@Override
 	public void renderAddAction(String name,
 									String label,
@@ -2543,6 +3397,9 @@ public class FacesViewRenderer extends ViewRenderer {
 //		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.Add);
 	}
 
+	/**
+	 * Renders a remove action entry.
+	 */
 	@Override
 	public void renderRemoveAction(String name,
 									String label,
@@ -2555,6 +3412,9 @@ public class FacesViewRenderer extends ViewRenderer {
 		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.Remove, canDelete);
 	}
 
+	/**
+	 * Renders a zoom-out action entry.
+	 */
 	@Override
 	public void renderZoomOutAction(String name,
 										String label,
@@ -2566,6 +3426,9 @@ public class FacesViewRenderer extends ViewRenderer {
 		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.ZoomOut, false);
 	}
 
+	/**
+	 * Renders a navigate action entry.
+	 */
 	@Override
 	public void renderNavigateAction(String name,
 										String label,
@@ -2577,6 +3440,9 @@ public class FacesViewRenderer extends ViewRenderer {
 //		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.Navigate, false);
 	}
 
+	/**
+	 * Renders an OK action entry.
+	 */
 	@Override
 	public void renderOKAction(String name,
 								String label,
@@ -2588,6 +3454,9 @@ public class FacesViewRenderer extends ViewRenderer {
 		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.OK, false);
 	}
 
+	/**
+	 * Renders a save action entry.
+	 */
 	@Override
 	public void renderSaveAction(String name,
 									String label,
@@ -2599,6 +3468,9 @@ public class FacesViewRenderer extends ViewRenderer {
 		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.Save, false);
 	}
 
+	/**
+	 * Renders a cancel action entry.
+	 */
 	@Override
 	public void renderCancelAction(String name,
 									String label,
@@ -2610,6 +3482,9 @@ public class FacesViewRenderer extends ViewRenderer {
 		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.Cancel, false);
 	}
 
+	/**
+	 * Renders a delete action entry.
+	 */
 	@Override
 	public void renderDeleteAction(String name,
 									String label,
@@ -2622,10 +3497,15 @@ public class FacesViewRenderer extends ViewRenderer {
 	}
 
 	/**
-	 * Create a button with a href URL that looks like...
-	 * http://localhost:8080/skyve/report/Bum.html?_f=html&_c=<webId>&_id=<id>&wee=poo&_n=Bum&_mod=<module>&_doc=<document>
-	 * 
-	 * @param action
+	 * Renders the report action as an implicit report button.
+	 *
+	 * @param name the action name
+	 * @param label the action label
+	 * @param iconUrl the icon URL
+	 * @param iconStyleClass the icon style class
+	 * @param toolTip tooltip text
+	 * @param confirmationText confirmation text
+	 * @param action the action metadata
 	 */
 	@Override
 	public void renderReportAction(String name,
@@ -2638,6 +3518,9 @@ public class FacesViewRenderer extends ViewRenderer {
 		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.Report, false);
 	}
 
+	/**
+	 * Renders a business export action entry.
+	 */
 	@Override
 	public void renderBizExportAction(String name,
 										String label,
@@ -2649,6 +3532,9 @@ public class FacesViewRenderer extends ViewRenderer {
 		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.BizExport, false);
 	}
 
+		/**
+		 * Renders a business import action entry.
+		 */
 	@Override
 	public void renderBizImportAction(String name,
 										String label,
@@ -2660,6 +3546,9 @@ public class FacesViewRenderer extends ViewRenderer {
 		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.BizImport, false);
 	}
 
+	/**
+	 * Renders a download action entry.
+	 */
 	@Override
 	public void renderDownloadAction(String name,
 										String label,
@@ -2671,6 +3560,9 @@ public class FacesViewRenderer extends ViewRenderer {
 		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.Download, false);
 	}
 
+	/**
+	 * Renders an upload action entry.
+	 */
 	@Override
 	public void renderUploadAction(String name,
 									String label,
@@ -2682,6 +3574,9 @@ public class FacesViewRenderer extends ViewRenderer {
 		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.Upload, false);
 	}
 
+	/**
+	 * Renders a new action entry.
+	 */
 	@Override
 	public void renderNewAction(String name,
 									String label,
@@ -2693,6 +3588,9 @@ public class FacesViewRenderer extends ViewRenderer {
 //		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.New, false);
 	}
 
+	/**
+	 * Renders an edit action entry.
+	 */
 	@Override
 	public void renderEditAction(String name,
 									String label,
@@ -2704,6 +3602,9 @@ public class FacesViewRenderer extends ViewRenderer {
 //		processImplicitAction(action, ImplicitActionName.Edit);
 	}
 
+	/**
+	 * Renders a print action entry.
+	 */
 	@Override
 	public void renderPrintAction(String name,
 									String label,
@@ -2715,6 +3616,17 @@ public class FacesViewRenderer extends ViewRenderer {
 		// TODO implement
 	}
 
+	/**
+	 * Adds an implicit action entry to each toolbar layout.
+	 *
+	 * @param label action label
+	 * @param iconStyleClass icon style class
+	 * @param toolTip tooltip text
+	 * @param confirmationText confirmation text
+	 * @param action action metadata
+	 * @param name implicit action name
+	 * @param canDelete whether delete is allowed
+	 */
 	private void processImplicitAction(String label,
 										String iconStyleClass,
 										String toolTip,
@@ -2760,6 +3672,9 @@ public class FacesViewRenderer extends ViewRenderer {
 		}
 	}
 
+	/**
+	 * Visits an on-changed event handler and wires JSF change AJAX events.
+	 */
 	@Override
 	public void visitOnChangedEventHandler(Changeable changeable, boolean parentVisible, boolean parentEnabled) {
 		String binding = changeable.getBinding();
@@ -2779,90 +3694,138 @@ public class FacesViewRenderer extends ViewRenderer {
 		}
 	}
 
+	/**
+	 * Completes visit for an on-changed event handler.
+	 */
 	@Override
 	public void visitedOnChangedEventHandler(Changeable changeable, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
+	/**
+	 * Visits an on-focus event handler and wires JSF focus AJAX events.
+	 */
 	@Override
 	public void visitOnFocusEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
 		String binding = (blurable instanceof Bound bound) ? bound.getBinding() : null;
 		cb.addAjaxBehavior(eventSource, "focus", dataWidgetBinding, dataWidgetVar, binding, blurable.getFocusActions());
 	}
 
+	/**
+	 * Completes visit for an on-focus event handler.
+	 */
 	@Override
 	public void visitedOnFocusEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
+	/**
+	 * Visits an on-blur event handler and wires JSF blur AJAX events.
+	 */
 	@Override
 	public void visitOnBlurEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
 		String binding = (blurable instanceof Bound bound) ? bound.getBinding() : null;
 		cb.addAjaxBehavior(eventSource, "blur", dataWidgetBinding, dataWidgetVar, binding, blurable.getBlurActions());
 	}
 
+	/**
+	 * Completes visit for an on-blur event handler.
+	 */
 	@Override
 	public void visitedOnBlurEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
+	/**
+	 * Visits on-added handler metadata.
+	 */
 	@Override
 	public void visitOnAddedEventHandler(Addable addable, boolean parentVisible, boolean parentEnabled) {
 		// Cannot edit/zoom in on lookup descriptions in these faces views, so ignore the event
 		// TODO - need to account for data/list grids in here
 	}
 
+	/**
+	 * Completes on-added handler visitation.
+	 */
 	@Override
 	public void visitedOnAddedEventHandler(Addable addable, boolean parentVisible, boolean parentEnabled) {
 		// Cannot edit/zoom in on lookup descriptions in these faces views, so ignore the event
 		// TODO - need to account for data/list grids in here
 	}
 
+	/**
+	 * Visits on-edited handler metadata.
+	 */
 	@Override
 	public void visitOnEditedEventHandler(Editable editable, boolean parentVisible, boolean parentEnabled) {
 		// Cannot edit/zoom in on lookup descriptions in these faces views, so ignore the event
 		// TODO - need to account for data/list grids in here
 	}
 
+	/**
+	 * Completes on-edited handler visitation.
+	 */
 	@Override
 	public void visitedOnEditedEventHandler(Editable editable, boolean parentVisible, boolean parentEnabled) {
 		// Cannot edit/zoom in on lookup descriptions in these faces views, so ignore the event
 		// TODO - need to account for data/list grids in here
 	}
 
+	/**
+	 * Visits on-removed handler metadata.
+	 */
 	@Override
 	public void visitOnRemovedEventHandler(Removable removable, boolean parentVisible, boolean parentEnabled) {
 		// Cannot edit/zoom in on lookup descriptions in these faces views, so ignore the event
 		// TODO - need to account for data/list grids in here
 	}
 
+	/**
+	 * Completes on-removed handler visitation.
+	 */
 	@Override
 	public void visitedOnRemovedEventHandler(Removable removable, boolean parentVisible, boolean parentEnabled) {
 		// Cannot edit/zoom in on lookup descriptions in these faces views, so ignore the event
 		// TODO - need to account for data/list grids in here
 	}
 
+	/**
+	 * Visits on-selected handler metadata.
+	 */
 	@Override
 	public void visitOnSelectedEventHandler(Selectable selectable, boolean parentVisible, boolean parentEnabled) {
 		// TODO - need to account for data/list/tree grids in here
 	}
 
+	/**
+	 * Completes on-selected handler visitation.
+	 */
 	@Override
 	public void visitedOnSelectedEventHandler(Selectable selectable, boolean parentVisible, boolean parentEnabled) {
 		// TODO - need to account for data/list/tree grids in here
 	}
 
+	/**
+	 * Visits on-picked handler metadata for lookup descriptions.
+	 */
 	@Override
 	public void visitOnPickedEventHandler(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 		cb.addAjaxBehavior(eventSource, "itemSelect", dataWidgetBinding, dataWidgetVar, lookup.getBinding(),
 				lookup.getPickedActions());
 	}
 
+	/**
+	 * Completes on-picked handler visitation.
+	 */
 	@Override
 	public void visitedOnPickedEventHandler(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
+	/**
+	 * Visits on-cleared handler metadata for lookup descriptions.
+	 */
 	@Override
 	public void visitOnClearedEventHandler(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 		cb.addAjaxBehavior(eventSource,
@@ -2873,6 +3836,9 @@ public class FacesViewRenderer extends ViewRenderer {
 							lookup.getClearedActions());
 	}
 
+	/**
+	 * Completes on-cleared handler visitation.
+	 */
 	@Override
 	public void visitedOnClearedEventHandler(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
@@ -2914,22 +3880,59 @@ public class FacesViewRenderer extends ViewRenderer {
 		// event actions are handled when visiting the action handlers
 	}
 
+	/**
+	 * Visits parameter metadata.
+	 */
 	@Override
 	public void visitParameter(Parameter parameter, boolean parentVisible, boolean parentEnabled) {
 		// nothing to see here
 	}
 
+	/**
+	 * Visits filter-parameter metadata.
+	 */
 	@Override
 	public void visitFilterParameter(FilterParameter parameter, boolean parentVisible, boolean parentEnabled) {
 		// nothing to see here
 	}
 
+	/**
+	 * Validates collapsible metadata.
+	 *
+	 * @param collapsible collapsible metadata
+	 * @param borderTitle border title
+	 */
 	private static void validateCollapsible(Collapsible collapsible, String borderTitle) {
 		if (collapsible != null && borderTitle == null) {
 			throw new MetaDataException("Border title must be defined if the collapsible attribute is present");
 		}
 	}
 
+	/**
+	 * Returns the resolved escape decision paired with a rendered border title.
+	 *
+	 * @param size metadata object that owns the border title
+	 * @return {@code true} to escape at the component boundary; {@code false} to
+	 *         allow trusted markup
+	 */
+	private static boolean resolveBorderTitleEscape(RelativeSize size) {
+		if (size instanceof Bordered bordered) {
+			return shouldEscape(bordered.getEscapeBorderTitle());
+		}
+		if (size instanceof AbstractDataWidget widget) {
+			return shouldEscape(widget.getEscapeTitle());
+		}
+		if (size instanceof AbstractListWidget widget) {
+			return shouldEscape(widget.getEscapeTitle());
+		}
+		return true;
+	}
+
+	/**
+	 * Begins sidebar rendering.
+	 *
+	 * @param sidebar sidebar metadata
+	 */
 	@Override
 	public void renderSidebar(Sidebar sidebar) {
 		facesSidebar = lb.sidebarLayout(null, sidebar, createView);
@@ -2946,6 +3949,11 @@ public class FacesViewRenderer extends ViewRenderer {
 		}
 	}
 
+	/**
+	 * Completes sidebar rendering.
+	 *
+	 * @param sidebar sidebar metadata
+	 */
 	@Override
 	public void renderedSidebar(Sidebar sidebar) {
 		// stop rendering if appropriate

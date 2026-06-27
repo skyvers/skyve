@@ -12,43 +12,79 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 /**
- * The application interface for the meta data repository.
+ * The primary application-level interface for the Skyve metadata repository.
+ *
+ * <p>A {@code Repository} provides the basic operations needed at runtime: resolving
+ * resource files, obtaining the request router, loading customer configurations, and
+ * retrieving users. Higher-level metadata lookup is provided by the
+ * {@link ProvidedRepository} extension.
+ *
+ * <p>The singleton instance is obtained via {@link org.skyve.CORE#getRepository()}.
+ *
+ * @see ProvidedRepository
+ * @see CachedRepository
  */
 public interface Repository {
 	/**
-	 * Check in customer module folder, check in module folder, check in customer images folder, check in images folder.
-	 * 
-	 * @param imagePath The relative path to the image
-	 * @param customerName The name of the customer.
-	 * @param moduleName The name of the module.
-	 * @return The resource file.
+	 * Resolves a resource file by searching customer, module, and global resource
+	 * folders in priority order.
+	 *
+	 * <p>Search order: customer+module folder, vanilla module folder, customer images
+	 * folder, global images folder.
+	 *
+	 * @param resourcePath  the relative path to the resource; must not be {@code null}
+	 * @param customerName  the customer name to scope the search; may be {@code null}
+	 * @param moduleName    the module name to scope the search; may be {@code null}
+	 * @return the resolved resource {@link File}, or {@code null} when not found
 	 */
-	@Nonnull File findResourceFile(@Nonnull String resourcePath, @Nullable String customerName, @Nullable String moduleName);
+	@Nullable File findResourceFile(@Nonnull String resourcePath, @Nullable String customerName, @Nullable String moduleName);
 	
 	/**
-	 * @return A merged Router consisting of the main router and all of the module routers.
+	 * Returns the merged router combining the global router and all module-level routers.
+	 *
+	 * @return the active merged router, or {@code null} when no router metadata exists
 	 */
-	@Nonnull Router getRouter();
+	@Nullable Router getRouter();
 
 	/**
-	 * 
-	 * @param customerName
-	 * @return
+	 * Returns the customer configuration for the given customer name, or {@code null}
+	 * if no such customer is registered.
+	 *
+	 * @param customerName  the customer name to resolve; must not be {@code null}
+	 * @return the customer, or {@code null}
 	 */
 	@Nullable Customer getCustomer(@Nonnull String customerName);
 
+	/**
+	 * Returns the data factory (test fixture builder) for the given document within a
+	 * customer context, or {@code null} if none is registered.
+	 *
+	 * @param customer      the customer context; may be {@code null}
+	 * @param document      the document to look up the factory for; must not be {@code null}
+	 * @return the data factory instance, or {@code null}
+	 */
+	@Nullable Object getDataFactory(@Nullable Customer customer, @Nonnull Document document);
+	
+	/**
+	 * Convenience overload that resolves the {@link Document} from a module and document
+	 * name before delegating to {@link #getDataFactory(Customer, Document)}.
+	 *
+	 * @param customer    the customer context; must not be {@code null}
+	 * @param moduleName  the module name; must not be {@code null}
+	 * @param documentName the document name; must not be {@code null}
+	 * @return the data factory instance, or {@code null}
+	 */
 	default @Nullable Object getDataFactory(@Nonnull Customer customer, @Nonnull String moduleName, @Nonnull String documentName) {
 		Module m = customer.getModule(moduleName);
 		Document d = m.getDocument(customer, documentName);
 		return getDataFactory(customer, d);
 	}
 	
-	@Nullable Object getDataFactory(@Nullable Customer customer, @Nonnull Document document);
-	
 	/**
-	 * 
-	 * @param userName
-	 * @return
+	 * Retrieves the user record for the given username from the data store.
+	 *
+	 * @param userName  the username to look up; must not be {@code null}
+	 * @return the user, or {@code null} if not found
 	 */
 	@Nullable User retrieveUser(@Nonnull String userName);
 }

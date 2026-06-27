@@ -16,6 +16,20 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * JAXB-annotated descriptor for a document-level CRUD privilege within a module
+ * role.
+ *
+ * <p>Specifies the create/read/update/delete flags and an optional scope
+ * ({@link org.skyve.metadata.MetaData.DocumentPermissionScope}) for a named
+ * document.  Also carries the list of action privileges and the set of roles
+ * that are granted access.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see ModuleRoleMetaData
+ * @see ActionPrivilegeMetaData
+ */
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE, 
 			propOrder = {"documentName", 
 							"permission", 

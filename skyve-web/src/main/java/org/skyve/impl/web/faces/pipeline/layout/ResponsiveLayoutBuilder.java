@@ -31,6 +31,7 @@ import jakarta.faces.component.html.HtmlOutputLabel;
 import jakarta.faces.component.html.HtmlOutputText;
 import jakarta.faces.component.html.HtmlPanelGroup;
 
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate responsive-layout attribute fragments.
 public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 /*
 	@Override
@@ -98,6 +99,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 	}
 
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public UIComponent addToContainer(UIComponent component,
 										Container viewContainer, 
 										UIComponent container, 
@@ -160,7 +162,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 				}
 			}
 			if (unsizedCols > 0) {
-				mutablePercentageWidth = Integer.valueOf(LayoutUtil.responsiveWidthToPercentageWidth(mediumColsRemaining / unsizedCols));
+				mutablePercentageWidth = Integer.valueOf(LayoutUtil.responsiveWidthToPercentageWidth(((double) mediumColsRemaining) / unsizedCols));
 			}
 		}
 		HtmlPanelGroup div = responsiveColumn(pixelWidth, responsiveWidth, mutablePercentageWidth, sm, md, lg, xl, widgetInvisible, nopad);
@@ -269,6 +271,28 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 		}
 	}
 	
+	/**
+	 * Lays out the responsive form-item label column.
+	 *
+	 * <p>Side effects: appends a responsive wrapper to {@code formOrRowLayout}
+	 * and adds an output label whose metadata text and required marker are
+	 * separate output responsibilities. A {@code null} label or required-message
+	 * escape flag has the default escaped behaviour; only {@code Boolean.FALSE}
+	 * allows trusted markup for the paired metadata text.
+	 *
+	 * @param formOrRowLayout target form or row layout
+	 * @param formItemComponent form-item component being labelled
+	 * @param currentForm current form metadata
+	 * @param currentFormItem current form-item metadata
+	 * @param currentFormColumn current form-column metadata
+	 * @param widgetLabel raw fallback label text
+	 * @param widgetEscapeLabel resolved label escape decision
+	 * @param widgetRequiredMessage required-message text normalised for unescaped
+	 *        PrimeFaces message rendering
+	 * @param widgetEscapeRequiredMessage resolved escape decision retained for layout
+	 * @param widgetInvisible invisible-condition expression
+	 * @param widgetHelpText help text
+	 */
 	@Override
 	public void layoutFormItemLabel(UIComponent formOrRowLayout, 
 										UIComponent formItemComponent, 
@@ -276,7 +300,9 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 										FormItem currentFormItem, 
 										FormColumn currentFormColumn,
 										String widgetLabel, 
+										boolean widgetEscapeLabel,
 										@Nullable String widgetRequiredMessage,
+										boolean widgetEscapeRequiredMessage,
 										String widgetInvisible,
 										String widgetHelpText) {
 		String label = currentFormItem.getLocalisedLabel();
@@ -294,10 +320,35 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 		div.setValueExpression("styleClass", 
 								ef.createValueExpression(elc, expression, String.class));
 		formOrRowLayout.getChildren().add(div);
-		HtmlOutputLabel l = label(label, formItemComponent.getId(), widgetRequiredMessage);
+		HtmlOutputLabel l = label(label, widgetEscapeLabel, formItemComponent.getId(), widgetRequiredMessage);
 		div.getChildren().add(l);
 	}
 	
+	/**
+	 * Lays out the responsive form-item widget column.
+	 *
+	 * <p>Side effects: appends a responsive widget wrapper to
+	 * {@code formOrRowLayout}, adds an unescaped PF message component, and may add
+	 * a top label and help icon.
+	 *
+	 * @param formOrRowLayout target form or row layout
+	 * @param formItemComponent form-item component
+	 * @param currentForm current form metadata
+	 * @param currentFormItem current form-item metadata
+	 * @param currentFormColumn current form-column metadata
+	 * @param widgetLabel raw fallback label text
+	 * @param widgetEscapeLabel resolved label escape decision
+	 * @param widgetColspan widget column span
+	 * @param widgetRequiredMessage required-message text normalised for unescaped
+	 *        PrimeFaces message rendering
+	 * @param widgetEscapeRequiredMessage resolved escape decision retained for layout
+	 * @param widgetInvisible invisible-condition expression
+	 * @param widgetHelpText help text
+	 * @param widgetEscapeHelp resolved help escape decision
+	 * @param widgetPixelWidth optional pixel width
+	 * @param showLabel whether labels are shown
+	 * @param topLabel whether labels render above widgets
+	 */
 	@Override
 	public void layoutFormItemWidget(UIComponent formOrRowLayout, 
 										UIComponent formItemComponent, 
@@ -305,10 +356,13 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 										FormItem currentFormItem, 
 										FormColumn currentFormColumn,
 										String widgetLabel,
+										boolean widgetEscapeLabel,
 										int widgetColspan,
 										@Nullable String widgetRequiredMessage,
+										boolean widgetEscapeRequiredMessage,
 										String widgetInvisible,
 										String widgetHelpText,
+										boolean widgetEscapeHelp,
 										Integer widgetPixelWidth,
 										boolean showLabel,
 										boolean topLabel) {
@@ -324,7 +378,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 		
 		// Add message, component and help to flex box as required
 		
-		Message m = message(formItemComponent.getId());
+		Message m = message(formItemComponent.getId(), widgetEscapeRequiredMessage);
 		m.setStyleClass("formMessageStyle");
 		flexChildren.add(m);
 
@@ -348,7 +402,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 				label = widgetLabel;
 			}
 
-			floatSpanChildren.add(label(label, formItemComponent.getId(), widgetRequiredMessage));
+			floatSpanChildren.add(label(label, widgetEscapeLabel, formItemComponent.getId(), widgetRequiredMessage));
 
 			flexChildren.add(fieldDiv);
 		}
@@ -360,7 +414,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 		if (helpText != null) {
 			HtmlOutputText output = new HtmlOutputText();
 			output.setEscape(false);
-			output.setValue(String.format("<i class=\"%s help\" data-tooltip=\"%s\"></i>", Icons.FONT_HELP, helpText));
+			output.setValue(String.format("<i class=\"%s help\" data-tooltip=\"%s\"></i>", Icons.FONT_HELP, escapeFacesAttribute(helpText, widgetEscapeHelp)));
 			flexChildren.add(output);
 		}
 		
@@ -436,6 +490,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 		return result;
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private HtmlPanelGroup responsiveColumn(Integer pixelWidth, 
 												Integer responsiveWidth, 
 												Integer percentageWidth,
@@ -513,6 +568,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 		return new ResponsiveGridStyle(small, medium, large, extraLarge).toString();
 	}
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static ResponsiveGridStyle[] responsiveFormStyleClasses(List<FormColumn> formColumns) {
 		ResponsiveGridStyle[] result = new ResponsiveGridStyle[formColumns.size()];
 		

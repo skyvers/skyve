@@ -8,6 +8,7 @@ import jakarta.xml.bind.annotation.XmlType;
  * Describes the type of domain values possible on a field
  */
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+@SuppressWarnings("java:S115") // Suppress "Constant names should comply with a naming convention" as these are not constants but enum values
 public enum DomainType {
 	/**
 	 * Constant bunch of values (able to be cached for each customer, or fat client)

@@ -1,8 +1,8 @@
 package modules.admin.Startup;
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,7 +16,8 @@ import jakarta.inject.Inject;
 import modules.admin.domain.Startup;
 import util.AbstractH2Test;
 
-public class StartupBizletH2Test extends AbstractH2Test {
+@SuppressWarnings({"java:S5778", "java:S5976"})
+class StartupBizletH2Test extends AbstractH2Test {
 
 	@Inject
 	private StartupBizlet bizlet;
@@ -25,15 +26,14 @@ public class StartupBizletH2Test extends AbstractH2Test {
 	private StartupExtension bean;
 
 	@BeforeEach
-	public void startup() throws Exception {
+	void startup() {
 		db = new DataBuilder().fixture(FixtureType.crud);
 
 		bean = Startup.newInstance();
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testValidateBackupDirectoryNameMinimumLength() throws Exception {
+	void testValidateBackupDirectoryNameMinimumLength() throws Exception {
 		// setup the test data
 		bean.setBackupDirectoryName("aa");
 		ValidationException e = new ValidationException();
@@ -42,13 +42,12 @@ public class StartupBizletH2Test extends AbstractH2Test {
 		bizlet.validate(bean, e);
 
 		// verify the result
-		assertThat(e.getMessages().size(), is(1));
+		assertEquals(1, e.getMessages().size());
 		assertThat(e.getMessages().get(0).getText(), containsString("3 characters"));
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testValidateBackupDirectoryNameExceedsMaximumLength() throws Exception {
+	void testValidateBackupDirectoryNameExceedsMaximumLength() throws Exception {
 		// setup the test data
 		bean.setBackupDirectoryName("1234567890123456789012345678901234567890123456789012345678901234567890");
 		ValidationException e = new ValidationException();
@@ -57,13 +56,12 @@ public class StartupBizletH2Test extends AbstractH2Test {
 		bizlet.validate(bean, e);
 
 		// verify the result
-		assertThat(e.getMessages().size(), is(1));
+		assertEquals(1, e.getMessages().size());
 		assertThat(e.getMessages().get(0).getText(), containsString("63 characters"));
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testValidateBackupDirectoryNameAgainstMetadataRegexInvalidCharacters() throws Exception {
+	void testValidateBackupDirectoryNameAgainstMetadataRegexInvalidCharacters() {
 		// setup the test data
 		bean = db.build(Startup.MODULE_NAME, Startup.DOCUMENT_NAME);
 		bean.setBackupDirectoryName("container@name");
@@ -75,13 +73,12 @@ public class StartupBizletH2Test extends AbstractH2Test {
 		});
 
 		// verify the result
-		assertThat(result.getMessages().size(), is(1));
+		assertEquals(1, result.getMessages().size());
 		assertThat(result.getMessages().get(0).getText(), containsString("valid DNS name"));
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testValidateBackupDirectoryNameAgainstMetadataRegexUpperCaseLetters() throws Exception {
+	void testValidateBackupDirectoryNameAgainstMetadataRegexUpperCaseLetters() {
 		// setup the test data
 		bean = db.build(Startup.MODULE_NAME, Startup.DOCUMENT_NAME);
 		bean.setBackupDirectoryName("MyContainer");
@@ -93,13 +90,12 @@ public class StartupBizletH2Test extends AbstractH2Test {
 		});
 
 		// verify the result
-		assertThat(result.getMessages().size(), is(1));
+		assertEquals(1, result.getMessages().size());
 		assertThat(result.getMessages().get(0).getText(), containsString("valid DNS name"));
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testValidateBackupDirectoryNameAgainstMetadataRegexEndingWithDash() throws Exception {
+	void testValidateBackupDirectoryNameAgainstMetadataRegexEndingWithDash() {
 		// setup the test data
 		bean = db.build(Startup.MODULE_NAME, Startup.DOCUMENT_NAME);
 		bean.setBackupDirectoryName("container-");
@@ -111,13 +107,12 @@ public class StartupBizletH2Test extends AbstractH2Test {
 		});
 
 		// verify the result
-		assertThat(result.getMessages().size(), is(1));
+		assertEquals(1, result.getMessages().size());
 		assertThat(result.getMessages().get(0).getText(), containsString("valid DNS name"));
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testValidateBackupDirectoryNameAgainstMetadataRegexStartingWithDash() throws Exception {
+	void testValidateBackupDirectoryNameAgainstMetadataRegexStartingWithDash() {
 		// setup the test data
 		bean = db.build(Startup.MODULE_NAME, Startup.DOCUMENT_NAME);
 		bean.setBackupDirectoryName("-container");
@@ -129,13 +124,12 @@ public class StartupBizletH2Test extends AbstractH2Test {
 		});
 
 		// verify the result
-		assertThat(result.getMessages().size(), is(1));
+		assertEquals(1, result.getMessages().size());
 		assertThat(result.getMessages().get(0).getText(), containsString("valid DNS name"));
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testValidateBackupDirectoryNameAgainstMetadataRegexConsecutiveDashes() throws Exception {
+	void testValidateBackupDirectoryNameAgainstMetadataRegexConsecutiveDashes() {
 		// setup the test data
 		bean = db.build(Startup.MODULE_NAME, Startup.DOCUMENT_NAME);
 		bean.setBackupDirectoryName("my--container");
@@ -147,12 +141,12 @@ public class StartupBizletH2Test extends AbstractH2Test {
 		});
 
 		// verify the result
-		assertThat(result.getMessages().size(), is(1));
+		assertEquals(1, result.getMessages().size());
 		assertThat(result.getMessages().get(0).getText(), containsString("valid DNS name"));
 	}
 
 	@Test
-	public void testValidateBackupDirectoryNameAgainstMetadataRegexValidName() throws Exception {
+	void testValidateBackupDirectoryNameAgainstMetadataRegexValidNameDoesNotThrow() {
 		// setup the test data
 		bean = db.build(Startup.MODULE_NAME, Startup.DOCUMENT_NAME);
 		bean.setBackupDirectoryName("my-container-1");

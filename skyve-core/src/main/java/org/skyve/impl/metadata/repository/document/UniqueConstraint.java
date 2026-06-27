@@ -18,6 +18,19 @@ import jakarta.xml.bind.annotation.XmlElementWrapper;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * JAXB-annotated descriptor for a {@code <uniqueConstraint>} element in a document
+ * XML file.
+ *
+ * <p>Declares a named composite uniqueness constraint on a document, specifying the
+ * scope (user / customer / global), a violation message, and the ordered list of
+ * {@link FieldReference} attribute paths that form the key.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see FieldReference
+ * @see org.skyve.metadata.model.document.Document
+ */
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE, 
 			name = "DocumentUniqueConstraint", 
 			propOrder = {"scope", "description", "message", "fieldReferences", "properties"})

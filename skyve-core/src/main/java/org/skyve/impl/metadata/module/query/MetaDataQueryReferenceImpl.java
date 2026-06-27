@@ -11,6 +11,20 @@ import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 
+/**
+ * A query reference that points to an existing {@link MetaDataQueryDefinition}
+ * by name.
+ *
+ * <p>Used in widget definitions to reuse a named metadata query from the same
+ * module without duplicating its column declarations.  The named query is
+ * resolved from the module at runtime.
+ *
+ * <p>Threading: not thread-safe.  Instances are populated during metadata loading
+ * and are read-only once placed in the repository cache.
+ *
+ * @see QueryReferenceImpl
+ * @see MetaDataQueryDefinition
+ */
 public class MetaDataQueryReferenceImpl extends QueryReferenceImpl implements MetaDataQueryDefinition {
 	private static final long serialVersionUID = 7292447476649591811L;
 

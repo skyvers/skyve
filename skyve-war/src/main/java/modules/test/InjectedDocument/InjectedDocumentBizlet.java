@@ -10,15 +10,42 @@ import org.skyve.persistence.Persistence;
 
 import jakarta.inject.Inject;
 
+/**
+ * Exposes container-managed collaborators for injection integration tests.
+ */
 public class InjectedDocumentBizlet extends Bizlet<InjectedDocumentExtension> {
+	/**
+	 * Injected persistence context.
+	 */
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	public Persistence p;
+
+	/**
+	 * Injected customer context.
+	 */
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	public Customer c;
+
+	/**
+	 * Injected user context.
+	 */
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	public User u;
+
+	/**
+	 * Injected session-scoped map.
+	 */
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	public Map<String, Object> s;
+	
+	/**
+	 * Injected metadata repository.
+	 */
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	public Repository r;
 }

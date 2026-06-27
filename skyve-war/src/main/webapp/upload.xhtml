@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+		xmlns:h="http://java.sun.com/jsf/html"
+		xmlns:f="http://java.sun.com/jsf/core"
+		xmlns:p="http://primefaces.org/ui"
+		lang="#{_skyveContent.languageTag}" xml:lang="#{_skyveContent.languageTag}"
+		dir="#{_skyveContent.dir}">
+    <f:view contentType="text/html" encoding="#{_skyveContent.encoding}">
+		<f:metadata>
+			<f:event type="preRenderView" listener="#{_skyveContent.preRender}" />
+		</f:metadata>
+		<h:head>
+			<title>#{_skyveContent.i18n['page.contentUpload.title']}</title>
+			<base href="#{_skyveContent.baseHref}" />
+			<link type="text/css" rel="stylesheet" href="fontawesome-6.5.1/css/all.min.css" />
+			<link type="text/css" rel="stylesheet" href="skyve/css/prime-min.css?v=#{_skyveContent.webResourceFileVersion}" />
+			<link type="text/css" rel="stylesheet" href="skyve/css/upload-min.css?v=#{_skyveContent.webResourceFileVersion}" />
+			<h:outputStylesheet name="cropper.min.css"
+								library="cropperjs"
+								rendered="#{_skyveContent.imageUpload or _skyveContent.cameraUploadAllowed}" />
+			<h:outputScript name="cropper.min.js"
+							library="cropperjs"
+							rendered="#{_skyveContent.imageUpload or _skyveContent.cameraUploadAllowed}" />
+			<h:outputScript name="skyve/prime/upload-image.js"
+							rendered="#{_skyveContent.imageUpload or _skyveContent.cameraUploadAllowed}" />
+			<h:outputScript name="skyve/prime/upload-video.js"
+							rendered="#{_skyveContent.videoUpload or _skyveContent.videoUploadAllowed}" />
+			<h:outputScript rendered="#{_skyveContent.imageUpload or _skyveContent.cameraUploadAllowed}">
+				window.skyveMaximumUploadSizeInBytes = #{_skyveContent.cameraMaximumSizeInBytes};
+			</h:outputScript>
+			<script type="text/javascript" src="skyve/prime/skyve-min.js?v=#{_skyveContent.webResourceFileVersion}"></script>
+			<script type="text/javascript">
+				//<![CDATA[
+				function skyveAfterActionUpload(uploadKind) {
+					var owner = SKYVE.Util.findSmartClientWindow();
+					if (owner && uploadKind === 'action') {
+						owner.isc.WindowStack.getOpener().saveInstance(true, '_PUSH');
+					}
+				}
+				//]]>
+			</script>
+		</h:head>
+		<h:body>
+			<p:staticMessage severity="error"
+								summary="You cannot access this function"
+								detail="Click &lt;a href=&quot;javascript:void(0)&quot; onclick=&quot;window.top.location=''&quot;&gt;here&lt;/a&gt;"
+								rendered="#{not _skyveContent.canAccess}"
+								escape="false"
+								style="width:100%; height:50px" />
+			<h:form id="form" enctype="multipart/form-data" prependId="false" rendered="#{_skyveContent.canAccess}">
+				<h:inputHidden id="_u" value="#{_skyveContent.uploadState.uploadKind}" />
+				<h:inputHidden id="_c" value="#{_skyveContent.context}" />
+				<h:inputHidden id="_b" value="#{_skyveContent.binding}" />
+				<h:inputHidden id="_n" value="#{_skyveContent.contentBinding}" />
+				<h:inputHidden id="_a" value="#{_skyveContent.action}" />
+				<h:inputHidden id="_d" value="#{_skyveContent.display}" />
+				<h:inputHidden id="_cap" value="#{_skyveContent.capture}" />
+				<h:inputHidden id="_af" value="#{_skyveContent.uploadAffordance}" />
+				<h:inputHidden id="_m" value="#{_skyveContent.uploadState.companion}" />
+				<h:inputHidden id="_g" value="#{_skyveContent.dataWidgetBinding}" />
+				<h:inputHidden id="_id" value="#{_skyveContent.elementBizId}" />
+				<p:fileUpload id="upload"
+								listener="#{_skyveContent.handleFileUpload}"
+								styleClass="#{_skyveContent.genericUploadAllowed ? '' : 'capture-only-upload'}"
+								accept="#{_skyveContent.accept}"
+								multiple="false"
+								fileLimit="1"
+								fileLimitMessage="#{_skyveContent.i18n['page.contentUpload.fileLimit']}"
+								sizeLimit="#{_skyveContent.maximumSizeInBytes}"
+								invalidSizeMessage="#{_skyveContent.i18n['page.contentUpload.sizeLimit']}"
+								allowTypes="#{'/'.concat(_skyveContent.whitelistRegex).concat('/i')}"
+								invalidFileMessage="#{_skyveContent.i18n['page.contentUpload.invalidFile']}"
+								label="Choose"
+								uploadIcon="fa-solid fa-upload"
+								cancelIcon="fa-solid fa-ban"
+								update="messages problems"
+								oncomplete="skyveAfterActionUpload('#{_skyveContent.uploadState.uploadKind}')" />
+			    <p:growl id="messages" showDetail="true" escape="false">
+					<p:autoUpdate />
+			    </p:growl>
+				<h:panelGroup id="problems">
+					<p:dataTable value="#{_skyveContent.problems}" var="problem" rendered="#{not empty _skyveContent.problems}">
+						<f:facet name="header">#{_skyveContent.i18n['page.fileUpload.problems']}</f:facet>
+						<p:column width="40" style="text-align:center">
+							<p:graphicImage value="/images/icons/error.png" rendered="#{problem.error}" />
+							<p:graphicImage value="/images/icons/warning.png" rendered="#{not problem.error}" />
+						</p:column>
+						<p:column headerText="#{_skyveContent.i18n['page.fileUpload.where']}">
+							<span style="font-weight: bold;">#{problem.where}</span>
+						</p:column>
+						<p:column headerText="#{_skyveContent.i18n['page.fileUpload.what']}">
+							#{problem.what}
+						</p:column>
+					</p:dataTable>
+				</h:panelGroup>
+				<p:button id="camera"
+							type="button"
+							icon="fa-solid fa-camera"
+							value="Camera"
+							title="Take a photo"
+							style="display:none"
+							onclick="captureImage();return false"
+							rendered="#{_skyveContent.cameraUploadAllowed}" />
+				<p:button id="video"
+							type="button"
+							icon="fa-solid fa-video"
+							value="Video"
+							title="Capture video"
+							style="display:none"
+							onclick="captureVideo();return false"
+							rendered="#{_skyveContent.videoUploadAllowed}" />
+				<p:button id="edit"
+							widgetVar="editButton"
+							type="button"
+							disabled="true"
+							icon="fa-solid fa-pencil"
+							value="Edit"
+							title="Crop &amp; rotate the uploaded image"
+							style="display:none"
+							onclick="editImage();return false"
+							rendered="#{_skyveContent.imageUpload}" />
+				<div id="cropperUpload" class="ui-fileupload ui-widget">
+					<div id="cropperBar" class="ui-fileupload-buttonbar ui-widget-header ui-corner-top">
+						<p:button id="crop"
+									type="button"
+									icon="fa-solid fa-upload"
+									value="Upload"
+									title="Upload Cropped Image"
+									onclick="cropAndUpload();return false"
+									rendered="#{_skyveContent.imageUpload or _skyveContent.cameraUploadAllowed}" />
+						<p:button id="cancel"
+									type="button"
+									icon="fa-solid fa-ban"
+									value="Cancel"
+									title="Cancel editing"
+									onclick="location.reload();return false"
+									rendered="#{_skyveContent.imageUpload or _skyveContent.cameraUploadAllowed}" />
+					</div>
+				</div>
+				<div id="cropperContainer">
+					<div id="cropperFrame" class="cropperFrame">
+						<div id="cropperImageContainer">
+							<img id="cropperImage" alt="" />
+						</div>
+					</div>
+					<div class="cropperControls">
+						<p:button type="button"
+									icon="fa-solid fa-rotate-left"
+									title="Rotate Left"
+									onclick="rotateImage(-90);return false"
+									rendered="#{_skyveContent.imageUpload or _skyveContent.cameraUploadAllowed}" />
+						<p:button type="button"
+									icon="fa-solid fa-rotate-right"
+									title="Rotate Right"
+									onclick="rotateImage(90);return false"
+									rendered="#{_skyveContent.imageUpload or _skyveContent.cameraUploadAllowed}" />
+					</div>
+				</div>
+			</h:form>
+		</h:body>
+	</f:view>
+</html>

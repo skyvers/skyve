@@ -148,7 +148,7 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-	public static enum SailUserAgentType implements Enumeration {
+	public enum SailUserAgentType implements Enumeration {
 		desktop("desktop", "Desktop"),
 		tablet("tablet", "Tablet"),
 		phone("phone", "Phone"),
@@ -222,7 +222,7 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-	public static enum SailTestStrategy implements Enumeration {
+	public enum SailTestStrategy implements Enumeration {
 		Assert("Assert", "Assert"),
 		Verify("Verify", "Verify"),
 		None("None", "None");
@@ -293,7 +293,7 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-	public static enum SailExecutor implements Enumeration {
+	public enum SailExecutor implements Enumeration {
 		primeFacesInlineSelenese("org.skyve.impl.sail.execution.PrimeFacesInlineSeleneseExecutor", "PrimeFaces Inline Selenese"),
 		primeFacesInlineWebDriver("org.skyve.impl.sail.execution.PrimeFacesInlineWebDriverExecutor", "PrimeFaces Inline Web Driver");
 

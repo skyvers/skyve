@@ -22,6 +22,17 @@ import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB-annotated validator for {@link String}-typed document fields.
+ *
+ * <p>Supports regular-expression pattern matching, minimum and maximum length
+ * constraints, and a severity level (error or warning).  Extends
+ * {@link FieldValidator}.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see FieldValidator
+ */
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 public class TextValidator extends FieldValidator<String> {
@@ -32,10 +43,11 @@ public class TextValidator extends FieldValidator<String> {
 	 */
 	private static final String DEFAULT_PROTOCOL = "http://";
 	private static final String PATTERN_EMAIL = "^[^@]+@[^@]+$";
-	private static final String PATTERN_PROTOCOL = "^(?:(ht|f)tp(s?)\\:\\/\\/)+.*$";
+	private static final String PATTERN_PROTOCOL = "^(?:https?|ftps?)://.*";
 
 	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public static enum ValidatorType {
+	@SuppressWarnings("java:S115") // Enum names are metadata XML values.
+	public enum ValidatorType {
 		creditCard,
 		internetDomain,
 		ean13CheckDigit,
@@ -85,6 +97,7 @@ public class TextValidator extends FieldValidator<String> {
 	}
 	
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void validate(User user,
 							String value,
 							String binding,

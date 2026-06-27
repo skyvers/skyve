@@ -1,0 +1,15 @@
+{
+    "java.compile.nullAnalysis.mode": "interactive",
+    "java.compile.nullAnalysis.nonnull": [
+        "jakarta.annotation.Nonnull",
+        "org.eclipse.jdt.annotation.NonNull"
+    ],
+    "java.compile.nullAnalysis.nullable": [
+        "jakarta.annotation.Nullable",
+        "org.eclipse.jdt.annotation.Nullable"
+    ],
+    "java.compile.nullAnalysis.nonnullbydefault": [
+        "org.eclipse.jdt.annotation.NonNullByDefault"
+    ],
+    "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx4G -Xms100m -Xlog:disable"
+}

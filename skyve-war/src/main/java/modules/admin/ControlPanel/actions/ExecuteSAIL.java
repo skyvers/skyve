@@ -19,7 +19,21 @@ import modules.admin.domain.ControlPanel;
 import modules.admin.domain.ControlPanel.SailExecutor;
 import modules.admin.domain.UserProxy;
 
+import org.slf4j.Logger;
+import org.skyve.util.logging.SkyveLoggerFactory;
+
+/**
+ * Executes SAIL automation against the selected runtime context.
+ */
 public class ExecuteSAIL implements ServerSideAction<ControlPanelExtension> {
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ExecuteSAIL.class);
+	/**
+	 * Performs the execute operation.
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public ServerSideActionResult<ControlPanelExtension> execute(ControlPanelExtension bean, WebContext webContext)
 	throws Exception {
@@ -77,7 +91,7 @@ public class ExecuteSAIL implements ServerSideAction<ControlPanelExtension> {
 				componentBuilder = loader.loadClass(componentBuilderClass).getConstructor().newInstance();
 			}
 			catch (Exception e) {
-				e.printStackTrace();
+				LOGGER.error(e.getMessage(), e);
 				throw new ValidationException(new Message(ControlPanel.sailComponentBuilderPropertyName,
 															"Cannot create component builder: " + e.getMessage()));
 			}
@@ -86,7 +100,7 @@ public class ExecuteSAIL implements ServerSideAction<ControlPanelExtension> {
 				layoutBuilder = loader.loadClass(layoutBuilderClass).getConstructor().newInstance();
 			}
 			catch (Exception e) {
-				e.printStackTrace();
+				LOGGER.error(e.getMessage(), e);
 				throw new ValidationException(new Message(ControlPanel.sailLayoutBuilderPropertyName,
 															"Cannot create layout builder: " + e.getMessage()));
 			}

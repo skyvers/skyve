@@ -14,7 +14,12 @@ import modules.admin.Tag.TagExtension;
  */
 public class Clear implements ServerSideAction<TagExtension> {
 	/**
-	 * Clear tagged values.
+	 * Removes all tagged rows associated with the current tag.
+	 *
+	 * @param bean The tag to clear.
+	 * @param webContext The current web context.
+	 * @return The same tag bean with counters reset.
+	 * @throws Exception If SQL execution fails.
 	 */
 	@Override
 	public ServerSideActionResult<TagExtension> execute(TagExtension bean, WebContext webContext)

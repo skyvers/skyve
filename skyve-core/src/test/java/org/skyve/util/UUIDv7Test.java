@@ -3,6 +3,7 @@ package org.skyve.util;
 import static java.util.stream.Collectors.toSet;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -13,6 +14,7 @@ import java.util.UUID;
 import org.junit.Test;
 import org.skyve.impl.util.UUIDv7;
 
+@SuppressWarnings("java:S8692") // system clock OK
 public class UUIDv7Test {
 
     private final int iterationCount = 100_000;
@@ -56,7 +58,7 @@ public class UUIDv7Test {
                                           .limit(2000)
                                           .collect(toSet());
 
-        assertThat(timePrefix.size(), is(1));
+        assertEquals(1, timePrefix.size());
     }
 
  	@Test

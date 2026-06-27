@@ -7,6 +7,20 @@ import org.skyve.metadata.FormatterName;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 
+/**
+ * Implementation of a projected (data-bound) column in a metadata query.
+ *
+ * <p>Extends {@link AbstractMetaDataQueryColumn} with projection-specific properties:
+ * whether the column is editable inline in the list grid, whether the bound
+ * value should be aligned, and the pixel width.  Corresponds to the
+ * {@code <column>} element in a query descriptor.
+ *
+ * <p>Threading: not thread-safe.  Instances are populated during metadata loading
+ * and are read-only once placed in the repository cache.
+ *
+ * @see AbstractMetaDataQueryColumn
+ * @see MetaDataQueryProjectedColumn
+ */
 public class MetaDataQueryProjectedColumnImpl extends AbstractMetaDataQueryColumn implements MetaDataQueryProjectedColumn {
 	private static final long serialVersionUID = -6310887576572791787L;
 

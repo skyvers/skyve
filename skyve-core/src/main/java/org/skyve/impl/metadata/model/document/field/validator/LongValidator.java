@@ -9,6 +9,16 @@ import org.skyve.metadata.user.User;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB-annotated range validator for {@link Long}-typed document fields.
+ *
+ * <p>Enforces that the long-integer value falls within the declared {@code min}
+ * and/or {@code max} long boundaries.  Extends {@link RangeValidator}.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see RangeValidator
+ */
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 public class LongValidator extends RangeValidator<Long> {

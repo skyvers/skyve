@@ -8,6 +8,9 @@ import java.nio.file.Paths;
 import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.skyve.impl.create.MavenSkyveProject;
+import org.skyve.impl.create.MavenSkyveProject.MavenSkyveProjectCreator;
 
 /**
  * Unit tests for AssembleMojo parameters.
@@ -16,10 +19,9 @@ import org.junit.jupiter.api.Test;
  * to verify @Parameter annotations. Since the plugin descriptor doesn't include property attributes
  * for this mojo, source parsing is the primary and only verification method used.
  */
+@SuppressWarnings("static-method")
 class AssembleMojoTest {
-
 	@Test
-	@SuppressWarnings("static-method")
     void testAssembleMojoParameterPropertyConfiguration() throws Exception {
         // Since plugin descriptor doesn't include property attributes, always use source parsing
         String source = loadMojoSource();
@@ -36,10 +38,41 @@ class AssembleMojoTest {
         // Verify templateDir annotation has property="templateDir"
         Pattern templateDirPattern = Pattern.compile("@Parameter\\s*\\(\\s*property\\s*=\\s*\\\"templateDir\\\"[\\s,]*\\)");
         assertTrue(templateDirPattern.matcher(source).find(), "templateDir should be @Parameter(property=\"templateDir\")");
-    }
+	    }
+
+	@Test
+	void newProjectCreatorReturnsMavenSkyveProjectCreator() {
+		AssembleMojo mojo = new AssembleMojo();
+
+		org.junit.jupiter.api.Assertions.assertInstanceOf(MavenSkyveProjectCreator.class, mojo.newProjectCreator());
+	}
+
+	@Test
+	void initialiseCreatesConfiguredMavenSkyveProject() {
+		AssembleMojo mojo = new AssembleMojo();
+		MavenSkyveProjectCreator creator = new MavenSkyveProjectCreator()
+				.projectName("test-project")
+				.projectDirectory("target/test-project")
+				.customerName("demo")
+				.skyveDirectory("target/skyve");
+
+		org.junit.jupiter.api.Assertions.assertNotNull(mojo.initialise(creator));
+	}
+
+	@Test
+	void assembleDelegatesToMavenSkyveProject() throws Exception {
+		AssembleMojo mojo = new AssembleMojo();
+		MavenSkyveProject project = Mockito.mock(MavenSkyveProject.class);
+
+		mojo.clearBeforeAssemble(project);
+		mojo.assemble(project);
+
+		Mockito.verify(project).clearBeforeAssemble();
+		Mockito.verify(project).assemble();
+	}
 
 
-    private static String loadMojoSource() throws Exception {
+	    private static String loadMojoSource() throws Exception {
         // Find source relative to test class location
         Path testDir = Paths.get(
                 AssembleMojoTest.class

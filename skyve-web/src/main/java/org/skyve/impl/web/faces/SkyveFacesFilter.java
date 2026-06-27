@@ -12,10 +12,11 @@ import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.util.Util;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.faces.application.ViewExpiredException;
 import jakarta.servlet.Filter;
@@ -27,9 +28,12 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+/**
+ * Filters inbound or outbound requests before downstream web processing.
+ */
 public class SkyveFacesFilter implements Filter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SkyveFacesFilter.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SkyveFacesFilter.class);
     private static final Logger FACES_LOGGER = Category.FACES.logger();
 
 	// This is used when the principal is not (or no longer) logged in.
@@ -44,6 +48,9 @@ public class SkyveFacesFilter implements Filter {
 	// The value of jakarta.faces.DEFAULT_SUFFIX or ".jsf";
 	private String facesSuffix = ".jsf";
 
+	/**
+	 * Initialises configured routing and security parameters used by the Faces filter.
+	 */
 	@Override
 	public void init(FilterConfig config) throws ServletException {
 		forwardURI = Util.processStringValue(config.getInitParameter("forward"));
@@ -63,6 +70,9 @@ public class SkyveFacesFilter implements Filter {
 		}
 	}
 
+	/**
+	 * Clears filter configuration state.
+	 */
 	@Override
 	public void destroy() {
 		forwardURI = null;
@@ -70,7 +80,11 @@ public class SkyveFacesFilter implements Filter {
 		unsecuredURLPrefixes = null;
 	}
 
+	/**
+	 * Applies Faces-page authentication/session routing and error handling before delegating the filter chain.
+	 */
 	@Override
+	@SuppressWarnings({"javasecurity:S5146", "java:S3776"}) // false positive: see below; Complexity OK
 	public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain)
 	throws IOException, ServletException {
 		HttpServletRequest request = (HttpServletRequest) req;
@@ -107,10 +121,10 @@ public class SkyveFacesFilter implements Filter {
 			}
 
 			if (request.getUserPrincipal() == null) { // not logged in
-				// NB Can't use the referer header because if we traverse a data grid,
+				// NB Can't use the referer header (WebUtil.getRefererHeader()) because if we traverse a data grid,
 				// the URL does not represent all of the state required to perform a get and redisplay the page.
 				// This is because part of the state is temporarily saved in the session.
-				// String redirect = WebUtil.getRefererHeader(request);
+				// javasecurity:S5146 - false positive: these values are not user controlled.
 				String redirect = Util.getSkyveContextUrl() + forwardURI;
 				redirect = response.encodeRedirectURL(redirect);
 
@@ -135,8 +149,7 @@ public class SkyveFacesFilter implements Filter {
 		catch (Exception e) {
 			Throwable c = e.getCause();
 
-			LOGGER.error("SkyveFacesFilter.doFilter", e);
-			e.printStackTrace();
+			String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "SkyveFacesFilter request failed for " + request.getServletPath(), e);
 
 			// redirect to appropriate page
 			String uri = errorURI;
@@ -147,6 +160,9 @@ public class SkyveFacesFilter implements Filter {
 					(e instanceof ConversationEndedException) ||
 					(c instanceof ConversationEndedException)) {
 				uri = expiredURI;
+			}
+			else {
+				uri = WebErrorUtil.appendErrorReference(uri, reference);
 			}
 
 			// Can't use FacesContext.getCurrentInstance().getExternalContext().redirect()
@@ -170,4 +186,5 @@ public class SkyveFacesFilter implements Filter {
 			if (UtilImpl.FACES_TRACE) StateUtil.logStateStats();
 		}
 	}
+
 }

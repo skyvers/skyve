@@ -14,6 +14,16 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * JAXB-annotated combo-box (drop-down) input widget bound to an enum or
+ * constrained-text attribute.
+ *
+ * <p>Renders as a single-select dropdown populated from the bound attribute's
+ * domain or constrained values.  Supports absolute width, focus/blur/change
+ * events, and disabled/invisible conditions.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ */
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 public final class Combo extends ChangeableInputWidget implements AbsoluteWidth, FormItemWidget {

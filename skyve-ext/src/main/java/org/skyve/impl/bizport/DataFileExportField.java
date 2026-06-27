@@ -1,5 +1,9 @@
 package org.skyve.impl.bizport;
 
+/**
+ * Descriptor for a single export column, associating a display title with a
+ * Skyve binding expression used to extract the column value from the domain object.
+ */
 public class DataFileExportField {
 
 	private String fieldTitle;

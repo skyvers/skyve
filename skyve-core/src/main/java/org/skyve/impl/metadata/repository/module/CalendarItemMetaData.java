@@ -7,6 +7,16 @@ import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB-annotated descriptor for a {@code <calendar>} menu item in a module menu.
+ *
+ * <p>Navigates to a calendar view for the named document and query,
+ * optionally restricted to specific UX/UI scopes.  Extends {@link ItemMetaData}.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see ItemMetaData
+ */
 @XmlType(name = "calendar", namespace = XMLMetaData.MODULE_NAMESPACE)
 @XmlRootElement(name = "calendar", namespace = XMLMetaData.MODULE_NAMESPACE)
 public class CalendarItemMetaData extends ItemMetaData {

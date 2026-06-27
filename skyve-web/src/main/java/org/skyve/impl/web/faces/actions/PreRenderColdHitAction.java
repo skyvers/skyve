@@ -7,16 +7,19 @@ import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.user.User;
 import org.skyve.util.logging.Category;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.skyve.web.WebAction;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import jakarta.faces.context.FacesContext;
 import jakarta.servlet.http.HttpServletRequest;
 
+/**
+ * Executes a Faces callback action within the current Skyve web context.
+ */
 public class PreRenderColdHitAction extends FacesAction<Void> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PreRenderColdHitAction.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(PreRenderColdHitAction.class);
     private static final Logger FACES_LOGGER = Category.FACES.logger();
 
 	private FacesView facesView;
@@ -25,6 +28,7 @@ public class PreRenderColdHitAction extends FacesAction<Void> {
 	}
 
 	@Override
+	@SuppressWarnings({ "unused", "null" }) // test there is a user here
 	public Void callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("PreRenderColdHitAction");
 

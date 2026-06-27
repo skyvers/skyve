@@ -5,16 +5,17 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.generate.client.flutter.FlutterGenerator.GeneratorConfig;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 abstract class FlutterView implements Comparable<FlutterView> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(FlutterView.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(FlutterView.class);
 
     protected FlutterGenerator generator;
     protected String moduleName;
@@ -41,7 +42,7 @@ abstract class FlutterView implements Comparable<FlutterView> {
         modulePath.mkdir();
         File component = new File(modulePath, fileName);
         if (component.exists()) {
-            component.delete();
+            Files.delete(component.toPath());
         }
 
         LOGGER.debug("Generating: {}", component);

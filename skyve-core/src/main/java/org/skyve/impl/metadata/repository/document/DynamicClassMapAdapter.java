@@ -10,10 +10,20 @@ import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
  * JAXB Adapter for Map<String, String> to/from DynamicClassMapType.
+ *
+ * <p>The XML representation stores repeated {@code <class>} elements while the
+ * runtime representation expects a {@code Map<String, String>} keyed by logical
+ * name.
  */
 public class DynamicClassMapAdapter extends XmlAdapter<DynamicClassMapType, Map<String, String>> implements Serializable {
 	private static final long serialVersionUID = -3958205804507420927L;
 
+	/**
+	 * Converts JAXB list representation into a sorted runtime map.
+	 *
+	 * @param v JAXB wrapper containing dynamic class entries
+	 * @return a map keyed by entry name with class names as values
+	 */
 	@Override
 	public Map<String, String> unmarshal(DynamicClassMapType v) throws Exception {
 		Map<String, String> result = new TreeMap<>();
@@ -23,6 +33,12 @@ public class DynamicClassMapAdapter extends XmlAdapter<DynamicClassMapType, Map<
 		return result;
 	}
 
+	/**
+	 * Converts runtime map representation into JAXB list form.
+	 *
+	 * @param v dynamic class mappings keyed by logical name
+	 * @return JAXB wrapper, or {@code null} when the map is empty
+	 */
 	@Override
 	public DynamicClassMapType marshal(Map<String, String> v) throws Exception {
 		DynamicClassMapType result = null;

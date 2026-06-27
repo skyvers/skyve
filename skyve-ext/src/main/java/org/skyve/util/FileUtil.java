@@ -13,6 +13,11 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,11 +29,6 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.comparator.NameFileComparator;
@@ -307,7 +307,7 @@ public class FileUtil {
 	 * @throws IOException
 	 */
 	public static void addToZip(@Nonnull File directoryToZip, @Nonnull File file, @Nonnull ZipOutputStream zos)
-	throws FileNotFoundException, IOException {
+	throws IOException {
 		addPathToZip(directoryToZip.toPath(), file.toPath(), zos);
 	}
 
@@ -341,23 +341,59 @@ public class FileUtil {
 		}
 	}
 
-	private static void extractFile(@Nonnull ZipInputStream in, @Nonnull File outdir, @Nonnull String name)
+	/**
+	 * Extracts a single entry from a zip stream into the output directory.
+	 * Returns the number of bytes written so the caller can accumulate a running total.
+	 * The write loop checks {@code bytesWrittenSoFar + bytesThisEntry} after each
+	 * buffer flush and throws immediately if the combined total exceeds the limit —
+	 * catching single-entry zip bombs before they can exhaust disk space.
+	 *
+	 * @param in                   the zip input stream positioned at the entry
+	 * @param outdir               the target directory; must already exist
+	 * @param name                 the entry name (relative path within the archive)
+	 * @param bytesWrittenSoFar    cumulative bytes written by previous entries in this archive
+	 * @param maxUncompressedBytes upper bound in bytes on the total uncompressed bytes written
+	 *                             ({@code bytesWrittenSoFar + bytesThisEntry})
+	 * @return the number of bytes written for this entry
+	 * @throws IOException if a Zip Slip path-traversal is detected, if the size
+	 *                     limit is exceeded, or if an I/O error occurs
+	 */
+	private static long extractFile(@Nonnull ZipInputStream in, @Nonnull File outdir, @Nonnull String name,
+			long bytesWrittenSoFar, long maxUncompressedBytes)
 	throws IOException {
 		File file = new File(outdir, name);
+		// Zip Slip protection: resolve symlinks and ".." segments, then confirm the
+		// target path is still inside outdir before writing any data.
+		String outdirCanonical = outdir.getCanonicalPath();
+		if (! file.getCanonicalPath().startsWith(outdirCanonical + File.separator)) {
+			throw new IOException("Zip entry '" + name + "' would be extracted outside of the target directory");
+		}
 		if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("Writing '{}' from zip file to {}", name, file);
+		long bytesWritten = 0L;
 		try (FileOutputStream fos = new FileOutputStream(file)) {
 			try (BufferedOutputStream out = new BufferedOutputStream(fos)) {
 				byte[] bytes = new byte[1024];
 			    int length = 0;
 			    while ((length = in.read(bytes)) >= 0) {
 		    		out.write(bytes, 0, length);
+		    		bytesWritten += length;
+		    		if (bytesWrittenSoFar + bytesWritten > maxUncompressedBytes) {
+		    			throw new IOException("Zip archive exceeds maximum uncompressed size of " + maxUncompressedBytes + " bytes");
+		    		}
 			    }
 			}
 		}
+		return bytesWritten;
 	}
 
-	private static void mkdirs(@Nonnull File outdir, @Nonnull String path) {
+	private static void mkdirs(@Nonnull File outdir, @Nonnull String path)
+	throws IOException {
 		File d = new File(outdir, path);
+		// Zip Slip protection: same canonical-path check applied to directory entries.
+		String outdirCanonical = outdir.getCanonicalPath();
+		if (! d.getCanonicalPath().startsWith(outdirCanonical + File.separator)) {
+			throw new IOException("Zip entry '" + path + "' would be extracted outside of the target directory");
+		}
 		if (! d.exists()) {
 			d.mkdirs();
 		}
@@ -369,36 +405,65 @@ public class FileUtil {
 	  }
 
 	/**
-	 * Extract zipfile to outdir with complete directory structure
-	 * 
-	 * @param zipfile Input .zip file
-	 * @param outdir Output directory
+	 * Extract zipfile to outdir with complete directory structure, aborting if
+	 * the archive exceeds either of the supplied safety limits.
+	 *
+	 * <p>Both limits protect against zip bomb attacks:
+	 * <ul>
+	 *   <li>{@code maxEntries} — caps the total number of zip entries processed.
+	 *       Must be greater than {@code 0}.</li>
+	 *   <li>{@code maxUncompressedMB} — caps the cumulative uncompressed bytes
+	 *       written to disk, expressed in MB. The check is applied per write-buffer
+	 *       flush, so a single oversized entry is caught before it exhausts disk
+	 *       space. Must be greater than {@code 0}.</li>
+	 * </ul>
+	 * When a limit is exceeded an {@link IOException} is thrown whose message
+	 * starts with {@code "Zip archive exceeds"}. Any bytes already written to
+	 * {@code outdir} are <em>not</em> cleaned up by this method; the caller is
+	 * responsible for removing the partially extracted directory.
+	 *
+	 * @param zipfile              the archive to extract; must exist
+	 * @param outdir               the destination directory; created if absent
+	 * @param maxEntries           maximum number of zip entries; must be greater than {@code 0}
+	 * @param maxUncompressedMB    maximum cumulative uncompressed size in MB; must be greater than {@code 0}
+	 * @throws IllegalArgumentException if either limit is less than or equal to zero
+	 * @throws IOException if a limit is exceeded, a Zip Slip entry is detected,
+	 *                     or an I/O error occurs
 	 */
-	public static void extractZipArchive(@Nonnull File zipfile, @Nonnull File outdir)
+	public static void extractZipArchive(@Nonnull File zipfile,
+											@Nonnull File outdir,
+											int maxEntries,
+											int maxUncompressedMB)
 	throws IOException {
+		if (maxEntries <= 0) {
+			throw new IllegalArgumentException("maxEntries must be greater than 0");
+		}
+		if (maxUncompressedMB <= 0) {
+			throw new IllegalArgumentException("maxUncompressedMB must be greater than 0");
+		}
 		outdir.mkdirs();
+		int entryCount = 0;
+		long totalBytes = 0L;
+		long maxUncompressedBytes = maxUncompressedMB * 1024L * 1024L;
 		try (FileInputStream fis = new FileInputStream(zipfile)) {
 			try (ZipInputStream zin = new ZipInputStream(fis)) {
 				ZipEntry entry = null;
 				while ((entry = zin.getNextEntry()) != null) {
+					if (++entryCount > maxEntries) {
+						throw new IOException("Zip archive exceeds maximum entry count of " + maxEntries);
+					}
 					String name = entry.getName();
 					if (entry.isDirectory()) {
 						mkdirs(outdir, name);
 						if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("create dir {}", name);
 						continue;
 					}
-					/* this part is necessary because file entry can come before
-					 * directory entry where is file located
-					 * i.e.:
-					 *   /foo/foo.txt
-					 *   /foo/
-					 */
 					String dir = dirpart(name);
 					if (dir != null) {
 						mkdirs(outdir, dir);
 						if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("create dir {}", name);
 					}
-					extractFile(zin, outdir, name);
+					totalBytes += extractFile(zin, outdir, name, totalBytes, maxUncompressedBytes);
 				}
 			}
 		}

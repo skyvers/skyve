@@ -43,9 +43,8 @@ import org.skyve.impl.metadata.view.widget.bound.input.CheckMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
@@ -93,6 +92,13 @@ import org.skyve.util.Util;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
+/**
+ * Abstract base renderer that converts a {@link org.skyve.metadata.view.View}
+ * into a client-specific representation.
+ *
+ * <p>Extends {@link org.skyve.impl.metadata.view.ViewVisitor} to walk the
+ * view tree and emit renderer-specific output.
+ */
 public abstract class ViewRenderer extends ViewVisitor {
 	// The user to render for
 	protected User user;
@@ -101,6 +107,14 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	// Stack of containers sent in to render methods
 	private Deque<Container> currentContainers = new ArrayDeque<>(24); // non-null elements
+
+	/**
+	 * Returns the active container stack used during view traversal.
+	 *
+	 * <p>Top of stack is the current rendering container.
+	 *
+	 * @return mutable traversal stack used by renderer hooks
+	 */
 	public Deque<Container> getCurrentContainers() {
 		return currentContainers;
 	}
@@ -108,11 +122,38 @@ public abstract class ViewRenderer extends ViewVisitor {
 	// Attributes pushed and popped during internal processing
 	private Deque<String> renderAttributes = new LinkedList<>(); // nullable elements
 	
+	/**
+	 * Creates a renderer bound to the supplied view metadata context.
+	 *
+	 * @param user the current user context used for visibility and localisation
+	 * @param module the module owning the rendered view
+	 * @param document the document owning the rendered view
+	 * @param view the view metadata to traverse
+	 * @param uxui the target UX/UI profile key
+	 */
 	protected ViewRenderer(User user, Module module, Document document, View view, String uxui) {
 		super((CustomerImpl) user.getCustomer(), (ModuleImpl) module, (DocumentImpl) document, (ViewImpl) view, uxui);
 		this.user = user;
 	}
 
+	/**
+	 * Resolves nullable metadata escape flags to the renderer escape decision.
+	 *
+	 * @param escape {@code Boolean.FALSE} to allow trusted markup; {@code null} or
+	 *        {@code Boolean.TRUE} to escape at the renderer boundary
+	 * @return {@code false} only when {@code escape} is {@code Boolean.FALSE}
+	 */
+	public static boolean shouldEscape(@Nullable Boolean escape) {
+		return ! Boolean.FALSE.equals(escape);
+	}
+
+	/**
+	 * Forces form rendering to use top-aligned labels for the current traversal.
+	 *
+	 * <p>Side effects: mutates renderer state and affects later form-render decisions.
+	 *
+	 * @return this renderer for fluent configuration
+	 */
 	public ViewRenderer forceTopFormLabelAlignment() {
 		this.forceTopFormLabelAlignment = true;
 		return this;
@@ -121,6 +162,9 @@ public abstract class ViewRenderer extends ViewVisitor {
 	private String viewIcon16x16Url;
 	private String viewIcon32x32Url;
 	
+	/**
+	 * Begins rendering of the root view and pushes it onto the container stack.
+	 */
 	@Override
 	public final void visitView() {
 		viewIcon16x16Url = iconToUrl(document.getIcon16x16RelativeFileName());
@@ -131,8 +175,17 @@ public abstract class ViewRenderer extends ViewVisitor {
 	}
 
 	// NB View titles are evaluated dynamically for a view
+	/**
+	 * Renders the opening portion of the root view.
+	 *
+	 * @param icon16x16Url resolved 16x16 icon URL for the view/document
+	 * @param icon32x32Url resolved 32x32 icon URL for the view/document
+	 */
 	public abstract void renderView(String icon16x16Url, String icon32x32Url);
 	
+	/**
+	 * Finalises rendering of the root view and pops it from the container stack.
+	 */
 	@Override
 	public final void visitedView() {
 		renderedView(viewIcon16x16Url, viewIcon32x32Url);
@@ -140,29 +193,56 @@ public abstract class ViewRenderer extends ViewVisitor {
 	}
 
 	// NB View titles are evaluated dynamically for a view
+	/**
+	 * Renders the closing portion of the root view.
+	 *
+	 * @param icon16x16Url resolved 16x16 icon URL for the view/document
+	 * @param icon32x32Url resolved 32x32 icon URL for the view/document
+	 */
 	public abstract void renderedView(String icon16x16Url, String icon32x32Url);
 	
 	private TabPane currentTabPane;
+
+	/**
+	 * Returns the tab pane currently being rendered.
+	 *
+	 * @return current tab pane, or {@code null} when traversal is outside a tab pane
+	 */
 	public TabPane getCurrentTabPane() {
 		return currentTabPane;
 	}
 	
+	/**
+	 * Begins rendering of a tab pane.
+	 */
 	@Override
 	public final void visitTabPane(TabPane tabPane, boolean parentVisible, boolean parentEnabled) {
 		renderTabPane(tabPane);
 		currentTabPane = tabPane;
 	}
 	
+	/**
+	 * Renders the opening portion of a tab pane.
+	 */
 	public abstract void renderTabPane(TabPane tabPane);
 	
+	/**
+	 * Finalises rendering of a tab pane.
+	 */
 	@Override
 	public final void visitedTabPane(TabPane tabPane, boolean parentVisible, boolean parentEnabled) {
 		renderedTabPane(tabPane);
 		currentTabPane = null;
 	}
 
+	/**
+	 * Renders the closing portion of a tab pane.
+	 */
 	public abstract void renderedTabPane(TabPane tabPane);
 	
+	/**
+	 * Begins rendering of a tab and pushes it onto the container stack.
+	 */
 	@Override
 	public final void visitTab(Tab tab, boolean parentVisible, boolean parentEnabled) {
 		String title = tab.getLocalisedTitle();
@@ -173,14 +253,23 @@ public abstract class ViewRenderer extends ViewVisitor {
 		currentContainers.push(tab);
 	}
 
+	/**
+	 * Renders the opening portion of a tab.
+	 */
 	public abstract void renderTab(String title, String icon16x16Url, Tab tab);
 	
+	/**
+	 * Finalises rendering of a tab and pops it from the container stack.
+	 */
 	@Override
 	public final void visitedTab(Tab tab, boolean parentVisible, boolean parentEnabled) {
 		renderedTab(renderAttributes.pop(), renderAttributes.pop(), tab);
 		currentContainers.pop();
 	}
 	
+	/**
+	 * Renders the closing portion of a tab.
+	 */
 	public abstract void renderedTab(String title, String icon16x16Url, Tab tab);
 
 	@Override
@@ -191,6 +280,9 @@ public abstract class ViewRenderer extends ViewVisitor {
 		currentContainers.push(vbox);
 	}
 
+	/**
+	 * Renders the opening portion of a vertical box container.
+	 */
 	public abstract void renderVBox(String borderTitle, VBox vbox);
 	
 	@Override
@@ -199,6 +291,9 @@ public abstract class ViewRenderer extends ViewVisitor {
 		currentContainers.pop();
 	}
 
+	/**
+	 * Renders the closing portion of a vertical box container.
+	 */
 	public abstract void renderedVBox(String borderTitle, VBox vbox);
 
 	@Override
@@ -207,6 +302,9 @@ public abstract class ViewRenderer extends ViewVisitor {
 		currentContainers.push(sidebar);
 	}
 
+	/**
+	 * Renders the opening portion of a sidebar container.
+	 */
 	public abstract void renderSidebar(Sidebar sidebar);
 	
 	@Override
@@ -215,8 +313,10 @@ public abstract class ViewRenderer extends ViewVisitor {
 		currentContainers.pop();
 	}
 
+	/**
+	 * Renders the closing portion of a sidebar container.
+	 */
 	public abstract void renderedSidebar(Sidebar sidebar);
-
 	
 	@Override
 	public final void visitHBox(HBox hbox, boolean parentVisible, boolean parentEnabled) {
@@ -226,6 +326,9 @@ public abstract class ViewRenderer extends ViewVisitor {
 		currentContainers.push(hbox);
 	}
 
+	/**
+	 * Renders the opening portion of a horizontal box container.
+	 */
 	public abstract void renderHBox(String borderTitle, HBox hbox);
 	
 	@Override
@@ -234,22 +337,44 @@ public abstract class ViewRenderer extends ViewVisitor {
 		currentContainers.pop();
 	}
 
+	/**
+	 * Renders the closing portion of a horizontal box container.
+	 */
 	public abstract void renderedHBox(String title, HBox hbox);
 	
 	private Form currentForm;
+	
+	/**
+	 * Returns the form currently being rendered.
+	 *
+	 * @return current form, or {@code null} when traversal is outside a form
+	 */
 	public Form getCurrentForm() {
 		return currentForm;
 	}
+	
 	private String currentFormBorderTitle;
 	
 	// Is this form defined with top labels or side labels (by module default or form setting)
 	private boolean currentFormAuthoredTopLabels = false;
+	
+	/**
+	 * Indicates whether the authored form label layout resolves to top labels.
+	 *
+	 * @return {@code true} when authored/default form metadata resolves to top labels
+	 */
 	public boolean isCurrentFormAuthoredTopLabels() {
 		return currentFormAuthoredTopLabels;
 	}
 
 	// Should this form be rendered with top labels or side labels
 	private boolean currentFormRenderTopLabels = false;
+	
+	/**
+	 * Indicates whether the current form should be rendered with top labels.
+	 *
+	 * @return {@code true} when current rendering should use top-aligned labels
+	 */
 	public boolean isCurrentFormRenderTopLabels() {
 		return forceTopFormLabelAlignment || currentFormRenderTopLabels;
 	}
@@ -316,6 +441,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	public abstract void renderFormRow(FormRow row);
 
 	private int currentFormColumnIndex = 0;
+
 	public void incrementFormColumn() {
 		if (currentForm != null) {
 			List<FormColumn> formColumns = currentForm.getColumns();
@@ -339,6 +465,18 @@ public abstract class ViewRenderer extends ViewVisitor {
 	public String getCurrentWidgetLabel() {
 		return currentWidgetLabel;
 	}
+
+	private boolean currentWidgetEscapeLabel = true;
+	
+	/**
+	 * Returns whether the resolved current form-item label should be escaped.
+	 *
+	 * @return {@code true} to escape at the renderer boundary; {@code false} to allow trusted label markup
+	 */
+	public boolean getCurrentWidgetEscapeLabel() {
+		return currentWidgetEscapeLabel;
+	}
+	
 	private boolean currentWidgetShowLabel;
 	public boolean isCurrentWidgetShowLabel() {
 		return currentWidgetShowLabel;
@@ -348,10 +486,34 @@ public abstract class ViewRenderer extends ViewVisitor {
 	public String getCurrentWidgetRequiredMessage() {
 		return currentWidgetRequiredMessage;
 	}
+	
+	private boolean currentWidgetEscapeRequiredMessage = true;
+	
+	/**
+	 * Returns whether the resolved current form-item required message should be escaped.
+	 *
+	 * @return {@code true} to escape at the renderer boundary; {@code false} to allow trusted message markup
+	 */
+	public boolean getCurrentWidgetEscapeRequiredMessage() {
+		return currentWidgetEscapeRequiredMessage;
+	}
+	
 	private String currentWidgetHelp;
 	public String getCurrentWidgetHelp() {
 		return currentWidgetHelp;
 	}
+	
+	private boolean currentWidgetEscapeHelp = true;
+	
+	/**
+	 * Returns whether the resolved current form-item help text should be escaped.
+	 *
+	 * @return {@code true} to escape at the renderer boundary; {@code false} to allow trusted help markup
+	 */
+	public boolean getCurrentWidgetEscapeHelp() {
+		return currentWidgetEscapeHelp;
+	}
+	
 	private int currentWidgetColspan = 1;
 	public int getCurrentWidgetColspan() {
 		return currentWidgetColspan;
@@ -366,7 +528,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 		currentFormItem = item;
 	}
 
-	public abstract void renderFormItem(@Nonnull String label,
+	public abstract void renderFormItem(@Nullable String label,
 											@Nullable String requiredMessage,
 											@Nullable String help,
 											boolean showsLabel,
@@ -375,10 +537,13 @@ public abstract class ViewRenderer extends ViewVisitor {
 	
 	private void preProcessWidget(String binding, boolean showsLabelByDefault) {
 		currentWidgetLabel = null;
+		currentWidgetEscapeLabel = true;
 		currentWidgetShowLabel = false;
 		currentWidgetRequired = false;
 		currentWidgetRequiredMessage = null;
+		currentWidgetEscapeRequiredMessage = true;
 		currentWidgetHelp = null;
+		currentWidgetEscapeHelp = true;
 		currentWidgetColspan = 1;
 		currentTarget = null;
 		
@@ -418,22 +583,28 @@ public abstract class ViewRenderer extends ViewVisitor {
 		}
 	}
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void preProcessWidget(boolean clearState, boolean showsLabelByDefault) {
 		if (clearState) {
 			currentWidgetLabel = null;
+			currentWidgetEscapeLabel = true;
 			currentWidgetHelp = null;
+			currentWidgetEscapeHelp = true;
 			currentWidgetRequired = false;
 			currentWidgetRequiredMessage = null;
+			currentWidgetEscapeRequiredMessage = true;
 			currentWidgetColspan = 1;
 		}
 		if (currentFormItem != null) {
 			String label = currentFormItem.getLocalisedLabel();
 			if (label != null) {
 				currentWidgetLabel = label;
+				currentWidgetEscapeLabel = shouldEscape(currentFormItem.getEscapeLabel());
 			}
 			String help = currentFormItem.getLocalisedHelp();
 			if (help != null) {
 				currentWidgetHelp = help;
+				currentWidgetEscapeHelp = shouldEscape(currentFormItem.getEscapeHelp());
 			}
 			Boolean required = currentFormItem.getRequired();
 			if (required != null) {
@@ -444,6 +615,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 				String requiredMessage = currentFormItem.getLocalisedRequiredMessage();
 				if (requiredMessage != null) {
 					currentWidgetRequiredMessage = requiredMessage;
+					currentWidgetEscapeRequiredMessage = shouldEscape(currentFormItem.getEscapeRequiredMessage());
 				}
 			}
 			// Ensure required message is set to the default if widget input is required and there is no message
@@ -484,9 +656,12 @@ public abstract class ViewRenderer extends ViewVisitor {
 		currentFormItem = null;
 		currentWidgetRequired = false;
 		currentWidgetRequiredMessage = null;
+		currentWidgetEscapeRequiredMessage = true;
 		currentWidgetLabel = null;
+		currentWidgetEscapeLabel = true;
 		currentWidgetShowLabel = false;
 		currentWidgetHelp = null;
+		currentWidgetEscapeHelp = true;
 		currentWidgetColspan = 1;
 		currentTarget = null;
 	}
@@ -512,23 +687,67 @@ public abstract class ViewRenderer extends ViewVisitor {
 	private String actionIconStyleClass;
 	private String actionToolTip;
 	private String actionConfirmationText;
+	private boolean actionEscapeDisplayName = true;
+	private boolean actionEscapeToolTip = true;
+	private boolean actionEscapeConfirm = true;
+
+	/**
+	 * Returns whether the resolved current action label should be escaped.
+	 *
+	 * @return {@code true} to escape at the renderer boundary; {@code false} to allow trusted label markup
+	 */
+	public boolean getActionEscapeDisplayName() {
+		return actionEscapeDisplayName;
+	}
+
+	/**
+	 * Returns whether the resolved current action tooltip should be escaped.
+	 *
+	 * @return {@code true} to escape at the renderer boundary; {@code false} to allow trusted tooltip markup
+	 */
+	public boolean getActionEscapeToolTip() {
+		return actionEscapeToolTip;
+	}
+
+	/**
+	 * Returns whether the resolved current action confirmation text should be escaped.
+	 *
+	 * @return {@code true} to escape at the renderer boundary; {@code false} to allow trusted confirmation markup
+	 */
+	public boolean getActionEscapeConfirm() {
+		return actionEscapeConfirm;
+	}
 	
 	/**
 	 * @param action
 	 * @return	false if the user does not have privileges to execute the action, otherwise true.
 	 */
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // Complexity OK
 	private boolean preProcessAction(ImplicitActionName implicitName, Action action, ActionShow showOverride) {
 		boolean result = true;
 		
 		String resourceName = action.getResourceName();
 		String displayName = action.getLocalisedDisplayName();
+		actionEscapeDisplayName = true;
+		actionEscapeToolTip = true;
+		actionEscapeConfirm = true;
 		// Note that the " " result is for SC
-		actionLabel = (displayName == null) ? 
-						((implicitName == null) ? " " : implicitName.getLocalisedDisplayName()) :
-							displayName;
+		if (displayName != null) {
+			actionLabel = displayName;
+			actionEscapeDisplayName = shouldEscape(action.getEscapeDisplayName());
+		}
+		else if (implicitName == null) {
+			actionLabel = " ";
+		}
+		else {
+			actionLabel = implicitName.getLocalisedDisplayName();
+		}
 		String relativeIconFileName = action.getRelativeIconFileName();
 		actionIconStyleClass = action.getIconStyleClass();
 		actionConfirmationText = action.getConfirmationText(); // NB localised later with the param
+		if (actionConfirmationText != null) {
+			actionEscapeConfirm = shouldEscape(action.getEscapeConfirm());
+		}
 		String actionConfirmationParam = null;
 		
 		if (implicitName == null) {
@@ -723,6 +942,9 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 		actionIconUrl = iconToUrl(relativeIconFileName);
 		actionToolTip = action.getLocalisedToolTip();
+		if (actionToolTip != null) {
+			actionEscapeToolTip = shouldEscape(action.getEscapeToolTip());
+		}
 		if (actionConfirmationParam != null) {
 			actionConfirmationText = Util.i18n(actionConfirmationText, actionConfirmationParam);
 		}
@@ -764,6 +986,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 		}
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public abstract void renderFormButton(String name,
 											String label,
 											String iconUrl,
@@ -772,6 +995,8 @@ public abstract class ViewRenderer extends ViewVisitor {
 											String confirmationText,
 											Action action,
 											Button button);
+
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public abstract void renderButton(String name,
 										String label,
 										String iconUrl,
@@ -1384,38 +1609,59 @@ public abstract class ViewRenderer extends ViewVisitor {
 	public abstract void renderedBoundColumnCombo(Combo combo);
 	public abstract void renderedFormCombo(Combo combo);
 	
+	/**
+	 * Dispatches a content upload to the active rendering context.
+	 *
+	 * @param content the content upload to render; must not be {@code null}
+	 * @param parentVisible whether ancestor metadata is visible
+	 * @param parentEnabled whether ancestor metadata is enabled
+	 */
 	@Override
-	public final void visitContentImage(ContentImage image, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget(image.getBinding(), image.showsLabelByDefault());
+	public final void visitContent(@Nonnull ContentUpload content, boolean parentVisible, boolean parentEnabled) {
+		preProcessWidget(content.getBinding(), content.showsLabelByDefault());
 		if (currentBoundColumn != null) {
-			renderBoundColumnContentImage(image);
+			renderBoundColumnContent(content);
 		}
 		else if (currentContainerColumn != null) {
-			renderContainerColumnContentImage(image);
+			renderContainerColumnContent(content);
 		}
 		else {
-			renderFormContentImage(image);
+			renderFormContent(content);
 		}
 	}
-
-	public abstract void renderBoundColumnContentImage(ContentImage image);
-	public abstract void renderContainerColumnContentImage(ContentImage image);
-	public abstract void renderFormContentImage(ContentImage image);
 	
-	@Override
-	public final void visitContentLink(ContentLink link, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget(link.getBinding(), link.showsLabelByDefault());
-		String value = link.getLocalisedValue();
-		if (currentBoundColumn != null) {
-			renderBoundColumnContentLink(value, link);
-		}
-		else {
-			renderFormContentLink(value, link);
-		}
+	/**
+	 * Renders content for a bound data-grid column.
+	 *
+	 * @param content the content upload to render; must not be {@code null}
+	 * @throws MetaDataException until a concrete renderer implements content rendering
+	 */
+	@SuppressWarnings("static-method")
+	public void renderBoundColumnContent(@Nonnull ContentUpload content) {
+		throw new MetaDataException("Content upload rendering is not implemented for this renderer: " + content.getBinding());
 	}
 
-	public abstract void renderBoundColumnContentLink(String value, ContentLink link);
-	public abstract void renderFormContentLink(String value, ContentLink link);
+	/**
+	 * Renders content for a container data-grid column.
+	 *
+	 * @param content the content upload to render; must not be {@code null}
+	 * @throws MetaDataException until a concrete renderer implements content rendering
+	 */
+	@SuppressWarnings("static-method")
+	public void renderContainerColumnContent(@Nonnull ContentUpload content) {
+		throw new MetaDataException("Content upload rendering is not implemented for this renderer: " + content.getBinding());
+	}
+
+	/**
+	 * Renders content for a form item.
+	 *
+	 * @param content the content upload to render; must not be {@code null}
+	 * @throws MetaDataException until a concrete renderer implements content rendering
+	 */
+	@SuppressWarnings("static-method")
+	public void renderFormContent(@Nonnull ContentUpload content) {
+		throw new MetaDataException("Content upload rendering is not implemented for this renderer: " + content.getBinding());
+	}
 
 	@Override
 	public final void visitContentSignature(ContentSignature signature, boolean parentVisible, boolean parentEnabled) {
@@ -1837,6 +2083,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 							canDelete);
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public abstract void renderRemoveAction(String name,
 												String label,
 												String iconUrl,

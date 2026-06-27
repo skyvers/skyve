@@ -7,15 +7,33 @@ import java.util.regex.Pattern;
 
 import org.skyve.nlp.cron.ExpressionElementProvider;
 
+/**
+ * Parses recurring hour phrases such as {@code hourly} and {@code every 2 hour}.
+ */
 public class EveryHour implements ExpressionElementProvider {
 
-	private static final String PATTERN = "(hourly|(every|each) ?([0-9]+)?\\shour)";
-	private Pattern pattern = Pattern.compile(PATTERN, Pattern.CASE_INSENSITIVE);
+	/**
+	 * Regex pattern for hourly recurrence expressions.
+	 */
+	private static final String PATTERN = "(hourly|(every|each) ?(\\d+)?\\shour)";
+	/**
+	 * Compiled matcher for hourly recurrence expressions.
+	 */
+	private Pattern compiledPattern = Pattern.compile(PATTERN, Pattern.CASE_INSENSITIVE);
+	/**
+	 * Captured regex groups from the last successful match.
+	 */
 	private List<String> segments = new ArrayList<>();
 
+	/**
+	 * Matches recurring-hour language in the supplied text.
+	 *
+	 * @param value The text to inspect.
+	 * @return {@code true} when recurring-hour syntax is detected.
+	 */
 	@Override
 	public boolean matches(String value) {
-		Matcher m = pattern.matcher(value);
+		Matcher m = compiledPattern.matcher(value);
 		while (m.find()) {
 			for (int i = 0; i <= m.groupCount(); i++) {
 				if (m.group(i) != null) {
@@ -23,24 +41,44 @@ public class EveryHour implements ExpressionElementProvider {
 				}
 			}
 		}
-		return segments.size() > 0;
+		return !segments.isEmpty();
 	}
 
+	/**
+	 * Indicates this provider does not supply a minute element.
+	 *
+	 * @return {@code false}.
+	 */
 	@Override
 	public boolean canProvideMinute() {
 		return false;
 	}
 
+	/**
+	 * Returns the minute element.
+	 *
+	 * @return {@code null}, as minute values are not provided by this parser.
+	 */
 	@Override
 	public String getMinuteElement() {
 		return null;
 	}
 
+	/**
+	 * Indicates whether this provider can supply an hour element.
+	 *
+	 * @return {@code true} when an hourly expression was matched.
+	 */
 	@Override
 	public boolean canProvideHour() {
-		return segments.size() > 0;
+		return !segments.isEmpty();
 	}
 
+	/**
+	 * Returns either wildcard hours or stepped hours depending on the parsed phrase.
+	 *
+	 * @return {@code *} or stepped hour token, or {@code null} when unsupported.
+	 */
 	@Override
 	public String getHourElement() {
 		if (canProvideHour()) {
@@ -49,56 +87,111 @@ public class EveryHour implements ExpressionElementProvider {
 		return null;
 	}
 
+	/**
+	 * Indicates this provider does not supply a day-of-month element.
+	 *
+	 * @return {@code false}.
+	 */
 	@Override
 	public boolean canProvideDayNumber() {
 		return false;
 	}
 
+	/**
+	 * Returns the day-of-month element.
+	 *
+	 * @return {@code null}, as day-of-month values are not provided.
+	 */
 	@Override
 	public String getDayNumberElement() {
 		return null;
 	}
 
+	/**
+	 * Indicates this provider does not supply a month element.
+	 *
+	 * @return {@code false}.
+	 */
 	@Override
 	public boolean canProvideMonth() {
 		return false;
 	}
 
+	/**
+	 * Returns the month element.
+	 *
+	 * @return {@code null}, as month values are not provided.
+	 */
 	@Override
 	public String getMonthElement() {
 		return null;
 	}
 
+	/**
+	 * Indicates this provider does not supply a day-of-week element.
+	 *
+	 * @return {@code false}.
+	 */
 	@Override
 	public boolean canProvideDayOfWeek() {
 		return false;
 	}
 
+	/**
+	 * Returns the day-of-week element.
+	 *
+	 * @return {@code null}, as day-of-week values are not provided.
+	 */
 	@Override
 	public String getDayOfWeekElement() {
 		return null;
 	}
 
+	/**
+	 * Indicates whether the minute element is locked.
+	 *
+	 * @return {@code false}.
+	 */
 	@Override
 	public boolean isMinuteElementLocked() {
 		return false;
 	}
 
+	/**
+	 * Indicates whether the hour element is locked.
+	 *
+	 * @return {@code true}.
+	 */
 	@Override
 	public boolean isHourElementLocked() {
 		return true;
 	}
 
+	/**
+	 * Indicates whether the day-of-month element is locked.
+	 *
+	 * @return {@code false}.
+	 */
 	@Override
 	public boolean isDayNumberElementLocked() {
 		return false;
 	}
 
+	/**
+	 * Indicates whether the month element is locked.
+	 *
+	 * @return {@code false}.
+	 */
 	@Override
 	public boolean isMonthElementLocked() {
 		return false;
 	}
 
+	/**
+	 * Indicates whether the day-of-week element is locked.
+	 *
+	 * @return {@code false}.
+	 */
 	@Override
 	public boolean isDayOfWeekElementLocked() {
 		return false;

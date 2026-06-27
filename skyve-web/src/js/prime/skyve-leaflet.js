@@ -102,6 +102,7 @@ SKYVE.BizMap = function() {
 			}
 
 			display._objects = {}; // if we are building a new map, there will be no layers, so clear our state
+			display._markerClusterGroup = null;
 			display.webmap = L.map(SKYVE.PF.getByIdEndsWith(options.elementId)[0], mapOptions);
 
 			if (options.showRefresh) {
@@ -152,7 +153,7 @@ SKYVE.BizMap = function() {
 			
 			var result = layer.zoomData.infoMarkup;
 	    	result += '<br/><br/><input type="button" value="Zoom" onclick="window.location=\'' + SKYVE.Util.CONTEXT_URL;
-			result += '?m=' + layer.zoomData.mod + '&d=' + layer.zoomData.doc + '&i=' + layer.zoomData.bizId + "'\"/>";
+			result += '?a=e&m=' + layer.zoomData.mod + '&d=' + layer.zoomData.doc + '&i=' + layer.zoomData.bizId + "'\"/>";
 			return result;
 		},
 		

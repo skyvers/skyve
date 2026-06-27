@@ -8,6 +8,10 @@ import org.skyve.web.UserAgentType;
 
 import java.util.Map;
 
+/**
+ * React Native-oriented view renderer specialisation.
+ */
+@SuppressWarnings("java:S110") // This inheritance-depth warning is ridiculous for intentional framework hierarchies.
 public class ReactNativeViewRenderer extends ReactViewRenderer {
 	static final String REACT_NATIVE_IMPORT = "react-native";
 	static final String STARTING_INDENT = "\t\t\t";

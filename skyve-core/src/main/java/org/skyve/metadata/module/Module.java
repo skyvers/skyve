@@ -25,8 +25,22 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 /**
- * Represents a module within the Skyve application.
- * A module is a logical grouping of documents, queries, roles and menu items.
+ * The metadata contract for a Skyve module.
+ *
+ * <p>A module is the primary organisational unit in a Skyve application — a logical
+ * grouping of {@link Document documents}, named queries, security roles, background jobs,
+ * and a navigation menu. Modules are declared in {@code {moduleName}/{moduleName}.xml}
+ * and loaded by the repository at startup.
+ *
+ * <p>Module documents may be defined locally or imported from another module via a
+ * {@code <document>} ref with a {@code moduleRef} attribute. The
+ * {@link DocumentRef} inner class records this cross-module relationship.
+ *
+ * <p>Threading: {@code Module} implementations are long-lived singletons read concurrently.
+ * Implementations must be thread-safe after initialisation.
+ *
+ * @see org.skyve.metadata.customer.Customer#getModule(String)
+ * @see org.skyve.metadata.customer.Customer#getModules()
  */
 public interface Module extends NamedMetaData, PersistentMetaData, ReloadableMetaData, DecoratedMetaData {
 
@@ -122,6 +136,10 @@ public interface Module extends NamedMetaData, PersistentMetaData, ReloadableMet
 			this.referencedModuleName = referencedModuleName;
 		}
 		
+		/**
+		 * Returns the properties.
+		 * @return the result
+		 */
 		@Override
 		public Map<String, String> getProperties() {
 			return properties;
@@ -177,7 +195,7 @@ public interface Module extends NamedMetaData, PersistentMetaData, ReloadableMet
 	 * 
 	 * @return The form label layout for this module
 	 */
-	FormLabelLayout getFormLabelLayout();
+	@Nullable FormLabelLayout getFormLabelLayout();
 	
 	/**
 	 * Returns a map of document references belonging to this module.
@@ -245,7 +263,7 @@ public interface Module extends NamedMetaData, PersistentMetaData, ReloadableMet
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Returns the SQL query with the specified name.
 	 * 
@@ -276,7 +294,14 @@ public interface Module extends NamedMetaData, PersistentMetaData, ReloadableMet
 	 * @return The role
 	 */
 	@Nullable Role getRole(@Nonnull String roleName);
-	
+
+	/**
+	 * Returns the named role, throwing if it does not exist.
+	 *
+	 * @param roleName  the role name; must not be {@code null}
+	 * @return the role; never {@code null}
+	 * @throws org.skyve.metadata.MetaDataException if no role with that name exists in this module
+	 */
 	default @Nonnull Role getNullSafeRole(@Nonnull String roleName) {
 		Role result = getRole(roleName);
 		if (result == null) {

@@ -13,6 +13,15 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 
+/**
+ * JAXB-annotated event action that toggles the visibility of a bound widget
+ * when a widget event fires.
+ *
+ * <p>A {@code <toggleVisibility>} action inverts the current visible state of
+ * the widget identified by {@code binding} each time the event fires.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ */
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "toggleVisibility")
 public class ToggleVisibilityEventAction extends AbstractBound implements EventAction {

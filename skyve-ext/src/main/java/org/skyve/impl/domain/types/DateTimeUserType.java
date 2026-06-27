@@ -15,6 +15,10 @@ import org.hibernate.type.LiteralType;
 import org.hibernate.usertype.UserType;
 import org.skyve.domain.types.DateTime;
 
+/**
+ * Hibernate {@link org.hibernate.usertype.UserType} that maps the Skyve
+ * {@link org.skyve.domain.types.DateTime} type to a SQL {@code TIMESTAMP} column.
+ */
 public class DateTimeUserType implements UserType, LiteralType<Date>, Serializable {
 	private static final long serialVersionUID = 4767832769224136166L;
 

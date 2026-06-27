@@ -16,13 +16,29 @@ import org.skyve.web.WebContext;
 
 import modules.admin.ControlPanel.ControlPanelExtension;
 
+/**
+ * Downloads generated SAIL output for the current Control Panel run.
+ */
 public class DownloadSAIL extends DownloadAction<ControlPanelExtension> {
+	/**
+	 * Performs the prepare operation.
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public void prepare(ControlPanelExtension bean, WebContext webContext)
 	throws Exception {
 		ExecuteSAIL.executeSAIL(bean);
 	}
 	
+	/**
+	 * Performs the download operation.
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public Download download(ControlPanelExtension bean, WebContext webContext)
 	throws Exception {

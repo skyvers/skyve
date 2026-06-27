@@ -22,9 +22,8 @@ import org.skyve.impl.metadata.view.widget.bound.Label;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
@@ -47,8 +46,13 @@ import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
+/**
+ * React Native-specific widget/component renderer.
+ */
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate fragments of generated React Native component output.
 public class ReactNativeComponentRenderer extends ComponentRenderer {
 	public static final String REACT_NATIVE_IMPORT = "react-native";
 
@@ -367,28 +371,23 @@ System.out.println("action column " + current);
 		return label(component, "combo");
 	}
 
+	/**
+	 * Creates the temporary React Native placeholder for content metadata.
+	 *
+	 * @param component the parent render node
+	 * @param dataWidgetVar row variable for repeating contexts
+	 * @param content source managed-content upload metadata
+	 * @param title resolved input title
+	 * @param requiredMessage optional required-message expression
+	 * @return the placeholder rendered component
+	 */
 	@Override
-	public RenderedComponent contentImage(RenderedComponent component,
-											String dataWidgetVar,
-											ContentImage image,
-											String title,
-											@Nullable String requiredMessage) {
-		RenderedComponent result = new RenderedComponent();
-		StringBuilder output = result.getOutput();
-		output.append("contentImage");
-		return label(component, "contentImage");
-	}
-
-	@Override
-	public RenderedComponent contentLink(RenderedComponent component,
-											String dataWidgetVar,
-											ContentLink link,
-											String title,
-											@Nullable String requiredMessage) {
-		RenderedComponent result = new RenderedComponent();
-		StringBuilder output = result.getOutput();
-		output.append("<span>ContentLink</span>");
-		return label(component, "contentLink");
+	public @Nonnull RenderedComponent content(@Nullable RenderedComponent component,
+												@Nullable String dataWidgetVar,
+												@Nonnull ContentUpload content,
+												@Nullable String title,
+												@Nullable String requiredMessage) {
+		return label(component, "content");
 	}
 
 	@Override

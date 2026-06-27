@@ -46,14 +46,26 @@ import modules.admin.domain.DataMaintenance.EvictOption;
  */
 public class PerformDocumentActionForTagJob extends Job {
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient TagService tagService;
 
+	/**
+	 * Indicates cancellation is not implemented for this job.
+	 *
+	 * @return Always {@code null}.
+	 */
 	@Override
 	public String cancel() {
 		return null;
 	}
 
+	/**
+	 * Executes the configured action against each tagged bean in scope.
+	 *
+	 * @throws Exception If metadata lookup or action execution fails.
+	 */
 	@Override
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	public void execute() throws Exception {
 
 		List<String> log = getLog();

@@ -1,17 +1,22 @@
 package org.skyve.job;
 
+
 import org.skyve.metadata.user.User;
 
 import jakarta.annotation.Nonnull;
 
 /**
- * Associates a {@link JobSchedule} with a specific {@link User}.
- * <p>
- * This class binds a job schedule to the user context under which
- * the scheduled job should execute.
- * </p>
- * 
- * @author Mike
+ * Binds a {@link JobSchedule} to the user security context that must be used
+ * when executing that schedule.
+ *
+ * <p>The pairing expresses an execution invariant: job logic must run as the
+ * supplied {@link User}, not as an ambient/system principal. Callers should
+ * treat both constructor arguments as required and non-null for the lifetime
+ * of the instance.
+ *
+ * <p>Threading: effectively immutable after construction and safe for
+ * concurrent read access if referenced as published immutable state.
+ *
  * @since 9.5.0
  */
 public class UserJobSchedule {

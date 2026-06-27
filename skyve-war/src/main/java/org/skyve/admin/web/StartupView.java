@@ -13,11 +13,17 @@ import jakarta.inject.Named;
 import modules.admin.domain.Startup;
 import router.DefaultUxUiSelector;
 
+/**
+ * Renders and handles the startup wizard view for first-login administrators.
+ */
 @ViewScoped
 @Named("skyveStartup")
 public class StartupView extends FacesView {
 	private static final long serialVersionUID = -5794022492296214306L;
 
+	/**
+	 * Initialises startup module/document parameters on first render.
+	 */
 	@Override
 	public void preRender() {
 		if (! FacesContext.getCurrentInstance().isPostback()) {
@@ -28,6 +34,13 @@ public class StartupView extends FacesView {
 		super.preRender();
 	}
 	
+	/**
+	 * Handles startup actions and suppresses repeat display for the current session.
+	 *
+	 * @param actionName the action name to execute
+	 * @param dataWidgetBinding the data widget binding for the action source
+	 * @param bizId the business id in context
+	 */
 	@Override
 	public void action(String actionName, String dataWidgetBinding, String bizId) {
 		super.action(actionName, dataWidgetBinding, bizId);

@@ -11,7 +11,13 @@ import modules.admin.domain.ReportTemplate.WizardState;
  * Navigates backwards through the report template wizard
  */
 public class Back implements ServerSideAction<ReportTemplateExtension> {
-
+	/**
+	 * Executes execute.
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @return the result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public ServerSideActionResult<ReportTemplateExtension> execute(ReportTemplateExtension bean, WebContext webContext)
 			throws Exception {
@@ -22,5 +28,4 @@ public class Back implements ServerSideAction<ReportTemplateExtension> {
 
 		return new ServerSideActionResult<>(bean);
 	}
-
 }

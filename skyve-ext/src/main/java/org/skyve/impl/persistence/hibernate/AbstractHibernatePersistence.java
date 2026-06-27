@@ -1,9 +1,6 @@
 package org.skyve.impl.persistence.hibernate;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.sql.Connection;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -45,10 +42,12 @@ import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.boot.spi.MetadataImplementor;
 import org.hibernate.cache.CacheException;
 import org.hibernate.cfg.AvailableSettings;
+import org.hibernate.engine.config.spi.ConfigurationService;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.event.service.spi.EventListenerRegistry;
 import org.hibernate.event.spi.EventType;
 import org.hibernate.hql.internal.ast.QuerySyntaxException;
+import org.hibernate.hql.spi.id.inline.InlineIdsOrClauseBulkIdStrategy;
 import org.hibernate.integrator.spi.Integrator;
 import org.hibernate.integrator.spi.IntegratorService;
 import org.hibernate.internal.SessionImpl;
@@ -57,8 +56,12 @@ import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
 import org.hibernate.service.spi.SessionFactoryServiceRegistry;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
-import org.hibernate.tool.hbm2ddl.SchemaUpdate;
 import org.hibernate.tool.schema.TargetType;
+import org.hibernate.tool.schema.internal.ExceptionHandlerLoggedImpl;
+import org.hibernate.tool.schema.spi.ExecutionOptions;
+import org.hibernate.tool.schema.spi.SchemaManagementTool;
+import org.hibernate.tool.schema.spi.ScriptTargetOutput;
+import org.hibernate.tool.schema.spi.TargetDescriptor;
 import org.hibernate.type.StringType;
 import org.hibernate.type.Type;
 import org.skyve.EXT;
@@ -135,8 +138,8 @@ import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
 import org.skyve.util.logging.Category;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -168,21 +171,38 @@ import jakarta.persistence.RollbackException;
  * {@link #removeBeanContent(PersistentBean)}, {@link #putBeanContent(BeanContent)},
  * and {@link #closeContent()}.
  * </p>
+ * <p>
+ * Threading: thread-confined — do not share instances across threads.
+ * </p>
  *
  * @see AbstractPersistence
  * @see Persistence
  * @see DynamicPersistence
+ * @see HibernateContentPersistence
+ * @see HibernateNoContentPersistence
  */
 public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	private static final long serialVersionUID = -1813679859498468849L;
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractHibernatePersistence.class);
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(AbstractHibernatePersistence.class);
     private static final Logger QUERY_LOGGER = Category.QUERY.logger();
     private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
+
+    private static final String DOCUMENT_PREFIX = "Document ";
+	private static final String ID_COLUMN_SUFFIX = "_id";
+	private static final String INSERT_INTO_SQL = "insert into ";
+	private static final String IS_NOT_PERSISTABLE = " is not persistable";
+	private static final String AND_SQL = " and ";
+	private static final String CONFIG_FALSE = "false";
+	private static final String FROM_BEAN = " from bean ";
+	private static final String TYPE_COLUMN_SUFFIX = "_type";
+	private static final String VALUES_SQL = ") values (:";
+	private static final String WHERE_SQL = " where ";
 
     /**
      * Shared Hibernate session factory for all persistence instances.
      */
+	@SuppressWarnings("resource") // static lifecycle is controlled by configure()/shutdown hooks
 	private static SessionFactory sf = null;
 	
 	/**
@@ -207,16 +227,19 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	/**
 	 * JPA EntityManager for the current persistence instance.
 	 */
+	@SuppressWarnings("resource") // closed by persistence lifecycle
 	private EntityManager em = null;
 	
 	/**
 	 * Hibernate Session unwrapped from the EntityManager.
 	 */
+	@SuppressWarnings("resource") // closed by persistence lifecycle
 	private Session session = null;
 	
 	/**
 	 * Create a new persistence instance with a manual-flush Hibernate session.
 	 */
+	@SuppressWarnings("resource") // em/session are closed by close() lifecycle
 	protected AbstractHibernatePersistence() {
 		em = sf.createEntityManager();
 		session = em.unwrap(Session.class);
@@ -246,6 +269,9 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 */
 	protected abstract void closeContent() throws Exception;
 	
+	/**
+	 * Performs disposeAllPersistenceInstances.
+	 */
 	@Override
 	@SuppressWarnings("unchecked")
 	public final void disposeAllPersistenceInstances() {
@@ -286,7 +312,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	/**
 	 * Configure the shared Hibernate SessionFactory and metadata.
 	 */
-	@SuppressWarnings("resource")
+	@SuppressWarnings({"resource", "java:S3776"}) // Complexity OK
 	private static void configure() {
 		LoadedConfig config = LoadedConfig.baseline();
 		Map<String, String> cfg = config.getConfigurationValues();
@@ -303,7 +329,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 			if (value != null) {
 				cfg.put(AvailableSettings.PASS, value);
 			}
-			cfg.put(AvailableSettings.AUTOCOMMIT, "false");
+			cfg.put(AvailableSettings.AUTOCOMMIT, CONFIG_FALSE);
 		}
 		else {
 			cfg.put(AvailableSettings.DATASOURCE, dataSource);
@@ -311,7 +337,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		cfg.put(AvailableSettings.DIALECT, UtilImpl.DATA_STORE.getDialectClassName());
 
 		// Query Caching screws up pessimistic locking
-		cfg.put(AvailableSettings.USE_QUERY_CACHE, "false");
+		cfg.put(AvailableSettings.USE_QUERY_CACHE, CONFIG_FALSE);
 
 		// turn on second level caching
 		cfg.put(AvailableSettings.USE_SECOND_LEVEL_CACHE, "true");
@@ -336,7 +362,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		}
 
 		// Whether to generate dynamic proxies as classes or not (adds to classes loaded and thus Permanent Generation)
-		cfg.put(AvailableSettings.USE_REFLECTION_OPTIMIZER, "false");
+		cfg.put(AvailableSettings.USE_REFLECTION_OPTIMIZER, CONFIG_FALSE);
 
 		// Update the database schema on first use
 		if (UtilImpl.DDL_SYNC) {
@@ -347,14 +373,17 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		cfg.put(AvailableSettings.HBM2DDL_JDBC_METADATA_EXTRACTOR_STRATEGY, "individually");
 
 		// Keep stats on usage
-		cfg.put(AvailableSettings.GENERATE_STATISTICS, "false");
+		cfg.put(AvailableSettings.GENERATE_STATISTICS, CONFIG_FALSE);
 
 		// Log SQL to stdout
 		cfg.put(AvailableSettings.SHOW_SQL, Boolean.toString(UtilImpl.SQL_TRACE));
 		cfg.put(AvailableSettings.FORMAT_SQL, Boolean.toString(UtilImpl.PRETTY_SQL_OUTPUT));
 
 		// Don't import simple class names as entity names
-		cfg.put("auto-import", "false");
+		cfg.put("auto-import", CONFIG_FALSE);
+
+		// Disable the unsafe inline bulk-id strategy that is vulnerable to CVE-2026-0603, even if configured by the user, and fail fast with a clear error message.
+		validateBulkIdStrategyConfiguration(cfg);
 
 		StandardServiceRegistryBuilder ssrb = new StandardServiceRegistryBuilder().configure(config);
 		ssrb.addService(IntegratorService.class, new IntegratorService() {
@@ -391,6 +420,9 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 						eventListenerRegistry.appendListeners(EventType.INIT_COLLECTION, listener);
 					}
 					
+					/**
+					 * {@inheritDoc}
+					 */
 					@Override
 					public void disintegrate(SessionFactoryImplementor sessionFactory, SessionFactoryServiceRegistry serviceRegistry) {
 						// nothing to clean up here
@@ -409,39 +441,33 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		sources.addAnnotatedClass(UniquenessEntity.class);
 
 		ProvidedRepository repository = ProvidedRepositoryFactory.get();
-		if (UtilImpl.USING_JPA) {
-			// cfg.configure("bizhub", null);
-			// emf = javax.persistence.Persistence.createEntityManagerFactory("bizhub");
-		}
-		else {
-			StringBuilder sb = new StringBuilder(64);
+		StringBuilder sb = new StringBuilder(64);
 
-			for (String moduleName : repository.getAllVanillaModuleNames()) {
-				// repository.REPOSITORY_DIRECTORY
-				sb.setLength(0);
-				sb.append(ProvidedRepository.MODULES_NAME).append('/');
-				sb.append(moduleName).append('/');
-				sb.append(ProvidedRepository.DOMAIN_NAME).append('/');
-				sb.append(moduleName).append("_orm.hbm.xml");
-				String mappingPath = sb.toString();
+		for (String moduleName : repository.getAllVanillaModuleNames()) {
+			// repository.REPOSITORY_DIRECTORY
+			sb.setLength(0);
+			sb.append(ProvidedRepository.MODULES_NAME).append('/');
+			sb.append(moduleName).append('/');
+			sb.append(ProvidedRepository.DOMAIN_NAME).append('/');
+			sb.append(moduleName).append("_orm.hbm.xml");
+			String mappingPath = sb.toString();
 
-				File mappingFile = new File(UtilImpl.getAbsoluteBasePath() + mappingPath);
-				if (mappingFile.exists()) {
-					sources.addResource(mappingPath);
-				}
+			File mappingFile = new File(UtilImpl.getAbsoluteBasePath() + mappingPath);
+			if (mappingFile.exists()) {
+				sources.addResource(mappingPath);
 			}
+		}
 
-			// Check for customer overridden ORMs
-			for (String customerName : repository.getAllCustomerNames()) {
-				sb.setLength(0);
-				sb.append(ProvidedRepository.CUSTOMERS_NAMESPACE).append(customerName).append('/');
-				sb.append(ProvidedRepository.MODULES_NAME).append("/orm.hbm.xml");
-				String ormResourcePath = sb.toString();
-				
-				File ormFile = new File(UtilImpl.getAbsoluteBasePath() + ormResourcePath);
-				if (ormFile.exists()) {
-					sources.addResource(ormResourcePath);
-				}
+		// Check for customer overridden ORMs
+		for (String customerName : repository.getAllCustomerNames()) {
+			sb.setLength(0);
+			sb.append(ProvidedRepository.CUSTOMERS_NAMESPACE).append(customerName).append('/');
+			sb.append(ProvidedRepository.MODULES_NAME).append("/orm.hbm.xml");
+			String ormResourcePath = sb.toString();
+			
+			File ormFile = new File(UtilImpl.getAbsoluteBasePath() + ormResourcePath);
+			if (ormFile.exists()) {
+				sources.addResource(ormResourcePath);
 			}
 		}
 
@@ -462,9 +488,32 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 				DDLDelegate.migrate(standardRegistry, metadata, AbstractHibernatePersistence.getDialect(), true);
 			}
 			catch (Exception e) {
-				LOGGER.error("Could not apply skyve extra schema updates");
-				e.printStackTrace();
+				LOGGER.error("Could not apply skyve extra schema updates", e);
 			}
+		}
+	}
+
+	/**
+	 * Validate the configured Hibernate bulk-id strategy to prevent unsafe inline strategies that are vulnerable to CVE-2026-0603.
+	 * @param cfg
+	 */
+	private static void validateBulkIdStrategyConfiguration(Map<String, String> cfg) {
+		String configuredStrategy = cfg.get(AvailableSettings.HQL_BULK_ID_STRATEGY);
+		if (configuredStrategy == null) {
+			return;
+		}
+
+		configuredStrategy = configuredStrategy.trim();
+		if (configuredStrategy.isEmpty()) {
+			return;
+		}
+
+		if (InlineIdsOrClauseBulkIdStrategy.class.getName().equals(configuredStrategy)) {
+			LOGGER.error("Attempted configuration of unsafe Hibernate bulk-id strategy '{}' was blocked due to CVE-2026-0603", configuredStrategy);
+			throw new IllegalStateException(String.format(
+					"Unsafe Hibernate bulk-id strategy '%s' is disabled due to CVE-2026-0603. "
+							+ "Use a non-inline strategy (or the dialect default).",
+					configuredStrategy));
 		}
 	}
 
@@ -523,37 +572,99 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		
 	}
 	
+	/**
+	 * Performs generateDDL.
+	 */
 	@Override
 	@SuppressWarnings("resource")
-	public final void generateDDL(String dropDDLFilePath, String createDDLFilePath, String updateDDLFilePath) {
+	public final void generateDDL(List<String> dropDDL, List<String> createDDL, List<String> updateDDL) {
 		try {
-			if (dropDDLFilePath != null) {
-				new SchemaExport().setOutputFile(dropDDLFilePath).drop(EnumSet.of(TargetType.SCRIPT), metadata);
+			if (dropDDL != null) {
+				new SchemaExport().perform(SchemaExport.Action.DROP, metadata, new ListScriptTargetOutput(dropDDL));
 			}
-			if (createDDLFilePath != null) {
-				new SchemaExport().setOutputFile(createDDLFilePath).createOnly(EnumSet.of(TargetType.SCRIPT), metadata);
+			if (createDDL != null) {
+				new SchemaExport().perform(SchemaExport.Action.CREATE, metadata, new ListScriptTargetOutput(createDDL));
 			}
-			if (updateDDLFilePath != null) {
-				new SchemaUpdate().setOutputFile(updateDDLFilePath).execute(EnumSet.of(TargetType.SCRIPT), metadata);
-				try (FileWriter fw = new FileWriter(updateDDLFilePath, true)) {
-					try (BufferedWriter bw = new BufferedWriter(fw)) {
-						for (String ddl : DDLDelegate.migrate(((MetadataImplementor) metadata).getMetadataBuildingOptions().getServiceRegistry(),
-																metadata,
-																AbstractHibernatePersistence.getDialect(),
-																false)) {
-							bw.write(ddl);
-							bw.write(';');
-							bw.newLine();
-						}
+			if (updateDDL != null) {
+				// NOTE: In later Hibernate, the old org.hibernate.tool.hbm2ddl.SchemaUpdate path appears to be gone
+				// from the published 6.6/7.0 Javadocs, and the supported API is the schema tooling SPI under org.hibernate.tool.schema.
+				// That SPI does support in-memory collection, but through SchemaMigrator plus TargetDescriptor and ScriptTargetOutput, not through a convenience SchemaUpdate wrapper.
+				MetadataImplementor metadataImplementor = (MetadataImplementor) metadata;
+				org.hibernate.service.ServiceRegistry serviceRegistry = metadataImplementor.getMetadataBuildingOptions().getServiceRegistry();
+				Map<?, ?> configurationValues = serviceRegistry.getService(ConfigurationService.class).getSettings();
+
+				ExecutionOptions executionOptions = new ExecutionOptions() {
+					@Override
+					public Map<?, ?> getConfigurationValues() {
+						return configurationValues;
 					}
+
+					@Override
+					public boolean shouldManageNamespaces() {
+						return false;
+					}
+
+					@Override
+					public org.hibernate.tool.schema.spi.ExceptionHandler getExceptionHandler() {
+						return ExceptionHandlerLoggedImpl.INSTANCE;
+					}
+				};
+
+				TargetDescriptor targetDescriptor = new TargetDescriptor() {
+					@Override
+					public EnumSet<TargetType> getTargetTypes() {
+						return EnumSet.of(TargetType.SCRIPT);
+					}
+
+					@Override
+					public ScriptTargetOutput getScriptTargetOutput() {
+						return new ListScriptTargetOutput(updateDDL);
+					}
+				};
+
+				serviceRegistry.getService(SchemaManagementTool.class)
+							.getSchemaMigrator(configurationValues)
+							.doMigration(metadata, executionOptions, targetDescriptor);
+
+				updateDDL.addAll(DDLDelegate.migrate(serviceRegistry,
+												metadata,
+												AbstractHibernatePersistence.getDialect(),
+												false));
+			}
+		}
+		catch (Exception e) {
+			throw new DomainException("Could not generate DDL", e);
+		}
+	}
+
+	private static final class ListScriptTargetOutput implements ScriptTargetOutput {
+		private final List<String> commands;
+
+		private ListScriptTargetOutput(List<String> commands) {
+			this.commands = commands;
+		}
+
+		@Override
+		public void prepare() {
+			// nothing to prepare
+		}
+
+		@Override
+		public void accept(String command) {
+			if (command != null) {
+				String sql = command.trim();
+				if (! sql.isEmpty()) {
+					if (sql.endsWith(";")) {
+						sql = sql.substring(0, sql.length() - 1);
+					}
+					commands.add(sql);
 				}
 			}
 		}
-		catch (IOException e) {
-			throw new DomainException("Could not create temporary DDL file", e);
-		}
-		catch (Exception e) {
-			throw new DomainException("Could not read temporary DDL file", e);
+
+		@Override
+		public void release() {
+			// nothing to release
 		}
 	}
 
@@ -596,10 +707,11 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 * @param operationType The persistence operation being performed.
 	 * @param bean The bean involved, if any.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void treatPersistenceThrowable(@Nonnull Throwable t,
 											@Nonnull OperationType operationType,
 											@Nullable PersistentBean bean) {
-t.printStackTrace();
+		LOGGER.error(t.getMessage(), t);
 		if (t instanceof jakarta.persistence.OptimisticLockException) {
 			if (bean == null) {
 				throw new DomainException(t);
@@ -742,6 +854,9 @@ t.printStackTrace();
 		for (String moduleName : repository.getAllVanillaModuleNames()) {
 			Customer moduleCustomer = (accessibleModuleNames.contains(moduleName) ? user.getCustomer() : null);
 			Module module = repository.getModule(moduleCustomer, moduleName);
+			if (module == null) {
+				continue;
+			}
 
 			for (String documentName : module.getDocumentRefs().keySet()) {
 				Document document = module.getDocument(moduleCustomer, documentName);
@@ -766,14 +881,15 @@ t.printStackTrace();
 		for (String moduleName : repository.getAllVanillaModuleNames()) {
 			Customer moduleCustomer = (accessibleModuleNames.contains(moduleName) ? user.getCustomer() : null);
 			Module module = repository.getModule(moduleCustomer, moduleName);
-
-			for (String documentName : module.getDocumentRefs().keySet()) {
-				Document document = module.getDocument(moduleCustomer, documentName);
-				if ((! document.isDynamic()) && // is not dynamic
-						(document.isPersistable()) && // is persistent document
-						(repository.findNearestPersistentSingleOrJoinedSuperDocument(moduleCustomer, module, document) == null) && // not an ORM sub-class (which don't have filters)
-						moduleName.equals(document.getOwningModuleName())) { // document belongs to this module
-					resetFilters(document);
+			if (module != null) {
+				for (String documentName : module.getDocumentRefs().keySet()) {
+					Document document = module.getDocument(moduleCustomer, documentName);
+					if ((! document.isDynamic()) && // is not dynamic
+							(document.isPersistable()) && // is persistent document
+							(repository.findNearestPersistentSingleOrJoinedSuperDocument(moduleCustomer, module, document) == null) && // not an ORM sub-class (which don't have filters)
+							moduleName.equals(document.getOwningModuleName())) { // document belongs to this module
+						resetFilters(document);
+					}
 				}
 			}
 		}
@@ -785,6 +901,7 @@ t.printStackTrace();
 	 * @param document The document to apply filters to.
 	 * @param scope The permission scope.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void setFilters(@Nonnull Document document, @Nonnull DocumentPermissionScope scope) {
 		Set<String> accessibleModuleNames = ((UserImpl) user).getAccessibleModuleNames(); 
 		ProvidedRepository repository = ProvidedRepositoryFactory.get();
@@ -798,6 +915,9 @@ t.printStackTrace();
 		while (tempFilterDocument != null) {
 			Customer moduleCustomer = (accessibleModuleNames.contains(moduleName) ? customer : null);
 			Module module = repository.getModule(moduleCustomer, moduleName);
+			if (module == null) {
+				break;
+			}
 
 			tempFilterDocument = repository.findNearestPersistentSingleOrJoinedSuperDocument(moduleCustomer, 
 																								module,
@@ -933,6 +1053,7 @@ t.printStackTrace();
 	 * @param close Whether to close this persistence instance after commit.
 	 * @param removeUniqueHashes Whether to remove temporary unique hashes before commit.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public final void commit(boolean close, boolean removeUniqueHashes) {
 		boolean rollbackOnly = false;
 		try {
@@ -956,7 +1077,7 @@ t.printStackTrace();
 								final String persistentIdentifier = persistent.getPersistentIdentifier();
 								for (String hash : uniqueHashes) {
 									StringBuilder query = new StringBuilder(64);
-									query.append("delete from ").append(persistentIdentifier).append(" where ");
+									query.append("delete from ").append(persistentIdentifier).append(WHERE_SQL);
 									query.append(UniquenessEntity.HASH_COLUMN_NAME).append(" = :").append(UniquenessEntity.HASH_COLUMN_NAME);
 									newSQL(query.toString()).putParameter(UniquenessEntity.HASH_COLUMN_NAME, hash, false).execute();
 								}
@@ -968,7 +1089,6 @@ t.printStackTrace();
 								rollbackOnly = true;
 
 								LOGGER.error("Cannot remove unique hashes (stack trace underneath) - attempting a rollback....", e);
-								e.printStackTrace();
 
 								// try rollback
 								et.rollback();
@@ -1006,7 +1126,6 @@ t.printStackTrace();
 				}
 				catch (Exception e) {
 					LOGGER.warn("Cannot commit content manager - {}", e.getLocalizedMessage(), e);
-					e.printStackTrace();
 				}
 				finally {
 					try {
@@ -1269,6 +1388,7 @@ t.printStackTrace();
 	 * @param beanToSave The root bean being saved.
 	 * @param beansToMerge Optional map of static beans reachable via dynamic relations.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void setMandatories(@Nonnull Document document,
 									final @Nonnull PersistentBean beanToSave,
 									@Nullable Map<PersistentBean, PersistentBean> beansToMerge) {
@@ -1318,15 +1438,14 @@ t.printStackTrace();
 
 						// Add non-dynamic (static) unpersisted (transient) beans reachable by persistent dynamic relations to the Set to persist later (excluding top-level).
 						// This implements persistence by reachability for dynamic -> static beans in mixed graphs
-						if (beansToMerge != null) {
-							if ((owningRelation != null) && // not the top-level bean or parent
-									(owningDocument != null) && // not the top-level bean or parent
-									(persistentBean != beanToSave) && // not a reference to the top level bean
-									(! document.isDynamic()) && // bean is not dynamic
-										owningRelation.isPersistent() && // persistent relation
-										owningDocument.isDynamic()) { // dynamic relation
-								beansToMerge.put(persistentBean, null);
-							}
+						if ((beansToMerge != null) && 
+								(owningRelation != null) && // not the top-level bean or parent
+								(owningDocument != null) && // not the top-level bean or parent
+								(persistentBean != beanToSave) && // not a reference to the top level bean
+								(! document.isDynamic()) && // bean is not dynamic
+									owningRelation.isPersistent() && // persistent relation
+									owningDocument.isDynamic()) { // dynamic relation
+							beansToMerge.put(persistentBean, null);
 						}
 					}
 				}
@@ -1378,6 +1497,7 @@ t.printStackTrace();
 	 * @param document The root document metadata.
 	 * @param beanToSave The root bean.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static void firePreSaveEvents(@Nonnull final Customer customer,
 											@Nonnull Document document,
 											@Nonnull final Bean beanToSave) {
@@ -1438,6 +1558,7 @@ t.printStackTrace();
 	 * @param document The root document metadata.
 	 * @param beanToSave The root bean.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void validatePreMerge(@Nonnull final Customer customer,
 									@Nonnull Document document,
 									@Nonnull final Bean beanToSave) {
@@ -1632,7 +1753,7 @@ t.printStackTrace();
 	 */
 	private Deque<Map<PersistentBean, PersistentBean>> saveContext = new ArrayDeque<>(32); // non-null elements
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "java:S3776"}) // Complexity OK
 	private @Nonnull <T extends PersistentBean> T save(@Nonnull Document document, @Nonnull T bean, boolean flush) {
 		T result = null;
 		
@@ -1726,7 +1847,7 @@ t.printStackTrace();
 		return result;
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "java:S3776"}) // Complexity OK
 	private @Nonnull <T extends PersistentBean> List<T> save(@Nonnull List<T> beans, boolean flush) {
 		List<T> results = new ArrayList<>();
 		PersistentBean currentBean = null; // used in exception handling
@@ -1866,6 +1987,7 @@ t.printStackTrace();
 	 * @param beanToSave The merged bean.
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void postMerge(Document document, final PersistentBean beanToSave) {
 		final Customer customer = user.getCustomer();
 		
@@ -1923,6 +2045,7 @@ t.printStackTrace();
 	 * @param unmergedBean The original instance, if available.
 	 * @param otherMergedBeans Mapping of original to merged beans.
 	 */
+	@SuppressWarnings({"java:S2637", "java:S3776"}) // Complexity OK & False positive - merged bean is never null
 	private void prepareMergedBean(@Nonnull Document document,
 									@Nonnull final PersistentBean mergedBean,
 									@Nullable final PersistentBean unmergedBean,
@@ -2039,6 +2162,7 @@ t.printStackTrace();
 	 * @param document The document metadata.
 	 * @param bean The bean to validate.
 	 */
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	private void checkUniqueConstraints(@Nonnull Customer customer, @Nonnull Document document, @Nonnull Bean bean) {
 // TODO - Work the dynamic something in here - remove the short-circuit on dynamic
 if (document.isDynamic()) return;
@@ -2118,8 +2242,8 @@ if (document.isDynamic()) return;
 								persistent.setName(UniquenessEntity.TABLE_NAME);
 								String persistentIdentifier = persistent.getPersistentIdentifier();
 								StringBuilder sql = new StringBuilder(64);
-								sql.append("insert into ").append(persistentIdentifier).append(" (").append(UniquenessEntity.HASH_COLUMN_NAME);
-								sql.append(") values (:").append(UniquenessEntity.HASH_COLUMN_NAME).append(')');
+								sql.append(INSERT_INTO_SQL).append(persistentIdentifier).append(" (").append(UniquenessEntity.HASH_COLUMN_NAME);
+								sql.append(VALUES_SQL).append(UniquenessEntity.HASH_COLUMN_NAME).append(')');
 								newSQL(sql.toString()).putParameter(UniquenessEntity.HASH_COLUMN_NAME, hash, false).execute();
 							}
 							catch (@SuppressWarnings("unused") DomainException e) {
@@ -2288,7 +2412,7 @@ if (document.isDynamic()) return;
 			message = BindUtil.formatMessage(constraint.getMessage(), bean);
 		}
 		catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 			message = "Unique Constraint Violation occurred but could not display the unique constraint message for constraint " +
 							constraint.getName();
 		}
@@ -2319,6 +2443,7 @@ if (document.isDynamic()) return;
 	 * Delete a document bean from the data store.
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public final <T extends PersistentBean> void delete(Document document, T bean) {
 		if (isPersisted(bean)) {
 			try {
@@ -2391,6 +2516,7 @@ if (document.isDynamic()) return;
 	 * @param beans The beans to delete.
 	 * @throws Exception If validation or persistence fails during deletion.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void deleteStatic(@Nonnull Set<PersistentBean> beans) throws Exception {
 		Map<String, Set<Bean>> beansToDelete = null;
 		for (PersistentBean bean : beans) {
@@ -2462,6 +2588,7 @@ if (document.isDynamic()) return;
 	 * @param preRemove True when invoked from Hibernate pre-remove events.
 	 */
 	// Do not increase visibility of this method as we don't want it to be public.
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void checkReferentialIntegrityOnDelete(@Nonnull Document document, 
 													@Nonnull PersistentBean bean, 
 													@Nonnull Set<String> documentsVisited,
@@ -2648,6 +2775,7 @@ if (document.isDynamic()) return;
 	 * @param modoc Module/document identifier for the reference owner.
 	 * @param referenceDocument The document that holds the reference.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void checkPolymorphicallyMappedReference(@Nonnull PersistentBean bean, 
 														@Nonnull Map<String, Set<Bean>> beansToBeCascaded,
 														@Nonnull Document document,
@@ -2670,10 +2798,10 @@ if (document.isDynamic()) return;
 				queryString.append(persistent.getPersistentIdentifier());
 				if (ref.isCollection()) {
 					queryString.append('_').append(ref.getReferenceFieldName());
-					queryString.append(" where ").append(PersistentBean.ELEMENT_COLUMN_NAME).append(" = :reference_id");
+					queryString.append(WHERE_SQL).append(PersistentBean.ELEMENT_COLUMN_NAME).append(" = :reference_id");
 				}
 				else {
-					queryString.append(" where ").append(ref.getReferenceFieldName());
+					queryString.append(WHERE_SQL).append(ref.getReferenceFieldName());
 					queryString.append("_id = :reference_id");
 				}
 				
@@ -2682,10 +2810,10 @@ if (document.isDynamic()) return;
 					int i = 0;
 					for (@SuppressWarnings("unused") Bean thisBeanToBeCascaded : theseBeansToBeCascaded) {
 						if (ref.isCollection()) {
-							queryString.append(" and ").append(PersistentBean.OWNER_COLUMN_NAME).append(" != :deleted_id");
+							queryString.append(AND_SQL).append(PersistentBean.OWNER_COLUMN_NAME).append(" != :deleted_id");
 						}
 						else {
-							queryString.append(" and ").append(Bean.DOCUMENT_ID).append(" != :deleted_id");
+							queryString.append(AND_SQL).append(Bean.DOCUMENT_ID).append(" != :deleted_id");
 						}
 						queryString.append(i++);
 					}
@@ -2793,13 +2921,8 @@ if (document.isDynamic()) return;
 	@SuppressWarnings("unchecked")
 	private final @Nullable <T extends Bean> T retrieve(@Nonnull Document document, @Nonnull String id, boolean forUpdate) {
 		T result = null;
-		Class<?> beanClass = null;
 		String entityName = getDocumentEntityName(document.getOwningModuleName(), document.getName());
-		Customer customer = user.getCustomer();
 		try {
-			if (UtilImpl.USING_JPA && (! entityName.startsWith(customer.getName()))) {
-				beanClass = ((DocumentImpl) document).getBeanClass(customer);
-			}
 			if (document.isDynamic()) {
 				try {
 					result = (T) dynamicPersistence.populate(id);
@@ -2811,21 +2934,11 @@ if (document.isDynamic()) return;
 			}
 			else {
 				if (forUpdate) {
-					if (beanClass != null) {
-						result = (T) session.load(beanClass, id, LockMode.PESSIMISTIC_WRITE);
-					}
-					else {
-						result = (T) session.load(entityName, id, LockMode.PESSIMISTIC_WRITE);
-					}
+					result = (T) session.load(entityName, id, LockMode.PESSIMISTIC_WRITE);
 				}
 				else // works with transient instances
 				{
-					if (beanClass != null) {
-						result = (T) em.find(beanClass, id);
-					}
-					else {
-						result = (T) session.get(entityName, id);
-					}
+					result = (T) session.get(entityName, id);
 				}
 			}
 		}
@@ -2834,14 +2947,15 @@ if (document.isDynamic()) return;
 			// The select for update is by [bizId] and [bizVersion] and other transaction changed the bizVersion
 			// so it cannot be found.
 			// The result is null here, so retrieve it again (from the database) without trying to lock
-			if (beanClass != null) {
-				result = (T) em.find(beanClass, id);
-			}
-			else {
-				result = (T) session.get(entityName, id);
-			}
+			result = (T) session.get(entityName, id);
 
 			session.refresh(result, LockMode.PESSIMISTIC_WRITE);
+		}
+		catch (@SuppressWarnings("unused") org.hibernate.ObjectNotFoundException e) {
+			// session.load() with a pessimistic lock issues immediate SQL; if the row does not exist
+			// Hibernate throws ObjectNotFoundException rather than returning null. Normalise to null
+			// so callers see the standard "not found" contract.
+			result = null;
 		}
 		catch (ClassNotFoundException e) { // Can emanate out of hibernate innards
 			throw new MetaDataException("Could not find bean", e);
@@ -2899,6 +3013,7 @@ if (document.isDynamic()) return;
 	 * @param document The document metadata.
 	 * @param loadedBean The bean being processed.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static void nullEmbeddedReferencesOnLoad(@Nonnull Customer customer,
 														@Nonnull Module module,
 														@Nonnull Document document,
@@ -2942,6 +3057,7 @@ if (document.isDynamic()) return;
 	 * @throws Exception If indexing or content storage fails.
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void reindex(PersistentBean beanToReindex)
 	throws Exception {
 		TextExtractor extractor = null; // lazily instantiated
@@ -2991,6 +3107,7 @@ if (document.isDynamic()) return;
 	 * @param state Current property state.
 	 * @throws Exception If indexing or content storage fails.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void index(@Nonnull PersistentBean beanToIndex,
 						@Nonnull String[] propertyNames,
 						@Nonnull Type[] propertyTypes,
@@ -3063,6 +3180,7 @@ if (document.isDynamic()) return;
 
 	// Need the callback because an element removed from a collection will be deleted and only this event will pick it up
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void preRemove(PersistentBean bean)
 	throws Exception {
 		final Map<String, Set<Bean>> beansToDelete = deleteContext.isEmpty() ? new TreeMap<>() : deleteContext.peek();
@@ -3070,9 +3188,12 @@ if (document.isDynamic()) return;
 		if (! deleteContext.isEmpty()) { // called within a Persistence.delete() operation 
 			// Don't continue if we've already called preDelete on this bean 
 			// as it was the argument in a Persistence.delete() call
-			Bean beanToDelete = beansToDelete.get("").stream().findFirst().get();
-			if (bean.equals(beanToDelete)) {
-				return;
+			Set<Bean> rootBeansToDelete = beansToDelete.get("");
+			if (rootBeansToDelete != null) {
+				Bean beanToDelete = rootBeansToDelete.stream().findFirst().orElse(null);
+				if (bean.equals(beanToDelete)) {
+					return;
+				}
 			}
 		}
 		
@@ -3140,6 +3261,7 @@ if (document.isDynamic()) return;
 	}
 
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void postRemove(PersistentBean bean)
 	throws Exception {
 		final Customer customer = user.getCustomer();
@@ -3151,16 +3273,19 @@ if (document.isDynamic()) return;
 		if (! deleteContext.isEmpty()) { // called within a Persistence.delete() operation 
 			// Don't continue if we've already called preDelete on this bean 
 			// as it was the argument in a Persistence.delete() call
-			Bean beanToDelete = beansToDelete.get("").stream().findFirst().get();
-			if (bean.equals(beanToDelete)) {
-				// remove content and unique constraints state but don't call Bizlet.postDelete()
-				try {
-					removeBeanContent(bean);
+			Set<Bean> rootBeansToDelete = beansToDelete.get("");
+			if (rootBeansToDelete != null) {
+				Bean beanToDelete = rootBeansToDelete.stream().findFirst().orElse(null);
+				if (bean.equals(beanToDelete)) {
+					// remove content and unique constraints state but don't call Bizlet.postDelete()
+					try {
+						removeBeanContent(bean);
+					}
+					finally {
+						removeInsertedUniqueConstraintState(customer, document, bean);
+					}
+					return;
 				}
-				finally {
-					removeInsertedUniqueConstraintState(customer, document, bean);
-				}
-				return;
 			}
 		}
 
@@ -3194,6 +3319,7 @@ if (document.isDynamic()) return;
 		}
 	}
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void removeInsertedUniqueConstraintState(Customer customer, Document document, Bean bean) {
 // TODO - Work the dynamic something in here - remove the short-circuit on dynamic
 if (document.isDynamic()) return;
@@ -3255,7 +3381,7 @@ if (document.isDynamic()) return;
 					String persistentIdentifier = persistent.getPersistentIdentifier();
 					StringBuilder sql = new StringBuilder(64);
 					sql.append("delete from ").append(persistentIdentifier);
-					sql.append(" where ").append(UniquenessEntity.HASH_COLUMN_NAME).append(" = :").append(UniquenessEntity.HASH_COLUMN_NAME);
+					sql.append(WHERE_SQL).append(UniquenessEntity.HASH_COLUMN_NAME).append(" = :").append(UniquenessEntity.HASH_COLUMN_NAME);
 					newSQL(sql.toString()).putParameter(UniquenessEntity.HASH_COLUMN_NAME, hash, false).execute();
 				}
 			}
@@ -3269,6 +3395,7 @@ if (document.isDynamic()) return;
 		while (currentExtends != null);
 	}
 
+	@SuppressWarnings("resource") // connection lifecycle remains owned by the underlying session
 	public final @Nonnull Connection getConnection() {
 /*
 Maybe use this...
@@ -3285,13 +3412,17 @@ public void doWorkOnConnection(Session session) {
 	
 	private static final Integer NEW_VERSION = Integer.valueOf(0);
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	public void upsertBeanTuple(PersistentBean bean) {
 		CustomerImpl customer = (CustomerImpl) user.getCustomer();
 		Module module = customer.getModule(bean.getBizModule());
 		Document document = module.getDocument(customer, bean.getBizDocument());
 		if (! document.isPersistable()) {
-			throw new MetaDataException("Document " + module.getName() + '.' + document.getName() + " is not persistable");
+			throw new MetaDataException(DOCUMENT_PREFIX + module.getName() + '.' + document.getName() + IS_NOT_PERSISTABLE);
 		}
 		@SuppressWarnings("null") // tested above
 		String persistentIdentifier = document.getPersistent().getPersistentIdentifier();
@@ -3349,14 +3480,14 @@ public void doWorkOnConnection(Session session) {
 				else if (attribute instanceof Association association) {
 					// Exclude embedded associations
 					if (association.getType() != AssociationType.embedded) {
-						query.append(',').append(attributeName).append("_id=:").append(attributeName).append("_id");
+						query.append(',').append(attributeName).append("_id=:").append(attributeName).append(ID_COLUMN_SUFFIX);
 
 						// If this is an arc, add the type column to the insert
 						String referencedDocumentName = association.getDocumentName();
 						Document referencedDocument = module.getDocument(customer, referencedDocumentName);
 						Persistent referencedPersistent = referencedDocument.getPersistent();
 						if ((referencedPersistent != null) && referencedPersistent.isPolymorphicallyMapped()) {
-							query.append(',').append(attributeName).append("_type=:").append(attributeName).append("_type");
+							query.append(',').append(attributeName).append("_type=:").append(attributeName).append(TYPE_COLUMN_SUFFIX);
 						}
 					}
 				}
@@ -3365,7 +3496,7 @@ public void doWorkOnConnection(Session session) {
 				}
 			}
 
-			query.append(" where ").append(Bean.DOCUMENT_ID).append("=:").append(Bean.DOCUMENT_ID);
+			query.append(WHERE_SQL).append(Bean.DOCUMENT_ID).append("=:").append(Bean.DOCUMENT_ID);
 		}
 		else { // insert a new row
 			// Add the built ins
@@ -3416,16 +3547,16 @@ public void doWorkOnConnection(Session session) {
 				else if (attribute instanceof Association association) {
 					// Exclude embedded associations
 					if (association.getType() != AssociationType.embedded) {
-						columns.append(',').append(attributeName).append("_id");
-						values.append(",:").append(attributeName).append("_id");
+						columns.append(',').append(attributeName).append(ID_COLUMN_SUFFIX);
+						values.append(",:").append(attributeName).append(ID_COLUMN_SUFFIX);
 	
 						// If this is an arc, add the type column to the insert
 						String referencedDocumentName = association.getDocumentName();
 						Document referencedDocument = module.getDocument(customer, referencedDocumentName);
 						Persistent referencedPersistent = referencedDocument.getPersistent();
 						if ((referencedPersistent != null) && referencedPersistent.isPolymorphicallyMapped()) {
-							columns.append(',').append(attributeName).append("_type");
-							values.append(",:").append(attributeName).append("_type");
+							columns.append(',').append(attributeName).append(TYPE_COLUMN_SUFFIX);
+							values.append(",:").append(attributeName).append(TYPE_COLUMN_SUFFIX);
 						}
 					}
 				}
@@ -3484,7 +3615,7 @@ public void doWorkOnConnection(Session session) {
 				if (attribute instanceof Association association) {
 					// Exclude embedded associations
 					if (association.getType() != AssociationType.embedded) {
-						String columnName = new StringBuilder(64).append(attributeName).append("_id").toString();
+						String columnName = new StringBuilder(64).append(attributeName).append(ID_COLUMN_SUFFIX).toString();
 						String binding = new StringBuilder(64).append(attributeName).append('.').append(Bean.DOCUMENT_ID).toString();
 						sql.putParameter(columnName, (String) BindUtil.get(bean, binding), false);
 	
@@ -3493,7 +3624,7 @@ public void doWorkOnConnection(Session session) {
 						Document referencedDocument = module.getDocument(customer, referencedDocumentName);
 						Persistent referencedPersistent = referencedDocument.getPersistent();
 						if ((referencedPersistent != null) && referencedPersistent.isPolymorphicallyMapped()) {
-							columnName = new StringBuilder(64).append(attributeName).append("_type").toString();
+							columnName = new StringBuilder(64).append(attributeName).append(TYPE_COLUMN_SUFFIX).toString();
 							Bean referencedBean = (Bean) BindUtil.get(bean, attributeName);
 							String value = null;
 							if (referencedBean != null) {
@@ -3527,7 +3658,7 @@ public void doWorkOnConnection(Session session) {
 			}
 			catch (Exception e) {
 				throw new DomainException("Could not grab the value in attribute " + attributeName +
-											" from bean " + bean, e);
+											FROM_BEAN + bean, e);
 			}
 		}
 
@@ -3539,13 +3670,16 @@ public void doWorkOnConnection(Session session) {
 		bean.setBizVersion((bizVersion == null) ? NEW_VERSION : Integer.valueOf(bizVersion.intValue() + 1));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void upsertCollectionTuples(PersistentBean owningBean, String collectionName) {
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(owningBean.getBizModule());
 		Document document = module.getDocument(customer, owningBean.getBizDocument());
 		if (! document.isPersistable()) {
-			throw new MetaDataException("Document " + module.getName() + '.' + document.getName() + " is not persistable");
+			throw new MetaDataException(DOCUMENT_PREFIX + module.getName() + '.' + document.getName() + IS_NOT_PERSISTABLE);
 		}
 		@SuppressWarnings("null") // tested above
 		String persistentIdentifier = document.getPersistent().getPersistentIdentifier();
@@ -3560,14 +3694,14 @@ public void doWorkOnConnection(Session session) {
 		}
 		catch (Exception e) {
 			throw new DomainException("Could not get collection " + collectionName + 
-										" from bean " + owningBean, e);
+										FROM_BEAN + owningBean, e);
 		}
 		
 		if (elementBeans != null) {
 			for (Bean elementBean : elementBeans) {
 				query.append("select * from ").append(persistentIdentifier).append('_').append(collectionName);
-				query.append(" where ").append(PersistentBean.OWNER_COLUMN_NAME).append("=:");
-				query.append(PersistentBean.OWNER_COLUMN_NAME).append(" and ").append(PersistentBean.ELEMENT_COLUMN_NAME);
+				query.append(WHERE_SQL).append(PersistentBean.OWNER_COLUMN_NAME).append("=:");
+				query.append(PersistentBean.OWNER_COLUMN_NAME).append(AND_SQL).append(PersistentBean.ELEMENT_COLUMN_NAME);
 				query.append("=:").append(PersistentBean.ELEMENT_COLUMN_NAME);
 	
 				SQL sql = newSQL(query.toString());
@@ -3577,9 +3711,9 @@ public void doWorkOnConnection(Session session) {
 				boolean notExists = sql.tupleResults().isEmpty();
 				query.setLength(0);
 				if (notExists) {
-					query.append("insert into ").append(persistentIdentifier).append('_').append(collectionName);
+					query.append(INSERT_INTO_SQL).append(persistentIdentifier).append('_').append(collectionName);
 					query.append(" (").append(PersistentBean.OWNER_COLUMN_NAME).append(',').append(PersistentBean.ELEMENT_COLUMN_NAME);
-					query.append(") values (:").append(PersistentBean.OWNER_COLUMN_NAME).append(",:");
+					query.append(VALUES_SQL).append(PersistentBean.OWNER_COLUMN_NAME).append(",:");
 					query.append(PersistentBean.ELEMENT_COLUMN_NAME).append(')');
 	
 					sql = newSQL(query.toString());
@@ -3593,20 +3727,23 @@ public void doWorkOnConnection(Session session) {
 		}
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void insertCollectionTuples(PersistentBean owningBean, String collectionName) {
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(owningBean.getBizModule());
 		Document document = module.getDocument(customer, owningBean.getBizDocument());
 		if (! document.isPersistable()) {
-			throw new MetaDataException("Document " + module.getName() + '.' + document.getName() + " is not persistable");
+			throw new MetaDataException(DOCUMENT_PREFIX + module.getName() + '.' + document.getName() + IS_NOT_PERSISTABLE);
 		}
 		@SuppressWarnings("null") // tested above
 		String persistentIdentifier = document.getPersistent().getPersistentIdentifier();
 		StringBuilder query = new StringBuilder(256);
-		query.append("insert into ").append(persistentIdentifier).append('_').append(collectionName);
+		query.append(INSERT_INTO_SQL).append(persistentIdentifier).append('_').append(collectionName);
 		query.append(" (").append(PersistentBean.OWNER_COLUMN_NAME).append(',').append(PersistentBean.ELEMENT_COLUMN_NAME);
-		query.append(") values (:").append(PersistentBean.OWNER_COLUMN_NAME).append(",:");
+		query.append(VALUES_SQL).append(PersistentBean.OWNER_COLUMN_NAME).append(",:");
 		query.append(PersistentBean.ELEMENT_COLUMN_NAME).append(')');
 
 		List<PersistentBean> elementBeans = null;
@@ -3617,7 +3754,7 @@ public void doWorkOnConnection(Session session) {
 		}
 		catch (Exception e) {
 			throw new DomainException("Could not get collection " + collectionName + 
-										" from bean " + owningBean, e);
+										FROM_BEAN + owningBean, e);
 		}
 		
 		if (elementBeans != null) {

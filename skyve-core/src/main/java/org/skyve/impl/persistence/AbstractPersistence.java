@@ -1,5 +1,6 @@
 package org.skyve.impl.persistence;
 
+import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -15,6 +16,21 @@ import org.skyve.persistence.Persistence;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
+/**
+ * Thread-confined persistence context that forms the foundation for all Skyve
+ * persistence back-end implementations.
+ *
+ * <p>One instance is associated with the current thread via a {@link ThreadLocal}.
+ * It is obtained with {@link #get()} and discarded (with transaction commit or rollback)
+ * via the {@link #commit} / {@link #rollback} / {@link #dispose} lifecycle methods.
+ *
+ * <p>Subclasses (e.g. {@code AbstractHibernatePersistence} in {@code skyve-ext})
+ * bind this contract to a concrete ORM session.
+ *
+ * <p>Threading: thread-confined. Instances must not be shared across threads.
+ *
+ * @see org.skyve.persistence.Persistence
+ */
 public abstract class AbstractPersistence implements Persistence {
 	private static final long serialVersionUID = -766607064543920926L;
 
@@ -27,8 +43,12 @@ public abstract class AbstractPersistence implements Persistence {
 	protected static final ThreadLocal<AbstractPersistence> threadLocalPersistence = new ThreadLocal<>();
 
 	/**
-	 * Grab a thread-scoped singleton Persistence instance for the current thread.
-	 * If one doesn't exist it is created.
+	 * Returns the thread-confined persistence instance for the current thread.
+	 *
+	 * <p>Side effects: lazily creates and stores a new persistence instance in the
+	 * thread-local slot when one is not already bound.
+	 *
+	 * @return the persistence bound to the current thread; never {@code null}
 	 */
 	public static @Nonnull AbstractPersistence get() {
 		AbstractPersistence result = threadLocalPersistence.get();
@@ -40,8 +60,9 @@ public abstract class AbstractPersistence implements Persistence {
 	}
 
 	/**
-	 * Indicates if a thread-scoped singleton Persistence instance is associated
-	 * with the current thread of execution.
+	 * Indicates whether a persistence instance is already bound to this thread.
+	 *
+	 * @return {@code true} when {@link #get()} would reuse an existing instance
 	 */
 	public static boolean isPresent() {
 		return (threadLocalPersistence.get() != null);
@@ -49,7 +70,14 @@ public abstract class AbstractPersistence implements Persistence {
 
 	/**
 	 * Construct a Persistence implementation based on Skyve system configuration.
-	 * @throws IllegalArgumentException When the persistence class name obtained through configuration can't be loaded.
+	 *
+	 * <p>Side effects: instantiates the configured concrete persistence and
+	 * dynamic-persistence implementations, and links them via
+	 * {@link DynamicPersistence#postConstruct(AbstractPersistence)}.
+	 *
+	 * @return a newly constructed persistence instance
+	 * @throws IllegalArgumentException if either configured implementation class
+	 *             cannot be instantiated
 	 */
 	public static @Nonnull AbstractPersistence newInstance()
 	throws IllegalArgumentException {
@@ -78,15 +106,30 @@ public abstract class AbstractPersistence implements Persistence {
 	// NB We can never keep a reference to the customer as the app coder could change the customer name on their user at any time.
 	//protected transient Customer customer;
 
-	// indicates if this persistence is running in a job or background task thread 
+	// indicates if this persistence is running in a job or background task thread
 	protected transient boolean asyncThread = false;
+
+	/**
+	 * Indicates whether this persistence is executing in an asynchronous thread.
+	 *
+	 * @return {@code true} for job/background execution threads
+	 */
 	public boolean isAsyncThread() {
 		return asyncThread;
 	}
+
+	/**
+	 * Marks this persistence as running in synchronous or asynchronous mode.
+	 *
+	 * <p>Side effects: updates timeout-selection behaviour for query execution.
+	 *
+	 * @param asyncThread {@code true} for background/job execution threads
+	 */
 	public void setAsyncThread(boolean asyncThread) {
 		this.asyncThread = asyncThread;
 	}
 
+	@SuppressWarnings("resource")
 	protected DynamicPersistence dynamicPersistence;
 	
 	/**
@@ -102,14 +145,27 @@ public abstract class AbstractPersistence implements Persistence {
 	 * Bear in mind that this map is serialised and cached in the conversation.
 	 */
 	private SortedMap<String, Object> stash = new TreeMap<>();
+
+	/**
+	 * Returns the mutable conversation stash associated with this persistence.
+	 *
+	 * <p>Side effects: callers may mutate returned state that is serialized with
+	 * the persistence conversation context.
+	 *
+	 * @return a non-null, mutable sorted map for conversation-scoped values
+	 */
 	public @Nonnull SortedMap<String, Object> getStash() {
 		return stash;
 	}
 
 	/**
-	 * When an error occurs, the state of a persistence is indeterminate. 
-	 * You will need to chuck away the old one and use a new one.
-	 * This is what this method does.
+	 * Replaces the current thread-bound persistence after an error condition.
+	 *
+	 * <p>Side effects: rolls back and commits-disposes the current persistence,
+	 * creates and binds a fresh instance, begins a new transaction, and restores
+	 * the previous user context.
+	 *
+	 * @return the replacement persistence bound to the current thread
 	 */
 	public static AbstractPersistence renewPersistence() {
 		// Get old persistence and close
@@ -126,34 +182,96 @@ public abstract class AbstractPersistence implements Persistence {
 		return persistence;
 	}
 
+	/**
+	 * Returns the current value for this property from the wrapped metadata.
+	 */
 	@Override
 	public User getUser() {
 		return user;
 	}
 
+	/**
+	 * Sets the effective user context for subsequent persistence operations.
+	 *
+	 * @param user the active user; must not be {@code null}
+	 */
 	public void setUser(@Nonnull User user) {
 		this.user = user;
 	}
 
+	/**
+	 * Binds this persistence instance into the current thread-local slot.
+	 *
+	 * <p>Side effects: overwrites any previously bound persistence for this thread.
+	 */
 	public final void setForThread() {
 		threadLocalPersistence.set(this);
 	}
 	
+	/**
+	 * Indicates whether a bean currently has a persisted identity/version.
+	 *
+	 * @param bean the bean to test
+	 * @return {@code true} when the bean is a persistent bean with non-null version
+	 */
 	@Override
 	public final boolean isPersisted(@Nonnull Bean bean) {
 		return (bean instanceof PersistentBean persistentBean) && (persistentBean.getBizVersion() != null);
 	}
 
+	/**
+	 * Disposes all persistence instances managed by this implementation.
+	 */
 	public abstract void disposeAllPersistenceInstances();
-	public abstract void generateDDL(@Nullable String dropDDLFilePath, @Nullable String createDDLFilePath, @Nullable String updateDDLFilePath);
 
+	/**
+	 * Produces dialect-specific DDL fragments for schema migration.
+	 *
+	 * @param dropDDL receives drop statements when requested; may be {@code null}
+	 * @param createDDL receives create statements when requested; may be {@code null}
+	 * @param updateDDL receives alter/update statements when requested; may be {@code null}
+	 */
+	public abstract void generateDDL(@Nullable List<String> dropDDL, @Nullable List<String> createDDL, @Nullable List<String> updateDDL);
 
+	/**
+	 * Resolves a document to its persistence entity name.
+	 *
+	 * @param moduleName owning module name
+	 * @param documentName document name within the module
+	 * @return the persistence entity name used in generated queries
+	 */
 	public abstract @Nonnull String getDocumentEntityName(@Nonnull String moduleName, @Nonnull String documentName);
 
+	/**
+	 * Executes lifecycle logic after a bean has been loaded.
+	 *
+	 * @param bean the loaded bean
+	 * @throws Exception if lifecycle handling fails
+	 */
 	public abstract void postLoad(@Nonnull PersistentBean bean) throws Exception;
+
+	/**
+	 * Executes lifecycle logic before a bean is removed.
+	 *
+	 * @param bean the bean pending removal
+	 * @throws Exception if lifecycle handling fails
+	 */
 	public abstract void preRemove(@Nonnull PersistentBean bean) throws Exception;
+
+	/**
+	 * Executes lifecycle logic after a bean has been removed.
+	 *
+	 * @param bean the removed bean
+	 * @throws Exception if lifecycle handling fails
+	 */
 	public abstract void postRemove(@Nonnull PersistentBean bean) throws Exception;
 
+	/**
+	 * Saves a bean using metadata-derived module and document definitions.
+	 *
+	 * @param bean the bean to save
+	 * @return the managed bean returned by the concrete persistence implementation
+	 */
 	@Override
 	public final <T extends PersistentBean> T save(T bean) {
 		Customer customer = user.getCustomer();
@@ -163,6 +281,12 @@ public abstract class AbstractPersistence implements Persistence {
 		return save(document, bean);
 	}
 
+	/**
+	 * Merges a bean using metadata-derived module and document definitions.
+	 *
+	 * @param bean the bean to merge
+	 * @return the managed merged bean
+	 */
 	@Override
 	public final <T extends PersistentBean> T merge(T bean) {
 		Customer customer = user.getCustomer();
@@ -172,6 +296,11 @@ public abstract class AbstractPersistence implements Persistence {
 		return merge(document, bean);
 	}
 
+	/**
+	 * Deletes a bean using metadata-derived module and document definitions.
+	 *
+	 * @param bean the bean to delete
+	 */
 	@Override
 	public final <T extends PersistentBean> void delete(T bean) {
 		Customer customer = user.getCustomer();
@@ -181,6 +310,14 @@ public abstract class AbstractPersistence implements Persistence {
 		delete(document, bean);
 	}
 
+	/**
+	 * Retrieves a bean by module/document name and identifier.
+	 *
+	 * @param moduleName the owning module name
+	 * @param documentName the document name within the module
+	 * @param id the bean identifier
+	 * @return the retrieved bean, or {@code null} when no row exists
+	 */
 	@Override
 	public final <T extends Bean> T retrieve(String moduleName,
 												String documentName,
@@ -192,6 +329,14 @@ public abstract class AbstractPersistence implements Persistence {
 		return retrieve(document, id);
 	}
 
+	/**
+	 * Retrieves and pessimistically locks a bean by module/document name and id.
+	 *
+	 * @param moduleName the owning module name
+	 * @param documentName the document name within the module
+	 * @param id the bean identifier
+	 * @return the locked bean, or {@code null} when no row exists
+	 */
 	@Override
 	public final <T extends Bean> T retrieveAndLock(String moduleName,
 														String documentName,

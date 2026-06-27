@@ -16,21 +16,31 @@ import modules.whosin.domain.Office;
 import modules.whosin.domain.Staff;
 
 /**
- * Load Demonstration Data for the Who's In? module
- * 
- * @author rob
+ * Loads demonstration records for the Who's In module.
  */
 public class LoadDemonstrationDataJob extends Job {
 //	private static String[] roles = { "Manager", "Sales Manager", "Sales Consultant", "Sales Support Technician", "Accountant", "Receptionist" };
 
 	private volatile boolean cancelled = false;
 	
+	/**
+	 * Requests cancellation of the current job execution.
+	 *
+	 * @return {@code null} because this job has no custom cancellation message
+	 */
 	@Override
 	public String cancel() {
 		cancelled = true;
 		return null;
 	}
 	
+	/**
+	 * Executes demonstration data generation.
+	 *
+	 * <p>Side effects: writes demo staff records and appends messages to the job log.
+	 *
+	 * @throws Exception if generation fails before errors are handled internally
+	 */
 	@Override
 	public void execute() throws Exception {
 		List<String> log = getLog();
@@ -48,15 +58,22 @@ public class LoadDemonstrationDataJob extends Job {
 			log.add("Finished Loading Demonstration Data at " + new Date());
 		} catch (Throwable t) {
 			log.add("Encountered an error during the job run: " + t.getMessage());
-			t.printStackTrace();
+			LOGGER.error(t.getMessage(), t);
 		}
 	}
 
+	@SuppressWarnings("java:S2245") // It's ok that this is not cryptographically strong as it's only used for generating demo data
+	private Random random = new Random();
+
+	/**
+	 * Generates random demonstration staff records until complete or cancelled.
+	 *
+	 * <p>Side effects: persists generated staff instances and evicts them from the persistence cache.
+	 */
 	private void generateRandomData() {
-		
 		//generate a random number of staff
-		int staffCount = new Random().nextInt(1000) + 50;
-		for(int i=0;i<staffCount;i++) {
+		int staffCount = random.nextInt(1000) + 50;
+		for (int i = 0; i < staffCount; i++) {
 			if (cancelled) {
 				return;
 			}

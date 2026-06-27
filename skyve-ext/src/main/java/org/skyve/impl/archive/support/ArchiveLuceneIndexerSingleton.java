@@ -19,7 +19,7 @@ import org.skyve.impl.util.SystemObserver;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.event.Level;
 
 /**
@@ -28,7 +28,7 @@ import org.slf4j.event.Level;
  * and properly close resources on shutdown.
  */
 public class ArchiveLuceneIndexerSingleton implements SystemObserver {
-	private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveLuceneIndexerSingleton.class);
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ArchiveLuceneIndexerSingleton.class);
 
 	/** The singleton instance */
 	private static ArchiveLuceneIndexerSingleton instance = new ArchiveLuceneIndexerSingleton();

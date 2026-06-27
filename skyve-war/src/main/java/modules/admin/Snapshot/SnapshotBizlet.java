@@ -13,13 +13,20 @@ import org.skyve.web.WebContext;
 import jakarta.inject.Inject;
 import modules.admin.domain.Snapshot;
 
+/**
+ * Implements Snapshot document lifecycle behavior and dynamic domain support.
+ */
 public class SnapshotBizlet extends Bizlet<Snapshot> {
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient SnapshotService snapshotService;
 
 	/**
 	 * Max + 1 the snapshot ordinal to place a new snapshot at the bottom of the list.
 	 * No data store locking required here as the uniqueness of the number derived is not critical.
+	 *
+	 * @param bean the snapshot being persisted
+	 * @throws Exception if ordinal lookup fails
 	 */
 	@Override
 	public void preSave(Snapshot bean) throws Exception {
@@ -50,6 +57,10 @@ public class SnapshotBizlet extends Bizlet<Snapshot> {
 
 	/**
 	 * Get variant domain values for the module name attribute.
+	 *
+	 * @param attributeName the attribute requesting variant domain values
+	 * @return module domain values when requested, otherwise superclass values
+	 * @throws Exception if domain-value retrieval fails
 	 */
 	@Override
 	public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
@@ -61,6 +72,11 @@ public class SnapshotBizlet extends Bizlet<Snapshot> {
 
 	/**
 	 * Get dynamic domain values for the query name attribute based on the selected module.
+	 *
+	 * @param attributeName the attribute requesting dynamic values
+	 * @param bean the current snapshot bean
+	 * @return query domain values scoped to the selected module
+	 * @throws Exception if dynamic-value retrieval fails
 	 */
 	@Override
 	public List<DomainValue> getDynamicDomainValues(String attributeName, Snapshot bean) throws Exception {
@@ -71,7 +87,12 @@ public class SnapshotBizlet extends Bizlet<Snapshot> {
 	}
 
 	/**
-	 * Null out queryName on moduleName change
+	 * Clears query selection when the source module changes.
+	 *
+	 * @param source the triggering attribute binding
+	 * @param bean the current snapshot bean
+	 * @param webContext the current web context
+	 * @throws Exception if rerender preparation fails
 	 */
 	@Override
 	public void preRerender(String source, Snapshot bean, WebContext webContext) throws Exception {

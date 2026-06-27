@@ -41,13 +41,23 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Util;
 import org.skyve.web.SortParameter;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import com.google.common.base.Stopwatch;
 
+/**
+ * Abstract Lucene-backed list model for archived Skyve documents.
+ * <p>
+ * Provides common archived-query behavior (paging, filtering, sorting, summary,
+ * and dynamic-bean conversion hooks) while delegating document-specific mapping
+ * details to subclasses.
+ * </p>
+ *
+ * @param <U> The bean type.
+ */
 public abstract class ArchivedDocumentListModel<U extends Bean> extends ListModel<U> {
 	// NB An instance member LOGGER is OK here as this is not Serializable
-    private final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    private final Logger logger = SkyveLoggerFactory.getLogger(getClass());
 
     private LuceneFilter filter = new LuceneFilter();
 
@@ -82,10 +92,12 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
     @Override
     public Page fetch() throws Exception {
 
-        LOGGER.debug("Executing fetch, filter={}, start={}, end={}", filter, getStartRow(), getEndRow());
+        if (logger.isDebugEnabled()) {
+            logger.debug("Executing fetch, filter={}, start={}, end={}", filter, Integer.toString(getStartRow()), Integer.toString(getEndRow()));
+        }
 
         if (findArchiveDocumentConfig().isEmpty()) {
-            LOGGER.debug("No archive config for {}.{} returning an empty page", getModule(), getDocument());
+            logger.debug("No archive config for {}.{} returning an empty page", getModule(), getDocument());
             return emptyPage();
         }
 
@@ -99,12 +111,11 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
 
             return p;
         } catch (IndexNotFoundException e) {
-            LOGGER.atWarn()
+            logger.atWarn()
                   .setCause(e)
                   .log("No index found, returning empty Page");
 
-            Page p = emptyPage();
-            return p;
+            return emptyPage();
         }
     }
 
@@ -124,11 +135,11 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
                 for (MetaDataQueryColumn column : getColumns()) {
                     String binding = column.getBinding();
 
-                    props.put(binding, rowCount);
+                    props.put(binding, Long.valueOf(rowCount));
                 }
             } else {
                 // We probably can't support the other aggregations types
-                LOGGER.warn("Aggregate function {} not supported by {}", getSummary(), this);
+                logger.warn("Aggregate function {} not supported by {}", getSummary(), this);
             }
         }
 
@@ -148,7 +159,9 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
             lri.iterator()
                .forEachRemaining(rows::add);
 
-            LOGGER.debug("Got {} results of {}; took {}", rows.size(), lri.totalHits(), t);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Got {} results of {}; took {}", Integer.toString(rows.size()), lri.totalHits(), t);
+            }
 
             return new Result(rows, hits.value);
         }
@@ -159,11 +172,11 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
         SortParameter[] params = getSortParameters();
         if (params == null || params.length == 0) {
             Sort defaultSort = getDefaultSort();
-            LOGGER.debug("No sorting defined, using {}", defaultSort);
+            logger.debug("No sorting defined, using {}", defaultSort);
             return defaultSort;
         }
 
-        LOGGER.atDebug()
+		logger.atDebug()
               .addArgument(() -> Arrays.asList(params))
               .log("SortParameters: {}");
 
@@ -175,7 +188,7 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
             String binding = toSortBinding(sp.getBy());
             SortField sf = new SortField(binding, Type.STRING, reverse);
 
-            LOGGER.debug("Sorting by {}", sf);
+            logger.debug("Sorting by {}", sf);
 
             sortFields.add(sf);
         }
@@ -184,45 +197,61 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
     }
 
     /**
-     * Default to sorting by relevance (i.e. Lucene score). Can be overridden by subclasses as needed.
-     * 
-     * @return
+     * Returns the default Lucene sort when no explicit sort parameters are supplied.
+     *
+     * <p>Defaults to relevance (Lucene score); subclasses may override to enforce
+     * deterministic ordering for their document type.
+     *
+     * @return the default sort strategy, never {@code null}
      */
+	@SuppressWarnings("static-method")
     protected Sort getDefaultSort() {
         return Sort.RELEVANCE;
     }
 
     /**
-     * Convert the given binding into the sort field binding that will be used with
-     * Lucene (most likely <em>${binding}_sort</em>); this is determined when converting
-     * the Skyve document into a Lucene document in the relevant DocumentConverter.
-     * See <em>DocumentConverter.toSortBinding(String)</em> for more info.
-     * 
-     * @param binding
-     * @return
+     * Converts a Skyve binding into the Lucene sort-field binding.
+     *
+     * <p>This typically appends a sort suffix (for example {@code _sort}) matching
+     * the field written by the document converter.
+     *
+     * @param binding the Skyve binding used in list metadata
+     * @return the Lucene field name used for sorting
      */
     protected abstract String toSortBinding(String binding);
 
     /**
-     * Convert the supplied Lucene Document into a skyve Bean.
-     * <p>
-     * NB DynamicBean is suitable, and likely to be easier that constructing a whole
-     * Bean instance.
-     * 
-     * @param luceneDoc
-     * @return
+     * Converts a Lucene document into the row bean returned by this list model.
+     *
+     * <p>{@link DynamicBean} is typically suitable when no concrete generated domain
+     * class is required.
+     *
+     * @param luceneDoc the Lucene document read from the archive index
+     * @return the converted bean row to include in list results
      */
     protected abstract Bean convertToBean(Document luceneDoc);
 
     /**
+	 * Reads a stored Lucene document by id.
+	 * <p>
+	 * Exposed as a protected seam to allow deterministic testing of iterator
+	 * error handling without relying on brittle Lucene internals.
+	 * </p>
+	 */
+	@SuppressWarnings("static-method")
+	protected Document readStoredDocument(DirectoryReader reader, int docId) throws IOException {
+		return reader.storedFields().document(docId);
+	}
+
+	/**
      * Tuple record for ferrying query results around
      */
     private static record Result(List<Bean> rows, long totalRowCount) {
     }
 
-    @Override
+	@Override
+    @SuppressWarnings("resource")
     public AutoClosingIterable<Bean> iterate() throws Exception {
-
         return this.new LuceneResultsIterable(0, Integer.MAX_VALUE);
     }
 
@@ -242,40 +271,42 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
     }
 
     /**
-     * Get the module for the driving document, also used
-     * to find the ArchiveDocConfig.
-     * 
-     * @return
+     * Returns the module name for the driving archived document.
+     *
+     * <p>Used to resolve both document metadata and archive configuration.
+     *
+     * @return the module name used by this model
      */
     protected abstract String getModule();
 
     /**
-     * Get the document for the driving document, also used
-     * to find the ArchiveDocConfig.
-     * 
-     * @return
+     * Returns the document name for the driving archived document.
+     *
+     * <p>Used to resolve both document metadata and archive configuration.
+     *
+     * @return the document name used by this model
      */
     protected abstract String getDocument();
 
     /**
-     * Get the (lucene) index directory from the document config for the configured module+document
-     * in the application config (via <em>Util.getArchiveConfig()</em>). Can be overridden if needed.
-     * 
-     * @throws NoSuchElementException if the module+document combination is not present in the
-     *         application config.
-     * @return
+     * Resolves the Lucene index directory configured for this model's module and document.
+     *
+     * @return the configured index directory path
+     * @throws NoSuchElementException if no archive configuration exists for the
+     *         module and document combination
      */
     protected Path getIndexDirectory() {
         return Util.getArchiveConfig()
                    .findArchiveDocConfig(getModule(), getDocument())
-                   .get()
+				   .orElseThrow(() -> new NoSuchElementException(getModule() + '.' + getDocument() + " is not configured for archive indexing."))
                    .getIndexDirectory();
     }
     
     /**
-     * Find the ArchiveDocConfig for this list model's document type.
-     * Could be an empty optional if no archive config is set up
-     * for the document type. 
+     * Finds the archive document configuration for this model's module and document.
+     *
+     * @return the matching archive configuration, or empty when archiving is not
+     *         configured for this document type
      */
     protected Optional<ArchiveDocConfig> findArchiveDocumentConfig() {
 
@@ -286,8 +317,9 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
     /**
      * NB Not a static class, accesses state from outer class (filter, sort)
      */
+	@SuppressWarnings("resource")
     private class LuceneResultsIterable implements AutoClosingIterable<Bean> {
-        private final Logger LRI_LOGGER = LoggerFactory.getLogger(LuceneResultsIterable.class);
+        private final Logger luceneResultsLogger = SkyveLoggerFactory.getLogger(LuceneResultsIterable.class);
 
         private int readNextRowIdx = 0;
         private final ScoreDoc[] scoreDocs;
@@ -299,10 +331,10 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
 
             // open the index
             Path indexPath = getIndexDirectory();
-            LRI_LOGGER.debug("Using index at {}", indexPath);
+            luceneResultsLogger.debug("Using index at {}", indexPath);
             ArchiveDocConfig archiveDocConfig = Util.getArchiveConfig()
 					.findArchiveDocConfig(getModule(), getDocument())
-					.get();
+					.orElseThrow(() -> new NoSuchElementException(getModule() + '.' + getDocument() + " is not configured for archive indexing."));
             directory = archiveLuceneIndexerSingleton
 					.getLuceneConfigs()
 					.get(archiveDocConfig).indexDirectory();
@@ -316,24 +348,29 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
                 // If no criteria have been set search for "bizId is not null" 
                 // so that some results are displayed
                 query = new FieldExistsQuery(Bean.DOCUMENT_ID);
-                LRI_LOGGER.debug("Filter is empty, using default query: {}", query);
+                luceneResultsLogger.debug("Filter is empty, using default query: {}", query);
             } else {
                 // Otherwise run the actual criteria supplied
                 query = filter.toQuery();
             }
-            LRI_LOGGER.debug("Executing filter {}; query '{}'", filter, query);
+            luceneResultsLogger.debug("Executing filter {}; query '{}'", filter, query);
             topDocs = isearcher.search(query, endRow, getSort());
 
             // set aside scoredocs
             ScoreDoc[] allScoreDocs = topDocs.scoreDocs;
             scoreDocs = ArrayUtils.subarray(allScoreDocs, startRow, endRow);
-            LRI_LOGGER.debug("Got {} results, retained {}", allScoreDocs.length, scoreDocs.length);
+            if (luceneResultsLogger.isDebugEnabled()) {
+				luceneResultsLogger.debug("Got {} results, retained {}", Integer.toString(allScoreDocs.length), Integer.toString(scoreDocs.length));
+			}
         }
 
         /**
-         * Iterator is not resettable, calling a 2nd time will break.
-         * 
-         * @return
+         * Returns a forward-only iterator over the fetched Lucene score docs.
+         *
+         * <p>Threading: this iterator is stateful and not resettable; callers must
+         * consume it once.
+         *
+         * @return a stateful iterator over converted bean rows
          */
         @Override
         public Iterator<Bean> iterator() {
@@ -351,7 +388,7 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
             try {
                 ac.close();
             } catch (Exception e) {
-                LRI_LOGGER.atWarn()
+                luceneResultsLogger.atWarn()
                           .setCause(e)
                           .log("Could not close {}", ac);
             }
@@ -373,18 +410,19 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
 
             @Override
             public Bean next() {
+				if (! hasNext()) {
+					throw new NoSuchElementException();
+				}
                 int docId = scoreDocs[readNextRowIdx].doc;
                 ++readNextRowIdx;
 
                 try {
-                    Document doc = dirReader.storedFields()
-                                            .document(docId);
+                    Document doc = readStoredDocument(dirReader, docId);
                     return convertToBean(doc);
                 } catch (IOException ioe) {
-                    throw new RuntimeException("Unable to retrieve doc #" + docId, ioe);
+					throw new IllegalStateException("Unable to retrieve doc #" + docId, ioe);
                 }
             }
         }
-
     }
 }

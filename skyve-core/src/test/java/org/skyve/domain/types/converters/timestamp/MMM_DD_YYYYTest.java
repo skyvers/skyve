@@ -2,7 +2,7 @@ package org.skyve.domain.types.converters.timestamp;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -11,27 +11,24 @@ import org.skyve.domain.messages.ConversionException;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.util.Time;
 
-public class MMM_DD_YYYYTest {
+class MMM_DD_YYYYTest {
 
 	private MMM_DD_YYYY formatter;
 
 	@BeforeEach
-	public void before() {
+	void before() {
 		formatter = new MMM_DD_YYYY();
 	}
 
 	@Test
-	public void testFromDisplayValueInvalidFormat() throws Exception {
-		ConversionException ce = assertThrows(ConversionException.class, () -> {
-			// call the method under test
-			formatter.fromDisplayValue("03-01-2020");
-		});
+	void testFromDisplayValueInvalidFormat() {
+		ConversionException ce = assertThrows(ConversionException.class, () -> formatter.fromDisplayValue("03-01-2020"));
 
 		assertTrue(ce.getMessages().size() > 0);
 	}
 
 	@Test
-	public void testFromDisplayValue() throws Exception {
+	void testFromDisplayValue() {
 		// setup the test data
 		Timestamp testDate = new Timestamp(Time.withDate(01, 03, 2020));
 
@@ -40,7 +37,7 @@ public class MMM_DD_YYYYTest {
 	}
 
 	@Test
-	public void testToDisplayValue() throws Exception {
+	void testToDisplayValue() {
 		// setup the test data
 		Timestamp testDate = new Timestamp(Time.withDate(01, 03, 2020));
 

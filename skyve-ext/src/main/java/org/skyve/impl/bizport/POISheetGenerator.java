@@ -20,6 +20,10 @@ import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 
+/**
+ * Generates styled Excel ({@code .xlsx}) worksheets from a Skyve document's
+ * query results using Apache POI.
+ */
 public class POISheetGenerator {
 	private static final String XLSX = ".xlsx";
 
@@ -95,7 +99,7 @@ public class POISheetGenerator {
 	 * @param dff
 	 * @throws Exception
 	 */
-	public void addField(DataFileExportField field) throws Exception {
+	public void addField(DataFileExportField field) {
 		fields.add(field);
 	}
 
@@ -105,10 +109,11 @@ public class POISheetGenerator {
 	 * @param fieldTitle
 	 * @param binding
 	 */
-	public void addField(String fieldTitle, String binding) throws Exception {
+	public void addField(String fieldTitle, String binding) {
 		fields.add(new DataFileExportField(fieldTitle, binding));
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public Download getDownload() throws Exception {
 
 		Download result= null;

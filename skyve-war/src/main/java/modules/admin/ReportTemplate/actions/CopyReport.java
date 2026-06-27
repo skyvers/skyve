@@ -16,9 +16,15 @@ import modules.admin.domain.ReportTemplate;
  * and parameters while prefixing the name with "Copy of".
  */
 public class CopyReport implements ServerSideAction<ReportTemplate> {
-
 	private static final String COPY_PREFIX = "Copy of ";
 
+	/**
+	 * Executes execute.
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @return the result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public ServerSideActionResult<ReportTemplate> execute(ReportTemplate bean, WebContext webContext)
 			throws Exception {
@@ -61,5 +67,4 @@ public class CopyReport implements ServerSideAction<ReportTemplate> {
 		newReport = CORE.getPersistence().save(newReport);
 		return new ServerSideActionResult<>(newReport);
 	}
-
 }

@@ -104,6 +104,7 @@ class Table {
 	 * @param customer the owning customer used to resolve modules/documents
 	 * @param document the document whose metadata drives the backup schema
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	void addFieldsFromDocument(Customer customer, Document document) {
 		boolean joinedExtension = false;
 		Persistent persistent = document.getPersistent();
@@ -165,6 +166,7 @@ class Table {
 	 * @param customer the owning customer used to resolve referenced documents
 	 * @param document the document whose attributes are being processed
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void processAttributes(boolean joinedExtension, String embeddedColumnsPrefix, Customer customer, Document document) {
 		for (Attribute attribute : joinedExtension ? document.getAttributes() : document.getAllAttributes(customer)) {
 			if (attribute.isPersistent()) {

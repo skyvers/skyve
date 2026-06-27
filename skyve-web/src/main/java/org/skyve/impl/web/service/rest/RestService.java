@@ -14,6 +14,7 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.NoResultsException;
 import org.skyve.domain.messages.SecurityException;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.impl.web.filter.rest.AbstractRestFilter;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -25,12 +26,15 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.JSON;
+import org.skyve.util.OWASP;
 import org.skyve.util.Thumbnail;
 import org.skyve.util.Util;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.RequestScoped;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.Consumes;
@@ -45,23 +49,42 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 
+/**
+ * Implements generic Skyve REST endpoint.
+ * Think carefully about the security ramifications of exposing this.
+ * It is currently blocked in web.xml.
+ */
 @Path("/api")
 @RequestScoped
+@SuppressWarnings("javasecurity:S6173") // This class is currently blocked in web.xml and an ACL will be added if it is ever used
 public class RestService {
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(RestService.class);
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RestService.class);
+    private static final String READ_DATA_PERMISSION = "read this data";
+	private static final String BEAN_PATH_PARAM = "bean";
+	private static final String DOCUMENT_PATH_PARAM = "document";
+	private static final String ID_PATH_PARAM = "id";
+	private static final String MODULE_PATH_PARAM = "module";
 
 	@Context
 	private HttpServletRequest request;
 	@Context
 	private HttpServletResponse response;
 	
+	/**
+	 * Retrieves a single document instance and returns it as JSON.
+	 *
+	 * @param module module name
+	 * @param document document name
+	 * @param id business id
+	 * @return marshalled JSON payload, or {@code null} when an error occurs
+	 */
 	@GET
 	@Path("/json/{module}/{document}/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String retrieveJSON(@PathParam("module") String module, 
-								@PathParam("document") String document,
-								@PathParam("id") String id) {
+	public @Nullable String retrieveJSON(@PathParam(MODULE_PATH_PARAM) @Nonnull String module,
+											@PathParam(DOCUMENT_PATH_PARAM) @Nonnull String document,
+											@PathParam(ID_PATH_PARAM) @Nonnull String id) {
 		String result = null;
 		Bean bean = null;
 		
@@ -75,7 +98,7 @@ public class RestService {
 			Document d = m.getDocument(c, document);
 			
 			if (! u.canReadDocument(d)) {
-				throw new SecurityException("read this data", u.getName());
+				throw new SecurityException(READ_DATA_PERMISSION, u.getName());
 			}
 	
 	    	bean = p.retrieve(d, id);
@@ -86,19 +109,26 @@ public class RestService {
 	    	result = JSON.marshall(CORE.getUser().getCustomer(), bean);
 		}
 		catch (Throwable t) {
-			t.printStackTrace();
-			AbstractRestFilter.error(p, response, t.getLocalizedMessage());
+			handleUnexpectedRestError(p, "REST retrieve JSON by id failed", t);
 		}
 		
 		return result;
 	}
 
+	/**
+	 * Retrieves a single document instance and returns it as XML.
+	 *
+	 * @param module module name
+	 * @param document document name
+	 * @param id business id
+	 * @return retrieved bean, or {@code null} when an error occurs
+	 */
 	@GET
 	@Path("/xml/{module}/{document}/{id}")
 	@Produces(MediaType.APPLICATION_XML)
-	public Bean retrieveXML(@PathParam("module") String module, 
-										@PathParam("document") String document,
-										@PathParam("id") String id) {
+	public @Nullable Bean retrieveXML(@PathParam(MODULE_PATH_PARAM) @Nonnull String module,
+										@PathParam(DOCUMENT_PATH_PARAM) @Nonnull String document,
+										@PathParam(ID_PATH_PARAM) @Nonnull String id) {
 		Bean result = null;
 		
 		Persistence p = null;
@@ -111,7 +141,7 @@ public class RestService {
 			Document d = m.getDocument(c, document);
 			
 			if (! u.canReadDocument(d)) {
-				throw new SecurityException("read this data", u.getName());
+				throw new SecurityException(READ_DATA_PERMISSION, u.getName());
 			}
 	
 	    	result = p.retrieve(d, id);
@@ -121,20 +151,28 @@ public class RestService {
 	    	Util.populateFully(result);
 		}
 		catch (Throwable t) {
-			t.printStackTrace();
-			AbstractRestFilter.error(p, response, t.getLocalizedMessage());
+			handleUnexpectedRestError(p, "REST retrieve XML by id failed", t);
 		}
 		
 		return result;
 	}
 	
+	/**
+	 * Retrieves a page of document instances and returns them as JSON.
+	 *
+	 * @param module module name
+	 * @param document document name
+	 * @param start first row index (inclusive)
+	 * @param end end row index (exclusive)
+	 * @return marshalled JSON payload, or {@code null} when an error occurs
+	 */
 	@GET
 	@Path("/json/{module}/{document}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String retrieveJSON(@PathParam("module") String module, 
-								@PathParam("document") String document,
-								@QueryParam("start") int start,
-								@QueryParam("end") int end) {
+	public @Nullable String retrieveJSON(@PathParam(MODULE_PATH_PARAM) @Nonnull String module,
+											@PathParam(DOCUMENT_PATH_PARAM) @Nonnull String document,
+											@QueryParam("start") int start,
+											@QueryParam("end") int end) {
 		String result = null;
 		
 		Persistence p = null;
@@ -148,7 +186,7 @@ public class RestService {
 			Document d = m.getDocument(c, document);
 			
 			if (! u.canReadDocument(d)) {
-				throw new SecurityException("read this data", u.getName());
+				throw new SecurityException(READ_DATA_PERMISSION, u.getName());
 			}
 			
 	    	DocumentQuery q = p.newDocumentQuery(d);
@@ -161,29 +199,46 @@ public class RestService {
 			result = JSON.marshall(CORE.getUser().getCustomer(), beans);
 		}
 		catch (Throwable t) {
-			t.printStackTrace();
-			AbstractRestFilter.error(p, response, t.getLocalizedMessage());
+			handleUnexpectedRestError(p, "REST retrieve JSON list failed", t);
 		}
 		
 		return result;
 	}
 
+	/**
+	 * Supports insert operations over GET for legacy clients by delegating to JSON insert.
+	 *
+	 * @param json JSON payload representing the bean to insert
+	 * @return marshalled inserted bean JSON, or {@code null} when an error occurs
+	 */
 	@GET
 	@Path("/json/insert/{bean}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String insertJSONGet(@PathParam("bean") String json) {
+	public @Nullable String insertJSONGet(@PathParam(BEAN_PATH_PARAM) @Nonnull String json) {
 		return insertJSON(json);
 	}
 
+	/**
+	 * Inserts a new persistent bean from a JSON payload.
+	 *
+	 * @param json JSON payload representing the bean to insert
+	 * @return marshalled inserted bean JSON, or {@code null} when an error occurs
+	 */
 	@PUT
 	@Path("/json/insert")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public String insertJSONPost(String json) {
+	public @Nullable String insertJSONPost(@Nonnull String json) {
 		return insertJSON(json);
 	}
 	
-	private String insertJSON(String json) {
+	/**
+	 * Inserts a new persistent bean from a JSON payload.
+	 *
+	 * @param json JSON payload representing the bean to insert
+	 * @return marshalled inserted bean JSON, or {@code null} when an error occurs
+	 */
+	private @Nullable String insertJSON(@Nonnull String json) {
 		String result = null;
 		
 		Persistence p = null;
@@ -197,29 +252,46 @@ public class RestService {
 			result = JSON.marshall(u.getCustomer(), bean);
 		}
 		catch (Throwable t) {
-			t.printStackTrace();
-			AbstractRestFilter.error(p, response, t.getLocalizedMessage());
+			handleUnexpectedRestError(p, "REST insert JSON failed", t);
 		}
 		
 		return result;
 	}
 
+	/**
+	 * Supports update operations over GET for legacy clients by delegating to JSON update.
+	 *
+	 * @param json JSON payload representing the bean to update
+	 * @return marshalled updated bean JSON, or {@code null} when an error occurs
+	 */
 	@GET
 	@Path("/json/update/{bean}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String updateJSONGet(@PathParam("bean") String json) {
+	public @Nullable String updateJSONGet(@PathParam(BEAN_PATH_PARAM) @Nonnull String json) {
 		return updateJSON(json);
 	}
 
+	/**
+	 * Updates an existing persistent bean from a JSON payload.
+	 *
+	 * @param json JSON payload representing the bean to update
+	 * @return marshalled updated bean JSON, or {@code null} when an error occurs
+	 */
 	@POST
 	@Path("/json/update")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public String updateJSONPost(String json) {
+	public @Nullable String updateJSONPost(@Nonnull String json) {
 		return updateJSON(json);
 	}
 	
-	private String updateJSON(String json) {
+	/**
+	 * Updates an existing persistent bean from a JSON payload.
+	 *
+	 * @param json JSON payload representing the bean to update
+	 * @return marshalled updated bean JSON, or {@code null} when an error occurs
+	 */
+	private @Nullable String updateJSON(@Nonnull String json) {
 		String result = null;
 		
 		Persistence p = null;
@@ -235,29 +307,46 @@ public class RestService {
 			result = JSON.marshall(u.getCustomer(), beanToUpdate);
 		}
 		catch (Throwable t) {
-			t.printStackTrace();
-			AbstractRestFilter.error(p, response, t.getLocalizedMessage());
+			handleUnexpectedRestError(p, "REST update JSON failed", t);
 		}
 		
 		return result;
 	}
 
+	/**
+	 * Supports delete operations over GET for legacy clients by delegating to JSON delete.
+	 *
+	 * @param json JSON payload representing the bean to delete
+	 * @return empty JSON object string, or {@code null} when an error occurs
+	 */
 	@GET
 	@Path("/json/delete/{bean}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String deleteJSONGet(@PathParam("bean") String json) {
+	public @Nullable String deleteJSONGet(@PathParam(BEAN_PATH_PARAM) @Nonnull String json) {
 		return deleteJSON(json);
 	}
 	
+	/**
+	 * Deletes an existing persistent bean identified by a JSON payload.
+	 *
+	 * @param json JSON payload representing the bean to delete
+	 * @return empty JSON object string, or {@code null} when an error occurs
+	 */
 	@DELETE
 	@Path("/json/delete")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public String deleteJSONDelete(String json) {
+	public @Nullable String deleteJSONDelete(@Nonnull String json) {
 		return deleteJSON(json);
 	}
 
-	private String deleteJSON(String json) {
+	/**
+	 * Deletes an existing persistent bean identified by a JSON payload.
+	 *
+	 * @param json JSON payload representing the bean to delete
+	 * @return empty JSON object string, or {@code null} when an error occurs
+	 */
+	private @Nullable String deleteJSON(@Nonnull String json) {
 		String result = null;
 		
 		Persistence p = null;
@@ -272,8 +361,7 @@ public class RestService {
 			result = "{}";
 		}
 		catch (Throwable t) {
-			t.printStackTrace();
-			AbstractRestFilter.error(p, response, t.getLocalizedMessage());
+			handleUnexpectedRestError(p, "REST delete JSON failed", t);
 		}
 		
 		return result;
@@ -283,8 +371,8 @@ public class RestService {
 	@GET
 	@Path("/xml/{module}/{document}")
 	@Produces(MediaType.APPLICATION_XML)
-	public List<Bean> retrieveXML(@PathParam("module") String module, 
-								@PathParam("document") String document,
+	public List<Bean> retrieveXML(@PathParam(MODULE_PATH_PARAM) String module,
+								@PathParam(DOCUMENT_PATH_PARAM) String document,
 								@QueryParam("start") int start,
 								@QueryParam("end") int end) throws Throwable {
 		response.setContentType(MediaType.APPLICATION_XML);
@@ -292,13 +380,22 @@ public class RestService {
 	}
 */
 
+	/**
+	 * Executes a metadata query or default document query and returns projected rows as JSON.
+	 *
+	 * @param module module name
+	 * @param documentOrQuery query name or document name whose default query will be used
+	 * @param start first row index (inclusive)
+	 * @param end end row index (exclusive)
+	 * @return marshalled JSON payload, or {@code null} when an error occurs
+	 */
 	@GET
 	@Path("/json/query/{module}/{documentOrQuery}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String query(@PathParam("module") String module,
-							@PathParam("documentOrQuery") String documentOrQuery,
-							@QueryParam("start") int start,
-							@QueryParam("end") int end) {
+	public @Nullable String query(@PathParam(MODULE_PATH_PARAM) @Nonnull String module,
+									@PathParam("documentOrQuery") @Nonnull String documentOrQuery,
+									@QueryParam("start") int start,
+									@QueryParam("end") int end) {
 		String result = null;
 		
 		Persistence p = null;
@@ -322,7 +419,7 @@ public class RestService {
 	
 	        Document d = qm.getDrivingDocument();
 			if (! u.canReadDocument(d)) {
-				throw new SecurityException("read this data", u.getName());
+				throw new SecurityException(READ_DATA_PERMISSION, u.getName());
 			}
 	        
 	        List<Bean> beans = qm.fetch().getRows();
@@ -337,17 +434,22 @@ public class RestService {
 	        result = JSON.marshall(c, beans, qm.getProjections());
 		}
 		catch (Throwable t) {
-			t.printStackTrace();
-			AbstractRestFilter.error(p, response, t.getLocalizedMessage());
+			handleUnexpectedRestError(p, "REST query JSON failed", t);
 		}
 		
 		return result;
 	}
 	
+	/**
+	 * Retrieves stored attachment content as binary thumbnail bytes for the supplied content id.
+	 *
+	 * @param contentId content identifier
+	 * @return thumbnail bytes, or {@code null} when content is not found or an error occurs
+	 */
 	@GET
 	@Path("/content/{contentId}")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
-	public byte[] queryContent(@PathParam("contentId") String contentId) {
+	public @Nullable byte[] queryContent(@PathParam("contentId") @Nonnull String contentId) {
 		byte[] result = null;
 		
 		try {
@@ -383,31 +485,40 @@ public class RestService {
 					fileName = "content." + mimeType.getStandardFileSuffix();
 				}
 				response.setHeader("Content-Disposition", 
-									String.format("attachment; filename=\"%s\"", fileName));
-				// The following allows partial requests which are useful for large media or downloading files with pause and resume functions.
-				response.setHeader("Accept-Ranges", "bytes");
+									String.format("attachment; filename=\"%s\"", OWASP.sanitiseFileName(fileName)));
 				LOGGER.info("{} served as binary", request.getRequestURI());
 			}				
 		}
 		catch (Throwable t) {
-			t.printStackTrace();
-			AbstractRestFilter.error(null, response, t.getLocalizedMessage());
+			handleUnexpectedRestError(null, "REST content thumbnail failed", t);
 		}
 			
 		return result;
 	}
 
+	/**
+	 * Inserts or replaces attachment content for a bean attribute using Base64-encoded payload data.
+	 *
+	 * @param customer customer name
+	 * @param module module name
+	 * @param document document name
+	 * @param id bean business id
+	 * @param attributeName content attribute name
+	 * @param contentType content MIME type label
+	 * @param encodedContent Base64-encoded payload
+	 * @return new content id, or {@code null} when not found or an error occurs
+	 */
 	@PUT
 	@Path("/content/insert/{customer}/{module}/{document}/{id}/{attributeName}/{contentType}")
 	@Consumes(MediaType.TEXT_PLAIN)
 	@Produces(MediaType.TEXT_PLAIN)
-	public String insertContent(@PathParam("customer") String customer,
-								@PathParam("module") String module,
-								@PathParam("document") String document,
-								@PathParam("id") String id,
-								@PathParam("attributeName") String attributeName,
-								@PathParam("contentType") String contentType,
-								String encodedContent) {
+	public @Nullable String insertContent(@PathParam("customer") @Nonnull String customer,
+											@PathParam(MODULE_PATH_PARAM) @Nonnull String module,
+											@PathParam(DOCUMENT_PATH_PARAM) @Nonnull String document,
+											@PathParam(ID_PATH_PARAM) @Nonnull String id,
+											@PathParam("attributeName") @Nonnull String attributeName,
+											@PathParam("contentType") @Nonnull String contentType,
+											@Nonnull String encodedContent) {
 		try {
 			response.setContentType(MediaType.APPLICATION_JSON);
 			final User u = CORE.getUser();
@@ -421,10 +532,14 @@ public class RestService {
 				throw new SecurityException(module + '.' + document + '.' + attributeName, u.getName());
 			}
 
-			final PersistentBean bean = CORE.getPersistence().retrieveAndLock(module, document, id);
-			if (bean == null) {
-			    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-			    return null;
+			PersistentBean bean = null;
+			try {
+				bean = CORE.getPersistence().retrieveAndLock(module, document, id);
+			}
+			catch (@SuppressWarnings("unused") NoResultsException e) {
+				LOGGER.info("{} not found", request.getRequestURI());
+				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+				return null;
 			}
 
 			try (final ContentManager cm = EXT.newContentManager()) {
@@ -445,10 +560,24 @@ public class RestService {
 			}
 		}
 		catch (Throwable t) {
-			t.printStackTrace();
-			AbstractRestFilter.error(null, response, t.getLocalizedMessage());
+			handleUnexpectedRestError(null, "REST content insert failed", t);
 		}
 
 		return null;
+	}
+
+	/**
+	 * Logs an unexpected REST failure, captures a support reference, and writes a generic error response.
+	 *
+	 * <p>Side effects: records the underlying throwable through the shared web-error logger and delegates to
+	 * the REST filter error pipeline so callers do not leak internal exception details to API clients.
+	 *
+	 * @param persistence the active persistence context, or {@code null} when failure occurred before one was available
+	 * @param context a human-readable description of the failing REST operation for structured logging
+	 * @param t the unexpected failure that triggered the REST error response
+	 */
+	private void handleUnexpectedRestError(@Nullable Persistence persistence, @Nonnull String context, @Nonnull Throwable t) {
+		String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, context, t);
+		AbstractRestFilter.error(persistence, response, WebErrorUtil.genericMessage(reference));
 	}
 }

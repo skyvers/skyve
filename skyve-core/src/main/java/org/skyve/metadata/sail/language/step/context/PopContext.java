@@ -9,19 +9,35 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
- * A SAIL step that pops the current automation context from the context stack.
- * 
- * @author mike
+ * Pops the current context from the automation execution stack, returning control
+ * to the enclosing context that was active before the last push.
+ *
+ * <p>Precondition: at least one context must have been pushed via
+ * {@link PushEditContext} or {@link PushListContext}; behaviour is undefined if
+ * the stack is empty when this step executes.
+ *
+ * @see PushEditContext
+ * @see PushListContext
+ * @see ClearContext
  */
 @XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
 public class PopContext implements Step {
 
+	/**
+	 * Executes execute.
+	 * @param executor the executor
+	 */
 	@Override
 	public void execute(Executor executor) {
 		executor.executePopContext(this);
 	}
 
+	/**
+	 * Returns the identifier.
+	 * @param context the context
+	 * @return the result
+	 */
 	@Override
 	public String getIdentifier(AutomationContext context) {
 		return null;

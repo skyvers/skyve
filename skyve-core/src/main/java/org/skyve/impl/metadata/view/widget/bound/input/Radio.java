@@ -14,6 +14,16 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * JAXB-annotated radio-button group input widget bound to an enum or
+ * constrained-text attribute.
+ *
+ * <p>Renders the bound attribute's domain values as a set of mutually exclusive
+ * radio buttons.  Supports absolute width, focus/blur/change events, and
+ * disabled/invisible conditions.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ */
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 public final class Radio extends ChangeableInputWidget implements AbsoluteWidth, FormItemWidget {

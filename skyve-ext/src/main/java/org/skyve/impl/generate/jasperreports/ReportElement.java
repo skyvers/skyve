@@ -4,8 +4,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.skyve.domain.types.Decimal2;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 
+/**
+ * Describes a single positioned element (text field, static text, image) within
+ * a JasperReports band during programmatic {@code .jrxml} generation.
+ */
 public class ReportElement {
-	public static enum ElementType {
+	@SuppressWarnings("java:S115") // Enum names are JasperReports/view element names.
+	public enum ElementType {
 		staticText, 
 		textField, 
 		checkBox, 
@@ -25,7 +30,8 @@ public class ReportElement {
 		border
 	}
 
-	public static enum ElementAlignment {
+	@SuppressWarnings("java:S115") // Enum names are JasperReports alignment names.
+	public enum ElementAlignment {
 		left, right, center;
 
 		@Override
@@ -46,7 +52,8 @@ public class ReportElement {
 		}
 	}
 
-	public static enum EvaluationTime {
+	@SuppressWarnings("java:S115") // Enum names are JasperReports evaluation-time names.
+	public enum EvaluationTime {
 		now, report, page, column, band, auto;
 		
 		@Override
@@ -520,6 +527,7 @@ public class ReportElement {
 	 * @param italic
 	 * @param printWhenExpression
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public ReportElement(ElementType type, String name, String valueExpression, String fontName, Integer fontSize, Integer top, Integer left,
 			Integer width, Integer height, Boolean border, ElementAlignment alignment, Boolean bold, Boolean italic, String invisibleConditionName) {
 

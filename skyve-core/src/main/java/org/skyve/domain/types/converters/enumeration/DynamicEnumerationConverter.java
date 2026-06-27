@@ -17,16 +17,34 @@ import org.skyve.util.Util;
 public class DynamicEnumerationConverter implements Converter<String> {
 	private List<EnumeratedValue> values;
 	
+	/**
+	 * Creates a converter backed by the dynamic enumeration target values.
+	 *
+	 * @param enumeration the enumeration metadata supplying runtime values
+	 */
 	public DynamicEnumerationConverter(Enumeration enumeration) {
 		values = enumeration.getTarget().getValues();
 	}
 	
+	/**
+	 * Returns the value type handled by this converter.
+	 *
+	 * @return {@link String}
+	 */
 	@Override
 	public Class<String> getValueType() {
 		return String.class;
 	}
 	
+	/**
+	 * Converts an enumeration code, name, or description into the display text.
+	 *
+	 * @param value the source value to convert
+	 * @return the localised display value, or an empty string when no match is found
+	 * @throws ConversionException when conversion fails unexpectedly
+	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public String toDisplayValue(String value) throws ConversionException {
 		try {
 			// check code first
@@ -68,6 +86,13 @@ public class DynamicEnumerationConverter implements Converter<String> {
 		}
 	}
 
+	/**
+	 * Converts a display value back to the underlying enumeration code.
+	 *
+	 * @param displayValue the display value to convert
+	 * @return the matching enumeration code
+	 * @throws ConversionException when the value cannot be resolved
+	 */
 	@Override
 	public String fromDisplayValue(String displayValue) throws ConversionException {
 		try {
@@ -99,21 +124,41 @@ public class DynamicEnumerationConverter implements Converter<String> {
 		}
 	}
 
+	/**
+	 * Returns the attribute type supported by this converter.
+	 *
+	 * @return {@link AttributeType#enumeration}
+	 */
 	@Override
 	public AttributeType getAttributeType() {
 		return AttributeType.enumeration;
 	}
 
+	/**
+	 * Returns an optional format descriptor.
+	 *
+	 * @return {@code null}, as this converter has no custom format descriptor
+	 */
 	@Override
 	public Format<String> getFormat() {
 		return null;
 	}
 
+	/**
+	 * Returns an optional validator descriptor.
+	 *
+	 * @return {@code null}, as this converter has no custom validator descriptor
+	 */
 	@Override
 	public Validator<String> getValidator() {
 		return null;
 	}
 	
+	/**
+	 * Returns an optional format pattern.
+	 *
+	 * @return {@code null}, as this converter does not use a format pattern
+	 */
 	@Override
 	public String getFormatPattern() {
 		return null;

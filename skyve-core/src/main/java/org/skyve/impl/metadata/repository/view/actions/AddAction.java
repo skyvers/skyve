@@ -6,6 +6,17 @@ import org.skyve.metadata.controller.ImplicitActionName;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB-annotated descriptor for an {@code <add>} action button in a collection
+ * sub-view.
+ *
+ * <p>An add action adds a new member to the owning collection widget and
+ * navigates to the child's edit view.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see PositionableAction
+ */
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "add")
 public class AddAction extends PositionableAction {

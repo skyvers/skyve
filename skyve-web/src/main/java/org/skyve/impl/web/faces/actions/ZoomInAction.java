@@ -18,30 +18,55 @@ import org.skyve.util.logging.Category;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 
+/**
+ * Executes a Faces callback action within the current Skyve web context.
+ */
 public class ZoomInAction extends FacesAction<Void> {
-
     private static final Logger FACES_LOGGER = Category.FACES.logger();
     private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
 
 	private FacesView facesView;
 	private String binding;
 	private String bizId;
+
+	/**
+	 * Creates a zoom-in action for a collection element binding.
+	 *
+	 * @param facesView the active faces view
+	 * @param dataWidgetBinding the binding path to the collection or association
+	 * @param bizId the business identifier of the selected collection element
+	 */
 	public ZoomInAction(FacesView facesView, String dataWidgetBinding, String bizId) {
 		this.facesView = facesView;
 		this.binding = dataWidgetBinding;
 		this.bizId = bizId;
 	}
 	
+	/**
+	 * Creates a zoom-in action for a direct reference binding.
+	 *
+	 * @param facesView the active faces view
+	 * @param referenceBinding the binding path to the referenced bean
+	 */
 	public ZoomInAction(FacesView facesView, String referenceBinding) {
 		this.facesView = facesView;
 		this.binding = referenceBinding;
 	}
 	
+	/**
+	 * Resolves the zoom target bean, executes pre-execute hooks, and redirects into the nested edit context.
+	 *
+	 * @return always {@code null} because this action mutates view and navigation state only
+	 * @throws Exception if bean resolution, instantiation, pre-execute hooks, or redirect handling fails
+	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public Void callback() throws Exception {
 		StringBuilder sb = new StringBuilder(64);
 		sb.append("ZoomInAction - binding=").append(binding).append(" : bizId=").append(bizId);
-		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info(sb.toString());
+		if (UtilImpl.FACES_TRACE) {
+			FACES_LOGGER.info("ZoomInAction - binding={} : bizId={}", binding, bizId);
+		}
 
 		// We can't check for update privilege here as we don't know if the zoom in is read-only or not.
 		// Its up to the app coder to disable the UI if appropriate.
@@ -55,12 +80,16 @@ public class ZoomInAction extends FacesAction<Void> {
 				sb.append("ElementById(").append(bizId).append(')');
 			}
 			facesView.getZoomInBindings().push(sb.toString());
-			if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("Push ZoomInBinding {}", sb.toString());
+			if (UtilImpl.FACES_TRACE) {
+				FACES_LOGGER.info("Push ZoomInBinding {}", sb);
+			}
 			if (viewBinding != null) {
 				sb.insert(0, '.').insert(0, viewBinding);
 			}
 			facesView.setViewBinding(sb.toString());
-			if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("Set ViewBinding {}", sb.toString());
+			if (UtilImpl.FACES_TRACE) {
+				FACES_LOGGER.info("Set ViewBinding {}", sb);
+			}
 	
 			Bean currentBean = ActionUtil.getTargetBeanForView(facesView);
 			if (currentBean == null) { // instantiate one

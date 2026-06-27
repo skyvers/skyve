@@ -38,7 +38,10 @@ import org.skyve.persistence.DataStore;
 import org.skyve.toolchain.AbstractSkyveMojo;
 
 /**
- * From a skyve project generate a baseline flutter project.
+ * Generates a baseline Flutter project from an existing Skyve project.
+ *
+ * <p>Threading: this mojo bootstraps CDI, persistence, repository, and utility singletons and should be treated
+ * as thread-confined.
  */
 @Mojo(name = "flutter-init")
 public class FlutterInitMojo extends AbstractSkyveMojo {
@@ -64,6 +67,12 @@ public class FlutterInitMojo extends AbstractSkyveMojo {
     @Parameter(property = "modocWhitelist", required = true, defaultValue = "*.*")
     private List<String> modocWhitelist;
 
+    /**
+     * Resolves interactive parameters, prepares the output directory, and runs the Flutter generator.
+     *
+     * @throws MojoExecutionException if generation fails
+     * @throws MojoFailureException if required parameters are missing or the target directory already exists
+     */
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
 
@@ -105,8 +114,7 @@ public class FlutterInitMojo extends AbstractSkyveMojo {
 	
 	            modocWhitelist.forEach(config::addModocWhitelistEntry);
 	
-	            FlutterGenerator generator = new FlutterGenerator(config);
-	            generator.generate();
+	            generate(config);
             }
 	        finally {
                 weld.shutdown();
@@ -117,8 +125,18 @@ public class FlutterInitMojo extends AbstractSkyveMojo {
         }
     }
 
-    @SuppressWarnings("resource") // NB for weld use
-	private Weld bootstrapSkyve() throws DependencyResolutionRequiredException, MalformedURLException {
+    /**
+     * Bootstraps the Skyve runtime needed by the Flutter generator.
+     *
+     * <p>Side effects: initialises CDI, configures persistence, data stores, repository access, and the current
+     * thread's Skyve user context.
+     *
+     * @return the initialised Weld container
+     * @throws DependencyResolutionRequiredException if Maven cannot resolve the test classpath
+     * @throws MalformedURLException if a classpath element cannot be converted to a URL
+     */
+    @SuppressWarnings("java:S2696") // Part of init and only ever called once, so static mutability is acceptable here.
+	Weld bootstrapSkyve() throws DependencyResolutionRequiredException, MalformedURLException {
         configureClasspath(srcDir);
 
         String output = project.getBuild()
@@ -132,8 +150,7 @@ public class FlutterInitMojo extends AbstractSkyveMojo {
         final String DB_DIALECT = "org.skyve.impl.persistence.hibernate.dialect.H2SpatialDialect";
 
         Weld weld = new Weld();
-        weld.addPackage(true, SkyveCDIProducer.class);
-        weld.initialize();
+        initialize(weld);
 
         Class<BeforeShutdownImpl> bsi = BeforeShutdownImpl.class;
         debug(bsi + "");
@@ -149,21 +166,47 @@ public class FlutterInitMojo extends AbstractSkyveMojo {
         UtilImpl.JOB_SCHEDULER = false;
         UtilImpl.CONFIGURATION = new TreeMap<>();
 
-        ProvidedRepositoryFactory.set(new LocalDesignRepository());
+        setRepository();
 
-        String MOJO_USERNAME = "flutter-gen-user";
+        String mojoUsername = "flutter-gen-user";
         final SuperUser user = new SuperUser();
         user.setCustomerName(customer);
-        user.setName(MOJO_USERNAME);
-        user.setId(MOJO_USERNAME);
+        user.setName(mojoUsername);
+        user.setId(mojoUsername);
 
-        final AbstractPersistence persistence = AbstractPersistence.get();
+        final AbstractPersistence persistence = getPersistence();
         persistence.setUser(user);
 
         return weld;
     }
 
-    private Path prepareTargetDirectory(String dir, boolean clear) throws MojoFailureException, MojoExecutionException {
+	@SuppressWarnings({"static-method", "resource"}) // test seam
+	void initialize(Weld weld) {
+        weld.addPackage(true, SkyveCDIProducer.class);
+        weld.initialize();
+    }
+
+	@SuppressWarnings("static-method") // test seam
+	void setRepository() {
+        ProvidedRepositoryFactory.set(new LocalDesignRepository());
+    }
+
+	@SuppressWarnings("static-method") // test seam
+	AbstractPersistence getPersistence() {
+        return AbstractPersistence.get();
+    }
+
+    /**
+     * Creates or clears the target directory for the generated Flutter project.
+     *
+     * @param dir the target directory path
+     * @param clear whether to delete existing contents instead of failing when the directory exists
+     * @return the resolved target path
+     * @throws MojoFailureException if the directory already exists and {@code clear} is {@code false}
+     * @throws MojoExecutionException if the directory cannot be created or cleared
+     */
+	@SuppressWarnings("java:S3776") // complexity OK
+	private Path prepareTargetDirectory(String dir, boolean clear) throws MojoFailureException, MojoExecutionException {
         Path root = Path.of(dir);
         if (root.toFile()
                 .exists()) {
@@ -180,7 +223,7 @@ public class FlutterInitMojo extends AbstractSkyveMojo {
 	                        if (file.isDirectory()) {
 	                            FileUtils.deleteDirectory(path.toFile());
 	                        } else {
-	                            file.delete();
+	                            Files.delete(path);
 	                        }
 	                    }
                     }
@@ -204,19 +247,37 @@ public class FlutterInitMojo extends AbstractSkyveMojo {
         return root;
     }
 
-    private void debug(CharSequence msg) {
-
+    /**
+     * Logs a debug message using the mojo prefix.
+     *
+     * @param msg the message to log
+     */
+	private void debug(CharSequence msg) {
         getLog().debug("[flutter-init] " + msg);
     }
 
-    private void info(CharSequence msg) {
-
+    /**
+     * Logs an informational message using the mojo prefix.
+     *
+     * @param msg the message to log
+     */
+	private void info(CharSequence msg) {
         getLog().info("[flutter-init] " + msg);
     }
 
-    private void debugParam(String name, Object value) {
-
+    /**
+     * Logs a named debug parameter value using the mojo prefix.
+     *
+     * @param name the parameter name
+     * @param value the parameter value
+     */
+	private void debugParam(String name, Object value) {
         debug(name + "=" + value);
     }
 
+	@SuppressWarnings("static-method") // test seam
+	void generate(GeneratorConfig config) throws IOException {
+        FlutterGenerator generator = new FlutterGenerator(config);
+        generator.generate();
+    }
 }

@@ -9,9 +9,18 @@ import org.skyve.web.WebContext;
 
 import modules.admin.ControlPanel.ControlPanelExtension;
 
+/**
+ * Downloads the latest query results generated from Control Panel execution.
+ */
 public class DownloadResults extends DownloadAction<ControlPanelExtension> {
-	private static final String FILE_TITLE = "sail.txt";
+	private static final String FILE_TITLE = "SAIL.txt";
 
+	/**
+	 * Performs the prepare operation.
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public void prepare(ControlPanelExtension bean, WebContext webContext) throws Exception {
 		if (bean.getResults() ==  null) {
@@ -19,6 +28,13 @@ public class DownloadResults extends DownloadAction<ControlPanelExtension> {
 		}	
 	}
 
+	/**
+	 * Performs the download operation.
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public Download download(ControlPanelExtension bean, WebContext webContext) throws Exception {
 		

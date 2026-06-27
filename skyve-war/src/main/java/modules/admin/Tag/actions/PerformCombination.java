@@ -18,10 +18,16 @@ import modules.admin.domain.Tag;
  */
 public class PerformCombination implements ServerSideAction<TagExtension> {
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient TagService tagService;
 
 	/**
-	 * Combine 2 tags with a set operator.
+	 * Applies configured set operation between the current tag and operand tag.
+	 *
+	 * @param bean The subject tag.
+	 * @param webContext The current web context.
+	 * @return The same tag bean.
+	 * @throws Exception If validation or set operation fails.
 	 */
 	@Override
 	public ServerSideActionResult<TagExtension> execute(TagExtension bean, WebContext webContext) throws Exception {

@@ -16,7 +16,7 @@ import org.skyve.CORE;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.metadata.user.User;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import com.google.common.base.MoreObjects;
 
@@ -29,7 +29,7 @@ import jakarta.annotation.Nonnull;
  * If a user is specified that is not currently using the system, the push message is not sent.
  */
 public class PushMessage {
-	private static final Logger LOGGER = LoggerFactory.getLogger(PushMessage.class);
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(PushMessage.class);
 
 	private static final String ITEM_TYPE = "type";
 	private static final String ITEM_SEVERITY = "severity";
@@ -52,6 +52,7 @@ public class PushMessage {
 	 * 
 	 * @param intervalInSeconds How often (in seconds) to scan for stale receivers.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static synchronized void startReaper(int intervalInSeconds) {
 		if (reaperFuture != null) {
 			LOGGER.warn("Push message reaper already running – ignoring duplicate start request");

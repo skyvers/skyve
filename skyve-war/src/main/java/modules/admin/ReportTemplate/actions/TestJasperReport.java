@@ -27,6 +27,12 @@ import modules.admin.domain.ReportTemplate.Mode;
  * Used to test a Jasper {@link ReportTemplate}.
  */
 public class TestJasperReport extends DownloadAction<ReportTemplate> {
+	/**
+	 * Executes prepare.
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public void prepare(ReportTemplate bean, WebContext webContext) throws Exception {
 		// check there are no unsaved changes
@@ -62,9 +68,15 @@ public class TestJasperReport extends DownloadAction<ReportTemplate> {
 		}
 	}
 
+	/**
+	 * Executes download.
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @return the result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public Download download(ReportTemplate bean, WebContext webContext) throws Exception {
-
 		User user = CORE.getUser();
 		Module module = user.getCustomer().getModule(bean.getModuleName());
 		Document document = module.getDocument(user.getCustomer(), bean.getDocumentName());
@@ -101,5 +113,4 @@ public class TestJasperReport extends DownloadAction<ReportTemplate> {
 			return new Download(String.format("%s.pdf", bean.getName()), baos.toByteArray(), MimeType.pdf);
 		}
 	}
-	
 }

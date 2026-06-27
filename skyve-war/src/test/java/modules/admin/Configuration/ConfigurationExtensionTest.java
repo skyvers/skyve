@@ -14,10 +14,12 @@ public class ConfigurationExtensionTest {
 	@Spy
 	private ConfigurationExtension bean;
 
+	@SuppressWarnings("resource")
 	private AutoCloseable closeable;
 	
 	@Before
-	public void setup() throws Exception {
+	@SuppressWarnings("resource")
+	public void setup() {
 		closeable = MockitoAnnotations.openMocks(this);
 	}
 

@@ -6,6 +6,15 @@ import org.skyve.metadata.controller.ImplicitActionName;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB-annotated descriptor for an {@code <ok>} action button in a view.
+ *
+ * <p>An OK action saves the current bean and returns to the parent list/view.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see ValidatableAction
+ */
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "ok")
 public class OKAction extends ValidatableAction {

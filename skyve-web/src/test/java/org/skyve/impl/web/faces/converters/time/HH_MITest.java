@@ -2,6 +2,7 @@ package org.skyve.impl.web.faces.converters.time;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import org.junit.Before;
@@ -10,7 +11,6 @@ import org.skyve.domain.types.TimeOnly;
 import org.skyve.util.Time;
 
 import jakarta.faces.convert.ConverterException;
-
 public class HH_MITest {
 	private HH_MI formatter;
 
@@ -20,7 +20,7 @@ public class HH_MITest {
 	}
 
 	@Test(expected = ConverterException.class)
-	public void testGetAsObjectInvalidFormat() throws Exception {
+	public void testGetAsObjectInvalidFormat() {
 		// call the method under test
 		formatter.getAsObject(null, null, "03-01-2020 02:30:05");
 
@@ -28,7 +28,7 @@ public class HH_MITest {
 	}
 
 	@Test
-	public void testGetAsObjectValidFormatAM() throws Exception {
+	public void testGetAsObjectValidFormatAM() {
 		// setup the test data
 		TimeOnly testDate = new TimeOnly(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 02, 30, 00);
@@ -38,7 +38,7 @@ public class HH_MITest {
 	}
 
 	@Test
-	public void testGetAsObjectValidFormatPM() throws Exception {
+	public void testGetAsObjectValidFormatPM() {
 		// setup the test data
 		TimeOnly testDate = new TimeOnly(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 14, 30, 00);
@@ -48,7 +48,7 @@ public class HH_MITest {
 	}
 
 	@Test
-	public void testGetAsStringAM() throws Exception {
+	public void testGetAsStringAM() {
 		// setup the test data
 		TimeOnly testDate = new TimeOnly(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 02, 30, 55);
@@ -58,12 +58,22 @@ public class HH_MITest {
 	}
 
 	@Test
-	public void testGetAsStringPM() throws Exception {
+	public void testGetAsStringPM() {
 		// setup the test data
 		TimeOnly testDate = new TimeOnly(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 14, 30, 55);
 
 		// call the method under test
 		assertThat(formatter.getAsString(null, null, testDate), is("02:30 PM"));
+	}
+
+	@Test
+	public void testGetAsObjectNullValue() {
+		assertNull(formatter.getAsObject(null, null, null));
+	}
+
+	@Test
+	public void testGetAsStringNullValue() {
+		assertThat(formatter.getAsString(null, null, null), is(""));
 	}
 }

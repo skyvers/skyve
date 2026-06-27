@@ -16,13 +16,11 @@ import modules.admin.domain.SystemDashboard;
  * environment when a new instance is created.
  */
 public class SystemDashboardBizlet extends Bizlet<SystemDashboard> {
-
-        /**
-         * Create a new dashboard instance with runtime status details.
-         */
-        @Override
-        public SystemDashboard newInstance(SystemDashboard bean) throws Exception {
-
+	/**
+	 * Create a new dashboard instance with runtime status details.
+	 */
+	@Override
+	public SystemDashboard newInstance(SystemDashboard bean) throws Exception {
 		// generate status information for display
 		String valTrue = Util.nullSafeI18n("ui.true.valueIconStyleClass");
 		String valFalse = Util.nullSafeI18n("ui.false.valueIconStyleClass");
@@ -118,6 +116,15 @@ public class SystemDashboardBizlet extends Bizlet<SystemDashboard> {
 		return super.newInstance(bean);
 	}
 
+	/**
+	 * Formats a boolean status as a styled icon snippet.
+	 *
+	 * @param value the boolean value to render
+	 * @param valTrue the icon class used for true values
+	 * @param valFalse the icon class used for false values
+	 * @param suggestion the tooltip suggestion for negative outcomes
+	 * @return formatted HTML icon markup
+	 */
 	private static String formatBooleanHTML(final boolean value, final String valTrue, final String valFalse, final String suggestion) {
 		final String template = "<i style='color: %1$s;' class='fa %2$s' title='%3$s' ></i>";
 
@@ -127,10 +134,23 @@ public class SystemDashboardBizlet extends Bizlet<SystemDashboard> {
 		return String.format(template, "#ff6385", valFalse, suggestion);
 	}
 
+	/**
+	 * Formats a plain value as HTML with an optional tooltip.
+	 *
+	 * @param value the display value
+	 * @param suggestion the tooltip text
+	 * @return formatted HTML markup
+	 */
 	private static String formatStringValueHTML(final String value, final String suggestion) {
 		return String.format("<div><i title='%1$s'>%2$s</i></div>", suggestion, value);
 	}
 
+	/**
+	 * Formats a dashboard label cell as left-aligned HTML.
+	 *
+	 * @param label the label text
+	 * @return formatted label markup
+	 */
 	private static String formatLabelHTML(final String label) {
 		return String.format("<div style='text-align: left'>%1$s<div>", label);
 	}

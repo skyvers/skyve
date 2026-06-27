@@ -1,8 +1,6 @@
 package modules.admin.MonitoringDashboard.models;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
@@ -23,8 +21,28 @@ public abstract class AbstractMonitoringChartModel extends ChartModel<Monitoring
 	/**
 	 * Check if the request data is valid for the current period based on the last update time.
 	 * If the last update was too long ago, the data should not be displayed.
+	 *
+	 * @param measurements the measurements value
+	 * @param period the period value
+	 * @return the result
 	 */
 	protected static boolean isDataValidForCurrentPeriod(RequestMeasurements measurements, Period period) {
+		return isDataValidForPeriod(measurements, period);
+	}
+
+	/**
+	 * Check if the request data is valid for the specified period based on the last update time.
+	 * If the last update was too long ago, the data should not be displayed.
+	 *
+	 * @param measurements the measurements value
+	 * @param period the period value
+	 * @return the result
+	 */
+	protected static boolean isDataValidForPeriod(RequestMeasurements measurements, Period period) {
+		return isDataValidForPeriod(measurements, period, Instant.now());
+	}
+
+	static boolean isDataValidForPeriod(RequestMeasurements measurements, Period period, Instant now) {
 		if (measurements == null) {
 			return false;
 		}
@@ -34,16 +52,13 @@ public abstract class AbstractMonitoringChartModel extends ChartModel<Monitoring
 			return false; // No data recorded yet
 		}
 
-		LocalDateTime lastUpdate = LocalDateTime.ofInstant(
-				Instant.ofEpochMilli(lastUpdateTime),
-				ZoneId.systemDefault());
-		LocalDateTime now = LocalDateTime.now();
+		Instant lastUpdate = Instant.ofEpochMilli(lastUpdateTime);
 
 		// Calculate how long ago the last update was
 		long minutesAgo = ChronoUnit.MINUTES.between(lastUpdate, now);
 		long hoursAgo = ChronoUnit.HOURS.between(lastUpdate, now);
 		long daysAgo = ChronoUnit.DAYS.between(lastUpdate, now);
-		long weeksAgo = ChronoUnit.WEEKS.between(lastUpdate, now);
+		long weeksAgo = daysAgo / 7;
 
 		// Determine validity based on time period and staleness
 		return switch (period) {
@@ -57,6 +72,9 @@ public abstract class AbstractMonitoringChartModel extends ChartModel<Monitoring
 
 	/**
 	 * Get a human-readable label for the time period.
+	 *
+	 * @param period the period value
+	 * @return the result
 	 */
 	protected static String getTimePeriodLabel(Period period) {
 		return switch (period) {
@@ -70,6 +88,11 @@ public abstract class AbstractMonitoringChartModel extends ChartModel<Monitoring
 
 	/**
 	 * Build time series data, only including time points with meaningful values.
+	 *
+	 * @param timeLabels the output list of formatted time labels
+	 * @param values the output list of numeric values
+	 * @param data the source time-indexed data map
+	 * @param period the selected monitoring period
 	 */
 	protected static void buildTimeSeriesData(List<String> timeLabels, List<Number> values,
 			Map<Integer, ? extends Number> data, Period period) {
@@ -107,6 +130,9 @@ public abstract class AbstractMonitoringChartModel extends ChartModel<Monitoring
 	/**
 	 * Build a request key from the bean's request stats selections.
 	 * Format: {type}{module}.{document}^{component}
+	 *
+	 * @param bean the bean value
+	 * @return the result
 	 */
 	protected static String buildRequestKey(MonitoringDashboard bean) {
 		StringBuilder result = new StringBuilder();
@@ -138,6 +164,9 @@ public abstract class AbstractMonitoringChartModel extends ChartModel<Monitoring
 
 	/**
 	 * Get a human-readable description of the request selection.
+	 *
+	 * @param bean the bean value
+	 * @return the result
 	 */
 	protected static String getRequestDescription(MonitoringDashboard bean) {
 		StringBuilder result = new StringBuilder();

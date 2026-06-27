@@ -11,6 +11,15 @@ import org.skyve.domain.messages.NoResultsException;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
+/**
+ * Base class for all Skyve query implementations, holding shared parameter state,
+ * driving document metadata, and timeout configuration.
+ *
+ * <p>Three concrete query styles extend this class:
+ * {@link AbstractDocumentQuery} (document-object queries),
+ * {@link AbstractBizQL} (Skyve BizQL string queries), and
+ * {@link AbstractSQL} (raw SQL queries).
+ */
 public abstract class AbstractQuery {
 	protected Map<String, Object> parameters = new TreeMap<>();
 	

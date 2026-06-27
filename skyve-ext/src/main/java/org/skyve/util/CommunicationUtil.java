@@ -35,16 +35,24 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nonnull;
 
+/**
+ * Executes communication-template workflows for {@code admin.Communication} documents.
+ *
+ * <p>This utility resolves recipients, applies template/body bindings, assembles
+ * attachments (including optional calendar payloads), and dispatches via SMTP or
+ * writes message files depending on the configured action path.
+ */
 public class CommunicationUtil {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CommunicationUtil.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(CommunicationUtil.class);
 
 	private static final String EMAIL_ADDRESS_DELIMETERS = "[,;]";
 	private static final String INVALID_RESOLVED_EMAIL_ADDRESS = "The sendTo address could not be resolved to a valid email address";
+	private static final String DEFAULT_ATTACHMENT_NAME = "attachment";
 	public static final String SPECIAL_BEAN_URL = "{#url}";
 	public static final String SPECIAL_CONTEXT = "{#context}";
 	public static final String SPECIAL_LOGOUT_URL = "{#resetPasswordUrl}";
@@ -55,7 +63,7 @@ public class CommunicationUtil {
 	 * 
 	 * SILENT logs any exception stack EXPLICIT throws any exception
 	 */
-	public static enum ResponseMode {
+	public enum ResponseMode {
 		SILENT, EXPLICIT;
 	}
 
@@ -67,14 +75,17 @@ public class CommunicationUtil {
 	 * action can be performed (for example to test whether a communication
 	 * message is valid and can be bound with the beans provided)
 	 */
-	public static enum RunMode {
+	public enum RunMode {
 		ACTION, TEST;
 	}
 
-	public static enum ActionType {
+	public enum ActionType {
 		FILE, SMTP;
 	}
 
+	/**
+	 * Holds generated calendar links and iCalendar payload bytes for a communication.
+	 */
 	public static class CommunicationCalendarItem {
 		private String googleCalendarLink;
 		private String yahooCalendarLink;
@@ -119,6 +130,7 @@ public class CommunicationUtil {
 	 * 
 	 * @throws Exception
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static String actionCommunicationRequest(WebContext webContext, ActionType actionType, Communication communication, RunMode runMode, ResponseMode responseMode,
 			MailAttachment[] additionalAttachments, @Nonnull Bean... specificBeans) throws Exception {
 
@@ -231,7 +243,8 @@ public class CommunicationUtil {
 				if (RunMode.ACTION.equals(runMode)) {
 					switch (communication.getFormatType()) {
 					case email:
-						EXT.writeMail(new Mail().addTo(sendToAddresses)
+						EXT.getMailService()
+								.writeMail(new Mail().addTo(sendToAddresses)
 													.addCC(ccToAddresses)
 													.addBCC(bcc)
 													.from(sendFrom)
@@ -259,7 +272,8 @@ public class CommunicationUtil {
 			if (RunMode.ACTION.equals(runMode)) {
 				switch (communication.getFormatType()) {
 				case email:
-					EXT.sendMail(new Mail().addTo(sendToAddresses)
+					EXT.getMailService()
+							.sendMail(new Mail().addTo(sendToAddresses)
 											.addCC(ccToAddresses)
 											.addBCC(bcc)
 											.from(sendFrom)
@@ -287,6 +301,7 @@ public class CommunicationUtil {
 	 * @param addressList
 	 * @return
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static List<String> resolveAndValidateEmailAddressList(String addressList, ResponseMode responseMode, Document communicationDoc,
 			Document subscriptionDoc) throws Exception {
 
@@ -388,14 +403,15 @@ public class CommunicationUtil {
 	}
 
 	/**
-	 * Wrapper specific for generating to file
+	 * Generates communication output to file storage rather than sending via SMTP.
 	 * 
-	 * @param communication
-	 * @param runMode
-	 * @param responseMode
-	 * @param additionalAttachments
-	 * @param specificBeans
-	 * @throws Exception
+	 * @param communication Communication definition to execute
+	 * @param runMode Whether to execute or dry-run
+	 * @param responseMode Exception handling mode
+	 * @param additionalAttachments Attachments to append ahead of configured attachments
+	 * @param specificBeans Binding context beans
+	 * @return Generated output file path when generation occurs, otherwise {@code null}
+	 * @throws Exception If generation fails and explicit mode is used
 	 */
 	public static String generate(Communication communication, RunMode runMode, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... specificBeans)
 			throws Exception {
@@ -405,11 +421,10 @@ public class CommunicationUtil {
 	/**
 	 * Retrieves a persisted system communication with the nominated description
 	 * 
-	 * @param description
-	 * @return
-	 * @throws Exception
+	 * @param description Communication description to search for
+	 * @return Matching system communication, or {@code null} when not found
 	 */
-	public static Communication getSystemCommunicationByDescription(String description) throws Exception {
+	public static Communication getSystemCommunicationByDescription(String description) {
 		return CORE.getPersistence().withDocumentPermissionScopes(DocumentPermissionScope.customer, p -> {
 			DocumentQuery query = p.newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.COMMUNICATION_DOCUMENT_NAME);
 			query.getFilter().addEquals(AppConstants.DESCRIPTION_ATTRIBUTE_NAME, description);
@@ -452,7 +467,13 @@ public class CommunicationUtil {
 	/**
 	 * Creates the required system communication if it does not exist
 	 * 
-	 * @return
+	 * @param description Communication description key
+	 * @param sendToExpression Recipient expression
+	 * @param ccExpression CC expression
+	 * @param defaultSubject Default subject template
+	 * @param defaultBody Default body template
+	 * @return Existing or newly created persisted communication
+	 * @throws Exception If initialisation fails
 	 */
 	public static Communication initialiseSystemCommunication(String description, String sendToExpression, String ccExpression, String defaultSubject, String defaultBody)
 			throws Exception {
@@ -483,6 +504,15 @@ public class CommunicationUtil {
 		return result;
 	}
 
+	/**
+	 * Creates a system communication with default recipient expression when absent.
+	 *
+	 * @param description Communication description key
+	 * @param defaultSubject Default subject template
+	 * @param defaultBody Default body template
+	 * @return Existing or newly created persisted communication
+	 * @throws Exception If initialisation fails
+	 */
 	public static Communication initialiseSystemCommunication(String description, String defaultSubject, String defaultBody) throws Exception {
 
 		return initialiseSystemCommunication(description, "{contact.email1}", null, defaultSubject, defaultBody);
@@ -507,6 +537,17 @@ public class CommunicationUtil {
 		sendFailSafeSystemCommunication(webContext, description, sendTo, ccTo, defaultSubject, defaultBody, responseMode, additionalAttachments, beans);
 	}
 
+	/**
+	 * Fail-safe sends a system communication using default recipient expressions.
+	 *
+	 * @param description Communication description key
+	 * @param defaultSubject Default subject template
+	 * @param defaultBody Default body template
+	 * @param responseMode Exception handling mode
+	 * @param additionalAttachments Attachments to append
+	 * @param beans Binding context beans
+	 * @throws Exception If initialisation or send fails in explicit mode
+	 */
 	public static void sendFailSafeSystemCommunication(String description, String defaultSubject, String defaultBody, ResponseMode responseMode,
 			MailAttachment[] additionalAttachments, Bean... beans) throws Exception {
 		sendFailSafeSystemCommunication(null, description, defaultSubject, defaultBody, responseMode, additionalAttachments, beans);
@@ -524,12 +565,27 @@ public class CommunicationUtil {
 	 * @param bean
 	 * @throws Exception
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public static void sendFailSafeSystemCommunication(WebContext webContext, String description, String sendTo, String ccTo, String defaultSubject, String defaultBody,
 			ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... beans) throws Exception {
 		Communication c = initialiseSystemCommunication(description, sendTo, ccTo, defaultSubject, defaultBody);
 		actionCommunicationRequest(webContext, ActionType.SMTP, c, RunMode.ACTION, responseMode, additionalAttachments, beans);
 	}
 
+	/**
+	 * Fail-safe sends a system communication using explicit recipient expressions.
+	 *
+	 * @param description Communication description key
+	 * @param sendTo Recipient expression
+	 * @param ccTo CC expression
+	 * @param defaultSubject Default subject template
+	 * @param defaultBody Default body template
+	 * @param responseMode Exception handling mode
+	 * @param additionalAttachments Attachments to append
+	 * @param beans Binding context beans
+	 * @throws Exception If initialisation or send fails in explicit mode
+	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public static void sendFailSafeSystemCommunication(String description, String sendTo, String ccTo, String defaultSubject, String defaultBody, ResponseMode responseMode,
 			MailAttachment[] additionalAttachments, Bean... beans) throws Exception {
 		sendFailSafeSystemCommunication(null, description, sendTo, ccTo, defaultSubject, defaultBody, responseMode, additionalAttachments, beans);
@@ -542,9 +598,9 @@ public class CommunicationUtil {
 	 * Using the tag, format and action type, run the one shot job to either
 	 * test, send or generate the communication files.
 	 * 
-	 * @param communication
-	 * @return
-	 * @throws Exception
+	 * @param bean Communication instance driving the one-shot job request
+	 * @return Persisted communication instance with updated results text
+	 * @throws Exception If job kickoff cannot be scheduled
 	 */
 	public static <T extends Communication> T kickOffJob(T bean) throws Exception {
 
@@ -710,7 +766,7 @@ public class CommunicationUtil {
 			if (communication.getAttachmentFileName1() != null && communication.getAttachment1() != null) {
 				AttachmentContent content1 = cm.getAttachment(communication.getAttachment1());
 				byte[] fileBytes1 = content1.getContentBytes();
-				String attachmentName1 = (communication.getAttachmentFileName1() == null ? "attachment" : communication.getAttachmentFileName1());
+				String attachmentName1 = (communication.getAttachmentFileName1() == null ? DEFAULT_ATTACHMENT_NAME : communication.getAttachmentFileName1());
 				ma1 = new MailAttachment(attachmentName1, fileBytes1, content1.getMimeType());
 			}
 
@@ -718,7 +774,7 @@ public class CommunicationUtil {
 			if (communication.getAttachmentFileName2() != null && communication.getAttachment2() != null) {
 				AttachmentContent content2 = cm.getAttachment(communication.getAttachment2());
 				byte[] fileBytes2 = content2.getContentBytes();
-				String attachmentName2 = (communication.getAttachmentFileName2() == null ? "attachment" : communication.getAttachmentFileName2());
+				String attachmentName2 = (communication.getAttachmentFileName2() == null ? DEFAULT_ATTACHMENT_NAME : communication.getAttachmentFileName2());
 				ma2 = new MailAttachment(attachmentName2, fileBytes2, content2.getMimeType());
 			}
 
@@ -726,7 +782,7 @@ public class CommunicationUtil {
 			if (communication.getAttachmentFileName3() != null && communication.getAttachment3() != null) {
 				AttachmentContent content3 = cm.getAttachment(communication.getAttachment3());
 				byte[] fileBytes3 = content3.getContentBytes();
-				String attachmentName3 = (communication.getAttachmentFileName3() == null ? "attachment" : communication.getAttachmentFileName3());
+				String attachmentName3 = (communication.getAttachmentFileName3() == null ? DEFAULT_ATTACHMENT_NAME : communication.getAttachmentFileName3());
 				ma3 = new MailAttachment(attachmentName3, fileBytes3, content3.getMimeType());
 			}
 		}
@@ -748,7 +804,7 @@ public class CommunicationUtil {
 	 * @return
 	 * @throws Exception
 	 */
-	public static String formatCommunicationMessage(Customer customer, String expression, Bean... beans) throws Exception {
+	public static String formatCommunicationMessage(Customer customer, String expression, Bean... beans) {
 		String result = expression;
 		
 		if (result != null) {
@@ -782,7 +838,7 @@ public class CommunicationUtil {
 		String[] lines = html.split("\n");
 		for (String line : lines) {
 			sb.append(line);
-			if (line.length() > 0 && !line.endsWith(">")) {
+			if ((! line.isEmpty()) && (! line.endsWith(">"))) {
 				sb.append("<br>\n");
 			} else {
 				sb.append("\n");

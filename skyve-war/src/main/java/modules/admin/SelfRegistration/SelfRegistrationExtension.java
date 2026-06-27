@@ -15,8 +15,11 @@ import modules.admin.domain.Contact;
 import modules.admin.domain.SelfRegistration;
 import modules.admin.domain.User;
 
+/**
+ * Extends {@link SelfRegistration} with cross-field validation and helper
+ * accessors used by the public registration view.
+ */
 public class SelfRegistrationExtension extends SelfRegistration {
-
 	private static final long serialVersionUID = 4437526012340020305L;
 
 	private static final String EMAIL_MISMATCH = "You did not type the same email. Please re-enter your email again.";
@@ -52,7 +55,9 @@ public class SelfRegistrationExtension extends SelfRegistration {
 
 	/**
 	 * This is called from a Skyve EL expression within the recaptcha blurb in the edit view.
-	 * @return	The site key.
+	 *
+	 * @return the active captcha site key, or {@code null} when captcha is not
+	 *         configured
 	 */
 	public String getSiteKey() {
 		if(isShowGoogleRecaptcha()) {
@@ -68,7 +73,8 @@ public class SelfRegistrationExtension extends SelfRegistration {
 	 * Validates that the password and confirmPassword entered during a SelfRegistration
 	 * match.
 	 * 
-	 * @throws A {@link ValidationException} if there are any problems.
+	 * @throws ValidationException if the password fields are missing, mismatched,
+	 *         or fail configured complexity rules
 	 */
 	public void validateConfirmPassword() {
 		if (getUser() != null) {
@@ -119,7 +125,11 @@ public class SelfRegistrationExtension extends SelfRegistration {
 	/**
 	 * Validates that the email and confirmEmail entered during a SelfRegistration
 	 * match. Throws a {@link ValidationException} if there are any problems.
+	 *
+	 * @throws ValidationException if either field is blank or the values do not
+	 *         match
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void validateConfirmEmail() {
 		if (getUser() != null) {
 			Contact contact = getUser().getContact();

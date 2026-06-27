@@ -33,6 +33,20 @@ import org.skyve.metadata.module.Module;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
+/**
+ * Evaluates, formats, and validates Skyve expression syntax.
+ *
+ * <p>Expressions are resolved by a registered evaluator prefix (for example binding,
+ * EL, i18n, role, or stash). Unprefixed expressions are interpreted as implicit
+ * built-ins (such as {@code {USER}}) or binding expressions.
+ *
+ * <p>This class is also responsible for optional format-suffix handling using
+ * {@link org.skyve.domain.types.formatters.Formatter} resolution.
+ *
+ * <p>Threading: evaluator registration is expected during startup; read operations
+ * ({@link #evaluate}, {@link #format}, {@link #validate}) are thread-safe for runtime use.
+ */
+@SuppressWarnings({"java:S2390", "java:S6548"}) // This class represents a strong cohesive collaboration between it and its subclasses
 public abstract class ExpressionEvaluator {
 	public static final String USER_EXPRESSION = "USER";
 	public static final String USERID_EXPRESSION = "USERID";
@@ -45,6 +59,9 @@ public abstract class ExpressionEvaluator {
 	public static final String DATETIME_EXPRESSION = "DATETIME";
 	public static final String TIMESTAMP_EXPRESSION = "TIMESTAMP";
 	public static final String URL_EXPRESSION = "URL";
+
+	private static final String MISSING_EVALUATOR_PREFIX = "Cannot find an expression evaluator for prefix ";
+	private static final String FORMATTER_PREFIX = "Formatter ";
 
 	// Map of expression evaluator implementations keyed by their prefix
 	private static final Map<String, ExpressionEvaluator> EVALUATORS = new TreeMap<>();
@@ -159,6 +176,7 @@ public abstract class ExpressionEvaluator {
 	 * @param document	The document to validate for.
 	 * @return	null if valid or the error message if not.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static @Nullable String validate(@Nonnull String expression,
 												@Nullable Class<?> returnType,
 												@Nullable Customer customer,
@@ -179,10 +197,10 @@ public abstract class ExpressionEvaluator {
 			}
 			formatter = Formatters.get(formatName);
 			if (formatter == null) {
-				return "Formatter " + formatName + " does not exist";
+				return FORMATTER_PREFIX + formatName + " does not exist";
 			}
 			if ((returnType != null) && (! returnType.isAssignableFrom(String.class))) {
-				return "Formatter " + formatName + " evaluates to a String, not " + returnType;
+				return FORMATTER_PREFIX + formatName + " evaluates to a String, not " + returnType;
 			}
 		}
 		
@@ -238,7 +256,7 @@ public abstract class ExpressionEvaluator {
 			// Select the evaluator
 			ExpressionEvaluator eval = EVALUATORS.get(prefix);
 			if (eval == null) {
-				result = "Cannot find an expression evaluator for prefix " + prefix;
+				result = MISSING_EVALUATOR_PREFIX + prefix;
 			}
 			else {
 				result = eval.validateWithoutPrefixOrSuffix(expressionWithoutPrefixOrSuffix,
@@ -252,7 +270,7 @@ public abstract class ExpressionEvaluator {
 		
 		if ((formatter != null) && (result == null) && (testType != null)) { // valid expression but we still need to validate the format
 			if (! formatter.getValueType().isAssignableFrom(testType)) {
-				result = "Formatter " + formatName + " for type " + formatter.getValueType() + 
+				result = FORMATTER_PREFIX + formatName + " for type " + formatter.getValueType() +
 							" is incompatible with expression " +
 							expressionWithoutSuffix + " of type " + testType;
 			}
@@ -314,7 +332,7 @@ public abstract class ExpressionEvaluator {
 
 		ExpressionEvaluator eval = EVALUATORS.get(prefix);
 		if (eval == null) {
-			throw new DomainException("Cannot find an expression evaluator for prefix " + prefix);
+			throw new DomainException(MISSING_EVALUATOR_PREFIX + prefix);
 		}
 		
 		StringBuilder result = new StringBuilder(expressionWithoutPrefixOfSuffix);
@@ -382,6 +400,7 @@ public abstract class ExpressionEvaluator {
 	 * @param document	The document to complete for.
 	 * @return	A list of valid completions.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static @Nonnull List<String> completeExpression(@Nullable String fragment,
 															@Nonnull Customer customer,
 															@Nonnull Module module,
@@ -517,6 +536,7 @@ public abstract class ExpressionEvaluator {
 	 * @param format Whether this is called by format(), otherwise called by evaluate().
 	 * @return The evaluated expression.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static Object process(String expression, Bean bean, boolean format) {
 		String expressionWithoutSuffix = expression;
 		String formatName = null;
@@ -657,7 +677,7 @@ public abstract class ExpressionEvaluator {
 
 		ExpressionEvaluator eval = EVALUATORS.get(prefix);
 		if (eval == null) {
-			throw new DomainException("Cannot find an expression evaluator for prefix " + prefix);
+			throw new DomainException(MISSING_EVALUATOR_PREFIX + prefix);
 		}
 		
 		if (formatName != null) {

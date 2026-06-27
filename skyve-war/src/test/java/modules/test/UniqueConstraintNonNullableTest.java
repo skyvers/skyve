@@ -5,8 +5,8 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.skyve.CORE;
 import org.skyve.domain.messages.UniqueConstraintViolationException;
@@ -14,22 +14,23 @@ import org.skyve.util.test.TestUtil;
 
 import modules.test.domain.UniqueConstraintNonNullable;
 
-public class UniqueConstraintNonNullableTest extends AbstractSkyveTest {
+@SuppressWarnings({ "java:S5778", "java:S1130", "java:S1854" })
+class UniqueConstraintNonNullableTest extends AbstractSkyveTest {
 
 	private UniqueConstraintNonNullable uniqueConstraintNonNullable;
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		uniqueConstraintNonNullable = TestUtil.constructRandomInstance(u, m, ucnn, 0);
 	}
 
 	@Test
-	public void testSaveSingleInstance() throws Exception {
-		CORE.getPersistence().save(uniqueConstraintNonNullable);
+	void testSaveSingleInstance() throws Exception {
+		Assertions.assertDoesNotThrow(() -> CORE.getPersistence().save(uniqueConstraintNonNullable));
 	}
 
 	@Test
-	public void testSaveTwoDifferentInstances() throws Exception {
+	void testSaveTwoDifferentInstances() throws Exception {
 		// setup the test data
 		UniqueConstraintNonNullable uniqueConstraintNonNullable2 = TestUtil.constructRandomInstance(u, m, ucnn, 0);
 
@@ -43,8 +44,8 @@ public class UniqueConstraintNonNullableTest extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testSaveTwoIdenticalInstances() throws Exception {
-		UniqueConstraintViolationException ucve = Assert.assertThrows(UniqueConstraintViolationException.class, () -> {
+	void testSaveTwoIdenticalInstances() throws Exception {
+		UniqueConstraintViolationException ucve = Assertions.assertThrows(UniqueConstraintViolationException.class, () -> {
 			// setup the test data
 			UniqueConstraintNonNullable uniqueConstraintNonNullable2 = UniqueConstraintNonNullable.newInstance();
 			uniqueConstraintNonNullable2.setBooleanFlag(uniqueConstraintNonNullable.getBooleanFlag());

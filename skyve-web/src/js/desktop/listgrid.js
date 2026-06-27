@@ -1777,6 +1777,7 @@ isc.BizListGrid.addMethods({
 
 						// For floating filter icon in grid
 						summaryFields.add({ name: "_filter", width: 16 });
+						this._summaryGrid.setFields(summaryFields);
 
 						// Extract and set summary data
 						const summaryData = newData.pop();

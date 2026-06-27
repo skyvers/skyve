@@ -27,12 +27,20 @@ import jakarta.faces.event.PhaseId;
 import jakarta.faces.event.PhaseListener;
 import jakarta.servlet.http.HttpServletRequest;
 
+/**
+ * Listens for lifecycle events and applies Skyve-specific web behavior.
+ */
 public class SkyveFacesPhaseListener implements PhaseListener {
 	private static final long serialVersionUID = 3757264858610371158L;
 
 	private static final Logger FACES_LOGGER = Category.FACES.logger();
 	private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
 
+	/**
+	 * Logs and prepares pre-phase diagnostics for the JSF lifecycle.
+	 *
+	 * @param event the current JSF phase event
+	 */
 	@Override
 	public void beforePhase(PhaseEvent event) {
 		if (UtilImpl.FACES_TRACE) {
@@ -41,6 +49,11 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 		}
 	}
 
+	/**
+	 * Executes Skyve lifecycle hooks after each JSF phase.
+	 *
+	 * @param event the current JSF phase event
+	 */
 	@Override
 	public void afterPhase(PhaseEvent event) {
 		PhaseId phaseId = event.getPhaseId();
@@ -67,11 +80,22 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 		}
 	}
 
+	/**
+	 * Subscribes to all JSF phases.
+	 *
+	 * @return {@link PhaseId#ANY_PHASE}
+	 */
 	@Override
 	public PhaseId getPhaseId() {
 		return PhaseId.ANY_PHASE;
 	}
 	
+	/**
+	 * Restores any cached Skyve conversation before JSF processing continues and begins a persistence transaction.
+	 *
+	 * @param event the current RESTORE_VIEW phase event
+	 * @throws Exception when cached conversation restoration fails
+	 */
 	private static void afterRestoreView(PhaseEvent event)
 	throws Exception {
 		FacesContext fc = event.getFacesContext();
@@ -109,6 +133,13 @@ public class SkyveFacesPhaseListener implements PhaseListener {
     	WebUtil.processUserPrincipalForRequest(request, (userPrincipal == null) ? null : userPrincipal.getName());
 	}
 
+	/**
+	 * Rehydrates the supplied Faces view from its cached web context and binds the conversation to the thread.
+	 *
+	 * @param view the faces view to hydrate
+	 * @param ec the external context associated with the current request
+	 * @throws Exception when conversation restoration fails
+	 */
 	private static void restore(FacesView view, ExternalContext ec)
 	throws Exception {
 		// restore the context
@@ -123,6 +154,13 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 		}
 	}
 
+	/**
+	 * Restores a cached conversation by web id and binds its persistence context to the current thread.
+	 *
+	 * @param webId the cached conversation identifier
+	 * @param ec the external context associated with the current request
+	 * @throws Exception when conversation restoration fails
+	 */
 	private static void restore(String webId, ExternalContext ec)
 	throws Exception {
 		// restore the context
@@ -134,6 +172,11 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 		}
 	}
 
+	/**
+	 * Gathers dual-list model state after model updates so pending list mutations survive later dehydration.
+	 *
+	 * @param event the current UPDATE_MODEL_VALUES phase event
+	 */
 	private static void afterUpdateModelValues(PhaseEvent event) {
 		UIViewRoot vr = event.getFacesContext().getViewRoot();
 		if (vr != null) {
@@ -146,6 +189,14 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 		}
 	}
 
+	/**
+	 * Performs post-render hooks, recaches the conversation when the response is error-free, dehydrates the view,
+	 * and finally commits and disconnects persistence for the completed Faces response.
+	 *
+	 * @param event the current rendering-complete phase event
+	 * @throws Exception when post-render lifecycle processing fails
+	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static void afterResponseRendered(PhaseEvent event)
 	throws Exception {
 		try {
@@ -177,8 +228,17 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 
 						// Cache the conversation
 						Severity maximumSeverity = event.getFacesContext().getMaximumSeverity();
-						if ((maximumSeverity == null) || 
+						if ((maximumSeverity == null) ||
 								(maximumSeverity.getOrdinal() < FacesMessage.SEVERITY_ERROR.getOrdinal())) {
+							// Commit (which ends the transaction and releases the JDBC connection) BEFORE
+							// serialising the conversation, so the Hibernate session is disconnected and
+							// serialises cleanly. A list grid that runs a query during the JSF RENDER phase
+							// otherwise leaves the session connected, causing "Cannot serialize SessionImpl
+							// while connected" and a corrupted conversation. Pass false so the EntityManager
+							// stays open for the cached conversation to be restored; the finally block below
+							// performs the final commit(true) which closes it. This is a reorder of the commit
+							// that already happens every request, not an additional commit.
+							AbstractPersistence.get().commit(false);
 							StateUtil.cacheConversation(webContext);
 						}
 						// Dehydrate the view

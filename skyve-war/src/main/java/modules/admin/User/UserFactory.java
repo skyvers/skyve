@@ -14,13 +14,21 @@ import modules.admin.domain.Contact;
 import modules.admin.domain.Group;
 import modules.admin.domain.User;
 
+/**
+ * Creates test fixtures for admin {@link User} documents.
+ */
 @SkyveFactory(excludedActions = { Check.class, GeneratePassword.class, Next.class, ResendActivation.class,
 		New.class }, excludedUpdateAttributes = { User.passwordLastChangedCountryCodePropertyName,
 				User.passwordLastChangedCountryNamePropertyName })
 public class UserFactory {
-
+	/**
+	 * Builds a CRUD-oriented user fixture including contact and at least one group.
+	 *
+	 * @return A test-ready user extension.
+	 * @throws Exception If fixture construction fails.
+	 */
 	@SkyveFixture(types = FixtureType.crud)
-	public static UserExtension crudInstance() throws Exception {
+	public static UserExtension crudInstance() {
 		UserExtension user = new DataBuilder().factoryBuild(User.MODULE_NAME, User.DOCUMENT_NAME);
 		user.setConfirmPassword(null);
 		user.setGeneratedPassword(null);

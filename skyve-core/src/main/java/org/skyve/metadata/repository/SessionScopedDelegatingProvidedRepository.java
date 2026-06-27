@@ -4,6 +4,7 @@ import java.io.File;
 import java.sql.Connection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.skyve.domain.Bean;
@@ -35,33 +36,48 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 /**
- * Implements a repository that delegates to a map of other repository delegates keyed by the User's session ID.
- * This is thread-safe and setSessionDelegate() and removeSessionDelegate() can be called safely at any time.
+ * Routes repository lookups to a per-session delegate repository.
+ *
+ * <p>Delegates are keyed by {@code User#getSessionId()}. If no delegate exists
+ * for the current session, lookup methods return {@code null} or an empty
+ * result according to method contract.
+ *
+ * <p>Threading: thread-safe for delegate registration/removal and lookup via
+ * {@link ConcurrentHashMap}; thread affinity for user/persistence context is
+ * provided by {@link AbstractPersistence}.
  */
 public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositoryFactory {
 	private ConcurrentHashMap<String, ProvidedRepository> sessionScopedDelegates = new ConcurrentHashMap<>();
 	
+	/**
+	 * Returns the sessionDelegate.
+	 * @return the result
+	 */
 	public @Nullable ProvidedRepository getSessionDelegate() {
 		if (AbstractPersistence.isPresent()) {
-			User user = AbstractPersistence.get().getUser();
-			if (user != null) {
-				return getSessionDelegate(user);
-			}
+			return Optional.ofNullable(AbstractPersistence.get().getUser()).map(this::getSessionDelegate).orElse(null);
 		}
 		return null;
 	}
 	
+	/**
+	 * Returns the sessionDelegate.
+	 * @param user the user
+	 * @return the result
+	 */
 	public @Nullable ProvidedRepository getSessionDelegate(@Nonnull User user) {
 		String sessionId = user.getSessionId();
 		return (sessionId == null) ? null : sessionScopedDelegates.get(sessionId);
 	}
 	
+	/**
+	 * Sets the sessionDelegate.
+	 * @param delegate the delegate
+	 */
 	public void setSessionDelegate(@Nonnull ProvidedRepository delegate) {
 		if (AbstractPersistence.isPresent()) {
-			User user = AbstractPersistence.get().getUser();
-			if (user == null) {
-				throw new IllegalStateException("No user on the persistence on this thread");
-			}
+			User user = Optional.ofNullable(AbstractPersistence.get().getUser())
+								.orElseThrow(() -> new IllegalStateException("No user on the persistence on this thread"));
 			setSessionDelegate(user, delegate);
 		}
 		else {
@@ -69,6 +85,11 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		}
 	}
 	
+	/**
+	 * Sets the sessionDelegate.
+	 * @param user the user
+	 * @param delegate the delegate
+	 */
 	public void setSessionDelegate(@Nonnull User user, @Nonnull ProvidedRepository delegate) {
 		String sessionId = user.getSessionId();
 		if (sessionId == null) {
@@ -77,12 +98,13 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		sessionScopedDelegates.put(sessionId, delegate);
 	}
 
+	/**
+	 * Executes removeSessionDelegate.
+	 */
 	public void removeSessionDelegate() {
 		if (AbstractPersistence.isPresent()) {
-			User user = AbstractPersistence.get().getUser();
-			if (user == null) {
-				throw new IllegalStateException("No user on the persistence on this thread");
-			}
+			User user = Optional.ofNullable(AbstractPersistence.get().getUser())
+								.orElseThrow(() -> new IllegalStateException("No user on the persistence on this thread"));
 			removeSessionDelegate(user);
 		}
 		else {
@@ -90,6 +112,10 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		}
 	}
 	
+	/**
+	 * Executes removeSessionDelegate.
+	 * @param user the user
+	 */
 	public void removeSessionDelegate(@Nonnull User user) {
 		String sessionId = user.getSessionId();
 		if (sessionId == null) {
@@ -98,6 +124,10 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		sessionScopedDelegates.remove(sessionId);
 	}
 
+	/**
+	 * Executes evictCachedMetaData.
+	 * @param customer the customer
+	 */
 	@Override
 	public void evictCachedMetaData(Customer customer) {
 		ProvidedRepository delegate = getSessionDelegate();
@@ -106,6 +136,13 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		}
 	}
 
+	/**
+	 * Executes findResourceFile.
+	 * @param resourcePath the resourcePath
+	 * @param customerName the customerName
+	 * @param moduleName the moduleName
+	 * @return the result
+	 */
 	@Override
 	public File findResourceFile(String resourcePath, String customerName, String moduleName) {
 		File result = null;
@@ -116,6 +153,10 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		return result;
 	}
 
+	/**
+	 * Returns the router.
+	 * @return the result
+	 */
 	@Override
 	public Router getRouter() {
 		Router result = null;
@@ -126,6 +167,11 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		return result;
 	}
 
+	/**
+	 * Returns the customer.
+	 * @param customerName the customerName
+	 * @return the result
+	 */
 	@Override
 	public Customer getCustomer(String customerName) {
 		Customer result = null;
@@ -136,6 +182,14 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		return result;
 	}
 
+	/**
+	 * Returns the dynamicImage.
+	 * @param customer the customer
+	 * @param document the document
+	 * @param imageName the imageName
+	 * @param runtime the runtime
+	 * @return the result
+	 */
 	@Override
 	public <T extends Bean> DynamicImage<T> getDynamicImage(Customer customer, Document document, String imageName, boolean runtime) {
 		DynamicImage<T> result = null;
@@ -146,6 +200,14 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		return result;
 	}
 
+	/**
+	 * Returns the view.
+	 * @param uxui the uxui
+	 * @param customer the customer
+	 * @param document the document
+	 * @param name the name
+	 * @return the result
+	 */
 	@Override
 	public View getView(String uxui, Customer customer, Document document, String name) {
 		View result = null;
@@ -156,6 +218,13 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		return result;
 	}
 
+	/**
+	 * Returns the metaDataAction.
+	 * @param customer the customer
+	 * @param document the document
+	 * @param actionName the actionName
+	 * @return the result
+	 */
 	@Override
 	public ActionMetaData getMetaDataAction(Customer customer, Document document, String actionName) {
 		ActionMetaData result = null;
@@ -166,6 +235,14 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		return result;
 	}
 
+	/**
+	 * Returns the comparisonModel.
+	 * @param customer the customer
+	 * @param document the document
+	 * @param modelName the modelName
+	 * @param runtime the runtime
+	 * @return the result
+	 */
 	@Override
 	public <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(Customer customer, Document document, String modelName, boolean runtime) {
 		ComparisonModel<T, C> result = null;
@@ -176,6 +253,14 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		return result;
 	}
 
+	/**
+	 * Returns the mapModel.
+	 * @param customer the customer
+	 * @param document the document
+	 * @param modelName the modelName
+	 * @param runtime the runtime
+	 * @return the result
+	 */
 	@Override
 	public <T extends Bean> MapModel<T> getMapModel(Customer customer, Document document, String modelName, boolean runtime) {
 		MapModel<T> result = null;
@@ -186,6 +271,14 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		return result;
 	}
 
+	/**
+	 * Returns the chartModel.
+	 * @param customer the customer
+	 * @param document the document
+	 * @param modelName the modelName
+	 * @param runtime the runtime
+	 * @return the result
+	 */
 	@Override
 	public <T extends Bean> ChartModel<T> getChartModel(Customer customer, Document document, String modelName, boolean runtime) {
 		ChartModel<T> result = null;
@@ -196,6 +289,14 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		return result;
 	}
 
+	/**
+	 * Returns the listModel.
+	 * @param customer the customer
+	 * @param document the document
+	 * @param modelName the modelName
+	 * @param runtime the runtime
+	 * @return the result
+	 */
 	@Override
 	public <T extends Bean> ListModel<T> getListModel(Customer customer, Document document, String modelName, boolean runtime) {
 		ListModel<T> result = null;
@@ -206,6 +307,14 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		return result;
 	}
 
+	/**
+	 * Returns the serverSideAction.
+	 * @param customer the customer
+	 * @param document the document
+	 * @param className the className
+	 * @param runtime the runtime
+	 * @return the result
+	 */
 	@Override
 	public ServerSideAction<Bean> getServerSideAction(Customer customer, Document document, String className, boolean runtime) {
 		ServerSideAction<Bean> result = null;
@@ -216,6 +325,14 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		return result;
 	}
 
+	/**
+	 * Returns the bizExportAction.
+	 * @param customer the customer
+	 * @param document the document
+	 * @param className the className
+	 * @param runtime the runtime
+	 * @return the result
+	 */
 	@Override
 	public BizExportAction getBizExportAction(Customer customer, Document document, String className, boolean runtime) {
 		BizExportAction result = null;
@@ -226,6 +343,14 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		return result;
 	}
 
+	/**
+	 * Returns the bizImportAction.
+	 * @param customer the customer
+	 * @param document the document
+	 * @param className the className
+	 * @param runtime the runtime
+	 * @return the result
+	 */
 	@Override
 	public BizImportAction getBizImportAction(Customer customer, Document document, String className, boolean runtime) {
 		BizImportAction result = null;
@@ -236,6 +361,14 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		return result;
 	}
 
+	/**
+	 * Returns the downloadAction.
+	 * @param customer the customer
+	 * @param document the document
+	 * @param className the className
+	 * @param runtime the runtime
+	 * @return the result
+	 */
 	@Override
 	public DownloadAction<Bean> getDownloadAction(Customer customer, Document document, String className, boolean runtime) {
 		DownloadAction<Bean> result = null;
@@ -246,6 +379,14 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		return result;
 	}
 
+	/**
+	 * Returns the uploadAction.
+	 * @param customer the customer
+	 * @param document the document
+	 * @param className the className
+	 * @param runtime the runtime
+	 * @return the result
+	 */
 	@Override
 	public UploadAction<Bean> getUploadAction(Customer customer, Document document, String className, boolean runtime) {
 		UploadAction<Bean> result = null;
@@ -256,6 +397,12 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		return result;
 	}
 
+	/**
+	 * Returns the dataFactory.
+	 * @param customer the customer
+	 * @param document the document
+	 * @return the result
+	 */
 	@Override
 	public Object getDataFactory(Customer customer, Document document) {
 		Object result = null;
@@ -266,6 +413,11 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		return result;
 	}
 
+	/**
+	 * Executes retrieveUser.
+	 * @param userName the userName
+	 * @return the result
+	 */
 	@Override
 	public UserImpl retrieveUser(String userName) {
 		UserImpl result = null;
@@ -276,6 +428,10 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		return result;
 	}
 	
+	/**
+	 * Executes retrieveAllScheduledJobsForAllCustomers.
+	 * @return the result
+	 */
 	@Override
 	public List<UserJobSchedule> retrieveAllScheduledJobsForAllCustomers() {
 		List<UserJobSchedule> result = null;
@@ -283,9 +439,13 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		if (delegate != null) {
 			result = delegate.retrieveAllScheduledJobsForAllCustomers();
 		}
-		return result;
+		return (result == null) ? Collections.emptyList() : result;
 	}
 
+	/**
+	 * Executes retrieveAllScheduledReportsForAllCustomers.
+	 * @return the result
+	 */
 	@Override
 	public List<UserJobSchedule> retrieveAllScheduledReportsForAllCustomers() {
 		List<UserJobSchedule> result = null;
@@ -293,9 +453,14 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		if (delegate != null) {
 			result = delegate.retrieveAllScheduledReportsForAllCustomers();
 		}
-		return result;
+		return (result == null) ? Collections.emptyList() : result;
 	}
 	
+	/**
+	 * Executes retrievePublicUserName.
+	 * @param customerName the customerName
+	 * @return the result
+	 */
 	@Override
 	public String retrievePublicUserName(String customerName) {
 		String result = null;
@@ -306,6 +471,10 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		return result;
 	}
 	
+	/**
+	 * Executes resetMenus.
+	 * @param user the user
+	 */
 	@Override
 	public void resetMenus(User user) {
 		ProvidedRepository delegate = getSessionDelegate();
@@ -314,6 +483,11 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		}
 	}
 
+	/**
+	 * Executes populatePermissions.
+	 * @param user the user
+	 * @return the result
+	 */
 	@Override
 	public boolean populatePermissions(User user) {
 		ProvidedRepository delegate = getSessionDelegate();
@@ -324,6 +498,10 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		return false;
 	}
 
+	/**
+	 * Executes resetUserPermissions.
+	 * @param user the user
+	 */
 	@Override
 	public void resetUserPermissions(User user) {
 		ProvidedRepository delegate = getSessionDelegate();
@@ -332,6 +510,12 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		}
 	}
 
+	/**
+	 * Executes populateUser.
+	 * @param user the user
+	 * @param connection the connection
+	 * @return the result
+	 */
 	@Override
 	public boolean populateUser(User user, Connection connection) {
 		ProvidedRepository delegate = getSessionDelegate();
@@ -342,6 +526,10 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		return false;
 	}
 	
+	/**
+	 * Returns the allCustomerNames.
+	 * @return the result
+	 */
 	@Override
 	public List<String> getAllCustomerNames() {
 		ProvidedRepository delegate = getSessionDelegate();
@@ -351,6 +539,10 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		return Collections.emptyList();
 	}
 
+	/**
+	 * Returns the allVanillaModuleNames.
+	 * @return the result
+	 */
 	@Override
 	public List<String> getAllVanillaModuleNames() {
 		ProvidedRepository delegate = getSessionDelegate();
@@ -360,6 +552,12 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		return Collections.emptyList();
 	}
 
+	/**
+	 * Returns the module.
+	 * @param customer the customer
+	 * @param moduleName the moduleName
+	 * @return the result
+	 */
 	@Override
 	public Module getModule(Customer customer, String moduleName) {
 		Module result = null;
@@ -370,6 +568,13 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		return result;
 	}
 
+	/**
+	 * Returns the document.
+	 * @param customer the customer
+	 * @param module the module
+	 * @param documentName the documentName
+	 * @return the result
+	 */
 	@Override
 	public Document getDocument(Customer customer, Module module, String documentName) {
 		Document result = null;
@@ -380,6 +585,13 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		return result;
 	}
 
+	/**
+	 * Returns the bizlet.
+	 * @param customer the customer
+	 * @param document the document
+	 * @param runtime the runtime
+	 * @return the result
+	 */
 	@Override
 	public <T extends Bean> Bizlet<T> getBizlet(Customer customer, Document document, boolean runtime) {
 		Bizlet<T> result = null;
@@ -390,6 +602,12 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		return result;
 	}
 
+	/**
+	 * Returns the metaDataBizlet.
+	 * @param customer the customer
+	 * @param document the document
+	 * @return the result
+	 */
 	@Override
 	public BizletMetaData getMetaDataBizlet(Customer customer, Document document) {
 		BizletMetaData result = null;
@@ -400,6 +618,10 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		return result;
 	}
 
+	/**
+	 * Executes validateCustomerForGenerateDomain.
+	 * @param customer the customer
+	 */
 	@Override
 	public void validateCustomerForGenerateDomain(Customer customer) {
 		ProvidedRepository delegate = getSessionDelegate();
@@ -408,6 +630,11 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		}
 	}
 
+	/**
+	 * Executes validateModuleForGenerateDomain.
+	 * @param customer the customer
+	 * @param module the module
+	 */
 	@Override
 	public void validateModuleForGenerateDomain(Customer customer, Module module) {
 		ProvidedRepository delegate = getSessionDelegate();
@@ -416,6 +643,11 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		}
 	}
 
+	/**
+	 * Executes validateDocumentForGenerateDomain.
+	 * @param customer the customer
+	 * @param document the document
+	 */
 	@Override
 	public void validateDocumentForGenerateDomain(Customer customer, Document document) {
 		ProvidedRepository delegate = getSessionDelegate();
@@ -424,6 +656,13 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		}
 	}
 
+	/**
+	 * Executes validateViewForGenerateDomain.
+	 * @param customer the customer
+	 * @param document the document
+	 * @param view the view
+	 * @param uxui the uxui
+	 */
 	@Override
 	public void validateViewForGenerateDomain(Customer customer, Document document, View view, String uxui) {
 		ProvidedRepository delegate = getSessionDelegate();
@@ -432,6 +671,10 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		}
 	}
 
+	/**
+	 * Returns the globalRouter.
+	 * @return the result
+	 */
 	@Override
 	public Router getGlobalRouter() {
 		Router result = null;
@@ -442,6 +685,10 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		return result;
 	}
 
+	/**
+	 * Returns the moduleRouters.
+	 * @return the result
+	 */
 	@Override
 	public List<Router> getModuleRouters() {
 		ProvidedRepository delegate = getSessionDelegate();
@@ -451,6 +698,13 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		return Collections.emptyList();
 	}
 
+	/**
+	 * Returns the reportFileName.
+	 * @param customer the customer
+	 * @param document the document
+	 * @param reportName the reportName
+	 * @return the result
+	 */
 	@Override
 	public String getReportFileName(Customer customer, Document document, String reportName) {
 		String result = null;
@@ -461,6 +715,12 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		return result;
 	}
 	
+	/**
+	 * Returns the javaClass.
+	 * @param customer the customer
+	 * @param key the key
+	 * @return the result
+	 */
 	@Override
 	public Class<?> getJavaClass(Customer customer, String key) {
 		Class<?> result = null;
@@ -471,6 +731,12 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		return result;
 	}
 	
+	/**
+	 * Executes vtable.
+	 * @param customerName the customerName
+	 * @param key the key
+	 * @return the result
+	 */
 	@Override
 	public String vtable(String customerName, String key) {
 		String result = null;
@@ -481,6 +747,10 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		return result;
 	}
 	
+	/**
+	 * Returns the useScaffoldedViews.
+	 * @return the result
+	 */
 	@Override
 	public boolean getUseScaffoldedViews() {
 		ProvidedRepository delegate = getSessionDelegate();

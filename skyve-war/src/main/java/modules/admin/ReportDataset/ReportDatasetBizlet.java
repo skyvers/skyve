@@ -20,8 +20,16 @@ import modules.admin.ReportParameter.ReportParameterExtension;
 import modules.admin.domain.ReportDataset;
 import modules.admin.domain.ReportTemplate;
 
+/**
+ * Applies dataset-specific validation and dynamic behaviour during report dataset editing.
+ */
 public class ReportDatasetBizlet extends Bizlet<ReportDatasetExtension> {
-
+	/**
+	 * Returns variant domain values for dataset type selection.
+	 * @param attributeName the attributeName value
+	 * @return the result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
 		if (ReportDataset.datasetTypePropertyName.equals(attributeName)) {
@@ -40,6 +48,15 @@ public class ReportDatasetBizlet extends Bizlet<ReportDatasetExtension> {
 		return super.getVariantDomainValues(attributeName);
 	}
 
+	/**
+	 * Executes dataset-level pre-action checks and parent-parameter validation when zooming out.
+	 * @param actionName the implicit action being executed
+	 * @param bean the dataset bean
+	 * @param parentBean the parent bean for the current context
+	 * @param webContext the current web context
+	 * @return the dataset bean after pre-execute processing
+	 * @throws Exception if pre-execute processing fails
+	 */
 	@Override
 	public ReportDatasetExtension preExecute(ImplicitActionName actionName, ReportDatasetExtension bean, Bean parentBean,
 			WebContext webContext) throws Exception {
@@ -52,6 +69,13 @@ public class ReportDatasetBizlet extends Bizlet<ReportDatasetExtension> {
 		return super.preExecute(actionName, bean, parentBean, webContext);
 	}
 
+	/**
+	 * Responds to query changes by discovering and adding missing report parameters.
+	 * @param source the source value
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public void preRerender(String source, ReportDatasetExtension bean, WebContext webContext) throws Exception {
 
@@ -67,6 +91,7 @@ public class ReportDatasetBizlet extends Bizlet<ReportDatasetExtension> {
 	 * view won't validate the parameters as they belong to the parent ReportTemplate not the dataset
 	 * being edited.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static void validateReportParameters(ReportDatasetExtension bean) {
 		if (bean.getParent() != null) {
 			List<ReportParameterExtension> parameters = bean.getParent().getParameters();

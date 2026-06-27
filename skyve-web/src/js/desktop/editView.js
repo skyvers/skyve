@@ -1807,7 +1807,7 @@ isc.BizButton.addMethods({
 					if (instance) {
 						this._view.saveInstance(validate, null, (data, success) => {
 							if (success) {
-								url = `fileUpload.xhtml?_a=${this.actionName}&_c=${instance._c}`;
+								url = `upload.xhtml?_u=action&_a=${this.actionName}&_c=${instance._c}&_cap=${this.capture || "none"}`;
 								if (this._view._b) {
 									url += `&_b=${this._view._b.replaceAll("_", ".")}`;
 								}

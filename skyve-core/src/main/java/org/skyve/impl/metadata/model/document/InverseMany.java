@@ -13,6 +13,21 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * Inverse navigation attribute that resolves to a collection of beans.
+ *
+ * <p>Represents the one-side of a one-to-many relation, allowing the parent
+ * document to navigate back to all associated child records without declaring
+ * an explicit collection.  Implements {@link OrderedAttribute} to support
+ * explicit element ordering.
+ *
+ * <p>Threading: not thread-safe.  Instances are populated during metadata loading
+ * and are read-only once placed in the repository cache.
+ *
+ * @see AbstractInverse
+ * @see InverseOne
+ * @see OrderedAttribute
+ */
 @XmlRootElement(name = "inverseMany", namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE, propOrder = {"ordering"})
 public class InverseMany extends AbstractInverse implements OrderedAttribute {

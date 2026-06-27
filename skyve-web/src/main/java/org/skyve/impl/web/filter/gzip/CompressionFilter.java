@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.util.Enumeration;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
@@ -43,7 +43,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public class CompressionFilter implements Filter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CompressionFilter.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(CompressionFilter.class);
 
     /**
      * The filter configuration object we are associated with.  If this value
@@ -74,6 +74,7 @@ public class CompressionFilter implements Filter {
      */
 
     @Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void init(FilterConfig filterConfig) {
 
         config = filterConfig;
@@ -133,6 +134,7 @@ public class CompressionFilter implements Filter {
      **/
 
     @Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void doFilter(ServletRequest request,
 							ServletResponse response,
 							FilterChain chain)

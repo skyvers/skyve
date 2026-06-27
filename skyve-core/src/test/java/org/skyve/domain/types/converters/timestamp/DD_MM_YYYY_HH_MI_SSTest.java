@@ -1,41 +1,37 @@
 package org.skyve.domain.types.converters.timestamp;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.messages.ConversionException;
 import org.skyve.domain.types.Timestamp;
+import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.util.Time;
 
-public class DD_MM_YYYY_HH_MI_SSTest {
+class DD_MM_YYYY_HH_MI_SSTest {
 
 	private DD_MM_YYYY_HH_MI_SS formatter;
 
 	@BeforeEach
-	public void before() {
+	void before() {
 		formatter = new DD_MM_YYYY_HH_MI_SS();
 	}
 
 	@Test
-	public void testFromDisplayValueInvalidFormat() throws Exception {
-		ConversionException ce = assertThrows(ConversionException.class, () -> {
-			// setup the test data
-			Timestamp testDate = new Timestamp(Time.withDate(01, 03, 2020));
-			Time.setTime(testDate, 02, 30, 05);
-
-			// call the method under test
-			assertThat(formatter.fromDisplayValue("01-03-2020 02:30:05"), is(testDate));
-		});
+	void testFromDisplayValueInvalidFormat() {
+		ConversionException ce = assertThrows(ConversionException.class, () -> formatter.fromDisplayValue("01-03-2020 02:30:05"));
 
 		assertTrue(ce.getMessages().size() > 0);
 	}
 
 	@Test
-	public void testFromDisplayValueAM() throws Exception {
+	void testFromDisplayValueAM() {
 		// setup the test data
 		Timestamp testDate = new Timestamp(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 02, 30, 55);
@@ -45,7 +41,7 @@ public class DD_MM_YYYY_HH_MI_SSTest {
 	}
 
 	@Test
-	public void testFromDisplayValuePM() throws Exception {
+	void testFromDisplayValuePM() {
 		// setup the test data
 		Timestamp testDate = new Timestamp(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 14, 30, 55);
@@ -55,7 +51,7 @@ public class DD_MM_YYYY_HH_MI_SSTest {
 	}
 
 	@Test
-	public void testToDisplayValueAM() throws Exception {
+	void testToDisplayValueAM() {
 		// setup the test data
 		Timestamp testDate = new Timestamp(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 02, 30, 55);
@@ -65,12 +61,43 @@ public class DD_MM_YYYY_HH_MI_SSTest {
 	}
 
 	@Test
-	public void testToDisplayValuePM() throws Exception {
+	void testToDisplayValuePM() {
 		// setup the test data
 		Timestamp testDate = new Timestamp(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 14, 30, 55);
 
 		// call the method under test
 		assertThat(formatter.toDisplayValue(testDate), is("01/03/2020 02:30:55 PM"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testGetValueTypeIsTimestamp() {
+		assertEquals(Timestamp.class, new DD_MM_YYYY_HH_MI_SS().getValueType());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testGetFormatIsNull() {
+		assertThat(new DD_MM_YYYY_HH_MI_SS().getFormat(), is(nullValue()));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testGetValidatorIsNull() {
+		assertThat(new DD_MM_YYYY_HH_MI_SS().getValidator(), is(nullValue()));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testGetAttributeTypeIsTimestamp() {
+		assertThat(new DD_MM_YYYY_HH_MI_SS().getAttributeType(), is(AttributeType.timestamp));
+	}
+
+	@Test
+	@SuppressWarnings({ "static-method", "null" })
+	void testToDisplayValueNullThrows() {
+		DD_MM_YYYY_HH_MI_SS converter = new DD_MM_YYYY_HH_MI_SS();
+		assertThrows(ConversionException.class, () -> converter.toDisplayValue(null));
 	}
 }

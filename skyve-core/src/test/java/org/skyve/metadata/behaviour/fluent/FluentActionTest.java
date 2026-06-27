@@ -1,0 +1,126 @@
+package org.skyve.metadata.behaviour.fluent;
+
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.junit.jupiter.api.Test;
+import org.skyve.domain.Bean;
+import org.skyve.impl.metadata.behaviour.IfStatement;
+import org.skyve.impl.metadata.behaviour.SetStatement;
+import org.skyve.impl.metadata.repository.behaviour.ActionMetaData;
+import org.skyve.impl.metadata.repository.behaviour.statement.StatementMetaData;
+
+/** Exercises fluent action and statement builders for copy and branch-management paths. */
+@SuppressWarnings("static-method")
+class FluentActionTest {
+	/** Verifies that {@link FluentSetStatement#from(SetStatement)} copies base properties and fields. */
+	@Test
+	void setStatementFromCopiesBasePropertiesAndFields() {
+		SetStatement source = new SetStatement();
+		source.getProperties().put("scope", "request");
+		source.setBinding("customer.name");
+		source.setExpression("'Skyve'");
+
+		FluentSetStatement fluent = new FluentSetStatement().from(source);
+
+		assertThat(fluent.get().getProperties().get("scope"), is("request"));
+		assertThat(fluent.get().getBinding(), is("customer.name"));
+		assertThat(fluent.get().getExpression(), is("'Skyve'"));
+	}
+
+	/** Verifies that {@link FluentIfStatement#from(IfStatement)} copies the condition and nested branches. */
+	@Test
+	void ifStatementFromCopiesConditionAndNestedStatements() {
+		IfStatement source = new IfStatement();
+		source.getProperties().put("branch", "main");
+		source.setCondition("bean.active");
+		source.getThenStatements().add(new SetStatement());
+		source.getElseStatements().add(new SetStatement());
+
+		FluentIfStatement fluent = new FluentIfStatement().from(source);
+
+		assertThat(fluent.get().getProperties().get("branch"), is("main"));
+		assertThat(fluent.get().getCondition(), is("bean.active"));
+		assertEquals(1, fluent.get().getThenStatements().size());
+		assertEquals(1, fluent.get().getElseStatements().size());
+	}
+
+	/** Verifies that {@link FluentAction} adds, copies, and clears statement metadata. */
+	@Test
+	void actionManagesStatementsAndCopiesFromSource() {
+		FluentSetStatement first = new FluentSetStatement().binding("one").expression("1");
+		FluentSetStatement second = new FluentSetStatement().binding("two").expression("2");
+		FluentAction fluent = new FluentAction().name("save").documentation("Save action")
+				.addStatement(first)
+				.addStatement(0, second);
+
+		assertEquals(2, fluent.get().getStatements().size());
+		assertThat(((SetStatement) fluent.get().getStatements().get(0)).getBinding(), is("two"));
+
+		ActionMetaData source = new ActionMetaData();
+		source.setName("copied");
+		source.setDocumentation("Copied action");
+		source.getStatements().add(first.get());
+		source.getStatements().add(new FluentIfStatement().condition("bean.active").get());
+		FluentAction copied = new FluentAction().from(source);
+		assertThat(copied.get().getName(), is("copied"));
+		assertThat(copied.get().getDocumentation(), is("Copied action"));
+		assertEquals(2, copied.get().getStatements().size());
+		assertThat(copied.get().getStatements().get(1), is(instanceOf(IfStatement.class)));
+
+		fluent.clearStatements();
+		assertTrue(fluent.get().getStatements().isEmpty());
+	}
+
+	/** Verifies that {@link FluentIfStatement} manages ordered then and else branches. */
+	@Test
+	void ifStatementManagesThenAndElseBranches() {
+		FluentSetStatement thenStatement = new FluentSetStatement().binding("then").expression("1");
+		FluentSetStatement elseStatement = new FluentSetStatement().binding("else").expression("0");
+		FluentIfStatement fluent = new FluentIfStatement().condition("bean.active")
+				.addThenStatement(thenStatement)
+				.addElseStatement(elseStatement)
+				.addThenStatement(0, new FluentSetStatement().binding("first").expression("2"))
+				.addElseStatement(0, new FluentSetStatement().binding("fallback").expression("3"));
+
+		assertEquals(2, fluent.get().getThenStatements().size());
+		assertThat(((SetStatement) fluent.get().getThenStatements().get(0)).getBinding(), is("first"));
+		assertEquals(2, fluent.get().getElseStatements().size());
+		assertThat(((SetStatement) fluent.get().getElseStatements().get(0)).getBinding(), is("fallback"));
+
+		fluent.clearThenStatements().clearElseStatements();
+		assertTrue(fluent.get().getThenStatements().isEmpty());
+		assertTrue(fluent.get().getElseStatements().isEmpty());
+	}
+
+	/** Verifies that the statement factory wraps supported metadata in the expected fluent types. */
+	@Test
+	void statementFactoryReturnsExpectedFluentTypes() {
+		FluentStatement<?> fromSet = FluentStatement.from(new SetStatement());
+		FluentStatement<?> fromIf = FluentStatement.from(new IfStatement());
+
+		assertThat(fromSet, is(instanceOf(FluentSetStatement.class)));
+		assertThat(fromIf, is(instanceOf(FluentIfStatement.class)));
+	}
+
+	/** Verifies that the statement factory rejects unsupported metadata implementations. */
+	@Test
+	void statementFactoryRejectsUnsupportedStatements() {
+		StatementMetaData unknown = new StatementMetaData() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void execute(Bean bean) {
+				// no-op
+			}
+		};
+
+		IllegalStateException ex = assertThrows(IllegalStateException.class, () -> FluentStatement.from(unknown));
+		assertThat(ex.getMessage(), is(notNullValue()));
+	}
+}

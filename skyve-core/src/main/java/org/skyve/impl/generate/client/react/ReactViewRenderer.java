@@ -8,6 +8,9 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
 
+/**
+ * React view renderer entry point used by React generators.
+ */
 public class ReactViewRenderer extends ClientViewRenderer {
 	protected Map<String, String> imports;
 

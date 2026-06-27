@@ -29,20 +29,34 @@ import org.skyve.metadata.user.UserAccess;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+/**
+ * Servlet implementation for text-search requests.
+ * This is used to power the global text search mechanism.
+ */
 public class SmartClientTextSearchServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SmartClientTextSearchServlet.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SmartClientTextSearchServlet.class);
 
+    private static final String DATA_FIELD = "data";
+
+	/**
+	 * Executes SmartClient text-search requests and returns matching indexed content in ISC JSON format.
+	 *
+	 * @param request inbound HTTP request containing search criteria
+	 * @param response outbound HTTP response receiving ISC JSON payload
+	 * @throws ServletException when search execution fails
+	 * @throws IOException when response writing fails
+	 */
 	@Override
-	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
+	@SuppressWarnings({"java:S1989", "java:S3776"}) // there exists JavaEE error pages; Complexity OK
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
 	throws ServletException, IOException {
 		Enumeration<String> parameterNames = request.getParameterNames();
@@ -117,7 +131,7 @@ public class SmartClientTextSearchServlet extends HttpServlet {
 				            row.put("score", Integer.valueOf(result.getScore()));
 				            if (bean == null) { // deleted or otherwise non-existent
 				            	row.put(Bean.BIZ_KEY, null);
-				            	row.put("data", null);
+								row.put(DATA_FIELD, null);
 				            }
 				            else {
 				            	row.put(Bean.BIZ_KEY, bean.getBizKey());
@@ -128,10 +142,10 @@ public class SmartClientTextSearchServlet extends HttpServlet {
 				                    url.append("?m=");
 				                    url.append(moduleName).append("&d=").append(documentName);
 				                    url.append("&i=").append(bizId);
-						            row.put("data", url.toString());
+						            row.put(DATA_FIELD, url.toString());
 				            	}
 				            	else {
-				            		row.put("data", null);
+									row.put(DATA_FIELD, null);
 				            	}
 				            }
 				            if (result.isAttachment()) {
@@ -148,7 +162,7 @@ public class SmartClientTextSearchServlet extends HttpServlet {
 				            message.append(JSON.marshall(customer, row)).append(',');
 						}
 						catch (Exception e) { // don't allow anything that goes wrong to stop us returning the searches
-							e.printStackTrace();
+							LOGGER.warn("Skipping content search result that could not be resolved.", e);
 							resultIterator.remove(); // remove the offending result
 						}
 					}

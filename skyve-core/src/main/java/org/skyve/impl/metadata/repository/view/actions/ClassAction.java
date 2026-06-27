@@ -7,21 +7,51 @@ import org.skyve.impl.util.XMLMetaData;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * Abstract JAXB base for action descriptors that invoke a server-side Java class.
+ *
+ * <p>Adds a {@code className} attribute to {@link ValidatableAction} identifying
+ * the fully-qualified implementation class to instantiate and execute.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see CustomAction
+ * @see BizExportAction
+ * @see BizImportAction
+ */
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 public abstract class ClassAction extends ValidatableAction {
 	private static final long serialVersionUID = -2913422200090616971L;
 
 	private String className;
 
+	/**
+	 * Returns the fully-qualified action implementation class name.
+	 *
+	 * @return action implementation class name, or {@code null}
+	 */
 	public String getClassName() {
 		return className;
 	}
 	
+	/**
+	 * Sets the fully-qualified action implementation class name.
+	 *
+	 * @param className action implementation class name
+	 */
 	@XmlAttribute(required = false)
 	public void setClassName(String className) {
 		this.className = UtilImpl.processStringValue(className);
 	}
 
+	/**
+	 * Converts this descriptor to runtime metadata including the backing class name.
+	 *
+	 * <p>When no explicit action name is supplied, the configured class name becomes
+	 * the runtime action name.
+	 *
+	 * @return runtime action metadata with resource linkage applied
+	 */
 	@Override
 	public ActionImpl toMetaDataAction() {
 		ActionImpl result = super.toMetaDataAction();

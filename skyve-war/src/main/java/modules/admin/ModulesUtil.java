@@ -36,13 +36,13 @@ import modules.admin.domain.GroupRole;
  *
  * @author robert.brown
  * @deprecated This class is deprecated and will be removed in a future version.
- *
  */
 @Deprecated
 public class ModulesUtil {
 
 	/** general types of time-based frequencies */
-	public static enum OccurenceFrequency {
+	@SuppressWarnings("java:S115") // Enum names are legacy domain value labels.
+	public enum OccurenceFrequency {
 		OneOff, EverySecond, EveryMinute, Hourly, Daily, Weekly, Fortnightly, Monthly, Quarterly, HalfYearly, Yearly, Irregularly, DuringHolidays, NotDuringHolidays, WeekDays, Weekends;
 	}
 
@@ -75,7 +75,8 @@ public class ModulesUtil {
 	}
 
 	/** normal days of the week */
-	public static enum DayOfWeek {
+	@SuppressWarnings("java:S115") // Enum names are legacy domain value labels.
+	public enum DayOfWeek {
 		Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday
 	}
 
@@ -162,7 +163,8 @@ public class ModulesUtil {
 	}
 
 	/** returns the number of days between day1 and day2 */
-	public static enum OccurrencePeriod {
+	@SuppressWarnings("java:S115") // Enum names are legacy domain value labels.
+	public enum OccurrencePeriod {
 		Seconds, Minutes, Hours, Days, Weeks, Months, Years
 	}
 
@@ -432,6 +434,11 @@ public class ModulesUtil {
 		return date;
 	}
 
+	/**
+	 * Performs the sqlFormatDateOnly operation.
+	 * @param theDate the theDate value
+	 * @return the operation result
+	 */
 	public static String sqlFormatDateOnly(DateOnly theDate) {
 		String result = "";
 
@@ -462,7 +469,7 @@ public class ModulesUtil {
 	}
 
 	/** abbreviated forms of calendar months */
-	public static enum CalendarMonth {
+	public enum CalendarMonth {
 		JAN, FEB, MAR, APR, MAY, JUN, JUL, AUG, SEP, OCT, NOV, DEC
 	}
 
@@ -514,6 +521,12 @@ public class ModulesUtil {
 		}
 	}
 
+	/**
+	 * Performs the addValidationError operation.
+	 * @param e the e value
+	 * @param fieldName the fieldName value
+	 * @param messageString the messageString value
+	 */
 	public static void addValidationError(ValidationException e, String fieldName, String messageString) {
 		Message vM = new Message(messageString);
 		vM.addBinding(fieldName);
@@ -570,6 +583,7 @@ public class ModulesUtil {
 	 *         general Exception for metadata exception or string
 	 *         manipulation failure etc
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static String replaceBindingsInString(Bean bean, String replacementString) throws Exception {
 
 		StringBuilder result = new StringBuilder(replacementString);
@@ -588,7 +602,7 @@ public class ModulesUtil {
 
 				// if the format string includes a sub-bean attribute, get the
 				// sub-bean
-				if (binding.toString().length() > 0) {
+				if (! binding.toString().isEmpty()) {
 					b = (Bean) Binder.get(bean, binding.toString());
 				}
 
@@ -610,7 +624,7 @@ public class ModulesUtil {
 					for (Attribute attribute : document.getAllAttributes(customer)) {
 						if (attribute.getLocalisedDisplayName().equals(a)) {
 							found = true;
-							if (binding.toString().length() > 0) {
+							if (! binding.toString().isEmpty()) {
 								binding.append('.').append(attribute.getName());
 							} else {
 								binding.append(attribute.getName());
@@ -663,8 +677,8 @@ public class ModulesUtil {
 		String delim = Util.coalesceNull(delimiter, " ");
 
 		for (String s : strings) {
-			if (Util.coalesceNull(s, "").length() > 0) {
-				if (sb.toString().length() > 0) {
+			if (! Util.coalesceNull(s, "").isEmpty()) {
+				if (! sb.toString().isEmpty()) {
 					sb.append(delim);
 				}
 				sb.append(s);
@@ -776,5 +790,4 @@ public class ModulesUtil {
 
 		return g;
 	}
-
 }

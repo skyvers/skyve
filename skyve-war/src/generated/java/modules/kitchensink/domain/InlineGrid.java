@@ -77,7 +77,7 @@ public class InlineGrid extends AbstractTransientBean implements ChildBean<Kitch
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-	public static enum ConstantEnum implements Enumeration {
+	public enum ConstantEnum implements Enumeration {
 		one1("one", "One (1)!"),
 		two2("two", "Two (2)!"),
 		three3("three", "Three (3)!");

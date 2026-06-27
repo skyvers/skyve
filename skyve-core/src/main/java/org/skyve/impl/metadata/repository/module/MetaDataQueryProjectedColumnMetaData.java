@@ -12,8 +12,19 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
-@XmlRootElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "column")
+/**
+ * JAXB-annotated descriptor for a {@code <column>} projected data column in a
+ * metadata query.
+ *
+ * <p>Adds projected flag, MVEL expression, sortable/filterable/editable flags,
+ * HTML-escape and sanitisation settings, and formatter specification to the base
+ * {@link MetaDataQueryColumnMetaData} contract.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see MetaDataQueryColumnMetaData
+ * @see MetaDataQueryContentColumnMetaData
+ */@XmlRootElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "column")
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE, 
 			propOrder = {"projected",
 							"expression",

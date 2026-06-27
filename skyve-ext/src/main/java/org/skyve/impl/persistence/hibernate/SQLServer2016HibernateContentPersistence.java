@@ -4,20 +4,24 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 /**
- * In SQL Server 2016, the connection must be in a specific isolation mode (TRANSACTION_SNAPSHOT)
- * to work like a real database and not a toy.
- * The below sets the underlying connection in this mode.
- * @author mike
+ * Configures {@link HibernateContentPersistence} for SQL Server 2016 snapshot-style transactions.
  *
+ * <p>Side effects: the constructor updates the current JDBC connection isolation level to
+ * SQL Server's snapshot mode when it is not already configured.
  */
 public class SQLServer2016HibernateContentPersistence extends HibernateContentPersistence {
 	private static final long serialVersionUID = 3977869075169663549L;
 	
 	/**
-	 * Microsofts non-standard isolation level.
+	 * SQL Server-specific constant for snapshot isolation.
 	 */
 	private static final int TRANSACTION_SNAPSHOT = Connection.TRANSACTION_READ_COMMITTED + 4094;
 	
+	/**
+	 * Creates the persistence instance and ensures the active connection uses SQL Server snapshot isolation.
+	 *
+	 * @throws SQLException if the connection cannot be inspected or the isolation level cannot be updated
+	 */
 	public SQLServer2016HibernateContentPersistence() throws SQLException {
 		@SuppressWarnings("resource")
 		Connection c = getConnection();

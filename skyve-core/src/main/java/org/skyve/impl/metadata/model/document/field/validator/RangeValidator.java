@@ -10,6 +10,22 @@ import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * Abstract JAXB base for range-constraint validators on ordered field types.
+ *
+ * <p>Adds an optional {@code min} and {@code max} boundary to
+ * {@link FieldValidator}.  Concrete subclasses specialise the generic type:
+ * {@link DateValidator}, {@link DecimalValidator}, {@link IntegerValidator},
+ * {@link LongValidator}.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @param <T> the ordered field value type
+ * @see DateValidator
+ * @see DecimalValidator
+ * @see IntegerValidator
+ * @see LongValidator
+ */
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 public abstract class RangeValidator<T> extends FieldValidator<T> {
 	private static final long serialVersionUID = 1703003606474596114L;
@@ -54,6 +70,7 @@ public abstract class RangeValidator<T> extends FieldValidator<T> {
 	}
 
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public String constructMessage(User user, String localisedDisplayName, Converter<T> converter) {
 		String result = getLocalisedValidationMessage();
 		if (result == null) {

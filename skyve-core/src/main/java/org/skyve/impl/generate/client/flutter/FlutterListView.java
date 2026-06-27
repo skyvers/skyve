@@ -15,10 +15,10 @@ import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 class FlutterListView extends FlutterView {
-	private static final Logger LOGGER = LoggerFactory.getLogger(FlutterListView.class);
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(FlutterListView.class);
 
 	private Document document;
 	private ListModel<Bean> model;
@@ -60,6 +60,7 @@ class FlutterListView extends FlutterView {
 		fw.write(substitute("templates/list.dart", subs));
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void addQuerySubstitutes(Map<String, String> subs) {
 		String description = "";
 		String column1 = null;

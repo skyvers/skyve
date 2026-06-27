@@ -3108,7 +3108,7 @@ isc.BizContentLinkItem.addMethods({
 					"." +
 					this.form._view._doc +
 					"&_b=" +
-					this.name.replaceAll("_", ".");
+					SKYVE.Util.unsanitiseBinding(this.name);
 
 				// Update the link's contents with the constructed URL
 				this._link.setContents(
@@ -3182,6 +3182,12 @@ isc.BizContentImageItem.addMethods({
 			src: "[SKIN]blank.gif",
 			cursor: "pointer",
 			click(event) {
+				if (!this.creator.getValue()) {
+					if (config.editable) {
+						isc.BizUtil.openContentUpload(this.creator, true);
+					}
+					return;
+				}
 				let src = this.src;
 				// Remove the width and height parameters to get the full image, not a Thumbnail
 				src = src.replace(/&_w=\d*/, "").replace(/&_h=\d*/, "");
@@ -3237,7 +3243,7 @@ isc.BizContentImageItem.addMethods({
 					"." +
 					this.form._view._doc +
 					"&_b=" +
-					this.name.replaceAll("_", ".") +
+					SKYVE.Util.unsanitiseBinding(this.name) +
 					"&_w=" +
 					(this._img.getWidth() - 20) + // -20 for the border
 					"&_h=" +
@@ -3259,6 +3265,270 @@ isc.SimpleType.create({
 	inheritsFrom: "canvas",
 	name: "bizContentImage",
 	editorType: "BizContentImageItem",
+});
+
+/**
+ * Implements the unified content item widget.
+ * Extends CanvasItem from the SmartClient library.
+ */
+isc.ClassFactory.defineClass("BizContentItem", isc.CanvasItem);
+
+isc.BizContentItem.addProperties({
+	width: "*",
+	rowSpan: "*",
+	endRow: false,
+	startRow: false,
+	canFocus: true,
+	shouldSaveValue: true, // This is an editable data item
+});
+
+isc.BizContentItem.addClassMethods({
+	_previewUploadItems: {},
+
+	_openUploadFromPreview: function (itemID) {
+		const item = this._previewUploadItems[itemID];
+		if (item) {
+			item._openUploadFromPreview();
+		}
+	},
+});
+
+isc.BizContentItem.addMethods({
+	/**
+	 * Initializes the `BizContentItem` by creating preview and optional upload controls.
+	 *
+	 * @param {object} config - the configuration object for the component.
+	 * @param {string} [config.display='auto'] - auto, link, image, or video.
+	 * @param {string} [config.capture='none'] - none, camera, video, or all.
+	 * @param {string} [config.companion] - companion media-kind field for auto mode.
+	 * @param {boolean} config.editable - whether the content is editable.
+	 * @param {boolean} [config.showMarkup=false] - whether image markup controls are enabled.
+	 */
+	init: function (config) {
+		this.display = config.display || "auto";
+		this.capture = config.capture || "none";
+		this.companion = config.companion;
+		this.showMarkup = config.showMarkup || false;
+		this.emptyText = config.emptyText || "No content";
+		this._editable = !!config.editable;
+		this._imageIntent = this.display === "image";
+		this._previewFixedHeight = config.height != null;
+		this._previewWidth = config.width && config.width !== "*" ? config.width : "100%";
+		this._previewHeight = config.height || null;
+		this._previewCanvasWidth = config.width || (config.editable ? "*" : "100%");
+		this._currentMediaKind = this._defaultMediaKind();
+		this._previewUploadItemID = this.getID();
+		isc.BizContentItem._previewUploadItems[this._previewUploadItemID] = this;
+		const contentItem = this;
+		this._preview = isc.HTMLFlow.create({
+			contents: "",
+			width: this._previewCanvasWidth,
+			height: this._previewHeight || 1,
+			overflow: "visible",
+			drawn: function () {
+				this.Super("drawn", arguments);
+				contentItem._syncPreviewHeight();
+			},
+			resized: function () {
+				this.Super("resized", arguments);
+				contentItem._syncPreviewHeight();
+			},
+		});
+		this._preview.setContents(this._emptyPreviewContents());
+
+		if (config.editable) {
+			this.canvas = isc.HLayout.create({
+				defaultLayoutAlign: "center",
+				members: [
+					this._preview,
+					isc.LayoutSpacer.create({ width: 5 }),
+					isc.BizUtil.createUploadButton(this, this._imageIntent, this.showMarkup),
+				],
+			});
+		} else {
+			this.canvas = isc.HLayout.create({
+				defaultLayoutAlign: "center",
+				members: [this._preview],
+			});
+		}
+
+		this.Super("init", arguments);
+	},
+
+	_defaultMediaKind: function () {
+		if (this.display === "link" || this.display === "video") {
+			return this.display;
+		}
+		return "image";
+	},
+
+	_resolveMediaKind: function () {
+		if (this.display !== "auto") {
+			return this.display;
+		}
+		if (this.companion && this.form && this.form._view && this.form._view._vm) {
+			return this.form._view._vm.getValue(this.companion) || "link";
+		}
+		return "link";
+	},
+
+	isMarkupAvailable: function () {
+		return this.showMarkup && this._resolveMediaKind() === "image";
+	},
+
+	_contentUrl: function (value) {
+		return (
+			SKYVE.Util.CONTEXT_URL +
+			"content?_n=" +
+			value +
+			"&_doc=" +
+			this.form._view._mod +
+			"." +
+			this.form._view._doc +
+			"&_b=" +
+			SKYVE.Util.unsanitiseBinding(this.name)
+		);
+	},
+
+	_linkPreviewContents: function (contents) {
+		return (
+			'<div style="align-items:center;box-sizing:border-box;display:flex;height:25px;line-height:25px;vertical-align:middle;">' +
+			contents +
+			"</div>"
+		);
+	},
+
+	_openUploadFromPreview: function () {
+		if (this._editable && !this.isDisabled()) {
+			isc.BizUtil.openContentUpload(this, this._imageIntent);
+		}
+	},
+
+	destroy: function () {
+		delete isc.BizContentItem._previewUploadItems[this._previewUploadItemID];
+		return this.Super("destroy", arguments);
+	},
+
+	_syncPreviewHeight: function () {
+		if (this._previewFixedHeight || !this._preview) {
+			return;
+		}
+
+		const kind = this._currentMediaKind || this._resolveMediaKind();
+		if (kind === "link") {
+			this._preview.setHeight(25);
+			return;
+		}
+
+		const width = this._preview.getVisibleWidth ? this._preview.getVisibleWidth() : this._preview.getWidth();
+		if (!width || width < 1) {
+			return;
+		}
+
+		const ratio = kind === "video" ? 9 / 16 : 1;
+		const height = Math.max(25, Math.round(width * ratio));
+		if (this._preview.getHeight() !== height) {
+			this._preview.setHeight(height);
+		}
+	},
+
+	_previewMediaStyle: function (aspectRatio) {
+		let style = "box-sizing:border-box;";
+		if (this._previewWidth) {
+			style += typeof this._previewWidth === "number" ? "width:" + this._previewWidth + "px;" : "width:" + this._previewWidth + ";";
+		} else {
+			style += "width:100%;";
+		}
+		if (this._previewHeight) {
+			style += typeof this._previewHeight === "number" ? "height:" + this._previewHeight + "px;" : "height:" + this._previewHeight + ";";
+		} else {
+			style += "height:auto;aspect-ratio:" + aspectRatio + ";";
+		}
+		return style;
+	},
+
+	_emptyPreviewContents: function () {
+		if (this.display === "link") {
+			return this._linkPreviewContents(
+				String(this.emptyText)
+					.replace(/&/g, "&amp;")
+					.replace(/</g, "&lt;")
+					.replace(/>/g, "&gt;")
+					.replace(/"/g, "&quot;")
+					.replace(/'/g, "&#39;"),
+			);
+		}
+		const clickableStyle = this._editable ? "cursor:pointer;" : "";
+		const clickHandler = this._editable ? ' onclick="isc.BizContentItem._openUploadFromPreview(\'' + this._previewUploadItemID + '\')"' : "";
+		return (
+			'<div style="align-items:center;background:#f8fafc;border:1px dashed #cbd5e1;color:#6b7280;display:flex;flex-direction:column;justify-content:center;text-align:center;' +
+			clickableStyle +
+			this._previewMediaStyle(this.display === "video" ? "16 / 9" : "1 / 1") +
+			'min-height:4rem;"' +
+			clickHandler +
+			">" +
+			'<span style="border:2px solid #cbd5e1;border-radius:4px;box-sizing:border-box;display:block;height:1.8rem;margin-bottom:0.35rem;position:relative;width:2.4rem;">' +
+			'<span style="background:#cbd5e1;border-radius:50%;display:block;height:0.35rem;position:absolute;right:0.35rem;top:0.35rem;width:0.35rem;"></span>' +
+			'<span style="border-bottom:0.55rem solid #cbd5e1;border-left:0.55rem solid transparent;border-right:0.55rem solid transparent;bottom:0.25rem;display:block;height:0;left:0.35rem;position:absolute;width:0;"></span>' +
+			"</span>" +
+			'<span style="font-size:0.85rem;line-height:1.2;">' +
+			String(this.emptyText)
+				.replace(/&/g, "&amp;")
+				.replace(/</g, "&lt;")
+				.replace(/>/g, "&gt;")
+				.replace(/"/g, "&quot;")
+				.replace(/'/g, "&#39;") +
+			"</span></div>"
+		);
+	},
+
+	/**
+	 * Updates the visible preview when the content id changes.
+	 *
+	 * @param {string|null} newValue - the new content id, or `null`.
+	 * @returns {object} - the updated `BizContentItem` instance.
+	 */
+	setValue: function (newValue) {
+		if (this.canvas != null && !this.userSetValue) {
+			if (newValue) {
+				const url = this._contentUrl(newValue);
+				const kind = this._resolveMediaKind();
+				this._currentMediaKind = kind;
+				if (kind === "image") {
+					let imageUrl = url;
+					if (typeof this._previewWidth === "number") {
+						imageUrl += "&_w=" + this._previewWidth;
+					}
+					if (typeof this._previewHeight === "number") {
+						imageUrl += "&_h=" + this._previewHeight;
+					}
+					this._preview.setContents(
+						`<a href="${url}" target="_blank"><img src="${imageUrl}" style="border:1px solid #bfbfbf;${this._previewMediaStyle("1 / 1")}object-fit:contain"/></a>`,
+					);
+				} else if (kind === "video") {
+					this._preview.setContents(
+						`<video controls preload="metadata" src="${url}" style="${this._previewMediaStyle("16 / 9")}object-fit:contain"></video>`,
+					);
+				} else {
+					this._preview.setContents(
+						this._linkPreviewContents(this.canvas.linkHTML(url, "Content", "_blank")),
+					);
+				}
+			} else {
+				this._currentMediaKind = this._defaultMediaKind();
+				this._preview.setContents(this._emptyPreviewContents());
+			}
+			this._syncPreviewHeight();
+		}
+
+		return this.Super("setValue", [newValue]);
+	},
+});
+
+isc.SimpleType.create({
+	inheritsFrom: "canvas",
+	name: "bizContent",
+	editorType: "BizContentItem",
 });
 
 /**

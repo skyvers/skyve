@@ -55,6 +55,7 @@ import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.QueryDefinition;
+import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.Role;
 import org.skyve.persistence.DataStore;
 import org.skyve.toolchain.freemarker.PlantUMLDirective;
@@ -63,10 +64,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Generates Skyve System Documentation PDF.
+ * Generates the Skyve system documentation report and exports it as a PDF.
+ *
+ * <p>Threading: this mojo mutates global Skyve bootstrap state, repository wiring, caches, and persistence
+ * configuration; it must be treated as thread-confined.
  */
 @Mojo(name = "systemDocumentation") //, requiresDependencyResolution = ResolutionScope.TEST)
 @Execute(phase = LifecyclePhase.PROCESS_RESOURCES)
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate system-documentation metadata keys.
 public class SystemDocumentationMojo extends AbstractSkyveMojo {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SystemDocumentationMojo.class);
 
@@ -106,7 +111,17 @@ public class SystemDocumentationMojo extends AbstractSkyveMojo {
 	@Parameter(property = "excludedModules")
 	private String excludedModules;
 
+	/**
+	 * Bootstraps a temporary reporting environment, renders the HTML report, and copies the generated PDF into
+	 * the target directory.
+	 *
+	 * <p>Side effects: mutates Skyve global singletons, creates temporary files, and writes
+	 * {@code target/system-documentation.pdf}.
+	 *
+	 * @throws MojoExecutionException if report generation fails
+	 */
 	@Override
+	@SuppressWarnings("java:S2696") // set statics here as this is single threaded
 	public void execute() throws MojoExecutionException {
 		try {
 			configureClasspath(srcDir);
@@ -134,11 +149,11 @@ public class SystemDocumentationMojo extends AbstractSkyveMojo {
 			UtilImpl.SESSION_CACHE = new SessionCacheConfig(10, 0, 0, 60);
 			UtilImpl.GEO_IP_CACHE = new GeoIPCacheConfig(10, 0, 0, 60);
 
-			ProvidedRepositoryFactory.set(new DefaultRepository());
-			Customer c = ProvidedRepositoryFactory.get().getCustomer(customer);
-			if (c == null) {
-				throw new IllegalStateException("Customer " + customer + " does not exist");
-			}
+				ProvidedRepositoryFactory.set(newRepository());
+				Customer c = getCustomer(customer);
+				if (c == null) {
+					throw new IllegalStateException("Customer " + customer + " does not exist");
+				}
 
 			final SuperUser user = new SuperUser();
 			user.setCustomerName(customer);
@@ -148,34 +163,41 @@ public class SystemDocumentationMojo extends AbstractSkyveMojo {
 			AbstractPersistence.IMPLEMENTATION_CLASS = HibernateContentPersistence.class;
 			AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = RDBMSDynamicPersistence.class;
 
-			final AbstractPersistence persistence = AbstractPersistence.get();
-			persistence.setUser(user);
+				final AbstractPersistence persistence = getPersistence();
+				persistence.setUser(user);
 
-			File temp = pdf();
-			FileUtil.copy(temp, new File("./target/system-documentation.pdf"));
-			FileUtil.delete(new File("./target/temp"));
+				File temp = pdf();
+				copy(temp, new File("./target/system-documentation.pdf"));
+				delete(new File("./target/temp"));
 			
 		}
 		catch (Exception e) {
-			LOGGER.error("Failed to generate system documentation.", e);
+			LOGGER.error("Failed to generate system documentation.");
 			throw new MojoExecutionException("Failed to generate system documentation.", e);
 		}
 	}
 	
 	/**
-	 * Generates a PDF for the application. Assumes there's a file named 'systemDocumentation.html' in the directory.
-	 * 
-	 * @return A File to the generated PDF on disk
-	 * @throws Exception
+	 * Renders the system documentation report to a PDF file.
+	 *
+	 * @return the generated PDF file on disk
+	 * @throws Exception if report rendering fails
 	 */
 	public File pdf() throws Exception {
 		Map<String, Object> parameters = prepareParameters();
 		return EXT.getReporting().createFreemarkerReportPDF(REPORT_FILENAME, parameters, "system-documentation");
 	}
 
+	/**
+	 * Builds the data model consumed by the system documentation template.
+	 *
+	 * @return the template parameter map
+	 * @throws IOException if report assets cannot be loaded
+	 */
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	private Map<String, Object> prepareParameters() throws IOException {
 		Map<String, Object> result = new HashMap<>();
-		Customer c = CORE.getCustomer();
+		Customer c = getCustomer();
 
 		String[] excludedModuleNames = (excludedModules == null) ? new String[0] : excludedModules.split(",");
 
@@ -274,9 +296,11 @@ public class SystemDocumentationMojo extends AbstractSkyveMojo {
 				for (String conditionName : document.getConditionNames()) {
 					Map<String, Object> conditionData = new HashMap<>();
 					Condition condition = document.getCondition(conditionName);
-					conditionData.put("name", conditionName);
-					conditionData.put("documentation", condition.getDocumentation());
-					conditions.add(conditionData);
+					if (condition != null) {
+						conditionData.put("name", conditionName);
+						conditionData.put("documentation", condition.getDocumentation());
+						conditions.add(conditionData);
+					}
 				}
 				documentData.put("conditions", conditions);
 
@@ -387,13 +411,45 @@ public class SystemDocumentationMojo extends AbstractSkyveMojo {
 		
 		return result;
 	}
+
+	@SuppressWarnings("static-method") // test seam
+	Customer getCustomer() {
+		return CORE.getCustomer();
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	Customer getCustomer(String customerName) {
+		return ProvidedRepositoryFactory.get().getCustomer(customerName);
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	ProvidedRepository newRepository() {
+		return new DefaultRepository();
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	AbstractPersistence getPersistence() {
+		return AbstractPersistence.get();
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	void copy(File source, File destination) throws IOException {
+		FileUtil.copy(source, destination);
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	void delete(File file) throws IOException {
+		FileUtil.delete(file);
+	}
 	
 	/**
-	 * Generates a PlantUML diagram for the document.
-	 * 
-	 * @param document The document to generate the diagram for.
-	 * @return The generated PlantUML markup, or null if there are no associations or collections to model
+	 * Generates a PlantUML diagram for the supplied document when the document has relationships to model.
+	 *
+	 * @param document the document to describe
+	 * @param customer the current customer context used for attribute resolution
+	 * @return the generated PlantUML markup, or {@code null} when no relationships are present
 	 */
+	@SuppressWarnings("java:S3776") // complexity OK
 	private static String generateDiagram(final Document document, final Customer customer) {
 		boolean noDiagram = true; // determines whether to return a diagram or null
 
@@ -478,6 +534,15 @@ public class SystemDocumentationMojo extends AbstractSkyveMojo {
 		return outputDiagram(document, (parentDocument != null), uniqueRelatedNames, relations.toString());
 	}
 	
+	/**
+	 * Wraps the PlantUML relation block in a full diagram definition.
+	 *
+	 * @param document the primary document being rendered
+	 * @param child whether the document has a parent relationship
+	 * @param relatedNames the related document and interface names to declare
+	 * @param relations the relation statements to append
+	 * @return the full PlantUML diagram text
+	 */
 	private static String outputDiagram(Document document,
 											boolean child,
 											Set<String> relatedNames,
@@ -499,6 +564,7 @@ public class SystemDocumentationMojo extends AbstractSkyveMojo {
 		
 		// append the referenced document names
 		for (String name : relatedNames) {
+			@SuppressWarnings("java:S2692") // must be > 0
 			boolean interfaceName = (name.indexOf('.') > 0); // interface class name, not a document
 			result.append(interfaceName ? "interface " : "class ");
 			result.append(name).append("\n");

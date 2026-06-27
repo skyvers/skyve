@@ -24,16 +24,30 @@ import org.skyve.util.monitoring.RequestKey;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 
+/**
+ * Executes a Faces callback action within the current Skyve web context.
+ */
 public class DeleteAction extends FacesAction<Void> {
-
     private static final Logger FACES_LOGGER = Category.FACES.logger();
     private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
 
 	private FacesView facesView;
+	
+	/**
+	 * Creates a delete action for the current bean in the supplied view context.
+	 *
+	 * @param facesView the active Faces view state
+	 */
 	public DeleteAction(FacesView facesView) {
 		this.facesView = facesView;
 	}
 
+	/**
+	 * Deletes the current bean after permission checks, optimistic-lock validation, and pre-execute interception.
+	 *
+	 * @return {@code null}; this action mutates persistence and view state through side effects
+	 * @throws Exception when deletion cannot be completed
+	 */
 	@Override
 	public Void callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("DeleteAction");

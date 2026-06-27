@@ -15,15 +15,27 @@ import org.skyve.content.AttachmentContent;
 import org.skyve.content.TextExtractor;
 import org.skyve.impl.util.UtilImpl;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
+/**
+ * Extracts searchable text and metadata from markup and binary attachments using Apache Tika.
+ *
+ * <p>Threading: thread-safe for current usage because it maintains no mutable instance state.
+ */
 @Extension(points = {TextExtractor.class})
 public class TikaTextExtractor implements TextExtractor {
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(TikaTextExtractor.class);
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TikaTextExtractor.class);
+    private static final String METADATA_SEPARATOR = ". ";
 
 	private static final Tika TIKA = new Tika();
 	
+	/**
+	 * Extracts plain text from a markup fragment.
+	 *
+	 * @param markup the markup to parse
+	 * @return normalised text, or {@code null} when no meaningful text is available
+	 */
 	@Override
 	public String extractTextFromMarkup(String markup) {
 		String result = null;
@@ -39,6 +51,14 @@ public class TikaTextExtractor implements TextExtractor {
 		return result;
 	}
 	
+	/**
+	 * Extracts searchable text and selected metadata from attachment content.
+	 *
+	 * <p>Side effects: reads attachment streams and logs extraction failures.
+	 *
+	 * @param content the attachment to parse
+	 * @return extracted text, or {@code null} when extraction yields no content
+	 */
 	@Override
 	@SuppressWarnings("java:S3776")
 	public String extractTextFromContent(AttachmentContent content) {
@@ -59,7 +79,7 @@ public class TikaTextExtractor implements TextExtractor {
 				String title = metadata.get(TikaCoreProperties.TITLE);
 				if (title != null) {
 					if (! result.isEmpty()) {
-						result.append(". ");
+						result.append(METADATA_SEPARATOR);
 					}
 					result.append(title);
 				}
@@ -67,7 +87,7 @@ public class TikaTextExtractor implements TextExtractor {
 				String author = metadata.get(Office.AUTHOR);
 				if (author != null) {
 					if (! result.isEmpty()) {
-						result.append(". ");
+						result.append(METADATA_SEPARATOR);
 					}
 					result.append(author);
 				}
@@ -75,7 +95,7 @@ public class TikaTextExtractor implements TextExtractor {
 				String subject = metadata.get(TikaCoreProperties.SUBJECT);
 				if (subject != null) {
 					if (! result.isEmpty()) {
-						result.append(". ");
+						result.append(METADATA_SEPARATOR);
 					}
 					result.append(subject);
 				}
@@ -88,7 +108,7 @@ public class TikaTextExtractor implements TextExtractor {
 					markup = UtilImpl.processStringValue(TIKA.parseToString(markupStream, new Metadata(), 100000));
 					if (markup != null) {
 						if (! result.isEmpty()) {
-							result.append(". ");
+							result.append(METADATA_SEPARATOR);
 						}
 						result.append(markup);
 					}
@@ -102,6 +122,11 @@ public class TikaTextExtractor implements TextExtractor {
 		return result.isEmpty() ? null : result.toString();
 	}
 	
+	/**
+	 * Detects and sets the attachment MIME type when one has not already been supplied.
+	 *
+	 * @param attachment the attachment whose content type should be detected
+	 */
 	@Override
 	public void sniffContentType(AttachmentContent attachment) {
 		// Sniff content type if necessary
@@ -125,11 +150,28 @@ public class TikaTextExtractor implements TextExtractor {
 		}
 	}
 	
+	/**
+	 * Detects the language code for the supplied text.
+	 *
+	 * @param text the text to classify
+	 * @return the detected language code, or {@code null} when no language can be inferred
+	 */
 	@Override
 	public String sniffLanguage(String text) {
-		LanguageResult result = LanguageDetector.getDefaultLanguageDetector().detect(text);
-		if (result != null) {
-			return result.getLanguage();
+		if (text == null || text.isBlank()) {
+			return null;
+		}
+		try {
+			LanguageResult result = LanguageDetector.getDefaultLanguageDetector().detect(text);
+			if (result != null) {
+				String lang = result.getLanguage();
+				if (lang != null && !lang.equalsIgnoreCase("unknown")) {
+					return lang;
+				}
+			}
+		}
+		catch (Throwable t) { // include Errors like NoClassDefFound
+			LOGGER.error("TextExtractorImpl.sniffLanguage(): Language could not be detected by TIKA", t);
 		}
 		return null;
 	}

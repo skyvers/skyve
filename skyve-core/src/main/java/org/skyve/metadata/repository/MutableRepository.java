@@ -14,6 +14,22 @@ import org.skyve.metadata.view.View;
 
 import jakarta.annotation.Nonnull;
 
+/**
+ * Extension of the repository interfaces that supports programmatic mutation of
+ * loaded metadata.
+ *
+ * <p>A {@code MutableRepository} allows framework infrastructure (domain generators,
+ * test fixtures, hot-reload pipelines) to install or replace metadata artefacts
+ * (router, customers, modules, documents, views, actions, bizlets) at runtime without
+ * restarting the application.
+ *
+ * <p>All {@code put*} methods convert the raw metadata ({@code MetaData} XML binding
+ * objects) into the resolved runtime representation and install it in the repository,
+ * returning the converted artefact.
+ *
+ * @see ProvidedRepository
+ * @see OnDemandRepository
+ */
 public interface MutableRepository {
 	/**
 	 * Set's the router in this repository.

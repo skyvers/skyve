@@ -22,9 +22,16 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 import modules.admin.domain.ModuleDocument;
 import modules.admin.domain.Tag;
 
+/**
+ * Generates synthetic test data in the background for selected scope.
+ */
 public class GenerateTestDataJob extends CancellableJob {
 	private DataBuilder db;
 	
+	/**
+	 * Performs the execute operation.
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public void execute() throws Exception {
 		EXT.push(new PushMessage().user(CORE.getUser()).growl(MessageSeverity.info,
@@ -67,7 +74,7 @@ public class GenerateTestDataJob extends CancellableJob {
 				} catch (Exception e) {
 					failed++;
 					log.add(String.format("Error creating instance of %s - %s", docName.getDocumentName(), e.getMessage()));
-					e.printStackTrace();
+					LOGGER.error(e.getMessage(), e);
 				}
 				setPercentComplete((int) (((float) i) / ((float) size) * 100F));
 			}
@@ -82,6 +89,13 @@ public class GenerateTestDataJob extends CancellableJob {
 				String.format("%d Documents successfully created", Integer.valueOf(successful))));
 	}
 
+	/**
+	 * Resolves the tag used to mark generated test data, creating it when required.
+	 *
+	 * @param pers The persistence context used to query and save tags.
+	 * @param bean The control-panel request bean containing tag options.
+	 * @return The existing or newly created tag, or {@code null} when tagging is disabled.
+	 */
 	private static Tag createOrRetrieveTag(Persistence pers, ControlPanelExtension bean) {
 		Tag tag = null;
 

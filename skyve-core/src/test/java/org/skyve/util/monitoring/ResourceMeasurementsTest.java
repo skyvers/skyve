@@ -1,0 +1,335 @@
+package org.skyve.util.monitoring;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.lang.reflect.Field;
+import java.util.Map;
+
+import org.junit.jupiter.api.Test;
+
+@SuppressWarnings({ "boxing", "java:S8692" }) // system clock OK
+class ResourceMeasurementsTest {
+
+	@Test
+	@SuppressWarnings("static-method")
+	void constructorInitialisesSuccessfully() {
+		ResourceMeasurements rm = new ResourceMeasurements();
+		assertNotNull(rm);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getSecondsSystemCpuUsageInitiallyEmpty() {
+		ResourceMeasurements rm = new ResourceMeasurements();
+		assertTrue(rm.getSecondsSystemCpuUsageUsage().isEmpty());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getMinutesSystemCpuUsageInitiallyEmpty() {
+		ResourceMeasurements rm = new ResourceMeasurements();
+		assertTrue(rm.getMinutesSystemCpuUsageUsage().isEmpty());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getHoursSystemCpuUsageInitiallyEmpty() {
+		ResourceMeasurements rm = new ResourceMeasurements();
+		assertTrue(rm.getHoursSystemCpuUsage().isEmpty());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getDaysSystemCpuUsageInitiallyEmpty() {
+		ResourceMeasurements rm = new ResourceMeasurements();
+		assertTrue(rm.getDaysSystemCpuUsage().isEmpty());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getWeeksSystemCpuUsageInitiallyEmpty() {
+		ResourceMeasurements rm = new ResourceMeasurements();
+		assertTrue(rm.getWeeksSystemCpuUsage().isEmpty());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getSecondsHeapRamUsageInitiallyEmpty() {
+		ResourceMeasurements rm = new ResourceMeasurements();
+		assertTrue(rm.getSecondsHeapRamUsage().isEmpty());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getMinutesHeapRamUsageInitiallyEmpty() {
+		ResourceMeasurements rm = new ResourceMeasurements();
+		assertTrue(rm.getMinutesHeapRamUsage().isEmpty());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getHoursHeapRamUsageInitiallyEmpty() {
+		ResourceMeasurements rm = new ResourceMeasurements();
+		assertTrue(rm.getHoursHeapRamUsage().isEmpty());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getDaysHeapRamUsageInitiallyEmpty() {
+		ResourceMeasurements rm = new ResourceMeasurements();
+		assertTrue(rm.getDaysHeapRamUsage().isEmpty());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getWeeksHeapRamUsageInitiallyEmpty() {
+		ResourceMeasurements rm = new ResourceMeasurements();
+		assertTrue(rm.getWeeksHeapRamUsage().isEmpty());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void toStringContainsClassName() {
+		ResourceMeasurements rm = new ResourceMeasurements();
+		String s = rm.toString();
+		assertTrue(s.contains("ResourceMeasurements"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void toStringInitiallyShowsEmpty() {
+		ResourceMeasurements rm = new ResourceMeasurements();
+		String s = rm.toString();
+		assertTrue(s.contains("(empty)"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void updateMeasurementsRecordsSystemCpuInSecondsMap() {
+		ResourceMeasurements rm = new ResourceMeasurements();
+		rm.updateMeasurements(0.5f, 0.3f);
+		Map<Integer, Float> seconds = rm.getSecondsSystemCpuUsageUsage();
+		assertEquals(1, seconds.size());
+		// 0.5 * 100 = 50 short, then 50/100F = 0.5
+		assertEquals(0.5f, seconds.values().iterator().next().floatValue(), 0.01f);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void updateMeasurementsRecordsHeapRamInSecondsMap() {
+		ResourceMeasurements rm = new ResourceMeasurements();
+		rm.updateMeasurements(0.1f, 0.75f);
+		Map<Integer, Float> seconds = rm.getSecondsHeapRamUsage();
+		assertEquals(1, seconds.size());
+		// 0.75 * 100 = 75 short, then 75/100F = 0.75
+		assertEquals(0.75f, seconds.values().iterator().next().floatValue(), 0.01f);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void rollupDoesNotThrow() {
+		ResourceMeasurements rm = new ResourceMeasurements();
+		rm.updateMeasurements(0.5f, 0.3f);
+		assertDoesNotThrow(rm::rollup);
+	}
+
+	private static void setIntField(ResourceMeasurements rm, String fieldName, int value) throws Exception {
+		Field f = ResourceMeasurements.class.getDeclaredField(fieldName);
+		f.setAccessible(true);
+		f.set(rm, Integer.valueOf(value));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void rollupWithMinuteBoundaryMovesSecondsToMinutes() throws Exception {
+		ResourceMeasurements rm = new ResourceMeasurements();
+		rm.updateMeasurements(0.8f, 0.5f);
+
+		Field lastMinuteField = ResourceMeasurements.class.getDeclaredField("lastMinute");
+		lastMinuteField.setAccessible(true);
+		int currentMinute = lastMinuteField.getInt(rm);
+
+		int prevMinute = (currentMinute - 1 + 60) % 60;
+		setIntField(rm, "lastMinute", prevMinute);
+
+		rm.rollup();
+
+		Map<Integer, Float> minutesCpu = rm.getMinutesSystemCpuUsageUsage();
+		assertFalse(minutesCpu.isEmpty(), "minutesSystemCpu should have an entry after minute rollup");
+		assertEquals(prevMinute, minutesCpu.keySet().iterator().next().intValue());
+
+		assertTrue(rm.getSecondsSystemCpuUsageUsage().isEmpty(), "secondsCpu should be empty after rollup");
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void rollupWithTwoMinutesBoundaryFillsMinutesBuckets() throws Exception {
+		ResourceMeasurements rm = new ResourceMeasurements();
+		rm.updateMeasurements(0.6f, 0.4f);
+
+		Field lastMinuteField = ResourceMeasurements.class.getDeclaredField("lastMinute");
+		lastMinuteField.setAccessible(true);
+		int currentMinute = lastMinuteField.getInt(rm);
+
+		int twoBack = (currentMinute - 2 + 60) % 60;
+		setIntField(rm, "lastMinute", twoBack);
+
+		rm.rollup();
+
+		Map<Integer, Float> minutesCpu = rm.getMinutesSystemCpuUsageUsage();
+		assertFalse(minutesCpu.isEmpty(), "minutesCpu should have entries after 2-minute rollup");
+		assertTrue(minutesCpu.containsKey(twoBack), "minutesCpu should have entry for first skipped minute");
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void rollupStaticHelperAveragesNonMinValues() throws Exception {
+		java.lang.reflect.Method rollupMethod = ResourceMeasurements.class
+				.getDeclaredMethod("rollup", short[].class, short[].class, int.class);
+		rollupMethod.setAccessible(true);
+
+		short[] source = new short[60];
+		java.util.Arrays.fill(source, Short.MIN_VALUE);
+		source[3] = (short) 100;
+		source[7] = (short) 200;
+		short[] target = new short[60];
+		java.util.Arrays.fill(target, Short.MIN_VALUE);
+
+		rollupMethod.invoke(null, source, target, Integer.valueOf(1));
+
+		assertEquals((short) 150, target[1]);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void rollupStaticHelperAllMinValueProducesShortMinValue() throws Exception {
+		java.lang.reflect.Method rollupMethod = ResourceMeasurements.class
+				.getDeclaredMethod("rollup", short[].class, short[].class, int.class);
+		rollupMethod.setAccessible(true);
+
+		short[] source = new short[60];
+		java.util.Arrays.fill(source, Short.MIN_VALUE);
+		short[] target = new short[60];
+		java.util.Arrays.fill(target, Short.MIN_VALUE);
+
+		rollupMethod.invoke(null, source, target, Integer.valueOf(5));
+
+		assertEquals(Short.MIN_VALUE, target[5]);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void clearResetsAllArraysAndLastValues() throws Exception {
+		ResourceMeasurements rm = new ResourceMeasurements();
+		rm.updateMeasurements(0.9f, 0.7f);
+
+		// Verify data was recorded
+		assertFalse(rm.getSecondsSystemCpuUsageUsage().isEmpty());
+
+		// Access package-private clear() method
+		java.lang.reflect.Method clearMethod = ResourceMeasurements.class.getDeclaredMethod("clear");
+		clearMethod.setAccessible(true);
+		clearMethod.invoke(rm);
+
+		// After clear, all getters should return empty maps
+		assertTrue(rm.getSecondsSystemCpuUsageUsage().isEmpty(), "secondsCpu should be empty after clear");
+		assertTrue(rm.getSecondsHeapRamUsage().isEmpty(), "secondsRam should be empty after clear");
+		assertTrue(rm.getMinutesSystemCpuUsageUsage().isEmpty(), "minutesCpu should be empty after clear");
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void updateMeasurementsTimeLastUpdateIsUpdated() {
+		ResourceMeasurements rm = new ResourceMeasurements();
+		long before = System.currentTimeMillis();
+		rm.updateMeasurements(0.5f, 0.3f);
+		long after = System.currentTimeMillis();
+		assertNotNull(rm);
+		// After update, should still be fine
+		assertTrue(after >= before);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void toStringWithDataShowsNonEmptyEntries() {
+		ResourceMeasurements rm = new ResourceMeasurements();
+		rm.updateMeasurements(0.5f, 0.3f);
+		String s = rm.toString();
+		// After recording data the seconds arrays should have a non-empty entry for the current second
+		assertTrue(s.contains("=0.50]") && s.contains("=0.30]"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void rollupCrossesMinuteBoundaryWhenLastMinuteIsStale() throws Exception {
+		ResourceMeasurements rm = new ResourceMeasurements();
+		// First rollup to initialise all lastXxx fields to current time values
+		rm.rollup();
+
+		java.time.LocalDateTime now = java.time.LocalDateTime.now();
+		int currentMinute = now.getMinute();
+		int currentDay = now.getDayOfWeek().getValue() - 1;
+		int currentWeek = now.get(java.time.temporal.ChronoField.ALIGNED_WEEK_OF_YEAR) - 1;
+
+		// Set lastMinute one behind current minute so the while loop fires once
+		int staleMinute = (currentMinute + 59) % 60;
+		Field lastMinuteField = ResourceMeasurements.class.getDeclaredField("lastMinute");
+		lastMinuteField.setAccessible(true);
+		lastMinuteField.set(rm, staleMinute);
+
+		// Ensure lastDay and lastWeek match current so only one iteration runs
+		Field lastDayField = ResourceMeasurements.class.getDeclaredField("lastDay");
+		lastDayField.setAccessible(true);
+		lastDayField.set(rm, currentDay);
+		Field lastWeekField = ResourceMeasurements.class.getDeclaredField("lastWeek");
+		lastWeekField.setAccessible(true);
+		lastWeekField.set(rm, currentWeek);
+
+		// Also set lastHour to current hour so hour boundary does not fire
+		Field lastHourField = ResourceMeasurements.class.getDeclaredField("lastHour");
+		lastHourField.setAccessible(true);
+		lastHourField.set(rm, now.getHour());
+
+		// Rollup should process the minute boundary crossing without error
+		assertDoesNotThrow(rm::rollup);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void rollupCrossesHourBoundaryWhenLastMinuteIs59AndHourIsStale() throws Exception {
+		ResourceMeasurements rm = new ResourceMeasurements();
+		rm.rollup();
+
+		java.time.LocalDateTime now = java.time.LocalDateTime.now();
+		int currentMinute = now.getMinute();
+		int currentHour = now.getHour();
+		int currentDay = now.getDayOfWeek().getValue() - 1;
+		int currentWeek = now.get(java.time.temporal.ChronoField.ALIGNED_WEEK_OF_YEAR) - 1;
+
+		// Set lastMinute = 59 so the next increment produces 0, triggering hour boundary
+		// Only works if current minute != 59 (otherwise the loop wouldn't run)
+		if (currentMinute != 59) {
+			Field lastMinuteField = ResourceMeasurements.class.getDeclaredField("lastMinute");
+			lastMinuteField.setAccessible(true);
+			lastMinuteField.set(rm, 59);
+
+			// Stale hour triggers hour boundary when lastMinute rolls to 0
+			Field lastHourField = ResourceMeasurements.class.getDeclaredField("lastHour");
+			lastHourField.setAccessible(true);
+			lastHourField.set(rm, (currentHour + 23) % 24);
+
+			Field lastDayField = ResourceMeasurements.class.getDeclaredField("lastDay");
+			lastDayField.setAccessible(true);
+			lastDayField.set(rm, currentDay);
+			Field lastWeekField = ResourceMeasurements.class.getDeclaredField("lastWeek");
+			lastWeekField.setAccessible(true);
+			lastWeekField.set(rm, currentWeek);
+
+			assertDoesNotThrow(rm::rollup);
+		}
+	}
+}

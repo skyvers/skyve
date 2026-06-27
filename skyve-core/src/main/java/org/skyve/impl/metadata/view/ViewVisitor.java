@@ -49,9 +49,8 @@ import org.skyve.impl.metadata.view.widget.bound.input.CheckMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.DefaultWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
@@ -83,11 +82,26 @@ import org.skyve.metadata.view.Invisible;
 import org.skyve.metadata.view.widget.bound.Bound;
 import org.skyve.util.Binder.TargetMetaData;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
+
+/**
+ * Abstract visitor that traverses the full widget and action tree of a
+ * {@link ViewImpl}, visiting every widget type and every action.
+ *
+ * <p>Subclasses override the relevant {@code visit*} methods for the widget
+ * types they care about.  Use {@link NoOpViewVisitor} to inherit empty
+ * implementations and override only the needed methods.
+ *
+ * <p>Threading: not thread-safe; one instance per traversal.
+ *
+ * @see ActionVisitor
+ * @see NoOpViewVisitor
+ */
 public abstract class ViewVisitor extends ActionVisitor {
 	// NB An instance member LOGGER is OK here as this is not Serializable
-    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    protected final Logger LOGGER = SkyveLoggerFactory.getLogger(getClass());
 
 	protected CustomerImpl customer;
 	protected ModuleImpl module;
@@ -302,12 +316,16 @@ public abstract class ViewVisitor extends ActionVisitor {
 	public abstract void visitedCombo(Combo combo,
 										boolean parentVisible,
 										boolean parentEnabled);
-	public abstract void visitContentImage(ContentImage image,
-											boolean parentVisible,
-											boolean parentEnabled);
-	public abstract void visitContentLink(ContentLink link,
-											boolean parentVisible,
-											boolean parentEnabled);
+	/**
+	 * Visits a managed-content upload.
+	 *
+	 * @param content the content upload being visited; must not be {@code null}
+	 * @param parentVisible whether ancestor metadata is visible
+	 * @param parentEnabled whether ancestor metadata is enabled
+	 */
+	public abstract void visitContent(@Nonnull ContentUpload content,
+										boolean parentVisible,
+										boolean parentEnabled);
 	public abstract void visitContentSignature(ContentSignature signature,
 												boolean parentVisible,
 												boolean parentEnabled);
@@ -469,6 +487,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 		return true;
 	}
 
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	private void visitWidget(MetaData widget, 
 								boolean parentVisible,
 								boolean parentEnabled) {
@@ -644,12 +663,8 @@ public abstract class ViewVisitor extends ActionVisitor {
 			visitChangeable(combo, parentVisible, parentEnabled);
 			visitedCombo(combo, parentVisible, parentEnabled);
 		}
-		else if (widget instanceof ContentImage image) {
-			visitContentImage(image, parentVisible, parentEnabled);
-		}
-		else if (widget instanceof ContentLink link) {
-			visitContentLink(link, parentVisible, parentEnabled);
-			visitParameterizable(link, parentVisible, parentEnabled);
+		else if (widget instanceof ContentUpload content) {
+			visitContent(content, parentVisible, parentEnabled);
 		}
 		else if (widget instanceof ContentSignature signature) {
 			visitContentSignature(signature, parentVisible, parentEnabled);
@@ -755,6 +770,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 		}
 	}
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void visitContainer(Container container, 
 									boolean parentVisible,
 									boolean parentEnabled) {
@@ -805,6 +821,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 		}
 	}
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void visitDataWidgetColumns(AbstractDataWidget widget,
 											String widgetBindingPrefix,
 											boolean widgetVisible,

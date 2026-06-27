@@ -50,11 +50,30 @@ import org.skyve.persistence.DataStore;
 import org.skyve.util.BeanVisitor;
 import org.skyve.util.JSON;
 import org.skyve.util.logging.Category;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import net.gcardone.junidecode.Junidecode;
 
+/**
+ * Primary framework configuration façade and miscellaneous utility class.
+ *
+ * <p>All fields are public and mutable because they are set once during application
+ * bootstrap (typically from {@code skyve.json}) and then treated as read-only for the
+ * lifetime of the application.
+ *
+ * <p>Key responsibilities:
+ * <ul>
+ *   <li>Holds global configuration: application name, data-store settings,
+ *       environment name, cache configs, bootstrap user credentials, etc.
+ *   <li>Provides deep-clone, serialisation, and Hibernate-proxy utilities via
+ *       {@link #cloneToTransientBeanFromPersistentBean} and {@link #cloneToTransientBeanFromPersistentBean}.
+ *   <li>Provides bean-graph traversal helpers used throughout the framework.
+ * </ul>
+ *
+ * <p>Threading: configuration fields are read after bootstrap without synchronisation;
+ * callers must not modify these fields outside of the bootstrap phase.
+ */
 @SuppressWarnings({"java:S3008", "java:S1104", "java:S1444", "java:S2386"})
 public class UtilImpl {
 	/**
@@ -76,8 +95,8 @@ public class UtilImpl {
 	public static Map<String, Object> OVERRIDE_CONFIGURATION;
 
 	// For versioning javascript/css etc for web site
-	public static final String WEB_RESOURCE_FILE_VERSION = "58";
-	public static final String SKYVE_VERSION = "9.5.0-SNAPSHOT";
+	public static final String WEB_RESOURCE_FILE_VERSION = "59";
+	public static final String SKYVE_VERSION = "10.0.0-SNAPSHOT";
 	public static final String SMART_CLIENT_DIR = "isomorphic130";
 
 	public static boolean XML_TRACE = false;
@@ -98,7 +117,7 @@ public class UtilImpl {
      * Replace with someting like this:
      * <p>
      * <code>
-     * private final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(MyClass.class);
+     * private final org.slf4j.Logger logger = org.skyve.util.logging.SkyveLoggerFactory.getLogger(MyClass.class);
      * </code>
      * 
      * @deprecated This logger will be removed; please switch to using
@@ -110,7 +129,7 @@ public class UtilImpl {
     @Deprecated(since = "9.3.0", forRemoval = true)
     public static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(Category.LEGACY.getName());
 
-    private static final Logger utilLogger = LoggerFactory.getLogger(UtilImpl.class);
+    private static final Logger utilLogger = SkyveLoggerFactory.getLogger(UtilImpl.class);
 
 	// the name of the application archive, e.g. typically projectName.war or projectName.ear
 	public static String ARCHIVE_NAME;
@@ -155,8 +174,13 @@ public class UtilImpl {
 	
 	// Properties required to connect to a cloud provider for backup storage
 	public static Map<String, Object> BACKUP_PROPERTIES = null;
-	
-	
+
+	// Maximum number of zip entries to extract from a backup archive before aborting (zip bomb protection)
+	public static int BACKUP_RESTORE_MAX_EXTRACT_ENTRIES = 10_000;
+
+	// Maximum total uncompressed size in MB to extract from a backup archive before aborting (zip bomb protection)
+	public static int BACKUP_RESTORE_MAX_EXTRACT_SIZE_MB = 500;
+
 	// Allowed file upload file names - default is a blacklist of harmful "executable" files
 	public static String UPLOADS_FILE_WHITELIST_REGEX = "^.+\\.(?!(ADE|ADP|APP|ASA|ASP|BAS|BAT|CAB|CER|CHM|CMD|COM|CPL|CRT|CSH|DLL|DOCM|DOTM|EXE|FXP|HLP|HTA|HTR|INF|INS|ISP|ITS|JS|JSE|KSH|LNK|MAD|MAF|MAG|MAM|MAQ|MAR|MAS|MAT|MAU|MAV|MAW|MDA|MDB|MDE|MDT|MDW|MDZ|MSC|MSI|MSP|MST|OCX|OPS|PCD|PIF|POTM|PPAM|PPSM|PPTM|PRF|PRG|REG|SCF|SO|SCR|SCT|SHB|SHS|TMP|URL|VB|VBE|VBS|VBX|VSMACROS|VSS|VST|VSW|WS|WSC|WSF|WSH|XLAM|XLSB|XLSM|XSTM|XSL)$)([^.]+$)";
 	
@@ -174,6 +198,12 @@ public class UtilImpl {
 	
 	// Max image upload size - default is 10MB the same as wildfly default
 	public static int UPLOADS_IMAGE_MAXIMUM_SIZE_IN_MB = UPLOADS_FILE_MAXIMUM_SIZE_IN_MB;
+
+	// Allowed video upload file names - default is common browser/mobile video containers
+	public static String UPLOADS_VIDEO_WHITELIST_REGEX = "^.+\\.(MP4|WEBM|MOV|M4V|OGV|AVI)$";
+
+	// Max video upload size - default is 100MB for about one minute of typical mobile video
+	public static int UPLOADS_VIDEO_MAXIMUM_SIZE_IN_MB = 100;
 
 	// Allowed bizport upload file names - default is a XLS and XLSX files
 	public static String UPLOADS_BIZPORT_WHITELIST_REGEX = "^.+\\.(XLS|XLSX)$";
@@ -264,12 +294,11 @@ public class UtilImpl {
 	public static String SKYVE_NUMBER_GENERATOR_CLASS = null;
 	public static String SKYVE_CUSTOMISATIONS_CLASS = null;
 	public static String SKYVE_GEOIP_SERVICE_CLASS = null;
+	public static String SKYVE_MAIL_SERVICE_CLASS = null;
 	public static String SKYVE_SMS_SERVICE_CLASS = null;
 
 	// The directory used for temp files for file uploads etc
 	public static final String TEMP_DIRECTORY = System.getProperty("java.io.tmpdir");
-
-	public static boolean USING_JPA = false;
 
 	// For caches
 	// Cache folder - defaults to <content.directory>/SKYVE_CACHE/
@@ -312,7 +341,7 @@ public class UtilImpl {
 	public static boolean SMTP_TEST_BOGUS_SEND = false;
 
 	// Map Keys
-	@SuppressWarnings("java:S115") // these are populated by strings from the JSON config
+	@SuppressWarnings("java:S115") // Suppress "Constant names should comply with a naming convention" as these are not constants but enum values
 	public enum MapType {
 		gmap, leaflet;
 	}
@@ -347,6 +376,7 @@ public class UtilImpl {
 	public static boolean JOB_SCHEDULER = true;
 
 	// Password hashing algorithm - usually argon2, bcrypt, pbkdf2, scrypt.
+	@SuppressWarnings("java:S2068") // false positive - this is not a hard coded password, it's a hashing algorithm that we need to specify for security purposes
 	public static String PASSWORD_HASHING_ALGORITHM = "argon2";
 	// Number of days until a password change is required - Use null to indicate no password aging
 	public static int PASSWORD_EXPIRY_IN_DAYS = 0;
@@ -401,6 +431,10 @@ public class UtilImpl {
 	public static String BOOTSTRAP_EMAIL = null;
 	public static String BOOTSTRAP_PASSWORD = null;
 	
+	// IP tracking configurations
+	public static boolean IP_ADDRESS_CHECKS = true;
+	public static int IP_ADDRESS_HISTORY_CHECK_COUNT = 1;
+
 	// Security notifications configurations
 	public static String SECURITY_NOTIFICATIONS_EMAIL_ADDRESS = null;
 	public static boolean GEO_IP_BLOCK_NOTIFICATIONS = true;
@@ -409,10 +443,13 @@ public class UtilImpl {
 	public static boolean IP_ADDRESS_CHANGE_NOTIFICATIONS = true;
 	public static boolean ACCESS_EXCEPTION_NOTIFICATIONS = true;
 	public static boolean SECURITY_EXCEPTION_NOTIFICATIONS = true;
+	public static boolean CONCURRENT_SESSION_WARNINGS = true;
+	public static boolean CONCURRENT_SESSION_NOTIFICATIONS = true;
 
 	public static boolean PRIMEFLEX = false;
 	
 	public static Set<String> TWO_FACTOR_AUTH_CUSTOMERS = null;
+	public static int TWO_FACTOR_AUTH_RESEND_COOLDOWN_SECONDS = 60;
 	
 	// for skyve script
 	/**
@@ -738,6 +775,7 @@ public class UtilImpl {
         }
     }
 
+    @SuppressWarnings("java:S2068") // false positive - this is not a hard coded password, it's a hashing algorithm that we need to specify for security purposes
     public static void clear() {
     	// reset the state of this class (mostly static) to what it would be on JVM startup
     	CONFIGURATION = null;
@@ -770,6 +808,8 @@ public class UtilImpl {
     	BACKUP_DIRECTORY = null;
     	BACKUP_EXTERNAL_BACKUP_CLASS = null;
     	BACKUP_PROPERTIES = null;
+    	BACKUP_RESTORE_MAX_EXTRACT_ENTRIES = 10_000;
+    	BACKUP_RESTORE_MAX_EXTRACT_SIZE_MB = 500;
     	
     	UPLOADS_FILE_WHITELIST_REGEX = "^.+\\.(?!(ADE|ADP|APP|ASA|ASP|BAS|BAT|CAB|CER|CHM|CMD|COM|CPL|CRT|CSH|DLL|DOCM|DOTM|EXE|FXP|HLP|HTA|HTR|INF|INS|ISP|ITS|JS|JSE|KSH|LNK|MAD|MAF|MAG|MAM|MAQ|MAR|MAS|MAT|MAU|MAV|MAW|MDA|MDB|MDE|MDT|MDW|MDZ|MSC|MSI|MSP|MST|OCX|OPS|PCD|PIF|POTM|PPAM|PPSM|PPTM|PRF|PRG|REG|SCF|SO|SCR|SCT|SHB|SHS|TMP|URL|VB|VBE|VBS|VBX|VSMACROS|VSS|VST|VSW|WS|WSC|WSF|WSH|XLAM|XLSB|XLSM|XSTM|XSL)$)([^.]+$)";
     	UPLOADS_FILE_MAXIMUM_SIZE_IN_MB = 10;
@@ -778,6 +818,8 @@ public class UtilImpl {
     	UPLOADS_CONTENT_MAXIMUM_SIZE_IN_MB = UPLOADS_FILE_MAXIMUM_SIZE_IN_MB;
     	UPLOADS_IMAGE_WHITELIST_REGEX = UPLOADS_FILE_WHITELIST_REGEX;
     	UPLOADS_IMAGE_MAXIMUM_SIZE_IN_MB = UPLOADS_FILE_MAXIMUM_SIZE_IN_MB;
+    	UPLOADS_VIDEO_WHITELIST_REGEX = "^.+\\.(MP4|WEBM|MOV|M4V|OGV|AVI)$";
+    	UPLOADS_VIDEO_MAXIMUM_SIZE_IN_MB = 100;
     	UPLOADS_BIZPORT_WHITELIST_REGEX = "^.+\\.(XLS|XLSX)$";
     	UPLOADS_BIZPORT_MAXIMUM_SIZE_IN_MB = UPLOADS_FILE_MAXIMUM_SIZE_IN_MB;
     	
@@ -814,9 +856,8 @@ public class UtilImpl {
     	SKYVE_NUMBER_GENERATOR_CLASS = null;
     	SKYVE_CUSTOMISATIONS_CLASS = null;
     	SKYVE_GEOIP_SERVICE_CLASS = null;
+    	SKYVE_MAIL_SERVICE_CLASS = null;
     	SKYVE_SMS_SERVICE_CLASS = null;
-
-    	USING_JPA = false;
 
     	CACHE_DIRECTORY = null;
     	CACHE_MULTIPLE = false;
@@ -906,11 +947,12 @@ public class UtilImpl {
     	ACCESS_EXCEPTION_NOTIFICATIONS = true;
     	SECURITY_EXCEPTION_NOTIFICATIONS = true;
 
-    	PRIMEFLEX = false;
-    	
-    	TWO_FACTOR_AUTH_CUSTOMERS = null;
-    	
-    	MODULE_DIRECTORY = null;
+	    	PRIMEFLEX = false;
+	    	
+	    	TWO_FACTOR_AUTH_CUSTOMERS = null;
+	    	TWO_FACTOR_AUTH_RESEND_COOLDOWN_SECONDS = 60;
+	    	
+	    	MODULE_DIRECTORY = null;
 
     	absoluteBasePath = null;
     }

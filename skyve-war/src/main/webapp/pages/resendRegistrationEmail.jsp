@@ -7,11 +7,13 @@
 <%@page import="java.security.Principal"%>
 <%@page import="java.util.Locale"%>
 <%@page import="java.util.UUID"%>
+<%@page import="org.skyve.util.Util"%>
+<%@page import="org.skyve.util.OWASP"%>
 <%@page import="org.skyve.impl.util.UtilImpl"%>
 <%@page import="org.skyve.impl.web.UserAgent"%>
 <%@page import="org.skyve.impl.web.WebUtil"%>
 <%@page import="org.skyve.metadata.user.User"%>
-<%@page import="org.skyve.util.Util"%>
+<%@page import="org.skyve.metadata.view.TextOutput.Sanitisation"%>
 <%@page import="org.slf4j.LoggerFactory"%>
 <%@page import="org.slf4j.Logger"%>
 
@@ -26,8 +28,8 @@
 	Locale locale = (user == null) ? request.getLocale() : user.getLocale();
 
 	// This is a postback, process it and move on
-	String customerValue = request.getParameter("customer");
-	String userIdValue = request.getParameter("userId");
+	String customerValue = OWASP.sanitise(Sanitisation.text, request.getParameter("customer"));
+	String userIdValue = OWASP.sanitise(Sanitisation.text, request.getParameter("userId"));
 	
 	boolean postback = (userIdValue != null);
 	if (postback) {
@@ -41,7 +43,7 @@
 	}
 %>
 <!DOCTYPE html>
-<html dir="<%=Util.isRTL(locale) ? "rtl" : "ltr"%>">
+<html dir="<%=Util.isRTL(locale) ? "rtl" : "ltr"%>" lang="<%=locale.getLanguage()%>" xml:lang="<%=locale.getLanguage()%>">
 	<head>
 		<!-- Standard Meta -->
 	    <meta charset="utf-8" />

@@ -33,15 +33,36 @@ import org.hibernate.tool.schema.spi.SchemaManagementTool;
 import org.skyve.EXT;
 import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect.RDBMS;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
+/**
+ * Utility class that applies Hibernate DDL migration scripts to the database,
+ * delegating schema-diffing to the Hibernate {@code StandardServiceRegistry}.
+ */
 public class DDLDelegate {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DDLDelegate.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(DDLDelegate.class);
 
+	/**
+	 * Prevents instantiation of this static utility class.
+	 */
     private DDLDelegate() {
     	// nothing to see here
     }
 
+	/**
+	 * Generates Skyve-specific alter-column DDL and optionally applies it to the live database.
+	 *
+	 * <p>Side effects: when {@code execute} is {@code true}, this method opens a datastore connection,
+	 * logs each generated statement, and executes best-effort schema updates against physical tables.
+	 *
+	 * @param standardRegistry the Hibernate service registry backing schema tooling
+	 * @param metadata the Hibernate metadata to compare against the live schema
+	 * @param skyveDialect the Skyve dialect supplying vendor-specific schema rules
+	 * @param execute whether generated statements should be executed immediately
+	 * @return the generated alter-column statements, in execution order
+	 * @throws SQLException if the datastore connection or schema inspection cannot be established
+	 */
+    @SuppressWarnings("java:S3776") // Complexity OK
     public static List<String> migrate(ServiceRegistry standardRegistry, Metadata metadata, SkyveDialect skyveDialect, boolean execute)
 	throws SQLException {
 		List<String> result = new ArrayList<>(20);
@@ -50,21 +71,37 @@ public class DDLDelegate {
 			connection.setAutoCommit(true);
 
 			final DdlTransactionIsolator ddlTransactionIsolator = new DdlTransactionIsolator() {
+				/**
+				 * Releases resources owned by this isolator.
+				 */
 				@Override
 				public void release() {
 					// nothing to do as the connection is outside
 				}
 				
+				/**
+				 * Prepares the isolator before schema tooling work begins.
+				 */
 				@Override
 				public void prepare() {
 					// nothing to do as the connection is outside
 				}
 				
+				/**
+				 * Returns the JDBC context associated with this isolator.
+				 *
+				 * @return null because this isolator is backed directly by an external connection
+				 */
 				@Override
 				public JdbcContext getJdbcContext() {
 					return null;
 				}
 				
+				/**
+				 * Returns the externally managed isolated connection used for DDL operations.
+				 *
+				 * @return the datastore connection opened by migrate
+				 */
 				@Override
 				public Connection getIsolatedConnection() {
 					return connection;
@@ -73,11 +110,24 @@ public class DDLDelegate {
 
 			if (RDBMS.h2.equals(skyveDialect.getRDBMS())) {
 				JdbcUtils.addClassFactory(new ClassFactory() {
+					/**
+					 * Indicates whether this factory can attempt class resolution.
+					 *
+					 * @param name the class name requested by H2
+					 * @return true to delegate all class loading requests to this factory
+					 */
 					@Override
 					public boolean match(String name) {
 						return true;
 					}
 
+					/**
+					 * Loads a class through the current thread context class loader.
+					 *
+					 * @param name the fully qualified class name to load
+					 * @return the resolved class
+					 * @throws ClassNotFoundException if the class cannot be loaded
+					 */
 					@Override
 					public Class<?> loadClass(String name) throws ClassNotFoundException {
 						return Thread.currentThread().getContextClassLoader().loadClass(name);
@@ -128,11 +178,20 @@ public class DDLDelegate {
 	}
 	
 	/**
-     * This method exists because by default, hibernate does not issue "alter table alter/modify column" statements only
-     * "alter table add column" statements. So this hack allows alter table modify/alter column when the type, length or precision
-     * has changed. The "modify column" syntax is outside the scope of the hibernate dialect classes and so its added to SkyveDialect.
-     */
+	 * Builds alter-column DDL statements for an existing table by comparing mapped columns with live metadata.
+	 *
+	 * <p>This supplements Hibernate's default schema update behavior, which commonly adds missing columns
+	 * but does not emit alter-column statements for type, length, precision, or scale changes.
+	 *
+	 * @param skyveDialect the Skyve-aware dialect that supplies alter-column syntax and comparison rules
+	 * @param table the mapped Hibernate table definition
+	 * @param tableInfo the extracted live table metadata
+	 * @param sqlStringGenerationContext the SQL rendering context used to format table identifiers
+	 * @param metadata the Hibernate metadata used for SQL type resolution
+	 * @return iterable alter-column DDL statements for columns requiring changes
+	 */
 	// from org.hibernate.mapping.Table
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static Iterable<String> sqlAlterTableDDL(SkyveDialect skyveDialect, 
 														Table table, 
 														TableInformation tableInfo,
@@ -186,6 +245,13 @@ public class DDLDelegate {
 		return result;
 	}
 	
+	/**
+	 * Determines whether a mapped column differs from the live column metadata enough to require alter-column DDL.
+	 *
+	 * @param column the mapped Hibernate column definition
+	 * @param columnInfo the extracted live database column metadata
+	 * @return true when a type/size/precision/scale difference requires a column change statement, otherwise false
+	 */
 	static final boolean isAlterTableColumnChangeRequired(Column column, ColumnInformation columnInfo) {
 /*
 		if (columnInfo != null) {
@@ -235,6 +301,12 @@ public class DDLDelegate {
 		return result;
 	}
 	
+	/**
+	 * Tests whether a JDBC SQL type code represents a character-based textual type.
+	 *
+	 * @param typeCode the JDBC SQL type code to evaluate
+	 * @return true when the type code is a char/varchar/clob variant, otherwise false
+	 */
 	static boolean isChar(int typeCode) {
 		return (typeCode == Types.CHAR) ||
 				(typeCode == Types.VARCHAR) || 

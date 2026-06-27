@@ -69,7 +69,7 @@ public class StaffQualification extends AbstractPersistentBean implements ChildB
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-	public static enum Type implements Enumeration {
+	public enum Type implements Enumeration {
 		skill("Skill", "Skill"),
 		experience("Experience", "Experience"),
 		diploma("Diploma", "Diploma"),

@@ -2,6 +2,7 @@ package org.skyve.metadata.repository;
 
 import java.sql.Connection;
 import java.util.List;
+import java.util.Optional;
 
 import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.repository.behaviour.ActionMetaData;
@@ -34,12 +35,27 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 /**
- * Repository API for resolving metadata, UI artifacts, and runtime components for modules/documents.
- * Supports customer overrides and runtime resolution, and exposes permission/user population helpers.
+ * The primary metadata resolution API used throughout the Skyve framework at runtime.
  *
- * <p>Nullability is expressed via {@link Nonnull} and {@link Nullable} on parameters and return values.
+ * <p>{@code ProvidedRepository} extends {@link CachedRepository} with the full set of
+ * operations needed to resolve modules, documents, views, bizlets, actions, models,
+ * reports, and user/permission state &mdash; always honouring customer overrides and
+ * UX/UI-specific variants.
+ *
+ * <p>Constant fields define the standard folder namespaces (e.g.
+ * {@link #MODULES_NAMESPACE}, {@link #VIEWS_NAMESPACE}) used throughout the metadata
+ * file system layout.
+ *
+ * <p>The singleton instance is obtained via
+ * {@link org.skyve.CORE#getRepository()}.
+ *
+ * @see Repository
+ * @see CachedRepository
+ * @see MutableRepository
  */
 public interface ProvidedRepository extends CachedRepository {
+	final String DOCUMENT_PREFIX = "Document ";
+
 	final String ROUTER_NAME = "router";
 	final String ROUTER_NAMESPACE = ROUTER_NAME + '/';
 	final String CUSTOMERS_NAME = "customers";
@@ -84,9 +100,9 @@ public interface ProvidedRepository extends CachedRepository {
 	 *
 	 * @param customer optional customer; if {@code null}, return the un-overridden module
 	 * @param moduleName module name to resolve
-	 * @return resolved module
+	 * @return resolved module, or {@code null} when not found
 	 */
-	@Nonnull Module getModule(@Nullable Customer customer, @Nonnull String moduleName);
+	@Nullable Module getModule(@Nullable Customer customer, @Nonnull String moduleName);
 
 	/**
 	 * Resolve a document by name, optionally using a customer override.
@@ -94,9 +110,9 @@ public interface ProvidedRepository extends CachedRepository {
 	 * @param customer optional customer; if {@code null}, return the un-overridden document
 	 * @param module module that owns the document
 	 * @param documentName document name to resolve
-	 * @return resolved document
+	 * @return resolved document, or {@code null} when not found
 	 */
-	@Nonnull Document getDocument(@Nullable Customer customer, @Nonnull Module module, @Nonnull String documentName);
+	@Nullable Document getDocument(@Nullable Customer customer, @Nonnull Module module, @Nonnull String documentName);
 
 	/**
 	 * Resolve a view by name for the given document and UX/UI, optionally using a customer override.
@@ -141,7 +157,7 @@ public interface ProvidedRepository extends CachedRepository {
 	 * @param runtime {@code true} to prefer runtime overrides
 	 * @return bizlet if present; otherwise {@code null}
 	 */
-	@Nullable <T extends Bean> Bizlet<T> getBizlet(@Nonnull Customer customer, @Nonnull Document document, boolean runtime);
+	@Nullable <T extends Bean> Bizlet<T> getBizlet(@Nullable Customer customer, @Nonnull Document document, boolean runtime);
 
 	/**
 	 * Resolve a bizlet metadata definition for a document.
@@ -159,9 +175,9 @@ public interface ProvidedRepository extends CachedRepository {
 	 * @param document document
 	 * @param imageName image name
 	 * @param runtime {@code true} to prefer runtime overrides
-	 * @return dynamic image
+	 * @return dynamic image if found; otherwise {@code null}
 	 */
-	@Nonnull <T extends Bean> DynamicImage<T> getDynamicImage(@Nullable Customer customer,
+	@Nullable <T extends Bean> DynamicImage<T> getDynamicImage(@Nullable Customer customer,
 																@Nonnull Document document,
 																@Nonnull String imageName,
 																boolean runtime);
@@ -173,9 +189,9 @@ public interface ProvidedRepository extends CachedRepository {
 	 * @param document document
 	 * @param modelName model name
 	 * @param runtime {@code true} to prefer runtime overrides
-	 * @return comparison model
+	 * @return comparison model if found; otherwise {@code null}
 	 */
-	@Nonnull <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(@Nullable Customer customer,
+	@Nullable <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(@Nullable Customer customer,
 																						@Nonnull Document document,
 																						@Nonnull String modelName,
 																						boolean runtime);
@@ -187,9 +203,9 @@ public interface ProvidedRepository extends CachedRepository {
 	 * @param document document
 	 * @param modelName model name
 	 * @param runtime {@code true} to prefer runtime overrides
-	 * @return map model
+	 * @return map model if found; otherwise {@code null}
 	 */
-	@Nonnull <T extends Bean> MapModel<T> getMapModel(@Nullable Customer customer,
+	@Nullable <T extends Bean> MapModel<T> getMapModel(@Nullable Customer customer,
 														@Nonnull Document document,
 														@Nonnull String modelName,
 														boolean runtime);
@@ -201,9 +217,9 @@ public interface ProvidedRepository extends CachedRepository {
 	 * @param document document
 	 * @param modelName model name
 	 * @param runtime {@code true} to prefer runtime overrides
-	 * @return chart model
+	 * @return chart model if found; otherwise {@code null}
 	 */
-	@Nonnull <T extends Bean> ChartModel<T> getChartModel(@Nullable Customer customer,
+	@Nullable <T extends Bean> ChartModel<T> getChartModel(@Nullable Customer customer,
 															@Nonnull Document document,
 															@Nonnull String modelName,
 															boolean runtime);
@@ -215,9 +231,9 @@ public interface ProvidedRepository extends CachedRepository {
 	 * @param document document
 	 * @param modelName model name
 	 * @param runtime {@code true} to prefer runtime overrides
-	 * @return list model
+	 * @return list model if found; otherwise {@code null}
 	 */
-	@Nonnull <T extends Bean> ListModel<T> getListModel(@Nullable Customer customer,
+	@Nullable <T extends Bean> ListModel<T> getListModel(@Nullable Customer customer,
 															@Nonnull Document document,
 															@Nonnull String modelName,
 															boolean runtime);
@@ -229,9 +245,9 @@ public interface ProvidedRepository extends CachedRepository {
 	 * @param document document the action belongs to
 	 * @param className action class name (fully qualified)
 	 * @param runtime {@code true} to prefer runtime overrides
-	 * @return server-side action
+	 * @return server-side action if found; otherwise {@code null}
 	 */
-	@Nonnull ServerSideAction<Bean> getServerSideAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String className, boolean runtime);
+	@Nullable ServerSideAction<Bean> getServerSideAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String className, boolean runtime);
 
 	/**
 	 * Resolve a biz export action implementation.
@@ -240,9 +256,9 @@ public interface ProvidedRepository extends CachedRepository {
 	 * @param document document the action belongs to
 	 * @param className action class name (fully qualified)
 	 * @param runtime {@code true} to prefer runtime overrides
-	 * @return export action
+	 * @return export action if found; otherwise {@code null}
 	 */
-	@Nonnull BizExportAction getBizExportAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String className, boolean runtime);
+	@Nullable BizExportAction getBizExportAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String className, boolean runtime);
 
 	/**
 	 * Resolve a biz import action implementation.
@@ -251,9 +267,9 @@ public interface ProvidedRepository extends CachedRepository {
 	 * @param document document the action belongs to
 	 * @param className action class name (fully qualified)
 	 * @param runtime {@code true} to prefer runtime overrides
-	 * @return import action
+	 * @return import action if found; otherwise {@code null}
 	 */
-	@Nonnull BizImportAction getBizImportAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String className, boolean runtime);
+	@Nullable BizImportAction getBizImportAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String className, boolean runtime);
 
 	/**
 	 * Resolve a download action implementation.
@@ -262,9 +278,9 @@ public interface ProvidedRepository extends CachedRepository {
 	 * @param document document the action belongs to
 	 * @param className action class name (fully qualified)
 	 * @param runtime {@code true} to prefer runtime overrides
-	 * @return download action
+	 * @return download action if found; otherwise {@code null}
 	 */
-	@Nonnull DownloadAction<Bean> getDownloadAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String className, boolean runtime);
+	@Nullable DownloadAction<Bean> getDownloadAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String className, boolean runtime);
 
 	/**
 	 * Resolve an upload action implementation.
@@ -273,9 +289,9 @@ public interface ProvidedRepository extends CachedRepository {
 	 * @param document document the action belongs to
 	 * @param className action class name (fully qualified)
 	 * @param runtime {@code true} to prefer runtime overrides
-	 * @return upload action
+	 * @return upload action if found; otherwise {@code null}
 	 */
-	@Nonnull UploadAction<Bean> getUploadAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String className, boolean runtime);
+	@Nullable UploadAction<Bean> getUploadAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String className, boolean runtime);
 
 	/**
 	 * Validate a customer for domain generation.
@@ -311,9 +327,9 @@ public interface ProvidedRepository extends CachedRepository {
 	void validateViewForGenerateDomain(@Nonnull Customer customer, @Nonnull Document document, @Nonnull View view, @Nonnull String uxui);
 
 	/**
-	 * @return the global router that is not module specific
+	 * @return the global router that is not module specific, or {@code null} when none exists
 	 */
-	@Nonnull Router getGlobalRouter();
+	@Nullable Router getGlobalRouter();
 
 	/**
 	 * @return list of module-specific routers
@@ -414,44 +430,56 @@ public interface ProvidedRepository extends CachedRepository {
 	 * @return nearest persistent single/joined super-document, or {@code null} if none
 	 */
 	default @Nullable Document findNearestPersistentSingleOrJoinedSuperDocument(@Nullable Customer customer, @Nonnull Module module, @Nonnull Document document) {
-		Document result = null;
-		
+		Document result = resolveInheritedDocument(customer, module, document);
+		return isPersistentSingleOrJoinedDocument(result) ? result : null;
+	}
+
+	private @Nullable Document resolveInheritedDocument(@Nullable Customer customer, @Nonnull Module module, @Nonnull Document document) {
 		Extends inherits = document.getExtends();
-		if (inherits != null) {
-			result = module.getDocument(customer, inherits.getDocumentName());
-			if (result == null) {
-				throw new MetaDataException("Document " + document.getName() + 
-												" extends document " + inherits.getDocumentName() +
-												" which does not exist in module " + module.getName());
-			}
-			Persistent inheritsPersistent = result.getPersistent();
-			if (inheritsPersistent != null) {
-				ExtensionStrategy strategy = inheritsPersistent.getStrategy();
-				if (ExtensionStrategy.mapped.equals(strategy)) {
-					Extends baseInherits = result.getExtends();
-					if (baseInherits != null) { // only recurse if we have a base document to recurse to
-						Module baseModule = getModule(customer, result.getOwningModuleName());
-						result = findNearestPersistentSingleOrJoinedSuperDocument(customer, baseModule, result);
-					}
+		if (inherits == null) {
+			return null;
+		}
+
+		Document inheritedDocument = null;
+		try {
+			inheritedDocument = Optional.ofNullable(module.getDocument(customer, inherits.getDocumentName()))
+									.orElseThrow(() -> new MetaDataException(DOCUMENT_PREFIX + document.getName() +
+																" extends document " + inherits.getDocumentName() +
+																" which does not exist in module " + module.getName()));
+		}
+		catch (IllegalStateException e) {
+			throw new MetaDataException(DOCUMENT_PREFIX + document.getName() +
+									" extends document " + inherits.getDocumentName() +
+									" which does not exist in module " + module.getName(), e);
+		}
+
+		Persistent persistent = inheritedDocument.getPersistent();
+		if ((persistent != null) && ExtensionStrategy.mapped.equals(persistent.getStrategy())) {
+			Extends baseInherits = inheritedDocument.getExtends();
+			if (baseInherits != null) {
+				Module baseModule = getModule(customer, inheritedDocument.getOwningModuleName());
+				if (baseModule == null) {
+					throw new MetaDataException(DOCUMENT_PREFIX + inheritedDocument.getName() +
+									" is owned by module " + inheritedDocument.getOwningModuleName() +
+									" which does not exist.");
 				}
+				return findNearestPersistentSingleOrJoinedSuperDocument(customer, baseModule, inheritedDocument);
 			}
 		}
-		
-		if (result != null) {
-			Persistent persistent = result.getPersistent();
-			if (persistent == null) {
-				result = null; 
-			}
-			else if (persistent.getName() == null) {
-				result = null;
-			}
-			else {
-				ExtensionStrategy strategy = persistent.getStrategy();
-				if (ExtensionStrategy.mapped.equals(strategy)) {
-					result = null;
-				}
-			}
+
+		return inheritedDocument;
+	}
+
+	private static boolean isPersistentSingleOrJoinedDocument(@Nullable Document document) {
+		if (document == null) {
+			return false;
 		}
-		return result;
+
+		Persistent persistent = document.getPersistent();
+		if ((persistent == null) || (persistent.getName() == null)) {
+			return false;
+		}
+
+		return ! ExtensionStrategy.mapped.equals(persistent.getStrategy());
 	}
 }

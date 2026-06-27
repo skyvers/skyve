@@ -2,13 +2,13 @@ package org.skyve.impl.web.faces.converters.integer;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import jakarta.faces.convert.ConverterException;
-
 public class LongIntegerSeparatorTest {
 	private LongIntegerSeparator converter;
 
@@ -18,7 +18,7 @@ public class LongIntegerSeparatorTest {
 	}
 
 	@Test(expected = ConverterException.class)
-	public void testGetAsObjectInvalidStringValue() throws Exception {
+	public void testGetAsObjectInvalidStringValue() {
 		// call the method under test
 		converter.getAsObject(null, null, "not an Long");
 
@@ -26,7 +26,7 @@ public class LongIntegerSeparatorTest {
 	}
 
 	@Test
-	public void testGetAsObjectInvalidTooLargeValue() throws Exception {
+	public void testGetAsObjectInvalidTooLargeValue() {
 		// call the method under test
 		try {
 			converter.getAsObject(null, null, "9999999999999999999");
@@ -39,7 +39,7 @@ public class LongIntegerSeparatorTest {
 	}
 
 	@Test
-	public void testGetAsObjectInvalidTooLargePositiveValue() throws Exception {
+	public void testGetAsObjectInvalidTooLargePositiveValue() {
 		// call the method under test
 		try {
 			converter.getAsObject(null, null, "+9999999999999999999");
@@ -52,7 +52,7 @@ public class LongIntegerSeparatorTest {
 	}
 
 	@Test
-	public void testGetAsObjectInvalidTooSmallValue() throws Exception {
+	public void testGetAsObjectInvalidTooSmallValue() {
 		// call the method under test
 		try {
 			converter.getAsObject(null, null, "-9999999999999999999");
@@ -65,7 +65,7 @@ public class LongIntegerSeparatorTest {
 	}
 
 	@Test
-	public void testGetAsObjectValidValue() throws Exception {
+	public void testGetAsObjectValidValue() {
 		// setup the test data
 		java.lang.Long testValue = java.lang.Long.valueOf(1000);
 
@@ -74,7 +74,7 @@ public class LongIntegerSeparatorTest {
 	}
 
 	@Test
-	public void testGetAsObjectValidLargeValue() throws Exception {
+	public void testGetAsObjectValidLargeValue() {
 		// setup the test data
 		java.lang.Long testValue = java.lang.Long.valueOf("999999999999999999");
 
@@ -83,7 +83,7 @@ public class LongIntegerSeparatorTest {
 	}
 
 	@Test
-	public void testGetAsObjectValidSmallValue() throws Exception {
+	public void testGetAsObjectValidSmallValue() {
 		// setup the test data
 		java.lang.Long testValue = java.lang.Long.valueOf("-999999999999999999");
 
@@ -92,7 +92,7 @@ public class LongIntegerSeparatorTest {
 	}
 
 	@Test
-	public void testGetAsString() throws Exception {
+	public void testGetAsString() {
 		// setup the test data
 		java.lang.Long testValue = java.lang.Long.valueOf(1000);
 
@@ -101,11 +101,21 @@ public class LongIntegerSeparatorTest {
 	}
 
 	@Test
-	public void testGetAsStringLargeValue() throws Exception {
+	public void testGetAsStringLargeValue() {
 		// setup the test data
 		java.lang.Long testValue = java.lang.Long.valueOf(1000000000);
 
 		// call the method under test
 		assertThat(converter.getAsString(null, null, testValue), is("1,000,000,000"));
+	}
+
+	@Test
+	public void testGetAsObjectNullValue() {
+		assertNull(converter.getAsObject(null, null, null));
+	}
+
+	@Test
+	public void testGetAsStringNullValue() {
+		assertThat(converter.getAsString(null, null, null), is(""));
 	}
 }

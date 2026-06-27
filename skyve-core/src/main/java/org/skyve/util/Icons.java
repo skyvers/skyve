@@ -1,5 +1,11 @@
 package org.skyve.util;
 
+/**
+ * Defines shared icon constants used by Skyve UI actions and framework controls.
+ *
+ * <p>Each action may expose both a Font Awesome class name and a legacy image path
+ * so renderers can select the appropriate representation.
+ */
 public class Icons {
 	private Icons() {
 		// prevent instantiation
@@ -21,6 +27,8 @@ public class Icons {
 
 	public static final String FONT_UPLOAD = "fa-solid fa-upload";
 	public static final String IMAGE_UPLOAD = "actions/Upload.png";
+
+	public static final String FONT_CAMERA = "fa-solid fa-camera";
 	
 	public static final String FONT_CANCEL = "fa-solid fa-chevron-left";
 	public static final String IMAGE_CANCEL = "actions/Cancel.gif";

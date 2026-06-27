@@ -23,10 +23,17 @@ import org.skyve.metadata.view.TextOutput.Sanitisation;
 
 import jakarta.annotation.Nullable;
 import jakarta.faces.component.UIComponent;
+import jakarta.faces.component.html.HtmlOutputText;
 import jakarta.faces.component.html.HtmlPanelGrid;
 import jakarta.faces.component.html.HtmlPanelGroup;
 
 public class TabularLayoutBuilder extends LayoutBuilder {
+	/**
+	 * Builds the root view layout as a single-column panel grid.
+	 *
+	 * @param component existing component
+	 * @return existing component when provided, otherwise a new view layout
+	 */
 	@Override
 	public UIComponent viewLayout(UIComponent component) {
 		if (component != null) {
@@ -39,6 +46,12 @@ public class TabularLayoutBuilder extends LayoutBuilder {
     	return result;
 	}
 
+	/**
+	 * Builds toolbar layout containers.
+	 *
+	 * @param components existing toolbar layout components
+	 * @return existing components when provided, otherwise a new toolbar layout list
+	 */
 	@Override
 	public List<UIComponent> toolbarLayouts(List<UIComponent> components) {
 		if (components != null) {
@@ -53,6 +66,12 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 		return result;
 	}
 	
+	/**
+	 * Adds generated toolbar layouts into the supplied toolbar components.
+	 *
+	 * @param toolbars toolbar components
+	 * @param toolbarLayouts toolbar layout components
+	 */
 	@Override
 	public void addToolbarLayouts(List<UIComponent> toolbars, List<UIComponent> toolbarLayouts) {
 		for (int i = 0, s = toolbars.size(); i < s; i++) {
@@ -68,12 +87,21 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	
 	/**
 	 * There's only 1 toolbar for this layout and its at the top.
+	 *
+	 * @param view view component
+	 * @param toolbarsOrLayouts toolbar or layout components
 	 */
 	@Override
 	public void addToolbarsOrLayouts(UIComponent view, List<UIComponent> toolbarsOrLayouts) {
 		view.getChildren().add(0, toolbarsOrLayouts.get(0));
 	}
 
+	/**
+	 * Builds the tab layout container as a single-column panel grid.
+	 *
+	 * @param component existing component
+	 * @return existing component when provided, otherwise a new tab layout
+	 */
 	@Override
 	public UIComponent tabLayout(UIComponent component) {
 		if (component != null) {
@@ -85,6 +113,14 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 		return result;
 	}
 	
+	/**
+	 * Adds tab layout content into a tab component.
+	 *
+	 * @param component existing component
+	 * @param tab tab component
+	 * @param tabLayout tab layout component
+	 * @return existing component when provided, otherwise the tab layout
+	 */
 	@Override
 	public UIComponent addTabLayout(UIComponent component, UIComponent tab, UIComponent tabLayout) {
 		if (component != null) {
@@ -95,11 +131,24 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 		return tabLayout;
 	}
 	
+	/**
+	 * Adds a tab component into a tab-pane container.
+	 *
+	 * @param tabPane tab-pane component
+	 * @param tab tab component
+	 */
 	@Override
 	public void addTab(UIComponent tabPane, UIComponent tab) {
 		tabPane.getChildren().add(tab);
 	}
 	
+	/**
+	 * Completes tab processing by returning to the tab-pane parent context.
+	 *
+	 * @param component existing component
+	 * @param tab tab component
+	 * @return existing component when provided, otherwise the parent context component
+	 */
 	@Override
 	public UIComponent addedTab(UIComponent component, UIComponent tab) {
 		if (component != null) {
@@ -110,11 +159,24 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 		return tab.getParent().getParent();
 	}
 	
+	/**
+	 * Adds border layout content into a border component.
+	 *
+	 * @param border border component
+	 * @param borderLayout border layout component
+	 */
 	@Override
 	public void addBorderLayout(UIComponent border, UIComponent borderLayout) {
 		border.getChildren().add(borderLayout);
 	}
 	
+	/**
+	 * Completes border-layout processing by returning to the parent context.
+	 *
+	 * @param component existing component
+	 * @param borderLayout border layout component
+	 * @return existing component when provided, otherwise the border parent component
+	 */
 	@Override
 	public UIComponent addedBorderLayout(UIComponent component, UIComponent borderLayout) {
 		if (component != null) {
@@ -124,6 +186,13 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 		return borderLayout.getParent();
 	}
 	
+	/**
+	 * Builds vertical-box layout as a single-column panel grid.
+	 *
+	 * @param component existing component
+	 * @param vbox vbox metadata
+	 * @return existing component when provided, otherwise a new vbox layout
+	 */
 	@Override
 	public UIComponent vboxLayout(UIComponent component, VBox vbox) {
 		if (component != null) {
@@ -142,6 +211,13 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 		return result;
 	}
 	
+	/**
+	 * Builds horizontal-box layout as a multi-column panel grid.
+	 *
+	 * @param component existing component
+	 * @param hbox hbox metadata
+	 * @return existing component when provided, otherwise a new hbox layout
+	 */
 	@Override
 	public UIComponent hboxLayout(UIComponent component, HBox hbox) {
 		if (component != null) {
@@ -158,6 +234,14 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 							hbox.getWidgetId());
 	}
 
+	/**
+	 * Builds sidebar layout markup for tabular rendering.
+	 *
+	 * @param component existing component
+	 * @param sidebar sidebar metadata
+	 * @param createView whether create-view mode is active
+	 * @return existing component when provided, otherwise a new sidebar layout
+	 */
 	@Override
 	public UIComponent sidebarLayout(UIComponent component, Sidebar sidebar, boolean createView) {
 		if (component != null) {
@@ -196,6 +280,13 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	}
 
 	
+	/**
+	 * Builds form layout as a panel grid.
+	 *
+	 * @param component existing component
+	 * @param form form metadata
+	 * @return existing component when provided, otherwise a new form layout
+	 */
 	@Override
 	public UIComponent formLayout(UIComponent component, Form form) {
 		if (component != null) {
@@ -211,6 +302,13 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 							form.getWidgetId());
 	}
 	
+	/**
+	 * Builds a form-row layout wrapper.
+	 *
+	 * @param component existing component
+	 * @param row form-row metadata
+	 * @return existing component when provided, otherwise a new row component
+	 */
 	@Override
 	public UIComponent formRowLayout(UIComponent component, FormRow row) {
 		if (component != null) {
@@ -220,6 +318,14 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 		return row();
 	}
 	
+	/**
+	 * Adds a row layout into the form layout.
+	 *
+	 * @param component existing component
+	 * @param formLayout form layout component
+	 * @param rowLayout row layout component
+	 * @return existing component when provided, otherwise the row layout
+	 */
 	@Override
 	public UIComponent addFormRowLayout(UIComponent component, UIComponent formLayout, UIComponent rowLayout) {
 		if (component != null) {
@@ -230,6 +336,13 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 		return rowLayout;
 	}
 
+	/**
+	 * Completes form-row layout processing by returning to the parent context.
+	 *
+	 * @param component existing component
+	 * @param rowLayout row layout component
+	 * @return existing component when provided, otherwise the row-layout parent
+	 */
 	@Override
 	public UIComponent addedFormRowLayout(UIComponent component, UIComponent rowLayout) {
 		if (component != null) {
@@ -239,6 +352,23 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 		return rowLayout.getParent();
 	}
 
+	/**
+	 * Lays out form-item label cell content.
+	 *
+	 * @param formOrRowLayout form or row layout component
+	 * @param formItemComponent form-item component
+	 * @param currentForm current form metadata
+	 * @param currentFormItem current form-item metadata
+	 * @param currentFormColumn current form-column metadata
+	 * @param widgetLabel widget label fallback
+	 * @param widgetEscapeLabel resolved escape decision for widget label
+	 * @param widgetRequiredMessage optional required-message text normalised for
+	 *        unescaped PrimeFaces message rendering
+	 * @param widgetEscapeRequiredMessage resolved escape decision retained for layout
+	 *        API compatibility
+	 * @param widgetInvisible widget invisible condition
+	 * @param widgetHelpText widget help text
+	 */
 	@Override
 	public void layoutFormItemLabel(UIComponent formOrRowLayout,
 										UIComponent formItemComponent,
@@ -246,7 +376,9 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 										FormItem currentFormItem,
 										FormColumn currentFormColumn,
 										String widgetLabel,
+										boolean widgetEscapeLabel,
 										@Nullable String widgetRequiredMessage,
+										boolean widgetEscapeRequiredMessage,
 										String widgetInvisible,
 										String widgetHelpText) {
 		// The label
@@ -265,12 +397,34 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 		formOrRowLayout.getChildren().add(column);
 		HtmlPanelGroup pg = panelGroup(true, true, false, widgetInvisible, null);
 		column.getChildren().add(pg);
-		OutputLabel l = label(label, formItemComponent.getId(), widgetRequiredMessage);
+		OutputLabel l = label(label, widgetEscapeLabel, formItemComponent.getId(), widgetRequiredMessage);
 		pg.getChildren().add(l);
-		Message m = message(formItemComponent.getId());
+		Message m = message(formItemComponent.getId(), widgetEscapeRequiredMessage);
 		pg.getChildren().add(m);
 	}
 
+	/**
+	 * Lays out form-item widget cell content.
+	 *
+	 * @param formOrRowLayout form or row layout component
+	 * @param formItemComponent form-item component
+	 * @param currentForm current form metadata
+	 * @param currentFormItem current form-item metadata
+	 * @param currentFormColumn current form-column metadata
+	 * @param widgetLabel widget label
+	 * @param widgetEscapeLabel resolved escape decision for widget label
+	 * @param widgetColspan widget column span
+	 * @param widgetRequiredMessage optional required-message text normalised for
+	 *        unescaped PrimeFaces message rendering
+	 * @param widgetEscapeRequiredMessage resolved escape decision retained for layout
+	 *        API compatibility
+	 * @param widgetInvisible widget invisible condition
+	 * @param widgetHelpText widget help text
+	 * @param widgetEscapeHelp resolved escape decision for widget help text
+	 * @param widgetPixelWidth widget pixel width
+	 * @param showLabel whether label is shown
+	 * @param topLabel whether top-label mode is active
+	 */
 	@Override
 	public void layoutFormItemWidget(UIComponent formOrRowLayout,
 										UIComponent formItemComponent,
@@ -278,10 +432,13 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 										FormItem currentFormItem,
 										FormColumn currentFormColumn,
 										String widgetLabel,
+										boolean widgetEscapeLabel,
 										int widgetColspan,
 										@Nullable String widgetRequiredMessage,
+										boolean widgetEscapeRequiredMessage,
 										String widgetInvisible,
 										String widgetHelpText,
+										boolean widgetEscapeHelp,
 										Integer widgetPixelWidth,
 										boolean showLabel,
 										boolean topLabel) {
@@ -298,6 +455,13 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 		col.getChildren().add(formItemComponent);
 	}
 	
+	/**
+	 * Builds layout wrapper for content-signature widgets.
+	 *
+	 * @param component existing component
+	 * @param signature content-signature metadata
+	 * @return existing component when provided, otherwise a new signature layout
+	 */
 	@Override
 	public UIComponent contentSignatureLayout(UIComponent component, ContentSignature signature) {
 		if (component != null) {
@@ -307,11 +471,28 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 		// Signature Grid
 		HtmlPanelGrid result = (HtmlPanelGrid) a.createComponent(HtmlPanelGrid.COMPONENT_TYPE);
 		setId(result, null);
-		result.setColumns(2);
+		result.setColumns(1);
 		setInvisible(result, signature.getInvisibleConditionName(), null);
 		return result;
 	}
 
+	/**
+	 * Adds a component into the current container layout.
+	 *
+	 * @param component existing component
+	 * @param viewContainer current view-container metadata
+	 * @param container current container component
+	 * @param componentToAdd component to add
+	 * @param pixelWidth optional fixed width
+	 * @param responsiveWidth optional responsive width
+	 * @param percentageWidth optional percentage width
+	 * @param sm optional small breakpoint width
+	 * @param md optional medium breakpoint width
+	 * @param lg optional large breakpoint width
+	 * @param xl optional extra-large breakpoint width
+	 * @param widgetInvisible widget invisible condition
+	 * @return existing component when provided, otherwise the added component
+	 */
 	@Override
 	public UIComponent addToContainer(UIComponent component,
 										Container viewContainer,
@@ -356,6 +537,14 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 		return componentToAdd;
 	}
 	
+	/**
+	 * Completes container-add processing by returning to the parent context.
+	 *
+	 * @param component existing component
+	 * @param viewContainer current view-container metadata
+	 * @param container current container component
+	 * @return existing component when provided, otherwise the parent context component
+	 */
 	@Override
 	public UIComponent addedToContainer(UIComponent component, Container viewContainer, UIComponent container) {
 		if (component != null) {
@@ -373,15 +562,50 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 		return result;
 	}
 
-	protected OutputLabel label(String value, String forId, @Nullable String requiredMessage) {
+	/**
+	 * Creates a standard output label for a form item.
+	 *
+	 * <p>Side effects: asks the JSF application to create an output label and child
+	 * output text components. The metadata label remains raw on its own child and
+	 * uses the paired escape decision; the required marker and trailing colon are
+	 * renderer-owned text on separate unescaped children.
+	 *
+	 * @param value label text
+	 * @param escapeLabel resolved escape decision for {@code value}
+	 * @param forId target component id
+	 * @param requiredMessage optional required-message text
+	 * @return configured output label
+	 */
+	protected OutputLabel label(String value, boolean escapeLabel, String forId, @Nullable String requiredMessage) {
 		OutputLabel result = (OutputLabel) a.createComponent(OutputLabel.COMPONENT_TYPE);
-		result.setValue((requiredMessage != null) ? value + "&nbsp;*:" : value + ":");
 		result.setEscape(false);
 		setId(result, null);
 		result.setFor(forId);
+
+		HtmlOutputText labelText = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
+		labelText.setValue(value);
+		labelText.setEscape(escapeLabel);
+		result.getChildren().add(labelText);
+
+		HtmlOutputText suffix = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
+		suffix.setValue((requiredMessage != null) ? "&nbsp;*:" : ":");
+		suffix.setEscape(false);
+		result.getChildren().add(suffix);
 		return result;
 	}
 
+	/**
+	 * Creates a panel-grid container configured with invisibility, sizing, and widget identity.
+	 *
+	 * @param pixelWidth optional pixel width
+	 * @param responsiveWidth optional responsive width
+	 * @param percentageWidth optional percentage width
+	 * @param pixelHeight optional pixel height
+	 * @param percentageHeight optional percentage height
+	 * @param invisibleConditionName invisible condition name
+	 * @param widgetId widget id
+	 * @return configured panel grid
+	 */
 	protected PanelGrid panelGrid(Integer pixelWidth, 
 									Integer responsiveWidth,
 									Integer percentageWidth, 
@@ -404,6 +628,18 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 		return result;
 	}
 
+	/**
+	 * Creates a panel container configured with invisibility, sizing, and widget identity.
+	 *
+	 * @param pixelWidth optional pixel width
+	 * @param responsiveWidth optional responsive width
+	 * @param percentageWidth optional percentage width
+	 * @param pixelHeight optional pixel height
+	 * @param percentageHeight optional percentage height
+	 * @param invisibleConditionName invisible condition name
+	 * @param widgetId widget id
+	 * @return configured panel
+	 */
 	protected Panel panel(Integer pixelWidth, 
 							Integer responsiveWidth,
 							Integer percentageWidth, 
@@ -425,6 +661,11 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 		return result;
 	}
 
+	/**
+	 * Creates a row component with generated identifier.
+	 *
+	 * @return configured row component
+	 */
 	private Row row() {
 		Row result = (Row) a.createComponent(Row.COMPONENT_TYPE);
 		setId(result, null);

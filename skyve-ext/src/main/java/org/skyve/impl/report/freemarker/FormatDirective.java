@@ -51,7 +51,7 @@ public class FormatDirective implements TemplateDirectiveModel {
 	private static final String PARAM_NAME_EXPRESSION = "expression";
 	private static final String PARAM_ESCAPE = "escape";
 
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({"rawtypes", "java:S3776"}) // Complexity OK
 	@Override
 	public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
 			throws TemplateException, IOException {

@@ -17,8 +17,17 @@ import modules.admin.ControlPanel.ControlPanelExtension;
 import modules.admin.domain.ControlPanel;
 import modules.admin.domain.Tag;
 
+/**
+ * Deletes generated test data for the selected module scope.
+ */
 public class DeleteTestData implements ServerSideAction<ControlPanelExtension> {
-
+	/**
+	 * Performs the execute operation.
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public ServerSideActionResult<ControlPanelExtension> execute(ControlPanelExtension bean, WebContext webContext)
 			throws Exception {
@@ -43,5 +52,4 @@ public class DeleteTestData implements ServerSideAction<ControlPanelExtension> {
 		
 		return new ServerSideActionResult<>(bean);
 	}
-
 }

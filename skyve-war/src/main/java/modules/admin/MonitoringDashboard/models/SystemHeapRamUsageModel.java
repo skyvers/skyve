@@ -9,18 +9,35 @@ import org.skyve.util.monitoring.ResourceMeasurements;
 
 import modules.admin.domain.MonitoringDashboard.Period;
 
+/**
+ * Line chart model for system heap RAM usage trend data in the monitoring dashboard.
+ */
 public class SystemHeapRamUsageModel extends AbstractSystemResourceModel {
-
+	/**
+	 * Returns the chart dataset label.
+	 * @return the result
+	 */
 	@Override
 	protected String getChartLabel() {
 		return "Heap RAM Usage (%)";
 	}
 
+	/**
+	 * Returns the chart title for the selected period.
+	 * @param period the period value
+	 * @return the result
+	 */
 	@Override
 	protected String getChartTitle(Period period) {
 		return "Heap RAM Usage - " + period.toLocalisedDescription();
 	}
 
+	/**
+	 * Selects heap RAM usage telemetry aligned to the chosen period.
+	 * @param resourceMeasurements the resourceMeasurements value
+	 * @param period the period value
+	 * @return the result
+	 */
 	@Override
 	protected Map<Integer, Float> getResourceDataForPeriod(ResourceMeasurements resourceMeasurements, Period period) {
 		switch (period) {
@@ -39,6 +56,11 @@ public class SystemHeapRamUsageModel extends AbstractSystemResourceModel {
 		}
 	}
 
+	/**
+	 * Applies usage-based line colouring for RAM charts.
+	 * @param cd the cd value
+	 * @param values the values value
+	 */
 	@Override
 	protected void setChartColors(ChartData cd, List<Number> values) {
 		Color lineColour = Color.LIGHT_GRAY;

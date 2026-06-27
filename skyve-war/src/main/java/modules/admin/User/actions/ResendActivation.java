@@ -14,7 +14,14 @@ import modules.admin.User.UserExtension;
  * has lost or did not receive their activation email upon registration.
  */
 public class ResendActivation implements ServerSideAction<UserExtension> {
-
+	/**
+	 * Regenerates activation details and sends a replacement activation email.
+	 *
+	 * @param bean The user receiving activation details.
+	 * @param webContext The current web context.
+	 * @return The same user bean.
+	 * @throws Exception If activation generation or email dispatch fails.
+	 */
 	@Override
 	public ServerSideActionResult<UserExtension> execute(UserExtension bean, WebContext webContext) throws Exception {
 

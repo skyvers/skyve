@@ -7,6 +7,14 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.XmlValue;
 
+/**
+ * JAXB descriptor for a single numeric range entry within a
+ * {@link NumericRangeBucketMetaData} definition.
+ *
+ * <p>Defines the range bounds and label for one bucket.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ */
 @XmlRootElement(name = "range", namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 public class NumericRangeMetaData extends NumericRangeBucket {

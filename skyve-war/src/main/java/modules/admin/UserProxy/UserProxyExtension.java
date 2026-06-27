@@ -12,6 +12,9 @@ import modules.admin.User.UserExtension;
 import modules.admin.domain.User;
 import modules.admin.domain.UserProxy;
 
+/**
+ * Extends {@link UserProxy} with conversions to metadata-user and admin-user forms.
+ */
 public class UserProxyExtension extends UserProxy {
 	private static final long serialVersionUID = 6917022687678513883L;
 

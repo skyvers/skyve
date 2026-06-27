@@ -12,6 +12,9 @@ import org.skyve.util.CommunicationUtil.RunMode;
 import modules.admin.domain.Configuration;
 import modules.admin.domain.Generic;
 
+/**
+ * Raises an alarm when available disk space drops below the configured threshold.
+ */
 public class AvailableDiskSpaceAlarmJob extends Job {
 	private static final Integer DEFAULT_AVAILABLE_DISK_SPACE_ALARM_LEVEL_PERCENTAGE = Integer.valueOf(10);
 	private static final String AVAILABLE_DISK_SPACE_ALARM_NOFITICATION = "Available Disk Space Alarm Notification";
@@ -19,6 +22,10 @@ public class AvailableDiskSpaceAlarmJob extends Job {
 	private static final String AVAILABLE_DISK_SPACE_ALARM_DEFAULT_SUBJECT = "Disk space notification for {#context}";
 	private static final String AVAILABLE_DISK_SPACE_ALARM_DEFAULT_BODY = "<p>{text5001} available disk space has fallen below the alarm level:</p><p>{markup1}</p>";
 
+	/**
+	 * Performs the cancel operation.
+	 * @return the operation result
+	 */
 	@Override
 	public String cancel() {
 		return null;
@@ -37,8 +44,8 @@ public class AvailableDiskSpaceAlarmJob extends Job {
 		List<String> log = getLog();
 
 		// evaluate whether alarm should be sent
-		ConfigurationExtension configuration = Configuration.newInstance();
-		DiskSpaceSummary diskSpaceSummary = new DiskSpaceSummary();
+		ConfigurationExtension configuration = newConfiguration();
+		DiskSpaceSnapshot diskSpaceSummary = newDiskSpaceSnapshot();
 		String htmlSummary = diskSpaceSummary.getHTMLSummary();
 		log.add(htmlSummary);
 
@@ -51,10 +58,8 @@ public class AvailableDiskSpaceAlarmJob extends Job {
 		}
 		if ((diskSpaceSummary.getTotalAvailableLevel() <= percentageLevel.longValue()) ||
 				(levelMB != null && (diskSpaceSummary.getTotalAvailable() <= levelMB.longValue()))) {
-			Communication communication = CommunicationUtil.initialiseSystemCommunication(AVAILABLE_DISK_SPACE_ALARM_NOFITICATION,
-					AVAILABLE_DISK_SPACE_ALARM_DEFAULT_SEND_TO, null, AVAILABLE_DISK_SPACE_ALARM_DEFAULT_SUBJECT,
-					AVAILABLE_DISK_SPACE_ALARM_DEFAULT_BODY);
-			Generic generic = Generic.newInstance();
+			Communication communication = initialiseSystemCommunication();
+			Generic generic = newGeneric();
 			generic.setMarkup1(htmlSummary);
 			// nameEnv is the application name and environment identifier.
 			StringBuilder nameEnv = new StringBuilder();
@@ -64,9 +69,68 @@ public class AvailableDiskSpaceAlarmJob extends Job {
 			}
 			nameEnv.append("]");
 			generic.setText5001(nameEnv.toString());
-			CommunicationUtil.send(communication, RunMode.ACTION, ResponseMode.SILENT, null, configuration, generic);
+			send(communication, configuration, generic);
 		}
 
 		setPercentComplete(100);
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	protected ConfigurationExtension newConfiguration() {
+		return Configuration.newInstance();
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	protected DiskSpaceSnapshot newDiskSpaceSnapshot() {
+		DiskSpaceSummary summary = new DiskSpaceSummary();
+		return new DiskSpaceSummarySnapshot(summary);
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	protected Communication initialiseSystemCommunication() throws Exception {
+		return CommunicationUtil.initialiseSystemCommunication(AVAILABLE_DISK_SPACE_ALARM_NOFITICATION,
+				AVAILABLE_DISK_SPACE_ALARM_DEFAULT_SEND_TO, null, AVAILABLE_DISK_SPACE_ALARM_DEFAULT_SUBJECT,
+				AVAILABLE_DISK_SPACE_ALARM_DEFAULT_BODY);
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	protected Generic newGeneric() {
+		return Generic.newInstance();
+	}
+
+	@SuppressWarnings("static-method") // test seam
+	protected void send(Communication communication, Configuration configuration, Generic generic) throws Exception {
+		CommunicationUtil.send(communication, RunMode.ACTION, ResponseMode.SILENT, null, configuration, generic);
+	}
+
+	protected interface DiskSpaceSnapshot {
+		long getTotalAvailable();
+
+		long getTotalAvailableLevel();
+
+		String getHTMLSummary();
+	}
+
+	private static class DiskSpaceSummarySnapshot implements DiskSpaceSnapshot {
+		private final DiskSpaceSummary summary;
+
+		private DiskSpaceSummarySnapshot(DiskSpaceSummary summary) {
+			this.summary = summary;
+		}
+
+		@Override
+		public long getTotalAvailable() {
+			return summary.getTotalAvailable();
+		}
+
+		@Override
+		public long getTotalAvailableLevel() {
+			return summary.getTotalAvailableLevel();
+		}
+
+		@Override
+		public String getHTMLSummary() {
+			return summary.getHTMLSummary();
+		}
 	}
 }

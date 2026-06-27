@@ -16,10 +16,18 @@ import org.skyve.metadata.module.query.MetaDataQueryContentColumn;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.user.User;
 import org.skyve.util.BeanValidator;
-import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 
+/**
+ * Encapsulates SmartClient query-column metadata for list-grid and repeater rendering.
+ *
+ * <p>Instances enrich the base attribute definition with query-specific contract data
+ * such as filtering, sorting, detail-only rendering, and thumbnail handling.
+ */
 public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefinition {
+	private static final String IMAGE_TYPE = "image";
+	private static final String TEXT_TYPE = "text";
+
 	private boolean canFilter = true;
 	private boolean canSave = true;
 	private boolean detail = false;
@@ -31,6 +39,18 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 	protected Integer pixelHeight;
 	protected String emptyThumbnailRelativeFile;
 	
+	/**
+	 * Builds a SmartClient query-column definition from metadata query column details.
+	 *
+	 * @param user active user
+	 * @param customer active customer metadata
+	 * @param module module containing the query/document metadata
+	 * @param document driving document metadata
+	 * @param column query column metadata
+	 * @param runtime whether runtime domain values should be resolved
+	 * @param uxui active UX/UI profile name
+	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	protected SmartClientQueryColumnDefinition(User user,
 												Customer customer, 
 												Module module, 
@@ -84,8 +104,8 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 					canSave = false; // can't edit as it is the code anyway
 					// reset to a text field as it was set to enum in SmartClientAttribute super constructor call
 					valueMap = null; 
-					type = "text";
-					filterEditorType = "text";
+					type = TEXT_TYPE;
+					filterEditorType = TEXT_TYPE;
 					hasTextFilterOperators = true;
 					sortByField = name; // sort by the code field, not _display_*
 					// Dynamic domain values can't be filtered
@@ -112,7 +132,7 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 					String targetDocumentName = association.getDocumentName();
 					Document targetDocument = module.getDocument(customer, targetDocumentName);
 					if (targetDocument.isPersistable()) { // this is a persistent target document - not a mapped document
-						type = "text";
+						type = TEXT_TYPE;
 						editorType = "comboBox";
 						lookup = new SmartClientLookupDefinition(false,
 																	user,
@@ -143,7 +163,7 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 			pixelHeight = contentColumn.getPixelHeight();
 			emptyThumbnailRelativeFile = contentColumn.getEmptyThumbnailRelativeFile();
 			if (DisplayType.thumbnail.equals(contentColumn.getDisplay())) {
-				type = "image";
+				type = IMAGE_TYPE;
 				if (pixelHeight == null) {
 					pixelHeight = Integer.valueOf(64);
 				}
@@ -154,69 +174,145 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 		}
 	}
 
+	/**
+	 * Indicates whether this query column can be filtered in the SmartClient list view.
+	 *
+	 * @return {@code true} when filtering is enabled
+	 */
 	public boolean isCanFilter() {
 		return canFilter;
 	}
 
+	/**
+	 * Sets whether this query column can be filtered in the SmartClient list view.
+	 *
+	 * @param canFilter whether filtering is enabled
+	 */
 	public void setCanFilter(boolean canFilter) {
 		this.canFilter = canFilter;
 	}
 
+	/**
+	 * Indicates whether this query column can be persisted from inline edits.
+	 *
+	 * @return {@code true} when inline saves are enabled
+	 */
 	public boolean isCanSave() {
 		return canSave;
 	}
 
+	/**
+	 * Sets whether this query column can be persisted from inline edits.
+	 *
+	 * @param canSave whether inline saves are enabled
+	 */
 	public void setCanSave(boolean canSave) {
 		this.canSave = canSave;
 	}
 
+	/**
+	 * Indicates whether this query column is sortable only on the client.
+	 *
+	 * @return {@code true} when only client-side sorting is available
+	 */
 	public boolean isCanSortClientOnly() {
 		return canSortClientOnly;
 	}
 
+	/**
+	 * Sets whether this query column is sortable only on the client.
+	 *
+	 * @param canSortClientOnly whether only client-side sorting is available
+	 */
 	public void setCanSortClientOnly(boolean canSortClientOnly) {
 		this.canSortClientOnly = canSortClientOnly;
 	}
 
+	/**
+	 * Indicates whether this query column is marked as detail-only.
+	 *
+	 * @return {@code true} when the column is detail-only
+	 */
 	public boolean isDetail() {
 		return detail;
 	}
 
+	/**
+	 * Sets whether this query column is marked as detail-only.
+	 *
+	 * @param detail whether the column is detail-only
+	 */
 	public void setDetail(boolean detail) {
 		this.detail = detail;
 	}
 
+	/**
+	 * Returns the configured pixel height for rendered content values.
+	 *
+	 * @return configured pixel height, or {@code null}
+	 */
 	public Integer getPixelHeight() {
 		return pixelHeight;
 	}
 
+	/**
+	 * Sets the configured pixel height for rendered content values.
+	 *
+	 * @param pixelHeight configured pixel height
+	 */
 	public void setPixelHeight(Integer pixelHeight) {
 		this.pixelHeight = pixelHeight;
 	}
 
+	/**
+	 * Returns the relative file used when thumbnail content is empty.
+	 *
+	 * @return relative file path for empty thumbnails, or {@code null}
+	 */
 	public String getEmptyThumbnailRelativeFile() {
 		return emptyThumbnailRelativeFile;
 	}
 
+	/**
+	 * Sets the relative file used when thumbnail content is empty.
+	 *
+	 * @param emptyThumbnailRelativeFile relative file path for empty thumbnails
+	 */
 	public void setEmptyThumbnailRelativeFile(String emptyThumbnailRelativeFile) {
 		this.emptyThumbnailRelativeFile = emptyThumbnailRelativeFile;
 	}
 
+	/**
+	 * Returns the mask expression applied to filter/editor behaviour for this column.
+	 *
+	 * @return mask expression, or {@code null}
+	 */
 	public String getMask() {
 		return mask;
 	}
 
+	/**
+	 * Indicates whether text-oriented filter operators are available for this column.
+	 *
+	 * @return {@code true} when text filter operators are available
+	 */
 	public boolean getHasTextFilterOperators() {
 		return hasTextFilterOperators;
 	}
 	
+	/**
+	 * Produces the SmartClient JavaScript field definition payload for this query column.
+	 *
+	 * @return SmartClient JavaScript field definition payload
+	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public String toJavascript() {
 		StringBuilder result = new StringBuilder(64);
 
 		result.append("name:'");
 		result.append(name);
 		result.append("',title:'");
-		result.append(OWASP.escapeJsString(title));
+		result.append(SmartClientViewRenderer.escapeSmartClientText(title, true));
 		result.append("',type:'");
 		result.append(type);
 		if (editorType != null) {
@@ -239,14 +335,14 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
         }
 
 		if (required) {
-        	result.append(",bizRequired:true,requiredMessage:'");
-        	if (requiredMessage == null) {
-        		result.append(OWASP.escapeJsString(Util.nullSafeI18n(BeanValidator.VALIDATION_REQUIRED_KEY, title)));
-        	}
-        	else {
-        		result.append(OWASP.escapeJsString(requiredMessage));
-        	}
-        	result.append('\'');
+			result.append(",bizRequired:true,requiredMessage:'");
+			if (requiredMessage == null) {
+				result.append(SmartClientViewRenderer.escapeSmartClientText(Util.nullSafeI18n(BeanValidator.VALIDATION_REQUIRED_KEY, title), true));
+			}
+			else {
+				result.append(SmartClientViewRenderer.escapeSmartClientText(requiredMessage, true));
+			}
+			result.append('\'');
 		}
 		if (! canFilter) {
 			result.append(",canFilter:false");
@@ -268,9 +364,9 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
         	result.append(",align:'").append(align.toTextAlignmentString()).append('\'');
         }
         if (pixelWidth != null) {
-        	result.append(",width:").append("image".equals(type) ? pixelWidth.intValue() + 8 : pixelWidth.intValue());
+			result.append(",width:").append(IMAGE_TYPE.equals(type) ? pixelWidth.intValue() + 8 : pixelWidth.intValue());
         }
-        else if ("image".equals(type)) {
+        else if (IMAGE_TYPE.equals(type)) {
         	if (pixelHeight != null) {
             	result.append(",width:").append(pixelHeight.intValue() + 8);
         	}

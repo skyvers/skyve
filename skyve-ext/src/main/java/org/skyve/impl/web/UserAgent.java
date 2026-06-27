@@ -9,9 +9,9 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.router.UxUiSelector;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.skyve.web.UserAgentType;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.blueconic.browscap.BrowsCapField;
 import com.blueconic.browscap.Capabilities;
@@ -22,9 +22,11 @@ import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 
+/**
+ * Resolves user-agent capabilities and maps requests to Skyve UX/UI variants.
+ */
 public class UserAgent {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserAgent.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(UserAgent.class);
 
 	/**
 	 * Prevent instantiation
@@ -55,6 +57,14 @@ public class UserAgent {
 	
 	private static Map<String, UserAgentType> typeCache = new TreeMap<>();
 
+	/**
+	 * Determines the effective user-agent type for a request, using cookies, request attributes,
+	 * and BrowsCap device classification.
+	 *
+	 * @param request The active HTTP request.
+	 * @return The resolved user-agent type.
+	 */
+	@SuppressWarnings({"java:S3776", "java:S3824"}) // Complexity OK; computeIfAbsent() not required
 	public static @Nonnull UserAgentType getType(@Nonnull HttpServletRequest request) {
 		boolean touchEnabled = false;
 
@@ -115,10 +125,19 @@ public class UserAgent {
 		return result;
 	}
 	
-	public static @Nonnull UxUi getUxUi(@Nonnull HttpServletRequest request) throws Exception {
+	/**
+	 * Resolves the UX/UI variant selected for the current request.
+	 *
+	 * @param request The active HTTP request.
+	 * @return The resolved UX/UI value.
+	 */
+	public static @Nonnull UxUi getUxUi(@Nonnull HttpServletRequest request) {
 		UxUi result = (UxUi) request.getAttribute(AbstractWebContext.UXUI);
 		if (result == null) {
 			Router router = CORE.getRepository().getRouter();
+			if (router == null) {
+				throw new DomainException("No router configured; cannot resolve UX/UI");
+			}
 			UxUiSelector uxuiSelector = (UxUiSelector) router.getUxuiSelector();
 			UserAgentType type = UserAgent.getType(request);
 			result = UserAgent.isEmulated(request) ? uxuiSelector.emulate(type, request) : uxuiSelector.select(type, request);
@@ -128,6 +147,12 @@ public class UserAgent {
 		return result;
 	}
 
+	/**
+	 * Indicates whether user-agent selection is currently being emulated.
+	 *
+	 * @param request The active HTTP request.
+	 * @return {@code true} when emulation markers are present on the request.
+	 */
 	public static boolean isEmulated(HttpServletRequest request) {
 		return (request.getAttribute(AbstractWebContext.EMULATED_USER_AGENT_TYPE_KEY) != null);
 	}

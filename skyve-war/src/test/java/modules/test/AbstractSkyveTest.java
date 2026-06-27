@@ -78,7 +78,7 @@ public abstract class AbstractSkyveTest extends AbstractH2TestTruncate {
 	protected Persistence p;
 
 	@BeforeEach
-	public void before() {
+	void before() {
 		p = CORE.getPersistence();
 		u = p.getUser();
 		c = u.getCustomer();

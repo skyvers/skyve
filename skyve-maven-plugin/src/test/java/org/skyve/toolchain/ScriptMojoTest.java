@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -15,7 +16,11 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
+import org.apache.maven.project.MavenProject;
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.create.MavenSkyveProject;
+import org.skyve.impl.create.MavenSkyveProject.MavenSkyveProjectCreator;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -32,11 +37,10 @@ import org.w3c.dom.NodeList;
  * <p>The fallback approach is used when the plugin descriptor is not generated during the build,
  * ensuring tests remain reliable across different build configurations.
  */
+@SuppressWarnings("static-method")
 class ScriptMojoTest {
-
 	@Test
-	@SuppressWarnings("static-method")
-    void testScriptMojoParameterPropertyConfiguration() throws Exception {
+	void testScriptMojoParameterPropertyConfiguration() throws Exception {
         Document plugin = loadPluginDescriptor();
         if (plugin != null) {
             Node mojo = selectMojo(plugin, "script");
@@ -120,6 +124,97 @@ class ScriptMojoTest {
             assertTrue(scriptPathPattern.matcher(source).find(), "scriptPath should be @Parameter(required=true, defaultValue=\"script/skyve.md\", property=\"scriptPath\")");
         }
     }
+
+	@Test
+	void executeAppliesResolvedScriptToConfiguredProject() throws Exception {
+		RecordingScriptMojo mojo = new RecordingScriptMojo();
+		Path basedir = Files.createTempDirectory("script-mojo");
+		Path script = Files.createDirectories(basedir.resolve("script")).resolve("skyve.md");
+		Files.writeString(script, "script contents");
+		MavenProject project = new MavenProject();
+		project.setName("test-project");
+		ReflectionTestUtils.setField(project, "basedir", basedir.toFile());
+		ReflectionTestUtils.setField(mojo, "project", project);
+		ReflectionTestUtils.setField(mojo, "skyveDir", "skyve");
+		ReflectionTestUtils.setField(mojo, "customer", "demo");
+		ReflectionTestUtils.setField(mojo, "scriptPath", "script/skyve.md");
+
+		mojo.execute();
+
+		assertEquals("test-project", mojo.projectName);
+		assertEquals(basedir.toString(), mojo.projectDirectory);
+		assertEquals("demo", mojo.customerName);
+		assertEquals("skyve", mojo.skyveDirectory);
+		assertEquals(script.toString(), mojo.resolvedScriptPath);
+		assertEquals("script contents", mojo.appliedScript);
+	}
+
+	private static final class RecordingScriptMojo extends ScriptMojo {
+		private String projectName;
+		private String projectDirectory;
+		private String customerName;
+		private String skyveDirectory;
+		private String resolvedScriptPath;
+		private String appliedScript;
+
+		@Override
+		protected void configureClasspath() {
+			// This test verifies script-path resolution and application wiring.
+		}
+
+		@Override
+		MavenSkyveProjectCreator newProjectCreator() {
+			return new RecordingCreator(this);
+		}
+
+		@Override
+		String readScript(@SuppressWarnings("hiding") String resolvedScriptPath) throws IOException {
+			this.resolvedScriptPath = resolvedScriptPath;
+			return super.readScript(resolvedScriptPath);
+		}
+
+		@Override
+		void applyScript(MavenSkyveProject p, String script) {
+			appliedScript = script;
+		}
+	}
+
+	private static final class RecordingCreator extends MavenSkyveProjectCreator {
+		private final RecordingScriptMojo mojo;
+
+		private RecordingCreator(RecordingScriptMojo mojo) {
+			this.mojo = mojo;
+		}
+
+		@Override
+		public MavenSkyveProjectCreator projectName(String projectName) {
+			mojo.projectName = projectName;
+			return this;
+		}
+
+		@Override
+		public MavenSkyveProjectCreator projectDirectory(String projectDirectory) {
+			mojo.projectDirectory = projectDirectory;
+			return this;
+		}
+
+		@Override
+		public MavenSkyveProjectCreator customerName(String customerName) {
+			mojo.customerName = customerName;
+			return this;
+		}
+
+		@Override
+		public MavenSkyveProjectCreator skyveDirectory(String skyveDirectory) {
+			mojo.skyveDirectory = skyveDirectory;
+			return this;
+		}
+
+		@Override
+		public MavenSkyveProject initialise() {
+			return null;
+		}
+	}
 
     private static Document loadPluginDescriptor() throws Exception {
         // Prefer the assembled/classes location used at runtime

@@ -155,7 +155,7 @@ class NewDocumentMojoTest {
      * - Generated persistent name follows the correct format (first 3 chars of module + _ + document name)
      */
 	@Test
-	@SuppressWarnings("static-method")
+    @SuppressWarnings("static-method")
     void testGeneratePersistentName() throws Exception {
         // Get the private method using reflection
         java.lang.reflect.Method generatePersistentName = NewDocumentMojo.class.getDeclaredMethod("generatePersistentName", 
@@ -179,4 +179,77 @@ class NewDocumentMojoTest {
         result = (String) generatePersistentName.invoke(null, null, null);
         assertNull(result, "Persistent name should be null for null inputs");
     }
-} 
+
+	@Test
+	void executeThrowsWhenDocumentDirectoryAlreadyExists() throws Exception {
+		// Pre-create the document directory
+		Path documentDir = tempDir.resolve("modules").resolve(moduleName).resolve(documentName);
+		Files.createDirectories(documentDir);
+
+		org.junit.jupiter.api.Assertions.assertThrows(
+				org.apache.maven.plugin.MojoExecutionException.class,
+				() -> mojo.execute());
+	}
+
+	@Test
+	void executeCompletesWhenModuleXmlMissing() throws Exception {
+		// Remove the module XML so the mojo warns instead of updating it
+		Path moduleXml = tempDir.resolve("modules").resolve(moduleName).resolve(moduleName + ".xml");
+		Files.deleteIfExists(moduleXml);
+
+		// Should complete without exception (just logs a warning)
+		mojo.execute();
+
+		// Document XML should still be created
+		Path documentXml = tempDir.resolve("modules").resolve(moduleName).resolve(documentName).resolve(documentName + ".xml");
+		assertTrue(Files.exists(documentXml), "Document metadata should still be created");
+	}
+
+	@Test
+	void executeThrowsWhenModuleDirectoryDoesNotExist() {
+		// Change config to request a module that doesn't exist
+		org.skyve.toolchain.config.NewDocumentConfig config = new org.skyve.toolchain.config.NewDocumentConfig();
+		config.setDefaultModule("nonExistentModule");
+		ReflectionTestUtils.setField(mojo, "newDocumentConfig", config);
+
+		org.junit.jupiter.api.Assertions.assertThrows(
+				org.apache.maven.plugin.MojoExecutionException.class,
+				() -> mojo.execute());
+	}
+
+	@Test
+	void executeCreatesDocumentWithoutPersistentNameForShortModuleName() throws Exception {
+		// Use a 2-char module name so persistentName == null
+		String shortModule = "ab";
+		Path shortModuleDir = tempDir.resolve("modules").resolve(shortModule);
+		Files.createDirectories(shortModuleDir);
+
+		// Write module XML matching the schema used by the main test's setUp
+		String moduleXml = String.format("""
+				<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+				<module xmlns="http://www.skyve.org/xml/module" name="%s" title="%s">
+				    <documentation>Test module documentation</documentation>
+				    <homeDocument>%s</homeDocument>
+				    <documents>
+				        <document ref="%s"/>
+				    </documents>
+				    <menu/>
+				</module>""", shortModule, shortModule, documentName, documentName);
+		Files.write(shortModuleDir.resolve(shortModule + ".xml"), moduleXml.getBytes());
+
+		// Reconfigure mojo to use short module
+		org.skyve.toolchain.config.NewDocumentConfig config = new org.skyve.toolchain.config.NewDocumentConfig();
+		config.setDefaultModule(shortModule);
+		ReflectionTestUtils.setField(mojo, "newDocumentConfig", config);
+
+		mojo.execute();
+
+		// Document directory should exist
+		Path documentXml = shortModuleDir.resolve(documentName).resolve(documentName + ".xml");
+		assertTrue(Files.exists(documentXml), "Document metadata should be created for short module name");
+
+		// The document XML should not contain a persistent element
+		String content = Files.readString(documentXml);
+		assertTrue(!content.contains("<persistent"), "Document should not have persistent element when module name is too short");
+	}
+}

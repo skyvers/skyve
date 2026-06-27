@@ -1,23 +1,57 @@
 package org.skyve.impl.backup;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.skyve.impl.backup.BackupUtil.redactData;
 
+import java.io.File;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.nio.file.Files;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.Month;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.skyve.domain.Bean;
+import org.skyve.domain.messages.DomainException;
+import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.customer.ExportedReference;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
+import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.Persistent;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.Collection.CollectionType;
+import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.Module.DocumentRef;
+import org.skyve.metadata.repository.ProvidedRepository;
+import org.skyve.persistence.SQL;
+import org.skyve.metadata.user.User;
 
 public class BackupUtilTest {
 	@Test
@@ -193,16 +227,16 @@ public class BackupUtilTest {
 	@SuppressWarnings("static-method")
 	public void testRedactDate() {
 		// setup the test data
-		Date input1 =  Date.valueOf(LocalDate.of(2000, 1, 15));
-		Date input2 =  Date.valueOf(LocalDate.of(1989, 6, 11));
-		Date input3 =  Date.valueOf(LocalDate.of(2000, 6, 23));
-		Date input4 =  Date.valueOf(LocalDate.of(2010, 4, 15));
-		Date input5 =  Date.valueOf(LocalDate.of(2020, 3, 2));
-		Date input6 =  Date.valueOf(LocalDate.of(2000, 11, 28));
-		Date input7 =  Date.valueOf(LocalDate.of(1990, 10, 25));
-		Date input8 =  Date.valueOf(LocalDate.of(1991, 10, 19));
-		Date input9 =  Date.valueOf(LocalDate.of(1972, 9, 6));
-		Date input10 = Date.valueOf(LocalDate.of(1892, 11, 3));
+		Date input1 =  Date.valueOf(LocalDate.of(2000, Month.JANUARY, 15));
+		Date input2 =  Date.valueOf(LocalDate.of(1989, Month.JUNE, 11));
+		Date input3 =  Date.valueOf(LocalDate.of(2000, Month.JUNE, 23));
+		Date input4 =  Date.valueOf(LocalDate.of(2010, Month.APRIL, 15));
+		Date input5 =  Date.valueOf(LocalDate.of(2020, Month.MARCH, 2));
+		Date input6 =  Date.valueOf(LocalDate.of(2000, Month.NOVEMBER, 28));
+		Date input7 =  Date.valueOf(LocalDate.of(1990, Month.OCTOBER, 25));
+		Date input8 =  Date.valueOf(LocalDate.of(1991, Month.OCTOBER, 19));
+		Date input9 =  Date.valueOf(LocalDate.of(1972, Month.SEPTEMBER, 6));
+		Date input10 = Date.valueOf(LocalDate.of(1892, Month.NOVEMBER, 3));
 		
 		// call the method under test
 		Date result1 = (Date) redactData(AttributeType.date, input1);
@@ -217,32 +251,32 @@ public class BackupUtilTest {
 		Date result10 = (Date) redactData(AttributeType.date, input10);
 		
 		// verify the result
-		assertThat(result1, is(Date.valueOf(LocalDate.of(2000, 1, 1))));
-		assertThat(result2, is(Date.valueOf(LocalDate.of(1989, 6, 1))));
-		assertThat(result3, is(Date.valueOf(LocalDate.of(2000, 6, 1))));
-		assertThat(result4, is(Date.valueOf(LocalDate.of(2010, 4, 1))));
-		assertThat(result5, is(Date.valueOf(LocalDate.of(2020, 3, 1))));
-		assertThat(result6, is(Date.valueOf(LocalDate.of(2000, 11, 1))));
-		assertThat(result7, is(Date.valueOf(LocalDate.of(1990, 10, 1))));
-		assertThat(result8, is(Date.valueOf(LocalDate.of(1991, 10, 1))));
-		assertThat(result9, is(Date.valueOf(LocalDate.of(1972, 9, 1))));
-		assertThat(result10, is(Date.valueOf(LocalDate.of(1892, 11, 1))));
+		assertThat(result1, is(Date.valueOf(LocalDate.of(2000, Month.JANUARY, 1))));
+		assertThat(result2, is(Date.valueOf(LocalDate.of(1989, Month.JUNE, 1))));
+		assertThat(result3, is(Date.valueOf(LocalDate.of(2000, Month.JUNE, 1))));
+		assertThat(result4, is(Date.valueOf(LocalDate.of(2010, Month.APRIL, 1))));
+		assertThat(result5, is(Date.valueOf(LocalDate.of(2020, Month.MARCH, 1))));
+		assertThat(result6, is(Date.valueOf(LocalDate.of(2000, Month.NOVEMBER, 1))));
+		assertThat(result7, is(Date.valueOf(LocalDate.of(1990, Month.OCTOBER, 1))));
+		assertThat(result8, is(Date.valueOf(LocalDate.of(1991, Month.OCTOBER, 1))));
+		assertThat(result9, is(Date.valueOf(LocalDate.of(1972, Month.SEPTEMBER, 1))));
+		assertThat(result10, is(Date.valueOf(LocalDate.of(1892, Month.NOVEMBER, 1))));
 	}
 	
 	@Test
 	@SuppressWarnings("static-method")
 	public void testRedactTimestamp() {
 		// setup the test data
-		java.sql.Timestamp input1 = java.sql.Timestamp.valueOf(LocalDateTime.of(2000, 1, 15, 23, 58));
-		java.sql.Timestamp input2 = java.sql.Timestamp.valueOf(LocalDateTime.of(1989, 5, 11, 21, 45));
-		java.sql.Timestamp input3 = java.sql.Timestamp.valueOf(LocalDateTime.of(2000, 8, 8, 18, 45));
-		java.sql.Timestamp input4 = java.sql.Timestamp.valueOf(LocalDateTime.of(2010, 2, 1, 14, 19));
-		java.sql.Timestamp input5 = java.sql.Timestamp.valueOf(LocalDateTime.of(2020, 9, 18, 11, 59));
-		java.sql.Timestamp input6 = java.sql.Timestamp.valueOf(LocalDateTime.of(2000, 11, 23, 17, 22));
-		java.sql.Timestamp input7 = java.sql.Timestamp.valueOf(LocalDateTime.of(1990, 12, 11, 19, 11));
-		java.sql.Timestamp input8 = java.sql.Timestamp.valueOf(LocalDateTime.of(1991, 2, 12, 23, 36));
-		java.sql.Timestamp input9 = java.sql.Timestamp.valueOf(LocalDateTime.of(1972, 3, 15, 18, 8));
-		java.sql.Timestamp input10 = java.sql.Timestamp.valueOf(LocalDateTime.of(1892, 1, 14, 21, 5));
+		java.sql.Timestamp input1 = java.sql.Timestamp.valueOf(LocalDateTime.of(2000, Month.JANUARY, 15, 23, 58));
+		java.sql.Timestamp input2 = java.sql.Timestamp.valueOf(LocalDateTime.of(1989, Month.MAY, 11, 21, 45));
+		java.sql.Timestamp input3 = java.sql.Timestamp.valueOf(LocalDateTime.of(2000, Month.AUGUST, 8, 18, 45));
+		java.sql.Timestamp input4 = java.sql.Timestamp.valueOf(LocalDateTime.of(2010, Month.FEBRUARY, 1, 14, 19));
+		java.sql.Timestamp input5 = java.sql.Timestamp.valueOf(LocalDateTime.of(2020, Month.SEPTEMBER, 18, 11, 59));
+		java.sql.Timestamp input6 = java.sql.Timestamp.valueOf(LocalDateTime.of(2000, Month.NOVEMBER, 23, 17, 22));
+		java.sql.Timestamp input7 = java.sql.Timestamp.valueOf(LocalDateTime.of(1990, Month.DECEMBER, 11, 19, 11));
+		java.sql.Timestamp input8 = java.sql.Timestamp.valueOf(LocalDateTime.of(1991, Month.FEBRUARY, 12, 23, 36));
+		java.sql.Timestamp input9 = java.sql.Timestamp.valueOf(LocalDateTime.of(1972, Month.MARCH, 15, 18, 8));
+		java.sql.Timestamp input10 = java.sql.Timestamp.valueOf(LocalDateTime.of(1892, Month.JANUARY, 14, 21, 5));
 		
 		// call the method under test
 		java.sql.Timestamp result1 = (Timestamp) redactData(AttributeType.dateTime, input1);
@@ -257,16 +291,16 @@ public class BackupUtilTest {
 		java.sql.Timestamp result10 = (Timestamp) redactData(AttributeType.timestamp, input10);
 		
 		// verify the result
-		assertThat(result1, is(java.sql.Timestamp.valueOf(LocalDateTime.of(2000, 1, 1, 0, 0))));
-		assertThat(result2, is(java.sql.Timestamp.valueOf(LocalDateTime.of(1989, 5, 1, 0, 0))));
-		assertThat(result3, is(java.sql.Timestamp.valueOf(LocalDateTime.of(2000, 8, 1, 0, 0))));
-		assertThat(result4, is(java.sql.Timestamp.valueOf(LocalDateTime.of(2010, 2, 1, 0, 0))));
-		assertThat(result5, is(java.sql.Timestamp.valueOf(LocalDateTime.of(2020, 9, 1, 0, 0))));
-		assertThat(result6, is(java.sql.Timestamp.valueOf(LocalDateTime.of(2000, 11, 1, 0, 0))));
-		assertThat(result7, is(java.sql.Timestamp.valueOf(LocalDateTime.of(1990, 12, 1, 0, 0))));
-		assertThat(result8, is(java.sql.Timestamp.valueOf(LocalDateTime.of(1991, 2, 1, 0, 0))));
-		assertThat(result9, is(java.sql.Timestamp.valueOf(LocalDateTime.of(1972, 3, 1, 0, 0))));
-		assertThat(result10, is(java.sql.Timestamp.valueOf(LocalDateTime.of(1892, 1, 1, 0, 0))));
+		assertThat(result1, is(java.sql.Timestamp.valueOf(LocalDateTime.of(2000, Month.JANUARY, 1, 0, 0))));
+		assertThat(result2, is(java.sql.Timestamp.valueOf(LocalDateTime.of(1989, Month.MAY, 1, 0, 0))));
+		assertThat(result3, is(java.sql.Timestamp.valueOf(LocalDateTime.of(2000, Month.AUGUST, 1, 0, 0))));
+		assertThat(result4, is(java.sql.Timestamp.valueOf(LocalDateTime.of(2010, Month.FEBRUARY, 1, 0, 0))));
+		assertThat(result5, is(java.sql.Timestamp.valueOf(LocalDateTime.of(2020, Month.SEPTEMBER, 1, 0, 0))));
+		assertThat(result6, is(java.sql.Timestamp.valueOf(LocalDateTime.of(2000, Month.NOVEMBER, 1, 0, 0))));
+		assertThat(result7, is(java.sql.Timestamp.valueOf(LocalDateTime.of(1990, Month.DECEMBER, 1, 0, 0))));
+		assertThat(result8, is(java.sql.Timestamp.valueOf(LocalDateTime.of(1991, Month.FEBRUARY, 1, 0, 0))));
+		assertThat(result9, is(java.sql.Timestamp.valueOf(LocalDateTime.of(1972, Month.MARCH, 1, 0, 0))));
+		assertThat(result10, is(java.sql.Timestamp.valueOf(LocalDateTime.of(1892, Month.JANUARY, 1, 0, 0))));
 	}
 	
 	@Test
@@ -336,5 +370,976 @@ public class BackupUtilTest {
 		
 		Coordinate[] modifiedPolygonCoords = new Coordinate[] { new Coordinate(0, 0), new Coordinate(0, 1), new Coordinate(1, 2), new Coordinate(2, 0), new Coordinate(0, 0) };
 		assertThat(result3.getCoordinates(), is(modifiedPolygonCoords));
+	}
+
+	// ---- hasBizCustomer tests ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void hasBizCustomerReturnsFalseForTableWithoutCustomerField() {
+		Table table = new Table("myTable", "myTable");
+		table.fields.put("bizId", Table.TEXT);
+		table.fields.put("bizKey", Table.TEXT);
+		assertFalse(BackupUtil.hasBizCustomer(table));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void hasBizCustomerReturnsTrueWhenCustomerFieldPresent() {
+		Table table = new Table("myTable", "myTable");
+		table.fields.put("bizId", Table.TEXT);
+		table.fields.put(Bean.CUSTOMER_NAME, Table.TEXT);
+		assertTrue(BackupUtil.hasBizCustomer(table));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void hasBizCustomerReturnsTrueForMixedCaseFieldName() {
+		Table table = new Table("myTable", "myTable");
+		table.fields.put("BIZCUSTOMER", Table.TEXT);  // CUSTOMER_NAME = "bizCustomer"
+		// equalsIgnoreCase so "BIZCUSTOMER" matches "bizCustomer"
+		assertTrue(BackupUtil.hasBizCustomer(table));
+	}
+
+	// ---- secureSQL tests ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void secureSQLForJoinTableAlwaysAddsOwnerConstraint() {
+		JoinTable joinTable = new JoinTable("owner_roles", "owner_roles", "Owner", "Owner", false);
+		StringBuilder sql = new StringBuilder("select * from owner_roles");
+		BackupUtil.secureSQL(sql, joinTable, "testCustomer");
+		String result = sql.toString();
+		assertThat(result, containsString("where"));
+		assertThat(result, containsString("owner_id"));
+		assertThat(result, containsString("Owner"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void secureSQLForRegularTableWithNoCustomerFieldDoesNotAppend() {
+		Table table = new Table("NoCustomerTable", "NoCustomerTable");
+		table.fields.put("bizId", Table.TEXT);
+		StringBuilder sql = new StringBuilder("select * from NoCustomerTable");
+		BackupUtil.secureSQL(sql, table, "testCustomer");
+		assertFalse("SQL should remain non-empty after secureSQL", sql.isEmpty());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void redactDataReturnsNullForNullValue() {
+		assertThat(redactData(AttributeType.text, null), is(nullValue()));
+		assertThat(redactData(AttributeType.integer, null), is(nullValue()));
+		assertThat(redactData(AttributeType.date, null), is(nullValue()));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void redactDataReturnsValueUnchangedForUnknownType() {
+		// association type is not redacted by default — value returned unchanged
+		String value = "some-association-id";
+		Object result = redactData(AttributeType.association, value);
+		assertThat(result, is(value));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void redactDataContentTypeReturnsNull() {
+		// content and image fields are nullified
+		Object result = redactData(AttributeType.content, "some-content-id");
+		assertThat(result, is(nullValue()));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void redactDataImageTypeReturnsNull() {
+		Object result = redactData(AttributeType.image, "image-id");
+		assertThat(result, is(nullValue()));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void redactDataDateTypeRoundsToFirstOfMonth() {
+		Date input = Date.valueOf(LocalDate.of(2023, Month.JULY, 15));
+		Date result = (Date) redactData(AttributeType.date, input);
+		assertThat(result, is(Date.valueOf(LocalDate.of(2023, Month.JULY, 1))));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void redactDataTimeTypeRoundsToHour() {
+		Time input = Time.valueOf(LocalTime.of(14, 37, 22));
+		Time result = (Time) redactData(AttributeType.time, input);
+		assertThat(result, is(Time.valueOf(LocalTime.of(14, 0, 0))));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void redactDataDateTimeTypeRoundsToFirstOfMonth() {
+		Timestamp input = Timestamp.valueOf(LocalDateTime.of(2023, Month.AUGUST, 20, 10, 30, 0));
+		Timestamp result = (Timestamp) redactData(AttributeType.dateTime, input);
+		assertThat(result, is(Timestamp.valueOf(LocalDateTime.of(2023, Month.AUGUST, 1, 0, 0, 0))));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void redactDataTimestampTypeRoundsToFirstOfMonth() {
+		Timestamp input = Timestamp.valueOf(LocalDateTime.of(2021, Month.MARCH, 14, 9, 15, 0));
+		Timestamp result = (Timestamp) redactData(AttributeType.timestamp, input);
+		assertThat(result, is(Timestamp.valueOf(LocalDateTime.of(2021, Month.MARCH, 1, 0, 0, 0))));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void redactDataDecimal2TypeRoundsToNearestTen() {
+		BigDecimal input = BigDecimal.valueOf(47.5);
+		BigDecimal result = (BigDecimal) redactData(AttributeType.decimal2, input);
+		assertThat(result, is(BigDecimal.valueOf(50.0)));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void redactDataDecimal5TypeRoundsToNearestTen() {
+		BigDecimal input = BigDecimal.valueOf(23.12345);
+		BigDecimal result = (BigDecimal) redactData(AttributeType.decimal5, input);
+		assertThat(result, is(BigDecimal.valueOf(20.0)));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void redactDataDecimal10TypeRoundsToNearestTen() {
+		BigDecimal input = BigDecimal.valueOf(99.9999);
+		BigDecimal result = (BigDecimal) redactData(AttributeType.decimal10, input);
+		assertThat(result, is(BigDecimal.valueOf(100.0)));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void redactDataBoolTypeReturnsSameBooleanValue() {
+		Object result = redactData(AttributeType.bool, Boolean.TRUE);
+		assertThat(result, is(Boolean.TRUE));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void redactDataEnumerationTypeReturnsValueUnchanged() {
+		String value = "ACTIVE";
+		Object result = redactData(AttributeType.enumeration, value);
+		assertThat(result, is(value));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void redactDataColourTypeReturnsValueUnchanged() {
+		String value = "#FF0000";
+		Object result = redactData(AttributeType.colour, value);
+		assertThat(result, is(value));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void writeAndReadScriptRoundtripsCommands() throws Exception {
+		List<String> commands = Arrays.asList("INSERT INTO foo VALUES (1)", "UPDATE bar SET x = 2");
+		File tempFile = Files.createTempFile("backup_test_", ".sql").toFile();
+		try {
+			BackupUtil.writeScript(commands, tempFile);
+			List<String> result = BackupUtil.readScript(tempFile);
+			assertEquals(2, result.size());
+			assertThat(result.get(0), is("INSERT INTO foo VALUES (1)"));
+			assertThat(result.get(1), is("UPDATE bar SET x = 2"));
+		}
+		finally {
+			Files.delete(tempFile.toPath());
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void readScriptStripsTrailingSemicolon() throws Exception {
+		List<String> commands = Arrays.asList("SELECT 1");
+		File tempFile = Files.createTempFile("backup_test_", ".sql").toFile();
+		try {
+			BackupUtil.writeScript(commands, tempFile);
+			List<String> result = BackupUtil.readScript(tempFile);
+			// writeScript adds ; at end, readScript strips it
+			assertThat(result.get(0), is("SELECT 1"));
+		}
+		finally {
+			Files.delete(tempFile.toPath());
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void hasBizCustomerReturnsFalseForTableWithNoCustomerField() {
+		Table table = new Table("test", "test");
+		assertFalse(BackupUtil.hasBizCustomer(table));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void hasBizCustomerReturnsTrueForTableWithCustomerField() {
+		Table table = new Table("test", "test");
+		table.fields.put(Bean.CUSTOMER_NAME, Table.TEXT);
+		assertTrue(BackupUtil.hasBizCustomer(table));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void hasBizCustomerIsCaseInsensitive() {
+		Table table = new Table("test", "test");
+		table.fields.put(Bean.CUSTOMER_NAME.toUpperCase(), Table.TEXT);
+		assertTrue(BackupUtil.hasBizCustomer(table));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void secureSQLAppendsNothingForSingleTenantTableWithoutCustomerField() {
+		String previous = UtilImpl.CUSTOMER;
+		UtilImpl.CUSTOMER = "acme";
+		try {
+			Table table = new Table("test", "test");
+			StringBuilder sql = new StringBuilder("SELECT * FROM test");
+			BackupUtil.secureSQL(sql, table, "acme");
+			assertThat(sql.toString(), is("SELECT * FROM test"));
+		}
+		finally {
+			UtilImpl.CUSTOMER = previous;
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void tableToJSONRoundtripsViaFromJSON() throws Exception {
+		Table table = new Table("myTable", "myTable");
+		table.fields.put("id", Table.TEXT);
+		table.fields.put("amount", Table.INTEGER);
+
+		String json = table.toJSON();
+		assertThat(json, containsString("myTable"));
+
+		Table restored = Table.fromJSON(json);
+		assertThat(restored.agnosticIdentifier, is("myTable"));
+		assertTrue(restored.fields.containsKey("id"));
+		assertTrue(restored.fields.containsKey("amount"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void tableEqualsBasedOnAgnosticIdentifier() {
+		Table t1 = new Table("same", "same");
+		Table t2 = new Table("same", "different");
+		Table t3 = new Table("other", "same");
+		assertEquals(t1, t2);
+		assertNotEquals(t1, t3);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void tableHashCodeConsistentWithEquals() {
+		Table t1 = new Table("abc", "abc");
+		Table t2 = new Table("abc", "xyz");
+		assertEquals(t2.hashCode(), t1.hashCode());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void writeAndReadTablesRoundtrips() throws Exception {
+		Table t1 = new Table("table1", "Table1");
+		t1.fields.put("bizId", Table.TEXT);
+		t1.fields.put("bizVersion", Table.INTEGER);
+		Table t2 = new Table("table2", "Table2");
+		t2.fields.put("name", Table.TEXT);
+		java.util.List<Table> tables = Arrays.asList(t1, t2);
+
+		File tempFile = Files.createTempFile("backup_tables_", ".json").toFile();
+		try {
+			BackupUtil.writeTables(tables, tempFile);
+			java.util.Collection<Table> result = BackupUtil.readTables(tempFile);
+			assertEquals(2, result.size());
+		}
+		finally {
+			Files.delete(tempFile.toPath());
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void writeAndReadTablesPreservesFieldTypes() throws Exception {
+		Table t = new Table("myTable", "myTable");
+		t.fields.put("textField", Table.TEXT);
+		t.fields.put("intField", Table.INTEGER);
+		t.fields.put("assocField", Table.ASSOCIATION);
+		java.util.List<Table> tables = Arrays.asList(t);
+
+		File tempFile = Files.createTempFile("backup_tables_fields_", ".json").toFile();
+		try {
+			BackupUtil.writeTables(tables, tempFile);
+			java.util.Collection<Table> result = BackupUtil.readTables(tempFile);
+			Table restored = result.iterator().next();
+			assertThat(restored.agnosticIdentifier, is("myTable"));
+			assertTrue(restored.fields.containsKey("textField"));
+			assertTrue(restored.fields.containsKey("intField"));
+			assertTrue(restored.fields.containsKey("assocField"));
+		}
+		finally {
+			Files.delete(tempFile.toPath());
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void redactDataNullValueReturnsNull() {
+		Object result = redactData(AttributeType.text, null);
+		assertThat(result, nullValue());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void redactDataCollectionTypeReturnsValueUnchanged() {
+		String value = "col-value";
+		Object result = redactData(AttributeType.collection, value);
+		assertThat(result, is(value));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void redactDataInverseManyTypeReturnsValueUnchanged() {
+		String value = "inv-many-value";
+		Object result = redactData(AttributeType.inverseMany, value);
+		assertThat(result, is(value));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void redactDataInverseOneTypeReturnsValueUnchanged() {
+		String value = "inv-one-value";
+		Object result = redactData(AttributeType.inverseOne, value);
+		assertThat(result, is(value));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void joinTableToJSONAndFromJSONRoundtrips() throws Exception {
+		JoinTable joinTable = new JoinTable("ownerTable_elements", "ownerTable_elements",
+				"ownerTable", "ownerTable", false);
+		String json = joinTable.toJSON();
+		assertThat(json, containsString("ownerTable"));
+		Table restored = Table.fromJSON(json);
+		assertTrue(restored instanceof JoinTable);
+		JoinTable restoredJoin = (JoinTable) restored;
+		assertThat(restoredJoin.agnosticIdentifier, is("ownerTable_elements"));
+		assertThat(restoredJoin.ownerAgnosticIdentifier, is("ownerTable"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void orderedJoinTableToJSONAndFromJSONRoundtrips() throws Exception {
+		JoinTable joinTable = new JoinTable("list_items", "list_items",
+				"myList", "myList", true);
+		String json = joinTable.toJSON();
+		Table restored = Table.fromJSON(json);
+		assertTrue(restored instanceof JoinTable);
+		JoinTable restoredJoin = (JoinTable) restored;
+		assertTrue(restoredJoin.ordered);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void joinTableHasOwnerAndElementFields() {
+		JoinTable joinTable = new JoinTable("t_elem", "t_elem", "t_owner", "t_owner", false);
+		assertTrue(joinTable.fields.containsKey("owner_id"));
+		assertTrue(joinTable.fields.containsKey("element_id"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void orderedJoinTableHasOrderByField() {
+		JoinTable joinTable = new JoinTable("t_elem", "t_elem", "t_owner", "t_owner", true);
+		assertTrue(joinTable.fields.containsKey("bizOrdinal"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void tableFromJSONPreservesFieldTypes() throws Exception {
+		Table t = new Table("myTable", "myTable");
+		t.fields.put("bizId", Table.TEXT);
+		t.fields.put("amount", Table.INTEGER);
+		t.fields.put("owner", Table.ASSOCIATION);
+		String json = t.toJSON();
+		Table restored = Table.fromJSON(json);
+		assertThat(restored.fields.get("bizId").getAttributeType(), is(AttributeType.text));
+		assertThat(restored.fields.get("amount").getAttributeType(), is(AttributeType.integer));
+		assertThat(restored.fields.get("owner").getAttributeType(), is(AttributeType.association));
+	}
+
+	@Test
+	@SuppressWarnings({ "static-method", "boxing" })
+	public void getTablesReturnsSingleTableForSimpleStaticDocument() throws Exception {
+		ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		ProvidedRepositoryFactory.set(repository);
+
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		User user = mock(User.class);
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Module module = mock(Module.class);
+		DocumentRef documentRef = mock(DocumentRef.class);
+		Document document = mock(Document.class);
+		Persistent persistent = mock(Persistent.class);
+
+		Map<String, DocumentRef> refs = new HashMap<>();
+		refs.put("MyDoc", documentRef);
+
+		org.skyve.metadata.model.Attribute.Sensitivity sensitivity = org.skyve.metadata.model.Attribute.Sensitivity.none;
+
+		org.skyve.metadata.model.Extends extension = null;
+
+		try {
+			when(persistence.getUser()).thenReturn(user);
+			when(user.getCustomer()).thenReturn(customer);
+			when(customer.getModules()).thenReturn(Collections.singletonList(module));
+			when(customer.getModule("mod")).thenReturn(module);
+			when(customer.getExportedReferences(document)).thenReturn(null);
+			when(module.getName()).thenReturn("mod");
+			when(module.getDocumentRefs()).thenReturn(refs);
+			when(module.getDocument(customer, "MyDoc")).thenReturn(document);
+			when(documentRef.getOwningModuleName()).thenReturn("mod");
+			when(document.isDynamic()).thenReturn(false);
+			when(document.isPersistable()).thenReturn(true);
+			when(document.getPersistent()).thenReturn(persistent);
+			when(document.getOwningModuleName()).thenReturn("mod");
+			when(document.getAllAttributes(customer)).thenReturn(Collections.emptyList());
+			when(document.getParentDocumentName()).thenReturn(null);
+			when(document.isOrdered()).thenReturn(false);
+			when(document.getBizKeySensitity()).thenReturn(sensitivity);
+			when(document.getExtends()).thenReturn(extension);
+			when(persistent.getAgnosticIdentifier()).thenReturn("T_DOC");
+			when(persistent.getPersistentIdentifier()).thenReturn("T_DOC");
+			when(repository.findNearestPersistentSingleOrJoinedSuperDocument(customer, module, document)).thenReturn(document);
+
+			withThreadLocalPersistence(persistence, () -> {
+				Collection<Table> tables = BackupUtil.getTables();
+				assertEquals(1, tables.size());
+				Table table = tables.iterator().next();
+				assertEquals("T_DOC", table.agnosticIdentifier);
+				assertTrue(table.fields.containsKey(Bean.DOCUMENT_ID));
+				assertTrue(table.fields.containsKey(Bean.BIZ_KEY));
+			});
+		}
+		finally {
+			ProvidedRepositoryFactory.set(previousRepository);
+		}
+	}
+
+	@Test
+	@SuppressWarnings({ "static-method", "boxing" })
+	public void getTablesAddsJoinTableForAggregationReference() throws Exception {
+		ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		ProvidedRepositoryFactory.set(repository);
+
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		User user = mock(User.class);
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Module module = mock(Module.class);
+		DocumentRef documentRef = mock(DocumentRef.class);
+		Document document = mock(Document.class);
+		Persistent persistent = mock(Persistent.class);
+
+		Document referencedDocument = mock(Document.class);
+		org.skyve.metadata.model.document.Collection collection = mock(org.skyve.metadata.model.document.Collection.class);
+		Persistent ownerPersistent = mock(Persistent.class);
+
+		ExportedReference reference = new ExportedReference();
+		reference.setModuleName("mod");
+		reference.setDocumentName("RefDoc");
+		reference.setReferenceFieldName("items");
+		reference.setType(CollectionType.aggregation);
+		reference.setPersistent(ownerPersistent);
+
+		Map<String, DocumentRef> refs = new HashMap<>();
+		refs.put("MyDoc", documentRef);
+
+		org.skyve.metadata.model.Attribute.Sensitivity sensitivity = org.skyve.metadata.model.Attribute.Sensitivity.none;
+
+		try {
+			when(persistence.getUser()).thenReturn(user);
+			when(user.getCustomer()).thenReturn(customer);
+			when(customer.getModules()).thenReturn(Collections.singletonList(module));
+			when(customer.getModule("mod")).thenReturn(module);
+			when(customer.getExportedReferences(document)).thenReturn(Collections.singletonList(reference));
+			when(module.getName()).thenReturn("mod");
+			when(module.getDocumentRefs()).thenReturn(refs);
+			when(module.getDocument(customer, "MyDoc")).thenReturn(document);
+			when(module.getDocument(customer, "RefDoc")).thenReturn(referencedDocument);
+			when(documentRef.getOwningModuleName()).thenReturn("mod");
+			when(document.isDynamic()).thenReturn(false);
+			when(document.isPersistable()).thenReturn(true);
+			when(document.getPersistent()).thenReturn(persistent);
+			when(document.getOwningModuleName()).thenReturn("mod");
+			when(document.getAllAttributes(customer)).thenReturn(Collections.emptyList());
+			when(document.getParentDocumentName()).thenReturn(null);
+			when(document.isOrdered()).thenReturn(false);
+			when(document.getBizKeySensitity()).thenReturn(sensitivity);
+			when(document.getExtends()).thenReturn(null);
+			when(persistent.getAgnosticIdentifier()).thenReturn("T_DOC");
+			when(persistent.getPersistentIdentifier()).thenReturn("T_DOC");
+			when(repository.findNearestPersistentSingleOrJoinedSuperDocument(customer, module, document)).thenReturn(document);
+
+			when(referencedDocument.isDynamic()).thenReturn(false);
+			when(referencedDocument.getReferenceByName("items")).thenReturn(collection);
+			when(collection.isPersistent()).thenReturn(true);
+			when(collection.getOrdered()).thenReturn(Boolean.TRUE);
+
+			when(ownerPersistent.getAgnosticIdentifier()).thenReturn("T_OWNER");
+			when(ownerPersistent.getPersistentIdentifier()).thenReturn("T_OWNER");
+			when(ownerPersistent.getStrategy()).thenReturn(null);
+			when(ownerPersistent.isPolymorphicallyMapped()).thenReturn(false);
+
+			withThreadLocalPersistence(persistence, () -> {
+				Collection<Table> tables = BackupUtil.getTables();
+				assertEquals(2, tables.size());
+			});
+		}
+		finally {
+			ProvidedRepositoryFactory.set(previousRepository);
+		}
+	}
+
+	@Test
+	@SuppressWarnings({ "static-method", "boxing" })
+	public void getTablesAddsJoinTableForJoinedReferenceStrategy() throws Exception {
+		ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		ProvidedRepositoryFactory.set(repository);
+
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		User user = mock(User.class);
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Module module = mock(Module.class);
+		DocumentRef documentRef = mock(DocumentRef.class);
+		Document document = mock(Document.class);
+		Persistent persistent = mock(Persistent.class);
+
+		Document referencedDocument = mock(Document.class);
+		org.skyve.metadata.model.document.Collection collection = mock(org.skyve.metadata.model.document.Collection.class);
+		Persistent referencePersistent = mock(Persistent.class);
+		Persistent referencedPersistent = mock(Persistent.class);
+
+		ExportedReference reference = new ExportedReference();
+		reference.setModuleName("mod");
+		reference.setDocumentName("RefDoc");
+		reference.setReferenceFieldName("items");
+		reference.setType(CollectionType.aggregation);
+		reference.setPersistent(referencePersistent);
+
+		Map<String, DocumentRef> refs = new HashMap<>();
+		refs.put("MyDoc", documentRef);
+
+		org.skyve.metadata.model.Attribute.Sensitivity sensitivity = org.skyve.metadata.model.Attribute.Sensitivity.none;
+
+		try {
+			when(persistence.getUser()).thenReturn(user);
+			when(user.getCustomer()).thenReturn(customer);
+			when(customer.getModules()).thenReturn(Collections.singletonList(module));
+			when(customer.getModule("mod")).thenReturn(module);
+			when(customer.getExportedReferences(document)).thenReturn(Collections.singletonList(reference));
+			when(module.getName()).thenReturn("mod");
+			when(module.getDocumentRefs()).thenReturn(refs);
+			when(module.getDocument(customer, "MyDoc")).thenReturn(document);
+			when(module.getDocument(customer, "RefDoc")).thenReturn(referencedDocument);
+			when(documentRef.getOwningModuleName()).thenReturn("mod");
+			when(document.isDynamic()).thenReturn(false);
+			when(document.isPersistable()).thenReturn(true);
+			when(document.getPersistent()).thenReturn(persistent);
+			when(document.getOwningModuleName()).thenReturn("mod");
+			when(document.getAllAttributes(customer)).thenReturn(Collections.emptyList());
+			when(document.getParentDocumentName()).thenReturn(null);
+			when(document.isOrdered()).thenReturn(false);
+			when(document.getBizKeySensitity()).thenReturn(sensitivity);
+			when(document.getExtends()).thenReturn(null);
+			when(persistent.getAgnosticIdentifier()).thenReturn("T_DOC");
+			when(persistent.getPersistentIdentifier()).thenReturn("T_DOC");
+			when(repository.findNearestPersistentSingleOrJoinedSuperDocument(customer, module, document)).thenReturn(document);
+
+			when(referencedDocument.isDynamic()).thenReturn(false);
+			when(referencedDocument.getReferenceByName("items")).thenReturn(collection);
+			when(referencedDocument.getExtends()).thenReturn(null);
+			when(referencedDocument.getPersistent()).thenReturn(referencedPersistent);
+			when(collection.isPersistent()).thenReturn(true);
+			when(collection.getOrdered()).thenReturn(Boolean.FALSE);
+
+			when(referencePersistent.getAgnosticIdentifier()).thenReturn("T_OWNER");
+			when(referencePersistent.getPersistentIdentifier()).thenReturn("T_OWNER");
+			when(referencePersistent.getStrategy()).thenReturn(org.skyve.metadata.model.Persistent.ExtensionStrategy.joined);
+			when(referencePersistent.isPolymorphicallyMapped()).thenReturn(false);
+			when(referencedPersistent.getAgnosticIdentifier()).thenReturn("T_REF");
+			when(referencedPersistent.getPersistentIdentifier()).thenReturn("T_REF");
+
+			withThreadLocalPersistence(persistence, () -> {
+				Collection<Table> tables = BackupUtil.getTables();
+				assertEquals(2, tables.size());
+			});
+		}
+		finally {
+			ProvidedRepositoryFactory.set(previousRepository);
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void getTablesForAllCustomersThrowsWhenCustomerMissing() throws Exception {
+		ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		try {
+			ProvidedRepositoryFactory.set(repository);
+			when(repository.getAllCustomerNames()).thenReturn(Collections.singletonList("missingCustomer"));
+			when(repository.getCustomer("missingCustomer")).thenReturn(null);
+
+			try {
+				BackupUtil.getTablesForAllCustomers();
+				org.junit.Assert.fail("Expected MetaDataException");
+			}
+			catch (MetaDataException e) {
+				assertThat(e.getMessage(), containsString("missingCustomer does not exist"));
+			}
+		}
+		finally {
+			ProvidedRepositoryFactory.set(previousRepository);
+		}
+	}
+
+	@Test
+	@SuppressWarnings({ "static-method", "boxing" })
+	public void getTablesForAllCustomersReturnsMergedTables() throws Exception {
+		ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		try {
+			ProvidedRepositoryFactory.set(repository);
+
+			CustomerImpl customerOne = mock(CustomerImpl.class);
+			CustomerImpl customerTwo = mock(CustomerImpl.class);
+			Module moduleOne = mock(Module.class);
+			Module moduleTwo = mock(Module.class);
+			DocumentRef refOne = mock(DocumentRef.class);
+			DocumentRef refTwo = mock(DocumentRef.class);
+			Document docOne = mock(Document.class);
+			Document docTwo = mock(Document.class);
+			Persistent persistentOne = mock(Persistent.class);
+			Persistent persistentTwo = mock(Persistent.class);
+
+			Map<String, DocumentRef> refsOne = new HashMap<>();
+			refsOne.put("MyDoc", refOne);
+			Map<String, DocumentRef> refsTwo = new HashMap<>();
+			refsTwo.put("MyDoc", refTwo);
+
+			org.skyve.metadata.model.Attribute.Sensitivity sensitivity = org.skyve.metadata.model.Attribute.Sensitivity.none;
+
+			when(repository.getAllCustomerNames()).thenReturn(Arrays.asList("c1", "c2"));
+			when(repository.getCustomer("c1")).thenReturn(customerOne);
+			when(repository.getCustomer("c2")).thenReturn(customerTwo);
+
+			when(customerOne.getModules()).thenReturn(Collections.singletonList(moduleOne));
+			when(customerTwo.getModules()).thenReturn(Collections.singletonList(moduleTwo));
+
+			when(moduleOne.getName()).thenReturn("mod");
+			when(moduleTwo.getName()).thenReturn("mod");
+			when(moduleOne.getDocumentRefs()).thenReturn(refsOne);
+			when(moduleTwo.getDocumentRefs()).thenReturn(refsTwo);
+			when(refOne.getOwningModuleName()).thenReturn("mod");
+			when(refTwo.getOwningModuleName()).thenReturn("mod");
+
+			when(moduleOne.getDocument(customerOne, "MyDoc")).thenReturn(docOne);
+			when(moduleTwo.getDocument(customerTwo, "MyDoc")).thenReturn(docTwo);
+
+			when(docOne.isDynamic()).thenReturn(false);
+			when(docOne.isPersistable()).thenReturn(true);
+			when(docOne.getPersistent()).thenReturn(persistentOne);
+			when(docOne.getOwningModuleName()).thenReturn("mod");
+			when(docOne.getAllAttributes(customerOne)).thenReturn(Collections.emptyList());
+			when(docOne.getParentDocumentName()).thenReturn(null);
+			when(docOne.isOrdered()).thenReturn(false);
+			when(docOne.getBizKeySensitity()).thenReturn(sensitivity);
+			when(docOne.getExtends()).thenReturn(null);
+			when(customerOne.getExportedReferences(docOne)).thenReturn(Collections.emptyList());
+
+			when(docTwo.isDynamic()).thenReturn(false);
+			when(docTwo.isPersistable()).thenReturn(true);
+			when(docTwo.getPersistent()).thenReturn(persistentTwo);
+			when(docTwo.getOwningModuleName()).thenReturn("mod");
+			when(docTwo.getAllAttributes(customerTwo)).thenReturn(Collections.emptyList());
+			when(docTwo.getParentDocumentName()).thenReturn(null);
+			when(docTwo.isOrdered()).thenReturn(false);
+			when(docTwo.getBizKeySensitity()).thenReturn(sensitivity);
+			when(docTwo.getExtends()).thenReturn(null);
+			when(customerTwo.getExportedReferences(docTwo)).thenReturn(Collections.emptyList());
+
+			when(persistentOne.getAgnosticIdentifier()).thenReturn("T_DOC");
+			when(persistentOne.getPersistentIdentifier()).thenReturn("T_DOC");
+			when(persistentTwo.getAgnosticIdentifier()).thenReturn("T_DOC");
+			when(persistentTwo.getPersistentIdentifier()).thenReturn("T_DOC");
+
+			when(repository.findNearestPersistentSingleOrJoinedSuperDocument(customerOne, moduleOne, docOne)).thenReturn(docOne);
+			when(repository.findNearestPersistentSingleOrJoinedSuperDocument(customerTwo, moduleTwo, docTwo)).thenReturn(docTwo);
+
+			Collection<Table> tables = BackupUtil.getTablesForAllCustomers();
+			assertEquals(1, tables.size());
+		}
+		finally {
+			ProvidedRepositoryFactory.set(previousRepository);
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void validateSkyveBackupThrowsWhenDirectoryMissing() throws Exception {
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		User user = mock(User.class);
+		when(persistence.getUser()).thenReturn(user);
+		when(user.getCustomerName()).thenReturn("missingDirCustomer");
+
+		withThreadLocalPersistence(persistence, () -> {
+			String extractName = "missing-backup-dir-" + System.nanoTime();
+			try {
+				BackupUtil.validateSkyveBackup(extractName);
+			}
+			catch (DomainException e) {
+				assertThat(e.getMessage(), containsString("is not a directory"));
+				return;
+			}
+			org.junit.Assert.fail("Expected DomainException");
+		});
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void validateSkyveBackupThrowsWhenRootContainsNoCsvFiles() throws Exception {
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		User user = mock(User.class);
+		when(persistence.getUser()).thenReturn(user);
+		when(user.getCustomerName()).thenReturn("noCsvCustomer");
+		String previousBackupDirectory = UtilImpl.BACKUP_DIRECTORY;
+		File root = Files.createTempDirectory("skyve-backup-util-").toFile();
+		String extractName = "extract";
+		File backupDirectory = new File(new File(root, "backup_noCsvCustomer"), extractName);
+		assertTrue(backupDirectory.mkdirs());
+		UtilImpl.BACKUP_DIRECTORY = root.getAbsolutePath() + File.separator;
+
+		try {
+			withThreadLocalPersistence(persistence, () -> {
+				try {
+					BackupUtil.validateSkyveBackup(extractName);
+				}
+				catch (DomainException e) {
+					assertThat(e.getMessage(), containsString("No valid Skyve CSV files"));
+					return;
+				}
+				org.junit.Assert.fail("Expected DomainException");
+			});
+		}
+		finally {
+			UtilImpl.BACKUP_DIRECTORY = previousBackupDirectory;
+			Files.delete(backupDirectory.toPath());
+			Files.delete(backupDirectory.getParentFile().toPath());
+			Files.delete(root.toPath());
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void validateSkyveBackupReturnsDirectoryWhenRootContainsCsvFile() throws Exception {
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		User user = mock(User.class);
+		when(persistence.getUser()).thenReturn(user);
+		when(user.getCustomerName()).thenReturn("csvCustomer");
+		String previousBackupDirectory = UtilImpl.BACKUP_DIRECTORY;
+		File root = Files.createTempDirectory("skyve-backup-util-").toFile();
+		String extractName = "extract";
+		File backupDirectory = new File(new File(root, "backup_csvCustomer"), extractName);
+		assertTrue(backupDirectory.mkdirs());
+		File csv = new File(backupDirectory, "Document.CSV");
+		assertTrue(csv.createNewFile());
+		UtilImpl.BACKUP_DIRECTORY = root.getAbsolutePath() + File.separator;
+
+		try {
+			withThreadLocalPersistence(persistence, () -> {
+				File result = BackupUtil.validateSkyveBackup(extractName);
+
+				assertThat(result, is(backupDirectory));
+			});
+		}
+		finally {
+			UtilImpl.BACKUP_DIRECTORY = previousBackupDirectory;
+			Files.delete(csv.toPath());
+			Files.delete(backupDirectory.toPath());
+			Files.delete(backupDirectory.getParentFile().toPath());
+			Files.delete(root.toPath());
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void privateRedactStringReturnsNullForNullInput() throws Exception {
+		assertThat(invokePrivate("redactString", new Class<?>[] { String.class, Integer.class }, null, Integer.valueOf(10)), is(nullValue()));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void privateRedactNumericReturnsNullForNullInputAndUnsupportedNumber() throws Exception {
+		assertThat(invokePrivate("redactNumeric", new Class<?>[] { Number.class }, new Object[] { null }), is(nullValue()));
+		assertThat(invokePrivate("redactNumeric", new Class<?>[] { Number.class }, Short.valueOf((short) 7)), is(nullValue()));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void privateRedactGeometryReturnsOriginalForUnsupportedGeometryType() throws Exception {
+		Geometry geometry = new GeometryFactory().createMultiPointFromCoords(new Coordinate[] { new Coordinate(1.2, 3.4), new Coordinate(5.6, 7.8) });
+
+		Object result = invokePrivate("redactGeometry", new Class<?>[] { Geometry.class }, geometry);
+
+		assertThat(result, is(geometry));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void executeScriptThrowsWhenPersistenceIsNotHibernate() throws Exception {
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		SQL sql = mock(SQL.class);
+		when(persistence.newSQL("select 1")).thenReturn(sql);
+		when(sql.noTimeout()).thenReturn(sql);
+
+		withThreadLocalPersistence(persistence, () -> {
+			List<String> script = Collections.singletonList("select 1");
+			try {
+				BackupUtil.executeScript(script);
+			}
+			catch (ClassCastException e) {
+				assertThat(e.getMessage(), containsString("AbstractHibernatePersistence"));
+				return;
+			}
+			org.junit.Assert.fail("Expected ClassCastException");
+		});
+	}
+
+	@Test
+	@SuppressWarnings({ "static-method", "boxing" })
+	public void getTablesAddsJoinTableForPolymorphicReference() throws Exception {
+		ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		ProvidedRepositoryFactory.set(repository);
+
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		User user = mock(User.class);
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Module module = mock(Module.class);
+		DocumentRef documentRef = mock(DocumentRef.class);
+		Document document = mock(Document.class);
+		Persistent persistent = mock(Persistent.class);
+
+		Document referencedDocument = mock(Document.class);
+		org.skyve.metadata.model.document.Collection collection = mock(org.skyve.metadata.model.document.Collection.class);
+		Persistent ownerPersistent = mock(Persistent.class);
+
+		Document derivedDocument = mock(Document.class);
+		Persistent derivedPersistent = mock(Persistent.class);
+
+		ExportedReference reference = new ExportedReference();
+		reference.setModuleName("mod");
+		reference.setDocumentName("RefDoc");
+		reference.setReferenceFieldName("items");
+		reference.setType(CollectionType.composition);
+		reference.setPersistent(ownerPersistent);
+
+		Map<String, DocumentRef> refs = new HashMap<>();
+		refs.put("MyDoc", documentRef);
+
+		org.skyve.metadata.model.Attribute.Sensitivity sensitivity = org.skyve.metadata.model.Attribute.Sensitivity.none;
+
+		try {
+			when(persistence.getUser()).thenReturn(user);
+			when(user.getCustomer()).thenReturn(customer);
+			when(customer.getModules()).thenReturn(Collections.singletonList(module));
+			when(customer.getModule("mod")).thenReturn(module);
+			when(customer.getExportedReferences(document)).thenReturn(Collections.singletonList(reference));
+			when(customer.getDerivedDocuments(referencedDocument)).thenReturn(Collections.singletonList("mod.DerivedDoc"));
+			when(module.getName()).thenReturn("mod");
+			when(module.getDocumentRefs()).thenReturn(refs);
+			when(module.getDocument(customer, "MyDoc")).thenReturn(document);
+			when(module.getDocument(customer, "RefDoc")).thenReturn(referencedDocument);
+			when(module.getDocument(customer, "DerivedDoc")).thenReturn(derivedDocument);
+			when(documentRef.getOwningModuleName()).thenReturn("mod");
+			when(document.isDynamic()).thenReturn(false);
+			when(document.isPersistable()).thenReturn(true);
+			when(document.getPersistent()).thenReturn(persistent);
+			when(document.getOwningModuleName()).thenReturn("mod");
+			when(document.getAllAttributes(customer)).thenReturn(Collections.emptyList());
+			when(document.getParentDocumentName()).thenReturn(null);
+			when(document.isOrdered()).thenReturn(false);
+			when(document.getBizKeySensitity()).thenReturn(sensitivity);
+			when(document.getExtends()).thenReturn(null);
+			when(persistent.getAgnosticIdentifier()).thenReturn("T_DOC");
+			when(persistent.getPersistentIdentifier()).thenReturn("T_DOC");
+			when(repository.findNearestPersistentSingleOrJoinedSuperDocument(customer, module, document)).thenReturn(document);
+
+			when(referencedDocument.isDynamic()).thenReturn(false);
+			when(referencedDocument.getReferenceByName("items")).thenReturn(collection);
+			when(collection.isPersistent()).thenReturn(true);
+			when(collection.getOrdered()).thenReturn(Boolean.TRUE);
+
+			when(ownerPersistent.getAgnosticIdentifier()).thenReturn("T_OWNER");
+			when(ownerPersistent.getPersistentIdentifier()).thenReturn("T_OWNER");
+			when(ownerPersistent.getStrategy()).thenReturn(null);
+			when(ownerPersistent.isPolymorphicallyMapped()).thenReturn(true);
+
+			when(derivedDocument.isPersistable()).thenReturn(true);
+			when(derivedDocument.getPersistent()).thenReturn(derivedPersistent);
+			when(derivedPersistent.getAgnosticIdentifier()).thenReturn("T_DERIVED");
+			when(derivedPersistent.getPersistentIdentifier()).thenReturn("T_DERIVED");
+
+			withThreadLocalPersistence(persistence, () -> {
+				Collection<Table> tables = BackupUtil.getTables();
+				assertEquals(2, tables.size());
+			});
+		}
+		finally {
+			ProvidedRepositoryFactory.set(previousRepository);
+		}
+	}
+
+	private static void withThreadLocalPersistence(AbstractPersistence persistence, ThrowingRunnable runnable) throws Exception {
+		ThreadLocal<AbstractPersistence> threadLocal = getThreadLocalPersistence();
+		AbstractPersistence previous = threadLocal.get();
+		try {
+			threadLocal.set(persistence);
+			runnable.run();
+		}
+		finally {
+			if (previous == null) {
+				threadLocal.remove();
+			}
+			else {
+				threadLocal.set(previous);
+			}
+		}
+	}
+
+	private static ThreadLocal<AbstractPersistence> getThreadLocalPersistence() throws Exception {
+		Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
+		field.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		ThreadLocal<AbstractPersistence> threadLocal = (ThreadLocal<AbstractPersistence>) field.get(null);
+		return threadLocal;
+	}
+
+	private static Object invokePrivate(String name, Class<?>[] parameterTypes, Object... args) throws Exception {
+		Method method = BackupUtil.class.getDeclaredMethod(name, parameterTypes);
+		method.setAccessible(true);
+		return method.invoke(null, args);
+	}
+
+	@FunctionalInterface
+	private interface ThrowingRunnable {
+		void run() throws Exception;
 	}
 }

@@ -128,6 +128,7 @@ class SQLIterable<T> implements AutoClosingIterable<T> {
 			throw new IllegalStateException("Cannot remove from SQLIterator");
 		}
 
+		@SuppressWarnings("java:S3776") // Complexity OK
 		private @Nonnull Z nextBean() {
 			try {
 				User u = CORE.getUser();

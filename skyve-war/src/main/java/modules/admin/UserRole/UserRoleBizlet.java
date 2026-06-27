@@ -9,10 +9,21 @@ import jakarta.inject.Inject;
 import modules.admin.User.UserService;
 import modules.admin.domain.UserRole;
 
+/**
+ * Resolves selectable role values for {@link UserRole} maintenance.
+ */
 public class UserRoleBizlet extends Bizlet<UserRole> {
 	@Inject
-	private transient UserService userService;
+	@SuppressWarnings("java:S6813") // allow member injection
+	private UserService userService;
 
+	/**
+	 * Returns role domain values for the {@code roleName} field.
+	 *
+	 * @param fieldName The field requiring variant values.
+	 * @return Module-qualified role values when the role field is requested.
+	 * @throws Exception If role resolution fails.
+	 */
 	@Override
 	public List<DomainValue> getVariantDomainValues(String fieldName)
 			throws Exception {

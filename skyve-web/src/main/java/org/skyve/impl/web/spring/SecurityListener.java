@@ -15,27 +15,64 @@ import org.skyve.impl.util.UUIDv7;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.springframework.context.event.EventListener;
-import org.springframework.security.authentication.event.AuthenticationFailureBadCredentialsEvent;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.LockedException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.authentication.event.AbstractAuthenticationFailureEvent;
 import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
 import org.springframework.stereotype.Component;
 
+/**
+ * Handles Spring Security authentication success/failure events to maintain Skyve login-failure lockout state.
+ *
+ * <p>Side effects: writes failure counters and login-record audit rows to {@code ADM_SecurityUser}
+ * and {@code ADM_UserLoginRecord} using JDBC transactions.
+ */
 @Component
 public class SecurityListener {
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SecurityListener.class);
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SecurityListener.class);
+    private static final String UNKNOWN = "unknown";
 
+	/**
+	 * Records failed authentication attempts that qualify for account lockout tracking.
+	 *
+	 * @param evt The authentication failure event.
+	 */
 	@EventListener
 	@SuppressWarnings("static-method")
-	public void onAuthenticationFailure(AuthenticationFailureBadCredentialsEvent evt) {
+	public void onAuthenticationFailure(AbstractAuthenticationFailureEvent evt) {
+		AuthenticationException exception = evt.getException();
 		String userName = SkyveSpringSecurity.userNameFromPrincipal(evt.getAuthentication().getPrincipal());
+		if (! countsTowardLockout(exception)) {
+			LOGGER.warn("Login Attempt failed for user {} with {} and was not recorded as a lockout failure",
+							userName,
+							exception.getClass().getSimpleName());
+			return;
+		}
 		LOGGER.warn("Login Attempt failed for user {}", userName);
 		if (userName != null) {
 			recordLoginFailure(userName);
 		}
 	}
+
+	/**
+	 * Determines whether the authentication exception should increment lockout failure counters.
+	 *
+	 * @param exception The authentication exception.
+	 * @return True when the failure should be counted toward lockout.
+	 */
+	static boolean countsTowardLockout(AuthenticationException exception) {
+		return (exception instanceof BadCredentialsException) || (exception instanceof LockedException);
+	}
 	
+	/**
+	 * Resets persisted login-failure counters when authentication succeeds.
+	 *
+	 * @param evt The authentication success event.
+	 */
 	@EventListener
 	@SuppressWarnings("static-method")
 	public void onAuthenticationSuccess(AuthenticationSuccessEvent evt) {
@@ -49,6 +86,13 @@ public class SecurityListener {
 		}
 	}
 	
+	/**
+	 * Persists a failed login attempt for the specified user and updates lockout counters.
+	 *
+	 * @param username The username to record.
+	 * @throws MetaDataException If the failure record cannot be persisted.
+	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static void recordLoginFailure(String username) {
 		SkyveDialect dialect = AbstractHibernatePersistence.getDialect(UtilImpl.DATA_STORE.getDialectClassName());
 		RDBMS rdbms = dialect.getRDBMS();
@@ -96,19 +140,19 @@ public class SecurityListener {
 						bizCustomer = UtilImpl.processStringValue(username.substring(0, slashIndex));
 					}
 					if (userName == null) {
-						userName = "unknown";
+						userName = UNKNOWN;
 					}
 					if (bizCustomer == null) {
-						bizCustomer = "unknown";
+						bizCustomer = UNKNOWN;
 					}
 				}
 				java.sql.Timestamp now = new java.sql.Timestamp(System.currentTimeMillis());
 				ps.setString(1, UUIDv7.create().toString());
 				ps.setInt(2, 0);
-				ps.setString(3, new OptimisticLock("unknown", now).toString());
+				ps.setString(3, new OptimisticLock(UNKNOWN, now).toString());
 				ps.setString(4, "Failed Login attempt: " + userName + " @ " + TimeUtil.formatISODate(now, false));
 				ps.setString(5, bizCustomer);
-				ps.setString(6, "unknown");
+				ps.setString(6, UNKNOWN);
 				ps.setString(7, userName);
 				ps.setTimestamp(8, new java.sql.Timestamp(System.currentTimeMillis()));
 				ps.setBoolean(9, true);
@@ -126,6 +170,12 @@ public class SecurityListener {
 		}
 	}
 
+	/**
+	 * Clears login-failure counters for the specified user when a login succeeds.
+	 *
+	 * @param username The username to reset.
+	 * @throws MetaDataException If the reset cannot be persisted.
+	 */
 	private static void resetLoginFailure(String username) {
 		String sql = "update ADM_SecurityUser set authenticationFailures = 0, lastAuthenticationFailure = null where bizId = ?";
 
@@ -149,6 +199,16 @@ public class SecurityListener {
 		}
 	}
 	
+	/**
+	 * Resolves the security-user business ID for a username.
+	 *
+	 * @param fullUsername The full username, optionally including tenant prefix.
+	 * @param c The JDBC connection used to query the user row.
+	 * @param forReset Whether lookup is for a reset operation (which skips already-reset rows).
+	 * @return The matching business ID, or null when no applicable row is found.
+	 * @throws SQLException If the lookup query fails.
+	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static String getBizId(String fullUsername, Connection c, boolean forReset) throws SQLException {
 		String result = null;
 		

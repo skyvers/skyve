@@ -8,7 +8,21 @@ import org.skyve.web.WebContext;
 
 import modules.admin.domain.Job;
 
+/**
+ * Cancels a running job instance via the configured job scheduler.
+ */
 public class CancelJob implements ServerSideAction<Job> {
+	/**
+	 * Attempts to cancel the selected job instance and reports the outcome.
+	 *
+	 * @param bean
+	 *        the selected job bean
+	 * @param webContext
+	 *        the current web context used for growl feedback
+	 * @return a result wrapping {@code bean}
+	 * @throws Exception
+	 *         if scheduler interaction fails
+	 */
 	@Override
 	public ServerSideActionResult<Job> execute(Job bean, WebContext webContext) throws Exception {
 		String instanceId = bean.getInstanceId();

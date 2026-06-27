@@ -3,10 +3,11 @@ package modules.test;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.skyve.CORE;
 import org.skyve.EXT;
@@ -30,9 +31,9 @@ import modules.test.domain.MappedExtensionSingleStrategy;
 import modules.test.domain.MappedSubclassedJoinedStrategy;
 import modules.test.domain.MappedSubclassedSingleStrategy;
 
-public class BizPortTest extends AbstractSkyveTest {
+class BizPortTest extends AbstractSkyveTest {
 	@Test
-	public void testStandardSingleStrategy() throws Exception {
+	void testStandardSingleStrategy() throws Exception {
 		MappedExtensionSingleStrategy test = Util.constructRandomInstance(u, m, messd, 3);
 		test = p.save(test);
 		bizport(test);
@@ -41,28 +42,28 @@ public class BizPortTest extends AbstractSkyveTest {
 	// test transient object
 	
 	@Test
-	public void testStandardJoinedStrategy() throws Exception {
+	void testStandardJoinedStrategy() throws Exception {
 		MappedExtensionJoinedStrategy test = Util.constructRandomInstance(u, m, mejsd, 3);
 		test = p.save(test);
 		bizport(test);
 	}
 
 	@Test
-	public void testStandardSubclassedSingleStrategy() throws Exception {
+	void testStandardSubclassedSingleStrategy() throws Exception {
 		MappedSubclassedSingleStrategy test = Util.constructRandomInstance(u, m, msssd, 3);
 		test = p.save(test);
 		bizport(test);
 	}
 
 	@Test
-	public void testStandardSubclassedJoinedStrategy() throws Exception {
+	void testStandardSubclassedJoinedStrategy() throws Exception {
 		MappedSubclassedJoinedStrategy test = Util.constructRandomInstance(u, m, msjsd, 3);
 		test = p.save(test);
 		bizport(test);
 	}
 
 	@Test
-	public void testStandardChild() throws Exception {
+	void testStandardChild() throws Exception {
 		org.skyve.metadata.module.Module admin = c.getModule(Group.MODULE_NAME);
 		Document document = admin.getDocument(c, Group.DOCUMENT_NAME);
 		GroupExtension group = Util.constructRandomInstance(u, admin, document, 3);
@@ -71,14 +72,14 @@ public class BizPortTest extends AbstractSkyveTest {
 	}
 	
 	@Test
-	public void testStandardEmbedded() throws Exception {
+	void testStandardEmbedded() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 3);
 		test = p.save(test);
 		bizport(test);
 	}
 	
 	@Test
-	public void testStandardHierarchical() throws Exception {
+	void testStandardHierarchical() throws Exception {
 		Hierarchical root = Util.constructRandomInstance(u, m, hd, 1);
 		Hierarchical child = Util.constructRandomInstance(u, m, hd, 1);
 		child.setBizParentId(root.getBizId());
@@ -93,11 +94,6 @@ public class BizPortTest extends AbstractSkyveTest {
 	
 	private void bizport(Bean bean) throws Exception {
 		BizPortWorkbook workbook = EXT.standardBizExport(bean);
-// Uncomment to put the xlsx to the file system
-//try (OutputStream os = new FileOutputStream("/Users/mike/Downloads/test.xlsx")) {
-//workbook.write(os);
-//os.flush();
-//}
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(10240)) {
 			workbook.write(baos);
 			byte[] bytes = baos.toByteArray();
@@ -105,8 +101,8 @@ public class BizPortTest extends AbstractSkyveTest {
 				UploadException problems = new UploadException();
 				EXT.standardBizImport(bais, problems);
 				
-				Bean importedBean = CORE.getPersistence().retrieve(bean.getBizModule(), bean.getBizDocument(), bean.getBizId());
-				Assert.assertTrue("Beans not the same", same(bean, importedBean));
+				Bean importedBean = Objects.requireNonNull(CORE.getPersistence().retrieve(bean.getBizModule(), bean.getBizDocument(), bean.getBizId()));
+				Assertions.assertTrue(same(bean, importedBean), "Beans not the same");
 			}
 			catch (UploadException e ) {
 				handleUploadException(e);
@@ -122,7 +118,7 @@ public class BizPortTest extends AbstractSkyveTest {
 		for (Problem p : e.getErrors()) {
 			sb.append(p.toString()).append('\n');
 		}
-		Assert.fail(sb.toString());
+		Assertions.fail(sb.toString());
 	}
 	
 	private boolean same(@Nonnull Bean one, @Nonnull Bean other) {

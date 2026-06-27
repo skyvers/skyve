@@ -16,6 +16,21 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+/**
+ * JAXB-annotated routing rule that maps a set of {@link RouteCriteria} to an
+ * outcome URL.
+ *
+ * <p>A {@link Router} contains an ordered list of {@code Route} instances.  The
+ * router evaluates each route's criteria in order and redirects the request to the
+ * first matching {@code outcomeUrl}.  If no route matches, the router falls back to
+ * a default outcome.
+ *
+ * <p>Threading: not thread-safe.  Instances are populated during JAXB unmarshalling
+ * and are read-only once placed in the repository cache.
+ *
+ * @see Router
+ * @see RouteCriteria
+ */
 @XmlType(namespace = XMLMetaData.ROUTER_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.ROUTER_NAMESPACE)
 public class Route implements DecoratedMetaData {

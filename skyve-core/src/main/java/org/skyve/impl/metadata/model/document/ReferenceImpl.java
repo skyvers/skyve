@@ -11,6 +11,22 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * Abstract base for all reference (relation) attribute implementations.
+ *
+ * <p>A reference attribute points from one document to another.  This class
+ * holds the target {@code documentName}, the target {@code moduleName} (optional,
+ * defaults to the owning module), the cascade delete setting, and ownership
+ * semantics.  Concrete subclasses specialise as either an
+ * {@link AssociationImpl} (many-to-one) or {@link CollectionImpl} (one-to-many).
+ *
+ * <p>Threading: not thread-safe.  Instances are populated during metadata loading
+ * and are read-only once placed in the repository cache.
+ *
+ * @see AssociationImpl
+ * @see CollectionImpl
+ * @see AbstractAttribute
+ */
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE,
 			propOrder = {"persistentBool", "domainType", "documentName", "queryName"})
 public abstract class ReferenceImpl extends AbstractAttribute implements Reference {

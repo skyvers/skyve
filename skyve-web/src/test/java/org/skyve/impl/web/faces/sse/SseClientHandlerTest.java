@@ -6,9 +6,13 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingDeque;
@@ -30,7 +34,6 @@ import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.service.sse.SseClientHandler;
-import org.skyve.util.PushMessage;
 import org.skyve.web.WebContext;
 
 import jakarta.servlet.Filter;
@@ -46,8 +49,8 @@ import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.sse.InboundSseEvent;
 import jakarta.ws.rs.sse.OutboundSseEvent;
-import jakarta.ws.rs.sse.SseEventSource;
 import jakarta.ws.rs.sse.SseEventSink;
+import jakarta.ws.rs.sse.SseEventSource;
 
 /**
  * Integration and unit tests for {@link SseClientHandler}.
@@ -68,6 +71,7 @@ import jakarta.ws.rs.sse.SseEventSink;
  * {@link #clearReceiversAfterTest()} so that tests do not interfere with each
  * other.
  */
+@SuppressWarnings({"resource", "boxing", "java:S4144", "java:S1612", "java:S2925"})
 class SseClientHandlerTest extends JerseyTest {
 
 	private static final String TEST_USER_ID = "dead-beef";
@@ -77,9 +81,10 @@ class SseClientHandlerTest extends JerseyTest {
 	 * that static state from one test cannot affect another.
 	 */
 	@BeforeEach
+	@SuppressWarnings("static-method")
 	void clearReceiversBeforeTest() {
-		PushMessage.stopReaper();
-		PushMessage.RECEIVERS.clear();
+		org.skyve.util.PushMessage.stopReaper();
+		org.skyve.util.PushMessage.RECEIVERS.clear();
 	}
 
 	/**
@@ -87,9 +92,10 @@ class SseClientHandlerTest extends JerseyTest {
 	 * in case a test threw before reaching its own finally block.
 	 */
 	@AfterEach
+	@SuppressWarnings("static-method")
 	void clearReceiversAfterTest() {
-		PushMessage.stopReaper();
-		PushMessage.RECEIVERS.clear();
+		org.skyve.util.PushMessage.stopReaper();
+		org.skyve.util.PushMessage.RECEIVERS.clear();
 	}
 
 	/**
@@ -127,7 +133,7 @@ class SseClientHandlerTest extends JerseyTest {
 		UtilImpl.PUSH_KEEP_ALIVE_TIME_IN_SECONDS = 1;
 		try {
 
-			assertThat(PushMessage.RECEIVERS.size(), is(0));
+			assertEquals(0, org.skyve.util.PushMessage.RECEIVERS.size());
 
 			WebTarget target = target("stream");
 
@@ -147,7 +153,7 @@ class SseClientHandlerTest extends JerseyTest {
 						});
 				eventSource.open();
 
-				PushMessage msg = new PushMessage()
+				org.skyve.util.PushMessage msg = new org.skyve.util.PushMessage()
 						.user(TEST_USER_ID)
 						.growl(MessageSeverity.info, "I'm a unit test");
 				EXT.push(msg);
@@ -159,7 +165,7 @@ class SseClientHandlerTest extends JerseyTest {
 				eventSource.close();
 
 				// Wait for a keep-alive attempt to detect the disconnect and clean-up
-				for (int waitIterations = 5; PushMessage.RECEIVERS.size() > 0 && waitIterations > 0; --waitIterations) {
+				for (int waitIterations = 5; org.skyve.util.PushMessage.RECEIVERS.size() > 0 && waitIterations > 0; --waitIterations) {
 					TimeUnit.SECONDS.sleep(1);
 				}
 			}
@@ -176,7 +182,7 @@ class SseClientHandlerTest extends JerseyTest {
 			assertThat("Data events should have an ID", dataEvent.getId(), is(not(nullValue())));
 
 			// SseClientHandler should have unregistered itself
-			assertThat(PushMessage.RECEIVERS.size(), is(0));
+			assertEquals(0, org.skyve.util.PushMessage.RECEIVERS.size());
 		} finally {
 			UtilImpl.PUSH_KEEP_ALIVE_TIME_IN_SECONDS = originalKeepAlive;
 		}
@@ -189,21 +195,21 @@ class SseClientHandlerTest extends JerseyTest {
 		TrackingSseEventSink sink = new TrackingSseEventSink();
 
 		setSink(handler, sink);
-		PushMessage.RECEIVERS.add(handler);
-		getMessageQueue(handler).offerLast(new PushMessage().growl(MessageSeverity.info, "queued"));
+		org.skyve.util.PushMessage.RECEIVERS.add(handler);
+		getMessageQueue(handler).offerLast(new org.skyve.util.PushMessage().growl(MessageSeverity.info, "queued"));
 
-		assertThat(PushMessage.RECEIVERS.contains(handler), is(true));
-		assertThat(getMessageQueue(handler).isEmpty(), is(false));
+		assertTrue(org.skyve.util.PushMessage.RECEIVERS.contains(handler));
+		assertFalse(getMessageQueue(handler).isEmpty());
 
 		handler.close();
 
-		assertThat("close() should deregister the receiver", PushMessage.RECEIVERS.contains(handler), is(false));
-		assertThat("close() should clear queued messages", getMessageQueue(handler).isEmpty(), is(true));
-		assertThat("close() should close the sink", sink.isClosed(), is(true));
+		assertFalse(org.skyve.util.PushMessage.RECEIVERS.contains(handler), "close() should deregister the receiver");
+		assertTrue(getMessageQueue(handler).isEmpty(), "close() should clear queued messages");
+		assertTrue(sink.isClosed(), "close() should close the sink");
 
 		// Ensure idempotency
 		handler.close();
-		assertThat(PushMessage.RECEIVERS.contains(handler), is(false));
+		assertFalse(org.skyve.util.PushMessage.RECEIVERS.contains(handler));
 	}
 
 	@Test
@@ -215,40 +221,64 @@ class SseClientHandlerTest extends JerseyTest {
 		setSink(handler, sink);
 		handler.close();
 
-		handler.sendMessage(new PushMessage().growl(MessageSeverity.info, "after-close"));
+		handler.sendMessage(new org.skyve.util.PushMessage().growl(MessageSeverity.info, "after-close"));
 
-		assertThat("sendMessage() should be ignored after close", getMessageQueue(handler).isEmpty(), is(true));
+		assertTrue(getMessageQueue(handler).isEmpty(), "sendMessage() should be ignored after close");
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testStreamRejectedWhenGlobalReceiverLimitReached() {
 		int originalMaxTotal = UtilImpl.PUSH_MAX_RECEIVERS_TOTAL;
 		try {
 			UtilImpl.PUSH_MAX_RECEIVERS_TOTAL = 1;
 
-			PushMessage.PushMessageReceiver existing = new PushMessage.PushMessageReceiver() {
+			org.skyve.util.PushMessage.PushMessageReceiver existing = new org.skyve.util.PushMessage.PushMessageReceiver() {
 				@Override
 				public String forUserId() {
 					return "existing-user";
 				}
 
 				@Override
-				public void sendMessage(PushMessage message) {
+				public void sendMessage(org.skyve.util.PushMessage message) {
 					// no-op
 				}
 			};
-			PushMessage.RECEIVERS.add(existing);
+			org.skyve.util.PushMessage.RECEIVERS.add(existing);
 
-			assertThat(PushMessage.RECEIVERS.size(), is(1));
+			assertEquals(1, org.skyve.util.PushMessage.RECEIVERS.size());
 
 			Response response = target("stream").request().get();
 			response.close();
 
-			assertThat("global cap should prevent a new SSE receiver registration", PushMessage.RECEIVERS.size(), is(1));
-			assertThat(PushMessage.RECEIVERS.contains(existing), is(true));
+			assertEquals(1, org.skyve.util.PushMessage.RECEIVERS.size(), "global cap should prevent a new SSE receiver registration");
+			assertTrue(org.skyve.util.PushMessage.RECEIVERS.contains(existing));
 		} finally {
-			PushMessage.RECEIVERS.clear();
+			org.skyve.util.PushMessage.RECEIVERS.clear();
+			UtilImpl.PUSH_MAX_RECEIVERS_TOTAL = originalMaxTotal;
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testUnderGlobalReceiverLimitReturnsTrueWhenDisabled() throws Exception {
+		int originalMaxTotal = UtilImpl.PUSH_MAX_RECEIVERS_TOTAL;
+		try {
+			UtilImpl.PUSH_MAX_RECEIVERS_TOTAL = 0;
+			org.skyve.util.PushMessage.RECEIVERS.add(new org.skyve.util.PushMessage.PushMessageReceiver() {
+				@Override
+				public String forUserId() {
+					return "existing-user";
+				}
+
+				@Override
+				public void sendMessage(org.skyve.util.PushMessage message) {
+					// no-op
+				}
+			});
+
+			assertTrue(invokeUnderGlobalReceiverLimit());
+		} finally {
+			org.skyve.util.PushMessage.RECEIVERS.clear();
 			UtilImpl.PUSH_MAX_RECEIVERS_TOTAL = originalMaxTotal;
 		}
 	}
@@ -263,9 +293,9 @@ class SseClientHandlerTest extends JerseyTest {
 			TrackingSseEventSink sink = new TrackingSseEventSink();
 			setSink(handler, sink);
 
-			PushMessage first = new PushMessage().growl(MessageSeverity.info, "first");
-			PushMessage second = new PushMessage().growl(MessageSeverity.info, "second");
-			PushMessage third = new PushMessage().growl(MessageSeverity.info, "third");
+			org.skyve.util.PushMessage first = new org.skyve.util.PushMessage().growl(MessageSeverity.info, "first");
+			org.skyve.util.PushMessage second = new org.skyve.util.PushMessage().growl(MessageSeverity.info, "second");
+			org.skyve.util.PushMessage third = new org.skyve.util.PushMessage().growl(MessageSeverity.info, "third");
 
 			handler.sendMessage(first);
 			handler.sendMessage(second);
@@ -288,13 +318,13 @@ class SseClientHandlerTest extends JerseyTest {
 			SseClientHandler handler = new SseClientHandler();
 
 			// Should not be stale immediately
-			assertThat(handler.isStale(), is(false));
+			assertFalse(handler.isStale());
 
 			// Wait for the timeout to elapse
 			TimeUnit.MILLISECONDS.sleep(1100);
 
 			// Should now be stale
-			assertThat(handler.isStale(), is(true));
+			assertTrue(handler.isStale());
 		} finally {
 			UtilImpl.PUSH_STALE_RECEIVER_TIMEOUT_IN_SECONDS = originalTimeout;
 		}
@@ -308,7 +338,7 @@ class SseClientHandlerTest extends JerseyTest {
 			UtilImpl.PUSH_STALE_RECEIVER_TIMEOUT_IN_SECONDS = 0;
 
 			SseClientHandler handler = new SseClientHandler();
-			assertThat(handler.isStale(), is(false));
+			assertFalse(handler.isStale());
 		} finally {
 			UtilImpl.PUSH_STALE_RECEIVER_TIMEOUT_IN_SECONDS = originalTimeout;
 		}
@@ -331,8 +361,8 @@ class SseClientHandlerTest extends JerseyTest {
 			setUserId(existingHandler, TEST_USER_ID);
 			TrackingSseEventSink existingSink = new TrackingSseEventSink();
 			setSink(existingHandler, existingSink);
-			PushMessage.RECEIVERS.add(existingHandler);
-			assertThat(PushMessage.RECEIVERS.size(), is(1));
+			org.skyve.util.PushMessage.RECEIVERS.add(existingHandler);
+			assertEquals(1, org.skyve.util.PushMessage.RECEIVERS.size());
 
 			// Open a new SSE connection for the same user – eviction must fire
 			try (SseEventSource eventSource = SseEventSource.target(target("stream")).build()) {
@@ -341,18 +371,18 @@ class SseClientHandlerTest extends JerseyTest {
 				// Allow the server thread time to process the request and run evictExcessHandlers()
 				TimeUnit.MILLISECONDS.sleep(500);
 
-				assertThat("Old handler should be evicted", PushMessage.RECEIVERS.contains(existingHandler), is(false));
-				assertThat("Evicted sink should be closed", existingSink.isClosed(), is(true));
-				assertThat("New handler should be registered in its place", PushMessage.RECEIVERS.size(), is(1));
+				assertFalse(org.skyve.util.PushMessage.RECEIVERS.contains(existingHandler), "Old handler should be evicted");
+				assertTrue(existingSink.isClosed(), "Evicted sink should be closed");
+				assertEquals(1, org.skyve.util.PushMessage.RECEIVERS.size(), "New handler should be registered in its place");
 			}
 
 			// After the client closes, wait for the new handler to deregister
-			for (int i = 5; PushMessage.RECEIVERS.size() > 0 && i > 0; i--) {
+			for (int i = 5; org.skyve.util.PushMessage.RECEIVERS.size() > 0 && i > 0; i--) {
 				TimeUnit.SECONDS.sleep(1);
 			}
-			assertThat("Handler should deregister after client closes", PushMessage.RECEIVERS.size(), is(0));
+			assertEquals(0, org.skyve.util.PushMessage.RECEIVERS.size(), "Handler should deregister after client closes");
 		} finally {
-			PushMessage.RECEIVERS.clear();
+			org.skyve.util.PushMessage.RECEIVERS.clear();
 			UtilImpl.PUSH_MAX_RECEIVERS_PER_USER = originalMaxPerUser;
 			UtilImpl.PUSH_KEEP_ALIVE_TIME_IN_SECONDS = originalKeepAlive;
 		}
@@ -366,21 +396,21 @@ class SseClientHandlerTest extends JerseyTest {
 			UtilImpl.PUSH_STALE_RECEIVER_TIMEOUT_IN_SECONDS = 1;
 
 			SseClientHandler handler = new SseClientHandler();
-			PushMessage.RECEIVERS.add(handler);
+			org.skyve.util.PushMessage.RECEIVERS.add(handler);
 
-			assertThat(PushMessage.RECEIVERS.size(), is(1));
+			assertEquals(1, org.skyve.util.PushMessage.RECEIVERS.size());
 
 			// Start the reaper with a 1-second interval
-			PushMessage.startReaper(1);
+			org.skyve.util.PushMessage.startReaper(1);
 
 			// Wait for the stale timeout + reaper interval to elapse
 			TimeUnit.MILLISECONDS.sleep(2500);
 
 			// Reaper should have removed the stale handler
-			assertThat(PushMessage.RECEIVERS.size(), is(0));
+			assertEquals(0, org.skyve.util.PushMessage.RECEIVERS.size());
 		} finally {
-			PushMessage.stopReaper();
-			PushMessage.RECEIVERS.clear();
+			org.skyve.util.PushMessage.stopReaper();
+			org.skyve.util.PushMessage.RECEIVERS.clear();
 			UtilImpl.PUSH_STALE_RECEIVER_TIMEOUT_IN_SECONDS = originalTimeout;
 		}
 	}
@@ -393,21 +423,21 @@ class SseClientHandlerTest extends JerseyTest {
 			UtilImpl.PUSH_STALE_RECEIVER_TIMEOUT_IN_SECONDS = 1;
 
 			SseClientHandler handler = new SseClientHandler();
-			PushMessage.RECEIVERS.add(handler);
+			org.skyve.util.PushMessage.RECEIVERS.add(handler);
 
 			// Wait for handler to become stale
 			TimeUnit.MILLISECONDS.sleep(1100);
 
-			assertThat(handler.isStale(), is(true));
+			assertTrue(handler.isStale());
 
 			// Push a broadcast — should not throw or deliver to the stale handler
-			PushMessage msg = new PushMessage().growl(MessageSeverity.info, "broadcast");
+			org.skyve.util.PushMessage msg = new org.skyve.util.PushMessage().growl(MessageSeverity.info, "broadcast");
 			EXT.push(msg);
 
 			// The handler's queue should be empty because push skipped it
-			assertThat(getMessageQueue(handler).size(), is(0));
+			assertEquals(0, getMessageQueue(handler).size());
 		} finally {
-			PushMessage.RECEIVERS.clear();
+			org.skyve.util.PushMessage.RECEIVERS.clear();
 			UtilImpl.PUSH_STALE_RECEIVER_TIMEOUT_IN_SECONDS = originalTimeout;
 		}
 	}
@@ -423,9 +453,9 @@ class SseClientHandlerTest extends JerseyTest {
 		SseClientHandler handler = new SseClientHandler();
 		// sinkRef is null by default — never assigned
 
-		handler.sendMessage(new PushMessage().growl(MessageSeverity.info, "test"));
+		handler.sendMessage(new org.skyve.util.PushMessage().growl(MessageSeverity.info, "test"));
 
-		assertThat("sendMessage() should be ignored when sinkRef is null", getMessageQueue(handler).isEmpty(), is(true));
+		assertTrue(getMessageQueue(handler).isEmpty(), "sendMessage() should be ignored when sinkRef is null");
 	}
 
 	/**
@@ -440,9 +470,9 @@ class SseClientHandlerTest extends JerseyTest {
 		setSink(handler, sink);
 		sink.close();
 
-		handler.sendMessage(new PushMessage().growl(MessageSeverity.info, "test"));
+		handler.sendMessage(new org.skyve.util.PushMessage().growl(MessageSeverity.info, "test"));
 
-		assertThat("sendMessage() should be ignored when sink is closed", getMessageQueue(handler).isEmpty(), is(true));
+		assertTrue(getMessageQueue(handler).isEmpty(), "sendMessage() should be ignored when sink is closed");
 	}
 
 	/**
@@ -469,7 +499,7 @@ class SseClientHandlerTest extends JerseyTest {
 		SseClientHandler handler = new SseClientHandler();
 		String str = handler.toString();
 		assertThat("toString() should return a non-null string", str, is(not(nullValue())));
-		assertThat("toString() should not be empty", str.isEmpty(), is(false));
+		assertFalse(str.isEmpty(), "toString() should not be empty");
 	}
 
 	/**
@@ -483,8 +513,8 @@ class SseClientHandlerTest extends JerseyTest {
 		TrackingSseEventSink sink = new TrackingSseEventSink();
 		setSink(handler, sink);
 
-		PushMessage first = new PushMessage().growl(MessageSeverity.info, "first");
-		PushMessage second = new PushMessage().growl(MessageSeverity.info, "second");
+		org.skyve.util.PushMessage first = new org.skyve.util.PushMessage().growl(MessageSeverity.info, "first");
+		org.skyve.util.PushMessage second = new org.skyve.util.PushMessage().growl(MessageSeverity.info, "second");
 
 		handler.sendMessage(first);
 		handler.sendMessage(second);
@@ -515,12 +545,12 @@ class SseClientHandlerTest extends JerseyTest {
 				eventSource.register(events::add);
 				eventSource.open();
 
-				EXT.push(new PushMessage().user(TEST_USER_ID).growl(MessageSeverity.info, "after-reconnect"));
+				EXT.push(new org.skyve.util.PushMessage().user(TEST_USER_ID).growl(MessageSeverity.info, "after-reconnect"));
 
 				TimeUnit.SECONDS.sleep(2);
 				eventSource.close();
 
-				for (int i = 5; PushMessage.RECEIVERS.size() > 0 && i > 0; i--) {
+				for (int i = 5; org.skyve.util.PushMessage.RECEIVERS.size() > 0 && i > 0; i--) {
 					TimeUnit.SECONDS.sleep(1);
 				}
 			}
@@ -562,12 +592,12 @@ class SseClientHandlerTest extends JerseyTest {
 				eventSource.register(events::add);
 				eventSource.open();
 
-				EXT.push(new PushMessage().user(TEST_USER_ID).growl(MessageSeverity.info, "test"));
+				EXT.push(new org.skyve.util.PushMessage().user(TEST_USER_ID).growl(MessageSeverity.info, "test"));
 
 				TimeUnit.SECONDS.sleep(2);
 				eventSource.close();
 
-				for (int i = 5; PushMessage.RECEIVERS.size() > 0 && i > 0; i--) {
+				for (int i = 5; org.skyve.util.PushMessage.RECEIVERS.size() > 0 && i > 0; i--) {
 					TimeUnit.SECONDS.sleep(1);
 				}
 			}
@@ -590,10 +620,10 @@ class SseClientHandlerTest extends JerseyTest {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static BlockingDeque<PushMessage> getMessageQueue(SseClientHandler handler) throws Exception {
+	private static BlockingDeque<org.skyve.util.PushMessage> getMessageQueue(SseClientHandler handler) throws Exception {
 		Field field = SseClientHandler.class.getDeclaredField("messageQueue");
 		field.setAccessible(true);
-		return (BlockingDeque<PushMessage>) field.get(handler);
+		return (BlockingDeque<org.skyve.util.PushMessage>) field.get(handler);
 	}
 
 	private static void setSink(SseClientHandler handler, SseEventSink sink) throws Exception {
@@ -606,6 +636,12 @@ class SseClientHandlerTest extends JerseyTest {
 		Field field = SseClientHandler.class.getDeclaredField("userId");
 		field.setAccessible(true);
 		field.set(handler, userId);
+	}
+
+	private static boolean invokeUnderGlobalReceiverLimit() throws Exception {
+		Method method = SseClientHandler.class.getDeclaredMethod("underGlobalReceiverLimit");
+		method.setAccessible(true);
+		return ((Boolean) method.invoke(null)).booleanValue();
 	}
 
 	/**

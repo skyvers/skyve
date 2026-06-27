@@ -57,7 +57,7 @@ import org.skyve.util.Util;
 import org.skyve.util.monitoring.Monitoring;
 import org.skyve.util.monitoring.RequestKey;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -87,12 +87,24 @@ import jakarta.servlet.http.HttpServletResponse;
 public class ChartServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ChartServlet.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ChartServlet.class);
 
 	private static final String CHART_TYPE_NAME = "t";
 	private static final String DATA_SOURCE_NAME = "ds";
 	private static final String BUILDER_NAME = "b";
 	
+	/**
+	 * Produces chart configuration JSON for the requested chart model.
+	 *
+	 * <p>Response semantics: always returns JSON with no-cache headers. When model resolution or
+	 * aggregation fails, the servlet returns an empty JSON response body rather than propagating raw
+	 * stack traces to the client.
+	 *
+	 * @param request inbound servlet request containing chart model parameters
+	 * @param response outbound servlet response receiving chart configuration JSON
+	 * @throws ServletException when the servlet container reports a request-processing failure
+	 * @throws IOException when writing to the response stream fails
+	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -130,7 +142,7 @@ public class ChartServlet extends HttpServlet {
 				}
 			}
 			catch (Throwable t) {
-				t.printStackTrace();
+				LOGGER.error(t.getMessage(), t);
 				persistence.rollback();
 				pw.print(emptyResponse());
 			}
@@ -140,6 +152,14 @@ public class ChartServlet extends HttpServlet {
 		}
 	}
 	
+	/**
+	 * Delegates POST chart requests to {@link #doGet(HttpServletRequest, HttpServletResponse)}.
+	 *
+	 * @param request inbound servlet request
+	 * @param response outbound servlet response
+	 * @throws ServletException when servlet processing fails
+	 * @throws IOException when writing to the response stream fails
+	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -201,6 +221,7 @@ public class ChartServlet extends HttpServlet {
 		return result;
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static String processListModel(HttpServletRequest request)
 	throws Exception {
 		User user = CORE.getUser();

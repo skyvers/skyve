@@ -27,27 +27,33 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
 import org.skyve.util.Util;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import jakarta.inject.Inject;
 
+/**
+ * Attempts to recover from corrupt archive files by rolling back archive side effects.
+ */
 public class RecoverArchiveJob extends CancellableJob {
-
     private static final String CORRUPT_FILE_SUFFIX = ".corrupt";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RecoverArchiveJob.class);
-    
     private static final ArchiveLuceneIndexerSingleton archiveLuceneIndexerSingleton = ArchiveLuceneIndexerSingleton.getInstance();
 
     @Inject
+    @SuppressWarnings("java:S6813") // allow member injection
     private Persistence persistence;
 
     private FileLockRepo repo = FileLockRepo.getInstance();
 
+    /**
+     * Processes unresolved corrupt-archive errors and attempts recovery for each entry.
+     *
+     * <p>Each recovery attempt reverts soft-delete markers, removes related Lucene index
+     * entries, and renames the corrupt archive file after persistence updates commit.</p>
+     *
+     * @throws Exception If recovery fails outside per-error handling.
+     */
     @Override
     public void execute() throws Exception {
-
         List<CorruptArchiveError> unresolved = listUnresolvedErrors();
         getLog().add(String.format("%,d errors to resolve", unresolved.size()));
 
@@ -78,7 +84,6 @@ public class RecoverArchiveJob extends CancellableJob {
     }
 
     private void attemptRecovery(CorruptArchiveError error) throws IOException, InterruptedException {
-
         LOGGER.debug("Attempting recovery of: {}", error.getBizKey());
 
         // safety check on age of error?
@@ -125,7 +130,6 @@ public class RecoverArchiveJob extends CancellableJob {
      * @param config
      */
     private void doRecovery(CorruptArchiveError error, Path archivePath, ArchiveDocConfig config) {
-
         persistence.begin();
 
         // Update error resolution
@@ -157,7 +161,6 @@ public class RecoverArchiveJob extends CancellableJob {
      * Try to move the corrupt archive to a new path.
      */
     private void renameArchive(final Path archivePath) {
-
         Path destination = chooseDestinationPath(archivePath);
         log("Renaming corrupted archive file from " + archivePath + " to " + destination);
 
@@ -178,7 +181,6 @@ public class RecoverArchiveJob extends CancellableJob {
      */
     private Path chooseDestinationPath(final Path archivePath) {
         for (int i = 0; i < 100; ++i) {
-
             Path destination = archivePath.resolveSibling(archivePath.getFileName() + "." + i + CORRUPT_FILE_SUFFIX);
             if (Files.notExists(destination)) {
                 return destination;
@@ -196,7 +198,6 @@ public class RecoverArchiveJob extends CancellableJob {
      * @return
      */
     private int revertSoftDeletes(CorruptArchiveError error) {
-
         Document doc = getDocument(error.getArchiveTypeModule(), error.getArchiveTypeDocument());
         @SuppressWarnings("null")
 		String tableName = doc.getPersistent()
@@ -211,7 +212,6 @@ public class RecoverArchiveJob extends CancellableJob {
     }
 
     private String undoSoftDeleteSQL(String tableName) {
-
         final String undoSoftDeleteSQL = """
                 update %s
                   set  %s = null
@@ -236,7 +236,6 @@ public class RecoverArchiveJob extends CancellableJob {
      * any document references which refer to the given filename.
      */
     private void deleteIndexReferences(ArchiveDocConfig config, String filename) {
-
         Query archiveContents = new TermQuery(new Term(IndexArchivesJob.FILENAME_FIELD, filename));
         Query progressContents = new TermQuery(new Term(IndexArchivesJob.PROGRESS_FILENAME_FIELD, filename));
 
@@ -270,7 +269,6 @@ public class RecoverArchiveJob extends CancellableJob {
     }
 
     private ArchiveDocConfig findConfig(CorruptArchiveError error) {
-
         String module = error.getArchiveTypeModule();
         String document = error.getArchiveTypeDocument();
         return Util.getArchiveConfig()
@@ -286,11 +284,25 @@ public class RecoverArchiveJob extends CancellableJob {
         return errorQuery.beanResults();
     }
 
+    /**
+     * Signals a failure during archive recovery processing.
+     */
     private static class RecoveryException extends RuntimeException {
-
+        /**
+         * Creates a recovery exception with a message.
+         *
+         * @param msg Failure description.
+         */
         public RecoveryException(String msg) {
             super(msg);
         }
+
+        /**
+         * Creates a recovery exception with a message and cause.
+         *
+         * @param msg Failure description.
+         * @param cause Underlying cause.
+         */
 
         public RecoveryException(String msg, Throwable cause) {
             super(msg, cause);

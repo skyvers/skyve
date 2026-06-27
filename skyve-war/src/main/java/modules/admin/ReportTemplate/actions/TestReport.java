@@ -29,7 +29,16 @@ import modules.admin.domain.ReportTemplate;
  * Used to test a Freemarker {@link ReportTemplate}.
  */
 public class TestReport extends DownloadAction<ReportTemplate> {
+	private static final String PDF_FILE_NAME_FORMAT = "%s.pdf";
+
+	/**
+	 * Executes prepare.
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @throws Exception if the operation fails
+	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void prepare(ReportTemplate bean, WebContext webContext) throws Exception {
 		// check there are no unsaved changes
 		if (bean.isChanged()) {
@@ -91,6 +100,13 @@ public class TestReport extends DownloadAction<ReportTemplate> {
 		}
 	}
 
+	/**
+	 * Executes download.
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @return the result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public Download download(ReportTemplate bean, WebContext webContext) throws Exception {
 		// return the correct report type
@@ -99,17 +115,17 @@ public class TestReport extends DownloadAction<ReportTemplate> {
 		}
 
 		// html report download
-		// return new Download(String.format("%s.pdf", bean.getName()), inputStream, MimeType.html);
+		// return new Download(String.format(PDF_FILE_NAME_FORMAT, bean.getName()), inputStream, MimeType.html);
 
 		// pdf report download
 		Path tempDir = Paths.get(Util.getContentDirectory(), "temp");
 		tempDir.toFile().mkdirs();
 
-		File pdfFile = tempDir.resolve(String.format("%s.pdf", bean.getName())).toFile();
+		File pdfFile = tempDir.resolve(String.format(PDF_FILE_NAME_FORMAT, bean.getName())).toFile();
 		pdfFile.deleteOnExit();
 
 		EXT.getReporting().generateFreemarkerPDFFromHTML(bean.getResults(), pdfFile);
 
-		return new Download(String.format("%s.pdf", bean.getName()), pdfFile, MimeType.pdf);
+		return new Download(String.format(PDF_FILE_NAME_FORMAT, bean.getName()), pdfFile, MimeType.pdf);
 	}
 }

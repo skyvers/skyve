@@ -14,12 +14,10 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.TimeZone;
 import java.util.TreeMap;
 
 import org.locationtech.jts.geom.Coordinate;
@@ -30,7 +28,6 @@ import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 import org.skyve.CORE;
 import org.skyve.EXT;
-import org.skyve.content.ContentManager;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.DomainException;
@@ -62,22 +59,25 @@ import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.persistence.DataStore;
 import org.skyve.util.Util;
 import org.skyve.util.logging.Category;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Nullable;
 
 final class BackupUtil {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BackupUtil.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(BackupUtil.class);
     private static final Logger COMMAND_LOGGER = Category.COMMAND.logger();
+
+    private static final String TABLE_DEFINITION_CREATED = "Table definition created for {}";
+	private static final String PERSISTENT_METADATA_MISSING = " is persistable but has no persistent metadata.";
+	private static final String WHERE_SQL = " where ";
 
 	private BackupUtil() {
 		// nothing to see here
 	}
 
-	static Calendar GMT = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
-
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	static void initialise(String customerName,
 							String contentDirectory,
 							String contentFileStorage,
@@ -105,18 +105,14 @@ final class BackupUtil {
 		user.setName("backup");
 		AbstractPersistence.get().setUser(user);
 		
-		try (ContentManager cm = EXT.newContentManager()) {
-			@SuppressWarnings("resource")
-			AbstractContentManager acm = (AbstractContentManager) cm;
+		try (AbstractContentManager acm = (AbstractContentManager) EXT.newContentManager()) {
 			acm.startup();
 			Thread.sleep(2000);
 		}
 	}
 	
 	static void finalise() throws Exception {
-		try (ContentManager cm = EXT.newContentManager()) {
-			@SuppressWarnings("resource")
-			AbstractContentManager acm = (AbstractContentManager) cm;
+		try (AbstractContentManager acm = (AbstractContentManager) EXT.newContentManager()) {
 			acm.shutdown();
 			Thread.sleep(2000);
 		}
@@ -125,7 +121,7 @@ final class BackupUtil {
 		p.disposeAllPersistenceInstances();
 	}
 	
-	static Collection<Table> getTables() throws Exception {
+	static Collection<Table> getTables() {
 		// A case insensitive keyed map of tables
 		Map<String, Table> result = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		Customer customer = AbstractPersistence.get().getUser().getCustomer();
@@ -246,17 +242,20 @@ final class BackupUtil {
 		}
 	}
 
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	private static void addOrUpdate(Map<String, Table> tables, Customer customer, Document document) {
 		Persistent persistent = document.getPersistent();
 		if ((! document.isDynamic()) && document.isPersistable()) { // static persistent document
-			@SuppressWarnings("null") // test above
+			if (persistent == null) {
+				throw new MetaDataException(document.getName() + " is marked persistable but has no persistent metadata.");
+			}
 			String persistentIdentifier = persistent.getPersistentIdentifier();
 			String agnosticIdentifier = persistent.getAgnosticIdentifier();
 			Table table = tables.get(agnosticIdentifier);
 			if (table == null) {
 				table = new Table(agnosticIdentifier, persistentIdentifier);
 				tables.put(agnosticIdentifier, table);
-				if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("Table definition created for {}", agnosticIdentifier);
+				if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info(TABLE_DEFINITION_CREATED, agnosticIdentifier);
 			}
 
 			table.addFieldsFromDocument(customer, document);
@@ -290,7 +289,9 @@ final class BackupUtil {
 	
 											if (derivedDocument.isPersistable()) {
 												Persistent derivedPersistent = derivedDocument.getPersistent();
-												@SuppressWarnings("null") // tested above in isPersistable()
+												if (derivedPersistent == null) {
+													throw new MetaDataException(derivedDocument.getName() + PERSISTENT_METADATA_MISSING);
+												}
 												String ai = derivedPersistent.getAgnosticIdentifier();
 												ownerAgnosticIdentifier = ai;
 												ownerPersistentIdentifier = derivedPersistent.getPersistentIdentifier();
@@ -299,7 +300,7 @@ final class BackupUtil {
 												if (! tables.containsKey(joinAgnosticIdentifier)) {
 													JoinTable joinTable = new JoinTable(joinAgnosticIdentifier, joinPersistentIdentifier, ownerAgnosticIdentifier, ownerPersistentIdentifier, Boolean.TRUE.equals(collection.getOrdered()));
 													tables.put(joinAgnosticIdentifier, joinTable);
-													if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("Table definition created for {}", joinAgnosticIdentifier);
+													if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info(TABLE_DEFINITION_CREATED, joinAgnosticIdentifier);
 												}
 											}
 										}
@@ -317,7 +318,9 @@ final class BackupUtil {
 		
 											if (baseDocument.isPersistable()) {
 												Persistent basePersistent = baseDocument.getPersistent();
-												@SuppressWarnings("null") // tested above
+												if (basePersistent == null) {
+													throw new MetaDataException(baseDocument.getName() + PERSISTENT_METADATA_MISSING);
+												}
 												ExtensionStrategy baseStrategy = basePersistent.getStrategy();
 												// keep looking if joined
 												if (ExtensionStrategy.joined.equals(baseStrategy)) {
@@ -333,18 +336,22 @@ final class BackupUtil {
 										}
 
 										Persistent ultimatePersistent = ultimateDocument.getPersistent();
-										@SuppressWarnings("null") // tested above at baseDocument.isPersistable()
+										if (ultimatePersistent == null) {
+											throw new MetaDataException(ultimateDocument.getName() + PERSISTENT_METADATA_MISSING);
+										}
 										String ai = ultimatePersistent.getAgnosticIdentifier();
 										ownerAgnosticIdentifier = ai;
 										ownerPersistentIdentifier = ultimatePersistent.getPersistentIdentifier();
 										Persistent referencedPersistent = referencedDocument.getPersistent();
-										@SuppressWarnings("null") // tested above at baseDocument.isPersistable()
+										if (referencedPersistent == null) {
+											throw new MetaDataException(referencedDocument.getName() + PERSISTENT_METADATA_MISSING);
+										}
 										String joinAgnosticIdentifier = referencedPersistent.getAgnosticIdentifier() + '_' + referenceFieldName;
 										String joinPersistentIdentifier = referencedPersistent.getPersistentIdentifier() + '_' + referenceFieldName;
 										if (! tables.containsKey(joinAgnosticIdentifier)) {
 											JoinTable joinTable = new JoinTable(joinAgnosticIdentifier, joinPersistentIdentifier, ownerAgnosticIdentifier, ownerPersistentIdentifier, Boolean.TRUE.equals(collection.getOrdered()));
 											tables.put(joinAgnosticIdentifier, joinTable);
-											if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("Table definition created for {}", joinAgnosticIdentifier);
+											if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info(TABLE_DEFINITION_CREATED, joinAgnosticIdentifier);
 										}
 									}
 									else {
@@ -353,7 +360,7 @@ final class BackupUtil {
 										if (! tables.containsKey(joinAgnosticIdentifier)) {
 											JoinTable joinTable = new JoinTable(joinAgnosticIdentifier, joinPersistentIdentifier, ownerAgnosticIdentifier, ownerPersistentIdentifier, Boolean.TRUE.equals(collection.getOrdered()));
 											tables.put(joinAgnosticIdentifier, joinTable);
-											if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("Table definition created for {}", joinAgnosticIdentifier);
+											if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info(TABLE_DEFINITION_CREATED, joinAgnosticIdentifier);
 										}
 									}
 								}
@@ -378,16 +385,16 @@ final class BackupUtil {
 	
 	static void secureSQL(StringBuilder sql, Table table, String customerName) {
 		if (table instanceof JoinTable joinTable) {
-			sql.append(" where ").append(PersistentBean.OWNER_COLUMN_NAME);
+			sql.append(WHERE_SQL).append(PersistentBean.OWNER_COLUMN_NAME);
 			sql.append(" in (select ").append(Bean.DOCUMENT_ID).append(" from ").append(joinTable.ownerPersistentIdentifier);
 			if (UtilImpl.CUSTOMER == null) { // multi-tenant
-				sql.append(" where ").append(Bean.CUSTOMER_NAME).append(" = '").append(customerName).append('\'');
+				sql.append(WHERE_SQL).append(Bean.CUSTOMER_NAME).append(" = '").append(customerName).append('\'');
 			}
 			sql.append(')');
 		}
 		else {
 			if ((UtilImpl.CUSTOMER == null) && hasBizCustomer(table)) {
-				sql.append(" where ").append(Bean.CUSTOMER_NAME).append(" = '").append(customerName).append('\'');
+				sql.append(WHERE_SQL).append(Bean.CUSTOMER_NAME).append(" = '").append(customerName).append('\'');
 			}
 		}
 	}
@@ -515,7 +522,7 @@ final class BackupUtil {
 		int charsToShowAtStart = 2;
 		int charsToShowAtEnd = 2;
 
-		if (data.length() == 0) {
+		if (data.isEmpty()) {
 			return "";
 		} else if (data.length() <= 1) {
 			charsToShowAtStart = 0;

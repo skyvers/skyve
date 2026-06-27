@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" 
+<html xmlns="http://www.w3.org/1999/xhtml"
 		xmlns:h="http://java.sun.com/jsf/html" 
 		xmlns:f="http://java.sun.com/jsf/core"
 		xmlns:p="http://primefaces.org/ui"
 		xmlns:ui="http://java.sun.com/jsf/facelets"
 		xmlns:c="http://java.sun.com/jsp/jstl/core"
 		xmlns:sse="http://xmlns.jcp.org/jsf/composite/sse"
+		lang="#{desktop.languageTag}" xml:lang="#{desktop.languageTag}"
 		dir="#{desktop.dir}">
     <f:view contentType="text/html" encoding="#{desktop.encoding}">
 		<f:metadata>
@@ -52,7 +53,7 @@
 			<table class="logo" align="center">
 				<tbody>
 					<tr height="50px">
-						<td><img src="images/loading.gif" /></td>
+						<td><img src="images/loading.gif" alt="Loading" /></td>
 						<td>Loading Skyve Application</td>
 					</tr>
 				</tbody>

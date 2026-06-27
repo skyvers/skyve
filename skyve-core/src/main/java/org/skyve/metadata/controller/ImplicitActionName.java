@@ -9,6 +9,7 @@ import jakarta.xml.bind.annotation.XmlType;
  * Actions implicit to skyve.
  */
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
+@SuppressWarnings("java:S115") // Suppress "Constant names should comply with a naming convention" as these are not constants but enum values
 public enum ImplicitActionName {
 	/**
 	 * Produce default button for the view type
@@ -99,8 +100,10 @@ public enum ImplicitActionName {
 	private boolean validatable;
 
 	/**
-	 * 
-	 * @param displayName
+	 * Initialises an implicit action constant with its i18n display name key and validatability flag.
+	 *
+	 * @param displayName   the i18n resource key for the human-readable action name
+	 * @param validatable   {@code true} if the action supports a {@code clientValidation} attribute in view XML
 	 */
 	private ImplicitActionName(String displayName, boolean validatable) {
 		this.displayName = displayName;
@@ -108,13 +111,19 @@ public enum ImplicitActionName {
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Returns the i18n resource key for the human-readable display name of this action.
+	 *
+	 * @return the i18n key; never {@code null}
+	 * @see #getLocalisedDisplayName()
 	 */
 	public String getDisplayName() {
 		return displayName;
 	}
 	
+	/**
+	 * Returns the localisedDisplayName.
+	 * @return the result
+	 */
 	public String getLocalisedDisplayName() {
 		return Util.i18n(displayName);
 	}

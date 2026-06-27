@@ -1,19 +1,27 @@
 package org.skyve.impl.content.elastic;
 
-//import java.util.Collections;
-//import java.util.Iterator;
-
-//import org.elasticsearch.action.search.SearchResponse;
-//import org.elasticsearch.client.Client;
-//import org.elasticsearch.common.unit.TimeValue;
-//import org.elasticsearch.index.query.QueryBuilders;
-//import org.elasticsearch.search.SearchHit;
-//import org.elasticsearch.search.SearchHits;
-
 import org.skyve.content.ContentIterable;
 import org.skyve.content.SearchResult;
 
+/**
+ * Provides iteration over content records stored in the legacy Elasticsearch repository.
+ *
+ * <p>Current implementation is a placeholder that returns no results while legacy
+ * Elasticsearch integration remains disabled.
+ */
+@SuppressWarnings({"java:S125", "java:S2272"})
 class ElasticContentIterable implements ContentIterable {
+	//import java.util.Collections;
+	//import java.util.Iterator;
+
+	//import org.elasticsearch.action.search.SearchResponse;
+	//import org.elasticsearch.client.Client;
+	//import org.elasticsearch.common.unit.TimeValue;
+	//import org.elasticsearch.index.query.QueryBuilders;
+	//import org.elasticsearch.search.SearchHit;
+	//import org.elasticsearch.search.SearchHits;
+	
+	
 //	private Client client = null;
 /*
 	ElasticContentIterable(Client client) {
@@ -21,11 +29,17 @@ class ElasticContentIterable implements ContentIterable {
 	}
 */
 
+	/**
+	 * Iterates over Elasticsearch-backed content search hits.
+	 */
 	class ESIterator implements ContentIterator {
 //		private Iterator<SearchHit> i = null;
 		private long totalHits = 0;
 //		private String scrollId = null;
 		
+		/**
+		 * Creates the iterator state for a scroll-based Elasticsearch query.
+		 */
 		private ESIterator() {
 /*
 			@SuppressWarnings("synthetic-access")
@@ -54,6 +68,11 @@ class ElasticContentIterable implements ContentIterable {
 */
 		}
 
+		/**
+		 * Indicates whether more hits are available.
+		 *
+		 * @return {@code false} in the current placeholder implementation
+		 */
 		@Override
 		public boolean hasNext() {
 return false;
@@ -83,6 +102,11 @@ return false;
 */
 		}
 
+		/**
+		 * Returns the next search hit.
+		 *
+		 * @return {@code null} in the current placeholder implementation
+		 */
 		@Override
 		public SearchResult next() {
 /*
@@ -132,17 +156,32 @@ return false;
 return null;
 		}
 
+		/**
+		 * Rejects removal because content iterators are read-only.
+		 *
+		 * @throws IllegalAccessError always
+		 */
 		@Override
 		public void remove() {
 			throw new IllegalAccessError("Cannot remove from an ESIterator.");
 		}
 		
+		/**
+		 * Returns the total number of hits captured when the iterator was created.
+		 *
+		 * @return total hit count
+		 */
 		@Override
 		public long getTotalHits() {
 			return totalHits;
 		}
 	}
 	
+	/**
+	 * Creates a new iterator over the content index.
+	 *
+	 * @return iterator over indexed content records
+	 */
 	@Override
 	public ContentIterator iterator() {
 		return new ESIterator();

@@ -6,6 +6,14 @@ import java.util.TreeMap;
 
 import org.skyve.metadata.module.menu.Menu;
 
+/**
+ * A serialisable snapshot of the current user's identity and permissions,
+ * transferred to client-side code (e.g. the SmartClient or Vue front-end).
+ *
+ * <p>Contains the user's biz key, contact, customer name, data-group id,
+ * assigned role names, per-document CRUD permissions map, allowed action names,
+ * and the rendered module-menu map.
+ */
 public class ClientUserData {
 	private String id;
 	private String name;

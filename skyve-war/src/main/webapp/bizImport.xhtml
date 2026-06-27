@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" 
+<html xmlns="http://www.w3.org/1999/xhtml"
 		xmlns:ui="http://java.sun.com/jsf/facelets" 
 		xmlns:h="http://java.sun.com/jsf/html" 
 		xmlns:f="http://java.sun.com/jsf/core"
 		xmlns:p="http://primefaces.org/ui"
+		lang="#{_skyveBizImport.languageTag}" xml:lang="#{_skyveBizImport.languageTag}"
 		dir="#{_skyveBizImport.dir}">
     <f:view contentType="text/html" encoding="#{_skyveBizImport.encoding}">
 		<f:metadata>
@@ -35,6 +36,17 @@
 					}
 				}
 			</style>
+			<script type="text/javascript" src="skyve/prime/skyve-min.js?v=#{_skyveBizImport.webResourceFileVersion}"></script>
+			<script type="text/javascript">
+				//<![CDATA[
+				function skyveAfterBizImport() {
+					var owner = SKYVE.Util.findSmartClientWindow();
+					if (owner) {
+						owner.isc.WindowStack.getOpener().saveInstance(true, '_PUSH');
+					}
+				}
+				//]]>
+			</script>
 		</h:head>
 		<h:body>
 			<h:form enctype="multipart/form-data" prependId="false">
@@ -47,7 +59,7 @@
 								allowTypes="#{'/'.concat(_skyveBizImport.whitelistRegex).concat('/i')}"
 								invalidFileMessage="#{_skyveBizImport.i18n['page.bizImport.invalidFile']}"
 								update="messages problems" 
-								oncomplete="window.parent.isc.WindowStack.getOpener().saveInstance(true,'_PUSH');" />
+								oncomplete="skyveAfterBizImport()" />
 			    <p:growl id="messages" showDetail="true" escape="false" life="20000" />
 			    <p/>
 			    <p:dataTable id="problems" value="#{_skyveBizImport.problems}" var="problem">

@@ -10,9 +10,16 @@ import modules.admin.ImportExport.actions.RunImport;
 import modules.admin.domain.Contact;
 import modules.admin.domain.ImportExport;
 
+/**
+ * Creates fixtures for {@link ImportExport}.
+ */
 @SkyveFactory(excludedActions = { RunImport.class, ResetColumns.class })
 public class ImportExportFactory {
-
+	/**
+	 * Builds a CRUD fixture configured to the admin contact document.
+	 *
+	 * @return a fixture-ready import/export extension bean
+	 */
 	@SkyveFixture(types = FixtureType.crud)
 	@SuppressWarnings("static-method")
 	public ImportExportExtension crudInstance() {

@@ -10,12 +10,15 @@ import org.skyve.util.Binder;
 import modules.admin.domain.ReportParameter;
 import modules.admin.domain.ReportTemplate;
 
+/**
+ * Extends report parameters with formatted value accessors and runtime validation helpers.
+ */
 public class ReportParameterExtension extends ReportParameter {
-
 	private static final long serialVersionUID = 4674099989961751605L;
 
 	/**
 	 * Calculated field to return the default value as a String, regardless of the parameter type selected.
+	 * @return the result
 	 */
 	@Override
 	public String getDefaultValueString() {
@@ -31,6 +34,7 @@ public class ReportParameterExtension extends ReportParameter {
 
 	/**
 	 * Calculated field to return the formatted input value, or default value if not supplied.
+	 * @return the result
 	 */
 	@Override
 	public String getFormattedInputValue() {
@@ -40,7 +44,7 @@ public class ReportParameterExtension extends ReportParameter {
 					DateOnly date = CORE.getCustomer().getDefaultDateConverter().fromDisplayValue(getReportInputValue());
 					return CORE.getCustomer().getDefaultDateConverter().toDisplayValue(date);
 				} catch (Exception e) {
-					e.printStackTrace();
+					LOGGER.error(e.getMessage(), e);
 				}
 			}
 			return Binder.getDisplay(CORE.getCustomer(), this, ReportParameter.reportInputValuePropertyName);
@@ -53,6 +57,7 @@ public class ReportParameterExtension extends ReportParameter {
 
 	/**
 	 * Calculated field to return the test value as a String, regardless of the parameter type selected.
+	 * @return the result
 	 */
 	@Override
 	public String getTestValueString() {

@@ -5,6 +5,20 @@ import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 
+/**
+ * Abstract base for all metadata query column implementations.
+ *
+ * <p>Holds properties common to every column in a {@link MetaDataQueryDefinition}:
+ * binding path, display name, sortability, filter settings, and display/edit
+ * width hints.  Concrete subclasses add column-type-specific behaviour:
+ * {@link MetaDataQueryProjectedColumnImpl} for bound data attributes and
+ * {@link MetaDataQueryContentColumnImpl} for content (file) links.
+ *
+ * <p>Threading: not thread-safe.  Instances are populated during metadata loading
+ * and are read-only once placed in the repository cache.
+ *
+ * @see MetaDataQueryColumn
+ */
 public abstract class AbstractMetaDataQueryColumn implements MetaDataQueryColumn {
 	private static final long serialVersionUID = 5165779649604451833L;
 

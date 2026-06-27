@@ -32,6 +32,45 @@ body,html {
 	min-height: 0px !important;
 }
 
+.skyveMorphOpening {
+	animation: skyveMorphOpen 320ms cubic-bezier(.22, 1, .36, 1);
+	transform-origin: var(--skyve-morph-origin, top left);
+	will-change: transform, opacity, border-radius;
+	overflow: hidden;
+}
+.skyveMorphGhost {
+	box-shadow: 0 12px 32px rgba(0, 0, 0, .18);
+	pointer-events: none;
+	position: fixed;
+}
+
+@keyframes skyveMorphOpen {
+	from {
+		border-radius: var(--skyve-morph-start-radius, 16px);
+		opacity: .2;
+		transform: translate(var(--skyve-morph-x, 0), var(--skyve-morph-y, 0)) scale(var(--skyve-morph-scale-x, .25), var(--skyve-morph-scale-y, .25));
+	}
+	42% {
+		border-radius: max(var(--skyve-morph-start-radius, 16px), 38px);
+		opacity: .92;
+	}
+	78% {
+		border-radius: max(var(--skyve-morph-end-radius, 8px), 22px);
+		opacity: 1;
+	}
+	to {
+		border-radius: var(--skyve-morph-end-radius, inherit);
+		opacity: 1;
+		transform: translate(0, 0) scale(1, 1);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.skyveMorphOpening {
+		animation: none;
+	}
+}
+
 /* skyve alignment styles */
 .left {
 	text-align: left;
@@ -235,6 +274,92 @@ th.hiddenFilter input.ui-column-filter, th.hiddenFilter div.ui-column-customfilt
 	color: rgb(5, 116, 218);
 }
 
+.skyveContentHidden {
+	display: none !important;
+}
+
+.skyveContentPreview.skyveContentEmpty {
+	align-items: center;
+	background: #fafbfc;
+	border-color: #d6dee8 !important;
+	border-style: dashed !important;
+	color: #8a96a6;
+	display: flex;
+	justify-content: center;
+}
+
+.skyveContentPreview.skyveContentEmpty:before {
+	content: "\f03e";
+	font-family: "Font Awesome 6 Free";
+	font-size: 1.7rem;
+	font-weight: 900;
+	line-height: 1;
+	margin-top: -1.2rem;
+	opacity: 0.55;
+	position: absolute;
+}
+
+.skyveContentPreview.skyveContentEmpty:after {
+	content: "No image";
+	font-size: 0.85rem;
+	margin-top: 2.1rem;
+	opacity: 0.75;
+}
+
+.skyveContentPhoneResponsive {
+	width: 100%;
+}
+
+.skyveContentPhoneResponsive > tbody > tr > td:first-child {
+	width: 100%;
+}
+
+.skyveContentPhoneResponsive > tbody > tr > td:last-child {
+	vertical-align: middle;
+	white-space: nowrap;
+	width: 1%;
+}
+
+div.skyveContentPreview.skyveContentResponsiveImage,
+.skyveContentResponsiveVideo {
+	max-width: 100%;
+	width: 100% !important;
+}
+
+div.skyveContentPreview.skyveContentResponsiveImage {
+	aspect-ratio: 1 / 1;
+	height: auto !important;
+}
+
+.skyveContentResponsiveVideo {
+	aspect-ratio: 16 / 9;
+	height: auto !important;
+}
+
+/* PrimeFaces ui-g collapse breakpoint */
+@media screen and (max-width: 40em) {
+	div.skyveContentPreview.skyveContentResponsiveImage {
+		min-height: 8rem;
+	}
+}
+
+button.skyveContentActionButton.ui-button-icon-only,
+button.skyveContentActionButton.ui-button-text-icon-left {
+	padding: 0 !important;
+	position: relative;
+}
+button.skyveContentActionButton .ui-button-icon-left {
+	left: 50% !important;
+	margin: 0 !important;
+	position: absolute !important;
+	top: 50% !important;
+	transform: translate(-50%, -50%) !important;
+}
+button.skyveContentActionButton .ui-button-text {
+	padding: 0 !important;
+	text-indent: -9999999px;
+}
+
 /* ensure radio button groups have a text wrap that looks like its in a table */
 .ui-selectoneradio tbody tr td {
 	display: inline-flex;
@@ -263,4 +388,3 @@ th.hiddenFilter input.ui-column-filter, th.hiddenFilter div.ui-column-customfilt
     padding: 5px;
     margin: 3px;
 }
-

@@ -13,7 +13,17 @@ import org.skyve.web.WebContext;
 
 import modules.admin.domain.DataMaintenance;
 
+/**
+ * Rebuilds data index entries for persisted domain records.
+ */
 public class ReindexData implements ServerSideAction<DataMaintenance> {
+	/**
+	 * Performs the execute operation.
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public ServerSideActionResult<DataMaintenance> execute(DataMaintenance bean, WebContext webContext)
 	throws Exception {

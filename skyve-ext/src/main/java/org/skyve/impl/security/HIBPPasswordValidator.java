@@ -8,8 +8,8 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Nonnull;
 
@@ -20,9 +20,14 @@ import jakarta.annotation.Nonnull;
  */
 public class HIBPPasswordValidator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HIBPPasswordValidator.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(HIBPPasswordValidator.class);
 
 	private static final String HIBP_API_URL = "https://api.pwnedpasswords.com/range/";
+
+	@SuppressWarnings({"java:S1118", "java:S1186"})
+	public HIBPPasswordValidator() {
+		// Public no-op constructor retained for compatibility and test harnesses.
+	}
 
 	/**
 	 * Returns true if the passed password has been breached, using <code>IHaveBeenPwned</code> API.
@@ -54,7 +59,12 @@ public class HIBPPasswordValidator {
 					.toUpperCase();
 			
 			return isHashSuffixPresent(body, suffix);
-		} catch (Exception e) {
+		}
+		catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			LOGGER.warn("HaveIBeenPwned API call interrupted", e);
+		}
+		catch (Exception e) {
 			LOGGER.warn("HaveIBeenPwned API call failed", e);
 		}
 
@@ -69,6 +79,7 @@ public class HIBPPasswordValidator {
 	 * @throws NoSuchAlgorithmException
 	 */
 	public static String hashPassword(String password) throws NoSuchAlgorithmException {
+    	@SuppressWarnings("java:S4790") // Only for legacy use
 		MessageDigest digest = MessageDigest.getInstance("SHA-1");
 		byte[] hashBytes = digest.digest(password.getBytes(StandardCharsets.UTF_8));
 		StringBuilder hexString = new StringBuilder();

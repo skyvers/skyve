@@ -15,6 +15,7 @@ import modules.admin.domain.Contact;
 @Default
 public class ContactService {
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient Persistence persistence;
 
 	/**

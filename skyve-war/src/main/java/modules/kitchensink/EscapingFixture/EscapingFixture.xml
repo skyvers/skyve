@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="EscapingFixture"
+			xmlns="http://www.skyve.org/xml/document"
+			xmlns:v="http://www.skyve.org/xml/view"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			Non-persistent Kitchen Sink fixture for manually inspecting view boilerplate escaping.
+		]]>
+	</documentation>
+	<singularAlias>Escaping Fixture</singularAlias>
+	<pluralAlias>Escaping Fixtures</pluralAlias>
+	<description>Escaping fixture &lt;i&gt;document description&lt;/i&gt;</description>
+	<bizKey expression="{text1}" />
+	<attributes>
+		<text name="text1" required="true">
+			<displayName>Text 1</displayName>
+			<length>255</length>
+		</text>
+		<text name="text2" required="true">
+			<displayName>Text 2</displayName>
+			<length>255</length>
+		</text>
+		<text name="metadataLabelText" required="true">
+			<displayName>Escaped &lt;i&gt;attribute display&lt;/i&gt;</displayName>
+			<description>Escaped &lt;i&gt;attribute description&lt;/i&gt;</description>
+			<requiredMessage>Escaped &lt;i&gt;attribute required&lt;/i&gt;</requiredMessage>
+			<defaultValue>Escaped &lt;i&gt;default text&lt;/i&gt;</defaultValue>
+			<length>255</length>
+			<validator validationMessage="Escaped &lt;i&gt;text validator&lt;/i&gt;" regularExpression=".*" />
+		</text>
+		<text name="metadataWidgetText">
+			<displayName>Trusted &lt;i&gt;default widget display&lt;/i&gt;</displayName>
+			<description>Trusted &lt;i&gt;default widget description&lt;/i&gt;</description>
+			<defaultWidget><v:textField /></defaultWidget>
+			<defaultValue>Trusted &lt;i&gt;widget default&lt;/i&gt;</defaultValue>
+			<length>255</length>
+		</text>
+		<memo name="metadataMemo" required="true">
+			<displayName>Escaped &lt;i&gt;memo display&lt;/i&gt;</displayName>
+			<description>Escaped &lt;i&gt;memo description&lt;/i&gt;</description>
+			<defaultWidget><v:textArea /></defaultWidget>
+			<requiredMessage>Escaped &lt;i&gt;memo required&lt;/i&gt;</requiredMessage>
+			<defaultValue>Escaped &lt;i&gt;memo default&lt;/i&gt;</defaultValue>
+		</memo>
+		<markup name="metadataMarkup">
+			<displayName>Trusted &lt;i&gt;markup display&lt;/i&gt;</displayName>
+			<description>Trusted &lt;i&gt;markup description&lt;/i&gt;</description>
+			<defaultWidget><v:richText pixelWidth="500" pixelHeight="160" minPixelHeight="120" maxPixelHeight="260" /></defaultWidget>
+			<defaultValue>&lt;p&gt;Trusted markup default&lt;/p&gt;</defaultValue>
+		</markup>
+		<boolean name="metadataBoolean">
+			<displayName>Escaped &lt;i&gt;boolean display&lt;/i&gt;</displayName>
+			<description>Escaped &lt;i&gt;boolean description&lt;/i&gt;</description>
+			<defaultWidget><v:checkBox triState="false" /></defaultWidget>
+			<defaultValue>false</defaultValue>
+		</boolean>
+		<integer name="metadataInteger" required="true">
+			<displayName>Escaped &lt;i&gt;integer display&lt;/i&gt;</displayName>
+			<description>Escaped &lt;i&gt;integer description&lt;/i&gt;</description>
+			<defaultWidget><v:spinner /></defaultWidget>
+			<requiredMessage>Escaped &lt;i&gt;integer required&lt;/i&gt;</requiredMessage>
+			<defaultValue>3</defaultValue>
+			<validator validationMessage="Escaped &lt;i&gt;integer validator&lt;/i&gt;" min="0" max="10" />
+		</integer>
+		<date name="metadataDate">
+			<displayName>Escaped &lt;i&gt;date display&lt;/i&gt;</displayName>
+			<description>Escaped &lt;i&gt;date description&lt;/i&gt;</description>
+			<validator validationMessage="Escaped &lt;i&gt;date validator&lt;/i&gt;" min="2000-01-01" max="2099-12-31" />
+		</date>
+		<enum name="metadataEnum">
+			<displayName>Trusted &lt;i&gt;enum display&lt;/i&gt;</displayName>
+			<description>Trusted &lt;i&gt;enum description&lt;/i&gt;</description>
+			<defaultWidget><v:radio /></defaultWidget>
+			<values>
+				<value name="escaped" code="escaped" description="Escaped &lt;i&gt;enum value&lt;/i&gt;" />
+				<value name="trusted" code="trusted" description="Trusted &lt;i&gt;enum value&lt;/i&gt;" />
+			</values>
+		</enum>
+		<association name="zoomTarget" type="aggregation" persistent="false" usage="view">
+			<displayName>Zoom Target</displayName>
+			<description>Escaped &lt;i&gt;association description&lt;/i&gt;</description>
+			<documentName>LookupDescription</documentName>
+		</association>
+		<collection name="gridRows" type="aggregation" persistent="false" usage="view">
+			<displayName>Grid Rows</displayName>
+			<description>Escaped &lt;i&gt;grid collection description&lt;/i&gt;</description>
+			<documentName>ListAttributes</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="members" type="aggregation" persistent="false" usage="view">
+			<displayName>Members</displayName>
+			<description>Escaped &lt;i&gt;members collection description&lt;/i&gt;</description>
+			<domain>variant</domain>
+			<documentName>LookupDescription</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+	</attributes>
+</document>

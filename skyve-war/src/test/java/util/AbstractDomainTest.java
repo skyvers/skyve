@@ -5,14 +5,16 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.skyve.CORE;
@@ -30,27 +32,26 @@ import org.skyve.metadata.module.Module;
 import org.skyve.util.Binder;
 import org.skyve.util.test.TestUtil;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 public abstract class AbstractDomainTest<T extends PersistentBean> extends AbstractH2Test {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDomainTest.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(AbstractDomainTest.class);
 
 	protected abstract T getBean() throws Exception;
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testDelete() throws Exception {
+	void testDelete() throws Exception {
 		// create the test data
 		T bean = getBean();
 
-		assertThat(bean.isPersisted(), is(false));
+		assertFalse(bean.isPersisted());
 
 		T result = CORE.getPersistence().save(bean);
 
 		// validate the test data
 		assertThat(result, is(notNullValue()));
-		assertThat(result.isPersisted(), is(true));
+		assertTrue(result.isPersisted());
 		assertThat(result.getBizId(), is(notNullValue()));
 
 		// perform the method under test
@@ -65,7 +66,7 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 
 	@Test
 	@SuppressWarnings("boxing")
-	public void testFindAll() throws Exception {
+	void testFindAll() throws Exception {
 		// create the test data
 		T b1 = getBean();
 		T b2 = getBean();
@@ -91,7 +92,7 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 	}
 
 	@Test
-	public void testFindById() throws Exception {
+	void testFindById() throws Exception {
 		// create the test data
 		T bean = getBean();
 
@@ -101,15 +102,15 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 		T result = CORE.getPersistence().retrieve(bean.getBizModule(), bean.getBizDocument(), bean.getBizId());
 
 		// verify the results
-		Assert.assertNotNull(result);
+		Assertions.assertNotNull(result);
 		assertThat(result.getBizId(), is(bean.getBizId()));
 		assertThat(result, is(bean));
 	}
 
 	@Test
-	public void testGetConstantDomainValues() throws Exception {
+	@SuppressWarnings("java:S2699")
+	void testGetConstantDomainValues() throws Exception {
 		assumeTrue(getBizlet() != null);
-
 		// create the test data
 		ArrayList<? extends Attribute> allAttributes = getAllAttributes(getBean());
 
@@ -136,9 +137,9 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 	}
 
 	@Test
-	public void testGetDynamicDomainValues() throws Exception {
+	@SuppressWarnings("java:S2699")
+	void testGetDynamicDomainValues() throws Exception {
 		assumeTrue(getBizlet() != null);
-
 		// create the test data
 		ArrayList<? extends Attribute> allAttributes = getAllAttributes(getBean());
 
@@ -165,7 +166,8 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 	}
 
 	@Test
-	public void testGetVariantDomainValues() throws Exception {
+	@SuppressWarnings("java:S2699")
+	void testGetVariantDomainValues() throws Exception {
 		assumeTrue(getBizlet() != null);
 		// create the test data
 		T bean = getBean();
@@ -194,39 +196,37 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testSave() throws Exception {
+	void testSave() throws Exception {
 		// create the test data
 		T bean = getBean();
 
 		// validate the test data
-		assertThat(bean.isPersisted(), is(false));
+		assertFalse(bean.isPersisted());
 
 		// perform the method under test
 		T result = CORE.getPersistence().save(bean);
 
 		// verify the results
 		assertThat(result, is(notNullValue()));
-		assertThat(result.isPersisted(), is(true));
+		assertTrue(result.isPersisted());
 		assertThat(result.getBizId(), is(notNullValue()));
 	}
 
 	@Test
 	@Timeout(30)
-	@SuppressWarnings("boxing")
-	public void testUpdate() throws Exception {
+	void testUpdate() throws Exception {
 		// create the test data
 		T bean = getBean();
 
 		// validate the test data
-		assertThat(bean.isPersisted(), is(false));
+		assertFalse(bean.isPersisted());
 
 		// perform the method under test
 		T result = CORE.getPersistence().save(bean);
 
 		// verify the results
 		assertThat(result, is(notNullValue()));
-		assertThat(result.isPersisted(), is(true));
+		assertTrue(result.isPersisted());
 		assertThat(result.getBizId(), is(notNullValue()));
 
 		// perform an update
@@ -261,8 +261,7 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 		Customer customer = CORE.getUser().getCustomer();
 		Module module = customer.getModule(bean.getBizModule());
 		Document document = module.getDocument(customer, bean.getBizDocument());
-		ArrayList<? extends Attribute> allAttributes = new ArrayList<>(document.getAllAttributes(customer));
-		return allAttributes;
+		return new ArrayList<>(document.getAllAttributes(customer));
 	}
 
 	private Bizlet<T> getBizlet() throws Exception {

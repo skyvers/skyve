@@ -17,8 +17,19 @@ import org.skyve.web.WebContext;
 import modules.admin.ControlPanel.ControlPanelExtension;
 import modules.admin.domain.ControlPanel;
 
+/**
+ * Schedules generation of test data for the selected scope.
+ */
 public class GenerateTestData implements ServerSideAction<ControlPanelExtension> {
+	private static final String TEST_NUMBER_TO_GENERATE_DISPLAY_NAME_KEY = "admin.controlPanel.testNumberToGenerate.displayName";
 
+	/**
+	 * Performs the execute operation.
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public ServerSideActionResult<ControlPanelExtension> execute(ControlPanelExtension bean, WebContext webContext)
 			throws Exception {
@@ -35,6 +46,12 @@ public class GenerateTestData implements ServerSideAction<ControlPanelExtension>
 		return new ServerSideActionResult<>(bean);
 	}
 
+	/**
+	 * Validates required inputs before submitting the generate-test-data job.
+	 *
+	 * @param bean The control-panel request bean being validated.
+	 * @throws ValidationException If one or more required inputs are missing or invalid.
+	 */
 	private static void validateFields(ControlPanelExtension bean) {
 		ValidationException ve = new ValidationException();
 
@@ -50,23 +67,23 @@ public class GenerateTestData implements ServerSideAction<ControlPanelExtension>
 		if (bean.getTestNumberToGenerate() == null) {
 			ve.getMessages().add(new Message(ControlPanel.testNumberToGeneratePropertyName,
 					Util.nullSafeI18n(BeanValidator.VALIDATION_REQUIRED_KEY,
-							Util.nullSafeI18n("admin.controlPanel.testNumberToGenerate.displayName"))));
+							Util.nullSafeI18n(TEST_NUMBER_TO_GENERATE_DISPLAY_NAME_KEY))));
 		}
 
 		if (bean.getTestNumberToGenerate() == null || bean.getTestNumberToGenerate().intValue() < 1) {
 			ve.getMessages().add(new Message(ControlPanel.testNumberToGeneratePropertyName,
-					Util.nullSafeI18n("admin.controlPanel.testNumberToGenerate.displayName") + " must be greater than 0."));
+					Util.nullSafeI18n(TEST_NUMBER_TO_GENERATE_DISPLAY_NAME_KEY) + " must be greater than 0."));
 
 		} else if (bean.getTestNumberToGenerate().intValue() > 10000) {
 			ve.getMessages().add(new Message(ControlPanel.testNumberToGeneratePropertyName,
-					Util.nullSafeI18n("admin.controlPanel.testNumberToGenerate.displayName") + " must be less than 10,000."));
+					Util.nullSafeI18n(TEST_NUMBER_TO_GENERATE_DISPLAY_NAME_KEY) + " must be less than 10,000."));
 		}
 		
 		if(Boolean.TRUE.equals(bean.getTestTagGeneratedData()) && bean.getTestTagName()==null) {
 			ve.getMessages().add(new Message(ControlPanel.testTagNamePropertyName, "Enter the name of a tag for data tagging"));
 		}
 
-		if (ve.getMessages().size() > 0) {
+		if (! ve.getMessages().isEmpty()) {
 			throw ve;
 		}
 	}

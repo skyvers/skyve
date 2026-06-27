@@ -20,6 +20,9 @@ import org.skyve.persistence.DocumentQuery;
 import freemarker.cache.TemplateLoader;
 import freemarker.template.TemplateNotFoundException;
 
+/**
+ * Resolves FreeMarker templates stored in Skyve report template documents.
+ */
 public class SkyveDatastoreTemplateLoader implements TemplateLoader {
 	/**
 	 * Retrieves the associated template for a given id.

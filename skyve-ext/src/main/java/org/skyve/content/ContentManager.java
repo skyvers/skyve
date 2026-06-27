@@ -3,6 +3,30 @@ package org.skyve.content;
 import org.pf4j.ExtensionPoint;
 import org.skyve.impl.util.SystemObserver;
 
+/**
+ * Manages the storage, retrieval, search, and indexing of managed content
+ * (file attachments and bean-level full-text search data).
+ *
+ * <p>Content is stored in a pluggable content store (the default implementation uses a
+ * file-system store). Two categories of content are managed:
+ * <ul>
+ *   <li>{@link AttachmentContent} — binary file data attached to a document attribute.
+ *       Stored by a content ID and optionally indexed for full-text search.</li>
+ *   <li>{@link BeanContent} — textual metadata from a bean, indexed for search without
+ *       storing a physical file.</li>
+ * </ul>
+ *
+ * <p>Obtain a {@code ContentManager} via {@link org.skyve.EXT#newContentManager()}.
+ * {@code ContentManager} implements {@link AutoCloseable}; always use it in a
+ * try-with-resources block.
+ *
+ * <p>Threading: a {@code ContentManager} instance is not thread-safe. Use one
+ * instance per request or execution context and close it when done.
+ *
+ * @see AttachmentContent
+ * @see BeanContent
+ * @see SearchResults
+ */
 public interface ContentManager extends AutoCloseable, ExtensionPoint, SystemObserver {
 	public static final String FILE_STORE_NAME = "SKYVE_STORE";
 
@@ -42,9 +66,10 @@ public interface ContentManager extends AutoCloseable, ExtensionPoint, SystemObs
 	
 	/**
 	 * Get an attachment by content ID.
-	 * @param id
-	 * @return
-	 * @throws Exception
+	 *
+	 * @param contentId The unique attachment content identifier
+	 * @return The attachment content, or {@code null} when not found
+	 * @throws Exception If retrieval fails
 	 */
 	AttachmentContent getAttachment(String contentId) throws Exception;
 
@@ -64,10 +89,11 @@ public interface ContentManager extends AutoCloseable, ExtensionPoint, SystemObs
 
 	/**
 	 * Find matching content that the current user has access to containing the search term.
-	 * @param search
-	 * @param maxResults
-	 * @return
-	 * @throws Exception
+	 *
+	 * @param search The search text/query string
+	 * @param maxResults Maximum number of matches to return
+	 * @return Search results visible to the current user
+	 * @throws Exception If search execution fails
 	 */
 	SearchResults google(String search, int maxResults) throws Exception;
 	
@@ -101,8 +127,24 @@ public interface ContentManager extends AutoCloseable, ExtensionPoint, SystemObs
 	
 	/**
 	 * Iterate over all content independent of customer.
-	 * @return
-	 * @throws Exception
+	 *
+	 * @return Iterable cursor over all content records
+	 * @throws Exception If iteration cannot be opened
 	 */
 	ContentIterable all() throws Exception;
+
+	/**
+	 * Flushes pending content changes and releases per-instance resources.
+	 *
+	 * <p>Idempotency: implementations must tolerate repeated calls on the same instance.
+	 * A repeated call must not duplicate content or indexing side effects, and must not
+	 * fail solely because resources have already been flushed or released. This supports
+	 * persistence lifecycles that may flush content before serialising a conversation and
+	 * later close the same persistence instance.
+	 *
+	 * @throws Exception if flushing or resource release fails for a reason other than
+	 * already-completed cleanup
+	 */
+	@Override
+	void close() throws Exception;
 }

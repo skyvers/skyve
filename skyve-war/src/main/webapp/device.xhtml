@@ -1,12 +1,15 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" 
+<html xmlns="http://www.w3.org/1999/xhtml"
 		xmlns:ui="http://java.sun.com/jsf/facelets" 
 		xmlns:h="http://java.sun.com/jsf/html" 
-		xmlns:f="http://java.sun.com/jsf/core">
+		xmlns:f="http://java.sun.com/jsf/core"
+		lang="#{device.languageTag}" xml:lang="#{device.languageTag}">
     <f:view contentType="text/html" encoding="UTF-8">
 		<!-- Dont use h:head coz it'll bring in themes that can screw up the device layout -->
 		<head>
+			<title>${project.description}</title>
 			<meta name="viewport" content="width=device-width, initial-scale=1" />
+			<ui:include src="/WEB-INF/pages/includes/favicon.xhtml" />
 			<link type="text/css" rel="stylesheet" href="#{device.contextUrl}/fontawesome-6.5.1/css/all.min.css" />
 
 			<script type="text/javascript" src="#{device.contextUrl}/jakarta.faces.resource/jquery/jquery.js.xhtml?ln=primefaces"></script>
@@ -35,6 +38,41 @@
 				iframe {
 					padding: 0px;
 					margin: 0px;
+				}
+
+				#device .content {
+					background: white;
+				}
+
+				#iframe {
+					display: block;
+					opacity: 1;
+					background: white;
+					transform-origin: center center;
+					transition: opacity 350ms ease-out, transform 350ms ease-out, filter 350ms ease-out;
+				}
+
+				#device.mode-switching .content,
+				#device.mode-switching #iframe {
+					background: black;
+				}
+
+				#iframe.loading {
+					opacity: 0;
+					filter: brightness(0);
+					transform: scaleY(0.02);
+					transition: none;
+				}
+
+				#iframe.powering-on {
+					filter: brightness(1);
+					transform: scaleY(1);
+				}
+
+				@media (prefers-reduced-motion: reduce) {
+					#iframe {
+						transition: none;
+					}
 				}
 				
 				/* The device with borders */
@@ -218,7 +256,7 @@
 		<body>
 			<div id="device">
 			  <div class="content">
-			    <iframe id="iframe" style="width:100%;border:none;height:100%"></iframe>
+			    <iframe id="iframe" title="Device preview" style="width:100%;border:none;height:100%"></iframe>
 			  </div>
 			</div>
 			<div style="position:fixed;bottom:80px;right:70px;">
@@ -302,13 +340,36 @@
 						sessionStorage.setItem('preview_device', device);
 						$('#device').attr('class', device);
 						App.size(device);
-						$('#iframe').attr('src', "#{device.clickDeviceJspUrl}" + userAgentType);
+						$('#device').addClass('mode-switching');
+						window.clearTimeout(App.modeSwitchTimer);
+						var iframe = $('#iframe');
+						iframe.off('load.devicePreview').removeClass('powering-on').addClass('loading');
+						iframe[0].offsetHeight;
+						var powerOn = function() {
+							window.requestAnimationFrame(function() {
+								iframe.addClass('powering-on').removeClass('loading');
+								App.modeSwitchTimer = window.setTimeout(function() {
+									$('#device').removeClass('mode-switching');
+								}, 350);
+							});
+						};
+						var src = "#{device.clickDeviceJspUrl}" + userAgentType;
+						if (iframe.attr('src') == src) {
+							powerOn();
+						}
+						else {
+							iframe.one('load.devicePreview', powerOn);
+							iframe.attr('src', src);
+						}
 					},
 					size(styleClass) {
 						var device = $('#device');
 						var parent = device.parent();
 						if (! styleClass) {
 							styleClass = device.attr('class');
+							if (styleClass) {
+								styleClass = styleClass.split(' ')[0];
+							}
 						}
 						if (styleClass == 'phone') {
 							// height - 2 * margin top (20px) / screen height (800px) + 2 * shim height (60px)

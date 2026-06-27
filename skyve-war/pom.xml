@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.skyve</groupId>
 		<artifactId>skyve-parent</artifactId>
-		<version>9.5.0-SNAPSHOT</version>
+		<version>10.0.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>skyve-war</artifactId>
 
@@ -358,14 +358,13 @@
 		<dependency>
 			<groupId>org.glassfish</groupId>
 			<artifactId>jakarta.faces</artifactId>
-			<version>4.0.11</version>
+			<version>${mojarra.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<!-- Jakarta Mail implementation -->
 		<dependency>
 			<groupId>org.eclipse.angus</groupId>
 			<artifactId>jakarta.mail</artifactId>
-			<version>2.0.2</version>
 			<scope>test</scope>
 		</dependency>
 		<!-- Jakarta EL implementation -->

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="UploadFixture"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			Non-persistent Kitchen Sink fixture for manually inspecting upload.xhtml routes.
+		]]>
+	</documentation>
+	<singularAlias>Upload Fixture</singularAlias>
+	<pluralAlias>Upload Fixtures</pluralAlias>
+	<description>Upload fixture document</description>
+	<bizKey expression="Upload Fixture" />
+	<attributes>
+		<content name="contentAutoNone">
+			<displayName>Auto / none</displayName>
+		</content>
+		<content name="contentAutoCamera">
+			<displayName>Auto / camera</displayName>
+		</content>
+		<content name="contentAutoVideo">
+			<displayName>Auto / video</displayName>
+		</content>
+		<content name="contentAutoAll">
+			<displayName>Auto / all</displayName>
+		</content>
+		<content name="contentLinkNone">
+			<displayName>Link / none</displayName>
+		</content>
+		<content name="contentLinkCamera">
+			<displayName>Link / camera</displayName>
+		</content>
+		<content name="contentLinkVideo">
+			<displayName>Link / video</displayName>
+		</content>
+		<content name="contentLinkAll">
+			<displayName>Link / all</displayName>
+		</content>
+		<content name="contentImageNone">
+			<displayName>Image / none</displayName>
+		</content>
+		<content name="contentImageCamera">
+			<displayName>Image / camera</displayName>
+		</content>
+		<content name="contentImageAll">
+			<displayName>Image / all</displayName>
+		</content>
+		<content name="contentVideoNone">
+			<displayName>Video / none</displayName>
+		</content>
+		<content name="contentVideoVideo">
+			<displayName>Video / video</displayName>
+		</content>
+		<content name="contentVideoAll">
+			<displayName>Video / all</displayName>
+		</content>
+		<content name="contentDisabledAuto">
+			<displayName>Disabled Auto Content</displayName>
+		</content>
+		<content name="contentDisabledImage">
+			<displayName>Disabled Image Content</displayName>
+		</content>
+		<content name="contentReadOnlyLink">
+			<displayName>Read-only Link Content</displayName>
+		</content>
+		<content name="contentReadOnlyVideo">
+			<displayName>Read-only Video Content</displayName>
+		</content>
+		<collection name="gridRows" type="child">
+			<displayName>Grid Rows</displayName>
+			<documentName>UploadFixtureGridRow</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+	</attributes>
+</document>

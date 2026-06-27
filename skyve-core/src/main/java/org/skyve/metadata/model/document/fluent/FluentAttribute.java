@@ -5,8 +5,7 @@ import org.skyve.impl.metadata.view.WidgetReference;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
@@ -24,8 +23,7 @@ import org.skyve.metadata.model.Attribute.UsageType;
 import org.skyve.metadata.view.fluent.FluentCheckBox;
 import org.skyve.metadata.view.fluent.FluentColourPicker;
 import org.skyve.metadata.view.fluent.FluentCombo;
-import org.skyve.metadata.view.fluent.FluentContentImage;
-import org.skyve.metadata.view.fluent.FluentContentLink;
+import org.skyve.metadata.view.fluent.FluentContentUpload;
 import org.skyve.metadata.view.fluent.FluentGeometry;
 import org.skyve.metadata.view.fluent.FluentHTML;
 import org.skyve.metadata.view.fluent.FluentInputWidget;
@@ -38,12 +36,25 @@ import org.skyve.metadata.view.fluent.FluentSpinner;
 import org.skyve.metadata.view.fluent.FluentTextArea;
 import org.skyve.metadata.view.fluent.FluentTextField;
 
+import jakarta.annotation.Nonnull;
+
+/**
+ * Provides a fluent builder for FluentAttribute metadata.
+ */
 public abstract class FluentAttribute<T extends FluentAttribute<T>> {
+	/**
+	 * Creates a fluent builder instance.
+	 */
 	protected FluentAttribute() {
 		// nothing to see
 	}
 
-	@SuppressWarnings("unchecked")
+	/**
+	 * Copies the common attribute contract, including default widget metadata when present.
+	 *
+	 * <p>Side effects: replaces this builder's current state with values from {@code attribute}.
+	 */
+	@SuppressWarnings({"unchecked", "java:S3776"}) // Complexity OK
 	protected T from(Attribute attribute) {
 		audited(attribute.isAudited());
 		deprecated(attribute.isDeprecated());
@@ -59,11 +70,8 @@ public abstract class FluentAttribute<T extends FluentAttribute<T>> {
 		if ((attribute instanceof AbstractAttribute abstractAttribute) && 
 				(abstractAttribute.getDefaultWidgetReference() != null)) {
 			InputWidget input = abstractAttribute.getDefaultInputWidget();
-			if (input instanceof ContentImage image) {
-				defaultWidget(new FluentContentImage().from(image));
-			}
-			else if (input instanceof ContentLink link) {
-				defaultWidget(new FluentContentLink().from(link));
+			if (input instanceof ContentUpload content) {
+				defaultWidget(new FluentContentUpload().from(content));
 			}
 			else if (input instanceof CheckBox check) {
 				defaultWidget(new FluentCheckBox().from(check));
@@ -112,122 +120,193 @@ public abstract class FluentAttribute<T extends FluentAttribute<T>> {
 		return (T) this;
 	}
 	
+	/**
+	 * Updates metadata on this fluent builder.
+	 */
 	@SuppressWarnings("unchecked")
 	public T audited(boolean audited) {
 		get().setAudited(audited);
 		return (T) this;
 	}
 	
+	/**
+	 * Updates metadata on this fluent builder.
+	 */
 	@SuppressWarnings("unchecked")
 	public T deprecated(boolean deprecated) {
 		get().setDeprecated(deprecated);
 		return (T) this;
 	}
 	
+	/**
+	 * Updates metadata on this fluent builder.
+	 */
 	@SuppressWarnings("unchecked")
 	public T description(String description) {
 		get().setDescription(description);
 		return (T) this;
 	}
 	
+	/**
+	 * Updates metadata on this fluent builder.
+	 */
 	@SuppressWarnings("unchecked")
 	public T displayName(String displayName) {
 		get().setDisplayName(displayName);
 		return (T) this;
 	}
 
+	/**
+	 * Updates metadata on this fluent builder.
+	 */
 	@SuppressWarnings("unchecked")
 	public T documentation(String documentation) {
 		get().setDocumentation(documentation);
 		return (T) this;
 	}
 
+	/**
+	 * Updates metadata on this fluent builder.
+	 */
 	@SuppressWarnings("unchecked")
 	public T name(String name) {
 		get().setName(name);
 		return (T) this;
 	}
 	
+	/**
+	 * Updates metadata on this fluent builder.
+	 */
 	@SuppressWarnings("unchecked")
 	public T trackChanges(boolean trackChanges) {
 		get().setTrackChanges(trackChanges);
 		return (T) this;
 	}
 	
+	/**
+	 * Updates metadata on this fluent builder.
+	 */
 	@SuppressWarnings("unchecked")
 	public T transientAttribute(boolean transientAttribute) {
 		get().setTransient(transientAttribute);
 		return (T) this;
 	}
 	
+	/**
+	 * Updates metadata on this fluent builder.
+	 */
 	@SuppressWarnings("unchecked")
 	public T usage(UsageType usage) {
 		get().setUsage(usage);
 		return (T) this;
 	}
 
+	/**
+	 * Updates metadata on this fluent builder.
+	 */
 	@SuppressWarnings("unchecked")
 	public T sensitivity(Sensitivity sensitivity) {
 		get().setSensitivity(sensitivity);
 		return (T) this;
 	}
 
-	public T defaultWidget(FluentContentImage image) {
-		return defaultWidgetReference(image);
+	/**
+	 * Sets a managed-content default widget for the attribute.
+	 *
+	 * @param content the content upload builder to store as the default widget
+	 * @return this builder
+	 */
+	public @Nonnull T defaultWidget(@Nonnull FluentContentUpload content) {
+		return defaultWidgetReference(content);
 	}
 
-	public T defaultWidget(FluentContentLink link) {
-		return defaultWidgetReference(link);
-	}
-
+	/**
+	 * Updates metadata on this fluent builder.
+	 */
 	public T defaultWidget(FluentCheckBox check) {
 		return defaultWidgetReference(check);
 	}
 
+	/**
+	 * Updates metadata on this fluent builder.
+	 */
 	public T defaultWidget(FluentColourPicker colour) {
 		return defaultWidgetReference(colour);
 	}
 
+	/**
+	 * Updates metadata on this fluent builder.
+	 */
 	public T defaultWidget(FluentCombo combo) {
 		return defaultWidgetReference(combo);
 	}
 
+	/**
+	 * Updates metadata on this fluent builder.
+	 */
 	public T defaultWidget(FluentGeometry geometry) {
 		return defaultWidgetReference(geometry);
 	}
 
+	/**
+	 * Updates metadata on this fluent builder.
+	 */
 	public T defaultWidget(FluentHTML html) {
 		return defaultWidgetReference(html);
 	}
 
+	/**
+	 * Updates metadata on this fluent builder.
+	 */
 	public T defaultWidget(FluentLookupDescription lookup) {
 		return defaultWidgetReference(lookup);
 	}
 
+	/**
+	 * Updates metadata on this fluent builder.
+	 */
 	public T defaultWidget(FluentPassword password) {
 		return defaultWidgetReference(password);
 	}
 
+	/**
+	 * Updates metadata on this fluent builder.
+	 */
 	public T defaultWidget(FluentRadio radio) {
 		return defaultWidgetReference(radio);
 	}
 
+	/**
+	 * Updates metadata on this fluent builder.
+	 */
 	public T defaultWidget(FluentRichText richText) {
 		return defaultWidgetReference(richText);
 	}
 
+	/**
+	 * Updates metadata on this fluent builder.
+	 */
 	public T defaultWidget(FluentSlider slider) {
 		return defaultWidgetReference(slider);
 	}
 
+	/**
+	 * Updates metadata on this fluent builder.
+	 */
 	public T defaultWidget(FluentSpinner spinner) {
 		return defaultWidgetReference(spinner);
 	}
 
+	/**
+	 * Updates metadata on this fluent builder.
+	 */
 	public T defaultWidget(FluentTextArea textArea) {
 		return defaultWidgetReference(textArea);
 	}
 
+	/**
+	 * Updates metadata on this fluent builder.
+	 */
 	public T defaultWidget(FluentTextField textField) {
 		return defaultWidgetReference(textField);
 	}

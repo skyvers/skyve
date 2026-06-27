@@ -26,14 +26,24 @@ import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Nullable;
 
+/**
+ * Abstract base for source generators that produce domain classes from Skyve
+ * metadata.
+ *
+ * <p>Coordinates module/document traversal and delegates language-specific
+ * output to subclasses.
+ *
+ * <p>Threading: not thread-safe; intended for single-threaded generation runs.
+ */
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate fragments of generated source and SQL keyword output.
 public abstract class DomainGenerator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DomainGenerator.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(DomainGenerator.class);
 
 	protected static final String DECIMAL2 = "Decimal2";
 	protected static final String DECIMAL5 = "Decimal5";
@@ -213,6 +223,7 @@ public abstract class DomainGenerator {
 	
 	protected Map<Path, CharSequence> generation = new TreeMap<>();
 	
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	protected DomainGenerator(boolean write,
 								boolean debug,
 								boolean multiTenant,
@@ -234,6 +245,7 @@ public abstract class DomainGenerator {
 		this.excludedModules = excludedModules;
 	}
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void validateCustomer(String customerName) throws Exception {
 		if (debug) System.out.println("Get customer " + customerName);
 		Customer customer = repository.getCustomer(customerName);
@@ -251,7 +263,11 @@ public abstract class DomainGenerator {
 				Document document = module.getDocument(customer, documentName);
 				if (debug) System.out.println("Validate document " + documentName);
 				repository.validateDocumentForGenerateDomain(customer, document);
-				if (repository.getGlobalRouter().getUxuiSelectorClassName() == null) {
+				Router globalRouter = repository.getGlobalRouter();
+				if (globalRouter == null) {
+					throw new MetaDataException("Global router must be defined.");
+				}
+				if (globalRouter.getUxuiSelectorClassName() == null) {
 					throw new MetaDataException("uxuiSelectorClassName attribute must be defined in the global router.");
 				}
 				for (Router moduleRouter : repository.getModuleRouters()) {
@@ -259,7 +275,11 @@ public abstract class DomainGenerator {
 						throw new MetaDataException("uxuiSelectorClassName attribute must only be defined in the global router.");
 					}
 				}
-				for (UxUiMetadata uxui : repository.getRouter().getUxUis()) {
+				Router router = repository.getRouter();
+				if (router == null) {
+					throw new MetaDataException("Router must be defined.");
+				}
+				for (UxUiMetadata uxui : router.getUxUis()) {
 					String uxuiName = uxui.getName();
 					if (debug) System.out.println("Get edit view for document " + documentName + " and uxui " + uxuiName);
 					View view = repository.getView(uxuiName, customer, document, ViewType.edit.toString());
@@ -279,6 +299,7 @@ public abstract class DomainGenerator {
 
 	public abstract void generate() throws Exception;
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public static final DomainGenerator newDomainGenerator(boolean write,
 															boolean debug,
 															boolean multiTenant,
@@ -288,9 +309,15 @@ public abstract class DomainGenerator {
 															String testPath,
 															String generatedTestPath,
 															String... excludedModules) {
-		return (UtilImpl.USING_JPA ? 
-					new JPADomainGenerator(debug, multiTenant, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules) : 
-					new OverridableDomainGenerator(write, debug, multiTenant, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules));
+		return new OverridableDomainGenerator(write,
+												debug,
+												multiTenant,
+												dialectOptions,
+												srcPath,
+												generatedSrcPath,
+												testPath,
+												generatedTestPath,
+												excludedModules);
 	}
 	
 	/**
@@ -338,6 +365,7 @@ public abstract class DomainGenerator {
 	/**
 	 * Generate the domain model.
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public static void generate(boolean debug,
 									boolean multiTenant,
 									DialectOptions dialectOptions,
@@ -420,6 +448,7 @@ public abstract class DomainGenerator {
 	 * @param args
 	 * @throws Exception
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static void main(String[] args) throws Exception {
 		if (args.length == 0 || args.length < 4) {
 			System.err.println("You must have at least the src path, generated path, test path and generated test path as arguments"

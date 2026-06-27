@@ -9,8 +9,17 @@ import org.skyve.web.WebContext;
 
 import modules.admin.domain.Communication;
 
+/**
+ * Deletes generated output files for a selected communication batch.
+ */
 public class DeleteBatch implements ServerSideAction<Communication> {
-
+	/**
+	 * Performs the execute operation.
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public ServerSideActionResult<Communication> execute(Communication bean, WebContext webContext)
 	throws Exception {
@@ -27,5 +36,4 @@ public class DeleteBatch implements ServerSideAction<Communication> {
 
 		return new ServerSideActionResult<>(bean);
 	}
-	
 }

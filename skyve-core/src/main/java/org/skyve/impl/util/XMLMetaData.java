@@ -44,7 +44,7 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.sail.language.Automation;
 import org.skyve.util.Util;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.xml.sax.SAXException;
 
 import jakarta.xml.bind.JAXBContext;
@@ -75,7 +75,7 @@ import jakarta.xml.bind.Unmarshaller;
  * Therefore we have to resort to post processing the output with DOM4J.
  */
 public class XMLMetaData {
-    private static final Logger LOGGER = LoggerFactory.getLogger(XMLMetaData.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(XMLMetaData.class);
 
 	public static final String COMMON_NAMESPACE = "http://www.skyve.org/xml/common";
 	public static final String ROUTER_NAMESPACE = "http://www.skyve.org/xml/router";
@@ -87,6 +87,7 @@ public class XMLMetaData {
 	public static final String SAIL_NAMESPACE = "http://www.skyve.org/xml/sail";
 	public static final String CDATA_START_TAG = "<![CDATA[";
 	public static final String CDATA_END_TAG = "]]>";
+	private static final String XML_SUFFIX = ".xml";
 	public static final int CDATA_MIN_LENGTH = CDATA_START_TAG.length() + CDATA_END_TAG.length();
 
 	private static final String CUSTOMER_OVERRIDDEN_PATH = "../../";
@@ -237,7 +238,7 @@ public class XMLMetaData {
 		filePath.append("customers/").append(customer.getName()).append('/');
 		File file = new File(filePath.toString());
 		file.mkdirs();
-		filePath.append(customer.getName()).append(".xml");
+		filePath.append(customer.getName()).append(XML_SUFFIX);
 		file = new File(filePath.toString());
 		LOGGER.info("Attempting to write {}.xml to {}", customer.getName(), file.getAbsolutePath());
 
@@ -336,7 +337,7 @@ public class XMLMetaData {
 		filePath.append(module.getName()).append('/');
 		File file = new File(filePath.toString());
 		file.mkdirs();
-		filePath.append(module.getName()).append(".xml");
+		filePath.append(module.getName()).append(XML_SUFFIX);
 		file = new File(filePath.toString());
 		LOGGER.info("Attempting to write module.xml to {}", file.getAbsolutePath());
 
@@ -434,7 +435,7 @@ public class XMLMetaData {
 		filePath.append(document.getName()).append('/');
 		File file = new File(filePath.toString());
 		file.mkdirs();
-		filePath.append(document.getName()).append(".xml");
+		filePath.append(document.getName()).append(XML_SUFFIX);
 		file = new File(filePath.toString());
 		LOGGER.info("Attempting to write document.xml to {}", file.getPath());
 
@@ -632,7 +633,7 @@ public class XMLMetaData {
 		filePath.append("actions/");
 		File file = new File(filePath.toString());
 		file.mkdirs();
-		filePath.append(action.getName()).append(".xml");
+		filePath.append(action.getName()).append(XML_SUFFIX);
 		file = new File(filePath.toString());
 		LOGGER.info("Attempting to write action.xml to {}", file.getPath());
 
@@ -737,7 +738,7 @@ public class XMLMetaData {
 		filePath.append("views/");
 		File file = new File(filePath.toString());
 		file.mkdirs();
-		filePath.append(view.getName()).append(".xml");
+		filePath.append(view.getName()).append(XML_SUFFIX);
 		file = new File(filePath.toString());
 		LOGGER.info("Attempting to write view.xml to {}", file.getPath());
 
@@ -884,6 +885,7 @@ public class XMLMetaData {
 		}
 
 		@Override
+		@SuppressWarnings("java:S3776") // Complexity OK
 		public void visit(Element node) {
 			Namespace ns = node.getNamespace();
 

@@ -40,12 +40,16 @@ import org.skyve.cache.JCacheConfig;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.FileUtil;
 import org.skyve.util.Util;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+/**
+ * Singleton {@link org.skyve.cache.Caching} implementation that backs Skyve's
+ * application-level caches with Infinispan/EhCache.
+ */
 public class DefaultCaching implements Caching {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCaching.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(DefaultCaching.class);
 
 	private static final DefaultCaching INSTANCE = new DefaultCaching();
 
@@ -61,12 +65,18 @@ public class DefaultCaching implements Caching {
 		// nothing to see here
 	}
 
+	/**
+	 * Returns the singleton instance.
+	 */
 	public static DefaultCaching get() {
 		return INSTANCE;
 	}
 
+	/**
+	 * Performs startup.
+	 */
 	@Override
-	@SuppressWarnings("resource")
+	@SuppressWarnings({"resource", "java:S1143", "java:S1163", "java:S3776"}) // OK to throw in the finally block here as it stops deployment; Complexity OK
 	public void startup() {
 		if (isUnInitialised()) {
 			try {
@@ -76,11 +86,8 @@ public class DefaultCaching implements Caching {
 				// Check if there are any persistent caches and multiple cache instances have been requested
 				if (UtilImpl.CACHE_MULTIPLE) {
 					for (CacheConfig<? extends Serializable, ? extends Serializable> config : UtilImpl.APP_CACHES) {
-						if (config instanceof EHCacheConfig<?, ?>) {
-							EHCacheConfig<?, ?> ehConfig = (EHCacheConfig<?, ?>) config;
-							if (ehConfig.isPersistent()) {
-								throw new IllegalStateException("Cannot run multiple cache instances when one of the caches is persistent");
-							}
+						if (config instanceof EHCacheConfig<?, ?> ehConfig && ehConfig.isPersistent()) {
+							throw new IllegalStateException("Cannot run multiple cache instances when one of the caches is persistent");
 						}
 					}
 				}
@@ -142,6 +149,9 @@ public class DefaultCaching implements Caching {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void shutdown() {
 		// NB all caches are closed by closing the cache managers
@@ -195,16 +205,25 @@ public class DefaultCaching implements Caching {
 					jCacheManager.isClosed());
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public PersistentCacheManager getEHCacheManager() {
 		return ehCacheManager;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public javax.cache.CacheManager getJCacheManager() {
 		return jCacheManager;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public <K extends Serializable, V extends Serializable> Cache<K, V> createEHCache(EHCacheConfig<K, V> config) {
 		ResourcePoolsBuilder rpb = ResourcePoolsBuilder.newResourcePoolsBuilder();
@@ -239,6 +258,9 @@ public class DefaultCaching implements Caching {
 
 	@Override
 	@SuppressWarnings("resource")
+	/**
+	 * Creates the jCache.
+	 */
 	public <K extends Serializable, V extends Serializable> javax.cache.Cache<K, V> createJCache(JCacheConfig<K, V> config) {
 		ResourcePoolsBuilder rpb = ResourcePoolsBuilder.heap(config.getHeapSizeEntries());
 		long offHeapSizeInMB = config.getOffHeapSizeInMB();
@@ -262,31 +284,49 @@ public class DefaultCaching implements Caching {
 		return getJCacheManager().createCache(config.getName(), Eh107Configuration.fromEhcacheCacheConfiguration(ccb));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void removeEHCache(String name) {
 		ehCacheManager.removeCache(name);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void destroyEHCache(String name) throws CachePersistenceException {
 		ehCacheManager.destroyCache(name);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final void destroyJCache(String name) {
 		jCacheManager.destroyCache(name);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public <K extends Object, V extends Object> Cache<K, V> getEHCache(String name, Class<K> keyClass, Class<V> valueClass) {
 		return ehCacheManager.getCache(name, keyClass, valueClass);
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public <K extends Object, V extends Object> javax.cache.Cache<K, V> getJCache(String name, Class<K> keyClass, Class<V> valueClass) {
 		return jCacheManager.getCache(name, keyClass, valueClass);
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public CacheStatistics getEHCacheStatistics(String name) {
 		CacheStatistics result = null;
@@ -299,11 +339,17 @@ public class DefaultCaching implements Caching {
 		return result;
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public TierStatistics getEHTierStatistics(CacheStatistics statistics, CacheTier tier) {
 		return (statistics == null) ? null : statistics.getTierStatistics().get(tier.toString());
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public CacheStatisticsMXBean getJCacheStatisticsMXBean(String name) {
 		final MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
@@ -312,8 +358,7 @@ public class DefaultCaching implements Caching {
 			objectName = new ObjectName("*:type=CacheStatistics,*,Cache=" + name);
 		}
 		catch (MalformedObjectNameException e) {
-			LOGGER.error("Could not create statistics object name for cache {}", name);
-			e.printStackTrace();
+			LOGGER.error("Could not create statistics object name for cache {}", name, e);
 		}
 		Set<ObjectName> beans = mbeanServer.queryNames(objectName, null);
 		if (beans.isEmpty()) {

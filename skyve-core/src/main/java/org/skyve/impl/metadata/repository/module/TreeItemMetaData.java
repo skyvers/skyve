@@ -7,6 +7,16 @@ import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB-annotated descriptor for a {@code <tree>} menu item in a module menu.
+ *
+ * <p>Navigates to a tree view for the named self-referencing (hierarchical)
+ * document and query.  Extends {@link ItemMetaData}.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see ItemMetaData
+ */
 @XmlType(name = "tree", namespace = XMLMetaData.MODULE_NAMESPACE)
 @XmlRootElement(name = "tree", namespace = XMLMetaData.MODULE_NAMESPACE)
 public class TreeItemMetaData extends ItemMetaData {

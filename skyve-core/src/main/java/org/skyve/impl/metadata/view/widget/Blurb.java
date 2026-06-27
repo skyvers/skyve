@@ -22,9 +22,15 @@ import jakarta.xml.bind.annotation.XmlValue;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
- * If a label width/height is not specified, it sizes to fit its contents.
+ * Renders static or localisable markup content in a view form item.
+ *
+ * <p>The markup value is stored as CDATA for XML metadata round-tripping.
+ * Supports optional absolute sizing, text alignment, visibility conditions,
+ * and text escaping/sanitisation controls.
  * 
- * @author mike
+ * If a label width/height is not specified, it sizes to fit its contents.
+ *
+ * <p>Threading: not thread-safe. Read-only after JAXB unmarshalling.
  */
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
@@ -63,52 +69,82 @@ public class Blurb implements Invisible, AbsoluteSize, ContentSpecifiedWidth, Fo
 //	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
 	private Map<String, String> properties = new TreeMap<>();
 
+	/**
+	 * Indicates that this widget does not render an external form label by default.
+	 */
 	@Override
 	public boolean showsLabelByDefault() {
 		return false;
 	}
 	
+	/**
+	 * Returns the configured markup content.
+	 */
 	public String getMarkup() {
 		return markup;
 	}
 
+	/**
+	 * Returns the markup localised for the current user locale.
+	 */
 	public String getLocalisedMarkup() {
 		return Util.i18n(markup);
 	}
 	
+	/**
+	 * Sets the markup content after trimming and empty-string normalisation.
+	 */
 	@XmlValue
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
 	public void setMarkup(String markup) {
 		this.markup = UtilImpl.processStringValue(markup);
 	}
 
+	/**
+	 * Returns the absolute pixel width, or {@code null} when content-driven sizing is used.
+	 */
 	@Override
 	public Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
+	/**
+	 * Sets the absolute pixel width.
+	 */
 	@Override
 	@XmlAttribute(required = false)
 	public void setPixelWidth(Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 
+	/**
+	 * Returns the absolute pixel height, or {@code null} when content-driven sizing is used.
+	 */
 	@Override
 	public Integer getPixelHeight() {
 		return pixelHeight;
 	}
 
+	/**
+	 * Sets the absolute pixel height.
+	 */
 	@Override
 	@XmlAttribute(required = false)
 	public void setPixelHeight(Integer pixelHeight) {
 		this.pixelHeight = pixelHeight;
 	}
 
+	/**
+	 * Returns the condition expression that hides this widget.
+	 */
 	@Override
 	public String getInvisibleConditionName() {
 		return invisibleConditionName;
 	}
 
+	/**
+	 * Sets the condition expression that hides this widget.
+	 */
 	@Override
 	@XmlAttribute(name = "invisible", required = false)
 	public void setInvisibleConditionName(String invisibleConditionName) {
@@ -121,41 +157,67 @@ public class Blurb implements Invisible, AbsoluteSize, ContentSpecifiedWidth, Fo
 		return null;
 	}
 
+	/**
+	 * Sets the visible condition by storing its negation as the internal invisible condition.
+	 */
 	@Override
 	@XmlAttribute(name = "visible", required = false)
 	public void setVisibleConditionName(String visibleConditionName) {
 		this.invisibleConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(visibleConditionName));
 	}
 
+	/**
+	 * Returns the configured text alignment override.
+	 *
+	 * <p>When {@code null}, renderer defaults apply.
+	 */
 	public HorizontalAlignment getTextAlignment() {
 		return textAlignment;
 	}
 
+	/**
+	 * Sets the text alignment override.
+	 */
 	@XmlAttribute(name = "textAlignment", required = false)
 	public void setTextAlignment(HorizontalAlignment textAlignment) {
 		this.textAlignment = textAlignment;
 	}
 
+	/**
+	 * Returns whether output escaping is explicitly configured.
+	 */
 	@Override
 	public Boolean getEscape() {
 		return escape;
 	}
 
+	/**
+	 * Sets explicit output escaping behaviour.
+	 */
 	@XmlAttribute
 	public void setEscape(Boolean escape) {
 		this.escape = escape;
 	}
 
+	/**
+	 * Returns the configured sanitisation mode.
+	 */
 	@Override
 	public Sanitisation getSanitise() {
 		return sanitise;
 	}
 
+	/**
+	 * Sets the sanitisation mode for markup rendering.
+	 */
 	@XmlAttribute
 	public void setSanitise(Sanitisation sanitise) {
 		this.sanitise = sanitise;
 	}
 	
+	/**
+	 * Returns the mutable decorator property map.
+	 */
 	@Override
 	public Map<String, String> getProperties() {
 		return properties;

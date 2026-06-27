@@ -18,7 +18,7 @@ import org.skyve.util.PushMessage;
 import org.skyve.util.PushMessage.PushMessageReceiver;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import com.google.common.base.MoreObjects;
 
@@ -66,7 +66,7 @@ import jakarta.ws.rs.sse.SseEventSink;
 @Path("/")
 @RequestScoped
 public class SseClientHandler implements PushMessageReceiver {
-	private static final Logger LOGGER = LoggerFactory.getLogger(SseClientHandler.class);
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SseClientHandler.class);
 
 	private final BlockingDeque<PushMessage> messageQueue = new LinkedBlockingDeque<>(UtilImpl.PUSH_MESSAGE_QUEUE_SIZE);
 
@@ -483,14 +483,15 @@ public class SseClientHandler implements PushMessageReceiver {
 
 		// Queue reported full, drop the oldest message and retry
 		PushMessage dropped = messageQueue.pollFirst();
+		String logUserName = (userName == null) ? "unknown-user" : userName;
 		if (dropped == null) {
 			// This should not normally happen: the queue reported full but nothing could be polled
 			LOGGER.error("Unable to drop oldest queued push message for {} because the queue was unexpectedly empty while reported full (capacity = {})",
-							(userName == null) ? "unknown-user" : userName,
+							logUserName,
 							Integer.valueOf(UtilImpl.PUSH_MESSAGE_QUEUE_SIZE));
 			if (! messageQueue.offerLast(message)) {
 				LOGGER.error("Dropping push message for {} because the queue remains full and no message could be dropped (capacity = {})",
-								(userName == null) ? "unknown-user" : userName,
+								logUserName,
 								Integer.valueOf(UtilImpl.PUSH_MESSAGE_QUEUE_SIZE));
 			}
 			return;
@@ -498,14 +499,14 @@ public class SseClientHandler implements PushMessageReceiver {
 
 		if (messageQueue.offerLast(message)) {
 			LOGGER.warn("Dropped oldest queued push message for {} because the queue is full ({})",
-							(userName == null) ? "unknown-user" : userName,
+							logUserName,
 							Integer.valueOf(UtilImpl.PUSH_MESSAGE_QUEUE_SIZE));
 			return;
 		}
 
 		// At this point we have dropped one message but still cannot enqueue the new one: unexpected error
 		LOGGER.error("Dropping push message for {} because the queue remained full even after dropping the oldest message (capacity = {})",
-						(userName == null) ? "unknown-user" : userName,
+						logUserName,
 						Integer.valueOf(UtilImpl.PUSH_MESSAGE_QUEUE_SIZE));
 	}
 

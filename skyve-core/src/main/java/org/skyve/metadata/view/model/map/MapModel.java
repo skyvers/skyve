@@ -6,15 +6,31 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.view.model.ViewModel;
 
 /**
- * Extend to add map features to a map.
- * Consider extending DefaultMapModel, DocumentQueryMapModel or ReferenceMapModel.
- * NB Skyve cannot determine the access control required to zoom in on features
- * since they are programmatically defined and hetrogeneous, so you may need to add
- * some "singular" accesses to either the encapsulating view or to various module roles. 
- * 
- * @author mike
+ * Abstract base for custom map view models that supply geographic features to Skyve map widgets.
  *
- * @param <T>	The encapsulating bean.
+ * <p>Subclass {@code MapModel} and reference the class from a view's {@code modelName} attribute
+ * to drive a Skyve {@code map} widget with application-defined geometry features.
+ * Implement {@link #getResult(Geometry)} to return a {@link MapResult} containing the
+ * {@link MapItem} instances to display for the current map viewport.
+ *
+ * <p>Consider extending one of the concrete subclasses instead:
+ * <ul>
+ *   <li>{@link DefaultMapModel} — queries beans via a document query and converts geometry
+ *       attributes to map items automatically.</li>
+ *   <li>{@link DocumentQueryMapModel} — drives items from a named metadata query.</li>
+ *   <li>{@link ReferenceMapModel} — builds items from a collection attribute on the driving bean.</li>
+ * </ul>
+ *
+ * <p><b>Note:</b> Skyve cannot determine the access control required to zoom in on features
+ * since they are programmatically defined and heterogeneous. If features span multiple modules,
+ * add "singular" accesses to the encapsulating view or to the relevant module roles.
+ *
+ * <p>Threading: one instance is created per render cycle and is not shared across threads.
+ *
+ * @param <T> the driving document bean type
+ * @see MapResult
+ * @see MapItem
+ * @see MapFeature
  */
 public abstract class MapModel<T extends Bean> implements ViewModel {
 	private T bean;

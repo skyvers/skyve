@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.io.Writer;
 import java.text.MessageFormat;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -27,9 +28,9 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.skyve.util.test.TestUtil;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -45,7 +46,7 @@ public class Util {
      * Replace with someting like this:
      * <p>
      * <code>
-     * private final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(MyClass.class);
+     * private final org.slf4j.Logger logger = org.skyve.util.logging.SkyveLoggerFactory.getLogger(MyClass.class);
      * </code>
      * 
      * @deprecated This logger will be removed; please switch to using
@@ -54,10 +55,11 @@ public class Util {
      *             see the Typical usage pattern suggested by slf4j</a>.
      * 
      */
-    @Deprecated(since = "9.3.0", forRemoval = true)
+	@SuppressWarnings({"removal", "java:S1133"})
+	@Deprecated(since = "9.3.0", forRemoval = true)
     public static final java.util.logging.Logger LOGGER = UtilImpl.LOGGER;
 
-    private static final Logger utilLogger = LoggerFactory.getLogger(Util.class);
+    private static final Logger utilLogger = SkyveLoggerFactory.getLogger(Util.class);
 
 	/**
 	 * Number of bytes in one megabyte (1 MB), defined as 1024L * 1024L (1,048,576 bytes).
@@ -141,15 +143,16 @@ public class Util {
 	
 	// language code -> (key -> string)
 	// Use of this map is WAY faster than using ResourceBundle which sux arse.
-	// This map is synchronized on during the put but reads are left free.
-	// The usage of this map is almost always read.
 	// The map is keyed on language code because there are less language codes than locales.
-	// NB Make the map volatile to ensure it is readable by multiple threads.
-	private static volatile Map<String, Map<String, String>> I18N_PROPERTIES = new TreeMap<>();
+	// NB Copy-on-write publication keeps reads lock-free and avoids concurrent TreeMap mutation.
+	private static final Object I18N_PROPERTIES_LOCK = new Object();
+	@SuppressWarnings("java:S3077") // Copy-on-write publishes immutable map snapshots through this volatile reference.
+	private static volatile Map<String, Map<String, String>> I18N_PROPERTIES = Collections.emptyMap();
 	
 	/**
 	 * Internationalises a string for a particular locale and performs message formatting on tokens like {0}, {1} etc.
 	 */
+	@SuppressWarnings("java:S3776") // complexity OK
 	public static @Nonnull String nullSafeI18n(@Nonnull String key, @Nullable Locale locale, String... values) {
 		String result = null;
 
@@ -158,7 +161,7 @@ public class Util {
 			String lang = l.getLanguage();
 			Map<String, String> properties = I18N_PROPERTIES.get(lang);
 			if (properties == null) {
-				synchronized (I18N_PROPERTIES) {
+				synchronized (I18N_PROPERTIES_LOCK) {
 					properties = I18N_PROPERTIES.get(lang);
 					if (properties == null) {
 						ResourceBundle bundle = ResourceBundle.getBundle("resources.i18n", l, Thread.currentThread().getContextClassLoader());
@@ -166,8 +169,14 @@ public class Util {
 						for (String bundleKey : bundle.keySet()) {
 							properties.put(bundleKey, bundle.getString(bundleKey));
 						}
+						// Make sure the properties are unmodifiable
+						properties = Collections.unmodifiableMap(properties);
 						ResourceBundle.clearCache(Thread.currentThread().getContextClassLoader());
-						I18N_PROPERTIES.put(lang, properties);
+
+						// Copy-on-write publication of the new unmodifiable properties map
+						Map<String, Map<String, String>> updatedProperties = new TreeMap<>(I18N_PROPERTIES);
+						updatedProperties.put(lang, properties);
+						I18N_PROPERTIES = Collections.unmodifiableMap(updatedProperties);
 					}
 				}
 			}
@@ -232,7 +241,7 @@ public class Util {
 	 * @param sequence	To determine the byte length of.
 	 * @return	The byte length.
 	 */
-	public static int UTF8Length(@Nonnull CharSequence sequence) {
+	public static int utf8Length(@Nonnull CharSequence sequence) {
 		int count = 0;
 		for (int i = 0, len = sequence.length(); i < len; i++) {
 			char ch = sequence.charAt(i);
@@ -345,13 +354,14 @@ public class Util {
 		return ((UtilImpl.SUPPORT_EMAIL_ADDRESS == null) ? "" : UtilImpl.SUPPORT_EMAIL_ADDRESS);
 	}
 
+	@SuppressWarnings("java:S3077") // Double-checked locking publishes an immutable Boolean reference.
 	private static volatile Boolean secureUrl = null;
 	
 	public static boolean isSecureUrl() {
 		if (secureUrl == null) {
 			synchronized (Util.class) {
 				if (secureUrl == null) {
-					secureUrl = Boolean.valueOf((UtilImpl.SERVER_URL == null) ? false : UtilImpl.SERVER_URL.startsWith("https://"));
+					secureUrl = Boolean.valueOf((UtilImpl.SERVER_URL != null) && UtilImpl.SERVER_URL.startsWith("https://"));
 				}
 			}
 		}
@@ -678,8 +688,7 @@ public class Util {
 	 * @return A list of distinct String values matching the prefix, ordered alphabetically
 	 * @throws Exception
 	 */
-	public static List<String> getCompleteSuggestions(String moduleName, String documentName, String attributeName, String value)
-			throws Exception {
+	public static List<String> getCompleteSuggestions(String moduleName, String documentName, String attributeName, String value) {
 		DocumentQuery q = CORE.getPersistence().newDocumentQuery(moduleName, documentName);
 		if (value != null) {
 			q.getFilter().addLike(attributeName, value + "%");

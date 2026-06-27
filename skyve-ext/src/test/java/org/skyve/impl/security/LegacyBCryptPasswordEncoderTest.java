@@ -54,4 +54,37 @@ public class LegacyBCryptPasswordEncoderTest {
 		assertTrue("Password truncated to same 72-byte prefix should match",
 				encoder.matches(extended, encodedBase));
 	}
+
+        // ---- upgradeEncoding() ----
+
+        @Test
+        public void testUpgradeEncodingDelegatesToBCrypt() {
+                // BCryptPasswordEncoder.upgradeEncoding() returns false for any standard BCrypt hash
+                String encoded = encoder.encode("testpass");
+                assertFalse(encoder.upgradeEncoding(encoded));
+        }
+
+        // ---- utf8ByteLength() 3-byte and 4-byte paths ----
+
+        @Test
+        public void testPasswordWith3ByteUtf8CharTruncatesCorrectly() {
+                // U+4E2D (中) = 3 UTF-8 bytes.
+                // 24 ASCII chars + 16 CJK chars = 24 + 48 = 72 bytes exactly; any suffix is truncated
+                String base = "a".repeat(24) + "\u4E2D".repeat(16);
+                String extended = base + "extra";
+                String encodedBase = encoder.encode(base);
+                assertTrue("Password truncated to same 72-byte prefix must match",
+                                encoder.matches(extended, encodedBase));
+        }
+
+        @Test
+        public void testPasswordWith4ByteUtf8CharTruncatesCorrectly() {
+                // U+1F600 (😀) = 4 UTF-8 bytes.
+                // 16 ASCII chars + 14 emoji = 16 + 56 = 72 bytes exactly; any suffix is truncated
+                String base = "a".repeat(16) + "\uD83D\uDE00".repeat(14);
+                String extended = base + "extra";
+                String encodedBase = encoder.encode(base);
+                assertTrue("Password truncated to same 72-byte prefix must match",
+                                encoder.matches(extended, encodedBase));
+        }
 }

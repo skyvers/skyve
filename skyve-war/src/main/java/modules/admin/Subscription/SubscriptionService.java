@@ -16,7 +16,8 @@ import modules.admin.domain.Contact.ContactType;
 import modules.admin.domain.Subscription;
 
 /**
- * This class acts as a service layer to encapsulate domain logic.
+ * Encapsulates subscription persistence operations used for anonymous
+ * unsubscribe and subscription existence checks.
  *
  * Add this line to classes that wish to use it: @Inject private transient SubscriptionService subscriptionService;
  */

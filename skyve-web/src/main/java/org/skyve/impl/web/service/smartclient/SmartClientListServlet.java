@@ -48,6 +48,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.SortParameterImpl;
 import org.skyve.impl.web.UserAgent;
+import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.FormatterName;
 import org.skyve.metadata.MetaDataException;
@@ -80,7 +81,7 @@ import org.skyve.util.monitoring.Monitoring;
 import org.skyve.util.monitoring.RequestKey;
 import org.skyve.web.SortParameter;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -89,13 +90,18 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 /**
- * Service for list views.
+ * Serves SmartClient list-view requests and filter criteria processing.
  */
 public class SmartClientListServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(SmartClientListServlet.class);
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SmartClientListServlet.class);
 	private static final Logger COMMAND_LOGGER = Category.COMMAND.logger();
+
+	private static final String CRITERIA_FIELD = "criteria";
+	private static final String DISPLAY_FIELD_PREFIX = "_display_";
+	private static final String OPERATOR_FIELD = "operator";
+	private static final String VALUE_FIELD = "value";
 
 	static final String ISC_META_DATA_PREFIX = "isc_metaDataPrefix";
 	static final String ISC_DATA_FORMAT = "isc_dataFormat";
@@ -104,6 +110,14 @@ public class SmartClientListServlet extends HttpServlet {
 	static final String ISC_JSON_PREFIX = "<SCRIPT>//'\"]]>>isc_JSONResponseStart>>";
 	static final String ISC_JSON_SUFFIX = "//isc_JSONResponseEnd";
 
+	/**
+	 * Handles SmartClient list requests submitted with HTTP GET.
+	 *
+	 * @param request inbound HTTP request
+	 * @param response outbound HTTP response
+	 * @throws ServletException if request validation fails
+	 * @throws IOException if the response cannot be written
+	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -112,6 +126,14 @@ public class SmartClientListServlet extends HttpServlet {
 		processRequest(request, response);
 	}
 
+	/**
+	 * Handles SmartClient list requests submitted with HTTP POST.
+	 *
+	 * @param request inbound HTTP request
+	 * @param response outbound HTTP response
+	 * @throws ServletException if request validation fails
+	 * @throws IOException if the response cannot be written
+	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -120,6 +142,7 @@ public class SmartClientListServlet extends HttpServlet {
 		processRequest(request, response);
 	}
 
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	private static void processRequest(HttpServletRequest request, HttpServletResponse response)
 	throws IOException {
 		response.setContentType(MimeType.json.toString());
@@ -244,7 +267,7 @@ public class SmartClientListServlet extends HttpServlet {
 								name.startsWith(ISC_INTERNAL_GRID_COLUMN_NAME_PREFIX) ||
 								// don't need to add the criteria parameter to the internal parameters map
 								// as these are processed specifically by fetch...
-								name.equals("criteria")) {
+								name.equals(CRITERIA_FIELD)) {
 							continue;
 						}
 						String[] values = request.getParameterValues(name);
@@ -331,7 +354,7 @@ public class SmartClientListServlet extends HttpServlet {
 									startRow,
 									endRow,
 									operator,
-									request.getParameterValues("criteria"),
+									request.getParameterValues(CRITERIA_FIELD),
 									sortParameters,
 									(summary == null) ? null : AggregateFunction.valueOf(summary),
 									// include a summary extra row (for list grids)
@@ -427,12 +450,12 @@ public class SmartClientListServlet extends HttpServlet {
 				}
 			}
 			catch (Throwable t) {
-				t.printStackTrace();
 				if (persistence != null) {
 					persistence.rollback();
 				}
 
-				SmartClientEditServlet.produceErrorResponse(t, operation, false, pw);
+				String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "SmartClient list request failed for operation " + operation, t);
+				SmartClientEditServlet.produceErrorResponse(t, operation, false, pw, reference);
 			}
 			finally {
 				if (persistence != null) {
@@ -442,6 +465,7 @@ public class SmartClientListServlet extends HttpServlet {
 		}
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private static void fetch(Module module,
 								Document queryDocument,
 								int startRow,
@@ -501,6 +525,7 @@ public class SmartClientListServlet extends HttpServlet {
 		Util.chunkCharsToWriter(message, pw);
 	}
 
+	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
 	private static void addFilterCriteriaToQuery(Module module,
 													Document document,
 													User user,
@@ -512,7 +537,7 @@ public class SmartClientListServlet extends HttpServlet {
 	throws Exception {
 		SortedMap<String, Object> mutableParameters = new TreeMap<>(parameters);
 		CompoundFilterOperator compoundFilterOperator = CompoundFilterOperator.and;
-		String operatorParameter = (String) mutableParameters.get("operator");
+		String operatorParameter = (String) mutableParameters.get(OPERATOR_FIELD);
 		if (operatorParameter != null) { // advanced criteria
 			try {
 				compoundFilterOperator = CompoundFilterOperator.valueOf(operatorParameter);
@@ -546,8 +571,8 @@ public class SmartClientListServlet extends HttpServlet {
 			}
 			addAdvancedFilterCriteriaToQuery(module, document, user, compoundFilterOperator, advancedCriteria, tagId, model);
 
-			mutableParameters.remove("operator");
-			mutableParameters.remove("criteria");
+			mutableParameters.remove(OPERATOR_FIELD);
+			mutableParameters.remove(CRITERIA_FIELD);
 		}
 
 		// check for filter by flag permissions
@@ -561,6 +586,7 @@ public class SmartClientListServlet extends HttpServlet {
 
 	// Add display values and sanitise
 	// Returns the projections required from JSON.marshall()
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static Set<String> processRows(List<Bean> beans,
 											ListModel<Bean> model,
 											User user,
@@ -582,12 +608,12 @@ public class SmartClientListServlet extends HttpServlet {
 			if (column instanceof MetaDataQueryProjectedColumn projectedColumn) {
 				FormatterName formatterName = projectedColumn.getFormatterName();
 				if (formatterName != null) {
-					formatBindings.put(key, new ImmutablePair<>(formatterName.name(), "_display_" + BindUtil.sanitiseBinding(key)));
+					formatBindings.put(key, new ImmutablePair<>(formatterName.name(), DISPLAY_FIELD_PREFIX + BindUtil.sanitiseBinding(key)));
 					continue;
 				}
 				String customFormatterName = projectedColumn.getCustomFormatterName();
 				if (customFormatterName != null) {
-					formatBindings.put(key, new ImmutablePair<>(customFormatterName, "_display_" + BindUtil.sanitiseBinding(key)));
+					formatBindings.put(key, new ImmutablePair<>(customFormatterName, DISPLAY_FIELD_PREFIX + BindUtil.sanitiseBinding(key)));
 					continue;
 				}
 			}
@@ -599,7 +625,7 @@ public class SmartClientListServlet extends HttpServlet {
 				if (attribute != null) {
 					DomainType domainType = attribute.getDomainType();
 					if ((domainType == DomainType.variant) || (domainType == DomainType.dynamic)) {
-						displayBindings.put(binding, "_display_" + BindUtil.sanitiseBinding(binding));
+						displayBindings.put(binding, DISPLAY_FIELD_PREFIX + BindUtil.sanitiseBinding(binding));
 					}
 				}
 			}
@@ -706,16 +732,21 @@ public class SmartClientListServlet extends HttpServlet {
 	}
 
 	/**
-	 * Add simple criteria to the query.
-	 * 
-	 * @param module
-	 * @param document
-	 * @param customer
-	 * @param query          Add the filter criteria to this query.
-	 * @param filterOperator The default operator to use for all filter critiera.
-	 * @param criteria       A Map of name value pairs
-	 * @throws Exception
+	 * Adds simple SmartClient criteria to the active list-model filter.
+	 *
+	 * <p>Side effects: converts request values into typed filter parameters and mutates
+	 * the supplied model's parameter map and filter tree.
+	 *
+	 * @param module module containing the target document
+	 * @param document target document metadata
+	 * @param customer active customer metadata
+	 * @param filterOperator default operator to use for values that are not forced to equals
+	 * @param criteria name/value criteria map from the SmartClient request
+	 * @param tagId optional tag identifier used when constructing criteria metadata
+	 * @param model list model receiving the filter criteria
+	 * @throws Exception if metadata resolution or value conversion fails
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static void addSimpleFilterCriteriaToQuery(Module module,
 														Document document,
 														Customer customer,
@@ -815,7 +846,7 @@ public class SmartClientListServlet extends HttpServlet {
 				for (int i = 0, l = values.length; i < l; i++) {
 					Object v = values[i];
 					if (v != null) {
-						v = fromString(binding, "value", v.toString(), customer, converter, type);
+						v = fromString(binding, VALUE_FIELD, v.toString(), customer, converter, type);
 						values[i] = v;
 					}
 				}
@@ -828,7 +859,7 @@ public class SmartClientListServlet extends HttpServlet {
 				for (int i = 0, l = values.size(); i < l; i++) {
 					Object v = values.get(i);
 					if (v != null) {
-						v = fromString(binding, "value", v.toString(), customer, converter, type);
+						v = fromString(binding, VALUE_FIELD, v.toString(), customer, converter, type);
 						values.set(i, v);
 					}
 				}
@@ -837,7 +868,7 @@ public class SmartClientListServlet extends HttpServlet {
 			else if (value != null) {
 				// Only convert filter parameters and parameters that aren't beans already
 				if (! (parameter && (value instanceof Bean))) {
-					value = fromString(binding, "value", value.toString(), customer, converter, type);
+					value = fromString(binding, VALUE_FIELD, value.toString(), customer, converter, type);
 					if (noLikey || (value instanceof Date) || (value instanceof Number) || (value instanceof Boolean)) {
 						fo = SmartClientFilterOperator.equals;
 					}
@@ -854,16 +885,19 @@ public class SmartClientListServlet extends HttpServlet {
 	}
 
 	/**
-	 * Add advanced filter criteria to a query.
-	 * 
-	 * @param module
-	 * @param document
-	 * @param customer
-	 * @param user
-	 * @param query                  The query to add the filter criteria to.
-	 * @param compoundFilterOperator The compound filter operator to use between criteria
-	 * @param criteria               List of advanced critiera.
-	 * @throws Exception
+	 * Adds advanced SmartClient criteria to the active list-model filter.
+	 *
+	 * <p>Side effects: mutates the supplied model's filter tree and parameter map while
+	 * recursively normalising nested criterion groups.
+	 *
+	 * @param module module containing the target document
+	 * @param document target document metadata
+	 * @param user active user
+	 * @param compoundFilterOperator compound operator to apply between sibling criteria
+	 * @param criteria nested SmartClient advanced criteria structure
+	 * @param tagId optional tag identifier used when constructing criteria metadata
+	 * @param model list model receiving the filter criteria
+	 * @throws Exception if metadata resolution or value conversion fails
 	 */
 	public static void addAdvancedFilterCriteriaToQuery(Module module,
 															Document document,
@@ -886,6 +920,7 @@ public class SmartClientListServlet extends HttpServlet {
 
 	private static final String HIERARCHICAL_PARENT_ID_SUFFIX = "." + HierarchicalBean.PARENT_ID;
 
+	@SuppressWarnings({"java:S107", "java:S3776", "java:S6541"}) // Long parameter list preserves the existing framework/API contract; complexity OK
 	private static void addAdvancedFilterCriteriaToQueryInternal(Module module,
 																	Document document,
 																	User user,
@@ -904,13 +939,13 @@ public class SmartClientListServlet extends HttpServlet {
 			if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("criterion = {}", JSON.marshall(criterion));
 			String binding = (String) criterion.get("fieldName");
 			binding = BindUtil.unsanitiseBinding(binding);
-			SmartClientFilterOperator filterOperator = SmartClientFilterOperator.valueOf((String) criterion.get("operator"));
+			SmartClientFilterOperator filterOperator = SmartClientFilterOperator.valueOf((String) criterion.get(OPERATOR_FIELD));
 
 			if (binding == null) { // advanced criteria
 				Filter subFilter = model.newFilter();
 				CompoundFilterOperator subCompoundFilterOperator = CompoundFilterOperator.valueOf(filterOperator.toString());
 				@SuppressWarnings("unchecked")
-				List<Map<String, Object>> subCritiera = (List<Map<String, Object>>) criterion.get("criteria");
+				List<Map<String, Object>> subCritiera = (List<Map<String, Object>>) criterion.get(CRITERIA_FIELD);
 				addAdvancedFilterCriteriaToQueryInternal(module,
 															document,
 															user,
@@ -929,7 +964,7 @@ public class SmartClientListServlet extends HttpServlet {
 				}
 			}
 			else { // simple criteria
-				Object value = criterion.get("value");
+				Object value = criterion.get(VALUE_FIELD);
 				String valueString = null;
 				if (value != null) {
 					valueString = Util.processStringValue(value.toString());
@@ -1011,7 +1046,7 @@ public class SmartClientListServlet extends HttpServlet {
 					for (int i = 0, l = values.size(); i < l; i++) {
 						Object v = values.get(i);
 						if (v != null) {
-							v = fromString(binding, "value", v.toString(), customer, converter, type);
+							v = fromString(binding, VALUE_FIELD, v.toString(), customer, converter, type);
 							values.set(i, v);
 						}
 					}
@@ -1031,7 +1066,7 @@ public class SmartClientListServlet extends HttpServlet {
 				else {
 					// Only convert filter parameters and parameters that aren't beans already
 					if (! (parameter && (value instanceof Bean))) {
-						value = fromString(binding, "value", valueString, customer, converter, type);
+						value = fromString(binding, VALUE_FIELD, valueString, customer, converter, type);
 					}
 				}
 
@@ -1305,9 +1340,8 @@ public class SmartClientListServlet extends HttpServlet {
 					result = BindUtil.fromString(customer, converter, type, valueString);
 				}
 				catch (Exception e1) {
-					LOGGER.warn("Could not convert {} as type {} with converter {}. See the following stack traces below", valueString, type, converter, e1);
-					e.printStackTrace();
-					e1.printStackTrace();
+					LOGGER.warn("Could not convert {} as type {} with converter {} from serialised form.", valueString, type, converter, e);
+					LOGGER.warn("Could not convert {} as type {} with converter {} from display form.", valueString, type, converter, e1);
 					if (valueBinding == null) {
 						throw new ValidationException(new Message("Please enter a properly formatted " + valueDescription));
 					}
@@ -1345,6 +1379,7 @@ public class SmartClientListServlet extends HttpServlet {
 		return filterOperator;
 	}
 
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	private static void addCriterionToFilter(String binding,
 												SmartClientFilterOperator filterOperator,
 												Object value,
@@ -1621,8 +1656,8 @@ public class SmartClientListServlet extends HttpServlet {
 		properties.remove(Bean.BIZ_KEY);
 
 		// remove parameters that are not really properties
-		properties.remove("operator");
-		properties.remove("criteria");
+		properties.remove(OPERATOR_FIELD);
+		properties.remove(CRITERIA_FIELD);
 
 		// remove parameters that are not editable
 		for (MetaDataQueryColumn column : model.getColumns()) {
@@ -1690,6 +1725,7 @@ public class SmartClientListServlet extends HttpServlet {
 		Util.chunkCharsToWriter(returnTagUpdateMessage(user, customer, parameters, module, model, false), pw);
 	}
 
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private static void flag(HttpServletRequest request,
 								PrintWriter pw,
 								AbstractPersistence persistence,
@@ -1718,8 +1754,7 @@ public class SmartClientListServlet extends HttpServlet {
 														Document document,
 														ListModel<Bean> model, 
 														Bean bean,
-														boolean rowIstagged)
-	throws Exception {
+														boolean rowIstagged) {
 		StringBuilder message = new StringBuilder(256);
 		message.append("{\"response\":{\"status\":0,\"data\":");
 
@@ -1747,8 +1782,7 @@ public class SmartClientListServlet extends HttpServlet {
 															Map<String, Object> parameters,
 															Module module,
 															ListModel<Bean> model,
-															boolean tagging)
-	throws Exception {
+															boolean tagging) {
 		StringBuilder message = new StringBuilder(256);
 		message.append("{\"response\":{\"status\":0,\"data\":[");
 

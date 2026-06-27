@@ -13,6 +13,16 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 
+/**
+ * JAXB-annotated event action that triggers a client-side rerender of the
+ * view or a specified target widget.
+ *
+ * <p>When attached to a widget event handler, a {@code <rerender>} action
+ * causes the view renderer to refresh the bound area.  Optional
+ * {@code clientValidation} controls whether form validation is run first.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ */
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "rerender")
 public class RerenderEventAction implements EventAction {

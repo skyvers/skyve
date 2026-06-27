@@ -1,6 +1,7 @@
 package modules.test;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 import org.skyve.util.Util;
 
 import modules.admin.AuditJSONGenerator;
@@ -15,83 +16,83 @@ import modules.test.domain.MappedExtensionSingleStrategy;
 import modules.test.domain.MappedSubclassedJoinedStrategy;
 import modules.test.domain.MappedSubclassedSingleStrategy;
 
-public class AuditJSONGeneratorTests extends AbstractSkyveTest {
+class AuditJSONGeneratorTests extends AbstractSkyveTest {
 
 	@Test
-	public void testAllAttributesPersistent() throws Exception {
-		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 5);
+	void testAllAttributesPersistent() throws Exception {
+		AllAttributesPersistent test = Assertions.assertDoesNotThrow(() -> Util.constructRandomInstance(u, m, aapd, 5));
 		AuditJSONGenerator ajg = new AuditJSONGenerator(c);
 		ajg.visit(aapd, test, c);
 		ajg.toJSON();
 	}
 
 	@Test
-	public void testAllAttributesRequiredPersistent() throws Exception {
-		AllAttributesRequiredPersistent test = Util.constructRandomInstance(u, m, aarpd, 5);
+	void testAllAttributesRequiredPersistent() throws Exception {
+		AllAttributesRequiredPersistent test = Assertions.assertDoesNotThrow(() -> Util.constructRandomInstance(u, m, aarpd, 5));
 		AuditJSONGenerator ajg = new AuditJSONGenerator(c);
 		ajg.visit(aarpd, test, c);
 		ajg.toJSON();
 	}
 
 	@Test
-	public void testInverseOneToOnePersistent() throws Exception {
-		InverseOneToOnePersistent test = Util.constructRandomInstance(u, m, io2opd, 5);
+	void testInverseOneToOnePersistent() throws Exception {
+		InverseOneToOnePersistent test = Assertions.assertDoesNotThrow(() -> Util.constructRandomInstance(u, m, io2opd, 5));
 		AuditJSONGenerator ajg = new AuditJSONGenerator(c);
 		ajg.visit(io2opd, test, c);
 		ajg.toJSON();
 	}
 
 	@Test
-	public void testInverseOneToManyPersistent() throws Exception {
-		InverseOneToManyPersistent test = Util.constructRandomInstance(u, m, io2mpd, 5);
+	void testInverseOneToManyPersistent() throws Exception {
+		InverseOneToManyPersistent test = Assertions.assertDoesNotThrow(() -> Util.constructRandomInstance(u, m, io2mpd, 5));
 		AuditJSONGenerator ajg = new AuditJSONGenerator(c);
 		ajg.visit(io2mpd, test, c);
 		ajg.toJSON();
 	}
 
 	@Test
-	public void testInverseManyToManyPersistent() throws Exception {
-		InverseManyToManyPersistent test = Util.constructRandomInstance(u, m, im2mpd, 5);
+	void testInverseManyToManyPersistent() throws Exception {
+		InverseManyToManyPersistent test = Assertions.assertDoesNotThrow(() -> Util.constructRandomInstance(u, m, im2mpd, 5));
 		AuditJSONGenerator ajg = new AuditJSONGenerator(c);
 		ajg.visit(im2mpd, test, c);
 		ajg.toJSON();
 	}
 
 	@Test
-	public void testMappedBase() throws Exception {
-		MappedBase test = Util.constructRandomInstance(u, m, mbd, 5);
+	void testMappedBase() throws Exception {
+		MappedBase test = Assertions.assertDoesNotThrow(() -> Util.constructRandomInstance(u, m, mbd, 5));
 		AuditJSONGenerator ajg = new AuditJSONGenerator(c);
 		ajg.visit(mbd, test, c);
 		ajg.toJSON();
 	}
 
 	@Test
-	public void testMappedExtensionSingleStrategy() throws Exception {
-		MappedExtensionSingleStrategy test = Util.constructRandomInstance(u, m, messd, 5);
+	void testMappedExtensionSingleStrategy() throws Exception {
+		MappedExtensionSingleStrategy test = Assertions.assertDoesNotThrow(() -> Util.constructRandomInstance(u, m, messd, 5));
 		AuditJSONGenerator ajg = new AuditJSONGenerator(c);
 		ajg.visit(messd, test, c);
 		ajg.toJSON();
 	}
 
 	@Test
-	public void testMappedExtensionJoinedStrategy() throws Exception {
-		MappedExtensionJoinedStrategy test = Util.constructRandomInstance(u, m, mejsd, 5);
+	void testMappedExtensionJoinedStrategy() throws Exception {
+		MappedExtensionJoinedStrategy test = Assertions.assertDoesNotThrow(() -> Util.constructRandomInstance(u, m, mejsd, 5));
 		AuditJSONGenerator ajg = new AuditJSONGenerator(c);
 		ajg.visit(mejsd, test, c);
 		ajg.toJSON();
 	}
 
 	@Test
-	public void testMappedSubclassedSingleStrategy() throws Exception {
-		MappedSubclassedSingleStrategy test = Util.constructRandomInstance(u, m, msssd, 5);
+	void testMappedSubclassedSingleStrategy() throws Exception {
+		MappedSubclassedSingleStrategy test = Assertions.assertDoesNotThrow(() -> Util.constructRandomInstance(u, m, msssd, 5));
 		AuditJSONGenerator ajg = new AuditJSONGenerator(c);
 		ajg.visit(msssd, test, c);
 		ajg.toJSON();
 	}
 
 	@Test
-	public void testMappedSubclassedJoinedStrategy() throws Exception {
-		MappedSubclassedJoinedStrategy test = Util.constructRandomInstance(u, m, msjsd, 5);
+	void testMappedSubclassedJoinedStrategy() throws Exception {
+		MappedSubclassedJoinedStrategy test = Assertions.assertDoesNotThrow(() -> Util.constructRandomInstance(u, m, msjsd, 5));
 		AuditJSONGenerator ajg = new AuditJSONGenerator(c);
 		ajg.visit(msjsd, test, c);
 		ajg.toJSON();

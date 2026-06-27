@@ -9,17 +9,35 @@ import org.skyve.util.monitoring.ResourceMeasurements;
 
 import modules.admin.domain.MonitoringDashboard.Period;
 
+/**
+ * Line chart model for system CPU usage trend data in the monitoring dashboard.
+ */
 public class SystemCpuUsageModel extends AbstractSystemResourceModel {
+	/**
+	 * Returns the chart dataset label.
+	 * @return the result
+	 */
 	@Override
 	protected String getChartLabel() {
 		return "System CPU Usage (%)";
 	}
 
+	/**
+	 * Returns the chart title for the selected period.
+	 * @param period the period value
+	 * @return the result
+	 */
 	@Override
 	protected String getChartTitle(Period period) {
 		return "System CPU Usage - " + period.toLocalisedDescription();
 	}
 
+	/**
+	 * Selects system CPU usage telemetry aligned to the chosen period.
+	 * @param resourceMeasurements the resourceMeasurements value
+	 * @param period the period value
+	 * @return the result
+	 */
 	@Override
 	protected Map<Integer, Float> getResourceDataForPeriod(ResourceMeasurements resourceMeasurements, Period period) {
 		switch (period) {
@@ -38,6 +56,11 @@ public class SystemCpuUsageModel extends AbstractSystemResourceModel {
 		}
 	}
 
+	/**
+	 * Applies usage-based line colouring for CPU charts.
+	 * @param cd the cd value
+	 * @param values the values value
+	 */
 	@Override
 	protected void setChartColors(ChartData cd, List<Number> values) {
 		Color lineColour = Color.LIGHT_GRAY;

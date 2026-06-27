@@ -10,7 +10,12 @@ import org.skyve.domain.types.TimeOnly;
 import org.skyve.impl.util.TimeUtil;
 
 /**
- * 
+ * Provides date/time utility operations used across Skyve runtime and tests.
+ *
+ * <p>This facade delegates to {@link org.skyve.impl.util.TimeUtil} for field mutation,
+ * range/difference calculations, financial-year helpers, and date arithmetic.
+ * Methods mutate the provided {@link java.util.Date} instances in place unless they
+ * explicitly return a derived value.
  */
 public class Time {
 	/**
@@ -20,14 +25,18 @@ public class Time {
 	}
 
 	/**
-	 * Sets the time component of the date to 12 midnight.
+	 * Clears hour, minute, second, and millisecond components on the supplied date.
+	 *
+	 * @param date The date instance to mutate
 	 */
 	public static void clearTimeComponent(Date date) {
 		TimeUtil.clearTimeComponent(date);
 	}
 
 	/**
-	 * Sets the second component of the date to 0.
+	 * Clears second and millisecond components on the supplied date/time value.
+	 *
+	 * @param date The date instance to mutate
 	 */
 	public static void clearSecondAndMillisecondComponent(Date date) {
 		TimeUtil.clearSecondAndMillisecondComponent(date);
@@ -35,6 +44,8 @@ public class Time {
 
 	/**
 	 * Clears the millisecond component of the date/time.
+	 *
+	 * @param date The date instance to mutate
 	 */
 	public static final void clearMillisecondComponent(Date date) {
 		TimeUtil.clearMillisecondComponent(date);
@@ -49,76 +60,84 @@ public class Time {
 	}
 	
 	/**
-	 * 
-	 * @param date
-	 * @param hours24
-	 * @param minutes
-	 * @param seconds
+	 * Sets the time-of-day fields on the supplied date.
+	 *
+	 * @param date The date instance to mutate
+	 * @param hours24 Hour of day in 24-hour format (0-23)
+	 * @param minutes Minute of hour (0-59)
+	 * @param seconds Second of minute (0-59)
 	 */
 	public static final void setTime(Date date, int hours24, int minutes, int seconds) {
 		TimeUtil.setTime(date, hours24, minutes, seconds);
 	}
 
 	/**
-	 * 
-	 * @param date
-	 * @param dayOfMonth
-	 * @param monthStartingAt1
-	 * @param year
+	 * Sets the calendar date fields on the supplied date.
+	 *
+	 * @param date The date instance to mutate
+	 * @param dayOfMonth Day of month (1-31)
+	 * @param monthStartingAt1 Month of year (1-12)
+	 * @param year Year value
 	 */
 	public static final void setDate(Date date, int dayOfMonth, int monthStartingAt1, int year) {
 		TimeUtil.setDate(date, dayOfMonth, monthStartingAt1, year);
 	}
 
 	/**
-	 * 
-	 * @param date
-	 * @return
+	 * Returns the year component from a date.
+	 *
+	 * @param date Source date
+	 * @return Year component
 	 */
 	public static final int getYear(Date date) {
 		return TimeUtil.getYear(date);
 	}
 
 	/**
-	 * 
-	 * @param date
-	 * @return
+	 * Returns the month component as a one-based value.
+	 *
+	 * @param date Source date
+	 * @return Month in range 1-12
 	 */
 	public static final int getMonthStartingFrom1(Date date) {
 		return TimeUtil.getMonthStartingFrom1(date);
 	}
 
 	/**
-	 * 
-	 * @param date
-	 * @return
+	 * Returns the month component as a zero-based value.
+	 *
+	 * @param date Source date
+	 * @return Month in range 0-11
 	 */
 	public static final int getMonthStartingFrom0(Date date) {
 		return TimeUtil.getMonthStartingFrom0(date);
 	}
 
 	/**
-	 * 
-	 * @param date
-	 * @return
+	 * Returns the day-of-month component.
+	 *
+	 * @param date Source date
+	 * @return Day of month in range 1-31
 	 */
 	public static final int getDay(Date date) {
 		return TimeUtil.getDay(date);
 	}
 
 	/**
-	 * 
-	 * @param year
-	 * @return
+	 * Determines whether a year is a leap year.
+	 *
+	 * @param year Year value
+	 * @return {@code true} when the year is leap, otherwise {@code false}
 	 */
 	public static final boolean isLeapYear(int year) {
 		return TimeUtil.isLeapYear(year);
 	}
 	
 	/**
-	 * 
-	 * @param year
-	 * @return
+	 * Returns the number of days in a year.
+	 *
+	 * @param year Year value
+	 * @return 365 or 366 depending on leap-year status
 	 */
 	public static final int getDaysInYear(int year) {
 		return TimeUtil.getDaysInYear(year);
@@ -127,8 +146,8 @@ public class Time {
 	/**
 	 * Adds a number of hours to a date.
 	 * 
-	 * @param date	The date to add to.
-	 * @param numberOfDays The number of days to add (This can be negative).
+	 * @param date The date instance to mutate
+	 * @param numberOfHours The number of hours to add (may be negative)
 	 */
 	public static final void addHours(Date date, int numberOfHours) {
 		TimeUtil.addHours(date, numberOfHours);
@@ -177,7 +196,10 @@ public class Time {
 	/**
 	 * Returns the Financial Year in which this date exists.
 	 * 
-	 * Note: this only applies for locales where the financial year begins on July 1.
+	 * <p>Note: this calculation assumes financial year boundaries starting on July 1.
+	 *
+	 * @param date Source date
+	 * @return Financial year number for the supplied date
 	 */
 	public static final int getFinancialYear(Date date) {
 		return TimeUtil.getFinancialYear(date);
@@ -186,7 +208,10 @@ public class Time {
 	/**
 	 * Returns the Financial Year String in which this date exists.
 	 * 
-	 * Note: this only applies for locales where the financial year begins on July 1.
+	 * <p>Note: this calculation assumes financial year boundaries starting on July 1.
+	 *
+	 * @param date Source date
+	 * @return Financial year label (for example {@code 2025/26})
 	 */
 	public static final String getFinancialYearString(Date date) {
 		return TimeUtil.getFinancialYearString(date);
@@ -229,31 +254,34 @@ public class Time {
 	}
 
 	/**
-	 * Find the next day of the week.
+	 * Rolls a date forward to the next occurrence of a specified day-of-week.
 	 * 
-	 * @param date The existing date to roll.
-	 * @param dayOfWeek The int representing the day of the week - from {@link Calendar}. eg Calendar.MONDAY
-	 * @return	The date passed in to allow method chaining.
+	 * @param date The date instance to mutate
+	 * @param dayOfWeek Day-of-week constant from {@link Calendar} (for example {@link Calendar#MONDAY})
+	 * @return The same mutated date instance for chaining
 	 */
 	public static final Date findNextDayOfWeek(Date date, int dayOfWeek) {
 		return TimeUtil.findNextDayOfWeek(date, dayOfWeek);
 	}
 	
 	/**
-	 * Find the next day of the week.
+	 * Ensures the supplied date falls on a work day.
 	 * 
-	 * @param date The existing date to roll.
-	 * @return	The date passed in to allow method chaining.
+	 * <p>If the date is on a weekend, it is advanced to the next work day.
+	 *
+	 * @param date The date instance to mutate
+	 * @return The same mutated date instance for chaining
 	 */
 	public static final Date ensureWorkDay(Date date) {
 		return TimeUtil.ensureWorkDay(date);
 	}
 	
 	/**
-	 * Output a description of the days between 2 dates
-	 * @param now	The reference date to compare.
-	 * @param agoOrUntil	When to compare the now date to.
-	 * @return	"Today", "Yesterday", "Tomorrow" or "? days ago" or "? days time".
+	 * Produces a human-readable relative-day description between two dates.
+	 *
+	 * @param now The reference date
+	 * @param agoOrUntil The comparison date
+	 * @return Relative description such as "Today", "Yesterday", "Tomorrow", or day offsets
 	 */
 	public static final String daysBetweenDescription(Date now, Date agoOrUntil) {
 		return TimeUtil.daysBetweenDescription(now, agoOrUntil);
@@ -311,6 +339,10 @@ public class Time {
 
 	/**
 	 * Returns the first non-null date value
+	 *
+	 * @param val Primary value
+	 * @param ifNullValue Fallback value when {@code val} is null
+	 * @return {@code val} when non-null, otherwise {@code ifNullValue}
 	 */
 	public static DateOnly coalesce(DateOnly val, DateOnly ifNullValue) {
 		return TimeUtil.coalesce(val, ifNullValue);

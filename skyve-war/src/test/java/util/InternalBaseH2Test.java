@@ -163,10 +163,21 @@ abstract class InternalBaseH2Test {
 	 * Common tear down after each test
 	 */
 	protected static void internalAfter() {
+		internalAfter(true);
+	}
+
+	/**
+	 * Common tear down after each test.
+	 * @param close Whether to close and remove the current persistence after rollback.
+	 */
+	protected static void internalAfter(boolean close) {
 		final AbstractPersistence persistence = AbstractPersistence.get();
 		persistence.rollback();
 		persistence.evictAllCached();
 		persistence.evictAllSharedCache();
+		if (close) {
+			persistence.commit(true);
+		}
 		SingletonCachedBizlet.dispose();
 	}
 

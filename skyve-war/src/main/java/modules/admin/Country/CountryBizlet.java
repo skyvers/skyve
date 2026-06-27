@@ -6,8 +6,12 @@ import org.skyve.web.WebContext;
 
 import jakarta.inject.Inject;
 
+/**
+ * Applies Country document business rules used by the admin module.
+ */
 public class CountryBizlet extends Bizlet<CountryExtension> {
 	@Inject
+	@SuppressWarnings("java:S6813") // allow member injection
 	private transient CountryService countryService;
 
 	/**

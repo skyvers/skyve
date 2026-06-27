@@ -1,7 +1,7 @@
 package org.skyve.impl.snapshot;
 
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Nullable;
 
@@ -11,16 +11,19 @@ import jakarta.annotation.Nullable;
  */
 public abstract class SnapshotAdapter {
 	// NB An instance member LOGGER is OK here as this is not Serializable
-    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+	@SuppressWarnings("java:S116")
+	protected final Logger LOGGER = SkyveLoggerFactory.getLogger(getClass());
 
 	/**
 	 * SmartClient adapter.
 	 */
+	@SuppressWarnings("java:S2390") // parent class initialises concrete subclass instances by design
 	public static final SnapshotAdapter SMART_CLIENT = new SmartClientSnapshotAdapter();
 	
 	/**
 	 * Vue adapter.
 	 */
+	@SuppressWarnings("java:S2390") // parent class initialises concrete subclass instances by design
 	public static final SnapshotAdapter VUE = new VueSnapshotAdapter();
 	
 	/**

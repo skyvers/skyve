@@ -21,8 +21,25 @@ import io.undertow.servlet.api.ServletInfo;
 import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.core.Application;
 
+/**
+ * Configures the JAX-RS application and boots an embedded Undertow runtime for
+ * standalone Skyve execution.
+ *
+ * <p>Threading: application bootstrap is performed by the caller of
+ * {@link #main(String[])}. The returned JAX-RS class set from
+ * {@link #getClasses()} is immutable by convention after construction.
+ */
 @ApplicationPath("/")
 public class SkyveApplication extends Application {
+	/**
+	 * Returns the JAX-RS resource classes exposed by this application.
+	 *
+	 * <p>Currently this method registers {@link MyResource} as the root resource
+	 * type.
+	 *
+	 * @return the concrete resource class set for RESTEasy deployment; never
+	 *         {@code null}
+	 */
 	@Override
 	public Set<Class<?>> getClasses() {
 		Set<Class<?>> classes = new HashSet<>();
@@ -30,6 +47,17 @@ public class SkyveApplication extends Application {
 		return classes;
 	}
 
+	/**
+	 * Starts the embedded Undertow server and deploys this JAX-RS application.
+	 *
+	 * <p>Side effects: initializes RESTEasy deployment metadata, registers CDI
+	 * listeners and servlet mappings, opens an HTTP listener on localhost:8080,
+	 * and blocks the current thread for a fixed interval.
+	 *
+	 * @param args command-line arguments; currently ignored
+	 * @throws InterruptedException if the blocking sleep at the end of startup is
+	 *         interrupted
+	 */
 	public static void main(String[] args) throws InterruptedException {
 		UndertowJaxrsServer server = new UndertowJaxrsServer();
 
@@ -49,9 +77,6 @@ public class SkyveApplication extends Application {
 		deploymentInfo.addServlet(info);
 		
 		ResourceManager resourceManager = new ClassPathResourceManager(SkyveContextListener.class.getClassLoader(), "META-INF/resources/");
-//		deploymentInfo.setResourceManager(resourceManager);
-			
-//        deploymentInfo.addInitParameter(null, null)
 
 		server.deploy(deploymentInfo);
 
@@ -62,11 +87,9 @@ public class SkyveApplication extends Application {
 			@Override
 			public void handleRequest(HttpServerExchange exchange) throws Exception {
 				Handlers.resource(resourceManager);
-//				Handlers.resource(new PathResourceManager(Paths.get(System.getProperty("user.home")), 100)).setDirectoryListingEnabled(true);
 			}
 		});
 		builder.build().start();
-//		server.start(builder);
 		Thread.sleep(60000);
 	}
 }

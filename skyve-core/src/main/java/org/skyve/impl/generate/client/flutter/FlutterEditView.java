@@ -16,6 +16,9 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 
+/**
+ * Renders Flutter edit view scaffolding from Skyve metadata.
+ */
 public class FlutterEditView extends FlutterView {
     private Module module;
     private Document document;

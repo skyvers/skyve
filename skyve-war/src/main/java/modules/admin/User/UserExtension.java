@@ -30,6 +30,10 @@ import modules.admin.domain.User;
 import modules.admin.domain.UserProxy;
 import modules.admin.domain.UserRole;
 
+/**
+ * Extends admin {@link User} with metadata-user mapping and activation workflows.
+ */
+@SuppressWarnings("java:S110") // This inheritance-depth warning is ridiculous for intentional framework hierarchies.
 public class UserExtension extends User {
 	private static final long serialVersionUID = 3422968996147520436L;
 
@@ -43,7 +47,7 @@ public class UserExtension extends User {
 			+ "<p>To complete your account setup, please click the activation link below.</p>"
 			+ "<p><a href=\"{%2$s}\">{%2$s}</a></p>"
 			+ "<p>If you have any questions about your new account, contact us at <a href=\"mailto:%3$s\">%3$s</a>.</p>",
-			Binder.createCompoundBinding(User.contactPropertyName, Contact.namePropertyName),
+			Binder.createCompoundBinding(UserProxy.contactPropertyName, Contact.namePropertyName),
 			activateUrlPropertyName,
 			Util.getSupportEmailAddress());
 
@@ -54,6 +58,7 @@ public class UserExtension extends User {
 	 * @return List of UserRole objects representing the assigned roles
 	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public List<UserRole> getAssignedRoles() {
 		List<UserRole> assignedRoles = super.getAssignedRoles();
 		if (!determinedRoles) {
@@ -99,6 +104,7 @@ public class UserExtension extends User {
 	 *
 	 * @return the metadata user that is this user
 	 */
+	@Override
 	public org.skyve.metadata.user.User toMetaDataUser() {
 		UserImpl result = null;
 
@@ -232,11 +238,26 @@ public class UserExtension extends User {
 
 		private String bizUserId;
 
+		/**
+		 * Creates a visitor that stamps traversed beans with the supplied owner user id.
+		 *
+		 * @param bizUserId The owning biz user id to apply.
+		 */
 		public UpdateBizUserVisitor(String bizUserId) {
 			super(false, false);
 			this.bizUserId = bizUserId;
 		}
 
+		/**
+		 * Applies ownership to each visited bean in the object graph.
+		 *
+		 * @param binding The current binding path.
+		 * @param document The visited document metadata.
+		 * @param owningDocument The owning document metadata.
+		 * @param owningRelation The relation traversed to reach this bean.
+		 * @param bean The visited bean.
+		 * @return Always {@code true} to continue traversal.
+		 */
 		@Override
 		protected boolean accept(String binding, Document document, Document owningDocument, Relation owningRelation, Bean bean) {
 			bean.setBizUserId(bizUserId);
@@ -244,6 +265,11 @@ public class UserExtension extends User {
 		}
 	}
 
+	/**
+	 * Builds a defensive business key that includes inactive-state marker when applicable.
+	 *
+	 * @return A human-readable key for list and log contexts.
+	 */
 	public String bizKey() {
 		StringBuilder sb = new StringBuilder(64);
 		try {

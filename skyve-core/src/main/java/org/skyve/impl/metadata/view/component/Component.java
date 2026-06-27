@@ -19,7 +19,6 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.view.Invisible;
-import org.skyve.metadata.view.View;
 import org.skyve.util.Binder.TargetMetaData;
 
 import jakarta.xml.bind.annotation.XmlAttribute;
@@ -161,6 +160,7 @@ public class Component extends AbstractBound implements NamedMetaData, Decorated
 		return v.getFragment(customer, m, d, uxui, this);
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void link(String uxui, CustomerImpl customer, ModuleImpl owningModule, DocumentImpl owningDocument, String viewName) {
 		String binding = getBinding();
 		ModuleImpl m = null;
@@ -202,12 +202,15 @@ public class Component extends AbstractBound implements NamedMetaData, Decorated
 		targetDocument = d.getName();
 		targetView = (name == null) ? viewName : name;
 		
-		View originalView = d.getView(uxui, customer, targetView);
-		if (originalView == null) {
+		try {
+			d.getView(uxui, customer, targetView);
+		}
+		catch (MetaDataException e) {
 			throw new MetaDataException("Component named " + name + " in view " + viewName + " for document " +
 											owningModule.getName() + '.' + owningDocument.getName() +
 											" for uxui " + uxui + " does not reference a valid view " +
-											((name == null) ? viewName : name) + " in document " + m.getName() + '.' + d.getName());
+											((name == null) ? viewName : name) + " in document " + m.getName() + '.' + d.getName(),
+											e);
 		}
 	}
 }

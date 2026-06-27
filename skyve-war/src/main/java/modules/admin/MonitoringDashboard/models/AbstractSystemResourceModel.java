@@ -17,7 +17,10 @@ import modules.admin.domain.MonitoringDashboard.Period;
  * Provides common functionality for timestamp calculation, formatting, and chart data setup.
  */
 public abstract class AbstractSystemResourceModel extends ChartModel<MonitoringDashboard> {
-
+	/**
+	 * Executes getChartData.
+	 * @return the result
+	 */
 	@Override
 	public ChartData getChartData() {
 		MonitoringDashboard bean = getBean();
@@ -76,22 +79,30 @@ public abstract class AbstractSystemResourceModel extends ChartModel<MonitoringD
 
 	/**
 	 * Get the chart label for this resource type.
+	 * @return the result
 	 */
 	protected abstract String getChartLabel();
 
 	/**
 	 * Get the chart title for this resource type and period.
+	 * @param period the period value
+	 * @return the result
 	 */
 	protected abstract String getChartTitle(Period period);
 
 	/**
 	 * Get resource data for the specified period.
+	 * @param resourceMeasurements the captured system resource measurements
+	 * @param period the selected monitoring period
+	 * @return a time-indexed map of resource values for the requested period
 	 */
 	protected abstract Map<Integer, ? extends Number> getResourceDataForPeriod(ResourceMeasurements resourceMeasurements,
 			Period period);
 
 	/**
 	 * Set chart colors based on the resource values.
+	 * @param cd the cd value
+	 * @param values the values value
 	 */
 	protected abstract void setChartColors(ChartData cd, List<Number> values);
 }

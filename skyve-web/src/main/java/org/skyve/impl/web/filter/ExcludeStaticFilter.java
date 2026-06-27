@@ -16,6 +16,12 @@ public abstract class ExcludeStaticFilter implements Filter {
     // A list of all static URL prefixes
     private String[] staticURLPrefixes;
 
+	/**
+	 * Initializes static URL prefixes from servlet-context configuration.
+	 *
+	 * @param config filter configuration used to read static URL prefix settings
+	 * @throws ServletException when filter initialization fails
+	 */
 	@Override
 	public void init(FilterConfig config) throws ServletException {
 		String urls = Util.processStringValue(config.getServletContext().getInitParameter("staticURLPrefixes"));
@@ -27,6 +33,9 @@ public abstract class ExcludeStaticFilter implements Filter {
 		}
 	}
 
+	/**
+	 * Releases cached static URL prefix configuration.
+	 */
 	@Override
 	public void destroy() {
 		staticURLPrefixes = null;

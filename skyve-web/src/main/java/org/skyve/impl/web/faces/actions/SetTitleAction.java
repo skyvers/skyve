@@ -14,18 +14,35 @@ import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Binder;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
+/**
+ * Executes a Faces callback action within the current Skyve web context.
+ */
 public class SetTitleAction extends FacesAction<Void> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SetTitleAction.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SetTitleAction.class);
     private static final Logger FACES_LOGGER = Category.FACES.logger();
 
 	private FacesView facesView;
+
+	/**
+	 * Creates an action that updates the supplied view model's title.
+	 *
+	 * @param facesView Faces view receiving the raw resolved title; must not be {@code null}
+	 */
 	public SetTitleAction(FacesView facesView) {
 		this.facesView = facesView;
 	}
-	
+
+	/**
+	 * Resolves the active view title and stores the raw text on the current
+	 * {@link FacesView}.
+	 *
+	 * <p>Side effects: reads the current Skyve user/repository metadata and mutates
+	 * {@code facesView}. HTML escaping is deliberately left to the JSF/PrimeFaces
+	 * page-title output boundary.
+	 */
 	@Override
 	public Void callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("SetTitleAction");

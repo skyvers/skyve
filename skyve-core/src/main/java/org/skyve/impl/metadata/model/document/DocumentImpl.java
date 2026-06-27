@@ -73,9 +73,27 @@ import org.slf4j.Logger;
 
 import jakarta.annotation.Nonnull;
 
+/**
+ * Runtime implementation of the {@link Document} contract, populated from a
+ * document XML descriptor during repository bootstrap.
+ *
+ * <p>Extends {@link ModelImpl} with document-specific metadata: persistence
+ * descriptor, conditions, bizlet class reference, actions, and the complete
+ * attribute hierarchy (owned attributes and inherited ones from the parent
+ * document).  After loading the fully-resolved instance is placed in the
+ * repository cache and shared read-only across all threads.
+ *
+ * <p>Threading: not thread-safe.  The instance is written during loading and
+ * read-only afterwards.
+ *
+ * @see Document
+ * @see ModelImpl
+ */
 public final class DocumentImpl extends ModelImpl implements Document {
     private static final long serialVersionUID = 9091172268741052691L;
     private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
+    
+	private static final String DOCUMENT_PREFIX = "Document ";
 
 	private long lastModifiedMillis = Long.MAX_VALUE;
 	private long lastCheckedMillis = System.currentTimeMillis();
@@ -124,26 +142,58 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	
 	private Map<String, String> properties = new TreeMap<>();
 	
+	/**
+	 * Returns the last metadata modification timestamp recorded for this document.
+	 *
+	 * @return the last modification time in milliseconds since the epoch.
+	 */
 	@Override
 	public long getLastModifiedMillis() {
 		return lastModifiedMillis;
 	}
 
+	/**
+	 * Sets the last metadata modification timestamp recorded for this document.
+	 *
+	 * @param lastModifiedMillis the last modification time in milliseconds since the epoch.
+	 */
 	public void setLastModifiedMillis(long lastModifiedMillis) {
 		this.lastModifiedMillis = lastModifiedMillis;
 	}
 
+	/**
+	 * Returns the last repository validation timestamp recorded for this document.
+	 *
+	 * @return the last check time in milliseconds since the epoch.
+	 */
 	@Override
 	public long getLastCheckedMillis() {
 		return lastCheckedMillis;
 	}
 
+	/**
+	 * Sets the last repository validation timestamp recorded for this document.
+	 *
+	 * @param lastCheckedMillis the last check time in milliseconds since the epoch.
+	 */
 	@Override
 	public void setLastCheckedMillis(long lastCheckedMillis) {
 		this.lastCheckedMillis = lastCheckedMillis;
 	}
 
+	/**
+	 * Creates a new bean instance for the supplied user context.
+	 *
+	 * <p>Side effects: performs dependency injection, applies implicit biz identity fields,
+	 * executes customer interceptors and the document bizlet {@code newInstance()} hook,
+	 * and clears initial dirty-tracking values.
+	 *
+	 * @param user the active user context used to derive customer and ownership values.
+	 * @return a fully initialised bean instance.
+	 * @throws Exception if bean creation, interception, or bizlet execution fails.
+	 */
 	@Override
+	@SuppressWarnings({ "unused", "null" }) // Defensive check against App coders Bizlet.newIntance() returning null
 	public <T extends Bean> T newInstance(User user) throws Exception {
 		Customer customer = user.getCustomer();
 		T result = newInstance(customer);
@@ -183,7 +233,18 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		return result;
 	}
 
-	@SuppressWarnings("unchecked")
+	/**
+	 * Resolves the concrete bean class for this document and customer.
+	 *
+	 * <p>For dynamic documents this returns an in-memory dynamic bean type. For static
+	 * documents this resolves generated domain and optional extension classes through the
+	 * repository vtable, including customer overrides.
+	 *
+	 * @param customer the customer context used for repository vtable resolution.
+	 * @return the concrete bean class.
+	 * @throws ClassNotFoundException if a mapped class cannot be loaded.
+	 */
+	@SuppressWarnings({"unchecked", "java:S3776", "java:S1141"}) // Complexity OK; try-catch is clearer here than multiple ifs and throws is required for Class.forName()
 	public <T extends Bean> Class<T> getBeanClass(@Nonnull Customer customer)
 	throws ClassNotFoundException {
 		if (isDynamic()) {
@@ -277,14 +338,16 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	}
 
 	/**
-	 * Instantiates a static compiled bean by default constructor or a DynamicBean.
-	 * This is not the normal bean newInstance() static factory method as it does not call the bizlet or interceptor etc.
-	 * This is akin the the vanilla Java default constructor (but also caters for dynamic documents)
-	 * @param <T>	The type of bean to produce.
-	 * @param customer	The customer.
-	 * @return	The bean.
-	 * @throws Exception
+	 * Instantiates a base bean without running interceptors or bizlet {@code newInstance()}.
+	 *
+	 * <p>Creates either a dynamic bean with default framework properties or a compiled
+	 * domain bean via its default constructor, then applies dynamic attribute defaults.
+	 *
+	 * @param customer the customer context used for class resolution and attribute defaults.
+	 * @return the newly created base bean.
+	 * @throws Exception if class resolution or object construction fails.
 	 */
+	@SuppressWarnings({"java:S3776", "java:S112"}) // Complexity OK; throws Exception in API for app coder convenience
 	public <T extends Bean> T newInstance(Customer customer) throws Exception {
 		T result = null;
 		
@@ -360,6 +423,9 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		return result;
 	}
 	
+	/**
+	 * Populates dynamic default values for dynamic attributes on a compiled bean instance.
+	 */
 	public void populateDynamicAttributeDefaults(Customer customer, Bean bean) {
 		Module m = customer.getModule(getOwningModuleName());
 
@@ -370,6 +436,14 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		});
 	}
 	
+	/**
+	 * Computes the framework default value for a dynamic attribute.
+	 *
+	 * @param attribute the attribute being initialised.
+	 * @param bean the bean receiving the default value.
+	 * @return the resolved default value, or {@code null} when no default applies.
+	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static Object dynamicDefaultValue(Attribute attribute, Bean bean) {
 		Object result = null;
 		
@@ -382,7 +456,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 						result = BindUtil.formatMessage(defaultValue, bean);
 					}
 					else {
-						// NB Take care of escaped {
+						// NB Take care of escaped '{'
 						result = defaultValue.replace("\\{", "{");
 					}
 				}
@@ -407,32 +481,77 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		
 		return result;
 	}
-	
+
+	/**
+	 * Returns the named unique constraint declared on this document.
+	 *
+	 * @param name the unique-constraint name.
+	 * @return the matching constraint, or {@code null} if it is not defined.
+	 */
 	@Override
 	public UniqueConstraint getUniqueConstraint(String name) {
 		return (UniqueConstraint) getMetaData(name);
 	}
 
+	/**
+	 * Registers a unique constraint on this document.
+	 *
+	 * <p>Side effects: stores the constraint in both the general metadata map and the
+	 * ordered unique-constraint list.
+	 *
+	 * @param constraint the constraint metadata to register.
+	 */
 	public void putUniqueConstraint(UniqueConstraint constraint) {
 		putMetaData(constraint.getName(), constraint);
 		uniqueConstraints.add(constraint);
 	}
 
+	/**
+	 * Resolves a dynamic image definition for this document.
+	 *
+	 * @param customer the customer context used for repository lookup.
+	 * @param name the dynamic-image name.
+	 * @return the resolved dynamic image, or {@code null} if none is defined.
+	 */
 	@Override
 	public <T extends Bean> DynamicImage<T> getDynamicImage(Customer customer, String name) {
-		return ProvidedRepositoryFactory.get().getDynamicImage(customer, this, name, true);
+		DynamicImage<T> result = ProvidedRepositoryFactory.get().getDynamicImage(customer, this, name, true);
+		if (result == null) {
+			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no dynamic image defined for " + name);
+		}
+		return result;
 	}
 
+	/**
+	 * Returns the unique constraints declared on this document.
+	 *
+	 * @return an unmodifiable list of unique constraints in declaration order.
+	 */
 	@Override
 	public List<UniqueConstraint> getUniqueConstraints() {
 		return Collections.unmodifiableList(uniqueConstraints);
 	}
-	
+
+	/**
+	 * Returns the reference metadata registered under the supplied field name.
+	 *
+	 * @param referenceName the reference field name.
+	 * @return the matching reference, or {@code null} if the field is not a reference.
+	 */
 	@Override
 	public Reference getReferenceByName(String referenceName) {
 		return referencesByFieldNames.get(referenceName);
 	}
 
+	/**
+	 * Resolves the related document for the named relation, searching up the document
+	 * inheritance hierarchy when necessary.
+	 *
+	 * @param customer the customer context used for document resolution.
+	 * @param relationName the relation field name.
+	 * @return the related document metadata.
+	 * @throws IllegalStateException if the relation or its target document is not defined.
+	 */
 	@Override
 	public Document getRelatedDocument(Customer customer, String relationName) {
 		Relation relation = relationsByFieldNames.get(relationName);
@@ -458,11 +577,24 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		return customer.getModule(getOwningModuleName()).getDocument(customer, relatedDocumentName);
 	}
 
+	/**
+	 * Returns the names of reference relations declared on this document.
+	 *
+	 * @return the live set view of reference field names.
+	 */
 	@Override
 	public Set<String> getReferenceNames() {
 		return referencesByFieldNames.keySet();
 	}
 
+	/**
+	 * Registers a relation on this document.
+	 *
+	 * <p>Side effects: updates the relation map, optionally records the relation as a
+	 * reference, and exposes it through the document attribute registry.
+	 *
+	 * @param relation the relation metadata to register.
+	 */
 	public void putRelation(Relation relation) {
 		relationsByFieldNames.put(relation.getName(), relation);
 		if (relation instanceof Reference reference) {
@@ -471,52 +603,109 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		putAttribute(relation);
 	}
 
+	/**
+	 * Returns the parent or master document name for this document.
+	 *
+	 * @return the parent document name, or {@code null} when this document has no parent.
+	 */
 	@Override
 	public String getParentDocumentName() {
 		return parentDocumentName;
 	}
 
+	/**
+	 * Sets the parent or master document name for this document.
+	 *
+	 * @param parentDocumentName the parent document name, or {@code null} for a root document.
+	 */
 	public void setParentDocumentName(String parentDocumentName) {
 		this.parentDocumentName = parentDocumentName;
 	}
 	
+	/**
+	 * Indicates whether the parent foreign key should be indexed in the database.
+	 *
+	 * @return {@code Boolean.TRUE} to create the index, {@code Boolean.FALSE} to suppress it,
+	 *         or {@code null} to use repository defaults.
+	 */
 	public Boolean getParentDatabaseIndex() {
 		return parentDatabaseIndex;
 	}
 
+	/**
+	 * Sets whether the parent foreign key should be indexed in the database.
+	 *
+	 * @param parentDatabaseIndex {@code Boolean.TRUE} to create the index,
+	 *        {@code Boolean.FALSE} to suppress it, or {@code null} to use repository defaults.
+	 */
 	public void setParentDatabaseIndex(Boolean parentDatabaseIndex) {
 		this.parentDatabaseIndex = parentDatabaseIndex;
 	}
 
+	/**
+	 * Returns the generated Java source used to implement the business-key method.
+	 *
+	 * @return the business-key method source, or {@code null} if none is defined.
+	 */
 	public String getBizKeyMethodCode() {
 		return bizKeyMethodCode;
 	}
 
+	/**
+	 * Sets the generated Java source used to implement the business-key method.
+	 *
+	 * @param bizKeyMethodCode the business-key method source.
+	 */
 	public void setBizKeyMethodCode(String bizKeyMethodCode) {
 		this.bizKeyMethodCode = bizKeyMethodCode;
 	}
 
+	/**
+	 * Returns the declarative business-key expression for this document.
+	 *
+	 * @return the business-key expression, or {@code null} if none is defined.
+	 */
 	@Override
 	public String getBizKeyExpression() {
 		return bizKeyExpression;
 	}
 
+	/**
+	 * Sets the declarative business-key expression for this document.
+	 *
+	 * @param bizKeyExpression the expression used to derive the business key.
+	 */
 	public void setBizKeyExpression(String bizKeyExpression) {
 		this.bizKeyExpression = bizKeyExpression;
 	}
 	
+	/**
+	 * Returns the sensitivity classification applied to this document's business key.
+	 *
+	 * @return the business-key sensitivity.
+	 */
 	@Override
 	public Sensitivity getBizKeySensitity() {
 		return bizKeySensitity;
 	}
 
+	/**
+	 * Sets the sensitivity classification applied to this document's business key.
+	 *
+	 * @param bizKeySensitity the business-key sensitivity.
+	 */
 	public void setBizKeySensitity(Sensitivity bizKeySensitity) {
 		this.bizKeySensitity = bizKeySensitity;
 	}
 
 	/**
-	 * Set the bizKey value on the given persistent bean.
-	 * Note that Skyve may truncate the bizKey to the particular max data store length base don the Skyve Database Dialect.
+	 * Sets the business-key value on the supplied persistent bean.
+	 *
+	 * <p>Side effects: evaluates the dynamic business-key expression when required,
+	 * normalises blank values, substitutes {@code "Unknown"} for missing results, and
+	 * truncates the final key to the database dialect's maximum supported length.
+	 *
+	 * @param bean the persistent bean whose business key should be updated.
 	 */
 	@Override
 	public void setBizKey(PersistentBean bean) {
@@ -524,10 +713,12 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		String bizKey = null;
 		if (isDynamic()) {
 			try {
-				bizKey = BindUtil.formatMessage(getBizKeyExpression(), bean);
+				if (bizKeyExpression != null) {
+					bizKey = BindUtil.formatMessage(bizKeyExpression, bean);
+				}
 			}
 			catch (@SuppressWarnings("unused") Exception e) {
-				bizKey = null;
+				// nothing to do here
 			}
 		}
 		else {
@@ -550,35 +741,70 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		bean.setBizKey(bizKey);
 	}
 	
+	/**
+	 * Indicates whether any collection targeting this document preserves row order.
+	 *
+	 * @return {@code true} if the document participates in an ordered collection.
+	 */
 	@Override
 	public boolean isOrdered() {
 		return ordered;
 	}
 
+	/**
+	 * Sets whether any collection targeting this document preserves row order.
+	 *
+	 * @param ordered {@code true} if the document participates in an ordered collection.
+	 */
 	public void setOrdered(boolean ordered) {
 		this.ordered = ordered;
 	}
 
+	/**
+	 * Returns the condition metadata declared on this document.
+	 *
+	 * @return the live condition map keyed by condition name.
+	 */
 	public Map<String, Condition> getConditions() {
 		return conditions;
 	}
-	
+
+	/**
+	 * Resolves the parent document metadata for this document.
+	 *
+	 * @param customer the customer context used for repository resolution, or {@code null}
+	 *        to resolve against the base repository only.
+	 * @return the parent document metadata, or {@code null} when this document has no parent.
+	 */
 	@Override
 	public Document getParentDocument(Customer customer) {
 		Document result = null;
 
 		if (parentDocumentName != null) {
+			String owningModuleName = getOwningModuleName();
 			if (customer == null) {
-				result = ProvidedRepositoryFactory.get().getModule(null, getOwningModuleName()).getDocument(null, parentDocumentName);
+				Module owningModule = ProvidedRepositoryFactory.get().getModule(null, owningModuleName);
+				if (owningModule != null) {
+					result = owningModule.getDocument(null, parentDocumentName);
+				}
+				else {
+					throw new MetaDataException("Owning module " + owningModuleName + " not found in repository");
+				}
 			}
 			else {
-				result = customer.getModule(getOwningModuleName()).getDocument(customer, parentDocumentName);
+				result = customer.getModule(owningModuleName).getDocument(customer, parentDocumentName);
 			}
 		}
 
 		return result;
 	}
 
+	/**
+	 * Resolves the bizlet for this document and attaches any metadata-defined bizlet.
+	 *
+	 * @param customer the customer context used for repository lookup.
+	 * @return the resolved bizlet, a metadata-only adapter, or {@code null} if no bizlet exists.
+	 */
 	@Override
 	public <T extends Bean> Bizlet<T> getBizlet(Customer customer) {
 		ProvidedRepository repository = ProvidedRepositoryFactory.get();
@@ -594,26 +820,85 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		return result;
 	}
 
+	/**
+	 * Resolves the named comparison model for this document.
+	 *
+	 * @param customer the customer context used for repository lookup.
+	 * @param modelName the comparison-model name.
+	 * @param runtime whether runtime overrides should be consulted.
+	 * @return the resolved comparison model, or {@code null} if none is defined.
+	 */
 	@Override
 	public <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(Customer customer, String modelName, boolean runtime) {
-		return ProvidedRepositoryFactory.get().getComparisonModel(customer, this, modelName, runtime);
+		ComparisonModel<T, C> result = ProvidedRepositoryFactory.get().getComparisonModel(customer, this, modelName, runtime);
+		if (result == null) {
+			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no comparison model defined for " + modelName);
+		}
+		return result;
 	}
-	
+
+	/**
+	 * Resolves the named map model for this document.
+	 *
+	 * @param customer the customer context used for repository lookup.
+	 * @param modelName the map-model name.
+	 * @param runtime whether runtime overrides should be consulted.
+	 * @return the resolved map model, or {@code null} if none is defined.
+	 */
 	@Override
 	public <T extends Bean> MapModel<T> getMapModel(Customer customer, String modelName, boolean runtime) {
-		return ProvidedRepositoryFactory.get().getMapModel(customer, this, modelName, runtime);
+		MapModel<T> result = ProvidedRepositoryFactory.get().getMapModel(customer, this, modelName, runtime);
+		if (result == null) {
+			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no map model defined for " + modelName);
+		}
+		return result;
 	}
 
+	/**
+	 * Resolves the named chart model for this document.
+	 *
+	 * @param customer the customer context used for repository lookup.
+	 * @param modelName the chart-model name.
+	 * @param runtime whether runtime overrides should be consulted.
+	 * @return the resolved chart model, or {@code null} if none is defined.
+	 */
 	@Override
 	public <T extends Bean> ChartModel<T> getChartModel(Customer customer, String modelName, boolean runtime) {
-		return ProvidedRepositoryFactory.get().getChartModel(customer, this, modelName, runtime);
+		ChartModel<T> result = ProvidedRepositoryFactory.get().getChartModel(customer, this, modelName, runtime);
+		if (result == null) {
+			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no chart model defined for " + modelName);
+		}
+		return result;
 	}
 
+	/**
+	 * Resolves the named list model for this document.
+	 *
+	 * @param customer the customer context used for repository lookup.
+	 * @param modelName the list-model name.
+	 * @param runtime whether runtime overrides should be consulted.
+	 * @return the resolved list model, or {@code null} if none is defined.
+	 */
 	@Override
 	public <T extends Bean> ListModel<T> getListModel(Customer customer, String modelName, boolean runtime) {
-		return ProvidedRepositoryFactory.get().getListModel(customer, this, modelName, runtime);
+		ListModel<T> result = ProvidedRepositoryFactory.get().getListModel(customer, this, modelName, runtime);
+		if (result == null) {
+			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no list model defined for " + modelName);
+		}
+		return result;
 	}
-	
+
+	/**
+	 * Resolves the named server-side action for this document.
+	 *
+	 * <p>If the action is declared purely in metadata, this returns a metadata-backed
+	 * {@link ServerSideMetaDataAction} wrapper instead of a compiled action class.
+	 *
+	 * @param customer the customer context used for repository lookup.
+	 * @param className the action class or metadata action name.
+	 * @param runtime whether runtime overrides should be consulted.
+	 * @return the resolved server-side action, or {@code null} if none is defined.
+	 */
 	@Override
 	public ServerSideAction<Bean> getServerSideAction(Customer customer, String className, boolean runtime) {
 		ProvidedRepository repository = ProvidedRepositoryFactory.get();
@@ -621,30 +906,98 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		if (metaDataAction != null) {
 			return new ServerSideMetaDataAction(metaDataAction);
 		}
-		return repository.getServerSideAction(customer, this, className, runtime);
+		
+		ServerSideAction<Bean> result = repository.getServerSideAction(customer, this, className, runtime);
+		if (result == null) {
+			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no server-side action defined for " + className);
+		}
+		return result;
 	}
 
+	/**
+	 * Resolves the named BizPort export action for this document.
+	 *
+	 * @param customer the customer context used for repository lookup.
+	 * @param className the export action class name.
+	 * @param runtime whether runtime overrides should be consulted.
+	 * @return the resolved export action, or {@code null} if none is defined.
+	 */
 	@Override
 	public BizExportAction getBizExportAction(Customer customer, String className, boolean runtime) {
-		return ProvidedRepositoryFactory.get().getBizExportAction(customer, this, className, runtime);
+		BizExportAction result = ProvidedRepositoryFactory.get().getBizExportAction(customer, this, className, runtime);
+		if (result == null) {
+			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no BizPort export action defined for " + className);
+		}
+		return result;
 	}
 
+	/**
+	 * Resolves the named BizPort import action for this document.
+	 *
+	 * @param customer the customer context used for repository lookup.
+	 * @param className the import action class name.
+	 * @param runtime whether runtime overrides should be consulted.
+	 * @return the resolved import action, or {@code null} if none is defined.
+	 */
 	@Override
 	public BizImportAction getBizImportAction(Customer customer, String className, boolean runtime) {
-		return ProvidedRepositoryFactory.get().getBizImportAction(customer, this, className, runtime);
+		BizImportAction result = ProvidedRepositoryFactory.get().getBizImportAction(customer, this, className, runtime);
+		if (result == null) {
+			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no BizPort import action defined for " + className);
+		}
+		return result;
 	}
 
+	/**
+	 * Resolves the named download action for this document.
+	 *
+	 * @param customer the customer context used for repository lookup.
+	 * @param className the download action class name.
+	 * @param runtime whether runtime overrides should be consulted.
+	 * @return the resolved download action, or {@code null} if none is defined.
+	 */
 	@Override
 	public DownloadAction<Bean> getDownloadAction(Customer customer, String className, boolean runtime) {
-		return ProvidedRepositoryFactory.get().getDownloadAction(customer, this, className, runtime);
+		DownloadAction<Bean> result = ProvidedRepositoryFactory.get().getDownloadAction(customer, this, className, runtime);
+		if (result == null) {
+			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no download action defined for " + className);
+		}
+		return result;
 	}
 
+	/**
+	 * Resolves the named upload action for this document.
+	 *
+	 * @param customer the customer context used for repository lookup.
+	 * @param className the upload action class name.
+	 * @param runtime whether runtime overrides should be consulted.
+	 * @return the resolved upload action, or {@code null} if none is defined.
+	 */
 	@Override
 	public UploadAction<Bean> getUploadAction(Customer customer, String className, boolean runtime) {
-		return ProvidedRepositoryFactory.get().getUploadAction(customer, this, className, runtime);
+		UploadAction<Bean> result = ProvidedRepositoryFactory.get().getUploadAction(customer, this, className, runtime);
+		if (result == null) {
+			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no upload action defined for " + className);
+		}
+		return result;
 	}
 
-	
+	/**
+	 * Resolves domain values for the supplied attribute.
+	 *
+	 * <p>Delegates to constant, variant, or dynamic bizlet hooks as required and falls
+	 * back to reference-query based resolution when business logic does not supply values.
+	 *
+	 * @param customer the internal customer context used for interception and caching.
+	 * @param domainType the domain strategy declared by the attribute.
+	 * @param attribute the attribute whose domain values are required.
+	 * @param owningBean the current owning bean for dynamic-domain resolution.
+	 * @param runtime whether runtime overrides should be consulted.
+	 * @param <T> the owning bean type.
+	 * @return the resolved domain values, never {@code null}.
+	 * @throws MetaDataException if bizlet or query-based resolution fails.
+	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public <T extends Bean> List<DomainValue> getDomainValues(CustomerImpl customer,
 																DomainType domainType,
 																Attribute attribute,
@@ -713,8 +1066,15 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		return result;
 	}
 
-	private List<DomainValue> useQuery(Customer customer, Attribute attribute)
-	throws Exception {
+	/**
+	 * Resolves domain values from a referenced document query.
+	 *
+	 * @param customer the customer context used for repository and query resolution.
+	 * @param attribute the reference attribute driving the lookup.
+	 * @return the resolved query-backed domain values, an empty list for transient targets,
+	 *         or {@code null} when the attribute is not query-backed.
+	 */
+	private List<DomainValue> useQuery(Customer customer, Attribute attribute) {
 		List<DomainValue> result = null;
 		
 		if (attribute instanceof Reference reference) {
@@ -756,21 +1116,47 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		return result;
 	}
 	
+	/**
+	 * Returns the action names declared for privilege-driven view generation.
+	 *
+	 * @return the live set of defined action names.
+	 */
 	@Override
 	public Set<String> getDefinedActionNames() {
 		return definedActionNames;
 	}
 
+	/**
+	 * Returns the names of conditions declared on this document.
+	 *
+	 * @return the live set view of condition names.
+	 */
 	@Override
 	public Set<String> getConditionNames() {
 		return conditions.keySet();
 	}
-	
+
+	/**
+	 * Returns the named condition declared on this document.
+	 *
+	 * @param conditionName the condition name.
+	 * @return the matching condition, or {@code null} if it is not defined.
+	 */
 	@Override
 	public Condition getCondition(String conditionName) {
 		return conditions.get(conditionName);
 	}
 
+	/**
+	 * Resolves a named view for this document and UX/UI combination.
+	 *
+	 * <p>If no explicit create view exists, this falls back to the edit view.
+	 *
+	 * @param uxui the UX/UI profile.
+	 * @param customer the customer context used for repository lookup.
+	 * @param name the view name.
+	 * @return the resolved view, or {@code null} if no suitable view exists.
+	 */
 	@Override
 	public View getView(String uxui, Customer customer, String name) {
 		ProvidedRepository repository = ProvidedRepositoryFactory.get();
@@ -779,19 +1165,40 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		if ((view == null) && (ViewType.create.toString().equals(name))) {
 			view = repository.getView(uxui, customer, this, ViewType.edit.toString());
 		}
+		
+		if (view == null) {
+			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no view defined for " + name);
+		}
 
 		return view;
 	}
 
+	/**
+	 * Returns the free-form documentation text associated with this document.
+	 *
+	 * @return the document documentation, or {@code null} if none is defined.
+	 */
 	@Override
 	public String getDocumentation() {
 		return documentation;
 	}
 
+	/**
+	 * Sets the free-form documentation text associated with this document.
+	 *
+	 * <p>Side effects: normalises blank values via {@link UtilImpl#processStringValue(String)}.
+	 *
+	 * @param documentation the documentation text.
+	 */
 	public void setDocumentation(String documentation) {
 		this.documentation = UtilImpl.processStringValue(documentation);
 	}
 	
+	/**
+	 * Returns the arbitrary property map declared for this document.
+	 *
+	 * @return the live property map keyed by property name.
+	 */
 	@Override
 	public Map<String, String> getProperties() {
 		return properties;
@@ -808,6 +1215,12 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		bizKeyField.setDomainType(null);
 		bizKeyField.setLength(1024);
 	}
+
+	/**
+	 * Returns the synthetic business-key attribute exposed by the framework.
+	 *
+	 * @return the shared business-key attribute metadata.
+	 */
 	public static Text getBizKeyAttribute() {
 		return bizKeyField;
 	}
@@ -822,6 +1235,12 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		bizOrdinalField.setDescription(null);
 		bizOrdinalField.setDomainType(null);
 	}
+
+	/**
+	 * Returns the synthetic ordinal attribute used for ordered child collections.
+	 *
+	 * @return the shared ordinal attribute metadata.
+	 */
 	public static org.skyve.impl.metadata.model.document.field.Integer getBizOrdinalAttribute() {
 		return bizOrdinalField;
 	}

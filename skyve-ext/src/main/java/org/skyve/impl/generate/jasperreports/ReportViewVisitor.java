@@ -54,9 +54,8 @@ import org.skyve.impl.metadata.view.widget.bound.input.CheckMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
@@ -84,6 +83,12 @@ import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 
+import jakarta.annotation.Nonnull;
+
+/**
+ * View visitor that extracts field and parameter descriptors from a Skyve view
+ * model for use in JasperReports design generation.
+ */
 public class ReportViewVisitor extends ViewVisitor {
 	public static final double TWIP_TO_PIXEL = 0.0666666667;
 	public static final double PIXEL_TO_TWIP = 15;
@@ -114,30 +119,55 @@ public class ReportViewVisitor extends ViewVisitor {
 
 	protected Container currentContainer = null;
 
+	/**
+	 * Indicates whether the source view has already been traversed.
+	 *
+	 * @return {@code true} after {@link #visit()} has been executed.
+	 */
 	public boolean isVisited() {
 		return visited;
 	}
 
+	/**
+	 * Marks whether the visitor pass has completed.
+	 *
+	 * @param visited The visited flag value.
+	 */
 	public void setVisited(boolean visited) {
 		this.visited = visited;
 	}
 
+	/**
+	 * Returns the localised title of the visited view.
+	 *
+	 * @return The view title used for report headings.
+	 */
 	public String getViewTitle() {
 		return viewTitle;
 	}
 
+	/**
+	 * Returns whether implicit labels are rendered for value widgets.
+	 *
+	 * @return {@code true} when label elements should be emitted.
+	 */
 	public Boolean getShowLabel() {
 		return showLabel;
 	}
 
+	/**
+	 * Controls whether value widgets should emit implicit label elements.
+	 *
+	 * @param showLabel The label rendering flag.
+	 */
 	public void setShowLabel(Boolean showLabel) {
 		this.showLabel = showLabel;
 	}
 
 	/**
-	 * Set the report design which dictates how to interpret the view
-	 * 
-	 * @param reportDesign
+	 * Sets the mutable design being populated during view traversal.
+	 *
+	 * @param reportDesign The design context for this visitor run.
 	 */
 	public void setDesign(DesignSpecification reportDesign) {
 		design = reportDesign;
@@ -145,26 +175,24 @@ public class ReportViewVisitor extends ViewVisitor {
 
 
 	/**
-	 * After visiting, return all report bands, according to the design provided
-	 * 
-	 * @return
+	 * Returns the detail bands produced by the most recent visit pass.
+	 *
+	 * @return Mutable list of generated detail bands.
 	 */
 	public List<ReportBand> getDetailBands() {
 		return detailBands;
 	}
 
 	/**
-	 * Calculate a size in TWIPS, given either a pixel, percentage or responsive specification
-	 * 
-	 * Priority is given in order of specificity - Pixel, Percentage and Responsive
-	 * 
-	 * TODO: handle selection of a specific uxui - responsive may be a higher priority than percentage
-	 * 
-	 * @param containerSizeInTwips
-	 * @param pixels
-	 * @param percentage
-	 * @param responsive
-	 * @return
+	 * Calculates a TWIP size from pixel, percentage, or responsive width inputs.
+	 *
+	 * <p>Priority is applied in order: pixel, then percentage, then responsive.
+	 *
+	 * @param containerSizeInTwips The container size used for percentage/responsive calculations.
+	 * @param pixels The fixed pixel width, if supplied.
+	 * @param percentage The percentage width, if supplied.
+	 * @param responsive The 12-column responsive width, if supplied.
+	 * @return The computed size in TWIPs, or {@code null} when no sizing input is supplied.
 	 */
 	@SuppressWarnings("boxing")
 	private Integer calculateTwipSize(Integer containerSizeInTwips, Integer pixels, Integer percentage, Integer responsive) {
@@ -209,8 +237,7 @@ public class ReportViewVisitor extends ViewVisitor {
 			width = design.getColumnWidth().intValue();
 
 		} catch (Exception e) {
-			LOGGER.warn("COULD NOT CONSTRUCT BAND {} FOR WIDGET_ID {}", detailBands.size(), widgetId);
-			e.printStackTrace();
+			LOGGER.warn("COULD NOT CONSTRUCT BAND {} FOR WIDGET_ID {}", String.valueOf(detailBands.size()), widgetId, e);
 		}
 	}
 
@@ -244,6 +271,7 @@ public class ReportViewVisitor extends ViewVisitor {
 	 * @param horizontal
 	 * @param name
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	protected void addContainer(String widgetId, String borderTitle, Boolean border, Integer pixelWidth, Integer percentageWidth, Integer responsiveWidth, Boolean horizontal,
 			ContainerType type, String invisibleConditionName) {
 
@@ -313,7 +341,7 @@ public class ReportViewVisitor extends ViewVisitor {
 	 * 
 	 * @param container
 	 */
-	@SuppressWarnings("boxing")
+	@SuppressWarnings({"boxing", "java:S3776", "java:S6541"}) // complexity OK
 	protected void layout(Container container) {
 		
 		int sizedCols = 0;
@@ -630,12 +658,14 @@ public class ReportViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Constructor for this visitor - instantiate result lists for fields and bands
-	 * 
-	 * @param customer
-	 * @param module
-	 * @param document
-	 * @param view
+	 * Creates a visitor that maps a Skyve view into report fields and bands.
+	 *
+	 * @param reportDesignGenerator Generator used for nested subreport designs.
+	 * @param customer Customer metadata context.
+	 * @param module Module metadata context.
+	 * @param document Document metadata context.
+	 * @param view View definition to traverse.
+	 * @param uxui The UX/UI variant used to resolve the view.
 	 */
 	public ReportViewVisitor(ReportDesignGenerator reportDesignGenerator,
 								CustomerImpl customer,
@@ -658,7 +688,7 @@ public class ReportViewVisitor extends ViewVisitor {
 	 * @param percentageWidth
 	 * @param responsiveWidth
 	 */
-	@SuppressWarnings("boxing")
+	@SuppressWarnings({"java:S107", "boxing", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
 	protected void addElementFromItem(String binding, ReportElement.ElementType elementType, Integer pixelWidth, Integer percentageWidth, Integer responsiveWidth, Integer pixelHeight, 
 			String valueFontName, String invisibleConditionName) {
 		
@@ -853,75 +883,117 @@ public class ReportViewVisitor extends ViewVisitor {
 		addElementFromItem(binding, type, null, null, null, null, null, null);
 	}
 
+	/**
+	 * Visits a blurb widget.
+	 */
 	@Override
 	public void visitBlurb(Blurb arg0, boolean arg1, boolean arg2) {
 		// Not supported
 
 	}
 
+	/**
+	 * Visits a button widget.
+	 */
 	@Override
 	public void visitButton(Button arg0, boolean arg1, boolean arg2) {
 		// Not supported
 
 	}
 
+	/**
+	 * Visits a zoom-in widget.
+	 */
 	@Override
 	public void visitZoomIn(ZoomIn arg0, boolean arg1, boolean arg2) {
 		// Not supported
 	}
 
+	/**
+	 * Visits a check box widget and emits a checkbox report element.
+	 */
 	@Override
 	public void visitCheckBox(CheckBox arg0, boolean arg1, boolean arg2) {
 		addElementFromItem(arg0.getBinding(), ReportElement.ElementType.checkBox);
 	}
 
+	/**
+	 * Visits a check-membership widget.
+	 */
 	@Override
 	public void visitCheckMembership(CheckMembership arg0, boolean arg1, boolean arg2) {
 		// Not supported
 
 	}
 
+	/**
+	 * Visits a colour-picker widget and emits a colour report element.
+	 */
 	@Override
 	public void visitColourPicker(ColourPicker arg0, boolean arg1, boolean arg2) {
 		addElementFromItem(arg0.getBinding(), ElementType.colourPicker, arg0.getPixelWidth(), null, null, null, null, arg0.getInvisibleConditionName());	
 	}
 
+	/**
+	 * Visits a combo widget and emits a combo report element.
+	 */
 	@Override
 	public void visitCombo(Combo arg0, boolean arg1, boolean arg2) {
 		addElementFromItem(arg0.getBinding(), ElementType.combo);
 	}
 
+	/**
+	 * Visits a comparison widget.
+	 */
 	@Override
 	public void visitComparison(Comparison arg0, boolean arg1, boolean arg2) {
 		// Not supported
 	}
 
+	/**
+	 * Ignores managed-content uploads in report generation.
+	 *
+	 * @param content the content upload being visited
+	 * @param parentVisible whether ancestor metadata is visible
+	 * @param parentEnabled whether ancestor metadata is enabled
+	 */
 	@Override
-	public void visitContentImage(ContentImage arg0, boolean arg1, boolean arg2) {
-		addElementFromItem(arg0.getBinding(), ReportElement.ElementType.contentImage, arg0.getPixelWidth(), arg0.getPercentageWidth(), arg0.getResponsiveWidth(), arg0.getPixelHeight(), null, arg0.getInvisibleConditionName());
-	}
-
-	@Override
-	public void visitContentLink(ContentLink arg0, boolean arg1, boolean arg2) {
+	public void visitContent(@Nonnull ContentUpload content, boolean parentVisible, boolean parentEnabled) {
 		// Not supported
-
 	}
 
+	/**
+	 * Visits a content-signature widget and emits an image report element.
+	 */
 	@Override
 	public void visitContentSignature(ContentSignature arg0, boolean arg1, boolean arg2) {
 		addElementFromItem(arg0.getBinding(), ReportElement.ElementType.contentImage, arg0.getPixelWidth(), null, null, arg0.getPixelHeight(), null, arg0.getInvisibleConditionName());
 	}
 
+	/**
+	 * Visits a data-grid widget.
+	 */
 	@Override
 	public void visitDataGrid(DataGrid grid, boolean arg1, boolean arg2) {
 		visitDataWidget(grid);
 	}
 	
+	/**
+	 * Visits a data-repeater widget.
+	 */
 	@Override
 	public void visitDataRepeater(DataRepeater repeater, boolean arg1, boolean arg2) {
 		visitDataWidget(repeater);
 	}
 	
+	/**
+	 * Visits a tabular data widget and emits a nested subreport element/design.
+	 *
+	 * <p>Side effects: appends fields, containers, and a subreport definition to
+	 * the active design.
+	 *
+	 * @param widget The data widget to transform.
+	 */
 	public void visitDataWidget(AbstractDataWidget widget) {
 		LOGGER.info("DATA GRID WITH BINDING{}", widget.getBinding());
 		addContainer(widget.getWidgetId()
@@ -987,30 +1059,45 @@ public class ReportViewVisitor extends ViewVisitor {
 		subreport = true;
 	}
 
+	/**
+	 * Visits a data-grid bound column.
+	 */
 	@Override
 	public void visitDataGridBoundColumn(DataGridBoundColumn arg0, boolean arg1, boolean arg2) {
 		// Not supported
 
 	}
 
+	/**
+	 * Visits a data-grid container column.
+	 */
 	@Override
 	public void visitDataGridContainerColumn(DataGridContainerColumn arg0, boolean arg1, boolean arg2) {
 		// Not supported
 
 	}
 
+	/**
+	 * Visits a dialog button widget.
+	 */
 	@Override
 	public void visitDialogButton(DialogButton arg0, boolean arg1, boolean arg2) {
 		// Not supported
 
 	}
 
+	/**
+	 * Visits a dynamic-image widget and emits a dynamic image report element.
+	 */
 	@Override
 	public void visitDynamicImage(DynamicImage arg0, boolean arg1, boolean arg2) {
 		addElementFromItem(arg0.getName(), ReportElement.ElementType.dynamicImage, arg0.getPixelWidth(), arg0.getPercentageWidth(), arg0.getResponsiveWidth(), arg0.getPixelHeight(), null, arg0.getInvisibleConditionName());
 
 	}
 
+	/**
+	 * Visits a form container and initializes row/form traversal state.
+	 */
 	@Override
 	public void visitForm(Form arg0, boolean arg1, boolean arg2) {
 		addContainer(arg0.getWidgetId(), arg0.getBorderTitle(), arg0.getBorder(), arg0.getPixelWidth(), arg0.getPercentageWidth(), arg0.getResponsiveWidth(), Boolean.TRUE,
@@ -1019,12 +1106,18 @@ public class ReportViewVisitor extends ViewVisitor {
 		inForm = true;
 	}
 
+	/**
+	 * Visits a form column and creates a column container.
+	 */
 	@Override
 	public void visitFormColumn(FormColumn arg0, boolean arg1, boolean arg2) {
 		addContainer(null, null, null, arg0.getPixelWidth(), arg0.getPercentageWidth(), arg0.getResponsiveWidth(), Boolean.FALSE, ContainerType.column, null);
 		handleEndContainer();
 	}
 
+	/**
+	 * Visits a form item and captures label/alignment rendering hints.
+	 */
 	@Override
 	public void visitFormItem(FormItem arg0, boolean arg1, boolean arg2) {
 		showLabel = (arg0.getShowLabel() == null ? Boolean.TRUE : arg0.getShowLabel());
@@ -1032,6 +1125,9 @@ public class ReportViewVisitor extends ViewVisitor {
 		labelAlignment = ElementAlignment.fromHorizontalAlignment(arg0.getLabelHorizontalAlignment());
 	}
 
+	/**
+	 * Visits a form row and resets row-local layout state.
+	 */
 	@Override
 	public void visitFormRow(FormRow arg0, boolean arg1, boolean arg2) {
 		// reset columns and starting left position
@@ -1039,26 +1135,41 @@ public class ReportViewVisitor extends ViewVisitor {
 		left = 0;
 	}
 
+	/**
+	 * Visits a geometry widget and emits a geometry report element.
+	 */
 	@Override
 	public void visitGeometry(Geometry arg0, boolean arg1, boolean arg2) {
 		addElementFromItem(arg0.getBinding(), ElementType.geometry, arg0.getPixelWidth(), null, null, null, null, arg0.getInvisibleConditionName());
 	}
 
+	/**
+	 * Completes processing for a geometry widget.
+	 */
 	@Override
 	public void visitedGeometry(Geometry geometry, boolean parentVisible, boolean parentEnabled) {
 		// No action required
 	}
 	
+	/**
+	 * Visits a geometry-map widget and emits a geometry report element.
+	 */
 	@Override
 	public void visitGeometryMap(GeometryMap arg0, boolean arg1, boolean arg2) {
 		addElementFromItem(arg0.getBinding(), ElementType.geometry, arg0.getPixelWidth(), null, null, null, null, arg0.getInvisibleConditionName());
 	}
 
+	/**
+	 * Completes processing for a geometry-map widget.
+	 */
 	@Override
 	public void visitedGeometryMap(GeometryMap geometry, boolean parentVisible, boolean parentEnabled) {
 		// No action required
 	}
 	
+	/**
+	 * Visits an HBox container and emits a horizontal or vertical container based on verticalise settings.
+	 */
 	@Override
 	public void visitHBox(HBox arg0, boolean arg1, boolean arg2) {
 		Boolean horiz = Boolean.TRUE;
@@ -1068,277 +1179,424 @@ public class ReportViewVisitor extends ViewVisitor {
 		addContainer(arg0.getWidgetId(), arg0.getBorderTitle(), arg0.getBorder(), arg0.getPixelWidth(), arg0.getPercentageWidth(), arg0.getResponsiveWidth(), horiz, ContainerType.hbox, arg0.getInvisibleConditionName());
 	}
 
+	/**
+	 * Visits an HTML widget.
+	 */
 	@Override
 	public void visitHTML(HTML arg0, boolean arg1, boolean arg2) {
 		// Not supported
 
 	}
 
+	/**
+	 * Visits an inject widget.
+	 */
 	@Override
 	public void visitInject(Inject arg0, boolean arg1, boolean arg2) {
 		// Not supported
 
 	}
 
+	/**
+	 * Visits a label widget.
+	 */
 	@Override
 	public void visitLabel(Label arg0, boolean arg1, boolean arg2) {
 		// Not supported
 
 	}
 
+	/**
+	 * Visits a link widget.
+	 */
 	@Override
 	public void visitLink(Link arg0, boolean arg1, boolean arg2) {
 		// Not supported
 
 	}
 
+	/**
+	 * Visits a list-grid widget and marks subreport mode.
+	 */
 	@Override
 	public void visitListGrid(ListGrid arg0, boolean arg1, boolean arg2) {
 		subreport = true;
 	}
 
+	/**
+	 * Visits a list-repeater widget and marks subreport mode.
+	 */
 	@Override
 	public void visitListRepeater(ListRepeater repeater, boolean arg1, boolean arg2) {
 		subreport = true;
 	}
 
+	/**
+	 * Visits a list-membership widget and marks subreport mode.
+	 */
 	@Override
 	public void visitListMembership(ListMembership arg0, boolean arg1, boolean arg2) {
 		subreport = true;
 	}
 
+	/**
+	 * Visits a lookup-description widget and emits a text-field report element.
+	 */
 	@Override
 	public void visitLookupDescription(LookupDescription arg0, boolean arg1, boolean arg2) {
 		addElementFromItem(arg0.getBinding(), ElementType.textField);
 	}
 
+	/**
+	 * Visits a map widget.
+	 */
 	@Override
 	public void visitMap(MapDisplay arg0, boolean arg1, boolean arg2) {
 		// Not supported
 
 	}
 
+	/**
+	 * Visits a chart widget.
+	 */
 	@Override
 	public void visitChart(Chart arg0, boolean arg1, boolean arg2) {
 		// Not supported yet
 
 	}
 
+	/**
+	 * Visits an on-added event handler.
+	 */
 	@Override
 	public void visitOnAddedEventHandler(Addable arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
 
+	/**
+	 * Visits an on-blur event handler.
+	 */
 	@Override
 	public void visitOnBlurEventHandler(Focusable arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
 
+	/**
+	 * Visits an on-changed event handler.
+	 */
 	@Override
 	public void visitOnChangedEventHandler(Changeable arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
 
+	/**
+	 * Visits an on-cleared event handler.
+	 */
 	@Override
 	public void visitOnClearedEventHandler(LookupDescription arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
 
+	/**
+	 * Visits an on-edited event handler.
+	 */
 	@Override
 	public void visitOnEditedEventHandler(Editable arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
 
+	/**
+	 * Visits an on-focus event handler.
+	 */
 	@Override
 	public void visitOnFocusEventHandler(Focusable arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
 
+	/**
+	 * Visits an on-picked event handler.
+	 */
 	@Override
 	public void visitOnPickedEventHandler(LookupDescription arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
 
+	/**
+	 * Visits an on-removed event handler.
+	 */
 	@Override
 	public void visitOnRemovedEventHandler(Removable arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
 
+	/**
+	 * Visits an on-selected event handler.
+	 */
 	@Override
 	public void visitOnSelectedEventHandler(Selectable arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
 
+	/**
+	 * Visits a password widget and emits a text-field report element.
+	 */
 	@Override
 	public void visitPassword(Password arg0, boolean arg1, boolean arg2) {
 		addElementFromItem(arg0.getBinding(), ElementType.textField);
 	}
 
+	/**
+	 * Visits a progress-bar widget.
+	 */
 	@Override
 	public void visitProgressBar(ProgressBar arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
 
+	/**
+	 * Visits a radio widget and emits a radio report element.
+	 */
 	@Override
 	public void visitRadio(Radio arg0, boolean arg1, boolean arg2) {
 		addElementFromItem(arg0.getBinding(), ElementType.radio, arg0.getPixelWidth(), null, null, null, null, arg0.getInvisibleConditionName());
 	}
 
+	/**
+	 * Visits a rerender event action.
+	 */
 	@Override
 	public void visitRerenderEventAction(RerenderEventAction arg0, EventSource arg1, boolean arg2, boolean arg3) {
 		// No action required
 
 	}
 
+	/**
+	 * Visits a rich-text widget and emits a rich-text report element.
+	 */
 	@Override
 	public void visitRichText(RichText arg0, boolean arg1, boolean arg2) {
 		addElementFromItem(arg0.getBinding(), ElementType.richTextField, arg0.getPixelWidth(), null, null, null, null, arg0.getInvisibleConditionName());
 	}
 
+	/**
+	 * Visits a server-side action event action.
+	 */
 	@Override
 	public void visitServerSideActionEventAction(ServerSideActionEventAction arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
 
+	/**
+	 * Visits a set-disabled event action.
+	 */
 	@Override
 	public void visitSetDisabledEventAction(SetDisabledEventAction arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
 
+	/**
+	 * Visits a set-invisible event action.
+	 */
 	@Override
 	public void visitSetInvisibleEventAction(SetInvisibleEventAction arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
 
+	/**
+	 * Visits a slider widget and emits a slider report element.
+	 */
 	@Override
 	public void visitSlider(Slider arg0, boolean arg1, boolean arg2) {
 		addElementFromItem(arg0.getBinding(), ElementType.slider, arg0.getPixelWidth(), null, null, null, null, arg0.getInvisibleConditionName());	
 	}
 
+	/**
+	 * Visits a spacer and advances the column position.
+	 */
 	@Override
 	public void visitSpacer(Spacer arg0) {
 		col++;
 	}
 
+	/**
+	 * Visits a spinner widget and emits a spinner report element.
+	 */
 	@Override
 	public void visitSpinner(Spinner arg0, boolean arg1, boolean arg2) {
 		addElementFromItem(arg0.getBinding(), ElementType.spinner, arg0.getPixelWidth(), null, null, null, null, arg0.getInvisibleConditionName());
 	}
 
+	/**
+	 * Visits a static-image widget and emits a static image report element.
+	 */
 	@Override
 	public void visitStaticImage(StaticImage arg0, boolean arg1, boolean arg2) {
 		addElementFromItem(arg0.getRelativeFile(), ReportElement.ElementType.staticImage, arg0.getPixelWidth(), arg0.getPercentageWidth(), arg0.getResponsiveWidth(), arg0.getPixelHeight(), null, arg0.getInvisibleConditionName());
 	}
 
+	/**
+	 * Visits a tab container and emits a tab container section.
+	 */
 	@Override
 	public void visitTab(Tab arg0, boolean arg1, boolean arg2) {
 		addContainer(null, arg0.getLocalisedTitle(), Boolean.TRUE, null, null, null, Boolean.FALSE, ContainerType.tab, arg0.getInvisibleConditionName());
 	}
 
+	/**
+	 * Visits a tab-pane container.
+	 */
 	@Override
 	public void visitTabPane(TabPane arg0, boolean arg1, boolean arg2) {
 		// Ignored
 	}
 
+	/**
+	 * Visits a text-area widget and emits a text-field report element.
+	 */
 	@Override
 	public void visitTextArea(TextArea arg0, boolean arg1, boolean arg2) {
 		addElementFromItem(arg0.getBinding(), ReportElement.ElementType.textField, arg0.getPixelWidth(), null, null, null, null, arg0.getInvisibleConditionName());
 	}
 
+	/**
+	 * Visits a text-field widget and emits a text-field report element.
+	 */
 	@Override
 	public void visitTextField(TextField arg0, boolean arg1, boolean arg2) {
 		addElementFromItem(arg0.getBinding(), ReportElement.ElementType.textField, arg0.getPixelWidth(), null, null, null, null, arg0.getInvisibleConditionName());
 	}
 
+	/**
+	 * Visits a toggle-disabled event action.
+	 */
 	@Override
 	public void visitToggleDisabledEventAction(ToggleDisabledEventAction arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
 
+	/**
+	 * Visits a toggle-visibility event action.
+	 */
 	@Override
 	public void visitToggleVisibilityEventAction(ToggleVisibilityEventAction arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
 
+	/**
+	 * Visits a tree-grid widget.
+	 */
 	@Override
 	public void visitTreeGrid(TreeGrid arg0, boolean arg1, boolean arg2) {
 		// Not supported
 
 	}
 
+	/**
+	 * Visits a VBox container and emits a vertical container section.
+	 */
 	@Override
 	public void visitVBox(VBox arg0, boolean arg1, boolean arg2) {
 		addContainer(arg0.getWidgetId(), arg0.getBorderTitle(), arg0.getBorder(), arg0.getPixelWidth(), arg0.getPercentageWidth(), arg0.getResponsiveWidth(), Boolean.FALSE,
 				ContainerType.vbox, arg0.getInvisibleConditionName());
 	}
 
+	/**
+	 * Visits the root view and marks traversal as complete.
+	 */
 	@Override
 	public void visitView() {
 		visited = true;
 	}
 
+	/**
+	 * Completes processing for a check box widget.
+	 */
 	@Override
 	public void visitedCheckBox(CheckBox arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
 
+	/**
+	 * Completes processing for a check-membership widget.
+	 */
 	@Override
 	public void visitedCheckMembership(CheckMembership arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
 
+	/**
+	 * Completes processing for a colour-picker widget.
+	 */
 	@Override
 	public void visitedColourPicker(ColourPicker arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
 
+	/**
+	 * Completes processing for a combo widget.
+	 */
 	@Override
 	public void visitedCombo(Combo arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
 
+	/**
+	 * Completes processing for a data-grid widget and closes its container.
+	 */
 	@Override
 	public void visitedDataGrid(DataGrid arg0, boolean arg1, boolean arg2) {
 		subreport = false;
 		handleEndContainer();
 	}
 
+	/**
+	 * Completes processing for a data-repeater widget and closes its container.
+	 */
 	@Override
 	public void visitedDataRepeater(DataRepeater repeater, boolean arg1, boolean arg2) {
 		subreport = false;
 		handleEndContainer();
 	}
 
+	/**
+	 * Completes processing for a data-grid bound column.
+	 */
 	@Override
 	public void visitedDataGridBoundColumn(DataGridBoundColumn arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
 
+	/**
+	 * Completes processing for a data-grid container column and closes its container.
+	 */
 	@Override
 	public void visitedDataGridContainerColumn(DataGridContainerColumn arg0, boolean arg1, boolean arg2) {
 		handleEndContainer();
 	}
 
+	/**
+	 * Completes processing for a form container and finalizes column layout state.
+	 */
 	@Override
 	public void visitedForm(Form arg0, boolean arg1, boolean arg2) {
 		inForm = false;
@@ -1363,12 +1621,18 @@ public class ReportViewVisitor extends ViewVisitor {
 		handleEndContainer();
 	}
 
+	/**
+	 * Completes processing for a form item.
+	 */
 	@Override
 	public void visitedFormItem(FormItem arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
 
+	/**
+	 * Completes processing for a form row and advances row count when the row has content.
+	 */
 	@Override
 	public void visitedFormRow(FormRow arg0, boolean arg1, boolean arg2) {
 		// ignore row if all columns for this row are empty
@@ -1387,268 +1651,406 @@ public class ReportViewVisitor extends ViewVisitor {
 		}
 	}
 
+	/**
+	 * Completes processing for an HBox container and closes its nesting level.
+	 */
 	@Override
 	public void visitedHBox(HBox arg0, boolean arg1, boolean arg2) {
 		handleEndContainer();
 	}
 
+	/**
+	 * Completes processing for a list-grid widget.
+	 */
 	@Override
 	public void visitedListGrid(ListGrid arg0, boolean arg1, boolean arg2) {
 		subreport = false;
 	}
 
+	/**
+	 * Completes processing for a list-repeater widget.
+	 */
 	@Override
 	public void visitedListRepeater(ListRepeater repeater, boolean arg1, boolean arg2) {
 		subreport = false;
 	}
 
+	/**
+	 * Completes processing for a list-membership widget.
+	 */
 	@Override
 	public void visitedListMembership(ListMembership arg0, boolean arg1, boolean arg2) {
 		subreport = false;
 	}
 
+	/**
+	 * Completes processing for a lookup-description widget.
+	 */
 	@Override
 	public void visitedLookupDescription(LookupDescription arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
 
+	/**
+	 * Completes processing for an on-added event handler.
+	 */
 	@Override
 	public void visitedOnAddedEventHandler(Addable arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
 
+	/**
+	 * Completes processing for an on-blur event handler.
+	 */
 	@Override
 	public void visitedOnBlurEventHandler(Focusable arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
 
+	/**
+	 * Completes processing for an on-changed event handler.
+	 */
 	@Override
 	public void visitedOnChangedEventHandler(Changeable arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
 
+	/**
+	 * Completes processing for an on-cleared event handler.
+	 */
 	@Override
 	public void visitedOnClearedEventHandler(LookupDescription arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
 
+	/**
+	 * Completes processing for an on-edited event handler.
+	 */
 	@Override
 	public void visitedOnEditedEventHandler(Editable arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
 
+	/**
+	 * Completes processing for an on-focus event handler.
+	 */
 	@Override
 	public void visitedOnFocusEventHandler(Focusable arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
 
+	/**
+	 * Completes processing for an on-picked event handler.
+	 */
 	@Override
 	public void visitedOnPickedEventHandler(LookupDescription arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
 
+	/**
+	 * Completes processing for an on-removed event handler.
+	 */
 	@Override
 	public void visitedOnRemovedEventHandler(Removable arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
 
+	/**
+	 * Completes processing for an on-selected event handler.
+	 */
 	@Override
 	public void visitedOnSelectedEventHandler(Selectable arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
 
+	/**
+	 * Completes processing for a password widget.
+	 */
 	@Override
 	public void visitedPassword(Password arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
 
+	/**
+	 * Completes processing for a radio widget.
+	 */
 	@Override
 	public void visitedRadio(Radio arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
 
+	/**
+	 * Completes processing for a rich-text widget.
+	 */
 	@Override
 	public void visitedRichText(RichText arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
 
+	/**
+	 * Completes processing for a slider widget.
+	 */
 	@Override
 	public void visitedSlider(Slider arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
 
+	/**
+	 * Completes processing for a spinner widget.
+	 */
 	@Override
 	public void visitedSpinner(Spinner arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
 
+	/**
+	 * Completes processing for a tab container and closes its nesting level.
+	 */
 	@Override
 	public void visitedTab(Tab arg0, boolean arg1, boolean arg2) {
 		handleEndContainer();
 	}
 
+	/**
+	 * Completes processing for a tab-pane container.
+	 */
 	@Override
 	public void visitedTabPane(TabPane arg0, boolean arg1, boolean arg2) {
 		// handleEndContainer();
 	}
 
+	/**
+	 * Completes processing for a text-area widget.
+	 */
 	@Override
 	public void visitedTextArea(TextArea arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
 
+	/**
+	 * Completes processing for a text-field widget.
+	 */
 	@Override
 	public void visitedTextField(TextField arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
 
+	/**
+	 * Completes processing for a tree-grid widget.
+	 */
 	@Override
 	public void visitedTreeGrid(TreeGrid arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
 
+	/**
+	 * Completes processing for a VBox container and closes its nesting level.
+	 */
 	@Override
 	public void visitedVBox(VBox arg0, boolean arg1, boolean arg2) {
 		handleEndContainer();
 	}
 
+	/**
+	 * Completes processing for the root view.
+	 */
 	@Override
 	public void visitedView() {
 		// No action required
 
 	}
 
+	/**
+	 * Visits an add action.
+	 */
 	@Override
 	public void visitAddAction(ActionImpl arg0) {
 		// No action required
 
 	}
 
+	/**
+	 * Visits a biz-export action.
+	 */
 	@Override
 	public void visitBizExportAction(ActionImpl arg0) {
 		// No action required
 
 	}
 
+	/**
+	 * Visits a biz-import action.
+	 */
 	@Override
 	public void visitBizImportAction(ActionImpl arg0) {
 		// No action required
 
 	}
 
+	/**
+	 * Visits a cancel action.
+	 */
 	@Override
 	public void visitCancelAction(ActionImpl arg0) {
 		// No action required
 
 	}
 
+	/**
+	 * Visits a custom action.
+	 */
 	@Override
 	public void visitCustomAction(ActionImpl arg0) {
 		// No action required
 
 	}
 
+	/**
+	 * Visits a delete action.
+	 */
 	@Override
 	public void visitDeleteAction(ActionImpl arg0) {
 		// No action required
 
 	}
 
+	/**
+	 * Visits a download action.
+	 */
 	@Override
 	public void visitDownloadAction(ActionImpl arg0) {
 		// No action required
 
 	}
 
+	/**
+	 * Visits an edit action.
+	 */
 	@Override
 	public void visitEditAction(ActionImpl arg0) {
 		// No action required
 
 	}
 
+	/**
+	 * Visits a filter parameter.
+	 */
 	@Override
 	public void visitFilterParameter(FilterParameter arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
 
+	/**
+	 * Visits a navigate action.
+	 */
 	@Override
 	public void visitNavigateAction(ActionImpl arg0) {
 		// No action required
 
 	}
 
+	/**
+	 * Visits a new action.
+	 */
 	@Override
 	public void visitNewAction(ActionImpl arg0) {
 		// No action required
 
 	}
 
+	/**
+	 * Visits an OK action.
+	 */
 	@Override
 	public void visitOKAction(ActionImpl arg0) {
 		// No action required
 
 	}
 
+	/**
+	 * Visits an action parameter.
+	 */
 	@Override
 	public void visitParameter(Parameter arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
 
+	/**
+	 * Visits a remove action.
+	 */
 	@Override
 	public void visitRemoveAction(ActionImpl arg0) {
 		// No action required
 
 	}
 
+	/**
+	 * Visits a report action.
+	 */
 	@Override
 	public void visitReportAction(ActionImpl arg0) {
 		// No action required
 
 	}
 
+	/**
+	 * Visits a save action.
+	 */
 	@Override
 	public void visitSaveAction(ActionImpl arg0) {
 		// No action required
 
 	}
 
+	/**
+	 * Visits an upload action.
+	 */
 	@Override
 	public void visitUploadAction(ActionImpl arg0) {
 		// No action required
 
 	}
 
+	/**
+	 * Visits a zoom-out action.
+	 */
 	@Override
 	public void visitZoomOutAction(ActionImpl arg0) {
 		// No action required
 
 	}
 
+	/**
+	 * Visits a sidebar container.
+	 */
 	@Override
 	public void visitSidebar(Sidebar sidebar, boolean parentVisible, boolean parentEnabled) {
 		// Not supported
 	}
 
+	/**
+	 * Completes processing for a sidebar container.
+	 */
 	@Override
 	public void visitedSidebar(Sidebar sidebar, boolean parentVisible, boolean parentEnabled) {
 		// Not supported

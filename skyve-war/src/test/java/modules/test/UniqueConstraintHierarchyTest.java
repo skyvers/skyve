@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.UUID;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.messages.UniqueConstraintViolationException;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -16,12 +16,13 @@ import modules.test.domain.MappedExtensionUniqueSingleStrategy;
 import modules.test.domain.MappedSubclassedUniqueJoinedStrategy;
 import modules.test.domain.MappedSubclassedUniqueSingleStrategy;
 
-public class UniqueConstraintHierarchyTest extends AbstractSkyveTest {
+@SuppressWarnings({ "java:S5778", "java:S1130", "java:S1854" })
+class UniqueConstraintHierarchyTest extends AbstractSkyveTest {
 	/**
 	 * Insert the base document and then insert a duplicate extension document in the same transaction.
 	 */
 	@Test
-	public void testSingleStrategyBaseInSameTransaction() throws Exception {
+	void testSingleStrategyBaseInSameTransaction() throws Exception {
 		MappedExtensionUniqueSingleStrategy test1 = Util.constructRandomInstance(u, m, meussd, 1);
 		MappedSubclassedUniqueSingleStrategy test2 = Util.constructRandomInstance(u, m, msussd, 1);
 		inSameTransaction(test1, test2, true);
@@ -31,7 +32,7 @@ public class UniqueConstraintHierarchyTest extends AbstractSkyveTest {
 	 * Insert the base document and then insert a duplicate extension document in a different transaction.
 	 */
 	@Test
-	public void testSingleStrategyBaseInAnotherTransaction() throws Exception {
+	void testSingleStrategyBaseInAnotherTransaction() throws Exception {
 		MappedExtensionUniqueSingleStrategy test1 = Util.constructRandomInstance(u, m, meussd, 1);
 		MappedSubclassedUniqueSingleStrategy test2 = Util.constructRandomInstance(u, m, msussd, 1);
 		inAnotherTransaction(test1, test2, true);
@@ -41,7 +42,7 @@ public class UniqueConstraintHierarchyTest extends AbstractSkyveTest {
 	 * Insert the base document, commit and then insert a duplicate extension document.
 	 */
 	@Test
-	public void testSingleStrategyBaseWithCommit() throws Exception {
+	void testSingleStrategyBaseWithCommit() throws Exception {
 		MappedExtensionUniqueSingleStrategy test1 = Util.constructRandomInstance(u, m, meussd, 1);
 		MappedSubclassedUniqueSingleStrategy test2 = Util.constructRandomInstance(u, m, msussd, 1);
 		withCommit(test1, test2, true);
@@ -51,7 +52,7 @@ public class UniqueConstraintHierarchyTest extends AbstractSkyveTest {
 	 * Insert the base document and then insert a duplicate extension document in the same transaction.
 	 */
 	@Test
-	public void testJoinedStrategyBaseInSameTransaction() throws Exception {
+	void testJoinedStrategyBaseInSameTransaction() throws Exception {
 		MappedExtensionUniqueJoinedStrategy test1 = Util.constructRandomInstance(u, m, meujsd, 1);
 		MappedSubclassedUniqueJoinedStrategy test2 = Util.constructRandomInstance(u, m, msujsd, 1);
 		inSameTransaction(test1, test2, true);
@@ -61,7 +62,7 @@ public class UniqueConstraintHierarchyTest extends AbstractSkyveTest {
 	 * Insert the base document and then insert a duplicate extension document in a different transaction.
 	 */
 	@Test
-	public void testJoinedStrategyBaseInAnotherTransaction() throws Exception {
+	void testJoinedStrategyBaseInAnotherTransaction() throws Exception {
 		MappedExtensionUniqueJoinedStrategy test1 = Util.constructRandomInstance(u, m, meujsd, 1);
 		MappedSubclassedUniqueJoinedStrategy test2 = Util.constructRandomInstance(u, m, msujsd, 1);
 		inAnotherTransaction(test1, test2, true);
@@ -71,7 +72,7 @@ public class UniqueConstraintHierarchyTest extends AbstractSkyveTest {
 	 * Insert the base document, commit and then insert a duplicate extension document.
 	 */
 	@Test
-	public void testJoinedStrategyBaseWithCommit() throws Exception {
+	void testJoinedStrategyBaseWithCommit() throws Exception {
 		MappedExtensionUniqueJoinedStrategy test1 = Util.constructRandomInstance(u, m, meujsd, 1);
 		MappedSubclassedUniqueJoinedStrategy test2 = Util.constructRandomInstance(u, m, msujsd, 1);
 		withCommit(test1, test2, true);
@@ -81,7 +82,7 @@ public class UniqueConstraintHierarchyTest extends AbstractSkyveTest {
 	 * Insert duplicate id extension documents in the same transaction.
 	 */
 	@Test
-	public void testSingleStrategyDerivedInSameTransaction() throws Exception {
+	void testSingleStrategyDerivedInSameTransaction() throws Exception {
 		MappedSubclassedUniqueSingleStrategy test1 = Util.constructRandomInstance(u, m, msussd, 1);
 		MappedSubclassedUniqueSingleStrategy test2 = Util.constructRandomInstance(u, m, msussd, 1);
 		inSameTransaction(test1, test2, false);
@@ -91,7 +92,7 @@ public class UniqueConstraintHierarchyTest extends AbstractSkyveTest {
 	 * Insert duplicate id extension documents in a different transaction.
 	 */
 	@Test
-	public void testSingleStrategyDerivedInAnotherTransaction() throws Exception {
+	void testSingleStrategyDerivedInAnotherTransaction() throws Exception {
 		MappedSubclassedUniqueSingleStrategy test1 = Util.constructRandomInstance(u, m, msussd, 1);
 		MappedSubclassedUniqueSingleStrategy test2 = Util.constructRandomInstance(u, m, msussd, 1);
 		inAnotherTransaction(test1, test2, false);
@@ -101,7 +102,7 @@ public class UniqueConstraintHierarchyTest extends AbstractSkyveTest {
 	 * Insert duplicate id extension documents with commit in between.
 	 */
 	@Test
-	public void testSingleStrategyDerivedWithCommit() throws Exception {
+	void testSingleStrategyDerivedWithCommit() throws Exception {
 		MappedSubclassedUniqueSingleStrategy test1 = Util.constructRandomInstance(u, m, msussd, 1);
 		MappedSubclassedUniqueSingleStrategy test2 = Util.constructRandomInstance(u, m, msussd, 1);
 		withCommit(test1, test2, false);
@@ -111,7 +112,7 @@ public class UniqueConstraintHierarchyTest extends AbstractSkyveTest {
 	 * Insert duplicate id extension documents in the same transaction.
 	 */
 	@Test
-	public void testJoinedStrategyDerivedInSameTransaction() throws Exception {
+	void testJoinedStrategyDerivedInSameTransaction() throws Exception {
 		MappedSubclassedUniqueJoinedStrategy test1 = Util.constructRandomInstance(u, m, msujsd, 1);
 		MappedSubclassedUniqueJoinedStrategy test2 = Util.constructRandomInstance(u, m, msujsd, 1);
 		inSameTransaction(test1, test2, false);
@@ -121,7 +122,7 @@ public class UniqueConstraintHierarchyTest extends AbstractSkyveTest {
 	 * Insert duplicate id extension documents in a different transaction.
 	 */
 	@Test
-	public void testJoinedStrategyDerivedInAnotherTransaction() throws Exception {
+	void testJoinedStrategyDerivedInAnotherTransaction() throws Exception {
 		MappedSubclassedUniqueJoinedStrategy test1 = Util.constructRandomInstance(u, m, msujsd, 1);
 		MappedSubclassedUniqueJoinedStrategy test2 = Util.constructRandomInstance(u, m, msujsd, 1);
 		inAnotherTransaction(test1, test2, false);
@@ -131,7 +132,7 @@ public class UniqueConstraintHierarchyTest extends AbstractSkyveTest {
 	 * Insert duplicate id extension documents with a commit in between.
 	 */
 	@Test
-	public void testJoinedStrategyDerivedWithCommit() throws Exception {
+	void testJoinedStrategyDerivedWithCommit() throws Exception {
 		MappedSubclassedUniqueJoinedStrategy test1 = Util.constructRandomInstance(u, m, msujsd, 1);
 		MappedSubclassedUniqueJoinedStrategy test2 = Util.constructRandomInstance(u, m, msujsd, 1);
 		withCommit(test1, test2, false);
@@ -149,7 +150,7 @@ public class UniqueConstraintHierarchyTest extends AbstractSkyveTest {
 	}
 	
 	private void withCommit(MappedBase test1, MappedBase test2, boolean text) {
-		UniqueConstraintViolationException ucve = Assert.assertThrows(UniqueConstraintViolationException.class, () -> {
+		UniqueConstraintViolationException ucve = Assertions.assertThrows(UniqueConstraintViolationException.class, () -> {
 			duplicate(test1, text);
 			p.save(test1);
 			p.commit(false);
@@ -162,7 +163,7 @@ public class UniqueConstraintHierarchyTest extends AbstractSkyveTest {
 	}
 	
 	private void inAnotherTransaction(MappedBase test1, MappedBase test2, boolean text) {
-		UniqueConstraintViolationException ucve = Assert.assertThrows(UniqueConstraintViolationException.class, () -> {
+		UniqueConstraintViolationException ucve = Assertions.assertThrows(UniqueConstraintViolationException.class, () -> {
 			duplicate(test1, text);
 			p.save(test1);
 			AbstractPersistence p1 = AbstractPersistence.newInstance();
@@ -176,7 +177,7 @@ public class UniqueConstraintHierarchyTest extends AbstractSkyveTest {
 	}
 	
 	private void inSameTransaction(MappedBase test1, MappedBase test2, boolean text) {
-		UniqueConstraintViolationException ucve = Assert.assertThrows(UniqueConstraintViolationException.class, () -> {
+		UniqueConstraintViolationException ucve = Assertions.assertThrows(UniqueConstraintViolationException.class, () -> {
 			duplicate(test1, text);
 			p.save(test1);
 			duplicate(test2, text);
@@ -190,7 +191,7 @@ public class UniqueConstraintHierarchyTest extends AbstractSkyveTest {
 	 * Insert and then delete the same bean to ensure the unique state (hashes and ADM_Uniqueness rows) has been removed.
 	 */
 	@Test
-	public void testNoUniquenessStateAfterDelete() throws Exception {
+	void testNoUniquenessStateAfterDelete() throws Exception {
 		// Insert a bean
 		MappedExtensionUniqueJoinedStrategy test1 = Util.constructRandomInstance(u, m, meujsd, 1);
 		test1.setText("text");
@@ -200,6 +201,7 @@ public class UniqueConstraintHierarchyTest extends AbstractSkyveTest {
 		// Should be able to insert a new bean with the same unique text value
 		MappedSubclassedUniqueJoinedStrategy test2 = Util.constructRandomInstance(u, m, msujsd, 1);
 		test2.setText("text");
-		p.save(test2);
+		test2 = p.save(test2);
+		Assertions.assertNotNull(test2.getBizId());
 	}
 }

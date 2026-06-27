@@ -16,6 +16,11 @@ import jakarta.faces.event.ExceptionQueuedEventContext;
  * @author mike
  */
 public class SkyveExceptionHandler extends ExceptionHandlerWrapper {
+	/**
+	 * Creates a wrapper that rethrows queued Faces exceptions for central handling.
+	 *
+	 * @param wrapped the underlying JSF exception handler
+	 */
 	public SkyveExceptionHandler(ExceptionHandler wrapped) {
 		super(wrapped);
 	}
@@ -23,16 +28,15 @@ public class SkyveExceptionHandler extends ExceptionHandlerWrapper {
 	@Override
 	public void handle() throws FacesException {
 		ExceptionHandler wrapped = getWrapped();
-		Iterable<ExceptionQueuedEvent> events = wrapped.getUnhandledExceptionQueuedEvents();
-		for (Iterator<ExceptionQueuedEvent> it = events.iterator(); it.hasNext();) {
+		Iterator<ExceptionQueuedEvent> it = wrapped.getUnhandledExceptionQueuedEvents().iterator();
+		if (it.hasNext()) {
 			ExceptionQueuedEvent event = it.next();
 			ExceptionQueuedEventContext eqec = event.getContext();
-
-			Throwable e = eqec.getException();
-			if (e instanceof RuntimeException re) {
+			Throwable unhandled = eqec.getException();
+			if (unhandled instanceof RuntimeException re) {
 				throw re;
 			}
-			throw new FacesException(e);
+			throw new FacesException(unhandled);
 		}
 
 		wrapped.handle();

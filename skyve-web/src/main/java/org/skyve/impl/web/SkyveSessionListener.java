@@ -8,7 +8,7 @@ import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.User;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpSessionEvent;
@@ -23,11 +23,12 @@ import jakarta.servlet.http.HttpSessionListener;
  * @author mike
  */
 public class SkyveSessionListener implements HttpSessionListener {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(SkyveSessionListener.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SkyveSessionListener.class);
 
 	/**
 	 * Increment the session count
+	 *
+	 * @param se the session event for the created session
 	 */
 	@Override
 	public void sessionCreated(HttpSessionEvent se) {
@@ -38,6 +39,8 @@ public class SkyveSessionListener implements HttpSessionListener {
 	 * Decrement the session count, 
 	 * and if a logged in user exists, notify the customer that they have logged out,
 	 * and remove the session repository if it exists.
+	 *
+	 * @param se the session event for the destroyed session
 	 */
 	@Override
 	public void sessionDestroyed(HttpSessionEvent se) {
@@ -61,8 +64,7 @@ public class SkyveSessionListener implements HttpSessionListener {
 						customer = (CustomerImpl) user.getCustomer();
 					}
 					catch (Exception e) {
-						LOGGER.warn("Could not get the user customer {} from the repository to call notifyLogout() on session destroyed.", customerName);
-						e.printStackTrace();
+						LOGGER.warn("Could not get the user customer {} from the repository to call notifyLogout() on session destroyed.", customerName, e);
 					}
 					if (customer != null) {
 						customer.notifyLogout(user, session);

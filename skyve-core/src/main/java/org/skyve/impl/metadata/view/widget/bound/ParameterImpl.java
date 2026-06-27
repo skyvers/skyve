@@ -7,6 +7,17 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB-annotated runtime implementation of the {@link Parameter} metadata
+ * interface.
+ *
+ * <p>Carries a named action or report parameter: either a literal value or a
+ * binding-resolved value passed to the target at invocation time.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see org.skyve.metadata.view.widget.bound.Parameter
+ */
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE, propOrder = {"name", "value", "valueBinding"})
 public class ParameterImpl implements Parameter {
 	private static final long serialVersionUID = 3545853099050411888L;

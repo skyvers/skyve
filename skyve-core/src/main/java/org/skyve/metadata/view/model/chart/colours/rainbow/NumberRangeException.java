@@ -6,6 +6,6 @@ public class NumberRangeException extends RainbowException {
 	
 	@SuppressWarnings("boxing")
 	public NumberRangeException (double minNumber, double maxNumber) {
-		super(String.format("maxNumber (%d) is not greater than minNumber (%d)", maxNumber, minNumber));
+		super(String.format("maxNumber (%f) is not greater than minNumber (%f)", maxNumber, minNumber));
 	}
 }

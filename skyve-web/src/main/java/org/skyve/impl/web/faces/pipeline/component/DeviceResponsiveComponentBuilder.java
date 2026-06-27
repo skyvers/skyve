@@ -1,11 +1,15 @@
 package org.skyve.impl.web.faces.pipeline.component;
 
 import org.primefaces.component.commandbutton.CommandButton;
+import org.skyve.impl.generate.ViewRenderer;
 import org.skyve.impl.metadata.view.widget.Button;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentCapture;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentDisplay;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.view.Action;
 import org.skyve.web.UserAgentType;
 
+import jakarta.annotation.Nonnull;
 import jakarta.faces.component.UIComponent;
 
 public class DeviceResponsiveComponentBuilder extends ResponsiveComponentBuilder {
@@ -25,10 +29,16 @@ public class DeviceResponsiveComponentBuilder extends ResponsiveComponentBuilder
 	}
 	
 	/**
-	 * Buttons as wide as their layouts allow on phones.
+	 * Creates an action button, forcing phone buttons to occupy the layout width.
+	 *
+	 * <p>Side effects: delegates to the tabular action-button helper after replacing
+	 * explicit dimensions with {@code null} on phones. {@code title} and
+	 * {@code confirmationText} remain raw and carry their nullable escape flags to
+	 * the PrimeFaces output boundary; {@code tooltip} is assigned raw to the
+	 * component title property.
 	 */
 	@Override
-	protected CommandButton actionButton(String title, 
+	protected CommandButton actionButton(EscapableText title,
 											String iconStyleClass,
 											String tooltip, 
 											ImplicitActionName implicitActionName,
@@ -38,7 +48,7 @@ public class DeviceResponsiveComponentBuilder extends ResponsiveComponentBuilder
 											String dataWidgetVar,
 											Integer pixelWidth, 
 											Integer pixelHeight,
-											String confirmationText, 
+											EscapableText confirmationText,
 											String disabled, 
 											String formDisabled,
 											String invisible,
@@ -85,7 +95,11 @@ public class DeviceResponsiveComponentBuilder extends ResponsiveComponentBuilder
 	}
 	
 	/**
-	 * Use a dialog instead of an overlay panel for phones.
+	 * Creates an upload action using a dialog instead of an overlay panel on phones.
+	 *
+	 * <p>Side effects: delegates to the upload-button helper. The resolved label and
+	 * confirmation text remain raw with their metadata escape flags; tooltip text is
+	 * assigned raw to the component title property.
 	 */
 	@Override
 	public UIComponent upload(UIComponent component, 
@@ -98,22 +112,27 @@ public class DeviceResponsiveComponentBuilder extends ResponsiveComponentBuilder
 			return component;
 		}
 
-		return uploadButton(label,
+		return uploadButton(EscapableText.of(label, ViewRenderer.shouldEscape(action.getEscapeDisplayName())),
 								iconStyleClass,
 								toolTip,
 								action.getName(),
 								null,
 								null,
 								action.getClientValidation(),
-								confirmationText,
+								EscapableText.of(confirmationText, ViewRenderer.shouldEscape(action.getEscapeConfirm())),
 								action.getDisabledConditionName(),
 								null,
 								action.getInvisibleConditionName(),
+								resolveActionUploadCapture(action),
 								UserAgentType.phone.equals(userAgentType));
 	}
 
 	/**
-	 * Use a dialog instead of an overlay panel for phones.
+	 * Creates an upload button using a dialog instead of an overlay panel on phones.
+	 *
+	 * <p>Side effects: delegates to the upload-button helper. The resolved label and
+	 * confirmation text remain raw with their metadata escape flags; tooltip text is
+	 * assigned raw to the component title property.
 	 */
 	@Override
 	public UIComponent uploadButton(UIComponent component,
@@ -128,17 +147,28 @@ public class DeviceResponsiveComponentBuilder extends ResponsiveComponentBuilder
 			return component;
 		}
 
-		return uploadButton(label,
+		return uploadButton(EscapableText.of(label, ViewRenderer.shouldEscape(action.getEscapeDisplayName())),
 								iconStyleClass,
 								toolTip,
 								action.getName(),
 								button.getPixelWidth(),
 								button.getPixelHeight(),
 								action.getClientValidation(),
-								confirmationText,
+								EscapableText.of(confirmationText, ViewRenderer.shouldEscape(action.getEscapeConfirm())),
 								action.getDisabledConditionName(),
 								formDisabledConditionName,
 								action.getInvisibleConditionName(),
+								resolveActionUploadCapture(action),
 								UserAgentType.phone.equals(userAgentType));
+	}
+
+	@Override
+	protected boolean useGeometryDialog() {
+		return UserAgentType.phone.equals(userAgentType);
+	}
+
+	@Override
+	protected boolean useContentUploadDialog(boolean image, @Nonnull ContentDisplay display, @Nonnull ContentCapture capture) {
+		return UserAgentType.phone.equals(userAgentType) || super.useContentUploadDialog(image, display, capture);
 	}
 }

@@ -70,7 +70,7 @@ class OverridableDomainGeneratorTest {
 		OrderingImpl ascending = new OrderingImpl("title", SortDirection.ascending);
 		OrderingImpl descendingAssociation = new OrderingImpl("owner", SortDirection.descending);
 
-		when(ordered.isComplexOrdering()).thenReturn(false);
+		when(ordered.isComplexOrdering()).thenReturn(Boolean.FALSE);
 		when(ordered.getOrdering()).thenReturn(List.of(ascending, descendingAssociation));
 		when(referencedDocument.getAttribute("title")).thenReturn(mock(Attribute.class));
 		when(referencedDocument.getAttribute("owner")).thenReturn(mock(Association.class));
@@ -79,10 +79,10 @@ class OverridableDomainGeneratorTest {
 				.invoke(null, ordered, referencedDocument);
 		assertEquals("title asc, owner_id desc", result);
 
-		when(ordered.isComplexOrdering()).thenReturn(true);
+		when(ordered.isComplexOrdering()).thenReturn(Boolean.TRUE);
 		assertNull(declaredMethod("orderBy", OrderedAttribute.class, Document.class).invoke(null, ordered, referencedDocument));
 
-		when(ordered.isComplexOrdering()).thenReturn(false);
+		when(ordered.isComplexOrdering()).thenReturn(Boolean.FALSE);
 		when(ordered.getOrdering()).thenReturn(Collections.emptyList());
 		assertNull(declaredMethod("orderBy", OrderedAttribute.class, Document.class).invoke(null, ordered, referencedDocument));
 	}
@@ -203,17 +203,17 @@ class OverridableDomainGeneratorTest {
 		Document child = mock(Document.class);
 		when(child.getOwningModuleName()).thenReturn("admin");
 		when(child.getName()).thenReturn("Child");
-		when(child.isPersistable()).thenReturn(true);
+		when(child.isPersistable()).thenReturn(Boolean.TRUE);
 
 		Document transientChild = mock(Document.class);
 		when(transientChild.getOwningModuleName()).thenReturn("admin");
 		when(transientChild.getName()).thenReturn("TransientChild");
-		when(transientChild.isPersistable()).thenReturn(false);
+		when(transientChild.isPersistable()).thenReturn(Boolean.FALSE);
 
 		Document grandChild = mock(Document.class);
 		when(grandChild.getOwningModuleName()).thenReturn("admin");
 		when(grandChild.getName()).thenReturn("GrandChild");
-		when(grandChild.isPersistable()).thenReturn(true);
+		when(grandChild.isPersistable()).thenReturn(Boolean.TRUE);
 
 		Method putModocDerivation = declaredMethod("putModocDerivation", Document.class, Document.class);
 		putModocDerivation.invoke(generator, child, base);

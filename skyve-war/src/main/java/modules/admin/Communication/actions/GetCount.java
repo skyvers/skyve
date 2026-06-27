@@ -7,8 +7,17 @@ import org.skyve.web.WebContext;
 
 import modules.admin.domain.Communication;
 
+/**
+ * Returns the recipient count for the current communication selection.
+ */
 public class GetCount implements ServerSideAction<Communication> {
-
+	/**
+	 * Performs the execute operation.
+	 * @param communication the communication value
+	 * @param webContext the webContext value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
 	public ServerSideActionResult<Communication> execute(Communication communication, WebContext webContext) throws Exception {
 

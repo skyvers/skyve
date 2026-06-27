@@ -28,7 +28,18 @@ import org.skyve.util.Binder.TargetMetaData;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
+/**
+ * Deserialises JSON text into Java objects: {@link java.util.Map}, {@link java.util.List},
+ * {@link String}, {@link Number}, {@link Boolean}, and {@code null}.
+ *
+ * <p>Also supports domain-aware reading: when a {@link org.skyve.metadata.user.User}
+ * and document context are supplied, attribute values are converted via the
+ * document's declared {@link org.skyve.domain.types.converters.Converter}.
+ *
+ * <p>Threading: not thread-safe. Create a new instance per parse operation.
+ */
 public class JSONReader {
+	@SuppressWarnings("java:S115") // Suppress "Constant names should comply with a naming convention" as these are not constants but enum values
 	public enum JSONMode {
 		dynamic, // make collections and maps
 		bean, // make document beans
@@ -84,6 +95,7 @@ public class JSONReader {
 		}
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private @Nullable Object read() throws Exception {
 		skipWhiteSpace();
 		char ch = c;
@@ -175,7 +187,7 @@ public class JSONReader {
 		return token;
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "java:S3776", "java:S6541"}) // complexity OK
 	private @Nullable Object object() throws Exception {
 		Object key = read();
 		if (Bean.MODULE_KEY.equals(key)) {
@@ -236,7 +248,7 @@ public class JSONReader {
 					else if (PersistentBean.LOCK_NAME.equals(propertyName)) {
 						OptimisticLock lock = null;
 						String lockString = (String) value;
-						if ((lockString != null) && (lockString.length() > 0)) {
+						if ((lockString != null) && (! lockString.isEmpty())) {
 							lock = new OptimisticLock(lockString);
 						}
 						BindUtil.set(result, propertyName, lock);
@@ -251,7 +263,7 @@ public class JSONReader {
 					else {
 						// Convert the value if required
 						if (value instanceof String valueString) {
-							if (valueString.length() == 0) {
+							if (valueString.isEmpty()) {
 								value = null;
 							}
 							else {
@@ -419,6 +431,7 @@ public class JSONReader {
 		return result;
 	}
 
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private @Nonnull Object string(char delimiter) {
 		sb.setLength(0);
 		int i = 0;

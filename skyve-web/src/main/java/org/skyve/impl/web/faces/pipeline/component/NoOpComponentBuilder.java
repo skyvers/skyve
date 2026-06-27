@@ -13,6 +13,7 @@ import org.skyve.impl.metadata.view.container.TabPane;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
 import org.skyve.impl.metadata.view.widget.Chart;
+import org.skyve.impl.metadata.view.widget.DialogButton;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
 import org.skyve.impl.metadata.view.widget.Link;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
@@ -23,9 +24,8 @@ import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
@@ -52,6 +52,7 @@ import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.faces.component.UIComponent;
 
@@ -112,6 +113,23 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 
 	@Override
 	public UIComponent spacer(UIComponent component, Spacer spacer) {
+		return component;
+	}
+
+	/**
+	 * Leaves dialog-button construction unchanged.
+	 *
+	 * @param component the current component
+	 * @param label raw button label and nullable escape flag
+	 * @param button dialog-button metadata
+	 * @param formDisabledConditionName optional form-level disabled condition
+	 * @return the original component
+	 */
+	@Override
+	public UIComponent dialogButton(UIComponent component,
+										EscapableText label,
+										DialogButton button,
+										String formDisabledConditionName) {
 		return component;
 	}
 
@@ -326,10 +344,23 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 		return component;
 	}
 
+	/**
+	 * Leaves list-membership caption construction unchanged for no-op builders.
+	 *
+	 * @param component the existing wrapper component
+	 * @param candidatesHeading raw candidates-list heading and nullable escape flag;
+	 *        {@code null} and {@code Boolean.TRUE} escape, while {@code Boolean.FALSE}
+	 *        allows trusted markup
+	 * @param membersHeading raw members-list heading and nullable escape flag;
+	 *        {@code null} and {@code Boolean.TRUE} escape, while {@code Boolean.FALSE}
+	 *        allows trusted markup
+	 * @param membership the list-membership metadata
+	 * @return {@code component} unchanged
+	 */
 	@Override
 	public EventSourceComponent listMembership(EventSourceComponent component,
-												String candidatesHeading,
-												String membersHeading,
+												EscapableText candidatesHeading,
+												EscapableText membersHeading,
 												ListMembership membership) {
 		return component;
 	}
@@ -366,23 +397,15 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent contentImage(UIComponent component,
-										String dataWidgetVar,
-										ContentImage image,
-										String formDisabledConditionName,
-										String title,
-										@Nullable String requiredMessage) {
-		return component;
-	}
-
-	@Override
-	public UIComponent contentLink(UIComponent component,
-									String dataWidgetVar,
-									ContentLink link,
-									String formDisabledConditionName,
-									String title,
-									@Nullable String requiredMessage,
-									HorizontalAlignment textAlignment) {
+	public @Nullable UIComponent content(@Nullable UIComponent component,
+											@Nullable String dataWidgetVar,
+											@Nonnull ContentUpload content,
+											@Nullable String formDisabledConditionName,
+											@Nullable String title,
+											@Nullable String requiredMessage,
+											@Nullable HorizontalAlignment textAlignment,
+											boolean formContext,
+											boolean imageUpload) {
 		return component;
 	}
 

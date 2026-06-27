@@ -9,6 +9,13 @@ import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB descriptor for chart ordering configuration.
+ *
+ * <p>Defines sort direction and binding used to order chart data points.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ */
 @XmlRootElement(name = "order", namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 public class ChartBuilderOrderMetaData implements SerializableMetaData {

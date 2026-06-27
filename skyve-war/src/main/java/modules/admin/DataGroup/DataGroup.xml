@@ -12,7 +12,7 @@
 	<attributes>
 		<text name="name" required="true">
 			<displayName>Name</displayName>
-			<length>30</length>
+			<length>60</length>
 		</text>
 		<memo name="description" >
 			<displayName>Description</displayName>

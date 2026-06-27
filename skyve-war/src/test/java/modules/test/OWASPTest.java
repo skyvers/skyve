@@ -5,7 +5,7 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.UUID;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.bind.BindUtil;
@@ -16,14 +16,14 @@ import org.skyve.util.Util;
 
 import modules.test.domain.AllAttributesPersistent;
 
-public class OWASPTest extends AbstractSkyveTest {
+class OWASPTest extends AbstractSkyveTest {
 
 	private final Map<String, String> escape = new TreeMap<>();
 	private final Map<String, String> sanitise = new TreeMap<>();
 	private final Map<String, String> both = new TreeMap<>();
 	
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() {
 		escape.put("poo@wee.com", "poo@wee.com");
 		escape.put("<h1>test</h1>", "&lt;h1&gt;test&lt;/h1&gt;");
 		escape.put("<h1>test<script>alert(1)</script></h1>", "&lt;h1&gt;test&lt;script&gt;alert(1)&lt;/script&gt;&lt;/h1&gt;");
@@ -38,55 +38,55 @@ public class OWASPTest extends AbstractSkyveTest {
 	}
 	
 	@Test
-	public void testEscape() throws Exception {
+	void testEscape() {
 		for (Entry<String, String> entry : escape.entrySet()) {
-			Assert.assertEquals("Escape not working", entry.getValue(), OWASP.escapeHtml(entry.getKey()));
+			Assertions.assertEquals(entry.getValue(), OWASP.escapeHtml(entry.getKey()), "Escape not working");
 		}
 	}
 
 	@Test
-	public void testSanitise() throws Exception {
+	void testSanitise() {
 		for (Entry<String, String> entry : sanitise.entrySet()) {
-			Assert.assertEquals("Sanitise not working", entry.getValue(), OWASP.sanitise(Sanitisation.relaxed, entry.getKey()));
+			Assertions.assertEquals(entry.getValue(), OWASP.sanitise(Sanitisation.relaxed, entry.getKey()), "Sanitise not working");
 		}
 	}
 
 	@Test
-	public void testBoth() throws Exception {
+	void testBoth() {
 		for (Entry<String, String> entry : both.entrySet()) {
-			Assert.assertEquals("Sanitise and escape not as expected", entry.getValue(), OWASP.sanitiseAndEscapeHtml(Sanitisation.relaxed, entry.getKey()));
+			Assertions.assertEquals(entry.getValue(), OWASP.sanitiseAndEscapeHtml(Sanitisation.relaxed, entry.getKey()), "Sanitise and escape not as expected");
 		}
 	}
 
 	@Test
-	public void testSanitiseAsFunction() throws Exception {
+	void testSanitiseAsFunction() throws Exception {
 		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 2);
 		aap.setText("Test<script>alert(1)</script>Me");
 
-		Assert.assertEquals("Format Message with sanitise function should remove script tag", 
+		Assertions.assertEquals(
 								"<h1>TestMe</h1>",
-								BindUtil.formatMessage("<h1>{text}</h1>", displayName -> OWASP.sanitise(Sanitisation.relaxed, displayName), aap));
+								BindUtil.formatMessage("<h1>{text}</h1>", displayName -> OWASP.sanitise(Sanitisation.relaxed, displayName), aap), "Format Message with sanitise function should remove script tag");
 	}
 	
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSanitiseBindings() throws Exception {
-		Assert.assertEquals("Sanitise should leave bindings alone",
+	void testSanitiseBindings() {
+		Assertions.assertEquals(
 								"user.contacts(1234567890).poo[0]",
-								OWASP.sanitise(Sanitisation.text, "user.contacts(1234567890).poo[0]"));
+								OWASP.sanitise(Sanitisation.text, "user.contacts(1234567890).poo[0]"), "Sanitise should leave bindings alone");
 	}
 	
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSanitiseUUIDs() throws Exception {
+	void testSanitiseUUIDs() {
 		String uuid = UUID.randomUUID().toString();
-		Assert.assertEquals("Sanitise should leave UUIDs alone",
+		Assertions.assertEquals(
 								uuid,
-								OWASP.sanitise(Sanitisation.text, uuid));
+								OWASP.sanitise(Sanitisation.text, uuid), "Sanitise should leave UUIDs alone");
 		uuid = UUIDv7.create().toString();
-		Assert.assertEquals("Sanitise should leave UUIDs alone",
+		Assertions.assertEquals(
 								uuid,
-								OWASP.sanitise(Sanitisation.text, uuid));
+								OWASP.sanitise(Sanitisation.text, uuid), "Sanitise should leave UUIDs alone");
 	}
 
 }

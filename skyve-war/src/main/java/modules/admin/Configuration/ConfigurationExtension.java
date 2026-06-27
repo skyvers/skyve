@@ -14,8 +14,10 @@ import modules.admin.domain.Configuration;
 import modules.admin.domain.DataMaintenance;
 import modules.admin.domain.JobSchedule;
 
+/**
+ * Adds runtime helper state and defaults for the Configuration document.
+ */
 public class ConfigurationExtension extends Configuration {
-
 	private static final long serialVersionUID = -5669557826609528645L;
 	private static final String BACKUP_JOB_NAME = ".jBackup";
 	private static final String AVAILABLE_DISK_SPACE_ALARM_JOB_NAME = ".jAvailableDiskSpaceAlarm";
@@ -24,6 +26,7 @@ public class ConfigurationExtension extends Configuration {
 	 * The minimum length required for new usernames in the system.
 	 */
 	public static final int MINIMUM_USERNAME_LENGTH = 4;
+	
 	/**
 	 * The default minimum length required for new passwords when no specific length is defined.
 	 */
@@ -133,10 +136,18 @@ public class ConfigurationExtension extends Configuration {
 		return !"localhost".equals(UtilImpl.SMTP);
 	}
 
+	/**
+	 * Performs the defaultSMTPSender operation.
+	 * @return the operation result
+	 */
 	public static String defaultSMTPSender() {
 		return UtilImpl.SMTP_SENDER;
 	}
 
+	/**
+	 * Performs the validBackupConfiguration operation.
+	 * @return the operation result
+	 */
 	public static boolean validBackupConfiguration() {
 		boolean result = false;
 		DataMaintenance dm = DataMaintenance.newInstance();
@@ -148,6 +159,10 @@ public class ConfigurationExtension extends Configuration {
 		return result;
 	}
 
+	/**
+	 * Performs the validBackupSchedule operation.
+	 * @return the operation result
+	 */
 	public static boolean validBackupSchedule() {
 		DocumentQuery q = CORE.getPersistence().newDocumentQuery(JobSchedule.MODULE_NAME, JobSchedule.DOCUMENT_NAME);
 		q.getFilter().addNullOrEquals(JobSchedule.disabledPropertyName, Boolean.FALSE);
@@ -157,6 +172,10 @@ public class ConfigurationExtension extends Configuration {
 	}
 
 	
+	/**
+	 * Performs the validAvailableDiskSpaceAlarmSchedule operation.
+	 * @return the operation result
+	 */
 	public static boolean validAvailableDiskSpaceAlarmSchedule() {
 		DocumentQuery q = CORE.getPersistence().newDocumentQuery(JobSchedule.MODULE_NAME, JobSchedule.DOCUMENT_NAME);
 		q.getFilter().addNullOrEquals(JobSchedule.disabledPropertyName, Boolean.FALSE);
@@ -177,10 +196,12 @@ public class ConfigurationExtension extends Configuration {
 	}
 
 	/**
-	 * Anonymous public user (e.g. for public forms) is validly configured if:
-	 * - publicUser has been assigned.
-	 * 
-	 * @return
+	 * Indicates whether anonymous public-user access has been configured.
+	 *
+	 * <p>Anonymous public user support (for example, public forms) is considered valid
+	 * when {@link #getPublicUser()} is assigned.</p>
+	 *
+	 * @return {@code true} when a public user is assigned; otherwise {@code false}
 	 */
 	public boolean validAnonymousPublicUser() {
 		return (getPublicUser() != null);

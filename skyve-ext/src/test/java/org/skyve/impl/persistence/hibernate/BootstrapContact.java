@@ -1,5 +1,8 @@
 package org.skyve.impl.persistence.hibernate;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import org.skyve.domain.app.AppConstants;
 import org.skyve.impl.domain.AbstractPersistentBean;
 
@@ -16,6 +19,8 @@ public class BootstrapContact extends AbstractPersistentBean {
 	private static final long serialVersionUID = -6815798403338244649L;
 
 	private String bizKey;
+	@SuppressWarnings("unused")
+	private Set<String> roles = new LinkedHashSet<>();
 
 	@Override
 	public String getBizModule() {

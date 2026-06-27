@@ -22,25 +22,54 @@ import org.skyve.persistence.DocumentFilter;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.tag.TagManager;
 
+/**
+ * Implements tag lifecycle operations for the current user using admin tag documents.
+ *
+ * <p>Threading: this singleton is stateless and delegates all stateful work to the
+ * request-bound persistence context.
+ */
 public class DefaultTagManager implements TagManager {
 	private static final DefaultTagManager INSTANCE = new DefaultTagManager();
+
+	private static final String TAG_ATTRIBUTE_QUERY_PREFIX = "where bean.%s.%s = :%s ";
+	private static final String TAG_QUERY_AND_WITH_SPACE = "and bean.%s = :%s ";
+	private static final String TAG_QUERY_AND = "and bean.%s = :%s";
 	
+	/**
+	 * Returns the singleton instance.
+	 */
 	public static DefaultTagManager get() {
 		return INSTANCE;
 	}
 	
 	/**
-	 * Disallow external instantiation
+	 * Disallows external instantiation.
 	 */
 	private DefaultTagManager() {
 		// nothing to see here
 	}
 	
+	/**
+	 * Applies a tag to a bean.
+	 *
+	 * @param tagId The tag document id.
+	 * @param bean The bean to tag.
+	 * @throws Exception If tagging fails.
+	 */
 	@Override
 	public void tag(String tagId, Bean bean) throws Exception {
 		tag(tagId, bean.getBizModule(), bean.getBizDocument(), bean.getBizId());
 	}
 
+	/**
+	 * Applies a tag to a specific bean identity tuple.
+	 *
+	 * @param tagId The tag document id.
+	 * @param taggedModuleName The module containing the tagged document.
+	 * @param taggedDocumentName The tagged document name.
+	 * @param taggedBizId The tagged bean id.
+	 * @throws Exception If persistence or validation fails.
+	 */
 	@Override
 	public void tag(String tagId, String taggedModuleName, String taggedDocumentName, String taggedBizId) throws Exception {
 		AbstractPersistence persistence = AbstractPersistence.get();
@@ -71,22 +100,38 @@ public class DefaultTagManager implements TagManager {
 		}
 	}
 
+	/**
+	 * Removes a tag from a bean.
+	 *
+	 * @param tagId The tag document id.
+	 * @param bean The bean to untag.
+	 * @throws Exception If untagging fails.
+	 */
 	@Override
 	public void untag(String tagId, Bean bean) throws Exception {
 		untag(tagId, bean.getBizModule(), bean.getBizDocument(), bean.getBizId());
 	}
 
+	/**
+	 * Removes a tag association for a specific bean identity tuple.
+	 *
+	 * @param tagId The tag document id.
+	 * @param taggedModuleName The module containing the tagged document.
+	 * @param taggedDocumentName The tagged document name.
+	 * @param taggedBizId The tagged bean id.
+	 * @throws Exception If persistence operations fail.
+	 */
 	@Override
 	public void untag(String tagId, String taggedModuleName, String taggedDocumentName, String taggedBizId) throws Exception {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		User user = persistence.getUser();
 
 		BizQL deleteStatement = persistence.newBizQL(String.format("delete from {%s.%s} as bean " +
-																	"where bean.%s.%s = :%s " +
-																	"and bean.%s = :%s " +
-																	"and bean.%s = :%s " +
-																	"and bean.%s = :%s " +
-																	"and bean.%s = :%s",
+																	TAG_ATTRIBUTE_QUERY_PREFIX +
+																	TAG_QUERY_AND_WITH_SPACE +
+																	TAG_QUERY_AND_WITH_SPACE +
+																	TAG_QUERY_AND_WITH_SPACE +
+																	TAG_QUERY_AND,
 																		AppConstants.ADMIN_MODULE_NAME,
 																		AppConstants.TAGGED_DOCUMENT_NAME,
 																		AppConstants.TAG_ATTRIBUTE_NAME,
@@ -109,6 +154,14 @@ public class DefaultTagManager implements TagManager {
 		deleteStatement.execute();
 	}
 
+	/**
+	 * Creates a new user-owned tag.
+	 *
+	 * @param tagName The tag display name.
+	 * @param visible Whether the tag is visible in UI selectors.
+	 * @return The created tag biz id.
+	 * @throws Exception If creation fails.
+	 */
 	@Override
 	public String create(String tagName, boolean visible) throws Exception {
 	    AbstractPersistence persistence = AbstractPersistence.get();
@@ -125,6 +178,13 @@ public class DefaultTagManager implements TagManager {
         return tag.getBizId();
 	}
 
+	/**
+	 * Resolves the current user's tag id by tag name.
+	 *
+	 * @param tagName The tag display name.
+	 * @return The tag id, or {@code null} when no matching tag exists.
+	 * @throws Exception If lookup fails.
+	 */
 	@Override
 	public String getTagId(String tagName) throws Exception {
 	    AbstractPersistence persistence = AbstractPersistence.get();
@@ -145,6 +205,12 @@ public class DefaultTagManager implements TagManager {
         return result;
 	}
 
+	/**
+	 * Lists all tags owned by the current user ordered by name.
+	 *
+	 * @return Domain values where code is tag id and description is tag name.
+	 * @throws Exception If retrieval fails.
+	 */
 	@Override
 	public List<DomainValue> getTags() throws Exception {
 	    AbstractPersistence persistence = AbstractPersistence.get();
@@ -165,6 +231,12 @@ public class DefaultTagManager implements TagManager {
         return result;
 	}
 
+	/**
+	 * Deletes a tag after clearing all current-user associations.
+	 *
+	 * @param tagId The tag document id.
+	 * @throws Exception If delete validation or persistence fails.
+	 */
 	@Override
 	public void delete(String tagId) throws Exception {
 		clear(tagId);
@@ -183,6 +255,13 @@ public class DefaultTagManager implements TagManager {
 		persistence.delete(document, bean);
 	}
 
+	/**
+	 * Applies a tag to all beans in an iterable.
+	 *
+	 * @param tagId The tag document id.
+	 * @param beans Beans to tag.
+	 * @throws Exception If tagging fails for any bean.
+	 */
 	@Override
 	public void tag(String tagId, Iterable<Bean> beans) throws Exception {
 		for (Bean bean : beans) {
@@ -190,6 +269,13 @@ public class DefaultTagManager implements TagManager {
 		}
 	}
 
+	/**
+	 * Removes a tag from all beans in an iterable.
+	 *
+	 * @param tagId The tag document id.
+	 * @param beans Beans to untag.
+	 * @throws Exception If untagging fails for any bean.
+	 */
 	@Override
 	public void untag(String tagId, Iterable<Bean> beans) throws Exception {
 		for (Bean bean : beans) {
@@ -197,13 +283,19 @@ public class DefaultTagManager implements TagManager {
 		}
 	}
 
+	/**
+	 * Removes all tagged-document rows for the current user and tag.
+	 *
+	 * @param tagId The tag document id.
+	 * @throws Exception If deletion fails.
+	 */
 	@Override
 	public void clear(String tagId) throws Exception {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		User user = persistence.getUser();
 		BizQL deleteStatement = persistence.newBizQL(String.format("delete from {%s.%s} as bean " +
-																	"where bean.%s.%s = :%s " +
-																	"and bean.%s = :%s",
+																	TAG_ATTRIBUTE_QUERY_PREFIX +
+																	TAG_QUERY_AND,
 																		AppConstants.ADMIN_MODULE_NAME,
 																		AppConstants.TAGGED_DOCUMENT_NAME,
 																		AppConstants.TAG_ATTRIBUTE_NAME,
@@ -217,6 +309,13 @@ public class DefaultTagManager implements TagManager {
 		deleteStatement.execute();
 	}
 
+	/**
+	 * Iterates bean identities currently associated with a tag for the current user.
+	 *
+	 * @param tagId The tag document id.
+	 * @return A lazily-read iterable of tagged bean identities.
+	 * @throws Exception If query execution fails.
+	 */
 	@Override
 	@SuppressWarnings("resource")
 	public AutoClosingIterable<Bean> iterate(String tagId) throws Exception {
@@ -226,8 +325,8 @@ public class DefaultTagManager implements TagManager {
 																"bean.%s as %s, " + 
 																"bean.%s as %s " +
 															"from {%s.%s} as bean " + 
-															"where bean.%s.%s = :%s " +
-															"and bean.%s = :%s",
+															TAG_ATTRIBUTE_QUERY_PREFIX +
+															TAG_QUERY_AND,
 																AppConstants.TAGGED_MODULE_ATTRIBUTE_NAME,
 																AppConstants.TAGGED_MODULE_ATTRIBUTE_NAME,
 																AppConstants.TAGGED_DOCUMENT_ATTRIBUTE_NAME,

@@ -14,10 +14,16 @@ import modules.admin.domain.Communication;
 import modules.admin.domain.Contact;
 import modules.admin.domain.Tag;
 
+/**
+ * Creates Communication documents with default batching and scheduling values.
+ */
 @SkyveFactory(testDomain = false, excludedActions = {
 		CreateFiles.class, GetCount.class, GetResults.class, SendNow.class, TestSend.class })
 public class CommunicationFactory {
-
+	/**
+	 * Performs the crudInstance operation.
+	 * @return the operation result
+	 */
 	@SkyveFixture(types = FixtureType.crud)
 	public static CommunicationExtension crudInstance() {
 		CommunicationExtension bean = new DataBuilder().factoryBuild(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
@@ -28,6 +34,10 @@ public class CommunicationFactory {
 	}
 
 	// Ensure that system is switched off so that the communication can be deleted by the SAIL test.
+	/**
+	 * Performs the sail operation.
+	 * @return the operation result
+	 */
 	@SuppressWarnings("static-method")
 	@SkyveFixture(types = FixtureType.sail)
 	public CommunicationExtension sail() {

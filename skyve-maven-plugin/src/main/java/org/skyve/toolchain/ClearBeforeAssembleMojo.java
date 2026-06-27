@@ -8,6 +8,11 @@ import org.apache.maven.project.MavenProject;
 import org.skyve.impl.create.MavenSkyveProject;
 import org.skyve.impl.create.MavenSkyveProject.MavenSkyveProjectCreator;
 
+/**
+ * Removes any previously generated assemble output for the selected customer.
+ *
+ * <p>Threading: this mojo mutates filesystem state and should be treated as thread-confined.
+ */
 @Mojo(name = "clearBeforeAssemble")
 public class ClearBeforeAssembleMojo extends AbstractMojo {
 	@Parameter(defaultValue = "${project}", readonly = true)
@@ -19,6 +24,11 @@ public class ClearBeforeAssembleMojo extends AbstractMojo {
 	@Parameter(required = true, property = "customer")
 	private String customer;
 
+	/**
+	 * Loads the project context and clears assembled artefacts for the configured customer.
+	 *
+	 * @throws MojoExecutionException if the clean-up fails
+	 */
 	@Override
 	public void execute() throws MojoExecutionException {
 		try {

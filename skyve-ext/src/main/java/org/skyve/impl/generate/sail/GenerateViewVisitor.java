@@ -28,6 +28,12 @@ import org.skyve.metadata.sail.language.step.interaction.grids.DataGridNew;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Binder.TargetMetaData;
 
+/**
+ * View visitor that traverses a Skyve view model and emits a SAIL
+ * (Skyve Automated Integration Language) test script.
+ *
+ * <p>Used by {@link Generator} to produce SAIL scripts from existing view metadata.
+ */
 public class GenerateViewVisitor extends NoOpViewVisitor {
 	private List<Step> populateSteps = new ArrayList<>();
 	private List<Step> actionSteps = new ArrayList<>();

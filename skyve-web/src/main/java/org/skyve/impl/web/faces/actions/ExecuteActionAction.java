@@ -23,8 +23,10 @@ import org.skyve.util.monitoring.RequestKey;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 
+/**
+ * Executes a Faces callback action within the current Skyve web context.
+ */
 public class ExecuteActionAction extends FacesAction<Void> {
-
     private static final Logger FACES_LOGGER = Category.FACES.logger();
 
 	private FacesView facesView;
@@ -33,6 +35,14 @@ public class ExecuteActionAction extends FacesAction<Void> {
 	private String collectionName;
 	private String elementBizId;
 	
+	/**
+	 * Creates an action executor for a named view action and optional collection row context.
+	 *
+	 * @param facesView the active Faces view state
+	 * @param actionName the action name to execute
+	 * @param collectionName optional collection binding when targeting a row action
+	 * @param elementBizId optional row bizId when targeting a collection element
+	 */
 	public ExecuteActionAction(FacesView facesView,
 								String actionName,
 								String collectionName,
@@ -43,8 +53,14 @@ public class ExecuteActionAction extends FacesAction<Void> {
 		this.elementBizId = elementBizId;
 	}
 
+	/**
+	 * Executes the configured server-side action and updates Faces view state with the returned bean.
+	 *
+	 * @return {@code null}; the action applies updates to persistence and the current Faces view by side effect
+	 * @throws Exception when action execution fails
+	 */
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "java:S3776"}) // Complexity OK
 	public Void callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) {
 			if (collectionName != null) {

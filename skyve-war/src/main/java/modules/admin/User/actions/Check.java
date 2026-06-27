@@ -29,8 +29,20 @@ import modules.admin.domain.Contact.ContactType;
 import modules.admin.domain.User;
 import modules.admin.domain.UserCandidateContact;
 
+/**
+ * Searches for candidate contacts by name/email and prepares user wizard choices.
+ */
 public class Check implements ServerSideAction<UserExtension> {
+	/**
+	 * Validates search criteria, collects candidate contacts, and seeds defaults when no match is found.
+	 *
+	 * @param adminUser The user wizard bean containing search inputs.
+	 * @param webContext The current web context.
+	 * @return The updated user bean.
+	 * @throws Exception If search or retrieval fails.
+	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public ServerSideActionResult<UserExtension> execute(UserExtension adminUser, WebContext webContext) throws Exception {
 		// validate required fields
 		if (StringUtils.isAllBlank(adminUser.getSearchContactName(), adminUser.getSearchEmail())) {
@@ -60,11 +72,11 @@ public class Check implements ServerSideAction<UserExtension> {
 			// prepare the email for search
 			searchEmail = StringUtils.deleteWhitespace(searchEmail);
 
-			if (searchEmail.length() > 0) {
-				if (!searchEmail.startsWith("%")) {
+			if (! searchEmail.isEmpty()) {
+				if (! searchEmail.startsWith("%")) {
 					searchEmail = "%" + searchEmail;
 				}
-				if (!searchEmail.endsWith("%")) {
+				if (! searchEmail.endsWith("%")) {
 					searchEmail = searchEmail + "%";
 				}
 

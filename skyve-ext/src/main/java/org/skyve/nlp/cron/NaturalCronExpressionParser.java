@@ -27,13 +27,15 @@ import org.skyve.nlp.cron.elementprovider.recurring.EveryYear;
  * License: MIT
  */
 public class NaturalCronExpressionParser {
-
-	public static final String VALID_PATTERN = "^(((?:[1-9]?\\d|\\*)\\s*(?:(?:[\\/-][1-9]?\\d)|(?:,[1-9]?\\d)+)?\\s*){6})$";
+	public static final String VALID_PATTERN = "^(((?:\\d{1,2}+|\\*)\\s*+(?:(?:[\\/-]\\d{1,2}+)|(?:,\\d{1,2}+)++)?+\\s*+){6})$";
 
 	protected ExpressionElementProvider[] elementProviders;
 	private Map<String, CronExpression> mappings;
 	private Pattern pattern;
 
+	/**
+	 * Creates a parser with the default provider chain and static phrase mappings.
+	 */
 	public NaturalCronExpressionParser() {
 		elementProviders = new ExpressionElementProvider[] {
 				new EveryYear(),
@@ -66,6 +68,17 @@ public class NaturalCronExpressionParser {
 		pattern = Pattern.compile(VALID_PATTERN);
 	}
 
+	/**
+	 * Parses a natural-language schedule into a validated six-field cron expression.
+	 *
+	 * <p>Parsing merges contributions from all matching providers, respecting provider lock
+	 * semantics for each cron field.
+	 *
+	 * @param string The natural-language schedule to parse.
+	 * @return The parsed cron expression, or {@code null} when {@code string} is {@code null}.
+	 * @throws CronParserException If no valid cron expression can be derived.
+	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public CronExpression parse(final String string) {
 
 		if (string != null) {

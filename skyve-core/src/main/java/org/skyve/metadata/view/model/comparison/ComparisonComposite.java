@@ -6,7 +6,8 @@ import java.util.List;
 import org.skyve.metadata.model.document.Document;
 
 public class ComparisonComposite {
-	public static enum Mutation {
+	@SuppressWarnings("java:S115") // Enum names are comparison state values exposed to callers.
+	public enum Mutation {
 		unchanged,
 		added,
 		updated,

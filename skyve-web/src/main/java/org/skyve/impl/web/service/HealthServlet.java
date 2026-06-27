@@ -26,7 +26,7 @@ import org.skyve.persistence.DataStore;
 import org.skyve.util.Util;
 import org.skyve.util.monitoring.Monitoring;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -34,27 +34,39 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
- * Returns a JSON response regarding the health of the relevant Skyve system components, or a 404 if turned off in the JSON.
- * The response is cached for the JSON configured number of seconds to alleviate denial of service attacks.
- * <br/>
- * The way to test using this service is...
- * <ol>
- * <li>Can I hit it and get a response.</li>
- * <li>Either parse the JSON response to evaluate or string search for "error".</li>
- * </ol>
- * 
- * @author mike
+ * Reports runtime health for core Skyve subsystems as a JSON payload.
+ *
+ * <p>The response includes status probes for persistence, configured data stores, repository,
+ * add-ins, content manager, job scheduler, caching, and startup uptime. A configurable response
+ * cache window is used to reduce repeated probe cost under frequent health polling.
+ *
+ * <p>Side effects: may open and rollback datastore and persistence connections during probes,
+ * updates static cached response state, and writes probe outcomes to application logs.
  */
 public class HealthServlet extends HttpServlet {
 	private static final long serialVersionUID = -509208309881530817L;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HealthServlet.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(HealthServlet.class);
+
+    private static final String STATUS_OK = "ok";
+	private static final String STATUS_ERROR = "error";
 
 	// The thread-safe cached response
 	private static AtomicReference<StringBuilder> cachedResponse = new AtomicReference<>();
 	// The thread-safe millis at caching instant - used to determine whether to use the cached response or not
 	private static AtomicLong responseInstant = new AtomicLong(Long.MIN_VALUE);
 	
+	/**
+	 * Returns the current health payload, using the cached payload when still within cache TTL.
+	 *
+	 * <p>Response semantics: returns {@code 404} when health checks are disabled, otherwise returns
+	 * {@code 200} with a JSON payload.
+	 *
+	 * @param request inbound servlet request
+	 * @param response outbound servlet response
+	 * @throws ServletException when servlet processing fails
+	 * @throws IOException when writing to the response stream fails
+	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -94,6 +106,7 @@ public class HealthServlet extends HttpServlet {
 	 * Create a JSON response representing the status of the system components.
 	 * @return	The JSON.
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static StringBuilder determineResponse() {
 		StringBuilder result = new StringBuilder(128);
 		
@@ -102,7 +115,7 @@ public class HealthServlet extends HttpServlet {
 		try {
 			AbstractHibernatePersistence p = (AbstractHibernatePersistence) AbstractPersistence.get();
 			try {
-				result.append("ok");
+				result.append(STATUS_OK);
 				
 				// Primary Data Store
 				result.append("\",\"database\":\"");
@@ -118,7 +131,7 @@ public class HealthServlet extends HttpServlet {
 					StringBuilder sql = new StringBuilder(64);
 					sql.append("select 1 from ").append(persistent.getPersistentIdentifier()).append(" where 1 = 0");
 					p.newSQL(sql.toString()).scalarResults(Number.class);
-					result.append("ok");
+					result.append(STATUS_OK);
 				}
 				finally {
 					p.rollback();
@@ -129,8 +142,8 @@ public class HealthServlet extends HttpServlet {
 			}
 		}
 		catch (Throwable t) {
-			t.printStackTrace();
-			result.append("error");
+			LOGGER.error(t.getMessage(), t);
+			result.append(STATUS_ERROR);
 		}
 		
 		// Data Stores
@@ -143,11 +156,11 @@ public class HealthServlet extends HttpServlet {
 					}
 				}
 			}
-			result.append("ok");
+			result.append(STATUS_OK);
 		}
 		catch (Throwable t) {
-			t.printStackTrace();
-			result.append("error");
+			LOGGER.error(t.getMessage(), t);
+			result.append(STATUS_ERROR);
 		}
 		
 		// Repository
@@ -155,15 +168,15 @@ public class HealthServlet extends HttpServlet {
 		try {
 			// Obtain the repository
 			if (CORE.getRepository() == null) {
-				result.append("error");
+				result.append(STATUS_ERROR);
 			}
 			else {
-				result.append("ok");
+				result.append(STATUS_OK);
 			}
 		}
 		catch (Throwable t) {
-			t.printStackTrace();
-			result.append("error");
+			LOGGER.error(t.getMessage(), t);
+			result.append(STATUS_ERROR);
 		}
 
 		// Add-ins
@@ -171,11 +184,11 @@ public class HealthServlet extends HttpServlet {
 		try {
 			// Obtain the addin manager
 			EXT.getAddInManager();
-			result.append("ok");
+			result.append(STATUS_OK);
 		}
 		catch (Throwable t) {
-			t.printStackTrace();
-			result.append("error");
+			LOGGER.error(t.getMessage(), t);
+			result.append(STATUS_ERROR);
 		}
 
 		// Content
@@ -183,12 +196,12 @@ public class HealthServlet extends HttpServlet {
 		try {
 			// Open and close a new content manager
 			try (ContentManager cm = EXT.newContentManager()) {
-				result.append("ok");
+				result.append(STATUS_OK);
 			}
 		}
 		catch (Throwable t) {
-			t.printStackTrace();
-			result.append("error");
+			LOGGER.error(t.getMessage(), t);
+			result.append(STATUS_ERROR);
 		}
 
 		// Job Scheduler
@@ -197,11 +210,11 @@ public class HealthServlet extends HttpServlet {
 			try {
 				// Obtain the job scheduler manager
 				EXT.getJobScheduler();
-				result.append("ok");
+				result.append(STATUS_OK);
 			}
 			catch (Throwable t) {
-				t.printStackTrace();
-				result.append("error");
+				LOGGER.error(t.getMessage(), t);
+				result.append(STATUS_ERROR);
 			}
 		}
 		else {
@@ -213,11 +226,11 @@ public class HealthServlet extends HttpServlet {
 		try {
 			// Check for a bogus token that will get the CSRF token cache
 			StateUtil.checkToken("", null);
-			result.append("ok");
+			result.append(STATUS_OK);
 		}
 		catch (Throwable t) {
-			t.printStackTrace();
-			result.append("error");
+			LOGGER.error(t.getMessage(), t);
+			result.append(STATUS_ERROR);
 		}
 
 		// Resources

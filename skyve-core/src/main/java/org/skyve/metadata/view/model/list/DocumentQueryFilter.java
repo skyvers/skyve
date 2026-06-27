@@ -603,6 +603,7 @@ public class DocumentQueryFilter implements Filter {
 		in(binding, true, values);
 	}
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private void in(String binding, boolean not, Object... values) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) {

@@ -29,6 +29,11 @@ public class PrimeFacesAutomationContext extends AutomationContext<PrimeFacesGen
 	private Map<String, List<UIComponent>> components = new TreeMap<>();
 	private Map<String, List<Object>> widgets = new TreeMap<>();
 
+	/**
+	 * Generates list-view components and widgets for the supplied PrimeFaces list context.
+	 *
+	 * @param listContext the list generation context
+	 */
 	@Override
 	public void generate(PrimeFacesGenerateListContext listContext) {
 		PushListContext push = listContext.pushListContext();
@@ -59,6 +64,11 @@ public class PrimeFacesAutomationContext extends AutomationContext<PrimeFacesGen
 				cbc);
 	}
 
+	/**
+	 * Generates edit-view components and widgets for the supplied PrimeFaces edit context.
+	 *
+	 * @param editContext the edit generation context
+	 */
 	@Override
 	public void generate(PrimeFacesGenerateEditContext editContext) {
 		PushEditContext push = editContext.pushEditContext();
@@ -87,32 +97,48 @@ public class PrimeFacesAutomationContext extends AutomationContext<PrimeFacesGen
 				lbc);
 	}
 
+	/**
+	 * Records a component and widget pair for the supplied logical identifier.
+	 *
+	 * @param identifier the logical identifier used by SAIL steps
+	 * @param component the Faces component associated with the identifier
+	 * @param widget the Skyve widget associated with the identifier
+	 */
 	void put(String identifier, UIComponent component, Object widget) {
-		List<UIComponent> componentList = components.get(identifier);
-		if (componentList == null) {
-			componentList = new ArrayList<>();
-			components.put(identifier, componentList);
-		}
-
+		List<UIComponent> componentList = components.computeIfAbsent(identifier, key -> new ArrayList<>());
 		componentList.add(component);
 
-		List<Object> widgetList = widgets.get(identifier);
-		if (widgetList == null) {
-			widgetList = new ArrayList<>();
-			widgets.put(identifier, widgetList);
-		}
-
+		List<Object> widgetList = widgets.computeIfAbsent(identifier, key -> new ArrayList<>());
 		widgetList.add(widget);
 	}
 	
+	/**
+	 * Returns collected Faces components for a logical identifier.
+	 *
+	 * @param identifier the logical identifier to resolve
+	 * @return the collected Faces components, or {@code null} when none are recorded
+	 */
 	public List<UIComponent> getFacesComponents(String identifier) {
 		return components.get(identifier);
 	}
 
+	/**
+	 * Returns collected Skyve widgets for a logical identifier.
+	 *
+	 * @param identifier the logical identifier to resolve
+	 * @return the collected widgets, or {@code null} when none are recorded
+	 */
 	public List<Object> getSkyveWidgets(String identifier) {
 		return widgets.get(identifier);
 	}
 
+	/**
+	 * Resolves the client ID for a row-aware component reference.
+	 *
+	 * @param component the component whose client ID is required
+	 * @param row the row index to inject before the terminal client-ID segment
+	 * @return the row-aware client ID
+	 */
 	public static String clientId(UIComponent component, Integer row) {
 		String id = clientId(component);
 
@@ -126,6 +152,12 @@ public class PrimeFacesAutomationContext extends AutomationContext<PrimeFacesGen
 		return id;
 	}
 	
+	/**
+	 * Resolves the full client ID for a Faces component by traversing naming containers.
+	 *
+	 * @param component the component whose client ID is required
+	 * @return the resolved client ID
+	 */
 	public static String clientId(UIComponent component) {
 		StringBuilder result = new StringBuilder(32);
 		clientId(component, result);
@@ -142,8 +174,14 @@ public class PrimeFacesAutomationContext extends AutomationContext<PrimeFacesGen
 		return result.toString();
 	}
 	
+	/**
+	 * Prepends a component ID segment to the accumulating client-ID builder.
+	 *
+	 * @param component the component providing the ID segment
+	 * @param clientId the client-ID accumulator
+	 */
 	private static void clientId(UIComponent component, StringBuilder clientId) {
-		if (clientId.length() == 0) {
+		if (clientId.isEmpty()) {
 			clientId.append(component.getId());
 		} else {
 			clientId.insert(0, ':').insert(0, component.getId());

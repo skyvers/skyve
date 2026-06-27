@@ -3,8 +3,7 @@ package org.skyve.impl.metadata.view;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
@@ -23,6 +22,14 @@ import jakarta.xml.bind.annotation.XmlElementRef;
 import jakarta.xml.bind.annotation.XmlElementRefs;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB-annotated reference that wraps an input widget instance by identity.
+ *
+ * <p>Used in view descriptors where a widget placeholder can be resolved to a
+ * concrete {@link InputWidget} at conversion time.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ */
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 public class WidgetReference implements SerializableMetaData {
 	private static final long serialVersionUID = -4623822506842372448L;
@@ -33,8 +40,7 @@ public class WidgetReference implements SerializableMetaData {
 		return widget;
 	}
 
-	@XmlElementRefs({@XmlElementRef(type = ContentImage.class),
-						@XmlElementRef(type = ContentLink.class), 
+	@XmlElementRefs({@XmlElementRef(type = ContentUpload.class),
 						@XmlElementRef(type = CheckBox.class),
 						@XmlElementRef(type = ColourPicker.class), 
 						@XmlElementRef(type = Combo.class), 

@@ -18,8 +18,18 @@ import jakarta.xml.bind.annotation.XmlElementRefs;
 import jakarta.xml.bind.annotation.XmlElementWrapper;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
-@XmlType(namespace = XMLMetaData.MODULE_NAMESPACE,
+/**
+ * JAXB-annotated descriptor for a {@code <role>} element in a module descriptor.
+ *
+ * <p>Defines a named security role with a description, a list of document
+ * privileges ({@link DocumentPrivilegeMetaData}), and a list of user-access
+ * entries.  Extends {@link NamedMetaData} to bind the role to its symbolic name.
+ *
+ * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
+ *
+ * @see DocumentPrivilegeMetaData
+ * @see ModuleRoleUserAccessMetaData
+ */@XmlType(namespace = XMLMetaData.MODULE_NAMESPACE,
 			name = "role",
 			propOrder = {"documentation", "description", "privileges", "accesses", "properties"})
 public class ModuleRoleMetaData extends NamedMetaData implements DecoratedMetaData {

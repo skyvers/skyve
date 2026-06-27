@@ -2,6 +2,7 @@ package org.skyve.util.monitoring;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.temporal.ChronoField;
 import java.util.Arrays;
 import java.util.Map;
@@ -52,6 +53,9 @@ public class ResourceMeasurements implements Serializable {
 	private int lastDay = Integer.MIN_VALUE;
 	private int lastWeek = Integer.MIN_VALUE;
 
+	/**
+	 * Creates empty resource measurements for all rolling time windows.
+	 */
 	public ResourceMeasurements() {
 		clear(secondsSystemCpuUsage, secondsHeapRamUsage);
 		clear(minutesSystemCpuUsage, minutesHeapRamUsage);
@@ -60,22 +64,47 @@ public class ResourceMeasurements implements Serializable {
 		clear(weeksSystemCpuUsage, weeksHeapRamUsage);
 	}
 	
+	/**
+	 * Returns system CPU usage recorded for the current minute.
+	 *
+	 * @return second-indexed fractional percentages; never {@code null}
+	 */
 	public Map<Integer, Float> getSecondsSystemCpuUsageUsage() {
 		return getMap(secondsSystemCpuUsage);
 	}
 
+	/**
+	 * Returns system CPU usage roll-ups recorded for the current hour.
+	 *
+	 * @return minute-indexed fractional percentages; never {@code null}
+	 */
 	public Map<Integer, Float> getMinutesSystemCpuUsageUsage() {
 		return getMap(minutesSystemCpuUsage);
 	}
 
+	/**
+	 * Returns system CPU usage roll-ups recorded for the current day.
+	 *
+	 * @return hour-indexed fractional percentages; never {@code null}
+	 */
 	public Map<Integer, Float> getHoursSystemCpuUsage() {
 		return getMap(hoursSystemCpuUsage);
 	}
 
+	/**
+	 * Returns system CPU usage roll-ups recorded for the current week.
+	 *
+	 * @return day-indexed fractional percentages; never {@code null}
+	 */
 	public Map<Integer, Float> getDaysSystemCpuUsage() {
 		return getMap(daysSystemCpuUsage);
 	}
 
+	/**
+	 * Returns system CPU usage roll-ups recorded for the current year window.
+	 *
+	 * @return week-indexed fractional percentages; never {@code null}
+	 */
 	public Map<Integer, Float> getWeeksSystemCpuUsage() {
 		return getMap(weeksSystemCpuUsage);
 	}
@@ -91,22 +120,47 @@ public class ResourceMeasurements implements Serializable {
 		
 		return result;
 	}
+	/**
+	 * Returns heap RAM usage recorded for the current minute.
+	 *
+	 * @return second-indexed fractional percentages; never {@code null}
+	 */
 	public Map<Integer, Float> getSecondsHeapRamUsage() {
 		return getMap(secondsHeapRamUsage);
 	}
 
+	/**
+	 * Returns heap RAM usage roll-ups recorded for the current hour.
+	 *
+	 * @return minute-indexed fractional percentages; never {@code null}
+	 */
 	public Map<Integer, Float> getMinutesHeapRamUsage() {
 		return getMap(minutesHeapRamUsage);
 	}
 
+	/**
+	 * Returns heap RAM usage roll-ups recorded for the current day.
+	 *
+	 * @return hour-indexed fractional percentages; never {@code null}
+	 */
 	public Map<Integer, Float> getHoursHeapRamUsage() {
 		return getMap(hoursHeapRamUsage);
 	}
 
+	/**
+	 * Returns heap RAM usage roll-ups recorded for the current week.
+	 *
+	 * @return day-indexed fractional percentages; never {@code null}
+	 */
 	public Map<Integer, Float> getDaysHeapRamUsage() {
 		return getMap(daysHeapRamUsage);
 	}
 
+	/**
+	 * Returns heap RAM usage roll-ups recorded for the current year window.
+	 *
+	 * @return week-indexed fractional percentages; never {@code null}
+	 */
 	public Map<Integer, Float> getWeeksHeapRamUsage() {
 		return getMap(weeksHeapRamUsage);
 	}
@@ -118,8 +172,6 @@ public class ResourceMeasurements implements Serializable {
 	 * roll-ups into coarser-grained arrays. Each roll-up stores the average of all
 	 * non-zero values in the finer-grained array and clears the finer-grained array.
 	 *
-	 * @param currentDateTime the current timestamp (used to determine array indices
-	 *        and when roll-ups should occur)
 	 * @param percentageSystemLoad the average system load to record (percentage of all cores)
 	 * @param percentageUsedMemory the Heap RAM usage to record (percentage used)
 	 */
@@ -133,12 +185,18 @@ public class ResourceMeasurements implements Serializable {
 		lastSecond = second;
 	}
 	
+	/**
+	 * Rolls any elapsed time windows forward without adding a new resource measurement.
+	 *
+	 * <p>Side effects: mutates the internal rolling buckets.
+	 */
 	public synchronized void rollup() {
 		rollupInternal();
 	}
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private int rollupInternal() {
-		LocalDateTime currentDateTime = LocalDateTime.now();
+		LocalDateTime currentDateTime = LocalDateTime.now(ZoneId.systemDefault());
 		
 		int second = currentDateTime.getSecond();
 		int minute = currentDateTime.getMinute();

@@ -12,9 +12,8 @@ import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.bound.Label;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
@@ -22,6 +21,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Radio;
 import org.skyve.impl.metadata.view.widget.bound.input.RichText;
 import org.skyve.impl.util.UtilImpl;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.html.HtmlPanelGroup;
@@ -108,26 +108,16 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent contentLink(UIComponent component,
-									String dataWidgetVar,
-									ContentLink link,
-									String formDisabledConditionName,
-									String title,
-									@Nullable String requiredMessage,
-									HorizontalAlignment textAlignment) {
-		UIComponent result = super.contentLink(component, dataWidgetVar, link, formDisabledConditionName, title, requiredMessage, textAlignment);
-		addFloatLabelClass(result);
-		return result;
-	}
-	
-	@Override
-	public UIComponent contentImage(UIComponent component,
-										String dataWidgetVar,
-										ContentImage image,
-										String formDisabledConditionName,
-										String title,
-										@Nullable String requiredMessage) {
-		UIComponent result = super.contentImage(component, dataWidgetVar, image, formDisabledConditionName, title, requiredMessage);
+	public @Nonnull UIComponent content(@Nullable UIComponent component,
+											@Nullable String dataWidgetVar,
+											@Nonnull ContentUpload content,
+											@Nullable String formDisabledConditionName,
+											@Nullable String title,
+											@Nullable String requiredMessage,
+											@Nullable HorizontalAlignment textAlignment,
+											boolean formContext,
+											boolean imageUpload) {
+		UIComponent result = super.content(component, dataWidgetVar, content, formDisabledConditionName, title, requiredMessage, textAlignment, formContext, imageUpload);
 		addFloatLabelClass(result);
 		return result;
 	}

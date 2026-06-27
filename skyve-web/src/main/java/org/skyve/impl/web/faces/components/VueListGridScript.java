@@ -40,6 +40,7 @@ import jakarta.faces.context.FacesContext;
  * This component isn't in the skyve.taglib.xml and has no @Component annotation and is not meant to be used on an XHTML page. 
  * The resources skyvevue/index.js and skyvevue/index.css are brought in view view.xhtml (if enabled)
  */
+@SuppressWarnings("java:S1192") // Repeated literals are deliberate Vue list-grid script keys.
 public class VueListGridScript extends UIOutput {
 	private String containerId;
 
@@ -70,19 +71,22 @@ public class VueListGridScript extends UIOutput {
 	/**
 	 * This is called to set state.
 	 * 
-	 * @param containerId
-	 * @param moduleName
-	 * @param documentName
-	 * @param queryName
-	 * @param modelName
-	 * @param contextId
-	 * @param showAdd
-	 * @param showZoom
-	 * @param showFilter
-	 * @param showSummary
-	 * @param showSnap
-	 * @param selectedRemoteCommand
+	 * @param containerId the DOM container ID where the Vue grid is mounted
+	 * @param owningModuleName the owning module name
+	 * @param owningDocumentName the owning document name
+	 * @param drivingModuleName the driving module name
+	 * @param drivingDocumentName the driving document name
+	 * @param queryName the optional query name
+	 * @param modelName the optional model name
+	 * @param contextId the optional context ID used for state restoration
+	 * @param showAdd whether add actions are visible
+	 * @param showZoom whether zoom actions are visible
+	 * @param showFilter whether filter controls are visible
+	 * @param showSummary whether summary controls are visible
+	 * @param showSnap whether snap controls are visible
+	 * @param selectedRemoteCommand the optional remote command for selected row callbacks
 	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public VueListGridScript(String containerId,
 								String owningModuleName,
 								String owningDocumentName,
@@ -141,6 +145,12 @@ public class VueListGridScript extends UIOutput {
 		}
 	}
 
+	/**
+	 * Encodes and emits the generated script payload for the list grid component.
+	 *
+	 * @param context the current Faces context
+	 * @throws IOException if script output cannot be written
+	 */
 	@Override
 	public void encodeBegin(FacesContext context) throws IOException {
 		Map<String, Object> attributes = getAttributes();
@@ -152,6 +162,11 @@ public class VueListGridScript extends UIOutput {
 		super.encodeBegin(context);
 	}
 
+	/**
+	 * Restores transient fields from the component attribute map.
+	 *
+	 * @param attributes the component attributes map
+	 */
 	private void grabAttributes(Map<String, Object> attributes) {
 		this.containerId = (String) attributes.get("containerId");
 
@@ -173,6 +188,9 @@ public class VueListGridScript extends UIOutput {
 		this.selectedRemoteCommand = (String) attributes.get("selectedRemoteCommand");
 	}
 
+	/**
+	 * Builds the JavaScript bootstrap payload and stores it as this component's value.
+	 */
 	private void createScriptOutput() {
 		final User user = CORE.getUser();
 		final Customer customer = user.getCustomer();
@@ -296,6 +314,14 @@ public class VueListGridScript extends UIOutput {
 		private static final Map<Class<?>, String> implicitTypeConversions =
 				new ImmutableMap.Builder<Class<?>, String>().put(String.class, "text").put(Integer.class, "numeric").put(Boolean.class, "boolean").build();
 
+		/**
+		 * Creates column metadata used to serialise list-grid column configuration.
+		 *
+		 * @param mdQueryColumn the metadata query column definition
+		 * @param scQueryColumnDefn the SmartClient query-column definition
+		 * @param targetMetaData the resolved target metadata for the column binding
+		 * @param customer the current customer
+		 */
 		private ColumnMetaData(MetaDataQueryColumn mdQueryColumn,
 								SmartClientQueryColumnDefinition scQueryColumnDefn,
 								TargetMetaData targetMetaData,
@@ -330,6 +356,12 @@ public class VueListGridScript extends UIOutput {
 			return flattenType(type.name());
 		}
 
+		/**
+		 * Flattens framework attribute types into grid field types.
+		 *
+		 * @param inType the source attribute type
+		 * @return the flattened field type
+		 */
 		private static String flattenType(String inType) {
 			String resultType = attributeTypeConversions.get(inType);
 			if (resultType != null) {

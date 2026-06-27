@@ -37,8 +37,11 @@ import org.skyve.metadata.view.model.map.MapResult;
 import org.skyve.metadata.view.model.map.ReferenceMapModel;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.skyve.util.monitoring.Monitoring;
 import org.skyve.util.monitoring.RequestKey;
+
+import org.slf4j.Logger;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -48,10 +51,16 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
- * Map Servlet - supplies map data to a map display.
- * 
- * there are 3 usage modes:-
- * 
+ * Serves map overlay data as JSON for query, collection, and named map-model views.
+ *
+ * <p>The servlet supports three request shapes:
+ * <ol>
+ *   <li>query mode: execute a metadata query and extract geometry by binding,</li>
+ *   <li>collection mode: read geometry from a collection on the current conversation bean,</li>
+ *   <li>model mode: execute a named {@link MapModel} declared on the current document.</li>
+ * </ol>
+ *
+ * Three modes...
  * 1) This mode executes the query and then gets each geometry object using qeometryBinding.
  * 		parameters
  * 			query
@@ -66,15 +75,30 @@ import jakarta.servlet.http.HttpServletResponse;
  * 		parameters
  * 			webContext
  * 			modelName
+ *
+ * <p>Side effects: establishes persistence context, resolves user/session state from the web conversation,
+ * applies Skyve access checks, and records monitoring metrics for the selected model path.
  */
-// TODO This should support continue conversation
+//TODO This should support continue conversation
 public class MapServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(MapServlet.class);
 	
 	private static final String GEOMETRY_BINDING_NAME = "_geo";
 	private static final String NORTH_EAST_NAME = "_ne";
 	private static final String SOUTH_WEST_NAME = "_sw";
 	
+	/**
+	 * Resolves map request mode and returns the corresponding geometry payload as JSON.
+	 *
+	 * <p>Request routing: when {@code query} is present it executes query mode; otherwise when
+	 * {@code modelName} is present it executes model mode; otherwise it executes collection mode.
+	 *
+	 * @param request inbound servlet request containing map model/query parameters
+	 * @param response outbound servlet response receiving geometry JSON
+	 * @throws ServletException when servlet container processing fails
+	 * @throws IOException when writing to the response stream fails
+	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -123,7 +147,7 @@ public class MapServlet extends HttpServlet {
 				}
 			}
 			catch (Throwable t) {
-				t.printStackTrace();
+				LOGGER.error(t.getMessage(), t);
 				persistence.rollback();
 				pw.print(emptyResponse());
 			}
@@ -222,8 +246,8 @@ public class MapServlet extends HttpServlet {
 		String json = JSON.marshall(customer, result);
 		
 		// Add _doc property to json response for resources such as images for map pins.
-		String _doc = bean.getBizModule() + '.' + bean.getBizDocument();
-		json = json.substring(0, json.length() - 1) + ",\"_doc\":\"" + _doc + "\"}";
+		String doc = bean.getBizModule() + '.' + bean.getBizDocument();
+		json = json.substring(0, json.length() - 1) + ",\"_doc\":\"" + doc + "\"}";
 		Monitoring.measure(RequestKey.model(document, modelName));
 		return json;
 	}

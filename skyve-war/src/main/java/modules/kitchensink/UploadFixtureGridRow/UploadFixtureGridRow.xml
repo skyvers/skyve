@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="UploadFixtureGridRow"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<singularAlias>Upload Fixture Grid Row</singularAlias>
+	<pluralAlias>Upload Fixture Grid Rows</pluralAlias>
+	<parentDocument>UploadFixture</parentDocument>
+	<bizKey expression="{name}" />
+	<attributes>
+		<text name="name">
+			<displayName>Name</displayName>
+			<defaultValue>Grid upload row</defaultValue>
+			<length>255</length>
+		</text>
+		<content name="boundColumnContent">
+			<displayName>Bound-column Content</displayName>
+		</content>
+		<content name="containerColumnContent">
+			<displayName>Container-column Content</displayName>
+		</content>
+	</attributes>
+</document>

@@ -20,9 +20,14 @@ import org.skyve.persistence.Persistence;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 
+/**
+ * Utility class for emptying all Skyve customer tables in the correct order
+ * (observing foreign-key constraints) prior to a restore operation.
+ */
 public class Truncate {
-
     private static final Logger COMMAND_LOGGER = Category.COMMAND.logger();
+
+    private static final String DELETE_FROM = "delete from ";
 
 	public static void truncate(String schemaName, boolean database, boolean content) 
 	throws Exception {
@@ -30,6 +35,7 @@ public class Truncate {
 		truncate(tables, CORE.getUser().getCustomerName(), database, content);
 	}
 	
+	@SuppressWarnings("java:S3776") // Complexity OK
 	private static void truncate(Collection<Table> tables, 
 									String customerName, 
 									boolean database,
@@ -66,7 +72,7 @@ public class Truncate {
 			for (Table table : tables) {
 				if (table instanceof JoinTable) {
 					sql.setLength(0);
-					sql.append("delete from ").append(table.persistentIdentifier);
+					sql.append(DELETE_FROM).append(table.persistentIdentifier);
 					BackupUtil.secureSQL(sql, table, customerName);
 					if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("delete joining table {}", table.persistentIdentifier);
 					persistence.newSQL(sql.toString()).noTimeout().execute();
@@ -84,7 +90,7 @@ public class Truncate {
 					continue;
 				}
 				sql.setLength(0);
-				sql.append("delete from ").append(table.persistentIdentifier);
+				sql.append(DELETE_FROM).append(table.persistentIdentifier);
 				BackupUtil.secureSQL(sql, table, customerName);
 				if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("delete extension table {}", table.persistentIdentifier);
 				persistence.newSQL(sql.toString()).noTimeout().execute();
@@ -101,7 +107,7 @@ public class Truncate {
 					continue;
 				}
 				sql.setLength(0);
-				sql.append("delete from ").append(table.persistentIdentifier);
+				sql.append(DELETE_FROM).append(table.persistentIdentifier);
 				BackupUtil.secureSQL(sql, table, customerName);
 				if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("delete table {}", table.persistentIdentifier);
 				persistence.newSQL(sql.toString()).noTimeout().execute();
@@ -120,7 +126,7 @@ public class Truncate {
 	// table types for getting table database metadata from JDBC
 	private static final String[] TABLE_TYPES = new String[] {"TABLE"};
 	
-	@SuppressWarnings("resource")
+	@SuppressWarnings({"resource", "java:S3776"}) // Complexity OK
 	private static Collection<Table> getTables(String schema)
 	throws SQLException {
 		Collection<Table> result = new ArrayList<>();

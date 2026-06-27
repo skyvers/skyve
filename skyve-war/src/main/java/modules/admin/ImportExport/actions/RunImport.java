@@ -22,20 +22,37 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import modules.admin.ImportExport.ImportExportUtil;
 import modules.admin.domain.ImportExport;
 import modules.admin.domain.ImportExport.RollbackErrors;
 import modules.admin.domain.ImportExportColumn;
 
+/**
+ * Imports spreadsheet data into a target document using configured bindings.
+ */
 public class RunImport implements ServerSideAction<ImportExport> {
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(RunImport.class);
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(RunImport.class);
-
+	/**
+	 * Executes the import workflow for an uploaded spreadsheet file.
+	 * <p>
+	 * The action validates headers, maps configured bindings, iterates data rows,
+	 * saves each resolved bean, and writes user-visible import results.
+	 *
+	 * @param bean
+	 *        the import/export configuration bean
+	 * @param webContext
+	 *        the current web context used for growl feedback
+	 * @return a result wrapping {@code bean}
+	 * @throws Exception
+	 *         if the import pipeline fails
+	 */
 	@Override
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	public ServerSideActionResult<ImportExport> execute(ImportExport bean, WebContext webContext)
 			throws Exception {
 
@@ -174,27 +191,28 @@ public class RunImport implements ServerSideAction<ImportExport> {
 						}
 					}
 					try {
-						if (b != null && (b.getBizKey() == null || b.getBizKey().trim().length() == 0)) {
+						if (b != null && (b.getBizKey() == null || b.getBizKey().trim().isEmpty())) {
 							String msg = "The new record has no value for bizKey at row " + created + ".";
 							ValidationException ve = new ValidationException(new Message(msg));
 							throw ve;
 						}
 
-						b = persistence.save(b);
-						if (loader.isDebugMode()) {
-							LOGGER.info("{} - Saved successfully", b.getBizKey());
+						if (b != null) {
+							b = persistence.save(b);
+							if (loader.isDebugMode()) {
+								LOGGER.info("{} - Saved successfully", b.getBizKey());
+							}
+							persistence.evictCached(b);
+							
+							// commit and start a new transaction if selected
+							if (RollbackErrors.noRollbackErrors.equals(bean.getRollbackErrors())) {
+								persistence.commit(false);
+								persistence.begin();
+							}
+							created++;
 						}
-						persistence.evictCached(b);
-
-						// commit and start a new transaction if selected
-						if (RollbackErrors.noRollbackErrors.equals(bean.getRollbackErrors())) {
-							persistence.commit(false);
-							persistence.begin();
-						}
-						created++;
-
 					} catch (ValidationException ve) {
-						ve.printStackTrace();
+						LOGGER.error(ve.getMessage(), ve);
 						StringBuilder msg = new StringBuilder();
 						msg.append(
 								"The import succeeded but the imported record could not be saved because imported values were not valid:");
@@ -206,14 +224,14 @@ public class RunImport implements ServerSideAction<ImportExport> {
 
 						throw new ValidationException(new Message(msg.toString()));
 					} catch (OptimisticLockException ole) {
-						ole.printStackTrace();
+						LOGGER.error(ole.getMessage(), ole);
 						StringBuilder msg = new StringBuilder();
 						msg.append("The import succeeded but the save failed.");
 						msg.append(
 								"\nCheck that you don't have duplicates in your file, or multiple rows in your file are finding the same related record, or that other users are not changing related data.");
 						throw new ValidationException(new Message(msg.toString()));
 					} catch (Exception e) {
-						e.printStackTrace();
+						LOGGER.error(e.getMessage(), e);
 						StringBuilder msg = new StringBuilder();
 						msg.append("The import succeeded but saving the records failed.");
 						msg.append(

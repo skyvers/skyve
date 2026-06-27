@@ -10,7 +10,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -43,7 +42,7 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.report.ReportFormat;
 import org.skyve.util.Util;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.xhtmlrenderer.pdf.ITextOutputDevice;
@@ -62,6 +61,7 @@ import freemarker.cache.StringTemplateLoader;
 import freemarker.cache.TemplateLoader;
 import freemarker.core.HTMLOutputFormat;
 import freemarker.core.TemplateConfiguration;
+import freemarker.core.TemplateClassResolver;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -69,9 +69,11 @@ import freemarker.template.TemplateExceptionHandler;
 import freemarker.template.TemplateModel;
 import jakarta.annotation.Nonnull;
 
+/**
+ * Central utility for executing FreeMarker report templates and rendering PDF output.
+ */
 public final class FreemarkerReportUtil {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(FreemarkerReportUtil.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(FreemarkerReportUtil.class);
 
 	private static Configuration cfg;
 	private static PathMatchingResourcePatternResolver resolver;
@@ -81,11 +83,20 @@ public final class FreemarkerReportUtil {
 		// disallow instantiation
 	}
 
+	/**
+	 * Initializes FreeMarker configuration, template loaders, and shared directives.
+	 */
 	public static void init() {
 		// Create your Configuration instance, and specify if up to what FreeMarker
 		// version (here 2.3.29) do you want to apply the fixes that are not 100%
 		// backward-compatible. See the Configuration JavaDoc for details.
 		cfg = new Configuration(Configuration.VERSION_2_3_29);
+
+		// Security: restrict the ?new built-in so attacker-controlled report templates
+		// (admin.ReportTemplate documents, editable by the BasicUser role) cannot
+		// instantiate arbitrary classes such as freemarker.template.utility.Execute
+		// and achieve remote code execution.
+		cfg.setNewBuiltinClassResolver(TemplateClassResolver.ALLOWS_NOTHING_RESOLVER);
 
 		// Specify the source where the template files come from
 		ClassLoader cl = Thread.currentThread().getContextClassLoader();
@@ -106,7 +117,7 @@ public final class FreemarkerReportUtil {
 
 		// Set the preferred charset template files are stored in. UTF-8 is
 		// a good choice in most applications:
-		cfg.setDefaultEncoding("UTF-8");
+		cfg.setDefaultEncoding(StandardCharsets.UTF_8.name());
 
 		// Sets how errors will appear.
 		// During web page *development* TemplateExceptionHandler.HTML_DEBUG_HANDLER is better.
@@ -369,20 +380,34 @@ public final class FreemarkerReportUtil {
 		}
 		org.jsoup.nodes.Document doc;
 
-		doc = Jsoup.parse(in, "UTF-8", "");
+		doc = Jsoup.parse(in, StandardCharsets.UTF_8.name(), "");
 
 		// Should reuse W3CDom instance if converting multiple documents.
 		return new W3CDom().fromJsoup(doc);
 	}
 
+	/**
+	 * Retrieves a document-scoped report template by module, document, and report name.
+	 *
+	 * @param bean Bean providing module/document context.
+	 * @param reportName Report template name.
+	 * @return The resolved FreeMarker template.
+	 * @throws Exception If template lookup fails.
+	 */
 	public static Template getBeanReport(final Bean bean, final String reportName)
 	throws Exception {
 		final String templateName = String.format("%s/%s/reports/%s", bean.getBizModule(), bean.getBizDocument(), reportName);
 		return cfg.getTemplate(templateName);
 	}
 
-	public static Template getTemplate(final String templateName)
-	throws Exception {
+	/**
+	 * Retrieves a template by name with customer permission scope applied.
+	 *
+	 * @param templateName Template name/path.
+	 * @return The resolved template.
+	 * @throws Exception If template lookup fails.
+	 */
+	public static Template getTemplate(final String templateName) {
 		return CORE.getPersistence().withDocumentPermissionScopes(DocumentPermissionScope.customer, p -> {
 			try {
 				return cfg.getTemplate(templateName);
@@ -418,6 +443,7 @@ public final class FreemarkerReportUtil {
 	 * @return A String with the merged output of the template with the report parameters
 	 * @throws Exception
 	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public static String runReport(final String reportName, final Map<String, Object> reportParameters)
 	throws Exception {
 		// get the report template with the specified name
@@ -498,7 +524,7 @@ public final class FreemarkerReportUtil {
 				template.process(reportParameters, sw);
 
 				// write the output string to an input stream
-				InputStream inputStream = new ByteArrayInputStream(sw.toString().getBytes(Charset.forName("UTF-8")));
+				InputStream inputStream = new ByteArrayInputStream(sw.toString().getBytes(StandardCharsets.UTF_8));
 
 				Path tempDir = Paths.get(Util.getContentDirectory(), "temp");
 				tempDir.toFile().mkdirs();
@@ -598,6 +624,10 @@ public final class FreemarkerReportUtil {
 		});
 	}
 
+	/**
+	 * User-agent bridge used by Flying Saucer PDF rendering to resolve external resources
+	 * (for example images and stylesheets) via the configured classpath and URL handling.
+	 */
 	@ParametersAreNonnullByDefault
 	private static class ResourceLoaderUserAgent extends ITextUserAgent {
 		private ResourceLoaderUserAgent(ITextOutputDevice outputDevice, int dotsPerPixel) {

@@ -43,6 +43,9 @@ class SQLDataAccessSQL extends AbstractSQL {
 		this.dataAccess = dataAccess;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public <T extends Bean> List<T> beanResults() {
 		if (document == null) {
@@ -59,6 +62,9 @@ class SQLDataAccessSQL extends AbstractSQL {
 		return results;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public <T extends Bean> AutoClosingIterable<T> beanIterable() {
 		if (document == null) {
@@ -68,6 +74,9 @@ class SQLDataAccessSQL extends AbstractSQL {
 		return new SQLIterable<>(document, dataAccess, this, null);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public <T> List<T> scalarResults(Class<T> type) {
 		List<T> results = new ArrayList<>(100);
@@ -80,11 +89,17 @@ class SQLDataAccessSQL extends AbstractSQL {
 		return results;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public <T> AutoClosingIterable<T> scalarIterable(Class<T> type) {
 		return new SQLIterable<>(null, dataAccess, this, type);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public List<Object[]> tupleResults() {
 		List<Object[]> results = new ArrayList<>(100);
@@ -97,11 +112,17 @@ class SQLDataAccessSQL extends AbstractSQL {
 		return results;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public AutoClosingIterable<Object[]> tupleIterable() {
 		return new SQLIterable<>(null, dataAccess, this, null);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public List<DynaBean> dynaResults() {
 		try {
@@ -122,6 +143,9 @@ class SQLDataAccessSQL extends AbstractSQL {
 	
 	@Override
 	@SuppressWarnings("resource")
+	/**
+	 * Performs dynaIterable.
+	 */
 	public AutoClosingIterable<DynaBean> dynaIterable() {
 		try {
 			return new DynaIterable(dataAccess.getConnection(), this, dataAccess.dataStore, dataAccess.getDialect());
@@ -134,6 +158,9 @@ class SQLDataAccessSQL extends AbstractSQL {
 		}
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public int execute() {
 		try (NamedParameterPreparedStatement ps = new NamedParameterPreparedStatement(dataAccess.getConnection(), toQueryString())) {

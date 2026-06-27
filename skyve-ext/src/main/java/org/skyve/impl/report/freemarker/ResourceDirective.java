@@ -45,6 +45,7 @@ public class ResourceDirective implements TemplateDirectiveModel {
 	private static final String PARAM_NAME_MODULE = "module";
 
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
 	throws TemplateException, IOException {
 		if (params.isEmpty()) {

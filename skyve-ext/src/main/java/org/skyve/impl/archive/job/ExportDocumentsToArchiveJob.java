@@ -44,13 +44,16 @@ import com.google.common.base.MoreObjects;
 
 import jakarta.inject.Inject;
 
+/**
+ * Exports eligible document rows to archive files and marks exported rows as soft deleted.
+ */
 public class ExportDocumentsToArchiveJob extends CancellableJob {
-
     private static final char LF = '\n';
     private static final int LOCK_FAILURE = -999;
     private static final String REQD_BEAN_INTERFACE = ArchiveableBean.class.getName();
 
     @Inject
+    @SuppressWarnings("java:S6813") // allow member injection
     private transient Persistence persistence;
 
     private transient FileLockRepo repo = FileLockRepo.getInstance();
@@ -59,6 +62,9 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
     private final Instant targetEndTime;
     private final int batchSize;
 
+	/**
+	 * Creates an export job configured with current archive runtime and batch settings.
+	 */
     public ExportDocumentsToArchiveJob() {
         targetEndTime = now().plus(Duration.ofSeconds(Util.getArchiveConfig()
                                                           .exportRuntimeSec()));
@@ -66,6 +72,15 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
                         .exportBatchSize();
     }
 
+    /**
+     * Runs one export cycle across configured archive document types until cancellation,
+     * runtime limit, or completion.
+     *
+     * <p>For each configured type this cycle deletes expired soft-deleted rows first,
+     * then archives eligible rows in batches and marks them soft deleted.</p>
+     *
+     * @throws Exception If document validation, query execution, or archive file IO fails.
+     */
     @Override
     public void execute() throws Exception {
         logger.debug("Starting {} with config {}", this, Util.getArchiveConfig());
@@ -85,7 +100,6 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
         List<ArchiveDocConfig> docConfigs = Util.getArchiveConfig()
                                                 .docConfigs();
         for (ArchiveDocConfig archiveDocConfig : docConfigs) {
-
             if (isCancelled()) {
                 break;
             }
@@ -171,19 +185,28 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
     }
 
     private class JobSubstance {
-
         private final Document document;
         private final ArchiveDocConfig config;
         private final String updateStatement;
 
+        /**
+         * Creates the export worker for a specific document configuration.
+         *
+         * @param doc The document type being archived.
+         * @param config Archive configuration for the document type.
+         */
         public JobSubstance(Document doc, ArchiveDocConfig config) {
             this.document = doc;
             this.config = config;
             this.updateStatement = createUpdateStatement();
         }
 
+        /**
+         * Hard deletes previously archived rows once retention threshold is exceeded.
+         *
+         * @return Number of rows deleted.
+         */
         public int deleteExportedDocuments() {
-
             int totalDeleteCount = 0;
 
             // Loop until there's no records delete or we run out of time
@@ -247,15 +270,21 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
             return idsToDelete;
         }
 
+        /**
+         * Executes archive batch processing for this document type until cancelled, out of time,
+         * or no further rows are available.
+         *
+         * @return Number of rows exported.
+         * @throws IOException If archive file writing fails.
+         * @throws InterruptedException If lock acquisition is interrupted.
+         */
         public int execute() throws IOException, InterruptedException {
-
             int exportCount = 0;
 
             // Loop until time is up, or
             // zero records are exported, or
             // the job is cancelled
             for (int batchNum = 0; true; ++batchNum) {
-
                 if (isCancelled()) {
                     break;
                 }
@@ -291,7 +320,6 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
          * @param msg
          */
         private void logOnce(String msg) {
-
             List<String> log = getLog();
             if (log.isEmpty()) {
                 log.add(msg);
@@ -313,7 +341,6 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
          * @throws Exception
          */
         private int executeOneBatch() throws IOException, InterruptedException {
-
             File file = getArchiveFile();
             logOnce("Exporting documents to " + file.getName());
             logger.trace("Exporting documents to {}", file);
@@ -336,7 +363,6 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
         }
 
         private int writeBatch(File file) throws IOException {
-
             List<DynamicBean> documents = getDocumentsToExport(batchSize);
             if (documents.isEmpty()) {
                 return 0;
@@ -374,8 +400,14 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
             return documents.size();
         }
 
+        /**
+         * Marks an exported row as archived in the source table.
+         *
+         * @param currDocument The exported row.
+         * @param archiveTimestamp The timestamp the row was archived.
+         * @param archiveFilename The archive file name containing the row.
+         */
         public void softDeleteDocument(DynamicBean currDocument, Timestamp archiveTimestamp, String archiveFilename) {
-
             persistence.newSQL(updateStatement)
                        .putParameter("time", archiveTimestamp)
                        .putParameter("file", archiveFilename, false)
@@ -383,6 +415,11 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
                        .execute();
         }
 
+        /**
+         * Builds the SQL update statement used to mark rows as archived.
+         *
+         * @return The SQL update statement.
+         */
         public String createUpdateStatement() {
             @SuppressWarnings("null")
             String table = document.getPersistent()
@@ -413,7 +450,6 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
         }
 
         private String archiveFileNamePrefix() {
-
             return toRootLowerCase(document.getName());
         }
 
@@ -435,5 +471,4 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
                               .toString();
         }
     }
-
 }

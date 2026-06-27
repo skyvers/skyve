@@ -29,8 +29,7 @@ public abstract class DefaultMapModel<T extends Bean> extends MapModel<T> {
 
 	protected void addItem(Bean beanContainingGeometry, 
 							List<MapItem> itemsToAddTo,
-							Envelope mapExtents)
-	throws Exception {
+							Envelope mapExtents) {
 		Geometry geometry = (Geometry) Binder.get(beanContainingGeometry, geometryBinding);
 		if ((geometry != null) && mapExtents.intersects(geometry.getEnvelopeInternal())) {
 			MapItem item = new MapItem();

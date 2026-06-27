@@ -1,10 +1,12 @@
 package org.skyve.impl.archive.support;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -17,7 +19,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 import org.junit.Ignore;
 import org.junit.Test;
 
-@SuppressWarnings("boxing")
 public class FileLockRepoTest {
 
     private FileLockRepo repo = FileLockRepo.getInstance();
@@ -31,11 +32,11 @@ public class FileLockRepoTest {
         ReadLock readlock = rrwl.readLock();
         WriteLock writeLock = rrwl.writeLock();
 
-        assertThat(readlock.tryLock(), is(true));
-        assertThat(readlock.tryLock(), is(true));
+        assertTrue(readlock.tryLock());
+        assertTrue(readlock.tryLock());
 
         // Upgrading from a read to a write is not possible
-        assertThat(writeLock.tryLock(), is(false));
+        assertFalse(writeLock.tryLock());
     }
 
     /**
@@ -50,7 +51,7 @@ public class FileLockRepoTest {
         File f2 = new File("x/../b");
         ReentrantReadWriteLock rrwl2 = repo.getLockFor(f2);
 
-        assertThat(rrwl1 == rrwl2, is(true));
+        assertSame(rrwl1, rrwl2);
     }
 
     /**
@@ -64,6 +65,8 @@ public class FileLockRepoTest {
 
         ExecutorService pool1 = Executors.newSingleThreadExecutor();
         ExecutorService pool2 = Executors.newSingleThreadExecutor();
+        CountDownLatch readLockAcquired = new CountDownLatch(1);
+        CountDownLatch writeAttempted = new CountDownLatch(1);
 
         File f = new File("d");
         ReentrantReadWriteLock rwwl = repo.getLockFor(f);
@@ -71,22 +74,20 @@ public class FileLockRepoTest {
         Future<String> f1 = pool1.submit(() -> {
 
             ReadLock readlock = rwwl.readLock();
-            assertThat(readlock.tryLock(), is(true));
-
-            // After acquiring the write lock, pause for bit before releasing
-            TimeUnit.SECONDS.sleep(3);
+            assertTrue(readlock.tryLock());
+            readLockAcquired.countDown();
+            assertTrue(writeAttempted.await(2, TimeUnit.SECONDS));
             readlock.unlock();
 
             return "1 done";
         });
 
         Future<String> f2 = pool2.submit(() -> {
-
-            // Wait a moment so the write lock thread can acquire the lock first
-            TimeUnit.SECONDS.sleep(1);
+            assertTrue(readLockAcquired.await(2, TimeUnit.SECONDS));
 
             WriteLock writeLock = rwwl.writeLock();
-            assertThat(writeLock.tryLock(), is(false));
+            assertFalse(writeLock.tryLock());
+            writeAttempted.countDown();
 
             return "2 done";
         });

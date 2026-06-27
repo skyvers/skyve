@@ -54,7 +54,6 @@ import freemarker.template.utility.DeepUnwrap;
  * </p>
  */
 public class ContentDirective implements TemplateDirectiveModel {
-
 	private static final String PARAM_BEAN = "bean";
 	private static final String PARAM_MODULE = "module";
 	private static final String PARAM_DOCUMENT = "document";
@@ -64,7 +63,12 @@ public class ContentDirective implements TemplateDirectiveModel {
 	private static final String PARAM_CLASS = "class";
 	private static final String PARAM_STYLE = "style";
 
+	private static final String STRING_PARAMETER_REQUIRED_FORMAT = "The '%s' parameter must be a String.";
+	private static final String PARAMETER_REQUIRED_PREFIX = "Parameter '";
+	private static final String PARAMETER_REQUIRED_SUFFIX = "' is required";
+
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
 	throws TemplateException, IOException {
 		if (params.isEmpty()) {
@@ -107,19 +111,19 @@ public class ContentDirective implements TemplateDirectiveModel {
 			}
 			else if (paramName.equals(PARAM_MODULE)) {
 				if (! (paramValue instanceof TemplateScalarModel)) {
-					throw new TemplateModelException(String.format("The '%s' parameter must be a String.", PARAM_MODULE));
+					throw new TemplateModelException(String.format(STRING_PARAMETER_REQUIRED_FORMAT, PARAM_MODULE));
 				}
 				moduleParam = ((TemplateScalarModel) paramValue).getAsString();
 			}
 			else if (paramName.equals(PARAM_DOCUMENT)) {
 				if (! (paramValue instanceof TemplateScalarModel)) {
-					throw new TemplateModelException(String.format("The '%s' parameter must be a String.", PARAM_DOCUMENT));
+					throw new TemplateModelException(String.format(STRING_PARAMETER_REQUIRED_FORMAT, PARAM_DOCUMENT));
 				}
 				documentParam = ((TemplateScalarModel) paramValue).getAsString();
 			}
 			else if (paramName.equals(PARAM_ATTRIBUTE)) {
 				if (! (paramValue instanceof TemplateScalarModel)) {
-					throw new TemplateModelException(String.format("The '%s' parameter must be a String.", PARAM_ATTRIBUTE));
+					throw new TemplateModelException(String.format(STRING_PARAMETER_REQUIRED_FORMAT, PARAM_ATTRIBUTE));
 				}
 				attributeParam = ((TemplateScalarModel) paramValue).getAsString();
 			}
@@ -147,13 +151,13 @@ public class ContentDirective implements TemplateDirectiveModel {
 			}
 			else if (paramName.equals(PARAM_CLASS)) {
 				if (! (paramValue instanceof TemplateScalarModel)) {
-					throw new TemplateModelException(String.format("The '%s' parameter must be a String.", PARAM_CLASS));
+					throw new TemplateModelException(String.format(STRING_PARAMETER_REQUIRED_FORMAT, PARAM_CLASS));
 				}
 				classParam = ((TemplateScalarModel) paramValue).getAsString();
 			}
 			else if (paramName.equals(PARAM_STYLE)) {
 				if (! (paramValue instanceof TemplateScalarModel)) {
-					throw new TemplateModelException(String.format("The '%s' parameter must be a String.", PARAM_STYLE));
+					throw new TemplateModelException(String.format(STRING_PARAMETER_REQUIRED_FORMAT, PARAM_STYLE));
 				}
 				styleParam = ((TemplateScalarModel) paramValue).getAsString();
 			}
@@ -163,16 +167,16 @@ public class ContentDirective implements TemplateDirectiveModel {
 		}
 
 		if (attributeParam == null) {
-			throw new TemplateModelException("Parameter '" + PARAM_ATTRIBUTE + "' is required");
+			throw new TemplateModelException(PARAMETER_REQUIRED_PREFIX + PARAM_ATTRIBUTE + PARAMETER_REQUIRED_SUFFIX);
 		}
 		if (documentParam == null) {
-			throw new TemplateModelException("Parameter '" + PARAM_DOCUMENT + "' is required");
+			throw new TemplateModelException(PARAMETER_REQUIRED_PREFIX + PARAM_DOCUMENT + PARAMETER_REQUIRED_SUFFIX);
 		}
 		if (moduleParam == null) {
-			throw new TemplateModelException("Parameter '" + PARAM_MODULE + "' is required");
+			throw new TemplateModelException(PARAMETER_REQUIRED_PREFIX + PARAM_MODULE + PARAMETER_REQUIRED_SUFFIX);
 		}
 		if (beanParam == null) {
-			throw new TemplateModelException("Parameter '" + PARAM_BEAN + "' is required");
+			throw new TemplateModelException(PARAMETER_REQUIRED_PREFIX + PARAM_BEAN + PARAMETER_REQUIRED_SUFFIX);
 		}
 
 		// do the actual directive execution

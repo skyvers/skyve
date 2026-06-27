@@ -7,6 +7,9 @@ import org.skyve.domain.Bean;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.view.model.list.ListModel;
 
+/**
+ * Renders Flutter calendar view scaffolding from Skyve view metadata.
+ */
 public class FlutterCalendarView extends FlutterView {
 	@SuppressWarnings("unused")
 	private ListModel<Bean> model;

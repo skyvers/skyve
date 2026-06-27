@@ -10,6 +10,19 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * JAXB-annotated holder for text formatting constraints applied to a {@link Text} field.
+ *
+ * <p>Combines an optional input mask (characters: {@code A} alphanumeric,
+ * {@code #} digit, {@code L} letter) with a {@link org.skyve.domain.types.converters.Format.TextCase}
+ * transformation applied before storage.  Used by the UI widget and server-side
+ * validation to enforce a specific text format.
+ *
+ * <p>Threading: not thread-safe.  Instances are populated during metadata loading
+ * and are read-only once placed in the repository cache.
+ *
+ * @see Text
+ */
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "format")
 public class TextFormat {

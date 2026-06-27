@@ -21,9 +21,20 @@ import modules.admin.Configuration.ConfigurationExtension;
 import modules.admin.domain.ChangePassword;
 import modules.admin.domain.Configuration;
 
+/**
+ * Applies a password change and triggers follow-up notification handling.
+ */
 public class MakePasswordChange implements ServerSideAction<ChangePassword> {
 	
+	/**
+	 * Performs the execute operation.
+	 * @param bean the bean value
+	 * @param webContext the webContext value
+	 * @return the operation result
+	 * @throws Exception if the operation fails
+	 */
 	@Override
+	@SuppressWarnings("java:S3776") // Complexity OK
 	public ServerSideActionResult<ChangePassword> execute(ChangePassword bean, WebContext webContext) throws Exception {
 		Persistence persistence = CORE.getPersistence();
 		User user = persistence.getUser();

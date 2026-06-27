@@ -1,5 +1,8 @@
 package org.skyve.impl.generate.client.flutter;
 
+/**
+ * Runtime exception raised by Flutter client generation.
+ */
 public class FlutterGeneratorException extends RuntimeException {
 
     private static final long serialVersionUID = 4L;
