@@ -610,7 +610,7 @@ isc.BizUtil.addClassMethods({
 	createUploadButton: function (contentFormItem, image, showMarkup) {
 		const menu = [
 			{
-				title: "Clear",
+				title: isc.i18nMessages.bizUtilSplitButton_UploadButtonClearTitle,
 				icon: "icons/delete.png",
 				click: () => {
 					contentFormItem.setValue(null);
@@ -662,14 +662,38 @@ isc.BizUtil.addClassMethods({
 		}
 
 		return isc.BizUtil.createSplitButton(
-			"Upload",
+            isc.i18nMessages.bizUtilSplitButton_UploadButtonTitle,
 			null,
 			false,
-			"Upload content",
+            isc.i18nMessages.bizUtilSplitButton_UploadButtonTooltip,
 			function () {
-				isc.BizUtil.openContentUpload(contentFormItem, image);
+/* Add this in appropriately
+        const instance = contentFormItem.form._view.gather(false);
+				let url = `${
+					image ? "image" : "content"
+				}Upload.xhtml?_n=${contentFormItem.name.replaceAll("_", ".")}&_c=${
+					instance._c
+				}`;
+				if (contentFormItem.form._view._b) {
+					url += `&_b=${contentFormItem.form._view._b.replaceAll("_", ".")}`;
+				}
+				isc.WindowStack.popup(
+					null,
+					image ? isc.i18nMessages.bizUtilSplitButton_UploadPopupImageTitle
+                        : isc.i18nMessages.bizUtilSplitButton_UploadPopupContentTitle,
+					true,
+					[
+						isc.HTMLPane.create({
+							contentsType: "page",
+							contents: "Loading Page...",
+							contentsURL: url,
+						}),
+					],
+				);
+*/
+        isc.BizUtil.openContentUpload(contentFormItem, image);
 			},
-			"Other Options",
+            isc.i18nMessages.bizUtilSplitButton_UploadTooltip,
 			null,
 			menu,
 			85,
