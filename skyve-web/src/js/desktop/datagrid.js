@@ -170,8 +170,8 @@ isc.BizDataGrid.addMethods({
 
 		// Edit item
 		const editItem = {
-			title: "Edit",
-			name: isc.i18nMessages.bizGrid_EditItem,
+			title: isc.i18nMessages.bizGrid_EditItem,
+			name: "edit",
 			icon: "icons/edit.png",
 			enableIf: () =>
 				!this._disabled &&

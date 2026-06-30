@@ -653,6 +653,11 @@
 		<extension>svg#fontawesomeregular</extension>
 		<mime-type>image/svg+xml</mime-type>
 	</mime-mapping>
+	<!-- SmartClient locale bundles are loaded as script resources. -->
+	<mime-mapping>
+		<extension>properties</extension>
+		<mime-type>text/javascript</mime-type>
+	</mime-mapping>
 
 	<error-page>
 		<exception-type>org.springframework.security.web.authentication.rememberme.CookieTheftException</exception-type>

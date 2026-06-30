@@ -4,6 +4,9 @@
  */
 isc.Offline.isOffline = () => false;
 
+// Ensure that the `isc.i18nMessages` object exists to avoid errors when accessing it.
+isc.i18nMessages = isc.i18nMessages || {};
+
 isc.setAutoDraw(false);
 isc.RPCManager.fetchDataPrompt = "Contacting Server...";
 isc.RPCManager.saveDataPrompt = "Contacting Server...";
@@ -522,7 +525,8 @@ isc.BizUtil.addClassMethods({
 		const url = isc.BizUtil.createContentUploadUrl(contentFormItem, image);
 		isc.WindowStack.popup(
 			null,
-			image ? "Upload Image" : "Upload Content",
+			image ? isc.i18nMessages.bizUtilSplitButton_UploadPopupImageTitle : 
+						isc.i18nMessages.bizUtilSplitButton_UploadPopupContentTitle,
 			true,
 			[
 				isc.HTMLPane.create({
@@ -667,31 +671,7 @@ isc.BizUtil.addClassMethods({
 			false,
             isc.i18nMessages.bizUtilSplitButton_UploadButtonTooltip,
 			function () {
-/* Add this in appropriately
-        const instance = contentFormItem.form._view.gather(false);
-				let url = `${
-					image ? "image" : "content"
-				}Upload.xhtml?_n=${contentFormItem.name.replaceAll("_", ".")}&_c=${
-					instance._c
-				}`;
-				if (contentFormItem.form._view._b) {
-					url += `&_b=${contentFormItem.form._view._b.replaceAll("_", ".")}`;
-				}
-				isc.WindowStack.popup(
-					null,
-					image ? isc.i18nMessages.bizUtilSplitButton_UploadPopupImageTitle
-                        : isc.i18nMessages.bizUtilSplitButton_UploadPopupContentTitle,
-					true,
-					[
-						isc.HTMLPane.create({
-							contentsType: "page",
-							contents: "Loading Page...",
-							contentsURL: url,
-						}),
-					],
-				);
-*/
-        isc.BizUtil.openContentUpload(contentFormItem, image);
+				isc.BizUtil.openContentUpload(contentFormItem, image);
 			},
             isc.i18nMessages.bizUtilSplitButton_UploadTooltip,
 			null,

@@ -5,9 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Locale;
+
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Icons;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 @SuppressWarnings("static-method")
 class DesktopViewTest {
@@ -28,6 +33,52 @@ class DesktopViewTest {
 		DesktopView view = new DesktopView();
 
 		assertEquals(UtilImpl.SMART_CLIENT_DIR, view.getSmartClientDir());
+	}
+	
+	@Test
+	void localeScriptUsesDefaultBundlesForEnglish() {
+		DesktopView view = new ResourceAwareDesktopView(null);
+		
+		view.createLocaleScripts(Locale.ENGLISH);
+		
+		assertEquals(script("isomorphic130/locales/frameworkMessages.properties") + "\n" + script("desktop/skyveMessages.js"),
+						view.getLocaleScript());
+	}
+	
+	@Test
+	void localeScriptUsesLocalizedSkyveMessagesWhenWebappResourceExists() {
+		DesktopView view = new ResourceAwareDesktopView("/desktop/skyveMessages_de.js");
+		
+		view.createLocaleScripts(Locale.GERMAN);
+		
+		String localeScript = view.getLocaleScript();
+		assertTrue(localeScript.contains("isomorphic130/locales/frameworkMessages_de.properties"));
+		assertTrue(localeScript.contains("desktop/skyveMessages_de.js"));
+		assertFalse(localeScript.contains("skyveMessages_de.properties"));
+	}
+	
+	@Test
+	void localeScriptFallsBackToEnglishSkyveMessagesWhenLocalizedWebappResourceDoesNotExist() {
+		DesktopView view = new ResourceAwareDesktopView(null);
+		
+		view.createLocaleScripts(Locale.GERMAN);
+		
+		String localeScript = view.getLocaleScript();
+		assertTrue(localeScript.contains("isomorphic130/locales/frameworkMessages_de.properties"));
+		assertTrue(localeScript.contains("desktop/skyveMessages.js"));
+		assertFalse(localeScript.contains("desktop/skyveMessages_de.js"));
+	}
+	
+	@Test
+	void localeScriptUsesCorrectNorwegianFrameworkMessagesPath() {
+		DesktopView view = new ResourceAwareDesktopView(null);
+		
+		view.createLocaleScripts(new Locale("nb", "NO"));
+		
+		String localeScript = view.getLocaleScript();
+		assertTrue(localeScript.contains("isomorphic130/locales/frameworkMessages_nb_NO.properties"));
+		assertFalse(localeScript.contains("frameworkMessages_.nb_NOproperties"));
+		assertTrue(localeScript.contains("desktop/skyveMessages.js"));
 	}
 
 	@Test
@@ -64,5 +115,25 @@ class DesktopViewTest {
 		assertTrue(template.contains(Icons.FONT_HELP));
 		assertTrue(template.contains(Icons.FONT_DASHBOARD));
 		assertTrue(template.startsWith("<table"));
+	}
+	
+	private static String script(String src) {
+		return "<script type=\"text/javascript\" src=\"" + src + "\"></script>";
+	}
+	
+	private static final class ResourceAwareDesktopView extends DesktopView {
+		private static final long serialVersionUID = 1L;
+		
+		@Nullable
+		private final String existingResourcePath;
+		
+		private ResourceAwareDesktopView(@Nullable String existingResourcePath) {
+			this.existingResourcePath = existingResourcePath;
+		}
+		
+		@Override
+		boolean webResourceExists(@Nonnull String resourcePath) {
+			return resourcePath.equals(existingResourcePath);
+		}
 	}
 }

@@ -1155,12 +1155,13 @@ isc.BizListGrid.addMethods({
 					// Tag/Untag
 					const rowCount = this.grid.getTotalRows();
 					let confirmationMessage = isc.i18nMessages.bizListGrid_TagUntagItemAsk
-                        .replace(/(\$count)/g, count).replace(/(\$action)/g, ((action == 'U') ? 'un' : ''));
+						.replace(/(\$count)/g, rowCount)
+						.replace(/(\$action)/g, action === "U" ? "un" : "");
 
 					if (rowCount > 10000) {
-						confirmationMessage += isc.i18nMessagesbizListGrid_TagUntagItemAsk10000;
+						confirmationMessage += isc.i18nMessages.bizListGrid_TagUntagItemAsk10000;
 					} else if (rowCount > 1000) {
-						confirmationMessage += isc.i18nMessagesbizListGrid_TagUntagItemAsk1000;
+						confirmationMessage += isc.i18nMessages.bizListGrid_TagUntagItemAsk1000;
 					} else {
 						privateTagOp(tagId, action);
 						return;
