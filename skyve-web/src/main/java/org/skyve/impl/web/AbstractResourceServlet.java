@@ -73,7 +73,7 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 	 * @param customer the authenticated customer, if present
 	 * @param customerName the resolved customer name
 	 */
-	protected record RequestParams(
+	public record RequestParams(
 			@Nullable String moduleName,
 			@Nullable String documentName,
 			@Nullable String binding,
@@ -92,7 +92,7 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 	 * cached byte arrays in {@link #dispose()}.
 	 * </p>
 	 */
-	protected interface Resource {
+	public interface Resource {
 		/**
 		 * Releases all resources held by this object.
 		 * Called unconditionally after the response has been written.
@@ -146,7 +146,7 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 	 * compression, thumbnailing, markup, or other transformation is applied after
 	 * offsets have been calculated.
 	 */
-	protected interface StreamableResource extends Resource {
+	public interface StreamableResource extends Resource {
 		/**
 		 * Returns the number of original bytes available to stream, or a negative value
 		 * when the length is unknown.
@@ -182,7 +182,7 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 	 * Subclasses supply the backing data (file or content) via {@link #load()},
 	 * {@link #resolveContentType()} and {@link #resolveFileName()}.
 	 */
-	protected abstract static class AbstractResource implements Resource {
+	public abstract static class AbstractResource implements Resource {
 		protected int imageWidth = 0;
 		protected int imageHeight = 0;
 		private @Nullable Thumbnail image;
