@@ -624,6 +624,7 @@ class SmartClientViewRendererCoverageTest {
 		assertTrue(code.contains("display:'auto'"), code);
 		assertTrue(code.contains("capture:'all'"), code);
 		assertTrue(code.contains("emptyText:'No content'"), code);
+		assertTrue(code.contains("uploadNoun:'Content'"), code);
 		assertTrue(code.contains("companion:'_attachment'"), code);
 		assertTrue(code.contains("showMarkup:true"), code);
 		assertFalse(code.contains("width:200"), code);
@@ -666,8 +667,28 @@ class SmartClientViewRendererCoverageTest {
 		assertTrue(code.contains("type:'bizContent'"), code);
 		assertTrue(code.contains("display:'video'"), code);
 		assertTrue(code.contains("emptyText:'No video'"), code);
+		assertTrue(code.contains("uploadNoun:'Video'"), code);
 		assertFalse(code.contains("width:320"), code);
 		assertFalse(code.contains("height:180"), code);
+	}
+
+	@Test
+	void renderFormContentUploadCameraCaptureWritesImageUploadNoun() {
+		addTextAttribute("photo");
+		SmartClientViewRenderer renderer = rendererWithOpenForm();
+
+		FormItem item = beginFormItem(renderer, "Photo");
+		ContentUpload content = new ContentUpload();
+		content.setBinding("photo");
+		content.setCapture(ContentCapture.camera);
+		renderer.visitContent(content, true, true);
+		renderer.visitedFormItem(item, true, true);
+
+		String code = renderer.getCode().toString();
+		assertTrue(code.contains("type:'bizContent'"), code);
+		assertTrue(code.contains("display:'auto'"), code);
+		assertTrue(code.contains("capture:'camera'"), code);
+		assertTrue(code.contains("uploadNoun:'Image'"), code);
 	}
 
 	@Test
@@ -688,6 +709,7 @@ class SmartClientViewRendererCoverageTest {
 		assertTrue(code.contains("type:'bizContent'"), code);
 		assertTrue(code.contains("display:'link'"), code);
 		assertTrue(code.contains("emptyText:'No file'"), code);
+		assertTrue(code.contains("uploadNoun:'Content'"), code);
 		assertFalse(code.contains("companion:'_attachment'"), code);
 		assertTrue(code.contains("width:303"), code);
 		assertTrue(code.contains("height:303"), code);

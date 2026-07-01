@@ -61,8 +61,14 @@
 		<content name="contentDisabledImage">
 			<displayName>Disabled Image Content</displayName>
 		</content>
+		<content name="contentDisabledVideo">
+			<displayName>Disabled Video Content</displayName>
+		</content>
 		<content name="contentReadOnlyLink">
 			<displayName>Read-only Link Content</displayName>
+		</content>
+		<content name="contentReadOnlyImage">
+			<displayName>Read-only Image Content</displayName>
 		</content>
 		<content name="contentReadOnlyVideo">
 			<displayName>Read-only Video Content</displayName>

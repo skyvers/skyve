@@ -20,7 +20,7 @@ class SmartClientContentUploadScriptTest {
 
 		assertTrue(script.contains("_linkPreviewContents: function (contents)"), script);
 		assertTrue(script.contains("'<div style=\"align-items:center;box-sizing:border-box;display:flex;height:25px;line-height:25px;vertical-align:middle;\">' +"), script);
-		assertTrue(script.contains("this._linkPreviewContents(this.canvas.linkHTML(url, \"Content\", \"_blank\"))"), script);
+		assertTrue(script.contains("this._linkPreviewContents(this._contentDownloadLink(url))"), script);
 		assertTrue(script.contains("this.emptyText = config.emptyText || \"No content\";"), script);
 		assertTrue(script.contains("this._previewWidth = config.width && config.width !== \"*\" ? config.width : \"100%\";"), script);
 		assertTrue(script.contains("this._previewCanvasWidth = config.width || (config.editable ? \"*\" : \"100%\");"), script);
@@ -31,7 +31,7 @@ class SmartClientContentUploadScriptTest {
 		assertTrue(script.contains("isc.BizContentItem._previewUploadItems[this._previewUploadItemID] = this;"), script);
 		assertTrue(script.contains("_openUploadFromPreview: function ()"), script);
 		assertTrue(script.contains("_openUploadFromPreview: function (itemID)"), script);
-		assertTrue(script.contains("isc.BizUtil.openContentUpload(this, this._imageIntent);"), script);
+		assertTrue(script.contains("isc.BizUtil.openContentUpload(this, this._imageIntent, this.uploadNoun);"), script);
 		assertTrue(script.contains("const clickHandler = this._editable ? ' onclick=\"isc.BizContentItem._openUploadFromPreview(\\'' + this._previewUploadItemID + '\\')\"' : \"\";"), script);
 		assertTrue(script.contains("delete isc.BizContentItem._previewUploadItems[this._previewUploadItemID];"), script);
 		assertTrue(script.contains("_syncPreviewHeight: function ()"), script);
@@ -40,7 +40,20 @@ class SmartClientContentUploadScriptTest {
 		assertTrue(script.contains("this._preview.setContents(this._emptyPreviewContents());"), script);
 		assertTrue(script.contains("_previewMediaStyle: function (aspectRatio)"), script);
 		assertTrue(script.contains("_emptyPreviewContents: function ()"), script);
-		assertTrue(script.contains("String(this.emptyText)\n\t\t\t\t.replace(/&/g, \"&amp;\")\n\t\t\t\t.replace(/</g, \"&lt;\")\n\t\t\t\t.replace(/>/g, \"&gt;\")"), script);
+		assertTrue(script.contains("_emptyPreviewText: function ()"), script);
+		assertTrue(script.contains("_emptyUploadLink: function (contents)"), script);
+		assertTrue(script.contains("_contentDownloadLink: function (url)"), script);
+		assertTrue(script.contains("_emptyMediaIcon: function (kind)"), script);
+		assertTrue(script.contains("if (kind === \"video\")"), script);
+		assertTrue(script.contains("border-left:0.65rem solid #cbd5e1"), script);
+		assertTrue(script.contains("this._emptyUploadLink(this._emptyPreviewText())"), script);
+		assertTrue(script.contains("return isc.Canvas.linkHTML("), script);
+		assertTrue(script.contains("'onclick=\"window.open(this.href, this.target);return false\"'"), script);
+		assertTrue(script.contains("\"javascript:void(0)\""), script);
+		assertTrue(script.contains("\"_self\""), script);
+		assertTrue(script.contains("const kind = this._currentMediaKind || this._defaultMediaKind();"), script);
+		assertTrue(script.contains("return \"link\";"), script);
+		assertTrue(script.contains("String(this.emptyText)\n\t\t\t.replace(/&/g, \"&amp;\")\n\t\t\t.replace(/</g, \"&lt;\")\n\t\t\t.replace(/>/g, \"&gt;\")"), script);
 		assertTrue(script.contains("border:1px solid #bfbfbf;${this._previewMediaStyle(\"1 / 1\")}object-fit:contain"), script);
 		assertTrue(script.contains("style=\"${this._previewMediaStyle(\"16 / 9\")}object-fit:contain\""), script);
 	}

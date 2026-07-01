@@ -112,6 +112,7 @@ public class DeviceResponsiveComponentBuilder extends ResponsiveComponentBuilder
 			return component;
 		}
 
+		ContentCapture capture = resolveActionUploadCapture(action);
 		return uploadButton(EscapableText.of(label, ViewRenderer.shouldEscape(action.getEscapeDisplayName())),
 								iconStyleClass,
 								toolTip,
@@ -123,8 +124,8 @@ public class DeviceResponsiveComponentBuilder extends ResponsiveComponentBuilder
 								action.getDisabledConditionName(),
 								null,
 								action.getInvisibleConditionName(),
-								resolveActionUploadCapture(action),
-								UserAgentType.phone.equals(userAgentType));
+								capture,
+								UserAgentType.phone.equals(userAgentType) || useActionUploadDialog(capture));
 	}
 
 	/**
@@ -147,6 +148,7 @@ public class DeviceResponsiveComponentBuilder extends ResponsiveComponentBuilder
 			return component;
 		}
 
+		ContentCapture capture = resolveActionUploadCapture(action);
 		return uploadButton(EscapableText.of(label, ViewRenderer.shouldEscape(action.getEscapeDisplayName())),
 								iconStyleClass,
 								toolTip,
@@ -158,8 +160,8 @@ public class DeviceResponsiveComponentBuilder extends ResponsiveComponentBuilder
 								action.getDisabledConditionName(),
 								formDisabledConditionName,
 								action.getInvisibleConditionName(),
-								resolveActionUploadCapture(action),
-								UserAgentType.phone.equals(userAgentType));
+								capture,
+								UserAgentType.phone.equals(userAgentType) || useActionUploadDialog(capture));
 	}
 
 	@Override

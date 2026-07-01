@@ -498,6 +498,17 @@ isc.BizUtil.addClassMethods({
 						shadowDepth: 10,
 						target: splitTarget,
 						data: splitItems,
+						show: function () {
+							const data = this.getAllItems();
+							for (let i = 0, l = data.length; i < l; i++) {
+								const item = this.getItem(i, true);
+								if (item && item.hiddenIf) {
+									isc.Func.replaceWithMethod(item, "hiddenIf", "target,menu,item");
+									this.setItemHidden(i, item.hiddenIf(this.target, this, item));
+								}
+							}
+							return this.Super("show", arguments);
+						},
 					}),
 				}),
 			],
@@ -520,13 +531,18 @@ isc.BizUtil.addClassMethods({
 		return url;
 	},
 
-	openContentUpload: function (contentFormItem, image) {
+	openContentUpload: function (contentFormItem, image, uploadNoun) {
 		isc.BizUtil._registerContentFormItem(contentFormItem);
 		const url = isc.BizUtil.createContentUploadUrl(contentFormItem, image);
+		const messageSuffix = isc.BizUtil._contentUploadMessageSuffix(
+			uploadNoun,
+			image,
+		);
 		isc.WindowStack.popup(
 			null,
-			image ? isc.i18nMessages.bizUtilSplitButton_UploadPopupImageTitle : 
-						isc.i18nMessages.bizUtilSplitButton_UploadPopupContentTitle,
+			isc.i18nMessages[
+				"bizUtilSplitButton_UploadPopup" + messageSuffix + "Title"
+			],
 			true,
 			[
 				isc.HTMLPane.create({
@@ -536,6 +552,14 @@ isc.BizUtil.addClassMethods({
 				}),
 			],
 		);
+	},
+
+	_contentUploadMessageSuffix: function (uploadNoun, image) {
+		const noun = uploadNoun || (image ? "Image" : "Content");
+		if (noun === "Image" || noun === "Video") {
+			return noun;
+		}
+		return "Content";
 	},
 
 	_registerContentFormItem: function (contentFormItem) {
@@ -609,12 +633,22 @@ isc.BizUtil.addClassMethods({
 	 * @param {Object} contentFormItem - the form item for the upload.
 	 * @param {boolean} image - whether the upload is for an image.
 	 * @param {boolean} showMarkup - whether markup is enabled.
+	 * @param {string} [uploadNoun] - the noun used in upload menu labels.
 	 * @returns {Object} - the created upload button.
 	 */
-	createUploadButton: function (contentFormItem, image, showMarkup) {
+	createUploadButton: function (contentFormItem, image, showMarkup, uploadNoun) {
+		const messageSuffix = isc.BizUtil._contentUploadMessageSuffix(
+			uploadNoun,
+			image,
+		);
 		const menu = [
 			{
-				title: isc.i18nMessages.bizUtilSplitButton_UploadButtonClearTitle,
+				title:
+					isc.i18nMessages[
+						"bizUtilSplitButton_UploadButtonClear" +
+							messageSuffix +
+							"Title"
+					],
 				icon: "icons/delete.png",
 				click: () => {
 					contentFormItem.setValue(null);
@@ -627,15 +661,14 @@ isc.BizUtil.addClassMethods({
 		];
 
 		if (showMarkup) {
+			const markupAvailable = () =>
+				!contentFormItem.isMarkupAvailable ||
+				contentFormItem.isMarkupAvailable();
 			menu.push({
-				title: "Mark Up Image",
+				title: isc.i18nMessages.bizUtilSplitButton_UploadMarkupImageTitle,
 				icon: "icons/edit.png",
 				click: function () {
-					if (
-						!contentFormItem.getValue() ||
-						(contentFormItem.isMarkupAvailable &&
-							!contentFormItem.isMarkupAvailable())
-					) {
+					if (!contentFormItem.getValue() || !markupAvailable()) {
 						return;
 					}
 					isc.BizUtil._registerContentFormItem(contentFormItem);
@@ -646,34 +679,36 @@ isc.BizUtil.addClassMethods({
 					if (contentFormItem.form._view._b) {
 						url += `&_b=${SKYVE.Util.unsanitiseBinding(contentFormItem.form._view._b)}`;
 					}
-					isc.WindowStack.popup(null, "Mark Up Image", true, [
-						isc.HTMLPane.create({
-							contentsType: "page",
-							contents: "Loading Page...",
-							contentsURL: url,
-						}),
-					]);
+					isc.WindowStack.popup(
+						null,
+						isc.i18nMessages.bizUtilSplitButton_UploadMarkupImageTitle,
+						true,
+						[
+							isc.HTMLPane.create({
+								contentsType: "page",
+								contents: "Loading Page...",
+								contentsURL: url,
+							}),
+						],
+					);
 				},
 				enableIf: () =>
-					contentFormItem.getValue() !== null &&
-					(!contentFormItem.isMarkupAvailable ||
-						contentFormItem.isMarkupAvailable()),
-				showIf: () =>
-					contentFormItem.getValue() !== null &&
-					(!contentFormItem.isMarkupAvailable ||
-						contentFormItem.isMarkupAvailable()),
+					contentFormItem.getValue() !== null && markupAvailable(),
+				hiddenIf: () => !markupAvailable(),
 			});
 		}
 
 		return isc.BizUtil.createSplitButton(
-            isc.i18nMessages.bizUtilSplitButton_UploadButtonTitle,
+			isc.i18nMessages.bizUtilSplitButton_UploadButtonTitle,
 			null,
 			false,
-            isc.i18nMessages.bizUtilSplitButton_UploadButtonTooltip,
+			isc.i18nMessages[
+				"bizUtilSplitButton_UploadButton" + messageSuffix + "Tooltip"
+			],
 			function () {
-				isc.BizUtil.openContentUpload(contentFormItem, image);
+				isc.BizUtil.openContentUpload(contentFormItem, image, uploadNoun);
 			},
-            isc.i18nMessages.bizUtilSplitButton_UploadTooltip,
+			isc.i18nMessages.bizUtilSplitButton_UploadTooltip,
 			null,
 			menu,
 			85,

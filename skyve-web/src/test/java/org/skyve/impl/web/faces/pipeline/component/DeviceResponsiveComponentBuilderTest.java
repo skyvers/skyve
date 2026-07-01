@@ -17,6 +17,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -177,6 +178,7 @@ class DeviceResponsiveComponentBuilderTest {
 		when(action.getClientValidation()).thenReturn(Boolean.TRUE);
 		when(action.getDisabledConditionName()).thenReturn(null);
 		when(action.getInvisibleConditionName()).thenReturn(null);
+		when(action.getProperties()).thenReturn(Map.of());
 		builder.upload(null, "Upload", "icon", "tip", null, action);
 		assertTrue(capturedUseDialog[0], "Expected useDialog=true for phone");
 	}
@@ -210,8 +212,43 @@ class DeviceResponsiveComponentBuilderTest {
 		when(action.getClientValidation()).thenReturn(Boolean.FALSE);
 		when(action.getDisabledConditionName()).thenReturn(null);
 		when(action.getInvisibleConditionName()).thenReturn(null);
+		when(action.getProperties()).thenReturn(Map.of());
 		builder.upload(null, "Upload", "icon", "tip", null, action);
 		assertFalse(capturedUseDialog[0], "Expected useDialog=false for desktop");
+	}
+
+	@Test
+	@SuppressWarnings({"static-method"})
+	void uploadCallsUploadButtonWithDialogForDesktopCameraCapture() {
+		final boolean[] capturedUseDialog = {false};
+		DeviceResponsiveComponentBuilder builder = new DeviceResponsiveComponentBuilder() {
+			@Override
+			protected UIComponent uploadButton(EscapableText title,
+												String iconStyleClass,
+												String tooltip,
+												String actionName,
+												Integer pixelWidth,
+												Integer pixelHeight,
+												Boolean clientValidation,
+												EscapableText confirmationText,
+												String disabled,
+												String formDisabled,
+												String invisible,
+												ContentCapture capture,
+												boolean useDialog) {
+				capturedUseDialog[0] = useDialog;
+				return mock(UIComponent.class);
+			}
+		};
+		builder.setUserAgentType(UserAgentType.desktop);
+		Action action = mock(Action.class);
+		when(action.getName()).thenReturn("uploadCamera");
+		when(action.getClientValidation()).thenReturn(Boolean.FALSE);
+		when(action.getDisabledConditionName()).thenReturn(null);
+		when(action.getInvisibleConditionName()).thenReturn(null);
+		when(action.getProperties()).thenReturn(Map.of("capture", "camera"));
+		builder.upload(null, "Upload camera", "icon", "tip", null, action);
+		assertTrue(capturedUseDialog[0], "Expected useDialog=true for desktop camera upload");
 	}
 
 	// ---- uploadButton delegates with phone flag ----
@@ -246,6 +283,7 @@ class DeviceResponsiveComponentBuilderTest {
 		when(action.getClientValidation()).thenReturn(null);
 		when(action.getDisabledConditionName()).thenReturn(null);
 		when(action.getInvisibleConditionName()).thenReturn(null);
+		when(action.getProperties()).thenReturn(Map.of());
 		builder.uploadButton(null, "Upload", "icon", "tip", null, button, null, action);
 		assertTrue(capturedUseDialog[0], "Expected useDialog=true for phone");
 	}
@@ -280,8 +318,44 @@ class DeviceResponsiveComponentBuilderTest {
 		when(action.getClientValidation()).thenReturn(null);
 		when(action.getDisabledConditionName()).thenReturn(null);
 		when(action.getInvisibleConditionName()).thenReturn(null);
+		when(action.getProperties()).thenReturn(Map.of());
 		builder.uploadButton(null, "Upload", "icon", "tip", null, button, null, action);
 		assertFalse(capturedUseDialog[0], "Expected useDialog=false for desktop");
+	}
+
+	@Test
+	@SuppressWarnings({"static-method"})
+	void uploadButtonCallsUploadButtonWithDialogForDesktopAllCapture() {
+		final boolean[] capturedUseDialog = {false};
+		DeviceResponsiveComponentBuilder builder = new DeviceResponsiveComponentBuilder() {
+			@Override
+			protected UIComponent uploadButton(EscapableText title,
+												String iconStyleClass,
+												String tooltip,
+												String actionName,
+												Integer pixelWidth,
+												Integer pixelHeight,
+												Boolean clientValidation,
+												EscapableText confirmationText,
+												String disabled,
+												String formDisabled,
+												String invisible,
+												ContentCapture capture,
+												boolean useDialog) {
+				capturedUseDialog[0] = useDialog;
+				return mock(UIComponent.class);
+			}
+		};
+		builder.setUserAgentType(UserAgentType.desktop);
+		Button button = new Button();
+		Action action = mock(Action.class);
+		when(action.getName()).thenReturn("uploadAll");
+		when(action.getClientValidation()).thenReturn(null);
+		when(action.getDisabledConditionName()).thenReturn(null);
+		when(action.getInvisibleConditionName()).thenReturn(null);
+		when(action.getProperties()).thenReturn(Map.of("capture", "all"));
+		builder.uploadButton(null, "Upload all", "icon", "tip", null, button, null, action);
+		assertTrue(capturedUseDialog[0], "Expected useDialog=true for desktop all-capture upload button");
 	}
 
 	@Test

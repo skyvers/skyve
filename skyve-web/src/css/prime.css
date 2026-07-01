@@ -284,6 +284,7 @@ th.hiddenFilter input.ui-column-filter, th.hiddenFilter div.ui-column-customfilt
 	border-color: #d6dee8 !important;
 	border-style: dashed !important;
 	color: #8a96a6;
+	cursor: pointer;
 	display: flex;
 	justify-content: center;
 }
@@ -304,6 +305,14 @@ th.hiddenFilter input.ui-column-filter, th.hiddenFilter div.ui-column-customfilt
 	font-size: 0.85rem;
 	margin-top: 2.1rem;
 	opacity: 0.75;
+}
+
+.skyveContentPreview.skyveContentVideoEmpty:before {
+	content: "\f03d";
+}
+
+.skyveContentPreview.skyveContentVideoEmpty:after {
+	content: "No video";
 }
 
 .skyveContentPhoneResponsive {

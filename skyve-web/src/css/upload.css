@@ -15,6 +15,62 @@
 	background-repeat: no-repeat;
 }
 
+#upload .ui-fileupload-files {
+	display: block;
+	margin: 10px 0;
+	width: 100%;
+}
+
+#upload .ui-fileupload-files > div {
+	display: block;
+}
+
+#upload .ui-fileupload-row {
+	align-items: center;
+	display: grid;
+	gap: 8px 12px;
+	grid-template-columns: minmax(0, 1fr) auto;
+	width: 100%;
+}
+
+#upload .ui-fileupload-row > div {
+	min-width: 0;
+	padding: 4px 0;
+}
+
+#upload .ui-fileupload-row > .ui-fileupload-preview {
+	display: none;
+}
+
+#upload .ui-fileupload-row > .ui-fileupload-filename {
+	grid-column: 1;
+	grid-row: 1;
+	overflow-wrap: anywhere;
+	word-break: break-word;
+}
+
+#upload .ui-fileupload-row > .ui-fileupload-filename + div {
+	grid-column: 1;
+	grid-row: 2;
+}
+
+#upload .ui-fileupload-row > .ui-fileupload-progress {
+	grid-column: 1;
+	grid-row: 3;
+}
+
+#upload .ui-fileupload-row > div:last-child {
+	align-self: center;
+	grid-column: 2;
+	grid-row: 1 / 4;
+	justify-self: end;
+}
+
+#upload .ui-fileupload-content .ui-progressbar {
+	top: 0;
+	width: 100%;
+}
+
 .capture-only-upload .ui-fileupload-choose {
 	display: none !important;
 }

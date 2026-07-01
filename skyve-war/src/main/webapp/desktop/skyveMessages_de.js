@@ -93,7 +93,7 @@ isc.i18nMessages['editView_WarnCannotZoomUntilProblemFixed'] = 'Es kann nicht ge
 
 isc.i18nMessages['bizListMembership_CandidatesHeading'] = 'Kandidaten';
 isc.i18nMessages['bizListMembership_MembersHeading'] = 'Mitglieder';
-isc.i18nMessages['bizListMembership_AddSelectedCandidates'] = 'Gew&auml;hlte Kandidaten hinz&uuml;fügen.';
+isc.i18nMessages['bizListMembership_AddSelectedCandidates'] = 'Gew&auml;hlte Kandidaten hinz&uuml;fï¿½gen.';
 isc.i18nMessages['bizListMembership_RemoveSelectedMembers'] = 'Gew&auml;hlte Mitglieder entfernen.';
 
 isc.i18nMessages['bizComparison_DocumentTitle'] = 'Dokument';
@@ -130,11 +130,18 @@ isc.i18nMessages['bizHTMLItem_EditButtonWidth'] = '80'
 
 
 isc.i18nMessages['bizUtilSplitButton_UploadButtonTitle'] = 'Hochladen';
-isc.i18nMessages['bizUtilSplitButton_UploadButtonTooltip'] = 'Inhalt hochladen';
+isc.i18nMessages['bizUtilSplitButton_UploadButtonContentTooltip'] = 'Inhalt hochladen';
+isc.i18nMessages['bizUtilSplitButton_UploadButtonImageTooltip'] = 'Bild hochladen';
+isc.i18nMessages['bizUtilSplitButton_UploadButtonVideoTooltip'] = 'Video hochladen';
 isc.i18nMessages['bizUtilSplitButton_UploadPopupImageTitle'] = 'Bild hochladen';
 isc.i18nMessages['bizUtilSplitButton_UploadPopupContentTitle'] = 'Inhalt hochladen';
+isc.i18nMessages['bizUtilSplitButton_UploadPopupVideoTitle'] = 'Video hochladen';
 isc.i18nMessages['bizUtilSplitButton_UploadTooltip'] = 'Andere Optionen';
 isc.i18nMessages['bizUtilSplitButton_UploadButtonClearTitle'] = 'Leeren';
+isc.i18nMessages['bizUtilSplitButton_UploadButtonClearContentTitle'] = 'Inhalt leeren';
+isc.i18nMessages['bizUtilSplitButton_UploadButtonClearImageTitle'] = 'Bild leeren';
+isc.i18nMessages['bizUtilSplitButton_UploadButtonClearVideoTitle'] = 'Video leeren';
+isc.i18nMessages['bizUtilSplitButton_UploadMarkupImageTitle'] = 'Bild markieren';
 
 isc.i18nMessages['bizUtilSplitButton_PickButtonTitle'] = 'Auswahl';
 isc.i18nMessages['bizUtilSplitButton_PickButtonTooltip'] = 'Datensatz ausw&auml;hlen';

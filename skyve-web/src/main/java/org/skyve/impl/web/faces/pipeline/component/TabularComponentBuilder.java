@@ -664,6 +664,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			return component;
 		}
 
+		ContentCapture capture = resolveActionUploadCapture(action);
 		return uploadButton(actionDisplayName(label, action),
 								iconStyleClass,
 								actionToolTip(toolTip),
@@ -675,8 +676,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 								action.getDisabledConditionName(),
 								formDisabledConditionName,
 								action.getInvisibleConditionName(),
-								resolveActionUploadCapture(action),
-								false);
+								capture,
+								useActionUploadDialog(capture));
 	}
 
 	@Override
@@ -2531,6 +2532,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		ContentDisplay display = content.getResolvedDisplay();
 		boolean auto = ContentDisplay.auto.equals(display);
 		boolean showMarkup = isContentMarkupAllowed(content, display);
+		String disabledConditionName = content.getDisabledConditionName();
 		List<UIComponent> mediaChildren = toAddTo;
 		if (auto) {
 			HtmlPanelGroup mediaGroup = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
@@ -2539,8 +2541,22 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			mediaChildren = mediaGroup.getChildren();
 		}
 
+		ContentCapture capture = content.getResolvedCapture();
+		boolean fullUploadDialog = editable && useContentUploadDialog(imageUpload, display, capture);
+		String uploadOnclick = editable ? createDisabledAwareOnclick(createContentUploadOnclick(id,
+																									sanitisedBinding,
+																									id + "_" + sanitisedBinding + "Overlay",
+																									display,
+																									capture,
+																									auto ? companionFieldName(binding) : null,
+																									dataWidgetVar,
+																									fullUploadDialog),
+																		disabledConditionName,
+																		formDisabledConditionName)
+										: null;
+
 		if (ContentDisplay.link.equals(display) || auto) {
-			HtmlOutputLink link = contentLink(content.getPixelWidth(), textAlignment, dataWidgetVar, binding);
+			HtmlOutputLink link = contentLink(content.getPixelWidth(), textAlignment, dataWidgetVar, binding, uploadOnclick);
 			link.setId(String.format("%s_%s_link", id, sanitisedBinding));
 			if (auto) {
 				setAutoContentVisibleStyleClass(link, dataWidgetVar, binding, "link");
@@ -2549,15 +2565,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		}
 		String placeholderUploadOnclick = null;
 		if (editable && (ContentDisplay.image.equals(display) || auto)) {
-			boolean fullUploadDialog = useContentUploadDialog(imageUpload, display, content.getResolvedCapture());
-			placeholderUploadOnclick = createContentUploadOnclick(id,
-																	sanitisedBinding,
-																	id + "_" + sanitisedBinding + "Overlay",
-																	display,
-																	content.getResolvedCapture(),
-																	auto ? companionFieldName(binding) : null,
-																	dataWidgetVar,
-																	fullUploadDialog);
+			placeholderUploadOnclick = uploadOnclick;
 		}
 		if (ContentDisplay.image.equals(display) || auto) {
 			HtmlPanelGroup image = contentGraphicImage(resolveImageWidth(content),
@@ -2576,13 +2584,15 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			mediaChildren.add(image);
 		}
 		if (ContentDisplay.video.equals(display) || auto) {
+			String placeholderVideoUploadOnclick = editable ? uploadOnclick : null;
 			String videoId = String.format("%s_%s_video", id, sanitisedBinding);
 			HtmlOutputText video = contentVideo(resolveVideoWidth(content),
 												resolveVideoHeight(content),
 												binding,
 												dataWidgetVar,
 												videoId,
-												phoneResponsiveMedia);
+												phoneResponsiveMedia,
+												placeholderVideoUploadOnclick);
 			if (auto) {
 				setAutoContentVisibleStyleClass(video, dataWidgetVar, binding, "video");
 			}
@@ -2595,13 +2605,13 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 								binding,
 								sanitisedBinding,
 								requiredMessage,
-								content.getDisabledConditionName(),
+								disabledConditionName,
 								formDisabledConditionName,
 								imageUpload,
 								showMarkup,
 								auto,
 								display,
-								content.getResolvedCapture());
+								capture);
 		}
 
 		return result;
@@ -2704,13 +2714,18 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 													@Nonnull String binding,
 													@Nullable String dataWidgetVar,
 													@Nonnull String videoId,
-													boolean phoneResponsiveMedia) {
+													boolean phoneResponsiveMedia,
+													@Nullable String placeholderUploadOnclick) {
 		HtmlOutputText result = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
 		result.setEscape(false);
 		StringBuilder expression = new StringBuilder(192);
 		expression.append("<div id=\"").append(videoId).append('"');
-		if (phoneResponsiveMedia) {
-			expression.append(" class=\"skyveContentResponsiveVideo\"");
+		String previewClass = phoneResponsiveMedia ? "skyveContentPreview skyveContentResponsiveVideo" : "skyveContentPreview";
+		String emptyClass = previewClass + " skyveContentEmpty skyveContentVideoEmpty";
+		expression.append(" class=\"#{(empty ").append(contentValueExpression(dataWidgetVar, binding)).append(") ? '");
+		expression.append(emptyClass).append("' : '").append(previewClass).append("'}\"");
+		if (placeholderUploadOnclick != null) {
+			expression.append(" onclick=\"").append(createContentLinkOnclick(dataWidgetVar, binding, placeholderUploadOnclick)).append('"');
 		}
 		expression.append(" style=\"");
 		if (pixelWidth != null) {
@@ -2719,7 +2734,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		if (pixelHeight != null) {
 			expression.append("height:").append(pixelHeight).append("px;");
 		}
-		expression.append("border:1px solid #d6dee8\">");
+		expression.append("border:1px solid #d6dee8;position:relative;overflow:hidden;\">");
 		expression.append("#{empty ").append(contentValueExpression(dataWidgetVar, binding));
 		expression.append(" ? '' : '<video controls preload=\"metadata\" style=\"width:100%;height:100%;object-fit:contain\" src=\"'.concat(");
 		expression.append(contentUrlExpression(dataWidgetVar, binding, true));
@@ -2971,9 +2986,10 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		MenuButton actionButton = (MenuButton) a.createComponent(MenuButton.COMPONENT_TYPE);
 		setId(actionButton, null);
 		String actionButtonId = actionButton.getId();
+		String contentActionNoun = contentActionNoun(display, capture, image);
 		actionButton.setIcon("fa-solid fa-ellipsis-vertical");
-		actionButton.setTitle(image ? "Image Actions" : "Content Actions");
-		actionButton.setAriaLabel(image ? "Image Actions" : "Content Actions");
+		actionButton.setTitle(contentActionNoun + " Actions");
+		actionButton.setAriaLabel(contentActionNoun + " Actions");
 		actionButton.setValue(null);
 		actionButton.setButtonStyle("width:30px;height:30px;text-align:center");
 		actionButton.setButtonStyleClass("skyveContentActionButton");
@@ -2982,7 +2998,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		actionGroupChildren.add(actionButton);
 		List<UIComponent> actionItems = actionButton.getChildren();
 
-		UIMenuItem uploadItem = createContentMenuItem(image ? "Upload Image" : "Upload Content",
+		UIMenuItem uploadItem = createContentMenuItem("Upload " + contentActionNoun,
 														Icons.FONT_UPLOAD,
 														null,
 														disabledConditionName,
@@ -3004,7 +3020,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 		UIPanel panel = null;
 		if (fullUploadDialog) {
-			Dialog dialog = createFullScreenDialog(image ? "Image Upload" : "Content Upload");
+			Dialog dialog = createFullScreenDialog(contentActionNoun + " Upload");
 			dialog.setWidgetVar(overlayVar);
 			// clear the iframe src on hide so there is no flash next open
 			dialog.setOnHide(createContentOverlayOnHideScript(id, true, true));
@@ -3044,7 +3060,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		HtmlOutputText iframe = createIframe(id + "_overlayiframe", iframeAttributes);
 		panel.getChildren().add(iframe);
 
-		UIMenuItem clearItem = createContentMenuItem("Clear Content",
+		UIMenuItem clearItem = createContentMenuItem("Clear " + contentActionNoun,
 														Icons.FONT_CLEAR,
 														null,
 														disabledConditionName,
@@ -3129,6 +3145,16 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		}
 		setDisabled(result, disabledConditionName, formDisabledConditionName);
 		return result;
+	}
+
+	private static @Nonnull String contentActionNoun(@Nonnull ContentDisplay display, @Nonnull ContentCapture capture, boolean image) {
+		if (ContentDisplay.video.equals(display) || ContentCapture.video.equals(capture)) {
+			return "Video";
+		}
+		if (image || ContentDisplay.image.equals(display) || ContentCapture.camera.equals(capture)) {
+			return "Image";
+		}
+		return "Content";
 	}
 
 	/**
@@ -3776,6 +3802,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			return component;
 		}
 
+		ContentCapture capture = resolveActionUploadCapture(action);
 		return uploadButton(actionDisplayName(label, action),
 								iconStyleClass,
 								actionToolTip(toolTip),
@@ -3787,8 +3814,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 								action.getDisabledConditionName(),
 								null,
 								action.getInvisibleConditionName(),
-								resolveActionUploadCapture(action),
-								false);
+								capture,
+								useActionUploadDialog(capture));
 	}
 
 	@Override
@@ -4858,6 +4885,15 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	/**
+	 * Determine if we need upload dialog or overlay.
+	 * @param capture	The capture type
+	 * @return	true for dialog, false for overlay
+	 */
+	protected static boolean useActionUploadDialog(@Nonnull ContentCapture capture) {
+		return ContentCapture.camera.equals(capture) || ContentCapture.all.equals(capture);
+	}
+
+	/**
 	 * Creates a command link that performs a download action.
 	 *
 	 * <p>Side effects: creates and configures a command link, adds child output
@@ -5192,17 +5228,22 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	private HtmlOutputLink contentLink(Integer pixelWidth, HorizontalAlignment textAlignment, @Nullable String dataWidgetVar, String binding) {
+	private HtmlOutputLink contentLink(Integer pixelWidth,
+										HorizontalAlignment textAlignment,
+										@Nullable String dataWidgetVar,
+										String binding,
+										@Nullable String emptyOnclick) {
 		HtmlOutputLink result = (HtmlOutputLink) a.createComponent(HtmlOutputLink.COMPONENT_TYPE);
 
 		String expression = String.format("#{%s}", contentUrlExpression(dataWidgetVar, binding, false));
 		result.setValueExpression("value", ef.createValueExpression(elc, expression, String.class));
 
 		UIOutput outputText = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
-		outputText.setValue("Content");
+		expression = String.format("#{(empty %s) ? '&lt;Empty&gt;' : 'Content'}", contentValueExpression(dataWidgetVar, binding));
+		outputText.setValueExpression("value", ef.createValueExpression(elc, expression, String.class));
 		result.getChildren().add(outputText);
 
-		expression = String.format("#{(empty %s) ? 'return false' : null}", contentValueExpression(dataWidgetVar, binding));
+		expression = createContentLinkOnclick(dataWidgetVar, binding, emptyOnclick);
 		result.setValueExpression("onclick", ef.createValueExpression(elc, expression, String.class));
 
 		result.setTarget("_blank");
@@ -5210,6 +5251,47 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		setId(result, null);
 
 		return result;
+	}
+
+	private @Nonnull String createContentLinkOnclick(@Nullable String dataWidgetVar, @Nonnull String binding, @Nullable String emptyOnclick) {
+		String contentExpression = contentValueExpression(dataWidgetVar, binding);
+		if (emptyOnclick == null) {
+			return String.format("#{(empty %s) ? 'return false' : null}", contentExpression);
+		}
+		if (emptyOnclick.startsWith("#{") && emptyOnclick.endsWith("}")) {
+			String onclickBody = emptyOnclick.substring(2, emptyOnclick.length() - 1);
+			return String.format("#{(empty %s) ? (%s) : null}", contentExpression, onclickBody);
+		}
+		String escapedOnclick = emptyOnclick.replace("\\", "\\\\").replace("\"", "\\\"");
+		return String.format("#{(empty %s) ? \"%s\" : null}", contentExpression, escapedOnclick);
+	}
+
+	private @Nonnull String createDisabledAwareOnclick(@Nonnull String onclick,
+														@Nullable String disabledConditionName,
+														@Nullable String formDisabledConditionName) {
+		String disabledExpression = createDisabledExpression(disabledConditionName, formDisabledConditionName);
+		if (disabledExpression == null) {
+			return onclick;
+		}
+
+		String onclickBody = onclick;
+		if (onclick.startsWith("#{") && onclick.endsWith("}")) {
+			onclickBody = onclick.substring(2, onclick.length() - 1);
+		}
+		else {
+			onclickBody = "\"" + onclick.replace("\\", "\\\\").replace("\"", "\\\"") + "\"";
+		}
+		return String.format("#{(%s) ? 'return false' : %s}", disabledExpression, onclickBody);
+	}
+
+	private @Nullable String createDisabledExpression(@Nullable String disabledConditionName, @Nullable String formDisabledConditionName) {
+		if (disabledConditionName == null) {
+			return (formDisabledConditionName == null) ? null : createOredValueExpressionFragmentFromConditions(new String[] {formDisabledConditionName});
+		}
+		if (formDisabledConditionName == null) {
+			return createOredValueExpressionFragmentFromConditions(new String[] {disabledConditionName});
+		}
+		return createOredValueExpressionFragmentFromConditions(new String[] {disabledConditionName, formDisabledConditionName});
 	}
 
 	// TODO do the grids

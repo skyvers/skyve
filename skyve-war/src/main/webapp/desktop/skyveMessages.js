@@ -130,11 +130,18 @@ isc.i18nMessages['bizHTMLItem_EditButtonWidth'] = '40'
 
 
 isc.i18nMessages['bizUtilSplitButton_UploadButtonTitle'] = 'Upload';
-isc.i18nMessages['bizUtilSplitButton_UploadButtonTooltip'] = 'Upload Content';
+isc.i18nMessages['bizUtilSplitButton_UploadButtonContentTooltip'] = 'Upload Content';
+isc.i18nMessages['bizUtilSplitButton_UploadButtonImageTooltip'] = 'Upload Image';
+isc.i18nMessages['bizUtilSplitButton_UploadButtonVideoTooltip'] = 'Upload Video';
 isc.i18nMessages['bizUtilSplitButton_UploadPopupImageTitle'] = 'Upload Image';
 isc.i18nMessages['bizUtilSplitButton_UploadPopupContentTitle'] = 'Upload Content';
+isc.i18nMessages['bizUtilSplitButton_UploadPopupVideoTitle'] = 'Upload Video';
 isc.i18nMessages['bizUtilSplitButton_UploadTooltip'] = 'Other Options';
 isc.i18nMessages['bizUtilSplitButton_UploadButtonClearTitle'] = 'Clear';
+isc.i18nMessages['bizUtilSplitButton_UploadButtonClearContentTitle'] = 'Clear Content';
+isc.i18nMessages['bizUtilSplitButton_UploadButtonClearImageTitle'] = 'Clear Image';
+isc.i18nMessages['bizUtilSplitButton_UploadButtonClearVideoTitle'] = 'Clear Video';
+isc.i18nMessages['bizUtilSplitButton_UploadMarkupImageTitle'] = 'Mark Up Image';
 
 isc.i18nMessages['bizUtilSplitButton_PickButtonTitle'] = 'Pick';
 isc.i18nMessages['bizUtilSplitButton_PickButtonTooltip'] = 'Pick a record';

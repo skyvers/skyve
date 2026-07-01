@@ -3310,6 +3310,7 @@ isc.BizContentItem.addMethods({
 		this.companion = config.companion;
 		this.showMarkup = config.showMarkup || false;
 		this.emptyText = config.emptyText || "No content";
+		this.uploadNoun = config.uploadNoun || "Content";
 		this._editable = !!config.editable;
 		this._imageIntent = this.display === "image";
 		this._previewFixedHeight = config.height != null;
@@ -3342,7 +3343,7 @@ isc.BizContentItem.addMethods({
 				members: [
 					this._preview,
 					isc.LayoutSpacer.create({ width: 5 }),
-					isc.BizUtil.createUploadButton(this, this._imageIntent, this.showMarkup),
+					isc.BizUtil.createUploadButton(this, this._imageIntent, this.showMarkup, this.uploadNoun),
 				],
 			});
 		} else {
@@ -3356,10 +3357,10 @@ isc.BizContentItem.addMethods({
 	},
 
 	_defaultMediaKind: function () {
-		if (this.display === "link" || this.display === "video") {
+		if (this.display === "image" || this.display === "video") {
 			return this.display;
 		}
-		return "image";
+		return "link";
 	},
 
 	_resolveMediaKind: function () {
@@ -3398,9 +3399,65 @@ isc.BizContentItem.addMethods({
 		);
 	},
 
+	_emptyPreviewText: function () {
+		return String(this.emptyText)
+			.replace(/&/g, "&amp;")
+			.replace(/</g, "&lt;")
+			.replace(/>/g, "&gt;")
+			.replace(/"/g, "&quot;")
+			.replace(/'/g, "&#39;");
+	},
+
+	_emptyUploadLink: function (contents) {
+		if (!this._editable) {
+			return contents;
+		}
+		const clickHandler =
+			'onclick="isc.BizContentItem._openUploadFromPreview(\'' +
+			this._previewUploadItemID +
+			'\');return false"';
+		return isc.Canvas.linkHTML(
+			"javascript:void(0)",
+			contents,
+			"_self",
+			null,
+			null,
+			null,
+			clickHandler,
+		);
+	},
+
+	_contentDownloadLink: function (url) {
+		return isc.Canvas.linkHTML(
+			url,
+			"Content",
+			"_blank",
+			null,
+			null,
+			null,
+			'onclick="window.open(this.href, this.target);return false"',
+		);
+	},
+
+	_emptyMediaIcon: function (kind) {
+		if (kind === "video") {
+			return (
+				'<span style="background:#cbd5e1;border-radius:4px;box-sizing:border-box;display:block;height:1.45rem;margin-bottom:0.35rem;position:relative;width:2rem;">' +
+				'<span style="border-bottom:0.42rem solid transparent;border-left:0.65rem solid #cbd5e1;border-top:0.42rem solid transparent;display:block;height:0;position:absolute;right:-0.55rem;top:0.3rem;width:0;"></span>' +
+				"</span>"
+			);
+		}
+		return (
+			'<span style="border:2px solid #cbd5e1;border-radius:4px;box-sizing:border-box;display:block;height:1.8rem;margin-bottom:0.35rem;position:relative;width:2.4rem;">' +
+			'<span style="background:#cbd5e1;border-radius:50%;display:block;height:0.35rem;position:absolute;right:0.35rem;top:0.35rem;width:0.35rem;"></span>' +
+			'<span style="border-bottom:0.55rem solid #cbd5e1;border-left:0.55rem solid transparent;border-right:0.55rem solid transparent;bottom:0.25rem;display:block;height:0;left:0.35rem;position:absolute;width:0;"></span>' +
+			"</span>"
+		);
+	},
+
 	_openUploadFromPreview: function () {
 		if (this._editable && !this.isDisabled()) {
-			isc.BizUtil.openContentUpload(this, this._imageIntent);
+			isc.BizUtil.openContentUpload(this, this._imageIntent, this.uploadNoun);
 		}
 	},
 
@@ -3448,36 +3505,26 @@ isc.BizContentItem.addMethods({
 	},
 
 	_emptyPreviewContents: function () {
-		if (this.display === "link") {
+		const kind = this._currentMediaKind || this._defaultMediaKind();
+		if (kind === "link") {
 			return this._linkPreviewContents(
-				String(this.emptyText)
-					.replace(/&/g, "&amp;")
-					.replace(/</g, "&lt;")
-					.replace(/>/g, "&gt;")
-					.replace(/"/g, "&quot;")
-					.replace(/'/g, "&#39;"),
+				this._emptyUploadLink(this._emptyPreviewText()),
 			);
 		}
 		const clickableStyle = this._editable ? "cursor:pointer;" : "";
 		const clickHandler = this._editable ? ' onclick="isc.BizContentItem._openUploadFromPreview(\'' + this._previewUploadItemID + '\')"' : "";
+		const icon = this._emptyMediaIcon(kind);
+		const emptyText = this._emptyPreviewText();
 		return (
 			'<div style="align-items:center;background:#f8fafc;border:1px dashed #cbd5e1;color:#6b7280;display:flex;flex-direction:column;justify-content:center;text-align:center;' +
 			clickableStyle +
-			this._previewMediaStyle(this.display === "video" ? "16 / 9" : "1 / 1") +
+			this._previewMediaStyle(kind === "video" ? "16 / 9" : "1 / 1") +
 			'min-height:4rem;"' +
 			clickHandler +
 			">" +
-			'<span style="border:2px solid #cbd5e1;border-radius:4px;box-sizing:border-box;display:block;height:1.8rem;margin-bottom:0.35rem;position:relative;width:2.4rem;">' +
-			'<span style="background:#cbd5e1;border-radius:50%;display:block;height:0.35rem;position:absolute;right:0.35rem;top:0.35rem;width:0.35rem;"></span>' +
-			'<span style="border-bottom:0.55rem solid #cbd5e1;border-left:0.55rem solid transparent;border-right:0.55rem solid transparent;bottom:0.25rem;display:block;height:0;left:0.35rem;position:absolute;width:0;"></span>' +
-			"</span>" +
+			icon +
 			'<span style="font-size:0.85rem;line-height:1.2;">' +
-			String(this.emptyText)
-				.replace(/&/g, "&amp;")
-				.replace(/</g, "&lt;")
-				.replace(/>/g, "&gt;")
-				.replace(/"/g, "&quot;")
-				.replace(/'/g, "&#39;") +
+			emptyText +
 			"</span></div>"
 		);
 	},
@@ -3511,7 +3558,7 @@ isc.BizContentItem.addMethods({
 					);
 				} else {
 					this._preview.setContents(
-						this._linkPreviewContents(this.canvas.linkHTML(url, "Content", "_blank")),
+						this._linkPreviewContents(this._contentDownloadLink(url)),
 					);
 				}
 			} else {

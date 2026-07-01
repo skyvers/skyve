@@ -86,7 +86,13 @@ public class UploadFixture extends AbstractTransientBean {
 	public static final String contentDisabledImagePropertyName = "contentDisabledImage";
 
 	/** @hidden */
+	public static final String contentDisabledVideoPropertyName = "contentDisabledVideo";
+
+	/** @hidden */
 	public static final String contentReadOnlyLinkPropertyName = "contentReadOnlyLink";
+
+	/** @hidden */
+	public static final String contentReadOnlyImagePropertyName = "contentReadOnlyImage";
 
 	/** @hidden */
 	public static final String contentReadOnlyVideoPropertyName = "contentReadOnlyVideo";
@@ -175,9 +181,19 @@ public class UploadFixture extends AbstractTransientBean {
 	private String contentDisabledImage;
 
 	/**
+	 * Disabled Video Content
+	 **/
+	private String contentDisabledVideo;
+
+	/**
 	 * Read-only Link Content
 	 **/
 	private String contentReadOnlyLink;
+
+	/**
+	 * Read-only Image Content
+	 **/
+	private String contentReadOnlyImage;
 
 	/**
 	 * Read-only Video Content
@@ -513,6 +529,24 @@ public class UploadFixture extends AbstractTransientBean {
 	}
 
 	/**
+	 * {@link #contentDisabledVideo} accessor.
+	 * @return	The value.
+	 **/
+	public String getContentDisabledVideo() {
+		return contentDisabledVideo;
+	}
+
+	/**
+	 * {@link #contentDisabledVideo} mutator.
+	 * @param contentDisabledVideo	The new value.
+	 **/
+	@XmlElement
+	public void setContentDisabledVideo(String contentDisabledVideo) {
+		preset(contentDisabledVideoPropertyName, contentDisabledVideo);
+		this.contentDisabledVideo = contentDisabledVideo;
+	}
+
+	/**
 	 * {@link #contentReadOnlyLink} accessor.
 	 * @return	The value.
 	 **/
@@ -528,6 +562,24 @@ public class UploadFixture extends AbstractTransientBean {
 	public void setContentReadOnlyLink(String contentReadOnlyLink) {
 		preset(contentReadOnlyLinkPropertyName, contentReadOnlyLink);
 		this.contentReadOnlyLink = contentReadOnlyLink;
+	}
+
+	/**
+	 * {@link #contentReadOnlyImage} accessor.
+	 * @return	The value.
+	 **/
+	public String getContentReadOnlyImage() {
+		return contentReadOnlyImage;
+	}
+
+	/**
+	 * {@link #contentReadOnlyImage} mutator.
+	 * @param contentReadOnlyImage	The new value.
+	 **/
+	@XmlElement
+	public void setContentReadOnlyImage(String contentReadOnlyImage) {
+		preset(contentReadOnlyImagePropertyName, contentReadOnlyImage);
+		this.contentReadOnlyImage = contentReadOnlyImage;
 	}
 
 	/**

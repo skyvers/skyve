@@ -2270,8 +2270,10 @@ public class SmartClientViewRenderer extends ViewRenderer {
 													@Nonnull ContentDisplay display,
 													@Nonnull StringBuilder builder) {
 		builder.append("display:'").append(display).append("',");
-		builder.append("capture:'").append(content.getResolvedCapture()).append("',");
+		ContentCapture capture = content.getResolvedCapture();
+		builder.append("capture:'").append(capture).append("',");
 		builder.append("emptyText:'").append(contentEmptyText(display)).append("',");
+		builder.append("uploadNoun:'").append(contentActionNoun(display, capture)).append("',");
 		if (ContentDisplay.auto.equals(display)) {
 			builder.append("companion:'").append(contentCompanionName(content.getBinding())).append("',");
 		}
@@ -2290,6 +2292,16 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			return "No file";
 		}
 		return "No content";
+	}
+
+	private static @Nonnull String contentActionNoun(@Nonnull ContentDisplay display, @Nonnull ContentCapture capture) {
+		if (ContentDisplay.video.equals(display) || ContentCapture.video.equals(capture)) {
+			return "Video";
+		}
+		if (ContentDisplay.image.equals(display) || ContentCapture.camera.equals(capture)) {
+			return "Image";
+		}
+		return "Content";
 	}
 
 	/**
