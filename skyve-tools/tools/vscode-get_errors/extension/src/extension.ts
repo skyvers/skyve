@@ -192,14 +192,18 @@ function getRegistryPath(): string {
 function collectDiagnostics(request: DiagnosticRequest): DiagnosticResponse {
 	const diagnostics: DiagnosticError[] = [];
 	const includeWarnings = request.includeWarnings !== false;
-	const activeFile = getActiveFile();
+	const activeFileUri = getActiveFileUri();
+	const activeFile = activeFileUri?.fsPath;
 	const requestedFilePaths = request.filePaths?.filter((filePath) => filePath.trim().length > 0);
-	const filePaths = request.activeFileOnly && activeFile ? [activeFile] : requestedFilePaths;
 
-	if (filePaths && filePaths.length > 0) {
-		for (const filePath of filePaths) {
-			const uri = vscode.Uri.file(filePath);
-			processDiagnostics(uri, vscode.languages.getDiagnostics(uri), includeWarnings, diagnostics);
+	if (request.activeFileOnly && activeFileUri) {
+		processDiagnostics(activeFileUri, vscode.languages.getDiagnostics(activeFileUri), includeWarnings, diagnostics);
+	}
+	else if (requestedFilePaths && requestedFilePaths.length > 0) {
+		const diagnosticsByPath = diagnosticsSnapshotByPath();
+		for (const filePath of requestedFilePaths) {
+			const diagnosticEntry = diagnosticEntryForPath(filePath, diagnosticsByPath, activeFileUri);
+			processDiagnostics(diagnosticEntry.uri, diagnosticEntry.diagnostics, includeWarnings, diagnostics);
 		}
 	}
 	else {
@@ -222,6 +226,48 @@ function collectDiagnostics(request: DiagnosticRequest): DiagnosticResponse {
 		workspaceFolders: getWorkspaceFolders(),
 		activeFile
 	};
+}
+
+function diagnosticsSnapshotByPath(): Map<string, { uri: vscode.Uri; diagnostics: readonly vscode.Diagnostic[] }> {
+	const result = new Map<string, { uri: vscode.Uri; diagnostics: readonly vscode.Diagnostic[] }>();
+	for (const [uri, diagnostics] of vscode.languages.getDiagnostics()) {
+		if (uri.scheme === 'file') {
+			result.set(normalisePath(uri.fsPath), { uri, diagnostics });
+		}
+	}
+	return result;
+}
+
+function diagnosticEntryForPath(
+	filePath: string,
+	diagnosticsByPath: Map<string, { uri: vscode.Uri; diagnostics: readonly vscode.Diagnostic[] }>,
+	activeFileUri: vscode.Uri | undefined): { uri: vscode.Uri; diagnostics: readonly vscode.Diagnostic[] } {
+	if (activeFileUri && samePath(filePath, activeFileUri.fsPath)) {
+		return {
+			uri: activeFileUri,
+			diagnostics: vscode.languages.getDiagnostics(activeFileUri)
+		};
+	}
+
+	const snapshotEntry = diagnosticsByPath.get(normalisePath(filePath));
+	if (snapshotEntry) {
+		return snapshotEntry;
+	}
+
+	const uri = vscode.Uri.file(filePath);
+	return {
+		uri,
+		diagnostics: vscode.languages.getDiagnostics(uri)
+	};
+}
+
+function samePath(left: string, right: string): boolean {
+	return normalisePath(left) === normalisePath(right);
+}
+
+function normalisePath(filePath: string): string {
+	const resolved = path.resolve(filePath);
+	return process.platform === 'win32' || process.platform === 'darwin' ? resolved.toLowerCase() : resolved;
 }
 
 function processDiagnostics(
@@ -274,12 +320,16 @@ function isInWorkspace(filePath: string): boolean {
 }
 
 function getActiveFile(): string | undefined {
+	return getActiveFileUri()?.fsPath;
+}
+
+function getActiveFileUri(): vscode.Uri | undefined {
 	const activeEditor = vscode.window.activeTextEditor;
 	if (!activeEditor || activeEditor.document.uri.scheme !== 'file') {
 		return undefined;
 	}
 
-	return activeEditor.document.uri.fsPath;
+	return activeEditor.document.uri;
 }
 
 function isAuthorized(request: http.IncomingMessage): boolean {
