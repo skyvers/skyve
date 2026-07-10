@@ -53,6 +53,28 @@ body {
 	color: rgba(255, 255, 255, 0.72);
 }
 
+/* User dashboard tile icon accents (admin.css) are dark hues tuned for a light page -
+   swap to lighter tints of the same hues */
+.tile .title .fa-angle-up {
+	color: #9ec5fe;
+}
+
+.tile .title .fa-plus {
+	color: #9eeaf9;
+}
+
+.tile .title .fa-times {
+	color: #f1aeb5;
+}
+
+.tile .title .fa-chevron-right {
+	color: #c5a3ff;
+}
+
+.tile .title .fa-search-plus {
+	color: rgba(255, 255, 255, 0.55);
+}
+
 #footer .copyright {
 	color: rgba(255, 255, 255, 0.4);
 }

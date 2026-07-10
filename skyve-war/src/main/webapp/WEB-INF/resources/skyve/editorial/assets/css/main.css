@@ -41,7 +41,7 @@
 	--skyve-editorial-shadow: 0 0.125rem 0.5rem rgba(15, 23, 42, 0.12);
 	--skyve-editorial-sidebar-bg: #fff;
 	--skyve-editorial-sidebar-logo-bg: #fff;
-	--skyve-editorial-sidebar-width: 19.8rem;
+	--skyve-editorial-sidebar-width: 16rem;
 	--skyve-editorial-surface: #fff;
 	--skyve-editorial-surface-glass: rgba(255, 255, 255, 0.94);
 	--skyve-editorial-table-action-bg: var(--skyve-editorial-accent);
@@ -3043,6 +3043,19 @@ mark {
 				font-weight: 600;
 			}
 
+			/* current page - marked by editorial/assets/js/skyve-menu.js */
+			#menu .ui-panelmenu .ui-menuitem.skyve-menu-active > .ui-menuitem-link {
+				background: var(--skyve-editorial-menu-active-bg);
+				background-color: var(--skyve-editorial-menu-active-bg);
+				box-shadow: inset 0.25rem 0 0 var(--skyve-editorial-accent);
+				color: var(--skyve-editorial-accent);
+			}
+
+			#menu .ui-panelmenu .ui-menuitem.skyve-menu-active > .ui-menuitem-link .ui-menuitem-text,
+			#menu .ui-panelmenu .ui-menuitem.skyve-menu-active > .ui-menuitem-link .ui-menuitem-icon {
+				color: var(--skyve-editorial-accent) !important;
+			}
+
 			#menu .ui-panelmenu .ui-panelmenu-header.ui-state-active > a {
 				background: transparent;
 				background-color: transparent;
@@ -3197,7 +3210,7 @@ mark {
 
 		@media screen and (max-width: 1680px) {
 			:root {
-				--skyve-editorial-sidebar-width: 20.7rem;
+				--skyve-editorial-sidebar-width: 16rem;
 			}
 
 			#sidebar {
@@ -3237,7 +3250,7 @@ mark {
 
 		@media screen and (max-width: 1480px) {
 			:root {
-				--skyve-editorial-sidebar-width: 19.8rem;
+				--skyve-editorial-sidebar-width: 16rem;
 			}
 
 			#sidebar {
