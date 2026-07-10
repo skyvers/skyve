@@ -15,6 +15,7 @@
 	--skyve-editorial-divider-border: solid 5px var(--skyve-editorial-divider);
 	--skyve-editorial-divider-shadow: inset 0 -5px 0 var(--skyve-editorial-divider);
 	--skyve-editorial-focus-ring: rgba(var(--skyve-editorial-accent-rgb), 0.28);
+	--skyve-editorial-font: 'Montserrat', -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
 	--skyve-editorial-header-height: 5rem;
 	--skyve-editorial-menu-active-bg: var(--skyve-editorial-accent-soft);
 	--skyve-editorial-menu-group-active-bg: rgba(var(--skyve-editorial-accent-rgb), 0.08);
@@ -49,8 +50,31 @@
 	--skyve-editorial-table-header-bg: #f7f9fc;
 	--skyve-editorial-table-shell-shadow: 0 0.0625rem 0.375rem rgba(15, 23, 42, 0.05);
 	--skyve-editorial-title-text: #444c56;
+	--skyve-editorial-topbar-bg: #1e293b;
+	--skyve-editorial-topbar-text: #f8fafc;
 	--skyve-editorial-warning: #d97706;
 	--skyve-editorial-warning-soft: rgba(217, 119, 6, 0.12);
+}
+
+/* Typography - the saga theme hardcodes a system font stack on body .ui-widget
+   (it does not use its own --font-family variable there), so !important is needed
+   to win regardless of stylesheet load order. Icon fonts are unaffected because
+   Font Awesome declares font-family directly on the icon elements. */
+html:root {
+	--font-family: var(--skyve-editorial-font);
+}
+body,
+input, select, textarea, button {
+	font-family: var(--skyve-editorial-font);
+}
+body .ui-widget,
+body .ui-widget .ui-widget,
+body .ui-widget input,
+body .ui-widget select,
+body .ui-widget textarea,
+body .ui-widget button,
+.p-component {
+	font-family: var(--skyve-editorial-font) !important;
 }
 
 /* PF tweaks */
@@ -73,7 +97,7 @@
 */
 /* Saga theme alignment */
 body .ui-widget-content,
-body .ui-panel,
+body .ui-panel:not(#header),
 body .ui-dialog,
 body .ui-overlaypanel,
 body .ui-menu,
@@ -276,7 +300,7 @@ body .ui-growl .ui-growl-success {
 /* Device sizing */
 @media (min-width: 641px) {
 	body .ui-widget {
-		font-size: 1rem !important;
+		font-size: 0.9375rem !important;
 	}
 /* leaves selection buttons on fields large - see kitchen sink
 	body .ui-inputfield {
@@ -284,7 +308,7 @@ body .ui-growl .ui-growl-success {
 	}
 */
 	.p-component {
-		font-size: 1rem !important;
+		font-size: 0.9375rem !important;
 	}
 	.p-datatable .p-datatable-tbody>tr>td {
 		padding: 1rem !important;
@@ -292,7 +316,7 @@ body .ui-growl .ui-growl-success {
 }
 @media (min-width: 737px) {
 	body .ui-widget {
-		font-size: 0.95rem !important;
+		font-size: 0.875rem !important;
 	}
 /* leaves selection buttons on fields large - see kitchen sink
 	body .ui-inputfield {
@@ -300,7 +324,7 @@ body .ui-growl .ui-growl-success {
 	}
 */
 	.p-component {
-		font-size: 0.95rem !important;
+		font-size: 0.875rem !important;
 	}
 	.p-datatable .p-datatable-tbody>tr>td {
 		padding: 0.8rem 1rem !important;
@@ -308,7 +332,7 @@ body .ui-growl .ui-growl-success {
 }
 @media (min-width: 1281px) {
 	body .ui-widget {
-		font-size: 0.9rem !important;
+		font-size: 0.8125rem !important;
 	}
 /* leaves selection buttons on fields large - see kitchen sink
 	body .ui-inputfield {
@@ -316,7 +340,7 @@ body .ui-growl .ui-growl-success {
 	}
 */
 	.p-component {
-		font-size: 0.9rem !important;
+		font-size: 0.8125rem !important;
 	}
 	.p-datatable .p-datatable-tbody>tr>td {
 		padding: 0.6rem 1rem !important;
@@ -3354,12 +3378,23 @@ mark {
 			-webkit-flex: 1;
 			-ms-flex: 1;
 			flex: 1;
+			background: transparent !important;
 			border: 0 !important;
 			box-sizing: border-box;
+			font-weight: 600;
 			margin-bottom: 0;
 			min-width: 0;
 			overflow-wrap: anywhere;
 			white-space: normal;
+		}
+
+		#header .ui-avatar {
+			background: rgba(255, 255, 255, 0.18);
+			color: var(--skyve-editorial-topbar-text);
+		}
+
+		#header .ui-avatar:hover {
+			background: rgba(255, 255, 255, 0.28);
 		}
 
 		#header .logo {
@@ -3508,8 +3543,7 @@ mark {
 @media screen and (max-width: 1024px) {
 	#header {
 		align-items: center;
-		backdrop-filter: saturate(1.1) blur(0.375rem);
-		background: var(--skyve-editorial-surface-glass);
+		background: var(--skyve-editorial-topbar-bg);
 		border-bottom: 0;
 		box-sizing: border-box;
 		box-shadow: var(--skyve-editorial-divider-shadow);
@@ -3525,7 +3559,7 @@ mark {
 
 	#header .title {
 		box-sizing: border-box;
-		color: var(--skyve-editorial-title-text);
+		color: var(--skyve-editorial-topbar-text);
 		display: -webkit-box;
 		font-size: 1.25em !important;
 		line-height: 1.25;
@@ -3654,8 +3688,7 @@ mark {
 @media screen and (min-width: 1025px) {
 	#header {
 		align-items: center;
-		backdrop-filter: saturate(1.1) blur(0.375rem);
-		background: var(--skyve-editorial-surface-glass);
+		background: var(--skyve-editorial-topbar-bg);
 		border-bottom: 0;
 		box-sizing: border-box;
 		box-shadow: var(--skyve-editorial-divider-shadow);
@@ -3671,7 +3704,7 @@ mark {
 
 	#header .title {
 		box-sizing: border-box;
-		color: var(--skyve-editorial-title-text);
+		color: var(--skyve-editorial-topbar-text);
 		display: -webkit-box;
 		font-size: 1.25em !important;
 		line-height: 1.25;
