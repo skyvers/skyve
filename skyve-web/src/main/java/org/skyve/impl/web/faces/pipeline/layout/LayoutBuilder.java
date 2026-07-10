@@ -20,6 +20,7 @@ import jakarta.faces.component.UIComponent;
  * Defines the layout-stage contract for arranging rendered JSF components into view containers.
  */
 public abstract class LayoutBuilder extends AbstractFacesBuilder {
+	public static final String ACTION_BAR_WRAPPER_STYLE_CLASS = "skyve-action-bar-wrapper action-bar-wrapper";
 	public static final String LAYOUT_BUILDER_CLASS_KEY = "layoutBuilderClass";
 
 	/**

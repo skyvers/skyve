@@ -2,6 +2,57 @@
 
 @layer main {
 
+:root {
+	--skyve-editorial-accent-rgb: 59, 130, 246;
+	--skyve-editorial-accent: rgb(var(--skyve-editorial-accent-rgb));
+	--skyve-editorial-accent-hover: #2563EB;
+	--skyve-editorial-accent-border: rgba(var(--skyve-editorial-accent-rgb), 0.28);
+	--skyve-editorial-accent-soft: rgba(var(--skyve-editorial-accent-rgb), 0.10);
+	--skyve-editorial-actionbar-height: 3.625rem;
+	--skyve-editorial-actionbar-border: rgba(210, 215, 217, 0.85);
+	--skyve-editorial-border: rgba(210, 215, 217, 0.85);
+	--skyve-editorial-divider: var(--skyve-editorial-accent);
+	--skyve-editorial-divider-border: solid 5px var(--skyve-editorial-divider);
+	--skyve-editorial-divider-shadow: inset 0 -5px 0 var(--skyve-editorial-divider);
+	--skyve-editorial-focus-ring: rgba(var(--skyve-editorial-accent-rgb), 0.28);
+	--skyve-editorial-header-height: 5rem;
+	--skyve-editorial-menu-active-bg: var(--skyve-editorial-accent-soft);
+	--skyve-editorial-menu-group-active-bg: rgba(var(--skyve-editorial-accent-rgb), 0.08);
+	--skyve-editorial-menu-group-border: rgba(var(--skyve-editorial-accent-rgb), 0.18);
+	--skyve-editorial-menu-hover-bg: rgba(var(--skyve-editorial-accent-rgb), 0.06);
+	--skyve-editorial-menu-icon: #6b737b;
+	--skyve-editorial-menu-text: #444c56;
+	--skyve-editorial-page-bg: #f8fafc;
+	--skyve-editorial-panel-bg: #fff;
+	--skyve-editorial-panel-border: rgba(210, 215, 217, 0.85);
+	--skyve-editorial-panel-header-bg: #f3f6fb;
+	--skyve-editorial-panel-shadow: 0 0.0625rem 0.25rem rgba(15, 23, 42, 0.06);
+	--skyve-editorial-button-shadow: 0 0.0625rem 0.125rem rgba(15, 23, 42, 0.10);
+	--skyve-editorial-button-hover-shadow: 0 0.25rem 0.625rem rgba(15, 23, 42, 0.14);
+	--skyve-editorial-danger: #dc2626;
+	--skyve-editorial-danger-soft: rgba(220, 38, 38, 0.10);
+	--skyve-editorial-info: #0284c7;
+	--skyve-editorial-info-soft: rgba(2, 132, 199, 0.10);
+	--skyve-editorial-overlay-shadow: 0 0.5rem 1.5rem rgba(15, 23, 42, 0.18);
+	--skyve-editorial-row-hover-bg: #f7f9fc;
+	--skyve-editorial-success: #16a34a;
+	--skyve-editorial-success-soft: rgba(22, 163, 74, 0.10);
+	--skyve-editorial-shadow: 0 0.125rem 0.5rem rgba(15, 23, 42, 0.12);
+	--skyve-editorial-sidebar-bg: #fff;
+	--skyve-editorial-sidebar-logo-bg: #fff;
+	--skyve-editorial-sidebar-width: 19.8rem;
+	--skyve-editorial-surface: #fff;
+	--skyve-editorial-surface-glass: rgba(255, 255, 255, 0.94);
+	--skyve-editorial-table-action-bg: var(--skyve-editorial-accent);
+	--skyve-editorial-table-action-hover-bg: var(--skyve-editorial-accent-hover);
+	--skyve-editorial-table-edge-padding: 0.9rem;
+	--skyve-editorial-table-header-bg: #f7f9fc;
+	--skyve-editorial-table-shell-shadow: 0 0.0625rem 0.375rem rgba(15, 23, 42, 0.05);
+	--skyve-editorial-title-text: #444c56;
+	--skyve-editorial-warning: #d97706;
+	--skyve-editorial-warning-soft: rgba(217, 119, 6, 0.12);
+}
+
 /* PF tweaks */
 .ui-datatable-data > tr {
 	text-align: center !important;
@@ -20,10 +71,206 @@
     border: 1px solid #2196f3 !important;
 }
 */
-/* Style PF buttons the same as Vue */
+/* Saga theme alignment */
+body .ui-widget-content,
+body .ui-panel,
+body .ui-dialog,
+body .ui-overlaypanel,
+body .ui-menu,
+body .ui-selectonemenu-panel,
+body .ui-datepicker {
+    background: var(--skyve-editorial-panel-bg) !important;
+    border-color: var(--skyve-editorial-panel-border) !important;
+    color: var(--skyve-editorial-menu-text) !important;
+}
+body .ui-panel .ui-panel-titlebar,
+body .ui-dialog .ui-dialog-titlebar,
+body .ui-overlaypanel .ui-overlaypanel-content,
+body .ui-tabs .ui-tabs-nav,
+body .ui-accordion .ui-accordion-header {
+    background: var(--skyve-editorial-panel-header-bg) !important;
+    border-color: var(--skyve-editorial-panel-border) !important;
+    color: var(--skyve-editorial-title-text) !important;
+}
+body .ui-dialog,
+body .ui-overlaypanel,
+body .ui-selectonemenu-panel,
+body .ui-datepicker {
+    box-shadow: var(--skyve-editorial-overlay-shadow) !important;
+}
 body .ui-button {
-    background: #3B82F6 !important;
-    border: 1px solid #3B82F6 !important;
+    background: var(--skyve-editorial-accent) !important;
+    border: 1px solid var(--skyve-editorial-accent) !important;
+    box-shadow: var(--skyve-editorial-button-shadow);
+    transition: background-color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+body .ui-button.ui-state-hover,
+body .ui-button:hover {
+    background: var(--skyve-editorial-accent-hover) !important;
+    border-color: var(--skyve-editorial-accent-hover) !important;
+    box-shadow: var(--skyve-editorial-button-hover-shadow);
+}
+body .ui-button.ui-state-focus,
+body .ui-button:focus {
+    box-shadow: 0 0 0 0.2rem var(--skyve-editorial-focus-ring);
+}
+body .ui-button.ui-button-secondary,
+body .ui-button.ui-button-outlined {
+    background: var(--skyve-editorial-panel-bg) !important;
+    border-color: var(--skyve-editorial-accent-border) !important;
+    color: var(--skyve-editorial-accent) !important;
+}
+body .ui-inputfield.ui-state-hover,
+body .ui-inputfield:hover,
+body .ui-selectonemenu.ui-state-hover,
+body .ui-selectonemenu:hover,
+body .ui-selectcheckboxmenu.ui-state-hover,
+body .ui-selectcheckboxmenu:hover,
+body .ui-chkbox-box.ui-state-hover,
+body .ui-chkbox-box:hover,
+body .ui-radiobutton-box.ui-state-hover,
+body .ui-radiobutton-box:hover {
+    border-color: var(--skyve-editorial-accent-border) !important;
+}
+body .ui-inputfield.ui-state-focus,
+body .ui-inputfield:focus,
+body .ui-selectonemenu.ui-state-focus,
+body .ui-selectcheckboxmenu.ui-state-focus,
+body .ui-chkbox-box.ui-state-focus,
+body .ui-radiobutton-box.ui-state-focus {
+    border-color: var(--skyve-editorial-accent) !important;
+    box-shadow: 0 0 0 0.2rem var(--skyve-editorial-focus-ring) !important;
+}
+body .ui-state-highlight,
+body .ui-datatable .ui-state-highlight,
+body .ui-selectonemenu-panel .ui-selectonemenu-items .ui-selectonemenu-item.ui-state-highlight,
+body .ui-autocomplete-panel .ui-autocomplete-items .ui-autocomplete-item.ui-state-highlight {
+    background: var(--skyve-editorial-menu-active-bg) !important;
+    border-color: var(--skyve-editorial-accent-border) !important;
+    color: var(--skyve-editorial-title-text) !important;
+}
+body .ui-chkbox-box.ui-state-active,
+body .ui-radiobutton-box.ui-state-active,
+body .ui-toggleswitch.ui-toggleswitch-checked .ui-toggleswitch-slider {
+    background: var(--skyve-editorial-accent) !important;
+    border-color: var(--skyve-editorial-accent) !important;
+}
+body .ui-datatable tbody tr.ui-state-hover,
+body .ui-datatable tbody tr:hover,
+body .ui-selectonemenu-panel .ui-selectonemenu-items .ui-selectonemenu-item.ui-state-hover,
+body .ui-autocomplete-panel .ui-autocomplete-items .ui-autocomplete-item.ui-state-hover,
+body .ui-menu .ui-menuitem-link.ui-state-hover,
+body .ui-menu .ui-menuitem-link:hover {
+    background: var(--skyve-editorial-row-hover-bg) !important;
+    color: var(--skyve-editorial-menu-text) !important;
+}
+body .ui-tabs .ui-tabs-nav li.ui-tabs-selected,
+body .ui-tabs .ui-tabs-nav li.ui-state-active,
+body .ui-accordion .ui-accordion-header.ui-state-active,
+body .ui-paginator .ui-paginator-page.ui-state-active {
+    background: var(--skyve-editorial-menu-active-bg) !important;
+    border-color: var(--skyve-editorial-accent-border) !important;
+    color: var(--skyve-editorial-title-text) !important;
+}
+body .ui-tabs .ui-tabs-nav li.ui-tabs-selected a,
+body .ui-tabs .ui-tabs-nav li.ui-state-active a,
+body .ui-accordion .ui-accordion-header.ui-state-active a,
+body .ui-paginator .ui-paginator-page.ui-state-active {
+    color: var(--skyve-editorial-accent) !important;
+}
+body .ui-messages-info,
+body .ui-message-info,
+body .ui-growl-info {
+    background: var(--skyve-editorial-info-soft) !important;
+    border-color: var(--skyve-editorial-info) !important;
+    color: var(--skyve-editorial-info) !important;
+}
+body .ui-messages-warn,
+body .ui-message-warn,
+body .ui-growl-warn {
+    background: var(--skyve-editorial-warning-soft) !important;
+    border-color: var(--skyve-editorial-warning) !important;
+    color: var(--skyve-editorial-warning) !important;
+}
+body .ui-messages-error,
+body .ui-message-error,
+body .ui-growl-error,
+body .ui-state-error {
+    background: var(--skyve-editorial-danger-soft) !important;
+    border-color: var(--skyve-editorial-danger) !important;
+    color: var(--skyve-editorial-danger) !important;
+}
+body .ui-messages-success,
+body .ui-message-success,
+body .ui-growl-success {
+    background: var(--skyve-editorial-success-soft) !important;
+    border-color: var(--skyve-editorial-success) !important;
+    color: var(--skyve-editorial-success) !important;
+}
+body .ui-growl .ui-growl-item-container {
+    background: var(--skyve-editorial-panel-bg) !important;
+    border: 1px solid var(--skyve-editorial-panel-border) !important;
+    box-shadow: var(--skyve-editorial-overlay-shadow) !important;
+    opacity: 1 !important;
+}
+body .ui-growl .ui-growl-item {
+    background: var(--skyve-editorial-panel-bg) !important;
+    opacity: 1 !important;
+}
+body .ui-growl .ui-growl-info {
+    border-left: 0.25rem solid var(--skyve-editorial-info) !important;
+}
+body .ui-growl .ui-growl-warn {
+    border-left: 0.25rem solid var(--skyve-editorial-warning) !important;
+}
+body .ui-growl .ui-growl-error,
+body .ui-growl .ui-state-error {
+    border-left: 0.25rem solid var(--skyve-editorial-danger) !important;
+}
+body .ui-growl .ui-growl-success {
+    border-left: 0.25rem solid var(--skyve-editorial-success) !important;
+}
+#main > .inner > section .ui-panel:not(#header),
+#main > .inner > section fieldset {
+    background: var(--skyve-editorial-panel-bg) !important;
+    border-color: var(--skyve-editorial-panel-border) !important;
+    box-shadow: var(--skyve-editorial-panel-shadow) !important;
+}
+#main > .inner > section .ui-datatable thead th,
+#main > .inner > section .p-datatable .p-datatable-thead > tr > th {
+    background: var(--skyve-editorial-table-header-bg) !important;
+    border-color: var(--skyve-editorial-panel-border) !important;
+    color: var(--skyve-editorial-title-text) !important;
+}
+#main > .inner > section .ui-datatable {
+    background: var(--skyve-editorial-panel-bg) !important;
+    border: 1px solid var(--skyve-editorial-panel-border) !important;
+    box-shadow: var(--skyve-editorial-table-shell-shadow);
+}
+#main > .inner > section .ui-datatable .ui-paginator {
+    background: var(--skyve-editorial-panel-bg) !important;
+    border-color: var(--skyve-editorial-panel-border) !important;
+}
+#main > .inner > section .ui-datatable tbody td {
+    border-color: var(--skyve-editorial-panel-border) !important;
+}
+#main > .inner > section .ui-datatable thead th:first-child,
+#main > .inner > section .ui-datatable tbody td:first-child,
+#main > .inner > section .p-datatable .p-datatable-thead > tr > th:first-child,
+#main > .inner > section .p-datatable .p-datatable-tbody > tr > td:first-child {
+    padding-left: var(--skyve-editorial-table-edge-padding) !important;
+}
+#main > .inner > section .ui-datatable tbody .ui-button {
+    background: var(--skyve-editorial-table-action-bg) !important;
+    border-color: var(--skyve-editorial-table-action-bg) !important;
+    box-shadow: none;
+    min-height: 2.25rem;
+}
+#main > .inner > section .ui-datatable tbody .ui-button.ui-state-hover,
+#main > .inner > section .ui-datatable tbody .ui-button:hover {
+    background: var(--skyve-editorial-table-action-hover-bg) !important;
+    border-color: var(--skyve-editorial-table-action-hover-bg) !important;
+    box-shadow: var(--skyve-editorial-button-shadow);
 }
 
 /* Device sizing */
@@ -145,7 +392,7 @@ mark {
 	}
 
 	body {
-		background: #ffffff;
+		background: var(--skyve-editorial-page-bg);
 	}
 
 		body.is-preload *, body.is-preload *:before, body.is-preload *:after, body.is-resizing *, body.is-resizing *:before, body.is-resizing *:after {
@@ -2627,6 +2874,13 @@ mark {
 
 		}
 
+		@media screen and (min-width: 1281px) {
+			#main {
+				margin-left: var(--skyve-editorial-sidebar-width);
+				width: calc(100% - var(--skyve-editorial-sidebar-width));
+			}
+		}
+
 		@media screen and (max-width: 1280px) {
 
 			#main > .inner {
@@ -2653,7 +2907,7 @@ mark {
 
 /* Sidebar */
 
-	#sidebar {
+		#sidebar {
 		-moz-flex-grow: 0;
 		-webkit-flex-grow: 0;
 		-ms-flex-grow: 0;
@@ -2666,10 +2920,11 @@ mark {
 		-webkit-transition: margin-left 0.5s ease, box-shadow 0.5s ease;
 		-ms-transition: margin-left 0.5s ease, box-shadow 0.5s ease;
 		transition: margin-left 0.5s ease, box-shadow 0.5s ease;
-		background-color: white;
+		background-color: var(--skyve-editorial-sidebar-bg);
+		border-right: 1px solid var(--skyve-editorial-border);
 		font-size: 0.9em;
 		position: relative;
-		width: 22em;
+		width: var(--skyve-editorial-sidebar-width);
 	}
 
 		#sidebar h2 {
@@ -2677,14 +2932,163 @@ mark {
 		}
 
 		#sidebar > .inner {
+			height: 100%;
+			overflow: hidden;
 			position: relative;
-			width: 22em;
+			width: var(--skyve-editorial-sidebar-width);
 		}
 
+			#menu {
+				display: flex;
+				flex-direction: column;
+				height: 100%;
+				margin: 0;
+				min-height: 0;
+			}
+
+			#menu > table:first-child {
+				background: var(--skyve-editorial-sidebar-logo-bg);
+				border-bottom: 0 !important;
+				box-shadow: var(--skyve-editorial-divider-shadow);
+				flex: 0 0 auto;
+			}
+
+			#menu > table:first-child td {
+				border: 0 !important;
+			}
+
+			#menu > table:first-child img {
+				max-height: calc(var(--skyve-editorial-header-height) - 1rem);
+				max-width: calc(var(--skyve-editorial-sidebar-width) - 2rem) !important;
+			}
+
+			#menuform {
+				flex: 1 1 auto;
+				min-height: 0;
+				overflow-x: hidden;
+				overflow-y: auto;
+				-webkit-overflow-scrolling: touch;
+			}
+
+			#menu .ui-panelmenu {
+				background: transparent;
+				border: 0;
+			}
+
+			#menu .ui-panelmenu .ui-panelmenu-header,
+			#menu .ui-panelmenu .ui-menuitem {
+				background: transparent;
+				border: 0;
+			}
+
+			#menu .ui-panelmenu .ui-panelmenu-header {
+				border-top: 1px solid var(--skyve-editorial-menu-group-border);
+			}
+
+			#menu .ui-panelmenu .ui-panelmenu-header:first-child {
+				border-top: 0;
+			}
+
+			#menu .ui-panelmenu .ui-panelmenu-header.ui-state-active,
+			#menu .ui-panelmenu .ui-panelmenu-header.ui-state-hover {
+				background: var(--skyve-editorial-menu-group-active-bg);
+				background-color: var(--skyve-editorial-menu-group-active-bg);
+			}
+
+			#menu .ui-panelmenu .ui-panelmenu-header > a,
+			#menu .ui-panelmenu .ui-menuitem-link {
+				border-radius: 0;
+				box-shadow: inset 0.25rem 0 0 transparent;
+				color: var(--skyve-editorial-menu-text);
+				padding: 0.875rem 1rem;
+				transition: background-color 0.18s ease, box-shadow 0.18s ease, color 0.18s ease;
+			}
+
+			#menu .ui-panelmenu .ui-panelmenu-header > a {
+				font-weight: 700;
+			}
+
+			#menu .ui-panelmenu .ui-panelmenu-header.ui-state-active > a {
+				background: transparent;
+				background-color: transparent;
+				box-shadow: inset 0.25rem 0 0 transparent;
+			}
+
+			#menu .ui-panelmenu .ui-panelmenu-header > a.ui-state-focus,
+			#menu .ui-panelmenu .ui-panelmenu-header > a:focus {
+				background: transparent;
+				background-color: transparent;
+				box-shadow: inset 0.25rem 0 0 transparent;
+				outline: 0;
+			}
+
+			#menu .ui-panelmenu .ui-panelmenu-header.ui-state-active > *,
+			#menu .ui-panelmenu .ui-panelmenu-header.ui-state-hover > *,
+			#menu .ui-panelmenu .ui-panelmenu-header:hover > *,
+			#menu .ui-panelmenu .ui-panelmenu-header:focus-within > * {
+				background: transparent !important;
+				background-color: transparent !important;
+				box-shadow: none !important;
+			}
+
+			#menu .ui-panelmenu .ui-panelmenu-header > a * {
+				background: transparent !important;
+				background-color: transparent !important;
+				box-shadow: none !important;
+			}
+
+			#menu .ui-panelmenu .ui-panelmenu-header.ui-state-active > a *,
+			#menu .ui-panelmenu .ui-panelmenu-header.ui-state-hover > a *,
+			#menu .ui-panelmenu .ui-panelmenu-header > a:hover *,
+			#menu .ui-panelmenu .ui-panelmenu-header > a:focus * {
+				background: transparent !important;
+				background-color: transparent !important;
+				box-shadow: none !important;
+			}
+
+			#menu .ui-panelmenu .ui-panelmenu-header.ui-state-hover,
+			#menu .ui-panelmenu .ui-panelmenu-header:hover {
+				background: var(--skyve-editorial-menu-group-active-bg);
+				background-color: var(--skyve-editorial-menu-group-active-bg);
+				box-shadow: inset 0.25rem 0 0 transparent;
+				color: var(--skyve-editorial-menu-text);
+			}
+
+			#menu .ui-panelmenu .ui-panelmenu-header.ui-state-hover > a,
+			#menu .ui-panelmenu .ui-panelmenu-header > a:hover {
+				background: transparent;
+				background-color: transparent;
+				box-shadow: inset 0.25rem 0 0 transparent;
+				color: var(--skyve-editorial-menu-text);
+			}
+
+			#menu .ui-panelmenu .ui-menuitem-link.ui-state-hover,
+			#menu .ui-panelmenu .ui-menuitem-link:hover {
+				background: var(--skyve-editorial-menu-hover-bg);
+				box-shadow: inset 0.25rem 0 0 var(--skyve-editorial-accent-border);
+				color: var(--skyve-editorial-menu-text);
+			}
+
+			#menu .ui-panelmenu .ui-icon,
+			#menu .ui-panelmenu .fa {
+				color: var(--skyve-editorial-menu-icon);
+			}
+
+			#menu .ui-panelmenu .ui-menuitem-link.ui-state-active {
+				background: var(--skyve-editorial-menu-active-bg);
+				box-shadow: inset 0.25rem 0 0 var(--skyve-editorial-accent);
+			}
+
 			#sidebar > .inner > * {
-				border-bottom: solid 2px rgba(210, 215, 217, 0.75);
+				border-bottom: solid 1px var(--skyve-editorial-border);
 				margin: 0 0 3.5em 0;
 				padding: 0 0 3.5em 0;
+			}
+
+			#sidebar > .inner > #menu {
+				border-bottom: 0;
+				margin: 0;
+				padding: 0;
 			}
 
 				#sidebar > .inner > * > :last-child {
@@ -2749,7 +3153,7 @@ mark {
 			}
 
 		#sidebar.inactive {
-			margin-left: -22em;
+			margin-left: calc(0px - var(--skyve-editorial-sidebar-width));
 		}
 
 		#sidebar.inactive .toggle {
@@ -2757,13 +3161,16 @@ mark {
 		}
 
 		@media screen and (max-width: 1680px) {
+			:root {
+				--skyve-editorial-sidebar-width: 20.7rem;
+			}
 
 			#sidebar {
-				width: 23em;
+				width: var(--skyve-editorial-sidebar-width);
 			}
 
 				#sidebar > .inner {
-					width: 23em;
+					width: var(--skyve-editorial-sidebar-width);
 				}
 
 					#sidebar > .inner > .alt {
@@ -2785,7 +3192,7 @@ mark {
 					}
 
 				#sidebar.inactive {
-					margin-left: -23em;
+					margin-left: calc(0px - var(--skyve-editorial-sidebar-width));
 				}
 
 				#sidebar.inactive .toggle {
@@ -2794,17 +3201,21 @@ mark {
 		}
 
 		@media screen and (max-width: 1480px) {
+			:root {
+				--skyve-editorial-sidebar-width: 19.8rem;
+			}
+
 			#sidebar {
-				width: 22em;
+				width: var(--skyve-editorial-sidebar-width);
 			}
 			#sidebar > .inner {
-				width: 22em;
+				width: var(--skyve-editorial-sidebar-width);
 			}
 			#sidebar .toggle {
 				left: 18.5em;
 			}
 			#sidebar.inactive {
-				margin-left: -22em;
+				margin-left: calc(0px - var(--skyve-editorial-sidebar-width));
 			}
 			#sidebar.inactive .toggle {
 				left: 21.1em;
@@ -2812,6 +3223,9 @@ mark {
 		}
 
 		@media screen and (max-width: 1280px) {
+			:root {
+				--skyve-editorial-sidebar-width: 21.6rem;
+			}
 
 			#sidebar {
 				box-shadow: 0 0 5em 0 rgba(0, 0, 0, 0.175);
@@ -2820,12 +3234,12 @@ mark {
 				position: fixed;
 				top: 0;
 				z-index: 999;
-				width: 24em;
+				width: var(--skyve-editorial-sidebar-width);
 			}
 
 				#sidebar.inactive {
 					box-shadow: none;
-					margin-left: -24em;
+					margin-left: calc(0px - var(--skyve-editorial-sidebar-width));
 				}
 
 				#sidebar > .inner {
@@ -2833,10 +3247,10 @@ mark {
 					height: 100%;
 					left: 0;
 					overflow-x: hidden;
-					overflow-y: auto;
+					overflow-y: hidden;
 					position: absolute;
 					top: 0;
-					width: 24em;
+					width: var(--skyve-editorial-sidebar-width);
 				}
 
 					#sidebar > .inner:after {
@@ -2845,6 +3259,12 @@ mark {
 						height: 4em;
 						width: 100%;
 					}
+
+				#menu > table:first-child {
+					box-sizing: border-box;
+					height: var(--skyve-editorial-header-height);
+					min-height: var(--skyve-editorial-header-height) !important;
+				}
 
 				#sidebar .toggle {
 					left: 24em;
@@ -2866,6 +3286,24 @@ mark {
 					display: none;
 				}
 
+		}
+
+		@media screen and (min-width: 1281px) {
+			#sidebar {
+				bottom: 0;
+				height: 100vh;
+				left: 0;
+				position: fixed;
+				top: 0;
+				z-index: 22;
+			}
+
+			#menu > table:first-child {
+				border-bottom: 0 !important;
+				box-sizing: border-box;
+				height: var(--skyve-editorial-header-height);
+				min-height: var(--skyve-editorial-header-height) !important;
+			}
 		}
 
 		@media screen and (max-width: 736px) {
@@ -2903,7 +3341,10 @@ mark {
 		display: -webkit-flex;
 		display: -ms-flex;
 		display: flex;
-		border-bottom: solid 5px #7f888f;
+		border-bottom: 0;
+		box-sizing: border-box;
+		box-shadow: var(--skyve-editorial-divider-shadow);
+		min-width: 0;
 		padding: 1em 0 0 0;
 		position: relative;
 	}
@@ -2913,8 +3354,12 @@ mark {
 			-webkit-flex: 1;
 			-ms-flex: 1;
 			flex: 1;
-			margin-bottom: 0;
 			border: 0 !important;
+			box-sizing: border-box;
+			margin-bottom: 0;
+			min-width: 0;
+			overflow-wrap: anywhere;
+			white-space: normal;
 		}
 
 		#header .logo {
@@ -3058,4 +3503,306 @@ mark {
 	}
 
 	
+}
+
+@media screen and (max-width: 1024px) {
+	#header {
+		align-items: center;
+		backdrop-filter: saturate(1.1) blur(0.375rem);
+		background: var(--skyve-editorial-surface-glass);
+		border-bottom: 0;
+		box-sizing: border-box;
+		box-shadow: var(--skyve-editorial-divider-shadow);
+		height: var(--skyve-editorial-header-height);
+		left: 0;
+		min-width: 0;
+		padding: 0 3.75rem 0 5rem;
+		position: fixed;
+		right: 0;
+		top: 0;
+		z-index: 21;
+	}
+
+	#header .title {
+		box-sizing: border-box;
+		color: var(--skyve-editorial-title-text);
+		display: -webkit-box;
+		font-size: 1.25em !important;
+		line-height: 1.25;
+		margin-bottom: 0;
+		max-width: 100%;
+		min-width: 0;
+		overflow: hidden;
+		overflow-wrap: anywhere;
+		white-space: normal;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+	}
+
+	#header .icons {
+		margin: 0;
+		padding: 1rem !important;
+		position: absolute;
+		right: 0;
+		top: 0.25rem;
+	}
+
+	#main > .inner {
+		padding-top: var(--skyve-editorial-header-height);
+	}
+
+	#main > .inner:has(.skyve-action-bar),
+	#main > .inner:has(.action-bar) {
+		padding-top: calc(var(--skyve-editorial-header-height) + var(--skyve-editorial-actionbar-height));
+	}
+
+	#sidebarWrapper .skyve-action-bar-wrapper,
+	#sidebarWrapper .action-bar-wrapper,
+	.skyve-action-bar-wrapper,
+	.action-bar-wrapper {
+		height: 0;
+		min-height: 0;
+		overflow: visible;
+		padding: 0;
+	}
+
+	#sidebarWrapper .skyve-action-bar,
+	#sidebarWrapper .action-bar,
+	.skyve-action-bar,
+	.action-bar {
+		align-items: center;
+		backdrop-filter: saturate(1.1) blur(0.375rem);
+		background: var(--skyve-editorial-surface-glass);
+		border-bottom: 1px solid var(--skyve-editorial-actionbar-border);
+		border-left: 0;
+		border-radius: 0;
+		border-right: 0;
+		border-top: 1px solid var(--skyve-editorial-actionbar-border);
+		box-sizing: border-box;
+		box-shadow: var(--skyve-editorial-shadow);
+		display: flex;
+		flex-wrap: nowrap;
+		gap: 0.5rem;
+		left: 0;
+		min-height: var(--skyve-editorial-actionbar-height);
+		overflow-x: auto;
+		overflow-y: hidden;
+		padding: 0.5rem max(0.75rem, env(safe-area-inset-right)) 0.5rem max(0.75rem, env(safe-area-inset-left));
+		position: fixed !important;
+		right: 0;
+		scrollbar-width: thin;
+		top: var(--skyve-editorial-header-height) !important;
+		-webkit-overflow-scrolling: touch;
+		white-space: nowrap;
+		z-index: 20 !important;
+	}
+
+	#sidebarWrapper .skyve-action-bar .ui-toolbar-group-left,
+	#sidebarWrapper .skyve-action-bar .ui-toolbar-group-right,
+	#sidebarWrapper .action-bar .ui-toolbar-group-left,
+	#sidebarWrapper .action-bar .ui-toolbar-group-right,
+	.skyve-action-bar .ui-toolbar-group-left,
+	.skyve-action-bar .ui-toolbar-group-right,
+	.action-bar .ui-toolbar-group-left,
+	.action-bar .ui-toolbar-group-right {
+		align-items: center;
+		display: flex;
+		flex: 0 0 auto;
+		float: none;
+		gap: 0.5rem;
+	}
+
+	#sidebarWrapper .skyve-action-bar .ui-toolbar-group-left:first-child,
+	#sidebarWrapper .skyve-action-bar .ui-toolbar-group-right:first-child,
+	#sidebarWrapper .action-bar .ui-toolbar-group-left:first-child,
+	#sidebarWrapper .action-bar .ui-toolbar-group-right:first-child,
+	.skyve-action-bar .ui-toolbar-group-left:first-child,
+	.skyve-action-bar .ui-toolbar-group-right:first-child,
+	.action-bar .ui-toolbar-group-left:first-child,
+	.action-bar .ui-toolbar-group-right:first-child {
+		margin-left: auto;
+	}
+
+	#sidebarWrapper .skyve-action-bar .ui-toolbar-group-left:last-child,
+	#sidebarWrapper .skyve-action-bar .ui-toolbar-group-right:last-child,
+	#sidebarWrapper .action-bar .ui-toolbar-group-left:last-child,
+	#sidebarWrapper .action-bar .ui-toolbar-group-right:last-child,
+	.skyve-action-bar .ui-toolbar-group-left:last-child,
+	.skyve-action-bar .ui-toolbar-group-right:last-child,
+	.action-bar .ui-toolbar-group-left:last-child,
+	.action-bar .ui-toolbar-group-right:last-child {
+		margin-right: auto;
+	}
+
+	#sidebarWrapper .skyve-action-bar .ui-button,
+	#sidebarWrapper .action-bar .ui-button,
+	.skyve-action-bar .ui-button,
+	.action-bar .ui-button {
+		flex: 0 0 auto;
+		min-height: 2.625rem;
+		white-space: nowrap;
+	}
+
+	#sidebarWrapper .skyve-action-bar .ui-button .ui-button-text,
+	#sidebarWrapper .action-bar .ui-button .ui-button-text,
+	.skyve-action-bar .ui-button .ui-button-text,
+	.action-bar .ui-button .ui-button-text {
+		white-space: nowrap;
+	}
+}
+
+@media screen and (min-width: 1025px) {
+	#header {
+		align-items: center;
+		backdrop-filter: saturate(1.1) blur(0.375rem);
+		background: var(--skyve-editorial-surface-glass);
+		border-bottom: 0;
+		box-sizing: border-box;
+		box-shadow: var(--skyve-editorial-divider-shadow);
+		height: var(--skyve-editorial-header-height);
+		left: var(--skyve-editorial-sidebar-width);
+		min-width: 0;
+		padding: 0 3.75rem 0 5rem;
+		position: fixed;
+		right: 0;
+		top: 0;
+		z-index: 21;
+	}
+
+	#header .title {
+		box-sizing: border-box;
+		color: var(--skyve-editorial-title-text);
+		display: -webkit-box;
+		font-size: 1.25em !important;
+		line-height: 1.25;
+		margin-bottom: 0;
+		max-width: 100%;
+		min-width: 0;
+		overflow: hidden;
+		overflow-wrap: anywhere;
+		white-space: normal;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+	}
+
+	#header .icons {
+		margin: 0;
+		padding: 1rem !important;
+		position: absolute;
+		right: 0;
+		top: 0.25rem;
+	}
+
+	#main > .inner {
+		padding-top: var(--skyve-editorial-header-height);
+	}
+
+	#main > .inner:has(.skyve-action-bar),
+	#main > .inner:has(.action-bar) {
+		padding-top: calc(var(--skyve-editorial-header-height) + var(--skyve-editorial-actionbar-height));
+	}
+
+	#sidebarWrapper .skyve-action-bar-wrapper,
+	#sidebarWrapper .action-bar-wrapper,
+	.skyve-action-bar-wrapper,
+	.action-bar-wrapper {
+		height: 0;
+		min-height: 0;
+		overflow: visible;
+		padding: 0;
+	}
+
+	#sidebarWrapper .skyve-action-bar,
+	#sidebarWrapper .action-bar,
+	.skyve-action-bar,
+	.action-bar {
+		align-items: center;
+		backdrop-filter: saturate(1.1) blur(0.375rem);
+		background: var(--skyve-editorial-surface-glass);
+		border-bottom: 1px solid var(--skyve-editorial-actionbar-border);
+		border-left: 0;
+		border-radius: 0;
+		border-right: 0;
+		border-top: 1px solid var(--skyve-editorial-actionbar-border);
+		box-sizing: border-box;
+		box-shadow: var(--skyve-editorial-shadow);
+		display: flex;
+		flex-wrap: nowrap;
+		gap: 0.5rem;
+		left: var(--skyve-editorial-sidebar-width);
+		min-height: var(--skyve-editorial-actionbar-height);
+		overflow-x: auto;
+		overflow-y: hidden;
+		padding: 0.5rem max(0.75rem, env(safe-area-inset-right)) 0.5rem max(0.75rem, env(safe-area-inset-left));
+		position: fixed !important;
+		right: 0;
+		scrollbar-width: thin;
+		top: var(--skyve-editorial-header-height) !important;
+		-webkit-overflow-scrolling: touch;
+		white-space: nowrap;
+		z-index: 20 !important;
+	}
+
+	#sidebarWrapper .skyve-action-bar .ui-toolbar-group-left,
+	#sidebarWrapper .skyve-action-bar .ui-toolbar-group-right,
+	#sidebarWrapper .action-bar .ui-toolbar-group-left,
+	#sidebarWrapper .action-bar .ui-toolbar-group-right,
+	.skyve-action-bar .ui-toolbar-group-left,
+	.skyve-action-bar .ui-toolbar-group-right,
+	.action-bar .ui-toolbar-group-left,
+	.action-bar .ui-toolbar-group-right {
+		align-items: center;
+		display: flex;
+		flex: 0 0 auto;
+		float: none;
+		gap: 0.5rem;
+	}
+
+	#sidebarWrapper .skyve-action-bar .ui-toolbar-group-left:first-child,
+	#sidebarWrapper .skyve-action-bar .ui-toolbar-group-right:first-child,
+	#sidebarWrapper .action-bar .ui-toolbar-group-left:first-child,
+	#sidebarWrapper .action-bar .ui-toolbar-group-right:first-child,
+	.skyve-action-bar .ui-toolbar-group-left:first-child,
+	.skyve-action-bar .ui-toolbar-group-right:first-child,
+	.action-bar .ui-toolbar-group-left:first-child,
+	.action-bar .ui-toolbar-group-right:first-child {
+		margin-left: auto;
+	}
+
+	#sidebarWrapper .skyve-action-bar .ui-toolbar-group-left:last-child,
+	#sidebarWrapper .skyve-action-bar .ui-toolbar-group-right:last-child,
+	#sidebarWrapper .action-bar .ui-toolbar-group-left:last-child,
+	#sidebarWrapper .action-bar .ui-toolbar-group-right:last-child,
+	.skyve-action-bar .ui-toolbar-group-left:last-child,
+	.skyve-action-bar .ui-toolbar-group-right:last-child,
+	.action-bar .ui-toolbar-group-left:last-child,
+	.action-bar .ui-toolbar-group-right:last-child {
+		margin-right: auto;
+	}
+
+	#sidebarWrapper .skyve-action-bar .ui-button,
+	#sidebarWrapper .action-bar .ui-button,
+	.skyve-action-bar .ui-button,
+	.action-bar .ui-button {
+		flex: 0 0 auto;
+		min-height: 2.625rem;
+		white-space: nowrap;
+	}
+
+	#sidebarWrapper .skyve-action-bar .ui-button .ui-button-text,
+	#sidebarWrapper .action-bar .ui-button .ui-button-text,
+	.skyve-action-bar .ui-button .ui-button-text,
+	.action-bar .ui-button .ui-button-text {
+		white-space: nowrap;
+	}
+}
+
+@media screen and (min-width: 1025px) and (max-width: 1280px) {
+	#header,
+	#sidebarWrapper .skyve-action-bar,
+	#sidebarWrapper .action-bar,
+	.skyve-action-bar,
+	.action-bar {
+		left: 0;
+	}
 }

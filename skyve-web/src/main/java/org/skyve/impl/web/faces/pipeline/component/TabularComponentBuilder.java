@@ -351,6 +351,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		Toolbar toolbar = (Toolbar) a.createComponent(Toolbar.COMPONENT_TYPE);
 		setId(toolbar, widgetId);
 		toolbar.setStyle("width:100%");
+		toolbar.setStyleClass(ACTION_BAR_STYLE_CLASS);
 
 		List<UIComponent> result = new ArrayList<>(1);
 		result.add(toolbar);

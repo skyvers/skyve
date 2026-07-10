@@ -99,6 +99,7 @@ class ResponsiveComponentBuilderTest {
 		List<UIComponent> result = builder.toolbars(null, "toolbar1");
 		assertNotNull(result);
 		assertSame(toolbar, result.get(0));
+		verify(toolbar).setStyleClass(ComponentBuilder.ACTION_BAR_STYLE_CLASS);
 	}
 
 	@Test

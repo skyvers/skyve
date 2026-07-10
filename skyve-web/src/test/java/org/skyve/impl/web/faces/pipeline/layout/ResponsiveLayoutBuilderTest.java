@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -230,6 +231,7 @@ class ResponsiveLayoutBuilderTest {
 		// The grid div should be added to the view at index 0
 		assertEquals(1, viewChildren.size());
 		assertSame(gridDiv, viewChildren.get(0));
+		verify(gridDiv).setStyleClass(contains(LayoutBuilder.ACTION_BAR_WRAPPER_STYLE_CLASS));
 		// The toolbar should be added inside the grid div
 		assertTrue(gridDivChildren.contains(toolbar));
 	}

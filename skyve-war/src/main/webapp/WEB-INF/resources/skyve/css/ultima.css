@@ -1,5 +1,10 @@
 @CHARSET "UTF-8";
 
+.layout-wrapper {
+	--skyve-topbar-height: 4rem;
+	--skyve-action-bar-height: 58px;
+}
+
 /* page header */
 h2 {
 	text-align: center !important;
@@ -38,6 +43,173 @@ h2 {
 	.topbar-menu-tooltip {
 		display: none !important;
 	}	
+}
+
+body .layout-wrapper .layout-main .layout-content .action-bar,
+body .layout-wrapper .layout-main .layout-content .skyve-action-bar {
+	box-sizing: border-box;
+}
+
+@media (min-width: 992px) {
+	body .layout-wrapper .layout-main .layout-content .skyve-action-bar-wrapper,
+	body .layout-wrapper .layout-main .layout-content .action-bar-wrapper {
+		height: 0;
+		min-height: 0;
+		overflow: visible;
+		padding: 0;
+	}
+
+	body .layout-wrapper .layout-main .layout-content .action-bar,
+	body .layout-wrapper .layout-main .layout-content .skyve-action-bar {
+		align-items: center;
+		background: #fff;
+		border-left: 0;
+		border-radius: 0;
+		border-right: 0;
+		display: flex;
+		flex-wrap: nowrap;
+		gap: 8px;
+		left: 0;
+		min-height: var(--skyve-action-bar-height);
+		overflow-x: auto;
+		overflow-y: hidden;
+		padding: 8px max(12px, env(safe-area-inset-right)) 8px max(12px, env(safe-area-inset-left));
+		position: fixed;
+		right: 0;
+		scrollbar-width: thin;
+		top: var(--skyve-topbar-height);
+		-webkit-overflow-scrolling: touch;
+		white-space: nowrap;
+		z-index: 996;
+	}
+
+	body .layout-wrapper.layout-menu-static.layout-menu-active .layout-main .layout-content .action-bar,
+	body .layout-wrapper.layout-menu-static.layout-menu-active .layout-main .layout-content .skyve-action-bar {
+		left: 17rem;
+	}
+
+	body .layout-wrapper.layout-menu-slim .layout-main .layout-content .action-bar,
+	body .layout-wrapper.layout-menu-slim .layout-main .layout-content .skyve-action-bar {
+		left: 4.5rem;
+	}
+
+	body .layout-wrapper .layout-main .layout-content .action-bar .ui-toolbar-group-left,
+	body .layout-wrapper .layout-main .layout-content .action-bar .ui-toolbar-group-right,
+	body .layout-wrapper .layout-main .layout-content .skyve-action-bar .ui-toolbar-group-left,
+	body .layout-wrapper .layout-main .layout-content .skyve-action-bar .ui-toolbar-group-right {
+		align-items: center;
+		display: flex;
+		flex: 0 0 auto;
+		float: none;
+		gap: 8px;
+	}
+
+	body .layout-wrapper .layout-main .layout-content .action-bar .ui-toolbar-group-left:first-child,
+	body .layout-wrapper .layout-main .layout-content .action-bar .ui-toolbar-group-right:first-child,
+	body .layout-wrapper .layout-main .layout-content .skyve-action-bar .ui-toolbar-group-left:first-child,
+	body .layout-wrapper .layout-main .layout-content .skyve-action-bar .ui-toolbar-group-right:first-child {
+		margin-left: auto;
+	}
+
+	body .layout-wrapper .layout-main .layout-content .action-bar .ui-toolbar-group-left:last-child,
+	body .layout-wrapper .layout-main .layout-content .action-bar .ui-toolbar-group-right:last-child,
+	body .layout-wrapper .layout-main .layout-content .skyve-action-bar .ui-toolbar-group-left:last-child,
+	body .layout-wrapper .layout-main .layout-content .skyve-action-bar .ui-toolbar-group-right:last-child {
+		margin-right: auto;
+	}
+
+	body .layout-wrapper .layout-main .layout-content .action-bar .ui-button,
+	body .layout-wrapper .layout-main .layout-content .skyve-action-bar .ui-button {
+		flex: 0 0 auto;
+		min-height: 42px;
+		white-space: nowrap;
+	}
+
+	body .layout-wrapper .layout-main .layout-content .action-bar .ui-button .ui-button-text,
+	body .layout-wrapper .layout-main .layout-content .skyve-action-bar .ui-button .ui-button-text {
+		white-space: nowrap;
+	}
+
+	body .layout-wrapper .layout-main .layout-content:has(.action-bar),
+	body .layout-wrapper .layout-main .layout-content:has(.skyve-action-bar) {
+		padding-top: calc(1rem + var(--skyve-action-bar-height));
+	}
+}
+
+@media (max-width: 991px) {
+	body .layout-wrapper .layout-main .layout-content .skyve-action-bar-wrapper,
+	body .layout-wrapper .layout-main .layout-content .action-bar-wrapper {
+		height: 0;
+		min-height: 0;
+		overflow: visible;
+		padding: 0;
+	}
+
+	body .layout-wrapper .layout-main .layout-content .action-bar,
+	body .layout-wrapper .layout-main .layout-content .skyve-action-bar {
+		align-items: center;
+		background: #fff;
+		border-left: 0;
+		border-radius: 0;
+		border-right: 0;
+		display: flex;
+		flex-wrap: nowrap;
+		gap: 8px;
+		left: 0;
+		min-height: var(--skyve-action-bar-height);
+		overflow-x: auto;
+		overflow-y: hidden;
+		padding: 8px max(12px, env(safe-area-inset-right)) 8px max(12px, env(safe-area-inset-left));
+		position: fixed;
+		right: 0;
+		scrollbar-width: thin;
+		top: var(--skyve-topbar-height);
+		-webkit-overflow-scrolling: touch;
+		white-space: nowrap;
+		z-index: 996;
+	}
+
+	body .layout-wrapper .layout-main .layout-content .action-bar .ui-toolbar-group-left,
+	body .layout-wrapper .layout-main .layout-content .action-bar .ui-toolbar-group-right,
+	body .layout-wrapper .layout-main .layout-content .skyve-action-bar .ui-toolbar-group-left,
+	body .layout-wrapper .layout-main .layout-content .skyve-action-bar .ui-toolbar-group-right {
+		align-items: center;
+		display: flex;
+		flex: 0 0 auto;
+		float: none;
+		gap: 8px;
+	}
+
+	body .layout-wrapper .layout-main .layout-content .action-bar .ui-toolbar-group-left:first-child,
+	body .layout-wrapper .layout-main .layout-content .action-bar .ui-toolbar-group-right:first-child,
+	body .layout-wrapper .layout-main .layout-content .skyve-action-bar .ui-toolbar-group-left:first-child,
+	body .layout-wrapper .layout-main .layout-content .skyve-action-bar .ui-toolbar-group-right:first-child {
+		margin-left: auto;
+	}
+
+	body .layout-wrapper .layout-main .layout-content .action-bar .ui-toolbar-group-left:last-child,
+	body .layout-wrapper .layout-main .layout-content .action-bar .ui-toolbar-group-right:last-child,
+	body .layout-wrapper .layout-main .layout-content .skyve-action-bar .ui-toolbar-group-left:last-child,
+	body .layout-wrapper .layout-main .layout-content .skyve-action-bar .ui-toolbar-group-right:last-child {
+		margin-right: auto;
+	}
+
+	body .layout-wrapper .layout-main .layout-content .action-bar .ui-button,
+	body .layout-wrapper .layout-main .layout-content .skyve-action-bar .ui-button {
+		flex: 0 0 auto;
+		min-height: 42px;
+		white-space: nowrap;
+	}
+
+	body .layout-wrapper .layout-main .layout-content .action-bar .ui-button .ui-button-text,
+	body .layout-wrapper .layout-main .layout-content .skyve-action-bar .ui-button .ui-button-text {
+		white-space: nowrap;
+	}
+
+	body .layout-wrapper .layout-main .layout-content:has(.action-bar),
+	body .layout-wrapper .layout-main .layout-content:has(.skyve-action-bar) {
+		padding-top: calc(1rem + var(--skyve-action-bar-height));
+	}
 }
 
 /* z-index customisations to ensure leaflet map controls go under top bar */

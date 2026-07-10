@@ -77,6 +77,7 @@ import jakarta.faces.component.html.HtmlOutputText;
  */
 @SuppressWarnings("java:S1192") // Repeated literals are deliberate JSF component binding/script fragments.
 public abstract class ComponentBuilder extends AbstractFacesBuilder {
+	public static final String ACTION_BAR_STYLE_CLASS = "skyve-action-bar action-bar";
 	public static final String COLLECTION_BINDING_ATTRIBUTE_KEY = "collectionBinding";
 	public static final String COMPONENT_BUILDER_CLASS_KEY = "componentBuilderClass";
 

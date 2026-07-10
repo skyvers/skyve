@@ -1009,6 +1009,7 @@ class TabularComponentBuilderTest {
 		assertEquals(1, result.size());
 		assertSame(toolbar, result.get(0));
 		assertEquals("tb1", toolbar.getId());
+		assertEquals(ComponentBuilder.ACTION_BAR_STYLE_CLASS, toolbar.getStyleClass());
 	}
 
 	@SuppressWarnings("static-method")
@@ -1027,6 +1028,7 @@ class TabularComponentBuilderTest {
 		assertEquals(1, result.size());
 		assertSame(toolbar, result.get(0));
 		assertEquals("generatedToolbarId", toolbar.getId());
+		assertEquals(ComponentBuilder.ACTION_BAR_STYLE_CLASS, toolbar.getStyleClass());
 	}
 
 	@SuppressWarnings("static-method")

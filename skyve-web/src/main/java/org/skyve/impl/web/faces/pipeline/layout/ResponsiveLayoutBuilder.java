@@ -47,7 +47,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 	@Override
 	public void addToolbarsOrLayouts(UIComponent view, List<UIComponent> toolbarsOrLayouts) {
 		HtmlPanelGroup div = panelGroup(false, false, true, null, null);
-		div.setStyleClass(UtilImpl.PRIMEFLEX ? "p-col-12" : "ui-g-12");
+		div.setStyleClass((UtilImpl.PRIMEFLEX ? "p-col-12 " : "ui-g-12 ") + ACTION_BAR_WRAPPER_STYLE_CLASS);
 		div.getChildren().add(toolbarsOrLayouts.get(0));
 		view.getChildren().add(0, div);
 	}
