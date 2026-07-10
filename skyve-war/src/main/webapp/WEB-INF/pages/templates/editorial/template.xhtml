@@ -147,10 +147,15 @@
 						<div class="inner">
 							<!-- Menu -->
 							<nav id="menu">
-								<table style="margin: 0; padding: 0; border: 0; width:100%; min-height: 109px;">
+								<!-- Both logos are rendered; the active palette CSS shows one.
+									When no dark variant resource exists the dark img falls back to the standard
+									logo URL (same URL - served from browser cache) so no conditional rendering
+									is needed at view build time. -->
+								<table class="#{empty bean.logoDarkRelativeFileNameUrl ? '' : 'darkLogoAvailable'}" style="margin: 0; padding: 0; border: 0; width:100%; min-height: 109px;">
 									<tr>
 										<td style="vertical-align: middle; text-align: center;">
-											<img src="#{bean.logoRelativeFileNameUrl}" alt="logo" style="max-width: 280px; object-fit: contain" />
+											<img class="sidebar-logo-light" src="#{bean.logoRelativeFileNameUrl}" alt="logo" style="max-width: 280px; object-fit: contain" />
+											<img class="sidebar-logo-dark" src="#{empty bean.logoDarkRelativeFileNameUrl ? bean.logoRelativeFileNameUrl : bean.logoDarkRelativeFileNameUrl}" alt="logo" style="max-width: 280px; object-fit: contain" />
 										</td>
 									</tr>
 								</table>

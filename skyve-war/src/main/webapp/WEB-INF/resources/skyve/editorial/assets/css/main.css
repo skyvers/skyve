@@ -2992,6 +2992,11 @@ mark {
 				max-width: calc(var(--skyve-editorial-sidebar-width) - 2rem) !important;
 			}
 
+			/* the dark variant logo is only shown by the dark palette (themes/dark.css) */
+			#menu .sidebar-logo-dark {
+				display: none;
+			}
+
 			#menuform {
 				flex: 1 1 auto;
 				min-height: 0;

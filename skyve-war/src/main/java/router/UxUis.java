@@ -12,11 +12,12 @@ public class UxUis {
 	private static final String EDITORIAL_THEME = "editorial";
 	private static final String SKYVE_THEME = "skyve";
 	/**
-	 * Colour palette for the editorial template: "blue" (default), "indigo", "emerald" or "dark".
-	 * Each palette pairs a primefaces-skyve-&lt;colour&gt; alias theme (widget internals) with
-	 * editorial/assets/css/themes/&lt;colour&gt;.css (layout palette).
+	 * Colour palette for the editorial template: "auto", "blue", "indigo", "emerald" or "dark".
+	 * "auto" follows the browser/operating system colour scheme preference (blue in light mode,
+	 * dark palette in dark mode). Each palette pairs a primefaces-skyve-&lt;colour&gt; alias theme
+	 * (widget internals) with editorial/assets/css/themes/&lt;colour&gt;.css (layout palette).
 	 */
-	private static final String THEME_COLOUR = "dark";
+	private static final String THEME_COLOUR = "auto";
 
 	/**
 	 * PrimeFaces profile for phone devices.

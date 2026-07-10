@@ -6,7 +6,14 @@ on the UxUi in router.UxUis, e.g.
 
 	UxUi.newPrimeFaces("phone", "editorial", "skyve", "emerald")
 
-Available colours: "blue" (default), "indigo", "emerald" and "dark".
+Available colours: "auto" (default), "blue", "indigo", "emerald" and "dark".
+
+"auto" follows the browser/operating system colour scheme preference (the blue palette in
+light mode, the dark palette in dark mode). "dark" forces dark mode permanently.
+
+Dark logos: if a customer resource exists named <logoName>-dark.<extension> alongside the
+configured logo (e.g. mylogo-dark.png for mylogo.png), it is served automatically whenever
+the dark palette is active (both forced "dark" and "auto" in a dark-preferring browser).
 
 Each colour pairs two stylesheets:
 1) skyve-web META-INF/resources/primefaces-skyve-<colour>/theme.css - an alias

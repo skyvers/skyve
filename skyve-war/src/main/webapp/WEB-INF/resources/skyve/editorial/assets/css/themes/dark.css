@@ -33,6 +33,21 @@
 	--skyve-editorial-topbar-bg: #1e1e1e;
 }
 
+/* Swap to the dark variant logo */
+#menu .sidebar-logo-light {
+	display: none;
+}
+
+#menu .sidebar-logo-dark {
+	display: inline-block;
+}
+
+/* When the customer supplies a <logoName>-dark.<extension> resource the logo area
+   no longer needs a light plate to keep the logo visible */
+#menu > table.darkLogoAvailable:first-child {
+	--skyve-editorial-sidebar-logo-bg: var(--skyve-editorial-sidebar-bg);
+}
+
 /* The base editorial (HTML5UP) styles assume a light page */
 body {
 	color: rgba(255, 255, 255, 0.72);
