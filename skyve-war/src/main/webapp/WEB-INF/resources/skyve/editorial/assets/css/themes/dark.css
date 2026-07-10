@@ -11,8 +11,7 @@
 	--skyve-editorial-accent-hover: #64B5F6;
 	--skyve-editorial-actionbar-border: #383838;
 	--skyve-editorial-border: #383838;
-	--skyve-editorial-button-hover-shadow: 0 0.25rem 0.625rem rgba(0, 0, 0, 0.5);
-	--skyve-editorial-button-shadow: 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.4);
+	--skyve-editorial-button-base: rgba(0, 0, 0, 0.4);
 	--skyve-editorial-menu-icon: rgba(255, 255, 255, 0.55);
 	--skyve-editorial-menu-text: rgba(255, 255, 255, 0.75);
 	--skyve-editorial-overlay-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.6);
