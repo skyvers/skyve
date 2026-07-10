@@ -35,6 +35,7 @@
 -->
 			<link type="text/css" rel="stylesheet" href="skyve/css/prime-min.css?v=#{bean.webResourceFileVersion}" />
 			<h:outputStylesheet name="editorial/assets/css/main.css?v=#{bean.webResourceFileVersion}" library="skyve" />
+			<h:outputStylesheet name="#{'editorial/assets/css/themes/'.concat(skyve.getThemeColour('blue')).concat('.css?v=').concat(bean.webResourceFileVersion)}" library="skyve" />
 			<link type="text/css" rel="stylesheet" href="pages/css/admin.css?v=#{bean.webResourceFileVersion}" />  
 			<script type="text/javascript" src="skyve/prime/skyve-min.js?v=#{bean.webResourceFileVersion}"></script>
 			<script type="text/javascript">

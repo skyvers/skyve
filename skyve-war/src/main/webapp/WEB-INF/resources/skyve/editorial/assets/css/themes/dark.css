@@ -1,0 +1,43 @@
+/*
+	Editorial theme colour: dark.
+	Selected by the theme colour on the UxUi (see router.UxUis). The matching
+	primefaces-skyve-dark alias theme swaps the PrimeFaces base theme from saga to arya,
+	so widget internals (inputs, pickers, tables) are dark natively - this file re-points
+	the editorial layout palette at arya's neutral surfaces.
+*/
+:root {
+	color-scheme: dark;
+	--skyve-editorial-accent-rgb: 144, 202, 249;
+	--skyve-editorial-accent-hover: #64B5F6;
+	--skyve-editorial-actionbar-border: #383838;
+	--skyve-editorial-border: #383838;
+	--skyve-editorial-button-hover-shadow: 0 0.25rem 0.625rem rgba(0, 0, 0, 0.5);
+	--skyve-editorial-button-shadow: 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.4);
+	--skyve-editorial-menu-icon: rgba(255, 255, 255, 0.55);
+	--skyve-editorial-menu-text: rgba(255, 255, 255, 0.75);
+	--skyve-editorial-overlay-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.6);
+	--skyve-editorial-page-bg: #121212;
+	--skyve-editorial-panel-bg: #1e1e1e;
+	--skyve-editorial-panel-border: #383838;
+	--skyve-editorial-panel-header-bg: #262626;
+	--skyve-editorial-panel-shadow: 0 0.0625rem 0.25rem rgba(0, 0, 0, 0.4);
+	--skyve-editorial-row-hover-bg: rgba(255, 255, 255, 0.04);
+	--skyve-editorial-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.5);
+	--skyve-editorial-sidebar-bg: #1a1a1a;
+	--skyve-editorial-sidebar-logo-bg: rgba(255, 255, 255, 0.92);
+	--skyve-editorial-surface: #1e1e1e;
+	--skyve-editorial-surface-glass: rgba(30, 30, 30, 0.94);
+	--skyve-editorial-table-header-bg: #262626;
+	--skyve-editorial-table-shell-shadow: 0 0.0625rem 0.375rem rgba(0, 0, 0, 0.35);
+	--skyve-editorial-title-text: rgba(255, 255, 255, 0.87);
+	--skyve-editorial-topbar-bg: #1e1e1e;
+}
+
+/* The base editorial (HTML5UP) styles assume a light page */
+body {
+	color: rgba(255, 255, 255, 0.72);
+}
+
+#footer .copyright {
+	color: rgba(255, 255, 255, 0.4);
+}

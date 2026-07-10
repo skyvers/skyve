@@ -254,6 +254,12 @@ body .ui-growl .ui-state-error {
 body .ui-growl .ui-growl-success {
     border-left: 0.25rem solid var(--skyve-editorial-success) !important;
 }
+/* SKYVE.PF.sidebar() injects a style tag with a hardcoded white background for the
+   slide-in edit/create region - repaint it from the palette so dark themes work */
+body .sidebarEdit,
+body .sidebarCreate {
+	background-color: var(--skyve-editorial-page-bg) !important;
+}
 #main > .inner > section .ui-panel:not(#header),
 #main > .inner > section fieldset {
     background: var(--skyve-editorial-panel-bg) !important;
@@ -2879,7 +2885,7 @@ mark {
 
 			#main > .inner > section {
 				padding: 1.5em 0 4em 0 ;
-				border-top: solid 2px rgba(210, 215, 217, 0.75);
+				border-top: solid 2px var(--skyve-editorial-border);
 			}
 
 				#main > .inner > section:first-of-type {
@@ -3029,7 +3035,7 @@ mark {
 			}
 
 			#menu .ui-panelmenu .ui-panelmenu-header > a {
-				font-weight: 700;
+				font-weight: 600;
 			}
 
 			#menu .ui-panelmenu .ui-panelmenu-header.ui-state-active > a {
@@ -3381,7 +3387,7 @@ mark {
 			background: transparent !important;
 			border: 0 !important;
 			box-sizing: border-box;
-			font-weight: 600;
+			font-weight: 300;
 			margin-bottom: 0;
 			min-width: 0;
 			overflow-wrap: anywhere;

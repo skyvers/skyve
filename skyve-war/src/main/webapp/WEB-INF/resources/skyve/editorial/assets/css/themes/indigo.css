@@ -1,0 +1,11 @@
+/*
+	Editorial theme colour: indigo.
+	Selected by the theme colour on the UxUi (see router.UxUis) - loads after main.css so
+	these :root declarations win by source order. Derived variables (divider, focus ring,
+	menu highlights, table action buttons) follow the accent automatically.
+*/
+:root {
+	--skyve-editorial-accent-rgb: 99, 102, 241;
+	--skyve-editorial-accent-hover: #4F46E5;
+	--skyve-editorial-topbar-bg: #1e1b4b;
+}

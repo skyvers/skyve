@@ -1,3 +1,24 @@
+Free editorial template colour palettes (no paid theme required)
+================================================================
+
+The editorial template supports selectable colour palettes driven by the theme colour
+on the UxUi in router.UxUis, e.g.
+
+	UxUi.newPrimeFaces("phone", "editorial", "skyve", "emerald")
+
+Available colours: "blue" (default), "indigo", "emerald" and "dark".
+
+Each colour pairs two stylesheets:
+1) skyve-web META-INF/resources/primefaces-skyve-<colour>/theme.css - an alias
+   PrimeFaces theme that imports the free saga theme (or arya for "dark") so
+   widget internals are styled correctly.
+2) skyve-war WEB-INF/resources/skyve/editorial/assets/css/themes/<colour>.css -
+   overrides the --skyve-editorial-* CSS variables (accent, divider, topbar,
+   buttons and surfaces all derive from these).
+
+To add a new palette, create both files following an existing colour and set the
+new colour name in UxUis.
+
 To install the ultima theme (>= 7.0.0) on skyve.
 
 1) Drop ultima-theme-7.0.0-jakarta.jar from Foundry project into WEB-INF/lib/
