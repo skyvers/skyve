@@ -43,6 +43,7 @@ class VueListGridScriptTest {
 		assertEquals(Boolean.TRUE, attributes.get("showFilter"));
 		assertEquals(Boolean.FALSE, attributes.get("showSummary"));
 		assertEquals(Boolean.TRUE, attributes.get("showSnap"));
+		assertEquals(Boolean.FALSE, attributes.get("stickyHeader"));
 		assertEquals("onSelected", attributes.get("selectedRemoteCommand"));
 
 		String asString = script.toString();
@@ -76,6 +77,32 @@ class VueListGridScriptTest {
 		assertFalse(attributes.containsKey("modelName"));
 		assertFalse(attributes.containsKey("contextId"));
 		assertFalse(attributes.containsKey("selectedRemoteCommand"));
+		assertFalse(attributes.containsKey("stickyTopAt"));
+	}
+
+	@Test
+	void stickyHeaderSetterStoresAttributesAndToStringRemainsUsable() {
+		VueListGridScript script = new VueListGridScript("container",
+				"admin",
+				"Invoice",
+				"sales",
+				"Order",
+				null,
+				null,
+				null,
+				false,
+				false,
+				false,
+				false,
+				false,
+				null);
+
+		script.setStickyHeader(true, ".layout-topbar,#header");
+
+		Map<String, Object> attributes = script.getAttributes();
+		assertEquals(Boolean.TRUE, attributes.get("stickyHeader"));
+		assertEquals(".layout-topbar,#header", attributes.get("stickyTopAt"));
+		assertNotNull(script.toString());
 	}
 
 	@Test
@@ -95,6 +122,8 @@ class VueListGridScriptTest {
 		attributes.put("showFilter", Boolean.FALSE);
 		attributes.put("showSummary", Boolean.TRUE);
 		attributes.put("showSnap", Boolean.FALSE);
+		attributes.put("stickyHeader", Boolean.TRUE);
+		attributes.put("stickyTopAt", ".layout-topbar,#header");
 		attributes.put("selectedRemoteCommand", "onSelection");
 
 		Method grabAttributes = VueListGridScript.class.getDeclaredMethod("grabAttributes", Map.class);

@@ -56,9 +56,11 @@ import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
 import org.skyve.impl.sail.mock.MockFacesContext;
+import org.skyve.impl.web.faces.components.VueListGridScript;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder.EventSourceComponent;
 import org.skyve.impl.web.faces.pipeline.component.EscapableText;
+import org.skyve.impl.web.faces.pipeline.component.NoOpComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilder;
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.metadata.MetaDataException;
@@ -69,6 +71,7 @@ import org.skyve.metadata.view.View.ViewType;
 
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.UIComponentBase;
+import jakarta.faces.component.html.HtmlPanelGroup;
 import jakarta.faces.context.FacesContext;
 
 @SuppressWarnings("static-method")
@@ -90,6 +93,26 @@ class FacesViewRendererTest {
 		@Override
 		public String getFamily() {
 			return family;
+		}
+	}
+
+	public static final class TestVueListGridBuilder extends NoOpComponentBuilder {
+		private static VueListGridScript lastScript;
+
+		@Override
+		public UIComponent listGrid(UIComponent component,
+										String moduleName,
+										String documentName,
+										String modelName,
+										String uxui,
+										org.skyve.metadata.view.model.list.ListModel<org.skyve.domain.Bean> model,
+										org.skyve.metadata.model.document.Document owningDocument,
+										ListGrid grid,
+										boolean aggregateQuery) {
+			HtmlPanelGroup result = new HtmlPanelGroup();
+			lastScript = new VueListGridScript();
+			result.getChildren().add(lastScript);
+			return result;
 		}
 	}
 
@@ -219,6 +242,42 @@ class FacesViewRendererTest {
 
 		verify(dataTable, never()).setStickyHeader(true);
 		verify(dataTable, never()).setStickyTopAt(".layout-topbar,#header");
+	}
+
+	@Test
+	void renderListGridAppliesStickyHeaderToExplicitVueBuilderForListViewsOnly() {
+		UIComponent root = new TestComponent("root");
+		ComponentBuilder cb = mock(ComponentBuilder.class);
+		LayoutBuilder lb = mock(LayoutBuilder.class);
+		ListGrid grid = new ListGrid();
+		grid.setShowZoom(Boolean.FALSE);
+		grid.getProperties().put(ComponentBuilder.COMPONENT_BUILDER_CLASS_KEY, TestVueListGridBuilder.class.getName());
+
+		when(cb.view(null, false)).thenReturn(root);
+		when(lb.toolbarLayouts(null)).thenReturn(new ArrayList<>());
+		when(lb.viewLayout(null)).thenReturn(null);
+		when(lb.addToContainer(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(root);
+
+		ViewImpl listView = createView(null);
+		listView.setName(ViewType.list.toString());
+		FacesViewRenderer listRenderer = newRenderer(listView, null, cb, lb);
+		listRenderer.renderView(null, null);
+		listRenderer.getCurrentContainers().push(listView);
+		TestVueListGridBuilder.lastScript = null;
+		listRenderer.renderListGrid(null, false, grid);
+
+		assertTrue((Boolean) TestVueListGridBuilder.lastScript.getAttributes().get("stickyHeader"));
+		assertEquals(".layout-topbar,#header", TestVueListGridBuilder.lastScript.getAttributes().get("stickyTopAt"));
+
+		ViewImpl editView = createView(null);
+		FacesViewRenderer editRenderer = newRenderer(editView, null, cb, lb);
+		editRenderer.renderView(null, null);
+		editRenderer.getCurrentContainers().push(editView);
+		TestVueListGridBuilder.lastScript = null;
+		editRenderer.renderListGrid(null, false, grid);
+
+		assertNull(TestVueListGridBuilder.lastScript.getAttributes().get("stickyHeader"));
+		assertNull(TestVueListGridBuilder.lastScript.getAttributes().get("stickyTopAt"));
 	}
 
 	@Test

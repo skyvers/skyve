@@ -78,7 +78,8 @@ public class ListGrid extends HtmlPanelGroup {
 			Object filterRenderedAttribute = attributes.get("filterRendered");
 			final Boolean filterRendered = getBooleanObjectAttribute(filterRenderedAttribute);
 			final String componentBuilderClassString = (String) attributes.get("componentBuilderClass");
-			final ComponentBuilder componentBuilder = newComponentBuilder(componentBuilderClassString);
+			final boolean stickyHeader = getBooleanAttribute(attributes.get("stickyHeader"));
+			final ComponentBuilder componentBuilder = newComponentBuilder(componentBuilderClassString, stickyHeader);
 
 			new FacesAction<Void>() {
 				@Override
@@ -201,17 +202,27 @@ public class ListGrid extends HtmlPanelGroup {
 	 * @throws DomainException if the builder cannot be created
 	 */
 	public static ComponentBuilder newComponentBuilder(@Nullable String componentBuilderClassString) {
+		return newComponentBuilder(componentBuilderClassString, false);
+	}
+
+	/**
+	 * Instantiates a component builder and optionally decorates list grids with sticky headers.
+	 *
+	 * @param componentBuilderClassString the optional alias or class name
+	 * @param stickyHeader whether list-grid headers should stick below the page chrome
+	 * @return the instantiated component builder
+	 * @throws DomainException if the builder cannot be created
+	 */
+	public static ComponentBuilder newComponentBuilder(@Nullable String componentBuilderClassString, boolean stickyHeader) {
 		try {
 			ComponentBuilder result = null;
 			if (componentBuilderClassString == null) {
 				result = new ComponentBuilderChain(new DeviceResponsiveComponentBuilder(),
-													new PaginatedListGridBuilder(),
-													new StickyHeaderListBuilder());
+													new PaginatedListGridBuilder());
 			}
 			else if (componentBuilderClassString.equalsIgnoreCase("faces")) {
 				result = new ComponentBuilderChain(new DeviceResponsiveComponentBuilder(),
-													new PaginatedListGridBuilder(),
-													new StickyHeaderListBuilder());
+													new PaginatedListGridBuilder());
 			}
 			else if (componentBuilderClassString.equalsIgnoreCase("vue")) {
 				result = new VueListGridComponentBuilder();
@@ -219,6 +230,9 @@ public class ListGrid extends HtmlPanelGroup {
 			else {
 				Class<?> type = Thread.currentThread().getContextClassLoader().loadClass(componentBuilderClassString);
 				result = (ComponentBuilder) type.getDeclaredConstructor().newInstance();
+			}
+			if (stickyHeader) {
+				result = new ComponentBuilderChain(result, new StickyHeaderListBuilder());
 			}
 			return result;
 		}

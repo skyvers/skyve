@@ -1,5 +1,6 @@
 package org.skyve.impl.web.faces.pipeline.component;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.mock;
@@ -14,11 +15,13 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.primefaces.component.column.Column;
 import org.primefaces.component.datatable.DataTable;
+import org.skyve.impl.web.faces.components.VueListGridScript;
 
 import jakarta.el.ELContext;
 import jakarta.el.ExpressionFactory;
 import jakarta.faces.application.Application;
 import jakarta.faces.component.UIComponent;
+import jakarta.faces.component.html.HtmlPanelGroup;
 import jakarta.faces.context.FacesContext;
 
 class ListGridBuilderTest {
@@ -151,6 +154,21 @@ class ListGridBuilderTest {
 
 		UIComponent result = builder.listGrid(component, "mod", "doc", "model", "uxui", null, null, null, false);
 		assertSame(component, result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void stickyHeaderListBuilderSetsNestedVueListGridScript() {
+		StickyHeaderListBuilder builder = new StickyHeaderListBuilder();
+		HtmlPanelGroup container = new HtmlPanelGroup();
+		VueListGridScript script = new VueListGridScript();
+		container.getChildren().add(script);
+
+		UIComponent result = builder.listGrid(container, "mod", "doc", "model", "uxui", null, null, null, false);
+
+		assertSame(container, result);
+		assertEquals(Boolean.TRUE, script.getAttributes().get("stickyHeader"));
+		assertEquals(".layout-topbar,#header", script.getAttributes().get("stickyTopAt"));
 	}
 
 	@Test

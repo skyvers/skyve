@@ -58,6 +58,8 @@ public class VueListGridScript extends UIOutput {
 	private Boolean showFilter;
 	private Boolean showSummary;
 	private Boolean showSnap;
+	private Boolean stickyHeader;
+	private String stickyTopAt;
 	
 	private String selectedRemoteCommand;
 	
@@ -70,7 +72,7 @@ public class VueListGridScript extends UIOutput {
 	
 	/**
 	 * This is called to set state.
-	 * 
+	 *
 	 * @param containerId the DOM container ID where the Vue grid is mounted
 	 * @param owningModuleName the owning module name
 	 * @param owningDocumentName the owning document name
@@ -101,6 +103,61 @@ public class VueListGridScript extends UIOutput {
 								boolean showSummary,
 								boolean showSnap,
 								String selectedRemoteCommand) {
+		this(containerId,
+				owningModuleName,
+				owningDocumentName,
+				drivingModuleName,
+				drivingDocumentName,
+				queryName,
+				modelName,
+				contextId,
+				showAdd,
+				showZoom,
+				showFilter,
+				showSummary,
+				showSnap,
+				selectedRemoteCommand,
+				false,
+				null);
+	}
+
+	/**
+	 * This is called to set state.
+	 *
+	 * @param containerId the DOM container ID where the Vue grid is mounted
+	 * @param owningModuleName the owning module name
+	 * @param owningDocumentName the owning document name
+	 * @param drivingModuleName the driving module name
+	 * @param drivingDocumentName the driving document name
+	 * @param queryName the optional query name
+	 * @param modelName the optional model name
+	 * @param contextId the optional context ID used for state restoration
+	 * @param showAdd whether add actions are visible
+	 * @param showZoom whether zoom actions are visible
+	 * @param showFilter whether filter controls are visible
+	 * @param showSummary whether summary controls are visible
+	 * @param showSnap whether snap controls are visible
+	 * @param selectedRemoteCommand the optional remote command for selected row callbacks
+	 * @param stickyHeader whether the Vue DataTable header should stick under the page chrome
+	 * @param stickyTopAt optional selector used to calculate the sticky top offset
+	 */
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
+	public VueListGridScript(String containerId,
+								String owningModuleName,
+								String owningDocumentName,
+								String drivingModuleName,
+								String drivingDocumentName,
+								String queryName,
+								String modelName,
+								String contextId,
+								boolean showAdd,
+								boolean showZoom,
+								boolean showFilter,
+								boolean showSummary,
+								boolean showSnap,
+								String selectedRemoteCommand,
+								boolean stickyHeader,
+								String stickyTopAt) {
 		Map<String, Object> attributes = getAttributes();
 
 		this.containerId = containerId;
@@ -143,6 +200,27 @@ public class VueListGridScript extends UIOutput {
 		if (selectedRemoteCommand != null) {
 			attributes.put("selectedRemoteCommand", selectedRemoteCommand);
 		}
+
+		setStickyHeader(stickyHeader, stickyTopAt);
+	}
+
+	/**
+	 * Configures viewport sticky table headers for Vue list grids.
+	 *
+	 * @param stickyHeader whether sticky headers are enabled
+	 * @param stickyTopAt optional selector used by the Vue component to calculate the top offset
+	 */
+	public void setStickyHeader(boolean stickyHeader, String stickyTopAt) {
+		Map<String, Object> attributes = getAttributes();
+		this.stickyHeader = Boolean.valueOf(stickyHeader);
+		attributes.put("stickyHeader", this.stickyHeader);
+		this.stickyTopAt = stickyTopAt;
+		if (stickyTopAt == null) {
+			attributes.remove("stickyTopAt");
+		}
+		else {
+			attributes.put("stickyTopAt", stickyTopAt);
+		}
 	}
 
 	/**
@@ -184,6 +262,8 @@ public class VueListGridScript extends UIOutput {
 		this.showFilter = (Boolean) attributes.get("showFilter");
 		this.showSummary = (Boolean) attributes.get("showSummary");
 		this.showSnap = (Boolean) attributes.get("showSnap");
+		this.stickyHeader = (Boolean) attributes.get("stickyHeader");
+		this.stickyTopAt = (String) attributes.get("stickyTopAt");
 		
 		this.selectedRemoteCommand = (String) attributes.get("selectedRemoteCommand");
 	}
@@ -215,6 +295,12 @@ public class VueListGridScript extends UIOutput {
 		params.put("showFilter", showFilter);
 		params.put("showSummary", showSummary);
 		params.put("showSnap", showSnap);
+		if (Boolean.TRUE.equals(stickyHeader)) {
+			params.put("stickyHeader", stickyHeader);
+			if (stickyTopAt != null) {
+				params.put("stickyTopAt", stickyTopAt);
+			}
+		}
 
 		if (selectedRemoteCommand != null) {
 			Map<String, Object> actions = new TreeMap<>();

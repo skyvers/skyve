@@ -5,6 +5,7 @@ import java.util.List;
 import org.primefaces.component.datatable.DataTable;
 import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
+import org.skyve.impl.web.faces.components.VueListGridScript;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.FilterParameter;
@@ -13,7 +14,7 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 import jakarta.faces.component.UIComponent;
 
 public class StickyHeaderListBuilder extends NoOpComponentBuilder {
-	private static final String STICKY_TOP_AT = ".layout-topbar,#header";
+	public static final String STICKY_TOP_AT = ".layout-topbar,#header";
 
 	@Override
 	public UIComponent listGrid(UIComponent component,
@@ -28,6 +29,9 @@ public class StickyHeaderListBuilder extends NoOpComponentBuilder {
 		if (component instanceof DataTable dataTable) {
 			dataTable.setStickyHeader(true);
 			dataTable.setStickyTopAt(STICKY_TOP_AT);
+		}
+		else {
+			stickyVueListGridHeader(component);
 		}
 		return component;
 	}
@@ -47,5 +51,21 @@ public class StickyHeaderListBuilder extends NoOpComponentBuilder {
 			dataTable.setStickyTopAt(STICKY_TOP_AT);
 		}
 		return component;
+	}
+
+	private static void stickyVueListGridHeader(UIComponent component) {
+		if (component == null) {
+			return;
+		}
+
+		if (component instanceof VueListGridScript script) {
+			script.setStickyHeader(true, STICKY_TOP_AT);
+			return;
+		}
+
+		List<UIComponent> children = component.getChildren();
+		for (UIComponent child : children) {
+			stickyVueListGridHeader(child);
+		}
 	}
 }
