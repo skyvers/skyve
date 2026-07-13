@@ -322,6 +322,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 									ListModel<Bean> model,
 									Document owningDocument,
 									ListGrid listGrid,
+									String stickyHeaderAnchorSelector,
 									boolean aggregateQuery) {
 		return component;
 	}

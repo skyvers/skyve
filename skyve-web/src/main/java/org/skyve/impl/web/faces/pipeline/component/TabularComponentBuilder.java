@@ -1633,6 +1633,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 									ListModel<Bean> model,
 									Document owningDocument,
 									ListGrid grid,
+									String stickyHeaderAnchorSelector,
 									boolean aggregateQuery) {
 		if (component != null) {
 			return component;
@@ -1669,6 +1670,10 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
         result.setVar("row");
         result.setLazy(true);
     	result.setRows(50);
+		if (stickyHeaderAnchorSelector != null) {
+			result.setStickyHeader(true);
+			result.setStickyTopAt(stickyHeaderAnchorSelector);
+		}
 
 
 		UIOutput emptyMessage = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);

@@ -16,26 +16,27 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.primefaces.component.datatable.DataTable;
-import org.primefaces.component.picklist.PickList;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
+import org.primefaces.component.datatable.DataTable;
+import org.primefaces.component.picklist.PickList;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.generate.ViewRenderer;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
+import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.RelativeSize;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.container.Collapsible;
@@ -56,13 +57,11 @@ import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
 import org.skyve.impl.sail.mock.MockFacesContext;
-import org.skyve.impl.web.faces.components.VueListGridScript;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder.EventSourceComponent;
 import org.skyve.impl.web.faces.pipeline.component.EscapableText;
 import org.skyve.impl.web.faces.pipeline.component.NoOpComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilder;
-import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -97,7 +96,7 @@ class FacesViewRendererTest {
 	}
 
 	public static final class TestVueListGridBuilder extends NoOpComponentBuilder {
-		private static VueListGridScript lastScript;
+		private static String lastStickyHeaderAnchorSelector;
 
 		@Override
 		public UIComponent listGrid(UIComponent component,
@@ -108,11 +107,10 @@ class FacesViewRendererTest {
 										org.skyve.metadata.view.model.list.ListModel<org.skyve.domain.Bean> model,
 										org.skyve.metadata.model.document.Document owningDocument,
 										ListGrid grid,
+										String stickyHeaderAnchorSelector,
 										boolean aggregateQuery) {
-			HtmlPanelGroup result = new HtmlPanelGroup();
-			lastScript = new VueListGridScript();
-			result.getChildren().add(lastScript);
-			return result;
+			lastStickyHeaderAnchorSelector = stickyHeaderAnchorSelector;
+			return new HtmlPanelGroup();
 		}
 	}
 
@@ -199,6 +197,7 @@ class FacesViewRendererTest {
 							isNull(),
 							any(),
 							same(grid),
+							eq(FacesViewRenderer.DEFAULT_STICKY_HEADER_ANCHOR_SELECTOR),
 							eq(false))).thenReturn(dataTable);
 		when(lb.addToContainer(any(), any(), any(), same(dataTable), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(root);
 
@@ -207,8 +206,6 @@ class FacesViewRendererTest {
 		renderer.getCurrentContainers().push(view);
 		renderer.renderListGrid(null, false, grid);
 
-		verify(dataTable).setStickyHeader(true);
-		verify(dataTable).setStickyTopAt(".layout-topbar,#header");
 	}
 
 	@Test
@@ -232,6 +229,7 @@ class FacesViewRendererTest {
 							isNull(),
 							any(),
 							same(grid),
+							isNull(),
 							eq(false))).thenReturn(dataTable);
 		when(lb.addToContainer(any(), any(), any(), same(dataTable), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(root);
 
@@ -240,8 +238,6 @@ class FacesViewRendererTest {
 		renderer.getCurrentContainers().push(view);
 		renderer.renderListGrid(null, false, grid);
 
-		verify(dataTable, never()).setStickyHeader(true);
-		verify(dataTable, never()).setStickyTopAt(".layout-topbar,#header");
 	}
 
 	@Test
@@ -263,21 +259,20 @@ class FacesViewRendererTest {
 		FacesViewRenderer listRenderer = newRenderer(listView, null, cb, lb);
 		listRenderer.renderView(null, null);
 		listRenderer.getCurrentContainers().push(listView);
-		TestVueListGridBuilder.lastScript = null;
+		TestVueListGridBuilder.lastStickyHeaderAnchorSelector = null;
 		listRenderer.renderListGrid(null, false, grid);
 
-		assertTrue((Boolean) TestVueListGridBuilder.lastScript.getAttributes().get("stickyHeader"));
-		assertEquals(".layout-topbar,#header", TestVueListGridBuilder.lastScript.getAttributes().get("stickyTopAt"));
+		assertEquals(FacesViewRenderer.DEFAULT_STICKY_HEADER_ANCHOR_SELECTOR,
+				TestVueListGridBuilder.lastStickyHeaderAnchorSelector);
 
 		ViewImpl editView = createView(null);
 		FacesViewRenderer editRenderer = newRenderer(editView, null, cb, lb);
 		editRenderer.renderView(null, null);
 		editRenderer.getCurrentContainers().push(editView);
-		TestVueListGridBuilder.lastScript = null;
+		TestVueListGridBuilder.lastStickyHeaderAnchorSelector = FacesViewRenderer.DEFAULT_STICKY_HEADER_ANCHOR_SELECTOR;
 		editRenderer.renderListGrid(null, false, grid);
 
-		assertNull(TestVueListGridBuilder.lastScript.getAttributes().get("stickyHeader"));
-		assertNull(TestVueListGridBuilder.lastScript.getAttributes().get("stickyTopAt"));
+		assertNull(TestVueListGridBuilder.lastStickyHeaderAnchorSelector);
 	}
 
 	@Test

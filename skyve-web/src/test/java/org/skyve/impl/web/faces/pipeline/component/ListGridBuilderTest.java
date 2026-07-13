@@ -1,6 +1,5 @@
 package org.skyve.impl.web.faces.pipeline.component;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.mock;
@@ -15,13 +14,11 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.primefaces.component.column.Column;
 import org.primefaces.component.datatable.DataTable;
-import org.skyve.impl.web.faces.components.VueListGridScript;
 
 import jakarta.el.ELContext;
 import jakarta.el.ExpressionFactory;
 import jakarta.faces.application.Application;
 import jakarta.faces.component.UIComponent;
-import jakarta.faces.component.html.HtmlPanelGroup;
 import jakarta.faces.context.FacesContext;
 
 class ListGridBuilderTest {
@@ -55,7 +52,7 @@ class ListGridBuilderTest {
 	@SuppressWarnings("static-method")
 	void paginatedListGridBuilderNullComponentReturnsNull() {
 		PaginatedListGridBuilder builder = new PaginatedListGridBuilder();
-		UIComponent result = builder.listGrid(null, "mod", "doc", "model", "uxui", null, null, null, false);
+		UIComponent result = builder.listGrid(null, "mod", "doc", "model", "uxui", null, null, null, null, false);
 		assertNull(result);
 	}
 
@@ -64,7 +61,7 @@ class ListGridBuilderTest {
 	void paginatedListGridBuilderWithDataTableSetsPaginator() {
 		PaginatedListGridBuilder builder = new PaginatedListGridBuilder();
 		DataTable dataTable = mock(DataTable.class);
-		UIComponent result = builder.listGrid(dataTable, "mod", "doc", "model", "uxui", null, null, null, false);
+		UIComponent result = builder.listGrid(dataTable, "mod", "doc", "model", "uxui", null, null, null, null, false);
 		assertSame(dataTable, result);
 		verify(dataTable).setPaginator(true);
 		verify(dataTable).setRowsPerPageTemplate("25,50,75,100");
@@ -77,7 +74,7 @@ class ListGridBuilderTest {
 	@SuppressWarnings("static-method")
 	void unsortableListGridBuilderNullComponentReturnsNull() {
 		UnsortableListGridBuilder builder = new UnsortableListGridBuilder();
-		UIComponent result = builder.listGrid(null, "mod", "doc", "model", "uxui", null, null, null, false);
+		UIComponent result = builder.listGrid(null, "mod", "doc", "model", "uxui", null, null, null, null, false);
 		assertNull(result);
 	}
 
@@ -93,7 +90,7 @@ class ListGridBuilderTest {
 		children.add(col2);
 		when(dataTable.getChildren()).thenReturn(children);
 
-		UIComponent result = builder.listGrid(dataTable, "mod", "doc", "model", "uxui", null, null, null, false);
+		UIComponent result = builder.listGrid(dataTable, "mod", "doc", "model", "uxui", null, null, null, null, false);
 		assertSame(dataTable, result);
 		verify(col1).setSortable(false);
 		verify(col2).setSortable(false);
@@ -105,7 +102,7 @@ class ListGridBuilderTest {
 	@SuppressWarnings("static-method")
 	void unfilterableListGridBuilderNullComponentReturnsNull() {
 		UnfilterableListGridBuilder builder = new UnfilterableListGridBuilder();
-		UIComponent result = builder.listGrid(null, "mod", "doc", "model", "uxui", null, null, null, false);
+		UIComponent result = builder.listGrid(null, "mod", "doc", "model", "uxui", null, null, null, null, false);
 		assertNull(result);
 	}
 
@@ -119,75 +116,9 @@ class ListGridBuilderTest {
 		children.add(col);
 		when(dataTable.getChildren()).thenReturn(children);
 
-		UIComponent result = builder.listGrid(dataTable, "mod", "doc", "model", "uxui", null, null, null, false);
+		UIComponent result = builder.listGrid(dataTable, "mod", "doc", "model", "uxui", null, null, null, null, false);
 		assertSame(dataTable, result);
 		verify(col).setFilterable(false);
 	}
 
-	// ---- StickyHeaderListBuilder ----
-
-	@Test
-	@SuppressWarnings("static-method")
-	void stickyHeaderListBuilderNullComponentReturnsNull() {
-		StickyHeaderListBuilder builder = new StickyHeaderListBuilder();
-		UIComponent result = builder.listGrid(null, "mod", "doc", "model", "uxui", null, null, null, false);
-		assertNull(result);
-	}
-
-	@Test
-	@SuppressWarnings("static-method")
-	void stickyHeaderListBuilderWithDataTableSetsStickyHeader() {
-		StickyHeaderListBuilder builder = new StickyHeaderListBuilder();
-		DataTable dataTable = mock(DataTable.class);
-
-		UIComponent result = builder.listGrid(dataTable, "mod", "doc", "model", "uxui", null, null, null, false);
-		assertSame(dataTable, result);
-		verify(dataTable).setStickyHeader(true);
-		verify(dataTable).setStickyTopAt(".layout-topbar,#header");
-	}
-
-	@Test
-	@SuppressWarnings("static-method")
-	void stickyHeaderListBuilderIgnoresNonDataTableComponent() {
-		StickyHeaderListBuilder builder = new StickyHeaderListBuilder();
-		UIComponent component = mock(UIComponent.class);
-
-		UIComponent result = builder.listGrid(component, "mod", "doc", "model", "uxui", null, null, null, false);
-		assertSame(component, result);
-	}
-
-	@Test
-	@SuppressWarnings("static-method")
-	void stickyHeaderListBuilderSetsNestedVueListGridScript() {
-		StickyHeaderListBuilder builder = new StickyHeaderListBuilder();
-		HtmlPanelGroup container = new HtmlPanelGroup();
-		VueListGridScript script = new VueListGridScript();
-		container.getChildren().add(script);
-
-		UIComponent result = builder.listGrid(container, "mod", "doc", "model", "uxui", null, null, null, false);
-
-		assertSame(container, result);
-		assertEquals(Boolean.TRUE, script.getAttributes().get("stickyHeader"));
-		assertEquals(".layout-topbar,#header", script.getAttributes().get("stickyTopAt"));
-	}
-
-	@Test
-	@SuppressWarnings("static-method")
-	void stickyHeaderListRepeaterNullComponentReturnsNull() {
-		StickyHeaderListBuilder builder = new StickyHeaderListBuilder();
-		UIComponent result = builder.listRepeater(null, "doc", "model", "uxui", null, null, null, true, true);
-		assertNull(result);
-	}
-
-	@Test
-	@SuppressWarnings("static-method")
-	void stickyHeaderListRepeaterWithDataTableSetsStickyHeader() {
-		StickyHeaderListBuilder builder = new StickyHeaderListBuilder();
-		DataTable dataTable = mock(DataTable.class);
-
-		UIComponent result = builder.listRepeater(dataTable, "doc", "model", "uxui", null, null, null, true, true);
-		assertSame(dataTable, result);
-		verify(dataTable).setStickyHeader(true);
-		verify(dataTable).setStickyTopAt(".layout-topbar,#header");
-	}
 }

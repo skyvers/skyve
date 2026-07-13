@@ -239,10 +239,10 @@
 			<type>java.lang.String</type>
 		</attribute>
 		<attribute>
-			<description>Indicates whether the list-grid header should stick below the page chrome.</description>
-			<name>stickyHeader</name>
+			<description>CSS selector that anchors the sticky list-grid header below the page chrome.</description>
+			<name>stickyHeaderAnchorSelector</name>
 			<required>false</required>
-			<type>java.lang.Boolean</type>
+			<type>java.lang.String</type>
 		</attribute>
 		<attribute>
 			<description>Boolean value to specify that each rendering of the listGrid will be from scratch - dynamically rendered each time.</description>

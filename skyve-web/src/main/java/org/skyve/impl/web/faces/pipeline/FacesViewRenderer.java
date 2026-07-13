@@ -150,9 +150,7 @@ import org.skyve.impl.web.faces.converters.timestamp.MM_DD_YYYY_HH24_MI_SS;
 import org.skyve.impl.web.faces.converters.timestamp.MM_DD_YYYY_HH_MI_SS;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder.EventSourceComponent;
-import org.skyve.impl.web.faces.pipeline.component.ComponentBuilderChain;
 import org.skyve.impl.web.faces.pipeline.component.EscapableText;
-import org.skyve.impl.web.faces.pipeline.component.StickyHeaderListBuilder;
 import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilder;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.Customisations;
@@ -184,6 +182,8 @@ import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.UIComponentBase;
 
 public class FacesViewRenderer extends ViewRenderer {
+	static final String DEFAULT_STICKY_HEADER_ANCHOR_SELECTOR = ".layout-topbar,#header";
+
 	private ComponentBuilder cb;
 	private LayoutBuilder lb;
 	private boolean createView;
@@ -1512,19 +1512,11 @@ public class FacesViewRenderer extends ViewRenderer {
 	 */
 	@Override
 	public void renderListGrid(String title, boolean aggregateQuery, ListGrid grid) {
+		ComponentBuilder componentBuilder = cb;
+
 		// Use the component builder specified by the listGrid property if it exists
 		String componentBuilderClass = grid.getProperties().get(ComponentBuilder.COMPONENT_BUILDER_CLASS_KEY);
-		final ComponentBuilder componentBuilder;
-		if (componentBuilderClass == null) {
-			// Only use sticky headers on list views by default
-			if (listView) {
-				componentBuilder = new ComponentBuilderChain(cb, new StickyHeaderListBuilder());
-			}
-			else {
-				componentBuilder = cb;
-			}
-		}
-		else {
+		if (componentBuilderClass != null) {
 			componentBuilder = org.skyve.impl.web.faces.components.ListGrid.newComponentBuilder(componentBuilderClass);
 	        componentBuilder.setManagedBeanName(cb.managedBeanName);
 	        componentBuilder.setSAILManagedBean(cb.managedBean);
@@ -1533,6 +1525,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	    	componentBuilder.setUserAgentType(cb.userAgentType);
 		}
 		
+		String stickyHeaderAnchorSelector = listView ? DEFAULT_STICKY_HEADER_ANCHOR_SELECTOR : null;
 		UIComponent component = componentBuilder.listGrid(null,
 															module.getName(),
 															getCurrentListWidgetModelDocumentName(),
@@ -1541,6 +1534,7 @@ public class FacesViewRenderer extends ViewRenderer {
 															getCurrentListWidgetModel(),
 															document,
 															grid,
+															stickyHeaderAnchorSelector,
 															aggregateQuery);
 
 		addToContainerWithPotentialBorder(component,

@@ -311,6 +311,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 * @param model list model instance
 	 * @param owningDocument owning document metadata
 	 * @param listGrid list-grid metadata definition
+	 * @param stickyHeaderAnchorSelector optional CSS selector anchoring the sticky header
 	 * @param aggregateQuery whether aggregate-query mode is active
 	 * @return the supplied component
 	 */
@@ -323,6 +324,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 									ListModel<Bean> model,
 									Document owningDocument,
 									ListGrid listGrid,
+									String stickyHeaderAnchorSelector,
 									boolean aggregateQuery) {
 		if (component != null) {
 			addedViewComponent = listGrid;

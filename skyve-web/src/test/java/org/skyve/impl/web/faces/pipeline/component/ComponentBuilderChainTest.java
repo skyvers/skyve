@@ -407,8 +407,8 @@ class ComponentBuilderChainTest {
 		Document doc = mock(Document.class);
 		ListGrid listGrid = mock(ListGrid.class);
 		UIComponent result = mock(UIComponent.class);
-		when(mockBuilder.listGrid(mockComponent, "mod", "modelDoc", "model", "uxui", model, doc, listGrid, false)).thenReturn(result);
-		assertSame(result, chain.listGrid(mockComponent, "mod", "modelDoc", "model", "uxui", model, doc, listGrid, false));
+		when(mockBuilder.listGrid(mockComponent, "mod", "modelDoc", "model", "uxui", model, doc, listGrid, "#header", false)).thenReturn(result);
+		assertSame(result, chain.listGrid(mockComponent, "mod", "modelDoc", "model", "uxui", model, doc, listGrid, "#header", false));
 	}
 
 	@Test

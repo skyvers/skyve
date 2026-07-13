@@ -43,7 +43,7 @@ class VueListGridScriptTest {
 		assertEquals(Boolean.TRUE, attributes.get("showFilter"));
 		assertEquals(Boolean.FALSE, attributes.get("showSummary"));
 		assertEquals(Boolean.TRUE, attributes.get("showSnap"));
-		assertEquals(Boolean.FALSE, attributes.get("stickyHeader"));
+		assertFalse(attributes.containsKey("stickyHeaderAnchorSelector"));
 		assertEquals("onSelected", attributes.get("selectedRemoteCommand"));
 
 		String asString = script.toString();
@@ -77,11 +77,11 @@ class VueListGridScriptTest {
 		assertFalse(attributes.containsKey("modelName"));
 		assertFalse(attributes.containsKey("contextId"));
 		assertFalse(attributes.containsKey("selectedRemoteCommand"));
-		assertFalse(attributes.containsKey("stickyTopAt"));
+		assertFalse(attributes.containsKey("stickyHeaderAnchorSelector"));
 	}
 
 	@Test
-	void stickyHeaderSetterStoresAttributesAndToStringRemainsUsable() {
+	void stickyHeaderAnchorSelectorConstructorStoresAttributesAndToStringRemainsUsable() {
 		VueListGridScript script = new VueListGridScript("container",
 				"admin",
 				"Invoice",
@@ -95,13 +95,11 @@ class VueListGridScriptTest {
 				false,
 				false,
 				false,
-				null);
-
-		script.setStickyHeader(true, ".layout-topbar,#header");
+				null,
+				".layout-topbar,#header");
 
 		Map<String, Object> attributes = script.getAttributes();
-		assertEquals(Boolean.TRUE, attributes.get("stickyHeader"));
-		assertEquals(".layout-topbar,#header", attributes.get("stickyTopAt"));
+		assertEquals(".layout-topbar,#header", attributes.get("stickyHeaderAnchorSelector"));
 		assertNotNull(script.toString());
 	}
 
@@ -122,8 +120,7 @@ class VueListGridScriptTest {
 		attributes.put("showFilter", Boolean.FALSE);
 		attributes.put("showSummary", Boolean.TRUE);
 		attributes.put("showSnap", Boolean.FALSE);
-		attributes.put("stickyHeader", Boolean.TRUE);
-		attributes.put("stickyTopAt", ".layout-topbar,#header");
+		attributes.put("stickyHeaderAnchorSelector", ".layout-topbar,#header");
 		attributes.put("selectedRemoteCommand", "onSelection");
 
 		Method grabAttributes = VueListGridScript.class.getDeclaredMethod("grabAttributes", Map.class);

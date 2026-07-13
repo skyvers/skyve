@@ -147,7 +147,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 			builder.setUserAgentType(userAgentType);
 		}
 	}
-	
+
 	/**
 	 * Delegates top-level view component decoration.
 	 *
@@ -903,6 +903,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param model list model
 	 * @param owningDocument owning document
 	 * @param listGrid list-grid metadata
+	 * @param stickyHeaderAnchorSelector optional CSS selector anchoring the sticky header
 	 * @param aggregateQuery whether aggregate query mode is enabled
 	 * @return the transformed component
 	 */
@@ -915,6 +916,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 									ListModel<Bean> model,
 									Document owningDocument,
 									ListGrid listGrid,
+									String stickyHeaderAnchorSelector,
 									boolean aggregateQuery) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
@@ -926,6 +928,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 										model,
 										owningDocument,
 										listGrid,
+										stickyHeaderAnchorSelector,
 										aggregateQuery);
 		}
 		return result;

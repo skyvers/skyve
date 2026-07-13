@@ -24,7 +24,7 @@
 			<ui:param name="resetMenu" value="false" />
 			<ui:param name="showSwitchMode" value="#{'phone' ne skyve.userAgentType and skyve.canSwitchMode}" />
 			<ui:param name="showLogout" value="true" />
-			<ui:param name="vue" value="true" />
+			<ui:param name="vue" value="false" />
 			<ui:define name="body">
 				<s:csrfForm managedBean="skyve">
 					<ui:include src="/WEB-INF/pages/includes/formFocusAndPush.xhtml">
@@ -35,8 +35,8 @@
 									query="#{skyve.queryNameParameter}"
 									model="#{skyve.modelName}"
 									managedBean="skyve"
-									componentBuilderClass="vue"
-									stickyHeader="true"
+									componentBuilderClass="faces"
+									stickyHeaderAnchorSelector=".layout-topbar,#header"
 									update="@form" />
 				</s:csrfForm>
 			</ui:define>

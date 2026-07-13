@@ -18,6 +18,7 @@ public class PaginatedListGridBuilder extends NoOpComponentBuilder {
 									ListModel<Bean> model,
 									Document owningDocument,
 									ListGrid listGrid,
+									String stickyHeaderAnchorSelector,
 									boolean aggregateQuery) {
 		if (component instanceof UIPageableData dt) {
 			dt.setPaginator(true);

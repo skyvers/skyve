@@ -67,7 +67,7 @@ class VueListGridComponentBuilderTest {
 		VueListGridComponentBuilder builder = new VueListGridComponentBuilder();
 		UIComponent existing = new HtmlPanelGroup();
 
-		assertSame(existing, builder.listGrid(existing, "sales", "Order", "recent", "desktop", null, null, null, false));
+		assertSame(existing, builder.listGrid(existing, "sales", "Order", "recent", "desktop", null, null, null, null, false));
 	}
 
 	@Test
@@ -94,7 +94,7 @@ class VueListGridComponentBuilderTest {
 		VueListGridComponentBuilder builder = new VueListGridComponentBuilder();
 		builder.setSAILManagedBean(facesView);
 
-		HtmlPanelGroup result = (HtmlPanelGroup) builder.listGrid(null, "sales", "Order", "recent", "desktop", model, null, grid, false);
+		HtmlPanelGroup result = (HtmlPanelGroup) builder.listGrid(null, "sales", "Order", "recent", "desktop", model, null, grid, "#header", false);
 
 		assertEquals("block", result.getLayout());
 		assertEquals("lg1", result.getId());
@@ -111,6 +111,7 @@ class VueListGridComponentBuilderTest {
 		assertFalse((Boolean) script.getAttributes().get("showFilter"));
 		assertTrue((Boolean) script.getAttributes().get("showSummary"));
 		assertFalse((Boolean) script.getAttributes().get("showSnap"));
+		assertEquals("#header", script.getAttributes().get("stickyHeaderAnchorSelector"));
 	}
 
 	@Test
@@ -133,7 +134,7 @@ class VueListGridComponentBuilderTest {
 		VueListGridComponentBuilder builder = new VueListGridComponentBuilder();
 		builder.setSAILManagedBean(facesView);
 
-		HtmlPanelGroup result = (HtmlPanelGroup) builder.listGrid(null, "sales", null, "ignoredModel", "desktop", model, null, grid, true);
+		HtmlPanelGroup result = (HtmlPanelGroup) builder.listGrid(null, "sales", null, "ignoredModel", "desktop", model, null, grid, null, true);
 
 		VueListGridScript script = (VueListGridScript) result.getChildren().get(0);
 		assertEquals("Contact", script.getAttributes().get("owningDocumentName"));
@@ -170,7 +171,7 @@ class VueListGridComponentBuilderTest {
 		VueListGridComponentBuilder builder = new VueListGridComponentBuilder();
 		builder.setSAILManagedBean(facesView);
 
-		HtmlPanelGroup result = (HtmlPanelGroup) builder.listGrid(null, "sales", "Order", "recent", "desktop", model, null, grid, false);
+		HtmlPanelGroup result = (HtmlPanelGroup) builder.listGrid(null, "sales", "Order", "recent", "desktop", model, null, grid, null, false);
 
 		assertEquals(2, result.getChildCount());
 		RemoteCommand command = (RemoteCommand) result.getChildren().get(0);

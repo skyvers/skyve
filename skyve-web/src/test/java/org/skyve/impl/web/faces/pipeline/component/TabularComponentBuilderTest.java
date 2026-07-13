@@ -844,6 +844,12 @@ class TabularComponentBuilderTest {
 
 	private static ListGridCallResult invokeListGrid(boolean canCreateDocument,
 											java.util.function.Consumer<ListGrid> gridConfigurer) {
+		return invokeListGrid(canCreateDocument, gridConfigurer, null);
+	}
+
+	private static ListGridCallResult invokeListGrid(boolean canCreateDocument,
+											java.util.function.Consumer<ListGrid> gridConfigurer,
+											String stickyHeaderAnchorSelector) {
 		CapturingListGridBuilder builder = new CapturingListGridBuilder();
 		DataTable dataTable = mock(DataTable.class);
 		UIOutput emptyMessage = mock(UIOutput.class);
@@ -895,7 +901,16 @@ class TabularComponentBuilderTest {
 		UIComponent callResult;
 		try {
 			persistence.setForThread();
-			callResult = builder.listGrid(null, "sales", "Order", "recentOrders", "desktop", model, null, grid, false);
+			callResult = builder.listGrid(null,
+											"sales",
+											"Order",
+											"recentOrders",
+											"desktop",
+											model,
+											null,
+											grid,
+											stickyHeaderAnchorSelector,
+											false);
 		}
 		finally {
 			restorePersistence(previousPersistence);
@@ -3438,6 +3453,15 @@ class TabularComponentBuilderTest {
 		verify(r.dataTable).setFilterDelay(500);
 		verify(r.dataTable).setValueExpression("value", r.modelExpression);
 		verify(r.emptyMessage).setValue(TabularComponentBuilder.EMPTY_DATA_TABLE_CAN_ADD_MESSAGE);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testListGridConfiguresStickyHeaderFromBuilderSelector() {
+		ListGridCallResult r = invokeListGrid(true, grid -> grid.setShowZoom(Boolean.FALSE), "#header");
+
+		verify(r.dataTable).setStickyHeader(true);
+		verify(r.dataTable).setStickyTopAt("#header");
 	}
 
 	@SuppressWarnings("static-method")

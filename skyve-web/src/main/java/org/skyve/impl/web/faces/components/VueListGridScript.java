@@ -58,8 +58,7 @@ public class VueListGridScript extends UIOutput {
 	private Boolean showFilter;
 	private Boolean showSummary;
 	private Boolean showSnap;
-	private Boolean stickyHeader;
-	private String stickyTopAt;
+	private String stickyHeaderAnchorSelector;
 	
 	private String selectedRemoteCommand;
 	
@@ -117,7 +116,6 @@ public class VueListGridScript extends UIOutput {
 				showSummary,
 				showSnap,
 				selectedRemoteCommand,
-				false,
 				null);
 	}
 
@@ -138,8 +136,7 @@ public class VueListGridScript extends UIOutput {
 	 * @param showSummary whether summary controls are visible
 	 * @param showSnap whether snap controls are visible
 	 * @param selectedRemoteCommand the optional remote command for selected row callbacks
-	 * @param stickyHeader whether the Vue DataTable header should stick under the page chrome
-	 * @param stickyTopAt optional selector used to calculate the sticky top offset
+	 * @param stickyHeaderAnchorSelector optional selector used to anchor the sticky header
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public VueListGridScript(String containerId,
@@ -156,8 +153,7 @@ public class VueListGridScript extends UIOutput {
 								boolean showSummary,
 								boolean showSnap,
 								String selectedRemoteCommand,
-								boolean stickyHeader,
-								String stickyTopAt) {
+								String stickyHeaderAnchorSelector) {
 		Map<String, Object> attributes = getAttributes();
 
 		this.containerId = containerId;
@@ -201,25 +197,9 @@ public class VueListGridScript extends UIOutput {
 			attributes.put("selectedRemoteCommand", selectedRemoteCommand);
 		}
 
-		setStickyHeader(stickyHeader, stickyTopAt);
-	}
-
-	/**
-	 * Configures viewport sticky table headers for Vue list grids.
-	 *
-	 * @param stickyHeader whether sticky headers are enabled
-	 * @param stickyTopAt optional selector used by the Vue component to calculate the top offset
-	 */
-	public void setStickyHeader(boolean stickyHeader, String stickyTopAt) {
-		Map<String, Object> attributes = getAttributes();
-		this.stickyHeader = Boolean.valueOf(stickyHeader);
-		attributes.put("stickyHeader", this.stickyHeader);
-		this.stickyTopAt = stickyTopAt;
-		if (stickyTopAt == null) {
-			attributes.remove("stickyTopAt");
-		}
-		else {
-			attributes.put("stickyTopAt", stickyTopAt);
+		this.stickyHeaderAnchorSelector = stickyHeaderAnchorSelector;
+		if (stickyHeaderAnchorSelector != null) {
+			attributes.put("stickyHeaderAnchorSelector", stickyHeaderAnchorSelector);
 		}
 	}
 
@@ -262,8 +242,7 @@ public class VueListGridScript extends UIOutput {
 		this.showFilter = (Boolean) attributes.get("showFilter");
 		this.showSummary = (Boolean) attributes.get("showSummary");
 		this.showSnap = (Boolean) attributes.get("showSnap");
-		this.stickyHeader = (Boolean) attributes.get("stickyHeader");
-		this.stickyTopAt = (String) attributes.get("stickyTopAt");
+		this.stickyHeaderAnchorSelector = (String) attributes.get("stickyHeaderAnchorSelector");
 		
 		this.selectedRemoteCommand = (String) attributes.get("selectedRemoteCommand");
 	}
@@ -295,11 +274,8 @@ public class VueListGridScript extends UIOutput {
 		params.put("showFilter", showFilter);
 		params.put("showSummary", showSummary);
 		params.put("showSnap", showSnap);
-		if (Boolean.TRUE.equals(stickyHeader)) {
-			params.put("stickyHeader", stickyHeader);
-			if (stickyTopAt != null) {
-				params.put("stickyTopAt", stickyTopAt);
-			}
+		if (stickyHeaderAnchorSelector != null) {
+			params.put("stickyHeaderAnchorSelector", stickyHeaderAnchorSelector);
 		}
 
 		if (selectedRemoteCommand != null) {

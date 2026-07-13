@@ -144,7 +144,7 @@ class PrimeFacesAutomationContextTest {
 		UIComponent addedListGrid = new TestComponent("addedListGrid");
 		org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid listGrid = new org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid();
 
-		componentBuilder.listGrid(generatedListGrid, "sales", "Customer", "customers", "desktop", null, null, listGrid, false);
+		componentBuilder.listGrid(generatedListGrid, "sales", "Customer", "customers", "desktop", null, null, listGrid, null, false);
 
 		assertSame(generatedListGrid, componentBuilder.listGrid(generatedListGrid,
 																"sales",
@@ -152,9 +152,10 @@ class PrimeFacesAutomationContextTest {
 																"customers",
 																"desktop",
 																null,
-																null,
-																listGrid,
-																false));
+														null,
+														listGrid,
+														null,
+														false));
 		assertNull(context.getFacesComponents("sales.customers"));
 		assertNull(layoutBuilder.addToContainer(null, null, null, addedListGrid, null, null, null, null, null, null, null, null));
 

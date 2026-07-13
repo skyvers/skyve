@@ -635,6 +635,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param model the resolved list model
 	 * @param owningDocument the owning document definition
 	 * @param listGrid the list-grid metadata
+	 * @param stickyHeaderAnchorSelector optional CSS selector anchoring the sticky header
 	 * @param aggregateQuery whether the model uses aggregate query semantics
 	 * @return the resulting list-grid component
 	 */
@@ -647,6 +648,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 											ListModel<Bean> model,
 											Document owningDocument,
 											ListGrid listGrid,
+											@Nullable String stickyHeaderAnchorSelector,
 											boolean aggregateQuery);
 
 	/**

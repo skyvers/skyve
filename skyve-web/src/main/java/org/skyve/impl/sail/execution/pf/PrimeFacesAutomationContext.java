@@ -61,6 +61,7 @@ public class PrimeFacesAutomationContext extends AutomationContext<PrimeFacesGen
 				Boolean.TRUE,
 				false,
 				Boolean.TRUE,
+				null,
 				cbc);
 	}
 

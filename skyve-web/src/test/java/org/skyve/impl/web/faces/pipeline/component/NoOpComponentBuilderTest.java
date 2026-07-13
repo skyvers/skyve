@@ -258,7 +258,7 @@ class NoOpComponentBuilderTest {
 
 	@Test
 	void listGridReturnsInputComponent() {
-		assertSame(component, builder.listGrid(component, "module", "docName", "model", "uxui", mock(ListModel.class), mock(Document.class), new ListGrid(), false));
+		assertSame(component, builder.listGrid(component, "module", "docName", "model", "uxui", mock(ListModel.class), mock(Document.class), new ListGrid(), null, false));
 	}
 
 	@Test

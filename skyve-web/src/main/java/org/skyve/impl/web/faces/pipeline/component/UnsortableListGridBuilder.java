@@ -18,6 +18,7 @@ public class UnsortableListGridBuilder extends NoOpComponentBuilder {
 									ListModel<Bean> model,
 									Document owningDocument,
 									ListGrid listGrid,
+									String stickyHeaderAnchorSelector,
 									boolean aggregateQuery) {
 		if (component != null) {
 			for (UIComponent child : component.getChildren()) {

@@ -115,13 +115,9 @@ export default {
             type: Boolean,
             default: true
         },
-        stickyHeader: {
-            type: Boolean,
-            default: false
-        },
-        stickyTopAt: {
+        stickyHeaderAnchorSelector: {
             type: String,
-            default: '.layout-topbar,#header'
+            default: null
         }
     },
     data() {
@@ -395,7 +391,7 @@ export default {
             };
         },
         stickyHeaderStyle() {
-            if (!this.stickyHeader) {
+            if (!this.stickyHeaderAnchorSelector) {
                 return {};
             }
 
@@ -623,20 +619,18 @@ export default {
             });
         },
         calculateStickyHeaderTop() {
-            if (!this.stickyHeader) {
+            if (!this.stickyHeaderAnchorSelector) {
                 return;
             }
 
             let top = 0;
-            if (this.stickyTopAt) {
-                for (const element of document.querySelectorAll(this.stickyTopAt)) {
-                    top += element.getBoundingClientRect().height;
-                }
+            for (const element of document.querySelectorAll(this.stickyHeaderAnchorSelector)) {
+                top += element.getBoundingClientRect().height;
             }
             this.stickyHeaderTop = top;
         },
         scheduleStickyHeaderRefresh() {
-            if (!this.stickyHeader) {
+            if (!this.stickyHeaderAnchorSelector) {
                 return;
             }
 
@@ -658,7 +652,7 @@ export default {
         this.initFilters();
     },
     mounted() {
-        if (this.stickyHeader) {
+        if (this.stickyHeaderAnchorSelector) {
             this.scheduleStickyHeaderRefresh();
             window.addEventListener('resize', this.scheduleStickyHeaderRefresh);
             window.addEventListener('orientationchange', this.scheduleStickyHeaderRefresh);
@@ -727,7 +721,7 @@ export default {
     </Dialog>
 
     <div
-        :class="{ 'skyve-vue-list-grid-sticky': stickyHeader }"
+        :class="{ 'skyve-vue-list-grid-sticky': stickyHeaderAnchorSelector }"
         :style="stickyHeaderStyle"
     >
         <DataTable

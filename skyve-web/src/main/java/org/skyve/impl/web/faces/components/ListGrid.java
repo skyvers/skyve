@@ -17,7 +17,6 @@ import org.skyve.impl.web.faces.pipeline.component.ComponentBuilderChain;
 import org.skyve.impl.web.faces.pipeline.component.ComponentRenderer;
 import org.skyve.impl.web.faces.pipeline.component.DeviceResponsiveComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.component.PaginatedListGridBuilder;
-import org.skyve.impl.web.faces.pipeline.component.StickyHeaderListBuilder;
 import org.skyve.impl.web.faces.pipeline.component.VueListGridComponentBuilder;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -78,8 +77,8 @@ public class ListGrid extends HtmlPanelGroup {
 			Object filterRenderedAttribute = attributes.get("filterRendered");
 			final Boolean filterRendered = getBooleanObjectAttribute(filterRenderedAttribute);
 			final String componentBuilderClassString = (String) attributes.get("componentBuilderClass");
-			final boolean stickyHeader = getBooleanAttribute(attributes.get("stickyHeader"));
-			final ComponentBuilder componentBuilder = newComponentBuilder(componentBuilderClassString, stickyHeader);
+			final String stickyHeaderAnchorSelector = (String) attributes.get("stickyHeaderAnchorSelector");
+			final ComponentBuilder componentBuilder = newComponentBuilder(componentBuilderClassString);
 
 			new FacesAction<Void>() {
 				@Override
@@ -99,6 +98,7 @@ public class ListGrid extends HtmlPanelGroup {
 																		zoomRendered,
 																		zoomDisabled,
 																		filterRendered,
+																		stickyHeaderAnchorSelector,
 																		componentBuilder);
 					ListGrid.this.getChildren().addAll(components);
 					
@@ -127,6 +127,7 @@ public class ListGrid extends HtmlPanelGroup {
 	 * @param zoomRendered whether the zoom action is rendered
 	 * @param zoomDisabled whether the zoom action is disabled
 	 * @param filterRendered whether the filter action is rendered
+	 * @param stickyHeaderAnchorSelector optional CSS selector anchoring the sticky header
 	 * @param componentBuilder the builder used to generate the list grid components
 	 * @return the generated component list, typically containing the grid and optional context menu
 	 */
@@ -141,6 +142,7 @@ public class ListGrid extends HtmlPanelGroup {
 												@Nullable Boolean zoomRendered,
 												boolean zoomDisabled,
 												@Nullable Boolean filterRendered,
+												@Nullable String stickyHeaderAnchorSelector,
 												@Nonnull ComponentBuilder componentBuilder) {
 		ListModel<Bean> model = null;
 		org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid listGrid = new org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid();
@@ -186,6 +188,7 @@ public class ListGrid extends HtmlPanelGroup {
 														model,
 														null,
 														listGrid,
+														stickyHeaderAnchorSelector,
 														aggregateQuery);
 		result.add(grid);
 		if ((! aggregateQuery) && (! Boolean.FALSE.equals(zoomRendered))) {
@@ -202,18 +205,6 @@ public class ListGrid extends HtmlPanelGroup {
 	 * @throws DomainException if the builder cannot be created
 	 */
 	public static ComponentBuilder newComponentBuilder(@Nullable String componentBuilderClassString) {
-		return newComponentBuilder(componentBuilderClassString, false);
-	}
-
-	/**
-	 * Instantiates a component builder and optionally decorates list grids with sticky headers.
-	 *
-	 * @param componentBuilderClassString the optional alias or class name
-	 * @param stickyHeader whether list-grid headers should stick below the page chrome
-	 * @return the instantiated component builder
-	 * @throws DomainException if the builder cannot be created
-	 */
-	public static ComponentBuilder newComponentBuilder(@Nullable String componentBuilderClassString, boolean stickyHeader) {
 		try {
 			ComponentBuilder result = null;
 			if (componentBuilderClassString == null) {
@@ -230,9 +221,6 @@ public class ListGrid extends HtmlPanelGroup {
 			else {
 				Class<?> type = Thread.currentThread().getContextClassLoader().loadClass(componentBuilderClassString);
 				result = (ComponentBuilder) type.getDeclaredConstructor().newInstance();
-			}
-			if (stickyHeader) {
-				result = new ComponentBuilderChain(result, new StickyHeaderListBuilder());
 			}
 			return result;
 		}

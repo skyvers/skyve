@@ -34,6 +34,7 @@ public class VueListGridComponentBuilder extends NoOpComponentBuilder {
 									ListModel<Bean> model,
 									Document owningDocument,
 									ListGrid grid,
+									String stickyHeaderAnchorSelector,
 									boolean aggregateQuery) {
 		if (component != null) {
 			return component;
@@ -119,7 +120,8 @@ public class VueListGridComponentBuilder extends NoOpComponentBuilder {
 															showFilter,
 															showSummary,
 															showSnap,
-															selectedRemoteCommand);
+															selectedRemoteCommand,
+															stickyHeaderAnchorSelector);
 		children.add(script);
 
 		return result;
