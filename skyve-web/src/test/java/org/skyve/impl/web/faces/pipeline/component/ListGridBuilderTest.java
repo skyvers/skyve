@@ -140,6 +140,17 @@ class ListGridBuilderTest {
 		UIComponent result = builder.listGrid(dataTable, "mod", "doc", "model", "uxui", null, null, null, false);
 		assertSame(dataTable, result);
 		verify(dataTable).setStickyHeader(true);
+		verify(dataTable).setStickyTopAt(".layout-topbar,#header");
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void stickyHeaderListBuilderIgnoresNonDataTableComponent() {
+		StickyHeaderListBuilder builder = new StickyHeaderListBuilder();
+		UIComponent component = mock(UIComponent.class);
+
+		UIComponent result = builder.listGrid(component, "mod", "doc", "model", "uxui", null, null, null, false);
+		assertSame(component, result);
 	}
 
 	@Test
@@ -159,6 +170,6 @@ class ListGridBuilderTest {
 		UIComponent result = builder.listRepeater(dataTable, "doc", "model", "uxui", null, null, null, true, true);
 		assertSame(dataTable, result);
 		verify(dataTable).setStickyHeader(true);
+		verify(dataTable).setStickyTopAt(".layout-topbar,#header");
 	}
 }
-

@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+import org.primefaces.component.datatable.DataTable;
 import org.primefaces.component.picklist.PickList;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -151,6 +152,73 @@ class FacesViewRendererTest {
 
 		verify(cb).view(null, true);
 		assertSame(root, renderer.getFacesView());
+	}
+
+	@Test
+	void renderListGridAppliesStickyHeaderForListViewsOnly() {
+		UIComponent root = new TestComponent("root");
+		DataTable dataTable = mock(DataTable.class);
+		ComponentBuilder cb = mock(ComponentBuilder.class);
+		LayoutBuilder lb = mock(LayoutBuilder.class);
+		ViewImpl view = createView(null);
+		view.setName(ViewType.list.toString());
+		ListGrid grid = new ListGrid();
+		grid.setShowZoom(Boolean.FALSE);
+
+		when(cb.view(null, false)).thenReturn(root);
+		when(lb.toolbarLayouts(null)).thenReturn(new ArrayList<>());
+		when(lb.viewLayout(null)).thenReturn(null);
+		when(cb.listGrid(isNull(),
+							eq("testModule"),
+							isNull(),
+							isNull(),
+							eq("external"),
+							isNull(),
+							any(),
+							same(grid),
+							eq(false))).thenReturn(dataTable);
+		when(lb.addToContainer(any(), any(), any(), same(dataTable), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(root);
+
+		FacesViewRenderer renderer = newRenderer(view, null, cb, lb);
+		renderer.renderView(null, null);
+		renderer.getCurrentContainers().push(view);
+		renderer.renderListGrid(null, false, grid);
+
+		verify(dataTable).setStickyHeader(true);
+		verify(dataTable).setStickyTopAt(".layout-topbar,#header");
+	}
+
+	@Test
+	void renderListGridLeavesEditViewListGridsNonSticky() {
+		UIComponent root = new TestComponent("root");
+		DataTable dataTable = mock(DataTable.class);
+		ComponentBuilder cb = mock(ComponentBuilder.class);
+		LayoutBuilder lb = mock(LayoutBuilder.class);
+		ViewImpl view = createView(null);
+		ListGrid grid = new ListGrid();
+		grid.setShowZoom(Boolean.FALSE);
+
+		when(cb.view(null, false)).thenReturn(root);
+		when(lb.toolbarLayouts(null)).thenReturn(new ArrayList<>());
+		when(lb.viewLayout(null)).thenReturn(null);
+		when(cb.listGrid(isNull(),
+							eq("testModule"),
+							isNull(),
+							isNull(),
+							eq("external"),
+							isNull(),
+							any(),
+							same(grid),
+							eq(false))).thenReturn(dataTable);
+		when(lb.addToContainer(any(), any(), any(), same(dataTable), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(root);
+
+		FacesViewRenderer renderer = newRenderer(view, null, cb, lb);
+		renderer.renderView(null, null);
+		renderer.getCurrentContainers().push(view);
+		renderer.renderListGrid(null, false, grid);
+
+		verify(dataTable, never()).setStickyHeader(true);
+		verify(dataTable, never()).setStickyTopAt(".layout-topbar,#header");
 	}
 
 	@Test

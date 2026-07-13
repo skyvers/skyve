@@ -150,7 +150,9 @@ import org.skyve.impl.web.faces.converters.timestamp.MM_DD_YYYY_HH24_MI_SS;
 import org.skyve.impl.web.faces.converters.timestamp.MM_DD_YYYY_HH_MI_SS;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder.EventSourceComponent;
+import org.skyve.impl.web.faces.pipeline.component.ComponentBuilderChain;
 import org.skyve.impl.web.faces.pipeline.component.EscapableText;
+import org.skyve.impl.web.faces.pipeline.component.StickyHeaderListBuilder;
 import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilder;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.Customisations;
@@ -185,6 +187,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	private ComponentBuilder cb;
 	private LayoutBuilder lb;
 	private boolean createView;
+	private boolean listView;
 	private String widgetId;
 	private UIComponent fragment; // if we have a widgetId to render, this holds a reference to that component
 
@@ -220,6 +223,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		super(user, module, document, view, uxui);
 		String viewName = view.getName();
 		createView = ViewType.create.toString().equals(viewName);
+		listView = ViewType.list.toString().equals(viewName);
 		this.widgetId = widgetId;
 		this.cb = cb;
 		this.lb = lb;
@@ -1510,8 +1514,17 @@ public class FacesViewRenderer extends ViewRenderer {
 	public void renderListGrid(String title, boolean aggregateQuery, ListGrid grid) {
 		// Use the component builder specified by the listGrid property if it exists
 		String componentBuilderClass = grid.getProperties().get(ComponentBuilder.COMPONENT_BUILDER_CLASS_KEY);
-		ComponentBuilder componentBuilder = cb;
-		if (componentBuilderClass != null) {
+		final ComponentBuilder componentBuilder;
+		if (componentBuilderClass == null) {
+			// Only use sticky headers on list views by default
+			if (listView) {
+				componentBuilder = new ComponentBuilderChain(cb, new StickyHeaderListBuilder());
+			}
+			else {
+				componentBuilder = cb;
+			}
+		}
+		else {
 			componentBuilder = org.skyve.impl.web.faces.components.ListGrid.newComponentBuilder(componentBuilderClass);
 	        componentBuilder.setManagedBeanName(cb.managedBeanName);
 	        componentBuilder.setSAILManagedBean(cb.managedBean);

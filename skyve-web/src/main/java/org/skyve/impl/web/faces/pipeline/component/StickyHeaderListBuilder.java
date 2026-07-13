@@ -13,6 +13,8 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 import jakarta.faces.component.UIComponent;
 
 public class StickyHeaderListBuilder extends NoOpComponentBuilder {
+	private static final String STICKY_TOP_AT = ".layout-topbar,#header";
+
 	@Override
 	public UIComponent listGrid(UIComponent component,
 									String moduleName,
@@ -23,8 +25,9 @@ public class StickyHeaderListBuilder extends NoOpComponentBuilder {
 									Document owningDocument,
 									ListGrid listGrid,
 									boolean aggregateQuery) {
-		if (component != null) {
-			((DataTable) component).setStickyHeader(true);
+		if (component instanceof DataTable dataTable) {
+			dataTable.setStickyHeader(true);
+			dataTable.setStickyTopAt(STICKY_TOP_AT);
 		}
 		return component;
 	}
@@ -39,8 +42,9 @@ public class StickyHeaderListBuilder extends NoOpComponentBuilder {
 										List<Parameter> parameters,
 										boolean showColumnHeaders,
 										boolean showGrid) {
-		if (component != null) {
-			((DataTable) component).setStickyHeader(true);
+		if (component instanceof DataTable dataTable) {
+			dataTable.setStickyHeader(true);
+			dataTable.setStickyTopAt(STICKY_TOP_AT);
 		}
 		return component;
 	}

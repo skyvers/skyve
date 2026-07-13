@@ -252,6 +252,7 @@ public class ComponentRenderer {
 			putValue(attributes, "emptyMessage", table.getEmptyMessage());
 			if (table.isStickyHeader()) {
 				putValue(attributes, "stickyHeader", Boolean.TRUE);
+				putValue(attributes, "stickyTopAt", table.getStickyTopAt());
 			}
 			if ("multiple".equals(table.getSortMode())) {
 				putValue(attributes, "sortMode", "multiple");

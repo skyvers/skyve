@@ -54,6 +54,142 @@ SKYVE.PF = function() {
 		return widget && widget.jq ? widget.jq[0] : null;
 	};
 
+
+	// Start of sticky header fixes
+	// - keep filter inputs enabled
+	// arrange across ultima/ecuador and editorial
+	
+	var dispatchWindowScroll = function() {
+		if (typeof window.Event === 'function') {
+			window.dispatchEvent(new Event('scroll'));
+		}
+		else {
+			$(window).trigger('scroll');
+		}
+	};
+
+	var alignStickyDataTableHeader = function(dataTable) {
+		if ((! dataTable) || (! dataTable.jq) || (! dataTable.stickyContainer)) {
+			return;
+		}
+
+		var sourceTable = dataTable.jq.children('.ui-datatable-tablewrapper').children('table');
+		if (sourceTable.length === 0) {
+			sourceTable = dataTable.jq.find('> .ui-datatable-tablewrapper table').first();
+		}
+		if (sourceTable.length === 0) {
+			return;
+		}
+
+		var offset = sourceTable.offset();
+		if (! offset) {
+			return;
+		}
+
+		var width = sourceTable.outerWidth();
+		dataTable.stickyContainer.css({
+			left: offset.left + 'px',
+			width: width + 'px'
+		});
+		dataTable.stickyContainer.children('table').css('width', width + 'px');
+	};
+
+	var refreshStickyDataTableHeader = function(dataTable) {
+		alignStickyDataTableHeader(dataTable);
+		dispatchWindowScroll();
+		alignStickyDataTableHeader(dataTable);
+	};
+
+	var debounceStickyDataTableHeaderRefresh = function(dataTable, delay) {
+		if (! dataTable) {
+			return;
+		}
+		if (dataTable.skyveStickyRefreshTimeout) {
+			window.clearTimeout(dataTable.skyveStickyRefreshTimeout);
+		}
+		dataTable.skyveStickyRefreshTimeout = window.setTimeout(function() {
+			dataTable.skyveStickyRefreshTimeout = null;
+			refreshStickyDataTableHeader(dataTable);
+		}, delay);
+	};
+
+	var scheduleStickyDataTableHeaderRefresh = function(dataTable) {
+		refreshStickyDataTableHeader(dataTable);
+		window.setTimeout(function() {
+			refreshStickyDataTableHeader(dataTable);
+		}, 0);
+		window.setTimeout(function() {
+			refreshStickyDataTableHeader(dataTable);
+		}, 50);
+		window.setTimeout(function() {
+			refreshStickyDataTableHeader(dataTable);
+		}, 250);
+	};
+
+	var bindStickyDataTableHeaderRefresh = function(dataTable) {
+		if ((! dataTable) || dataTable.skyveStickyResizePatch) {
+			return;
+		}
+
+		var namespace = '.skyveStickyHeader-' + dataTable.id.replace(/\W/g, '_');
+		var refresh = function() {
+			refreshStickyDataTableHeader(dataTable);
+			debounceStickyDataTableHeaderRefresh(dataTable, 80);
+			window.setTimeout(function() {
+				refreshStickyDataTableHeader(dataTable);
+			}, 250);
+		};
+
+		$(window).on('resize' + namespace + ' orientationchange' + namespace, refresh);
+		$(document).on('click' + namespace, '.layout-menu-button,.menu-button,#topbar-menu-button', function() {
+			refreshStickyDataTableHeader(dataTable);
+			window.setTimeout(function() {
+				refreshStickyDataTableHeader(dataTable);
+			}, 250);
+		});
+
+		dataTable.addDestroyListener(function() {
+			if (dataTable.skyveStickyRefreshTimeout) {
+				window.clearTimeout(dataTable.skyveStickyRefreshTimeout);
+				dataTable.skyveStickyRefreshTimeout = null;
+			}
+			$(window).off(namespace);
+			$(document).off(namespace);
+		});
+		dataTable.skyveStickyResizePatch = true;
+	};
+
+	var patchPrimeFacesStickyDataTableFilters = function() {
+		var dataTablePrototype = window.PrimeFaces &&
+									PrimeFaces.widget &&
+									PrimeFaces.widget.DataTable &&
+									PrimeFaces.widget.DataTable.prototype;
+		if ((! dataTablePrototype) || dataTablePrototype.skyveStickyFilterPatch) {
+			return;
+		}
+
+		var setupStickyHeader = dataTablePrototype.setupStickyHeader;
+		if (typeof setupStickyHeader !== 'function') {
+			return;
+		}
+
+		dataTablePrototype.setupStickyHeader = function() {
+			setupStickyHeader.apply(this, arguments);
+
+			// PrimeFaces keeps the enabled filter controls in the sticky header and disables
+			// the cloned table header filters. Triggering the sticky scroll handler immediately
+			// keeps the enabled header layered over the disabled clone before the user scrolls.
+			bindStickyDataTableHeaderRefresh(this);
+			scheduleStickyDataTableHeaderRefresh(this);
+		};
+		dataTablePrototype.skyveStickyFilterPatch = true;
+	};
+
+	patchPrimeFacesStickyDataTableFilters();
+	$(patchPrimeFacesStickyDataTableFilters);
+
+	// end of sticky header fixes
+	
 	var prepareMorph = function(source, target, options) {
 		var sourceElement = getElement(source);
 		var targetElement = getElement(target);
@@ -712,6 +848,7 @@ SKYVE.PF = function() {
 				};
 				dataTable.find('.ui-filter-column').each(toggleClass);
 				dataTable.find('.ui-column-customfilter').each(toggleClass);
+				dispatchWindowScroll();
 			}
 		},
 		

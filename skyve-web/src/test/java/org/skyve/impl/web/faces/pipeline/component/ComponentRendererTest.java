@@ -352,6 +352,7 @@ class ComponentRendererTest {
 		when(table.isLazy()).thenReturn(true);
 		when(table.getEmptyMessage()).thenReturn("No records");
 		when(table.isStickyHeader()).thenReturn(true);
+		when(table.getStickyTopAt()).thenReturn(".layout-topbar,#header");
 		when(table.getSortMode()).thenReturn("multiple");
 		when(table.getWidgetVar()).thenReturn("tableWidget");
 		when(table.getSelectionMode()).thenReturn("single");
@@ -365,6 +366,7 @@ class ComponentRendererTest {
 		assertTrue(rendered.contains(" paginatorAlwaysVisible=\"false\""));
 		assertTrue(rendered.contains(" lazy=\"true\""));
 		assertTrue(rendered.contains(" stickyHeader=\"true\""));
+		assertTrue(rendered.contains(" stickyTopAt=\".layout-topbar,#header\""));
 		assertTrue(rendered.contains(" sortMode=\"multiple\""));
 	}
 
@@ -385,6 +387,7 @@ class ComponentRendererTest {
 		assertFalse(rendered.contains(" paginator=\"true\""));
 		assertFalse(rendered.contains(" lazy=\"true\""));
 		assertFalse(rendered.contains(" stickyHeader=\"true\""));
+		assertFalse(rendered.contains(" stickyTopAt="));
 		assertFalse(rendered.contains(" sortMode=\"multiple\""));
 	}
 

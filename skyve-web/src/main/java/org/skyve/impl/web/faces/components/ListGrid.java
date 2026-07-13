@@ -17,7 +17,7 @@ import org.skyve.impl.web.faces.pipeline.component.ComponentBuilderChain;
 import org.skyve.impl.web.faces.pipeline.component.ComponentRenderer;
 import org.skyve.impl.web.faces.pipeline.component.DeviceResponsiveComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.component.PaginatedListGridBuilder;
-import org.skyve.impl.web.faces.pipeline.component.SkyveComponentBuilderChain;
+import org.skyve.impl.web.faces.pipeline.component.StickyHeaderListBuilder;
 import org.skyve.impl.web.faces.pipeline.component.VueListGridComponentBuilder;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -204,11 +204,14 @@ public class ListGrid extends HtmlPanelGroup {
 		try {
 			ComponentBuilder result = null;
 			if (componentBuilderClassString == null) {
-				result = new SkyveComponentBuilderChain();
+				result = new ComponentBuilderChain(new DeviceResponsiveComponentBuilder(),
+													new PaginatedListGridBuilder(),
+													new StickyHeaderListBuilder());
 			}
 			else if (componentBuilderClassString.equalsIgnoreCase("faces")) {
 				result = new ComponentBuilderChain(new DeviceResponsiveComponentBuilder(),
-																	new PaginatedListGridBuilder());
+													new PaginatedListGridBuilder(),
+													new StickyHeaderListBuilder());
 			}
 			else if (componentBuilderClassString.equalsIgnoreCase("vue")) {
 				result = new VueListGridComponentBuilder();

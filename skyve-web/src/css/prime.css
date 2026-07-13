@@ -15,6 +15,10 @@ body,html {
 .ui-column-filter {
 	width: 95% !important;
 }
+/* Keep PrimeFaces sticky list headers below exposed layout menus/drawers. */
+.ui-datatable-sticky {
+	z-index: 995 !important;
+}
 
 /* Make font-awesome icons centered when buttons collapse their labels at mobile breakpoints */
 .ui-button {
