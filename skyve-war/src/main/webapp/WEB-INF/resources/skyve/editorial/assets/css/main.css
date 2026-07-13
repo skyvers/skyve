@@ -3766,7 +3766,7 @@ mark {
 	.skyve-action-bar .ui-toolbar-group-right:first-child,
 	.action-bar .ui-toolbar-group-left:first-child,
 	.action-bar .ui-toolbar-group-right:first-child {
-		margin-left: auto;
+		margin-left: 0;
 	}
 
 	#sidebarWrapper .skyve-action-bar .ui-toolbar-group-left:last-child,

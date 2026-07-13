@@ -108,7 +108,7 @@ body .layout-wrapper .layout-main .layout-content .skyve-action-bar {
 	body .layout-wrapper .layout-main .layout-content .action-bar .ui-toolbar-group-right:first-child,
 	body .layout-wrapper .layout-main .layout-content .skyve-action-bar .ui-toolbar-group-left:first-child,
 	body .layout-wrapper .layout-main .layout-content .skyve-action-bar .ui-toolbar-group-right:first-child {
-		margin-left: auto;
+		margin-left: 0;
 	}
 
 	body .layout-wrapper .layout-main .layout-content .action-bar .ui-toolbar-group-left:last-child,
