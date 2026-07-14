@@ -21,8 +21,10 @@ Each colour pairs two stylesheets:
    - built-in colours: skyve-web META-INF/resources/primefaces-skyve-<colour>/
    - project branding (e.g. "custom"): skyve-war WEB-INF/resources/primefaces-skyve-<colour>/
 2) skyve-war WEB-INF/resources/skyve/editorial/assets/css/themes/<colour>.css -
-   overrides the --skyve-editorial-* CSS variables (accent, divider, topbar,
-   buttons and surfaces all derive from these).
+   overrides the --skyve-editorial-* CSS variables (accent, divider, buttons
+   and surfaces all derive from these). The view title bar defaults to the
+   accent colour; set --skyve-editorial-topbar-bg only when you want different
+   chrome (dark still overrides it).
 
 Put project-specific aliases in the WAR so they deploy without rebuilding skyve-web.
 Full walkthrough: docs/editorial-custom-colour.md.
