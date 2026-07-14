@@ -358,5 +358,11 @@
 				<ref>userName</ref>
 			</fieldReferences>
 		</constraint>
+		<constraint name="UniqueUserContact" scope="customer">
+			<message>The contact {contact.bizKey} is already assigned to another user.</message>
+			<fieldReferences>
+				<ref>contact.bizId</ref>
+			</fieldReferences>
+		</constraint>
 	</uniqueConstraints>
 </document>
