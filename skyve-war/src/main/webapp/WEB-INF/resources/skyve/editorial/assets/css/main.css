@@ -28,7 +28,7 @@
 	--skyve-editorial-panel-border: rgba(210, 215, 217, 0.85);
 	--skyve-editorial-panel-header-bg: #f3f6fb;
 	--skyve-editorial-panel-shadow: 0 0.0625rem 0.25rem rgba(15, 23, 42, 0.06);
-	/* Button signature 1b/2b - tonal soft tint (accent wash + accent glyph), solid fill on hover */
+	/* Button signature - tonal soft tint (accent wash + accent glyph), solid fill on hover */
 	--skyve-editorial-button-radius: 0.375rem;
 	--skyve-editorial-button-bg: var(--skyve-editorial-accent-soft);
 	--skyve-editorial-button-fg: var(--skyve-editorial-accent);
@@ -97,13 +97,96 @@ body .ui-widget button,
 	padding: 4px !important;
 }
 
-/* PrimeVue tweaks */
-/* if enabled have to look at list grid filter popup buttons which got trampled
-.p-button {
-    background: #2196f3 !important;
-    border: 1px solid #2196f3 !important;
+/* PrimeVue (VueListGrid) — same tonal signature as .ui-button above.
+   Lara hard-codes #3b82f6 into .p-button / highlights; these !important rules live in
+   @layer main so they beat skyvevue's @layer primevue via important-cascade reversal.
+   Filter-menu Clear/Apply buttons share the tonal family on purpose. */
+body .p-button {
+    background: var(--skyve-editorial-button-bg) !important;
+    border: 1px solid var(--skyve-editorial-button-border) !important;
+    border-radius: var(--skyve-editorial-button-radius) !important;
+    box-shadow: none !important;
+    color: var(--skyve-editorial-button-fg) !important;
+    transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
 }
-*/
+body .p-button .p-button-icon,
+body .p-button .p-button-label {
+    color: inherit !important;
+}
+body .p-button:not(:disabled):hover,
+body .p-button:not(:disabled):active {
+    background: var(--skyve-editorial-button-hover-bg) !important;
+    border-color: var(--skyve-editorial-button-hover-bg) !important;
+    box-shadow: none !important;
+    color: var(--skyve-editorial-button-hover-fg) !important;
+}
+body .p-button:focus-visible,
+body .p-button:focus {
+    box-shadow: 0 0 0 0.2rem var(--skyve-editorial-focus-ring) !important;
+}
+body .p-button.p-button-secondary,
+body .p-button.p-button-outlined,
+body .p-button.p-button-text {
+    background: var(--skyve-editorial-button-secondary-bg) !important;
+    border-color: transparent !important;
+    color: var(--skyve-editorial-button-secondary-fg) !important;
+}
+body .p-button.p-button-secondary:not(:disabled):hover,
+body .p-button.p-button-outlined:not(:disabled):hover,
+body .p-button.p-button-text:not(:disabled):hover {
+    background: var(--skyve-editorial-button-secondary-hover-bg) !important;
+    border-color: transparent !important;
+    color: var(--skyve-editorial-button-secondary-fg) !important;
+}
+/* Lara hard-codes tr { background:#fff; color:#4b5563 }. In dark/auto we already
+   recolour td text via tokens, which made light-on-white unreadable until hover. */
+body .p-datatable .p-datatable-tbody > tr {
+    background: var(--skyve-editorial-panel-bg) !important;
+    color: var(--skyve-editorial-menu-text) !important;
+}
+body .p-datatable .p-datatable-tbody > tr > td {
+    background: transparent !important;
+    color: inherit !important;
+}
+body .p-datatable .p-datatable-tbody > tr.p-highlight,
+body .p-datatable .p-datatable-tbody > tr.p-highlight > td {
+    background: var(--skyve-editorial-menu-active-bg) !important;
+    color: var(--skyve-editorial-title-text) !important;
+}
+body .p-datatable .p-datatable-tbody > tr:not(.p-highlight):hover,
+body .p-datatable .p-datatable-tbody > tr:not(.p-highlight):hover > td {
+    background: var(--skyve-editorial-row-hover-bg) !important;
+    color: var(--skyve-editorial-menu-text) !important;
+}
+body .p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
+    background: var(--skyve-editorial-menu-active-bg) !important;
+    border-color: var(--skyve-editorial-accent-border) !important;
+    color: var(--skyve-editorial-accent) !important;
+}
+body .p-checkbox .p-checkbox-box.p-highlight,
+body .p-radiobutton .p-radiobutton-box.p-highlight,
+body .p-inputswitch.p-inputswitch-checked .p-inputswitch-slider {
+    background: var(--skyve-editorial-accent) !important;
+    border-color: var(--skyve-editorial-accent) !important;
+}
+body .p-dropdown:not(.p-disabled):hover,
+body .p-multiselect:not(.p-disabled):hover,
+body .p-inputtext:enabled:hover {
+    border-color: var(--skyve-editorial-accent-border) !important;
+}
+body .p-dropdown:not(.p-disabled).p-focus,
+body .p-multiselect:not(.p-disabled).p-focus,
+body .p-inputtext:enabled:focus {
+    border-color: var(--skyve-editorial-accent) !important;
+    box-shadow: 0 0 0 0.2rem var(--skyve-editorial-focus-ring) !important;
+}
+body .p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight,
+body .p-multiselect-panel .p-multiselect-items .p-multiselect-item.p-highlight,
+body .p-tieredmenu .p-menuitem-link:not(.p-disabled):hover,
+body .p-contextmenu .p-menuitem-link:not(.p-disabled):hover {
+    background: var(--skyve-editorial-menu-active-bg) !important;
+    color: var(--skyve-editorial-title-text) !important;
+}
 /* Saga theme alignment */
 body .ui-widget-content,
 body .ui-panel:not(#header),
@@ -131,7 +214,7 @@ body .ui-selectonemenu-panel,
 body .ui-datepicker {
     box-shadow: var(--skyve-editorial-overlay-shadow) !important;
 }
-/* Skyve button signature 1b/2b - tonal soft tint (accent wash + accent glyph).
+/* Skyve button signature - tonal soft tint (accent wash + accent glyph).
    Adornments, action row and grid buttons share one family; Cancel / secondary use a
    neutral tint so the primary actions still lead. Solid accent fill only on hover.
    NB !important is needed for anything saga/prime-min also declare - this file's rules
@@ -207,7 +290,7 @@ body .ui-autocomplete .ui-autocomplete-dropdown.ui-button .ui-icon {
     margin: 0 !important;
     position: static !important;
 }
-/* Cancel / secondary - neutral tint so the primary trio leads (mockup 1b/2b) */
+/* Cancel / secondary - neutral tint so the primary trio leads */
 body .ui-button.ui-button-secondary,
 body .ui-button.ui-button-outlined,
 .skyve-action-bar .ui-button[onclick*="popHistory"],
@@ -356,16 +439,27 @@ body .sidebarCreate {
     border-color: var(--skyve-editorial-panel-border) !important;
     color: var(--skyve-editorial-title-text) !important;
 }
-#main > .inner > section .ui-datatable {
+#main > .inner > section .ui-datatable,
+#main > .inner > section .p-datatable {
     background: var(--skyve-editorial-panel-bg) !important;
     border: 1px solid var(--skyve-editorial-panel-border) !important;
     box-shadow: var(--skyve-editorial-table-shell-shadow);
+    color: var(--skyve-editorial-menu-text) !important;
 }
-#main > .inner > section .ui-datatable .ui-paginator {
+#main > .inner > section .p-datatable .p-datatable-header,
+#main > .inner > section .p-datatable .p-datatable-footer {
     background: var(--skyve-editorial-panel-bg) !important;
     border-color: var(--skyve-editorial-panel-border) !important;
+    color: var(--skyve-editorial-title-text) !important;
 }
-#main > .inner > section .ui-datatable tbody td {
+#main > .inner > section .ui-datatable .ui-paginator,
+#main > .inner > section .p-datatable .p-paginator {
+    background: var(--skyve-editorial-panel-bg) !important;
+    border-color: var(--skyve-editorial-panel-border) !important;
+    color: var(--skyve-editorial-menu-text) !important;
+}
+#main > .inner > section .ui-datatable tbody td,
+#main > .inner > section .p-datatable .p-datatable-tbody > tr > td {
     border-color: var(--skyve-editorial-panel-border) !important;
 }
 #main > .inner > section .ui-datatable thead th:first-child,
@@ -374,9 +468,66 @@ body .sidebarCreate {
 #main > .inner > section .p-datatable .p-datatable-tbody > tr > td:first-child {
     padding-left: var(--skyve-editorial-table-edge-padding) !important;
 }
-/* in-table buttons inherit the 1b/2b tonal signature; keep a touch target floor */
-#main > .inner > section .ui-datatable tbody .ui-button {
+/* in-table buttons inherit the tonal signature; keep a touch target floor */
+#main > .inner > section .ui-datatable tbody .ui-button,
+#main > .inner > section .p-datatable .p-button {
     min-height: 2.25rem;
+}
+/* VueListGrid toolbar + footer controls.
+   Match All is a Dropdown whose label is also .p-inputtext — Lara sets font-size:1rem
+   there, so it reads larger than MultiSelect (inherits .p-component) and Snapshot.
+   Flex stretch on the label makes its text sit high vs Snapshot's inline-flex centre.
+   Paginator page controls are <button>s — UA styles reset font-size (~16px) so they
+   look larger than the RPP combo which inherits .p-component (~13px). */
+#main > .inner > section .p-datatable .p-datatable-header .p-dropdown,
+#main > .inner > section .p-datatable .p-datatable-header .p-multiselect,
+#main > .inner > section .p-datatable .p-datatable-footer .p-dropdown,
+#main > .inner > section .p-datatable .p-paginator .p-dropdown {
+    align-items: center !important;
+    background: var(--skyve-editorial-panel-bg) !important;
+    border-color: var(--skyve-editorial-panel-border) !important;
+    color: var(--skyve-editorial-menu-text) !important;
+    display: inline-flex !important;
+    font-size: inherit !important;
+}
+#main > .inner > section .p-datatable .p-datatable-header .p-dropdown .p-dropdown-label,
+#main > .inner > section .p-datatable .p-datatable-header .p-dropdown .p-dropdown-label.p-inputtext,
+#main > .inner > section .p-datatable .p-datatable-header .p-multiselect .p-multiselect-label,
+#main > .inner > section .p-datatable .p-datatable-footer .p-dropdown .p-dropdown-label,
+#main > .inner > section .p-datatable .p-paginator .p-dropdown .p-dropdown-label,
+#main > .inner > section .p-datatable .p-paginator .p-dropdown .p-dropdown-label.p-inputtext {
+    align-items: center !important;
+    display: flex !important;
+    font-size: inherit !important;
+    line-height: 1.25 !important;
+    padding: 0.5rem 0.75rem !important;
+}
+#main > .inner > section .p-datatable .p-datatable-header .p-multiselect .p-multiselect-label-container {
+    align-items: center !important;
+    display: flex !important;
+}
+#main > .inner > section .p-datatable .p-datatable-header .p-dropdown .p-dropdown-trigger,
+#main > .inner > section .p-datatable .p-datatable-header .p-multiselect .p-multiselect-trigger,
+#main > .inner > section .p-datatable .p-paginator .p-dropdown .p-dropdown-trigger {
+    align-items: center !important;
+    display: flex !important;
+    justify-content: center !important;
+    width: 2.25rem !important;
+}
+#main > .inner > section .p-datatable .p-paginator .p-dropdown {
+    height: auto !important;
+    min-height: 2rem;
+}
+#main > .inner > section .p-datatable .p-paginator .p-paginator-first,
+#main > .inner > section .p-datatable .p-paginator .p-paginator-prev,
+#main > .inner > section .p-datatable .p-paginator .p-paginator-next,
+#main > .inner > section .p-datatable .p-paginator .p-paginator-last,
+#main > .inner > section .p-datatable .p-paginator .p-paginator-page {
+    font-family: inherit !important;
+    font-size: inherit !important;
+    height: 2rem !important;
+    line-height: 1 !important;
+    min-width: 2rem !important;
 }
 
 /* Device sizing.

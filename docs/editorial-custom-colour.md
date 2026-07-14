@@ -1,16 +1,6 @@
 # Editorial custom colour schemes
 
-The free Editorial template supports client branding without a paid PrimeFaces theme or a Sass build. Colour schemes are thin CSS files that override a few `--skyve-editorial-*` variables; the rest of the layout (divider, focus ring, menu highlights, buttons, table actions) derives from those values automatically.
-
-This is the Editorial equivalent of editing Ecuador SCSS tokens such as:
-
-```scss
-$primaryColor: #004B88 !default;
-$primaryLightColor: scale-color($primaryColor, $lightness: 60%) !default;
-$primaryDarkColor: scale-color($primaryColor, $lightness: -10%) !default;
-$primaryDarkerColor: scale-color($primaryColor, $lightness: -20%) !default;
-$primaryTextColor: #ffffff !default;
-```
+The Editorial template supports client branding with thin CSS files that override a few `--skyve-editorial-*` variables. The rest of the layout (divider, focus ring, menu highlights, buttons, table actions, and the view title bar) derives from those values automatically.
 
 ## Built-in colours
 
@@ -63,20 +53,18 @@ Put project-specific aliases in the **WAR** under `WEB-INF/resources`. That way 
    :root {
        /* Primary brand colour as R, G, B (used for rgba() derived tokens) */
        --skyve-editorial-accent-rgb: 0, 75, 136;
-       /* Darker hover / pressed accent (≈ Sass primaryDark) */
+       /* Darker hover / pressed accent */
        --skyve-editorial-accent-hover: #00447A;
-       /* Darker chrome such as the top bar (≈ Sass primaryDarker) */
-       --skyve-editorial-topbar-bg: #003C6D;
+       /* Optional: override the view title bar (defaults to the accent) */
+       /* --skyve-editorial-topbar-bg: #003C6D; */
    }
    ```
 
-   | Ecuador SCSS | Editorial CSS variable |
+   | Variable | Purpose |
    |---|---|
-   | `$primaryColor` | `--skyve-editorial-accent-rgb` (and derived `--skyve-editorial-accent`) |
-   | `$primaryDarkColor` | `--skyve-editorial-accent-hover` |
-   | `$primaryDarkerColor` | `--skyve-editorial-topbar-bg` |
-   | `$primaryLightColor` | usually leave derived (`accent-soft`, `focus-ring`); override only if needed |
-   | `$primaryTextColor` | white on accent buttons by default; no variable required for typical branding |
+   | `--skyve-editorial-accent-rgb` | Primary brand colour as `R, G, B`. Also drives `--skyve-editorial-accent` and soft tints (focus ring, menu highlights, buttons). |
+   | `--skyve-editorial-accent-hover` | Darker accent for hover / pressed states. |
+   | `--skyve-editorial-topbar-bg` | View title bar background. Omit to use the accent colour. |
 
 3. **Add the PrimeFaces alias in the WAR** (light schemes all import saga):
 
@@ -109,13 +97,12 @@ and keep `THEME_COLOUR = "custom"`.
 
 ## Optional overrides
 
-Most branding only needs the three knobs above. If a surface still looks wrong, override additional tokens from `main.css` in the same `:root` block, for example:
+Most branding only needs the knobs above. If a surface still looks wrong, override additional tokens from `main.css` in the same `:root` block, for example:
 
 ```css
 :root {
 	--skyve-editorial-accent-rgb: 0, 75, 136;
 	--skyve-editorial-accent-hover: #00447A;
-	--skyve-editorial-topbar-bg: #003C6D;
 	--skyve-editorial-page-bg: #f5f7fa;
 	--skyve-editorial-sidebar-bg: #ffffff;
 }
@@ -123,9 +110,9 @@ Most branding only needs the three knobs above. If a surface still looks wrong, 
 
 Inspect `:root` at the top of `editorial/assets/css/main.css` for the full token list.
 
-## Limits vs paid Ecuador themes
+## Limits
 
-Editorial colour schemes recolour layout chrome and the PrimeFaces controls that Editorial restyles through CSS variables (buttons, panels, menus, and similar). Stock saga rules that hard-code their own blues are not regenerated the way Ecuador’s SCSS compile pipeline does. For deep widget recolouring without CSS overrides, use a paid PrimeFaces theme (see `primefaces-themes.txt`).
+Editorial colour schemes recolour layout chrome and the PrimeFaces controls that Editorial restyles through CSS variables (buttons, panels, menus, and similar). Some free saga widget rules still hard-code their own blues; override those selectively in CSS if needed.
 
 ## Dark logos
 
