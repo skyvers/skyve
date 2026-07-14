@@ -214,6 +214,32 @@ body .ui-selectonemenu-panel,
 body .ui-datepicker {
     box-shadow: var(--skyve-editorial-overlay-shadow) !important;
 }
+/* Avatar profile menu - Saga defaults .ui-overlaypanel-content to 1.25rem */
+body .ui-overlaypanel.profile-overlay .ui-overlaypanel-content {
+    padding: 0.5rem !important;
+}
+body .ui-overlaypanel.profile-overlay .ui-card {
+    box-shadow: var(--skyve-editorial-panel-shadow) !important;
+    margin-bottom: 0.5rem;
+}
+body .ui-overlaypanel.profile-overlay .ui-card .ui-card-body {
+    padding: 0.35rem 0.75rem 0.5rem !important;
+}
+body .ui-overlaypanel.profile-overlay .ui-card .ui-card-title {
+    font-size: 1.125rem !important;
+    margin-bottom: 0.125rem !important;
+}
+body .ui-overlaypanel.profile-overlay .ui-card .ui-card-subtitle {
+    margin-bottom: 0 !important;
+}
+body .ui-overlaypanel.profile-overlay .ui-card .ui-card-content {
+    display: none;
+}
+body .ui-overlaypanel.profile-overlay .ui-menu .ui-widget-header h3 {
+    font-size: 0.8125rem !important;
+    font-style: normal;
+    font-weight: 600;
+}
 /* Skyve button signature - tonal soft tint (accent wash + accent glyph).
    Adornments, action row and grid buttons share one family; Cancel / secondary use a
    neutral tint so the primary actions still lead. Solid accent fill only on hover.
@@ -3838,11 +3864,14 @@ mark {
 	}
 
 	#header .icons {
+		align-items: center;
+		bottom: 0;
+		display: flex;
 		margin: 0;
-		padding: 1rem !important;
+		padding: 0 1rem !important;
 		position: absolute;
 		right: 0;
-		top: 0.25rem;
+		top: 0;
 	}
 
 	#main > .inner {
@@ -3985,11 +4014,14 @@ mark {
 	}
 
 	#header .icons {
+		align-items: center;
+		bottom: 0;
+		display: flex;
 		margin: 0;
-		padding: 1rem !important;
+		padding: 0 1rem !important;
 		position: absolute;
 		right: 0;
-		top: 0.25rem;
+		top: 0;
 	}
 
 	#main > .inner {

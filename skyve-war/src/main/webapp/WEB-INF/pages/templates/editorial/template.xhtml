@@ -59,7 +59,7 @@
 								<p:autoUpdate />
 							</p:outputPanel>
 							<c:if test="#{showSwitchMode or showLogout}">
-								<ul class="icons" style="padding:20px 10px">
+								<ul class="icons">
 									<li>
 										<p:badge value="4" visible="false">
 											<p:avatar id="avatar" shape="circle" label="#{bean.userContactInitials}" style="cursor:pointer">
@@ -71,10 +71,10 @@
 							</c:if>
 						</header>
 						<c:if test="#{showSwitchMode or showLogout}">
-							<p:overlayPanel for="avatar">
-								<p:card style="text-align:center;background-color:rgb(248,249,250)" rendered="#{showLogout}">
+							<p:overlayPanel for="avatar" styleClass="profile-overlay">
+								<p:card style="text-align:center; background-color:rgb(248,249,250); padding: 0.5rem 0;" rendered="#{showLogout}">
 									<f:facet name="header">
-										<p:avatar size="xlarge" shape="circle" style="margin:5px" label="#{bean.userContactInitials}">
+										<p:avatar size="xlarge" shape="circle" style="margin:0.25rem;" label="#{bean.userContactInitials}">
 											<p:graphicImage value="#{bean.userContactImageUrl}" rendered="#{not empty bean.userContactImageUrl}" />
 										</p:avatar>
 									</f:facet>
@@ -89,7 +89,7 @@
 									<h:inputHidden id="uxuicsrf" value="#{bean.csrfToken}">
 										<p:autoUpdate />
 									</h:inputHidden>
-				  					<p:menu style="width:100%;border:0">
+				  					<p:menu style="width:100%; border:0">
 										<p:submenu label="User Management" rendered="#{showLogout}">
 											<p:menuitem value="Profile" url="?a=e&amp;m=admin&amp;d=UserDashboard" ajax="false" icon="fa-solid fa-user"/>
 											<p:menuitem value="Account" url="?a=e&amp;m=admin&amp;d=UserAccount" ajax="false" icon="fa-solid fa-user-shield"/>
