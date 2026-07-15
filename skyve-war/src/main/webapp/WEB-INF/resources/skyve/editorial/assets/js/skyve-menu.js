@@ -7,11 +7,20 @@
 
 	Menu items are not necessarily unique by target - e.g. a list and a tree over the same
 	query render identical URLs - so the last clicked menu item is remembered (per tab) and
-	used as a tiebreaker, and only ever one item is highlighted.
+	used as a tiebreaker, and only ever one item is highlighted. Menu selections also collapse
+	inactive modules and groups through the PrimeFaces widget so its persisted state stays in
+	sync with the menu shown to the user.
 */
 (function() {
 	'use strict';
 	var STORAGE_KEY = 'skyve.editorial.menu.clicked';
+	// Match PrimeFaces' animated root-panel transition
+	var MENU_ANIMATION_DURATION = 'normal';
+	var MENU_ANIMATION_EASING = 'easeInOutCirc';
+	var INITIALISE_RETRY_INTERVAL = 50;
+	var INITIALISE_RETRY_LIMIT = 100;
+	var initialiseAttempts = 0;
+	var initialised = false;
 
 	var linkQuery = function(link) {
 		var href = link.getAttribute('href') || '';
@@ -28,11 +37,132 @@
 		return link.textContent.trim() + '|' + (linkQuery(link) || '');
 	};
 
+	var isExpanded = function(widget, item) {
+		return widget.expandedNodes.indexOf(item.attr('id')) >= 0;
+	};
+
+	var animateTreeItem = function(item, expanded) {
+		var children = item.children('.ui-menu-list');
+		children.stop(true, true);
+		if (expanded) {
+			children.hide().slideDown(MENU_ANIMATION_DURATION, MENU_ANIMATION_EASING);
+		}
+		else {
+			children.show().slideUp(MENU_ANIMATION_DURATION, MENU_ANIMATION_EASING);
+		}
+	};
+
+	var collapseTreeItems = function(widget, items, animate) {
+		items.get().reverse().forEach(function(element) {
+			var item = $(element);
+			if (isExpanded(widget, item)) {
+				var children = item.children('.ui-menu-list');
+				children.stop(true, true);
+				widget.collapseTreeItem(item);
+				if (animate) {
+					children.show().slideUp(MENU_ANIMATION_DURATION, MENU_ANIMATION_EASING);
+				}
+			}
+		});
+	};
+
+	var collapseTreeBranches = function(widget, branches, animate) {
+		branches.each(function() {
+			var branch = $(this);
+			collapseTreeItems(widget, branch.find('.ui-menu-parent').addBack('.ui-menu-parent'), animate);
+		});
+	};
+
+	var collapseRootPanel = function(widget, panel) {
+		var header = panel.children('.ui-panelmenu-header');
+		var content = panel.children('.ui-panelmenu-content');
+		var collapseNestedGroups = function() {
+			collapseTreeItems(widget, panel.find('.ui-menu-parent'));
+		};
+
+		if (header.hasClass('ui-state-active') || isExpanded(widget, content)) {
+			widget.collapseRootSubmenu(header);
+			content.promise().done(collapseNestedGroups);
+		}
+		else if (content.is(':animated')) {
+			// multiple=false has already started closing this module. Let its slide finish
+			// before hiding nested groups so the content height does not jump mid-animation.
+			content.promise().done(collapseNestedGroups);
+		}
+		else {
+			collapseNestedGroups();
+		}
+	};
+
+	var collapseInactiveRootPanels = function(widget, activePanel) {
+		widget.jq.children('.ui-panelmenu-panel').each(function() {
+			if (this !== activePanel) {
+				collapseRootPanel(widget, $(this));
+			}
+		});
+	};
+
+	var collapseInactiveForSelection = function(widget, link) {
+		var item = $(link).closest('.ui-menuitem');
+		var activeGroups = item.parents('.ui-menu-parent').get();
+		var activePanel = item.closest('.ui-panelmenu-panel')[0];
+
+		collapseInactiveRootPanels(widget, activePanel);
+		widget.jq.find('.ui-menu-parent').each(function() {
+			if (activeGroups.indexOf(this) < 0) {
+				collapseTreeItems(widget, $(this));
+			}
+		});
+	};
+
+	var makeMenuExclusive = function(widget) {
+		widget.headers.on('click.skyveEditorialMenu', function() {
+			var header = $(this);
+			var panel = header.closest('.ui-panelmenu-panel');
+			var activePanel = header.hasClass('ui-state-active') ? panel[0] : null;
+			collapseInactiveRootPanels(widget, activePanel);
+		});
+
+		widget.treeLinks.on('click.skyveEditorialMenu', function() {
+			var item = $(this).parent('.ui-menu-parent');
+			var panel = item.closest('.ui-panelmenu-panel');
+			collapseInactiveRootPanels(widget, panel[0]);
+
+			if (isExpanded(widget, item)) {
+				animateTreeItem(item, true);
+				collapseTreeBranches(widget, item.siblings('.ui-menu-parent'), true);
+			}
+			else {
+				animateTreeItem(item, false);
+				collapseTreeItems(widget, item.find('.ui-menu-parent'));
+			}
+		});
+	};
+
 	var initialise = function() {
+		if (initialised) {
+			return;
+		}
+
+		// PrimeFaces creates widgets from a document-ready callback. This script can receive
+		// DOMContentLoaded first, so wait until the panel menu has actually been registered.
+		var widget = window.PrimeFaces && PrimeFaces.widgets && PrimeFaces.widgets.leftMenu;
+		if (! widget) {
+			initialiseAttempts++;
+			if (initialiseAttempts < INITIALISE_RETRY_LIMIT) {
+				window.setTimeout(initialise, INITIALISE_RETRY_INTERVAL);
+			}
+			return;
+		}
+		initialised = true;
+		makeMenuExclusive(widget);
+
 		var links = document.querySelectorAll('#leftMenu a.ui-menuitem-link');
 
-		// remember the last clicked menu item to disambiguate menu items sharing a target
-		links.forEach(function(link) {
+		// Remember the last clicked leaf to disambiguate menu items sharing a target, then
+		// retain only the expanded branch leading to that selection.
+		widget.menuitemLinks.not(widget.treeLinks).each(function() {
+			var link = this;
 			link.addEventListener('click', function() {
 				try {
 					sessionStorage.setItem(STORAGE_KEY, linkIdentity(link));
@@ -40,6 +170,7 @@
 				catch (e) {
 					// storage unavailable - fall back to first-match highlighting
 				}
+				collapseInactiveForSelection(widget, link);
 			});
 		});
 
@@ -111,6 +242,7 @@
 		var item = chosen.closest('.ui-menuitem');
 		if (item) {
 			item.classList.add('skyve-menu-active');
+			collapseInactiveForSelection(widget, chosen);
 		}
 	};
 
