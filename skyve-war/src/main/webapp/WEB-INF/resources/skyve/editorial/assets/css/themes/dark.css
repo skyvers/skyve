@@ -27,7 +27,6 @@
 	--skyve-editorial-row-hover-bg: rgba(255, 255, 255, 0.04);
 	--skyve-editorial-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.5);
 	--skyve-editorial-sidebar-bg: #1a1a1a;
-	--skyve-editorial-sidebar-logo-bg: rgba(255, 255, 255, 0.92);
 	--skyve-editorial-surface: #1e1e1e;
 	--skyve-editorial-surface-glass: rgba(30, 30, 30, 0.94);
 	--skyve-editorial-table-header-bg: #262626;
@@ -36,19 +35,16 @@
 	--skyve-editorial-topbar-bg: #1e1e1e;
 }
 
-/* Swap to the dark variant logo */
+/* Swap to the dark variant logo when the customer supplies one - the logo plate
+   follows the topbar colour (see main.css) so light primary logos remain visible
+   here without a variant; supply <logoName>-dark.<extension> only when the brand
+   wants a different treatment on near-black */
 #menu .sidebar-logo-light {
 	display: none;
 }
 
 #menu .sidebar-logo-dark {
 	display: inline-block;
-}
-
-/* When the customer supplies a <logoName>-dark.<extension> resource the logo area
-   no longer needs a light plate to keep the logo visible */
-#menu > table.darkLogoAvailable:first-child {
-	--skyve-editorial-sidebar-logo-bg: var(--skyve-editorial-sidebar-bg);
 }
 
 /* The base editorial (HTML5UP) styles assume a light page */
