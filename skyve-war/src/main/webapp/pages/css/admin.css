@@ -57,14 +57,14 @@ td > div > div.tile {
 }
 
 .tile .title {
-	color: #333;
+	color: var(--skyve-editorial-title-text, #333);
 	text-align: left;
 	font-weight: bold;
 	margin-bottom: 5px;
 }
 
 .tile .title a {
-	color: #333;
+	color: var(--skyve-editorial-title-text, #333);
 }
 
 .tile .title .fa {
@@ -91,14 +91,14 @@ td > div > div.tile {
 }
 
 .tile .description {
-	color: #666;
+	color: var(--skyve-editorial-menu-text, #666);
 	margin-right: 5px;
 	text-align: left;
 	font-size: 90%;
 }
 
 .tile .description .bizKey {
-	color: #333;
+	color: var(--skyve-editorial-title-text, #333);
 }
 
 .tile .icon {
@@ -111,7 +111,7 @@ td > div > div.tile {
 }
 
 .tile .footer {
-	color: #777;
+	color: var(--skyve-editorial-menu-icon, #777);
 	text-align: right;
 	font-size: 90%;
 	padding-left: 5px;

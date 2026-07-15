@@ -1,0 +1,8 @@
+/*
+	Skyve alias theme (auto) - follows the browser/operating system colour scheme preference.
+	The free saga theme provides the light widget styling; the free arya theme is layered on
+	top when the user prefers dark. The import expressions below are resolved by the JSF
+	resource handler at serve time.
+*/
+@import url("#{resource['primefaces-saga:theme.css']}");
+@import url("#{resource['primefaces-arya:theme.css']}") (prefers-color-scheme: dark);

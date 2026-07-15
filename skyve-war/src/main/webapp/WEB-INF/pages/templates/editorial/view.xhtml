@@ -30,6 +30,7 @@
 				<c:if test="#{vue}">
 					<h:outputScript library="skyvevue" name="index.js?v=#{bean.webResourceFileVersion}" />
 					<h:outputStylesheet library="skyvevue" name="index.css?v=#{bean.webResourceFileVersion}" />
+					<h:outputStylesheet library="skyve" name="editorial/assets/css/vue.css?v=#{bean.webResourceFileVersion}"  />
 				</c:if>
 				<ui:insert name="head" />
 			</ui:define>

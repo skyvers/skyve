@@ -1,5 +1,6 @@
 package org.skyve.impl.web.faces.views;
 
+import java.io.File;
 import java.util.Set;
 
 import org.skyve.CORE;
@@ -48,6 +49,19 @@ public abstract class HarnessView extends LocalisableView {
 	 */
 	public String getLogoRelativeFileNameUrl() {
 		return logoRelativeFileNameUrl;
+	}
+
+	private String logoDarkRelativeFileNameUrl;
+
+	/**
+	 * Returns the dark mode logo resource URL relative to the web context.
+	 * A dark variant is detected by convention - a customer resource named
+	 * &lt;logoName&gt;-dark.&lt;extension&gt; alongside the configured logo.
+	 *
+	 * @return dark logo resource URL, or {@code null} when no dark variant exists
+	 */
+	public String getLogoDarkRelativeFileNameUrl() {
+		return logoDarkRelativeFileNameUrl;
 	}
 
 	private String cssRelativeFileNameUrl;
@@ -280,9 +294,20 @@ public abstract class HarnessView extends LocalisableView {
 		Customer customer = user.getCustomer();
 		
 		StringBuilder sb = new StringBuilder(64);
-		sb.append("resources?_n=");
-		sb.append(customer.getUiResources().getLogoRelativeFileName());
-		logoRelativeFileNameUrl = sb.toString();
+		String logoRelativeFileName = customer.getUiResources().getLogoRelativeFileName();
+		logoRelativeFileNameUrl = "resources?_n=" + logoRelativeFileName;
+
+		// Detect an optional dark mode logo variant - <logoName>-dark.<extension> - in the customer resources
+		int logoDotIndex = logoRelativeFileName.lastIndexOf('.');
+		if (logoDotIndex > 0) {
+			String darkLogoRelativeFileName = logoRelativeFileName.substring(0, logoDotIndex) +
+												"-dark" +
+												logoRelativeFileName.substring(logoDotIndex);
+			File darkLogoFile = CORE.getRepository().findResourceFile(darkLogoRelativeFileName, customer.getName(), null);
+			if ((darkLogoFile != null) && darkLogoFile.exists()) {
+				logoDarkRelativeFileNameUrl = "resources?_n=" + darkLogoRelativeFileName;
+			}
+		}
 
 		if (bizModuleParameter == null) {
 			Set<String> moduleNames = user.getAccessibleModuleNames();

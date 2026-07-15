@@ -1,3 +1,34 @@
+Free editorial template colour palettes (no paid theme required)
+================================================================
+
+The editorial template supports selectable colour palettes driven by the theme colour
+on the UxUi in router.UxUis, e.g.
+
+	UxUi.newPrimeFaces("phone", "editorial", "skyve", "emerald")
+
+Available colours: "auto" (default), "blue", "indigo", "emerald", "custom" and "dark".
+
+"auto" follows the browser/operating system colour scheme preference (the blue palette in
+light mode, the dark palette in dark mode). "dark" forces dark mode permanently.
+"custom" is a starter corporate palette (#004B88) intended to be edited per project.
+
+Dark logos: if a customer resource exists named <logoName>-dark.<extension> alongside the
+configured logo (e.g. mylogo-dark.png for mylogo.png), it is served automatically whenever
+the dark palette is active (both forced "dark" and "auto" in a dark-preferring browser).
+
+Each colour pairs two stylesheets:
+1) PrimeFaces alias theme.css that imports free saga (or arya for "dark"):
+   - built-in colours: skyve-web META-INF/resources/primefaces-skyve-<colour>/
+   - project branding (e.g. "custom"): skyve-war WEB-INF/resources/primefaces-skyve-<colour>/
+2) skyve-war WEB-INF/resources/skyve/editorial/assets/css/themes/<colour>.css -
+   overrides the --skyve-editorial-* CSS variables (accent, divider, buttons
+   and surfaces all derive from these). The view title bar defaults to the
+   accent colour; set --skyve-editorial-topbar-bg only when you want different
+   chrome (dark still overrides it).
+
+Put project-specific aliases in the WAR so they deploy without rebuilding skyve-web.
+Full walkthrough: docs/editorial-custom-colour.md.
+
 To install the ultima theme (>= 7.0.0) on skyve.
 
 1) Drop ultima-theme-7.0.0-jakarta.jar from Foundry project into WEB-INF/lib/

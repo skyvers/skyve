@@ -15,6 +15,7 @@
 	--skyve-editorial-divider-border: solid 5px var(--skyve-editorial-divider);
 	--skyve-editorial-divider-shadow: inset 0 -5px 0 var(--skyve-editorial-divider);
 	--skyve-editorial-focus-ring: rgba(var(--skyve-editorial-accent-rgb), 0.28);
+	--skyve-editorial-font: 'Montserrat', -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
 	--skyve-editorial-header-height: 5rem;
 	--skyve-editorial-menu-active-bg: var(--skyve-editorial-accent-soft);
 	--skyve-editorial-menu-group-active-bg: rgba(var(--skyve-editorial-accent-rgb), 0.08);
@@ -27,8 +28,16 @@
 	--skyve-editorial-panel-border: rgba(210, 215, 217, 0.85);
 	--skyve-editorial-panel-header-bg: #f3f6fb;
 	--skyve-editorial-panel-shadow: 0 0.0625rem 0.25rem rgba(15, 23, 42, 0.06);
-	--skyve-editorial-button-shadow: 0 0.0625rem 0.125rem rgba(15, 23, 42, 0.10);
-	--skyve-editorial-button-hover-shadow: 0 0.25rem 0.625rem rgba(15, 23, 42, 0.14);
+	/* Button signature - tonal soft tint (accent wash + accent glyph), solid fill on hover */
+	--skyve-editorial-button-radius: 0.375rem;
+	--skyve-editorial-button-bg: var(--skyve-editorial-accent-soft);
+	--skyve-editorial-button-fg: var(--skyve-editorial-accent);
+	--skyve-editorial-button-border: transparent;
+	--skyve-editorial-button-hover-bg: var(--skyve-editorial-accent);
+	--skyve-editorial-button-hover-fg: var(--skyve-editorial-panel-bg);
+	--skyve-editorial-button-secondary-bg: #f1f4f8;
+	--skyve-editorial-button-secondary-fg: #64748b;
+	--skyve-editorial-button-secondary-hover-bg: #e8edf3;
 	--skyve-editorial-danger: #dc2626;
 	--skyve-editorial-danger-soft: rgba(220, 38, 38, 0.10);
 	--skyve-editorial-info: #0284c7;
@@ -39,8 +48,10 @@
 	--skyve-editorial-success-soft: rgba(22, 163, 74, 0.10);
 	--skyve-editorial-shadow: 0 0.125rem 0.5rem rgba(15, 23, 42, 0.12);
 	--skyve-editorial-sidebar-bg: #fff;
-	--skyve-editorial-sidebar-logo-bg: #fff;
-	--skyve-editorial-sidebar-width: 19.8rem;
+	/* the logo sits on the topbar colour so the brand band runs the full width -
+	   supply a light/white logo (or a <logoName>-dark variant for dark palettes) */
+	--skyve-editorial-sidebar-logo-bg: var(--skyve-editorial-topbar-bg);
+	--skyve-editorial-sidebar-width: 16rem;
 	--skyve-editorial-surface: #fff;
 	--skyve-editorial-surface-glass: rgba(255, 255, 255, 0.94);
 	--skyve-editorial-table-action-bg: var(--skyve-editorial-accent);
@@ -49,8 +60,33 @@
 	--skyve-editorial-table-header-bg: #f7f9fc;
 	--skyve-editorial-table-shell-shadow: 0 0.0625rem 0.375rem rgba(15, 23, 42, 0.05);
 	--skyve-editorial-title-text: #444c56;
+	/* View title bar is a deep shade derived from the accent so every palette reads as
+	   branded chrome without needing its own topbar colour (35% accent over near-black) */
+	--skyve-editorial-topbar-bg: color-mix(in srgb, var(--skyve-editorial-accent) 35%, #0b1420);
+	--skyve-editorial-topbar-text: #f8fafc;
 	--skyve-editorial-warning: #d97706;
 	--skyve-editorial-warning-soft: rgba(217, 119, 6, 0.12);
+}
+
+/* Typography - the saga theme hardcodes a system font stack on body .ui-widget
+   (it does not use its own --font-family variable there), so !important is needed
+   to win regardless of stylesheet load order. Icon fonts are unaffected because
+   Font Awesome declares font-family directly on the icon elements. */
+html:root {
+	--font-family: var(--skyve-editorial-font);
+}
+body,
+input, select, textarea, button {
+	font-family: var(--skyve-editorial-font);
+}
+body .ui-widget,
+body .ui-widget .ui-widget,
+body .ui-widget input,
+body .ui-widget select,
+body .ui-widget textarea,
+body .ui-widget button,
+.p-component {
+	font-family: var(--skyve-editorial-font) !important;
 }
 
 /* PF tweaks */
@@ -64,16 +100,99 @@
 	padding: 4px !important;
 }
 
-/* PrimeVue tweaks */
-/* if enabled have to look at list grid filter popup buttons which got trampled
-.p-button {
-    background: #2196f3 !important;
-    border: 1px solid #2196f3 !important;
+/* PrimeVue (VueListGrid) — same tonal signature as .ui-button above.
+   Lara hard-codes #3b82f6 into .p-button / highlights; these !important rules live in
+   @layer main so they beat skyvevue's @layer primevue via important-cascade reversal.
+   Filter-menu Clear/Apply buttons share the tonal family on purpose. */
+body .p-button {
+    background: var(--skyve-editorial-button-bg) !important;
+    border: 1px solid var(--skyve-editorial-button-border) !important;
+    border-radius: var(--skyve-editorial-button-radius) !important;
+    box-shadow: none !important;
+    color: var(--skyve-editorial-button-fg) !important;
+    transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
 }
-*/
+body .p-button .p-button-icon,
+body .p-button .p-button-label {
+    color: inherit !important;
+}
+body .p-button:not(:disabled):hover,
+body .p-button:not(:disabled):active {
+    background: var(--skyve-editorial-button-hover-bg) !important;
+    border-color: var(--skyve-editorial-button-hover-bg) !important;
+    box-shadow: none !important;
+    color: var(--skyve-editorial-button-hover-fg) !important;
+}
+body .p-button:focus-visible,
+body .p-button:focus {
+    box-shadow: 0 0 0 0.2rem var(--skyve-editorial-focus-ring) !important;
+}
+body .p-button.p-button-secondary,
+body .p-button.p-button-outlined,
+body .p-button.p-button-text {
+    background: var(--skyve-editorial-button-secondary-bg) !important;
+    border-color: transparent !important;
+    color: var(--skyve-editorial-button-secondary-fg) !important;
+}
+body .p-button.p-button-secondary:not(:disabled):hover,
+body .p-button.p-button-outlined:not(:disabled):hover,
+body .p-button.p-button-text:not(:disabled):hover {
+    background: var(--skyve-editorial-button-secondary-hover-bg) !important;
+    border-color: transparent !important;
+    color: var(--skyve-editorial-button-secondary-fg) !important;
+}
+/* Lara hard-codes tr { background:#fff; color:#4b5563 }. In dark/auto we already
+   recolour td text via tokens, which made light-on-white unreadable until hover. */
+body .p-datatable .p-datatable-tbody > tr {
+    background: var(--skyve-editorial-panel-bg) !important;
+    color: var(--skyve-editorial-menu-text) !important;
+}
+body .p-datatable .p-datatable-tbody > tr > td {
+    background: transparent !important;
+    color: inherit !important;
+}
+body .p-datatable .p-datatable-tbody > tr.p-highlight,
+body .p-datatable .p-datatable-tbody > tr.p-highlight > td {
+    background: var(--skyve-editorial-menu-active-bg) !important;
+    color: var(--skyve-editorial-title-text) !important;
+}
+body .p-datatable .p-datatable-tbody > tr:not(.p-highlight):hover,
+body .p-datatable .p-datatable-tbody > tr:not(.p-highlight):hover > td {
+    background: var(--skyve-editorial-row-hover-bg) !important;
+    color: var(--skyve-editorial-menu-text) !important;
+}
+body .p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
+    background: var(--skyve-editorial-menu-active-bg) !important;
+    border-color: var(--skyve-editorial-accent-border) !important;
+    color: var(--skyve-editorial-accent) !important;
+}
+body .p-checkbox .p-checkbox-box.p-highlight,
+body .p-radiobutton .p-radiobutton-box.p-highlight,
+body .p-inputswitch.p-inputswitch-checked .p-inputswitch-slider {
+    background: var(--skyve-editorial-accent) !important;
+    border-color: var(--skyve-editorial-accent) !important;
+}
+body .p-dropdown:not(.p-disabled):hover,
+body .p-multiselect:not(.p-disabled):hover,
+body .p-inputtext:enabled:hover {
+    border-color: var(--skyve-editorial-accent-border) !important;
+}
+body .p-dropdown:not(.p-disabled).p-focus,
+body .p-multiselect:not(.p-disabled).p-focus,
+body .p-inputtext:enabled:focus {
+    border-color: var(--skyve-editorial-accent) !important;
+    box-shadow: 0 0 0 0.2rem var(--skyve-editorial-focus-ring) !important;
+}
+body .p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight,
+body .p-multiselect-panel .p-multiselect-items .p-multiselect-item.p-highlight,
+body .p-tieredmenu .p-menuitem-link:not(.p-disabled):hover,
+body .p-contextmenu .p-menuitem-link:not(.p-disabled):hover {
+    background: var(--skyve-editorial-menu-active-bg) !important;
+    color: var(--skyve-editorial-title-text) !important;
+}
 /* Saga theme alignment */
 body .ui-widget-content,
-body .ui-panel,
+body .ui-panel:not(#header),
 body .ui-dialog,
 body .ui-overlaypanel,
 body .ui-menu,
@@ -98,27 +217,128 @@ body .ui-selectonemenu-panel,
 body .ui-datepicker {
     box-shadow: var(--skyve-editorial-overlay-shadow) !important;
 }
+/* Avatar profile menu - Saga defaults .ui-overlaypanel-content to 1.25rem */
+body .ui-overlaypanel.profile-overlay .ui-overlaypanel-content {
+    padding: 0.5rem !important;
+}
+body .ui-overlaypanel.profile-overlay .ui-card {
+    box-shadow: var(--skyve-editorial-panel-shadow) !important;
+    margin-bottom: 0.5rem;
+}
+body .ui-overlaypanel.profile-overlay .ui-card .ui-card-body {
+    padding: 0.35rem 0.75rem 0.5rem !important;
+}
+body .ui-overlaypanel.profile-overlay .ui-card .ui-card-title {
+    font-size: 1.125rem !important;
+    margin-bottom: 0.125rem !important;
+}
+body .ui-overlaypanel.profile-overlay .ui-card .ui-card-subtitle {
+    margin-bottom: 0 !important;
+}
+body .ui-overlaypanel.profile-overlay .ui-card .ui-card-content {
+    display: none;
+}
+body .ui-overlaypanel.profile-overlay .ui-menu .ui-widget-header h3 {
+    font-size: 0.8125rem !important;
+    font-style: normal;
+    font-weight: 600;
+}
+/* Skyve button signature - tonal soft tint (accent wash + accent glyph).
+   Adornments, action row and grid buttons share one family; Cancel / secondary use a
+   neutral tint so the primary actions still lead. Solid accent fill only on hover.
+   NB !important is needed for anything saga/prime-min also declare - this file's rules
+   live in @layer main which unlayered stylesheets beat regardless of specificity */
 body .ui-button {
-    background: var(--skyve-editorial-accent) !important;
-    border: 1px solid var(--skyve-editorial-accent) !important;
-    box-shadow: var(--skyve-editorial-button-shadow);
-    transition: background-color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+    background: var(--skyve-editorial-button-bg) !important;
+    border: 1px solid var(--skyve-editorial-button-border) !important;
+    border-radius: var(--skyve-editorial-button-radius) !important;
+    box-shadow: none !important;
+    color: var(--skyve-editorial-button-fg) !important;
+    transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+}
+body .ui-button .ui-button-text,
+body .ui-button .ui-icon {
+    color: inherit !important;
 }
 body .ui-button.ui-state-hover,
 body .ui-button:hover {
-    background: var(--skyve-editorial-accent-hover) !important;
-    border-color: var(--skyve-editorial-accent-hover) !important;
-    box-shadow: var(--skyve-editorial-button-hover-shadow);
+    background: var(--skyve-editorial-button-hover-bg) !important;
+    border-color: var(--skyve-editorial-button-hover-bg) !important;
+    box-shadow: none !important;
+    color: var(--skyve-editorial-button-hover-fg) !important;
 }
 body .ui-button.ui-state-focus,
 body .ui-button:focus {
-    box-shadow: 0 0 0 0.2rem var(--skyve-editorial-focus-ring);
+    box-shadow: 0 0 0 0.2rem var(--skyve-editorial-focus-ring) !important;
 }
+body .ui-button:active {
+    box-shadow: none !important;
+}
+/* Centre icon glyphs in standalone icon-only buttons.
+   Exclude field adornments and content-image actions:
+   - autocomplete/datepicker/spinner need their own stretch/center rules below
+   - .skyveContentActionButton is already centered by prime-min.css via absolute + translate;
+     position:static here would defeat that and leave FA glyphs optically high */
+body .ui-button.ui-button-icon-only:not(.ui-autocomplete-dropdown):not(.ui-datepicker-trigger):not(.ui-spinner-button):not(.skyveContentActionButton) {
+    align-items: center;
+    display: inline-flex !important;
+    justify-content: center;
+}
+body .ui-button.ui-button-icon-only:not(.ui-autocomplete-dropdown):not(.ui-datepicker-trigger):not(.ui-spinner-button):not(.skyveContentActionButton) .ui-icon {
+    height: auto !important;
+    margin: 0 !important;
+    position: static !important;
+    width: auto !important;
+}
+body .ui-button.ui-button-icon-only:not(.ui-autocomplete-dropdown):not(.ui-datepicker-trigger):not(.ui-spinner-button):not(.skyveContentActionButton) .ui-button-text {
+    display: none !important;
+}
+/* Stretch lookupDescription / autocomplete caret to the full input height (Ecuador parity).
+   Hide .ui-button-text - its padding box still participates in flex layout and shifts the
+   caret left of centre when the icon is position:static. */
+body .ui-autocomplete {
+    align-items: stretch;
+    display: inline-flex !important;
+}
+body .ui-autocomplete .ui-autocomplete-input {
+    flex: 1 1 auto;
+}
+body .ui-autocomplete .ui-autocomplete-dropdown.ui-button {
+    align-items: center;
+    align-self: stretch;
+    display: inline-flex !important;
+    height: auto !important;
+    justify-content: center;
+    min-height: 0 !important;
+    padding: 0 !important;
+}
+body .ui-autocomplete .ui-autocomplete-dropdown.ui-button .ui-button-text {
+    display: none !important;
+}
+body .ui-autocomplete .ui-autocomplete-dropdown.ui-button .ui-icon {
+    margin: 0 !important;
+    position: static !important;
+}
+/* Cancel / secondary - neutral tint so the primary trio leads */
 body .ui-button.ui-button-secondary,
-body .ui-button.ui-button-outlined {
-    background: var(--skyve-editorial-panel-bg) !important;
-    border-color: var(--skyve-editorial-accent-border) !important;
-    color: var(--skyve-editorial-accent) !important;
+body .ui-button.ui-button-outlined,
+.skyve-action-bar .ui-button[onclick*="popHistory"],
+.action-bar .ui-button[onclick*="popHistory"] {
+    background: var(--skyve-editorial-button-secondary-bg) !important;
+    border-color: transparent !important;
+    color: var(--skyve-editorial-button-secondary-fg) !important;
+}
+body .ui-button.ui-button-secondary.ui-state-hover,
+body .ui-button.ui-button-secondary:hover,
+body .ui-button.ui-button-outlined.ui-state-hover,
+body .ui-button.ui-button-outlined:hover,
+.skyve-action-bar .ui-button[onclick*="popHistory"].ui-state-hover,
+.skyve-action-bar .ui-button[onclick*="popHistory"]:hover,
+.action-bar .ui-button[onclick*="popHistory"].ui-state-hover,
+.action-bar .ui-button[onclick*="popHistory"]:hover {
+    background: var(--skyve-editorial-button-secondary-hover-bg) !important;
+    border-color: transparent !important;
+    color: var(--skyve-editorial-button-secondary-fg) !important;
 }
 body .ui-inputfield.ui-state-hover,
 body .ui-inputfield:hover,
@@ -230,6 +450,12 @@ body .ui-growl .ui-state-error {
 body .ui-growl .ui-growl-success {
     border-left: 0.25rem solid var(--skyve-editorial-success) !important;
 }
+/* SKYVE.PF.sidebar() injects a style tag with a hardcoded white background for the
+   slide-in edit/create region - repaint it from the palette so dark themes work */
+body .sidebarEdit,
+body .sidebarCreate {
+	background-color: var(--skyve-editorial-page-bg) !important;
+}
 #main > .inner > section .ui-panel:not(#header),
 #main > .inner > section fieldset {
     background: var(--skyve-editorial-panel-bg) !important;
@@ -242,16 +468,27 @@ body .ui-growl .ui-growl-success {
     border-color: var(--skyve-editorial-panel-border) !important;
     color: var(--skyve-editorial-title-text) !important;
 }
-#main > .inner > section .ui-datatable {
+#main > .inner > section .ui-datatable,
+#main > .inner > section .p-datatable {
     background: var(--skyve-editorial-panel-bg) !important;
     border: 1px solid var(--skyve-editorial-panel-border) !important;
     box-shadow: var(--skyve-editorial-table-shell-shadow);
+    color: var(--skyve-editorial-menu-text) !important;
 }
-#main > .inner > section .ui-datatable .ui-paginator {
+#main > .inner > section .p-datatable .p-datatable-header,
+#main > .inner > section .p-datatable .p-datatable-footer {
     background: var(--skyve-editorial-panel-bg) !important;
     border-color: var(--skyve-editorial-panel-border) !important;
+    color: var(--skyve-editorial-title-text) !important;
 }
-#main > .inner > section .ui-datatable tbody td {
+#main > .inner > section .ui-datatable .ui-paginator,
+#main > .inner > section .p-datatable .p-paginator {
+    background: var(--skyve-editorial-panel-bg) !important;
+    border-color: var(--skyve-editorial-panel-border) !important;
+    color: var(--skyve-editorial-menu-text) !important;
+}
+#main > .inner > section .ui-datatable tbody td,
+#main > .inner > section .p-datatable .p-datatable-tbody > tr > td {
     border-color: var(--skyve-editorial-panel-border) !important;
 }
 #main > .inner > section .ui-datatable thead th:first-child,
@@ -260,23 +497,86 @@ body .ui-growl .ui-growl-success {
 #main > .inner > section .p-datatable .p-datatable-tbody > tr > td:first-child {
     padding-left: var(--skyve-editorial-table-edge-padding) !important;
 }
-#main > .inner > section .ui-datatable tbody .ui-button {
-    background: var(--skyve-editorial-table-action-bg) !important;
-    border-color: var(--skyve-editorial-table-action-bg) !important;
-    box-shadow: none;
+/* in-table buttons inherit the tonal signature; keep a touch target floor */
+#main > .inner > section .ui-datatable tbody .ui-button,
+#main > .inner > section .p-datatable .p-button {
     min-height: 2.25rem;
 }
-#main > .inner > section .ui-datatable tbody .ui-button.ui-state-hover,
-#main > .inner > section .ui-datatable tbody .ui-button:hover {
-    background: var(--skyve-editorial-table-action-hover-bg) !important;
-    border-color: var(--skyve-editorial-table-action-hover-bg) !important;
-    box-shadow: var(--skyve-editorial-button-shadow);
+/* VueListGrid toolbar + footer controls.
+   Match All is a Dropdown whose label is also .p-inputtext — Lara sets font-size:1rem
+   there, so it reads larger than MultiSelect (inherits .p-component) and Snapshot.
+   Flex stretch on the label makes its text sit high vs Snapshot's inline-flex centre.
+   Paginator page controls are <button>s — UA styles reset font-size (~16px) so they
+   look larger than the RPP combo which inherits .p-component (~13px). */
+#main > .inner > section .p-datatable .p-datatable-header .p-dropdown,
+#main > .inner > section .p-datatable .p-datatable-header .p-multiselect,
+#main > .inner > section .p-datatable .p-datatable-footer .p-dropdown,
+#main > .inner > section .p-datatable .p-paginator .p-dropdown {
+    align-items: center !important;
+    background: var(--skyve-editorial-panel-bg) !important;
+    border-color: var(--skyve-editorial-panel-border) !important;
+    color: var(--skyve-editorial-menu-text) !important;
+    display: inline-flex !important;
+    font-size: inherit !important;
+}
+#main > .inner > section .p-datatable .p-datatable-header .p-dropdown .p-dropdown-label,
+#main > .inner > section .p-datatable .p-datatable-header .p-dropdown .p-dropdown-label.p-inputtext,
+#main > .inner > section .p-datatable .p-datatable-header .p-multiselect .p-multiselect-label,
+#main > .inner > section .p-datatable .p-datatable-footer .p-dropdown .p-dropdown-label,
+#main > .inner > section .p-datatable .p-paginator .p-dropdown .p-dropdown-label,
+#main > .inner > section .p-datatable .p-paginator .p-dropdown .p-dropdown-label.p-inputtext {
+    align-items: center !important;
+    display: flex !important;
+    font-size: inherit !important;
+    line-height: 1.25 !important;
+    padding: 0.5rem 0.75rem !important;
+}
+#main > .inner > section .p-datatable .p-datatable-header .p-multiselect .p-multiselect-label-container {
+    align-items: center !important;
+    display: flex !important;
+}
+#main > .inner > section .p-datatable .p-datatable-header .p-dropdown .p-dropdown-trigger,
+#main > .inner > section .p-datatable .p-datatable-header .p-multiselect .p-multiselect-trigger,
+#main > .inner > section .p-datatable .p-paginator .p-dropdown .p-dropdown-trigger {
+    align-items: center !important;
+    display: flex !important;
+    justify-content: center !important;
+    width: 2.25rem !important;
+}
+#main > .inner > section .p-datatable .p-paginator .p-dropdown {
+    height: auto !important;
+    min-height: 2rem;
+}
+#main > .inner > section .p-datatable .p-paginator .p-paginator-first,
+#main > .inner > section .p-datatable .p-paginator .p-paginator-prev,
+#main > .inner > section .p-datatable .p-paginator .p-paginator-next,
+#main > .inner > section .p-datatable .p-paginator .p-paginator-last,
+#main > .inner > section .p-datatable .p-paginator .p-paginator-page {
+    font-family: inherit !important;
+    font-size: inherit !important;
+    height: 2rem !important;
+    line-height: 1 !important;
+    min-width: 2rem !important;
 }
 
-/* Device sizing */
+/* Device sizing.
+   Include .ui-inputfield so SelectOneMenu labels (which are .ui-inputfield but NOT
+   .ui-widget) pick up the same size as text inputs. Saga sets those labels to
+   font-size:1rem which otherwise reads larger than the rest of the form. Padding
+   overrides stay commented - reducing input padding leaves adornment buttons oversized. */
+@media (max-width: 640px) {
+	body .ui-widget,
+	body .ui-inputfield {
+		font-size: 0.875rem !important;
+	}
+	.p-component {
+		font-size: 0.875rem !important;
+	}
+}
 @media (min-width: 641px) {
-	body .ui-widget {
-		font-size: 1rem !important;
+	body .ui-widget,
+	body .ui-inputfield {
+		font-size: 0.875rem !important;
 	}
 /* leaves selection buttons on fields large - see kitchen sink
 	body .ui-inputfield {
@@ -284,15 +584,16 @@ body .ui-growl .ui-growl-success {
 	}
 */
 	.p-component {
-		font-size: 1rem !important;
+		font-size: 0.875rem !important;
 	}
 	.p-datatable .p-datatable-tbody>tr>td {
 		padding: 1rem !important;
 	}
 }
 @media (min-width: 737px) {
-	body .ui-widget {
-		font-size: 0.95rem !important;
+	body .ui-widget,
+	body .ui-inputfield {
+		font-size: 0.8125rem !important;
 	}
 /* leaves selection buttons on fields large - see kitchen sink
 	body .ui-inputfield {
@@ -300,15 +601,16 @@ body .ui-growl .ui-growl-success {
 	}
 */
 	.p-component {
-		font-size: 0.95rem !important;
+		font-size: 0.8125rem !important;
 	}
 	.p-datatable .p-datatable-tbody>tr>td {
 		padding: 0.8rem 1rem !important;
 	}
 }
 @media (min-width: 1281px) {
-	body .ui-widget {
-		font-size: 0.9rem !important;
+	body .ui-widget,
+	body .ui-inputfield {
+		font-size: 0.8125rem !important;
 	}
 /* leaves selection buttons on fields large - see kitchen sink
 	body .ui-inputfield {
@@ -316,7 +618,7 @@ body .ui-growl .ui-growl-success {
 	}
 */
 	.p-component {
-		font-size: 0.9rem !important;
+		font-size: 0.8125rem !important;
 	}
 	.p-datatable .p-datatable-tbody>tr>td {
 		padding: 0.6rem 1rem !important;
@@ -2855,7 +3157,7 @@ mark {
 
 			#main > .inner > section {
 				padding: 1.5em 0 4em 0 ;
-				border-top: solid 2px rgba(210, 215, 217, 0.75);
+				border-top: solid 2px var(--skyve-editorial-border);
 			}
 
 				#main > .inner > section:first-of-type {
@@ -2962,6 +3264,11 @@ mark {
 				max-width: calc(var(--skyve-editorial-sidebar-width) - 2rem) !important;
 			}
 
+			/* the dark variant logo is only shown by the dark palette (themes/dark.css) */
+			#menu .sidebar-logo-dark {
+				display: none;
+			}
+
 			#menuform {
 				flex: 1 1 auto;
 				min-height: 0;
@@ -3005,7 +3312,20 @@ mark {
 			}
 
 			#menu .ui-panelmenu .ui-panelmenu-header > a {
-				font-weight: 700;
+				font-weight: 600;
+			}
+
+			/* current page - marked by editorial/assets/js/skyve-menu.js */
+			#menu .ui-panelmenu .ui-menuitem.skyve-menu-active > .ui-menuitem-link {
+				background: var(--skyve-editorial-menu-active-bg);
+				background-color: var(--skyve-editorial-menu-active-bg);
+				box-shadow: inset 0.25rem 0 0 var(--skyve-editorial-accent);
+				color: var(--skyve-editorial-accent);
+			}
+
+			#menu .ui-panelmenu .ui-menuitem.skyve-menu-active > .ui-menuitem-link .ui-menuitem-text,
+			#menu .ui-panelmenu .ui-menuitem.skyve-menu-active > .ui-menuitem-link .ui-menuitem-icon {
+				color: var(--skyve-editorial-accent) !important;
 			}
 
 			#menu .ui-panelmenu .ui-panelmenu-header.ui-state-active > a {
@@ -3162,7 +3482,7 @@ mark {
 
 		@media screen and (max-width: 1680px) {
 			:root {
-				--skyve-editorial-sidebar-width: 20.7rem;
+				--skyve-editorial-sidebar-width: 16rem;
 			}
 
 			#sidebar {
@@ -3202,7 +3522,7 @@ mark {
 
 		@media screen and (max-width: 1480px) {
 			:root {
-				--skyve-editorial-sidebar-width: 19.8rem;
+				--skyve-editorial-sidebar-width: 16rem;
 			}
 
 			#sidebar {
@@ -3271,11 +3591,33 @@ mark {
 					text-indent: 6em;
 					width: 6em;
 					display: block;
+					/* match the header height so the chip centres on the topbar like the avatar */
+					height: var(--skyve-editorial-header-height);
+					line-height: var(--skyve-editorial-header-height);
 				}
 
+					/* themed as a translucent chip on the topbar, like the avatar */
 					#sidebar .toggle:before {
-						font-size: 1.5rem;
-						margin-left: -0.4375em;
+						color: var(--skyve-editorial-topbar-text);
+						font-size: 1.1rem;
+						margin-left: 0;
+						z-index: 1;
+					}
+
+					#sidebar .toggle:after {
+						background: rgba(255, 255, 255, 0.18);
+						border-radius: 0.375rem;
+						content: '';
+						height: 2.75rem;
+						left: 50%;
+						margin: -1.375rem 0 0 -1.375rem;
+						position: absolute;
+						top: 50%;
+						width: 2.75rem;
+					}
+
+					#sidebar .toggle:hover:after {
+						background: rgba(255, 255, 255, 0.28);
 					}
 
 				#sidebar.inactive .toggle {
@@ -3314,22 +3656,11 @@ mark {
 			}
 
 				#sidebar .toggle:before {
-					color: #7f888f;
-					margin-left: -0.0625em;
-					margin-top: -0.5em;
+					color: var(--skyve-editorial-topbar-text);
+					margin-left: 0;
+					margin-top: 0;
 					font-size: 1.1rem;
 					z-index: 1;
-				}
-
-				#sidebar .toggle:after {
-					background: rgba(222, 225, 226, 0.75);
-					border-radius: 0.375em;
-					content: '';
-					height: 3em;
-					left: 1em;
-					position: absolute;
-					top: 1em;
-					width: 4em;
 				}
 
 		}
@@ -3354,16 +3685,41 @@ mark {
 			-webkit-flex: 1;
 			-ms-flex: 1;
 			flex: 1;
+			background: transparent !important;
 			border: 0 !important;
 			box-sizing: border-box;
+			/* NB the size must be declared (with !important) INSIDE @layer main - the
+			   layered body .ui-widget 13px !important beats any unlayered declaration
+			   because importance inverts layer priority */
+			font-size: 1.8rem !important;
+			font-weight: 300;
 			margin-bottom: 0;
 			min-width: 0;
 			overflow-wrap: anywhere;
 			white-space: normal;
 		}
 
+		@media screen and (max-width: 1024px) {
+			#header .title {
+				font-size: 1.25rem !important;
+			}
+		}
+
+		#header .ui-avatar {
+			background: rgba(255, 255, 255, 0.18);
+			color: var(--skyve-editorial-topbar-text);
+		}
+
+		#header .ui-avatar:hover {
+			background: rgba(255, 255, 255, 0.28);
+		}
+
 		#header .logo {
 			border-bottom: 0;
+		}
+		/* Title used to also carry the HTML5UP .logo class (1.8em) - keep that size only
+		   if a real logo wordmark is present without .title */
+		#header .logo:not(.title) {
 			font-size: 1.8em !important;
 		}
 
@@ -3508,8 +3864,7 @@ mark {
 @media screen and (max-width: 1024px) {
 	#header {
 		align-items: center;
-		backdrop-filter: saturate(1.1) blur(0.375rem);
-		background: var(--skyve-editorial-surface-glass);
+		background: var(--skyve-editorial-topbar-bg);
 		border-bottom: 0;
 		box-sizing: border-box;
 		box-shadow: var(--skyve-editorial-divider-shadow);
@@ -3525,10 +3880,11 @@ mark {
 
 	#header .title {
 		box-sizing: border-box;
-		color: var(--skyve-editorial-title-text);
+		color: var(--skyve-editorial-topbar-text);
 		display: -webkit-box;
-		font-size: 1.25em !important;
-		line-height: 1.25;
+		font-size: 1.8rem !important;
+		font-weight: 300;
+		line-height: 1.3;
 		margin-bottom: 0;
 		max-width: 100%;
 		min-width: 0;
@@ -3540,11 +3896,14 @@ mark {
 	}
 
 	#header .icons {
+		align-items: center;
+		bottom: 0;
+		display: flex;
 		margin: 0;
-		padding: 1rem !important;
+		padding: 0 1rem !important;
 		position: absolute;
 		right: 0;
-		top: 0.25rem;
+		top: 0;
 	}
 
 	#main > .inner {
@@ -3654,8 +4013,7 @@ mark {
 @media screen and (min-width: 1025px) {
 	#header {
 		align-items: center;
-		backdrop-filter: saturate(1.1) blur(0.375rem);
-		background: var(--skyve-editorial-surface-glass);
+		background: var(--skyve-editorial-topbar-bg);
 		border-bottom: 0;
 		box-sizing: border-box;
 		box-shadow: var(--skyve-editorial-divider-shadow);
@@ -3671,10 +4029,11 @@ mark {
 
 	#header .title {
 		box-sizing: border-box;
-		color: var(--skyve-editorial-title-text);
+		color: var(--skyve-editorial-topbar-text);
 		display: -webkit-box;
-		font-size: 1.25em !important;
-		line-height: 1.25;
+		font-size: 1.8rem !important;
+		font-weight: 300;
+		line-height: 1.3;
 		margin-bottom: 0;
 		max-width: 100%;
 		min-width: 0;
@@ -3686,11 +4045,14 @@ mark {
 	}
 
 	#header .icons {
+		align-items: center;
+		bottom: 0;
+		display: flex;
 		margin: 0;
-		padding: 1rem !important;
+		padding: 0 1rem !important;
 		position: absolute;
 		right: 0;
-		top: 0.25rem;
+		top: 0;
 	}
 
 	#main > .inner {

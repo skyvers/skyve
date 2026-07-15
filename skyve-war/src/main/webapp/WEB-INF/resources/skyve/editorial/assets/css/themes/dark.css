@@ -1,0 +1,79 @@
+/*
+	Editorial theme colour: dark.
+	Selected by the theme colour on the UxUi (see router.UxUis). The matching
+	primefaces-skyve-dark alias theme swaps the PrimeFaces base theme from saga to arya,
+	so widget internals (inputs, pickers, tables) are dark natively - this file re-points
+	the editorial layout palette at arya's neutral surfaces.
+*/
+:root {
+	color-scheme: dark;
+	--skyve-editorial-accent-rgb: 144, 202, 249;
+	--skyve-editorial-accent-hover: #64B5F6;
+	/* 2b tonal wash is a touch stronger than light 1b so it reads on near-black surfaces */
+	--skyve-editorial-accent-soft: rgba(var(--skyve-editorial-accent-rgb), 0.18);
+	--skyve-editorial-actionbar-border: #383838;
+	--skyve-editorial-border: #383838;
+	--skyve-editorial-button-secondary-bg: #232323;
+	--skyve-editorial-button-secondary-fg: #94a3b8;
+	--skyve-editorial-button-secondary-hover-bg: #2c2c2c;
+	--skyve-editorial-menu-icon: rgba(255, 255, 255, 0.55);
+	--skyve-editorial-menu-text: rgba(255, 255, 255, 0.75);
+	--skyve-editorial-overlay-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.6);
+	--skyve-editorial-page-bg: #121212;
+	--skyve-editorial-panel-bg: #1e1e1e;
+	--skyve-editorial-panel-border: #383838;
+	--skyve-editorial-panel-header-bg: #262626;
+	--skyve-editorial-panel-shadow: 0 0.0625rem 0.25rem rgba(0, 0, 0, 0.4);
+	--skyve-editorial-row-hover-bg: rgba(255, 255, 255, 0.04);
+	--skyve-editorial-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.5);
+	--skyve-editorial-sidebar-bg: #1a1a1a;
+	--skyve-editorial-surface: #1e1e1e;
+	--skyve-editorial-surface-glass: rgba(30, 30, 30, 0.94);
+	--skyve-editorial-table-header-bg: #262626;
+	--skyve-editorial-table-shell-shadow: 0 0.0625rem 0.375rem rgba(0, 0, 0, 0.35);
+	--skyve-editorial-title-text: rgba(255, 255, 255, 0.87);
+	--skyve-editorial-topbar-bg: #1e1e1e;
+}
+
+/* Swap to the dark variant logo when the customer supplies one - the logo plate
+   follows the topbar colour (see main.css) so light primary logos remain visible
+   here without a variant; supply <logoName>-dark.<extension> only when the brand
+   wants a different treatment on near-black */
+#menu .sidebar-logo-light {
+	display: none;
+}
+
+#menu .sidebar-logo-dark {
+	display: inline-block;
+}
+
+/* The base editorial (HTML5UP) styles assume a light page */
+body {
+	color: rgba(255, 255, 255, 0.72);
+}
+
+/* User dashboard tile icon accents (admin.css) are dark hues tuned for a light page -
+   swap to lighter tints of the same hues */
+.tile .title .fa-angle-up {
+	color: #9ec5fe;
+}
+
+.tile .title .fa-plus {
+	color: #9eeaf9;
+}
+
+.tile .title .fa-times {
+	color: #f1aeb5;
+}
+
+.tile .title .fa-chevron-right {
+	color: #c5a3ff;
+}
+
+.tile .title .fa-search-plus {
+	color: rgba(255, 255, 255, 0.55);
+}
+
+#footer .copyright {
+	color: rgba(255, 255, 255, 0.4);
+}

@@ -1,0 +1,36 @@
+/*
+	Editorial VueListGrid palette bridge.
+	Loaded after skyvevue/index.css (see editorial/view.xhtml) so these :root
+	remaps beat Lara's hardcoded --primary-color / Inter font. Component chrome
+	(buttons, table shell, paginator) is restyled from editorial tokens in main.css.
+*/
+:root {
+	--font-family: var(--skyve-editorial-font);
+	--font-feature-settings: normal;
+	--primary-color: var(--skyve-editorial-accent);
+	--primary-color-text: var(--skyve-editorial-button-hover-fg);
+	--surface-0: var(--skyve-editorial-panel-bg);
+	--surface-50: var(--skyve-editorial-table-header-bg);
+	--surface-100: var(--skyve-editorial-panel-header-bg);
+	--surface-ground: var(--skyve-editorial-page-bg);
+	--surface-section: var(--skyve-editorial-panel-bg);
+	--surface-card: var(--skyve-editorial-panel-bg);
+	--surface-overlay: var(--skyve-editorial-panel-bg);
+	--surface-border: var(--skyve-editorial-panel-border);
+	--text-color: var(--skyve-editorial-menu-text);
+	--text-color-secondary: var(--skyve-editorial-button-secondary-fg);
+	--maskbg: rgba(15, 23, 42, 0.4);
+}
+
+
+/* Dropdown / Multiselect overlays follow the editorial panel (Lara is light-only). */
+.p-dropdown-panel,
+.p-multiselect-panel,
+.p-tieredmenu,
+.p-contextmenu,
+.p-column-filter-overlay,
+.p-dialog {
+	background: var(--skyve-editorial-panel-bg);
+	color: var(--skyve-editorial-menu-text);
+	border-color: var(--skyve-editorial-panel-border);
+}

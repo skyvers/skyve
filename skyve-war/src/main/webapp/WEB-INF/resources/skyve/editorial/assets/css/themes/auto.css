@@ -1,0 +1,7 @@
+/*
+	Editorial theme colour: auto.
+	Follows the browser/operating system colour scheme preference - the default (blue) palette
+	in the light scheme, and the dark palette when the user prefers dark. The import expression
+	below is resolved by the JSF resource handler at serve time.
+*/
+@import url("#{resource['skyve:editorial/assets/css/themes/dark.css']}") (prefers-color-scheme: dark);
