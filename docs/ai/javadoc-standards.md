@@ -4,11 +4,10 @@ Javadoc is the authoritative contract record for public API. Write it so that a 
 
 ## When to Write Javadoc
 
-- Every public class, interface, enum, and annotation in `skyve-core`; these form the stable framework API.
-- Every public and protected method or constructor in `skyve-core` and any module that other modules or downstream applications call directly.
+- Every class, interface, enum, and annotation in `skyve-core`, regardless of visibility; these form the stable framework API.
+- Every method or constructor in `skyve-core`, regardless of visibility and any module that other modules or downstream applications call directly.
 - Package-level `package-info.java` when the package has a non-obvious purpose or threading model.
 - Skip generated sources (`src/generated/java`, `src/generatedTest/java`); they are throwaway artefacts.
-- Skip trivial JavaBean getters and setters unless the field carries a non-obvious invariant (for example lazy initialisation, thread confinement, or `null` meaning "not yet resolved").
 
 ## Lead Sentence
 
