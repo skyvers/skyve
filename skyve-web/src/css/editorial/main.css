@@ -669,10 +669,6 @@ mark {
 
 /* Basic */
 
-	@-ms-viewport {
-		width: device-width;
-	}
-
 	body {
 		-ms-overflow-style: scrollbar;
 	}
@@ -3910,17 +3906,12 @@ mark {
 		padding-top: var(--skyve-editorial-header-height);
 	}
 
-	#main > .inner:has(.skyve-action-bar),
-	#main > .inner:has(.action-bar) {
-		padding-top: calc(var(--skyve-editorial-header-height) + var(--skyve-editorial-actionbar-height));
-	}
-
 	#sidebarWrapper .skyve-action-bar-wrapper,
 	#sidebarWrapper .action-bar-wrapper,
 	.skyve-action-bar-wrapper,
 	.action-bar-wrapper {
-		height: 0;
-		min-height: 0;
+		height: var(--skyve-editorial-actionbar-height);
+		min-height: var(--skyve-editorial-actionbar-height);
 		overflow: visible;
 		padding: 0;
 	}
@@ -4059,17 +4050,12 @@ mark {
 		padding-top: var(--skyve-editorial-header-height);
 	}
 
-	#main > .inner:has(.skyve-action-bar),
-	#main > .inner:has(.action-bar) {
-		padding-top: calc(var(--skyve-editorial-header-height) + var(--skyve-editorial-actionbar-height));
-	}
-
 	#sidebarWrapper .skyve-action-bar-wrapper,
 	#sidebarWrapper .action-bar-wrapper,
 	.skyve-action-bar-wrapper,
 	.action-bar-wrapper {
-		height: 0;
-		min-height: 0;
+		height: var(--skyve-editorial-actionbar-height);
+		min-height: var(--skyve-editorial-actionbar-height);
 		overflow: visible;
 		padding: 0;
 	}

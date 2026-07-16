@@ -1,6 +1,0 @@
-/*
-	Skyve alias theme - delegates PrimeFaces widget styling to the free saga theme.
-	The layout palette for this colour lives in editorial/assets/css/themes/ in the application war.
-	The import expression below is resolved by the JSF resource handler at serve time.
-*/
-@import url("#{resource['primefaces-saga:theme.css']}");

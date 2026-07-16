@@ -1,5 +1,9 @@
 /*
 	Editorial theme colour: blue (default).
-	The default palette is defined in ../main.css - this file intentionally overrides nothing.
-	To create a new colour, copy indigo.css and adjust the variables.
+	The light palette is defined in main.css. These dark-accent tokens are consumed by dark.css
+	when the browser/operating system prefers dark mode.
 */
+:root {
+	--skyve-editorial-dark-accent-rgb: 144, 202, 249;
+	--skyve-editorial-dark-accent-hover: #64B5F6;
+}

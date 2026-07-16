@@ -1,10 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE project>
 <project name="Compress" default="compressJavascript" basedir=".">
-	<!-- Default if not supplied by Maven -->
-	<property name="closure.compiler.jar" value="lib/closure-compiler-v20240317.jar"/>
-	<property name="yui.compressor.jar" value="lib/yui-compressor-2.4.8.jar"/>
-	<target name="compressJavascript">
+	<property name="closure.compiler.version" value="v20240317"/>
+	<property name="closure.compiler.jar" value="lib/closure-compiler-${closure.compiler.version}.jar"/>
+	<property name="closure.compiler.sha256" value="6b1250ac21c05bdd209dc515d9b6037b30b5555a284dd741ff0591a82848b7ce"/>
+	<property name="lightningcss.version" value="1.32.0"/>
+
+	<target name="prepareCompressionTools">
+		<mkdir dir="lib"/>
+		<get src="https://repo.maven.apache.org/maven2/com/google/javascript/closure-compiler/${closure.compiler.version}/closure-compiler-${closure.compiler.version}.jar"
+				dest="${closure.compiler.jar}" skipexisting="true"/>
+		<checksum file="${closure.compiler.jar}" algorithm="SHA-256"
+				property="closure.compiler.actual.sha256"/>
+		<fail message="Closure Compiler ${closure.compiler.version} checksum mismatch: expected ${closure.compiler.sha256}, got ${closure.compiler.actual.sha256}">
+			<condition>
+				<not>
+					<equals arg1="${closure.compiler.actual.sha256}" arg2="${closure.compiler.sha256}" casesensitive="false"/>
+				</not>
+			</condition>
+		</fail>
+	</target>
+
+	<target name="compressJavascript" depends="prepareCompressionTools">
+		<mkdir dir="src/main/resources/META-INF/resources/skyve/editorial/assets/css"/>
+		<mkdir dir="src/main/resources/META-INF/resources/skyve/editorial/assets/js"/>
+
 	    <!-- Minify SmartClient JavaScript -->
 	    <java jar="${closure.compiler.jar}" fork="true">
 	        <!-- Common files -->
@@ -31,19 +51,81 @@
 	    </java>
 		<echo file="../skyve-web/src/main/resources/META-INF/resources/skyve/desktop/skyve-min.js" append="true">//# sourceMappingURL=skyve-min.js.map</echo>
 
-		<!-- Minify CSS -->
-		<java jar="${yui.compressor.jar}" fork="true">
-			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/skyve/css/basic-min.css src/css/basic.css"/>
-		</java>
-		<java jar="${yui.compressor.jar}" fork="true">
-			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/skyve/css/prime-min.css src/css/prime.css"/>
-		</java>
-		<java jar="${yui.compressor.jar}" fork="true">
-			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/skyve/css/skyve-login-min.css src/css/skyve-login.css"/>
-		</java>
-		<java jar="${yui.compressor.jar}" fork="true">
-			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/skyve/css/upload-min.css src/css/upload.css"/>
-		</java>
+		<!-- Minify CSS with a modern parser. npx downloads the pinned tool only when this
+		     explicit Ant target is run; normal Maven builds package the committed outputs. -->
+		<exec executable="cmd" osfamily="windows" failonerror="true">
+			<arg value="/c"/><arg value="npx.cmd"/>
+			<arg value="--yes"/><arg value="lightningcss-cli@${lightningcss.version}"/><arg value="--minify"/>
+			<arg value="--output-file"/><arg value="src/main/resources/META-INF/resources/skyve/css/basic-min.css"/>
+			<arg value="src/css/basic.css"/>
+		</exec>
+		<exec executable="/bin/sh" osfamily="unix" failonerror="true">
+			<arg value="-lc"/>
+			<arg value="npx --yes lightningcss-cli@${lightningcss.version} --minify --output-file src/main/resources/META-INF/resources/skyve/css/basic-min.css src/css/basic.css"/>
+		</exec>
+		<exec executable="cmd" osfamily="windows" failonerror="true">
+			<arg value="/c"/><arg value="npx.cmd"/>
+			<arg value="--yes"/><arg value="lightningcss-cli@${lightningcss.version}"/><arg value="--minify"/>
+			<arg value="--output-file"/><arg value="src/main/resources/META-INF/resources/skyve/css/prime-min.css"/>
+			<arg value="src/css/prime.css"/>
+		</exec>
+		<exec executable="/bin/sh" osfamily="unix" failonerror="true">
+			<arg value="-lc"/>
+			<arg value="npx --yes lightningcss-cli@${lightningcss.version} --minify --output-file src/main/resources/META-INF/resources/skyve/css/prime-min.css src/css/prime.css"/>
+		</exec>
+		<exec executable="cmd" osfamily="windows" failonerror="true">
+			<arg value="/c"/><arg value="npx.cmd"/>
+			<arg value="--yes"/><arg value="lightningcss-cli@${lightningcss.version}"/><arg value="--minify"/>
+			<arg value="--output-file"/><arg value="src/main/resources/META-INF/resources/skyve/css/skyve-login-min.css"/>
+			<arg value="src/css/skyve-login.css"/>
+		</exec>
+		<exec executable="/bin/sh" osfamily="unix" failonerror="true">
+			<arg value="-lc"/>
+			<arg value="npx --yes lightningcss-cli@${lightningcss.version} --minify --output-file src/main/resources/META-INF/resources/skyve/css/skyve-login-min.css src/css/skyve-login.css"/>
+		</exec>
+		<exec executable="cmd" osfamily="windows" failonerror="true">
+			<arg value="/c"/><arg value="npx.cmd"/>
+			<arg value="--yes"/><arg value="lightningcss-cli@${lightningcss.version}"/><arg value="--minify"/>
+			<arg value="--output-file"/><arg value="src/main/resources/META-INF/resources/skyve/css/upload-min.css"/>
+			<arg value="src/css/upload.css"/>
+		</exec>
+		<exec executable="/bin/sh" osfamily="unix" failonerror="true">
+			<arg value="-lc"/>
+			<arg value="npx --yes lightningcss-cli@${lightningcss.version} --minify --output-file src/main/resources/META-INF/resources/skyve/css/upload-min.css src/css/upload.css"/>
+		</exec>
+		<exec executable="cmd" osfamily="windows" failonerror="true">
+			<arg value="/c"/><arg value="npx.cmd"/>
+			<arg value="--yes"/><arg value="lightningcss-cli@${lightningcss.version}"/><arg value="--minify"/>
+			<arg value="--output-file"/><arg value="src/main/resources/META-INF/resources/skyve/editorial/assets/css/main-min.css"/>
+			<arg value="src/css/editorial/main.css"/>
+		</exec>
+		<exec executable="/bin/sh" osfamily="unix" failonerror="true">
+			<arg value="-lc"/>
+			<arg value="npx --yes lightningcss-cli@${lightningcss.version} --minify --output-file src/main/resources/META-INF/resources/skyve/editorial/assets/css/main-min.css src/css/editorial/main.css"/>
+		</exec>
+
+		<!-- Minify Editorial JavaScript -->
+	    <java jar="${closure.compiler.jar}" fork="true">
+	        <arg value="--js=src/js/editorial/util.js"/>
+	        <arg value="--js_output_file=src/main/resources/META-INF/resources/skyve/editorial/assets/js/util-min.js"/>
+	        <arg value="--create_source_map=src/main/resources/META-INF/resources/skyve/editorial/assets/js/util-min.js.map"/>
+	        <arg value="--source_map_include_content"/>
+	    </java>
+		<echo file="src/main/resources/META-INF/resources/skyve/editorial/assets/js/util-min.js" append="true">//# sourceMappingURL=util-min.js.map</echo>
+	    <java jar="${closure.compiler.jar}" fork="true">
+	        <arg value="--js=src/js/editorial/main.js"/>
+	        <arg value="--js_output_file=src/main/resources/META-INF/resources/skyve/editorial/assets/js/main-min.js"/>
+	        <arg value="--create_source_map=src/main/resources/META-INF/resources/skyve/editorial/assets/js/main-min.js.map"/>
+	        <arg value="--source_map_include_content"/>
+	    </java>
+		<echo file="src/main/resources/META-INF/resources/skyve/editorial/assets/js/main-min.js" append="true">//# sourceMappingURL=main-min.js.map</echo>
+	    <java jar="${closure.compiler.jar}" fork="true">
+	        <arg value="--js=src/js/editorial/skyve-menu.js"/>
+	        <arg value="--js_output_file=src/main/resources/META-INF/resources/skyve/editorial/assets/js/skyve-menu-min.js"/>
+	        <arg value="--create_source_map=src/main/resources/META-INF/resources/skyve/editorial/assets/js/skyve-menu-min.js.map"/>
+	        <arg value="--source_map_include_content"/>
+	    </java>
+		<echo file="src/main/resources/META-INF/resources/skyve/editorial/assets/js/skyve-menu-min.js" append="true">//# sourceMappingURL=skyve-menu-min.js.map</echo>
 
 	    <!-- Minify PrimeFaces JavaScript -->
 	    <java jar="${closure.compiler.jar}" fork="true">

@@ -11,8 +11,8 @@ import com.google.common.base.MoreObjects;
  * <p>Skyve supports multiple UX/UI variants within a single deployment (e.g.
  * {@code desktop}, {@code phone}, {@code tablet}). Each variant can render using
  * either the SmartClient ({@link #getScSkin()}) or PrimeFaces ({@link #getPfTemplateName()})
- * component library, and carries the theme name and optional colour variant used by
- * the PrimeFaces layer.
+ * component library, and carries an exact PrimeFaces theme plus a colour palette used by
+ * the selected template and its PrimeFaces widget overrides.
  *
  * <p>Instances are created via the static factory methods:
  * <ul>
@@ -84,56 +84,45 @@ public final class UxUi implements Serializable {
 	}
 
 	/**
-	 * Returns the pfThemeName.
-	 * @return the result
+	 * Returns the configured PrimeFaces theme name.
+	 *
+	 * @return the PrimeFaces theme name, or {@code null} when none is configured
 	 */
 	public String getPfThemeName() {
 		return pfThemeName;
 	}
 	/**
-	 * Sets the pfThemeName.
-	 * @param pfThemeName the pfThemeName
+	 * Sets the PrimeFaces theme name.
+	 *
+	 * @param pfThemeName the PrimeFaces theme name
 	 */
 	public void setPfThemeName(String pfThemeName) {
 		this.pfThemeName = pfThemeName;
 	}
 
 	/**
-	 * Returns the pfThemeColour.
-	 * @return the result
+	 * Returns the colour palette selected for the template and PrimeFaces widget overrides.
+	 *
+	 * @return the PrimeFaces theme colour, or {@code null} when none is configured
 	 */
 	public String getPfThemeColour() {
 		return pfThemeColour;
 	}
 	/**
-	 * Sets the pfThemeColour.
-	 * @param pfThemeColour the pfThemeColour
+	 * Sets the colour palette used by the template and PrimeFaces widget overrides.
+	 *
+	 * @param pfThemeColour the PrimeFaces theme colour
 	 */
 	public void setPfThemeColour(String pfThemeColour) {
 		this.pfThemeColour = pfThemeColour;
 	}
-	
-	/**
-	 * Returns the derived PrimeFaces theme identifier.
-	 *
-	 * <p>If a colour variant is configured, returns {@code "<themeName>-<themeColour>"}
-	 * (e.g. {@code "omega-blue"}); otherwise returns the plain theme name.
-	 *
-	 * @return the effective PrimeFaces theme string; may be {@code null} if no theme is set
-	 */
-	public String getPfTheme() {
-		if (pfThemeColour == null) {
-			return pfThemeName;
-		}
-		return String.format("%s-%s", pfThemeName, pfThemeColour);
-	}
-	
+
 	/**
 	 * Creates a PrimeFaces-backed UX/UI variant with a template and theme.
 	 *
 	 * @param name             the variant name (e.g. {@code "desktop"}); must not be {@code null}
 	 * @param pfTemplateName   the PrimeFaces layout template name; must not be {@code null}
-	 * @param pfThemeName      the PrimeFaces base theme name; must not be {@code null}
+	 * @param pfThemeName      the exact PrimeFaces theme identifier; must not be {@code null}
 	 * @return a new {@code UxUi} configured for PrimeFaces
 	 */
 	public static UxUi newPrimeFaces(String name, String pfTemplateName, String pfThemeName) {
@@ -144,14 +133,14 @@ public final class UxUi implements Serializable {
 	}
 
 	/**
-	 * Creates a PrimeFaces-backed UX/UI variant with a template, theme, and colour variant.
+	 * Creates a PrimeFaces-backed UX/UI variant with a template, theme, and colour palette.
 	 *
 	 * @param name             the variant name; must not be {@code null}
 	 * @param pfTemplateName   the PrimeFaces layout template name; must not be {@code null}
-	 * @param pfThemeName      the PrimeFaces base theme name; must not be {@code null}
-	 * @param pfThemeColour    the PrimeFaces theme colour variant (appended to the theme
-	 *                         name with a dash); must not be {@code null}
-	 * @return a new {@code UxUi} configured for PrimeFaces with a colour variant
+	 * @param pfThemeName      the exact PrimeFaces theme identifier; must not be {@code null}
+	 * @param pfThemeColour    the colour used by the template and PrimeFaces widget overrides;
+	 *                         must not be {@code null}
+	 * @return a new {@code UxUi} configured for PrimeFaces with a colour palette
 	 */
 	public static UxUi newPrimeFaces(String name, String pfTemplateName, String pfThemeName, String pfThemeColour) {
 		UxUi result = newPrimeFaces(name, pfTemplateName, pfThemeName);
@@ -164,7 +153,7 @@ public final class UxUi implements Serializable {
 	 *
 	 * @param name         the variant name; must not be {@code null}
 	 * @param scSkin       the SmartClient skin name; must not be {@code null}
-	 * @param pfThemeName  a PrimeFaces theme name used for components rendered outside
+	 * @param pfThemeName  a PrimeFaces theme identifier used for components rendered outside
 	 *                     the SmartClient layer; must not be {@code null}
 	 * @return a new {@code UxUi} configured for SmartClient
 	 */
@@ -176,12 +165,14 @@ public final class UxUi implements Serializable {
 	}
 
 	/**
-	 * Executes newSmartClient.
-	 * @param name the name
-	 * @param scSkin the scSkin
-	 * @param pfThemeName the pfThemeName
-	 * @param pfThemeColour the pfThemeColour
-	 * @return the result
+	 * Creates a SmartClient-backed UX/UI variant with a PrimeFaces colour palette.
+	 *
+	 * @param name          the variant name; must not be {@code null}
+	 * @param scSkin        the SmartClient skin name; must not be {@code null}
+	 * @param pfThemeName   the exact PrimeFaces theme identifier; must not be {@code null}
+	 * @param pfThemeColour the colour used by the template and PrimeFaces widget overrides;
+	 *                      must not be {@code null}
+	 * @return a new {@code UxUi} configured for SmartClient with a PrimeFaces colour palette
 	 */
 	public static UxUi newSmartClient(String name, String scSkin, String pfThemeName, String pfThemeColour) {
 		UxUi result = newSmartClient(name, scSkin, pfThemeName);
@@ -189,18 +180,18 @@ public final class UxUi implements Serializable {
 		return result;
 	}
 
-    /**
-     * Returns a string representation of this instance.
-     * @return the result
-     */
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                          .add("name", name)
-                          .add("scSkin", scSkin)
-                          .add("pfTemplateName", pfTemplateName)
-                          .add("pfThemeName", pfThemeName)
-                          .add("pfThemeColour", pfThemeColour)
-                          .toString();
-    }
+	/**
+	 * Returns a string representation of this instance.
+	 * @return the result
+	 */
+	@Override
+	public String toString() {
+		return MoreObjects.toStringHelper(this)
+							.add("name", name)
+							.add("scSkin", scSkin)
+							.add("pfTemplateName", pfTemplateName)
+							.add("pfThemeName", pfThemeName)
+							.add("pfThemeColour", pfThemeColour)
+							.toString();
+	}
 }

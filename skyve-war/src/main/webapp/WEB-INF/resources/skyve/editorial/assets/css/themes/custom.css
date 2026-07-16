@@ -12,6 +12,9 @@
 	--skyve-editorial-accent-rgb: 0, 75, 136;
 	/* ≈ scale-color($primaryColor, $lightness: -10%) */
 	--skyve-editorial-accent-hover: #00447A;
+	/* Lighter brand accents with sufficient contrast on dark surfaces */
+	--skyve-editorial-dark-accent-rgb: 92, 164, 214;
+	--skyve-editorial-dark-accent-hover: #3D8FC5;
 	/* topbar defaults to accent from main.css; uncomment to force a darker chrome:
 	   --skyve-editorial-topbar-bg: #003C6D; */
 }

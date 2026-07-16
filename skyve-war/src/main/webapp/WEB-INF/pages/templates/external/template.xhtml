@@ -29,11 +29,15 @@
 			<link type="text/css" rel="stylesheet" href="fontawesome-4.7.0/css/font-awesome.min.css" />
 			-->
 			<link type="text/css" rel="stylesheet" href="fontawesome-6.5.1/css/all.min.css" />
+			<link type="text/css" rel="stylesheet" href="skyve/editorial/assets/fonts/montserrat/montserrat.css?v=#{bean.webResourceFileVersion}" />
 <!--
 			<link type="text/css" rel="stylesheet" href="skyve/css/primeflex.min.css?v=#{bean.webResourceFileVersion}" />
 -->
 			<link type="text/css" rel="stylesheet" href="skyve/css/prime-min.css?v=#{bean.webResourceFileVersion}" />
-			<h:outputStylesheet name="editorial/assets/css/main.css?v=#{bean.webResourceFileVersion}" library="skyve" />
+			<h:outputStylesheet name="editorial/assets/css/main-min.css?v=#{bean.webResourceFileVersion}" library="skyve" />
+			<c:set var="editorialThemeColour" value="#{skyve.getThemeColour('blue')}" />
+			<h:outputStylesheet name="#{'editorial/assets/css/themes/'.concat(editorialThemeColour).concat('.css?v=').concat(bean.webResourceFileVersion)}" library="skyve" />
+			<h:outputStylesheet name="editorial/assets/css/themes/dark.css?v=#{bean.webResourceFileVersion}" library="skyve" media="(prefers-color-scheme: dark)" rendered="#{editorialThemeColour ne 'dark'}" />
 			<link type="text/css" rel="stylesheet" href="pages/css/admin.css?v=#{bean.webResourceFileVersion}" />  
 			<script type="text/javascript" src="skyve/prime/skyve-min.js?v=#{bean.webResourceFileVersion}"></script>
 			<script type="text/javascript">
@@ -57,7 +61,7 @@
 								<p:autoUpdate />
 							</p:outputPanel>
 							<c:if test="#{showSwitchMode or showLogout}">
-								<ul class="icons" style="padding:20px 10px">
+								<ul class="icons">
 									<li>
 										<p:badge value="4" visible="false">
 											<p:avatar id="avatar" shape="circle" label="#{bean.userContactInitials}" style="cursor:pointer">
@@ -69,10 +73,10 @@
 							</c:if>
 						</header>
 						<c:if test="#{showSwitchMode or showLogout}">
-							<p:overlayPanel for="avatar">
-								<p:card style="text-align:center;background-color:rgb(248,249,250)" rendered="#{showLogout}">
+							<p:overlayPanel for="avatar" styleClass="profile-overlay">
+								<p:card style="text-align:center; background-color:rgb(248,249,250); padding: 0.5rem 0;" rendered="#{showLogout}">
 									<f:facet name="header">
-										<p:avatar size="xlarge" shape="circle" style="margin:5px" label="#{bean.userContactInitials}">
+										<p:avatar size="xlarge" shape="circle" style="margin:0.25rem;" label="#{bean.userContactInitials}">
 											<p:graphicImage value="#{bean.userContactImageUrl}" rendered="#{not empty bean.userContactImageUrl}" />
 										</p:avatar>
 									</f:facet>
@@ -84,13 +88,13 @@
 									</f:facet>
 								</p:card>
 								<h:form id="uxuiform" prependId="false"> 
-											<h:inputHidden id="uxuicsrf" value="#{bean.csrfToken}">
-												<p:autoUpdate />
-											</h:inputHidden>
-				  					<p:menu style="width:100%;border:0">
+									<h:inputHidden id="uxuicsrf" value="#{bean.csrfToken}">
+										<p:autoUpdate />
+									</h:inputHidden>
+				  					<p:menu style="width:100%; border:0">
 										<p:submenu label="User Management" rendered="#{showLogout}">
 											<p:menuitem value="Profile" url="?a=e&amp;m=admin&amp;d=UserDashboard" ajax="false" icon="fa-solid fa-user"/>
-											<p:menuitem value="Authentication" url="?a=e&amp;m=admin&amp;d=UserAccount" ajax="false" icon="fa-solid fa-user-shield"/>
+											<p:menuitem value="Account" url="?a=e&amp;m=admin&amp;d=UserAccount" ajax="false" icon="fa-solid fa-user-shield"/>
 										</p:submenu>
 										<p:separator rendered="#{showLogout}" />
 										<p:menuitem value="Logout" url="loggedOut" ajax="false" icon="fa-solid fa-right-from-bracket" rendered="#{showLogout}" />
@@ -101,7 +105,7 @@
 									</p:menu>
 								</h:form>
 							</p:overlayPanel>
-					</c:if>
+						</c:if>
 						<section>
 							<p:messages id="messages" widgetVar="messages" globalOnly="true" escape="false">
 								<p:autoUpdate />
@@ -145,15 +149,20 @@
 						<div class="inner">
 							<!-- Menu -->
 							<nav id="menu">
-								<table style="margin: 0; padding: 0; border: 0; width:100%; min-height: 109px;">
+								<!-- Both logos are rendered; the active palette CSS shows one.
+									When no dark variant resource exists the dark img falls back to the standard
+									logo URL (same URL - served from browser cache) so no conditional rendering
+									is needed at view build time. -->
+								<table class="#{empty bean.logoDarkRelativeFileNameUrl ? '' : 'darkLogoAvailable'}" style="margin: 0; padding: 0; border: 0; width:100%; min-height: 109px;">
 									<tr>
 										<td style="vertical-align: middle; text-align: center;">
-											<img src="#{bean.logoRelativeFileNameUrl}" alt="logo" style="max-width: 280px; object-fit: contain" />
+											<img class="sidebar-logo-light" src="#{bean.logoRelativeFileNameUrl}" alt="logo" style="max-width: 280px; object-fit: contain" />
+											<img class="sidebar-logo-dark" src="#{empty bean.logoDarkRelativeFileNameUrl ? bean.logoRelativeFileNameUrl : bean.logoDarkRelativeFileNameUrl}" alt="logo" style="max-width: 280px; object-fit: contain" />
 										</td>
 									</tr>
 								</table>
 								<h:form id="menuform" prependId="false"> 
-									<p:panelMenu id="leftMenu" model="#{menu.menu}" stateful="true" statefulGlobal="true" />
+									<p:panelMenu id="leftMenu" widgetVar="leftMenu" model="#{menu.menu}" multiple="false" stateful="true" statefulGlobal="true" />
 								</h:form>
 							</nav>
 						</div>
@@ -173,8 +182,9 @@
 			<!-- Scripts -->
 			<h:outputScript name="editorial/assets/js/browser.min.js?v=#{bean.webResourceFileVersion}" library="skyve" />
 			<h:outputScript name="editorial/assets/js/breakpoints.min.js?v=#{bean.webResourceFileVersion}" library="skyve" />
-			<h:outputScript name="editorial/assets/js/util.js?v=#{bean.webResourceFileVersion}" library="skyve" />
-			<h:outputScript name="editorial/assets/js/main.js?v=#{bean.webResourceFileVersion}" library="skyve" />
+			<h:outputScript name="editorial/assets/js/util-min.js?v=#{bean.webResourceFileVersion}" library="skyve" />
+			<h:outputScript name="editorial/assets/js/main-min.js?v=#{bean.webResourceFileVersion}" library="skyve" />
+			<h:outputScript name="editorial/assets/js/skyve-menu-min.js?v=#{bean.webResourceFileVersion}" library="skyve" />
 		</h:body>
 	</f:view>
 </html>

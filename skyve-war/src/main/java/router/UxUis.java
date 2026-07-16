@@ -9,34 +9,50 @@ import org.skyve.metadata.router.UxUi;
  * Declare new UxUis in the DefaultUxUiSelector.
  */
 public class UxUis {
-	private static final String EDITORIAL_THEME = "editorial";
-	private static final String SKYVE_THEME = "skyve";
 	/**
-	 * Colour palette for the editorial template: "auto", "blue", "indigo", "emerald",
-	 * "custom" or "dark". "auto" follows the browser/operating system colour scheme preference
-	 * (blue in light mode, dark palette in dark mode). "custom" is a starter corporate palette
-	 * intended to be edited per project - see docs/editorial-custom-colour.md.
+	 * The PF Theme to use
 	 */
-	private static final String THEME_COLOUR = "auto";
+	private static final String EDITORIAL_THEME = "editorial";
+	
+	/**
+	 * Colour palette for the editorial template: "blue", "indigo", "emerald", "custom" or
+	 * "dark". Light palettes follow the browser/operating system colour scheme preference;
+	 * "dark" forces dark mode.
+	 * See docs/editorial-custom-colour.md.
+	 */
+	private static final String THEME_COLOUR = "blue";
+	// "dark" forces dark mode.
+	private static final String SKYVE_THEME = "dark".equals(THEME_COLOUR) ? "skyve-dark" : "skyve";
 
 	/**
 	 * PrimeFaces profile for phone devices.
 	 */
 	public static final UxUi PHONE = UxUi.newPrimeFaces("phone", EDITORIAL_THEME, SKYVE_THEME, THEME_COLOUR);
+	
 	/**
 	 * PrimeFaces profile for tablet devices.
 	 */
 	public static final UxUi TABLET = UxUi.newPrimeFaces("tablet", EDITORIAL_THEME, SKYVE_THEME, THEME_COLOUR);
+	
 	/**
 	 * SmartClient profile for desktop browsers.
 	 */
 	public static final UxUi DESKTOP = UxUi.newSmartClient(UxUi.DESKTOP_NAME, "Tahoe", "casablanca");
+	
 	/**
 	 * PrimeFaces profile for unauthenticated/public pages.
 	 */
 	public static final UxUi EXTERNAL = UxUi.newPrimeFaces("external", EDITORIAL_THEME, SKYVE_THEME, THEME_COLOUR);
+	
 	/**
 	 * PrimeFaces profile for startup/setup wizard pages.
 	 */
 	public static final UxUi STARTUP = UxUi.newPrimeFaces("startup", EDITORIAL_THEME, SKYVE_THEME, THEME_COLOUR);
+
+	/**
+	 * Prevent instantiation
+	 */
+	private UxUis() {
+		// nothing to see here
+	}
 }

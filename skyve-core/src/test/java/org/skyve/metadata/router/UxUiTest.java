@@ -20,21 +20,21 @@ class UxUiTest {
 	}
 
 	@Test
-	void newPrimeFacesWithColourSetsThemeColour() {
+	void newPrimeFacesWithColourSetsPfThemeColour() {
 		UxUi ui = UxUi.newPrimeFaces("desktop", "ace", "omega", "blue");
 		assertEquals("blue", ui.getPfThemeColour());
 	}
 
 	@Test
-	void getPfThemeWithColourReturnsCombined() {
+	void getPfThemeNameWithColourReturnsExactTheme() {
 		UxUi ui = UxUi.newPrimeFaces("desktop", "ace", "omega", "blue");
-		assertEquals("omega-blue", ui.getPfTheme());
+		assertEquals("omega", ui.getPfThemeName());
 	}
 
 	@Test
-	void getPfThemeWithoutColourReturnsThemeName() {
+	void getPfThemeNameWithoutColourReturnsThemeName() {
 		UxUi ui = UxUi.newPrimeFaces("desktop", "ace", "omega");
-		assertEquals("omega", ui.getPfTheme());
+		assertEquals("omega", ui.getPfThemeName());
 	}
 
 	@Test
@@ -48,10 +48,10 @@ class UxUiTest {
 	}
 
 	@Test
-	void newSmartClientWithColourSetsThemeColour() {
+	void newSmartClientWithColourSetsPfThemeColour() {
 		UxUi ui = UxUi.newSmartClient("desktop", "Enterprise", "omega", "green");
 		assertEquals("green", ui.getPfThemeColour());
-		assertEquals("omega-green", ui.getPfTheme());
+		assertEquals("omega", ui.getPfThemeName());
 	}
 
 	@Test
@@ -79,7 +79,7 @@ class UxUiTest {
 	void setPfThemeColourUpdates() {
 		UxUi ui = UxUi.newPrimeFaces("desktop", "ace", "omega");
 		ui.setPfThemeColour("red");
-		assertEquals("omega-red", ui.getPfTheme());
+		assertEquals("red", ui.getPfThemeColour());
 	}
 
 	@Test

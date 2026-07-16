@@ -6,39 +6,61 @@ on the UxUi in router.UxUis, e.g.
 
 	UxUi.newPrimeFaces("phone", "editorial", "skyve", "emerald")
 
-Available colours: "auto" (default), "blue", "indigo", "emerald", "custom" and "dark".
+Available colours: "blue" (default), "indigo", "emerald", "custom" and "dark".
 
-"auto" follows the browser/operating system colour scheme preference (the blue palette in
-light mode, the dark palette in dark mode). "dark" forces dark mode permanently.
-"custom" is a starter corporate palette (#004B88) intended to be edited per project.
+The light palettes follow the browser/operating system colour scheme preference and switch
+to the dark palette in dark mode.
+"dark" forces the dark palette and PrimeFaces arya theme permanently.
+"custom" is a starter corporate palette (#004B88) intended to be copied and edited per project.
 
 Dark logos: if a customer resource exists named <logoName>-dark.<extension> alongside the
 configured logo (e.g. mylogo-dark.png for mylogo.png), it is served automatically whenever
-the dark palette is active (both forced "dark" and "auto" in a dark-preferring browser).
+the browser prefers dark mode or "dark" is selected permanently.
 
-Each colour pairs two stylesheets:
-1) PrimeFaces alias theme.css that imports free saga (or arya for "dark"):
-   - built-in colours: skyve-web META-INF/resources/primefaces-skyve-<colour>/
-   - project branding (e.g. "custom"): skyve-war WEB-INF/resources/primefaces-skyve-<colour>/
-2) skyve-war WEB-INF/resources/skyve/editorial/assets/css/themes/<colour>.css -
+The exact PrimeFaces base theme and its colour palette are configured separately:
+1) skyve-web META-INF/resources/primefaces-skyve/theme.css imports free saga when the browser
+   prefers light and free arya when it prefers dark. Selecting the "dark" colour makes
+   UxUis use primefaces-skyve-dark/theme.css, which always imports arya.
+2) skyve-war WEB-INF/resources/skyve/editorial/assets/css/themes/<colour>.css
    overrides the --skyve-editorial-* CSS variables (accent, divider, buttons
    and surfaces all derive from these). The view title bar defaults to the
    accent colour; set --skyve-editorial-topbar-bg only when you want different
-   chrome (dark still overrides it).
+   chrome. Each palette also supplies dark-safe accent values. dark.css uses those
+   accents while overriding the surfaces, borders and text under a dark-mode media query.
 
-Put project-specific aliases in the WAR so they deploy without rebuilding skyve-web.
+The substantial readable Editorial sources live under skyve-web/src/css/editorial and
+skyve-web/src/js/editorial. The skyve-web build generates and commits their minified web
+resources; generated files must not be edited directly. Small palette, Vue, font and
+PrimeFaces alias stylesheets remain readable in their final web-resource locations. The
+palettes and Vue integration stay in skyve-war; fonts and the shared PrimeFaces alias stay
+in skyve-web.
+
+Put project-specific readable <colour>.css palettes in the WAR so they deploy without
+rebuilding skyve-web or running a minifier. No PrimeFaces alias is required per colour.
 Full walkthrough: docs/editorial-custom-colour.md.
 
-To install the ultima theme (>= 7.0.0) on skyve.
+To install the Ultima theme (>= 7.0.0) on Skyve:
+================================================================
 
-1) Drop ultima-theme-7.0.0-jakarta.jar from Foundry project into WEB-INF/lib/
-2) Drop ultima-layout/ folder from Foundry project into WEB-INF/resources/ and rename to layout/ 
-3) Change router.UxUis to use "ultima" for the template name, "ultima" for the theme name 
-	and a theme colour matching the theme colour if there is one eg "indigo"
+1) Drop ultima-theme-7.0.0-jakarta.jar from the Foundry project into WEB-INF/lib/.
+2) Drop the ultima-layout/ folder into WEB-INF/resources/ and rename it to layout/.
+3) Configure each applicable UxUi with the exact PrimeFaces theme identifier as the third
+   argument and the Ultima layout colour as the fourth argument, for example:
 
- To install the ecuador theme (>= 7.0.0) on skyve.
- 
-1) Drop ecuador-theme-7.0.0-jakarta.jar from Foundry project into WEB-INF/lib/
-2) Drop ecuador-layout/ folder from Foundry project into WEB-INF/resources/
-3) Change router.UxUis to use "ecuador" for the template name, "ecuador" for the theme name
-	and a theme colour matching the theme colour if there is one eg "indigo"
+	UxUi.newPrimeFaces("phone", "ultima", "ultima-indigo", "indigo")
+
+The third argument is not combined with the fourth. If a different colour is selected, use
+the complete theme identifier supplied by the Ultima theme JAR and the matching layout colour.
+
+To install the Ecuador theme (>= 7.0.0) on Skyve:
+================================================================
+
+1) Drop ecuador-theme-7.0.0-jakarta.jar from the Foundry project into WEB-INF/lib/.
+2) Drop the ecuador-layout/ folder into WEB-INF/resources/ without renaming it.
+3) Configure each applicable UxUi with the exact PrimeFaces theme identifier as the third
+   argument and the Ecuador layout colour as the fourth argument, for example:
+
+	UxUi.newPrimeFaces("phone", "ecuador", "ecuador-indigo", "indigo")
+
+The third argument is not combined with the fourth. If a different colour is selected, use
+the complete theme identifier supplied by the Ecuador theme JAR and the matching layout colour.

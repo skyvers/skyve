@@ -118,7 +118,7 @@
 	<!-- sam, redmond, smoothness, bootstrap -->
 	<context-param>
 		<param-name>primefaces.THEME</param-name>
-		<param-value>#{request.getAttribute('skyveUxUi') == null ? 'saga' : request.getAttribute('skyveUxUi').getPfTheme()}</param-value>
+		<param-value>#{request.getAttribute('skyveUxUi') == null ? 'saga' : request.getAttribute('skyveUxUi').getPfThemeName()}</param-value>
 	</context-param>
 	<context-param>
 		<param-name>org.skyve.web.faces.PRIMEFLEX</param-name>

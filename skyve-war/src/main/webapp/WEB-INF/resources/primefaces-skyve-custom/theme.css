@@ -1,7 +1,0 @@
-/*
-	Skyve alias theme - delegates PrimeFaces widget styling to the free saga theme.
-	The layout palette for this colour lives in editorial/assets/css/themes/custom.css.
-	App-level colour aliases belong under WEB-INF/resources so they deploy with the WAR
-	without rebuilding skyve-web. See docs/editorial-custom-colour.md.
-*/
-@import url("#{resource['primefaces-saga:theme.css']}");

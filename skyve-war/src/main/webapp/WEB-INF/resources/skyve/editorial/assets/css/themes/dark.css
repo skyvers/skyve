@@ -1,14 +1,14 @@
 /*
-	Editorial theme colour: dark.
-	Selected by the theme colour on the UxUi (see router.UxUis). The matching
-	primefaces-skyve-dark alias theme swaps the PrimeFaces base theme from saga to arya,
-	so widget internals (inputs, pickers, tables) are dark natively - this file re-points
-	the editorial layout palette at arya's neutral surfaces.
+	Editorial dark palette.
+	Loaded when dark is selected or the browser/operating system prefers dark mode. The matching
+	PrimeFaces alias loads arya, so widget internals (inputs, pickers, tables) are dark natively
+	while this file re-points the Editorial layout at arya's neutral surfaces.
+	The selected light palette supplies dark-safe accent tokens; blue remains the fallback.
 */
 :root {
 	color-scheme: dark;
-	--skyve-editorial-accent-rgb: 144, 202, 249;
-	--skyve-editorial-accent-hover: #64B5F6;
+	--skyve-editorial-accent-rgb: var(--skyve-editorial-dark-accent-rgb, 144, 202, 249);
+	--skyve-editorial-accent-hover: var(--skyve-editorial-dark-accent-hover, #64B5F6);
 	/* 2b tonal wash is a touch stronger than light 1b so it reads on near-black surfaces */
 	--skyve-editorial-accent-soft: rgba(var(--skyve-editorial-accent-rgb), 0.18);
 	--skyve-editorial-actionbar-border: #383838;

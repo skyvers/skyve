@@ -430,13 +430,14 @@ Skyve's JavaScript files are located in `skyve-web/src/js` and are organised as 
 - `/desktop/` - JavaScript files used in SmartClient
 - `/prime/` - JavaScript files used in PrimeFaces
 
-### Compressing JavaScript Files
+### Compressing JavaScript and CSS Files
 
-The JavaScript files are compressed for production use through a build target in `skyve-web/build.xml`. This compression happens automatically during:
-
-- Maven install
-- Maven package
-- Maven deploy
+The JavaScript and CSS files are compressed for production use through the
+`compressJavascript` target in `skyve-web/build.xml`. Generated resources are committed, so
+normal Maven builds only package them and do not run the compressors. Run the Ant target
+explicitly after changing a readable JavaScript or CSS source file. The target downloads and
+verifies the pinned Closure Compiler when required, and invokes the pinned Lightning CSS CLI
+through `npx`. Node.js with `npx` is therefore required only when running this Ant target.
 
 To manually compress the JavaScript files in Eclipse:
 

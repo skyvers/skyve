@@ -1,6 +1,6 @@
 /*
-	Skyve alias theme (dark) - delegates PrimeFaces widget styling to the free arya dark theme.
-	The layout palette lives in editorial/assets/css/themes/dark.css in the application war.
+	Skyve forced-dark alias theme - delegates PrimeFaces widget styling to the free arya theme.
+	The Editorial layout palette is selected independently from skyve/editorial/assets/css/themes/.
 	The import expression below is resolved by the JSF resource handler at serve time.
 */
 @import url("#{resource['primefaces-arya:theme.css']}");

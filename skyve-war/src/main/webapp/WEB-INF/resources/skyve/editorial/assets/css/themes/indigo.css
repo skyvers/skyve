@@ -7,4 +7,6 @@
 :root {
 	--skyve-editorial-accent-rgb: 99, 102, 241;
 	--skyve-editorial-accent-hover: #4F46E5;
+	--skyve-editorial-dark-accent-rgb: 165, 180, 252;
+	--skyve-editorial-dark-accent-hover: #818CF8;
 }
