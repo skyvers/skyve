@@ -48,6 +48,26 @@ isc.BizUtil.addClassProperties({
 			showShadow: true,
 			shadowSoftness: 10,
 			shadowOffset: 0,
+			members: [this.createLeftMenuContents(logoSrc)],
+		});
+	},
+
+	/**
+	 * Creates the framed contents of the left-hand menu panel.
+	 * @param {string} logoSrc - source URL for the logo image.
+	 * @returns {isc.VLayout} the framed logo and accordion menu.
+	 */
+	createLeftMenuContents: function (logoSrc) {
+		return isc.VLayout.create({
+			ID: "lhsmenuContents",
+			width: "100%",
+			height: "100%",
+			backgroundImage: "background.png",
+			backgroundRepeat: "repeat",
+			overflow: "hidden",
+			membersMargin: 2,
+			layoutMargin: 2,
+			margin: 2,
 			members: [
 				isc.Img.create({
 					height: isc.BizUtil.BRAND_BAR_HEIGHT,
