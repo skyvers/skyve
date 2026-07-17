@@ -22,10 +22,10 @@ class FacesThemeViewTest {
 
 	@Test
 	void smartClientProfileUsesExternalPrimeFacesShell() throws Exception {
-		FacesThemeView view = viewFor(UxUi.newSmartClient("desktop", "Tahoe", "casablanca"));
+		FacesThemeView view = viewFor(UxUi.newSmartClient("desktop", "Tahoe", "casablanca", "smartclient"));
 
 		assertEquals("external", view.getTemplateName());
-		assertEquals("blue", view.getThemeColour());
+		assertEquals("smartclient", view.getThemeColour());
 	}
 
 	@Test

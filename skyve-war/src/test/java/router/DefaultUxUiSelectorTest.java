@@ -141,8 +141,7 @@ class DefaultUxUiSelectorTest {
 			UxUi result = selector.select(UserAgentType.desktop, request);
 
 			assertEquals(UxUis.STARTUP, result);
-		}
-		finally {
+		} finally {
 			UtilImpl.SHOW_SETUP = previousShowSetup;
 		}
 	}
@@ -166,8 +165,7 @@ class DefaultUxUiSelectorTest {
 			UxUi result = selector.select(UserAgentType.desktop, request);
 
 			assertEquals(UxUis.EXTERNAL, result);
-		}
-		finally {
+		} finally {
 			UtilImpl.SHOW_SETUP = previousShowSetup;
 		}
 	}
@@ -190,6 +188,14 @@ class DefaultUxUiSelectorTest {
 	void emulateReturnsDESKTOPForDesktop() {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		assertEquals(UxUis.DESKTOP, selector.emulate(UserAgentType.desktop, request));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void desktopUsesSmartClientColourOverride() {
+		assertEquals("Tahoe", UxUis.DESKTOP.getScSkin());
+		assertEquals("casablanca", UxUis.DESKTOP.getPfThemeName());
+		assertEquals("smartclient", UxUis.DESKTOP.getPfThemeColour());
 	}
 
 	@Test

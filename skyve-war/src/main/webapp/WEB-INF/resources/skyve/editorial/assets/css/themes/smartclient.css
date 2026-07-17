@@ -1,0 +1,15 @@
+/*
+	SmartClient iframe colour override.
+	Matches the Tahoe skin used by the desktop UX/UI while retaining the external template's layout.
+*/
+:root {
+	--skyve-editorial-accent-rgb: 21, 127, 204;
+	--skyve-editorial-accent-hover: #3FA3EC;
+	--skyve-editorial-dark-accent-rgb: 63, 163, 236;
+	--skyve-editorial-dark-accent-hover: #1F99EF;
+	--skyve-editorial-button-bg: var(--skyve-editorial-accent);
+	--skyve-editorial-button-border: var(--skyve-editorial-accent);
+	--skyve-editorial-button-fg: #FFFFFF;
+	--skyve-editorial-button-hover-bg: var(--skyve-editorial-accent-hover);
+	--skyve-editorial-button-hover-fg: #FFFFFF;
+}

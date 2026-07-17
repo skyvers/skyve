@@ -55,17 +55,17 @@ public class UxUis {
 	 * PrimeFaces profile for tablet devices.
 	 */
 	public static final UxUi TABLET = UxUi.newPrimeFaces("tablet", EDITORIAL_TEMPLATE, SKYVE_THEME, THEME_COLOUR);
-	
+
 	/**
 	 * SmartClient profile for desktop browsers.
 	 */
-	public static final UxUi DESKTOP = UxUi.newSmartClient(UxUi.DESKTOP_NAME, "Tahoe", "casablanca");
-	
+	public static final UxUi DESKTOP = UxUi.newSmartClient(UxUi.DESKTOP_NAME, "Tahoe", "casablanca", "smartclient");
+
 	/**
 	 * PrimeFaces profile for unauthenticated/public pages.
 	 */
 	public static final UxUi EXTERNAL = UxUi.newPrimeFaces("external", EDITORIAL_TEMPLATE, SKYVE_THEME, THEME_COLOUR);
-	
+
 	/**
 	 * PrimeFaces profile for startup/setup wizard pages.
 	 */

@@ -2,6 +2,26 @@
 	font-size: 12px !important;
 }
 
+/* Casablanca uses legacy .ui-icon sprites and PrimeFaces only resets those sprites for the
+   old Font Awesome .fa/.fas class names. Upload and crop controls use FA 6's .fa-solid name. */
+.ui-icon.fa-solid {
+	background-image: none !important;
+	text-indent: 0 !important;
+}
+
+/* PrimeFaces creates this per-file remove button in JavaScript, so its icon is not configurable. */
+.ui-fileupload .ui-fileupload-content .ui-fileupload-cancel .ui-icon-close {
+	background-image: none !important;
+	font-family: "Font Awesome 6 Free";
+	font-style: normal;
+	font-weight: 900;
+	text-indent: 0 !important;
+}
+
+.ui-fileupload .ui-fileupload-content .ui-fileupload-cancel .ui-icon-close::before {
+	content: "\f00d";
+}
+
 .ui-panelgrid .ui-widget-content,
 .ui-panelgrid td {
 	border-width: 0;
