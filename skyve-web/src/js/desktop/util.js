@@ -240,6 +240,8 @@ isc.BizUtil.addClassProperties({
 	_modules: {}, // Map of modules loaded -> views -> used & unused views
 	_unusedPickLists: [], // List of picklists to use (for pick views)
 	_contentFormItemsByBinding: {}, // Content form items awaiting upload or markup callbacks
+	BRAND_BAR_BACKGROUND_COLOR: "#477db0",
+	BRAND_BAR_HEIGHT: 50,
 
 	// Data source for the "previous values" mechanism on text fields
 	COMPLETE_DATA_SOURCE: isc.RestDataSource.create({

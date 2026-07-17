@@ -26,17 +26,10 @@
 			<h:outputText value="#{bean.skyveVersionComment}" escape="false" />
 			-->	
 			<ui:include src="/WEB-INF/pages/includes/favicon.xhtml" />
-			<!-- 4.7 is disabled by default
-			<link type="text/css" rel="stylesheet" href="fontawesome-4.7.0/css/font-awesome.min.css" />
-			-->
-			<link type="text/css" rel="stylesheet" href="fontawesome-6.5.1/css/all.min.css" />
-			<link type="text/css" rel="stylesheet" href="skyve/css/prime-min.css?v=#{bean.webResourceFileVersion}" />
-			<link type="text/css" rel="stylesheet" href="pages/css/admin.css?v=#{bean.webResourceFileVersion}" />
-			<h:outputScript name="ripple/ripple.js?v=#{bean.webResourceFileVersion}" library="layout" />
-			<h:outputScript name="js/layout.js?v=#{bean.webResourceFileVersion}" library="layout" />
-			<!-- Unsure why this isn't included by the menu component but I had to manually include it -->
-			<h:outputScript name="js/layout.menu.js?v=#{bean.webResourceFileVersion}" library="layout" />
-			<script type="text/javascript" src="skyve/prime/skyve-min.js?v=#{bean.webResourceFileVersion}"></script>
+			<ui:include src="./head-resources.xhtml">
+				<ui:param name="bean" value="#{bean}" />
+				<ui:param name="iframe" value="false" />
+			</ui:include>
 			<script type="text/javascript">
 				<!-- PF8 doesnt work with touch on - a.swipe is not a function when registering swipeLeft and swipeRight -->
 				PrimeFaces.env.touch=false;
@@ -78,7 +71,7 @@
 					</div>
 				</h:form>
 				<div class="layout-main">
-					<p:messages id="messages" widgetVar="messages" globalOnly="true" escape="false">
+					<p:messages id="messages" widgetVar="messages" globalOnly="true" escape="false" styleClass="skyve-global-messages">
 						<p:autoUpdate />
 					</p:messages>
 					<p:growl id="growl" widgetVar="growl" globalOnly="true" escape="false">
@@ -127,10 +120,10 @@
 					<h:outputText value="" />
 				</f:facet>
 			</p:ajaxStatus>
-			<h:outputStylesheet name="styles/layout-light.css?v=#{bean.webResourceFileVersion}" library="layout" />
-			<h:outputStylesheet name="primeflex/primeflex.min.css?v=#{bean.webResourceFileVersion}" library="layout"/>
-			<h:outputStylesheet name="ripple/ripple.css?v=#{bean.webResourceFileVersion}" library="layout" />
-			<h:outputStylesheet name="css/ultima.css?v=#{bean.webResourceFileVersion}" library="skyve" />
+			<ui:include src="./body-resources.xhtml">
+				<ui:param name="bean" value="#{bean}" />
+				<ui:param name="iframe" value="false" />
+			</ui:include>
 			</h:body>
 	</f:view>
 </html>

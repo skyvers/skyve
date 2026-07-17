@@ -1,0 +1,11 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+		xmlns:ui="http://java.sun.com/jsf/facelets"
+		xmlns:h="http://java.sun.com/jsf/html">
+	<ui:fragment rendered="#{not iframe}">
+		<h:outputScript name="editorial/assets/js/browser.min.js?v=#{bean.webResourceFileVersion}" library="skyve" />
+		<h:outputScript name="editorial/assets/js/breakpoints.min.js?v=#{bean.webResourceFileVersion}" library="skyve" />
+		<h:outputScript name="editorial/assets/js/util-min.js?v=#{bean.webResourceFileVersion}" library="skyve" />
+		<h:outputScript name="editorial/assets/js/main-min.js?v=#{bean.webResourceFileVersion}" library="skyve" />
+		<h:outputScript name="editorial/assets/js/skyve-menu-min.js?v=#{bean.webResourceFileVersion}" library="skyve" />
+	</ui:fragment>
+</ui:composition>

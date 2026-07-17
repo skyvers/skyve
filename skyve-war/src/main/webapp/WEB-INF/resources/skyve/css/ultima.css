@@ -50,6 +50,12 @@ body .layout-wrapper .layout-main .layout-content .skyve-action-bar {
 	box-sizing: border-box;
 }
 
+body .layout-wrapper .layout-main:has(> .layout-content .skyve-action-bar, > .layout-content .action-bar) > .skyve-global-messages:not(:empty) {
+	margin-bottom: 0.5rem;
+	position: relative;
+	top: calc(var(--skyve-action-bar-height) + 0.5rem);
+}
+
 @media (min-width: 992px) {
 	body .layout-wrapper .layout-main .layout-content .skyve-action-bar-wrapper,
 	body .layout-wrapper .layout-main .layout-content .action-bar-wrapper {

@@ -116,6 +116,21 @@ class DesktopViewTest {
 		assertTrue(template.contains(Icons.FONT_DASHBOARD));
 		assertTrue(template.startsWith("<table"));
 	}
+
+	@Test
+	void headerTemplateDefersHeightToSmartClientHeader() {
+		DesktopView view = new DesktopView() {
+			@Override
+			public boolean isCanTextSearch() {
+				return false;
+			}
+		};
+
+		String template = view.getHeaderTemplate();
+
+		assertTrue(template.startsWith("<table class=\"skyveHeaderTable\"><tr>"));
+		assertFalse(template.contains("height=\"46px\""));
+	}
 	
 	private static String script(String src) {
 		return "<script type=\"text/javascript\" src=\"" + src + "\"></script>";

@@ -7,8 +7,9 @@ isc.defineClass("BizHeader", "HLayout");
 
 isc.BizHeader.addProperties({
 	width: "100%",
-	height: 50,
-	backgroundColor: "#477db0",
+	height: isc.BizUtil.BRAND_BAR_HEIGHT,
+	backgroundColor: isc.BizUtil.BRAND_BAR_BACKGROUND_COLOR,
+	overflow: "hidden",
 });
 
 isc.BizHeader.addMethods({
@@ -22,6 +23,8 @@ isc.BizHeader.addMethods({
 		this.addMember(
 			isc.HTMLFlow.create({
 				width: "100%",
+				height: "100%",
+				overflow: "hidden",
 				contents: "",
 			}),
 		);
@@ -111,6 +114,7 @@ isc.BizHeader.addMethods({
 		this.addMember(
 			isc.HTMLFlow.create({
 				width: 50,
+				height: "100%",
 				contents: avatarHtml,
 				click() {
 					this._userMenu.showNextTo(this, "bottom");

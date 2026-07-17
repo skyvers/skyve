@@ -51,15 +51,17 @@ FORM styles
 **************************************
 */
 
-/*
-    Used for the BizHub logo image on the top left.
-*/
+/* Customer logo in the SmartClient brand bar. */
 div.logo > table {
-    vertical-align: top;
+	height: 100%;
+	width: 100%;
 }
 div.logo img {
-	max-width: 280px; 
-	height: auto;
+	box-sizing: border-box;
+	height: 100%;
+	object-fit: contain;
+	padding: 4px 16px;
+	width: 100%;
 }
 
 body {
@@ -135,14 +137,27 @@ a.buttonlink {
 	width: 100%;
 }
 
+.skyveHeaderTable {
+	border-collapse: collapse;
+	border-spacing: 0;
+	height: 100%;
+	width: 100%;
+}
+
+.skyveHeaderTable tr {
+	height: 100%;
+}
+
+.skyveHeaderTable td {
+	vertical-align: middle;
+}
+
 .titleBar {
 	font-size: 16px;
 	font-weight: bold;
 	color: #eeeeee;
-	padding: 5px;
-	padding-left: 0px;
-	margin: 3px;
-	margin-left: 0px;
+	margin: 0;
+	padding: 0 5px 0 0;
 }
 
 .loginTable {

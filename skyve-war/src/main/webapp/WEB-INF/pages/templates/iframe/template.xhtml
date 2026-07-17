@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+		xmlns:ui="http://java.sun.com/jsf/facelets"
+		xmlns:h="http://java.sun.com/jsf/html"
+		xmlns:f="http://java.sun.com/jsf/core"
+		lang="#{bean.languageTag}" xml:lang="#{bean.languageTag}"
+		dir="#{bean.dir}">
+	<f:view contentType="text/html" encoding="#{bean.encoding}">
+		<h:head>
+			<title><ui:insert name="templateTitle" /></title>
+			<base href="#{bean.baseHref}" />
+			<ui:include src="#{'/WEB-INF/pages/templates/'.concat(_skyveTheme.templateName).concat('/head-resources.xhtml')}">
+				<ui:param name="bean" value="#{bean}" />
+				<ui:param name="iframe" value="true" />
+			</ui:include>
+			<!-- Layout styles historically emitted at the end of full-page bodies are loaded
+				 before iframe page overrides so upload/editor-specific rules retain precedence. -->
+			<ui:include src="#{'/WEB-INF/pages/templates/'.concat(_skyveTheme.templateName).concat('/body-resources.xhtml')}">
+				<ui:param name="bean" value="#{bean}" />
+				<ui:param name="iframe" value="true" />
+			</ui:include>
+			<style type="text/css">
+				html, body.skyve-iframe { height: 100%; margin: 0; padding: 0; }
+				body.skyve-iframe { min-height: 100%; }
+				/* Preserve the definite-height chain required by full-height iframe content such as the image cropper. */
+				.skyve-iframe-shell,
+				.skyve-iframe-shell .layout-main,
+				.skyve-iframe-shell .layout-content-wrapper,
+				.skyve-iframe-shell .layout-content,
+				.skyve-iframe-shell #main,
+				.skyve-iframe-shell #main > .inner {
+					box-sizing: border-box;
+					height: 100% !important;
+					margin: 0 !important;
+					max-width: none !important;
+					min-height: 0;
+					padding: 0 !important;
+					position: static !important;
+					width: 100% !important;
+				}
+			</style>
+			<ui:insert name="templateHead" />
+		</h:head>
+		<h:body styleClass="skyve-iframe is-preload main-body layout-compact ui-input-filled">
+			<div id="wrapper"
+				class="skyve-iframe-shell layout-wrapper layout-menu-light layout-menu-#{_skyveTheme.themeColour} layout-topbar-#{_skyveTheme.themeColour}">
+				<div id="main" class="layout-main layout-content-wrapper">
+					<div class="inner">
+						<section class="layout-content">
+							<ui:insert name="templateBody" />
+						</section>
+					</div>
+				</div>
+			</div>
+			<ui:insert name="templateBodyScripts" />
+		</h:body>
+	</f:view>
+</html>

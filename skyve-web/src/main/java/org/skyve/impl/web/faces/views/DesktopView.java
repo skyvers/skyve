@@ -243,8 +243,8 @@ public class DesktopView extends HarnessView {
 	 */
 	public String getHeaderTemplate() {
 		StringBuilder result = new StringBuilder(256);
-		result.append("<table style=\"width:100%\">");
-		result.append("<tr height=\"46px\">");
+		result.append("<table class=\"skyveHeaderTable\">");
+		result.append("<tr>");
 		result.append("<td width=\"1%\">{icon}</td>");
 		result.append("<td><div class=\"titleBar\">{title}</div></td>");
 		result.append("<td width=\"10%\" align=\"right\"><img src=\"images/skyve-thick-grey.png\" style=\"max-height: 28px; height: auto;\" alt=\"Skyve\"/></td>");
@@ -260,7 +260,7 @@ public class DesktopView extends HarnessView {
 		result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:isc.BizUtil.showPortal();\" class=\"dhtmlPageButton\" title=\"Dashboard\"><i class=\"");
 		result.append(Icons.FONT_DASHBOARD);
 		result.append(" fa-2x\"></i></a></td>");
-		result.append("<td width=\"1%\" align=\"right\"></tr></table>");
+		result.append("<td width=\"1%\" align=\"right\"></td></tr></table>");
 
 		return result.toString();
 	}

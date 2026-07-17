@@ -25,21 +25,10 @@
 			<h:outputText value="#{bean.skyveVersionComment}" escape="false" />
 			-->
 			<ui:include src="/WEB-INF/pages/includes/favicon.xhtml" />
-			<!-- 4.7 is disabled by default
-			<link type="text/css" rel="stylesheet" href="fontawesome-4.7.0/css/font-awesome.min.css" />
-			-->
-			<link type="text/css" rel="stylesheet" href="fontawesome-6.5.1/css/all.min.css" />
-			<link type="text/css" rel="stylesheet" href="skyve/editorial/assets/fonts/montserrat/montserrat.css?v=#{bean.webResourceFileVersion}" />
-<!--
-			<link type="text/css" rel="stylesheet" href="skyve/css/primeflex.min.css?v=#{bean.webResourceFileVersion}" />
--->
-			<link type="text/css" rel="stylesheet" href="skyve/css/prime-min.css?v=#{bean.webResourceFileVersion}" />
-			<h:outputStylesheet name="editorial/assets/css/main-min.css?v=#{bean.webResourceFileVersion}" library="skyve" />
-			<c:set var="editorialThemeColour" value="#{skyve.getThemeColour('blue')}" />
-			<h:outputStylesheet name="#{'editorial/assets/css/themes/'.concat(editorialThemeColour).concat('.css?v=').concat(bean.webResourceFileVersion)}" library="skyve" />
-			<h:outputStylesheet name="editorial/assets/css/themes/dark.css?v=#{bean.webResourceFileVersion}" library="skyve" media="(prefers-color-scheme: dark)" rendered="#{editorialThemeColour ne 'dark'}" />
-			<link type="text/css" rel="stylesheet" href="pages/css/admin.css?v=#{bean.webResourceFileVersion}" />  
-			<script type="text/javascript" src="skyve/prime/skyve-min.js?v=#{bean.webResourceFileVersion}"></script>
+			<ui:include src="./head-resources.xhtml">
+				<ui:param name="bean" value="#{bean}" />
+				<ui:param name="iframe" value="false" />
+			</ui:include>
 			<script type="text/javascript">
 				<!-- PF8 doesnt work with touch on - a.swipe is not a function when registering swipeLeft and swipeRight -->
 				PrimeFaces.env.touch=false;
@@ -107,7 +96,7 @@
 							</p:overlayPanel>
 						</c:if>
 						<section>
-							<p:messages id="messages" widgetVar="messages" globalOnly="true" escape="false">
+							<p:messages id="messages" widgetVar="messages" globalOnly="true" escape="false" styleClass="skyve-global-messages">
 								<p:autoUpdate />
 							</p:messages>
 							<p:growl id="growl" widgetVar="growl" globalOnly="true" escape="false">
@@ -180,11 +169,10 @@
 			</p:ajaxStatus>
 
 			<!-- Scripts -->
-			<h:outputScript name="editorial/assets/js/browser.min.js?v=#{bean.webResourceFileVersion}" library="skyve" />
-			<h:outputScript name="editorial/assets/js/breakpoints.min.js?v=#{bean.webResourceFileVersion}" library="skyve" />
-			<h:outputScript name="editorial/assets/js/util-min.js?v=#{bean.webResourceFileVersion}" library="skyve" />
-			<h:outputScript name="editorial/assets/js/main-min.js?v=#{bean.webResourceFileVersion}" library="skyve" />
-			<h:outputScript name="editorial/assets/js/skyve-menu-min.js?v=#{bean.webResourceFileVersion}" library="skyve" />
+			<ui:include src="./body-resources.xhtml">
+				<ui:param name="bean" value="#{bean}" />
+				<ui:param name="iframe" value="false" />
+			</ui:include>
 		</h:body>
 	</f:view>
 </html>

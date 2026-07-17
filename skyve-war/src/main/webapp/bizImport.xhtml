@@ -10,72 +10,74 @@
 		<f:metadata>
 			<f:event type="preRenderView" listener="#{_skyveBizImport.preRender}" />
 		</f:metadata>
-		<h:head>
-			<title>#{_skyveBizImport.i18n['page.bizImport.title']}</title>
-			<style>
-				.ui-widget {
-				    font-size: 12px !important;
-				}
-				.ui-panelgrid .ui-widget-content {
-					border-width: 0px;
-					border-style: none;
-				}
-				.ui-panelgrid td {
-					border-width: 0px;
-					border-style: none;
-				}
-				.ui-fileupload-content {
-					min-height: 200px;
-					background-image: url(images/filedrop.png);
-					background-position: right bottom;
-					background-repeat: no-repeat;
-				}
-				@media(max-width: 640px) {
-					.ui-fileupload-buttonbar .ui-button {
-						padding: 20px !important;
+		<ui:composition template="/WEB-INF/pages/templates/iframe/template.xhtml">
+			<ui:param name="bean" value="#{_skyveBizImport}" />
+			<ui:define name="templateTitle">#{_skyveBizImport.i18n['page.bizImport.title']}</ui:define>
+			<ui:define name="templateHead">
+				<style>
+					.ui-widget {
+					    font-size: 12px !important;
 					}
-				}
-			</style>
-			<script type="text/javascript" src="skyve/prime/skyve-min.js?v=#{_skyveBizImport.webResourceFileVersion}"></script>
-			<script type="text/javascript">
-				//<![CDATA[
-				function skyveAfterBizImport() {
-					var owner = SKYVE.Util.findSmartClientWindow();
-					if (owner) {
-						owner.isc.WindowStack.getOpener().saveInstance(true, '_PUSH');
+					.ui-panelgrid .ui-widget-content {
+						border-width: 0px;
+						border-style: none;
 					}
-				}
-				//]]>
-			</script>
-		</h:head>
-		<h:body>
-			<h:form enctype="multipart/form-data" prependId="false">
-				<h:inputHidden id="_c" value="#{_skyveBizImport.context}" />
-				<h:inputHidden id="_b" value="#{_skyveBizImport.binding}" />
-				<h:inputHidden id="_a" value="#{_skyveBizImport.action}" />
-				<p:fileUpload listener="#{_skyveBizImport.handleFileUpload}" 
-								sizeLimit="#{_skyveBizImport.maximumSizeInBytes}"
-								invalidSizeMessage="#{_skyveBizImport.i18n['page.bizImport.sizeLimit']}"
-								allowTypes="#{'/'.concat(_skyveBizImport.whitelistRegex).concat('/i')}"
-								invalidFileMessage="#{_skyveBizImport.i18n['page.bizImport.invalidFile']}"
-								update="messages problems" 
-								oncomplete="skyveAfterBizImport()" />
-			    <p:growl id="messages" showDetail="true" escape="false" life="20000" />
-			    <p/>
-			    <p:dataTable id="problems" value="#{_skyveBizImport.problems}" var="problem">
-					<f:facet name="header">#{_skyveBizImport.i18n['page.bizImport.problems']}</f:facet>
-					<p:column width="40" style="text-align:center">
-						<p:graphicImage value="/images/icons/error.png" rendered="#{problem.error}" />
-						<p:graphicImage value="/images/icons/warning.png" rendered="#{not problem.error}" />
-					</p:column>
-					<p:column headerText="#{_skyveBizImport.i18n['page.bizImport.where']}">
-						<span style="font-weight: bold;">#{problem.where}</span>
-					</p:column>
-					<p:column headerText="#{_skyveBizImport.i18n['page.bizImport.what']}">
-						#{problem.what}
-					</p:column>
-				</p:dataTable>
-			</h:form>
-		</h:body>
+					.ui-panelgrid td {
+						border-width: 0px;
+						border-style: none;
+					}
+					.ui-fileupload-content {
+						min-height: 200px;
+						background-image: url(images/filedrop.png);
+						background-position: right bottom;
+						background-repeat: no-repeat;
+					}
+					@media(max-width: 640px) {
+						.ui-fileupload-buttonbar .ui-button {
+							padding: 20px !important;
+						}
+					}
+				</style>
+				<script type="text/javascript">
+					//<![CDATA[
+					function skyveAfterBizImport() {
+						var owner = SKYVE.Util.findSmartClientWindow();
+						if (owner) {
+							owner.isc.WindowStack.getOpener().saveInstance(true, '_PUSH');
+						}
+					}
+					//]]>
+				</script>
+			</ui:define>
+			<ui:define name="templateBody">
+				<h:form enctype="multipart/form-data" prependId="false">
+					<h:inputHidden id="_c" value="#{_skyveBizImport.context}" />
+					<h:inputHidden id="_b" value="#{_skyveBizImport.binding}" />
+					<h:inputHidden id="_a" value="#{_skyveBizImport.action}" />
+					<p:fileUpload listener="#{_skyveBizImport.handleFileUpload}" 
+									sizeLimit="#{_skyveBizImport.maximumSizeInBytes}"
+									invalidSizeMessage="#{_skyveBizImport.i18n['page.bizImport.sizeLimit']}"
+									allowTypes="#{'/'.concat(_skyveBizImport.whitelistRegex).concat('/i')}"
+									invalidFileMessage="#{_skyveBizImport.i18n['page.bizImport.invalidFile']}"
+									update="messages problems" 
+									oncomplete="skyveAfterBizImport()" />
+				    <p:growl id="messages" showDetail="true" escape="false" life="20000" />
+				    <p/>
+				    <p:dataTable id="problems" value="#{_skyveBizImport.problems}" var="problem">
+						<f:facet name="header">#{_skyveBizImport.i18n['page.bizImport.problems']}</f:facet>
+						<p:column width="40" style="text-align:center">
+							<p:graphicImage value="/images/icons/error.png" rendered="#{problem.error}" />
+							<p:graphicImage value="/images/icons/warning.png" rendered="#{not problem.error}" />
+						</p:column>
+						<p:column headerText="#{_skyveBizImport.i18n['page.bizImport.where']}">
+							<span style="font-weight: bold;">#{problem.where}</span>
+						</p:column>
+						<p:column headerText="#{_skyveBizImport.i18n['page.bizImport.what']}">
+							#{problem.what}
+						</p:column>
+					</p:dataTable>
+				</h:form>
+			</ui:define>
+		</ui:composition>
 	</f:view>
 </html>

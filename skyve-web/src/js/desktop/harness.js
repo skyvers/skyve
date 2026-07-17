@@ -50,7 +50,9 @@ isc.BizUtil.addClassProperties({
 			shadowOffset: 0,
 			members: [
 				isc.Img.create({
-					imageType: "center",
+					height: isc.BizUtil.BRAND_BAR_HEIGHT,
+					backgroundColor: isc.BizUtil.BRAND_BAR_BACKGROUND_COLOR,
+					imageType: "stretch",
 					src: logoSrc,
 					overflow: "clip-h",
 					styleName: "logo",

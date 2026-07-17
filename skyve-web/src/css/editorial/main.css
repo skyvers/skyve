@@ -427,6 +427,12 @@ body .ui-growl-success {
     border-color: var(--skyve-editorial-success) !important;
     color: var(--skyve-editorial-success) !important;
 }
+#main > .inner > section:has(.skyve-action-bar, .action-bar) > .skyve-global-messages:not(:empty) {
+	margin-bottom: 0.5rem;
+	position: relative;
+	/* Its normal flow position is 2rem below the bar's top; finish the bar height, then add a 0.5rem gap. */
+	top: calc(var(--skyve-editorial-actionbar-height) - 1.5rem);
+}
 body .ui-growl .ui-growl-item-container {
     background: var(--skyve-editorial-panel-bg) !important;
     border: 1px solid var(--skyve-editorial-panel-border) !important;
