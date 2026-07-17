@@ -64,3 +64,18 @@ To install the Ecuador theme (>= 7.0.0) on Skyve:
 
 The third argument is not combined with the fourth. If a different colour is selected, use
 the complete theme identifier supplied by the Ecuador theme JAR and the matching layout colour.
+
+To install the Diamond theme on Skyve:
+================================================================
+
+1) Drop diamond-theme-7.0.0-jakarta.jar from the Foundry project into WEB-INF/lib/.
+2) Drop the diamond-layout/ folder into WEB-INF/resources/ without renaming it.
+3) Configure each applicable UxUi with the exact PrimeFaces theme identifier as the third
+   argument and the Diamond layout colour as the fourth argument, for example:
+
+
+	UxUi.newPrimeFaces("phone", "diamond", "diamond-indigo-light", "indigo-light")
+
+The third argument is not combined with the fourth. Use the complete theme identifier supplied
+by the Diamond theme JAR and repeat its matching <base-colour>-<scheme> value as the fourth
+argument.
