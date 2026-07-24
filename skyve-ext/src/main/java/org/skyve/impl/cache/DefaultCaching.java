@@ -265,16 +265,26 @@ public class DefaultCaching implements Caching {
 	 * {@inheritDoc}
 	 */
 	@Override
+	@SuppressWarnings("resource") // The shared caching service owns the manager lifecycle.
 	public @Nonnull PersistentCacheManager getEHCacheManager() {
-		return ehCacheManager;
+		PersistentCacheManager result = ehCacheManager;
+		if ((result == null) || Status.UNINITIALIZED.equals(result.getStatus())) {
+			throw new DomainException("EHCache manager has not been started");
+		}
+		return result;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
+	@SuppressWarnings("resource") // The shared caching service owns the manager lifecycle.
 	public @Nonnull javax.cache.CacheManager getJCacheManager() {
-		return jCacheManager;
+		javax.cache.CacheManager result = jCacheManager;
+		if ((result == null) || result.isClosed()) {
+			throw new DomainException("JCache manager has not been started");
+		}
+		return result;
 	}
 
 	/**
@@ -368,18 +378,20 @@ public class DefaultCaching implements Caching {
 	 * {@inheritDoc}
 	 */
 	@Override
+	@SuppressWarnings("resource") // The shared caching service owns the manager lifecycle.
 	public boolean isEHCache(@Nonnull String name) {
-		return ehCacheManager.getRuntimeConfiguration().getCacheConfigurations().containsKey(name);
+		return getEHCacheManager().getRuntimeConfiguration().getCacheConfigurations().containsKey(name);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
+	@SuppressWarnings("resource") // The shared caching service owns the manager lifecycle.
 	public @Nonnull <K extends Object, V extends Object> Cache<K, V> getEHCache(@Nonnull String name,
 																					@Nonnull Class<K> keyClass,
 																					@Nonnull Class<V> valueClass) {
-		Cache<K, V> result = ehCacheManager.getCache(name, keyClass, valueClass);
+		Cache<K, V> result = getEHCacheManager().getCache(name, keyClass, valueClass);
 		if (result == null) {
 			throw new DomainException("EHCache " + name + " does not exist");
 		}
@@ -392,7 +404,7 @@ public class DefaultCaching implements Caching {
 	@Override
 	@SuppressWarnings("resource") // The shared caching service owns the manager lifecycle.
 	public boolean isJCache(@Nonnull String name) {
-		return jCacheManager.getCache(name) != null;
+		return getJCacheManager().getCache(name) != null;
 	}
 
 	/**
@@ -403,7 +415,7 @@ public class DefaultCaching implements Caching {
 	public @Nonnull <K extends Object, V extends Object> javax.cache.Cache<K, V> getJCache(@Nonnull String name,
 																							@Nonnull Class<K> keyClass,
 																							@Nonnull Class<V> valueClass) {
-		javax.cache.Cache<K, V> result = jCacheManager.getCache(name, keyClass, valueClass);
+		javax.cache.Cache<K, V> result = getJCacheManager().getCache(name, keyClass, valueClass);
 		if (result == null) {
 			throw new DomainException("JCache " + name + " does not exist");
 		}
@@ -414,7 +426,9 @@ public class DefaultCaching implements Caching {
 	 * {@inheritDoc}
 	 */
 	@Override
+	@SuppressWarnings("resource") // The shared caching service owns the manager lifecycle.
 	public @Nonnull CacheStatistics getEHCacheStatistics(@Nonnull String name) {
+		getEHCacheManager();
 		CacheStatistics result;
 		try {
 			result = statisticsService.getCacheStatistics(name);

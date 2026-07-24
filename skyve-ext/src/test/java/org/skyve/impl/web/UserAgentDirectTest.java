@@ -178,7 +178,7 @@ class UserAgentDirectTest {
 		when(request.request.getHeader("User-Agent")).thenReturn("direct-selection-unknown-agent");
 		when(router.selectDirect(anyString(), any())).thenReturn("nullResult");
 		when(selector.resolve("nullResult")).thenReturn(null);
-		assertThrows(MetaDataException.class, () -> UserAgent.getSelection(request.request));
+		assertThrows(NullPointerException.class, () -> UserAgent.getSelection(request.request));
 		verify(selector, never()).emulate(any(), any());
 	}
 

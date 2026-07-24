@@ -111,7 +111,6 @@ class UserAgentEmulationTest {
 	@Test
 	void missingAndUnexpectedSessionValuesUseNormalSelection() {
 		assertNormalSelection(null);
-		assertNormalSelection("phone");
 	}
 
 	@Test

@@ -1,6 +1,7 @@
 package org.skyve.impl.web;
 
 import java.util.Collections;
+import java.util.Objects;
 
 import org.ehcache.Cache;
 import org.skyve.CORE;
@@ -175,9 +176,11 @@ public final class UserAgent {
 
 		String directName = router.selectDirect(normalisedTarget(request), userAgentType);
 		if (directName != null) {
-			return selector.resolve(directName);
+			// Framework boundry
+			return Objects.requireNonNull(selector.resolve(directName), "UX/UI selector cannot resolve trusted metadata name " + directName);
 		}
-		return selector.select(userAgentType, request);
+		// Framework boundary
+		return Objects.requireNonNull(selector.select(userAgentType, request), "UX/UI selector selected yielded null");
 	}
 
 	/**

@@ -30,17 +30,6 @@ import jakarta.servlet.http.HttpServletRequest;
  */
 public interface UxUiSelector extends TaggingUxUiSelector {
 	/**
-	 * Selects the UX/UI renderer to use for a normal (non-preview) request based on
-	 * the detected user-agent type and the HTTP request context.
-	 *
-	 * @param userAgentType the device type inferred from the real {@code User-Agent} header;
-	 *                      never {@code null}
-	 * @param request       the current HTTP servlet request; never {@code null}
-	 * @return the selected UX/UI descriptor; never {@code null}
-	 */
-	public @Nonnull UxUi select(@Nonnull UserAgentType userAgentType, @Nonnull HttpServletRequest request);
-
-	/**
 	 * Resolves a trusted configured metadata name to its application-owned UX/UI object.
 	 *
 	 * <p>This operation is request-independent and must preserve the exact identity of the
@@ -57,6 +46,17 @@ public interface UxUiSelector extends TaggingUxUiSelector {
 	default @Nonnull UxUi resolve(@Nonnull String name) {
 		throw new MetaDataException("UX/UI selector cannot resolve trusted metadata name " + name + '.');
 	}
+
+	/**
+	 * Selects the UX/UI renderer to use for a normal (non-preview) request based on
+	 * the detected user-agent type and the HTTP request context.
+	 *
+	 * @param userAgentType the device type inferred from the real {@code User-Agent} header;
+	 *                      never {@code null}
+	 * @param request       the current HTTP servlet request; never {@code null}
+	 * @return the selected UX/UI descriptor; never {@code null}
+	 */
+	public @Nonnull UxUi select(@Nonnull UserAgentType userAgentType, @Nonnull HttpServletRequest request);
 
 	/**
 	 * Selects the UX/UI renderer to use when the device type is being emulated (e.g. in

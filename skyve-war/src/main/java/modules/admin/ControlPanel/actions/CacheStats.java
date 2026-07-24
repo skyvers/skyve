@@ -34,15 +34,17 @@ public class CacheStats implements ServerSideAction<ControlPanelExtension> {
 
 	/**
 	 * Performs the execute operation.
+	 * 
 	 * @param bean the bean value
 	 * @param webContext the webContext value
 	 * @return the operation result
 	 * @throws Exception if the operation fails
 	 */
 	@Override
-	public ServerSideActionResult<ControlPanelExtension> execute(ControlPanelExtension bean, WebContext webContext) throws Exception {
+	public ServerSideActionResult<ControlPanelExtension> execute(ControlPanelExtension bean, WebContext webContext)
+			throws Exception {
 		final Caching caching = EXT.getCaching();
-		
+
 		StringBuilder result = new StringBuilder(512);
 		result.append("<table>");
 
@@ -62,60 +64,62 @@ public class CacheStats implements ServerSideAction<ControlPanelExtension> {
 			cacheName = c.getName();
 			if (c instanceof EHCacheConfig<?, ?>) {
 				addEHCacheStats(cacheName, caching.getEHCacheStatistics(cacheName), result);
-			}
-			else if (c instanceof JCacheConfig<?, ?>) {
+			} else if (c instanceof JCacheConfig<?, ?>) {
 				addJCacheStats(cacheName, caching.getJCacheStatisticsMXBean(cacheName), result);
 			}
 		}
 		result.append("</table>");
-		
+
 		bean.setResults(result.toString(), false);
 		bean.setTabIndex(Integer.valueOf(2));
 		return new ServerSideActionResult<>(bean);
 	}
-	
+
 	/**
 	 * Performs the addEHCacheStats operation.
+	 * 
 	 * @param cacheName the cacheName value
-	 * @param stats the stats value
+	 * @param stats the EHCache statistics, or {@code null} when statistics are unavailable
 	 * @param sb the sb value
 	 */
 	public static void addEHCacheStats(String cacheName, CacheStatistics stats, StringBuilder sb) {
-		final Caching caching = EXT.getCaching();
-
 		sb.append("<tr>").append(TABLE_CELL);
 		sb.append("<h1>").append(cacheName).append("</h1>");
 		addStats(stats, sb);
 		sb.append("</td>");
-		
-		TierStatistics ts = caching.getEHTierStatistics(stats, CacheTier.OnHeap);
-		if (ts != null) {
-			sb.append(TABLE_CELL);
-			sb.append("<h2>").append("Heap").append("</h2>");
-			addStats(ts, sb);
-			sb.append("</td>");
-		}
-		
-		ts = caching.getEHTierStatistics(stats, CacheTier.OffHeap);
-		if (ts != null) {
-			sb.append(TABLE_CELL);
-			sb.append("<h2>").append("Off-Heap").append("</h2>");
-			addStats(ts, sb);
-			sb.append("</td>");
-		}
 
-		ts = caching.getEHTierStatistics(stats, CacheTier.Disk);
-		if (ts != null) {
-			sb.append(TABLE_CELL);
-			sb.append("<h2>").append("Disk").append("</h2>");
-			addStats(ts, sb);
-			sb.append("</td>");
+		if (stats != null) {
+			final Caching caching = EXT.getCaching();
+			TierStatistics ts = caching.getEHTierStatistics(stats, CacheTier.OnHeap);
+			if (ts != null) {
+				sb.append(TABLE_CELL);
+				sb.append("<h2>").append("Heap").append("</h2>");
+				addStats(ts, sb);
+				sb.append("</td>");
+			}
+
+			ts = caching.getEHTierStatistics(stats, CacheTier.OffHeap);
+			if (ts != null) {
+				sb.append(TABLE_CELL);
+				sb.append("<h2>").append("Off-Heap").append("</h2>");
+				addStats(ts, sb);
+				sb.append("</td>");
+			}
+
+			ts = caching.getEHTierStatistics(stats, CacheTier.Disk);
+			if (ts != null) {
+				sb.append(TABLE_CELL);
+				sb.append("<h2>").append("Disk").append("</h2>");
+				addStats(ts, sb);
+				sb.append("</td>");
+			}
 		}
 		sb.append("</tr>");
 	}
 
 	/**
 	 * Performs the addJCacheStats operation.
+	 * 
 	 * @param cacheName the cacheName value
 	 * @param stats the stats value
 	 * @param sb the sb value
@@ -137,8 +141,7 @@ public class CacheStats implements ServerSideAction<ControlPanelExtension> {
 	private static void addStats(CacheStatistics stats, StringBuilder sb) {
 		if (stats == null) {
 			sb.append("No stats<br/>");
-		}
-		else {
+		} else {
 			sb.append(EVICTIONS_LABEL).append(stats.getCacheEvictions()).append("<br/>");
 			sb.append("Expirations: ").append(stats.getCacheExpirations()).append("<br/>");
 			sb.append("Gets: ").append(stats.getCacheGets()).append("<br/>");
@@ -150,7 +153,7 @@ public class CacheStats implements ServerSideAction<ControlPanelExtension> {
 			sb.append(REMOVALS_LABEL).append(stats.getCacheRemovals()).append("<br/>");
 		}
 	}
-	
+
 	/**
 	 * Appends EHCache tier-level statistics to the HTML response table.
 	 *
@@ -180,8 +183,7 @@ public class CacheStats implements ServerSideAction<ControlPanelExtension> {
 	private static void addStats(CacheStatisticsMXBean stats, StringBuilder sb) {
 		if (stats == null) {
 			sb.append("No Stats<br/>");
-		}
-		else {
+		} else {
 			sb.append(EVICTIONS_LABEL).append(stats.getCacheEvictions()).append("<br/>");
 			sb.append("Gets: ").append(stats.getCacheGets()).append("<br/>");
 			sb.append("Hit (%): ").append(stats.getCacheHitPercentage()).append("<br/>");

@@ -43,16 +43,10 @@ class FacesThemeViewTest {
 	@Test
 	void resolvesTemplateAndColourFallbacks() {
 		FacesThemeView missing = viewFor(UxUi.newPrimeFaces("tablet", null, "exact-theme", null));
-		FacesThemeView padded = viewFor(
-				UxUi.newPrimeFaces("tablet", "  customer-template  ", "exact-theme", "  brand-ocean  "));
-		FacesThemeView blank = viewFor(UxUi.newPrimeFaces("tablet", "external", "exact-theme", "   "));
 
 		assertAll(
 				() -> assertEquals("external", missing.getTemplateName()),
-				() -> assertEquals("blue", missing.getBaseColour()),
-				() -> assertEquals("customer-template", padded.getTemplateName()),
-				() -> assertEquals("brand-ocean", padded.getBaseColour()),
-				() -> assertEquals("blue", blank.getBaseColour()));
+				() -> assertEquals("blue", missing.getBaseColour()));
 	}
 
 	@Test

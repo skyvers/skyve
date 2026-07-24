@@ -93,8 +93,12 @@ public final class RequestUxUiSelection {
 	 *
 	 * @param selectedUxUi selected application UX/UI; must not be {@code null}
 	 * @throws IllegalStateException if this selection is already complete
+	 * @throws NullPointerException if {@code selectedUxUi} is {@code null}
 	 */
 	void complete(@Nonnull UxUi selectedUxUi) {
-		uxui = selectedUxUi;
+		if (uxui != null) {
+			throw new IllegalStateException("Request UX/UI selection is already complete");
+		}
+		uxui = Objects.requireNonNull(selectedUxUi);
 	}
 }

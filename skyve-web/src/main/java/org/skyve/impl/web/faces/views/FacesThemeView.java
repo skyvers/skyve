@@ -18,7 +18,7 @@ import jakarta.servlet.http.HttpServletRequest;
  * Exposes the selected UX/UI's configured and derived presentation values to Faces rendering.
  *
  * <p>The request-selected {@link UxUi} remains the source of configured values. The first access
- * to a derived value normalizes the configured template and colour, applies family defaults,
+ * to a derived value applies family defaults to absent template and colour values,
  * derives family-specific layout values, verifies the selected template's iframe resource pair,
  * and caches the result for the remainder of this bean's request lifetime. Subsequent derived
  * accesses return that snapshot without repeating servlet-resource lookups.
@@ -100,7 +100,7 @@ public class FacesThemeView {
 	 *
 	 * <p>Used as {@code _skyveTheme.templateName} by the top-level Faces pages to select
 	 * {@code /WEB-INF/pages/templates/<family>/view.xhtml}.
-	 * Null and blank configured names resolve to {@code external}.
+	 * A {@code null} configured name resolves to {@code external}.
 	 *
 	 * @return the effective template family; never {@code null}
 	 */
@@ -127,7 +127,7 @@ public class FacesThemeView {
 	 *
 	 * <p>Used as {@code _skyveTheme.baseColour} by the Editorial and External theme
 	 * stylesheets, the Ecuador layout stylesheet, and Ultima's browser theme-colour metadata.
-	 * Null and blank colours use the selected family's default; Diamond's scheme suffix is removed.
+	 * A {@code null} colour uses the selected family's default; Diamond's scheme suffix is removed.
 	 *
 	 * @return the effective base colour; never {@code null}
 	 */
