@@ -31,10 +31,10 @@ class RouterMetaDataTest {
 	}
 
 	@Test
-	void directDefaultsToExactWithWildcardConditions() {
+	void directLeavesDefaultMatchUnsetForXmlAndUsesWildcardConditions() {
 		Direct direct = new Direct();
 
-		assertThat(direct.getMatch(), is(DirectMatch.exact));
+		assertThat(direct.getMatch(), nullValue());
 		assertThat(direct.getUserAgentType(), nullValue());
 	}
 

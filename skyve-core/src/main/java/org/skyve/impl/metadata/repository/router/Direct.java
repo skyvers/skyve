@@ -13,7 +13,8 @@ import jakarta.xml.bind.annotation.XmlType;
 /**
  * Declares one ordered direct rule that selects a named UX/UI for a target path.
  *
-	 * <p>An absent user-agent condition is a wildcard. The containing
+ * <p>An absent match mode means exact matching, while an absent user-agent condition is a
+ * wildcard. The containing
  * {@link Router} evaluates declarations in effective list order, so duplicate and overlapping
  * declarations are retained and the first complete match wins.
  *
@@ -94,7 +95,10 @@ public class Direct implements SerializableMetaData {
 	/**
 	 * Returns the path comparison mode.
 	 *
-	 * @return the comparison mode
+	 * <p>A {@code null} value is retained so XML marshalling does not emit a default attribute;
+	 * consumers interpret it as {@link DirectMatch#exact}.
+	 *
+	 * @return the explicitly declared comparison mode, or {@code null} for exact matching
 	 * @since 10.0
 	 */
 	public @Nullable DirectMatch getMatch() {
@@ -104,7 +108,7 @@ public class Direct implements SerializableMetaData {
 	/**
 	 * Sets the path comparison mode.
 	 *
-	 * @param match the comparison mode; {@code null} restores the default exact match immediately
+	 * @param match the explicitly declared comparison mode, or {@code null} for exact matching
 	 * @since 10.0
 	 */
 	@XmlAttribute

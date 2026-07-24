@@ -2,6 +2,7 @@ package org.skyve.impl.util;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -810,6 +811,21 @@ class XMLMetaDataTest {
 		assertThat(result.getUxui(), is("external"));
 		assertThat(result.getMatch(), is(DirectMatch.prefix));
 		assertThat(result.getUserAgentType(), is(UserAgentType.phone));
+	}
+
+	@Test
+	void routerDirectLeavesDefaultExactMatchOutOfXml() {
+		Router router = new Router();
+		Direct direct = new Direct();
+		direct.setPath("/external/home.xhtml");
+		direct.setUxui("external");
+		router.getDirects().add(direct);
+
+		String xml = XMLMetaData.marshalRouter(router);
+		assertFalse(xml.contains(" match="));
+
+		Direct result = XMLMetaData.unmarshalRouterString(xml).getDirects().get(0);
+		assertThat(result.getMatch(), nullValue());
 	}
 
 	@Test

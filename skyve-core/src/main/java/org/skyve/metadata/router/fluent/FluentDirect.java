@@ -83,7 +83,7 @@ public class FluentDirect {
 	/**
 	 * Sets the declaration's comparison mode.
 	 *
-	 * @param match comparison mode, or {@code null} to restore exact matching immediately
+	 * @param match explicitly declared comparison mode, or {@code null} for exact matching
 	 * @return this builder
 	 * @since 10.0
 	 */

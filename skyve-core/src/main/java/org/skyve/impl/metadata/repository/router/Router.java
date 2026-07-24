@@ -348,6 +348,10 @@ public class Router implements ConvertibleMetaData<Router>, DecoratedMetaData, R
 				throw new MetaDataException(metaDataName + " direct path " + path
 												+ " must not contain query or fragment content.");
 			}
+			if ((direct.getMatch() == DirectMatch.prefix) && (! path.endsWith("/"))) {
+				throw new MetaDataException(metaDataName + " direct prefix path " + path
+												+ " must end with '/'.");
+			}
 			if (direct.getUxui() == null) {
 				throw new MetaDataException(metaDataName + " direct UX/UI target is required for path " + path + '.');
 			}
