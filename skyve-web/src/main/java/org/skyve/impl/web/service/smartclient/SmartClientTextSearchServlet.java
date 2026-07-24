@@ -27,6 +27,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.user.UserAccess;
 import org.skyve.util.JSON;
+import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
@@ -117,14 +118,18 @@ public class SmartClientTextSearchServlet extends HttpServlet {
 				            String icon16 = document.getIcon16x16RelativeFileName();
 				            String iconStyleClass = document.getIconStyleClass();
 				            iconMarkup.setLength(0);
-				            if (iconStyleClass != null) {
-				            	iconMarkup.append("<i class=\"bizhubFontIcon ").append(iconStyleClass).append("\"></i>");
-				            }
-				            else if (icon16 != null) {
-					            iconMarkup.append("<img style=\"width:16px;height:16px\" src=\"resources?_doc=");
-					            iconMarkup.append(moduleName).append('.').append(documentName);
-					            iconMarkup.append("&_n=").append(icon16).append("\"/>");
-				            }
+							if (iconStyleClass != null) {
+								iconMarkup.append("<i class=\"bizhubFontIcon ")
+											.append(OWASP.escapeHtml(iconStyleClass)).append("\"></i>");
+							}
+							else if (icon16 != null) {
+								url.setLength(0);
+								url.append("resources?_doc=").append(moduleName).append('.').append(documentName);
+								url.append("&_n=").append(icon16);
+								iconMarkup.append("<img style=\"width:16px;height:16px\" src=\"");
+								iconMarkup.append(OWASP.escapeHtml(url.toString()));
+								iconMarkup.append("\"/>");
+							}
 				            row.put("icon", iconMarkup.toString());
 				            row.put("doc", document.getLocalisedSingularAlias());
 				            row.put("excerpt", result.getExcerpt());
@@ -136,7 +141,7 @@ public class SmartClientTextSearchServlet extends HttpServlet {
 				            else {
 				            	row.put(Bean.BIZ_KEY, bean.getBizKey());
 				            	
-				            	String uxui = UserAgent.getUxUi(request).getName();
+				            	String uxui = UserAgent.getSelection(request).getUxUi().getName();
 				            	if (user.canAccess(UserAccess.singular(moduleName, documentName), uxui)) {
 					            	url.setLength(0);
 				                    url.append("?m=");

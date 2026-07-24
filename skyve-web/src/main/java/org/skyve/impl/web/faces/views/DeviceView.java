@@ -3,8 +3,11 @@ package org.skyve.impl.web.faces.views;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.impl.web.WebUtil;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.faces.context.FacesContext;
@@ -21,26 +24,25 @@ import jakarta.inject.Named;
 public class DeviceView extends LocalisableView {
 	private static final long serialVersionUID = 4687894848392321390L;
 
-	private String startingDeviceJspUrl;
-	
+	private String previewUrlPrefix;
+	private String endPreviewUrl;
+
 	/**
-	 * Returns the device JSP URL including the initial user-agent choice.
+	 * Returns the one-time preview command URL prefix.
 	 *
-	 * @return the URL to load in the device frame; initialised during post construction
+	 * @return the URL prefix; initialised during post construction
 	 */
-	public String getStartingDeviceJspUrl() {
-		return startingDeviceJspUrl;
+	public @Nonnull String getPreviewUrlPrefix() {
+		return previewUrlPrefix;
 	}
 
-	private String clickDeviceJspUrl;
-	
 	/**
-	 * Returns the device JSP URL prefix used when switching the user-agent choice.
+	 * Returns the command URL that ends preview without retaining the preview target parameters.
 	 *
-	 * @return the URL prefix ending with {@code ua=}; initialised during post construction
+	 * @return the end-preview URL; initialised during post construction
 	 */
-	public String getClickDeviceJspUrl() {
-		return clickDeviceJspUrl;
+	public @Nonnull String getEndPreviewUrl() {
+		return endPreviewUrl;
 	}
 
 	private String contextUrl;
@@ -50,7 +52,7 @@ public class DeviceView extends LocalisableView {
 	 *
 	 * @return the context URL; never {@code null} when Skyve configuration is available
 	 */
-	public String getContextUrl() {
+	public @Nonnull String getContextUrl() {
 		if (contextUrl == null) {
 			contextUrl = Util.getSkyveContextUrl();
 		}
@@ -58,34 +60,29 @@ public class DeviceView extends LocalisableView {
 	}
 
 	/**
-	 * Initialises inherited localisation state and device JSP URLs for this request.
+	 * Initialises inherited localisation state and the device-preview URL for this request.
 	 *
-	 * <p>Side effects: reads the current Faces request parameters and caches derived
-	 * URL strings on this request-scoped view instance.
+	 * <p>Side effects: reads the current Faces request parameters and caches a derived URL string on
+	 * this request-scoped view instance. The command is consumed into session state by
+	 * {@code device.jsp} before it redirects to the application context root without the command parameter.
 	 */
 	@PostConstruct
 	private void postConstruct() {
 		initialise();
 
-		Map<String, String> parameters = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
+		Map<String, String[]> parameters = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterValuesMap();
 		StringBuilder sb = new StringBuilder(128);
-		sb.append(getContextUrl()).append("/device.jsp?");
-		
-		String ua = null;
-		for (Entry<String, String> entry : parameters.entrySet()) {
-			String name = entry.getKey();
-			if ("ua".equals(name)) {
-				ua = entry.getValue();
-			}
-			else {
-				sb.append(name).append('=').append(entry.getValue()).append('&');
+		sb.append(getContextUrl()).append("/device.jsp");
+		for (Entry<String, String[]> entry : parameters.entrySet()) {
+			if (! AbstractWebContext.EMULATED_USER_AGENT_TYPE_PARAMETER.equals(entry.getKey())) {
+				WebUtil.appendQueryParameter(sb, entry.getKey(), entry.getValue());
 			}
 		}
-		
-		sb.append("ua=");
-		clickDeviceJspUrl = sb.toString();
-		
-		sb.append((ua == null) ? "phone" : ua);
-		startingDeviceJspUrl = sb.toString();
+		sb.append(sb.indexOf("?") < 0 ? '?' : '&')
+			.append(AbstractWebContext.EMULATED_USER_AGENT_TYPE_PARAMETER)
+			.append('=');
+		previewUrlPrefix = sb.toString();
+		endPreviewUrl = getContextUrl() + "/device.jsp?" +
+									AbstractWebContext.EMULATED_USER_AGENT_TYPE_PARAMETER + '=';
 	}
 }

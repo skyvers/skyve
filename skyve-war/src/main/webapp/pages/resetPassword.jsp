@@ -24,7 +24,7 @@
 	final String confirmPasswordFieldName = "confirmPassword";
 	
 	String basePath = Util.getSkyveContextUrl() + "/";
-	boolean mobile = UserAgent.getType(request).isMobile();
+	boolean mobile = UserAgent.detectType(request).isMobile();
 	Locale locale = request.getLocale();
 	
 	// Captcha checking

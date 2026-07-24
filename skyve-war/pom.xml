@@ -21,6 +21,72 @@
 	
 	<profiles>
 		<profile>
+			<id>deployed-it</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>build-helper-maven-plugin</artifactId>
+						<version>3.4.0</version>
+						<executions>
+							<execution>
+								<id>add-deployed-it-overlay-source</id>
+								<phase>generate-test-sources</phase>
+								<goals>
+									<goal>add-test-source</goal>
+								</goals>
+								<configuration>
+									<sources>
+										<source>src/deployed-it/java</source>
+									</sources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-war-plugin</artifactId>
+						<version>3.4.0</version>
+						<executions>
+							<execution>
+								<id>deployed-it-overlay-war</id>
+								<phase>package</phase>
+								<goals>
+									<goal>war</goal>
+								</goals>
+								<configuration>
+									<classifier>deployed-it</classifier>
+									<attachClasses>false</attachClasses>
+									<webappDirectory>${project.build.directory}/deployed-it-webapp</webappDirectory>
+									<webResources combine.children="append">
+										<webResource>
+											<directory>src/deployed-it/webapp</directory>
+										</webResource>
+										<webResource>
+											<directory>${project.build.testOutputDirectory}</directory>
+											<targetPath>WEB-INF/classes</targetPath>
+											<includes>
+												<include>util/deployed/transport/**</include>
+											</includes>
+										</webResource>
+									</webResources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-failsafe-plugin</artifactId>
+						<configuration>
+							<includes>
+								<include>**/*IT</include>
+							</includes>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
 			<id>spotless-with-download</id>
 			<build>
 				<plugins>
@@ -262,6 +328,21 @@
 			                        src="https://raw.githubusercontent.com/bizhubau/public-resources/refs/heads/main/code-style/eclipse-code-format-profile.xml"
 			                        dest="${project.basedir}/.config/eclipse-code-format-profile.xml"
 			                        skipexisting="true" />
+			                </target>
+			            </configuration>
+			        </execution>
+			        <execution>
+			            <id>remove-relocated-device-pages</id>
+			            <phase>prepare-package</phase>
+			            <goals>
+			                <goal>run</goal>
+			            </goals>
+			            <configuration>
+			                <target>
+			                    <!-- The exploded deployment directory persists between builds. Remove the old
+			                         WAR-root copies before the pages are resolved from the skyve-web JAR. -->
+			                    <delete file="${basedir}/deployments/skyve.war/device.xhtml" quiet="true" />
+			                    <delete file="${basedir}/deployments/skyve.war/device.jsp" quiet="true" />
 			                </target>
 			            </configuration>
 			        </execution>

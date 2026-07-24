@@ -46,8 +46,8 @@
 		rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
 	<h:panelGroup styleClass="skyveEnvBanner skyveBottomEnvBanner"
 		rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
-	<div class="#{(showMenu ? 'layout-wrapper layout-static' : 'layout-wrapper layout-static')
-             .concat(' layout-sidebar-').concat(skyve.getThemeColour('indigo').split('-')[0])}">
+	<div class="#{(showMenu ? 'layout-wrapper layout-static ' : 'layout-wrapper layout-static ')
+             .concat(_skyveTheme.layoutStyleClass)}">
 
 
 		<!-- Include the menu if we need to show topbar dropdown as otherwise the dropdown click event is not registered -->

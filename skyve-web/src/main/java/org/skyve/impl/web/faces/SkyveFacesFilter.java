@@ -115,7 +115,7 @@ public class SkyveFacesFilter implements Filter {
 			Router router = CORE.getRepository().getRouter();
 
 			// Test if this URL is unsecured in the router, and bug out if so
-			if (router.isUnsecured(pathToTest)) {
+			if ((router != null) && router.isUnsecured(pathToTest)) {
 				chain.doFilter(req, resp);
 				return;
 			}

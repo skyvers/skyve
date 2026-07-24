@@ -3,6 +3,6 @@
 		xmlns:h="http://java.sun.com/jsf/html">
 	<h:outputStylesheet name="css/primeicons.css" library="diamond-layout" />
 	<h:outputStylesheet name="css/primeflex.min.css" library="diamond-layout" />
-	<h:outputStylesheet name="#{'css/layout-'.concat(_skyveTheme.themeColour.split('-')[1]).concat('.css?v=').concat(bean.webResourceFileVersion)}" library="diamond-layout" />
+	<h:outputStylesheet name="#{'css/layout-'.concat(_skyveTheme.scheme).concat('.css?v=').concat(bean.webResourceFileVersion)}" library="diamond-layout" />
 	<h:outputStylesheet name="css/diamond.css?v=#{bean.webResourceFileVersion}" library="skyve" />
 </ui:composition>

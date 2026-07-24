@@ -34,6 +34,7 @@ import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.impl.web.RequestUxUiSelectionTestUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.model.document.Document;
@@ -277,7 +278,6 @@ class SmartClientGeneratorServletTest {
 		when(response.getWriter()).thenReturn(mock(PrintWriter.class, RETURNS_SELF));
 		when(request.getParameter(AbstractWebContext.MODULE_NAME)).thenReturn("admin");
 		when(request.getParameter(AbstractWebContext.DOCUMENT_NAME)).thenReturn("Contact");
-		when(request.getAttribute(AbstractWebContext.UXUI)).thenReturn(UxUi.newPrimeFaces("desktop", "template", "saga"));
 
 		assertDoesNotThrow(() -> servlet.doGet(request, response));
 	}
@@ -311,9 +311,9 @@ class SmartClientGeneratorServletTest {
 		when(request.getLocale()).thenReturn(Locale.ENGLISH);
 		when(session.getId()).thenReturn("session-deep-generator");
 		when(session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME)).thenReturn(null);
-		when(request.getAttribute(AbstractWebContext.UXUI)).thenReturn(UxUi.newPrimeFaces("desktop", "template", "saga"));
 		when(request.getParameter(AbstractWebContext.MODULE_NAME)).thenReturn("admin");
 		when(request.getParameter(AbstractWebContext.DOCUMENT_NAME)).thenReturn("Contact");
+		installDesktopSelection(request);
 
 		when(customer.getModule("admin")).thenReturn(module);
 		when(module.getDocument(customer, "Contact")).thenReturn(document);
@@ -358,9 +358,9 @@ class SmartClientGeneratorServletTest {
 		when(request.getLocale()).thenReturn(Locale.ENGLISH);
 		when(session.getId()).thenReturn("session-generator-edit-path");
 		when(session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME)).thenReturn(null);
-		when(request.getAttribute(AbstractWebContext.UXUI)).thenReturn(UxUi.newPrimeFaces("desktop", "template", "saga"));
 		when(request.getParameter(AbstractWebContext.MODULE_NAME)).thenReturn("admin");
 		when(request.getParameter(AbstractWebContext.DOCUMENT_NAME)).thenReturn("Contact");
+		installDesktopSelection(request);
 
 		when(customer.getModule("admin")).thenReturn(module);
 		when(module.getDocument(customer, "Contact")).thenReturn(document);
@@ -406,7 +406,7 @@ class SmartClientGeneratorServletTest {
 
 		when(request.getParameter(AbstractWebContext.MODULE_NAME)).thenReturn("admin");
 		when(request.getParameter(AbstractWebContext.DOCUMENT_NAME)).thenReturn("Contact");
-		when(request.getAttribute(AbstractWebContext.UXUI)).thenReturn(UxUi.newPrimeFaces("desktop", "template", "saga"));
+		installDesktopSelection(request);
 
 		when(customer.getModule("admin")).thenReturn(module);
 		when(module.getDocument(customer, "Contact")).thenReturn(document);
@@ -467,7 +467,7 @@ class SmartClientGeneratorServletTest {
 
 		when(request.getParameter(AbstractWebContext.MODULE_NAME)).thenReturn("admin");
 		when(request.getParameter(AbstractWebContext.DOCUMENT_NAME)).thenReturn("Contact");
-		when(request.getAttribute(AbstractWebContext.UXUI)).thenReturn(UxUi.newPrimeFaces("desktop", "template", "saga"));
+		installDesktopSelection(request);
 		when(customer.getModule("admin")).thenThrow(new RuntimeException("wave64-module-failure"));
 
 		AbstractPersistence persistence = mock(AbstractPersistence.class, CALLS_REAL_METHODS);
@@ -507,6 +507,7 @@ class SmartClientGeneratorServletTest {
 		when(request.getLocale()).thenReturn(Locale.ENGLISH);
 		when(session.getId()).thenReturn("session-1");
 		when(session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME)).thenReturn(null);
+		installDesktopSelection(request);
 		return request;
 	}
 
@@ -521,7 +522,15 @@ class SmartClientGeneratorServletTest {
 		when(request.getUserPrincipal()).thenReturn(null);
 		when(request.getLocale()).thenReturn(Locale.ENGLISH);
 		when(session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME)).thenReturn(null);
+		installDesktopSelection(request);
 		return request;
+	}
+
+	private static void installDesktopSelection(HttpServletRequest request) {
+		RequestUxUiSelectionTestUtil.install(request,
+				org.skyve.web.UserAgentType.desktop,
+				false,
+				UxUi.newSmartClient("desktop", "Tahoe", "casablanca", "smartclient"));
 	}
 
 	@SuppressWarnings("unchecked")

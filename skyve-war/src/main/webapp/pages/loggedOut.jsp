@@ -10,7 +10,7 @@
 <%@page import="org.skyve.web.WebContext"%>
 <%
 	String basePath = Util.getSkyveContextUrl() + "/";
-	boolean mobile = UserAgent.getType(request).isMobile();
+	boolean mobile = UserAgent.detectType(request).isMobile();
 	String referer = WebUtil.getRefererHeader(request);
 	User user = null;
 	HttpSession session = request.getSession(false); // don't make a new one

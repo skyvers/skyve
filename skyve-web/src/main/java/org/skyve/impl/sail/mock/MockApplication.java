@@ -64,7 +64,6 @@ import org.primefaces.component.tristatecheckbox.TriStateCheckbox;
 import org.skyve.impl.web.faces.components.Conversation;
 import org.skyve.impl.web.faces.components.ListGrid;
 import org.skyve.impl.web.faces.components.Map;
-import org.skyve.impl.web.faces.components.SetUxUi;
 import org.skyve.impl.web.faces.components.View;
 
 import jakarta.el.ExpressionFactory;
@@ -95,7 +94,7 @@ import jakarta.faces.validator.Validator;
  */
 public class MockApplication extends Application {
 	private ExpressionFactory ef = new MockExpressionFactory();
-	
+
 	/**
 	 * Returns the mock expression factory used by SAIL execution tests.
 	 */
@@ -103,7 +102,7 @@ public class MockApplication extends Application {
 	public ExpressionFactory getExpressionFactory() {
     	return ef;
     }
-    
+
 	/**
 	 * Creates a concrete PrimeFaces or Skyve component for the supplied component type identifier.
 	 *
@@ -280,9 +279,6 @@ public class MockApplication extends Application {
 		else if (SelectManyCheckbox.COMPONENT_TYPE.equals(componentType)) {
 			return new SelectManyCheckbox();
 		}
-		else if (SetUxUi.COMPONENT_TYPE.equals(componentType)) {
-			return new SetUxUi();
-		}
 		else if (Spacer.COMPONENT_TYPE.equals(componentType)) {
 			return new Spacer();
 		}
@@ -355,7 +351,7 @@ public class MockApplication extends Application {
 		}
 		throw new FacesException("MockApplication.createBehavior() does not cater for behaviorId " + behaviorId);
 	}
-	
+
 	/**
 	 * Returns no action listener in this mock implementation.
 	 */

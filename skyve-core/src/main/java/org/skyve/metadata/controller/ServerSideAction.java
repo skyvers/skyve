@@ -5,6 +5,7 @@ import org.skyve.metadata.MetaData;
 import org.skyve.web.WebContext;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * The primary Skyve action contract executed when a user activates an action widget.
@@ -31,10 +32,10 @@ public interface ServerSideAction<T extends Bean> extends MetaData {
 	 *
 	 * @param bean        the current bean from the view; never {@code null}
 	 * @param webContext  the current web context providing access to conversation and
-	 *                    session state; never {@code null}
+	 *                    session state or {@code null} if the action is not executing from a web request
 	 * @return a result wrapping the (potentially replaced) bean; never {@code null}
 	 * @throws Exception if the action cannot complete; Skyve will surface the exception
 	 *                   to the user as an error message
 	 */
-	public @Nonnull ServerSideActionResult<T> execute(T bean, WebContext webContext) throws Exception;
+	public @Nonnull ServerSideActionResult<T> execute(@Nonnull T bean, @Nullable WebContext webContext) throws Exception;
 }

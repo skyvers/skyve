@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+		xmlns:ui="http://java.sun.com/jsf/facelets"
+		xmlns:h="http://java.sun.com/jsf/html"
+		xmlns:f="http://java.sun.com/jsf/core"
+		xmlns:p="http://primefaces.org/ui"
+		xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+		lang="#{device.languageTag}" xml:lang="#{device.languageTag}">
+	<f:view contentType="text/html" encoding="UTF-8">
+		<h:head>
+			<title>${project.description}</title>
+			<meta name="viewport" content="width=device-width, initial-scale=1" />
+			<ui:include src="/WEB-INF/pages/includes/favicon.xhtml" />
+			<link type="text/css" rel="stylesheet" href="#{device.contextUrl}/fontawesome-6.5.1/css/all.min.css" />
+			<link type="text/css" rel="stylesheet" href="#{device.contextUrl}/skyve/css/device-min.css?v=#{device.webResourceFileVersion}" />
+		</h:head>
+		<h:body>
+			<h:panelGroup id="device"
+					layout="block"
+					pt:data-preview-url-prefix="#{device.previewUrlPrefix}"
+					pt:data-end-preview-url="#{device.endPreviewUrl}">
+				<div class="content">
+					<iframe id="iframe" title="Device preview"></iframe>
+				</div>
+			</h:panelGroup>
+			<div class="device-preview-controls">
+				<h:form id="previewControls">
+					<p:growl widgetVar="previewMessages" life="2000" showDetail="true" />
+					<p:tooltip globalSelector=".device-preview-controls .ui-speeddial-action" position="left" />
+					<p:speedDial showIcon="pi pi-bars"
+							hideIcon="pi pi-times"
+							buttonStyleClass="ui-button-danger"
+							radius="150"
+							direction="up-left"
+							type="quarter-circle"
+							ariaLabel="Device preview controls">
+						<p:menuitem id="devicePreviewPhone" title="Phone" ariaLabel="Phone" icon="fa-solid fa-mobile-screen-button" />
+						<p:menuitem id="devicePreviewTablet" title="Tablet" ariaLabel="Tablet" icon="fa-solid fa-tablet-screen-button" />
+						<p:menuitem id="devicePreviewLaptop" title="Laptop" ariaLabel="Laptop" icon="fa-solid fa-laptop" />
+						<p:menuitem id="devicePreviewDesktop" title="Desktop" ariaLabel="Desktop" icon="fa-solid fa-desktop" />
+						<p:menuitem id="devicePreviewEnd" title="End preview" ariaLabel="End preview" icon="fa-solid fa-power-off" />
+					</p:speedDial>
+				</h:form>
+			</div>
+			<script type="text/javascript" src="#{device.contextUrl}/skyve/prime/device-min.js?v=#{device.webResourceFileVersion}"></script>
+		</h:body>
+	</f:view>
+</html>

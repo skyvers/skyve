@@ -6,6 +6,7 @@ import org.skyve.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.controller.ServerSideAction;
@@ -22,6 +23,9 @@ import org.skyve.util.monitoring.Monitoring;
 import org.skyve.util.monitoring.RequestKey;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
+
+import jakarta.faces.context.FacesContext;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Executes a Faces callback action within the current Skyve web context.
@@ -76,7 +80,8 @@ public class ExecuteActionAction extends FacesAction<Void> {
     	Customer customer = user.getCustomer();
     	Module targetModule = customer.getModule(targetBean.getBizModule());
 		Document targetDocument = targetModule.getDocument(customer, targetBean.getBizDocument());
-		View view = targetDocument.getView(facesView.getUxUi().getName(), 
+		HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
+		View view = targetDocument.getView(UserAgent.getSelection(request).getUxUi().getName(),
 											customer, 
 											targetBean.isCreated() ? ViewType.edit.toString() : ViewType.create.toString());
     	Action action = view.getAction(actionName);

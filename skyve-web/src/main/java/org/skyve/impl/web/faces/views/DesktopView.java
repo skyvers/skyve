@@ -161,7 +161,7 @@ public class DesktopView extends HarnessView {
 			    	String bizId = getBizIdParameter();
 			    	
 					HttpServletRequest request = (HttpServletRequest) fc.getExternalContext().getRequest();
-					UxUi uxui = UserAgent.getUxUi(request);
+					UxUi uxui = UserAgent.getSelection(request).getUxUi();
 					skin = uxui.getScSkin();
 					
 					StringBuilder sb = new StringBuilder(8192);
@@ -645,13 +645,14 @@ public class DesktopView extends HarnessView {
 				if (config != null) {
 					result.append(",config:").append(config);
 				}
-				result.append(",ref:'").append(ref);
+				result.append(",ref:'").append(OWASP.escapeJsString(ref));
 				if ((iconStyleClass == null) && (icon16 != null)) {
 					result.append("',icon:'../resources?");
 					if ((itemModule != null) && (itemDocument != null)) { // NB link items have no document
-						result.append("_doc=").append(itemModule.getName()).append('.').append(itemDocument.getName()).append('&');
+						result.append("_doc=").append(OWASP.escapeJsString(itemModule.getName())).append('.')
+								.append(OWASP.escapeJsString(itemDocument.getName())).append('&');
 					}
-					result.append("_n=").append(icon16);
+					result.append("_n=").append(OWASP.escapeJsString(icon16));
 				}
 				result.append("'},");
 			}

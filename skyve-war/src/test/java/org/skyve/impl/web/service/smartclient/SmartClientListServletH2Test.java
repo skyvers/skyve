@@ -25,7 +25,6 @@ import org.skyve.impl.web.SortParameterImpl;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.snapshot.SmartClientFilterOperator;
-import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.ListModel;
@@ -57,13 +56,13 @@ class SmartClientListServletH2Test extends AbstractSkyveTest {
 		parameters.put("text", "list-fetch");
 
 		String body = invokeFetch(0,
-									25,
-									SmartClientFilterOperator.substring,
-									null,
-									null,
-									null,
-									false,
-									parameters);
+				25,
+				SmartClientFilterOperator.substring,
+				null,
+				null,
+				null,
+				false,
+				parameters);
 
 		assertSuccessfulFetch(body);
 		assertTrue(body.contains(bean.getBizId()));
@@ -75,13 +74,13 @@ class SmartClientListServletH2Test extends AbstractSkyveTest {
 		String criteria = "{\"fieldName\":\"text\",\"operator\":\"iContains\",\"value\":\"list-advanced\"}";
 
 		String body = invokeFetch(0,
-									10,
-									null,
-									new String[] {criteria},
-									null,
-									null,
-									false,
-									new TreeMap<>(Map.of("operator", "and")));
+				10,
+				null,
+				new String[] { criteria },
+				null,
+				null,
+				false,
+				new TreeMap<>(Map.of("operator", "and")));
 
 		assertSuccessfulFetch(body);
 		assertTrue(body.contains(bean.getBizId()));
@@ -96,18 +95,18 @@ class SmartClientListServletH2Test extends AbstractSkyveTest {
 		sort.setDirection(SortDirection.descending);
 
 		String body = invokeFetch(0,
-									1,
-									SmartClientFilterOperator.substring,
-									null,
-									new SortParameter[] {sort},
-									null,
-									false,
-									new TreeMap<>(Map.of("text", "list-sort")));
+				1,
+				SmartClientFilterOperator.substring,
+				null,
+				new SortParameter[] { sort },
+				null,
+				false,
+				new TreeMap<>(Map.of("text", "list-sort")));
 
 		assertSuccessfulFetch(body);
 		assertTrue(body.contains("\"endRow\":1"), body);
 		assertTrue(body.contains(second.getBizId()), body);
-		assertTrue(! body.contains(first.getBizId()), body);
+		assertTrue(!body.contains(first.getBizId()), body);
 	}
 
 	@Test
@@ -117,19 +116,19 @@ class SmartClientListServletH2Test extends AbstractSkyveTest {
 		parameters.put("text", "list-page-reset");
 
 		String body = invokeFetch(99,
-									100,
-									SmartClientFilterOperator.substring,
-									null,
-									null,
-									null,
-									false,
-									parameters);
+				100,
+				SmartClientFilterOperator.substring,
+				null,
+				null,
+				null,
+				false,
+				parameters);
 
 		assertSuccessfulFetch(body);
 		assertTrue(body.contains("\"startRow\":0"), body);
 		assertTrue(body.contains("\"endRow\":1"), body);
 		assertTrue(body.contains("\"totalRows\":1"), body);
-		assertTrue(! body.contains(bean.getBizId()), body);
+		assertTrue(!body.contains(bean.getBizId()), body);
 	}
 
 	@Test
@@ -164,21 +163,21 @@ class SmartClientListServletH2Test extends AbstractSkyveTest {
 
 	private AllAttributesPersistent saveUncommittedBean(String textPrefix) {
 		AllAttributesPersistent bean = new DataBuilder().fixture(FixtureType.crud)
-														.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
 		bean.setText(textPrefix + '-' + System.nanoTime());
 		bean = p.save(bean);
 		return bean;
 	}
 
 	private String invokeFetch(int startRow,
-								int endRow,
-								SmartClientFilterOperator operator,
-								String[] criteria,
-								SortParameter[] sortParameters,
-								AggregateFunction summaryType,
-								boolean includeExtraSummaryRow,
-								SortedMap<String, Object> parameters)
-	throws Exception {
+			int endRow,
+			SmartClientFilterOperator operator,
+			String[] criteria,
+			SortParameter[] sortParameters,
+			AggregateFunction summaryType,
+			boolean includeExtraSummaryRow,
+			SortedMap<String, Object> parameters)
+			throws Exception {
 		ListModel<Bean> model = EXT.newListModel(m.getDocumentDefaultQuery(c, AllAttributesPersistent.DOCUMENT_NAME));
 		StringWriter sink = new StringWriter();
 		try (PrintWriter writer = new PrintWriter(sink, true)) {
@@ -199,20 +198,20 @@ class SmartClientListServletH2Test extends AbstractSkyveTest {
 					ListModel.class);
 			fetch.setAccessible(true);
 			fetch.invoke(null,
-							m,
-							aapd,
-							Integer.valueOf(startRow),
-							Integer.valueOf(endRow),
-							operator,
-							criteria,
-							sortParameters,
-							summaryType,
-							Boolean.valueOf(includeExtraSummaryRow),
-							null,
-							parameters,
-							p,
-							writer,
-							model);
+					m,
+					aapd,
+					Integer.valueOf(startRow),
+					Integer.valueOf(endRow),
+					operator,
+					criteria,
+					sortParameters,
+					summaryType,
+					Boolean.valueOf(includeExtraSummaryRow),
+					null,
+					parameters,
+					p,
+					writer,
+					model);
 		}
 		return sink.toString();
 	}
@@ -278,7 +277,7 @@ class SmartClientListServletH2Test extends AbstractSkyveTest {
 		}
 
 		private RequestBuilder param(String name, String value) {
-			parameters.put(name, new String[] {value});
+			parameters.put(name, new String[] { value });
 			return this;
 		}
 
@@ -291,7 +290,6 @@ class SmartClientListServletH2Test extends AbstractSkyveTest {
 			when(request.getUserPrincipal()).thenReturn((Principal) null);
 			when(request.getLocale()).thenReturn(java.util.Locale.ENGLISH);
 			when(request.getHeader("User-Agent")).thenReturn("Mozilla/5.0");
-			when(request.getAttribute(AbstractWebContext.UXUI)).thenReturn(null);
 			for (Map.Entry<String, String[]> entry : parameters.entrySet()) {
 				when(request.getParameter(entry.getKey())).thenReturn(entry.getValue()[0]);
 				when(request.getParameterValues(entry.getKey())).thenReturn(entry.getValue());

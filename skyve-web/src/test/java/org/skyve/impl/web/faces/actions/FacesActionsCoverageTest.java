@@ -33,22 +33,29 @@ import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.web.RequestUxUiSelectionTestUtil;
+import org.skyve.impl.web.WebContainer;
 import org.skyve.impl.web.faces.models.BeanMapAdapter;
 import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
+import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.list.Page;
+import org.skyve.web.UserAgentType;
 
 import jakarta.faces.component.UIViewRoot;
 import jakarta.faces.component.html.HtmlInputText;
+import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.context.PartialViewContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @SuppressWarnings({"static-method", "boxing", "java:S1130", "java:S8692"}) // system clock OK
 class FacesActionsCoverageTest {
@@ -61,6 +68,7 @@ class FacesActionsCoverageTest {
 	@AfterEach
 	void tearDown() {
 		FacesContextBridge.setCurrent(null);
+		WebContainer.clear();
 		clearThreadPersistence();
 	}
 
@@ -82,6 +90,7 @@ class FacesActionsCoverageTest {
 
 	@Test
 	void getBeansActionCallbackReturnsLoadedRowsWhenModelResolves() throws Exception {
+		installRequestSelectionContext();
 		User user = mock(User.class);
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
@@ -104,7 +113,6 @@ class FacesActionsCoverageTest {
 		when(listModel.getColumns()).thenReturn(Collections.emptyList());
 
 		FacesView facesView = mock(FacesView.class);
-		when(facesView.getUxUi()).thenReturn(org.skyve.metadata.router.UxUi.newPrimeFaces("desktop", "template", "saga"));
 		when(facesView.getCurrentBean()).thenReturn(null);
 		when(facesView.getWebContext()).thenReturn(null);
 
@@ -221,7 +229,6 @@ class FacesActionsCoverageTest {
 		when(facesView.getBean()).thenReturn(bean);
 		when(bean.getBizModule()).thenReturn("admin");
 		when(bean.getBizDocument()).thenReturn("Contact");
-		when(facesView.getUxUi()).thenReturn(org.skyve.metadata.router.UxUi.newPrimeFaces("desktop", "template", "saga"));
 		when(facesView.getViewBinding()).thenReturn(null);
 
 		SetTitleAction action = new SetTitleAction(facesView);
@@ -232,6 +239,7 @@ class FacesActionsCoverageTest {
 
 	@Test
 	void setTitleActionSetsTitleWhenBeanAndViewAreResolved() throws Exception {
+		installRequestSelectionContext();
 		User user = mock(User.class);
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
@@ -247,7 +255,6 @@ class FacesActionsCoverageTest {
 		Bean bean = mock(Bean.class);
 		when(facesView.getBean()).thenReturn(bean);
 		when(facesView.getViewBinding()).thenReturn(null);
-		when(facesView.getUxUi()).thenReturn(org.skyve.metadata.router.UxUi.newPrimeFaces("desktop", "template", "saga"));
 
 		when(bean.getBizModule()).thenReturn("admin");
 		when(bean.getBizDocument()).thenReturn("Contact");
@@ -264,6 +271,7 @@ class FacesActionsCoverageTest {
 
 	@Test
 	void setTitleActionAllowsTrustedViewTitleWhenEscapingFalse() throws Exception {
+		installRequestSelectionContext();
 		User user = mock(User.class);
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
@@ -280,7 +288,6 @@ class FacesActionsCoverageTest {
 		Bean bean = mock(Bean.class);
 		when(facesView.getBean()).thenReturn(bean);
 		when(facesView.getViewBinding()).thenReturn(null);
-		when(facesView.getUxUi()).thenReturn(org.skyve.metadata.router.UxUi.newPrimeFaces("desktop", "template", "saga"));
 
 		when(bean.getBizModule()).thenReturn("admin");
 		when(bean.getBizDocument()).thenReturn("Contact");
@@ -297,6 +304,7 @@ class FacesActionsCoverageTest {
 
 	@Test
 	void setTitleActionUsesEditViewWhenBeanIsCreated() throws Exception {
+		installRequestSelectionContext();
 		User user = mock(User.class);
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
@@ -310,7 +318,6 @@ class FacesActionsCoverageTest {
 		Bean bean = mock(Bean.class);
 		when(facesView.getBean()).thenReturn(bean);
 		when(facesView.getViewBinding()).thenReturn(null);
-		when(facesView.getUxUi()).thenReturn(org.skyve.metadata.router.UxUi.newPrimeFaces("desktop", "template", "saga"));
 
 		when(bean.getBizModule()).thenReturn("admin");
 		when(bean.getBizDocument()).thenReturn("Contact");
@@ -387,6 +394,7 @@ class FacesActionsCoverageTest {
 
 	@Test
 	void executeActionActionThrowsSecurityExceptionWhenUserCannotExecuteResource() {
+		installRequestSelectionContext();
 		User user = mock(User.class);
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
@@ -410,7 +418,6 @@ class FacesActionsCoverageTest {
 
 		FacesView facesView = mock(FacesView.class);
 		when(facesView.getBean()).thenReturn(bean);
-		when(facesView.getUxUi()).thenReturn(org.skyve.metadata.router.UxUi.newPrimeFaces("desktop", "template", "saga"));
 
 		ExecuteActionAction action = new ExecuteActionAction(facesView, "myAction", null, null);
 
@@ -419,6 +426,7 @@ class FacesActionsCoverageTest {
 
 	@Test
 	void executeActionActionThrowsClassCastWhenExecutionAllowed() {
+		installRequestSelectionContext();
 		User user = mock(User.class);
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
@@ -443,7 +451,6 @@ class FacesActionsCoverageTest {
 
 		FacesView facesView = mock(FacesView.class);
 		when(facesView.getBean()).thenReturn(bean);
-		when(facesView.getUxUi()).thenReturn(org.skyve.metadata.router.UxUi.newPrimeFaces("desktop", "template", "saga"));
 		when(facesView.getWebContext()).thenReturn(null);
 
 		ExecuteActionAction action = new ExecuteActionAction(facesView, "myAction", null, null);
@@ -507,6 +514,7 @@ class FacesActionsCoverageTest {
 
 	@Test
 	void saveActionThrowsClassCastWhenCustomerIsNotInternalType() {
+		installRequestSelectionContext();
 		User user = mock(User.class);
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
@@ -528,7 +536,6 @@ class FacesActionsCoverageTest {
 
 		FacesView facesView = mock(FacesView.class);
 		when(facesView.getBean()).thenReturn(bean);
-		when(facesView.getUxUi()).thenReturn(org.skyve.metadata.router.UxUi.newPrimeFaces("desktop", "template", "saga"));
 		when(facesView.getWebContext()).thenReturn(null);
 
 		SaveAction action = new SaveAction(facesView, false);
@@ -537,6 +544,7 @@ class FacesActionsCoverageTest {
 
 	@Test
 	void saveActionOkBranchResolvesOkActionBeforeInternalCustomerCast() {
+		installRequestSelectionContext();
 		User user = mock(User.class);
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
@@ -558,7 +566,6 @@ class FacesActionsCoverageTest {
 
 		FacesView facesView = mock(FacesView.class);
 		when(facesView.getBean()).thenReturn(bean);
-		when(facesView.getUxUi()).thenReturn(org.skyve.metadata.router.UxUi.newPrimeFaces("desktop", "template", "saga"));
 		when(facesView.getWebContext()).thenReturn(null);
 
 		SaveAction action = new SaveAction(facesView, true);
@@ -806,7 +813,6 @@ class FacesActionsCoverageTest {
 		when(facesView.getBean()).thenReturn(rootBean);
 		when(facesView.getViewBinding()).thenReturn(null);
 		when(facesView.getWebContext()).thenReturn(null);
-		when(facesView.getUxUi()).thenReturn(org.skyve.metadata.router.UxUi.newPrimeFaces("desktop", "template", "saga"));
 
 		RemoveAction action = new RemoveAction(facesView, "items", "e1", null);
 		assertThrows(MetaDataException.class, action::callback);
@@ -874,6 +880,20 @@ class FacesActionsCoverageTest {
 		AbstractPersistence persistence = mock(AbstractPersistence.class, CALLS_REAL_METHODS);
 		persistence.setUser(user);
 		persistence.setForThread();
+	}
+
+	private static void installRequestSelectionContext() {
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		RequestUxUiSelectionTestUtil.install(request,
+				UserAgentType.desktop,
+				false,
+				UxUi.newPrimeFaces(UxUi.DESKTOP_NAME, "editorial", "skyve", "blue"));
+		ExternalContext externalContext = mock(ExternalContext.class);
+		when(externalContext.getRequest()).thenReturn(request);
+		FacesContext context = mock(FacesContext.class);
+		when(context.getExternalContext()).thenReturn(externalContext);
+		FacesContextBridge.setCurrent(context);
+		WebContainer.setHttpServletRequestResponse(request, mock(HttpServletResponse.class));
 	}
 
 	private static void invokeSetupViewForZoomIn(EditAction action, Bean bean, String bindingParameter) throws Exception {

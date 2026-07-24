@@ -66,30 +66,35 @@ public class ActionUtil {
 	 * @return the resolved target bean, or {@code null} when the view has no root bean
 	 */
 	public static Bean getTargetBeanForViewAndReferenceBinding(FacesView facesView,
-    															String referenceBinding,
+																String referenceBinding,
 																String elementBizId) {
-    	Bean result = facesView.getBean();
-    	
-    	if (result != null) { // hopefully never
-	    	String viewBinding = facesView.getViewBinding();
-	    	if (viewBinding != null) {
-	    		result = (Bean) Binder.get(result, viewBinding);
-	    	}
-			if (referenceBinding != null) {
-				if (elementBizId != null) {
-					result = Binder.getElementInCollection(result, referenceBinding, elementBizId);
-				}
-				else {
-					result = (Bean) Binder.get(result, referenceBinding);
+		Bean result = facesView.getBean();
+
+		if (result != null) { // hopefully always
+			String viewBinding = facesView.getViewBinding();
+			if (viewBinding != null) {
+				result = (Bean) Binder.get(result, viewBinding);
+			}
+			if (result != null) { // hopefully always
+				if (referenceBinding != null) {
+					if (elementBizId != null) {
+						result = Binder.getElementInCollection(result, referenceBinding, elementBizId);
+					}
+					else {
+						result = (Bean) Binder.get(result, referenceBinding);
+					}
 				}
 			}
-    	}
-    	else {
-    		LOGGER.warn("ActionUtil.getTargetBeanForViewAndReferenceBinding: FacesView.getBean() yields null");
-    	}
-    	
-    	return result;
-    }
+			else {
+				LOGGER.warn("ActionUtil.getTargetBeanForViewAndReferenceBinding: FacesView.getBean() : viewBinding {} yields null", viewBinding);
+			}
+		}
+		else {
+			LOGGER.warn("ActionUtil.getTargetBeanForViewAndReferenceBinding: FacesView.getBean() yields null");
+		}
+
+		return result;
+	}
 
 	/**
 	 * Replaces the current target bean (or collection element) for a faces view binding context.
@@ -170,7 +175,7 @@ public class ActionUtil {
 		}
 		ec.redirect(outcome.toString());
     }
-    
+
 	/**
 	 * Resolves a metadata query definition by name, falling back to the document default query.
 	 *

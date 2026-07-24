@@ -67,7 +67,7 @@
 	String customerFieldName = "customer";
 	String userFieldName = "user";
 
-	boolean mobile = UserAgent.getType(request).isMobile();
+	boolean mobile = UserAgent.detectType(request).isMobile();
 	
 	// is self-registration enabled
 	boolean allowRegistration = (UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION && (! show2FA));

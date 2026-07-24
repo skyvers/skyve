@@ -2,6 +2,8 @@ package org.skyve.metadata.controller;
 
 import org.skyve.domain.Bean;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Carries the result of a {@link ServerSideAction} execution back to the Skyve view pipeline.
  *
@@ -25,7 +27,7 @@ public final class ServerSideActionResult<T extends Bean> {
 	 *
 	 * @param bean  the bean to return; may be a new instance if the action replaced the original
 	 */
-	public ServerSideActionResult(T bean) {
+	public ServerSideActionResult(@Nonnull T bean) {
 		this.bean = bean;
 	}
 
@@ -34,7 +36,7 @@ public final class ServerSideActionResult<T extends Bean> {
 	 *
 	 * @return the bean; may differ from the bean passed into the action if it was replaced
 	 */
-	public T getBean() {
+	public @Nonnull T getBean() {
 		return bean;
 	}
 
@@ -46,7 +48,7 @@ public final class ServerSideActionResult<T extends Bean> {
 	 *
 	 * @param bean  the replacement bean; must not be {@code null}
 	 */
-	public void setBean(T bean) {
+	public void setBean(@Nonnull T bean) {
 		this.bean = bean;
 	}
 }

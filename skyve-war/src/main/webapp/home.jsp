@@ -1,6 +1,5 @@
 <%@ page session="false" language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.security.Principal"%>
-<%@ page import="java.util.Enumeration"%>
 <%@ page import="jakarta.servlet.http.Cookie"%>
 <%@ page import="org.skyve.domain.messages.SecurityException"%>
 <%@ page import="org.skyve.metadata.customer.Customer"%>
@@ -18,7 +17,6 @@
 <%@ page import="org.skyve.impl.persistence.AbstractPersistence"%>
 <%@ page import="org.skyve.impl.web.AbstractWebContext"%>
 <%@ page import="org.skyve.impl.web.UserAgent"%>
-<%@ page import="org.skyve.web.UserAgentType"%>
 <%@ page import="org.skyve.impl.web.WebUtil"%>
 <%@ page import="org.skyve.impl.util.UtilImpl"%>
 <%@ page import="org.skyve.util.logging.SkyveLoggerFactory"%>
@@ -66,9 +64,6 @@
 	String c = request.getParameter("c"); // customer
 	String b = request.getParameter("b"); // binding
 
-	// Get (and set) the user agent type (if required - could have been set by device.jsp)
-	UserAgentType userAgentType = UserAgent.getType(request);
-
 	Router router = repository.getRouter();
 
 	RouteCriteria criteria = new RouteCriteria();
@@ -96,7 +91,7 @@
 		}
 		
 		// Determine the UX/UI without a user principal
-		UxUi uxui = UserAgent.getUxUi(request);
+		UxUi uxui = UserAgent.getSelection(request).getUxUi();
 		String uxuiName = (uxui == null) ? "" : uxui.getName();
 		// Now determine if the outcome URL is unsecured or not.
 		String outcomeUrl = router.selectOutcomeUrl(uxuiName, criteria);
@@ -128,23 +123,14 @@
 			userName = customerName + "/" + userName;
 		}
 		else {
-			String queryString = request.getQueryString();
-			if (queryString == null) {
+			if (request.getQueryString() == null) {
 				response.sendRedirect(response.encodeRedirectURL(Util.getLoginUrl()));
 			}
 			else {
-				// Remove the customer parameter before redirecting as its now a cookie
-				StringBuilder sb = new StringBuilder(64);
-				Enumeration<String> en = request.getParameterNames();
-				while (en.hasMoreElements()) {
-					String name = en.nextElement();
-					if (! AbstractWebContext.CUSTOMER_COOKIE_NAME.equals(name)) {
-						sb.append((sb.length() == 0) ? '?' : '&');
-						sb.append(name).append('=');
-						sb.append(request.getParameter(name));
-					}
-				}
-				response.sendRedirect(response.encodeRedirectURL(Util.getBaseUrl() + "loggedIn.jsp" + sb.toString()));
+				// Remove the customer parameter before redirecting as it is now a cookie.
+				StringBuilder loginUrl = new StringBuilder(Util.getBaseUrl()).append("loggedIn.jsp");
+				WebUtil.appendRequestParameters(loginUrl, request, AbstractWebContext.CUSTOMER_COOKIE_NAME);
+				response.sendRedirect(response.encodeRedirectURL(loginUrl.toString()));
 			}
 			return;
 		}
@@ -194,7 +180,7 @@
 		}
 		
 		// Determine the UX/UI with the user principal
-		UxUi uxui = UserAgent.getUxUi(request);
+		UxUi uxui = UserAgent.getSelection(request).getUxUi();
 		String uxuiName = (uxui == null) ? "" : uxui.getName();
 		// Determine the route
 		String outcomeUrl = router.selectOutcomeUrl(uxuiName, criteria);

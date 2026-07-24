@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -42,7 +42,9 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-@SuppressWarnings({"static-method", "resource"})
+// Servlet doubles, reflection, temporary files, cookies and assertions are isolated test fixtures.
+@SuppressWarnings({ "static-method", "resource", "java:S112", "java:S1168", "java:S1192", "java:S1948",
+		"java:S2092", "java:S2226", "java:S2696", "java:S3011", "java:S3330", "java:S5443", "java:S5960" })
 class AbstractResourceServletTest {
 
 	@BeforeEach
@@ -81,6 +83,29 @@ class AbstractResourceServletTest {
 		assertEquals("contact", servlet.lastParams.binding());
 		assertEquals("avatar", servlet.lastParams.resourceFileName());
 		assertEquals("desktop", servlet.lastUxUiName);
+	}
+
+	@Test
+	void getHeadAndLastModifiedSecurityReceiveTheSelectedEmulatedUxUi() throws Exception {
+		UxUi phone = UxUi.newPrimeFaces("phone", "external", "phone-theme");
+		TestServlet servlet = new TestServlet();
+		servlet.resource = TestResource.with("hello".getBytes(StandardCharsets.UTF_8), "text/plain", "greeting.txt");
+		servlet.resource.lastModified = 1_700_000_000_000L;
+
+		HttpServletRequest getRequest = request(Map.of(), null, null, false, phone);
+		servlet.doGet(getRequest, responseWithOutput());
+		assertEquals("phone", servlet.lastUxUiName);
+		clearThreadLocalResource();
+
+		HttpServletRequest headRequest = request(Map.of(), null, null, false, phone);
+		servlet.doHead(headRequest, responseWithOutput());
+		assertEquals("phone", servlet.lastUxUiName);
+		clearThreadLocalResource();
+
+		HttpServletRequest lastModifiedRequest = request(Map.of(), null, null, false, phone);
+		assertEquals(1_700_000_000_000L, servlet.lastModified(lastModifiedRequest));
+		assertEquals("phone", servlet.lastUxUiName);
+		assertEquals(3, servlet.createCalls);
 	}
 
 	@Test
@@ -604,17 +629,28 @@ class AbstractResourceServletTest {
 	}
 
 	private static HttpServletRequest request(Map<String, String> params,
-														Object session,
-														Cookie[] cookies,
-														boolean forService) {
+												Object session,
+												Cookie[] cookies,
+												boolean forService) {
+		return request(params,
+				session,
+				cookies,
+				forService,
+				UxUi.newSmartClient(UxUi.DESKTOP_NAME, "Cerulean", "omega"));
+	}
+
+	private static HttpServletRequest request(Map<String, String> params,
+												Object session,
+												Cookie[] cookies,
+												boolean forService,
+												UxUi uxui) {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		Map<String, String> mutable = new HashMap<>(params);
 		when(request.getParameter(anyString())).thenAnswer(i -> mutable.get(i.getArgument(0, String.class)));
 		when(request.getSession(false)).thenReturn((jakarta.servlet.http.HttpSession) session);
 		when(request.getCookies()).thenReturn(cookies);
 
-		UxUi uxui = UxUi.newSmartClient(UxUi.DESKTOP_NAME, "Cerulean", "omega");
-		when(request.getAttribute(AbstractWebContext.UXUI)).thenReturn(uxui);
+		RequestUxUiSelectionTestUtil.install(request, org.skyve.web.UserAgentType.desktop, false, uxui);
 
 		if (forService) {
 			when(request.getMethod()).thenReturn("GET");
@@ -638,7 +674,7 @@ class AbstractResourceServletTest {
 		return response;
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "java:S3011" }) // Reflection clears the servlet's private per-thread test state.
 	private static void clearThreadLocalResource() throws Exception {
 		Field field = AbstractResourceServlet.class.getDeclaredField("RESOURCES");
 		field.setAccessible(true);
@@ -664,6 +700,10 @@ class AbstractResourceServletTest {
 				throw createFailure;
 			}
 			return resource;
+		}
+
+		private long lastModified(HttpServletRequest request) {
+			return getLastModified(request);
 		}
 
 		@Override

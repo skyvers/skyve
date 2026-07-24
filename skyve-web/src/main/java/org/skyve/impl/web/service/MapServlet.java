@@ -168,7 +168,7 @@ public class MapServlet extends HttpServlet {
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(moduleName);
 		MetaDataQueryDefinition query = module.getMetaDataQuery(documentOrQueryName);
-		UxUi uxui = UserAgent.getUxUi(request);
+		UxUi uxui = UserAgent.getSelection(request).getUxUi();
 		final RequestKey key;
 		if (query == null) {
 			EXT.checkAccess(user, UserAccess.documentAggregate(moduleName, documentOrQueryName), uxui.getName());
@@ -231,7 +231,7 @@ public class MapServlet extends HttpServlet {
 		final String moduleName = bean.getBizModule();
 		final String documentName = bean.getBizDocument();
 		final String modelName = request.getParameter(AbstractWebContext.MODEL_NAME);
-		UxUi uxui = UserAgent.getUxUi(request);
+		UxUi uxui = UserAgent.getSelection(request).getUxUi();
 		EXT.checkAccess(user, UserAccess.modelAggregate(moduleName, documentName, modelName), uxui.getName());
 
 		// Invoke the model

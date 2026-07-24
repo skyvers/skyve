@@ -89,6 +89,45 @@ mvn -pl skyve-core,skyve-ext clean compile
 
 Use the clean-compile prerequisite when you see `bad class file` or unresolved compilation artifacts from mixed Eclipse/javac outputs.
 
+## Reusable Deployed Integration Tests
+
+Deployed tests live in `skyve-war/src/test/java` and end in `IT`. Surefire excludes that suffix;
+the generic `deployed-it` profile builds a classified test-overlay WAR and Failsafe selects one
+suite through `-Dit.test`. The ordinary release WAR and default build do not contain overlay
+resources, probes, browser support, or test-only dependencies.
+
+Validate suite selection and credential redaction without preparing a runtime:
+
+```bash
+SKYVE_DEPLOYED_IT_TEST=example.ReusableHarnessIT tools/deployed-it/run.sh --validate-only
+```
+
+Full local runs use `tools/deployed-it/run.sh` with an approved runtime prepared from
+`tools/deployed-it/runtime.properties`, an isolated configuration directory, a loopback base URL,
+and protected credentials only when ephemeral H2/bootstrap credentials are insufficient. The
+runtime pin contains the reviewed WildFly URL/version, distribution SHA-256, and bundled Mojarra
+version; scripts and CI never infer a latest version. See [the harness guide](../../tools/deployed-it/README.md)
+for preparation and environment inputs.
+
+Results are written to `skyve-war/target/deployed-it/<test-class>/results.md`, Failsafe XML to
+`skyve-war/target/failsafe-reports`, and server/browser diagnostics beside the result. The reusable
+`.github/workflows/deployed-it.yml` accepts a test-class input and calls the same script;
+feature-specific callers select a suite without copying lifecycle orchestration. The supported
+ephemeral H2/bootstrap path needs no repository secret. A suite requiring protected credentials
+must run only on trusted events and cannot be a required fork-pull-request check.
+
+To add a suite:
+
+1. Add a standard `*IT` class under `skyve-war/src/test/java`.
+2. Reuse `util.deployed` for configuration, browser lifecycle, authentication, postbacks, probe
+   correlation, and redacted diagnostics.
+3. Put feature event vocabulary, hooks, fixtures, and assertions in the suite-specific overlay
+   adapter; keep the generic transport feature-neutral.
+4. Run `--validate-only`, the `DeployedItStructureTest,DeployedTestSupportTest` unit gate, then a
+   full isolated run through `run.sh`.
+5. Add a small caller workflow only when the suite should have a named CI entry point; do not copy
+   the Maven profile, runtime scripts, or reusable workflow.
+
 ## JaCoCo Coverage Profile
 
 Skyve uses an opt-in JaCoCo coverage profile for code coverage analysis. The JaCoCo plugin and coverage report generation are only activated when the Maven build is run with the `-Pcoverage` profile. This means:

@@ -511,7 +511,7 @@ public class ContentUploadView extends AbstractUploadView {
 			User user = persistence.getUser();
 			String bizModule = bean.getBizModule();
 			String bizDocument = bean.getBizDocument();
-			UxUi uxui = UserAgent.getUxUi(request);
+			UxUi uxui = UserAgent.getSelection(request).getUxUi();
 			String unsanitisedContentBinding = BindUtil.unsanitiseBinding(contentBinding);
 			EXT.checkAccess(user, UserAccess.content(bizModule, bizDocument, unsanitisedContentBinding), uxui.getName());
 

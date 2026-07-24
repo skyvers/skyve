@@ -7,14 +7,129 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.metadata.repository.router.Direct.DirectMatch;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.web.UserAgentType;
 
 class RouterTest implements TaggingUxUiSelector {
+	private static final long serialVersionUID = -534783648720934893L;
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertNormalizesDirectAndDoesNotValidateEffectiveTarget() {
+		Router router = new Router();
+		Direct direct = direct("  /public/register.xhtml  ", "  supplied-after-assembly  ");
+		router.getDirects().add(direct);
+
+		router.convert("test router");
+
+		assertEquals("/public/register.xhtml", direct.getPath());
+		assertEquals("supplied-after-assembly", direct.getUxui());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertRejectsInvalidDirectDeclarations() {
+		assertInvalid(direct(null, "desktop"), "path is required");
+		assertInvalid(direct("external/home.xhtml", "desktop"), "begin with '/'");
+		assertInvalid(direct("/external/home.xhtml?mode=1", "desktop"), "query or fragment");
+		assertInvalid(direct("/external/home.xhtml#content", "desktop"), "query or fragment");
+
+		Direct prefix = direct("/external", "desktop");
+		prefix.setMatch(DirectMatch.prefix);
+		assertInvalid(prefix, "must end with '/'");
+		assertInvalid(direct("/external/home.xhtml", "  "), "target is required");
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void selectDirectUsesDefaultExactAndExplicitPrefixMatching() {
+		Router router = new Router();
+		router.getDirects().add(direct("/external/startup.xhtml", "startup"));
+		Direct prefix = direct("/external/", "external");
+		prefix.setMatch(DirectMatch.prefix);
+		router.getDirects().add(prefix);
+		router.convert("test");
+
+		assertEquals("startup", router.selectDirect("/external/startup.xhtml", UserAgentType.desktop));
+		assertEquals("external", router.selectDirect("/external/home.xhtml", UserAgentType.desktop));
+		assertNull(router.selectDirect("/other.xhtml", UserAgentType.desktop));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void selectDirectUsesFirstDeclarationAcrossDuplicatesAndOverlaps() {
+		Router router = new Router();
+		Direct prefix = direct("/external/", "broad-first");
+		prefix.setMatch(DirectMatch.prefix);
+		router.getDirects().add(prefix);
+		router.getDirects().add(direct("/external/startup.xhtml", "exact-second"));
+		router.getDirects().add(direct("/external/startup.xhtml", "duplicate-third"));
+		router.convert("test");
+
+		assertEquals("broad-first", router.selectDirect("/external/startup.xhtml", UserAgentType.desktop));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void selectDirectAppliesOrderedUserAgentConditionsWithUnconditionalFallback() {
+		Router router = new Router();
+		Direct phone = direct("/register.xhtml", "phone");
+		phone.setUserAgentType(UserAgentType.phone);
+		router.getDirects().add(phone);
+		router.getDirects().add(direct("/register.xhtml", "fallback"));
+		router.convert("test");
+
+		assertEquals("phone", router.selectDirect("/register.xhtml", UserAgentType.phone));
+		assertEquals("fallback", router.selectDirect("/register.xhtml", UserAgentType.tablet));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void validateDirectTargetsRunsOnlyAfterCompleteAssembly() {
+		Router global = routerWithUxUi("global");
+		Router declaringModule = new Router();
+		declaringModule.getDirects().add(direct("/global.xhtml", "global"));
+		declaringModule.convert("declaring module");
+
+		global.merge(declaringModule);
+
+		global.validateDirectTargets();
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void validateDirectTargetsAcceptsSameAndOtherModuleTargetsRegardlessOfMergeOrder() {
+		Router effective = routerWithUxUi("global");
+		Router firstModule = routerWithUxUi("first");
+		firstModule.getDirects().add(direct("/same.xhtml", "first"));
+		firstModule.getDirects().add(direct("/later.xhtml", "later"));
+		firstModule.convert("first module");
+		Router laterModule = routerWithUxUi("later");
+		laterModule.getDirects().add(direct("/earlier.xhtml", "first"));
+		laterModule.convert("later module");
+
+		effective.merge(firstModule);
+		effective.merge(laterModule);
+
+		effective.validateDirectTargets();
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void validateDirectTargetsRejectsUnknownEffectiveTarget() {
+		Router router = routerWithUxUi("desktop");
+		router.getDirects().add(direct("/missing.xhtml", "missing"));
+
+		MetaDataException exception = assertThrows(MetaDataException.class,
+				() -> router.validateDirectTargets());
+
+		assertTrue(exception.getMessage().contains("unknown UX/UI missing"));
+	}
 
 	// ---- isUnsecured ----
 
@@ -301,5 +416,27 @@ class RouterTest implements TaggingUxUiSelector {
 		Router router = new Router();
 		router.setUxuiSelectorClassName("com.example.NonExistentClass");
 		assertThrows(MetaDataException.class, router::getUxuiSelector);
+	}
+
+	private static Direct direct(String path, String uxui) {
+		Direct result = new Direct();
+		result.setPath(path);
+		result.setUxui(uxui);
+		return result;
+	}
+
+	private static Router routerWithUxUi(String name) {
+		Router result = new Router();
+		UxUiMetadata uxui = new UxUiMetadata();
+		uxui.setName(name);
+		result.getUxUis().add(uxui);
+		return result.convert(name + " router");
+	}
+
+	private static void assertInvalid(Direct direct, String expectedMessage) {
+		Router router = new Router();
+		router.getDirects().add(direct);
+		MetaDataException exception = assertThrows(MetaDataException.class, () -> router.convert("test router"));
+		assertTrue(exception.getMessage().contains(expectedMessage));
 	}
 }

@@ -45,6 +45,7 @@ import org.skyve.util.Util;
  * {@link ArchivedDocumentListModel} to locate and deserialise the corresponding
  * record in the archive file via random-access file I/O.
  */
+@SuppressWarnings({"boxing", "static-method"})
 public class ArchiveRetriever {
 
     private final Logger logger = LogManager.getLogger();
@@ -194,15 +195,13 @@ public class ArchiveRetriever {
 
     private synchronized Cache<Serializable, Bean> getCache() {
         Caching caching = EXT.getCaching();
-        Cache<Serializable, Bean> cache = caching.getEHCache(ArchivedDocumentCacheConfig.CACHE_NAME, Serializable.class,
-                Bean.class);
-
-        if (cache == null) {
-            cache = caching.createEHCache(Util.getArchiveConfig()
-                                              .cacheConfig());
-            logger.debug("Created cache {}", cache);
+        if (caching.isEHCache(ArchivedDocumentCacheConfig.CACHE_NAME)) {
+            return caching.getEHCache(ArchivedDocumentCacheConfig.CACHE_NAME, Serializable.class, Bean.class);
         }
 
+        Cache<Serializable, Bean> cache = caching.createEHCache(Util.getArchiveConfig()
+                                                                   .cacheConfig());
+        logger.debug("Created cache {}", cache);
         return cache;
     }
 

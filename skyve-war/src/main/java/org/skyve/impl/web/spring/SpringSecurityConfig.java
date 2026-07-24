@@ -106,8 +106,6 @@ public class SpringSecurityConfig {
 				.requestMatchers("/pages/requestPasswordReset.jsp", "/pages/resetPassword.jsp").permitAll()
 				// Permit home.jsp as it controls access to public and private pages itself
 				.requestMatchers("/home.jsp").permitAll()
-				// Permit device.jsp as it forwards to home.jsp
-				.requestMatchers("/device.jsp").permitAll()
 				// Permit the health servlet resource
 				.requestMatchers("/health").permitAll()
 				// Secure the loggedIn.jsp so that redirect occurs after login

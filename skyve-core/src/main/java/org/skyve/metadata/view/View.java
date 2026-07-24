@@ -40,7 +40,7 @@ public interface View extends NamedMetaData, PersistentMetaData, ReloadableMetaD
 	/**
 	 * The type of a Skyve view, which determines the context in which it is rendered.
 	 */
-	@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
+	@XmlType(namespace = XMLMetaData.COMMON_NAMESPACE)
 	@SuppressWarnings("java:S115") // Enum names are metadata XML values.
 	public enum ViewType {
 		/** A tabular list view of document instances, driven by a query. */

@@ -2,6 +2,7 @@ package org.skyve.impl.generate;
 
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -29,6 +30,7 @@ import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 /**
@@ -173,7 +175,7 @@ public abstract class DomainGenerator {
 		String postgreSQLReserved[] = {
 				"all", "analyse", "analyze", "and", "any", "array",
 				"as", "asc", "authorization",
-				"between", "binary", 
+				"between", "binary",
 				"both", "case", "cast",
 				"check",
 				"column", "constraint",
@@ -245,8 +247,22 @@ public abstract class DomainGenerator {
 		this.excludedModules = excludedModules;
 	}
 	
+	/**
+	 * Validates one customer's complete metadata graph before generation.
+	 *
+	 * <p>Router assembly-component constraints and effective direct targets are checked once
+	 * per customer, including customers with no document references. Per-document edit and create
+	 * views are then validated against the same effective router instance.
+	 *
+	 * <p>Side effects: loads metadata through the configured repository and may populate repository
+	 * caches. When debug mode is enabled, progress is written to standard output.
+	 *
+	 * @param customerName repository customer name; must not be {@code null}
+	 * @throws MetaDataException if required customer or router metadata is absent or inconsistent
+	 * @throws Exception if repository metadata loading or validation fails
+	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void validateCustomer(String customerName) throws Exception {
+	public void validateCustomer(@Nonnull String customerName) throws Exception {
 		if (debug) System.out.println("Get customer " + customerName);
 		Customer customer = repository.getCustomer(customerName);
 		if (customer == null) {
@@ -254,6 +270,26 @@ public abstract class DomainGenerator {
 		}
 		if (debug) System.out.println("Validate customer " + customerName);
 		repository.validateCustomerForGenerateDomain(customer);
+
+		Router globalRouter = repository.getGlobalRouter();
+		if (globalRouter == null) {
+			throw new MetaDataException("Global router must be defined.");
+		}
+		if (globalRouter.getUxuiSelectorClassName() == null) {
+			throw new MetaDataException("uxuiSelectorClassName attribute must be defined in the global router.");
+		}
+		List<Router> moduleRouters = repository.getModuleRouters();
+		for (Router moduleRouter : moduleRouters) {
+			if (moduleRouter.getUxuiSelectorClassName() != null) {
+				throw new MetaDataException("uxuiSelectorClassName attribute must only be defined in the global router.");
+			}
+		}
+		Router router = repository.getRouter();
+		if (router == null) {
+			throw new MetaDataException("Router must be defined.");
+		}
+		router.validateDirectTargets();
+
 		for (Module module : customer.getModules()) {
 			if (debug) System.out.println("Validate module " + module.getName());
 			repository.validateModuleForGenerateDomain(customer, module);
@@ -263,22 +299,6 @@ public abstract class DomainGenerator {
 				Document document = module.getDocument(customer, documentName);
 				if (debug) System.out.println("Validate document " + documentName);
 				repository.validateDocumentForGenerateDomain(customer, document);
-				Router globalRouter = repository.getGlobalRouter();
-				if (globalRouter == null) {
-					throw new MetaDataException("Global router must be defined.");
-				}
-				if (globalRouter.getUxuiSelectorClassName() == null) {
-					throw new MetaDataException("uxuiSelectorClassName attribute must be defined in the global router.");
-				}
-				for (Router moduleRouter : repository.getModuleRouters()) {
-					if (moduleRouter.getUxuiSelectorClassName() != null) {
-						throw new MetaDataException("uxuiSelectorClassName attribute must only be defined in the global router.");
-					}
-				}
-				Router router = repository.getRouter();
-				if (router == null) {
-					throw new MetaDataException("Router must be defined.");
-				}
 				for (UxUiMetadata uxui : router.getUxUis()) {
 					String uxuiName = uxui.getName();
 					if (debug) System.out.println("Get edit view for document " + documentName + " and uxui " + uxuiName);
@@ -439,12 +459,12 @@ public abstract class DomainGenerator {
 	 * <dt>excludedModules</dt>
 	 * <dd>optional, comma separated list of modules not to generate unit tests for</dd>
 	 * </dl>
-	 * 
+	 *
 	 * E.g. src/skyve src/generated src/test src/generatedTest,
 	 * src/skyve src/generated src/test src/generatedTest true
 	 * src/skyve src/generated src/test src/generatedTest true MYSQL test,whosin
 	 * src/skyve src/generated src/test src/generatedTest false MYSQL whosin
-	 * 
+	 *
 	 * @param args
 	 * @throws Exception
 	 */

@@ -1,0 +1,292 @@
+html,
+body {
+	height: 100%;
+	padding: 0;
+	margin: 0;
+}
+
+:root {
+	--device-shim-color: #4b5058;
+	--device-shim-detail-color: #202329;
+	--device-laptop-base-highlight-color: #747b85;
+	--device-laptop-base-shadow-color: #30343a;
+	--device-laptop-groove-color: #1c1f24;
+	--device-button-highlight-color: #626974;
+	--device-button-color: #343940;
+	--device-button-shadow-color: #171a1e;
+	--device-button-ring-color: #777e88;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--device-shim-color: #b8bec8;
+		--device-shim-detail-color: #5f6773;
+		--device-laptop-base-highlight-color: #e2e5e9;
+		--device-laptop-base-shadow-color: #858d98;
+		--device-laptop-groove-color: #555d68;
+		--device-button-highlight-color: #858e9a;
+		--device-button-color: #5b636e;
+		--device-button-shadow-color: #343a43;
+		--device-button-ring-color: #e1e4e8;
+	}
+}
+
+iframe {
+	padding: 0;
+	margin: 0;
+}
+
+#device .content {
+	background: white;
+}
+
+#iframe {
+	display: block;
+	width: 100%;
+	height: 100%;
+	border: none;
+	opacity: 1;
+	background: white;
+	transform-origin: center center;
+	transition: opacity 350ms ease-out, transform 350ms ease-out, filter 350ms ease-out;
+}
+
+#device.mode-switching .content,
+#device.mode-switching #iframe {
+	background: black;
+}
+
+#iframe.loading {
+	opacity: 0;
+	filter: brightness(0);
+	transform: scaleY(0.02);
+	transition: none;
+}
+
+#iframe.powering-on {
+	filter: brightness(1);
+	transform: scaleY(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	#iframe {
+		transition: none;
+	}
+}
+
+/* The device with borders */
+.phone {
+	transform-origin: 0 0;
+	left: 50%;
+	position: absolute;
+	width: 480px;
+	height: 800px;
+	border: 16px var(--device-shim-color) solid;
+	border-top-width: 60px;
+	border-bottom-width: 60px;
+	border-radius: 36px;
+	margin-top: 20px;
+	box-sizing: content-box;
+}
+
+/* The horizontal line on the top of the device */
+.phone::before {
+	content: '';
+	display: block;
+	width: 60px;
+	height: 5px;
+	position: absolute;
+	top: -30px;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	background: var(--device-shim-detail-color);
+	border-radius: 10px;
+}
+
+/* The circle on the bottom of the device */
+.phone::after {
+	content: '';
+	display: block;
+	width: 44px;
+	height: 44px;
+	position: absolute;
+	left: 50%;
+	bottom: -74px;
+	transform: translate(-50%, -50%);
+	border: 2px solid var(--device-button-ring-color);
+	background: radial-gradient(circle at 35% 30%,
+			var(--device-button-highlight-color),
+			var(--device-button-color) 48%,
+			var(--device-button-shadow-color));
+	border-radius: 50%;
+	box-shadow: inset 0 1px 2px rgb(255 255 255 / 35%),
+			inset 0 -2px 3px rgb(0 0 0 / 45%),
+			0 2px 3px rgb(0 0 0 / 40%);
+	box-sizing: border-box;
+}
+
+/* The screen (or content) of the device */
+.phone .content {
+	width: 480px;
+	height: 800px;
+	background: white;
+}
+
+/* The device with borders */
+.tablet {
+	transform-origin: 0 0;
+	left: 50%;
+	position: absolute;
+	width: 768px;
+	height: 1024px;
+	border: 16px var(--device-shim-color) solid;
+	border-top-width: 60px;
+	border-bottom-width: 60px;
+	border-radius: 36px;
+	margin-top: 20px;
+	box-sizing: content-box;
+}
+
+/* The horizontal line on the top of the device */
+.tablet::before {
+	content: '';
+	display: block;
+	width: 60px;
+	height: 5px;
+	position: absolute;
+	top: -30px;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	background: var(--device-shim-detail-color);
+	border-radius: 10px;
+}
+
+/* The circle on the bottom of the device */
+.tablet::after {
+	content: '';
+	display: block;
+	width: 44px;
+	height: 44px;
+	position: absolute;
+	left: 50%;
+	bottom: -74px;
+	transform: translate(-50%, -50%);
+	border: 2px solid var(--device-button-ring-color);
+	background: radial-gradient(circle at 35% 30%,
+			var(--device-button-highlight-color),
+			var(--device-button-color) 48%,
+			var(--device-button-shadow-color));
+	border-radius: 50%;
+	box-shadow: inset 0 1px 2px rgb(255 255 255 / 35%),
+			inset 0 -2px 3px rgb(0 0 0 / 45%),
+			0 2px 3px rgb(0 0 0 / 40%);
+	box-sizing: border-box;
+}
+
+/* The screen (or content) of the device */
+.tablet .content {
+	width: 768px;
+	height: 1024px;
+	background: white;
+	margin: -1px;
+}
+
+/* The laptop with borders */
+.laptop {
+	transform-origin: 0 0;
+	left: 50%;
+	position: absolute;
+	width: 1366px;
+	height: 800px;
+	border-radius: 14px 14px 8px 8px;
+	border-style: solid;
+	border-color: var(--device-shim-color);
+	border-width: 18px 18px 60px;
+	background-color: var(--device-shim-color);
+	margin-top: 20px;
+	box-sizing: content-box;
+	box-shadow: 0 10px 24px rgb(0 0 0 / 24%),
+			inset 0 1px 1px rgb(255 255 255 / 20%);
+}
+
+/* The tapered laptop base */
+.laptop::after {
+	content: '';
+	display: block;
+	position: absolute;
+	left: 50%;
+	bottom: -150px;
+	width: 1402px;
+	height: 90px;
+	transform: translateX(-50%) perspective(825px) rotateX(55deg);
+	transform-origin: top center;
+	background: linear-gradient(180deg,
+			var(--device-laptop-base-highlight-color),
+			var(--device-shim-color) 32%,
+			var(--device-laptop-base-shadow-color));
+	border-radius: 0 0 14px 14px;
+	box-shadow: 0 12px 18px rgb(0 0 0 / 28%);
+}
+
+/* The front-edge opening notch */
+.laptop::before {
+	content: '';
+	display: block;
+	position: absolute;
+	width: 180px;
+	height: 7px;
+	bottom: -119px;
+	left: 50%;
+	transform: translateX(-50%);
+	background: var(--device-laptop-groove-color);
+	border-radius: 7px 7px 0 0;
+	box-shadow: inset 0 2px 2px rgb(0 0 0 / 35%);
+	z-index: 1;
+}
+
+/* The screen (or content) of the device */
+.laptop .content {
+	width: 1366px;
+	height: 800px;
+	overflow: hidden;
+	border: none;
+}
+
+.desktop {
+	transform-origin: 0 0;
+	left: 0;
+	position: relative;
+	width: 100%;
+	height: 100%;
+	border: none;
+}
+
+/* The screen (or content) of the device */
+.desktop .content {
+	width: 100%;
+	height: 100%;
+	overflow: auto;
+	border: none;
+}
+
+.device-preview-controls {
+	position: fixed;
+	bottom: 80px;
+	right: 70px;
+}
+
+.device-preview-controls .ui-speeddial-action {
+	width: 56px;
+	height: 56px;
+	text-decoration: none;
+}
+
+.device-preview-controls .ui-speeddial-action-icon {
+	font-size: 1.5rem;
+	line-height: 1;
+	margin: 0;
+}
+
+.device-preview-controls .ui-menuitem-text {
+	display: none;
+}

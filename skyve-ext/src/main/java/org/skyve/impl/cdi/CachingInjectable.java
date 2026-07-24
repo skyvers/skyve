@@ -16,6 +16,8 @@ import org.skyve.cache.Caching;
 import org.skyve.cache.EHCacheConfig;
 import org.skyve.cache.JCacheConfig;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.enterprise.inject.Alternative;
 
 /**
@@ -45,6 +47,17 @@ public class CachingInjectable implements Caching, Serializable {
 	}
 
 	/**
+	 * Determines whether an EHCache exists by name.
+	 *
+	 * @param name the cache region name.
+	 * @return {@code true} when the cache exists.
+	 */
+	@Override
+	public boolean isEHCache(@Nonnull String name) {
+		return EXT.getCaching().isEHCache(name);
+	}
+
+	/**
 	 * Returns an EHCache instance by cache name and key/value types.
 	 *
 	 * @param name the cache region name.
@@ -56,8 +69,21 @@ public class CachingInjectable implements Caching, Serializable {
 	 */
 
 	@Override
-	public <K, V> Cache<K, V> getEHCache(String name, Class<K> keyClass, Class<V> valueClass) {
+	public @Nonnull <K, V> Cache<K, V> getEHCache(@Nonnull String name,
+													@Nonnull Class<K> keyClass,
+													@Nonnull Class<V> valueClass) {
 		return EXT.getCaching().getEHCache(name, keyClass, valueClass);
+	}
+
+	/**
+	 * Determines whether a JCache exists by name.
+	 *
+	 * @param name the cache region name.
+	 * @return {@code true} when the cache exists.
+	 */
+	@Override
+	public boolean isJCache(@Nonnull String name) {
+		return EXT.getCaching().isJCache(name);
 	}
 
 	/**
@@ -73,7 +99,9 @@ public class CachingInjectable implements Caching, Serializable {
 
 	@Override
 	@SuppressWarnings("resource") // Cache lifecycle is owned by the shared EXT caching service.
-	public <K, V> javax.cache.Cache<K, V> getJCache(String name, Class<K> keyClass, Class<V> valueClass) {
+	public @Nonnull <K, V> javax.cache.Cache<K, V> getJCache(@Nonnull String name,
+																@Nonnull Class<K> keyClass,
+																@Nonnull Class<V> valueClass) {
 		return EXT.getCaching().getJCache(name, keyClass, valueClass);
 	}
 
@@ -87,7 +115,7 @@ public class CachingInjectable implements Caching, Serializable {
 	 */
 
 	@Override
-	public <K extends Serializable, V extends Serializable> Cache<K, V> createEHCache(EHCacheConfig<K, V> config) {
+	public @Nonnull <K extends Serializable, V extends Serializable> Cache<K, V> createEHCache(@Nonnull EHCacheConfig<K, V> config) {
 		return EXT.getCaching().createEHCache(config);
 	}
 
@@ -102,7 +130,7 @@ public class CachingInjectable implements Caching, Serializable {
 
 	@Override
 	@SuppressWarnings("resource") // Cache lifecycle is owned by the shared EXT caching service.
-	public <K extends Serializable, V extends Serializable> javax.cache.Cache<K, V> createJCache(JCacheConfig<K, V> config) {
+	public @Nonnull <K extends Serializable, V extends Serializable> javax.cache.Cache<K, V> createJCache(@Nonnull JCacheConfig<K, V> config) {
 		return EXT.getCaching().createJCache(config);
 	}
 
@@ -112,7 +140,7 @@ public class CachingInjectable implements Caching, Serializable {
 	 * @param name the cache region name.
 	 */
 	@Override
-	public void removeEHCache(String name) {
+	public void removeEHCache(@Nonnull String name) {
 		EXT.getCaching().removeEHCache(name);
 	}
 
@@ -123,7 +151,7 @@ public class CachingInjectable implements Caching, Serializable {
 	 * @throws CachePersistenceException if persistence cleanup fails.
 	 */
 	@Override
-	public void destroyEHCache(String name) throws CachePersistenceException {
+	public void destroyEHCache(@Nonnull String name) throws CachePersistenceException {
 		EXT.getCaching().destroyEHCache(name);
 	}
 
@@ -133,7 +161,7 @@ public class CachingInjectable implements Caching, Serializable {
 	 * @param name the cache region name.
 	 */
 	@Override
-	public void destroyJCache(String name) {
+	public void destroyJCache(@Nonnull String name) {
 		EXT.getCaching().destroyJCache(name);
 	}
 
@@ -144,7 +172,7 @@ public class CachingInjectable implements Caching, Serializable {
 	 * @return runtime statistics for the named cache.
 	 */
 	@Override
-	public CacheStatistics getEHCacheStatistics(String name) {
+	public @Nonnull CacheStatistics getEHCacheStatistics(@Nonnull String name) {
 		return EXT.getCaching().getEHCacheStatistics(name);
 	}
 
@@ -153,10 +181,10 @@ public class CachingInjectable implements Caching, Serializable {
 	 *
 	 * @param statistics cache-level statistics source.
 	 * @param tier the tier to inspect.
-	 * @return statistics for the requested tier.
+	 * @return statistics for the requested tier, or {@code null} when unavailable.
 	 */
 	@Override
-	public TierStatistics getEHTierStatistics(CacheStatistics statistics, CacheTier tier) {
+	public @Nullable TierStatistics getEHTierStatistics(@Nonnull CacheStatistics statistics, @Nonnull CacheTier tier) {
 		return EXT.getCaching().getEHTierStatistics(statistics, tier);
 	}
 
@@ -164,10 +192,10 @@ public class CachingInjectable implements Caching, Serializable {
 	 * Returns JCache statistics MBean for the named cache.
 	 *
 	 * @param name the cache region name.
-	 * @return the statistics MBean for the named JCache.
+	 * @return the statistics MBean for the named JCache, or {@code null} when unavailable.
 	 */
 	@Override
-	public CacheStatisticsMXBean getJCacheStatisticsMXBean(String name) {
+	public @Nullable CacheStatisticsMXBean getJCacheStatisticsMXBean(@Nonnull String name) {
 		return EXT.getCaching().getJCacheStatisticsMXBean(name);
 	}
 
@@ -179,7 +207,7 @@ public class CachingInjectable implements Caching, Serializable {
 
 	@Override
 	@SuppressWarnings("resource") // Cache manager lifecycle is owned by the shared EXT caching service.
-	public PersistentCacheManager getEHCacheManager() {
+	public @Nonnull PersistentCacheManager getEHCacheManager() {
 		return EXT.getCaching().getEHCacheManager();
 	}
 
@@ -191,7 +219,7 @@ public class CachingInjectable implements Caching, Serializable {
 
 	@Override
 	@SuppressWarnings("resource") // Cache manager lifecycle is owned by the shared EXT caching service.
-	public CacheManager getJCacheManager() {
+	public @Nonnull CacheManager getJCacheManager() {
 		return EXT.getCaching().getJCacheManager();
 	}
 }

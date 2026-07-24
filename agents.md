@@ -20,5 +20,5 @@ This file is intentionally a table of contents only.
 ## Repository Docs
 
 - [docs/coverage-plan.md](docs/coverage-plan.md)
-- [docs/architecture.md](docs/architecture.md)
+- [docs/architecture-design.md](docs/architecture-design.md)
 - [README.md](README.md)

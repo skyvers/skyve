@@ -30,9 +30,69 @@
 
 .ui-fileupload-content {
 	min-height: 200px;
-	background-image: url(../../images/filedrop.png);
-	background-position: right bottom;
-	background-repeat: no-repeat;
+	position: relative;
+}
+
+.skyve-upload {
+	position: relative;
+}
+
+.skyve-upload-watermark {
+	align-items: center;
+	color: #6b7280;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	left: 50%;
+	opacity: 0.5;
+	pointer-events: none;
+	position: absolute;
+	text-align: center;
+	top: calc(50% + 28px);
+	transform: translate(-50%, -50%);
+	width: calc(100% - 32px);
+	z-index: 1;
+}
+
+.skyve-upload-watermark .fa-cloud-arrow-up {
+	font-size: 4rem;
+	line-height: 1;
+}
+
+.skyve-upload-watermark span {
+	font-size: 1rem;
+	font-weight: 600;
+}
+
+.skyve-upload-watermark small {
+	font-size: 0.8rem;
+}
+
+.skyve-upload .ui-fileupload-files {
+	position: relative;
+	z-index: 2;
+}
+
+.skyve-upload:has(.ui-fileupload-row) .skyve-upload-watermark,
+.capture-only-upload .skyve-upload-watermark {
+	display: none;
+}
+
+#upload {
+	display: flex;
+	flex: 1 1 auto;
+	flex-direction: column;
+	min-height: 0;
+}
+
+#upload .ui-fileupload-buttonbar {
+	flex: 0 0 auto;
+}
+
+#upload .ui-fileupload-content {
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow: auto;
 }
 
 #upload .ui-fileupload-files {

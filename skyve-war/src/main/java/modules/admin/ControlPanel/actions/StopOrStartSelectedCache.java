@@ -2,8 +2,6 @@ package modules.admin.ControlPanel.actions;
 
 import java.io.Serializable;
 
-import javax.cache.Cache;
-
 import org.skyve.EXT;
 import org.skyve.cache.CacheConfig;
 import org.skyve.cache.Caching;
@@ -27,16 +25,18 @@ public class StopOrStartSelectedCache implements ServerSideAction<ControlPanelEx
 
 	/**
 	 * Performs the execute operation.
+	 *
 	 * @param bean the bean value
 	 * @param webContext the webContext value
 	 * @return the operation result
 	 * @throws Exception if the operation fails
 	 */
 	@Override
-	@SuppressWarnings("java:S3776") // Complexity OK
-	public ServerSideActionResult<ControlPanelExtension> execute(ControlPanelExtension bean, WebContext webContext) throws Exception {
+	@SuppressWarnings({ "java:S3776", "resource" }) // Complexity OK; shared caching service retains manager ownership.
+	public ServerSideActionResult<ControlPanelExtension> execute(ControlPanelExtension bean, WebContext webContext)
+	throws Exception {
 		bean.setTabIndex(null);
-		
+
 		String cacheName = bean.getSelectedCache();
 		boolean found = false;
 		if (cacheName != null) {
@@ -47,9 +47,8 @@ public class StopOrStartSelectedCache implements ServerSideAction<ControlPanelEx
 				if (cacheName.equals(appCacheName)) {
 					found = true;
 					if (c instanceof EHCacheConfig<?, ?>) {
-						if (caching.getEHCache(cacheName, c.getKeyClass(), c.getValueClass()) == null) {
+						if (! caching.isEHCache(cacheName)) {
 							caching.createEHCache((EHCacheConfig<? extends Serializable, ? extends Serializable>) c);
-							
 							webContext.growl(MessageSeverity.info, CACHE_PREFIX + cacheName + HAS_BEEN_STARTED);
 						}
 						else {
@@ -58,11 +57,8 @@ public class StopOrStartSelectedCache implements ServerSideAction<ControlPanelEx
 						}
 					}
 					else if (c instanceof JCacheConfig<?, ?>) {
-						@SuppressWarnings("resource")
-						Cache<?, ?> cache = caching.getJCache(cacheName, c.getKeyClass(), c.getValueClass());
-						if (cache == null) {
-							@SuppressWarnings({ "resource", "unused" })
-							Cache<?, ?> created = caching.createJCache((JCacheConfig<? extends Serializable, ? extends Serializable>) c);
+						if (! caching.isJCache(cacheName)) {
+							caching.createJCache((JCacheConfig<? extends Serializable, ? extends Serializable>) c);
 							webContext.growl(MessageSeverity.info, CACHE_PREFIX + cacheName + HAS_BEEN_STARTED);
 						}
 						else {
@@ -74,11 +70,11 @@ public class StopOrStartSelectedCache implements ServerSideAction<ControlPanelEx
 				}
 			}
 		}
-		
+
 		if (! found) {
 			webContext.growl(MessageSeverity.error, "Cant stop/start cache " + cacheName);
 		}
-		
+
 		return new ServerSideActionResult<>(bean);
 	}
 }

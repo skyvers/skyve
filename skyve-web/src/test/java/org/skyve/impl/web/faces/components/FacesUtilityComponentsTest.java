@@ -15,10 +15,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.primefaces.component.outputpanel.OutputPanel;
-import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.views.MenuView;
-import org.skyve.metadata.router.UxUi;
 
 import jakarta.el.ELContext;
 import jakarta.el.ELResolver;
@@ -34,7 +32,8 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-@SuppressWarnings("static-method")
+// Cookie flags, shared test state, repeated values and assertions are deliberate JSF fixtures.
+@SuppressWarnings({ "static-method", "java:S1192", "java:S2092", "java:S2696", "java:S3330", "java:S5960" })
 class FacesUtilityComponentsTest {
 	private abstract static class FacesContextBridge extends FacesContext {
 		static void setCurrent(FacesContext context) {
@@ -229,33 +228,6 @@ class FacesUtilityComponentsTest {
 		verify(application, never()).createComponent(OutputPanel.COMPONENT_TYPE);
 		verify(application, never()).createComponent(UIOutput.COMPONENT_TYPE);
 		assertEquals(1, form.getChildren().size());
-	}
-
-	@Test
-	void setUxUiSupportsPrecomputedUxUiOnRequest() throws Exception {
-		SetUxUi component = new SetUxUi();
-		FacesContext facesContext = mock(FacesContext.class);
-		ExternalContext externalContext = mock(ExternalContext.class);
-		HttpServletRequest request = mock(HttpServletRequest.class);
-
-		when(facesContext.getExternalContext()).thenReturn(externalContext);
-		when(externalContext.getRequest()).thenReturn(request);
-		when(request.getAttribute(AbstractWebContext.UXUI)).thenReturn(UxUi.newPrimeFaces("desktop", "template", "saga", "blue"));
-
-		component.encodeBegin(facesContext);
-		assertEquals("setUxUi", component.getFamily());
-	}
-
-	@Test
-	void setUxUiWrapsFailuresInIllegalStateException() {
-		SetUxUi component = new SetUxUi();
-		FacesContext facesContext = mock(FacesContext.class);
-		ExternalContext externalContext = mock(ExternalContext.class);
-
-		when(facesContext.getExternalContext()).thenReturn(externalContext);
-		when(externalContext.getRequest()).thenReturn(null);
-
-		assertThrows(IllegalStateException.class, () -> component.encodeBegin(facesContext));
 	}
 
 	@Test

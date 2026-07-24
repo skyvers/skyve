@@ -43,7 +43,7 @@ Use these sources when planning or executing milestones:
 - `docs/ai/javadoc-standards.md` for Javadoc contract standards
 - `docs/ai/testing-and-coverage.md` for test validation and coverage execution guidance
 - `docs/ai/learnings.md` for durable engineering guidance and project learnings
-- `docs/architecture.md` for framework architecture decisions and design attributes
+- `docs/architecture-design.md` for framework architecture decisions and design attributes
 - `docs/ai/test-patterns.md` before creating or modifying tests
 - `docs/coverage-plan.md` before any coverage-improvement work (defines target, skip list, tier ordering)
 - module-local `pom.xml` files for dependency and build structure
@@ -55,14 +55,14 @@ Use these sources when planning or executing milestones:
 
 These files should exist and evolve over time:
 - `docs/ai/plan.md` — framework roadmap and orchestration rules (this file)
-- `docs/architecture.md` — durable architecture decisions and design attributes
+- `docs/architecture-design.md` — durable architecture decisions and design attributes
 - `docs/ai/learnings.md` — durable engineering learnings and patterns
 - `docs/coverage-plan.md` — coverage improvement plan, baselines, and tier ordering
 - `docs/ai/test-patterns.md` — reusable test pattern cookbook
 - `docs/ai/plan_m{n}.md` — one self-contained plan per milestone, for example `docs/ai/plan_m1.md`
 
 If guidance is milestone-specific, keep it in `docs/ai/plan_m{n}.md`.
-If guidance is durable and architecture-oriented, put it in `docs/architecture.md`.
+If guidance is durable and architecture-oriented, put it in `docs/architecture-design.md`.
 If guidance is durable and broadly engineering-oriented, put it in `docs/ai/learnings.md`.
 
 ---
@@ -73,7 +73,7 @@ If the user asks you to plan a milestone, these are the steps to take.
 
 1. Read all of `docs/ai/plan.md` to understand the framework roadmap, milestone boundaries, and planning rules.
 2. Read any prior related `docs/ai/plan_m{n}.md` files that this milestone depends on.
-3. Read `docs/ai/project-agent-guide.md`, `docs/architecture.md`, and `docs/ai/learnings.md`.
+3. Read `docs/ai/project-agent-guide.md`, `docs/architecture-design.md`, and `docs/ai/learnings.md`.
 4. If the milestone involves coverage work, also read `docs/coverage-plan.md` and `docs/ai/test-patterns.md`.
 5. Inspect the current repository and determine the real current state before planning.
 6. Ask important clarifying questions only where needed.

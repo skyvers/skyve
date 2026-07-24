@@ -9,8 +9,8 @@
 	<link type="text/css" rel="stylesheet" href="skyve/editorial/assets/fonts/montserrat/montserrat.css?v=#{bean.webResourceFileVersion}" />
 	<link type="text/css" rel="stylesheet" href="skyve/css/prime-min.css?v=#{bean.webResourceFileVersion}" />
 	<h:outputStylesheet name="editorial/assets/css/main-min.css?v=#{bean.webResourceFileVersion}" library="skyve" />
-	<h:outputStylesheet name="#{'editorial/assets/css/themes/'.concat(_skyveTheme.themeColour).concat('.css?v=').concat(bean.webResourceFileVersion)}" library="skyve" />
-	<h:outputStylesheet name="editorial/assets/css/themes/dark.css?v=#{bean.webResourceFileVersion}" library="skyve" media="(prefers-color-scheme: dark)" rendered="#{not _skyveTheme.dark}" />
+	<h:outputStylesheet name="#{'editorial/assets/css/themes/'.concat(_skyveTheme.baseColour).concat('.css?v=').concat(bean.webResourceFileVersion)}" library="skyve" />
+	<h:outputStylesheet name="editorial/assets/css/themes/dark.css?v=#{bean.webResourceFileVersion}" library="skyve" media="(prefers-color-scheme: dark)" rendered="#{not _skyveTheme.forcedDark and not _skyveTheme.smartClient}" />
 	<link type="text/css" rel="stylesheet" href="pages/css/admin.css?v=#{bean.webResourceFileVersion}" />
 	<script type="text/javascript" src="skyve/prime/skyve-min.js?v=#{bean.webResourceFileVersion}"></script>
 </ui:composition>

@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import org.ehcache.Cache;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -348,10 +349,11 @@ public class SessionTrackingTest {
 	@Test
 	public void evictExpiredConversationsTouchesExistingEntries() {
 		String cacheName = UtilImpl.CONVERSATION_CACHE.getName();
-		DefaultCaching.get().getEHCache(cacheName, String.class, byte[].class)
-						.put("conversation-" + System.nanoTime(), new byte[] { 1, 2, 3 });
+		Cache<String, byte[]> cache = DefaultCaching.get().getEHCache(cacheName, String.class, byte[].class);
+		String conversationKey = "conversation-" + System.nanoTime();
+		cache.put(conversationKey, new byte[] { 1, 2, 3 });
 		StateUtil.evictExpiredConversations();
-		assertThat(DefaultCaching.get().getEHCache(cacheName, String.class, byte[].class) != null, is(true));
+		assertNotNull(cache.get(conversationKey));
 	}
 
 	@Test

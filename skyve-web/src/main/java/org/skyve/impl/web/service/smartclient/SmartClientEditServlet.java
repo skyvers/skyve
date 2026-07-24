@@ -234,7 +234,7 @@ public class SmartClientEditServlet extends HttpServlet {
 			    	}
 			        webContext.setAction(OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.ACTION_NAME))));
 			
-					UxUi uxui = UserAgent.getUxUi(request);
+					UxUi uxui = UserAgent.getSelection(request).getUxUi();
 					LOGGER.info("UX/UI = {}", uxui.getName());
 					
 			    	persistence.begin();

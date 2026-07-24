@@ -45,5 +45,6 @@
 		</route>
 		<route outcome="/external/home.xhtml" />
 	</uxui>
+	<direct path="/device.xhtml" uxui="external" />
 	<unsecured>/external/public.xhtml</unsecured>
 </router>

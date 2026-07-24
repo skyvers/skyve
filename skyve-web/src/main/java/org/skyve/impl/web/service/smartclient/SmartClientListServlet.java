@@ -218,7 +218,7 @@ public class SmartClientListServlet extends HttpServlet {
 						String moduleName = tokens[0];
 						module = customer.getModule(moduleName);
 
-						UxUi uxui = UserAgent.getUxUi(request);
+						UxUi uxui = UserAgent.getSelection(request).getUxUi();
 						// model type of request
 						if (dataSource.contains("__")) {
 							final String documentName = tokens[1];

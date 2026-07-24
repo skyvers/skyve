@@ -62,7 +62,8 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.User;
 
-@SuppressWarnings("static-method")
+// Repeated metadata literals, a fixture constructor and assertions are intentional in this exhaustive test.
+@SuppressWarnings({ "static-method", "java:S107", "java:S1192", "java:S5960" })
 class SmartClientAttributeDefinitionTest {
 
 	@Test
@@ -424,6 +425,7 @@ class SmartClientAttributeDefinitionTest {
 		assertTrue(result.contains("formatCellValue:function"));
 		assertTrue(result.contains("_w=72&_h=48"));
 		assertTrue(result.contains("images/placeholder.png"));
+		assertTrue(result.contains("&_doc='+rec.bizModule+'.'+rec.bizDocument+'&_w=72&_h=48\"/>'}return ''}"), result);
 	}
 
 	@Test

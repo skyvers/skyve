@@ -28,7 +28,7 @@ Implement the smallest safe code change that satisfies the requested behavior.
 - [project-agent-guide.md](project-agent-guide.md)
 - [performance-and-coding-conventions.md](performance-and-coding-conventions.md)
 - [learnings.md](learnings.md)
-- [../architecture.md](../architecture.md) when module boundaries, metadata flow, or generation are involved
+- [../architecture-design.md](../architecture-design.md) when module boundaries, metadata flow, or generation are involved
 
 ### Must Do
 - Respect module ownership and dependency direction (`skyve-core` -> `skyve-ext` -> `skyve-web` -> `skyve-war`).
@@ -108,7 +108,7 @@ Produce executable milestone plans with clear scope, compatibility, and validati
 - [plan.md](plan.md)
 - [project-agent-guide.md](project-agent-guide.md)
 - [learnings.md](learnings.md)
-- [../architecture.md](../architecture.md)
+- [../architecture-design.md](../architecture-design.md)
 - [../coverage-plan.md](../coverage-plan.md) for coverage milestones (skip `coverage-execution-log.md` unless troubleshooting)
 
 ### Must Do
@@ -126,4 +126,3 @@ Produce executable milestone plans with clear scope, compatibility, and validati
 - Milestone plan is self-contained and signoff-ready.
 - Risks and assumptions are explicit.
 - Validation plan is concrete and reproducible.
-

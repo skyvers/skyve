@@ -1,0 +1,74 @@
+name: Reusable Deployed Integration Test
+
+on:
+  workflow_call:
+    inputs:
+      test-class:
+        description: Fully qualified Failsafe test class ending in IT
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      test-class:
+        description: Fully qualified Failsafe test class ending in IT
+        required: true
+        type: string
+
+jobs:
+  deployed-it:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+    env:
+      SKYVE_DEPLOYED_IT_TEST: ${{ inputs['test-class'] }}
+      SKYVE_DEPLOYED_IT_RUNTIME_DIR: ${{ runner.temp }}/skyve-wildfly
+      SKYVE_DEPLOYED_IT_CONFIG_DIR: ${{ runner.temp }}/skyve-config
+      SKYVE_DEPLOYED_IT_CONTENT_DIR: ${{ runner.temp }}/skyve-content
+      SKYVE_DEPLOYED_IT_DATABASE_PATH: ${{ runner.temp }}/skyve-database/skyve
+      SKYVE_DEPLOYED_IT_BASE_URL: http://127.0.0.1:8080/skyve/
+      SKYVE_DEPLOYED_IT_USERNAME: deployed_it
+
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4
+        with:
+          java-version: '17'
+          distribution: temurin
+          cache: maven
+      - name: Verify headless browser
+        run: |
+          google-chrome --version
+          java -version
+      - name: Prepare isolated configuration
+        shell: bash
+        run: |
+          generated_password=$(openssl rand -hex 24)
+          echo "::add-mask::$generated_password"
+          echo "SKYVE_DEPLOYED_IT_PASSWORD=$generated_password" >> "$GITHUB_ENV"
+          tools/deployed-it/prepare-h2-config.sh
+      - name: Prepare approved runtime
+        run: tools/deployed-it/prepare-runtime.sh
+      - name: Run selected deployed integration test
+        run: tools/deployed-it/run.sh
+      - name: Test report
+        uses: dorny/test-reporter@df6247429542221bc30d46a036ee47af1102c451 # v2
+        if: success() || failure()
+        with:
+          name: Deployed integration test report
+          path: '**/target/failsafe-reports/TEST-*.xml'
+          reporter: java-junit
+      - name: Retain deployed-test diagnostics
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: deployed-it-${{ inputs['test-class'] }}
+          if-no-files-found: warn
+          path: |
+            **/target/failsafe-reports/TEST-*.xml
+            skyve-war/target/deployed-it/**/results.md
+            skyve-war/target/deployed-it/**/*.log
+            skyve-war/target/deployed-it/**/browser/**

@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<xs:schema version="1.0" targetNamespace="http://www.skyve.org/xml/sail" xmlns:tns="http://www.skyve.org/xml/sail" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:schema version="1.0" targetNamespace="http://www.skyve.org/xml/sail" xmlns:tns="http://www.skyve.org/xml/sail" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ns1="http://www.skyve.org/xml/common">
+
+  <xs:import namespace="http://www.skyve.org/xml/common" schemaLocation="common.xsd"/>
 
   <xs:element name="abstractAction" type="tns:abstractAction"/>
 
@@ -87,8 +89,6 @@
 
   <xs:element name="testValue" type="tns:testValue"/>
 
-  <xs:element name="userAgentType" type="tns:userAgentType"/>
-
   <xs:element name="zoomIn" type="tns:zoomIn"/>
 
   <xs:element name="zoomOut" type="tns:zoomOut"/>
@@ -100,7 +100,7 @@
       <xs:element name="after" type="tns:procedure" form="qualified" minOccurs="0"/>
     </xs:sequence>
     <xs:attribute name="uxui" type="xs:string" use="required"/>
-    <xs:attribute name="userAgentType" type="tns:userAgentType" use="required"/>
+    <xs:attribute name="userAgentType" type="ns1:userAgentType" use="required"/>
     <xs:attribute name="testStrategy" type="tns:testStrategy"/>
   </xs:complexType>
 
@@ -412,7 +412,7 @@
     <xs:complexContent>
       <xs:extension base="tns:navigateList">
         <xs:sequence/>
-        <xs:attribute name="userAgentType" type="tns:userAgentType"/>
+        <xs:attribute name="userAgentType" type="ns1:userAgentType"/>
         <xs:attribute name="uxui" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
@@ -423,7 +423,7 @@
     <xs:attribute name="createView" type="xs:boolean"/>
     <xs:attribute name="document" type="xs:string" use="required"/>
     <xs:attribute name="module" type="xs:string" use="required"/>
-    <xs:attribute name="userAgentType" type="tns:userAgentType"/>
+    <xs:attribute name="userAgentType" type="ns1:userAgentType"/>
     <xs:attribute name="uxui" type="xs:string"/>
   </xs:complexType>
 
@@ -491,15 +491,6 @@
     </xs:sequence>
     <xs:attribute name="name" type="xs:string" use="required"/>
   </xs:complexType>
-
-  <xs:simpleType name="userAgentType">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="phone"/>
-      <xs:enumeration value="tablet"/>
-      <xs:enumeration value="desktop"/>
-      <xs:enumeration value="other"/>
-    </xs:restriction>
-  </xs:simpleType>
 
   <xs:simpleType name="testStrategy">
     <xs:restriction base="xs:string">

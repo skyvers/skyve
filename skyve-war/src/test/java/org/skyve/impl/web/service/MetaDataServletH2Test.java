@@ -1,6 +1,8 @@
 package org.skyve.impl.web.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -9,12 +11,16 @@ import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.Principal;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.impl.web.RequestUxUiSelection;
+import org.skyve.impl.web.UserAgent;
 import org.skyve.metadata.user.User;
 import org.skyve.web.WebContext;
 
@@ -23,6 +29,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import modules.test.AbstractSkyveTest;
 
+@SuppressWarnings("java:S1192") // Repeated values are deliberate metadata rendering fixtures.
 class MetaDataServletH2Test extends AbstractSkyveTest {
 	private static final String UXUI = "external";
 
@@ -78,7 +85,8 @@ class MetaDataServletH2Test extends AbstractSkyveTest {
 		assertTrue(body.contains("\"toolTip\":\"Trusted <i>zoom tooltip</i>\",\"escapeToolTip\":false"), body);
 		assertTrue(body.contains("\"value\":\"Trusted <i>link</i>\",\"escapeValue\":false"), body);
 		assertTrue(body.contains("\"value\":\"Escaped <i>link</i>\",\"escapeValue\":true"), body);
-		assertTrue(body.contains("\"candidatesHeading\":\"Trusted <i>candidates heading</i>\",\"escapeCandidatesHeading\":false"), body);
+		assertTrue(body.contains("\"candidatesHeading\":\"Trusted <i>candidates heading</i>\",\"escapeCandidatesHeading\":false"),
+				body);
 		assertTrue(body.contains("\"membersHeading\":\"Trusted <i>members heading</i>\",\"escapeMembersHeading\":false"), body);
 		assertTrue(body.contains("\"confirm\":\"Trusted <i>cancel confirm</i>\",\"escapeConfirm\":false"), body);
 		assertTrue(body.contains("\"confirm\":\"Escaped <i>save confirm</i>\",\"escapeConfirm\":true"), body);
@@ -105,21 +113,35 @@ class MetaDataServletH2Test extends AbstractSkyveTest {
 		java.io.StringWriter body = new java.io.StringWriter();
 		HttpServletResponse response = responseWritingTo(body);
 
-		invokeServletMethod("doGet", authenticatedViewRequest(u, UXUI, "admin", "JobSchedule"), response);
+		invokeServletMethod("doGet", authenticatedViewRequest(u, "admin", "JobSchedule"), response);
 
 		assertTrue(body.toString().contains("\"type\":\"view\""), body.toString());
 		assertTrue(body.toString().contains("\"name\":\"edit\""), body.toString());
 	}
 
 	@Test
-	void doGetRendersAuthenticatedViewMetadataUsingUserAgentUxUiFallback() throws Exception {
+	void doGetRendersAuthenticatedViewMetadataUsingRequestSelection() throws Exception {
 		java.io.StringWriter body = new java.io.StringWriter();
 		HttpServletResponse response = responseWritingTo(body);
 
-		invokeServletMethod("doGet", authenticatedViewRequest(u, null, "admin", "JobSchedule"), response);
+		invokeServletMethod("doGet", authenticatedViewRequest(u, "admin", "JobSchedule"), response);
 
 		assertTrue(body.toString().contains("\"type\":\"view\""), body.toString());
 		assertTrue(body.toString().contains("\"name\":\"edit\""), body.toString());
+	}
+
+	@Test
+	void directMetadataRequestUsesValidatedCarriedEmulationForAccessAndRendering() throws Exception {
+		java.io.StringWriter body = new java.io.StringWriter();
+		HttpServletResponse response = responseWritingTo(body);
+		MutableRequest carried = authenticatedCarriedViewRequest(u, "phone", "admin", "JobSchedule");
+
+		invokeServletMethod("doGet", carried.request(), response);
+
+		assertTrue(body.toString().contains("\"type\":\"view\""), body.toString());
+		RequestUxUiSelection selection = UserAgent.getSelection(carried.request());
+		assertTrue(selection.isEmulated());
+		assertEquals("phone", selection.getUxUi().getName());
 	}
 
 	@Test
@@ -127,7 +149,7 @@ class MetaDataServletH2Test extends AbstractSkyveTest {
 		java.io.StringWriter body = new java.io.StringWriter();
 		HttpServletResponse response = responseWritingTo(body);
 
-		invokeServletMethod("doGet", authenticatedViewRequest(u, UXUI, "admin", "JobSchedule", true), response);
+		invokeServletMethod("doGet", authenticatedViewRequest(u, "admin", "JobSchedule", true), response);
 
 		assertTrue(body.toString().contains("\"type\":\"view\""), body.toString());
 		assertTrue(body.toString().contains("\"name\":\"edit\""), body.toString());
@@ -153,7 +175,7 @@ class MetaDataServletH2Test extends AbstractSkyveTest {
 		java.io.StringWriter body = new java.io.StringWriter();
 		HttpServletResponse response = responseWritingTo(body);
 
-		invokeServletMethod("doGet", authenticatedModuleRequest(u, UXUI, "admin"), response);
+		invokeServletMethod("doGet", authenticatedModuleRequest(u, "admin"), response);
 
 		assertTrue(body.toString().contains("\"menus\":[]"), body.toString());
 		assertTrue(body.toString().contains("\"dataSources\":[]"), body.toString());
@@ -164,7 +186,7 @@ class MetaDataServletH2Test extends AbstractSkyveTest {
 		java.io.StringWriter body = new java.io.StringWriter();
 		HttpServletResponse response = responseWritingTo(body);
 
-		invokeServletMethod("doPost", authenticatedViewRequest(u, UXUI, "admin", "JobSchedule"), response);
+		invokeServletMethod("doPost", authenticatedViewRequest(u, "admin", "JobSchedule"), response);
 
 		assertTrue(body.toString().contains("\"type\":\"view\""), body.toString());
 		assertTrue(body.toString().contains("\"name\":\"edit\""), body.toString());
@@ -175,7 +197,7 @@ class MetaDataServletH2Test extends AbstractSkyveTest {
 		java.io.StringWriter body = new java.io.StringWriter();
 		HttpServletResponse response = responseWritingTo(body);
 
-		invokeServletMethod("doGet", authenticatedViewRequest(u, UXUI, "admin", "MissingDocument"), response);
+		invokeServletMethod("doGet", authenticatedViewRequest(u, "admin", "MissingDocument"), response);
 
 		assertTrue(body.toString().contains("\"type\":\"view\""), body.toString());
 		assertTrue(body.toString().contains("\"contained\":[]"), body.toString());
@@ -189,8 +211,9 @@ class MetaDataServletH2Test extends AbstractSkyveTest {
 		assertTrue(body.contains("\"name\":\"edit\""), moduleName + '.' + documentName + ": " + body);
 	}
 
+	@SuppressWarnings("java:S3011") // Reflection exercises the private servlet rendering seam.
 	private static String invokeView(User user, String uxui, String moduleName, String documentName, boolean topLabels)
-	throws Exception {
+			throws Exception {
 		Method view = metaDataServletClass().getDeclaredMethod("view",
 				User.class,
 				String.class,
@@ -200,8 +223,7 @@ class MetaDataServletH2Test extends AbstractSkyveTest {
 		view.setAccessible(true);
 		try {
 			return view.invoke(null, user, uxui, moduleName, documentName, Boolean.valueOf(topLabels)).toString();
-		}
-		catch (InvocationTargetException e) {
+		} catch (InvocationTargetException e) {
 			Throwable cause = e.getCause();
 			if (cause instanceof Exception exception) {
 				throw exception;
@@ -210,15 +232,16 @@ class MetaDataServletH2Test extends AbstractSkyveTest {
 		}
 	}
 
-	private static void invokeServletMethod(String methodName, HttpServletRequest request, HttpServletResponse response) throws Exception {
+	@SuppressWarnings({ "java:S112", "java:S3011" }) // Preserve the invoked exception while exercising the private servlet seam.
+	private static void invokeServletMethod(String methodName, HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
 		Class<?> servletClass = metaDataServletClass();
 		Object servlet = servletClass.getDeclaredConstructor().newInstance();
 		Method method = servletClass.getDeclaredMethod(methodName, HttpServletRequest.class, HttpServletResponse.class);
 		method.setAccessible(true);
 		try {
 			method.invoke(servlet, request, response);
-		}
-		catch (InvocationTargetException e) {
+		} catch (InvocationTargetException e) {
 			Throwable cause = e.getCause();
 			if (cause instanceof Exception exception) {
 				throw exception;
@@ -238,22 +261,21 @@ class MetaDataServletH2Test extends AbstractSkyveTest {
 		return response;
 	}
 
-	private static HttpServletRequest authenticatedViewRequest(User user, String uxui, String moduleName, String documentName) {
-		return authenticatedViewRequest(user, uxui, moduleName, documentName, false);
+	private static HttpServletRequest authenticatedViewRequest(User user, String moduleName, String documentName) {
+		return authenticatedViewRequest(user, moduleName, documentName, false);
 	}
 
 	private static HttpServletRequest authenticatedViewRequest(User user,
-																String uxui,
-																String moduleName,
-																String documentName,
-																boolean topLabels) {
-		HttpServletRequest request = authenticatedModuleRequest(user, uxui, moduleName);
+			String moduleName,
+			String documentName,
+			boolean topLabels) {
+		HttpServletRequest request = authenticatedModuleRequest(user, moduleName);
 		when(request.getParameter(AbstractWebContext.DOCUMENT_NAME)).thenReturn(documentName);
 		when(request.getParameter(AbstractWebContext.TOP_FORM_LABELS_NAME)).thenReturn(topLabels ? Boolean.TRUE.toString() : null);
 		return request;
 	}
 
-	private static HttpServletRequest authenticatedModuleRequest(User user, String uxui, String moduleName) {
+	private static HttpServletRequest authenticatedModuleRequest(User user, String moduleName) {
 		HttpSession session = mock(HttpSession.class);
 		when(session.getId()).thenReturn("metadata-session-" + System.nanoTime());
 		when(session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME)).thenReturn(user);
@@ -265,8 +287,6 @@ class MetaDataServletH2Test extends AbstractSkyveTest {
 		when(request.getUserPrincipal()).thenReturn((Principal) null);
 		when(request.getLocale()).thenReturn(java.util.Locale.ENGLISH);
 		when(request.getHeader("User-Agent")).thenReturn("Mozilla/5.0");
-		when(request.getAttribute(AbstractWebContext.UXUI)).thenReturn(null);
-		when(request.getParameter(AbstractWebContext.UXUI)).thenReturn(uxui);
 		when(request.getParameter(AbstractWebContext.MODULE_NAME)).thenReturn(moduleName);
 		when(request.getParameter(AbstractWebContext.DOCUMENT_NAME)).thenReturn(null);
 		when(request.getParameter(AbstractWebContext.TOP_FORM_LABELS_NAME)).thenReturn(null);
@@ -279,10 +299,46 @@ class MetaDataServletH2Test extends AbstractSkyveTest {
 		when(request.getUserPrincipal()).thenReturn((Principal) null);
 		when(request.getLocale()).thenReturn(java.util.Locale.ENGLISH);
 		when(request.getHeader("User-Agent")).thenReturn("Mozilla/5.0");
-		when(request.getParameter(AbstractWebContext.UXUI)).thenReturn(UXUI);
 		when(request.getParameter(AbstractWebContext.MODULE_NAME)).thenReturn("admin");
 		when(request.getParameter(AbstractWebContext.DOCUMENT_NAME)).thenReturn(null);
 		return request;
+	}
+
+	private static MutableRequest authenticatedCarriedViewRequest(User user,
+			String carriedType,
+			String moduleName,
+			String documentName) {
+		HttpSession session = mock(HttpSession.class);
+		when(session.getId()).thenReturn("metadata-carried-session-" + System.nanoTime());
+		when(session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME)).thenReturn(user);
+		StateUtil.addSession(user.getId(), session);
+
+		Map<String, Object> attributes = new HashMap<>();
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		when(request.getSession()).thenReturn(session);
+		when(request.getSession(false)).thenReturn(session);
+		when(request.getUserPrincipal()).thenReturn((Principal) null);
+		when(request.getLocale()).thenReturn(java.util.Locale.ENGLISH);
+		when(request.getHeader("User-Agent")).thenReturn("Mozilla/5.0");
+		when(request.getAttribute(any())).thenAnswer(invocation -> attributes.get(invocation.getArgument(0)));
+		when(session.getAttribute(AbstractWebContext.EMULATED_USER_AGENT_TYPE_SESSION_ATTRIBUTE_NAME))
+				.thenReturn(org.skyve.web.UserAgentType.valueOf(carriedType));
+		when(request.getParameter(AbstractWebContext.MODULE_NAME)).thenReturn(moduleName);
+		when(request.getParameter(AbstractWebContext.DOCUMENT_NAME)).thenReturn(documentName);
+		when(request.getParameter(AbstractWebContext.TOP_FORM_LABELS_NAME)).thenReturn(null);
+		org.mockito.Mockito.doAnswer(invocation -> {
+			attributes.put(invocation.getArgument(0), invocation.getArgument(1));
+			return null;
+		}).when(request).setAttribute(any(), any());
+		org.mockito.Mockito.doAnswer(invocation -> {
+			attributes.remove(invocation.getArgument(0));
+			return null;
+		}).when(request).removeAttribute(any());
+		return new MutableRequest(request, attributes);
+	}
+
+	private record MutableRequest(HttpServletRequest request, Map<String, Object> attributes) {
+		// Immutable test carrier.
 	}
 
 }

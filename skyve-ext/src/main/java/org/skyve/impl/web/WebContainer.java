@@ -10,7 +10,13 @@ import jakarta.servlet.http.HttpServletResponse;
  * This class is called from EXT.
  */
 public class WebContainer {
-
+	/**
+	 * Prevent instantiation.
+	 */
+	private WebContainer() {
+		// nothing to see here
+	}
+	
 	private static final ThreadLocal<HttpServletRequestResponse> requestResponse = new ThreadLocal<>();
 
 	public static void setHttpServletRequestResponse(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response) {

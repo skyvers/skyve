@@ -36,7 +36,7 @@
 	}
 	
 	String basePath = Util.getSkyveContextUrl() + "/";
-	boolean mobile = UserAgent.getType(request).isMobile();
+	boolean mobile = UserAgent.detectType(request).isMobile();
 	Locale locale = user.getLocale();
 	
 	String passwordChangeErrorMessage = null;

@@ -6,6 +6,7 @@ import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.controller.ImplicitActionName;
@@ -22,6 +23,9 @@ import org.skyve.util.monitoring.Monitoring;
 import org.skyve.util.monitoring.RequestKey;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
+
+import jakarta.faces.context.FacesContext;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Executes a Faces callback action within the current Skyve web context.
@@ -41,7 +45,7 @@ public class SaveAction extends FacesAction<Void> {
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
 	public Void callback() throws Exception {
-		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("SaveAction - ok={}", ok);
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("SaveAction - ok={}", Boolean.valueOf(ok));
 
 		AbstractPersistence persistence = AbstractPersistence.get();
 		PersistentBean targetBean = (PersistentBean) ActionUtil.getTargetBeanForView(facesView);
@@ -49,7 +53,8 @@ public class SaveAction extends FacesAction<Void> {
     	Customer customer = user.getCustomer();
     	Module targetModule = customer.getModule(targetBean.getBizModule());
 		Document targetDocument = targetModule.getDocument(customer, targetBean.getBizDocument());
-		View view = targetDocument.getView(facesView.getUxUi().getName(), 
+		HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
+		View view = targetDocument.getView(UserAgent.getSelection(request).getUxUi().getName(),
 											customer, 
 											targetBean.isCreated() ? ViewType.edit.toString() : ViewType.create.toString());
 		ImplicitActionName ian = ok ? ImplicitActionName.OK : ImplicitActionName.Save;

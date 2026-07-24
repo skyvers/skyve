@@ -188,7 +188,7 @@ public class ReportServlet extends HttpServlet {
 			Customer customer = user.getCustomer();
 			Module module = customer.getModule(moduleName);
 			Document document = module.getDocument(customer, documentName);
-			UxUi uxui = UserAgent.getUxUi(request);
+			UxUi uxui = UserAgent.getSelection(request).getUxUi();
 
 			// Find the context bean
 			// Note - if there is no form in the view then there is no web context
@@ -451,7 +451,7 @@ public class ReportServlet extends HttpServlet {
 				String documentOrQueryOrModelName = module_QueryOrModel.substring(_Index + 1);
 				Document drivingDocument = null;
 				ListModel<Bean> model = null;
-				UxUi uxui = UserAgent.getUxUi(request);
+				UxUi uxui = UserAgent.getSelection(request).getUxUi();
 				int __Index = documentOrQueryOrModelName.indexOf("__");
 				if (__Index >= 0) {
 					String documentName = documentOrQueryOrModelName.substring(0, __Index);

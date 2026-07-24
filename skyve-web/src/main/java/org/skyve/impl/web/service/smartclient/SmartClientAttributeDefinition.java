@@ -788,26 +788,26 @@ abstract class SmartClientAttributeDefinition {
 								((pixelWidth == null) ? "64" : pixelWidth.toString()) : 
 								pixelHeight.toString();
 				result.append(",formatCellValue:function(v,rec,row,col){if(v){var u='content?_n='+v+'");
-            	result.append("&_doc='+rec.bizModule+'.'+rec.bizDocument+'&_b=").append(BindUtil.unsanitiseBinding(name));
-        		result.append("';return '<a href=\"'+u+'\" target=\"_blank\"><img src=\"'+u+'");
-        		result.append("&_w=").append(wpx).append("&_h=").append(hpx);
+				result.append("&_doc='+rec.bizModule+'.'+rec.bizDocument+'&_b=").append(BindUtil.unsanitiseBinding(name));
+				result.append("';return '<a href=\"'+u+'\" target=\"_blank\"><img src=\"'+u+'");
+				result.append("&_w=").append(wpx).append("&_h=").append(hpx);
         		result.append("\" style=\"width:").append(wpx).append("px;height:").append(hpx);
         		result.append("px:object-fit:contain\"/></a>'}if(rec && rec.bizId){return '");
         		if (emptyThumbnailRelativeFile == null) {
         			result.append("'}");
         		}
         		else {
-        			result.append("<img src=\"resources?_n=").append(emptyThumbnailRelativeFile);
-	            	result.append("&_doc='+rec.bizModule+'.'+rec.bizDocument+");
-            		result.append("'&_w=").append(wpx).append("&_h=").append(hpx);
-        			result.append("\"'}");
+					result.append("<img src=\"resources?_n=").append(emptyThumbnailRelativeFile);
+					result.append("&_doc='+rec.bizModule+'.'+rec.bizDocument+");
+					result.append("'&_w=").append(wpx).append("&_h=").append(hpx);
+					result.append("\"/>'}");
         		}
         		result.append("return ''}");
 			}
 			else if ("link".equals(type)) {
-    			result.append(",formatCellValue:function(v,rec,row,col){return (v ? '<a href=\"content?_n='+v+'");
-            	result.append("&_doc='+rec.bizModule+'.'+rec.bizDocument+'&_b=").append(BindUtil.unsanitiseBinding(name));
-            	result.append("\" target=\"_blank\">Content</a>' : '')}");
+				result.append(",formatCellValue:function(v,rec,row,col){if(!v){return ''}var u='content?_n='+v+'");
+				result.append("&_doc='+rec.bizModule+'.'+rec.bizDocument+'&_b=").append(BindUtil.unsanitiseBinding(name));
+				result.append("';return '<a href=\"'+u+'\" target=\"_blank\">Content</a>'}");
 			}
 			else {
 				if ((mask != null) || (textBoxStyle != null)) {

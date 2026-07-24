@@ -59,7 +59,7 @@ public class RequestLoggingAndStatisticsFilter extends ExcludeStaticFilter {
 				// types of requests are few and far between.
 				if (user != null) {
 					String userAgentHeader = httpRequest.getHeader("User-Agent");
-					UserAgentType userAgentType = UserAgent.getType(httpRequest);
+					UserAgentType userAgentType = UserAgent.detectType(httpRequest);
 					WebStatsUtil.recordHit(user, userAgentHeader, userAgentType);
 				}
 				else {

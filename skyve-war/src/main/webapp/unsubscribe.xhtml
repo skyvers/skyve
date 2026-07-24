@@ -16,7 +16,7 @@
 			<f:viewParam name="c" value="#{adminUnsubscribe.bizCustomerParameter}" />
 			<f:event type="preRenderView" listener="#{adminUnsubscribe.preRender}" />
 		</f:metadata>
-		<ui:composition template="#{'/WEB-INF/pages/templates/'.concat(adminUnsubscribe.templateName).concat('/view.xhtml')}">
+		<ui:composition template="#{'/WEB-INF/pages/templates/'.concat(_skyveTheme.templateName).concat('/view.xhtml')}">
 			<ui:param name="bean" value="#{adminUnsubscribe}" />
 			<ui:param name="showMenu" value="false" />
 			<ui:param name="showSwitchMode" value="false" />

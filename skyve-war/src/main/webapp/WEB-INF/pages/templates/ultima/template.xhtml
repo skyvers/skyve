@@ -17,7 +17,7 @@
 				<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 				<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
 				<meta name="apple-mobile-web-app-capable" content="yes" />
-				<meta name="theme-color" content="#{bean.getThemeColour('indigo')}" />
+				<meta name="theme-color" content="#{_skyveTheme.baseColour}" />
 			</f:facet>
 	
 			<title>${project.description}</title>
@@ -42,7 +42,7 @@
 		<h:body id="body" styleClass="ui-input-filled">
 			<h:panelGroup styleClass="skyveEnvBanner skyveTopEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
 			<h:panelGroup styleClass="skyveEnvBanner skyveBottomEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
-			<div class="#{showMenu ? 'layout-wrapper layout-menu-static layout-menu-light layout-menu-'.concat(bean.getThemeColour('indigo')).concat(' layout-topbar-').concat(bean.getThemeColour('indigo')) : 'layout-wrapper layout-topbar-'.concat(bean.getThemeColour('indigo'))}">
+			<div class="#{showMenu ? 'layout-wrapper layout-menu-static layout-menu-light '.concat(_skyveTheme.layoutStyleClass) : 'layout-wrapper '.concat(_skyveTheme.layoutStyleClass)}">
 				<ui:include src="./topbar.xhtml">
 					<ui:param name="showMenu" value="#{showMenu}" />
 					<ui:param name="showSwitchMode" value="#{showSwitchMode}" />

@@ -21,7 +21,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.user.User;
 import org.skyve.web.WebContext;
 
@@ -31,7 +30,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import modules.test.AbstractSkyveTest;
 
-@SuppressWarnings("resource")
+@SuppressWarnings({ "resource", "java:S1989", "java:S5960" }) // Servlet exceptions and assertions are test-only.
 class SmartClientSnapServletH2Test extends AbstractSkyveTest {
 	@AfterEach
 	void restorePersistenceUser() {
@@ -122,7 +121,7 @@ class SmartClientSnapServletH2Test extends AbstractSkyveTest {
 		}
 
 		private RequestBuilder param(String name, String value) {
-			parameters.put(name, new String[] {value});
+			parameters.put(name, new String[] { value });
 			return this;
 		}
 
@@ -135,7 +134,6 @@ class SmartClientSnapServletH2Test extends AbstractSkyveTest {
 			when(request.getUserPrincipal()).thenReturn((Principal) null);
 			when(request.getLocale()).thenReturn(java.util.Locale.ENGLISH);
 			when(request.getHeader("User-Agent")).thenReturn("Mozilla/5.0");
-			when(request.getAttribute(AbstractWebContext.UXUI)).thenReturn(null);
 			for (Map.Entry<String, String[]> entry : parameters.entrySet()) {
 				when(request.getParameter(entry.getKey())).thenReturn(entry.getValue()[0]);
 				when(request.getParameterValues(entry.getKey())).thenReturn(entry.getValue());

@@ -35,6 +35,7 @@ import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.impl.web.RequestUxUiSelectionTestUtil;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.module.Module;
@@ -199,7 +200,10 @@ class SmartClientCompleteServletTest {
 		when(request.getParameter("value")).thenReturn("a");
 		when(request.getParameter("_startRow")).thenReturn("0");
 		when(request.getParameter("_endRow")).thenReturn("2");
-		when(request.getAttribute(AbstractWebContext.UXUI)).thenReturn(UxUi.newPrimeFaces("desktop", "template", "saga"));
+		RequestUxUiSelectionTestUtil.install(request,
+				org.skyve.web.UserAgentType.desktop,
+				false,
+				UxUi.newPrimeFaces("desktop", "template", "saga"));
 
 		AbstractPersistence persistence = mock(AbstractPersistence.class, CALLS_REAL_METHODS);
 		persistence.setUser(user);

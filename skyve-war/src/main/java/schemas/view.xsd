@@ -445,7 +445,7 @@
         </xs:sequence>
         <xs:attribute name="pixelWidth" type="xs:int" use="required"/>
         <xs:attribute name="pixelHeight" type="xs:int" use="required"/>
-        <xs:attribute name="sanitise" type="tns:sanitisation"/>
+        <xs:attribute name="sanitise" type="ns1:sanitisation"/>
         <xs:attribute name="mentionMarkers" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
@@ -586,7 +586,7 @@
         <xs:attribute name="pixelHeight" type="xs:int" use="required"/>
         <xs:attribute name="minPixelHeight" type="xs:int" use="required"/>
         <xs:attribute name="maxPixelHeight" type="xs:int" use="required"/>
-        <xs:attribute name="sanitise" type="tns:sanitisation"/>
+        <xs:attribute name="sanitise" type="ns1:sanitisation"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -670,6 +670,7 @@
         </xs:sequence>
         <xs:attribute name="name" type="xs:string" use="required"/>
         <xs:attribute name="title" type="xs:string" use="required"/>
+        <xs:attribute name="escapeTitle" type="xs:boolean"/>
         <xs:attribute name="iconStyleClass" type="xs:string"/>
         <xs:attribute name="icon32x32RelativeFileName" type="xs:string"/>
         <xs:attribute name="helpRelativeFileName" type="xs:string"/>
@@ -677,7 +678,6 @@
         <xs:attribute name="refreshTimeInSeconds" type="xs:int"/>
         <xs:attribute name="refreshIf" type="xs:string"/>
         <xs:attribute name="refreshAction" type="xs:string"/>
-        <xs:attribute name="escapeTitle" type="xs:boolean"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -764,7 +764,7 @@
         <xs:attribute name="borderTitle" type="xs:string"/>
         <xs:attribute name="collapsible" type="tns:collapsible"/>
         <xs:attribute name="escapeBorderTitle" type="xs:boolean"/>
-        <xs:attribute name="horizontalAlignment" type="tns:horizontalAlignment"/>
+        <xs:attribute name="horizontalAlignment" type="ns1:horizontalAlignment"/>
         <xs:attribute name="invisible" type="xs:string"/>
         <xs:attribute name="lg" type="xs:int"/>
         <xs:attribute name="maxPixelHeight" type="xs:int"/>
@@ -799,7 +799,7 @@
         <xs:attribute name="borderTitle" type="xs:string"/>
         <xs:attribute name="collapsible" type="tns:collapsible"/>
         <xs:attribute name="escapeBorderTitle" type="xs:boolean"/>
-        <xs:attribute name="horizontalAlignment" type="tns:horizontalAlignment"/>
+        <xs:attribute name="horizontalAlignment" type="ns1:horizontalAlignment"/>
         <xs:attribute name="invisible" type="xs:string"/>
         <xs:attribute name="lg" type="xs:int"/>
         <xs:attribute name="maxPixelHeight" type="xs:int"/>
@@ -846,14 +846,14 @@
     <xs:attribute name="maxPixelHeight" type="xs:int"/>
     <xs:attribute name="border" type="xs:boolean"/>
     <xs:attribute name="borderTitle" type="xs:string"/>
+    <xs:attribute name="escapeBorderTitle" type="xs:boolean"/>
     <xs:attribute name="collapsible" type="tns:collapsible"/>
-    <xs:attribute name="defaultLabelAlign" type="tns:horizontalAlignment"/>
+    <xs:attribute name="defaultLabelAlign" type="ns1:horizontalAlignment"/>
     <xs:attribute name="labelLayout" type="ns1:formLabelLayout"/>
     <xs:attribute name="disabled" type="xs:string"/>
     <xs:attribute name="enabled" type="xs:string"/>
     <xs:attribute name="invisible" type="xs:string"/>
     <xs:attribute name="visible" type="xs:string"/>
-    <xs:attribute name="escapeBorderTitle" type="xs:boolean"/>
   </xs:complexType>
 
   <xs:complexType name="formColumn">
@@ -914,9 +914,9 @@
     <xs:attribute name="escapeLabel" type="xs:boolean"/>
     <xs:attribute name="escapeRequiredMessage" type="xs:boolean"/>
     <xs:attribute name="help" type="xs:string"/>
-    <xs:attribute name="align" type="tns:horizontalAlignment"/>
+    <xs:attribute name="align" type="ns1:horizontalAlignment"/>
     <xs:attribute name="label" type="xs:string"/>
-    <xs:attribute name="labelAlign" type="tns:horizontalAlignment"/>
+    <xs:attribute name="labelAlign" type="ns1:horizontalAlignment"/>
     <xs:attribute name="required" type="xs:boolean"/>
     <xs:attribute name="requiredMessage" type="xs:string"/>
     <xs:attribute name="rowspan" type="xs:int"/>
@@ -967,11 +967,11 @@
           <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
         </xs:sequence>
         <xs:attribute name="displayName" type="xs:string"/>
+        <xs:attribute name="escapeDisplayName" type="xs:boolean"/>
         <xs:attribute name="invisible" type="xs:string"/>
         <xs:attribute name="visible" type="xs:string"/>
         <xs:attribute name="disabled" type="xs:string"/>
         <xs:attribute name="enabled" type="xs:string"/>
-        <xs:attribute name="escapeDisplayName" type="xs:boolean"/>
         <xs:attribute name="escapeToolTip" type="xs:boolean"/>
         <xs:attribute name="iconStyleClass" type="xs:string"/>
         <xs:attribute name="maxPixelHeight" type="xs:int"/>
@@ -997,6 +997,7 @@
       <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
     </xs:sequence>
     <xs:attribute name="displayName" type="xs:string" use="required"/>
+    <xs:attribute name="escapeDisplayName" type="xs:boolean"/>
     <xs:attribute name="dialogName" type="xs:string"/>
     <xs:attribute name="command" type="xs:string"/>
     <xs:attribute name="dialogWidth" type="xs:int"/>
@@ -1006,7 +1007,6 @@
     <xs:attribute name="visible" type="xs:string"/>
     <xs:attribute name="disabled" type="xs:string"/>
     <xs:attribute name="enabled" type="xs:string"/>
-    <xs:attribute name="escapeDisplayName" type="xs:boolean"/>
   </xs:complexType>
 
   <xs:complexType name="geometryMap">
@@ -1061,8 +1061,8 @@
         <xs:attribute name="visible" type="xs:string"/>
         <xs:attribute name="formatted" type="xs:boolean"/>
         <xs:attribute name="escape" type="xs:boolean"/>
-        <xs:attribute name="sanitise" type="tns:sanitisation"/>
-        <xs:attribute name="textAlignment" type="tns:horizontalAlignment"/>
+        <xs:attribute name="sanitise" type="ns1:sanitisation"/>
+        <xs:attribute name="textAlignment" type="ns1:horizontalAlignment"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -1072,11 +1072,11 @@
       <xs:extension base="xs:string">
         <xs:attribute name="pixelWidth" type="xs:int"/>
         <xs:attribute name="pixelHeight" type="xs:int"/>
-        <xs:attribute name="textAlignment" type="tns:horizontalAlignment"/>
+        <xs:attribute name="textAlignment" type="ns1:horizontalAlignment"/>
         <xs:attribute name="invisible" type="xs:string"/>
         <xs:attribute name="visible" type="xs:string"/>
         <xs:attribute name="escape" type="xs:boolean"/>
-        <xs:attribute name="sanitise" type="tns:sanitisation"/>
+        <xs:attribute name="sanitise" type="ns1:sanitisation"/>
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>
@@ -1126,10 +1126,10 @@
       <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
     </xs:sequence>
     <xs:attribute name="value" type="xs:string"/>
+    <xs:attribute name="escapeValue" type="xs:boolean"/>
     <xs:attribute name="pixelWidth" type="xs:int"/>
     <xs:attribute name="invisible" type="xs:string"/>
     <xs:attribute name="visible" type="xs:string"/>
-    <xs:attribute name="escapeValue" type="xs:boolean"/>
   </xs:complexType>
 
   <xs:complexType name="actionReference">
@@ -1253,13 +1253,13 @@
           <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
         </xs:sequence>
         <xs:attribute name="title" type="xs:string" use="required"/>
+        <xs:attribute name="escapeTitle" type="xs:boolean"/>
         <xs:attribute name="icon16x16RelativeFileName" type="xs:string"/>
         <xs:attribute name="iconStyleClass" type="xs:string"/>
         <xs:attribute name="disabled" type="xs:string"/>
         <xs:attribute name="enabled" type="xs:string"/>
         <xs:attribute name="invisible" type="xs:string"/>
         <xs:attribute name="visible" type="xs:string"/>
-        <xs:attribute name="escapeTitle" type="xs:boolean"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -1440,11 +1440,11 @@
           <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
         </xs:sequence>
         <xs:attribute name="membersHeading" type="xs:string"/>
+        <xs:attribute name="escapeMembersHeading" type="xs:boolean"/>
         <xs:attribute name="candidatesHeading" type="xs:string"/>
+        <xs:attribute name="escapeCandidatesHeading" type="xs:boolean"/>
         <xs:attribute name="pixelWidth" type="xs:int"/>
         <xs:attribute name="minPixelHeight" type="xs:int"/>
-        <xs:attribute name="escapeCandidatesHeading" type="xs:boolean"/>
-        <xs:attribute name="escapeMembersHeading" type="xs:boolean"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -1571,6 +1571,7 @@
         <xs:sequence/>
         <xs:attribute name="widgetId" type="xs:string"/>
         <xs:attribute name="title" type="xs:string"/>
+        <xs:attribute name="escapeTitle" type="xs:boolean"/>
         <xs:attribute name="pixelWidth" type="xs:int"/>
         <xs:attribute name="responsiveWidth" type="xs:int"/>
         <xs:attribute name="sm" type="xs:int"/>
@@ -1586,7 +1587,6 @@
         <xs:attribute name="maxPixelHeight" type="xs:int"/>
         <xs:attribute name="invisible" type="xs:string"/>
         <xs:attribute name="visible" type="xs:string"/>
-        <xs:attribute name="escapeTitle" type="xs:boolean"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -1600,7 +1600,7 @@
         <xs:attribute name="binding" type="xs:string"/>
         <xs:attribute name="editable" type="xs:boolean"/>
         <xs:attribute name="escape" type="xs:boolean"/>
-        <xs:attribute name="sanitise" type="tns:sanitisation"/>
+        <xs:attribute name="sanitise" type="ns1:sanitisation"/>
         <xs:attribute name="formatter" type="ns1:formatterName"/>
         <xs:attribute name="customFormatter" type="xs:string"/>
       </xs:extension>
@@ -1612,7 +1612,7 @@
       <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
     </xs:sequence>
     <xs:attribute name="title" type="xs:string"/>
-    <xs:attribute name="alignment" type="tns:horizontalAlignment"/>
+    <xs:attribute name="alignment" type="ns1:horizontalAlignment"/>
     <xs:attribute name="pixelWidth" type="xs:int"/>
     <xs:attribute name="escapeTitle" type="xs:boolean"/>
   </xs:complexType>
@@ -1711,6 +1711,7 @@
       <xs:element name="parameter" type="tns:parameterImpl" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
     <xs:attribute name="title" type="xs:string"/>
+    <xs:attribute name="escapeTitle" type="xs:boolean"/>
     <xs:attribute name="query" type="xs:string"/>
     <xs:attribute name="model" type="xs:string"/>
     <xs:attribute name="postRefresh" type="xs:string"/>
@@ -1729,7 +1730,6 @@
     <xs:attribute name="maxPixelHeight" type="xs:int"/>
     <xs:attribute name="invisible" type="xs:string"/>
     <xs:attribute name="visible" type="xs:string"/>
-    <xs:attribute name="escapeTitle" type="xs:boolean"/>
   </xs:complexType>
 
   <xs:complexType name="treeGrid">
@@ -1846,17 +1846,17 @@
     </xs:sequence>
     <xs:attribute name="name" type="xs:string"/>
     <xs:attribute name="displayName" type="xs:string"/>
+    <xs:attribute name="escapeDisplayName" type="xs:boolean"/>
     <xs:attribute name="toolTip" type="xs:string"/>
+    <xs:attribute name="escapeToolTip" type="xs:boolean"/>
     <xs:attribute name="relativeIconFileName" type="xs:string"/>
     <xs:attribute name="iconStyleClass" type="xs:string"/>
     <xs:attribute name="confirm" type="xs:string"/>
+    <xs:attribute name="escapeConfirm" type="xs:boolean"/>
     <xs:attribute name="disabled" type="xs:string"/>
     <xs:attribute name="enabled" type="xs:string"/>
     <xs:attribute name="invisible" type="xs:string"/>
     <xs:attribute name="visible" type="xs:string"/>
-    <xs:attribute name="escapeConfirm" type="xs:boolean"/>
-    <xs:attribute name="escapeDisplayName" type="xs:boolean"/>
-    <xs:attribute name="escapeToolTip" type="xs:boolean"/>
   </xs:complexType>
 
   <xs:complexType name="bizExportAction">
@@ -2123,34 +2123,6 @@
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-
-  <xs:simpleType name="viewType">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="list"/>
-      <xs:enumeration value="create"/>
-      <xs:enumeration value="edit"/>
-      <xs:enumeration value="pick"/>
-      <xs:enumeration value="params"/>
-    </xs:restriction>
-  </xs:simpleType>
-
-  <xs:simpleType name="sanitisation">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="none"/>
-      <xs:enumeration value="relaxed"/>
-      <xs:enumeration value="simple"/>
-      <xs:enumeration value="basic"/>
-      <xs:enumeration value="text"/>
-    </xs:restriction>
-  </xs:simpleType>
-
-  <xs:simpleType name="horizontalAlignment">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="left"/>
-      <xs:enumeration value="centre"/>
-      <xs:enumeration value="right"/>
-    </xs:restriction>
-  </xs:simpleType>
 
   <xs:simpleType name="contentCapture">
     <xs:restriction base="xs:string">

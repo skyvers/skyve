@@ -14,7 +14,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.content.MimeType;
 import org.skyve.metadata.user.User;
 import org.skyve.web.WebContext;
@@ -24,7 +23,7 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpServletRequest;
 import modules.test.AbstractSkyveTest;
 
-@SuppressWarnings({"static-method", "resource"})
+@SuppressWarnings({ "static-method", "resource" })
 class ChartServletH2Test extends AbstractSkyveTest {
 	@AfterEach
 	void restorePersistenceUser() {
@@ -40,7 +39,8 @@ class ChartServletH2Test extends AbstractSkyveTest {
 
 	@Test
 	void processListModelBuildsEmptyResponseBeforeReadingChartParametersForModelDatasource() throws Exception {
-		String config = invokeProcessListModel(chartRequest("test_AllAttributesPersistent__AnotherModel", "not-json", "not-a-chart"));
+		String config = invokeProcessListModel(
+				chartRequest("test_AllAttributesPersistent__AnotherModel", "not-json", "not-a-chart"));
 
 		assertEquals("{}", config);
 	}
@@ -118,7 +118,6 @@ class ChartServletH2Test extends AbstractSkyveTest {
 		when(request.getUserPrincipal()).thenReturn((Principal) null);
 		when(request.getLocale()).thenReturn(java.util.Locale.ENGLISH);
 		when(request.getHeader("User-Agent")).thenReturn("Mozilla/5.0");
-		when(request.getAttribute(AbstractWebContext.UXUI)).thenReturn(null);
 		return request;
 	}
 
@@ -127,8 +126,7 @@ class ChartServletH2Test extends AbstractSkyveTest {
 		processListModel.setAccessible(true);
 		try {
 			return (String) processListModel.invoke(null, request);
-		}
-		catch (InvocationTargetException e) {
+		} catch (InvocationTargetException e) {
 			Throwable cause = e.getCause();
 			if (cause instanceof Exception exception) {
 				throw exception;

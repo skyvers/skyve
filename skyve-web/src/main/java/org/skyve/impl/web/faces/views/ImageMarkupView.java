@@ -325,10 +325,7 @@ public class ImageMarkupView extends LocalisableView {
 			User user = persistence.getUser();
 			String bizModule = bean.getBizModule();
 			String bizDocument = bean.getBizDocument();
-			UxUi uxui = UserAgent.getUxUi(request);
-			// Ensure no UXUI is set in the request for this page (after UserAgent.getUxUi() call above)
-			// This was it will default to what is in the web.xml theme expression
-			request.removeAttribute(AbstractWebContext.UXUI);
+			UxUi uxui = UserAgent.getSelection(request).getUxUi();
 			String unsanitisedContentBinding = BindUtil.unsanitiseBinding(contentBindingParameter);
 			EXT.checkAccess(user, UserAccess.content(bizModule, bizDocument, unsanitisedContentBinding), uxui.getName());
 			

@@ -23,7 +23,7 @@ import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 import jakarta.servlet.http.HttpSession;
 
-@SuppressWarnings("static-method")
+@SuppressWarnings({ "static-method", "java:S1192", "java:S5960" }) // Repeated values and assertions are test-only.
 class ImageMarkupViewTest {
 	private abstract static class FacesContextBridge extends FacesContext {
 		static void setCurrent(FacesContext context) {
@@ -170,6 +170,7 @@ class ImageMarkupViewTest {
 		return context;
 	}
 
+	@SuppressWarnings({ "java:S112", "java:S3011" }) // Reflection configures private view state without a JSF container.
 	private static void setField(Object target, String name, Object value) throws Exception {
 		Field field = ImageMarkupView.class.getDeclaredField(name);
 		field.setAccessible(true);

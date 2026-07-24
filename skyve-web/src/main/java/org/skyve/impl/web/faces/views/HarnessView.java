@@ -74,7 +74,7 @@ public abstract class HarnessView extends LocalisableView {
 	public String getCssRelativeFileNameUrl() {
 		return cssRelativeFileNameUrl;
 	}
-	
+
 	private String bizModuleParameter;
 
 	/**
@@ -114,7 +114,7 @@ public abstract class HarnessView extends LocalisableView {
 	public void setBizDocumentParameter(String bizDocumentParameter) {
 		this.bizDocumentParameter = OWASP.sanitise(Sanitisation.text, Util.processStringValue(bizDocumentParameter));
 	}
-	
+
 	private String queryNameParameter;
 
 	/**
@@ -197,7 +197,7 @@ public abstract class HarnessView extends LocalisableView {
 		result.append("<!-- SKYVE FRAMEWORK version is ").append(UtilImpl.SKYVE_VERSION).append(" -->");
 		return result.toString();
 	}
-	
+
 	private String apiScript;
 
 	/**
@@ -208,7 +208,7 @@ public abstract class HarnessView extends LocalisableView {
 	public String getApiScript() {
 		return apiScript;
 	}
-	
+
 	/**
 	 * Returns the computed base URL for the current request context.
 	 *
@@ -285,14 +285,14 @@ public abstract class HarnessView extends LocalisableView {
 		if (user == null) {
 			return;
 		}
-	
+		
 		userContactImageUrl = user.getContactImageUrl(64, 64);
 		userContactInitials = OWASP.escapeHtml(user.getContactAvatarInitials());
 		userContactName = OWASP.escapeHtml(user.getContactName());
 		userName = OWASP.escapeHtml(user.getName());
-		
+
 		Customer customer = user.getCustomer();
-		
+
 		StringBuilder sb = new StringBuilder(64);
 		String logoRelativeFileName = customer.getUiResources().getLogoRelativeFileName();
 		logoRelativeFileNameUrl = "resources?_n=" + logoRelativeFileName;
@@ -331,9 +331,9 @@ public abstract class HarnessView extends LocalisableView {
 				homeModule = customer.getModule(bizModuleParameter);
 			}
 			bizDocumentParameter = homeModule.getHomeDocumentName();
-			
+
 			viewType = homeModule.getHomeRef();
-			
+
 			if (ViewType.edit.equals(viewType)) {
 				webActionParameter = WebAction.e;
 
@@ -363,8 +363,8 @@ public abstract class HarnessView extends LocalisableView {
 				if (bizDocumentParameter != null) {
 					d = m.getDocument(customer, bizDocumentParameter);
 				}
-				if ((queryNameParameter != null) && 
-						(! queryNameParameter.equals(bizDocumentParameter)) && 
+				if ((queryNameParameter != null) &&
+						(! queryNameParameter.equals(bizDocumentParameter)) &&
 						(m.getMetaDataQuery(queryNameParameter) == null)) {
 					if (d == null) {
 						if (m.getDocument(customer, queryNameParameter) == null) {
@@ -382,7 +382,7 @@ public abstract class HarnessView extends LocalisableView {
 		catch (Exception e) {
 			throw new FacesException("Malformed URL", e);
 		}
-		
+
 		String cssRelativeFileName = customer.getHtmlResources().getCssRelativeFileName();
 		if (cssRelativeFileName != null) {
 			sb.setLength(0);
@@ -394,7 +394,7 @@ public abstract class HarnessView extends LocalisableView {
 			sb.append("skyve/css/basic-min.css?v=").append(UtilImpl.WEB_RESOURCE_FILE_VERSION);
 			cssRelativeFileNameUrl = sb.toString();
 		}
-		
+
 		sb.setLength(0);
 		sb.append("var u=SKYVE.Util;u.setTouchCookie();u.customer='").append(customer.getName()).append("';");
 		sb.append("u.v='").append(UtilImpl.WEB_RESOURCE_FILE_VERSION).append("';");
@@ -424,7 +424,7 @@ public abstract class HarnessView extends LocalisableView {
 
 		apiScript = sb.toString();
 	}
-	
+
 	/**
 	 * Returns the current session user, if present.
 	 *
@@ -435,7 +435,7 @@ public abstract class HarnessView extends LocalisableView {
 		ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
 		return (User) ec.getSessionMap().get(WebContext.USER_SESSION_ATTRIBUTE_NAME);
 	}
-	
+
 	/**
 	 * Asserts the supplied customer/user identity into the current web session.
 	 *
@@ -466,7 +466,7 @@ public abstract class HarnessView extends LocalisableView {
 			persistence.setUser(user);
 		}
 	}
-	
+
 	/**
 	 * Returns whether the current user can perform text search operations.
 	 *
@@ -476,7 +476,7 @@ public abstract class HarnessView extends LocalisableView {
 		User u = getUser();
 		return ((u != null) && (u.canTextSearch()));
 	}
-	
+
 	/**
 	 * Returns whether the current user can switch UX/UI mode.
 	 *
@@ -486,9 +486,12 @@ public abstract class HarnessView extends LocalisableView {
 		User u = getUser();
 		return ((u != null) && (u.canSwitchMode()));
 	}
-	
+
 	/**
-	 * Sets the UX/UI preference in the session.
+	 * Sets the UX/UI preference used when the next request is resolved.
+	 *
+	 * <p>This authorised mode switch changes only the session preference. It does not mutate
+	 * the current request selection; callers reload or navigate to start a newly resolved request.
 	 *
 	 * @param uxui the UX/UI name
 	 */
@@ -497,13 +500,13 @@ public abstract class HarnessView extends LocalisableView {
 			User u = getUser();
 			throw new SecurityException("switch modes", (u == null) ? "anonymous" : u.getName());
 		}
-		
+
 		ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
 		if (uxui == null) {
-			ec.getSessionMap().remove(AbstractWebContext.UXUI);
+			ec.getSessionMap().remove(AbstractWebContext.UXUI_SESSION_ATTRIBUTE_NAME);
 		}
 		else {
-			ec.getSessionMap().put(AbstractWebContext.UXUI, uxui);
+			ec.getSessionMap().put(AbstractWebContext.UXUI_SESSION_ATTRIBUTE_NAME, uxui);
 		}
 	}
 }

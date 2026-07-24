@@ -7,16 +7,15 @@ import java.util.Map;
 
 import org.skyve.CORE;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.impl.web.RequestUxUiSelection;
+import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.faces.FacesAction;
-import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.pipeline.FacesViewRenderer;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.component.ComponentRenderer;
 import org.skyve.impl.web.faces.pipeline.component.SkyveComponentBuilderChain;
 import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilder;
 import org.skyve.impl.web.faces.pipeline.layout.ResponsiveLayoutBuilder;
-import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -29,15 +28,18 @@ import org.skyve.web.UserAgentType;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.faces.component.FacesComponent;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.html.HtmlPanelGroup;
 import jakarta.faces.context.FacesContext;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Models a view interaction and binds it to the active Skyve web context.
  */
-@FacesComponent(View.COMPONENT_TYPE) 
+@FacesComponent(View.COMPONENT_TYPE)
 public class View extends HtmlPanelGroup {
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(View.class);
     private static final Logger FACES_LOGGER = Category.FACES.logger();
@@ -56,7 +58,7 @@ public class View extends HtmlPanelGroup {
     @SuppressWarnings("java:S3776") // Complexity OK
     public void encodeBegin(FacesContext context) throws IOException {
 		Map<String, Object> attributes = getAttributes();
-   	
+
 		if (Boolean.TRUE.toString().equals(attributes.get("dynamic"))) {
 			getChildren().clear();
 		}
@@ -78,7 +80,7 @@ public class View extends HtmlPanelGroup {
 	    		}
 	    		else {
 	    			Class<?> type = Thread.currentThread().getContextClassLoader().loadClass(classString);
-	    			tempComponentBuilder = (ComponentBuilder) type.getDeclaredConstructor().newInstance();	    			
+	    			tempComponentBuilder = (ComponentBuilder) type.getDeclaredConstructor().newInstance();
 	    		}
 	    	}
 	    	catch (Exception e) {
@@ -100,34 +102,26 @@ public class View extends HtmlPanelGroup {
 	    	}
 	    	final ComponentBuilder componentBuilder = tempComponentBuilder;
 	    	final LayoutBuilder layoutBuilder = tempLayoutBuilder;
-	    	
+
 	    	if (UtilImpl.FACES_TRACE) {
 	    	    FACES_LOGGER.info("View - GENERATE moduleName={} : documentName={} : managedBeanName={} : widgetId={} : process={} : update={} : managedBeanName={} : componentBuilderClass={} : layoutBuilderClass={}",
-			   										moduleName, 
-			   										documentName, 
-			   										managedBeanName, 
-			   										widgetId, 
-			   									 	process, 
-			   										update, 
-			   										managedBeanName, 
-			   										componentBuilder.getClass().getName(),
-			   										layoutBuilder.getClass().getName());
+													moduleName,
+													documentName,
+													managedBeanName,
+													widgetId,
+													process,
+													update,
+													managedBeanName,
+													componentBuilder.getClass().getName(),
+													layoutBuilder.getClass().getName());
 	   		}
 
 	    	FacesContext fc = FacesContext.getCurrentInstance();
-	    	Map<String, Object> requestMap = fc.getExternalContext().getRequestMap();
-	    	UxUi uxui = (UxUi) requestMap.get(AbstractWebContext.UXUI);
-	    	UserAgentType userAgentType = (UserAgentType) requestMap.get(AbstractWebContext.USER_AGENT_TYPE_KEY);
-	    	if ((uxui == null) || (userAgentType == null)) {
-	    		FacesView fv = (FacesView) FacesUtil.getNamed(managedBeanName);
-	    		if (uxui == null) {
-	    			uxui = fv.getUxUi();
-	    		}
-	    		if (userAgentType == null) {
-	    			userAgentType = fv.getUserAgentType();
-	    		}
-	    	}
-	    	
+			HttpServletRequest request = (HttpServletRequest) fc.getExternalContext().getRequest();
+			RequestUxUiSelection selection = UserAgent.getSelection(request);
+			UxUi uxui = selection.getUxUi();
+			UserAgentType userAgentType = selection.getUserAgentType();
+
 	    	final String uxuiName = uxui.getName();
 	    	final UserAgentType finalUAT = userAgentType;
 	    	new FacesAction<Void>() {
@@ -163,11 +157,11 @@ public class View extends HtmlPanelGroup {
 						}
 					}
 					View.this.getChildren().addAll(views);
-					
+
 	                return null;
 				}
 			}.execute();
-			
+
 			if ((UtilImpl.FACES_TRACE) && (! context.isPostback())) {
 				FACES_LOGGER.info("{}", new ComponentRenderer(this));
 			}
@@ -175,86 +169,84 @@ public class View extends HtmlPanelGroup {
 
 		super.encodeBegin(context);
     }
-    
+
 	/**
 	 * Generates Faces view components for edit/create variants of the requested document view.
-		 *
-		 * @param moduleName the module name containing the document
-		 * @param documentName the document name whose views are generated
-		 * @param widgetId the optional widget identifier used to wire the generated faces view
-		 * @param managedBeanName the managed bean name that owns the generated view
-		 * @param uxui the UX/UI profile name
-		 * @param userAgentType the current user-agent type
-		 * @param process the PrimeFaces process expression
-		 * @param update the PrimeFaces update expression
-		 * @param componentBuilder the component builder used to render the view
-		 * @param layoutBuilder the layout builder used to render the view
-		 * @return the generated faces view components, including an optional sidebar
+	 *
+	 * @param moduleName the module name containing the document
+	 * @param documentName the document name whose views are generated
+	 * @param widgetId the optional widget identifier used to wire the generated faces view
+	 * @param managedBeanName the managed bean name that owns the generated view
+	 * @param uxui the UX/UI profile name
+	 * @param userAgentType the current user-agent type
+	 * @param process the PrimeFaces process expression
+	 * @param update the PrimeFaces update expression
+	 * @param componentBuilder the component builder used to render the view
+	 * @param layoutBuilder the layout builder used to render the view
+	 * @return the generated faces view components, including an optional sidebar
 	 */
-    @SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-    public static List<UIComponent> generate(String moduleName,
-				    							String documentName,
-				    							String widgetId,
-				    							String managedBeanName,
-				    							String uxui,
-				    							UserAgentType userAgentType,
-				    							String process,
-				    							String update,
-				    							ComponentBuilder componentBuilder,
-				    							LayoutBuilder layoutBuilder) {
-    	List<UIComponent> result = new ArrayList<>(2);
-    	
-    	User user = CORE.getUser();
-    	Customer customer = user.getCustomer();
-        Module module = customer.getModule(moduleName);
+	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
+	public static @Nonnull List<UIComponent> generate(@Nonnull String moduleName,
+														@Nonnull String documentName,
+														@Nullable String widgetId,
+														@Nonnull String managedBeanName,
+														@Nonnull String uxui,
+														@Nonnull UserAgentType userAgentType,
+														@Nullable String process,
+														@Nullable String update,
+														@Nonnull ComponentBuilder componentBuilder,
+														@Nonnull LayoutBuilder layoutBuilder) {
+		List<UIComponent> result = new ArrayList<>(2);
+
+		User user = CORE.getUser();
+		Customer customer = user.getCustomer();
+		Module module = customer.getModule(moduleName);
 		Document document = module.getDocument(customer, documentName);
 
-        componentBuilder.setManagedBeanName(managedBeanName);
-    	componentBuilder.setProcess(process);
-    	componentBuilder.setUpdate(update);
-    	componentBuilder.setUserAgentType(userAgentType);
-    	layoutBuilder.setManagedBeanName(managedBeanName);
-    	layoutBuilder.setProcess(process);
-    	layoutBuilder.setUpdate(update);
-    	layoutBuilder.setUserAgentType(userAgentType);
+		componentBuilder.setManagedBeanName(managedBeanName);
+		componentBuilder.setProcess(process);
+		componentBuilder.setUpdate(update);
+		componentBuilder.setUserAgentType(userAgentType);
+		layoutBuilder.setManagedBeanName(managedBeanName);
+		layoutBuilder.setProcess(process);
+		layoutBuilder.setUpdate(update);
+		layoutBuilder.setUserAgentType(userAgentType);
 
-    	FacesViewRenderer fvr = null;
-        org.skyve.metadata.view.View view = document.getView(uxui, customer, ViewType.edit.toString());
-		if (view != null) {
-			fvr = new FacesViewRenderer(user,
-										module, 
+		FacesViewRenderer fvr = null;
+		org.skyve.metadata.view.View view = document.getView(uxui, customer, ViewType.edit.toString());
+		fvr = new FacesViewRenderer(user,
+										module,
 										document,
 										view,
 										uxui,
 										widgetId,
 										componentBuilder,
 										layoutBuilder);
-			fvr.visit();
-			result.add(fvr.getFacesView());
-			UIComponent sidebar = fvr.getSidebar();
-			if (sidebar != null) {
-				result.add(sidebar);
-			}
-        }
+		fvr.visit();
+		result.add(fvr.getFacesView());
+		UIComponent sidebar = fvr.getSidebar();
+		if (sidebar != null) {
+			result.add(sidebar);
+		}
 		// Get the create view and add (so long as we didn't get the edit view back)
-        view = document.getView(uxui, customer, ViewType.create.toString());
-		if ((view != null) && ViewType.create.toString().equals(view.getName())) {
-        	fvr = new FacesViewRenderer(user,
-                                          module, 
-                                          document,
-                                          view,
-                                          uxui,
-                                          widgetId,
-                                          componentBuilder,
-                                          layoutBuilder);
+		view = document.getView(uxui, customer, ViewType.create.toString());
+		if (ViewType.create.toString().equals(view.getName())) {
+			fvr = new FacesViewRenderer(user,
+					module,
+					document,
+					view,
+					uxui,
+					widgetId,
+					componentBuilder,
+					layoutBuilder);
 			fvr.visit();
 			result.add(fvr.getFacesView());
-			UIComponent sidebar = fvr.getSidebar();
+			sidebar = fvr.getSidebar();
 			if (sidebar != null) {
 				result.add(sidebar);
 			}
-        }
-        
-        return result;
-    }
+		}
+
+		return result;
+	}
 }

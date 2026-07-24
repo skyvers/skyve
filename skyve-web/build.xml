@@ -96,6 +96,26 @@
 		<exec executable="cmd" osfamily="windows" failonerror="true">
 			<arg value="/c"/><arg value="npx.cmd"/>
 			<arg value="--yes"/><arg value="lightningcss-cli@${lightningcss.version}"/><arg value="--minify"/>
+			<arg value="--output-file"/><arg value="src/main/resources/META-INF/resources/skyve/css/device-min.css"/>
+			<arg value="src/css/device.css"/>
+		</exec>
+		<exec executable="/bin/sh" osfamily="unix" failonerror="true">
+			<arg value="-lc"/>
+			<arg value="npx --yes lightningcss-cli@${lightningcss.version} --minify --output-file src/main/resources/META-INF/resources/skyve/css/device-min.css src/css/device.css"/>
+		</exec>
+		<exec executable="cmd" osfamily="windows" failonerror="true">
+			<arg value="/c"/><arg value="npx.cmd"/>
+			<arg value="--yes"/><arg value="lightningcss-cli@${lightningcss.version}"/><arg value="--minify"/>
+			<arg value="--output-file"/><arg value="src/main/resources/META-INF/resources/skyve/css/image-markup-min.css"/>
+			<arg value="src/css/image-markup.css"/>
+		</exec>
+		<exec executable="/bin/sh" osfamily="unix" failonerror="true">
+			<arg value="-lc"/>
+			<arg value="npx --yes lightningcss-cli@${lightningcss.version} --minify --output-file src/main/resources/META-INF/resources/skyve/css/image-markup-min.css src/css/image-markup.css"/>
+		</exec>
+		<exec executable="cmd" osfamily="windows" failonerror="true">
+			<arg value="/c"/><arg value="npx.cmd"/>
+			<arg value="--yes"/><arg value="lightningcss-cli@${lightningcss.version}"/><arg value="--minify"/>
 			<arg value="--output-file"/><arg value="src/main/resources/META-INF/resources/skyve/editorial/assets/css/main-min.css"/>
 			<arg value="src/css/editorial/main.css"/>
 		</exec>
@@ -152,6 +172,24 @@
 	        <arg value="--source_map_include_content"/>
 	    </java>
 		 <echo file="../skyve-web/src/main/resources/META-INF/resources/skyve/skyve-login-min.js" append="true">//# sourceMappingURL=skyve-login-min.js.map</echo>
+
+	    <!-- Minify device preview JavaScript -->
+	    <java jar="${closure.compiler.jar}" fork="true">
+	        <arg value="--js=src/js/prime/device.js"/>
+	        <arg value="--js_output_file=src/main/resources/META-INF/resources/skyve/prime/device-min.js"/>
+	        <arg value="--create_source_map=src/main/resources/META-INF/resources/skyve/prime/device-min.js.map"/>
+	        <arg value="--source_map_include_content"/>
+	    </java>
+		<echo file="src/main/resources/META-INF/resources/skyve/prime/device-min.js" append="true">//# sourceMappingURL=device-min.js.map</echo>
+
+	    <!-- Minify image markup JavaScript -->
+	    <java jar="${closure.compiler.jar}" fork="true">
+	        <arg value="--js=src/js/prime/image-markup.js"/>
+	        <arg value="--js_output_file=src/main/resources/META-INF/resources/skyve/prime/image-markup-min.js"/>
+	        <arg value="--create_source_map=src/main/resources/META-INF/resources/skyve/prime/image-markup-min.js.map"/>
+	        <arg value="--source_map_include_content"/>
+	    </java>
+		<echo file="src/main/resources/META-INF/resources/skyve/prime/image-markup-min.js" append="true">//# sourceMappingURL=image-markup-min.js.map</echo>
 
 	    <!-- Minify GEO SmartClient JavaScript -->
 	    <java jar="${closure.compiler.jar}" fork="true">

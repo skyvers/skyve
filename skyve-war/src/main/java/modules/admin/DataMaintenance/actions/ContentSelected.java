@@ -8,6 +8,8 @@ import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import modules.admin.domain.DataMaintenance;
 
 /**
@@ -16,13 +18,15 @@ import modules.admin.domain.DataMaintenance;
 public class ContentSelected implements ServerSideAction<DataMaintenance> {
 	/**
 	 * Performs the execute operation.
+	 *
 	 * @param bean the bean value
 	 * @param webContext the webContext value
 	 * @return the operation result
 	 * @throws Exception if the operation fails
 	 */
 	@Override
-	public ServerSideActionResult<DataMaintenance> execute(DataMaintenance bean, WebContext webContext)
+	public @Nonnull ServerSideActionResult<DataMaintenance> execute(@Nonnull DataMaintenance bean,
+																		@Nullable WebContext webContext)
 	throws Exception {
 		bean.setRefreshContent(Boolean.FALSE);
 
@@ -49,7 +53,7 @@ public class ContentSelected implements ServerSideAction<DataMaintenance> {
 				}
 			}
 		}
-		
+
 		return new ServerSideActionResult<>(bean);
 	}
 }

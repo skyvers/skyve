@@ -5,28 +5,22 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.mock;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
 import org.junit.After;
 import org.junit.Test;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 @SuppressWarnings("static-method")
 public class WebContainerTest {
-
 	@After
 	public void tearDown() {
 		WebContainer.clear();
 	}
 
 	@Test
-        public void defaultConstructorCanBeInstantiated() {
-                assertNotNull(new WebContainer());
-        }
-
-        @Test
-        public void getHttpServletRequestResponseReturnsNullWhenNotSet() {
-                assertNull(WebContainer.getHttpServletRequestResponse());
+	public void getHttpServletRequestResponseReturnsNullWhenNotSet() {
+		assertNull(WebContainer.getHttpServletRequestResponse());
 	}
 
 	@Test

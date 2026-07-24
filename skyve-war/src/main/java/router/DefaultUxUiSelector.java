@@ -1,10 +1,10 @@
 package router;
 
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.router.UxUiSelector;
 import org.skyve.metadata.user.User;
@@ -13,6 +13,7 @@ import org.skyve.web.UserAgentType;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import modules.admin.domain.Startup;
@@ -21,21 +22,36 @@ import modules.admin.domain.Startup;
  * Selects the effective UX/UI profile for incoming web requests.
  */
 public class DefaultUxUiSelector implements UxUiSelector {
+	private static final long serialVersionUID = -1248035215927799615L;
 
-    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(DefaultUxUiSelector.class);
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(DefaultUxUiSelector.class);
 
 	/**
 	 * Session key that records whether the startup wizard has been dismissed.
 	 */
 	public static final String DISMISS_STARTUP = "DISMISS_STARTUP";
 
-	private static final Map<String, UxUi> uxuis = new TreeMap<>();
-	static {
-		uxuis.put(UxUis.PHONE.getName(), UxUis.PHONE);
-		uxuis.put(UxUis.TABLET.getName(), UxUis.TABLET);
-		uxuis.put(UxUis.DESKTOP.getName(), UxUis.DESKTOP);
-		uxuis.put(UxUis.EXTERNAL.getName(), UxUis.EXTERNAL);
-		uxuis.put(UxUis.STARTUP.getName(), UxUis.STARTUP);
+	private static final Map<String, UxUi> UXUIS = Map.of(
+			UxUis.PHONE.getName(), UxUis.PHONE,
+			UxUis.TABLET.getName(), UxUis.TABLET,
+			UxUis.DESKTOP.getName(), UxUis.DESKTOP,
+			UxUis.EXTERNAL.getName(), UxUis.EXTERNAL,
+			UxUis.STARTUP.getName(), UxUis.STARTUP);
+
+	/**
+	 * Resolves a router-owned UX/UI name to the configured reference object.
+	 *
+	 * @param name trusted router metadata name; must not be {@code null}
+	 * @return the exact configured UX/UI object; never {@code null}
+	 * @throws MetaDataException if the configured registry has no such name
+	 */
+	@Override
+	public @Nonnull UxUi resolve(@Nonnull String name) {
+		UxUi result = UXUIS.get(name);
+		if (result == null) {
+			throw new MetaDataException("Unknown configured UX/UI name " + name + '.');
+		}
+		return result;
 	}
 
 	/**
@@ -66,9 +82,9 @@ public class DefaultUxUiSelector implements UxUiSelector {
 			}
 		}
 
-		String uxuiName = (session != null) ? (String) session.getAttribute(AbstractWebContext.UXUI) : null;
+		String uxuiName = (session != null) ? (String) session.getAttribute(AbstractWebContext.UXUI_SESSION_ATTRIBUTE_NAME) : null;
 		if (uxuiName != null) {
-			UxUi uxui = uxuis.get(uxuiName);
+			UxUi uxui = UXUIS.get(uxuiName);
 			if (uxui != null) {
 				return uxui;
 			}
@@ -86,7 +102,7 @@ public class DefaultUxUiSelector implements UxUiSelector {
 				return UxUis.EXTERNAL;
 		}
 	}
-	
+
 	/**
 	 * Selects the emulated UX/UI profile for preview and testing scenarios.
 	 *

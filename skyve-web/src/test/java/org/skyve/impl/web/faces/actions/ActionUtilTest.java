@@ -25,7 +25,8 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.User;
 
-@SuppressWarnings("static-method")
+
+@SuppressWarnings({ "static-method", "java:S1192" }) // Repeated values are deliberate navigation fixtures.
 class ActionUtilTest {
 	@AfterEach
 	void tearDown() {
@@ -184,7 +185,7 @@ class ActionUtilTest {
 		persistence.setForThread();
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "java:S3011" }) // Reflection clears the private persistence thread-local after each test.
 	private static void clearThreadPersistence() {
 		try {
 			Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");

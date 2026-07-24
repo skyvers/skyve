@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <xs:schema version="1.0" targetNamespace="http://www.skyve.org/xml/common" xmlns:tns="http://www.skyve.org/xml/common" xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
+  <xs:element name="userAgentType" type="tns:userAgentType"/>
+
   <xs:complexType name="namedMetaData" abstract="true">
     <xs:sequence/>
     <xs:attribute name="name" type="xs:string"/>
@@ -84,6 +86,26 @@
     <xs:restriction base="xs:string">
       <xs:enumeration value="side"/>
       <xs:enumeration value="top"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="viewType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="list"/>
+      <xs:enumeration value="create"/>
+      <xs:enumeration value="edit"/>
+      <xs:enumeration value="pick"/>
+      <xs:enumeration value="params"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="sanitisation">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="none"/>
+      <xs:enumeration value="relaxed"/>
+      <xs:enumeration value="simple"/>
+      <xs:enumeration value="basic"/>
+      <xs:enumeration value="text"/>
     </xs:restriction>
   </xs:simpleType>
 
@@ -227,6 +249,14 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <xs:simpleType name="horizontalAlignment">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="left"/>
+      <xs:enumeration value="centre"/>
+      <xs:enumeration value="right"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:simpleType name="reportFormat">
     <xs:restriction base="xs:string">
       <xs:enumeration value="csv"/>
@@ -251,6 +281,15 @@
       <xs:enumeration value="t"/>
       <xs:enumeration value="m"/>
       <xs:enumeration value="e"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="userAgentType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="phone"/>
+      <xs:enumeration value="tablet"/>
+      <xs:enumeration value="desktop"/>
+      <xs:enumeration value="other"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>

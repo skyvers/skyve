@@ -145,7 +145,7 @@ public class SmartClientTagServlet extends HttpServlet {
 						AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request);
 						Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
 
-						UxUi uxui = UserAgent.getUxUi(request);
+						UxUi uxui = UserAgent.getSelection(request).getUxUi();
 						try (AutoClosingIterable<Bean> iterable = iterate(tagId, 
 																			dataSourceName,
 																			criteria,
@@ -164,7 +164,7 @@ public class SmartClientTagServlet extends HttpServlet {
 						AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request);
 						Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
 
-						UxUi uxui = UserAgent.getUxUi(request);
+						UxUi uxui = UserAgent.getSelection(request).getUxUi();
 						try (AutoClosingIterable<Bean> iterable = iterate(tagId, 
 																			dataSourceName,
 																			criteria,

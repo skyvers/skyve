@@ -14,6 +14,7 @@ import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.view.widget.bound.input.CompleteType;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.customer.Customer;
@@ -30,6 +31,9 @@ import org.skyve.util.logging.Category;
 import org.skyve.util.monitoring.Monitoring;
 import org.skyve.util.monitoring.RequestKey;
 import org.slf4j.Logger;
+
+import jakarta.faces.context.FacesContext;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Executes a Faces callback action within the current Skyve web context.
@@ -119,7 +123,9 @@ public class CompleteAction extends FacesAction<List<String>> {
 		List<String> result = Collections.emptyList();
 
 		if (complete == CompleteType.previous) {
-			EXT.checkAccess(user, UserAccess.previousComplete(formModuleName, formDocumentName, binding), facesView.getUxUi().getName());
+			HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
+			String uxuiName = UserAgent.getSelection(request).getUxUi().getName();
+			EXT.checkAccess(user, UserAccess.previousComplete(formModuleName, formDocumentName, binding), uxuiName);
 	    	if (! user.canReadDocument(document)) {
 				throw new SecurityException("read this data", user.getName());
 			}

@@ -3,6 +3,10 @@ package org.skyve.impl.util;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,12 +16,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.function.Executable;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.io.TempDir;
 import org.skyve.domain.types.converters.Format.TextCase;
 import org.skyve.impl.metadata.model.document.AssociationImpl;
 import org.skyve.impl.metadata.model.document.CollectionImpl;
@@ -39,6 +39,8 @@ import org.skyve.impl.metadata.repository.document.DocumentMetaData;
 import org.skyve.impl.metadata.repository.document.ParentDocument;
 import org.skyve.impl.metadata.repository.module.ModuleDocumentMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleMetaData;
+import org.skyve.impl.metadata.repository.router.Direct;
+import org.skyve.impl.metadata.repository.router.Direct.DirectMatch;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.repository.view.ViewMetaData;
 import org.skyve.metadata.ConverterName;
@@ -50,6 +52,7 @@ import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.fluent.FluentListGrid;
 import org.skyve.metadata.view.fluent.FluentView;
+import org.skyve.web.UserAgentType;
 
 /**
  * This test depends on the schemas being up to date from skyve-war/src/main/java/schemas into skyve-core/src/test/resources/schemas.
@@ -787,6 +790,39 @@ class XMLMetaDataTest {
 		Router roundTripped = XMLMetaData.unmarshalRouterString(xml);
 		assertThat(roundTripped, is(notNullValue()));
 		assertThat(roundTripped.getUxuiSelectorClassName(), is("org.skyve.impl.metadata.repository.router.TaggingUxUiSelector"));
+	}
+
+	@Test
+	void routerDirectRoundTripsEveryAttributeThroughSchema() {
+		Router router = new Router();
+		router.setUxuiSelectorClassName("router.Selector");
+		Direct direct = new Direct();
+		direct.setPath("/external/");
+		direct.setUxui("external");
+		direct.setMatch(DirectMatch.prefix);
+		direct.setUserAgentType(UserAgentType.phone);
+		router.getDirects().add(direct);
+
+		Router roundTripped = XMLMetaData.unmarshalRouterString(XMLMetaData.marshalRouter(router));
+		Direct result = roundTripped.getDirects().get(0);
+
+		assertThat(result.getPath(), is("/external/"));
+		assertThat(result.getUxui(), is("external"));
+		assertThat(result.getMatch(), is(DirectMatch.prefix));
+		assertThat(result.getUserAgentType(), is(UserAgentType.phone));
+	}
+
+	@Test
+	void routerSchemaRejectsInvalidDirectEnumValues() {
+		String prefix = "<router xmlns=\"http://www.skyve.org/xml/router\">"
+				+ "<uxui name=\"desktop\"><route outcome=\"/home.xhtml\"/></uxui>";
+		String suffix = "</router>";
+
+		assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalRouterString(prefix
+				+ "<direct path=\"/x\" uxui=\"desktop\" match=\"contains\"/>" + suffix));
+		assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalRouterString(prefix
+				+ "<direct path=\"/x\" uxui=\"desktop\" userAgentType=\"watch\"/>" + suffix)
+				.convert("invalid router"));
 	}
 
 	@Test

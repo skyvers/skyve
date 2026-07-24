@@ -40,6 +40,10 @@ public abstract class AbstractWebContext implements WebContext {
 	public static final String QUERY_NAME = "_q";
 	public static final String ACTION_NAME = "_a";
 	public static final String SOURCE_NAME = "_s";
+	/** Names the one-time request parameter used by {@code device.jsp} to change device preview mode. */
+	public static final String EMULATED_USER_AGENT_TYPE_PARAMETER = "_ua";
+	/** Stores the active device-preview type in the HTTP session. */
+	public static final String EMULATED_USER_AGENT_TYPE_SESSION_ATTRIBUTE_NAME = "skyveEmulatedUserAgentType";
 	public static final String CUSTOMER_COOKIE_NAME = "customer";
 	public static final String REPORT_NAME = "_n";
 	public static final String REPORT_FORMAT = "_f";
@@ -51,21 +55,8 @@ public abstract class AbstractWebContext implements WebContext {
 	public static final String TOP_FORM_LABELS_NAME = "_t";
 	public static final String NO_MARKUP = "_nm";
 
-	/**
-	 *  Used to place the uxui (renderer) at play during the request as a request attribute
-	 *  or in the session when switched in the UI.
-	 */
-	public static final String UXUI = "skyveUxUi";
-
-	/**
-	 * Used to place the user agent type of the requesting device as a request attribute.
-	 */
-	public static String USER_AGENT_TYPE_KEY = "skyveUserAgentType";
-
-	/**
-	 * Used to indicate whether the user agent type was emulated or detected.
-	 */
-	public static String EMULATED_USER_AGENT_TYPE_KEY = "skyveEnumlatedUserAgentType";
+	/** Records the optional UX/UI mode preference applied to the next request. */
+	public static final String UXUI_SESSION_ATTRIBUTE_NAME = "skyveUxUiPreference";
 
 	// The Session ID of the session that "owns" this conversation - for security.
 	// This is set in the ViewWebContext constructor where we have access to the web session classes.

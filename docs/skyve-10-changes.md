@@ -3,4 +3,6 @@
 These notes collect release-ready framework changes introduced for Skyve 10.
 
 - [Managed Content Widget](content-widget.md)
+- [Reusable Deployed Integration Testing](deployed-integration-testing.md)
+- [Theme Resolution](theme-resolution.md)
 - [View Boilerplate Escaping](view-boilerplate-escaping.md)

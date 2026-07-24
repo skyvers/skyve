@@ -26,6 +26,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -90,6 +91,42 @@ class WebUtilTest {
 		UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY = savedCloudflareTurnstileSecretKey;
 		RECAPTCHA_CONNECTIONS.reset();
 		clearPersistenceThreadLocal();
+	}
+
+	// ===== appendQueryParameter =====
+
+	@SuppressWarnings("static-method")
+	@Test
+	void appendQueryParameterEncodesEveryValue() {
+		StringBuilder result = new StringBuilder("/home");
+
+		WebUtil.appendQueryParameter(result, "search term", new String[] {"one & two", null});
+
+		assertEquals("/home?search+term=one+%26+two&search+term=", result.toString());
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void appendQueryParameterIgnoresNullValuesArray() {
+		StringBuilder result = new StringBuilder("/home");
+
+		WebUtil.appendQueryParameter(result, "search", null);
+
+		assertEquals("/home", result.toString());
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void appendRequestParametersEncodesValuesAndOmitsExcludedParameter() {
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		when(request.getParameterNames()).thenReturn(Collections.enumeration(List.of("search term", "c")));
+		when(request.getParameterValues("search term")).thenReturn(new String[] {"one & two", "three"});
+		StringBuilder result = new StringBuilder("/home");
+
+		WebUtil.appendRequestParameters(result, request, "c");
+
+		assertEquals("/home?search+term=one+%26+two&search+term=three", result.toString());
+		verify(request, never()).getParameterValues("c");
 	}
 
 	// ===== generatePasswordResetToken =====

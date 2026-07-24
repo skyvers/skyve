@@ -39,6 +39,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.ContentDisplay;
 import org.skyve.impl.util.ImageUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.DynamicImageServlet;
 import org.skyve.impl.web.content.ContentMediaClassifier;
 import org.skyve.impl.web.content.ContentMediaClassifier.ContentMediaKind;
@@ -80,12 +81,10 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 import org.skyve.util.logging.Category;
-import org.skyve.web.UserAgentType;
 import org.slf4j.Logger;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
-import jakarta.annotation.PostConstruct;
 import jakarta.faces.FacesException;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.component.UIComponent;
@@ -94,6 +93,7 @@ import jakarta.faces.context.FacesContext;
 import jakarta.faces.model.SelectItem;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Models a view interaction and binds it to the active Skyve web context.
@@ -108,14 +108,6 @@ public class FacesView extends HarnessView {
 
 	// NB whatever state is added here needs to be handled by hydrate/dehydrate
 
-	// This is set from a request attribute (the attribute is set in home.jsp)
-	// NB This should be set once on post construct of the bean and it persists during all ajax requests.
-	// NNB hydrate/dehydrate does not clear/set this property
-	private UxUi uxui;
-	// This is set from a request attribute (the attribute is set in home.jsp)
-	// NB This should be set once on post construct of the bean and it persists during all ajax requests.
-	// NNB hydrate/dehydrate does not clear/set this property
-	private UserAgentType userAgentType;
 	// The view binding - where we are zoomed into within the conversation bean.
 	// This could be the same as zoom in binding or it could be deeper.
 	private String viewBinding;
@@ -227,16 +219,6 @@ public class FacesView extends HarnessView {
 	}
 
 	/**
-	 * Initializes request-scoped UX/UI and user-agent attributes after bean construction.
-	 */
-	@PostConstruct
-	protected void postConstruct() {
-		Map<String, Object> attributes = FacesContext.getCurrentInstance().getExternalContext().getRequestMap();
-		this.uxui = (UxUi) attributes.get(AbstractWebContext.UXUI);
-		this.userAgentType = (UserAgentType) attributes.get(AbstractWebContext.USER_AGENT_TYPE_KEY);
-	}
-
-	/**
 	 * Dispatches pre-render processing to either postback or cold-hit handlers.
 	 */
 	public void preRender() {
@@ -286,85 +268,6 @@ public class FacesView extends HarnessView {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Returns the active UX/UI descriptor.
-	 *
-	 * @return the active UX/UI descriptor, or {@code null}
-	 */
- 	public UxUi getUxUi() {
-		return uxui;
-	}
-
-	/**
-	 * Sets the active UX/UI descriptor and mirrors it to request attributes.
-	 *
-	 * @param uxui UX/UI descriptor to set
-	 */
-	public void setUxUi(UxUi uxui) {
-		this.uxui = uxui;
-		// Set the request attribute also
-		// NB Skyve never needs this set as it determines the UX/UI from the request/routing.
-		// Its set here so that FacesView extension classes can force the UX/UI in preRender() when
-		// an XHTML page is hit directly (not through the router)
-		FacesContext.getCurrentInstance().getExternalContext().getRequestMap().put(AbstractWebContext.UXUI, uxui);
-	}
-
-	/**
-	 * Returns the detected user-agent type for this view.
-	 *
-	 * @return the user-agent type, or {@code null}
-	 */
- 	public UserAgentType getUserAgentType() {
-		return userAgentType;
-	}
-
-	/**
-	 * Sets the detected user-agent type and mirrors it to request attributes.
-	 *
-	 * @param userAgentType user-agent type to set
-	 */
-	public void setUserAgentType(UserAgentType userAgentType) {
-		this.userAgentType = userAgentType;
-		// Set the request attribute also
-		// NB Skyve never needs this set as it determines the UserAgent from the request headers and cookies etc.
-		// Its set here so that FacesView extension classes can force the UX/UI in preRender() when
-		// an XHTML page is hit directly (not through the router)
-		FacesContext.getCurrentInstance().getExternalContext().getRequestMap().put(AbstractWebContext.USER_AGENT_TYPE_KEY, userAgentType);
-	}
-
-	/**
-	 * Resolves theme colour from current UX/UI with fallback to supplied default.
-	 *
-	 * @param defaultColour fallback colour to use when no theme colour is configured
-	 * @return resolved theme colour
-	 */
-	public String getThemeColour(String defaultColour) {
-		String result = defaultColour;
-		if (uxui != null) {
-			result = uxui.getPfThemeColour();
-			if (result == null) {
-				result = defaultColour;
-			}
-		}
-		return result;
-	}
-
-	/**
-	 * Resolves PF template name from current UX/UI with fallback to external template.
-	 *
-	 * @return PF template name
-	 */
-	public String getTemplateName() {
-		String result = "external";
-		if (uxui != null) {
-			result = uxui.getPfTemplateName();
-			if (result == null) {
-				result = "external";
-			}
-		}
-		return result;
 	}
 
 	/**
@@ -1039,7 +942,7 @@ public class FacesView extends HarnessView {
 	 * @return resolved content URL
 	 */
 	public String getContentUrl(final String binding, final boolean image) {
- 		return new GetContentURLAction(getCurrentBean().getBean(), binding, image).execute();
+		return new GetContentURLAction(getCurrentBean().getBean(), binding, image).execute();
  	}
 
 	/**
@@ -1181,7 +1084,7 @@ public class FacesView extends HarnessView {
  										Integer initialPixelWidth,
  										Integer initialPixelHeight) {
 		StringBuilder result = new StringBuilder(128);
-		result.append("/dynamic.png?").append(AbstractWebContext.DOCUMENT_NAME).append('=');
+		result.append("./dynamic.png?").append(AbstractWebContext.DOCUMENT_NAME).append('=');
 		result.append(moduleName).append('.').append(documentName);
 		result.append('&').append(DynamicImageServlet.IMAGE_NAME).append('=').append(name);
 		if (pixelWidth != null) {
@@ -1475,6 +1378,8 @@ public class FacesView extends HarnessView {
 				}
 				String bizModule = bean.getBizModule();
 				String bizDocument = bean.getBizDocument();
+				HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
+				UxUi uxui = UserAgent.getSelection(request).getUxUi();
 				EXT.checkAccess(user, UserAccess.content(bizModule, bizDocument, unsanitisedContentBinding), uxui.getName());
 
 				// Check document access

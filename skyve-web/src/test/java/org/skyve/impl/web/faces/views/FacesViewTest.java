@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterEach;
 import org.primefaces.component.datatable.DataTable;
 import org.primefaces.component.panel.Panel;
 import org.primefaces.event.ReorderEvent;
@@ -46,9 +47,7 @@ import org.skyve.domain.ChildBean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.document.Bizlet;
-import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
-import org.skyve.web.UserAgentType;
 import org.skyve.web.WebContext;
 
 import jakarta.faces.FacesException;
@@ -61,10 +60,9 @@ import jakarta.faces.context.PartialViewContext;
 
 /**
  * Tests for FacesView utility methods and state management that do not require a live CDI container.
- * Tests use plain instantiation (bypassing @PostConstruct) to exercise getters, setters,
- * and sanitisation logic.
+ * Tests use plain instantiation to exercise getters, setters, and sanitisation logic.
  */
-@SuppressWarnings({"static-method", "boxing"})
+@SuppressWarnings({ "static-method", "boxing", "java:S1192" }) // Repeated literals are deliberate Faces compatibility fixtures.
 class FacesViewTest {
 	private abstract static class FacesContextBridge extends FacesContext {
 		static void setCurrent(FacesContext context) {
@@ -72,26 +70,9 @@ class FacesViewTest {
 		}
 	}
 
-	// ----- getThemeColour -----
-
-	@Test
-	void getThemeColourWithNullUxUiReturnsDefault() {
-		FacesView view = new FacesView();
-		assertEquals("blue", view.getThemeColour("blue"));
-	}
-
-	@Test
-	void getThemeColourWithNullDefaultAndNullUxUiReturnsNull() {
-		FacesView view = new FacesView();
-		assertNull(view.getThemeColour(null));
-	}
-
-	// ----- getTemplateName -----
-
-	@Test
-	void getTemplateNameWithNullUxUiReturnsExternal() {
-		FacesView view = new FacesView();
-		assertEquals("external", view.getTemplateName());
+	@AfterEach
+	void clearFacesContext() {
+		FacesContextBridge.setCurrent(null);
 	}
 
 	// ----- nextId -----
@@ -341,10 +322,10 @@ class FacesViewTest {
 		FacesContextBridge.setCurrent(facesContext);
 
 		view.setUxUi("tablet");
-		assertEquals("tablet", sessionMap.get(AbstractWebContext.UXUI));
+		assertEquals("tablet", sessionMap.get(AbstractWebContext.UXUI_SESSION_ATTRIBUTE_NAME));
 
 		view.setUxUi((String) null);
-		assertFalse(sessionMap.containsKey(AbstractWebContext.UXUI));
+		assertFalse(sessionMap.containsKey(AbstractWebContext.UXUI_SESSION_ATTRIBUTE_NAME));
 
 		FacesContextBridge.setCurrent(null);
 	}
@@ -359,46 +340,6 @@ class FacesViewTest {
 	void getCssRelativeFileNameUrlIsNullByDefault() {
 		FacesView view = new FacesView();
 		assertNull(view.getCssRelativeFileNameUrl());
-	}
-
-	@Test
-	void getThemeColourUsesUxUiColourWhenPresent() throws Exception {
-		FacesView view = new FacesView();
-		UxUi uxui = UxUi.newPrimeFaces("external", "nova", "arya", "blue");
-		uxui.setPfThemeColour("green");
-		setUxUi(view, uxui);
-
-		assertEquals("green", view.getThemeColour("blue"));
-	}
-
-	@Test
-	void getThemeColourFallsBackToDefaultWhenUxUiColourIsNull() throws Exception {
-		FacesView view = new FacesView();
-		UxUi uxui = UxUi.newPrimeFaces("external", "nova", "arya", "blue");
-		uxui.setPfThemeColour(null);
-		setUxUi(view, uxui);
-
-		assertEquals("orange", view.getThemeColour("orange"));
-	}
-
-	@Test
-	void getTemplateNameUsesUxUiTemplateWhenPresent() throws Exception {
-		FacesView view = new FacesView();
-		UxUi uxui = UxUi.newPrimeFaces("external", "nova", "arya", "blue");
-		uxui.setPfTemplateName("nova");
-		setUxUi(view, uxui);
-
-		assertEquals("nova", view.getTemplateName());
-	}
-
-	@Test
-	void getTemplateNameFallsBackToExternalWhenUxUiTemplateIsNull() throws Exception {
-		FacesView view = new FacesView();
-		UxUi uxui = UxUi.newPrimeFaces("external", "nova", "arya", "blue");
-		uxui.setPfTemplateName(null);
-		setUxUi(view, uxui);
-
-		assertEquals("external", view.getTemplateName());
 	}
 
 	@Test
@@ -654,6 +595,7 @@ class FacesViewTest {
 		assertTrue(url.contains("_h=200"));
 		assertTrue(url.contains("_wz=100"));
 		assertTrue(url.contains("_hz=100"));
+		assertFalse(url.contains("_ua"));
 	}
 
 	@Test
@@ -671,12 +613,6 @@ class FacesViewTest {
 		assertFalse(url.contains("_h=64"));
 	}
 
-	private static void setUxUi(FacesView view, UxUi uxui) throws Exception {
-		Field field = FacesView.class.getDeclaredField("uxui");
-		field.setAccessible(true);
-		field.set(view, uxui);
-	}
-
 	private static ExternalContext setFacesContextWithRequestParameters(java.util.Map<String, String> requestParameters) {
 		FacesContext facesContext = mock(FacesContext.class);
 		ExternalContext externalContext = mock(ExternalContext.class);
@@ -686,12 +622,14 @@ class FacesViewTest {
 		return externalContext;
 	}
 
+	@SuppressWarnings({ "java:S112", "java:S3011" }) // Reflection verifies private compatibility state without a JSF container.
 	private static Object getPrivateField(FacesView view, String fieldName) throws Exception {
 		Field field = FacesView.class.getDeclaredField(fieldName);
 		field.setAccessible(true);
 		return field.get(view);
 	}
 
+	@SuppressWarnings({ "java:S112", "java:S3011" }) // Reflection configures private compatibility state without a JSF container.
 	private static void setPrivateField(FacesView view, String fieldName, Object value) throws Exception {
 		Field field = FacesView.class.getDeclaredField(fieldName);
 		field.setAccessible(true);
@@ -825,14 +763,6 @@ class FacesViewTest {
 		assertNull(view.getSelectedRow());
 	}
 
-	// ----- getUserAgentType / setUserAgentType -----
-
-	@Test
-	void userAgentTypeIsNullByDefault() {
-		FacesView view = new FacesView();
-		assertNull(view.getUserAgentType());
-	}
-
 	// ----- getDualListModels -----
 
 	@Test
@@ -850,27 +780,6 @@ class FacesViewTest {
 		webContext.setKey("key1");
 		view.setWebContext(webContext);
 		assertNull(view.getBean());
-	}
-
-	@Test
-	void postConstructReadsUxUiAndUserAgentFromRequestMap() {
-		FacesView view = new FacesView();
-		Map<String, Object> requestMap = new HashMap<>();
-		UxUi uxui = UxUi.newPrimeFaces("external", "nova", "arya", "blue");
-		requestMap.put(AbstractWebContext.UXUI, uxui);
-		requestMap.put(AbstractWebContext.USER_AGENT_TYPE_KEY, UserAgentType.desktop);
-
-		FacesContext facesContext = mock(FacesContext.class);
-		ExternalContext externalContext = mock(ExternalContext.class);
-		when(facesContext.getExternalContext()).thenReturn(externalContext);
-		when(externalContext.getRequestMap()).thenReturn(requestMap);
-		FacesContextBridge.setCurrent(facesContext);
-
-		view.postConstruct();
-		FacesContextBridge.setCurrent(null);
-
-		assertEquals(uxui, view.getUxUi());
-		assertEquals(UserAgentType.desktop, view.getUserAgentType());
 	}
 
 	@Test
@@ -925,41 +834,6 @@ class FacesViewTest {
 
 		invokeIgnoringThrowable(view::coldHit);
 		assertNotNull(view);
-	}
-
-	@Test
-	void setUxUiMirrorsToRequestMap() {
-		FacesView view = new FacesView();
-		Map<String, Object> requestMap = new HashMap<>();
-
-		FacesContext facesContext = mock(FacesContext.class);
-		ExternalContext externalContext = mock(ExternalContext.class);
-		when(facesContext.getExternalContext()).thenReturn(externalContext);
-		when(externalContext.getRequestMap()).thenReturn(requestMap);
-		FacesContextBridge.setCurrent(facesContext);
-
-		UxUi uxui = UxUi.newPrimeFaces("external", "nova", "arya", "blue");
-		view.setUxUi(uxui);
-		FacesContextBridge.setCurrent(null);
-
-		assertEquals(uxui, requestMap.get(AbstractWebContext.UXUI));
-	}
-
-	@Test
-	void setUserAgentTypeMirrorsToRequestMap() {
-		FacesView view = new FacesView();
-		Map<String, Object> requestMap = new HashMap<>();
-
-		FacesContext facesContext = mock(FacesContext.class);
-		ExternalContext externalContext = mock(ExternalContext.class);
-		when(facesContext.getExternalContext()).thenReturn(externalContext);
-		when(externalContext.getRequestMap()).thenReturn(requestMap);
-		FacesContextBridge.setCurrent(facesContext);
-
-		view.setUserAgentType(UserAgentType.phone);
-		FacesContextBridge.setCurrent(null);
-
-		assertEquals(UserAgentType.phone, requestMap.get(AbstractWebContext.USER_AGENT_TYPE_KEY));
 	}
 
 	@Test
@@ -1210,6 +1084,7 @@ class FacesViewTest {
 	}
 
 	@Test
+	@SuppressWarnings({ "java:S1143", "java:S1163" }) // Cleanup failure must fail this thread-local isolation test.
 	void selectGridRowStringWithBizIdAndBindingExecutesUpdateBranch() {
 		FacesView view = new FacesView();
 		Map<String, Object> values = new HashMap<>();
@@ -2128,20 +2003,21 @@ class FacesViewTest {
 		return facesContext;
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "java:S112", "java:S3011" }) // Reflection installs private persistence thread state.
 	private static void bindPersistenceToThread(AbstractPersistence persistence) throws Exception {
 		Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
 		field.setAccessible(true);
 		((ThreadLocal<AbstractPersistence>) field.get(null)).set(persistence);
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "java:S112", "java:S3011" }) // Reflection removes private persistence thread state.
 	private static void unbindPersistenceFromThread() throws Exception {
 		Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
 		field.setAccessible(true);
 		((ThreadLocal<AbstractPersistence>) field.get(null)).remove();
 	}
 
+	@SuppressWarnings("java:S1181") // Headless coverage intentionally observes any framework linkage failure.
 	private static void invokeIgnoringThrowable(Runnable invocation) {
 		try {
 			invocation.run();

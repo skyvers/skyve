@@ -18,7 +18,7 @@
 			<f:event type="preRenderView" listener="#{skyvePublic.preRender}"/>
 		</f:metadata>
 		<p:importEnum type="org.skyve.web.WebAction" var="WebAction" allSuffix="ALL_ENUM_VALUES" />  
-		<ui:composition template="#{'/WEB-INF/pages/templates/'.concat(skyvePublic.templateName).concat('/view.xhtml')}">
+		<ui:composition template="#{'/WEB-INF/pages/templates/'.concat(_skyveTheme.templateName).concat('/view.xhtml')}">
 			<ui:param name="bean" value="#{skyvePublic}" />
 			<ui:param name="showMenu" value="false" />
 			<ui:param name="resetMenu" value="false" />

@@ -1,11 +1,11 @@
 # Learnings
 
-`docs/ai/learnings.md` is for durable engineering wisdom that should survive refactors and apply across Skyve modules and agent implementations. If a lesson only applies to one document, generator, or package, it belongs closer to that code or in [docs/architecture.md](../architecture.md).
+`docs/ai/learnings.md` is for durable engineering wisdom that should survive refactors and apply across Skyve modules and agent implementations. If a lesson only applies to one document, generator, or package, it belongs closer to that code or in [docs/architecture-design.md](../architecture-design.md).
 
 ## Scope Ladder
 
 - Repo-wide and long-lived: keep it here.
-- Architecture or policy for Skyve as a framework: put it in [docs/architecture.md](../architecture.md).
+- Architecture or policy for Skyve as a framework: put it in [docs/architecture-design.md](../architecture-design.md).
 - Module- or subsystem-specific guidance: keep it with module-local docs.
 - Metadata-file rules: prefer comments or adjacent docs near the metadata source of truth.
 - Symbol-local contract: put it in code docblocks near the class or method. Follow [javadoc-standards.md](javadoc-standards.md) for how to document side effects, complexity, data structure choice, and threading.

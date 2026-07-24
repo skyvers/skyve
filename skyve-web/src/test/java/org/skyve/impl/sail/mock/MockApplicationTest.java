@@ -16,7 +16,7 @@ import jakarta.faces.FacesException;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.behavior.Behavior;
 
-@SuppressWarnings("static-method")
+@SuppressWarnings({ "static-method", "java:S1192", "java:S5960" }) // Repeated values and assertions are test-only.
 class MockApplicationTest {
 	private static String componentType(String className) {
 		try {
@@ -101,7 +101,6 @@ class MockApplicationTest {
 				"org.skyve.impl.web.faces.components.Conversation",
 				"org.skyve.impl.web.faces.components.ListGrid",
 				"org.skyve.impl.web.faces.components.Map",
-				"org.skyve.impl.web.faces.components.SetUxUi",
 				"org.skyve.impl.web.faces.components.View",
 				"jakarta.faces.component.UIForm",
 				"jakarta.faces.component.UIOutput",

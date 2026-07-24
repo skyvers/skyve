@@ -1,6 +1,7 @@
 package org.skyve.metadata.router;
 
 import org.skyve.impl.metadata.repository.router.TaggingUxUiSelector;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.web.UserAgentType;
 
 import jakarta.annotation.Nonnull;
@@ -13,6 +14,8 @@ import jakarta.servlet.http.HttpServletRequest;
  * {@code desktop}) that map to different Faces template directories and view file sets.
  * An application provides a single {@code UxUiSelector} implementation (typically via
  * a customer override) to determine which renderer to use for each request.
+ * Skyve invokes emulation directly when requested. For normal requests it evaluates router
+ * direct metadata before invoking request-dependent selector policy.
  *
  * <p>Two selection modes are supported:
  * <ul>
@@ -36,7 +39,25 @@ public interface UxUiSelector extends TaggingUxUiSelector {
 	 * @return the selected UX/UI descriptor; never {@code null}
 	 */
 	public @Nonnull UxUi select(@Nonnull UserAgentType userAgentType, @Nonnull HttpServletRequest request);
-	
+
+	/**
+	 * Resolves a trusted configured metadata name to its application-owned UX/UI object.
+	 *
+	 * <p>This operation is request-independent and must preserve the exact identity of the
+	 * configured object. Implementations are shared and must therefore make lookup thread-safe.
+	 * The default fails fast so selectors remain source-compatible when their router declares no
+	 * direct declarations.
+	 *
+	 * @param name trusted configured metadata name; must not be {@code null}
+	 * @return the configured application-owned object; never {@code null}
+	 * @throws MetaDataException if the name is unknown or this selector does not support named
+	 *                           resolution
+	 * @since 10.0
+	 */
+	default @Nonnull UxUi resolve(@Nonnull String name) {
+		throw new MetaDataException("UX/UI selector cannot resolve trusted metadata name " + name + '.');
+	}
+
 	/**
 	 * Selects the UX/UI renderer to use when the device type is being emulated (e.g. in
 	 * preview or developer mode).

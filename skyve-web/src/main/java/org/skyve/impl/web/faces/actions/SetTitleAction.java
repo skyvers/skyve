@@ -3,6 +3,7 @@ package org.skyve.impl.web.faces.actions;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.customer.Customer;
@@ -15,6 +16,9 @@ import org.skyve.util.Binder;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
+
+import jakarta.faces.context.FacesContext;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Executes a Faces callback action within the current Skyve web context.
@@ -53,7 +57,8 @@ public class SetTitleAction extends FacesAction<Void> {
 			Bean targetBean = ActionUtil.getTargetBeanForView(facesView);
 	    	Module targetModule = customer.getModule(targetBean.getBizModule());
 			Document targetDocument = targetModule.getDocument(customer, targetBean.getBizDocument());
-			View view = targetDocument.getView(facesView.getUxUi().getName(), 
+			HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
+			View view = targetDocument.getView(UserAgent.getSelection(request).getUxUi().getName(),
 												customer, 
 												targetBean.isCreated() ? 
 													ViewType.edit.toString() : 

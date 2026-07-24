@@ -24,6 +24,7 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.model.document.field.ConvertibleField;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.SortParameterImpl;
+import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
@@ -131,7 +132,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 		Customer c = u.getCustomer();
 		Module m = c.getModule(moduleName);
 		Document d = null;
-		String uxui = view.getUxUi().getName();
+		String uxui = UserAgent.getSelection(EXT.getHttpServletRequest()).getUxUi().getName();
 		MetaDataQueryDefinition query = null;
 		ListModel<Bean> model = null;
 		RequestKey key = null;

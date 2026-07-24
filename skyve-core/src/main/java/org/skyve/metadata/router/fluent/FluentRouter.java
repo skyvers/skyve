@@ -1,10 +1,22 @@
 package org.skyve.metadata.router.fluent;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+import org.skyve.impl.metadata.repository.router.Direct;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.repository.router.UxUiMetadata;
+import org.skyve.util.Util;
+
+import jakarta.annotation.Nonnull;
 
 /**
- * Builds router metadata including UX/UI variants and unsecured URL prefixes.
+ * Builds router metadata including UX/UI variants, ordered {@code direct} declarations, and
+ * unsecured URL prefixes.
+ *
+ * <p>Threading: not thread-safe. Callers must externally synchronise access when a builder is
+ * shared.
  */
 public class FluentRouter {
 	private Router router = null;
@@ -26,15 +38,27 @@ public class FluentRouter {
 	}
 
 	/**
-	 * Copies router metadata into this builder.
+	 * Copies router metadata into this builder while retaining source declaration order.
 	 *
-	 * @param router source router metadata
+	 * <p>Side effects: replaces the selector class name and appends copied UX/UI, direct, and
+	 * unsecured-prefix metadata to the existing backing router. Direct values are copied into
+	 * new declarations; the source declarations are not retained by identity.
+	 *
+	 * @param router source router metadata; must not be {@code null}
 	 * @return this builder
+	 * @throws NullPointerException if {@code router} is {@code null}
 	 */
-	public FluentRouter from(@SuppressWarnings("hiding") Router router) {
+	public @Nonnull FluentRouter from(@SuppressWarnings("hiding") @Nonnull Router router) {
 		uxuiSelectorClassName(router.getUxuiSelectorClassName());
-		router.getUxUis().forEach(u -> addUxUi(new FluentUxUi().from(u)));
-		router.getUnsecuredUrlPrefixes().forEach(this::addUnsecuredUrlPrefix);
+		for (UxUiMetadata uxui : router.getUxUis()) {
+			addUxUi(new FluentUxUi().from(uxui));
+		}
+		for (Direct direct : router.getDirects()) {
+			addDirect(new FluentDirect().from(direct));
+		}
+		for (String unsecuredUrlPrefix : router.getUnsecuredUrlPrefixes()) {
+			addUnsecuredUrlPrefix(unsecuredUrlPrefix);
+		}
 		return this;
 	}
 	
@@ -92,6 +116,76 @@ public class FluentRouter {
 	 */
 	public FluentRouter clearUxUis() {
 		router.getUxUis().clear();
+		return this;
+	}
+
+	/**
+	 * Appends one direct declaration without deduplicating or reordering it.
+	 *
+	 * @param direct declaration wrapper; must not be {@code null}
+	 * @return this builder
+	 * @throws NullPointerException if {@code direct} is {@code null}
+	 * @since 10.0
+	 */
+	public @Nonnull FluentRouter addDirect(@Nonnull FluentDirect direct) {
+		router.getDirects().add(direct.get());
+		return this;
+	}
+
+	/**
+	 * Finds every direct declaration having the supplied normalised path.
+	 *
+	 * <p>The result retains declaration order and includes duplicate, exact, prefix, and
+	 * conditionally distinct declarations. The returned wrappers mutate the declarations owned by
+	 * this router.
+	 *
+	 * <p>Complexity: O(d) time and O(m) space, where d is the declaration count and m is the number
+	 * of matching declarations.
+	 *
+	 * @param path path to normalise and find
+	 * @return a new mutable list of wrappers in declaration order; never {@code null}
+	 * @since 10.0
+	 */
+	public @Nonnull List<FluentDirect> findDirects(@Nonnull String path) {
+		String normalisedPath = Util.processStringValue(path);
+		List<Direct> directs = router.getDirects();
+		List<FluentDirect> result = new ArrayList<>(directs.size());
+		for (Direct direct : directs) {
+			if (Objects.equals(normalisedPath, direct.getPath())) {
+				result.add(new FluentDirect(direct));
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Removes every direct declaration having the supplied normalised path.
+	 *
+	 * <p>Side effects: mutates the backing router while preserving the relative order of all
+	 * declarations with other paths.
+	 *
+	 * <p>Complexity: O(d) time and O(1) auxiliary space, where d is the declaration count.
+	 *
+	 * @param path path to normalise and remove
+	 * @return this builder
+	 * @since 10.0
+	 */
+	public @Nonnull FluentRouter removeDirects(@Nonnull String path) {
+		String normalisedPath = Util.processStringValue(path);
+		router.getDirects().removeIf(direct -> Objects.equals(normalisedPath, direct.getPath()));
+		return this;
+	}
+
+	/**
+	 * Removes every direct declaration from the backing router.
+	 *
+	 * <p>Side effects: clears the mutable declaration list.
+	 *
+	 * @return this builder
+	 * @since 10.0
+	 */
+	public @Nonnull FluentRouter clearDirects() {
+		router.getDirects().clear();
 		return this;
 	}
 

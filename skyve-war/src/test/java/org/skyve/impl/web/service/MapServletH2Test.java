@@ -60,7 +60,6 @@ class MapServletH2Test extends AbstractSkyveTest {
 		when(request.getUserPrincipal()).thenReturn((Principal) null);
 		when(request.getLocale()).thenReturn(java.util.Locale.ENGLISH);
 		when(request.getHeader("User-Agent")).thenReturn("Mozilla/5.0");
-		when(request.getAttribute(AbstractWebContext.UXUI)).thenReturn(null);
 		when(request.getParameter(AbstractWebContext.CONTEXT_NAME)).thenReturn(null);
 		return request;
 	}

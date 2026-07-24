@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<xs:schema version="1.0" targetNamespace="http://www.skyve.org/xml/router" xmlns:tns="http://www.skyve.org/xml/router" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ns2="http://www.skyve.org/xml/view" xmlns:ns1="http://www.skyve.org/xml/common">
+<xs:schema version="1.0" targetNamespace="http://www.skyve.org/xml/router" xmlns:tns="http://www.skyve.org/xml/router" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ns1="http://www.skyve.org/xml/common">
 
   <xs:import namespace="http://www.skyve.org/xml/common" schemaLocation="common.xsd"/>
-
-  <xs:import namespace="http://www.skyve.org/xml/view" schemaLocation="view.xsd"/>
 
   <xs:element name="route" type="tns:route"/>
 
@@ -12,6 +10,7 @@
   <xs:complexType name="router">
     <xs:sequence>
       <xs:element name="uxui" type="tns:uxUiMetadata" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="direct" type="tns:direct" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
       <xs:element name="unsecured" type="xs:string" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
       <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
     </xs:sequence>
@@ -45,8 +44,23 @@
     <xs:attribute name="module" type="xs:string"/>
     <xs:attribute name="query" type="xs:string"/>
     <xs:attribute name="userId" type="xs:string"/>
-    <xs:attribute name="viewType" type="ns2:viewType"/>
+    <xs:attribute name="viewType" type="ns1:viewType"/>
     <xs:attribute name="webAction" type="ns1:webAction"/>
   </xs:complexType>
+
+  <xs:complexType name="direct">
+    <xs:sequence/>
+    <xs:attribute name="match" type="tns:directMatch"/>
+    <xs:attribute name="path" type="xs:string" use="required"/>
+    <xs:attribute name="userAgentType" type="ns1:userAgentType"/>
+    <xs:attribute name="uxui" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:simpleType name="directMatch">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="exact"/>
+      <xs:enumeration value="prefix"/>
+    </xs:restriction>
+  </xs:simpleType>
 </xs:schema>
 

@@ -1,9 +1,11 @@
 package org.skyve.impl.cache;
 
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.Serializable;
@@ -23,9 +25,12 @@ import org.skyve.cache.GeoIPCacheConfig;
 import org.skyve.cache.HibernateCacheConfig;
 import org.skyve.cache.JCacheConfig;
 import org.skyve.cache.SessionCacheConfig;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.web.UserAgentType;
 
-@SuppressWarnings("static-method")
+// Global configuration snapshots must remain per-test-instance; repeated values are cache fixtures.
+@SuppressWarnings({ "static-method", "java:S1170", "java:S1192" })
 class DefaultCachingTest {
 	@TempDir
 	private Path cacheDirectory;
@@ -57,6 +62,22 @@ class DefaultCachingTest {
 	@Test
 	void getReturnsSingleton() {
 		assertSame(DefaultCaching.get(), DefaultCaching.get());
+	}
+
+	@Test
+	void accessBeforeStartupThrowsDomainException() {
+		DefaultCaching caching = DefaultCaching.get();
+		caching.shutdown();
+
+		assertThrows(DomainException.class, caching::getEHCacheManager);
+		assertThrows(DomainException.class, caching::getJCacheManager);
+		assertThrows(DomainException.class, () -> caching.isEHCache("missing-cache"));
+		assertThrows(DomainException.class, () -> caching.isJCache("missing-cache"));
+		assertThrows(DomainException.class,
+				() -> caching.getEHCache("missing-cache", String.class, String.class));
+		assertThrows(DomainException.class,
+				() -> caching.getJCache("missing-cache", String.class, String.class));
+		assertThrows(DomainException.class, () -> caching.getEHCacheStatistics("missing-cache"));
 	}
 
 	@Test
@@ -113,16 +134,28 @@ class DefaultCachingTest {
 
 		assertNotNull(caching.getEHCacheManager());
 		assertNotNull(caching.getJCacheManager());
+		assertNotNull(caching.getEHCache(DefaultCaching.USER_AGENT_TYPE_CACHE_NAME,
+											String.class,
+											UserAgentType.class));
 		assertNotNull(caching.getEHCache("defaultCachingEh", String.class, String.class));
 		assertNotNull(caching.getJCache("defaultCachingJ", String.class, String.class));
 		assertNotNull(caching.getJCache("defaultCachingHibernate", Serializable.class, Serializable.class));
-		assertNull(caching.getEHCacheStatistics("missing-cache"));
-		assertNull(caching.getEHTierStatistics(null, org.skyve.cache.CacheTier.OnHeap));
+		assertTrue(caching.isEHCache("defaultCachingEh"));
+		assertFalse(caching.isEHCache("missing-cache"));
+		assertTrue(caching.isJCache("defaultCachingJ"));
+		assertFalse(caching.isJCache("missing-cache"));
+		assertThrows(DomainException.class, () -> caching.getEHCacheStatistics("missing-cache"));
+		assertNull(caching.getEHTierStatistics(caching.getEHCacheStatistics(DefaultCaching.USER_AGENT_TYPE_CACHE_NAME),
+				org.skyve.cache.CacheTier.Disk));
 		assertNull(caching.getJCacheStatisticsMXBean("missing-cache"));
 
 		caching.removeEHCache("defaultCachingEh");
-		assertNull(caching.getEHCache("defaultCachingEh", String.class, String.class));
+		assertFalse(caching.isEHCache("defaultCachingEh"));
+		assertThrows(DomainException.class,
+				() -> caching.getEHCache("defaultCachingEh", String.class, String.class));
 		caching.destroyJCache("defaultCachingJ");
-		assertNull(caching.getJCache("defaultCachingJ", String.class, String.class));
+		assertFalse(caching.isJCache("defaultCachingJ"));
+		assertThrows(DomainException.class,
+				() -> caching.getJCache("defaultCachingJ", String.class, String.class));
 	}
 }

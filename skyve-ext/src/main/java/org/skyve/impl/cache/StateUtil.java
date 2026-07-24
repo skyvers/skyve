@@ -337,27 +337,25 @@ public class StateUtil {
 	private static void logCacheStats(@Nonnull String cacheName, @Nonnull String cacheDescription) {
 		Caching caching = EXT.getCaching();
 		CacheStatistics statistics = caching.getEHCacheStatistics(cacheName);
-		if (statistics != null) {
-			StringBuilder log = new StringBuilder(64);
-			TierStatistics tier = caching.getEHTierStatistics(statistics, CacheTier.OnHeap);
-			if (tier != null) {
-				log.append(cacheDescription).append(" Count in heap memory = ").append(tier.getMappings());
-				FACES_LOGGER.info(log.toString());
-				log.setLength(0);
-			}
-			tier = caching.getEHTierStatistics(statistics, CacheTier.OffHeap);
-			if (tier != null) {
-				log.append(cacheDescription).append(" Count/MB in off-heap memory = ").append(tier.getMappings());
-				log.append('/').append((long) (tier.getOccupiedByteSize() / 1024.0 / 1024.0 * 10.0) / 10.0);
-				FACES_LOGGER.info(log.toString());
-				log.setLength(0);
-			}
-			tier = caching.getEHTierStatistics(statistics, CacheTier.Disk);
-			if (tier != null) {
-				log.append(cacheDescription).append(" Count/MB on disk = ").append(tier.getMappings());
-				log.append('/').append((long) (tier.getOccupiedByteSize() / 1024.0 / 1024.0 * 10.0) / 10.0);
-				FACES_LOGGER.info(log.toString());
-			}
+		StringBuilder log = new StringBuilder(64);
+		TierStatistics tier = caching.getEHTierStatistics(statistics, CacheTier.OnHeap);
+		if (tier != null) {
+			log.append(cacheDescription).append(" Count in heap memory = ").append(tier.getMappings());
+			FACES_LOGGER.info(log.toString());
+			log.setLength(0);
+		}
+		tier = caching.getEHTierStatistics(statistics, CacheTier.OffHeap);
+		if (tier != null) {
+			log.append(cacheDescription).append(" Count/MB in off-heap memory = ").append(tier.getMappings());
+			log.append('/').append((long) (tier.getOccupiedByteSize() / 1024.0 / 1024.0 * 10.0) / 10.0);
+			FACES_LOGGER.info(log.toString());
+			log.setLength(0);
+		}
+		tier = caching.getEHTierStatistics(statistics, CacheTier.Disk);
+		if (tier != null) {
+			log.append(cacheDescription).append(" Count/MB on disk = ").append(tier.getMappings());
+			log.append('/').append((long) (tier.getOccupiedByteSize() / 1024.0 / 1024.0 * 10.0) / 10.0);
+			FACES_LOGGER.info(log.toString());
 		}
 	}
 	

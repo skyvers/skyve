@@ -8,7 +8,7 @@
 <%@page import="org.skyve.impl.web.WebUtil"%>
 <%
 	String basePath = Util.getSkyveContextUrl() + "/";
-	boolean mobile = UserAgent.getType(request).isMobile();
+	boolean mobile = UserAgent.detectType(request).isMobile();
 	String referer = WebUtil.getRefererHeader(request);
 	
 	// Determine the locale

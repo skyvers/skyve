@@ -25,7 +25,6 @@
 				/images/
 				/isomorphic130/
 				/leaflet/
-				/primevue-3.12.6/
 				/semantic24/
 				/skyve/
 				/skyvevue/
@@ -118,7 +117,7 @@
 	<!-- sam, redmond, smoothness, bootstrap -->
 	<context-param>
 		<param-name>primefaces.THEME</param-name>
-		<param-value>#{request.getAttribute('skyveUxUi') == null ? 'saga' : request.getAttribute('skyveUxUi').getPfThemeName()}</param-value>
+		<param-value>#{_skyveTheme.componentThemeName}</param-value>
 	</context-param>
 	<context-param>
 		<param-name>org.skyve.web.faces.PRIMEFLEX</param-name>

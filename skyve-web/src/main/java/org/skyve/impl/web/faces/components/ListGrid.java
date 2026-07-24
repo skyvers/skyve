@@ -10,6 +10,7 @@ import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.RequestUxUiSelection;
 import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
@@ -85,8 +86,9 @@ public class ListGrid extends HtmlPanelGroup {
 				public Void callback() throws Exception {
 					componentBuilder.setManagedBeanName(managedBeanName);
 					HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
-					componentBuilder.setUserAgentType(UserAgent.getType(request));
-					UxUi uxui = UserAgent.getUxUi(request);
+					RequestUxUiSelection selection = UserAgent.getSelection(request);
+					componentBuilder.setUserAgentType(selection.getUserAgentType());
+					UxUi uxui = selection.getUxUi();
 
 					List<UIComponent> components = ListGrid.generate(moduleName,
 																		documentName,

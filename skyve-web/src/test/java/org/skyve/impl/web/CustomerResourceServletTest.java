@@ -32,7 +32,9 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-@SuppressWarnings({"static-method", "resource"})
+// Reflection, temporary files, cookies, repeated values and assertions are isolated test fixtures.
+@SuppressWarnings({ "static-method", "resource", "java:S112", "java:S1192", "java:S2092", "java:S3011",
+		"java:S5443", "java:S5960" })
 class CustomerResourceServletTest {
 
 	private ProvidedRepository originalRepository;
@@ -427,7 +429,7 @@ class CustomerResourceServletTest {
 		when(request.getHeader("Range")).thenReturn(rangeHeader);
 
 		UxUi uxui = UxUi.newSmartClient(UxUi.DESKTOP_NAME, "Cerulean", "omega");
-		when(request.getAttribute(AbstractWebContext.UXUI)).thenReturn(uxui);
+		RequestUxUiSelectionTestUtil.install(request, org.skyve.web.UserAgentType.desktop, false, uxui);
 
 		return request;
 	}

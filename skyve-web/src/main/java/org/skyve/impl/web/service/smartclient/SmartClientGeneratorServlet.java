@@ -140,7 +140,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 					throw new ServletException("No document name in the request.");
 				}
 
-				UxUi uxui = UserAgent.getUxUi(request);
+				UxUi uxui = UserAgent.getSelection(request).getUxUi();
 				String uxuiName = uxui.getName();
 				LOGGER.info("UX/UI = {}", uxuiName);
 

@@ -37,30 +37,57 @@ import org.skyve.cache.Caching;
 import org.skyve.cache.EHCacheConfig;
 import org.skyve.cache.HibernateCacheConfig;
 import org.skyve.cache.JCacheConfig;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.FileUtil;
 import org.skyve.util.Util;
 import org.skyve.util.logging.SkyveLoggerFactory;
+import org.skyve.web.UserAgentType;
 import org.slf4j.Logger;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Singleton {@link org.skyve.cache.Caching} implementation that backs Skyve's
  * application-level caches with Infinispan/EhCache.
  */
+@SuppressWarnings("java:S6548") // Singleton is fine.
 public class DefaultCaching implements Caching {
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(DefaultCaching.class);
 
-    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(DefaultCaching.class);
+	/**
+	 * Names the framework-owned cache of physical user-agent detection results.
+	 *
+	 * <p>The region is internal rather than application-configurable so its memory bound and
+	 * lifecycle cannot diverge from the request-processing assumptions in {@code UserAgent}.
+	 */
+	public static final String USER_AGENT_TYPE_CACHE_NAME = "org.skyve.internal.userAgentTypes";
+
+	/**
+	 * Limits the number of caller-controlled user-agent strings retained in heap memory.
+	 *
+	 * <p>A fixed entry bound prevents arbitrary {@code User-Agent} headers from creating an
+	 * unbounded cache. Eviction is deliberately approximate; callers must not depend on a
+	 * particular entry remaining cached.
+	 */
+	public static final long USER_AGENT_TYPE_CACHE_CAPACITY = 4096L;
 
 	private static final DefaultCaching INSTANCE = new DefaultCaching();
 
+	@SuppressWarnings("resource") // Owned and closed by shutdown().
 	private PersistentCacheManager ehCacheManager;
 	// This is a SPI class but there seems no clear way forward - see https://github.com/ehcache/ehcache3/issues/2951
 	private StatisticsService statisticsService = new DefaultStatisticsService();
+	@SuppressWarnings("resource") // Owned and closed by shutdown().
 	private javax.cache.CacheManager jCacheManager;
 
 	// This is either Util.getCacheDirectory(), or if multiple cache instances are required, Util.getCacheDirectory() + a random UUID.
 	private String cacheDirectory;
-	
+
+	/**
+	 * Prevent instantiation
+	 */
 	private DefaultCaching() {
 		// nothing to see here
 	}
@@ -68,7 +95,7 @@ public class DefaultCaching implements Caching {
 	/**
 	 * Returns the singleton instance.
 	 */
-	public static DefaultCaching get() {
+	public static @Nonnull DefaultCaching get() {
 		return INSTANCE;
 	}
 
@@ -91,7 +118,7 @@ public class DefaultCaching implements Caching {
 						}
 					}
 				}
-				
+
 				cacheDirectory = Util.getCacheDirectory();
 				if (UtilImpl.CACHE_MULTIPLE) {
 					cacheDirectory += ProcessHandle.current().pid() + "-" + UUID.randomUUID().toString() + "/";
@@ -109,13 +136,15 @@ public class DefaultCaching implements Caching {
 										.build(true);
 				}
 				jCacheManager = javax.cache.Caching.getCachingProvider().getCacheManager();
-				
+
+				createUserAgentTypeCache();
+
 				// Create the conversations cache
 				if (UtilImpl.CONVERSATION_CACHE != null) {
 					LOGGER.info("Create the conversation cache with config {}", UtilImpl.CONVERSATION_CACHE);
 					createEHCache(UtilImpl.CONVERSATION_CACHE);
 				}
-	
+
 				// Create the CSRF Token cache
 				if (UtilImpl.CSRF_TOKEN_CACHE != null) {
 					LOGGER.info("Create the CSRF token cache with config {}", UtilImpl.CSRF_TOKEN_CACHE);
@@ -139,7 +168,7 @@ public class DefaultCaching implements Caching {
 					LOGGER.info("Create app cache with config {}", config);
 					createCache(config);
 				}
-				
+
 				// Create the hibernate caches
 				for (HibernateCacheConfig config : UtilImpl.HIBERNATE_CACHES) {
 					LOGGER.info("Create hibernate cache with config {}", config);
@@ -147,6 +176,33 @@ public class DefaultCaching implements Caching {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Creates the bounded, concurrent cache used for physical user-agent detection.
+	 *
+	 * <p>Rationale: detection results are read on the request hot path, so Ehcache permits
+	 * concurrent access without serialising every request on one application object monitor.
+	 * A plain {@link java.util.concurrent.ConcurrentHashMap} was not selected because the HTTP
+	 * {@code User-Agent} header is caller-controlled and therefore requires a reliable memory
+	 * bound. This region uses the existing shared Ehcache manager instead of creating a private
+	 * manager, keeping startup, shutdown, statistics and resource ownership within the framework's
+	 * established cache lifecycle.
+	 *
+	 * <p>Eviction is Ehcache's concurrent approximate policy, not an exact access-order guarantee.
+	 * A cache miss can consequently repeat detection but cannot change its result.
+	 *
+	 * @implNote The region is heap-only and eternal: the entry limit controls retention, while
+	 * expiry timers and persistent storage would add overhead without improving detection
+	 * correctness.
+	 */
+	private void createUserAgentTypeCache() {
+		createEHCache(new EHCacheConfig<>(USER_AGENT_TYPE_CACHE_NAME,
+											USER_AGENT_TYPE_CACHE_CAPACITY,
+											CacheExpiryPolicy.eternal,
+											0L,
+											String.class,
+											UserAgentType.class));
 	}
 
 	/**
@@ -189,7 +245,7 @@ public class DefaultCaching implements Caching {
 	}
 
 	@SuppressWarnings("resource")
-	private <K extends Serializable, V extends Serializable> void createCache(CacheConfig<K, V> config) {
+	private <K extends Serializable, V extends Serializable> void createCache(@Nonnull CacheConfig<K, V> config) {
 		if (config instanceof EHCacheConfig<?, ?>) {
 			createEHCache((EHCacheConfig<K, V>) config);
 		}
@@ -199,7 +255,7 @@ public class DefaultCaching implements Caching {
 	}
 
 	private boolean isUnInitialised() {
-		return ((ehCacheManager == null) || 
+		return ((ehCacheManager == null) ||
 					Status.UNINITIALIZED.equals(ehCacheManager.getStatus()) ||
 					(jCacheManager == null) ||
 					jCacheManager.isClosed());
@@ -209,7 +265,7 @@ public class DefaultCaching implements Caching {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public PersistentCacheManager getEHCacheManager() {
+	public @Nonnull PersistentCacheManager getEHCacheManager() {
 		return ehCacheManager;
 	}
 
@@ -217,7 +273,7 @@ public class DefaultCaching implements Caching {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public javax.cache.CacheManager getJCacheManager() {
+	public @Nonnull javax.cache.CacheManager getJCacheManager() {
 		return jCacheManager;
 	}
 
@@ -225,7 +281,7 @@ public class DefaultCaching implements Caching {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public <K extends Serializable, V extends Serializable> Cache<K, V> createEHCache(EHCacheConfig<K, V> config) {
+	public @Nonnull <K extends Serializable, V extends Serializable> Cache<K, V> createEHCache(@Nonnull EHCacheConfig<K, V> config) {
 		ResourcePoolsBuilder rpb = ResourcePoolsBuilder.newResourcePoolsBuilder();
 		rpb = rpb.heap(config.getHeapSizeEntries(), EntryUnit.ENTRIES);
 		if (! UtilImpl.FORCE_NON_PERSISTENT_CACHING) {
@@ -253,15 +309,15 @@ public class DefaultCaching implements Caching {
 			}
 		}
 		CacheConfiguration<K, V> cacheConfiguration = ccb.build();
-		return ehCacheManager.createCache(config.getName(), cacheConfiguration); 
+		return ehCacheManager.createCache(config.getName(), cacheConfiguration);
 	}
 
-	@Override
-	@SuppressWarnings("resource")
 	/**
 	 * Creates the jCache.
 	 */
-	public <K extends Serializable, V extends Serializable> javax.cache.Cache<K, V> createJCache(JCacheConfig<K, V> config) {
+	@Override
+	@SuppressWarnings("resource")
+	public @Nonnull <K extends Serializable, V extends Serializable> javax.cache.Cache<K, V> createJCache(@Nonnull JCacheConfig<K, V> config) {
 		ResourcePoolsBuilder rpb = ResourcePoolsBuilder.heap(config.getHeapSizeEntries());
 		long offHeapSizeInMB = config.getOffHeapSizeInMB();
 		if (offHeapSizeInMB > 0) {
@@ -281,14 +337,14 @@ public class DefaultCaching implements Caching {
 				ccb = ccb.withExpiry(ExpiryPolicyBuilder.timeToLiveExpiration(Duration.ofMinutes(expiryInMinutes)));
 			}
 		}
-		return getJCacheManager().createCache(config.getName(), Eh107Configuration.fromEhcacheCacheConfiguration(ccb));
+		return jCacheManager.createCache(config.getName(), Eh107Configuration.fromEhcacheCacheConfiguration(ccb));
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void removeEHCache(String name) {
+	public void removeEHCache(@Nonnull String name) {
 		ehCacheManager.removeCache(name);
 	}
 
@@ -296,7 +352,7 @@ public class DefaultCaching implements Caching {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void destroyEHCache(String name) throws CachePersistenceException {
+	public void destroyEHCache(@Nonnull String name) throws CachePersistenceException {
 		ehCacheManager.destroyCache(name);
 	}
 
@@ -304,7 +360,7 @@ public class DefaultCaching implements Caching {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public final void destroyJCache(String name) {
+	public final void destroyJCache(@Nonnull String name) {
 		jCacheManager.destroyCache(name);
 	}
 
@@ -312,46 +368,79 @@ public class DefaultCaching implements Caching {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public <K extends Object, V extends Object> Cache<K, V> getEHCache(String name, Class<K> keyClass, Class<V> valueClass) {
-		return ehCacheManager.getCache(name, keyClass, valueClass);
+	public boolean isEHCache(@Nonnull String name) {
+		return ehCacheManager.getRuntimeConfiguration().getCacheConfigurations().containsKey(name);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public <K extends Object, V extends Object> javax.cache.Cache<K, V> getJCache(String name, Class<K> keyClass, Class<V> valueClass) {
-		return jCacheManager.getCache(name, keyClass, valueClass);
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public CacheStatistics getEHCacheStatistics(String name) {
-		CacheStatistics result = null;
-		try {
-			result = statisticsService.getCacheStatistics(name);
-		}
-		catch (@SuppressWarnings("unused") Exception e) {
-			LOGGER.warn("Cache Stats requested on EHCache {}that does not exist", name);
+	public @Nonnull <K extends Object, V extends Object> Cache<K, V> getEHCache(@Nonnull String name,
+																					@Nonnull Class<K> keyClass,
+																					@Nonnull Class<V> valueClass) {
+		Cache<K, V> result = ehCacheManager.getCache(name, keyClass, valueClass);
+		if (result == null) {
+			throw new DomainException("EHCache " + name + " does not exist");
 		}
 		return result;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public TierStatistics getEHTierStatistics(CacheStatistics statistics, CacheTier tier) {
-		return (statistics == null) ? null : statistics.getTierStatistics().get(tier.toString());
+	@SuppressWarnings("resource") // The shared caching service owns the manager lifecycle.
+	public boolean isJCache(@Nonnull String name) {
+		return jCacheManager.getCache(name) != null;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public CacheStatisticsMXBean getJCacheStatisticsMXBean(String name) {
+	@SuppressWarnings("resource") // The manager retains cache ownership.
+	public @Nonnull <K extends Object, V extends Object> javax.cache.Cache<K, V> getJCache(@Nonnull String name,
+																							@Nonnull Class<K> keyClass,
+																							@Nonnull Class<V> valueClass) {
+		javax.cache.Cache<K, V> result = jCacheManager.getCache(name, keyClass, valueClass);
+		if (result == null) {
+			throw new DomainException("JCache " + name + " does not exist");
+		}
+		return result;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public @Nonnull CacheStatistics getEHCacheStatistics(@Nonnull String name) {
+		CacheStatistics result;
+		try {
+			result = statisticsService.getCacheStatistics(name);
+		}
+		catch (Exception e) {
+			throw new DomainException("Statistics requested for EHCache " + name + " that does not exist", e);
+		}
+		if (result == null) {
+			throw new DomainException("Statistics requested for EHCache " + name + " that does not exist");
+		}
+		return result;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public @Nullable TierStatistics getEHTierStatistics(@Nonnull CacheStatistics statistics, @Nonnull CacheTier tier) {
+		return statistics.getTierStatistics().get(tier.toString());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public @Nullable CacheStatisticsMXBean getJCacheStatisticsMXBean(@Nonnull String name) {
 		final MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
 		ObjectName objectName = null;
 		try {

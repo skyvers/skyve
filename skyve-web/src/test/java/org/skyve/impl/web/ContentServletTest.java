@@ -21,7 +21,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,6 +33,7 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.util.TimeUtil;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
@@ -45,7 +45,9 @@ import jakarta.servlet.WriteListener;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-@SuppressWarnings({"static-method", "resource"})
+// Legacy dates, servlet doubles, reflection, temporary files and repeated values are test fixtures.
+@SuppressWarnings({ "static-method", "resource", "java:S112", "java:S1192", "java:S1948", "java:S2143",
+		"java:S2226", "java:S3011", "java:S5443", "java:S5960" })
 class ContentServletTest {
 	@AfterEach
 	void tearDown() throws Exception {
@@ -147,7 +149,7 @@ class ContentServletTest {
 	@Test
 	void contentResourceExposesAttachmentMetadataAndBytes() throws Exception {
 		AttachmentContent content = newAttachmentContent("report.txt");
-		content.setLastModified(new Date(12345L));
+		content.setLastModified(TimeUtil.parseISODate("1970-01-01T00:00:12.345Z"));
 		AbstractResourceServlet.Resource resource = newContentResource(content);
 
 		assertEquals(12345L, resource.getLastModified());
@@ -459,7 +461,7 @@ class ContentServletTest {
 		when(request.getParameter(anyString())).thenAnswer(i -> mutable.get(i.getArgument(0, String.class)));
 		when(request.getHeader("Range")).thenReturn(rangeHeader);
 		org.skyve.metadata.router.UxUi uxui = org.skyve.metadata.router.UxUi.newSmartClient(org.skyve.metadata.router.UxUi.DESKTOP_NAME, "Cerulean", "omega");
-		when(request.getAttribute(AbstractWebContext.UXUI)).thenReturn(uxui);
+		RequestUxUiSelectionTestUtil.install(request, org.skyve.web.UserAgentType.desktop, false, uxui);
 		return request;
 	}
 

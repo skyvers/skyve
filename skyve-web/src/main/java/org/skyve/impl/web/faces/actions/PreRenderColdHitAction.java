@@ -2,7 +2,6 @@ package org.skyve.impl.web.faces.actions;
 
 import org.skyve.CORE;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.user.User;
@@ -11,8 +10,6 @@ import org.skyve.util.logging.SkyveLoggerFactory;
 import org.skyve.web.WebAction;
 import org.slf4j.Logger;
 
-import jakarta.faces.context.FacesContext;
-import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Executes a Faces callback action within the current Skyve web context.
@@ -32,15 +29,6 @@ public class PreRenderColdHitAction extends FacesAction<Void> {
 	public Void callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("PreRenderColdHitAction");
 
-		// Set the UX/UI and user agent type
-		HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
-		if (facesView.getUserAgentType() == null) {
-			facesView.setUserAgentType(UserAgent.getType(request));
-		}
-		if (facesView.getUxUi() == null) {
-			facesView.setUxUi(UserAgent.getUxUi(request));
-		}
-		
 		User user = CORE.getUser();
 		if (user == null) {
 			return null;

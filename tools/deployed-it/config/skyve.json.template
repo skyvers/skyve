@@ -1,0 +1,111 @@
+{
+	"trace": {
+		"xml": false,
+		"http": false,
+		"command": false,
+		"faces": false,
+		"query": false,
+		"sql": false,
+		"content": false,
+		"security": false,
+		"bizlet": false,
+		"dirty": false
+	},
+	"content": {
+		"directory": "@CONTENT_DIR@",
+		"gcCron": "0 7 0/1 1/1 * ? *",
+		"fileStorage": true,
+		"fileSuffixes": false
+	},
+	"url": {
+		"server": "@SERVER_URL@",
+		"context": "/skyve",
+		"home": "/"
+	},
+	"state": {
+		"multiple": false,
+		"conversations": {
+			"heapSizeEntries": 100,
+			"offHeapSizeMB": 0,
+			"diskSizeGB": 0,
+			"expiryTimeMinutes": 60
+		},
+		"csrfTokens": {
+			"heapSizeEntries": 100,
+			"offHeapSizeMB": 0,
+			"diskSizeGB": 0,
+			"expiryTimeMinutes": 60
+		},
+		"sessions": {
+			"heapSizeEntries": 100,
+			"offHeapSizeMB": 0,
+			"diskSizeGB": 0,
+			"expiryTimeMinutes": 60
+		},
+		"geoIPs": {
+			"heapSizeEntries": 100,
+			"offHeapSizeMB": 0,
+			"diskSizeGB": 0,
+			"expiryTimeMinutes": 60
+		}
+	},
+	"dataStores": {
+		"skyve": {
+			"jndi": "java:/SkyveDB",
+			"dialect": "org.skyve.impl.persistence.hibernate.dialect.H2SpatialDialect",
+			"oltpConnectionTimeoutInSeconds": 30,
+			"asyncConnectionTimeoutInSeconds": 300
+		}
+	},
+	"hibernate": {
+		"dataStore": "skyve",
+		"ddlSync": true,
+		"catalog": null,
+		"schema": null,
+		"prettySql": false,
+		"caches": {
+			"eternal": {
+				"heapSizeEntries": 10,
+				"offHeapSizeMB": 0,
+				"expiryPolicy": "eternal"
+			},
+			"reference": {
+				"heapSizeEntries": 100,
+				"offHeapSizeMB": 0,
+				"expiryPolicy": "timeToIdle",
+				"expiryTimeMinutes": 10
+			}
+		}
+	},
+	"factories": {},
+	"smtp": {
+		"server": "localhost",
+		"port": 25,
+		"sender": "deployed-it@example.invalid",
+		"testBogusSend": true
+	},
+	"map": {
+		"type": "leaflet",
+		"layers": "[]"
+	},
+	"account": {
+		"passwordHashingAlgorithm": "argon2",
+		"allowUserSelfRegistration": false
+	},
+	"environment": {
+		"identifier": "deployed-it",
+		"devMode": false,
+		"accessControl": true,
+		"customer": "@CUSTOMER@",
+		"jobScheduler": false,
+		"moduleDirectory": null,
+		"showSetup": false
+	},
+	"api": {},
+	"bootstrap": {
+		"customer": "@CUSTOMER@",
+		"user": "@USERNAME@",
+		"email": "@USERNAME@@example.invalid",
+		"password": "@PASSWORD@"
+	}
+}

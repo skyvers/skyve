@@ -9,13 +9,13 @@
 		<h:head>
 			<title><ui:insert name="templateTitle" /></title>
 			<base href="#{bean.baseHref}" />
-			<ui:include src="#{'/WEB-INF/pages/templates/'.concat(_skyveTheme.templateName).concat('/head-resources.xhtml')}">
+			<ui:include src="#{'/WEB-INF/pages/templates/'.concat(_skyveTheme.iframeResourceTemplateName).concat('/head-resources.xhtml')}">
 				<ui:param name="bean" value="#{bean}" />
 				<ui:param name="iframe" value="true" />
 			</ui:include>
 			<!-- Layout styles historically emitted at the end of full-page bodies are loaded
 				 before iframe page overrides so upload/editor-specific rules retain precedence. -->
-			<ui:include src="#{'/WEB-INF/pages/templates/'.concat(_skyveTheme.templateName).concat('/body-resources.xhtml')}">
+			<ui:include src="#{'/WEB-INF/pages/templates/'.concat(_skyveTheme.iframeResourceTemplateName).concat('/body-resources.xhtml')}">
 				<ui:param name="bean" value="#{bean}" />
 				<ui:param name="iframe" value="true" />
 			</ui:include>
@@ -43,7 +43,7 @@
 		</h:head>
 		<h:body styleClass="skyve-iframe is-preload main-body layout-compact ui-input-filled">
 			<div id="wrapper"
-				class="skyve-iframe-shell layout-wrapper layout-menu-light layout-menu-#{_skyveTheme.themeColour} layout-topbar-#{_skyveTheme.themeColour}">
+				class="skyve-iframe-shell layout-wrapper layout-menu-light #{_skyveTheme.layoutStyleClass}">
 				<div id="main" class="layout-main layout-content-wrapper">
 					<div class="inner">
 						<section class="layout-content">

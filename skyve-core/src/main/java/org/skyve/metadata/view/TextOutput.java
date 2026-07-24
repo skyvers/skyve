@@ -32,7 +32,7 @@ public interface TextOutput {
 	 * ({@link #text}). When comparing policies the ordinal may be used to determine
 	 * relative restrictiveness.
 	 */
-	@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
+	@XmlType(namespace = XMLMetaData.COMMON_NAMESPACE)
 	@SuppressWarnings("java:S115") // Enum names are metadata XML values.
 	public enum Sanitisation {
 		// Note the values are ordered from least restrictive to most restrictive so we can compare the ordinals

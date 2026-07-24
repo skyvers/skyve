@@ -19,8 +19,10 @@ import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.metadata.controller.Customisations;
 
-@SuppressWarnings({"static-method", "boxing"})
+@SuppressWarnings({ "static-method", "boxing", "java:S1192", "java:S5960" }) // Values and assertions are test-only.
 class SmartClientFieldAndDataGridDefinitionUnsafeTest {
+	private static final String UNSAFE_TEXT = "<img src=x onerror=alert(1)> & \"quoted\" 'single'";
+
 	@Test
 	void fieldToJavascriptIncludesLookupMaskValidationHelpAndTextAlign() throws Exception {
 		SmartClientFieldDefinition def = allocate(SmartClientFieldDefinition.class);
@@ -68,9 +70,9 @@ class SmartClientFieldAndDataGridDefinitionUnsafeTest {
 
 		String js = def.toJavascript();
 
-		assertTrue(js.contains("title:'" + SmartClientViewRenderer.escapeSmartClientText(unsafeText(), true) + " *'"), js);
-		assertTrue(js.contains("requiredMessage:'" + SmartClientViewRenderer.escapeSmartClientText(unsafeText(), true)), js);
-		assertTrue(js.contains("prompt:'" + SmartClientViewRenderer.escapeSmartClientText(unsafeText(), true) + "'"), js);
+		assertTrue(js.contains("title:'" + SmartClientViewRenderer.escapeSmartClientText(UNSAFE_TEXT, true) + " *'"), js);
+		assertTrue(js.contains("requiredMessage:'" + SmartClientViewRenderer.escapeSmartClientText(UNSAFE_TEXT, true)), js);
+		assertTrue(js.contains("prompt:'" + SmartClientViewRenderer.escapeSmartClientText(UNSAFE_TEXT, true) + "'"), js);
 	}
 
 	@Test
@@ -82,9 +84,9 @@ class SmartClientFieldAndDataGridDefinitionUnsafeTest {
 
 		String js = def.toJavascript();
 
-		assertTrue(js.contains("title:'" + SmartClientViewRenderer.escapeSmartClientText(unsafeText(), true) + " *'"), js);
-		assertTrue(js.contains("requiredMessage:'" + SmartClientViewRenderer.escapeSmartClientText(unsafeText(), true) + "'"), js);
-		assertTrue(js.contains("prompt:'" + SmartClientViewRenderer.escapeSmartClientText(unsafeText(), true) + "'"), js);
+		assertTrue(js.contains("title:'" + SmartClientViewRenderer.escapeSmartClientText(UNSAFE_TEXT, true) + " *'"), js);
+		assertTrue(js.contains("requiredMessage:'" + SmartClientViewRenderer.escapeSmartClientText(UNSAFE_TEXT, true) + "'"), js);
+		assertTrue(js.contains("prompt:'" + SmartClientViewRenderer.escapeSmartClientText(UNSAFE_TEXT, true) + "'"), js);
 	}
 
 	@Test
@@ -96,9 +98,9 @@ class SmartClientFieldAndDataGridDefinitionUnsafeTest {
 
 		String js = def.toJavascript();
 
-		assertTrue(js.contains("title:'" + SmartClientViewRenderer.escapeSmartClientText(unsafeText(), false) + " *'"), js);
-		assertTrue(js.contains("requiredMessage:'" + SmartClientViewRenderer.escapeSmartClientText(unsafeText(), false) + "'"), js);
-		assertTrue(js.contains("prompt:'" + SmartClientViewRenderer.escapeSmartClientText(unsafeText(), false) + "'"), js);
+		assertTrue(js.contains("title:'" + SmartClientViewRenderer.escapeSmartClientText(UNSAFE_TEXT, false) + " *'"), js);
+		assertTrue(js.contains("requiredMessage:'" + SmartClientViewRenderer.escapeSmartClientText(UNSAFE_TEXT, false) + "'"), js);
+		assertTrue(js.contains("prompt:'" + SmartClientViewRenderer.escapeSmartClientText(UNSAFE_TEXT, false) + "'"), js);
 	}
 
 	@Test
@@ -195,8 +197,8 @@ class SmartClientFieldAndDataGridDefinitionUnsafeTest {
 
 		String js = def.toJavascript();
 
-		assertTrue(js.contains("title:'" + SmartClientViewRenderer.escapeSmartClientText(unsafeText(), true) + "'"), js);
-		assertTrue(js.contains("requiredMessage:'" + SmartClientViewRenderer.escapeSmartClientText(unsafeText(), true)), js);
+		assertTrue(js.contains("title:'" + SmartClientViewRenderer.escapeSmartClientText(UNSAFE_TEXT, true) + "'"), js);
+		assertTrue(js.contains("requiredMessage:'" + SmartClientViewRenderer.escapeSmartClientText(UNSAFE_TEXT, true)), js);
 	}
 
 	@Test
@@ -206,7 +208,7 @@ class SmartClientFieldAndDataGridDefinitionUnsafeTest {
 
 		String js = def.toJavascript();
 
-		assertTrue(js.contains("title:'" + SmartClientViewRenderer.escapeSmartClientText(unsafeText(), true) + "'"), js);
+		assertTrue(js.contains("title:'" + SmartClientViewRenderer.escapeSmartClientText(UNSAFE_TEXT, true) + "'"), js);
 	}
 
 	@Test
@@ -216,8 +218,8 @@ class SmartClientFieldAndDataGridDefinitionUnsafeTest {
 
 		String js = def.toJavascript();
 
-		assertTrue(js.contains("title:'" + SmartClientViewRenderer.escapeSmartClientText(unsafeText(), false) + "'"), js);
-		assertTrue(js.contains("requiredMessage:'" + SmartClientViewRenderer.escapeSmartClientText(unsafeText(), true)), js);
+		assertTrue(js.contains("title:'" + SmartClientViewRenderer.escapeSmartClientText(UNSAFE_TEXT, false) + "'"), js);
+		assertTrue(js.contains("requiredMessage:'" + SmartClientViewRenderer.escapeSmartClientText(UNSAFE_TEXT, true)), js);
 	}
 
 	@Test
@@ -298,13 +300,16 @@ class SmartClientFieldAndDataGridDefinitionUnsafeTest {
 		def.pixelWidth = Integer.valueOf(32);
 		String imageJs = def.toJavascript();
 		assertTrue(imageJs.contains("formatCellValue:function(v,rec,row,col){if(v){var u='content?_n='+v+'"));
+		assertFalse(imageJs.contains("emulationAwareUrl"));
 		assertTrue(imageJs.contains("&_w=32&_h=32"));
 
 		def.type = "link";
 		String linkJs = def.toJavascript();
-		assertTrue(linkJs.contains("formatCellValue:function(v,rec,row,col){return (v ? '<a href=\"content?_n='+v+"));
+		assertTrue(linkJs.contains("formatCellValue:function(v,rec,row,col){if(!v){return ''}var u='content?_n='+v+"));
+		assertFalse(linkJs.contains("emulationAwareUrl"));
 	}
 
+	@SuppressWarnings({ "java:S112", "java:S3011" }) // Unsafe allocation isolates escaping from constructor dependencies.
 	private static <T> T allocate(Class<T> type) throws Exception {
 		Class<?> unsafeType = Class.forName("sun.misc.Unsafe");
 		Field f = unsafeType.getDeclaredField("theUnsafe");
@@ -317,28 +322,25 @@ class SmartClientFieldAndDataGridDefinitionUnsafeTest {
 	private static SmartClientFieldDefinition unsafeFieldDefinition() throws Exception {
 		SmartClientFieldDefinition def = allocate(SmartClientFieldDefinition.class);
 		def.name = "unsafe";
-		def.title = unsafeText();
+		def.title = UNSAFE_TEXT;
 			def.type = "text";
 			def.required = true;
-			def.requiredMessage = unsafeText();
+		def.requiredMessage = UNSAFE_TEXT;
 			def.setEscapeTitle(true);
 			def.setEscapeRequiredMessage(true);
 			def.setEscapeHelp(true);
-			def.setHelpText(unsafeText());
+		def.setHelpText(UNSAFE_TEXT);
 			return def;
 		}
 
 	private static SmartClientDataGridFieldDefinition unsafeDataGridDefinition() throws Exception {
 		SmartClientDataGridFieldDefinition def = allocate(SmartClientDataGridFieldDefinition.class);
 		def.name = "unsafe";
-			def.title = unsafeText();
+		def.title = UNSAFE_TEXT;
 			def.type = "text";
 			def.required = true;
 			def.setEscapeTitle(true);
 			return def;
 		}
 
-	private static String unsafeText() {
-		return "<img src=x onerror=alert(1)> & \"quoted\" 'single'";
-	}
 }

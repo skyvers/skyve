@@ -132,7 +132,7 @@ public class SmartClientSnapServlet extends HttpServlet {
 						Module module = customer.getModule(moduleName);
 						documentOrQueryOrModelName = dataSource.substring(_Index + 1);
 
-						UxUi uxui = UserAgent.getUxUi(request);
+						UxUi uxui = UserAgent.getSelection(request).getUxUi();
 
 						int __Index = documentOrQueryOrModelName.indexOf("__");
 						// model type of request

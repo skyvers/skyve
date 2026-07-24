@@ -4,3 +4,4 @@ org.eclipse.core.resources.prefs
 **/.project
 **/.settings/
 **/target/
+**/extensions.idx

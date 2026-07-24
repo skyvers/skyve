@@ -2,6 +2,7 @@ package org.skyve.impl.cdi;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -15,6 +16,7 @@ import org.ehcache.Cache;
 import org.ehcache.PersistentCacheManager;
 import org.ehcache.Status;
 import org.ehcache.config.CacheConfiguration;
+import org.ehcache.config.Configuration;
 import org.ehcache.core.spi.service.StatisticsService;
 import org.ehcache.core.statistics.CacheStatistics;
 import org.ehcache.core.statistics.TierStatistics;
@@ -31,6 +33,7 @@ class CachingInjectableTest {
 		DefaultCaching caching = DefaultCaching.get();
 		PersistentCacheManager ehManager = mock(PersistentCacheManager.class);
 		javax.cache.CacheManager jManager = mock(javax.cache.CacheManager.class);
+		Configuration ehRuntimeConfiguration = mock(Configuration.class);
 		StatisticsService statisticsService = mock(StatisticsService.class);
 		Cache<String, String> ehCache = mock(Cache.class);
 		javax.cache.Cache<String, String> jCache = mock(javax.cache.Cache.class);
@@ -51,6 +54,9 @@ class CachingInjectableTest {
 
 			when(ehManager.getCache("eh", String.class, String.class)).thenReturn(ehCache);
 			when(jManager.getCache("j", String.class, String.class)).thenReturn(jCache);
+			when(ehManager.getRuntimeConfiguration()).thenReturn(ehRuntimeConfiguration);
+			when(ehRuntimeConfiguration.getCacheConfigurations()).thenReturn(Map.of("eh", mock(CacheConfiguration.class)));
+			when(jManager.<String, String> getCache("j")).thenReturn(jCache);
 			when(ehManager.createCache(eq("ehCreate"), any(CacheConfiguration.class))).thenReturn(ehCache);
 			when(jManager.createCache(eq("jCreate"), any()))
 					.thenReturn((javax.cache.Cache<Object, Object>) (javax.cache.Cache<?, ?>) jCache);
@@ -61,6 +67,8 @@ class CachingInjectableTest {
 
 			injectable.startup();
 
+			assertTrue(injectable.isEHCache("eh"));
+			assertTrue(injectable.isJCache("j"));
 			assertSame(ehCache, injectable.getEHCache("eh", String.class, String.class));
 			assertSame(jCache, injectable.getJCache("j", String.class, String.class));
 			assertSame(ehCache, injectable.createEHCache(ehConfig));
@@ -70,7 +78,7 @@ class CachingInjectableTest {
 			injectable.destroyJCache("j");
 			assertSame(ehStats, injectable.getEHCacheStatistics("eh"));
 			assertSame(tierStats, injectable.getEHTierStatistics(ehStats, CacheTier.OnHeap));
-			assertNull(injectable.getEHTierStatistics(null, CacheTier.OnHeap));
+			assertNull(injectable.getEHTierStatistics(ehStats, CacheTier.Disk));
 			assertNull(injectable.getJCacheStatisticsMXBean("no-such-cache"));
 			assertSame(ehManager, injectable.getEHCacheManager());
 			assertSame(jManager, injectable.getJCacheManager());

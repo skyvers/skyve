@@ -253,10 +253,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 				persistence.setUser(user);
 
-				String uxui = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.UXUI)));
-				if (uxui == null) {
-					uxui = UserAgent.getUxUi(request).getName();
-				}
+				String uxui = UserAgent.getSelection(request).getUxUi().getName();
 				String moduleName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.MODULE_NAME)));
 				documentName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.DOCUMENT_NAME)));
 				if (documentName != null) {

@@ -64,7 +64,8 @@ public class Map extends HtmlPanelGroup {
 				@Override
 				public Void callback() throws Exception {
 					componentBuilder.setManagedBeanName(managedBeanName);
-			    	componentBuilder.setUserAgentType(UserAgent.getType((HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest()));
+					HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
+					componentBuilder.setUserAgentType(UserAgent.getSelection(request).getUserAgentType());
 
 			    	Map.this.getChildren().add(generate(moduleName,
 															queryName,

@@ -179,7 +179,7 @@ public class ChartServlet extends HttpServlet {
 		User user = CORE.getUser();
 		String moduleName = bean.getBizModule();
 		String documentName = bean.getBizDocument();
-		UxUi uxui = UserAgent.getUxUi(request);
+		UxUi uxui = UserAgent.getSelection(request).getUxUi();
 		String uxuiName = uxui.getName();
 
 		Customer customer = CORE.getCustomer();
@@ -237,7 +237,7 @@ public class ChartServlet extends HttpServlet {
 			return emptyResponse();
 		}
 
-		UxUi uxui = UserAgent.getUxUi(request);
+		UxUi uxui = UserAgent.getSelection(request).getUxUi();
 
 		MetaDataQueryDefinition query = module.getMetaDataQuery(documentOrQueryOrModelName);
 		// not a query, must be a document

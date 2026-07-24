@@ -337,7 +337,7 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 								params.binding(),
 								params.resourceFileName(),
 								params.user(),
-								UserAgent.getUxUi(request).getName());
+								UserAgent.getSelection(request).getUxUi().getName());
 				RESOURCES.set(resource);
 			}
 
@@ -393,7 +393,7 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 								params.binding(),
 								params.resourceFileName(),
 								params.user(),
-								UserAgent.getUxUi(request).getName());
+								UserAgent.getSelection(request).getUxUi().getName());
 				RESOURCES.set(resource);
 			}
 

@@ -4,16 +4,39 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.metadata.repository.router.Direct.DirectMatch;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.web.UserAgentType;
 import org.skyve.web.WebAction;
 
 @SuppressWarnings("static-method")
 class RouterMetaDataTest {
+	@Test
+	void directAttributesNormalizeAndRoundTrip() {
+		Direct direct = new Direct();
+		direct.setPath("  /external/  ");
+		direct.setUxui("  external  ");
+		direct.setMatch(DirectMatch.prefix);
+		direct.setUserAgentType(UserAgentType.phone);
+
+		assertThat(direct.getPath(), is("/external/"));
+		assertThat(direct.getUxui(), is("external"));
+		assertThat(direct.getMatch(), is(DirectMatch.prefix));
+		assertThat(direct.getUserAgentType(), is(UserAgentType.phone));
+	}
+
+	@Test
+	void directDefaultsToExactWithWildcardConditions() {
+		Direct direct = new Direct();
+
+		assertThat(direct.getMatch(), is(DirectMatch.exact));
+		assertThat(direct.getUserAgentType(), nullValue());
+	}
 
 	// Route
 

@@ -1,5 +1,6 @@
 package org.skyve.impl.web.faces;
 
+import java.io.Serializable;
 import java.security.Principal;
 import java.util.Map;
 
@@ -10,15 +11,21 @@ import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.impl.web.RequestUxUiSelection;
+import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.util.logging.Category;
+import org.skyve.web.UserAgentType;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.faces.FacesException;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.application.FacesMessage.Severity;
+import jakarta.faces.application.ViewExpiredException;
 import jakarta.faces.component.UIViewRoot;
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
@@ -35,6 +42,17 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 
 	private static final Logger FACES_LOGGER = Category.FACES.logger();
 	private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
+
+	/**
+	 * Records the request selection that determines Faces view compatibility.
+	 */
+	static record FacesViewSelectionMarker(boolean emulated,
+											UserAgentType userAgentType,
+											String uxuiName) implements Serializable {
+		private static final long serialVersionUID = -4691985235216910666L;
+	}
+
+	private static final String VIEW_SELECTION_MARKER_KEY = FacesViewSelectionMarker.class.getName();
 
 	/**
 	 * Logs and prepares pre-phase diagnostics for the JSF lifecycle.
@@ -100,9 +118,11 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 	throws Exception {
 		FacesContext fc = event.getFacesContext();
 		ExternalContext ec = fc.getExternalContext();
+		UIViewRoot vr = fc.getViewRoot();
+		validateViewSelection(fc, ec, vr);
+
 		Map<String, Object> s = ec.getSessionMap();
 		String webId = ec.getRequestParameterMap().get(AbstractWebContext.CONTEXT_NAME);
-		UIViewRoot vr = fc.getViewRoot();
 
 		// restore from the session - used when http redirect is used to navigate to a new view
 		if (s.containsKey(FacesUtil.MANAGED_BEAN_NAME_KEY)) {
@@ -129,8 +149,46 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("SkyveFacesPhaseListener - CONNECT PERSISTENCE AND BEGIN TRANSACTION");
 		persistence.begin();
 		HttpServletRequest request = (HttpServletRequest) ec.getRequest();
-    	Principal userPrincipal = request.getUserPrincipal();
-    	WebUtil.processUserPrincipalForRequest(request, (userPrincipal == null) ? null : userPrincipal.getName());
+		Principal userPrincipal = request.getUserPrincipal();
+		WebUtil.processUserPrincipalForRequest(request, (userPrincipal == null) ? null : userPrincipal.getName());
+	}
+
+	/**
+	 * Records a fresh view's request selection or rejects an incompatible restored view.
+	 *
+	 * <p>Side effects: stores one Serializable selection marker in a fresh view's view map. A postback
+	 * with no marker or with a divergent device or UX/UI selection is expired before
+	 * conversation restoration or other request processing can begin.
+	 */
+	private static void validateViewSelection(@Nonnull FacesContext fc,
+			@Nonnull ExternalContext ec,
+			@Nullable UIViewRoot vr) {
+		if (vr == null) {
+			if (fc.isPostback()) {
+				throw incompatibleView(null);
+			}
+			return;
+		}
+
+		HttpServletRequest request = (HttpServletRequest) ec.getRequest();
+		RequestUxUiSelection selection = UserAgent.getSelection(request);
+		FacesViewSelectionMarker current = new FacesViewSelectionMarker(selection.isEmulated(),
+																			selection.getUserAgentType(),
+																			selection.getUxUi().getName());
+		if (fc.isPostback()) {
+			Map<String, Object> viewMap = vr.getViewMap(false);
+			Object marker = (viewMap == null) ? null : viewMap.get(VIEW_SELECTION_MARKER_KEY);
+			if (! current.equals(marker)) {
+				throw incompatibleView(vr.getViewId());
+			}
+		}
+		else {
+			vr.getViewMap().put(VIEW_SELECTION_MARKER_KEY, current);
+		}
+	}
+
+	private static @Nonnull ViewExpiredException incompatibleView(@Nullable String viewId) {
+		return new ViewExpiredException("The restored view is incompatible with the current request selection", viewId);
 	}
 
 	/**
@@ -218,7 +276,9 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 								@SuppressWarnings("unchecked")
 								Bizlet<Bean> bizlet = (Bizlet<Bean>) view.getPostRenderBizlet();
 				    			if (bizlet != null) {
-									if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.postRender: {}, {}", bizlet.getClass().getName(), postRenderBean, webContext);
+									if (UtilImpl.BIZLET_TRACE) {
+										BIZLET_LOGGER.info("Entering {}.postRender: {}, {}", bizlet.getClass().getName(), postRenderBean, webContext);
+									}
 					    			bizlet.postRender(postRenderBean, webContext);
 					    			if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.postRender: {}, {}", bizlet.getClass().getName(), postRenderBean, webContext);
 				    			}

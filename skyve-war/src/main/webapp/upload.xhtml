@@ -60,7 +60,7 @@
 					<h:inputHidden id="_id" value="#{_skyveContent.elementBizId}" />
 					<p:fileUpload id="upload"
 									listener="#{_skyveContent.handleFileUpload}"
-									styleClass="#{_skyveContent.genericUploadAllowed ? '' : 'capture-only-upload'}"
+									styleClass="#{_skyveContent.genericUploadAllowed ? 'skyve-upload' : 'skyve-upload capture-only-upload'}"
 									accept="#{_skyveContent.accept}"
 									multiple="false"
 									fileLimit="1"
@@ -73,7 +73,13 @@
 									uploadIcon="fa-solid fa-upload"
 									cancelIcon="fa-solid fa-ban"
 									update="messages problems"
-									oncomplete="skyveAfterActionUpload('#{_skyveContent.uploadState.uploadKind}')" />
+									oncomplete="skyveAfterActionUpload('#{_skyveContent.uploadState.uploadKind}')">
+						<div class="skyve-upload-watermark">
+							<i class="fa-solid fa-cloud-arrow-up" aria-hidden="true"></i>
+							<span>#{_skyveContent.i18n['page.fileUpload.dropInstruction']}</span>
+							<small>#{_skyveContent.i18n['page.fileUpload.chooseInstruction']}</small>
+						</div>
+					</p:fileUpload>
 				    <p:growl id="messages" showDetail="true" escape="false">
 						<p:autoUpdate />
 				    </p:growl>

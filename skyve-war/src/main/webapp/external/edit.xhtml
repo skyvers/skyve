@@ -20,11 +20,11 @@
 		</f:metadata>
 		<p:importEnum type="org.skyve.web.WebAction" var="WebAction" allSuffix="ALL_ENUM_VALUES" />  
 		<p:importEnum type="org.skyve.web.UserAgentType" var="UserAgentType" allSuffix="ALL_ENUM_VALUES" />  
-		<ui:composition template="#{'/WEB-INF/pages/templates/'.concat(skyve.templateName).concat('/view.xhtml')}">
+		<ui:composition template="#{'/WEB-INF/pages/templates/'.concat(_skyveTheme.templateName).concat('/view.xhtml')}">
 			<ui:param name="bean" value="#{skyve}" />
 			<ui:param name="showMenu" value="true" />
 			<ui:param name="resetMenu" value="false" />
-			<ui:param name="showSwitchMode" value="#{'phone' ne skyve.userAgentType and skyve.canSwitchMode}" />
+			<ui:param name="showSwitchMode" value="#{not _skyveTheme.phone and skyve.canSwitchMode}" />
 			<ui:param name="showLogout" value="true" />
 			<ui:param name="vue" value="false" />
 			<ui:define name="body">

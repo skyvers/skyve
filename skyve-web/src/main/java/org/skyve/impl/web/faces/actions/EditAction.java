@@ -15,6 +15,7 @@ import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.FacesUtil;
@@ -75,6 +76,7 @@ public class EditAction extends FacesAction<Void> {
 		
 		try {
 			ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
+			String uxuiName = UserAgent.getSelection((HttpServletRequest) ec.getRequest()).getUxUi().getName();
 			Map<String, Object> session = ec.getSessionMap();
 			// This is executed from a redirect from a data grid add or zoom in, or from a subsequent zoom out or remove.
 			// See ActionUtil.redirectViewScopedConversation().
@@ -95,7 +97,7 @@ public class EditAction extends FacesAction<Void> {
 				final String bizModule = current.getBizModule();
 				final String bizDocument = current.getBizDocument();
 
-				EXT.checkAccess(user, UserAccess.singular(bizModule, bizDocument), facesView.getUxUi().getName());
+				EXT.checkAccess(user, UserAccess.singular(bizModule, bizDocument), uxuiName);
 				
 				facesView.setBizModuleParameter(bizModule);
 				facesView.setBizDocumentParameter(bizDocument);
@@ -110,7 +112,7 @@ public class EditAction extends FacesAction<Void> {
 					throw new IllegalStateException("bizDocument is required");
 				}
 
-				EXT.checkAccess(user, UserAccess.singular(bizModule, bizDocument), facesView.getUxUi().getName());
+				EXT.checkAccess(user, UserAccess.singular(bizModule, bizDocument), uxuiName);
 
 				Module module = customer.getModule(bizModule);
 				Document document = module.getDocument(customer, bizDocument);
@@ -142,7 +144,7 @@ public class EditAction extends FacesAction<Void> {
 																	document, 
 																	bean, 
 																	parameters,
-																	facesView.getUxUi().getName());
+																	uxuiName);
 						
 						CustomerImpl internalCustomer = (CustomerImpl) customer;
 						boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.New, bean, null, webContext);

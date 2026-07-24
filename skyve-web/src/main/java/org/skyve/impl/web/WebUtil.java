@@ -14,6 +14,7 @@ import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -823,6 +824,47 @@ public class WebUtil {
 			}
 		}
 		return result;
+	}
+
+	/**
+	 * Appends each supplied value as a UTF-8 encoded query parameter.
+	 *
+	 * @param result URL under construction
+	 * @param name query parameter name
+	 * @param values query parameter values, or {@code null} to append nothing
+	 */
+	public static void appendQueryParameter(@Nonnull StringBuilder result,
+											@Nonnull String name,
+											@Nullable String[] values) {
+		if (values != null) {
+			for (String value : values) {
+				result.append(result.indexOf("?") < 0 ? '?' : '&');
+				result.append(URLEncoder.encode(name, StandardCharsets.UTF_8));
+				result.append('=');
+				result.append(URLEncoder.encode((value == null) ? "" : value, StandardCharsets.UTF_8));
+			}
+		}
+	}
+
+	/**
+	 * Appends all request parameters except the named exclusion to a URL under construction.
+	 * Parameter names and values are UTF-8 encoded, repeated values retain their request order,
+	 * and {@code null} values are represented by an empty value.
+	 *
+	 * @param result URL under construction
+	 * @param request request supplying the parameters
+	 * @param excludedParameterName parameter name to omit
+	 */
+	public static void appendRequestParameters(@Nonnull StringBuilder result,
+											@Nonnull HttpServletRequest request,
+											@Nonnull String excludedParameterName) {
+		Enumeration<String> parameterNames = request.getParameterNames();
+		while (parameterNames.hasMoreElements()) {
+			String parameterName = parameterNames.nextElement();
+			if (! excludedParameterName.equals(parameterName)) {
+				appendQueryParameter(result, parameterName, request.getParameterValues(parameterName));
+			}
+		}
 	}
 
 	/**

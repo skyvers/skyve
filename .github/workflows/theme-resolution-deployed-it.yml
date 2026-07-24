@@ -1,0 +1,10 @@
+name: Theme Resolution Deployed Integration Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  theme-resolution-deployed-it:
+    uses: ./.github/workflows/deployed-it.yml
+    with:
+      test-class: org.skyve.impl.web.faces.ThemeResolutionLifecycleIT

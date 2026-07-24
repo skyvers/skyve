@@ -14,30 +14,7 @@
 			<ui:param name="bean" value="#{_skyveBizImport}" />
 			<ui:define name="templateTitle">#{_skyveBizImport.i18n['page.bizImport.title']}</ui:define>
 			<ui:define name="templateHead">
-				<style>
-					.ui-widget {
-					    font-size: 12px !important;
-					}
-					.ui-panelgrid .ui-widget-content {
-						border-width: 0px;
-						border-style: none;
-					}
-					.ui-panelgrid td {
-						border-width: 0px;
-						border-style: none;
-					}
-					.ui-fileupload-content {
-						min-height: 200px;
-						background-image: url(images/filedrop.png);
-						background-position: right bottom;
-						background-repeat: no-repeat;
-					}
-					@media(max-width: 640px) {
-						.ui-fileupload-buttonbar .ui-button {
-							padding: 20px !important;
-						}
-					}
-				</style>
+				<link type="text/css" rel="stylesheet" href="skyve/css/upload-min.css?v=#{_skyveBizImport.webResourceFileVersion}" />
 				<script type="text/javascript">
 					//<![CDATA[
 					function skyveAfterBizImport() {
@@ -54,13 +31,20 @@
 					<h:inputHidden id="_c" value="#{_skyveBizImport.context}" />
 					<h:inputHidden id="_b" value="#{_skyveBizImport.binding}" />
 					<h:inputHidden id="_a" value="#{_skyveBizImport.action}" />
-					<p:fileUpload listener="#{_skyveBizImport.handleFileUpload}" 
+					<p:fileUpload listener="#{_skyveBizImport.handleFileUpload}"
+									styleClass="skyve-upload"
 									sizeLimit="#{_skyveBizImport.maximumSizeInBytes}"
 									invalidSizeMessage="#{_skyveBizImport.i18n['page.bizImport.sizeLimit']}"
 									allowTypes="#{'/'.concat(_skyveBizImport.whitelistRegex).concat('/i')}"
 									invalidFileMessage="#{_skyveBizImport.i18n['page.bizImport.invalidFile']}"
-									update="messages problems" 
-									oncomplete="skyveAfterBizImport()" />
+									update="messages problems"
+									oncomplete="skyveAfterBizImport()">
+						<div class="skyve-upload-watermark">
+							<i class="fa-solid fa-cloud-arrow-up" aria-hidden="true"></i>
+							<span>#{_skyveBizImport.i18n['page.fileUpload.dropInstruction']}</span>
+							<small>#{_skyveBizImport.i18n['page.fileUpload.chooseInstruction']}</small>
+						</div>
+					</p:fileUpload>
 				    <p:growl id="messages" showDetail="true" escape="false" life="20000" />
 				    <p/>
 				    <p:dataTable id="problems" value="#{_skyveBizImport.problems}" var="problem">

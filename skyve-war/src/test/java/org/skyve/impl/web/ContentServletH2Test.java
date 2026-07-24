@@ -69,8 +69,7 @@ class ContentServletH2Test extends AbstractSkyveTest {
 			assertEquals("clip.mp4", resource.getFileName());
 			assertTrue(resource instanceof AbstractResourceServlet.StreamableResource);
 			assertEquals(bytes.length, ((AbstractResourceServlet.StreamableResource) resource).getContentLength());
-		}
-		finally {
+		} finally {
 			resource.dispose();
 		}
 	}
@@ -139,13 +138,13 @@ class ContentServletH2Test extends AbstractSkyveTest {
 
 	private AttachmentContent putAttachment(byte[] bytes, String markup) throws Exception {
 		AttachmentContent attachment = new AttachmentContent(c.getName(),
-																KitchenSink.MODULE_NAME,
-																KitchenSink.DOCUMENT_NAME,
-																null,
-																u.getId(),
-																"bizId",
-																KitchenSink.contentLinkPropertyName)
-				.attachment("clip.mp4", "video/mp4", bytes);
+				KitchenSink.MODULE_NAME,
+				KitchenSink.DOCUMENT_NAME,
+				null,
+				u.getId(),
+				"bizId",
+				KitchenSink.contentLinkPropertyName)
+						.attachment("clip.mp4", "video/mp4", bytes);
 		attachment.setMarkup(markup);
 		try (ContentManager contentManager = EXT.newContentManager()) {
 			contentManager.put(attachment, false);
@@ -159,7 +158,10 @@ class ContentServletH2Test extends AbstractSkyveTest {
 		request.setParameter(AbstractWebContext.BINDING_NAME, KitchenSink.contentLinkPropertyName);
 		request.setParameter(AbstractWebContext.RESOURCE_FILE_NAME, contentId);
 		request.getSession(true).setAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME, u);
-		request.setAttribute(AbstractWebContext.UXUI, UxUi.newSmartClient(UxUi.DESKTOP_NAME, "Cerulean", "omega"));
+		request.setAttribute(UserAgent.class.getName() + ".selection",
+				new RequestUxUiSelection(org.skyve.web.UserAgentType.desktop,
+						false,
+						UxUi.newSmartClient(UxUi.DESKTOP_NAME, "Cerulean", "omega")));
 		return request;
 	}
 }

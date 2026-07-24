@@ -26,10 +26,13 @@ Skyve must be performant. Apply these rules to all production Java code; they ar
 ## Nullability and Optional
 
 - Prefer `jakarta.annotation.Nonnull` and `jakarta.annotation.Nullable` to `Optional<T>` for ordinary parameters, fields, getters, and return values. Make the nullability contract explicit without adding wrapper allocation or chaining overhead.
+- On every method declaration, place the return nullability annotation after the modifiers and before the return type; for a generic method, the annotation must precede the type-parameter list. Annotate every reference-typed parameter individually with either `@Nonnull` or `@Nullable` immediately before its type. Do not annotate `void` returns or primitive types. For example: `public static @Nonnull <T> T resolve(@Nonnull String key, @Nullable T fallback, int attempts)`.
+- Use nullability annotations instead of runtime non-null checks for internal contracts. Do not add `assert value != null`, `Objects.requireNonNull(value)`, or equivalent guards merely to restate a `@Nonnull` contract; they consume processing cycles for a condition that the compiler or static analyser can check.
+- Allow an ordinary `NullPointerException` to propagate when annotated internal code violates a non-null contract. At that boundary, an NPE exposes the programming error directly and usually does not benefit from an earlier duplicate check.
 - Do not use `Optional<T>` merely to avoid returning `null`, and do not use it as a parameter or field type unless absence is itself a meaningful value in the model. Never return `null` from a method whose declared return type is `Optional<T>`.
 - Use `Optional<T>` only when it materially improves the API or represents additional state, such as a composable lookup result or distinguishing a cached miss from a key that has not been queried. Preserve existing `Optional` contracts unless deliberately changing the API.
 - For multi-valued results, return an empty collection rather than `null` or `Optional<Collection<T>>`, unless an existing contract assigns a distinct meaning to absence.
-- Nullability annotations document and support static analysis; they do not perform runtime validation. Validate untrusted input and required public API arguments only where failure must be enforced at runtime; usually a propagating NullPointerException is fine.
+- Nullability annotations document and support static analysis; they do not perform runtime validation. Validate untrusted input and required public API arguments only where the boundary requires a specific failure mode, exception type, or message. Do not add runtime checks by default; usually a propagating `NullPointerException` is the correct outcome.
 
 ## Utility Reuse
 

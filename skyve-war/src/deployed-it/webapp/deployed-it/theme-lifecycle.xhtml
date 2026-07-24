@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+		xmlns:f="jakarta.faces.core"
+		xmlns:h="jakarta.faces.html"
+		xmlns:p="http://primefaces.org/ui">
+	<h:head>
+		<title>Theme lifecycle deployed fixture</title>
+	</h:head>
+	<h:body>
+		<f:event type="preRenderView" listener="#{_deployedThemeLifecycle.preRender}" />
+			<div id="theme-lifecycle-state"
+				 data-uxui="#{_deployedThemeLifecycle.uxUiName}"
+				 data-user-agent="#{_deployedThemeLifecycle.userAgentType}"
+				 data-emulated="#{_deployedThemeLifecycle.emulated}">
+			<h:form id="lifecycleForm">
+				<h:inputText id="model" value="#{_deployedThemeLifecycle.modelValue}" />
+				<h:commandButton id="normal" value="Normal" action="#{_deployedThemeLifecycle.normalAction}" />
+				<p:commandButton id="ajax" value="Ajax" action="#{_deployedThemeLifecycle.ajaxAction}"
+						process="@form" update="state" />
+				<h:outputText id="state" value="#{_deployedThemeLifecycle.modelValue}" />
+			</h:form>
+		</div>
+	</h:body>
+</html>

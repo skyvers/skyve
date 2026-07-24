@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.same;
@@ -155,6 +156,8 @@ import org.skyve.impl.metadata.view.widget.StaticImage;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 
+// Repeated values specify builder contracts; reflection is required for isolated private-helper coverage.
+@SuppressWarnings({ "java:S112", "java:S1192", "java:S3011", "java:S5960" }) // Reflection and assertions are test-only.
 class TabularComponentBuilderTest {
 
 	private static ExpressionFactory mockExpressionFactory;
@@ -809,6 +812,7 @@ class TabularComponentBuilderTest {
 		final ValueExpression modelExpression;
 		final UIComponent result;
 
+		@SuppressWarnings("java:S107") // The result bundle mirrors the builder call's independently asserted outputs.
 		ListGridCallResult(CapturingListGridBuilder builder,
 							DataTable dataTable,
 							UIOutput emptyMessage,
@@ -937,7 +941,7 @@ class TabularComponentBuilderTest {
 		FacesContextBridge.setCurrent(null);
 	}
 
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({ "static-method", "java:S135", "java:S3776" }) // Reflection deliberately covers every public method shape.
 	@Test
 	void testShortCircuitMethodsReturnExistingComponent() throws Exception {
 		TabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -2902,7 +2906,7 @@ class TabularComponentBuilderTest {
 
 		assertEquals("*9a\\9\\a\\*\\?", method.invoke(null, format));
 		assertNull(method.invoke(null, new Format<>(null, TextCase.upper)));
-		assertNull(method.invoke(null, new Object[] {null}));
+		assertNull(method.invoke(null, (Object) null));
 	}
 
 	@SuppressWarnings("static-method")
@@ -3756,6 +3760,7 @@ class TabularComponentBuilderTest {
 		verify(contextMenu).setFor("listGrid1");
 		verify(zoomItem).setValueExpression("disabled", disabledExpression);
 		verify(popoutItem).setValueExpression("disabled", disabledExpression);
+		verify(popoutItem).setOnclick(argThat(value -> value.contains("window.open('?a=")));
 	}
 
 	@SuppressWarnings("static-method")

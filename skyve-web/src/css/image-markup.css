@@ -1,0 +1,63 @@
+html,
+body {
+	margin: 0;
+	padding: 0;
+	height: 100%;
+	overflow: hidden;
+}
+
+#form {
+	margin: 0;
+	height: 100%;
+}
+
+#excalidraw-wrapper {
+	position: fixed;
+	top: 0;
+	right: 0;
+	bottom: 45px;
+	left: 0;
+}
+
+#excalidraw-root {
+	width: 100%;
+	height: 100%;
+}
+
+.skyve-markup-access-message {
+	width: 100%;
+	height: 50px;
+}
+
+.skyve-markup-apply {
+	position: fixed;
+	right: 8px;
+	bottom: 8px;
+	z-index: 9999;
+	padding: 7px 14px;
+	cursor: pointer;
+	background: var(--skyve-editorial-button-bg, var(--primary-color, #007ad9));
+	color: var(--skyve-editorial-button-fg, var(--primary-color-text, #fff));
+	border: none;
+	border-radius: 3px;
+	font-size: 14px;
+	font-family: inherit;
+}
+
+.skyve-markup-apply:hover {
+	background: var(--skyve-editorial-button-hover-bg, var(--primary-color, #116fbf));
+	color: var(--skyve-editorial-button-hover-fg, var(--primary-color-text, #fff));
+}
+
+.skyve-markup-hidden-action {
+	display: none;
+}
+
+.excalidraw .sidebar-trigger,
+.excalidraw .main-menu-trigger,
+.excalidraw .App-toolbar__extra-tools-dropdown,
+.excalidraw .App-toolbar__extra-tools-trigger,
+.excalidraw .App-toolbar__divider:has(~ .App-toolbar__extra-tools-trigger),
+.excalidraw .App-toolbar__divider:has(+ * .App-toolbar__extra-tools-trigger) {
+	display: none !important;
+}

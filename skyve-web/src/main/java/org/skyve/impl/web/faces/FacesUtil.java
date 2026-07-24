@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 import org.primefaces.PrimeFaces;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.sail.mock.MockFacesContext;
+import org.skyve.util.OWASP;
 
 import jakarta.el.ELContext;
 import jakarta.el.ExpressionFactory;
@@ -136,7 +137,7 @@ public class FacesUtil {
 	 * @param url the redirect destination URL
 	 */
 	public static void jsRedirect(String url) {
-		PrimeFaces.current().executeScript(String.format("window.location='%s'", url));
+		PrimeFaces.current().executeScript("window.location='" + OWASP.escapeJsString(url) + "'");
 	}
 
 	/**

@@ -5,17 +5,20 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.metadata.repository.router.Direct;
+import org.skyve.impl.metadata.repository.router.Direct.DirectMatch;
 import org.skyve.impl.metadata.repository.router.Route;
 import org.skyve.impl.metadata.repository.router.RouteCriteria;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.repository.router.UxUiMetadata;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.web.UserAgentType;
 import org.skyve.web.WebAction;
 
 /** Exercises fluent router builders for criteria, route, and UX/UI copy and mutation paths. */
@@ -145,6 +148,58 @@ class FluentRouterTest {
 	void wrappingConstructorPreservesInstance() {
 		Router existing = new Router();
 		FluentRouter fluent = new FluentRouter(existing);
+		assertThat(fluent.get(), is(existing));
+	}
+
+	/** Verifies that fluent direct setters and copying preserve every metadata value. */
+	@Test
+	void directSetsAndCopiesEveryValue() {
+		FluentDirect source = new FluentDirect().path(" /external/ ")
+				.uxui(" external ")
+				.match(DirectMatch.prefix)
+				.userAgentType(UserAgentType.phone);
+
+		FluentDirect copied = new FluentDirect().from(source.get());
+
+		assertThat(copied.get().getPath(), is("/external/"));
+		assertThat(copied.get().getUxui(), is("external"));
+		assertThat(copied.get().getMatch(), is(DirectMatch.prefix));
+		assertThat(copied.get().getUserAgentType(), is(UserAgentType.phone));
+	}
+
+	/** Verifies ordered all-match find, remove, clear, and source-copy direct semantics. */
+	@Test
+	void routerManagesAllDuplicateDirectsInDeclarationOrder() {
+		FluentDirect first = new FluentDirect().path("/same.xhtml").uxui("first");
+		FluentDirect other = new FluentDirect().path("/other.xhtml").uxui("other");
+		FluentDirect second = new FluentDirect().path("/same.xhtml")
+				.uxui("second")
+				.match(DirectMatch.prefix);
+		FluentRouter fluent = new FluentRouter().addDirect(first).addDirect(other).addDirect(second);
+
+		List<FluentDirect> found = fluent.findDirects("  /same.xhtml  ");
+		assertEquals(2, found.size());
+		assertThat(found.get(0).get().getUxui(), is("first"));
+		assertThat(found.get(1).get().getUxui(), is("second"));
+
+		Router source = fluent.get();
+		FluentRouter copied = new FluentRouter().from(source);
+		assertEquals(3, copied.get().getDirects().size());
+		assertThat(copied.get().getDirects().get(1).getUxui(), is("other"));
+		assertThat(copied.get().getDirects().get(2).getMatch(), is(DirectMatch.prefix));
+
+		fluent.removeDirects(" /same.xhtml ");
+		assertEquals(1, fluent.get().getDirects().size());
+		assertThat(fluent.get().getDirects().get(0).getUxui(), is("other"));
+		fluent.clearDirects();
+		assertTrue(fluent.get().getDirects().isEmpty());
+	}
+
+	/** Verifies that the wrapping constructor retains a supplied direct instance. */
+	@Test
+	void directWrappingConstructorPreservesInstance() {
+		Direct existing = new Direct();
+		FluentDirect fluent = new FluentDirect(existing);
 		assertThat(fluent.get(), is(existing));
 	}
 

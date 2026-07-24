@@ -1,5 +1,7 @@
 package org.skyve.impl.metadata.repository.router;
 
+import java.io.Serializable;
+
 /**
  * Marks UX/UI selector implementations that require web-tier request context.
  *
@@ -11,6 +13,6 @@ package org.skyve.impl.metadata.repository.router;
  * bootstrap and dispatch code can recognise implementations that are coupled to
  * servlet request state and must be created in the web runtime.
  */
-public interface TaggingUxUiSelector {
+public interface TaggingUxUiSelector extends Serializable {
 	// nothing to see here
 }

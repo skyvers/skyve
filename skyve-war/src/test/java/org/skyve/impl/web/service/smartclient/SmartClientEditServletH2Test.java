@@ -45,6 +45,8 @@ import jakarta.servlet.http.HttpSession;
 import modules.test.AbstractSkyveTest;
 import modules.test.domain.AllAttributesPersistent;
 
+// Reflection and servlet exception propagation are required to exercise private servlet branches.
+@SuppressWarnings({ "java:S1192", "java:S1989", "java:S3011", "java:S5960" })
 class SmartClientEditServletH2Test extends AbstractSkyveTest {
 	private static final String UXUI = "external";
 
@@ -123,7 +125,7 @@ class SmartClientEditServletH2Test extends AbstractSkyveTest {
 	@Test
 	void removeDeletesPersistedTopLevelBeanAndWritesSuccessPayload() throws Exception {
 		AllAttributesPersistent bean = new DataBuilder().fixture(FixtureType.crud)
-														.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
 		bean.setText("edit-delete-" + System.nanoTime());
 		bean = p.save(bean);
 
@@ -161,21 +163,20 @@ class SmartClientEditServletH2Test extends AbstractSkyveTest {
 			pumpOutResponse.setAccessible(true);
 			try {
 				pumpOutResponse.invoke(null,
-										webContext,
-										u,
-										(CustomerImpl) c,
-										m,
-										aapd,
-										view,
-										UXUI,
-										bean,
-										null,
-										Integer.valueOf(0),
-										Integer.valueOf(0),
-										"/download/test",
-										writer);
-			}
-			catch (InvocationTargetException e) {
+						webContext,
+						u,
+						c,
+						m,
+						aapd,
+						view,
+						UXUI,
+						bean,
+						null,
+						Integer.valueOf(0),
+						Integer.valueOf(0),
+						"/download/test",
+						writer);
+			} catch (InvocationTargetException e) {
 				Throwable cause = e.getCause();
 				if (cause instanceof Exception exception) {
 					throw exception;
@@ -222,27 +223,26 @@ class SmartClientEditServletH2Test extends AbstractSkyveTest {
 			apply.setAccessible(true);
 			try {
 				apply.invoke(null,
-								webContext,
-								u,
-								c,
-								m,
-								aapd,
-								bean,
-								aapd,
-								bean,
-								null,
-								null,
-								null,
-								null,
-								ServletConstants.PUSH_ACTION_NAME,
-								Integer.valueOf(0),
-								Integer.valueOf(0),
-								new TreeMap<>(),
-								p,
-								UXUI,
-								writer);
-			}
-			catch (InvocationTargetException e) {
+						webContext,
+						u,
+						c,
+						m,
+						aapd,
+						bean,
+						aapd,
+						bean,
+						null,
+						null,
+						null,
+						null,
+						ServletConstants.PUSH_ACTION_NAME,
+						Integer.valueOf(0),
+						Integer.valueOf(0),
+						new TreeMap<>(),
+						p,
+						UXUI,
+						writer);
+			} catch (InvocationTargetException e) {
 				Throwable cause = e.getCause();
 				if (cause instanceof Exception exception) {
 					throw exception;
@@ -257,10 +257,10 @@ class SmartClientEditServletH2Test extends AbstractSkyveTest {
 	}
 
 	private String invokeFetch(String bizId,
-								String source,
-								ImplicitActionName action,
-								SortedMap<String, Object> parameters)
-	throws Exception {
+			String source,
+			ImplicitActionName action,
+			SortedMap<String, Object> parameters)
+			throws Exception {
 		AbstractWebContext webContext = mockWebContext();
 		webContext.setConversation((AbstractPersistence) p);
 		StringWriter sink = new StringWriter();
@@ -285,24 +285,23 @@ class SmartClientEditServletH2Test extends AbstractSkyveTest {
 			fetch.setAccessible(true);
 			try {
 				fetch.invoke(null,
-								webContext,
-								u,
-								c,
-								null,
-								m,
-								aapd,
-								null,
-								source,
-								bizId,
-								Integer.valueOf(0),
-								Integer.valueOf(0),
-								action,
-								parameters,
-								p,
-								UXUI,
-								writer);
-			}
-			catch (InvocationTargetException e) {
+						webContext,
+						u,
+						c,
+						null,
+						m,
+						aapd,
+						null,
+						source,
+						bizId,
+						Integer.valueOf(0),
+						Integer.valueOf(0),
+						action,
+						parameters,
+						p,
+						UXUI,
+						writer);
+			} catch (InvocationTargetException e) {
 				Throwable cause = e.getCause();
 				if (cause instanceof Exception exception) {
 					throw exception;
@@ -331,16 +330,15 @@ class SmartClientEditServletH2Test extends AbstractSkyveTest {
 			remove.setAccessible(true);
 			try {
 				remove.invoke(null,
-								webContext,
-								u,
-								(CustomerImpl) c,
-								aapd,
-								beanToDelete,
-								bizlet,
-								p,
-								writer);
-			}
-			catch (InvocationTargetException e) {
+						webContext,
+						u,
+						c,
+						aapd,
+						beanToDelete,
+						bizlet,
+						p,
+						writer);
+			} catch (InvocationTargetException e) {
 				Throwable cause = e.getCause();
 				if (cause instanceof Exception exception) {
 					throw exception;
@@ -412,7 +410,7 @@ class SmartClientEditServletH2Test extends AbstractSkyveTest {
 		}
 
 		private RequestBuilder param(String name, String value) {
-			parameters.put(name, new String[] {value});
+			parameters.put(name, new String[] { value });
 			return this;
 		}
 
@@ -425,7 +423,6 @@ class SmartClientEditServletH2Test extends AbstractSkyveTest {
 			when(request.getUserPrincipal()).thenReturn((Principal) null);
 			when(request.getLocale()).thenReturn(java.util.Locale.ENGLISH);
 			when(request.getHeader("User-Agent")).thenReturn("Mozilla/5.0");
-			when(request.getAttribute(AbstractWebContext.UXUI)).thenReturn(null);
 			for (Map.Entry<String, String[]> entry : parameters.entrySet()) {
 				when(request.getParameter(entry.getKey())).thenReturn(entry.getValue()[0]);
 				when(request.getParameterValues(entry.getKey())).thenReturn(entry.getValue());
@@ -442,6 +439,7 @@ class SmartClientEditServletH2Test extends AbstractSkyveTest {
 		private final StringWriter sink = new StringWriter();
 		private final HttpServletResponse response = mock(HttpServletResponse.class);
 
+		@SuppressWarnings("resource") // The servlet owns the response writer lifecycle.
 		private CapturedResponse() throws IOException {
 			when(response.getWriter()).thenReturn(new PrintWriter(sink, true));
 		}

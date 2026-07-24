@@ -24,6 +24,8 @@ import org.skyve.util.Binder;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.inject.Inject;
 import modules.admin.User.UserExtension;
 import modules.admin.User.UserService;
@@ -118,12 +120,15 @@ public class UserDashboardExtension extends UserDashboard {
 				Customer customer = p.getUser().getCustomer();
 				for (Module module : customer.getModules()) {
 					// check if user has access to the home document
-					Document document = module.getDocument(customer, module.getHomeDocumentName());
+					String homeDocumentName = module.getHomeDocumentName();
+					if (homeDocumentName == null) {
+						continue;
+					}
+					Document document = module.getDocument(customer, homeDocumentName);
 					if (ViewType.list.equals(module.getHomeRef())) {
 						if (CORE.getUser().canCreateDocument(document)) {
 							String reason = "Suggested for creation";
-							addTile(createTile(Operation.insert, module.getName(), module.getHomeDocumentName(), null,
-									reason));
+							addTile(createTile(Operation.insert, module.getName(), homeDocumentName, null, reason));
 						}
 					} else {
 						// exclude user dashboard - we are already here
@@ -213,23 +218,24 @@ public class UserDashboardExtension extends UserDashboard {
 			for (Bean audit : audits) {
 				String moduleName = (String) Binder.get(audit, Audit.auditModuleNamePropertyName);
 				String documentName = (String) Binder.get(audit, Audit.auditDocumentNamePropertyName);
-				Customer customer = CORE.getCustomer();
-				Module module = customer.getModule(moduleName);
-				Document document = module.getDocument(customer, documentName);
+				if ((moduleName == null) || (documentName == null)) {
+					LOGGER.debug("{} tile skipped for an audit without a module or document", reason);
+				} else {
+					Customer customer = CORE.getCustomer();
+					Module module = customer.getModule(moduleName);
+					Document document = module.getDocument(customer, documentName);
 
-				if (!document.isPersistable()) {
-					LOGGER.debug(reason + " tile skipped for non-persistable document: " + moduleName + "." + documentName);
-					continue;
-				}
-
-				if (CORE.getUser().canAccessDocument(document)) {
-					String id = (String) Binder.get(audit, Audit.auditBizIdPropertyName);
-					if (id != null) {
-						Bean exists = persistence.retrieve(moduleName, documentName, id);
-						if (exists != null) {
-							boolean added = addTile(createTile(Operation.update, moduleName, documentName, exists, reason));
-							if (added) {
-								count++;
+					if (! document.isPersistable()) {
+						LOGGER.debug("{} tile skipped for non-persistable document: {}.{}", reason, moduleName, documentName);
+					} else if (CORE.getUser().canAccessDocument(document)) {
+						String id = (String) Binder.get(audit, Audit.auditBizIdPropertyName);
+						if (id != null) {
+							Bean exists = persistence.retrieve(moduleName, documentName, id);
+							if (exists != null) {
+								boolean added = addTile(createTile(Operation.update, moduleName, documentName, exists, reason));
+								if (added) {
+									count++;
+								}
 							}
 						}
 					}
@@ -261,12 +267,15 @@ public class UserDashboardExtension extends UserDashboard {
 			Timestamp timestamp = (Timestamp) Binder.get(audit, Audit.timestampPropertyName);
 			String moduleName = (String) Binder.get(audit, Audit.auditModuleNamePropertyName);
 			String documentName = (String) Binder.get(audit, Audit.auditDocumentNamePropertyName);
-			if (checkModuleDocumentCanBeRead(moduleName, documentName)) {
+			if ((moduleName == null) || (documentName == null)) {
+				LOGGER.debug("{} tile skipped for an audit without a module or document", reason);
+			} else if (checkModuleDocumentCanBeRead(moduleName, documentName)) {
 				if (Operation.update.equals(operation)) {
 					String id = (String) Binder.get(audit, Audit.auditBizIdPropertyName);
-					Bean exists = persistence.retrieve(moduleName, documentName, id);
-					if (exists != null) {
-						if ((lastTime == null || lastTime.before(timestamp))
+					if (id != null) {
+						Bean exists = persistence.retrieve(moduleName, documentName, id);
+						if ((exists != null)
+								&& (lastTime == null || lastTime.before(timestamp))
 								&& !documents.contains(documentName)) {
 							boolean added = addTile(createTile(operation, moduleName, documentName, exists, reason));
 							lastTime = timestamp;
@@ -275,14 +284,12 @@ public class UserDashboardExtension extends UserDashboard {
 							}
 						}
 					}
-				} else {
-					if ((lastTime == null || lastTime.before(timestamp))
+				} else if ((lastTime == null || lastTime.before(timestamp))
 							&& !documents.contains(documentName)) {
-						boolean added = addTile(createTile(operation, moduleName, documentName, null, reason));
-						lastTime = timestamp;
-						if (added) {
-							count++;
-						}
+					boolean added = addTile(createTile(operation, moduleName, documentName, null, reason));
+					lastTime = timestamp;
+					if (added) {
+						count++;
 					}
 				}
 				if (count == top) {
@@ -321,10 +328,13 @@ public class UserDashboardExtension extends UserDashboard {
 	 * @param reason Reason text shown on the tile.
 	 * @return A tile descriptor, or {@code null} when access checks fail.
 	 */
-	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
-	private static Tile createTile(Operation operation, String moduleName, String documentName, Bean bean, String reason) {
-
-		if (!checkModuleDocumentCanBeRead(moduleName, documentName)) {
+	@SuppressWarnings({ "java:S3776", "java:S6541" }) // complexity OK
+	private static @Nullable Tile createTile(@Nonnull Operation operation,
+												@Nonnull String moduleName,
+												@Nullable String documentName,
+												@Nullable Bean bean,
+												@Nullable String reason) {
+		if ((documentName == null) || (!checkModuleDocumentCanBeRead(moduleName, documentName))) {
 			return null;
 		}
 
@@ -423,7 +433,7 @@ public class UserDashboardExtension extends UserDashboard {
 								+ "&_w=24&_h=24";
 						icon = String.format("<span class='icon'>"
 								+ "  <img src='%1$s'/>"
-								+ "</span>", imgSrc);
+								+ "</span>", OWASP.escapeHtml(imgSrc));
 					}
 					break;
 				}

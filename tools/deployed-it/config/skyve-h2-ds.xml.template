@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<datasources>
+	<datasource jndi-name="java:/SkyveDB" pool-name="Skyve Deployed IT" enabled="true" jta="false" use-ccm="true">
+		<connection-url>jdbc:h2:file:@DATABASE_PATH@;IFEXISTS=FALSE;IGNORECASE=TRUE;AUTO_SERVER=FALSE</connection-url>
+		<driver>h2</driver>
+		<security>
+			<user-name>@DATABASE_USERNAME@</user-name>
+			<password>@DATABASE_PASSWORD@</password>
+		</security>
+	</datasource>
+</datasources>

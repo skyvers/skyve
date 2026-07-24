@@ -8,7 +8,7 @@ Skyve is a metadata-driven Java low-code framework implemented as a multi-module
 - [plan.md](plan.md) must be read when asked to plan or execute a milestone or sprint. It defines the planning workflow, milestone plan format, execution steps, and the current roadmap.
 - [test-patterns.md](test-patterns.md) should be read before writing or modifying tests.
 - [../coverage-plan.md](../coverage-plan.md) must be read before starting any coverage-improvement work. It defines the target, skip list, and ranked package priorities.
-- [../architecture.md](../architecture.md) should be read whenever the task touches architecture, generated code, metadata flow, module boundaries, runtime bootstrapping, or delivery packaging.
+- [../architecture-design.md](../architecture-design.md) should be read whenever the task touches architecture, generated code, metadata flow, module boundaries, runtime bootstrapping, or delivery packaging.
 - [../../README.md](../../README.md) and module-local docs should be treated as the source of truth for user-facing framework capabilities and supported workflows.
 
 ## Repository Shape

@@ -147,7 +147,7 @@ public class DynamicImageServlet extends HttpServlet {
 			Customer customer = user.getCustomer();
 			document = customer.getModule(moduleName).getDocument(customer, documentName);
 			
-			UxUi uxui = UserAgent.getUxUi(request);
+			UxUi uxui = UserAgent.getSelection(request).getUxUi();
 			EXT.checkAccess(user, UserAccess.dynamicImage(moduleName, documentName, imageName), uxui.getName());
 
 			DynamicImage<Bean> dynamicImage = document.getDynamicImage(customer, imageName);

@@ -5,6 +5,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.messages.SecurityException;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.views.FacesView;
@@ -16,9 +17,13 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.util.OWASP;
 import org.skyve.util.logging.Category;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
+
+import jakarta.faces.context.FacesContext;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * /download?_n=<action>&_doc=<module.document>&_c=<webId>&_ctim=<millis> and optionally &_b=<view binding>
@@ -60,7 +65,8 @@ public class ExecuteDownloadAction extends FacesAction<Void> {
     	Customer customer = user.getCustomer();
     	Module targetModule = customer.getModule(targetBean.getBizModule());
 		Document targetDocument = targetModule.getDocument(customer, targetBean.getBizDocument());
-		View view = targetDocument.getView(facesView.getUxUi().getName(), 
+		HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
+		View view = targetDocument.getView(UserAgent.getSelection(request).getUxUi().getName(),
 											customer, 
 											targetBean.isCreated() ? ViewType.edit.toString() : ViewType.create.toString());
     	Action action = view.getAction(actionName);
@@ -88,7 +94,7 @@ public class ExecuteDownloadAction extends FacesAction<Void> {
 														facesView.getViewBinding(),
 														dataWidgetBinding,
 														elementBizId);
-			PrimeFaces.current().executeScript("window.location.assign(\"" + url + "\")");
+			PrimeFaces.current().executeScript("window.location.assign('" + OWASP.escapeJsString(url) + "')");
 			
 			// We want to call post render
 			facesView.setPostRender(targetDocument.getBizlet(customer), targetBean);
