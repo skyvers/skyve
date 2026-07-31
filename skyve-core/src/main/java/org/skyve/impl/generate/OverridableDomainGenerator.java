@@ -71,6 +71,8 @@ import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Reference.ReferenceType;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.QueryDefinition;
+import org.skyve.metadata.user.Role;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.util.logging.SkyveLoggerFactory;
@@ -514,6 +516,126 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		if (write) {
 			generation.put(mappingFilePath, mappingFileContents);
 		}
+
+		generateModuleConstants(module, packagePath);
+	}
+
+	/**
+	 * Generate a module-level constants class in the module's domain package holding the module
+	 * name and a nested constants holder per kind of stringly-referenced module metadata — the
+	 * role names, document names and module query names declared in the module.xml — so each can
+	 * be referenced in a compile-checked way (a rename in the module.xml breaks compilation at
+	 * every reference, mirroring the generated <code>*PropertyName</code> attribute constants).
+	 * <p>
+	 * The class is named for the module (e.g. <code>Admin</code> for the admin module), or
+	 * <code>&lt;Module&gt;Constants</code> when a document in the module already claims that class
+	 * name in the domain package. An empty nested holder is not generated.
+	 *
+	 * @param module	The module to generate constants for.
+	 * @param packagePath	The module's domain package path (relative, '/' separated).
+	 */
+	private void generateModuleConstants(final Module module, final String packagePath) {
+		final String moduleName = module.getName();
+		final String packageName = packagePath.replaceAll("\\\\|\\/", ".");
+
+		// A document class of the same name lives in the same generated package - dodge it
+		// (and keep suffixing in the pathological case where the suffixed name is a document too).
+		// The comparison is case-insensitive because the generated files must coexist on
+		// case-insensitive file systems - e.g. module kitchensink's constants class Kitchensink
+		// would clobber its KitchenSink document class on macOS or Windows.
+		String className = BindUtil.toJavaTypeIdentifier(moduleName);
+		while (containsIgnoreCase(module.getDocumentRefs().keySet(), className)) {
+			className += "Constants";
+		}
+
+		StringBuilder contents = new StringBuilder(2048);
+		contents.append("package ").append(packageName).append(";\n\n");
+
+		Set<String> imports = new TreeSet<>();
+		imports.add("jakarta.annotation.Generated");
+
+		// generate imports
+		for (String importClassName : imports) {
+			contents.append("import ").append(importClassName).append(";\n");
+		}
+
+		// generate javadoc
+		contents.append("\n/**\n");
+		contents.append(" * The metadata names declared in the ").append(moduleName).append(" module.\n");
+		contents.append(" * Generated - local changes will be overwritten.\n");
+		contents.append(" */\n");
+		contents.append("@Generated(value = \"").append(getClass().getName()).append("\")\n");
+		contents.append("public final class ").append(className).append(" {\n");
+		contents.append("\t/** The name of the ").append(moduleName).append(" module. */\n");
+		contents.append("\tpublic static final String MODULE_NAME = \"").append(moduleName).append("\";\n");
+
+		generateModuleConstantsHolder(contents, moduleName, className, "Roles", "role",
+										module.getRoles().stream().map(Role::getName).toList());
+		generateModuleConstantsHolder(contents, moduleName, className, "Documents", "document",
+										new ArrayList<>(module.getDocumentRefs().keySet()));
+		generateModuleConstantsHolder(contents, moduleName, className, "Queries", "query",
+										module.getMetadataQueries().stream().map(QueryDefinition::getName).toList());
+
+		contents.append("\n\tprivate ").append(className).append("() {\n");
+		contents.append("\t\t// prevent instantiation\n");
+		contents.append("\t}\n");
+		contents.append("}\n");
+		contents.trimToSize();
+
+		if (write) {
+			generation.put(Paths.get(generatedSrcPath, packagePath, className + ".java"), contents);
+		}
+	}
+
+	/** Whether the set contains the candidate, compared case-insensitively. */
+	private static boolean containsIgnoreCase(final Set<String> names, final String candidate) {
+		return names.stream().anyMatch(candidate::equalsIgnoreCase);
+	}
+
+	/**
+	 * Generate one nested static constants holder (e.g. <code>Roles</code>) inside the module
+	 * constants class, with a String constant per metadata name. Nothing is generated when there
+	 * are no names.
+	 *
+	 * @param contents	The module constants class contents to append to.
+	 * @param moduleName	The name of the module (for error messages).
+	 * @param className	The module constants class name (for error messages).
+	 * @param holderName	The nested class name - "Roles", "Documents" or "Queries".
+	 * @param kind	The singular metadata kind for javadoc and error messages - e.g. "role".
+	 * @param names	The metadata names to generate constants for.
+	 */
+	private static void generateModuleConstantsHolder(final StringBuilder contents,
+														final String moduleName,
+														final String className,
+														final String holderName,
+														final String kind,
+														final List<String> names) {
+		if (names.isEmpty()) {
+			return;
+		}
+
+		contents.append("\n\t/** The ").append(kind).append(" names declared in the ")
+					.append(moduleName).append(" module. */\n");
+		contents.append("\tpublic static final class ").append(holderName).append(" {\n");
+
+		Set<String> constantNames = new TreeSet<>();
+		for (String name : names) {
+			String constantName = BindUtil.toJavaStaticIdentifier(name);
+			if (! constantNames.add(constantName)) {
+				throw new MetaDataException("Module " + moduleName + ' ' + kind + ' ' + name +
+												" yields the duplicate Java constant name " + constantName +
+												" in the generated " + className + '.' + holderName +
+												" class. Rename the " + kind + '.');
+			}
+			contents.append("\t\t/** The \"").append(name).append("\" ").append(kind).append(" name. */\n");
+			contents.append("\t\tpublic static final String ").append(constantName)
+						.append(" = \"").append(name).append("\";\n");
+		}
+
+		contents.append("\n\t\tprivate ").append(holderName).append("() {\n");
+		contents.append("\t\t\t// prevent instantiation\n");
+		contents.append("\t\t}\n");
+		contents.append("\t}\n");
 	}
 
 	private SkyveFactory retrieveFactoryAnnotation(final File factoryFile) {

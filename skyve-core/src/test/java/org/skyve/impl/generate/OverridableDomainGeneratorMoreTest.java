@@ -17,6 +17,8 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -40,6 +42,8 @@ import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.QueryDefinition;
+import org.skyve.metadata.user.Role;
 import org.skyve.metadata.repository.ProvidedRepository;
 
 /**
@@ -5058,5 +5062,128 @@ class OverridableDomainGeneratorMoreTest {
 		String java = methods.toString();
 		assertTrue(java.contains("getMtmBackRefsElementById"), "manyToMany should have get-by-id method, got: " + java);
 		assertTrue(java.contains("addMtmBackRefsElement"), "manyToMany should have add method, got: " + java);
+	}
+
+	// ----- generateModuleConstants ------------------------------------------
+
+	private static Module moduleConstantsModule(String moduleName,
+													List<String> roleNames,
+													List<String> documentNames,
+													List<String> queryNames) {
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn(moduleName);
+
+		List<Role> roles = roleNames.stream().map(name -> {
+			Role role = mock(Role.class);
+			when(role.getName()).thenReturn(name);
+			return role;
+		}).toList();
+		when(module.getRoles()).thenReturn(roles);
+
+		Map<String, Module.DocumentRef> refs = new TreeMap<>();
+		for (String documentName : documentNames) {
+			refs.put(documentName, new Module.DocumentRef());
+		}
+		when(module.getDocumentRefs()).thenReturn(refs);
+
+		List<QueryDefinition> queries = queryNames.stream().map(name -> {
+			QueryDefinition query = mock(QueryDefinition.class);
+			when(query.getName()).thenReturn(name);
+			return query;
+		}).toList();
+		when(module.getMetadataQueries()).thenReturn(queries);
+
+		return module;
+	}
+
+	private static String generateModuleConstants(Module module) throws Exception {
+		OverridableDomainGenerator gen = new OverridableDomainGenerator(true, false, false,
+				DialectOptions.H2_NO_INDEXES, "", "", "", "", null);
+		declaredMethod("generateModuleConstants", Module.class, String.class)
+				.invoke(gen, module, "modules/" + module.getName() + "/domain");
+		assertEquals(1, gen.generation.size(), "One module constants file should be queued");
+		Map.Entry<Path, CharSequence> entry = gen.generation.entrySet().iterator().next();
+		return entry.getKey().getFileName() + "\n" + entry.getValue();
+	}
+
+	@Test
+	void shouldGenerateModuleConstantsWithNestedHolders() throws Exception {
+		Module module = moduleConstantsModule("staffPortal",
+				List.of("Read Only", "SecurityAdministrator"),
+				List.of("MyDetails"),
+				List.of("qActiveUsers"));
+
+		String java = generateModuleConstants(module);
+
+		assertTrue(java.startsWith("StaffPortal.java\n"), "Class should be named for the module, got: " + java);
+		assertTrue(java.contains("package modules.staffPortal.domain;"), java);
+		assertTrue(java.contains("public final class StaffPortal {"), java);
+		assertTrue(java.contains("public static final String MODULE_NAME = \"staffPortal\";"), java);
+		assertTrue(java.contains("public static final class Roles {"), java);
+		assertTrue(java.contains("public static final String READ_ONLY = \"Read Only\";"), java);
+		assertTrue(java.contains("public static final String SECURITY_ADMINISTRATOR = \"SecurityAdministrator\";"), java);
+		assertTrue(java.contains("public static final class Documents {"), java);
+		assertTrue(java.contains("public static final String MY_DETAILS = \"MyDetails\";"), java);
+		assertTrue(java.contains("public static final class Queries {"), java);
+		assertTrue(java.contains("public static final String Q_ACTIVE_USERS = \"qActiveUsers\";"), java);
+	}
+
+	@Test
+	void shouldOmitEmptyModuleConstantsHolders() throws Exception {
+		Module module = moduleConstantsModule("staffPortal",
+				List.of(),
+				List.of("MyDetails"),
+				List.of());
+
+		String java = generateModuleConstants(module);
+
+		assertFalse(java.contains("class Roles"), "Empty Roles holder should be omitted, got: " + java);
+		assertFalse(java.contains("class Queries"), "Empty Queries holder should be omitted, got: " + java);
+		assertTrue(java.contains("public static final class Documents {"), java);
+	}
+
+	@Test
+	void shouldSuffixModuleConstantsClassNameUntilNoDocumentCollision() throws Exception {
+		// A document class named for the module already owns the class name in the domain package,
+		// and so does the first fallback - the name must keep suffixing until it is free.
+		Module module = moduleConstantsModule("inspection",
+				List.of("Inspector"),
+				List.of("Inspection", "InspectionConstants"),
+				List.of());
+
+		String java = generateModuleConstants(module);
+
+		assertTrue(java.startsWith("InspectionConstantsConstants.java\n"),
+				"Class name should dodge both document names, got: " + java);
+		assertTrue(java.contains("public final class InspectionConstantsConstants {"), java);
+	}
+
+	@Test
+	void shouldSuffixModuleConstantsClassNameOnCaseInsensitiveDocumentCollision() throws Exception {
+		// Module kitchensink's candidate class Kitchensink differs from its KitchenSink document
+		// only by case - the same file on a case-insensitive file system, so it must be dodged.
+		Module module = moduleConstantsModule("kitchensink",
+				List.of("Tester"),
+				List.of("KitchenSink"),
+				List.of());
+
+		String java = generateModuleConstants(module);
+
+		assertTrue(java.startsWith("KitchensinkConstants.java\n"),
+				"Class name should dodge the case-insensitively equal document name, got: " + java);
+	}
+
+	@Test
+	void shouldThrowWhenModuleConstantsNamesCollideAfterMangling() {
+		// "Read Only" and "ReadOnly" both mangle to READ_ONLY
+		Module module = moduleConstantsModule("staffPortal",
+				List.of("Read Only", "ReadOnly"),
+				List.of("MyDetails"),
+				List.of());
+
+		InvocationTargetException e = assertThrows(InvocationTargetException.class,
+				() -> generateModuleConstants(module));
+		assertTrue(e.getCause() instanceof MetaDataException, String.valueOf(e.getCause()));
+		assertTrue(e.getCause().getMessage().contains("READ_ONLY"), e.getCause().getMessage());
 	}
 }
