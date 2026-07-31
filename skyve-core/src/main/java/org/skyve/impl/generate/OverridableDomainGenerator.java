@@ -567,7 +567,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		contents.append("@Generated(value = \"").append(getClass().getName()).append("\")\n");
 		contents.append("public final class ").append(className).append(" {\n");
 		contents.append("\t/** The name of the ").append(moduleName).append(" module. */\n");
-		contents.append("\tpublic static final String MODULE_NAME = \"").append(moduleName).append("\";\n");
+		contents.append("\tpublic static final String MODULE_NAME = \"").append(javaStringLiteral(moduleName)).append("\";\n");
 
 		generateModuleConstantsHolder(contents, moduleName, className, "Roles", "role",
 										module.getRoles().stream().map(Role::getName).toList());
@@ -590,6 +590,15 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	/** Whether the set contains the candidate, compared case-insensitively. */
 	private static boolean containsIgnoreCase(final Set<String> names, final String candidate) {
 		return names.stream().anyMatch(candidate::equalsIgnoreCase);
+	}
+
+	/** Escapes a metadata name for emission inside a generated Java String literal. */
+	private static String javaStringLiteral(final String name) {
+		return name.replace("\\", "\\\\")
+					.replace("\"", "\\\"")
+					.replace("\n", "\\n")
+					.replace("\r", "\\r")
+					.replace("\t", "\\t");
 	}
 
 	/**
@@ -627,9 +636,10 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 												" in the generated " + className + '.' + holderName +
 												" class. Rename the " + kind + '.');
 			}
-			contents.append("\t\t/** The \"").append(name).append("\" ").append(kind).append(" name. */\n");
+			String literal = javaStringLiteral(name);
+			contents.append("\t\t/** The \"").append(literal).append("\" ").append(kind).append(" name. */\n");
 			contents.append("\t\tpublic static final String ").append(constantName)
-						.append(" = \"").append(name).append("\";\n");
+						.append(" = \"").append(literal).append("\";\n");
 		}
 
 		contents.append("\n\t\tprivate ").append(holderName).append("() {\n");

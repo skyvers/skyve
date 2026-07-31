@@ -5174,6 +5174,22 @@ class OverridableDomainGeneratorMoreTest {
 	}
 
 	@Test
+	void shouldEscapeModuleConstantsValuesAsJavaStringLiterals() throws Exception {
+		// A quote or backslash in a metadata name must not break the generated class
+		Module module = moduleConstantsModule("staffPortal",
+				List.of("Read \"Only\"", "Back\\Slash"),
+				List.of("MyDetails"),
+				List.of());
+
+		String java = generateModuleConstants(module);
+
+		assertTrue(java.contains("= \"Read \\\"Only\\\"\";"),
+				"Double quotes should be escaped in the generated literal, got: " + java);
+		assertTrue(java.contains("= \"Back\\\\Slash\";"),
+				"Backslashes should be escaped in the generated literal, got: " + java);
+	}
+
+	@Test
 	void shouldThrowWhenModuleConstantsNamesCollideAfterMangling() {
 		// "Read Only" and "ReadOnly" both mangle to READ_ONLY
 		Module module = moduleConstantsModule("staffPortal",
