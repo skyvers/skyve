@@ -517,35 +517,67 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			generation.put(mappingFilePath, mappingFileContents);
 		}
 
-		generateModuleConstants(module, packagePath);
+		generateModuleMetadataEnums(module, packagePath);
 	}
 
 	/**
-	 * Generate a module-level constants class in the module's domain package holding the module
-	 * name and a nested constants holder per kind of stringly-referenced module metadata — the
-	 * role names, document names and module query names declared in the module.xml — so each can
-	 * be referenced in a compile-checked way (a rename in the module.xml breaks compilation at
-	 * every reference, mirroring the generated <code>*PropertyName</code> attribute constants).
-	 * <p>
-	 * The class is named for the module (e.g. <code>Admin</code> for the admin module), or
-	 * <code>&lt;Module&gt;Constants</code> when a document in the module already claims that class
-	 * name in the domain package. An empty nested holder is not generated.
+	 * Generate one enum per kind of module metadata (<code>&lt;Module&gt;Role</code>,
+	 * <code>&lt;Module&gt;Document</code>, <code>&lt;Module&gt;Query</code>) in the module's
+	 * domain package, each implementing the corresponding <code>org.skyve.metadata</code>
+	 * reference interface so a single enum constant carries the module name and metadata name
+	 * (e.g. <code>user.isInRole(AdminRole.AUDIT_MANAGER)</code>) and resolves itself through the
+	 * current customer via the interface's default method. An empty kind generates no enum.
 	 *
-	 * @param module	The module to generate constants for.
+	 * @param module	The module to generate metadata enums for.
 	 * @param packagePath	The module's domain package path (relative, '/' separated).
 	 */
-	private void generateModuleConstants(final Module module, final String packagePath) {
+	private void generateModuleMetadataEnums(final Module module, final String packagePath) {
+		generateModuleMetadataEnum(module, packagePath, "Role", "role",
+									"org.skyve.metadata.user.ModuleRole", "roleName",
+									module.getRoles().stream().map(Role::getName).toList());
+		generateModuleMetadataEnum(module, packagePath, "Document", "document",
+									"org.skyve.metadata.model.document.ModuleDocument", "documentName",
+									new ArrayList<>(module.getDocumentRefs().keySet()));
+		generateModuleMetadataEnum(module, packagePath, "Query", "query",
+									"org.skyve.metadata.module.query.ModuleQuery", "queryName",
+									module.getMetadataQueries().stream().map(QueryDefinition::getName).toList());
+	}
+
+	/**
+	 * Generate one module metadata reference enum (e.g. <code>AdminRole</code>) with a constant
+	 * per metadata name, implementing the given reference interface. The enum class name dodges
+	 * document class names in the same package case-insensitively, mirroring the module metadata
+	 * factory class. Nothing is generated when there are no names.
+	 *
+	 * @param module	The module to generate the enum for.
+	 * @param packagePath	The module's domain package path (relative, '/' separated).
+	 * @param kindSuffix	The enum class name suffix - "Role", "Document" or "Query".
+	 * @param kind	The singular metadata kind for javadoc and error messages - e.g. "role".
+	 * @param interfaceClassName	The fully qualified reference interface the enum implements.
+	 * @param nameAccessor	The interface's name accessor method - e.g. "roleName".
+	 * @param names	The metadata names to generate enum constants for.
+	 */
+	private void generateModuleMetadataEnum(final Module module,
+											final String packagePath,
+											final String kindSuffix,
+											final String kind,
+											final String interfaceClassName,
+											final String nameAccessor,
+											final List<String> names) {
+		if (names.isEmpty()) {
+			return;
+		}
+
 		final String moduleName = module.getName();
 		final String packageName = packagePath.replaceAll("\\\\|\\/", ".");
+		final String interfaceSimpleName = interfaceClassName.substring(interfaceClassName.lastIndexOf('.') + 1);
 
-		// A document class of the same name lives in the same generated package - dodge it
-		// (and keep suffixing in the pathological case where the suffixed name is a document too).
-		// The comparison is case-insensitive because the generated files must coexist on
-		// case-insensitive file systems - e.g. module kitchensink's constants class Kitchensink
-		// would clobber its KitchenSink document class on macOS or Windows.
-		String className = BindUtil.toJavaTypeIdentifier(moduleName);
-		while (containsIgnoreCase(module.getDocumentRefs().keySet(), className)) {
-			className += "Constants";
+		// Dodge document class names in the same generated package - e.g. a module could declare a
+		// document named <Module>Role. The comparison is case-insensitive because the generated
+		// files must coexist on case-insensitive file systems (macOS, Windows).
+		String enumName = BindUtil.toJavaTypeIdentifier(moduleName) + kindSuffix;
+		while (containsIgnoreCase(module.getDocumentRefs().keySet(), enumName)) {
+			enumName += kindSuffix;
 		}
 
 		StringBuilder contents = new StringBuilder(2048);
@@ -553,6 +585,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		Set<String> imports = new TreeSet<>();
 		imports.add("jakarta.annotation.Generated");
+		imports.add(interfaceClassName);
 
 		// generate imports
 		for (String importClassName : imports) {
@@ -561,29 +594,51 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		// generate javadoc
 		contents.append("\n/**\n");
-		contents.append(" * The metadata names declared in the ").append(moduleName).append(" module.\n");
+		contents.append(" * Compile-time references to the ").append(kind).append("s declared in the ")
+					.append(moduleName).append(" module.\n");
 		contents.append(" * Generated - local changes will be overwritten.\n");
 		contents.append(" */\n");
 		contents.append("@Generated(value = \"").append(getClass().getName()).append("\")\n");
-		contents.append("public final class ").append(className).append(" {\n");
-		contents.append("\t/** The name of the ").append(moduleName).append(" module. */\n");
-		contents.append("\tpublic static final String MODULE_NAME = \"").append(javaStringLiteral(moduleName)).append("\";\n");
+		contents.append("public enum ").append(enumName).append(" implements ").append(interfaceSimpleName).append(" {\n");
 
-		generateModuleConstantsHolder(contents, moduleName, className, "Roles", "role",
-										module.getRoles().stream().map(Role::getName).toList());
-		generateModuleConstantsHolder(contents, moduleName, className, "Documents", "document",
-										new ArrayList<>(module.getDocumentRefs().keySet()));
-		generateModuleConstantsHolder(contents, moduleName, className, "Queries", "query",
-										module.getMetadataQueries().stream().map(QueryDefinition::getName).toList());
+		Set<String> constantNames = new TreeSet<>();
+		boolean first = true;
+		for (String name : names) {
+			String constantName = BindUtil.toJavaStaticIdentifier(name);
+			if (! constantNames.add(constantName)) {
+				throw new MetaDataException("Module " + moduleName + ' ' + kind + ' ' + name +
+												" yields the duplicate Java enum constant name " + constantName +
+												" in the generated " + enumName + " enum. Rename the " + kind + '.');
+			}
+			if (! first) {
+				contents.append(",\n");
+			}
+			first = false;
+			String literal = javaStringLiteral(name);
+			contents.append("\t/** The \"").append(literal).append("\" ").append(kind).append(". */\n");
+			contents.append("\t").append(constantName).append("(\"").append(literal).append("\")");
+		}
+		contents.append(";\n");
 
-		contents.append("\n\tprivate ").append(className).append("() {\n");
-		contents.append("\t\t// prevent instantiation\n");
+		contents.append("\n\tprivate final String name;\n");
+		contents.append("\n\tprivate ").append(enumName).append("(String name) {\n");
+		contents.append("\t\tthis.name = name;\n");
+		contents.append("\t}\n");
+
+		contents.append("\n\t@Override\n");
+		contents.append("\tpublic String moduleName() {\n");
+		contents.append("\t\treturn \"").append(javaStringLiteral(moduleName)).append("\";\n");
+		contents.append("\t}\n");
+
+		contents.append("\n\t@Override\n");
+		contents.append("\tpublic String ").append(nameAccessor).append("() {\n");
+		contents.append("\t\treturn name;\n");
 		contents.append("\t}\n");
 		contents.append("}\n");
 		contents.trimToSize();
 
 		if (write) {
-			generation.put(Paths.get(generatedSrcPath, packagePath, className + ".java"), contents);
+			generation.put(Paths.get(generatedSrcPath, packagePath, enumName + ".java"), contents);
 		}
 	}
 
@@ -599,53 +654,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					.replace("\n", "\\n")
 					.replace("\r", "\\r")
 					.replace("\t", "\\t");
-	}
-
-	/**
-	 * Generate one nested static constants holder (e.g. <code>Roles</code>) inside the module
-	 * constants class, with a String constant per metadata name. Nothing is generated when there
-	 * are no names.
-	 *
-	 * @param contents	The module constants class contents to append to.
-	 * @param moduleName	The name of the module (for error messages).
-	 * @param className	The module constants class name (for error messages).
-	 * @param holderName	The nested class name - "Roles", "Documents" or "Queries".
-	 * @param kind	The singular metadata kind for javadoc and error messages - e.g. "role".
-	 * @param names	The metadata names to generate constants for.
-	 */
-	private static void generateModuleConstantsHolder(final StringBuilder contents,
-														final String moduleName,
-														final String className,
-														final String holderName,
-														final String kind,
-														final List<String> names) {
-		if (names.isEmpty()) {
-			return;
-		}
-
-		contents.append("\n\t/** The ").append(kind).append(" names declared in the ")
-					.append(moduleName).append(" module. */\n");
-		contents.append("\tpublic static final class ").append(holderName).append(" {\n");
-
-		Set<String> constantNames = new TreeSet<>();
-		for (String name : names) {
-			String constantName = BindUtil.toJavaStaticIdentifier(name);
-			if (! constantNames.add(constantName)) {
-				throw new MetaDataException("Module " + moduleName + ' ' + kind + ' ' + name +
-												" yields the duplicate Java constant name " + constantName +
-												" in the generated " + className + '.' + holderName +
-												" class. Rename the " + kind + '.');
-			}
-			String literal = javaStringLiteral(name);
-			contents.append("\t\t/** The \"").append(literal).append("\" ").append(kind).append(" name. */\n");
-			contents.append("\t\tpublic static final String ").append(constantName)
-						.append(" = \"").append(literal).append("\";\n");
-		}
-
-		contents.append("\n\t\tprivate ").append(holderName).append("() {\n");
-		contents.append("\t\t\t// prevent instantiation\n");
-		contents.append("\t\t}\n");
-		contents.append("\t}\n");
 	}
 
 	private SkyveFactory retrieveFactoryAnnotation(final File factoryFile) {

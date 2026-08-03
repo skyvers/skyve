@@ -840,4 +840,69 @@ class UserImplTest {
 		// After merging C____ with _R__G the user still has scope (merged permission)
 		assertNotNull(user.getScope("admin", "User"));
 	}
+
+	/** Builds a mock metadata Role owned by a mock module, for the isInRole(Role) default method. */
+	private static org.skyve.metadata.user.Role metadataRole(String moduleName, String roleName) {
+		Module module = Mockito.mock(Module.class);
+		Mockito.when(module.getName()).thenReturn(moduleName);
+		org.skyve.metadata.user.Role role = Mockito.mock(org.skyve.metadata.user.Role.class);
+		Mockito.when(role.getOwningModule()).thenReturn(module);
+		Mockito.when(role.getName()).thenReturn(roleName);
+		return role;
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testIsInRoleWithRoleDelegatesToOwningModuleAndRoleNames() {
+		// The User.isInRole(Role) default method must delegate to isInRole(String, String)
+		// with the role's owning module name and role name
+		UserImpl user = Mockito.spy(new UserImpl());
+		Mockito.doReturn(Boolean.TRUE).when(user).isInRole("admin", "AuditManager");
+
+		assertTrue(user.isInRole(metadataRole("admin", "AuditManager")));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testIsInRoleWithRoleReturnsFalseWhenRoleNotHeld() {
+		UserImpl user = Mockito.spy(new UserImpl());
+		Mockito.doReturn(Boolean.FALSE).when(user).isInRole("admin", "AuditManager");
+
+		assertFalse(user.isInRole(metadataRole("admin", "AuditManager")));
+	}
+
+	/** A compile-time role reference as the generated per-module role enums implement it. */
+	private enum TestModuleRole implements org.skyve.metadata.user.ModuleRole {
+		AUDIT_MANAGER;
+
+		@Override
+		public String moduleName() {
+			return "admin";
+		}
+
+		@Override
+		public String roleName() {
+			return "AuditManager";
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testIsInRoleWithModuleRoleDelegatesToModuleAndRoleNames() {
+		// The User.isInRole(ModuleRole) default method must delegate to isInRole(String, String)
+		// with the enum constant's module name and role name
+		UserImpl user = Mockito.spy(new UserImpl());
+		Mockito.doReturn(Boolean.TRUE).when(user).isInRole("admin", "AuditManager");
+
+		assertTrue(user.isInRole(TestModuleRole.AUDIT_MANAGER));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testIsInRoleWithModuleRoleReturnsFalseWhenRoleNotHeld() {
+		UserImpl user = Mockito.spy(new UserImpl());
+		Mockito.doReturn(Boolean.FALSE).when(user).isInRole("admin", "AuditManager");
+
+		assertFalse(user.isInRole(TestModuleRole.AUDIT_MANAGER));
+	}
 }

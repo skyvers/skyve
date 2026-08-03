@@ -179,7 +179,31 @@ public interface User extends NamedMetaData {
 	 * @return {@code true} if the user holds the role
 	 */
 	boolean isInRole(String moduleName, String roleName);
-	
+
+	/**
+	 * Returns {@code true} if this user has been assigned the specified role.
+	 * Convenience overload for the typed role accessors on the generated module
+	 * metadata classes - e.g. {@code user.isInRole(Admin.getAuditManagerRole())}.
+	 *
+	 * @param role  the role, resolved from its owning module's metadata; must not be {@code null}
+	 * @return {@code true} if the user holds the role
+	 */
+	default boolean isInRole(Role role) {
+		return isInRole(role.getOwningModule().getName(), role.getName());
+	}
+
+	/**
+	 * Returns {@code true} if this user has been assigned the specified role.
+	 * Convenience overload for the generated per-module role enums -
+	 * e.g. {@code user.isInRole(AdminRole.AUDIT_MANAGER)}.
+	 *
+	 * @param role  the compile-time role reference; must not be {@code null}
+	 * @return {@code true} if the user holds the role
+	 */
+	default boolean isInRole(ModuleRole role) {
+		return isInRole(role.moduleName(), role.roleName());
+	}
+
 	/**
 	 * Returns the effective {@link DocumentPermissionScope} for the user on the given
 	 * document, computed as the union of all assigned role permissions.
