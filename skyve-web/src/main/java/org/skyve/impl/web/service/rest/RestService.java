@@ -60,6 +60,7 @@ import jakarta.ws.rs.core.MediaType;
 public class RestService {
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(RestService.class);
 
+	private static final String AGGREGATE_QUERY_UNSUPPORTED = "Aggregate queries are not supported by this REST endpoint.";
     private static final String READ_DATA_PERMISSION = "read this data";
 	private static final String BEAN_PATH_PARAM = "bean";
 	private static final String DOCUMENT_PATH_PARAM = "document";
@@ -383,7 +384,9 @@ public class RestService {
 */
 
 	/**
-	 * Executes a metadata query or default document query and returns projected rows as JSON.
+	 * Executes a non-aggregate metadata query or default document query and returns projected rows as JSON.
+	 * Aggregate metadata queries are rejected with an HTTP 400 response because their list models do not
+	 * apply paging before materialising results.
 	 *
 	 * @param module module name
 	 * @param documentOrQuery query name or document name whose default query will be used
@@ -414,6 +417,18 @@ public class RestService {
 			// not a query, could be a document
 			if (q == null) {
 				q = m.getDocumentDefaultQuery(c, documentOrQuery);
+			}
+			if (q.isAggregate()) {
+				Module queryModule = q.getDocumentModule(c);
+				Document queryDocument = queryModule.getDocument(c, q.getDocumentName());
+				if (! u.canReadDocument(queryDocument)) {
+					throw new SecurityException(READ_DATA_PERMISSION, u.getName());
+				}
+				AbstractRestFilter.error(p,
+									response,
+									HttpServletResponse.SC_BAD_REQUEST,
+									AGGREGATE_QUERY_UNSUPPORTED);
+				return result;
 			}
 	 
 			ListModel<Bean> qm = EXT.newListModel(q);
