@@ -162,8 +162,10 @@ public class RestService {
 	 *
 	 * @param module module name
 	 * @param document document name
-	 * @param start first row index (inclusive)
-	 * @param end end row index (exclusive)
+	 * @param start first row index (inclusive); negative values are treated as {@code 0}
+	 * @param end end row index used with the document-list formula {@code maxResults = end - start - 1};
+	 * 		omitted, inverted, or oversized ranges are clamped to at most
+	 * 		{@link RestPaging#MAX_REST_PAGE_SIZE} rows
 	 * @return marshalled JSON payload, or {@code null} when an error occurs
 	 */
 	@GET
@@ -190,8 +192,8 @@ public class RestService {
 			}
 			
 	    	DocumentQuery q = p.newDocumentQuery(d);
-	    	q.setFirstResult(start);
-	    	q.setMaxResults(end - start - 1);
+	    	q.setFirstResult(RestPaging.safeStart(start));
+	    	q.setMaxResults(RestPaging.safeDocumentListMaxResults(start, end));
 	    	List<Bean> beans = q.projectedResults();
 	    	for (Bean bean : beans) {
 	    		Util.populateFully(bean);
@@ -385,8 +387,9 @@ public class RestService {
 	 *
 	 * @param module module name
 	 * @param documentOrQuery query name or document name whose default query will be used
-	 * @param start first row index (inclusive)
-	 * @param end end row index (exclusive)
+	 * @param start first row index (inclusive); negative values are treated as {@code 0}
+	 * @param end exclusive end row; omitted, inverted, or oversized ranges are clamped so
+	 * 		{@code end - start} is at most {@link RestPaging#MAX_REST_PAGE_SIZE}
 	 * @return marshalled JSON payload, or {@code null} when an error occurs
 	 */
 	@GET
@@ -414,8 +417,8 @@ public class RestService {
 			}
 	 
 			ListModel<Bean> qm = EXT.newListModel(q);
-	        qm.setStartRow(start);
-	        qm.setEndRow(end);
+	        qm.setStartRow(RestPaging.safeStart(start));
+	        qm.setEndRow(RestPaging.safeQueryEndRow(start, end));
 	
 	        Document d = qm.getDrivingDocument();
 			if (! u.canReadDocument(d)) {
