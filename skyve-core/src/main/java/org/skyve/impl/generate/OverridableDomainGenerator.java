@@ -532,13 +532,13 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 * @param packagePath	The module's domain package path (relative, '/' separated).
 	 */
 	private void generateModuleMetadataEnums(final Module module, final String packagePath) {
-		generateModuleMetadataEnum(module, packagePath, "Role", "role",
+		generateModuleMetadataEnum(module, packagePath, "Role", "role", "roles",
 									"org.skyve.metadata.user.ModuleRole", "roleName",
 									module.getRoles().stream().map(Role::getName).toList());
-		generateModuleMetadataEnum(module, packagePath, "Document", "document",
+		generateModuleMetadataEnum(module, packagePath, "Document", "document", "documents",
 									"org.skyve.metadata.model.document.ModuleDocument", "documentName",
 									new ArrayList<>(module.getDocumentRefs().keySet()));
-		generateModuleMetadataEnum(module, packagePath, "Query", "query",
+		generateModuleMetadataEnum(module, packagePath, "Query", "query", "queries",
 									"org.skyve.metadata.module.query.ModuleQuery", "queryName",
 									module.getMetadataQueries().stream().map(QueryDefinition::getName).toList());
 	}
@@ -553,6 +553,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 * @param packagePath	The module's domain package path (relative, '/' separated).
 	 * @param kindSuffix	The enum class name suffix - "Role", "Document" or "Query".
 	 * @param kind	The singular metadata kind for javadoc and error messages - e.g. "role".
+	 * @param kindPlural	The plural metadata kind for javadoc - e.g. "roles", "queries".
 	 * @param interfaceClassName	The fully qualified reference interface the enum implements.
 	 * @param nameAccessor	The interface's name accessor method - e.g. "roleName".
 	 * @param names	The metadata names to generate enum constants for.
@@ -561,6 +562,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 											final String packagePath,
 											final String kindSuffix,
 											final String kind,
+											final String kindPlural,
 											final String interfaceClassName,
 											final String nameAccessor,
 											final List<String> names) {
@@ -594,7 +596,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		// generate javadoc
 		contents.append("\n/**\n");
-		contents.append(" * Compile-time references to the ").append(kind).append("s declared in the ")
+		contents.append(" * Compile-time references to the ").append(kindPlural).append(" declared in the ")
 					.append(moduleName).append(" module.\n");
 		contents.append(" * Generated - local changes will be overwritten.\n");
 		contents.append(" */\n");

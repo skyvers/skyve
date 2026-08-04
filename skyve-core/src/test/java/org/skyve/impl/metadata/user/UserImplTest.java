@@ -860,6 +860,9 @@ class UserImplTest {
 		Mockito.doReturn(Boolean.TRUE).when(user).isInRole("admin", "AuditManager");
 
 		assertTrue(user.isInRole(metadataRole("admin", "AuditManager")));
+		// a role the user does not hold must not resolve through the same delegation
+		assertFalse(user.isInRole(metadataRole("admin", "SecurityAdministrator")));
+		assertFalse(user.isInRole(metadataRole("whosin", "AuditManager")));
 	}
 
 	@Test
@@ -873,16 +876,26 @@ class UserImplTest {
 
 	/** A compile-time role reference as the generated per-module role enums implement it. */
 	private enum TestModuleRole implements org.skyve.metadata.user.ModuleRole {
-		AUDIT_MANAGER;
+		AUDIT_MANAGER("admin", "AuditManager"),
+		SECURITY_ADMINISTRATOR("admin", "SecurityAdministrator"),
+		WHOSIN_AUDIT_MANAGER("whosin", "AuditManager");
+
+		private final String moduleName;
+		private final String roleName;
+
+		private TestModuleRole(String moduleName, String roleName) {
+			this.moduleName = moduleName;
+			this.roleName = roleName;
+		}
 
 		@Override
 		public String moduleName() {
-			return "admin";
+			return moduleName;
 		}
 
 		@Override
 		public String roleName() {
-			return "AuditManager";
+			return roleName;
 		}
 	}
 
@@ -895,6 +908,9 @@ class UserImplTest {
 		Mockito.doReturn(Boolean.TRUE).when(user).isInRole("admin", "AuditManager");
 
 		assertTrue(user.isInRole(TestModuleRole.AUDIT_MANAGER));
+		// a role the user does not hold must not resolve through the same delegation
+		assertFalse(user.isInRole(TestModuleRole.SECURITY_ADMINISTRATOR));
+		assertFalse(user.isInRole(TestModuleRole.WHOSIN_AUDIT_MANAGER));
 	}
 
 	@Test

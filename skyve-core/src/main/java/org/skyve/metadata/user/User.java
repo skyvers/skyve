@@ -173,17 +173,25 @@ public interface User extends NamedMetaData {
 
 	/**
 	 * Returns {@code true} if this user has been assigned the specified role.
+	 * <p/>
+	 * This remains the primitive that the typed overloads delegate to, and the only way to
+	 * resolve a role held as a string at runtime, but application code should no longer call
+	 * it directly - use {@link #isInRole(ModuleRole)} with the generated per-module role enums
+	 * (e.g. {@code user.isInRole(AdminRole.AUDIT_MANAGER)}) so role references are checked at
+	 * compile time.
 	 *
 	 * @param moduleName  the module that declares the role; must not be {@code null}
 	 * @param roleName    the role name within the module; must not be {@code null}
 	 * @return {@code true} if the user holds the role
+	 * @deprecated Use {@link #isInRole(ModuleRole)} or {@link #isInRole(Role)} instead.
 	 */
+	@Deprecated(since = "10.0.0")
 	boolean isInRole(String moduleName, String roleName);
 
 	/**
 	 * Returns {@code true} if this user has been assigned the specified role.
-	 * Convenience overload for the typed role accessors on the generated module
-	 * metadata classes - e.g. {@code user.isInRole(Admin.getAuditManagerRole())}.
+	 * Convenience overload for a role resolved from module metadata -
+	 * e.g. {@code user.isInRole(module.getRole("AuditManager"))}.
 	 *
 	 * @param role  the role, resolved from its owning module's metadata; must not be {@code null}
 	 * @return {@code true} if the user holds the role

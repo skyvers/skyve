@@ -4,7 +4,7 @@ import jakarta.annotation.Generated;
 import org.skyve.metadata.module.query.ModuleQuery;
 
 /**
- * Compile-time references to the querys declared in the admin module.
+ * Compile-time references to the queries declared in the admin module.
  * Generated - local changes will be overwritten.
  */
 @Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
