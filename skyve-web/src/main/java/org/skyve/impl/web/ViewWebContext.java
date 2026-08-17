@@ -4,6 +4,7 @@ import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.cache.StateUtil;
+import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.web.BackgroundTask;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,6 +35,15 @@ public abstract class ViewWebContext extends AbstractWebContext {
 
 	@Override
 	public void cacheConversation() throws Exception {
+		// Commit (which ends the transaction and releases the JDBC connection) BEFORE serialising
+		// the conversation, so the Hibernate session is disconnected and serialises cleanly.
+		// A server-side action that calls cacheConversation() or background() mid-request runs
+		// inside the request's transaction, so the session is otherwise still connected, causing
+		// "Cannot serialize SessionImpl while connected" and a corrupted conversation — the same
+		// defect SkyveFacesPhaseListener.afterResponseRendered() guards against at render time.
+		// Pass false so the EntityManager stays open for the remainder of the request; the phase
+		// listener's finally block performs the final commit(true) which closes it.
+		AbstractPersistence.get().commit(false);
 		StateUtil.cacheConversation(this);
 	}
 	
