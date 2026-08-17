@@ -41,8 +41,9 @@ public abstract class ViewWebContext extends AbstractWebContext {
 		// inside the request's transaction, so the session is otherwise still connected, causing
 		// "Cannot serialize SessionImpl while connected" and a corrupted conversation — the same
 		// defect SkyveFacesPhaseListener.afterResponseRendered() guards against at render time.
-		// Pass false so the EntityManager stays open for the remainder of the request; the phase
-		// listener's finally block performs the final commit(true) which closes it.
+		// Pass false so the EntityManager stays open for the remainder of the request; whichever
+		// entry point is servicing the request (the JSF phase listener, a SmartClient servlet etc)
+		// performs the final commit(true) in its request cleanup, which closes it.
 		AbstractPersistence.get().commit(false);
 		StateUtil.cacheConversation(this);
 	}
