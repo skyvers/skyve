@@ -47,10 +47,12 @@
 		<lucene.version>9.7.0</lucene.version>
 		<omnifaces.version>4.3</omnifaces.version>
 		<owasp.encoder.version>1.2.3</owasp.encoder.version>
-		<owasp.html.sanitizer.version>20200713.1</owasp.html.sanitizer.version>
+		<owasp.html.sanitizer.version>20220608.1</owasp.html.sanitizer.version>
 		<owasp.json.sanitizer.version>[1.0,)</owasp.json.sanitizer.version>
+		<!-- vulnerability in hibernate spatial transitive dependency -->
+		<postgresql.version>42.7.12</postgresql.version>
 		<pf4j.version>3.10.0</pf4j.version>
-		<bouncycastle.version>1.78.1</bouncycastle.version>
+		<bouncycastle.version>1.84</bouncycastle.version>
 		<poi.version>5.4.0</poi.version>
 		<primefaces.version>13.0.10</primefaces.version>
 		<primefaces-extensions.version>13.0.14</primefaces-extensions.version>
@@ -69,8 +71,8 @@
 		<junit-jupiter.version>5.10.2</junit-jupiter.version>
 		<mockito.version>4.2.0</mockito.version>
 		<weld.version>5.1.2.Final</weld.version>
-		<spring-security.version>6.3.4</spring-security.version>
-		<spring.version>6.1.14</spring.version>
+		<spring-security.version>6.5.11</spring-security.version>
+		<spring.version>6.2.17</spring.version>
 		<!-- freemarker report versions -->
 		<flying-saucer.version>9.6.1</flying-saucer.version>
 		<freemarker.version>2.3.32</freemarker.version>
@@ -335,6 +337,12 @@
 						<artifactId>hibernate-core</artifactId>
                     </exclusion>
 				</exclusions>
+			</dependency>
+			<!-- vulnerability in hibernate spatial transitive dependency -->
+			<dependency>
+				<groupId>org.postgresql</groupId>
+				<artifactId>postgresql</artifactId>
+				<version>${postgresql.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate</groupId>
