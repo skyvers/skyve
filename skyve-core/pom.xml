@@ -36,6 +36,12 @@
 			<artifactId>hibernate-spatial</artifactId>
 			<scope>compile</scope>
 		</dependency>
+		<!-- Declared directly so the managed version reaches downstream projects (hibernate-spatial's transitive pin does not); only loaded by PostgreSQL projects -->
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>compile</scope>
+		</dependency>
 		<dependency>
 			<groupId>commons-beanutils</groupId>
 			<artifactId>commons-beanutils</artifactId>
