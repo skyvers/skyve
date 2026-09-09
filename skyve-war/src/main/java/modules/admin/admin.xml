@@ -259,8 +259,7 @@
 				<document name="ChangePassword" permission="_____">
 					<action name="MakePasswordChange" />
 				</document>
-				<document name="CorruptArchiveError" permission="CRUDC">
-				</document>
+				<document name="CorruptArchiveError" permission="CRUDC" />
 				<document name="ControlPanel" permission="_____">
 					<action name="CacheStats" />
 					<action name="EvictFromCache" />
