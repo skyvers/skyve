@@ -24,6 +24,12 @@
 			<version>${skyve.version}</version>
 			<scope>compile</scope>
 		</dependency>
+		<!-- Declared directly so this version wins dependency mediation in downstream projects over hibernate-spatial's transitive version -->
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>compile</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-jcache</artifactId>
