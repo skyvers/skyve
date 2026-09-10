@@ -17,6 +17,8 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -40,6 +42,8 @@ import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.QueryDefinition;
+import org.skyve.metadata.user.Role;
 import org.skyve.metadata.repository.ProvidedRepository;
 
 /**
@@ -5058,5 +5062,177 @@ class OverridableDomainGeneratorMoreTest {
 		String java = methods.toString();
 		assertTrue(java.contains("getMtmBackRefsElementById"), "manyToMany should have get-by-id method, got: " + java);
 		assertTrue(java.contains("addMtmBackRefsElement"), "manyToMany should have add method, got: " + java);
+	}
+
+	// ----- generateModuleMetadataEnums --------------------------------------
+
+	private static Module moduleConstantsModule(String moduleName,
+													List<String> roleNames,
+													List<String> documentNames,
+													List<String> queryNames) {
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn(moduleName);
+
+		List<Role> roles = roleNames.stream().map(name -> {
+			Role role = mock(Role.class);
+			when(role.getName()).thenReturn(name);
+			return role;
+		}).toList();
+		when(module.getRoles()).thenReturn(roles);
+
+		Map<String, Module.DocumentRef> refs = new TreeMap<>();
+		for (String documentName : documentNames) {
+			refs.put(documentName, new Module.DocumentRef());
+		}
+		when(module.getDocumentRefs()).thenReturn(refs);
+
+		List<QueryDefinition> queries = queryNames.stream().map(name -> {
+			QueryDefinition query = mock(QueryDefinition.class);
+			when(query.getName()).thenReturn(name);
+			return query;
+		}).toList();
+		when(module.getMetadataQueries()).thenReturn(queries);
+
+		return module;
+	}
+
+	private static String generateModuleMetadataEnums(Module module) throws Exception {
+		OverridableDomainGenerator gen = new OverridableDomainGenerator(true, false, false,
+				DialectOptions.H2_NO_INDEXES, "", "", "", "", null);
+		declaredMethod("generateModuleMetadataEnums", Module.class, String.class)
+				.invoke(gen, module, "modules/" + module.getName() + "/domain");
+		StringBuilder all = new StringBuilder(2048);
+		for (Map.Entry<Path, CharSequence> entry : gen.generation.entrySet()) {
+			all.append(entry.getKey().getFileName()).append('\n').append(entry.getValue()).append('\n');
+		}
+		return all.toString();
+	}
+
+	@Test
+	void shouldGenerateModuleMetadataEnumsImplementingReferenceInterfaces() throws Exception {
+		Module module = moduleConstantsModule("staffPortal",
+				List.of("Read Only", "SecurityAdministrator"),
+				List.of("MyDetails"),
+				List.of("qActiveUsers"));
+
+		String java = generateModuleMetadataEnums(module);
+
+		assertTrue(java.contains("StaffPortalRole.java"), java);
+		assertTrue(java.contains("public enum StaffPortalRole implements ModuleRole {"), java);
+		assertTrue(java.contains("import org.skyve.metadata.user.ModuleRole;"), java);
+		assertTrue(java.contains("READ_ONLY(\"Read Only\")"), java);
+		assertTrue(java.contains("SECURITY_ADMINISTRATOR(\"SecurityAdministrator\")"), java);
+		assertTrue(java.contains("public String roleName() {"), java);
+		assertTrue(java.contains("return \"staffPortal\";"), java);
+		assertTrue(java.contains("StaffPortalDocument.java"), java);
+		assertTrue(java.contains("public enum StaffPortalDocument implements ModuleDocument {"), java);
+		assertTrue(java.contains("MY_DETAILS(\"MyDetails\")"), java);
+		assertTrue(java.contains("public String documentName() {"), java);
+		assertTrue(java.contains("StaffPortalQuery.java"), java);
+		assertTrue(java.contains("public enum StaffPortalQuery implements ModuleQuery {"), java);
+		assertTrue(java.contains("Q_ACTIVE_USERS(\"qActiveUsers\")"), java);
+		assertTrue(java.contains("public String queryName() {"), java);
+	}
+
+	@Test
+	void shouldOmitEmptyModuleMetadataEnums() throws Exception {
+		Module module = moduleConstantsModule("staffPortal",
+				List.of(),
+				List.of("MyDetails"),
+				List.of());
+
+		String java = generateModuleMetadataEnums(module);
+
+		assertFalse(java.contains("StaffPortalRole"), "No role enum should be generated, got: " + java);
+		assertFalse(java.contains("StaffPortalQuery"), "No query enum should be generated, got: " + java);
+		assertTrue(java.contains("public enum StaffPortalDocument implements ModuleDocument {"), java);
+	}
+
+	@Test
+	void shouldSuffixModuleMetadataEnumNameOnDocumentCollision() throws Exception {
+		// A document named for the enum candidate claims the class name in the domain package
+		Module module = moduleConstantsModule("staffPortal",
+				List.of("Employee"),
+				List.of("StaffPortalRole"),
+				List.of());
+
+		String java = generateModuleMetadataEnums(module);
+
+		assertTrue(java.contains("public enum StaffPortalRoleRole implements ModuleRole {"),
+				"Enum name should dodge the colliding document name, got: " + java);
+	}
+
+	@Test
+	void shouldSuffixModuleMetadataEnumNameOnCaseInsensitiveDocumentCollision() throws Exception {
+		// A document differing from the enum candidate only by case is the same file on a
+		// case-insensitive file system, so it must be dodged too.
+		Module module = moduleConstantsModule("staffPortal",
+				List.of("Employee"),
+				List.of("StaffPortalROLE"),
+				List.of());
+
+		String java = generateModuleMetadataEnums(module);
+
+		assertTrue(java.contains("public enum StaffPortalRoleRole implements ModuleRole {"),
+				"Enum name should dodge the case-insensitively equal document name, got: " + java);
+	}
+
+	@Test
+	void shouldSuffixModuleMetadataEnumNameUntilNoDocumentCollision() throws Exception {
+		// Documents claim both the enum candidate and its first fallback - the name must keep
+		// suffixing until it is free.
+		Module module = moduleConstantsModule("staffPortal",
+				List.of("Employee"),
+				List.of("StaffPortalRole", "StaffPortalRoleRole"),
+				List.of());
+
+		String java = generateModuleMetadataEnums(module);
+
+		assertTrue(java.contains("public enum StaffPortalRoleRoleRole implements ModuleRole {"),
+				"Enum name should dodge both document names, got: " + java);
+	}
+
+	@Test
+	void shouldThrowWhenModuleMetadataEnumDocumentNamesCollideAfterMangling() {
+		// "My Details" and "MyDetails" both mangle to MY_DETAILS - the document enum must reject it
+		Module module = moduleConstantsModule("staffPortal",
+				List.of("Employee"),
+				List.of("My Details", "MyDetails"),
+				List.of());
+
+		InvocationTargetException e = assertThrows(InvocationTargetException.class,
+				() -> generateModuleMetadataEnums(module));
+		assertTrue(e.getCause() instanceof MetaDataException, String.valueOf(e.getCause()));
+		assertTrue(e.getCause().getMessage().contains("MY_DETAILS"), e.getCause().getMessage());
+	}
+
+	@Test
+	void shouldEscapeModuleMetadataEnumValuesAsJavaStringLiterals() throws Exception {
+		// A quote or backslash in a metadata name must not break the generated enum
+		Module module = moduleConstantsModule("staffPortal",
+				List.of("Read \"Only\"", "Back\\Slash"),
+				List.of("MyDetails"),
+				List.of());
+
+		String java = generateModuleMetadataEnums(module);
+
+		assertTrue(java.contains("(\"Read \\\"Only\\\"\")"),
+				"Double quotes should be escaped in the generated literal, got: " + java);
+		assertTrue(java.contains("(\"Back\\\\Slash\")"),
+				"Backslashes should be escaped in the generated literal, got: " + java);
+	}
+
+	@Test
+	void shouldThrowWhenModuleMetadataEnumNamesCollideAfterMangling() {
+		// "Read Only" and "ReadOnly" both mangle to READ_ONLY
+		Module module = moduleConstantsModule("staffPortal",
+				List.of("Read Only", "ReadOnly"),
+				List.of("MyDetails"),
+				List.of());
+
+		InvocationTargetException e = assertThrows(InvocationTargetException.class,
+				() -> generateModuleMetadataEnums(module));
+		assertTrue(e.getCause() instanceof MetaDataException, String.valueOf(e.getCause()));
+		assertTrue(e.getCause().getMessage().contains("READ_ONLY"), e.getCause().getMessage());
 	}
 }
