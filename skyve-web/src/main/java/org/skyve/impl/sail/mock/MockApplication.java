@@ -81,6 +81,7 @@ import jakarta.faces.component.behavior.Behavior;
 import jakarta.faces.component.html.HtmlForm;
 import jakarta.faces.component.html.HtmlInputHidden;
 import jakarta.faces.component.html.HtmlInputText;
+import jakarta.faces.component.html.HtmlOutputLabel;
 import jakarta.faces.component.html.HtmlOutputLink;
 import jakarta.faces.component.html.HtmlOutputText;
 import jakarta.faces.component.html.HtmlPanelGrid;
@@ -179,6 +180,9 @@ public class MockApplication extends Application {
 		}
 		else if (HtmlInputText.COMPONENT_TYPE.equals(componentType)) {
 			return new HtmlInputText();
+		}
+		else if (HtmlOutputLabel.COMPONENT_TYPE.equals(componentType)) {
+			return new HtmlOutputLabel();
 		}
 		else if (HtmlOutputLink.COMPONENT_TYPE.equals(componentType)) {
 			return new HtmlOutputLink();

@@ -109,6 +109,7 @@ class MockApplicationTest {
 				"jakarta.faces.component.html.HtmlForm",
 				"jakarta.faces.component.html.HtmlInputHidden",
 				"jakarta.faces.component.html.HtmlInputText",
+				"jakarta.faces.component.html.HtmlOutputLabel",
 				"jakarta.faces.component.html.HtmlOutputLink",
 				"jakarta.faces.component.html.HtmlOutputText");
 
