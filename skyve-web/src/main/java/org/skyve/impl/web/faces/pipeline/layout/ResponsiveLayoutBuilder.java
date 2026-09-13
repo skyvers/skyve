@@ -18,6 +18,7 @@ import org.skyve.impl.metadata.view.container.form.Form;
 import org.skyve.impl.metadata.view.container.form.FormColumn;
 import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.container.form.FormRow;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.pipeline.ResponsiveFormGrid;
@@ -80,10 +81,20 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 			return component;
 		}
 
-		return responsiveContainer(vbox.getVerticalAlignment(),
+		HtmlPanelGroup result = responsiveContainer(vbox.getVerticalAlignment(),
 									vbox.getHorizontalAlignment(),
 									vbox.getInvisibleConditionName(),
 									vbox.getWidgetId());
+		Integer responsiveWidth = vbox.getResponsiveWidth();
+		if ((responsiveWidth == null) || (responsiveWidth.intValue() == LayoutUtil.MAX_RESPONSIVE_WIDTH_COLUMNS)) {
+			for (MetaData child : vbox.getContained()) {
+				if (child instanceof DataGrid) {
+					result.setStyle("flex:1 1 100%;min-width:0;width:100%");
+					break;
+				}
+			}
+		}
+		return result;
 	}
 	
 	@Override

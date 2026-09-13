@@ -149,6 +149,7 @@ import jakarta.faces.component.UIOutput;
 import jakarta.faces.component.UISelectItems;
 import jakarta.faces.component.html.HtmlInputHidden;
 import jakarta.faces.component.html.HtmlInputText;
+import jakarta.faces.component.html.HtmlOutputLabel;
 import jakarta.faces.component.html.HtmlOutputLink;
 import jakarta.faces.component.html.HtmlOutputText;
 import jakarta.faces.component.html.HtmlPanelGrid;
@@ -4704,6 +4705,7 @@ class TabularComponentBuilderTest {
 
 		assertSame(dataTable, result);
 		assertSame(emptyMessage, facets.get("emptyMessage"));
+		verify(dataTable).setStyleClass("skyve-card-grid");
 		verify(emptyMessage).setValue(TabularComponentBuilder.EMPTY_DATA_TABLE_CAN_ADD_MESSAGE);
 	}
 
@@ -4795,6 +4797,104 @@ class TabularComponentBuilderTest {
 		assertSame(header, facets.get("header"));
 		verify(header).setValue("Name");
 		verify(header).setEscape(true);
+		verify(createdColumn).setResponsivePriority(0);
+		verify(createdColumn).setStyleClass("skyve-card-cell");
+	}
+
+	@Test
+	void testDataGridPixelWidthRemainsFixedInCardLayout() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("fixedCardColumnId");
+		builder.setManagedBeanForTest(managedBean);
+		Column createdColumn = mock(Column.class);
+		HtmlOutputText header = mock(HtmlOutputText.class);
+		when(mockApplication.createComponent(Column.COMPONENT_TYPE)).thenReturn(createdColumn);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(header);
+		when(createdColumn.getFacets()).thenReturn(new HashMap<>());
+		when(createdColumn.getStyle()).thenReturn("width:170px;");
+		UIComponent current = mock(UIComponent.class);
+		when(current.getChildren()).thenReturn(new ArrayList<>());
+		DataGridBoundColumn column = new DataGridBoundColumn();
+		column.setPixelWidth(Integer.valueOf(170));
+
+		builder.addDataGridBoundColumn(null, current, new DataGrid(), column, "row", "Media", "mediaPreview",
+				new StringBuilder(), null, Integer.valueOf(170));
+
+		verify(createdColumn).setStyle("width:170px;--skyve-card-width:170px;");
+		verify(createdColumn).setStyleClass("skyve-card-cell skyve-card-fixed");
+	}
+
+	@Test
+	void testDataGridCardLabelCopiesResolvedHeader() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		Column column = new Column();
+		column.setStyleClass("skyve-card-cell");
+		HtmlOutputText header = new HtmlOutputText();
+		header.setValue("Notes");
+		column.getFacets().put("header", header);
+		HtmlOutputText label = new HtmlOutputText();
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(label);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("cardLabelId");
+		builder.setManagedBeanForTest(managedBean);
+
+		builder.addedDataGridBoundColumn(null, column, HorizontalAlignment.left);
+
+		assertSame(label, column.getChildren().get(0));
+		assertEquals("Notes", label.getValue());
+		assertEquals("skyve-card-cell-label", label.getStyleClass());
+	}
+
+	@Test
+	void testEditableDataGridCardLabelTargetsInput() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("cardInputId");
+		builder.setManagedBeanForTest(managedBean);
+		Message message = new Message();
+		HtmlPanelGroup panelGroup = new HtmlPanelGroup();
+		HtmlOutputLabel outputLabel = new HtmlOutputLabel();
+		when(mockApplication.createComponent(Message.COMPONENT_TYPE)).thenReturn(message);
+		when(mockApplication.createComponent(HtmlPanelGroup.COMPONENT_TYPE)).thenReturn(panelGroup);
+		when(mockApplication.createComponent(HtmlOutputLabel.COMPONENT_TYPE)).thenReturn(outputLabel);
+		Column column = new Column();
+		column.setStyleClass("skyve-card-cell");
+		HtmlOutputText header = new HtmlOutputText();
+		header.setValue("Description");
+		column.getFacets().put("header", header);
+		InputText input = new InputText();
+		input.setId("description");
+		column.getChildren().add(input);
+
+		builder.addedDataGridBoundColumn(null, column, HorizontalAlignment.left);
+
+		HtmlOutputLabel label = (HtmlOutputLabel) column.getChildren().get(0);
+		assertEquals("description", label.getFor());
+		assertEquals("Description", label.getValue());
+	}
+
+	@Test
+	void testDataGridCalculatesCardBreakpoint() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("cardColumnId");
+		builder.setManagedBeanForTest(managedBean);
+		when(mockApplication.createComponent(Column.COMPONENT_TYPE)).thenAnswer(invocation -> new Column());
+		DataTable table = new DataTable();
+		DataGrid grid = new DataGrid();
+		grid.setInline(Boolean.TRUE);
+		grid.setEditable(Boolean.FALSE);
+		DataGridBoundColumn column = new DataGridBoundColumn();
+		column.setEditable(Boolean.TRUE);
+		for (int i = 0; i < 3; i++) {
+			builder.addDataGridBoundColumn(null, table, grid, column, "row", null, "name",
+					new StringBuilder(), null, Integer.valueOf(170));
+		}
+
+		builder.addDataGridActionColumn(null, table, grid, "row", "{name}", "Item", false, false, false);
+
+		assertEquals("--skyve-card-breakpoint:614px", table.getStyle());
 	}
 
 	@Test
@@ -5745,6 +5845,8 @@ class TabularComponentBuilderTest {
 		assertSame(col, currentChildren.get(0));
 		assertEquals(1, colChildren.size());
 		assertSame(zoomBtn, colChildren.get(0));
+		verify(col).setResponsivePriority(0);
+		verify(col).setStyleClass("skyve-card-actions");
 	}
 
 	@Test
@@ -5796,6 +5898,7 @@ class TabularComponentBuilderTest {
 		// add button in header
 		assertEquals(1, headerChildren.size());
 		assertSame(addBtn, headerChildren.get(0));
+		verify(col).setStyleClass("skyve-card-actions skyve-card-toolbar");
 	}
 
 	@Test

@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -29,6 +30,7 @@ import org.skyve.impl.metadata.view.container.form.Form;
 import org.skyve.impl.metadata.view.container.form.FormColumn;
 import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.container.form.FormRow;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.util.Icons;
 
@@ -196,6 +198,28 @@ class ResponsiveLayoutBuilderTest {
 	void vboxLayoutCreatesHtmlPanelGroup() {
 		UIComponent result = builder.vboxLayout(null, new VBox());
 		assertSame(mockHtmlPanelGroup, result);
+	}
+
+	@Test
+	void vboxWithFullWidthDataGridFillsAvailableRow() {
+		VBox vbox = new VBox();
+		vbox.setResponsiveWidth(Integer.valueOf(12));
+		vbox.getContained().add(new DataGrid());
+
+		builder.vboxLayout(null, vbox);
+
+		verify(mockHtmlPanelGroup).setStyle("flex:1 1 100%;min-width:0;width:100%");
+	}
+
+	@Test
+	void narrowVBoxWithDataGridKeepsDeclaredWidth() {
+		VBox vbox = new VBox();
+		vbox.setResponsiveWidth(Integer.valueOf(6));
+		vbox.getContained().add(new DataGrid());
+
+		builder.vboxLayout(null, vbox);
+
+		verify(mockHtmlPanelGroup, never()).setStyle("flex:1 1 100%;min-width:0;width:100%");
 	}
 
 	@Test

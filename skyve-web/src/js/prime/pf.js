@@ -1013,3 +1013,49 @@ SKYVE.PF = function() {
 		}
 	};
 }();
+
+// Keep Skyve DataGrids as tables until their own rendered columns no longer fit.
+// Observe the containing column rather than the table: switching to cards changes table width.
+(function() {
+	var observers = new Map();
+
+	function updateCardLayout(grid, container) {
+		var width = container.getBoundingClientRect().width;
+		if (width > 0) {
+			var breakpoint = parseFloat(getComputedStyle(grid).getPropertyValue('--skyve-card-breakpoint'));
+			grid.classList.toggle('skyve-card-grid-active', width < breakpoint);
+		}
+	}
+
+	function registerCardGrids() {
+		observers.forEach(function(observer, grid) {
+			if (!document.contains(grid)) {
+				observer.disconnect();
+				observers.delete(grid);
+			}
+		});
+		document.querySelectorAll('.skyve-card-grid').forEach(function(grid) {
+			if (observers.has(grid) || !grid.parentElement) {
+				return;
+			}
+			var container = grid.parentElement;
+			var observer = new ResizeObserver(function() {
+				updateCardLayout(grid, container);
+			});
+			observer.observe(container);
+			observers.set(grid, observer);
+			updateCardLayout(grid, container);
+		});
+	}
+
+	function startCardGrids() {
+		registerCardGrids();
+		$(document).on('pfAjaxComplete', registerCardGrids);
+	}
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', startCardGrids);
+	}
+	else {
+		startCardGrids();
+	}
+})();

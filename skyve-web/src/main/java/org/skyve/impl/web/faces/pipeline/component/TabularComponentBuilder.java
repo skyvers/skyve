@@ -187,6 +187,7 @@ import jakarta.faces.component.UISelectBoolean;
 import jakarta.faces.component.UISelectItems;
 import jakarta.faces.component.html.HtmlInputHidden;
 import jakarta.faces.component.html.HtmlInputText;
+import jakarta.faces.component.html.HtmlOutputLabel;
 import jakarta.faces.component.html.HtmlOutputLink;
 import jakarta.faces.component.html.HtmlOutputText;
 import jakarta.faces.component.html.HtmlPanelGrid;
@@ -831,6 +832,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	private int columnPriority;
+	private int dataGridMinimumWidth;
 
 	@Override
 	public UIComponent dataGrid(UIComponent component, String dataWidgetVar, boolean ordered, DataGrid grid) {
@@ -839,6 +841,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		}
 
 		columnPriority = 1;
+		dataGridMinimumWidth = ordered ? 34 : 0;
 
 		String disabledConditionName = grid.getDisabledConditionName();
 		String disableZoomConditionName = grid.getDisableZoomConditionName();
@@ -861,6 +864,12 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 												grid.getSelectedActions(),
 												ordered,
 												grid.getWidgetId());
+		dataTable.setStyleClass("skyve-card-grid");
+		if (ordered) {
+			Column dragColumn = (Column) dataTable.getChildren().get(0);
+			dragColumn.setResponsivePriority(0);
+			dragColumn.setStyleClass("skyve-card-actions");
+		}
 
 		UIOutput emptyMessage = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
 		if ((! Boolean.FALSE.equals(grid.getEditable())) && (! Boolean.FALSE.equals(grid.getShowAdd()))) {
@@ -905,6 +914,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
+	@SuppressWarnings("java:S3776") // complexity OK
 	public UIComponent addDataGridBoundColumn(UIComponent component,
 												UIComponent current,
 												AbstractDataWidget widget,
@@ -926,9 +936,20 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 								alignment,
 	                            false,
 	                            pixelWidth);
-		result.setResponsivePriority(columnPriority);
-		if (columnPriority < 6) {
-			columnPriority++;
+		if (widget instanceof DataGrid) {
+			result.setResponsivePriority(0);
+			result.setStyleClass("skyve-card-cell");
+			if (column.getPixelWidth() != null) {
+				result.setStyle(result.getStyle() + "--skyve-card-width:" + column.getPixelWidth() + "px;");
+				result.setStyleClass("skyve-card-cell skyve-card-fixed");
+			}
+			dataGridMinimumWidth += ((pixelWidth == null) ? 220 : pixelWidth.intValue()) + 24;
+		}
+		else {
+			result.setResponsivePriority(columnPriority);
+			if (columnPriority < 6) {
+				columnPriority++;
+			}
 		}
 		current.getChildren().add(result);
 
@@ -975,9 +996,13 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		// and surround the lot with <div style="display:flex"></div>
 		// The flex div ensures controls are laid out to available column width correctly (think combos)
 		List<UIComponent> currentChildren = current.getChildren();
+		String inputId = null;
 		if (! currentChildren.isEmpty()) {
 			UIComponent contents = currentChildren.get(0);
 			String forId = contents.getId();
+			if (contents instanceof UIInput) {
+				inputId = forId;
+			}
 
 			// The message to the left
 			Message message = message(forId);
@@ -1016,6 +1041,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 				currentChildren.add(0, message);
 			}
 		}
+		addDataGridCardLabel(current, inputId);
 
 		return current.getParent(); // move from column to table
 	}
@@ -1038,9 +1064,21 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 								alignment,
 				                false,
 				                column.getPixelWidth());
-		col.setResponsivePriority(columnPriority);
-		if (columnPriority < 6) {
-			columnPriority++;
+		if (widget instanceof DataGrid) {
+			col.setResponsivePriority(0);
+			col.setStyleClass("skyve-card-cell");
+			Integer columnWidth = column.getPixelWidth();
+			if (columnWidth != null) {
+				col.setStyle(col.getStyle() + "--skyve-card-width:" + columnWidth + "px;");
+				col.setStyleClass("skyve-card-cell skyve-card-fixed");
+			}
+			dataGridMinimumWidth += ((columnWidth == null) ? 220 : columnWidth.intValue()) + 24;
+		}
+		else {
+			col.setResponsivePriority(columnPriority);
+			if (columnPriority < 6) {
+				columnPriority++;
+			}
 		}
 		current.getChildren().add(col);
 		return col;
@@ -1052,7 +1090,45 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			return component;
 		}
 
+		addDataGridCardLabel(current, null);
 		return current.getParent(); // move from column to table
+	}
+
+	/** Adds the resolved column header as a visible label in card layout. */
+	private void addDataGridCardLabel(UIComponent current, String inputId) {
+		if (! (current instanceof Column column)) {
+			return;
+		}
+		String styleClass = column.getStyleClass();
+		if ((styleClass == null) || (! styleClass.contains("skyve-card-cell"))) {
+			return;
+		}
+		UIComponent header = column.getFacet("header");
+		if (! (header instanceof HtmlOutputText headerText)) {
+			return;
+		}
+
+		UIOutput label;
+		if (inputId == null) {
+			HtmlOutputText text = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
+			text.setEscape(headerText.isEscape());
+			label = text;
+		}
+		else {
+			HtmlOutputLabel outputLabel = (HtmlOutputLabel) a.createComponent(HtmlOutputLabel.COMPONENT_TYPE);
+			outputLabel.setFor(inputId);
+			label = outputLabel;
+		}
+		setId(label, null);
+		label.getAttributes().put("styleClass", "skyve-card-cell-label");
+		ValueExpression valueExpression = headerText.getValueExpression("value");
+		if (valueExpression == null) {
+			label.setValue(headerText.getValue());
+		}
+		else {
+			label.setValueExpression("value", valueExpression);
+		}
+		column.getChildren().add(0, label);
 	}
 
 	@Override
@@ -1081,7 +1157,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 									HorizontalAlignment.centre,
 					                true,
 					                SINGLE_ACTION_COLUMN_WIDTH_INTEGER);
-			col.setResponsivePriority(1);
+			col.setResponsivePriority(0);
+			col.setStyleClass("skyve-card-actions" +
+					((canCreate && (! Boolean.FALSE.equals(grid.getShowAdd()))) ? " skyve-card-toolbar" : ""));
 			List<UIComponent> children = col.getChildren();
 
 			String disabledConditionName = grid.getDisabledConditionName();
@@ -1120,9 +1198,16 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 					col.setStyle("text-align:center !important");
 				}
 				current.getChildren().add(col);
+				dataGridMinimumWidth += (children.size() > 1) ?
+						Integer.parseInt(DOUBLE_ACTION_COLUMN_WIDTH) : SINGLE_ACTION_COLUMN_WIDTH_INTEGER.intValue();
 			}
 		}
 
+		if (current instanceof DataTable dataTable) {
+			String style = dataTable.getStyle();
+			dataTable.setStyle(((style == null) ? "" : style + ';') +
+					"--skyve-card-breakpoint:" + Math.max(480, dataGridMinimumWidth + 32) + "px");
+		}
 		return current;
 	}
 

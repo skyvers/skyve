@@ -55,6 +55,110 @@ body,html {
 	z-index: 995 !important;
 }
 
+/* A DataGrid stays tabular until its own rendered columns need more room. */
+.skyve-card-grid {
+	box-sizing: border-box;
+	min-width: 0;
+	width: 100%;
+}
+.skyve-card-grid:not(.skyve-card-grid-active) > .ui-datatable-tablewrapper {
+	overflow-x: auto;
+}
+.skyve-card-cell-label {
+	display: none;
+}
+.skyve-card-grid-active > .ui-datatable-tablewrapper,
+.skyve-card-grid-active > .ui-datatable-tablewrapper > table,
+.skyve-card-grid-active > .ui-datatable-tablewrapper > table > tbody {
+	box-sizing: border-box;
+	display: block;
+	min-width: 0;
+	width: 100%;
+}
+.skyve-card-grid-active > .ui-datatable-tablewrapper {
+	overflow: visible;
+	padding: 12px;
+}
+.skyve-card-grid-active > .ui-datatable-tablewrapper > table > thead,
+.skyve-card-grid-active > .ui-datatable-tablewrapper > table > thead > tr {
+	display: block;
+}
+.skyve-card-grid-active > .ui-datatable-tablewrapper > table > thead > tr > th:not(.skyve-card-toolbar) {
+	display: none !important;
+}
+.skyve-card-grid-active > .ui-datatable-tablewrapper > table > thead > tr > th.skyve-card-toolbar {
+	box-sizing: border-box;
+	display: block !important;
+	text-align: start;
+	width: 100% !important;
+}
+.skyve-card-grid-active > .ui-datatable-tablewrapper > table > thead > tr > th.skyve-card-toolbar > div {
+	align-items: flex-start !important;
+	height: auto !important;
+}
+.skyve-card-grid-active > .ui-datatable-tablewrapper > table > tbody > tr:not(.ui-datatable-empty-message) {
+	background: var(--surface-card, #fff);
+	border: 1px solid var(--surface-border, #d8dde3);
+	border-radius: 6px;
+	box-sizing: border-box;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+	margin-bottom: 12px;
+	padding: 12px;
+	width: 100%;
+}
+.skyve-card-grid-active > .ui-datatable-tablewrapper > table > tbody > tr:not(.ui-datatable-empty-message):last-child {
+	margin-bottom: 0;
+}
+.skyve-card-grid-active > .ui-datatable-tablewrapper > table > tbody > tr > td.skyve-card-cell:not(.ui-helper-hidden) {
+	box-sizing: border-box;
+	display: block !important;
+	flex: 1 1 200px;
+	min-width: min(100%, 180px);
+	overflow-wrap: anywhere;
+	width: auto !important;
+}
+.skyve-card-grid-active > .ui-datatable-tablewrapper > table > tbody > tr > td.skyve-card-fixed:not(.ui-helper-hidden) {
+	flex: 0 0 min(100%, var(--skyve-card-width));
+	max-width: var(--skyve-card-width);
+	min-width: 0;
+}
+.skyve-card-grid-active > .ui-datatable-tablewrapper > table > tbody > tr > td.skyve-card-actions:not(.ui-helper-hidden) {
+	box-sizing: border-box;
+	display: block !important;
+	flex: 1 1 100%;
+	width: 100% !important;
+}
+.skyve-card-grid-active > .ui-datatable-tablewrapper > table > tbody > tr > td.ui-helper-hidden {
+	display: none !important;
+}
+.skyve-card-grid-active .skyve-card-cell-label {
+	color: var(--text-color-secondary, #56616b);
+	display: block;
+	font-size: 12px;
+	font-weight: 700;
+	margin-bottom: 4px;
+}
+.skyve-card-grid-active > .ui-datatable-tablewrapper > table > tbody > tr.ui-datatable-empty-message,
+.skyve-card-grid-active > .ui-datatable-tablewrapper > table > tbody > tr.ui-datatable-empty-message > td {
+	display: block;
+	width: 100%;
+}
+.skyve-card-grid-active .ui-datatable-data input:not([type="checkbox"]),
+.skyve-card-grid-active .ui-datatable-data textarea,
+.skyve-card-grid-active .ui-datatable-data .ui-selectonemenu,
+.skyve-card-grid-active .ui-datatable-data .ui-autocomplete {
+	box-sizing: border-box;
+	max-width: 100%;
+	width: 100%;
+}
+@media (max-width: 640px) {
+	.skyve-card-grid-active > .ui-datatable-tablewrapper > table > tbody > tr > td.skyve-card-cell:not(.skyve-card-fixed) {
+		flex-basis: 100%;
+	}
+}
+
 /* Keep Leaflet's internal stacking order below shared PrimeFaces layout chrome. */
 .leaflet-container:not(.leaflet-pseudo-fullscreen) {
 	position: relative;
