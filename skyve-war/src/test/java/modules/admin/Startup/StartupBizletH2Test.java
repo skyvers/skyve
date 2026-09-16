@@ -47,6 +47,19 @@ class StartupBizletH2Test extends AbstractH2Test {
 	}
 
 	@Test
+	void testPreRerenderMapTypeLeafletSetsSupportedOpenStreetMapLayer() throws Exception {
+		// setup the test data
+		bean.setMapType(Startup.MapType.leaflet);
+
+		// call the method under test
+		bizlet.preRerender(Startup.mapTypePropertyName, bean, null);
+
+		// verify the result
+		assertThat(bean.getMapLayer(), containsString("https://tile.openstreetmap.org/{z}/{x}/{y}.png"));
+		assertThat(bean.getMapLayer(), containsString("referrerPolicy: 'strict-origin-when-cross-origin'"));
+	}
+
+	@Test
 	void testValidateBackupDirectoryNameExceedsMaximumLength() throws Exception {
 		// setup the test data
 		bean.setBackupDirectoryName("1234567890123456789012345678901234567890123456789012345678901234567890");
