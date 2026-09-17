@@ -7,7 +7,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.skyve.CORE;
 import org.skyve.domain.messages.ValidationException;
+import org.skyve.impl.metadata.model.document.field.Text;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Document;
 import org.skyve.util.BeanValidator;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
@@ -57,6 +61,15 @@ class StartupBizletH2Test extends AbstractH2Test {
 		// verify the result
 		assertThat(bean.getMapLayer(), containsString("https://tile.openstreetmap.org/{z}/{x}/{y}.png"));
 		assertThat(bean.getMapLayer(), containsString("referrerPolicy: 'strict-origin-when-cross-origin'"));
+	}
+
+	@Test
+	void testMapLayerFieldCanHoldOpenStreetMapDefault() throws Exception {
+		Customer customer = CORE.getCustomer();
+		Document document = customer.getModule(Startup.MODULE_NAME).getDocument(customer, Startup.DOCUMENT_NAME);
+		Text mapLayer = (Text) document.getAttribute(Startup.mapLayerPropertyName);
+
+		Assertions.assertTrue(mapLayer.getLength() >= StartupBizlet.MAP_LAYER_OPEN_STREET_MAP.length());
 	}
 
 	@Test
