@@ -55,7 +55,7 @@
 		<text name="mapLayer" required="true">
 			<displayName>Layers</displayName>
 			<description>Google Map or Leaflet layer to show the map backdrop</description>
-			<length>200</length>
+			<length>512</length>
 		</text>
 		<geometry name="mapCentre">
 			<displayName>Centre</displayName>

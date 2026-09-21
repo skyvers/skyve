@@ -18,7 +18,7 @@ import modules.admin.domain.Startup;
  */
 public class StartupBizlet extends Bizlet<StartupExtension> {
 	public static final String MAP_LAYER_GMAP = "google.maps.MapTypeId.ROADMAP";
-	public static final String MAP_LAYER_OPEN_STREET_MAP = "[L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19, attribution: '&copy; <a href=\\\\\\\"https://www.openstreetmap.org/copyright\\\\\\\">OpenStreetMap</a> contributors'})]";
+	public static final String MAP_LAYER_OPEN_STREET_MAP = "[L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19, referrerPolicy: 'strict-origin-when-cross-origin', attribution: '&copy; <a href=\\\\\\\"https://www.openstreetmap.org/copyright\\\\\\\">OpenStreetMap</a> contributors'})]";
 
 	@Inject
 	@SuppressWarnings("java:S6813") // allow member injection
