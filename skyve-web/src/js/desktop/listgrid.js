@@ -204,7 +204,7 @@ isc.BizListGrid.addMethods({
 			title: "Popout", 
 			icon: "icons/popout.png",
 			enableIf: function(target, menu, item) {
-				return (me.canZoom && (! me.aggregate) && (! (config && config.contConv)) && me.grid.anySelected());
+				return (me.canZoom && (! me.aggregate) && me.grid.anySelected());
 			},
 			click: function() {
 				var url = "?a=e&m=" + me._eventRecord.bizModule + 
@@ -1131,7 +1131,7 @@ isc.BizListGrid.addMethods({
 				if (this.anySelected()) {
 					var zoomDisabled = me.aggregate || (! me.canZoom);
 					me._zoomButton.setDisabled(zoomDisabled);
-					me._popoutButton.setDisabled(zoomDisabled || (config && config.contConv));
+					me._popoutButton.setDisabled(zoomDisabled);
 					me._editButton.setDisabled(me._disabled || (! me.canUpdate) || (! me.canEdit));
 					me._pickButton.setDisabled(me._disabled);
 					me.deleteSelectionButton.setDisabled(me._disabled || (! me.canDelete) || (! me.canRemove));
