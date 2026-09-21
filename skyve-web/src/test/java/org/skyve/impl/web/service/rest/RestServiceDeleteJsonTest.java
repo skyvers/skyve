@@ -512,6 +512,37 @@ class RestServiceDeleteJsonTest {
 	}
 
 	@Test
+	void queryRejectsAggregateMetadataQueryBeforeListModelCreation() throws Exception {
+		RestService service = new RestService();
+		HttpServletResponse response = mockResponse();
+		setPrivateField(service, "response", response);
+
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		MetaDataQueryDefinition query = mock(MetaDataQueryDefinition.class);
+
+		when(persistence.getUser()).thenReturn(user);
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("admin")).thenReturn(module);
+		when(module.getMetaDataQuery("AggregateQuery")).thenReturn(query);
+		when(query.isAggregate()).thenReturn(true);
+		when(query.getDocumentModule(customer)).thenReturn(module);
+		when(query.getDocumentName()).thenReturn("Contact");
+		when(module.getDocument(customer, "Contact")).thenReturn(document);
+		when(user.canReadDocument(document)).thenReturn(true);
+		bindPersistenceToThread(persistence);
+
+		String result = service.query("admin", "AggregateQuery", 0, 100);
+
+		assertNull(result);
+		verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
+		verify(persistence).rollback();
+	}
+
+	@Test
 	void queryContentReturnsNullAndSetsNotFoundWhenAttachmentMissing() throws Exception {
 		RestService service = new RestService();
 		HttpServletResponse response = mockResponse();
