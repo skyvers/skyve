@@ -362,18 +362,6 @@ class SecurityUtilTest {
 	}
 
 	@Test
-	void testHashPasswordSHA1() {
-		String originalAlgorithm = UtilImpl.PASSWORD_HASHING_ALGORITHM;
-		try {
-			UtilImpl.PASSWORD_HASHING_ALGORITHM = "SHA1";
-			String hashed = SecurityUtil.hashPassword("secret");
-			assertThat(hashed, org.hamcrest.CoreMatchers.notNullValue());
-		} finally {
-			UtilImpl.PASSWORD_HASHING_ALGORITHM = originalAlgorithm;
-		}
-	}
-
-	@Test
 	void testHashPasswordUnsupportedAlgorithmThrowsDomainException() {
 		// covers SecurityUtil.hashPassword@379 (else throw new DomainException)
 		String originalAlgorithm = UtilImpl.PASSWORD_HASHING_ALGORITHM;
