@@ -55,7 +55,7 @@
 		<!-- vulnerability in hibernate spatial transitive dependency -->
 		<postgresql.version>42.7.12</postgresql.version>
 		<pf4j.version>3.14.1</pf4j.version>
-		<bouncycastle.version>1.84</bouncycastle.version>
+		<bouncycastle.version>1.85</bouncycastle.version>
 		<poi.version>5.4.0</poi.version>
 		<primefaces.version>13.0.10</primefaces.version>
 		<primefaces-extensions.version>13.0.14</primefaces-extensions.version>
