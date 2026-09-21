@@ -1014,43 +1014,82 @@ SKYVE.PF = function() {
 	};
 }();
 
-// Keep Skyve DataGrids as tables until their own rendered columns no longer fit.
+// Keep Skyve DataGrids as tables while their columns and rendered content fit.
 // Observe the containing column rather than the table: switching to cards changes table width.
 (function() {
 	var observers = new Map();
 
-	function updateCardLayout(grid, container) {
-		var width = container.getBoundingClientRect().width;
-		if (width > 0) {
-			var breakpoint = parseFloat(getComputedStyle(grid).getPropertyValue('--skyve-card-breakpoint'));
-			grid.classList.toggle('skyve-card-grid-active', width < breakpoint);
+	function updateCardLayout(grid, state) {
+		var width = state.container.getBoundingClientRect().width;
+		if (width <= 0 || width === state.lastWidth) {
+			return;
+		}
+		state.lastWidth = width;
+		var columnWidth = parseFloat(getComputedStyle(grid).getPropertyValue('--skyve-card-breakpoint')) || 0;
+
+		if (grid.classList.contains('skyve-card-grid-active')) {
+			if (width < Math.max(columnWidth, state.minimumTableWidth)) {
+				return;
+			}
+			grid.classList.remove('skyve-card-grid-active');
+		}
+
+		var wrapper = grid.querySelector('.ui-datatable-tablewrapper');
+		if (wrapper && wrapper.clientWidth > 0) {
+			var overflow = wrapper.scrollWidth > wrapper.clientWidth + 1;
+			if (width < columnWidth || overflow) {
+				// Cell controls may wrap before the table itself overflows.
+				state.minimumTableWidth = overflow ? Math.max(width + 1, wrapper.scrollWidth) : 0;
+				grid.classList.add('skyve-card-grid-active');
+			}
+			else {
+				state.minimumTableWidth = 0;
+			}
+		}
+		else {
+			// A hidden tab has no measurable table; retry when it becomes visible.
+			state.lastWidth = null;
 		}
 	}
 
-	function registerCardGrids() {
-		observers.forEach(function(observer, grid) {
-			if (!document.contains(grid)) {
-				observer.disconnect();
+	function registerCardGrids(refresh) {
+		observers.forEach(function(state, grid) {
+			if (!document.contains(grid) || grid.parentElement !== state.container) {
+				state.observer.disconnect();
 				observers.delete(grid);
 			}
 		});
 		document.querySelectorAll('.skyve-card-grid').forEach(function(grid) {
-			if (observers.has(grid) || !grid.parentElement) {
+			if (!grid.parentElement) {
 				return;
 			}
-			var container = grid.parentElement;
+			var state = observers.get(grid);
+			if (state) {
+				if (refresh) {
+					// Ajax can change columns or row content without replacing the grid.
+					grid.classList.remove('skyve-card-grid-active');
+					state.minimumTableWidth = 0;
+					state.lastWidth = null;
+					updateCardLayout(grid, state);
+				}
+				return;
+			}
+			state = {container: grid.parentElement, minimumTableWidth: 0, lastWidth: null};
 			var observer = new ResizeObserver(function() {
-				updateCardLayout(grid, container);
+				updateCardLayout(grid, state);
 			});
-			observer.observe(container);
-			observers.set(grid, observer);
-			updateCardLayout(grid, container);
+			state.observer = observer;
+			observer.observe(state.container);
+			observers.set(grid, state);
+			updateCardLayout(grid, state);
 		});
 	}
 
 	function startCardGrids() {
-		registerCardGrids();
-		$(document).on('pfAjaxComplete', registerCardGrids);
+		registerCardGrids(false);
+		$(document).on('pfAjaxComplete', function() {
+			registerCardGrids(true);
+		});
 	}
 	if (document.readyState === 'loading') {
 		document.addEventListener('DOMContentLoaded', startCardGrids);

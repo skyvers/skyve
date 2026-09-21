@@ -371,7 +371,6 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		StringBuilder expr = new StringBuilder(96);
 		TabView result = (TabView) a.createComponent(TabView.COMPONENT_TYPE);
 		// NB We can't turn prependId off as PF doesn't work.
-		// result.setPrependId(false);
 		setInvisible(result, tabPane.getInvisibleConditionName(), null);
 		setId(result, tabPane.getWidgetId());
 		String id = result.getId();
@@ -845,6 +844,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 		String disabledConditionName = grid.getDisabledConditionName();
 		String disableZoomConditionName = grid.getDisableZoomConditionName();
+		@SuppressWarnings("java:S3358") // nest ternary if ok here
 		String[] clickToZoomDisabledConditionNames = (disableZoomConditionName == null) ?
 														((disabledConditionName == null) ?
 															null :
@@ -939,8 +939,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		if (widget instanceof DataGrid) {
 			result.setResponsivePriority(0);
 			result.setStyleClass("skyve-card-cell");
-			if (column.getPixelWidth() != null) {
-				result.setStyle(result.getStyle() + "--skyve-card-width:" + column.getPixelWidth() + "px;");
+			if (pixelWidth != null) {
+				result.setStyle(result.getStyle() + "--skyve-card-width:" + pixelWidth + "px;");
 				result.setStyleClass("skyve-card-cell skyve-card-fixed");
 			}
 			dataGridMinimumWidth += ((pixelWidth == null) ? 220 : pixelWidth.intValue()) + 24;
@@ -1206,7 +1206,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		if (current instanceof DataTable dataTable) {
 			String style = dataTable.getStyle();
 			dataTable.setStyle(((style == null) ? "" : style + ';') +
-					"--skyve-card-breakpoint:" + Math.max(480, dataGridMinimumWidth + 32) + "px");
+					"--skyve-card-breakpoint:" + (dataGridMinimumWidth + 32) + "px");
 		}
 		return current;
 	}
@@ -1242,6 +1242,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			result.setUpdate(update);
 		}
 		String disableAddConditionName = grid.getDisableAddConditionName();
+		@SuppressWarnings("java:S3358") // nest ternary if ok here
 		String[] createDisabled = (disableAddConditionName == null) ?
 									((disabledConditionName == null) ?
 										null :
@@ -1271,6 +1272,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 		action(result, ImplicitActionName.Remove, null, dataWidgetBinding, dataWidgetVar, true, grid.getRemovedActions());
 		String disableRemoveConditionName = grid.getDisableRemoveConditionName();
+		@SuppressWarnings("java:S3358") // nest ternary if ok here
 		String[] removeDisabled = (disableRemoveConditionName == null) ?
 									((disabledConditionName == null) ?
 										null :
@@ -1295,6 +1297,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		result.setUpdate(update);
 		action(result, ImplicitActionName.Navigate, null, dataWidgetBinding, dataWidgetVar, inline, null);
 		String disableZoomConditionName = grid.getDisableZoomConditionName();
+		@SuppressWarnings("java:S3358") // nest ternary if ok here
 		String[] zoomDisabled = (disableZoomConditionName == null) ?
 									((disabledConditionName == null) ?
 										null :
@@ -1742,6 +1745,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		boolean createRendered = (! aggregateQuery) && (! Boolean.FALSE.equals(grid.getShowAdd()));
 		String disableAddConditionName = grid.getDisableAddConditionName();
 		String disabledConditionName = grid.getDisabledConditionName();
+		@SuppressWarnings("java:S3358") // nest ternary if ok here
 		String[] createDisabled = (disableAddConditionName == null) ?
 									((disabledConditionName == null) ?
 											null :
@@ -2091,9 +2095,11 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 												binding);
 
 				if (DisplayType.thumbnail.equals(display)) {
+					@SuppressWarnings("java:S3358") // nest ternary if ok here
 					String width = (pixelWidth == null) ?
 			    						((pixelHeight == null) ? "64" : pixelHeight.toString()) :
 										pixelWidth.toString();
+					@SuppressWarnings("java:S3358") // nest ternary if ok here
 					String height = (pixelHeight == null) ?
 										((pixelWidth == null) ? "64" : pixelWidth.toString()) :
 										pixelHeight.toString();
@@ -2258,7 +2264,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	protected UIComponent createListGridZoomButton(String zoomDisabledConditionName,
-													@SuppressWarnings("unused") Map<String, String> properties) {
+													@SuppressWarnings({"unused", "java:S1172"}) Map<String, String> properties) {
 		final CommandButton button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		setId(button, null);
 		button.setValue(null);
@@ -2436,7 +2442,6 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
         result.setScrollable(true);
         result.setScrollRows(50);
 		result.setLiveScroll(true);
-		//result.setScrollHeight(200);
 
         return result;
 	}
@@ -2634,6 +2639,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 		ContentCapture capture = content.getResolvedCapture();
 		boolean fullUploadDialog = editable && useContentUploadDialog(imageUpload, display, capture);
+		@SuppressWarnings("java:S3358") // nest ternary if ok here
 		String uploadOnclick = editable ? createDisabledAwareOnclick(createContentUploadOnclick(id,
 																									sanitisedBinding,
 																									id + "_" + sanitisedBinding + "Overlay",
@@ -5263,7 +5269,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 											(pixelHeight == null) ? "null" : pixelHeight.toString(),
 											(initialPixelWidth == null) ? "null" : initialPixelWidth.toString(),
 											(initialPixelHeight == null) ? "null" : initialPixelHeight.toString());
-		result.setValueExpression("value", ef.createValueExpression(elc, expression.toString(), String.class));
+		result.setValueExpression("value", ef.createValueExpression(elc, expression, String.class));
 
 		setSizeAndTextAlignStyle(result,
 									"border:1px solid gray;",
@@ -5281,6 +5287,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	// To enable a scaled image to keep its aspect ratio, construct something like
 	// <div><img/></div> & set the size of the div to what is required
 	// and set the image as width:100%;height:100%;object-fit:contain;
+	@SuppressWarnings("java:S107") // parameter number ok
 	private HtmlPanelGroup contentGraphicImage(Integer pixelWidth,
 												Integer responsiveWidth,
 												Integer percentageWidth,
@@ -5365,7 +5372,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			return onclick;
 		}
 
-		String onclickBody = onclick;
+		String onclickBody;
 		if (onclick.startsWith("#{") && onclick.endsWith("}")) {
 			onclickBody = onclick.substring(2, onclick.length() - 1);
 		}
@@ -5861,7 +5868,6 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		// Cannot utilise the faces required attributes as some requests need to ignore required-ness.
 		// eg - triggered actions on widget events.
 		// Setting required attribute to an expression worked server-side but the client-side message integration didn't.
-		// result.setValueExpression("required", ef.createValueExpression(required ? "true" : "false", Boolean.class));
 		// So we use the requiredMessage to perform the check ourselves based on clientValidation attribute
 		if (required) {
 			result.setRequiredMessage(requiredMessage);
@@ -5995,87 +6001,4 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			valueSetter.accept(escapeFacesText(value, escape));
 		}
 	}
-
-/*
-	private HtmlForm form() {
-		HtmlForm result = (HtmlForm) a.createComponent(HtmlForm.COMPONENT_TYPE);
-		setId(result);
-
-		return result;
-	}
-
-	private Fieldset fieldset(String legend, String invisible) {
-		Fieldset result = (Fieldset) a.createComponent(Fieldset.COMPONENT_TYPE);
-		if (legend != null) {
-			result.setLegend(legend);
-		}
-		setInvisible(result, invisible, null);
-		setId(result);
-		return result;
-	}
-
-	private UIParameter parameter(String name, Object value) {
-		UIParameter result = (UIParameter) a.createComponent(UIParameter.COMPONENT_TYPE);
-		result.setName(name);
-		result.setValue(value);
-		setId(result);
-		return result;
-	}
-
-	private ProgressBar progressBar() {
-		ProgressBar result = (ProgressBar) a.createComponent(ProgressBar.COMPONENT_TYPE);
-		setId(result);
-		return result;
-	}
-
-	private TriStateCheckbox triStateCheckbox(String bindingPrefix,
-												String binding,
-												String title,
-												boolean required,
-												String disabled) {
-		return (TriStateCheckbox) input(TriStateCheckbox.COMPONENT_TYPE,
-											bindingPrefix,
-											binding,
-											title,
-											required,
-											disabled);
-	}
-
-	private SelectManyCheckbox manyCheckbox(String bindingPrefix,
-												String binding,
-												String title,
-												boolean required,
-												String disabled) {
-		return (SelectManyCheckbox) input(SelectManyCheckbox.COMPONENT_TYPE,
-											bindingPrefix,
-											binding,
-											title,
-											required,
-											disabled);
-	}
-
-	private FileUpload fileUpload(String bindingPrefix,
-									String binding,
-									String title,
-									boolean required,
-									String disabled) {
-		return (FileUpload) input(FileUpload.COMPONENT_TYPE, bindingPrefix, binding, title, required, disabled);
-	}
-*/
-	/**
-	 * <h:link outcome="reviewBatch" value="Restart" rendered=#{batch.renderRestart}">
-	 *     <f:param name="c" value=#{batch.row.batchHeader.identifier.clientId}" />
-	 *     <f:param name="b" value="#{batch.row.batchHeader.identifier.batchNumber}" />
-	 * </h:link>
-	 */
-/*
-	private HtmlOutputLink outputLink(String value, String outcome, String disabled, String invisible) {
-		HtmlOutputLink result = (HtmlOutputLink) a.createComponent(HtmlOutputLink.COMPONENT_TYPE);
-		result.setValue(value);
-		setDisabled(result, disabled);
-		setInvisible(result, invisible, null);
-		setId(result);
-		return result;
-	}
-*/
 }

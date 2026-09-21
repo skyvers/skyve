@@ -57,6 +57,19 @@ public class NoCustomisations implements Customisations {
 	}
 
 	@Override
+	public Integer determineDefaultEditableColumnWidth(String uxui, AttributeType attributeType) {
+		Integer width = determineDefaultColumnWidth(uxui, attributeType);
+		if ((width != null) &&
+				(AttributeType.date.equals(attributeType) ||
+					AttributeType.dateTime.equals(attributeType) ||
+					AttributeType.time.equals(attributeType) ||
+					AttributeType.timestamp.equals(attributeType))) {
+			return Integer.valueOf(width.intValue() + 30);
+		}
+		return width;
+	}
+
+	@Override
 	public ReportFormat[] listGridExportFormats() {
 		return ReportFormat.values(); // ordered as per the report format enum
 	}

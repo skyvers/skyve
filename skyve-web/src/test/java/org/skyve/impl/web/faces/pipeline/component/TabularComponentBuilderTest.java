@@ -4826,6 +4826,29 @@ class TabularComponentBuilderTest {
 	}
 
 	@Test
+	void testDataGridDefaultPixelWidthRemainsFixedInCardLayout() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("defaultFixedCardColumnId");
+		builder.setManagedBeanForTest(managedBean);
+		Column createdColumn = mock(Column.class);
+		HtmlOutputText header = mock(HtmlOutputText.class);
+		when(mockApplication.createComponent(Column.COMPONENT_TYPE)).thenReturn(createdColumn);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(header);
+		when(createdColumn.getFacets()).thenReturn(new HashMap<>());
+		when(createdColumn.getStyle()).thenReturn("width:110px;");
+		UIComponent current = mock(UIComponent.class);
+		when(current.getChildren()).thenReturn(new ArrayList<>());
+		DataGridBoundColumn column = new DataGridBoundColumn();
+
+		builder.addDataGridBoundColumn(null, current, new DataGrid(), column, "row", "Date", "date",
+				new StringBuilder(), null, Integer.valueOf(110));
+
+		verify(createdColumn).setStyle("width:110px;--skyve-card-width:110px;");
+		verify(createdColumn).setStyleClass("skyve-card-cell skyve-card-fixed");
+	}
+
+	@Test
 	void testDataGridCardLabelCopiesResolvedHeader() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
 		Column column = new Column();
@@ -4875,7 +4898,28 @@ class TabularComponentBuilderTest {
 	}
 
 	@Test
-	void testDataGridCalculatesCardBreakpoint() {
+	void testDataGridColumnBreakpointHasNoMobileFloor() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("cardColumnId");
+		builder.setManagedBeanForTest(managedBean);
+		when(mockApplication.createComponent(Column.COMPONENT_TYPE)).thenAnswer(invocation -> new Column());
+		DataTable table = new DataTable();
+		DataGrid grid = new DataGrid();
+		grid.setInline(Boolean.TRUE);
+		grid.setEditable(Boolean.FALSE);
+		DataGridBoundColumn column = new DataGridBoundColumn();
+		column.setEditable(Boolean.TRUE);
+		builder.addDataGridBoundColumn(null, table, grid, column, "row", null, "name",
+				new StringBuilder(), null, Integer.valueOf(170));
+
+		builder.addDataGridActionColumn(null, table, grid, "row", "{name}", "Item", false, false, false);
+
+		assertEquals("--skyve-card-breakpoint:226px", table.getStyle());
+	}
+
+	@Test
+	void testDataGridCalculatesMultiColumnBreakpoint() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
 		FacesView managedBean = mock(FacesView.class);
 		when(managedBean.nextId()).thenReturn("cardColumnId");

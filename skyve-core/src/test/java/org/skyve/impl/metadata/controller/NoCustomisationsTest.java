@@ -123,6 +123,18 @@ class NoCustomisationsTest {
 
 	@Test
 	@SuppressWarnings("static-method")
+	void determineDefaultEditableColumnWidthAddsControlSpaceToTemporalTypes() {
+		NoCustomisations nc = new NoCustomisations();
+		assertEquals(Integer.valueOf(140), nc.determineDefaultEditableColumnWidth("desktop", AttributeType.date));
+		assertEquals(Integer.valueOf(160), nc.determineDefaultEditableColumnWidth("desktop", AttributeType.dateTime));
+		assertEquals(Integer.valueOf(110), nc.determineDefaultEditableColumnWidth("desktop", AttributeType.time));
+		assertEquals(Integer.valueOf(170), nc.determineDefaultEditableColumnWidth("desktop", AttributeType.timestamp));
+		assertEquals(Integer.valueOf(75), nc.determineDefaultEditableColumnWidth("desktop", AttributeType.bool));
+		assertNull(nc.determineDefaultEditableColumnWidth("desktop", AttributeType.text));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
 	void listGridExportFormatsReturnsAllFormats() {
 		NoCustomisations nc = new NoCustomisations();
 		ReportFormat[] formats = nc.listGridExportFormats();

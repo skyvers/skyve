@@ -153,6 +153,22 @@ body,html {
 	max-width: 100%;
 	width: 100%;
 }
+/* A date input and its PrimeFaces trigger must share the grid cell's width in either layout. */
+.skyve-card-grid .ui-datatable-data .p-datepicker.ui-trigger-calendar {
+	align-items: stretch;
+	display: inline-flex;
+	max-width: 100%;
+	min-width: 0;
+	width: 100%;
+}
+.skyve-card-grid .ui-datatable-data .p-datepicker.ui-trigger-calendar > input {
+	flex: 1 1 0;
+	min-width: 0;
+	width: 0 !important;
+}
+.skyve-card-grid .ui-datatable-data .p-datepicker.ui-trigger-calendar > .ui-datepicker-trigger {
+	flex: 0 0 auto;
+}
 @media (max-width: 640px) {
 	.skyve-card-grid-active > .ui-datatable-tablewrapper > table > tbody > tr > td.skyve-card-cell:not(.skyve-card-fixed) {
 		flex-basis: 100%;

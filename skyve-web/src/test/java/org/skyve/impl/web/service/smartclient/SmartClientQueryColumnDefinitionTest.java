@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -391,7 +393,10 @@ class SmartClientQueryColumnDefinitionTest {
 		try {
 			CustomisationsStaticSingleton.set(customisations);
 			ProvidedRepositoryFactory.set(repository);
-			return new SmartClientQueryColumnDefinition(user, customer, module, document, column, false, "desktop");
+			SmartClientQueryColumnDefinition result =
+					new SmartClientQueryColumnDefinition(user, customer, module, document, column, false, "desktop");
+			verify(customisations, never()).determineDefaultEditableColumnWidth("desktop", attribute.getAttributeType());
+			return result;
 		}
 		finally {
 			CustomisationsStaticSingleton.set(previousCustomisations);

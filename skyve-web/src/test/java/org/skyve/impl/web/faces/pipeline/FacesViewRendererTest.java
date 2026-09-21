@@ -34,6 +34,7 @@ import org.primefaces.component.datatable.DataTable;
 import org.primefaces.component.picklist.PickList;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.generate.ViewRenderer;
+import org.skyve.impl.metadata.controller.CustomisationsStaticSingleton;
 import org.skyve.impl.metadata.MetadataIconResolver.ResolvedIcon;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
@@ -69,6 +70,7 @@ import org.skyve.impl.web.faces.pipeline.component.EscapableText;
 import org.skyve.impl.web.faces.pipeline.component.NoOpComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilder;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.controller.Customisations;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.user.User;
@@ -525,6 +527,64 @@ class FacesViewRendererTest {
 		renderer.renderBoundColumnCheckBox(checkBox);
 
 		verify(cb).checkBox(isNull(), isNull(), same(checkBox), isNull(), isNull(), isNull());
+	}
+
+	@Test
+	void editableDataGridUsesEditableDefaultColumnWidth() throws ReflectiveOperationException {
+		ComponentBuilder cb = mock(ComponentBuilder.class);
+		FacesViewRenderer renderer = newRenderer(createView(null), null, cb, mock(LayoutBuilder.class));
+		DataGrid grid = new DataGrid();
+		grid.setInline(Boolean.TRUE);
+		DataGridBoundColumn column = new DataGridBoundColumn();
+		Customisations customisations = mock(Customisations.class);
+		when(customisations.determineDefaultColumnTextAlignment("external", AttributeType.text))
+				.thenReturn(org.skyve.impl.metadata.view.HorizontalAlignment.left);
+		when(customisations.determineDefaultEditableColumnWidth("external", AttributeType.text))
+				.thenReturn(Integer.valueOf(240));
+		Customisations previousCustomisations = CustomisationsStaticSingleton.get();
+		try {
+			CustomisationsStaticSingleton.set(customisations);
+			setViewRendererField(renderer, "currentDataWidget", grid);
+
+			renderer.renderDataGridBoundColumn("Name", column);
+
+			verify(customisations).determineDefaultEditableColumnWidth("external", AttributeType.text);
+			verify(customisations, never()).determineDefaultColumnWidth("external", AttributeType.text);
+			verify(cb).addDataGridBoundColumn(isNull(), isNull(), same(grid), same(column), isNull(),
+					eq("Name"), eq(org.skyve.domain.Bean.BIZ_KEY), isNull(),
+					eq(org.skyve.impl.metadata.view.HorizontalAlignment.left), eq(Integer.valueOf(240)));
+		}
+		finally {
+			CustomisationsStaticSingleton.set(previousCustomisations);
+		}
+	}
+
+	@Test
+	void nonEditableDataGridUsesRegularDefaultColumnWidth() throws ReflectiveOperationException {
+		ComponentBuilder cb = mock(ComponentBuilder.class);
+		FacesViewRenderer renderer = newRenderer(createView(null), null, cb, mock(LayoutBuilder.class));
+		DataGrid grid = new DataGrid();
+		grid.setInline(Boolean.TRUE);
+		grid.setEditable(Boolean.FALSE);
+		DataGridBoundColumn column = new DataGridBoundColumn();
+		Customisations customisations = mock(Customisations.class);
+		when(customisations.determineDefaultColumnTextAlignment("external", AttributeType.text))
+				.thenReturn(org.skyve.impl.metadata.view.HorizontalAlignment.left);
+		when(customisations.determineDefaultColumnWidth("external", AttributeType.text))
+				.thenReturn(Integer.valueOf(180));
+		Customisations previousCustomisations = CustomisationsStaticSingleton.get();
+		try {
+			CustomisationsStaticSingleton.set(customisations);
+			setViewRendererField(renderer, "currentDataWidget", grid);
+
+			renderer.renderDataGridBoundColumn("Name", column);
+
+			verify(customisations).determineDefaultColumnWidth("external", AttributeType.text);
+			verify(customisations, never()).determineDefaultEditableColumnWidth("external", AttributeType.text);
+		}
+		finally {
+			CustomisationsStaticSingleton.set(previousCustomisations);
+		}
 	}
 
 	@Test

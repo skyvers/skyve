@@ -36,6 +36,17 @@ public interface Customisations {
 	@Nullable Integer determineDefaultColumnWidth(@Nonnull String uxui, @Nullable AttributeType attributeType);
 
 	/**
+	 * Determine the default editable DataGrid column width in pixels for an attribute type.
+	 * This width is used by renderers that place input controls inside grid cells.
+	 * <code>null</code> may be returned if there is no default.
+	 *
+	 * @param uxui the active UX/UI name
+	 * @param attributeType the column attribute type, or {@code null} for an untyped column
+	 * @return the default editable column width in pixels, or {@code null}
+	 */
+	@Nullable Integer determineDefaultEditableColumnWidth(@Nonnull String uxui, @Nullable AttributeType attributeType);
+
+	/**
 	 * Register custom ExpressionEvaluators for use in this Skyve deployment using ExpressionEvaluator.register().
 	 */
 	void registerCustomExpressions();

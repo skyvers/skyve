@@ -509,6 +509,10 @@ body .sidebarCreate {
 #main > .inner > section .p-datatable .p-datatable-tbody > tr > td:first-child {
     padding-left: var(--skyve-editorial-table-edge-padding) !important;
 }
+/* Card cells already have an inset from the card; keep the first field aligned with the rest. */
+#main > .inner > section .ui-datatable.skyve-card-grid-active tbody td:first-child {
+    padding-left: 4px !important;
+}
 /* in-table buttons inherit the tonal signature; keep a touch target floor */
 #main > .inner > section .ui-datatable tbody .ui-button,
 #main > .inner > section .p-datatable .p-button {

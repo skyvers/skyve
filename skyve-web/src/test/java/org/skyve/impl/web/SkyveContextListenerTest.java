@@ -372,6 +372,11 @@ public class SkyveContextListenerTest {
 		}
 
 		@Override
+		public Integer determineDefaultEditableColumnWidth(String widgetType, AttributeType attributeType) {
+			return null;
+		}
+
+		@Override
 		public void registerCustomExpressions() {
 			// no-op
 		}

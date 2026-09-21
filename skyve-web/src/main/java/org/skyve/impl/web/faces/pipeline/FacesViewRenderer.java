@@ -1883,7 +1883,14 @@ public class FacesViewRenderer extends ViewRenderer {
 			gridColumnAlignment = customisations.determineDefaultColumnTextAlignment(currentUxUi, attributeType);
 		}
 		if (pixelWidth == null) {
-			pixelWidth = customisations.determineDefaultColumnWidth(currentUxUi, attributeType);
+			AbstractDataWidget dataWidget = getCurrentDataWidget();
+			boolean editableDataGridColumn = (dataWidget instanceof DataGrid dataGrid) &&
+					Boolean.TRUE.equals(dataGrid.getInline()) &&
+					(! Boolean.FALSE.equals(dataGrid.getEditable())) &&
+					(! Boolean.FALSE.equals(column.getEditable()));
+			pixelWidth = editableDataGridColumn ?
+					customisations.determineDefaultEditableColumnWidth(currentUxUi, attributeType) :
+					customisations.determineDefaultColumnWidth(currentUxUi, attributeType);
 		}
 
 		cb.setCurrentInputTitleEscape(shouldEscape(column.getEscapeTitle()));
