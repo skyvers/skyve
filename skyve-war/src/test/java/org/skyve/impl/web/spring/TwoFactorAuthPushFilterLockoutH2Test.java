@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
@@ -29,13 +30,22 @@ import org.skyve.domain.types.DateTime;
 import org.skyve.impl.util.TwoFactorAuthConfigurationSingleton;
 import org.skyve.impl.util.TwoFactorAuthCustomerConfiguration;
 import org.skyve.impl.util.UtilImpl;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DefaultAuthenticationEventPublisher;
 import org.springframework.security.authentication.LockedException;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.event.AbstractAuthenticationFailureEvent;
 import org.springframework.security.authentication.event.AuthenticationFailureLockedEvent;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.provisioning.UserDetailsManager;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.RequestDispatcher;
@@ -92,7 +102,8 @@ class TwoFactorAuthPushFilterLockoutH2Test extends AbstractH2Test {
 
 		UserDetailsManager userDetailsManager = new SkyveSpringSecurity().jdbcUserDetailsManager();
 		TwoFactorAuthPushEmailFilter filter = new FreshLookupTwoFactorAuthPushEmailFilter(userDetailsManager);
-		AuthenticationManager authenticationManager = authentication -> failAuthenticationAndRecordFailure(fullUsername, authentication);
+		AuthenticationManager authenticationManager = authentication -> failAuthenticationAndRecordFailure(fullUsername,
+				authentication);
 		filter.setAuthenticationManager(authenticationManager);
 
 		HttpServletRequest request = tfaCodeRequest(token, fullUsername, "123456");
@@ -112,17 +123,140 @@ class TwoFactorAuthPushFilterLockoutH2Test extends AbstractH2Test {
 
 	@Test
 	void testLockedAuthenticationFailureStillIncrementsFailuresPastThreshold() throws Exception {
+		assertLockedAuthenticationFailureRecordsIpAddress("203.0.113.9", "203.0.113.9");
+	}
+
+	@Test
+	void testLockedAuthenticationFailureRecordsUnknownForBlankIpAddress() throws Exception {
+		assertLockedAuthenticationFailureRecordsIpAddress("   ", "unknown");
+	}
+
+	@Test
+	void testBadEmailMfaCodePublishesRequestIpAddressToLoginAudit() throws Exception {
+		String username = "mfa.ip.user." + UUID.randomUUID().toString().replace("-", "").substring(0, 12);
+		String fullUsername = CUSTOMER + "/" + username;
+		String token = "valid-" + System.currentTimeMillis();
+		String expectedIpAddress = "203.0.113.27";
+		insertSecurityUserWithTwoFactorState(username, token, 0);
+
+		SecurityListener listener = new SecurityListener();
+		AtomicReference<AbstractAuthenticationFailureEvent> publishedFailure = new AtomicReference<>();
+		ProviderManager authenticationManager = rejectingAuthenticationManager(expectedIpAddress,
+				"bad MFA code",
+				listener,
+				publishedFailure);
+
+		UserDetailsManager userDetailsManager = new SkyveSpringSecurity().jdbcUserDetailsManager();
+		TwoFactorAuthPushEmailFilter filter = new FreshLookupTwoFactorAuthPushEmailFilter(userDetailsManager);
+		filter.setAuthenticationDetailsSource(new SkyveSpringSecurity().authenticationDetailsSource());
+		filter.setAuthenticationManager(authenticationManager);
+
+		HttpServletRequest request = tfaCodeRequest(token, fullUsername, "123456");
+		when(request.getHeader("Forwarded")).thenReturn("for=" + expectedIpAddress + "; proto=https");
+		RequestDispatcher dispatcher = mock(RequestDispatcher.class);
+		when(request.getRequestDispatcher("/login")).thenReturn(dispatcher);
+		HttpServletResponse response = loginResponse();
+		FilterChain chain = mock(FilterChain.class);
+
+		filter.doFilter(request, response, chain);
+
+		AbstractAuthenticationFailureEvent failure = publishedFailure.get();
+		Assertions.assertNotNull(failure);
+		WebAuthenticationDetails details = Assertions.assertInstanceOf(WebAuthenticationDetails.class,
+				failure.getAuthentication().getDetails());
+		Assertions.assertEquals(expectedIpAddress, details.getRemoteAddress());
+		Assertions.assertEquals(expectedIpAddress, loadFailedLoginIpAddress(username));
+		Assertions.assertEquals(Integer.valueOf(1), loadAuthenticationFailures(fullUsername));
+		verify(dispatcher).forward(request, response);
+		verify(chain, never()).doFilter(any(), any());
+	}
+
+	@Test
+	void testBadPasswordPublishesRequestIpAddressToLoginAudit() throws Exception {
+		String username = "password.ip.user." + UUID.randomUUID().toString().replace("-", "").substring(0, 12);
+		String fullUsername = CUSTOMER + "/" + username;
+		String expectedIpAddress = "198.51.100.42";
+		insertSecurityUserWithTwoFactorState(username, "unused-token", 0);
+
+		SecurityListener listener = new SecurityListener();
+		AtomicReference<AbstractAuthenticationFailureEvent> publishedFailure = new AtomicReference<>();
+		ProviderManager authenticationManager = rejectingAuthenticationManager(expectedIpAddress,
+				"bad password",
+				listener,
+				publishedFailure);
+		UsernamePasswordAuthenticationFilter filter = new UsernamePasswordAuthenticationFilter(authenticationManager);
+		filter.setFilterProcessesUrl(SkyveSpringSecurity.LOGIN_ATTEMPT_PATH);
+		filter.setAuthenticationDetailsSource(new SkyveSpringSecurity().authenticationDetailsSource());
+		AtomicReference<AuthenticationException> handledFailure = new AtomicReference<>();
+		filter.setAuthenticationFailureHandler((request, response, exception) -> handledFailure.set(exception));
+
+		HttpServletRequest request = loginRequest(CUSTOMER);
+		when(request.getParameter(UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_USERNAME_KEY))
+				.thenReturn(fullUsername);
+		when(request.getParameter(UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_PASSWORD_KEY))
+				.thenReturn("incorrect-password");
+		when(request.getHeader("Forwarded")).thenReturn("for=" + expectedIpAddress + "; proto=https");
+		HttpServletResponse response = loginResponse();
+		FilterChain chain = mock(FilterChain.class);
+
+		filter.doFilter(request, response, chain);
+
+		Assertions.assertInstanceOf(BadCredentialsException.class, handledFailure.get());
+		AbstractAuthenticationFailureEvent failure = publishedFailure.get();
+		Assertions.assertNotNull(failure);
+		WebAuthenticationDetails details = Assertions.assertInstanceOf(WebAuthenticationDetails.class,
+				failure.getAuthentication().getDetails());
+		Assertions.assertEquals(expectedIpAddress, details.getRemoteAddress());
+		Assertions.assertEquals(expectedIpAddress, loadFailedLoginIpAddress(username));
+		Assertions.assertEquals(Integer.valueOf(1), loadAuthenticationFailures(fullUsername));
+		verify(chain, never()).doFilter(any(), any());
+	}
+
+	private static ProviderManager rejectingAuthenticationManager(String expectedIpAddress,
+			String failureMessage,
+			SecurityListener listener,
+			AtomicReference<AbstractAuthenticationFailureEvent> publishedFailure) {
+		ApplicationEventPublisher applicationEventPublisher = event -> {
+			if (event instanceof AbstractAuthenticationFailureEvent failure) {
+				publishedFailure.set(failure);
+				listener.onAuthenticationFailure(failure);
+			}
+		};
+		DefaultAuthenticationEventPublisher authenticationEventPublisher = new DefaultAuthenticationEventPublisher(
+				applicationEventPublisher);
+		AuthenticationProvider rejectingProvider = new AuthenticationProvider() {
+			@Override
+			public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+				WebAuthenticationDetails details = Assertions.assertInstanceOf(WebAuthenticationDetails.class,
+						authentication.getDetails());
+				Assertions.assertEquals(expectedIpAddress, details.getRemoteAddress());
+				throw new BadCredentialsException(failureMessage);
+			}
+
+			@Override
+			public boolean supports(Class<?> authentication) {
+				return UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication);
+			}
+		};
+		ProviderManager result = new ProviderManager(rejectingProvider);
+		result.setAuthenticationEventPublisher(authenticationEventPublisher);
+		return result;
+	}
+
+	private void assertLockedAuthenticationFailureRecordsIpAddress(String remoteAddress, String expectedIpAddress)
+			throws Exception {
 		String username = "locked.user." + UUID.randomUUID().toString().replace("-", "").substring(0, 12);
 		String fullUsername = CUSTOMER + "/" + username;
 		String token = "valid-" + System.currentTimeMillis();
 		insertSecurityUserWithTwoFactorState(username, token, UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD);
 
 		SecurityListener listener = new SecurityListener();
-		listener.onAuthenticationFailure(new AuthenticationFailureLockedEvent(
-				new UsernamePasswordAuthenticationToken(fullUsername, "bad"),
-				new LockedException("locked")));
+		UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(fullUsername, "bad");
+		authentication.setDetails(new WebAuthenticationDetails(remoteAddress, null));
+		listener.onAuthenticationFailure(new AuthenticationFailureLockedEvent(authentication, new LockedException("locked")));
 
 		Assertions.assertEquals(Integer.valueOf(UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD + 1), loadAuthenticationFailures(fullUsername));
+		Assertions.assertEquals(expectedIpAddress, loadFailedLoginIpAddress(username));
 	}
 
 	private static final class FreshLookupTwoFactorAuthPushEmailFilter extends TwoFactorAuthPushEmailFilter {
@@ -139,7 +273,7 @@ class TwoFactorAuthPushFilterLockoutH2Test extends AbstractH2Test {
 	}
 
 	private static org.springframework.security.core.Authentication failAuthenticationAndRecordFailure(String fullUsername,
-																		org.springframework.security.core.Authentication authentication) {
+			Authentication authentication) {
 		if (authentication != null) {
 			authentication.getName();
 		}
@@ -173,8 +307,7 @@ class TwoFactorAuthPushFilterLockoutH2Test extends AbstractH2Test {
 			update.setString(3, customer);
 			update.setString(4, username);
 			update.executeUpdate();
-		}
-		catch (SQLException e) {
+		} catch (SQLException e) {
 			throw new IllegalStateException(e);
 		}
 	}
@@ -190,7 +323,8 @@ class TwoFactorAuthPushFilterLockoutH2Test extends AbstractH2Test {
 		String customer = fullUsername.substring(0, slashIndex);
 		String username = fullUsername.substring(slashIndex + 1);
 		try (Connection c = EXT.getDataStoreConnection();
-				PreparedStatement ps = c.prepareStatement("select authenticationFailures from ADM_SecurityUser where bizCustomer = ? and userName = ?")) {
+				PreparedStatement ps = c.prepareStatement(
+						"select authenticationFailures from ADM_SecurityUser where bizCustomer = ? and userName = ?")) {
 			ps.setString(1, customer);
 			ps.setString(2, username);
 			try (ResultSet rs = ps.executeQuery()) {
@@ -199,15 +333,29 @@ class TwoFactorAuthPushFilterLockoutH2Test extends AbstractH2Test {
 					return rs.wasNull() ? Integer.valueOf(0) : Integer.valueOf(failures);
 				}
 			}
-		}
-		catch (SQLException e) {
+		} catch (SQLException e) {
 			throw new IllegalStateException(e);
 		}
 		return null;
 	}
 
+	private static String loadFailedLoginIpAddress(String username) {
+		try (Connection c = EXT.getDataStoreConnection();
+				PreparedStatement ps = c.prepareStatement(
+						"select ipAddress from ADM_UserLoginRecord where bizCustomer = ? and userName = ? and failed = ?")) {
+			ps.setString(1, CUSTOMER);
+			ps.setString(2, username);
+			ps.setBoolean(3, true);
+			try (ResultSet rs = ps.executeQuery()) {
+				return rs.next() ? rs.getString(1) : null;
+			}
+		} catch (SQLException e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
 	private void insertSecurityUserWithTwoFactorState(String username, String token, int authenticationFailures)
-	throws SQLException {
+			throws SQLException {
 		String contactId = UUID.randomUUID().toString();
 		String userId = UUID.randomUUID().toString();
 		long now = new DateTime().getTime();
@@ -272,11 +420,9 @@ class TwoFactorAuthPushFilterLockoutH2Test extends AbstractH2Test {
 				deleteContacts.setString(1, contactId);
 				deleteContacts.executeUpdate();
 			}
-		}
-		catch (SQLException e) {
+		} catch (SQLException e) {
 			throw new IllegalStateException(e);
-		}
-		finally {
+		} finally {
 			insertedSecurityUserIds.clear();
 			insertedContactIds.clear();
 		}
@@ -286,7 +432,8 @@ class TwoFactorAuthPushFilterLockoutH2Test extends AbstractH2Test {
 	private static ConcurrentHashMap<String, TwoFactorAuthCustomerConfiguration> getConfigurationMap() throws Exception {
 		Field field = TwoFactorAuthConfigurationSingleton.class.getDeclaredField("configuration");
 		field.setAccessible(true);
-		return (ConcurrentHashMap<String, TwoFactorAuthCustomerConfiguration>) field.get(TwoFactorAuthConfigurationSingleton.getInstance());
+		return (ConcurrentHashMap<String, TwoFactorAuthCustomerConfiguration>) field
+				.get(TwoFactorAuthConfigurationSingleton.getInstance());
 	}
 
 	private static HttpServletRequest tfaCodeRequest(String token, String username, String code) {

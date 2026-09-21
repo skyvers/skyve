@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -16,12 +17,15 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 //import org.springframework.security.saml2.provider.service.registration.InMemoryRelyingPartyRegistrationRepository;
 //import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistration;
 //import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository;
 //import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrations;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Supplies Spring Security beans and request-filter configuration for Skyve WAR.
@@ -72,6 +76,8 @@ public class SpringSecurityConfig {
 	@Bean
 	@SuppressWarnings("java:S4502") // Suppress CSRF turned off as Skyve implements its own
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+		AuthenticationDetailsSource<HttpServletRequest, WebAuthenticationDetails> authenticationDetailsSource = skyve.authenticationDetailsSource();
+
 		http.authorizeHttpRequests(c -> {
 			if (UtilImpl.DEV_LOGIN_FILTER_USED) {
 				// Open SC list view servlet
@@ -164,7 +170,8 @@ public class SpringSecurityConfig {
 				.useSecureCookie(Util.isSecureUrl())
 		)
 		.formLogin(c -> 
-			c.defaultSuccessUrl(Util.getHomeUrl())
+			c.authenticationDetailsSource(authenticationDetailsSource)
+				.defaultSuccessUrl(Util.getHomeUrl())
 				.loginPage(Util.getLoginUrl())
 				.loginProcessingUrl(SkyveSpringSecurity.LOGIN_ATTEMPT_PATH)
 				.failureUrl(Util.getLoginUrl() + LOGIN_ERROR_QUERY)
@@ -202,6 +209,7 @@ public class SpringSecurityConfig {
 //		);
 
 		TwoFactorAuthPushEmailFilter tfaEmail = new TwoFactorAuthPushEmailFilter(userDetailsManager());
+		tfaEmail.setAuthenticationDetailsSource(authenticationDetailsSource);
 		http.addFilterBefore(tfaEmail, UsernamePasswordAuthenticationFilter.class);
 
 		DefaultSecurityFilterChain result = http.build();

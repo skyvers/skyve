@@ -17,12 +17,17 @@ import org.junit.jupiter.api.Test;
 import org.skyve.impl.util.TwoFactorAuthConfigurationSingleton;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.persistence.DataStore;
+import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.core.AuthenticatedPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
 
 import javax.sql.DataSource;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -112,6 +117,39 @@ class SkyveSpringSecurityTest {
 		UserDetails loaded = service.loadUserByUsername("cust/user");
 		assertNotNull(loaded);
 		assertEquals("cust/user", loaded.getUsername());
+	}
+
+	@Test
+	void authenticationDetailsSourceUsesProxyAwareIpAddressAndExistingSession() {
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpSession session = mock(HttpSession.class);
+		when(request.getHeader("Forwarded")).thenReturn("for=203.0.113.5; proto=https");
+		when(request.getHeader("X-Forwarded-For")).thenReturn("198.51.100.10");
+		when(request.getRemoteAddr()).thenReturn("10.0.0.1");
+		when(request.getSession(false)).thenReturn(session);
+		when(session.getId()).thenReturn("session-1");
+
+		AuthenticationDetailsSource<HttpServletRequest, WebAuthenticationDetails> source =
+				new SkyveSpringSecurity().authenticationDetailsSource();
+		WebAuthenticationDetails details = source.buildDetails(request);
+
+		assertEquals("203.0.113.5", details.getRemoteAddress());
+		assertEquals("session-1", details.getSessionId());
+	}
+
+	@Test
+	void authenticationDetailsSourceUsesXForwardedForWithoutCreatingSession() {
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		when(request.getHeader("Forwarded")).thenReturn("   ");
+		when(request.getHeader("X-Forwarded-For")).thenReturn("198.51.100.12, 192.0.2.1");
+		when(request.getRemoteAddr()).thenReturn("10.0.0.1");
+
+		AuthenticationDetailsSource<HttpServletRequest, WebAuthenticationDetails> source =
+				new SkyveSpringSecurity().authenticationDetailsSource();
+		WebAuthenticationDetails details = source.buildDetails(request);
+
+		assertEquals("198.51.100.12", details.getRemoteAddress());
+		assertNull(details.getSessionId());
 	}
 
 	@Test

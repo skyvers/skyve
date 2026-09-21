@@ -14,15 +14,18 @@ import org.skyve.impl.util.TimeUtil;
 import org.skyve.impl.util.UUIDv7;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.util.OWASP;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 import org.springframework.context.event.EventListener;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.LockedException;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.authentication.event.AbstractAuthenticationFailureEvent;
 import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
 
 /**
  * Handles Spring Security authentication success/failure events to maintain Skyve login-failure lockout state.
@@ -45,16 +48,27 @@ public class SecurityListener {
 	@SuppressWarnings("static-method")
 	public void onAuthenticationFailure(AbstractAuthenticationFailureEvent evt) {
 		AuthenticationException exception = evt.getException();
-		String userName = SkyveSpringSecurity.userNameFromPrincipal(evt.getAuthentication().getPrincipal());
+		Authentication authentication = evt.getAuthentication();
+		String userName = SkyveSpringSecurity.userNameFromPrincipal(authentication.getPrincipal());
+		String ipAddress = UNKNOWN;
+		Object details = authentication.getDetails();
+		if (details instanceof WebAuthenticationDetails webDetails) {
+			String remoteAddress = UtilImpl.processStringValue(webDetails.getRemoteAddress());
+			if (remoteAddress != null) {
+				ipAddress = remoteAddress;
+			}
+		}
+		String logIpAddress = OWASP.sanitiseLog(ipAddress);
 		if (! countsTowardLockout(exception)) {
-			LOGGER.warn("Login Attempt failed for user {} with {} and was not recorded as a lockout failure",
+			LOGGER.warn("Login Attempt failed for user {} from IP Address {} with {} and was not recorded as a lockout failure",
 							userName,
+							logIpAddress,
 							exception.getClass().getSimpleName());
 			return;
 		}
-		LOGGER.warn("Login Attempt failed for user {}", userName);
+		LOGGER.warn("Login Attempt failed for user {} from IP Address {}", userName, logIpAddress);
 		if (userName != null) {
-			recordLoginFailure(userName);
+			recordLoginFailure(userName, ipAddress);
 		}
 	}
 
@@ -90,10 +104,11 @@ public class SecurityListener {
 	 * Persists a failed login attempt for the specified user and updates lockout counters.
 	 *
 	 * @param username The username to record.
+	 * @param ipAddress The source IP address supplied by Spring Security, or {@value #UNKNOWN} when unavailable.
 	 * @throws MetaDataException If the failure record cannot be persisted.
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private static void recordLoginFailure(String username) {
+	private static void recordLoginFailure(String username, String ipAddress) {
 		SkyveDialect dialect = AbstractHibernatePersistence.getDialect(UtilImpl.DATA_STORE.getDialectClassName());
 		RDBMS rdbms = dialect.getRDBMS();
 		String sql = null;
@@ -129,7 +144,7 @@ public class SecurityListener {
 				}
 			}
 			
-			sql = "insert into ADM_UserLoginRecord (bizId, bizVersion, bizLock, bizKey, bizCustomer, bizUserId, userName, loginDateTime, failed) values (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+			sql = "insert into ADM_UserLoginRecord (bizId, bizVersion, bizLock, bizKey, bizCustomer, bizUserId, userName, loginDateTime, failed, ipAddress) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 			try (PreparedStatement ps = c.prepareStatement(sql)) {
 				String bizCustomer = UtilImpl.CUSTOMER;
 				String userName = username;
@@ -156,6 +171,7 @@ public class SecurityListener {
 				ps.setString(7, userName);
 				ps.setTimestamp(8, new java.sql.Timestamp(System.currentTimeMillis()));
 				ps.setBoolean(9, true);
+				ps.setString(10, ipAddress);
 				ps.executeUpdate();
 			}
 			catch (Exception e) {

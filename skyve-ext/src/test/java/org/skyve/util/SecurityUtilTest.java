@@ -3,11 +3,11 @@ package org.skyve.util;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.OutputStream;
 import java.lang.reflect.Method;
@@ -17,12 +17,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.app.admin.SecurityLog;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.mail.MailServiceStaticSingleton;
-import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.util.UtilImpl;
 
-@SuppressWarnings("java:S4144")
+@SuppressWarnings({"static-method", "java:S4144"})
 class SecurityUtilTest {
 	private final CaptureMailService capture = new CaptureMailService();
 
@@ -147,7 +147,6 @@ class SecurityUtilTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testFormatTimestampReturnsNullForNullTimestamp() throws Exception {
 		Method method = SecurityUtil.class.getDeclaredMethod("formatTimestampWithServerAndUTCZone", Timestamp.class);
 		method.setAccessible(true);
@@ -163,7 +162,6 @@ class SecurityUtilTest {
 
 	// ======== getSourceIpAddress() ========
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testGetSourceIpAddressFromForwardedHeader() {
 		jakarta.servlet.http.HttpServletRequest request = mock(jakarta.servlet.http.HttpServletRequest.class);
@@ -173,7 +171,14 @@ class SecurityUtilTest {
 		assertThat(ip, is("203.0.113.5"));
 	}
 
-	@SuppressWarnings("static-method")
+	@Test
+	void testGetSourceIpAddressUsesFirstForwardedAddressWithLeadingWhitespace() {
+		jakarta.servlet.http.HttpServletRequest request = mock(jakarta.servlet.http.HttpServletRequest.class);
+		when(request.getHeader("Forwarded")).thenReturn("  for=203.0.113.5, for=198.51.100.10; proto=https");
+		String ip = SecurityUtil.getSourceIpAddress(request);
+		assertThat(ip, is("203.0.113.5"));
+	}
+
 	@Test
 	void testGetSourceIpAddressFromForwardedHeaderWithoutForFieldFallsBackToRemoteAddr() {
 		// Forwarded header present but no "for=" field — should fall through to remote addr
@@ -185,7 +190,34 @@ class SecurityUtilTest {
 		assertThat(ip, is("10.0.0.2"));
 	}
 
-	@SuppressWarnings("static-method")
+	@Test
+	void testGetSourceIpAddressWithBlankForwardedForFallsBackToXForwardedFor() {
+		jakarta.servlet.http.HttpServletRequest request = mock(jakarta.servlet.http.HttpServletRequest.class);
+		when(request.getHeader("Forwarded")).thenReturn("for=   ; proto=https");
+		when(request.getHeader("X-Forwarded-For")).thenReturn("198.51.100.10");
+		when(request.getRemoteAddr()).thenReturn("10.0.0.2");
+		String ip = SecurityUtil.getSourceIpAddress(request);
+		assertThat(ip, is("198.51.100.10"));
+	}
+
+	@Test
+	void testGetSourceIpAddressWithEmptyForwardedListEntryFallsBackToXForwardedFor() {
+		jakarta.servlet.http.HttpServletRequest request = mock(jakarta.servlet.http.HttpServletRequest.class);
+		when(request.getHeader("Forwarded")).thenReturn("for=,");
+		when(request.getHeader("X-Forwarded-For")).thenReturn("198.51.100.11");
+		String ip = SecurityUtil.getSourceIpAddress(request);
+		assertThat(ip, is("198.51.100.11"));
+	}
+
+	@Test
+	void testGetSourceIpAddressWithBlankForwardedPartFallsBackToXForwardedFor() {
+		jakarta.servlet.http.HttpServletRequest request = mock(jakarta.servlet.http.HttpServletRequest.class);
+		when(request.getHeader("Forwarded")).thenReturn(" ;proto=https");
+		when(request.getHeader("X-Forwarded-For")).thenReturn("198.51.100.13");
+		String ip = SecurityUtil.getSourceIpAddress(request);
+		assertThat(ip, is("198.51.100.13"));
+	}
+
 	@Test
 	void testGetSourceIpAddressFromXForwardedForHeader() {
 		jakarta.servlet.http.HttpServletRequest request = mock(jakarta.servlet.http.HttpServletRequest.class);
@@ -195,18 +227,36 @@ class SecurityUtilTest {
 		assertThat(ip, is("198.51.100.10"));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
-	void testGetSourceIpAddressWithEmptyXForwardedForHeaderFallsBackToRemoteAddr() {
+	void testGetSourceIpAddressWithBlankXForwardedForHeaderFallsBackToRemoteAddr() {
 		jakarta.servlet.http.HttpServletRequest request = mock(jakarta.servlet.http.HttpServletRequest.class);
 		when(request.getHeader("Forwarded")).thenReturn(null);
-		when(request.getHeader("X-Forwarded-For")).thenReturn("");
+		when(request.getHeader("X-Forwarded-For")).thenReturn("   ");
 		when(request.getRemoteAddr()).thenReturn("10.0.0.3");
 		String ip = SecurityUtil.getSourceIpAddress(request);
 		assertThat(ip, is("10.0.0.3"));
 	}
 
-	@SuppressWarnings("static-method")
+	@Test
+	void testGetSourceIpAddressWithEmptyXForwardedForListFallsBackToRemoteAddr() {
+		jakarta.servlet.http.HttpServletRequest request = mock(jakarta.servlet.http.HttpServletRequest.class);
+		when(request.getHeader("Forwarded")).thenReturn(null);
+		when(request.getHeader("X-Forwarded-For")).thenReturn(",");
+		when(request.getRemoteAddr()).thenReturn("10.0.0.4");
+		String ip = SecurityUtil.getSourceIpAddress(request);
+		assertThat(ip, is("10.0.0.4"));
+	}
+
+	@Test
+	void testGetSourceIpAddressWithBlankXForwardedForListTokenFallsBackToRemoteAddr() {
+		jakarta.servlet.http.HttpServletRequest request = mock(jakarta.servlet.http.HttpServletRequest.class);
+		when(request.getHeader("Forwarded")).thenReturn(null);
+		when(request.getHeader("X-Forwarded-For")).thenReturn(", \t ,");
+		when(request.getRemoteAddr()).thenReturn("10.0.0.5");
+		String ip = SecurityUtil.getSourceIpAddress(request);
+		assertThat(ip, is("10.0.0.5"));
+	}
+
 	@Test
 	void testGetSourceIpAddressFromRemoteAddr() {
 		jakarta.servlet.http.HttpServletRequest request = mock(jakarta.servlet.http.HttpServletRequest.class);
@@ -217,9 +267,18 @@ class SecurityUtilTest {
 		assertThat(ip, is("10.0.0.1"));
 	}
 
+	@Test
+	void testGetSourceIpAddressReturnsUnknownWhenAllSourcesAreBlank() {
+		jakarta.servlet.http.HttpServletRequest request = mock(jakarta.servlet.http.HttpServletRequest.class);
+		when(request.getHeader("Forwarded")).thenReturn("   ");
+		when(request.getHeader("X-Forwarded-For")).thenReturn("\t");
+		when(request.getRemoteAddr()).thenReturn("   ");
+		String ip = SecurityUtil.getSourceIpAddress(request);
+		assertThat(ip, is("unknown"));
+	}
+
 	// ======== getProvenance() ========
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testGetProvenanceReturnsFirstStackTraceElement() {
 		Exception e = new RuntimeException("test");
@@ -227,7 +286,6 @@ class SecurityUtilTest {
 		assertThat(provenance, containsString("SecurityUtilTest"));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testGetProvenanceReturnsNullForEmptyStackTrace() {
 		Exception e = new RuntimeException("test");
@@ -238,14 +296,12 @@ class SecurityUtilTest {
 
 	// ======== createDelegatingPasswordEncoder() ========
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testCreateDelegatingPasswordEncoderIsNotNull() {
 		org.springframework.security.crypto.password.PasswordEncoder encoder = SecurityUtil.createDelegatingPasswordEncoder();
 		assertThat(encoder, org.hamcrest.CoreMatchers.notNullValue());
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testCreateDelegatingPasswordEncoderCanEncode() {
 		org.springframework.security.crypto.password.PasswordEncoder encoder = SecurityUtil.createDelegatingPasswordEncoder();
@@ -253,7 +309,6 @@ class SecurityUtilTest {
 		assertThat(encoded, containsString("{argon2}"));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testCreateDelegatingPasswordEncoderCanMatch() {
 		org.springframework.security.crypto.password.PasswordEncoder encoder = SecurityUtil.createDelegatingPasswordEncoder();
@@ -263,7 +318,6 @@ class SecurityUtilTest {
 
 	// ======== hashPassword() ========
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testHashPasswordReturnsArgon2Prefix() {
 		// Default algorithm is argon2
@@ -271,7 +325,6 @@ class SecurityUtilTest {
 		assertThat(hashed, containsString("{argon2}"));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testHashPasswordBcrypt() {
 		String originalAlgorithm = UtilImpl.PASSWORD_HASHING_ALGORITHM;
@@ -284,7 +337,6 @@ class SecurityUtilTest {
 		}
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testHashPasswordPbkdf2() {
 		String originalAlgorithm = UtilImpl.PASSWORD_HASHING_ALGORITHM;
@@ -297,7 +349,6 @@ class SecurityUtilTest {
 		}
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testHashPasswordScrypt() {
 		String originalAlgorithm = UtilImpl.PASSWORD_HASHING_ALGORITHM;
@@ -310,7 +361,6 @@ class SecurityUtilTest {
 		}
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testHashPasswordSHA1() {
 		String originalAlgorithm = UtilImpl.PASSWORD_HASHING_ALGORITHM;
@@ -324,7 +374,6 @@ class SecurityUtilTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testHashPasswordUnsupportedAlgorithmThrowsDomainException() {
 		// covers SecurityUtil.hashPassword@379 (else throw new DomainException)
 		String originalAlgorithm = UtilImpl.PASSWORD_HASHING_ALGORITHM;
@@ -337,14 +386,12 @@ class SecurityUtilTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testCreateDelegatingPasswordEncoderReturnsNonNull() {
 		org.springframework.security.crypto.password.PasswordEncoder encoder = SecurityUtil.createDelegatingPasswordEncoder();
 		assertThat(encoder, org.hamcrest.CoreMatchers.notNullValue());
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testCreateDelegatingPasswordEncoderCanEncodeAndMatch() {
 		org.springframework.security.crypto.password.PasswordEncoder encoder = SecurityUtil.createDelegatingPasswordEncoder();
 		String encoded = encoder.encode("myPassword");

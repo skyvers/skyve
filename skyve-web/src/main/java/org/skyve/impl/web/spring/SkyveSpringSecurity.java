@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.config.oauth2.client.CommonOAuth2Provider;
 import org.springframework.security.core.AuthenticatedPrincipal;
 import org.springframework.security.core.GrantedAuthority;
@@ -48,7 +49,11 @@ import org.springframework.security.oauth2.core.oidc.IdTokenClaimNames;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Implements internal web-module behavior for this Skyve runtime concern.
@@ -70,6 +75,23 @@ public class SkyveSpringSecurity {
 	@SuppressWarnings("static-method")
 	public PasswordEncoder passwordEncoder() {
 		return SecurityUtil.createDelegatingPasswordEncoder();
+	}
+
+	/**
+	 * Provides request authentication details using Skyve's proxy-aware source IP resolution.
+	 *
+	 * <p>The source address is resolved from {@code Forwarded}, then {@code X-Forwarded-For},
+	 * and finally the servlet request's remote address.
+	 *
+	 * @return an authentication details source that preserves the current session ID when available
+	 */
+	@SuppressWarnings("static-method")
+	public AuthenticationDetailsSource<HttpServletRequest, WebAuthenticationDetails> authenticationDetailsSource() {
+		return request -> {
+			HttpSession session = request.getSession(false);
+			return new WebAuthenticationDetails(SecurityUtil.getSourceIpAddress(request),
+												(session == null) ? null : session.getId());
+		};
 	}
 	
 	/**
