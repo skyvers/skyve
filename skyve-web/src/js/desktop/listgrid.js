@@ -228,7 +228,6 @@ isc.BizListGrid.addMethods({
 				return (
 					this.canZoom &&
 					!this.aggregate &&
-					!(config && config.contConv) &&
 					this.grid.anySelected()
 				);
 			},
@@ -1567,7 +1566,7 @@ isc.BizListGrid.addMethods({
 				if (this.anySelected()) {
 					const zoomDisabled = me.aggregate || !me.canZoom;
 					me._zoomButton.setDisabled(zoomDisabled);
-					me._popoutButton.setDisabled(zoomDisabled || (config && config.contConv));
+					me._popoutButton.setDisabled(zoomDisabled);
 					me._editButton.setDisabled(me._disabled || !me.canUpdate || !me.canEdit);
 					me._pickButton.setDisabled(me._disabled);
 					me.deleteSelectionButton.setDisabled(
