@@ -114,52 +114,9 @@ available while an orphan disappears from both storage layers.
 
 ## Scheduled Backups and Azure Copies
 
-### What changed
-
-The scheduled backup job (`modules.admin.DataMaintenance.BackupJob`) previously copied the
-daily backup to the `WEEKLY_`, `MONTHLY_` and `YEARLY_` names on every run, and the Azure
-external backup copied blobs by streaming them down through the application server and
-back up again. With every tier enabled that was four full downloads and five uploads of the
-backup per day, which is where the Azure transport cost was going.
-
-- Weekly, monthly and yearly copies are now made at most once per period. If the period's
-  copy already exists in the store in use it is skipped. The period's copy is therefore the
-  first daily of the period whose copy succeeded, not the last. A failed copy leaves nothing
-  behind and is retried on the next run.
-- A daily backup with problems is copied to the period name with the `_PROBLEMS` suffix
-  (for example `WEEKLY_20260904_PROBLEMS.zip`) and does not stop a later good daily from
-  producing the period's real copy. Problem copies are culled at twice the tier's retention,
-  as daily problem backups already were.
-- `AzureBlobStorageBackup.copyBackup` uses Azure's asynchronous server-side copy. The blob
-  never leaves the storage account, there is no 256 MB limit, and both account-key and
-  SAS-token connection strings work. `moveBackup` (the daily rename) benefits too.
-- Plain `YEARLY_` backups are now culled to `yearlyBackupRetention`. Previously only
-  `YEARLY_*_PROBLEMS` backups were culled, so yearly backups accumulated without limit.
-- `ExternalBackup.exists`, `copyBackup` and `moveBackup` now document that a copy must be
-  complete when it returns and must not leave a partial destination on failure. Custom
-  `externalBackupClass` implementations should be checked against that contract.
-
-### Upgrade notes
-
-- **Yearly retention is now enforced.** Before the first scheduled run after upgrading,
-  check `yearlyBackupRetention` on the Data Maintenance Backup/Restore tab. Yearly backups
-  beyond it are deleted on that run, locally and externally. A retention of 0 or empty
-  deletes every yearly backup, as it always has for weekly and monthly. Archive any yearly
-  backups you want to keep first.
-- **Re-assemble the admin module.** The scheduled job lives in the application's own copy
-  of the admin module, so the once-per-period behaviour and the yearly cull only take effect
-  after the application is re-assembled (`skyve:assemble`) and redeployed. The Azure copy
-  change arrives with the `skyve-ext` dependency.
-- The first run after upgrading finds the current period's weekly, monthly and yearly copies
-  already present (made daily by the old code) and skips them, so the current period's copy
-  is the last daily taken before the upgrade. New copies are made when the next period
-  starts.
-
-### Verification coverage
-
-`BackupJobTest` (skyve-war, H2) covers once-per-period skipping locally and externally, the
-`_PROBLEMS` path in both modes, retry after a failed external copy, skipping the periodic
-copies when the daily move fails, and the yearly cull. `AzureBlobStorageBackupTest`
-(skyve-ext, Mockito) covers the server-side copy's success, failure and timeout handling.
-The copy was not exercised against a live Azure account in the framework build; verify
-against Azurite or a storage account with a backup larger than 256 MB before relying on it.
+The scheduled backup job now makes each weekly, monthly and yearly copy once per period
+instead of every day, the Azure external backup copies blobs server-side instead of
+streaming them through the application server, and plain `YEARLY_` backups are now culled
+to `yearlyBackupRetention` (previously they were never culled, so check that retention
+before the first run after upgrading, and re-assemble the admin module to pick up the job
+change).
