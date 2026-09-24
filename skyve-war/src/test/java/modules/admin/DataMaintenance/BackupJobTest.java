@@ -69,8 +69,8 @@ class BackupJobTest extends AbstractH2Test {
 		Path sourceZip = createFile("backup.zip");
 		createFile("DAILY_20200102000000.zip");
 		Path oldDaily = createFile("DAILY_20200101000000.zip");
-		createFile("WEEKLY_20200101000000.zip");
-		createFile("MONTHLY_20200101000000.zip");
+		Path oldWeekly = createFile("WEEKLY_20200101000000.zip");
+		Path oldMonthly = createFile("MONTHLY_20200101000000.zip");
 		Path oldYearly = createFile("YEARLY_2020.zip");
 		createFile("YEARLY_20200101000000_PROBLEMS.zip");
 		modules.admin.domain.DataMaintenance dm = modules.admin.domain.DataMaintenance.newInstance();
@@ -89,7 +89,10 @@ class BackupJobTest extends AbstractH2Test {
 		assertTrue(Files.exists(tempDir.resolve(periodName("WEEKLY_", "yyyyMMWW"))));
 		assertTrue(Files.exists(tempDir.resolve(periodName("MONTHLY_", "yyyyMM"))));
 		assertTrue(Files.exists(tempDir.resolve(periodName("YEARLY_", "yyyy"))));
+		assertFalse(Files.exists(oldWeekly));
+		assertFalse(Files.exists(oldMonthly));
 		assertFalse(Files.exists(oldYearly));
+		assertFalse(hasFileEndingWith(".partial"));
 		assertTrue(job.getLog().stream().anyMatch(entry -> entry.contains("Finished Backup")));
 	}
 
@@ -177,6 +180,7 @@ class BackupJobTest extends AbstractH2Test {
 		String weeklyName = periodName("WEEKLY_", "yyyyMMWW");
 		String monthlyName = periodName("MONTHLY_", "yyyyMM");
 		String yearlyName = periodName("YEARLY_", "yyyy");
+		FakeExternalBackup.backups.add("YEARLY_2020.zip");
 
 		new LocalBackupJob(dm, tempDir.resolve("first.zip").toFile()).execute();
 
@@ -191,12 +195,57 @@ class BackupJobTest extends AbstractH2Test {
 		assertThat(FakeExternalBackup.movedBackups, is(List.of("first.zip->DAILY_first.zip", "second.zip->DAILY_second.zip")));
 		assertEquals(3, FakeExternalBackup.copiedBackups.size());
 		assertEquals(3, secondJob.getLog().stream().filter(entry -> entry.startsWith("Skipped ")).count());
-		assertTrue(FakeExternalBackup.deletedBackups.isEmpty());
+		assertThat(FakeExternalBackup.deletedBackups, is(List.of("YEARLY_2020.zip")));
+		assertFalse(FakeExternalBackup.backups.contains("YEARLY_2020.zip"));
 	}
 
 	@Test
-	void executeLogsExternalPeriodicCopyFailureAndContinues() throws Exception {
+	void executeLogsExternalPeriodicCopyFailureAndRetriesOnTheNextRun() throws Exception {
 		FakeExternalBackup.throwOnCopy = true;
+		UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS = FakeExternalBackup.class.getName();
+		modules.admin.domain.DataMaintenance dm = modules.admin.domain.DataMaintenance.newInstance();
+		dm.setDailyBackupRetention(Integer.valueOf(2));
+		dm.setWeeklyBackupRetention(Integer.valueOf(1));
+		String weeklyName = periodName("WEEKLY_", "yyyyMMWW");
+		BackupJob job = new LocalBackupJob(dm, tempDir.resolve("first.zip").toFile());
+
+		job.execute();
+
+		assertEquals(100, job.getPercentComplete());
+		assertThat(FakeExternalBackup.movedBackups, is(List.of("first.zip->DAILY_first.zip")));
+		assertTrue(FakeExternalBackup.copiedBackups.isEmpty());
+		assertFalse(job.getLog().stream().anyMatch(entry -> entry.startsWith("Failed to move external backup")));
+		assertTrue(job.getLog().stream().anyMatch(entry -> entry.startsWith("Failed to copy external backup for")));
+		assertTrue(job.getLog().stream().anyMatch(entry -> entry.contains("Could not send a backup problem email")));
+		assertTrue(job.getLog().stream().anyMatch(entry -> entry.contains("Finished Backup")));
+
+		FakeExternalBackup.throwOnCopy = false;
+		new LocalBackupJob(dm, tempDir.resolve("second.zip").toFile()).execute();
+
+		assertThat(FakeExternalBackup.copiedBackups, is(List.of("DAILY_second.zip->" + weeklyName)));
+	}
+
+	@Test
+	void executeSkipsPeriodicCopiesWhenTheExternalMoveFails() throws Exception {
+		FakeExternalBackup.throwOnMove = true;
+		UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS = FakeExternalBackup.class.getName();
+		modules.admin.domain.DataMaintenance dm = modules.admin.domain.DataMaintenance.newInstance();
+		dm.setDailyBackupRetention(Integer.valueOf(1));
+		dm.setWeeklyBackupRetention(Integer.valueOf(1));
+		dm.setMonthlyBackupRetention(Integer.valueOf(1));
+		BackupJob job = new LocalBackupJob(dm, tempDir.resolve("first.zip").toFile());
+
+		job.execute();
+
+		assertEquals(100, job.getPercentComplete());
+		assertTrue(job.getLog().stream().anyMatch(entry -> entry.startsWith("Failed to move external backup")));
+		assertTrue(job.getLog().stream().anyMatch(entry -> entry.startsWith("Skipped weekly, monthly and yearly backups")));
+		assertTrue(FakeExternalBackup.copiedBackups.isEmpty());
+	}
+
+	@Test
+	void executeLogsExternalExistenceCheckFailureAndDoesNotCopy() throws Exception {
+		FakeExternalBackup.throwOnExists = true;
 		UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS = FakeExternalBackup.class.getName();
 		modules.admin.domain.DataMaintenance dm = modules.admin.domain.DataMaintenance.newInstance();
 		dm.setDailyBackupRetention(Integer.valueOf(1));
@@ -206,9 +255,29 @@ class BackupJobTest extends AbstractH2Test {
 		job.execute();
 
 		assertEquals(100, job.getPercentComplete());
-		assertTrue(job.getLog().stream().anyMatch(entry -> entry.startsWith("Failed to move external backup")));
-		assertTrue(job.getLog().stream().anyMatch(entry -> entry.startsWith("Failed to copy external backup")));
-		assertTrue(job.getLog().stream().anyMatch(entry -> entry.contains("Finished Backup")));
+		assertTrue(job.getLog().stream().anyMatch(entry -> entry.startsWith("Failed to check for an existing weekly backup")));
+		assertFalse(job.getLog().stream().anyMatch(entry -> entry.startsWith("Failed to copy external backup")));
+		assertTrue(FakeExternalBackup.copiedBackups.isEmpty());
+	}
+
+	@Test
+	void executeWithExternalBackupsCopiesProblemDailyWithProblemsSuffixAndDoesNotBlockLaterGoodCopy() throws Exception {
+		UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS = FakeExternalBackup.class.getName();
+		modules.admin.domain.DataMaintenance dm = modules.admin.domain.DataMaintenance.newInstance();
+		dm.setDailyBackupRetention(Integer.valueOf(5));
+		dm.setWeeklyBackupRetention(Integer.valueOf(1));
+		String weeklyName = periodName("WEEKLY_", "yyyyMMWW");
+		String weeklyProblemsName = weeklyName.replace(".zip", "_PROBLEMS.zip");
+
+		new LocalBackupJob(dm, tempDir.resolve("bad_PROBLEMS.zip").toFile()).execute();
+		BackupJob secondProblemJob = new LocalBackupJob(dm, tempDir.resolve("bad2_PROBLEMS.zip").toFile());
+		secondProblemJob.execute();
+		new LocalBackupJob(dm, tempDir.resolve("good.zip").toFile()).execute();
+
+		assertThat(FakeExternalBackup.copiedBackups, is(List.of("DAILY_bad_PROBLEMS.zip->" + weeklyProblemsName,
+				"DAILY_good.zip->" + weeklyName)));
+		assertThat(secondProblemJob.getLog().stream().filter(entry -> entry.startsWith("Skipped weekly backup")).toList(),
+				is(List.of("Skipped weekly backup as " + weeklyProblemsName + " already exists for this period")));
 	}
 
 	@Test
@@ -283,16 +352,18 @@ class BackupJobTest extends AbstractH2Test {
 
 	@Test
 	void cullDeletesExternalBackupsBeyondRetention() throws Exception {
-		FakeExternalBackup.backups.add("DAILY_20240103000000.zip");
-		FakeExternalBackup.backups.add("DAILY_20240102000000.zip");
-		FakeExternalBackup.backups.add("MONTHLY_20240101000000.zip");
+		// added oldest first; the fake lists newest first as the interface requires
 		FakeExternalBackup.backups.add("DAILY_20240101000000.zip");
+		FakeExternalBackup.backups.add("MONTHLY_20240101000000.zip");
+		FakeExternalBackup.backups.add("DAILY_20240102000000.zip");
+		FakeExternalBackup.backups.add("DAILY_20240103000000.zip");
 		UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS = FakeExternalBackup.class.getName();
 		BackupJob job = new BackupJob();
 
 		invokeCull(job, tempDir.toFile(), "DAILY_", 1);
 
 		assertThat(FakeExternalBackup.deletedBackups, is(List.of("DAILY_20240102000000.zip", "DAILY_20240101000000.zip")));
+		assertThat(FakeExternalBackup.backups, is(List.of("MONTHLY_20240101000000.zip", "DAILY_20240103000000.zip")));
 		assertEquals(2, job.getLog().size());
 		assertThat(job.getLog().get(0), containsString("DAILY_20240102000000.zip"));
 	}
@@ -311,8 +382,8 @@ class BackupJobTest extends AbstractH2Test {
 
 	@Test
 	void cullLogsExternalBackupDeleteFailure() throws Exception {
-		FakeExternalBackup.backups.add("DAILY_20240103000000.zip");
 		FakeExternalBackup.backups.add("DAILY_20240102000000.zip");
+		FakeExternalBackup.backups.add("DAILY_20240103000000.zip");
 		FakeExternalBackup.throwOnDelete = true;
 		UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS = FakeExternalBackup.class.getName();
 		BackupJob job = new BackupJob();
@@ -328,6 +399,12 @@ class BackupJobTest extends AbstractH2Test {
 		Path path = tempDir.resolve(fileName);
 		Files.writeString(path, fileName);
 		return path;
+	}
+
+	private boolean hasFileEndingWith(String suffix) throws Exception {
+		try (var files = Files.list(tempDir)) {
+			return files.anyMatch(path -> path.getFileName().toString().endsWith(suffix));
+		}
 	}
 
 	private static String periodName(String prefix, String datePattern) {
@@ -394,6 +471,8 @@ class BackupJobTest extends AbstractH2Test {
 		private static boolean throwOnList;
 		private static boolean throwOnDelete;
 		private static boolean throwOnCopy;
+		private static boolean throwOnMove;
+		private static boolean throwOnExists;
 
 		private static void reset() {
 			backups.clear();
@@ -403,18 +482,29 @@ class BackupJobTest extends AbstractH2Test {
 			throwOnList = false;
 			throwOnDelete = false;
 			throwOnCopy = false;
+			throwOnMove = false;
+			throwOnExists = false;
 		}
 
+		/**
+		 * Backups are recorded in the order they were added, so the newest is last;
+		 * the interface contract is newest first, as the Azure implementation lists them.
+		 */
 		@Override
 		public List<String> listBackups() {
 			if (throwOnList) {
 				throw new IllegalStateException("list failed");
 			}
-			return backups;
+			List<String> result = new ArrayList<>(backups);
+			java.util.Collections.reverse(result);
+			return result;
 		}
 
 		@Override
 		public boolean exists(String backupName) {
+			if (throwOnExists) {
+				throw new IllegalStateException("exists failed");
+			}
 			return backups.contains(backupName);
 		}
 
@@ -434,6 +524,7 @@ class BackupJobTest extends AbstractH2Test {
 				throw new IllegalStateException("delete failed");
 			}
 			deletedBackups.add(backupName);
+			backups.remove(backupName);
 		}
 
 		@Override
@@ -447,7 +538,7 @@ class BackupJobTest extends AbstractH2Test {
 
 		@Override
 		public void moveBackup(String srcBackupName, String destBackupName) {
-			if (throwOnCopy) {
+			if (throwOnMove) {
 				throw new IllegalStateException("move failed");
 			}
 			movedBackups.add(srcBackupName + "->" + destBackupName);

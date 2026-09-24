@@ -1,21 +1,36 @@
 package org.skyve.impl.backup;
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.time.Duration;
 import java.util.HashMap;
 
 import org.junit.Test;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.user.User;
+
+import com.azure.core.util.polling.LongRunningOperationStatus;
+import com.azure.core.util.polling.PollResponse;
+import com.azure.core.util.polling.SyncPoller;
+import com.azure.storage.blob.BlobClient;
+import com.azure.storage.blob.models.BlobCopyInfo;
+import com.azure.storage.blob.models.CopyStatusType;
 
 @SuppressWarnings("static-method")
 public class AzureBlobStorageBackupTest {
@@ -59,6 +74,46 @@ public class AzureBlobStorageBackupTest {
 		assertEquals("source.zip", backup.copiedSource);
 		assertEquals("destination.zip", backup.copiedDestination);
 		assertEquals("source.zip", backup.deletedBackup);
+	}
+
+	@Test
+	public void copyStartsServerSideCopyFromTheSourceUrlAndWaitsForSuccess() throws Exception {
+		CopyFixture fixture = new CopyFixture();
+		when(fixture.poller.waitForCompletion(any(Duration.class)))
+				.thenReturn(new PollResponse<>(LongRunningOperationStatus.SUCCESSFULLY_COMPLETED, copyInfo(CopyStatusType.SUCCESS, null)));
+
+		invokeCopy(fixture);
+
+		verify(fixture.dest).beginCopy(eq(SOURCE_URL), any(Duration.class));
+		verify(fixture.dest, never()).deleteIfExists();
+		verify(fixture.poller, never()).cancelOperation();
+	}
+
+	@Test
+	public void copyDeletesPartialDestinationAndThrowsWhenTheCopyFails() {
+		CopyFixture fixture = new CopyFixture();
+		when(fixture.poller.waitForCompletion(any(Duration.class)))
+				.thenReturn(new PollResponse<>(LongRunningOperationStatus.FAILED, copyInfo(CopyStatusType.FAILED, "server busy")));
+
+		DomainException thrown = assertCopyThrows(fixture);
+
+		assertThat(thrown.getMessage(), containsString("Failed to copy source.zip to destination.zip in Azure"));
+		assertThat(thrown.getMessage(), containsString("copy status failed - server busy"));
+		verify(fixture.dest).deleteIfExists();
+		verify(fixture.poller, never()).cancelOperation();
+	}
+
+	@Test
+	public void copyAbortsAndDeletesPartialDestinationWhenTheCopyTimesOut() {
+		CopyFixture fixture = new CopyFixture();
+		when(fixture.poller.waitForCompletion(any(Duration.class))).thenThrow(new IllegalStateException("timed out"));
+
+		DomainException thrown = assertCopyThrows(fixture);
+
+		assertThat(thrown.getMessage(), containsString("copy did not complete within PT4H"));
+		assertEquals("timed out", thrown.getCause().getMessage());
+		verify(fixture.poller).cancelOperation();
+		verify(fixture.dest).deleteIfExists();
 	}
 
 	@Test
@@ -122,6 +177,39 @@ public class AzureBlobStorageBackupTest {
 
 	private interface ThrowingRunnable {
 		void run() throws Exception;
+	}
+
+	private static final String SOURCE_URL = "https://account.blob.core.windows.net/container/backup-acme/source.zip";
+
+	private static BlobCopyInfo copyInfo(CopyStatusType status, String error) {
+		return new BlobCopyInfo(SOURCE_URL, "copy-id", status, "etag", null, error);
+	}
+
+	/**
+	 * Invokes the private static copy method with mocked blob clients so nothing talks to Azure.
+	 */
+	private static void invokeCopy(CopyFixture fixture) throws Exception {
+		Method method = AzureBlobStorageBackup.class.getDeclaredMethod("copy", String.class, String.class, BlobClient.class, BlobClient.class);
+		method.setAccessible(true);
+		method.invoke(null, "source.zip", "destination.zip", fixture.src, fixture.dest);
+	}
+
+	private static DomainException assertCopyThrows(CopyFixture fixture) {
+		InvocationTargetException thrown = assertThrows(InvocationTargetException.class, () -> invokeCopy(fixture));
+		assertEquals(DomainException.class, thrown.getCause().getClass());
+		return (DomainException) thrown.getCause();
+	}
+
+	private static final class CopyFixture {
+		private final BlobClient src = mock(BlobClient.class);
+		private final BlobClient dest = mock(BlobClient.class);
+		@SuppressWarnings("unchecked")
+		private final SyncPoller<BlobCopyInfo, Void> poller = mock(SyncPoller.class);
+
+		private CopyFixture() {
+			when(src.getBlobUrl()).thenReturn(SOURCE_URL);
+			when(dest.beginCopy(any(String.class), any(Duration.class))).thenReturn(poller);
+		}
 	}
 
 	private static final class RecordingAzureBlobStorageBackup extends AzureBlobStorageBackup {
