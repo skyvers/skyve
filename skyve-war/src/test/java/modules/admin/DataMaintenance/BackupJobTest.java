@@ -21,6 +21,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.skyve.CORE;
+import org.skyve.domain.types.DateOnly;
 import org.skyve.impl.backup.ExternalBackup;
 import org.skyve.impl.util.UtilImpl;
 
@@ -69,6 +71,7 @@ class BackupJobTest extends AbstractH2Test {
 		Path oldDaily = createFile("DAILY_20200101000000.zip");
 		createFile("WEEKLY_20200101000000.zip");
 		createFile("MONTHLY_20200101000000.zip");
+		Path oldYearly = createFile("YEARLY_2020.zip");
 		createFile("YEARLY_20200101000000_PROBLEMS.zip");
 		modules.admin.domain.DataMaintenance dm = modules.admin.domain.DataMaintenance.newInstance();
 		dm.setDailyBackupRetention(Integer.valueOf(1));
@@ -83,9 +86,10 @@ class BackupJobTest extends AbstractH2Test {
 		assertFalse(Files.exists(sourceZip));
 		assertTrue(Files.exists(tempDir.resolve("DAILY_backup.zip")));
 		assertFalse(Files.exists(oldDaily));
-		assertTrue(hasFileStartingWith("WEEKLY_"));
-		assertTrue(hasFileStartingWith("MONTHLY_"));
-		assertTrue(hasFileStartingWith("YEARLY_"));
+		assertTrue(Files.exists(tempDir.resolve(periodName("WEEKLY_", "yyyyMMWW"))));
+		assertTrue(Files.exists(tempDir.resolve(periodName("MONTHLY_", "yyyyMM"))));
+		assertTrue(Files.exists(tempDir.resolve(periodName("YEARLY_", "yyyy"))));
+		assertFalse(Files.exists(oldYearly));
 		assertTrue(job.getLog().stream().anyMatch(entry -> entry.contains("Finished Backup")));
 	}
 
@@ -116,6 +120,95 @@ class BackupJobTest extends AbstractH2Test {
 		assertTrue(Files.exists(tempDir.resolve("DAILY_daily-only.zip")));
 		assertTrue(job.getLog().stream().anyMatch(entry -> entry.contains("No weekly backup taken")));
 		assertTrue(job.getLog().stream().anyMatch(entry -> entry.contains("No monthly backup taken")));
+	}
+
+	@Test
+	void executeSkipsLocalPeriodicCopiesThatAlreadyExistForThePeriod() throws Exception {
+		Path sourceZip = createFile("second.zip");
+		Path existingWeekly = tempDir.resolve(periodName("WEEKLY_", "yyyyMMWW"));
+		Files.writeString(existingWeekly, "first backup of the week");
+		modules.admin.domain.DataMaintenance dm = modules.admin.domain.DataMaintenance.newInstance();
+		dm.setDailyBackupRetention(Integer.valueOf(2));
+		dm.setWeeklyBackupRetention(Integer.valueOf(1));
+		dm.setMonthlyBackupRetention(Integer.valueOf(1));
+		BackupJob job = new LocalBackupJob(dm, sourceZip.toFile());
+
+		job.execute();
+
+		assertEquals("first backup of the week", Files.readString(existingWeekly));
+		assertTrue(Files.exists(tempDir.resolve(periodName("MONTHLY_", "yyyyMM"))));
+		assertTrue(job.getLog().stream().anyMatch(entry -> entry.startsWith("Skipped weekly backup")));
+		assertFalse(job.getLog().stream().anyMatch(entry -> entry.startsWith("Skipped monthly backup")));
+	}
+
+	@Test
+	void executeCopiesProblemDailyWithProblemsSuffixAndDoesNotBlockLaterGoodCopy() throws Exception {
+		modules.admin.domain.DataMaintenance dm = modules.admin.domain.DataMaintenance.newInstance();
+		dm.setDailyBackupRetention(Integer.valueOf(2));
+		dm.setWeeklyBackupRetention(Integer.valueOf(1));
+		String weeklyName = periodName("WEEKLY_", "yyyyMMWW");
+		String weeklyProblemsName = weeklyName.replace(".zip", "_PROBLEMS.zip");
+
+		new LocalBackupJob(dm, createFile("bad_PROBLEMS.zip").toFile()).execute();
+
+		assertTrue(Files.exists(tempDir.resolve(weeklyProblemsName)));
+		assertFalse(Files.exists(tempDir.resolve(weeklyName)));
+
+		BackupJob secondProblemJob = new LocalBackupJob(dm, createFile("bad2_PROBLEMS.zip").toFile());
+		secondProblemJob.execute();
+
+		assertTrue(secondProblemJob.getLog().stream().anyMatch(entry -> entry.startsWith("Skipped weekly backup")));
+		assertFalse(Files.exists(tempDir.resolve(weeklyName)));
+
+		new LocalBackupJob(dm, createFile("good.zip").toFile()).execute();
+
+		assertTrue(Files.exists(tempDir.resolve(weeklyName)));
+		assertTrue(Files.exists(tempDir.resolve(weeklyProblemsName)));
+	}
+
+	@Test
+	void executeWithExternalBackupsCopiesEachPeriodOnceAndSkipsOnLaterRuns() throws Exception {
+		UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS = FakeExternalBackup.class.getName();
+		modules.admin.domain.DataMaintenance dm = modules.admin.domain.DataMaintenance.newInstance();
+		dm.setDailyBackupRetention(Integer.valueOf(5));
+		dm.setWeeklyBackupRetention(Integer.valueOf(1));
+		dm.setMonthlyBackupRetention(Integer.valueOf(1));
+		dm.setYearlyBackupRetention(Integer.valueOf(1));
+		String weeklyName = periodName("WEEKLY_", "yyyyMMWW");
+		String monthlyName = periodName("MONTHLY_", "yyyyMM");
+		String yearlyName = periodName("YEARLY_", "yyyy");
+
+		new LocalBackupJob(dm, tempDir.resolve("first.zip").toFile()).execute();
+
+		assertThat(FakeExternalBackup.movedBackups, is(List.of("first.zip->DAILY_first.zip")));
+		assertThat(FakeExternalBackup.copiedBackups, is(List.of("DAILY_first.zip->" + weeklyName,
+				"DAILY_first.zip->" + monthlyName,
+				"DAILY_first.zip->" + yearlyName)));
+
+		BackupJob secondJob = new LocalBackupJob(dm, tempDir.resolve("second.zip").toFile());
+		secondJob.execute();
+
+		assertThat(FakeExternalBackup.movedBackups, is(List.of("first.zip->DAILY_first.zip", "second.zip->DAILY_second.zip")));
+		assertEquals(3, FakeExternalBackup.copiedBackups.size());
+		assertEquals(3, secondJob.getLog().stream().filter(entry -> entry.startsWith("Skipped ")).count());
+		assertTrue(FakeExternalBackup.deletedBackups.isEmpty());
+	}
+
+	@Test
+	void executeLogsExternalPeriodicCopyFailureAndContinues() throws Exception {
+		FakeExternalBackup.throwOnCopy = true;
+		UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS = FakeExternalBackup.class.getName();
+		modules.admin.domain.DataMaintenance dm = modules.admin.domain.DataMaintenance.newInstance();
+		dm.setDailyBackupRetention(Integer.valueOf(1));
+		dm.setWeeklyBackupRetention(Integer.valueOf(1));
+		BackupJob job = new LocalBackupJob(dm, tempDir.resolve("first.zip").toFile());
+
+		job.execute();
+
+		assertEquals(100, job.getPercentComplete());
+		assertTrue(job.getLog().stream().anyMatch(entry -> entry.startsWith("Failed to move external backup")));
+		assertTrue(job.getLog().stream().anyMatch(entry -> entry.startsWith("Failed to copy external backup")));
+		assertTrue(job.getLog().stream().anyMatch(entry -> entry.contains("Finished Backup")));
 	}
 
 	@Test
@@ -237,10 +330,8 @@ class BackupJobTest extends AbstractH2Test {
 		return path;
 	}
 
-	private boolean hasFileStartingWith(String prefix) throws Exception {
-		try (var files = Files.list(tempDir)) {
-			return files.anyMatch(path -> path.getFileName().toString().startsWith(prefix));
-		}
+	private static String periodName(String prefix, String datePattern) {
+		return prefix + CORE.getDateFormat(datePattern).format(new DateOnly()) + ".zip";
 	}
 
 	private static void invokeCull(BackupJob job, File backupDir, String prefix, int retain) throws Exception {
@@ -298,14 +389,20 @@ class BackupJobTest extends AbstractH2Test {
 	public static class FakeExternalBackup implements ExternalBackup {
 		private static final List<String> backups = new ArrayList<>();
 		private static final List<String> deletedBackups = new ArrayList<>();
+		private static final List<String> copiedBackups = new ArrayList<>();
+		private static final List<String> movedBackups = new ArrayList<>();
 		private static boolean throwOnList;
 		private static boolean throwOnDelete;
+		private static boolean throwOnCopy;
 
 		private static void reset() {
 			backups.clear();
 			deletedBackups.clear();
+			copiedBackups.clear();
+			movedBackups.clear();
 			throwOnList = false;
 			throwOnDelete = false;
+			throwOnCopy = false;
 		}
 
 		@Override
@@ -341,12 +438,21 @@ class BackupJobTest extends AbstractH2Test {
 
 		@Override
 		public void copyBackup(String srcBackupName, String destBackupName) {
-			throw new UnsupportedOperationException();
+			if (throwOnCopy) {
+				throw new IllegalStateException("copy failed");
+			}
+			copiedBackups.add(srcBackupName + "->" + destBackupName);
+			backups.add(destBackupName);
 		}
 
 		@Override
 		public void moveBackup(String srcBackupName, String destBackupName) {
-			throw new UnsupportedOperationException();
+			if (throwOnCopy) {
+				throw new IllegalStateException("move failed");
+			}
+			movedBackups.add(srcBackupName + "->" + destBackupName);
+			backups.remove(srcBackupName);
+			backups.add(destBackupName);
 		}
 
 		@Override

@@ -1,9 +1,9 @@
 package org.skyve.impl.backup;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Paths;
+import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -12,18 +12,21 @@ import java.util.stream.Collectors;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.util.UtilImpl;
-import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
+import org.slf4j.Logger;
 
+import com.azure.core.util.polling.LongRunningOperationStatus;
+import com.azure.core.util.polling.PollResponse;
+import com.azure.core.util.polling.SyncPoller;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
+import com.azure.storage.blob.models.BlobCopyInfo;
 import com.azure.storage.blob.models.BlobItem;
 import com.azure.storage.blob.models.BlobProperties;
-import com.azure.storage.blob.models.BlobRequestConditions;
-import com.azure.storage.blob.models.ParallelTransferOptions;
-import com.azure.storage.blob.specialized.BlobOutputStream;
+import com.azure.storage.blob.sas.BlobSasPermission;
+import com.azure.storage.blob.sas.BlobServiceSasSignatureValues;
 
 /**
  * {@link ExternalBackup} implementation that stores Skyve backup archives in
@@ -38,7 +41,8 @@ public class AzureBlobStorageBackup implements ExternalBackup {
 
 	public static final String AZURE_CONNECTION_STRING_KEY = "connectionString";
 	public static final String AZURE_CONTAINER_NAME_KEY = "containerName";
-	private static final long BLOCK_SIZE = 4194304; // 4 MB
+	private static final long COPY_SAS_EXPIRY_MINUTES = 60;
+	private static final long COPY_POLL_INTERVAL_SECONDS = 2;
 
 	@Override
 	public List<String> listBackups() {
@@ -88,37 +92,39 @@ public class AzureBlobStorageBackup implements ExternalBackup {
 		return blobContainerClient;
 	}
 
+	/**
+	 * Copy a backup blob to a new name using Azure's server-side asynchronous copy.
+	 * <p>
+	 * The copy happens entirely within the storage account, so the backup is never
+	 * streamed through the application server (no egress charge, no local bandwidth)
+	 * and there is no blob size limit (unlike the synchronous copy-from-URL operation,
+	 * which is capped at 256 MB).
+	 * The source is addressed with a short-lived read SAS so the copy is authorised
+	 * regardless of whether the account permits anonymous same-account copies.
+	 */
 	@Override
 	public void copyBackup(String srcBackupName, String destBackupName) {
-		BlobClient srcBlobClient = getBlobContainerClient().getBlobClient(getDirectoryName() + srcBackupName);
+		final BlobContainerClient blobContainerClient = getBlobContainerClient();
+		final BlobClient srcBlobClient = blobContainerClient.getBlobClient(getDirectoryName() + srcBackupName);
+		final BlobClient destBlobClient = blobContainerClient.getBlobClient(getDirectoryName() + destBackupName);
+		LOGGER.info("Copying from {} to {} in Azure", srcBackupName, destBackupName);
 
-		try {
-			BlobClient destBlobClient = getBlobContainerClient().getBlobClient(getDirectoryName() + destBackupName);
-			LOGGER.info("Copying from {} to {} in Azure", srcBackupName, destBackupName);
-
-			// copy the backup in chunks to workaround Azure's blob size limit
-			ParallelTransferOptions opts = new ParallelTransferOptions()
-					.setBlockSizeLong(Long.valueOf(BLOCK_SIZE))
-					.setMaxConcurrency(Integer.valueOf(5));
-
-			BlobRequestConditions requestConditions = new BlobRequestConditions();
-
-			try (BlobOutputStream bos = destBlobClient.getBlockBlobClient()
-					.getBlobOutputStream(
-							opts, null, null, null, requestConditions);
-
-					InputStream is = srcBlobClient.getBlockBlobClient().openInputStream()) {
-
-				byte[] buffer = new byte[(int) BLOCK_SIZE];
-				for (int len; (len = is.read(buffer)) != -1;) {
-					bos.write(buffer, 0, len);
-				}
-			}
-
-			LOGGER.info("Successfully copied to {} in Azure", destBackupName);
-		} catch (IOException e) {
-			throw new DomainException(e);
+		final BlobSasPermission readPermission = new BlobSasPermission().setReadPermission(true);
+		final String sas = srcBlobClient.generateSas(new BlobServiceSasSignatureValues(OffsetDateTime.now().plusMinutes(COPY_SAS_EXPIRY_MINUTES),
+																						readPermission));
+		final SyncPoller<BlobCopyInfo, Void> poller = destBlobClient.beginCopy(srcBlobClient.getBlobUrl() + "?" + sas,
+																				Duration.ofSeconds(COPY_POLL_INTERVAL_SECONDS));
+		final PollResponse<BlobCopyInfo> response = poller.waitForCompletion();
+		final BlobCopyInfo info = response.getValue();
+		if (! LongRunningOperationStatus.SUCCESSFULLY_COMPLETED.equals(response.getStatus())) {
+			throw new DomainException(String.format("Failed to copy %s to %s in Azure - copy status %s%s",
+													srcBackupName,
+													destBackupName,
+													(info == null) ? response.getStatus() : info.getCopyStatus(),
+													((info == null) || (info.getError() == null)) ? "" : " - " + info.getError()));
 		}
+
+		LOGGER.info("Successfully copied to {} in Azure", destBackupName);
 	}
 
 	@Override

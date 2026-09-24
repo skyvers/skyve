@@ -22,8 +22,13 @@ import modules.admin.domain.DataMaintenance;
  */
 public class BackupJob extends Job {
 	private static final String COPY_BACKUP_FORMAT = "Copy Backup %s to %s";
+	private static final String SKIPPED_FORMAT = "Skipped %s backup as %s already exists for this period";
 	private static final String DAILY_PREFIX = "DAILY_";
+	private static final String WEEKLY_PREFIX = "WEEKLY_";
+	private static final String MONTHLY_PREFIX = "MONTHLY_";
+	private static final String YEARLY_PREFIX = "YEARLY_";
 	private static final String PROBLEMS_SUFFIX = "_PROBLEMS";
+	private static final String ZIP_SUFFIX = ".zip";
 
 	/**
 	 * Performs the cancel operation.
@@ -105,92 +110,23 @@ public class BackupJob extends Job {
 				LOGGER.info(trace);
 			}
 
-			// copy daily to weekly
-			if (weekly > 0) {
-				File copy = new File(backupDir,
-						String.format("WEEKLY_%s.zip",
-								CORE.getDateFormat("yyyyMMWW").format(now)));
-				if (ExternalBackup.areExternalBackupsEnabled()) {
-					try {
-						ExternalBackup.getInstance().copyBackup(dailyZip.getName(), copy.getName());
-					} catch (Exception e) {
-						trace = String.format("Failed to copy external backup for %s from %s to %s",
-								UtilImpl.ARCHIVE_NAME, dailyZip.getName(), copy.getName());
-						log.add(trace);
-						LOGGER.warn(trace, e);
-						org.skyve.impl.backup.BackupJob.emailProblem(log, trace);
-					}
-				} else {
-					trace = String.format(COPY_BACKUP_FORMAT, backupZip.getAbsolutePath(), copy.getAbsolutePath());
-					log.add(trace);
-					LOGGER.info(trace);
-					FileUtil.copy(dailyZip, copy);
-				}
-			} else {
-				trace = "No weekly backup taken by the BackupJob as weeklyBackupRetention in DataMaintenance is null or zero";
-				log.add(trace);
-				LOGGER.warn(trace);
-			}
-			// copy daily to monthly
-			if (monthly > 0) {
-				File copy = new File(backupDir,
-						String.format("MONTHLY_%s.zip",
-								CORE.getDateFormat("yyyyMM").format(now)));
-				if (ExternalBackup.areExternalBackupsEnabled()) {
-					try {
-						ExternalBackup.getInstance().copyBackup(dailyZip.getName(), copy.getName());
-					} catch (Exception e) {
-						trace = String.format("Failed to copy external backup for %s from %s to %s",
-								UtilImpl.ARCHIVE_NAME, dailyZip.getName(), copy.getName());
-						log.add(trace);
-						LOGGER.warn(trace, e);
-						org.skyve.impl.backup.BackupJob.emailProblem(log, trace);
-					}
-				} else {
-					trace = String.format(COPY_BACKUP_FORMAT, backupZip.getAbsolutePath(), copy.getAbsolutePath());
-					log.add(trace);
-					LOGGER.info(trace);
-					FileUtil.copy(dailyZip, copy);
-				}
-			}
-			else {
-				trace = "No monthly backup taken by the BackupJob as monthlyBackupRetention in DataMaintenance is null or zero";
-				log.add(trace);
-				LOGGER.warn(trace);
-			}
-			// copy daily to yearly
-			if (yearly > 0) {
-				File copy = new File(backupDir,
-						String.format("YEARLY_%s.zip",
-								CORE.getDateFormat("yyyy").format(now)));
-				if (ExternalBackup.areExternalBackupsEnabled()) {
-					try {
-						ExternalBackup.getInstance().copyBackup(dailyZip.getName(), copy.getName());
-					} catch (@SuppressWarnings("unused") Exception e) {
-						trace = String.format("Failed to copy external backup from %s to %s", dailyZip.getName(), copy.getName());
-						log.add(trace);
-						LOGGER.warn(trace);
-						org.skyve.impl.backup.BackupJob.emailProblem(log, trace);
-					}
-				} else {
-					trace = String.format(COPY_BACKUP_FORMAT, backupZip.getAbsolutePath(), copy.getAbsolutePath());
-					log.add(trace);
-					LOGGER.info(trace);
-					FileUtil.copy(dailyZip, copy);
-				}
-			}
+			// copy daily to weekly, monthly and yearly (at most once per period)
+			copyPeriodic(backupDir, dailyZip, "weekly", WEEKLY_PREFIX, "yyyyMMWW", now, weekly);
+			copyPeriodic(backupDir, dailyZip, "monthly", MONTHLY_PREFIX, "yyyyMM", now, monthly);
+			copyPeriodic(backupDir, dailyZip, "yearly", YEARLY_PREFIX, "yyyy", now, yearly);
 
 			// cull daily
 			cull(backupDir, DAILY_PREFIX, daily);
 			cull(backupDir, DAILY_PREFIX, PROBLEMS_SUFFIX, daily * 2);
 			// cull weekly
-			cull(backupDir, "WEEKLY_", weekly);
-			cull(backupDir, "WEEKLY_", PROBLEMS_SUFFIX, weekly * 2);
+			cull(backupDir, WEEKLY_PREFIX, weekly);
+			cull(backupDir, WEEKLY_PREFIX, PROBLEMS_SUFFIX, weekly * 2);
 			// cull monthly
-			cull(backupDir, "MONTHLY_", monthly);
-			cull(backupDir, "MONTHLY_", PROBLEMS_SUFFIX, monthly * 2);
+			cull(backupDir, MONTHLY_PREFIX, monthly);
+			cull(backupDir, MONTHLY_PREFIX, PROBLEMS_SUFFIX, monthly * 2);
 			// cull yearly
-			cull(backupDir, "YEARLY_", PROBLEMS_SUFFIX, yearly * 2);
+			cull(backupDir, YEARLY_PREFIX, yearly);
+			cull(backupDir, YEARLY_PREFIX, PROBLEMS_SUFFIX, yearly * 2);
 		}
 
 		setPercentComplete(100);
@@ -207,6 +143,85 @@ public class BackupJob extends Job {
 	@SuppressWarnings("static-method") // test seam
 	protected org.skyve.impl.backup.BackupJob createBackupJob() {
 		return new org.skyve.impl.backup.BackupJob();
+	}
+
+	/**
+	 * Copy the daily backup to a weekly, monthly or yearly backup named for the current period.
+	 * <p>
+	 * The copy is made at most once per period: if a backup for the period already exists
+	 * (locally or externally) the copy is skipped, so external storage sees one new
+	 * weekly/monthly/yearly upload per period rather than one per day.
+	 * A daily backup with problems is copied with the problems suffix and does not
+	 * stand in for a good backup, so a later good daily still produces the period's backup.
+	 *
+	 * @param backupDir the local backup directory
+	 * @param dailyZip the daily backup to copy (may not exist locally when external backups are enabled)
+	 * @param period the period name used in log messages (weekly, monthly or yearly)
+	 * @param prefix the backup name prefix for the period
+	 * @param datePattern the date format used to name the period's backup
+	 * @param now the date of this backup run
+	 * @param retention the retention count for the period (zero or less disables the copy)
+	 * @throws Exception if a local copy fails
+	 */
+	private void copyPeriodic(File backupDir,
+								File dailyZip,
+								String period,
+								String prefix,
+								String datePattern,
+								DateOnly now,
+								int retention)
+	throws Exception {
+		List<String> log = getLog();
+		String trace;
+
+		if (retention <= 0) {
+			trace = String.format("No %s backup taken by the BackupJob as %sBackupRetention in DataMaintenance is null or zero", period, period);
+			log.add(trace);
+			LOGGER.warn(trace);
+			return;
+		}
+
+		boolean problem = dailyZip.getName().endsWith(PROBLEMS_SUFFIX + ZIP_SUFFIX);
+		String periodName = prefix + CORE.getDateFormat(datePattern).format(now);
+		String goodName = periodName + ZIP_SUFFIX;
+		String copyName = problem ? periodName + PROBLEMS_SUFFIX + ZIP_SUFFIX : goodName;
+		File copy = new File(backupDir, copyName);
+
+		if (ExternalBackup.areExternalBackupsEnabled()) {
+			try {
+				ExternalBackup externalBackup = ExternalBackup.getInstance();
+				String existing = externalBackup.exists(goodName) ? goodName : null;
+				if ((existing == null) && problem && externalBackup.exists(copyName)) {
+					existing = copyName;
+				}
+				if (existing != null) {
+					trace = String.format(SKIPPED_FORMAT, period, existing);
+					log.add(trace);
+					LOGGER.info(trace);
+					return;
+				}
+				externalBackup.copyBackup(dailyZip.getName(), copyName);
+			} catch (Exception e) {
+				trace = String.format("Failed to copy external backup for %s from %s to %s",
+						UtilImpl.ARCHIVE_NAME, dailyZip.getName(), copyName);
+				log.add(trace);
+				LOGGER.warn(trace, e);
+				org.skyve.impl.backup.BackupJob.emailProblem(log, trace);
+			}
+		} else {
+			File good = new File(backupDir, goodName);
+			File existing = good.exists() ? good : ((problem && copy.exists()) ? copy : null);
+			if (existing != null) {
+				trace = String.format(SKIPPED_FORMAT, period, existing.getAbsolutePath());
+				log.add(trace);
+				LOGGER.info(trace);
+				return;
+			}
+			trace = String.format(COPY_BACKUP_FORMAT, dailyZip.getAbsolutePath(), copy.getAbsolutePath());
+			log.add(trace);
+			LOGGER.info(trace);
+			FileUtil.copy(dailyZip, copy);
+		}
 	}
 
 	private void cull(File backupDir, String prefix, int retain)
