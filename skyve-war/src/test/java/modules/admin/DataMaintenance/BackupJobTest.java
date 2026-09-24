@@ -34,16 +34,25 @@ class BackupJobTest extends AbstractH2Test {
 	private Path tempDir;
 
 	private String savedExternalBackupClass;
+	private String savedSupportEmailAddress;
 
+	/**
+	 * External backups are off unless a test turns them on, and no support email address is
+	 * configured so backup problems are logged rather than mailed (other tests in the same JVM
+	 * may have set one, and there is no mail service in this test environment).
+	 */
 	@BeforeEach
-	void disableExternalBackups() {
+	void disableExternalBackupsAndSupportEmail() {
 		savedExternalBackupClass = UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS;
 		UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS = null;
+		savedSupportEmailAddress = UtilImpl.SUPPORT_EMAIL_ADDRESS;
+		UtilImpl.SUPPORT_EMAIL_ADDRESS = null;
 	}
 
 	@AfterEach
-	void restoreExternalBackups() {
+	void restoreExternalBackupsAndSupportEmail() {
 		UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS = savedExternalBackupClass;
+		UtilImpl.SUPPORT_EMAIL_ADDRESS = savedSupportEmailAddress;
 		FakeExternalBackup.reset();
 	}
 
