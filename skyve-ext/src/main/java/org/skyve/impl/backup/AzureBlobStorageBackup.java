@@ -25,6 +25,8 @@ import com.azure.storage.blob.models.BlobCopyInfo;
 import com.azure.storage.blob.models.BlobItem;
 import com.azure.storage.blob.models.BlobProperties;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * {@link ExternalBackup} implementation that stores Skyve backup archives in
  * Azure Blob Storage.
@@ -88,13 +90,8 @@ public class AzureBlobStorageBackup implements ExternalBackup {
 		return blobContainerClient;
 	}
 
-	/**
-	 * Returns the client for the named backup blob in this customer's backup directory.
-	 *
-	 * @param backupName the backup file name; must not be {@code null}
-	 * @return the blob client; never {@code null}
-	 */
-	private BlobClient getBlobClient(String backupName) {
+	/** Returns the client for {@code backupName} in this customer's backup directory. */
+	private @Nonnull BlobClient getBlobClient(@Nonnull String backupName) {
 		return getBlobContainerClient().getBlobClient(getDirectoryName() + backupName);
 	}
 
@@ -116,11 +113,19 @@ public class AzureBlobStorageBackup implements ExternalBackup {
 	 */
 	@Override
 	public void copyBackup(String srcBackupName, String destBackupName) {
-		copy(srcBackupName, destBackupName, getBlobClient(srcBackupName), getBlobClient(destBackupName));
+		// resolve the container (a client build plus an existence round-trip) once for both blobs
+		final BlobContainerClient blobContainerClient = getBlobContainerClient();
+		final String directoryName = getDirectoryName();
+		copy(srcBackupName,
+				destBackupName,
+				blobContainerClient.getBlobClient(directoryName + srcBackupName),
+				blobContainerClient.getBlobClient(directoryName + destBackupName));
 	}
 
 	/**
 	 * Performs the server-side copy between two resolved blob clients; see {@link #copyBackup(String, String)}.
+	 * Kept separate from {@link #copyBackup(String, String)} by agreement so the copy logic can be
+	 * exercised with mocked blob clients without a protected seam.
 	 */
 	private static void copy(String srcBackupName, String destBackupName, BlobClient srcBlobClient, BlobClient destBlobClient) {
 		LOGGER.info("Copying from {} to {} in Azure", srcBackupName, destBackupName);
