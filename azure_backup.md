@@ -34,7 +34,10 @@
 # Azure copy/move
 - copyBackup uses Azure's asynchronous server-side copy (beginCopy on the source blob URL).
     - Account-key connection string: the request's Shared Key authorisation is applied to the same-account source, so nothing is added to the source URL.
-    - SAS connection string: Azure does not extend the request's SAS to the copy source (CannotVerifyCopySource / NoAuthenticationInformation), so the connection string's own SAS is appended to the source URL. The SAS needs resource types Service, Container and Object with Read, Write, Delete, List, Add and Create.
+    - SAS connection string: Azure does not extend the request's SAS to the copy source (CannotVerifyCopySource / NoAuthenticationInformation), so the connection string's own SAS is appended to the source URL.
+        - The SAS needs resource types Service, Container and Object (Container alone fails every blob operation with AuthorizationResourceTypeMismatch) with Read, Write, Delete, List, Add and Create.
+        - The SAS must not carry an IP restriction: Azure reads the copy source from its own network, so an IP-restricted SAS fails the copy with AuthorizationFailure while uploads from the allowed address still work.
+        - Startup's connection string field accepts up to 500 characters; a portal-generated SAS connection string is ~450.
     - The blob never passes through the app server: no egress charge, no local bandwidth, no 256 MB limit (that limit only applies to the synchronous copyFromUrl).
     - The copy is waited on (4 hour cap). On failure or timeout the copy is aborted and any partial destination blob is deleted, so exists() never reports a bad copy.
     - moveBackup is copyBackup then deleteBackup.
