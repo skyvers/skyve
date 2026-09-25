@@ -191,12 +191,17 @@ class BackupJobTest extends AbstractH2Test {
 		String yearlyName = periodName("YEARLY_", "yyyy");
 		FakeExternalBackup.backups.add("YEARLY_2020.zip");
 
-		new LocalBackupJob(dm, tempDir.resolve("first.zip").toFile()).execute();
+		BackupJob firstJob = new LocalBackupJob(dm, tempDir.resolve("first.zip").toFile());
+		firstJob.execute();
 
 		assertThat(FakeExternalBackup.movedBackups, is(List.of("first.zip->DAILY_first.zip")));
 		assertThat(FakeExternalBackup.copiedBackups, is(List.of("DAILY_first.zip->" + weeklyName,
 				"DAILY_first.zip->" + monthlyName,
 				"DAILY_first.zip->" + yearlyName)));
+		assertTrue(firstJob.getLog().contains("External backup moved from first.zip to DAILY_first.zip"));
+		assertTrue(firstJob.getLog().contains("Copied external backup DAILY_first.zip to " + weeklyName));
+		assertTrue(firstJob.getLog().contains("Copied external backup DAILY_first.zip to " + monthlyName));
+		assertTrue(firstJob.getLog().contains("Copied external backup DAILY_first.zip to " + yearlyName));
 
 		BackupJob secondJob = new LocalBackupJob(dm, tempDir.resolve("second.zip").toFile());
 		secondJob.execute();

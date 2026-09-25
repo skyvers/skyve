@@ -98,6 +98,9 @@ public class BackupJob extends Job {
 			if (ExternalBackup.areExternalBackupsEnabled()) {
 				try {
 					ExternalBackup.getInstance().moveBackup(backupZip.getName(), dailyZip.getName());
+					trace = String.format("External backup moved from %s to %s", backupZip.getName(), dailyZip.getName());
+					log.add(trace);
+					LOGGER.info(trace);
 				} catch (Exception e) {
 					moved = false;
 					trace = String.format("Failed to move external backup for %s from %s to %s",
@@ -228,6 +231,9 @@ public class BackupJob extends Job {
 		if (external) {
 			try {
 				externalBackup.copyBackup(dailyZip.getName(), copyName);
+				trace = String.format("Copied external backup %s to %s", dailyZip.getName(), copyName);
+				log.add(trace);
+				LOGGER.info(trace);
 			} catch (Exception e) {
 				trace = String.format("Failed to copy external backup for %s from %s to %s",
 						UtilImpl.ARCHIVE_NAME, dailyZip.getName(), copyName);
