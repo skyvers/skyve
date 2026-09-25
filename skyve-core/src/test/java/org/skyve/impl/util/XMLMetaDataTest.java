@@ -646,6 +646,23 @@ class XMLMetaDataTest {
 	}
 
 	@Test
+	void testRootMetadataAttributesPrecedeNamespaceDeclarations() throws Exception {
+		ViewMetaData view = new FluentView().name("edit").title("Names & \"quotes\"").get();
+		view.getProperties().put("first", "one");
+		view.getProperties().put("second", "two");
+		String xml = XMLMetaData.marshalView(view, false, false);
+		int namespaces = xml.indexOf("xmlns=");
+		assertTrue(xml.indexOf("name=\"edit\"") < namespaces);
+		assertTrue(xml.indexOf("title=") < namespaces);
+		assertTrue(namespaces < xml.indexOf("xsi:schemaLocation="));
+		assertEquals(xml.indexOf("xmlns:c="), xml.lastIndexOf("xmlns:c="));
+		Element root = DocumentHelper.parseText(xml).getRootElement();
+		assertEquals("Names & \"quotes\"", root.attributeValue("title"));
+		assertEquals(XMLMetaData.VIEW_NAMESPACE, root.getNamespaceURI());
+		assertEquals(xml, XMLMetaData.marshalView(XMLMetaData.unmarshalViewString(xml), false, false));
+	}
+
+	@Test
 	void testEmptyWrapperCleanupPreservesContentAndExtensions() throws Exception {
 		for (String wrapper : new String[] { "<ordering/>", "<ordering>  </ordering>",
 			"<ordering enabled=\"true\"/>", "<ordering>meaningful</ordering>",

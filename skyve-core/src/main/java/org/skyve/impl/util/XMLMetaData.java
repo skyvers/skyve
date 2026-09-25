@@ -13,6 +13,8 @@ import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.ListIterator;
@@ -25,6 +27,7 @@ import javax.xml.validation.Schema;
 
 import org.dom4j.Attribute;
 import org.dom4j.Document;
+import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.dom4j.Namespace;
 import org.dom4j.Node;
@@ -854,7 +857,44 @@ public class XMLMetaData {
 		format.setTrimText(false);
 		format.setNewLineAfterDeclaration(false);
 		StringWriter result = new StringWriter();
-		XMLWriter writer = new XMLWriter(result, format);
+		XMLWriter writer = new XMLWriter(result, format) {
+			private final List<Namespace> rootNamespaces = new ArrayList<>();
+			private boolean rootAttributesPending = true;
+
+			@Override
+			protected void writeNamespace(Namespace namespace) throws IOException {
+				if (rootAttributesPending) {
+					rootNamespaces.add(namespace);
+				}
+				else {
+					super.writeNamespace(namespace);
+				}
+			}
+
+			@Override
+			protected void writeAttributes(Element element) throws IOException {
+				if (!rootAttributesPending) {
+					super.writeAttributes(element);
+					return;
+				}
+				// Let dom4j retain namespace tracking and escaping while moving root declarations
+				// after ordinary metadata attributes, ahead of schema-location attributes.
+				Element namespacedAttributes = DocumentHelper.createElement(element.getQName());
+				for (Attribute attribute : element.attributes()) {
+					if (attribute.getNamespaceURI().isEmpty()) {
+						super.writeAttribute(attribute);
+					}
+					else {
+						namespacedAttributes.add((Attribute) attribute.clone());
+					}
+				}
+				rootAttributesPending = false;
+				for (Namespace namespace : rootNamespaces) {
+					super.writeNamespace(namespace);
+				}
+				super.writeAttributes(namespacedAttributes);
+			}
+		};
 		writer.write(document);
 		writer.flush();
 		return result.toString();
