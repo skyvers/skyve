@@ -24,15 +24,15 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.validation.Schema;
 
 import org.dom4j.Attribute;
-import org.dom4j.CDATA;
 import org.dom4j.Document;
-import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.dom4j.Namespace;
 import org.dom4j.Node;
 import org.dom4j.QName;
 import org.dom4j.Visitor;
 import org.dom4j.VisitorSupport;
+import org.dom4j.io.OutputFormat;
+import org.dom4j.io.XMLWriter;
 import org.skyve.impl.metadata.repository.behaviour.ActionMetaData;
 import org.skyve.impl.metadata.repository.behaviour.BizletMetaData;
 import org.skyve.impl.metadata.repository.customer.CustomerMetaData;
@@ -150,7 +150,7 @@ public class XMLMetaData {
 	public static String marshalRouter(Router router) {
 		try {
 			Marshaller marshaller = ROUTER_CONTEXT.createMarshaller();
-			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.FALSE);
 			marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION,
 									ROUTER_NAMESPACE + " ../schemas/router.xsd");
 			StringWriter sos = new StringWriter(1024);
@@ -159,7 +159,7 @@ public class XMLMetaData {
 			Document document = SecureDom4j.newSAXReader().read(new StringReader(sos.toString()));
 			Visitor visitor = new JAXBFixingVisitor(ROUTER_NAMESPACE);
 			document.accept(visitor);
-			return document.asXML();
+			return format(document);
 		}
 		catch (Exception e) {
 			throw new MetaDataException("Could not marshal router", e);
@@ -202,7 +202,7 @@ public class XMLMetaData {
 	public static String marshalCustomer(CustomerMetaData customer) {
 		try {
 			Marshaller marshaller = CUSTOMER_CONTEXT.createMarshaller();
-			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.FALSE);
 			marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION,
 									CUSTOMER_NAMESPACE + " ../../schemas/customer.xsd");
 			StringWriter sos = new StringWriter(1024);
@@ -212,7 +212,7 @@ public class XMLMetaData {
 			Visitor visitor = new JAXBFixingVisitor(CUSTOMER_NAMESPACE);
 			document.accept(visitor);
 
-			return cleanup(document.asXML());
+			return format(document);
 		}
 		catch (Exception e) {
 			throw new MetaDataException("Could not marshal customer " + customer.getName(), e);
@@ -294,7 +294,7 @@ public class XMLMetaData {
 	public static String marshalModule(ModuleMetaData module, boolean overridden) {
 		try {
 			Marshaller marshaller = MODULE_CONTEXT.createMarshaller();
-			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.FALSE);
 			marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION,
 									(overridden ? 
 										MODULE_NAMESPACE + " ../../../schemas/module.xsd" :
@@ -306,7 +306,7 @@ public class XMLMetaData {
 			Visitor visitor = new JAXBFixingVisitor(MODULE_NAMESPACE);
 			document.accept(visitor);
 			
-			return cleanup(document.asXML());
+			return format(document);
 		}
 		catch (Exception e) {
 			throw new MetaDataException("Could not marshal module " + module.getName(), e);
@@ -393,7 +393,7 @@ public class XMLMetaData {
 	public static String marshalDocument(DocumentMetaData document, boolean overridden) {
 		try {
 			Marshaller marshaller = DOCUMENT_CONTEXT.createMarshaller();
-			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.FALSE);
 			marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION,
 					(overridden ? DOCUMENT_NAMESPACE + " ../../../../schemas/document.xsd"
 							: DOCUMENT_NAMESPACE + " ../../../schemas/document.xsd"));
@@ -404,7 +404,7 @@ public class XMLMetaData {
 			Visitor visitor = new JAXBFixingVisitor(DOCUMENT_NAMESPACE);
 			doc.accept(visitor);
 
-			return cleanup(doc.asXML());
+			return format(doc);
 		}
 		catch (Exception e) {
 			throw new MetaDataException("Could not marshal document " + document.getName(), e);
@@ -491,7 +491,7 @@ public class XMLMetaData {
 	public static String marshalBizlet(BizletMetaData bizlet, boolean customerOverridden) {
 		try {
 			Marshaller marshaller = BIZLET_CONTEXT.createMarshaller();
-			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.FALSE);
 			StringBuilder location = new StringBuilder(64);
 			location.append(BEHAVIOUR_NAMESPACE).append(' ');
 			if (customerOverridden) {
@@ -505,7 +505,7 @@ public class XMLMetaData {
 			Document document = SecureDom4j.newSAXReader().read(new StringReader(sos.toString()));
 			Visitor visitor = new JAXBFixingVisitor(BEHAVIOUR_NAMESPACE);
 			document.accept(visitor);
-			return document.asXML();
+			return format(document);
 		}
 		catch (Exception e) {
 			throw new MetaDataException("Could not marshal bizlet", e);
@@ -588,7 +588,7 @@ public class XMLMetaData {
 	public static String marshalAction(ActionMetaData action, boolean customerOverridden) {
 		try {
 			Marshaller marshaller = ACTION_CONTEXT.createMarshaller();
-			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.FALSE);
 			StringBuilder location = new StringBuilder(64);
 			location.append(BEHAVIOUR_NAMESPACE).append(' ');
 			if (customerOverridden) {
@@ -602,7 +602,7 @@ public class XMLMetaData {
 			Document document = SecureDom4j.newSAXReader().read(new StringReader(sos.toString()));
 			Visitor visitor = new JAXBFixingVisitor(BEHAVIOUR_NAMESPACE);
 			document.accept(visitor);
-			return document.asXML();
+			return format(document);
 		}
 		catch (Exception e) {
 			throw new MetaDataException("Could not marshal " + action.getName() + " action", e);
@@ -689,7 +689,7 @@ public class XMLMetaData {
 	public static String marshalView(ViewMetaData view, boolean customerOverridden, boolean uxuiOverridden) {
 		try {
 			Marshaller marshaller = VIEW_CONTEXT.createMarshaller();
-			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.FALSE);
 			StringBuilder location = new StringBuilder(64);
 			location.append(VIEW_NAMESPACE).append(' ');
 			if (customerOverridden) {
@@ -706,7 +706,7 @@ public class XMLMetaData {
 			Document document = SecureDom4j.newSAXReader().read(new StringReader(sos.toString()));
 			Visitor visitor = new JAXBFixingVisitor(VIEW_NAMESPACE);
 			document.accept(visitor);
-			return document.asXML();
+			return format(document);
 		}
 		catch (Exception e) {
 			throw new MetaDataException("Could not marshal " + view.getName() + " view", e);
@@ -794,7 +794,7 @@ public class XMLMetaData {
 	public static String marshalSAIL(Automation automation) {
 		try {
 			Marshaller marshaller = SAIL_CONTEXT.createMarshaller();
-			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.FALSE);
 			marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION,
 									SAIL_NAMESPACE + " http://www.skyve.org/xml/sail.xsd");
 			marshaller.setSchema(SAIL_SCHEMA);
@@ -804,7 +804,7 @@ public class XMLMetaData {
 			Document document = SecureDom4j.newSAXReader().read(new StringReader(sos.toString()));
 			Visitor visitor = new JAXBFixingVisitor(VIEW_NAMESPACE);
 			document.accept(visitor);
-			return document.asXML();
+			return format(document);
 		}
 		catch (Exception e) {
 			throw new MetaDataException("Could not marshal SAIL", e);
@@ -842,14 +842,22 @@ public class XMLMetaData {
 	}
 
 	/**
-	 * Cleans the XML string by removing any empty lines left by removing
-	 * nodes during the {@link JAXBFixingVisitor}.
-	 * 
-	 * @param xml The xml to clean
-	 * @return The cleansed string
+	 * Formats XML after metadata cleanup so removed elements leave no blank lines.
+	 * Text content retains its whitespace; CDATA blocks have a trimmed value and an indented boundary.
+	 *
+	 * @param document the cleaned metadata document
+	 * @return XML with tab indentation
+	 * @throws IOException if writing the XML fails
 	 */
-	private static String cleanup(String xml) {
-		return xml != null ? xml.replaceAll("\n\\s{4,}\n", "\n") : null;
+	private static String format(Document document) throws IOException {
+		OutputFormat format = new OutputFormat("\t", true, StandardCharsets.UTF_8.name());
+		format.setTrimText(false);
+		format.setNewLineAfterDeclaration(false);
+		StringWriter result = new StringWriter();
+		XMLWriter writer = new XMLWriter(result, format);
+		writer.write(document);
+		writer.flush();
+		return result.toString();
 	}
 
 	/*
@@ -924,7 +932,10 @@ public class XMLMetaData {
 			if (uri.equals(MODULE_NAMESPACE)) {
 				Element parent = node.getParent();
 				if (parent == null) {
-					removeEmptyChildElements(node, new String[] { "jobs", "queries", "privileges" });
+					removeEmptyChildElements(node, new String[] { "jobs", "queries", "privileges", "documents", "roles" });
+				}
+				else if (node.getName().equals("query")) {
+					removeEmptyChildElements(node, new String[] { "columns" });
 				}
 				else if (parent.getName().equals("roles")) {
 					removeEmptyChildElements(node, new String[] { "privileges", "accesses" });
@@ -936,6 +947,17 @@ public class XMLMetaData {
 				Element parent = node.getParent();
 				if (parent == null) {
 					removeEmptyChildElements(node, new String[] { "conditions", "implements", "uniqueConstraints" });
+				}
+
+				if (node.getName().equals("collection") || node.getName().equals("inverseMany")) {
+					removeEmptyChildElements(node, new String[] { "ordering" });
+				}
+
+				if (node.getName().equals("enum")) {
+					removeEmptyChildElements(node, new String[] { "values" });
+				}
+				if (node.getName().equals("constraint") || node.getName().equals("unique")) {
+					removeEmptyChildElements(node, new String[] { "fieldReferences" });
 				}
 
 				if (parent != null && parent.getName().equals("attributes")) {
@@ -965,15 +987,39 @@ public class XMLMetaData {
 				}
 			}
 			
-			// detect any empty view elements which require children
+			// These optional view wrappers represent lists; an absent wrapper is an empty list.
 			if (uri.equals(VIEW_NAMESPACE)) {
-				Element parent = node.getParent();
-				if (parent == null) { // view element
-					removeEmptyChildElements(node, new String[] { "newParameters" });
+				removeEmptyChildElements(node, new String[] { "onFocusHandlers",
+																"onBlurHandlers",
+																"onChangedHandlers",
+																"onAddedHandlers",
+																"onEditedHandlers",
+																"onRemovedHandlers", "onDeletedHandlers",
+																"onSelectedHandlers",
+																"onPickedHandlers",
+																"onClearedHandlers" });
+				switch (node.getName()) {
+					case "view":
+						removeEmptyChildElements(node, new String[] { "newParameters" });
+						break;
+					case "dialogButton", "dynamicImage", "reportReference":
+						removeEmptyChildElements(node, new String[] { "parameters" });
+						break;
+					case "component":
+						removeEmptyChildElements(node, new String[] { "names" });
+						break;
+					case "lookupDescription":
+						removeEmptyChildElements(node, new String[] { "dropDown" });
+						break;
+					default:
+						break;
 				}
-				else if (node.getName().equals("listGrid")) {
-					removeEmptyChildElements(node, new String[] { "onEditedHandlers", "onDeletedHandlers", "onSelectedHandlers" });
-				}
+			}
+			if (uri.equals(BEHAVIOUR_NAMESPACE) && node.getName().equals("if")) {
+				removeEmptyChildElements(node, new String[] { "else" });
+			}
+			if (uri.equals(CUSTOMER_NAMESPACE) && node.getName().equals("role")) {
+				removeEmptyChildElements(node, new String[] { "roles" });
 			}
 
 			ListIterator<?> namespaces = node.additionalNamespaces().listIterator();
@@ -994,6 +1040,18 @@ public class XMLMetaData {
 				}
 			}
 
+			// Declare imported namespaces once on the root so descendants reuse their prefixes.
+			Namespace namespace = node.getNamespace();
+			if (COMMON.equals(namespace) || 
+					MODULE.equals(namespace) ||
+					DOCUMENT.equals(namespace) ||
+					VIEW.equals(namespace)) {
+				Element root = node.getDocument().getRootElement();
+				if (! namespace.equals(root.getNamespaceForPrefix(namespace.getPrefix()))) {
+					root.add(namespace);
+				}
+			}
+
 			// Replace escaped characters within CDATA tags
 			String text = Util.processStringValue(node.getText());
 			if ((text != null) && 
@@ -1004,9 +1062,22 @@ public class XMLMetaData {
 							.replace("&quot;", "\"")
 							.replace("&lt;", "<")
 							.replace("&gt;", ">");
-				CDATA cdata = DocumentHelper.createCDATA(text);
 				node.clearContent();
-				node.add(cdata);
+				// Keep CDATA only where it avoids escaping XML markup or ampersands.
+				if (text.indexOf('<') >= 0 || text.indexOf('&') >= 0) {
+					int depth = 0;
+					for (Element parent = node.getParent(); parent != null; parent = parent.getParent()) {
+						depth++;
+					}
+					String indent = "\t".repeat(depth);
+					// Readers trim the boundary whitespace; preserve all internal line breaks and spacing.
+					node.addText("\n" + indent + "\t");
+					node.addCDATA("\n" + indent + "\t\t" + text.trim() + "\n" + indent + "\t");
+					node.addText("\n" + indent);
+				}
+				else {
+					node.addText(text);
+				}
 			}
 		}
 		
@@ -1024,28 +1095,20 @@ public class XMLMetaData {
 
 		private static void removeEmptyChildElements(Element parent, String[] nodesToRemove) {
 			Set<String> nodesToRemoveSet = Set.of(nodesToRemove);
-			
 			ListIterator<Element> childNodes = parent.elements().listIterator();
 			while (childNodes.hasNext()) {
 				Element child = childNodes.next();
-
-				if (nodesToRemoveSet.contains(child.getName()) && 
-						child.isTextOnly() &&
-						child.elements().isEmpty()) {
+				// remove blank child text nodes (with only text nodes below)
+				if (nodesToRemoveSet.contains(child.getName()) &&
+						parent.getNamespaceURI().equals(child.getNamespaceURI()) &&
+						(child.attributeCount() == 0) &&
+						child.getText().isBlank() &&
+						child.content().stream().allMatch(n -> n.getNodeType() == Node.TEXT_NODE)) {
 					childNodes.remove();
 				}
 			}
-
-	        // If this element has no child elements, remove all text nodes
-	        if (parent.elements().isEmpty()) {
-				for (Iterator<Node> it = parent.nodeIterator(); it.hasNext();) {
-					Node node = it.next();
-					if (node.getNodeType() == Node.TEXT_NODE) {
-						it.remove();
-					}
-				}
-	        }
 		}
+
 	}
 	
 	

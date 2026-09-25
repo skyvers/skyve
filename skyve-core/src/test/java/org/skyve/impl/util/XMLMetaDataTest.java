@@ -11,15 +11,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.api.io.TempDir;
 import org.skyve.domain.types.converters.Format.TextCase;
+import org.skyve.impl.metadata.OrderingImpl;
 import org.skyve.impl.metadata.model.document.AssociationImpl;
 import org.skyve.impl.metadata.model.document.CollectionImpl;
 import org.skyve.impl.metadata.model.document.field.Field;
@@ -44,8 +48,15 @@ import org.skyve.impl.metadata.repository.router.Direct;
 import org.skyve.impl.metadata.repository.router.Direct.DirectMatch;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.repository.view.ViewMetaData;
+import org.skyve.impl.metadata.view.container.form.Form;
+import org.skyve.impl.metadata.view.container.form.FormColumn;
+import org.skyve.impl.metadata.view.container.form.FormItem;
+import org.skyve.impl.metadata.view.container.form.FormRow;
+import org.skyve.impl.metadata.view.event.RerenderEventAction;
+import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.metadata.ConverterName;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Collection.CollectionType;
@@ -79,6 +90,55 @@ class XMLMetaDataTest {
 
 		assertTrue(result.contains("name=\"TestDocument\""));
 		assertTrue(result.contains("<displayName>Attribute 1</displayName>"));
+	}
+
+	@Test
+	void testMarshalDocumentDeclaresCommonNamespaceOnlyOnRoot() throws Exception {
+		DocumentMetaData document = createDocument();
+		Field field = createAttribute();
+		field.getProperties().put("first", "one");
+		field.getProperties().put("second", "two");
+		document.getAttributes().add(field);
+
+		String xml = XMLMetaData.marshalDocument(document, false);
+		Element root = DocumentHelper.parseText(xml).getRootElement();
+		assertEquals(XMLMetaData.DOCUMENT_NAMESPACE, root.getNamespaceURI());
+		assertEquals("", root.getNamespacePrefix());
+		assertEquals(XMLMetaData.COMMON_NAMESPACE, root.getNamespaceForPrefix("c").getURI());
+		Element properties = root.element("attributes").elements().get(0).element("properties");
+		assertEquals(2, properties.elements().size());
+		for (Element property : properties.elements()) {
+			assertEquals("c", property.getNamespacePrefix());
+			assertEquals(XMLMetaData.COMMON_NAMESPACE, property.getNamespaceURI());
+		}
+		assertEquals(xml.indexOf("xmlns:c="), xml.lastIndexOf("xmlns:c="));
+		DocumentMetaData restored = XMLMetaData.unmarshalDocumentString(xml);
+		assertEquals(field.getProperties(), restored.getAttributes().get(0).getProperties());
+		assertEquals(xml, XMLMetaData.marshalDocument(restored, false));
+	}
+
+	@Test
+	void testMarshalCollectionOmitsEmptyOrderingAndPreservesRules() {
+		DocumentMetaData document = createDocument();
+		CollectionImpl collection = createCollection();
+		collection.setType(CollectionType.aggregation);
+		collection.setMinCardinality(0);
+		document.getAttributes().add(collection);
+
+		String xml = XMLMetaData.marshalDocument(document, false);
+		assertFalse(xml.contains("<ordering"));
+		CollectionImpl restored = (CollectionImpl) XMLMetaData.unmarshalDocumentString(xml).getAttributes().get(0);
+		assertTrue(restored.getOrdering().isEmpty());
+
+		collection.getOrdering().add(new OrderingImpl("name", SortDirection.ascending));
+		collection.getOrdering().add(new OrderingImpl("createdDate", SortDirection.descending));
+		xml = XMLMetaData.marshalDocument(document, false);
+		restored = (CollectionImpl) XMLMetaData.unmarshalDocumentString(xml).getAttributes().get(0);
+		assertEquals(2, restored.getOrdering().size());
+		assertEquals("name", restored.getOrdering().get(0).getBy());
+		assertEquals(SortDirection.ascending, restored.getOrdering().get(0).getSort());
+		assertEquals("createdDate", restored.getOrdering().get(1).getBy());
+		assertEquals(SortDirection.descending, restored.getOrdering().get(1).getSort());
 	}
 
 	@Test
@@ -515,6 +575,259 @@ class XMLMetaDataTest {
 	}
 
 	@Test
+	void testMarshalTextAreaRemovesEmptyHandlersAndPreservesActions() {
+		ViewMetaData view = new FluentView().title("Test").name(ViewType.edit.toString()).get();
+		TextArea textArea = new TextArea();
+		textArea.setBinding("notes");
+		FormItem item = new FormItem();
+		item.setWidget(textArea);
+		FormRow row = new FormRow();
+		row.getItems().add(item);
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		form.getRows().add(row);
+		view.getContained().add(form);
+
+		String xml = XMLMetaData.marshalView(view, false, false);
+		assertFalse(xml.contains("onFocusHandlers"));
+		assertFalse(xml.contains("onBlurHandlers"));
+		assertFalse(xml.contains("onChangedHandlers"));
+
+		textArea.getFocusActions().add(new RerenderEventAction());
+		textArea.getBlurActions().add(new RerenderEventAction());
+		textArea.getChangedActions().add(new RerenderEventAction());
+		xml = XMLMetaData.marshalView(view, false, false);
+		assertTrue(xml.contains("onFocusHandlers"));
+		assertTrue(xml.contains("onBlurHandlers"));
+		assertTrue(xml.contains("onChangedHandlers"));
+		ViewMetaData restored = XMLMetaData.unmarshalViewString(xml);
+		Form restoredForm = (Form) restored.getContained().get(0);
+		TextArea restoredTextArea = (TextArea) restoredForm.getRows().get(0).getItems().get(0).getWidget();
+		assertEquals(1, restoredTextArea.getFocusActions().size());
+		assertEquals(1, restoredTextArea.getBlurActions().size());
+		assertEquals(1, restoredTextArea.getChangedActions().size());
+	}
+
+	@Test
+	void testMarshalViewFormatsAfterCleanupAndPreservesText() {
+		String text = "first line\n\n\tsecond line";
+		ViewMetaData view = XMLMetaData.unmarshalViewString(
+				"<view xmlns=\"http://www.skyve.org/xml/view\" name=\"edit\" title=\"Test\">"
+				+ "<blurb><![CDATA[" + text + "]]></blurb></view>");
+		String propertyText = "  preserve leading and trailing whitespace  ";
+		view.getProperties().put("formatting", propertyText);
+		String xml = XMLMetaData.marshalView(view, false, false);
+		assertTrue(xml.contains(propertyText));
+		assertTrue(xml.contains("\n\t<blurb>"));
+		assertTrue(xml.contains(text));
+		assertFalse(xml.contains("newParameters"));
+		String structuralXml = xml.replace(text, "content");
+		assertTrue(structuralXml.lines().noneMatch(String::isBlank), xml);
+		assertEquals(xml, XMLMetaData.marshalView(XMLMetaData.unmarshalViewString(xml), false, false));
+	}
+
+	@Test
+	void testCdataIsOmittedOnlyWhenTextNeedsNoMarkupEscaping() throws Exception {
+		for (String text : new String[] { "Created date", "first line\n\n\tsecond line", "5 > 3", "He said \"hello\"",
+				"<b>Important</b>", "Research & development", "x < 10 && y > 5", "<b>First</b>\n\n\tsecond line" }) {
+			ViewMetaData view = XMLMetaData.unmarshalViewString(
+					"<view xmlns='http://www.skyve.org/xml/view' name='edit' title='Test'>"
+					+ "<blurb><![CDATA[" + text + "]]></blurb></view>");
+			String xml = XMLMetaData.marshalView(view, false, false);
+			boolean needsCdata = text.contains("<") || text.contains("&");
+			assertEquals(Boolean.valueOf(needsCdata), Boolean.valueOf(xml.contains("<![CDATA[")), text);
+			String actual = DocumentHelper.parseText(xml).getRootElement().element("blurb").getText();
+			assertEquals(text, needsCdata ? actual.trim() : actual);
+			if (needsCdata) {
+				assertTrue(xml.contains("<blurb>\n\t\t<![CDATA[\n\t\t\t" + text + "\n\t\t]]>\n\t</blurb>"));
+			}
+			assertEquals(xml, XMLMetaData.marshalView(XMLMetaData.unmarshalViewString(xml), false, false));
+		}
+	}
+
+	@Test
+	void testEmptyWrapperCleanupPreservesContentAndExtensions() throws Exception {
+		for (String wrapper : new String[] { "<ordering/>", "<ordering>  </ordering>",
+			"<ordering enabled=\"true\"/>", "<ordering>meaningful</ordering>",
+			"<spacer/>", "<ordering><?keep value?></ordering>", "<ordering xml:space=\"preserve\"> </ordering>",
+			"<ordering><!--keep--></ordering>", "<ordering><![CDATA[  ]]></ordering>",
+			"<ordering><order by=\"name\"/></ordering>", "<ordering xmlns=\"urn:extension\"/>" }) {
+			Element parent = DocumentHelper.parseText("<collection xmlns=\"" + XMLMetaData.DOCUMENT_NAMESPACE
+					+ "\">parent text" + wrapper + "</collection>").getRootElement();
+			Class<?> visitor = Class.forName(XMLMetaData.class.getName() + "$JAXBFixingVisitor");
+			Method cleanup = visitor.getDeclaredMethod("removeEmptyChildElements", Element.class, String[].class);
+			cleanup.setAccessible(true);
+			String originalChild = parent.elements().get(0).asXML();
+			cleanup.invoke(null, parent, new String[] { "ordering" });
+			boolean empty = wrapper.equals("<ordering/>") || wrapper.equals("<ordering>  </ordering>");
+			assertEquals(empty ? 0 : 1, parent.elements().size(), wrapper);
+			if (!empty) {
+				assertEquals(originalChild, parent.elements().get(0).asXML());
+			}
+			assertEquals("parent text", parent.getText());
+		}
+	}
+
+	@Test
+	void testMarshalOtherInputsOmitsEmptyHandlers() {
+		ViewMetaData view = XMLMetaData.unmarshalViewString(
+				"<view xmlns=\"http://www.skyve.org/xml/view\" name=\"edit\" title=\"Test\">"
+				+ "<form><column/><row><item><textField binding=\"name\"/></item></row>"
+				+ "<row><item><lookupDescription binding=\"owner\" descriptionBinding=\"name\"/></item></row></form>"
+				+ "<dataGrid binding=\"children\"><boundColumn binding=\"name\"/></dataGrid><listMembership binding=\"members\"/>"
+				+ "<component name=\"details\"/></view>");
+		String xml = XMLMetaData.marshalView(view, false, false);
+		assertFalse(xml.contains("Handlers"));
+		assertFalse(xml.contains("<dropDown"));
+		assertFalse(xml.contains("<names"));
+		assertEquals(xml, XMLMetaData.marshalView(XMLMetaData.unmarshalViewString(xml), false, false));
+	}
+
+	@Test
+	void testOptionalViewWrappersRoundTripEmptyAndPopulated() {
+		for (boolean populated : new boolean[] { false, true }) {
+			String parameters = populated ? "<parameters><parameter name='id' value='123'/></parameters>" : "";
+			String names = populated ? "<names><name fromComponent='old' mappedTo='new'/></names>" : "";
+			String input = "<view xmlns='http://www.skyve.org/xml/view' name='edit' title='Test'>"
+					+ "<dialogButton displayName='Open'>" + parameters + "</dialogButton>"
+					+ "<dynamicImage name='photo'>" + parameters + "</dynamicImage>"
+					+ "<link><reportReference moduleName='test' documentName='Test' reportName='report'>"
+					+ parameters + "</reportReference></link>"
+					+ "<component name='details'>" + names + "</component>"
+					+ "<spacer/><actions><defaults/></actions></view>";
+			String xml = XMLMetaData.marshalView(XMLMetaData.unmarshalViewString(input), false, false);
+			assertEquals(Boolean.valueOf(populated), Boolean.valueOf(xml.contains("<parameters>")));
+			assertEquals(Boolean.valueOf(populated), Boolean.valueOf(xml.contains("<names>")));
+			assertTrue(xml.contains("<spacer/>"));
+			assertTrue(xml.contains("<defaults/>"));
+			if (populated) {
+				assertTrue(xml.contains("123"));
+				assertTrue(xml.contains("mappedTo"));
+			}
+			assertEquals(xml, XMLMetaData.marshalView(XMLMetaData.unmarshalViewString(xml), false, false));
+		}
+	}
+
+	@Test
+	void testBehaviourCleanupRetainsRequiredArgumentsAndPopulatedElse() {
+		for (boolean populated : new boolean[] { false, true }) {
+			String otherwise = populated ? "<else><set binding='name' expression='false'/></else>" : "<else/>";
+			String input = "<action xmlns='http://www.skyve.org/xml/behaviour' name='test'>"
+					+ "<if condition='true'><then><invoke method='refresh'><arguments/></invoke></then>"
+					+ otherwise + "</if></action>";
+			String xml = XMLMetaData.marshalAction(XMLMetaData.unmarshalActionString(input), false);
+			assertEquals(Boolean.valueOf(populated), Boolean.valueOf(xml.contains("<else>")));
+			assertFalse(xml.contains("<else/>"));
+			assertTrue(xml.contains("<arguments/>"));
+			assertTrue(xml.contains("<then>"));
+			assertEquals(xml, XMLMetaData.marshalAction(XMLMetaData.unmarshalActionString(xml), false));
+		}
+	}
+
+	@Test
+	void testInverseAndEnumWrappersRoundTripEmptyAndPopulated() {
+		for (boolean populated : new boolean[] { false, true }) {
+			String ordering = populated ? "<ordering><order by='name' sort='ascending'/></ordering>" : "";
+			String values = populated ? "<values><value code='A' description='Active'/></values>" : "";
+			String input = "<document xmlns='http://www.skyve.org/xml/document' name='Test'>"
+					+ "<singularAlias>Test</singularAlias><pluralAlias>Tests</pluralAlias><bizKey expression='Test'/>"
+					+ "<attributes><inverseMany name='children'><displayName>Children</displayName>"
+					+ "<documentName>Child</documentName><referenceName>parent</referenceName>" + ordering + "</inverseMany>"
+					+ "<enum name='status'><displayName>Status</displayName>" + values + "</enum></attributes></document>";
+			String xml = XMLMetaData.marshalDocument(XMLMetaData.unmarshalDocumentString(input), false);
+			assertEquals(Boolean.valueOf(populated), Boolean.valueOf(xml.contains("<ordering>")));
+			assertEquals(Boolean.valueOf(populated), Boolean.valueOf(xml.contains("<values>")));
+			assertFalse(xml.contains("<ordering/>"));
+			assertFalse(xml.contains("<values/>"));
+			assertEquals(xml, XMLMetaData.marshalDocument(XMLMetaData.unmarshalDocumentString(xml), false));
+		}
+	}
+
+	@Test
+	void testQueryColumnsRoundTripEmptyAndPopulated() {
+		for (boolean populated : new boolean[] { false, true }) {
+			String columns = populated ? "<columns><column binding='name'/></columns>" : "";
+			String input = "<module xmlns='http://www.skyve.org/xml/module' name='test' title='Test'>"
+					+ "<homeDocument>Test</homeDocument><menu/><queries><query name='qTest' documentName='Test'>"
+					+ columns + "</query></queries></module>";
+			String xml = XMLMetaData.marshalModule(XMLMetaData.unmarshalModuleString(input), false);
+			assertEquals(Boolean.valueOf(populated), Boolean.valueOf(xml.contains("<columns>")));
+			assertFalse(xml.contains("<documents"));
+			assertFalse(xml.contains("<roles"));
+			assertEquals(xml, XMLMetaData.marshalModule(XMLMetaData.unmarshalModuleString(xml), false));
+		}
+	}
+
+	@Test
+	void testCustomerRoleMappingsRoundTripEmptyAndPopulated() {
+		for (boolean populated : new boolean[] { false, true }) {
+			String roles = populated ? "<roles><role module='test' name='Reader'/></roles>" : "";
+			String input = "<customer xmlns='http://www.skyve.org/xml/customer' name='test'>"
+					+ "<defaultDateConverter>DD_MMM_YYYY</defaultDateConverter>"
+					+ "<defaultTimeConverter>HH24_MI</defaultTimeConverter>"
+					+ "<defaultDateTimeConverter>DD_MMM_YYYY_HH24_MI</defaultDateTimeConverter>"
+					+ "<defaultTimestampConverter>DD_MMM_YYYY_HH24_MI_SS</defaultTimestampConverter>"
+					+ "<modules homeModule='test'><module name='test'/></modules>"
+					+ "<roles allowModuleRoles='true'><role name='Reader'><description>Reader</description>"
+					+ roles + "</role></roles></customer>";
+			String xml = XMLMetaData.marshalCustomer(XMLMetaData.unmarshalCustomerString(input));
+			assertEquals(Boolean.valueOf(populated), Boolean.valueOf(xml.contains("<roles>")));
+			assertFalse(xml.contains("<roles/>"));
+			assertEquals(xml, XMLMetaData.marshalCustomer(XMLMetaData.unmarshalCustomerString(xml)));
+		}
+	}
+
+	@Test
+	void testConstraintFieldReferencesRoundTripEmptyAndPopulated() {
+		for (boolean populated : new boolean[] { false, true }) {
+			String fields = populated ? "<fieldReferences><ref>name</ref></fieldReferences>" : "";
+			String input = "<document xmlns='http://www.skyve.org/xml/document' name='Test'>"
+					+ "<singularAlias>Test</singularAlias><pluralAlias>Tests</pluralAlias><bizKey expression='Test'/>"
+					+ "<attributes><collection name='children' type='aggregation'><displayName>Children</displayName>"
+					+ "<documentName>Child</documentName><minCardinality>0</minCardinality>"
+					+ "<unique name='uniqueChild'><message>Duplicate</message>" + fields + "</unique></collection></attributes>"
+					+ "<uniqueConstraints><constraint name='uniqueName' scope='customer'><message>Duplicate</message>"
+					+ fields + "</constraint></uniqueConstraints></document>";
+			String xml = XMLMetaData.marshalDocument(XMLMetaData.unmarshalDocumentString(input), false);
+			assertEquals(Boolean.valueOf(populated), Boolean.valueOf(xml.contains("<fieldReferences>")));
+			assertFalse(xml.contains("<fieldReferences/>"));
+			assertTrue(xml.contains("uniqueChild"));
+			assertTrue(xml.contains("uniqueName"));
+			assertEquals(xml, XMLMetaData.marshalDocument(XMLMetaData.unmarshalDocumentString(xml), false));
+		}
+	}
+
+	@Test
+	void testImportedNamespacesAreDeclaredOnceAndKeepElementIdentities() throws Exception {
+		String input = "<customer xmlns='" + XMLMetaData.CUSTOMER_NAMESPACE + "' xmlns:c='" + XMLMetaData.COMMON_NAMESPACE
+				+ "' xmlns:m='" + XMLMetaData.MODULE_NAMESPACE + "' xmlns:d='" + XMLMetaData.DOCUMENT_NAMESPACE
+				+ "' xmlns:v='" + XMLMetaData.VIEW_NAMESPACE + "'>"
+				+ "<c:property key='first'>one</c:property><c:property key='second'>two</c:property>"
+				+ "<m:module/><m:module/><d:document/><d:document/><v:label/><v:label/></customer>";
+		org.dom4j.Document document = DocumentHelper.parseText(input);
+		Class<?> visitorType = Class.forName(XMLMetaData.class.getName() + "$JAXBFixingVisitor");
+		java.lang.reflect.Constructor<?> constructor = visitorType.getDeclaredConstructor(String.class);
+		constructor.setAccessible(true);
+		document.accept((org.dom4j.Visitor) constructor.newInstance(XMLMetaData.CUSTOMER_NAMESPACE));
+		Element root = document.getRootElement();
+		assertEquals(XMLMetaData.CUSTOMER_NAMESPACE, root.getNamespaceURI());
+		assertEquals("", root.getNamespacePrefix());
+		String xml = document.asXML();
+		for (String prefix : new String[] { "c", "m", "d", "v" }) {
+			String declaration = "xmlns:" + prefix + "=";
+			assertTrue(xml.contains(declaration));
+			assertEquals(xml.indexOf(declaration), xml.lastIndexOf(declaration));
+		}
+		Element original = DocumentHelper.parseText(input).getRootElement();
+		Element restored = DocumentHelper.parseText(xml).getRootElement();
+		assertEquals(original.elements().size(), restored.elements().size());
+		for (int i = 0; i < original.elements().size(); i++) {
+			assertEquals(original.elements().get(i).getQName(), restored.elements().get(i).getQName());
+			assertEquals(original.elements().get(i).getText(), restored.elements().get(i).getText());
+		}
+	}
+
+	@Test
 	void testMarshalModuleRemovesEmptyChildElements() {
 		// setup the test data
 		ModuleMetaData module = createModule();
@@ -535,7 +848,7 @@ class XMLMetaDataTest {
 
 		assertTrue(result.contains("name=\"test\""));
 		assertTrue(result.contains("<documents"), "XML should contain 'documents'");
-		assertTrue(result.contains("<roles"), "XML should contain 'roles'");
+		assertFalse(result.contains("<roles"), "Empty roles should be omitted");
 
 		assertFalse(result.contains("<jobs"), "XML should not contain 'jobs'");
 		assertFalse(result.contains("<queries"), "XML should not contain 'queries'");
@@ -837,8 +1150,7 @@ class XMLMetaDataTest {
 		assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalRouterString(prefix
 				+ "<direct path=\"/x\" uxui=\"desktop\" match=\"contains\"/>" + suffix));
 		assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalRouterString(prefix
-				+ "<direct path=\"/x\" uxui=\"desktop\" userAgentType=\"watch\"/>" + suffix)
-				.convert("invalid router"));
+				+ "<direct path=\"/x\" uxui=\"desktop\" userAgentType=\"watch\"/>" + suffix));
 	}
 
 	@Test
