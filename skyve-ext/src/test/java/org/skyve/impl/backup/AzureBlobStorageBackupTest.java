@@ -135,6 +135,24 @@ public class AzureBlobStorageBackupTest {
 	}
 
 	@Test
+	public void copySourceUrlIgnoresASharedAccessSignatureKeyTheSdkWouldNotMatch() throws Exception {
+		HashMap<String, Object> properties = new HashMap<>();
+		properties.put(AzureBlobStorageBackup.AZURE_CONNECTION_STRING_KEY,
+				"AccountName=account;AccountKey=c2VjcmV0;sharedaccesssignature=sv=2024-11-04&sig=abc");
+
+		withBackupProperties(properties, () -> assertEquals(SOURCE_URL, invokeCopySourceUrl()));
+	}
+
+	@Test
+	public void copySourceUrlUsesTheLastSharedAccessSignatureLikeTheSdk() throws Exception {
+		HashMap<String, Object> properties = new HashMap<>();
+		properties.put(AzureBlobStorageBackup.AZURE_CONNECTION_STRING_KEY,
+				"BlobEndpoint=https://account.blob.core.windows.net/;SharedAccessSignature=sig=first;SharedAccessSignature=sig=second");
+
+		withBackupProperties(properties, () -> assertEquals(SOURCE_URL + "?sig=second", invokeCopySourceUrl()));
+	}
+
+	@Test
 	public void copySourceUrlStripsALeadingQuestionMarkFromTheSharedAccessSignature() throws Exception {
 		HashMap<String, Object> properties = new HashMap<>();
 		properties.put(AzureBlobStorageBackup.AZURE_CONNECTION_STRING_KEY,
@@ -213,7 +231,7 @@ public class AzureBlobStorageBackupTest {
 	}
 
 	/**
-	 * Invokes the private static copy method with mocked blob clients so nothing talks to Azure.
+	 * Invokes the private static copy method with a mocked destination blob client so nothing talks to Azure.
 	 */
 	private static void invokeCopy(CopyFixture fixture) throws Exception {
 		Method method = AzureBlobStorageBackup.class.getDeclaredMethod("copy", String.class, String.class, String.class, BlobClient.class);

@@ -130,7 +130,7 @@ public class AzureBlobStorageBackup implements ExternalBackup {
 	 * Returns the URL Azure should read the copy source from: the blob URL, plus the
 	 * connection string's shared access signature when the connection string carries one.
 	 */
-	private static String copySourceUrl(String srcBlobUrl) {
+	private static @Nonnull String copySourceUrl(@Nonnull String srcBlobUrl) {
 		final String sas = getSharedAccessSignature();
 		return (sas == null) ? srcBlobUrl : srcBlobUrl + '?' + sas;
 	}
@@ -140,7 +140,10 @@ public class AzureBlobStorageBackup implements ExternalBackup {
 	 * Kept separate from {@link #copyBackup(String, String)} by agreement so the copy logic can be
 	 * exercised with a mocked blob client without a protected seam.
 	 */
-	private static void copy(String srcBackupName, String destBackupName, String srcUrl, BlobClient destBlobClient) {
+	private static void copy(@Nonnull String srcBackupName,
+								@Nonnull String destBackupName,
+								@Nonnull String srcUrl,
+								@Nonnull BlobClient destBlobClient) {
 		LOGGER.info("Copying from {} to {} in Azure", srcBackupName, destBackupName);
 
 		final SyncPoller<BlobCopyInfo, Void> poller = destBlobClient.beginCopy(srcUrl,
@@ -215,16 +218,19 @@ public class AzureBlobStorageBackup implements ExternalBackup {
 	/**
 	 * Returns the shared access signature from the configured connection string without a
 	 * leading question mark, or {@code null} when the connection string uses an account key.
+	 * The key is matched exactly and the last occurrence wins, as the Azure SDK's own
+	 * connection string parser does, so a SAS is only ever appended when the client used it.
 	 */
 	private static @Nullable String getSharedAccessSignature() {
+		String result = null;
 		for (String pair : getConnectionString().split(";")) {
-			final int equals = pair.indexOf('=');
-			if ((equals > 0) && AZURE_SAS_CONNECTION_STRING_KEY.equalsIgnoreCase(pair.substring(0, equals).trim())) {
-				final String sas = pair.substring(equals + 1).trim();
-				return sas.startsWith("?") ? sas.substring(1) : sas;
+			final String trimmed = pair.trim();
+			if (trimmed.startsWith(AZURE_SAS_CONNECTION_STRING_KEY + '=')) {
+				final String sas = trimmed.substring(AZURE_SAS_CONNECTION_STRING_KEY.length() + 1).trim();
+				result = sas.startsWith("?") ? sas.substring(1) : sas;
 			}
 		}
-		return null;
+		return result;
 	}
 
 	private static String getContainerName() {
