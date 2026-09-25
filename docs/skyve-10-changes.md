@@ -7,6 +7,7 @@ These notes collect release-ready framework changes introduced for Skyve 10.
 - [Theme Resolution](theme-resolution.md)
 - [View Boilerplate Escaping](view-boilerplate-escaping.md)
 - [Lucene Content Identifiers and Garbage Collection](#lucene-content-identifiers-and-garbage-collection)
+- [Scheduled Backups and Azure Copies](#scheduled-backups-and-azure-copies)
 
 ## Lucene Content Identifiers and Garbage Collection
 
@@ -110,3 +111,12 @@ dynamic ownership checks, cross-references, age and safety guards, error continu
 Quartz registration, manual invocation, and real orphan removal from Lucene and the
 filesystem. The real-store integration test also proves that referenced content remains
 available while an orphan disappears from both storage layers.
+
+## Scheduled Backups and Azure Copies
+
+The scheduled backup job now makes each weekly, monthly and yearly copy once per period
+instead of every day, the Azure external backup copies blobs server-side instead of
+streaming them through the application server, and plain `YEARLY_` backups are now culled
+to `yearlyBackupRetention` (previously they were never culled, so check that retention
+before the first run after upgrading, and re-assemble the admin module to pick up the job
+change).

@@ -44,6 +44,12 @@ public interface ExternalBackup {
 	List<String> listBackups();
 
 	/**
+	 * Returns whether a complete, usable backup with the given name exists.
+	 * <p>
+	 * The scheduled backup job relies on this to decide whether a weekly, monthly or
+	 * yearly backup has already been made for the current period, so an implementation
+	 * must not report a partial or failed upload or copy as existing.
+	 *
 	 * @param backupName The name of the backup to check the existence for.
 	 * @return True if the given backup exists.
 	 */
@@ -66,12 +72,21 @@ public interface ExternalBackup {
 	void deleteBackup(String backupName);
 
 	/**
+	 * Copies a backup to a new name and returns only once the destination is complete.
+	 * <p>
+	 * On failure an implementation must throw and must not leave a partial destination
+	 * behind, otherwise {@link #exists(String)} would stop the scheduled backup job from
+	 * retrying the copy for the rest of the period.
+	 *
 	 * @param srcBackupName The name of the backup to copy.
 	 * @param destBackupName The name of the backup to copy to.
 	 */
 	void copyBackup(String srcBackupName, String destBackupName);
 
 	/**
+	 * Moves a backup to a new name and returns only once the destination is complete.
+	 * The same contract as {@link #copyBackup(String, String)} applies.
+	 *
 	 * @param srcBackupName The name of the backup to move.
 	 * @param destBackupName The name of the backup to move to.
 	 */

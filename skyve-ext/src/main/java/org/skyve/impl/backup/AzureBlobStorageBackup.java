@@ -1,9 +1,8 @@
 package org.skyve.impl.backup;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -12,18 +11,22 @@ import java.util.stream.Collectors;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.util.UtilImpl;
-import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
+import org.slf4j.Logger;
 
+import com.azure.core.util.polling.LongRunningOperationStatus;
+import com.azure.core.util.polling.PollResponse;
+import com.azure.core.util.polling.SyncPoller;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
+import com.azure.storage.blob.models.BlobCopyInfo;
 import com.azure.storage.blob.models.BlobItem;
 import com.azure.storage.blob.models.BlobProperties;
-import com.azure.storage.blob.models.BlobRequestConditions;
-import com.azure.storage.blob.models.ParallelTransferOptions;
-import com.azure.storage.blob.specialized.BlobOutputStream;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * {@link ExternalBackup} implementation that stores Skyve backup archives in
@@ -38,7 +41,9 @@ public class AzureBlobStorageBackup implements ExternalBackup {
 
 	public static final String AZURE_CONNECTION_STRING_KEY = "connectionString";
 	public static final String AZURE_CONTAINER_NAME_KEY = "containerName";
-	private static final long BLOCK_SIZE = 4194304; // 4 MB
+	private static final String AZURE_SAS_CONNECTION_STRING_KEY = "SharedAccessSignature";
+	private static final long COPY_POLL_INTERVAL_SECONDS = 2;
+	private static final Duration COPY_TIMEOUT = Duration.ofHours(4);
 
 	@Override
 	public List<String> listBackups() {
@@ -58,20 +63,19 @@ public class AzureBlobStorageBackup implements ExternalBackup {
 	@Override
 	public void downloadBackup(String backupName, OutputStream outputStream) {
 		LOGGER.info("Downloading backup {} from Azure", backupName);
-		getBlobContainerClient().getBlobClient(getDirectoryName() + backupName).downloadStream(outputStream);
+		getBlobClient(backupName).downloadStream(outputStream);
 	}
 
 	@Override
 	public void uploadBackup(String backupFilePath) {
 		LOGGER.info("Uploading backup {} to Azure", Paths.get(backupFilePath).getFileName().toString());
-		getBlobContainerClient().getBlobClient(getDirectoryName() + Paths.get(backupFilePath).getFileName().toString())
-				.uploadFromFile(backupFilePath);
+		getBlobClient(Paths.get(backupFilePath).getFileName().toString()).uploadFromFile(backupFilePath);
 	}
 
 	@Override
 	public void deleteBackup(String backupName) {
 		LOGGER.info("Deleting backup {} from Azure", backupName);
-		getBlobContainerClient().getBlobClient(getDirectoryName() + backupName).delete();
+		getBlobClient(backupName).delete();
 	}
 
 	private BlobContainerClient getBlobContainerClient() {
@@ -88,36 +92,104 @@ public class AzureBlobStorageBackup implements ExternalBackup {
 		return blobContainerClient;
 	}
 
+	/** Returns the client for {@code backupName} in this customer's backup directory. */
+	private @Nonnull BlobClient getBlobClient(@Nonnull String backupName) {
+		return getBlobContainerClient().getBlobClient(getDirectoryName() + backupName);
+	}
+
+	/**
+	 * Copies a backup blob to a new name using Azure's asynchronous server-side copy
+	 * and returns once the destination blob is complete.
+	 *
+	 * <p>The copy runs inside the storage account, so the backup is never streamed
+	 * through the application server (no egress charge, no local bandwidth) and there
+	 * is no blob size limit, unlike the synchronous copy-from-URL operation which is
+	 * capped at 256 MB. With an account-key connection string the destination's
+	 * Shared Key authorisation is applied to the same-account source. With a SAS
+	 * connection string Azure does not extend the request's SAS to the source, so the
+	 * connection string's SAS is appended to the source URL.
+	 *
+	 * <p>Side effects: creates the destination blob. If the copy fails, is aborted or
+	 * does not complete within {@link #COPY_TIMEOUT}, any partial destination blob is
+	 * deleted before throwing so a later retry is not mistaken for a finished copy.
+	 *
+	 * @throws DomainException if the copy does not complete successfully
+	 */
 	@Override
 	public void copyBackup(String srcBackupName, String destBackupName) {
-		BlobClient srcBlobClient = getBlobContainerClient().getBlobClient(getDirectoryName() + srcBackupName);
+		// resolve the container (a client build plus an existence round-trip) once for both blobs
+		final BlobContainerClient blobContainerClient = getBlobContainerClient();
+		final String directoryName = getDirectoryName();
+		copy(srcBackupName,
+				destBackupName,
+				copySourceUrl(blobContainerClient.getBlobClient(directoryName + srcBackupName).getBlobUrl()),
+				blobContainerClient.getBlobClient(directoryName + destBackupName));
+	}
 
+	/**
+	 * Returns the URL Azure should read the copy source from: the blob URL, plus the
+	 * connection string's shared access signature when the connection string carries one.
+	 */
+	private static @Nonnull String copySourceUrl(@Nonnull String srcBlobUrl) {
+		final String sas = getSharedAccessSignature();
+		return (sas == null) ? srcBlobUrl : srcBlobUrl + '?' + sas;
+	}
+
+	/**
+	 * Performs the server-side copy from a source URL to a resolved blob client; see {@link #copyBackup(String, String)}.
+	 * Kept separate from {@link #copyBackup(String, String)} by agreement so the copy logic can be
+	 * exercised with a mocked blob client without a protected seam.
+	 */
+	private static void copy(@Nonnull String srcBackupName,
+								@Nonnull String destBackupName,
+								@Nonnull String srcUrl,
+								@Nonnull BlobClient destBlobClient) {
+		LOGGER.info("Copying from {} to {} in Azure", srcBackupName, destBackupName);
+
+		final SyncPoller<BlobCopyInfo, Void> poller = destBlobClient.beginCopy(srcUrl,
+																				Duration.ofSeconds(COPY_POLL_INTERVAL_SECONDS));
+		final PollResponse<BlobCopyInfo> response;
 		try {
-			BlobClient destBlobClient = getBlobContainerClient().getBlobClient(getDirectoryName() + destBackupName);
-			LOGGER.info("Copying from {} to {} in Azure", srcBackupName, destBackupName);
+			response = poller.waitForCompletion(COPY_TIMEOUT);
+		}
+		catch (RuntimeException e) {
+			abandonCopy(poller, destBlobClient, destBackupName);
+			throw new DomainException(String.format("Failed to copy %s to %s in Azure - copy did not complete within %s",
+													srcBackupName,
+													destBackupName,
+													COPY_TIMEOUT),
+										e);
+		}
 
-			// copy the backup in chunks to workaround Azure's blob size limit
-			ParallelTransferOptions opts = new ParallelTransferOptions()
-					.setBlockSizeLong(Long.valueOf(BLOCK_SIZE))
-					.setMaxConcurrency(Integer.valueOf(5));
+		if (! LongRunningOperationStatus.SUCCESSFULLY_COMPLETED.equals(response.getStatus())) {
+			final BlobCopyInfo info = response.getValue();
+			destBlobClient.deleteIfExists();
+			throw new DomainException(String.format("Failed to copy %s to %s in Azure - copy status %s%s",
+													srcBackupName,
+													destBackupName,
+													(info == null) ? response.getStatus() : info.getCopyStatus(),
+													((info == null) || (info.getError() == null)) ? "" : " - " + info.getError()));
+		}
 
-			BlobRequestConditions requestConditions = new BlobRequestConditions();
+		LOGGER.info("Successfully copied to {} in Azure", destBackupName);
+	}
 
-			try (BlobOutputStream bos = destBlobClient.getBlockBlobClient()
-					.getBlobOutputStream(
-							opts, null, null, null, requestConditions);
-
-					InputStream is = srcBlobClient.getBlockBlobClient().openInputStream()) {
-
-				byte[] buffer = new byte[(int) BLOCK_SIZE];
-				for (int len; (len = is.read(buffer)) != -1;) {
-					bos.write(buffer, 0, len);
-				}
-			}
-
-			LOGGER.info("Successfully copied to {} in Azure", destBackupName);
-		} catch (IOException e) {
-			throw new DomainException(e);
+	/**
+	 * Aborts an in-flight copy and removes whatever partial destination blob it left behind.
+	 * Failures here are logged and swallowed because the caller is already about to throw.
+	 */
+	private static void abandonCopy(SyncPoller<BlobCopyInfo, Void> poller, BlobClient destBlobClient, String destBackupName) {
+		try {
+			poller.cancelOperation();
+		}
+		catch (RuntimeException e) {
+			LOGGER.warn("Could not abort the Azure copy to {}", destBackupName, e);
+		}
+		try {
+			destBlobClient.deleteIfExists();
+		}
+		catch (RuntimeException e) {
+			LOGGER.warn("Could not delete the partial Azure copy {}", destBackupName, e);
 		}
 	}
 
@@ -129,9 +201,7 @@ public class AzureBlobStorageBackup implements ExternalBackup {
 
 	@Override
 	public long getFileSize(String fileName) {
-		final BlobContainerClient blobContainerClient = getBlobContainerClient();
-		final BlobClient blobClient = blobContainerClient.getBlobClient(getDirectoryName() + fileName);
-		final BlobProperties blobProperties = blobClient.getProperties();
+		final BlobProperties blobProperties = getBlobClient(fileName).getProperties();
 		long result = blobProperties.getBlobSize();
 
 		return result;
@@ -143,6 +213,24 @@ public class AzureBlobStorageBackup implements ExternalBackup {
 			throw new IllegalStateException("Missing JSON property connectionString under backup.");
 		}
 		return connectionString;
+	}
+
+	/**
+	 * Returns the shared access signature from the configured connection string without a
+	 * leading question mark, or {@code null} when the connection string uses an account key.
+	 * The key is matched exactly and the last occurrence wins, as the Azure SDK's own
+	 * connection string parser does, so a SAS is only ever appended when the client used it.
+	 */
+	private static @Nullable String getSharedAccessSignature() {
+		String result = null;
+		for (String pair : getConnectionString().split(";")) {
+			final String trimmed = pair.trim();
+			if (trimmed.startsWith(AZURE_SAS_CONNECTION_STRING_KEY + '=')) {
+				final String sas = trimmed.substring(AZURE_SAS_CONNECTION_STRING_KEY.length() + 1).trim();
+				result = sas.startsWith("?") ? sas.substring(1) : sas;
+			}
+		}
+		return result;
 	}
 
 	private static String getContainerName() {
