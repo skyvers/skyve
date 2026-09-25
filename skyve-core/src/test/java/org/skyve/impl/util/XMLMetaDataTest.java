@@ -686,6 +686,52 @@ class XMLMetaDataTest {
 	}
 
 	@Test
+	void testRemovedChildrenLeaveSelfClosingParent() throws Exception {
+		for (String declaration : new String[] { "", " enabled=\"true\"" }) {
+			org.dom4j.Document document = DocumentHelper.parseText(
+					"<textArea binding=\"notes\"" + declaration
+					+ ">\n\t<onFocusHandlers/>\n\t<onBlurHandlers/>\n</textArea>");
+			Class<?> visitor = Class.forName(XMLMetaData.class.getName() + "$JAXBFixingVisitor");
+			Method cleanup = visitor.getDeclaredMethod("removeEmptyChildElements", Element.class, String[].class);
+			cleanup.setAccessible(true);
+			cleanup.invoke(null, document.getRootElement(), new String[] { "onFocusHandlers", "onBlurHandlers" });
+			Method format = XMLMetaData.class.getDeclaredMethod("format", org.dom4j.Document.class);
+			format.setAccessible(true);
+			String xml = (String) format.invoke(null, document);
+			assertTrue(xml.contains("<textArea binding=\"notes\"" + declaration + "/>"), xml);
+		}
+	}
+
+	@Test
+	void testRemovedChildrenPreserveOtherParentContent() throws Exception {
+		for (String content : new String[] { "meaningful", "<![CDATA[ ]]>", "<!--keep-->",
+				"<?keep value?>", "<other/>", "<onFocusHandlers>meaningful</onFocusHandlers>" }) {
+			Element parent = DocumentHelper.parseText("<textArea>\n" + content
+					+ "\n<onBlurHandlers/>\n</textArea>").getRootElement();
+			Class<?> visitor = Class.forName(XMLMetaData.class.getName() + "$JAXBFixingVisitor");
+			Method cleanup = visitor.getDeclaredMethod("removeEmptyChildElements", Element.class, String[].class);
+			cleanup.setAccessible(true);
+			String expected = parent.asXML().replace("<onBlurHandlers/>", "");
+			cleanup.invoke(null, parent, new String[] { "onFocusHandlers", "onBlurHandlers" });
+			assertEquals(expected, parent.asXML());
+		}
+	}
+
+	@Test
+	void testRemovedChildrenHonourInheritedXmlSpace() throws Exception {
+		for (String attributes : new String[] { "", " xml:space=\"preserve\"", " xml:space=\"default\"" }) {
+			Element root = DocumentHelper.parseText("<root xml:space=\"preserve\"><textArea"
+					+ attributes + ">\n\t<onFocusHandlers/>\n</textArea></root>").getRootElement();
+			Element parent = root.element("textArea");
+			Class<?> visitor = Class.forName(XMLMetaData.class.getName() + "$JAXBFixingVisitor");
+			Method cleanup = visitor.getDeclaredMethod("removeEmptyChildElements", Element.class, String[].class);
+			cleanup.setAccessible(true);
+			cleanup.invoke(null, parent, new String[] { "onFocusHandlers" });
+			assertEquals(attributes.contains("default") ? "" : "\n\t\n", parent.getText());
+		}
+	}
+
+	@Test
 	void testMarshalOtherInputsOmitsEmptyHandlers() {
 		ViewMetaData view = XMLMetaData.unmarshalViewString(
 				"<view xmlns=\"http://www.skyve.org/xml/view\" name=\"edit\" title=\"Test\">"

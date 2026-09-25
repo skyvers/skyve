@@ -14,9 +14,9 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
@@ -46,8 +46,8 @@ import org.skyve.impl.metadata.repository.view.ViewMetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.sail.language.Automation;
 import org.skyve.util.Util;
-import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
+import org.slf4j.Logger;
 import org.xml.sax.SAXException;
 
 import jakarta.xml.bind.JAXBContext;
@@ -919,6 +919,9 @@ public class XMLMetaData {
 	 * and optional attributes set to their default value.
 	 */
 	private static class JAXBFixingVisitor extends VisitorSupport {
+		private static final String ROLES_ELEMENT = "roles";
+		private static final String PRIVILEGES_ELEMENT = "privileges";
+
 		private static final Namespace COMMON = Namespace.get("c", COMMON_NAMESPACE);
 		private static final Namespace MODULE = Namespace.get("m", MODULE_NAMESPACE);
 		private static final Namespace DOCUMENT = Namespace.get("d", DOCUMENT_NAMESPACE);
@@ -972,13 +975,13 @@ public class XMLMetaData {
 			if (uri.equals(MODULE_NAMESPACE)) {
 				Element parent = node.getParent();
 				if (parent == null) {
-					removeEmptyChildElements(node, new String[] { "jobs", "queries", "privileges", "documents", "roles" });
+					removeEmptyChildElements(node, new String[] { "jobs", "queries", PRIVILEGES_ELEMENT, "documents", ROLES_ELEMENT });
 				}
 				else if (node.getName().equals("query")) {
 					removeEmptyChildElements(node, new String[] { "columns" });
 				}
-				else if (parent.getName().equals("roles")) {
-					removeEmptyChildElements(node, new String[] { "privileges", "accesses" });
+				else if (parent.getName().equals(ROLES_ELEMENT)) {
+					removeEmptyChildElements(node, new String[] { PRIVILEGES_ELEMENT, "accesses" });
 				}
 			}
 
@@ -1016,11 +1019,11 @@ public class XMLMetaData {
 						String name = child.getName();
 						String text = child.getText();
 						// remove transient element from attributes where transient is false
-						if ("transient".equals(name) && "false".equals(text)) {
+						if ("transient".equals(name) && Boolean.FALSE.toString().equals(text)) {
 							childNodes.remove();
 						}
 						// remove dynamic element from attributes where dynamic is false
-						if ("dynamic".equals(name) && "false".equals(text)) {
+						if ("dynamic".equals(name) && Boolean.FALSE.toString().equals(text)) {
 							childNodes.remove();
 						}
 					}
@@ -1059,7 +1062,7 @@ public class XMLMetaData {
 				removeEmptyChildElements(node, new String[] { "else" });
 			}
 			if (uri.equals(CUSTOMER_NAMESPACE) && node.getName().equals("role")) {
-				removeEmptyChildElements(node, new String[] { "roles" });
+				removeEmptyChildElements(node, new String[] { ROLES_ELEMENT });
 			}
 
 			ListIterator<?> namespaces = node.additionalNamespaces().listIterator();
@@ -1133,8 +1136,10 @@ public class XMLMetaData {
 			}
 		}
 
+		@SuppressWarnings("java:S3776") // complexity OK
 		private static void removeEmptyChildElements(Element parent, String[] nodesToRemove) {
 			Set<String> nodesToRemoveSet = Set.of(nodesToRemove);
+			boolean removed = false;
 			ListIterator<Element> childNodes = parent.elements().listIterator();
 			while (childNodes.hasNext()) {
 				Element child = childNodes.next();
@@ -1145,7 +1150,22 @@ public class XMLMetaData {
 						child.getText().isBlank() &&
 						child.content().stream().allMatch(n -> n.getNodeType() == Node.TEXT_NODE)) {
 					childNodes.remove();
+					removed = true;
 				}
+			}
+			if (removed && parent.content().stream().allMatch(n -> n.getNodeType() == Node.NAMESPACE_NODE || (n.getNodeType() == Node.TEXT_NODE && n.getText().isBlank()))) {
+				// Honour the nearest xml:space declaration, including inherited preservation.
+				for (Element ancestor = parent; ancestor != null; ancestor = ancestor.getParent()) {
+					String space = ancestor.attributeValue(QName.get("space", Namespace.XML_NAMESPACE));
+					if ("preserve".equals(space)) {
+						return;
+					}
+					if ("default".equals(space)) {
+						break;
+					}
+				}
+				// Leftover indentation is content to XMLWriter and prevents a self-closing tag.
+				parent.content().removeIf(n -> n.getNodeType() == Node.TEXT_NODE);
 			}
 		}
 
