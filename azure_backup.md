@@ -32,7 +32,9 @@
     - Retention 0 (or null) for a tier culls every backup of that tier, including yearly (yearly was never culled before Skyve 10).
 - Skyve applications carry their own copy of the admin module, so the scheduled job changes only reach an app after it is re-assembled (skyve:assemble); the Azure class changes arrive with the skyve-ext dependency.
 # Azure copy/move
-- copyBackup uses Azure's asynchronous server-side copy (beginCopy on the source blob URL; a same-account source is authorised by the destination's Shared Key, so no SAS is generated and SAS-token connection strings still work).
+- copyBackup uses Azure's asynchronous server-side copy (beginCopy on the source blob URL).
+    - Account-key connection string: the request's Shared Key authorisation is applied to the same-account source, so nothing is added to the source URL.
+    - SAS connection string: Azure does not extend the request's SAS to the copy source (CannotVerifyCopySource / NoAuthenticationInformation), so the connection string's own SAS is appended to the source URL. The SAS needs resource types Service, Container and Object with Read, Write, Delete, List, Add and Create.
     - The blob never passes through the app server: no egress charge, no local bandwidth, no 256 MB limit (that limit only applies to the synchronous copyFromUrl).
     - The copy is waited on (4 hour cap). On failure or timeout the copy is aborted and any partial destination blob is deleted, so exists() never reports a bad copy.
     - moveBackup is copyBackup then deleteBackup.
