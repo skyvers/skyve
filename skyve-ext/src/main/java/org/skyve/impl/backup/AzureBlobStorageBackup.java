@@ -26,6 +26,7 @@ import com.azure.storage.blob.models.BlobItem;
 import com.azure.storage.blob.models.BlobProperties;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * {@link ExternalBackup} implementation that stores Skyve backup archives in
@@ -40,6 +41,7 @@ public class AzureBlobStorageBackup implements ExternalBackup {
 
 	public static final String AZURE_CONNECTION_STRING_KEY = "connectionString";
 	public static final String AZURE_CONTAINER_NAME_KEY = "containerName";
+	private static final String AZURE_SAS_CONNECTION_STRING_KEY = "SharedAccessSignature";
 	private static final long COPY_POLL_INTERVAL_SECONDS = 2;
 	private static final Duration COPY_TIMEOUT = Duration.ofHours(4);
 
@@ -102,8 +104,10 @@ public class AzureBlobStorageBackup implements ExternalBackup {
 	 * <p>The copy runs inside the storage account, so the backup is never streamed
 	 * through the application server (no egress charge, no local bandwidth) and there
 	 * is no blob size limit, unlike the synchronous copy-from-URL operation which is
-	 * capped at 256 MB. The source is in the same account, so the destination's
-	 * Shared Key authorisation is applied to the source and no SAS is required.
+	 * capped at 256 MB. With an account-key connection string the destination's
+	 * Shared Key authorisation is applied to the same-account source. With a SAS
+	 * connection string Azure does not extend the request's SAS to the source, so the
+	 * connection string's SAS is appended to the source URL.
 	 *
 	 * <p>Side effects: creates the destination blob. If the copy fails, is aborted or
 	 * does not complete within {@link #COPY_TIMEOUT}, any partial destination blob is
@@ -118,19 +122,31 @@ public class AzureBlobStorageBackup implements ExternalBackup {
 		final String directoryName = getDirectoryName();
 		copy(srcBackupName,
 				destBackupName,
-				blobContainerClient.getBlobClient(directoryName + srcBackupName),
+				copySourceUrl(blobContainerClient.getBlobClient(directoryName + srcBackupName).getBlobUrl()),
 				blobContainerClient.getBlobClient(directoryName + destBackupName));
 	}
 
 	/**
-	 * Performs the server-side copy between two resolved blob clients; see {@link #copyBackup(String, String)}.
-	 * Kept separate from {@link #copyBackup(String, String)} by agreement so the copy logic can be
-	 * exercised with mocked blob clients without a protected seam.
+	 * Returns the URL Azure should read the copy source from: the blob URL, plus the
+	 * connection string's shared access signature when the connection string carries one.
 	 */
-	private static void copy(String srcBackupName, String destBackupName, BlobClient srcBlobClient, BlobClient destBlobClient) {
+	private static @Nonnull String copySourceUrl(@Nonnull String srcBlobUrl) {
+		final String sas = getSharedAccessSignature();
+		return (sas == null) ? srcBlobUrl : srcBlobUrl + '?' + sas;
+	}
+
+	/**
+	 * Performs the server-side copy from a source URL to a resolved blob client; see {@link #copyBackup(String, String)}.
+	 * Kept separate from {@link #copyBackup(String, String)} by agreement so the copy logic can be
+	 * exercised with a mocked blob client without a protected seam.
+	 */
+	private static void copy(@Nonnull String srcBackupName,
+								@Nonnull String destBackupName,
+								@Nonnull String srcUrl,
+								@Nonnull BlobClient destBlobClient) {
 		LOGGER.info("Copying from {} to {} in Azure", srcBackupName, destBackupName);
 
-		final SyncPoller<BlobCopyInfo, Void> poller = destBlobClient.beginCopy(srcBlobClient.getBlobUrl(),
+		final SyncPoller<BlobCopyInfo, Void> poller = destBlobClient.beginCopy(srcUrl,
 																				Duration.ofSeconds(COPY_POLL_INTERVAL_SECONDS));
 		final PollResponse<BlobCopyInfo> response;
 		try {
@@ -197,6 +213,24 @@ public class AzureBlobStorageBackup implements ExternalBackup {
 			throw new IllegalStateException("Missing JSON property connectionString under backup.");
 		}
 		return connectionString;
+	}
+
+	/**
+	 * Returns the shared access signature from the configured connection string without a
+	 * leading question mark, or {@code null} when the connection string uses an account key.
+	 * The key is matched exactly and the last occurrence wins, as the Azure SDK's own
+	 * connection string parser does, so a SAS is only ever appended when the client used it.
+	 */
+	private static @Nullable String getSharedAccessSignature() {
+		String result = null;
+		for (String pair : getConnectionString().split(";")) {
+			final String trimmed = pair.trim();
+			if (trimmed.startsWith(AZURE_SAS_CONNECTION_STRING_KEY + '=')) {
+				final String sas = trimmed.substring(AZURE_SAS_CONNECTION_STRING_KEY.length() + 1).trim();
+				result = sas.startsWith("?") ? sas.substring(1) : sas;
+			}
+		}
+		return result;
 	}
 
 	private static String getContainerName() {

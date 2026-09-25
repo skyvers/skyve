@@ -117,6 +117,51 @@ public class AzureBlobStorageBackupTest {
 	}
 
 	@Test
+	public void copySourceUrlIsThePlainBlobUrlForAnAccountKeyConnectionString() throws Exception {
+		HashMap<String, Object> properties = new HashMap<>();
+		properties.put(AzureBlobStorageBackup.AZURE_CONNECTION_STRING_KEY,
+				"DefaultEndpointsProtocol=https;AccountName=account;AccountKey=c2VjcmV0;EndpointSuffix=core.windows.net");
+
+		withBackupProperties(properties, () -> assertEquals(SOURCE_URL, invokeCopySourceUrl()));
+	}
+
+	@Test
+	public void copySourceUrlCarriesTheSharedAccessSignatureFromTheConnectionString() throws Exception {
+		HashMap<String, Object> properties = new HashMap<>();
+		properties.put(AzureBlobStorageBackup.AZURE_CONNECTION_STRING_KEY,
+				"BlobEndpoint=https://account.blob.core.windows.net/;SharedAccessSignature=sv=2024-11-04&ss=b&srt=sco&sp=rwdlac&sig=abc%2Fdef%3D");
+
+		withBackupProperties(properties, () -> assertEquals(SOURCE_URL + "?sv=2024-11-04&ss=b&srt=sco&sp=rwdlac&sig=abc%2Fdef%3D", invokeCopySourceUrl()));
+	}
+
+	@Test
+	public void copySourceUrlIgnoresASharedAccessSignatureKeyTheSdkWouldNotMatch() throws Exception {
+		HashMap<String, Object> properties = new HashMap<>();
+		properties.put(AzureBlobStorageBackup.AZURE_CONNECTION_STRING_KEY,
+				"AccountName=account;AccountKey=c2VjcmV0;sharedaccesssignature=sv=2024-11-04&sig=abc");
+
+		withBackupProperties(properties, () -> assertEquals(SOURCE_URL, invokeCopySourceUrl()));
+	}
+
+	@Test
+	public void copySourceUrlUsesTheLastSharedAccessSignatureLikeTheSdk() throws Exception {
+		HashMap<String, Object> properties = new HashMap<>();
+		properties.put(AzureBlobStorageBackup.AZURE_CONNECTION_STRING_KEY,
+				"BlobEndpoint=https://account.blob.core.windows.net/;SharedAccessSignature=sig=first;SharedAccessSignature=sig=second");
+
+		withBackupProperties(properties, () -> assertEquals(SOURCE_URL + "?sig=second", invokeCopySourceUrl()));
+	}
+
+	@Test
+	public void copySourceUrlStripsALeadingQuestionMarkFromTheSharedAccessSignature() throws Exception {
+		HashMap<String, Object> properties = new HashMap<>();
+		properties.put(AzureBlobStorageBackup.AZURE_CONNECTION_STRING_KEY,
+				"BlobEndpoint=https://account.blob.core.windows.net/;SharedAccessSignature=?sv=2024-11-04&sig=abc");
+
+		withBackupProperties(properties, () -> assertEquals(SOURCE_URL + "?sv=2024-11-04&sig=abc", invokeCopySourceUrl()));
+	}
+
+	@Test
 	public void getDirectoryNameUsesLowerCaseCustomerName() throws Exception {
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		User user = mock(User.class);
@@ -186,12 +231,18 @@ public class AzureBlobStorageBackupTest {
 	}
 
 	/**
-	 * Invokes the private static copy method with mocked blob clients so nothing talks to Azure.
+	 * Invokes the private static copy method with a mocked destination blob client so nothing talks to Azure.
 	 */
 	private static void invokeCopy(CopyFixture fixture) throws Exception {
-		Method method = AzureBlobStorageBackup.class.getDeclaredMethod("copy", String.class, String.class, BlobClient.class, BlobClient.class);
+		Method method = AzureBlobStorageBackup.class.getDeclaredMethod("copy", String.class, String.class, String.class, BlobClient.class);
 		method.setAccessible(true);
-		method.invoke(null, "source.zip", "destination.zip", fixture.src, fixture.dest);
+		method.invoke(null, "source.zip", "destination.zip", SOURCE_URL, fixture.dest);
+	}
+
+	private static Object invokeCopySourceUrl() throws Exception {
+		Method method = AzureBlobStorageBackup.class.getDeclaredMethod("copySourceUrl", String.class);
+		method.setAccessible(true);
+		return method.invoke(null, SOURCE_URL);
 	}
 
 	private static DomainException assertCopyThrows(CopyFixture fixture) {
@@ -201,13 +252,11 @@ public class AzureBlobStorageBackupTest {
 	}
 
 	private static final class CopyFixture {
-		private final BlobClient src = mock(BlobClient.class);
 		private final BlobClient dest = mock(BlobClient.class);
 		@SuppressWarnings("unchecked")
 		private final SyncPoller<BlobCopyInfo, Void> poller = mock(SyncPoller.class);
 
 		private CopyFixture() {
-			when(src.getBlobUrl()).thenReturn(SOURCE_URL);
 			when(dest.beginCopy(any(String.class), any(Duration.class))).thenReturn(poller);
 		}
 	}

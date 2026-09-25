@@ -634,7 +634,9 @@ public abstract class Startup extends AbstractTransientBean {
 	 * Connection String
 	 * <br/>
 	 * The connection string to the external backup location, e.g. 
-					<code style='white-space: pre-wrap;'>DefaultEndpointsProtocol=https;AccountName=ACCOUNT_NAME;AccountKey=ACCOUNT_KEY;EndpointSuffix=core.windows.net</code>.
+					<code style='white-space: pre-wrap;'>DefaultEndpointsProtocol=https;AccountName=ACCOUNT_NAME;AccountKey=ACCOUNT_KEY;EndpointSuffix=core.windows.net</code>
+					or, using a shared access signature,
+					<code style='white-space: pre-wrap;'>BlobEndpoint=https://ACCOUNT_NAME.blob.core.windows.net/;SharedAccessSignature=SAS_TOKEN</code>.
 	 **/
 	private String backupConnectionString;
 
