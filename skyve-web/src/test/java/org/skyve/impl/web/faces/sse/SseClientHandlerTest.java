@@ -9,6 +9,9 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -210,6 +213,24 @@ class SseClientHandlerTest extends JerseyTest {
 		// Ensure idempotency
 		handler.close();
 		assertFalse(org.skyve.util.PushMessage.RECEIVERS.contains(handler));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testCloseCleansUpAfterSinkIOException() throws Exception {
+		SseClientHandler handler = new SseClientHandler();
+		SseEventSink sink = mock(SseEventSink.class);
+		doThrow(new IOException("Connection reset")).when(sink).close();
+		setSink(handler, sink);
+		org.skyve.util.PushMessage.RECEIVERS.add(handler);
+		getMessageQueue(handler).offerLast(new org.skyve.util.PushMessage().growl(MessageSeverity.info, "queued"));
+
+		handler.close();
+		handler.close();
+
+		verify(sink).close();
+		assertFalse(org.skyve.util.PushMessage.RECEIVERS.contains(handler));
+		assertTrue(getMessageQueue(handler).isEmpty());
 	}
 
 	@Test

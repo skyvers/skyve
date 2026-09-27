@@ -5,9 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayOutputStream;
@@ -18,6 +20,7 @@ import java.util.Collections;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.web.WebContainer;
 import org.skyve.domain.DynamicBean;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -33,8 +36,29 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @SuppressWarnings({"static-method", "boxing"})
 class RestServiceDeleteJsonTest {
+	@Test
+	void reusedServiceWritesToTheCurrentRequestResponse() throws Exception {
+		RestService service = new RestService();
+		HttpServletResponse first = mockResponse();
+		HttpServletResponse second = mockResponse();
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		bindPersistenceToThread(persistence);
+
+		WebContainer.setHttpServletRequestResponse(mock(HttpServletRequest.class), first);
+		assertNull(service.retrieveJSON("admin", "Contact", "missing"));
+		verify(first, atLeastOnce()).setContentType("application/json");
+		verifyNoInteractions(second);
+		clearInvocations(first);
+
+		WebContainer.setHttpServletRequestResponse(mock(HttpServletRequest.class), second);
+		assertNull(service.retrieveJSON("admin", "Contact", "missing"));
+		verify(second, atLeastOnce()).setContentType("application/json");
+		verifyNoInteractions(first);
+	}
+
 	@AfterEach
 	void tearDown() throws Exception {
+		WebContainer.clear();
 		unbindPersistenceFromThread();
 	}
 
@@ -42,7 +66,7 @@ class RestServiceDeleteJsonTest {
 	void deleteJsonDeleteReturnsNullAndRollsBackOnMissingUser() throws Exception {
 		RestService service = new RestService();
 		HttpServletResponse response = mockResponse();
-		setPrivateField(service, "response", response);
+		WebContainer.setHttpServletRequestResponse(mock(HttpServletRequest.class), response);
 
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		when(persistence.getUser()).thenReturn(null);
@@ -59,7 +83,7 @@ class RestServiceDeleteJsonTest {
 	void deleteJsonGetReturnsNullAndRollsBackOnUnmarshallFailure() throws Exception {
 		RestService service = new RestService();
 		HttpServletResponse response = mockResponse();
-		setPrivateField(service, "response", response);
+		WebContainer.setHttpServletRequestResponse(mock(HttpServletRequest.class), response);
 
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		when(persistence.getUser()).thenReturn(mock(User.class));
@@ -76,7 +100,7 @@ class RestServiceDeleteJsonTest {
 	void retrieveJsonByIdReturnsNullAndRollsBackOnMissingUser() throws Exception {
 		RestService service = new RestService();
 		HttpServletResponse response = mockResponse();
-		setPrivateField(service, "response", response);
+		WebContainer.setHttpServletRequestResponse(mock(HttpServletRequest.class), response);
 
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		when(persistence.getUser()).thenReturn(null);
@@ -93,7 +117,7 @@ class RestServiceDeleteJsonTest {
 	void retrieveXmlByIdReturnsNullAndRollsBackOnMissingUser() throws Exception {
 		RestService service = new RestService();
 		HttpServletResponse response = mockResponse();
-		setPrivateField(service, "response", response);
+		WebContainer.setHttpServletRequestResponse(mock(HttpServletRequest.class), response);
 
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		when(persistence.getUser()).thenReturn(null);
@@ -110,7 +134,7 @@ class RestServiceDeleteJsonTest {
 	void retrieveJsonListReturnsNullAndRollsBackOnMissingUser() throws Exception {
 		RestService service = new RestService();
 		HttpServletResponse response = mockResponse();
-		setPrivateField(service, "response", response);
+		WebContainer.setHttpServletRequestResponse(mock(HttpServletRequest.class), response);
 
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		when(persistence.getUser()).thenReturn(null);
@@ -127,7 +151,7 @@ class RestServiceDeleteJsonTest {
 	void insertJsonPostReturnsNullAndRollsBackOnMissingUser() throws Exception {
 		RestService service = new RestService();
 		HttpServletResponse response = mockResponse();
-		setPrivateField(service, "response", response);
+		WebContainer.setHttpServletRequestResponse(mock(HttpServletRequest.class), response);
 
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		when(persistence.getUser()).thenReturn(null);
@@ -144,7 +168,7 @@ class RestServiceDeleteJsonTest {
 	void insertJsonGetReturnsNullAndRollsBackOnMissingUser() throws Exception {
 		RestService service = new RestService();
 		HttpServletResponse response = mockResponse();
-		setPrivateField(service, "response", response);
+		WebContainer.setHttpServletRequestResponse(mock(HttpServletRequest.class), response);
 
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		when(persistence.getUser()).thenReturn(null);
@@ -161,7 +185,7 @@ class RestServiceDeleteJsonTest {
 	void updateJsonPostReturnsNullAndRollsBackOnMissingUser() throws Exception {
 		RestService service = new RestService();
 		HttpServletResponse response = mockResponse();
-		setPrivateField(service, "response", response);
+		WebContainer.setHttpServletRequestResponse(mock(HttpServletRequest.class), response);
 
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		when(persistence.getUser()).thenReturn(null);
@@ -178,7 +202,7 @@ class RestServiceDeleteJsonTest {
 	void updateJsonGetReturnsNullAndRollsBackOnMissingUser() throws Exception {
 		RestService service = new RestService();
 		HttpServletResponse response = mockResponse();
-		setPrivateField(service, "response", response);
+		WebContainer.setHttpServletRequestResponse(mock(HttpServletRequest.class), response);
 
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		when(persistence.getUser()).thenReturn(null);
@@ -195,7 +219,7 @@ class RestServiceDeleteJsonTest {
 	void retrieveJsonByIdReturnsNullAndRollsBackOnReadDenied() throws Exception {
 		RestService service = new RestService();
 		HttpServletResponse response = mockResponse();
-		setPrivateField(service, "response", response);
+		WebContainer.setHttpServletRequestResponse(mock(HttpServletRequest.class), response);
 
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		User user = mock(User.class);
@@ -221,7 +245,7 @@ class RestServiceDeleteJsonTest {
 	void retrieveXmlByIdReturnsNullAndRollsBackOnReadDenied() throws Exception {
 		RestService service = new RestService();
 		HttpServletResponse response = mockResponse();
-		setPrivateField(service, "response", response);
+		WebContainer.setHttpServletRequestResponse(mock(HttpServletRequest.class), response);
 
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		User user = mock(User.class);
@@ -247,7 +271,7 @@ class RestServiceDeleteJsonTest {
 	void retrieveJsonListReturnsNullAndRollsBackOnReadDenied() throws Exception {
 		RestService service = new RestService();
 		HttpServletResponse response = mockResponse();
-		setPrivateField(service, "response", response);
+		WebContainer.setHttpServletRequestResponse(mock(HttpServletRequest.class), response);
 
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		User user = mock(User.class);
@@ -273,7 +297,7 @@ class RestServiceDeleteJsonTest {
 	void retrieveJsonByIdReturnsNullAndRollsBackOnNoResults() throws Exception {
 		RestService service = new RestService();
 		HttpServletResponse response = mockResponse();
-		setPrivateField(service, "response", response);
+		WebContainer.setHttpServletRequestResponse(mock(HttpServletRequest.class), response);
 
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		User user = mock(User.class);
@@ -300,7 +324,7 @@ class RestServiceDeleteJsonTest {
 	void retrieveXmlByIdReturnsNullAndRollsBackOnNoResults() throws Exception {
 		RestService service = new RestService();
 		HttpServletResponse response = mockResponse();
-		setPrivateField(service, "response", response);
+		WebContainer.setHttpServletRequestResponse(mock(HttpServletRequest.class), response);
 
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		User user = mock(User.class);
@@ -327,7 +351,7 @@ class RestServiceDeleteJsonTest {
 	void retrieveXmlByIdReturnsBeanWhenReadableAndFound() throws Exception {
 		RestService service = new RestService();
 		HttpServletResponse response = mockResponse();
-		setPrivateField(service, "response", response);
+		WebContainer.setHttpServletRequestResponse(mock(HttpServletRequest.class), response);
 
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		User user = mock(User.class);
@@ -355,7 +379,7 @@ class RestServiceDeleteJsonTest {
 	void retrieveJsonByIdCoversNonNullRetrieveBranchThenRollsBackOnPopulateFailure() throws Exception {
 		RestService service = new RestService();
 		HttpServletResponse response = mockResponse();
-		setPrivateField(service, "response", response);
+		WebContainer.setHttpServletRequestResponse(mock(HttpServletRequest.class), response);
 
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		User user = mock(User.class);
@@ -383,7 +407,7 @@ class RestServiceDeleteJsonTest {
 	void retrieveXmlByIdCoversNonNullRetrieveBranchThenRollsBackOnPopulateFailure() throws Exception {
 		RestService service = new RestService();
 		HttpServletResponse response = mockResponse();
-		setPrivateField(service, "response", response);
+		WebContainer.setHttpServletRequestResponse(mock(HttpServletRequest.class), response);
 
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		User user = mock(User.class);
@@ -410,7 +434,7 @@ class RestServiceDeleteJsonTest {
 	void retrieveJsonListCoversNonEmptyProjectedResultsLoopThenRollsBackOnPopulateFailure() throws Exception {
 		RestService service = new RestService();
 		HttpServletResponse response = mockResponse();
-		setPrivateField(service, "response", response);
+		WebContainer.setHttpServletRequestResponse(mock(HttpServletRequest.class), response);
 
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		User user = mock(User.class);
@@ -442,7 +466,7 @@ class RestServiceDeleteJsonTest {
 	void retrieveJsonListReturnsNullAndRollsBackAfterDocumentQueryExecutionPath() throws Exception {
 		RestService service = new RestService();
 		HttpServletResponse response = mockResponse();
-		setPrivateField(service, "response", response);
+		WebContainer.setHttpServletRequestResponse(mock(HttpServletRequest.class), response);
 
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		User user = mock(User.class);
@@ -473,7 +497,7 @@ class RestServiceDeleteJsonTest {
 	void queryReturnsNullAndRollsBackOnMissingUser() throws Exception {
 		RestService service = new RestService();
 		HttpServletResponse response = mockResponse();
-		setPrivateField(service, "response", response);
+		WebContainer.setHttpServletRequestResponse(mock(HttpServletRequest.class), response);
 
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		when(persistence.getUser()).thenReturn(null);
@@ -490,7 +514,7 @@ class RestServiceDeleteJsonTest {
 	void queryReturnsNullAndRollsBackWhenListModelCreationFails() throws Exception {
 		RestService service = new RestService();
 		HttpServletResponse response = mockResponse();
-		setPrivateField(service, "response", response);
+		WebContainer.setHttpServletRequestResponse(mock(HttpServletRequest.class), response);
 
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		User user = mock(User.class);
@@ -515,7 +539,7 @@ class RestServiceDeleteJsonTest {
 	void queryRejectsAggregateMetadataQueryBeforeListModelCreation() throws Exception {
 		RestService service = new RestService();
 		HttpServletResponse response = mockResponse();
-		setPrivateField(service, "response", response);
+		WebContainer.setHttpServletRequestResponse(mock(HttpServletRequest.class), response);
 
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		User user = mock(User.class);
@@ -549,7 +573,7 @@ class RestServiceDeleteJsonTest {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		when(request.getRequestURI()).thenReturn("/api/content/cid-404");
 		setPrivateField(service, "request", request);
-		setPrivateField(service, "response", response);
+		WebContainer.setHttpServletRequestResponse(mock(HttpServletRequest.class), response);
 
 		byte[] result = service.queryContent("cid-404");
 
@@ -560,7 +584,7 @@ class RestServiceDeleteJsonTest {
 	void queryContentReturnsNullWhenRequestIsUnavailable() throws Exception {
 		RestService service = new RestService();
 		HttpServletResponse response = mockResponse();
-		setPrivateField(service, "response", response);
+		WebContainer.setHttpServletRequestResponse(mock(HttpServletRequest.class), response);
 
 		byte[] result = service.queryContent("cid-500");
 
@@ -574,7 +598,7 @@ class RestServiceDeleteJsonTest {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		when(request.getRequestURI()).thenReturn("/api/content/cid-1");
 		setPrivateField(service, "request", request);
-		setPrivateField(service, "response", response);
+		WebContainer.setHttpServletRequestResponse(mock(HttpServletRequest.class), response);
 
 		byte[] result = service.queryContent("cid-1");
 
@@ -585,7 +609,7 @@ class RestServiceDeleteJsonTest {
 	void insertContentReturnsNullAndRollsBackOnAccessDenied() throws Exception {
 		RestService service = new RestService();
 		HttpServletResponse response = mockResponse();
-		setPrivateField(service, "response", response);
+		WebContainer.setHttpServletRequestResponse(mock(HttpServletRequest.class), response);
 
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		User user = mock(User.class);
@@ -604,7 +628,7 @@ class RestServiceDeleteJsonTest {
 	void insertContentReturnsNullWhenCurrentUserIsMissing() throws Exception {
 		RestService service = new RestService();
 		HttpServletResponse response = mockResponse();
-		setPrivateField(service, "response", response);
+		WebContainer.setHttpServletRequestResponse(mock(HttpServletRequest.class), response);
 
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		when(persistence.getUser()).thenReturn(null);
@@ -620,7 +644,7 @@ class RestServiceDeleteJsonTest {
 	void insertContentReturnsNullWhenAccessCheckFailsEarly() throws Exception {
 		RestService service = new RestService();
 		HttpServletResponse response = mockResponse();
-		setPrivateField(service, "response", response);
+		WebContainer.setHttpServletRequestResponse(mock(HttpServletRequest.class), response);
 
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		User user = mock(User.class);
@@ -640,7 +664,7 @@ class RestServiceDeleteJsonTest {
 	void queryReturnsNullAndRollsBackWhenMetaDataQueryLookupFails() throws Exception {
 		RestService service = new RestService();
 		HttpServletResponse response = mockResponse();
-		setPrivateField(service, "response", response);
+		WebContainer.setHttpServletRequestResponse(mock(HttpServletRequest.class), response);
 
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		User user = mock(User.class);
@@ -664,7 +688,7 @@ class RestServiceDeleteJsonTest {
 	void queryReturnsNullAndRollsBackWhenCustomerIsMissing() throws Exception {
 		RestService service = new RestService();
 		HttpServletResponse response = mockResponse();
-		setPrivateField(service, "response", response);
+		WebContainer.setHttpServletRequestResponse(mock(HttpServletRequest.class), response);
 
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		User user = mock(User.class);
@@ -684,7 +708,7 @@ class RestServiceDeleteJsonTest {
 	void queryReturnsNullAndRollsBackWhenDefaultQueryLookupFails() throws Exception {
 		RestService service = new RestService();
 		HttpServletResponse response = mockResponse();
-		setPrivateField(service, "response", response);
+		WebContainer.setHttpServletRequestResponse(mock(HttpServletRequest.class), response);
 
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		User user = mock(User.class);
@@ -709,7 +733,7 @@ class RestServiceDeleteJsonTest {
 	void queryReturnsNullAndRollsBackWhenMetaAndDefaultQueriesAreNull() throws Exception {
 		RestService service = new RestService();
 		HttpServletResponse response = mockResponse();
-		setPrivateField(service, "response", response);
+		WebContainer.setHttpServletRequestResponse(mock(HttpServletRequest.class), response);
 
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		User user = mock(User.class);
@@ -734,7 +758,7 @@ class RestServiceDeleteJsonTest {
 	void retrieveJsonByIdReturnsJsonWhenReadableAndFound() throws Exception {
 		RestService service = new RestService();
 		HttpServletResponse response = mockResponse();
-		setPrivateField(service, "response", response);
+		WebContainer.setHttpServletRequestResponse(mock(HttpServletRequest.class), response);
 
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		User user = mock(User.class);
@@ -762,7 +786,7 @@ class RestServiceDeleteJsonTest {
 	void retrieveJsonListReturnsJsonWhenReadableAndFound() throws Exception {
 		RestService service = new RestService();
 		HttpServletResponse response = mockResponse();
-		setPrivateField(service, "response", response);
+		WebContainer.setHttpServletRequestResponse(mock(HttpServletRequest.class), response);
 
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		User user = mock(User.class);

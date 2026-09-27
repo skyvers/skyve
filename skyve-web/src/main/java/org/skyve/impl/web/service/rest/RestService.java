@@ -34,9 +34,9 @@ import org.skyve.util.Util;
 import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
 
-import jakarta.enterprise.context.RequestScoped;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import jakarta.enterprise.context.RequestScoped;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.Consumes;
@@ -71,8 +71,6 @@ public class RestService {
 
 	@Context
 	private HttpServletRequest request;
-	@Context
-	private HttpServletResponse response;
 	
 	/**
 	 * Retrieves a single document instance and returns it as JSON.
@@ -85,6 +83,7 @@ public class RestService {
 	@GET
 	@Path("/json/{module}/{document}/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
+	@SuppressWarnings("static-method")
 	public @Nullable String retrieveJSON(@PathParam(MODULE_PATH_PARAM) @Nonnull String module,
 											@PathParam(DOCUMENT_PATH_PARAM) @Nonnull String document,
 											@PathParam(ID_PATH_PARAM) @Nonnull String id) {
@@ -93,7 +92,7 @@ public class RestService {
 		
 		Persistence p = null;
 		try {
-			response.setContentType(MediaType.APPLICATION_JSON);
+			EXT.getHttpServletRespsone().setContentType(MediaType.APPLICATION_JSON);
 			p = CORE.getPersistence();
 			User u = p.getUser();
 			Customer c = u.getCustomer();
@@ -129,6 +128,7 @@ public class RestService {
 	@GET
 	@Path("/xml/{module}/{document}/{id}")
 	@Produces(MediaType.APPLICATION_XML)
+	@SuppressWarnings("static-method")
 	public @Nullable Bean retrieveXML(@PathParam(MODULE_PATH_PARAM) @Nonnull String module,
 										@PathParam(DOCUMENT_PATH_PARAM) @Nonnull String document,
 										@PathParam(ID_PATH_PARAM) @Nonnull String id) {
@@ -136,7 +136,7 @@ public class RestService {
 		
 		Persistence p = null;
 		try {
-			response.setContentType(MediaType.APPLICATION_XML);
+			EXT.getHttpServletRespsone().setContentType(MediaType.APPLICATION_XML);
 			p = CORE.getPersistence();
 			User u = p.getUser();
 			Customer c = u.getCustomer();
@@ -174,6 +174,7 @@ public class RestService {
 	@GET
 	@Path("/json/{module}/{document}")
 	@Produces(MediaType.APPLICATION_JSON)
+	@SuppressWarnings("static-method")
 	public @Nullable String retrieveJSON(@PathParam(MODULE_PATH_PARAM) @Nonnull String module,
 											@PathParam(DOCUMENT_PATH_PARAM) @Nonnull String document,
 											@QueryParam("start") int start,
@@ -182,7 +183,7 @@ public class RestService {
 		
 		Persistence p = null;
 		try {
-			response.setContentType(MediaType.APPLICATION_JSON);
+			EXT.getHttpServletRespsone().setContentType(MediaType.APPLICATION_JSON);
 
 			p = CORE.getPersistence();
 			User u = p.getUser();
@@ -219,6 +220,7 @@ public class RestService {
 	@GET
 	@Path("/json/insert/{bean}")
 	@Produces(MediaType.APPLICATION_JSON)
+	@SuppressWarnings("static-method")
 	public @Nullable String insertJSONGet(@PathParam(BEAN_PATH_PARAM) @Nonnull String json) {
 		return insertJSON(json);
 	}
@@ -233,6 +235,7 @@ public class RestService {
 	@Path("/json/insert")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
+	@SuppressWarnings("static-method")
 	public @Nullable String insertJSONPost(@Nonnull String json) {
 		return insertJSON(json);
 	}
@@ -243,12 +246,12 @@ public class RestService {
 	 * @param json JSON payload representing the bean to insert
 	 * @return marshalled inserted bean JSON, or {@code null} when an error occurs
 	 */
-	private @Nullable String insertJSON(@Nonnull String json) {
+	private static @Nullable String insertJSON(@Nonnull String json) {
 		String result = null;
 		
 		Persistence p = null;
 		try {
-			response.setContentType(MediaType.APPLICATION_JSON);
+			EXT.getHttpServletRespsone().setContentType(MediaType.APPLICATION_JSON);
 			p = CORE.getPersistence();
 			User u = p.getUser();
 			
@@ -272,6 +275,7 @@ public class RestService {
 	@GET
 	@Path("/json/update/{bean}")
 	@Produces(MediaType.APPLICATION_JSON)
+	@SuppressWarnings("static-method")
 	public @Nullable String updateJSONGet(@PathParam(BEAN_PATH_PARAM) @Nonnull String json) {
 		return updateJSON(json);
 	}
@@ -286,6 +290,7 @@ public class RestService {
 	@Path("/json/update")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
+	@SuppressWarnings("static-method")
 	public @Nullable String updateJSONPost(@Nonnull String json) {
 		return updateJSON(json);
 	}
@@ -296,12 +301,12 @@ public class RestService {
 	 * @param json JSON payload representing the bean to update
 	 * @return marshalled updated bean JSON, or {@code null} when an error occurs
 	 */
-	private @Nullable String updateJSON(@Nonnull String json) {
+	private static @Nullable String updateJSON(@Nonnull String json) {
 		String result = null;
 		
 		Persistence p = null;
 		try {
-			response.setContentType(MediaType.APPLICATION_JSON);
+			EXT.getHttpServletRespsone().setContentType(MediaType.APPLICATION_JSON);
 			p = CORE.getPersistence();
 			User u = p.getUser();
 			
@@ -327,6 +332,7 @@ public class RestService {
 	@GET
 	@Path("/json/delete/{bean}")
 	@Produces(MediaType.APPLICATION_JSON)
+	@SuppressWarnings("static-method")
 	public @Nullable String deleteJSONGet(@PathParam(BEAN_PATH_PARAM) @Nonnull String json) {
 		return deleteJSON(json);
 	}
@@ -341,6 +347,7 @@ public class RestService {
 	@Path("/json/delete")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
+	@SuppressWarnings("static-method")
 	public @Nullable String deleteJSONDelete(@Nonnull String json) {
 		return deleteJSON(json);
 	}
@@ -351,12 +358,12 @@ public class RestService {
 	 * @param json JSON payload representing the bean to delete
 	 * @return empty JSON object string, or {@code null} when an error occurs
 	 */
-	private @Nullable String deleteJSON(@Nonnull String json) {
+	private static @Nullable String deleteJSON(@Nonnull String json) {
 		String result = null;
 		
 		Persistence p = null;
 		try {
-			response.setContentType(MediaType.APPLICATION_JSON);
+			EXT.getHttpServletRespsone().setContentType(MediaType.APPLICATION_JSON);
 			p = CORE.getPersistence();
 			User u = p.getUser();
 			
@@ -380,7 +387,7 @@ public class RestService {
 								@PathParam(DOCUMENT_PATH_PARAM) String document,
 								@QueryParam("start") int start,
 								@QueryParam("end") int end) throws Throwable {
-		response.setContentType(MediaType.APPLICATION_XML);
+		EXT.getHttpServletRespsone().setContentType(MediaType.APPLICATION_XML);
 		return retrieve(module, document, start, end);
 	}
 */
@@ -400,6 +407,7 @@ public class RestService {
 	@GET
 	@Path("/json/query/{module}/{documentOrQuery}")
 	@Produces(MediaType.APPLICATION_JSON)
+	@SuppressWarnings("static-method")
 	public @Nullable String query(@PathParam(MODULE_PATH_PARAM) @Nonnull String module,
 									@PathParam("documentOrQuery") @Nonnull String documentOrQuery,
 									@QueryParam("start") int start,
@@ -408,6 +416,7 @@ public class RestService {
 		
 		Persistence p = null;
 		try {
+			HttpServletResponse response = EXT.getHttpServletRespsone();
 			response.setContentType(MediaType.APPLICATION_JSON);
 			p = CORE.getPersistence();
 			User u = p.getUser();
@@ -473,6 +482,7 @@ public class RestService {
 		byte[] result = null;
 		
 		try {
+			HttpServletResponse response = EXT.getHttpServletRespsone();
 			try (ContentManager cm = EXT.newContentManager()) {
 				AttachmentContent content = cm.getAttachment(contentId);
 				
@@ -540,7 +550,8 @@ public class RestService {
 											@PathParam("contentType") @Nonnull String contentType,
 											@Nonnull String encodedContent) {
 		try {
-			response.setContentType(MediaType.APPLICATION_JSON);
+			HttpServletResponse response = EXT.getHttpServletRespsone();
+			response.setContentType(MediaType.TEXT_PLAIN);
 			final User u = CORE.getUser();
 			if (! u.canAccessContent(id,
 										module,
@@ -605,8 +616,8 @@ public class RestService {
 	 * @param context a human-readable description of the failing REST operation for structured logging
 	 * @param t the unexpected failure that triggered the REST error response
 	 */
-	private void handleUnexpectedRestError(@Nullable Persistence persistence, @Nonnull String context, @Nonnull Throwable t) {
+	private static void handleUnexpectedRestError(@Nullable Persistence persistence, @Nonnull String context, @Nonnull Throwable t) {
 		String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, context, t);
-		AbstractRestFilter.error(persistence, response, WebErrorUtil.genericMessage(reference));
+		AbstractRestFilter.error(persistence, EXT.getHttpServletRespsone(), WebErrorUtil.genericMessage(reference));
 	}
 }

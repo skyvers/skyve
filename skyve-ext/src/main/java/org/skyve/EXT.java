@@ -126,9 +126,9 @@ import jakarta.servlet.http.HttpServletResponse;
  * @see org.skyve.CORE
  */
 public class EXT {
-
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(EXT.class);
-	private static final String WITH_BINDING = " with binding ";
+
+    private static final String WITH_BINDING = " with binding ";
 	private static final String WITH_UX_UI = " with UX/UI ";
 	private static final String NAMED = " named ";
 

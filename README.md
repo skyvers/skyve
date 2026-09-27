@@ -121,9 +121,11 @@ Using Skyve Foundry to create your project will not prevent you deploying the ap
 
 These instructions assume the use of Eclipse with the JBoss Server Tools plugin installed, and Wildfly as the application server.
 
-* Install a Java 11+ JDK for your operating system.
+* Install a Java 17+ JDK for your operating system (Java 21 is recommended for WildFly).
 * Install Eclipse or an alternative Java based Integrated Development Environment.
-* Install JBoss Wildfly - Our instructions are for Wildfly 20+ - you may be able to use older versions and other application servers if you're familiar with configuration.
+* Install a Jakarta EE 11 application server, such as the standard WildFly 41 distribution.
+
+See [Migrating to Jakarta EE 11](docs/jakarta-ee-11-migration.md) when upgrading an existing application.
 
 ### Creating your project using Skyve Foundry
 * Go to https://foundry.skyve.org/foundry and register for an account

@@ -382,6 +382,12 @@
 	</build>
 
 	<dependencies>
+		<!-- The EE 11 server supplies the platform APIs, including their transitive API JARs. -->
+		<dependency>
+			<groupId>jakarta.platform</groupId>
+			<artifactId>jakarta.jakartaee-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.skyve</groupId>
 			<artifactId>skyve-web</artifactId>

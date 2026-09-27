@@ -1,5 +1,6 @@
 package org.skyve.impl.web.service.sse;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -187,6 +188,8 @@ public class SseClientHandler implements PushMessageReceiver {
 
 			// Loop and send
 			sendMessageLoop(sink);
+		} catch (IOException e) {
+			logSendFailure(e);
 		} finally {
 			cleanupAndClose();
 			LOGGER.debug("Closing stream to {}", userName);
@@ -403,7 +406,7 @@ public class SseClientHandler implements PushMessageReceiver {
 
 	/**
 	 * Attempts to close the given {@link SseEventSink}, swallowing any
-	 * {@link RuntimeException} that may be thrown if the sink is already closed
+	 * {@link IOException} or {@link RuntimeException} thrown if the sink is already closed
 	 * or the underlying connection has been reset.
 	 *
 	 * @param sink the sink to close
@@ -412,7 +415,7 @@ public class SseClientHandler implements PushMessageReceiver {
 		try {
 			sink.close();
 		}
-		catch (RuntimeException e) {
+		catch (IOException | RuntimeException e) {
 			LOGGER.atTrace()
 					.setMessage("Closing stream to {} failed: {}")
 					.addArgument(userName)

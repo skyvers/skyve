@@ -1442,7 +1442,7 @@ public class FacesView extends HarnessView {
 				byte[] signature = ImageUtil.signature(json, width, height, rgbHexBackgroundColour, rgbHexForegroundColour);
 				// Add to content
 				// NB This handles compound bindings and checks for content access on the content owning bean
-				AttachmentContent content = FacesContentUtil.handleFileUpload(signature, MimeType.png.toString(), bean, BindUtil.unsanitiseBinding(binding));
+				AttachmentContent content = FacesContentUtil.handleFileUpload(signature, MimeType.png.toString(), bean, unsanitisedContentBinding);
 				// Set the content attribute
 				String contentId = Objects.requireNonNull(content.getContentId(), "contentId");
 				BindUtil.set(bean, unsanitisedContentBinding, contentId);
@@ -1552,6 +1552,8 @@ public class FacesView extends HarnessView {
 	 * the form column/row contract in the skyve view metadata.
 	 * This method is called within the div styleClass attribute
 	 * in form layouts.
+	 * Repeated evaluations for the same component within a request reuse its style,
+	 * so renderer attribute reads do not advance the form grid more than once.
 	 *
 	 * @param formIndex form index to resolve
 	 * @param alignment optional alignment CSS class suffix
@@ -1560,8 +1562,21 @@ public class FacesView extends HarnessView {
 	 */
 	@SuppressWarnings({"unchecked", "static-method"})
 	public String getResponsiveFormStyle(int formIndex, String alignment, int colspan) {
-		List<ResponsiveFormGrid> formStyles = (List<ResponsiveFormGrid>) FacesContext.getCurrentInstance().getViewRoot().getAttributes().get(FacesUtil.FORM_STYLES_KEY);
-		String result = formStyles.get(formIndex).getStyle(colspan);
+		FacesContext context = FacesContext.getCurrentInstance();
+		UIComponent component = UIComponent.getCurrentComponent(context);
+		// Use a unique key to ensure repeated call idempotencym(per request).
+		String cacheKey = (component == null) ? 
+							null : 
+							FacesUtil.FORM_STYLES_KEY + ':' + formIndex + ':' + component.getClientId(context) + ':' + colspan;
+		Map<Object, Object> requestAttributes = context.getAttributes();
+		String result = (cacheKey == null) ? null : (String) requestAttributes.get(cacheKey);
+		if (result == null) {
+			List<ResponsiveFormGrid> formStyles = (List<ResponsiveFormGrid>) context.getViewRoot().getAttributes().get(FacesUtil.FORM_STYLES_KEY);
+			result = formStyles.get(formIndex).getStyle(colspan);
+			if (cacheKey != null) {
+				requestAttributes.put(cacheKey, result);
+			}
+		}
 		if (alignment != null) {
 			result = String.format("%s %s", result, alignment);
 		}
