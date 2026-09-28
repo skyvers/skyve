@@ -327,6 +327,7 @@ class ResponsiveLayoutBuilderTest {
 		assertTrue(formChildren.contains(rowLayout));
 		// Grid should be added to rowLayout
 		assertTrue(rowChildren.contains(gridDiv));
+		verify(gridDiv).setStyleClass(contains("skyve-form-row"));
 	}
 
 	@Test
@@ -420,6 +421,7 @@ class ResponsiveLayoutBuilderTest {
 		assertTrue(flexChildren.contains(fieldDiv));
 		// widget should be in floatSpan
 		assertTrue(floatChildren.contains(widget));
+		verify(floatSpan).setStyleClass("ui-float-label skyve-floating-label");
 	}
 
 	@Test

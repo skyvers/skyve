@@ -4,6 +4,41 @@ body,html {
 	height: 100%;
 }
 
+/* Floating labels wrap within their field and grow upwards, clear of the control.
+ * The row observer reserves the tallest floated label's height, even for empty fields. */
+.skyve-floating-label > label {
+	right: 0;
+	white-space: normal;
+	overflow-wrap: anywhere;
+}
+.skyve-floating-label > input:focus ~ label,
+.skyve-floating-label > input.ui-state-filled ~ label,
+.skyve-floating-label > textarea:focus ~ label,
+.skyve-floating-label > textarea.ui-state-filled ~ label,
+.skyve-floating-label > .ui-inputwrapper-focus ~ label,
+.skyve-floating-label > .ui-inputwrapper-filled ~ label {
+	top: auto !important;
+	bottom: calc(100% + 4px);
+	margin-top: 0;
+}
+.skyve-floating-label > input:-webkit-autofill ~ label,
+.skyve-floating-label > textarea:-webkit-autofill ~ label {
+	top: auto !important;
+	bottom: calc(100% + 4px);
+	margin-top: 0;
+}
+.skyve-floating-label-measure {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	visibility: hidden;
+	pointer-events: none;
+}
+.skyve-floating-label-measure > label {
+	transition: none !important;
+}
+
 /* Metadata icon and title shared by all PrimeFaces layout themes. */
 .skyve-title {
 	display: inline-flex;

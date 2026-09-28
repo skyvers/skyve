@@ -254,7 +254,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 		}
 
 		HtmlPanelGroup grid = panelGroup(false, false, true, null, null);
-		grid.setStyleClass(UtilImpl.PRIMEFLEX ? "p-grid" : "ui-g");
+		grid.setStyleClass(UtilImpl.PRIMEFLEX ? "p-grid skyve-form-row" : "ui-g skyve-form-row");
 		rowLayout.getChildren().add(grid);
 		formLayout.getChildren().add(rowLayout);
 
@@ -403,7 +403,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 				fieldDiv.setStyle("width:100%");
 			}
 			HtmlPanelGroup floatSpan = panelGroup(false, false, false, null, null);
-			floatSpan.setStyleClass("ui-float-label");
+			floatSpan.setStyleClass("ui-float-label skyve-floating-label");
 			fieldDiv.getChildren().add(floatSpan);
 			List<UIComponent> floatSpanChildren = floatSpan.getChildren();
 			floatSpanChildren.add(formItemComponent);

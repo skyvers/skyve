@@ -1014,6 +1014,222 @@ SKYVE.PF = function() {
 	};
 }();
 
+// Reserve label space per visual form row. Hidden measurement labels stay floated so
+// focusing an empty field does not change row height. No polling or per-keystroke work.
+(function() {
+	var rows = new Map();
+	var dirtyRows = new Set();
+	var frame = null;
+	var observedSizes = new WeakMap();
+	var owners = new WeakMap();
+	var resizeObserver = new ResizeObserver(function(entries) {
+		entries.forEach(function(entry) {
+			var previous = observedSizes.get(entry.target);
+			var width = entry.contentRect.width;
+			// Padding can change row/cell height; only label height is an input.
+			var height = entry.target.tagName === 'LABEL' ? entry.contentRect.height : 0;
+			if (!previous || previous.width !== width || previous.height !== height) {
+				observedSizes.set(entry.target, {width: width, height: height});
+				schedule(owners.get(entry.target));
+			}
+		});
+	});
+
+	function schedule(row) {
+		if (row) {
+			dirtyRows.add(row);
+		}
+		if (frame === null && dirtyRows.size) {
+			frame = requestAnimationFrame(updateRows);
+		}
+	}
+
+	function updateRows() {
+		frame = null;
+		var changes = [];
+		// Complete all geometry reads before writing any padding.
+		dirtyRows.forEach(function(row) {
+			var state = rows.get(row);
+			if (!state || !row.isConnected || !row.getClientRects().length) {
+				return;
+			}
+			var lines = new Map();
+			state.cells.forEach(function(originalPadding, cell) {
+				if (!cell.getClientRects().length) {
+					return;
+				}
+				var top = cell.offsetTop;
+				var line = lines.get(top);
+				if (!line) {
+					line = {height: 0, cells: []};
+					lines.set(top, line);
+				}
+				line.cells.push({cell: cell, padding: originalPadding});
+			});
+			state.fields.forEach(function(field) {
+				if (field.label.getClientRects().length) {
+					var line = lines.get(field.cell.offsetTop);
+					if (line) {
+						line.height = Math.max(line.height, 16, Math.ceil(field.measure.getBoundingClientRect().height + 4));
+					}
+				}
+			});
+			lines.forEach(function(line) {
+				line.cells.forEach(function(item) {
+					changes.push({cell: item.cell, padding: line.height ? line.height + 'px' : item.padding});
+				});
+			});
+		});
+		dirtyRows.clear();
+		changes.forEach(function(change) {
+			if (change.cell.style.paddingTop !== change.padding) {
+				change.cell.style.paddingTop = change.padding;
+			}
+		});
+	}
+
+	function removeField(field) {
+		resizeObserver.unobserve(field.measure);
+		field.measure.parentElement.remove();
+	}
+
+	function registerRow(row, records) {
+		var state = rows.get(row);
+		if (!state) {
+			state = {cells: new Map(), fields: new Map(), observer: new MutationObserver(function(mutations) {
+				// Ignore our hidden mirrors, including their insertion and removal.
+				var changes = mutations.filter(function(mutation) {
+					var target = mutation.target.nodeType === 1 ? mutation.target : mutation.target.parentElement;
+					if (!target || target.closest('.skyve-floating-label-measure')) {
+						return false;
+					}
+					if (mutation.type === 'attributes' || target.closest('.skyve-floating-label > label')) {
+						return true;
+					}
+					// Ignore editing inside controls; only field/cell structure affects registration.
+					return mutation.type === 'childList' && Array.from(mutation.addedNodes).concat(Array.from(mutation.removedNodes)).some(function(node) {
+						return node.nodeType === 1 && !node.classList.contains('skyve-floating-label-measure') &&
+							(target === row || node.matches('.field, .skyve-floating-label, label') || node.querySelector('.field > .skyve-floating-label'));
+					});
+				});
+				if (changes.length) {
+					// Class/style changes usually only need geometry recalculation.
+					if (changes.some(function(change) {
+						return change.type !== 'attributes' || change.target.closest('label') ||
+							state.fields.has(change.target) || change.target.matches('.field, .skyve-floating-label');
+					})) {
+						registerRow(row, changes);
+					}
+					schedule(row);
+				}
+			})};
+			rows.set(row, state);
+			owners.set(row, row);
+			resizeObserver.observe(row);
+			state.observer.observe(row, {childList: true, characterData: true, subtree: true,
+				attributes: true, attributeFilter: ['class', 'style', 'hidden']});
+		}
+		var fields = new Set();
+		var changed = false;
+		state.cells.forEach(function(padding, cell) {
+			if (cell.parentElement !== row) {
+				resizeObserver.unobserve(cell);
+				cell.style.paddingTop = padding;
+				state.cells.delete(cell);
+				changed = true;
+			}
+		});
+		Array.from(row.children).forEach(function(cell) {
+			if (!state.cells.has(cell)) {
+				state.cells.set(cell, cell.style.paddingTop);
+				owners.set(cell, row);
+				resizeObserver.observe(cell);
+				changed = true;
+			}
+			cell.querySelectorAll('.field > .skyve-floating-label').forEach(function(span) {
+				if (span.closest('.skyve-form-row') !== row) {
+					return;
+				}
+				var label = span.querySelector(':scope > label');
+				if (!label) {
+					return;
+				}
+				fields.add(span);
+				var field = state.fields.get(span);
+				if (field && field.label === label && field.cell === cell &&
+					!(records || []).some(function(record) { return label.contains(record.target); })) {
+					return;
+				}
+				if (field) {
+					removeField(field);
+				}
+				var mirror = document.createElement('span');
+				mirror.className = 'ui-float-label skyve-floating-label skyve-floating-label-measure';
+				mirror.setAttribute('aria-hidden', 'true');
+				mirror.inert = true;
+				var filled = document.createElement('span');
+				filled.className = 'ui-inputwrapper-filled';
+				mirror.appendChild(filled);
+				var measure = label.cloneNode(true);
+				measure.removeAttribute('id');
+				measure.removeAttribute('for');
+				measure.querySelectorAll('[id]').forEach(function(element) {
+					element.removeAttribute('id');
+				});
+				mirror.appendChild(measure);
+				span.appendChild(mirror);
+				state.fields.set(span, {cell: cell, label: label, measure: measure});
+				owners.set(measure, row);
+				resizeObserver.observe(measure);
+				changed = true;
+			});
+		});
+		state.fields.forEach(function(field, span) {
+			if (!fields.has(span)) {
+				removeField(field);
+				state.fields.delete(span);
+				changed = true;
+			}
+		});
+		if (changed) {
+			schedule(row);
+		}
+	}
+
+	function registerRows() {
+		rows.forEach(function(state, row) {
+			if (!row.isConnected) {
+				state.observer.disconnect();
+				resizeObserver.unobserve(row);
+				state.cells.forEach(function(padding, cell) {
+					resizeObserver.unobserve(cell);
+					cell.style.paddingTop = padding;
+				});
+				state.fields.forEach(removeField);
+				rows.delete(row);
+				dirtyRows.delete(row);
+			}
+		});
+		document.querySelectorAll('.skyve-form-row').forEach(function(row) {
+			// Side-label-only rows need no observers or measurements.
+			if (rows.has(row) || row.querySelector('.field > .skyve-floating-label')) {
+				registerRow(row);
+			}
+		});
+	}
+
+	function start() {
+		registerRows();
+		$(document).on('pfAjaxComplete', registerRows);
+	}
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', start);
+	}
+	else {
+		start();
+	}
+})();
+
 // Keep Skyve DataGrids as tables while their columns and rendered content fit.
 // Observe the containing column rather than the table: switching to cards changes table width.
 (function() {
