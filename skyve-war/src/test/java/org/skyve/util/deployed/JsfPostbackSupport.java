@@ -1,4 +1,4 @@
-package util.deployed;
+package org.skyve.util.deployed;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;

@@ -1,4 +1,4 @@
-package util;
+package org.skyve.util;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -25,6 +25,8 @@ import modules.test.domain.AllAttributesPersistent;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
+
+import util.AbstractH2Test;
 
 /**
  * Tier 0 — Pipeline smoke tests (upgrade gate).

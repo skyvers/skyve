@@ -1,4 +1,4 @@
-package util;
+package org.skyve.util;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -15,6 +15,8 @@ import org.skyve.persistence.Persistence;
 import org.skyve.impl.generate.jasperreports.BeanForReport;
 
 import modules.test.domain.AllAttributesPersistent;
+
+import util.AbstractH2Test;
 
 class BeanForReportH2Test extends AbstractH2Test {
 

@@ -1,4 +1,4 @@
-package util;
+package org.skyve.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -19,6 +19,8 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 
 import modules.test.domain.AllAttributesPersistent;
+
+import util.AbstractH2Test;
 
 /**
  * H2-backed tests for {@link BindUtil} methods that require a real

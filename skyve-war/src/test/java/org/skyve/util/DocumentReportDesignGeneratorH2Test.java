@@ -1,4 +1,4 @@
-package util;
+package org.skyve.util;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -13,6 +13,8 @@ import org.skyve.impl.generate.jasperreports.DocumentReportDesignGenerator;
 import org.skyve.impl.generate.jasperreports.ReportDesignGeneratorFactory;
 
 import modules.test.domain.AllAttributesPersistent;
+
+import util.AbstractH2Test;
 
 class DocumentReportDesignGeneratorH2Test extends AbstractH2Test {
 

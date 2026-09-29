@@ -23,12 +23,12 @@ import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
 
-import util.deployed.DeployedBrowser;
-import util.deployed.DeployedCorrelation;
-import util.deployed.DeployedDiagnostics;
-import util.deployed.DeployedProbeClient;
-import util.deployed.DeployedTestConfiguration;
-import util.deployed.JsfPostbackSupport;
+import org.skyve.util.deployed.DeployedBrowser;
+import org.skyve.util.deployed.DeployedCorrelation;
+import org.skyve.util.deployed.DeployedDiagnostics;
+import org.skyve.util.deployed.DeployedProbeClient;
+import org.skyve.util.deployed.DeployedTestConfiguration;
+import org.skyve.util.deployed.JsfPostbackSupport;
 
 /** Exercises the deployed request, Mojarra state and UX/UI-selection lifecycle. */
 @SuppressWarnings("java:S1192") // Repeated literals document observable lifecycle outcomes.

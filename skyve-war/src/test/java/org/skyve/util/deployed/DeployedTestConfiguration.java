@@ -1,4 +1,4 @@
-package util.deployed;
+package org.skyve.util.deployed;
 
 import java.net.URI;
 import java.time.Duration;

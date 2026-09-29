@@ -1,4 +1,4 @@
-package util;
+package org.skyve.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -12,6 +12,8 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.persistence.Persistence;
 
 import modules.test.domain.AllAttributesPersistent;
+
+import util.AbstractH2Test;
 
 /**
  * H2-backed tests for BindUtil collection manipulation methods that require

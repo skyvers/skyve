@@ -414,7 +414,7 @@ that needs protected credentials must be limited to trusted events and cannot be
 fork-pull-request check.
 
 To add another deployed suite, place its test in `skyve-war/src/test/java` with an `IT` suffix,
-reuse `util.deployed`, and keep feature vocabulary and hooks in its overlay adapter. Do not copy
+reuse `org.skyve.util.deployed`, and keep feature vocabulary and hooks in its overlay adapter. Do not copy
 the Maven profile, scripts, transport, or workflow. SAIL is a future consumer of this contract;
 migrating existing SAIL suites is outside the Skyve 10 theme change.
 

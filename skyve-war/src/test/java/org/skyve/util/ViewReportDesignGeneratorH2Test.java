@@ -1,4 +1,4 @@
-package util;
+package org.skyve.util;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -16,6 +16,8 @@ import modules.admin.domain.ReportParameter;
 import modules.admin.domain.Snapshot;
 import modules.test.domain.ArcOneToMany;
 import modules.test.domain.ArcOneToOne;
+
+import util.AbstractH2Test;
 
 /**
  * H2-backed tests for {@link ViewReportDesignGenerator} and {@link org.skyve.impl.generate.jasperreports.ReportViewVisitor}.

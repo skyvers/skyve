@@ -1,4 +1,4 @@
-package util.deployed;
+package org.skyve.util.deployed;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;

@@ -1,4 +1,4 @@
-package util;
+package org.skyve.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -23,6 +23,8 @@ import org.skyve.impl.bizport.DataFileField.LoadAction;
 import org.skyve.impl.bizport.POISheetLoader;
 
 import modules.test.domain.AllAttributesPersistent;
+
+import util.AbstractH2Test;
 
 /**
  * H2-backed tests for AbstractDataFileLoader, CSVLoader, and POISheetLoader.

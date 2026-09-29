@@ -1,4 +1,4 @@
-package util;
+package org.skyve.util;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
@@ -22,6 +22,8 @@ import org.skyve.impl.report.freemarker.FreemarkerReportUtil;
 import org.skyve.impl.report.freemarker.SkyveDatastoreTemplateLoader;
 
 import modules.test.domain.AllAttributesPersistent;
+
+import util.AbstractH2Test;
 
 /**
  * H2-backed tests for FreemarkerReportUtil and related freemarker directive classes.

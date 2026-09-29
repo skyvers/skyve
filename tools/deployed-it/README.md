@@ -96,7 +96,7 @@ transport provides:
 - ordered generic event documents with no feature vocabulary.
 
 A new suite lives in the standard `skyve-war/src/test/java` tree and ends in `IT`. It should reuse
-`util.deployed` for configuration, browser login/logout, view-state extraction, normal and
+`org.skyve.util.deployed` for configuration, browser login/logout, view-state extraction, normal and
 PrimeFaces Ajax postbacks, probe correlation, and redacted diagnostics. Feature-specific event
 names, hooks, fixtures, and assertions belong to that suite's overlay adapter, never the generic
 transport, Maven profile, scripts, or workflow.

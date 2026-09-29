@@ -544,6 +544,7 @@ class WebUtilH2Test extends AbstractH2Test {
 					Configuration.DOCUMENT_NAME);
 			configuration.getStartup().setMapLayer(StartupBizlet.MAP_LAYER_GMAP);
 			configuration.getStartup().setMailPort(Integer.valueOf(25));
+			configuration.setPasswordMinLength(Integer.valueOf(ConfigurationExtension.PASSWORD_DEFAULT_MIN_LENGTH));
 			configuration.setPasswordResetTokenExpiryMinutes(Integer.valueOf(minutes));
 			CORE.getPersistence().save(configuration);
 			CORE.getPersistence().commit(false);

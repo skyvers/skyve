@@ -1,4 +1,4 @@
-package util;
+package org.skyve.util;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -19,6 +19,8 @@ import modules.test.domain.AllAttributesPersistent;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRField;
 import net.sf.jasperreports.engine.design.JRDesignField;
+
+import util.AbstractH2Test;
 
 class SkyveDataSourceH2Test extends AbstractH2Test {
 

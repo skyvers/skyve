@@ -28,7 +28,7 @@ HTML reports: `skyve-core/target/site/jacoco/index.html` and `skyve-coverage/tar
 |---|---|---|
 | Pure Java (no persistence, no metadata loading) | `skyve-core/src/test/java/` | Plain JUnit 5 or `@ExtendWith(MockitoExtension.class)` |
 | Needs a live H2 session or `CORE.getPersistence()` | `skyve-war/src/test/java/modules/test/` | `AbstractSkyveTest` (truncate) or `AbstractSkyveTestDispose` (dispose) |
-| Needs persistence but no rich domain graph | `skyve-war/src/test/java/util/` | `AbstractH2Test` |
+| Needs persistence but no rich domain graph | `skyve-war/src/test/java/org/skyve/` | `AbstractH2Test` |
 
 Tests written in `skyve-war` that call `skyve-core` classes contribute to `skyve-core` coverage in the JaCoCo aggregate report. Use this freely for anything requiring H2; the coverage credits flow correctly.
 
@@ -119,7 +119,7 @@ must run only on trusted events and cannot be a required fork-pull-request check
 To add a suite:
 
 1. Add a standard `*IT` class under `skyve-war/src/test/java`.
-2. Reuse `util.deployed` for configuration, browser lifecycle, authentication, postbacks, probe
+2. Reuse `org.skyve.util.deployed` for configuration, browser lifecycle, authentication, postbacks, probe
    correlation, and redacted diagnostics.
 3. Put feature event vocabulary, hooks, fixtures, and assertions in the suite-specific overlay
    adapter; keep the generic transport feature-neutral.
