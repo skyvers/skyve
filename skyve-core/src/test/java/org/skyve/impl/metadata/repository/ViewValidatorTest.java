@@ -1,7 +1,12 @@
 package org.skyve.impl.metadata.repository;
 
+import java.util.Set;
+import org.skyve.impl.util.UtilImpl;
+import org.skyve.metadata.user.UserAccess;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -9,6 +14,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -3721,4 +3728,277 @@ class ViewValidatorTest {
 		ViewValidator v = newValidator();
 		assertThrows(MetaDataException.class, v::visit);
 	}
+	private LookupDescription modelLookup() {
+		addAssociation("contact", "ContactDoc", "unusedReferenceQuery");
+		addTargetDocument("ContactDoc", null);
+		LookupDescription lookup = new LookupDescription();
+		lookup.setBinding("contact");
+		lookup.setDescriptionBinding(Bean.BIZ_KEY);
+		lookup.setModelName("ContactsModel");
+		return lookup;
+	}
+
+	@Test
+	void lookupModelResolvesAgainstEnclosingDocument() {
+		LookupDescription lookup = modelLookup();
+		ListModel<Bean> model = mock(ListModel.class);
+		when(repository.getListModel(customer, document, "ContactsModel", false)).thenReturn(model);
+		DocumentImpl target = (DocumentImpl) module.getDocument(customer, "ContactDoc");
+		when(model.getDrivingDocument()).thenReturn(target);
+		when(model.getColumns()).thenReturn(List.of());
+		assertDoesNotThrow(() -> newValidator().visitLookupDescription(lookup, true, true));
+		verify(module, never()).getNullSafeMetaDataQuery(anyString());
+	}
+
+	@Test
+	void lookupRejectsQueryAndModelTogether() {
+		LookupDescription lookup = modelLookup();
+		lookup.setQuery("contacts");
+		MetaDataException failure = assertThrows(MetaDataException.class,
+				() -> newValidator().visitLookupDescription(lookup, true, true));
+		assertTrue(failure.getMessage().contains("query and a model"));
+	}
+
+	@Test
+	void lookupRejectsMissingModel() {
+		LookupDescription lookup = modelLookup();
+		MetaDataException failure = assertThrows(MetaDataException.class,
+				() -> newValidator().visitLookupDescription(lookup, true, true));
+		assertTrue(failure.getMessage().contains("ContactsModel"));
+	}
+
+	@Test
+	void lookupRejectsModelWithoutDrivingDocument() {
+		LookupDescription lookup = modelLookup();
+		when(repository.getListModel(customer, document, "ContactsModel", false)).thenReturn(mock(ListModel.class));
+		MetaDataException failure = assertThrows(MetaDataException.class,
+				() -> newValidator().visitLookupDescription(lookup, true, true));
+		assertTrue(failure.getMessage().contains("driving document"));
+	}
+
+	@Test
+	void lookupRejectsModelForDifferentDocument() {
+		LookupDescription lookup = modelLookup();
+		ListModel<Bean> model = mock(ListModel.class);
+		when(repository.getListModel(customer, document, "ContactsModel", false)).thenReturn(model);
+		when(model.getDrivingDocument()).thenReturn(document);
+		MetaDataException failure = assertThrows(MetaDataException.class,
+				() -> newValidator().visitLookupDescription(lookup, true, true));
+		assertTrue(failure.getMessage().contains("target document"));
+	}
+
+	@Test
+	void lookupRejectsUnprojectedModelDropdownColumn() {
+		LookupDescription lookup = modelLookup();
+		LookupDescriptionColumn dropdown = new LookupDescriptionColumn();
+		dropdown.setName("name");
+		lookup.getDropDownColumns().add(dropdown);
+		ListModel<Bean> model = mock(ListModel.class);
+		when(repository.getListModel(customer, document, "ContactsModel", false)).thenReturn(model);
+		DocumentImpl target = (DocumentImpl) module.getDocument(customer, "ContactDoc");
+		when(model.getDrivingDocument()).thenReturn(target);
+		MetaDataQueryProjectedColumn column = mock(MetaDataQueryProjectedColumn.class);
+		when(column.getName()).thenReturn("name");
+		when(model.getColumns()).thenReturn(List.of(column));
+		MetaDataException failure = assertThrows(MetaDataException.class,
+				() -> newValidator().visitLookupDescription(lookup, true, true));
+		assertTrue(failure.getMessage().contains("not projected"));
+	}
+
+	@Test
+	void lookupDerivesModelAccessAndPreservesSingularAccess() {
+		LookupDescription lookup = modelLookup();
+		view.getContained().add(lookup);
+		when(module.getName()).thenReturn("testMod");
+		newValidator(); // Consume the shared repository setup before exercising access derivation.
+		boolean accessControl = UtilImpl.ACCESS_CONTROL;
+		try {
+			UtilImpl.ACCESS_CONTROL = true;
+			view.resolve("desktop", customer, module, document, true);
+			Set<UserAccess> accesses = view.getAccesses(customer, document, "desktop");
+			assertTrue(accesses.contains(UserAccess.modelAggregate("testMod", "TestDoc", "ContactsModel")));
+			assertTrue(accesses.contains(UserAccess.singular("testMod", "ContactDoc")));
+			assertFalse(accesses.contains(UserAccess.queryAggregate("testMod", "unusedReferenceQuery")));
+			assertFalse(accesses.contains(UserAccess.documentAggregate("testMod", "ContactDoc")));
+		}
+		finally {
+			UtilImpl.ACCESS_CONTROL = accessControl;
+		}
+	}
+
+	@Test
+	void lookupModelInGridUsesCompoundBindingAndViewOwner() {
+		LookupDescription lookup = modelLookup();
+		addChildDoc("ItemDoc", document.getAttribute("contact"));
+		addDataGrid("items", lookup);
+		ListModel<Bean> model = mock(ListModel.class);
+		when(repository.getListModel(customer, document, "ContactsModel", false)).thenReturn(model);
+		DocumentImpl target = (DocumentImpl) module.getDocument(customer, "ContactDoc");
+		when(model.getDrivingDocument()).thenReturn(target);
+		when(model.getColumns()).thenReturn(List.of());
+		assertDoesNotThrow(newValidator()::visit);
+		verify(repository, org.mockito.Mockito.atLeastOnce()).getListModel(customer, document, "ContactsModel", false);
+	}
+
+	@Test
+	void lookupModelWithoutBindingInGridUsesCollectionTarget() {
+		DocumentImpl child = addChildDoc("ItemDoc", null);
+		LookupDescription lookup = new LookupDescription();
+		lookup.setDescriptionBinding(Bean.BIZ_KEY);
+		lookup.setModelName("ItemsModel");
+		addDataGrid("items", lookup);
+		ListModel<Bean> model = mock(ListModel.class);
+		when(repository.getListModel(customer, document, "ItemsModel", false)).thenReturn(model);
+		when(model.getDrivingDocument()).thenReturn(child);
+		when(model.getColumns()).thenReturn(List.of());
+		assertDoesNotThrow(newValidator()::visit);
+	}
+
+	@Test
+	void lookupRejectsSameNamedModelDocumentInDifferentModule() {
+		LookupDescription lookup = modelLookup();
+		DocumentImpl other = new DocumentImpl();
+		other.setName("ContactDoc");
+		other.setOwningModuleName("otherModule");
+		ListModel<Bean> model = mock(ListModel.class);
+		when(repository.getListModel(customer, document, "ContactsModel", false)).thenReturn(model);
+		when(model.getDrivingDocument()).thenReturn(other);
+		MetaDataException failure = assertThrows(MetaDataException.class,
+				() -> newValidator().visitLookupDescription(lookup, true, true));
+		assertTrue(failure.getMessage().contains("target document"));
+	}
+
+	@Test
+	void lookupWithoutQueryOrModelUsesAssociationQuery() {
+		LookupDescription lookup = modelLookup();
+		lookup.setModelName(null);
+		stubLookupQuery("unusedReferenceQuery", (DocumentImpl) module.getDocument(customer, "ContactDoc"));
+		assertDoesNotThrow(() -> newValidator().visitLookupDescription(lookup, true, true));
+		verify(module).getNullSafeMetaDataQuery("unusedReferenceQuery");
+		verify(repository, never()).getListModel(any(), any(), anyString(), org.mockito.ArgumentMatchers.anyBoolean());
+	}
+
+	@Test
+	void lookupWithoutQueryOrModelInGridUsesDefaultQuery() {
+		DocumentImpl child = addChildDoc("ItemDoc", null);
+		MetaDataQueryDefinition query = mock(MetaDataQueryDefinition.class);
+		when(module.getDocumentDefaultQuery(customer, child.getName())).thenReturn(query);
+		when(query.getColumns()).thenReturn(List.of());
+		LookupDescription lookup = new LookupDescription();
+		lookup.setDescriptionBinding(Bean.BIZ_KEY);
+		addDataGrid("items", lookup);
+		assertDoesNotThrow(newValidator()::visit);
+		verify(module).getDocumentDefaultQuery(customer, "ItemDoc");
+	}
+
+	@Test
+	void lookupWithoutQueryOrModelInGridUsesNestedAssociationQuery() {
+		LookupDescription lookup = modelLookup();
+		lookup.setModelName(null);
+		addChildDoc("ItemDoc", document.getAttribute("contact"));
+		addDataGrid("items", lookup);
+		stubLookupQuery("unusedReferenceQuery", (DocumentImpl) module.getDocument(customer, "ContactDoc"));
+		assertDoesNotThrow(newValidator()::visit);
+		verify(module).getNullSafeMetaDataQuery("unusedReferenceQuery");
+	}
+
+	@Test
+	void lookupModelAcceptsProjectedDescriptionAndDropdownByBinding() {
+		LookupDescription lookup = modelLookup();
+		lookup.setDescriptionBinding("name");
+		Text name = new Text();
+		name.setName("name");
+		DocumentImpl target = (DocumentImpl) module.getDocument(customer, "ContactDoc");
+		target.putAttribute(name);
+		LookupDescriptionColumn dropdown = new LookupDescriptionColumn();
+		dropdown.setName("name");
+		lookup.getDropDownColumns().add(dropdown);
+		ListModel<Bean> model = mock(ListModel.class);
+		when(repository.getListModel(customer, document, "ContactsModel", false)).thenReturn(model);
+		when(model.getDrivingDocument()).thenReturn(target);
+		MetaDataQueryProjectedColumn column = mock(MetaDataQueryProjectedColumn.class);
+		when(column.getBinding()).thenReturn("name");
+		when(column.isProjected()).thenReturn(true);
+		when(model.getColumns()).thenReturn(List.of(column));
+		assertDoesNotThrow(() -> newValidator().visitLookupDescription(lookup, true, true));
+	}
+
+	@Test
+	void lookupModelRejectsUnprojectedDescription() {
+		LookupDescription lookup = modelLookup();
+		lookup.setDescriptionBinding("name");
+		Text name = new Text();
+		name.setName("name");
+		DocumentImpl target = (DocumentImpl) module.getDocument(customer, "ContactDoc");
+		target.putAttribute(name);
+		ListModel<Bean> model = mock(ListModel.class);
+		when(repository.getListModel(customer, document, "ContactsModel", false)).thenReturn(model);
+		when(model.getDrivingDocument()).thenReturn(target);
+		MetaDataQueryProjectedColumn column = mock(MetaDataQueryProjectedColumn.class);
+		when(column.getName()).thenReturn("name");
+		when(model.getColumns()).thenReturn(List.of(column));
+		MetaDataException failure = assertThrows(MetaDataException.class,
+				() -> newValidator().visitLookupDescription(lookup, true, true));
+		assertTrue(failure.getMessage().contains("description binding of name which is not projected"));
+	}
+
+	@Test
+	void lookupModelRejectsMissingDropdownColumn() {
+		LookupDescription lookup = modelLookup();
+		LookupDescriptionColumn dropdown = new LookupDescriptionColumn();
+		dropdown.setName("missing");
+		lookup.getDropDownColumns().add(dropdown);
+		ListModel<Bean> model = mock(ListModel.class);
+		when(repository.getListModel(customer, document, "ContactsModel", false)).thenReturn(model);
+		DocumentImpl target = (DocumentImpl) module.getDocument(customer, "ContactDoc");
+		when(model.getDrivingDocument()).thenReturn(target);
+		when(model.getColumns()).thenReturn(List.of());
+		MetaDataException failure = assertThrows(MetaDataException.class,
+				() -> newValidator().visitLookupDescription(lookup, true, true));
+		assertTrue(failure.getMessage().contains("drop down column of missing which is not defined"));
+	}
+
+	@Test
+	void lookupModelRejectsMissingDescriptionColumn() {
+		LookupDescription lookup = modelLookup();
+		lookup.setDescriptionBinding("name");
+		Text name = new Text();
+		name.setName("name");
+		DocumentImpl target = (DocumentImpl) module.getDocument(customer, "ContactDoc");
+		target.putAttribute(name);
+		ListModel<Bean> model = mock(ListModel.class);
+		when(repository.getListModel(customer, document, "ContactsModel", false)).thenReturn(model);
+		when(model.getDrivingDocument()).thenReturn(target);
+		when(model.getColumns()).thenReturn(List.of());
+		MetaDataException failure = assertThrows(MetaDataException.class,
+				() -> newValidator().visitLookupDescription(lookup, true, true));
+		assertTrue(failure.getMessage().contains("description binding of name which is not defined"));
+	}
+
+	@Test
+	void lookupModelRejectsMissingBindingBeforeResolvingModel() {
+		LookupDescription lookup = new LookupDescription();
+		lookup.setModelName("ContactsModel");
+		lookup.setDescriptionBinding(Bean.BIZ_KEY);
+		MetaDataException failure = assertThrows(MetaDataException.class,
+				() -> newValidator().visitLookupDescription(lookup, true, true));
+		assertTrue(failure.getMessage().contains("binding"));
+		verify(repository, never()).getListModel(any(), any(), anyString(), org.mockito.ArgumentMatchers.anyBoolean());
+	}
+
+	@Test
+	void lookupModelWithCompoundFormBindingUsesViewOwner() {
+		LookupDescription lookup = modelLookup();
+		DocumentImpl intermediate = addTargetDocument("IntermediateDoc", document.getAttribute("contact"));
+		addAssociation("intermediate", intermediate.getName(), null);
+		lookup.setBinding("intermediate.contact");
+		ListModel<Bean> model = mock(ListModel.class);
+		when(repository.getListModel(customer, document, "ContactsModel", false)).thenReturn(model);
+		DocumentImpl target = (DocumentImpl) module.getDocument(customer, "ContactDoc");
+		when(model.getDrivingDocument()).thenReturn(target);
+		when(model.getColumns()).thenReturn(List.of());
+		assertDoesNotThrow(() -> newValidator().visitLookupDescription(lookup, true, true));
+		verify(repository, never()).getListModel(customer, intermediate, "ContactsModel", false);
+	}
+
 }

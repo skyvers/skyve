@@ -581,7 +581,10 @@ class TabularComponentBuilderTest {
 													List<org.skyve.metadata.view.widget.FilterParameter> filterParameters,
 													List<org.skyve.metadata.view.widget.bound.Parameter> parameters,
 													Integer pixelWidth,
-													boolean dontDisplay) {
+													boolean dontDisplay,
+													Document owningDocument,
+													String modelName,
+													List<org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn> dropDownColumns) {
 			this.lookupDataWidgetVar = dataWidgetVar;
 			this.lookupBinding = binding;
 			this.lookupTitle = title;
@@ -2336,7 +2339,7 @@ class TabularComponentBuilderTest {
 																	"Required",
 																	HorizontalAlignment.left,
 																	"name",
-																	query);
+																	query, null);
 
 		assertSame(builder.delegatedLookupDescriptionResult, result.getComponent());
 		assertSame(builder.delegatedLookupDescriptionResult, result.getEventSource());
@@ -2603,12 +2606,12 @@ class TabularComponentBuilderTest {
 		assertEquals("tel", passThroughAttributes.get("inputmode"));
 	}
 
-	@Test
-	void testLookupDescriptionUsesBaseLookupDescriptionBuilder() {
+	@org.junit.jupiter.params.ParameterizedTest
+	@org.junit.jupiter.params.provider.ValueSource(booleans = {false, true})
+	void lookupWithoutDropdownColumnsHasNoHeading(boolean modelBacked) {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
-		AutoComplete autoComplete = mock(AutoComplete.class);
-		Map<String, Object> attributes = new HashMap<>();
-		when(autoComplete.getAttributes()).thenReturn(attributes);
+		AutoComplete autoComplete = new AutoComplete();
+		Map<String, Object> attributes = autoComplete.getAttributes();
 
 		FacesView managedBean = mock(FacesView.class);
 		when(managedBean.nextId()).thenReturn("lookupBaseId");
@@ -2621,6 +2624,13 @@ class TabularComponentBuilderTest {
 		LookupDescription lookupDescription = new LookupDescription();
 		lookupDescription.setBinding("customer");
 		lookupDescription.setPixelWidth(Integer.valueOf(240));
+		if (modelBacked) {
+			lookupDescription.setModelName("CustomersModel");
+		}
+
+		Document owningDocument = mock(Document.class);
+		when(owningDocument.getOwningModuleName()).thenReturn("sales");
+		when(owningDocument.getName()).thenReturn("Order");
 
 		QueryDefinition query = mock(QueryDefinition.class);
 		org.skyve.metadata.module.Module module = mock(org.skyve.metadata.module.Module.class);
@@ -2636,13 +2646,123 @@ class TabularComponentBuilderTest {
 													null,
 													HorizontalAlignment.left,
 													"name",
-													query);
+													query, owningDocument);
 
 		assertSame(autoComplete, result.getComponent());
 		assertSame(autoComplete, result.getEventSource());
 		assertEquals("sales", attributes.get("module"));
-		assertEquals("CustomerLookup", attributes.get("query"));
+		assertEquals(modelBacked ? "Order" : null, attributes.get("document"));
+		assertEquals(modelBacked ? "CustomersModel" : null, attributes.get("model"));
+		assertEquals(modelBacked ? null : "CustomerLookup", attributes.get("query"));
 		assertEquals("name", attributes.get("display"));
+		// PrimeFaces renders suggestions as a plain list when there are no Column children.
+		assertTrue(autoComplete.getColums().isEmpty());
+		assertTrue(autoComplete.getFacets().isEmpty());
+		assertFalse(attributes.containsKey("filterFields"));
+	}
+
+	@org.junit.jupiter.params.ParameterizedTest
+	@org.junit.jupiter.params.provider.ValueSource(booleans = {false, true})
+	@SuppressWarnings("boxing")
+	void lookupBuildsColumnsAndHonoursFilterability(boolean queryBacked) {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		AutoComplete autocomplete = new AutoComplete();
+		when(mockApplication.createComponent(AutoComplete.COMPONENT_TYPE)).thenReturn(autocomplete);
+		Map<String, Object> attributes = autocomplete.getAttributes();
+		List<UIComponent> children = autocomplete.getChildren();
+		when(mockApplication.createComponent(Column.COMPONENT_TYPE)).thenAnswer(invocation -> new Column());
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenAnswer(invocation -> new HtmlOutputText());
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(Object.class)))
+				.thenAnswer(invocation -> {
+					ValueExpression expression = mock(ValueExpression.class);
+					when(expression.getExpressionString()).thenReturn(invocation.getArgument(1));
+					return expression;
+				});
+		FacesView faces = mock(FacesView.class);
+		builder.setManagedBeanForTest(faces);
+		java.util.concurrent.atomic.AtomicInteger ids = new java.util.concurrent.atomic.AtomicInteger();
+		when(faces.nextId()).thenAnswer(invocation -> "column" + ids.incrementAndGet());
+		org.skyve.metadata.user.User user = mock(org.skyve.metadata.user.User.class);
+		org.skyve.metadata.customer.Customer customer = mock(org.skyve.metadata.customer.Customer.class);
+		org.skyve.metadata.module.Module module = mock(org.skyve.metadata.module.Module.class);
+		Document document = mock(Document.class);
+		when(document.getOwningModuleName()).thenReturn("sales");
+		when(document.getName()).thenReturn("Order");
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("sales")).thenReturn(module);
+		when(module.getDocument(customer, "Order")).thenReturn(document);
+		ListModel<org.skyve.domain.Bean> model = mockListModel();
+		when(document.getListModel(customer, "Contacts", true)).thenReturn(model);
+		when(model.getDrivingDocument()).thenReturn(document);
+		LookupDescription lookup = new LookupDescription();
+		lookup.setBinding("customer");
+		lookup.setModelName("Contacts");
+		List<org.skyve.metadata.module.query.MetaDataQueryColumn> columns = new ArrayList<>();
+		String[] names = {"name", "email", "disabled", "count", "forced", "variant", "dynamic", "unprojected"};
+		for (String name : names) {
+			MetaDataQueryProjectedColumn column = mock(MetaDataQueryProjectedColumn.class);
+			when(column.getBinding()).thenReturn(name);
+			when(column.isProjected()).thenReturn(Boolean.valueOf(! "unprojected".equals(name)));
+			when(column.isFilterable()).thenReturn(Boolean.TRUE);
+			when(column.isEscape()).thenReturn(Boolean.TRUE);
+			when(model.determineColumnTitle(column)).thenReturn(name);
+			columns.add(column);
+			org.skyve.metadata.model.Attribute attribute = mock(org.skyve.metadata.model.Attribute.class);
+			when(attribute.getAttributeType()).thenReturn("count".equals(name) ? org.skyve.metadata.model.Attribute.AttributeType.integer : org.skyve.metadata.model.Attribute.AttributeType.text);
+			if ("variant".equals(name) || "dynamic".equals(name)) {
+				when(attribute.getDomainType()).thenReturn(org.skyve.metadata.model.document.DomainType.valueOf(name));
+			}
+			org.mockito.Mockito.doReturn(String.class).when(attribute).getImplementingType();
+			when(document.getAttribute(name)).thenReturn(attribute);
+			org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn dropdown = new org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn();
+			dropdown.setName(name);
+			if ("disabled".equals(name)) {
+				dropdown.setFilterable(Boolean.FALSE);
+			}
+			if ("forced".equals(name)) {
+				dropdown.setFilterable(Boolean.TRUE);
+				when(column.isFilterable()).thenReturn(Boolean.FALSE);
+				when(column.getBinding()).thenReturn(null);
+				when(column.getName()).thenReturn(name);
+			}
+			lookup.getDropDownColumns().add(dropdown);
+		}
+		MetaDataQueryProjectedColumn formatted = (MetaDataQueryProjectedColumn) columns.get(0);
+		when(formatted.getCustomFormatterName()).thenReturn("customName");
+		when(formatted.getPixelWidth()).thenReturn(Integer.valueOf(140));
+		when(formatted.getAlignment()).thenReturn(HorizontalAlignment.right);
+		when(model.getColumns()).thenReturn(columns);
+		org.skyve.metadata.module.query.MetaDataQueryDefinition query = null;
+		if (queryBacked) {
+			lookup.setModelName(null);
+			query = mock(org.skyve.metadata.module.query.MetaDataQueryDefinition.class);
+			when(query.getOwningModule()).thenReturn(module);
+			when(module.getName()).thenReturn("sales");
+			when(query.getName()).thenReturn("Contacts");
+			when(query.getDocumentModule(customer)).thenReturn(module);
+			when(query.getDocumentName()).thenReturn("Order");
+			when(query.getColumns()).thenReturn(columns);
+		}
+		AbstractPersistence persistence = mock(AbstractPersistence.class, org.mockito.Mockito.CALLS_REAL_METHODS);
+		AbstractPersistence previous = currentPersistenceIfPresent();
+		when(persistence.getUser()).thenReturn(user);
+		try {
+			persistence.setForThread();
+			builder.lookupDescription(null, "customer", "Customer", null, HorizontalAlignment.left, null, null,
+					"bizKey", query, lookup.getFilterParameters(), lookup.getParameters(), null, false,
+					document, lookup.getModelName(), lookup.getDropDownColumns());
+		}
+		finally {
+			restorePersistence(previous);
+		}
+		assertEquals(List.of("name", "email", "forced", "variant"), attributes.get("filterFields"));
+		assertEquals(7, children.size());
+		Column first = (Column) children.get(0);
+		assertEquals("width:140px;text-align:right;", first.getStyle());
+		HtmlOutputText text = (HtmlOutputText) first.getChildren().get(0);
+		assertTrue(text.isEscape());
+		assertEquals("#{customerRow['{name|customName}']}", text.getValueExpression("value").getExpressionString());
+		assertEquals("bizKey", attributes.get("display"));
 	}
 
 	@Test

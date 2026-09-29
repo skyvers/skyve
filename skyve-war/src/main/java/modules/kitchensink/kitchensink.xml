@@ -17,6 +17,8 @@
 		<document ref="UploadFixture" />
 		<document ref="UploadFixtureGridRow" />
 		<document ref="LookupDescription" />
+		<document ref="ModelLookupFixture" />
+		<document ref="ModelLookupRow" />
 	</documents>
 	<roles>
 		<role name="dev">
@@ -64,6 +66,8 @@
 					<contentPermission attribute="containerColumnContent" />
 				</document>
 				<document name="LookupDescription" permission="CRUDD" />
+				<document name="ModelLookupFixture" permission="CRUDD" />
+				<document name="ModelLookupRow" permission="CRUDD" />
 			</privileges>
 		</role>
 	</roles>
@@ -92,12 +96,31 @@
 		<list name="Lookup values" document="LookupDescription">
 			<role name="dev" />
 		</list>
+		<edit name="Model Lookup Fixture" document="ModelLookupFixture">
+			<role name="dev" />
+		</edit>
 	</menu>
 	<queries>
 		<query name="qEscapingFixture" documentName="ListAttributes">
 			<description>Small query used by the Kitchen Sink escaping fixture view.</description>
 			<columns>
 				<column binding="text" displayName="Text" />
+			</columns>
+		</query>
+		<query name="qModelLookupValues" documentName="LookupDescription">
+			<description>Model lookup values</description>
+			<columns>
+				<column binding="description" displayName="Lookup Description" sortOrder="ascending" />
+				<column binding="bizId" displayName="Record ID" />
+			</columns>
+		</query>
+		<query name="qModelLookupFixtures" documentName="ModelLookupFixture">
+			<description>Saved model lookup selections</description>
+			<columns>
+				<column binding="name" />
+				<column binding="selection" displayName="Selected Lookup" />
+				<column binding="selection.description" displayName="Selected Description" />
+				<column binding="singleSelection.description" displayName="Single-column Selection" />
 			</columns>
 		</query>
 	</queries>

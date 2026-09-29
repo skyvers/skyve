@@ -1199,6 +1199,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param textAlignment the text alignment
 	 * @param displayBinding the display binding
 	 * @param query the lookup query definition
+	 * @param owningDocument document owning the lookup model
 	 * @return the transformed event source component
 	 */
 	@Override
@@ -1210,7 +1211,8 @@ public class ComponentBuilderChain extends ComponentBuilder {
 													@Nullable String requiredMessage,
 													HorizontalAlignment textAlignment,
 													String displayBinding,
-													QueryDefinition query) {
+													QueryDefinition query,
+													Document owningDocument) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.lookupDescription(result,
@@ -1221,7 +1223,8 @@ public class ComponentBuilderChain extends ComponentBuilder {
 												requiredMessage,
 												textAlignment,
 												displayBinding,
-												query);
+												query,
+												owningDocument);
 		}
 		return result;
 	}

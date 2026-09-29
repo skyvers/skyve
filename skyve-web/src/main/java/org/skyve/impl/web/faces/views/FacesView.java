@@ -248,29 +248,28 @@ public class FacesView extends HarnessView {
 	 * Handles postback lifecycle processing including CSRF token checks.
 	 */
 	protected void postBack() {
-		StringBuilder log = new StringBuilder(128);
-		log.append("PostBack - a=").append(getWebActionParameter());
-		log.append(" : m=").append(getBizModuleParameter());
-		log.append(" : d=").append(getBizDocumentParameter());
-		log.append(" : q=").append(getQueryNameParameter());
-		log.append(" : i=").append(getBizIdParameter());
-		LOGGER.info(log.toString());
+		if (LOGGER.isInfoEnabled()) {
+			LOGGER.info("PostBack - a={} : m={} : d={} : q={} : i={}",
+							getWebActionParameter(),
+							getBizModuleParameter(),
+							getBizDocumentParameter(),
+							getQueryNameParameter(),
+							getBizIdParameter());
+		}
 
-		if (! csrfTokenChecked) {
-			if (! FacesUtil.isIgnoreAutoUpdate()) {
-				ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
-				String csrfTokenParameterValue = ec.getRequestParameterMap().get("csrfToken");
-				if (csrfTokenParameterValue != null) {
-					setCsrfToken(csrfTokenParameterValue);
+		if ((! csrfTokenChecked) && (! FacesUtil.isIgnoreAutoUpdate())) {
+			ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
+			String csrfTokenParameterValue = ec.getRequestParameterMap().get("csrfToken");
+			if (csrfTokenParameterValue != null) {
+				setCsrfToken(csrfTokenParameterValue);
+			}
+			else {
+				try {
+					LOGGER.error("No CSRF token detected");
+					ec.redirect(Util.getLoggedOutUrl());
 				}
-				else {
-					try {
-						LOGGER.error("No CSRF token detected");
-						ec.redirect(Util.getLoggedOutUrl());
-					}
-					catch (IOException e) {
-						throw new FacesException("Could not redirect home after CSRF attack", e);
-					}
+				catch (IOException e) {
+					throw new FacesException("Could not redirect home after CSRF attack", e);
 				}
 			}
 		}
@@ -483,9 +482,7 @@ public class FacesView extends HarnessView {
 	 * Navigates into a referenced bean from a data-widget binding and selected biz id.
 	 */
 	public void navigate(String dataWidgetBinding, String bizId) {
-		StringBuilder log = new StringBuilder(128);
-		log.append("FacesView - zoom in to ").append(dataWidgetBinding).append('(').append(bizId).append(')');
-		LOGGER.info(log.toString());
+		LOGGER.info("FacesView - zoom in to {}({})", dataWidgetBinding, bizId);
 		new ZoomInAction(this, dataWidgetBinding, bizId).execute();
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("FacesView - view binding now {}", viewBinding);
 	}
@@ -519,9 +516,7 @@ public class FacesView extends HarnessView {
 	 * Adds a new child row for the supplied data-widget binding.
 	 */
 	public void add(String dataWidgetBinding, boolean inline) {
-		StringBuilder log = new StringBuilder(128);
-		log.append("FacesView - add to ").append(dataWidgetBinding).append((inline ? " inline" : " with zoom"));
-		LOGGER.info(log.toString());
+		LOGGER.info("FacesView - add to {}{}", dataWidgetBinding, inline ? " inline" : " with zoom");
 		new AddAction(this, dataWidgetBinding, inline).execute();
 		if (inline && UtilImpl.FACES_TRACE) LOGGER.info("FacesView - view binding now {}", viewBinding);
 	}
@@ -734,9 +729,7 @@ public class FacesView extends HarnessView {
 				key = String.format("%s.%s", moduleName, documentName);
 			}
 		}
-		SkyveLazyDataModel result = lazyDataModels.get(key);
-
-		if (result == null) {
+		return lazyDataModels.computeIfAbsent(key, cacheKey -> {
 			// Collect the filter parameters from the criteria sent
 			List<FilterParameter> filterParameters = null;
 			List<Parameter> parameters = null;
@@ -760,7 +753,7 @@ public class FacesView extends HarnessView {
 				}
 			}
 
-			result = new SkyveLazyDataModel(this,
+			return new SkyveLazyDataModel(this,
 												moduleName,
 												documentName,
 												queryName,
@@ -768,10 +761,7 @@ public class FacesView extends HarnessView {
 												filterParameters,
 												parameters,
 												true);
-			lazyDataModels.put(key, result);
-		}
-
-		return result;
+		});
 	}
 
 	/**
@@ -788,13 +778,13 @@ public class FacesView extends HarnessView {
 	public void download(String actionName, String dataWidgetBinding, String bizId) {
 		String collectionBinding = UtilImpl.processStringValue(dataWidgetBinding);
 		String elementBizId = UtilImpl.processStringValue(bizId);
-		StringBuilder log = new StringBuilder(128);
-		log.append("FacesView - download action ").append(actionName);
 		if (collectionBinding != null) {
-			log.append(" for data widget ").append(collectionBinding);
-			log.append(" with selected row ").append(elementBizId);
+			LOGGER.info("FacesView - download action {} for data widget {} with selected row {}",
+					actionName, collectionBinding, elementBizId);
 		}
-		LOGGER.info(log.toString());
+		else {
+			LOGGER.info("FacesView - download action {}", actionName);
+		}
 		new ExecuteDownloadAction(this,
 									actionName,
 									collectionBinding,
@@ -1195,10 +1185,7 @@ public class FacesView extends HarnessView {
 		Map<String, Object> attributes = currentComponent.getAttributes();
 		String binding = (String) attributes.get("binding");
 		CompleteType complete = (CompleteType) attributes.get("complete");
-		StringBuilder log = new StringBuilder(128);
-		log.append("FacesView - complete for query '").append(query);
-		log.append("' and binding ").append(binding);
-		LOGGER.info(log.toString());
+		LOGGER.info("FacesView - complete for query '{}' and binding {}", query, binding);
 
 		return new CompleteAction(this, query, binding, complete).execute();
 	}
@@ -1216,11 +1203,10 @@ public class FacesView extends HarnessView {
 		String completeModule = (String) attributes.get("module");
 		String completeDocument = (String) attributes.get("document");
 		String completeQuery = (String) attributes.get("query");
-		// TODO Finish this once we have list models for lookup descriptions
-		// String completeModel = (String) attributes.get("model");
+		String completeModel = (String) attributes.get("model");
 		String displayBinding = (String) attributes.get("display");
 
-		// Take a defensive copy of the parameters collection and add the query to the description binding
+		// Preserve the metadata parameters while applying the typed search separately.
 		@SuppressWarnings("unchecked")
 		List<FilterParameter> filterParameters = (List<FilterParameter>) attributes.get("filterParameters");
 		if (filterParameters == null) {
@@ -1230,29 +1216,36 @@ public class FacesView extends HarnessView {
 			filterParameters = new ArrayList<>(filterParameters);
 		}
 
-		// Add the query parameter if its defined
-		String parameterValue = Util.processStringValue(query);
-		if (parameterValue != null) {
-			FilterParameterImpl displayParameter = new FilterParameterImpl();
-			displayParameter.setFilterBinding(displayBinding);
-			displayParameter.setOperator(FilterOperator.like);
-			displayParameter.setValue(parameterValue);
-			filterParameters.add(displayParameter);
+		@SuppressWarnings("unchecked")
+		List<String> filterFields = (List<String>) attributes.get("filterFields");
+		if ((filterFields == null) || filterFields.isEmpty()) {
+			filterFields = List.of(displayBinding);
 		}
+		String parameterValue = Util.processStringValue(query);
 
 		@SuppressWarnings("unchecked")
 		List<Parameter> parameters = (List<Parameter>) attributes.get("parameters");
 
-		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("FacesView - COMPLETE = {}.{} : {}", completeModule, completeQuery, query);
+		if (UtilImpl.FACES_TRACE) {
+			FACES_LOGGER.info("FacesView - COMPLETE = {}.{} : {}", completeModule, completeQuery, query);
+		}
 
  		List<BeanMapAdapter> result = null;
 
  		// these are ultimately web parameters that may not be present in the request
- 		if ((completeQuery == null) || completeQuery.isEmpty()) {
+		if (((completeQuery == null) || completeQuery.isEmpty()) && (completeModel == null)) {
  			result = new ArrayList<>();
  		}
  		else {
-	 		StringBuilder key = new StringBuilder(64).append(completeModule).append('.').append(completeQuery);
+			StringBuilder key = new StringBuilder(64).append(completeModule).append('.');
+			if (completeModel != null) {
+				key.append(completeDocument).append(".__").append(completeModel);
+			}
+			else {
+				key.append(completeQuery);
+			}
+			// Different lookup configurations must not share cached search results.
+			key.append(".lookup:").append(currentComponent.getClientId()).append(':').append(filterFields).append(':').append(parameterValue);
  			for (FilterParameter parameter : filterParameters) {
  				String valueOrBinding = parameter.getValue();
  				if (valueOrBinding == null) {
@@ -1272,7 +1265,9 @@ public class FacesView extends HarnessView {
 	 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("FacesView - LIST KEY = {}", key);
 			result = beans.get(key.toString());
 			if (result == null) {
-				result = new GetBeansAction(this, completeModule, completeDocument, completeQuery, modelName, filterParameters, parameters, false).execute();
+				GetBeansAction action = new GetBeansAction(this, completeModule, completeDocument, completeQuery, completeModel, filterParameters, parameters, false);
+				action.setLookupFilter(filterFields, parameterValue);
+				result = action.execute();
 				beans.put(key.toString(), result);
 			}
  		}
@@ -1442,7 +1437,7 @@ public class FacesView extends HarnessView {
 				byte[] signature = ImageUtil.signature(json, width, height, rgbHexBackgroundColour, rgbHexForegroundColour);
 				// Add to content
 				// NB This handles compound bindings and checks for content access on the content owning bean
-				AttachmentContent content = FacesContentUtil.handleFileUpload(signature, MimeType.png.toString(), bean, BindUtil.unsanitiseBinding(binding));
+				AttachmentContent content = FacesContentUtil.handleFileUpload(signature, MimeType.png.toString(), bean, unsanitisedContentBinding);
 				// Set the content attribute
 				String contentId = Objects.requireNonNull(content.getContentId(), "contentId");
 				BindUtil.set(bean, unsanitisedContentBinding, contentId);
@@ -1519,6 +1514,7 @@ public class FacesView extends HarnessView {
 	 *
 	 * @return bizlet used for post-render callbacks, or {@code null}
 	 */
+	@SuppressWarnings("java:S1452") // Preserves subtype-specific bizlets; Bizlet<T> is not assignable to Bizlet<Bean>.
 	public Bizlet<? extends Bean> getPostRenderBizlet() {
 		return postRenderBizlet;
 	}

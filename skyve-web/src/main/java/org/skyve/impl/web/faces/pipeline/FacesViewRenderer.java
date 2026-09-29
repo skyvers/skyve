@@ -2503,7 +2503,9 @@ public class FacesViewRenderer extends ViewRenderer {
 														requiredMessage,
 														CORE.getCustomisations().determineDefaultWidgetTextAlignment(currentUxUi, attributeType),
 														descriptionBinding,
-														query);
+														query,
+														document);
+
 		eventSource = c.getEventSource();
 		addComponent(title,
 						formColspan,

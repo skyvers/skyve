@@ -33,6 +33,7 @@ import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.user.UserAccess;
@@ -70,6 +71,8 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 	private List<FilterParameter> filterParameters;
 	private List<Parameter> parameters;
 	private boolean escape;
+	private List<String> lookupFilterFields;
+	private String lookupSearch;
 	
 	/**
 	 * Creates a lazy data model for query/model-backed list rendering with optional filter parameters.
@@ -102,6 +105,17 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 		this.escape = escape;
 	}
 	
+	/**
+	 * Configures a lookup substring search, ORed across fields and ANDed with existing filters.
+	 *
+	 * @param fields query column names or bindings to search
+	 * @param search typed text; blank text leaves the model unfiltered
+	 */
+	public void setLookupFilter(List<String> fields, String search) {
+		lookupFilterFields = fields;
+		lookupSearch = Util.processStringValue(search);
+	}
+
 	/**
 	 * Can't implement this as the rows and the count come back together in the load method.
 	 *
@@ -200,7 +214,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 			if (filters != null) {
 				filter(filters, model, c);
 			}
-			
+			applyLookupFilter(model, c, d);
 			page = model.fetch();
 		}
 		catch (Exception e) {
@@ -273,6 +287,57 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 	}
 	
 	/**
+	 * Adds the configured lookup search to the model, ORing fields and ANDing existing filters.
+	 *
+	 * @param model the target list model
+	 * @param customer the current customer metadata
+	 * @param drivingDocument the model's driving document
+	 * @throws Exception if metadata resolution or variant domain lookup fails
+	 */
+	@SuppressWarnings("java:S3776") // complexity OK
+	private void applyLookupFilter(@Nonnull ListModel<Bean> model,
+								@Nonnull Customer customer,
+								@Nonnull Document drivingDocument) {
+		if ((lookupSearch != null) && (lookupFilterFields != null)) {
+			Filter searchFilter = null;
+			Module drivingModule = customer.getModule(drivingDocument.getOwningModuleName());
+			for (String field : lookupFilterFields) {
+				String binding = field;
+				boolean expression = false;
+				for (MetaDataQueryColumn column : model.getColumns()) {
+					if (field.equals(column.getName())) {
+						String columnBinding = column.getBinding();
+						expression = (columnBinding == null);
+						if (columnBinding != null) {
+							binding = columnBinding;
+						}
+						break;
+					}
+				}
+				// Expression aliases have no document attribute to resolve.
+				TargetMetaData target = expression ? null : BindUtil.getMetaDataForBinding(customer, drivingModule, drivingDocument, binding);
+				Attribute attribute = (target == null) ? null : target.getAttribute();
+				Filter fieldFilter = model.newFilter();
+				if ((target != null) && (attribute != null) && (attribute.getDomainType() == DomainType.variant)) {
+					fieldFilter.addIn(binding, ListModel.getTop100VariantDomainValueCodesFromDescriptionFilter(target.getDocument(), attribute, lookupSearch));
+				}
+				else {
+					fieldFilter.addContains(binding, lookupSearch);
+				}
+				if (searchFilter == null) {
+					searchFilter = fieldFilter;
+				}
+				else {
+					searchFilter.addOr(fieldFilter);
+				}
+			}
+			if (searchFilter != null) {
+				model.getFilter().addAnd(searchFilter);
+			}
+		}
+	}
+
+	/**
 	 * Applies PrimeFaces filter metadata to the list model.
 	 *
 	 * @param filters filter metadata entries
@@ -280,7 +345,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 	 * @param customer the current customer metadata
 	 * @throws Exception if metadata resolution or conversion fails
 	 */
-	@SuppressWarnings({"java:S3776", "java:S6541", "java:S112"}) // complex method OK
+	@SuppressWarnings({"java:S3776", "java:S6541", "java:S112", "java:S135"}) // complex method OK
 	private static void filter(Map<String, FilterMeta> filters, ListModel<Bean> model, Customer customer)
 	throws Exception {
 		Document drivingDocument = model.getDrivingDocument();
@@ -347,8 +412,8 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 			}
 
 			if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("    FILTER {} {} {}", key, contains ? "contains" : "=", value);
-			if (contains) {
-				modelFilter.addContains(key, (String) value);
+			if (contains && (value instanceof String string)) {
+				modelFilter.addContains(key, string);
 			}
 			else {
 				if (value instanceof Boolean bool) {

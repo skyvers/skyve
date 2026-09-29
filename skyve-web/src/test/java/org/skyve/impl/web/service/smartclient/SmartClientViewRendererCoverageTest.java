@@ -1,30 +1,39 @@
 package org.skyve.impl.web.service.smartclient;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.List;
+import java.util.TreeSet;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.skyve.domain.Bean;
 import org.skyve.impl.generate.ViewRenderer;
 import org.skyve.impl.metadata.MetadataIconResolver.ResolvedIcon;
 import org.skyve.impl.metadata.controller.CustomisationsStaticSingleton;
 import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.model.document.AssociationImpl;
 import org.skyve.impl.metadata.model.document.CollectionImpl;
-import org.skyve.impl.metadata.model.document.field.Text;
-import org.skyve.impl.metadata.view.ActionImpl;
-import org.skyve.impl.metadata.view.LoadingType;
-import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.metadata.module.ModuleImpl;
+import org.skyve.impl.metadata.view.ActionImpl;
+import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.Inject;
+import org.skyve.impl.metadata.view.LoadingType;
 import org.skyve.impl.metadata.view.VerticalAlignment;
+import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.container.Collapsible;
 import org.skyve.impl.metadata.view.container.HBox;
+import org.skyve.impl.metadata.view.container.Sidebar;
 import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.container.TabPane;
 import org.skyve.impl.metadata.view.container.VBox;
@@ -32,7 +41,6 @@ import org.skyve.impl.metadata.view.container.form.Form;
 import org.skyve.impl.metadata.view.container.form.FormColumn;
 import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.container.form.FormRow;
-import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
 import org.skyve.impl.metadata.view.event.EventSource;
 import org.skyve.impl.metadata.view.event.RerenderEventAction;
 import org.skyve.impl.metadata.view.event.ServerSideActionEventAction;
@@ -40,8 +48,6 @@ import org.skyve.impl.metadata.view.event.SetDisabledEventAction;
 import org.skyve.impl.metadata.view.event.SetInvisibleEventAction;
 import org.skyve.impl.metadata.view.event.ToggleDisabledEventAction;
 import org.skyve.impl.metadata.view.event.ToggleVisibilityEventAction;
-import org.skyve.impl.metadata.view.ViewImpl;
-import org.skyve.impl.metadata.view.container.Sidebar;
 import org.skyve.impl.metadata.view.widget.Button;
 import org.skyve.impl.metadata.view.widget.Chart;
 import org.skyve.impl.metadata.view.widget.Chart.ChartType;
@@ -50,6 +56,7 @@ import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.Spacer;
 import org.skyve.impl.metadata.view.widget.StaticImage;
 import org.skyve.impl.metadata.view.widget.bound.Label;
+import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.impl.metadata.view.widget.bound.input.CompleteType;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentCapture;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentDisplay;
@@ -59,19 +66,24 @@ import org.skyve.impl.metadata.view.widget.bound.input.GeometryInputType;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
+import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 import org.skyve.impl.metadata.view.widget.bound.input.Password;
 import org.skyve.impl.metadata.view.widget.bound.input.Radio;
 import org.skyve.impl.metadata.view.widget.bound.input.Slider;
 import org.skyve.impl.metadata.view.widget.bound.input.Spinner;
 import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
-import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
-import org.skyve.metadata.controller.ImplicitActionName;
-import org.skyve.metadata.controller.Customisations;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.controller.Customisations;
+import org.skyve.metadata.controller.ImplicitActionName;
+import org.skyve.metadata.model.Dynamic;
+import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.util.OWASP;
 
+@SuppressWarnings("java:S5960") // JUnit assertions belong in this test class.
 class SmartClientViewRendererCoverageTest {
 	private static final ResolvedIcon NO_ICON = new ResolvedIcon(null, null);
 
@@ -716,8 +728,7 @@ class SmartClientViewRendererCoverageTest {
 		content.setCapture(ContentCapture.video);
 		content.setShowMarkup(Boolean.TRUE);
 
-		SmartClientDataGridFieldDefinition definition =
-				new SmartClientDataGridFieldDefinition(user, customer, module, document, content, null, false, true, false, "desktop");
+		SmartClientDataGridFieldDefinition definition = new SmartClientDataGridFieldDefinition(user, customer, module, document, document, content, null, false, true, false, "desktop");
 		String javascript = definition.toJavascript();
 
 		assertTrue(javascript.contains("editorType:'bizContent'"), javascript);
@@ -1198,4 +1209,52 @@ class SmartClientViewRendererCoverageTest {
 		action.setResourceName(resourceName);
 		return action;
 	}
+	@Test
+	void modelLookupDataSourceIncludesOwnerAndHiddenDescription() {
+		DocumentImpl owner = mock(DocumentImpl.class);
+		ListModel<Bean> model = mock(ListModel.class);
+		when(owner.getListModel(customer, "ContactsModel", true)).thenReturn(model);
+		when(model.getDrivingDocument()).thenReturn(document);
+		when(model.getLocalisedDescription()).thenReturn("Contacts");
+		when(model.getColumns()).thenReturn(List.of());
+		LookupDescription lookup = new LookupDescription();
+		lookup.setModelName("ContactsModel");
+		lookup.setDescriptionBinding("bizKey");
+		StringBuilder output = new StringBuilder();
+		String id = SmartClientViewRenderer.appendDataSourceDefinition(user, customer, module, owner, "ContactsModel",
+				"admin_Order__ContactsModel_contact", lookup, "desktop", false, output, new TreeSet<>());
+		org.junit.jupiter.api.Assertions.assertEquals("admin_Order__ContactsModel_contact", id);
+		assertTrue(output.toString().contains("ID:'admin_Order__ContactsModel_contact'"));
+		assertTrue(output.toString().contains("modoc:'admin.Contact"));
+		assertTrue(output.toString().contains("{name:'bizKey',type:'text',hidden:true}"));
+	}
+
+	@Test
+	void nestedGridLookupUsesViewDocumentModel() {
+		document.setDynamism(new Dynamic());
+		DocumentImpl owner = spy(document);
+		ListModel<Bean> model = mock(ListModel.class);
+		doReturn(model).when(owner).getListModel(customer, "ContactsModel", true);
+		when(model.getDrivingDocument()).thenReturn(document);
+		DocumentImpl row = new DocumentImpl();
+		row.setName("Line");
+		row.setOwningModuleName("admin");
+		row.setDynamism(new Dynamic());
+		AssociationImpl association = new AssociationImpl();
+		association.setName("contact");
+		association.setDocumentName("Contact");
+		association.setType(AssociationType.aggregation);
+		row.putAttribute(association);
+		LookupDescription lookup = new LookupDescription();
+		lookup.setBinding("contact");
+		lookup.setDescriptionBinding("bizKey");
+		lookup.setModelName("ContactsModel");
+		SmartClientViewRenderer renderer = new SmartClientViewRenderer(user, module, owner, view, "desktop", false);
+		SmartClientDataGridFieldDefinition field = renderer.getDataGridField(row, lookup, null, false, true);
+		org.junit.jupiter.api.Assertions.assertEquals("admin_Contact__ContactsModel_contact", field.getLookup().getOptionDataSource());
+		verify(owner).getListModel(customer, "ContactsModel", true);
+		assertTrue(field.toJavascript().contains("requestProperties.params._c=view.gather(false)._c"));
+		assertTrue(field.toJavascript().contains("this.formItem.grid.parentElement._view"));
+	}
+
 }

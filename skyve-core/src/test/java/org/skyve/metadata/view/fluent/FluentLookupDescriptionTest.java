@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 
-@SuppressWarnings("static-method")
+@SuppressWarnings({"static-method", "java:S5960"}) // JUnit assertions belong in this test class.
 class FluentLookupDescriptionTest {
 
 	@Test
@@ -181,4 +181,10 @@ class FluentLookupDescriptionTest {
 		src.getParameters().add(p);
 		assertEquals(1, new FluentLookupDescription().from(src).get().getParameters().size());
 	}
+	@Test
+	void fromPreservesModelName() {
+		LookupDescription lookup = new FluentLookupDescription().modelName("ContactsModel").get();
+		assertEquals("ContactsModel", new FluentLookupDescription().from(lookup).get().getModelName());
+	}
+
 }

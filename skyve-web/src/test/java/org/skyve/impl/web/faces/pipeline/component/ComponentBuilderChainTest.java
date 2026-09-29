@@ -71,7 +71,7 @@ import jakarta.faces.context.FacesContext;
 /**
  * Tests for ComponentBuilderChain delegation and state propagation.
  */
-@SuppressWarnings({"static-method", "boxing"})
+@SuppressWarnings({"static-method", "boxing", "java:S5960" }) // JUnit assertions belong in this test class.
 class ComponentBuilderChainTest {
 
 	private abstract static class FacesContextBridge extends FacesContext {
@@ -482,9 +482,10 @@ class ComponentBuilderChainTest {
 	void lookupDescriptionDelegatesToBuilder() {
 		LookupDescription lookup = mock(LookupDescription.class);
 		QueryDefinition query = mock(QueryDefinition.class);
+		Document owningDocument = mock(Document.class);
 		EventSourceComponent result = new EventSourceComponent(mock(UIComponent.class), mock(UIComponentBase.class));
-		when(mockBuilder.lookupDescription(mockEventSource, "var", lookup, "disabled", "title", null, HorizontalAlignment.left, "displayBinding", query)).thenReturn(result);
-		assertSame(result, chain.lookupDescription(mockEventSource, "var", lookup, "disabled", "title", null, HorizontalAlignment.left, "displayBinding", query));
+		when(mockBuilder.lookupDescription(mockEventSource, "var", lookup, "disabled", "title", null, HorizontalAlignment.left, "displayBinding", query, owningDocument)).thenReturn(result);
+		assertSame(result, chain.lookupDescription(mockEventSource, "var", lookup, "disabled", "title", null, HorizontalAlignment.left, "displayBinding", query, owningDocument));
 	}
 
 	@Test

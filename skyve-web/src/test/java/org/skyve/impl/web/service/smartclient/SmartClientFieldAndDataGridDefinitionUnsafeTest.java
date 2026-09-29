@@ -171,15 +171,16 @@ class SmartClientFieldAndDataGridDefinitionUnsafeTest {
 
 		try {
 			SmartClientDataGridFieldDefinition def = new SmartClientDataGridFieldDefinition(null,
-					new CustomerImpl(),
-					null,
-					document,
-					widget,
-					null,
-					false,
-					false,
-					false,
-					"desktop");
+																								new CustomerImpl(),
+																								null,
+																								document,
+																								document,
+																								widget,
+																								null,
+																								false,
+																								false,
+																								false,
+																								"desktop");
 
 			String js = def.toJavascript();
 

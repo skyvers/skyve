@@ -844,6 +844,15 @@ abstract class SmartClientAttributeDefinition {
         	}
         	
         	// defaultDynamicValue and value map processing
+			if (forDataGrid && (lookup.getQuery() == null)) {
+				// Model lookups in grid editors need the enclosing view's conversation bean.
+				result.append(",pickListProperties:{filterData:function(criteria,callback,requestProperties){");
+				result.append("var view=this.formItem.grid.parentElement._view;");
+				result.append("requestProperties=requestProperties||{};requestProperties.params=requestProperties.params||{};");
+				result.append("requestProperties.params._c=view.gather(false)._c;requestProperties.params._cc='';");
+				result.append("if(view._b){requestProperties.params._b=view._b;}");
+				result.append("return this.Super('filterData',[criteria,callback,requestProperties]);}}");
+			}
 			result.append(",defaultDynamicValue:'if(this.grid){var r=this.grid.getRecord(this.rowNum);var v=(r?r.");
 			if (! bindingToDataGrid) {
 			    result.append(name);

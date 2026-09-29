@@ -1,5 +1,7 @@
 package org.skyve.impl.web.service.smartclient;
 
+import org.skyve.domain.Bean;
+import org.skyve.metadata.view.model.list.ListModel;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -21,7 +23,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.User;
 
-@SuppressWarnings({"static-method", "boxing"})
+@SuppressWarnings({"static-method", "boxing", "java:S5960" }) // JUnit assertions belong in this test class.
 class SmartClientLookupDefinitionTest {
 	@Test
 	void constructorUsesReferenceQueryWhenLookupIsNull() {
@@ -224,4 +226,34 @@ class SmartClientLookupDefinitionTest {
 		assertFalse(definition.getCanUpdate());
 		assertSame(queryOverride, definition.getQuery());
 	}
+	@Test
+	void modelLookupUsesOwningDocumentAndDrivingDocumentPermissions() {
+		User user = mock(User.class);
+		Module module = mock(Module.class);
+		Document owner = mock(Document.class);
+		Document target = mock(Document.class);
+		Customer customer = mock(Customer.class);
+		Relation relation = mock(Relation.class);
+		ListModel<Bean> model = mock(ListModel.class);
+		LookupDescription lookup = new LookupDescription();
+		lookup.setModelName("ContactsModel");
+		lookup.setDescriptionBinding("bizKey");
+		when(owner.getOwningModuleName()).thenReturn("sales");
+		when(owner.getName()).thenReturn("Order");
+		when(owner.getListModel(customer, "ContactsModel", true)).thenReturn(model);
+		when(model.getDrivingDocument()).thenReturn(target);
+		when(relation.getName()).thenReturn("contact");
+		when(user.canCreateDocument(target)).thenReturn(true);
+		when(user.canUpdateDocument(target)).thenReturn(false);
+
+		SmartClientLookupDefinition definition = new SmartClientLookupDefinition(false, user, customer, module,
+				owner, relation, lookup, true, "desktop");
+
+		assertEquals("sales_Order__ContactsModel_contact", definition.getOptionDataSource());
+		assertEquals("bizKey", definition.getDisplayField());
+		assertTrue(definition.getCanCreate());
+		assertFalse(definition.getCanUpdate());
+		org.mockito.Mockito.verifyNoInteractions(module);
+	}
+
 }

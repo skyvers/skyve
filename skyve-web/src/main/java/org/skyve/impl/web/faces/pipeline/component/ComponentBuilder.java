@@ -920,6 +920,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param textAlignment text alignment
 	 * @param displayBinding display binding
 	 * @param query backing query definition
+	 * @param owningDocument document owning the lookup model
 	 * @return the resulting wrapper component
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
@@ -931,7 +932,8 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 															@Nullable String requiredMessage,
 															HorizontalAlignment textAlignment,
 															String displayBinding,
-															QueryDefinition query);
+															QueryDefinition query,
+															Document owningDocument);
 	
 	/**
 	 * Creates a password input component wrapper.

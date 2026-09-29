@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view name="edit"
+		title="Model Lookup Fixture"
+		xmlns="http://www.skyve.org/xml/view"
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<blurb>
+		Create lookup values from Kitchen Sink / Lookup values, then select them below. Save this fixture and refresh the saved selections list to check the displayed association.
+	</blurb>
+	<form border="true" borderTitle="Multi-column model lookup">
+		<column responsiveWidth="3" />
+		<column responsiveWidth="9" />
+		<row>
+			<item>
+				<textField binding="name" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<lookupDescription binding="selection" descriptionBinding="description" model="LookupValuesModel">
+					<dropDown>
+						<column>description</column>
+						<column filterable="true">bizId</column>
+					</dropDown>
+				</lookupDescription>
+			</item>
+		</row>
+	</form>
+	<form border="true"
+		borderTitle="Single-column model lookup (no heading)">
+		<column responsiveWidth="3" />
+		<column responsiveWidth="9" />
+		<row>
+			<item>
+				<lookupDescription binding="singleSelection" descriptionBinding="description" model="LookupValuesModel" />
+			</item>
+		</row>
+	</form>
+	<dataGrid binding="rows" title="Data-grid model lookups"
+		inline="true">
+		<boundColumn binding="selection"
+			title="Multi-column lookup" editable="true">
+			<input>
+				<lookupDescription descriptionBinding="description" model="LookupValuesModel">
+					<dropDown>
+						<column>description</column>
+						<column filterable="true">bizId</column>
+					</dropDown>
+				</lookupDescription>
+			</input>
+		</boundColumn>
+		<boundColumn binding="singleSelection"
+			title="Single-column lookup (no heading)" editable="true">
+			<input>
+				<lookupDescription descriptionBinding="description" model="LookupValuesModel" />
+			</input>
+		</boundColumn>
+	</dataGrid>
+	<listGrid model="LookupValuesModel" 
+				continueConversation="false"
+				title="Lookup values from the same model"
+				showEdit="false"
+				showAdd="false"
+				showRemove="false" />
+	<listGrid query="qModelLookupFixtures"
+				title="Saved selections"
+				continueConversation="false"
+				showEdit="false"
+				showAdd="false"
+				showRemove="false" />
+	<actions>
+		<defaults />
+	</actions>
+</view>

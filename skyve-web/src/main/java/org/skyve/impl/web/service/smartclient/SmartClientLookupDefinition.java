@@ -17,6 +17,7 @@ import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.view.model.list.ListModel;
 
 /**
  * SmartClient lookup definition encapsulates metadata used to render SmartClient option data sources and pick lists for lookup fields.
@@ -50,85 +51,91 @@ public class SmartClientLookupDefinition {
 	 */
 	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
 	protected SmartClientLookupDefinition(boolean bindingToDataGrid,
-		    								User user,
-		    								Customer customer,
-		    								Module module,
-		    								Document document,
-		    								Relation relation,
-		    								LookupDescription lookup,
-		    								boolean runtime,
-		    								String uxui) {
-        this.bindingToDataGrid = bindingToDataGrid;
-        String queryName = (lookup == null) ? null : lookup.getQuery();
-        // Use reference query name if none provided in lookup
-        if ((queryName == null) && (relation instanceof Reference reference)) {
-        	queryName = reference.getQueryName();
-        }
-		// Use the default query if none is defined, else get the named query.
-        if (queryName == null) {
-        	query = module.getDocumentDefaultQuery(customer, relation.getDocumentName());
-        	queryName = query.getName();
-        }
-        else {
-        	query = module.getNullSafeMetaDataQuery(queryName);
-        }
-        
-        StringBuilder sb = new StringBuilder(128);
-        sb.append(module.getName()).append('_').append(queryName).append('_');
-        sb.append(document.getName()).append('_').append(relation.getName());
-        optionDataSource = sb.toString();
+											User user,
+											Customer customer,
+											Module module,
+											Document document,
+											Relation relation,
+											LookupDescription lookup,
+											boolean runtime,
+											String uxui) {
+		this.bindingToDataGrid = bindingToDataGrid;
+		String modelName = (lookup == null) ? null : lookup.getModelName();
+		Document queryDocument;
+		List<MetaDataQueryColumn> columns;
+		if (modelName != null) {
+			ListModel<Bean> model = document.getListModel(customer, modelName, runtime);
+			queryDocument = model.getDrivingDocument();
+			columns = model.getColumns();
+			optionDataSource = new StringBuilder(128).append(document.getOwningModuleName()).append('_')
+														.append(document.getName()).append("__")
+														.append(modelName).append('_').append(relation.getName()).toString();
+		}
+		else {
+			String queryName = (lookup == null) ? null : lookup.getQuery();
+			if ((queryName == null) && (relation instanceof Reference reference)) {
+				queryName = reference.getQueryName();
+			}
+			if (queryName == null) {
+				query = module.getDocumentDefaultQuery(customer, relation.getDocumentName());
+				queryName = query.getName();
+			}
+			else {
+				query = module.getNullSafeMetaDataQuery(queryName);
+			}
+			optionDataSource = new StringBuilder(128).append(module.getName()).append('_')
+														.append(queryName).append('_')
+														.append(document.getName()).append('_')
+														.append(relation.getName()).toString();
+			queryDocument = module.getDocument(customer, query.getDocumentName());
+			columns = query.getColumns();
+		}
 
-        String descriptionBinding = (lookup == null) ? null : lookup.getDescriptionBinding();
-        displayField = (descriptionBinding == null) ? 
-        					Bean.BIZ_KEY : 
-    						BindUtil.sanitiseBinding(descriptionBinding);
+		String descriptionBinding = (lookup == null) ? null : lookup.getDescriptionBinding();
+		displayField = (descriptionBinding == null) ?
+							Bean.BIZ_KEY :
+							BindUtil.sanitiseBinding(descriptionBinding);
 
-        Document queryDocument = module.getDocument(customer, query.getDocumentName());
-        
-        if (user != null) {
-            canCreate = user.canCreateDocument(queryDocument);
-            canUpdate = user.canUpdateDocument(queryDocument);
-        }
-        
-        List<LookupDescriptionColumn> dropDownColumns = (lookup == null) ? null : lookup.getDropDownColumns();
-        if ((dropDownColumns == null) || dropDownColumns.isEmpty()) {
-        	pickListFields.add(displayField);
-        }
-        else {
-            for (MetaDataQueryColumn column : query.getColumns()) {
-            	String alias = column.getName();
-            	if (alias == null) {
-            		alias = column.getBinding();
-            	}
-            	final String a = alias;
-            	Optional<LookupDescriptionColumn> optional = dropDownColumns.stream().filter(c -> a.equals(c.getName())).findAny();
-            	if (optional.isPresent()) {
-            		if ((column instanceof MetaDataQueryProjectedColumn projected) && projected.isProjected()) {
-                        SmartClientQueryColumnDefinition def = SmartClientViewRenderer.getQueryColumn(user,
-                    																					customer, 
-																                                        module,
-																                                        queryDocument,
-																                                        column,
-																                                        runtime,
-																                                        uxui);
 
-                    	pickListFields.add(def.getName());
-                    	// only add fields that are filterable and can use the substring operator
-                    	Boolean filterable = optional.get().getFilterable();
-                    	if (Boolean.TRUE.equals(filterable)) {
-                    		filterFields.add(def.getName());
-                    	}
-                    	else if ((filterable == null) && 
-                    				def.isCanFilter() && 
-                    				def.getHasTextFilterOperators()) {
-                    		filterFields.add(def.getName());
-                    	}
-            		}
-            	}
-            }
-        }
-    }
-    
+		if (user != null) {
+			canCreate = user.canCreateDocument(queryDocument);
+			canUpdate = user.canUpdateDocument(queryDocument);
+		}
+
+		List<LookupDescriptionColumn> dropDownColumns = (lookup == null) ? null : lookup.getDropDownColumns();
+		if ((dropDownColumns == null) || dropDownColumns.isEmpty()) {
+			pickListFields.add(displayField);
+		}
+		else {
+			for (MetaDataQueryColumn column : columns) {
+				String alias = column.getName();
+				if (alias == null) {
+					alias = column.getBinding();
+				}
+				final String a = alias;
+				Optional<LookupDescriptionColumn> optional = dropDownColumns.stream().filter(c -> a.equals(c.getName())).findAny();
+				if (optional.isPresent() &&
+						(column instanceof MetaDataQueryProjectedColumn projected) && projected.isProjected()) {
+					SmartClientQueryColumnDefinition def = SmartClientViewRenderer.getQueryColumn(user,
+																									customer,
+																									(modelName == null) ? module : customer.getModule(queryDocument.getOwningModuleName()),
+																									queryDocument,
+																									column,
+																									runtime,
+																									uxui);
+
+					pickListFields.add(def.getName());
+					// only add fields that are filterable and can use the substring operator
+					Boolean filterable = optional.get().getFilterable();
+					if (Boolean.TRUE.equals(filterable) ||
+							((filterable == null) && def.isCanFilter() && def.getHasTextFilterOperators())) {
+						filterFields.add(def.getName());
+					}
+				}
+			}
+		}
+	}
+
 	/**
 	 * Returns the field name used to display selected lookup values.
 	 *

@@ -51,6 +51,7 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"descriptionBinding",
 							"query",
+							"modelName",
 							"disableEditConditionName",
 							"enableEditConditionName",
 							"disableAddConditionName",
@@ -74,6 +75,7 @@ public class LookupDescription extends InputWidget implements FormItemWidget, Ed
 
 	private String descriptionBinding;
 	private String query;
+	private String modelName;
 
 	private String disableEditConditionName;
 	private String disableAddConditionName;
@@ -143,6 +145,25 @@ public class LookupDescription extends InputWidget implements FormItemWidget, Ed
 	@XmlAttribute(required = false)
 	public void setQuery(String query) {
 		this.query = UtilImpl.processStringValue(query);
+	}
+
+	/**
+	 * Returns the list model owned by the enclosing view's document.
+	 *
+	 * @return the model name, or {@code null} to use query resolution
+	 */
+	public String getModelName() {
+		return modelName;
+	}
+
+	/**
+	 * Sets the document-scoped list model used instead of a query.
+	 *
+	 * @param modelName the model name; blank values are normalised to {@code null}
+	 */
+	@XmlAttribute(name = "model", required = false)
+	public void setModelName(String modelName) {
+		this.modelName = UtilImpl.processStringValue(modelName);
 	}
 
 	/**

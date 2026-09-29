@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="ModelLookupRow"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<persistent name="KS_ModelLookupRow" />
+	<singularAlias>Model Lookup Row</singularAlias>
+	<pluralAlias>Model Lookup Rows</pluralAlias>
+	<parentDocument>ModelLookupFixture</parentDocument>
+	<bizKey expression="{selection}" />
+	<attributes>
+		<association name="selection" type="aggregation">
+			<displayName>Grid Model Lookup</displayName>
+			<documentName>LookupDescription</documentName>
+		</association>
+		<association name="singleSelection" type="aggregation">
+			<displayName>Single-column Model Lookup</displayName>
+			<documentName>LookupDescription</documentName>
+		</association>
+	</attributes>
+</document>

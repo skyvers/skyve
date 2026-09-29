@@ -2,12 +2,37 @@
 
 These notes collect release-ready framework changes introduced for Skyve 10.
 
+- [Model-backed Lookup Descriptions](#model-backed-lookup-descriptions)
 - [Managed Content Widget](content-widget.md)
 - [Reusable Deployed Integration Testing](deployed-integration-testing.md)
 - [Theme Resolution](theme-resolution.md)
 - [View Boilerplate Escaping](view-boilerplate-escaping.md)
 - [Lucene Content Identifiers and Garbage Collection](#lucene-content-identifiers-and-garbage-collection)
 - [Scheduled Backups and Azure Copies](#scheduled-backups-and-azure-copies)
+
+## Model-backed Lookup Descriptions
+
+`lookupDescription` now accepts a `model` attribute to populate its choices from a
+list model, in both SmartClient and PrimeFaces forms and data grids:
+
+```xml
+<lookupDescription binding="contact" descriptionBinding="name" model="ContactsModel" />
+```
+
+As with `listGrid`, the model belongs to the document owning the enclosing view,
+including when the lookup is inside a data grid or uses a compound binding.
+Customer overrides are supported. The model's driving document must match the
+lookup's target document, and its columns must support the description and dropdown.
+
+Specify either `query` or `model`, never both. Existing lookups need no changes:
+omitting both still uses the association's query, then the target document's default
+query. Model lookups generate `UserAccess.modelAggregate` access and require read
+permission on the driving document. If view access generation is disabled, declare
+the model access explicitly.
+
+See [lookup model documentation](view_models.md#lookup-descriptions-backed-by-list-models)
+for details, or try **Kitchen Sink → Model Lookup Fixture** using the
+[SC/PF test steps](../skyve-war/src/main/java/modules/kitchensink/ModelLookupFixture/README.md).
 
 ## Lucene Content Identifiers and Garbage Collection
 
@@ -101,16 +126,6 @@ and do not deploy Skyve 10 over the only copy of an inline-content index.
 
 Exercise this migration against a production-sized copy first. Verify content counts and
 representative bytes before retiring the legacy index.
-
-### Verification coverage
-
-The garbage-collection job is covered at 100% of its executable lines and branches. The
-test suites exercise exact UUID lookup and replacement, inline and filesystem attachment
-lifecycles, restart and rollback, concurrent updates, schema incompatibility, static and
-dynamic ownership checks, cross-references, age and safety guards, error continuation,
-Quartz registration, manual invocation, and real orphan removal from Lucene and the
-filesystem. The real-store integration test also proves that referenced content remains
-available while an orphan disappears from both storage layers.
 
 ## Scheduled Backups and Azure Copies
 

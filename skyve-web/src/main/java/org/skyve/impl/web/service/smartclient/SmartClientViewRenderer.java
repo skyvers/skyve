@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -1341,7 +1342,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 */
 	@Override
 	public void renderFormBlurb(String markup, Blurb blurb) {
-		renderFormLabel(markup, BindUtil.containsSkyveExpressions(markup), makeNewLabelFromBlurb(blurb));
+		renderFormLabel(markup, (markup != null) && BindUtil.containsSkyveExpressions(markup), makeNewLabelFromBlurb(blurb));
 	}
 
 	/**
@@ -1363,7 +1364,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 */
 	@Override
 	public void renderBlurb(String markup, Blurb blurb) {
-		renderLabel(markup, BindUtil.containsSkyveExpressions(markup), makeNewLabelFromBlurb(blurb));
+		renderLabel(markup, (markup != null) && BindUtil.containsSkyveExpressions(markup), makeNewLabelFromBlurb(blurb));
 	}
 
 	/**
@@ -1375,7 +1376,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 */
 	@Override
 	public void renderFormLabel(String value, boolean boundValue, Label label) {
-		FormItem currentFormItem = getCurrentFormItem();
+		FormItem currentFormItem = Objects.requireNonNull(getCurrentFormItem());
 
 		// Set colSpan 1 if not set otherwise all formatting hell breaks loose
 		if (currentFormItem.getColspan() == null) { // not set
@@ -1643,9 +1644,6 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		String queryName = widget.getQueryName();
 		String modelName = widget.getModelName();
 		String dataSourceId = null;
-		if ((module == null) || (document == null)) {
-			throw new MetaDataException("Cannot render list widget without module and document context");
-		}
 		if (queryName != null) { // its a query
 			MetaDataQueryDefinition query = module.getNullSafeMetaDataQuery(queryName);
 			StringBuilder ds = new StringBuilder(256);
@@ -1859,7 +1857,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 */
 	private void renderDataWidget(AbstractDataWidget widget) {
 		dataWidgetBinding = widget.getBinding();
-		Relation relation = (Relation) getCurrentTarget().getAttribute();
+		Relation relation = (Relation) Objects.requireNonNull(getCurrentTarget()).getAttribute();
 		if (relation == null) { // should never happen
 			throw new MetaDataException(dataWidgetBinding + " does not point to a relation");
 		}
@@ -1968,15 +1966,31 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			if (lookup != null) {
 				StringBuilder ds = new StringBuilder(64);
 				String optionDataSource = lookup.getOptionDataSource();
-				SmartClientViewRenderer.appendDataSourceDefinition(user,
-																	customer,
-																	lookup.getQuery(),
-																	optionDataSource,
-																	(LookupDescription) dataWidgetColumnInputWidget,
-																	currentUxUi,
-																	false,
-																	ds,
-																	new TreeSet<>());
+				LookupDescription lookupWidget = (LookupDescription) dataWidgetColumnInputWidget;
+				if (lookupWidget.getModelName() != null) {
+					appendDataSourceDefinition(user,
+												customer,
+												module,
+												document,
+												lookupWidget.getModelName(),
+												optionDataSource,
+												lookupWidget,
+												currentUxUi,
+												false,
+												ds,
+												new TreeSet<>());
+				}
+				else {
+					SmartClientViewRenderer.appendDataSourceDefinition(user,
+																		customer,
+																		lookup.getQuery(),
+																		optionDataSource,
+																		(LookupDescription) dataWidgetColumnInputWidget,
+																		currentUxUi,
+																		false,
+																		ds,
+																		new TreeSet<>());
+				}
 				code.insert(0, ds);
 			}
 			dataWidgetColumnInputWidget = null;
@@ -2399,7 +2413,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 */
 	@Override
 	public void renderListMembership(String candidatesHeading, String membersHeading, ListMembership membership) {
-		Relation relation = (Relation) getCurrentTarget().getAttribute();
+		Relation relation = (Relation) Objects.requireNonNull(getCurrentTarget()).getAttribute();
 
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append("=isc.BizListMembership.create({_b:'");
@@ -2507,15 +2521,30 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 		StringBuilder ds = new StringBuilder(256);
 		String optionDataSource = def.getLookup().getOptionDataSource();
-		SmartClientViewRenderer.appendDataSourceDefinition(user,
-															customer,
-															query,
-															optionDataSource,
-															lookup,
-															currentUxUi,
-															false,
-															ds,
-															new TreeSet<>());
+		if (lookup.getModelName() != null) {
+			appendDataSourceDefinition(user,
+										customer,
+										module,
+										document,
+										lookup.getModelName(),
+										optionDataSource,
+										lookup,
+										currentUxUi,
+										false,
+										ds,
+										new TreeSet<>());
+		}
+		else {
+			SmartClientViewRenderer.appendDataSourceDefinition(user,
+																customer,
+																query,
+																optionDataSource,
+																lookup,
+																currentUxUi,
+																false,
+																ds,
+																new TreeSet<>());
+		}
 		code.insert(0, ds);
 	}
 
@@ -4677,7 +4706,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
     															String dataGridBinding,
     															boolean hasFormatter,
     															boolean runtime) {
-    	return new SmartClientDataGridFieldDefinition(user, customer, module, document, widget, dataGridBinding, hasFormatter, runtime, false, currentUxUi);
+		return new SmartClientDataGridFieldDefinition(user, customer, module, document, this.document, widget, dataGridBinding, hasFormatter, runtime, false, currentUxUi);
     }
 
     /**
@@ -4707,6 +4736,47 @@ public class SmartClientViewRenderer extends ViewRenderer {
 														boolean config,
 														StringBuilder toAppendTo,
 														Set<String> visitedQueryNames) {
+		return appendDataSourceDefinition(user,
+											customer,
+											owningModule,
+											owningDocument,
+											modelName,
+											null,
+											null,
+											uxui,
+											config,
+											toAppendTo,
+											visitedQueryNames);
+	}
+
+	/**
+	 * Appends a model data source, including lookup-specific fields when supplied.
+	 *
+	 * @param user active user
+	 * @param customer active customer
+	 * @param owningModule model owner module
+	 * @param owningDocument model owner document
+	 * @param modelName model name
+	 * @param dataSourceIDOverride optional lookup data source identifier
+	 * @param forLookup optional lookup metadata
+	 * @param uxui active UX/UI
+	 * @param config whether to emit configuration only
+	 * @param toAppendTo output buffer
+	 * @param visitedQueryNames visited data sources
+	 * @return the data source identifier
+	 */
+	@SuppressWarnings("java:S107") // Matches the query data-source overload with model ownership.
+	public static String appendDataSourceDefinition(User user,
+														Customer customer,
+														Module owningModule,
+														Document owningDocument,
+														String modelName,
+														String dataSourceIDOverride,
+														LookupDescription forLookup,
+														String uxui,
+														boolean config,
+														StringBuilder toAppendTo,
+														Set<String> visitedQueryNames) {
 		ListModel<Bean> model = owningDocument.getListModel(customer, modelName, true);
 		// Note we cannot set the bean on the model here as we are only generating out the UI.
 		Document drivingDocument = model.getDrivingDocument();
@@ -4726,8 +4796,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 											modelName,
 											model.getLocalisedDescription(),
 											model.getColumns(),
-											null,
-											null,
+											dataSourceIDOverride,
+											forLookup,
 											uxui,
 											config,
 											toAppendTo,

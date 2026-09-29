@@ -128,6 +128,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.KeyboardType;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
+import org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn;
 import org.skyve.impl.metadata.view.widget.bound.input.Radio;
 import org.skyve.impl.metadata.view.widget.bound.input.RichText;
 import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
@@ -158,6 +159,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryContentColumn;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.module.query.QueryDefinition;
@@ -3442,7 +3444,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 													@Nullable String requiredMessage,
 													HorizontalAlignment textAlignment,
 													String displayBinding,
-													QueryDefinition query) {
+													QueryDefinition query,
+													Document owningDocument) {
 		if (component != null) {
 			return component;
 		}
@@ -3459,7 +3462,10 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 													lookup.getFilterParameters(),
 													lookup.getParameters(),
 													lookup.getPixelWidth(),
-													false);
+													false,
+													owningDocument,
+													lookup.getModelName(),
+													lookup.getDropDownColumns());
 		return new EventSourceComponent(result, result);
 	}
 
@@ -5499,7 +5505,10 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 												List<FilterParameter> filterParameters,
 												List<Parameter> parameters,
 												Integer pixelWidth,
-												boolean dontDisplay) {
+												boolean dontDisplay,
+												Document owningDocument,
+												String modelName,
+												List<LookupDescriptionColumn> dropDownColumns) {
 		AutoComplete result = (AutoComplete) input(AutoComplete.COMPONENT_TYPE,
 													dataWidgetVar,
 													binding,
@@ -5532,11 +5541,31 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 															new Class[] {String.class}));
 
 		Map<String, Object> attributes = result.getAttributes();
-		attributes.put("module", query.getOwningModule().getName());
-		attributes.put("query", query.getName());
+		if (modelName != null) {
+			attributes.put("module", owningDocument.getOwningModuleName());
+			attributes.put("document", owningDocument.getName());
+			attributes.put("model", modelName);
+		}
+		else if (query != null) {
+			attributes.put("module", query.getOwningModule().getName());
+			attributes.put("query", query.getName());
+		}
 		attributes.put("display", displayBinding);
 		attributes.put("filterParameters", filterParameters);
 		attributes.put("parameters", parameters);
+
+		if (! dropDownColumns.isEmpty()) {
+			Customer customer = CORE.getCustomer();
+			ListModel<Bean> model;
+			if (modelName != null) {
+				model = owningDocument.getListModel(customer, modelName, true);
+			}
+			else {
+				model = new DocumentQueryListModel<>((MetaDataQueryDefinition) query);
+				model.postConstruct(customer, false);
+			}
+			addLookupDropDownColumns(result, dropDownColumns, model, customer);
+		}
 
 		// NB inputStyle attribute styles the text field
 		setSizeAndTextAlignStyle(result,
@@ -5553,6 +5582,66 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 									"0.5rem");
 
 		return result;
+	}
+
+	/** 
+	 * Adds projected lookup columns and records the fields eligible for typed searches. 
+	 */
+	@SuppressWarnings({"java:S3776", "java:S135"}) // complexity and multiple loop exits OK here
+	protected void addLookupDropDownColumns(AutoComplete result,
+												List<LookupDescriptionColumn> dropDownColumns,
+												ListModel<Bean> model,
+												Customer customer) {
+		Document document = model.getDrivingDocument();
+		Module module = customer.getModule(document.getOwningModuleName());
+		List<String> filterFields = new ArrayList<>();
+		for (MetaDataQueryColumn queryColumn : model.getColumns()) {
+			if (! (queryColumn instanceof MetaDataQueryProjectedColumn projected) || ! projected.isProjected()) {
+				continue;
+			}
+			String name = (queryColumn.getName() == null) ? queryColumn.getBinding() : queryColumn.getName();
+			LookupDescriptionColumn dropDown = dropDownColumns.stream()
+					.filter(c -> name.equals(c.getName())).findFirst().orElse(null);
+			if (dropDown == null) {
+				continue;
+			}
+			Column column = (Column) a.createComponent(Column.COMPONENT_TYPE);
+			setId(column, null);
+			putOutputTextFacetValueOrValueExpression(column, "header", model.determineColumnTitle(queryColumn), true);
+			StringBuilder style = new StringBuilder();
+			if (queryColumn.getPixelWidth() != null) {
+				style.append("width:").append(queryColumn.getPixelWidth()).append("px;");
+			}
+			if (queryColumn.getAlignment() != null) {
+				style.append("text-align:").append(queryColumn.getAlignment().toTextAlignmentString()).append(';');
+			}
+			column.setStyle(style.toString());
+			String formatter = (projected.getFormatterName() == null) ? projected.getCustomFormatterName() : projected.getFormatterName().name();
+			String value = "#{" + result.getVar() + "['{" + name + ((formatter == null) ? "" : "|" + formatter) + "}']}";
+			HtmlOutputText text = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
+			text.setValueExpression("value", ef.createValueExpression(elc, value, Object.class));
+			// Lookup rows are sanitised, but not escaped, so their labels can populate the input.
+			text.setEscape(queryColumn.isEscape());
+			column.getChildren().add(text);
+			result.getChildren().add(column);
+
+			boolean filterable = Boolean.TRUE.equals(dropDown.getFilterable());
+			String binding = queryColumn.getBinding();
+			if ((dropDown.getFilterable() == null) && projected.isFilterable() && (binding != null)) {
+				Attribute attribute = BindUtil.getMetaDataForBinding(customer, module, document, binding).getAttribute();
+				if (attribute != null) {
+					AttributeType type = attribute.getAttributeType();
+					DomainType domain = attribute.getDomainType();
+					filterable = (type != AttributeType.enumeration) && ((domain == DomainType.variant) ||
+							((domain == null) && ((type == AttributeType.text) || (type == AttributeType.memo) ||
+									(type == AttributeType.markup) || (type == AttributeType.colour))));
+				}
+			}
+			if (filterable) {
+				filterFields.add(name);
+			}
+		}
+		result.getAttributes().put("filterFields", filterFields);
 	}
 
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.

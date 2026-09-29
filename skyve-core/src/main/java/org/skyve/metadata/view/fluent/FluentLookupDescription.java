@@ -31,6 +31,7 @@ public class FluentLookupDescription extends FluentInputWidget<FluentLookupDescr
 	public FluentLookupDescription from(@SuppressWarnings("hiding") LookupDescription lookup) {
 		descriptionBinding(lookup.getDescriptionBinding());
 		query(lookup.getQuery());
+		modelName(lookup.getModelName());
 		disableEditConditionName(lookup.getDisableEditConditionName());
 		disableAddConditionName(lookup.getDisableAddConditionName());
 		disableClearConditionName(lookup.getDisableClearConditionName());
@@ -74,6 +75,17 @@ public class FluentLookupDescription extends FluentInputWidget<FluentLookupDescr
 	 */
 	public FluentLookupDescription query(String query) {
 		lookup.setQuery(query);
+		return this;
+	}
+
+	/**
+	 * Sets the list model owned by the enclosing view's document.
+	 *
+	 * @param modelName the model name
+	 * @return this builder
+	 */
+	public FluentLookupDescription modelName(String modelName) {
+		lookup.setModelName(modelName);
 		return this;
 	}
 

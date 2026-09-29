@@ -1391,8 +1391,15 @@ public class MetaDataServlet extends HttpServlet {
 				result.append("{\"type\":\"lookupDescription\"");
 				processInputWidget(lookup);
 				result.append(",\"descriptionBinding\":\"").append(descriptionBinding).append('"');
-				result.append(",\"dataSource\":\"").append(query.getOwningModule().getName()).append('_');
-				result.append(query.getDocumentName()).append('"');
+				result.append(",\"dataSource\":\"");
+				if (lookup.getModelName() != null) {
+					result.append(document.getOwningModuleName()).append('_').append(document.getName())
+							.append("__").append(lookup.getModelName());
+				}
+				else if (query != null) {
+					result.append(query.getOwningModule().getName()).append('_').append(query.getDocumentName());
+				}
+				result.append('"');
 				result.append(",\"canCreate\":").append(canCreate);
 				result.append(",\"canUpdate\":").append(canUpdate);
 				processEditable(lookup);

@@ -1,5 +1,9 @@
 package org.skyve.impl.metadata.view.widget.bound.input;
 
+import java.io.StringWriter;
+import java.io.StringReader;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -7,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-@SuppressWarnings("static-method")
+@SuppressWarnings({"static-method", "java:S5960"}) // JUnit assertions belong in this test class.
 class LookupDescriptionTest {
 
 	@Test
@@ -168,4 +172,17 @@ class LookupDescriptionTest {
 	void jaxbHelperGetEnablePickConditionNameReturnsNull() {
 		assertNull(new LookupDescription().getEnablePickConditionName());
 	}
+	@Test
+	void modelAttributeSurvivesXmlRoundTrip() throws JAXBException {
+		JAXBContext context = JAXBContext.newInstance(LookupDescription.class);
+		String xml = "<lookupDescription xmlns=\"http://www.skyve.org/xml/view\" binding=\"contact\" descriptionBinding=\"bizKey\" model=\" ContactsModel \"/>";
+		LookupDescription lookup = (LookupDescription) context.createUnmarshaller().unmarshal(new StringReader(xml));
+		assertEquals("ContactsModel", lookup.getModelName());
+		StringWriter output = new StringWriter();
+		context.createMarshaller().marshal(lookup, output);
+		assertTrue(output.toString().contains("model=\"ContactsModel\""));
+		lookup.setModelName("  ");
+		assertNull(lookup.getModelName());
+	}
+
 }

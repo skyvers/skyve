@@ -64,6 +64,7 @@ import jakarta.faces.context.FacesContext;
 /**
  * Tests for NoOpComponentBuilder - verifies each method returns the input component unchanged.
  */
+@SuppressWarnings("java:S5960") // JUnit assertions belong in this test class.
 class NoOpComponentBuilderTest {
 
 	private abstract static class FacesContextBridge extends FacesContext {
@@ -309,7 +310,7 @@ class NoOpComponentBuilderTest {
 
 	@Test
 	void lookupDescriptionReturnsInputEventSource() {
-		assertSame(eventSourceComponent, builder.lookupDescription(eventSourceComponent, "var", new LookupDescription(), "disabled", "title", null, HorizontalAlignment.left, "displayBinding", mock(QueryDefinition.class)));
+		assertSame(eventSourceComponent, builder.lookupDescription(eventSourceComponent, "var", new LookupDescription(), "disabled", "title", null, HorizontalAlignment.left, "displayBinding", mock(QueryDefinition.class), null));
 	}
 
 	@Test

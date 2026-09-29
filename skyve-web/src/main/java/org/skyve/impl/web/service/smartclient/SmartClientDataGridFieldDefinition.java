@@ -35,28 +35,30 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 	/**
 	 * Builds a SmartClient data-grid field definition from widget and document metadata.
 	 *
-	 * @param user active user used for localisation and metadata rules
-	 * @param customer active customer metadata
-	 * @param module module containing the target document
-	 * @param document target document metadata
-	 * @param widget source widget metadata
-	 * @param dataGridBindingOverride optional binding override, or {@code null}
+	 * @param user active user
+	 * @param customer active customer
+	 * @param module binding context module
+	 * @param document binding context document
+	 * @param owningDocument enclosing view document that owns lookup models
+	 * @param widget widget metadata
+	 * @param dataGridBindingOverride optional collection binding
 	 * @param hasFormatter whether a display formatter is applied
-	 * @param runtime whether runtime domain values should be resolved
-	 * @param isField whether the definition is generated for a field context
-	 * @param uxui active UX/UI profile name
+	 * @param runtime whether runtime metadata is required
+	 * @param isField whether this is a form field
+	 * @param uxui active UX/UI
 	 */
-    @SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
-    protected SmartClientDataGridFieldDefinition(User user,
-			    									Customer customer, 
-			                                        Module module, 
-			                                        Document document, 
-			                                        InputWidget widget,
-			                                        String dataGridBindingOverride,
-			                                        boolean hasFormatter,
-			                                        boolean runtime,
-			                                        boolean isField,
-			                                        String uxui) {
+	@SuppressWarnings({"java:S107", "java:S3776"}) // Binding and model ownership are distinct in nested grids.
+	protected SmartClientDataGridFieldDefinition(User user,
+													Customer customer,
+													Module module,
+													Document document,
+													Document owningDocument,
+													InputWidget widget,
+													String dataGridBindingOverride,
+													boolean hasFormatter,
+													boolean runtime,
+													boolean isField,
+													String uxui) {
 		super(user,
 				customer,
 				module,
@@ -104,7 +106,7 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
         												user,
         												customer,
         												module,
-        												document,
+														(lookupDescription.getModelName() == null) ? document : owningDocument,
         												relation,
         												lookupDescription,
         												runtime,

@@ -571,6 +571,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 * @param textAlignment text alignment metadata
 	 * @param displayBinding display binding
 	 * @param query lookup query definition
+	 * @param owningDocument document owning the lookup model
 	 * @return the supplied component
 	 */
 	@Override
@@ -582,7 +583,8 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 													@Nullable String requiredMessage,
 													HorizontalAlignment textAlignment,
 													String displayBinding,
-													QueryDefinition query) {
+													QueryDefinition query,
+													Document owningDocument) {
 		return putByBinding(lookup, component);
 	}
 	

@@ -439,7 +439,8 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 													@Nullable String requiredMessage,
 													HorizontalAlignment textAlignment,
 													String displayBinding,
-													QueryDefinition query) {
+													QueryDefinition query,
+													Document owningDocument) {
 		return component;
 	}
 

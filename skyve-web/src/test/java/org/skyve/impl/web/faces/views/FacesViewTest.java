@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -64,7 +65,7 @@ import jakarta.faces.context.PartialViewContext;
  * Tests for FacesView utility methods and state management that do not require a live CDI container.
  * Tests use plain instantiation to exercise getters, setters, and sanitisation logic.
  */
-@SuppressWarnings({ "static-method", "boxing", "java:S1192" }) // Repeated literals are deliberate Faces compatibility fixtures.
+@SuppressWarnings({ "static-method", "boxing", "java:S1192", "java:S5960" }) // Repeated literals are deliberate fixtures; assertions are test-only.
 class FacesViewTest {
 	private abstract static class FacesContextBridge extends FacesContext {
 		static void setCurrent(FacesContext context) {
@@ -742,6 +743,7 @@ class FacesViewTest {
 	}
 
 	@Test
+	@SuppressWarnings("java:S2696") // JUnit instance test temporarily changes static configuration and restores it in finally.
 	void getCsrfTokenReturnsExistingValueWhenFacesTraceEnabled() throws Exception {
 		FacesView view = new FacesView();
 		setPrivateField(view, "csrfToken", "existing-token");
@@ -814,6 +816,7 @@ class FacesViewTest {
 	}
 
 	@Test
+	@SuppressWarnings("java:S2696") // JUnit instance test temporarily changes static configuration and restores it in finally.
 	void setCsrfTokenWithFacesTraceEnabledStillMarksChecked() throws Exception {
 		FacesView view = new FacesView();
 		FacesContext facesContext = mock(FacesContext.class);
@@ -1284,6 +1287,70 @@ class FacesViewTest {
 	}
 
 	@Test
+	void getLazyDataModelRejectsMissingModuleAndDocumentKeys() {
+		FacesView view = new FacesView();
+
+		assertThrows(NullPointerException.class,
+				() -> view.getLazyDataModel(null, "document", "query", "model", null));
+		assertThrows(NullPointerException.class,
+				() -> view.getLazyDataModel(null, null, null, null, null));
+		assertThrows(NullPointerException.class,
+				() -> view.getLazyDataModel("module", null, null, null, null));
+		assertNotNull(view.getLazyDataModel("module", "document", null, null, null));
+	}
+
+	@Test
+	void getLazyDataModelKeepsDistinctKeysSeparate() {
+		FacesView view = new FacesView();
+		List<SkyveLazyDataModel> models = List.of(
+				view.getLazyDataModel("sales", "Order", "Orders", null, null),
+				view.getLazyDataModel("sales", "Order", "OpenOrders", null, null),
+				view.getLazyDataModel("admin", "Order", "Orders", null, null),
+				view.getLazyDataModel("sales", "Order", null, null, null),
+				view.getLazyDataModel("sales", "Contact", null, null, null),
+				view.getLazyDataModel("sales", "Order", null, "Recent", null),
+				view.getLazyDataModel("sales", "Order", null, "Archived", null));
+
+		for (int i = 0; i < models.size(); i++) {
+			for (int j = i + 1; j < models.size(); j++) {
+				assertNotSame(models.get(i), models.get(j));
+			}
+		}
+		assertSame(models.get(3), view.getLazyDataModel("sales", "Order", null, null, null));
+		assertSame(models.get(5), view.getLazyDataModel("sales", "Order", null, "Recent", null));
+	}
+
+	@Test
+	void getLazyDataModelQueryKeyTakesPrecedenceOverDocumentAndModel() {
+		FacesView view = new FacesView();
+		SkyveLazyDataModel first = view.getLazyDataModel("sales", "Order", "Orders", "Recent", null);
+
+		assertSame(first, view.getLazyDataModel("sales", "Contact", "Orders", "Archived", null));
+	}
+
+	@Test
+	void getLazyDataModelCacheHitDoesNotParseReplacementCriteria() {
+		FacesView view = new FacesView();
+		SkyveLazyDataModel first = view.getLazyDataModel("sales", "Order", "Orders", null,
+				List.of(List.of("name", "equal", "Alice")));
+		List<List<String>> invalidCriteria = List.of(List.of("name", "notAnOperator", "Bob"));
+
+		assertSame(first, view.getLazyDataModel("sales", "Order", "Orders", null, invalidCriteria));
+	}
+
+	@Test
+	void getLazyDataModelFailedCreationDoesNotPopulateCache() {
+		FacesView view = new FacesView();
+		List<List<String>> invalidCriteria = List.of(List.of("name", "notAnOperator", "Alice"));
+
+		assertThrows(IllegalArgumentException.class,
+				() -> view.getLazyDataModel("sales", "Order", "Orders", null, invalidCriteria));
+		SkyveLazyDataModel model = view.getLazyDataModel("sales", "Order", "Orders", null, List.of());
+		assertNotNull(model);
+		assertSame(model, view.getLazyDataModel("sales", "Order", "Orders", null, null));
+	}
+
+	@Test
 	void onRowReorderWithNullEventDoesNothing() {
 		FacesView view = new FacesView();
 
@@ -1451,6 +1518,7 @@ class FacesViewTest {
 	}
 
 	@Test
+	@SuppressWarnings("java:S2696") // JUnit instance test temporarily changes static configuration and restores it in finally.
 	void getSelectItemsWithFacesTraceEnabledStillRequiresPersistenceSetup() {
 		FacesView view = new FacesView();
 		boolean originalFacesTrace = UtilImpl.FACES_TRACE;
@@ -1512,6 +1580,7 @@ class FacesViewTest {
 	}
 
 	@Test
+	@SuppressWarnings("java:S2696") // JUnit instance test temporarily changes static configuration and restores it in finally.
 	void navigationAndAddInlineWithFacesTraceEnabledExecuteMethodBodiesInHeadlessMode() {
 		FacesView view = new FacesView();
 		boolean originalFacesTrace = UtilImpl.FACES_TRACE;
@@ -1830,6 +1899,52 @@ class FacesViewTest {
 	}
 
 	@Test
+	void postRenderStateAcceptsSubtypeSpecificBizlet() {
+		FacesView view = new FacesView();
+		java.util.concurrent.atomic.AtomicReference<DynamicBean> renderedBean = new java.util.concurrent.atomic.AtomicReference<>();
+		java.util.concurrent.atomic.AtomicReference<WebContext> renderedContext = new java.util.concurrent.atomic.AtomicReference<>();
+		Bizlet<DynamicBean> bizlet = new Bizlet<>() {
+			@Override
+			public void postRender(DynamicBean bean, WebContext webContext) {
+				renderedBean.set(bean);
+				renderedContext.set(webContext);
+			}
+		};
+		DynamicBean bean = mock(DynamicBean.class);
+		WebContext context = mock(WebContext.class);
+		view.setPostRender(bizlet, bean);
+
+		// Preserve the state through the getter/setter round trip used on redirects.
+		view.setPostRender(view.getPostRenderBizlet(), view.getPostRenderBean());
+		assertSame(bizlet, view.getPostRenderBizlet());
+		assertSame(bean, view.getPostRenderBean());
+		// Match the phase listener's invocation through the Bean-level contract.
+		@SuppressWarnings("unchecked")
+		Bizlet<Bean> callback = (Bizlet<Bean>) view.getPostRenderBizlet();
+		callback.postRender(view.getPostRenderBean(), context);
+		assertSame(bean, renderedBean.get());
+		assertSame(context, renderedContext.get());
+	}
+
+	@Test
+	void postRenderStateSupportsAbsentBizletAndClearing() {
+		FacesView view = new FacesView();
+		assertNull(view.getPostRenderBizlet());
+		assertNull(view.getPostRenderBean());
+		Bean bean = mock(Bean.class);
+		Bizlet<Bean> bizlet = new Bizlet<>();
+		view.setPostRender(bizlet, bean);
+
+		view.setPostRender(null, bean);
+		assertNull(view.getPostRenderBizlet());
+		assertSame(bean, view.getPostRenderBean());
+
+		view.setPostRender(null, null);
+		assertNull(view.getPostRenderBizlet());
+		assertNull(view.getPostRenderBean());
+	}
+
+	@Test
 	void setBeanWithWebContextInitialisesCurrentBeanAdapter() {
 		FacesView view = new FacesView();
 		MockWebContext webContext = new MockWebContext();
@@ -1878,6 +1993,7 @@ class FacesViewTest {
 	}
 
 	@Test
+	@SuppressWarnings("java:S2696") // JUnit instance test temporarily changes static configuration and restores it in finally.
 	void dehydrateWithFacesTraceEnabledStillCapturesWebId() {
 		FacesView view = new FacesView();
 		MockWebContext webContext = new MockWebContext();
@@ -1930,6 +2046,7 @@ class FacesViewTest {
 	}
 
 	@Test
+	@SuppressWarnings("java:S2696") // JUnit instance test temporarily changes static configuration and restores it in finally.
 	void hydrateWithFacesTraceEnabledRestoresWebContextAndClearsDehydratedWebId() {
 		FacesView view = new FacesView();
 		MockWebContext initialContext = new MockWebContext();
@@ -2006,6 +2123,7 @@ class FacesViewTest {
 	}
 
 	@Test
+	@SuppressWarnings("java:S2696") // JUnit instance test temporarily changes static configuration and restores it in finally.
 	void resetResponsiveFormStyleReturnsPrimeFlexClassWhenEnabled() {
 		FacesView view = new FacesView();
 		ResponsiveFormGrid grid = new ResponsiveFormGrid(new ResponsiveFormGrid.ResponsiveGridStyle[] {

@@ -830,28 +830,34 @@ public class ViewImpl extends Container implements View {
 					}
 					String targetDocumentName = targetRelation.getDocumentName();
 	
-					// Check lookup query
-					String queryName = lookup.getQuery();
-					// Maybe the relation is a reference and has a query
-					if (queryName == null) {
-						if (targetRelation instanceof Reference reference) {
-							queryName = reference.getQueryName();
-						}
-					}
-					// Look for the default query for the relation document name
-					if (queryName == null) {
-						DocumentRef ref = module.getDocumentRefs().get(targetDocumentName);
-						queryName = ref.getDefaultQueryName();
-					}
-	
-					// add the query aggregate or a document aggregate
-					if (queryName == null) {
-						accesses.add(UserAccess.documentAggregate(moduleName, targetDocumentName));
+					String modelName = lookup.getModelName();
+					if (modelName != null) {
+						accesses.add(UserAccess.modelAggregate(moduleName, documentName, modelName));
 					}
 					else {
-						accesses.add(UserAccess.queryAggregate(moduleName, queryName));
+						// Check lookup query
+						String queryName = lookup.getQuery();
+						// Maybe the relation is a reference and has a query
+						if (queryName == null) {
+							if (targetRelation instanceof Reference reference) {
+								queryName = reference.getQueryName();
+							}
+						}
+						// Look for the default query for the relation document name
+						if (queryName == null) {
+							DocumentRef ref = module.getDocumentRefs().get(targetDocumentName);
+							queryName = ref.getDefaultQueryName();
+						}
+
+						// add the query aggregate or a document aggregate
+						if (queryName == null) {
+							accesses.add(UserAccess.documentAggregate(moduleName, targetDocumentName));
+						}
+						else {
+							accesses.add(UserAccess.queryAggregate(moduleName, queryName));
+						}
 					}
-	
+
 					// If not in a grid and is editable, add the zoom in access
 					if ((dataGridBinding == null) && (! Boolean.FALSE.equals(lookup.getEditable()))) {
 						Document targetDocument = module.getDocument(customer, targetDocumentName);

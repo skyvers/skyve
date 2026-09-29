@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
@@ -173,7 +174,7 @@ class ViewValidator extends ViewVisitor {
 					CustomerImpl customer,
 					DocumentImpl document,
 					String uxui) {
-		super(customer, (ModuleImpl) repository.getModule(customer, document.getOwningModuleName()), document, view, uxui);
+		super(customer, (ModuleImpl) Objects.requireNonNull(repository.getModule(customer, document.getOwningModuleName())), document, view, uxui);
 		this.repository = repository;
 		viewIdentifier = view.getName() + " view for UX/UI " + uxui + " for document " + module.getName() + '.' + document.getName();
 	}
@@ -1390,19 +1391,22 @@ class ViewValidator extends ViewVisitor {
 		validateConditionName(lookup.getDisableEditConditionName(), lookupIdentifier);
 		validateConditionName(lookup.getDisableAddConditionName(), lookupIdentifier);
 		validateConditionName(lookup.getDisableClearConditionName(), lookupIdentifier);
-		Document drivingDocument = validateQueryName(lookup.getQuery(), lookupIdentifier);
+		String modelName = lookup.getModelName();
+		String queryName = lookup.getQuery();
+		Document drivingDocument = (modelName == null) ?
+				validateQueryName(queryName, lookupIdentifier) :
+				validateQueryOrModel(queryName, modelName, lookupIdentifier);
 		validateFilterParameterBindings(lookup.getFilterParameters(), lookupIdentifier, drivingDocument);
 		validateParameterBindings(lookup.getParameters(), lookupIdentifier);
 		validateNoColonInFilterParameter(lookup.getFilterParameters(), lookupIdentifier);
 		validateNoColonInParameter(lookup.getParameters(), lookupIdentifier);
 
-		// determine the query that will be used
-		MetaDataQueryDefinition query = null;
-		if (lookup.getQuery() != null) {
-    		query = module.getNullSafeMetaDataQuery(lookup.getQuery());
-    	}
-		else {
-			// NB Use getMetaDataForBinding() to ensure we find attributes from base documents inherited
+		// determine the columns that will be used
+		List<MetaDataQueryColumn> columns;
+		if (modelName != null) {
+			if (drivingDocument == null) {
+				throw new MetaDataException(lookupIdentifier + IN + viewIdentifier + " requires a model with a driving document.");
+			}
 			String fullBinding = binding;
 			if (dataWidgetBinding != null) {
 				if (binding == null) {
@@ -1416,18 +1420,50 @@ class ViewValidator extends ViewVisitor {
 				throw new MetaDataException(lookupIdentifier + IN + viewIdentifier + " - binding is required.");
 			}
 			TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, fullBinding);
-    		Relation relation = (Relation) target.getAttribute();
-    		// This should never happen as shit was validated above
-    		if (relation == null) {
-    			throw new MetaDataException(fullBinding + " doesn't point to an attribute from document " + document.getName());
-    		}
-    		String queryName = (relation instanceof Reference reference) ? reference.getQueryName() : null;
-    		if (queryName != null) {
-        		query = module.getNullSafeMetaDataQuery(queryName);
-    		}
-    		else {
-    			query = module.getDocumentDefaultQuery(customer, relation.getDocumentName());
-    		}
+			Relation relation = (Relation) Objects.requireNonNull(target.getAttribute());
+			Document targetDocument = customer.getModule(target.getDocument().getOwningModuleName())
+					.getDocument(customer, relation.getDocumentName());
+			if ((! targetDocument.getName().equals(drivingDocument.getName())) ||
+					(! targetDocument.getOwningModuleName().equals(drivingDocument.getOwningModuleName()))) {
+				throw new MetaDataException(lookupIdentifier + IN + viewIdentifier + " model must drive the lookup target document.");
+			}
+			columns = Objects.requireNonNull(repository.getListModel(customer, document, modelName, false)).getColumns();
+		}
+		else {
+			MetaDataQueryDefinition query = null;
+			if (queryName != null) {
+				query = module.getNullSafeMetaDataQuery(queryName);
+			}
+			else {
+				// NB Use getMetaDataForBinding() to ensure we find attributes from base documents inherited
+				String fullBinding = binding;
+				if (dataWidgetBinding != null) {
+					if (binding == null) {
+						fullBinding = dataWidgetBinding;
+					}
+					else {
+						fullBinding = BindUtil.createCompoundBinding(dataWidgetBinding, binding);
+					}
+				}
+				if (fullBinding == null) {
+					throw new MetaDataException(lookupIdentifier + IN + viewIdentifier + " - binding is required.");
+				}
+				TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, fullBinding);
+				Relation relation = (Relation) target.getAttribute();
+				// This should never happen as shit was validated above
+				if (relation == null) {
+					throw new MetaDataException(fullBinding + " doesn't point to an attribute from document " + document.getName());
+				}
+				queryName = (relation instanceof Reference reference) ? reference.getQueryName() : null;
+				if (queryName != null) {
+					query = module.getNullSafeMetaDataQuery(queryName);
+				}
+				else {
+					query = module.getDocumentDefaultQuery(customer, relation.getDocumentName());
+				}
+			}
+
+			columns = query.getColumns();
 		}
 
 		// validate drop down columns and description binding
@@ -1442,36 +1478,36 @@ class ViewValidator extends ViewVisitor {
 				}
 			}
 		}
-			boolean foundLookupDescription = Bean.BIZ_KEY.equals(descriptionBinding);
+		boolean foundLookupDescription = Bean.BIZ_KEY.equals(descriptionBinding);
 
-			for (MetaDataQueryColumn column : query.getColumns()) {
-				String alias = column.getName();
-				if (alias == null) {
-					alias = column.getBinding();
-				}
-				MetaDataQueryProjectedColumn projectedColumn = (column instanceof MetaDataQueryProjectedColumn projected) ?
-																	projected :
-																	null;
-				if ((testColumns != null) && testColumns.contains(alias)) {
-					if ((projectedColumn != null) && (! projectedColumn.isProjected())) {
-						throw new MetaDataException(lookupIdentifier + IN + viewIdentifier + " has a drop down column of " + alias + " which is not projected in the query.");
-					}
-					testColumns.remove(alias);
-				}
-				if ((! foundLookupDescription) && descriptionBinding.equals(alias)) {
-					if ((projectedColumn != null) && (! projectedColumn.isProjected())) {
-						throw new MetaDataException(lookupIdentifier + IN + viewIdentifier + " has a description binding of " + alias + " which is not projected in the query.");
-					}
-					foundLookupDescription = true;
-				}
+		for (MetaDataQueryColumn column : columns) {
+			String alias = column.getName();
+			if (alias == null) {
+				alias = column.getBinding();
 			}
+			MetaDataQueryProjectedColumn projectedColumn = (column instanceof MetaDataQueryProjectedColumn projected) ?
+																projected :
+																null;
+			if ((testColumns != null) && testColumns.contains(alias)) {
+				if ((projectedColumn != null) && (! projectedColumn.isProjected())) {
+					throw new MetaDataException(lookupIdentifier + IN + viewIdentifier + " has a drop down column of " + alias + " which is not projected in the query or model.");
+				}
+				testColumns.remove(alias);
+			}
+			if ((! foundLookupDescription) && descriptionBinding.equals(alias)) {
+				if ((projectedColumn != null) && (! projectedColumn.isProjected())) {
+					throw new MetaDataException(lookupIdentifier + IN + viewIdentifier + " has a description binding of " + alias + " which is not projected in the query or model.");
+				}
+				foundLookupDescription = true;
+			}
+		}
 
-    	if (! foundLookupDescription) {
-			throw new MetaDataException(lookupIdentifier + IN + viewIdentifier + " has a description binding of " + descriptionBinding + " which is not defined in the query.");
-    	}
-    	if ((testColumns != null) && (! testColumns.isEmpty())) {
-			throw new MetaDataException(lookupIdentifier + IN + viewIdentifier + " has a drop down column of " + testColumns.iterator().next() + " which is not defined in the query.");
-    	}
+		if (! foundLookupDescription) {
+			throw new MetaDataException(lookupIdentifier + IN + viewIdentifier + " has a description binding of " + descriptionBinding + " which is not defined in the query or model.");
+		}
+		if ((testColumns != null) && (! testColumns.isEmpty())) {
+			throw new MetaDataException(lookupIdentifier + IN + viewIdentifier + " has a drop down column of " + testColumns.iterator().next() + " which is not defined in the query or model.");
+		}
 	}
 
 	@Override
