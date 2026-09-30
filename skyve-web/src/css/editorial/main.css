@@ -3717,13 +3717,15 @@ mark {
 			}
 		}
 
+		/* NB background needs !important INSIDE @layer main to beat the un-layered PrimeFaces
+		   .ui-avatar background, otherwise the light initials are unreadable in light mode */
 		#header .ui-avatar {
-			background: rgba(255, 255, 255, 0.18);
+			background: rgba(255, 255, 255, 0.18) !important;
 			color: var(--skyve-editorial-topbar-text);
 		}
 
 		#header .ui-avatar:hover {
-			background: rgba(255, 255, 255, 0.28);
+			background: rgba(255, 255, 255, 0.28) !important;
 		}
 
 		#header .logo {

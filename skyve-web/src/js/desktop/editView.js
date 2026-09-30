@@ -874,7 +874,7 @@ isc.EditView.addMethods({
 					} else if (grid._candidateList && grid._memberList) {
 						this._handleListMembership(data, valueMaps, gridBinding, grid);
 					} else if (grid.grid) {
-						this._handleDataGrid(data, valueMaps, gridBinding, grid);
+						this._handleDataGrid(data, valueMaps, gridBinding, grid, values);
 					}
 				}
 			});
@@ -952,8 +952,9 @@ isc.EditView.addMethods({
 	 * @param {Object} valueMaps - the value maps associated w
 	 * @param {Object} gridBinding - the binding name of the grid.
 	 * @param {Object} grid - the grid object to be updated.
+	 * @param {Object} values - the scattered values, used to select the grid row bound to selectedIdBinding.
 	 */
-	_handleDataGrid: function (data, valueMaps, gridBinding, grid) {
+	_handleDataGrid: function (data, valueMaps, gridBinding, grid, values) {
 		const gridFields = grid.grid.fields;
 		gridFields.forEach((gridField) => {
 			const { type, name } = gridField;
@@ -972,7 +973,7 @@ isc.EditView.addMethods({
 
 		// Handle selection from server
 		if (grid.selectedIdBinding) {
-			this._handleGridSelection(data, grid);
+			this._handleGridSelection(data, grid, values);
 		} else {
 			grid.grid.setData(data);
 		}
@@ -1004,8 +1005,9 @@ isc.EditView.addMethods({
 	 *
 	 * @param {Array} data - the data to be set in the grid.
 	 * @param {Object} grid - the grid object to be updated.
+	 * @param {Object} values - the scattered values, used to select the grid row bound to selectedIdBinding.
 	 */
-	_handleGridSelection: function (data, grid) {
+	_handleGridSelection: function (data, grid, values) {
 		const method = grid.grid.selectionUpdated;
 		try {
 			grid.grid.selectionUpdated = null;

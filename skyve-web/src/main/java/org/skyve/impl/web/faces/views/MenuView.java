@@ -82,6 +82,11 @@ public class MenuView extends HarnessView {
 			public @Nullable Void callback() throws Exception {
 				if (! fc.isPostback()) {
 					setBizModuleParameter(request.getParameter("m"));
+					// The menu only needs the module - clear the document, query and action left by a previous
+					// build in this session, otherwise initialise() validates them against the new module
+					setBizDocumentParameter(null);
+					setQueryNameParameter(null);
+					setWebActionParameter(null);
 					initialise(); // check m parameter and set to default if DNE
 				}
 
