@@ -170,7 +170,8 @@
 			</hbox>
 		</tab>
 		<tab title="My Logins and Attempts" iconStyleClass="fa-solid fa-right-to-bracket">
-			<listGrid query="qMyLoginHistory" title="My Logins and Attempts" continueConversation="false" disabled="true" />
+			<!-- Don't allow zoom here as only some users have "singular" access to the UerLoginRecord -->
+			<listGrid query="qMyLoginHistory" title="My Logins and Attempts" continueConversation="false" disabled="true" showZoom="false" />
 		</tab>
 	</tabPane>
 </view>
