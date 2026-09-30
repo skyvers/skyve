@@ -123,13 +123,13 @@
 				<document name="UserDashboard" permission="CR__U">
 					<action name="UpdateMyDetails" />
 				</document>
+				<document name="UserLoginRecord" permission="_R__U" />
 				<document name="UserProxy" permission="_RU_U" />
 			</privileges>
 			<accesses>
 				<singularAccess document="ReportTemplate"/>
 				<singularAccess document="UserAccount" />
 				<queryAggregateAccess query="qMyLoginHistory" />
-				<queryAggregateAccess query="qMySecurityLogs" />
 				<contentAccess document="Contact" binding="image" />
 				<contentAccess document="UserDashboard" binding="currentUser.contact.image" />
 			</accesses>
@@ -204,12 +204,12 @@
 				<document name="UserDashboard" permission="CR__U">
 					<action name="UpdateMyDetails" />
 				</document>
+				<document name="UserLoginRecord" permission="_R__U" />
 				<document name="UserProxy" permission="_R__C" />
 			</privileges>
 			<accesses>
 				<singularAccess document="UserAccount" />
 				<queryAggregateAccess query="qMyLoginHistory" />
-				<queryAggregateAccess query="qMySecurityLogs" />
 			</accesses>
 		</role>
 		<role name="ContactManager">
@@ -485,11 +485,11 @@
 				<document name="UserDashboard" permission="CR__U">
 					<action name="UpdateMyDetails" />
 				</document>
+				<document name="UserLoginRecord" permission="_R__U" />
 			</privileges>
 			<accesses>
 				<singularAccess document="UserAccount" />
 				<queryAggregateAccess query="qMyLoginHistory" />
-				<queryAggregateAccess query="qMySecurityLogs" />
 			</accesses>
 		</role>
 	</roles>
@@ -999,19 +999,5 @@
 				<column binding="archiveFilename" hidden="true" />
 			</columns>
 		</query>
-		<query name="qMySecurityLogs" documentName="SecurityLog">
-            <description>My Security Events</description>
-            <columns>
-                <column binding="timestamp" sortOrder="descending"/>
-                <column binding="username"/>
-                <column binding="eventType"/>
-                <column binding="eventMessage"/>
-                <column binding="loggedInUserId">
-                	<filterOperator>equal</filterOperator>
-                	<filterExpression>{USERID}</filterExpression>
-                	<projected>false</projected>
-                </column>
-            </columns>
-        </query>
 	</queries>
 </module>

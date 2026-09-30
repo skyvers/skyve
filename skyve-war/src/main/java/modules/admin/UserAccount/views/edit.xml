@@ -172,8 +172,5 @@
 		<tab title="My Logins and Attempts" iconStyleClass="fa-solid fa-right-to-bracket">
 			<listGrid query="qMyLoginHistory" title="My Logins and Attempts" continueConversation="false" disabled="true" />
 		</tab>
-		<tab title="My Security Events" iconStyleClass="fa-solid fa-shield-virus">
-			<listGrid query="qMySecurityLogs" title="My Security Events" continueConversation="false" disabled="true" />
-		</tab>
 	</tabPane>
 </view>
