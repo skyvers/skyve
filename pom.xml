@@ -41,6 +41,7 @@
 		<hibernate-entitymanager.version>5.6.15.Final</hibernate-entitymanager.version>
 		<hibernate-spatial.version>5.6.15.Final</hibernate-spatial.version>
 		<ireport.version>4.7.0</ireport.version>
+		<jackson.version>2.18.11</jackson.version>
 		<jasperreports.version>7.0.7</jasperreports.version>
 		<java.version>17</java.version>
 		<javassist.version>3.20.0-GA</javassist.version>
@@ -251,6 +252,14 @@
 
 	<dependencyManagement>
 		<dependencies>
+			<!-- Align all Jackson modules; h2gis otherwise drags in an older jackson-core than JasperReports needs -->
+			<dependency>
+				<groupId>com.fasterxml.jackson</groupId>
+				<artifactId>jackson-bom</artifactId>
+				<version>${jackson.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
 			<dependency>
 				<groupId>jakarta.platform</groupId>
 				<artifactId>jakarta.jakartaee-api</artifactId>
