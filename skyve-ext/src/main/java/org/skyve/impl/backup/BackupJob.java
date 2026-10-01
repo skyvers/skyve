@@ -470,10 +470,9 @@ public class BackupJob extends CancellableJob {
 												}
 											}
 										}
-										trace = String.format("Backup %s - %,d %s in %s",
+										trace = String.format("Backup %s - %s in %s",
 																table.agnosticIdentifier,
-																Integer.valueOf(rows),
-																(rows == 1) ? "row" : "rows",
+																countOf(rows, "row"),
 																elapsed(tableStart));
 										log.add(trace);
 										LOGGER.info(trace);
@@ -531,27 +530,7 @@ public class BackupJob extends CancellableJob {
 						log.add(trace);
 						LOGGER.info(trace);
 						backupZip = zip;
-	
-						// Peak disk usage - the backup folder and the zip both exist
-						long unzippedSize = FileUtils.sizeOfDirectory(directory);
-						long zippedSize = zip.length();
-						trace = String.format("Backup size %s unzipped, %s zipped (%.1f%% of unzipped)",
-												formatSize(unzippedSize),
-												formatSize(zippedSize),
-												Double.valueOf((unzippedSize == 0) ? 0 : (100.0 * zippedSize / unzippedSize)));
-						log.add(trace);
-						LOGGER.info(trace);
-						long usableSpace = directory.getUsableSpace();
-						trace = "Usable space on backup volume after compression " + formatSize(usableSpace);
-						log.add(trace);
-						LOGGER.info(trace);
-						if (usableSpace < unzippedSize + zippedSize) {
-							trace = String.format("Usable space on backup volume %s is less than the %s the next backup needs (unzipped + zipped)",
-													formatSize(usableSpace),
-													formatSize(unzippedSize + zippedSize));
-							log.add(trace);
-							LOGGER.warn(trace);
-						}
+						long zippedSize = logDiskUsage(directory, zip);
 	
 						if (ExternalBackup.areExternalBackupsEnabled()) {
 							long uploadStart = System.currentTimeMillis();
@@ -578,14 +557,23 @@ public class BackupJob extends CancellableJob {
 						throw t;
 					}
 					finally {
-						problemCount = logProblems(new File(directory, PROBLEMS_TXT), log);
+						try {
+							problemCount = logProblems(new File(directory, PROBLEMS_TXT), log);
+						}
+						catch (IOException e) {
+							// don't let this mask the original problem or leave the backup folder behind
+							trace = "Could not read " + PROBLEMS_TXT + " : " + e.getLocalizedMessage();
+							log.add(trace);
+							LOGGER.warn(trace);
+						}
 						FileUtil.delete(directory);
 						trace = "Deleted backup folder " + directory.getAbsolutePath();
 						log.add(trace);
 						LOGGER.info(trace);
 						setPercentComplete(100);
-						trace = String.format("Backup Completed%s - %s in %s",
-												problem ? String.format(" with %,d problems", Integer.valueOf(problemCount)) : "",
+						trace = String.format("Backup %s%s - %s in %s",
+												(causation == null) ? "Completed" : "Failed",
+												problem ? " with " + countOf(problemCount, "problem") : "",
 												(backupZip == null) ? "no backup file" : backupZip.getName(),
 												elapsed(start));
 						log.add(trace);
@@ -602,8 +590,8 @@ public class BackupJob extends CancellableJob {
 		}
 		finally {
 			if (problem) {
-				String details = String.format("%,d problems recorded%s.",
-												Integer.valueOf(problemCount),
+				String details = String.format("%s recorded%s.",
+												countOf(problemCount, "problem"),
 												(backupZip == null) ? "" : " in backup " + backupZip.getName());
 				emailProblem(log, (causation == null) ? details : causation + ". " + details);
 			}
@@ -676,13 +664,56 @@ public class BackupJob extends CancellableJob {
 			logged.add(String.format("... and %,d more", Integer.valueOf(count - MAX_LOGGED_PROBLEMS)));
 		}
 		if (count > 0) {
-			logged.add(0, String.format("%,d problems recorded in %s", Integer.valueOf(count), PROBLEMS_TXT));
+			logged.add(0, countOf(count, "problem") + " recorded in " + PROBLEMS_TXT);
 			for (String trace : logged) {
 				jobLog.add(trace);
 				SLOGGER.warn(trace);
 			}
 		}
 		return count;
+	}
+
+	/**
+	 * Logs the backup sizes and the usable space on the backup volume at its peak, while the backup
+	 * folder and the zip both exist, and warns when there is not enough room for the next backup.
+	 *
+	 * @param directory the backup folder
+	 * @param zip the compressed backup
+	 * @return the size of the zip in bytes
+	 */
+	private long logDiskUsage(@Nonnull File directory, @Nonnull File zip) {
+		List<String> log = getLog();
+		long unzippedSize = FileUtils.sizeOfDirectory(directory);
+		long zippedSize = zip.length();
+		String trace = String.format("Backup size %s unzipped, %s zipped (%.1f%% of unzipped)",
+										formatSize(unzippedSize),
+										formatSize(zippedSize),
+										Double.valueOf((unzippedSize == 0) ? 0 : (100.0 * zippedSize / unzippedSize)));
+		log.add(trace);
+		LOGGER.info(trace);
+		long usableSpace = directory.getUsableSpace();
+		trace = "Usable space on backup volume after compression " + formatSize(usableSpace);
+		log.add(trace);
+		LOGGER.info(trace);
+		if (usableSpace < unzippedSize + zippedSize) {
+			trace = String.format("Usable space on backup volume %s is less than the %s the next backup needs (unzipped + zipped)",
+									formatSize(usableSpace),
+									formatSize(unzippedSize + zippedSize));
+			log.add(trace);
+			LOGGER.warn(trace);
+		}
+		return zippedSize;
+	}
+
+	/**
+	 * Formats a count with its noun for the job log, using the singular noun for a count of 1.
+	 *
+	 * @param count the count
+	 * @param noun the singular noun
+	 * @return the count and noun, e.g. "1 row" or "1,234 rows"
+	 */
+	private static String countOf(int count, @Nonnull String noun) {
+		return String.format("%,d %s%s", Integer.valueOf(count), noun, (count == 1) ? "" : "s");
 	}
 
 	/**
