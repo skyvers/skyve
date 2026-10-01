@@ -422,6 +422,7 @@ public class BackupJob extends CancellableJob {
 																		}
 																		catch (Throwable t) {
 																			if (t instanceof FileNotFoundException) {
+																				problem = true;
 																				problems.write(String.format("Table [%s] with [%s] = %s is missing a file in the content store for attribute [%s] = %s",
 																						table.agnosticIdentifier,
 																						Bean.DOCUMENT_ID,
