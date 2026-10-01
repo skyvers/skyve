@@ -14,6 +14,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -845,6 +846,166 @@ public class XMLMetaData {
 	}
 
 	/**
+	 * Preferred XML attribute order, sampled from the admin module and completed with
+	 * other bundled metadata. Edit one entry to reorder an element; unlisted
+	 * attributes and elements follow alphabetic order. Namespace declarations and
+	 * schema locations keep their existing root placement.
+	 */
+	@SuppressWarnings("java:S1192") // Attribute names intentionally repeat across element-specific order lists.
+	private static final Map<String, List<String>> ATTRIBUTE_ORDER = Map.ofEntries(
+			Map.entry("behaviour:action", List.of("name")),
+			Map.entry("behaviour:set", List.of("binding", "expression")),
+			Map.entry("common:property", List.of("key")),
+			Map.entry("document:association", List.of("name", "type", "embeddedColumnsPrefix", "required", "persistent", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:bizKey", List.of("expression", "sensitivity")),
+			Map.entry("document:boolean", List.of("name", "required", "persistent", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:class", List.of("name", "className")),
+			Map.entry("document:collection", List.of("name", "type", "ordered", "persistent", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:colour", List.of("name", "required", "persistent", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:condition", List.of("name", "usage")),
+			Map.entry("document:constraint", List.of("name", "scope", "description")),
+			Map.entry("document:content", List.of("name", "required", "persistent", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:date", List.of("name", "required", "persistent", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:dateTime", List.of("name", "required", "persistent", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:decimal10", List.of("name", "required", "persistent", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:decimal2", List.of("name", "required", "persistent", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:decimal5", List.of("name", "required", "persistent", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:document", List.of("name")),
+			Map.entry("document:dynamic", List.of("bizletClassName", "dataFactoryClassName")),
+			Map.entry("document:enum", List.of("name", "required", "documentRef", "attributeRef", "moduleRef", "typeName", "implementingEnumClassName", "persistent", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:extends", List.of("document")),
+			Map.entry("document:format", List.of("mask", "case")),
+			Map.entry("document:geometry", List.of("name", "required", "persistent", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:id", List.of("name", "required", "persistent", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:image", List.of("name", "required", "persistent", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:integer", List.of("name", "required", "persistent", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:inverseMany", List.of("name", "cascade", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:inverseOne", List.of("name", "cascade", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:longInteger", List.of("name", "required", "persistent", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:markup", List.of("name", "required", "persistent", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:memo", List.of("name", "required", "persistent", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:order", List.of("by", "sort")),
+			Map.entry("document:parentDocument", List.of("databaseIndex")),
+			Map.entry("document:persistent", List.of("name", "schema", "catalog", "strategy", "discriminator")),
+			Map.entry("document:text", List.of("name", "required", "persistent", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:time", List.of("name", "required", "persistent", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:timestamp", List.of("name", "required", "persistent", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:unique", List.of("name", "description")),
+			Map.entry("document:validator", List.of("type", "min", "max", "precision", "regularExpression", "validationMessage")),
+			Map.entry("document:value", List.of("name", "code", "description")),
+			Map.entry("module:action", List.of("name")),
+			Map.entry("module:bizQL", List.of("name", "timeoutInSeconds")),
+			Map.entry("module:bizQLImport", List.of("name", "moduleRef", "ref")),
+			Map.entry("module:calendar", List.of("name", "document", "query", "model", "startBinding", "endBinding")),
+			Map.entry("module:column", List.of("binding", "displayName", "sortOrder", "pixelWidth", "hidden", "escape", "sanitise", "sortable", "filterable", "editable", "alignment", "formatter", "customFormatter")),
+			Map.entry("module:content", List.of("binding", "displayName", "display", "emptyThumbnailRelativeFile", "sortOrder", "pixelWidth", "pixelHeight", "hidden", "alignment")),
+			Map.entry("module:contentAccess", List.of("document", "binding")),
+			Map.entry("module:contentPermission", List.of("attribute")),
+			Map.entry("module:document", List.of("name", "moduleRef", "ref", "defaultQueryName", "permission")),
+			Map.entry("module:documentAggregateAccess", List.of("document")),
+			Map.entry("module:dynamicImageAccess", List.of("document", "image")),
+			Map.entry("module:edit", List.of("name", "document")),
+			Map.entry("module:group", List.of("name")),
+			Map.entry("module:job", List.of("name", "displayName", "description", "className")),
+			Map.entry("module:link", List.of("name", "href")),
+			Map.entry("module:list", List.of("name", "document", "query", "model", "autoPopulate")),
+			Map.entry("module:map", List.of("name", "document", "query", "model", "geometryBinding", "refreshTimeInSeconds", "showRefreshControls")),
+			Map.entry("module:modelAggregateAccess", List.of("document", "model")),
+			Map.entry("module:module", List.of("name", "title", "formLabelLayout", "prototype")),
+			Map.entry("module:previousCompleteAccess", List.of("document", "binding")),
+			Map.entry("module:query", List.of("name", "documentName", "aggregate", "timeoutInSeconds", "polymorphic")),
+			Map.entry("module:queryAggregateAccess", List.of("query")),
+			Map.entry("module:queryImport", List.of("name", "moduleRef", "ref")),
+			Map.entry("module:reportAccess", List.of("module", "document", "report")),
+			Map.entry("module:role", List.of("name")),
+			Map.entry("module:singularAccess", List.of("document")),
+			Map.entry("module:sql", List.of("name", "timeoutInSeconds")),
+			Map.entry("module:sqlImport", List.of("name", "moduleRef", "ref")),
+			Map.entry("module:tree", List.of("name", "document", "query", "model", "autoPopulate")),
+			Map.entry("module:uxui", List.of("name")),
+			Map.entry("router:criteria", List.of("webAction", "module", "document")),
+			Map.entry("router:route", List.of("outcome")),
+			Map.entry("router:uxui", List.of("name")),
+			Map.entry("view:action", List.of("name", "className", "displayName", "escapeDisplayName", "clientValidation", "inActionPanel", "show", "toolTip", "escapeToolTip", "relativeIconFileName", "iconStyleClass", "confirm", "escapeConfirm", "disabled", "enabled", "invisible", "visible")),
+			Map.entry("view:actionReference", List.of("action")),
+			Map.entry("view:actions", List.of("widgetId")),
+			Map.entry("view:blurb", List.of("textAlignment", "escape", "sanitise", "invisible", "visible", "pixelWidth", "pixelHeight")),
+			Map.entry("view:boundColumn", List.of("binding", "title", "escapeTitle", "alignment", "escape", "sanitise", "editable", "formatter", "customFormatter", "pixelWidth")),
+			Map.entry("view:button", List.of("action", "show", "pixelWidth", "pixelHeight", "minPixelHeight", "maxPixelHeight")),
+			Map.entry("view:cancel", List.of("name", "displayName", "escapeDisplayName", "inActionPanel", "show", "toolTip", "escapeToolTip", "relativeIconFileName", "iconStyleClass", "confirm", "escapeConfirm", "disabled", "enabled", "invisible", "visible")),
+			Map.entry("view:chart", List.of("type", "modelName", "invisible", "visible", "pixelWidth", "responsiveWidth", "sm", "md", "lg", "xl", "percentageWidth", "minPixelWidth", "maxPixelWidth", "pixelHeight", "percentageHeight", "minPixelHeight", "maxPixelHeight")),
+			Map.entry("view:checkBox", List.of("binding", "triState", "disabled", "enabled", "invisible", "visible", "pixelWidth", "pixelHeight")),
+			Map.entry("view:column", List.of("filterable", "pixelWidth", "responsiveWidth", "sm", "md", "lg", "xl", "percentageWidth")),
+			Map.entry("view:combo", List.of("binding", "disabled", "enabled", "invisible", "visible", "pixelWidth")),
+			Map.entry("view:comparison", List.of("binding", "modelName", "editable", "disabled", "enabled", "invisible", "visible", "pixelWidth", "responsiveWidth", "sm", "md", "lg", "xl", "percentageWidth", "minPixelWidth", "maxPixelWidth", "pixelHeight", "percentageHeight", "minPixelHeight", "maxPixelHeight")),
+			Map.entry("view:component", List.of("name", "binding", "module", "document", "widgetId", "invisible", "visible")),
+			Map.entry("view:containerColumn", List.of("title", "escapeTitle", "alignment", "pixelWidth")),
+			Map.entry("view:content", List.of("binding", "display", "capture", "editable", "showMarkup", "disabled", "enabled", "invisible", "visible", "pixelWidth", "responsiveWidth", "sm", "md", "lg", "xl", "percentageWidth", "minPixelWidth", "maxPixelWidth", "pixelHeight", "percentageHeight", "minPixelHeight", "maxPixelHeight")),
+			Map.entry("view:contentSignature", List.of("binding", "rgbHexBackgroundColour", "rgbHexForegroundColour", "disabled", "enabled", "invisible", "visible", "pixelWidth", "pixelHeight")),
+			Map.entry("view:dataGrid", List.of("binding", "title", "escapeTitle", "selectedIdBinding", "inline", "editable", "wrap", "disabled", "enabled", "invisible", "visible", "disableAdd", "enableAdd", "disableZoom", "enableZoom", "disableEdit", "enableEdit", "disableRemove", "enableRemove", "showAdd", "showZoom", "showEdit", "showRemove", "showDeselect", "widgetId", "pixelWidth", "responsiveWidth", "sm", "md", "lg", "xl", "percentageWidth", "minPixelWidth", "maxPixelWidth", "pixelHeight", "percentageHeight", "minPixelHeight", "maxPixelHeight")),
+			Map.entry("view:dataRepeater", List.of("binding", "title", "escapeTitle", "showColumnHeaders", "showGrid", "widgetId", "invisible", "visible", "pixelWidth", "responsiveWidth", "sm", "md", "lg", "xl", "percentageWidth", "minPixelWidth", "maxPixelWidth", "pixelHeight", "percentageHeight", "minPixelHeight", "maxPixelHeight")),
+			Map.entry("view:default", List.of("binding")),
+			Map.entry("view:delete", List.of("name", "displayName", "escapeDisplayName", "clientValidation", "inActionPanel", "show", "toolTip", "escapeToolTip", "relativeIconFileName", "iconStyleClass", "confirm", "escapeConfirm", "disabled", "enabled", "invisible", "visible")),
+			Map.entry("view:dialogButton", List.of("dialogName", "command", "displayName", "escapeDisplayName", "modalDialog", "disabled", "enabled", "invisible", "visible", "dialogWidth", "dialogHeight")),
+			Map.entry("view:download", List.of("name", "className", "displayName", "escapeDisplayName", "clientValidation", "inActionPanel", "show", "toolTip", "escapeToolTip", "relativeIconFileName", "iconStyleClass", "confirm", "escapeConfirm", "disabled", "enabled", "invisible", "visible")),
+			Map.entry("view:export", List.of("name", "className", "displayName", "escapeDisplayName", "clientValidation", "inActionPanel", "show", "toolTip", "escapeToolTip", "relativeIconFileName", "iconStyleClass", "confirm", "escapeConfirm", "disabled", "enabled", "invisible", "visible")),
+			Map.entry("view:filterParameter", List.of("filterBinding", "operator", "value", "valueBinding")),
+			Map.entry("view:form", List.of("defaultLabelAlign", "labelLayout", "border", "borderTitle", "escapeBorderTitle", "collapsible", "widgetId", "disabled", "enabled", "invisible", "visible", "pixelWidth", "percentageWidth", "responsiveWidth", "sm", "md", "lg", "xl", "minPixelWidth", "maxPixelWidth", "pixelHeight", "percentageHeight", "minPixelHeight", "maxPixelHeight")),
+			Map.entry("view:geometry", List.of("binding", "type", "disabled", "enabled", "invisible", "visible", "pixelWidth")),
+			Map.entry("view:geometryMap", List.of("binding", "type", "disabled", "enabled", "invisible", "visible", "pixelWidth", "responsiveWidth", "sm", "md", "lg", "xl", "percentageWidth", "minPixelWidth", "maxPixelWidth", "pixelHeight", "percentageHeight", "minPixelHeight", "maxPixelHeight")),
+			Map.entry("view:hbox", List.of( "verticalAlignment", "horizontalAlignment", "shrinkWrap", "pixelPadding", "pixelMemberPadding",  "widgetId", "collapsible", "border", "borderTitle", "escapeBorderTitle", "invisible", "visible", "pixelWidth", "responsiveWidth", "sm", "md", "lg", "xl", "percentageWidth", "minPixelWidth", "maxPixelWidth", "pixelHeight", "percentageHeight", "minPixelHeight", "maxPixelHeight")),
+			Map.entry("view:html", List.of("binding", "mentionMarkers", "sanitise", "disabled", "enabled", "invisible", "visible", "pixelWidth", "pixelHeight")),
+			Map.entry("view:import", List.of("name", "className", "displayName", "escapeDisplayName", "clientValidation", "inActionPanel", "show", "toolTip", "escapeToolTip", "relativeIconFileName", "iconStyleClass", "confirm", "escapeConfirm", "disabled", "enabled", "invisible", "visible")),
+			Map.entry("view:item", List.of("colspan", "rowspan", "align", "required", "requiredMessage", "escapeRequiredMessage", "label", "escapeLabel", "showLabel", "labelAlign", "help", "escapeHelp", "showHelp")),
+			Map.entry("view:label", List.of("binding", "value", "for", "formatted", "textAlignment", "escape", "sanitise", "pixelWidth", "pixelHeight", "invisible", "visible")),
+			Map.entry("view:link", List.of("value", "escapeValue", "invisible", "visible", "pixelWidth")),
+			Map.entry("view:listGrid", List.of("query", "model", "title", "escapeTitle", "continueConversation", "selectedIdBinding", "autoPopulate", "disableAdd", "enableAdd", "disableZoom", "enableZoom", "disableEdit", "enableEdit", "disableRemove", "enableRemove", "showAdd", "showZoom", "showEdit", "showRemove", "showDeselect", "showExport", "showChart", "showFilter", "showSummary", "showSnap", "showTag", "showFlag", "postRefresh", "disabled", "enabled", "invisible", "visible", "pixelWidth", "responsiveWidth", "sm", "md", "lg", "xl", "percentageWidth", "minPixelWidth", "maxPixelWidth", "pixelHeight", "percentageHeight", "minPixelHeight", "maxPixelHeight")),
+			Map.entry("view:listMembership", List.of("binding", "candidatesHeading", "escapeCandidatesHeading", "membersHeading", "escapeMembersHeading", "disabled", "enabled", "invisible", "visible", "pixelWidth", "minPixelHeight")),
+			Map.entry("view:listRepeater", List.of("query", "model", "title", "escapeTitle", "showColumnHeaders", "showGrid", "postRefresh", "invisible", "visible", "pixelWidth", "responsiveWidth", "sm", "md", "lg", "xl", "percentageWidth", "minPixelWidth", "maxPixelWidth", "pixelHeight", "percentageHeight", "minPixelHeight", "maxPixelHeight")),
+			Map.entry("view:lookupDescription", List.of("binding", "descriptionBinding", "query", "model", "editable", "disableEdit", "enableEdit", "disableAdd", "enableAdd", "disableClear", "enableClear", "disablePick", "enablePick", "disabled", "enabled", "invisible", "visible", "pixelWidth")),
+			Map.entry("view:map", List.of("modelName", "loading", "refreshTimeInSeconds", "showRefreshControls", "invisible", "visible", "pixelWidth", "responsiveWidth", "sm", "md", "lg", "xl", "percentageWidth", "minPixelWidth", "maxPixelWidth", "pixelHeight", "percentageHeight", "minPixelHeight", "maxPixelHeight")),
+			Map.entry("view:name", List.of("fromComponent", "mappedTo")),
+			Map.entry("view:ok", List.of("name", "displayName", "escapeDisplayName", "clientValidation", "inActionPanel", "show", "toolTip", "escapeToolTip", "relativeIconFileName", "iconStyleClass", "confirm", "escapeConfirm", "disabled", "enabled", "invisible", "visible")),
+			Map.entry("view:parameter", List.of("name", "value", "valueBinding", "fromBinding", "boundTo")),
+			Map.entry("view:password", List.of("binding", "disabled", "enabled", "invisible", "visible", "pixelWidth")),
+			Map.entry("view:radio", List.of("binding", "vertical", "disabled", "enabled", "invisible", "visible", "pixelWidth")),
+			Map.entry("view:rerender", List.of("clientValidation")),
+			Map.entry("view:resourceReference", List.of("relativeFile")),
+			Map.entry("view:richText", List.of("binding", "disabled", "enabled", "invisible", "visible", "pixelWidth", "pixelHeight", "minPixelHeight", "maxPixelHeight", "sanitise")),
+			Map.entry("view:save", List.of("name", "displayName", "escapeDisplayName", "toolTip", "escapeToolTip", "relativeIconFileName", "iconStyleClass", "confirm", "escapeConfirm", "disabled", "enabled", "invisible", "visible", "inActionPanel", "show", "clientValidation")),
+			Map.entry("view:server", List.of("action")),
+			Map.entry("view:sidebar", List.of("floatingPixelWidth", "floatingPixelWidthBreakpoint", "widgetId", "invisible", "visible", "pixelWidth", "percentageWidth", "responsiveWidth")),
+			Map.entry("view:slider", List.of("binding", "vertical", "min", "max", "numberOfDiscreteValues", "roundingPrecision", "disabled", "enabled", "invisible", "visible", "pixelWidth", "pixelHeight", "minPixelHeight", "maxPixelHeight")),
+			Map.entry("view:spacer", List.of("pixelWidth", "pixelHeight", "invisible", "visible")),
+			Map.entry("view:spinner", List.of("binding", "min", "max", "step", "editable", "keyboardType", "complete", "disabled", "enabled", "invisible", "visible", "pixelWidth")),
+			Map.entry("view:staticImage", List.of("relativeFile", "invisible", "visible", "pixelWidth", "responsiveWidth", "sm", "md", "lg", "xl", "percentageWidth", "minPixelWidth", "maxPixelWidth", "pixelHeight", "percentageHeight", "minPixelHeight", "maxPixelHeight")),
+			Map.entry("view:tab", List.of("title", "escapeTitle", "icon16x16RelativeFileName", "iconStyleClass", "disabled", "enabled", "invisible", "visible")),
+			Map.entry("view:tabPane", List.of("selectedTabIndexBinding", "disabled", "enabled", "invisible", "visible", "widgetId", "pixelWidth", "responsiveWidth", "sm", "md", "lg", "xl", "percentageWidth", "minPixelWidth", "maxPixelWidth", "pixelHeight", "percentageHeight", "minPixelHeight", "maxPixelHeight")),
+			Map.entry("view:textArea", List.of("binding", "wrap", "editable", "keyboardType", "disabled", "enabled", "invisible", "visible", "pixelWidth", "pixelHeight", "minPixelHeight")),
+			Map.entry("view:textField", List.of("binding", "editable", "keyboardType", "complete", "disabled", "enabled", "invisible", "visible", "pixelWidth")),
+			Map.entry("view:treeGrid", List.of("query", "model", "title", "escapeTitle", "rootIdBinding", "continueConversation", "autoPopulate", "selectedIdBinding", "postRefresh", "disableAdd", "enableAdd", "disableZoom", "enableZoom", "disableEdit", "enableEdit", "disableRemove", "enableRemove", "showAdd", "showZoom", "showEdit", "showRemove", "showDeselect", "showExport", "showChart", "showFilter", "showSummary", "showSnap", "showTag", "showFlag", "disabled", "enabled", "invisible", "visible", "pixelWidth", "responsiveWidth", "sm", "md", "lg", "xl", "percentageWidth", "minPixelWidth", "maxPixelWidth", "pixelHeight", "percentageHeight", "minPixelHeight", "maxPixelHeight")),
+			Map.entry("view:upload", List.of("name", "className", "displayName", "escapeDisplayName", "capture", "clientValidation", "inActionPanel", "show", "toolTip", "escapeToolTip", "relativeIconFileName", "iconStyleClass", "confirm", "escapeConfirm", "disabled", "enabled", "invisible", "visible")),
+			Map.entry("view:vbox", List.of("border", "borderTitle", "escapeBorderTitle", "pixelPadding", "pixelMemberPadding", "horizontalAlignment", "verticalAlignment", "shrinkWrap", "collapsible", "widgetId", "invisible", "visible", "pixelWidth", "responsiveWidth", "sm", "md", "lg", "xl", "percentageWidth", "minPixelWidth", "maxPixelWidth", "pixelHeight", "percentageHeight", "minPixelHeight", "maxPixelHeight")),
+			Map.entry("view:view", List.of("name", "title", "escapeTitle", "iconStyleClass", "icon32x32RelativeFileName", "helpRelativeFileName", "helpURL", "refreshTimeInSeconds", "refreshIf", "refreshAction")),
+			Map.entry("view:zoomIn", List.of("binding", "displayName", "escapeDisplayName", "relativeIconFileName", "iconStyleClass", "show", "toolTip", "escapeToolTip", "disabled", "enabled", "invisible", "visible", "pixelWidth", "pixelHeight", "minPixelHeight", "maxPixelHeight")),
+			Map.entry("view:zoomOut", List.of("name", "displayName", "escapeDisplayName", "clientValidation", "inActionPanel", "show", "relativeIconFileName", "iconStyleClass", "toolTip", "escapeToolTip", "confirm", "escapeConfirm", "disabled", "enabled", "invisible", "visible"))
+	);
+	private static final Map<String, Map<String, Integer>> ATTRIBUTE_RANKS;
+	static {
+		Map<String, Map<String, Integer>> ranksByElement = new HashMap<>();
+		for (Map.Entry<String, List<String>> entry : ATTRIBUTE_ORDER.entrySet()) {
+			Map<String, Integer> ranks = new HashMap<>();
+			for (String attribute : entry.getValue()) {
+				if (ranks.putIfAbsent(attribute, Integer.valueOf(ranks.size())) != null) {
+					throw new IllegalStateException("Duplicate XML attribute order: " + entry.getKey() + '.' + attribute);
+				}
+			}
+			ranksByElement.put(entry.getKey(), ranks);
+		}
+		ATTRIBUTE_RANKS = ranksByElement;
+	}
+
+	/**
 	 * Formats XML after metadata cleanup so removed elements leave no blank lines.
 	 * Text content retains its whitespace; CDATA blocks have a trimmed value and an indented boundary.
 	 *
@@ -852,7 +1013,27 @@ public class XMLMetaData {
 	 * @return XML with tab indentation
 	 * @throws IOException if writing the XML fails
 	 */
+	@SuppressWarnings("java:S3776") // complexity OK
 	private static String format(Document document) throws IOException {
+		// Keep this ordering next to the writer: JAXB property order does not define XML attribute order.
+		document.accept(new VisitorSupport() {
+			@Override
+			public void visit(Element element) {
+				List<Attribute> attributes = new ArrayList<>(element.attributes());
+				if (attributes.size() < 2) {
+					return;
+				}
+				String namespace = element.getNamespaceURI();
+				String policyKey = namespace.substring(namespace.lastIndexOf('/') + 1) + ':' + element.getName();
+				Map<String, Integer> ranks = ATTRIBUTE_RANKS.getOrDefault(policyKey, Map.of());
+				attributes.sort(Comparator.comparingInt((Attribute attribute) -> {
+					Integer rank = ranks.get(attribute.getName());
+					return (rank == null) ? Integer.MAX_VALUE : rank.intValue();
+				}).thenComparing(attribute -> attribute.getQName().getQualifiedName()));
+				element.setAttributes(attributes);
+			}
+		});
+
 		OutputFormat format = new OutputFormat("\t", true, StandardCharsets.UTF_8.name());
 		format.setTrimText(false);
 		format.setNewLineAfterDeclaration(false);

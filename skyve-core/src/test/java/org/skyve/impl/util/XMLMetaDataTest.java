@@ -42,6 +42,9 @@ import org.skyve.impl.metadata.repository.customer.HTMLResourcesMetaData;
 import org.skyve.impl.metadata.repository.document.BizKey;
 import org.skyve.impl.metadata.repository.document.DocumentMetaData;
 import org.skyve.impl.metadata.repository.document.ParentDocument;
+import org.skyve.impl.metadata.repository.module.EditItemMetaData;
+import org.skyve.impl.metadata.repository.module.ListItemMetaData;
+import org.skyve.impl.metadata.repository.module.MenuMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleDocumentMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleMetaData;
 import org.skyve.impl.metadata.repository.router.Direct;
@@ -71,6 +74,51 @@ import org.skyve.web.UserAgentType;
  */
 @SuppressWarnings("static-method")
 class XMLMetaDataTest {
+	@Test
+	void testMarshalDocumentAndModuleUseConsistentAttributeOrder() {
+		DocumentMetaData document = createDocument();
+		Text field = createTextAttribute();
+		field.setRequired(true);
+		field.setPersistent(false);
+		document.getAttributes().add(field);
+		String documentXml = XMLMetaData.marshalDocument(document, false);
+		assertTrue(documentXml.contains("<text name=\"att1\" required=\"true\" persistent=\"false\""));
+
+		ModuleMetaData module = createModule();
+		MenuMetaData menu = new MenuMetaData();
+		EditItemMetaData edit = new EditItemMetaData();
+		edit.setName("Edit document");
+		edit.setDocumentName("TestDocument");
+		menu.getActions().add(edit);
+		ListItemMetaData list = new ListItemMetaData();
+		list.setName("List documents");
+		list.setDocumentName("TestDocument");
+		list.setQueryName("qTestDocuments");
+		menu.getActions().add(list);
+		module.setMenu(menu);
+		String moduleXml = XMLMetaData.marshalModule(module, false);
+		assertTrue(moduleXml.contains("<edit name=\"Edit document\" document=\"TestDocument\""));
+		assertTrue(moduleXml.contains("<list name=\"List documents\" document=\"TestDocument\" query=\"qTestDocuments\""));
+	}
+
+	@Test
+	void testMarshalViewUsesPreferredAttributeOrder() {
+		String input = "<view xmlns='" + XMLMetaData.VIEW_NAMESPACE + "' title='Test' name='edit'>"
+				+ "<form borderTitle='Details' border='true' responsiveWidth='12'>"
+				+ "<column percentageWidth='100' responsiveWidth='12'/>"
+				+ "<row><item showLabel='false' required='true'>"
+				+ "<lookupDescription disableEdit='true' model='OwnerLookup' descriptionBinding='description' disabled='true' binding='owner'/>"
+				+ "</item></row></form></view>";
+		String xml = XMLMetaData.marshalView(XMLMetaData.unmarshalViewString(input), false, false);
+
+		assertTrue(xml.contains("<view name=\"edit\" title=\"Test\" xmlns="));
+		assertTrue(xml.contains("<form border=\"true\" borderTitle=\"Details\" responsiveWidth=\"12\">"));
+		assertTrue(xml.contains("<column responsiveWidth=\"12\" percentageWidth=\"100\"/>"));
+		assertTrue(xml.contains("<item required=\"true\" showLabel=\"false\">"));
+		assertTrue(xml.contains("<lookupDescription binding=\"owner\" descriptionBinding=\"description\" model=\"OwnerLookup\" disableEdit=\"true\" disabled=\"true\"/>"));
+		assertEquals(xml, XMLMetaData.marshalView(XMLMetaData.unmarshalViewString(xml), false, false));
+	}
+
 	@Test
 	void testMarshalDocumentScalarAttribute() {
 		// setup the test data
@@ -171,7 +219,7 @@ class XMLMetaDataTest {
 
 		assertTrue(result.contains("name=\"TestDocument\""));
 		assertTrue(result.contains("<displayName>Attribute 1</displayName>"));
-		assertTrue(result.contains("<validator max=\"10\" min=\"0\" validationMessage=\"Value must be between 0 and 10\"/>"));
+		assertTrue(result.contains("<validator min=\"0\" max=\"10\" validationMessage=\"Value must be between 0 and 10\"/>"));
 	}
 
 	@Test
@@ -203,7 +251,7 @@ class XMLMetaDataTest {
 
 		assertTrue(result.contains("name=\"TestDocument\""));
 		assertTrue(result.contains("<displayName>Attribute 1</displayName>"));
-		assertTrue(result.contains("<validator max=\"10\" min=\"0\"/>"));
+		assertTrue(result.contains("<validator min=\"0\" max=\"10\"/>"));
 	}
 
 	@Test
@@ -335,7 +383,7 @@ class XMLMetaDataTest {
 
 		assertTrue(result.contains("name=\"TestDocument\""));
 		assertTrue(result.contains("<displayName>Attribute 1</displayName>"));
-		assertTrue(result.contains("<validator regularExpression=\"^\\d{15,16}$\" type=\"creditCard\"/>"));
+		assertTrue(result.contains("<validator type=\"creditCard\" regularExpression=\"^\\d{15,16}$\"/>"));
 	}
 
 	@Test
