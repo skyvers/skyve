@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
@@ -103,6 +104,29 @@ class BackupJobTest extends AbstractH2Test {
 		assertFalse(Files.exists(oldYearly));
 		assertFalse(hasFileEndingWith(".partial"));
 		assertTrue(job.getLog().stream().anyMatch(entry -> entry.contains("Finished Backup")));
+	}
+
+	@Test
+	void executeLogsSkippedRenameCopiesAndCullingWhenTheBackupFails() throws Exception {
+		Path sourceZip = createFile("failed_PROBLEMS.zip");
+		modules.admin.domain.DataMaintenance dm = modules.admin.domain.DataMaintenance.newInstance();
+		dm.setDailyBackupRetention(Integer.valueOf(1));
+		BackupJob job = new LocalBackupJob(dm, sourceZip.toFile()) {
+			@Override
+			protected org.skyve.impl.backup.BackupJob createBackupJob() {
+				return new org.skyve.impl.backup.BackupJob() {
+					@Override
+					public void execute() {
+						throw new IllegalStateException("simulated failure");
+					}
+				};
+			}
+		};
+
+		assertThrows(IllegalStateException.class, job::execute);
+
+		assertTrue(Files.exists(sourceZip));
+		assertTrue(job.getLog().stream().anyMatch(entry -> entry.startsWith("Skipped the DAILY rename") && entry.endsWith("simulated failure")));
 	}
 
 	@Test
