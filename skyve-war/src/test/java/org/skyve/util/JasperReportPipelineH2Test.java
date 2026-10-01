@@ -4,11 +4,17 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.CORE;
@@ -87,14 +93,32 @@ class JasperReportPipelineH2Test extends AbstractH2Test {
 	void exportsToXlsProducesNonEmptyOutput() throws Exception {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		JasperReportUtil.runReport(filledPrint, ReportFormat.xls, out);
-		assertTrue(out.size() > 0, "XLS output must not be empty");
+		try (Workbook workbook = WorkbookFactory.create(new ByteArrayInputStream(out.toByteArray()))) {
+			DataFormatter formatter = new DataFormatter();
+			boolean found = false;
+			for (Row row : workbook.getSheetAt(0)) {
+				for (Cell cell : row) {
+					found |= formatter.formatCellValue(cell).contains("pipeline smoke test");
+				}
+			}
+			assertTrue(found, "XLS export must contain the report bean value");
+		}
 	}
 
 	@Test
 	void exportsToXlsxProducesNonEmptyOutput() throws Exception {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		JasperReportUtil.runReport(filledPrint, ReportFormat.xlsx, out);
-		assertTrue(out.size() > 0, "XLSX output must not be empty");
+		try (Workbook workbook = WorkbookFactory.create(new ByteArrayInputStream(out.toByteArray()))) {
+			DataFormatter formatter = new DataFormatter();
+			boolean found = false;
+			for (Row row : workbook.getSheetAt(0)) {
+				for (Cell cell : row) {
+					found |= formatter.formatCellValue(cell).contains("pipeline smoke test");
+				}
+			}
+			assertTrue(found, "XLSX export must contain the report bean value");
+		}
 	}
 
 	@Test

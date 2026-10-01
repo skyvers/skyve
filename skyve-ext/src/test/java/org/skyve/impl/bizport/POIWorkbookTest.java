@@ -5,9 +5,13 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Date;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -137,19 +141,31 @@ public class POIWorkbookTest {
 	@Test
 	public void materialiseCreatesWorkbookXlsx() throws Exception {
 		POIWorkbook wb = new POIWorkbook(true);
+		wb.addSheet(new SheetKey("sales", "Order"), new POISheet("Orders"));
 		wb.materialise();
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		wb.write(out);
-		assertTrue(out.size() > 0);
+		try (Workbook reopened = WorkbookFactory.create(new ByteArrayInputStream(out.toByteArray()))) {
+			assertTrue(reopened instanceof XSSFWorkbook);
+			assertEquals("Orders", reopened.getSheetAt(0).getSheetName());
+			assertEquals("sales", reopened.getSheetAt(0).getRow(0).getCell(0).getStringCellValue());
+			assertEquals("Order", reopened.getSheetAt(0).getRow(0).getCell(1).getStringCellValue());
+		}
 	}
 
 	@Test
 	public void materialiseCreatesWorkbookXls() throws Exception {
 		POIWorkbook wb = new POIWorkbook(false);
+		wb.addSheet(new SheetKey("sales", "Order"), new POISheet("Orders"));
 		wb.materialise();
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		wb.write(out);
-		assertTrue(out.size() > 0);
+		try (Workbook reopened = WorkbookFactory.create(new ByteArrayInputStream(out.toByteArray()))) {
+			assertTrue(reopened instanceof HSSFWorkbook);
+			assertEquals("Orders", reopened.getSheetAt(0).getSheetName());
+			assertEquals("sales", reopened.getSheetAt(0).getRow(0).getCell(0).getStringCellValue());
+			assertEquals("Order", reopened.getSheetAt(0).getRow(0).getCell(1).getStringCellValue());
+		}
 	}
 
 	@Test
