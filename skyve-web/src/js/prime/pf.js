@@ -1090,16 +1090,22 @@ SKYVE.PF = function() {
 
 	function removeField(field) {
 		resizeObserver.unobserve(field.measure);
-		field.measure.parentElement.remove();
+		field.mirror.remove();
 	}
 
 	function registerRow(row, records) {
 		var state = rows.get(row);
 		if (!state) {
 			state = {cells: new Map(), fields: new Map(), observer: new MutationObserver(function(mutations) {
-				// Ignore our hidden mirrors, including their insertion and removal.
+				// Rebuild a removed mirror or measurement label; ignore other mirror changes.
 				var changes = mutations.filter(function(mutation) {
 					var target = mutation.target.nodeType === 1 ? mutation.target : mutation.target.parentElement;
+					if (target && mutation.type === 'childList' && Array.from(mutation.removedNodes).some(function(node) {
+						return node.nodeType === 1 && (node.classList.contains('skyve-floating-label-measure') ||
+							(target.classList.contains('skyve-floating-label-measure') && node.tagName === 'LABEL'));
+					})) {
+						return true;
+					}
 					if (!target || target.closest('.skyve-floating-label-measure')) {
 						return false;
 					}
@@ -1157,6 +1163,7 @@ SKYVE.PF = function() {
 				fields.add(span);
 				var field = state.fields.get(span);
 				if (field && field.label === label && field.cell === cell &&
+					field.mirror.parentElement === span && field.measure.parentElement === field.mirror &&
 					!(records || []).some(function(record) { return label.contains(record.target); })) {
 					return;
 				}
@@ -1178,7 +1185,7 @@ SKYVE.PF = function() {
 				});
 				mirror.appendChild(measure);
 				span.appendChild(mirror);
-				state.fields.set(span, {cell: cell, label: label, measure: measure});
+				state.fields.set(span, {cell: cell, label: label, mirror: mirror, measure: measure});
 				owners.set(measure, row);
 				resizeObserver.observe(measure);
 				changed = true;
@@ -1196,7 +1203,7 @@ SKYVE.PF = function() {
 		}
 	}
 
-	function registerRows() {
+	function cleanupDetachedRows() {
 		rows.forEach(function(state, row) {
 			if (!row.isConnected) {
 				state.observer.disconnect();
@@ -1210,6 +1217,10 @@ SKYVE.PF = function() {
 				dirtyRows.delete(row);
 			}
 		});
+	}
+
+	function registerRows() {
+		cleanupDetachedRows();
 		document.querySelectorAll('.skyve-form-row').forEach(function(row) {
 			// Side-label-only rows need no observers or measurements.
 			if (rows.has(row) || row.querySelector('.field > .skyve-floating-label')) {
@@ -1221,6 +1232,15 @@ SKYVE.PF = function() {
 	function start() {
 		registerRows();
 		$(document).on('pfAjaxComplete', registerRows);
+		new MutationObserver(function(mutations) {
+			if (mutations.some(function(mutation) {
+				return Array.from(mutation.removedNodes).some(function(node) {
+					return node.nodeType === 1 && (rows.has(node) || node.querySelector('.skyve-form-row'));
+				});
+			})) {
+				cleanupDetachedRows();
+			}
+		}).observe(document.documentElement, {childList: true, subtree: true});
 	}
 	if (document.readyState === 'loading') {
 		document.addEventListener('DOMContentLoaded', start);
