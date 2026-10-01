@@ -76,7 +76,7 @@ class BackupTest extends AbstractSkyveTestDispose {
 			List<String> log = job.getLog();
 			assertTrue(log.contains("Backup options: include audit log = true, include content = true, redaction = internal"));
 			assertTrue(log.stream().anyMatch(entry -> entry.startsWith("Usable space on backup volume ")));
-			assertTrue(log.stream().anyMatch(entry -> entry.matches("Backup .+ - [\\d,]+ rows in .+")));
+			assertTrue(log.stream().anyMatch(entry -> entry.matches("Backup .+ - [\\d,]+ rows? in .+")));
 			assertTrue(log.stream().anyMatch(entry -> entry.startsWith("Exported ")));
 			assertTrue(log.stream().anyMatch(entry -> entry.startsWith("Backup size ")));
 			assertTrue(log.stream().anyMatch(entry -> entry.startsWith("Usable space on backup volume after compression ")));

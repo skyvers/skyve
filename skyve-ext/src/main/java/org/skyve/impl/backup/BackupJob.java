@@ -85,6 +85,7 @@ public class BackupJob extends CancellableJob {
 	private static final String CREATE_SQL = "create.sql";
 	private static final String PROBLEMS_TXT = "problems.txt";
 	private static final int MAX_LOGGED_PROBLEMS = 100;
+	private static final long GIGABYTE = 1024L * Util.MEGABYTE;
 	private static final String FIELD_VALUE_SUFFIX = " value.";
 	private static final String MISSING_FIELD_PREFIX = " is missing a ";
 	private static final String WITH_DOCUMENT_ID = " with " + Bean.DOCUMENT_ID + " = ";
@@ -469,8 +470,11 @@ public class BackupJob extends CancellableJob {
 												}
 											}
 										}
-										trace = String.format("Backup %s - %,d rows in %s",
-																table.agnosticIdentifier, Integer.valueOf(rows), elapsed(tableStart));
+										trace = String.format("Backup %s - %,d %s in %s",
+																table.agnosticIdentifier,
+																Integer.valueOf(rows),
+																(rows == 1) ? "row" : "rows",
+																elapsed(tableStart));
 										log.add(trace);
 										LOGGER.info(trace);
 									}
@@ -682,13 +686,16 @@ public class BackupJob extends CancellableJob {
 	}
 
 	/**
-	 * Formats a number of bytes in megabytes for the job log.
+	 * Formats a number of bytes for the job log, in GB from 1 GB upwards and in MB below that.
 	 *
 	 * @param bytes the number of bytes
-	 * @return the size in MB to 1 decimal place
+	 * @return the size in GB or MB to 1 decimal place
 	 */
 	private static String formatSize(long bytes) {
-		return String.format("%,.1f MB", Double.valueOf((double) bytes / Util.MEGABYTE));
+		if (bytes < GIGABYTE) {
+			return String.format("%,.1f MB", Double.valueOf((double) bytes / Util.MEGABYTE));
+		}
+		return String.format("%,.1f GB", Double.valueOf((double) bytes / GIGABYTE));
 	}
 
 	/**

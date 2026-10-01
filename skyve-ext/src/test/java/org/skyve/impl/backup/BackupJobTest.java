@@ -188,6 +188,20 @@ class BackupJobTest {
 		assertFalse(invokeGetIncludeAuditLog(bean));
 	}
 
+	@Test
+	void formatSizeUsesMegabytesBelowOneGigabyteAndGigabytesFromThere() throws Exception {
+		// Expected values are formatted the same way so the test holds in any default locale
+		assertEquals(String.format("%,.1f MB", Double.valueOf(1023)), invokeFormatSize(1023L * 1024 * 1024));
+		assertEquals(String.format("%,.1f GB", Double.valueOf(1)), invokeFormatSize(1024L * 1024 * 1024));
+		assertEquals(String.format("%,.1f GB", Double.valueOf(1.5)), invokeFormatSize(1536L * 1024 * 1024));
+	}
+
+	private static String invokeFormatSize(long bytes) throws Exception {
+		Method method = BackupJob.class.getDeclaredMethod("formatSize", long.class);
+		method.setAccessible(true);
+		return (String) method.invoke(null, Long.valueOf(bytes));
+	}
+
 	private static File writeProblems(Path dir, int count) throws Exception {
 		Path problemsTxt = dir.resolve("problems.txt");
 		Files.write(problemsTxt, IntStream.rangeClosed(1, count).mapToObj(i -> "problem " + i).toList());
