@@ -37,11 +37,12 @@ class BackupJobH2Test extends AbstractSkyveTest {
 	}
 
 	@Test
+	@SuppressWarnings("java:S1854") // the saved contact is not read again
 	void backupFlagsProblemsWhenAContentFileIsMissingFromTheContentStore() throws Exception {
 		Contact contact = Contact.newInstance();
 		contact.setName("Missing content file");
 		contact.setImage(UUID.randomUUID().toString());
-		p.save(contact);
+		contact = p.save(contact);
 		p.commit(false);
 		p.begin();
 		BackupJob job = new BackupJob();
