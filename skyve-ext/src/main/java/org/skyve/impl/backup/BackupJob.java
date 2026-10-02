@@ -571,29 +571,33 @@ public class BackupJob extends CancellableJob {
 						log.add(trace);
 						LOGGER.info(trace);
 						setPercentComplete(100);
-						trace = String.format("Backup %s%s - %s in %s",
-												(causation == null) ? "Completed" : "Failed",
-												problem ? " with " + countOf(problemCount, "problem") : "",
-												(backupZip == null) ? "no backup file" : backupZip.getName(),
-												elapsed(start));
-						log.add(trace);
-						if (problem) {
-							LOGGER.warn(trace);
-						}
-						else {
-							LOGGER.info(trace);
-						}
-						EXT.push(new PushMessage().user().growl(problem ? MessageSeverity.warn : MessageSeverity.info, trace));
 					}
 				}
 			}
 		}
 		finally {
-			if (problem) {
-				String details = String.format("%s recorded%s.",
-												countOf(problemCount, "problem"),
-												(backupZip == null) ? "" : " in backup " + backupZip.getName());
-				emailProblem(log, (causation == null) ? details : causation + ". " + details);
+			try {
+				if (problem) {
+					String details = String.format("%s recorded%s.",
+													countOf(problemCount, "problem"),
+													(backupZip == null) ? "" : " in backup " + backupZip.getName());
+					emailProblem(log, (causation == null) ? details : causation + ". " + details);
+				}
+			}
+			finally {
+				trace = String.format("Backup %s%s - %s in %s",
+										(causation == null) ? "Completed" : "Failed",
+										problem ? " with " + countOf(problemCount, "problem") : "",
+										(backupZip == null) ? "no backup file" : backupZip.getName(),
+										elapsed(start));
+				log.add(trace);
+				if (problem) {
+					LOGGER.warn(trace);
+				}
+				else {
+					LOGGER.info(trace);
+				}
+				EXT.push(new PushMessage().user().growl(problem ? MessageSeverity.warn : MessageSeverity.info, trace));
 			}
 		}
 	}
