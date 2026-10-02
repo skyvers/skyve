@@ -695,9 +695,11 @@ public class BackupJob extends CancellableJob {
 		trace = "Usable space on backup volume after compression " + formatSize(usableSpace);
 		log.add(trace);
 		LOGGER.info(trace);
-		if (usableSpace < unzippedSize + zippedSize) {
-			trace = String.format("Usable space on backup volume %s is less than the %s the next backup needs (unzipped + zipped)",
-									formatSize(usableSpace),
+		// The backup folder is deleted once zipped, so the next backup starts with its space back
+		long nextUsableSpace = usableSpace + unzippedSize;
+		if (nextUsableSpace < unzippedSize + zippedSize) {
+			trace = String.format("Usable space on backup volume after clean up %s is less than the %s the next backup needs (unzipped + zipped)",
+									formatSize(nextUsableSpace),
 									formatSize(unzippedSize + zippedSize));
 			log.add(trace);
 			LOGGER.warn(trace);
