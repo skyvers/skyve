@@ -2,11 +2,14 @@ package org.skyve.impl.backup;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.math.BigDecimal;
@@ -25,6 +28,7 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.TreeMap;
 
+import org.apache.commons.io.FileUtils;
 import org.hibernate.engine.spi.SessionImplementor;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.WKTWriter;
@@ -79,6 +83,9 @@ public class BackupJob extends CancellableJob {
 	private static final Logger SLOGGER = SkyveLoggerFactory.getLogger(BackupJob.class);
 
 	private static final String CREATE_SQL = "create.sql";
+	private static final String PROBLEMS_TXT = "problems.txt";
+	private static final int MAX_LOGGED_PROBLEMS = 100;
+	private static final long GIGABYTE = 1024L * Util.MEGABYTE;
 	private static final String FIELD_VALUE_SUFFIX = " value.";
 	private static final String MISSING_FIELD_PREFIX = " is missing a ";
 	private static final String WITH_DOCUMENT_ID = " with " + Bean.DOCUMENT_ID + " = ";
@@ -123,6 +130,7 @@ public class BackupJob extends CancellableJob {
 	 */
 	@SuppressWarnings({"java:S1143", "java:S3776", "java:S6541"}) // Allow nested try blocks for clarity in resource management and error handling; complexity OK
 	private void backup() throws Exception {
+		long start = System.currentTimeMillis();
 		Bean bean = getBean();
 		List<String> log = getLog();
 		Collection<Table> tables = BackupUtil.getTables();
@@ -142,6 +150,9 @@ public class BackupJob extends CancellableJob {
 		String causation = null;
 		log.add(trace);
 		LOGGER.info(trace);
+		trace = "Usable space on backup volume " + formatSize(directory.getUsableSpace());
+		log.add(trace);
+		LOGGER.info(trace);
 		
 		// Are we including audits in this backup?
 		boolean includeAuditLog = getIncludeAuditLog(bean);
@@ -158,6 +169,12 @@ public class BackupJob extends CancellableJob {
 		
 		// Determine level of redaction
 		int sensitivityLevel = getSensitivityLevel(bean);
+		trace = String.format("Backup options: include audit log = %s, include content = %s, redaction = %s",
+								Boolean.valueOf(includeAuditLog),
+								Boolean.valueOf(includeContent),
+								Sensitivity.values()[sensitivityLevel]);
+		log.add(trace);
+		LOGGER.info(trace);
 		
 		BackupUtil.writeTables(tables, new File(backupDir, "tables.txt"));
 
@@ -167,24 +184,27 @@ public class BackupJob extends CancellableJob {
 		BackupUtil.writeScript(dropDDL, new File(backupDir, "drop.sql"));
 		BackupUtil.writeScript(createDDL, new File(backupDir, CREATE_SQL));
 		boolean problem = false; // indicates if the backup had a problem
+		int problemCount = 0;
 		try {
 			try {
-				try (FileWriter problemsTxt = new FileWriter(new File(backupDir, "problems.txt"))) {
+				try (FileWriter problemsTxt = new FileWriter(new File(backupDir, PROBLEMS_TXT))) {
 					try (BufferedWriter problems = new BufferedWriter(problemsTxt)) {
 						try (Connection connection = EXT.getDataStoreConnection()) {
 							connection.setAutoCommit(false);
 	
 							try (ContentManager cm = EXT.newContentManager()) {
+								long exportStart = System.currentTimeMillis();
+								int contentFiles = 0;
+								long contentBytes = 0;
 								for (Table table : tables) {
+									long tableStart = System.currentTimeMillis();
+									int rows = 0;
 									StringBuilder sql = new StringBuilder(128);
 									try (Statement statement = connection.createStatement()) {
 										sql.append("select * from ").append(table.persistentIdentifier);
 										BackupUtil.secureSQL(sql, table, customerName);
 										statement.execute(sql.toString());
 										try (ResultSet resultSet = statement.getResultSet()) {
-											trace = "Backup " + table.agnosticIdentifier;
-											log.add(trace);
-											LOGGER.info(trace);
 											try (OutputStreamWriter out = new OutputStreamWriter(
 													new FileOutputStream(backupDir + File.separator + table.agnosticIdentifier + ".csv"), UTF_8)) {
 												try (CsvMapWriter writer = new CsvMapWriter(out, CsvPreference.STANDARD_PREFERENCE)) {
@@ -198,6 +218,7 @@ public class BackupJob extends CancellableJob {
 														if (isCancelled()) {
 															return;
 														}
+														rows++;
 														values.clear();
 	
 														for (String name : table.fields.keySet()) {
@@ -418,10 +439,13 @@ public class BackupJob extends CancellableJob {
 																				try (InputStream cs = content.getContentStream()) {
 																					AbstractContentManager.writeContentFiles(contentPath, content, cs, true);
 																				}
+																				contentFiles++;
+																				contentBytes += content.getContentLength();
 																			}
 																		}
 																		catch (Throwable t) {
 																			if (t instanceof FileNotFoundException) {
+																				problem = true;
 																				problems.write(String.format("Table [%s] with [%s] = %s is missing a file in the content store for attribute [%s] = %s",
 																						table.agnosticIdentifier,
 																						Bean.DOCUMENT_ID,
@@ -446,6 +470,12 @@ public class BackupJob extends CancellableJob {
 												}
 											}
 										}
+										trace = String.format("Backup %s - %s in %s",
+																table.agnosticIdentifier,
+																countOf(rows, "row"),
+																elapsed(tableStart));
+										log.add(trace);
+										LOGGER.info(trace);
 									}
 									// log the offending SQL statement
 									catch (SQLException e) {
@@ -459,6 +489,13 @@ public class BackupJob extends CancellableJob {
 								}
 	
 								connection.commit();
+								trace = String.format("Exported %,d tables and %,d content files (%s) in %s",
+														Integer.valueOf(tables.size()),
+														Integer.valueOf(contentFiles),
+														formatSize(contentBytes),
+														elapsed(exportStart));
+								log.add(trace);
+								LOGGER.info(trace);
 							}
 						}
 						// log the exception in problems.txt on the way out
@@ -475,7 +512,7 @@ public class BackupJob extends CancellableJob {
 				trace = "A problem backing up " + UtilImpl.ARCHIVE_NAME + " was encountered : " + t.getLocalizedMessage();
 				causation = trace;
 				log.add(trace);
-				LOGGER.info(trace);
+				LOGGER.error(trace);
 				throw t;
 			}
 			finally {
@@ -487,17 +524,21 @@ public class BackupJob extends CancellableJob {
 					try {
 						File zip = new File(directory.getParentFile(),
 								directory.getName() + (problem ? "_PROBLEMS.zip" : ".zip"));
+						long zipStart = System.currentTimeMillis();
 						FileUtil.createZipArchive(directory, zip);
-						trace = "Compressed backup to " + zip.getAbsolutePath();
+						trace = "Compressed backup to " + zip.getAbsolutePath() + " in " + elapsed(zipStart);
 						log.add(trace);
 						LOGGER.info(trace);
 						backupZip = zip;
+						long zippedSize = logDiskUsage(directory, zip);
 	
 						if (ExternalBackup.areExternalBackupsEnabled()) {
+							long uploadStart = System.currentTimeMillis();
 							ExternalBackup.getInstance().uploadBackup(zip.getAbsolutePath());
-							final String uploadLogMessage = "Uploaded compressed backup";
-							log.add(uploadLogMessage);
-							LOGGER.info(uploadLogMessage);
+							trace = String.format("Uploaded compressed backup %s (%s) in %s",
+													zip.getName(), formatSize(zippedSize), elapsed(uploadStart));
+							log.add(trace);
+							LOGGER.info(trace);
 	
 							FileUtil.delete(zip);
 							final String deleteLogMessage = "Deleted local backup";
@@ -512,26 +553,51 @@ public class BackupJob extends CancellableJob {
 							causation = trace;
 						}
 						log.add(trace);
-						LOGGER.info(trace);
+						LOGGER.error(trace);
 						throw t;
 					}
 					finally {
+						try {
+							problemCount = logProblems(new File(directory, PROBLEMS_TXT), log);
+						}
+						catch (IOException e) {
+							// don't let this mask the original problem or leave the backup folder behind
+							trace = "Could not read " + PROBLEMS_TXT + " : " + e.getLocalizedMessage();
+							log.add(trace);
+							LOGGER.warn(trace);
+						}
 						FileUtil.delete(directory);
 						trace = "Deleted backup folder " + directory.getAbsolutePath();
 						log.add(trace);
 						LOGGER.info(trace);
 						setPercentComplete(100);
-						trace = "Backup Completed" + (problem ? " with problems" : "");
-						log.add(trace);
-						LOGGER.info(trace);
-						EXT.push(new PushMessage().user().growl(MessageSeverity.info, trace));
 					}
 				}
 			}
 		}
 		finally {
-			if (problem) {
-				emailProblem(log, causation);
+			try {
+				if (problem) {
+					String details = String.format("%s recorded%s.",
+													countOf(problemCount, "problem"),
+													(backupZip == null) ? "" : " in backup " + backupZip.getName());
+					emailProblem(log, (causation == null) ? details : causation + ". " + details);
+				}
+			}
+			finally {
+				trace = String.format("Backup %s%s - %s in %s",
+										(causation == null) ? "Completed" : "Failed",
+										problem ? " with " + countOf(problemCount, "problem") : "",
+										(backupZip == null) ? "no backup file" : backupZip.getName(),
+										elapsed(start));
+				log.add(trace);
+				if (problem) {
+					LOGGER.warn(trace);
+				}
+				else {
+					LOGGER.info(trace);
+				}
+				EXT.push(new PushMessage().user().growl(problem ? MessageSeverity.warn : MessageSeverity.info, trace));
 			}
 		}
 	}
@@ -558,6 +624,7 @@ public class BackupJob extends CancellableJob {
 		else {
 			body += "a problem:- " + problem;
 		}
+		body += " See the backup job log (admin -> Jobs) for details.";
 
 		StringBuilder subjectBuilder = new StringBuilder();
 		subjectBuilder.append(nameEnv).append(" Backup Problem");
@@ -574,6 +641,108 @@ public class BackupJob extends CancellableJob {
 			jobLog.add(trace);
 			SLOGGER.info(trace);
 		}
+	}
+
+	/**
+	 * Logs a summary of the problems recorded in problems.txt followed by the problems themselves,
+	 * capped at {@link #MAX_LOGGED_PROBLEMS} lines, so a backup can be triaged from the job log.
+	 * Nothing is logged when there are no problems.
+	 *
+	 * @param problemsTxt the problems.txt file written by the backup
+	 * @param jobLog the job log to append messages to
+	 * @return the number of problems recorded
+	 * @throws IOException if problems.txt cannot be read
+	 */
+	static int logProblems(@Nonnull File problemsTxt, @Nonnull List<String> jobLog) throws IOException {
+		List<String> logged = new java.util.ArrayList<>();
+		int count = 0;
+		try (BufferedReader reader = new BufferedReader(new FileReader(problemsTxt))) {
+			String line;
+			while ((line = reader.readLine()) != null) {
+				if (count++ < MAX_LOGGED_PROBLEMS) {
+					logged.add(line);
+				}
+			}
+		}
+		if (count > MAX_LOGGED_PROBLEMS) {
+			logged.add(String.format("... and %,d more", Integer.valueOf(count - MAX_LOGGED_PROBLEMS)));
+		}
+		if (count > 0) {
+			logged.add(0, countOf(count, "problem") + " recorded in " + PROBLEMS_TXT);
+			for (String trace : logged) {
+				jobLog.add(trace);
+				SLOGGER.warn(trace);
+			}
+		}
+		return count;
+	}
+
+	/**
+	 * Logs the backup sizes and the usable space on the backup volume at its peak, while the backup
+	 * folder and the zip both exist, and warns when there is not enough room for the next backup.
+	 *
+	 * @param directory the backup folder
+	 * @param zip the compressed backup
+	 * @return the size of the zip in bytes
+	 */
+	private long logDiskUsage(@Nonnull File directory, @Nonnull File zip) {
+		List<String> log = getLog();
+		long unzippedSize = FileUtils.sizeOfDirectory(directory);
+		long zippedSize = zip.length();
+		String trace = String.format("Backup size %s unzipped, %s zipped (%.1f%% of unzipped)",
+										formatSize(unzippedSize),
+										formatSize(zippedSize),
+										Double.valueOf((unzippedSize == 0) ? 0 : (100.0 * zippedSize / unzippedSize)));
+		log.add(trace);
+		LOGGER.info(trace);
+		long usableSpace = directory.getUsableSpace();
+		trace = "Usable space on backup volume after compression " + formatSize(usableSpace);
+		log.add(trace);
+		LOGGER.info(trace);
+		// The backup folder is deleted once zipped, so the next backup starts with its space back
+		long nextUsableSpace = usableSpace + unzippedSize;
+		if (nextUsableSpace < unzippedSize + zippedSize) {
+			trace = String.format("Usable space on backup volume after clean up %s is less than the %s the next backup needs (unzipped + zipped)",
+									formatSize(nextUsableSpace),
+									formatSize(unzippedSize + zippedSize));
+			log.add(trace);
+			LOGGER.warn(trace);
+		}
+		return zippedSize;
+	}
+
+	/**
+	 * Formats a count with its noun for the job log, using the singular noun for a count of 1.
+	 *
+	 * @param count the count
+	 * @param noun the singular noun
+	 * @return the count and noun, e.g. "1 row" or "1,234 rows"
+	 */
+	private static String countOf(int count, @Nonnull String noun) {
+		return String.format("%,d %s%s", Integer.valueOf(count), noun, (count == 1) ? "" : "s");
+	}
+
+	/**
+	 * Formats a number of bytes for the job log, in GB from 1 GB upwards and in MB below that.
+	 *
+	 * @param bytes the number of bytes
+	 * @return the size in GB or MB to 1 decimal place
+	 */
+	private static String formatSize(long bytes) {
+		if (bytes < GIGABYTE) {
+			return String.format("%,.1f MB", Double.valueOf((double) bytes / Util.MEGABYTE));
+		}
+		return String.format("%,.1f GB", Double.valueOf((double) bytes / GIGABYTE));
+	}
+
+	/**
+	 * Formats the time elapsed since a start time for the job log.
+	 *
+	 * @param startMillis the start time in epoch milliseconds
+	 * @return the elapsed time in seconds to 1 decimal place
+	 */
+	private static String elapsed(long startMillis) {
+		return String.format("%,.1f s", Double.valueOf((System.currentTimeMillis() - startMillis) / 1000.0));
 	}
 
 	/**

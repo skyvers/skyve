@@ -11,13 +11,18 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Method;
+import java.io.File;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.skyve.domain.Bean;
 import org.skyve.domain.app.admin.DataMaintenance;
 import org.skyve.domain.app.admin.DataMaintenance.DataSensitivity;
@@ -81,6 +86,34 @@ class BackupJobTest {
 		assertThat(capture.lastSend.getSenderEmailAddress(), is("noreply@skyve.org"));
 		assertThat(capture.lastSend.getSubject(), is("[SkyveTest - TEST] Backup Problem"));
 		assertThat(capture.lastSend.getBody(), containsString("a problem:- simulated failure"));
+		assertThat(capture.lastSend.getBody(), containsString("See the backup job log (admin -> Jobs) for details."));
+	}
+
+	@Test
+	void logProblemsLogsNothingWhenThereAreNoProblems(@TempDir Path tempDir) throws Exception {
+		List<String> jobLog = new ArrayList<>();
+
+		assertEquals(0, BackupJob.logProblems(writeProblems(tempDir, 0), jobLog));
+		assertTrue(jobLog.isEmpty());
+	}
+
+	@Test
+	void logProblemsLogsSummaryThenEachProblem(@TempDir Path tempDir) throws Exception {
+		List<String> jobLog = new ArrayList<>();
+
+		assertEquals(3, BackupJob.logProblems(writeProblems(tempDir, 3), jobLog));
+		assertEquals(List.of("3 problems recorded in problems.txt", "problem 1", "problem 2", "problem 3"), jobLog);
+	}
+
+	@Test
+	void logProblemsCapsLoggedProblems(@TempDir Path tempDir) throws Exception {
+		List<String> jobLog = new ArrayList<>();
+
+		assertEquals(150, BackupJob.logProblems(writeProblems(tempDir, 150), jobLog));
+		assertEquals(102, jobLog.size());
+		assertEquals("150 problems recorded in problems.txt", jobLog.get(0));
+		assertEquals("problem 100", jobLog.get(100));
+		assertEquals("... and 50 more", jobLog.get(101));
 	}
 
 	@Test
@@ -153,6 +186,26 @@ class BackupJobTest {
 		assertEquals(0, invokeGetSensitivityLevel(bean));
 		assertFalse(invokeGetIncludeContent(bean));
 		assertFalse(invokeGetIncludeAuditLog(bean));
+	}
+
+	@Test
+	void formatSizeUsesMegabytesBelowOneGigabyteAndGigabytesFromThere() throws Exception {
+		// Expected values are formatted the same way so the test holds in any default locale
+		assertEquals(String.format("%,.1f MB", Double.valueOf(1023)), invokeFormatSize(1023L * 1024 * 1024));
+		assertEquals(String.format("%,.1f GB", Double.valueOf(1)), invokeFormatSize(1024L * 1024 * 1024));
+		assertEquals(String.format("%,.1f GB", Double.valueOf(1.5)), invokeFormatSize(1536L * 1024 * 1024));
+	}
+
+	private static String invokeFormatSize(long bytes) throws Exception {
+		Method method = BackupJob.class.getDeclaredMethod("formatSize", long.class);
+		method.setAccessible(true);
+		return (String) method.invoke(null, Long.valueOf(bytes));
+	}
+
+	private static File writeProblems(Path dir, int count) throws Exception {
+		Path problemsTxt = dir.resolve("problems.txt");
+		Files.write(problemsTxt, IntStream.rangeClosed(1, count).mapToObj(i -> "problem " + i).toList());
+		return problemsTxt.toFile();
 	}
 
 	private static int invokeGetSensitivityLevel(Bean bean) throws Exception {
