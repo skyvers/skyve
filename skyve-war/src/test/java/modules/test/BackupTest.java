@@ -2,6 +2,7 @@ package modules.test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -71,6 +72,15 @@ class BackupTest extends AbstractSkyveTestDispose {
 			job.setBean(bean);
 			job.execute();
 			backupZip = job.getBackupZip();
+
+			List<String> log = job.getLog();
+			assertTrue(log.contains("Backup options: include audit log = true, include content = true, redaction = internal"));
+			assertTrue(log.stream().anyMatch(entry -> entry.startsWith("Usable space on backup volume ")));
+			assertTrue(log.stream().anyMatch(entry -> entry.matches("Backup .+ - [\\d,]+ rows? in .+")));
+			assertTrue(log.stream().anyMatch(entry -> entry.startsWith("Exported ")));
+			assertTrue(log.stream().anyMatch(entry -> entry.startsWith("Backup size ")));
+			assertTrue(log.stream().anyMatch(entry -> entry.startsWith("Usable space on backup volume after compression ")));
+			assertTrue(log.get(log.size() - 1).startsWith("Backup Completed - " + backupZip.getName() + " in "));
 		}
 		assertNotNull(backupZip);
 	}
