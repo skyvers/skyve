@@ -1,15 +1,20 @@
 package org.skyve.impl.bind;
 
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -21,19 +26,27 @@ import org.skyve.domain.types.Decimal10;
 import org.skyve.domain.types.Decimal2;
 import org.skyve.domain.types.Decimal5;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.user.UserImpl;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.util.ExpressionEvaluator;
 import org.skyve.util.Util;
-import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
+import org.slf4j.Logger;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import jakarta.el.ELClass;
+import jakarta.el.ELContext;
 import jakarta.el.ELManager;
 import jakarta.el.ELProcessor;
+import jakarta.el.ELResolver;
+import jakarta.el.FunctionMapper;
+import jakarta.el.VariableMapper;
 
 /**
  * Evaluates Skyve EL expressions against bean, user, and stash contexts.
@@ -55,8 +68,62 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	 */
 	public static final String RTEL_PREFIX = "rtel";
 
-    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ELExpressionEvaluator.class); 
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ELExpressionEvaluator.class);
 	private static final String BEAN_VARIABLE = "bean";
+	private static final String USER_VARIABLE = "user";
+	private static final String STASH_VARIABLE = "stash";
+	private static final Map<String, Method> FIXED_FUNCTIONS = fixedFunctions();
+	private static final BindingELResolver BINDING_RESOLVER = new BindingELResolver();
+	/** Immutable enum bindings per bean class; ClassValue does not pin redeployed class loaders. */
+	static final ClassValue<Map<String, ELClass>> ENUM_BEANS = new ClassValue<>() {
+		@Override
+		protected Map<String, ELClass> computeValue(Class<?> type) {
+			return enumBeans(type);
+		}
+	};
+
+	/** Keeps evaluation state local while resolving fixed functions from the shared mapper. */
+	private static final class FunctionContext extends ELContext {
+		private final ELResolver resolver;
+		private final VariableMapper variables;
+		private Map<String, Method> localFunctions;
+		private final FunctionMapper functions = new FunctionMapper() {
+			@Override
+			public Method resolveFunction(String prefix, String localName) {
+				String key = prefix + ':' + localName;
+				Method result = (localFunctions == null) ? null : localFunctions.get(key);
+				return (result == null) ? FIXED_FUNCTIONS.get(key) : result;
+			}
+
+			@Override
+			public void mapFunction(String prefix, String localName, Method method) {
+				if (localFunctions == null) {
+					localFunctions = new HashMap<>();
+				}
+				localFunctions.put(prefix + ':' + localName, method);
+			}
+		};
+
+		private FunctionContext(ELContext original) {
+			resolver = original.getELResolver();
+			variables = original.getVariableMapper();
+		}
+
+		@Override
+		public ELResolver getELResolver() {
+			return resolver;
+		}
+
+		@Override
+		public FunctionMapper getFunctionMapper() {
+			return functions;
+		}
+
+		@Override
+		public VariableMapper getVariableMapper() {
+			return variables;
+		}
+	}
 
 	// Regex expressions to find the start of an EL expression
 	private static final String[] COMMENCING_REGEX_TOKENS = new String[] {BEAN_VARIABLE + "\\s*\\.",
@@ -108,8 +175,8 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	private static final String[] COMMENCING_COMPLETES = new String[] {"empty",
 																		"concat(",
 																		BEAN_VARIABLE,
-																		"user",
-																		"stash",
+																		USER_VARIABLE,
+																		STASH_VARIABLE,
 																		"newDateOnly()",
 																		"newDateOnlyFromMillis(",
 																		"newDateOnlyFromDate(",
@@ -171,8 +238,7 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	 */
 	@Override
 	public Object evaluateWithoutPrefixOrSuffix(String expression, Bean bean) {
-		ELProcessor elp = newSkyveEvaluationProcessor(bean);
-		return elp.eval(expression);
+		return newSkyveEvaluationProcessor(bean).eval(expression);
 	}
 
 	/**
@@ -215,6 +281,10 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 				if (returnType != null) {
 					Class<?> type = null;
 					if (evaluation instanceof DocumentImpl evaluationDocument) {
+						// Only reachable with a document, which newSkyveValidationProcessor() requires a customer for
+						if (customer == null) {
+							throw new IllegalStateException("Cannot resolve a document bean class without a customer");
+						}
 						type = evaluationDocument.getBeanClass(customer);
 					}
 					else if (evaluation instanceof Class<?> evaluationClass) {
@@ -245,7 +315,7 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	 * Completes the expression fragment using the current EL context.
 	 *
 	 * @param fragment the partial expression being authored
-	 * @param customer the customer metadata context
+	 * @param customer the customer metadata context; may be {@code null} when no document is resolved
 	 * @param module the module metadata context
 	 * @param document the document metadata context
 	 * @return matching completion candidates in the order they were discovered
@@ -278,9 +348,10 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 
 			// If we have an expression currently being authored
 			if ((lastCommencingTokenIndex >= 0) && (lastCommencingTokenIndex < lastDelimiterIndex)) {
-				String lastExpression = (lastDelimiterIndex == lastClosingSquareBraceIndex) ? 
-											input.substring(lastCommencingTokenIndex, lastDelimiterIndex + 1) :
-											input.substring(lastCommencingTokenIndex, lastDelimiterIndex);
+				String lastExpression = input.substring(lastCommencingTokenIndex,
+															(lastDelimiterIndex == lastClosingSquareBraceIndex) ?
+																lastDelimiterIndex + 1 :
+																lastDelimiterIndex);
 				try {
 					// Evaluate the penultimate expression
 					ELProcessor elp = newSkyveValidationProcessor(customer, document);
@@ -369,10 +440,9 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 								result.add(baseExpression + "[9]");
 							}
 							// if a map, start EL map key notation
-							else if (lastEvaluation instanceof Class<?> lastEvaluationType) {
-								if (Map.class.isAssignableFrom(lastEvaluationType)) {
-									result.add(baseExpression + "['");
-								}
+							else if ((lastEvaluation instanceof Class<?> lastEvaluationType) &&
+										Map.class.isAssignableFrom(lastEvaluationType)) {
+								result.add(baseExpression + "['");
 							}
 						}
 						// not continuing an expression - commence a new expression
@@ -446,14 +516,92 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	/**
 	 * Creates an EL processor configured for validation against metadata.
 	 *
-	 * @param customer the customer metadata context
+	 * @param customer the customer metadata context; may be {@code null} only when {@code document} is {@code null}
 	 * @param document the document metadata context; may be {@code null}
 	 * @return a configured processor with Skyve EL functions and validation resolvers
+	 * @throws IllegalArgumentException if {@code document} is given without a {@code customer}
 	 */
-	public static ELProcessor newSkyveValidationProcessor(@Nonnull Customer customer, @Nullable Document document) {
-		ELProcessor result = setupProcessor(customer, document, UserImpl.class, Map.class);
-		result.getELManager().addELResolver(new ValidationELResolver(customer));
+	public static ELProcessor newSkyveValidationProcessor(@Nullable Customer customer, @Nullable Document document) {
+		ELProcessor result = new ELProcessor();
+		ELManager manager = result.getELManager();
+		manager.setELContext(new FunctionContext(manager.getELContext()));
+		result.defineBean(USER_VARIABLE, UserImpl.class);
+		result.defineBean(STASH_VARIABLE, Map.class);
+		manager.importClass(Decimal2.class.getCanonicalName());
+		manager.importClass(Decimal5.class.getCanonicalName());
+		manager.importClass(Decimal10.class.getCanonicalName());
+		if (document != null) {
+			if (customer == null) {
+				throw new IllegalArgumentException("A customer is required to validate against a document");
+			}
+			result.defineBean(BEAN_VARIABLE, document);
+			defineEnumBeans(result, customer, document);
+		}
+		manager.addELResolver(new ValidationELResolver(customer));
 		return result;
+	}
+	
+	/**
+	 * Binds the document's static enumerations by simple name, using the generated enum class when it can be
+	 * loaded and the enumeration metadata otherwise (during domain generation, before the class exists).
+	 * Locally declared enums take precedence over imported enums with the same simple name.
+	 *
+	 * @param processor the validation processor to define the enum beans on
+	 * @param customer the customer metadata context
+	 * @param document the document whose attributes declare the enumerations
+	 */
+	private static void defineEnumBeans(@Nonnull ELProcessor processor, @Nonnull Customer customer, @Nonnull Document document) {
+		Set<String> boundNames = new HashSet<>();
+		for (Enumeration enumeration : staticEnumerations(customer, document)) {
+			String name = enumeration.toJavaIdentifier();
+			if (boundNames.add(name)) {
+				Class<?> enumClass = loadEnumClass(enumeration);
+				processor.defineBean(name, (enumClass == null) ? enumeration : new ELClass(enumClass));
+			}
+		}
+	}
+
+	/**
+	 * Lists the document's static enumerations with locally declared enums ahead of imported ones.
+	 *
+	 * @param customer the customer metadata context
+	 * @param document the document whose attributes declare the enumerations
+	 * @return the static enumerations, local declarations first
+	 */
+	private static @Nonnull List<Enumeration> staticEnumerations(@Nonnull Customer customer, @Nonnull Document document) {
+		List<Enumeration> result = new ArrayList<>();
+		List<Enumeration> importedEnums = new ArrayList<>();
+		for (Attribute attribute : document.getAllAttributes(customer)) {
+			if ((attribute instanceof Enumeration enumeration) && (! enumeration.isDynamic())) {
+				if ((enumeration.getAttributeRef() == null) && (enumeration.getImplementingEnumClassName() == null)) {
+					result.add(enumeration);
+				}
+				else {
+					importedEnums.add(enumeration);
+				}
+			}
+		}
+		// Locally declared enums retain their simple names when imported types collide.
+		result.addAll(importedEnums);
+		return result;
+	}
+
+	/**
+	 * Loads the generated enum class for the enumeration.
+	 *
+	 * @param enumeration the enumeration metadata
+	 * @return the enum class, or {@code null} if it has not been generated yet
+	 */
+	private static @Nullable Class<?> loadEnumClass(@Nonnull Enumeration enumeration) {
+		try {
+			return enumeration.getImplementingType();
+		}
+		catch (MetaDataException e) {
+			if (! Enumeration.isEnumClassLoadingFailure(e)) {
+				throw e;
+			}
+			return null;
+		}
 	}
 	
 	/**
@@ -463,109 +611,115 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	 * @return a configured processor with Skyve EL functions and runtime binding resolvers
 	 */
 	public static ELProcessor newSkyveEvaluationProcessor(@Nullable Bean bean) {
-		ELProcessor result = setupProcessor(null, bean, CORE.getUser(), CORE.getStash());
-		result.getELManager().addELResolver(new BindingELResolver());
+		ELProcessor result = new ELProcessor();
+		ELManager manager = result.getELManager();
+		manager.setELContext(new FunctionContext(manager.getELContext()));
+		manager.addELResolver(BINDING_RESOLVER);
+		if (bean != null) {
+			manager.defineBean(BEAN_VARIABLE, bean);
+			ENUM_BEANS.get(bean.getClass()).forEach(manager::defineBean);
+		}
+		manager.defineBean(USER_VARIABLE, CORE.getUser());
+		manager.defineBean(STASH_VARIABLE, CORE.getStash());
+		manager.importClass(Decimal2.class.getCanonicalName());
+		manager.importClass(Decimal5.class.getCanonicalName());
+		manager.importClass(Decimal10.class.getCanonicalName());
 		return result;
 	}
-	
-	private static ELProcessor setupProcessor(@SuppressWarnings("unused") Customer customer, Object bean, Object user, Object stash) {
-		ELProcessor result = new ELProcessor();
-		if (bean != null) {
-		result.defineBean(BEAN_VARIABLE, bean);
+
+	/**
+	 * Collects the declared and imported enum types from a bean class hierarchy, keyed by simple name.
+	 * Declared enum types take precedence over imported instance field types, and subclass declarations
+	 * take precedence over superclass declarations when simple names match.
+	 *
+	 * @param beanClass the bean class whose hierarchy declares enums or has enum-typed instance fields
+	 * @return an immutable map of simple enum names to their EL classes
+	 */
+	static @Nonnull Map<String, ELClass> enumBeans(@Nonnull Class<?> beanClass) {
+		Map<String, ELClass> result = new HashMap<>();
+		for (Class<?> type = beanClass; type != null; type = type.getSuperclass()) {
+			for (Class<?> nested : type.getDeclaredClasses()) {
+				if (nested.isEnum() && Modifier.isPublic(nested.getModifiers())) {
+					result.putIfAbsent(nested.getSimpleName(), new ELClass(nested));
+				}
+			}
 		}
-		result.defineBean("user", user);
-		result.defineBean("stash", stash);
+		for (Class<?> type = beanClass; type != null; type = type.getSuperclass()) {
+			for (Field field : type.getDeclaredFields()) {
+				Class<?> fieldType = field.getType();
+				if ((! Modifier.isStatic(field.getModifiers())) && fieldType.isEnum() && Modifier.isPublic(fieldType.getModifiers())) {
+					result.putIfAbsent(fieldType.getSimpleName(), new ELClass(fieldType));
+				}
+			}
+		}
+		return Map.copyOf(result);
+	}
+	
+	/**
+	 * Builds the fixed Skyve functions, keyed as {@code prefix:localName} with an empty prefix.
+	 * The map is immutable so it can be shared safely by concurrent EL contexts.
+	 */
+	private static @Nonnull Map<String, Method> fixedFunctions() {
+		Map<String, Method> result = new HashMap<>();
 		
 		try {
 			Class<?> functions = ELFunctions.class;
-			result.defineFunction("", "", functions.getMethod("newDateOnly"));
-			result.defineFunction("", "", functions.getMethod("newDateOnlyFromMillis", Long.TYPE));
-			result.defineFunction("", "", functions.getMethod("newDateOnlyFromDate", Date.class));
-			result.defineFunction("", "", functions.getMethod("newDateOnlyFromSerializedForm", String.class));
-			result.defineFunction("", "", functions.getMethod("newDateOnlyFromLocalDate", LocalDate.class));
-			result.defineFunction("", "", functions.getMethod("newDateOnlyFromLocalDateTime", LocalDateTime.class));
+			defineFunction(result, functions.getMethod("newDateOnly"));
+			defineFunction(result, functions.getMethod("newDateOnlyFromMillis", Long.TYPE));
+			defineFunction(result, functions.getMethod("newDateOnlyFromDate", Date.class));
+			defineFunction(result, functions.getMethod("newDateOnlyFromSerializedForm", String.class));
+			defineFunction(result, functions.getMethod("newDateOnlyFromLocalDate", LocalDate.class));
+			defineFunction(result, functions.getMethod("newDateOnlyFromLocalDateTime", LocalDateTime.class));
 
-			result.defineFunction("", "", functions.getMethod("newDateTime"));
-			result.defineFunction("", "", functions.getMethod("newDateTimeFromMillis", Long.TYPE));
-			result.defineFunction("", "", functions.getMethod("newDateTimeFromDate", Date.class));
-			result.defineFunction("", "", functions.getMethod("newDateTimeFromSerializedForm", String.class));
-			result.defineFunction("", "", functions.getMethod("newDateTimeFromLocalDate", LocalDate.class));
-			result.defineFunction("", "", functions.getMethod("newDateTimeFromLocalDateTime", LocalDateTime.class));
+			defineFunction(result, functions.getMethod("newDateTime"));
+			defineFunction(result, functions.getMethod("newDateTimeFromMillis", Long.TYPE));
+			defineFunction(result, functions.getMethod("newDateTimeFromDate", Date.class));
+			defineFunction(result, functions.getMethod("newDateTimeFromSerializedForm", String.class));
+			defineFunction(result, functions.getMethod("newDateTimeFromLocalDate", LocalDate.class));
+			defineFunction(result, functions.getMethod("newDateTimeFromLocalDateTime", LocalDateTime.class));
 
-			result.defineFunction("", "", functions.getMethod("newTimeOnly"));
-			result.defineFunction("", "", functions.getMethod("newTimeOnlyFromMillis", Long.TYPE));
-			result.defineFunction("", "", functions.getMethod("newTimeOnlyFromDate", Date.class));
-			result.defineFunction("", "", functions.getMethod("newTimeOnlyFromComponents", Integer.TYPE, Integer.TYPE, Integer.TYPE));
-			result.defineFunction("", "", functions.getMethod("newTimeOnlyFromSerializedForm", String.class));
-			result.defineFunction("", "", functions.getMethod("newTimeOnlyFromLocalTime", LocalTime.class));
-			result.defineFunction("", "", functions.getMethod("newTimeOnlyFromLocalDateTime", LocalDateTime.class));
+			defineFunction(result, functions.getMethod("newTimeOnly"));
+			defineFunction(result, functions.getMethod("newTimeOnlyFromMillis", Long.TYPE));
+			defineFunction(result, functions.getMethod("newTimeOnlyFromDate", Date.class));
+			defineFunction(result, functions.getMethod("newTimeOnlyFromComponents", Integer.TYPE, Integer.TYPE, Integer.TYPE));
+			defineFunction(result, functions.getMethod("newTimeOnlyFromSerializedForm", String.class));
+			defineFunction(result, functions.getMethod("newTimeOnlyFromLocalTime", LocalTime.class));
+			defineFunction(result, functions.getMethod("newTimeOnlyFromLocalDateTime", LocalDateTime.class));
 			
-			result.defineFunction("", "", functions.getMethod("newTimestamp"));
-			result.defineFunction("", "", functions.getMethod("newTimestampFromMillis", Long.TYPE));
-			result.defineFunction("", "", functions.getMethod("newTimestampFromDate", Date.class));
-			result.defineFunction("", "", functions.getMethod("newTimestampFromSerializedForm", String.class));
-			result.defineFunction("", "", functions.getMethod("newTimestampFromLocalDate", LocalDate.class));
-			result.defineFunction("", "", functions.getMethod("newTimestampFromLocalDateTime", LocalDateTime.class));
+			defineFunction(result, functions.getMethod("newTimestamp"));
+			defineFunction(result, functions.getMethod("newTimestampFromMillis", Long.TYPE));
+			defineFunction(result, functions.getMethod("newTimestampFromDate", Date.class));
+			defineFunction(result, functions.getMethod("newTimestampFromSerializedForm", String.class));
+			defineFunction(result, functions.getMethod("newTimestampFromLocalDate", LocalDate.class));
+			defineFunction(result, functions.getMethod("newTimestampFromLocalDateTime", LocalDateTime.class));
 
-			result.defineFunction("", "", functions.getMethod("newDecimal2", Double.TYPE));
-			result.defineFunction("", "", functions.getMethod("newDecimal2FromBigDecimal", BigDecimal.class));
-			result.defineFunction("", "", functions.getMethod("newDecimal2FromDecimal", Decimal.class));
-			result.defineFunction("", "", functions.getMethod("newDecimal2FromString", String.class));
+			defineFunction(result, functions.getMethod("newDecimal2", Double.TYPE));
+			defineFunction(result, functions.getMethod("newDecimal2FromBigDecimal", BigDecimal.class));
+			defineFunction(result, functions.getMethod("newDecimal2FromDecimal", Decimal.class));
+			defineFunction(result, functions.getMethod("newDecimal2FromString", String.class));
 			
-			result.defineFunction("", "", functions.getMethod("newDecimal5", Double.TYPE));
-			result.defineFunction("", "", functions.getMethod("newDecimal5FromBigDecimal", BigDecimal.class));
-			result.defineFunction("", "", functions.getMethod("newDecimal5FromDecimal", Decimal.class));
-			result.defineFunction("", "", functions.getMethod("newDecimal5FromString", String.class));
+			defineFunction(result, functions.getMethod("newDecimal5", Double.TYPE));
+			defineFunction(result, functions.getMethod("newDecimal5FromBigDecimal", BigDecimal.class));
+			defineFunction(result, functions.getMethod("newDecimal5FromDecimal", Decimal.class));
+			defineFunction(result, functions.getMethod("newDecimal5FromString", String.class));
 
-			result.defineFunction("", "", functions.getMethod("newDecimal10", Double.TYPE));
-			result.defineFunction("", "", functions.getMethod("newDecimal10FromBigDecimal", BigDecimal.class));
-			result.defineFunction("", "", functions.getMethod("newDecimal10FromDecimal", Decimal.class));
-			result.defineFunction("", "", functions.getMethod("newDecimal10FromString", String.class));
+			defineFunction(result, functions.getMethod("newDecimal10", Double.TYPE));
+			defineFunction(result, functions.getMethod("newDecimal10FromBigDecimal", BigDecimal.class));
+			defineFunction(result, functions.getMethod("newDecimal10FromDecimal", Decimal.class));
+			defineFunction(result, functions.getMethod("newDecimal10FromString", String.class));
 
-			result.defineFunction("", "", functions.getMethod("newOptimisticLock", String.class, Date.class));
-			result.defineFunction("", "", functions.getMethod("newOptimisticLockFromString", String.class));
-			result.defineFunction("", "", functions.getMethod("newGeometry", String.class));
+			defineFunction(result, functions.getMethod("newOptimisticLock", String.class, Date.class));
+			defineFunction(result, functions.getMethod("newOptimisticLockFromString", String.class));
+			defineFunction(result, functions.getMethod("newGeometry", String.class));
 		}
 		catch (NoSuchMethodException | SecurityException e) {
 			throw new DomainException("Cannot define EL functions", e);
 		}
 		
-		final ELManager elManager = result.getELManager();
-		elManager.importClass(Decimal2.class.getCanonicalName());
-		elManager.importClass(Decimal5.class.getCanonicalName());
-		elManager.importClass(Decimal10.class.getCanonicalName());
+		return Map.copyOf(result);
+	}
 
-/* TODO resolve this inner enum class problem.
-	Cannot import the domain classes here coz its not on the classpath for the maven mojo.
-	And I cant get it to work at runtime for a nested enum class either using $ or . in the class name.
-	We might have to use the normal defaulting for default values and allow built-in EL String coercion for enums in expressions.
-
-		Class<?> classToImport = null;
-		
-		if (bean instanceof DocumentImpl d) { // could be a Document in validation mode
-			if (! d.isDynamic()) {
-				try {
-					classToImport = d.getBeanClass(customer);
-				} catch (ClassNotFoundException e) {
-					// TODO Auto-generated catch block
-					LOGGER.error(e.getMessage(), e);
-				}
-			}
-		}
-		else if ((bean != null) && (! (bean instanceof DynamicBean))) { // not dynamic
-			classToImport = bean.getClass();
-		}
-
-		if (classToImport != null) {
-			String name = classToImport.getCanonicalName();
-			elManager.importClass(name);
-			for (Class<?> innerClass : classToImport.getDeclaredClasses()) {
-				String innerName = innerClass.getCanonicalName();// name + '$' + innerClass.getSimpleName();
-				elManager.importClass(innerName);
-			}
-			classToImport.getSuperclass();
-		}
-*/		
-		return result;
+	private static void defineFunction(@Nonnull Map<String, Method> functions, @Nonnull Method method) {
+		functions.put(':' + method.getName(), method);
 	}
 }

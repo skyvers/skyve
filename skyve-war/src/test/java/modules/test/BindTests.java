@@ -10,12 +10,16 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Stream;
 
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
 import org.locationtech.jts.io.WKTReader;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -43,7 +47,9 @@ import org.skyve.util.Util;
 
 import modules.admin.User.UserExtension;
 import modules.admin.domain.Contact;
+import modules.admin.domain.DataMaintenance.EvictOption;
 import modules.admin.domain.Snapshot;
+import modules.admin.domain.Tag;
 import modules.admin.domain.User;
 import modules.admin.domain.UserProxy;
 import modules.admin.domain.UserRole;
@@ -51,6 +57,22 @@ import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.AllAttributesPersistent.Enum3;
 
 class BindTests extends AbstractSkyveTest {
+	@Test
+	void evaluatesAndValidatesGeneratedNestedEnum() {
+		AllAttributesPersistent bean = new AllAttributesPersistent();
+		assertEquals(Enum3.one, ExpressionEvaluator.evaluate("{rtel:Enum3.one}", bean));
+		assertNull(ExpressionEvaluator.validate("{el:Enum3.one}", Enum3.class, c, m, aapd));
+		assertEquals(Boolean.TRUE, ExpressionEvaluator.evaluate("{rtel:bean.enum3 eq 'one'}", bean));
+		assertNull(ExpressionEvaluator.validate("{el:bean.enum3 eq 'one'}", Boolean.class, c, m, aapd));
+	}
+
+	@Test
+	void evaluatesAndValidatesImportedEnum() {
+		Tag bean = Tag.newInstance();
+		assertEquals(EvictOption.bean, ExpressionEvaluator.evaluate("{el:EvictOption.bean}", bean));
+		Document document = c.getModule("admin").getDocument(c, "Tag");
+		assertNull(ExpressionEvaluator.validate("{el:EvictOption.bean}", EvictOption.class, c, c.getModule("admin"), document));
+	}
 
 	@Test
 	@SuppressWarnings("static-method")
@@ -419,8 +441,7 @@ class BindTests extends AbstractSkyveTest {
 		assertEquals(Boolean.FALSE, ExpressionEvaluator.evaluate("{el:bean.falseyBooleanEvaluation}", bean));
 		
 		bean = aadpd.newInstance(u);
-		System.out.println(bean);
-		System.out.println();
+		assertNotNull(bean.toString());
 	}
 	
 	@Test
@@ -712,32 +733,15 @@ class BindTests extends AbstractSkyveTest {
 									"Format Message with sanitise function should remove script tag");
 	}
 
-	@Test
-	void testGetMetaDataForBindingThrowsOnParentBindingOfNonChildDocument() {
-		MetaDataException mde = assertThrows(MetaDataException.class, () -> {
-			BindUtil.getMetaDataForBinding(c, m, aapd, ChildBean.PARENT_NAME);
-		});
-
-		assertThat(mde.getMessage(), is(notNullValue()));
-	}
-
-	@Test
-	void testGetMetaDataForBindingThrowsOnCompoundParentBindingOfNonChildDocument() {
-		MetaDataException mde = assertThrows(MetaDataException.class, () -> {
-			BindUtil.getMetaDataForBinding(c, m, aapd,
-					AllAttributesPersistent.aggregatedAssociationPropertyName + ChildBean.CHILD_PARENT_NAME_SUFFIX);
-		});
-
-		assertThat(mde.getMessage(), is(notNullValue()));
-	}
-	
-	@Test
-	void testGetMetaDataForBindingThrowsOnCompoundBinding() {
-		MetaDataException mde = assertThrows(MetaDataException.class, () -> {
-			BindUtil.getMetaDataForBinding(c, m, aapd, "bogusPropertyName" + ChildBean.CHILD_PARENT_NAME_SUFFIX);
-		});
-
-		assertThat(mde.getMessage(), is(notNullValue()));
+	@TestFactory
+	Stream<DynamicTest> testGetMetaDataForBindingThrowsOnInvalidBindings() {
+		return Stream.of(ChildBean.PARENT_NAME, // parent binding of a non-child document
+							AllAttributesPersistent.aggregatedAssociationPropertyName + ChildBean.CHILD_PARENT_NAME_SUFFIX, // compound parent binding of a non-child document
+							"bogusPropertyName" + ChildBean.CHILD_PARENT_NAME_SUFFIX) // compound binding
+						.map(binding -> dynamicTest(binding, () -> {
+							MetaDataException mde = assertThrows(MetaDataException.class, () -> BindUtil.getMetaDataForBinding(c, m, aapd, binding));
+							assertThat(mde.getMessage(), is(notNullValue()));
+						}));
 	}
 
 	@Test

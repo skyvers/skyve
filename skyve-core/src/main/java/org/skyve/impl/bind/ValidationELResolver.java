@@ -24,6 +24,9 @@ import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.InverseMany;
+import org.skyve.impl.metadata.model.document.field.Enumeration;
+import org.skyve.impl.metadata.model.document.field.Enumeration.EnumeratedValue;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Extends;
@@ -83,14 +86,6 @@ class ValidationELResolver extends ELResolver {
 		TERMINATING_MOCKS.put(Decimal10.class, new Decimal10(1.0));
 		
 		TERMINATING_MOCKS.put(String.class, "");
-
-		TERMINATING_MOCKS.put(Date.class, new Date());
-		TERMINATING_MOCKS.put(DateOnly.class, new DateOnly());
-		TERMINATING_MOCKS.put(TimeOnly.class, new TimeOnly());
-		TERMINATING_MOCKS.put(DateTime.class, new DateTime());
-		TERMINATING_MOCKS.put(Timestamp.class, new Timestamp());
-		
-		TERMINATING_MOCKS.put(Geometry.class, new GeometryFactory().createPoint());
 	}
 	
 	ValidationELResolver(Customer customer) {
@@ -142,6 +137,7 @@ class ValidationELResolver extends ELResolver {
 	/**
 	 * This method returns 
 	 * <ul>
+	 * 	<li>an enum code if given enumeration metadata and a declared value name.</li>
 	 * 	<li>a document if given a document as a base and the property is an association or inverseOne.</li>
 	 * 	<li>a singleton list of document if given a document as a base and the property is a collection or inverseMany.</li>
 	 * 	<li>Object.class if base is Object.class (in non type-safe mode)</li>
@@ -152,12 +148,20 @@ class ValidationELResolver extends ELResolver {
 	 * </ul>
 	 * @param base
 	 * @param property
-	 * @return Document, List or Class
+	 * @return an enum code, document, list, or class
 	 */
 	@SuppressWarnings({"java:S6541", "java:S3776"}) // Not a brain method
 	private Object getClassOrDocument(Object base, Object property) {
 		Object object = base;
 		final String propertyName = property.toString();
+		if (object instanceof Enumeration enumeration) {
+			for (EnumeratedValue value : enumeration.getValues()) {
+				if (value.toJavaIdentifier().equals(propertyName)) {
+					return value.getCode();
+				}
+			}
+			throw new PropertyNotFoundException("Enumeration value " + propertyName + " does not exist on " + enumeration.toJavaIdentifier());
+		}
 
 		// Possible Collection or InverseMany
 		// If so, return the single element in the list which is the related document
@@ -191,7 +195,18 @@ class ValidationELResolver extends ELResolver {
 						// Associations and InverseOne return the related Document
 						return relationDocument;
 					}
-					// Every other attribute is a scalar type
+					// Generated enum classes may not exist yet during domain generation.
+					if (attribute instanceof Enumeration) {
+						try {
+							return mock(attribute.getImplementingType());
+						}
+						catch (MetaDataException e) {
+							if (! Enumeration.isEnumClassLoadingFailure(e)) {
+								throw e;
+							}
+							return mock(String.class);
+						}
+					}
 					return mock(attribute.getImplementingType());
 				}
 				
@@ -250,6 +265,9 @@ class ValidationELResolver extends ELResolver {
 		Object value = getClassOrDocument(base, property);
 		if (value instanceof Class<?> type) {
 			result = type;
+		}
+		else if (value instanceof Enum<?> constant) {
+			result = constant.getDeclaringClass();
 		}
 		else if (value instanceof List<?>) {
 			result = List.class;
@@ -365,7 +383,7 @@ class ValidationELResolver extends ELResolver {
 				object = document.getBeanClass(customer);
 			}
 			catch (ClassNotFoundException e) {
-				throw new IllegalStateException("Cannot get bean class for document " + document.getOwningModuleName() + "." + document.getName(), e);
+				throw new IllegalStateException(CANNOT_GET_BEAN_CLASS_FOR_DOCUMENT + document.getOwningModuleName() + "." + document.getName(), e);
 			}
 		}
 		
@@ -417,6 +435,30 @@ class ValidationELResolver extends ELResolver {
 	}
 	
 	private static Object mock(Class<?> type) {
+		// Validation expressions can invoke methods on these values, so never share mutable mocks.
+		if (Date.class.equals(type)) {
+			return new Date();
+		}
+		if (DateOnly.class.equals(type)) {
+			return new DateOnly();
+		}
+		if (TimeOnly.class.equals(type)) {
+			return new TimeOnly();
+		}
+		if (DateTime.class.equals(type)) {
+			return new DateTime();
+		}
+		if (Timestamp.class.equals(type)) {
+			return new Timestamp();
+		}
+		if (Geometry.class.equals(type)) {
+			return new GeometryFactory().createPoint();
+		}
+		// Enum constants are immutable singletons; EL cannot coerce a Class to an enum in comparisons.
+		if (type.isEnum()) {
+			Object[] constants = type.getEnumConstants();
+			return (constants.length > 0) ? constants[0] : type;
+		}
 		Object mock = TERMINATING_MOCKS.get(type);
 		return (mock == null) ? type : mock;
 	}

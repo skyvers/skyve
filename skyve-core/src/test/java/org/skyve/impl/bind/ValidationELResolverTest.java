@@ -4,17 +4,35 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
+import org.locationtech.jts.geom.Geometry;
+import org.skyve.domain.types.DateOnly;
+import org.skyve.domain.types.DateTime;
+import org.skyve.domain.types.OptimisticLock;
+import org.skyve.domain.types.TimeOnly;
+import org.skyve.domain.types.Timestamp;
+import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.metadata.model.document.field.Enumeration;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute;
 
 import jakarta.el.ELContext;
 import jakarta.el.MethodNotFoundException;
@@ -54,6 +72,44 @@ class ValidationELResolverTest {
 	public static class ReadOnlyBean {
 		public String getValue() {
 			return "v";
+		}
+	}
+
+	public enum Colour { RED, GREEN }
+
+	public enum Empty {
+		// no constants
+	}
+
+	public static class EnumValueBean {
+		public Colour getColour() {
+			return null;
+		}
+
+		public Empty getEmpty() {
+			return null;
+		}
+	}
+
+	public static class MutableTypesBean {
+		public DateOnly getDateOnly() {
+			return null;
+		}
+
+		public TimeOnly getTimeOnly() {
+			return null;
+		}
+
+		public DateTime getDateTime() {
+			return null;
+		}
+
+		public Timestamp getTimestamp() {
+			return null;
+		}
+
+		public Geometry getGeometry() {
+			return null;
 		}
 	}
 
@@ -99,6 +155,72 @@ class ValidationELResolverTest {
 		assertEquals("", arrayValue);
 		assertEquals(Object.class, mapValue);
 		assertEquals(Object.class, objectValue);
+	}
+
+	@Test
+	void mutableValidationValuesAreIsolatedBetweenEvaluations() {
+		ValidationELResolver resolver = newResolver();
+		ELContext context = mock(ELContext.class);
+		// OptimisticLock.getTimestamp() returns java.util.Date, which is mocked with a fresh instance
+		Object first = resolver.getValue(context, OptimisticLock.class, "timestamp");
+		Object second = resolver.getValue(context, OptimisticLock.class, "timestamp");
+		assertEquals("java.util.Date", first.getClass().getName());
+		assertNotSame(first, second);
+	}
+
+	@Test
+	void enumValuesMockAsConstantsWithEnumType() {
+		ValidationELResolver resolver = newResolver();
+		ELContext context = mock(ELContext.class);
+		assertEquals(Colour.RED, resolver.getValue(context, EnumValueBean.class, "colour"));
+		assertEquals(Colour.class, resolver.getType(context, EnumValueBean.class, "colour"));
+		assertEquals(Empty.class, resolver.getValue(context, EnumValueBean.class, "empty"));
+	}
+
+	@Test
+	void mutableSkyveTypeMocksAreFreshInstances() {
+		ValidationELResolver resolver = newResolver();
+		ELContext context = mock(ELContext.class);
+		Map<String, Class<?>> properties = Map.of("dateOnly", DateOnly.class,
+													"timeOnly", TimeOnly.class,
+													"dateTime", DateTime.class,
+													"timestamp", Timestamp.class,
+													"geometry", Geometry.class);
+		properties.forEach((property, type) -> {
+			Object first = resolver.getValue(context, MutableTypesBean.class, property);
+			assertTrue(type.isInstance(first), property);
+			assertNotSame(first, resolver.getValue(context, MutableTypesBean.class, property), property);
+		});
+	}
+
+	@Test
+	void documentScalarAttributeMocksImplementingType() {
+		ValidationELResolver resolver = newResolver();
+		DocumentImpl document = mock(DocumentImpl.class);
+		Attribute attribute = mock(Attribute.class);
+		doReturn(String.class).when(attribute).getImplementingType();
+		when(document.getAttribute("text")).thenReturn(attribute);
+		assertEquals("", resolver.getValue(mock(ELContext.class), document, "text"));
+	}
+
+	@Test
+	void documentEnumAttributeRethrowsNonClassLoadingFailure() {
+		ValidationELResolver resolver = newResolver();
+		DocumentImpl document = mock(DocumentImpl.class);
+		Enumeration enumeration = mock(Enumeration.class);
+		when(enumeration.getImplementingType()).thenThrow(new MetaDataException("Broken metadata"));
+		when(document.getAttribute("choice")).thenReturn(enumeration);
+		ELContext context = mock(ELContext.class);
+		assertThrows(MetaDataException.class, () -> resolver.getValue(context, document, "choice"));
+	}
+
+	@Test
+	void isReadOnlyThrowsWhenDocumentBeanClassIsMissing() throws Exception {
+		ValidationELResolver resolver = newResolver();
+		DocumentImpl document = mock(DocumentImpl.class);
+		when(document.getBeanClass(any())).thenThrow(new ClassNotFoundException("Missing"));
+		ELContext context = mock(ELContext.class);
+		assertThrows(IllegalStateException.class, () -> resolver.isReadOnly(context, document, "unknown"));
 	}
 
 	@Test
@@ -174,48 +296,21 @@ class ValidationELResolverTest {
 		assertNull(resolver.getCommonPropertyType(context, new Object()));
 	}
 
-	@Test
-	void setValueDoesNothingWhenTypeIsNull() {
-		// Object.class base with an unresolvable property → type=null → no-op
+	@TestFactory
+	Stream<DynamicTest> setValueAcceptsResolvableAndUnresolvableValues() {
 		ValidationELResolver resolver = newResolver();
 		ELContext context = mock(ELContext.class);
-		// no exception expected
-		assertDoesNotThrow(() -> resolver.setValue(context, new Object(), "unknownProp", "value"));
-	}
-
-	@Test
-	void setValueHandlesNullValueWithoutThrowing() {
-		for (String property : List.of("name", "count")) {
-			ValidationELResolver resolver = newResolver();
-			ELContext context = mock(ELContext.class);
-			assertDoesNotThrow(() -> resolver.setValue(context, SampleBean.class, property, null));
-		}
-	}
-
-	@Test
-	void setValueSetsPropertyResolvedWhenTypeIsObjectClass() {
-		ValidationELResolver resolver = newResolver();
-		ELContext context = mock(ELContext.class);
-		// Object.class base → type=Object.class → setPropertyResolved
-		assertDoesNotThrow(() -> resolver.setValue(context, Object.class, "anything", "someValue"));
-	}
-
-	@Test
-	void setValueSetsPropertyResolvedWhenValAssignableToType() {
-		ValidationELResolver resolver = newResolver();
-		ELContext context = mock(ELContext.class);
-		// SampleBean.name is String, val is a String → assignable → setPropertyResolved
-		assertDoesNotThrow(() -> resolver.setValue(context, SampleBean.class, "name", "hello"));
-	}
-
-	@Test
-	void setValueDoesNothingForKnownStringPropertyBecauseTypeResolvesToTerminatingMock() {
-		// SampleBean.name is String — getType() returns null (mock("") not String.class)
-		// so setValue is a no-op even when passing Integer
-		ValidationELResolver resolver = newResolver();
-		ELContext context = mock(ELContext.class);
-		// no exception expected
-		assertDoesNotThrow(() -> resolver.setValue(context, SampleBean.class, "name", Integer.valueOf(42)));
+		// base, property, value
+		Object[][] cases = {
+			{new Object(), "unknownProp", "value"}, // type is null so no-op
+			{SampleBean.class, "name", null},
+			{SampleBean.class, "count", null},
+			{Object.class, "anything", "someValue"}, // not type-safe
+			{SampleBean.class, "name", "hello"}, // assignable
+			{SampleBean.class, "name", Integer.valueOf(42)} // String type resolves to a terminating mock so no-op
+		};
+		return Stream.of(cases).map(c -> dynamicTest(c[0] + "." + c[1] + " = " + c[2],
+														() -> assertDoesNotThrow(() -> resolver.setValue(context, c[0], c[1], c[2]))));
 	}
 
 	@Test
@@ -231,7 +326,8 @@ class ValidationELResolverTest {
 		ValidationELResolver resolver = newResolver();
 		ELContext context = mock(ELContext.class);
 		// Boolean is not a Number, String, or Character → PropertyNotFoundException
-		assertThrows(PropertyNotFoundException.class, () -> resolver.isReadOnly(context, new ArrayList<>(), Boolean.TRUE));
+		List<Object> list = new ArrayList<>();
+		assertThrows(PropertyNotFoundException.class, () -> resolver.isReadOnly(context, list, Boolean.TRUE));
 	}
 
 	@Test
