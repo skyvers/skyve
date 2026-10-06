@@ -246,44 +246,50 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 		finally {
 			endTime = new Timestamp();
 
-			persistence.evictAllCached();
-			persistence.commit(false);
+			try {
+				persistence.evictAllCached();
+				persistence.commit(false);
 
-			persistence.setAsyncThread(false);
-			persistence.begin();
+				persistence.setAsyncThread(false);
+				persistence.begin();
 
-			if (persistJobExecutionOnSuccess() || status != JobStatus.complete) {
-				// save the job to the database
-				if ((customer == null) || (user == null)) {
-					throw new JobExecutionException("Could not insert completed job in the database as customer or user is undefined");
-				}
-
-				try {
-					Module module = customer.getModule(AppConstants.ADMIN_MODULE_NAME);
-					Document document = module.getDocument(customer, AppConstants.JOB_DOCUMENT_NAME);
-					PersistentBean job = document.newInstance(user);
-
-					BindUtil.set(job, AppConstants.START_TIME_ATTRIBUTE_NAME, getStartTime());
-					BindUtil.set(job, AppConstants.DISPLAY_NAME_ATTRIBUTE_NAME, getDisplayName());
-					BindUtil.set(job, AppConstants.STATUS_ATTRIBUTE_NAME, status.toString());
-					BindUtil.set(job, AppConstants.END_TIME_ATTRIBUTE_NAME, getEndTime());
-					BindUtil.set(job, AppConstants.PERCENTAGE_COMPLETE_ATTRIBUTE_NAME, Integer.valueOf(getPercentComplete()));
-					BindUtil.set(job, AppConstants.LOG_ATTRIBUTE_NAME, createLogDescriptionString());
-					if (bean != null) {
-						BindUtil.set(job, AppConstants.BEAN_BIZID_ATTRIBUTE_NAME, bean.getBizId());
-						BindUtil.set(job, AppConstants.BEAN_MODULE_NAME_ATTRIBUTE_NAME, bean.getBizModule());
-						BindUtil.set(job, AppConstants.BEAN_DOCUMENT_NAME_ATTRIBUTE_NAME, bean.getBizDocument());
+				if (persistJobExecutionOnSuccess() || status != JobStatus.complete) {
+					// save the job to the database
+					if ((customer == null) || (user == null)) {
+						throw new JobExecutionException("Could not insert completed job in the database as customer or user is undefined");
 					}
 
-					persistence.save(document, job);
-				}
-				catch (Exception e) {
-					throw new JobExecutionException("Could not insert completed job in the database", e);
-				}
-			}
+					try {
+						Module module = customer.getModule(AppConstants.ADMIN_MODULE_NAME);
+						Document document = module.getDocument(customer, AppConstants.JOB_DOCUMENT_NAME);
+						PersistentBean job = document.newInstance(user);
 
-			persistence.evictAllCached();
-			persistence.commit(true);
+						BindUtil.set(job, AppConstants.START_TIME_ATTRIBUTE_NAME, getStartTime());
+						BindUtil.set(job, AppConstants.DISPLAY_NAME_ATTRIBUTE_NAME, getDisplayName());
+						BindUtil.set(job, AppConstants.STATUS_ATTRIBUTE_NAME, status.toString());
+						BindUtil.set(job, AppConstants.END_TIME_ATTRIBUTE_NAME, getEndTime());
+						BindUtil.set(job, AppConstants.PERCENTAGE_COMPLETE_ATTRIBUTE_NAME, Integer.valueOf(getPercentComplete()));
+						BindUtil.set(job, AppConstants.LOG_ATTRIBUTE_NAME, createLogDescriptionString());
+						if (bean != null) {
+							BindUtil.set(job, AppConstants.BEAN_BIZID_ATTRIBUTE_NAME, bean.getBizId());
+							BindUtil.set(job, AppConstants.BEAN_MODULE_NAME_ATTRIBUTE_NAME, bean.getBizModule());
+							BindUtil.set(job, AppConstants.BEAN_DOCUMENT_NAME_ATTRIBUTE_NAME, bean.getBizDocument());
+						}
+
+						persistence.save(document, job);
+					}
+					catch (Exception e) {
+						throw new JobExecutionException("Could not insert completed job in the database", e);
+					}
+				}
+
+				persistence.evictAllCached();
+			}
+			finally {
+				// Always close the persistence and remove it from this thread, even if the steps above threw,
+				// otherwise the next job on this pooled Quartz thread inherits it and its (possibly dead) connection.
+				persistence.commit(true);
+			}
 
 			if ((sleepInSeconds != null) && (sleepInSeconds.intValue() > 0)) {
 				try {

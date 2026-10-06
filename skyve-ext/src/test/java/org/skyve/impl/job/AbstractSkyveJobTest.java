@@ -1,6 +1,7 @@
 package org.skyve.impl.job;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -321,6 +322,29 @@ class AbstractSkyveJobTest {
 		verify(persistence).save(jobDocument, persistedJob);
 		verify(persistence).commit(false);
 		verify(persistence).commit(true);
+	}
+
+	@Test
+	void executeContextClosesPersistenceWhenCommitInFinallyFails() throws Exception {
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		IllegalStateException connectionClosed = new IllegalStateException("No operations allowed after connection closed.");
+		doThrow(connectionClosed).when(persistence).commit(false);
+		JobExecutionContext context = newContext(mock(User.class));
+		bindPersistenceToThread(persistence);
+
+		IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> job.execute(context));
+
+		assertSame(connectionClosed, thrown);
+		verify(persistence).commit(true);
+	}
+
+	private static JobExecutionContext newContext(User user) {
+		JobExecutionContext context = mock(JobExecutionContext.class);
+		JobDataMap dataMap = new JobDataMap();
+		dataMap.put(AbstractSkyveJob.DISPLAY_NAME_JOB_PARAMETER_KEY, "Nightly Work");
+		dataMap.put(AbstractSkyveJob.USER_JOB_PARAMETER_KEY, user);
+		when(context.getMergedJobDataMap()).thenReturn(dataMap);
+		return context;
 	}
 
 	private static DynamicPersistentBean newJobBean() {
