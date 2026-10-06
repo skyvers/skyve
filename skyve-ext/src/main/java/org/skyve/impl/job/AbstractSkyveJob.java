@@ -285,6 +285,11 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 
 				persistence.evictAllCached();
 			}
+			catch (Throwable t) {
+				// Roll back a partly recorded job so the commit(true) below doesn't commit it
+				persistence.rollback();
+				throw t;
+			}
 			finally {
 				// Always close the persistence and remove it from this thread, even if the steps above threw,
 				// otherwise the next job on this pooled Quartz thread inherits it and its (possibly dead) connection.

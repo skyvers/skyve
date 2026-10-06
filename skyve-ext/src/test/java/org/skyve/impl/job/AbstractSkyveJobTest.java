@@ -2,6 +2,7 @@ package org.skyve.impl.job;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -12,6 +13,7 @@ import java.util.HashMap;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InOrder;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -335,7 +337,10 @@ class AbstractSkyveJobTest {
 		IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> job.execute(context));
 
 		assertSame(connectionClosed, thrown);
-		verify(persistence).commit(true);
+		InOrder inOrder = inOrder(persistence);
+		inOrder.verify(persistence).commit(false);
+		inOrder.verify(persistence).rollback();
+		inOrder.verify(persistence).commit(true);
 	}
 
 	@Test
@@ -357,7 +362,10 @@ class AbstractSkyveJobTest {
 		JobExecutionException thrown = assertThrows(JobExecutionException.class, () -> job.execute(context));
 
 		assertEquals("Could not insert completed job in the database", thrown.getMessage());
-		verify(persistence).commit(true);
+		InOrder inOrder = inOrder(persistence);
+		inOrder.verify(persistence).save(jobDocument, persistedJob);
+		inOrder.verify(persistence).rollback();
+		inOrder.verify(persistence).commit(true);
 	}
 
 	private static JobExecutionContext newContext(User user) {
