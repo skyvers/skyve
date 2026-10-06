@@ -338,6 +338,28 @@ class AbstractSkyveJobTest {
 		verify(persistence).commit(true);
 	}
 
+	@Test
+	void executeContextClosesPersistenceWhenSavingJobRecordFails() throws Exception {
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		Module adminModule = mock(Module.class);
+		Document jobDocument = mock(Document.class);
+		DynamicPersistentBean persistedJob = newJobBean();
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule(AppConstants.ADMIN_MODULE_NAME)).thenReturn(adminModule);
+		when(adminModule.getDocument(customer, AppConstants.JOB_DOCUMENT_NAME)).thenReturn(jobDocument);
+		when(jobDocument.newInstance(user)).thenReturn(persistedJob);
+		doThrow(new IllegalStateException("No operations allowed after connection closed.")).when(persistence).save(jobDocument, persistedJob);
+		JobExecutionContext context = newContext(user);
+		bindPersistenceToThread(persistence);
+
+		JobExecutionException thrown = assertThrows(JobExecutionException.class, () -> job.execute(context));
+
+		assertEquals("Could not insert completed job in the database", thrown.getMessage());
+		verify(persistence).commit(true);
+	}
+
 	private static JobExecutionContext newContext(User user) {
 		JobExecutionContext context = mock(JobExecutionContext.class);
 		JobDataMap dataMap = new JobDataMap();
