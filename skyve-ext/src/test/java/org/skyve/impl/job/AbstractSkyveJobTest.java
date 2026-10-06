@@ -1,6 +1,8 @@
 package org.skyve.impl.job;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -11,6 +13,7 @@ import java.util.HashMap;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InOrder;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -321,6 +324,57 @@ class AbstractSkyveJobTest {
 		verify(persistence).save(jobDocument, persistedJob);
 		verify(persistence).commit(false);
 		verify(persistence).commit(true);
+	}
+
+	@Test
+	void executeContextClosesPersistenceWhenCommitInFinallyFails() throws Exception {
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		IllegalStateException connectionClosed = new IllegalStateException("No operations allowed after connection closed.");
+		doThrow(connectionClosed).when(persistence).commit(false);
+		JobExecutionContext context = newContext(mock(User.class));
+		bindPersistenceToThread(persistence);
+
+		IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> job.execute(context));
+
+		assertSame(connectionClosed, thrown);
+		InOrder inOrder = inOrder(persistence);
+		inOrder.verify(persistence).commit(false);
+		inOrder.verify(persistence).rollback();
+		inOrder.verify(persistence).commit(true);
+	}
+
+	@Test
+	void executeContextClosesPersistenceWhenSavingJobRecordFails() throws Exception {
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		Module adminModule = mock(Module.class);
+		Document jobDocument = mock(Document.class);
+		DynamicPersistentBean persistedJob = newJobBean();
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule(AppConstants.ADMIN_MODULE_NAME)).thenReturn(adminModule);
+		when(adminModule.getDocument(customer, AppConstants.JOB_DOCUMENT_NAME)).thenReturn(jobDocument);
+		when(jobDocument.newInstance(user)).thenReturn(persistedJob);
+		doThrow(new IllegalStateException("No operations allowed after connection closed.")).when(persistence).save(jobDocument, persistedJob);
+		JobExecutionContext context = newContext(user);
+		bindPersistenceToThread(persistence);
+
+		JobExecutionException thrown = assertThrows(JobExecutionException.class, () -> job.execute(context));
+
+		assertEquals("Could not insert completed job in the database", thrown.getMessage());
+		InOrder inOrder = inOrder(persistence);
+		inOrder.verify(persistence).save(jobDocument, persistedJob);
+		inOrder.verify(persistence).rollback();
+		inOrder.verify(persistence).commit(true);
+	}
+
+	private static JobExecutionContext newContext(User user) {
+		JobExecutionContext context = mock(JobExecutionContext.class);
+		JobDataMap dataMap = new JobDataMap();
+		dataMap.put(AbstractSkyveJob.DISPLAY_NAME_JOB_PARAMETER_KEY, "Nightly Work");
+		dataMap.put(AbstractSkyveJob.USER_JOB_PARAMETER_KEY, user);
+		when(context.getMergedJobDataMap()).thenReturn(dataMap);
+		return context;
 	}
 
 	private static DynamicPersistentBean newJobBean() {
