@@ -285,15 +285,19 @@ class FacesActionTest {
 		FacesContextBridge.setCurrent(context);
 
 		List<String> messageTargets = new ArrayList<>();
+		List<String> messageSummaries = new ArrayList<>();
 		doAnswer(invocation -> {
 			messageTargets.add((String) invocation.getArgument(0));
+			messageSummaries.add(((FacesMessage) invocation.getArgument(1)).getSummary());
 			return null;
 		}).when(context).addMessage(any(), any(FacesMessage.class));
 
 		boolean valid = FacesAction.validateRequiredFields();
 
 		assertFalse(valid);
-		assertTrue(messageTargets.contains("form:triState"));
+		// field message on the checkbox itself, then the global message
+		assertEquals(java.util.Arrays.asList("form:triState", null), messageTargets);
+		assertEquals(List.of("Tri-state required", "Tri-state required"), messageSummaries);
 	}
 
 	@SafeVarargs
