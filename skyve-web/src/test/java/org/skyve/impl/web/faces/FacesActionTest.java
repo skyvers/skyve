@@ -21,6 +21,7 @@ import java.util.Set;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.primefaces.component.message.Message;
+import org.primefaces.component.tristatecheckbox.TriStateCheckbox;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.persistence.AbstractPersistence;
 
@@ -256,6 +257,47 @@ class FacesActionTest {
 
 		assertFalse(valid);
 		assertTrue(messageTargets.contains("form:parent"));
+	}
+
+	@Test
+	void validateRequiredFieldsForTextInputWithNullStyleUsesInputClientId() {
+		UIViewRoot root = mock(UIViewRoot.class);
+		org.mockito.Mockito.doReturn(Boolean.TRUE).when(root).isRendered();
+
+		// TriStateCheckbox is an HtmlInputText with no style set
+		TriStateCheckbox triState = mock(TriStateCheckbox.class);
+		org.mockito.Mockito.doReturn(Boolean.TRUE).when(triState).isRendered();
+		when(triState.getRequiredMessage()).thenReturn("Tri-state required");
+		when(triState.getValue()).thenReturn(null);
+		when(triState.getStyle()).thenReturn(null);
+		when(triState.getClientId()).thenReturn("form:triState");
+		when(triState.getFacetsAndChildren()).thenAnswer(i -> iterator());
+
+		when(root.getFacetsAndChildren()).thenAnswer(i -> iterator(triState));
+
+		Set<String> renderIds = new LinkedHashSet<>();
+		PartialViewContext partial = mock(PartialViewContext.class);
+		when(partial.getRenderIds()).thenReturn(renderIds);
+
+		FacesContext context = mock(FacesContext.class);
+		when(context.getViewRoot()).thenReturn(root);
+		when(context.getPartialViewContext()).thenReturn(partial);
+		FacesContextBridge.setCurrent(context);
+
+		List<String> messageTargets = new ArrayList<>();
+		List<String> messageSummaries = new ArrayList<>();
+		doAnswer(invocation -> {
+			messageTargets.add((String) invocation.getArgument(0));
+			messageSummaries.add(((FacesMessage) invocation.getArgument(1)).getSummary());
+			return null;
+		}).when(context).addMessage(any(), any(FacesMessage.class));
+
+		boolean valid = FacesAction.validateRequiredFields();
+
+		assertFalse(valid);
+		// field message on the checkbox itself, then the global message
+		assertEquals(java.util.Arrays.asList("form:triState", null), messageTargets);
+		assertEquals(List.of("Tri-state required", "Tri-state required"), messageSummaries);
 	}
 
 	@SafeVarargs
