@@ -162,12 +162,17 @@ class FacesViewRendererTest extends AbstractSkyveTest {
 	}
 
 	@BeforeAll
+	@SuppressWarnings("resource") // The installed context is released by tearDownFacesContext()
 	static void setUpFacesContext() {
 		FacesContextBridge.setCurrent(new MockFacesContext());
 	}
 
 	@AfterAll
 	static void tearDownFacesContext() {
+		FacesContext context = FacesContext.getCurrentInstance();
+		if (context != null) {
+			context.release();
+		}
 		FacesContextBridge.setCurrent(null);
 	}
 

@@ -264,6 +264,18 @@ class FacesViewRendererTest {
 		renderer.getCurrentContainers().push(view);
 		renderer.renderListGrid(null, false, grid);
 
+		ArgumentCaptor<String> stickyHeaderAnchorSelector = ArgumentCaptor.forClass(String.class);
+		verify(cb).listGrid(isNull(),
+								eq("testModule"),
+								isNull(),
+								isNull(),
+								eq("external"),
+								isNull(),
+								any(),
+								same(grid),
+								stickyHeaderAnchorSelector.capture(),
+								eq(false));
+		assertNull(stickyHeaderAnchorSelector.getValue());
 	}
 
 	@Test
