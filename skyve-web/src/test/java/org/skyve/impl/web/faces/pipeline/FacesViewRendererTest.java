@@ -865,7 +865,7 @@ class FacesViewRendererTest {
 		verify(cb).addAjaxBehavior(eventSource, "focus", null, null, "name", text.getFocusActions());
 		verify(cb).addAjaxBehavior(eventSource, "blur", null, null, "name", text.getBlurActions());
 		verify(cb).addAjaxBehavior(eventSource, "itemSelect", null, null, "customer", lookup.getPickedActions());
-		verify(cb).addAjaxBehavior(eventSource, "itemUnselect", null, null, "customer", lookup.getClearedActions());
+		verify(cb).addAjaxBehavior(eventSource, "clear", null, null, "customer", lookup.getClearedActions());
 	}
 
 	@Test

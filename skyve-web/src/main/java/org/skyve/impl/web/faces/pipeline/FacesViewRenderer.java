@@ -3844,7 +3844,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	@Override
 	public void visitOnClearedEventHandler(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 		cb.addAjaxBehavior(eventSource,
-							"itemUnselect",
+							"clear",
 							dataWidgetBinding,
 							dataWidgetVar,
 							lookup.getBinding(),

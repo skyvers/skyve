@@ -32,7 +32,10 @@
 		<column responsiveWidth="9" />
 		<row>
 			<item>
-				<lookupDescription binding="singleSelection" descriptionBinding="description" model="LookupValuesModel" />
+				<lookupDescription binding="singleSelection" descriptionBinding="description" model="LookupValuesModel">
+					<onPickedHandlers><rerender clientValidation="false" /></onPickedHandlers>
+					<onClearedHandlers><rerender clientValidation="false" /></onClearedHandlers>
+				</lookupDescription>
 			</item>
 		</row>
 	</form>
