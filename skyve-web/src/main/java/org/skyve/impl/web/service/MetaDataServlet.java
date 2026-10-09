@@ -311,7 +311,7 @@ public class MetaDataServlet extends HttpServlet {
 			pw.append('"').append(value).append('"');
 		}
 		value = user.getContactAvatarInitials();
-		pw.append(",\"userContactAvatarInitials\":\"").append(value).append("\"}");
+		pw.append(",\"userContactAvatarInitials\":\"").append(OWASP.escapeJsonString(value)).append("\"}");
 	}
 	
 	@SuppressWarnings("java:S3776") // Complexity OK
@@ -351,10 +351,10 @@ public class MetaDataServlet extends HttpServlet {
 											String iconStyleClass) {
 				menuJson.append("{\"calendar\":\"").append(OWASP.escapeJsonString(item.getLocalisedName()));
 				if (iconStyleClass != null) {
-					menuJson.append("\",\"fontIcon\":\"").append(iconStyleClass);
+					menuJson.append("\",\"fontIcon\":\"").append(OWASP.escapeJsonString(iconStyleClass));
 				}
 				else if (icon16 != null) {
-					menuJson.append("\",\"icon16\":\"").append(icon16);
+					menuJson.append("\",\"icon16\":\"").append(OWASP.escapeJsonString(icon16));
 				}
 				String modelName = item.getModelName();
 				if (modelName != null) {
@@ -381,10 +381,10 @@ public class MetaDataServlet extends HttpServlet {
 										String iconStyleClass) {
 				menuJson.append("{\"edit\":\"").append(OWASP.escapeJsonString(item.getLocalisedName()));
 				if (iconStyleClass != null) {
-					menuJson.append("\",\"fontIcon\":\"").append(iconStyleClass);
+					menuJson.append("\",\"fontIcon\":\"").append(OWASP.escapeJsonString(iconStyleClass));
 				}
 				else if (icon16 != null) {
-					menuJson.append("\",\"icon16\":\"").append(icon16);
+					menuJson.append("\",\"icon16\":\"").append(OWASP.escapeJsonString(icon16));
 				}
 				menuJson.append("\",\"document\":\"").append(itemDocument.getName()).append("\"},");
 			}
@@ -393,7 +393,7 @@ public class MetaDataServlet extends HttpServlet {
 			@Override
 			public void renderLinkItem(LinkItem item, Module menuModule, boolean relative, String absoluteHref) {
 				menuJson.append("{\"link\":\"").append(OWASP.escapeJsonString(item.getLocalisedName()));
-				menuJson.append("\",\"href\":\"").append(absoluteHref).append("\"},");
+				menuJson.append("\",\"href\":\"").append(OWASP.escapeJsonString(absoluteHref)).append("\"},");
 			}
 			
 			/** {@inheritDoc} */
@@ -407,10 +407,10 @@ public class MetaDataServlet extends HttpServlet {
 										String iconStyleClass) {
 				menuJson.append("{\"list\":\"").append(OWASP.escapeJsonString(item.getLocalisedName()));
 				if (iconStyleClass != null) {
-					menuJson.append("\",\"fontIcon\":\"").append(iconStyleClass);
+					menuJson.append("\",\"fontIcon\":\"").append(OWASP.escapeJsonString(iconStyleClass));
 				}
 				else if (icon16 != null) {
-					menuJson.append("\",\"icon16\":\"").append(icon16);
+					menuJson.append("\",\"icon16\":\"").append(OWASP.escapeJsonString(icon16));
 				}
 				String modelName = item.getModelName();
 				if (modelName != null) {
@@ -436,10 +436,10 @@ public class MetaDataServlet extends HttpServlet {
 										String iconStyleClass) {
 				menuJson.append("{\"map\":\"").append(OWASP.escapeJsonString(item.getLocalisedName()));
 				if (iconStyleClass != null) {
-					menuJson.append("\",\"fontIcon\":\"").append(iconStyleClass);
+					menuJson.append("\",\"fontIcon\":\"").append(OWASP.escapeJsonString(iconStyleClass));
 				}
 				else if (icon16 != null) {
-					menuJson.append("\",\"icon16\":\"").append(icon16);
+					menuJson.append("\",\"icon16\":\"").append(OWASP.escapeJsonString(icon16));
 				}
 				String modelName = item.getModelName();
 				if (modelName != null) {
@@ -466,10 +466,10 @@ public class MetaDataServlet extends HttpServlet {
 										String iconStyleClass) {
 				menuJson.append("{\"tree\":\"").append(OWASP.escapeJsonString(item.getLocalisedName()));
 				if (iconStyleClass != null) {
-					menuJson.append("\",\"fontIcon\":\"").append(iconStyleClass);
+					menuJson.append("\",\"fontIcon\":\"").append(OWASP.escapeJsonString(iconStyleClass));
 				}
 				else if (icon16 != null) {
-					menuJson.append("\",\"icon16\":\"").append(icon16);
+					menuJson.append("\",\"icon16\":\"").append(OWASP.escapeJsonString(icon16));
 				}
 				String modelName = item.getModelName();
 				if (modelName != null) {
@@ -843,15 +843,15 @@ public class MetaDataServlet extends HttpServlet {
 				appendViewIcon(result, resolvedIcon, document);
 				String value = view.getHelpRelativeFileName();
 				if (value != null) {
-					result.append(",\"helpRelativeFileName\":\"").append(value).append('"');
+					result.append(",\"helpRelativeFileName\":\"").append(OWASP.escapeJsonString(value)).append('"');
 				}
 				value = view.getHelpURL();
 				if (value != null) {
-					result.append(",\"helpURL\":\"").append(value).append('"');
+					result.append(",\"helpURL\":\"").append(OWASP.escapeJsonString(value)).append('"');
 				}
 				Integer integer = view.getRefreshTimeInSeconds();
 				if (integer != null) {
-					result.append(",\"helpURL\":").append(integer);
+					result.append(",\"refreshTimeInSeconds\":").append(integer);
 				}
 				value = view.getRefreshConditionName();
 				if (value != null) {
@@ -1124,7 +1124,7 @@ public class MetaDataServlet extends HttpServlet {
 					result.append(",\"escapeHelp\":").append(getCurrentWidgetEscapeHelp());
 				}
 				if (requiredMessage != null) {
-					result.append(",\"requiredMessage\":\"").append(requiredMessage).append('"');
+					result.append(",\"requiredMessage\":\"").append(OWASP.escapeJsonString(requiredMessage)).append('"');
 					result.append(",\"escapeRequiredMessage\":").append(getCurrentWidgetEscapeRequiredMessage());
 				}
 				processDecorated(item);
@@ -1285,19 +1285,19 @@ public class MetaDataServlet extends HttpServlet {
 				processInputWidget(slider);
 				Double dubs = slider.getMin();
 				if (dubs != null) {
-					result.append(",\"min\":\"").append(dubs);
+					result.append(",\"min\":").append(dubs);
 				}
 				dubs = slider.getMax();
 				if (dubs != null) {
-					result.append(",\"max\":\"").append(dubs);
+					result.append(",\"max\":").append(dubs);
 				}
 				Integer integer = slider.getNumberOfDiscreteValues();
 				if (integer != null) {
-					result.append(",\"numberOfDiscreteValues\":\"").append(integer);
+					result.append(",\"numberOfDiscreteValues\":").append(integer);
 				}
 				integer = slider.getRoundingPrecision();
 				if (integer != null) {
-					result.append(",\"roundingPrecision\":\"").append(integer);
+					result.append(",\"roundingPrecision\":").append(integer);
 				}
 				Boolean vertical = slider.getVertical();
 				if (vertical != null) {
@@ -1424,7 +1424,7 @@ public class MetaDataServlet extends HttpServlet {
 				if ((dropDownColumns != null) && (! dropDownColumns.isEmpty())) {
 					result.append(",\"dropDownColumns\":[");
 					for (LookupDescriptionColumn column : dropDownColumns) {
-						result.append("{\"name\":\"").append(column.getName());
+						result.append("{\"name\":\"").append(OWASP.escapeJsonString(column.getName())).append('"');
 						Boolean filterable = column.getFilterable();
 						if (filterable != null) {
 							result.append(",\"filterable\":").append(filterable);
@@ -1510,7 +1510,7 @@ public class MetaDataServlet extends HttpServlet {
 						@Override
 						public void processExternalReference(ExternalReference reference) {
 							result.append("\"type\":\"externalRef\",\"href\":\"");
-							result.append(reference.getHref()).append('"');
+							result.append(OWASP.escapeJsonString(reference.getHref())).append('"');
 						}
 						
 						/** {@inheritDoc} */
@@ -1659,11 +1659,11 @@ public class MetaDataServlet extends HttpServlet {
 				}
 				String string = button.getDialogName();
 				if (string != null) {
-					result.append(",\"dialogName\":\"").append(string).append('"');
+					result.append(",\"dialogName\":\"").append(OWASP.escapeJsonString(string)).append('"');
 				}
 				string = button.getCommand();
 				if (string != null) {
-					result.append(",\"command\":\"").append(string).append('"');
+					result.append(",\"command\":\"").append(OWASP.escapeJsonString(string)).append('"');
 				}
 				result.append(",\"modalDialog\":").append(button.isModalDialog());
 				result.append(",\"dialogWidth\":").append(button.getDialogWidth());
@@ -1682,11 +1682,11 @@ public class MetaDataServlet extends HttpServlet {
 				processInputWidget(signature);
 				String colour = signature.getRgbHexBackgroundColour();
 				if (colour != null) {
-					result.append(",\"rgbHexBackgroundColour\":\"").append(colour).append('"');
+					result.append(",\"rgbHexBackgroundColour\":\"").append(OWASP.escapeJsonString(colour)).append('"');
 				}
 				colour = signature.getRgbHexForegroundColour();
 				if (colour != null) {
-					result.append(",\"rgbHexForegroundColour\":\"").append(colour).append('"');
+					result.append(",\"rgbHexForegroundColour\":\"").append(OWASP.escapeJsonString(colour)).append('"');
 				}
 				processSize(signature);
 				processDecorated(signature);
@@ -2548,7 +2548,7 @@ public class MetaDataServlet extends HttpServlet {
 				result.append("{\"type\":\"dynamicImage\"");
 				String name = image.getName();
 				if (name != null) {
-					result.append(",\"name\":\"").append(name).append('"');
+					result.append(",\"name\":\"").append(OWASP.escapeJsonString(name)).append('"');
 				}
 				Integer pixels = image.getImageInitialPixelWidth();
 				if (pixels != null) {
@@ -2599,11 +2599,11 @@ public class MetaDataServlet extends HttpServlet {
 					result.append(",\"modelName\":\"").append(model.getModelName()).append('"');
 					String string = model.getTitle();
 					if (string != null) {
-						result.append(",\"title\":\"").append(string).append('"');
+						result.append(",\"title\":\"").append(OWASP.escapeJsonString(string)).append('"');
 					}
 					string = model.getLabel();
 					if (string != null) {
-						result.append(",\"label\":\"").append(string).append('"');
+						result.append(",\"label\":\"").append(OWASP.escapeJsonString(string)).append('"');
 					}
 					string = model.getModuleName();
 					if (string != null) {
@@ -2648,9 +2648,9 @@ public class MetaDataServlet extends HttpServlet {
 							result.append("{\"type\":\"textLengthBucket\"}");
 						}
 						else if (bucket instanceof TextStartsWithBucketMetaData startsWith) {
-							result.append("{\"type\":\"textStartsWithBucket\",\"textStartsWithBucket\":\"length\":");
+							result.append("{\"type\":\"textStartsWithBucket\",\"length\":");
 							result.append(startsWith.getLength());
-							result.append("\"caseSensitive\":").append(startsWith.isCaseSensitive());
+							result.append(",\"caseSensitive\":").append(startsWith.isCaseSensitive());
 							result.append('}');
 						}
 						else {
@@ -2681,11 +2681,11 @@ public class MetaDataServlet extends HttpServlet {
 					}
 					string = model.getJFreeChartPostProcessorClassName();
 					if (string != null) {
-						result.append("\"jFreeChartPostProcessorClassName\":\"").append(string).append('"');
+						result.append(",\"jFreeChartPostProcessorClassName\":\"").append(string).append('"');
 					}
 					string = model.getPrimeFacesChartPostProcessorClassName();
 					if (string != null) {
-						result.append("\"primeFacesChartPostProcessorClassName\":\"").append(string).append('"');
+						result.append(",\"primeFacesChartPostProcessorClassName\":\"").append(string).append('"');
 					}
 				}
 				processSize(chart);
@@ -3315,7 +3315,7 @@ public class MetaDataServlet extends HttpServlet {
 			private void processIdentifiable(Identifiable identifiable) {
 				String widgetId = identifiable.getWidgetId();
 				if (widgetId != null) {
-					result.append(",\"widgetId\":\"").append(widgetId).append('"');
+					result.append(",\"widgetId\":\"").append(OWASP.escapeJsonString(widgetId)).append('"');
 				}
 			}
 
@@ -3610,7 +3610,7 @@ public class MetaDataServlet extends HttpServlet {
 			private void processMetaDataQueryColumn(MetaDataQueryColumn column) {
 				String string = column.getLocalisedDisplayName();
 				if (string != null) {
-					result.append(",\"lobel\":\"").append(string).append('"');
+					result.append(",\"label\":\"").append(OWASP.escapeJsonString(string)).append('"');
 				}
 				string = column.getName();
 				if (string != null) {
@@ -3645,7 +3645,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			private void processChartBuilderOrderMetaData(ChartBuilderOrderMetaData order) {
 				result.append("\"by\":\"").append(order.getBy());
-				result.append(",\"sort\":\"").append(order.getSort()).append('"');
+				result.append("\",\"sort\":\"").append(order.getSort()).append('"');
 			}
 			
 			@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
@@ -3674,7 +3674,7 @@ public class MetaDataServlet extends HttpServlet {
 					actionsJSON.append(",\"escapeDisplayName\":").append(getActionEscapeDisplayName());
 				}
 				if (iconStyleClass != null) {
-					actionsJSON.append(",\"fontIcon\":\"").append(iconStyleClass).append('"');
+					actionsJSON.append(",\"fontIcon\":\"").append(OWASP.escapeJsonString(iconStyleClass)).append('"');
 				}
 				if (iconUrl != null) {
 					actionsJSON.append(",\"iconUrl\":\"").append(OWASP.escapeJsonString(iconUrl)).append('"');
@@ -3762,7 +3762,8 @@ public class MetaDataServlet extends HttpServlet {
 		if ((properties != null) && (! properties.isEmpty())) {
 			json.append(",\"properties\":{");
 			for (Entry<String, String> entry : properties.entrySet()) {
-				json.append('"').append(entry.getKey()).append("\":\"").append(entry.getValue()).append("\",");
+				json.append('"').append(OWASP.escapeJsonString(entry.getKey()));
+				json.append("\":\"").append(OWASP.escapeJsonString(entry.getValue())).append("\",");
 			}
 			json.setLength(json.length() - 1); // remove comma
 			json.append('}');
@@ -3785,7 +3786,7 @@ public class MetaDataServlet extends HttpServlet {
 	
 	private static String emptyResponse(String documentName) {
 		if (documentName != null) { // request was for a view
-			return "{\"type\":\"view\",\"name\":\"edit\",\"contained\":[],\"title\":\"" + documentName + "\"}";
+			return "{\"type\":\"view\",\"name\":\"edit\",\"contained\":[],\"title\":\"" + OWASP.escapeJsonString(documentName) + "\"}";
 		}
 		return "{\"menus\":[],\"dataSources\":[]}";
 	}

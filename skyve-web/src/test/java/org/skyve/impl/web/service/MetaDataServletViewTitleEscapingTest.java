@@ -72,6 +72,16 @@ class MetaDataServletViewTitleEscapingTest {
 	}
 
 	@Test
+	void processDecoratedEscapesPropertyNamesAndValuesForJson() throws Exception {
+		StringBuilder json = new StringBuilder();
+		DecoratedMetaData decorated = () -> Map.of("key \"quoted\"", "C:\\path \"quoted\"\nnext");
+
+		invokeStaticAppender("processDecorated", DecoratedMetaData.class, decorated, json);
+
+		assertEquals(",\"properties\":{\"key \\\"quoted\\\"\":\"C:\\\\path \\\"quoted\\\"\\nnext\"}", json.toString());
+	}
+
+	@Test
 	void processInvisibleAndDisableableAppendConditionNames() throws Exception {
 		StringBuilder json = new StringBuilder();
 
@@ -91,6 +101,15 @@ class MetaDataServletViewTitleEscapingTest {
 		assertEquals("{\"type\":\"view\",\"name\":\"edit\",\"contained\":[],\"title\":\"Missing\"}",
 						emptyResponse.invoke(null, "Missing"));
 		assertEquals("{\"menus\":[],\"dataSources\":[]}", emptyResponse.invoke(null, new Object[] { null }));
+	}
+
+	@Test
+	void emptyResponseEscapesDocumentNameForJson() throws Exception {
+		Method emptyResponse = MetaDataServlet.class.getDeclaredMethod("emptyResponse", String.class);
+		emptyResponse.setAccessible(true);
+
+		assertEquals("{\"type\":\"view\",\"name\":\"edit\",\"contained\":[],\"title\":\"Miss\\\"ing\\\\\"}",
+						emptyResponse.invoke(null, "Miss\"ing\\"));
 	}
 
 	private static void invokeStaticAppender(String methodName, Class<?> parameterType, Object value, StringBuilder json)
