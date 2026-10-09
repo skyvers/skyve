@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.omnifaces.config.WebXml;
 import org.primefaces.component.datatable.DataTable;
@@ -290,7 +291,7 @@ public abstract class FacesAction<T> {
 					fc.addMessage(hidden.getParent().getClientId(), msg);
 				}
 				// Catch text fields with display none - geometryMap
-				else if ((input instanceof HtmlInputText text) && text.getStyle().contains("display:none")) {
+				else if ((input instanceof HtmlInputText text) && Strings.CS.contains(text.getStyle(), "display:none")) {
 					fc.addMessage(text.getParent().getClientId(), msg);
 				}
 				else {
